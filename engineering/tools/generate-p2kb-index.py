@@ -23,7 +23,6 @@ Git mtime is used for version tracking - no manual version numbers needed.
 
 import hashlib
 import json
-import os
 import re
 import subprocess
 import yaml
@@ -119,28 +118,48 @@ def harvest_aliases_from_yaml(yaml_path: Path, index_key: str) -> Dict[str, str]
     return aliases
 
 
-# Assert THIS repo safe for every git subprocess, via environment rather than a
-# config file. The sandbox here intermittently refuses git with "dubious
-# ownership" even though the ownership matches (repo, .git and the running user
-# are all the same), and ~/.gitconfig is not writable to fix it the usual way.
-#
-# Why it matters HERE specifically: both helpers below fall back on failure --
-# get_git_mtime() to filesystem mtime, get_git_blob_sha256() to working-tree
-# bytes. Those fallbacks are correct for a NEVER-COMMITTED file, which is what
-# they were written for. They are wrong for a git that simply could not run:
-# every timestamp would silently become a filesystem mtime, and every published
-# hash would be of working-tree bytes rather than the committed blob that
-# raw.githubusercontent.com actually serves -- and consumers verify against that
-# hash to detect a stale or poisoned cache. Removing the spurious failure keeps
-# the fallbacks scoped to the case they were designed for.
-def _git_env():
-    env = dict(os.environ)
-    n = int(env.get("GIT_CONFIG_COUNT", "0"))
-    env["GIT_CONFIG_COUNT"] = str(n + 1)
-    env[f"GIT_CONFIG_KEY_{n}"] = "safe.directory"
-    # Resolved from this file's own location: engineering/tools/<script>.
-    env[f"GIT_CONFIG_VALUE_{n}"] = str(Path(__file__).resolve().parents[2])
-    return env
+class GitUnavailable(RuntimeError):
+    """git could not be RUN. Distinct from git running and having no answer."""
+
+
+def assert_git_usable(repo_root: Path) -> None:
+    """Prove git can answer in this tree BEFORE building an index from it.
+
+    Both helpers below fall back on failure -- get_git_mtime() to filesystem
+    mtime, get_git_blob_sha256() to working-tree bytes. Those fallbacks are
+    correct for a NEVER-COMMITTED file, which is what they were written for.
+    They are silently WRONG for a git that simply could not run: every
+    timestamp would become a filesystem mtime, and every published sha256 would
+    be of working-tree bytes rather than the committed blob that
+    raw.githubusercontent.com actually serves -- and consumers verify against
+    that hash to detect a stale or poisoned cache. A per-call return code
+    cannot tell the two apart, because "no such path in HEAD" and "git is
+    broken" both exit 128.
+
+    So the two cases are separated ONCE, here, by proving git works at all.
+    Past this point a per-file failure means the file is genuinely not in HEAD
+    and the fallback is the right answer. If git cannot run, this raises rather
+    than emitting an index whose timestamps and hashes are quietly fictional.
+
+    (History: the failure this guards was first met as an intermittent "dubious
+    ownership" refusal in the devcontainer. That cause is closed -- the image
+    carries a system-scope `safe.directory=/workspaces/*`, see
+    .devcontainer/Dockerfile -- so the per-subprocess environment workaround
+    that used to sit here is gone. The guard is not: closing one cause does not
+    make a silent fallback safe.)
+    """
+    try:
+        out = subprocess.run(['git', '-C', str(repo_root), 'rev-parse',
+                              '--verify', 'HEAD'],
+                             capture_output=True, text=True)
+    except OSError as e:                      # git missing / not executable
+        raise GitUnavailable(f"cannot execute git: {e}") from e
+    if out.returncode != 0:
+        raise GitUnavailable(
+            f"git cannot read {repo_root} (rev-parse HEAD exited "
+            f"{out.returncode}): {(out.stderr or '').strip()}\n"
+            "Refusing to build the index: every mtime would silently become a "
+            "filesystem mtime and every sha256 would be of working-tree bytes.")
 
 
 def get_git_mtime(filepath: Path) -> int:
@@ -150,8 +169,7 @@ def get_git_mtime(filepath: Path) -> int:
             ['git', 'log', '-1', '--format=%ct', '--', str(filepath)],
             capture_output=True,
             text=True,
-            cwd=filepath.parent,
-            env=_git_env()
+            cwd=filepath.parent
         )
         if result.returncode == 0 and result.stdout.strip():
             return int(result.stdout.strip())
@@ -174,8 +192,7 @@ def get_git_blob_sha256(repo_rel_path: str) -> str:
     try:
         result = subprocess.run(
             ['git', 'show', f'HEAD:{repo_rel_path}'],
-            capture_output=True,
-            env=_git_env()
+            capture_output=True
         )
         if result.returncode == 0:
             return hashlib.sha256(result.stdout).hexdigest()
@@ -553,6 +570,10 @@ def main():
 
     print("Generating p2kb-index.json v3.5 (array aliases + sha256 cache-integrity)...")
     print(f"  Source: {base_path / 'deliverables/ai/P2/'}")
+
+    # Timestamps and blob hashes are both DERIVED from git; prove it can answer
+    # before emitting an index that would otherwise be quietly fictional.
+    assert_git_usable(base_path)
 
     # Generate the index
     index = generate_index(base_path)

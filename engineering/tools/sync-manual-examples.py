@@ -55,7 +55,6 @@ Exit: 0 clean / 1 out of sync or missing input / 2 usage error.
 
 import argparse
 import re
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -130,12 +129,16 @@ def git(*args, default=""):
       git could not run at all     -> the environment is broken. `default` is a
                                       LIE, and it gets written into the file.
 
-    In this devcontainer git intermittently fails with "dubious ownership", so
-    the second case is real, not theoretical. Observed consequence: `--check`
-    reported the ONE adopted document RED six times, then GREEN twelve times,
-    with nothing on disk changing -- reproduced deterministically by stubbing
-    git to exit 128. The verdict of a release gate depended on whether git
-    happened to work that second.
+    The second case is real, not theoretical. It was first met as an
+    intermittent "dubious ownership" refusal in this devcontainer -- THAT
+    particular cause is gone (the image now carries a system-scope
+    `safe.directory=/workspaces/*`, .devcontainer/Dockerfile) -- and the
+    observed consequence was that `--check` reported the ONE adopted document
+    RED six times, then GREEN twelve times, with nothing on disk changing,
+    reproduced deterministically by stubbing git to exit 128. The verdict of a
+    release gate depended on whether git happened to work that second. Closing
+    one cause does not retire the rule: any git that cannot run tells the same
+    lie, so the raise stays.
 
     The unshipped half is worse. Under `--adopt` the same substitution would
     have written `Started.... unknown` / `Updated.... unknown` into the header
@@ -145,21 +148,9 @@ def git(*args, default=""):
 
     So: raise. A caller that genuinely wants a fallback can catch it.
     """
-    # Declare THIS repo safe for the duration of the call, via environment
-    # rather than a config file. Not a workaround hiding a risk: the ownership
-    # genuinely matches (checked 2026-08-22 -- repo, .git and the running user
-    # are all vscode:vscode), the "dubious ownership" refusal comes from the
-    # sandbox wrapper, and ~/.gitconfig is not writable here to fix it the usual
-    # way. GIT_CONFIG_COUNT/KEY/VALUE is git's own supported no-file mechanism,
-    # so this asserts something true and leaves the user's config untouched.
-    env = dict(os.environ)
-    n0 = int(env.get("GIT_CONFIG_COUNT", "0"))
-    env["GIT_CONFIG_COUNT"] = str(n0 + 1)
-    env[f"GIT_CONFIG_KEY_{n0}"] = "safe.directory"
-    env[f"GIT_CONFIG_VALUE_{n0}"] = str(REPO)
     try:
         out = subprocess.run(["git", "-C", str(REPO), *args],
-                             capture_output=True, text=True, env=env)
+                             capture_output=True, text=True)
     except OSError as e:                      # git missing / not executable
         raise GitUnavailable(f"cannot execute git: {e}") from e
     if out.returncode != 0:

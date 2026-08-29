@@ -2,6 +2,18 @@
 
 Outstanding work items. Sweep completed items into a dated archive at closeout.
 
+- **21 of 34 example headers are out of sync with `sync-manual-examples.py`** — OPEN, found
+  2026-08-29. `python3 engineering/tools/sync-manual-examples.py --doc
+  engineering/document-production/manuals/p2-debug-window-manual --check` exits **1** with
+  `RED — 21 problem(s)`, each `header/footer out of sync`: ch01, ch02 (×3), ch05 (×4), ch07 (×2),
+  ch08, ch09, ch11 (×2), ch12 (×2), ch14 (×2), ch15 (×3). The other 13 pass, so this is drift in
+  a subset rather than a tool or adoption problem. Headers here are **generated, never
+  hand-edited** — the repair is `--adopt`, which rewrites the derived fields (Started / Updated /
+  licence year, all from git). Do it as debug-window work, not in passing: regenerating headers
+  touches shipped example files, so the byte-identity gate against the printed code blocks must
+  be re-run afterwards. Found incidentally while verifying an unrelated change to the tool
+  (removing a devcontainer git workaround); the tool itself is fine and was proven unchanged.
+
 ## PDF Review Cycle — opened 2026-06-08 (R1–R5 DONE + render-verified v8/v10; STAGED to outbound)
 
 **All five implemented and proven in the daemon render; staged to outbound 2026-06-08.**
