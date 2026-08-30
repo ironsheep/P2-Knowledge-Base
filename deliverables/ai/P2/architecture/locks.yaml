@@ -119,9 +119,9 @@ instructions:
       Propeller 2 Documentation v35 (Rev B/C), LOCKS > Allocating Locks --
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3686; encoding at
       silicon-doc-text.txt:5237; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1795 (LOCKRET's
-        row; :1794 is a wrapped continuation of the LOCKREL row above it -- corrected
-        2026-08-30, F-399).
+      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1795 -- LOCKRET's
+        row. The locator previously named line 1794, which is a wrapped continuation of
+        the LOCKREL row above it. Corrected 2026-08-30, F-399.
     operation: |
       Return lock D[3:0] to the unallocated lock pool. Any cog can return an
       allocated lock, even one it did not allocate with LOCKNEW.

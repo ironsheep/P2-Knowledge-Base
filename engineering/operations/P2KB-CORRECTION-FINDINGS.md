@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-399`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-401`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,84 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The 409-citation read, run to the end: 721 locators opened at their cited lines, 22 repaired, and the instrument had to be repaired first (2026-08-30, release fix pass step 3) — F-399
+
+### F-399 — every citation locator in the shipped set now resolves AND its cited line supports the claim it carries; F-377's class is closed by reading, because nothing else can close it — `RESOLVED`
+
+**This is the discharge of F-377 and of the census's category-1 "409".** F-377's finding was that a locator can be **in range, non-blank, and still point at the wrong line**, and that no instrument in this project can see that. The only closure available is to open every cited line and read it. That has now been done.
+
+**MEASURED TOTAL: 721 citation locators, in 83 shipped files, citing 40 source documents.** Every one was opened. The evidence is not truncated: the per-file counts are reproducible from the extractor described below.
+
+The census counted **424** locators and **409** in the "resolvable" class. The number here is larger for three reasons, all benign: this extractor binds **bare continuation locators** (`", :1565"`) that the census's count did not enumerate separately; it expands a multi-locator token (`path:9-19` plus its trailing `:99-115`, `:114`) into one record each; and roughly thirty citations were added by the repairs in this same release. The classes are the same; the granularity is finer.
+
+---
+
+### The instrument had two defects, and both had to be fixed before any count could be trusted
+
+The census's appendix names the §1 method but ships no script, so the extractor was written for this pass. Two defects surfaced immediately, and **either one alone would have produced a confidently wrong measurement.**
+
+**1. `str.splitlines()` breaks on FORM FEED, and these sources are full of them.** Python's `str.splitlines()` splits on `\x0c` (and `\v`, `\x1c`, `\x1d`, `\x1e`, `\x85`, ` `, ` `) in addition to `\n`. **117 of the ingested source files disagree with `grep -n` about their own line count** — `p1-propeller-manual-v1.2-layout-text.txt` by **+398** lines, `p1-PE-Kit-Labs/122-32305-PE-Labs-Fundamentals-text.txt` by +232, `pasm2-manual-narrative.txt` by +161, `p2-documentation.txt` by +122, `spin2-v51/spin2-text.txt` by +56.
+
+These are PDF-derived captures; the form feeds are page breaks. **The citations were written by agents reading with `grep -n` / `sed -n`, and a human verifying one uses `sed -n 'Np'` — so newline-only is the TRUTH SIDE, and any Python tool that uses `splitlines()` reads a different line than the citation means.** Under `splitlines()` the extractor reported **14** citations landing on blank lines; with newline-only splitting the true figure is **6**. Eight "defects" were the instrument's own.
+
+This is the `feedback_scope_an_instruments_truth_side` shape exactly: the instrument and the thing it measures have to agree about what a line *is* before any verdict it issues means anything. **Any future tool that resolves a `path:line` citation against these sources must split on `\n` only.**
+
+**2. A bare continuation locator cannot be bound to its file without a rule, and this corpus writes locators on BOTH sides of the path.** The dominant form is `path:N, :M, :K` — locators follow. But a second form trails the attribution: both `basic-io.yaml` files wrote *"features summary p.2 :107,:117; Special-Purpose Registers table p.13 :579-586 ... -- <path>p2-datasheet-text.txt"*, with every locator BEFORE the file it belongs to, and the previous scalar ending in a different filename. Nearest-token binding and preceding-token binding each mis-bind a different set, and both mis-bound this one.
+
+**Where a locator could not be bound without guessing, the CITATION was rewritten**, not the tool — a citation whose file attribution is ambiguous to a careful reader is a citation defect, and the same ambiguity is what would mislead an agent chasing it. Fixed in `language/pasm2/concepts/basic-io.yaml`, `language/spin2/concepts/basic-io.yaml` and `architecture/streamer/pin-capture.yaml`.
+
+---
+
+### What the read found: 22 locators repaired across 12 files
+
+| class | count | |
+|---|---|---|
+| **points at content that does not support the claim** | **18** | the F-377 shape; in range, non-blank, invisible to every gate |
+| lands on a blank line | 1 | `clock_system.yaml` cited `part3-interrupts.txt:520`; the HUBSET clock-mode line is `:521` |
+| names a file that resolves to nothing | 2 | `edge-standard-module.yaml` and `edge-32mb-module.yaml` each cited a bare `narrative.txt` |
+| ambiguous — the basename exists under two source folders | 1 | `pin-drive-configuration.yaml` cited `complete-tables-reference.md:326-338`; that name is under **both** `p2-datasheet/` and `p2-hardware-manual/`, and F-367 established two same-named documents can differ |
+
+**Ten of the eighteen were the F-365 carry-over shape** — `p2-documentation.txt` line numbers attributed to `silicon-doc-text.txt`, in `architecture/streamer/pin-capture.yaml` (5) and `architecture/streamer/pin-selection.yaml` (5). Some landed in range on unrelated content (line 3604 is CORDIC example code); some were past the end of the file. **The claims were right in every case; only the locators were wrong** — which is precisely why the range check reported zero and why F-377 said no tool can see this.
+
+**The other eight, each found by reading and by nothing else:**
+
+- `p2an002-cordic-for-real-work.yaml` — the CORDIC solver summary was sourced to `:434` (COGID and COG RAM) and the GETQX/GETQY no-result event to `:5145` and `:5401` (the RDLUT and MERGEW encoding tables). Correct: `:3304`, `:3315`, `:2054`, `:2291`, `:3413`.
+- `architecture/locks.yaml` — LOCKRET's datasheet row cited as `:1794`. That line is **`into C.`**, a wrapped continuation of the LOCKREL row above it. LOCKRET is `:1795`. **A wrapped table row is its own defect class**: the PASM2 tables in `p2-datasheet-text.txt` wrap a long description onto the line *above* its mnemonic, so an off-by-one lands on a neighbouring instruction's prose and still reads like a table row.
+- `architecture/lookup_ram.yaml` — `:1831` cited as if it were a LUT instruction row. It is **RDLONG**. The LUT rows are `:2061`/`:2063`/`:2065`, which the header already carried; what `:1831` actually supports is the cog/LUT block-transfer note on RDLONG's row, and it now says so.
+- `architecture/streamer/modes-reference.yaml` — the D[16] alternate-bit-order flag sourced to `:3653-3654`, which is **`jmp #loop 'loop for another sample set`**. The rule is at `:1456`.
+- `architecture/streamer/dds-goertzel.yaml` — S[11:0] and the %T phase-offset bits sourced to `:4062-4095`, which is the **PWM/SMPS smart-pin mode** text; and the worked program's mode/data longs to `:4289-4305`, which is **Table 34's streamer clocks/bits rows**. They are `:1586-1600` and `:1686-1687`.
+
+**Every replacement locator was opened and read before it was written.**
+
+---
+
+### Two mechanical class-checks, run corpus-wide, both now clean
+
+Reading 721 citations one at a time finds what it finds; it does not prove a class is closed. Two checks were built to do that, and both were run over the whole set after the repairs:
+
+1. **The carry-over detector.** For all **222** `silicon-doc-text.txt` citations, compare the claim's context against the SAME line number in `silicon-doc-text.txt` and in the superseded `p2-documentation.txt`. A locator that matches p2-documentation better is a carry-over candidate. **Result after repair: zero.** (Before repair it named exactly the sites listed above.) The one surviving `p2-documentation.txt` citation in the set — `smart-pin-11011-usb-host-device.yaml:19` — is **deliberate and correct**: it documents a sentence the DOCX capture omits, and says so.
+2. **The no-shared-anchor detector.** Flag any citation whose cited text shares no distinctive token (mnemonic, `$hex`, `%binary`, number-with-unit) with its claim. **175 of 721 flagged; all 175 read individually; all sound.** The flag rate is high because prose claims citing prose legitimately share no such token — the detector is a reading aid, not a verdict.
+
+**RESULT: 721 of 721 read. Every locator resolves — 0 missing, 0 out of range, 0 on a blank line, 0 ambiguous — and every cited line carries the claim attached to it.**
+
+**What this does NOT certify**, and it matters: this closes the question *"is the claim supported by the line it cites?"* It says nothing about a claim that cites nothing (the Tier-2 population, F-381), and nothing about a claim that is wrong in a file with no citation defect at all — which is the class F-390, F-391 and F-395 belong to, and which has no instrument. **The delta is not the defect boundary, and neither is the citation set.**
+
+---
+
+## `pnut-ts` shorthand `v55:NNNN` is used as a citation across the shipped set and resolves to no file (2026-08-30, release fix pass step 3) — F-400
+
+### F-400 — a locator form that a reader can follow and a tool cannot — `CONFIRMED`
+
+**Not fixed. Registered, bounded, and a definition call.**
+
+Several files cite the Spin2 v55 documentation in a shorthand established at the top of the same block — `(v55:1709-1710, :1725)`, `v55:812`, `v55:520`. `guides/pasm2-getting-started.yaml` uses it heavily. The block always names `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` in full somewhere above, so a human reading the block resolves it without effort, and **every instance checked in the F-399 sweep resolved to the right line** (`v55:1725` is the `clkmode_` compiler-constant row, exactly what the claim needs).
+
+**Why it is still a finding.** The shorthand is not a path. A tool walking the file binds `:1725` to whatever full path token is nearest, which is how the F-399 extractor attributed it to `p2-datasheet-text.txt:1725` — the CALL instruction row. That is the same failure mode F-399 fixed in `basic-io.yaml` by rewriting the citation, and consistency says the same fix applies here. It was not applied in this pass because the form is used widely enough (55 spin2-v55 citations, plus `v51:` and `v35:` variants) that changing it is its own sweep with its own verification, and doing half of it is worse than doing none.
+
+**The call for whoever takes it:** either (a) expand every shorthand to a full path, or (b) declare the shorthand a supported citation form and give the resolvers a prefix table (`v55:` → `sources/spin2-v55/spin2-v55-text.txt`, and so on) so tools and readers agree. **(b) is the recommendation** — the shorthand is genuinely more readable inside a long multi-source block, and a declared prefix table makes it machine-resolvable without touching 55 citations.
+
+---
 
 ## The KB told readers to feed a 5.5 V-maximum board 9 V, and that the two Edge breakout carriers cannot take accessory boards at all — both are the opposite of what the guides say (2026-08-30, release fix pass step 1) — F-395
 
@@ -1162,7 +1240,9 @@ exposed 12 always-uncited blocks as Tier-1 blocking. All 12 are now cited or rem
 
 ## Two residues the gates cannot see: a citation re-anchor that translated line numbers, and an eighth fabricated-provenance file (2026-08-27, «#325» verification) — F-377
 
-### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `CONFIRMED`
+### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `RESOLVED`
+
+**DISCHARGED 2026-08-30 by F-399.** Part 1 (the translated-locator class) is closed the only way it can be: all **721** citation locators in the shipped set were opened at their cited lines and read. 22 were repaired — 18 pointing at content that does not support the claim, of which **10 were exactly this carry-over shape** in `pin-capture.yaml` and `pin-selection.yaml`; the two named in this entry (`dds-goertzel.yaml`) are among them. A corpus-wide carry-over detector now returns **zero** across all 222 `silicon-doc-text.txt` citations. Part 2 (`io_pin_timing.yaml`'s fabricated `part3-pins.txt`) was repaired earlier and its replacement locators were re-read in the F-399 sweep. **See F-399 for the method, the totals, and the two instrument defects that had to be fixed before any of it could be trusted.**
 
 **Part 1 — the re-anchor residue.** F-365 moved 23 shipped citations from the superseded
 `p2-documentation.txt` to `silicon-doc-text.txt`, and its own instruction was explicit: *verify each
