@@ -28,9 +28,33 @@ memory_organization:
       - "TAQOZ Forth interpreter"
       
   write_protection:
+    # CORRECTED 2026-08-30 (F-391). This previously read
+    # `protection_bit: "Set via HUBSET D[2]"`. W is D[16], not D[2] -- D[2] sits
+    # inside the per-cog debug-enable field, and a HUBSET assembled from the old
+    # sentence would carry the %0000 clock-configuration opcode, not %0010.
+    source: >-
+      P2 Documentation v35 Rev B/C, "Write-Protecting the Last 16KB of Hub RAM
+      and Enabling Debug Interrupts" --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2743-2762
+      (the operand format and the L/W/D field definitions), :2765-2772 (the three
+      worked examples).
     last_16kb: "Can be write-protected via HUBSET"
     debug_area: "Upper 16KB used for debug state storage"
-    protection_bit: "Set via HUBSET D[2]"
+    hubset_operand: "%0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD"
+    protection_bit: >-
+      W = D[16]. 0 = the last 16KB can be read and written at both its normal
+      range and at $FC000..$FFFFF (default); 1 = it disappears from its normal
+      range and is write-protected at $FC000..$FFFFF, except from within debug
+      ISRs.
+    lock_bit: >-
+      L = D[17]. 0 = establish the W and D settings and allow subsequent
+      modification; 1 = establish them and disallow subsequent modification
+      until the next reset.
+    debug_enable_bits: "D[15:0] = debug interrupt enables for cogs 15..0 respectively; 0 = disabled (default), 1 = enabled"
+    examples:
+      - "HUBSET ##$2000_0001 -- enable the debug interrupt for cog 0"
+      - "HUBSET ##$2001_FFFF -- enable debug interrupts for cogs 15..0 and write-protect the last 16KB"
+      - "HUBSET ##$2003_00FF -- enable debug interrupts for cogs 7..0, write-protect, and disallow subsequent changes"
 
 egg_beater_architecture:
   description: |
@@ -220,12 +244,28 @@ special_features:
     event_signaling: "Fast COG-to-COG events"
 
 debugging:
+  # CORRECTED 2026-08-30 (F-391). `state_preservation` previously read "All COG
+  # states saved on debug entry". The silicon saves SIXTEEN registers, not all
+  # of them -- and `architecture/debug_interrupt.yaml` already said so, so this
+  # page was contradicting a sibling page.
+  source: >-
+    P2 Documentation v35 Rev B/C, DEBUG INTERRUPT --
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2427-2431
+    (the $1F8 entry sequence: save $000..$00F, load $000..$00F, JMP #$000) and
+    :2437-2439 (the $1FD exit routine restores $000..$00F, then RETI0).
   protected_area: "Last 16KB for debug state"
   write_protect: "HUBSET can protect debug area"
-  state_preservation: "All COG states saved on debug entry"
+  state_preservation: >-
+    Cog registers $000..$00F ONLY -- and only when the ROM entry routine at $1F8
+    is used. They are saved to hub RAM at ($FF800 + !CogNumber << 7) and restored
+    from there by the $1FD exit routine. Nothing else is preserved automatically:
+    PA, PB, PTRA, PTRB and every other register are the debug ISR's own
+    responsibility. See architecture/debug_interrupt.yaml, which carries the full
+    entry/exit contract.
 
 related_components:
   architecture/p2-architecture-mental-model.yaml: "High-level architecture orientation for agents"
+  architecture/debug_interrupt.yaml: "The debug interrupt's full entry/exit contract -- what the $1F8/$1FD ROM routines save and restore, and what they do not"
   cogs: "Eight processors sharing hub"
   fifo: "Streaming interface to hub"
   locks: "Synchronization primitives"

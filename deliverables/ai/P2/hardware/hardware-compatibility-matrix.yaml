@@ -23,47 +23,75 @@ analysis_date: "2025-09-06"
 
 edge_module_carrier_compatibility:
   description: "Edge modules with carrier board compatibility"
-  
+  # CORRECTED 2026-08-30. Every row previously carried a single bare
+  # `pin_access:` integer, and the integer meant a different thing on different
+  # rows -- sometimes the carrier's header count, sometimes the module's free-pin
+  # count -- so several were wrong (P2-EC32MB on a full 64-pin carrier read 40).
+  # A pin budget is the product of TWO independently sourced facts: which pins
+  # the MODULE leaves free, and which pins the CARRIER brings to a header. Both
+  # are now stated per row, from their own guides, and neither is a derived total.
+  source: >-
+    Module side -- hardware/edge-standard-module.yaml ("64 accessible at the edge
+    connector, 56 fully free"; free pins P0-P55, P56-P63 routed to peripherals)
+    and hardware/edge-32mb-module.yaml ("46 accessible at the edge connector, 40
+    fully free"; free pins P0-P39, P40-P57 routed to the on-module PSRAM,
+    P58-P63 to peripherals and boot). Both trace to the respective Parallax
+    module guides, cited in those files.
+    Carrier side -- 64029 P2 Edge Breakout Board Guide (2023-03-01),
+    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:39;
+    64019 P2 Edge Mini Breakout Board Guide v1.1,
+    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:28
+    ("Smart I/O pins P0-P31 and P56-P63 are available at pin headers. Pins
+    P32-P55 may be accessed by adding jumper wires on the bottom side of the
+    PCB"), :45; 64020 P2 Edge Module Breadboard Product Guide REV B,
+    engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:56.
+
   combinations:
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64029 (Standard Breakout)"
-      pin_access: 64
       rating: "5_stars_perfect"
+      module_free_pins: "P0-P55 (56 fully free; P56-P63 routed to peripherals)"
+      carrier_header_pins: "all 64 at eight 2x6 accessory headers"
       use_case: "Full P2 development platform"
       cost_efficiency: "optimal"
-      
+
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64019 (Mini Breakout)"
-      pin_access: 40
       rating: "2_stars_limited"
+      module_free_pins: "P0-P55 (56 fully free; P56-P63 routed to peripherals)"
+      carrier_header_pins: "P0-P31 and P56-P63 (40) at four 2x6 accessory headers plus one programming header; P32-P55 reach no header but may be picked up with jumper wires on the bottom side of the PCB"
       use_case: "Simple projects only"
       cost_efficiency: "underutilized"
-      
+
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64020 (Breadboard Carrier)"
-      pin_access: 64
       rating: "5_stars_professional"
+      module_free_pins: "P0-P55 (56 fully free; P56-P63 routed to peripherals)"
+      carrier_header_pins: "all 64 at 0.1 inch pin sockets and eight 2x6 accessory headers"
       use_case: "Complex prototyping and education"
       cost_efficiency: "professional_premium"
-      
+
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64029 (Standard Breakout)"
-      pin_access: 40
       rating: "3_stars_oversized"
+      module_free_pins: "P0-P39 (40 fully free; P40-P57 routed to the on-module PSRAM, P58-P63 to peripherals and boot)"
+      carrier_header_pins: "all 64 at eight 2x6 accessory headers -- the PSRAM pins reach the headers but are dedicated"
       use_case: "Standard form factor with memory"
       cost_efficiency: "acceptable_but_oversized"
-      
+
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64019 (Mini Breakout)"
-      pin_access: 40
       rating: "5_stars_perfect"
+      module_free_pins: "P0-P39 (40 fully free; P40-P57 routed to the on-module PSRAM, P58-P63 to peripherals and boot)"
+      carrier_header_pins: "P0-P31 and P56-P63 (40) at four 2x6 accessory headers plus one programming header. P40-P55 reach no header on this carrier; P56/P57 do, but are PSRAM CLK/CE."
       use_case: "Compact memory-intensive projects"
       cost_efficiency: "optimal_memory_solution"
-      
+
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64020 (Breadboard Carrier)"
-      pin_access: 40
       rating: "2_stars_overkill"
+      module_free_pins: "P0-P39 (40 fully free; P40-P57 routed to the on-module PSRAM, P58-P63 to peripherals and boot)"
+      carrier_header_pins: "all 64 at 0.1 inch pin sockets and eight 2x6 accessory headers -- the PSRAM pins reach the headers but are dedicated"
       use_case: "Educational memory platform"
       cost_efficiency: "expensive_overkill"
 
@@ -73,7 +101,17 @@ edge_module_carrier_compatibility:
 
 addon_board_host_compatibility:
   description: "Add-on board compatibility with development platforms"
-  
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:9-19
+    (the eight #64006 part numbers and the one-header-per-board rule) and
+    :99-115 (the Serial Host 5 V requirement and its shunt jumper: "on a P2-ES
+    Eval Board Rev B, the shunt jumper must connect that board's ACC HDR and 5V
+    pins", :114). The addon-wave-2026-06 rows below are sourced in their own
+    per-board files (hardware/addon-*.yaml), each of which carries its guide
+    citation.
+
   eval_board_compatibility:
     host: "P2 Eval Board (64000)"
     addon_connector: "2x6 expansion headers"
@@ -167,21 +205,38 @@ addon_board_host_compatibility:
         conflicts: "uses a full dual header; check panel power budget separately"
 
   edge_carrier_compatibility:
+    # CORRECTED 2026-08-30. This block previously stated that the #64029 and
+    # #64019 carriers have "No 2x6 expansion headers" and therefore
+    # `addon_support: none`. All three carrier guides state the opposite: every
+    # carrier brings its I/O pins out to 2x6 way P2 accessory headers and takes
+    # the #64006-series boards. The corrected counts below come from the guides
+    # and agree with hardware/edge-standard-breakout.yaml,
+    # hardware/edge-mini-breakout.yaml and hardware/p2-hardware-feature-comparison.yaml.
+    source: >-
+      64029 P2 Edge Breakout Board Guide (2023-03-01) --
+      engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:39
+      ("All 64 Smart I/O pins brought out to 0.1" 2x6 way P2 accessory
+      headers"), :132 (the accessory boards it names);
+      64019 P2 Edge Mini Breakout Board Guide v1.1 --
+      engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:45,
+      :115, :171-177;
+      64020 P2 Edge Module Breadboard Product Guide REV B --
+      engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:56.
     breadboard_carrier:
       host: "P2 Edge Module Breadboard (64020)"
-      addon_support: "limited"
-      reason: "Focused on breadboard prototyping"
-      recommendation: "Use breadboard instead of add-ons"
-      
+      addon_support: "yes"
+      headers: "all 64 Smart I/O pins at 0.1 inch pin sockets AND eight 2x6 way accessory headers"
+      reason: "Breadboard prototyping is the board's focus, but the accessory headers are present and usable"
+
     standard_breakout:
       host: "P2 Edge Standard Breakout (64029)"
-      addon_support: "none"
-      reason: "No 2x6 expansion headers"
-      
+      addon_support: "yes"
+      headers: "all 64 Smart I/O pins at eight 2x6 way accessory headers, each arranged to accept single or dual accessory boards"
+
     mini_breakout:
       host: "P2 Edge Mini Breakout (64019)"
-      addon_support: "none"
-      reason: "No 2x6 expansion headers"
+      addon_support: "yes"
+      headers: "40 Smart I/O pins (P0-P31, P56-P63) at four 2x6 way accessory headers plus one programming header; P32-P55 reach no header but may be picked up with jumper wires on the bottom side of the PCB"
 
 # ============================================================================
 # PHYSICAL COMPATIBILITY CONSTRAINTS
@@ -222,31 +277,56 @@ physical_stacking_constraints:
 # ============================================================================
 
 power_compatibility:
+  source: >-
+    64000 Propeller 2 Eval Board Rev C Guide (Parallax Inc.) --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:47
+    (5 VDC input, absolute maximum 5.5 VDC), :55-56 (PC-USB 500 mA, AUX-USB
+    2000 mA), :58 (VIO 3.3 V up to 300 mA per 8 I/O pins), :115 (AUX 5V/GND
+    pads, 4.5-5.5 V).
+    64029 P2 Edge Breakout Board Guide (2023-03-01) --
+    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:53-57;
+    64019 P2 Edge Mini Breakout Board Guide v1.1 --
+    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:55-59;
+    64020 P2 Edge Module Breadboard Product Guide REV B --
+    engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:61-66.
+    All three carriers state the same input requirement.
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:62-80
+    (Control: four blue LEDs, each with a 470 ohm series resistor), :99-115
+    (Serial Host: up to 500 mA continuous per socket, 5 V required),
+    :195-197 (LED Matrix: ~4 mA per lit LED, 224 mA if all 56 were on at once,
+    4 mA instantaneous under Charlieplexing), :328 (A/V Breakout: "Amplified
+    Audio Out (80mW)").
   host_power_capabilities:
     eval_board:
-      usb_power: "Limited - may require auxiliary power"
-      auxiliary_power: "Recommended for multiple add-ons"
-      power_connector: "P2-USB socket"
-      
+      usb_power: "Two micro-USB sockets, source auto-selected: PC-USB limited to 500 mA, AUX-USB to 2000 mA"
+      auxiliary_power: "Recommended for multiple add-ons -- prefer the AUX USB socket for its higher limit"
+      power_connector: "micro-USB (PC and AUX). Optional AUX 5V/GND pads accept 4.5 V to 5.5 V and MUST NOT exceed 5.5 V; do not drive the pads and the AUX socket at once"
+
     edge_carriers:
-      usb_power: "Adequate for moderate loads"
-      external_power: "5V or 6-9V depending on carrier"
-      regulation: "Onboard 3.3V regulation"
-      
+      usb_power: "via the recommended Parallax USB A to DC-Jack cable (#805-00019) into the barrel jack"
+      external_power: "5 VDC only, absolute maximum 5.5 VDC, at the 2.1 mm centre-positive barrel jack -- the same on all three carriers (#64029, #64019, #64020). No carrier accepts a wide input range."
+      input_current: "recommended minimum 100 mA; #64020 additionally states 1000 mA typical; maximum according to the customer application"
+      regulation: "VIO 3.3 V up to 300 mA per 8 I/O pins -- supplied by the P2 Edge Module, not by the carrier (all three guides: 'requires P2 Edge Module')"
+
   addon_power_requirements:
+    # The #64006 guide gives a current figure for only two of the eight boards
+    # (LED Matrix and Serial Host). For the rest it describes the circuit, not a
+    # draw. The remaining entries state what the guide states -- no figure is
+    # derived from LED counts or resistor values.
     low_power:
-      - "64006A (Control) - ~16mA max (4 LEDs)"
-      - "64006C (LED Matrix) - 4mA (Charlieplexed)"
+      - "64006A (Control) - four blue LEDs and four push-buttons, each on a 470 ohm series resistor; the guide states no current figure"
+      - "64006C (LED Matrix) - ~4 mA per lit LED; Charlieplexing lights one at a time, so instantaneous draw stays ~4 mA (vs 224 mA if all 56 were on)"
       - "64006E (Mini Prototyping) - User dependent"
-      
+
     moderate_power:
       - "64006D (Digital Video Out) - Signal level only"
       - "64006F (Serial Device) - USB device mode"
       - "64006G (Goertzel) - Touch sensing circuits"
-      
+
     high_power:
-      - "64006B (Serial Host) - 500mA per USB port + 5V required"
-      - "64006H (A/V Breakout) - 80mW audio amplifier + video drivers"
+      - "64006B (Serial Host) - up to 500 mA continuous per USB socket (current-limited load switch, subject to overall available system power) + 5 V required"
+      - "64006H (A/V Breakout) - amplified audio output rated 80 mW, plus video drivers. 80 mW is the amplifier's OUTPUT rating, not the board's supply draw; the guide states no supply figure. Use the P2-EVAL 3.3 V LDO power selection when working with audio."
 
 # ============================================================================
 # PIN USAGE COMPATIBILITY
@@ -273,15 +353,25 @@ pin_usage_analysis:
       addon_positions: "8 positions × 8 pins = 64 total possible"
       
     edge_carriers:
-      standard_breakout: "64 pins available, no addon headers"
-      mini_breakout: "40 pins available, no addon headers"
-      breadboard_carrier: "64 pins available, limited addon support"
+      standard_breakout: "64 pins available at eight 2x6 accessory headers"
+      mini_breakout: "40 pins available (P0-P31, P56-P63) at four 2x6 accessory headers; P32-P55 reach no header but may be picked up with jumper wires on the bottom side of the PCB"
+      breadboard_carrier: "64 pins available at pin sockets and eight 2x6 accessory headers"
 
 # ============================================================================
 # PERFORMANCE COMPATIBILITY
 # ============================================================================
 
 performance_considerations:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:189-191:
+    "When Propeller 2 code switches each LED on and off at least 50 times a
+    second (50 Hz), flickering should not be noticeable... each I/O could switch
+    faster than 180 MHz". Both figures are the LED Matrix board's Charlieplexing
+    discussion; the 180 MHz is that guide's statement about I/O switching, not a
+    silicon maximum -- for P2 clock and pin limits see architecture/ and the
+    P2 Datasheet.
   timing_requirements:
     led_matrix:
       refresh_rate: "Minimum 50Hz for flicker-free operation"
@@ -330,7 +420,7 @@ optimal_configurations:
   compact_memory_system:
     host: "P2 Edge Mini Breakout (64019)"
     module: "P2-EC32MB (32MB Edge Module)"
-    addons: "None (no addon support)"
+    addons: "Optional -- the #64019 has four 2x6 accessory headers. Note the pin budget: the P2-EC32MB dedicates P40-P57 to the on-module PSRAM, and the #64019 exposes only P0-P31 and P56-P63, so P56/P57 (PSRAM CLK/CE) are already spoken for and P0-P31 is what remains for accessories."
     rationale: "Optimal compact memory-intensive applications"
     
   professional_development:
@@ -344,11 +434,23 @@ optimal_configurations:
 # ============================================================================
 
 incompatibilities:
+  source: >-
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
+    2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:99-115
+    (the Serial Host 5 V supply and its ACC HDR / 5V shunt jumper) and :357-359
+    ("Tip: Always use the P2-EVAL 3.3V LDO Power selection when working with
+    Audio!" -- the A/V Breakout).
+    This block previously listed "Edge carriers (64029, 64019) have no 2x6
+    addon headers / Cannot use 64006-series add-on boards" as the first hardware
+    conflict. That is the opposite of what the guides say and it has been
+    removed -- see the note under `edge_carrier_compatibility`.
   hardware_conflicts:
-    - description: "Edge carriers (64029, 64019) have no 2x6 addon headers"
-      impact: "Cannot use 64006-series add-on boards"
-      solution: "Use P2 Eval Board for addon compatibility"
-      
+    - description: "The #64019 Mini Breakout brings out only 40 of the 64 I/O pins (P0-P31, P56-P63) at four accessory headers"
+      impact: "Fewer simultaneous accessory positions than the #64029 or #64020, and P32-P55 reach no header but may be picked up with jumper wires on the bottom side of the PCB"
+      solution: "Use the #64029 Standard Breakout or #64020 Breadboard carrier when more than four accessory positions are needed"
+
+
     - description: "Serial Host (64006B) requires 5V supply"
       impact: "May not work with 3.3V-only systems"
       solution: "Ensure 5V available and shunt jumper configured"
@@ -380,7 +482,7 @@ upgrade_paths:
       - "Production deployment path"
     tradeoffs:
       - "Lose built-in peripherals"
-      - "No direct add-on board compatibility"
+      - "Programming needs a Prop Plug (#32201) -- no built-in USB-serial on the carriers"
       - "Higher initial cost"
       
   memory_upgrades:

@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-395`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-399`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,178 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The KB told readers to feed a 5.5 V-maximum board 9 V, and that the two Edge breakout carriers cannot take accessory boards at all — both are the opposite of what the guides say (2026-08-30, release fix pass step 1) — F-395
+
+### F-395 — `hardware-compatibility-matrix.yaml` shipped an out-of-range supply voltage and an inverted accessory-header capability; two module files carried a pin range that contradicts its own count — `RESOLVED`
+
+**Class: a documented value that is simply wrong.** Not a citation gap — the file cited nothing
+anywhere, so nothing could go red. This is the class F-390/F-391 opened, found the same way: by
+reading the file, not by running an instrument.
+
+**Three defects, all in files that no gate had ever flagged.**
+
+**1. `external_power: "5V or 6-9V depending on carrier"`** (`hardware-compatibility-matrix.yaml:233`
+as shipped). **No P2 carrier accepts a wide input.** All three guides state the same requirement
+verbatim — *"Voltage input requirements: 5 VDC, absolute maximum 5.5 VDC"*:
+`engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:53`,
+`engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:55`,
+`engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:61`,
+each followed by a boxed *"CAUTION! Always use a well-regulated power supply and do not exceed
+5.5 VDC"*. A reader taking the KB at its word applies 9 V to a 5.5 V absolute maximum.
+**This is the `max_current_per_pin: 150mA` shape exactly** — an out-of-range electrical figure, in
+the one number that decides what you plug in, sitting where the blocking gate structurally could
+not reach it. `edge-breadboard-carrier.yaml` had *the same* wide-input claim removed on 2026-08-25
+(ledger item 7, and the comment at `:59-64` records it); the sweep stopped at that file.
+
+**2. `addon_support: "none"` / `reason: "No 2x6 expansion headers"`** for the #64029 and #64019,
+plus *"Edge carriers (64029, 64019) have no 2x6 addon headers → Cannot use 64006-series add-on
+boards"* under `incompatibilities`. **Every carrier has 2x6 accessory headers and takes the #64006
+boards.** `edge-breakout-board-narrative.txt:39` — *"All 64 Smart I/O pins brought out to 0.1"
+2x6 way P2 accessory headers"*; `edge-mini-breakout-narrative.txt:45` — the same for its 40 pins,
+and `:171-177` describes the accessory headers with their 5 V output;
+`edge-module-breadboard-narrative.txt:56` — *"All 64 Smart I/O pins brought out to 0.1" pin sockets
+and 2x6 way P2 accessory headers"*. Our own `edge-mini-breakout.yaml:56-58` already said the #64019
+takes *"the #64006-ES P2-ES Eval Board Accessory Set (eight boards)"*, so **the file contradicted a
+sibling page** — the F-391 shape. **Nine sites** across five blocks carried the inversion
+(`edge_carrier_compatibility` ×3, `host_pin_availability` ×2, `compact_memory_system`,
+`incompatibilities`, `upgrade_paths`, and the `pin_access` column below).
+Consumer cost: an agent asked "which board for add-ons?" is told to buy the Eval Board and that two
+of the three carriers are disqualified. The recommendation is wrong and the reason for it is
+fabricated.
+
+**3. `pin_access: "P0-P31, P58-P63 accessible (40 pins)"`** —
+`edge-standard-module.yaml:261` and `edge-32mb-module.yaml:439`. **The range and the count disagree
+with each other**: P0-P31 + P58-P63 is 38, not 40. The guide says P56-P63
+(`edge-mini-breakout-narrative.txt:28`), which is what makes 40. The file's own arithmetic was the
+tell, and nothing checks arithmetic. `edge-32mb-module.yaml:441` compounded it with
+*"PSRAM pins internal to module, not on headers"* — P56/P57 are PSRAM CLK/CE and they DO reach the
+#64019's headers; it is P40-P55 that do not.
+
+**Also corrected in the same pass:** the `combinations` table's `pin_access:` was a single bare
+integer that meant the carrier's header count on some rows and the module's free-pin count on
+others, so P2-EC32MB on a full 64-pin carrier read `40`. A pin budget is the product of two
+independently sourced facts — what the MODULE frees and what the CARRIER brings to a header — and
+both are now stated per row from their own guides, with no derived total. The unsourced `rating:`
+values were **deliberately left in place**: they belong to F-374, whose class boundary is still
+Stephen's call, and removing six of the thirteen would have silently moved that finding's count.
+
+**APPLIED 2026-08-30.** All three defects corrected against the guides above, with block-level
+`source:` fields added. Four gates re-run: claim-sourcing PASS (Tier 1 none), crossref 0
+unresolved, constant-fidelity PASS, duplicate-keys 0 across 1132 files.
+
+---
+
+## F-350 corrected one file of a four-file family and no sweep ever ran — the whole fabrication set was still live in `p2-hardware-selection-guide.yaml` (2026-08-30, release fix pass step 1) — F-396
+
+### F-396 — every fabrication F-350 removed from `p2-hardware-feature-comparison.yaml` on 2026-08-25 was still shipping, unchanged, in the sibling selection guide — `RESOLVED`
+
+**This is the finding about the other findings.** `p2-hardware-feature-comparison.yaml:159-167`
+carries a `corrections_applied_2026_08_25` block naming exactly what F-350 removed. Every item on
+that list was still present in `p2-hardware-selection-guide.yaml` five days later, because F-350
+was applied to the file where it was noticed and the family was never swept.
+
+| F-350 removed from feature-comparison | still live in selection-guide | authority |
+|---|---|---|
+| part number `64000-ES` for the Eval Board | 3 sites (`:21`, `:27`, `:36`) | Rev C guide documents **#64000**; `-ES` is the limited-edition engineering sample (`p2-hardware-feature-comparison.yaml:83`) |
+| fabricated `P2-EVAL-STD-BREAKOUT` | 2 sites (`:42`, `:57`) | the part is **#64029** |
+| fabricated `P2-EVAL-MINI-BREAKOUT` | 3 sites (`:51`, `:66`, `:72`) | the part is **#64019** |
+| *"USB-C programming"* | 3 sites (`:37`, `:104`, `:165`) | dual **micro-USB**; `complete-p2-eval-board-reference.md:59`, `:76`. The ingestion's own cross-source analysis already wrote *"**there is no barrel jack**"* (`p2-eval-board-cross-source-analysis.md:145-147`) |
+| eval board `127x89mm` | `:221` | **3.55 x 3.55 in** (90 x 90 mm), octagonal — `complete-p2-eval-board-reference.md:62`, `:253-260` |
+| carriers' wrong dimensions | `76×51mm` (`:222`), `38×25mm` (`:52`, `:223`) | #64029 = **4 x 1.4 in (101.6 x 35.6 mm)** (`edge-breakout-board-narrative.txt:64`); #64019 = **3.15 x 1.4 in (80 x 35.5 mm)** (`edge-mini-breakout-narrative.txt:65`) |
+| *"All 64 pins on edge castellations"* | `castellation` ×2 (`:54`, `:247`) | the string **"castell" appears nowhere** in the #64019 guide; the carrier has four plated mounting holes and an edge socket |
+
+**Plus one not in F-350's list:** `"VGA video output up to 1024×768"` (`:84`) — the #64006H guide
+lists sockets and signal formats (`p2-eval-add-on-boards-text.txt:326-334`) and states no
+resolution ceiling. `1024` appears in that source only inside a phone number.
+
+**The structural lesson, and it is the point of this entry.** F-350's disposition read as complete
+because the file it was found in was fully repaired and carries a correction record saying so. What
+made it incomplete is invisible from that file: **a fabrication that reaches a family of sibling
+documents is one finding with N locations, and a repair record written in one of them looks
+identical to a finished sweep.** This is the standing rule
+(`feedback_classwide_sweep_on_every_finding`) failing in the one place it is hardest to notice —
+not a missed occurrence in a grep, but a missed *file*, in a family where the repaired file
+documents its own repair.
+Two consequences worth carrying: (a) a correction record belongs with the FINDING, not only in the
+repaired file; (b) when a finding names a fabricated value, the sweep must run over the whole
+corpus and be reported with its total, before the finding can close.
+
+**APPLIED 2026-08-30.** All 15 sites corrected against the guides above. Gates re-run, all green.
+
+---
+
+## Nineteen electrical quantities shipped uncited in two hardware files; one was a derived LED current with no source, and one was an amplifier's OUTPUT rating filed as a supply requirement (2026-08-30, release fix pass step 1) — F-397
+
+### F-397 — the census's category-1 uncited-quantity block, sourced or removed — `RESOLVED`
+
+**Origin:** `engineering/analysis/2026-08-30-yaml-defect-census.md` §3 — 14 quantities in
+`hardware-compatibility-matrix.yaml` (4 blocks) and 5 in `p2-hardware-selection-guide.yaml`
+(1 block), category 1 not because they were known wrong but **because of their shape**: uncited
+electrical figures in wholly-uncited files, where Tier 1 structurally cannot reach them (F-381).
+Reading them found that three *were* wrong.
+
+**Sourced as stated (kept, now cited):** LED Matrix ~4 mA per lit LED and 224 mA if all 56 were on
+(`p2-eval-add-on-boards-text.txt:195-197`); Serial Host 500 mA continuous per USB socket (`:100`);
+the 5 V shunt-jumper requirement (`:114`); 50 Hz flicker threshold and >180 MHz I/O switching
+(`:189-191`); A/V 3.3 V LDO power selection (`:357-359`); VIO 3.3 V up to 300 mA per 8 I/O pins and
+the PC-USB 500 mA / AUX-USB 2000 mA limits (`complete-p2-eval-board-reference.md:55-58`).
+
+**Wrong, and replaced with what the source states:**
+- **`"64006A (Control) - ~16mA max (4 LEDs)"`** — **no source anywhere states 16 mA.** The #64006
+  guide says the Control board has four blue LEDs and four push-buttons, each on a **470 Ω series
+  resistor** (`:62`, `:74-80`), and gives no current. 16 mA reads as 4 × the LED Matrix's 4 mA — a
+  figure borrowed from a different board with different circuitry and presented as this board's
+  maximum. **A derived electrical quantity wearing a data key is the 150 mA defect in miniature.**
+  Replaced with the resistor fact and an explicit note that the guide states no current figure.
+- **`"64006H (A/V Breakout) - 80mW audio amplifier"`** under `high_power:
+  addon_power_requirements` — 80 mW is real (`:328`, *"Amplified Audio Out (80mW)"*) but it is the
+  amplifier's **output** rating. Filed as a power *requirement* it invites a supply budget built
+  from the wrong number, off by whatever the amplifier's efficiency is. A correct citation attached
+  to a miscategorised quantity still ships a wrong claim.
+- **`"5V @ 1A minimum (USB-C or barrel jack)"`** and **`"Additional current budget (50-500mA
+  each)"`** — 1 A, 50 mA and the connector both unsourced; see F-396 for the connector.
+  Replaced with the guide's actual limits and an explicit statement that the #64006 guide gives a
+  current for two of its eight boards and none for the rest.
+
+**APPLIED 2026-08-30.** All five blocks now carry block-level `source:`. `audit-yaml-claim-sourcing.py`
+Tier 2 advisory 32 → 27; Tier 1 still none, so adding citations to these two wholly-uncited files did
+not expose an uncited sibling block in either (the F-381 trap was checked for, not assumed).
+
+---
+
+## The hardware selection guide ships 2025 US retail prices as data, in a set with no mechanism to age them (2026-08-30, release fix pass step 1) — F-398
+
+### F-398 — ~15 USD price sites across `p2-hardware-selection-guide.yaml`; needs a policy call, not a citation — `CONFIRMED`
+
+**Not fixed. Registered for a definition call, and it is the sibling of F-374.**
+
+`p2-hardware-selection-guide.yaml` states prices as first-class data — `cost_estimate: "$150-200"`
+(6 sites), `total_investment` (2), `cost` (4), `additional_cost` (2), `total_cost` (3),
+`"PropPlug programmer required (+$30)"`, `cost_difference: "$30-50"` — under `last_updated:
+"2025-09-06"`. No source is cited and none could be: a Parallax guide does not carry retail price,
+and the web store's price is a moving target the KB has no mechanism to track.
+
+**Why it is a finding and not a style note.** It fails the same two tests F-374 applies. Nothing
+sources it. And the consumer cannot act on it safely: an agent reading `$150-200` states it as
+fact to a user who may be reading a year later in another currency, and a KB that is wrong about
+money is wrong in a way the reader can check — which is the kind of wrong that costs trust in
+everything else on the page. It is also the `feedback_durable_mechanism_over_perishable_catalog`
+shape: **vendor facts rot, and this set has no expiry mechanism.**
+
+**Why it is NOT being swept in this pass.** The disposition is a judgement with a real cost either
+way — deleting every price guts a guide whose entire purpose is budget-tiered selection, and the
+relative ordering (mini breakout cheapest, full add-on set dearest) is durable even when the
+absolute numbers are not. That is a definition call of exactly F-374's kind, and this register's
+own rule is that a call belonging to Stephen is not made by the agent that found it.
+
+**The options, for whoever takes the call:** (a) delete every absolute figure and keep the relative
+tiering; (b) keep them behind an explicit `as_of: 2025-09-06, retail USD, verify at parallax.com`
+qualifier on every site; (c) replace the whole cost axis with a pointer to the web store. **(a) is
+the recommendation** — it is the only one that cannot go stale, and the guide's decision tree turns
+on ordering, not amounts.
+
+---
 
 ## Inline PASM's real stack rule is "5 of the 8 hardware levels", and our page says "PASM doesn't use Spin2 stack" — the one number a nested inline routine needs is the one we omit (2026-08-30, debug/stack research) — F-394
 
@@ -106,7 +278,7 @@ save-restore. Same treatment for the `CALL()` / `REGEXEC` surface, which shares 
 
 ## We tell agents to pass `-1` for "any available cog", and the silicon reads `-1` as "start a PAIR" — two cogs on one stack buffer (2026-08-30, debug/stack research) — F-390
 
-### F-390 — `cogspin.yaml` and `coginit.yaml` document `-1` as a synonym for `NEWCOG`; it is not, and the value it actually selects launches an even/odd cog pair — `CONFIRMED`
+### F-390 — `cogspin.yaml` and `coginit.yaml` document `-1` as a synonym for `NEWCOG`; it is not, and the value it actually selects launches an even/odd cog pair — `RESOLVED`
 
 **Class: BEHAVIOUR — an agent following the KB emits code that silently consumes two cogs and gives
 them one shared stack. This is a manufactured instability, in the exact class the question that
@@ -159,11 +331,20 @@ the third (`cogspin.yaml:45`) is correct and stays.
 **Bench confirmation available (not required to act):** `c := cogspin(-1, worker(), @stk)` then
 `cogchk()` per cog — the prediction is two running cogs, not one.
 
+**APPLIED 2026-08-30.** `cogspin.yaml:18-49` and `coginit.yaml:14-41` rewritten. `-1` is gone as an
+input from both; `NEWCOG` (`%01_0000`) is stated as the only COGSPIN symbol, and COGINIT now carries
+all six of its table's symbols including the two `_PAIR` forms it had never listed. Both files gained
+a block `source:` (v55 `:1658-1665` / `:1667-1669`, v51 `:12516-12520`, Silicon Doc `:381-390`) and a
+`not_an_input:` field stating what `-1` actually selects and why. `-1` stays as the failure **return**
+(`cogspin.yaml:71`, unchanged and correct). **Class sweep run over all 1133 shipped files** for
+`NEWCOG.*-1|-1.*NEWCOG|cog(spin|init)\s*\(\s*-\s*1`: the only surviving match is that correct return
+line. Four gates re-run, all green.
+
 ---
 
 ## `HUBSET D[2]` protects nothing: the KB's write-protect bit is off by fourteen bits, and "all COG states saved" is the opposite of what the silicon does (2026-08-30, debug/stack research) — F-391
 
-### F-391 — `architecture/hub.yaml` states a fabricated HUBSET bit position and a debug save scope the Silicon Doc contradicts — `CONFIRMED`
+### F-391 — `architecture/hub.yaml` states a fabricated HUBSET bit position and a debug save scope the Silicon Doc contradicts — `RESOLVED`
 
 **Class: BEHAVIOUR (the bit) + FABRICATION (the save scope).**
 
@@ -196,6 +377,15 @@ automatically*"), so `hub.yaml:225` also **contradicts a sibling KB page**.
 **Correction:** replace `protection_bit` with the operand format and the `L`/`W`/`D` field map, citing
 `:2743-2762`; replace `state_preservation` with "registers `$000..$00F` only, via the `$1F8` ROM
 routine — see `architecture/debug_interrupt.yaml`", and link the two pages.
+
+**APPLIED 2026-08-30.** `hub.yaml` `write_protection` now carries the full operand format
+`%0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD` with W=D[16], L=D[17], D[15:0] as the per-cog enables, plus
+the three worked examples, sourced to `silicon-doc-text.txt:2743-2762` and `:2765-2772`.
+`debugging.state_preservation` now states `$000..$00F` ONLY, via the `$1F8` ROM routine, saved to
+`($FF800 + !CogNumber << 7)` and restored by `$1FD`, with an explicit "nothing else is preserved
+automatically" — sourced to `:2427-2431` and `:2437-2439`. The two pages are linked:
+`related_components` gained `architecture/debug_interrupt.yaml`. Four gates re-run, all green
+(crossref 0 unresolved, so the new reference resolves).
 
 ---
 

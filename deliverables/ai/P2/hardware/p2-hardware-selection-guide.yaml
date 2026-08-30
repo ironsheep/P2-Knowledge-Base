@@ -18,13 +18,13 @@ decision_tree:
       question: "Are you new to P2 development?"
       new_user:
         recommendation: "P2 Eval Board + Control Board Add-on"
-        part_numbers: ["64000-ES", "64006A"]
+        part_numbers: ["64000", "64006A"]
         rationale: "Complete development environment with programming, debugging, and simple I/O"
         cost_estimate: "$150-200"
         next_steps: "Add more add-on boards as needed"
       experienced_user:
         recommendation: "P2 Eval Board + Complete Add-on Set"
-        part_numbers: ["64000-ES", "64006-ES"]
+        part_numbers: ["64000", "64006-ES"]
         rationale: "Full ecosystem access for comprehensive development"
         cost_estimate: "$250-300"
         next_steps: "Transition to breakout boards for production"
@@ -33,13 +33,13 @@ decision_tree:
       question: "Do you need integrated programming and debugging?"
       integrated_needed:
         recommendation: "P2 Eval Board"
-        part_numbers: ["64000-ES"]
-        rationale: "Built-in programming via USB-C, extensive prototyping area"
+        part_numbers: ["64000"]
+        rationale: "Built-in FTDI USB-to-serial programming over the PC micro-USB socket (there is no USB-C socket on the #64000), extensive prototyping area"
         cost_estimate: "$100-150"
         expansion_options: ["Add-on boards as needed", "Breadboard integration"]
       external_programming_ok:
         recommendation: "P2 Edge Standard Breakout + P2-EC"
-        part_numbers: ["P2-EVAL-STD-BREAKOUT", "P2-EC"]
+        part_numbers: ["64029", "P2-EC"]
         rationale: "Lower cost, all pins accessible, breadboard compatible"
         cost_estimate: "$60-80"
         additional_needed: "PropPlug or similar programmer"
@@ -48,13 +48,13 @@ decision_tree:
       question: "What are your size constraints?"
       size_critical:
         recommendation: "P2 Edge Mini Breakout + P2-EC"
-        part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC"]
-        rationale: "Smallest possible footprint (38×25mm) with full P2 capability"
+        part_numbers: ["64019", "P2-EC"]
+        rationale: "Smallest carrier footprint -- 3.15 x 1.4 in (80 x 35.5 mm) -- with 40 of the 64 I/O pins at headers"
         cost_estimate: "$50-70"
-        mounting: "Castellation mounting for surface mount integration"
+        mounting: "Four plated mounting holes attached to the ground plane; the P2 Edge Module drops into the board's edge socket. The word \"castellation\" appears nowhere in the #64019 guide -- this is not a castellated surface-mount part."
       size_moderate:
         recommendation: "P2 Edge Standard Breakout + P2-EC"
-        part_numbers: ["P2-EVAL-STD-BREAKOUT", "P2-EC"]
+        part_numbers: ["64029", "P2-EC"]
         rationale: "Larger but easier to work with, header pin access"
         cost_estimate: "$60-80"
         mounting: "Through-hole headers or breadboard mounting"
@@ -63,13 +63,13 @@ decision_tree:
       question: "Do you need PSRAM (32MB of external RAM beyond the 512KB hub)?"
       large_programs:
         recommendation: "P2 Edge Mini Breakout + P2-EC32MB"
-        part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC32MB"]
+        part_numbers: ["64019", "P2-EC32MB"]
         rationale: "Production-ready form factor with maximum memory"
         cost_estimate: "$80-120"
         memory: "16MB Flash + 32MB PSRAM"
       standard_programs:
         recommendation: "P2 Edge Mini Breakout + P2-EC"
-        part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC"]
+        part_numbers: ["64019", "P2-EC"]
         rationale: "Cost-effective production solution"
         cost_estimate: "$50-70"
         memory: "16MB Flash (no PSRAM) sufficient for most applications"
@@ -81,7 +81,14 @@ application_specific_guides:
     optional_addons: ["64006D - Digital Video Out", "64006C - LED Matrix"]
     total_investment: "$200-350"
     capabilities:
-      - "VGA video output up to 1024×768"
+      # The #64006H guide lists sockets and signal formats, not a resolution
+      # ceiling. "VGA video output up to 1024x768" was stated here with no
+      # source and has been replaced by the guide's own feature list
+      # (p2-eval-add-on-boards-text.txt:326-334). Resolution is a function of
+      # the streamer/NCO timing you drive, not of the breakout board -- see
+      # architecture/streamer/nco-timing.yaml.
+      - "VGA output on a 15-pin VGA socket"
+      - "Component video to RCA 4-band (composite sync, RGBS), digital component video on RCA, and composite video on RCA"
       - "Stereo audio with multiple output formats"
       - "Digital video experimentation"
       - "LED matrix displays for graphics"
@@ -101,7 +108,7 @@ application_specific_guides:
       - "Dual-port configurations for complex scenarios"
       - "Device enumeration and power management"
     development_path:
-      1: "Start with basic USB programming via Eval Board USB-C"
+      1: "Start with basic USB programming via the Eval Board PC micro-USB socket"
       2: "Add Serial Host for connecting USB devices"
       3: "Add Serial Device for custom device emulation"
       4: "Develop complex USB ecosystems"
@@ -162,7 +169,7 @@ budget_optimization_strategies:
   value_balanced:
     configuration: "P2 Eval Board"
     total_cost: "$100-150"
-    programming: "Integrated USB-C programming"
+    programming: "Integrated programming -- built-in FTDI USB-to-serial over the PC micro-USB socket"
     expansion: "Add specific add-on boards as needed"
     best_for: "Most users, balanced cost/capability"
     
@@ -207,21 +214,44 @@ development_workflow_optimization:
     programming: "In-circuit via PropPlug or custom programmer"
 
 compatibility_considerations:
+  # CORRECTED 2026-08-30. `power_supply_requirements` previously read
+  # "5V @ 1A minimum (USB-C or barrel jack)" for the eval board -- the #64000 has
+  # neither a USB-C socket nor a barrel jack, and 1 A appears in no guide; and
+  # "Regulated 3.3V or 5V depending on model" for the carriers, which take 5 VDC
+  # only. The "50-500mA each" add-on budget was likewise unsourced: the #64006
+  # guide gives a current figure for two of its eight boards and none for the rest.
+  source: >-
+    64000 Propeller 2 Eval Board Rev C Guide (Parallax Inc.) --
+    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:47
+    (5 VDC, absolute maximum 5.5 VDC), :55-56 (PC-USB 500 mA, AUX-USB 2000 mA),
+    :58 (VIO 3.3 V up to 300 mA per 8 I/O pins), :76 (dual micro-USB inputs),
+    :115 (AUX 5V/GND pads, 4.5-5.5 V, MUST NOT exceed 5.5 V).
+    64029 P2 Edge Breakout Board Guide (2023-03-01) --
+    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:53-57;
+    64019 P2 Edge Mini Breakout Board Guide v1.1 --
+    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:55-59;
+    64020 P2 Edge Module Breadboard Product Guide REV B --
+    engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:61-66.
+    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (2021-01-12) --
+    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:99-115
+    (Serial Host: up to 500 mA continuous per USB socket), :195-197 (LED Matrix:
+    ~4 mA per lit LED).
   power_supply_requirements:
-    eval_board: "5V @ 1A minimum (USB-C or barrel jack)"
-    breakouts: "Regulated 3.3V or 5V depending on model"
-    addon_boards: "Additional current budget (50-500mA each)"
-    
+    eval_board: "5 VDC (absolute maximum 5.5 VDC) at either micro-USB socket -- PC-USB is limited to 500 mA, AUX-USB to 2000 mA, and the source is auto-selected. Optional AUX 5V/GND pads accept 4.5-5.5 V. The #64000 has no USB-C socket and no barrel jack."
+    breakouts: "5 VDC only, absolute maximum 5.5 VDC, at the 2.1 mm centre-positive barrel jack -- the same on #64029, #64019 and #64020. Recommended minimum 100 mA; the #64020 additionally states 1000 mA typical. VIO 3.3 V (up to 300 mA per 8 I/O pins) is supplied by the P2 Edge Module, not by the carrier."
+    addon_boards: "Budget per board from its own guide entry, not from a blanket range. The #64006 guide states a current for two of its eight boards only: Serial Host up to 500 mA continuous per USB socket, LED Matrix ~4 mA (one Charlieplexed LED lit at a time). See hardware/addon-*.yaml for the wave-2026-06 boards."
+
+
   programming_infrastructure:
     eval_board: "No additional hardware required"
     breakouts: "PropPlug or compatible programmer needed"
     production: "In-circuit programming capability recommended"
     
   mechanical_integration:
-    eval_board: "Large form factor (127×89mm), not production-ready"
-    standard_breakout: "PCB-mount friendly (76×51mm)"
-    mini_breakout: "Compact integration (38×25mm)"
-    mounting: "Header pins vs castellation mounting options"
+    eval_board: "Large form factor -- 3.55 x 3.55 in (90 x 90 mm), octagonal outline -- not production-ready"
+    standard_breakout: "PCB-mount friendly -- 4 x 1.4 in (101.6 x 35.6 mm)"
+    mini_breakout: "Compact integration -- 3.15 x 1.4 in (80 x 35.5 mm)"
+    mounting: "0.1 inch header sockets on every carrier, plus four plated mounting holes; the #64020 adds a solderless breadboard"
 
 common_mistakes_to_avoid:
   overbuying_initially:

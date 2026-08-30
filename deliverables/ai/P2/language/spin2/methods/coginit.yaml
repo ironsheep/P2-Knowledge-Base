@@ -17,11 +17,33 @@ parameters:
   - name: "CogNum"
     type: "long"
     description: |
-      Cog number to start:
+      Cog number to start, or one of the built-in symbols below.
       - 0-7: Start specific cog (will stop if running)
-      - COGEXEC_NEW or NEWCOG (-1): Start any available cog
+      - COGEXEC_NEW (%01_0000): Start any available cog, cogexec mode
+      - HUBEXEC_NEW (%11_0000): Start any available cog, hubexec mode
+      - COGEXEC_NEW_PAIR (%01_0001): Start an available EVEN/ODD PAIR of cogs, cogexec mode (useful for LUT sharing)
+      - HUBEXEC_NEW_PAIR (%11_0001): Start an available EVEN/ODD PAIR of cogs, hubexec mode
+      - COGEXEC (%00_0000, default) / HUBEXEC (%10_0000): add a cog number, e.g. "HUBEXEC + 3"
       - Bit 5 set: Execute from hub RAM (HUBEXEC mode)
-      
+
+      DO NOT pass -1. It is not a synonym for "any available cog" -- see
+      not_an_input below.
+    # CORRECTED 2026-08-30 (F-390). This read "COGEXEC_NEW or NEWCOG (-1): Start
+    # any available cog". -1 is TASKSPIN's NEWTASK, not a COGINIT input.
+    source: >-
+      Spin2 v55 Language Documentation, "Built-In Symbols for COGINIT() Usage" --
+      engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1658-1665
+      (the six symbols and their values); :1673 (-1 is NEWTASK, TASKSPIN's
+      symbol). P2 Documentation v35 Rev B/C, COGINIT D operand --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:381-390.
+    not_an_input: >-
+      -1 does NOT mean "any available cog". It reaches COGINIT as $FFFF_FFFF, so
+      the silicon decodes D[5:0] = %111111 -- D[4]=1 selects the free-cog search
+      and D[0]=1 selects the PAIR form, so it starts an even/odd cog PAIR and
+      returns the even/lower cog's ID. The single-cog form is %x1_xxx0.
+      -1 IS the failure RETURN value; see returns.
+
+
   - name: "PASMaddr"
     type: "address"
     description: |
