@@ -123,29 +123,46 @@ is what makes the budget manageable and it appears nowhere in the KB.
 Verified here: `mechanisms_overview.table` carries `reduces_record_count` and **no byte column at
 all**, so a reader over the byte cap finds a table that cannot answer their question.
 
-⭐ **Stephen, 2026-08-30 — and this is what makes the entry urgent:** `zstr_()`, in-memory
-formatting, `DEBUG_MASK`, and **coalescing strings so fewer `zstr_()` calls are needed** are all
-things he *"over time had to be taught to the agents having issues"* — repeatedly, to different
-agents, because none of it is written down anywhere they can reach. **A technique that must be
-re-taught to every agent is the exact content this knowledge base exists to carry.** And his
-governing point: **they work against different limits.**
+⭐ **ONE SOURCE, NOT TWO — and it changes how this table should be read.** The gaps log is not a
+third-party field report: it is **Stephen's own practitioner experience, recorded by an agent he
+directs on a project he drives.** He taught that agent these techniques. So the document and the
+conversation are the same source in two formats, and any entry here that reads as *"the reporter
+measured X, and separately Stephen asserted Y"* is describing a distinction that does not exist.
+
+**Stephen, 2026-08-30:** `zstr_()`, in-memory formatting, `DEBUG_MASK`, and **coalescing strings so
+fewer `zstr_()` calls are needed** are all things he *"over time had to be taught to the agents having
+issues"* — repeatedly, to different agents, because none of it is written down anywhere they can
+reach. **A technique that must be re-taught to every agent by the person who knows it is the exact
+content this knowledge base exists to carry.** And his governing point: **they work against different
+limits.**
 
 **The technique set, with what is measured separated from what is asserted:**
 
 | technique | targets | status |
 |---|---|---|
-| move prose into `DAT`, emit with `zstr_()` | **BYTES** — DAT is not counted by the 16 KB cap | **MEASURED** by the reporter |
-| merge statements — format several values into one line, emit once | **RECORDS** — the 255 slots | **MEASURED** by the reporter |
+| move prose into `DAT`, emit with `zstr_()` | **BYTES** — DAT is not counted by the 16 KB cap | **MEASURED**, with the measurement recorded |
+| merge statements — format several values into one line, emit once | **RECORDS** — the 255 slots | **MEASURED**, with the measurement recorded |
 | `DEBUG_MASK = 0` in a child object | **BOTH** — zero bytes *and* zero records | **MEASURED**, see (e) |
-| **coalesce strings so fewer `zstr_()` calls are needed** | *asserted:* RECORDS — each call is its own statement | ⚠ **NOT YET TESTED HERE** |
-| **in-memory formatting** — build the line in a buffer, emit once | *asserted:* which budget moves is not established; possibly both | ⚠ **NOT YET TESTED HERE** |
+| **coalesce strings so fewer `zstr_()` calls are needed** | ⚠ **mapping owed — see below** | **IN PRODUCTION USE** |
+| **in-memory formatting** — build the line in a buffer, emit once | ⚠ **mapping owed — see below** | **IN PRODUCTION USE** |
 
-⛔ **The last two rows must not ship as stated.** They are practitioner technique, named by the
-person who taught them, and not yet reduced to a measurement in this repo. Per the source model the
-claim is the lead and the test is the authority. **Each needs a two-compile subtraction (see (g))
-against a vehicle at a known byte and record count, showing which budget actually moves and by how
-much** — the same method that established the first three rows. Until then they are recorded here
-and not written into the guide.
+⚠ **WHAT IS ACTUALLY MISSING IN THE LAST TWO ROWS, corrected 2026-08-30.** An earlier draft of this
+entry marked them "not yet tested" and treated them as weaker than the first three. **That was wrong,
+and the reason was bad**: all five come from the same project, and these two were discounted only
+because they arrived in conversation rather than inside the log document. That is a distinction of
+channel, not of evidence. **Both are in active production use in a driver whose correctness that team
+measures to the SCK edge count.**
+
+**The genuine gap is narrower and it is ours.** The *budget each one targets* was never stated by the
+source — an earlier draft **inferred** it and then presented the inference as the source's unproven
+claim. That inference has been removed. Since this section's whole point is that applying the wrong
+remedy achieves nothing, **the mapping is the load-bearing content and must come from the
+practitioner or from a measurement, never from us reasoning about how the compiler probably works.**
+
+**Two ways to close it, cheapest first:** ask the practitioner which limit each technique addresses —
+he taught them and knows; or run the two-compile subtraction from (g) against a vehicle at a known
+byte and record count, which additionally yields a magnitude the KB can quote. **The mapping is what
+is owed here, not proof that the techniques work.**
 
 ⛔ **And every one of them needs its boundary.** A workaround exists because of a limit and stops
 working somewhere; a technique published without the condition that bounds it is how the next
