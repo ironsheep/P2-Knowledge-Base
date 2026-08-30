@@ -9,10 +9,15 @@
 component: streamer_pins
 description: Pin group selection via %ppp field and sub-pin selection
 
+# LOCATORS REPAIRED 2026-08-30 (F-399). Five locators (lines 3653, 3603-3605,
+# 3654-3655, 3661-3662 and 6693-6701) were superseded p2-documentation.txt line
+# numbers attributed to silicon-doc-text.txt -- the F-365 carry-over shape. Lines
+# 1443 and 1535 were already correct. Every replacement below was opened and read;
+# the CLAIMS were right in each case, only the locators were wrong.
 source: "Propeller 2 Documentation v35, Streamer -- the %ppp pin-group rule and the
   sub-8-pin resolution rule at
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443 and :3653;
-  the %e / %w meanings at :3603-3605; per-mode D[19:16] templates from the Spin2 v55
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443 and :1454;
+  the %e / %w meanings at :1439-1441; per-mode D[19:16] templates from the Spin2 v55
   streamer symbol table, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1608-1637."
 
 aliases:
@@ -118,7 +123,7 @@ sub_pin_selection:
     D[22:20] select the pin group, in 8-pin increments\"
     (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443) and \"For
     modes which involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are
-    used to further resolve the pin number(s)\" (:3653). Per-width templates from the
+    used to further resolve the pin number(s)\" (:1454). Per-width templates from the
     Spin2 v55 streamer symbol table -- X_1P_1DAC1_WFBYTE %1100_DDDD_WPPP_PPPA,
     X_2P_2DAC1_WFBYTE %1101_DDDD_WPPP_PP0A, X_4P_4DAC1_WFBYTE %1110_DDDD_WPPP_P00A,
     X_8P_4DAC2_WFBYTE %1110_DDDD_WPPP_0110 --
@@ -192,8 +197,8 @@ enable_control:
     source: "Propeller 2 Documentation v35, Pins => DACs/WRFAST at
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535 (the read
       source, the widths, the %w rule and the accrual rule), the %w statement at
-      :3604-3605, the bit-order rule at :3654-3655, and the WRFAST prerequisite at
-      :3661-3662 with the WRFAST operand definitions at :6693-6701."
+      :1441, the bit-order rule at :1456, and the WRFAST prerequisite at
+      :1460 with the WRFAST operand definitions at :3030-3036."
 
 # Alternate bit order
 alt_bit_order:

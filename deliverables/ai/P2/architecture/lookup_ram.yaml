@@ -7,7 +7,11 @@
 #     silicon-doc-text.txt:5140 (RDLUT), :5209 (WRLUT), :5340 (SETLUTS)
 #   P2X8C4M64P Datasheet 2022/11/01, "Lookup RAM" p.14 --
 #     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:592-616
-#     and the PASM2 instruction table -- p2-datasheet-text.txt:1831, :2061-2065
+#     and the PASM2 instruction table -- p2-datasheet-text.txt:2061 (RDLUT), :2063
+#     (SETLUTS), :2065 (WRLUT); the cog/LUT block-transfer note lives on RDLONG's
+#     row at :1830-1832 ("Prior SETQ/SETQ2 invokes cog/LUT block transfer").
+#     The header previously cited :1831 alone as if it were a LUT instruction row;
+#     it is RDLONG. Corrected 2026-08-30, F-399.
 
 component_name: "Lookup RAM (LUT)"
 

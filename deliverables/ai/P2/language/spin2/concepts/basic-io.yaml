@@ -36,7 +36,7 @@ core_concept_configuration_vs_operation:
     behavior: "Normal digital I/O with configured electrical characteristics"
 
 pin_architecture:
-  source: "P2 Datasheet 2022/11/01 -- features summary p.2 :107,:117; Special-Purpose Registers table p.13 :579-586; I/O Pin Registers table p.21 :981-986 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt. The register table appears identically on the reconstructed path, engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:157-164."
+  source: "P2 Datasheet 2022/11/01 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:107 and :117 (features summary, p.2), :579-586 (Special-Purpose Registers table, p.13), :981-986 (I/O Pin Registers table, p.21). The register table appears identically on the reconstructed path, engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:157-164."
   pin_count: 64
   pin_range: "P0 to P63"
   datasheet_statement: "64 Smart I/O pins, each with: ... Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float"
@@ -52,7 +52,7 @@ pin_architecture:
   no_milliamp_ladder: "The datasheet's drive list is the whole list. No per-pin milliamp drive ladder and no programmable slew rate exists; see /deliverables/ai/P2/architecture/pin-drive-configuration.yaml no_other_rungs."
 
 control_registers:
-  source: "P2 Datasheet 2022/11/01 -- Special-Purpose Registers p.13 :579-586 and I/O Pin Registers p.21 :981-986 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt; the same table on the reconstructed path at engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:157-164"
+  source: "P2 Datasheet 2022/11/01 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:579-586 (Special-Purpose Registers, p.13) and :981-986 (I/O Pin Registers, p.21); the same table on the reconstructed path at engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:157-164"
   addressing_note: "RAM registers $1F8 through $1FF give mapped access to eight special-purpose functions. In general, when specifying an address between $1F8 and $1FF, the PASM instruction accesses a special-purpose register."
   dira:
     address: "$1FA"

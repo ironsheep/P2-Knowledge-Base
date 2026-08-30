@@ -100,7 +100,12 @@ prerequisites:
   - "P2 32-bit signed integer / fixed-point model (no floating-point hardware)"
 
 gotchas:
-  source: "Propeller 2 Documentation v35 -- CORDIC solver summary engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:175,:434, and the GETQX/GETQY no-result event at :5145,:5401; hardware-verified pipeline behaviour EF-053 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:637-655"
+  # LOCATORS REPAIRED 2026-08-30 (F-399). Three of the four silicon-doc locators
+  # (lines 434, 5145 and 5401) landed in range on unrelated content -- COGID and
+  # COG RAM, and the RDLUT and MERGEW encoding tables -- the F-377 shape, invisible
+  # to a range check. Line 175 was already correct. Every replacement was opened
+  # and read.
+  source: "Propeller 2 Documentation v35 -- CORDIC solver summary at engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:175 and :3304 ('a 54-stage pipelined CORDIC solver'), the 55-clock result latency at :3315, and the GETQX/GETQY no-result event at :2054 and :2291 ('Event 15 = GETQX/GETQY executed without any CORDIC results available') with the pipelining/interrupt warning at :3413; hardware-verified pipeline behaviour EF-053 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:637-655"
   items:
     - flag: pitfall
       text: "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED -- a negative operand becomes a huge positive one. For signed data take magnitude and sign separately. QVECTOR/QROTATE ARE signed, being built for coordinates."

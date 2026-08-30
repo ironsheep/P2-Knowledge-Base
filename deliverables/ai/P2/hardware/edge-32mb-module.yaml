@@ -54,7 +54,7 @@ specifications:
   chip_marking_note: >-
     A limited number of P2 Rev C chips carry the extended part number
     P2X8C4M64PES instead of P2X8C4M64P. The guide states the two are identical
-    other than the part marking (narrative.txt:143-146).
+    other than the part marking (engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:143-146).
   oscillator: "TCXO 20 MHz +/-0.5 PPM (high-precision temperature-compensated crystal oscillator)"
   crystal_load_capacitance: "9 pF, internal to the P2's on-chip crystal oscillator"
   clock:

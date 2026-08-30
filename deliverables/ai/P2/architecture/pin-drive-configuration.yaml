@@ -159,7 +159,7 @@ drive_ladder:
     reconciled table at
     engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:257-268; the
     same ladder is drawn on the equivalent-schematic figures, datasheet pp.27-32, read at
-    complete-tables-reference.md:326-338; and the datasheet feature list states it in one
+    engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:326-338; and the datasheet feature list states it in one
     line at p2-datasheet-text.txt:117"
   no_other_rungs: "The legend enumerates these eight and no others. Any per-pin current
     or impedance figure beyond them is not in the source."

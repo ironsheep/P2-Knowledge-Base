@@ -71,7 +71,12 @@ adc_input_pins:
       RF modulation -- named in this mode's own applications list -- is done with the
       %T bits. Nothing downstream can do it while S[11:0] is described only as a
       label.
-    source: "Silicon Doc silicon-doc-text.txt:1565 and :4062-4095"
+    source: "Silicon Doc engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1565
+      (the S[19:0] configuration paragraph) and :1586-1600 (the S[11:0] table and the
+      %A/%T rule: 'the lower bits being the sum of the %T bits and the topmost NCO
+      bits ... to shift or modulate the phase of playback'). The locator previously
+      read :4062-4095, which is the PWM/SMPS smart-pin mode text; corrected
+      2026-08-30, F-399."
   bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit (silicon-doc-text.txt:1563)."
   gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the shipped Silicon Doc demo can use high gain because it couples capacitively through a touch pad."
 
@@ -300,7 +305,11 @@ usage_pattern:
     EF-054 swept %TT on a jumpered cog-DAC pin (%00 = 1,408, no drive; %01 = 6,737)
     and EF-055 watched the spread collapse from 1,305/2,000 samples to 25 once
     P_CHANNEL was added. See F-272 and language/pasm2/wrpin.yaml:54.
-  source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program, silicon-doc-text.txt:1636 (setup) and :4289-4305 (mode/data longs)."
+  source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1621-1640 (the
+      program's description and setup) and :1686-1687 (the dds_d / dds_s mode and data
+      longs). The second locator previously read :4289-4305, which is Table 34's
+      streamer clocks/bits rows; corrected 2026-08-30, F-399."
 
 see_also:
   - architecture/streamer/modes-reference.yaml

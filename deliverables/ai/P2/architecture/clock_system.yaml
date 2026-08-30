@@ -130,7 +130,7 @@ pll_system:
   cross_source_conflict: "The P2 Hardware Manual's equivalent table states the recommended VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz (engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:574). Filed as F-330; the 100-200 MHz recommendation and the separate 350 MHz overclock ceiling are the form used here."
 
 hubset_configuration:
-  source: "P2 Datasheet p.18 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:775-777; Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:520"
+  source: "P2 Datasheet p.18 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:775-777; Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:521"
   instruction: "HUBSET ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS   'set clock mode"
   fields:
     E: "PLL off/on"

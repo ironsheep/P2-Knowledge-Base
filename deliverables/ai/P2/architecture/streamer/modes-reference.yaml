@@ -32,7 +32,12 @@ encoding:
       unaligned base pin silently selects a DIFFERENT MODE rather than a different
       pin: the stray low bits have nowhere to go and carry up into D[22:20].
     "a": >-
-      the ALTERNATE-BIT-ORDER flag, D[16] (Silicon Doc :3653-3654). It is NOT a pin
+      the ALTERNATE-BIT-ORDER flag, D[16] (Silicon Doc
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1456 -- "Some of
+      these modes have the %a bit in D[16] to reorder the data sequence within the
+      individual bytes to top-first when %a = 1". The locator previously read
+      :3653-3654, a superseded p2-documentation.txt number; corrected 2026-08-30,
+      F-399). It is NOT a pin
       bit. Writing a 4th p where an `a` belongs is the specific error F-304 records.
     "b": "a LUT base-address bit, in the LUT-indexed modes only."
   field_notation_caveat: >-

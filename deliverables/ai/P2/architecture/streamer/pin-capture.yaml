@@ -49,10 +49,22 @@ description: |
   selector routes 'A' from the bus pin. That neighbour's IN then carries the bus
   pin's level, and the capture records the waveform.
 
+# LOCATORS REPAIRED 2026-08-30 (F-399). Every locator in this block except the
+# capture-path one was a p2-documentation.txt line number attributed to
+# silicon-doc-text.txt -- the F-365 carry-over shape. Each landed IN RANGE on
+# unrelated content (line 3604 was CORDIC example code), or past the end of the
+# file, so no range check could see it. The claims themselves were correct; only
+# the locators were wrong. Every replacement below was opened and read.
 source: "Propeller 2 Documentation v35 -- the capture path at
   engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535, the %w rule
-  at :3604-3605, the pin-group and alignment rules at :3606-3651 and :3653, and the
-  IN-signal handshake at :7833-7838 with the non-smart-pin case at :7615 (section
+  at engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1441, the
+  pin-group and alignment rules at
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443-1452 and
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1454, and the
+  IN-signal handshake at
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3845 with the
+  non-smart-pin case at
+  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3767 (section
   extraction: engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-157
   and :50). The composition itself is stated and worked by Parallax in the Spin2 v55
   LOGIC display section, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144.
