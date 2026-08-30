@@ -228,8 +228,9 @@ What follows is what a release reviewer would still hit.
     parks every quantity block in Tier 2; the gate judges a block against **its own file's other
     sections as the control**, and a wholly-uncited file supplies none. One real citation turns the
     rest of the file red. The 12 were always uncited — they were merely invisible. **32 advisory
-    blocks across 24 files remain in that state**, and 32 is only what the gate can *name*: the true
-    figure is whatever those 24 files hold, and the three-file sample yielded twelve. The 24 split
+    blocks across 24 files remain in that state** — **measured, not inferred**: a simulation
+    inserting one recognised citation into each of the 24 files returns exactly 32, matching the
+    advisory count. *(Corrects the 2026-08-29 wording, which called 32 a floor. Census §2.)* The 24 split
     into ordinary citation debt (8 smart-pin mode pages, 6 clock/timing language files) and content
     that may need a *declared exemption* rather than a citation (3 OBEX object-metadata files,
     5 `architecture/decomposition/` reasoning-layer files, 2 hardware guides — one of which is

@@ -75,9 +75,17 @@ they became *visible*.
 | `hardware/` | 2 | `hardware-compatibility-matrix` (V, mA, Hz), `p2-hardware-selection-guide` (A, V, mA) |
 | `language/` clock + timing | 6 | `hubset`, `asmclk`, `clkset`, `waitct`, `clkfreq`, `single_communication` |
 
-Each is one citation away from turning that file's remaining blocks red. The count of blocks that
-would surface is **not** 32 — 32 is only what the gate can currently *name*; the true number is
-whatever those 24 files hold, and the «#334» sample turned 3 files into 12 blocks.
+Each is one citation away from turning that file's remaining blocks red.
+
+**Measured 2026-08-30 — the count is exactly 32, and this entry originally said otherwise.** It
+first claimed 32 was only what the gate could *name* and that the true number was larger, reasoning
+from the «#334» sample where 3 files yielded 12 blocks. A simulation settles it: insert one
+recognised citation into each of the 24 files, run the gate, count that file's blocking rows,
+restore. The total is **32**, identical to the advisory count, and the «#334» sample was consistent
+all along — those three files held **16** advisory blocks, of which 12 surfaced as blocking and 4
+were covered by the citations added. **The blind spot is real; its size was never underreported.**
+Full measurement in `engineering/analysis/2026-08-30-yaml-defect-census.md` §2, with the per-file
+breakdown.
 
 **Why this is a gate-design finding and not just a backlog.** The tool's banner says Tier 2 is
 "advisory by design, non-blocking, and its population is not zero", which reads as a considered
