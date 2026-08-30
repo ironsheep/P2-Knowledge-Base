@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-382`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-390`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,387 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## A streamer count of `$FFFF` is PERPETUAL, and our own stated bound points a reader straight at it (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-3) — F-382
+
+### F-382 — `p2kbPasm2Xinit` gives the chunk bound as `longs * 32 < 65536`, which admits the one value that means "never terminate" — `CONFIRMED`
+
+**Class: BEHAVIOUR — measured by the reporter, re-verified here against the tree.**
+
+`language/pasm2/xinit.yaml:105` states:
+
+> *"Maximum block per XINIT for bit-counted streamer modes: 2047 longs (65504 bits). The streamer's
+> bit-count field is 16 bits, so transfers in bit-granularity modes must satisfy `longs * 32 < 65536`."*
+
+`< 65536` admits **65,535 = `$FFFF`**, and `$FFFF` in the count field is the **perpetual/continuous**
+encoding — the streamer runs without terminating the chunk. **A chunk chain written to our documented
+rule and sized at its stated ceiling silently collapses to its remainder.** The reporter's did: a
+7-chunk chain became one chunk of 32,771 samples. Their `CAP_CHUNK_MAX` is now `65_534` (`$FFFE`)
+with the reason recorded at the constant.
+
+**Verified here 2026-08-30:** the bound reads exactly as quoted, and a corpus-wide grep for any
+statement associating `$FFFF` with perpetual or continuous streaming returns **nothing** — the
+encoding is documented nowhere in the shipped set.
+
+**Why this is ours and not the reporter's carelessness.** The KB's own arithmetic points *at* the trap
+value, and the `large_transfer_chunking` worked example is safe as written (`bmask x, #10` caps at
+2047 longs = 65,504 bits) — **so the hazard is invisible from the page, because the example never
+reaches the value that breaks.** Their run sheet records the judgement at the time: *"No amount of
+care against the KB alone would have caught this."*
+
+**Correction.** State on `p2kbPasm2Xinit` and in the modes reference that **`$FFFF` in the count field
+selects perpetual/continuous streaming**, and correct the bound from `longs * 32 < 65536` to a maximum
+count of **`$FFFE`** for terminating transfers. Source the perpetual encoding from the Silicon Doc
+before writing it — the reporter measured the behaviour; we have not yet located the documentary
+statement.
+
+---
+
+## The DEBUG budget: we ship all three limits and none of what they cost (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-4) — F-383
+
+### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `CONFIRMED`
+
+**Class: MIXED — parts (a)(c)(e)(f) are BEHAVIOUR to be proven by test; parts (d)(g) are TECHNIQUE and
+need their conditions stated. Part (b) is an editorial correction.**
+
+**START WITH THE CREDIT, because it changes what is being asked for.** The guide already documents all
+three hard limits, and the reporter confirmed one of them exactly: **255 debug statements compile, 256
+fails** with the compiler's own text *"DEBUG data is too long: too many records: max 255"* (measured
+2026-08-28, pnut-ts). `unique_debug_records: 255` is **right**. The guide's compile-time vs runtime
+split is also right, including the `reduces_record_count` column correctly marking `DEBUG_COGS` and
+`debug IF()` as no help to the record budget. **This entry is not a complaint about that table.**
+
+**(a) The 16 KB cap's failure mode is a silent mute board, and nothing says so.** Verified here: the
+guide states *"All debug records combined cannot exceed 16,384 bytes"* and says **nothing** about what
+crossing it does. Measured by the reporter 2026-08-27: over the cap **the debug subsystem is dead at
+load and the program prints nothing at all** — not even a banner placed before every other statement —
+and **pnut-ts emits no error and no warning.** On hardware that is indistinguishable from a dead
+board. It cost their bench an evening; every mechanical check they ran passed, because none of them
+can see this. ⭐ **The contrast is the finding:** the 255-record limit fails **loudly at build time
+with a named error** and can never mute a board; the 16 KB limit fails **silently, at load, on
+hardware**. We list them side by side as three peer numbers with the dangerous one unmarked.
+
+**(b) Our headline claim is the opposite of their experience.** The guide says twice that the
+255-record limit is *"the one you'll hit first"*, and its entire `decision_guide` is keyed to statement
+**count**. They hit the **byte** cap first and not narrowly — 18,077 bytes while still under 255
+records. A vehicle whose diagnostics are long formatted lines burns bytes far faster than slots.
+**A reader following our decision table monitors the limit that would have warned them and stays blind
+to the one that mutes the board.**
+
+**(c) What the 16 KB counts is never stated.** Measured: it counts `debug()` **format strings** across
+the whole program plus per-statement overhead, and ⭐ **does NOT count DAT strings.** That one sentence
+is what makes the budget manageable and it appears nowhere in the KB.
+
+**(d) ⭐⭐ THE REMEDIES TARGET DIFFERENT BUDGETS, AND APPLYING THE WRONG ONE ACHIEVES NOTHING.**
+Verified here: `mechanisms_overview.table` carries `reduces_record_count` and **no byte column at
+all**, so a reader over the byte cap finds a table that cannot answer their question.
+
+⭐ **Stephen, 2026-08-30 — and this is what makes the entry urgent:** `zstr_()`, in-memory
+formatting, `DEBUG_MASK`, and **coalescing strings so fewer `zstr_()` calls are needed** are all
+things he *"over time had to be taught to the agents having issues"* — repeatedly, to different
+agents, because none of it is written down anywhere they can reach. **A technique that must be
+re-taught to every agent is the exact content this knowledge base exists to carry.** And his
+governing point: **they work against different limits.**
+
+**The technique set, with what is measured separated from what is asserted:**
+
+| technique | targets | status |
+|---|---|---|
+| move prose into `DAT`, emit with `zstr_()` | **BYTES** — DAT is not counted by the 16 KB cap | **MEASURED** by the reporter |
+| merge statements — format several values into one line, emit once | **RECORDS** — the 255 slots | **MEASURED** by the reporter |
+| `DEBUG_MASK = 0` in a child object | **BOTH** — zero bytes *and* zero records | **MEASURED**, see (e) |
+| **coalesce strings so fewer `zstr_()` calls are needed** | *asserted:* RECORDS — each call is its own statement | ⚠ **NOT YET TESTED HERE** |
+| **in-memory formatting** — build the line in a buffer, emit once | *asserted:* which budget moves is not established; possibly both | ⚠ **NOT YET TESTED HERE** |
+
+⛔ **The last two rows must not ship as stated.** They are practitioner technique, named by the
+person who taught them, and not yet reduced to a measurement in this repo. Per the source model the
+claim is the lead and the test is the authority. **Each needs a two-compile subtraction (see (g))
+against a vehicle at a known byte and record count, showing which budget actually moves and by how
+much** — the same method that established the first three rows. Until then they are recorded here
+and not written into the guide.
+
+⛔ **And every one of them needs its boundary.** A workaround exists because of a limit and stops
+working somewhere; a technique published without the condition that bounds it is how the next
+generation of wrong entries is made. `DEBUG_MASK`'s boundary is already known — see (f): it cannot
+be overridden at instantiation, and the `-D` that drives it is global.
+
+**A team that learns only the DAT technique sheds bytes for weeks and never moves the record count,
+and will not understand why.** The reverse holds too. **This is the most useful thing in the report
+and we have no equivalent.**
+
+**(e) ~2,945 bytes are gone before the first `debug()` — 18% of the budget.** Measured twice: a bare
+vehicle with no driver reads 2,945; a minimal vehicle **plus the entire driver** reads 2,945. Two facts
+in one measurement — fixed subsystem overhead takes ~18% before you write anything, and **a child
+object compiled with `DEBUG_MASK = 0` contributes zero BYTES, not merely zero records.** We state the
+record half for `DEBUG_DISABLE`; the byte half is unstated and it is the half that decides whether a
+large library is safe to include.
+
+**(f) `DEBUG_MASK` cannot be overridden at object instantiation.** Every example defines it as a `CON`
+in the file that uses it and nothing says a parent cannot set a child's mask. It cannot. **Their
+workaround, worth publishing with the gap:** derive `DEBUG_MASK` from an ordinary `CON` and drive that
+`CON` from the build with `-D`. ⚠ **Condition that must travel with it:** `-D` in pnut-ts is **global**
+— it reaches every object in the compile, which is what makes the technique work and also what makes
+it blunt.
+
+**(g) We tell readers to monitor the budget and never say how.** *"Use regular debug() but monitor your
+count"*, with no method. **The method is two compiles and a subtraction:** build once without `-d`,
+once with `-d`, subtract the binary sizes — the difference IS the debug data. Deliberately dumb, and
+that is its virtue: nothing to drift from what the compiler actually did. ⚠ **Condition:** an earlier
+attempt to estimate the same quantity by regex-counting literals and subtracting from a measured total
+produced a confident wrong answer. A subtraction between a measured quantity and an estimated one is
+an estimate and will be read as a measurement unless labelled.
+
+⛔ **WHAT WE MUST NOT DO WITH THIS ENTRY.** The reporter has **not** verified that 16,384 is the true
+byte ceiling. Their gate is **13,332** (*"the highest value MEASURED to work… a known-good point, not a
+proven ceiling"*) and **17,821** is measured to fail. **The ceiling is un-bisected between those**, and
+our 16,384 sits inside that interval uncontradicted. Only `255` is confirmed. Any rewrite that presents
+all three numbers as confirmed launders an assumption into a fact.
+
+**Correction.** (1) State what exceeding `total_debug_data` does, beside the number, and mark it the
+silent one against the record limit's loud one. (2) Re-scope the which-limit-hits-first claim.
+(3) State what the 16 KB counts, and the fixed overhead. (4) Add a byte column to
+`mechanisms_overview` plus the DAT/`zstr_()` and statement-merging pair. (5) Give the two-compile
+subtraction as the method. (6) State that `DEBUG_MASK` is per-object with the `CON`+`-D` workaround and
+the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
+
+---
+
+## Two pin-reading questions the KB discusses in detail and never answers (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-1/GAP-2) — F-384
+
+### F-384 — nothing states what the streamer INPUT samples, or what a live smart pin does to it; and AAAA's "read state" is undefined for a smart-pin neighbour — `CONFIRMED`
+
+**Class: BEHAVIOUR — empirically settled by the reporter, needs our own sourcing before it ships.**
+
+**What they measured.** A silicon edge counter reading its own pin level through a jumper from SCK
+counted **4,736 rises on every one of six sector reads**, decomposing exactly as an SPI sector read
+must: 512×8 = 4,096, CRC16 adds 16 → 4,112, and the remaining 624 is CMD17 + R1 + token poll +
+trailing clocks. **Two pre-registered self-tests ran first** — a DC level check, then 137 deliberately
+driven edges counted as exactly 137 — so the mechanism was proven before the measurement. The counter
+failed **only** when aimed *through* a pin driven by a live smart pin.
+
+**The consequence, and it is unsignposted:** a pin whose smart pin cannot be disabled — `SCK` running
+`P_TRANSITION`, because it generates the clock — **cannot be read correctly by the streamer at all**,
+and no software routing repairs it, because routing only moves `IN`.
+
+⚠ **And the page that should carry this grew without it.** `p2kbPasm2StreamerSmartpinControl` gained
+`bit_edge_lockstep` and `alignment_pad`, both marked GOLDEN, and `alignment_pad` is explicitly about
+**the streamer sampling an input pin** at exactly this use case. `pin_output_hierarchy` on that page
+and on `p2kbArchSmartPins` remains **output-only**. So the KB now discusses the streamer reading an
+input pin in detail and still never says what it reads or that a live smart pin on that pin corrupts
+it. **A reader arriving via `alignment_pad` — the most likely route for anyone doing SPI capture — is
+given the timing and not the hazard.**
+
+**GAP-2, related and still open:** `p2kbArchSmartPins` → `aaaa` reads *"relative +1 pin's read state"*
+with **"read state" undefined for a neighbour running a smart-pin mode** — which is the same question
+one level down.
+
+**Correction.** State, in the streamer overview and again in `alignment_pad` where the reader already
+is, what the streamer input path samples and what a live smart pin does to it, with the corollary that
+pins whose mode cannot be disabled are not capturable. Define "read state" on the AAAA table for the
+smart-pin case. **Both need a documentary or EF-ledger source before shipping — the reporter's
+measurement is the lead, not yet our citation.**
+
+---
+
+## `p2kbArchStreamerPinSelection` names one field three different ways, and the streamer symbols never got the composition rule the smart pins did (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-1) — F-385
+
+### F-385 — `D[19:16]` vs `D[19:17]` vs `D[22:17]` on one page, and mode constants that collide with the pin-base field — `CONFIRMED`
+
+**Class: AMBIGUITY — no instrument can see it; a reader cannot construct a mode word without guessing.**
+
+**Verified here 2026-08-30 in `architecture/streamer/pin-selection.yaml`:** the header comment at `:2`
+says *"D[22:20] pin group and **D[19:16]** sub-pin selection"*; `:15`, `:98` and `:114` also say
+`D[19:16]`; but `:74` defines the field as ***"D[19:17]**, the low three bits of the six-bit pin number
+in **D[22:17]**"* and `:76-78` explains that reading well. Separately `:179-180` assigns **`D[16]`** to
+the `%a` alt bit — a bit the header's `D[19:16]` claims for the sub-pin field.
+
+**The body's explanation is now good.** The residual defect is that four sites still say `D[19:16]` and
+contradict it, including the header comment a reader meets first.
+
+**What it costs:** the reporter's four signals sit on **P58–P61, straddling a 4-pin boundary**. Under
+the aligned reading a 4-pin capture at base 58 silently captures 56–59, dropping CS and SCK — no error,
+plausible meaningless data.
+
+⭐ **And there is a precedent we have already accepted on the other side of the chip.**
+`p2kbArchSmartPins` now carries a `composition_rule` — *"COMBINE PIN-MODE CONSTANTS WITH `|`, NEVER
+`+`… The P_* constants are BIT FIELDS positioned inside the WRPIN mode word, not additive flags…
+There is no error and no warning — the pin simply does something else"* — backed by measured silicon
+(EF-054). **The streamer side has the identical hazard undocumented:** `X_8P_4DAC2_WFBYTE = $E006_0000`
+sets bits 17 and 18, inside the pin-base field, and our own examples compose with `+` —
+`pin-selection.yaml` shows `mode + 8<<17`, and `streamer-symbols.yaml:425` shows
+`X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + base<<17 + 640`, **mixing both operators in one line.**
+
+**Correction.** Reconcile the four `D[19:16]` sites to the `D[19:17]` / `D[22:17]` model the body
+already explains, starting with the header comment. Give the streamer symbols the same
+`composition_rule` treatment the smart-pin constants received: which bits each mode constant occupies,
+and what `+` does when the base collides with them. Add a **misaligned**-base example — the current one
+is aligned, which is precisely why it does not disambiguate.
+
+---
+
+## An improvement to the general smart-pin page made a contradiction with the mode page SHARPER (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-5) — F-386
+
+### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `CONFIRMED`
+
+**Class: AMBIGUITY — and a regression created by a good change, which is the notable part.**
+
+**Verified here 2026-08-30.** `architecture/smart_pins.yaml:115` now states:
+*"**PINSTART()/pinstart() writes Y before raising DIR, so it is NOT safe for** the trigger modes — use
+the explicit sequence below for those."* Meanwhile
+`architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml` still shows
+`pinstart(counter_pin, P_COUNT_RISES | P_PLUS1_B, 0, 1)` at **`:47` and `:56`**, and its PASM example
+still runs `wypin` at `:64` before `dirh` at `:65`.
+
+**Before, two pages disagreed. Now one page explicitly warns against what the other page demonstrates
+twice.** For `%01110` the consequence is probably benign — `Y[0]=0` is the reset default — **but a
+reader cannot know that from either page**, and the general page's whole argument is that one order is
+always right.
+
+**The lesson for the sweep discipline:** strengthening a general page without sweeping its mode pages
+converts a quiet inconsistency into a loud one. This is the class the register's own class-wide-sweep
+rule exists to prevent, arriving from the direction of an improvement rather than a defect.
+
+**Correction.** Make the per-mode examples follow the universal order, or state on the mode page why
+this one differs and that it is safe. Then sweep every other mode page for the same shape.
+
+---
+
+## `||` means logical OR in P2 and absolute value in P1, and the page that flags exactly this hazard twice does not flag it (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-6) — F-387
+
+### F-387 — `language/spin2/concepts/operators.yaml` annotates `~` and `~~` as P1 differences and leaves `||` unmarked — `CONFIRMED`
+
+**Class: AMBIGUITY, with a near-miss cost recorded.**
+
+**Verified here 2026-08-30.** `:288` and `:294` each carry *"P2 Spin2 semantics; **not P1
+sign-extend**. For sign-extend use SIGNX."* — on `~` and `~~`. `||` at `:101` is listed correctly as
+*"Logical OR"* and carries **no P1 note at all**.
+
+**`||` is the more dangerous of the three**, because a P1 habit meaning "absolute value" becomes a
+boolean inside an arithmetic expression. The reporter got lucky: `||(a - b)` failed to parse. **A P1
+habit that *does* parse — `||` between two non-zero values yielding `-1` instead of a magnitude —
+compiles clean and produces a wrong number**, in their case in a driver where a wrong phase pad means
+silent whole-sector write corruption.
+
+**It joins a family we have already paid for:** P1's `=>` / `=<` versus P2's `>=` / `<=` — same shape,
+an operator existing in both languages with different meaning, documented correctly for P2 and never
+flagged as changed.
+
+**Correction.** Add a P1-difference note on `||` matching the ones on `~` and `~~`, naming `ABS` as the
+P2 spelling. Then author an *"operators that changed meaning from P1"* section — **two hits are
+unlikely to be the only two, and this should be a class sweep, not a single edit.**
+
+---
+
+## `X_PINS_ON` and `X_WRITE_ON` are one bit listed as two controls, and the file that resolves it is a different file (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-2/3) — F-388
+
+### F-388 — `streamer-symbols.yaml` lists both at `$0080_0000` under separate headings with no cross-note — `CONFIRMED`
+
+**Class: AMBIGUITY.**
+
+**Verified here 2026-08-30:** `language/spin2/symbols/streamer-symbols.yaml:311-312` gives
+`X_PINS_ON = $0080_0000` and `:323-324` gives `X_WRITE_ON = $0080_0000`, under separate headings, as
+though they were independent controls. `architecture/streamer/pin-selection.yaml` resolves it — one
+bit `D[23]`, meaning *"enable pin output"* in output modes and *"enable WRFAST"* in capture modes —
+**in a different file.** A reader working from the symbol list will reasonably conclude they are
+independent and can be combined.
+
+**AMBIGUOUS-3 (`X_ALT_ON` scope) is folded here** and carries a correction the reporter made against
+their own log: their original entry described a contradiction *between two pages*; the text has since
+moved and the entry pointed at the wrong file. Re-derive the current state before acting on that half.
+
+**Correction.** Cross-note the two symbols in `streamer-symbols.yaml` — same bit, mode-dependent
+meaning — pointing at the page that carries the full explanation. Do not delete either symbol; both
+spellings are real and both appear in Parallax material.
+
+---
+
+## The index returns partial results by construction: 27 of 60 debug files reachable, and nine DEBUG-window pages carry no searchable trace of the word (2026-08-30, measured; corroborates P2KB-GAPS-RUNNING-LOG FINDABLE-1/2/3) — F-389
+
+### F-389 — key generation abbreviates and drops path components, so whole subtrees vanish from the term that names them — `CONFIRMED`
+
+**Class: FINDABILITY — a defect in the index generator, not in any entry's content.**
+
+**Measured 2026-08-30 against the live index (1133 files, 2082 aliases):**
+
+| | |
+|---|---|
+| files reachable by searching **"debug"** (key or alias) | **27** |
+| files with substantial debug content (≥5 mentions) | **60** |
+| **substantial debug files UNREACHABLE by "debug"** | **33** |
+
+**Three mechanisms, all visible in one directory listing:**
+
+1. **Abbreviation in the generated key.** `debug-commands/c-z.yaml` → `p2kbSpin2Dbg**CZ**`. "debug"
+   does not substring-match "Dbg", so `c-z`, `dly`, `pc_key`, `pc_mouse` are invisible — while
+   `debug-formatters-binary.yaml` → `p2kbSpin2Dbg**Debug**FormattersBinary` **is** reachable, only
+   because its filename repeats the word. **Within one directory, some files return and some do not,
+   decided by whether the filename happened to say "debug" twice. That is the partial-results failure
+   mode, exactly.**
+2. **A whole directory dropped from the key.** Every file in `debug-displays/`: `scope.yaml` →
+   `p2kbSpin2Scope`, `plot.yaml` → `p2kbSpin2Plot`, likewise `logic`, `bitmap`, `fft`, `midi`,
+   `spectro`, `term`, `scope_xy`. **Nine DEBUG window pages, and the word "debug" appears in none of
+   their keys.**
+3. **Debug content not *named* debug.** `brk.yaml` (35 mentions, the breakpoint instruction),
+   `getbrk.yaml`, and the preprocessor files `ifdef`, `define`, `external-symbols`,
+   `preprocessor-overview` — **which are how you turn debug statements on and off**, the exact thing
+   the reporter went looking for.
+
+**The reporter's independent corroboration**, from the user side:
+
+| query | result |
+|---|---|
+| `p2kb_find "debug data too long"` — **the compiler's own error text** | **0 results** |
+| `p2kb_find "16KB debug limit board prints nothing"` — the symptom | **0 results** |
+| `p2kb_find "smart pin measure time"` | **0 results**, while `category:"smart_pins_timing"` returns 8 keys |
+| `p2kb_get "smart pin AAAA input selector relative neighbor pin read state"` | 20 suggestions, and **`p2kbArchSmartPins` — the page holding the AAAA table — was not among them** |
+
+**Neither the error a compiler prints nor the symptom a developer sees reaches the page that explains
+both.** And `p2kbSpin2DbgDebugStrategyGuide` is titled *"Managing the 255-Record Limit"*, so a reader
+hunting a **byte** cap has no reason to open it.
+
+**Why this is systemic and predictable.** `generate-p2kb-index.py` builds keys from paths, abbreviating
+some components and dropping others. **Any directory whose name is abbreviated or dropped loses its
+whole subtree from the term that names it.** `debug-displays` is the instance found; it will not be
+the only one — that is mechanically checkable by testing, for every path component in the corpus,
+whether it survives into the keys beneath it.
+
+**A third instance, found while filing this entry — and it is the sharpest one yet, because the
+content is excellent.** The reporter named the 16-long inline-PASM ceiling as *"the one we would most
+like documented somewhere findable"*, having redesigned around it twice. **It is documented, and
+documented well**: `language/spin2/constructs/inline_pasm.yaml` carries a `variable_limit` block —
+`total_longs: 16`, with the breakdown *"First 16 long variables (params + result + locals) are copied
+to cog registers $1E0..$1EF. This 16-long limit applies to VARIABLES ONLY — not to the PASM code
+itself"* — plus a separate `code_size_limit` that correctly distinguishes the two. It even lists
+*"What's the size limit on an inline PASM block?"* among its own questions.
+
+Probed against the live index 2026-08-30:
+
+| query | result |
+|---|---|
+| `"Local variable must be LONG and within first 16 longs"` — **the compiler's exact error text** | **MISS** |
+| `"inline PASM variable limit"` | **MISS** |
+| `"16 long variable limit"` | **MISS** |
+| `"how many locals can inline PASM use"` | **MISS** |
+| `"inline pasm"` | substring hit only |
+
+**Only someone who already knows the feature's name can reach it.** A developer meets this limit as a
+compiler error, and the error text reaches nothing. This is the strongest argument in the entry for
+alias vocabulary built from **symptoms and compiler strings** rather than feature names: the page needs
+no content work at all, and it is still effectively unreachable by the person who needs it.
+
+**Related, and it generalises the fix.** FINDABLE-1 records that *"`TESTP` on a smart pin returns the
+flag, not the level"* is stated **per mode**, so a reader must already suspect it to go looking. The
+reporter's phrasing is the principle this finding turns on: *"That is the difference between documented
+and discoverable."*
+
+**Correction.** Three separable pieces. (1) Repair the key generator so a path component is not
+silently lost or abbreviated below searchability — with a negative control proving a dropped component
+is detected. (2) Run the component-survival check corpus-wide and publish the hole list. (3) Add
+aliases carrying the **task and symptom vocabulary**, not only the name of the thing — compiler error
+strings among them. **92% of shipped files carry zero aliases** (1048 of 1132), so (3) is a corpus-wide
+programme, not an edit; it should be scoped from the hole list rather than started blind.
+
+---
 
 ## Citing ONE block in a wholly-uncited file turns its other blocks Tier-1 RED — 32 uncited quantity blocks across 24 files are structurally invisible to the blocking gate (2026-08-29, «#334», proved by accident) — F-381
 
