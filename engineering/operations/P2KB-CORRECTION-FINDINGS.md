@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-394`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-395`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,61 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Inline PASM's real stack rule is "5 of the 8 hardware levels", and our page says "PASM doesn't use Spin2 stack" — the one number a nested inline routine needs is the one we omit (2026-08-30, debug/stack research) — F-394
+
+### F-394 — `inline_pasm.yaml` omits the 5-level hardware-stack budget, the CALL-based entry/exit contract, and the interpreter's PTRA/PB save-restore — `CONFIRMED`
+
+**Class: OMISSION — three facts, each stated plainly in a source, each load-bearing for anyone writing
+inline PASM that nests, parks, or touches the pointer registers.**
+
+`deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml:299-301` is the file's entire treatment
+of the subject:
+
+```yaml
+  - consideration: "stack_usage"
+    description: "PASM doesn't use Spin2 stack"
+    solution: "Manual stack operations if needed"
+```
+
+True and useless. The rest of the file is strong — the `$000..$11F` code area, the `$1E0..$1EF`
+16-variable buffer, the `$100..$11F` multitasking-taskptr overlap, the `$120..$1D7` / LUT
+`$010..$1FF` avoid-list are all correct and well cited. These three are missing:
+
+**1. Inline PASM gets 5 of the 8 hardware stack levels, not 8.** Spin2 v55 states it twice, once for
+inline PASM and once for `CALL()`: *"Use up to 5 levels of the hardware stack for nested CALLs,
+including CALLs to hub RAM"* (`sources/spin2-v55/spin2-v55-text.txt:812` and `:837`). The interpreter
+holds the other three across the block. **This is the practical form of G-028** — the undocumented
+9th-push behaviour becomes an undocumented **6th**-push behaviour the moment code is inline, and the
+budget is small enough to reach by accident in a three-deep helper chain.
+
+**2. Inline PASM is entered by CALL, and that is what makes it exitable — or parkable.** v55:790-797:
+*"CALL the PASM code. The PASM code returns when an intervening `_RET_` or `RET` executes, or the
+appended RET executes"*, and *"Your PASM code will be assembled with a RET instruction added at the
+end."* Confirmed in the interpreter's `inline` routine — `call w` — and confirmed in the emitted
+image: `org / jmp #$ / end` compiles to exactly two longs, the branch and the auto-appended RET
+(`pnut_ts -l`, 2026-08-30). The consequence the KB should carry: **code that never returns leaves the
+cog parked inside that CALL, with the interpreter suspended rather than damaged** — which is a
+legitimate diagnostic instrument, not a hang (see the note on F-392).
+
+**3. PTRA, PTRB, PA and PB are explicitly SAFE to use inside inline PASM — the interpreter saves and
+restores them.** The `inline` routine's own comment says so: *"call pasm code (can use pa/pb/ptra/ptrb/
+stack, C/Z=0)"*, and the code brackets the call with `mov y,pb` / `mov z,ptra` before and
+`mov pb,y wc` / `_ret_ mov ptra,z` after. This matters **because PTRA is the live Spin2 stack
+pointer** (F-392): without the save-restore an inline block that used PTRA would corrupt the method
+stack, and a reader who knows F-392 will assume exactly that unless told otherwise. The save-restore
+is also *why* the `$120..$1D7` avoid-list is not merely tidiness — `z` and `y` live there, so
+clobbering that range destroys the saved PTRA rather than any abstract "interpreter state".
+v55:812 additionally states the entry condition **C/Z = 0**, which the file's `flag_states` note does
+not mention.
+
+**Correction:** replace the `stack_usage` consideration with the 5-level budget cited to v55:812/:837
+and cross-linked to `language/pasm2/concepts/stack_operations.yaml` (the 8-level hardware stack) and
+G-028; add the CALL entry/exit contract with the auto-appended RET; add the PTRA/PB save-restore and
+the C/Z=0 entry condition, and say plainly that the `$120..$1D7` rule exists to protect that
+save-restore. Same treatment for the `CALL()` / `REGEXEC` surface, which shares all three facts.
+
+---
 
 ## We tell agents to pass `-1` for "any available cog", and the silicon reads `-1` as "start a PAIR" — two cogs on one stack buffer (2026-08-30, debug/stack research) — F-390
 
