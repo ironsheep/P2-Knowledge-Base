@@ -234,6 +234,14 @@ top-level|default stack` returns nothing.
    method**, which is the deep-frame hazard stated in the language's own terms.
 4. **What it runs into.** Free hub RAM above the program image, up to `$7FFFF` — or up to `$7BFFF`
    when DEBUG is enabled, because the debugger takes `$7C000..$7FFFF` (see F-393).
+5. **What is OBSERVABLE about it, and what is not.** A `cogspin`/`TASKSPIN` stack is an ordinary hub
+   buffer, so **any** cog can inspect it — that is what makes cross-cog stack supervision possible at
+   all. But `PTRA` is a cog register and *"each cog has its own RAM"*
+   (`sources/silicon-doc/silicon-doc-text.txt:137`, `:284`), so **no cog can read another cog's live
+   stack pointer.** A supervisor therefore measures the **high-water mark** left in the fill pattern,
+   never the instantaneous depth. The only route to another cog's live `PTRA`/PC is `COGBRK` issued
+   from inside a debug ISR with the target's `%I` bit armed (`:2520-2524`) — which is precisely the
+   escalation path the debug interrupt exists to provide, and worth cross-linking from here.
 
 **The unsourced numbers.** `cogspin.yaml:39` and its `stack_requirements` block ship
 `minimum: "32 longs"` / `typical: "64-128 longs"` under `documentation_source: enhanced`. No Parallax
@@ -251,9 +259,19 @@ migrant will reach for them and be silently ignored.
 
 **Correction:** add a top-level-cog stack entry carrying (1)-(4) above with the interpreter and
 Spin2-doc citations; re-source or re-label `cogspin.yaml`'s sizing numbers; state the `_STACK`/`_FREE`
-non-existence on the P1-differences surface. The technique answer — move deep work into a `cogspin`
-cog whose buffer you own and instrument per P2AN006, because cog 0's stack cannot be sized or
-guarded — belongs with it.
+non-existence on the P1-differences surface, and carry (5)'s observability split — inspectable hub
+buffer, private `PTRA`, high-water not live depth.
+
+**The technique answer, corrected 2026-08-30 by the reporter's actual rig.** An earlier draft of this
+entry said "move deep work into a `cogspin` cog whose buffer you own" — i.e. get off cog 0. **That is
+the wrong lesson from (1)-(3).** The rig in use is a driver in a back cog with several front cogs
+exercising it, and **cog 0 is kept alive deliberately as the supervisor**: it watches the front cogs'
+stack buffers and is still able to report when they lock up. Cog 0 earns that role *because* of this
+finding, not despite it — it is the one cog whose stack cannot be sized or guarded, so it is the one
+cog you keep **trivially shallow by construction** (flat loop, no nesting, no large method locals),
+which also makes it the likeliest survivor. Parking cog 0 (`org` / `jmp #$` / `end`, F-394) is not the
+pattern; it is a **control applied to a suspect cog**, and in this topology the suspect is a front
+cog. The page must not imply that cog 0 is a place to evacuate.
 
 ---
 
