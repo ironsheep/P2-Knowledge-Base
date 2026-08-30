@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-390`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-394`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,206 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## We tell agents to pass `-1` for "any available cog", and the silicon reads `-1` as "start a PAIR" — two cogs on one stack buffer (2026-08-30, debug/stack research) — F-390
+
+### F-390 — `cogspin.yaml` and `coginit.yaml` document `-1` as a synonym for `NEWCOG`; it is not, and the value it actually selects launches an even/odd cog pair — `CONFIRMED`
+
+**Class: BEHAVIOUR — an agent following the KB emits code that silently consumes two cogs and gives
+them one shared stack. This is a manufactured instability, in the exact class the question that
+surfaced it was asking about.**
+
+Two sites:
+
+| file | line | text |
+|---|---|---|
+| `language/spin2/methods/cogspin.yaml` | 24 | `- NEWCOG or -1: Start any available cog` |
+| `language/spin2/methods/coginit.yaml` | 22 | `- COGEXEC_NEW or NEWCOG (-1): Start any available cog` |
+
+**What the sources say.** Spin2 v55's *Built-In Symbol for COGSPIN() Usage* table lists **exactly one**
+symbol — `NEWCOG = %01_0000` (`engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1667-1669`).
+v51 lists the same single value (`spin2-v51/spin2-text.txt:12516-12520`). Neither edition mentions
+`-1` for `COGSPIN` or `COGINIT`. `-1` is `TASKSPIN`'s `NEWTASK` (v55:1670-1672) and P1's `COGNEW`
+convention; it appears to have been carried across, and it is also the **return** value both methods
+give when no cog is free — which is very likely where the confusion started (`cogspin.yaml:45` states
+that return correctly).
+
+**Proof the two are not interchangeable — `pnut_ts` v1.55.4, 2026-08-30.** The same program compiled
+twice, `cogspin(-1, worker(), @stk)` vs `cogspin(NEWCOG, worker(), @stk)`, differs in the emitted
+constant: the `-1` form emits the compact bytecode `$A0` (`bc_con_n1_14`, the −1..14 constant), the
+`NEWCOG` form emits `$42 $10` (push byte 16). Different value, different binary, 6312 vs 6312 bytes
+with the operand bytes differing from offset 6285.
+
+**What `-1` actually does.** The Spin2 interpreter's `cogspin_` does `or x,#%10_0000` (set hubexec) and
+then `coginit x,y wc` with **no masking** of the cog operand
+(`Spin2_interpreter.spin2`, `cogspin_` and the `pop2` block). So `-1` reaches `COGINIT` as
+`$FFFF_FFFF`, and the silicon decodes `D[5:0] = %111111`. Per the Silicon Doc's COGINIT D format
+(`engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:377-390`):
+
+> `%x_1_xxx0` — *If a cog is free (stopped), then start it.*
+> `%x_1_xxx1` — ***If an even/odd cog pair is free (stopped), then start them.***
+
+`%111111` has D[4]=1 (free-cog search) **and D[0]=1 (pair)**, so it selects the pair form —
+`silicon-doc-text.txt:413` gives `COGINIT #%1_1_0001,addr` as exactly that call. `NEWCOG|%10_0000` is
+`%11_0000`, the single-cog form.
+
+**Consequence:** `cogspin(-1, worker(), @stk)` starts **two** cogs running `worker()`, both handed the
+**same** `@stk`. Two Spin2 interpreters push call frames into one buffer with no arbitration. Also,
+the pair form returns the **even/lower** cog's ID, so `cogstop(id)` later stops one of the two.
+
+**Correction:** in both files, state `NEWCOG` (`%01_0000`) as the only symbol for "any available cog",
+delete `-1` as an input value, keep `-1` described as the failure **return**, and add the pair form
+(`COGEXEC_NEW_PAIR` / `HUBEXEC_NEW_PAIR`) where the input values are enumerated. Sweep for the pattern
+elsewhere: three lines match `NEWCOG.*-1|-1.*NEWCOG|cogspin(-1|coginit(-1` across the shipped set, and
+the third (`cogspin.yaml:45`) is correct and stays.
+
+**Bench confirmation available (not required to act):** `c := cogspin(-1, worker(), @stk)` then
+`cogchk()` per cog — the prediction is two running cogs, not one.
+
+---
+
+## `HUBSET D[2]` protects nothing: the KB's write-protect bit is off by fourteen bits, and "all COG states saved" is the opposite of what the silicon does (2026-08-30, debug/stack research) — F-391
+
+### F-391 — `architecture/hub.yaml` states a fabricated HUBSET bit position and a debug save scope the Silicon Doc contradicts — `CONFIRMED`
+
+**Class: BEHAVIOUR (the bit) + FABRICATION (the save scope).**
+
+Two claims in `deliverables/ai/P2/architecture/hub.yaml`:
+
+| line | shipped text | what the source says |
+|---|---|---|
+| 33 | `protection_bit: "Set via HUBSET D[2]"` | **W is D[16]**; `L` is D[17]; `D[15:0]` are the per-cog debug enables |
+| 225 | `state_preservation: "All COG states saved on debug entry"` | **only registers `$000..$00F`**, and only if the ROM entry routine is used |
+
+**Authority — Silicon Doc v35 Rev B/C, *Write-Protecting the Last 16KB of Hub RAM and Enabling Debug
+Interrupts*, `engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2743-2774`:**
+
+> `{#}D = %0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD`
+> `%L:` *Lock W and D bit settings until next reset*
+> `%W:` *Write-protect last 16KB of hub RAM … 1 = Last 16KB of hub RAM disappears from its normal
+> range and is write-protected at `$FC000..$FFFFF`, except from within debug ISR's*
+> `%D:` *Debug interrupt enables for cogs 15..0*
+
+The worked examples at `:2765-2772` confirm the field positions: `$2000_0001` = enable cog 0 only;
+`$2001_FFFF` = all 16 cogs **+ write-protect**; `$2003_00FF` = cogs 7..0 + write-protect + **lock**.
+`D[2]` is inside the cog-enable field — a `HUBSET` built from the KB's sentence would land in the
+`%0000` clock-configuration opcode entirely, not the `%0010` protection opcode.
+
+**On the save scope**, `silicon-doc-text.txt:2427-2431` and Table 25 (`:2442-2477`): the ROM routine at
+`$1F8` saves **`$000..$00F` only**, to `$FF800 + !CogNumber << 7`. `architecture/debug_interrupt.yaml`
+already carries this correctly ("*Nothing preserves PA, PB, PTRA, PTRB or any other register
+automatically*"), so `hub.yaml:225` also **contradicts a sibling KB page**.
+
+**Correction:** replace `protection_bit` with the operand format and the `L`/`W`/`D` field map, citing
+`:2743-2762`; replace `state_preservation` with "registers `$000..$00F` only, via the `$1F8` ROM
+routine — see `architecture/debug_interrupt.yaml`", and link the two pages.
+
+---
+
+## The whole top-level cog stack is missing from the KB — no entry says cog 0 has one, where it starts, which way it grows, or that nothing checks it (2026-08-30, debug/stack research) — F-392
+
+### F-392 — the KB documents `cogspin`/`TASKSPIN` stacks and is silent on the stack every Spin2 program already has; the sizing numbers it does ship are unsourced and are cited back as authority — `CONFIRMED`
+
+**Class: OMISSION + UNSOURCED CLAIM.**
+
+**Measured against the shipped set, 2026-08-30:** grepping 1133 files for `top-level object` +
+stack, `main cog`, `cog 0.*stack`, `interpreter.*stack` returns **zero** entries describing the
+top-level cog's stack. `application-notes/p2an006-sizing-cog-task-stacks.yaml` and its published note
+cover `cogspin` and `TASKSPIN` buffers only — grepping the P2AN006 master for `main cog|cog 0|
+top-level|default stack` returns nothing.
+
+**All of the following is available in ground-truth sources and none of it is in the KB.**
+
+1. **Cog 0 has a stack, and the compiler places it.** `DBASE` is the stack base and it sits
+   immediately after VAR space: the interpreter's launch block computes
+   `var_longs = (@test_dbase - @test_vbase) >> 2` and does `setq dbase_init` / `coginit #hubexec,
+   ##launch_spin`, which passes `DBASE` into the new cog's `PTRA`
+   (`Spin2_interpreter.spin2` v55, launch block). Confirmed against `pnut_ts -m`: a program whose map
+   reports `VAR SPACE $0001C-$0005F` has its stack base at `$00060`.
+   Spin2 v55 shows the same pair in the DEBUG INIT line — *"the Spin2 interpreter is launched from
+   `$00D6C` with its stack space starting at `$010BC`"* (`spin2-v55-text.txt:1036`).
+2. **It grows UPWARD, without a bound.** Push is `wrlong v,ptra++`, pop is `rdlong y,--ptra`
+   throughout the interpreter. There is **no comparison of `PTRA` against any limit anywhere in the
+   interpreter** — the only trace of the idea is the author's own note on line 1 of the source:
+   *"TESTT add registers stack_start (on launch) and stack_max (on call or return) to track stack size
+   for allocation need."* Nothing detects overflow; it writes forward into whatever is next.
+3. **A call frame costs exactly 6 longs, plus the method's locals.** The interpreter's *Drop anchor*
+   block pushes `v / pbase / vbase / dbase / mrecv / msend` (`setq #6-1` + `wrlong v,ptra++`), then
+   `callgo`'s `.clear` pushes the method's local longs. `launch_spin` lays the same 6-long header at
+   the base of **every** Spin2 stack, cog 0 and `cogspin` alike. So the floor for any Spin2 cog stack
+   is 6 longs before one parameter is stored — and Spin2 v55:279 permits **64KB of locals in a single
+   method**, which is the deep-frame hazard stated in the language's own terms.
+4. **What it runs into.** Free hub RAM above the program image, up to `$7FFFF` — or up to `$7BFFF`
+   when DEBUG is enabled, because the debugger takes `$7C000..$7FFFF` (see F-393).
+
+**The unsourced numbers.** `cogspin.yaml:39` and its `stack_requirements` block ship
+`minimum: "32 longs"` / `typical: "64-128 longs"` under `documentation_source: enhanced`. No Parallax
+source states either figure — Spin2 v51/v55 give no stack-size guidance at all. `p2an006`'s
+`cog_stack_defaults` then cites **`cogspin.yaml`** for "cog stack floor ~32 longs, typical 64-128",
+so a published application note rests on a KB value that rests on nothing. Either derive the floor
+from the interpreter's frame arithmetic and cite that, or mark both as heuristics and say so.
+
+**Also absent: P1's mechanism is gone and nothing says so.** P1 reserved stack with `_STACK` /
+`_FREE` (`p1-propeller-manual-v1.2-layout-text.txt:1272`, `:7002-7014`, and the whole *The Need for
+Stack Space* section at `:2682-2726`). **Spin2 has no such symbol.** Proven with `pnut_ts` v1.55.4:
+`_STACK = 100` and `_FREE = 100` in a `CON` block each compile to a binary **byte-identical** to the
+same program without them (md5 `1e7165f1…` for all three). They are inert user constants. A P1
+migrant will reach for them and be silently ignored.
+
+**Correction:** add a top-level-cog stack entry carrying (1)-(4) above with the interpreter and
+Spin2-doc citations; re-source or re-label `cogspin.yaml`'s sizing numbers; state the `_STACK`/`_FREE`
+non-existence on the P1-differences surface. The technique answer — move deep work into a `cogspin`
+cog whose buffer you own and instrument per P2AN006, because cog 0's stack cannot be sized or
+guarded — belongs with it.
+
+---
+
+## DEBUG's cost to the running application is nowhere in the KB: 16KB of hub gone, the protection LOCKED until reset, `LOCK[15]` taken, two pins consumed (2026-08-30, debug/stack research) — F-393
+
+### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `CONFIRMED`
+
+**Class: OMISSION — every item here changes what an application may legally do, and each one fails
+silently when violated.**
+
+**Measured 2026-08-30:** across the shipped set, `debugger occupies|reserves|allocated by the
+debugger` returns **0 files**; `top 16|last 16` returns only two lines, neither of which says the
+region becomes unavailable; the ≥10 MHz-crystal precondition appears in no file.
+`LOCK[15]` appears once, at `language/spin2/statements/debug.yaml:93`, and only as a note that `DLY`
+*releases* it — the KB never says the debugger **holds** it.
+
+**The full set, from Spin2 v55 *Things to know about the DEBUG system*
+(`spin2-v55-text.txt:897-930`) and the debugger's own source (`Spin2_debugger.spin2` v51):**
+
+| resource | fact | source |
+|---|---|---|
+| hub RAM | *"The debugging program occupies the top 16 KB of hub RAM, remapped to `$FC000..$FFFFF` and write-protected. The hub RAM at **`$7C000..$7FFFF` will no longer be available**."* | v55:900 |
+| protection lock | the debugger issues `HUBSET $2003_00FF` — `L=1`, so write-protect and the per-cog enables **cannot be changed again until reset** | `Spin2_debugger.spin2:172`, `:121`; format at `silicon-doc-text.txt:2749-2752` |
+| `LOCK[15]` | the debugger allocates **all 16** locks then returns 14..0, *"leaves lock[15] allocated"*, and each debug ISR does `locktry #15` / `lockrel #15` | `Spin2_debugger.spin2:77-82`, `:201`, `:235` |
+| P62 | DEBUG serial TX, 2 Mbaud 8-N-1 | v55:907 |
+| P63 | held in **long-repository mode** carrying `clkfreq`; **must be rewritten on every clock change** or the debugger's baud goes wrong | v55:926, and the worked `clock_change` snippet at v55:1061 |
+| clock | *"you must configure at least a 10 MHz clock derived from a crystal or external input. You cannot use RCFAST or RCSLOW."* | v55:899 |
+| interrupts | DEBUG skews ISR cycle-frame timing; a smart-pin ISR that re-arms on INA/INB **rise** can miss its retrigger and **stop cycling altogether**. CT interrupts are immune. | v55:1071 |
+| DEBUG record cap | 255 `DEBUG()` statements (`BRK #1..255`) | v55:909 |
+
+**The exact protected-region layout is also available and unrecorded** — `Spin2_debugger.spin2:20-49`
+maps it: `$FC000` DEBUG data · `$FEA00` cog N reg `$010..$1F7` buffer · `$FF1A0` debugger + overlays ·
+`$FFC00..$FFFFF` the eight per-cog `$000..$00F` buffer/ISR pairs whose addresses are *fixed in
+silicon* (Silicon Doc Table 25, `silicon-doc-text.txt:2442-2477`).
+
+**Why each is an instability source, not trivia:** a program that keeps a buffer at the top of hub
+works undebugged and has its writes **silently dropped** under DEBUG; `LOCKNEW` returns one fewer
+lock under DEBUG, so a program that allocates a fixed count fails only when debugged; a `HUBSET`
+clock change without the P63 repository update leaves the debugger emitting garbage that reads as a
+dead application; and the interrupt-skew item makes a working smart-pin ISR stop for good.
+
+**Correction:** one *DEBUG system requirements and resource cost* entry carrying the table above, with
+`aliases` written as symptoms (*"works without debug fails with debug"*, *"debug output stopped after
+clock change"*, *"lock count differs under debug"*, *"top of hub RAM not writable"*), cross-linked
+from `architecture/hub.yaml`, `architecture/debug_interrupt.yaml`, `locknew.yaml`, and the DEBUG
+statement pages. This overlaps F-383's DEBUG-budget finding — file the two together so the reader
+gets cost and limits on one page.
+
+---
 
 ## A streamer count of `$FFFF` is PERPETUAL, and our own stated bound points a reader straight at it (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-3) — F-382
 
