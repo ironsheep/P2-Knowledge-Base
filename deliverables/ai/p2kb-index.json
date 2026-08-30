@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-27T01:34:49.664638",
+    "generated": "2026-08-30T18:52:29.369648",
     "total_entries": 1133,
     "total_categories": 59,
     "total_aliases": 2082,
@@ -7064,8 +7064,8 @@
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
-      "mtime": 1787775765,
-      "sha256": "dd378e474b0d0680076b4e2ef94a40939ddfdbaada988495d6101a1945179a93"
+      "mtime": 1788115079,
+      "sha256": "d8a83de1a26388503134b5272d3be4cafbc8ed374e2f147a7b3773debff7117d"
     },
     "p2kbAppNoteP2an003DacAnalogSignalGeneration": {
       "path": "deliverables/ai/P2/application-notes/p2an003-dac-analog-signal-generation.yaml",
@@ -7134,8 +7134,8 @@
     },
     "p2kbArchClockSystem": {
       "path": "deliverables/ai/P2/architecture/clock_system.yaml",
-      "mtime": 1787684528,
-      "sha256": "13efd132c38dd2bd3a15170c9477aaab527a30802fc9843b884b1e9ee39937d7"
+      "mtime": 1788115079,
+      "sha256": "eed62537906bac1bc0fdf49e3e253df083e0556a0eec1d59d17a617d029bac46"
     },
     "p2kbArchCog": {
       "path": "deliverables/ai/P2/architecture/cog.yaml",
@@ -7244,8 +7244,8 @@
     },
     "p2kbArchHub": {
       "path": "deliverables/ai/P2/architecture/hub.yaml",
-      "mtime": 1782428268,
-      "sha256": "0677c05aaf54185d162cd447e4ad1bc5529306c5d84d848ac410adc62c3a17f2"
+      "mtime": 1788114448,
+      "sha256": "233b71bc006cdec376188ddd7046cdde3834e17cca1b4bc46b967c941d7c4558"
     },
     "p2kbArchInterrupts": {
       "path": "deliverables/ai/P2/architecture/interrupts.yaml",
@@ -7254,18 +7254,18 @@
     },
     "p2kbArchIoPinTiming": {
       "path": "deliverables/ai/P2/architecture/io_pin_timing.yaml",
-      "mtime": 1787684528,
-      "sha256": "ff94b0b574c99f30cdb8edbd19ee79aff1c11930696e63a5be62bc9400189cea"
+      "mtime": 1788045127,
+      "sha256": "6431c7f680be21db5bae7c25435018faabd000ccdd0d07a821efc85e943bce2f"
     },
     "p2kbArchLocks": {
       "path": "deliverables/ai/P2/architecture/locks.yaml",
-      "mtime": 1787785333,
-      "sha256": "08c7ce125d024a79d77fcbd0972d2b2749fb836fcd9d9982dc36839da6d9e782"
+      "mtime": 1788115405,
+      "sha256": "51e0681cdb6dd73450d8a6a003276a6bec7d92ab91e5574a7a31da985c28c14e"
     },
     "p2kbArchLookupRam": {
       "path": "deliverables/ai/P2/architecture/lookup_ram.yaml",
-      "mtime": 1787785333,
-      "sha256": "c12d1b69a76b69c63a40de2e5c54510a737931b73099348cdb3b1ae23a1ada23"
+      "mtime": 1788115079,
+      "sha256": "2d99531aaf10831a39796f225b3d5d905ebcc74e0dff9d54fec6ad3a35188347"
     },
     "p2kbArchMultiResourceManagement": {
       "path": "deliverables/ai/P2/architecture/multi_resource_management.yaml",
@@ -7319,8 +7319,8 @@
     },
     "p2kbArchPinDriveConfiguration": {
       "path": "deliverables/ai/P2/architecture/pin-drive-configuration.yaml",
-      "mtime": 1787707066,
-      "sha256": "6d1e6f101871675c8bf02efcf4c3cb714c3675c502271828de5b71ee9dfd7a20"
+      "mtime": 1788115079,
+      "sha256": "d66356164234d4026f181204589ed37dda737a416a2dc636f1df3a7c1b84ca71"
     },
     "p2kbArchPinPowerDomains": {
       "path": "deliverables/ai/P2/architecture/pin-power-domains.yaml",
@@ -7519,18 +7519,18 @@
     },
     "p2kbArchDdsGoertzel": {
       "path": "deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml",
-      "mtime": 1787775765,
-      "sha256": "de4c600c7c3ca3ecbc8f09a84a9e70ac778c792189648dde1411be60052367cd"
+      "mtime": 1788115405,
+      "sha256": "886834b53775744f1ac98072f5d98f8e7e208653c67ecec20b38374a76cfbb31"
     },
     "p2kbArchModesReference": {
       "path": "deliverables/ai/P2/architecture/streamer/modes-reference.yaml",
-      "mtime": 1787775765,
-      "sha256": "c465fe6872cd8fb1ce20c7fe1993be8cde1fa1b84a10fb1558ceb0c4b2a8ae5c"
+      "mtime": 1788115405,
+      "sha256": "802ce2836747d7e7a987bbd4990217ae6337718e31d10e1605b72426dc927400"
     },
     "p2kbArchNcoTiming": {
       "path": "deliverables/ai/P2/architecture/streamer/nco-timing.yaml",
-      "mtime": 1787707066,
-      "sha256": "57cb16dd9a2fabfa544e9df70bafbe412ae4a068b42495e97143703a54adf7ca"
+      "mtime": 1788045127,
+      "sha256": "85a6ade90b727479906369a591330092a5ddb782cd117d51914d10eaab8cfddc"
     },
     "p2kbArchOverview": {
       "path": "deliverables/ai/P2/architecture/streamer/overview.yaml",
@@ -7539,13 +7539,13 @@
     },
     "p2kbArchPinCapture": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-capture.yaml",
-      "mtime": 1787775765,
-      "sha256": "1a1c562366c7c6d0698434d3aa90ee503d2ce2c304cff1ed5fd2de9c1a281f0f"
+      "mtime": 1788115079,
+      "sha256": "8bb5615e5020ecfc7cf839d7594b02aa8636bbe744972fe7bafed8f19343dc25"
     },
     "p2kbArchPinSelection": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-selection.yaml",
-      "mtime": 1787775765,
-      "sha256": "c78539dfef5398897387d8febeb93dd0b1548f82a135af8a2d5296b6a64f1fac"
+      "mtime": 1788115079,
+      "sha256": "20b3b2f76aca8410d04b925341db273cd9043e01266604efe88ba2806784e158"
     },
     "p2kbArchCompleteSystemRegistersIndex": {
       "path": "deliverables/ai/P2/architecture/system-registers/complete-system-registers-index.yaml",
@@ -8549,8 +8549,8 @@
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
-      "mtime": 1787781755,
-      "sha256": "bcc5ed9b412ba13c08d945d9438a853bcd95be3387b5b1f447fdfa467d888d45"
+      "mtime": 1788115079,
+      "sha256": "d6fe50d927af28478d240f541fb27344a8ff7f93da604629ec487d44bcd16e86"
     },
     "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier": {
       "path": "deliverables/ai/P2/hardware/edge-breadboard-carrier.yaml",
@@ -8569,13 +8569,13 @@
     },
     "p2kbHwEdgeStandardModuleEdgeStandardModule": {
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
-      "mtime": 1787781755,
-      "sha256": "579308c4c309fdaebcd7de20c78282007da87a8139e15122e095ba9d9805a388"
+      "mtime": 1788115079,
+      "sha256": "73541afe4b05e384f06af8ade5970752ef20734cb93add581c1e789acb3e17e9"
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
-      "mtime": 1787732317,
-      "sha256": "5fa36847afb0e5bc2ae906bf94b4c0aad17de4a63b1fd78c6e6ee0db7699b345"
+      "mtime": 1788114448,
+      "sha256": "c7f8686134cb4e4726e089f044531b45f5054959c56de2b29987af1f591ed354"
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
@@ -8599,8 +8599,8 @@
     },
     "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide": {
       "path": "deliverables/ai/P2/hardware/p2-hardware-selection-guide.yaml",
-      "mtime": 1781981347,
-      "sha256": "44f8988be8e0d9b09f1eb0866774a87e3a04cc7e40830e2c8dcf594f6762464e"
+      "mtime": 1788114448,
+      "sha256": "cd7c587815f09eedc524f2017eb3ba85817ad4e0c4c6d2886a6712139b837180"
     },
     "p2kbHwP2PackageMechanicalP2PackageMechanical": {
       "path": "deliverables/ai/P2/hardware/p2-package-mechanical.yaml",
@@ -8949,8 +8949,8 @@
     },
     "p2kbPasm2BasicIo": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml",
-      "mtime": 1787781755,
-      "sha256": "96cd70fb9c7147d2c10832f4588f8831cc07f3d5b334d57420863ca82d280d56"
+      "mtime": 1788115079,
+      "sha256": "fa5a4960f871e5245a1ec826cbe363fa2eff5f3b38ba33533f31ef39aa21cb77"
     },
     "p2kbPasm2BranchAddressing": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/branch_addressing.yaml",
@@ -10344,8 +10344,8 @@
     },
     "p2kbPasm2Setxfrq": {
       "path": "deliverables/ai/P2/language/pasm2/setxfrq.yaml",
-      "mtime": 1787684528,
-      "sha256": "7c5f5efa6be54cfd8d0f3880532368eb39c0fa7a80bbe356748ba5f4d9bd0f34"
+      "mtime": 1788044929,
+      "sha256": "9421d10593ae062224d53f36bbaab8abe22e95683038e21bc919dbf79e2d51df"
     },
     "p2kbPasm2Seussf": {
       "path": "deliverables/ai/P2/language/pasm2/seussf.yaml",
@@ -10804,8 +10804,8 @@
     },
     "p2kbSpin2BasicIo": {
       "path": "deliverables/ai/P2/language/spin2/concepts/basic-io.yaml",
-      "mtime": 1787781755,
-      "sha256": "9c0fd1c2dfab3eb349dbdbdb24c80bb3df7a98abf07c1c072a7efd834a2497fd"
+      "mtime": 1788115079,
+      "sha256": "eb4bc5e113f61b80dc5f97b5cc1b0941d9172229eaa5910276c01fbc3ee5366e"
     },
     "p2kbSpin2CordicSolver": {
       "path": "deliverables/ai/P2/language/spin2/concepts/cordic_solver.yaml",
@@ -10864,8 +10864,8 @@
     },
     "p2kbSpin2TimingOperations": {
       "path": "deliverables/ai/P2/language/spin2/concepts/timing_operations.yaml",
-      "mtime": 1787351063,
-      "sha256": "09ed33bab2d785196167e85be23d52fbc2003c443f30d0912fc08851f15fe383"
+      "mtime": 1788047092,
+      "sha256": "52431f163ee6c1e9b07ae337372c8fdf0ba357838a0e42c7af632e9829454ca2"
     },
     "p2kbSpin2TypePropagation": {
       "path": "deliverables/ai/P2/language/spin2/concepts/type-propagation.yaml",
@@ -10889,8 +10889,8 @@
     },
     "p2kbSpin2SpecialConfigurationSymbols": {
       "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
-      "mtime": 1784009392,
-      "sha256": "74bba628c8140bbed062340ed19de14e57c2c78f537bf248937323df20ec9048"
+      "mtime": 1788047092,
+      "sha256": "89738b56e3f885218e7207cd0b1ff0f6c89a2ef0280886e0a8a813bf0bf7c0e9"
     },
     "p2kbSpin2Thistask": {
       "path": "deliverables/ai/P2/language/spin2/constants/thistask.yaml",
@@ -11374,13 +11374,13 @@
     },
     "p2kbSpin2Coginit": {
       "path": "deliverables/ai/P2/language/spin2/methods/coginit.yaml",
-      "mtime": 1781076792,
-      "sha256": "cdd28bc77040aca00df0f256be049ed2393b0d061862c16f557b1c82baa1c32f"
+      "mtime": 1788114448,
+      "sha256": "9afea5a27a2461fefeb826bf316645ee52534825b048d3a1bfa1c90965f7f8a7"
     },
     "p2kbSpin2Cogspin": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogspin.yaml",
-      "mtime": 1768613644,
-      "sha256": "b89d3fe05de00384ea0a30607fa8a60acca348c1944f8bb95a982f058972ac5c"
+      "mtime": 1788114448,
+      "sha256": "68c69a16000eb397943b9c26a24c50762af60eadfd7b0858c6859a800133d024"
     },
     "p2kbSpin2Cogstop": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogstop.yaml",
@@ -12709,8 +12709,8 @@
     },
     "p2kbSpin2VarClkmode": {
       "path": "deliverables/ai/P2/language/spin2/system-variables/clkmode.yaml",
-      "mtime": 1769213380,
-      "sha256": "17d2e89ce206e48417a22550917ec3f8845c13c204084b8f46eadb184436bdf9"
+      "mtime": 1788047092,
+      "sha256": "23fa4362d95d92099eef16a372bfc63b234d328badeac9a87f9145be10094538"
     },
     "p2kbSpin2VarVarbase": {
       "path": "deliverables/ai/P2/language/spin2/system-variables/varbase.yaml",
