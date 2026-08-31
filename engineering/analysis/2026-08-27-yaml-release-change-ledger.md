@@ -36,6 +36,84 @@ figures for the fourteen it re-touched are carried in **§1.19**, which is where
 
 ---
 
+# Why this release touched the KB — the drivers, and how far each one reached
+
+**Read this first.** Part 1 groups the changes by *what kind of change* they are and Part 2 by
+*where* they landed; both assume you already know **why anyone was in these files**. This section is
+that missing layer. Every file count and region list below is measured from `git log`/`git diff`
+over `v1.17.0..HEAD`, not asserted.
+
+**The one-sentence version.** This release started from **one reported symptom** — the KB described
+the P2 as having pull-up resistors it does not have — and the fix for it exposed that the mechanism
+it should have named had *no definition anywhere in the set*, which in turn exposed how much of the
+set's physical content *cited nothing at all*. Everything after that is the consequence: a policy sweep,
+then a sequence of audits, each of which was designed to catch what the previous one structurally
+could not, and each of which found a different class of defect. **No audit here found the class the
+audit before it was looking for.** That is the shape of the release.
+
+## The drivers, in the order they arose
+
+| | Driver | What set it off | Reach | Scope | Detail |
+|---|---|---|---|---|---|
+| **A** | **The reported symptom** — drive strength mislabelled as bias resistors | **The P2 has no pull-up or pull-down resistors.** `P_HIGH_*`/`P_LOW_*` select drive strength; the shipped KB called them bias resistors, so an agent asking how to enable a pull-up was handed a mechanism the silicon does not have. This is the one defect that was *reported* rather than found — everything else below was found while fixing it or while checking the fix | 6 regions — `language/spin2` · `language/pasm2` · `hardware` · `guides` · `architecture/smart-pins` · `code-examples` | **12 files** | §1.4 |
+| **B** | **Cite-or-omit, applied as policy** — the uncited-quantity purge and its source-first repopulation | Fixing A meant reading the sources, and the reading showed the mislabel was not isolated: the set was full of physical quantities that named no source at all. Removal first, deliberately, so nothing could be rationalised in place | 8 of the 11 regions — all but `architecture/streamer`, `architecture/system-registers` and `code-examples` | **42 files**; **119 blocks removed**, **80 returned cited**, **41 did not come back** | §1.1 · §1.2 · §1.3 |
+| **C** | **The definition gap** — 55 constants the KB used and defined nowhere | A's replacement text had to name the real mechanism, and the real mechanism's constants had no home. You cannot cite a constant you never defined | 3 regions — `architecture` · `language/spin2` · `language/pasm2` | **5 files**; 55 constants defined, all **116** v55 constants covered in one home, and a **116-name `aliases:` block** added — without it the index harvests nothing and none of the definitions resolve through `p2kb_get` | §1.5 |
+| **D** | **The actionability filter** — does this block change the code an agent emits? | Neither purge asked it. A block can be true, cited, and still be noise a code-generating agent must wade through | 3 regions — `hardware` · `language/spin2` · `language/pasm2` | **4 files**; **233 blocks** given a written disposition | §1.8 |
+| **E** | **The fabricated-provenance audit** (F-359) | A provenance header naming source files that **have never existed** satisfies every citation gate ever written. Once one was found, the question became how far the same 2025-11-29 authoring run reached | 2 regions — `architecture` · `architecture/system-registers` | **7 files** touched, **6 re-derived from scratch** (a seventh carrying the same header had already been purged); across the six, **41 of 45** encodings were wrong, 4 mnemonics did not exist, 6 semantic inversions | §1.6 |
+| **F** | **The ingestion sprint's findings, finally applied** | `ingest-source` forbids YAML edits by design, so everything the ingestion sprint found had been sitting in the register untouched. This release is where it reached the KB | 9 regions — the widest reach of any driver | **22 files** | §1.12 · §1.9 |
+| **G** | **New ingestions** — Click Adapter, WX module, streamer pin capture | Coverage the KB did not have, ingested from schematics and guides rather than inferred | 5 regions — `hardware` · `architecture` · `architecture/streamer` · `language/spin2` · `language/pasm2` | **17 files**; **two of the four new files** this release (`streamer/pin-capture.yaml`, `addon-click-adapter.yaml`) | §1.11 · §1.12 |
+| **H** | **The differential read** — what did we *lose*? | A diffstat cannot tell a repair from a deletion. The read asked, per file, whether HEAD still says everything `v1.17.0` said. It found one file **gutted**: `pasm2-getting-started.yaml` explained what happens when you declare a clock mode and no longer said how to declare one | 2 regions — `guides` · `architecture` | **3 files**; **34 top-level keys across 24 files** also changed YAML type, measured here | §1.14 · §1.13 · §1.16 |
+| **I** | **Instruments armed, and the defects they immediately found** | Three gates went from advisory to blocking and one was built from nothing. Arming them was not the end of the work — it was the start of a new class: a duplicate YAML key silently discarded this sprint's own central corrective sentence | 4 regions — `architecture` · `hardware` · `language/spin2` · `language/pasm2` | **19 files**; duplicate keys to **0/1132** | §1.10 · §1.17 · §1.13 |
+| **J** | **Citation routing** — the paths every new agent follows | Both getting-started guides told an agent to read `concepts/basic-io.yaml` first, and **two real files answer to that name** — the routing citation pointed at nothing deterministic, straight at the files carrying the mislabel from A | 3 regions — `guides` · `language/spin2` · `language/pasm2` | **4 files** | §1.9 |
+| **K** | **Register drains — including two refusals** | The corrections register had accumulated findings older than this sprint. Two of them were **rejected**: applying them would have introduced defects into content that is currently correct | 2 regions — `architecture` · `architecture/smart-pins` | **2 files** | §1.15 |
+| **L** | **2026-08-29 pre-release pass** | Re-reading before shipping, rather than re-checking a prior pass's conclusions. Recomputing the SETXFRQ NCO class instead of trusting two named values found **nine shipped values wrong** by one bit | 4 regions — `architecture` · `architecture/streamer` · `language/spin2` · `language/pasm2` | **6 files** | §1.18 |
+| **M** | **2026-08-30 pre-release pass** | The defect census graded two items category 1 — 19 uncited hardware quantities and 721 unread citations. Reading the 19 found **three were wrong** and opened a family sweep; reading the 721 discharged F-377 | 6 regions — `hardware` · `architecture` · `architecture/streamer` · `application-notes` · `language/spin2` · `language/pasm2` | **18 files** | §1.19 |
+
+Every one of the **96** changed files is attributable to at least one driver above; the union is 96,
+with no remainder. Files appear under more than one driver where more than one reason reached them,
+and **how many drivers entered a region is the best single predictor of how large its per-file diffs
+are in Part 2**:
+
+| Region | Drivers that entered it | |
+|---|---|---|
+| `language/spin2` · `language/pasm2` · `architecture` | **10 each** | the three most re-entered regions. `architecture/`'s re-derived files carry the largest *rewrites* — `interrupts.yaml` +219/−115, `debug_interrupt.yaml` +208/−92, `clock_system.yaml` +185/−136 — while `language/spin2/`'s largest change is the one-way constant expansion `spin2-builtin-symbols-complete.yaml` **+1052/−23**, the biggest single diff in the release |
+| `hardware` | **7** | A · B · D · F · G · I · M — the widest region by file count (28) |
+| `architecture/smart-pins` · `guides` · `architecture/streamer` | 4 each | |
+| `application-notes` | 3 | |
+| `architecture/boot-rom` · `architecture/system-registers` | 2 each | |
+| `code-examples` | 1 | driver A only — one word changed, and that is the whole of it |
+
+The two new files not attributable to G are `architecture/pin-drive-configuration.yaml` (driver C —
+it *is* the definition home) and `hardware/p2-package-mechanical.yaml` (driver F — written as the
+package record for F-366).
+
+## What each audit actually contributed — and what it could not have found
+
+The audits are not redundant. Each was built to see something the last one was blind to, and the
+record of *what it caught that nothing else would have* is the argument for having run it.
+
+| Audit / pass | Found what nothing before it could | Was structurally blind to |
+|---|---|---|
+| **The purge** (B) | Every quantity with no source named | A wrong value that *is* cited; a fabricated citation |
+| **Source-first repopulation** (B) | Wrong scalars and invented board sections in blocks that **survived** the purge — because rebuilding from the source rather than the removed block reads the source | Anything in a block it did not rebuild |
+| **The promotion filter** (D) | Content that is true and cited and still cannot change emitted code | Correctness of any kind |
+| **The fabricated-provenance audit** (E) | Citations naming files that never existed, and the 41 wrong encodings hiding behind them | The seven files' *siblings* — the audit was scoped to the authoring run |
+| **The differential read** (H) | A file **gutted** by an otherwise-good rewrite; 34 silent schema-type changes | Anything present at both revisions and wrong at both |
+| **Armed instruments** (I) | Duplicate keys — including one destroying this sprint's own corrective sentence | Any claim a regex cannot read; the gates say so themselves |
+| **The defect census** (2026-08-30) | The *size* of what remained, class by class — which is what made M finishable rather than open-ended | A class it did not model; it says so, and M then found one |
+| **The 08-29 pass** (L) | Nine NCO values wrong by one bit, in files that **quoted the very rule they violated** | Anything outside the classes it recomputed |
+| **The 08-30 pass** (M) | 22 mis-pointing citation locators, and six facts simply wrong in files with no citation defect at all | The Tier-2 population; and it says so |
+
+**The through-line, and the reason §0.5 still has a red block.** Every instrument in §0.4 is green and
+was green before each of the fixes above. **No gate here can read a sentence.** What found the wrong
+values was, in every case, a person or an agent *reading the source at the line* — and in two cases
+(F-389 and the debug/stack questions behind F-390/F-391) it was **a question from outside the release
+entirely**. That is why the ledger reports gate results as *"not caught by these checks"* rather than
+*"correct"*, and why the count of findings in a class is the size of the class we measured, never the
+size of the defect population.
+
+---
+
 ## Part 0 — Scope, reconciliation, gate state, and what is still open
 
 ### 0.1 Scope, measured at HEAD
@@ -987,6 +1065,168 @@ rewritten in place and **RESOLVED** · next finding ID now `F-382`.
 
 ---
 
+## 1.19 The 2026-08-30 pre-release fix pass — 18 files, 3 commits, and the two instruments that had to be fixed first
+
+Three commits: `ca684aac` (steps 1-2), `912100db` (step 3, mechanical half), `9ab0433b` (step 3,
+semantic half). Four files entered the change set — `architecture/hub.yaml`,
+`hardware/p2-hardware-selection-guide.yaml`, `language/spin2/methods/coginit.yaml`,
+`language/spin2/methods/cogspin.yaml` — and fourteen already in it were re-touched. **No file was
+added to or removed from the shipped set.**
+
+### The four files new to the change set
+
+| File | ± (v1.17.0..HEAD) | Verdict | What changed |
+|---|---|---|---|
+| `architecture/hub.yaml` | +42/−2 | stronger | **F-391.** `protection_bit: "Set via HUBSET D[2]"` — W is **D[16]**; D[2] is inside the per-cog debug-enable field, so a HUBSET assembled from the old sentence carries the `%0000` clock-configuration opcode, not `%0010`. Replaced with the full operand map (`%0010_xxxx_xxxx_xxLW_DDDD…`, L=D[17], D[15:0]) and the three worked examples, cited to `silicon-doc-text.txt:2743-2762` and `:2765-2772`. Separately, `state_preservation: "All COG states saved on debug entry"` — the silicon saves `$000..$00F` only, via the `$1F8` ROM routine, **and `debug_interrupt.yaml` already said so**, so this page was contradicting a sibling. The two pages are now linked. |
+| `hardware/p2-hardware-selection-guide.yaml` | +52/−22 | **corrected** | **F-396** — see below. Fabricated part numbers, USB-C on a micro-USB board, three wrong board dimensions, castellations that appear nowhere in the guide, an unsourced VGA resolution ceiling, and **F-397**'s `"5V @ 1A minimum (USB-C or barrel jack)"` / `"50-500mA each"` power block. |
+| `language/spin2/methods/cogspin.yaml` | +28/−2 | **corrected** | **F-390.** `-1` is gone as an input. It is not a synonym for `NEWCOG`. |
+| `language/spin2/methods/coginit.yaml` | +25/−3 | **corrected** | **F-390**, plus the two `_PAIR` symbols the file had never listed. |
+
+### The fourteen re-touched, with their revised totals
+
+`hardware-compatibility-matrix.yaml` **+174/−47** (was +27/−2 — this pass is +147/−45 of it) ·
+`streamer/pin-capture.yaml` **+324/−0** · `streamer/pin-selection.yaml` **+193/−57** ·
+`architecture/clock_system.yaml` **+185/−136** · `architecture/lookup_ram.yaml` **+156/−99** ·
+`architecture/pin-drive-configuration.yaml` **+277/−0** ·
+`hardware/edge-32mb-module.yaml` **+225/−419** · `hardware/edge-standard-module.yaml` **+173/−336** ·
+`language/pasm2/concepts/basic-io.yaml` **+96/−121** ·
+`language/spin2/concepts/basic-io.yaml` **+89/−121** · `architecture/locks.yaml` **+91/−53** ·
+`streamer/modes-reference.yaml` **+49/−9** · `streamer/dds-goertzel.yaml` **+31/−10** ·
+`application-notes/p2an002-cordic-for-real-work.yaml` **+19/−12**.
+
+---
+
+### Change class 1 — the census's 19 uncited electrical quantities, sourced or removed (F-397)
+
+All 19 now carry a block-level `source:`. **Tier-2 advisory 32 → 27; Tier 1 stayed at none**, so
+citing two wholly-uncited files exposed no uncited sibling block in either — the F-381 trap was
+checked for, not assumed.
+
+Reading them found **three of the nineteen were wrong**:
+
+- **`"64006A (Control) - ~16mA max (4 LEDs)"`** — **no source anywhere states 16 mA.** The #64006
+  guide gives the Control board four blue LEDs and four push-buttons, each on a **470 Ω series
+  resistor** (`p2-eval-add-on-boards-text.txt:62`, `:74-80`), and no current at all. 16 mA reads as
+  4 × the LED Matrix's 4 mA — a figure borrowed from a different board with different circuitry and
+  presented as this board's maximum. **A derived electrical quantity wearing a data key is the
+  150 mA defect in miniature.**
+- **`"64006H (A/V Breakout) - 80mW audio amplifier"`** filed under `addon_power_requirements.high_power`.
+  80 mW is real (`:328`, *"Amplified Audio Out (80mW)"*) but it is the amplifier's **output** rating.
+  Filed as a power *requirement* it invites a supply budget built from the wrong number.
+  **A correct citation attached to a miscategorised quantity still ships a wrong claim.**
+- **`"5V @ 1A minimum (USB-C or barrel jack)"`** — 1 A appears in no guide, and see class 2 for the
+  connector.
+
+### Change class 2 — three inverted or damaging facts, found by reading (F-395, F-396)
+
+- **`external_power: "5V or 6-9V depending on carrier"`.** **No P2 carrier accepts a wide input.**
+  All three guides state the same requirement verbatim — *"Voltage input requirements: 5 VDC,
+  absolute maximum 5.5 VDC"* — each followed by a boxed *"CAUTION! … do not exceed 5.5 VDC"*. A
+  reader taking the KB at its word applies 9 V to a 5.5 V absolute maximum. This is the
+  `max_current_per_pin: 150mA` shape exactly, and `edge-breadboard-carrier.yaml` had *the same*
+  wide-input claim removed on 2026-08-25 (item 7 of the archived ledger) — **the sweep stopped at
+  that file.**
+- **`addon_support: "none"` / `"No 2x6 expansion headers"`** for the #64029 and #64019, and
+  *"Cannot use 64006-series add-on boards"* under `incompatibilities`. **Every carrier has 2x6
+  accessory headers and takes the #64006 boards** (`edge-breakout-board-narrative.txt:39`,
+  `edge-mini-breakout-narrative.txt:45`, `edge-module-breadboard-narrative.txt:56`), and our own
+  `edge-mini-breakout.yaml:56-58` already said so — **the file contradicted a sibling page**, the
+  F-391 shape. **Nine sites** across five blocks carried the inversion. An agent asked "which board
+  for add-ons?" was told to buy the Eval Board and that two of the three carriers are disqualified:
+  the recommendation wrong and the reason for it fabricated.
+- **`pin_access: "P0-P31, P58-P63 accessible (40 pins)"`** in `edge-standard-module.yaml` and
+  `edge-32mb-module.yaml`. **The range and the count disagree with each other** — P0-P31 + P58-P63
+  is 38. The guide says P56-P63, which is what makes 40. *The file's own arithmetic was the tell,
+  and nothing checks arithmetic.*
+
+Also corrected: the `combinations` table's `pin_access:` was a single bare integer that meant the
+carrier's header count on some rows and the module's free-pin count on others, so P2-EC32MB on a
+full 64-pin carrier read `40`. A pin budget is the product of **two** independently sourced facts —
+what the module frees and what the carrier brings to a header — and both are now stated per row,
+with no derived total. **The unsourced `rating:` values were deliberately left in place**: they
+belong to F-374, whose class boundary is still Stephen's call, and removing six of the thirteen
+would have silently moved that finding's count.
+
+### Change class 3 — F-350's sweep never ran, and the whole fabrication set was still live (F-396)
+
+`p2-hardware-feature-comparison.yaml:159-167` carries a `corrections_applied_2026_08_25` block
+naming exactly what F-350 removed. **Every item on that list was still present in the sibling
+`p2-hardware-selection-guide.yaml` five days later**, because F-350 was applied to the file where it
+was noticed and the family was never swept: `64000-ES` ×3 (the Rev C guide documents **#64000**),
+fabricated `P2-EVAL-STD-BREAKOUT` ×2 and `P2-EVAL-MINI-BREAKOUT` ×3 (the parts are **#64029** and
+**#64019**), *"USB-C programming"* ×3 on a board with two **micro-USB** sockets, `127x89mm` /
+`76×51mm` / `38×25mm` against the guides' 3.55×3.55 in / 4×1.4 in / 3.15×1.4 in, and
+*"castellation mounting"* ×2 where the string *castell* appears **nowhere** in the #64019 guide.
+
+**The lesson, and it is the point of the class.** F-350's disposition read as complete because the
+file it was found in was fully repaired **and carries a correction record saying so**. What made it
+incomplete is invisible from that file. **A fabrication that reaches a family of sibling documents
+is one finding with N locations, and a repair record written inside one of them looks identical to a
+finished sweep.** Two consequences worth carrying: a correction record belongs with the **finding**,
+not only in the repaired file; and a finding that names a fabricated value cannot close until the
+sweep has run corpus-wide **and been reported with its total**.
+
+### Change class 4 — the citation read, and the instrument that had to be repaired first (F-399)
+
+This discharges **F-377** and the census's category-1 "409". **721 locators, 83 files, 40 source
+documents, every one opened at its cited line and read.** The census's 424/409 is the same
+population at coarser granularity: this extractor enumerates bare continuation locators separately,
+expands multi-locator tokens, and includes the ~30 citations this release added.
+
+**Two instrument defects, either of which alone would have produced a confidently wrong measurement:**
+
+1. **`str.splitlines()` breaks on FORM FEED.** **117 ingested sources disagree with `grep -n` about
+   their own line count** — `p1-propeller-manual-v1.2-layout-text.txt` by **+398**,
+   `122-32305-PE-Labs-Fundamentals-text.txt` by +232, `pasm2-manual-narrative.txt` by +161,
+   `p2-documentation.txt` by +122. They are PDF captures; the form feeds are page breaks. The
+   citations were written against `grep`/`sed` numbering and a human verifies with `sed -n 'Np'`, so
+   **newline-only is the truth side**. Under `splitlines()` the extractor called **14** citations
+   blank; the true figure is **6**. Eight "defects" were the instrument's own. *Any future tool that
+   resolves a `path:line` citation against these sources must split on `\n` only.*
+2. **A bare continuation locator has no unambiguous owner.** This corpus writes locators on **both**
+   sides of the path they belong to. Nearest-token and preceding-token binding each mis-bind a
+   different set. Where a locator could not be bound without guessing the **citation** was
+   rewritten, not the tool — ambiguity that misleads a tool misleads an agent chasing it. Fixed in
+   both `basic-io.yaml` files and `streamer/pin-capture.yaml`; the surviving `v55:NNNN` shorthand is
+   registered as **F-400** and deliberately not half-swept.
+
+**22 locators repaired across 12 files.** Ten were the F-365 carry-over shape —
+`p2-documentation.txt` numbers attributed to `silicon-doc-text.txt`, in `streamer/pin-capture.yaml`
+and `streamer/pin-selection.yaml` — some landing in range on unrelated content (line 3604 is CORDIC
+example code), some past the end of the file. **The claims were right in every case; only the
+locators were wrong**, which is precisely why the range check reported zero. The other eight were
+found by reading and by nothing else:
+
+| File | cited | actually there | should be |
+|---|---|---|---|
+| `p2an002-cordic-for-real-work.yaml` | `:434`, `:5145`, `:5401` | COGID / COG RAM; the RDLUT and MERGEW encoding tables | `:3304`, `:3315`, `:2054`, `:2291`, `:3413` |
+| `architecture/locks.yaml` | `:1794` for **LOCKRET** | **`into C.`** — a wrapped continuation of the LOCKREL row above it | `:1795` |
+| `architecture/lookup_ram.yaml` | `:1831` as a LUT instruction row | **RDLONG** | `:2061`/`:2063`/`:2065`, with `:1830-1832` correctly labelled as RDLONG's cog/LUT block-transfer note |
+| `streamer/modes-reference.yaml` | `:3653-3654` for the D[16] bit-order flag | `jmp #loop 'loop for another sample set` | `:1456` |
+| `streamer/dds-goertzel.yaml` | `:4062-4095` for S[11:0]/%T; `:4289-4305` for the worked program's longs | the PWM/SMPS smart-pin mode text; Table 34's clocks/bits rows | `:1586-1600`; `:1686-1687` |
+| `architecture/clock_system.yaml` | `:520` | a blank line | `:521` |
+| `edge-standard-module.yaml`, `edge-32mb-module.yaml` | a bare `narrative.txt` | resolves to nothing | the full path; both line numbers were already right |
+| `pin-drive-configuration.yaml` | `complete-tables-reference.md:326-338` | that basename exists under **both** `p2-datasheet/` and `p2-hardware-manual/`, and F-367 established two same-named documents can differ | the full `p2-datasheet/` path |
+
+**A new defect class this pass names: the wrapped table row.** The PASM2 tables in
+`p2-datasheet-text.txt` wrap a long description onto the line **above** its mnemonic, so an
+off-by-one lands on a neighbouring instruction's prose **and still reads like a table row**. That is
+what `:1794` was.
+
+**Two mechanical class-checks now run corpus-wide, both clean after repair.** The carry-over
+detector — compare each `silicon-doc-text.txt` citation's claim against the same line number in the
+superseded capture — returns **zero** across all **222**. The no-shared-anchor detector flagged
+**175 of 721**; all 175 were read individually and all are sound (prose claims citing prose
+legitimately share no mnemonic).
+
+⚠️ **What this does not certify.** It closes *"is the claim supported by the line it cites?"* It says
+nothing about a claim that cites nothing (the Tier-2 population, F-381), and nothing about a claim
+that is simply wrong in a file with no citation defect at all — the **F-390 / F-391 / F-395** class,
+which has no instrument and which this same pass found three more members of. **The delta is not the
+defect boundary, and neither is the citation set.**
+
+---
+
 # PART 2 — By region → file
 
 **All 89 files, each carrying its differential-read verdict.** Regions are ordered by file count as
@@ -1158,168 +1398,6 @@ over-reports — a reworded fact counts as gone — and is a *reading list*, not
 
 ---
 
-## 1.19 The 2026-08-30 pre-release fix pass — 18 files, 3 commits, and the two instruments that had to be fixed first
-
-Three commits: `ca684aac` (steps 1-2), `912100db` (step 3, mechanical half), `9ab0433b` (step 3,
-semantic half). Four files entered the change set — `architecture/hub.yaml`,
-`hardware/p2-hardware-selection-guide.yaml`, `language/spin2/methods/coginit.yaml`,
-`language/spin2/methods/cogspin.yaml` — and fourteen already in it were re-touched. **No file was
-added to or removed from the shipped set.**
-
-### The four files new to the change set
-
-| File | ± (v1.17.0..HEAD) | Verdict | What changed |
-|---|---|---|---|
-| `architecture/hub.yaml` | +42/−2 | stronger | **F-391.** `protection_bit: "Set via HUBSET D[2]"` — W is **D[16]**; D[2] is inside the per-cog debug-enable field, so a HUBSET assembled from the old sentence carries the `%0000` clock-configuration opcode, not `%0010`. Replaced with the full operand map (`%0010_xxxx_xxxx_xxLW_DDDD…`, L=D[17], D[15:0]) and the three worked examples, cited to `silicon-doc-text.txt:2743-2762` and `:2765-2772`. Separately, `state_preservation: "All COG states saved on debug entry"` — the silicon saves `$000..$00F` only, via the `$1F8` ROM routine, **and `debug_interrupt.yaml` already said so**, so this page was contradicting a sibling. The two pages are now linked. |
-| `hardware/p2-hardware-selection-guide.yaml` | +52/−22 | **corrected** | **F-396** — see below. Fabricated part numbers, USB-C on a micro-USB board, three wrong board dimensions, castellations that appear nowhere in the guide, an unsourced VGA resolution ceiling, and **F-397**'s `"5V @ 1A minimum (USB-C or barrel jack)"` / `"50-500mA each"` power block. |
-| `language/spin2/methods/cogspin.yaml` | +28/−2 | **corrected** | **F-390.** `-1` is gone as an input. It is not a synonym for `NEWCOG`. |
-| `language/spin2/methods/coginit.yaml` | +25/−3 | **corrected** | **F-390**, plus the two `_PAIR` symbols the file had never listed. |
-
-### The fourteen re-touched, with their revised totals
-
-`hardware-compatibility-matrix.yaml` **+174/−47** (was +27/−2 — this pass is +147/−45 of it) ·
-`streamer/pin-capture.yaml` **+324/−0** · `streamer/pin-selection.yaml` **+193/−57** ·
-`architecture/clock_system.yaml` **+185/−136** · `architecture/lookup_ram.yaml` **+156/−99** ·
-`architecture/pin-drive-configuration.yaml` **+277/−0** ·
-`hardware/edge-32mb-module.yaml` **+225/−419** · `hardware/edge-standard-module.yaml` **+173/−336** ·
-`language/pasm2/concepts/basic-io.yaml` **+96/−121** ·
-`language/spin2/concepts/basic-io.yaml` **+89/−121** · `architecture/locks.yaml` **+91/−53** ·
-`streamer/modes-reference.yaml` **+49/−9** · `streamer/dds-goertzel.yaml` **+31/−10** ·
-`application-notes/p2an002-cordic-for-real-work.yaml` **+19/−12**.
-
----
-
-### Change class 1 — the census's 19 uncited electrical quantities, sourced or removed (F-397)
-
-All 19 now carry a block-level `source:`. **Tier-2 advisory 32 → 27; Tier 1 stayed at none**, so
-citing two wholly-uncited files exposed no uncited sibling block in either — the F-381 trap was
-checked for, not assumed.
-
-Reading them found **three of the nineteen were wrong**:
-
-- **`"64006A (Control) - ~16mA max (4 LEDs)"`** — **no source anywhere states 16 mA.** The #64006
-  guide gives the Control board four blue LEDs and four push-buttons, each on a **470 Ω series
-  resistor** (`p2-eval-add-on-boards-text.txt:62`, `:74-80`), and no current at all. 16 mA reads as
-  4 × the LED Matrix's 4 mA — a figure borrowed from a different board with different circuitry and
-  presented as this board's maximum. **A derived electrical quantity wearing a data key is the
-  150 mA defect in miniature.**
-- **`"64006H (A/V Breakout) - 80mW audio amplifier"`** filed under `addon_power_requirements.high_power`.
-  80 mW is real (`:328`, *"Amplified Audio Out (80mW)"*) but it is the amplifier's **output** rating.
-  Filed as a power *requirement* it invites a supply budget built from the wrong number.
-  **A correct citation attached to a miscategorised quantity still ships a wrong claim.**
-- **`"5V @ 1A minimum (USB-C or barrel jack)"`** — 1 A appears in no guide, and see class 2 for the
-  connector.
-
-### Change class 2 — three inverted or damaging facts, found by reading (F-395, F-396)
-
-- **`external_power: "5V or 6-9V depending on carrier"`.** **No P2 carrier accepts a wide input.**
-  All three guides state the same requirement verbatim — *"Voltage input requirements: 5 VDC,
-  absolute maximum 5.5 VDC"* — each followed by a boxed *"CAUTION! … do not exceed 5.5 VDC"*. A
-  reader taking the KB at its word applies 9 V to a 5.5 V absolute maximum. This is the
-  `max_current_per_pin: 150mA` shape exactly, and `edge-breadboard-carrier.yaml` had *the same*
-  wide-input claim removed on 2026-08-25 (item 7 of the archived ledger) — **the sweep stopped at
-  that file.**
-- **`addon_support: "none"` / `"No 2x6 expansion headers"`** for the #64029 and #64019, and
-  *"Cannot use 64006-series add-on boards"* under `incompatibilities`. **Every carrier has 2x6
-  accessory headers and takes the #64006 boards** (`edge-breakout-board-narrative.txt:39`,
-  `edge-mini-breakout-narrative.txt:45`, `edge-module-breadboard-narrative.txt:56`), and our own
-  `edge-mini-breakout.yaml:56-58` already said so — **the file contradicted a sibling page**, the
-  F-391 shape. **Nine sites** across five blocks carried the inversion. An agent asked "which board
-  for add-ons?" was told to buy the Eval Board and that two of the three carriers are disqualified:
-  the recommendation wrong and the reason for it fabricated.
-- **`pin_access: "P0-P31, P58-P63 accessible (40 pins)"`** in `edge-standard-module.yaml` and
-  `edge-32mb-module.yaml`. **The range and the count disagree with each other** — P0-P31 + P58-P63
-  is 38. The guide says P56-P63, which is what makes 40. *The file's own arithmetic was the tell,
-  and nothing checks arithmetic.*
-
-Also corrected: the `combinations` table's `pin_access:` was a single bare integer that meant the
-carrier's header count on some rows and the module's free-pin count on others, so P2-EC32MB on a
-full 64-pin carrier read `40`. A pin budget is the product of **two** independently sourced facts —
-what the module frees and what the carrier brings to a header — and both are now stated per row,
-with no derived total. **The unsourced `rating:` values were deliberately left in place**: they
-belong to F-374, whose class boundary is still Stephen's call, and removing six of the thirteen
-would have silently moved that finding's count.
-
-### Change class 3 — F-350's sweep never ran, and the whole fabrication set was still live (F-396)
-
-`p2-hardware-feature-comparison.yaml:159-167` carries a `corrections_applied_2026_08_25` block
-naming exactly what F-350 removed. **Every item on that list was still present in the sibling
-`p2-hardware-selection-guide.yaml` five days later**, because F-350 was applied to the file where it
-was noticed and the family was never swept: `64000-ES` ×3 (the Rev C guide documents **#64000**),
-fabricated `P2-EVAL-STD-BREAKOUT` ×2 and `P2-EVAL-MINI-BREAKOUT` ×3 (the parts are **#64029** and
-**#64019**), *"USB-C programming"* ×3 on a board with two **micro-USB** sockets, `127x89mm` /
-`76×51mm` / `38×25mm` against the guides' 3.55×3.55 in / 4×1.4 in / 3.15×1.4 in, and
-*"castellation mounting"* ×2 where the string *castell* appears **nowhere** in the #64019 guide.
-
-**The lesson, and it is the point of the class.** F-350's disposition read as complete because the
-file it was found in was fully repaired **and carries a correction record saying so**. What made it
-incomplete is invisible from that file. **A fabrication that reaches a family of sibling documents
-is one finding with N locations, and a repair record written inside one of them looks identical to a
-finished sweep.** Two consequences worth carrying: a correction record belongs with the **finding**,
-not only in the repaired file; and a finding that names a fabricated value cannot close until the
-sweep has run corpus-wide **and been reported with its total**.
-
-### Change class 4 — the citation read, and the instrument that had to be repaired first (F-399)
-
-This discharges **F-377** and the census's category-1 "409". **721 locators, 83 files, 40 source
-documents, every one opened at its cited line and read.** The census's 424/409 is the same
-population at coarser granularity: this extractor enumerates bare continuation locators separately,
-expands multi-locator tokens, and includes the ~30 citations this release added.
-
-**Two instrument defects, either of which alone would have produced a confidently wrong measurement:**
-
-1. **`str.splitlines()` breaks on FORM FEED.** **117 ingested sources disagree with `grep -n` about
-   their own line count** — `p1-propeller-manual-v1.2-layout-text.txt` by **+398**,
-   `122-32305-PE-Labs-Fundamentals-text.txt` by +232, `pasm2-manual-narrative.txt` by +161,
-   `p2-documentation.txt` by +122. They are PDF captures; the form feeds are page breaks. The
-   citations were written against `grep`/`sed` numbering and a human verifies with `sed -n 'Np'`, so
-   **newline-only is the truth side**. Under `splitlines()` the extractor called **14** citations
-   blank; the true figure is **6**. Eight "defects" were the instrument's own. *Any future tool that
-   resolves a `path:line` citation against these sources must split on `\n` only.*
-2. **A bare continuation locator has no unambiguous owner.** This corpus writes locators on **both**
-   sides of the path they belong to. Nearest-token and preceding-token binding each mis-bind a
-   different set. Where a locator could not be bound without guessing the **citation** was
-   rewritten, not the tool — ambiguity that misleads a tool misleads an agent chasing it. Fixed in
-   both `basic-io.yaml` files and `streamer/pin-capture.yaml`; the surviving `v55:NNNN` shorthand is
-   registered as **F-400** and deliberately not half-swept.
-
-**22 locators repaired across 12 files.** Ten were the F-365 carry-over shape —
-`p2-documentation.txt` numbers attributed to `silicon-doc-text.txt`, in `streamer/pin-capture.yaml`
-and `streamer/pin-selection.yaml` — some landing in range on unrelated content (line 3604 is CORDIC
-example code), some past the end of the file. **The claims were right in every case; only the
-locators were wrong**, which is precisely why the range check reported zero. The other eight were
-found by reading and by nothing else:
-
-| File | cited | actually there | should be |
-|---|---|---|---|
-| `p2an002-cordic-for-real-work.yaml` | `:434`, `:5145`, `:5401` | COGID / COG RAM; the RDLUT and MERGEW encoding tables | `:3304`, `:3315`, `:2054`, `:2291`, `:3413` |
-| `architecture/locks.yaml` | `:1794` for **LOCKRET** | **`into C.`** — a wrapped continuation of the LOCKREL row above it | `:1795` |
-| `architecture/lookup_ram.yaml` | `:1831` as a LUT instruction row | **RDLONG** | `:2061`/`:2063`/`:2065`, with `:1830-1832` correctly labelled as RDLONG's cog/LUT block-transfer note |
-| `streamer/modes-reference.yaml` | `:3653-3654` for the D[16] bit-order flag | `jmp #loop 'loop for another sample set` | `:1456` |
-| `streamer/dds-goertzel.yaml` | `:4062-4095` for S[11:0]/%T; `:4289-4305` for the worked program's longs | the PWM/SMPS smart-pin mode text; Table 34's clocks/bits rows | `:1586-1600`; `:1686-1687` |
-| `architecture/clock_system.yaml` | `:520` | a blank line | `:521` |
-| `edge-standard-module.yaml`, `edge-32mb-module.yaml` | a bare `narrative.txt` | resolves to nothing | the full path; both line numbers were already right |
-| `pin-drive-configuration.yaml` | `complete-tables-reference.md:326-338` | that basename exists under **both** `p2-datasheet/` and `p2-hardware-manual/`, and F-367 established two same-named documents can differ | the full `p2-datasheet/` path |
-
-**A new defect class this pass names: the wrapped table row.** The PASM2 tables in
-`p2-datasheet-text.txt` wrap a long description onto the line **above** its mnemonic, so an
-off-by-one lands on a neighbouring instruction's prose **and still reads like a table row**. That is
-what `:1794` was.
-
-**Two mechanical class-checks now run corpus-wide, both clean after repair.** The carry-over
-detector — compare each `silicon-doc-text.txt` citation's claim against the same line number in the
-superseded capture — returns **zero** across all **222**. The no-shared-anchor detector flagged
-**175 of 721**; all 175 were read individually and all are sound (prose claims citing prose
-legitimately share no mnemonic).
-
-⚠️ **What this does not certify.** It closes *"is the claim supported by the line it cites?"* It says
-nothing about a claim that cites nothing (the Tier-2 population, F-381), and nothing about a claim
-that is simply wrong in a file with no citation defect at all — the **F-390 / F-391 / F-395** class,
-which has no instrument and which this same pass found three more members of. **The delta is not the
-defect boundary, and neither is the citation set.**
-
----
-
 # Appendix A — Commit legend
 
 The **24 commits that touched `deliverables/ai/P2/**/*.yaml`**, oldest first. (107 commits landed in
@@ -1354,17 +1432,23 @@ documents or manuals.)
 | 24 | `b466a538` | 08-27 | The E-016 sibling sweep found its case: `ADDSX`/`SUBSX` shipping the manual's wrong C-flag sentence while contradicting it in the same file, plus two `SUM*` encoding fields. **F-379**. |
 
 | 25 | `856ef2f2` | 08-29 | The SETXFRQ increment rule (**F-380**) — nine shipped NCO values wrong by one in bit 0 of a 31-bit phase word. §1.18. |
-| 26 | `43e7f8b1` | 08-29 | The compiler-acceptance-range sweep (**F-378**) — five sites, not one. §1.18. |
-| 27 | `79fbbe1e` | 08-29 | The remainder of the 08-29 pass; the ledger's previous derivation baseline. §1.18. |
+| 26 | `9723e482` | 08-29 | `io_pin_timing.yaml` re-anchored to the lines it actually comes from — **F-377 part 2**, the eighth fabricated-provenance file. §1.18. |
+| 27 | `efc683a8` | 08-29 | Compiler acceptance range vs silicon rating, said as two different numbers (**F-378**) — five sites, not one. §1.18. |
 | 28 | `ca684aac` | 08-30 | Sourced the census's 19 hardware quantities and fixed the six wrong facts reading them exposed — **F-395**, **F-396**, **F-397** filed, **F-398** registered unfixed; **F-390** and **F-391** applied. §1.19. |
 | 29 | `912100db` | 08-30 | Every mechanically-broken citation locator repaired, and the first four F-377 mis-points found by reading. Built the extractor the census described but did not ship, after fixing its two defects. §1.19. |
 | 30 | `9ab0433b` | 08-30 | Finished the citation read — **721 of 721** opened at their cited lines. **F-399** filed, **F-400** registered unfixed, **F-377** discharged. §1.19. |
 
-*(Rows 25-27 are the 2026-08-29 pass; the ledger's 2026-08-29 revision described them in §1.18 but
-its Appendix A table stopped at 24. Recorded here so the legend and the count agree.)*
+*(Rows 25-27 are the 2026-08-29 pass; that revision described them in §1.18 but its Appendix A table
+stopped at 24. Recorded here so the legend and the count agree. **Corrected 2026-08-31:** the
+2026-08-30 revision of this table named `43e7f8b1` at row 26 — **no such object exists**, and row 27
+named `79fbbe1e`, which touches no shipped YAML and belongs in the list below, not in the legend.
+Both were written from recollection rather than derived from `git log`, which is the one thing this
+document is not allowed to do; the three hashes above are now read from
+`git log --oneline … -- 'deliverables/ai/P2/**/*.yaml'`. 24 + 3 + 3 = **30**, matching §0.1.)*
 
 **In the range, touching no shipped YAML, and load-bearing for this release:**
-`d756b44c` (the three `p2-hub75-adapter` source renames — half of #20) ·
+`79fbbe1e` (brought this ledger up to the tree it describes, and was its derivation baseline until
+2026-08-30) · `d756b44c` (the three `p2-hub75-adapter` source renames — half of #20) ·
 `02ff61b7` (armed `audit-yaml-duplicate-keys.py`) ·
 `d62544ea` (repaired `audit-register-hygiene.py` so it reads the registers it was reporting clean on)
 · `11ebec54` (regenerated the index **and** its gzip together, the pair F-357 records as having
