@@ -72,7 +72,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Every Spin2 operator and special symbol is unreachable by the token an agent actually reads in source: 0 of 62 are in the index (2026-09-05, codegen findability audit) — F-401
 
-### F-401 — the index harvests four name fields and `operator:`/`symbol:` are not among them, so `+//`, `:=`, `<=>`, `^@`, `??` resolve to nothing — `CONFIRMED`
+### F-401 — the index harvests four name fields and `operator:`/`symbol:` are not among them, so `+//`, `:=`, `<=>`, `^@`, `??` resolve to nothing — `PENDING-VALIDATION`
 
 **Location:** `engineering/tools/generate-p2kb-index.py`, `harvest_aliases_from_yaml()` (the harvester), against `deliverables/ai/P2/language/spin2/operators/` (77 files) and `language/spin2/special-symbols/` (13 files).
 
@@ -85,6 +85,22 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 **Proposed correction.** Add `operator` and `symbol` to `harvest_aliases_from_yaml()` alongside the existing four (+62 tokens). Then `keyword` (36 files), `directive` (24), `register` (17), `concept` (27), `name` (32), `component_name`, `title` (39) — which together cover **246 of the 452 files currently reachable by neither alias nor category**. Nested-name files (`object_metadata.title`/`object_id`, 131 OBEX objects; `quick_byte.*`, 42) need one level of descent and should be judged separately, since OBEX has its own `p2kb_obex_*` retrieval path.
 
 **Scale, for prioritisation.** 452 of 1,133 files (39.9%) are reachable by neither an alias nor a category; 576 are in no category at all. The index's per-file record is `{path, mtime, sha256}` — no title, no description — so there is no content-level retrieval to fall back on. Everything rests on aliases, keys and categories.
+
+**APPLIED 2026-09-05** (`ba24f0f9` harvester + `d55b6c7f` index). Twelve name-bearing scalar fields are now harvested; `group:` was excluded on measurement (11 files, 2 distinct values — collisions, not lookups). Measured in the emitted artifact, against the index it replaced:
+
+| | before | after |
+|---|---|---|
+| pure-symbol names in the index | **0 of 62** | **62 of 62** |
+| files reachable by an alias | 591 (52.2%) | 916 (80.8%) |
+| files reachable by neither alias nor category | 452 (39.9%) | **206 (18.2%)** |
+| alias entries | 2,082 | 2,660 |
+| aliases lost | — | **0** |
+
+F-376's third silent exit-0 is closed in the same function: a harvest failure now returns its reason and the generator refuses to emit rather than reporting success over a file that is present-but-unfindable. Proven with a negative control — a planted malformed YAML gives exit 1, names the file and the parser error, and leaves the existing index byte-identical.
+
+**Why this is `PENDING-VALIDATION` and not `RESOLVED`:** the served index is the published one, so none of this reaches an agent until the set is pushed. The validation owed is a post-publish probe — `p2kb_find("+//")` returning the operator file instead of dumping 59 categories.
+
+**Still open, deliberately out of this pass:** 206 files remain dark. 131 OBEX objects and 42 quick bytes name themselves one level down (`object_metadata.title`, `quick_byte.*`) and OBEX has its own `p2kb_obex_*` route, so it is likely not dark in practice; the residue is ~33 files carrying no name field at all. Reading a nested name is a different change from reading a field that was already there, and it needs its own decision.
 
 **Not introduced by the unpublished delta, and not fixed by it.** Identical at `v1.17.0` and at HEAD: 62 symbols absent in both. The delta moved file-level darkness 461 → 452 (40.8% → 39.9%), which is real but is not this. Related: F-116 (hardware findability, closed — `hardware/` is now 0% dark, 29/29 reachable) and F-376's `except Exception: pass` in the same harvester, which silently drops a malformed file's aliases (task «#339» item 3) — the two touch the same function and should be fixed in one pass.
 
