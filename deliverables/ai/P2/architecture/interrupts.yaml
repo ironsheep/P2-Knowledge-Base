@@ -10,7 +10,9 @@
 #     silicon-doc-text.txt:5302-5315 (ALLOWI/STALLI/TRGINTx/NIXINTx/SETINTx)
 #     and :5478-5486 (RESIx/RETIx alias definitions)
 #   Per-instruction encodings for the RETIx aliases are carried in this knowledge
-#     base's own language/pasm2/reti0..3.yaml
+#     base's own language/pasm2/reti0.yaml, reti1.yaml, reti2.yaml and reti3.yaml
+#     (the RESIx counterparts are resi0.yaml .. resi3.yaml). Written out rather
+#     than abbreviated: "reti0..3.yaml" is not a path any reader can resolve.
 #   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has NO interrupt section; it
 #     carries the IJMPx/IRETx register rows at
 #     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:558-563 and

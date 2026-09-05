@@ -60,8 +60,11 @@ power:
   # voltage that the #64020 guide contradicts; the wrong figure was removed with its
   # whole block and nothing replaced it, leaving the file with no power figure at
   # all. The guide is unambiguous: 5 VDC only, absolute maximum 5.5 VDC. The removed
-  # wording is recorded in engineering/analysis/2026-08-25-yaml-release-change-ledger.md
-  # (item 7) and is deliberately not repeated here.
+  # wording is recorded in
+  # engineering/analysis/archived/2026-08-25-yaml-release-change-ledger.md (item 7)
+  # and is deliberately not repeated here. That ledger was superseded by
+  # 2026-08-27-yaml-release-change-ledger.md and moved to archived/ on the way; this
+  # locator was left pointing at the pre-move path until 2026-09-05.
   source: >-
     64020 P2 Edge Module Breadboard Product Guide v1.2 (Parallax Inc., 2021-01-07),
     "Key Specifications" and the numbered feature descriptions --
