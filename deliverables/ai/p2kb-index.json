@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-08-30T18:52:29.369648",
+    "generated": "2026-09-05T21:24:31.662388",
     "total_entries": 1133,
     "total_categories": 59,
-    "total_aliases": 2082,
-    "multi_target_aliases": 97,
+    "total_aliases": 2660,
+    "multi_target_aliases": 145,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
@@ -693,6 +693,12 @@
     ]
   },
   "aliases": {
+    "!&&": [
+      "p2kbSpin2OpOpNotandand"
+    ],
+    "#": [
+      "p2kbSpin2SymHash"
+    ],
     "#32201": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
@@ -763,6 +769,121 @@
     ],
     "#64014 add-on board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "#>": [
+      "p2kbSpin2OpOpMax"
+    ],
+    "#DEFINE": [
+      "p2kbSpin2Define"
+    ],
+    "#ELSE": [
+      "p2kbSpin2Else"
+    ],
+    "#ELSEIFDEF": [
+      "p2kbSpin2Elseifdef"
+    ],
+    "#ELSEIFNDEF": [
+      "p2kbSpin2Elseifndef"
+    ],
+    "#ENDIF": [
+      "p2kbSpin2Endif"
+    ],
+    "#ERROR": [
+      "p2kbSpin2Error"
+    ],
+    "#IFDEF": [
+      "p2kbSpin2Ifdef"
+    ],
+    "#IFNDEF": [
+      "p2kbSpin2Ifndef"
+    ],
+    "#INCLUDE": [
+      "p2kbSpin2Include"
+    ],
+    "#PRAGMA EXPORTDEF": [
+      "p2kbSpin2PragmaExportdef"
+    ],
+    "#UNDEF": [
+      "p2kbSpin2Undef"
+    ],
+    "#WARN": [
+      "p2kbSpin2Warn"
+    ],
+    "$": [
+      "p2kbSpin2SymDollar"
+    ],
+    "$$": [
+      "p2kbSpin2SymDoubleDollar"
+    ],
+    "%": [
+      "p2kbSpin2SymPercent"
+    ],
+    "&&": [
+      "p2kbSpin2OpOpAndand"
+    ],
+    "*": [
+      "p2kbSpin2OpOpMul"
+    ],
+    "*.": [
+      "p2kbSpin2OpOpMuldot"
+    ],
+    "+": [
+      "p2kbSpin2OpOpAdd"
+    ],
+    "++": [
+      "p2kbSpin2OpOpInc"
+    ],
+    "+.": [
+      "p2kbSpin2OpOpAdddot"
+    ],
+    "+/": [
+      "p2kbSpin2OpOpAdddiv"
+    ],
+    "+//": [
+      "p2kbSpin2OpModuloAdd",
+      "p2kbSpin2OpOpAddmodulo"
+    ],
+    "+<": [
+      "p2kbSpin2OpOpAddlt"
+    ],
+    "+<=": [
+      "p2kbSpin2OpOpAddlteq"
+    ],
+    "+<=>": [
+      "p2kbSpin2OpOpAddlteqgt"
+    ],
+    "+>": [
+      "p2kbSpin2OpOpAddgt"
+    ],
+    "+>=": [
+      "p2kbSpin2OpOpAddgteq"
+    ],
+    "-": [
+      "p2kbSpin2OpOpSub"
+    ],
+    "--": [
+      "p2kbSpin2OpOpDec"
+    ],
+    "-.": [
+      "p2kbSpin2OpOpSubdot"
+    ],
+    ".": [
+      "p2kbSpin2Sym"
+    ],
+    "..": [
+      "p2kbSpin2SymDoubleDot"
+    ],
+    "...": [
+      "p2kbSpin2OpOpLineContinuation"
+    ],
+    "/": [
+      "p2kbSpin2OpOpDiv"
+    ],
+    "/.": [
+      "p2kbSpin2OpOpDivdot"
+    ],
+    "//": [
+      "p2kbSpin2OpOpDivdiv"
     ],
     "16-BIT DAC": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
@@ -860,6 +981,84 @@
     "64032": [
       "p2kbHwHub75AdapterHub75Adapter"
     ],
+    ":": [
+      "p2kbSpin2OpOpColon"
+    ],
+    ":=": [
+      "p2kbSpin2OpOpAssign"
+    ],
+    ":=:": [
+      "p2kbSpin2OpOpSwap"
+    ],
+    "<": [
+      "p2kbSpin2OpOpLt"
+    ],
+    "<#": [
+      "p2kbSpin2OpOpMin"
+    ],
+    "<.": [
+      "p2kbSpin2OpOpLtdot"
+    ],
+    "<<": [
+      "p2kbSpin2OpOpShl"
+    ],
+    "<=": [
+      "p2kbSpin2OpOpLteq"
+    ],
+    "<=.": [
+      "p2kbSpin2OpOpLteqdot"
+    ],
+    "<=>": [
+      "p2kbSpin2OpOpLteqgt"
+    ],
+    "<>": [
+      "p2kbSpin2OpOpLtgt"
+    ],
+    "<>.": [
+      "p2kbSpin2OpOpLtgtdot"
+    ],
+    "<>>": [
+      "p2kbSpin2OpOpLtshr"
+    ],
+    "==": [
+      "p2kbSpin2OpOpEqeq"
+    ],
+    "==.": [
+      "p2kbSpin2OpOpEqeqdot"
+    ],
+    "===": [
+      "p2kbSpin2OpOpEqeqeq"
+    ],
+    ">": [
+      "p2kbSpin2OpOpGt"
+    ],
+    ">.": [
+      "p2kbSpin2OpOpGtdot"
+    ],
+    ">=": [
+      "p2kbSpin2OpOpGteq"
+    ],
+    ">=.": [
+      "p2kbSpin2OpOpGteqdot"
+    ],
+    ">>": [
+      "p2kbSpin2OpOpShr"
+    ],
+    "?": [
+      "p2kbSpin2OpOpQuestion"
+    ],
+    "? :": [
+      "p2kbSpin2OpOpTernary"
+    ],
+    "??": [
+      "p2kbSpin2OpOpRand"
+    ],
+    "@": [
+      "p2kbSpin2SymAt"
+    ],
+    "@@": [
+      "p2kbSpin2SymDoubleAt"
+    ],
     "A INPUT SELECTOR": [
       "p2kbPasm2Wrpin"
     ],
@@ -878,9 +1077,16 @@
     "AAAA field": [
       "p2kbPasm2Wrpin"
     ],
+    "ABORT": [
+      "p2kbSpin2KwABORT"
+    ],
     "ABS": [
       "p2kbPasm2Abs",
-      "p2kbSpin2Abs"
+      "p2kbSpin2Abs",
+      "p2kbSpin2OpOpABS"
+    ],
+    "ABSOLUTE ADDRESS OPERATOR": [
+      "p2kbSpin2SymDoubleAt"
     ],
     "ABSOLUTE VOLTAGE MEASUREMENT": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
@@ -888,8 +1094,29 @@
     "ACCIDENTAL SECOND INSTANCE": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "ACCUMULATOR UP/DOWN COUNTER": [
+      "p2kbArchSmartPin01101ARiseIncDecByB"
+    ],
     "ADC REFERENCE DOMAIN": [
       "p2kbArchPinPowerDomains"
+    ],
+    "ADC SAMPLE/FILTER/CAPTURE - EXTERNAL CLOCK": [
+      "p2kbArchSmartPin11001AdcExternalClock"
+    ],
+    "ADC SAMPLE/FILTER/CAPTURE - INTERNAL CLOCK": [
+      "p2kbArchSmartPin11000AdcInternalClock"
+    ],
+    "ADC SCOPE WITH TRIGGER": [
+      "p2kbArchSmartPin11010AdcScopeTrigger"
+    ],
+    "ADC Sample/Filter/Capture - External Clock": [
+      "p2kbArchSmartPin11001AdcExternalClock"
+    ],
+    "ADC Sample/Filter/Capture - Internal Clock": [
+      "p2kbArchSmartPin11000AdcInternalClock"
+    ],
+    "ADC Scope with Trigger": [
+      "p2kbArchSmartPin11010AdcScopeTrigger"
     ],
     "ADC TO DAC PASSTHROUGH": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
@@ -906,6 +1133,9 @@
     "ADD-ON BOARD COMPATIBILITY": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "ADDBITS": [
+      "p2kbSpin2OpOpADDBITS"
+    ],
     "ADDCT1": [
       "p2kbPasm2Addct1"
     ],
@@ -915,8 +1145,23 @@
     "ADDCT3": [
       "p2kbPasm2Addct3"
     ],
+    "ADDITIONAL PASM2 CONCEPTS FOR COMPLETE COVERAGE": [
+      "p2kbPasm2AdditionalConceptsNeeded"
+    ],
+    "ADDITIONAL_CONCEPTS_NEEDED": [
+      "p2kbPasm2AdditionalConceptsNeeded"
+    ],
+    "ADDPINS": [
+      "p2kbSpin2OpOpADDPINS"
+    ],
     "ADDPIX": [
       "p2kbPasm2Addpix"
+    ],
+    "ADDRESS-OF OPERATOR": [
+      "p2kbSpin2SymAt"
+    ],
+    "ADDRESSING_MODES": [
+      "p2kbPasm2AddressingModes"
     ],
     "ADDS": [
       "p2kbPasm2Adds"
@@ -939,6 +1184,17 @@
     "AKPIN": [
       "p2kbPasm2Akpin",
       "p2kbSpin2Akpin"
+    ],
+    "ALIGNL": [
+      "p2kbPasm2Alignl",
+      "p2kbSpin2AsmAlignl"
+    ],
+    "ALIGNMENT CHECK - MANUAL CATEGORIES VS OUR CONCEPT FILES": [
+      "p2kbPasm2ManualCategoryAlignmentCheck"
+    ],
+    "ALIGNW": [
+      "p2kbPasm2Alignw",
+      "p2kbSpin2AsmAlignw"
     ],
     "ALLOWI": [
       "p2kbPasm2Allowi"
@@ -964,6 +1220,9 @@
     "ALTI": [
       "p2kbPasm2Alti"
     ],
+    "ALTITUDE_LAYERING": [
+      "p2kbArchAltitudeLayering"
+    ],
     "ALTR": [
       "p2kbPasm2Altr"
     ],
@@ -986,13 +1245,20 @@
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "AND": [
-      "p2kbPasm2And"
+      "p2kbPasm2And",
+      "p2kbSpin2OpOpAnd"
     ],
     "ANDN": [
       "p2kbPasm2Andn"
     ],
     "ASMCLK": [
       "p2kbPasm2Asmclk"
+    ],
+    "ASYNCHRONOUS SERIAL RECEIVE": [
+      "p2kbArchSmartPin11111AsyncSerialReceive"
+    ],
+    "ASYNCHRONOUS SERIAL TRANSMIT": [
+      "p2kbArchSmartPin11110AsyncSerialTransmit"
     ],
     "ATOMIC PUBLISH": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -1015,6 +1281,27 @@
     "AUGS": [
       "p2kbPasm2Augs"
     ],
+    "Absolute Address Operator": [
+      "p2kbSpin2SymDoubleAt"
+    ],
+    "Accumulator Up/Down Counter": [
+      "p2kbArchSmartPin01101ARiseIncDecByB"
+    ],
+    "Additional PASM2 Concepts for Complete Coverage": [
+      "p2kbPasm2AdditionalConceptsNeeded"
+    ],
+    "Address-Of Operator": [
+      "p2kbSpin2SymAt"
+    ],
+    "Alignment Check - Manual Categories vs Our Concept Files": [
+      "p2kbPasm2ManualCategoryAlignmentCheck"
+    ],
+    "Asynchronous Serial Receive": [
+      "p2kbArchSmartPin11111AsyncSerialReceive"
+    ],
+    "Asynchronous Serial Transmit": [
+      "p2kbArchSmartPin11110AsyncSerialTransmit"
+    ],
     "B INPUT SELECTOR": [
       "p2kbPasm2Wrpin"
     ],
@@ -1035,6 +1322,9 @@
     ],
     "BINARY ANGLE": [
       "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "BIT MANIPULATION IDIOMS": [
+      "p2kbSpin2BitManipulation"
     ],
     "BITC": [
       "p2kbPasm2Bitc"
@@ -1073,7 +1363,8 @@
       "p2kbPasm2Blnpix"
     ],
     "BMASK": [
-      "p2kbPasm2Bmask"
+      "p2kbPasm2Bmask",
+      "p2kbSpin2OpOpBMASK"
     ],
     "BOARD ADAPTER COMPATIBILITY": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
@@ -1086,6 +1377,21 @@
     ],
     "BOARD SELECTION": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "BOOT_PATTERN_SELECTION": [
+      "p2kbArchBootPatternSelection"
+    ],
+    "BOOT_ROM": [
+      "p2kbArchIndex"
+    ],
+    "BOOT_ROM_CONTENTS": [
+      "p2kbArchBootRomContents"
+    ],
+    "BRANCH ADDRESSING IN PASM2": [
+      "p2kbPasm2BranchAddressing"
+    ],
+    "BRANCH_ADDRESSING": [
+      "p2kbPasm2BranchAddressing"
     ],
     "BREADBOARD ADAPTER": [
       "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
@@ -1109,6 +1415,9 @@
       "p2kbHwAddonControlBoardAddonControlBoard"
     ],
     "BYTE": [
+      "p2kbPasm2Byte",
+      "p2kbSpin2AsmByte",
+      "p2kbSpin2KwBYTE",
       "p2kbSpin2Byte"
     ],
     "BYTECOMP": [
@@ -1117,11 +1426,21 @@
     "BYTEFILL": [
       "p2kbSpin2Bytefill"
     ],
+    "BYTEFIT": [
+      "p2kbPasm2Bytefit",
+      "p2kbSpin2KwBYTEFIT"
+    ],
     "BYTEMOVE": [
       "p2kbSpin2Bytemove"
     ],
     "BYTESWAP": [
       "p2kbSpin2Byteswap"
+    ],
+    "Bit Manipulation Idioms": [
+      "p2kbSpin2BitManipulation"
+    ],
+    "Branch Addressing in PASM2": [
+      "p2kbPasm2BranchAddressing"
     ],
     "CALL": [
       "p2kbPasm2Call",
@@ -1175,8 +1494,14 @@
     "CARTESIAN TO POLAR": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "CASE": [
+      "p2kbSpin2KwCASE"
+    ],
     "CASE OUTLINE": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "CASE_FAST": [
+      "p2kbSpin2KwCASEFAST"
     ],
     "CHARLIEPLEX LED BOARD": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
@@ -1208,6 +1533,9 @@
     "CLICK PIN OFFSETS": [
       "p2kbArchClickModuleIntegration"
     ],
+    "CLICK_MODULE_INTEGRATION": [
+      "p2kbArchClickModuleIntegration"
+    ],
     "CLICK_OFST": [
       "p2kbArchClickModuleIntegration"
     ],
@@ -1225,6 +1553,9 @@
     ],
     "CLOCK_ROUTING": [
       "p2kbArchSpiImplementationGuide"
+    ],
+    "CLOCK_SYSTEM": [
+      "p2kbArchClockSystem"
     ],
     "CMP": [
       "p2kbPasm2Cmp"
@@ -1247,8 +1578,26 @@
     "CMPX": [
       "p2kbPasm2Cmpx"
     ],
+    "COG": [
+      "p2kbArchCog"
+    ],
+    "COG ATTENTION SYSTEM": [
+      "p2kbArchCogAttention"
+    ],
+    "COG Attention System": [
+      "p2kbArchCogAttention"
+    ],
+    "COG MANAGEMENT IDIOMS": [
+      "p2kbSpin2CogOperations"
+    ],
     "COG STACK SIZE": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "COG VS HUB EXECUTION": [
+      "p2kbPasm2CogHubExecution"
+    ],
+    "COG vs HUB Execution": [
+      "p2kbPasm2CogHubExecution"
     ],
     "COGATN": [
       "p2kbPasm2Cogatn",
@@ -1259,6 +1608,9 @@
     ],
     "COGCHK": [
       "p2kbSpin2Cogchk"
+    ],
+    "COGEXEC": [
+      "p2kbPasm2Cogexec"
     ],
     "COGID": [
       "p2kbPasm2Cogid",
@@ -1281,6 +1633,9 @@
     "COMPARE P2 BOARDS": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
     ],
+    "CON": [
+      "p2kbSpin2KwCON"
+    ],
     "CON OVERRIDE FORK": [
       "p2kbSpin2ObjectImageDedup"
     ],
@@ -1299,6 +1654,12 @@
     "CON override syntax": [
       "p2kbSpin2KwOBJ"
     ],
+    "CONDITIONAL EXECUTION": [
+      "p2kbPasm2ConditionalExecution"
+    ],
+    "CONDITIONAL EXECUTION IDIOMS": [
+      "p2kbPasm2IdiomsConditionalExecution"
+    ],
     "CONFIGURABLE OBJECT": [
       "p2kbSpin2ObjectArchetypes"
     ],
@@ -1311,20 +1672,64 @@
     "COOPERATIVE MULTITASKING": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
+    "COOPERATIVE MULTITASKING WITH SPIN2 TASK METHODS": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
     "COOPERATIVE YIELD": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
     "CORDIC": [
+      "p2kbAppNoteP2an002CordicForRealWork",
+      "p2kbArchCordic"
+    ],
+    "CORDIC FOR REAL WORK": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
     "CORDIC PIPELINING": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "CORDIC SOLVER - HARDWARE MATH ACCELERATION": [
+      "p2kbPasm2CordicSolver"
+    ],
+    "CORDIC SOLVER - HARDWARE MATH FUNCTIONS": [
+      "p2kbSpin2CordicSolver"
+    ],
+    "CORDIC Solver - Hardware Math Acceleration": [
+      "p2kbPasm2CordicSolver"
+    ],
+    "CORDIC Solver - Hardware Math Functions": [
+      "p2kbSpin2CordicSolver"
+    ],
+    "CORDIC for Real Work": [
+      "p2kbAppNoteP2an002CordicForRealWork"
+    ],
     "CORDIC pipelining": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "CORDIC_SOLVER": [
+      "p2kbPasm2CordicSolver",
+      "p2kbSpin2CordicSolver"
+    ],
     "COROUTINES": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "COUNT HIGHS OVER PERIODS WITHIN X CLOCKS": [
+      "p2kbArchSmartPin10110CountHighsInXClocks"
+    ],
+    "COUNT PERIODS WITHIN X CLOCK CYCLES": [
+      "p2kbArchSmartPin10111CountPeriodsInXClocks"
+    ],
+    "COUNT TIME OVER PERIODS WITHIN X CLOCKS": [
+      "p2kbArchSmartPin10101CountTicksInXClocks"
+    ],
+    "COUNTER EVENT JUMP INSTRUCTIONS": [
+      "p2kbPasm2CounterEventJumps"
+    ],
+    "COUNTER EVENT POLL INSTRUCTIONS": [
+      "p2kbPasm2CounterEventPolls"
+    ],
+    "COUNTER EVENT WAIT INSTRUCTIONS": [
+      "p2kbPasm2CounterEventWaits"
     ],
     "CRCBIT": [
       "p2kbPasm2Crcbit"
@@ -1337,6 +1742,12 @@
     ],
     "CROSS-COG DATA": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "CROSS-CUTTING FORCES (C1-C5) \u2014 OBJECTS THAT SPAN OR GUARD THE TREE": [
+      "p2kbArchCrossCuttingForces"
+    ],
+    "CROSS_CUTTING_FORCES": [
+      "p2kbArchCrossCuttingForces"
     ],
     "Charlieplex LED board": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
@@ -1362,6 +1773,60 @@
     "Click pin offsets": [
       "p2kbArchClickModuleIntegration"
     ],
+    "Clock_System": [
+      "p2kbArchClockSystem"
+    ],
+    "Cog Management Idioms": [
+      "p2kbSpin2CogOperations"
+    ],
+    "Conditional Execution": [
+      "p2kbPasm2ConditionalExecution"
+    ],
+    "Conditional Execution Idioms": [
+      "p2kbPasm2IdiomsConditionalExecution"
+    ],
+    "Cooperative Multitasking with Spin2 TASK Methods": [
+      "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "Count Highs Over Periods Within X Clocks": [
+      "p2kbArchSmartPin10110CountHighsInXClocks"
+    ],
+    "Count Periods Within X Clock Cycles": [
+      "p2kbArchSmartPin10111CountPeriodsInXClocks"
+    ],
+    "Count Time Over Periods Within X Clocks": [
+      "p2kbArchSmartPin10101CountTicksInXClocks"
+    ],
+    "Counter Event Jump Instructions": [
+      "p2kbPasm2CounterEventJumps"
+    ],
+    "Counter Event Poll Instructions": [
+      "p2kbPasm2CounterEventPolls"
+    ],
+    "Counter Event Wait Instructions": [
+      "p2kbPasm2CounterEventWaits"
+    ],
+    "Cross-Cutting Forces (C1-C5) \u2014 Objects That Span or Guard the Tree": [
+      "p2kbArchCrossCuttingForces"
+    ],
+    "DAC & ANALOG SIGNAL GENERATION": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "DAC & Analog Signal Generation": [
+      "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "DAC 16-BIT WITH PSEUDO-RANDOM DITHER": [
+      "p2kbArchSmartPin00010Dac16bitPseudoRandomDither"
+    ],
+    "DAC 16-BIT WITH PWM DITHER": [
+      "p2kbArchSmartPin00011Dac16bitPwmDither"
+    ],
+    "DAC 16-bit with PWM Dither": [
+      "p2kbArchSmartPin00011Dac16bitPwmDither"
+    ],
+    "DAC 16-bit with Pseudo-Random Dither": [
+      "p2kbArchSmartPin00010Dac16bitPseudoRandomDither"
+    ],
     "DAC CHANNEL ROUTING": [
       "p2kbArchDacRouting"
     ],
@@ -1374,6 +1839,9 @@
     "DAC output": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
+    "DAT": [
+      "p2kbSpin2KwDAT"
+    ],
     "DAT SINGLETON FORK": [
       "p2kbSpin2ObjectImageDedup"
     ],
@@ -1382,6 +1850,12 @@
     ],
     "DATA STRUCTURES": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "DATA STRUCTURES WITH THE NEW LANGUAGE FACILITIES": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "DATA_FLOW_CONTRACTS": [
+      "p2kbArchDataFlowContracts"
     ],
     "DDDD FIELD": [
       "p2kbArchDacRouting"
@@ -1397,13 +1871,17 @@
       "p2kbArchDdsGoertzel"
     ],
     "DEBUG": [
-      "p2kbPasm2Debug"
+      "p2kbPasm2Debug",
+      "p2kbSpin2DbgDebug"
     ],
     "DEBUG BITMAP": [
       "p2kbSpin2Bitmap"
     ],
     "DEBUG FFT": [
       "p2kbSpin2Fft"
+    ],
+    "DEBUG INTERRUPT": [
+      "p2kbArchDebugInterrupt"
     ],
     "DEBUG LOGIC": [
       "p2kbSpin2Logic"
@@ -1422,6 +1900,9 @@
     ],
     "DEBUG SPECTRO": [
       "p2kbSpin2Spectro"
+    ],
+    "DEBUG STRATEGY GUIDE: MANAGING THE 255-RECORD LIMIT": [
+      "p2kbSpin2DbgDebugStrategyGuide"
     ],
     "DEBUG TERM": [
       "p2kbSpin2Term"
@@ -1499,7 +1980,20 @@
       "p2kbPasm2Decmod"
     ],
     "DECOD": [
-      "p2kbPasm2Decod"
+      "p2kbPasm2Decod",
+      "p2kbSpin2OpOpDECOD"
+    ],
+    "DECOMPOSITION METHOD \u2014 FROM MACHINE TO OBJECT SET (THE GENERATIVE THEORY)": [
+      "p2kbArchDecompositionMethod"
+    ],
+    "DECOMPOSITION REASONING LAYER \u2014 GLOSSARY, AUTHORITY-TIER LEGEND, AND REFERENCE CANON": [
+      "p2kbArchDecompositionGlossary"
+    ],
+    "DECOMPOSITION_GLOSSARY": [
+      "p2kbArchDecompositionGlossary"
+    ],
+    "DECOMPOSITION_METHOD": [
+      "p2kbArchDecompositionMethod"
     ],
     "DEPENDENCY INJECTION": [
       "p2kbSpin2MethodPointers"
@@ -1515,6 +2009,12 @@
     ],
     "DIGITAL VIDEO OUT BOARD": [
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
+    ],
+    "DIRA": [
+      "p2kbSpin2RegDira"
+    ],
+    "DIRB": [
+      "p2kbSpin2RegDirb"
     ],
     "DIRC": [
       "p2kbPasm2Dirc"
@@ -1552,6 +2052,10 @@
     "DITHERED DAC": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
+    "DITTO": [
+      "p2kbPasm2Ditto",
+      "p2kbSpin2AsmDitto"
+    ],
     "DJF": [
       "p2kbPasm2Djf"
     ],
@@ -1563,6 +2067,9 @@
     ],
     "DJZ": [
       "p2kbPasm2Djz"
+    ],
+    "DLY": [
+      "p2kbSpin2DbgDly"
     ],
     "DMA ENGINE": [
       "p2kbArchOverview"
@@ -1612,6 +2119,21 @@
     "DVI add-on": [
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
     ],
+    "Data Structures with the New Language Facilities": [
+      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "Debug Interrupt": [
+      "p2kbArchDebugInterrupt"
+    ],
+    "Debug Strategy Guide: Managing the 255-Record Limit": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "Decomposition Method \u2014 From Machine to Object Set (the Generative Theory)": [
+      "p2kbArchDecompositionMethod"
+    ],
+    "Decomposition Reasoning Layer \u2014 Glossary, Authority-Tier Legend, and Reference Canon": [
+      "p2kbArchDecompositionGlossary"
+    ],
     "EDGE BOARD PINOUT": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
@@ -1626,6 +2148,9 @@
     ],
     "EDGE CARRIER BOARD": [
       "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
+    ],
+    "EDGE COUNTER WITH OPTIONAL UP/DOWN": [
+      "p2kbArchSmartPin01110CountAEdgesOptionalBDec"
     ],
     "EDGE LDO GROUP": [
       "p2kbArchPinPowerDomains"
@@ -1645,8 +2170,18 @@
     "EDGE STANDARD BREAKOUT": [
       "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout"
     ],
+    "ELSE": [
+      "p2kbSpin2KwELSE"
+    ],
+    "ELSEIF": [
+      "p2kbSpin2KwELSEIF"
+    ],
+    "ELSEIFNOT": [
+      "p2kbSpin2KwELSEIFNOT"
+    ],
     "ENCOD": [
-      "p2kbPasm2Encod"
+      "p2kbPasm2Encod",
+      "p2kbSpin2OpOpENCOD"
     ],
     "ENDIANL": [
       "p2kbSpin2Endianl"
@@ -1666,11 +2201,32 @@
     "ESP8266 adapter": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
     ],
+    "ESSENTIAL P2 I/O INSTRUCTIONS": [
+      "p2kbExampleSmartPins001BasicIo"
+    ],
+    "EVALUATION VOCABULARY \u2014 HOW TO JUDGE A DECOMPOSITION": [
+      "p2kbArchEvaluationVocabulary"
+    ],
+    "EVALUATION_VOCABULARY": [
+      "p2kbArchEvaluationVocabulary"
+    ],
+    "EVENT AND INTERRUPT CONFIGURATION": [
+      "p2kbPasm2EventInterruptConfig"
+    ],
+    "EVENT SYSTEM": [
+      "p2kbArchEventSystem"
+    ],
+    "EVENT_INTERRUPT_CONFIGURATION": [
+      "p2kbPasm2EventInterruptConfig"
+    ],
     "EXACTLY-ONCE INSTANTIATION": [
       "p2kbSpin2ObjectImageDedup"
     ],
     "EXECF": [
       "p2kbPasm2Execf"
+    ],
+    "EXECUTION_MODES": [
+      "p2kbPasm2ExecutionModes"
     ],
     "EXP": [
       "p2kbSpin2Exp"
@@ -1684,8 +2240,26 @@
     "EXTERNALIZED CONTEXT": [
       "p2kbSpin2OpTypedPointers"
     ],
+    "Edge Counter with Optional Up/Down": [
+      "p2kbArchSmartPin01110CountAEdgesOptionalBDec"
+    ],
     "Edge LDO group": [
       "p2kbArchPinPowerDomains"
+    ],
+    "Essential P2 I/O Instructions": [
+      "p2kbExampleSmartPins001BasicIo"
+    ],
+    "Evaluation Vocabulary \u2014 How to Judge a Decomposition": [
+      "p2kbArchEvaluationVocabulary"
+    ],
+    "Event System": [
+      "p2kbArchEventSystem"
+    ],
+    "Event and Interrupt Configuration": [
+      "p2kbPasm2EventInterruptConfig"
+    ],
+    "FABS": [
+      "p2kbSpin2OpOpFABS"
     ],
     "FBLOCK": [
       "p2kbPasm2Fblock"
@@ -1699,14 +2273,40 @@
     "FGES": [
       "p2kbPasm2Fges"
     ],
+    "FIELD OPERATOR": [
+      "p2kbSpin2OpFIELD"
+    ],
+    "FIELD Operator": [
+      "p2kbSpin2OpFIELD"
+    ],
+    "FIELD POINTER OPERATOR": [
+      "p2kbSpin2SymCaretAt"
+    ],
     "FIELD-ORIENTED MOTOR CONTROL": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
     "FIFO": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "FILE": [
+      "p2kbSpin2AsmFile",
+      "p2kbSpin2KwFILE"
+    ],
+    "FIRST-CONTACT PROCEDURE \u2014 THE ORDERED ROUTINE FOR AN UNSEEN HARDWARE MIX": [
+      "p2kbArchFirstContactProcedure"
+    ],
+    "FIRST_CONTACT_PROCEDURE": [
+      "p2kbArchFirstContactProcedure"
+    ],
+    "FIT": [
+      "p2kbPasm2Fit",
+      "p2kbSpin2AsmFit"
+    ],
     "FIXED-POINT MATH": [
       "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "FLASH LOADER (FLASH_LOADER.SPIN2) \u2014 ANNOTATED REFERENCE CASE STUDY": [
+      "p2kbExampleFlashLoaderCaseStudy"
     ],
     "FLE": [
       "p2kbPasm2Fle"
@@ -1716,6 +2316,9 @@
     ],
     "FLOAT": [
       "p2kbSpin2Float"
+    ],
+    "FLOATING-POINT OPERATIONS": [
+      "p2kbSpin2FloatingPoint"
     ],
     "FLTC": [
       "p2kbPasm2Fltc"
@@ -1744,8 +2347,26 @@
     "FOOTPRINT": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
+    "FORCE 1 \u2014 RESOURCE OWNERSHIP AND TIMING DOMAINS": [
+      "p2kbArchResourceOwnership"
+    ],
+    "FORCE 2 \u2014 THE DATA-FLOW CONTRACT BETWEEN OBJECTS (CROSSED WITH THE THREE PLANES)": [
+      "p2kbArchDataFlowContracts"
+    ],
+    "FORCE 3 \u2014 RATE ADAPTATION ACROSS TIME DOMAINS (+ COOPERATIVE TASKS-IN-A-COG)": [
+      "p2kbArchRateAdaptation"
+    ],
+    "FORCE 4 (EMERGENT) \u2014 ALTITUDE: LAYER BY UNIT CONVERSION AND AXIS OF CHANGE": [
+      "p2kbArchAltitudeLayering"
+    ],
+    "FRAC": [
+      "p2kbSpin2OpOpFRAC"
+    ],
     "FRAMEBUFFER": [
       "p2kbSpin2Bitmap"
+    ],
+    "FREQUENCY / ROTATION / RC-TIMING MEASUREMENT": [
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "FREQUENCY DETECTION": [
       "p2kbArchDdsGoertzel"
@@ -1756,11 +2377,47 @@
     "FREQUENCY MEASUREMENT": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
+    "FROM": [
+      "p2kbSpin2KwFROM"
+    ],
+    "FSQRT": [
+      "p2kbSpin2OpOpFSQRT"
+    ],
     "FTDI FT231X PROGRAMMER": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
     "FTDI FT231X programmer": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "Field Pointer Operator": [
+      "p2kbSpin2SymCaretAt"
+    ],
+    "First-Contact Procedure \u2014 The Ordered Routine for an Unseen Hardware Mix": [
+      "p2kbArchFirstContactProcedure"
+    ],
+    "Flash Loader (flash_loader.spin2) \u2014 Annotated Reference Case Study": [
+      "p2kbExampleFlashLoaderCaseStudy"
+    ],
+    "Floating-Point Operations": [
+      "p2kbSpin2FloatingPoint"
+    ],
+    "Force 1 \u2014 Resource Ownership and Timing Domains": [
+      "p2kbArchResourceOwnership"
+    ],
+    "Force 2 \u2014 The Data-Flow Contract Between Objects (crossed with the Three Planes)": [
+      "p2kbArchDataFlowContracts"
+    ],
+    "Force 3 \u2014 Rate Adaptation Across Time Domains (+ Cooperative Tasks-in-a-Cog)": [
+      "p2kbArchRateAdaptation"
+    ],
+    "Force 4 (emergent) \u2014 Altitude: Layer by Unit Conversion and Axis of Change": [
+      "p2kbArchAltitudeLayering"
+    ],
+    "Frequency / Rotation / RC-Timing Measurement": [
+      "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
+    ],
+    "GATED POSITIVE EDGE COUNTER": [
+      "p2kbArchSmartPin01100CountARiseBHigh"
     ],
     "GETBRK": [
       "p2kbPasm2Getbrk"
@@ -1824,11 +2481,17 @@
     "GUARANTEE ONE INSTANCE": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "Gated Positive Edge Counter": [
+      "p2kbArchSmartPin01100CountARiseBHigh"
+    ],
     "Goertzel": [
       "p2kbArchDdsGoertzel"
     ],
     "Goertzel touch board": [
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
+    ],
+    "HALT AND FAULT RESPONSE IDIOMS": [
+      "p2kbPasm2HaltAndFaultResponse"
     ],
     "HALT AND RESUME TASKS": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
@@ -1843,7 +2506,8 @@
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
     ],
     "HARDWARE LOCKS": [
-      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
+      "p2kbArchLocks"
     ],
     "HARDWARE MATH SOLVER": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -1875,13 +2539,25 @@
     "HOW BIG A STACK": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
+    "HUB": [
+      "p2kbArchHub"
+    ],
+    "HUB FIFO INTERFACE": [
+      "p2kbArchFifo"
+    ],
     "HUB FIFO STREAMING": [
       "p2kbArchOverview"
+    ],
+    "HUB MEMORY ACCESS IDIOMS": [
+      "p2kbPasm2HubMemory"
     ],
     "HUB SHARED DATA": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "HUB75 ADAPTER": [
+      "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "HUB75 Adapter": [
       "p2kbHwHub75AdapterHub75Adapter"
     ],
     "HUB75 LED PANEL ADAPTER": [
@@ -1892,6 +2568,9 @@
     ],
     "HUB75 adapter": [
       "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "HUBEXEC": [
+      "p2kbPasm2Hubexec"
     ],
     "HUBSET": [
       "p2kbArchClockSystem",
@@ -1910,6 +2589,18 @@
     "HYPERRAM HYPERFLASH BOARD": [
       "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
+    "Halt and Fault Response Idioms": [
+      "p2kbPasm2HaltAndFaultResponse"
+    ],
+    "Hardware Locks": [
+      "p2kbArchLocks"
+    ],
+    "Hub FIFO Interface": [
+      "p2kbArchFifo"
+    ],
+    "Hub Memory Access Idioms": [
+      "p2kbPasm2HubMemory"
+    ],
     "HyperFlash add-on": [
       "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
@@ -1918,6 +2609,33 @@
     ],
     "HyperRAM add-on": [
       "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
+    ],
+    "I/O PIN POWER DOMAINS \u2014 SILICON GROUPS OF FOUR, BOARD GROUPS OF EIGHT": [
+      "p2kbArchPinPowerDomains"
+    ],
+    "I/O PIN TIMING": [
+      "p2kbArchIoPinTiming"
+    ],
+    "I/O Pin Power Domains \u2014 Silicon Groups of Four, Board Groups of Eight": [
+      "p2kbArchPinPowerDomains"
+    ],
+    "I/O Pin Timing": [
+      "p2kbArchIoPinTiming"
+    ],
+    "IF": [
+      "p2kbSpin2KwIF"
+    ],
+    "IFNOT": [
+      "p2kbSpin2KwIFNOT"
+    ],
+    "IJMP1": [
+      "p2kbSpin2RegIjmp1"
+    ],
+    "IJMP2": [
+      "p2kbSpin2RegIjmp2"
+    ],
+    "IJMP3": [
+      "p2kbSpin2RegIjmp3"
     ],
     "IJNZ": [
       "p2kbPasm2Ijnz"
@@ -1949,20 +2667,95 @@
     "IN signal semantics": [
       "p2kbArchSmartPins"
     ],
+    "INA": [
+      "p2kbSpin2RegIna"
+    ],
+    "INB": [
+      "p2kbSpin2RegInb"
+    ],
+    "INCLUDE BINARY FILE": [
+      "p2kbSpin2AsmFile"
+    ],
     "INCMOD": [
       "p2kbPasm2Incmod"
+    ],
+    "INLINE PASM2 IN SPIN2 METHODS (REDIRECT STUB)": [
+      "p2kbSpin2InlinePasm2"
+    ],
+    "INLINE_PASM2": [
+      "p2kbSpin2InlinePasm2"
     ],
     "INPUT SELECTOR": [
       "p2kbPasm2Wrpin"
     ],
+    "INSERT BYTE DATA": [
+      "p2kbSpin2AsmByte"
+    ],
+    "INSERT LONG DATA": [
+      "p2kbSpin2AsmLong"
+    ],
+    "INSERT WORD DATA": [
+      "p2kbSpin2AsmWord"
+    ],
+    "INSTRUCTION SKIPPING - SKIP AND SKIPF": [
+      "p2kbPasm2InstructionSkipping"
+    ],
+    "INSTRUCTION_SKIPPING": [
+      "p2kbPasm2InstructionSkipping"
+    ],
     "INSTRUMENTATION ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "INTERRUPT RESUME INSTRUCTIONS": [
+      "p2kbPasm2InterruptResume"
+    ],
+    "INTERRUPT RETURN INSTRUCTIONS": [
+      "p2kbPasm2InterruptReturn"
+    ],
+    "INTERRUPT SYSTEM": [
+      "p2kbArchInterrupts"
+    ],
+    "IRET1": [
+      "p2kbSpin2RegIret1"
+    ],
+    "IRET2": [
+      "p2kbSpin2RegIret2"
+    ],
+    "IRET3": [
+      "p2kbSpin2RegIret3"
     ],
     "ISOLATED SUPPLY DOMAIN": [
       "p2kbArchPinPowerDomains"
     ],
     "ISP_STACK_CHECK": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
+    "Include Binary File": [
+      "p2kbSpin2AsmFile"
+    ],
+    "Inline PASM2 in Spin2 Methods (redirect stub)": [
+      "p2kbSpin2InlinePasm2"
+    ],
+    "Insert Byte Data": [
+      "p2kbSpin2AsmByte"
+    ],
+    "Insert Long Data": [
+      "p2kbSpin2AsmLong"
+    ],
+    "Insert Word Data": [
+      "p2kbSpin2AsmWord"
+    ],
+    "Instruction Skipping - SKIP and SKIPF": [
+      "p2kbPasm2InstructionSkipping"
+    ],
+    "Interrupt Resume Instructions": [
+      "p2kbPasm2InterruptResume"
+    ],
+    "Interrupt Return Instructions": [
+      "p2kbPasm2InterruptReturn"
+    ],
+    "Interrupt System": [
+      "p2kbArchInterrupts"
     ],
     "JATN": [
       "p2kbPasm2Jatn"
@@ -2036,6 +2829,12 @@
     "JNXRO": [
       "p2kbPasm2Jnxro"
     ],
+    "JOHNNY MAC COMPLETE SPIN PROGRAMMING STANDARD": [
+      "p2kbSpin2JohnnyMacDocumentationStyle"
+    ],
+    "JOHNNY-MAC-DOCUMENTATION-STYLE": [
+      "p2kbSpin2JohnnyMacDocumentationStyle"
+    ],
     "JPAT": [
       "p2kbPasm2Jpat"
     ],
@@ -2065,6 +2864,12 @@
     ],
     "JXRO": [
       "p2kbPasm2Jxro"
+    ],
+    "Johnny Mac Complete Spin Programming Standard": [
+      "p2kbSpin2JohnnyMacDocumentationStyle"
+    ],
+    "LABELS": [
+      "p2kbPasm2Labels"
     ],
     "LAND PATTERN": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
@@ -2098,6 +2903,9 @@
     ],
     "LED panel interface": [
       "p2kbHwHub75AdapterHub75Adapter"
+    ],
+    "LEVEL-SENSITIVE HIGH COUNTER": [
+      "p2kbArchSmartPin01111CountHighsOptionalDec"
     ],
     "LIGHT TO FREQUENCY": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
@@ -2163,7 +2971,13 @@
       "p2kbSpin2Logic"
     ],
     "LONG": [
+      "p2kbPasm2Long",
+      "p2kbSpin2AsmLong",
+      "p2kbSpin2KwLONG",
       "p2kbSpin2Long"
+    ],
+    "LONG REPOSITORY (NON-DAC) / DAC NOISE (DAC MODE)": [
+      "p2kbArchSmartPin00001LongRepositoryOrDacNoise"
     ],
     "LONGCOMP": [
       "p2kbSpin2Longcomp"
@@ -2178,16 +2992,27 @@
       "p2kbSpin2Longswap"
     ],
     "LOOKDOWN": [
+      "p2kbSpin2KwLOOKDOWN",
       "p2kbSpin2Lookdown"
     ],
     "LOOKDOWNZ": [
+      "p2kbSpin2KwLOOKDOWNZ",
       "p2kbSpin2Lookdownz"
     ],
     "LOOKUP": [
+      "p2kbSpin2KwLOOKUP",
       "p2kbSpin2Lookup"
     ],
+    "LOOKUP RAM (LUT)": [
+      "p2kbArchLookupRam"
+    ],
     "LOOKUPZ": [
+      "p2kbSpin2KwLOOKUPZ",
       "p2kbSpin2Lookupz"
+    ],
+    "LOOP CONTROL IDIOMS": [
+      "p2kbPasm2LoopControl",
+      "p2kbSpin2LoopPatterns"
     ],
     "LSTRING": [
       "p2kbSpin2Lstring"
@@ -2200,8 +3025,21 @@
       "p2kbPasm2Rdlut",
       "p2kbPasm2Wrlut"
     ],
+    "Level-Sensitive High Counter": [
+      "p2kbArchSmartPin01111CountHighsOptionalDec"
+    ],
     "Lissajous": [
       "p2kbSpin2ScopeXy"
+    ],
+    "Long Repository (non-DAC) / DAC Noise (DAC mode)": [
+      "p2kbArchSmartPin00001LongRepositoryOrDacNoise"
+    ],
+    "Lookup RAM (LUT)": [
+      "p2kbArchLookupRam"
+    ],
+    "Loop Control Idioms": [
+      "p2kbPasm2LoopControl",
+      "p2kbSpin2LoopPatterns"
     ],
     "M FIELD": [
       "p2kbArchPinDriveConfiguration"
@@ -2212,6 +3050,9 @@
     "MAILBOX": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "MANUAL_CATEGORY_ALIGNMENT_CHECK": [
+      "p2kbPasm2ManualCategoryAlignmentCheck"
+    ],
     "MEASURING STACK SPACE": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
@@ -2220,6 +3061,9 @@
     ],
     "MEMBER BITFIELDS": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "MEMORY ACCESS IDIOMS": [
+      "p2kbSpin2MemoryAccess"
     ],
     "MERGEB": [
       "p2kbPasm2Mergeb"
@@ -2261,6 +3105,9 @@
       "p2kbHwAddonClickAdapterAddonClickAdapter"
     ],
     "MIKROELEKTRONIKA CLICK": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "MIKROELEKTRONIKA CLICK MODULE INTEGRATION PATTERNS": [
       "p2kbArchClickModuleIntegration"
     ],
     "MINI BREAKOUT BOARD": [
@@ -2312,11 +3159,20 @@
     "MULTI-BUS FORKING": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "MULTI-COG SYNCHRONIZATION AND COORDINATION": [
+      "p2kbPasm2MultiCogSynchronization"
+    ],
     "MULTI-WRITER QUEUE": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "MULTIPLE TASKS ONE COG": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "MULTI_COG_SYNCHRONIZATION": [
+      "p2kbPasm2MultiCogSynchronization"
+    ],
+    "MULTI_RESOURCE_MANAGEMENT": [
+      "p2kbArchMultiResourceManagement"
     ],
     "MUSIC KEYBOARD": [
       "p2kbSpin2Midi"
@@ -2342,17 +3198,41 @@
     "MUXZ": [
       "p2kbPasm2Muxz"
     ],
+    "Memory Access Idioms": [
+      "p2kbSpin2MemoryAccess"
+    ],
+    "Method Pointers": [
+      "p2kbSpin2MethodPointers"
+    ],
     "MikroE Click adapter": [
       "p2kbHwAddonClickAdapterAddonClickAdapter"
     ],
     "MikroElektronika Click": [
       "p2kbArchClickModuleIntegration"
     ],
+    "MikroElektronika Click Module Integration Patterns": [
+      "p2kbArchClickModuleIntegration"
+    ],
+    "Multi-COG Synchronization and Coordination": [
+      "p2kbPasm2MultiCogSynchronization"
+    ],
     "NAMELESS STRUCT MEMBER": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "NAN": [
       "p2kbSpin2Nan"
+    ],
+    "NCO DUTY (VARIABLE DUTY CYCLE)": [
+      "p2kbArchSmartPin00111NcoDuty"
+    ],
+    "NCO Duty (Variable Duty Cycle)": [
+      "p2kbArchSmartPin00111NcoDuty"
+    ],
+    "NCO FREQUENCY (NUMERICALLY CONTROLLED OSCILLATOR)": [
+      "p2kbArchSmartPin00110NcoFrequency"
+    ],
+    "NCO Frequency (Numerically Controlled Oscillator)": [
+      "p2kbArchSmartPin00110NcoFrequency"
     ],
     "NCO ROLLOVER": [
       "p2kbArchNcoTiming"
@@ -2384,6 +3264,9 @@
     "NEGNZ": [
       "p2kbPasm2Negnz"
     ],
+    "NEGX": [
+      "p2kbPasm2Negx"
+    ],
     "NEGZ": [
       "p2kbPasm2Negz"
     ],
@@ -2400,6 +3283,9 @@
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Newtask"
     ],
+    "NEXT": [
+      "p2kbSpin2KwNEXT"
+    ],
     "NIXINT1": [
       "p2kbPasm2Nixint1"
     ],
@@ -2412,14 +3298,24 @@
     "NOP": [
       "p2kbPasm2Nop"
     ],
+    "NORMAL I/O (SMART PIN OFF)": [
+      "p2kbArchSmartPin00000NormalMode"
+    ],
     "NOT": [
-      "p2kbPasm2Not"
+      "p2kbPasm2Not",
+      "p2kbSpin2OpOpNot"
     ],
     "NOTE DISPLAY": [
       "p2kbSpin2Midi"
     ],
     "NOTE VELOCITY": [
       "p2kbSpin2Midi"
+    ],
+    "Normal I/O (Smart Pin OFF)": [
+      "p2kbArchSmartPin00000NormalMode"
+    ],
+    "OBJ": [
+      "p2kbSpin2KwOBJ"
     ],
     "OBJ BLOCK": [
       "p2kbSpin2KwOBJ"
@@ -2436,6 +3332,9 @@
     "OBJECT IMAGE DEDUP": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "OBJECT IMAGE DEDUPLICATION": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
     "OBJECT INSTANCES": [
       "p2kbSpin2KwOBJ"
     ],
@@ -2450,16 +3349,39 @@
       "p2kbArchSharedBusBroker"
     ],
     "ONES": [
-      "p2kbPasm2Ones"
+      "p2kbPasm2Ones",
+      "p2kbSpin2OpOpONES"
     ],
     "OPEN DRAIN": [
       "p2kbArchPinDriveConfiguration"
     ],
     "OR": [
-      "p2kbPasm2Or"
+      "p2kbPasm2Or",
+      "p2kbSpin2OpOpOr"
+    ],
+    "ORG": [
+      "p2kbPasm2Org",
+      "p2kbSpin2AsmOrg"
+    ],
+    "ORGF": [
+      "p2kbPasm2Orgf",
+      "p2kbSpin2AsmOrgf"
+    ],
+    "ORGH": [
+      "p2kbPasm2Orgh",
+      "p2kbSpin2AsmOrgh"
     ],
     "OSCILLOSCOPE": [
       "p2kbSpin2Scope"
+    ],
+    "OTHER": [
+      "p2kbSpin2KwOTHER"
+    ],
+    "OUTA": [
+      "p2kbSpin2RegOuta"
+    ],
+    "OUTB": [
+      "p2kbSpin2RegOutb"
     ],
     "OUTC": [
       "p2kbPasm2Outc"
@@ -2491,6 +3413,12 @@
     "OVERRIDE FORWARDING": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "Object Archetypes": [
+      "p2kbSpin2ObjectArchetypes"
+    ],
+    "Object Image Deduplication": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
     "P1 CHARACTER SET": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
     ],
@@ -2502,6 +3430,24 @@
     ],
     "P1 character set": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P1_ROM_FONT": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P1_ROM_Font": [
+      "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "P2 ADDRESSING MODEL": [
+      "p2kbSpin2Addressing"
+    ],
+    "P2 ARCHITECTURE MENTAL MODEL FOR CODE-GENERATING AGENTS": [
+      "p2kbArchP2ArchitectureMentalModel"
+    ],
+    "P2 Addressing Model": [
+      "p2kbSpin2Addressing"
+    ],
+    "P2 Architecture Mental Model for Code-Generating Agents": [
+      "p2kbArchP2ArchitectureMentalModel"
     ],
     "P2 BOARD FEATURES TABLE": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
@@ -2566,6 +3512,9 @@
     "P2 EVALUATION BOARD": [
       "p2kbHwP2EvalBoardP2EvalBoard"
     ],
+    "P2 EXECUTION MODES - REGISTER, LOOKUP, AND HUB": [
+      "p2kbPasm2ExecutionModes"
+    ],
     "P2 Edge 32MB Module": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
@@ -2617,17 +3566,32 @@
     "P2 Eval Serial Host Add-on Board": [
       "p2kbHwAddonSerialHostAddonSerialHost"
     ],
+    "P2 Execution Modes - Register, Lookup, and Hub": [
+      "p2kbPasm2ExecutionModes"
+    ],
     "P2 HARDWARE BUYING GUIDE": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
     "P2 HARDWARE ECOSYSTEM": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "P2 HARDWARE FEATURE COMPARISON TABLE": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "P2 HARDWARE SELECTION GUIDE": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
     "P2 HD AUDIO ADD-ON SET": [
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
     "P2 HD Audio Add-on Set": [
       "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "P2 Hardware Feature Comparison Table": [
+      "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
+    ],
+    "P2 Hardware Selection Guide": [
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
     "P2 MICROSD ADD-ON BOARD": [
       "p2kbHwAddonMicrosdAddonMicrosd"
@@ -2640,6 +3604,18 @@
     ],
     "P2 RTC Add-on Board": [
       "p2kbHwAddonRtcAddonRtc"
+    ],
+    "P2 SOURCE FILE ORGANIZATION STANDARD": [
+      "p2kbSpin2P2SourceFileOrganizationStandard"
+    ],
+    "P2 STACK OPERATIONS": [
+      "p2kbPasm2StackOperations"
+    ],
+    "P2 Source File Organization Standard": [
+      "p2kbSpin2P2SourceFileOrganizationStandard"
+    ],
+    "P2 Stack Operations": [
+      "p2kbPasm2StackOperations"
     ],
     "P2 TO MIKROBUS CLICK ADAPTER": [
       "p2kbHwAddonClickAdapterAddonClickAdapter"
@@ -2695,11 +3671,32 @@
     "P2-ES Eval HyperRAM & HyperFlash Add-on Board": [
       "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash"
     ],
+    "P2-SOURCE-FILE-ORGANIZATION-STANDARD": [
+      "p2kbSpin2P2SourceFileOrganizationStandard"
+    ],
+    "P2X8C4M64P PACKAGE AND MECHANICAL": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "P2X8C4M64P Package and Mechanical": [
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "P2_ARCHITECTURE_MENTAL_MODEL": [
+      "p2kbArchP2ArchitectureMentalModel"
+    ],
+    "P2_MONITOR": [
+      "p2kbArchP2Monitor"
+    ],
+    "P2_Monitor": [
+      "p2kbArchP2Monitor"
+    ],
     "P8X32A FONT": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
     ],
     "P8X32A font": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
+    ],
+    "PA": [
+      "p2kbSpin2RegPa"
     ],
     "PACKAGE": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
@@ -2722,6 +3719,54 @@
     "PARK TRANSFORM": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "PASM2 ADDRESSING MODES": [
+      "p2kbPasm2AddressingModes"
+    ],
+    "PASM2 Addressing Modes": [
+      "p2kbPasm2AddressingModes"
+    ],
+    "PASM2 BASIC I/O - DIGITAL PIN CONTROL": [
+      "p2kbPasm2BasicIo"
+    ],
+    "PASM2 Basic I/O - Digital Pin Control": [
+      "p2kbPasm2BasicIo"
+    ],
+    "PASM2 GETTING STARTED - CORE ASSEMBLY ESSENTIALS": [
+      "p2kbGuidePasm2GettingStarted"
+    ],
+    "PASM2 Getting Started - Core Assembly Essentials": [
+      "p2kbGuidePasm2GettingStarted"
+    ],
+    "PASM2 LABEL RULES AND SYNTAX": [
+      "p2kbLanguagePasmLabels"
+    ],
+    "PASM2 LABELS AND SYMBOL SCOPING": [
+      "p2kbPasm2Labels"
+    ],
+    "PASM2 Label Rules and Syntax": [
+      "p2kbLanguagePasmLabels"
+    ],
+    "PASM2 Labels and Symbol Scoping": [
+      "p2kbPasm2Labels"
+    ],
+    "PASM2 SPECIAL PURPOSE REGISTERS": [
+      "p2kbPasm2SpecialRegisters"
+    ],
+    "PASM2 Special Purpose Registers": [
+      "p2kbPasm2SpecialRegisters"
+    ],
+    "PASM2-BASIC-IO": [
+      "p2kbPasm2BasicIo"
+    ],
+    "PASM2-GETTING-STARTED": [
+      "p2kbGuidePasm2GettingStarted"
+    ],
+    "PASM2_IDIOMS": [
+      "p2kbPasm2Index"
+    ],
+    "PB": [
+      "p2kbSpin2RegPb"
+    ],
     "PCB FOOTPRINT": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
@@ -2734,6 +3779,12 @@
     "PCF8523 board": [
       "p2kbHwAddonRtcAddonRtc"
     ],
+    "PC_KEY": [
+      "p2kbSpin2DbgPcKey"
+    ],
+    "PC_MOUSE": [
+      "p2kbSpin2DbgPcMouse"
+    ],
     "PER-COG MAILBOX": [
       "p2kbArchSharedBusBroker"
     ],
@@ -2743,11 +3794,17 @@
     "PERIOD MEASUREMENT": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
+    "PERIOD TIME ACCUMULATOR": [
+      "p2kbArchSmartPin10011CountTimeXPeriods"
+    ],
     "PHASE PLOT": [
       "p2kbSpin2ScopeXy"
     ],
     "PHOTOCELL READER": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
+    ],
+    "PI": [
+      "p2kbPasm2Pi"
     ],
     "PIANO KEYBOARD": [
       "p2kbSpin2Midi"
@@ -2761,11 +3818,17 @@
     "PIN CAPTURE": [
       "p2kbArchPinCapture"
     ],
+    "PIN CONTROL IDIOMS": [
+      "p2kbPasm2PinControl"
+    ],
     "PIN DRIVE CONFIGURATION": [
       "p2kbArchPinDriveConfiguration"
     ],
     "PIN GROUP": [
       "p2kbArchPinSelection"
+    ],
+    "PIN OPERATIONS IDIOMS": [
+      "p2kbSpin2PinOperations"
     ],
     "PIN PITCH": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
@@ -2827,6 +3890,9 @@
     "PIN_OUTPUT_HIERARCHY": [
       "p2kbArchSmartPins"
     ],
+    "PIN_POWER_DOMAINS": [
+      "p2kbArchPinPowerDomains"
+    ],
     "PLL": [
       "p2kbArchClockSystem"
     ],
@@ -2835,6 +3901,12 @@
     ],
     "PLUGGABLE METHOD": [
       "p2kbSpin2MethodPointers"
+    ],
+    "PNUT-TS COMPILER USAGE GUIDE": [
+      "p2kbToolsPnutTsCompiler"
+    ],
+    "PNut-TS Compiler Usage Guide": [
+      "p2kbToolsPnutTsCompiler"
     ],
     "POINTER TO STRUCT": [
       "p2kbSpin2OpTypedPointers"
@@ -2907,6 +3979,12 @@
     "POPB": [
       "p2kbPasm2Popb"
     ],
+    "POSX": [
+      "p2kbPasm2Posx"
+    ],
+    "POW": [
+      "p2kbSpin2OpOpPOW"
+    ],
     "POWER GROUP OF 4": [
       "p2kbArchPinPowerDomains"
     ],
@@ -2915,6 +3993,9 @@
     ],
     "PPP FIELD": [
       "p2kbArchPinSelection"
+    ],
+    "PRI": [
+      "p2kbSpin2KwPRI"
     ],
     "PROP PLUG": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
@@ -2958,6 +4039,15 @@
     "PSRAM edge module": [
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
+    "PTRA": [
+      "p2kbSpin2RegPtra"
+    ],
+    "PTRB": [
+      "p2kbSpin2RegPtrb"
+    ],
+    "PUB": [
+      "p2kbSpin2KwPUB"
+    ],
     "PULL-DOWN": [
       "p2kbArchPinDriveConfiguration"
     ],
@@ -2970,6 +4060,9 @@
     "PULSE WIDTH MEASUREMENT": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
+    "PULSE/CYCLE OUTPUT": [
+      "p2kbArchSmartPin00100PulseCycleOutput"
+    ],
     "PUSH": [
       "p2kbPasm2Push"
     ],
@@ -2981,6 +4074,24 @@
     ],
     "PWM DITHER": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "PWM SAWTOOTH WAVE OUTPUT": [
+      "p2kbArchSmartPin01001PwmSawtooth"
+    ],
+    "PWM SWITCH-MODE POWER SUPPLY": [
+      "p2kbArchSmartPin01010PwmSmps"
+    ],
+    "PWM Sawtooth Wave Output": [
+      "p2kbArchSmartPin01001PwmSawtooth"
+    ],
+    "PWM Switch-Mode Power Supply": [
+      "p2kbArchSmartPin01010PwmSmps"
+    ],
+    "PWM TRIANGLE WAVE OUTPUT": [
+      "p2kbArchSmartPin01000PwmTriangle"
+    ],
+    "PWM Triangle Wave Output": [
+      "p2kbArchSmartPin01000PwmTriangle"
     ],
     "PWM dither": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
@@ -3353,6 +4464,18 @@
     "Park transform": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "Period Time Accumulator": [
+      "p2kbArchSmartPin10011CountTimeXPeriods"
+    ],
+    "Pin Control Idioms": [
+      "p2kbPasm2PinControl"
+    ],
+    "Pin Operations Idioms": [
+      "p2kbSpin2PinOperations"
+    ],
+    "Pin_Drive_Configuration": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "Prop Plug": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
@@ -3365,6 +4488,9 @@
     "Propeller programming adapter": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
+    "Pulse/Cycle Output": [
+      "p2kbArchSmartPin00100PulseCycleOutput"
+    ],
     "QCOS": [
       "p2kbSpin2Qcos"
     ],
@@ -3373,14 +4499,16 @@
     ],
     "QEXP": [
       "p2kbPasm2Qexp",
-      "p2kbSpin2Qexp"
+      "p2kbSpin2Qexp",
+      "p2kbSpin2OpOpQEXP"
     ],
     "QFRAC": [
       "p2kbPasm2Qfrac"
     ],
     "QLOG": [
       "p2kbPasm2Qlog",
-      "p2kbSpin2Qlog"
+      "p2kbSpin2Qlog",
+      "p2kbSpin2OpOpQLOG"
     ],
     "QMUL": [
       "p2kbPasm2Qmul"
@@ -3397,14 +4525,29 @@
     "QUADRATURE ENCODER": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
+    "QUADRATURE ENCODER INPUT": [
+      "p2kbArchSmartPin01011QuadratureEncoder"
+    ],
     "QUADRATURE KNOB": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "QUEUE": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "QUIT": [
+      "p2kbSpin2KwQUIT"
+    ],
     "QVECTOR": [
       "p2kbPasm2Qvector"
+    ],
+    "Quadrature Encoder Input": [
+      "p2kbArchSmartPin01011QuadratureEncoder"
+    ],
+    "RANDOM NUMBER GENERATION": [
+      "p2kbSpin2RandomGeneration"
+    ],
+    "RATE_ADAPTATION": [
+      "p2kbArchRateAdaptation"
     ],
     "RATIOMETRIC ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
@@ -3473,6 +4616,9 @@
     "READ ANALOG VOLTAGE NO EXTERNAL ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
+    "READING BUTTON INPUT WITH INA REGISTER": [
+      "p2kbExampleSmartPins002ButtonReading"
+    ],
     "REAL TIME CLOCK CALENDAR": [
       "p2kbHwAddonRtcAddonRtc"
     ],
@@ -3494,6 +4640,18 @@
     "REGEXEC": [
       "p2kbSpin2Regexec"
     ],
+    "REGISTER ADDRESS OPERATOR": [
+      "p2kbSpin2SymHash"
+    ],
+    "REGISTER INDIRECTION - ALTX INSTRUCTIONS": [
+      "p2kbPasm2RegisterIndirection"
+    ],
+    "REGISTER OPERATION IDIOMS": [
+      "p2kbPasm2RegisterOperations"
+    ],
+    "REGISTER_INDIRECTION": [
+      "p2kbPasm2RegisterIndirection"
+    ],
     "REGLOAD": [
       "p2kbSpin2Regload"
     ],
@@ -3502,6 +4660,25 @@
     ],
     "REP": [
       "p2kbPasm2Rep"
+    ],
+    "REP - ZERO-OVERHEAD HARDWARE LOOPS": [
+      "p2kbPasm2RepInstruction"
+    ],
+    "REP - Zero-Overhead Hardware Loops": [
+      "p2kbPasm2RepInstruction"
+    ],
+    "REPEAT": [
+      "p2kbSpin2KwREPEAT"
+    ],
+    "REPLICATING ONE OBJECT TREE ONTO N IDENTICAL SHARED BUSES": [
+      "p2kbArchSharedBusReplication"
+    ],
+    "REP_INSTRUCTION": [
+      "p2kbPasm2RepInstruction"
+    ],
+    "RES": [
+      "p2kbPasm2Res",
+      "p2kbSpin2AsmRes"
     ],
     "RESI0": [
       "p2kbPasm2Resi0"
@@ -3517,6 +4694,12 @@
     ],
     "RESIDENT ARBITER COG": [
       "p2kbArchSharedBusBroker"
+    ],
+    "RESOURCE_BUDGET": [
+      "p2kbArchResourceBudget"
+    ],
+    "RESOURCE_OWNERSHIP": [
+      "p2kbArchResourceOwnership"
     ],
     "RESUME TASK": [
       "p2kbSpin2Taskcont"
@@ -3542,11 +4725,15 @@
     "RETI3": [
       "p2kbPasm2Reti3"
     ],
+    "RETURN": [
+      "p2kbSpin2KwRETURN"
+    ],
     "RETURN FROM SUBROUTINE": [
       "p2kbPasm2Ret"
     ],
     "REV": [
-      "p2kbPasm2Rev"
+      "p2kbPasm2Rev",
+      "p2kbSpin2OpOpREV"
     ],
     "RFBYTE": [
       "p2kbPasm2Rfbyte"
@@ -3582,7 +4769,8 @@
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "ROL": [
-      "p2kbPasm2Rol"
+      "p2kbPasm2Rol",
+      "p2kbSpin2OpOpROL"
     ],
     "ROLBYTE": [
       "p2kbPasm2Rolbyte"
@@ -3600,7 +4788,8 @@
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
     ],
     "ROR": [
-      "p2kbPasm2Ror"
+      "p2kbPasm2Ror",
+      "p2kbSpin2OpOpROR"
     ],
     "ROTARY ENCODER": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
@@ -3630,6 +4819,24 @@
     "RTC add-on": [
       "p2kbHwAddonRtcAddonRtc"
     ],
+    "Random Number Generation": [
+      "p2kbSpin2RandomGeneration"
+    ],
+    "Reading Button Input with INA Register": [
+      "p2kbExampleSmartPins002ButtonReading"
+    ],
+    "Register Address Operator": [
+      "p2kbSpin2SymHash"
+    ],
+    "Register Indirection - ALTx Instructions": [
+      "p2kbPasm2RegisterIndirection"
+    ],
+    "Register Operation Idioms": [
+      "p2kbPasm2RegisterOperations"
+    ],
+    "Replicating One Object Tree onto N Identical Shared Buses": [
+      "p2kbArchSharedBusReplication"
+    ],
     "SAL": [
       "p2kbPasm2Sal"
     ],
@@ -3640,19 +4847,25 @@
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "SAR": [
-      "p2kbPasm2Sar"
+      "p2kbPasm2Sar",
+      "p2kbSpin2OpOpSAR"
     ],
     "SCA": [
-      "p2kbPasm2Sca"
+      "p2kbPasm2Sca",
+      "p2kbSpin2OpOpSCA"
     ],
     "SCAS": [
-      "p2kbPasm2Scas"
+      "p2kbPasm2Scas",
+      "p2kbSpin2OpOpSCAS"
     ],
     "SCOPE": [
       "p2kbSpin2Scope"
     ],
     "SCOPE_XY": [
       "p2kbSpin2ScopeXy"
+    ],
+    "SCRATCH STORAGE IDIOMS": [
+      "p2kbPasm2ScratchStorage"
     ],
     "SD CARD ADAPTER": [
       "p2kbHwAddonMicrosdAddonMicrosd"
@@ -3665,6 +4878,18 @@
     ],
     "SD card add-on": [
       "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "SD_CARD_BOOT": [
+      "p2kbArchSdCardBoot"
+    ],
+    "SELECTOR EVENT JUMP INSTRUCTIONS": [
+      "p2kbPasm2SelectorEventJumps"
+    ],
+    "SELECTOR EVENT WAIT INSTRUCTIONS": [
+      "p2kbPasm2SelectorEventWaits"
+    ],
+    "SELF-MODIFYING CODE IDIOMS": [
+      "p2kbPasm2SelfModifyingCode"
     ],
     "SEND": [
       "p2kbSpin2Send"
@@ -3695,6 +4920,9 @@
     ],
     "SERIAL TERMINAL": [
       "p2kbSpin2Term"
+    ],
+    "SERIAL_LOADER": [
+      "p2kbArchSerialLoader"
     ],
     "SETBYTE": [
       "p2kbPasm2Setbyte"
@@ -3747,8 +4975,17 @@
     "SETQ": [
       "p2kbPasm2Setq"
     ],
+    "SETQ/SETQ2 BLOCK OPERATIONS": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "SETQ/SETQ2 Block Operations": [
+      "p2kbPasm2SetqBlockOps"
+    ],
     "SETQ2": [
       "p2kbPasm2Setq2"
+    ],
+    "SETQ_BLOCK_OPERATIONS": [
+      "p2kbPasm2SetqBlockOps"
     ],
     "SETR": [
       "p2kbPasm2Setr"
@@ -3797,6 +5034,15 @@
     "SHARED INSTANCE INJECTION": [
       "p2kbSpin2MethodPointers"
     ],
+    "SHARED-BUS BROKER WITH PER-COG MAILBOXES (ONE BUS, MANY COGS)": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "SHARED_BUS_BROKER": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "SHARED_BUS_REPLICATION": [
+      "p2kbArchSharedBusReplication"
+    ],
     "SHL": [
       "p2kbPasm2Shl"
     ],
@@ -3807,7 +5053,8 @@
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
     "SIGNX": [
-      "p2kbPasm2Signx"
+      "p2kbPasm2Signx",
+      "p2kbSpin2OpOpSIGNX"
     ],
     "SINC1": [
       "p2kbArchDdsGoertzel"
@@ -3827,6 +5074,9 @@
     "SINE OSCILLATOR": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
+    "SINGLE COG MANAGING MULTIPLE RESOURCES": [
+      "p2kbArchMultiResourceManagement"
+    ],
     "SINGLE PRODUCER SINGLE CONSUMER": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
@@ -3836,6 +5086,9 @@
     "SINGLE-PIN DAC": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
+    "SINGLE-PIN INSTRUMENTATION ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
     "SINGLETON": [
       "p2kbSpin2ObjectImageDedup"
     ],
@@ -3843,11 +5096,17 @@
       "p2kbAppNoteP2an007DataStructuresNewFacilities",
       "p2kbSpin2Sizeof"
     ],
+    "SIZING COG & TASK STACKS": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "SKIP": [
       "p2kbPasm2Skip"
     ],
     "SKIPF": [
       "p2kbPasm2Skipf"
+    ],
+    "SKIPF_BRANCHING": [
+      "p2kbPasm2SkipfBranching"
     ],
     "SMART PIN DAC AUDIO BOARD": [
       "p2kbHwAddonHdAudioAddonHdAudio"
@@ -3864,11 +5123,35 @@
     "SMART PIN POWER GROUPING": [
       "p2kbArchPinPowerDomains"
     ],
+    "SMART_PINS": [
+      "p2kbArchSmartPins"
+    ],
     "SMART_PIN_CONFIGURATION": [
       "p2kbArchSmartPins"
     ],
+    "SMART_PIN_PATTERNS": [
+      "p2kbArchSmartPinPatterns"
+    ],
     "SNIFF SPI": [
       "p2kbArchPinCapture"
+    ],
+    "SPATIAL COMPUTING ON THE P2 \u2014 THE FPGA-DOMAIN THESIS AND THE SMELL CATALOG": [
+      "p2kbArchSpatialComputing"
+    ],
+    "SPATIAL_COMPUTING": [
+      "p2kbArchSpatialComputing"
+    ],
+    "SPECIAL CONFIGURATION SYMBOLS": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "SPECIAL REGISTERS": [
+      "p2kbPasm2Pasm2SpecialRegisters"
+    ],
+    "SPECIAL SKIPF BRANCHING RULES": [
+      "p2kbPasm2SkipfBranching"
+    ],
+    "SPECIAL_REGISTERS": [
+      "p2kbPasm2SpecialRegisters"
     ],
     "SPECTRO": [
       "p2kbSpin2Spectro"
@@ -3885,11 +5168,44 @@
     "SPI CAPTURE": [
       "p2kbArchPinCapture"
     ],
+    "SPIN2 BASIC I/O - DIGITAL PIN CONTROL": [
+      "p2kbSpin2BasicIo"
+    ],
+    "SPIN2 GETTING STARTED - CORE LANGUAGE ESSENTIALS": [
+      "p2kbGuideSpin2GettingStarted"
+    ],
+    "SPIN2 JONNYMAC DOCUMENTATION STYLE": [
+      "p2kbSpin2Spin2DocsJonnymac"
+    ],
+    "SPIN2 JONNYMAC NAMING CONVENTIONS": [
+      "p2kbSpin2Spin2NamingJonnymac"
+    ],
+    "SPIN2 OPERATORS": [
+      "p2kbSpin2Operators"
+    ],
+    "SPIN2 PROFESSIONAL FORMATTING STANDARDS": [
+      "p2kbSpin2Spin2FormattingStandards"
+    ],
     "SPIN2 STRUCTURES": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "SPIN2 TASKS": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "SPIN2-BASIC-IO": [
+      "p2kbSpin2BasicIo"
+    ],
+    "SPIN2-DOCS-JONNYMAC": [
+      "p2kbSpin2Spin2DocsJonnymac"
+    ],
+    "SPIN2-FORMATTING-STANDARDS": [
+      "p2kbSpin2Spin2FormattingStandards"
+    ],
+    "SPIN2-GETTING-STARTED": [
+      "p2kbGuideSpin2GettingStarted"
+    ],
+    "SPIN2-NAMING-JONNYMAC": [
+      "p2kbSpin2Spin2NamingJonnymac"
     ],
     "SPIN2_DOCS_VSCODE": [
       "p2kbSpin2VscodePnutDocumentationStyle"
@@ -3897,7 +5213,13 @@
     "SPIN2_DOCUMENTATION_STYLE": [
       "p2kbSpin2VscodePnutDocumentationStyle"
     ],
+    "SPI_FLASH_BOOT": [
+      "p2kbArchSpiFlashBoot"
+    ],
     "SPI_MASTER": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "SPI_SMART_PIN_IMPLEMENTATION": [
       "p2kbArchSpiImplementationGuide"
     ],
     "SPLITB": [
@@ -3916,7 +5238,8 @@
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "SQRT": [
-      "p2kbSpin2Sqrt"
+      "p2kbSpin2Sqrt",
+      "p2kbSpin2OpOpSQRT"
     ],
     "SSSSS FIELD": [
       "p2kbArchSmartPins"
@@ -3939,6 +5262,9 @@
     "STACK SIZING": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
+    "STACK_OPERATIONS": [
+      "p2kbPasm2StackOperations"
+    ],
     "STALLI": [
       "p2kbPasm2Stalli"
     ],
@@ -3947,6 +5273,9 @@
     ],
     "STANDARD EDGE MODULE": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "STEP": [
+      "p2kbSpin2KwSTEP"
     ],
     "STEPPER MOTOR DRIVER ADD-ON": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
@@ -3961,10 +5290,14 @@
       "p2kbSpin2Strcopy"
     ],
     "STREAMER": [
+      "p2kbArchStreamerIndex",
       "p2kbArchOverview"
     ],
     "STREAMER ANALOG OUTPUT": [
       "p2kbArchDacRouting"
+    ],
+    "STREAMER AND SMART PIN CONTROL": [
+      "p2kbPasm2StreamerSmartpinControl"
     ],
     "STREAMER BASE PIN": [
       "p2kbArchPinSelection"
@@ -4023,20 +5356,44 @@
     "STREAMER SAMPLE RATE": [
       "p2kbArchNcoTiming"
     ],
+    "STREAMER_DAC": [
+      "p2kbArchDacRouting"
+    ],
+    "STREAMER_DDS_GOERTZEL": [
+      "p2kbArchDdsGoertzel"
+    ],
+    "STREAMER_MODES": [
+      "p2kbArchModesReference"
+    ],
+    "STREAMER_NCO": [
+      "p2kbArchNcoTiming"
+    ],
+    "STREAMER_PINS": [
+      "p2kbArchPinSelection"
+    ],
     "STREAMER_PIN_CAPTURE": [
       "p2kbArchPinCapture"
     ],
+    "STREAMER_SMARTPIN_CONTROL": [
+      "p2kbPasm2StreamerSmartpinControl"
+    ],
     "STRING": [
+      "p2kbSpin2KwSTRING",
       "p2kbSpin2String"
+    ],
+    "STRING CONSTANTS": [
+      "p2kbSpin2StringConstants"
     ],
     "STRSIZE": [
       "p2kbSpin2Strsize"
     ],
     "STRUCT": [
-      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
+      "p2kbSpin2KwSTRUCT"
     ],
     "STRUCT BITFIELDS": [
-      "p2kbAppNoteP2an007DataStructuresNewFacilities"
+      "p2kbAppNoteP2an007DataStructuresNewFacilities",
+      "p2kbSpin2StructBitfields"
     ],
     "STRUCT POINTER": [
       "p2kbSpin2OpTypedPointers"
@@ -4059,6 +5416,9 @@
     "SUBX": [
       "p2kbPasm2Subx"
     ],
+    "SUM PULSE DURATION OVER X PERIODS": [
+      "p2kbArchSmartPin10100CountHighsXPeriods"
+    ],
     "SUMC": [
       "p2kbPasm2Sumc"
     ],
@@ -4077,14 +5437,113 @@
     "SYNCHRONOUS DETECTION": [
       "p2kbArchDdsGoertzel"
     ],
+    "SYNCHRONOUS SERIAL RECEIVE (SYNC RX, SSR)": [
+      "p2kbArchSmartPin11101SyncSerialReceive"
+    ],
+    "SYNCHRONOUS SERIAL TRANSMIT (SYNC TX, SST)": [
+      "p2kbArchSmartPin11100SyncSerialTransmit"
+    ],
+    "Scratch Storage Idioms": [
+      "p2kbPasm2ScratchStorage"
+    ],
+    "Selector Event Jump Instructions": [
+      "p2kbPasm2SelectorEventJumps"
+    ],
+    "Selector Event Wait Instructions": [
+      "p2kbPasm2SelectorEventWaits"
+    ],
+    "Self-Modifying Code Idioms": [
+      "p2kbPasm2SelfModifyingCode"
+    ],
+    "Serial_Loader": [
+      "p2kbArchSerialLoader"
+    ],
+    "Shared-Bus Broker with Per-Cog Mailboxes (One Bus, Many Cogs)": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "Single COG Managing Multiple Resources": [
+      "p2kbArchMultiResourceManagement"
+    ],
+    "Single-Pin Instrumentation ADC": [
+      "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
+    ],
+    "Sizing Cog & Task Stacks": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "Smart Pin DAC audio board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
+    ],
+    "Smart_Pin_Patterns": [
+      "p2kbArchSmartPinPatterns"
+    ],
+    "Smart_Pins": [
+      "p2kbArchSmartPins"
+    ],
+    "Spatial Computing on the P2 \u2014 The FPGA-Domain Thesis and the Smell Catalog": [
+      "p2kbArchSpatialComputing"
+    ],
+    "Special Configuration Symbols": [
+      "p2kbSpin2SpecialConfigurationSymbols"
+    ],
+    "Special Registers": [
+      "p2kbPasm2Pasm2SpecialRegisters"
+    ],
+    "Special SKIPF Branching Rules": [
+      "p2kbPasm2SkipfBranching"
+    ],
+    "Spin2 Basic I/O - Digital Pin Control": [
+      "p2kbSpin2BasicIo"
+    ],
+    "Spin2 Getting Started - Core Language Essentials": [
+      "p2kbGuideSpin2GettingStarted"
+    ],
+    "Spin2 JonnyMac Documentation Style": [
+      "p2kbSpin2Spin2DocsJonnymac"
+    ],
+    "Spin2 JonnyMac Naming Conventions": [
+      "p2kbSpin2Spin2NamingJonnymac"
+    ],
+    "Spin2 Operators": [
+      "p2kbSpin2Operators"
+    ],
+    "Spin2 Professional Formatting Standards": [
+      "p2kbSpin2Spin2FormattingStandards"
     ],
     "Spin2 structures": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "Spin2 tasks": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "Streamer and Smart Pin Control": [
+      "p2kbPasm2StreamerSmartpinControl"
+    ],
+    "Streamer_Pin_Capture": [
+      "p2kbArchPinCapture"
+    ],
+    "String Constants": [
+      "p2kbSpin2StringConstants"
+    ],
+    "Struct Bitfields": [
+      "p2kbSpin2StructBitfields"
+    ],
+    "Sum Pulse Duration Over X Periods": [
+      "p2kbArchSmartPin10100CountHighsXPeriods"
+    ],
+    "Synchronous Serial Receive (Sync RX, SSR)": [
+      "p2kbArchSmartPin11101SyncSerialReceive"
+    ],
+    "Synchronous Serial Transmit (Sync TX, SST)": [
+      "p2kbArchSmartPin11100SyncSerialTransmit"
+    ],
+    "TABLE LOOKUP FUNCTIONS": [
+      "p2kbSpin2TableLookup"
+    ],
+    "TAQOZ_FORTH": [
+      "p2kbArchTaqozForth"
+    ],
+    "TAQOZ_Forth": [
+      "p2kbArchTaqozForth"
     ],
     "TASK CONTINUE": [
       "p2kbSpin2Taskcont"
@@ -4115,6 +5574,9 @@
     "TASKHALT": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Taskhalt"
+    ],
+    "TASKHLT": [
+      "p2kbSpin2RegTaskhlt"
     ],
     "TASKID": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
@@ -4162,12 +5624,33 @@
     "TEXT WINDOW": [
       "p2kbSpin2Term"
     ],
+    "THE RESOURCE BUDGET \u2014 A REQUIRED DESIGN ARTIFACT": [
+      "p2kbArchResourceBudget"
+    ],
     "THERMISTOR READER": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
     ],
     "THISTASK": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks",
       "p2kbSpin2Thistask"
+    ],
+    "TIME EVENTS OR TIMEOUT DETECTION": [
+      "p2kbArchSmartPin10010TimeXAEvents"
+    ],
+    "TIME HIGH STATE DURATIONS": [
+      "p2kbArchSmartPin10001TimeAHighs"
+    ],
+    "TIME INPUT STATE DURATIONS": [
+      "p2kbArchSmartPin10000TimeAStates"
+    ],
+    "TIMING AND DELAY IDIOMS": [
+      "p2kbSpin2TimingDelays"
+    ],
+    "TIMING CONTROL IDIOMS": [
+      "p2kbPasm2TimingControl"
+    ],
+    "TIMING OPERATIONS": [
+      "p2kbSpin2TimingOperations"
     ],
     "TJF": [
       "p2kbPasm2Tjf"
@@ -4189,6 +5672,9 @@
     ],
     "TJZ": [
       "p2kbPasm2Tjz"
+    ],
+    "TO": [
+      "p2kbSpin2KwTO"
     ],
     "TONE DETECTION": [
       "p2kbArchDdsGoertzel"
@@ -4217,6 +5703,9 @@
     "TRAJECTORY PLOT": [
       "p2kbSpin2ScopeXy"
     ],
+    "TRANSITION OUTPUT": [
+      "p2kbArchSmartPin00101TransitionOutput"
+    ],
     "TRGINT1": [
       "p2kbPasm2Trgint1"
     ],
@@ -4235,7 +5724,43 @@
     "TT_BITS": [
       "p2kbArchSmartPins"
     ],
+    "TYPE PROPAGATION RULES": [
+      "p2kbSpin2TypePropagation"
+    ],
     "TYPED POINTERS": [
+      "p2kbSpin2OpTypedPointers"
+    ],
+    "Table Lookup Functions": [
+      "p2kbSpin2TableLookup"
+    ],
+    "The Resource Budget \u2014 A Required Design Artifact": [
+      "p2kbArchResourceBudget"
+    ],
+    "Time Events or Timeout Detection": [
+      "p2kbArchSmartPin10010TimeXAEvents"
+    ],
+    "Time High State Durations": [
+      "p2kbArchSmartPin10001TimeAHighs"
+    ],
+    "Time Input State Durations": [
+      "p2kbArchSmartPin10000TimeAStates"
+    ],
+    "Timing Control Idioms": [
+      "p2kbPasm2TimingControl"
+    ],
+    "Timing Operations": [
+      "p2kbSpin2TimingOperations"
+    ],
+    "Timing and Delay Idioms": [
+      "p2kbSpin2TimingDelays"
+    ],
+    "Transition Output": [
+      "p2kbArchSmartPin00101TransitionOutput"
+    ],
+    "Type Propagation Rules": [
+      "p2kbSpin2TypePropagation"
+    ],
+    "Typed Pointers": [
       "p2kbSpin2OpTypedPointers"
     ],
     "UNIVERSAL MOTOR DRIVER": [
@@ -4244,11 +5769,23 @@
     "UNIVERSAL MOTOR DRIVER P2 ADD-ON BOARD": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
+    "UNSIGNED REMAINDER": [
+      "p2kbSpin2OpModuloAdd"
+    ],
+    "UNTIL": [
+      "p2kbSpin2KwUNTIL"
+    ],
     "USB DEVICE BOARD": [
       "p2kbHwAddonSerialDeviceAddonSerialDevice"
     ],
     "USB HOST ADD-ON": [
       "p2kbHwAddonSerialHostAddonSerialHost"
+    ],
+    "USB HOST/DEVICE": [
+      "p2kbArchSmartPin11011UsbHostDevice"
+    ],
+    "USB Host/Device": [
+      "p2kbArchSmartPin11011UsbHostDevice"
     ],
     "USB SERIAL ADAPTER": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
@@ -4273,6 +5810,12 @@
     ],
     "Universal Motor Driver P2 Add-on Board": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
+    ],
+    "Unsigned Remainder": [
+      "p2kbSpin2OpModuloAdd"
+    ],
+    "VAR": [
+      "p2kbSpin2KwVAR"
     ],
     "VECTOR GRAPHICS": [
       "p2kbSpin2Plot"
@@ -4301,7 +5844,16 @@
     "VIO supply mapping": [
       "p2kbArchPinPowerDomains"
     ],
+    "VSCODE-PNUT-DOCUMENTATION-STYLE": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
+    "VSCODE/PNUT_TS DOCUMENTATION STYLE": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
     "VSCODE_SPIN2_COMMENTS": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
+    "VSCode/PNUT_TS Documentation Style": [
       "p2kbSpin2VscodePnutDocumentationStyle"
     ],
     "WAITATN": [
@@ -4403,6 +5955,9 @@
     "WHICH PINS": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "WHILE": [
+      "p2kbSpin2KwWHILE"
+    ],
     "WIFI ADAPTER BOARD": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
     ],
@@ -4412,10 +5967,16 @@
     "WIRELESS PROGRAMMING MODULE": [
       "p2kbHwAddonWxWifiAddonWxWifi"
     ],
+    "WITH": [
+      "p2kbSpin2KwWITH"
+    ],
     "WMLONG": [
       "p2kbPasm2Wmlong"
     ],
     "WORD": [
+      "p2kbPasm2Word",
+      "p2kbSpin2AsmWord",
+      "p2kbSpin2KwWORD",
       "p2kbSpin2Word"
     ],
     "WORDCOMP": [
@@ -4424,11 +5985,27 @@
     "WORDFILL": [
       "p2kbSpin2Wordfill"
     ],
+    "WORDFIT": [
+      "p2kbPasm2Wordfit",
+      "p2kbSpin2KwWORDFIT"
+    ],
     "WORDMOVE": [
       "p2kbSpin2Wordmove"
     ],
     "WORDSWAP": [
       "p2kbSpin2Wordswap"
+    ],
+    "WORKED DERIVATION (EXAMPLE) \u2014 A FAST-ADC STREAMING PIPELINE, END TO END": [
+      "p2kbArchWorkedDerivationStreamingPipeline"
+    ],
+    "WORKED DERIVATION (EXAMPLE) \u2014 A QUADRUPED ROBOT, END TO END": [
+      "p2kbArchWorkedDerivationRobotDog"
+    ],
+    "WORKED_DERIVATION_ROBOT_DOG": [
+      "p2kbArchWorkedDerivationRobotDog"
+    ],
+    "WORKED_DERIVATION_STREAMING_PIPELINE": [
+      "p2kbArchWorkedDerivationStreamingPipeline"
     ],
     "WRBYTE": [
       "p2kbPasm2Wrbyte"
@@ -4517,8 +6094,20 @@
     "WiFi adapter board": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
     ],
+    "Worked Derivation (EXAMPLE) \u2014 A Fast-ADC Streaming Pipeline, End to End": [
+      "p2kbArchWorkedDerivationStreamingPipeline"
+    ],
+    "Worked Derivation (EXAMPLE) \u2014 A Quadruped Robot, End to End": [
+      "p2kbArchWorkedDerivationRobotDog"
+    ],
     "X0 X1 X2 X3": [
       "p2kbArchDacRouting"
+    ],
+    "XBYTE_ENGINE": [
+      "p2kbArchXbyteEngine"
+    ],
+    "XBYTE_Engine": [
+      "p2kbArchXbyteEngine"
     ],
     "XCONT": [
       "p2kbArchOverview",
@@ -4547,7 +6136,8 @@
       "p2kbArchClockSystem"
     ],
     "XOR": [
-      "p2kbPasm2Xor"
+      "p2kbPasm2Xor",
+      "p2kbSpin2OpOpXor"
     ],
     "XORO32": [
       "p2kbPasm2Xoro32"
@@ -4582,7 +6172,17 @@
       "p2kbArchPinSelection"
     ],
     "ZEROX": [
-      "p2kbPasm2Zerox"
+      "p2kbPasm2Zerox",
+      "p2kbSpin2OpOpZEROX"
+    ],
+    "^@": [
+      "p2kbSpin2SymCaretAt"
+    ],
+    "^^": [
+      "p2kbSpin2OpOpXorxor"
+    ],
+    "_": [
+      "p2kbSpin2SymUnderscore"
     ],
     "_AUTOCLK": [
       "p2kbSpin2SpecialConfigurationSymbols"
@@ -4638,6 +6238,9 @@
     "_xtlfreq": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
+    "`": [
+      "p2kbSpin2Sym`"
+    ],
     "abs": [
       "p2kbPasm2Abs",
       "p2kbSpin2Abs"
@@ -4663,8 +6266,14 @@
     "addct3": [
       "p2kbPasm2Addct3"
     ],
+    "additional_concepts_needed": [
+      "p2kbPasm2AdditionalConceptsNeeded"
+    ],
     "addpix": [
       "p2kbPasm2Addpix"
+    ],
+    "addressing_modes": [
+      "p2kbPasm2AddressingModes"
     ],
     "adds": [
       "p2kbPasm2Adds"
@@ -4705,6 +6314,9 @@
     ],
     "alti": [
       "p2kbPasm2Alti"
+    ],
+    "altitude_layering": [
+      "p2kbArchAltitudeLayering"
     ],
     "altr": [
       "p2kbPasm2Altr"
@@ -4823,6 +6435,18 @@
     "board selection": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
+    "boot_pattern_selection": [
+      "p2kbArchBootPatternSelection"
+    ],
+    "boot_rom": [
+      "p2kbArchIndex"
+    ],
+    "boot_rom_contents": [
+      "p2kbArchBootRomContents"
+    ],
+    "branch_addressing": [
+      "p2kbPasm2BranchAddressing"
+    ],
     "breadboard adapter": [
       "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier"
     ],
@@ -4924,6 +6548,9 @@
     "choose P2 board": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
+    "click_module_integration": [
+      "p2kbArchClickModuleIntegration"
+    ],
     "clkset": [
       "p2kbSpin2Clkset"
     ],
@@ -5013,6 +6640,10 @@
     "cooperative_tasking": [
       "p2kbSpin2Spin2CooperativeTasking"
     ],
+    "cordic_solver": [
+      "p2kbPasm2CordicSolver",
+      "p2kbSpin2CordicSolver"
+    ],
     "coroutines": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
     ],
@@ -5028,8 +6659,14 @@
     "cross-cog data": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "cross_cutting_forces": [
+      "p2kbArchCrossCuttingForces"
+    ],
     "data structures": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "data_flow_contracts": [
+      "p2kbArchDataFlowContracts"
     ],
     "data_logger": [
       "p2kbSpin2DataLogger"
@@ -5057,6 +6694,12 @@
     ],
     "decod": [
       "p2kbPasm2Decod"
+    ],
+    "decomposition_glossary": [
+      "p2kbArchDecompositionGlossary"
+    ],
+    "decomposition_method": [
+      "p2kbArchDecompositionMethod"
     ],
     "dependency injection": [
       "p2kbSpin2MethodPointers"
@@ -5205,14 +6848,23 @@
     "error_handling": [
       "p2kbSpin2Spin2ErrorHandling"
     ],
+    "evaluation_vocabulary": [
+      "p2kbArchEvaluationVocabulary"
+    ],
     "event_dispatcher": [
       "p2kbSpin2Spin2EventDispatcher"
+    ],
+    "event_interrupt_configuration": [
+      "p2kbPasm2EventInterruptConfig"
     ],
     "exactly-once instantiation": [
       "p2kbSpin2ObjectImageDedup"
     ],
     "execf": [
       "p2kbPasm2Execf"
+    ],
+    "execution_modes": [
+      "p2kbPasm2ExecutionModes"
     ],
     "exp": [
       "p2kbSpin2Exp"
@@ -5240,6 +6892,9 @@
     ],
     "field-oriented motor control": [
       "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "first_contact_procedure": [
+      "p2kbArchFirstContactProcedure"
     ],
     "fixed-point math": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -5406,8 +7061,14 @@
     "incmod": [
       "p2kbPasm2Incmod"
     ],
+    "inline_pasm2": [
+      "p2kbSpin2InlinePasm2"
+    ],
     "input selector": [
       "p2kbPasm2Wrpin"
+    ],
+    "instruction_skipping": [
+      "p2kbPasm2InstructionSkipping"
     ],
     "instrumentation ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
@@ -5493,6 +7154,9 @@
     "jnxro": [
       "p2kbPasm2Jnxro"
     ],
+    "johnny-mac-documentation-style": [
+      "p2kbSpin2JohnnyMacDocumentationStyle"
+    ],
     "jpat": [
       "p2kbPasm2Jpat"
     ],
@@ -5522,6 +7186,9 @@
     ],
     "jxro": [
       "p2kbPasm2Jxro"
+    ],
+    "labels": [
+      "p2kbPasm2Labels"
     ],
     "land pattern": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
@@ -5625,6 +7292,9 @@
     "mailbox_communication": [
       "p2kbSpin2Spin2MailboxCommunication"
     ],
+    "manual_category_alignment_check": [
+      "p2kbPasm2ManualCategoryAlignmentCheck"
+    ],
     "measuring stack space": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
@@ -5725,6 +7395,9 @@
     "multi-writer queue": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "multi_cog_synchronization": [
+      "p2kbPasm2MultiCogSynchronization"
+    ],
     "multi_display_system": [
       "p2kbSpin2MultiDisplaySystem"
     ],
@@ -5733,6 +7406,9 @@
     ],
     "multi_motor_system": [
       "p2kbSpin2MultiMotorSystem"
+    ],
+    "multi_resource_management": [
+      "p2kbArchMultiResourceManagement"
     ],
     "multimedia_device": [
       "p2kbSpin2MultimediaDevice"
@@ -5885,6 +7561,12 @@
     "override forwarding": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "p2-source-file-organization-standard": [
+      "p2kbSpin2P2SourceFileOrganizationStandard"
+    ],
+    "p2_architecture_mental_model": [
+      "p2kbArchP2ArchitectureMentalModel"
+    ],
     "package": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ],
@@ -5900,8 +7582,17 @@
     "packed status word": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "pasm2-basic-io": [
+      "p2kbPasm2BasicIo"
+    ],
+    "pasm2-getting-started": [
+      "p2kbGuidePasm2GettingStarted"
+    ],
     "pasm2_hub_synchronization": [
       "p2kbPasm2Pasm2HubSynchronization"
+    ],
+    "pasm2_idioms": [
+      "p2kbPasm2Index"
     ],
     "pasm2_initialization": [
       "p2kbPasm2Pasm2Initialization"
@@ -5950,6 +7641,9 @@
     ],
     "pin_control": [
       "p2kbSpin2Spin2PinControl"
+    ],
+    "pin_power_domains": [
+      "p2kbArchPinPowerDomains"
     ],
     "pinclear": [
       "p2kbSpin2Pinclear"
@@ -6142,6 +7836,9 @@
     "qvector": [
       "p2kbPasm2Qvector"
     ],
+    "rate_adaptation": [
+      "p2kbArchRateAdaptation"
+    ],
     "rate_domain_decoupler": [
       "p2kbSpin2Spin2RateDomainDecoupler"
     ],
@@ -6209,6 +7906,9 @@
     "regexec": [
       "p2kbSpin2Regexec"
     ],
+    "register_indirection": [
+      "p2kbPasm2RegisterIndirection"
+    ],
     "regload": [
       "p2kbSpin2Regload"
     ],
@@ -6217,6 +7917,9 @@
     ],
     "rep": [
       "p2kbPasm2Rep"
+    ],
+    "rep_instruction": [
+      "p2kbPasm2RepInstruction"
     ],
     "resi0": [
       "p2kbPasm2Resi0"
@@ -6232,6 +7935,12 @@
     ],
     "resident arbiter cog": [
       "p2kbArchSharedBusBroker"
+    ],
+    "resource_budget": [
+      "p2kbArchResourceBudget"
+    ],
+    "resource_ownership": [
+      "p2kbArchResourceOwnership"
     ],
     "resource_pool": [
       "p2kbSpin2Spin2ResourcePool"
@@ -6354,6 +8063,9 @@
     "scope_xy": [
       "p2kbSpin2ScopeXy"
     ],
+    "sd_card_boot": [
+      "p2kbArchSdCardBoot"
+    ],
     "send": [
       "p2kbSpin2Send"
     ],
@@ -6444,6 +8156,9 @@
     "setq2": [
       "p2kbPasm2Setq2"
     ],
+    "setq_block_operations": [
+      "p2kbPasm2SetqBlockOps"
+    ],
     "setr": [
       "p2kbPasm2Setr"
     ],
@@ -6491,6 +8206,12 @@
     ],
     "shared instance injection": [
       "p2kbSpin2MethodPointers"
+    ],
+    "shared_bus_broker": [
+      "p2kbArchSharedBusBroker"
+    ],
+    "shared_bus_replication": [
+      "p2kbArchSharedBusReplication"
     ],
     "shared_memory": [
       "p2kbSpin2Spin2SharedMemory"
@@ -6540,6 +8261,9 @@
     "skipf": [
       "p2kbPasm2Skipf"
     ],
+    "skipf_branching": [
+      "p2kbPasm2SkipfBranching"
+    ],
     "slew_easing_engine": [
       "p2kbSpin2Spin2SlewEasingEngine"
     ],
@@ -6561,6 +8285,12 @@
     "sniff spi": [
       "p2kbArchPinCapture"
     ],
+    "spatial_computing": [
+      "p2kbArchSpatialComputing"
+    ],
+    "special_registers": [
+      "p2kbPasm2SpecialRegisters"
+    ],
     "spectrogram": [
       "p2kbSpin2Spectro"
     ],
@@ -6569,6 +8299,27 @@
     ],
     "spi capture": [
       "p2kbArchPinCapture"
+    ],
+    "spi_flash_boot": [
+      "p2kbArchSpiFlashBoot"
+    ],
+    "spi_smart_pin_implementation": [
+      "p2kbArchSpiImplementationGuide"
+    ],
+    "spin2-basic-io": [
+      "p2kbSpin2BasicIo"
+    ],
+    "spin2-docs-jonnymac": [
+      "p2kbSpin2Spin2DocsJonnymac"
+    ],
+    "spin2-formatting-standards": [
+      "p2kbSpin2Spin2FormattingStandards"
+    ],
+    "spin2-getting-started": [
+      "p2kbGuideSpin2GettingStarted"
+    ],
+    "spin2-naming-jonnymac": [
+      "p2kbSpin2Spin2NamingJonnymac"
     ],
     "spin2_docs_vscode": [
       "p2kbSpin2VscodePnutDocumentationStyle"
@@ -6606,6 +8357,9 @@
     "stack sizing": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
+    "stack_operations": [
+      "p2kbPasm2StackOperations"
+    ],
     "stalli": [
       "p2kbPasm2Stalli"
     ],
@@ -6632,6 +8386,7 @@
       "p2kbSpin2Strcopy"
     ],
     "streamer": [
+      "p2kbArchStreamerIndex",
       "p2kbArchOverview"
     ],
     "streamer DAC channels": [
@@ -6693,6 +8448,24 @@
     ],
     "streamer sample rate": [
       "p2kbArchNcoTiming"
+    ],
+    "streamer_dac": [
+      "p2kbArchDacRouting"
+    ],
+    "streamer_dds_goertzel": [
+      "p2kbArchDdsGoertzel"
+    ],
+    "streamer_modes": [
+      "p2kbArchModesReference"
+    ],
+    "streamer_nco": [
+      "p2kbArchNcoTiming"
+    ],
+    "streamer_pins": [
+      "p2kbArchPinSelection"
+    ],
+    "streamer_smartpin_control": [
+      "p2kbPasm2StreamerSmartpinControl"
     ],
     "string": [
       "p2kbSpin2String"
@@ -6872,6 +8645,9 @@
     "vector graphics": [
       "p2kbSpin2Plot"
     ],
+    "vscode-pnut-documentation-style": [
+      "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
     "vscode_spin2_comments": [
       "p2kbSpin2VscodePnutDocumentationStyle"
     ],
@@ -6992,6 +8768,12 @@
     "wordswap": [
       "p2kbSpin2Wordswap"
     ],
+    "worked_derivation_robot_dog": [
+      "p2kbArchWorkedDerivationRobotDog"
+    ],
+    "worked_derivation_streaming_pipeline": [
+      "p2kbArchWorkedDerivationStreamingPipeline"
+    ],
     "wrbyte": [
       "p2kbPasm2Wrbyte"
     ],
@@ -7054,6 +8836,15 @@
     ],
     "zerox": [
       "p2kbPasm2Zerox"
+    ],
+    "||": [
+      "p2kbSpin2OpOpOror"
+    ],
+    "~": [
+      "p2kbSpin2Sym~"
+    ],
+    "~~": [
+      "p2kbSpin2Sym~~"
     ]
   },
   "files": {
@@ -7249,8 +9040,8 @@
     },
     "p2kbArchInterrupts": {
       "path": "deliverables/ai/P2/architecture/interrupts.yaml",
-      "mtime": 1787789220,
-      "sha256": "f2a6f1e3896ab58bb8d79d51901c1e77399cba3307dd9d6ee3b652f8c125f82c"
+      "mtime": 1788638815,
+      "sha256": "5bac33900e5183ea4c14be9e3c7cff56b4096de89227929d0172fbb1e0ce4890"
     },
     "p2kbArchIoPinTiming": {
       "path": "deliverables/ai/P2/architecture/io_pin_timing.yaml",
@@ -8554,8 +10345,8 @@
     },
     "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier": {
       "path": "deliverables/ai/P2/hardware/edge-breadboard-carrier.yaml",
-      "mtime": 1787783019,
-      "sha256": "fd3be311e6455a3bd19a3e49e1a2b827eedcd5b4cacfa37c4a26e22bede7590b"
+      "mtime": 1788638815,
+      "sha256": "e98be970b7a12f3bc09867720b0dda478c0f241a9d9a0b9054da175969783416"
     },
     "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout": {
       "path": "deliverables/ai/P2/hardware/edge-mini-breakout.yaml",
@@ -11824,8 +13615,8 @@
     },
     "p2kbSpin2OpModuloAdd": {
       "path": "deliverables/ai/P2/language/spin2/operators/modulo_add.yaml",
-      "mtime": 1764449566,
-      "sha256": "05f8a808185e8a2c1c01c221e51346aab924b642aeafd49a9c38877eb662b552"
+      "mtime": 1788643444,
+      "sha256": "2d1152c84e306e825fe28cef96ae6ff664344fc5f5d93b7fa6d517dab55d40ee"
     },
     "p2kbSpin2OpOpABS": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_ABS.yaml",
