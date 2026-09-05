@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-401`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-402`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,26 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Every Spin2 operator and special symbol is unreachable by the token an agent actually reads in source: 0 of 62 are in the index (2026-09-05, codegen findability audit) — F-401
+
+### F-401 — the index harvests four name fields and `operator:`/`symbol:` are not among them, so `+//`, `:=`, `<=>`, `^@`, `??` resolve to nothing — `CONFIRMED`
+
+**Location:** `engineering/tools/generate-p2kb-index.py`, `harvest_aliases_from_yaml()` (the harvester), against `deliverables/ai/P2/language/spin2/operators/` (77 files) and `language/spin2/special-symbols/` (13 files).
+
+**What is wrong.** The harvester reads exactly four fields — `aliases`, `pattern_id`, `instruction`, `method`. The operator and special-symbol files name themselves in `operator:` and `symbol:`, which it does not read, and their symbolic value can never appear in the path-derived camelCase index key either (`op_addlteqgt.yaml` → `p2kbSpin2OpOpAddlteqgt`; the token is `+<=>`). Measured across the whole shipped set: **62 distinct pure-symbol names — `:=` `==` `+/` `+//` `<=>` `+<=>` `#>` `<#` `@` `@@` `^@` `~` `~~` `??` `..` `? :` and 46 more — and 0 of the 62 appear in the index in any form.**
+
+**Evidence.** Live against the published index, not reasoned: `p2kb_find("+//")` matches nothing and falls back to dumping all 59 categories / 1,129 entries — the undifferentiated-directory response. Contrast the word-named population, which is healthy: **560 of 560** mnemonic/method names (every PASM2 instruction, every Spin2 method) resolve by name, 0 misses. The defect is confined to symbolic tokens, and they are precisely the tokens an agent meets when reading or generating Spin2 source.
+
+**The fix is known to work.** The alias table already carries 161 punctuated keys and the matcher resolves them exactly: `p2kb_get("#32201")` returns `"resolved_from": "#32201"`. So punctuation survives both the index and the query path; adding `operator:` and `symbol:` as harvest sources is sufficient, and needs no matcher change.
+
+**Proposed correction.** Add `operator` and `symbol` to `harvest_aliases_from_yaml()` alongside the existing four (+62 tokens). Then `keyword` (36 files), `directive` (24), `register` (17), `concept` (27), `name` (32), `component_name`, `title` (39) — which together cover **246 of the 452 files currently reachable by neither alias nor category**. Nested-name files (`object_metadata.title`/`object_id`, 131 OBEX objects; `quick_byte.*`, 42) need one level of descent and should be judged separately, since OBEX has its own `p2kb_obex_*` retrieval path.
+
+**Scale, for prioritisation.** 452 of 1,133 files (39.9%) are reachable by neither an alias nor a category; 576 are in no category at all. The index's per-file record is `{path, mtime, sha256}` — no title, no description — so there is no content-level retrieval to fall back on. Everything rests on aliases, keys and categories.
+
+**Not introduced by the unpublished delta, and not fixed by it.** Identical at `v1.17.0` and at HEAD: 62 symbols absent in both. The delta moved file-level darkness 461 → 452 (40.8% → 39.9%), which is real but is not this. Related: F-116 (hardware findability, closed — `hardware/` is now 0% dark, 29/29 reachable) and F-376's `except Exception: pass` in the same harvester, which silently drops a malformed file's aliases (task «#339» item 3) — the two touch the same function and should be fixed in one pass.
+
+---
 
 ## The 409-citation read, run to the end: 721 locators opened at their cited lines, 22 repaired, and the instrument had to be repaired first (2026-08-30, release fix pass step 3) — F-399
 
