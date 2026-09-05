@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-402`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-403`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,27 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Two files define the Spin2 `+//` operator and they disagreed about what it does; the duplicate home is still open (2026-09-05, F-401 index regeneration) — F-402
+
+### F-402 — `modulo_add.yaml` called `+//` an "Unsigned Modulo Add" that "performs addition"; corrected, but the second definition home remains — `PARTIAL`
+
+**How it surfaced.** Arming the `operator:` field as an index alias (F-401) made `+//` resolve to **two** targets — `language/spin2/operators/modulo_add.yaml` and `language/spin2/operators/op_addmodulo.yaml`. The collision was the symptom; reading the two files found they did not agree.
+
+**What was wrong** (`modulo_add.yaml`, corrected in this pass):
+- `name: Unsigned Modulo Add` and *"The +// operator performs addition with unsigned modulo"* — **it performs no addition**. A leading `+` on a division-family operator selects the UNSIGNED form: `/` signed divide vs `+/` unsigned divide, `//` signed remainder vs `+//` unsigned remainder.
+- `related_operators` gave `"//": Unsigned divide remainder` — this **inverts the single distinction the file exists to draw**. `//` is the signed remainder.
+- `related_operators` listed `"%%": Signed modulo`. `%%` appears in neither operator reference and is not a Spin2 operator; removed rather than relabelled.
+
+**Authority:** `engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:715` (*"`+//` | Remainder (unsigned)"*), :62 (precedence group *"`*` `/` `+/` `//` `+//` `SCA` `SCAS` `FRAC` | Multiply/Divide"*), :103 (*"The `+/` and `+//` operators treat both operands as unsigned 32-bit integers"*). `op_addmodulo.yaml` — *"Unsigned remainder (modulo)"* — was correct throughout and is unchanged.
+
+**Why the examples still worked, which is why this survived.** Every wrap-around idiom in the file adds *explicitly* and then takes the remainder — `(tail + 1) +// 32`, `(index + 1) +// BUFFER_SIZE`. The code was right while the prose describing it was wrong, so nothing an agent copied would fail; only what it *believed the operator was* would be wrong. No instrument can see that: the sourcing gate reads quantities, the constant gate reads names, and neither reads a semantic claim.
+
+**What remains open — the reason this is `PARTIAL`.** Two files still define one operator. The project's stated discipline is a single definition home (`architecture/pin-drive-configuration.yaml` declares its own non-home status explicitly for exactly this reason), so one of these should become the home and the other a pointer. That is a merge decision, not a correction: `modulo_add.yaml` carries the richer material — worked ring-buffer patterns, the power-of-2 `&`-mask comparison — while `op_addmodulo.yaml` carries the correct terse definition and matches the naming convention of the other 74 operator files. **Recommend keeping `op_addmodulo.yaml` as the definition home and folding the patterns into it**, but the call is Stephen's.
+
+**Class sweep, run:** only two files in the whole set carry `documentation_source: code_analysis` — this one and `architecture/multi_resource_management.yaml`. The latter documents an architectural *pattern*, not a language fact, so code analysis is a legitimate provenance there and it is **not** a finding. No other file calls `//` unsigned or references `%%`.
+
+---
 
 ## Every Spin2 operator and special symbol is unreachable by the token an agent actually reads in source: 0 of 62 are in the index (2026-09-05, codegen findability audit) — F-401
 

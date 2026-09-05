@@ -1,15 +1,31 @@
 operator: +//
-name: Unsigned Modulo Add
+name: Unsigned Remainder
 category: arithmetic_operators
-description: Add with unsigned modulo (circular arithmetic)
+description: Unsigned remainder (modulo); the `+` prefix selects unsigned, it does not add
 documentation_source: code_analysis
 documentation_level: comprehensive
 created: 2025-09-09
 
+# CORRECTED 2026-09-05 (F-402). This file previously called `+//` "Unsigned Modulo
+# Add" and said it "performs addition with unsigned modulo". It performs no
+# addition. In Spin2 a leading `+` on a division-family operator selects the
+# UNSIGNED form of that operator -- `/` signed divide vs `+/` unsigned divide,
+# `//` signed remainder vs `+//` unsigned remainder. The wrap-around examples
+# below were always correct because each one adds EXPLICITLY and then takes the
+# remainder, e.g. `(tail + 1) +// 32`; only the naming was wrong.
+name_source: >-
+  Spin2 operator reference -- engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:715
+  ("`+//` | Remainder (unsigned) | `a +// b`"), precedence group at :62
+  ("`*` `/` `+/` `//` `+//` `SCA` `SCAS` `FRAC` | Multiply/Divide"), and the unsigned
+  rule at :103 ("The `+/` and `+//` operators treat both operands as unsigned 32-bit
+  integers"). The same operator is defined at
+  language/spin2/operators/op_addmodulo.yaml, which stated it correctly.
+
 overview: |
-  The +// operator performs addition with unsigned modulo, creating circular
-  arithmetic perfect for buffer management and wrap-around counters. This is
-  a key operator for implementing circular queues and ring buffers in Spin2.
+  The +// operator returns the remainder of an unsigned division. Its usual role
+  is the wrap step of circular arithmetic -- add first, then take the remainder --
+  which makes it the natural tool for ring-buffer indices and wrap-around counters.
+  The addition in those idioms is written explicitly; `+//` supplies only the wrap.
 
 syntax:
   format: "result := value +// modulus"
@@ -112,10 +128,19 @@ best_practices:
   - Consider using for all circular arithmetic
 
 related_operators:
-  - "//": Unsigned divide remainder (modulo)
+  - "//": Signed remainder (modulo) -- the signed counterpart of this operator
   - "+/": Unsigned divide quotient
-  - "%%": Signed modulo
   - "&": AND mask (alternative for power-of-2)
+related_operators_source: >-
+  engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:62 and :103.
+  CORRECTED 2026-09-05 (F-402): this block called `//` the UNSIGNED remainder, which
+  inverts the one distinction the file exists to draw -- `//` is signed, `+//` is
+  unsigned. It also listed `%%` as "Signed modulo"; `%%` is not a Spin2 operator and
+  appears in neither operator reference, so it is removed rather than relabelled.
+related:
+  - language/spin2/operators/op_addmodulo.yaml
+  - language/spin2/operators/op_adddiv.yaml
+  - language/spin2/operators/precedence.yaml
 
 notes:
   - More flexible than AND mask method

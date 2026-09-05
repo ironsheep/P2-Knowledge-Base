@@ -55,17 +55,59 @@ def to_camel_case(name: str) -> str:
     return result
 
 
-def harvest_aliases_from_yaml(yaml_path: Path, index_key: str) -> Dict[str, str]:
+# Top-level scalar fields in which a file states its OWN NAME. Each is harvested
+# as a lookup key, because a name a file carries but the index does not is a name
+# no agent can search by.
+#
+# F-401 (2026-09-05): before this list existed the harvester read four fields only
+# (aliases / pattern_id / instruction / method), and the measured consequence was
+# that 0 of the 62 pure-symbol Spin2 names -- `:=` `==` `+/` `+//` `<=>` `+<=>`
+# `#>` `<#` `@` `@@` `^@` `~` `~~` `??` and the rest -- appeared in the index in
+# any form. A symbolic token cannot reach the index the other way either: the
+# per-file key is derived from the path, so op_addlteqgt.yaml becomes
+# p2kbSpin2OpOpAddlteqgt and the token `+<=>` survives nowhere. `p2kb_find("+//")`
+# matched nothing and fell back to dumping all 59 categories.
+#
+# Punctuation is safe on both sides and this was verified before the change, not
+# assumed: the table already held 161 punctuated keys and the resolver returned
+# `"resolved_from": "#32201"` for a bare-symbol query. No matcher change is owed.
+#
+# `group:` is deliberately NOT here: 11 files carry it and they hold 2 distinct
+# values between them, so it yields collisions rather than lookups.
+NAME_FIELDS = (
+    # symbolic — the tokens an agent actually reads in Spin2 source
+    'operator',        # 75 files: + +/ +// <=> +<=> #> <# ... and word-forms (ADDBITS)
+    'symbol',          # 13 files: $ $$ @ @@ ^@ % . .. ` _
+    'directive',       # 37 files: #DEFINE #IFDEF #PRAGMA EXPORTDEF ...
+    # word-named things that simply were not being read
+    'keyword',         # 37 files: ABORT CASE_FAST LOOKDOWNZ ...
+    'register',        # 17 files: DIRA IJMP1 TASKHLT ...
+    'command',         # 4 files: DEBUG PC_KEY PC_MOUSE DLY
+    'concept',         # 46 files
+    'name',            # 64 files
+    'component',       # 46 files
+    'component_name',  # 8 files
+    'id',              # 10 files: slug identifiers
+    'title',           # 90 files: descriptive, exact-match value only
+)
+
+
+def harvest_aliases_from_yaml(yaml_path: Path, index_key: str) -> Tuple[Dict[str, str], Optional[str]]:
     """
     Harvest aliases from a YAML file.
 
-    Looks for three types of alias sources:
+    Alias sources:
     1. 'aliases' field - explicit list of aliases (e.g., aliases: ["PINH"])
     2. 'pattern_id' field - pattern identifier for combines_with references
     3. 'instruction' field - PASM2 mnemonic for instruction lookups
     4. 'method' field - Spin2 method name for method lookups
+    5. every field in NAME_FIELDS - the name the file states for itself (F-401)
 
-    Returns dict mapping alias -> index_key
+    Returns (alias -> index_key, error) where error is None on success and a
+    human-readable reason otherwise. A file that cannot be read still gets a path
+    and a sha256 in the index, so a swallowed failure here does not remove the
+    entry -- it removes every way of FINDING it, silently. That is F-376's third
+    silent exit-0, and it is why this returns the reason instead of `pass`.
     """
     aliases = {}
 
@@ -74,7 +116,9 @@ def harvest_aliases_from_yaml(yaml_path: Path, index_key: str) -> Dict[str, str]
             content = yaml.safe_load(f)
 
         if not isinstance(content, dict):
-            return aliases
+            # A non-mapping document has no fields to harvest. This is a real
+            # shape, not a failure, so it is reported as neither.
+            return aliases, None
 
         # Source 1: Explicit aliases field
         if 'aliases' in content:
@@ -111,11 +155,21 @@ def harvest_aliases_from_yaml(yaml_path: Path, index_key: str) -> Dict[str, str]
                 aliases[method_name] = index_key
                 aliases[method_name.lower()] = index_key
 
-    except Exception as e:
-        # Silently skip files that can't be parsed
-        pass
+        # Source 5: the name the file states for itself (F-401).
+        # Stored verbatim AND uppercased, matching the treatment the explicit
+        # `aliases` list already gets. For a pure-symbol value the two coincide,
+        # which is harmless -- dict assignment collapses them.
+        for field in NAME_FIELDS:
+            value = content.get(field)
+            if isinstance(value, str) and value.strip():
+                value = value.strip()
+                aliases[value] = index_key
+                aliases[value.upper()] = index_key
 
-    return aliases
+    except Exception as e:
+        return {}, f"{type(e).__name__}: {e}"
+
+    return aliases, None
 
 
 class GitUnavailable(RuntimeError):
@@ -463,6 +517,7 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
     existing_keys: Set[str] = set()
     collisions = []
     multi_target_aliases = []  # Track aliases with multiple targets
+    harvest_failures = []  # F-376: files whose aliases could not be harvested
 
     # Walk all YAML files
     for yaml_file in sorted(ai_path.rglob("*.yaml")):
@@ -504,7 +559,9 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
         }
 
         # Harvest aliases from this YAML file
-        file_aliases = harvest_aliases_from_yaml(yaml_file, key)
+        file_aliases, harvest_error = harvest_aliases_from_yaml(yaml_file, key)
+        if harvest_error:
+            harvest_failures.append({'path': full_path, 'reason': harvest_error})
         for alias, target_key in file_aliases.items():
             if alias not in aliases:
                 aliases[alias] = []
@@ -545,6 +602,17 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
         'aliases': sorted_aliases,
         'files': files
     }
+
+    # F-376 (third silent exit-0): a file that cannot be harvested is still
+    # indexed with a path and a sha256, so it looks present and is unfindable.
+    # Refuse to emit an index in that state rather than reporting success over it.
+    if harvest_failures:
+        print(f"\nFAIL: {len(harvest_failures)} file(s) could not be harvested for aliases.")
+        print("      Each would still be indexed with a path and sha256 -- present, but")
+        print("      reachable by no name. Fix the file(s) and re-run; this is not advisory.")
+        for f in harvest_failures:
+            print(f"  - {f['path']}\n      {f['reason']}")
+        raise SystemExit(1)
 
     # Report collisions if any
     if collisions:
