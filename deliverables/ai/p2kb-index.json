@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-05T21:24:31.662388",
+    "generated": "2026-09-05T22:19:49.706083",
     "total_entries": 1133,
     "total_categories": 59,
-    "total_aliases": 2660,
-    "multi_target_aliases": 145,
+    "total_aliases": 2896,
+    "multi_target_aliases": 189,
     "source": "deliverables/ai/P2/"
   },
   "categories": {
@@ -1078,6 +1078,7 @@
       "p2kbPasm2Wrpin"
     ],
     "ABORT": [
+      "p2kbSpin2Abort",
       "p2kbSpin2KwABORT"
     ],
     "ABS": [
@@ -1251,6 +1252,9 @@
     "ANDN": [
       "p2kbPasm2Andn"
     ],
+    "ARRAY FORMATTER": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "ASMCLK": [
       "p2kbPasm2Asmclk"
     ],
@@ -1323,6 +1327,9 @@
     "BINARY ANGLE": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
+    "BINARY FORMATTER": [
+      "p2kbSpin2DbgDebugFormattersBinary"
+    ],
     "BIT MANIPULATION IDIOMS": [
       "p2kbSpin2BitManipulation"
     ],
@@ -1362,6 +1369,9 @@
     "BLNPIX": [
       "p2kbPasm2Blnpix"
     ],
+    "BLOCK TYPES": [
+      "p2kbSpin2Blocks"
+    ],
     "BMASK": [
       "p2kbPasm2Bmask",
       "p2kbSpin2OpOpBMASK"
@@ -1377,6 +1387,9 @@
     ],
     "BOARD SELECTION": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "BOOL": [
+      "p2kbSpin2DbgDebugFormattersComplete"
     ],
     "BOOT_PATTERN_SELECTION": [
       "p2kbArchBootPatternSelection"
@@ -1439,6 +1452,9 @@
     "Bit Manipulation Idioms": [
       "p2kbSpin2BitManipulation"
     ],
+    "Block Types": [
+      "p2kbSpin2Blocks"
+    ],
     "Branch Addressing in PASM2": [
       "p2kbPasm2BranchAddressing"
     ],
@@ -1495,10 +1511,14 @@
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
     "CASE": [
+      "p2kbSpin2Case",
       "p2kbSpin2KwCASE"
     ],
     "CASE OUTLINE": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "CASE SENSITIVITY": [
+      "p2kbLanguageCaseSensitivity"
     ],
     "CASE_FAST": [
       "p2kbSpin2KwCASEFAST"
@@ -1511,6 +1531,9 @@
     ],
     "CHOOSE P2 BOARD": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+    ],
+    "CIRCULAR ARITHMETIC": [
+      "p2kbSpin2OpOpAddmodulo"
     ],
     "CLICK ADAPTER": [
       "p2kbHwAddonClickAdapterAddonClickAdapter"
@@ -1540,10 +1563,12 @@
       "p2kbArchClickModuleIntegration"
     ],
     "CLKFREQ": [
-      "p2kbArchClockSystem"
+      "p2kbArchClockSystem",
+      "p2kbSpin2VarClkfreq"
     ],
     "CLKMODE": [
-      "p2kbArchClockSystem"
+      "p2kbArchClockSystem",
+      "p2kbSpin2VarClkmode"
     ],
     "CLKSET": [
       "p2kbSpin2Clkset"
@@ -1578,6 +1603,9 @@
     "CMPX": [
       "p2kbPasm2Cmpx"
     ],
+    "CODE EXAMPLE SCHEMA": [
+      "p2kbExampleCodeExampleSchema"
+    ],
     "COG": [
       "p2kbArchCog"
     ],
@@ -1589,6 +1617,9 @@
     ],
     "COG MANAGEMENT IDIOMS": [
       "p2kbSpin2CogOperations"
+    ],
+    "COG REGISTER MAP": [
+      "p2kbArchCompleteSystemRegistersIndex"
     ],
     "COG STACK SIZE": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
@@ -1630,6 +1661,9 @@
       "p2kbPasm2Cogstop",
       "p2kbSpin2Cogstop"
     ],
+    "COMMAND-LINE PREPROCESSOR OPTIONS": [
+      "p2kbSpin2ExternalSymbols"
+    ],
     "COMPARE P2 BOARDS": [
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison"
     ],
@@ -1653,6 +1687,9 @@
     ],
     "CON override syntax": [
       "p2kbSpin2KwOBJ"
+    ],
+    "CONDITIONAL DEBUG": [
+      "p2kbPasm2ConditionalDebug"
     ],
     "CONDITIONAL EXECUTION": [
       "p2kbPasm2ConditionalExecution"
@@ -1749,6 +1786,12 @@
     "CROSS_CUTTING_FORCES": [
       "p2kbArchCrossCuttingForces"
     ],
+    "C_Z": [
+      "p2kbSpin2DbgCZ"
+    ],
+    "Case Sensitivity": [
+      "p2kbLanguageCaseSensitivity"
+    ],
     "Charlieplex LED board": [
       "p2kbHwAddonLedMatrixAddonLedMatrix"
     ],
@@ -1778,6 +1821,12 @@
     ],
     "Cog Management Idioms": [
       "p2kbSpin2CogOperations"
+    ],
+    "Command-Line Preprocessor Options": [
+      "p2kbSpin2ExternalSymbols"
+    ],
+    "Conditional DEBUG": [
+      "p2kbPasm2ConditionalDebug"
     ],
     "Conditional Execution": [
       "p2kbPasm2ConditionalExecution"
@@ -1872,13 +1921,26 @@
     ],
     "DEBUG": [
       "p2kbPasm2Debug",
-      "p2kbSpin2DbgDebug"
+      "p2kbSpin2DbgDebug",
+      "p2kbSpin2Debug"
     ],
     "DEBUG BITMAP": [
       "p2kbSpin2Bitmap"
     ],
     "DEBUG FFT": [
       "p2kbSpin2Fft"
+    ],
+    "DEBUG FORMATTER": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "DEBUG FORMATTERS": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "DEBUG FORMATTERS COMPLETE": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "DEBUG GETTING STARTED": [
+      "p2kbSpin2DbgDebugNewUserGuide"
     ],
     "DEBUG INTERRUPT": [
       "p2kbArchDebugInterrupt"
@@ -1888,6 +1950,15 @@
     ],
     "DEBUG MIDI": [
       "p2kbSpin2Midi"
+    ],
+    "DEBUG NEW USER GUIDE": [
+      "p2kbSpin2DbgDebugNewUserGuide"
+    ],
+    "DEBUG OUTPUT FORMAT": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "DEBUG OUTPUT LOOKS WEIRD": [
+      "p2kbSpin2DbgDebugNewUserGuide"
     ],
     "DEBUG PLOT": [
       "p2kbSpin2Plot"
@@ -1906,6 +1977,15 @@
     ],
     "DEBUG TERM": [
       "p2kbSpin2Term"
+    ],
+    "DEBUG formatters": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "DEBUG formatters complete": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "DEBUG new user guide": [
+      "p2kbSpin2DbgDebugNewUserGuide"
     ],
     "DEBUG_255_LIMIT": [
       "p2kbSpin2DbgDebugStrategyGuide"
@@ -1976,6 +2056,9 @@
     "DEBUG_WINDOWS_OFF": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
+    "DECIMAL FORMATTER": [
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
     "DECMOD": [
       "p2kbPasm2Decmod"
     ],
@@ -2011,9 +2094,14 @@
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
     ],
     "DIRA": [
+      "p2kbArchDiraDirbRegisters",
       "p2kbSpin2RegDira"
     ],
+    "DIRA/DIRB": [
+      "p2kbArchDiraDirbRegisters"
+    ],
     "DIRB": [
+      "p2kbArchDiraDirbRegisters",
       "p2kbSpin2RegDirb"
     ],
     "DIRC": [
@@ -2021,6 +2109,9 @@
     ],
     "DIRECT DIGITAL SYNTHESIS": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "DIRECTION REGISTERS": [
+      "p2kbArchDiraDirbRegisters"
     ],
     "DIRH": [
       "p2kbPasm2Dirh"
@@ -2189,6 +2280,9 @@
     "ENDIANW": [
       "p2kbSpin2Endianw"
     ],
+    "ESCAPE STRINGS": [
+      "p2kbSpin2EscapeStrings"
+    ],
     "ESP8266 ADAPTER": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
     ],
@@ -2222,6 +2316,9 @@
     "EXACTLY-ONCE INSTANTIATION": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "EXAMPLE SCHEMA": [
+      "p2kbExampleCodeExampleSchema"
+    ],
     "EXECF": [
       "p2kbPasm2Execf"
     ],
@@ -2246,6 +2343,9 @@
     "Edge LDO group": [
       "p2kbArchPinPowerDomains"
     ],
+    "Escape Strings": [
+      "p2kbSpin2EscapeStrings"
+    ],
     "Essential P2 I/O Instructions": [
       "p2kbExampleSmartPins001BasicIo"
     ],
@@ -2263,6 +2363,17 @@
     ],
     "FBLOCK": [
       "p2kbPasm2Fblock"
+    ],
+    "FDEC": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "FDEC_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "FDEC_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays",
+      "p2kbSpin2DbgDebugFormattersComplete"
     ],
     "FFT": [
       "p2kbSpin2Fft"
@@ -2291,6 +2402,9 @@
     "FILE": [
       "p2kbSpin2AsmFile",
       "p2kbSpin2KwFILE"
+    ],
+    "FIRST DEBUG": [
+      "p2kbSpin2DbgDebugNewUserGuide"
     ],
     "FIRST-CONTACT PROCEDURE \u2014 THE ORDERED ROUTINE FOR AN UNSEEN HARDWARE MIX": [
       "p2kbArchFirstContactProcedure"
@@ -2358,6 +2472,12 @@
     ],
     "FORCE 4 (EMERGENT) \u2014 ALTITUDE: LAYER BY UNIT CONVERSION AND AXIS OF CHANGE": [
       "p2kbArchAltitudeLayering"
+    ],
+    "FORMATTER REFERENCE": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "FORMATTERS": [
+      "p2kbSpin2DbgDebugFormattersOverview"
     ],
     "FRAC": [
       "p2kbSpin2OpOpFRAC"
@@ -2527,6 +2647,15 @@
     "HDMI add-on board": [
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut"
     ],
+    "HEX DUMP": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "HEX FORMATTER": [
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "HEXADECIMAL FORMATTER": [
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
     "HHH": [
       "p2kbArchPinDriveConfiguration"
     ],
@@ -2622,8 +2751,14 @@
     "I/O Pin Timing": [
       "p2kbArchIoPinTiming"
     ],
+    "IDENTIFIER RULES": [
+      "p2kbLanguageIdentifierRules"
+    ],
     "IF": [
       "p2kbSpin2KwIF"
+    ],
+    "IF/IFNOT/ELSEIF/ELSEIFNOT/ELSE": [
+      "p2kbSpin2IfElseifElse"
     ],
     "IFNOT": [
       "p2kbSpin2KwIFNOT"
@@ -2679,6 +2814,9 @@
     "INCMOD": [
       "p2kbPasm2Incmod"
     ],
+    "INLINE PASM2": [
+      "p2kbSpin2InlinePasm"
+    ],
     "INLINE PASM2 IN SPIN2 METHODS (REDIRECT STUB)": [
       "p2kbSpin2InlinePasm2"
     ],
@@ -2730,8 +2868,14 @@
     "ISP_STACK_CHECK": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
+    "Identifier Rules": [
+      "p2kbLanguageIdentifierRules"
+    ],
     "Include Binary File": [
       "p2kbSpin2AsmFile"
+    ],
+    "Inline PASM2": [
+      "p2kbSpin2InlinePasm"
     ],
     "Inline PASM2 in Spin2 Methods (redirect stub)": [
       "p2kbSpin2InlinePasm2"
@@ -3014,6 +3158,9 @@
       "p2kbPasm2LoopControl",
       "p2kbSpin2LoopPatterns"
     ],
+    "LSTR": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "LSTRING": [
       "p2kbSpin2Lstring"
     ],
@@ -3071,6 +3218,9 @@
     "MERGEW": [
       "p2kbPasm2Mergew"
     ],
+    "METHOD DEFINITIONS": [
+      "p2kbSpin2MethodDefinition"
+    ],
     "METHOD POINTERS": [
       "p2kbSpin2MethodPointers"
     ],
@@ -3118,6 +3268,9 @@
     ],
     "MISO": [
       "p2kbArchSpiImplementationGuide"
+    ],
+    "MIXING SPIN2 AND PASM2": [
+      "p2kbSpin2Spin2Pasm2Integration"
     ],
     "MIXPIX": [
       "p2kbPasm2Mixpix"
@@ -3200,6 +3353,9 @@
     ],
     "Memory Access Idioms": [
       "p2kbSpin2MemoryAccess"
+    ],
+    "Method Definitions": [
+      "p2kbSpin2MethodDefinition"
     ],
     "Method Pointers": [
       "p2kbSpin2MethodPointers"
@@ -3284,6 +3440,7 @@
       "p2kbSpin2Newtask"
     ],
     "NEXT": [
+      "p2kbSpin2Next",
       "p2kbSpin2KwNEXT"
     ],
     "NIXINT1": [
@@ -3310,6 +3467,9 @@
     ],
     "NOTE VELOCITY": [
       "p2kbSpin2Midi"
+    ],
+    "NOTHING APPEARS IN DEBUG": [
+      "p2kbSpin2DbgDebugNewUserGuide"
     ],
     "Normal I/O (Smart Pin OFF)": [
       "p2kbArchSmartPin00000NormalMode"
@@ -3354,6 +3514,9 @@
     ],
     "OPEN DRAIN": [
       "p2kbArchPinDriveConfiguration"
+    ],
+    "OPERATOR PRECEDENCE": [
+      "p2kbSpin2OpPrecedence"
     ],
     "OR": [
       "p2kbPasm2Or",
@@ -3418,6 +3581,9 @@
     ],
     "Object Image Deduplication": [
       "p2kbSpin2ObjectImageDedup"
+    ],
+    "Operator Precedence": [
+      "p2kbSpin2OpPrecedence"
     ],
     "P1 CHARACTER SET": [
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet"
@@ -3731,6 +3897,9 @@
     "PASM2 Basic I/O - Digital Pin Control": [
       "p2kbPasm2BasicIo"
     ],
+    "PASM2 FROM SPIN2": [
+      "p2kbSpin2Spin2Pasm2Integration"
+    ],
     "PASM2 GETTING STARTED - CORE ASSEMBLY ESSENTIALS": [
       "p2kbGuidePasm2GettingStarted"
     ],
@@ -3755,6 +3924,9 @@
     "PASM2 Special Purpose Registers": [
       "p2kbPasm2SpecialRegisters"
     ],
+    "PASM2 from Spin2": [
+      "p2kbSpin2Spin2Pasm2Integration"
+    ],
     "PASM2-BASIC-IO": [
       "p2kbPasm2BasicIo"
     ],
@@ -3763,6 +3935,9 @@
     ],
     "PASM2_IDIOMS": [
       "p2kbPasm2Index"
+    ],
+    "PATTERN_INDEX": [
+      "p2kbSpin2PatternIndex"
     ],
     "PB": [
       "p2kbSpin2RegPb"
@@ -3820,6 +3995,9 @@
     ],
     "PIN CONTROL IDIOMS": [
       "p2kbPasm2PinControl"
+    ],
+    "PIN DIRECTION REGISTERS": [
+      "p2kbArchDiraDirbRegisters"
     ],
     "PIN DRIVE CONFIGURATION": [
       "p2kbArchPinDriveConfiguration"
@@ -3994,6 +4172,9 @@
     "PPP FIELD": [
       "p2kbArchPinSelection"
     ],
+    "PREPROCESSOR SYSTEM": [
+      "p2kbSpin2PreprocessorOverview"
+    ],
     "PRI": [
       "p2kbSpin2KwPRI"
     ],
@@ -4040,6 +4221,7 @@
       "p2kbHwEdge32mbModuleEdge32mbModule"
     ],
     "PTRA": [
+      "p2kbArchPtraRegister",
       "p2kbSpin2RegPtra"
     ],
     "PTRB": [
@@ -4476,6 +4658,9 @@
     "Pin_Drive_Configuration": [
       "p2kbArchPinDriveConfiguration"
     ],
+    "Preprocessor System": [
+      "p2kbSpin2PreprocessorOverview"
+    ],
     "Prop Plug": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
@@ -4535,6 +4720,7 @@
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "QUIT": [
+      "p2kbSpin2Quit",
       "p2kbSpin2KwQUIT"
     ],
     "QVECTOR": [
@@ -4643,8 +4829,14 @@
     "REGISTER ADDRESS OPERATOR": [
       "p2kbSpin2SymHash"
     ],
+    "REGISTER CONSTANTS": [
+      "p2kbSpin2RegisterConstants"
+    ],
     "REGISTER INDIRECTION - ALTX INSTRUCTIONS": [
       "p2kbPasm2RegisterIndirection"
+    ],
+    "REGISTER MAP": [
+      "p2kbArchCompleteSystemRegistersIndex"
     ],
     "REGISTER OPERATION IDIOMS": [
       "p2kbPasm2RegisterOperations"
@@ -4668,6 +4860,7 @@
       "p2kbPasm2RepInstruction"
     ],
     "REPEAT": [
+      "p2kbSpin2Repeat",
       "p2kbSpin2KwREPEAT"
     ],
     "REPLICATING ONE OBJECT TREE ONTO N IDENTICAL SHARED BUSES": [
@@ -4768,6 +4961,9 @@
     "RING BUFFER": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
+    "RING BUFFER WRAP": [
+      "p2kbSpin2OpOpAddmodulo"
+    ],
     "ROL": [
       "p2kbPasm2Rol",
       "p2kbSpin2OpOpROL"
@@ -4828,6 +5024,9 @@
     "Register Address Operator": [
       "p2kbSpin2SymHash"
     ],
+    "Register Constants": [
+      "p2kbSpin2RegisterConstants"
+    ],
     "Register Indirection - ALTx Instructions": [
       "p2kbPasm2RegisterIndirection"
     ],
@@ -4849,6 +5048,30 @@
     "SAR": [
       "p2kbPasm2Sar",
       "p2kbSpin2OpOpSAR"
+    ],
+    "SBIN": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "SBIN_": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "SBIN_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SBIN_BYTE": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "SBIN_LONG": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "SBIN_WORD": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
     ],
     "SCA": [
       "p2kbPasm2Sca",
@@ -4878,6 +5101,30 @@
     ],
     "SD card add-on": [
       "p2kbHwAddonMicrosdAddonMicrosd"
+    ],
+    "SDEC": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal",
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "SDEC_": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "SDEC_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SDEC_BYTE": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "SDEC_LONG": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "SDEC_WORD": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
     ],
     "SD_CARD_BOOT": [
       "p2kbArchSdCardBoot"
@@ -5043,6 +5290,30 @@
     "SHARED_BUS_REPLICATION": [
       "p2kbArchSharedBusReplication"
     ],
+    "SHEX": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal",
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "SHEX_": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "SHEX_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SHEX_BYTE": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "SHEX_LONG": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "SHEX_WORD": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
     "SHL": [
       "p2kbPasm2Shl"
     ],
@@ -5144,6 +5415,9 @@
     "SPECIAL CONFIGURATION SYMBOLS": [
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
+    "SPECIAL PURPOSE REGISTERS": [
+      "p2kbArchCompleteSystemRegistersIndex"
+    ],
     "SPECIAL REGISTERS": [
       "p2kbPasm2Pasm2SpecialRegisters"
     ],
@@ -5171,6 +5445,12 @@
     "SPIN2 BASIC I/O - DIGITAL PIN CONTROL": [
       "p2kbSpin2BasicIo"
     ],
+    "SPIN2 COMPLETE MAP": [
+      "p2kbSpin2Spin2LanguageCompleteMap"
+    ],
+    "SPIN2 COVERAGE REPORT": [
+      "p2kbSpin2Spin2LanguageCompleteMap"
+    ],
     "SPIN2 GETTING STARTED - CORE LANGUAGE ESSENTIALS": [
       "p2kbGuideSpin2GettingStarted"
     ],
@@ -5180,17 +5460,32 @@
     "SPIN2 JONNYMAC NAMING CONVENTIONS": [
       "p2kbSpin2Spin2NamingJonnymac"
     ],
+    "SPIN2 LANGUAGE MAP": [
+      "p2kbSpin2Spin2LanguageCompleteMap"
+    ],
+    "SPIN2 LANGUAGE SCHEMA": [
+      "p2kbSpin2Spin2LanguageSchema"
+    ],
     "SPIN2 OPERATORS": [
       "p2kbSpin2Operators"
     ],
+    "SPIN2 PASM2 INTEGRATION": [
+      "p2kbSpin2Spin2Pasm2Integration"
+    ],
     "SPIN2 PROFESSIONAL FORMATTING STANDARDS": [
       "p2kbSpin2Spin2FormattingStandards"
+    ],
+    "SPIN2 SCHEMA": [
+      "p2kbSpin2Spin2LanguageSchema"
     ],
     "SPIN2 STRUCTURES": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "SPIN2 TASKS": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "SPIN2 TO PASM2": [
+      "p2kbSpin2Spin2Pasm2Integration"
     ],
     "SPIN2-BASIC-IO": [
       "p2kbSpin2BasicIo"
@@ -5443,6 +5738,12 @@
     "SYNCHRONOUS SERIAL TRANSMIT (SYNC TX, SST)": [
       "p2kbArchSmartPin11100SyncSerialTransmit"
     ],
+    "SYSTEM REGISTER INDEX": [
+      "p2kbArchCompleteSystemRegistersIndex"
+    ],
+    "SYSTEM REGISTERS": [
+      "p2kbArchCompleteSystemRegistersIndex"
+    ],
     "Scratch Storage Idioms": [
       "p2kbPasm2ScratchStorage"
     ],
@@ -5506,14 +5807,35 @@
     "Spin2 Operators": [
       "p2kbSpin2Operators"
     ],
+    "Spin2 PASM2 integration": [
+      "p2kbSpin2Spin2Pasm2Integration"
+    ],
     "Spin2 Professional Formatting Standards": [
       "p2kbSpin2Spin2FormattingStandards"
+    ],
+    "Spin2 complete map": [
+      "p2kbSpin2Spin2LanguageCompleteMap"
+    ],
+    "Spin2 coverage report": [
+      "p2kbSpin2Spin2LanguageCompleteMap"
+    ],
+    "Spin2 language map": [
+      "p2kbSpin2Spin2LanguageCompleteMap"
+    ],
+    "Spin2 language schema": [
+      "p2kbSpin2Spin2LanguageSchema"
+    ],
+    "Spin2 schema": [
+      "p2kbSpin2Spin2LanguageSchema"
     ],
     "Spin2 structures": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
     ],
     "Spin2 tasks": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "Spin2 to PASM2": [
+      "p2kbSpin2Spin2Pasm2Integration"
     ],
     "Streamer and Smart Pin Control": [
       "p2kbPasm2StreamerSmartpinControl"
@@ -5763,13 +6085,100 @@
     "Typed Pointers": [
       "p2kbSpin2OpTypedPointers"
     ],
+    "UBIN": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "UBIN_": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "UBIN_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UBIN_BYTE": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "UBIN_LONG": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "UBIN_WORD": [
+      "p2kbSpin2DbgDebugFormattersBinary",
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "UDEC": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal",
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "UDEC_": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "UDEC_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UDEC_BYTE": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "UDEC_LONG": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "UDEC_WORD": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "UHEX": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal",
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "UHEX_": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "UHEX_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UHEX_BYTE": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "UHEX_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UHEX_LONG": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "UHEX_WORD": [
+      "p2kbSpin2DbgDebugFormattersComplete",
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "UNDERSCORE RULE": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
     "UNIVERSAL MOTOR DRIVER": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "UNIVERSAL MOTOR DRIVER P2 ADD-ON BOARD": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
+    "UNSIGNED MODULO": [
+      "p2kbSpin2OpOpAddmodulo"
+    ],
+    "UNSIGNED MODULO ADD": [
+      "p2kbSpin2OpModuloAdd"
+    ],
     "UNSIGNED REMAINDER": [
+      "p2kbSpin2OpOpAddmodulo"
+    ],
+    "UNSIGNED REMAINDER (SEE OP_ADDMODULO.YAML)": [
       "p2kbSpin2OpModuloAdd"
     ],
     "UNTIL": [
@@ -5812,10 +6221,19 @@
       "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
     "Unsigned Remainder": [
+      "p2kbSpin2OpOpAddmodulo"
+    ],
+    "Unsigned Remainder (see op_addmodulo.yaml)": [
       "p2kbSpin2OpModuloAdd"
     ],
     "VAR": [
       "p2kbSpin2KwVAR"
+    ],
+    "VARBASE": [
+      "p2kbSpin2VarVarbase"
+    ],
+    "VARIABLE SCOPING AND BEST PRACTICES": [
+      "p2kbLanguageVariableScopingBestPractices"
     ],
     "VECTOR GRAPHICS": [
       "p2kbSpin2Plot"
@@ -5855,6 +6273,9 @@
     ],
     "VSCode/PNUT_TS Documentation Style": [
       "p2kbSpin2VscodePnutDocumentationStyle"
+    ],
+    "Variable Scoping and Best Practices": [
+      "p2kbLanguageVariableScopingBestPractices"
     ],
     "WAITATN": [
       "p2kbPasm2Waitatn",
@@ -5949,6 +6370,9 @@
     "WHICH BOARD": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "WHICH FORMATTER TO USE": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
     "WHICH P2 BOARD": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
@@ -6006,6 +6430,9 @@
     ],
     "WORKED_DERIVATION_STREAMING_PIPELINE": [
       "p2kbArchWorkedDerivationStreamingPipeline"
+    ],
+    "WRAP-AROUND INDEX": [
+      "p2kbSpin2OpOpAddmodulo"
     ],
     "WRBYTE": [
       "p2kbPasm2Wrbyte"
@@ -6165,15 +6592,248 @@
     "XZERO mode": [
       "p2kbArchModesReference"
     ],
+    "X_16P_2DAC8_WFWORD": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_16P_4DAC4_WFWORD": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_1ADC8_0P_1DAC8_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_1ADC8_8P_2DAC8_WFWORD": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_1P_1DAC1_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_2ADC8_0P_2DAC8_WFWORD": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_2ADC8_16P_4DAC8_WFLONG": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_2P_1DAC2_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_2P_2DAC1_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_32P_4DAC8_WFLONG": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_4ADC8_0P_4DAC8_WFLONG": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_4P_1DAC4_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_4P_2DAC2_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_4P_4DAC1_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_8P_1DAC8_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_8P_2DAC4_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_8P_4DAC2_WFBYTE": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_ALT_OFF": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_ALT_ON": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_0N0_0N0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_0N0_X_X": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_0_0_0_0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_0_0_X_X": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_0_X_X_X": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_1N1_0N0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_1_0_1_0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_1_0_X_X": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_3_2_1_0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_OFF": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_X_0_X_X": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_X_X_0N0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_X_X_0_0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_X_X_0_X": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_X_X_1_0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DACS_X_X_X_0": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DDS_GOERTZEL_SINC1": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_DDS_GOERTZEL_SINC2": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_16X2_1DAC2": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_16X2_2DAC1": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_16X2_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_1X32_4DAC8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_2X16_2DAC8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_2X16_4DAC4": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_32X1_1DAC1": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_32X1_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_4X8_1DAC8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_4X8_2DAC4": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_4X8_4DAC2": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_4X8_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_8X4_1DAC4": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_8X4_2DAC2": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_8X4_4DAC1": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_IMM_8X4_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_PINS_OFF": [
+      "p2kbSpin2StreamerSymbols"
+    ],
     "X_PINS_ON": [
-      "p2kbArchPinSelection"
+      "p2kbArchPinSelection",
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_1P_1DAC1": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_2P_1DAC2": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_2P_2DAC1": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_4P_1DAC4": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_4P_2DAC2": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_4P_4DAC1": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_8P_1DAC8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_8P_2DAC4": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_8P_4DAC2": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_LUMA8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_RGB8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFBYTE_RGBI8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFLONG_16X2_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFLONG_32P_4DAC8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFLONG_32X1_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFLONG_4X8_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFLONG_8X4_LUT": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFLONG_RGB24": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFWORD_16P_2DAC8": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFWORD_16P_4DAC4": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_RFWORD_RGB16": [
+      "p2kbSpin2StreamerSymbols"
+    ],
+    "X_WRITE_OFF": [
+      "p2kbSpin2StreamerSymbols"
     ],
     "X_WRITE_ON": [
-      "p2kbArchPinSelection"
+      "p2kbArchPinSelection",
+      "p2kbSpin2StreamerSymbols"
     ],
     "ZEROX": [
       "p2kbPasm2Zerox",
       "p2kbSpin2OpOpZEROX"
+    ],
+    "ZSTR": [
+      "p2kbSpin2DbgDebugFormattersComplete"
     ],
     "^@": [
       "p2kbSpin2SymCaretAt"
@@ -6348,6 +7008,9 @@
     "animation_engine": [
       "p2kbSpin2AnimationEngine"
     ],
+    "array formatter": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "array_architecture": [
       "p2kbSpin2ArrayArchitecture"
     ],
@@ -6389,6 +7052,9 @@
     ],
     "binary angle": [
       "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "binary formatter": [
+      "p2kbSpin2DbgDebugFormattersBinary"
     ],
     "bitc": [
       "p2kbPasm2Bitc"
@@ -6548,6 +7214,9 @@
     "choose P2 board": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
+    "circular arithmetic": [
+      "p2kbSpin2OpOpAddmodulo"
+    ],
     "click_module_integration": [
       "p2kbArchClickModuleIntegration"
     ],
@@ -6577,6 +7246,12 @@
     ],
     "cmpx": [
       "p2kbPasm2Cmpx"
+    ],
+    "code example schema": [
+      "p2kbExampleCodeExampleSchema"
+    ],
+    "cog register map": [
+      "p2kbArchCompleteSystemRegistersIndex"
     ],
     "cog stack size": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
@@ -6677,6 +7352,18 @@
     "debug": [
       "p2kbPasm2Debug"
     ],
+    "debug formatter": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "debug getting started": [
+      "p2kbSpin2DbgDebugNewUserGuide"
+    ],
+    "debug output format": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "debug output looks weird": [
+      "p2kbSpin2DbgDebugNewUserGuide"
+    ],
     "debug_255_limit": [
       "p2kbSpin2DbgDebugStrategyGuide"
     ],
@@ -6688,6 +7375,9 @@
     ],
     "debug_strategy_guide": [
       "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "decimal formatter": [
+      "p2kbSpin2DbgDebugFormattersDecimal"
     ],
     "decmod": [
       "p2kbPasm2Decmod"
@@ -6724,6 +7414,9 @@
     ],
     "direct digital synthesis": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
+    ],
+    "direction registers": [
+      "p2kbArchDiraDirbRegisters"
     ],
     "dirh": [
       "p2kbPasm2Dirh"
@@ -6860,6 +7553,9 @@
     "exactly-once instantiation": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "example schema": [
+      "p2kbExampleCodeExampleSchema"
+    ],
     "execf": [
       "p2kbPasm2Execf"
     ],
@@ -6892,6 +7588,9 @@
     ],
     "field-oriented motor control": [
       "p2kbAppNoteP2an002CordicForRealWork"
+    ],
+    "first DEBUG": [
+      "p2kbSpin2DbgDebugNewUserGuide"
     ],
     "first_contact_procedure": [
       "p2kbArchFirstContactProcedure"
@@ -6934,6 +7633,12 @@
     ],
     "footprint": [
       "p2kbHwP2PackageMechanicalP2PackageMechanical"
+    ],
+    "formatter reference": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "formatters": [
+      "p2kbSpin2DbgDebugFormattersOverview"
     ],
     "framebuffer": [
       "p2kbSpin2Bitmap"
@@ -7023,6 +7728,15 @@
     ],
     "hardware_specific_app": [
       "p2kbSpin2HardwareSpecificApp"
+    ],
+    "hex dump": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "hex formatter": [
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "hexadecimal formatter": [
+      "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
     "high-definition audio board": [
       "p2kbHwAddonHdAudioAddonHdAudio"
@@ -7349,6 +8063,9 @@
     "mini prototyping board": [
       "p2kbHwAddonMiniPrototypingAddonMiniPrototyping"
     ],
+    "mixing Spin2 and PASM2": [
+      "p2kbSpin2Spin2Pasm2Integration"
+    ],
     "mixpix": [
       "p2kbPasm2Mixpix"
     ],
@@ -7501,6 +8218,9 @@
     "note velocity": [
       "p2kbSpin2Midi"
     ],
+    "nothing appears in debug": [
+      "p2kbSpin2DbgDebugNewUserGuide"
+    ],
     "object archetypes": [
       "p2kbSpin2ObjectArchetypes"
     ],
@@ -7597,6 +8317,9 @@
     "pasm2_initialization": [
       "p2kbPasm2Pasm2Initialization"
     ],
+    "pattern_index": [
+      "p2kbSpin2PatternIndex"
+    ],
     "per-cog mailbox": [
       "p2kbArchSharedBusBroker"
     ],
@@ -7623,6 +8346,9 @@
     ],
     "pin capture": [
       "p2kbArchPinCapture"
+    ],
+    "pin direction registers": [
+      "p2kbArchDiraDirbRegisters"
     ],
     "pin drive configuration": [
       "p2kbArchPinDriveConfiguration"
@@ -7906,6 +8632,9 @@
     "regexec": [
       "p2kbSpin2Regexec"
     ],
+    "register map": [
+      "p2kbArchCompleteSystemRegistersIndex"
+    ],
     "register_indirection": [
       "p2kbPasm2RegisterIndirection"
     ],
@@ -8001,6 +8730,9 @@
     ],
     "ring buffer": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
+    ],
+    "ring buffer wrap": [
+      "p2kbSpin2OpOpAddmodulo"
     ],
     "robotics": [
       "p2kbSpin2Robotics"
@@ -8288,6 +9020,9 @@
     "spatial_computing": [
       "p2kbArchSpatialComputing"
     ],
+    "special purpose registers": [
+      "p2kbArchCompleteSystemRegistersIndex"
+    ],
     "special_registers": [
       "p2kbPasm2SpecialRegisters"
     ],
@@ -8515,6 +9250,12 @@
     "synchronous detection": [
       "p2kbArchDdsGoertzel"
     ],
+    "system register index": [
+      "p2kbArchCompleteSystemRegistersIndex"
+    ],
+    "system registers": [
+      "p2kbArchCompleteSystemRegistersIndex"
+    ],
     "task continue": [
       "p2kbSpin2Taskcont"
     ],
@@ -8639,6 +9380,18 @@
     "typed pointers": [
       "p2kbSpin2OpTypedPointers"
     ],
+    "underscore rule": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
+    "unsigned modulo": [
+      "p2kbSpin2OpOpAddmodulo"
+    ],
+    "unsigned modulo add": [
+      "p2kbSpin2OpModuloAdd"
+    ],
+    "unsigned remainder": [
+      "p2kbSpin2OpOpAddmodulo"
+    ],
     "utility_library": [
       "p2kbSpin2UtilityLibrary"
     ],
@@ -8741,6 +9494,9 @@
     "which board": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
+    "which formatter to use": [
+      "p2kbSpin2DbgDebugFormattersOverview"
+    ],
     "which pins": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
@@ -8773,6 +9529,9 @@
     ],
     "worked_derivation_streaming_pipeline": [
       "p2kbArchWorkedDerivationStreamingPipeline"
+    ],
+    "wrap-around index": [
+      "p2kbSpin2OpOpAddmodulo"
     ],
     "wrbyte": [
       "p2kbPasm2Wrbyte"
@@ -9340,13 +10099,13 @@
     },
     "p2kbArchCompleteSystemRegistersIndex": {
       "path": "deliverables/ai/P2/architecture/system-registers/complete-system-registers-index.yaml",
-      "mtime": 1787785333,
-      "sha256": "30f9fcaa8556435b4cf2ab18e83e0d8439c3619ac840ea11b458525949510171"
+      "mtime": 1788646757,
+      "sha256": "975634281b90adf820695aaf20c97334fd0f8360df81cd3227d6cc112d0a92de"
     },
     "p2kbArchDiraDirbRegisters": {
       "path": "deliverables/ai/P2/architecture/system-registers/dira-dirb-registers.yaml",
-      "mtime": 1764449566,
-      "sha256": "837e7e9afa295a051650d0b9e51ff462449879fb627323d814e2d1c58b7e9beb"
+      "mtime": 1788646757,
+      "sha256": "4775aaec1c46b3c0fc104a469d77edffe0cb996f523c11e0cf276ce27489e453"
     },
     "p2kbArchPtraRegister": {
       "path": "deliverables/ai/P2/architecture/system-registers/ptra-register.yaml",
@@ -9360,8 +10119,8 @@
     },
     "p2kbExampleCodeExampleSchema": {
       "path": "deliverables/ai/P2/code-examples/code-example-schema.yaml",
-      "mtime": 1764449566,
-      "sha256": "93df7de5bcb4511a901bb1689cc337e1097c40aee988e6cb5f03a109b81102ae"
+      "mtime": 1788646757,
+      "sha256": "5cdc796b83931a6692371fe3c8d3fa7e881d57231f3c98f895f4046753d0bec5"
     },
     "p2kbExampleFlashLoaderCaseStudy": {
       "path": "deliverables/ai/P2/code-examples/flash-loader-case-study.yaml",
@@ -12780,38 +13539,38 @@
     },
     "p2kbSpin2DbgDebugFormattersArrays": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-arrays.yaml",
-      "mtime": 1764449566,
-      "sha256": "65b36f05981168accc912a330af7401654fa074d8426c867fed10c4dc76731ec"
+      "mtime": 1788646757,
+      "sha256": "2fd73f33e3b6166d90cba94a4e3bc141aef9f126fb87822c209f25e1c29c6039"
     },
     "p2kbSpin2DbgDebugFormattersBinary": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-binary.yaml",
-      "mtime": 1764449566,
-      "sha256": "d317c2985ccb0730c85c700b3998324e379385c2e03ccd0d903a6fc0fca7cba0"
+      "mtime": 1788646757,
+      "sha256": "462a08b72407789b746c21d77db337a49800863cab1d553797d8a822e9f48fe2"
     },
     "p2kbSpin2DbgDebugFormattersComplete": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-complete.yaml",
-      "mtime": 1784009392,
-      "sha256": "221e3854e758a42d56e1768bab7a2293c9866f1329e77bacd2f89a2008ee9688"
+      "mtime": 1788646757,
+      "sha256": "ee10c91145f8ce79b5394a6d962e22a63431e2e56b5a9f638d39711d8d4c4718"
     },
     "p2kbSpin2DbgDebugFormattersDecimal": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-decimal.yaml",
-      "mtime": 1764449566,
-      "sha256": "df1c8025ca9eae0630f7915f4bcd0c1700f42d03b45f9890e221519b5fca0051"
+      "mtime": 1788646757,
+      "sha256": "0ebe29aa725ce94074cebc95edd663baf94ed2cabfa84cd81b733a1562f6e6e7"
     },
     "p2kbSpin2DbgDebugFormattersHexadecimal": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-hexadecimal.yaml",
-      "mtime": 1764449566,
-      "sha256": "77c182200428fe4765bc923978cbbe6f970fc01ee89ec3d51e07e8404ae5c26e"
+      "mtime": 1788646757,
+      "sha256": "517dd5b2077a440f59160a5141ef81a83d35acf4d5af43baf74b989091efd304"
     },
     "p2kbSpin2DbgDebugFormattersOverview": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-overview.yaml",
-      "mtime": 1764449566,
-      "sha256": "29dafa8cb14ef8781bb4ce6403fc56067314cdf8b68943439d2ec5751f28ed0e"
+      "mtime": 1788646757,
+      "sha256": "655731b2218b505874b0540139503592b8501bc3c72ea810cf14ab7affde197c"
     },
     "p2kbSpin2DbgDebugNewUserGuide": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-new-user-guide.yaml",
-      "mtime": 1764449566,
-      "sha256": "bf766701ea7a71a7deee9d32c2c74329b7452437877927a58ef627b2d10662e7"
+      "mtime": 1788646757,
+      "sha256": "6a37572a08f35d51f5ea2516de231da5257af36741959f4908c6574a6fdaf9d5"
     },
     "p2kbSpin2DbgDebugStrategyGuide": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
@@ -12915,8 +13674,8 @@
     },
     "p2kbSpin2Spin2Pasm2Integration": {
       "path": "deliverables/ai/P2/language/spin2/integration/spin2-pasm2-integration.yaml",
-      "mtime": 1786839805,
-      "sha256": "09afa9c27d14e8c2edb31ded9061627dff467af56c11d8e760a1ace38a90f670"
+      "mtime": 1788646757,
+      "sha256": "66f97d1cb45e5f73a268ad6ef7ef4d55ee1dc436d12ff468c61c6357c289cf55"
     },
     "p2kbSpin2KwABORT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/ABORT.yaml",
@@ -13615,8 +14374,8 @@
     },
     "p2kbSpin2OpModuloAdd": {
       "path": "deliverables/ai/P2/language/spin2/operators/modulo_add.yaml",
-      "mtime": 1788643444,
-      "sha256": "2d1152c84e306e825fe28cef96ae6ff664344fc5f5d93b7fa6d517dab55d40ee"
+      "mtime": 1788646757,
+      "sha256": "0264cf611b3e09cba9bb2deae9d7de50ad12e472f53214008daf5f71f9d6786a"
     },
     "p2kbSpin2OpOpABS": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_ABS.yaml",
@@ -13770,8 +14529,8 @@
     },
     "p2kbSpin2OpOpAddmodulo": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_addmodulo.yaml",
-      "mtime": 1764449566,
-      "sha256": "9db2d4ed9c794c71ec7f45a0220d4bb007511bddf8459ba9a60caacd2288e245"
+      "mtime": 1788646757,
+      "sha256": "28ccbe1b109c0958aa54eb6507ced8179d3e6b0fc0c2f90a492f2ffa33a02aaa"
     },
     "p2kbSpin2OpOpAnd": {
       "path": "deliverables/ai/P2/language/spin2/operators/op_and.yaml",
@@ -14470,13 +15229,13 @@
     },
     "p2kbSpin2Spin2LanguageCompleteMap": {
       "path": "deliverables/ai/P2/language/spin2/spin2-language-complete-map.yaml",
-      "mtime": 1780269492,
-      "sha256": "e341445720e2d82166ab32a973a70385f53caa616b5da7a20b33e8c0f7f0edb5"
+      "mtime": 1788646757,
+      "sha256": "1e59257f2e2285daff259846c674d0950aafd709509fe3edd1cbe6f401452682"
     },
     "p2kbSpin2Spin2LanguageSchema": {
       "path": "deliverables/ai/P2/language/spin2/spin2-language-schema.yaml",
-      "mtime": 1764449566,
-      "sha256": "d8596098ccbc58c5ac04b4bdaed0b7467fe9dcf220658eb102d50ba7170c32c0"
+      "mtime": 1788646757,
+      "sha256": "e2ec07cb2ccfa6738425b6225ec529869f760897d30778ecf938f8b99fe9d9f7"
     },
     "p2kbSpin2Debug": {
       "path": "deliverables/ai/P2/language/spin2/statements/debug.yaml",
@@ -14490,8 +15249,8 @@
     },
     "p2kbSpin2StreamerSymbols": {
       "path": "deliverables/ai/P2/language/spin2/symbols/streamer-symbols.yaml",
-      "mtime": 1787351393,
-      "sha256": "e4aef761b7c7d64841e0d6d4c91b722ef85b025db10321d9c66c3bc42ae54809"
+      "mtime": 1788646757,
+      "sha256": "2211897a6d61f46a9d3028b62aad34a05e2d28c0d5e0fd0f443a119010b805b4"
     },
     "p2kbSpin2VarClkfreq": {
       "path": "deliverables/ai/P2/language/spin2/system-variables/clkfreq.yaml",
