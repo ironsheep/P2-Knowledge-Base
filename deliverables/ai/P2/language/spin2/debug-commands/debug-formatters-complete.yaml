@@ -1,6 +1,52 @@
 # Complete Debug Formatters Reference
 # Remember: formatter_() gives just value, formatter() includes name
 
+
+# Findability index (F-401, 2026-09-05). This file named itself in no
+# top-level field, so neither it nor anything it documents was reachable by
+# name through the published index -- only by guessing its camelCase key.
+# An alias is a lookup key, never a definition; every name below is defined
+# in this file.
+aliases:
+  - "DEBUG formatters complete"
+  - "formatter reference"
+  - "UDEC"
+  - "UDEC_"
+  - "UDEC_BYTE"
+  - "UDEC_WORD"
+  - "UDEC_LONG"
+  - "SDEC"
+  - "SDEC_"
+  - "SDEC_BYTE"
+  - "SDEC_WORD"
+  - "SDEC_LONG"
+  - "UHEX"
+  - "UHEX_"
+  - "UHEX_BYTE"
+  - "UHEX_WORD"
+  - "UHEX_LONG"
+  - "SHEX"
+  - "SHEX_"
+  - "SHEX_BYTE"
+  - "SHEX_WORD"
+  - "SHEX_LONG"
+  - "UBIN"
+  - "UBIN_"
+  - "UBIN_BYTE"
+  - "UBIN_WORD"
+  - "UBIN_LONG"
+  - "SBIN"
+  - "SBIN_"
+  - "SBIN_BYTE"
+  - "SBIN_WORD"
+  - "SBIN_LONG"
+  - "FDEC"
+  - "FDEC_"
+  - "FDEC_ARRAY"
+  - "ZSTR"
+  - "LSTR"
+  - "BOOL"
+
 underscore_rule: "name = value → value"
 
 # DECIMAL (everyday numbers)

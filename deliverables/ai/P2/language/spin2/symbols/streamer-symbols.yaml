@@ -3,7 +3,110 @@
 
 category: streamer
 description: Complete streamer symbol definitions with values
-total_symbols: 82
+
+# Count of the records actually present below, derived by walking them. This
+# field read 82 until 2026-09-05; the file holds 78 records carrying a `symbol:`
+# key, with no duplicates, so the old tally overstated the file by four and no
+# fourth-symbol group is missing -- there were never 82. Corrected rather than
+# explained away, per the same rule that corrected
+# spin2-builtin-symbols-complete.yaml's 1224-vs-136.
+total_symbols: 78
+
+# Findability index. `generate-p2kb-index.py` harvests names from TOP-LEVEL
+# fields, and every symbol below is defined one level down under a `symbol:` key
+# inside a mode list -- so without this block not one X_* streamer constant is
+# reachable by name through the published index, and neither is this file. That
+# was measured on 2026-09-05 (F-401): X_RFBYTE_1P_1DAC1, X_IMM_32X1_LUT and
+# X_ALT_ON all resolved to nothing, while X_PINS_ON and X_WRITE_ON resolved only
+# because architecture/streamer/pin-selection.yaml happens to list those two in
+# its own hand-written aliases.
+#
+# These constants are what a streamer command word is COMPOSED FROM, and
+# composing one wrong is silent -- see pin-selection.yaml's
+# what_goes_wrong_at_an_unaligned_base. A constant an agent cannot look up is a
+# constant it will guess.
+#
+# Every name here is DEFINED below -- an alias is a lookup key, never a
+# definition.
+aliases:
+  - "X_16P_2DAC8_WFWORD"
+  - "X_16P_4DAC4_WFWORD"
+  - "X_1ADC8_0P_1DAC8_WFBYTE"
+  - "X_1ADC8_8P_2DAC8_WFWORD"
+  - "X_1P_1DAC1_WFBYTE"
+  - "X_2ADC8_0P_2DAC8_WFWORD"
+  - "X_2ADC8_16P_4DAC8_WFLONG"
+  - "X_2P_1DAC2_WFBYTE"
+  - "X_2P_2DAC1_WFBYTE"
+  - "X_32P_4DAC8_WFLONG"
+  - "X_4ADC8_0P_4DAC8_WFLONG"
+  - "X_4P_1DAC4_WFBYTE"
+  - "X_4P_2DAC2_WFBYTE"
+  - "X_4P_4DAC1_WFBYTE"
+  - "X_8P_1DAC8_WFBYTE"
+  - "X_8P_2DAC4_WFBYTE"
+  - "X_8P_4DAC2_WFBYTE"
+  - "X_ALT_OFF"
+  - "X_ALT_ON"
+  - "X_DACS_0N0_0N0"
+  - "X_DACS_0N0_X_X"
+  - "X_DACS_0_0_0_0"
+  - "X_DACS_0_0_X_X"
+  - "X_DACS_0_X_X_X"
+  - "X_DACS_1N1_0N0"
+  - "X_DACS_1_0_1_0"
+  - "X_DACS_1_0_X_X"
+  - "X_DACS_3_2_1_0"
+  - "X_DACS_OFF"
+  - "X_DACS_X_0_X_X"
+  - "X_DACS_X_X_0N0"
+  - "X_DACS_X_X_0_0"
+  - "X_DACS_X_X_0_X"
+  - "X_DACS_X_X_1_0"
+  - "X_DACS_X_X_X_0"
+  - "X_DDS_GOERTZEL_SINC1"
+  - "X_DDS_GOERTZEL_SINC2"
+  - "X_IMM_16X2_1DAC2"
+  - "X_IMM_16X2_2DAC1"
+  - "X_IMM_16X2_LUT"
+  - "X_IMM_1X32_4DAC8"
+  - "X_IMM_2X16_2DAC8"
+  - "X_IMM_2X16_4DAC4"
+  - "X_IMM_32X1_1DAC1"
+  - "X_IMM_32X1_LUT"
+  - "X_IMM_4X8_1DAC8"
+  - "X_IMM_4X8_2DAC4"
+  - "X_IMM_4X8_4DAC2"
+  - "X_IMM_4X8_LUT"
+  - "X_IMM_8X4_1DAC4"
+  - "X_IMM_8X4_2DAC2"
+  - "X_IMM_8X4_4DAC1"
+  - "X_IMM_8X4_LUT"
+  - "X_PINS_OFF"
+  - "X_PINS_ON"
+  - "X_RFBYTE_1P_1DAC1"
+  - "X_RFBYTE_2P_1DAC2"
+  - "X_RFBYTE_2P_2DAC1"
+  - "X_RFBYTE_4P_1DAC4"
+  - "X_RFBYTE_4P_2DAC2"
+  - "X_RFBYTE_4P_4DAC1"
+  - "X_RFBYTE_8P_1DAC8"
+  - "X_RFBYTE_8P_2DAC4"
+  - "X_RFBYTE_8P_4DAC2"
+  - "X_RFBYTE_LUMA8"
+  - "X_RFBYTE_RGB8"
+  - "X_RFBYTE_RGBI8"
+  - "X_RFLONG_16X2_LUT"
+  - "X_RFLONG_32P_4DAC8"
+  - "X_RFLONG_32X1_LUT"
+  - "X_RFLONG_4X8_LUT"
+  - "X_RFLONG_8X4_LUT"
+  - "X_RFLONG_RGB24"
+  - "X_RFWORD_16P_2DAC8"
+  - "X_RFWORD_16P_4DAC4"
+  - "X_RFWORD_RGB16"
+  - "X_WRITE_OFF"
+  - "X_WRITE_ON"
 
 # Mode symbols - Immediate → LUT
 immediate_lut_modes:

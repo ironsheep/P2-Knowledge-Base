@@ -1,7 +1,160 @@
+# Spin2 `+//` -- unsigned remainder
+#
+# DEFINITION HOME for this operator (F-402, 2026-09-05). Two files defined `+//`
+# and they disagreed: language/spin2/operators/modulo_add.yaml called it an
+# "Unsigned Modulo Add" that "performs addition with unsigned modulo". It performs
+# no addition -- a leading `+` on a division-family operator selects the UNSIGNED
+# form of that operator (`/` signed divide vs `+/` unsigned; `//` signed remainder
+# vs `+//` unsigned). The worked material from that file is folded in below; the
+# file itself is now a redirect, kept because its index key is in the published
+# set and removing a published key breaks any consumer that cached it.
+
 operator: "+//"
+name: Unsigned Remainder
 type: operator
-description: |
-  Unsigned remainder (modulo)
 category: Arithmetic
+description: |
+  Unsigned remainder (modulo). The `+` prefix selects the unsigned form of `//`;
+  it does not add.
+
+source: >-
+  Spin2 operator reference -- engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:715
+  ("`+//` | Remainder (unsigned) | `a +// b`"), precedence group at :62
+  ("`*` `/` `+/` `//` `+//` `SCA` `SCAS` `FRAC` | Multiply/Divide"), and the unsigned
+  rule at :103 ("The `+/` and `+//` operators treat both operands as unsigned 32-bit
+  integers").
+
+aliases:
+  - "+//"
+  - "unsigned remainder"
+  - "unsigned modulo"
+  - "circular arithmetic"
+  - "ring buffer wrap"
+  - "wrap-around index"
+
+overview: |
+  The `+//` operator returns the remainder of an unsigned division. Its usual role
+  is the wrap step of circular arithmetic -- add first, then take the remainder --
+  which makes it the natural tool for ring-buffer indices and wrap-around counters.
+  The addition in those idioms is written explicitly; `+//` supplies only the wrap.
+
+syntax:
+  format: "result := value +// modulus"
+  parameters:
+    value: The value to operate on
+    modulus: The wrap-around point (result will be 0 to modulus-1)
+  returns: Value modulo modulus
+
+operation:
+  description: |
+    Performs (value % modulus) where % is unsigned modulo.
+    Result ranges from 0 to (modulus - 1).
+    Equivalent to: value // modulus
+  
+  formula: "result = value MOD modulus (unsigned)"
+
 examples:
-  - "remainder := dividend +// divisor"
+  circular_buffer_increment:
+    description: Increment buffer index with wrap-around
+    code: |
+      VAR
+        LONG head, tail
+        BYTE buffer[32]
+      
+      PUB addByte(data)
+        ' Calculate next tail position
+        nextTail := (tail + 1) +// 32
+        
+        ' Check if buffer full
+        if nextTail == head
+          return FALSE  ' Buffer full
+          
+        ' Add data and update tail
+        buffer[tail] := data
+        tail := nextTail
+        return TRUE
+    source: P2-OctoSerial pattern
+    
+  modulo_arithmetic:
+    description: Various modulo operations
+    code: |
+      ' Simple wrap-around
+      index := (index + 1) +// BUFFER_SIZE
+      
+      ' Increment by N with wrap
+      position := (position + step) +// MAX_POSITION
+      
+      ' Calculate distance in circular buffer
+      distance := (head - tail) +// BUFFER_SIZE
+    
+  queue_management:
+    description: Circular queue push operation
+    code: |
+      PRI rxCheckInternal(portHandle) : nChar
+        nChar := NO_CHAR
+        if rxTailIdx[portHandle] <> rxHeadIdx[portHandle]
+          ' Increment with modulo
+          rxHeadIdx[portHandle] := (rxHeadIdx[portHandle] + 1) +// BUF_SIZE
+          ' Read from new head position
+          nChar := BYTE[pRxBuf[portHandle]][rxHeadIdx[portHandle]]
+    source: P2-OctoSerial
+
+common_patterns:
+  buffer_sizes:
+    - "Power of 2 not required (unlike & mask method)"
+    - "Any buffer size works: +// 30, +// 100, etc."
+    - "Typically used with constants for clarity"
+    
+  typical_usage:
+    - Circular buffer index management
+    - Ring buffer wrap-around
+    - Cyclic counter implementation
+    - Round-robin scheduling indexes
+
+comparison_with_alternatives:
+  and_mask_method:
+    description: "Alternative using AND mask (power of 2 only)"
+    code: |
+      ' Only works with power-of-2 sizes
+      index := (index + 1) & (BUFFER_SIZE - 1)  ' BUFFER_SIZE must be 2^n
+      
+      ' +// works with any size
+      index := (index + 1) +// BUFFER_SIZE      ' Any size works
+  
+  manual_method:
+    description: "Manual wrap-around check"
+    code: |
+      ' Manual method
+      index++
+      if index >= BUFFER_SIZE
+        index := 0
+        
+      ' Using +// operator
+      index := (index + 1) +// BUFFER_SIZE    ' One line, same result
+
+best_practices:
+  - Use parentheses for clarity with complex expressions
+  - Define buffer sizes as constants
+  - Remember result range is 0 to (modulus-1)
+  - Consider using for all circular arithmetic
+related_operators:
+  - "//": Signed remainder (modulo) -- the signed counterpart of this operator
+  - "+/": Unsigned divide quotient
+  - "&": AND mask (alternative for power-of-2)
+related_operators_source: >-
+  engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:62 and :103.
+  The pre-merge form of this block (in modulo_add.yaml) called `//` the UNSIGNED
+  remainder, inverting the single distinction this file exists to draw, and listed
+  `%%` as "Signed modulo" -- `%%` is not a Spin2 operator and appears in neither
+  operator reference, so it is removed rather than relabelled.
+
+notes:
+  - Works with any modulus value, not only powers of two
+  - Result range is 0 to (modulus - 1)
+  - The worked patterns above come from production driver code (P2-OctoSerial);
+    they are usage examples, not a Parallax statement about the operator
+
+related:
+  - language/spin2/operators/modulo_add.yaml
+  - language/spin2/operators/op_adddiv.yaml
+  - language/spin2/operators/precedence.yaml

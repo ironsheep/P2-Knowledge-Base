@@ -1,6 +1,24 @@
 # Debug Array Formatters
 # ALL array formatters support underscore (_) variants
 
+
+# Findability index (F-401, 2026-09-05). This file named itself in no
+# top-level field, so neither it nor anything it documents was reachable by
+# name through the published index -- only by guessing its camelCase key.
+# An alias is a lookup key, never a definition; every name below is defined
+# in this file.
+aliases:
+  - "array formatter"
+  - "UDEC_ARRAY"
+  - "SDEC_ARRAY"
+  - "UHEX_ARRAY"
+  - "SHEX_ARRAY"
+  - "UBIN_ARRAY"
+  - "SBIN_ARRAY"
+  - "FDEC_ARRAY"
+  - "UHEX_BYTE_ARRAY"
+  - "hex dump"
+
 syntax: "formatter(pointer, count)"
 underscore_rule: "array_name = v1, v2, v3 → v1, v2, v3"
 

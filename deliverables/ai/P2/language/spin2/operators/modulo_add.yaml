@@ -1,154 +1,32 @@
-operator: +//
-name: Unsigned Remainder
-category: arithmetic_operators
-description: Unsigned remainder (modulo); the `+` prefix selects unsigned, it does not add
-documentation_source: code_analysis
-documentation_level: comprehensive
-created: 2025-09-09
+# `+//` -- REDIRECT
+#
+# The definition home for `+//` is language/spin2/operators/op_addmodulo.yaml
+# (F-402, 2026-09-05). This file previously carried a second, conflicting
+# definition: it called `+//` an "Unsigned Modulo Add" that "performs addition
+# with unsigned modulo". It performs no addition -- the leading `+` selects the
+# UNSIGNED form of `//`. Its worked ring-buffer material was correct and has been
+# folded into the home file unchanged.
+#
+# The file is kept rather than deleted because its index key
+# (p2kbSpin2OpModuloAdd) is present in the published v1.17.0 set, and removing a
+# published key breaks any consumer that cached it. It resolves, it is findable,
+# and it now says one true thing instead of a conflicting definition.
 
-# CORRECTED 2026-09-05 (F-402). This file previously called `+//` "Unsigned Modulo
-# Add" and said it "performs addition with unsigned modulo". It performs no
-# addition. In Spin2 a leading `+` on a division-family operator selects the
-# UNSIGNED form of that operator -- `/` signed divide vs `+/` unsigned divide,
-# `//` signed remainder vs `+//` unsigned remainder. The wrap-around examples
-# below were always correct because each one adds EXPLICITLY and then takes the
-# remainder, e.g. `(tail + 1) +// 32`; only the naming was wrong.
-name_source: >-
-  Spin2 operator reference -- engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:715
-  ("`+//` | Remainder (unsigned) | `a +// b`"), precedence group at :62
-  ("`*` `/` `+/` `//` `+//` `SCA` `SCAS` `FRAC` | Multiply/Divide"), and the unsigned
-  rule at :103 ("The `+/` and `+//` operators treat both operands as unsigned 32-bit
-  integers"). The same operator is defined at
-  language/spin2/operators/op_addmodulo.yaml, which stated it correctly.
+operator: "+//"
+name: Unsigned Remainder (see op_addmodulo.yaml)
+type: operator_redirect
+category: Arithmetic
+description: |
+  Unsigned remainder (modulo). Defined in full at
+  language/spin2/operators/op_addmodulo.yaml -- including the circular-buffer and
+  ring-index patterns that used to live here.
 
-overview: |
-  The +// operator returns the remainder of an unsigned division. Its usual role
-  is the wrap step of circular arithmetic -- add first, then take the remainder --
-  which makes it the natural tool for ring-buffer indices and wrap-around counters.
-  The addition in those idioms is written explicitly; `+//` supplies only the wrap.
+definition_home: language/spin2/operators/op_addmodulo.yaml
 
-syntax:
-  format: "result := value +// modulus"
-  parameters:
-    value: The value to operate on
-    modulus: The wrap-around point (result will be 0 to modulus-1)
-  returns: Value modulo modulus
+aliases:
+  - "unsigned modulo add"
 
-operation:
-  description: |
-    Performs (value % modulus) where % is unsigned modulo.
-    Result ranges from 0 to (modulus - 1).
-    Equivalent to: value // modulus
-  
-  formula: "result = value MOD modulus (unsigned)"
-
-examples:
-  circular_buffer_increment:
-    description: Increment buffer index with wrap-around
-    code: |
-      VAR
-        LONG head, tail
-        BYTE buffer[32]
-      
-      PUB addByte(data)
-        ' Calculate next tail position
-        nextTail := (tail + 1) +// 32
-        
-        ' Check if buffer full
-        if nextTail == head
-          return FALSE  ' Buffer full
-          
-        ' Add data and update tail
-        buffer[tail] := data
-        tail := nextTail
-        return TRUE
-    source: P2-OctoSerial pattern
-    
-  modulo_arithmetic:
-    description: Various modulo operations
-    code: |
-      ' Simple wrap-around
-      index := (index + 1) +// BUFFER_SIZE
-      
-      ' Increment by N with wrap
-      position := (position + step) +// MAX_POSITION
-      
-      ' Calculate distance in circular buffer
-      distance := (head - tail) +// BUFFER_SIZE
-    
-  queue_management:
-    description: Circular queue push operation
-    code: |
-      PRI rxCheckInternal(portHandle) : nChar
-        nChar := NO_CHAR
-        if rxTailIdx[portHandle] <> rxHeadIdx[portHandle]
-          ' Increment with modulo
-          rxHeadIdx[portHandle] := (rxHeadIdx[portHandle] + 1) +// BUF_SIZE
-          ' Read from new head position
-          nChar := BYTE[pRxBuf[portHandle]][rxHeadIdx[portHandle]]
-    source: P2-OctoSerial
-
-common_patterns:
-  buffer_sizes:
-    - "Power of 2 not required (unlike & mask method)"
-    - "Any buffer size works: +// 30, +// 100, etc."
-    - "Typically used with constants for clarity"
-    
-  typical_usage:
-    - Circular buffer index management
-    - Ring buffer wrap-around
-    - Cyclic counter implementation
-    - Round-robin scheduling indexes
-
-comparison_with_alternatives:
-  and_mask_method:
-    description: "Alternative using AND mask (power of 2 only)"
-    code: |
-      ' Only works with power-of-2 sizes
-      index := (index + 1) & (BUFFER_SIZE - 1)  ' BUFFER_SIZE must be 2^n
-      
-      ' +// works with any size
-      index := (index + 1) +// BUFFER_SIZE      ' Any size works
-  
-  manual_method:
-    description: "Manual wrap-around check"
-    code: |
-      ' Manual method
-      index++
-      if index >= BUFFER_SIZE
-        index := 0
-        
-      ' Using +// operator
-      index := (index + 1) +// BUFFER_SIZE    ' One line, same result
-
-best_practices:
-  - Use parentheses for clarity with complex expressions
-  - Define buffer sizes as constants
-  - Remember result range is 0 to (modulus-1)
-  - Consider using for all circular arithmetic
-
-related_operators:
-  - "//": Signed remainder (modulo) -- the signed counterpart of this operator
-  - "+/": Unsigned divide quotient
-  - "&": AND mask (alternative for power-of-2)
-related_operators_source: >-
-  engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:62 and :103.
-  CORRECTED 2026-09-05 (F-402): this block called `//` the UNSIGNED remainder, which
-  inverts the one distinction the file exists to draw -- `//` is signed, `+//` is
-  unsigned. It also listed `%%` as "Signed modulo"; `%%` is not a Spin2 operator and
-  appears in neither operator reference, so it is removed rather than relabelled.
 related:
   - language/spin2/operators/op_addmodulo.yaml
   - language/spin2/operators/op_adddiv.yaml
   - language/spin2/operators/precedence.yaml
-
-notes:
-  - More flexible than AND mask method
-  - Works with any modulus value
-  - Essential for circular buffer implementation
-  - Commonly used in multi-port/multi-resource drivers
-
-references:
-  - P2-OctoSerial: Extensive use in circular buffers
-  - Spin2 documentation: Arithmetic operators
-  - Production code patterns from Iron Sheep Productions

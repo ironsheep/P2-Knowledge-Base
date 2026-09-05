@@ -89,6 +89,23 @@ NAME_FIELDS = (
     'component_name',  # 8 files
     'id',              # 10 files: slug identifiers
     'title',           # 90 files: descriptive, exact-match value only
+    # 2026-09-05 second pass: the field a file uses to name itself follows its
+    # SUBTREE's convention, not one house style, so the first list still left 19
+    # files dark that were naming themselves plainly all along -- CLKFREQ under
+    # `variable:`, Operator Precedence under `topic:`, Inline PASM2 under
+    # `construct:`. Every value below was read before the field was added.
+    'variable',        # 3 files: CLKFREQ CLKMODE VARBASE
+    'construct',       # 11 files: ABORT CASE Inline PASM2 Method Definitions ...
+    'feature',         # 3 files: Conditional DEBUG, Preprocessor System ...
+    'fundamental',     # 3 files: Case Sensitivity, Identifier Rules ...
+    'topic',           # 1 file: Operator Precedence
+    'statement',       # 1 file: DEBUG
+    'formatter',       # 1 file: C_Z
+    'register_name',   # 1 file: PTRA
+    'manifest_type',   # 1 file: pattern_index
+    # NOT harvested, and the reason is worth keeping: `fundamental_concept:`
+    # holds multi-paragraph prose, not a name, so it would put an entire essay
+    # in the alias table. `registers:` is a nested structure, not a scalar.
 )
 
 

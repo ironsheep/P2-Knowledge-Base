@@ -1,6 +1,16 @@
 # Code Example Schema for P2 Knowledge Base
 # Structured format for extracting, validating, and indexing code examples
 
+
+# Findability index (F-401, 2026-09-05). This file named itself in no
+# top-level field, so neither it nor anything it documents was reachable by
+# name through the published index -- only by guessing its camelCase key.
+# An alias is a lookup key, never a definition; every name below is defined
+# in this file.
+aliases:
+  - "code example schema"
+  - "example schema"
+
 code_example_schema:
   version: "1.0.0"
   description: "Schema for structured P2 code examples with comprehensive metadata"

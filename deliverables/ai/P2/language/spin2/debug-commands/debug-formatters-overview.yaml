@@ -1,6 +1,27 @@
 # Debug Formatters Overview - START HERE
 # The ONE critical concept: underscore (_) controls output format
 
+
+# Findability index (F-401, 2026-09-05). This file named itself in no
+# top-level field, so neither it nor anything it documents was reachable by
+# name through the published index -- only by guessing its camelCase key.
+# An alias is a lookup key, never a definition; every name below is defined
+# in this file.
+aliases:
+  - "DEBUG formatters"
+  - "debug formatter"
+  - "formatters"
+  - "underscore rule"
+  - "debug output format"
+  - "which formatter to use"
+  - "UDEC"
+  - "SDEC"
+  - "UHEX"
+  - "SHEX"
+  - "UBIN"
+  - "SBIN"
+  - "FDEC"
+
 THE_GOLDEN_RULE: |
   WITHOUT underscore → "variable_name = value"
   WITH underscore → just "value"

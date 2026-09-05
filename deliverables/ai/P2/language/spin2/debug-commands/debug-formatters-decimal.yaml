@@ -1,6 +1,25 @@
 # Decimal Debug Formatters (UDEC/SDEC)
 # ALL support underscore (_) variants
 
+
+# Findability index (F-401, 2026-09-05). This file named itself in no
+# top-level field, so neither it nor anything it documents was reachable by
+# name through the published index -- only by guessing its camelCase key.
+# An alias is a lookup key, never a definition; every name below is defined
+# in this file.
+aliases:
+  - "UDEC"
+  - "UDEC_"
+  - "UDEC_BYTE"
+  - "UDEC_WORD"
+  - "UDEC_LONG"
+  - "SDEC"
+  - "SDEC_"
+  - "SDEC_BYTE"
+  - "SDEC_WORD"
+  - "SDEC_LONG"
+  - "decimal formatter"
+
 underscore_rule: "UDEC(x) → 'x = 42' | UDEC_(x) → '42'"
 
 unsigned:

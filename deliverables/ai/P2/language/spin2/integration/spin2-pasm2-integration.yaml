@@ -2,6 +2,18 @@
 # Source: spin2-pasm-integration-deep-dive.md
 # Layer 1: Direct extraction from Spin2 v51 documentation
 
+
+# Findability index (F-401, 2026-09-05). This file named itself in no
+# top-level field, so neither it nor anything it documents was reachable by
+# name through the published index -- only by guessing its camelCase key.
+# An alias is a lookup key, never a definition; every name below is defined
+# in this file.
+aliases:
+  - "Spin2 PASM2 integration"
+  - "mixing Spin2 and PASM2"
+  - "Spin2 to PASM2"
+  - "PASM2 from Spin2"
+
 spin2_pasm2_integration:
   schema_version: "1.0.0"
   extraction_date: "2025-09-06"

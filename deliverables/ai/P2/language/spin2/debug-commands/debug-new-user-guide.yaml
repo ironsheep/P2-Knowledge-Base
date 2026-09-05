@@ -1,6 +1,19 @@
 # Debug Guide for New P2 Users
 # Answers the questions you're about to ask
 
+
+# Findability index (F-401, 2026-09-05). This file named itself in no
+# top-level field, so neither it nor anything it documents was reachable by
+# name through the published index -- only by guessing its camelCase key.
+# An alias is a lookup key, never a definition; every name below is defined
+# in this file.
+aliases:
+  - "DEBUG new user guide"
+  - "debug getting started"
+  - "first DEBUG"
+  - "debug output looks weird"
+  - "nothing appears in debug"
+
 first_time_debug:
   simplest_example: 'DEBUG("Hello World")'
   show_a_variable: 'DEBUG("Count: ", UDEC(myVariable))'
