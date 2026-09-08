@@ -11,8 +11,10 @@
 component: boot_rom
 description: |
   The P2's boot subsystem — a 16KB mask ROM containing the Bootloader, the
-  P2 Monitor debug interface, the TAQOZ Forth interpreter, utility routines,
-  character font data, and math tables. On power-up or reset, the Bootloader
+  P2 Monitor debug interface, and the TAQOZ Forth interpreter. (Those three are
+  what the Hardware Manual's content line names; a prior form of this sentence
+  added utility routines, character font data and math tables, which no source
+  states — F-403.) On power-up or reset, the Bootloader
   reads three boot pattern pins (P59-P61) and selects one of three boot
   paths: serial (P63/P62), SPI flash (P58-P61), or microSD card. Each path
   has documented fallback behavior. The Monitor and TAQOZ are interactive
@@ -61,7 +63,7 @@ files:
       - "Identifying which ROM-resident component handles a given function"
       - "Researching ROM features beyond the bootloader"
     contains:
-      - The six ROM residents (Bootloader, Monitor, TAQOZ, utility routines, character font, math tables)
+      - The three ROM residents the Hardware Manual names (Bootloader, Monitor, TAQOZ), plus the shared subroutines observed in the listing
       - Size and purpose of each
       - Cross-references to the per-component entries (Monitor, TAQOZ)
       - ROM listing source pointer (rom-booter ingestion)
