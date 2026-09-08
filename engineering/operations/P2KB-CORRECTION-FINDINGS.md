@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-403`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-404`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -48,6 +48,42 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## `boot-rom-contents.yaml` ships six ROM residents; the authoritative list names three, and two of the extras appear in no source at all (2026-09-08, boot-ROM survey) — F-403
+
+### F-403 — character font data and sin/cos/log math tables are asserted as boot-ROM contents with `verification_status: "Existence confirmed"`, sourced only to our own generated narrative — `CONFIRMED`
+
+**Location:** `deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml`, `residents:` — the `utility_routines`, `character_font_data` and `math_tables` entries.
+
+**What the authority says.** The P2 Hardware Manual 2022-11-01 states the ROM's contents in one line, and it names **three** things:
+
+> `ROM | 16 KB (Bootloader, P2 Monitor debug interface, and TAQOZ (Forth) command interface)`
+> — `engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:210`
+
+The same three-item list is what our own extraction matrix recorded from that manual (`engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md`, "Boot ROM Contents (16 KB)"). The P2 Datasheet (`:99`) and Silicon Doc (`:189`) say only *"16KB boot ROM"* and inventory nothing.
+
+**What the shipped file says.** Six residents — the three above plus `utility_routines`, `character_font_data` ("Bitmap font data for terminal output / debug displays") and `math_tables` ("Sin/cos/log tables"). The latter two carry `verification_status: "Existence confirmed; specifics not yet documented"`.
+
+**Existence is not confirmed.** Measured 2026-09-08 against the ROM assembly listing we hold — the strongest available evidence, since it *is* the ROM:
+
+| term | `ROM_Booter.lst` | `rom_booter_v33_01j.lst` |
+|---|---|---|
+| `font` | **0** | **0** |
+| `glyph` | **0** | **0** |
+| `sine` / `sin_` | **0** | **0** |
+| `log2` | **0** | **0** |
+
+`TAQOZ` (48 hits) and `Monitor`/`debugger` (40) are plainly present in the same listing, so the search is not blind to real residents.
+
+**Where the claim actually came from.** `engineering/ingestion/sources/rom-booter/rom-booter-narrative.txt:51-56` — *"Beyond the bootloader, the ROM also contains: Monitor/debugger code, TAQOZ Forth interpreter, Utility routines, Character font data, Math tables (sin/cos/log)"*. That file was created by commit `9fcf7d84` **"Complete narrative text generation for all P2 sources"** — it is **our own generated summary of the source, not a Parallax document.** A generated narrative was promoted to an authority, which is the F-341 defect shape (manufacturing provenance inside the documentary truth root).
+
+**Why no instrument caught it.** The claims carry no quantities, so `audit-yaml-claim-sourcing.py` never scored them; they name no constants, so the fidelity gate never saw them. The file cites four real sources in its header, which is exactly what makes a Tier-2 sweep read it as a citing file. Same blind spot as F-402: **no gate reads a semantic claim.**
+
+**Correction applied 2026-09-08.** The two unsupported residents are removed and the removal is recorded in place so the narrative cannot quietly reintroduce them. `utility_routines` is retained but reclassified: the listing does contain called subroutines, which is an observation about the code, not a documented ROM component, and it is now stated that way rather than as a fifth resident with a source line.
+
+**Not asserted in the correction:** that font data and math tables are *absent* from the ROM. A 16 KB mask ROM can hold unlabelled data blocks that an assembly listing's symbol names would not reveal. What is established is that **no source we hold supports them and the one authoritative content list omits them** — so the KB must not state them. If their presence matters, it is a question for Chip Gracey, not a document.
+
+---
 
 ## Two files define the Spin2 `+//` operator and they disagreed about what it does; the duplicate home is still open (2026-09-05, F-401 index regeneration) — F-402
 

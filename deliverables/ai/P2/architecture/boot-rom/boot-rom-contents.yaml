@@ -22,6 +22,14 @@ rom_facts:
   identical_across_units: true
   hub_write_protection: "Hub also has a write-protectable upper 16KB used for debug state — see architecture/hub.yaml. NOTE: that 16KB is HUB space, distinct from the ROM 16KB documented here."
 
+# The one authoritative statement of what the ROM CONTAINS.
+authoritative_content_list:
+  statement: "ROM | 16 KB (Bootloader, P2 Monitor debug interface, and TAQOZ (Forth) command interface)"
+  names: 3
+  source: "P2 Hardware Manual 2022-11-01 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:210"
+  corroboration: "Same three-item list recorded in engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md ('Boot ROM Contents (16 KB)')."
+  what_other_sources_say: "The P2 Datasheet (p2-datasheet-text.txt:99) and the Silicon Doc (silicon-doc-text.txt:189) state only '16KB boot ROM' and inventory nothing. No ingested source inventories the ROM more finely than the line above."
+
 # ROM residents (per Hardware Manual + ROM booter narrative)
 residents:
   bootloader:
@@ -60,34 +68,33 @@ residents:
     entry_keystroke: '"> " (greater-than + space) then ESC'
     canonical_entry: architecture/boot-rom/taqoz-forth.yaml
 
+  # REMOVED 2026-09-08 (F-403): `character_font_data` and `math_tables` were
+  # listed here as ROM residents carrying
+  # `verification_status: "Existence confirmed"`. Existence was NOT confirmed.
+  # Their only source was engineering/ingestion/sources/rom-booter/
+  # rom-booter-narrative.txt:51-56, which is OUR OWN GENERATED SUMMARY of the
+  # listing (commit 9fcf7d84, "Complete narrative text generation"), not a
+  # Parallax document. The Hardware Manual states the ROM's contents in one line
+  # and names three things, not five or six (see authoritative_content_list
+  # below), and the ROM assembly listing itself returns ZERO hits for font,
+  # glyph, sine, sin_ and log2 in both editions -- while returning 48 for TAQOZ
+  # and 40 for Monitor/debugger, so the search is not blind to real residents.
+  #
+  # This does NOT assert that the ROM contains no font or math data. A 16 KB mask
+  # ROM can hold unlabelled data blocks no symbol name would reveal. It records
+  # that no source we hold supports them, so the KB does not state them. Open
+  # question for Chip Gracey, not for a document.
+
   utility_routines:
-    role: "Low-level helper routines used by ROM components"
+    role: "Shared subroutines called by the ROM components"
     description: |
-      The ROM listing references "utility routines" used by the
-      Bootloader, Monitor, and TAQOZ — likely string handling, byte
-      I/O, and similar shared helpers. Not directly callable from user
-      code; documented here for completeness.
-    source_listing: "Parallax P2 boot ROM listing (ROM_Booter.lst)"
-    canonical_entry: "(no dedicated entry — internal to ROM components)"
-
-  character_font_data:
-    role: "Bitmap font data for terminal output / debug displays"
-    description: |
-      Font data used by ROM components when rendering text. The full
-      coverage (which characters, which sizes) is not documented in
-      ingested primary sources but is mentioned by name in the ROM
-      booter narrative.
-    canonical_entry: "(no dedicated entry — internal data)"
-    verification_status: "Existence confirmed; specifics not yet documented"
-
-  math_tables:
-    role: "Lookup tables for trigonometric and logarithmic functions"
-    description: |
-      Sin/cos/log tables referenced by ROM components. Not directly
-      callable from user code (use SETQ + TABLE or CORDIC for runtime
-      math access in user programs).
-    canonical_entry: "(no dedicated entry — internal data)"
-    verification_status: "Existence confirmed; specifics not yet documented"
+      The ROM listing contains subroutines called from the bootloader, Monitor
+      and TAQOZ paths. This is an observation about the code in the listing, NOT
+      a documented ROM component -- the Hardware Manual's content line names
+      three residents and does not break out helper code as a fourth. Not
+      callable from user code.
+    status: "observed in the listing; not a documented ROM component"
+    source: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst (call sites)"
 
 # What's NOT in the boot ROM (common misconceptions)
 not_in_rom:
