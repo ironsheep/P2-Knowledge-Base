@@ -12,8 +12,7 @@ workflow, then the reading splits into the GUI path and the headless command-lin
 you follow only the half you work in. It states the tool's compiler independence outright
 — downloading is the P2's own boot protocol, so a binary from any toolchain downloads and
 runs — and is plain about the one place toolchains differ: PNut and `pnut-ts` images are
-auto-detected and carry their own debug baud rate, and a debug build from anything else
-needs `-b`.
+auto-detected and carry their own serial rate, and a build from anything else needs `-b`.
 
 **The opening teaches the loop you can actually see.** Chapter 1 places the tool in the
 workflow as *you* operate it: you compile, PNut-Term-TS downloads and runs, and what the
@@ -25,7 +24,35 @@ codes, and its log are in hand. The two chapters carry matching diagrams of one 
 the difference between them is the lesson: **who is watching decides what the return path
 is.**
 
-Ships with four TikZ diagrams and six screenshots. Co-released with the *P2 Single-Step
+**Written against the tool as it shipped at v1.0.7.** The guide was drafted from feeds
+that had fallen seven releases behind, and the whole surface was re-checked against
+re-snapshotted ones before release rather than after. Four things a reader would have
+acted on came out of that pass:
+
+- **The exit codes say what they now promise.** Code **0** asserts that the captured log
+  is *complete* — a promise about the data, not about a tidy shutdown — and **125** is its
+  opposite number, covering both a long drain and output lost while writing. Code **1**
+  now includes hardware that stopped mid-run, and code **4** is documented at all: a
+  `debug()` directive that names a display something the tool cannot address. Chapter 13
+  is the scripting contract Chapter 15's automated run depends on, so it states each of
+  these rather than leaving a script author to infer them.
+- **The menus are right on every platform.** The guide had taught that File, Help, Find
+  and Clear Terminal were Windows/Linux only — telling a Mac reader that commands on their
+  own screen did not exist. The in-window menu bar is the application's menu everywhere;
+  macOS adds a native menu carrying the standard macOS items beside it.
+- **The Debug Logger is a window onto the log, not the log.** Closing it closes a window
+  and recording continues; **Window → Show Log** reattaches to the same file and repaints
+  recent history. The log is ended by the run — a P2 reset or a download start rotates it,
+  quitting closes it — never by a window. The `⋯ N line(s) not shown ⋯` marker a fast
+  stream produces is the display keeping up on purpose and is never written to the file,
+  which is the difference between a slow window and lost data.
+- **Naming a display is a rule you can break.** A display's name is its only address on
+  the wire, so it cannot be a word the display language already uses: `trace` is illegal,
+  `spin2` is fine, names are case-insensitive and stop at 30 characters. PNut discards
+  such a statement silently; this tool reports it and stops, which is why the guide can
+  tell you what to look for.
+
+Ships with four TikZ diagrams and six screenshots. Released alongside the *P2 Single-Step
 Debugger Manual*, which covers driving the debugger itself.
 
 ## v0.9.0 (2026-08-12): Tool developer review draft — compiler compatibility

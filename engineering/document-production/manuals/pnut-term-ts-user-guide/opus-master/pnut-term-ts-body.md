@@ -296,15 +296,15 @@ debug windows. If you are here to automate P2 runs instead, skip ahead to *Part 
 # Chapter 5: The Main Window
 
 When you launch PNut-Term-TS, **two windows open**: the **main window** and the
-**Debug Logger** (a separate window that captures the run's log). These are the
-two windows the auto-layout keeps reserved spots for (Chapter 8); the other debug
-windows — scopes, plots, and the rest — open on their own later, as your program
-draws to them.
+**Debug Logger** (a window that shows you the run's log as it is written). These
+are the two windows the auto-layout keeps reserved spots for (Chapter 8); the other
+debug windows — scopes, plots, and the rest — open on their own later, as your
+program draws to them.
 
-This chapter is about the main window: your home base for connecting,
-downloading, and reading text output. It has five areas, top to bottom — a **menu
-bar**, a **toolbar**, a **text-entry field**, the **terminal display**, and a
-**status bar**.
+This chapter covers both of them, starting with the main window: your home base for
+connecting, downloading, and reading text output. It has five areas, top to bottom —
+a **menu bar**, a **toolbar**, a **text-entry field**, the **terminal display**, and
+a **status bar**. The Debug Logger comes at the end of the chapter.
 
 ```{=latex}
 \begin{figure}[H]
@@ -361,6 +361,68 @@ On the **right**:
 - **Baud** — the active serial baud rate.
 
 The active reset line (DTR or RTS) lives on the *toolbar* button, not here.
+
+## The Debug Logger — a window onto the log, not the log itself
+
+The other window that opened at startup is the **Debug Logger**, and it is worth
+separating two things that share its name:
+
+- **the log file** — the durable record on disk, written to the log directory;
+- **the Debug Logger window** — a view of that file, live, as it fills.
+
+The file is the record. The window is how you watch it.
+
+### Closing the window does not stop logging
+
+Close the Debug Logger and you close a window. **The log keeps recording.** The file
+stays open, every line still reaches it, and it notes when the window was closed and
+when it came back — so a gap in your attention is never a gap in the record.
+
+- **Window → Show Log** reopens it. It attaches to the **same** file rather than
+  starting a new one, and repaints the recent history so you are not staring at a
+  blank pane.
+- **Window → Hide Log** closes it. The menu entry names whichever action applies.
+
+The log is ended by the *run*, not by the window. Three things end one: a P2 reset
+and the start of a download each rotate to a fresh file, and quitting closes it.
+
+A **cog** window works the same way. Closing one stops that window; that cog's log
+keeps recording.
+
+### Reading it
+
+- The view **follows live data**. Scroll up to pause it and read; the view stays
+  where you put it. Click **↓ Follow Live Data** to catch up again.
+- Bytes you sent are marked `[TX]`, with control characters spelled out as `<cr>`
+  and `<lf>`.
+- A P2 reset writes a session marker, clears the view, and rotates the file.
+- System messages, errors, warnings, binary and hex fallbacks, and debugger output
+  are colour-coded.
+- **Show All 8 Cogs** opens the full set of cog windows; **Export Active Cog Logs**
+  writes the current cog logs out to files.
+- The status bar shows the log's filename, its line count, its size, and whether the
+  view is live or paused.
+
+How much history the window keeps is set by **History Lines** in Preferences
+(default 1000). That is the window's memory, not the file's — the file keeps
+everything either way.
+
+### When output arrives faster than the window can draw
+
+Under a heavy stream the window stops trying to draw every line, skips ahead to stay
+current, and tells you so:
+
+```
+⋯ 4,500 line(s) not shown — display fell behind; the log file has every line ⋯
+```
+
+**This is not data loss.** Only the drawing was reduced, and only while it was
+behind; the marker itself is never written to the file. At ordinary rates you will
+not see it.
+
+It also points at the cheapest fix if the application feels sluggish under a flood:
+the Debug Logger is the most expensive window to draw, so **Hide Log** buys back the
+most, and it costs you nothing in the record.
 
 # Chapter 6: Downloading and Running Your Program
 
@@ -461,10 +523,17 @@ PNut-Term-TS has to be listening at that same rate or the text is unreadable.
 That asymmetry is the whole reason for two settings — and for one of them being
 almost invisible.
 
+**Two rates, not three.** The serial rate carries your program's `debug()` output
+*and* anything you type at the terminal, because those are not two connections: they
+are one serial link, in two directions. There is no separate "terminal rate" to find
+and no third number to keep in step. Downloading is the one job with a rate of its
+own, and it has one because it is the one job where the P2 is listening rather than
+talking.
+
 ## The serial baud rate — you should not need to set it
 
-When you download a binary that PNut-Term-TS recognises, **it reads the debug baud
-rate out of the image itself** and listens at exactly that rate. PNut and `pnut-ts`
+When you download a binary that PNut-Term-TS recognises, **it reads the rate out of
+the image itself** and listens at exactly that rate. PNut and `pnut-ts`
 write the value in — including when your source sets its own rate:
 
 ```spin2
@@ -477,7 +546,7 @@ for you, with no flag from you.
 
 This is the one place in the download path where toolchains differ, so it is worth
 being plain about it. **PNut-Term-TS auto-detects a PNut or `pnut-ts` image** and
-takes the debug baud rate from it, which is why downloading one settles the question
+takes the serial rate from it, which is why downloading one settles the question
 with no flag from you.
 
 **A binary it does not recognise as PNut or `pnut-ts` downloads and runs exactly the
@@ -513,8 +582,15 @@ into your other work. Chapter 10 has the full order in which these resolve.
 
 If you pass `-b` and it disagrees with the binary you are downloading, PNut-Term-TS
 warns you — the P2 will transmit at its own compiled rate regardless, and the
-mismatch would make the output unreadable. When text comes out garbled, the first
-thing to try is *dropping* `-b`.
+mismatch would make the output unreadable:
+
+```
+WARNING: --baud 115200 disagrees with this binary's compiled DEBUG_BAUD (2000000).
+The P2 will transmit at 2000000 — expect unreadable output. Drop --baud to use the binary's rate.
+```
+
+`DEBUG_BAUD` there is the field's name inside the image, not a second setting. When
+text comes out garbled, the first thing to try is *dropping* `-b`.
 
 **The accepted range is 300 to 20,000,000**, and its two ends mean quite different
 things — neither of them a statement about how fast your link will actually go.
@@ -672,6 +748,31 @@ that decides what the window shows. The window types are:
 > tool *presents* them; when you want a window in depth, that manual is where to
 > go.
 
+## Naming a display
+
+You name a display in the `debug()` directive that creates it — `` `PLOT MyPlot … `` —
+and every later update addresses that window **by name**. The name is the display's
+only address on the wire, so it cannot be a word the display language is already
+using for something else.
+
+| Rule | Detail |
+|------|--------|
+| Character set | Start with a letter or `_`, then letters, digits and `_` |
+| Not a reserved word | No display type (`PLOT`, `TERM`, `SCOPE`, …) and no directive keyword (`TRACE`, `SET`, `LINE`, `TITLE`, `WINDOW`, `CLOSE`, `RED`, `GRAY`, …) |
+| Case-insensitive | `trace`, `Trace` and `TRACE` are one name — the window still shows your spelling |
+| Unique among open displays | Closing a display frees its name for reuse |
+| 30 characters | Longer names are shortened to 30, so two names that differ only after the 30th character become the same name |
+
+The reserved words are the **display language's own**, not Spin2's. `spin2` is a
+perfectly legal display name. So are `traces`, `my_trace` and `plotter`, which merely
+contain a reserved word without being one.
+
+> **A bad name stops the run.** PNut-Term-TS reports the problem and exits with
+> **code 4** (Chapter 13) rather than leaving you with a window that never appears.
+> This is a deliberate difference from PNut, which discards the display statement
+> **silently** — same program, no window, no message, and nothing to search for.
+> Renaming the display in your P2 program and re-running is the whole fix.
+
 ## Automatic Window Placement
 
 A P2 program can name a screen position for each
@@ -822,22 +923,29 @@ every run, and the management of the USB devices you connect through.
 
 ## Menus differ by platform
 
-PNut-Term-TS uses the **native application menu on macOS** and an **in-window menu
-bar on Windows and Linux** — and they are **not equivalent**. The macOS native
-menu offers only the application, Edit, and Window menus; **File, Help, Find,
-Clear Terminal, and the show/hide-windows items live only on the Windows/Linux
-in-window menu bar**. Accelerators differ too: `Cmd` on macOS, `Ctrl` on
-Windows/Linux.
+**The menu bar inside the window is the application's menu, on every platform** —
+File, Edit, Window and Help, the same four on Windows, Linux and macOS alike. What
+differs between platforms is the accelerator key: `Cmd` on macOS, `Ctrl` on
+Windows and Linux.
 
 | Menu | Items |
 |------|-------|
-| **File** *(Win/Linux bar)* | New / Open / Save Recording; Select PropPlug; Start Recording (`Ctrl+R`); Stop Recording; Playback Recording (`Ctrl+P`); Exit (`Ctrl+Q`) |
+| **File** | New / Open / Save Recording; Select PropPlug; Start Recording (`Ctrl+R`); Stop Recording; Playback Recording (`Ctrl+P`); Exit (`Ctrl+Q`) |
 | **Edit** | Cut / Copy / Paste; Find… (`Ctrl+F`); Clear Terminal; Preferences… (`Ctrl+,`) |
-| **Window** | Performance Monitor; Show All Windows; Hide All Windows |
-| **Help** *(Win/Linux bar)* | Documentation (`F1`); About PNut-Term-TS |
+| **Window** | Show Log / Hide Log; Performance Monitor; Show All Windows; Hide All Windows |
+| **Help** | Documentation (`F1`); About PNut-Term-TS |
 
-On macOS, **Preferences…** is under the application menu (`Cmd+,`), along with the
-standard Quit and Hide items.
+macOS shows one thing extra: the **native application menu** in the system menu bar
+at the top of the screen, where a Mac user expects to find it. It carries the
+standard macOS items only — About, Preferences… (`Cmd+,`), Hide and Show All, Quit,
+the clipboard commands, and Minimize / Close / Zoom / Bring All to Front. It is not
+a second copy of the application's menus, and nothing is missing from the Mac
+because of it: anything not in that short list is in the in-window menu bar, the
+same as everywhere else.
+
+The **Window** menu's first entry names whichever action is available — **Show Log**
+when the Debug Logger window is closed, **Hide Log** when it is open. Closing that
+window does not stop logging; see Chapter 5.
 
 ## Settings and the hierarchy behind them
 
@@ -1034,17 +1142,28 @@ identically either way:
 
 | Code | Meaning |
 |------|---------|
-| 0 | Clean exit — all SAVEs and logs flushed |
-| 1 | Port / device error — the command was valid; the hardware was not there |
+| 0 | Clean exit — all SAVEs and logs flushed, and the captured log is complete |
+| 1 | Port / device error — the command was valid; the hardware was not there, or it stopped responding mid-run |
 | 2 | Bad command line — nothing ran |
 | 3 | Download failed |
+| 4 | Fatal `DEBUG` display error in your P2 program — a display name the tool cannot use, or the same name twice (Chapter 8) |
 | 124 | Headless `--timeout` expired |
-| 125 | Shutdown drain exceeded its timeout — output may be incomplete |
+| 125 | The log may be incomplete — the shutdown drain ran long, or output was lost while writing |
+
+**Code 0 is a promise about the log, not about the shutdown.** It says the capture
+you are about to read is complete: every line the P2 sent reached the file. That is
+the thing a script actually needs to know before it parses the log, which is why the
+code asserts it. Code 125 is its opposite number — the run may have finished
+perfectly well and the *record* still be short.
 
 One thing worth knowing about code 2: the command line is checked **before
 anything runs**. If an option is wrong, PNut-Term-TS reports *every* problem with
 it at once and exits — no device is touched, no download attempted, no window
 opened.
+
+Code 4 comes from your P2 program rather than from the command line, so it can only
+appear once a program is running. It means a `debug()` directive named a display
+something the tool cannot address — see *Naming a display* in Chapter 8.
 
 # Chapter 14: The Log Is Your Feedback Loop
 
@@ -1060,9 +1179,15 @@ The log's first job is to carry your program's output — its `DEBUG()` text —
 there to see. PNut-Term-TS keeps that stream clean and adds only a thin layer of
 run narrative alongside it: window-placement notices, download start / success /
 failure, the baud and reset lines, and any directive errors or warnings (the ones
-that help you fix a bad `debug()` directive). The tool's own internal
-transport chatter is kept *out* of released builds entirely, so it can never
-crowd out the output you came for.
+that help you fix a bad `debug()` directive).
+
+That narrative records **events, not the machinery that carries them out**. One
+reset of the P2 is one line; the several control-line transitions that perform it
+are not, and neither are port handles opening and closing or a channel being
+reopened. Those are transport diagnostics — real, and available when you want them
+under `--diag-serial` (below), but kept out of an ordinary run so they cannot crowd
+out the output you came for. Errors are the exception and always appear: a port that
+will not open is something you need to see whether or not you asked for detail.
 
 ## What a log is named, and what it records
 
@@ -1078,8 +1203,12 @@ them). The names are:
 
 Every log begins with a banner that records **which build produced it** —
 `PNut-Term-TS: vX.Y.Z` — because a captured log is often kept as regression
-evidence, and evidence has to say what version it came from. A P2 reset starts a
-fresh log file, so each file reads as a single clean run.
+evidence, and evidence has to say what version it came from.
+
+A log's life is the run's life. Two things start a fresh file — **a P2 reset** and
+**the start of a download** — and quitting closes the one in hand, so each file reads
+as a single clean run. Closing a window is not one of them; the Debug Logger is a
+view of the file, not the file itself (Chapter 5).
 
 ## The USB traffic log
 
@@ -1290,8 +1419,9 @@ try another port. On Linux and macOS, check serial-port permissions (below).
 **Text is garbled or missing.** Almost always a baud mismatch, and which way to
 fix it depends on where the binary came from. If you built with PNut or `pnut-ts`
 and passed `-b`, **try dropping it** — those images are auto-detected and carry
-their own baud (Chapter 6); watch for the warning that `-b` disagrees with
-the binary. If you built with **any other toolchain**, or you are attaching to an
+their own rate (Chapter 6); look in the output for the line beginning
+`WARNING: --baud … disagrees with this binary's compiled DEBUG_BAUD`, which names
+the mismatch outright. If you built with **any other toolchain**, or you are attaching to an
 *already-running* P2, there is no rate for us to read, so it is the opposite move:
 set the rate yourself with `-b`, or set the **Serial Baud Rate** preference — for
 the current project or for every project (Chapter 10) — if it is a board you come
@@ -1317,6 +1447,23 @@ clones use RTS.
 **A window is blank or data is missing.** Confirm the program is actually running
 and sending `debug()` output. Open the Performance Monitor; if buffer usage is
 high, lower the data rate.
+
+**A window never opens, or the run stops with a display-name error (exit code 4).**
+The name in the `debug()` directive that creates the display is not one the tool can
+use — most often because it is also a directive keyword, such as `trace`. The check
+is case-insensitive, so `Trace` fails for the same reason. See *Naming a display* in
+Chapter 8; renaming the display in your P2 program and re-running is the whole fix.
+
+**The application feels sluggish under a heavy stream.** Close the Debug Logger with
+**Window → Hide Log** — it is the most expensive window to draw, and closing it does
+not interrupt logging. **Window → Show Log** brings it back. Beyond that, close debug
+windows you are not watching, or lower the data rate in the P2 program. A
+`⋯ N line(s) not shown ⋯` marker in the Debug Logger is the display deliberately
+keeping up, not an error and not data loss — the file has every line (Chapter 5).
+
+**A reopened Debug Logger looks like it is missing earlier output.** The window
+repaints recent history, not the whole session; the file holds all of it. Open the
+log file itself to see everything.
 
 **Recording problems.** Check free disk space and write permission to the
 recordings directory, and stop any recording in progress before starting a new

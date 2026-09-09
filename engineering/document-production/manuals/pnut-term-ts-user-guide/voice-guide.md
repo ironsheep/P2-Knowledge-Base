@@ -73,10 +73,12 @@ program's `debug()` session:
    `.p2rec` / end-session marker / headless gets a one-line plain-language
    definition. No forward references to undefined terms.
 2. **The source is the authority — match the shipping tool, not our memory.**
-   The behavior of record is the **PNut-Term-TS repository** (the two feed
-   documents, current as of **v0.10.3**). When the tool changes, re-pull and
-   re-verify — do not describe behavior from recollection. If a feed and the
-   live repo disagree, the repo wins.
+   The behavior of record is the **PNut-Term-TS repository** (the feed documents
+   in `REF-NO-COMMIT/`, current as of **v1.0.7**, re-snapshotted 2026-09-09).
+   When the tool changes, re-pull and re-verify — do not describe behavior from
+   recollection. If a feed and the live repo disagree, the repo wins. The feeds'
+   own `README.md` states what changed at each re-snapshot; `_OLD/` keeps the
+   previous copy, so what moved is a diff rather than a guess.
 3. **Names, exactly.** The application is **PNut-Term-TS** (the invocation is
    `pnut-term-ts`). The compiler that produces the `.bin` and bakes in the
    debug baud is **`pnut-ts`** (product: **PNut-TS**). **Both names are
@@ -99,10 +101,18 @@ program's `debug()` session:
 6. **Both modes, always in view.** When a capability differs headed vs headless
    (logging direction, TX path, auto-exit, reset), state the difference plainly
    rather than describing only the GUI and leaving automation readers guessing.
-7. **Platform differences are real — name them.** macOS native menu vs
-   Windows/Linux in-window menu bar; `Cmd` vs `Ctrl`; `/dev/tty.usbserial-*` vs
-   `/dev/ttyUSB*` vs COM ports; the `dialout` group on Linux. Don't flatten
-   these into one imagined platform.
+7. **Platform differences are real — name them, and only the real ones.**
+   `Cmd` vs `Ctrl`; `/dev/tty.usbserial-*` vs `/dev/ttyUSB*` vs COM ports; the
+   `dialout` group on Linux. Don't flatten these into one imagined platform —
+   and don't invent one either. **The menus are NOT such a difference:** the
+   in-window menu bar is the application's menu on every platform, macOS
+   included, and macOS merely adds a native menu carrying the standard macOS
+   items. This rule previously read "macOS native menu vs Windows/Linux
+   in-window menu bar", which is the shape of a real platform difference and was
+   wrong on the facts; Chapter 10 taught it, and told Mac readers that File,
+   Help, Find and Clear Terminal did not exist for them. Corrected 2026-09-09
+   from the v1.0.7 feed. A platform difference has to be verified, not assumed
+   from the platform's reputation.
 
 ## The shared narrative discipline
 
