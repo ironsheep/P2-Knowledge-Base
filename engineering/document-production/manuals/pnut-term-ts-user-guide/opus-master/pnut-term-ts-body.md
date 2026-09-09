@@ -56,7 +56,7 @@ of tools for developing on the Propeller 2:
 |------|---------|
 | **`pnut-ts`** | The Spin2 / PASM2 compiler. Turns your source into a binary the P2 can run (and bakes in the debug settings). |
 | **`pnut-term-ts`** | *This tool.* Downloads that binary to the P2 and shows you its `debug()` output. |
-| Spin2 VS Code extension *(optional)* | Your editor, with Spin2 syntax and semantic highlighting. |
+| Spin2 VS Code extension *(optional)* | Your editor, with Spin2 syntax and semantic highlighting. Search VS Code's Extensions view for `spin2` (Chapter 19). |
 
 Think of the first two as compile, then run-and-observe. `pnut-ts` produces the
 binary; **PNut-Term-TS is where you watch it come alive.**
@@ -1493,8 +1493,18 @@ stays right as new builds appear.
   <https://github.com/ironsheep/PNut-Term-TS/releases>
 - **`pnut-ts`** — the Spin2 / PASM2 compiler of Chapter 1.\
   <https://github.com/ironsheep/PNut-TS/releases>
-- **P2KB MCP** — the knowledge-base server an assistant reads from, Chapter 15.\
+- **P2KB MCP** — the `p2kb-mcp` server of Chapter 15.\
   <https://github.com/ironsheep/P2-Knowledge-Base-MCP/releases>
+
+What you install there is the **server**, not the knowledge base. Once it is
+running, your assistant queries it and the P2 knowledge reaches you through the
+assistant — there is no knowledge-base download to go looking for, and no copy of
+it to keep current yourself.
+
+The **Spin2 VS Code extension** is the one thing here with no download page at all.
+Get it from inside your editor: open VS Code's **Extensions** view, search for
+**`spin2`**, and install it. That is its formal name, and searching it is the whole
+procedure.
 
 ## Reporting a problem, or asking
 
