@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-404`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-406`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,9 +49,64 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## The index and its gzip drifted apart again and the release validator sat red in committed history for four days — F-357's defect, recurred (2026-09-09, ledger re-derivation) — F-405
+
+### F-405 — `validate-dod-release.py` exits 1 on a stale gzip, and nothing in this project makes it run — `PARTIAL`
+
+**Location:** `deliverables/ai/p2kb-index.json` / `deliverables/ai/p2kb-index.json.gz`, and the absence of any trigger for `engineering/tools/validate-dod-release.py`.
+
+**What was measured.** Run at `b0057ec1` before any repair, the release validator reported **`❌ Gzip Compression: FAIL — Gzip content does not match JSON file`** and exited **1** (*VALIDATION FAILURES - DO NOT RELEASE*). The other ten checks passed.
+
+**Why.** Derived from `git log` on the two paths, not recalled:
+
+| | `p2kb-index.json` | `p2kb-index.json.gz` |
+|---|---|---|
+| last regenerated | `da896073` (2026-09-05) | **`b753a29d` (2026-08-30)** |
+| commits touching it since `9ab0433b` | `d55b6c7f`, `da896073` | **none** |
+
+The 2026-09-05 findability pass regenerated the JSON **twice** and the gzip **neither time**. **This is F-357 recurring while F-357 reads `RESOLVED`** — which is what makes it a regression rather than an open item.
+
+**A second, unrelated staleness in the same artifact.** The index was generated on 09-05 and the 09-08 boot-ROM pass (F-403) committed content afterwards. Regenerating updated exactly **two** entries — `p2kbArchBootRomContents` and `p2kbArchIndex` (`architecture/boot-rom/_index.yaml`), mtime and sha256 both — and added or removed none; the count stayed at 1,133. So the pair was *inconsistent* **and** the index was *stale*, and those are two different defects with two different remedies.
+
+**Repaired 2026-09-09.** Both regenerated together, in the required order (the index stores the git blob sha256, so it must be rebuilt after the content commit). `gzip -cd … | cmp -` is clean and the validator is green at 11 of 11.
+
+**Why this is `PARTIAL` and not `RESOLVED`.** The drift is gone; **the reason it happened is not.** The instrument worked — it caught the drift on its first run. What failed is that **nothing invokes the instrument**: a red release gate lived in committed history for four days and was found only because the change ledger was being re-derived. That is the same sentence F-360 has been carrying about the duplicate-key gate, now with a demonstration attached instead of a prediction.
+
+**What closes it — two checks, one wiring pass** (task «#339», block H):
+1. Wire `audit-yaml-duplicate-keys.py` into `validate-dod-release.py` as a blocking gate (F-360's open half).
+2. Add an **index-freshness** check: run `generate-p2kb-index.py`, then `git diff --quiet` on the pair. The pair-*consistency* check already exists and just proved itself; **freshness** is the one that is missing, and it is what would have caught the two stale boot-ROM entries.
+
+**The generalisable shape, stated so it is not relearned:** *a defect closed by a one-time repair, with no gate wired to the release path, is a defect scheduled to come back.* F-357 is the proof — repaired 2026-08-26, recurred 2026-09-05.
+
+---
+
+## 24 of the 54 Spin2 DEBUG formatter names the v55 reference lists resolve to nothing, because the file documents them as a composition rule rather than as strings (2026-09-09, ledger re-derivation) — F-404
+
+### F-404 — `UHEX_LONG_ARRAY` and 23 sibling formatter names are unreachable by the token an agent types — `PENDING-VALIDATION`
+
+**Location:** `deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-arrays.yaml`.
+
+**How it surfaced.** Verifying F-401's own claim while re-deriving the release change ledger. F-401 moved pure-symbol Spin2 names from 0 of 62 to 62 of 62; this is the same class one level further in, and F-401's pass did not reach it.
+
+**What is wrong.** The file defines the array formatters **by composition** — `formatters: {decimal: [UDEC, SDEC], hexadecimal: [UHEX, SHEX], binary: [UBIN, SBIN], floating: [FDEC]}` crossed with `array_types: {REG_ARRAY, BYTE_ARRAY, WORD_ARRAY, LONG_ARRAY}`. **A composition rule is not a string.** No field in the shipped set holds the literal token `UHEX_LONG_ARRAY`, so the alias harvester — which reads scalar name-bearing fields — has nothing to read, and the path-derived camelCase key cannot carry it either.
+
+**Measured against the published index at HEAD, not reasoned:** of the **54** distinct formatter names the Spin2 v55 language reference lists in its formatter tables, **30 resolve and 24 do not** — and all 24 are the sized and register forms (`<fmt>_{REG,BYTE,WORD,LONG}_ARRAY`). The bare `_ARRAY` forms resolve, because the 2026-09-05 pass enumerated those seven by hand.
+
+**Why it matters more than a count suggests.** `UHEX_LONG_ARRAY` is the **only trusted packed-data feed shape for a scrolling LOGIC or SCOPE window** — a single `` `(packed) `` long does not fill the window, and our own DEBUG Window manual teaches the full-window array feed (F-207). The one name an agent most needs when a scrolling window renders empty resolved to nothing.
+
+**Authority.** All 24 transcribed from `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` and each read at its line: `:943` (`FDEC_REG_ARRAY`), `:951-954` (UDEC), `:960-963` (SDEC), `:969-972` (UHEX), `:978-981` (SHEX), `:987-990` (UBIN), `:996-999` (SBIN). **`FDEC` has `_REG_ARRAY` and `_ARRAY` forms only** — no `FDEC_BYTE_ARRAY`/`_WORD_ARRAY`/`_LONG_ARRAY` appears in the reference, and none was invented to make the cross-product tidy.
+
+**Correction applied 2026-09-09.** The 24 names are added to the file's `aliases:` block, grouped by array type, with the source lines recorded in place. **They are lookup keys for a rule the file already documents** — no new claim is made, and an alias is never a definition.
+
+**Why no instrument caught it.** The same reason as F-401: **no gate in this project asks whether a file can be *found*.** Every one of them asks whether it is *right*. `verify-yaml-format.py` parses it, `validate-crossref-keys.py` resolves its references, the sourcing and fidelity gates read its quantities and constants — and a name that exists in no field is invisible to all of them because there is nothing to read.
+
+**Why `PENDING-VALIDATION`.** The served index is the published one, so this reaches no agent until the set is pushed. The validation owed is one post-publish probe: `p2kb_find("UHEX_LONG_ARRAY")` returning the array-formatter page instead of dumping the category list. Same gate as F-401 and F-402.
+
+---
+
 ## `boot-rom-contents.yaml` ships six ROM residents; the authoritative list names three, and two of the extras appear in no source at all (2026-09-08, boot-ROM survey) — F-403
 
-### F-403 — character font data and sin/cos/log math tables are asserted as boot-ROM contents with `verification_status: "Existence confirmed"`, sourced only to our own generated narrative — `CONFIRMED`
+### F-403 — character font data and sin/cos/log math tables are asserted as boot-ROM contents with `verification_status: "Existence confirmed"`, sourced only to our own generated narrative — `PENDING-VALIDATION`
 
 **Location:** `deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml`, `residents:` — the `utility_routines`, `character_font_data` and `math_tables` entries.
 
@@ -83,11 +138,17 @@ The same three-item list is what our own extraction matrix recorded from that ma
 
 **Not asserted in the correction:** that font data and math tables are *absent* from the ROM. A 16 KB mask ROM can hold unlabelled data blocks that an assembly listing's symbol names would not reveal. What is established is that **no source we hold supports them and the one authoritative content list omits them** — so the KB must not state them. If their presence matters, it is a question for Chip Gracey, not a document.
 
+**The sweep half — and the ordering lesson it carries** (`b0057ec1`, same day). `2a6df5ef`'s commit body ends *"Class sweep run: no other shipped file makes a font-data or math-table ROM claim."* **That was written before the sweep's output was read, and it was wrong.** The sweep returned four hits and two of them were the same fabricated list, in the same directory: `architecture/boot-rom/_index.yaml` stated six residents in its `description:` sentence **and again** in the `contains:` line under `boot-rom-contents`. Both corrected to the three the Hardware Manual names, plus the shared subroutines the listing actually shows. The other two hits were read and correctly left alone — `hardware/p1_rom_font_character_set.yaml` documents the **P1's** ROM font, which is real and is a different chip, and `assembly-directives/file.yaml` shows a `FILE` directive including a font file from *user* code.
+
+*Two consequences worth carrying.* **A class-sweep claim written before its output is read is an assertion, not a measurement** — the same shape as F-396, where a repair record inside the repaired file read as a finished sweep. And **the second site was in the sibling `_index.yaml` of the very directory being corrected**: an index file restates its members' claims, so any finding that removes a claim from a file must sweep that file's index in the same pass.
+
+**Why `PENDING-VALIDATION` and not `RESOLVED`.** Both halves are applied and no source-side work is owed; what remains is the release. The corrected file reaches an agent only when the set is published. *(Re-graded 2026-09-09 during the ledger re-derivation: the entry had stood at `CONFIRMED` while its own body said "Correction applied 2026-09-08" — the exact status-lag this register's "annotate as you fix, in the same pass" rule exists to prevent.)*
+
 ---
 
-## Two files define the Spin2 `+//` operator and they disagreed about what it does; the duplicate home is still open (2026-09-05, F-401 index regeneration) — F-402
+## Two files defined the Spin2 `+//` operator and they disagreed about what it does; corrected, and the duplicate home merged (2026-09-05, F-401 index regeneration) — F-402
 
-### F-402 — `modulo_add.yaml` called `+//` an "Unsigned Modulo Add" that "performs addition"; corrected, but the second definition home remains — `PARTIAL`
+### F-402 — `modulo_add.yaml` called `+//` an "Unsigned Modulo Add" that "performs addition"; corrected, and `op_addmodulo.yaml` is now the single definition home — `PENDING-VALIDATION`
 
 **How it surfaced.** Arming the `operator:` field as an index alias (F-401) made `+//` resolve to **two** targets — `language/spin2/operators/modulo_add.yaml` and `language/spin2/operators/op_addmodulo.yaml`. The collision was the symptom; reading the two files found they did not agree.
 
@@ -96,11 +157,18 @@ The same three-item list is what our own extraction matrix recorded from that ma
 - `related_operators` gave `"//": Unsigned divide remainder` — this **inverts the single distinction the file exists to draw**. `//` is the signed remainder.
 - `related_operators` listed `"%%": Signed modulo`. `%%` appears in neither operator reference and is not a Spin2 operator; removed rather than relabelled.
 
-**Authority:** `engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:715` (*"`+//` | Remainder (unsigned)"*), :62 (precedence group *"`*` `/` `+/` `//` `+//` `SCA` `SCAS` `FRAC` | Multiply/Divide"*), :103 (*"The `+/` and `+//` operators treat both operands as unsigned 32-bit integers"*). `op_addmodulo.yaml` — *"Unsigned remainder (modulo)"* — was correct throughout and is unchanged.
+**Authority:** `engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:715` (*"`+//` | Remainder (unsigned)"*), :62 (precedence group *"`*` `/` `+/` `//` `+//` `SCA` `SCAS` `FRAC` | Multiply/Divide"*), :103 (*"The `+/` and `+//` operators treat both operands as unsigned 32-bit integers"*). `op_addmodulo.yaml` — *"Unsigned remainder (modulo)"* — was correct throughout, and is now the definition home.
 
 **Why the examples still worked, which is why this survived.** Every wrap-around idiom in the file adds *explicitly* and then takes the remainder — `(tail + 1) +// 32`, `(index + 1) +// BUFFER_SIZE`. The code was right while the prose describing it was wrong, so nothing an agent copied would fail; only what it *believed the operator was* would be wrong. No instrument can see that: the sourcing gate reads quantities, the constant gate reads names, and neither reads a semantic claim.
 
-**What remains open — the reason this is `PARTIAL`.** Two files still define one operator. The project's stated discipline is a single definition home (`architecture/pin-drive-configuration.yaml` declares its own non-home status explicitly for exactly this reason), so one of these should become the home and the other a pointer. That is a merge decision, not a correction: `modulo_add.yaml` carries the richer material — worked ring-buffer patterns, the power-of-2 `&`-mask comparison — while `op_addmodulo.yaml` carries the correct terse definition and matches the naming convention of the other 74 operator files. **Recommend keeping `op_addmodulo.yaml` as the definition home and folding the patterns into it**, but the call is Stephen's.
+**The merge — decided by Stephen and applied the same day (`19385b66`).** Two files defining one operator is what the project's single-definition-home discipline exists to prevent (`architecture/pin-drive-configuration.yaml` declares its own non-home status explicitly for the same reason). The recommendation put to him was to keep `op_addmodulo.yaml` — it carried the correct terse definition and matches the naming convention of the other 74 operator files — and fold in `modulo_add.yaml`'s richer material. **He agreed, and that is what shipped.**
+
+- `op_addmodulo.yaml` is the **definition home**: +156/−3, gaining 13 top-level keys and losing none. The worked ring-buffer patterns came across intact — `(index + 1) +// BUFFER_SIZE`, the head/tail distance idiom, and the power-of-2 `&`-mask comparison.
+- `modulo_add.yaml` is a **32-line redirect**, not a deletion. Its index key `p2kbSpin2OpModuloAdd` **is in the published `v1.17.0` set**, and removing a published key breaks any consumer that cached it. The file states its `definition_home:` and one true sentence in place of a conflicting definition.
+- Result: **one definition, two resolvable keys, no conflict.** Verified against the emitted index — `+//` resolves to `["p2kbSpin2OpModuloAdd", "p2kbSpin2OpOpAddmodulo"]`, the redirect and the home.
+- Four keys were deliberately **not** carried over: `created`, `documentation_level`, `documentation_source: code_analysis` (the very token this entry's class sweep flagged), and `references` — which held *"P2-OctoSerial: Extensive use in circular buffers"*, *"Spin2 documentation: Arithmetic operators"* and *"Production code patterns from Iron Sheep Productions"*, three pointers and not one locatable citation. The home file carries a real one in their place.
+
+**Why `PENDING-VALIDATION`.** Nothing is owed on the source side. The served index is the published one, so this reaches no agent until the set is pushed; the validation owed is the post-publish probe that `+//` resolves to the home. *(Re-graded 2026-09-09 during the ledger re-derivation: this entry had stood at `PARTIAL` saying "two files still define one operator … the call is Stephen's" **four days after he made the call and the merge landed**. The artifact was right and the register was stale — read the tree, not the status line.)*
 
 **Class sweep, run:** only two files in the whole set carry `documentation_source: code_analysis` — this one and `architecture/multi_resource_management.yaml`. The latter documents an architectural *pattern*, not a language fact, so code analysis is a legitimate provenance there and it is **not** a finding. No other file calls `//` unsigned or references `%%`.
 
@@ -122,21 +190,27 @@ The same three-item list is what our own extraction matrix recorded from that ma
 
 **Scale, for prioritisation.** 452 of 1,133 files (39.9%) are reachable by neither an alias nor a category; 576 are in no category at all. The index's per-file record is `{path, mtime, sha256}` — no title, no description — so there is no content-level retrieval to fall back on. Everything rests on aliases, keys and categories.
 
-**APPLIED 2026-09-05** (`ba24f0f9` harvester + `d55b6c7f` index). Twelve name-bearing scalar fields are now harvested; `group:` was excluded on measurement (11 files, 2 distinct values — collisions, not lookups). Measured in the emitted artifact, against the index it replaced:
+**APPLIED 2026-09-05, in TWO passes.** Pass 1 (`ba24f0f9` harvester + `d55b6c7f` index) harvested twelve name-bearing scalar fields; `group:` was excluded on measurement (11 files, 2 distinct values — collisions, not lookups). Pass 2 (`19385b66` + `da896073`) answered *why the residue was dark*: those files were **not missing data** — they named themselves in fields the harvester did not read, because **the field a file uses follows its subtree's convention rather than one house style** (`variable:` for CLKFREQ/CLKMODE/VARBASE, `topic:` for Operator Precedence, `construct:` for Inline PASM2 and ten siblings, `statement:` for DEBUG, `register_name:` for PTRA, `fundamental:` for three language fundamentals). Nine more fields harvested, every value read first. `fundamental_concept:` was deliberately **not** harvested — it holds multi-paragraph prose, and reading it would put whole essays in the alias table. Thirteen files carried no name anywhere and got a hand-authored `aliases:` block instead.
 
-| | before | after |
-|---|---|---|
-| pure-symbol names in the index | **0 of 62** | **62 of 62** |
-| files reachable by an alias | 591 (52.2%) | 916 (80.8%) |
-| files reachable by neither alias nor category | 452 (39.9%) | **206 (18.2%)** |
-| alias entries | 2,082 | 2,660 |
-| aliases lost | — | **0** |
+Measured in the emitted artifact, against the index each pass replaced:
+
+| | before (at `v1.17.0`) | after pass 1 | **after pass 2 — HEAD** |
+|---|---|---|---|
+| pure-symbol names in the index | **0 of 62** | 62 of 62 | **62 of 62** |
+| files reachable by an alias | 591 (52.2%) | 916 (80.8%) | **955 (84.3%)** |
+| files reachable by neither alias nor category | 452 (39.9%) | 206 (18.2%) | **173 (15.3%)** |
+| alias entries | 2,082 | 2,660 | **2,896** |
+| aliases lost | — | 0 | **0** |
+
+**Every one of the 173 that remain is under `community/`** — 131 OBEX objects and 42 Quick Bytes, which name themselves one level down (`object_metadata.title`, `quick_byte.*`) and have their own `p2kb_obex_*` retrieval route. **Outside `community/` the count is zero.** *(Re-derived from the emitted index 2026-09-09; the two right-hand columns are that measurement. The single-column table this entry carried until then recorded pass 1 only and was never updated after pass 2 — the same status-lag as F-402, in numbers rather than in a status token.)*
+
+**Two named seams in pass 2, both worth carrying.** The **DEBUG formatters** were the largest single gap — `UDEC`, `SDEC`, `UHEX`, `SHEX`, `UBIN`, `SBIN`, `FDEC` and their `_BYTE`/`_WORD`/`_LONG` variants resolved to **nothing**, and those are among the most-typed names in Spin2 work. (The composite `_<size>_ARRAY` forms were still missed by that pass and are **F-404**.) And `symbols/streamer-symbols.yaml` got the treatment `spin2-builtin-symbols-complete.yaml` had already had: its **78** `X_*` constants are defined one level down under `symbol:` keys, so neither they nor the file were reachable — `X_RFBYTE_1P_1DAC1`, `X_IMM_32X1_LUT` and `X_ALT_ON` all resolved to nothing, while `X_PINS_ON` and `X_WRITE_ON` resolved only because `pin-selection.yaml` happens to list those two by hand. **These constants are what a streamer command word is composed from, and composing one wrong is silent.** Its `total_symbols` also read **82 against 78 actual records**; corrected — the same class as the `1224`-vs-136 the symbols file carried.
 
 F-376's third silent exit-0 is closed in the same function: a harvest failure now returns its reason and the generator refuses to emit rather than reporting success over a file that is present-but-unfindable. Proven with a negative control — a planted malformed YAML gives exit 1, names the file and the parser error, and leaves the existing index byte-identical.
 
 **Why this is `PENDING-VALIDATION` and not `RESOLVED`:** the served index is the published one, so none of this reaches an agent until the set is pushed. The validation owed is a post-publish probe — `p2kb_find("+//")` returning the operator file instead of dumping 59 categories.
 
-**Still open, deliberately out of this pass:** 206 files remain dark. 131 OBEX objects and 42 quick bytes name themselves one level down (`object_metadata.title`, `quick_byte.*`) and OBEX has its own `p2kb_obex_*` route, so it is likely not dark in practice; the residue is ~33 files carrying no name field at all. Reading a nested name is a different change from reading a field that was already there, and it needs its own decision.
+**Still open, deliberately out of these passes:** **173** files remain dark, and pass 2 closed the residue this line used to name. 131 OBEX objects and 42 Quick Bytes name themselves one level down (`object_metadata.title`, `quick_byte.*`) and OBEX has its own `p2kb_obex_*` route, so they are likely not dark in practice; **the ~33 files that carried no name field at all were given hand-authored `aliases:` blocks in pass 2**, which is why 206 became 173 and why the remainder is now exactly the `community/` population. Reading a *nested* name is a different change from reading a scalar field that was already there, and it needs its own decision — not to be started unasked.
 
 **Not introduced by the unpublished delta, and not fixed by it.** Identical at `v1.17.0` and at HEAD: 62 symbols absent in both. The delta moved file-level darkness 461 → 452 (40.8% → 39.9%), which is real but is not this. Related: F-116 (hardware findability, closed — `hardware/` is now 0% dark, 29/29 reachable) and F-376's `except Exception: pass` in the same harvester, which silently drops a malformed file's aliases (task «#339» item 3) — the two touch the same function and should be fixed in one pass.
 

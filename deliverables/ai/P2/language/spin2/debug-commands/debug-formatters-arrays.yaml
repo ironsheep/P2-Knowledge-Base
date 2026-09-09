@@ -7,6 +7,21 @@
 # name through the published index -- only by guessing its camelCase key.
 # An alias is a lookup key, never a definition; every name below is defined
 # in this file.
+#
+# EXTENDED 2026-09-09 (F-404). The 2026-09-05 block enumerated the seven bare
+# `_ARRAY` forms plus UHEX_BYTE_ARRAY, and left the sized and register forms to
+# the composition rule in `formatters` x `array_types` below. A composition rule
+# is not a string, so no field held the literal token and the harvester could not
+# read one: of the 54 formatter names the Spin2 v55 language reference lists,
+# 30 resolved and 24 did not, and all 24 were these. UHEX_LONG_ARRAY is the one
+# that shows why it matters -- it is the only trusted packed-data feed shape for
+# a scrolling LOGIC or SCOPE window, and it resolved to nothing.
+#
+# The 24 names below are transcribed from the v55 formatter tables and each was
+# read at its line: engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt
+# :943 (FDEC_REG_ARRAY), :951-954 (UDEC), :960-963 (SDEC), :969-972 (UHEX),
+# :978-981 (SHEX), :987-990 (UBIN), :996-999 (SBIN). They are LOOKUP KEYS for
+# the composition rule already documented here; nothing new is claimed.
 aliases:
   - "array formatter"
   - "UDEC_ARRAY"
@@ -16,8 +31,36 @@ aliases:
   - "UBIN_ARRAY"
   - "SBIN_ARRAY"
   - "FDEC_ARRAY"
-  - "UHEX_BYTE_ARRAY"
   - "hex dump"
+  # register-array forms (cog registers)
+  - "UDEC_REG_ARRAY"
+  - "SDEC_REG_ARRAY"
+  - "UHEX_REG_ARRAY"
+  - "SHEX_REG_ARRAY"
+  - "UBIN_REG_ARRAY"
+  - "SBIN_REG_ARRAY"
+  - "FDEC_REG_ARRAY"
+  # hub byte-array forms
+  - "UDEC_BYTE_ARRAY"
+  - "SDEC_BYTE_ARRAY"
+  - "UHEX_BYTE_ARRAY"
+  - "SHEX_BYTE_ARRAY"
+  - "UBIN_BYTE_ARRAY"
+  - "SBIN_BYTE_ARRAY"
+  # hub word-array forms
+  - "UDEC_WORD_ARRAY"
+  - "SDEC_WORD_ARRAY"
+  - "UHEX_WORD_ARRAY"
+  - "SHEX_WORD_ARRAY"
+  - "UBIN_WORD_ARRAY"
+  - "SBIN_WORD_ARRAY"
+  # hub long-array forms
+  - "UDEC_LONG_ARRAY"
+  - "SDEC_LONG_ARRAY"
+  - "UHEX_LONG_ARRAY"
+  - "SHEX_LONG_ARRAY"
+  - "UBIN_LONG_ARRAY"
+  - "SBIN_LONG_ARRAY"
 
 syntax: "formatter(pointer, count)"
 underscore_rule: "array_name = v1, v2, v3 → v1, v2, v3"
