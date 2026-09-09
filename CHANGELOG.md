@@ -20,25 +20,40 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
-## [1.18.0] - 2026-08-25
+## [1.18.0] - 2026-09-09
 
-**Smart-pin drive strength, per-pin current limits, and timing bounds documented as the silicon defines them.**
+**Every operator, symbol and formatter name resolves by the token you type — and every physical figure names its source.**
 
 ### Added
 
+- **Every Spin2 operator and special symbol resolves by name** — `:=`, `+//`, `+/`, `<=>`, `+<=>`, `#>`, `<#`, `@@`, `^@`, `??` and 52 more, all 62 reachable through `p2kb_get` and `p2kb_find`
+- **Every DEBUG formatter name resolves**, including the sized and register array forms — `UHEX_LONG_ARRAY`, `SDEC_BYTE_ARRAY`, `UDEC_REG_ARRAY` and the rest of the 54 the Spin2 v55 reference lists
 - **55 additional Spin2 built-in constants** are documented from the Spin2 v55 specification, all 116 findable by name
+- **Pin drive configuration has a single documented home** — the 13-bit `%M..M` WRPIN field, its sub-fields, the eight-rung drive ladder stated by encoding, and the DIR/OUT rule that governs when a drive setting is live
+- **Holding a line weakly high or low** is documented with the constant, the required pin state, and working examples in both Spin2 and PASM2
+- **I/O pin DC characteristics** — the input logic threshold, input leakage, and output low and high voltages at 1, 10 and 30 mA
+- **Streamer pin capture** — which pins a streamer command reads, and the rule that `IN` is the event flag
+- **The `#64008` Click adapter**, the **WX Wi-Fi module's two form factors**, and the **P2 package record**
 
 ### Changed
 
-- **Quantitative specifications** across architecture, language, hardware, and guide content trace to a cited source; figures that could not be verified are not carried
+- **Quantitative specifications** across architecture, language, hardware, guide and application-note content trace to a cited source; figures that could not be verified are not carried
+- **Every citation in the shipped set resolves to the line it names** — 721 locators across 83 files and 40 source documents, each one opened and read
+- **Clock ranges say whose limit they are** — the compiler's accepted range, the datasheet's rating, and the documented overclock ceiling, given as three distinct numbers rather than one
+- ⚠️ **Some entries changed shape.** 34 top-level fields across 24 files are now structured values where they were lists or plain strings, so each can carry its own source citation. Consumers that walk those fields by type should re-check their parsing before upgrading.
 
 ### Fixed
 
-- **`P_HIGH_*` / `P_LOW_*`** select the smart pin's drive strength — the P2 has no internal pull-up or pull-down resistors
+- **`P_HIGH_*` / `P_LOW_*`** select the smart pin's drive strength
+- **`NEWCOG`** is the symbol for "start any available cog" in `COGINIT` and `COGSPIN`
+- **`HUBSET`'s write-protect bit** is `D[16]`
+- **Streamer NCO frequency values** follow the documented increment rule — truncate, then increment when the division leaves a remainder
 - **ADC smart-pin `P_ADC_GIO` / `P_ADC_VIO` / `P_ADC_FLOAT`** select a calibration reference, not an input range — the gain settings (`P_ADC_1X`…`P_ADC_100X`) set the range
 - **The `P_ADC_3X`–`P_ADC_100X` gain windows center near mid-supply** (~1.64 V on 3.3 V), not 0 V — measured on P2 silicon
 - **Per-I/O-pin current** is documented at ±30 mA, the datasheet's absolute maximum rating
 - **`WAITMS` / `WAITUS`** document their bound in clocks (`$8000_0000`, about 10.7 seconds at 200 MHz)
+- **P2 Edge carriers** take a 5 VDC supply with a 5.5 VDC absolute maximum, and every carrier provides 2×6 accessory headers that accept the `#64006` add-on boards
+- **The boot ROM** contains the bootloader, the P2 Monitor debug interface, and the TAQOZ Forth command interface
 - **`#64006G`** (Goertzel/Touch Sensing Add-on Board) is documented as its own board; its LEDs and switches belong to the separate `#64006A` Control Add-on Board
 
 ---
