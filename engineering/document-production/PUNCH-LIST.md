@@ -20,11 +20,37 @@ about it are housekeeping and **never** gate a publication or hold a correction 
 
 ---
 
-## Review ALL manual content against the YAML-fidelity release — OPEN
+## Review ALL manual content against the YAML-fidelity release — OPEN, AND ITS GATE IS NOW DISCHARGED
 
 **Status:** Open — raised by Stephen 2026-08-25, **owed AFTER that release ships**, not before.
 Deliberately deferred: the release is being reviewed and shipped first, and the manual sweep is a
 separate pass so it is not rushed alongside it.
+
+> ⚠️ **THE RELEASE HAS SHIPPED. `v1.18.0`, 2026-09-09.** The waiting condition on this item is
+> discharged; the sweep is now owed rather than deferred. The `release-yamls` Step 8 impact survey
+> was run at the publish moment and its result is below, so the sweep does not have to re-derive it.
+>
+> **Delta:** 118 files · +7528/−3684 · 41 commits · every region of the KB except `architecture/xbyte_engine`.
+> Full record: `engineering/analysis/2026-08-27-yaml-release-change-ledger.md`.
+>
+> **Intersection against each live document's `MANUAL-DESCRIPTOR.md` declared sources:**
+>
+> | Document | Verdict |
+> |---|---|
+> | `p2-assembly-language-manual` · `p2-pasm-desilva-style` | **INTERSECTS** — `language/`, `language/pasm2/`, `language/spin2/` |
+> | `p2-architect-guide` · `p2-getting-started-guide` | **INTERSECTS** — `architecture/`, `language/` |
+> | `p2-streamer-programming-guide` | **INTERSECTS** — `architecture/streamer/`. ⚠️ **Also carries the F-380 owed re-release**: the NCO increment rule was corrected in its master and the shipped PDF still teaches `round()` in three places |
+> | `p2-debug-window-manual` · `p2-single-step-debugger-manual` · `pnut-term-ts-user-guide` | **INTERSECTS** — `language/` |
+> | `P2AN001` · `P2AN002` · `P2AN003` · `P2AN004` | **INTERSECTS** — each note's own YAML companion changed |
+> | `p2-io-and-smart-pins-user-guide` | **JUDGE BY SUBJECT** — its descriptor declares no KB paths, so the mechanical intersection cannot speak. Its subject is smart pins and ADC, which this release changed heavily (drive strength, `P_ADC_*` calibration sources, the DC characteristics). **Treat as intersecting.** Separately carries **F-356**: the drive-strength mislabel is alive in its master at 23 sites |
+> | `p2-xbyte-programming-guide` | **no intersection** — its declared source `architecture/xbyte_engine.yaml` was not touched this release |
+> | `P2AN005` · `P2AN006` · `P2AN007` | **no intersection** — their companions were not touched |
+>
+> **The three highest-value things for the sweep to carry**, because they are corrections a manual
+> can restate wrongly without any gate noticing: `P_HIGH_*`/`P_LOW_*` are **drive strength**, not bias
+> resistors (and the reader asking for a pull-up gets `P_HIGH_15K` with `DIR=1, OUT=1`); `-1` is **not**
+> a synonym for `NEWCOG`; and the clock ranges must say **whose** limit they are — compiler, datasheet,
+> or overclock ceiling.
 
 **Why it is owed.** The `yaml-fidelity` sprint rewrote the shipped KB on a scale that has no
 precedent here — every uncited quantitative block removed and then repopulated source-first, 55
