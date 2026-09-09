@@ -32,7 +32,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
-| **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | ⏳ | — |
+| **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
@@ -239,6 +239,19 @@ because the platform's `\providecommand` defaults them to empty and the build st
 (**ISP + Parallax**, unlike PNut-Term-TS which is ISP alone). Confirmed by reading the returned
 PDF's metadata, not by the declaration: `Keywords` = *"Copyright 2026 Iron Sheep Productions, LLC
 and Parallax Inc.; licensed under CC BY-SA 4.0"*.
+
+¹⁴ **Single-Step Debugger — cross-ref filter adopted and AUDITED ON THE RENDER 2026-09-09.**
+The audit *is* the adoption, so it was measured rather than assumed, before/after on the same
+document: **NAMED internal links 127 → 147, +20** — and the source carries **exactly 20 reachable
+prose `Chapter N` references** (32 occurrences, less 10 chapter headings, less 2 inside a raw-LaTeX
+block), so every reachable one links. **0 links unresolved** (each resolves to a real page; a link
+to nowhere is worse than no link) and **47 → 47 pages**, so nothing re-flowed.
+**The negative half was checked too:** all 50 remaining `Chapter N` occurrences are chapter
+headings and running heads — every one ends `N:` — and the filter correctly left every one of them
+plain. **Known structural limit, not a defect:** the two references inside the Chapter 3 landmark
+table do NOT link, because that table is a hand-authored `` ```{=latex} `` block and pandoc passes
+raw LaTeX through untouched — no Lua filter can see inside it. Anything needing a live
+cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
 
