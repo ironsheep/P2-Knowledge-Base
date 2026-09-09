@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-09T18:50:12.291271",
+    "generated": "2026-09-09T18:58:13.805003",
     "total_entries": 1133,
     "total_categories": 59,
     "total_aliases": 2950,
@@ -11661,8 +11661,8 @@
     },
     "p2kbPasm2BasicIo": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml",
-      "mtime": 1788115079,
-      "sha256": "fa5a4960f871e5245a1ec826cbe363fa2eff5f3b38ba33533f31ef39aa21cb77"
+      "mtime": 1788980269,
+      "sha256": "ded0bc5ade935c4cf78c05380bb481e12b9514c97d14bcdc4281d75196f923fa"
     },
     "p2kbPasm2BranchAddressing": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/branch_addressing.yaml",
@@ -13516,8 +13516,8 @@
     },
     "p2kbSpin2BasicIo": {
       "path": "deliverables/ai/P2/language/spin2/concepts/basic-io.yaml",
-      "mtime": 1788115079,
-      "sha256": "eb4bc5e113f61b80dc5f97b5cc1b0941d9172229eaa5910276c01fbc3ee5366e"
+      "mtime": 1788980269,
+      "sha256": "9d55f9d23c688b0c3cb5c7dcd5a7d9665fc316fbcf91753018332d2ad802a106"
     },
     "p2kbSpin2CordicSolver": {
       "path": "deliverables/ai/P2/language/spin2/concepts/cordic_solver.yaml",
