@@ -161,4 +161,4 @@ see_also:
   - "language/spin2/methods/wrpin.yaml"
   - "language/spin2/methods/wypin.yaml"
   - "language/spin2/methods/rdpin.yaml"
-  - "architecture/smart-pins/*.yaml"
+  - "architecture/smart_pins.yaml"

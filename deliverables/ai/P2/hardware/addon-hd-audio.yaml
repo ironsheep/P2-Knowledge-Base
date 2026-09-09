@@ -159,7 +159,7 @@ resources:
 
 see_also:
   - hardware/p2-hardware-feature-comparison.yaml
-  - language/spin2/methods/_index.yaml
+  - language/spin2/methods/wrpin.yaml
 
 ecosystem_position: "audio_io"
 hardware_family: "p2_accessory_addons"

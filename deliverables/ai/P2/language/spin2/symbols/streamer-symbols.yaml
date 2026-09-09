@@ -535,5 +535,5 @@ usage_example: |
   ' - 640 pixel count
 
 see_also:
-  - ../../architecture/streamer/modes-reference.yaml
-  - ../../architecture/streamer/dac-routing.yaml
+  - architecture/streamer/modes-reference.yaml
+  - architecture/streamer/dac-routing.yaml

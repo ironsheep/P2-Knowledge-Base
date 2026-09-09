@@ -764,3 +764,45 @@ someone has to re-make each time.
 longer reads `Status: unauthored stub`. Nothing here is owed until then — but the local
 guide is also the natural **source text** for that upstream profile, so proposing it is a
 standing promotion candidate.
+
+---
+
+## Author `language/spin2/methods/_index.yaml` — the Spin2 methods catalog that has never existed — OPEN
+
+**Status:** Open — raised 2026-09-09 during the `see_also` repair sweep. **Stephen: punch-list it,
+"we may or may not do it."** Not owed, not scheduled, and explicitly not a release gate.
+
+**Scope note:** this is a **P2KB content** item, not a document-production one. It lives here because
+this is the project's only cross-cutting punch list and because its state is *maybe* — which is what
+this list is for. It is deliberately **not** in `P2KB-CORRECTION-FINDINGS.md`: nothing in the shipped
+set is wrong, so it is not a correction finding, and `ENH-NN` is the ungoverned allocator the release
+ledger's §0.5 item 4 is already asking Stephen to adjudicate. Filing it there would add to that
+problem.
+
+**What surfaced it.** Four hardware add-on files (`addon-motor-driver`, `addon-microsd`,
+`addon-hd-audio`, `addon-rtc`) each carried a lone `see_also: language/spin2/methods/_index.yaml`.
+**That file has never existed** — no `_index.yaml` under `methods/` in any revision. The four
+references were repaired 2026-09-09 by pointing at `language/spin2/methods/wrpin.yaml`, which is the
+entry point all four boards genuinely go through (Stephen's option C of three). That repair is
+accurate and complete; what it does not do is give the reader the **catalog** the original reference
+was reaching for.
+
+**What the work would be.** `methods/` holds **101** files. Three sibling directories already carry
+the shape to copy — `architecture/streamer/_index.yaml`, `architecture/boot-rom/_index.yaml`,
+`language/pasm2/idioms/_index.yaml` — each with `component` · `description` · `aliases` · `files` ·
+`decision_tree` · `related`. The `decision_tree` is the part with real value and real cost: it is
+what turns 101 filenames into "you want to do X, go here."
+
+**What it is NOT.** `language/spin2/spin2-language-complete-map.yaml` is not a substitute and should
+not be repurposed as one — it is a **coverage report** about how much of the language is documented
+(percentages, completion status, extraction quality), not an index of methods. Pointing readers at it
+would answer a different question than the one they asked.
+
+**Why it might be worth doing.** Every future pointer at the methods directory would have a target,
+and the 101 methods would become browsable by intent rather than by remembering a name. F-401 and
+F-404 both established that this KB's weak axis is **findability**, not correctness; an index is the
+structural version of that fix.
+
+**Why it might not.** 101 files is real authoring, the per-method pages are already reachable by name
+through the index (all 560 mnemonic/method names resolve, measured 2026-09-05), and a decision tree
+that is merely a sorted list would add a maintenance surface without adding retrieval.

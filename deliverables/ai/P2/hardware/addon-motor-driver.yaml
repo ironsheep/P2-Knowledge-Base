@@ -188,7 +188,7 @@ resources:
   product_page: "www.parallax.com (search 64010) - latest guide, free software, example programs, schematic"
 
 see_also:
-  - language/spin2/methods/_index.yaml
+  - language/spin2/methods/wrpin.yaml
 
 ecosystem_position: "motor_control"
 hardware_family: "p2_accessory_addons"

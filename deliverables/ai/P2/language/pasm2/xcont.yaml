@@ -68,5 +68,5 @@ related_instructions:
 - WAITXMT: Wait for command buffer empty
 
 see_also:
-  - ../../architecture/streamer/overview.yaml
-  - ../../architecture/streamer/nco-timing.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/streamer/nco-timing.yaml

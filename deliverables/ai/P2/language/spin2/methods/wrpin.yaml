@@ -160,4 +160,4 @@ see_also:
   - "language/spin2/methods/wxpin.yaml"
   - "language/spin2/methods/wypin.yaml"
   - "language/spin2/methods/pinstart.yaml"
-  - "architecture/smart-pins/*.yaml"
+  - "architecture/smart_pins.yaml"

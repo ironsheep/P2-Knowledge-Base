@@ -420,9 +420,9 @@ related_concepts:
   - "SETQ instruction for pin span override"
 
 see_also:
-  - "deliverables/ai/P2/architecture/pin-drive-configuration.yaml"
-  - "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml"
-  - "deliverables/ai/P2/guides/pasm2-getting-started.yaml"
-  - "deliverables/ai/P2/architecture/smart_pins.yaml"
-  - "deliverables/ai/P2/architecture/io_pin_timing.yaml"
-  - "deliverables/ai/P2/architecture/system-registers/dira-dirb-registers.yaml"
+  - "architecture/pin-drive-configuration.yaml"
+  - "language/spin2/symbols/spin2-builtin-symbols-complete.yaml"
+  - "guides/pasm2-getting-started.yaml"
+  - "architecture/smart_pins.yaml"
+  - "architecture/io_pin_timing.yaml"
+  - "architecture/system-registers/dira-dirb-registers.yaml"

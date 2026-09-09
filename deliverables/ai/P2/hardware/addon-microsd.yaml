@@ -106,7 +106,7 @@ resources:
   product_page: "www.parallax.com (search 64009) - latest guide, schematic, example code"
 
 see_also:
-  - language/spin2/methods/_index.yaml
+  - language/spin2/methods/wrpin.yaml
 
 ecosystem_position: "mass_storage"
 hardware_family: "p2_accessory_addons"

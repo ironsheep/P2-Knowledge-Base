@@ -219,7 +219,7 @@ related:
   - language/pasm2/concepts/addressing_modes.yaml
 
 see_also:
-  - jmp.yaml
-  - call.yaml
-  - djnz.yaml
-  - rep.yaml
+  - language/pasm2/jmp.yaml
+  - language/pasm2/call.yaml
+  - language/pasm2/djnz.yaml
+  - language/pasm2/rep.yaml

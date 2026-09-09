@@ -464,9 +464,9 @@ fifo_behavior:
     - "Move tight inner loops to cogexec (REP), keep large straight-line code in hubexec"
   
   see_also:
-    - "deliverables/ai/P2/architecture/fifo.yaml — FIFO hardware (streamer-transfer role)"
-    - "deliverables/ai/P2/language/pasm2/concepts/execution_modes.yaml — three-mode overview"
-    - "deliverables/ai/P2/architecture/p2-architecture-mental-model.yaml — 19-stage prefetch FIFO"
+    - "architecture/fifo.yaml — FIFO hardware (streamer-transfer role)"
+    - "language/pasm2/concepts/execution_modes.yaml — three-mode overview"
+    - "architecture/p2-architecture-mental-model.yaml — 19-stage prefetch FIFO"
 
 interrupt_considerations:
   cogexec:

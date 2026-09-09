@@ -266,4 +266,4 @@ see_also:
   - "language/spin2/methods/cogstop.yaml"
   - "language/spin2/methods/locknew.yaml"
   - "language/spin2/constructs/method_definition.yaml"
-  - "concepts/multi_cog_synchronization.yaml"
+  - "language/pasm2/concepts/multi_cog_synchronization.yaml"

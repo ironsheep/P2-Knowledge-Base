@@ -95,8 +95,10 @@ related:
   - architecture/smart_pins.yaml
 
 see_also:
-  - "P2 Edge standard module — the board's 8 LDOs / 8-pin header groups: hardware/edge-standard-module.yaml"
-  - "P2 Edge 32MB module — same board power architecture: hardware/edge-32mb-module.yaml"
+  # P2 Edge standard module -- the board's 8 LDOs / 8-pin header groups
+  - hardware/edge-standard-module.yaml
+  # P2 Edge 32MB module -- same board power architecture
+  - hardware/edge-32mb-module.yaml
   - "ADC sample/filter/capture, internal clock (mode %11000) — the per-group reference governs P_ADC_GIO/P_ADC_VIO"
   - "Ratiometric and multi-channel ADC layout is covered in the I/O & Smart Pins User Guide (Ch.16)"
 

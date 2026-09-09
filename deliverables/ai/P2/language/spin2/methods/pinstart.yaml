@@ -181,4 +181,4 @@ see_also:
   - "Smart pin modes"
   - "Smart pin configuration"
   - "P2 smart pin constants"
-  - "concepts/inline_pasm2.yaml"
+  - "language/spin2/constructs/inline_pasm.yaml"

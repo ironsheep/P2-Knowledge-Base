@@ -159,7 +159,7 @@ resources:
   battery_datasheet: "Seiko MS421R (https://www.sii.co.jp/en/)"
 
 see_also:
-  - language/spin2/methods/_index.yaml
+  - language/spin2/methods/wrpin.yaml
 
 ecosystem_position: "timekeeping"
 hardware_family: "p2_accessory_addons"

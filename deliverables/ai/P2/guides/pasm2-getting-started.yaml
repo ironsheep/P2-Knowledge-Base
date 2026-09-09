@@ -718,8 +718,11 @@ next_steps:
     - "Multi-COG programming - parallel processing"
 
 see_also:
-  - deliverables/ai/P2/language/pasm2/special-registers.yaml
-  - deliverables/ai/P2/language/pasm2/idioms/
-  - deliverables/ai/P2/language/pasm2/patterns/
-  - deliverables/ai/P2/language/pasm2/concepts/
-  - manifests/P2/language/pasm2-manifest.yaml
+  - language/pasm2/special-registers.yaml
+  - language/pasm2/idioms/
+  - language/pasm2/patterns/
+  - language/pasm2/concepts/
+  # The manifests/ scheme (DOD v3.0 key-based access, e271cab0) was retired by 03189a7d;
+  # no manifest file has existed since. The categorised instruction inventory it indexed
+  # is the groups/ tree.
+  - language/pasm2/groups/

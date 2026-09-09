@@ -1657,7 +1657,43 @@ Recorded here so they are not rediscovered.
 
 ## `validate-crossref-keys.py` exempts three top-level fields from resolving, and 14 shipped file paths sitting in them point at nothing (2026-08-26, «#321» verification) — F-373
 
-### F-373 — `see_also`, `references` and `related_concepts` are typed `'text'`, so a file path in any of them is never resolved and the gate stays green — `CONFIRMED`
+### F-373 — `see_also`, `references` and `related_concepts` are typed `'text'`, so a file path in any of them is never resolved and the gate stays green — `PARTIAL`
+
+> **CONTENT HALF CLOSED 2026-09-09 (task «#335»).** Every unresolvable file reference in those three
+> fields has been repaired across the shipped set. Re-measured after the sweep: **159 file references
+> + 7 directory references, 0 broken, 0 root-prefixed, 0 globs.** Before it: **18 broken · 22 carrying
+> a `deliverables/ai/P2/` prefix unresolvable as written · 3 globs = 43 sites.** Per Sacred Rule 7,
+> **not one reference was deleted** — every one was redirected to where the content actually is:
+>
+> - **8 wrong-base** — `cogspin` → `language/pasm2/concepts/multi_cog_synchronization.yaml`;
+>   `pinstart` → `language/spin2/constructs/inline_pasm.yaml` (the definition home, not the
+>   `concepts/inline_pasm2.yaml` redirect stub); `streamer-symbols` and `xcont` → four
+>   `architecture/streamer/` files whose `../../` relative form resolved to nothing; `labels.yaml` →
+>   `language/pasm2/{jmp,call,djnz,rep}.yaml`. **`call.yaml` was ambiguous** — two files answer to
+>   that basename — which is the `complete-tables-reference.md` trap F-399 closed; full paths kill it.
+> - **4 to a file that never existed** — `language/spin2/methods/_index.yaml`, from the four add-on
+>   board files, now `language/spin2/methods/wrpin.yaml`, the entry point all four boards genuinely
+>   go through (Stephen's call, option C of three). **Authoring the real catalog is punch-listed**
+>   (`engineering/document-production/PUNCH-LIST.md`) as explicitly *maybe*, not owed.
+> - **2 to a retired scheme** — `manifests/P2/language/*-manifest.yaml`. Git says why: manifests were
+>   part of DOD v3.0 key-based access (`e271cab0`), removed by `03189a7d`. No manifest has existed
+>   since. Redirected to what carries that inventory now — the Spin2 language map, and the PASM2
+>   `groups/` tree — each with the retirement recorded in place so the next reader is not left
+>   guessing why a link moved.
+> - **2 prose-prefixed** — `pin-power-domains.yaml` buried its paths inside a sentence
+>   (`"P2 Edge standard module — the board's 8 LDOs …: hardware/edge-standard-module.yaml"`), which no
+>   tool can bind. Path is now the value; the prose is a comment above it, so nothing was lost.
+> - **3 globs** — `architecture/smart-pins/*.yaml` in `wrpin`/`wxpin`/`wypin` → `architecture/smart_pins.yaml`.
+> - **22 root-prefixed** — the `deliverables/ai/P2/` prefix stripped in 5 files. Every one resolved
+>   to a real file *after* stripping, so these were never dangling; they were **unresolvable as
+>   written**, because a consumer that prepends the KB root gets `deliverables/ai/P2/deliverables/ai/P2/…`.
+>
+> **What remains open, and why this stays `PARTIAL`:** the **gate half**. All three fields are still
+> typed `'text'`, so the validator still cannot see any of this — it was green before the sweep and is
+> green after it, and it would be green again tomorrow if a broken path were reintroduced. **The
+> repair is content-only and nothing defends it.** That is the same shape as F-360's armed-but-unwired
+> duplicate-key gate and F-405's unrun validator: *a defect closed by a one-time repair, with no gate
+> wired to the release path, is a defect scheduled to come back.*
 
 **Not F-340.** F-340 is the **nested-traversal** blind spot, and it is *disclosed on every run*:
 the banner reads `✅ ALL TOP-LEVEL CROSS-REFERENCES RESOLVE — 692 nested site(s) NOT checked
