@@ -18,7 +18,14 @@ component_type: "pin_timing_specifications"
 description: |
   What this file carries: the clock-cycle latency between an instruction writing DIRx/OUTx
   and the pin actually moving, the P2 Datasheet's absolute maximum electrical ratings for
-  an I/O pin, and what those ratings imply for driving a 3.3 V pin from a 5 V signal.
+  an I/O pin, what those ratings imply for driving a 3.3 V pin from a 5 V signal, and --
+  added 2026-09-09 -- the datasheet's DC Characteristics: the input logic threshold, input
+  leakage, and the Vol/Voh output voltages at 1, 10 and 30 mA.
+
+  Two electrical tables sit here and they answer different questions. ABSOLUTE MAXIMUM
+  RATINGS are stress limits -- exceed them and the part is damaged. DC CHARACTERISTICS are
+  operating specifications -- what you design to. "Will this input read as a 1?" is a DC
+  Characteristics question; "will this voltage destroy the pin?" is an absolute-maximum one.
 
   What it deliberately does NOT carry, and where those live instead:
     - Drive strength. The datasheet states it as a set of DRIVE MODES, not a current
@@ -125,6 +132,114 @@ absolute_maximum_ratings:
   max_current_per_IO_pin: "+/-30 mA"
   esd_HBM: "4 kV (JS-001)"
   esd_CDM: "1 kV (JS-002)"
+
+dc_characteristics:
+  description: |
+    OPERATING specifications -- what you design to. Distinct from
+    absolute_maximum_ratings above, which are stress limits: what destroys the chip.
+    These are the figures to reach for when the question is "will this input read as
+    a 1?", "how much will the pin sag when I sink current through it?", or "what does
+    an undriven input leak?"
+
+    Added 2026-09-09. The block that previously stood in this file's place
+    (`input_characteristics`) was FABRICATED -- it stated VIL_max 0.8 V, VIH_min
+    2.0 V, a ~1.5 V switching threshold, Schmitt thresholds of 1.65 V / 1.35 V and
+    ~300 mV hysteresis, none of which any Parallax source states. It was removed under
+    cite-or-omit and, until now, nothing replaced it, so the KB answered these
+    questions with silence while the real table sat in a source we hold. Every figure
+    below is transcribed from that table and read at its line.
+  source: "Parallax P2 Datasheet 2022/11/01, DC Characteristics table, page 47-48 --
+    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2151-2186.
+    Per-row lines given below. Operating temperature range for the whole table:
+    -40 degC to +105 degC unless otherwise noted (:2152). Typ column footnote:
+    'Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated' (:2186)."
+
+  operating_temperature_range: "-40 degC to +105 degC unless otherwise noted"
+
+  supplies:
+    core_supply_voltage_Vdd:
+      min: "1.7 V"
+      typ: "1.8 V"
+      max: "1.9 V"
+      source_line: ":2159"
+    io_supply_voltage_Vxxyy:
+      min: "3.15 V"
+      typ: "3.3 V"
+      max: "3.45 V"
+      note: "Vxxyy is the per-group I/O supply; see architecture/pin-power-domains.yaml"
+      source_line: ":2161"
+
+  input_logic_threshold_Vih:
+    parameter: "Input Logic Threshold"
+    min: "Vxxyy * 0.3"
+    typ: "Vxxyy * 0.5"
+    max: "Vxxyy * 0.7"
+    units: "V"
+    source_line: ":2163"
+    what_this_means: |
+      The datasheet states the threshold as a FRACTION OF THE I/O SUPPLY, not as fixed
+      volts, and gives one threshold rather than a VIL/VIH pair. At the nominal 3.3 V
+      Vxxyy that is 0.99 V min / 1.65 V typ / 2.31 V max. Read it as: an input is
+      guaranteed to read LOW below 0.99 V and HIGH above 2.31 V; between those the
+      part is within spec either way, and where it actually switches is nominally
+      mid-supply. Because it scales with Vxxyy, a group running at 3.15 V and a group
+      running at 3.45 V do not have the same thresholds.
+    not_stated_by_any_source: |
+      Separate VIL / VIH figures, Schmitt-trigger switching thresholds, and hysteresis
+      in millivolts. The P2 HAS Schmitt input modes (P_SCHMITT_A and its variants,
+      defined in language/spin2/symbols/spin2-builtin-symbols-complete.yaml), but no
+      Parallax source we hold states the hysteresis those modes produce. Do not infer
+      it from this row.
+
+  input_leakage_current_Iil:
+    parameter: "Input Leakage Current"
+    conditions: "IO pin Vin = GND or Vio"
+    typ: "+/-0.1 uA"
+    max: "+/-10 uA"
+    source_line: ":2165"
+
+  output_low_voltage_Vol:
+    parameter: "Output Low Voltage (relative to GND)"
+    conditions_note: "VDD = 3.3 V. The datasheet's condition column says VDD; the I/O
+      rail is Vxxyy, and the table is stated as printed rather than reinterpreted."
+    sinking_1mA: "15 mV"
+    sinking_10mA: "160 mV"
+    sinking_30mA: "510 mV"
+    source_line: ":2172-2174"
+
+  output_high_voltage_Voh:
+    parameter: "Output High Voltage (relative to Vxxyy)"
+    conditions_note: "VDD = 3.3 V, as printed. Values are NEGATIVE because they are
+      stated relative to the supply rail -- the pin sits this far BELOW Vxxyy."
+    sourcing_1mA: "-6 mV"
+    sourcing_10mA: "-170 mV"
+    sourcing_30mA: "-580 mV"
+    source_line: ":2176-2178"
+
+  quiescent_current:
+    Iq_Vdd:
+      conditions: "RESn = TEST = P0..P64 = 0V, Vxxyy = 3.3V, VDD = 1.8V"
+      typ: "40 uA"
+      source_line: ":2180-2181"
+    Iq_Vxxyy:
+      conditions: "RESn = TEST = P0..P64 = 0V, Vxxyy = 3.3V, VDD = 1.8V"
+      typ: "0.5 uA"
+      source_line: ":2183-2184"
+
+  the_30mA_ceiling_this_table_confirms: |
+    Vol and Voh are characterised at 1 mA, 10 mA and 30 mA and stop there, which agrees
+    with absolute_maximum_ratings' max_current_per_IO_pin of +/-30 mA above. Any figure
+    above 30 mA per pin is not supported by this datasheet -- a shipped claim of 150 mA
+    was removed as fabricated (F-348 class), and this table is the reason it could never
+    have been right.
+
+  ac_characteristics_are_clock_specs_only: |
+    Checked 2026-09-09 so the absence is a finding rather than an oversight: the AC
+    Characteristics table on the facing page (:2188-2210) states oscillator frequency
+    ranges and XI/XO pin capacitance ONLY. It carries no pin propagation, rise or fall
+    figures, which is why this file's description says no source states them. Its PLL
+    row -- 3.33 MHz min / 180 MHz typ / 320 MHz max, with the note that 180 MHz is
+    nominal at up to 105 degC -- is the same ceiling F-378 corrected the clock files to.
 
 input_voltage_and_protection:
   description: |
