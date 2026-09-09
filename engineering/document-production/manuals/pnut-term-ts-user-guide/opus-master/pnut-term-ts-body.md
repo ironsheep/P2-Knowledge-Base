@@ -413,7 +413,8 @@ Under a heavy stream the window stops trying to draw every line, skips ahead to 
 current, and tells you so:
 
 ```
-⋯ 4,500 line(s) not shown — display fell behind; the log file has every line ⋯
+... 450 line(s) not shown — display fell behind;
+the log file has every line ...
 ```
 
 **This is not data loss.** Only the drawing was reduced, and only while it was
@@ -585,8 +586,10 @@ warns you — the P2 will transmit at its own compiled rate regardless, and the
 mismatch would make the output unreadable:
 
 ```
-WARNING: --baud 115200 disagrees with this binary's compiled DEBUG_BAUD (2000000).
-The P2 will transmit at 2000000 — expect unreadable output. Drop --baud to use the binary's rate.
+WARNING: --baud 115200 disagrees with this binary's
+compiled DEBUG_BAUD (2000000). The P2 will transmit at
+2000000 — expect unreadable output. Drop --baud to use
+the binary's rate.
 ```
 
 `DEBUG_BAUD` there is the field's name inside the image, not a second setting. When
@@ -750,7 +753,7 @@ that decides what the window shows. The window types are:
 
 ## Naming a display
 
-You name a display in the `debug()` directive that creates it — `` `PLOT MyPlot … `` —
+You name a display in the `debug()` directive that creates it — `` `PLOT MyPlot ... `` —
 and every later update addresses that window **by name**. The name is the display's
 only address on the wire, so it cannot be a word the display language is already
 using for something else.
@@ -1420,7 +1423,7 @@ try another port. On Linux and macOS, check serial-port permissions (below).
 fix it depends on where the binary came from. If you built with PNut or `pnut-ts`
 and passed `-b`, **try dropping it** — those images are auto-detected and carry
 their own rate (Chapter 6); look in the output for the line beginning
-`WARNING: --baud … disagrees with this binary's compiled DEBUG_BAUD`, which names
+`WARNING: --baud ... disagrees with this binary's compiled DEBUG_BAUD`, which names
 the mismatch outright. If you built with **any other toolchain**, or you are attaching to an
 *already-running* P2, there is no rate for us to read, so it is the opposite move:
 set the rate yourself with `-b`, or set the **Serial Baud Rate** preference — for
@@ -1458,7 +1461,7 @@ Chapter 8; renaming the display in your P2 program and re-running is the whole f
 **Window → Hide Log** — it is the most expensive window to draw, and closing it does
 not interrupt logging. **Window → Show Log** brings it back. Beyond that, close debug
 windows you are not watching, or lower the data rate in the P2 program. A
-`⋯ N line(s) not shown ⋯` marker in the Debug Logger is the display deliberately
+the "line(s) not shown" marker in the Debug Logger is the display deliberately
 keeping up, not an error and not data loss — the file has every line (Chapter 5).
 
 **A reopened Debug Logger looks like it is missing earlier output.** The window

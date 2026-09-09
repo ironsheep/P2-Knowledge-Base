@@ -76,6 +76,12 @@ DENY_CODEPOINTS = {
     0x207F,  # SUPERSCRIPT LATIN SMALL LETTER N   -- observed missing 2026-07-14
     0x26A0,  # WARNING SIGN                       -- observed missing 2026-07-14
     0xFE0F,  # VARIATION SELECTOR-16 (emoji form) -- observed missing 2026-07-14
+    0x22EF,  # MIDLINE HORIZONTAL ELLIPSIS        -- observed missing 2026-09-09
+             #   IBMPlexMono-Regular has no glyph. Found in the PNut-Term-TS guide,
+             #   where it opened AND closed the Debug Logger's shed-lines marker --
+             #   the two characters that make the line read as a truncation marker.
+             #   Both would have printed as nothing. NOT caught by this gate: see
+             #   --compile-log below, added in the same pass for that reason.
 }
 
 # Ranges text fonts do not carry.
@@ -215,15 +221,56 @@ def audit_one(assembled: pathlib.Path, source_dir, covered) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("assembled", nargs="+", metavar="assembled.md",
+    ap.add_argument("assembled", nargs="*", metavar="assembled.md",
                     help="assembled markdown to audit; MULTIPLE FILES ARE AUDITED, "
-                         "one report each")
+                         "one report each. Optional when --compile-log is given.")
     ap.add_argument("--source-dir", metavar="DIR",
                     help="opus-master dir, to name the chapter that authored each hit")
     ap.add_argument("--templates", nargs="+", default=[], metavar="DIR",
                     help="REQUIRED in practice: the .sty stacks this document loads; "
                          "a \\newunicodechar there means the glyph renders")
+    ap.add_argument("--compile-log", metavar="LOG", action="append", default=[],
+                    help="a Forge output.compile.log. Reports EVERY 'Missing character:' "
+                         "xelatex actually emitted, denylisted or not. This is the only "
+                         "check here that reads the ARTIFACT rather than predicting from "
+                         "a list, so it is the only one that can catch a FIRST occurrence.")
     args = ap.parse_args()
+
+    # --- artifact check, run first: xelatex already told us the truth ---------
+    # The denylist above is seeded from PAST failures, so by construction it cannot
+    # flag a codepoint no document has lost yet -- U+22EF passed this gate cleanly
+    # on 2026-09-09 while the compile log carried 8 warnings for it. A denylist
+    # predicts; the log observes. Read the log.
+    log_exit = 0
+    for logname in args.compile_log:
+        lp = pathlib.Path(logname)
+        if not lp.is_file():
+            print(f"ERROR: not a file: {lp}")
+            log_exit = max(log_exit, 2)
+            continue
+        missing = {}
+        for line in lp.read_text(errors="replace").splitlines():
+            if "Missing character:" not in line:
+                continue
+            for cp in re.findall(r"\(U\+([0-9A-Fa-f]{4,6})\)", line):
+                missing[int(cp, 16)] = missing.get(int(cp, 16), 0) + 1
+        if missing:
+            print(f"\n{lp}: MISSING GLYPHS IN THE RENDERED PDF")
+            for cp, n in sorted(missing.items()):
+                ch = chr(cp)
+                try:
+                    nm = unicodedata.name(ch)
+                except ValueError:
+                    nm = "<unnamed>"
+                seeded = "already denylisted" if cp in DENY_CODEPOINTS else "NOT DENYLISTED -- add it"
+                print(f"  U+{cp:04X} {nm}  x{n} warning(s)  [{seeded}]")
+            print("  Each of these printed NOTHING on the page. Fix the source, then add"
+                  "\n  the codepoint to DENY_CODEPOINTS so the next document cannot reship it.")
+            log_exit = max(log_exit, 1)
+        else:
+            print(f"{lp}: OK (xelatex emitted no Missing character warnings)")
+    if args.compile_log and not args.assembled:
+        return log_exit
 
     source_dir = pathlib.Path(args.source_dir) if args.source_dir else None
     # Template coverage is a property of the STACK, not of any one document, so it
@@ -231,7 +278,7 @@ def main() -> int:
     # invocation would silently apply the wrong exemptions — run those separately.
     covered = covered_by_templates(args.templates)
 
-    worst = 0
+    worst = log_exit
     for name in args.assembled:
         path = pathlib.Path(name)
         if not path.is_file():
