@@ -51,7 +51,9 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## The datasheet's DC Characteristics table was never carried, so the KB answered "what is the input threshold?" with silence after the fabricated answer was removed (2026-09-09, terminology review) — F-407
 
-### F-407 — fabrication removed correctly, the real table never put in its place — `PENDING-VALIDATION`
+### F-407 — fabrication removed correctly, the real table never put in its place — `RESOLVED`
+
+> **VALIDATED 2026-09-09 on the published server** — v1.18.0 pushed (tag `v1.18.0` → `0be06925`); `p2kb_refresh` returned 1133 entries / 2950 aliases, and the probes ran against the live index: `p2kb_find("+//")` → 2 keys, `p2kb_find("UHEX_LONG_ARRAY")` → the arrays page, `p2kb_find("pullup")` → `p2kbArchPinDriveConfiguration`, and `p2kb_get("p2kbArchIoPinTiming")` returns the `dc_characteristics` block. The served index file is byte-identical to `origin/main`.
 
 **Location:** `deliverables/ai/P2/architecture/io_pin_timing.yaml`.
 
@@ -87,7 +89,9 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## A coder asking for a pull-up got a denial first and the answer fourth, and 15 of 17 phrasings of the question resolved to nothing (2026-09-09, terminology review) — F-406
 
-### F-406 — the KB was correct about the constants and hostile to the reader asking for them — `PENDING-VALIDATION`
+### F-406 — the KB was correct about the constants and hostile to the reader asking for them — `RESOLVED`
+
+> **VALIDATED 2026-09-09 on the published server** — v1.18.0 pushed (tag `v1.18.0` → `0be06925`); `p2kb_refresh` returned 1133 entries / 2950 aliases, and the probes ran against the live index: `p2kb_find("+//")` → 2 keys, `p2kb_find("UHEX_LONG_ARRAY")` → the arrays page, `p2kb_find("pullup")` → `p2kbArchPinDriveConfiguration`, and `p2kb_get("p2kbArchIoPinTiming")` returns the `dc_characteristics` block. The served index file is byte-identical to `origin/main`.
 
 **Location:** `deliverables/ai/P2/architecture/pin-drive-configuration.yaml` (retrieval) and both `concepts/basic-io.yaml` files (framing).
 
@@ -161,7 +165,9 @@ The 2026-09-05 findability pass regenerated the JSON **twice** and the gzip **ne
 
 ## 24 of the 54 Spin2 DEBUG formatter names the v55 reference lists resolve to nothing, because the file documents them as a composition rule rather than as strings (2026-09-09, ledger re-derivation) — F-404
 
-### F-404 — `UHEX_LONG_ARRAY` and 23 sibling formatter names are unreachable by the token an agent types — `PENDING-VALIDATION`
+### F-404 — `UHEX_LONG_ARRAY` and 23 sibling formatter names are unreachable by the token an agent types — `RESOLVED`
+
+> **VALIDATED 2026-09-09 on the published server** — v1.18.0 pushed (tag `v1.18.0` → `0be06925`); `p2kb_refresh` returned 1133 entries / 2950 aliases, and the probes ran against the live index: `p2kb_find("+//")` → 2 keys, `p2kb_find("UHEX_LONG_ARRAY")` → the arrays page, `p2kb_find("pullup")` → `p2kbArchPinDriveConfiguration`, and `p2kb_get("p2kbArchIoPinTiming")` returns the `dc_characteristics` block. The served index file is byte-identical to `origin/main`.
 
 **Location:** `deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-arrays.yaml`.
 
@@ -185,7 +191,9 @@ The 2026-09-05 findability pass regenerated the JSON **twice** and the gzip **ne
 
 ## `boot-rom-contents.yaml` ships six ROM residents; the authoritative list names three, and two of the extras appear in no source at all (2026-09-08, boot-ROM survey) — F-403
 
-### F-403 — character font data and sin/cos/log math tables are asserted as boot-ROM contents with `verification_status: "Existence confirmed"`, sourced only to our own generated narrative — `PENDING-VALIDATION`
+### F-403 — character font data and sin/cos/log math tables are asserted as boot-ROM contents with `verification_status: "Existence confirmed"`, sourced only to our own generated narrative — `RESOLVED`
+
+> **VALIDATED 2026-09-09 on the published server** — v1.18.0 pushed (tag `v1.18.0` → `0be06925`); `p2kb_refresh` returned 1133 entries / 2950 aliases, and the probes ran against the live index: `p2kb_find("+//")` → 2 keys, `p2kb_find("UHEX_LONG_ARRAY")` → the arrays page, `p2kb_find("pullup")` → `p2kbArchPinDriveConfiguration`, and `p2kb_get("p2kbArchIoPinTiming")` returns the `dc_characteristics` block. The served index file is byte-identical to `origin/main`.
 
 **Location:** `deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml`, `residents:` — the `utility_routines`, `character_font_data` and `math_tables` entries.
 
@@ -227,7 +235,9 @@ The same three-item list is what our own extraction matrix recorded from that ma
 
 ## Two files defined the Spin2 `+//` operator and they disagreed about what it does; corrected, and the duplicate home merged (2026-09-05, F-401 index regeneration) — F-402
 
-### F-402 — `modulo_add.yaml` called `+//` an "Unsigned Modulo Add" that "performs addition"; corrected, and `op_addmodulo.yaml` is now the single definition home — `PENDING-VALIDATION`
+### F-402 — `modulo_add.yaml` called `+//` an "Unsigned Modulo Add" that "performs addition"; corrected, and `op_addmodulo.yaml` is now the single definition home — `RESOLVED`
+
+> **VALIDATED 2026-09-09 on the published server** — v1.18.0 pushed (tag `v1.18.0` → `0be06925`); `p2kb_refresh` returned 1133 entries / 2950 aliases, and the probes ran against the live index: `p2kb_find("+//")` → 2 keys, `p2kb_find("UHEX_LONG_ARRAY")` → the arrays page, `p2kb_find("pullup")` → `p2kbArchPinDriveConfiguration`, and `p2kb_get("p2kbArchIoPinTiming")` returns the `dc_characteristics` block. The served index file is byte-identical to `origin/main`.
 
 **How it surfaced.** Arming the `operator:` field as an index alias (F-401) made `+//` resolve to **two** targets — `language/spin2/operators/modulo_add.yaml` and `language/spin2/operators/op_addmodulo.yaml`. The collision was the symptom; reading the two files found they did not agree.
 
@@ -255,7 +265,9 @@ The same three-item list is what our own extraction matrix recorded from that ma
 
 ## Every Spin2 operator and special symbol is unreachable by the token an agent actually reads in source: 0 of 62 are in the index (2026-09-05, codegen findability audit) — F-401
 
-### F-401 — the index harvests four name fields and `operator:`/`symbol:` are not among them, so `+//`, `:=`, `<=>`, `^@`, `??` resolve to nothing — `PENDING-VALIDATION`
+### F-401 — the index harvests four name fields and `operator:`/`symbol:` are not among them, so `+//`, `:=`, `<=>`, `^@`, `??` resolve to nothing — `RESOLVED`
+
+> **VALIDATED 2026-09-09 on the published server** — v1.18.0 pushed (tag `v1.18.0` → `0be06925`); `p2kb_refresh` returned 1133 entries / 2950 aliases, and the probes ran against the live index: `p2kb_find("+//")` → 2 keys, `p2kb_find("UHEX_LONG_ARRAY")` → the arrays page, `p2kb_find("pullup")` → `p2kbArchPinDriveConfiguration`, and `p2kb_get("p2kbArchIoPinTiming")` returns the `dc_characteristics` block. The served index file is byte-identical to `origin/main`.
 
 **Location:** `engineering/tools/generate-p2kb-index.py`, `harvest_aliases_from_yaml()` (the harvester), against `deliverables/ai/P2/language/spin2/operators/` (77 files) and `language/spin2/special-symbols/` (13 files).
 
