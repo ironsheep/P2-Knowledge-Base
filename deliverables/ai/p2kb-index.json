@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-09T18:32:34.940753",
+    "generated": "2026-09-09T18:50:12.291271",
     "total_entries": 1133,
     "total_categories": 59,
-    "total_aliases": 2920,
+    "total_aliases": 2950,
     "multi_target_aliases": 189,
     "source": "deliverables/ai/P2/"
   },
@@ -1323,6 +1323,9 @@
     ],
     "BBBB field": [
       "p2kbPasm2Wrpin"
+    ],
+    "BIAS RESISTOR": [
+      "p2kbArchPinDriveConfiguration"
     ],
     "BINARY ANGLE": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -2847,6 +2850,12 @@
     "INSTRUMENTATION ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
+    "INTERNAL PULL-DOWN": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "INTERNAL PULL-UP": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "INTERRUPT RESUME INSTRUCTIONS": [
       "p2kbPasm2InterruptResume"
     ],
@@ -4233,10 +4242,37 @@
     "PUB": [
       "p2kbSpin2KwPUB"
     ],
+    "PULL DOWN": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "PULL RESISTOR": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "PULL UP": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "PULL-DOWN": [
       "p2kbArchPinDriveConfiguration"
     ],
+    "PULL-DOWN RESISTOR": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "PULL-UP": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "PULL-UP RESISTOR": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "PULLDOWN": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "PULLUP": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "PULL_DOWN": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "PULL_UP": [
       "p2kbArchPinDriveConfiguration"
     ],
     "PULSE MEASUREMENT": [
@@ -4554,6 +4590,12 @@
     ],
     "P_PLUS3_B": [
       "p2kbSpin2Spin2BuiltinSymbolsComplete"
+    ],
+    "P_PULLDOWN": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "P_PULLUP": [
+      "p2kbArchPinDriveConfiguration"
     ],
     "P_PULSE": [
       "p2kbSpin2Spin2BuiltinSymbolsComplete"
@@ -6424,6 +6466,12 @@
     "WEAK DRIVE": [
       "p2kbArchPinDriveConfiguration"
     ],
+    "WEAK PULL-DOWN": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "WEAK PULL-UP": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "WFBYTE": [
       "p2kbPasm2Wfbyte"
     ],
@@ -7121,6 +7169,9 @@
     ],
     "battery-backed clock add-on": [
       "p2kbHwAddonRtcAddonRtc"
+    ],
+    "bias resistor": [
+      "p2kbArchPinDriveConfiguration"
     ],
     "binary angle": [
       "p2kbAppNoteP2an002CordicForRealWork"
@@ -7859,6 +7910,12 @@
     "instrumentation ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
+    "internal pull-down": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "internal pull-up": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "iot_device": [
       "p2kbSpin2IotDevice"
     ],
@@ -8572,10 +8629,37 @@
     "pseudo-random dither": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
+    "pull down": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "pull resistor": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "pull up": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "pull-down": [
       "p2kbArchPinDriveConfiguration"
     ],
+    "pull-down resistor": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "pull-up": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "pull-up resistor": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "pull_down": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "pull_up": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "pulldown": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "pullup": [
       "p2kbArchPinDriveConfiguration"
     ],
     "pulse measurement": [
@@ -9551,6 +9635,12 @@
     "weak drive": [
       "p2kbArchPinDriveConfiguration"
     ],
+    "weak pull-down": [
+      "p2kbArchPinDriveConfiguration"
+    ],
+    "weak pull-up": [
+      "p2kbArchPinDriveConfiguration"
+    ],
     "wfbyte": [
       "p2kbPasm2Wfbyte"
     ],
@@ -9941,8 +10031,8 @@
     },
     "p2kbArchPinDriveConfiguration": {
       "path": "deliverables/ai/P2/architecture/pin-drive-configuration.yaml",
-      "mtime": 1788115079,
-      "sha256": "d66356164234d4026f181204589ed37dda737a416a2dc636f1df3a7c1b84ca71"
+      "mtime": 1788979784,
+      "sha256": "059dad8b94685fb736e57201c9281ae12096a6ad9b396093f6b09eeb47095fd5"
     },
     "p2kbArchPinPowerDomains": {
       "path": "deliverables/ai/P2/architecture/pin-power-domains.yaml",
