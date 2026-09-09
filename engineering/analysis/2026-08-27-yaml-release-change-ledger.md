@@ -9,13 +9,30 @@ see from a diffstat?"*
 not annotated as fixed. If you want the history of what was once outstanding, read the archived
 predecessor named below and the git log — not this file.
 
-**Range.** `v1.17.0` (`7ff76b30`, 2026-08-21) `..` `9ab0433b` (2026-08-30).
-**Re-derived on disk 2026-08-30.** Every count below was measured from git and from the parsed YAML
+**Range.** `v1.17.0` (`7ff76b30`, 2026-08-21) `..` `b0057ec1` (2026-09-08).
+**Re-derived on disk 2026-09-09.** Every count below was measured from git and from the parsed YAML
 at HEAD. *(The 2026-08-27 revision measured the range ending at `b466a538`; the 2026-08-29
 pre-release fix pass added three commits touching KB YAML — §1.18; the **2026-08-30 fix pass** added
-three more — §1.19 — and every count in §0.1, §0.4 and §0.5 was re-measured, not adjusted, on each
-occasion.)* Where a project record, a commit message or a companion analysis disagrees with the
-artifact, the artifact is reported and the disagreement is named (§0.2).
+three more — §1.19; and the **2026-09-05 / 2026-09-08 passes** added five more — §1.20 · §1.21 ·
+§1.22. Every count in §0.1, §0.3, §0.4 and §0.5 was re-measured, not adjusted, on each occasion.)*
+Where a project record, a commit message or a companion analysis disagrees with the artifact, the
+artifact is reported and the disagreement is named (§0.2).
+
+**The body is derived at `b0057ec1`; this document's own commit changes one already-counted file.**
+Re-deriving found three defects (§1.23) and the discipline is to fix them in the same pass, so the
+commit carrying this ledger also carries the F-404 alias repair and the regenerated index pair. That
+moves the line totals to **+7306/−3642** and leaves the file count at **112** — stated in §0.1 rather
+than folded silently into a number, because a derived document that quietly absorbs its own edits is
+the drift this re-derivation exists to remove.
+
+⚠️ **This re-derivation found the tree RED and repaired it.** `validate-dod-release.py` exited **1**
+at `b0057ec1`: *"Gzip Compression: FAIL — gzip content does not match JSON file."* The 2026-09-05
+pass regenerated `p2kb-index.json` **twice** (`d55b6c7f`, `da896073`) and regenerated
+`p2kb-index.json.gz` **neither time**, so the pair had been out of sync in committed history for
+four days — **F-357's exact defect, recurred**. The index was separately stale by the two files the
+2026-09-08 pass changed. Both are fixed in the commit that carries this document; the pair is back
+in sync and the validator is green at 11 of 11. See §0.4. *The re-derivation is what found this: no
+gate runs itself, and nothing had run the validator since 08-30.*
 
 **Supersedes** `engineering/analysis/2026-08-25-yaml-release-change-ledger.md`, archived to
 `engineering/analysis/archived/2026-08-25-yaml-release-change-ledger.md`, **byte-identical to its
@@ -28,11 +45,15 @@ after it. It was **re-derived, not patched** — hand-patching a derived documen
 the drift this re-derivation exists to remove.
 
 **Two views of the same facts.** Part 1 groups by *reason* — a class usually crosses regions.
-Part 2 goes region → file, all 96, **each carrying its differential-read verdict**. *(Part 2's tables
-were written when the set was 92. The four files the 2026-08-30 pass brought into the change set —
+Part 2 goes region → file, **each carrying its differential-read verdict**. *(Part 2's tables were
+written when the set was 92, and its **92 rows** are still the differential read's population. The
+change set is now **112**, and the arithmetic is stated so nothing reads as an omission:
+**92 rows + 4 (§1.19) + 15 (§1.21) + 1 (§1.22) = 112.** The four the 2026-08-30 pass brought in —
 `architecture/hub.yaml`, `hardware/p2-hardware-selection-guide.yaml`,
-`language/spin2/methods/coginit.yaml`, `language/spin2/methods/cogspin.yaml` — and the revised ±
-figures for the fourteen it re-touched are carried in **§1.19**, which is where to read them.)*
+`language/spin2/methods/coginit.yaml`, `language/spin2/methods/cogspin.yaml` — are in §1.19 with the
+revised ± figures for the fourteen it re-touched; the fifteen the findability pass brought in are in
+§1.21 and the one the boot-ROM pass brought in is in §1.22. Part 2's region headers carry the HEAD
+file counts, so header total (112) and row count (92) differ by exactly those twenty.)*
 
 ---
 
@@ -68,20 +89,23 @@ audit before it was looking for.** That is the shape of the release.
 | **K** | **Register drains — including two refusals** | The corrections register had accumulated findings older than this sprint. Two of them were **rejected**: applying them would have introduced defects into content that is currently correct | 2 regions — `architecture` · `architecture/smart-pins` | **2 files** | §1.15 |
 | **L** | **2026-08-29 pre-release pass** | Re-reading before shipping, rather than re-checking a prior pass's conclusions. Recomputing the SETXFRQ NCO class instead of trusting two named values found **nine shipped values wrong** by one bit | 4 regions — `architecture` · `architecture/streamer` · `language/spin2` · `language/pasm2` | **6 files** | §1.18 |
 | **M** | **2026-08-30 pre-release pass** | The defect census graded two items category 1 — 19 uncited hardware quantities and 721 unread citations. Reading the 19 found **three were wrong** and opened a family sweep; reading the 721 discharged F-377 | 6 regions — `hardware` · `architecture` · `architecture/streamer` · `application-notes` · `language/spin2` · `language/pasm2` | **18 files** | §1.19 |
+| **N** | **The codegen-effect audit of the unpublished delta** (2026-09-05) | The only question this whole release exists to answer had never been asked directly: *of the content an agent actually receives, do these changes weaken its ability to generate code?* Answered by running today's instruments over a real `git worktree` of `v1.17.0` — the baselines are first-hand, not relayed from commit messages | 2 regions — `architecture` · `hardware` | **2 files** — the audit's own two introduced-locator repairs; the audit itself changed nothing else | §1.20 |
+| **O** | **The findability audit** (F-401, F-402 — 2026-09-05) | **A question from outside the release**: an agent failed three or four times over two days to locate information the KB *has*. Reproduced and measured — the index harvested four name fields, and **0 of the 62 pure-symbol Spin2 names** (`:=` `+//` `<=>` `^@` `??` …) were in it in any form. Those are precisely the tokens an agent meets when reading Spin2 source | 3 regions — `language/spin2` · `architecture/system-registers` · `code-examples` | **16 files**; 12 name-bearing fields now harvested, 13 files given a hand-authored `aliases:` block, and the duplicate `+//` definition home merged | §1.21 |
+| **P** | **The boot-ROM content list** (F-403 — 2026-09-08) | A survey of what the KB asserts about the 16 KB mask ROM. The shipped file named **six** residents; the one authoritative content list we hold names **three**, and two of the extras trace to *our own generated narrative* rather than to any Parallax document | 1 region — `architecture/boot-rom` | **2 files** | §1.22 |
 
-Every one of the **96** changed files is attributable to at least one driver above; the union is 96,
-with no remainder. Files appear under more than one driver where more than one reason reached them,
-and **how many drivers entered a region is the best single predictor of how large its per-file diffs
-are in Part 2**:
+Every one of the **112** changed files is attributable to at least one driver above; the union is
+112, with no remainder. Files appear under more than one driver where more than one reason reached
+them, and **how many drivers entered a region is the best single predictor of how large its per-file
+diffs are in Part 2**:
 
 | Region | Drivers that entered it | |
 |---|---|---|
-| `language/spin2` · `language/pasm2` · `architecture` | **10 each** | the three most re-entered regions. `architecture/`'s re-derived files carry the largest *rewrites* — `interrupts.yaml` +219/−115, `debug_interrupt.yaml` +208/−92, `clock_system.yaml` +185/−136 — while `language/spin2/`'s largest change is the one-way constant expansion `spin2-builtin-symbols-complete.yaml` **+1052/−23**, the biggest single diff in the release |
-| `hardware` | **7** | A · B · D · F · G · I · M — the widest region by file count (28) |
+| `language/spin2` · `architecture` | **11 each** | the two most re-entered regions. `architecture/`'s re-derived files carry the largest *rewrites* — `interrupts.yaml` +221/−115, `debug_interrupt.yaml` +208/−92, `clock_system.yaml` +185/−136 — while `language/spin2/`'s largest change is the one-way constant expansion `spin2-builtin-symbols-complete.yaml` **+1052/−23**, still the biggest single diff in the release |
+| `language/pasm2` | **10** | untouched by every pass after 08-30 |
+| `hardware` | **8** | A · B · D · F · G · I · M · N — the widest region by file count (28) and by lines changed (+2233/−1752) |
 | `architecture/smart-pins` · `guides` · `architecture/streamer` | 4 each | |
-| `application-notes` | 3 | |
-| `architecture/boot-rom` · `architecture/system-registers` | 2 each | |
-| `code-examples` | 1 | driver A only — one word changed, and that is the whole of it |
+| `application-notes` · `architecture/boot-rom` · `architecture/system-registers` | 3 each | `boot-rom` and `system-registers` were each entered once more by the 2026-09 passes |
+| `code-examples` | **2** | driver A (one word) and driver O (an `aliases:` block on the schema file) — and that is the whole of it |
 
 The two new files not attributable to G are `architecture/pin-drive-configuration.yaml` (driver C —
 it *is* the definition home) and `hardware/p2-package-mechanical.yaml` (driver F — written as the
@@ -103,14 +127,24 @@ record of *what it caught that nothing else would have* is the argument for havi
 | **The defect census** (2026-08-30) | The *size* of what remained, class by class — which is what made M finishable rather than open-ended | A class it did not model; it says so, and M then found one |
 | **The 08-29 pass** (L) | Nine NCO values wrong by one bit, in files that **quoted the very rule they violated** | Anything outside the classes it recomputed |
 | **The 08-30 pass** (M) | 22 mis-pointing citation locators, and six facts simply wrong in files with no citation defect at all | The Tier-2 population; and it says so |
+| **The codegen-effect audit** (N) | What the delta does to the *consumer* — the only direction no other instrument measures. It is also the only pass that measured `v1.17.0` with today's tools, which is what makes every "before" figure real rather than quoted | Anything wrong at **both** revisions; it compares two trees, so a defect that predates the tag is invisible to it |
+| **The findability audit** (O) | Content that is present, correct, cited — and **unreachable by the name an agent types**. No gate in §0.4 asks whether a file can be *found*; every one of them asks whether it is *right* | Whether the content it made reachable is correct. It moved 0 → 62 symbol names and read none of the definitions behind them — except the one collision that forced a read, which is exactly how F-402 surfaced |
+| **The boot-ROM survey** (P) | A claim with **no quantity and no constant in it**, sourced to a file we generated ourselves. The sourcing gate never scored it (no numbers) and the fidelity gate never saw it (no constant names), while the file's four real header citations made a Tier-2 sweep read it as a citing file | Everything outside the one file it surveyed; it names its own scope |
 
 **The through-line, and the reason §0.5 still has a red block.** Every instrument in §0.4 is green and
-was green before each of the fixes above. **No gate here can read a sentence.** What found the wrong
-values was, in every case, a person or an agent *reading the source at the line* — and in two cases
-(F-389 and the debug/stack questions behind F-390/F-391) it was **a question from outside the release
-entirely**. That is why the ledger reports gate results as *"not caught by these checks"* rather than
-*"correct"*, and why the count of findings in a class is the size of the class we measured, never the
-size of the defect population.
+was green before each of the fixes above. **No gate here can read a sentence, and none of them asks
+whether a file can be found at all.** What found the wrong values was, in every case, a person or an
+agent *reading the source at the line* — and in three cases (F-389/F-401, and the debug/stack
+questions behind F-390/F-391) it was **a question from outside the release entirely**. That is why
+the ledger reports gate results as *"not caught by these checks"* rather than *"correct"*, and why
+the count of findings in a class is the size of the class we measured, never the size of the defect
+population.
+
+**And one gate result was not a green at all.** The eight instruments in §0.4 all passed at
+`b0057ec1`, but `validate-dod-release.py` — which wraps them and adds four artifact-level checks —
+**exited 1**. Nothing had run it since 2026-08-30, so a red release gate sat in committed history
+for four days. **A gate that nothing runs is not a gate**, which is the same sentence §0.5 item 19
+has been carrying about the duplicate-key checker, now demonstrated rather than predicted.
 
 ---
 
@@ -120,18 +154,29 @@ size of the defect population.
 
 | Quantity | Measured | Command |
 |---|---|---|
-| Commits touching KB YAML | **30** | `git log --oneline v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
-| Commits in the range, all paths | **128** | `git log --oneline v1.17.0..HEAD \| wc -l` |
-| YAML files changed | **96** | `git diff --name-only v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
-| Lines | **+6703 / −3480** | `git diff --numstat … \| awk '{a+=$1;r+=$2} END{print a,r}'` |
+| Commits touching KB YAML | **35** | `git log --oneline v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
+| Commits in the range, all paths | **140** | `git log --oneline v1.17.0..HEAD \| wc -l` |
+| YAML files changed | **112** | `git diff --name-only v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
+| Lines | **+7263 / −3642** | `git diff --numstat … \| awk '{a+=$1;r+=$2} END{print a,r}'` |
+| ↳ *at the commit carrying this document* | **+7306 / −3642**, **112 files still** | §1.23's F-404 repair adds **+43** to `debug-formatters-arrays.yaml`, which was already in the set (+18/−0 → **+61/−0**). No file enters or leaves. |
 | New files | **4** | `git diff --diff-filter=A --name-only …` |
 | Deleted / renamed files | **0 / 0** | `git diff --diff-filter=DR -M --name-status …` |
-| Shipped set size | **1129 → 1133 files** (unchanged by the 2026-08-30 pass — it added no files and deleted none) | `git archive` both revisions, count `*.yaml` |
-| Region spread | hardware 28 · language/spin2 17 · architecture 15 · language/pasm2 12 · architecture/streamer 8 · architecture/smart-pins 4 · architecture/boot-rom 4 · application-notes 4 · guides 2 · code-examples 1 · architecture/system-registers 1 | `… \| awk -F/ …` |
+| Shipped set size | **1129 → 1133 files** (unchanged by every pass after 2026-08-26 — the 08-29, 08-30, 09-05 and 09-08 passes added no files and deleted none) | `git archive` both revisions, count `*.yaml` |
+| Region spread | hardware 28 · language/spin2 **30** · architecture 15 · language/pasm2 12 · architecture/streamer 8 · architecture/boot-rom **5** · architecture/smart-pins 4 · application-notes 4 · guides 2 · code-examples **2** · architecture/system-registers **2** | `… \| awk -F/ …` |
+| Lines by region | hardware +2233/−1752 · language/spin2 +1915/−404 · architecture +1757/−966 · architecture/streamer +692/−94 · language/pasm2 +197/−166 · guides +166/−83 · architecture/boot-rom +93/−63 · architecture/smart-pins +72/−42 · application-notes +65/−54 · architecture/system-registers +62/−17 · code-examples +11/−1 | sums to +7263/−3642 exactly |
 
-The four new files: `architecture/pin-drive-configuration.yaml`,
-`architecture/streamer/pin-capture.yaml`, `hardware/addon-click-adapter.yaml`,
-`hardware/p2-package-mechanical.yaml`.
+The four new files are unchanged from the 2026-08-30 derivation:
+`architecture/pin-drive-configuration.yaml`, `architecture/streamer/pin-capture.yaml`,
+`hardware/addon-click-adapter.yaml`, `hardware/p2-package-mechanical.yaml`. **The sixteen files that
+entered the change set after `9ab0433b` were all already in the shipped set** — the 2026-09 passes
+added names and corrected content, they did not add coverage:
+
+| Region | Files new to the change set since `9ab0433b` | Pass |
+|---|---|---|
+| `language/spin2` (13) | `debug-commands/debug-formatters-{overview,complete,decimal,hexadecimal,binary,arrays}.yaml`, `debug-commands/debug-new-user-guide.yaml`, `integration/spin2-pasm2-integration.yaml`, `operators/modulo_add.yaml`, `operators/op_addmodulo.yaml`, `spin2-language-complete-map.yaml`, `spin2-language-schema.yaml`, `symbols/streamer-symbols.yaml` | §1.21 |
+| `architecture/system-registers` (1) | `dira-dirb-registers.yaml` | §1.21 |
+| `code-examples` (1) | `code-example-schema.yaml` | §1.21 |
+| `architecture/boot-rom` (1) | `boot-rom-contents.yaml` | §1.22 |
 
 **Out of scope, named once so their absence from Part 2 is not read as an omission.**
 `deliverables/ai/P2/CHANGELOG.md`, `deliverables/ai/P2/README.md` and `deliverables/ai/README.md`
@@ -154,6 +199,11 @@ a different method. Recorded because a stale count is what sent this document ba
 | `491f2b55`'s own body | "Of the 59 blocks … 34 return … 24 stay" | 34 + 24 = **58** | One hardware block is unaccounted for in that commit's arithmetic. Not reconciled here; the HEAD-side key-set delta (§0.3, 41 keys) is the reliable instrument. |
 | `11ebec54`'s commit message, and this task's own dispatch | "validate-dod-release: **12** checks" | **11** | The script's `validations` list holds eleven functions (`validate-dod-release.py:661-673`); its output prints eleven named checks plus a summary line. It held **nine** at `v1.17.0`; the two content gates armed by `43b0ede2` took it to eleven. It has never been twelve. The shape-change audit's own §6 also records eleven. |
 | `2026-08-26-yaml-differential-read.md` §8.6 | `audit-register-hygiene.py … P1-CORRECTION-FINDINGS.md` remains exit 1 `no-counter` | **exit 0, CLEAN** | Repaired after that read, by `d62544ea`. Both P1 registers now name their allocators. |
+| `2026-09-05-codegen-effect-of-the-unpublished-yaml-delta.md` | 96 files, +6,703/−3,480; 130 commits since the tag, 97 unpushed | **112 · +7263/−3642**; 140 commits, **107 unpushed** | It measured at `a7fd84e3`, before its own repairs and before the two 2026-09 passes. Its *findings* stand; its scope line is superseded by §0.1 here. |
+| The same document's findability rows | files with top-level `aliases:` 71 (6.3%) → **84 (7.4%)**; alias keys 508 → **755** | **100 (8.8%) / 961 keys** at HEAD | Measured before F-401. The findability pass (§1.21) added sixteen more `aliases:`-bearing files. **The index's own alias table is a different instrument and a different number — 2,896 entries** — because it harvests twelve name-bearing fields, not just a top-level `aliases:` block. Do not compare the two. |
+| The F-401 register entry's result table | dark files 452 → **206**; alias entries 2,082 → **2,660** | **173 dark (15.3%) · 2,896 alias entries** | The entry records the **first** of two passes (`ba24f0f9`/`d55b6c7f`) and was never updated after the second (`19385b66`/`da896073`). Corrected in the register in this pass. |
+| `19385b66`'s claim *"zero dark files outside `community/`"* | — | **confirmed: all 173 dark files are under `community/`** | Re-derived from the emitted index at HEAD: 1,133 files, 955 reachable by an alias (84.3%), 557 in a category, 173 in neither — every one of them an OBEX object or a Quick Byte, which have their own `p2kb_obex_*` retrieval route. |
+| F-403's evidence table | `Monitor`/`debugger` **40** hits in the ROM listing | **`Monitor` 32 + `debugger` 9 = 41** in `ROM_Booter.lst`; **33 + 10 = 43** in `rom_booter_v33_01j.lst` | Re-counted here. The finding's point is untouched — the residents it removed return **0** in both listings for `font`, `glyph`, `sine`, `sin_` and `log2`, verified at the line, while `TAQOZ` returns **48** in both. |
 
 ### 0.3 The block accounting — where the content went
 
@@ -166,16 +216,39 @@ at HEAD.
 | Blocks removed by the purges | **119**, across **41 distinct files** | 60 (`15c84de5`, 25 files) + 59 (`c733a223`, 17 files); one file appears in both |
 | Blocks returned carrying a citation | **80** | 46 (`597d5eba`, 24 files) + 34 (`491f2b55`, 15 files) |
 | Blocks removed *by the repopulation* | **1** | `hardware/edge-32mb-module.yaml alternate_part` — the fabricated `64000-ES` part number, deleted with a note saying why |
-| **Top-level keys present at `v1.17.0` and absent at HEAD** | **41, across 18 files** | the reliable instrument: a strict key-set delta at HEAD, immune to any intermediate churn |
+| **Top-level keys present at `v1.17.0` and absent at HEAD** | **54, across 19 files** | the reliable instrument: a strict key-set delta at HEAD, immune to any intermediate churn |
 
-**Disposition of the 41** — carried from the differential read §3 and checked here: every key it
-names appears in the HEAD-side delta, and the three groups sum to 41 exactly.
+**Disposition of the 54** — the first three groups are carried from the differential read §3 and
+checked here; the fourth is new at HEAD and is **not a loss**. The four groups sum to 54 exactly.
 
 | Disposition | Keys | Where |
 |---|---|---|
 | **Fabricated / disproven** — no source states it, and several are contradicted | **15** | `io_pin_timing` ×8 · `{pasm2,spin2}/concepts/basic-io` ×3 each · `p2-eval-board video_audio` |
 | **True but not actionable** — cannot change emitted code; verified present in the ingestion tree | **24** | all in `hardware/`, across 13 files |
 | **Authored here, no upstream** — correct, actionable, unsupportable by anything we hold | **2** | `io_pin_timing best_practices` · `click_module_integration best_practices` — **F-352, open** |
+| **Moved to the definition home** — the `+//` merge (F-402, §1.21) | **13** | all `language/spin2/operators/modulo_add.yaml` |
+
+⚠️ **The fourth group is an instrument artefact, and it is worth saying exactly how.** This
+measurement is a **per-file** key-set delta, so it cannot see a key that moved to a different file.
+`modulo_add.yaml` became a redirect and `op_addmodulo.yaml` became the definition home. Of the 13
+keys the redirect shed, **8 are present in the home file at HEAD** — `best_practices`,
+`common_patterns`, `comparison_with_alternatives`, `notes`, `operation`, `overview`,
+`related_operators`, `syntax` — verified by parsing both files at both revisions. The home file
+gained 13 keys in the same move and lost none.
+
+The **five that did not move** are all deliberate: `examples` (the home carries its own, and the
+redirect's worked ring-buffer material was folded into `common_patterns` — `(index + 1) +//
+BUFFER_SIZE`, the head/tail distance idiom and the power-of-2 `&`-mask comparison are all present in
+the home file), and four bookkeeping keys — `created: 2025-09-09`, `documentation_level`,
+`documentation_source: code_analysis` (the very token F-402's class sweep flagged) and `references`.
+That last one is the only judgement call in the group and it is an improvement: it held
+*"P2-OctoSerial: Extensive use in circular buffers"*, *"Spin2 documentation: Arithmetic operators"*
+and *"Production code patterns from Iron Sheep Productions"* — three pointers, none of them a
+locatable citation. The home file carries a real one in its place
+(`complete-spin2-operators.md:715`, `:62`, `:103`).
+
+**So the honest reading of 54 is: 41 keys gone, 13 relocated.** The earlier 41 is not superseded —
+it is still the loss figure, and this pass did not add to it.
 
 The differential read separately estimates **1930 leaf facts across 73 files** whose value string
 appears nowhere in the shipped KB at HEAD, and states plainly that this over-reports: a reworded
@@ -192,24 +265,44 @@ re-derived in this document.
 | `validation/audit-constant-fidelity.py` | Tier 1 none, Tier 2 none, across 120 source-defined constants; truth side 35 files, editions `spin2-v51` + `spin2-v55` | 0 |
 | `validation/audit-extraction-digit-density.py --all` | CLEAN, 65 artifacts at or above the 20% floor, 4 declared exempt | 0 |
 | `validation/audit-yaml-duplicate-keys.py` | 1132 scanned, **0 files with duplicate keys** | 0 |
-| `validation/audit-register-hygiene.py` ×3 | corrections **124 live / 294 archived / 0 unaccounted**, next `F-401` · gaps **37 live** · errata **17 live** | 0, 0, 0 |
-| `validate-dod-release.py` | **11 checks, all PASS** — READY FOR RELEASE | 0 |
+| `validation/audit-register-hygiene.py` ×3 | corrections **127 live / 294 archived / 0 unaccounted**, next `F-404` · gaps **37 live**, next `G-29`/`Q-10` · errata **17 live**, next `E-18` | 0, 0, 0 |
+| `validate-dod-release.py` | **11 checks, all PASS** — READY FOR RELEASE ⚠️ **only after the repair below; it exited 1 at `b0057ec1`** | 0 |
 
-`deliverables/ai/p2kb-index.json.gz` decompresses **byte-identical** to `p2kb-index.json`
-(`gzip -cd … | cmp -s - …`). That pair drifted for four days as **F-357**; it is in sync, and it must
-be regenerated *after* the content commit because the index stores the **git blob** sha256.
+**⚠️ The index pair had drifted again, and the release validator was red because of it.**
 
-⚠️ **Regenerated 2026-08-30, and it was stale by 24 files — not 18.** The pair was internally
-consistent (`.gz` matched `.json` before the regen, so F-357's specific defect did not recur), but
-the index itself had not been rebuilt since `eeb0b266`. The 2026-08-30 pass changed 18 YAML files;
-the regen updated **24** sha256 entries, because the **2026-08-29 pass committed content and never
-regenerated** — `io_pin_timing.yaml`, `streamer/nco-timing.yaml`, `pasm2/setxfrq.yaml`,
-`spin2/concepts/timing_operations.yaml`, `spin2/constants/special-configuration-symbols.yaml` and
-`spin2/system-variables/clkmode.yaml` carried a stale hash in the shipped index for a day. Nothing
-was released, so nothing shipped wrong — but **nothing forces the regeneration either.** The
-gate list in this table does not check index freshness, and `validate-dod-release.py` does not
-either. It is a one-line check (`generate-p2kb-index.py` then `git diff --quiet` on the pair) and it
-belongs beside the duplicate-key gate in **§0.5 item 12a**'s wiring work.
+Run at `b0057ec1`, before any repair, `validate-dod-release.py` reported
+**`❌ Gzip Compression: FAIL — Gzip content does not match JSON file`** and exited **1**
+(*VALIDATION FAILURES - DO NOT RELEASE*). The other ten checks passed. Diagnosis, from `git log` on
+the two paths rather than from recollection:
+
+| | `p2kb-index.json` | `p2kb-index.json.gz` |
+|---|---|---|
+| last regenerated | `da896073` (2026-09-05) | **`b753a29d` (2026-08-30)** |
+| commits touching it since `9ab0433b` | `d55b6c7f`, `da896073` | **none** |
+
+The 2026-09-05 pass regenerated the JSON **twice** and the gzip **neither time**, so the pair sat
+out of sync in committed history for four days. **This is F-357's exact defect, recurred** — and
+F-357 is `RESOLVED` in the register, which is what makes it a regression rather than an open item.
+
+The index was **separately stale**, for a second and unrelated reason: it was generated on 09-05 and
+the 09-08 boot-ROM pass committed content after it. Regenerating updated exactly **two** entries —
+`p2kbArchBootRomContents` and `p2kbArchIndex` (`architecture/boot-rom/_index.yaml`), both mtime and
+sha256, the two files §1.22 changed. No entry was added or removed; the count stayed at 1,133.
+
+**Both are repaired in the commit that carries this document**, regenerated together and in the
+required order (the index stores the **git blob** sha256, so it must be rebuilt *after* the content
+commit). `gzip -cd … | cmp -` is clean, and the validator is green at 11 of 11.
+
+**What this says about the release, and it is the more important half.** Nothing had run
+`validate-dod-release.py` since 2026-08-30. A **red release gate lived in committed history for four
+days** and was found only because this document was re-derived. The gate itself works — it caught
+the drift on the first run — so the defect is not in the instrument, it is that **nothing makes the
+instrument run**. That is the same sentence §0.5 items 12a and 19 have been carrying about the
+duplicate-key checker, now with a demonstration attached instead of a prediction. Two checks belong
+in the same wiring work: **the duplicate-key gate**, and an **index-freshness check**
+(`generate-p2kb-index.py` then `git diff --quiet` on the pair) — the pair-*consistency* check
+already exists and just proved itself; what is missing is *freshness*, which would have caught the
+two stale boot-ROM entries as well.
 
 ⚠️ **What these greens do not certify, and each instrument says so itself.** The sourcing gate
 checks that a citation is *present*, never that it is *right* — nothing here opens the cited
@@ -227,6 +320,21 @@ this table was green before that fix and is green after it. The same pass found 
 64-bit system counter as 32-bit, and a `~1-2 ns` smart-pin figure that exists in no Parallax source.
 None of it was detectable by any instrument listed above. **Read this table as "not caught by these
 checks", never as "correct" — the gates themselves say so in their own closing banners.**
+
+**2026-09 adds two more blind spots, and one of them is a different axis entirely.**
+
+- **F-403 (§1.22) is the *quantity-free* claim.** `boot-rom-contents.yaml` asserted character font
+  data and sin/cos/log tables as ROM residents with `verification_status: "Existence confirmed"`.
+  The sourcing gate never scored those blocks because **they carry no quantities**; the fidelity
+  gate never saw them because **they name no constants**; and the file's header cites four real
+  sources, which is exactly what makes a Tier-2 sweep read it as a citing file. It was found by
+  reading the ROM's own assembly listing. **A claim with no number and no constant in it is
+  invisible to every content gate this project has.**
+- **F-401 (§1.21) is not a correctness blind spot at all — it is a *findability* one.** Every gate
+  in this table asks whether a file is *right*. Not one asks whether an agent can *find* it. The
+  measurement: **0 of 62** pure-symbol Spin2 names were in the index in any form, while **560 of
+  560** word-named mnemonics and methods resolved cleanly. Content that cannot be retrieved is
+  functionally absent, and eleven green gates said nothing about it for the life of the index.
 
 ### 0.5 What is still open — the pre-ship list, as it actually stands at HEAD
 
@@ -374,17 +482,38 @@ today; the two that `ca07aaf7` closed have been dropped from this list.
     `p2-hardware-feature-comparison.yaml selection_criteria` are authored buying-guide content,
     correctly retained under the promotion filter's sub-rule P and **never given a disposition** —
     the same missing branch as F-352.
-18. **Two tooling silent-failures (F-376).** `fetch-kb-file.sh -v <KEY>` fetches nothing and exits 0;
-    `generate-p2kb-index.py`'s alias harvest ends in `except Exception: pass`, so a syntactically
-    invalid file is still indexed with a path and a sha256 while silently losing its aliases, and
-    the run exits 0 printing nothing. **A green index generation is not evidence that the corpus
-    parses** — `verify-yaml-format.py` is the tool that answers that. `CONFIRMED`.
+18. **Tooling silent-failures (F-376) — one of the two is now CLOSED.** ~~`generate-p2kb-index.py`'s
+    alias harvest ends in `except Exception: pass`~~ **CLOSED 2026-09-05 (`ba24f0f9`, §1.21):** the
+    harvest now returns its failure reason and the generator **refuses to emit** rather than
+    reporting success over a file that is present-but-unfindable. Proven with a negative control — a
+    planted malformed YAML gives exit 1, names the file and the parser error, and leaves the
+    existing index byte-identical. *That failure shape mattered because it removed **findability**,
+    not the entry: the file still got a path and a sha256 and looked present.* **Still open:**
+    `fetch-kb-file.sh -v <KEY>` fetches nothing and exits 0. **A green index generation is still not
+    evidence that the corpus parses** — `verify-yaml-format.py` is the tool that answers that.
+    `CONFIRMED`, half-discharged.
 19. **The duplicate-key gate exists, passes, and nothing makes it run.**
     `validation/audit-yaml-duplicate-keys.py` was armed by `02ff61b7` and returns 0 across 1132
     files — but it is **not wired into `validate-dod-release.py`**, which calls
     `audit-constant-fidelity.py` and `audit-yaml-claim-sourcing.py` as blocking gates and not this
     one. A duplicate key reintroduced tomorrow turns nothing red at release. Named in **F-360**'s
     own closing line as the one thing that entry leaves open.
+
+19b. **Nothing makes the *release validator itself* run, and that is no longer hypothetical.**
+    The index/gzip pair drifted on 2026-09-05 and `validate-dod-release.py` sat **red in committed
+    history for four days** until this re-derivation ran it (§0.4). The gate worked; nothing invoked
+    it. Two checks belong in the same wiring work as item 19: the duplicate-key gate, and an
+    **index-freshness** check — regenerate, then `git diff --quiet` on the pair. The pair-consistency
+    check already exists and just proved itself; freshness is the one that is missing, and it would
+    also have caught the two boot-ROM entries the index was stale by. **F-357 recurring while marked
+    `RESOLVED` is the argument**: a defect closed by a one-time repair, with no gate wired to the
+    release path, is a defect scheduled to come back.
+
+19c. **F-401's fix is applied and unvalidated — the validation is a *post-publish* probe.**
+    The index served to agents is the **published** one, so none of §1.21 reaches an agent until the
+    set is pushed. What is owed after publish is one query: `p2kb_find("+//")` must return the
+    operator file instead of dumping 59 categories. `PENDING-VALIDATION`, and it cannot move to
+    `RESOLVED` before a release. Same shape for **F-402**.
 20. **`validate_metadata_filter` reads the pattern list, not the artifact.** It classifies which
     lines the filter removed and never re-parses the filtered payload, so a block delivered as
     `null` passes it clean. The corpus is clean today (0 of 1133); the gate is measuring the wrong
@@ -410,6 +539,20 @@ today; the two that `ca07aaf7` closed have been dropped from this list.
     block *today*, not because it has been adjudicated.
 23. **698 nested cross-reference sites are never checked** (F-340) and three top-level fields are
     exempt (F-373). `validate-crossref-keys.py`'s exit 0 covers less than it reads as covering.
+24. **173 files are still dark — and all 173 are under `community/`.** Re-derived from the emitted
+    index at HEAD: 1,133 files · 955 reachable by an alias (84.3%) · 557 in a category · **173 in
+    neither, every one of them an OBEX object or a Quick Byte.** Those name themselves one level
+    down (`object_metadata.title`, `quick_byte.*`) and have their own `p2kb_obex_*` retrieval route,
+    so they are very likely not dark *in practice*. Reading a nested name is a different change from
+    reading a scalar field that was already there, and it wants its own decision — **not blocking,
+    and not to be started unasked.** Outside `community/` the count is **zero**.
+25. **F-403 leaves one question no document can answer.** The correction establishes that *no source
+    we hold supports* character font data or math tables in the boot ROM, and that the one
+    authoritative content list omits them — so the KB must not state them. It does **not** assert
+    they are absent: a 16 KB mask ROM can hold unlabelled data blocks that an assembly listing's
+    symbol names would never reveal. If their presence ever matters, that is a question for Chip
+    Gracey, **not a gap to research and not a release blocker**. Recorded so the silence reads as a
+    decision rather than an oversight.
 
 ---
 
@@ -1227,10 +1370,348 @@ defect boundary, and neither is the citation set.**
 
 ---
 
+## 1.20 The 2026-09-05 codegen-effect audit — the question the whole release exists to answer
+
+One commit, `395d6362`, and **two files changed** — because this pass was an *audit*, not a fix pass.
+Its output is `engineering/analysis/2026-09-05-codegen-effect-of-the-unpublished-yaml-delta.md`; the
+two file changes are the two defects the audit found **in its own delta** and repaired rather than
+carried.
+
+**The question.** Every other pass asked *is this content correct?* This one asked the only question
+the release is actually for: **of the content an agent receives, do these changes weaken its ability
+to generate code?** Nothing else here measures that direction.
+
+**The method matters more than the answer, and it is the reusable part.** Today's instruments were
+run over **a real `git worktree` checkout of `v1.17.0`** with the tools copied in — *not* a flat copy
+of the old tree. Three of the gates did not exist at that tag, and all three derive the repo root
+from their own path: a flat copy silently breaks that derivation and returns **a false green**. So
+every "before" figure below is first-hand, and none of it is relayed from a commit message.
+
+| Instrument (today's, run over both trees) | `v1.17.0` | HEAD | direction |
+|---|---|---|---|
+| Uncited quantitative blocks, Tier 1 (blocking) | **128** | **0** | ▲ |
+| Tier 2 advisory (wholly-uncited files) | 66 | 27 | ▲ |
+| Constant-fidelity Tier 1 (mechanical) | **50** | **0** | ▲ |
+| Constant-fidelity Tier 2 `CONTRADICT` | 23 | 0 | ▲ |
+| Files with duplicate YAML keys | 3 | 0 | ▲ |
+| PASM2 encodings present but **fabricated** | 41 | 0 | ▲ |
+| Cross-reference sites | 1,319 | 1,423 | ▲ |
+| …of which unresolved | 21 | 19 → **18** after this pass | ▲ |
+| PASM2 mnemonic lines in examples | 62 | 227 | ▲ |
+| Spin2 method-call lines in examples | 27 | 48 | ▲ |
+
+*(Its findability rows — files with a top-level `aliases:` block 71 → 84, alias keys 508 → 755 — were
+measured at `a7fd84e3`, **before** F-401. At HEAD they read **100 files (8.8%) / 961 keys**; see §0.2,
+and do not confuse either with the index's 2,896-entry alias table, which is a different instrument.)*
+
+**Four things the *published* set was telling agents**, each of which an agent would have acted on:
+
+1. **The interrupt vector map was inverted.** `IJMP1`/`IRET1` given `$1F0`/`$1F1` where the Silicon
+   Doc says `IJMP3`/`IRET3` — stated twice, at `:446-451` and `:2296-2301`. **An INT1 handler
+   installed itself into INT3's register and still compiled.**
+2. **Forty-one fabricated instruction encodings.** Of the 44 removed from the `architecture/` concept
+   files, 41 appear nowhere in the Silicon Doc's PASM2 table; all three that do are still carried,
+   and `RDLUT` differed from the real encoding by **one bit**.
+3. **A duplicate key was silently deleting content the file appeared to carry.** `drvl.yaml`'s
+   duplicate `timing:` meant the parser handed an agent `{cycles: 2, type: fixed}` and **dropped the
+   pin-latency block its sibling `drvh.yaml` delivered** — two instructions of one pair answering
+   differently, with nothing in the file to show it.
+4. **Code the published set taught that does not work** — the pull-up idiom that floats the pin, the
+   streamer `+` composition that silently selects a different mode, and a `WAITMS` ceiling wrong by
+   **400×**.
+
+**And it checked its own repair for fresh fabrication**, which is the half that is easy to skip: of
+the **42** encodings the repopulation *added*, **38 are verbatim in the source** and the remaining 4
+are the `RETIx` aliases, expanded from the alias definitions at `:5483-5486` and **byte-identical to
+the per-instruction files**.
+
+**The two defects this delta introduced — both repaired here, not carried** (CLAUDE.md's no-deferring
+rule, and the reason this pass touched any YAML at all):
+
+| file | ± at HEAD | what was wrong |
+|---|---|---|
+| `architecture/interrupts.yaml` | +221/−115 (was +219/−115) | cited `language/pasm2/reti0..3.yaml` — **not a resolvable path**; the four filenames are now written out |
+| `hardware/edge-breadboard-carrier.yaml` | +69/−69 (was +66/−69) | cited the 2026-08-25 ledger **at its pre-move path** — the same stale-locator class F-365/F-377 were closing; re-pointed at `archived/`, where item 7 still reads as cited |
+
+*The lack:* **neither was visible to `validate-crossref-keys.py`** — both sit in comment text, which
+is F-373's blind spot exactly. Broken reference sites 19 → 18; unresolved ingestion-source citations
+**1 → 0 of 368**. The 17 that remain are pre-existing block-D work (task «#335») and the report names
+them as out of scope rather than leaving them implied.
+
+**Verdict, quoted because it is the answer to the release question:** *"Strengthened. Not by adding
+more, but by removing content that produced plausible, compilable, wrong code… The residual risk
+moved from 'the agent is confidently told something false' to 'the agent is told less, and told where
+the rest lives.'"*
+
+**Appendix A of that report is written for you.** It reproduces **verbatim** the two `best_practices`
+blocks the purge deleted (`io_pin_timing`, `click_module_integration` — F-352's two authored-here
+areas, §0.5 item 11) so the deletion can be eyeballed rather than taken on trust.
+
+---
+
+## 1.21 The 2026-09-05 findability pass — the first defect class that is not about correctness
+
+Four commits: `ba24f0f9` (harvester), `d55b6c7f` (index), `19385b66` (the residue + the `+//` merge),
+`da896073` (index). **16 files entered the change set, all of them already in the shipped set** — this
+pass added *names*, not coverage.
+
+**It started outside the release.** Stephen reported that an agent had failed three or four times
+over two days to locate information the KB **has**. Reproduced and measured here, and the measurement
+is the finding: **the index harvested four name fields** — `aliases`, `pattern_id`, `instruction`,
+`method` — and the operator and special-symbol files name themselves in `operator:` and `symbol:`,
+neither of which it read. Nor could the path-derived key carry them: `op_addlteqgt.yaml` becomes
+`p2kbSpin2OpOpAddlteqgt`, and the token `+<=>` survives nowhere.
+
+> **0 of 62** pure-symbol Spin2 names were in the index in any form — `:=` `==` `+/` `+//` `<=>`
+> `+<=>` `#>` `<#` `@` `@@` `^@` `~` `~~` `??` `..` `? :` and 46 more.
+> Against **560 of 560** word-named mnemonics and methods resolving cleanly.
+
+**The defect is confined to symbolic tokens, and those are precisely the tokens an agent meets when
+reading or generating Spin2 source.** Evidence was taken live against the published index, not
+reasoned: `p2kb_find("+//")` matched nothing and fell back to dumping all 59 categories / 1,129
+entries — the undifferentiated-directory response.
+
+**The mechanism was verified *before* the fix was written**, which is why no matcher change was owed:
+the alias table already held **161 punctuated keys** and the resolver returned `"resolved_from":
+"#32201"` for a bare-symbol query, so punctuation already survived both the index and the query path.
+
+**Pass 2 answered *why* the residue was dark, and the answer is a convention fact, not a data gap.**
+The files were not missing names — **the field a file uses follows its subtree's convention rather
+than one house style**: `variable:` (CLKFREQ/CLKMODE/VARBASE), `topic:` (Operator Precedence),
+`construct:` (Inline PASM2 and ten siblings), `statement:` (DEBUG), `register_name:` (PTRA),
+`fundamental:` (three language fundamentals). Nine more fields harvested, **every value read first**.
+`fundamental_concept:` was deliberately excluded — it holds multi-paragraph prose, and harvesting it
+would put whole essays in the alias table. Thirteen files carried no name anywhere and were given a
+hand-authored `aliases:` block.
+
+| | `v1.17.0` | after pass 1 | **HEAD** |
+|---|---|---|---|
+| pure-symbol names in the index | **0 of 62** | 62 of 62 | **62 of 62** |
+| files reachable by an alias | 591 (52.2%) | 916 (80.8%) | **955 (84.3%)** |
+| files reachable by neither alias nor category | 452 (39.9%) | 206 (18.2%) | **173 (15.3%)** |
+| alias entries | 2,082 | 2,660 | **2,896** |
+| aliases lost | — | 0 | **0** |
+
+**All 173 that remain are under `community/`** — 131 OBEX objects and 42 Quick Bytes, which name
+themselves one level down and have their own `p2kb_obex_*` route. **Outside `community/`, zero.**
+
+**Two seams worth naming.** The **DEBUG formatters** were the largest single gap: `UDEC`, `SDEC`,
+`UHEX`, `SHEX`, `UBIN`, `SBIN`, `FDEC` and their sized variants resolved to nothing, and they are
+among the most-typed names in Spin2 work. And `symbols/streamer-symbols.yaml` got the treatment
+`spin2-builtin-symbols-complete.yaml` had already had: its **78** `X_*` constants are defined one
+level down under `symbol:` keys, so `X_RFBYTE_1P_1DAC1`, `X_IMM_32X1_LUT` and `X_ALT_ON` all resolved
+to nothing — while `X_PINS_ON` and `X_WRITE_ON` resolved *only* because `pin-selection.yaml` happens
+to list those two by hand. **These constants are what a streamer command word is composed from, and
+composing one wrong is silent.** Its `total_symbols` also read **82 against 78 actual records**;
+corrected, the same class as the `1224`-vs-136 the symbols file carried.
+
+**F-376's third silent exit-0, closed in the same function.** The harvest ended in
+`except Exception: pass`, so a file that could not be parsed **still received a path and a sha256** —
+it looked present and was reachable by no name. *The failure removed findability, not the entry*,
+which is why swallowing it was the wrong shape. The harvest now returns its reason and the generator
+**refuses to emit**. Proven with a negative control: a planted malformed YAML gives exit 1, names the
+file and the parser error, and leaves the existing index **byte-identical**.
+
+**F-402 — arming the alias found a conflict, and that is the only content defect this pass produced.**
+`+//` suddenly resolved to **two** targets. Reading them found they disagreed: `modulo_add.yaml`
+called `+//` an *"Unsigned Modulo Add"* that *"performs addition with unsigned modulo"* — **it
+performs no addition**; a leading `+` on a division-family operator selects the UNSIGNED form
+(`/` signed divide vs `+/` unsigned; `//` signed remainder vs `+//` unsigned). Its
+`related_operators` also **inverted the one distinction the file exists to draw** (giving `//` as
+unsigned) and invented `%%`, which is not a Spin2 operator. Corrected against
+`complete-spin2-operators.md:62`, `:103`, `:715`.
+
+> **Why it survived every gate, and this is the general lesson.** Every wrap-around idiom in the file
+> **adds explicitly and then takes the remainder** — `(tail + 1) +// 32`, `(index + 1) +//
+> BUFFER_SIZE`. **The code was right while the prose describing it was wrong.** Nothing an agent
+> copied would fail; only what it *believed the operator was* would be wrong. The sourcing gate reads
+> quantities, the constant gate reads names, **and neither reads a semantic claim.**
+
+**The merge, decided by Stephen and applied the same day.** `op_addmodulo.yaml` is the definition
+home (+156/−3, 13 keys gained, none lost, the ring-buffer patterns and the power-of-2 `&`-mask
+comparison folded in). `modulo_add.yaml` is a **32-line redirect rather than a deletion**, because its
+key `p2kbSpin2OpModuloAdd` **is in the published `v1.17.0` set** and removing a published key breaks
+any consumer that cached it. One definition, two resolvable keys, no conflict — verified in the
+emitted index.
+
+**Per-file, this pass:**
+
+| file | ± | new to the change set? | what changed |
+|---|---|---|---|
+| `language/spin2/operators/op_addmodulo.yaml` | +156/−3 | **yes** | the definition home; folded-in patterns; a real `source:` replacing three unlocatable `references` |
+| `language/spin2/symbols/streamer-symbols.yaml` | +104/−1 | **yes** | 78 `X_*` names harvestable; `total_symbols` 82 → 78 |
+| `language/spin2/debug-commands/debug-formatters-complete.yaml` | +46/−0 | **yes** | formatter names reachable |
+| `language/spin2/operators/modulo_add.yaml` | +32/−129 | **yes** | conflicting definition → redirect |
+| `language/spin2/debug-commands/debug-formatters-overview.yaml` | +21/−0 | **yes** | |
+| `language/spin2/debug-commands/debug-formatters-hexadecimal.yaml` | +20/−0 | **yes** | |
+| `…-binary.yaml` · `…-decimal.yaml` | +19/−0 each | **yes** | |
+| `language/spin2/debug-commands/debug-formatters-arrays.yaml` | +18/−0 | **yes** | ⚠️ **incomplete — see §1.23** |
+| `architecture/system-registers/complete-system-registers-index.yaml` | +49/−17 | no | |
+| `architecture/system-registers/dira-dirb-registers.yaml` | +13/−0 | **yes** | |
+| `language/spin2/debug-commands/debug-new-user-guide.yaml` | +13/−0 | **yes** | |
+| `language/spin2/integration/spin2-pasm2-integration.yaml` | +12/−0 | **yes** | |
+| `language/spin2/spin2-language-complete-map.yaml` | +11/−0 | **yes** | |
+| `language/spin2/spin2-language-schema.yaml` | +10/−0 | **yes** | |
+| `code-examples/code-example-schema.yaml` | +10/−0 | **yes** | |
+
+**Registers moved:** `F-401` filed (`PENDING-VALIDATION` — the served index is the published one, so
+none of this reaches an agent until the set is pushed) · `F-402` filed and now
+`PENDING-VALIDATION` · `F-376` half-discharged.
+
+---
+
+## 1.22 The 2026-09-08 boot-ROM pass — a claim with no quantity and no constant in it
+
+Two commits, `2a6df5ef` and `b0057ec1`; **two files**, one of them new to the change set.
+
+**What the shipped file said.** `architecture/boot-rom/boot-rom-contents.yaml` listed **six** ROM
+residents — Bootloader, P2 Monitor, TAQOZ, plus `utility_routines`, `character_font_data` (*"Bitmap
+font data for terminal output / debug displays"*) and `math_tables` (*"Sin/cos/log tables"*). The last
+two carried `verification_status: "Existence confirmed; specifics not yet documented"`.
+
+**What the authority says — one line, and it names three things:**
+
+> `ROM | 16 KB (Bootloader, P2 Monitor debug interface, and TAQOZ (Forth) command interface)`
+> — P2 Hardware Manual 2022-11-01, `p2-hardware-manual-text.txt:210`
+
+The same three-item list is what our own extraction matrix recorded from that manual. The P2
+Datasheet (`:99`) and the Silicon Doc (`:189`) say only *"16KB boot ROM"* and inventory nothing.
+
+**Existence was not confirmed.** Measured against the ROM assembly listing — the strongest evidence
+available, because it **is** the ROM. Re-counted for this ledger:
+
+| term | `ROM_Booter.lst` | `rom_booter_v33_01j.lst` |
+|---|---|---|
+| `font` · `glyph` · `sine` · `sin_` · `log2` | **0** each | **0** each |
+| `TAQOZ` | 48 | 48 |
+| `Monitor` + `debugger` | 32 + 9 | 33 + 10 |
+
+The real residents are plainly present, so **the search is not blind** — which is the only thing that
+makes the zeros mean anything.
+
+**Where the claim came from, and it is the F-341 shape.**
+`sources/rom-booter/rom-booter-narrative.txt:51-56` — *"Beyond the bootloader, the ROM also contains:
+Monitor/debugger code, TAQOZ Forth interpreter, Utility routines, Character font data, Math tables
+(sin/cos/log)"*. That file was created by commit `9fcf7d84`, **"Complete narrative text generation for
+all P2 sources"** — it is **our own generated summary, not a Parallax document**, sitting inside the
+documentary truth root and read as an authority.
+
+**Why no instrument could catch it.** The claims **carry no quantities**, so the sourcing gate never
+scored them; they **name no constants**, so the fidelity gate never saw them; and the file cites four
+real sources in its header, which is exactly what makes a Tier-2 sweep read it as a citing file. This
+is the F-402 blind spot again, one step further out: **no gate reads a semantic claim, and a claim
+with no number and no constant in it has nothing for any gate to grip.**
+
+**Applied.** The two unsupported residents are removed with the removal recorded in place, so the
+narrative cannot quietly reintroduce them, and the authoritative content line is now carried in the
+file. `utility_routines` is **retained but reclassified**: the listing does contain called
+subroutines, which is an observation about the code, not a documented ROM component, and it now says
+so instead of standing as a fifth resident with a source line.
+
+**Deliberately NOT asserted:** that font data and math tables are *absent*. A 16 KB mask ROM can hold
+unlabelled blocks no symbol name would reveal. What is established is that **no source we hold
+supports them and the one authoritative content list omits them**, so the KB must not state them. If
+it ever matters, that is a question for Chip Gracey, **not a gap to research** (§0.5 item 25).
+
+**The sweep half, and the ordering lesson.** `2a6df5ef`'s commit body ends *"Class sweep run: no other
+shipped file makes a font-data or math-table ROM claim."* **It was written before the sweep's output
+was read, and it was wrong.** `b0057ec1` found two more instances of the same fabricated list **in the
+same directory** — `boot-rom/_index.yaml` stated six residents in its `description:` sentence *and
+again* in the `contains:` line under `boot-rom-contents`. Both corrected. The sweep's other two hits
+were read and correctly left alone: `hardware/p1_rom_font_character_set.yaml` documents the **P1's**
+ROM font (real, different chip) and `assembly-directives/file.yaml` shows a `FILE` directive
+including a font file from *user* code.
+
+> **Two consequences.** *A class-sweep claim written before its output is read is an assertion, not a
+> measurement* — the F-396 shape in a different key. And **the second site was the sibling
+> `_index.yaml` of the very directory being corrected**: an index file restates its members' claims,
+> so a finding that removes a claim must sweep that file's index in the same pass.
+
+| file | ± | new to the change set? | verdict |
+|---|---|---|---|
+| `architecture/boot-rom/boot-rom-contents.yaml` | +33/−26 | **yes** | **corrected** — six residents → three, plus the authoritative content line |
+| `architecture/boot-rom/_index.yaml` | +23/−18 (was +18/−15) | no | **corrected** — the same claim, twice, in the directory index |
+
+**Registers moved:** `F-403` filed, both halves applied, now `PENDING-VALIDATION`.
+
+---
+
+## 1.23 The 2026-09-09 re-derivation — what re-deriving the ledger itself found
+
+**Re-deriving a document is an instrument**, and this run of it returned three defects. None was
+found by reading the tree looking for defects; each fell out of checking a number this document
+asserts.
+
+**1. The release validator was RED, and had been for four days (F-405).** `validate-dod-release.py`
+exited **1** at `b0057ec1` — *Gzip Compression: FAIL*. The 2026-09-05 pass regenerated
+`p2kb-index.json` twice and `p2kb-index.json.gz` neither time. **This is F-357's exact defect,
+recurring while F-357 reads `RESOLVED`.** The index was *separately* stale by the two files §1.22
+changed. Both repaired here; §0.4 carries the diagnosis. **The generalisable form:** *a defect closed
+by a one-time repair, with no gate wired to the release path, is a defect scheduled to come back.*
+
+**2. Three register entries were lagging the artifact.** Each is the "annotate as you fix, in the same
+pass" rule failing in the same session that made the fix:
+
+| entry | what it said | what the tree said |
+|---|---|---|
+| **F-402** | `PARTIAL` — *"two files still define one operator … the call is Stephen's"* | He made the call and **the merge landed the same day** (`19385b66`). `op_addmodulo.yaml` is the home; `modulo_add.yaml` is a redirect. Re-graded `PENDING-VALIDATION`. |
+| **F-401** | a one-column result table: dark **206**, aliases **2,660** | Those are **pass 1**. Pass 2 (`19385b66`/`da896073`) took it to **173 / 2,896** and was never written back. Table re-derived and both passes recorded. |
+| *(and)* **F-403** | `CONFIRMED`, with its own body reading *"Correction applied 2026-09-08"* | Fully applied, unpublished → `PENDING-VALIDATION`. The `_index.yaml` half was not recorded at all. |
+
+**A status line is not evidence, and it lies in both directions** — F-402 under-reported progress,
+F-403 over-reported openness. The artifact settles it.
+
+**3. A new finding, filed and fixed: F-404 — 24 of 54 DEBUG formatter names resolve to nothing.**
+Found by *verifying* §1.21's own claim rather than restating it. `debug-formatters-arrays.yaml`
+defines the array formatters **by composition** — `formatters` × `array_types` — and **a composition
+rule is not a string**, so no field holds the literal token and the harvester has nothing to read.
+
+> Measured against the emitted index at HEAD — the *published* index is `v1.17.0`'s and cannot answer
+> this: of the **54** formatter names the Spin2 v55 reference lists in its formatter tables,
+> **30 resolved and 24 did not** — every one of them a `<fmt>_{REG,BYTE,WORD,LONG}_ARRAY` form.
+> **`UHEX_LONG_ARRAY` is among them** — and it is the *only* trusted packed-data feed shape for a
+> scrolling LOGIC or SCOPE window (F-207). The one name an agent most needs when a scrolling window
+> renders empty resolved to nothing.
+
+All 24 were transcribed from the v55 formatter tables and **read at their lines** (`:943`,
+`:951-954`, `:960-963`, `:969-972`, `:978-981`, `:987-990`, `:996-999`) and added to the file's
+`aliases:` block. **`FDEC` has `_REG_ARRAY` and `_ARRAY` forms only** — no `FDEC_BYTE_ARRAY` appears
+in the reference, and none was invented to make the cross-product tidy. They are **lookup keys for a
+rule the file already documents**; nothing new is claimed, and an alias is never a definition.
+
+*The lack, and it is F-401's lack one level in:* **no gate in this project asks whether a file can be
+found.** Every one asks whether it is right. A name that exists in no field is invisible to all of
+them, because there is nothing to read.
+
+| file | ± | verdict |
+|---|---|---|
+| `language/spin2/debug-commands/debug-formatters-arrays.yaml` | +18/−0 → **+61/−0** | **stronger** — 24 sourced formatter names now resolve |
+
+**Measured in the emitted index after the repair, not asserted:**
+
+| | at `b0057ec1` | **after** |
+|---|---|---|
+| v55 formatter names resolving | **30 of 54** | **54 of 54** |
+| `UHEX_LONG_ARRAY` in the index alias table | absent | `["p2kbSpin2DbgDebugFormattersArrays"]` |
+| alias entries | 2,896 | **2,920** |
+| files reachable by an alias · dark | 955 · 173 | 955 · 173 *(unchanged — the file was already reachable; this repair adds names, not files)* |
+| `validate-dod-release.py` | **exit 1** | **exit 0, 11 of 11 PASS** |
+
+*(Every other findability figure in this document — §0.4, §0.5 item 24, §1.21 — is stated at
+`b0057ec1`, which is the derivation baseline. Only the alias-entry count moves, 2,896 → 2,920, and it
+moves here rather than being back-filled silently into the tables above.)*
+
+---
+
 # PART 2 — By region → file
 
-**All 89 files, each carrying its differential-read verdict.** Regions are ordered by file count as
-measured at HEAD, so related corrections sit together.
+**92 files, each carrying its differential-read verdict.** Regions are ordered by their **rowed** file
+count, so related corrections sit together; **each region header carries its HEAD file count**, which
+is why the headers sum to 112 while the rows number 92 — and why `language/spin2` (30 at HEAD) sits
+second behind `hardware` (28) rather than first. The other twenty are the
+files that entered the change set after the differential read was written, and each is carried where
+its pass is described: **4 in §1.19 · 15 in §1.21 · 1 in §1.22.** *(92 + 4 + 15 + 1 = 112.)* Nothing
+is omitted; the split is by where the reader will find the reasoning, not by importance.
 
 **The verdicts** (`2026-08-26-yaml-differential-read.md` §0.1): **stronger** — what was removed was
 replaced by better-sourced content. **equal** — reworded or restructured, same substance.
@@ -1238,10 +1719,17 @@ replaced by better-sourced content. **equal** — reworded or restructured, same
 is *correct*. **gutted** — removed content the KB **needs** *and* that a source we hold **can
 support**; both halves required. **new file** — nothing could have been removed from it.
 
-**Tally at HEAD: 78 stronger · 6 equal · 1 gutted-then-restored · 4 new file = 89.** Zero files are
-`thinner-but-honest` at *file* level; that verdict lives at block level (§1.3). The four
-`language/pasm2` files added after the differential read was written are verdicted here, from
-`b466a538`'s diff.
+**Tally over the 92 rows: 78 stronger · 6 equal · 1 gutted-then-restored · 4 new file · 3 corrected
+(§1.19) = 92.** Zero files are `thinner-but-honest` at *file* level; that verdict lives at block level
+(§1.3). The four `language/pasm2` files added after the differential read was written are verdicted
+here, from `b466a538`'s diff.
+
+**The twenty files carried in their pass sections do not have differential-read verdicts, and that is
+correct rather than missing.** The read compared `v1.17.0` against `4caeb6cc`; a file that entered the
+change set afterwards was never in its population. Their verdicts are stated where their changes are
+described — **corrected** for the six that had content wrong (`hub.yaml`,
+`p2-hardware-selection-guide.yaml`, `cogspin.yaml`, `coginit.yaml`, `boot-rom-contents.yaml`,
+`modulo_add.yaml`) and **stronger** for the fourteen that gained names or a definition home.
 
 `GONE` = top-level keys present at `v1.17.0` and absent at HEAD **plus** leaf-fact candidates whose
 value string appears nowhere in the shipped KB, as measured by the differential read. It
@@ -1300,7 +1788,7 @@ over-reports — a reworded fact counts as gone — and is a *reading list*, not
 | `smart_pin_patterns.yaml` | +5/−7 | 7 | stronger | Generic unsourced notes replaced by verbatim cited statements; the timing cross-reference kept **and** promoted into `related:`. |
 | `pin-drive-configuration.yaml` | **+277/−0** | — | *new file* | Eight real rungs, cited, expressed by encoding. §1.5. Its duplicate `note:` — which silently discarded the sprint's own central corrective sentence — was found and fixed by `43061dad`. |
 
-## `language/spin2/` — 17 files · 14 stronger · 1 equal · 2 corrected (`methods/cogspin.yaml`, `methods/coginit.yaml`, §1.19)
+## `language/spin2/` — **30 files at HEAD**, 15 rowed here · 14 stronger · 1 equal · 2 corrected (`methods/cogspin.yaml`, `methods/coginit.yaml`, §1.19) · **13 more in §1.21** (the findability pass: the seven DEBUG-formatter pages, `spin2-pasm2-integration`, both `+//` operator files, both language-map/schema files, `streamer-symbols`)
 
 | File | ± | GONE | Verdict | What changed |
 |---|---|---|---|---|
@@ -1359,7 +1847,7 @@ over-reports — a reworded fact counts as gone — and is a *reading list*, not
 | `smart-pin-00011-dac-16bit-pwm-dither.yaml` | +17/−15 | 6 | stronger | Dither facts returned verbatim from `part4-smart-pins.txt:284-308`, plus the `M[12:10]=%101` requirement. |
 | `smart-pin-11000-adc-internal-clock.yaml` | +9/−4 | 4 | stronger | `P_ADC_GIO`/`P_ADC_VIO` **redefined correctly** — they are calibration *sources*, not input ranges. The old text was a legal name with a wrong definition, which is the shape no constant gate can catch. |
 
-## `architecture/boot-rom/` — 4 files · 4 stronger
+## `architecture/boot-rom/` — **5 files at HEAD**, 4 rowed here · 4 stronger · **`boot-rom-contents.yaml` in §1.22**
 
 | File | ± | GONE | Verdict | What changed |
 |---|---|---|---|---|
@@ -1384,13 +1872,13 @@ over-reports — a reworded fact counts as gone — and is a *reading list*, not
 | `pasm2-getting-started.yaml` | +135/−70 | 24 | ✅ **gutted → RESTORED** | The CON clock-setup declarations went missing while the file kept explaining what happens once you declare one. Net a large improvement everywhere else, which is exactly why a gate would have passed it. Restored source-first by `ca07aaf7`, with the "Required" claim dropped and the clock-ceiling block **replaced** rather than restored. §1.14. |
 | `spin2-getting-started.yaml` | +31/−13 | 7 | equal | Relative→absolute path re-anchors, all targets verified present, plus dropping "pull resistors" from a routing blurb — honest, since `basic-io.yaml` now states the P2 has no internal pull network. Carried the same "Required" claim and was corrected with its sibling. |
 
-## `architecture/system-registers/` — 1 file · 1 stronger
+## `architecture/system-registers/` — **2 files at HEAD**, 1 rowed here · 1 stronger · **`dira-dirb-registers.yaml` in §1.21**
 
 | File | ± | GONE | Verdict | What changed |
 |---|---|---|---|---|
 | `complete-system-registers-index.yaml` | +36/−17 | 15 | stronger | 13 dangling `yaml_file:` pointers removed (**F-364**), content kept inline; `$1F6`/`$1F7` descriptions **corrected** — PA/PB hold the CALLD-imm *return* address and the CALLPA/CALLPB parameter, which "CALLD-imm parameter" named neither (**F-363**). |
 
-## `code-examples/` — 1 file · 1 equal
+## `code-examples/` — **2 files at HEAD**, 1 rowed here · 1 equal · **`code-example-schema.yaml` in §1.21**
 
 | File | ± | GONE | Verdict | What changed |
 |---|---|---|---|---|
@@ -1400,9 +1888,11 @@ over-reports — a reworded fact counts as gone — and is a *reading list*, not
 
 # Appendix A — Commit legend
 
-The **24 commits that touched `deliverables/ai/P2/**/*.yaml`**, oldest first. (107 commits landed in
+The **35 commits that touched `deliverables/ai/P2/**/*.yaml`**, oldest first. (140 commits landed in
 the range across all paths; the rest touched tooling, registers, ingestion sources, analysis
-documents or manuals.)
+documents or manuals.) **Every hash below is read from
+`git log --oneline --reverse v1.17.0..b0057ec1 -- 'deliverables/ai/P2/**/*.yaml'`, not from
+recollection** — see the correction note under the table for why that sentence is here.
 
 | # | Commit | Date | What it did to the shipped YAML |
 |---|---|---|---|
@@ -1437,14 +1927,21 @@ documents or manuals.)
 | 28 | `ca684aac` | 08-30 | Sourced the census's 19 hardware quantities and fixed the six wrong facts reading them exposed — **F-395**, **F-396**, **F-397** filed, **F-398** registered unfixed; **F-390** and **F-391** applied. §1.19. |
 | 29 | `912100db` | 08-30 | Every mechanically-broken citation locator repaired, and the first four F-377 mis-points found by reading. Built the extractor the census described but did not ship, after fixing its two defects. §1.19. |
 | 30 | `9ab0433b` | 08-30 | Finished the citation read — **721 of 721** opened at their cited lines. **F-399** filed, **F-400** registered unfixed, **F-377** discharged. §1.19. |
+| 31 | `395d6362` | 09-05 | The codegen-effect audit of the unpublished delta, and the **two locators the delta itself introduced**, repaired rather than carried — `interrupts.yaml`'s unresolvable `reti0..3.yaml`, and `edge-breadboard-carrier.yaml`'s citation of the ledger at its pre-move path. Both invisible to the crossref gate (comment text — F-373). §1.20. |
+| 32 | `ba24f0f9` | 09-05 | The harvester reads twelve name-bearing fields instead of four — **0 → 62 of 62** pure-symbol Spin2 names. **F-376**'s third silent exit-0 closed in the same function, with a negative control. **F-401** and **F-402** filed; `modulo_add.yaml`'s inverted definition corrected. §1.21. |
+| 33 | `19385b66` | 09-05 | Nine more fields harvested (the subtree-convention finding), thirteen files given hand-authored `aliases:`, `streamer-symbols.yaml`'s 78 `X_*` constants made reachable and its `total_symbols` corrected 82 → 78, and **the `+//` definition home merged per Stephen's agreement**. §1.21. |
+| 34 | `2a6df5ef` | 09-08 | **F-403** — six ROM residents where the Hardware Manual names three, two of them traced to our own generated narrative. §1.22. |
+| 35 | `b0057ec1` | 09-08 | Finished the F-403 sweep the previous commit had claimed without reading its output: `boot-rom/_index.yaml` stated the six-resident list **twice**. §1.22. |
 
 *(Rows 25-27 are the 2026-08-29 pass; that revision described them in §1.18 but its Appendix A table
 stopped at 24. Recorded here so the legend and the count agree. **Corrected 2026-08-31:** the
 2026-08-30 revision of this table named `43e7f8b1` at row 26 — **no such object exists**, and row 27
 named `79fbbe1e`, which touches no shipped YAML and belongs in the list below, not in the legend.
 Both were written from recollection rather than derived from `git log`, which is the one thing this
-document is not allowed to do; the three hashes above are now read from
-`git log --oneline … -- 'deliverables/ai/P2/**/*.yaml'`. 24 + 3 + 3 = **30**, matching §0.1.)*
+document is not allowed to do. 24 + 3 + 3 + **5** = **35**, matching §0.1. Rows 31-35 were derived
+the same way, and the **two 09-05 index regenerations are deliberately NOT in this table** — they
+touch `deliverables/ai/p2kb-index.json` only, which is a regenerated artifact and not shipped YAML.
+That is exactly how the gzip drift stayed invisible: see F-405 and the list below.)*
 
 **In the range, touching no shipped YAML, and load-bearing for this release:**
 `79fbbe1e` (brought this ledger up to the tree it describes, and was its derivation baseline until
@@ -1452,7 +1949,14 @@ document is not allowed to do; the three hashes above are now read from
 `02ff61b7` (armed `audit-yaml-duplicate-keys.py`) ·
 `d62544ea` (repaired `audit-register-hygiene.py` so it reads the registers it was reporting clean on)
 · `11ebec54` (regenerated the index **and** its gzip together, the pair F-357 records as having
-drifted for four days) · `fc45912d` (the `deliverables/ai/P2/CHANGELOG.md` release entry).
+drifted for four days) · `fc45912d` (the `deliverables/ai/P2/CHANGELOG.md` release entry) ·
+`b753a29d` (re-derived this ledger at `9ab0433b` and regenerated the index pair) ·
+`a7fd84e3` (gave this ledger its "why" layer, and corrected the invented hash named above) ·
+`068ccaa0` (filed **F-401**) · `2a869e64` (annotated F-401 with what pass 1 measured) ·
+`6434fdc0` (added Appendix A to the codegen report — the two deleted blocks verbatim, for your visual
+audit) · **`d55b6c7f` and `da896073`** (the two 09-05 index regenerations — ⚠️ **each rebuilt
+`p2kb-index.json` and neither rebuilt `p2kb-index.json.gz`; this is F-405, and it left
+`validate-dod-release.py` red for four days**).
 
 **In the range and NOT this release's work:** `7be432a6` ("pnut-ts 015504, and the Dockerfile no
 longer names the version") — another session, no KB YAML.
@@ -1468,6 +1972,11 @@ Status read from the registers at HEAD, not carried from a task record. `RESOLVE
 
 | ID | Status at HEAD | Subject |
 |---|---|---|
+| **F-405** | **`PARTIAL`** | The index and its gzip drifted apart again and `validate-dod-release.py` sat **red in committed history for four days** — F-357's defect, recurred. Drift repaired; **the missing wiring that would prevent recurrence is not** |
+| F-404 | `PENDING-VALIDATION` | 24 of the 54 Spin2 DEBUG formatter names the v55 reference lists resolve to nothing, because the file documents them as a composition rule rather than as strings. Includes `UHEX_LONG_ARRAY` |
+| F-403 | `PENDING-VALIDATION` | Character font data and sin/cos/log tables asserted as boot-ROM residents on the strength of our own generated narrative; the authoritative content list names three things |
+| F-402 | `PENDING-VALIDATION` | Two files defined `+//` and disagreed; `modulo_add.yaml` called it an addition. Corrected, and merged into one definition home per Stephen's call |
+| F-401 | `PENDING-VALIDATION` | The index harvested four name fields, so **0 of 62** pure-symbol Spin2 names were reachable. Twelve fields now harvested; 62 of 62, and dark files 452 → 173 |
 | F-379 | `RESOLVED` | `ADDSX`/`SUBSX` shipped the manual's wrong C-flag sentence; two `SUM*` encoding fields malformed |
 | **F-378** | **`CONFIRMED`** | `_CLKFREQ range` ships the compiler's acceptance range, unlabelled, 180 MHz past the datasheet ceiling |
 | F-377 | `RESOLVED` | Translated locators that are in range and point at nothing; an eighth fabricated-provenance file. **Discharged 2026-08-30 by F-399** — all 721 locators opened and read. |
@@ -1533,9 +2042,23 @@ CLEAN both before and after the flip**, so it cannot see this class: F-358's hea
 reads `**Status:**` at column 0, and this entry states its status indented inside a bullet. Not
 filed as a new finding — the allocator is the arbiter's — but it is the same shape as F-358.
 
-**Register state at HEAD:** 103 live · 294 archived · 0 unaccounted · next `F-380`.
-**Seven findings were filed during this sprint** (F-373…F-379), every one of them by a verification
-step rather than by the work it was verifying.
+**Register state after this pass:** **129 live · 294 archived · 0 unaccounted · next `F-406`**
+(`audit-register-hygiene.py`, exit 0). It read 124 live / next `F-401` on 2026-08-30; F-401…F-405
+account for the difference.
+
+**Findings filed during this sprint: F-373…F-405, thirty-three of them — and every single one was
+filed by a verification step rather than by the work it was verifying.** That pattern has not broken
+once. The last five are the sharpest instance of it: **F-401 came from a question outside the release
+entirely**, F-402 from *arming* F-401's fix, F-403 from surveying what the KB claims rather than
+fixing anything, and **F-404 and F-405 from re-deriving this very document** (§1.23). Nothing here
+was found by the pass that created the defect.
+
+**Three status corrections were made while building this table**, all of them the register lagging
+the artifact rather than the artifact being wrong — F-402 (`PARTIAL` → `PENDING-VALIDATION`; the
+merge it called Stephen's open call had landed four days earlier), F-403 (`CONFIRMED` →
+`PENDING-VALIDATION`, and its `_index.yaml` half was unrecorded), and F-401's result table, which
+recorded pass 1 of two. **A status line is not evidence, and it lies in both directions:** F-402
+under-reported progress, F-403 over-reported openness.
 
 ## Source errata
 
@@ -1552,7 +2075,8 @@ manual is wrong **and our KB followed it**, in two of the eight files in the fam
 
 ## Knowledge gaps
 
-**36 live, next `G-028` / `Q-010`.**
+**37 live, next `G-29` / `Q-10`** (`audit-register-hygiene.py` at HEAD, exit 0 — the earlier "36 live"
+was measured before the counter advanced).
 
 | ID | State | Note |
 |---|---|---|
@@ -1570,12 +2094,12 @@ manual is wrong **and our KB followed it**, in two of the eight files in the fam
 G="git"   # the -c safe.directory workaround is retired: /etc/gitconfig carries
          # safe.directory=/workspaces/* at system scope (8778e6a2). Do not re-add it.
 
-# Scope (§0.1)
-$G diff --name-only  v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 96
-$G log  --oneline    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 30
-$G log  --oneline    v1.17.0..HEAD | wc -l                                       # 128
+# Scope (§0.1)   — figures are at b0057ec1; add this document's own commit for +7306/-3642
+$G diff --name-only  v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 112
+$G log  --oneline    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' | wc -l     # 35
+$G log  --oneline    v1.17.0..HEAD | wc -l                                       # 140
 $G diff --numstat    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \
-   | awk '{a+=$1;r+=$2} END{print a,r}'                                          # 6703 3480
+   | awk '{a+=$1;r+=$2} END{print a,r}'                                          # 7263 3642
 $G diff --diff-filter=A  --name-only    v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml'   # 4
 $G diff --diff-filter=DR -M --name-status v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' # empty
 
@@ -1604,9 +2128,26 @@ python3 engineering/tools/validate-dod-release.py                               
 #   tool defect. Expect: 721 locators, 83 files, 40 source documents, 0 unresolved.
 
 # The index pair — regenerate TOGETHER, and AFTER the content commit (the index stores git blob sha256)
+#   ⚠️ BOTH LINES, ALWAYS. Regenerating the .json alone is F-357 / F-405, and it has now happened
+#   TWICE: 11ebec54 records the first (four days adrift), d55b6c7f + da896073 the second (four more).
+#   validate-dod-release.py catches it on the first run — so RUN IT, every time either file moves.
 python3 engineering/tools/generate-p2kb-index.py
 gzip -c deliverables/ai/p2kb-index.json > deliverables/ai/p2kb-index.json.gz
 gzip -cd deliverables/ai/p2kb-index.json.gz | cmp - deliverables/ai/p2kb-index.json
+$G diff --quiet deliverables/ai/p2kb-index.json deliverables/ai/p2kb-index.json.gz  # freshness: no gate does this yet
+
+# Findability (§1.21, §1.23) — read the EMITTED index, never the generator's summary
+python3 - <<'EOF'
+import json
+b=json.load(open('deliverables/ai/p2kb-index.json'))
+files,al,cats=b['files'],b['aliases'],b['categories']
+tgt={t for v in al.values() for t in (v if isinstance(v,list) else [v])}
+mem={m for v in cats.values() for m in (v if isinstance(v,list) else v.keys())}
+dark=set(files)-tgt-mem
+print(len(files), len(set(files)&tgt), len(dark), len(al))   # 1133 955 173 2920
+print({files[k]['path'].split('/')[3] for k in dark})        # {'community'}
+EOF
+#   2920 is post-F-404; the tables above read 2896, which is the count at b0057ec1.
 ```
 
 **The tree is at release position and is deliberately unreleased.** No version bump, no tag, no push.
@@ -1618,12 +2159,26 @@ its "already done" paragraph as superseded by §0.1 and §0.5 here.
 visual check of the all changes document confirms the content."* Nothing is tagged or pushed until
 that read happens.
 
-**Re-derived 2026-08-30 at `9ab0433b`.** The 2026-08-30 fix pass (§1.19) closed the two category-1
-items the census named — the 19 uncited hardware quantities and the citation read — and closed
-**F-377** with them. It also found six facts that were simply wrong in files with no citation defect
-(**F-390**, **F-391**, **F-395**, **F-396**), which is the class no gate in §0.4 can see. What is
-left for Stephen is §0.5's red block: **F-359** (the eight non-derivable claims — deletion is his),
-**F-367** (reconcile-or-delete the duplicate Silicon Doc DOCX), **F-375** (the 383-file rename
-scope call), the **ENH-NN** allocator, and now **F-398** (the price data) and **F-400** (the `v55:`
-shorthand) — plus **F-374**, whose class boundary is still undefined and is a definition call, not
-research.
+**Re-derived 2026-09-09 at `b0057ec1`**, on Stephen's instruction, because the document was derived at
+`9ab0433b` and five commits had touched the shipped YAML since.
+
+**What the re-derivation changed, in one paragraph.** The change set is **112 files / +7306 −3642 /
+35 commits** (was 96 / +6703 −3480 / 30). Three new passes are described — **§1.20** the
+codegen-effect audit, **§1.21** the findability pass, **§1.22** the boot-ROM content list — and a
+fourth, **§1.23**, records what re-deriving found on its own account. Every count in §0.1, §0.2, §0.3,
+§0.4 and §0.5 was **re-measured, not adjusted**.
+
+**And it found the tree red.** `validate-dod-release.py` exited **1** at `b0057ec1` — the index and
+its gzip had drifted apart on 09-05 and **nothing had run the validator since 08-30**. That is F-357
+recurring while F-357 reads `RESOLVED` (**F-405**, `PARTIAL`). Repaired; the validator is green at
+11 of 11. Two register entries were also lagging the artifact and one was over-reporting openness
+(F-401, F-402, F-403 — all corrected), and one new finding was filed and fixed (**F-404**: 24 of 54
+DEBUG formatter names resolved to nothing; now 54 of 54). **The four defects this pass produced were
+all found by checking numbers this document asserts — none by going looking for defects.**
+
+**What is left for Stephen is unchanged**, and no new decision was added to it: §0.5's red block —
+**F-359** (the eight non-derivable claims — deletion is his), **F-367** (reconcile-or-delete the
+duplicate Silicon Doc DOCX), **F-375** (the 383-file rename scope call), the **ENH-NN** allocator,
+**F-398** (the price data), **F-400** (the `v55:` shorthand) — plus **F-374**, whose class boundary is
+still undefined and is a definition call, not research. **F-402's merge left that list**: he decided
+it on 09-05 and it shipped the same day.

@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-05T22:19:49.706083",
+    "generated": "2026-09-09T18:32:34.940753",
     "total_entries": 1133,
     "total_categories": 59,
-    "total_aliases": 2896,
+    "total_aliases": 2920,
     "multi_target_aliases": 189,
     "source": "deliverables/ai/P2/"
   },
@@ -2374,6 +2374,9 @@
     "FDEC_ARRAY": [
       "p2kbSpin2DbgDebugFormattersArrays",
       "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "FDEC_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "FFT": [
       "p2kbSpin2Fft"
@@ -5065,13 +5068,25 @@
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "SBIN_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SBIN_LONG": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "SBIN_LONG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SBIN_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SBIN_WORD": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "SBIN_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SCA": [
       "p2kbPasm2Sca",
@@ -5118,13 +5133,25 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "SDEC_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SDEC_LONG": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "SDEC_LONG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SDEC_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SDEC_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "SDEC_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SD_CARD_BOOT": [
       "p2kbArchSdCardBoot"
@@ -5306,13 +5333,25 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "SHEX_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SHEX_LONG": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "SHEX_LONG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SHEX_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SHEX_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "SHEX_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SHL": [
       "p2kbPasm2Shl"
@@ -6101,13 +6140,25 @@
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "UBIN_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UBIN_LONG": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "UBIN_LONG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UBIN_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UBIN_WORD": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "UBIN_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UDEC": [
       "p2kbSpin2DbgDebugFormattersComplete",
@@ -6125,13 +6176,25 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "UDEC_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UDEC_LONG": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "UDEC_LONG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UDEC_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UDEC_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
+    ],
+    "UDEC_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UHEX": [
       "p2kbSpin2DbgDebugFormattersComplete",
@@ -6156,9 +6219,18 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "UHEX_LONG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UHEX_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UHEX_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
+    ],
+    "UHEX_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UNDERSCORE RULE": [
       "p2kbSpin2DbgDebugFormattersOverview"
@@ -9644,8 +9716,8 @@
     },
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
-      "mtime": 1787684528,
-      "sha256": "ce84fafe8837078ba78c78aa08953311a372bb8eccb521b5b3305de1133cc220"
+      "mtime": 1788890813,
+      "sha256": "f68f31d60fc315ac31724f627b6958b9a30b668cc5655e6d5bd7e5fb1dab06f4"
     },
     "p2kbArchBootPatternSelection": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-pattern-selection.yaml",
@@ -9654,8 +9726,8 @@
     },
     "p2kbArchBootRomContents": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml",
-      "mtime": 1781325191,
-      "sha256": "5894a127d3179c9f4575f55093de54775f5e589082bad625d3865b5a7da55913"
+      "mtime": 1788890790,
+      "sha256": "5c35cb78065dfffcd9d3fb23450a539d87f86e2568f48a47972da0ad627b9d92"
     },
     "p2kbArchP2Monitor": {
       "path": "deliverables/ai/P2/architecture/boot-rom/p2-monitor.yaml",
@@ -13539,8 +13611,8 @@
     },
     "p2kbSpin2DbgDebugFormattersArrays": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-arrays.yaml",
-      "mtime": 1788646757,
-      "sha256": "2fd73f33e3b6166d90cba94a4e3bc141aef9f126fb87822c209f25e1c29c6039"
+      "mtime": 1788978721,
+      "sha256": "c508b598d0cfa2ebc2451ad6d6242a2317b2b157be63f645e661b434a1167a4a"
     },
     "p2kbSpin2DbgDebugFormattersBinary": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-binary.yaml",
