@@ -170,12 +170,27 @@ pin_field_encoding:
 
 internal_pull_resistors:
   source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147, :117. THAT IS THE AUTHORITY HERE -- documentary, not empirical. EF-063 and EF-064 (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840, real P2, 2026-08-20) corroborate that the mechanism behaves as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements: EF-063 is a streamer-fed DAC %TT finding (:813) and EF-064 a streamer pin-placement finding (:834). Neither is a pull-up/drive-strength finding, and the ledger contains none."
-  there_is_no_bias_resistor_selector: |
-    The P2 has no internal pull-up/pull-down resistor network. The Pin Mode Legend
-    enumerates the whole %M..M field -- C, I, O, HHH, LLL -- and there is no
-    bias-resistor selector among them. What the P2 offers instead is a per-side
-    DRIVE STRENGTH: the high side and the low side each pick one rung of the same
-    eight-rung ladder (logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float).
+  yes_you_can_pull_a_line_high_or_low: |
+    Yes -- the P2 can hold a line weakly high or weakly low, and the constants that
+    do it are P_HIGH_15K and P_LOW_15K (the whole ladder is below). In your circuit
+    this behaves as a pull-up or pull-down behaves: it holds the net, and a stronger
+    external driver overpowers it. The Silicon Doc uses that same vocabulary for
+    these same ladder rungs -- USB mode is described as "two 15k pull-downs for
+    'host' or a 1.5k pull-up and a float for 'device'"
+    (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4599).
+
+    ONE THING DIFFERS FROM THE PULL-UP YOU ARE USED TO, and it is the thing that
+    breaks code: see the_dir_rule below. The pull is a property of DRIVING, so the
+    pin must stay an output. Drop DIR and the pull is gone.
+  how_the_p2_does_it: |
+    The P2 has no dedicated bias-resistor network to switch on -- the Pin Mode
+    Legend enumerates the whole %M..M field (C, I, O, HHH, LLL) and there is no
+    bias-resistor selector among them. What it has instead is per-side DRIVE
+    STRENGTH: the high side and the low side each pick one rung of the same
+    eight-rung ladder (logic / 1.5 k / 15 k / 150 k / 1 mA / 100 uA / 10 uA /
+    float). Choosing a resistive rung and driving to a rail is how you get the
+    effect; that is why the DIR rule applies and why a dedicated pull-up bit is
+    not what you are looking for.
   the_dir_rule: |
     A drive selection is a property of DRIVING, so it is live only while the pin
     drives. Configuring a weak drive and then dropping DIR gives a plain
@@ -188,7 +203,7 @@ internal_pull_resistors:
     and settle nothing about this rule. It is the reason the older form of this
     block -- weak drive followed by a float -- does not work.
   ladder_definition_home: /deliverables/ai/P2/architecture/pin-drive-configuration.yaml
-  substitute_for_a_pull_up:
+  pull_a_line_high:
     intent: "hold a line high weakly, so a stronger external drive can overpower it"
     mode_word: "P_HIGH_15K"
     required_pin_state: "DIR = 1, OUT = 1"
@@ -198,7 +213,7 @@ internal_pull_resistors:
       pinhigh(16)                  ' DIR = 1, OUT = 1 -- REQUIRED; pinfloat() here floats the pin
       waitms(1)                    ' settle: a weak drive into pin and wire capacitance
       level := pinread(16)         ' reads 1 unless something stronger holds the line low
-  substitute_for_a_pull_down:
+  pull_a_line_low:
     intent: "hold a line low weakly, so an undriven pin reads 0 for a stated reason"
     mode_word: "P_LOW_15K"
     required_pin_state: "DIR = 1, OUT = 0"
