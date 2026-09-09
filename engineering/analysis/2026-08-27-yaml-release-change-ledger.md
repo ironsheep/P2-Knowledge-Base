@@ -158,7 +158,7 @@ has been carrying about the duplicate-key checker, now demonstrated rather than 
 | Commits in the range, all paths | **140** | `git log --oneline v1.17.0..HEAD \| wc -l` |
 | YAML files changed | **112** | `git diff --name-only v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml' \| wc -l` |
 | Lines | **+7263 / −3642** | `git diff --numstat … \| awk '{a+=$1;r+=$2} END{print a,r}'` |
-| ↳ *at the commit carrying this document* | **+7306 / −3642**, **112 files still** | §1.23's F-404 repair adds **+43** to `debug-formatters-arrays.yaml`, which was already in the set (+18/−0 → **+61/−0**). No file enters or leaves. |
+| ↳ *after the 2026-09-09 terminology review* | **+7479 / −3642**, **112 files still**; **39 commits** touching KB YAML, **148** in the range | §1.23's F-404 repair plus §1.24's F-406/F-407 work. Five files changed, **every one already in the set** — no file has entered or left since `9ab0433b`. |
 | New files | **4** | `git diff --diff-filter=A --name-only …` |
 | Deleted / renamed files | **0 / 0** | `git diff --diff-filter=DR -M --name-status …` |
 | Shipped set size | **1129 → 1133 files** (unchanged by every pass after 2026-08-26 — the 08-29, 08-30, 09-05 and 09-08 passes added no files and deleted none) | `git archive` both revisions, count `*.yaml` |
@@ -1703,6 +1703,113 @@ moves here rather than being back-filled silently into the tables above.)*
 
 ---
 
+## 1.24 The 2026-09-09 terminology review — the class where the KB is right and the reader is worse off
+
+Four content commits, five files, **all five already in the change set**. This pass produced no new
+coverage and corrected no fact. It fixed something none of the other passes were looking for: places
+where the KB is **correct, cited, gate-green — and the reader who asks the question is worse off than
+before.**
+
+**How it started.** Reading this ledger, Stephen asked: *"our spin2 language has pull up and pull down
+named constants… how are these handled in our .yaml files?"* — and then, when the first answer was a
+lecture about naming rather than an answer: *"Are those constants defined in the YAML? Are they
+described in how they can be used, and do we have examples showing which instructions they get used
+in? Yes or no? They need to be. If we took them out of the YAML, we broke the YAML."*
+
+**The answer was yes, yes, yes — and coverage had grown, not shrunk.**
+
+| | `v1.17.0` | HEAD |
+|---|---|---|
+| distinct `P_HIGH_*`/`P_LOW_*` names | 16 | 16 |
+| occurrences in the shipped set | 73 | **153** |
+| files carrying them | 11 | **13** |
+
+All 16 encodings re-checked against the v55 table and correct; each record carries `value`,
+`bit_pattern`, `description`, `usage_context`, `hardware_relationship`, `related_symbols`; 16 files
+show them in working `WRPIN`/`PINSTART`/`DRVH`/`DRVL` examples. The only `P_*` names this release
+deleted are `P_LEVEL_B` and `P_SCHMITT_B`, and `pnut-ts` rejects both as undefined while accepting
+`P_LEVEL_A`/`P_SCHMITT_A`.
+
+**But two things were wrong, and neither is a fact (F-406).**
+
+1. **Retrieval.** Of **17** phrasings a coder types for this concept, **2 resolved** — `pull-up` and
+   `pull-down`, hyphenated singular. `pullup`, `pull up`, `weak pull-up`, `pull-up resistor`,
+   `bias resistor`, `P_PULLUP` and eleven more returned the category dump. **Now 17 of 17.**
+2. **Framing.** Both `basic-io.yaml` files opened with *"The P2 has no internal pull-up/pull-down
+   resistor network"* and delivered the answer **fourth**, under `substitute_for_a_pull_up`.
+
+**And the substantive point was Stephen's, not the KB's.** `P_HIGH_15K` with `DIR=1, OUT=1` is a
+15 kΩ resistive path to VIO — **in the reader's circuit that is a pull-up.** The **Silicon Doc uses
+that vocabulary for these same rungs**: `:4599`, USB mode, *"two 15k pull-downs for 'host' or a 1.5k
+pull-up and a float for 'device'"*. The KB had been policing a word its own authority uses. The one
+real difference — the pull is a property of **driving**, so DIR must stay high — is unchanged and now
+stated first, because it is the part that breaks code.
+
+Reframed accordingly: `yes_you_can_pull_a_line_high_or_low` leads, the DIR caveat follows, and
+`how_the_p2_does_it` carries the no-dedicated-bias-network fact as the *reason* for the caveat rather
+than as a refusal. `substitute_for_a_pull_up`/`_down` → `pull_a_line_high`/`_low`. **None of the
+renamed keys is in the published `v1.17.0` set**, so the rename cost no consumer anything — and this
+was the last moment it was free. The published parent `internal_pull_resistors` is unchanged.
+
+**Then the audit he actually asked for: does anything else in the change set have this shape?**
+All 112 files, all 41 removed top-level keys, a denial-shaped-key sweep, and retrieval probes per
+removed topic. **One instance (F-407), and three findings of "this is the pattern, keep it":**
+
+| | verdict |
+|---|---|
+| `io_pin_timing.yaml`'s *"What it deliberately does NOT carry, and where those live instead"* | **the model.** Drive strength → forwarded; slew rate → *"There is none to document"* with zero-hit evidence; propagation/rise/fall → *"No Parallax source states them"* |
+| F-390's `-1` correction | **exemplary.** A coder with `-1` learns it arrives as `$FFFF_FFFF`, decodes `D[5:0]=%111111` and **launches an even/odd cog pair** — cited, and confirmed against emitted bytecode |
+| the `no_*` / `not_*` keys (11 of them) | **scoping, not denial.** Each says where the answer lives or that no source states it |
+| `hardware/` `specifications`/`power_*` removals (24 keys) | forward only via each file's source citation — recoverable, weaker than the `io_pin_timing` pattern. **Noted, not a defect** |
+
+**The one instance — F-407, and it is the same shape one level worse.** The purge removed
+`io_pin_timing.yaml`'s `input_characteristics` block and was **right** to: `VIL_max 0.8 V`,
+`VIH_min 2.0 V`, a `~1.5 V` threshold, Schmitt thresholds `1.65 V`/`1.35 V`, `~300 mV` hysteresis —
+no Parallax source states any of it. **But nothing replaced it**, and the real table was in a source
+the same file already cites. The P2 Datasheet's **DC Characteristics**, p.47-48:
+
+| Symbol | Parameter | Value | Line |
+|---|---|---|---|
+| `Vih` | Input Logic Threshold | min `Vxxyy*0.3` · typ `*0.5` · max `*0.7` | `:2163` |
+| `Iil` | Input Leakage Current | ±0.1 µA typ · ±10 µA max | `:2165` |
+| `Vol` | Output Low (vs GND) | 15 / 160 / 510 mV at 1 / 10 / 30 mA | `:2172-2174` |
+| `Voh` | Output High (vs Vxxyy) | −6 / −170 / −580 mV at 1 / 10 / 30 mA | `:2176-2178` |
+| `Vdd` · `Vxxyy` | Supply ranges | 1.7/1.8/1.9 V · 3.15/3.3/3.45 V | `:2159`, `:2161` |
+
+**The threshold row's *shape* is what the fabrication got wrong.** The datasheet states **one**
+threshold as a **fraction of the I/O supply**, not a VIL/VIH pair in fixed volts — 0.99 / 1.65 /
+2.31 V at 3.3 V, and it **moves with `Vxxyy`**, so two pin groups on different supplies do not share
+thresholds. The removed `0.8 V / 2.0 V` pair reads as generic 5 V TTL numbers; it cannot be derived
+from this table.
+
+**`Vol`/`Voh` stop at 30 mA**, agreeing with the `±30 mA` absolute maximum already in the file.
+**That is the table that made the shipped `150 mA` claim impossible** — it was in the datasheet all
+along, on the page after the one we were already citing.
+
+**One claim verified rather than asserted while writing it:** the file says no source states
+propagation, rise or fall figures. The **AC Characteristics** table on the facing page
+(`:2188-2210`) is oscillator frequency and XI/XO capacitance **only**. The claim stands. Its PLL row
+(3.33 / 180 / 320 MHz) is the same ceiling **F-378** corrected the clock files to.
+
+**Why no instrument could catch F-407, and this is the lesson of the pass.** Every gate scores what is
+**present** — quantities, constants, references. **A question the KB does not answer at all is
+invisible to all of them.** This file passed all eight gates cleanly while carrying no answer where a
+fabricated one had been removed. *Removal under cite-or-omit is only half a repair; the other half is
+a forwarding address or the real figure, and nothing measures whether it was written.*
+
+| file | ± | verdict |
+|---|---|---|
+| `architecture/io_pin_timing.yaml` | +29/−14 → **+162/−270** | **stronger** — the DC Characteristics table, transcribed and line-verified |
+| `architecture/pin-drive-configuration.yaml` | +277/−0 → **+305/−0** | **stronger** — 18 pull-vocabulary aliases; 2 of 17 → 17 of 17 |
+| `language/spin2/concepts/basic-io.yaml` | +89/−121 → **+104/−121** | **stronger** — answer-first reframe |
+| `language/pasm2/concepts/basic-io.yaml` | +96/−121 → **+111/−121** | **stronger** — same |
+| `language/spin2/debug-commands/debug-formatters-arrays.yaml` | +18/−0 → **+61/−0** | **stronger** — F-404, §1.23 |
+
+**Registers moved:** `F-406` and `F-407` filed, both `PENDING-VALIDATION`; next finding ID `F-408`.
+Register at **131 live · 294 archived · 0 unaccounted**.
+
+---
+
 # PART 2 — By region → file
 
 **92 files, each carrying its differential-read verdict.** Regions are ordered by their **rowed** file
@@ -1888,10 +1995,10 @@ over-reports — a reworded fact counts as gone — and is a *reading list*, not
 
 # Appendix A — Commit legend
 
-The **35 commits that touched `deliverables/ai/P2/**/*.yaml`**, oldest first. (140 commits landed in
+The **39 commits that touched `deliverables/ai/P2/**/*.yaml`**, oldest first. (148 commits landed in
 the range across all paths; the rest touched tooling, registers, ingestion sources, analysis
 documents or manuals.) **Every hash below is read from
-`git log --oneline --reverse v1.17.0..b0057ec1 -- 'deliverables/ai/P2/**/*.yaml'`, not from
+`git log --oneline --reverse v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml'`, not from
 recollection** — see the correction note under the table for why that sentence is here.
 
 | # | Commit | Date | What it did to the shipped YAML |
@@ -1932,13 +2039,17 @@ recollection** — see the correction note under the table for why that sentence
 | 33 | `19385b66` | 09-05 | Nine more fields harvested (the subtree-convention finding), thirteen files given hand-authored `aliases:`, `streamer-symbols.yaml`'s 78 `X_*` constants made reachable and its `total_symbols` corrected 82 → 78, and **the `+//` definition home merged per Stephen's agreement**. §1.21. |
 | 34 | `2a6df5ef` | 09-08 | **F-403** — six ROM residents where the Hardware Manual names three, two of them traced to our own generated narrative. §1.22. |
 | 35 | `b0057ec1` | 09-08 | Finished the F-403 sweep the previous commit had claimed without reading its output: `boot-rom/_index.yaml` stated the six-resident list **twice**. §1.22. |
+| 36 | `de9b693e` | 09-09 | **F-404** — the 24 `<fmt>_{REG,BYTE,WORD,LONG}_ARRAY` formatter names a composition rule cannot spell; plus three lagging register statuses corrected (F-401, F-402, F-403). §1.23. |
+| 37 | `235e714e` | 09-09 | **F-406**, retrieval half — 18 pull-vocabulary aliases, so a coder finds the drive constants by the word they type. 2 of 17 phrasings → 17 of 17. §1.24. |
+| 38 | `2b4d81fb` | 09-09 | **F-406**, framing half — both `basic-io.yaml` blocks answer the pull-up question before qualifying it; three unpublished keys renamed. §1.24. |
+| 39 | `4ef81b58` | 09-09 | **F-407** — the datasheet's DC Characteristics table, carried at last, where a fabricated `input_characteristics` block had been removed with nothing put in its place. §1.24. |
 
 *(Rows 25-27 are the 2026-08-29 pass; that revision described them in §1.18 but its Appendix A table
 stopped at 24. Recorded here so the legend and the count agree. **Corrected 2026-08-31:** the
 2026-08-30 revision of this table named `43e7f8b1` at row 26 — **no such object exists**, and row 27
 named `79fbbe1e`, which touches no shipped YAML and belongs in the list below, not in the legend.
 Both were written from recollection rather than derived from `git log`, which is the one thing this
-document is not allowed to do. 24 + 3 + 3 + **5** = **35**, matching §0.1. Rows 31-35 were derived
+document is not allowed to do. 24 + 3 + 3 + 5 + **4** = **39**, matching §0.1. Rows 31-35 were derived
 the same way, and the **two 09-05 index regenerations are deliberately NOT in this table** — they
 touch `deliverables/ai/p2kb-index.json` only, which is a regenerated artifact and not shipped YAML.
 That is exactly how the gzip drift stayed invisible: see F-405 and the list below.)*
@@ -1972,6 +2083,8 @@ Status read from the registers at HEAD, not carried from a task record. `RESOLVE
 
 | ID | Status at HEAD | Subject |
 |---|---|---|
+| F-407 | `PENDING-VALIDATION` | The datasheet's DC Characteristics table was never carried, so the KB answered "what is the input threshold?" with silence after the fabricated answer was removed |
+| F-406 | `PENDING-VALIDATION` | A coder asking for a pull-up got a denial first and the answer fourth, and 15 of 17 phrasings of the question resolved to nothing |
 | **F-405** | **`PARTIAL`** | The index and its gzip drifted apart again and `validate-dod-release.py` sat **red in committed history for four days** — F-357's defect, recurred. Drift repaired; **the missing wiring that would prevent recurrence is not** |
 | F-404 | `PENDING-VALIDATION` | 24 of the 54 Spin2 DEBUG formatter names the v55 reference lists resolve to nothing, because the file documents them as a composition rule rather than as strings. Includes `UHEX_LONG_ARRAY` |
 | F-403 | `PENDING-VALIDATION` | Character font data and sin/cos/log tables asserted as boot-ROM residents on the strength of our own generated narrative; the authoritative content list names three things |
@@ -2042,11 +2155,11 @@ CLEAN both before and after the flip**, so it cannot see this class: F-358's hea
 reads `**Status:**` at column 0, and this entry states its status indented inside a bullet. Not
 filed as a new finding — the allocator is the arbiter's — but it is the same shape as F-358.
 
-**Register state after this pass:** **129 live · 294 archived · 0 unaccounted · next `F-406`**
+**Register state after this pass:** **131 live · 294 archived · 0 unaccounted · next `F-408`**
 (`audit-register-hygiene.py`, exit 0). It read 124 live / next `F-401` on 2026-08-30; F-401…F-405
 account for the difference.
 
-**Findings filed during this sprint: F-373…F-405, thirty-three of them — and every single one was
+**Findings filed during this sprint: F-373…F-407, thirty-five of them — and every single one was
 filed by a verification step rather than by the work it was verifying.** That pattern has not broken
 once. The last five are the sharpest instance of it: **F-401 came from a question outside the release
 entirely**, F-402 from *arming* F-401's fix, F-403 from surveying what the KB claims rather than

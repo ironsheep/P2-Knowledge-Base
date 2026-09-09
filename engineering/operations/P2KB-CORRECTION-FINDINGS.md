@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-406`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-408`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -43,6 +43,85 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > file. The previous sweep was deferred on 2026-06-20 pending G-004 and G-005; G-005 closed
 > 2026-07-04, and G-004's remainder was found to be out of KB scope entirely (see its entry), so the
 > deferral's condition is discharged.
+
+---
+
+
+
+
+## The datasheet's DC Characteristics table was never carried, so the KB answered "what is the input threshold?" with silence after the fabricated answer was removed (2026-09-09, terminology review) — F-407
+
+### F-407 — fabrication removed correctly, the real table never put in its place — `PENDING-VALIDATION`
+
+**Location:** `deliverables/ai/P2/architecture/io_pin_timing.yaml`.
+
+**How it surfaced.** Stephen asked, after the F-406 pull-up review, whether anything **else** in the release change set had that same shape. This is the answer: the only other instance in the 112 changed files.
+
+**What happened.** The uncited-quantity purge removed this file's `input_characteristics` block, and removing it was **correct** — it stated `VIL_max 0.8 V`, `VIH_min 2.0 V`, a `~1.5 V` switching threshold, Schmitt thresholds of `1.65 V`/`1.35 V` and `~300 mV` hysteresis, and **no Parallax source states any of it**. But nothing replaced it. From that day the KB answered the input-threshold question with **nothing at all**, and carried no marker saying the answer was unknown — while the real table sat in a source this same file already cites.
+
+**What the source actually has.** P2 Datasheet 2022/11/01, **DC Characteristics**, p.47-48 (`p2-datasheet-text.txt:2151-2186`):
+
+| Symbol | Parameter | Value | Line |
+|---|---|---|---|
+| `Vih` | Input Logic Threshold | min `Vxxyy*0.3` · typ `*0.5` · max `*0.7` | `:2163` |
+| `Iil` | Input Leakage Current | ±0.1 µA typ · ±10 µA max | `:2165` |
+| `Vol` | Output Low Voltage (vs GND) | 15 / 160 / 510 mV at 1 / 10 / 30 mA | `:2172-2174` |
+| `Voh` | Output High Voltage (vs Vxxyy) | −6 / −170 / −580 mV at 1 / 10 / 30 mA | `:2176-2178` |
+| `Vdd` · `Vxxyy` | Supply ranges | 1.7/1.8/1.9 V · 3.15/3.3/3.45 V | `:2159`, `:2161` |
+
+**The threshold row is the one that matters, and its shape is what the fabrication got wrong.** The datasheet states **one** threshold as a **fraction of the I/O supply**, not a VIL/VIH pair in fixed volts. At 3.3 V that is 0.99 / 1.65 / 2.31 V — and it **moves with `Vxxyy`**, so two pin groups on different supplies do not share thresholds. The removed block's fixed 0.8 V / 2.0 V pair could not have been derived from this table; it reads as generic 5 V-logic TTL numbers.
+
+**Named as not stated, so the next reader does not infer it:** separate VIL/VIH figures, Schmitt switching thresholds, and hysteresis in millivolts. The P2 **has** Schmitt input modes (`P_SCHMITT_A` and variants) and no source we hold says what hysteresis they produce.
+
+**A cross-check this table settles.** `Vol`/`Voh` are characterised at 1, 10 and 30 mA and stop, agreeing with the `±30 mA` absolute maximum already in the file. **This is the table that made the shipped `150 mA` pin-current claim impossible** (F-348 class) — it was in the datasheet the whole time.
+
+**And one claim verified rather than asserted.** The file's description says no source states propagation, rise or fall figures. Checked: the **AC Characteristics** table on the facing page (`:2188-2210`) is oscillator frequency and XI/XO capacitance **only**. The claim stands. Its PLL row — 3.33 / 180 / 320 MHz — is the same ceiling F-378 corrected the clock files to.
+
+**Correction applied 2026-09-09.** A `dc_characteristics:` block, every figure transcribed from the table, read at its line, per-row line numbers recorded in the block, and verified programmatically after writing. The description now states what the two electrical tables are *for*: absolute maximum ratings are stress limits, DC characteristics are what you design to.
+
+**Why no instrument caught it.** No gate can see a **missing** block. The sourcing gate scores quantities that are present; the fidelity gate scores constants that are present; the crossref gate resolves references that are present. **A question the KB does not answer at all is invisible to every one of them** — and this file passed all of them, cleanly, while carrying no answer.
+
+**Why `PENDING-VALIDATION`.** Applied; the release is what it awaits.
+
+---
+
+## A coder asking for a pull-up got a denial first and the answer fourth, and 15 of 17 phrasings of the question resolved to nothing (2026-09-09, terminology review) — F-406
+
+### F-406 — the KB was correct about the constants and hostile to the reader asking for them — `PENDING-VALIDATION`
+
+**Location:** `deliverables/ai/P2/architecture/pin-drive-configuration.yaml` (retrieval) and both `concepts/basic-io.yaml` files (framing).
+
+**How it surfaced.** Stephen, reviewing the release change list: *"our spin2 language has pull up and pull down named constants... how are these handled in our .yaml files?"*
+
+**First, what is NOT wrong — checked before anything was changed.** All 16 drive-strength constants are defined, described and exemplified, and coverage **grew** this release:
+
+| | `v1.17.0` | HEAD |
+|---|---|---|
+| distinct `P_HIGH_*`/`P_LOW_*` names | 16 | 16 |
+| occurrences across the shipped set | 73 | **153** |
+| files carrying them | 11 | **13** |
+
+Each carries `value`, `bit_pattern`, `description`, `usage_context` (`"SmartPin input/output configuration (WRPIN)"`), `hardware_relationship` and `related_symbols`; all 16 encodings were re-checked against the v55 table and are right; 16 files show them in working `WRPIN`/`PINSTART`/`DRVH`/`DRVL` examples. **Nothing was removed.** The only `P_*` deletions this release were `P_LEVEL_B` and `P_SCHMITT_B`, and `pnut-ts` rejects both as undefined symbols while accepting `P_LEVEL_A`/`P_SCHMITT_A`.
+
+**What WAS wrong — two things, both about the reader rather than the facts.**
+
+1. **Retrieval.** Of 17 phrasings a coder actually types, **2 resolved** — `pull-up` and `pull-down`, hyphenated singular. `pullup`, `pulldown`, `pull up`, `pull_up`, `weak pull-up`, `pull-up resistor`, `pull resistor`, `bias resistor`, `P_PULLUP`, `P_PULLDOWN` and the rest returned the undifferentiated category dump. **Now 17 of 17.**
+2. **Framing.** Both `basic-io.yaml` files opened the `internal_pull_resistors` block with *"The P2 has no internal pull-up/pull-down resistor network"* and delivered the answer **fourth**, under a key named `substitute_for_a_pull_up`. The reader asking a real question was told first that the thing does not exist, then that it sort of does, under another name, as a substitute.
+
+**The substantive point, and Stephen's:** `P_HIGH_15K` with `DIR=1, OUT=1` is a 15 kΩ resistive path to VIO. **In the reader's circuit that is a pull-up** — it holds the net and a stronger driver overpowers it. **The Silicon Doc uses that vocabulary for these same ladder rungs**: `silicon-doc-text.txt:4599`, USB mode — *"two 15k pull-downs for 'host' or a 1.5k pull-up and a float for 'device'"*. So "partially correct" is exactly right, and the KB was policing vocabulary the authority itself uses.
+
+**The one real difference, unchanged and now stated first:** the pull is a property of **DRIVING**. Drop DIR and it is gone. That is why the old `WRPIN P_HIGH_15K` + `DIRL` idiom did nothing, and it is the fact that breaks code.
+
+**Correction applied 2026-09-09**, shape chosen by Stephen (option C of three):
+- 18 pull-vocabulary aliases added to `pin-drive-configuration.yaml`. **Aliases only — an alias is never a definition.**
+- Both `basic-io.yaml` blocks now lead with `yes_you_can_pull_a_line_high_or_low`, then the DIR caveat, then `how_the_p2_does_it` — where the no-dedicated-bias-network fact explains *why* the DIR rule exists instead of standing as a refusal.
+- Keys renamed: `there_is_no_bias_resistor_selector` → `how_the_p2_does_it`; `substitute_for_a_pull_up`/`_down` → `pull_a_line_high`/`_low`. **None of the three is in the published `v1.17.0` set** — they were authored this cycle — so the rename costs no consumer anything, and this was the last point at which it was free. The published parent key `internal_pull_resistors` is deliberately unchanged. Nothing in any script, filter or generator reads these names; verified by grep.
+
+**No claim, source or example changed.**
+
+**Why no instrument caught it.** Every gate asks whether a file is *right*. **None asks whether the reader can find it, or whether it answers the question the reader actually asked.** This file was correct, cited, gate-green, and unreachable by 15 of the 17 ways its subject is named. Third instance of the class this week, after F-401 and F-404.
+
+**Why `PENDING-VALIDATION`.** The served index is the published one; the aliases reach no agent until the set is pushed.
 
 ---
 
