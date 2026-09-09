@@ -26,6 +26,10 @@
 \renewcommand{\DocSubtitle}{$subtitle$}
 \renewcommand{\DocVersion}{$version$}
 \renewcommand{\DocDate}{$date$}
+% F-316: rights reach the PDF's metadata. Fed per document from request.json --
+% never a platform constant, because rights differ per document.
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
 \renewcommand{\DocAuthor}{$author$}
 
 \title{\DocTitle}

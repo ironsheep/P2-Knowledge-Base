@@ -302,7 +302,7 @@ these and you can drive the debugger; everything else is detail you look up.
   2 & Status strip & top row: \texttt{C Z PC SKIPF XBYTE CT} & where you are: flags, PC, skip pattern, XBYTE state, system counter & click \textbf{PC} to re-lock the disassembly to the PC; hover \textbf{CT} for elapsed seconds & --- \\
   5 & Disassembly & center; code lines, one highlighted & your code, decoded; the highlighted line is the next instruction & L-click = lock to PC \textperiodcentered{} R-click a line = toggle an address breakpoint \textperiodcentered{} wheel scrolls, faster with \textbf{Ctrl}, \textbf{Shift}, \textbf{Ctrl+Shift} (full step sizes in Chapter 5) & --- \\
   9 & Execution mode & small tag below disassembly & \texttt{MAIN}, or \texttt{INT1/2/3} while in an interrupt & --- & --- \\
-  18 & Break buttons \& Go & bottom-right cluster around the big button & which break conditions are armed; run/step control & L-click a condition = set it exclusively \textperiodcentered{} R-click = toggle \textperiodcentered{} L-click \textbf{Go} = run to next break \textperiodcentered{} R-click \textbf{Go} = run through breaks & \textbf{SPACE} = Go \textperiodcentered{} \textbf{ENTER} = run/stop \textperiodcentered{} \textbf{B} \textbf{I} \textbf{D} \textbf{M} toggle BREAK/INIT/DEBUG/MAIN \\
+  18 & Break buttons \& Go & bottom-right cluster around the big button & which break conditions are armed; run/step control & L-click a condition = set it exclusively \textperiodcentered{} R-click = toggle it \emph{and} clear DEBUG \textperiodcentered{} L-click \textbf{Go} = run to next break \textperiodcentered{} R-click \textbf{Go} = run through breaks & \textbf{SPACE} = Go \textperiodcentered{} \textbf{ENTER} = run/stop \textperiodcentered{} \textbf{B} \textbf{I} \textbf{D} \textbf{M} toggle BREAK/INIT/DEBUG/MAIN \\
   19 & Hint bar & very bottom edge (empty until you hover) & a one-line description of whatever you point at & hover any region to read what it is and how to use it & --- \\
 \end{regiontbl}
 ```
@@ -342,7 +342,7 @@ columns down the left, the register columns down the right.
   \# & Region & Find it on screen by\ldots{} & What it shows & Mouse & Keys \\
   3 & Cog register map & far-left tall column tagged \texttt{REG} & heat map of all cog RAM (\$000--\$1FF) & click a spot to lock the disassembly to that cog address & --- \\
   4 & LUT register map & 2nd tall column tagged \texttt{LUT} & heat map of all LUT RAM (\$200--\$3FF) & click to lock the disassembly there & --- \\
-  6 & Register Watch & tagged \texttt{REG} with a delta marker, right of disassembly & cog registers that just changed & click the box to reset the list & \textbf{R} = reset \emph{both} this list and the LUT one \\
+  6 & Register Watch & tagged \texttt{REG} with a delta marker, right of disassembly & cog registers that just changed & click the box to reset the list & \textbf{R} = reset this list \\
   7 & Special registers & register-name column, \texttt{IJMP3} through \texttt{INB} & the 16 special-function registers, \$1F0--\$1FF & click \emph{any} value to follow it: \texttt{IJMP3}--\texttt{IRET1} reach cog space only when the value is below \$400, and every other case is read as a hub pointer & --- \\
   8 & Event flags & far-right column of event names (\texttt{INT}, \texttt{CT1}, \ldots{} \texttt{QMT}), each \texttt{0/1} & which hardware events are set & L-click a name = arm a break on that event \textperiodcentered{} R-click = toggle & --- \\
   10 & Call stack & band tagged \texttt{STACK}, 8 hex values & the 8-level hardware CALL stack & click a value to jump the disassembly to that return address & --- \\
@@ -672,11 +672,11 @@ debugger from a Spin2 `DEBUG`, a PASM `debug`, or a cog start.
 |-----|--------|--------------|
 | **Space** | Go to next break | Run to the next armed break (same as left-clicking **Go**); with MAIN armed, that is one instruction per press |
 | **Enter** | Run / stop | Run continuously through breaks, with the display updated at a throttled rate — about 20 breaks a second, not every one; press again to stop (same as right-clicking **Go**) |
-| **B** | BREAK mode | Click the **BREAK** button — async-break mode; clears the other conditions |
+| **B** | BREAK mode | Click the **BREAK** button — async-break mode; clears every condition **except INIT** |
 | **D** | DEBUG toggle | Toggle break-on-`DEBUG` |
 | **I** | INIT toggle | Toggle break-on-COGINIT |
 | **M** | MAIN toggle | Toggle break-on-MAIN (single-step main code) |
-| **R** | Reset watches | Clear **both** delta watch lists — the register one and the LUT one |
+| **R** | Reset watch | Clear the register-delta watch list. There is no LUT watch list — the LUT heat map is not a watch list and `R` does not touch it |
 | **↑ / ↓** | Hub scroll | Scroll the hub data viewer one row (±$10) |
 | **PgUp / PgDn** | Hub page | Page the hub data viewer ($80 per press; $1000 with Ctrl, $10000 with Shift) |
 
@@ -686,8 +686,15 @@ the same way.
 
 > **No key switches between cogs.** Each cog that hits a breakpoint opens its
 > **own window**, titled *Debugger - Cog N*; the windows cascade on screen as
-> they open. To work on a different cog, switch to its window. (The Tab key is
-> intentionally inert inside the debugger window.)
+> they open. To work on a different cog, switch to its window.
+
+**Some keys are captured and then deliberately do nothing.** `Tab` is swallowed so
+keyboard focus cannot leave the debugger window, and **←**, **→**, **Home**,
+**End**, **Delete** and **Insert** are captured but reach no command. They are not missing
+features to work around — the window takes them and stops.
+
+**Alt and Cmd combinations are ignored entirely.** Holding either does not fall
+through to the plain letter, so `Alt+M` is not `M`; it is nothing.
 
 ## Control-key combinations
 
@@ -698,16 +705,25 @@ commands. Every other Ctrl combination does nothing.
 |-----|--------|
 | **Ctrl+C** | Hub scroll up one row (same as ↑) |
 | **Ctrl+D** | Hub scroll down one row (same as ↓) |
-| **Ctrl+K** | Hub page up |
-| **Ctrl+L** | Hub page down |
+| **Ctrl+K** | Hub page up, by `$1000` — the Ctrl-sized page, because Ctrl is genuinely held |
+| **Ctrl+L** | Hub page down, by `$1000`, for the same reason |
 | **Ctrl+M** | Run / stop (same as Enter) |
 
 ::: caution
 **Ctrl+D is not the DEBUG toggle.** `D` on its own toggles break-on-`DEBUG`, but
 holding Ctrl reaches hub-scroll-down instead — a different command, in a different
 part of the window, with no visible complaint. If your DEBUG condition is not
-toggling, check whether Ctrl is down.
+toggling, check whether Ctrl is down. The same applies to **Ctrl+M**, which is
+run/stop rather than the MAIN toggle: holding Ctrl *replaces* the letter command,
+it does not add to it.
 :::
+
+> **One deliberate difference from PNut.** `Ctrl+K` and `Ctrl+L` page by `$1000`
+> here because the modifier state is read as it actually is at the moment you press
+> them. PNut reads a state left over from a previous key, so the same combination
+> can page by whatever tier happened to be set last. This is the straightforward
+> reading rather than a reproduction of that behaviour, and it is noted so the
+> difference is not mistaken for a fault.
 
 ## Mouse — clicks by region
 
@@ -719,10 +735,22 @@ program, and everything you click to look at something.
 
 | Region | Left-click | Right-click |
 |--------|------------|-------------|
-| **Break-condition button** | set that condition **exclusively** — replaces the others, except INIT | toggle it on or off, leaving the others alone |
+| **Break-condition button** | set that condition **exclusively** — replaces the others, except INIT | toggle it on or off — **and clear DEBUG**. Four buttons depart from this; see Chapter 6 |
 | **BREAK button** | clear every condition except INIT | the same — BREAK does not distinguish the buttons |
-| **Go button** | run to the next break (same as Space) | run through breaks (same as Enter) |
-| **Go button, while running** | stop | stop — either button |
+| **Go**, cog halted at a break | run to the next break (same as Space) | run through breaks (same as Enter) |
+| **Stop**, repeat mode running | stop | stop — either button |
+| **Break**, cog free-running (display dimmed) | request an asynchronous COGBRK for *this* cog | the same |
+
+**Go is a state machine, and it reads its state before it reads your button.** That
+is why the left/right distinction only means anything from a halted cog: while a
+repeat run is going, either button stops it, and while the cog is free-running,
+either button requests a COGBRK. Space and Enter follow the same rule.
+
+When the cog runs for 250 ms without hitting a breakpoint the **display dims** —
+every pixel halved — and the button's caption changes to **Break**. That dimming is
+the window telling you what you are looking at is no longer current. Any press of
+Go also **flashes** the button, inverting its colours for about a tenth of a second,
+so a press is visible even when it changes nothing else on screen.
 
 ### Looking at something
 
@@ -732,20 +760,36 @@ when the line resolves below `$400`**. Nothing appears to happen, and nothing is
 wrong — that address is cog space, which an address breakpoint set from hub mode
 cannot name.
 
+**Only four regions read which button you pressed** — the break buttons, the
+disassembly, the event names, and the smart-pin watch box. Everywhere else a
+right-click does **exactly what a left-click does**. It is not ignored and it is
+not a second command, so "same" in the table below means the region genuinely
+acts, not that nothing happens.
+
 | Region | Left-click | Right-click |
 |--------|------------|-------------|
 | **Disassembly** | lock the disassembly to follow the PC | toggle an address breakpoint on the clicked line |
-| **REG or LUT heat map** | lock the disassembly to the clicked address, placed mid-window | — |
-| **PC box** | lock the disassembly to follow the PC | — |
-| **Special-function register** | follow the value: `IJMP3`–`IRET1` reach cog space only when the value is below `$400`; every other case is read as a hub pointer | — |
-| **Stack value** | follow the value; a hub-range value takes the disassembly with it | — |
-| **Pointer address** | move the hub viewer *and* the disassembly there | — |
-| **Register Watch box** | reset the list | — |
+| **REG or LUT heat map** | lock the disassembly to the clicked address, placed mid-window | same |
+| **PC box** | lock the disassembly to follow the PC | same |
+| **Special-function register** | follow the value: `IJMP3`–`IRET1` reach cog space only when the value is below `$400`; every other case is read as a hub pointer | same |
+| **Stack value** | follow the value; a hub-range value takes the disassembly with it | same |
+| **Pointer address** | move the hub viewer *and* the disassembly there | same |
+| **Register Watch box** | reset the list | same |
 | **Smart-Pin Watch box** | reset the list | reset it **and** switch between all pins and only pins with DIR set |
-| **Hub data, hex** | move the hub address to the clicked byte | — |
-| **Hub data, ASCII** | the same, one character per byte — a separate region from the hex | — |
-| **Hub heat map** | jump the viewer to that 128-byte sub-block | — |
+| **Hub data, hex** | move the hub address to the clicked byte | same |
+| **Hub data, ASCII** | the same, one character per byte — a separate region from the hex | same |
+| **Hub heat map** | jump the viewer to that 128-byte sub-block | same |
 | **Event name** | set the break event to that event **and arm it** | toggle that event break off or on |
+
+**The REG and LUT heat strips are inset inside their boxes**, and only the strip
+itself is clickable — the labelled box around it is hover-only. The register you
+click is placed **mid-window** rather than at the top, and clamped so a full
+sixteen-line window always stays in range.
+
+**Right-clicking on macOS.** A physical right-press, a two-finger trackpad tap and
+**`Ctrl`+left-click** all deliver a right-click. macOS reports one physical
+right-press as more than one event, so the whole gesture is latched — a single
+right-press toggles an address breakpoint exactly **once**, not twice.
 
 ## Mouse — the wheel
 
@@ -775,19 +819,52 @@ pointer by one, so you can dial an address in place.
 **Over the hub heat map**, nothing — the heat map is deliberately excluded from
 wheel scrolling. Click it to jump instead.
 
+**Cog mode clamps; hub mode wraps.** Cog-mode scrolling stops at `$000` and `$3F0`
+so the window always stays full, but hub scrolling **wraps** at 20 bits (`$FFFFF`)
+rather than clamping — scroll far enough past the top or bottom of hub RAM and the
+address comes round again.
+
+**Everywhere else the wheel does nothing.** Only the disassembly box and the hub
+panel handle it; over the buttons, the PC, the watch list, the SFRs, the stack, the
+events, the pointers, the smart-pin watch or the REG/LUT strips there is no wheel
+action at all.
+
+**On macOS**, `Shift`+wheel arrives as a horizontal scroll rather than a vertical
+one. It is folded back into a single step, so `Shift`+wheel scrolls exactly as it
+does on the other platforms.
+
 ## Mouse — hover
 
-Point at anything and the hint bar at the bottom of the window describes it. What
-you get depends on where you are:
+Point at a region and the hint bar at the bottom of the window names what you can
+do there. It is recomputed on every mouse-move.
 
 | Pointing at | The hint bar shows |
 |-------------|--------------------|
-| a register | its address, name, and current value |
-| an event | what that event means |
-| a break button | what that condition breaks on |
-| **CT** | elapsed seconds at the current clock frequency |
-| **XBYTE** | the full mode description |
-| hub data | the address and the byte value |
+| a break button, or **Go** | what that condition breaks on; **Go**'s text changes with its state |
+| the REG or LUT box | what the box is |
+| the REG or LUT **heat strip** | what a click there will do — the strip and its box read differently |
+| the disassembly | its three actions: lock to PC, toggle a break address, and what the wheel does |
+| an event row | the event under the cursor |
+| **CT** | elapsed seconds implied by the tick count at the current clock frequency |
+| **XBYTE** | a decode of the mode word, naming the addressing mode and whether C and Z are affected |
+
+**Some regions clear the bar on purpose.** Hover the SFR values, the stack values,
+a pointer's address, data or characters, the hub data bytes or characters, or the
+smart-pin watch box, and the hint bar goes **empty** rather than keeping the last
+text. That is deliberate, and it matches PNut — a hint invented for these was
+removed as a deviation from it. An empty bar over a value is not a fault.
+
+**Move the pointer off the window and the bar does not go blank.** It falls back to
+a standing idle line naming the clock the P2 reported:
+
+```
+Clock frequency is 200,000,000 Hz
+```
+
+and holds it until the pointer returns. That is also what the bar reads when the
+window first opens, before the mouse has been over it — so the first thing the bar
+ever tells you is the clock, not nothing. Before the first breakpoint the frequency
+is not yet known, and the bar stays empty rather than claiming `0 Hz`.
 
 
 # Chapter 6: Breakpoints
@@ -825,11 +902,28 @@ in different columns and do different things, so when this manual says "click
 INT1" it means the plain one.
 
 You arm and disarm these with the condition buttons in the bottom-right cluster.
-**Left-click** a button to set that condition exclusively; **right-click** to
-toggle it without disturbing the others. Three of them also have keyboard toggles
-from Chapter 5 — **D** (DEBUG), **I** (INIT), and **M** (MAIN). An armed condition
+**Left-click** a button to arm that condition **exclusively** — every other
+condition clears, INIT excepted. **Right-click** toggles the one you clicked —
+**and clears DEBUG with it.** Three of them also have keyboard toggles from
+Chapter 5 — **D** (DEBUG), **I** (INIT), and **M** (MAIN). An armed condition
 shows bright, a disarmed one dim — there is no numeric "break value" on screen, so
 the button brightness *is* your confirmation of what is armed.
+
+That DEBUG side-effect is easy to trip over: right-click any condition while
+break-on-`DEBUG` is armed and DEBUG quietly goes out. If you want both, arm the
+other condition first and toggle DEBUG **last**, or use the **D** key.
+
+### Four buttons that do not follow that grammar
+
+The departures are what make the panel usable, so they are worth knowing rather
+than discovering:
+
+| Button | How it differs |
+|--------|----------------|
+| **INIT** | Independent in both directions. Left-click **adds** it without clearing anything else; right-click toggles it alone. No other button ever clears it |
+| **DEBUG** | Right-click keeps INIT *and* DEBUG before toggling, so toggling DEBUG cannot clear DEBUG out from under itself. DEBUG is exclusive to everything but INIT |
+| **EVENT** | Mutually exclusive with ADDR. Right-click clears it if it is armed; otherwise it clears ADDR and arms EVENT with the selected event number |
+| **ADDR** | The mirror image — right-click clears it, or clears EVENT and arms ADDR with the address you set by right-clicking a disassembly line |
 
 There is one exception to that rule. **`BREAK`, at the top of the cluster, lights
 up when *nothing* is armed.**

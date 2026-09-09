@@ -32,7 +32,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
-| **Single-Step Debugger** | manual | **✅** | ⏳ | ⏳ | — |
+| **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | ⏳ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
@@ -230,6 +230,15 @@ macros with seven `\renewcommand{\Doc*}` lines. Assembly's template instead hard
 populates the info dictionary from `\Doc*` and deliberately not from `\@title`/`\@author`. Render 1
 came back with all four fields EMPTY and `Keywords` reading literally `"; licensed under "`.
 **Any document adopting this must edit its template, not just its request.json.**
+
+¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
+`p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`
+— the same half-wired shape found on PNut-Term-TS (¹²), and invisible from `request.json` alone
+because the platform's `\providecommand` defaults them to empty and the build stays clean. Both
+`\renewcommand`s added to the template and both values added to `request.json`
+(**ISP + Parallax**, unlike PNut-Term-TS which is ISP alone). Confirmed by reading the returned
+PDF's metadata, not by the declaration: `Keywords` = *"Copyright 2026 Iron Sheep Productions, LLC
+and Parallax Inc.; licensed under CC BY-SA 4.0"*.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
 
