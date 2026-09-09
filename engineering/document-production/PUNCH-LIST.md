@@ -51,6 +51,28 @@ separate pass so it is not rushed alongside it.
 > resistors (and the reader asking for a pull-up gets `P_HIGH_15K` with `DIR=1, OUT=1`); `-1` is **not**
 > a synonym for `NEWCOG`; and the clock ranges must say **whose** limit they are — compiler, datasheet,
 > or overclock ceiling.
+>
+> ---
+>
+> ✅ **THE LOCATED WORK LIST NOW EXISTS — start there, not from the table above.**
+> **`engineering/analysis/2026-09-09-v1.18.0-manual-update-list.md`** (2026-09-09).
+>
+> The table above is a **path intersection**: it says which documents touch changed ground, which
+> is nearly all of them. It cannot say what to write. The update list asks the next question —
+> *which changed facts does each document actually restate, and where* — by probing all 126 live
+> master files against the release's reader-visible change classes and **reading every hit in
+> context**. It grades each finding 🔴 CORRECTION / 🟡 ALIGN / 🟢 ENHANCE and gives file:line.
+>
+> **Result: 9 documents need edits, 7 need none** — against 17 "INTERSECTS" verdicts here. It
+> found **10 🔴 corrections**, four of them in the Assembly manual, which this table could only
+> call *"INTERSECTS — `language/`…"*. It also records what is **verified clean** (the `150 mA`
+> scalar, the inverted interrupt map, `WRLUT` operand order, the boot-ROM fabrications, the whole
+> shipped example corpus) so the sweep does not spend time re-deriving negatives.
+>
+> ⚠️ **F-356's repair changed shape.** Ledger §1.24 settled that calling `P_HIGH_15K` a
+> "15 kΩ pull-up" is *acceptable vocabulary* — the KB stopped policing a word the Silicon Doc
+> itself uses. The repair is **the `DIR` caveat plus a source for the composition**, not deleting
+> the word. Anyone scoping F-356 off its original wording will do the wrong repair.
 
 **Why it is owed.** The `yaml-fidelity` sprint rewrote the shipped KB on a scale that has no
 precedent here — every uncited quantitative block removed and then repopulated source-first, 55

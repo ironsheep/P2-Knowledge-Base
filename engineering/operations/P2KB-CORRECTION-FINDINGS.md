@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-408`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-416`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,138 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 ---
 
 
+
+
+## The manuals were audited against the v1.18.0 delta at the FACT level, not the path level, and eight corrections were located that the path intersection could not see (2026-09-09, post-release manual sweep) — F-408…F-415
+
+**How this surfaced.** `release-yamls` Step 8 recorded a **path intersection** — each document's
+`MANUAL-DESCRIPTOR.md` declared sources against the release's changed files — and returned
+*"INTERSECTS"* for 17 of 20 documents. Stephen asked for the list we would actually work from. A
+path intersection cannot produce one: it says a document touches changed ground, never that it
+restates a changed fact. Re-run at the fact level — 31 probes over all **126 live master files**,
+every hit read in context — the answer is **9 documents with work and 7 with none**.
+
+**Full located list, with the negatives that keep the sweep from re-deriving them:**
+`engineering/analysis/2026-09-09-v1.18.0-manual-update-list.md`.
+
+**Verified clean, so nothing below is a sweep target:** the `150 mA` per-pin scalar never reached
+any manual (every drive figure reads 30 mA); no document carries TTL `VIL`/`VIH`/`VOL`/`VOH`
+figures; ALM's interrupt vector map is correct (`$1F0=IJMP3` … `$1F5=IRET1`); `WRLUT` operand order
+and LUT-sharing direction are both correct in ALM; `LOCKTRY` acquires everywhere; no fabricated
+mnemonics (`RDCOGID`, `RDLUTS`, `NIXINT0`, `TRGINT0`) appear anywhere; no boot-ROM font or math-table
+claim survives; no document states a `WAITMS` ceiling; and **of 95 shipped `examples-library/*.spin2`
+files, none carries a pull idiom or a `-1` cog launch.**
+
+### F-408 — the Assembly manual's own feature list says the P2 has "programmable pull-up/down resistors" — `CONFIRMED`
+
+`p2-assembly-language-manual/opus-master/part-i/chapter-05-hardware.md:231`. The sprint's origin
+class (ledger §1.4) in ALM's capability summary. `P_HIGH_*`/`P_LOW_*` select **drive strength**.
+
+**The repair is not a deletion.** Ledger §1.24 settled that a reader *can* pull a line high or low —
+`P_HIGH_15K` with `DIR=1, OUT=1` is a 15 kΩ path to VIO, and the Silicon Doc uses that vocabulary
+for these same rungs (`silicon-doc-text.txt:4599`). The difference that breaks code is that the pull
+is a property of **driving**, so **DIR must stay high**. Source:
+`architecture/pin-drive-configuration.yaml`, `language/{pasm2,spin2}/concepts/basic-io.yaml`.
+
+### F-409 — ADDSX's C-flag prose contradicts its own Operation line and encoding row — `CONFIRMED`
+
+`part-ii/instructions-a.md:228` reads *"the C flag is set (1) if the result is negative
+(**Result[31] = 1**)"* while `:208` and `:219` in the same file both give **`C = true sign of
+(D + S + C)`**. The two differ **exactly on overflow**, the condition `TJV` exists to detect.
+
+This is **F-379** in the manual — the KB repaired the identical wording in
+`language/pasm2/{addsx,subsx}.yaml` this release. The rest of the family is already correct in ALM
+(`ADDS :169`, `SUBS :1223`, `SUBSX :1254`, `CMPS :387`, `CMPSX :470`, `SUMC :1321`), so **ADDSX is
+the lone outlier** — F-379's own lesson repeating: *a class sweep that misses one member leaves a
+defect that looks deliberate, because every neighbour is right.*
+
+Lesser, same paragraph: `:191` (ADDS) writes *"the true sign of the signed sum, Result[31] = 1"* as
+if the two were one thing. It recovers in the next sentence, so fix the parenthetical only.
+
+### F-410 — ALM says GETBRK's flag effect is optional; it is required, and the sibling manual says so — `CONFIRMED`
+
+`part-ii/instructions-g.md:14` (`{WC|WZ|WCZ}` braces) and `:19` (*"optional effects"*). The shipped
+KB, `language/pasm2/getbrk.yaml:13`: *"GETBRK **REQUIRES** a flag effect (WC, WZ, or WCZ); the
+no-flag form does not assemble."* Each flag selects a **different** result (**F-368**).
+
+**`p2-xbyte-programming-guide/opus-master/xbyte-body.md:1193` already has it right** — *"It requires
+a flag effect, and the flag you choose selects which information you get"* — which is Chip Gracey's
+own CG-3 correction. **Two shipped manuals disagree with each other**, and ALM's syntax braces are
+wrong as well as its prose.
+
+### F-411 — ALM's clock row attributes to the P2 Datasheet two figures the datasheet does not contain, and contradicts its own Chapter 4 — `CONFIRMED`
+
+`front-matter.md:144`: *"180 MHz recommended; **250 MHz typical overclock; 350 MHz absolute max**¹"*,
+footnoted at `:153` *"¹ **Per P2 Datasheet.**"*
+
+The datasheet's AC Characteristics PLL row gives **min 3.33 / typ 180 / max 320 MHz**
+(`p2-datasheet-text.txt:2200`, footnote 2 at `:2209`). It contains **neither 250 nor 350**.
+
+- **250 MHz "typical overclock"** — no source we hold.
+- **350 MHz** is real but is **not** an absolute maximum and **not** the datasheet's: it is the
+  **VCO/1 overclock ceiling** from the Silicon Doc (`part3-interrupts.txt:545`).
+  `architecture/clock_system.yaml:209` states the distinction outright.
+- **The datasheet's actual 320 MHz maximum is absent from the row.**
+
+**And the manual contradicts itself:** `part-i/chapter-04-timing.md:94` says *"up to 320 MHz"*, with
+`:96`, `:562`, `:655` all computing from 320. `ch04:34` states the 350 MHz VCO/1 case **correctly** —
+copy that discipline up. This is the whose-limit rule (**E-007**): every clock figure must name
+whether it is the compiler's, the datasheet's, or an overclock ceiling.
+
+### F-412 — the IOSP states the input threshold as fixed volts; the datasheet gives it as a fraction of the I/O supply — `CONFIRMED`
+
+`p2-io-and-smart-pins-user-guide/.../chapter-12-digital-input.md:25` and `:95` — *"approximately
+**1.65V** threshold"*.
+
+**F-407**'s shape in the manual. The P2 Datasheet DC Characteristics (`:2163`) give **one** threshold
+as `Vih = Vxxyy * 0.3 min / *0.5 typ / *0.7 max`. At 3.3 V that is **0.99 / 1.65 / 2.31 V** — 1.65 is
+the *typ*, the band is ±0.66 V wide, and **it moves with `Vxxyy`**, so two pin groups on different
+supplies do not share thresholds. Same chapter, same class: `:156` hard-codes
+`threshold = (level / 256) × 3.3V` for the level comparator, which genuinely is a fraction of VIO;
+`:130`, `:133`, `:583` derive the ~1.4 V TTL level from that same hard-coded supply.
+
+### F-413 — P2AN001's clock pitfall states a 300 MHz maximum that exists in no source, and contradicts its own YAML companion — `CONFIRMED`
+
+`app-notes/P2AN001/opus-master/P2AN001.md:638` — *"The P2's **specified maximum is 300 MHz**; the
+original research code ran at 320 MHz, **which is over spec**."*
+
+**300 MHz appears in no source we hold and in no KB file.** The datasheet maximum is **320 MHz**, so
+the research code was **at** the limit, not over it. `application-notes/p2an001-…yaml` was corrected
+2026-09-09 and now carries the datasheet's min 3.33 / typ 180 / max 320 with its 105 °C footnote —
+so **the note and its own companion now disagree**, which the four-artifact model forbids.
+
+### F-414 — P2AN001 carries the unreproduced 15 mV designer figure and not the measured ≤9 mV result — `CONFIRMED`
+
+`P2AN001.md:626`. The note qualifies 15 mV correctly as designer-stated, but the companion has moved
+past it: *"Hardware-verified 2026-07-07 on real P2: the ratiometric single-pin absolute error was
+**≤9 mV**, reproducible… the wider '~15 mV pin-to-pin spread' figure is a designer report that **the
+bench has NOT yet reproduced**… **Do not quote 15 mV as a specification.**"* Empirical sources are
+first-class here and outrank a designer report.
+
+### F-415 — P2AN002 states the CORDIC issue interval as a fixed eight clocks; it depends on the number of running cogs — `CONFIRMED`
+
+`app-notes/P2AN002/opus-master/P2AN002.md:367` (*"each cog gets a turn every eight clocks"*), and the
+same assumption at `:235` and `:328`. The companion quotes the authority: *"Cogs can start CORDIC
+operations **every 1/2/4/8/16 (#cogs) clocks** and get results 55 clocks later."* Eight is one case,
+not the rule. The 55-clock latency is fixed and the note has that right.
+
+---
+
+### Re-adjudicated, not newly filed — F-356's DeSilva disposition
+
+F-356 records `p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md:2881` as *"checked and left
+because it is already **correct**."* Against the framing in force on 2026-08-25, it was. **Ledger
+§1.24 (2026-09-09) changed the framing.** Under it the line is weak twice: *"No pullup/pulldown **by
+default**"* implies a non-default internal pull exists, and it sends the reader to **smart-pin
+modes** when the mechanism is **drive strength**. Not re-filed as a correction — nothing here makes
+a reader's code fail — but F-356's disposition should not be read as settling it.
+
+**And F-356's own repair changed shape.** §1.24 settled that calling `P_HIGH_15K` a "15 kΩ pull-up"
+is *acceptable vocabulary*; the KB stopped policing a word its own authority uses. What F-356 owes
+is **the `DIR` caveat plus a source for the `P_HIGH_15K | P_LOW_FLOAT` composition**, not deletion of
+the word. Anyone scoping F-356 off its original wording will do the wrong repair.
+
+---
 
 
 ## The datasheet's DC Characteristics table was never carried, so the KB answered "what is the input threshold?" with silence after the fabricated answer was removed (2026-09-09, terminology review) — F-407
