@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-09T18:58:13.805003",
+    "generated": "2026-09-09T19:05:26.284797",
     "total_entries": 1133,
     "total_categories": 59,
     "total_aliases": 2950,
@@ -9966,8 +9966,8 @@
     },
     "p2kbArchIoPinTiming": {
       "path": "deliverables/ai/P2/architecture/io_pin_timing.yaml",
-      "mtime": 1788045127,
-      "sha256": "6431c7f680be21db5bae7c25435018faabd000ccdd0d07a821efc85e943bce2f"
+      "mtime": 1788980698,
+      "sha256": "c7fa55fa3b48712f38d968ab5181c4077139f53c160ac6cf192528be868008f2"
     },
     "p2kbArchLocks": {
       "path": "deliverables/ai/P2/architecture/locks.yaml",
