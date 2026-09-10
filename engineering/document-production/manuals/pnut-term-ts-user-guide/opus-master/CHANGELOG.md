@@ -1,6 +1,6 @@
 # PNut-Term-TS User Guide Changelog
 
-## v1.0.0 (2026-08-19): Initial public release
+## v1.0.0 (2026-09-10): Initial public release
 
 **Initial release.** The operating guide for **PNut-Term-TS** — the downloader, serial
 terminal, and debug display for the Propeller 2, in one program that runs the same way on
