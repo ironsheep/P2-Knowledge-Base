@@ -206,6 +206,13 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \node[iospbox, below=15mm of term] (log) {the log file\\\texttt{./logs/}};
 \node[iospsub, below=1.5mm of log] (logsub)
    {a timestamped record\\of the run};
+% The windows are a PLACE, not a wire. Drawing them as a labelled arc into the
+% IDE (which this figure did until 2026-09-10) says the terminal and the debug
+% windows feed the editor. They do not: PNut-Term-TS draws them, you look at
+% them, and the loop closes when YOU type the next change. Stephen caught it on
+% the v1.0.0 render.
+\node[iospbox, above=13mm of term, align=center] (windows)
+   {terminal + debug windows\\on your screen};
 \draw[iospflow] (you) -- node[above, font=\scriptsize]{Spin2} (compile);
 \draw[iospflow] (compile) -- node[above, font=\scriptsize]{\texttt{.bin}} (term);
 % The serial link is a TWO-WAY conversation, and both directions terminate at
@@ -216,17 +223,14 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 \draw[iospflow] ([yshift=-2mm]p2.west) --
    node[below, font=\scriptsize]{\texttt{debug()}} ([yshift=-2mm]term.east);
 \draw[iospflow] (term) -- node[right, font=\scriptsize]{writes} (log);
-% TWO return legs reach you, and that is the point of this figure. The screen is
-% the live one -- arced OVER the spine so it does not collide with the .bin arrow
-% running beneath it.
-\draw[iospflow] (term.north) to[out=90, in=90, looseness=0.55]
-   node[pos=0.5, above, inner sep=2pt, font=\scriptsize]
-   {terminal + debug windows} (you.north);
-% The log is the second one, and it is NOT merely a keepsake: you and the IDE go
-% back over it after the run. Arced UNDER the spine, mirroring the screen arc
-% above, so the figure reads as two ways back rather than one. Ch15 draws this
-% same leg as the ONLY way back, because headless has no screen -- keep the two
-% figures recognisably parallel.
+% PNut-Term-TS DRIVES the windows -- this arrow points UP, away from the spine,
+% and stops there. Nothing runs from the windows back to the IDE, because nothing
+% does: you read them.
+\draw[iospflow] (term.north) -- node[right, font=\scriptsize]{shows} (windows.south);
+% ONE wire leads back to you, and it is the log -- a file, which an editor can
+% actually open. Arced UNDER the spine. Ch15 draws this same leg as the only way
+% back, because headless has no screen -- keep the two figures recognisably
+% parallel; the difference is that Ch1 grows a windows node Ch15 has no use for.
 \draw[iospflow] (log.west) to[out=180, in=-90, looseness=0.7]
    node[pos=0.42, below, yshift=-2pt, inner sep=2pt, font=\scriptsize]
    {you and your IDE read the log} (you.south);
@@ -236,8 +240,9 @@ binary; **PNut-Term-TS is where you watch it come alive.**
 editor of your choice, and it drives both tools: \texttt{pnut-ts} builds the
 binary; PNut-Term-TS downloads it, starts it, and shows you what the chip sends
 back — as terminal text and as the debug windows your program draws to — while
-writing the same output to a log file. Two paths lead back to you: the screen
-while the run is live, and the log afterwards.}
+writing the same output to a log file. Only one line leads back to the editor, and
+it is the log: the windows are a place you watch, not a path your code travels.
+You close the loop yourself, by reading them and typing the next change.}
 \end{figure}
 ```
 
