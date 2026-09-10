@@ -327,15 +327,26 @@
 % not on assuming it does.
 %
 % Each branch is guarded: a document that has not adopted these keys writes no
-% pdfkeywords at all, exactly as before, so an unconverted document is unchanged
-% rather than given a malformed rights string.
+% pdfkeywords at all, so an unconverted document is unchanged rather than given a
+% malformed rights string.
+%
+% The guard tests an \edef'd copy, NOT the macro itself. `\ifx\DocCopyright\@empty`
+% reads correct and never fires: \providecommand (and \renewcommand) build a \long
+% macro, \@empty is not \long, so \ifx compares them UNEQUAL even when both expand
+% to nothing — and the un-adopted document falls into the both-present branch and
+% emits the malformed string this block exists to prevent. P2AN001 v1.0.5 shipped
+% exactly that, `Keywords: "; licensed under "`, and the compile was clean; only
+% audit-pdf-metadata.py reading the finished artifact saw it (2026-09-10).
+% \edef yields a non-\long macro, so the comparison means what it says.
 \AtBeginDocument{%
-  \ifx\DocCopyright\@empty
-    \ifx\DocLicense\@empty\else
+  \edef\DocRightsHolder{\DocCopyright}%
+  \edef\DocRightsGrant{\DocLicense}%
+  \ifx\DocRightsHolder\@empty
+    \ifx\DocRightsGrant\@empty\else
       \hypersetup{pdfkeywords={\DocLicense}}%
     \fi
   \else
-    \ifx\DocLicense\@empty
+    \ifx\DocRightsGrant\@empty
       \hypersetup{pdfkeywords={\DocCopyright}}%
     \else
       % Semicolon, not a full stop: a copyright string normally ENDS in one
