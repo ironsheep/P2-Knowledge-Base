@@ -24,9 +24,9 @@
 \vspace{0.25cm}
 {\Large\itshape No external ADC — a single-pin instrumentation ADC and a catalog of techniques\par}
 \vspace{0.35cm}
-{\large September 2026\par}
+{\large \DocDate\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.0.5\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vspace{0.25cm}
 % App-note cover box: repurposes the manuals' bottom-of-cover content table.

@@ -13,17 +13,20 @@
       ],
       "lua_filters": [
         "p2kb-platform-figures",
+        "p2kb-platform-crossref",
         "p2kb-platform-tables",
         "p2kb-platform-mnemonic-bold",
         "p2kb-platform-code-coloring",
         "p2kb-platform-pagination"
       ],
       "metadata": {
-        "title": "Discovering P2 Assembly",
-        "subtitle": "Build, Experiment, and Master the Propeller 2",
+        "title": "P2 Assembly Programming",
+        "subtitle": "A Human-Centered Approach to Parallel Processing",
         "author": "Iron Sheep Productions, LLC",
-        "version": "Version 3.0.7",
-        "date": "September 2026"
+        "version": "3.0.7",
+        "date": "September 2026",
+        "copyright": "Copyright 2025-2026 Iron Sheep Productions, LLC and Parallax Inc.",
+        "license": "CC BY-SA 4.0"
       }
     }
   ]

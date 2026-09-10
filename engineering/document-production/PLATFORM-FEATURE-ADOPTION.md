@@ -10,6 +10,22 @@ be turned on set-wide — that would churn every published corpus to fix one. So
 adoption is deliberately per document, at its next natural release, for any reason.
 Until then the document is unchanged, never broken.
 
+> **THE STANDING RULE (Stephen, 2026-09-10): every time we release a document, that
+> document adopts everything still outstanding for it.** A release is the opportunity,
+> and the opportunity is not declined. This replaces the earlier framing in which
+> deferral was a judgement call made per release — it was that framing which let ⏳
+> rows sit through about a dozen releases (**F-301**).
+>
+> A `⏳` in a row therefore means *"owed, and it will be taken at that document's next
+> release"* — never *"pending a decision about whether to bother."* The only thing a
+> release may not do is mark a feature `✅` it has not PROVEN on the returned PDF:
+> adoption is wired **and** audited, so a document mid-release sits at `🔧` and
+> `release-manual` Phase 3e flips it once the artifact says so.
+>
+> Where adoption is genuinely blocked by something outside the release (a prerequisite
+> another document owns, a conflict needing a ruling), the block is named in the
+> footnote with what would unblock it — a blocker is a fact, not a deferral.
+
 **Why it is ONE table.** Adoption used to live in three places — a per-feature file,
 prose in the punch list, and the roster's coarse `Platform` column. The per-feature
 file recorded the rule correctly and was then passed over about a dozen times
@@ -24,17 +40,18 @@ each feature's *mechanism* stays in its own document, linked below.
 
 | Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers |
 |---|---|:--:|:--:|:--:|:--:|
-| Getting Started | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
-| I/O & Smart Pins | manual | ⏳ | ⏳ | ✅ ¹ | 🔧 ¹¹ |
+| Getting Started | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | **✅** ¹⁰ |
+| I/O & Smart Pins | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹ ¹⁵ | 🔧 ¹¹ |
 | **Assembly Reference** | manual | **✅** ⁹ | **✅** ⁹ | **✅** ⁹ | — |
-| DeSilva Tutorial | manual | ⏳ ² | ⏳ | ⏳ | **✅** ¹⁰ |
+| DeSilva Tutorial | manual | 🔧 ² ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | **✅** ¹⁰ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
-| P2AN001 … P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
+| P2AN001 · P2AN002 · P2AN004 | app-note | 🔧 ⁴ ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | ⏳ ⁵ |
+| P2AN003 · P2AN005 · P2AN006 · P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
 
@@ -127,6 +144,36 @@ have written an empty library over a good corpus; use `--repack` until then. And
 own hand-written header, not an example — it is why P2AN006 reads 4+1 rather than 5, and
 whatever convention lands must let a corpus hold a non-example file without flagging it.
 
+
+¹⁵ **Adopted 2026-09-10 in the v1.18.0 wave, under the standing rule** — six documents took
+every feature they still owed, because they were being released. Wiring done and gated; each
+mark flips `🔧` → `✅` only when `release-manual` Phase 3e reads it off that document's returned
+PDF.
+
+What was wired: **cross-ref** added to `lua_filters` **before** `p2kb-platform-tables` in five
+`request.json` (tables flattens each cell to a string, so a filter after it cannot see a
+table-borne reference); I/O & Smart Pins already had it and owed only the audit footnote 1 left
+open. **Rights + metadata single-source** needed the part `request.json` alone does not do — all
+four templates (`getting-started`, `iosp`, `desilva`, and the shared `appnote`) bound **zero**
+`\Doc*` macros, the same shape that shipped Assembly v3.1.6 with Title, Subject and Author
+EMPTY; each now binds all seven, copying Streamer's proven block. Covers stopped hardcoding
+version and date and read `\DocVersion` / `\DocDate`, which is what makes single-sourcing real:
+this same wave had already found **two covers stuck on August** while their metadata said
+September.
+
+Copyright was sourced from **each document's own licence page**, never copied between them —
+DeSilva carries a year RANGE (*2025-2026*) where the others carry 2026, and the metadata gate
+compares the declared rights against that page. Five `metadata.version` values lost a leading
+`v`, which the gate would never have found on page 1 (it prints *"Version 1.0.4"*).
+
+**DeSilva's footnote-2 blocker was resolved rather than carried:** its `request.json` said
+*"Discovering P2 Assembly"* / *"Build, Experiment, and Master the Propeller 2"* while its cover
+said *"P2 Assembly Programming"* / *"A Human-Centered Approach to Parallel Processing"*. The
+cover wins — confirmed on the **shipped v3.0.6 PDF's own page 1** and the public deliverables
+index, where the `request.json` title appears nowhere a reader has ever seen.
+
+The four app notes not in this wave keep `⏳`: the shared template is converted and ready for
+them, but no release has rendered or audited them, and a row does not go green on a template.
 
 ¹⁰ **Getting Started + DeSilva — generated example headers adopted 2026-08-22, and this is the
 one feature whose proof is NOT a rendered PDF.** `--adopt` writes only the `.spin2` files; it

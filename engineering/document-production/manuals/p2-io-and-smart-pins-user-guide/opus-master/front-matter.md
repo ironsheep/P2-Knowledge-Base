@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Complete P2 Pin I/O and Smart Pin Reference\par}
 \vspace{0.6cm}
-{\large September 2026\par}
+{\large \DocDate\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.10\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vfill
 \begin{tcolorbox}[

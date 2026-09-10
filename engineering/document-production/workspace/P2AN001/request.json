@@ -10,6 +10,7 @@
       ],
       "lua_filters": [
         "p2kb-platform-figures",
+        "p2kb-platform-crossref",
         "p2kb-platform-tables",
         "p2kb-platform-mnemonic-bold",
         "p2kb-platform-code-coloring",
@@ -17,10 +18,12 @@
       ],
       "metadata": {
         "title": "Measure an Absolute Voltage in Microvolts on a P2 Pin",
-        "subtitle": "Application Note P2AN001 — No External ADC",
+        "subtitle": "Application Note P2AN001 \u2014 No External ADC",
         "author": "Iron Sheep Productions, LLC",
-        "version": "v1.0.5",
-        "date": "September 2026"
+        "version": "1.0.5",
+        "date": "September 2026",
+        "copyright": "Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.",
+        "license": "CC BY-SA 4.0"
       }
     }
   ]

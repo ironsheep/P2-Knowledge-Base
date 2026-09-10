@@ -23,8 +23,10 @@
         "title": "P2 I/O & Smart Pins User Guide",
         "subtitle": "Complete P2 Pin I/O and Smart Pin Reference",
         "author": "Iron Sheep Productions, LLC",
-        "version": "v1.0.10",
-        "date": "September 2026"
+        "version": "1.0.10",
+        "date": "September 2026",
+        "copyright": "Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.",
+        "license": "CC BY-SA 4.0"
       }
     }
   ]

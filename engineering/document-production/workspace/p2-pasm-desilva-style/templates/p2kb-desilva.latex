@@ -29,6 +29,30 @@
 % TikZ diagrams for COG/Hub memory layouts (self-contained: loads its own tikz).
 \usepackage{p2kb-desilva-diagrams}
 
+% ==================== DOCUMENT METADATA ====================
+% Single-source (F-300): every identity string lives once, in request.json
+% metadata, and reaches BOTH the PDF info dictionary and the cover page.
+% \renewcommand, not \newcommand -- p2kb-platform-foundation has already
+% \providecommand'd these. The macros carry the VALUE; the cover block in the
+% markdown keeps its own presentation (the word "Version", the colour).
+%
+% Adoption is TWO parts and request.json alone is NOT one of them: the platform
+% populates the PDF info dictionary from \Doc* and deliberately not from
+% \@title/\@author, so a document that sets metadata in request.json without
+% binding these macros ships with Title, Subject and Author EMPTY. Assembly
+% v3.1.6 shipped exactly that way.
+\renewcommand{\DocTitle}{$title$}
+\renewcommand{\DocSubtitle}{$subtitle$}
+\renewcommand{\DocVersion}{$version$}
+\renewcommand{\DocDate}{$date$}
+\renewcommand{\DocAuthor}{$author$}
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
+
+\title{\DocTitle}
+\author{\DocAuthor}
+\date{\DocDate}
+
 % ==================== DOCUMENT STRUCTURE ====================
 \begin{document}
 
