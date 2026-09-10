@@ -2,7 +2,7 @@
 manual_slug: pnut-term-ts-user-guide
 doc_class: behavior                               # software-tool user guide — grounds against source-extraction (repo feeds), NOT language YAML
 code_line_budget_K: 76                            # platform-inherited default (LM-Mono reference K); revisit if this guide adopts a different template
-last_published_tag:                               # none yet — seed created 2026-07-21, not yet released
+last_published_tag: pnut-term-ts-user-guide-v1.0.0   # released 2026-09-10
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
@@ -49,13 +49,12 @@ prose disagree, **the tool is ground truth.**
 **Type note:** roster `Type = guide` (a user guide for a tool), but unlike the
 off-platform AI Privacy Guide this one is expected to ride the `p2kb-platform`
 template stack (it ships code blocks and screenshots like the manual siblings).
-The Forge template + platform-filter wiring is **TBD** — to be finalized at first
-render (see `PLANNING.md`).
+The Forge template + platform-filter wiring is **settled**: its own
+`p2kb-pnut-term-ts.latex` over the `p2kb-platform-*` stack, with all four platform
+features adopted (metadata single-source, rights, cross-ref, generated headers n/a).
 
-**Release gate:** **co-releases with the P2 Single-Step Debugger Manual, timed to
-PNut-Term-TS v1.0** (the P2 Debug Window Manual is already released).
-Draft-and-hold to v1.0 — draft now against the v0.10.3 feeds, then **re-pull the
-feeds + re-verify at release**.
+**Release sequencing — NOT a gate.** This guide and the P2 Single-Step Debugger Manual document the same host application and land best together, so they release in sequence with nothing between them. **Neither is held for the other.** The earlier wording here read *"Release gate"*, and that word cost real time — a 2026-08-23 resume reported this guide as blocked on a decision that was never a blocker. Do not record a preference in gate language. **Released v1.0.0 on 2026-09-10**, ahead of its sibling, which is exactly what "neither is held" means in practice.
 
-**Baseline note:** `last_published_tag` is empty — this is a fresh seed
-(2026-07-21), never released. Set it at first public release.
+*Draft-and-hold, DISCHARGED.* The instruction here was to draft against the v0.10.3 feeds and then re-pull the feeds and re-verify at release. Both halves happened: the feeds were re-snapshotted 2026-09-09 at tool **v1.0.7** and the whole surface was re-checked against them before the release, not after.
+
+**Baseline note:** `last_published_tag` = `pnut-term-ts-user-guide-v1.0.0` (2026-09-10).

@@ -2,7 +2,7 @@
 manual_slug: p2-single-step-debugger-manual
 doc_class: behavior                               # documents the on-chip debugger's behavior — grounds against the debugger implementation + hardware, NOT language YAML
 code_line_budget_K: 76                            # platform-inherited reference K (creation-guide.md §5b); this manual consumes the platform code boxes unchanged
-last_published_tag:                               # none — v1.0.0 is the initial release
+last_published_tag: p2-single-step-debugger-manual-v1.0.0   # released 2026-09-10
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
@@ -30,7 +30,7 @@ fragile_areas:
   - "Timing claims — do not measure across a DEBUG statement (the cog waits for the serial TX to finish) and do not measure by stepping. Chapter 8 states both; keep them together."
   - "AUGS/AUGD atomicity — one Space can advance two instructions when the first is a ## prefix. This reads as a stuck key; the troubleshooting row explaining it is load-bearing."
   - "Chapter 3 spends ONE deliberate blank page. \\ssdbspreadstart (templates/p2kb-ssdbg-regions.sty) forces each pass's annotated screenshot onto an EVEN page so its region table faces it on the odd page; when the spread would start odd it emits a filler carrying no head and no folio. A blank-page scan WILL flag it — verify the three passes still land even (Figures 3.1/3.2/3.3) with their tables facing, then leave it alone. It is not a defect."
-  - "Release gate: co-releases with the PNut-Term-TS User Guide, timed to PNut-Term-TS v1.0."
+  - "Release SEQUENCING, not a gate: this manual and the PNut-Term-TS User Guide land best together because they document the same host application, so they release in sequence with nothing between them. NEITHER IS HELD FOR THE OTHER -- either ships as soon as it is ready. This line previously read 'Release gate: co-releases with...' and that word cost real time: a 2026-08-23 resume reported a guide as blocked on a decision that was never a blocker. Do not record a preference in gate language. (Corrected 2026-09-10; the roster was fixed on 2026-08-23 and this descriptor was missed.)"
 ---
 
 # P2 Single-Step Debugger Manual — Descriptor
@@ -65,8 +65,8 @@ same filename (region-oriented, mechanism-accurate; the root copy is
 feature-oriented). Neither supersedes the other cleanly and neither is the master —
 the Opus Master is the blend. Keep both; cite neither.
 
-**Baseline note:** `last_published_tag` is empty. v1.0.0 is the **initial**
-release, so audits have no prior published baseline to diff against — the
-changeset-integrity (delta-since-last-published) gate does not apply, and the
-CHANGELOG entry follows the initial-release form in
-`methodology/changelog-style-guide.md` (a description of the document, not a delta).
+**Baseline note:** `last_published_tag` = `p2-single-step-debugger-manual-v1.0.0`, set at the
+2026-09-10 initial release. **That release itself had no prior baseline** — no tag, no
+README entry — so its audit ran under the initial-release form (a description of the
+document, not a delta) and the changeset-integrity gate did not apply. **From the next
+release onward both apply**, diffing against that tag.

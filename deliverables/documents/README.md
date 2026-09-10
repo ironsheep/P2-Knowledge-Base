@@ -39,7 +39,7 @@ Two short companion reads go deeper on the questions every reviewer asks:
 
 ## Documents in Community Review
 
-Eight documents are available now for community technical review, along with seven application notes. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
+Nine documents are available now for community technical review, along with seven application notes. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
 
 ### [Getting Started with the Propeller 2](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Getting-Started-Guide.pdf)
 **Meet the Chip, Read Its Code, Put It to Work** · *Version 1.0.3*
@@ -96,6 +96,13 @@ The design-and-realization companion to the reference manuals, picking up where 
 The complete guide to the Propeller 2's XBYTE hardware bytecode engine: the skip family (SKIP/SKIPF/EXECF), the FIFO bytecode stream, and LUT dispatch that together let one indexed jump select and run a handler with no software in the loop. It works up from what the engine is, through the three decisions that settle whether your project can actually take it — most P2 emulators land one rung short of the full engine, and the guide says plainly why — to building on it: a minimal custom virtual machine, that same machine grown until its dispatch table has to work for a living, and a compact, illustrative CPU emulator, with chapters on servicing guest interrupts, prefix bytes and alternate tables, and using the engine beyond interpreters to parse protocols and drive displays. Written in two registers, a warm teaching layer for the concepts and a precise reference layer for the tables, encodings, and configuration bits, and grounded throughout in the P2 documentation, the knowledge base, and worked community code. Includes a downloadable library of three compile-clean Spin2 example programs.
 
 *August 2026 - Community Review Edition* | [Changelog](DOCs/p2-xbyte-programming-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-xbyte-programming-guide-src.zip)
+
+### [P2 Single-Step Debugger Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Single-Step-Debugger-Manual.pdf)
+**Observe and Control Your Running P2 Code** · *Version 1.0.0*
+
+A complete working guide to the Propeller 2's built-in single-step debugger — the on-chip debugger that halts your program at an exact instruction and shows you every register, flag, and byte of memory as it stands at that moment. Written for anyone building with `pnut-ts -d` and running in PNut-Term-TS, from a first breakpoint through multi-cog and interrupt work. It teaches the debugger window twice over, deliberately: a guided tour walks the display region by region so the wall of numbers becomes a set of places you know, then a command reference gathers the whole interaction set in one place to look up — every key and Ctrl combination, every left- and right-click by region, and every wheel step in both cog and hub modes. That interaction set is stated from the debugger's own code and confirmed on real P2 silicon, down to the details that cost an afternoon when they are missing: which four regions actually read the mouse button, why `Ctrl+D` is not the DEBUG toggle, and why some hover hints are deliberately blank.
+
+*September 2026 - Community Review Edition* | [Changelog](DOCs/p2-single-step-debugger-manual-changelog.md)
 
 ### Application Notes
 
@@ -197,11 +204,6 @@ Beyond the documents in review above, here is the complete planned set, so you c
 ### In Development & Planned
 
 The rest of the set, in production or on the drawing board:
-
-#### P2 Single-Step Debugger Manual
-**Observe and Control Your Running P2 Code**
-
-A practical guide to single-stepping P2 code: pausing and resuming a running program, inspecting values and timing, and driving the debugger from the host.
 
 #### Application Notes in Planning
 
