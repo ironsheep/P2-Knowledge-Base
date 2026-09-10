@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-09T19:51:43.001389",
+    "generated": "2026-09-10T22:07:06.963003",
     "total_entries": 1133,
     "total_categories": 59,
     "total_aliases": 2950,
@@ -9776,8 +9776,8 @@
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
-      "mtime": 1788115079,
-      "sha256": "d8a83de1a26388503134b5272d3be4cafbc8ed374e2f147a7b3773debff7117d"
+      "mtime": 1789074313,
+      "sha256": "eb7dad3e7481112be489f698716d346ae30644ad9cbe79b5e92bf6b7c85cb87a"
     },
     "p2kbAppNoteP2an003DacAnalogSignalGeneration": {
       "path": "deliverables/ai/P2/application-notes/p2an003-dac-analog-signal-generation.yaml",
@@ -9861,8 +9861,8 @@
     },
     "p2kbArchCordic": {
       "path": "deliverables/ai/P2/architecture/cordic.yaml",
-      "mtime": 1786839805,
-      "sha256": "e465aea20b60b68e0aaf921b3536d354625377958bd4eac1b508895c4101e237"
+      "mtime": 1789074313,
+      "sha256": "4339ed16025744fc6c16f13182123831294612eda94a6b5424d31a800edac3b4"
     },
     "p2kbArchDebugInterrupt": {
       "path": "deliverables/ai/P2/architecture/debug_interrupt.yaml",
