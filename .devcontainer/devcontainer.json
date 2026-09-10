@@ -13,7 +13,7 @@
   // Node, @openai/codex, pnut-ts, Claude CLI, PyYAML and the PDF toolkit are all
   // baked into .devcontainer/Dockerfile (persistent across rebuilds). Only steps
   // that genuinely depend on runtime mounts remain here.
-  "postCreateCommand": "sudo mkdir -p /Users/stephen && sudo ln -sfn /opt/container-tools /Users/stephen/container-tools; sudo chown -R vscode:vscode /home/vscode/.local 2>/dev/null || true; cat /workspaces/P2-Knowledge-Base/.bashrc >> ~/.bashrc; export PATH=\"$HOME/.local/bin:$PATH\"; claude --update || true;",
+  "postCreateCommand": "sudo mkdir -p /Users/stephen && sudo ln -sfn /opt/container-tools /Users/stephen/container-tools; sudo chown -R vscode:vscode /home/vscode/.local 2>/dev/null || true; mkdir -p ~/.ssh && cp /tmp/.ssh/* ~/.ssh/ 2>/dev/null; chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_* 2>/dev/null; chmod 644 ~/.ssh/*.pub 2>/dev/null; sed -i -e 's#/Users/stephen/\\.ssh/#/home/vscode/.ssh/#g' -e 's|^\\([[:space:]]*\\)UseKeychain|\\1#UseKeychain|' ~/.ssh/config 2>/dev/null || true; cat /workspaces/P2-Knowledge-Base/.bashrc >> ~/.bashrc; export PATH=\"$HOME/.local/bin:$PATH\"; claude --update || true;",
 
   "customizations": {
     "vscode": {
