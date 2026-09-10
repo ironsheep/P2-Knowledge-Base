@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-421`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-422`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,51 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The two ROM listings are different BUILD TARGETS, and F-123's grounding plan names the FPGA one (2026-09-10, ROM-asset mining) — F-421
+
+### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `CONFIRMED`
+
+Found 2026-09-10 while scoping the ROM-facility mining Stephen asked for. The corpus holds two ROM
+listings in `engineering/ingestion/sources/rom-booter/` and nothing says which is the chip.
+
+**They are the same SOURCE and different TARGETS.** Both changelogs are byte-identical — 76 lines
+each, both ending `RR20180527 v141 proposed final SD & Monitor` / `PBJ20180527 Added SD and FAT32
+routines`. So neither is a newer revision of the other. The build target is selected by a single
+active `ver` constant, and every other candidate is commented out:
+
+| file | active `ver` | target |
+|---|---|---|
+| `ROM_Booter.lst` (7,296 lines) | `ver = "A"` | `Prop123-A9 / BeMicro-A9, 8 cogs, 64 smart pins` — **an FPGA board** |
+| `rom_booter_v33_01j.lst` (7,356 lines) | `ver = "G"` | **`Prop2 Silicon v2`** |
+
+Read directly: `ROM_Booter.lst:118` has `ver = "A"` uncommented with `B`-`F` commented;
+`rom_booter_v33_01j.lst:125-131` has `A`-`F` ALL commented and `ver = "G"` active. The A-file has no
+`"G"` line at all.
+
+The difference is not cosmetic — 835 hunks across ~3,300 lines once CRLF is normalised (the silicon
+listing is CRLF, the FPGA one LF, which is why a naive `diff` reports every line as changed and
+tells you nothing). Sampled divergences are exactly what a silicon-vs-FPGA build implies: the FPGA
+build computes `delay5us = _cpufreq / 200_000` from live `_clockmax`/`_clockfreq`/`_clockfpga`
+constants, while the silicon build comments those out and hardcodes `(20_000_000 / 100_000 / 2) - 2`
+for 20 MHz; a `spare` reserved long in the FPGA build is `_AA55` ("used to store $AA55 to validate
+MBR/VOL/FSI") in silicon; and the SD entry is reorganised — `_Start_SDcard` calls `_SDcard_Init`
+then separately `_readMBR`/`_readDIR`/`_readFILE` in the FPGA build, versus a single
+`_SDcard_Init0` doing "Init/CSD/CID/MBR/VOL/FSI/FAT" in silicon.
+
+**The defect: F-123's grounding plan names the wrong file.** F-123 says *"mine `ROM_Booter.lst`"*,
+and its 2026-08-25 re-verification note calls `rom_booter_v33_01j` "the mined edition" only because
+E-005 cites it — a citation, not a build-target analysis. Mining `ROM_Booter.lst` would document a
+ROM **that is not in the chip**: FPGA clock constants, a different SD call structure, and a reserved
+long that silicon uses for MBR validation.
+
+**Correction:** all ROM-facility and ROM-technique mining reads `rom_booter_v33_01j.lst`.
+`ROM_Booter.lst` is retained as the FPGA-era comparison point and must be labelled as such wherever
+it is referenced. F-123's plan text is annotated accordingly.
+
+**F-403 is unaffected and stays RESOLVED.** Its measurement was run against BOTH listings (its table
+carries a column for each) and returned 0 for `font`, `glyph`, `sine`/`sin_` and `log2` in both, so
+its conclusion does not rest on the file this finding re-picks.
 
 ## A release gate could not reach a fixpoint: satisfying it re-broke it, because its own fix is a commit it reads (2026-09-10, manual-head gate-runner wiring) — F-420
 
@@ -7352,6 +7397,13 @@ drift.
   > until then the ROM-monitor half is groundable from `ROM_Booter.lst` alone and the Forth-vocabulary half
   > is not. Stays `TRACKED → ingestion` — the preliminary web-research material
   > (`taqoz-web-research-preliminary.md`) remains community-tier and is still not citable.
+  >
+  > 🔴 **CORRECTED 2026-09-10 by F-421 — this plan names the WRONG listing.** *"mine
+  > `ROM_Booter.lst`"* points at the **FPGA** build (`ver = "A"`, Prop123-A9/BeMicro-A9).
+  > The chip's ROM is `rom_booter_v33_01j.lst` (`ver = "G"`, Prop2 Silicon v2) — same source
+  > version v141, different build target. Mine THAT one; the FPGA listing carries FPGA clock
+  > constants, a different SD call structure, and a reserved long that silicon uses for MBR
+  > validation. Keep `ROM_Booter.lst` only as the labelled FPGA comparison point.
 
 ---
 
