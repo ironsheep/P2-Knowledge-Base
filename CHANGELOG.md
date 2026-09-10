@@ -20,6 +20,21 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.18.1] - 2026-09-10
+
+**The CORDIC solver's result formats, as the Silicon Doc states them**
+
+### Fixed
+- CORDIC operation results now carry the format each one actually produces: square root
+  as 64-bit -> 32-bit, and logarithm and exponential in 5.27 fixed-point, each pointing at
+  the instruction entry that details it (`qsqrt`, `qlog`, `qexp`).
+- Trigonometric accuracy is described by its mechanism rather than a bit count: rotate,
+  polar-to-cartesian and cartesian-to-polar are iterative, so a result's low bits are
+  approximate and the magnitude scale factor is corrected in hardware. No Parallax source
+  states a residual bit count, so none is asserted — measure it against your own tolerance.
+- The `accuracy:` block cites its source: Propeller 2 Documentation v35 (Rev B/C), the
+  CORDIC solver summary.
+
 ## [1.18.0] - 2026-09-09
 
 **Every operator, symbol and formatter name resolves by the token you type — and every physical figure names its source.**
