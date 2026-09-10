@@ -52,6 +52,13 @@ a completeness certificate.
 54/54 tables, 47 headings, 25/25 media extracted losslessly from `word/media`. Document order
 preserved; intra-cell newlines preserved (33 tables need it).
 
+**Per-figure catalog (added 2026-09-10):**
+[`assets/images-taqoz-bitbashers-2026-08-26/image-catalog.md`](assets/images-taqoz-bitbashers-2026-08-26/image-catalog.md).
+Extraction accounted for the 25 media here from the start; the catalog that says *what each one
+is* was pass 3's deliverable and had not been written. It records one substantive follow-up:
+**10 of the 25 figures are QR codes**, and the URLs they encode are invisible to the text
+extraction — decoding them needs a QR reader this container does not have.
+
 ## Pass 2 — code: capture-and-catalogue, NOT compiler-validated
 
 **The code in this guide is Forth.** `pnut-ts` compiles Spin2/PASM2 and **cannot** validate Forth;
