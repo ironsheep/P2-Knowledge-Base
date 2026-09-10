@@ -42,7 +42,7 @@ each feature's *mechanism* stays in its own document, linked below.
 |---|---|:--:|:--:|:--:|:--:|
 | Getting Started | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | **✅** ¹⁰ |
 | I/O & Smart Pins | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹ ¹⁵ | 🔧 ¹¹ |
-| **Assembly Reference** | manual | **✅** ⁹ | **✅** ⁹ | **✅** ⁹ | — |
+| **Assembly Reference** | manual | 🔧 ⁹ ¹⁶ | **✅** ⁹ | **✅** ⁹ | — |
 | DeSilva Tutorial | manual | 🔧 ² ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | **✅** ¹⁰ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
@@ -277,6 +277,26 @@ macros with seven `\renewcommand{\Doc*}` lines. Assembly's template instead hard
 populates the info dictionary from `\Doc*` and deliberately not from `\@title`/`\@author`. Render 1
 came back with all four fields EMPTY and `Keywords` reading literally `"; licensed under "`.
 **Any document adopting this must edit its template, not just its request.json.**
+
+¹⁶ **Assembly Reference — ✅ under the AUGUST bar, re-opened 2026-09-10 because the bar moved.**
+Footnote 9 is accurate about what it proved: the template binds all seven `\Doc*` macros and the
+v3.1.7 info dictionary carried Title, Subject, Author and Keywords where v3.1.6 carried none. That
+was the whole standard in August. The **September** wave raised it — *"covers stopped hardcoding
+version and date and read `\DocVersion` / `\DocDate`, which is what makes single-sourcing real"* —
+after finding two covers stuck on August while their metadata said September. Assembly was marked
+✅ before that clause existed and was never re-swept against it, so it kept **two** version
+locations: `metadata.version` **and** a literal `Version 3.1.8` on its own cover.
+
+Nothing was rendering wrong — the two agreed at 3.1.8 — which is exactly why it survived a release.
+A row that reads ✅ is not evidence; this was found by reading the covers of all 20 documents, not
+the table. Assembly is the ONLY document in that state: Streamer, Single-Step Debugger and
+PNut-Term-TS all read the macros already.
+
+Converted 2026-09-10 in `opus-master/front-matter.md` (two lines; title and subtitle stay literal
+on the cover by convention, as they do on every converted document). Costs no template deploy —
+Assembly's `p2kb-pasm2-reference.latex` has bound `\DocVersion`/`\DocDate` since August and is
+already in the manual store. Flips back to ✅ when `release-manual` Phase 3e reads
+`September 2026` / `Version 3.1.8` off the returned v3.1.8 PDF.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`
