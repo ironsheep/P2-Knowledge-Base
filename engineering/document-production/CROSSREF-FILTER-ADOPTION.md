@@ -17,10 +17,20 @@ So adoption is deliberately **gated per manual**:
   1. add `p2kb-platform-crossref` to that manual's `request.json` `lua_filters`, and
   2. **visually audit** the rendered PDF for cross-ref behavior — every auto-link points
      where it should, and nothing got wrongly linked — before promoting.
-- Until both are done, the manual's status below stays **PENDING AUDIT**.
+- Until both are done, the document's **Cross-ref filter** column in
+  `PLATFORM-FEATURE-ADOPTION.md` stays `⏳`.
 
-`release-manual` Phase 1/Phase 4 should consult this tracker; flip a row to ADOPTED ✅
-only after the per-manual visual audit passes.
+**Status is not kept here.** It lives in one place — the per-document matrix in
+[`PLATFORM-FEATURE-ADOPTION.md`](PLATFORM-FEATURE-ADOPTION.md), which `prepare-manual`
+reads at staging (to name what a release owes) and `release-manual` Phase 3e writes at
+release (to flip a row on the evidence of the rendered PDF). This file keeps the
+*mechanism* only: what the filter does, and the mandatory ordering rule below.
+
+The table at the foot of this file is a frozen historical snapshot. It is **wrong today
+and deliberately left that way** — it still shows Assembly, I/O & Smart Pins and the
+Single-Step Debugger as pending when all three are adopted and audited, and it has no row
+at all for the PNut-Term-TS guide. Read it as the record of what this tracker used to
+carry, never as state.
 
 ## ⚠️ REQUIRED: crossref must be listed BEFORE the tables filter
 
