@@ -4,7 +4,7 @@
 ''   Purpose....  A DAC pin fed at an audio sample rate, driven by the
 ''                smart pin rather than by the cog
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.9 (2026-08-18)
+''   Version....  v1.0.10 (2026-09-10)
 ''   Appears in.  Chapter 10: DAC Output -- 10.8 Worked Examples
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

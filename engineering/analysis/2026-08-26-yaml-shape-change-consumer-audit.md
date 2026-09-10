@@ -31,8 +31,8 @@ blocks.
 Command:
 
 ```bash
-git -c safe.directory=$PWD archive v1.17.0 deliverables/ai/P2 | tar -x -C /tmp/old
-git -c safe.directory=$PWD archive HEAD      deliverables/ai/P2 | tar -x -C /tmp/new
+git archive v1.17.0 deliverables/ai/P2 | tar -x -C /tmp/old
+git archive HEAD      deliverables/ai/P2 | tar -x -C /tmp/new
 # then: yaml.safe_load every file at both revisions, compare type() of each top-level key
 ```
 
@@ -222,9 +222,11 @@ blocking: no consumer is affected today.
 ## 6 — Commands, for re-running
 
 ```bash
-# the 34 shape changes
-git -c safe.directory=$PWD archive v1.17.0 deliverables/ai/P2 | tar -x -C /tmp/old
-git -c safe.directory=$PWD archive HEAD      deliverables/ai/P2 | tar -x -C /tmp/new
+# the 34 shape changes.  These once ran as `git -c safe.directory=$PWD ...`; that workaround is
+# retired — /etc/gitconfig carries safe.directory=/workspaces/* at system scope (8778e6a2).
+# Do not re-add it.
+git archive v1.17.0 deliverables/ai/P2 | tar -x -C /tmp/old
+git archive HEAD      deliverables/ai/P2 | tar -x -C /tmp/new
 # compare type() of each top-level key of each file across the two trees
 
 # consumers, current tree

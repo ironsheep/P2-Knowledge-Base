@@ -4,13 +4,13 @@
 ''   Purpose....  PTRA carrying a pin number, then reused as scratch to
 ''                build the delay - one image, four different behaviours
 ''   Manual.....  DeSilva PASM2 Tutorial Manual
-''   Version....  v3.0.6 (2026-08-16)
+''   Version....  v3.0.7 (2026-09-10)
 ''   Appears in.  Chapter 2: Architecture Safari -- Let's See Cogs in
 ''                Action
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Jun 2026
-''   Updated....  Jul 2026
+''   Updated....  Aug 2026
 ''
 ''   This file is an EXAMPLE from the manual above. Everything below
 ''   this header is byte-identical to the listing printed there --

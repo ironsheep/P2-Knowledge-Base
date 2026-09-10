@@ -588,8 +588,9 @@ legitimate wildcard prose: `"Can combine with P_DAC_*, P_ADC_*, P_COMPARE_* mode
 
 Ordered, mechanical. Phase 2 decides nothing.
 
-**Preconditions.** `export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory
-GIT_CONFIG_VALUE_0=/workspaces/P2-Knowledge-Base`. Back up
+**Preconditions.** No git preconditions: the `GIT_CONFIG_COUNT`/`safe.directory` export this step
+once carried is retired — `/etc/gitconfig` carries `safe.directory=/workspaces/*` at system scope
+(`8778e6a2`). Do not re-add it. Back up
 `spin2-builtin-symbols-complete.yaml` (959 lines) and `spin2/methods/wrpin.yaml` (161 lines) with
 `engineering/tools/backup-file.sh` — Sacred Rule #1. `pasm2/wrpin.yaml` is 126 lines: no backup
 owed, but the edit is surgical regardless.

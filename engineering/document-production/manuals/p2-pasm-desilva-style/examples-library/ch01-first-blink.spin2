@@ -4,12 +4,12 @@
 ''   Purpose....  Your first cog of your own - Spin2 launches a DAT block
 ''                of PASM2 and then gets out of its way
 ''   Manual.....  DeSilva PASM2 Tutorial Manual
-''   Version....  v3.0.6 (2026-08-16)
+''   Version....  v3.0.7 (2026-09-10)
 ''   Appears in.  Chapter 1: Your First Spin -- What's Really Happening
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Jun 2026
-''   Updated....  Jul 2026
+''   Updated....  Aug 2026
 ''
 ''   This file is an EXAMPLE from the manual above. Everything below
 ''   this header is byte-identical to the listing printed there --

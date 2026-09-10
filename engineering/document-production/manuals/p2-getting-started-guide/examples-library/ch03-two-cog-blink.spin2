@@ -4,12 +4,12 @@
 ''   Purpose....  Two LEDs at two rates, because the second cog runs the
 ''                same method independently rather than taking turns
 ''   Manual.....  Getting Started with the Propeller 2
-''   Version....  v1.0.3 (2026-08-08)
+''   Version....  v1.0.4 (2026-09-10)
 ''   Appears in.  Chapter 3: Putting It to Work -- Adding a second Cog
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Jun 2026
-''   Updated....  Jul 2026
+''   Updated....  Aug 2026
 ''
 ''   This file is an EXAMPLE from the manual above. Everything below
 ''   this header is byte-identical to the listing printed there --

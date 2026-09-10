@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Complete P2 Pin I/O and Smart Pin Reference\par}
 \vspace{0.6cm}
-{\large August 2026\par}
+{\large September 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.9\par}
+{\large\color{blue}Version 1.0.10\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -1627,6 +1627,8 @@ When mode bits [5:1] = %00000, the pin operates in P_NORMAL mode with enhanced c
 
 The P2 provides configurable drive strength for both high-side (driving to VIO) and low-side (driving to ground) independently. This enables open-drain configurations, current limiting, and power optimization.
 
+Note what these constants are *not*: the P2 has no separate programmable pull-up or pull-down resistors. The resistive rungs below are drive strengths, and a drive strength is a property of driving — every one of them requires `DIR = 1` to do anything. The "pull-up" use cases in the tables are real, and they are how a pull is made on this chip, but each is a driven pin rather than a resistor switched onto a floating input.
+
 ### Drive-High Options
 
 Select one drive-high constant. These control the high-side output driver.
@@ -1659,6 +1661,8 @@ Select one drive-low constant. These control the low-side output driver.
 
 ### Common Drive Configurations
 
+Each line below is the **mode word** only — what `WRPIN` writes. A drive selection is a property of *driving*, so none of these does anything until `DIR` goes high; with `DIR` low the pin is a high-impedance input whatever the mode word says. For the pull-up case that means both bits: `DIR = 1` to enable the driver and `OUT = 1` to select the high side, which is what `PINHIGH()` (Spin2) and `DRVH` (PASM2) do in one step.
+
 **Standard Digital (Default):**
 ```spin2
 WRPIN(pin, P_HIGH_FAST | P_LOW_FAST)     ' Maximum drive both directions
@@ -1677,6 +1681,7 @@ WRPIN(pin, P_HIGH_FAST | P_LOW_FLOAT)  ' OUT=1 drives high, OUT=0 floats
 **Pull-Up Resistor:**
 ```spin2
 WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)     ' 15kΩ pull-up, no low drive
+PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
 **Current-Limited Output:**
@@ -1982,6 +1987,7 @@ WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
 **Weak pull-up with inverted input:**
 ```spin2
 WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT | P_INVERT_IN)
+PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
 **Current-limited output with inverted polarity:**
@@ -2022,7 +2028,7 @@ CON
 PUB setup_button()
   ' Internal 15kΩ pull-up, Schmitt trigger for noise immunity
   WRPIN(BUTTON_PIN, P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
-  PINHIGH(BUTTON_PIN)                     ' Enable pull-up
+  PINHIGH(BUTTON_PIN)                     ' DIR=1, OUT=1: pull now live
   
   ' Now PINREAD returns 1 when released, 0 when pressed
 ```
@@ -2063,7 +2069,7 @@ PUB set_voltage(level) | config
 
 ' Internal pull-up button
               wrpin ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A), btn_pin
-              drvh      btn_pin                ' Enable pull-up
+              drvh      btn_pin                ' DIR=1, OUT=1: pull live
 
 ' Current-source LED
               wrpin     ##(P_HIGH_1MA | P_LOW_FAST), led_pin
@@ -2183,6 +2189,14 @@ Z is read via **RDPIN** or **RQPIN**. Software cannot write Z directly—it is m
 ### Register Initialization
 
 When a smart pin is reset (DIR transitions from 1 to 0), the registers are initialized according to the mode. Specific initialization behavior is documented in each mode's chapter.
+
+### Why Configuration Requires DIR Low
+
+Each smart pin holds **126 bits of state**, and that state is separate from the `WRPIN` configuration word. This separation is the reason behind the configure-while-`DIR`-is-low rule that runs through the rest of this book.
+
+`WRPIN` does not simply select a mode. It **multiplexes those 126 state bits** onto the subcircuit named by the five `%SSSSS` mode bits — a counter mode and a serial mode read the same physical bits as entirely different things. Issue `WRPIN` while `DIR` is high and that mapping changes underneath live state, which the Propeller 2 Documentation describes as producing "unpredictable and quite certainly useless behavior in the newly-selected smart pin mode."
+
+So the sequence is not a convention to be tidy about; it is a consequence of how the hardware is built. Lower `DIR`, write the configuration, then raise `DIR` to start the mode running on state that was initialized for it.
 
 
 ## 3.3 The IN Bit - Event Signaling
@@ -3798,7 +3812,7 @@ If external pull-up isn't available, use internal resistive drive:
 WRPIN(pin, P_HIGH_15K | P_LOW_FAST)       ' 15kΩ pull-up when high
 ```
 
-Note: Internal pull-ups are weaker than typical external pull-ups and may not meet bus specifications for higher speeds.
+Note that this is a substitute for open-drain, not open-drain itself: with `P_HIGH_15K` the high side actively drives through 15 kΩ rather than floating. That is fine when the P2 is the only device that can pull the line up, and it is weaker than a typical external pull-up, so it may not meet bus specifications at higher speeds. On a genuine multi-master bus, where another device must be able to hold the line low against everything else on it, use `P_HIGH_FLOAT` with an external pull-up.
 
 ### Open-Source Output
 
@@ -4095,7 +4109,7 @@ PUB step_reverse(steps) | i
 | Push-pull (standard) | `P_HIGH_FAST` \| `P_LOW_FAST` |
 | Push-pull (current limit) | `P_HIGH_1K5` \| `P_LOW_1K5` |
 | Open-drain | `P_HIGH_FLOAT` \| `P_LOW_FAST` |
-| Open-drain + internal pull-up | `P_HIGH_15K` \| `P_LOW_FAST` |
+| Weak-high / strong-low (open-drain substitute) | `P_HIGH_15K` \| `P_LOW_FAST` |
 | Open-source | `P_HIGH_FAST` \| `P_LOW_FLOAT` |
 | Inverted | `P_INVERT_OUTPUT` |
 | LED current source | `P_HIGH_1MA` \| `P_LOW_FAST` |
@@ -4373,7 +4387,7 @@ Edge period = 1000 / 200MHz = 5 µs
 | 250 MHz | 250 | 2500 |
 | 350 MHz | 350 | 3500 |
 
-*The P2 datasheet gives a rated 180 MHz; the Silicon Documentation notes a practical ceiling around 350 MHz. Frequencies in between (e.g. 250 MHz) are commonly used. Operation above the rated frequency depends on cooling and duty cycle — sustained high-throughput work generates heat that limits the usable maximum. (180 MHz: P2 Datasheet; 350 MHz ceiling: Parallax Propeller 2 Documentation, Silicon Doc.)*
+*Three different limits sit behind that table, and each has a different owner. The P2 Datasheet's AC Characteristics rate the PLL system clock at **180 MHz typical** and **320 MHz maximum**, with the 180 MHz figure specified up to 105 °C. The Silicon Documentation separately notes that the PLL can be pushed to **350 MHz** in VCO/1 mode (%PPPP = 15) for fastest overclocking — an overclock ceiling, not a rating. So 250 MHz is inside the datasheet maximum but above the typical rating, and 350 MHz is outside the datasheet entirely. Operation above 180 MHz depends on cooling and duty cycle; sustained high-throughput work generates heat that limits the usable maximum. (180 MHz and 320 MHz: P2 Datasheet, AC Characteristics; 350 MHz VCO/1 ceiling: Parallax Propeller 2 Documentation.)*
 
 
 ## 7.6 Comparison: When to Use Each Mode
@@ -4406,9 +4420,9 @@ Edge period = 1000 / 200MHz = 5 µs
 CON
   _clkfreq = 200_000_000
   STEP_PIN = 10
-  STEP_PERIOD = 400                       ' 2 µs period
-  STEP_LOW = 200                          ' X[31:16] compare = 1 µs low time
-  ' (high time = 400-200 = 200 = 1 µs, 50% duty)
+  STEP_PERIOD = 400                       ' 2 us period
+  STEP_LOW = 200                          ' X[31:16] compare = 1 us low time
+  ' (high time = 400-200 = 200 = 1 us, 50% duty)
 
 PUB step_motor(steps) | ack
   PINFLOAT(STEP_PIN)
@@ -4758,7 +4772,7 @@ CON
 PUB three_phase_nco() | y_val, phase_120, phase_240
   y_val := FREQ_HZ FRAC _clkfreq
   
-  ' Phase offsets: 0°, 120°, 240°
+  ' Phase offsets: 0 deg, 120 deg, 240 deg
   phase_120 := 65536 / 3                  ' 21845
   phase_240 := 65536 * 2 / 3              ' 43690
   
@@ -4771,9 +4785,9 @@ PUB three_phase_nco() | y_val, phase_120, phase_240
   WRPIN(PHASE_B, P_NCO_FREQ | P_OE)
   WRPIN(PHASE_C, P_NCO_FREQ | P_OE)
   
-  WXPIN(PHASE_A, 1 | (0 << 16))           ' 0° phase
-  WXPIN(PHASE_B, 1 | (phase_120 << 16))   ' 120° phase
-  WXPIN(PHASE_C, 1 | (phase_240 << 16))   ' 240° phase
+  WXPIN(PHASE_A, 1 | (0 << 16))           ' 0 deg phase
+  WXPIN(PHASE_B, 1 | (phase_120 << 16))   ' 120 deg phase
+  WXPIN(PHASE_C, 1 | (phase_240 << 16))   ' 240 deg phase
   
   ' Same frequency for all
   WYPIN(PHASE_A, y_val)
@@ -6874,7 +6888,12 @@ Every P2 I/O pin includes a complete input path with multiple conditioning optio
 
 ### Default Input Mode
 
-With no configuration (WRPIN = 0 or P_NORMAL), pins operate as standard CMOS inputs with approximately 1.65V threshold.
+With no configuration (WRPIN = 0 or P_NORMAL), pins operate as standard CMOS inputs. The datasheet states the input logic threshold not as a voltage but as a fraction of the I/O supply `Vxxyy`: minimum `Vxxyy * 0.3`, typical `Vxxyy * 0.5`, maximum `Vxxyy * 0.7`. Two consequences follow, and both matter when a design leaves the nominal case:
+
+- **The threshold is a band, not a point.** At a 3.3 V supply it spans 0.99 V to 2.31 V, with 1.65 V as the typical value. A signal that lands inside that band is not guaranteed to read either way.
+- **The threshold moves with the supply.** `Vxxyy` is itself specified 3.15 V to 3.45 V, and pin groups running on different supplies do not share a threshold.
+
+Quote 1.65 V as the typical value at 3.3 V, never as the switching point.
 
 
 ## 12.2 Reading Input State
@@ -6944,7 +6963,7 @@ TESTP reaches the pin a clock sooner than the INA/INB register path (the latenci
 
 ### P_LOGIC_A, P_LOGIC_A_FB, and P_LOGIC_B_FB
 
-All three present the pin as a standard CMOS logic input (~1.65V threshold). They are not interchangeable spellings of one mode — they differ along **two independent routing axes**:
+All three present the pin as a standard CMOS logic input, at the supply-referenced threshold of §12.1. They are not interchangeable spellings of one mode — they differ along **two independent routing axes**:
 
 - **Which input reaches IN.** Every smart pin has two independently-selectable input taps, **A** and **B**; each tap can read this pin, a ±1/±2/±3 neighbor, or the pin's own OUT bit (Appendix B, *A/B Input Selection*). `P_LOGIC_A` sends the **A** tap to IN; `P_LOGIC_B_FB` sends the **B** tap instead.
 - **What drives the pin's output.** Either the cog's **OUT** bit (the normal path) or the pin's own logic level **fed back** to the output. The `_FB` suffix selects that feedback path.
@@ -6979,10 +6998,10 @@ WRPIN(pin, P_SCHMITT_A)
 
 ### TTL Threshold (via P_LEVEL_A)
 
-There is no dedicated TTL-threshold constant. To detect a ~1.4V TTL crossing, use the programmable level comparator with a level value of 108 (1.4V ÷ 3.3V × 256 ≈ 108):
+There is no dedicated TTL-threshold constant. To detect a ~1.4V TTL crossing, use the programmable level comparator with a level value of 108, which is 1.4V expressed as a fraction of the nominal 3.3 V I/O supply (1.4 ÷ 3.3 × 256 ≈ 108). Recompute the level if `Vxxyy` is not 3.3 V — the level sets a fraction of the supply, not a voltage:
 
 ```spin2
-WRPIN(pin, P_LEVEL_A | (108 << 8))         ' ~1.4V threshold (TTL)
+WRPIN(pin, P_LEVEL_A | (108 << 8))         ' ~1.4V at Vxxyy = 3.3V
 PINFLOAT(pin)
 ```
 
@@ -6999,16 +7018,19 @@ Programmable level comparator input:
 ```spin2
 ' Compare against 8-bit level value
 ' Level in M[7:0] (shifted into WRPIN value)
-level := 128                               ' Mid-scale (approx 1.65V)
+level := 128                               ' Mid-scale (Vxxyy / 2)
 WRPIN(pin, P_LEVEL_A | (level << 8))
 ```
 
-**Level calculation:**
+**Level calculation:** the eight bits are a DAC level, so the threshold is a fraction of the I/O supply, not a fixed voltage:
+
 ```formula
-threshold_voltage = (level / 256) × 3.3V
+threshold_voltage = (level / 256) × Vxxyy
 ```
 
-| Level | Voltage |
+The voltages below assume the nominal `Vxxyy` of 3.3 V. On a board running the I/O supply at either end of its 3.15–3.45 V range, every row shifts with it — the *fraction* is what the level fixes.
+
+| Level | Voltage (at Vxxyy = 3.3 V) |
 |-------|---------|
 | 0 | 0.0V |
 | 64 | 0.83V |
@@ -7271,7 +7293,7 @@ PUB main()
 
   ' Configure button with pull-up and Schmitt trigger
   WRPIN(BUTTON_PIN, P_SCHMITT_A | P_HIGH_15K)
-  ' DIR=1, OUT=1 → 15kΩ drive-high pull-up
+  ' DIR=1, OUT=1 -> 15kohm drive-high pull-up
   PINHIGH(BUTTON_PIN)
 
   ' Main loop
@@ -7357,6 +7379,7 @@ CON
 PUB detect_voltage_ranges() : range | level, threshold
   ' Configure level comparator
   ' Test against multiple thresholds
+  ' Levels below assume Vxxyy = 3.3V; scale them to your I/O supply
 
   ' Test for >2.5V
   threshold := (250 * 256) / 330           ' 193
@@ -7943,7 +7966,7 @@ PUB measure_distance_cm() : distance | echo_us
   WRPIN(ECHO_PIN, P_HIGH_TICKS | P_SCHMITT_A)
   PINLOW(ECHO_PIN)
 
-  ' Send 10µs trigger pulse
+  ' Send 10us trigger pulse
   PINHIGH(TRIG_PIN)
   WAITUS(10)
   PINLOW(TRIG_PIN)
@@ -7953,7 +7976,7 @@ PUB measure_distance_cm() : distance | echo_us
 
   echo_us := (RDPIN(ECHO_PIN) & $7FFF_FFFF) / (_clkfreq / 1_000_000)
 
-  ' Distance = (echo_time / 2) / 29.1 µs/cm
+  ' Distance = (echo_time / 2) / 29.1 us/cm
   distance := echo_us / 58
 ```
 
@@ -8744,7 +8767,7 @@ Several smart-pin modes across Chapters 13–15 measure time-domain signal prope
 | Edge or event count | P_COUNT_RISES (and other counting modes) | Ch14 |
 | Period (precise, frequency range known) | P_PERIODS_TICKS | Ch15 §15.2 |
 | Frequency (unknown or variable) | P_COUNTER_PERIODS | Ch15 §15.3 |
-| Duty cycle | P_PERIODS_HIGHS + P_PERIODS_TICKS (or the time-window pair) | Ch15 §15.2/§15.4 |
+| Duty cycle | P_PERIODS_HIGHS *and* P_PERIODS_TICKS, on two pins (or the time-window pair) | Ch15 §15.2/§15.4 |
 
 ### Two Approaches to Period Measurement
 
@@ -11451,13 +11474,21 @@ The USB mode uses the smart pin registers for configuration and data:
 
 #### Baud Rate — Worked Example
 
-The baud fraction's top two bits must be zero, so the baud rate must stay below ¼ of sysclk. For 12 Mbps (full-speed) on an 80 MHz clock:
+The baud field is a 16-bit fraction of the system clock whose top two bits must be zero, so **the bit rate must stay below ¼ of `clkfreq`**. That is a hardware constraint, not a convention — it falls straight out of the field's width. (Source: *P2 Hardware Manual*, 2022/11/01, §*USB Host/Device (%11011)*.)
+
+For 12 Mbps (full-speed) at this chapter's 200 MHz clock:
 
 ```formula
-baud_fraction = 12,000,000 / 80,000,000 × $10000 = $2666
+baud_fraction = 12,000,000 / 200,000,000 × $10000 = $0F5C
 ```
 
-Selecting host + full-speed (D[15]=1, D[14]=1, i.e. $C000) gives a WXPIN value of **$E666** (`$C000 | $2666`).
+Selecting host + full-speed (D[15]=1, D[14]=1, i.e. $C000) gives a WXPIN value of **$CF5C** (`$C000 | $0F5C`).
+
+The arithmetic is the same at any clock: divide the target bit rate by `clkfreq`, multiply by $10000, and confirm the result still fits in 14 bits.
+
+::: caution
+**Clearing the ÷4 rule is not the same as having enough clock.** The ¼-`clkfreq` ceiling is the only sysclk dependency any Parallax source states for this mode, and full speed clears it on every clock above 48 MHz. But that is a bound on the *baud generator* — it says nothing about how reliably the line itself signals at that rate, and no published source settles what full-speed work needs in practice. So treat a low clock as untested rather than as supported: run with real margin (this chapter uses 200 MHz throughout), and if a design must go slower, prove the link on hardware before depending on it.
+:::
 
 #### Y Register — Line States and Packet Output (WYPIN)
 
@@ -11692,6 +11723,10 @@ Choose USB pins based on:
 - USB 3.x SuperSpeed
 - Isochronous transfers with guaranteed timing (challenging)
 
+### Clock Requirements
+
+The baud field is a 16-bit fraction of `clkfreq` with its top two bits forced to zero, so the bit rate must stay below `clkfreq`/4 — full speed (12 Mbps) therefore needs a clock above 48 MHz. That ceiling is the only sysclk dependency the P2 documentation states; how much *more* clock reliable full-speed signaling wants is not published. See §19.4.
+
 ### Software Requirements
 
 Implementing USB requires:
@@ -11736,6 +11771,7 @@ PINHIGH(even_pin+1)                       ' Enable DP
 - Software must implement full USB protocol stack
 - Use existing libraries when possible
 - Supports USB 1.1 Full Speed and Low Speed only
+- Bit rate must stay below `clkfreq`/4 — full speed needs a clock above 48 MHz (§19.4)
 - OUT signals are overridden by USB mode
 - Limited official documentation - community resources essential
 
@@ -12076,6 +12112,8 @@ Two independent fields in bits [27:24]: the polarity bit (bit 27) combines with 
 
 ## Drive Strength - High (pick one)
 
+These are drive strengths, not switchable resistors: each acts only while `DIR = 1`, and the pull-up rungs additionally need `OUT = 1` to select the high side. See Chapter 2, *Drive Strength Configuration*.
+
 | Constant | Drive | Description |
 |----------|-------|-------------|
 | P_HIGH_FAST | 30mA | Fast drive high (default) |
@@ -12160,6 +12198,7 @@ P_ADC_10X | P_ADC                              ' 10x gain ADC
 ### Button Input with Pull-up
 ```spin2
 P_SCHMITT_A | P_HIGH_15K                  ' Schmitt trigger + 15k pull-up
+' then PINHIGH(pin): DIR=1, OUT=1 makes the pull live
 ```
 
 ### Open-Drain Output
@@ -12819,7 +12858,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | Simple frequency count | P_COUNTER_PERIODS | Direct Hz reading with 1s gate |
 | Precise period | P_PERIODS_TICKS | Clock-accurate over N periods |
 | Unknown frequency | P_COUNTER_PERIODS | Time-windowed, consistent rate |
-| Duty cycle | P_PERIODS_HIGHS + P_PERIODS_TICKS | Both measurements needed |
+| Duty cycle | P_PERIODS_HIGHS *and* P_PERIODS_TICKS, on two pins | Two separate measurements — the modes are mutually exclusive |
 | RPM measurement | P_COUNTER_PERIODS | 100ms-1s gate time |
 | Oscillator calibration | P_PERIODS_TICKS | Many periods for ppm accuracy |
 
@@ -15006,7 +15045,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **PINSTART** - Configure and start (Spin2), Ch. 4
 - **PINWRITE** - Write pin value (Spin2), Ch. 4, 6
 - **PRNG dithering** - Random DAC dither, Ch. 18
-- **Pull-up/pull-down** - P_HIGH_15K, P_LOW_15K, etc., Ch. 6
+- **Pull-up/pull-down** - drive-strength rungs, not resistors: P_HIGH_15K, P_LOW_15K, etc., Ch. 2, 6
 - **Pulse measurement** - P_HIGH_TICKS, Ch. 13
 - **Pulse output** - P_PULSE mode, Ch. 7
 - **PWM** - Pulse Width Modulation, Ch. 9

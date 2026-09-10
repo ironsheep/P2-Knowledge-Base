@@ -537,7 +537,8 @@ the sample itself is not in the repo to check.
 ## 6 — Commands, for re-running
 
 ```bash
-G="git -c safe.directory=/workspaces/P2-Knowledge-Base"
+G="git"   # the -c safe.directory workaround is retired: /etc/gitconfig carries
+          # safe.directory=/workspaces/* at system scope (8778e6a2). Do not re-add it.
 
 # Scope
 $G diff --name-status v1.17.0..HEAD -- 'deliverables/ai/P2/**/*.yaml'

@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Meet the Chip, Read Its Code, Put It to Work\par}
 \vspace{0.35cm}
-{\large August 2026\par}
+{\large September 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.0.3 — Community Review Edition\par}
+{\large\color{blue}Version 1.0.4 — Community Review Edition\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
@@ -151,7 +151,7 @@ CONVENTIONS:
   - "P1 note" migration sidebars use a fenced div:  ::: p1note … :::
     (mapped by filters/p2kb-getting-started-local.lua → P1NoteBlock)
   - Tip asides use ::: tip fenced callouts (platform-styled box, not raw emoji)
-  - Code is fenced ```spin2 / ```pasm2 and pnut_ts-verified (never code-divisions)
+  - Code is fenced ```spin2 / ```pasm2 and pnut-ts-verified (never code-divisions)
 ================================================================================
 -->
 
@@ -713,6 +713,11 @@ program:
   point; the chip runs it on Cog 0 when your program loads.
 - `pinhigh`, `pinlow`, and `waitms` are built-in Spin2 methods. Driving a pin really
   is that direct — name the pin, set it high or low.
+- **One board check before you run it.** `56` is the LED pin on a P2 Eval Board and on
+  the standard P2 Edge Module, but the **P2 Edge 32MB Module** puts its two LEDs on
+  **P38 and P39** — and P56 there is a PSRAM clock line, so as written this program
+  would light nothing and write to the memory bus instead. Change `LED` to match your
+  board.
 
 ::: tip
 You don't load this onto the chip by hand — your development tool
@@ -763,6 +768,11 @@ Three details that generalize:
 
 - `NEWCOG` means "any free cog" — you usually don't care which one. `cogspin` returns
   the cog number it actually used (or −1 if all eight were busy).
+- That −1 travels in one direction only. It is what you get *back* on failure, never
+  something you pass *in*. If you meet `coginit(-1, ...)` in older or P1-shaped code, it
+  is not asking for "any free cog": the value arrives as `$FFFF_FFFF`, whose low six
+  bits read as `%111111`, and that starts an even/odd **pair** of cogs — quietly using
+  two where one was meant. `NEWCOG` is the symbol that means "any free one".
 - The new cog needs a little **stack** space in hub to work with; that's the
   `long stack[64]` we hand it with `@stack` (the `@` means "the address of").
 - `blink` is written once and used by both cogs. A `PUB` method is the public face of
@@ -782,7 +792,7 @@ CON
 
 VAR
   long stack[64]
-  long count                    ' a hub variable — every cog can see it
+  long count                    ' a hub variable - every cog can see it
 
 PUB main()
   cogspin(NEWCOG, ticker(@count), @stack)   ' worker updates count in hub

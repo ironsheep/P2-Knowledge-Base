@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape A Human-Centered Approach to Parallel Processing\par}
 \vspace{0.6cm}
-{\large August 2026\par}
+{\large September 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.0.6\par}
+{\large\color{blue}Version 3.0.7\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -226,7 +226,7 @@ If you've fought with interrupt priority conflicts on an ARM, watched your timin
 
 Here's the P2 philosophy in a nutshell:
 
-**Instead of one processor fighting with interrupts**, you get eight complete, identical processors (cogs) that run truly in parallel. Your serial handler never delays your motor control. Your sensor sampling never misses a deadline. Each task owns its own processor.
+**Instead of one processor fighting with interrupts**, you get eight complete, identical processors (cogs) that run truly in parallel. Your serial handler cannot delay your motor control, because it is not running on the same processor to delay it. Add another job later and the ones already running keep the timing they had - they were never sharing anything for the new one to take. Each task owns its own processor.
 
 **Instead of fixed peripherals**, every one of the 64 pins contains its own programmable state machine. Any pin can become a UART, PWM output, quadrature encoder, ADC - whatever you need, wherever you need it.
 
@@ -291,7 +291,7 @@ This isn't a quirk anyone is embarrassed about - the P2 Edge module guides say s
 
 On the P2 Eval board there's a second, entirely unmysterious reason for lit LEDs. The LEDs on **P58 through P63** are shared with the USB data lines and the memory signals, so they're genuinely busy during boot and after every reset. That's the board working, not a fault. P56 and P57 are the two left free for you.
 
-The cure is the same as the lesson: **a floating pin has no opinion.** The moment your code executes `drvh` or `drvl`, the cog's output driver wins and the flicker stops. If you want a pin held at a known level *without* driving it, the P2 gives you pull-ups and pull-downs for exactly that. Uff - your first piece of real hardware intuition, and you got it by accident.
+The cure is the same as the lesson: **a floating pin has no opinion.** The moment your code executes `drvh` or `drvl`, the cog's output driver wins and the flicker stops. And if you are reaching for the pull-up resistor you would have switched on somewhere else - there isn't one. The P2 has no bias resistors at all. What it has instead is a choice of *how hard to drive*: the same `drvh`, but through 15 kΩ rather than through a fast transistor, if you ask for it (Chapter 14). Read that as the deliberate trade it is - a weak drive is still a drive, so `dir` stays high either way, and a floating pin stays exactly as opinionless as it was. Uff - your first piece of real hardware intuition, and you got it by accident.
 :::
 
 ## What's Really Happening
@@ -506,6 +506,8 @@ Before we move on, let me save you some debugging time:
 3. **Clock setup required** - P2 boots on its internal RCFAST oscillator (nominally ~24MHz, spec'd 20MHz minimum). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust **WAITX** values if your clock differs.
 
 4. **Cog already running** - If you `coginit` to a specific cog that's already running something else, it will be stopped and replaced. Use `COGEXEC_NEW` to automatically find a free cog.
+
+5. **`-1` is not "any free cog"** - You may meet `coginit(-1, ...)` in older code, or in code carried over from the P1, where that was the idiom. It does not mean what it looks like here. `-1` reaches COGINIT as `$FFFF_FFFF`, and the silicon reads only the low six bits — `%111111` — which asks for a free even/odd *pair* of cogs and hands you back the even one. You quietly spend two cogs where you wanted one. Say `COGEXEC_NEW` when you mean "any free cog"; `-1` is what you get *back* when the launch fails.
 
 ## What We've Learned
 
@@ -2878,7 +2880,7 @@ Before you pull your hair out wondering why a pin "won't work," save yourself de
 
 1. **Pin numbers are 0-63** - Not port.bit notation like other MCUs
 
-2. **No pullup/pulldown by default** - Use external resistors or configure smart pin modes (advanced topic)
+2. **No separate pullup/pulldown resistors** - but you *can* pull a line high or low, and you don't need an external resistor to do it. Give the pin a resistive drive strength — `P_HIGH_15K` — and then *drive* it high (`DIR=1, OUT=1`), which gets you a 15 kΩ path to VIO. That word *drive* is the whole catch: leave DIR low and the pin is simply a floating input, and your carefully chosen "pull-up" does exactly nothing.
 
 3. **Pins float on reset** - All pins start as inputs (floating)
 
@@ -6058,7 +6060,7 @@ P2 represents a fundamentally different approach to embedded computing—one tha
 - **Deterministic timing** means your code works the same way every time
 - **Hardware CORDIC** means real-time math without floating-point libraries
 
-Engineers who've fought interrupt priority inversions, missed timing deadlines, and PCB rework due to peripheral conflicts find P2 refreshing. You spend your time solving your actual problem, not fighting your MCU.
+If you have ever re-tuned a whole interrupt priority table because you added one handler, or moved a part across a board because two functions wanted the same pins, you already know the shape of what changes here. The work does not disappear - you will still write the driver, and you will still get the timing wrong the first time. What changes is that you stop having to redo it every time the design grows.
 
 **Welcome to the P2 community.** You've got 8 processors, 64 smart pins, and a community that's been building amazing things since the original Propeller. Time to see what you can build.
 
