@@ -185,7 +185,20 @@ def artifacts(folder: Path):
                 if big(p, 2000) and "audit" not in p.name.lower()
                 and p.name.lower() not in ("readme.md", "ingestion-process.md")]
     code = [d for d in folder.glob("assets/code-*") if d.is_dir() and any(d.iterdir())]
-    imgs = list(folder.glob("assets/images-*/image-catalog.md"))
+    # Catalog FILENAMES are not standardised in this corpus, and an anchored glob
+    # called two fully-catalogued sources uncatalogued. Three live shapes:
+    #   image-catalog.md                     p2-hardware-manual, smart-pins-titus, ...
+    #   <doc>_image_catalog.md               p2-datasheet (x3 extractions)
+    #   <doc>_smartpins_catalog.md           smart-pins
+    # Match on the QUESTION (is there a catalog beside the images?), not the name.
+    # The naming drift is itself worth fixing at the source one day; until then a
+    # gate that only knows one spelling manufactures false gaps.
+    # ...and not the DIRECTORY name either: p2-click-adapter's visuals live under
+    # assets/render-*/ because that source has zero embedded images (vector art with
+    # its text converted to curves), so its figures are rendered pages rather than
+    # extracted XObjects.
+    imgs = [q for q in folder.glob("assets/*/*")
+            if q.suffix.lower() in (".md", ".json") and "catalog" in q.name.lower()]
     audit = [p for p in folder.glob("*audit*.md") if big(p, 500)]
     xsrc = list(folder.glob("*cross-source*.md"))
     # SIZE is a separate question from PRESENCE, and conflating them cost a false
