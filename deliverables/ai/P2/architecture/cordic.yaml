@@ -177,12 +177,28 @@ programming_patterns:
       GETQY   new_y
 
 accuracy:
-  multiply: "Exact 64-bit result"
-  divide: "Exact quotient and remainder"
-  square_root: "16-bit result, ±1 LSB"
-  trig_functions: "~28 bits of precision"
-  logarithm: "5.32 fixed-point precision"
-  exponential: "5.32 fixed-point precision"
+  source: >-
+    Propeller 2 Documentation v35 (Rev B/C), CORDIC solver summary --
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:175-182, which states the
+    solver and each operation's result format verbatim. REPOPULATED 2026-09-10 (F-416, F-419):
+    the previous block was uncited and four of its six values disagreed with this source and
+    with the KB's own per-instruction entries -- square root given as "16-bit result" where the
+    source says 64-bit -> 32-bit, logarithm and exponential both given as "5.32 fixed-point"
+    where the source says 5.27, and a "~28 bits of precision" trig figure that no Parallax
+    source states. Per-operation detail lives in the instruction entries below; this block
+    states only the result formats and does not restate them.
+  solver: "32-bit, pipelined, with scale-factor correction (Silicon Doc verbatim)"
+  multiply: "Exact -- 32 x 32 unsigned, 64-bit result (see language/pasm2/qmul.yaml)"
+  divide: "Exact -- 64 / 32 unsigned, 32-bit quotient and 32-bit remainder (see language/pasm2/qdiv.yaml)"
+  square_root: "64-bit -> 32-bit square root (see language/pasm2/qsqrt.yaml)"
+  logarithm: "32-bit unsigned -> 5.27 fixed-point logarithm (see language/pasm2/qlog.yaml)"
+  exponential: "5.27 fixed-point logarithm -> 32-bit unsigned (see language/pasm2/qexp.yaml)"
+  trigonometric: >-
+    Rotate, polar-to-cartesian and cartesian-to-polar are iterative, so the low bits of a
+    result are approximate; the magnitude scale factor is corrected in hardware. NO PARALLAX
+    SOURCE STATES A BIT COUNT for that residual and none is asserted here -- a figure would
+    need a bench measurement and an EF entry, not a carried-forward number. Measure it against
+    your own tolerance.
 
 special_features:
   parallel_operations: |
@@ -231,8 +247,21 @@ related_components:
   smart_pins: "CORDIC supports Goertzel mode calculations"
   math_instructions: "Complements MUL/MULS/SCA/SCAS instructions"
 
-see_also:
-  - "QMUL instruction details"
-  - "Fixed-point arithmetic guide"
-  - "Vector math applications"
-  - "Pipeline optimization techniques"
+# Redirected 2026-09-10 per Sacred Rule #7: these were bare prose ("QMUL instruction
+# details"), which `see_also:` never resolves, so a consumer following them reached
+# nothing. The same concepts now resolve as full paths in `related:` below.
+related:
+  - language/pasm2/qmul.yaml
+  - language/pasm2/qdiv.yaml
+  - language/pasm2/qsqrt.yaml
+  - language/pasm2/qlog.yaml
+  - language/pasm2/qexp.yaml
+  - language/pasm2/qrotate.yaml
+  - language/pasm2/qvector.yaml
+  # "Pipeline optimization techniques" was the fourth bare-prose see_also entry.
+  # Redirected, not dropped (Sacred Rule #7): the concept is documented in
+  # cordic_solver.yaml ("processing large datasets where pipeline optimization
+  # provides significant benefit") and worked as a runnable fill/steady/drain
+  # recipe in the P2AN002 companion.
+  - language/spin2/concepts/cordic_solver.yaml
+  - p2kbAppNoteP2an002CordicForRealWork

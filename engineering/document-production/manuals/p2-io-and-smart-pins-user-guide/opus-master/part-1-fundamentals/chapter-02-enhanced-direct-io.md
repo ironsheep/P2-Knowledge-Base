@@ -42,6 +42,8 @@ When mode bits [5:1] = %00000, the pin operates in P_NORMAL mode with enhanced c
 
 The P2 provides configurable drive strength for both high-side (driving to VIO) and low-side (driving to ground) independently. This enables open-drain configurations, current limiting, and power optimization.
 
+Note what these constants are *not*: the P2 has no separate programmable pull-up or pull-down resistors. The resistive rungs below are drive strengths, and a drive strength is a property of driving — every one of them requires `DIR = 1` to do anything. The "pull-up" use cases in the tables are real, and they are how a pull is made on this chip, but each is a driven pin rather than a resistor switched onto a floating input.
+
 ### Drive-High Options
 
 Select one drive-high constant. These control the high-side output driver.
@@ -74,6 +76,8 @@ Select one drive-low constant. These control the low-side output driver.
 
 ### Common Drive Configurations
 
+Each line below is the **mode word** only — what `WRPIN` writes. A drive selection is a property of *driving*, so none of these does anything until `DIR` goes high; with `DIR` low the pin is a high-impedance input whatever the mode word says. For the pull-up case that means both bits: `DIR = 1` to enable the driver and `OUT = 1` to select the high side, which is what `PINHIGH()` (Spin2) and `DRVH` (PASM2) do in one step.
+
 **Standard Digital (Default):**
 ```spin2
 WRPIN(pin, P_HIGH_FAST | P_LOW_FAST)     ' Maximum drive both directions
@@ -92,6 +96,7 @@ WRPIN(pin, P_HIGH_FAST | P_LOW_FLOAT)  ' OUT=1 drives high, OUT=0 floats
 **Pull-Up Resistor:**
 ```spin2
 WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)     ' 15kΩ pull-up, no low drive
+PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
 **Current-Limited Output:**
@@ -397,6 +402,7 @@ WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
 **Weak pull-up with inverted input:**
 ```spin2
 WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT | P_INVERT_IN)
+PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
 **Current-limited output with inverted polarity:**
@@ -437,7 +443,7 @@ CON
 PUB setup_button()
   ' Internal 15kΩ pull-up, Schmitt trigger for noise immunity
   WRPIN(BUTTON_PIN, P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
-  PINHIGH(BUTTON_PIN)                     ' Enable pull-up
+  PINHIGH(BUTTON_PIN)                     ' DIR=1, OUT=1: pull now live
   
   ' Now PINREAD returns 1 when released, 0 when pressed
 ```
@@ -478,7 +484,7 @@ PUB set_voltage(level) | config
 
 ' Internal pull-up button
               wrpin ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A), btn_pin
-              drvh      btn_pin                ' Enable pull-up
+              drvh      btn_pin                ' DIR=1, OUT=1: pull live
 
 ' Current-source LED
               wrpin     ##(P_HIGH_1MA | P_LOW_FAST), led_pin

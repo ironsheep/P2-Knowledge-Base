@@ -23,7 +23,7 @@
 \vspace{0.6cm}
 {\large August 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.0.6\par}
+{\large\color{blue}Version 3.0.7\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -506,6 +506,8 @@ Before we move on, let me save you some debugging time:
 3. **Clock setup required** - P2 boots on its internal RCFAST oscillator (nominally ~24MHz, spec'd 20MHz minimum). Most programs configure 200MHz with a crystal. Our examples assume 200MHz - adjust **WAITX** values if your clock differs.
 
 4. **Cog already running** - If you `coginit` to a specific cog that's already running something else, it will be stopped and replaced. Use `COGEXEC_NEW` to automatically find a free cog.
+
+5. **`-1` is not "any free cog"** - You may meet `coginit(-1, ...)` in older code, or in code carried over from the P1, where that was the idiom. It does not mean what it looks like here. `-1` reaches COGINIT as `$FFFF_FFFF`, and the silicon reads only the low six bits — `%111111` — which asks for a free even/odd *pair* of cogs and hands you back the even one. You quietly spend two cogs where you wanted one. Say `COGEXEC_NEW` when you mean "any free cog"; `-1` is what you get *back* when the launch fails.
 
 ## What We've Learned
 
@@ -2878,7 +2880,7 @@ Before you pull your hair out wondering why a pin "won't work," save yourself de
 
 1. **Pin numbers are 0-63** - Not port.bit notation like other MCUs
 
-2. **No pullup/pulldown by default** - Use external resistors or configure smart pin modes (advanced topic)
+2. **No separate pullup/pulldown resistors** - but you *can* pull a line high or low, and you don't need an external resistor to do it. Give the pin a resistive drive strength — `P_HIGH_15K` — and then *drive* it high (`DIR=1, OUT=1`), which gets you a 15 kΩ path to VIO. That word *drive* is the whole catch: leave DIR low and the pin is simply a floating input, and your carefully chosen "pull-up" does exactly nothing.
 
 3. **Pins float on reset** - All pins start as inputs (floating)
 

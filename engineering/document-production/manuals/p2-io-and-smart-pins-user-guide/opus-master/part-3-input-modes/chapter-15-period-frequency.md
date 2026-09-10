@@ -16,7 +16,7 @@ Several smart-pin modes across Chapters 13–15 measure time-domain signal prope
 | Edge or event count | P_COUNT_RISES (and other counting modes) | Ch14 |
 | Period (precise, frequency range known) | P_PERIODS_TICKS | Ch15 §15.2 |
 | Frequency (unknown or variable) | P_COUNTER_PERIODS | Ch15 §15.3 |
-| Duty cycle | P_PERIODS_HIGHS + P_PERIODS_TICKS (or the time-window pair) | Ch15 §15.2/§15.4 |
+| Duty cycle | P_PERIODS_HIGHS *and* P_PERIODS_TICKS, on two pins (or the time-window pair) | Ch15 §15.2/§15.4 |
 
 ### Two Approaches to Period Measurement
 

@@ -202,6 +202,8 @@ Two independent fields in bits [27:24]: the polarity bit (bit 27) combines with 
 
 ## Drive Strength - High (pick one)
 
+These are drive strengths, not switchable resistors: each acts only while `DIR = 1`, and the pull-up rungs additionally need `OUT = 1` to select the high side. See Chapter 2, *Drive Strength Configuration*.
+
 | Constant | Drive | Description |
 |----------|-------|-------------|
 | P_HIGH_FAST | 30mA | Fast drive high (default) |
@@ -286,6 +288,7 @@ P_ADC_10X | P_ADC                              ' 10x gain ADC
 ### Button Input with Pull-up
 ```spin2
 P_SCHMITT_A | P_HIGH_15K                  ' Schmitt trigger + 15k pull-up
+' then PINHIGH(pin): DIR=1, OUT=1 makes the pull live
 ```
 
 ### Open-Drain Output

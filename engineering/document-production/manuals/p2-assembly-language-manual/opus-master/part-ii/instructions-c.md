@@ -720,6 +720,8 @@ The following predefined constants encode these bit patterns:
 
 For specific cog targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
 
+**Pitfall:** `-1` is not a COGINIT target, and the P1 habit of writing it to mean "any free one" misfires here. `-1` is `NEWTASK`, TASKSPIN's symbol. A register holding it reaches COGINIT as $FFFF_FFFF, so Dest[5:0] decodes as `%11_1111`—hubexec, find-a-free-cog, *and* the pair bit set. That starts an even/odd cog **pair** and returns the even (lower) cog's ID, quietly consuming two cogs where one was intended. To start a single free cog, use `COGEXEC_NEW` (`%01_0000`) or `HUBEXEC_NEW` (`%11_0000`).
+
 The lower 20 bits of Src is the code address; the entire 32-bit Src is written to the target cog's PTRB. If COGINIT is preceded by SETQ, that value is written to the target cog's PTRA.
 
 If the WC effect is specified, C is set (1) on failure or cleared (0) on success. When WC is given and Dest is a register, Dest receives the launched cog's ID (or $F on failure).

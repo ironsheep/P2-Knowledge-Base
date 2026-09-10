@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Complete PASM2 Instruction Set Documentation\par}
 \vspace{0.6cm}
-{\large August 2026\par}
+{\large September 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.1.7\par}
+{\large\color{blue}Version 3.1.8\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -141,7 +141,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 
 | | P1 | P2 |
 |---|---|---|
-| Clock | 80 MHz | 180 MHz recommended; 250 MHz typical overclock; 350 MHz absolute max¹ |
+| Clock | 80 MHz | 180 MHz typical; 320 MHz datasheet maximum¹ |
 | Clocks/Instruction | 4 | 2 |
 | Hub RAM | 32 KB | 512 KB |
 | Cog RAM | 512 longs | 512 + 512 LUT |
@@ -150,7 +150,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 | Interrupts | None | 3 per Cog |
 | Instructions | ~60 | ~380 |
 
-¹ Per P2 Datasheet. Higher frequencies require adequate thermal management.
+¹ The P2 Datasheet's AC Characteristics give the PLL system clock as 3.33 MHz minimum, 180 MHz typical, 320 MHz maximum, with the nominal 180 MHz rating specified up to 105 °C. Beyond the datasheet, the Silicon Documentation notes that the PLL can be pushed to 350 MHz using VCO/1 mode (%PPPP = 15) for fastest overclocking — that figure is an overclock ceiling, not a rated maximum, and stability there is application-dependent. Higher frequencies require adequate thermal management. Chapter 4 covers clock configuration in full.
 
 **Architecture That Transfers**
 
@@ -2192,7 +2192,7 @@ The P2 provides four clock source options, each suited to different application 
 
 **Crystal oscillator** mode connects an external crystal (typically 10-20 MHz) between the XI and XO pins. The P2 includes internal feedback resistors and programmable loading capacitors, simplifying crystal circuit design. Crystal sources provide the stability needed for precise timing, communication protocols, and frequency synthesis.
 
-**External clock** mode accepts an external clock signal on the XI pin, supporting frequencies up to the device's rated system-clock maximum (180 MHz typical, 320 MHz extended per the spec sheet). Note that 350 MHz is the PLL overclock ceiling (VCO/1 mode, see §4.1.2), not the direct external-input range. This mode allows the P2 to synchronize with external timing sources or use specialized oscillators.
+**External clock** mode accepts an external clock signal on the XI pin. Two different limits apply here and it is worth keeping them apart: the P2 Datasheet rates *direct drive into XI* at DC–200 MHz, while the *system clock* the PLL produces from that input is rated 180 MHz typical and 320 MHz maximum. The input ceiling is the lower of the two. Note that 350 MHz is the PLL overclock ceiling (VCO/1 mode, see §4.1.2) — neither a datasheet rating nor the direct external-input range. This mode allows the P2 to synchronize with external timing sources or use specialized oscillators.
 
 ### 4.1.2 PLL Multiplication
 
@@ -3070,12 +3070,14 @@ The P2 provides 64 smart pins, one per I/O pin, each containing a complete progr
 
 Each smart pin integrates multiple hardware components that work together to implement various I/O functions:
 
-- **Configurable I/O circuitry:** Programmable pull-up/down resistors, output drivers, and high-impedance (floating) modes
+- **Configurable I/O circuitry:** Independently selectable drive strength for the high and low side of the output driver, plus high-impedance (floating) mode
 - **Mode selection logic:** 32 distinct operating modes covering digital, analog, serial, and timing applications
 - **Local state machine:** Autonomous operation once configured, generating events when data is ready
 - **DAC hardware:** 8-bit digital-to-analog converter for analog output and sigma-delta modulation
 - **ADC hardware:** Analog-to-digital conversion using sigma-delta and comparator techniques
 - **Timing hardware:** Counters and comparators for precise edge detection and pulse generation
+
+Drive strength deserves a closer look, because the P2 has no separate programmable pull-up or pull-down resistors. The high side and the low side of each pin's driver each select one rung of the same eight-rung ladder, running from a fast digital drive down to float, and the two sides are selected independently—a pin can drive hard one way and weakly the other. A resistive rung *is* the pull: `P_HIGH_15K` with `DIR=1` and `OUT=1` presents a 15 kΩ path to VIO, which is a pull-up in every sense that matters to the circuit. One caveat governs all of it—a drive selection is a property of *driving*. With DIR low, the pin is simply a high-impedance input and the selection does nothing.
 
 Once configured, a smart pin operates independently of the cog—a UART smart pin transmits and receives bytes, a PWM smart pin generates continuous waveforms, an encoder smart pin tracks position changes, all without ongoing cog attention. The cog interacts with smart pins only when new data arrives or new output is needed.
 
@@ -3200,23 +3202,27 @@ The P2 supports event-driven programming through a comprehensive event system. E
 
 ### 5.4.1 Event Sources
 
-The P2 defines numerous event sources, each representing a distinct hardware condition:
+A cog monitors sixteen background events, numbered 0 through 15. The numbers matter: for events 1-15 they are also the codes SETINT1/2/3 take to select an interrupt source (§5.4.2), so this table doubles as that code list. Event 0 is the one exception, noted below the table.
 
 | Event | Source | Typical Use |
 |-------|--------|-------------|
-| INT | An interrupt occurred (any of the three levels INT1/INT2/INT3) | Interrupt handling; each level's source is selected via SETINTx |
-| CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
-| SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
-| PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
-| FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
-| XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
-| XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
-| XRO | Streamer NCO rollover | Waveform/DDS timing (phase-accumulator overflow) |
-| XRL | Streamer read LUT $1FF | LUT-wrap timing event |
-| ATN | Attention from another Cog | Inter-Cog communication |
-| QMT | CORDIC read with no result available (pipeline-empty) | Detecting a premature/erroneous GETQX/GETQY read |
+| 0 — INT | An interrupt occurred (any of the three levels INT1/INT2/INT3) | Interrupt handling; each level's source is selected via SETINTx |
+| 1-3 — CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
+| 4-7 — SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
+| 8 — PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
+| 9 — FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
+| 10 — XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
+| 11 — XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
+| 12 — XRO | Streamer NCO rollover | Waveform/DDS timing (phase-accumulator overflow) |
+| 13 — XRL | Streamer read LUT $1FF | LUT-wrap timing event |
+| 14 — ATN | Attention from another Cog | Inter-Cog communication |
+| 15 — QMT | CORDIC read with no result available (pipeline-empty) | Detecting a premature/erroneous GETQX/GETQY read |
 
-Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation).
+Only events 4-7 are programmable—those are the selectable events, configured by SETSE1-SETSE4. Events 0-3 and 8-15 are fixed sensors wired to specific hardware conditions.
+
+**Pitfall:** Event 0 and interrupt-source code 0 are not the same thing. As an *event*, 0 means "an interrupt occurred" and is pollable with POLLINT. As a *SETINTx source code*, 0 means `<off>`—the default on cog start for all three levels. Codes 1-15 map to events 1-15 exactly; only code 0 diverges.
+
+Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation). Every event except 15 has a matching WAITxxx and a Jxxx/JNxxx branch; there is no WAITQMT, because that event cannot occur while waiting.
 
 ### 5.4.2 Event Configuration
 
@@ -3234,7 +3240,7 @@ Each SETSE instruction selects one condition from dozens of options: pin edges (
 
 Interrupt setup involves two steps: configuring the interrupt source and enabling interrupt processing:
 
-- **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
+- **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). Codes 1-15 are the event numbers from the table in §5.4.1—`SETINT1 #4` makes SE1 trigger INT1, and `SETINT2 #14` makes an attention request from another cog trigger INT2. Code 0 means `<off>`, which is the default on cog start, so `SETINT1 #0` turns INT1 off again. The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
 - **STALLI** - Stall (disable) interrupt processing
 - **ALLOWI** - Allow (enable) interrupt processing (default on cog start)
 
@@ -4669,7 +4675,7 @@ ADDS sums the two signed values of Dest and Src together and stores the result i
 
 If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended). Use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value, negative or positive.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative (the true sign of the signed sum, Result[31] = 1), or is cleared (0) if the result is non-negative. C carries the true sign of the result; it is not a signed-overflow indicator.
+If the WC or WCZ effect is specified, the C flag is set (1) if the signed sum is negative — the true sign of (Dest + Src) at full precision — or is cleared (0) if it is non-negative. C carries the true sign of the result; it is not a signed-overflow indicator, and it is not Result[31]. The two agree except when the signed sum overflows 32 bits, which is exactly the case where Result[31] misreports the sign.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero.
 
@@ -4706,7 +4712,7 @@ Add Signed Extended
 
 ADDSX sums the signed values of Dest and Src plus C together and stores the result into the Dest register. The ADDSX instruction is used to perform signed multi-long (extended) addition, such as 64-bit addition.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative (Result[31] = 1), or is cleared (0) if positive. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag state.
+If the WC or WCZ effect is specified, the C flag is set (1) if the signed sum is negative — the true sign of (Dest + Src + C) at full precision — or is cleared (0) if it is non-negative. **C is not Result[31].** The two differ exactly when the signed sum overflows 32 bits, which is the condition [TJV](#tjv) exists to detect; taking C as the result's top bit is wrong in precisely the case that matters. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag state.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest + Src + C is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper final Z flag state. This allows detection of a zero result across the entire multi-long value.
 
@@ -6580,6 +6586,8 @@ The following predefined constants encode these bit patterns:
 
 For specific cog targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
 
+**Pitfall:** `-1` is not a COGINIT target, and the P1 habit of writing it to mean "any free one" misfires here. `-1` is `NEWTASK`, TASKSPIN's symbol. A register holding it reaches COGINIT as $FFFF_FFFF, so Dest[5:0] decodes as `%11_1111`—hubexec, find-a-free-cog, *and* the pair bit set. That starts an even/odd cog **pair** and returns the even (lower) cog's ID, quietly consuming two cogs where one was intended. To start a single free cog, use `COGEXEC_NEW` (`%01_0000`) or `HUBEXEC_NEW` (`%11_0000`).
+
 The lower 20 bits of Src is the code address; the entire 32-bit Src is written to the target cog's PTRB. If COGINIT is preceded by SETQ, that value is written to the target cog's PTRA.
 
 If the WC effect is specified, C is set (1) on failure or cleared (0) on success. When WC is given and Dest is a register, Dest receives the launched cog's ID (or $F on failure).
@@ -7991,12 +7999,12 @@ Get Breakpoint Status
 [Interrupts](#interrupts) - Retrieves breakpoint or cog status information.
 :::
 
-**GETBRK**  *Dest*  **{WC|WZ|WCZ}**
+**GETBRK**  *Dest*  **WC|WZ|WCZ**
 
 **Result:** Breakpoint or cog status information is retrieved into Dest based on the flag effect specified.
 
 - Dest is a register where the status information is written.
-- WC, WZ, or WCZ are optional effects that determine which status information is retrieved.
+- WC, WZ, or WCZ is **required** — note the absence of braces above. The flag effect is not an optional add-on that updates flags alongside a fixed result; it *selects which of three different results* GETBRK returns. GETBRK with no flag effect does not assemble.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -17345,7 +17353,7 @@ int1_handler
 
 ### PA {#pa}
 
-Address $1F6. Multi-purpose register A. Serves multiple special functions or can be used as general RAM.
+Address $1F6. Holds the CALLD-immediate return address, the parameter passed by CALLPA, or an address stored by LOC. Can be used as general RAM when none of those functions is needed.
 
 **Access**: Read/Write
 
@@ -17373,7 +17381,7 @@ When these functions are not needed, PA can be used as general-purpose cog RAM.
 
 ### PB {#pb}
 
-Address $1F7. Multi-purpose register B. Serves multiple special functions or can be used as general RAM.
+Address $1F7. Holds the CALLD-immediate return address, the parameter passed by CALLPB, or an address stored by LOC. Can be used as general RAM when none of those functions is needed.
 
 **Access**: Read/Write
 
@@ -19200,8 +19208,8 @@ These extended effects enable testing multiple bits or pins and accumulating the
 | 499 | $1F3 | IRET2 | R/W | Interrupt 2 return address |
 | 500 | $1F4 | IJMP1 | R/W | Interrupt 1 jump address |
 | 501 | $1F5 | IRET1 | R/W | Interrupt 1 return address |
-| 502 | $1F6 | PA | R/W | Multi-purpose register A |
-| 503 | $1F7 | PB | R/W | Multi-purpose register B |
+| 502 | $1F6 | PA | R/W | CALLD-imm return, CALLPA parameter, or LOC address |
+| 503 | $1F7 | PB | R/W | CALLD-imm return, CALLPB parameter, or LOC address |
 | 504 | $1F8 | PTRA | R/W | Hub pointer A |
 | 505 | $1F9 | PTRB | R/W | Hub pointer B |
 | 506 | $1FA | DIRA | R/W | Pin direction 0-31 |
@@ -20476,9 +20484,11 @@ Constants are combined using OR operations to build the complete configuration:
 ### Open-Drain Output (I2C-style)
 
 ```pasm2
-' Configure for open-drain with 1.5kΩ pull-up
+' Open-drain: floats when OUT=1, sinks through 1.5k when OUT=0.
+' The bus pull-up is external — the 1.5k here is the LOW-side drive.
         mov     mode, ##P_HIGH_FLOAT | P_LOW_1K5
         wrpin   mode, #44
+        dirh    #44                 ' Drive acts only with DIR high
 ```
 
 ### Schmitt Trigger Input with Filter
@@ -21340,8 +21350,8 @@ Can be used as general RAM or special registers depending on enabled features:
 - **IRET2** - interrupt 2 return address ($1F3, 499)
 - **IJMP1** - interrupt 1 jump address ($1F4, 500)
 - **IRET1** - interrupt 1 return address ($1F5, 501)
-- **PA** - Multi-purpose register A ($1F6, 502)
-- **PB** - Multi-purpose register B ($1F7, 503)
+- **PA** - CALLD-imm return, CALLPA parameter, or LOC address ($1F6, 502)
+- **PB** - CALLD-imm return, CALLPB parameter, or LOC address ($1F7, 503)
 
 ### Fixed Special Registers ($1F8-$1FF)
 

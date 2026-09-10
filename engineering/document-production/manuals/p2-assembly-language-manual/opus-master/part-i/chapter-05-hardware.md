@@ -228,12 +228,14 @@ The P2 provides 64 smart pins, one per I/O pin, each containing a complete progr
 
 Each smart pin integrates multiple hardware components that work together to implement various I/O functions:
 
-- **Configurable I/O circuitry:** Programmable pull-up/down resistors, output drivers, and high-impedance (floating) modes
+- **Configurable I/O circuitry:** Independently selectable drive strength for the high and low side of the output driver, plus high-impedance (floating) mode
 - **Mode selection logic:** 32 distinct operating modes covering digital, analog, serial, and timing applications
 - **Local state machine:** Autonomous operation once configured, generating events when data is ready
 - **DAC hardware:** 8-bit digital-to-analog converter for analog output and sigma-delta modulation
 - **ADC hardware:** Analog-to-digital conversion using sigma-delta and comparator techniques
 - **Timing hardware:** Counters and comparators for precise edge detection and pulse generation
+
+Drive strength deserves a closer look, because the P2 has no separate programmable pull-up or pull-down resistors. The high side and the low side of each pin's driver each select one rung of the same eight-rung ladder, running from a fast digital drive down to float, and the two sides are selected independently—a pin can drive hard one way and weakly the other. A resistive rung *is* the pull: `P_HIGH_15K` with `DIR=1` and `OUT=1` presents a 15 kΩ path to VIO, which is a pull-up in every sense that matters to the circuit. One caveat governs all of it—a drive selection is a property of *driving*. With DIR low, the pin is simply a high-impedance input and the selection does nothing.
 
 Once configured, a smart pin operates independently of the cog—a UART smart pin transmits and receives bytes, a PWM smart pin generates continuous waveforms, an encoder smart pin tracks position changes, all without ongoing cog attention. The cog interacts with smart pins only when new data arrives or new output is needed.
 
@@ -358,23 +360,27 @@ The P2 supports event-driven programming through a comprehensive event system. E
 
 ### 5.4.1 Event Sources
 
-The P2 defines numerous event sources, each representing a distinct hardware condition:
+A cog monitors sixteen background events, numbered 0 through 15. The numbers matter: for events 1-15 they are also the codes SETINT1/2/3 take to select an interrupt source (§5.4.2), so this table doubles as that code list. Event 0 is the one exception, noted below the table.
 
 | Event | Source | Typical Use |
 |-------|--------|-------------|
-| INT | An interrupt occurred (any of the three levels INT1/INT2/INT3) | Interrupt handling; each level's source is selected via SETINTx |
-| CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
-| SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
-| PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
-| FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
-| XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
-| XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
-| XRO | Streamer NCO rollover | Waveform/DDS timing (phase-accumulator overflow) |
-| XRL | Streamer read LUT $1FF | LUT-wrap timing event |
-| ATN | Attention from another Cog | Inter-Cog communication |
-| QMT | CORDIC read with no result available (pipeline-empty) | Detecting a premature/erroneous GETQX/GETQY read |
+| 0 — INT | An interrupt occurred (any of the three levels INT1/INT2/INT3) | Interrupt handling; each level's source is selected via SETINTx |
+| 1-3 — CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
+| 4-7 — SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
+| 8 — PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
+| 9 — FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
+| 10 — XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
+| 11 — XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
+| 12 — XRO | Streamer NCO rollover | Waveform/DDS timing (phase-accumulator overflow) |
+| 13 — XRL | Streamer read LUT $1FF | LUT-wrap timing event |
+| 14 — ATN | Attention from another Cog | Inter-Cog communication |
+| 15 — QMT | CORDIC read with no result available (pipeline-empty) | Detecting a premature/erroneous GETQX/GETQY read |
 
-Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation).
+Only events 4-7 are programmable—those are the selectable events, configured by SETSE1-SETSE4. Events 0-3 and 8-15 are fixed sensors wired to specific hardware conditions.
+
+**Pitfall:** Event 0 and interrupt-source code 0 are not the same thing. As an *event*, 0 means "an interrupt occurred" and is pollable with POLLINT. As a *SETINTx source code*, 0 means `<off>`—the default on cog start for all three levels. Codes 1-15 map to events 1-15 exactly; only code 0 diverges.
+
+Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation). Every event except 15 has a matching WAITxxx and a Jxxx/JNxxx branch; there is no WAITQMT, because that event cannot occur while waiting.
 
 ### 5.4.2 Event Configuration
 
@@ -392,7 +398,7 @@ Each SETSE instruction selects one condition from dozens of options: pin edges (
 
 Interrupt setup involves two steps: configuring the interrupt source and enabling interrupt processing:
 
-- **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
+- **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). Codes 1-15 are the event numbers from the table in §5.4.1—`SETINT1 #4` makes SE1 trigger INT1, and `SETINT2 #14` makes an attention request from another cog trigger INT2. Code 0 means `<off>`, which is the default on cog start, so `SETINT1 #0` turns INT1 off again. The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
 - **STALLI** - Stall (disable) interrupt processing
 - **ALLOWI** - Allow (enable) interrupt processing (default on cog start)
 

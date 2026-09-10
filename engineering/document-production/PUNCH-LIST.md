@@ -20,11 +20,31 @@ about it are housekeeping and **never** gate a publication or hold a correction 
 
 ---
 
-## Review ALL manual content against the YAML-fidelity release — OPEN, AND ITS GATE IS NOW DISCHARGED
+## Review ALL manual content against the YAML-fidelity release — ⏳ HALF DELIVERED 2026-09-10: content COMPLETE, releases owed
 
 **Status:** Open — raised by Stephen 2026-08-25, **owed AFTER that release ships**, not before.
 Deliberately deferred: the release is being reviewed and shipped first, and the manual sweep is a
 separate pass so it is not rushed alongside it.
+
+> ⏳ **THE SWEEP HAS BEEN RUN AND ITS CONTENT HALF IS COMPLETE (2026-09-10).** All nine documents the
+> fact-level pass identified are edited, versioned and changelogged; the register carries the
+> outcome as **F-408…F-418**. What remains is **release**, not content: each document still needs
+> prepare-manual → Forge → verify → publish, and this item stays open until they ship.
+>
+> Findings: 7 of the 8 filed corrections applied. **F-415 was REJECTED on the evidence** and is
+> archived `RESOLVED-INVALID` — it read *"every 1/2/4/8/16 (#cogs) clocks"* as runtime-variable when
+> `(#cogs)` is the part's cog count (the P2X8C4M64P has 8, always); applying it as filed would have
+> made a correct manual wrong. Four further defects were found that the list did not carry (F-417,
+> F-418, plus ALM ch04's XI-input limit under F-411). One KB edit was created and is still owed:
+> **F-416**, `architecture/cordic.yaml:183`'s uncited "~28 bits".
+>
+> **P2AN003 needed no change** — verified, not assumed: it already defers every ENOB/SNR/THD figure
+> to bench measurement.
+>
+> Render verification for the two layout-risky edits is DONE on the interactive daemon (ALM ch05
+> event table clean; torture §6.2 clean). ⚠️ **The full ALM cannot round-trip on the interactive
+> daemon** — xelatex writes all 506 pages, then the daemon's shell times out at 608s before copying
+> the PDF out. Its margin gate therefore runs at the PRODUCTION build, not here.
 
 > ⚠️ **THE RELEASE HAS SHIPPED. `v1.18.0`, 2026-09-09.** The waiting condition on this item is
 > discharged; the sweep is now owed rather than deferred. The `release-yamls` Step 8 impact survey
@@ -280,7 +300,7 @@ deliberately retained; this one is not in that category).
 
 ---
 
-## IOSP joins two mutually exclusive smart-pin modes with `+` (two tables) — OPEN
+## IOSP joins two mutually exclusive smart-pin modes with `+` (two tables) — RESOLVED 2026-09-10
 
 **Status:** ⏳ Open — found 2026-08-16 by «#220»'s class sweep, **deliberately not fixed** (IOSP is
 out of the Sprint-2 release wave, and «#220» is scoped to the Streamer Guide).
@@ -304,6 +324,19 @@ so the cell stops looking like an expression.
 **When worked:** re-check the whole IOSP mode-comparison appendix for the same shape, and confirm no
 other manual pairs two mode constants with an operator. Ships with IOSP's next release; no bump is
 owed for it alone.
+
+> ✅ **RESOLVED 2026-09-10, shipping in IOSP v1.0.10** — exactly as this item said it would, bundled
+> into the release the v1.18.0 content sweep was already preparing. Both cells now read
+> *"`P_PERIODS_HIGHS` **and** `P_PERIODS_TICKS`, on two pins"* with the mutual exclusivity stated,
+> so neither looks like an expression. Mode values re-verified live: `%10100` / `%10011` in
+> `architecture/smart-pins/smart-pin-1010 0-*.yaml` and `-10011-*.yaml`.
+>
+> **The "confirm no other manual" half was run and it found one more hit — which turned out NOT to
+> be a defect.** `p2-streamer-programming-guide/opus-master/streamer-body.md:1151` carries
+> `mode := P_CHANNEL + P_OE`, but it sits inside an ```` ```antipattern ```` block, captioned
+> *"Wrong — the carry lands in the next mode up"*. That is §13.4 **teaching** this exact rule with a
+> correct/wrong pair, and `P_CHANNEL`/`P_OE`/`P_TT_01` really are one `$40` bit-field under three
+> names. Fixing it would have deleted the lesson. Recorded here so the next sweep does not re-flag it.
 
 ---
 

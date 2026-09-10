@@ -23,12 +23,13 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-416`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-420`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
 - F-125…F-266 (closed) → `correction-sweeps/2026-08-15-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-08-19 (18 findings: F-227, F-228, F-254, F-255, F-257, F-258, F-259, F-260, F-261, F-262, F-263, F-264, F-265, F-266, F-267, F-269, F-270, F-273) → `correction-sweeps/2026-08-19-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-09-10 (1 finding: F-415, `RESOLVED-INVALID`) → `correction-sweeps/2026-09-10-P2KB-CORRECTION-FINDINGS-archive.md`
 
 > **Swept 2026-08-19** per `punch-list-maintenance`, as **rename-then-trim** (the archive is a
 > git-tracked rename of the original; both files are subtractions from a preserved copy — see the
@@ -49,7 +50,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## The manuals were audited against the v1.18.0 delta at the FACT level, not the path level, and eight corrections were located that the path intersection could not see (2026-09-09, post-release manual sweep) — F-408…F-415
+## The manuals were audited against the v1.18.0 delta at the FACT level, not the path level, and eight corrections were located that the path intersection could not see (2026-09-09, post-release manual sweep, applied 2026-09-10) — F-408…F-419
 
 **How this surfaced.** `release-yamls` Step 8 recorded a **path intersection** — each document's
 `MANUAL-DESCRIPTOR.md` declared sources against the release's changed files — and returned
@@ -57,6 +58,11 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 path intersection cannot produce one: it says a document touches changed ground, never that it
 restates a changed fact. Re-run at the fact level — 31 probes over all **126 live master files**,
 every hit read in context — the answer is **9 documents with work and 7 with none**.
+
+**Range extended to F-416 on 2026-09-10** as the sweep was applied: F-416 is a KB defect
+(`cordic.yaml`) that this sweep *surfaced* rather than a manual correction, and it is kept under this
+header because that is where its provenance is legible. **F-415 was rejected on the evidence** — see
+its entry — so the header's "eight corrections" is seven applied plus one that was not a defect.
 
 **Full located list, with the negatives that keep the sweep from re-deriving them:**
 `engineering/analysis/2026-09-09-v1.18.0-manual-update-list.md`.
@@ -69,7 +75,7 @@ mnemonics (`RDCOGID`, `RDLUTS`, `NIXINT0`, `TRGINT0`) appear anywhere; no boot-R
 claim survives; no document states a `WAITMS` ceiling; and **of 95 shipped `examples-library/*.spin2`
 files, none carries a pull idiom or a `-1` cog launch.**
 
-### F-408 — the Assembly manual's own feature list says the P2 has "programmable pull-up/down resistors" — `CONFIRMED`
+### F-408 — the Assembly manual's own feature list says the P2 has "programmable pull-up/down resistors" — `PENDING-VALIDATION`
 
 `p2-assembly-language-manual/opus-master/part-i/chapter-05-hardware.md:231`. The sprint's origin
 class (ledger §1.4) in ALM's capability summary. `P_HIGH_*`/`P_LOW_*` select **drive strength**.
@@ -80,7 +86,10 @@ for these same rungs (`silicon-doc-text.txt:4599`). The difference that breaks c
 is a property of **driving**, so **DIR must stay high**. Source:
 `architecture/pin-drive-configuration.yaml`, `language/{pasm2,spin2}/concepts/basic-io.yaml`.
 
-### F-409 — ADDSX's C-flag prose contradicts its own Operation line and encoding row — `CONFIRMED`
+**APPLIED 2026-09-10** — ALM v3.1.8: the bullet now reads *"Independently selectable drive strength for the high and low side of the output driver"*, and a new paragraph after the component list carries the eight-rung ladder, the independent high/low sides, `P_HIGH_15K`+`DIR=1`+`OUT=1` as a 15 kΩ path to VIO, and the DIR caveat. The word "pull-up" is KEPT, per §1.24. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
+
+
+### F-409 — ADDSX's C-flag prose contradicts its own Operation line and encoding row — `PENDING-VALIDATION`
 
 `part-ii/instructions-a.md:228` reads *"the C flag is set (1) if the result is negative
 (**Result[31] = 1**)"* while `:208` and `:219` in the same file both give **`C = true sign of
@@ -95,7 +104,10 @@ defect that looks deliberate, because every neighbour is right.*
 Lesser, same paragraph: `:191` (ADDS) writes *"the true sign of the signed sum, Result[31] = 1"* as
 if the two were one thing. It recovers in the next sentence, so fix the parenthetical only.
 
-### F-410 — ALM says GETBRK's flag effect is optional; it is required, and the sibling manual says so — `CONFIRMED`
+**APPLIED 2026-09-10** — ALM v3.1.8: both `:191` (ADDS) and `:228` (ADDSX) now state C as the true sign at full precision and say plainly it is **not** `Result[31]`; ADDSX cites `TJV` as the case that separates them. **Independently re-verified the "lone outlier" claim** — the only surviving `Result[31]` in ALM is `appendix-a:74` for **CMPM**, where it is CORRECT (`cmpm.yaml`: *"C: Set to MSB of (D - S), i.e., Result[31]"*) — that IS the instruction. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
+
+
+### F-410 — ALM says GETBRK's flag effect is optional; it is required, and the sibling manual says so — `PENDING-VALIDATION`
 
 `part-ii/instructions-g.md:14` (`{WC|WZ|WCZ}` braces) and `:19` (*"optional effects"*). The shipped
 KB, `language/pasm2/getbrk.yaml:13`: *"GETBRK **REQUIRES** a flag effect (WC, WZ, or WCZ); the
@@ -106,7 +118,10 @@ a flag effect, and the flag you choose selects which information you get"* — w
 own CG-3 correction. **Two shipped manuals disagree with each other**, and ALM's syntax braces are
 wrong as well as its prose.
 
-### F-411 — ALM's clock row attributes to the P2 Datasheet two figures the datasheet does not contain, and contradicts its own Chapter 4 — `CONFIRMED`
+**APPLIED 2026-09-10** — ALM v3.1.8: syntax line is now `**GETBRK**  *Dest*  **WC|WZ|WCZ**` (braces dropped — 166 other syntax lines legitimately use `{}`, GETBRK being the lone required-flag instruction), and the bullet states the flag is **required** and *selects which of three different results* is returned. **Narrower than filed:** the entry's own **Explanation** body was ALREADY correct (*"A flag effect is required … does not assemble"*), so the manual was contradicting itself three paragraphs apart, not simply wrong. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
+
+
+### F-411 — ALM's clock row attributes to the P2 Datasheet two figures the datasheet does not contain, and contradicts its own Chapter 4 — `PENDING-VALIDATION`
 
 `front-matter.md:144`: *"180 MHz recommended; **250 MHz typical overclock; 350 MHz absolute max**¹"*,
 footnoted at `:153` *"¹ **Per P2 Datasheet.**"*
@@ -125,7 +140,10 @@ The datasheet's AC Characteristics PLL row gives **min 3.33 / typ 180 / max 320 
 copy that discipline up. This is the whose-limit rule (**E-007**): every clock figure must name
 whether it is the compiler's, the datasheet's, or an overclock ceiling.
 
-### F-412 — the IOSP states the input threshold as fixed volts; the datasheet gives it as a fraction of the I/O supply — `CONFIRMED`
+**APPLIED 2026-09-10** — ALM v3.1.8: the row now reads *"180 MHz typical; 320 MHz datasheet maximum"* and the footnote gives min 3.33 / typ 180 / max 320 with the 105 °C condition, attributing 350 MHz to the Silicon Documentation as the VCO/1 overclock ceiling. Datasheet re-verified live: 250 and 350 appear nowhere as clock figures (the only hits are *"~350 unique instructions"* and a `250 ms` code example). **A second defect found at the same time, NOT in this finding:** `ch04:20` gave 320 MHz as the **XI external-input** ceiling; the datasheet rates direct drive into XI at **DC–200 MHz**, and 320 is the PLL *output* max. Rewritten to keep the two limits apart. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
+
+
+### F-412 — the IOSP states the input threshold as fixed volts; the datasheet gives it as a fraction of the I/O supply — `PENDING-VALIDATION`
 
 `p2-io-and-smart-pins-user-guide/.../chapter-12-digital-input.md:25` and `:95` — *"approximately
 **1.65V** threshold"*.
@@ -137,7 +155,10 @@ supplies do not share thresholds. Same chapter, same class: `:156` hard-codes
 `threshold = (level / 256) × 3.3V` for the level comparator, which genuinely is a fraction of VIO;
 `:130`, `:133`, `:583` derive the ~1.4 V TTL level from that same hard-coded supply.
 
-### F-413 — P2AN001's clock pitfall states a 300 MHz maximum that exists in no source, and contradicts its own YAML companion — `CONFIRMED`
+**APPLIED 2026-09-10** — IOSP v1.0.10: §12.1 now states `Vih` as `Vxxyy * 0.3 / * 0.5 / * 0.7`, spells out the 0.99–2.31 V band at 3.3 V, says the threshold moves with the supply, and instructs that 1.65 V is the typical value and not the switching point. The level-comparator formula reads `(level / 256) * Vxxyy`, its voltage table names the 3.3 V supply its rows assume, the TTL level-108 derivation says to recompute for another `Vxxyy`, and the Example-4 block declares the assumption. `:95`'s restatement now points at §12.1 instead of repeating a number. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
+
+
+### F-413 — P2AN001's clock pitfall states a 300 MHz maximum that exists in no source, and contradicts its own YAML companion — `PENDING-VALIDATION`
 
 `app-notes/P2AN001/opus-master/P2AN001.md:638` — *"The P2's **specified maximum is 300 MHz**; the
 original research code ran at 320 MHz, **which is over spec**."*
@@ -147,7 +168,10 @@ the research code was **at** the limit, not over it. `application-notes/p2an001-
 2026-09-09 and now carries the datasheet's min 3.33 / typ 180 / max 320 with its 105 °C footnote —
 so **the note and its own companion now disagree**, which the four-artifact model forbids.
 
-### F-414 — P2AN001 carries the unreproduced 15 mV designer figure and not the measured ≤9 mV result — `CONFIRMED`
+**APPLIED 2026-09-10** — P2AN001 v1.0.5: the pitfall now gives min 3.33 / typ 180 / max 320 MHz with the 105 °C footnote, and states that the research code's 320 MHz sat *at* the datasheet maximum rather than beyond it, though above the typical rating. Note and companion agree. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
+
+
+### F-414 — P2AN001 carries the unreproduced 15 mV designer figure and not the measured ≤9 mV result — `PENDING-VALIDATION`
 
 `P2AN001.md:626`. The note qualifies 15 mV correctly as designer-stated, but the companion has moved
 past it: *"Hardware-verified 2026-07-07 on real P2: the ratiometric single-pin absolute error was
@@ -155,12 +179,8 @@ past it: *"Hardware-verified 2026-07-07 on real P2: the ratiometric single-pin a
 bench has NOT yet reproduced**… **Do not quote 15 mV as a specification.**"* Empirical sources are
 first-class here and outrank a designer report.
 
-### F-415 — P2AN002 states the CORDIC issue interval as a fixed eight clocks; it depends on the number of running cogs — `CONFIRMED`
+**APPLIED 2026-09-10** — P2AN001 v1.0.5: the pitfall now LEADS with the measured ≤9 mV floor (offset, not noise, so averaging does not remove it) and demotes 15 mV to a designer report the bench has not reproduced, with the instruction not to quote it as a specification. Verified LIVE against `P2-EMPIRICAL-FINDINGS.md` rather than via the companion — the ledger states the ≤9 mV result *"does NOT support a ~15 mV single-pin absolute floor"*, CONFIRMED 2026-07-07. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
 
-`app-notes/P2AN002/opus-master/P2AN002.md:367` (*"each cog gets a turn every eight clocks"*), and the
-same assumption at `:235` and `:328`. The companion quotes the authority: *"Cogs can start CORDIC
-operations **every 1/2/4/8/16 (#cogs) clocks** and get results 55 clocks later."* Eight is one case,
-not the rule. The 55-clock latency is fixed and the note has that right.
 
 ---
 
@@ -172,6 +192,128 @@ because it is already **correct**."* Against the framing in force on 2026-08-25,
 default**"* implies a non-default internal pull exists, and it sends the reader to **smart-pin
 modes** when the mechanism is **drive strength**. Not re-filed as a correction — nothing here makes
 a reader's code fail — but F-356's disposition should not be read as settling it.
+
+### F-416 — `cordic.yaml` states a ~28-bit trig precision that no source gives, and that the P2AN002 companion already dropped — `PENDING-VALIDATION`
+
+`deliverables/ai/P2/architecture/cordic.yaml:183` — `trig_functions: "~28 bits of precision"`.
+
+**No Parallax source states a bit figure for CORDIC trigonometric precision.** Swept 2026-09-10:
+neither `silicon-doc-text.txt` nor `p2-datasheet-text.txt` contains a 28-bit precision claim
+anywhere. The figure survives in the KB while the **P2AN002 YAML companion already removed its own
+`verify: Precision ~28 bits` flag under cite-or-omit** — so the KB and a shipped companion now
+disagree about a number neither can source.
+
+Surfaced while applying the v1.18.0 manual sweep: P2AN002 quoted "about 28 bits" in two places
+(`:354`, `:369`) and was traced back to this file rather than to an authority.
+
+**Proposed correction:** drop the bit count and state the behaviour the sources do support — the
+integer operations (QMUL/QDIV/QFRAC/QSQRT) are exact 64-bit integer operations; the iterative ones
+(QROTATE/QVECTOR/QSIN/QLOG/QEXP) leave the low bits approximate, with the magnitude scale factor
+corrected in hardware. If a bit figure is wanted, it needs a bench measurement and an EF entry, not
+a carried-forward number.
+
+**Already applied downstream (P2AN002 v1.0.4):** the note now describes the residual instead of
+counting it, and tells the reader to measure it against their own tolerance. The KB edit is what
+remains owed here.
+
+> ✅ **APPLIED 2026-09-10; `PENDING-VALIDATION` until a KB release publishes it** — p2kb-mcp serves
+> the PUBLISHED tree, so a consumer still reads `~28 bits` until then. Repaired under `SOURCE-REPAIR-ORDER` — re-read the source, **removed the
+> whole uncited block**, repopulated from the source rather than citing in place.
+>
+> **The finding was NARROWER than the defect, in two directions.** (a) The claim was alive at **two**
+> KB sites, not one: `architecture/cordic.yaml:183` *and* `application-notes/p2an002-…yaml:95`, whose
+> `precision:` field still carried *"trig … ~28 bits"* — this entry recorded the companion as having
+> dropped it, and only its `verify:` flag had been. Both are repaired. (b) Opening the block found
+> **three further wrong values in the same six lines**, which is exactly what the repair order
+> predicts — see **F-419**.
+>
+> **Source trace:** no bit count for CORDIC trigonometric precision appears anywhere under
+> `engineering/ingestion/sources/` (swept). The repopulated `accuracy:` block cites
+> `silicon-doc-text.txt:175-182` and states the formats that source gives; the trigonometric entry
+> now says plainly that no source states a figure and none is asserted, pointing at a bench
+> measurement + EF entry as what a number would require.
+>
+> **Findability improved in the same touch:** the file's `see_also:` was four bare-prose strings
+> (*"QMUL instruction details"*, *"Pipeline optimization techniques"*, …) which that field never
+> resolves, so a consumer following them reached nothing. Redirected per Sacred Rule #7 into a
+> `related:` block of resolving keys — the seven `Q*` instruction entries, plus
+> `cordic_solver.yaml` and `p2kbAppNoteP2an002CordicForRealWork` for the pipeline-optimization
+> concept. `validate-crossref-keys.py` CLEAN.
+
+### F-419 — `cordic.yaml`'s `accuracy:` block contradicted its own `operations:` block on three quantities — `PENDING-VALIDATION`
+
+Found 2026-09-10 while repairing F-416, by removing the uncited block instead of citing it in place.
+
+`deliverables/ai/P2/architecture/cordic.yaml`, the six-line `accuracy:` block. Four of its six
+values were defective — one uncited (F-416's `~28 bits`) and **three flatly wrong**:
+
+| field | the block said | Silicon Doc `:176-182` + the KB's own entries |
+|---|---|---|
+| `square_root` | "16-bit result, ±1 LSB" | **64-bit → 32-bit** (`qsqrt.yaml`; and this file's own `operations.square_root:79`) |
+| `logarithm` | "5.32 fixed-point" | **5.27** (`qlog.yaml`; own `operations.logarithm:104`) |
+| `exponential` | "5.32 fixed-point" | **5.27** (`qexp.yaml`; own `operations.exponential:112`) |
+
+**The file disagreed with itself.** Its `operations:` block already stated all three correctly, so a
+consumer's answer depended on which block it happened to read — the F-409 shape (ADDSX's prose
+against its own operation line), in the KB rather than a manual. "5.32" looks like a plausible
+transcription of a 32-bit total, which is why it survived: 5 integer + 27 fraction **is** 32 bits.
+
+**Nothing could have caught it.** The values are well-formed, they sit beside correct neighbours,
+and no gate we run compares two blocks inside one file for agreement.
+
+**Applied:** the block is removed and repopulated from `silicon-doc-text.txt:175-182`, each entry
+naming the per-instruction file that owns the detail rather than restating it. `verify-yaml-format`
+clean, `validate-crossref-keys` clean. Stays `PENDING-VALIDATION` until a KB release publishes it.
+
+### F-417 — two open-drain configurations name the wrong side of the driver, in a released manual and a released appendix — `PENDING-VALIDATION`
+
+Neither was on the v1.18.0 sweep list; both surfaced while applying it, by asking of every
+pull-vocabulary site the question §1.24 asks. Both are **fixed**; renders are owed.
+
+**(a) `p2-assembly-language-manual/opus-master/part-iii/appendix-f-smartpin-constants.md:312`** —
+an example commented *"Configure for open-drain with 1.5kΩ pull-up"* over
+`P_HIGH_FLOAT | P_LOW_1K5`. `P_LOW_1K5` is the **low-side** rung (`spin2-builtin-symbols-complete.yaml`:
+*"Drive low 1.5kΩ"*), so the 1.5 kΩ is the **sink**, not a pull-up; an I2C bus pull-up is external.
+The block also set **no DIR**, so as printed it drove nothing.
+
+**(b) `p2-io-and-smart-pins-user-guide/.../chapter-06-digital-output.md:441`** — the §6.6
+*Configuration Quick Reference* row read *"Open-drain + internal pull-up | `P_HIGH_15K` \|
+`P_LOW_FAST`"*. That configuration is **not open-drain**: with `P_HIGH_15K` the high side actively
+drives through 15 kΩ instead of floating. The row is now *"Weak-high / strong-low (open-drain
+substitute)"*, and the prose beside it says a genuine multi-master bus wants `P_HIGH_FLOAT` with an
+external pull-up. A quick-reference table is exactly where a wrong label does damage, because it is
+scanned and copied rather than read.
+
+*Why this class keeps recurring:* §1.24 made "pull-up" acceptable vocabulary, which is right — but
+the vocabulary being acceptable does not make a **composition** correct. The remaining question at
+every site is *which side drives, and does DIR let it*.
+
+### F-418 — the layout torture test is built on 44 constant names that exist in no Parallax source — `CONFIRMED` (scope decision owed)
+
+`p2-layout-torture-test/opus-master/P2-Layout-Torture-Test.md`. Measured 2026-09-10 against **every**
+ingested source under `engineering/ingestion/sources/` plus the published KB: of **63** `P_*`/`X_*`/
+`EVENT_*` symbols the document uses, **19 are real and 44 appear nowhere**.
+
+**Fixed in this pass (6 sites), because these claimed to be a symbol reference:**
+- §6.2 *"Long Unbreakable Tokens"* — all three rows were invented at 30-32 characters. **The longest
+  constant that actually exists in the P2 symbol set is 24 characters** (`X_2ADC8_16P_4DAC8_WFLONG`),
+  so the section was calibrating the width allocator against an input no real document can produce,
+  leaving the true worst case untested. That is a **validity** defect in the instrument, not a
+  cosmetic one. Now the three longest real symbols (24 / 23 / 23), and `X_2ADC8_16P_4DAC8_WFLONG` is
+  the right target for a second reason: it is the symbol that printed ON TOP of its own value in the
+  released Assembly manual, the defect behind the tables filter's token-fit branch.
+- §6.1 and two mode-table rows — `X_RFBYTE_1P_1ADC` / `X_RFBYTE_1P_1ADCb` → real analogues.
+- Two **PASM2 code** sites — `xinit ##X_RFLONG_32P` → `X_RFLONG_32P_4DAC8`. A constant that does not
+  exist inside a code listing is the least defensible instance of the class.
+
+**Still open — 44 names, and it is a scope decision, not a defect to fix silently.** The rest sit in
+the instrument's wide synthetic mode tables, whose cells are layout fodder ("HDMI and VGA framebuffer
+scan-out"). The document is an **instrument**, never published to readers, and it is *"engineered to
+reproduce every known layout defect"*. Against that, changing 44 symbols shifts column widths and
+would invalidate the `VerifiedBox` claims throughout — each of which was verified against a specific
+numbered render. **The question for the register's owner:** does the no-fabricated-names rule reach
+an instrument's test fixtures, or stop at documents a reader can obtain? Answer that once and it
+settles the whole table set; do not re-derive it per row.
 
 **And F-356's own repair changed shape.** §1.24 settled that calling `P_HIGH_15K` a "15 kΩ pull-up"
 is *acceptable vocabulary*; the KB stopped policing a word its own authority uses. What F-356 owes
@@ -1439,7 +1581,7 @@ start unasked. What «#334» fixed is only the three files it touched.
 
 ## The SETXFRQ increment rule is quoted in three files and applied in none of their pixel-rate tables — 9 wrong NCO words in the shipped KB, 8 more in a released manual (2026-08-29, «#332» release-review recomputation) — F-380
 
-### F-380 — `SETXFRQ` values computed by truncation or by `round()`, where the source requires truncate-then-increment — `RESOLVED`
+### F-380 — `SETXFRQ` values computed by truncation or by `round()`, where the source requires truncate-then-increment — `PENDING-VALIDATION`
 
 **The rule, read at the line.** *Parallax Propeller 2 Documentation* v35, Streamer NCO —
 `engineering/ingestion/sources/silicon-doc/part2-pixel-ops.txt:104-117`, with the footnote at
@@ -1504,6 +1646,21 @@ all 3 rule statements — **the workspace render was NOT edited; it regenerates 
 
 **⚠️ OWED: a Streamer Guide re-release.** The corrected values are in the master; the published
 v1.1.0 PDF still carries the 8 wrong ones. Scheduling that release is Stephen's.
+
+**Status corrected 2026-09-10: this read `RESOLVED` while its own paragraph above said a re-release
+was owed.** The legend is explicit — `RESOLVED` requires the validation to have LANDED and the
+artifact to have been READ; a fix awaiting its render is `PENDING-VALIDATION`. Left as `RESOLVED`,
+this entry reported a reader-facing defect as closed while the shipped PDF still taught the wrong
+values. That is the both-directions failure the register warns about, in its own file.
+
+**PREPARED 2026-09-10 — v1.1.1 is staged for the release wave.** `request.json` carries 1.1.1 /
+September 2026 (this manual single-sources its cover from `\DocVersion`, so that is the only
+version site), and the CHANGELOG entry states the rule as truncate-then-conditional-increment.
+**All eighteen Appendix C values were re-derived independently from the rule before the bump** —
+`floor($8000_0000 * pixel / sysclk)` plus one where the division leaves a remainder, in exact
+rational arithmetic — and matched the master at 18 of 18, with `round(` at zero occurrences. The
+caption's claim that exactly three entries divide exactly (25.000, 40.000 and 65.000 MHz, each at
+320 MHz) was confirmed by the same computation. Closes when the v1.1.1 PDF is rendered and read.
 
 ---
 
@@ -2880,7 +3037,7 @@ ENH-NNN` report line on every run so the question surfaces instead of staying si
 
 ## The "masters are clean of the drive-strength mislabel" measurement is wrong (2026-08-25, «#301») — F-356
 
-### F-356 — the drive-strength mislabel is alive in the IOSP master at 23 sites, including the one composition this sprint forbids by name — `CONFIRMED`
+### F-356 — the drive-strength mislabel is alive in the IOSP master at 23 sites, including the one composition this sprint forbids by name — `PARTIAL`
 
 **How this surfaced.** «#301» was told, as a *measured result and not an assumption*, that a
 class-wide sweep on 2026-08-24 found the manual and app-note masters **clean** of this sprint's
@@ -2920,6 +3077,38 @@ widen a roster. The two sites «#301» *did* fix are the ones inside its own ros
 deSilva `COMPLETE-OPUS-MASTER.md:294` (inside F-251's aside), and `:2881` was checked and left
 because it is already **correct** (*"No pullup/pulldown by default — Use external resistors or
 configure smart pin modes"*).
+
+**PARTIAL 2026-09-10 — the MECHANISM half is applied across IOSP and deSilva; the SOURCING half is
+not, and it is tracked by F-336.** Worked as part of the v1.18.0 sweep, under §1.24's reframing.
+
+⚠️ **§1.24 changed what the repair is, and this entry's own site counts must be read through it.**
+Calling `P_HIGH_15K` a "15 kΩ pull-up" is now *acceptable vocabulary* — the Silicon Doc uses it for
+these same rungs, and the KB deliberately carries `pull-up`/`pull-down` **aliases** so a coder
+asking the real question lands on the real answer. So the "23 mislabel sites" are no longer 23
+defects. **What was owed, and is now delivered, is the DIR caveat and the mechanism at every place
+the constants are presented:**
+- `chapter-02` — a passage before the drive tables stating the P2 has no separate pull resistors,
+  that these are drive strengths, and that every rung needs `DIR = 1`; a second note governing the
+  *Common Drive Configurations* block (those lines are mode words only); and `PINHIGH` added to the
+  two bare-`WRPIN` pull-up recipes at `:94` and `:399`.
+- `chapter-06` — `:144` now says this is an open-drain *substitute* whose high side drives rather
+  than floats, and sends a genuine multi-master bus to `P_HIGH_FLOAT` + an external pull-up; `:441`'s
+  summary row is retitled *"Weak-high / strong-low (open-drain substitute)"* (that row is **F-417(b)**).
+- `appendix-b` — the *Drive Strength - High* table now opens with the DIR/OUT rule, and the button
+  recipe carries its `PINHIGH` step.
+- `deSilva :2881` — **re-adjudicated and rewritten.** This entry records it as "already correct",
+  and against the framing of 2026-08-25 it was; under §1.24 *"no pullup/pulldown **by default**"*
+  implies a non-default internal pull, and it sent the reader to smart-pin modes when the mechanism
+  is drive strength. It now gives the answer first.
+- `part-5-appendices/index.md:221` — the index sent a reader looking up "Pull-up" to Ch. 6, when the
+  mechanism and the constant tables are in Ch. 2. Now "Ch. 2, 6", and it names them as drive-strength
+  rungs. `appendix-a-intent-index.md:56` was read and **left**: an intent-index row using the
+  vocabulary a reader actually types is the findability behaviour the KB's own aliases exist for.
+
+**STILL OPEN — the sourcing half.** `P_HIGH_15K | P_LOW_FLOAT` still has no Parallax documentary
+statement and no bench result; the manual now explains the mechanism correctly but cannot *cite* the
+composition. That is **F-336**, which owns it, and it closes with a source or a silicon run — not
+with prose. This entry stays `PARTIAL` until F-336 resolves.
 
 **What would settle it.** Nothing further to establish — the mechanism is closed (F-321 applied, the
 Pin Mode Legend cited, the idioms hardware-verified in
@@ -3006,7 +3195,7 @@ Parallax statement nor a bench result) · F-341 (the same mislabel in our own de
 > Board". Those four were left strictly alone because Stephen confirmed three numbers, not seven,
 > and «#323» would have been widening its own scope to act on them.
 
-Status: `CONFIRMED` — measured, unfixed by decision; belongs to whoever owns the IOSP manual head.
+Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and deSilva (2026-09-10, in the v1.18.0 sweep, shipping in IOSP v1.0.10); the sourcing half for `P_HIGH_15K | P_LOW_FLOAT` is still owed and is tracked by F-336.
 
 ---
 

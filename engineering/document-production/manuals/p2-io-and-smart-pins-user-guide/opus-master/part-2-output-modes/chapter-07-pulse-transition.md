@@ -268,7 +268,7 @@ Edge period = 1000 / 200MHz = 5 µs
 | 250 MHz | 250 | 2500 |
 | 350 MHz | 350 | 3500 |
 
-*The P2 datasheet gives a rated 180 MHz; the Silicon Documentation notes a practical ceiling around 350 MHz. Frequencies in between (e.g. 250 MHz) are commonly used. Operation above the rated frequency depends on cooling and duty cycle — sustained high-throughput work generates heat that limits the usable maximum. (180 MHz: P2 Datasheet; 350 MHz ceiling: Parallax Propeller 2 Documentation, Silicon Doc.)*
+*Three different limits sit behind that table, and each has a different owner. The P2 Datasheet's AC Characteristics rate the PLL system clock at **180 MHz typical** and **320 MHz maximum**, with the 180 MHz figure specified up to 105 °C. The Silicon Documentation separately notes that the PLL can be pushed to **350 MHz** in VCO/1 mode (%PPPP = 15) for fastest overclocking — an overclock ceiling, not a rating. So 250 MHz is inside the datasheet maximum but above the typical rating, and 350 MHz is outside the datasheet entirely. Operation above 180 MHz depends on cooling and duty cycle; sustained high-throughput work generates heat that limits the usable maximum. (180 MHz and 320 MHz: P2 Datasheet, AC Characteristics; 350 MHz VCO/1 ceiling: Parallax Propeller 2 Documentation.)*
 
 
 ## 7.6 Comparison: When to Use Each Mode

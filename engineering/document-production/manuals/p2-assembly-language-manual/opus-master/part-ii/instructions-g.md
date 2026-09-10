@@ -11,12 +11,12 @@ Get Breakpoint Status
 [Interrupts](#interrupts) - Retrieves breakpoint or cog status information.
 :::
 
-**GETBRK**  *Dest*  **{WC|WZ|WCZ}**
+**GETBRK**  *Dest*  **WC|WZ|WCZ**
 
 **Result:** Breakpoint or cog status information is retrieved into Dest based on the flag effect specified.
 
 - Dest is a register where the status information is written.
-- WC, WZ, or WCZ are optional effects that determine which status information is retrieved.
+- WC, WZ, or WCZ is **required** — note the absence of braces above. The flag effect is not an optional add-on that updates flags alongside a fixed result; it *selects which of three different results* GETBRK returns. GETBRK with no flag effect does not assemble.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |

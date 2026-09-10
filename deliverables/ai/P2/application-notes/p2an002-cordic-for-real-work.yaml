@@ -92,7 +92,9 @@ key_parameters:
     - "QVECTOR (X,Y) -> (length, angle) (signed)"
     - "QLOG integer -> 5.27 fixed-point log2"
     - "QEXP 5.27 fixed-point -> integer"
-  precision: "trig (rotate/vector/sin/log/exp) ~28 bits; integer ops (mul/div/sqrt) exact"
+  # F-416/F-419, 2026-09-10: the "~28 bits" figure is stated by no Parallax source and is
+  # not asserted. See architecture/cordic.yaml accuracy.trigonometric.
+  precision: "integer ops (mul/div/sqrt) exact; trig (rotate/vector/log/exp) iterative -- low bits approximate, no sourced bit count"
 
 prerequisites:
   - "Spin2 read/write, PASM2 read (throughput recipe + capstone are assembly)"

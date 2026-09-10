@@ -22,7 +22,12 @@ Every P2 I/O pin includes a complete input path with multiple conditioning optio
 
 ### Default Input Mode
 
-With no configuration (WRPIN = 0 or P_NORMAL), pins operate as standard CMOS inputs with approximately 1.65V threshold.
+With no configuration (WRPIN = 0 or P_NORMAL), pins operate as standard CMOS inputs. The datasheet states the input logic threshold not as a voltage but as a fraction of the I/O supply `Vxxyy`: minimum `Vxxyy * 0.3`, typical `Vxxyy * 0.5`, maximum `Vxxyy * 0.7`. Two consequences follow, and both matter when a design leaves the nominal case:
+
+- **The threshold is a band, not a point.** At a 3.3 V supply it spans 0.99 V to 2.31 V, with 1.65 V as the typical value. A signal that lands inside that band is not guaranteed to read either way.
+- **The threshold moves with the supply.** `Vxxyy` is itself specified 3.15 V to 3.45 V, and pin groups running on different supplies do not share a threshold.
+
+Quote 1.65 V as the typical value at 3.3 V, never as the switching point.
 
 
 ## 12.2 Reading Input State
@@ -92,7 +97,7 @@ TESTP reaches the pin a clock sooner than the INA/INB register path (the latenci
 
 ### P_LOGIC_A, P_LOGIC_A_FB, and P_LOGIC_B_FB
 
-All three present the pin as a standard CMOS logic input (~1.65V threshold). They are not interchangeable spellings of one mode — they differ along **two independent routing axes**:
+All three present the pin as a standard CMOS logic input, at the supply-referenced threshold of §12.1. They are not interchangeable spellings of one mode — they differ along **two independent routing axes**:
 
 - **Which input reaches IN.** Every smart pin has two independently-selectable input taps, **A** and **B**; each tap can read this pin, a ±1/±2/±3 neighbor, or the pin's own OUT bit (Appendix B, *A/B Input Selection*). `P_LOGIC_A` sends the **A** tap to IN; `P_LOGIC_B_FB` sends the **B** tap instead.
 - **What drives the pin's output.** Either the cog's **OUT** bit (the normal path) or the pin's own logic level **fed back** to the output. The `_FB` suffix selects that feedback path.
@@ -127,10 +132,10 @@ WRPIN(pin, P_SCHMITT_A)
 
 ### TTL Threshold (via P_LEVEL_A)
 
-There is no dedicated TTL-threshold constant. To detect a ~1.4V TTL crossing, use the programmable level comparator with a level value of 108 (1.4V ÷ 3.3V × 256 ≈ 108):
+There is no dedicated TTL-threshold constant. To detect a ~1.4V TTL crossing, use the programmable level comparator with a level value of 108, which is 1.4V expressed as a fraction of the nominal 3.3 V I/O supply (1.4 ÷ 3.3 × 256 ≈ 108). Recompute the level if `Vxxyy` is not 3.3 V — the level sets a fraction of the supply, not a voltage:
 
 ```spin2
-WRPIN(pin, P_LEVEL_A | (108 << 8))         ' ~1.4V threshold (TTL)
+WRPIN(pin, P_LEVEL_A | (108 << 8))         ' ~1.4V at Vxxyy = 3.3V
 PINFLOAT(pin)
 ```
 
@@ -147,16 +152,19 @@ Programmable level comparator input:
 ```spin2
 ' Compare against 8-bit level value
 ' Level in M[7:0] (shifted into WRPIN value)
-level := 128                               ' Mid-scale (approx 1.65V)
+level := 128                               ' Mid-scale (Vxxyy / 2)
 WRPIN(pin, P_LEVEL_A | (level << 8))
 ```
 
-**Level calculation:**
+**Level calculation:** the eight bits are a DAC level, so the threshold is a fraction of the I/O supply, not a fixed voltage:
+
 ```formula
-threshold_voltage = (level / 256) × 3.3V
+threshold_voltage = (level / 256) × Vxxyy
 ```
 
-| Level | Voltage |
+The voltages below assume the nominal `Vxxyy` of 3.3 V. On a board running the I/O supply at either end of its 3.15–3.45 V range, every row shifts with it — the *fraction* is what the level fixes.
+
+| Level | Voltage (at Vxxyy = 3.3 V) |
 |-------|---------|
 | 0 | 0.0V |
 | 64 | 0.83V |
@@ -505,6 +513,7 @@ CON
 PUB detect_voltage_ranges() : range | level, threshold
   ' Configure level comparator
   ' Test against multiple thresholds
+  ' Levels below assume Vxxyy = 3.3V; scale them to your I/O supply
 
   ' Test for >2.5V
   threshold := (250 * 256) / 330           ' 193

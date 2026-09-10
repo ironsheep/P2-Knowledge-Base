@@ -8,8 +8,8 @@
 | 499 | $1F3 | IRET2 | R/W | Interrupt 2 return address |
 | 500 | $1F4 | IJMP1 | R/W | Interrupt 1 jump address |
 | 501 | $1F5 | IRET1 | R/W | Interrupt 1 return address |
-| 502 | $1F6 | PA | R/W | Multi-purpose register A |
-| 503 | $1F7 | PB | R/W | Multi-purpose register B |
+| 502 | $1F6 | PA | R/W | CALLD-imm return, CALLPA parameter, or LOC address |
+| 503 | $1F7 | PB | R/W | CALLD-imm return, CALLPB parameter, or LOC address |
 | 504 | $1F8 | PTRA | R/W | Hub pointer A |
 | 505 | $1F9 | PTRB | R/W | Hub pointer B |
 | 506 | $1FA | DIRA | R/W | Pin direction 0-31 |

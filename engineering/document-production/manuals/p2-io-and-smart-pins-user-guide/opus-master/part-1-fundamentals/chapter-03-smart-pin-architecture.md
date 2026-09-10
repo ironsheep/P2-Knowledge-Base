@@ -77,6 +77,14 @@ Z is read via **RDPIN** or **RQPIN**. Software cannot write Z directly—it is m
 
 When a smart pin is reset (DIR transitions from 1 to 0), the registers are initialized according to the mode. Specific initialization behavior is documented in each mode's chapter.
 
+### Why Configuration Requires DIR Low
+
+Each smart pin holds **126 bits of state**, and that state is separate from the `WRPIN` configuration word. This separation is the reason behind the configure-while-`DIR`-is-low rule that runs through the rest of this book.
+
+`WRPIN` does not simply select a mode. It **multiplexes those 126 state bits** onto the subcircuit named by the five `%SSSSS` mode bits — a counter mode and a serial mode read the same physical bits as entirely different things. Issue `WRPIN` while `DIR` is high and that mapping changes underneath live state, which the Propeller 2 Documentation describes as producing "unpredictable and quite certainly useless behavior in the newly-selected smart pin mode."
+
+So the sequence is not a convention to be tidy about; it is a consequence of how the hardware is built. Lower `DIR`, write the configuration, then raise `DIR` to start the mode running on state that was initialized for it.
+
 
 ## 3.3 The IN Bit - Event Signaling
 

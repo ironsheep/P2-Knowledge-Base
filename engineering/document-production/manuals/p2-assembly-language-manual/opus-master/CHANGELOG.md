@@ -1,5 +1,27 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.8 (2026-09-10)
+
+**Every clock figure, flag effect and special-register role names what it actually is**, and the smart-pin section says how a pull is really made.
+
+### Added
+
+- **A drive-strength passage opens the smart-pin architecture section**: the high side and the low side each select one rung of the same eight-rung ladder, from a fast digital drive down to float
+- **`P_HIGH_15K` with `DIR=1` and `OUT=1` is a 15 kΩ path to VIO** — a pull-up in every sense that matters to the circuit
+- **A drive selection is a property of driving**: with DIR low the pin is a high-impedance input and the selection does nothing
+- **The sixteen event sources carry their numbers**, 0 through 15, which are the codes `SETINT1/2/3` take
+- **`SETINTx` code 0 means `<off>`**, the default on cog start, and is distinguished from event 0 ("an interrupt occurred"), which is pollable but not selectable as an interrupt source
+- **`COGINIT` names `-1` as `NEWTASK`**, not a cog target: it arrives as `%11_1111` and starts an even/odd cog **pair**, so `COGEXEC_NEW` or `HUBEXEC_NEW` is what starts one free cog
+
+### Changed
+
+- **The P1/P2 comparison gives the PLL system clock as 180 MHz typical and 320 MHz maximum**, from the datasheet's AC Characteristics, and its footnote attributes 350 MHz to the Silicon Documentation as the VCO/1 overclock ceiling, where stability is application-dependent
+- **External-clock mode keeps its two limits apart**: DC–200 MHz direct drive into XI, and the 320 MHz system clock the PLL produces from that input
+- **`ADDS` and `ADDSX` state C as the true sign of the sum at full precision**, not `Result[31]`; the two diverge exactly on overflow, which is the condition `TJV` exists to detect
+- **`GETBRK` requires a flag effect**, and the flag selects which of three different results is returned — the syntax line carries no braces
+- **`PA` and `PB` name their roles** — CALLD-immediate return, `CALLPA`/`CALLPB` parameter, or `LOC` address — across the register reference and both appendices
+- **The Appendix F open-drain example names the side each constant drives**: `P_HIGH_FLOAT | P_LOW_1K5` floats when OUT=1 and sinks through 1.5 kΩ when OUT=0, with the bus pull-up external, and it sets DIR so the drive selection acts
+
 ## v3.1.7 (2026-08-22)
 
 **Every streamer constant reads the way its name is built**, and the examples carry the setup that makes them run.

@@ -141,7 +141,7 @@ If external pull-up isn't available, use internal resistive drive:
 WRPIN(pin, P_HIGH_15K | P_LOW_FAST)       ' 15kΩ pull-up when high
 ```
 
-Note: Internal pull-ups are weaker than typical external pull-ups and may not meet bus specifications for higher speeds.
+Note that this is a substitute for open-drain, not open-drain itself: with `P_HIGH_15K` the high side actively drives through 15 kΩ rather than floating. That is fine when the P2 is the only device that can pull the line up, and it is weaker than a typical external pull-up, so it may not meet bus specifications at higher speeds. On a genuine multi-master bus, where another device must be able to hold the line low against everything else on it, use `P_HIGH_FLOAT` with an external pull-up.
 
 ### Open-Source Output
 
@@ -438,7 +438,7 @@ PUB step_reverse(steps) | i
 | Push-pull (standard) | `P_HIGH_FAST` \| `P_LOW_FAST` |
 | Push-pull (current limit) | `P_HIGH_1K5` \| `P_LOW_1K5` |
 | Open-drain | `P_HIGH_FLOAT` \| `P_LOW_FAST` |
-| Open-drain + internal pull-up | `P_HIGH_15K` \| `P_LOW_FAST` |
+| Weak-high / strong-low (open-drain substitute) | `P_HIGH_15K` \| `P_LOW_FAST` |
 | Open-source | `P_HIGH_FAST` \| `P_LOW_FLOAT` |
 | Inverted | `P_INVERT_OUTPUT` |
 | LED current source | `P_HIGH_1MA` \| `P_LOW_FAST` |

@@ -291,7 +291,7 @@ init    setxfrq ##FREQ              ' set NCO frequency for the streamer
         wxpin   ##1, #BASE
         dirh    #BASE
         rdfast  #0, ptra            ' point FIFO at the source buffer
-        xinit   ##X_RFLONG_32P, #0  ' begin streaming, 32 pins per transfer
+        xinit   ##X_RFLONG_32P_4DAC8, #0  ' begin streaming, 32 pins per transfer
 .loop   xcont   m_rf, #0            ' stream one block of data
         testb   ina, #STATUS  wc    ' sample a status pin into C
    if_c jmp     #.fault             ' branch out on fault
@@ -304,7 +304,7 @@ init    setxfrq ##FREQ              ' set NCO frequency for the streamer
         jmp     #recover
 recover mov     count, ##BLOCKS     ' reload the block counter
         rdfast  #0, ptra            ' re-point the FIFO
-        xinit   ##X_RFLONG_32P, #0  ' restart the stream
+        xinit   ##X_RFLONG_32P_4DAC8, #0  ' restart the stream
         jmp     #.loop
 ```
 
@@ -592,7 +592,7 @@ Table: Streamer transfer modes --- the full mode matrix (a breaking table, capti
 | WFWORD | X_WRWORD_2P | 16 | pins | FIFO | dual input |
 | WFLONG | X_WRLONG_4P | 32 | pins | FIFO | quad input |
 | DDS/Goertzel | X_1P_1DAC1_WFBYTE | 1 | FIFO | DAC+ADC | sampling |
-| ADC 8b | X_RFBYTE_1P_1ADC | 8 | ADC | FIFO | scope mode |
+| ADC 8b | X_RFBYTE_1P_1DAC1 | 8 | ADC | FIFO | scope mode |
 | Pins 1b | X_1ADC8_0P | 1 | ADC | FIFO | bit capture |
 | Pins 2b | X_2ADC8_0P | 2 | ADC | FIFO | dual ADC |
 | Pins 4b | X_4ADC8_0P | 4 | ADC | FIFO | quad ADC |
@@ -634,7 +634,7 @@ Table: Streamer transfer modes --- the full mode matrix (a breaking table, capti
 | RF bit | X_RFBYTE_RGBI1b | 1 | FIFO | pins | palette1 |
 | WF nibble | X_WRBYTE_4P | 8 | pins | FIFO | quad capture |
 | WF crumb | X_WRBYTE_8P | 8 | pins | FIFO | octal capture |
-| Scope 8 | X_RFBYTE_1P_1ADCb | 8 | ADC | FIFO | scope basic |
+| Scope 8 | X_RFBYTE_2P_1DAC2 | 8 | ADC | FIFO | scope basic |
 | Scope 16 | X_RFWORD_2P_2ADC | 16 | ADC | FIFO | scope wide |
 | Scope 32 | X_RFLONG_4P_4ADC | 32 | ADC | FIFO | scope full |
 | Goertzel 1 | X_1P_1DAC1_GOERTZEL | 1 | FIFO | DAC+ADC | tone detect |
@@ -706,7 +706,7 @@ pandoc's narrow defaults.
 | Mode | Mnemonic | Bits/Clk | DAC Channels | Pin Group | NCO Source | Event Raised | Typical Application | Companion Instruction | Reset Behavior |
 |------|----------|---------|--------------|-----------|------------|--------------|---------------------|-----------------------|----------------|
 | RGB24 video output | X_RFLONG_RGB24 | 24 | DAC0–DAC3 differential | pins 0–31 selectable | XFRQ accumulator high bits | XFI on buffer empty | HDMI and VGA framebuffer scan-out | SETXFRQ before XINIT | clears on XINIT reload |
-| ADC scope sampling | X_RFBYTE_1P_1ADC | 8 | single DAC feedback | pins 8–15 group | XFRQ paced sample clock | XMT on block done | oscilloscope capture front-end | RDFAST to stage buffer | continues across XCONT |
+| ADC scope sampling | X_RFBYTE_1P_1DAC1 | 8 | single DAC feedback | pins 8–15 group | XFRQ paced sample clock | XMT on block done | oscilloscope capture front-end | RDFAST to stage buffer | continues across XCONT |
 | Goertzel tone detect | X_1P_1DAC1_WFBYTE | 1 | DAC0 stimulus only | pin 0 stimulus + sense | XFRQ sets bin frequency | XRL on accumulation | single-frequency lock-in detection | SETSE for sense routing | accumulators zeroed on reload |
 
 ## 6.2 Long Unbreakable Tokens in a Narrow Column
@@ -718,14 +718,21 @@ widens to fit its longest symbol --- the symbol is never split, and it no longer
 column or overlaps the description to its right. Verified in the v20 render: the symbol/description
 width allocator now sizes column 1 to its longest unbreakable token (capped so the description keeps
 a readable half).
+
+These are the three longest constants that actually exist in the P2 symbol set --- 24, 23 and 23
+characters. Earlier revisions of this section used invented 30-to-32-character names, which stressed
+a width no real document can produce and left the true worst case untested. X_2ADC8_16P_4DAC8_WFLONG
+is the right calibration target for a further reason: it is the symbol that printed ON TOP of its own
+value in the released Assembly manual (the defect behind the tables filter's token-fit branch), so
+this row is a regression test with a real failure behind it.
 \end{VerifiedBox}
 ```
 
 | Symbol | Description |
 |--------|-------------|
-| X_RFLONG_32P_4DAC8_DIFFERENTIAL | a deliberately long constant name with no natural break points |
-| P_OE_FLOAT_LOW_1K5_PULLUP_FILTER | another long symbol that cannot wrap on spaces |
-| EVENT_STREAMER_FIFO_EMPTY_INT1 | a long event-source symbol |
+| X_2ADC8_16P_4DAC8_WFLONG | the longest constant name in the P2 symbol set, with no natural break points |
+| X_4ADC8_0P_4DAC8_WFLONG | another of the longest, one character shorter |
+| X_2ADC8_0P_2DAC8_WFWORD | a third at the same width, to prove the allocator sizes to the family |
 
 ```{=latex}
 \clearpage

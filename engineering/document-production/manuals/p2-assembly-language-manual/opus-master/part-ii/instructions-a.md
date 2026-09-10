@@ -188,7 +188,7 @@ ADDS sums the two signed values of Dest and Src together and stores the result i
 
 If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended). Use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value, negative or positive.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative (the true sign of the signed sum, Result[31] = 1), or is cleared (0) if the result is non-negative. C carries the true sign of the result; it is not a signed-overflow indicator.
+If the WC or WCZ effect is specified, the C flag is set (1) if the signed sum is negative — the true sign of (Dest + Src) at full precision — or is cleared (0) if it is non-negative. C carries the true sign of the result; it is not a signed-overflow indicator, and it is not Result[31]. The two agree except when the signed sum overflows 32 bits, which is exactly the case where Result[31] misreports the sign.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero.
 
@@ -225,7 +225,7 @@ Add Signed Extended
 
 ADDSX sums the signed values of Dest and Src plus C together and stores the result into the Dest register. The ADDSX instruction is used to perform signed multi-long (extended) addition, such as 64-bit addition.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative (Result[31] = 1), or is cleared (0) if positive. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag state.
+If the WC or WCZ effect is specified, the C flag is set (1) if the signed sum is negative — the true sign of (Dest + Src + C) at full precision — or is cleared (0) if it is non-negative. **C is not Result[31].** The two differ exactly when the signed sum overflows 32 bits, which is the condition [TJV](#tjv) exists to detect; taking C as the result's top bit is wrong in precisely the case that matters. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag state.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest + Src + C is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper final Z flag state. This allows detection of a zero result across the entire multi-long value.
 

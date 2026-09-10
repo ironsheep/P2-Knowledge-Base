@@ -139,7 +139,7 @@ int1_handler
 
 ### PA {#pa}
 
-Address $1F6. Multi-purpose register A. Serves multiple special functions or can be used as general RAM.
+Address $1F6. Holds the CALLD-immediate return address, the parameter passed by CALLPA, or an address stored by LOC. Can be used as general RAM when none of those functions is needed.
 
 **Access**: Read/Write
 
@@ -167,7 +167,7 @@ When these functions are not needed, PA can be used as general-purpose cog RAM.
 
 ### PB {#pb}
 
-Address $1F7. Multi-purpose register B. Serves multiple special functions or can be used as general RAM.
+Address $1F7. Holds the CALLD-immediate return address, the parameter passed by CALLPB, or an address stored by LOC. Can be used as general RAM when none of those functions is needed.
 
 **Access**: Read/Write
 

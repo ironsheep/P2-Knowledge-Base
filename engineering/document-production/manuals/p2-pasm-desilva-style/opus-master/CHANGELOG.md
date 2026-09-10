@@ -1,5 +1,17 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.7 (2026-09-10)
+
+**How you actually pull a line high on this chip, and the cog-launch idiom that costs you a second cog.**
+
+### Changed
+
+- **Pin Basics** now says the P2 has no separate pullup/pulldown resistors and shows what to do instead: give the pin a resistive drive strength (`P_HIGH_15K`) and *drive* it high (`DIR=1, OUT=1`) for a 15 kΩ path to VIO — with the warning that leaving DIR low makes the pin a floating input and the pull do nothing
+
+### Added
+
+- **`-1` is not "any free cog"** (Starting Cogs): the P1 idiom reaches COGINIT as `$FFFF_FFFF`, whose low six bits read `%111111` and start an even/odd **pair**, returning the even one — `COGEXEC_NEW` is the symbol that means "any free cog", and `-1` is what comes *back* when a launch fails
+
 ## v3.0.6 (2026-08-16)
 
 **An honest platform comparison, and the multi-cog hazard that costs a debugging session.**

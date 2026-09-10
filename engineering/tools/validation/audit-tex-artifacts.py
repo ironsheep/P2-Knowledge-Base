@@ -220,6 +220,16 @@ def main(argv):
         if not Path(p).is_file():
             print(f"SKIP (not a file): {p}")
             continue
+        # This gate reads the GENERATED .tex, which is the only artifact where
+        # "what LaTeX actually received" is visible. Handed a master .md it
+        # reports every legitimate ```pasm2 fence as a leaked artifact -- 1117
+        # false findings across the Assembly manual's nine masters, 2026-09-10.
+        # A gate pointed at the wrong artifact must refuse, not answer: a wall
+        # of noise is how a real finding gets scrolled past.
+        if Path(p).suffix.lower() != ".tex":
+            print(f"ERROR: {p} is not a .tex -- this gate reads the generated "
+                  f".tex handed back by the Forge, not the authored master.")
+            return 2
         try:
             findings = scan(p)
         except OSError as e:

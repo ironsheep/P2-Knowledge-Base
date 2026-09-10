@@ -309,9 +309,11 @@ Constants are combined using OR operations to build the complete configuration:
 ### Open-Drain Output (I2C-style)
 
 ```pasm2
-' Configure for open-drain with 1.5kΩ pull-up
+' Open-drain: floats when OUT=1, sinks through 1.5k when OUT=0.
+' The bus pull-up is external — the 1.5k here is the LOW-side drive.
         mov     mode, ##P_HIGH_FLOAT | P_LOW_1K5
         wrpin   mode, #44
+        dirh    #44                 ' Drive acts only with DIR high
 ```
 
 ### Schmitt Trigger Input with Filter

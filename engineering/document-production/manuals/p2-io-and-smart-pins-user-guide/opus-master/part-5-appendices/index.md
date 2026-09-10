@@ -218,7 +218,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **PINSTART** - Configure and start (Spin2), Ch. 4
 - **PINWRITE** - Write pin value (Spin2), Ch. 4, 6
 - **PRNG dithering** - Random DAC dither, Ch. 18
-- **Pull-up/pull-down** - P_HIGH_15K, P_LOW_15K, etc., Ch. 6
+- **Pull-up/pull-down** - drive-strength rungs, not resistors: P_HIGH_15K, P_LOW_15K, etc., Ch. 2, 6
 - **Pulse measurement** - P_HIGH_TICKS, Ch. 13
 - **Pulse output** - P_PULSE mode, Ch. 7
 - **PWM** - Pulse Width Modulation, Ch. 9

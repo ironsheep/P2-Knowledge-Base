@@ -631,6 +631,11 @@ Three details that generalize:
 
 - `NEWCOG` means "any free cog" — you usually don't care which one. `cogspin` returns
   the cog number it actually used (or −1 if all eight were busy).
+- That −1 travels in one direction only. It is what you get *back* on failure, never
+  something you pass *in*. If you meet `coginit(-1, ...)` in older or P1-shaped code, it
+  is not asking for "any free cog": the value arrives as `$FFFF_FFFF`, whose low six
+  bits read as `%111111`, and that starts an even/odd **pair** of cogs — quietly using
+  two where one was meant. `NEWCOG` is the symbol that means "any free one".
 - The new cog needs a little **stack** space in hub to work with; that's the
   `long stack[64]` we hand it with `@stack` (the `@` means "the address of").
 - `blink` is written once and used by both cogs. A `PUB` method is the public face of

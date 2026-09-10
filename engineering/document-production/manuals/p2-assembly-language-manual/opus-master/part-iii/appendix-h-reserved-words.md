@@ -427,8 +427,8 @@ Can be used as general RAM or special registers depending on enabled features:
 - **IRET2** - interrupt 2 return address ($1F3, 499)
 - **IJMP1** - interrupt 1 jump address ($1F4, 500)
 - **IRET1** - interrupt 1 return address ($1F5, 501)
-- **PA** - Multi-purpose register A ($1F6, 502)
-- **PB** - Multi-purpose register B ($1F7, 503)
+- **PA** - CALLD-imm return, CALLPA parameter, or LOC address ($1F6, 502)
+- **PB** - CALLD-imm return, CALLPB parameter, or LOC address ($1F7, 503)
 
 ### Fixed Special Registers ($1F8-$1FF)
 

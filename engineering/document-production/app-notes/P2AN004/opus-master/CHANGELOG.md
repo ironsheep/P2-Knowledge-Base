@@ -1,5 +1,13 @@
 # P2AN004 Changelog: Frequency / Rotation / RC-Timing Measurement
 
+## v1.0.3 (2026-09-10)
+
+**Each half of the RC-timing pin configuration names the job it does.** No instruments added.
+
+### Changed
+
+- **`P_OE | P_LOW_FLOAT` is explained by its parts**: `P_LOW_FLOAT` selects *float* as the low-side drive strength, leaving the high side at its default fast drive, and `P_OE` is documented as *"enable output in smart pin mode, regardless of DIR"* — which is what lets the smart pin work the output without the DIR handling a plain drive-strength configuration would need
+
 ## v1.0.2 (2026-08-08)
 
 A licensing change. No technical content changed.

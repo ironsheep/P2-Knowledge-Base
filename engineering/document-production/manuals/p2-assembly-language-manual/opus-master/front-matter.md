@@ -21,9 +21,9 @@
 \vspace{0.3cm}
 {\Large\itshape Complete PASM2 Instruction Set Documentation\par}
 \vspace{0.6cm}
-{\large August 2026\par}
+{\large September 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 3.1.7\par}
+{\large\color{blue}Version 3.1.8\par}
 
 \vfill
 \begin{tcolorbox}[
@@ -141,7 +141,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 
 | | P1 | P2 |
 |---|---|---|
-| Clock | 80 MHz | 180 MHz recommended; 250 MHz typical overclock; 350 MHz absolute max¹ |
+| Clock | 80 MHz | 180 MHz typical; 320 MHz datasheet maximum¹ |
 | Clocks/Instruction | 4 | 2 |
 | Hub RAM | 32 KB | 512 KB |
 | Cog RAM | 512 longs | 512 + 512 LUT |
@@ -150,7 +150,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 | Interrupts | None | 3 per Cog |
 | Instructions | ~60 | ~380 |
 
-¹ Per P2 Datasheet. Higher frequencies require adequate thermal management.
+¹ The P2 Datasheet's AC Characteristics give the PLL system clock as 3.33 MHz minimum, 180 MHz typical, 320 MHz maximum, with the nominal 180 MHz rating specified up to 105 °C. Beyond the datasheet, the Silicon Documentation notes that the PLL can be pushed to 350 MHz using VCO/1 mode (%PPPP = 15) for fastest overclocking — that figure is an overclock ceiling, not a rated maximum, and stability there is application-dependent. Higher frequencies require adequate thermal management. Chapter 4 covers clock configuration in full.
 
 **Architecture That Transfers**
 

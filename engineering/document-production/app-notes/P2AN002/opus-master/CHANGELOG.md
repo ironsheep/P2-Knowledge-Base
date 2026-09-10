@@ -1,5 +1,15 @@
 # P2AN002 Changelog: CORDIC for Real Work
 
+## v1.0.4 (2026-09-10)
+
+**Each timing and precision figure is stated to the scope its source supports.** No recipes added.
+
+### Changed
+
+- **The eight-clock turn is named to the part**: the issue interval equals the part's cog count, and the P2X8C4M64P has eight, so neither the turn nor the 55-clock latency shrinks when fewer cogs are running
+- **Trigonometric precision is described rather than counted**: the integer operations are exact, the iterative ones leave the low bits approximate, and no Parallax source states a bit figure for that residual — so the note asks the reader to measure it against their own tolerance
+- **The hub-access pitfall states what its measurement establishes**: it locates *where* results are lost, not *why*, and reads as the tested shape rather than a general law about hub access near the CORDIC
+
 ## v1.0.3 (2026-08-16)
 
 **The pipelining recipe keeps hub access out of both CORDIC loops** — the shape that was measured clean on silicon.

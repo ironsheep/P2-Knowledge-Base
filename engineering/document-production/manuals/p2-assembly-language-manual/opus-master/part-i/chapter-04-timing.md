@@ -17,7 +17,7 @@ The P2 provides four clock source options, each suited to different application 
 
 **Crystal oscillator** mode connects an external crystal (typically 10-20 MHz) between the XI and XO pins. The P2 includes internal feedback resistors and programmable loading capacitors, simplifying crystal circuit design. Crystal sources provide the stability needed for precise timing, communication protocols, and frequency synthesis.
 
-**External clock** mode accepts an external clock signal on the XI pin, supporting frequencies up to the device's rated system-clock maximum (180 MHz typical, 320 MHz extended per the spec sheet). Note that 350 MHz is the PLL overclock ceiling (VCO/1 mode, see §4.1.2), not the direct external-input range. This mode allows the P2 to synchronize with external timing sources or use specialized oscillators.
+**External clock** mode accepts an external clock signal on the XI pin. Two different limits apply here and it is worth keeping them apart: the P2 Datasheet rates *direct drive into XI* at DC–200 MHz, while the *system clock* the PLL produces from that input is rated 180 MHz typical and 320 MHz maximum. The input ceiling is the lower of the two. Note that 350 MHz is the PLL overclock ceiling (VCO/1 mode, see §4.1.2) — neither a datasheet rating nor the direct external-input range. This mode allows the P2 to synchronize with external timing sources or use specialized oscillators.
 
 ### 4.1.2 PLL Multiplication
 

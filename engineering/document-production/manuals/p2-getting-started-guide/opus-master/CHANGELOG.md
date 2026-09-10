@@ -10,6 +10,16 @@ commits). Newest entry first.
 
 ---
 
+## v1.0.4 (2026-09-10)
+
+**The one cog-launch value that means the opposite of what it looks like.**
+
+### Added
+
+- **The `-1` return travels in one direction only** (Running Code on Another Cog): it is what `cogspin` returns on failure, never a value you pass in. `coginit(-1, ...)` — the idiom carried over from P1 code — arrives as `$FFFF_FFFF`, whose low six bits read `%111111`, and starts an even/odd **pair** of cogs, quietly spending two where one was meant. `NEWCOG` is the symbol that means "any free cog"
+
+---
+
 ## v1.0.3 (2026-08-08)
 
 A licensing change. No technical content changed.

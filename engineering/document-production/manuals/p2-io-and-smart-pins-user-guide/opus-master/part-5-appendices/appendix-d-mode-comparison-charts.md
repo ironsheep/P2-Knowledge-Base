@@ -116,7 +116,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 | Simple frequency count | P_COUNTER_PERIODS | Direct Hz reading with 1s gate |
 | Precise period | P_PERIODS_TICKS | Clock-accurate over N periods |
 | Unknown frequency | P_COUNTER_PERIODS | Time-windowed, consistent rate |
-| Duty cycle | P_PERIODS_HIGHS + P_PERIODS_TICKS | Both measurements needed |
+| Duty cycle | P_PERIODS_HIGHS *and* P_PERIODS_TICKS, on two pins | Two separate measurements — the modes are mutually exclusive |
 | RPM measurement | P_COUNTER_PERIODS | 100ms-1s gate time |
 | Oscillator calibration | P_PERIODS_TICKS | Many periods for ppm accuracy |
 
