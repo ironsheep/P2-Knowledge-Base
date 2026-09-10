@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-420`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-421`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,50 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## A release gate could not reach a fixpoint: satisfying it re-broke it, because its own fix is a commit it reads (2026-09-10, manual-head gate-runner wiring) — F-420
+
+### F-420 — `sync-manual-examples.py` derives `Updated` from the file's git mtime, so committing its own fix re-breaks the gate — `CONFIRMED`
+
+Found 2026-09-10 while wiring the manual-head gate runner. Not a content defect: a **gate that
+cannot reach a fixpoint**, which trains people to ignore it.
+
+**The mechanism.** `sync-manual-examples.py:372` sets the header's `Updated....` field from
+`git log -1 --format=%ad --date=format:'%b %Y' -- */<name>` — the last commit that touched the
+FILE. A header re-sync is itself a commit that touches the file. So:
+
+1. version bumps → `--check` reads RED → sync writes `Updated.... Aug 2026`
+2. commit the synced file → its last-touching commit is now **September**
+3. `--check` reads RED again, wanting `Sep 2026` — immediately after doing the right thing
+
+Reproduced 2026-09-10 across all three corpus-shipping manuals: Getting Started (4 files),
+deSilva (3) and I/O & Smart Pins (15) all went GREEN, were committed, and read RED on the next
+run. 22 files, one line each, `Aug 2026` → `Sep 2026`.
+
+**The tool anticipated this and the mitigation is incomplete.** Its own comment at :368 says
+month granularity was chosen so that *"the tool would not be idempotent across a commit … a month
+changes rarely and only when the body actually changed in a new month."* The second half is
+false. `git log -1 -- <file>` returns the last commit touching the file **including a header-only
+commit**, so the field moves whenever a re-sync crosses a month boundary — which is exactly what a
+release does, because a release is when the version bumps. The mitigation reduces the frequency to
+once per month boundary; it does not remove the class.
+
+**Why it matters more than one stale line.** This gate is now BLOCKING in
+`validate-manual-release.py --phase prepare`. A blocking gate that goes red immediately after
+being satisfied is the fastest way to teach an operator to skip it — the same failure the
+non-blocking KNOWN tier exists to avoid elsewhere in that runner.
+
+**The fix (not applied — it rewrites 22 shipped headers and wants its own verification pass).**
+Derive `Updated` from the last commit that changed the file's **body**, not the file. The tool
+already splits header from body to rebuild the header, and `verify-example-corpus-identity.py`
+already compares bodies, so the concept exists on both sides: walk `git log --format=%H -- <file>`
+newest-first, strip each revision's header, and take the first commit whose body differs from its
+parent's. Prove it with a negative control — a body-only change must move the field, a header-only
+commit must not.
+
+**Interim state:** the 22 headers were re-synced to `Sep 2026` and committed, so the gate is green
+and stays green for the remainder of September 2026. It will go red again at the first release
+that crosses into October.
 
 ## The manuals were audited against the v1.18.0 delta at the FACT level, not the path level, and eight corrections were located that the path intersection could not see (2026-09-09, post-release manual sweep, applied 2026-09-10) — F-408…F-419
 
