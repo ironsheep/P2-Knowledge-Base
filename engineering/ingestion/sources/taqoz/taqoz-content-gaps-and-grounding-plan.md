@@ -1,7 +1,8 @@
 # TAQOZ Forth / ROM Monitor — Content Gaps & Grounding Plan
 
 **Created:** 2026-06-13 (surfaced during the F-115 shipped-YAML self-sufficiency sweep)
-**Status:** ⚠️ Preliminary — needs proper ingestion before the shipped YAML can be called fully grounded.
+**Status:** 🟡 **Partly grounded 2026-09-10** — the ROM listing has been mined; the Jakacki
+half is still not runnable. See *Grounding progress* below before planning any work here.
 
 ## Why this doc exists
 
@@ -20,6 +21,38 @@ sound; the **interactive-Forth/Monitor capability detail** is what needs groundi
 - `taqoz-web-research-preliminary.md` — **direction-finding only, NOT a source for facts.**
 - `taqoz-narrative.txt` — narrative summary.
 - **Not yet here:** Peter Jakacki's `TAQOZ.spin2` source; an extraction of the ROM dictionary.
+
+## Grounding progress — 2026-09-10
+
+**Mined the ROM listing. Two of the plan's four sources are now answered from the ROM itself.**
+
+🔴 **First, a correction that changes what "the ROM listing" means.** This plan named
+`ROM_Booter.lst`. That is the **FPGA** build (`ver = "A"`, *Prop123-A9 / BeMicro-A9*). The chip's
+ROM is **`rom_booter_v33_01j.lst`** (`ver = "G"`, *Prop2 Silicon v2*) — same source v141,
+different build target, ~3,300 lines apart. Mining the file this plan named would have described
+a ROM that is not in the chip. Filed as **F-421**; all work below reads the silicon listing.
+
+**Produced, in `sources/rom-booter/`:**
+
+| Artifact | Answers |
+|---|---|
+| `taqoz-rom-dictionary.md` + `romdict-data.json` | *"the actual TAQOZ word dictionary"* — **432 words**, 50 immediate, with addresses and code targets, plus **17 words commented OUT** and therefore not in ROM. Self-checked: all 432 rebuilt names match the length the listing declares independently. |
+| `rom-monitor-command-grammar.md` | *"the ROM Monitor command parser (full command grammar; modify-command syntax)"* — the complete 8-command dispatch, the `[xxxxxx]<cmd>` line format, case-insensitivity, and the digit-count rule that distinguishes cog/LUT from hub. **The modify command is `:`** (Download); there is no separate examine-and-alter syntax. |
+| `rom-facility-map.md` | Stephen's question — *what facilities are in the ROM that we should be documenting* — as an address map of the 16 KB. |
+
+**ROM TAQOZ is v33h** (`taqoz_name`, `$FD054`; `taqoz_version = 1_1`). That settles the shape of
+the ROM-versus-Reloaded question: **Reloaded 2.8's glossary is a superset claim** against v33h and
+must be filtered by the 432-word list, not merged with it.
+
+**Still not runnable:** Jakacki's `TAQOZ.spin2` is still absent from the repo, so plan item 2
+cannot proceed. It is now needed for *less* than before — the dictionary and Monitor grammar are
+answered from the ROM — but the **word-level semantics** (what each of the 432 words does, and
+their stack effects) are not, and that is what item 2 was really for.
+
+**Deliberately not done:** the dictionary carries names, addresses, targets and the immediate
+flag. It does **not** carry semantics or stack effects, because those live in the code at each
+target address and this pass did not read them. Nothing about a word's behaviour may be inferred
+from its name.
 
 ## Primary sources to ingest (the grounding plan)
 

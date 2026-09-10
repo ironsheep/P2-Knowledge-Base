@@ -1,0 +1,3516 @@
+{
+ "source": "rom_booter_v33_01j.lst (ver=\"G\" Prop2 Silicon v2; source v141, 2018-05-27)",
+ "extracted": "2026-09-10",
+ "word_count": 432,
+ "words": [
+  {
+   "addr": "ff466",
+   "len": 3,
+   "immediate": false,
+   "name": "DUP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "DUP"
+  },
+  {
+   "addr": "ff46c",
+   "len": 4,
+   "immediate": false,
+   "name": "OVER",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "OVER"
+  },
+  {
+   "addr": "ff473",
+   "len": 4,
+   "immediate": false,
+   "name": "SWAP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "SWAP"
+  },
+  {
+   "addr": "ff47a",
+   "len": 3,
+   "immediate": false,
+   "name": "ROT",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "ROT"
+  },
+  {
+   "addr": "ff480",
+   "len": 4,
+   "immediate": false,
+   "name": "-ROT",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "ROT2"
+  },
+  {
+   "addr": "ff487",
+   "len": 4,
+   "immediate": false,
+   "name": "DROP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "DROP"
+  },
+  {
+   "addr": "ff48e",
+   "len": 3,
+   "immediate": false,
+   "name": "3RD",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "THIRD"
+  },
+  {
+   "addr": "ff494",
+   "len": 3,
+   "immediate": false,
+   "name": "4TH",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "FOURTH"
+  },
+  {
+   "addr": "ff49a",
+   "len": 5,
+   "immediate": false,
+   "name": "2DROP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "DROP2"
+  },
+  {
+   "addr": "ff4a2",
+   "len": 5,
+   "immediate": false,
+   "name": "3DROP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "DROP3"
+  },
+  {
+   "addr": "ff4aa",
+   "len": 3,
+   "immediate": false,
+   "name": "NIP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "NIP"
+  },
+  {
+   "addr": "ff4b0",
+   "len": 5,
+   "immediate": false,
+   "name": "2SWAP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "DSWAP"
+  },
+  {
+   "addr": "ff4b8",
+   "len": 4,
+   "immediate": false,
+   "name": "2DUP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "DUP2"
+  },
+  {
+   "addr": "ff4bf",
+   "len": 4,
+   "immediate": false,
+   "name": "?DUP",
+   "listing_banner": "(before the listing's first banner)",
+   "target": "QDUP"
+  },
+  {
+   "addr": "ff4c6",
+   "len": 3,
+   "immediate": false,
+   "name": "AND",
+   "listing_banner": "BITWISE LOGIC",
+   "target": "_AND"
+  },
+  {
+   "addr": "ff4cc",
+   "len": 4,
+   "immediate": false,
+   "name": "ANDN",
+   "listing_banner": "BITWISE LOGIC",
+   "target": "_ANDN"
+  },
+  {
+   "addr": "ff4d3",
+   "len": 2,
+   "immediate": false,
+   "name": "OR",
+   "listing_banner": "BITWISE LOGIC",
+   "target": "_OR"
+  },
+  {
+   "addr": "ff4d8",
+   "len": 3,
+   "immediate": false,
+   "name": "XOR",
+   "listing_banner": "BITWISE LOGIC",
+   "target": "_XOR"
+  },
+  {
+   "addr": "ff4de",
+   "len": 3,
+   "immediate": false,
+   "name": "ROL",
+   "listing_banner": "SHIFT",
+   "target": "_ROL"
+  },
+  {
+   "addr": "ff4e4",
+   "len": 3,
+   "immediate": false,
+   "name": "ROR",
+   "listing_banner": "SHIFT",
+   "target": "_ROR"
+  },
+  {
+   "addr": "ff4ea",
+   "len": 2,
+   "immediate": false,
+   "name": ">>",
+   "listing_banner": "SHIFT",
+   "target": "_SHR"
+  },
+  {
+   "addr": "ff4ef",
+   "len": 2,
+   "immediate": false,
+   "name": "<<",
+   "listing_banner": "SHIFT",
+   "target": "_SHL"
+  },
+  {
+   "addr": "ff4f4",
+   "len": 3,
+   "immediate": false,
+   "name": "SAR",
+   "listing_banner": "SHIFT",
+   "target": "_SAR"
+  },
+  {
+   "addr": "ff4fa",
+   "len": 2,
+   "immediate": false,
+   "name": "2/",
+   "listing_banner": "SHIFT",
+   "target": "_SHR1"
+  },
+  {
+   "addr": "ff4ff",
+   "len": 2,
+   "immediate": false,
+   "name": "2*",
+   "listing_banner": "SHIFT",
+   "target": "_SHL1"
+  },
+  {
+   "addr": "ff504",
+   "len": 2,
+   "immediate": false,
+   "name": "4/",
+   "listing_banner": "SHIFT",
+   "target": "_SHR2"
+  },
+  {
+   "addr": "ff509",
+   "len": 2,
+   "immediate": false,
+   "name": "4*",
+   "listing_banner": "SHIFT",
+   "target": "_SHL2"
+  },
+  {
+   "addr": "ff50e",
+   "len": 3,
+   "immediate": false,
+   "name": "8<<",
+   "listing_banner": "SHIFT",
+   "target": "_SHL8"
+  },
+  {
+   "addr": "ff514",
+   "len": 4,
+   "immediate": false,
+   "name": "16>>",
+   "listing_banner": "SHIFT",
+   "target": "_SHR16"
+  },
+  {
+   "addr": "ff51b",
+   "len": 3,
+   "immediate": false,
+   "name": "8>>",
+   "listing_banner": "SHIFT",
+   "target": "_SHR8"
+  },
+  {
+   "addr": "ff521",
+   "len": 3,
+   "immediate": false,
+   "name": "9<<",
+   "listing_banner": "SHIFT",
+   "target": "_SHL9"
+  },
+  {
+   "addr": "ff527",
+   "len": 3,
+   "immediate": false,
+   "name": "9>>",
+   "listing_banner": "SHIFT",
+   "target": "_SHR9"
+  },
+  {
+   "addr": "ff52d",
+   "len": 3,
+   "immediate": false,
+   "name": "REV",
+   "listing_banner": "SHIFT",
+   "target": "_REV"
+  },
+  {
+   "addr": "ff533",
+   "len": 2,
+   "immediate": false,
+   "name": "|<",
+   "listing_banner": "SHIFT",
+   "target": "MASK"
+  },
+  {
+   "addr": "ff538",
+   "len": 2,
+   "immediate": false,
+   "name": ">|",
+   "listing_banner": "SHIFT",
+   "target": "ENCODE"
+  },
+  {
+   "addr": "ff53d",
+   "len": 2,
+   "immediate": false,
+   "name": ">N",
+   "listing_banner": "SHIFT",
+   "target": "BITS4"
+  },
+  {
+   "addr": "ff542",
+   "len": 2,
+   "immediate": false,
+   "name": ">B",
+   "listing_banner": "SHIFT",
+   "target": "BITS8"
+  },
+  {
+   "addr": "ff547",
+   "len": 2,
+   "immediate": false,
+   "name": ">9",
+   "listing_banner": "SHIFT",
+   "target": "BITS9"
+  },
+  {
+   "addr": "ff54c",
+   "len": 4,
+   "immediate": false,
+   "name": "BITS",
+   "listing_banner": "SHIFT",
+   "target": "BITS"
+  },
+  {
+   "addr": "ff553",
+   "len": 3,
+   "immediate": false,
+   "name": "NOT",
+   "listing_banner": "SHIFT",
+   "target": "_NOT"
+  },
+  {
+   "addr": "ff559",
+   "len": 1,
+   "immediate": false,
+   "name": "=",
+   "listing_banner": "COMPARISON",
+   "target": "_EQ"
+  },
+  {
+   "addr": "ff55d",
+   "len": 2,
+   "immediate": false,
+   "name": "<>",
+   "listing_banner": "COMPARISON",
+   "target": "_NEQ"
+  },
+  {
+   "addr": "ff562",
+   "len": 2,
+   "immediate": false,
+   "name": "0=",
+   "listing_banner": "COMPARISON",
+   "target": "_ZEQ"
+  },
+  {
+   "addr": "ff567",
+   "len": 3,
+   "immediate": false,
+   "name": "0<>",
+   "listing_banner": "COMPARISON",
+   "target": "_ZNE"
+  },
+  {
+   "addr": "ff56d",
+   "len": 2,
+   "immediate": false,
+   "name": "0<",
+   "listing_banner": "COMPARISON",
+   "target": "_ZLT"
+  },
+  {
+   "addr": "ff572",
+   "len": 1,
+   "immediate": false,
+   "name": "<",
+   "listing_banner": "COMPARISON",
+   "target": "LT"
+  },
+  {
+   "addr": "ff576",
+   "len": 2,
+   "immediate": false,
+   "name": "U<",
+   "listing_banner": "COMPARISON",
+   "target": "_ULT"
+  },
+  {
+   "addr": "ff57b",
+   "len": 1,
+   "immediate": false,
+   "name": ">",
+   "listing_banner": "COMPARISON",
+   "target": "GT"
+  },
+  {
+   "addr": "ff57f",
+   "len": 2,
+   "immediate": false,
+   "name": "U>",
+   "listing_banner": "COMPARISON",
+   "target": "UGT"
+  },
+  {
+   "addr": "ff584",
+   "len": 2,
+   "immediate": false,
+   "name": "<=",
+   "listing_banner": "COMPARISON",
+   "target": "LTEQ"
+  },
+  {
+   "addr": "ff589",
+   "len": 2,
+   "immediate": false,
+   "name": "=>",
+   "listing_banner": "COMPARISON",
+   "target": "EQGT"
+  },
+  {
+   "addr": "ff58e",
+   "len": 6,
+   "immediate": false,
+   "name": "WITHIN",
+   "listing_banner": "COMPARISON",
+   "target": "WITHIN"
+  },
+  {
+   "addr": "ff597",
+   "len": 5,
+   "immediate": false,
+   "name": "DUPC@",
+   "listing_banner": "COMPARISON",
+   "target": "DUPCFT"
+  },
+  {
+   "addr": "ff59f",
+   "len": 2,
+   "immediate": false,
+   "name": "C@",
+   "listing_banner": "COMPARISON",
+   "target": "CFETCH"
+  },
+  {
+   "addr": "ff5a4",
+   "len": 2,
+   "immediate": false,
+   "name": "W@",
+   "listing_banner": "COMPARISON",
+   "target": "WFETCH"
+  },
+  {
+   "addr": "ff5a9",
+   "len": 1,
+   "immediate": false,
+   "name": "@",
+   "listing_banner": "COMPARISON",
+   "target": "FETCH"
+  },
+  {
+   "addr": "ff5ad",
+   "len": 3,
+   "immediate": false,
+   "name": "C+!",
+   "listing_banner": "COMPARISON",
+   "target": "CPLUSST"
+  },
+  {
+   "addr": "ff5b3",
+   "len": 2,
+   "immediate": false,
+   "name": "C!",
+   "listing_banner": "COMPARISON",
+   "target": "CSTORE"
+  },
+  {
+   "addr": "ff5b8",
+   "len": 4,
+   "immediate": false,
+   "name": "C@++",
+   "listing_banner": "COMPARISON",
+   "target": "CFETCHINC"
+  },
+  {
+   "addr": "ff5bf",
+   "len": 3,
+   "immediate": false,
+   "name": "W+!",
+   "listing_banner": "COMPARISON",
+   "target": "WPLUSST"
+  },
+  {
+   "addr": "ff5c5",
+   "len": 2,
+   "immediate": false,
+   "name": "W!",
+   "listing_banner": "COMPARISON",
+   "target": "WSTORE"
+  },
+  {
+   "addr": "ff5ca",
+   "len": 2,
+   "immediate": false,
+   "name": "+!",
+   "listing_banner": "COMPARISON",
+   "target": "PLUSST"
+  },
+  {
+   "addr": "ff5cf",
+   "len": 1,
+   "immediate": false,
+   "name": "!",
+   "listing_banner": "COMPARISON",
+   "target": "STORE"
+  },
+  {
+   "addr": "ff5d3",
+   "len": 4,
+   "immediate": false,
+   "name": "BIT!",
+   "listing_banner": "COMPARISON",
+   "target": "BITST"
+  },
+  {
+   "addr": "ff5da",
+   "len": 3,
+   "immediate": false,
+   "name": "SET",
+   "listing_banner": "COMPARISON",
+   "target": "SET"
+  },
+  {
+   "addr": "ff5e0",
+   "len": 3,
+   "immediate": false,
+   "name": "CLR",
+   "listing_banner": "COMPARISON",
+   "target": "CLR"
+  },
+  {
+   "addr": "ff5e6",
+   "len": 4,
+   "immediate": false,
+   "name": "SET?",
+   "listing_banner": "COMPARISON",
+   "target": "BITQ"
+  },
+  {
+   "addr": "ff5ed",
+   "len": 2,
+   "immediate": false,
+   "name": "1+",
+   "listing_banner": "MATHS",
+   "target": "INC"
+  },
+  {
+   "addr": "ff5f2",
+   "len": 2,
+   "immediate": false,
+   "name": "1-",
+   "listing_banner": "MATHS",
+   "target": "DEC"
+  },
+  {
+   "addr": "ff5f7",
+   "len": 2,
+   "immediate": false,
+   "name": "2+",
+   "listing_banner": "MATHS",
+   "target": "INC2"
+  },
+  {
+   "addr": "ff5fc",
+   "len": 2,
+   "immediate": false,
+   "name": "2-",
+   "listing_banner": "MATHS",
+   "target": "DEC2"
+  },
+  {
+   "addr": "ff601",
+   "len": 2,
+   "immediate": false,
+   "name": "4+",
+   "listing_banner": "MATHS",
+   "target": "INC4"
+  },
+  {
+   "addr": "ff606",
+   "len": 1,
+   "immediate": false,
+   "name": "+",
+   "listing_banner": "MATHS",
+   "target": "PLUS"
+  },
+  {
+   "addr": "ff60a",
+   "len": 1,
+   "immediate": false,
+   "name": "-",
+   "listing_banner": "MATHS",
+   "target": "MINUS"
+  },
+  {
+   "addr": "ff60e",
+   "len": 3,
+   "immediate": false,
+   "name": "UM*",
+   "listing_banner": "MATHS",
+   "target": "UMMUL"
+  },
+  {
+   "addr": "ff614",
+   "len": 1,
+   "immediate": false,
+   "name": "*",
+   "listing_banner": "MATHS",
+   "target": "MULTIPLY"
+  },
+  {
+   "addr": "ff618",
+   "len": 2,
+   "immediate": false,
+   "name": "W*",
+   "listing_banner": "MATHS",
+   "target": "MUL16"
+  },
+  {
+   "addr": "ff61d",
+   "len": 1,
+   "immediate": false,
+   "name": "/",
+   "listing_banner": "MATHS",
+   "target": "DIVIDE"
+  },
+  {
+   "addr": "ff621",
+   "len": 2,
+   "immediate": false,
+   "name": "U/",
+   "listing_banner": "MATHS",
+   "target": "UDIVIDE"
+  },
+  {
+   "addr": "ff626",
+   "len": 3,
+   "immediate": false,
+   "name": "U//",
+   "listing_banner": "MATHS",
+   "target": "UDIVMOD"
+  },
+  {
+   "addr": "ff62c",
+   "len": 2,
+   "immediate": false,
+   "name": "//",
+   "listing_banner": "MATHS",
+   "target": "UMOD"
+  },
+  {
+   "addr": "ff631",
+   "len": 2,
+   "immediate": false,
+   "name": "*/",
+   "listing_banner": "MATHS",
+   "target": "MULDIV"
+  },
+  {
+   "addr": "ff636",
+   "len": 4,
+   "immediate": false,
+   "name": "UM//",
+   "listing_banner": "MATHS",
+   "target": "UMDIVMOD64"
+  },
+  {
+   "addr": "ff63d",
+   "len": 3,
+   "immediate": false,
+   "name": "C++",
+   "listing_banner": "MATHS",
+   "target": "CINC"
+  },
+  {
+   "addr": "ff643",
+   "len": 3,
+   "immediate": false,
+   "name": "C--",
+   "listing_banner": "MATHS",
+   "target": "CDEC"
+  },
+  {
+   "addr": "ff649",
+   "len": 3,
+   "immediate": false,
+   "name": "W++",
+   "listing_banner": "MATHS",
+   "target": "WINC"
+  },
+  {
+   "addr": "ff64f",
+   "len": 3,
+   "immediate": false,
+   "name": "W--",
+   "listing_banner": "MATHS",
+   "target": "WDEC"
+  },
+  {
+   "addr": "ff655",
+   "len": 2,
+   "immediate": false,
+   "name": "++",
+   "listing_banner": "MATHS",
+   "target": "LINC"
+  },
+  {
+   "addr": "ff65a",
+   "len": 2,
+   "immediate": false,
+   "name": "--",
+   "listing_banner": "MATHS",
+   "target": "LDEC"
+  },
+  {
+   "addr": "ff65f",
+   "len": 3,
+   "immediate": false,
+   "name": "RND",
+   "listing_banner": "MATHS",
+   "target": "_RND"
+  },
+  {
+   "addr": "ff665",
+   "len": 6,
+   "immediate": false,
+   "name": "GETRND",
+   "listing_banner": "MATHS",
+   "target": "_GETRND"
+  },
+  {
+   "addr": "ff66e",
+   "len": 4,
+   "immediate": false,
+   "name": "SQRT",
+   "listing_banner": "MATHS",
+   "target": "_SQRT"
+  },
+  {
+   "addr": "ff675",
+   "len": 7,
+   "immediate": false,
+   "name": "SETDACS",
+   "listing_banner": "MATHS",
+   "target": "_SETDACS"
+  },
+  {
+   "addr": "ff67f",
+   "len": 1,
+   "immediate": false,
+   "name": "~",
+   "listing_banner": "MATHS",
+   "target": "CLRL"
+  },
+  {
+   "addr": "ff683",
+   "len": 2,
+   "immediate": false,
+   "name": "~~",
+   "listing_banner": "MATHS",
+   "target": "SETL"
+  },
+  {
+   "addr": "ff688",
+   "len": 2,
+   "immediate": false,
+   "name": "W~",
+   "listing_banner": "MATHS",
+   "target": "CLRW"
+  },
+  {
+   "addr": "ff68d",
+   "len": 3,
+   "immediate": false,
+   "name": "W~~",
+   "listing_banner": "MATHS",
+   "target": "SETW"
+  },
+  {
+   "addr": "ff693",
+   "len": 2,
+   "immediate": false,
+   "name": "C~",
+   "listing_banner": "MATHS",
+   "target": "CLRC"
+  },
+  {
+   "addr": "ff698",
+   "len": 3,
+   "immediate": false,
+   "name": "C~~",
+   "listing_banner": "MATHS",
+   "target": "SETC"
+  },
+  {
+   "addr": "ff69e",
+   "len": 3,
+   "immediate": false,
+   "name": "L>S",
+   "listing_banner": "MATHS",
+   "target": "L2S"
+  },
+  {
+   "addr": "ff6a4",
+   "len": 2,
+   "immediate": false,
+   "name": ">W",
+   "listing_banner": "MATHS",
+   "target": "TOW"
+  },
+  {
+   "addr": "ff6a9",
+   "len": 3,
+   "immediate": false,
+   "name": "L>W",
+   "listing_banner": "MATHS",
+   "target": "L2W"
+  },
+  {
+   "addr": "ff6af",
+   "len": 3,
+   "immediate": false,
+   "name": "W>B",
+   "listing_banner": "MATHS",
+   "target": "W2B"
+  },
+  {
+   "addr": "ff6b5",
+   "len": 3,
+   "immediate": false,
+   "name": "W>L",
+   "listing_banner": "MATHS",
+   "target": "W2L"
+  },
+  {
+   "addr": "ff6bb",
+   "len": 3,
+   "immediate": false,
+   "name": "B>W",
+   "listing_banner": "MATHS",
+   "target": "B2W"
+  },
+  {
+   "addr": "ff6c1",
+   "len": 3,
+   "immediate": false,
+   "name": "B>L",
+   "listing_banner": "MATHS",
+   "target": "B2L"
+  },
+  {
+   "addr": "ff6c7",
+   "len": 4,
+   "immediate": false,
+   "name": "MINS",
+   "listing_banner": "MATHS",
+   "target": "_MINS"
+  },
+  {
+   "addr": "ff6ce",
+   "len": 4,
+   "immediate": false,
+   "name": "MAXS",
+   "listing_banner": "MATHS",
+   "target": "_MAXS"
+  },
+  {
+   "addr": "ff6d5",
+   "len": 3,
+   "immediate": false,
+   "name": "MIN",
+   "listing_banner": "MATHS",
+   "target": "_MIN"
+  },
+  {
+   "addr": "ff6db",
+   "len": 3,
+   "immediate": false,
+   "name": "MAX",
+   "listing_banner": "MATHS",
+   "target": "_MAX"
+  },
+  {
+   "addr": "ff6e1",
+   "len": 3,
+   "immediate": false,
+   "name": "ABS",
+   "listing_banner": "MATHS",
+   "target": "_ABS"
+  },
+  {
+   "addr": "ff6e7",
+   "len": 7,
+   "immediate": false,
+   "name": "-NEGATE",
+   "listing_banner": "MATHS",
+   "target": "MNEGATE"
+  },
+  {
+   "addr": "ff6f1",
+   "len": 7,
+   "immediate": false,
+   "name": "?NEGATE",
+   "listing_banner": "MATHS",
+   "target": "QNEGATE"
+  },
+  {
+   "addr": "ff6fb",
+   "len": 6,
+   "immediate": false,
+   "name": "NEGATE",
+   "listing_banner": "MATHS",
+   "target": "NEGATE"
+  },
+  {
+   "addr": "ff704",
+   "len": 2,
+   "immediate": false,
+   "name": "ON",
+   "listing_banner": "CONSTANTS",
+   "target": "MINUS1"
+  },
+  {
+   "addr": "ff709",
+   "len": 4,
+   "immediate": false,
+   "name": "TRUE",
+   "listing_banner": "CONSTANTS",
+   "target": "MINUS1"
+  },
+  {
+   "addr": "ff710",
+   "len": 2,
+   "immediate": false,
+   "name": "-1",
+   "listing_banner": "CONSTANTS",
+   "target": "MINUS1"
+  },
+  {
+   "addr": "ff715",
+   "len": 5,
+   "immediate": false,
+   "name": "FALSE",
+   "listing_banner": "CONSTANTS",
+   "target": "_0"
+  },
+  {
+   "addr": "ff71d",
+   "len": 3,
+   "immediate": false,
+   "name": "OFF",
+   "listing_banner": "CONSTANTS",
+   "target": "_0"
+  },
+  {
+   "addr": "ff723",
+   "len": 4,
+   "immediate": true,
+   "name": "GOTO",
+   "listing_banner": "STRUCTURES",
+   "target": "GOTO"
+  },
+  {
+   "addr": "ff72a",
+   "len": 2,
+   "immediate": true,
+   "name": "IF",
+   "listing_banner": "STRUCTURES",
+   "target": "_IF_"
+  },
+  {
+   "addr": "ff72f",
+   "len": 4,
+   "immediate": true,
+   "name": "ELSE",
+   "listing_banner": "STRUCTURES",
+   "target": "_ELSE_"
+  },
+  {
+   "addr": "ff736",
+   "len": 4,
+   "immediate": true,
+   "name": "THEN",
+   "listing_banner": "STRUCTURES",
+   "target": "_THEN_"
+  },
+  {
+   "addr": "ff73d",
+   "len": 5,
+   "immediate": true,
+   "name": "BEGIN",
+   "listing_banner": "STRUCTURES",
+   "target": "_BEGIN_"
+  },
+  {
+   "addr": "ff745",
+   "len": 5,
+   "immediate": true,
+   "name": "UNTIL",
+   "listing_banner": "STRUCTURES",
+   "target": "_UNTIL_"
+  },
+  {
+   "addr": "ff74d",
+   "len": 5,
+   "immediate": true,
+   "name": "AGAIN",
+   "listing_banner": "STRUCTURES",
+   "target": "_AGAIN_"
+  },
+  {
+   "addr": "ff755",
+   "len": 5,
+   "immediate": true,
+   "name": "WHILE",
+   "listing_banner": "STRUCTURES",
+   "target": "_IF_"
+  },
+  {
+   "addr": "ff75d",
+   "len": 6,
+   "immediate": true,
+   "name": "REPEAT",
+   "listing_banner": "STRUCTURES",
+   "target": "_REPEAT_"
+  },
+  {
+   "addr": "ff766",
+   "len": 6,
+   "immediate": false,
+   "name": "SWITCH",
+   "listing_banner": "STRUCTURES",
+   "target": "_SWITCH"
+  },
+  {
+   "addr": "ff76f",
+   "len": 5,
+   "immediate": false,
+   "name": "CASE@",
+   "listing_banner": "STRUCTURES",
+   "target": "SWFETCH"
+  },
+  {
+   "addr": "ff777",
+   "len": 5,
+   "immediate": false,
+   "name": "CASE=",
+   "listing_banner": "STRUCTURES",
+   "target": "ISEQ"
+  },
+  {
+   "addr": "ff77f",
+   "len": 5,
+   "immediate": false,
+   "name": "CASE>",
+   "listing_banner": "STRUCTURES",
+   "target": "ISWITHIN"
+  },
+  {
+   "addr": "ff787",
+   "len": 5,
+   "immediate": true,
+   "name": "BREAK",
+   "listing_banner": "STRUCTURES",
+   "target": "ISEND"
+  },
+  {
+   "addr": "ff78f",
+   "len": 4,
+   "immediate": true,
+   "name": "CASE",
+   "listing_banner": "STRUCTURES",
+   "target": "_CASE"
+  },
+  {
+   "addr": "ff796",
+   "len": 3,
+   "immediate": false,
+   "name": "ADO",
+   "listing_banner": "LOOPS",
+   "target": "ADO"
+  },
+  {
+   "addr": "ff79c",
+   "len": 2,
+   "immediate": false,
+   "name": "DO",
+   "listing_banner": "LOOPS",
+   "target": "DO"
+  },
+  {
+   "addr": "ff7a1",
+   "len": 4,
+   "immediate": false,
+   "name": "LOOP",
+   "listing_banner": "LOOPS",
+   "target": "LOOP"
+  },
+  {
+   "addr": "ff7a8",
+   "len": 5,
+   "immediate": false,
+   "name": "+LOOP",
+   "listing_banner": "LOOPS",
+   "target": "PLOOP"
+  },
+  {
+   "addr": "ff7b0",
+   "len": 3,
+   "immediate": false,
+   "name": "FOR",
+   "listing_banner": "LOOPS",
+   "target": "FOR"
+  },
+  {
+   "addr": "ff7b6",
+   "len": 4,
+   "immediate": false,
+   "name": "NEXT",
+   "listing_banner": "LOOPS",
+   "target": "forNEXT"
+  },
+  {
+   "addr": "ff7bd",
+   "len": 5,
+   "immediate": false,
+   "name": "?NEXT",
+   "listing_banner": "LOOPS",
+   "target": "QNEXT"
+  },
+  {
+   "addr": "ff7c5",
+   "len": 1,
+   "immediate": false,
+   "name": "I",
+   "listing_banner": "LOOPS",
+   "target": "IX"
+  },
+  {
+   "addr": "ff7c9",
+   "len": 1,
+   "immediate": false,
+   "name": "J",
+   "listing_banner": "LOOPS",
+   "target": "J"
+  },
+  {
+   "addr": "ff7cd",
+   "len": 5,
+   "immediate": false,
+   "name": "LEAVE",
+   "listing_banner": "LOOPS",
+   "target": "LEAVE"
+  },
+  {
+   "addr": "ff7d5",
+   "len": 3,
+   "immediate": false,
+   "name": "IC@",
+   "listing_banner": "LOOPS",
+   "target": "ICFETCH"
+  },
+  {
+   "addr": "ff7db",
+   "len": 2,
+   "immediate": false,
+   "name": "I+",
+   "listing_banner": "LOOPS",
+   "target": "IPLUS"
+  },
+  {
+   "addr": "ff7e0",
+   "len": 6,
+   "immediate": false,
+   "name": "BOUNDS",
+   "listing_banner": "LOOPS",
+   "target": "BOUNDS"
+  },
+  {
+   "addr": "ff7e9",
+   "len": 1,
+   "immediate": false,
+   "name": "H",
+   "listing_banner": "LOOPS",
+   "target": "H"
+  },
+  {
+   "addr": "ff7ed",
+   "len": 1,
+   "immediate": false,
+   "name": "L",
+   "listing_banner": "LOOPS",
+   "target": "L"
+  },
+  {
+   "addr": "ff7f1",
+   "len": 1,
+   "immediate": false,
+   "name": "T",
+   "listing_banner": "LOOPS",
+   "target": "_T"
+  },
+  {
+   "addr": "ff7f5",
+   "len": 1,
+   "immediate": false,
+   "name": "F",
+   "listing_banner": "LOOPS",
+   "target": "F"
+  },
+  {
+   "addr": "ff7f9",
+   "len": 1,
+   "immediate": false,
+   "name": "R",
+   "listing_banner": "LOOPS",
+   "target": "R"
+  },
+  {
+   "addr": "ff7fd",
+   "len": 4,
+   "immediate": false,
+   "name": "HIGH",
+   "listing_banner": "LOOPS",
+   "target": "HIGH"
+  },
+  {
+   "addr": "ff804",
+   "len": 3,
+   "immediate": false,
+   "name": "LOW",
+   "listing_banner": "LOOPS",
+   "target": "LOW"
+  },
+  {
+   "addr": "ff80a",
+   "len": 5,
+   "immediate": false,
+   "name": "FLOAT",
+   "listing_banner": "LOOPS",
+   "target": "_FLOAT"
+  },
+  {
+   "addr": "ff812",
+   "len": 4,
+   "immediate": false,
+   "name": "PIN@",
+   "listing_banner": "LOOPS",
+   "target": "PINTEST"
+  },
+  {
+   "addr": "ff819",
+   "len": 5,
+   "immediate": false,
+   "name": "WRPIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_WRPIN"
+  },
+  {
+   "addr": "ff821",
+   "len": 5,
+   "immediate": false,
+   "name": "WXPIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_WXPIN"
+  },
+  {
+   "addr": "ff829",
+   "len": 5,
+   "immediate": false,
+   "name": "WYPIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_WYPIN"
+  },
+  {
+   "addr": "ff831",
+   "len": 5,
+   "immediate": false,
+   "name": "RDPIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_RDPIN"
+  },
+  {
+   "addr": "ff839",
+   "len": 5,
+   "immediate": false,
+   "name": "RQPIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_RQPIN"
+  },
+  {
+   "addr": "ff841",
+   "len": 5,
+   "immediate": false,
+   "name": "AKPIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_AKPIN"
+  },
+  {
+   "addr": "ff849",
+   "len": 7,
+   "immediate": false,
+   "name": "WAITPIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "WAITPIN"
+  },
+  {
+   "addr": "ff853",
+   "len": 5,
+   "immediate": false,
+   "name": "WRACK",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "WRACK"
+  },
+  {
+   "addr": "ff85b",
+   "len": 3,
+   "immediate": false,
+   "name": "PIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_PIN"
+  },
+  {
+   "addr": "ff861",
+   "len": 4,
+   "immediate": false,
+   "name": "@PIN",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "_ATPIN"
+  },
+  {
+   "addr": "ff868",
+   "len": 2,
+   "immediate": false,
+   "name": "ns",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "ns"
+  },
+  {
+   "addr": "ff86d",
+   "len": 2,
+   "immediate": false,
+   "name": "PW",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "PW"
+  },
+  {
+   "addr": "ff872",
+   "len": 5,
+   "immediate": false,
+   "name": "PULSE",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "PULSE"
+  },
+  {
+   "addr": "ff87a",
+   "len": 6,
+   "immediate": false,
+   "name": "PULSES",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "PULSES"
+  },
+  {
+   "addr": "ff883",
+   "len": 4,
+   "immediate": false,
+   "name": "HILO",
+   "listing_banner": "SMARTPIN INSTRUCTIONS",
+   "target": "HILO"
+  },
+  {
+   "addr": "ff88a",
+   "len": 4,
+   "immediate": false,
+   "name": "DUTY",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "DUTY"
+  },
+  {
+   "addr": "ff891",
+   "len": 3,
+   "immediate": false,
+   "name": "NCO",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "NCO"
+  },
+  {
+   "addr": "ff897",
+   "len": 2,
+   "immediate": false,
+   "name": "HZ",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "HZ"
+  },
+  {
+   "addr": "ff89c",
+   "len": 3,
+   "immediate": false,
+   "name": "KHZ",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "KHZ"
+  },
+  {
+   "addr": "ff8a2",
+   "len": 3,
+   "immediate": false,
+   "name": "MHZ",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "MHZ"
+  },
+  {
+   "addr": "ff8a8",
+   "len": 4,
+   "immediate": false,
+   "name": "MUTE",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "MUTE"
+  },
+  {
+   "addr": "ff8af",
+   "len": 5,
+   "immediate": false,
+   "name": "BLINK",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "BLINK"
+  },
+  {
+   "addr": "ff8b7",
+   "len": 3,
+   "immediate": false,
+   "name": "PWM",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "PWM"
+  },
+  {
+   "addr": "ff8bd",
+   "len": 3,
+   "immediate": false,
+   "name": "SAW",
+   "listing_banner": "SMARTPIN NCO/PWM",
+   "target": "SAW"
+  },
+  {
+   "addr": "ff8c3",
+   "len": 3,
+   "immediate": false,
+   "name": "BIT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "BIT"
+  },
+  {
+   "addr": "ff8c9",
+   "len": 4,
+   "immediate": false,
+   "name": "BAUD",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "BAUDST"
+  },
+  {
+   "addr": "ff8d0",
+   "len": 3,
+   "immediate": false,
+   "name": "TXD",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "TXD"
+  },
+  {
+   "addr": "ff8d6",
+   "len": 3,
+   "immediate": false,
+   "name": "RXD",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "RXD"
+  },
+  {
+   "addr": "ff8dc",
+   "len": 5,
+   "immediate": false,
+   "name": "TXDAT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_TXDAT"
+  },
+  {
+   "addr": "ff8e4",
+   "len": 5,
+   "immediate": false,
+   "name": "WAITX",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "DELTA"
+  },
+  {
+   "addr": "ff8ec",
+   "len": 7,
+   "immediate": false,
+   "name": "WAITCNT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "WAITCNTS"
+  },
+  {
+   "addr": "ff8f6",
+   "len": 6,
+   "immediate": false,
+   "name": "REBOOT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "REBOOT"
+  },
+  {
+   "addr": "ff8ff",
+   "len": 5,
+   "immediate": false,
+   "name": "RESET",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "RESET"
+  },
+  {
+   "addr": "ff907",
+   "len": 5,
+   "immediate": false,
+   "name": "0EXIT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "ZEXIT"
+  },
+  {
+   "addr": "ff90f",
+   "len": 4,
+   "immediate": false,
+   "name": "EXIT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "EXIT"
+  },
+  {
+   "addr": "ff916",
+   "len": 3,
+   "immediate": false,
+   "name": "NOP",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_NOP"
+  },
+  {
+   "addr": "ff91c",
+   "len": 4,
+   "immediate": false,
+   "name": "CALL",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "ACALL"
+  },
+  {
+   "addr": "ff923",
+   "len": 4,
+   "immediate": false,
+   "name": "JUMP",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "AJMP"
+  },
+  {
+   "addr": "ff92a",
+   "len": 2,
+   "immediate": false,
+   "name": ">R",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "PUSHR"
+  },
+  {
+   "addr": "ff92f",
+   "len": 2,
+   "immediate": false,
+   "name": "R>",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "RPOP"
+  },
+  {
+   "addr": "ff934",
+   "len": 2,
+   "immediate": false,
+   "name": ">L",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "PUSHL"
+  },
+  {
+   "addr": "ff939",
+   "len": 2,
+   "immediate": false,
+   "name": "L>",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "LPOP"
+  },
+  {
+   "addr": "ff93e",
+   "len": 3,
+   "immediate": false,
+   "name": "!SP",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "INITSP"
+  },
+  {
+   "addr": "ff944",
+   "len": 5,
+   "immediate": false,
+   "name": "DEPTH",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_DEPTH"
+  },
+  {
+   "addr": "ff94c",
+   "len": 4,
+   "immediate": false,
+   "name": "COG@",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "COGFETCH"
+  },
+  {
+   "addr": "ff953",
+   "len": 4,
+   "immediate": false,
+   "name": "COG!",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "COGSTORE"
+  },
+  {
+   "addr": "ff95a",
+   "len": 4,
+   "immediate": false,
+   "name": "LUT@",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "LUTFETCH"
+  },
+  {
+   "addr": "ff961",
+   "len": 4,
+   "immediate": false,
+   "name": "LUT!",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "LUTSTORE"
+  },
+  {
+   "addr": "ff968",
+   "len": 5,
+   "immediate": false,
+   "name": "COGID",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_COGID"
+  },
+  {
+   "addr": "ff970",
+   "len": 7,
+   "immediate": false,
+   "name": "COGINIT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_COGINIT"
+  },
+  {
+   "addr": "ff97a",
+   "len": 7,
+   "immediate": false,
+   "name": "COGSTOP",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_COGSTOP"
+  },
+  {
+   "addr": "ff984",
+   "len": 6,
+   "immediate": false,
+   "name": "NEWCOG",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "NEWCOG"
+  },
+  {
+   "addr": "ff98d",
+   "len": 6,
+   "immediate": false,
+   "name": "COGATN",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_COGATN"
+  },
+  {
+   "addr": "ff996",
+   "len": 7,
+   "immediate": false,
+   "name": "POLLATN",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_POLLATN"
+  },
+  {
+   "addr": "ff9a0",
+   "len": 6,
+   "immediate": false,
+   "name": "SETEDG",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_SETEDG"
+  },
+  {
+   "addr": "ff9a9",
+   "len": 7,
+   "immediate": false,
+   "name": "POLLEDG",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_POLLEDG"
+  },
+  {
+   "addr": "ff9b3",
+   "len": 3,
+   "immediate": false,
+   "name": "KEY",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "KEY"
+  },
+  {
+   "addr": "ff9b9",
+   "len": 4,
+   "immediate": false,
+   "name": "WKEY",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "WKEY"
+  },
+  {
+   "addr": "ff9c0",
+   "len": 4,
+   "immediate": false,
+   "name": "KEY!",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "PUTKEY"
+  },
+  {
+   "addr": "ff9c7",
+   "len": 3,
+   "immediate": false,
+   "name": "CON",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_CON"
+  },
+  {
+   "addr": "ff9cd",
+   "len": 4,
+   "immediate": false,
+   "name": "NONE",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "NONE"
+  },
+  {
+   "addr": "ff9d4",
+   "len": 3,
+   "immediate": false,
+   "name": "COM",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "_COM"
+  },
+  {
+   "addr": "ff9da",
+   "len": 6,
+   "immediate": false,
+   "name": "CONKEY",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "CONKEY"
+  },
+  {
+   "addr": "ff9e3",
+   "len": 7,
+   "immediate": false,
+   "name": "CONEMIT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "CONEMIT"
+  },
+  {
+   "addr": "ff9ed",
+   "len": 6,
+   "immediate": false,
+   "name": "SEROUT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "SEROUT"
+  },
+  {
+   "addr": "ff9f6",
+   "len": 4,
+   "immediate": false,
+   "name": "EMIT",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "EMIT"
+  },
+  {
+   "addr": "ff9fd",
+   "len": 5,
+   "immediate": false,
+   "name": "EMITS",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "EMITS"
+  },
+  {
+   "addr": "ffa05",
+   "len": 4,
+   "immediate": false,
+   "name": "CRLF",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "CRLF"
+  },
+  {
+   "addr": "ffa0c",
+   "len": 2,
+   "immediate": false,
+   "name": "CR",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "CR"
+  },
+  {
+   "addr": "ffa11",
+   "len": 3,
+   "immediate": false,
+   "name": "CLS",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "CLS"
+  },
+  {
+   "addr": "ffa17",
+   "len": 5,
+   "immediate": false,
+   "name": "SPACE",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "SPACE"
+  },
+  {
+   "addr": "ffa1f",
+   "len": 6,
+   "immediate": false,
+   "name": "SPACES",
+   "listing_banner": "SMARTPIN ASYNCH",
+   "target": "SPACES"
+  },
+  {
+   "addr": "ffa28",
+   "len": 3,
+   "immediate": false,
+   "name": "RAM",
+   "listing_banner": "DUMP MEMORY",
+   "target": "RAM"
+  },
+  {
+   "addr": "ffa2e",
+   "len": 5,
+   "immediate": false,
+   "name": "DUMP:",
+   "listing_banner": "DUMP MEMORY",
+   "target": "SETDMP"
+  },
+  {
+   "addr": "ffa36",
+   "len": 4,
+   "immediate": false,
+   "name": "DUMP",
+   "listing_banner": "DUMP MEMORY",
+   "target": "DUMP"
+  },
+  {
+   "addr": "ffa3d",
+   "len": 5,
+   "immediate": false,
+   "name": "DUMPW",
+   "listing_banner": "DUMP MEMORY",
+   "target": "DUMPW"
+  },
+  {
+   "addr": "ffa45",
+   "len": 5,
+   "immediate": false,
+   "name": "DUMPL",
+   "listing_banner": "DUMP MEMORY",
+   "target": "DUMPL"
+  },
+  {
+   "addr": "ffa4d",
+   "len": 5,
+   "immediate": false,
+   "name": "DUMPA",
+   "listing_banner": "DUMP MEMORY",
+   "target": "DUMPA"
+  },
+  {
+   "addr": "ffa55",
+   "len": 6,
+   "immediate": false,
+   "name": "DUMPAW",
+   "listing_banner": "DUMP MEMORY",
+   "target": "DUMPAW"
+  },
+  {
+   "addr": "ffa5e",
+   "len": 2,
+   "immediate": false,
+   "name": "QD",
+   "listing_banner": "DUMP MEMORY",
+   "target": "QD"
+  },
+  {
+   "addr": "ffa63",
+   "len": 2,
+   "immediate": false,
+   "name": "QW",
+   "listing_banner": "DUMP MEMORY",
+   "target": "QW"
+  },
+  {
+   "addr": "ffa68",
+   "len": 5,
+   "immediate": false,
+   "name": "DEBUG",
+   "listing_banner": "DUMP MEMORY",
+   "target": "DEBUG"
+  },
+  {
+   "addr": "ffa70",
+   "len": 4,
+   "immediate": false,
+   "name": "lsio",
+   "listing_banner": "DUMP MEMORY",
+   "target": "lsio"
+  },
+  {
+   "addr": "ffa77",
+   "len": 3,
+   "immediate": false,
+   "name": "COG",
+   "listing_banner": "DUMP MEMORY",
+   "target": "_COG"
+  },
+  {
+   "addr": "ffa7d",
+   "len": 3,
+   "immediate": false,
+   "name": "LUT",
+   "listing_banner": "DUMP MEMORY",
+   "target": "_LUT"
+  },
+  {
+   "addr": "ffa83",
+   "len": 2,
+   "immediate": false,
+   "name": "KB",
+   "listing_banner": "DUMP MEMORY",
+   "target": "KB"
+  },
+  {
+   "addr": "ffa88",
+   "len": 2,
+   "immediate": false,
+   "name": "MB",
+   "listing_banner": "DUMP MEMORY",
+   "target": "MB"
+  },
+  {
+   "addr": "ffa8d",
+   "len": 1,
+   "immediate": false,
+   "name": "M",
+   "listing_banner": "DUMP MEMORY",
+   "target": "M"
+  },
+  {
+   "addr": "ffa91",
+   "len": 1,
+   "immediate": false,
+   "name": ".",
+   "listing_banner": "PRINTING",
+   "target": "PRT"
+  },
+  {
+   "addr": "ffa95",
+   "len": 5,
+   "immediate": false,
+   "name": "PRINT",
+   "listing_banner": "PRINTING",
+   "target": "PRT"
+  },
+  {
+   "addr": "ffa9d",
+   "len": 3,
+   "immediate": false,
+   "name": ".AS",
+   "listing_banner": "PRINTING",
+   "target": "PRTAS"
+  },
+  {
+   "addr": "ffaa3",
+   "len": 4,
+   "immediate": true,
+   "name": ".AS\"",
+   "listing_banner": "PRINTING",
+   "target": "PRTASR"
+  },
+  {
+   "addr": "ffaaa",
+   "len": 5,
+   "immediate": false,
+   "name": ".DECL",
+   "listing_banner": "PRINTING",
+   "target": "PRTDECL"
+  },
+  {
+   "addr": "ffab2",
+   "len": 5,
+   "immediate": false,
+   "name": ".DEC4",
+   "listing_banner": "PRINTING",
+   "target": "PRTDEC4"
+  },
+  {
+   "addr": "ffaba",
+   "len": 4,
+   "immediate": false,
+   "name": "HOLD",
+   "listing_banner": "PRINTING",
+   "target": "HOLD"
+  },
+  {
+   "addr": "ffac1",
+   "len": 2,
+   "immediate": false,
+   "name": "#>",
+   "listing_banner": "PRINTING",
+   "target": "RHASH"
+  },
+  {
+   "addr": "ffac6",
+   "len": 2,
+   "immediate": false,
+   "name": "<#",
+   "listing_banner": "PRINTING",
+   "target": "LHASH"
+  },
+  {
+   "addr": "ffacb",
+   "len": 1,
+   "immediate": false,
+   "name": "#",
+   "listing_banner": "PRINTING",
+   "target": "HASH"
+  },
+  {
+   "addr": "ffacf",
+   "len": 2,
+   "immediate": false,
+   "name": "#S",
+   "listing_banner": "PRINTING",
+   "target": "HASHS"
+  },
+  {
+   "addr": "ffad4",
+   "len": 3,
+   "immediate": false,
+   "name": "<D>",
+   "listing_banner": "PRINTING",
+   "target": "DNUM"
+  },
+  {
+   "addr": "ffada",
+   "len": 2,
+   "immediate": false,
+   "name": "U.",
+   "listing_banner": "PRINTING",
+   "target": "UPRT"
+  },
+  {
+   "addr": "ffadf",
+   "len": 4,
+   "immediate": false,
+   "name": ".DEC",
+   "listing_banner": "PRINTING",
+   "target": "PRTDEC"
+  },
+  {
+   "addr": "ffae6",
+   "len": 4,
+   "immediate": false,
+   "name": ".BIN",
+   "listing_banner": "PRINTING",
+   "target": "PRTBIN"
+  },
+  {
+   "addr": "ffaed",
+   "len": 2,
+   "immediate": false,
+   "name": ".H",
+   "listing_banner": "PRINTING",
+   "target": "PRTHEX"
+  },
+  {
+   "addr": "ffaf2",
+   "len": 2,
+   "immediate": false,
+   "name": ".B",
+   "listing_banner": "PRINTING",
+   "target": "PRTB"
+  },
+  {
+   "addr": "ffaf7",
+   "len": 5,
+   "immediate": false,
+   "name": ".BYTE",
+   "listing_banner": "PRINTING",
+   "target": "PRTBYTE"
+  },
+  {
+   "addr": "ffaff",
+   "len": 2,
+   "immediate": false,
+   "name": ".W",
+   "listing_banner": "PRINTING",
+   "target": "PRTW"
+  },
+  {
+   "addr": "ffb04",
+   "len": 5,
+   "immediate": false,
+   "name": ".WORD",
+   "listing_banner": "PRINTING",
+   "target": "PRTWORD"
+  },
+  {
+   "addr": "ffb0c",
+   "len": 2,
+   "immediate": false,
+   "name": ".L",
+   "listing_banner": "PRINTING",
+   "target": "PRTL"
+  },
+  {
+   "addr": "ffb11",
+   "len": 5,
+   "immediate": false,
+   "name": ".LONG",
+   "listing_banner": "PRINTING",
+   "target": "PRTLONG"
+  },
+  {
+   "addr": "ffb19",
+   "len": 5,
+   "immediate": false,
+   "name": ".ADDR",
+   "listing_banner": "PRINTING",
+   "target": "PRTADR"
+  },
+  {
+   "addr": "ffb21",
+   "len": 6,
+   "immediate": false,
+   "name": "PRINT$",
+   "listing_banner": "PRINTING",
+   "target": "PRINTSTR"
+  },
+  {
+   "addr": "ffb2a",
+   "len": 4,
+   "immediate": false,
+   "name": "LEN$",
+   "listing_banner": "PRINTING",
+   "target": "STRLEN"
+  },
+  {
+   "addr": "ffb31",
+   "len": 1,
+   "immediate": true,
+   "name": "\"",
+   "listing_banner": "PRINTING",
+   "target": "_STRING_"
+  },
+  {
+   "addr": "ffb35",
+   "len": 2,
+   "immediate": true,
+   "name": ".\"",
+   "listing_banner": "PRINTING",
+   "target": "_PSTR_"
+  },
+  {
+   "addr": "ffb3a",
+   "len": 5,
+   "immediate": false,
+   "name": "CTYPE",
+   "listing_banner": "PRINTING",
+   "target": "CTYPE"
+  },
+  {
+   "addr": "ffb42",
+   "len": 5,
+   "immediate": false,
+   "name": "?EXIT",
+   "listing_banner": "PRINTING",
+   "target": "IFEXIT"
+  },
+  {
+   "addr": "ffb4a",
+   "len": 5,
+   "immediate": false,
+   "name": "DATA?",
+   "listing_banner": "MEMORY BLOCKS",
+   "target": "DATAQ"
+  },
+  {
+   "addr": "ffb52",
+   "len": 5,
+   "immediate": false,
+   "name": "ERASE",
+   "listing_banner": "MEMORY BLOCKS",
+   "target": "ERASE"
+  },
+  {
+   "addr": "ffb5a",
+   "len": 4,
+   "immediate": false,
+   "name": "FILL",
+   "listing_banner": "MEMORY BLOCKS",
+   "target": "CFILL"
+  },
+  {
+   "addr": "ffb61",
+   "len": 5,
+   "immediate": false,
+   "name": "CMOVE",
+   "listing_banner": "MEMORY BLOCKS",
+   "target": "CMOVE"
+  },
+  {
+   "addr": "ffb69",
+   "len": 6,
+   "immediate": false,
+   "name": "<CMOVE",
+   "listing_banner": "MEMORY BLOCKS",
+   "target": "RCMOVE"
+  },
+  {
+   "addr": "ffb72",
+   "len": 1,
+   "immediate": false,
+   "name": "s",
+   "listing_banner": "TIMING",
+   "target": "secs"
+  },
+  {
+   "addr": "ffb76",
+   "len": 2,
+   "immediate": false,
+   "name": "ms",
+   "listing_banner": "TIMING",
+   "target": "ms"
+  },
+  {
+   "addr": "ffb7b",
+   "len": 2,
+   "immediate": false,
+   "name": "us",
+   "listing_banner": "TIMING",
+   "target": "us"
+  },
+  {
+   "addr": "ffb80",
+   "len": 4,
+   "immediate": false,
+   "name": "CNT@",
+   "listing_banner": "LAP TIMING",
+   "target": "_GETCNT"
+  },
+  {
+   "addr": "ffb87",
+   "len": 3,
+   "immediate": false,
+   "name": "LAP",
+   "listing_banner": "LAP TIMING",
+   "target": "LAP"
+  },
+  {
+   "addr": "ffb8d",
+   "len": 4,
+   "immediate": false,
+   "name": "LAP@",
+   "listing_banner": "LAP TIMING",
+   "target": "LAPFETCH"
+  },
+  {
+   "addr": "ffb94",
+   "len": 4,
+   "immediate": false,
+   "name": ".LAP",
+   "listing_banner": "LAP TIMING",
+   "target": "PRTLAP"
+  },
+  {
+   "addr": "ffb9b",
+   "len": 3,
+   "immediate": false,
+   "name": ".ms",
+   "listing_banner": "LAP TIMING",
+   "target": "PRTMS"
+  },
+  {
+   "addr": "ffba1",
+   "len": 3,
+   "immediate": false,
+   "name": "HEX",
+   "listing_banner": "RADIX",
+   "target": "HEX"
+  },
+  {
+   "addr": "ffba7",
+   "len": 3,
+   "immediate": false,
+   "name": "DEC",
+   "listing_banner": "RADIX",
+   "target": "DECIMAL"
+  },
+  {
+   "addr": "ffbad",
+   "len": 3,
+   "immediate": false,
+   "name": "BIN",
+   "listing_banner": "RADIX",
+   "target": "BIN"
+  },
+  {
+   "addr": "ffbb3",
+   "len": 2,
+   "immediate": false,
+   "name": ".S",
+   "listing_banner": "RADIX",
+   "target": "PRTSTK"
+  },
+  {
+   "addr": "ffbb8",
+   "len": 5,
+   "immediate": false,
+   "name": "WORDS",
+   "listing_banner": "DICTIONARY",
+   "target": "WORDS"
+  },
+  {
+   "addr": "ffbc0",
+   "len": 6,
+   "immediate": false,
+   "name": "@WORDS",
+   "listing_banner": "DICTIONARY",
+   "target": "ATNAMES"
+  },
+  {
+   "addr": "ffbc9",
+   "len": 4,
+   "immediate": false,
+   "name": "GET$",
+   "listing_banner": "DICTIONARY",
+   "target": "_GETWORD"
+  },
+  {
+   "addr": "ffbd0",
+   "len": 6,
+   "immediate": false,
+   "name": "SEARCH",
+   "listing_banner": "DICTIONARY",
+   "target": "SEARCH"
+  },
+  {
+   "addr": "ffbd9",
+   "len": 3,
+   "immediate": false,
+   "name": "$>#",
+   "listing_banner": "DICTIONARY",
+   "target": "NUMBER"
+  },
+  {
+   "addr": "ffbdf",
+   "len": 5,
+   "immediate": false,
+   "name": "@DATA",
+   "listing_banner": "DICTIONARY",
+   "target": "ATDAT"
+  },
+  {
+   "addr": "ffbe7",
+   "len": 4,
+   "immediate": false,
+   "name": "HERE",
+   "listing_banner": "DICTIONARY",
+   "target": "ATHERE"
+  },
+  {
+   "addr": "ffbee",
+   "len": 5,
+   "immediate": false,
+   "name": "@HERE",
+   "listing_banner": "DICTIONARY",
+   "target": "rg+here"
+  },
+  {
+   "addr": "ffbf6",
+   "len": 6,
+   "immediate": false,
+   "name": "@CODES",
+   "listing_banner": "DICTIONARY",
+   "target": "rg+codes"
+  },
+  {
+   "addr": "ffbff",
+   "len": 5,
+   "immediate": false,
+   "name": "uemit",
+   "listing_banner": "VARIABLES",
+   "target": "rg+uemit"
+  },
+  {
+   "addr": "ffc07",
+   "len": 4,
+   "immediate": false,
+   "name": "ukey",
+   "listing_banner": "VARIABLES",
+   "target": "rg+ukey"
+  },
+  {
+   "addr": "ffc0e",
+   "len": 4,
+   "immediate": false,
+   "name": "char",
+   "listing_banner": "VARIABLES",
+   "target": "w+lastkey"
+  },
+  {
+   "addr": "ffc15",
+   "len": 5,
+   "immediate": false,
+   "name": "delim",
+   "listing_banner": "VARIABLES",
+   "target": "rg+delim"
+  },
+  {
+   "addr": "ffc1d",
+   "len": 5,
+   "immediate": false,
+   "name": "names",
+   "listing_banner": "VARIABLES",
+   "target": "rg+names"
+  },
+  {
+   "addr": "ffc25",
+   "len": 4,
+   "immediate": false,
+   "name": "TASK",
+   "listing_banner": "VARIABLES",
+   "target": "TASK"
+  },
+  {
+   "addr": "ffc2c",
+   "len": 3,
+   "immediate": false,
+   "name": "REG",
+   "listing_banner": "VARIABLES",
+   "target": "ATREG"
+  },
+  {
+   "addr": "ffc32",
+   "len": 5,
+   "immediate": false,
+   "name": "@WORD",
+   "listing_banner": "VARIABLES",
+   "target": "rg+wordbuf"
+  },
+  {
+   "addr": "ffc3a",
+   "len": 4,
+   "immediate": false,
+   "name": "SPIN",
+   "listing_banner": "VARIABLES",
+   "target": "SPINNER"
+  },
+  {
+   "addr": "ffc41",
+   "len": 1,
+   "immediate": true,
+   "name": "|",
+   "listing_banner": "VARIABLES",
+   "target": "CCOMP"
+  },
+  {
+   "addr": "ffc45",
+   "len": 2,
+   "immediate": true,
+   "name": "||",
+   "listing_banner": "VARIABLES",
+   "target": "WCOMP"
+  },
+  {
+   "addr": "ffc4a",
+   "len": 1,
+   "immediate": true,
+   "name": ",",
+   "listing_banner": "VARIABLES",
+   "target": "LCOMP"
+  },
+  {
+   "addr": "ffc4e",
+   "len": 3,
+   "immediate": true,
+   "name": "[W]",
+   "listing_banner": "VARIABLES",
+   "target": "COMPW"
+  },
+  {
+   "addr": "ffc54",
+   "len": 3,
+   "immediate": true,
+   "name": "[\"]",
+   "listing_banner": "VARIABLES",
+   "target": "COMPSTR"
+  },
+  {
+   "addr": "ffc5a",
+   "len": 5,
+   "immediate": false,
+   "name": "NULL$",
+   "listing_banner": "VARIABLES",
+   "target": "NULLSTR"
+  },
+  {
+   "addr": "ffc62",
+   "len": 2,
+   "immediate": false,
+   "name": "$!",
+   "listing_banner": "VARIABLES",
+   "target": "STRST"
+  },
+  {
+   "addr": "ffc67",
+   "len": 2,
+   "immediate": false,
+   "name": "$=",
+   "listing_banner": "VARIABLES",
+   "target": "STREQ"
+  },
+  {
+   "addr": "ffc6c",
+   "len": 3,
+   "immediate": false,
+   "name": "ASM",
+   "listing_banner": "DEFINITIONS",
+   "target": "_ASM"
+  },
+  {
+   "addr": "ffc72",
+   "len": 6,
+   "immediate": true,
+   "name": "FORGET",
+   "listing_banner": "DEFINITIONS",
+   "target": "FORGET"
+  },
+  {
+   "addr": "ffc7b",
+   "len": 7,
+   "immediate": true,
+   "name": "CREATE$",
+   "listing_banner": "DEFINITIONS",
+   "target": "CREATEWORD"
+  },
+  {
+   "addr": "ffc85",
+   "len": 6,
+   "immediate": true,
+   "name": "CREATE",
+   "listing_banner": "DEFINITIONS",
+   "target": "CREATE"
+  },
+  {
+   "addr": "ffc8e",
+   "len": 3,
+   "immediate": true,
+   "name": "VAR",
+   "listing_banner": "DEFINITIONS",
+   "target": "_VAR"
+  },
+  {
+   "addr": "ffc94",
+   "len": 3,
+   "immediate": true,
+   "name": "pub",
+   "listing_banner": "DEFINITIONS",
+   "target": "PUBDEF"
+  },
+  {
+   "addr": "ffc9a",
+   "len": 3,
+   "immediate": true,
+   "name": "pri",
+   "listing_banner": "DEFINITIONS",
+   "target": "PRIDEF"
+  },
+  {
+   "addr": "ffca0",
+   "len": 3,
+   "immediate": true,
+   "name": "pre",
+   "listing_banner": "DEFINITIONS",
+   "target": "PREDEF"
+  },
+  {
+   "addr": "ffca6",
+   "len": 1,
+   "immediate": true,
+   "name": ":",
+   "listing_banner": "DEFINITIONS",
+   "target": "NEWDEF"
+  },
+  {
+   "addr": "ffcaa",
+   "len": 1,
+   "immediate": true,
+   "name": ";",
+   "listing_banner": "DEFINITIONS",
+   "target": "ENDDEF"
+  },
+  {
+   "addr": "ffcae",
+   "len": 1,
+   "immediate": true,
+   "name": "[",
+   "listing_banner": "DEFINITIONS",
+   "target": "UNDEF"
+  },
+  {
+   "addr": "ffcb2",
+   "len": 1,
+   "immediate": true,
+   "name": "]",
+   "listing_banner": "DEFINITIONS",
+   "target": "REDEF"
+  },
+  {
+   "addr": "ffcb6",
+   "len": 1,
+   "immediate": true,
+   "name": "'",
+   "listing_banner": "DEFINITIONS",
+   "target": "ATICK"
+  },
+  {
+   "addr": "ffcba",
+   "len": 2,
+   "immediate": true,
+   "name": ":=",
+   "listing_banner": "DEFINITIONS",
+   "target": "_CONST"
+  },
+  {
+   "addr": "ffcbf",
+   "len": 3,
+   "immediate": false,
+   "name": "==!",
+   "listing_banner": "DEFINITIONS",
+   "target": "CONST"
+  },
+  {
+   "addr": "ffcc5",
+   "len": 5,
+   "immediate": false,
+   "name": "ALIGN",
+   "listing_banner": "DEFINITIONS",
+   "target": "_ALIGN"
+  },
+  {
+   "addr": "ffccd",
+   "len": 6,
+   "immediate": true,
+   "name": "DATCON",
+   "listing_banner": "DEFINITIONS",
+   "target": "_DATCON"
+  },
+  {
+   "addr": "ffcd6",
+   "len": 5,
+   "immediate": false,
+   "name": "ALLOT",
+   "listing_banner": "DEFINITIONS",
+   "target": "ALLOT"
+  },
+  {
+   "addr": "ffcde",
+   "len": 3,
+   "immediate": false,
+   "name": "org",
+   "listing_banner": "DEFINITIONS",
+   "target": "DATORG"
+  },
+  {
+   "addr": "ffce4",
+   "len": 5,
+   "immediate": true,
+   "name": "bytes",
+   "listing_banner": "DEFINITIONS",
+   "target": "dbytes"
+  },
+  {
+   "addr": "ffcec",
+   "len": 5,
+   "immediate": true,
+   "name": "words",
+   "listing_banner": "DEFINITIONS",
+   "target": "dwords"
+  },
+  {
+   "addr": "ffcf4",
+   "len": 5,
+   "immediate": true,
+   "name": "longs",
+   "listing_banner": "DEFINITIONS",
+   "target": "dlongs"
+  },
+  {
+   "addr": "ffcfc",
+   "len": 4,
+   "immediate": true,
+   "name": "byte",
+   "listing_banner": "DEFINITIONS",
+   "target": "dbyte"
+  },
+  {
+   "addr": "ffd03",
+   "len": 4,
+   "immediate": true,
+   "name": "word",
+   "listing_banner": "DEFINITIONS",
+   "target": "dword"
+  },
+  {
+   "addr": "ffd0a",
+   "len": 4,
+   "immediate": true,
+   "name": "long",
+   "listing_banner": "DEFINITIONS",
+   "target": "dlong"
+  },
+  {
+   "addr": "ffd11",
+   "len": 3,
+   "immediate": false,
+   "name": "res",
+   "listing_banner": "DEFINITIONS",
+   "target": "dres"
+  },
+  {
+   "addr": "ffd17",
+   "len": 3,
+   "immediate": true,
+   "name": "[C]",
+   "listing_banner": "DEFINITIONS",
+   "target": "COMPILES"
+  },
+  {
+   "addr": "ffd1d",
+   "len": 4,
+   "immediate": true,
+   "name": "GRAB",
+   "listing_banner": "DEFINITIONS",
+   "target": "GRAB"
+  },
+  {
+   "addr": "ffd24",
+   "len": 4,
+   "immediate": true,
+   "name": "NFA'",
+   "listing_banner": "FIELDS",
+   "target": "_NFATICK"
+  },
+  {
+   "addr": "ffd2b",
+   "len": 3,
+   "immediate": false,
+   "name": "CPA",
+   "listing_banner": "FIELDS",
+   "target": "NFACPA"
+  },
+  {
+   "addr": "ffd31",
+   "len": 3,
+   "immediate": false,
+   "name": "CFA",
+   "listing_banner": "FIELDS",
+   "target": "NFACFA"
+  },
+  {
+   "addr": "ffd37",
+   "len": 1,
+   "immediate": true,
+   "name": "\\",
+   "listing_banner": "COMMENTS",
+   "target": "COMMENT"
+  },
+  {
+   "addr": "ffd3b",
+   "len": 3,
+   "immediate": true,
+   "name": "---",
+   "listing_banner": "COMMENTS",
+   "target": "COMMENT"
+  },
+  {
+   "addr": "ffd41",
+   "len": 1,
+   "immediate": true,
+   "name": "(",
+   "listing_banner": "COMMENTS",
+   "target": "PAREN"
+  },
+  {
+   "addr": "ffd45",
+   "len": 1,
+   "immediate": true,
+   "name": "{",
+   "listing_banner": "COMMENTS",
+   "target": "BRACE"
+  },
+  {
+   "addr": "ffd49",
+   "len": 1,
+   "immediate": true,
+   "name": "}",
+   "listing_banner": "COMMENTS",
+   "target": "_NOP"
+  },
+  {
+   "addr": "ffd4d",
+   "len": 6,
+   "immediate": true,
+   "name": "IFNDEF",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "IFNDEF"
+  },
+  {
+   "addr": "ffd56",
+   "len": 5,
+   "immediate": true,
+   "name": "IFDEF",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "IFDEF"
+  },
+  {
+   "addr": "ffd5e",
+   "len": 5,
+   "immediate": false,
+   "name": "TAQOZ",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "_TAQOZ"
+  },
+  {
+   "addr": "ffd66",
+   "len": 4,
+   "immediate": false,
+   "name": "TERM",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "TERMINAL"
+  },
+  {
+   "addr": "ffd6d",
+   "len": 4,
+   "immediate": true,
+   "name": "AUTO",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "AUTORUN"
+  },
+  {
+   "addr": "ffd74",
+   "len": 5,
+   "immediate": false,
+   "name": "SPIRD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIRD"
+  },
+  {
+   "addr": "ffd7c",
+   "len": 6,
+   "immediate": false,
+   "name": "SPIRDL",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIRDL"
+  },
+  {
+   "addr": "ffd85",
+   "len": 5,
+   "immediate": false,
+   "name": "SPIWB",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIWR8"
+  },
+  {
+   "addr": "ffd8d",
+   "len": 5,
+   "immediate": false,
+   "name": "SPICE",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPICE"
+  },
+  {
+   "addr": "ffd95",
+   "len": 5,
+   "immediate": false,
+   "name": "SPIWC",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIWRC"
+  },
+  {
+   "addr": "ffd9d",
+   "len": 5,
+   "immediate": false,
+   "name": "SPIWW",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIWR16"
+  },
+  {
+   "addr": "ffda5",
+   "len": 5,
+   "immediate": false,
+   "name": "SPIWM",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIWM"
+  },
+  {
+   "addr": "ffdad",
+   "len": 5,
+   "immediate": false,
+   "name": "SPIWL",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIWRL"
+  },
+  {
+   "addr": "ffdb5",
+   "len": 7,
+   "immediate": false,
+   "name": "SPIPINS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIPINS"
+  },
+  {
+   "addr": "ffdbf",
+   "len": 5,
+   "immediate": false,
+   "name": "SPIRX",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPIRX"
+  },
+  {
+   "addr": "ffdc7",
+   "len": 6,
+   "immediate": false,
+   "name": "SPITXE",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPITXE"
+  },
+  {
+   "addr": "ffdd0",
+   "len": 5,
+   "immediate": false,
+   "name": "SPITX",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SPITX"
+  },
+  {
+   "addr": "ffdd8",
+   "len": 4,
+   "immediate": false,
+   "name": "WAIT",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "WAIT"
+  },
+  {
+   "addr": "ffddf",
+   "len": 6,
+   "immediate": false,
+   "name": "CLKDIV",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "CLKDIV"
+  },
+  {
+   "addr": "ffde8",
+   "len": 6,
+   "immediate": false,
+   "name": "RCSLOW",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "RCSLOW"
+  },
+  {
+   "addr": "ffdf1",
+   "len": 6,
+   "immediate": false,
+   "name": "HUBSET",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "_HUBSET"
+  },
+  {
+   "addr": "ffdfa",
+   "len": 2,
+   "immediate": false,
+   "name": "WP",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "WP"
+  },
+  {
+   "addr": "ffdff",
+   "len": 2,
+   "immediate": false,
+   "name": "WE",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "WE"
+  },
+  {
+   "addr": "ffe04",
+   "len": 5,
+   "immediate": false,
+   "name": "CLKHZ",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "CLKHZ"
+  },
+  {
+   "addr": "ffe0c",
+   "len": 5,
+   "immediate": false,
+   "name": "ERROR",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "ERROR"
+  },
+  {
+   "addr": "ffe14",
+   "len": 6,
+   "immediate": false,
+   "name": "SFPINS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFPINS"
+  },
+  {
+   "addr": "ffe1d",
+   "len": 3,
+   "immediate": false,
+   "name": "SF?",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFSTAT"
+  },
+  {
+   "addr": "ffe23",
+   "len": 4,
+   "immediate": false,
+   "name": "SFWE",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFWE"
+  },
+  {
+   "addr": "ffe2a",
+   "len": 5,
+   "immediate": false,
+   "name": "SFINS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFINS"
+  },
+  {
+   "addr": "ffe32",
+   "len": 4,
+   "immediate": false,
+   "name": "SFWD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFWD"
+  },
+  {
+   "addr": "ffe39",
+   "len": 5,
+   "immediate": false,
+   "name": "SFSID",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFSID"
+  },
+  {
+   "addr": "ffe41",
+   "len": 5,
+   "immediate": false,
+   "name": "SFJID",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFJID"
+  },
+  {
+   "addr": "ffe49",
+   "len": 5,
+   "immediate": false,
+   "name": "SFER4",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFER4"
+  },
+  {
+   "addr": "ffe51",
+   "len": 6,
+   "immediate": false,
+   "name": "SFER32",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFER32"
+  },
+  {
+   "addr": "ffe5a",
+   "len": 6,
+   "immediate": false,
+   "name": "SFER64",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFER64"
+  },
+  {
+   "addr": "ffe63",
+   "len": 7,
+   "immediate": false,
+   "name": "SFERASE",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFERALL"
+  },
+  {
+   "addr": "ffe6d",
+   "len": 6,
+   "immediate": false,
+   "name": "SFWRPG",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFWRPAGE"
+  },
+  {
+   "addr": "ffe76",
+   "len": 6,
+   "immediate": false,
+   "name": "BACKUP",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "BACKUP"
+  },
+  {
+   "addr": "ffe7f",
+   "len": 7,
+   "immediate": false,
+   "name": "RESTORE",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "RESTORE"
+  },
+  {
+   "addr": "ffe89",
+   "len": 5,
+   "immediate": false,
+   "name": "SFRDS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFRDS"
+  },
+  {
+   "addr": "ffe91",
+   "len": 5,
+   "immediate": false,
+   "name": "SFWRS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFWRS"
+  },
+  {
+   "addr": "ffe99",
+   "len": 4,
+   "immediate": false,
+   "name": "SFC@",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFCFETCH"
+  },
+  {
+   "addr": "ffea0",
+   "len": 4,
+   "immediate": false,
+   "name": "SFW@",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFWFETCH"
+  },
+  {
+   "addr": "ffea7",
+   "len": 3,
+   "immediate": false,
+   "name": "SF@",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SFFETCH"
+  },
+  {
+   "addr": "ffead",
+   "len": 2,
+   "immediate": false,
+   "name": "SF",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SF"
+  },
+  {
+   "addr": "ffeb2",
+   "len": 3,
+   "immediate": false,
+   "name": ".SF",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "PRTSF"
+  },
+  {
+   "addr": "ffeb8",
+   "len": 5,
+   "immediate": false,
+   "name": "SDBUF",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDBUF"
+  },
+  {
+   "addr": "ffec0",
+   "len": 6,
+   "immediate": false,
+   "name": "sdpins",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "_sdpins"
+  },
+  {
+   "addr": "ffec9",
+   "len": 5,
+   "immediate": false,
+   "name": "MOUNT",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "MOUNT"
+  },
+  {
+   "addr": "ffed1",
+   "len": 3,
+   "immediate": false,
+   "name": "DIR",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "PRTDIR"
+  },
+  {
+   "addr": "ffed7",
+   "len": 3,
+   "immediate": false,
+   "name": "!SD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "INITSD"
+  },
+  {
+   "addr": "ffedd",
+   "len": 3,
+   "immediate": false,
+   "name": "!SX",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "INITSX"
+  },
+  {
+   "addr": "ffee3",
+   "len": 3,
+   "immediate": false,
+   "name": "SD?",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDQ"
+  },
+  {
+   "addr": "ffee9",
+   "len": 3,
+   "immediate": false,
+   "name": "CMD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "CMD"
+  },
+  {
+   "addr": "ffeef",
+   "len": 4,
+   "immediate": false,
+   "name": "ACMD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "ACMD"
+  },
+  {
+   "addr": "ffef6",
+   "len": 3,
+   "immediate": false,
+   "name": "cid",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "w+cid"
+  },
+  {
+   "addr": "ffefc",
+   "len": 4,
+   "immediate": false,
+   "name": "SDWR",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDWR"
+  },
+  {
+   "addr": "fff03",
+   "len": 5,
+   "immediate": false,
+   "name": "SDRDS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDRDS"
+  },
+  {
+   "addr": "fff0b",
+   "len": 5,
+   "immediate": false,
+   "name": "SDWRS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDWRS"
+  },
+  {
+   "addr": "fff13",
+   "len": 5,
+   "immediate": false,
+   "name": "FLUSH",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "FLUSH"
+  },
+  {
+   "addr": "fff1b",
+   "len": 5,
+   "immediate": false,
+   "name": "FOPEN",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "FOPEN"
+  },
+  {
+   "addr": "fff23",
+   "len": 5,
+   "immediate": false,
+   "name": "FLOAD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "FLOAD"
+  },
+  {
+   "addr": "fff2b",
+   "len": 4,
+   "immediate": false,
+   "name": "FGET",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "FGET"
+  },
+  {
+   "addr": "fff32",
+   "len": 5,
+   "immediate": false,
+   "name": "FREAD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "FREAD"
+  },
+  {
+   "addr": "fff3a",
+   "len": 6,
+   "immediate": false,
+   "name": "FWRITE",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "FWRITE"
+  },
+  {
+   "addr": "fff43",
+   "len": 6,
+   "immediate": false,
+   "name": "SECTOR",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SECTOR"
+  },
+  {
+   "addr": "fff4c",
+   "len": 4,
+   "immediate": false,
+   "name": "SDRD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDRD"
+  },
+  {
+   "addr": "fff53",
+   "len": 5,
+   "immediate": false,
+   "name": "SDRDS",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDRDS"
+  },
+  {
+   "addr": "fff5b",
+   "len": 5,
+   "immediate": false,
+   "name": "SDADR",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDADR"
+  },
+  {
+   "addr": "fff63",
+   "len": 3,
+   "immediate": false,
+   "name": "SD@",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDFETCH"
+  },
+  {
+   "addr": "fff69",
+   "len": 3,
+   "immediate": false,
+   "name": "SD!",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDSTORE"
+  },
+  {
+   "addr": "fff6f",
+   "len": 4,
+   "immediate": false,
+   "name": "SDC@",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDCFETCH"
+  },
+  {
+   "addr": "fff76",
+   "len": 4,
+   "immediate": false,
+   "name": "SDC!",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDCSTORE"
+  },
+  {
+   "addr": "fff7d",
+   "len": 4,
+   "immediate": false,
+   "name": "SDW@",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SDWFETCH"
+  },
+  {
+   "addr": "fff84",
+   "len": 2,
+   "immediate": false,
+   "name": "SD",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "SD"
+  },
+  {
+   "addr": "fff89",
+   "len": 4,
+   "immediate": false,
+   "name": "@FAT",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "ATFAT"
+  },
+  {
+   "addr": "fff90",
+   "len": 5,
+   "immediate": false,
+   "name": "@BOOT",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "ATBOOT"
+  },
+  {
+   "addr": "fff98",
+   "len": 5,
+   "immediate": false,
+   "name": "@ROOT",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "ATROOT"
+  },
+  {
+   "addr": "fffa0",
+   "len": 3,
+   "immediate": false,
+   "name": "fat",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "w+fat32"
+  },
+  {
+   "addr": "fffa6",
+   "len": 3,
+   "immediate": false,
+   "name": "END",
+   "listing_banner": "CONDITIONAL COMPILATION",
+   "target": "_END"
+  }
+ ],
+ "commented_out_not_in_rom": [
+  {
+   "name": "ZEROX"
+  },
+  {
+   "name": "SHROUT"
+  },
+  {
+   "name": "SHRINP"
+  },
+  {
+   "name": "SKIPNZ"
+  },
+  {
+   "name": "keypoll"
+  },
+  {
+   "name": "DISCARD"
+  },
+  {
+   "name": ".DEC2"
+  },
+  {
+   "name": ">CHAR"
+  },
+  {
+   "name": "LOOKIN"
+  },
+  {
+   "name": "LOOKUP"
+  },
+  {
+   "name": ":="
+  },
+  {
+   "name": "IDLE"
+  },
+  {
+   "name": ".VER"
+  },
+  {
+   "name": "CLKMHZ"
+  },
+  {
+   "name": "csd"
+  },
+  {
+   "name": "RDFAT"
+  },
+  {
+   "name": "CL>SECT"
+  }
+ ]
+}
