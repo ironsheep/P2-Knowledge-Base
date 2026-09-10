@@ -1,3 +1,25 @@
+> **⚠️ SUPERSEDED 2026-09-10 — historical, not state. Do not update it; do not plan from it.**
+>
+> Per-document deliverable state has ONE home:
+> [`../document-production/PUBLICATION-ROSTER.md`](../document-production/PUBLICATION-ROSTER.md),
+> which `release-manual` and `prepare-manual` keep current and `whats-next` reads. This file is a
+> **September-2025 presentation-era** snapshot and `PROCESS-DOC-CATALOG.md` has carried its
+> disposition — *"superseded by PUBLICATION-ROSTER.md → retire (don't maintain two)"* — since
+> 2026-06-11.
+>
+> It is wrong in almost every particular, which is why it gets a banner rather than a quiet edit:
+> the **Smart Pins Complete Reference** it leads with was retired from the live tree (CLAUDE.md);
+> **DeSilva** is listed *Queued* at v3.0.6 published and v3.0.7 shipping; the **Single-Step
+> Debugger** is listed *Content Ready* and released v1.0.0 on 2026-09-10; the roster now carries
+> **18 published documents** against this file's handful of planned ones; the working paths it
+> names (`workspace/smart-pins-manual/`, `workspace/desilva-manual/`,
+> `/documentation/work-mode-guides/`) no longer exist; and its template stacks
+> (`p2kb-foundation`, `iron-sheep-tech-review`) were replaced by the shared `platform/` stack.
+>
+> Retained because four live documents still link here. Read it as 2025 history.
+
+---
+
 # Document Production Pipeline Tracker
 
 *Last Updated: 2025-12-17*
