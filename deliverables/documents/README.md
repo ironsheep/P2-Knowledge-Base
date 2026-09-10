@@ -150,6 +150,46 @@ Spin2's STRUCT facility gives the P2 real records: named, typed, packed fields y
 
 *August 2026 - Community Review Edition* | [Changelog](DOCs/p2an007-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN007-src.zip)
 
+## Iron Sheep Tool Guides
+
+**These are not community-review documents.** The manuals above are P2 references built
+from the knowledge base and put in front of practitioners to be checked. What follows is
+different in kind: a guide to a tool **Iron Sheep Productions builds**, written by the
+people who build it, describing the tool as it currently ships.
+
+The practical differences are worth stating, because they change what you should do with
+the document:
+
+- It **tracks the tool's releases**, not a review cycle. Its version moves when the tool
+  moves, and it is written against a stated build.
+- It is about **software we own**, not about P2 silicon, so there is no Parallax source to
+  check it against — and none of the AI-assistance caveats above apply the same way. Its
+  authority is the tool's own code.
+- **Report problems to the tool's own repository**, not to the document issue tracker
+  above. A wrong keystroke in the guide and a wrong keystroke in the program are usually
+  the same bug, and it belongs where the fix goes.
+
+It ships here because it is a P2 document — the tool exists to download to a P2 and watch
+one run — and that is the shelf a P2 developer looks on.
+
+### [PNut-Term-TS User Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/PNut-Term-TS-User-Guide.pdf)
+**The Cross-Platform Downloader, Terminal, and Debug Display for the Propeller 2** · *Version 1.0.0*
+
+The operating guide for PNut-Term-TS — the downloader, serial terminal, and `debug()` display
+in one program that runs the same way on Windows, macOS, and Linux. It replaces Parallax Serial
+Terminal, hosts the debug display windows and the single-step debugger, and does all three
+without requiring a particular operating system. The guide forks by intent after a shared
+orientation: one opening places the tool in your workflow, then the reading splits into the GUI
+path and the headless command-line path, so you follow only the half you work in. Downloading is
+the P2's own boot protocol, so a binary from any toolchain runs here — PNut and `pnut-ts` images
+carry their own serial rate and are detected automatically. Three subjects get extra room because
+each one costs real time when guessed at: the exit codes as a contract a script can branch on,
+the Debug Logger as a window onto the log rather than the log itself, and the naming rule that
+decides whether a display window ever appears.
+
+*September 2026* · Tracks **PNut-Term-TS v1.0.7** | [Changelog](DOCs/pnut-term-ts-user-guide-changelog.md) | [Report a tool or guide issue](https://github.com/ironsheep/PNut-Term-TS/issues)
+
+
 ## The Full Documentation Set
 
 Beyond the documents in review above, here is the complete planned set, so you can see where the whole library is headed. Titles and scope of the not-yet-released items may still evolve.
