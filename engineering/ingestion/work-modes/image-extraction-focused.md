@@ -262,7 +262,7 @@ mcp__filesystem__read_text_file path:"sources/extractions/[document-audit]/asset
 **🚨 v3.0 Enhancement**: Integrated sequential numbering system
 
 **Required Outputs**:
-1. **JSON Catalog**: `[document-name]_image_catalog.json` (automated by enhanced_pdf_extractor.py)
+1. **JSON Catalog**: `image-catalog.json` (automated by enhanced_pdf_extractor.py)
 2. **Markdown Catalog**: `image-catalog.md` (automated with sequential numbering)
 3. **Sequential numbering**: Applied using `update_catalog_numbering.py`
 
@@ -477,7 +477,8 @@ mcp__todo-mcp__todo_create content:"Add [document-name] visual assets to technic
 **Final Report**: Total images, success rate, sequential numbering applied
 
 ### JSON Catalog Structure
-**Generated File**: `[document-name]_image_catalog.json`
+**Generated File**: `image-catalog.json`  
+**Naming is fixed, not per-document (2026-09-10):** the catalog is `image-catalog.md` / `image-catalog.json` in EVERY `assets/images-*/` directory. Three spellings had accumulated because the extractors emitted per-document names, which made the catalog unfindable by any tool that knew only one of them.
 
 **Key Fields**:
 - `source_pdf`: Original document path

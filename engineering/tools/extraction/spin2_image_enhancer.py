@@ -117,7 +117,10 @@ class Spin2ImageEnhancer:
         
     def load_existing_catalog(self):
         """Load the existing JSON catalog"""
-        catalog_path = self.assets_path / "P2 Spin2 Documentation v51-250425_image_catalog.json"
+        # Was "P2 Spin2 Documentation v51-250425_image_catalog.json" -- a name no file in
+        # the repo has ever carried, so this loader could not have run. Catalog naming was
+        # unified to image-catalog.json on 2026-09-10.
+        catalog_path = self.assets_path / "image-catalog.json"
         with open(catalog_path, 'r') as f:
             return json.load(f)
     

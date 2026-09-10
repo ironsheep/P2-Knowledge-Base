@@ -476,7 +476,7 @@ class SmartPinsImageExtractor:
     def save_catalogs(self):
         """Save both JSON and Markdown catalogs with Smart Pins organization."""
         # Save JSON catalog
-        json_path = os.path.join(self.output_dir, f"{self.pdf_name}_smartpins_catalog.json")
+        json_path = os.path.join(self.output_dir, "image-catalog.json")  # one name, always (2026-09-10)
         with open(json_path, 'w') as f:
             json.dump({
                 "metadata": {
@@ -493,7 +493,7 @@ class SmartPinsImageExtractor:
         print(f"📋 JSON catalog saved: {json_path}")
         
         # Save Markdown catalog
-        md_path = os.path.join(self.output_dir, f"{self.pdf_name}_smartpins_catalog.md")
+        md_path = os.path.join(self.output_dir, "image-catalog.md")  # one name, always (2026-09-10)
         self._save_markdown_catalog(md_path)
         print(f"📖 Markdown catalog saved: {md_path}")
     

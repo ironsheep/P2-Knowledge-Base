@@ -10,7 +10,7 @@
 ## 📁 EXTRACTED ASSETS
 
 ### 🖼️ Enhanced Image Catalog
-**[DEBUG Display Catalog: assets/images-spin2-enhanced-20250901/P2_Spin2_Documentation_v51_spin2_catalog.md](assets/images-spin2-enhanced-20250901/P2_Spin2_Documentation_v51_spin2_catalog.md)**
+**[DEBUG Display Catalog: assets/images-spin2-enhanced-20250901/image-catalog.md](assets/images-spin2-enhanced-20250901/image-catalog.md)**
 - **Total Images**: 24 DEBUG display windows
 - **Enhancement Date**: 2025-09-01 (Visual inspection and classification)
 - **Key Visual Assets**: DEBUG Output, Single-Step Debugger, SCOPE, SCOPE_XY, SPECTRO, LOGIC, TERM windows

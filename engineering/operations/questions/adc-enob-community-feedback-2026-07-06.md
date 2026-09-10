@@ -219,10 +219,10 @@ Part4 p5–13.
 vector-safe page-render (`pdftoppm @150 DPI`), verified (entry counts, renders present, no broken
 embeds):
 - **Datasheet:** `engineering/ingestion/sources/p2-datasheet/assets/images-20260706/`
-  `Propeller2-P2X8C4M64P-Datasheet_image_catalog.md` — 16 figure pages → **38 figures** (P2DS-R001–R038).
+  `image-catalog.md` — 16 figure pages → **38 figures** (P2DS-R001–R038).
   Genuinely *supersedes* the 2025-09 embedded-image catalog (it had missed all vector schematics).
 - **Silicon Doc v35:** `engineering/ingestion/sources/silicon-doc/assets/images-20260706/`
-  `P2-Silicon-Doc-v35_image_catalog.md` — 18 figure pages (P2SD-R001–R018). *Complements* (does not
+  `image-catalog.md` — 18 figure pages (P2SD-R001–R018). *Complements* (does not
   supersede) the 2025-09 catalog; adds full-page context, ASCII/text figures, and rich descriptions.
 - Old `images-20250906/` folders retained for history.
 

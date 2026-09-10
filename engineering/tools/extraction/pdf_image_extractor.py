@@ -133,7 +133,7 @@ def extract_images_from_pdf(pdf_path, output_dir="extracted_images"):
             pix = None  # Free memory
     
     # Save catalog as JSON before closing document
-    catalog_path = os.path.join(output_dir, f"{Path(pdf_path).stem}_image_catalog.json")
+    catalog_path = os.path.join(output_dir, "image-catalog.json")  # one name, always (2026-09-10)
     page_count = len(doc)  # Get page count before closing
     doc.close()
     

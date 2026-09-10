@@ -185,14 +185,12 @@ def artifacts(folder: Path):
                 if big(p, 2000) and "audit" not in p.name.lower()
                 and p.name.lower() not in ("readme.md", "ingestion-process.md")]
     code = [d for d in folder.glob("assets/code-*") if d.is_dir() and any(d.iterdir())]
-    # Catalog FILENAMES are not standardised in this corpus, and an anchored glob
-    # called two fully-catalogued sources uncatalogued. Three live shapes:
-    #   image-catalog.md                     p2-hardware-manual, smart-pins-titus, ...
-    #   <doc>_image_catalog.md               p2-datasheet (x3 extractions)
-    #   <doc>_smartpins_catalog.md           smart-pins
-    # Match on the QUESTION (is there a catalog beside the images?), not the name.
-    # The naming drift is itself worth fixing at the source one day; until then a
-    # gate that only knows one spelling manufactures false gaps.
+    # Catalog naming was UNIFIED to image-catalog.{md,json} on 2026-09-10 -- 17 files
+    # renamed, and the four extractors that were emitting per-document names fixed, so
+    # the drift cannot regrow. This match stays name-agnostic anyway: it asks the
+    # QUESTION (is there a catalog beside the visuals?) rather than trusting a
+    # filename, because an anchored glob is exactly what called two fully-catalogued
+    # sources uncatalogued and nearly sent someone to redo finished work.
     # ...and not the DIRECTORY name either: p2-click-adapter's visuals live under
     # assets/render-*/ because that source has zero embedded images (vector art with
     # its text converted to curves), so its figures are rendered pages rather than

@@ -15,7 +15,7 @@
 ## 📁 EXTRACTED ASSETS
 
 ### 🖼️ Image Catalog
-**[Enhanced Image Catalog: assets/images-smartpins-20250901/P2 SmartPins-220809_smartpins_catalog.md](assets/images-smartpins-20250901/P2%20SmartPins-220809_smartpins_catalog.md)**
+**[Enhanced Image Catalog: assets/images-smartpins-20250901/image-catalog.md](assets/images-smartpins-20250901/image-catalog.md)**
 - **Total Images**: 21 (mode diagrams, timing charts, configuration tables, circuit schematics)
 - **Extraction Date**: 2025-09-01 (Enhanced with .docx narrative context)
 - **Key Visual Assets**: Smart Pin mode operation diagrams, ADC/DAC timing charts, PWM waveforms, USB protocol diagrams

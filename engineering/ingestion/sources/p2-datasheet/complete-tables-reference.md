@@ -321,7 +321,7 @@ the footer, nothing more — the content is entirely raster.
 
 They are already captured as images in
 `assets/images-20250906/Propeller2-P2X8C4M64P-Datasheet-20221101_page{26..32}_img*.png`
-(25 files; catalogued in that folder's `_image_catalog.md`).
+(25 files; catalogued in that folder's `image-catalog.md`).
 
 **Read off the figures (page 27, `page27_img01.png`, read 2026-08-24):** each schematic carries the
 same on-diagram drive legend, and it is **resistive**, matching the p.24 Pin Mode Legend exactly:
