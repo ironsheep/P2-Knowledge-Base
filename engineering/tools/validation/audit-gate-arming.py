@@ -102,6 +102,10 @@ HEADS = {
     },
     "ingestion": {
         "audit-extraction-digit-density.py",
+        # Invoked ADVISORY from the manual release runner (Stephen, 2026-09-10) so the
+        # ingestion corpus feeding the manuals is read at every release. It belongs to
+        # the ingestion head even though the manual head is what currently runs it.
+        "audit-ingestion-row-artifacts.py",
     },
 }
 

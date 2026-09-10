@@ -177,7 +177,12 @@ def build_gates(slug: str, phase: str, pdf: str | None):
         G += [
             ("license-block", f"{V}/audit-license-block.py", [], True,
              "license drift reached 17 documents and shipped for two months"),
-            ("review-scaffolding", f"{V}/audit-review-scaffolding.py", [], True,
+            # Takes paths, not a bare invocation: run over the opus-master sources AND
+            # the generated .tex, because either alone misses a case -- a box
+            # hand-written in raw LaTeX never appears as a fence, and a stale .tex
+            # never appears in the source.
+            ("review-scaffolding", f"{V}/audit-review-scaffolding.py",
+             [str(doc / "opus-master")], True,
              "a tool-review box puts a private question to a third party in public"),
         ]
         if corpus:
@@ -215,6 +220,14 @@ def build_gates(slug: str, phase: str, pdf: str | None):
 
     # The meta-gate runs in BOTH phases and is the reason this manifest stays
     # honest: it turns red when a gate script exists that nothing invokes.
+    if phase == "release":
+        # ADVISORY, and it PRINTS rather than merely passing. Stephen asked to see
+        # the state of ingestion we consider critical at the moment of release --
+        # a check that only reports pass/fail would tell him nothing at all.
+        G.append(("ingestion-state", f"{V}/audit-ingestion-row-artifacts.py",
+                  ["--critical-only"], "advisory",
+                  "ingestion rows whose ✅ has no artifact behind it"))
+
     # --head manual on purpose: a YAML- or ingestion-head gate left unwired must
     # not block a manual release, or the meta-gate becomes the thing everyone
     # routes around -- which is how gates die in the first place.
@@ -255,19 +268,41 @@ def main():
         return 0
 
     print(f"manual-release gates — {args.slug} — phase {args.phase}\n")
-    failed, skipped, passed, known = [], [], [], []
+    failed, skipped, passed, known, advisory = [], [], [], [], []
     for name, script, argv, blocking, why in gates:
         if script is None or argv is None:
             print(f"  SKIP    {name:<22} {why}")
             skipped.append(name)
             continue
         rc, out = run_gate(script, argv)
-        if rc == 0:
+        if blocking == "advisory":
+            print(f"  ADVISORY {name} — {why}")
+            for line in out.strip().splitlines():
+                if line.strip():
+                    print(f"            {line}")
+            advisory.append(name)
+        elif rc == 0:
             print(f"  PASS    {name}")
             passed.append(name)
+        elif rc == 2:
+            # Usage/IO error: the gate did not evaluate anything. That is a WIRING
+            # defect and it must be loud -- reporting it as a failure blames the
+            # document, and reporting it as a skip lets a mis-wired gate go quiet,
+            # which is the whole failure class this runner exists to end.
+            print(f"  \033[1mERROR\033[0m   {name:<22} the gate could not run "
+                  f"(exit 2 = bad invocation). Fix the wiring, not the document.")
+            for line in out.strip().splitlines()[:4]:
+                print(f"            {line}")
+            failed.append(name + " (wiring)")
         elif rc in (124, 125):
             print(f"  SKIP    {name:<22} could not run ({out.strip()[:60]})")
             skipped.append(name)
+        elif blocking == "advisory":
+            print(f"  ADVISORY {name} — {why}")
+            for line in out.strip().splitlines():
+                if line.strip():
+                    print(f"            {line}")
+            advisory.append(name)
         elif not blocking:
             # Declared non-blocking: a KNOWN, RECORDED gap. It is printed every
             # run precisely so it cannot fade into background -- but it does not
@@ -284,7 +319,8 @@ def main():
 
     total = len(gates)
     print(f"\n{len(passed)} passed · {len(failed)} failed · {len(known)} "
-          f"known-gap · {len(skipped)} skipped, of {total} declared.")
+          f"known-gap · {len(skipped)} skipped · {len(advisory)} advisory, "
+          f"of {total} declared.")
     if known:
         print("  A KNOWN gap is a recorded decision, not a clean result: "
               + ", ".join(known))
