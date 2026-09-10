@@ -186,7 +186,12 @@ def blocks_with_context(md: Path):
             body, j = [], i + 1
             while j < n and lines[j].strip() != "```":
                 body.append(lines[j]); j += 1
-            where = chapter + (" -- " + heading if heading else "")
+            # Join only the parts that exist. `chapter + " -- " + heading` wrote a
+            # LEADING separator for any document with no `# Chapter N` headings at
+            # all -- every app note -- so the shipped header read
+            # "Appears in.  -- The Base Build" (found 2026-09-10, on the first
+            # app-note adoption).
+            where = " -- ".join(p for p in (chapter, heading) if p)
             yield cap, "\n".join(body) + "\n", where
             i = j + 1
         else:
@@ -283,7 +288,14 @@ def doc_meta(doc: Path):
         # IOSP silently fell back to the SLUG -- and the slug is what would have
         # been written into 49 shipped example headers a reader opens.
         CL = r"[Cc]hange\s*[Ll]og"
-        for pat in (rf"^#\s+{CL}\s*[:\-\u2013\u2014]\s*(.+?)\s*$",   # Changelog: Title
+        # A FOURTH shape, found 2026-09-10 when the app notes adopted: every one
+        # of the seven reads "# P2AN00N Changelog: <Title>" -- a slug BEFORE the
+        # keyword and the title after it. Neither pattern matched, so all seven
+        # fell back to the slug and wrote "Manual..... P2AN001" into a header a
+        # reader opens. Same failure as the one this loop was widened for; the
+        # optional prefix closes it. It cannot swallow shape B ("<Title> -
+        # Changelog"), which has no separator+text AFTER the keyword.
+        for pat in (rf"^#\s+(?:.*?\s)?{CL}\s*[:\-\u2013\u2014]\s*(.+?)\s*$",  # [slug ]Changelog: Title
                     rf"^#\s+(.+?)[\s:\-\u2013\u2014]*{CL}\s*$"):      # Title - Changelog
             m = re.search(pat, txt, re.M)
             if m and m.group(1).strip(" -:"):
