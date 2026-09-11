@@ -2066,7 +2066,7 @@ file cannot read sentences.
 
 ## The delivery filter strips `documentation_source:` from every file it serves, and 706 of those values are real citations (2026-08-26, «#324» verification) — F-375
 
-### F-375 — a remote agent receives 383 of our files with their source line deleted, and the gate that checks the filter cannot see it — `CONFIRMED`
+### F-375 — a remote agent receives 383 of our files with their source line deleted, and the gate that checks the filter cannot see it — `PARTIAL — gate half RESOLVED 2026-09-11; the 383-file rename remains Stephen's scope call`
 
 **The mechanism.** Both delivery paths run the same five-pattern line filter:
 `engineering/tools/p2kb/fetch-kb-file.sh:189` and the `FilterMetadata` contract recorded in
@@ -2121,6 +2121,12 @@ what the delivery path does to files that were never part of the shape question 
 
 ---
 
+
+**GATE HALF RESOLVED 2026-09-11 (block I «#340»).** The structural complaint — *every gate reads the tree, the consumer reads the stream, nothing compares them* — is answered where it mattered: `validate_metadata_filter` now `yaml.safe_load`s the DELIVERED payload and fails on any key that collapsed to `None`, proven with an independently-built negative control (block H, `75911edb`).
+
+**Delivery-strip numbers re-derived and recorded** in the change ledger §1.26 so they reach Stephen's visual read: `filter_metadata` strips five fields; `documentation_source` is **396 values across 395 files**, of which **363 (91%) are real provenance** and only 33 are bookkeeping tokens (`enhanced` 16, `original` 15, `code_analysis` 1, `redirect_stub` 1). So the set satisfies cite-or-omit ON DISK and is delivered NOT satisfying it, and nine tenths of what the filter removes is the provenance the project's own rule requires. Filing drift noted rather than smoothed: the entry said 397/396, today measures 396/395.
+
+**REMAINS OPEN:** the 383-file rename is a scope call Stephen owns and was explicitly out of block I.
 ## Two silent-failure bugs in the KB tooling (2026-08-26, «#324» verification) — F-376
 
 ### F-376 — `fetch-kb-file.sh -v <KEY>` fetches nothing and exits 0; the index generator swallows parse errors — `CONFIRMED`
