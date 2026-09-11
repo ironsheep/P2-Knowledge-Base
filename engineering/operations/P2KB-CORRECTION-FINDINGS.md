@@ -1794,7 +1794,7 @@ start unasked. What «#334» fixed is only the three files it touched.
 
 ## The SETXFRQ increment rule is quoted in three files and applied in none of their pixel-rate tables — 9 wrong NCO words in the shipped KB, 8 more in a released manual (2026-08-29, «#332» release-review recomputation) — F-380
 
-### F-380 — `SETXFRQ` values computed by truncation or by `round()`, where the source requires truncate-then-increment — `PENDING-VALIDATION`
+### F-380 — `SETXFRQ` values computed by truncation or by `round()`, where the source requires truncate-then-increment — `RESOLVED — validated on the served KB 2026-09-11`
 
 **The rule, read at the line.** *Parallax Propeller 2 Documentation* v35, Streamer NCO —
 `engineering/ingestion/sources/silicon-doc/part2-pixel-ops.txt:104-117`, with the footnote at
@@ -1877,6 +1877,10 @@ caption's claim that exactly three entries divide exactly (25.000, 40.000 and 65
 
 ---
 
+
+**VALIDATED ON THE SERVED KB 2026-09-11.** `language/pasm2/setxfrq.yaml` now states the rule the source states and says which arithmetic it is NOT: *"D = (target_frequency x $8000_0000) / clkfreq, truncated, then incremented by 1 if that division left a remainder. The increment is required by the source, not an optional refinement"* (`:52`), and `:58` closes the door on the defect explicitly — *"It is NOT round-to-nearest -- a fraction whose remainder is below half still increments."* It proves the rule against the source's OWN table rather than asserting it: 1/3 is given as `$2AAA_AAAA+1` and 1/5 as `$1999_9999+1`, while the exact divisions 1/2, 1/4 and 1/8 carry no increment. `:57` cites `part2-pixel-ops.txt:104-117` verbatim and flags that the governing sentence is SPLIT BY A PAGE BREAK (:117 and :121) — which is plausibly how the increment clause was lost in the first place. `:55` carries the 2^31-not-2^32 multiplier, and `architecture/streamer/nco-timing.yaml:106` derives from the same rule rather than restating it.
+
+**The adjacent app-note residue is clean too:** `p2an003-dac-analog-signal-generation.yaml:127` keeps its DDS phase-increment arithmetic explicitly OUT of the sourced block — *"not statements taken from a Parallax source"* — and points at `setxfrq.yaml frequency_formula` for the rule that is sourced.
 ## `ADDSX` and `SUBSX` ship the PASM2 Manual's wrong C-flag sentence while contradicting it in the same file (2026-08-27, «#328» E-016 sibling sweep) — F-379
 
 ### F-379 — the two instructions v1.11.1's signed-flag repair skipped, plus two malformed `SUM*` encoding fields — `RESOLVED`
@@ -6328,6 +6332,43 @@ number**.
 > **The half that is NOT version-coupled remains this entry's only record**, and is unaffected by the hold:
 > `SYMBOL INDEX` stores symbols **per source file**, so a forked file's second image has no row there. That
 > survives 1.55.4 and is documented nowhere else.
+
+## F-413's 300 MHz maximum also stood in the P2AN004 companion, which F-413 never looked at (2026-09-11) — F-426
+
+### F-426 — `p2an004`'s `measurement_ceiling` gave 300 MHz as the P2's maximum — `RESOLVED — fixed 2026-09-11`
+
+Found while VALIDATING block G's edit to an adjacent line of the same file — the reviewer's eye
+landed one line below the change. `p2an004-frequency-rotation-rc-timing-measurement.yaml:90` read:
+
+> `runs at a legal 200 MHz (300 MHz max)`
+
+F-413 already adjudicated this exact claim in P2AN001 and ruled it plainly: *"300 MHz appears in
+no source we hold and in no KB file. The datasheet maximum is 320 MHz."* F-413 was scoped to
+P2AN001's markdown and its own companion; **it never looked at P2AN004's companion**, so the same
+number survived one file over.
+
+**The trap worth recording: `300 MHz` IS genuinely sourced — three times — just never as a maximum.**
+A sweep that had matched the string and deleted it would have destroyed correct content:
+
+| site | what it says | verdict |
+|---|---|---|
+| `edge-standard-module` / `edge-32mb-module` / `p2-eval-board` / `p2-hardware-feature-comparison` | quotes Parallax's feature list, *"Overclocking possible beyond 300 MHz"* | **correct — keep** |
+| `special-configuration-symbols.yaml:97` | *"The P2 Datasheet rates direct drive into XI at DC to 200 MHz MAXIMUM ... The compiler accepts 300 MHz beyond that"* | **correct — keep** |
+| `timing_operations.yaml:44,:200` · `spin2-getting-started.yaml:63` | 300 MHz as an example `clock_freq` | **correct — a usable value, not a claimed ceiling** |
+| `p2an004:90` | 300 MHz as **the maximum** | **the defect** |
+
+So the defective thing is not the number, it is the *role* the number is given. This is the
+confidence-source mismatch shape (`feedback_titus_trust_tier_representation`) in numeric form:
+an overclocking threshold and a compiler ceiling promoted to a silicon specification.
+
+**Fixed in the same pass**, per no-deferring: the line now states 200 MHz against the datasheet's
+actual PLL range (180 MHz typical, 320 MHz maximum, AC Characteristics) and names what 300 MHz
+really is, so the figure cannot be promoted back.
+
+**Class check run, not assumed:** the four sites above were each read and left alone, and no other
+shipped file gives 300 MHz as a maximum.
+
+---
 
 ## F-374's class survives under three key names the sweep was scoped not to touch (2026-09-11) — F-425
 

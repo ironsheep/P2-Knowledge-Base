@@ -77,7 +77,6 @@ runnable_code:                     # reference to the validated artifact — NOT
 key_parameters:
   clock_hz: 200_000_000
   adc_mode: "P_ADC with X = %01_0111 (SINC2 filtering, 128-clock sample period)"
-  raw_sample_rate_sps: 1_562_500        # 200_000_000 / 128
   sources: [P_ADC_GIO, P_ADC_VIO, P_ADC_1X]
   ratiometric_formula: "microvolts = (pin - GIO) / (VIO - GIO) * 3_300_000"
   full_scale_uv: 3_300_000
