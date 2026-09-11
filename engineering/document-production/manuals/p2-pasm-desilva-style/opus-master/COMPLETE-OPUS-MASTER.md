@@ -4549,8 +4549,8 @@ The streamer configuration for LUT reading is covered in detail in the Video and
 
 | Instruction | Operation | Cycles |
 |-------------|-----------|--------|
-| **RDLUT** D, S | Read LUT[S] into D | 3 |
-| **WRLUT** D, S | Write D to LUT[S] | 2 |
+| **RDLUT** D, S | Read LUT\[S\] into D | 3 |
+| **WRLUT** D, S | Write D to LUT\[S\] | 2 |
 | **SETLUTS** D | Enable LUT write copying (D[0]=1) | 2 |
 
 **Memory Map:**

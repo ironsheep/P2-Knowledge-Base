@@ -141,6 +141,25 @@ CHECKS = [
                 r"[ ]+(?![\\%])\S"),
      False),
 
+    # Pandoc's implicit_header_references turns a bracketed span into a LINK when
+    # it happens to match a heading id -- and DROPS THE BRACKETS doing it. deSilva
+    # wrote `Read LUT[S] into D` in an instruction table; `[S]` matched a heading
+    # whose id is "s", so the page printed "Read LUTS into D" with a stray link to
+    # an unrelated section. The sibling rows `LUT[100]` and `LUT[index]` were fine,
+    # because nothing matched them -- which is what makes this so sneaky: it fires
+    # only on the operand names short enough to collide, and it shipped in v3.0.6
+    # and earlier with nothing to catch it.
+    #
+    # A real anchor is a slug. A one- or two-character target is the signature of
+    # an accidental reference, never of a deliberate cross-reference: the 183
+    # genuine links in the Streamer guide all target slugs like `app-a` and
+    # `adc-configuration-example`.
+    ("implicit-reference-link",
+     "a \\hyperlink to a 1-2 character target: pandoc turned a bracketed span "
+     "into a link and swallowed the brackets. Escape them (LUT\\[S\\])",
+     re.compile(r"\\hyperlink\{[A-Za-z0-9]{1,2}\}\{"),
+     False),
+
     # Authoring markers that must never ship.
     ("todo-marker",
      "TODO/FIXME/XXX marker in shipped text",

@@ -6,7 +6,7 @@
 
 ### Changed
 
-- **Pin Basics** now says the P2 has no separate pullup/pulldown resistors and shows what to do instead: give the pin a resistive drive strength (`P_HIGH_15K`) and *drive* it high (`DIR=1, OUT=1`) for a 15 kΩ path to VIO — with the warning that leaving DIR low makes the pin a floating input and the pull do nothing
+- **Pin Basics — and Chapter 1's first-blink aside, which had promised pull-ups the chip does not have** — now say the P2 has no separate pullup/pulldown resistors and shows what to do instead: give the pin a resistive drive strength (`P_HIGH_15K`) and *drive* it high (`DIR=1, OUT=1`) for a 15 kΩ path to VIO — with the warning that leaving DIR low makes the pin a floating input and the pull do nothing
 
 ### Added
 
