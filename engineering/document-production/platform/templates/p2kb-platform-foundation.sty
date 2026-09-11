@@ -22,9 +22,14 @@
 \newcommand{\passthrough}[1]{#1}
 
 % Additional pandoc compatibility
+% \makeatletter is REQUIRED here: with @ at catcode 12 these parse as
+% `\gdef\@` with delimiter text `subtitle`, globally clobbering LaTeX's \@
+% rather than defining \@subtitle. Same defect class as F-319 (2026-09-11).
+\makeatletter
 \providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
 \providecommand{\institute}[1]{\gdef\@institute{#1}}
 \providecommand{\titlegraphic}[1]{\gdef\@titlegraphic{#1}}
+\makeatother
 
 % Prevent pandoc from breaking with missing commands
 \providecommand{\VerbatimFootnotes}{}
@@ -338,6 +343,19 @@
 % exactly that, `Keywords: "; licensed under "`, and the compile was clean; only
 % audit-pdf-metadata.py reading the finished artifact saw it (2026-09-10).
 % \edef yields a non-\long macro, so the comparison means what it says.
+%
+% ...and that alone was NOT enough. F-319's negative control (2026-09-11, the
+% Layout Torture Test on the interactive daemon) returned `"; licensed under "`
+% STILL, with the \edef in place. A catcode readout at this exact line reported
+% `\the\catcode`\@` = 12: this block sits below line 166's \makeatother and above
+% line 425's \makeatletter, so `@` is OTHER here and `\@empty` never denoted the
+% kernel's empty macro at all — it tokenised as `\@` followed by the letters
+% `empty`, making every test `\ifx<macro>\@` (always false) and spilling the
+% characters `empty` into the stream. \makeatletter is therefore REQUIRED, and so
+% is the \edef: a control run with \makeatletter but no \edef still emitted the
+% malformed string, because \ifx does distinguish the \long prefix. Both halves,
+% or neither works. Proven on the artifact, both directions.
+\makeatletter
 \AtBeginDocument{%
   \edef\DocRightsHolder{\DocCopyright}%
   \edef\DocRightsGrant{\DocLicense}%
@@ -358,6 +376,7 @@
     \fi
   \fi
 }
+\makeatother
 
 % Force link colors AFTER all packages load (overrides any Pandoc injection)
 \AtBeginDocument{%

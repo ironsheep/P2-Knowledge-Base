@@ -61,7 +61,12 @@
 \title{\DocTitle}
 \author{\DocAuthor}
 \date{\DocDate}
+% \makeatletter is REQUIRED here: with @ at catcode 12 these parse as
+% `\gdef\@` with delimiter text `subtitle`, globally clobbering LaTeX's \@
+% rather than defining \@subtitle. Same defect class as F-319 (2026-09-11).
+\makeatletter
 \providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
+\makeatother
 
 % Pandoc header-includes (syntax-highlight macros, etc.)
 $for(header-includes)$

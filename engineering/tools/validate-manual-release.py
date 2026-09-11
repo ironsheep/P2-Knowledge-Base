@@ -153,6 +153,22 @@ def build_gates(slug: str, phase: str, pdf: str | None):
                        "--templates", str(ws / "templates"),
                        str(DOCPROD / "platform/templates")], True,
                       "a glyph the font lacks prints NOTHING, with a clean log"))
+
+        # F-319: a LaTeX internal (\@empty) used where @ is catcode 12 does not
+        # mean what it reads as -- it tokenises as \@ plus letters, so the guard
+        # around it silently never fires. Invisible to reading; it survived one
+        # confident fix and was only caught by rendering an unadopted document.
+        # Scans this manual's own templates AND the shared platform layer it loads.
+        tpls = sorted(
+            [str(f) for f in (ws / "templates").glob("*.sty")]
+            + [str(f) for f in (ws / "templates").glob("*.latex")]
+            + [str(f) for f in (DOCPROD / "platform/templates").glob("*.sty")]
+        )
+        if tpls:
+            G.append(("latex-at-catcode", f"{V}/audit-latex-at-catcode.py", tpls, True,
+                      "\\@empty outside \\makeatletter means \\@ plus letters, so the "
+                      "guard using it never fires (F-319 shipped a malformed rights "
+                      "string this way, past a clean compile AND a landed fix)"))
         else:
             G.append(("font-glyphs", None, None, True,
                       "workspace markdown not assembled yet -- run the assemble step"))

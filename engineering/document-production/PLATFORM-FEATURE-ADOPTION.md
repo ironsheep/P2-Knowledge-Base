@@ -246,6 +246,13 @@ broken for every document that has not wired these two macros — the `⏳` rows
 above. Adopting the guide out of the victim pool also removes it as a possible **negative control**
 for F-319; the Layout Torture Test is the remaining candidate.
 
+> **Superseded 2026-09-11 — F-319 is now CLOSED.** The Layout Torture Test ran as the negative
+> control and **failed the 2026-09-10 fix**, exposing the real cause: the guard sat outside any
+> `\makeatletter` region, so `@` was catcode 12 and `\@empty` meant `\@` + the letters `empty`.
+> The completed fix (`\makeatletter` wrapper **plus** the `\edef`) is proven on returned PDFs in
+> all four branches — unadopted emits no Keywords, and the two single-value branches, unreachable
+> until now, each emit correctly. The `⏳` Rights rows above are no longer broken-on-render.
+
 From here on `audit-pdf-metadata.py --require-rights` gates this guide's rights on every render.
 
 ⁷ **Streamer Guide, verified on the returned v1.1.0 PDF 2026-08-21 — not on staging, not on a clean compile log.** Page 1 reads the four expected lines exactly (title · subtitle · `August 2026` · `Version 1.1.0`), so the `\Doc*` macros resolved and the blank-cover failure mode did not fire. The info dictionary carries Title, Subject and Author, where v1.0.9 carried **none of the three**. `Subject` reads *"Comprehensive Reference for Propeller 2 Streamer Hardware"* — the intended change, since `request.json` and the cover had disagreed and the recorded rule is that the cover wins. Zero occurrences of `1.0.9` or `June 2026` across all 91 pages. Re-confirmed on the 2026-08-22 build that added rights (footnote 8): identical page and word counts, and **zero pages whose text differs** — the metadata change moved nothing.

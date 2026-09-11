@@ -22,9 +22,14 @@
 \newcommand{\passthrough}[1]{#1}
 
 % Additional pandoc compatibility that might be needed
+% \makeatletter is REQUIRED here: with @ at catcode 12 these parse as
+% `\gdef\@` with delimiter text `subtitle`, globally clobbering LaTeX's \@
+% rather than defining \@subtitle. Same defect class as F-319 (2026-09-11).
+\makeatletter
 \providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
 \providecommand{\institute}[1]{\gdef\@institute{#1}}
 \providecommand{\titlegraphic}[1]{\gdef\@titlegraphic{#1}}
+\makeatother
 
 % Prevent pandoc from breaking with missing commands
 \providecommand{\VerbatimFootnotes}{}

@@ -6283,7 +6283,7 @@ number**.
 
 ## The rights guard fails open, so an unadopted document emits a malformed rights string (2026-08-22) — F-319
 
-### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `FIX LANDED 2026-09-10 — POSITIVE control proven on the artifact; NEGATIVE control still owed`
+### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `CLOSED 2026-09-11 — the negative control FAILED the 2026-09-10 fix and exposed the real cause (`@` at catcode 12); completed fix proven on the artifact in all four branches`
 
 **How it surfaced.** The Assembly Language Reference v3.1.7 render (2026-08-22) came back with
 `Keywords: "; licensed under "` — the both-values-present branch, with both values empty.
@@ -6393,6 +6393,79 @@ their `request.json`: `p2-layout-torture-test` (the named candidate, and the che
 instrument, no release attached), `p2-architect-guide`, `p2-debug-window-manual`,
 `p2-xbyte-programming-guide`, and app notes P2AN003 / P2AN005 / P2AN006 / P2AN007. Whichever
 renders first settles it; until one does, the fix is proven safe but not proven effective.
+
+---
+
+**NEGATIVE CONTROL RUN 2026-09-11 — IT FAILED, and that is why it existed.** The Layout Torture
+Test (unadopted, no `\Doc*` bound — confirmed by reading the generated `.tex`: zero `\Doc*`
+mentions, zero `\hypersetup`) was rendered on the interactive Forge daemon against the **fixed**
+`p2kb-platform-foundation.sty`. It came back with `Keywords: "; licensed under "` — **the same
+malformed string the fix was supposed to eliminate.** The `\edef` normalisation alone does not
+close F-319.
+
+**Root cause, read off the machine rather than argued.** A `\typeout` probe placed in the guard
+reported:
+
+```
+F319-PROBE: catcode-of-at-HERE = 12          <- @ is OTHER at this line
+F319-PROBE: DocCopyright = [\long macro:->]   <- the \long diagnosis WAS correct
+F319-PROBE: holder       = [macro:->]         <- the \edef DID strip \long
+F319-PROBE: atempty      = [macro:->\spacefactor \@m {}empty]
+F319-PROBE: holder-NOT-empty
+```
+
+That last reading is the whole finding. `\@empty` was never denoting the kernel's empty macro.
+The guard sits **below** the file's line-166 `\makeatother` and **above** its line-425
+`\makeatletter`, so `@` is catcode 12 there and `\@empty` tokenises as the control sequence `\@`
+followed by the four letters `e m p t y`. Every test was therefore `\ifx<macro>\@` — comparing a
+rights value against LaTeX's end-of-sentence macro — which is false for anything, forever. The
+stray `empty` characters caused no visible damage only because they fall inside the branch `\ifx`
+then skips; page-1 text is byte-identical before and after.
+
+**Both halves are required, and that is measured, not reasoned.** A control run with
+`\makeatletter` but *without* the `\edef` still emitted `"; licensed under "` (`holder-NOT-empty`),
+because `\ifx` does compare the `\long` prefix. So the 2026-09-10 fix was necessary and
+insufficient; the completed fix wraps the block in `\makeatletter` … `\makeatother` **and** keeps
+the `\edef`.
+
+**COMPLETED FIX — all four branches proven on returned PDFs, 2026-09-11.** One template stack, four
+renders, 54pp each, compile log 0 serious signatures:
+
+| binding | Keywords in the returned PDF | verdict |
+|---|---|---|
+| neither (unadopted) | *(none at all)* | **NEGATIVE control PASS** |
+| both | `Iron Sheep Productions, LLC; licensed under CC BY-SA 4.0` | PASS |
+| copyright only | `Iron Sheep Productions, LLC` | PASS |
+| license only | `CC BY-SA 4.0` | PASS |
+
+The two single-value branches had been **unreachable for the entire life of this code** — the
+broken guard always fell to the both-present branch — so this is their first execution ever. They
+were exercised deliberately for that reason, not for completeness.
+
+**No released document was harmed.** All 17 PDFs in `deliverables/documents/DOCs/` were read:
+**0** carry the malformed string, 10 carry correct rights, 7 carry none because they were rendered
+before the rights block existed. Those 7 are precisely the unadopted set — each was one render away
+from shipping `"; licensed under "`, which is what the negative control was protecting.
+
+**Class-wide sweep — the same `@`-catcode defect, 4 more live sites.** A checker over every
+template in the tree found `\providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}` (and the
+`\institute` / `\titlegraphic` siblings) sitting outside any `\makeatletter` region. With `@` at
+catcode 12 that parses as `\gdef\@` with delimiter text `subtitle`, which would **globally clobber
+LaTeX's `\@`** rather than define `\@subtitle`. Latent, not live — nothing reads `\@subtitle`, and
+no current template emits `\subtitle{...}` — but one pandoc template variable away from firing.
+Wrapped at all live sites: `p2kb-platform-foundation.sty`, `donna-book-foundation.sty`,
+`p2kb-ssdbg.latex`, `p2kb-pnut-term-ts.latex`, plus the orphan `p2kb-foundation.sty` copies under
+`ai-privacy-guide` and `spin2-reference-manual`. **Deliberately NOT touched** (recorded as a chosen
+gap, not an accidental one): the archived `templates-archived/*MONOLITHIC.latex` pair and the three
+superseded shared `p2kb-foundation.sty` copies under `templates/shared/` and `shared-assets/` —
+nothing loads them; no live template does `\usepackage{p2kb-foundation}`.
+
+**The lesson this finding paid for twice.** The August entry above reasoned its way to a mechanism
+(`\long`), was upgraded to *"believed CONFIRMED by reading, though still not executed"*, and shipped
+on that reading. The reading was correct **and the fix still did not work**, because a second
+defect sat in the same three lines and no amount of reading the macro semantics could see it — only
+the catcode could, and only a real engine reports the catcode. *A mechanism confirmed by reading is
+a hypothesis; only the artifact closes it.*
 
 ## Appendix G's mode tables misdecode the naming convention the same appendix documents (2026-08-22) — F-318
 
