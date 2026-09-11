@@ -6378,7 +6378,7 @@ shipped file gives 300 MHz as a maximum.
 
 ## F-374's class survives under three key names the sweep was scoped not to touch (2026-09-11) — F-425
 
-### F-425 — `cost_efficiency`, `production_readiness: "excellent"` and two prose lines carry the same unsourced quality judgement F-374 removed — `CONFIRMED`
+### F-425 — `cost_efficiency`, `production_readiness: "excellent"` and two prose lines carry the same unsourced quality judgement F-374 removed — `RESOLVED — fixed 2026-09-11, same day as filing`
 
 Found 2026-09-11 by the F-374 sweep itself. F-374 was deliberately scoped to five key
 shapes, because an earlier pass matching the bare key `value` returned 299 sites and was
@@ -6432,6 +6432,41 @@ re-open the bare-`value` class — 299 sites, overwhelmingly legitimate utility.
 
 ---
 
+
+**FIXED 2026-09-11, hours after filing — and the filing itself was the error.**
+
+Stephen: *"If we find problems, we're supposed to get them out to the agents as soon as possible.
+If you file it, we're not doing that."* Correct. `p2kb-mcp` serves the PUBLISHED tree, so a filed-
+but-unfixed defect reaches nobody; filing is how a defect waits, not how it ships.
+
+**Why it was wrong, precisely.** F-374's task carried a *do not widen this sweep* bar, and that bar
+existed to stop a blind sweep of a class that was mostly LEGITIMATE — an earlier pass matching bare
+`value` returned 299 sites and was discarded. It never forbade fixing sites already verified one by
+one, and all three shapes here HAD been verified before this entry was written. "Do not widen
+blindly" was read as "do not fix what you have proven."
+
+**What was done:**
+
+| site | disposition |
+|---|---|
+| `hardware-compatibility-matrix.yaml` — `cost_efficiency` ×6 | **deleted.** Every row already states `module_free_pins`, `carrier_header_pins` and `use_case`; the grade sat directly beneath the facts that would have justified it. |
+| `edge-standard-module.yaml` · `edge-32mb-module.yaml` — `production_readiness: "excellent"` ×2 | **deleted**, together with the literal `# QUALITY RATINGS` banner heading them. `memory_class: "high_capacity"` kept (a fact) and its banner relabelled `CLASSIFICATION`. |
+| `p2-eval-board.yaml` — `target_audience` | **adjective stripped, fact kept** — e.g. *"Ideal - no hardware selection needed"* → *"No hardware selection needed -- board, USB and power are one part"*. |
+
+**The filing undercounted, which is its own lesson.** This entry named TWO prose lines; there are
+**FOUR** (`professionals` and `production` carry the same shape), and it did not notice that the
+`production_readiness` sites sat under a `# QUALITY RATINGS` banner that was itself the defect's
+home. Both were found by opening the files to fix them. A finding written from a grep is a map, not
+an inventory.
+
+**The four surviving `production_readiness` values are NOT this defect and were deliberately kept:**
+`"prototype_platform"` (×3) and `"not_applicable"` state what the board is FOR. That is utility,
+which the rule permits. Only `"excellent"` was a grade.
+
+**Verified:** class sweep returns only the known-legitimate survivors (the 32 A / 400 V terminal
+spec, the four categorical `production_readiness` values, and the `educational_value` facts block);
+no `QUALITY RATINGS` banner remains anywhere; `verify-yaml-format` 1133/1133 clean; crossref 100%;
+`validate-dod-release` 12/12 PASS.
 ## An ADC comparator example still states the input threshold in fixed volts, in the manual F-412 just repaired (2026-09-11) — F-424
 
 ### F-424 — IOSP §2.5's ADC comparator example quotes `~1.65V` as an input threshold without the supply-fraction caveat the same manual now carries everywhere else — `CONFIRMED`

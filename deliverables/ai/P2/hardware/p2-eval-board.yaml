@@ -221,10 +221,10 @@ comparison_with_edge:
     production_path: "Custom PCB vs module reuse"
     
 target_audience:
-  beginners: "Ideal - no hardware selection needed"
-  educators: "Perfect - built-in teaching aids"
-  professionals: "Good for rapid prototyping"
-  production: "Not suitable - use Edge modules"
+  beginners: "No hardware selection needed -- board, USB and power are one part"
+  educators: "Built-in teaching aids (LEDs, buttons, headers) need no add-on to demonstrate"
+  professionals: "Rapid prototyping -- all 64 pins at accessory headers, no carrier to select"
+  production: "Not a production form factor -- the Edge modules are the deployable part"
   
 documentation:
   primary: "64000 Propeller 2 Eval Board Rev C Guide"
