@@ -130,11 +130,11 @@ Turn a single P2 pin into a 16-bit audio-quality analog output using only the bu
 *August 2026 - Community Review Edition* | [Changelog](DOCs/p2an003-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003-src.zip)
 
 #### [Read Real-World Sensors by Frequency, Rotation, and RC Timing on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN004.pdf)
-**Application Note P2AN004 · Frequency / Rotation / RC-Timing Measurement** · *Version 1.0.2*
+**Application Note P2AN004 · Frequency / Rotation / RC-Timing Measurement** · *Version 1.0.3*
 
 Read a resistive, capacitive, light, or rotary sensor directly on a single P2 pin. The smart pin times, counts, or decodes the signal in hardware and the cog just reads the answer, with no external counter or ADC. One shared idea comes first, then three runnable instruments to choose among by what you're reading: an RC-decay reader that times a capacitor's discharge through a photocell, thermistor, or pot; a light-to-frequency reader that turns a TSL235R's output frequency into an irradiance with a reciprocal frequency counter; and a drop-in quadrature-knob instrument with detent normalization, preset, a range clamp, and a debounced button. Every worked program compiles clean and runs on a bare P2 board. The encoder self-verifies with two jumper wires and a known-answer detent count, while the analog recipes carry no invented readings and defer their absolute calibration to a hardware pass.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2an004-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN004-src.zip)
+*September 2026 - Community Review Edition* | [Changelog](DOCs/p2an004-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN004-src.zip)
 
 #### [Run Several Cooperative Jobs in One P2 Cog](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN005.pdf)
 **Application Note P2AN005 · Cooperative Multitasking with Spin2 TASK Methods** · *Version 1.0.2*

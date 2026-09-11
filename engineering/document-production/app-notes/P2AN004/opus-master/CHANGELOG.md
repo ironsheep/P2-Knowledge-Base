@@ -7,6 +7,8 @@
 ### Changed
 
 - **`P_OE | P_LOW_FLOAT` is explained by its parts**: `P_LOW_FLOAT` selects *float* as the low-side drive strength, leaving the high side at its default fast drive, and `P_OE` is documented as *"enable output in smart pin mode, regardless of DIR"* — which is what lets the smart pin work the output without the DIR handling a plain drive-strength configuration would need
+- **Every build instruction names the compiler `pnut-ts`**, the name that runs
+- **Each printed program carries its filename from `P2AN004-src.zip`**, and each file in that ZIP names the note and the version it belongs to — so a listing on the page and the file you downloaded identify each other
 
 ## v1.0.2 (2026-08-08)
 

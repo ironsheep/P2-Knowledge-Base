@@ -1,5 +1,15 @@
 # P2AN004 Changelog: Frequency / Rotation / RC-Timing Measurement
 
+## v1.0.3 (2026-09-10)
+
+**Each half of the RC-timing pin configuration names the job it does.** No instruments added.
+
+### Changed
+
+- **`P_OE | P_LOW_FLOAT` is explained by its parts**: `P_LOW_FLOAT` selects *float* as the low-side drive strength, leaving the high side at its default fast drive, and `P_OE` is documented as *"enable output in smart pin mode, regardless of DIR"* — which is what lets the smart pin work the output without the DIR handling a plain drive-strength configuration would need
+- **Every build instruction names the compiler `pnut-ts`**, the name that runs
+- **Each printed program carries its filename from `P2AN004-src.zip`**, and each file in that ZIP names the note and the version it belongs to — so a listing on the page and the file you downloaded identify each other
+
 ## v1.0.2 (2026-08-08)
 
 A licensing change. No technical content changed.
@@ -24,7 +34,7 @@ through three runnable instruments the reader selects among by transducer: an RC
 times a capacitor's discharge for any resistive or capacitive sensor, a light-to-frequency reader
 that turns a TSL235R's output frequency into an irradiance with a reciprocal frequency counter, and
 a drop-in quadrature-knob instrument with detent normalization, preset, range clamp, and a debounced
-button. Every worked program compiles clean under `pnut_ts`; the encoder recipe self-verifies on a
+button. Every worked program compiles clean under `pnut-ts`; the encoder recipe self-verifies on a
 bare board with two jumper wires and a known-answer detent count, while the analog recipes' absolute
 calibration defers to a hardware pass and carries no invented readings. Circuit schematics (RC-decay
 network, TSL235R hookup) and a quadrature timing diagram are rendered inline. Ships with a

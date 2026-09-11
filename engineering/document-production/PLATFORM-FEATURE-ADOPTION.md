@@ -52,7 +52,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
 | **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ |
-| P2AN004 | app-note | 🔧 ⁴ ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁸ |
+| **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ |
 | P2AN003 · P2AN005 · P2AN006 · P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
@@ -412,6 +412,33 @@ right-aligned monospace inside its Spin2Block. `verify-example-corpus-identity.p
 
 **Max overfull 0.62pt**, three orders of magnitude below the 20pt open-the-page threshold, and the
 same box on both xelatex passes rather than two distinct ones.
+
+²⁰ **P2AN004 — all four PROVEN on the returned v1.0.3 PDF, 2026-09-11 02:45**, completing the
+app-note trio in the v1.18.0 wave. P2AN003/005/006/007 stay ⏳ ⁵ until their own updates.
+
+**Metadata single-source + rights.** `audit-pdf-metadata.py` CLEAN, all seven declared fields
+round-tripped: cover `September 2026` / `Version 1.0.3`, Title, Subject, Author and Keywords
+carrying rights, where v1.0.2 carried none of the four.
+
+**Cross-ref filter — wired, correctly silent**, the same structural reason as P2AN001 and P2AN002:
+the note is organised by Recipe, so it holds no self-reference to link.
+
+**Captions + generated headers.** All three captions read on the artifact (pages 5, 7, 10);
+corpus identity 3/3 GREEN, published-ZIP currency 4/4 GREEN.
+
+**What this row cost, and why it earns a footnote rather than a tick.** Certification failed TWICE.
+The margin gate found two prose spans crossing the right edge — and the PUBLISHED v1.0.2 measures
+the same two spans at the same magnitudes, so they shipped in August and nothing looked. The first
+repair then made one WORSE, 43.4pt → 65.3pt: replacing `%10001 (P_HIGH_TICKS), …` with a bare comma
+list removed the short `%NNNNN ` tokens that had been TeX's breakpoints BETWEEN the long atoms.
+
+Only measurement settled it. Against the page's own IBMPlexSans 10.9pt and the list item's 440.7pt
+measure, no single atom forces an overfull — `P_HIGH_TICKS` 78.8pt, `P_COUNTER_TICKS` 105.5pt,
+`P_COUNTER_PERIODS` 122.4pt, `P_QUADRATURE` 89.7pt, each 18-28% of the measure. The four together
+are ~396pt of unbreakable text in a 440pt line, so every candidate break scores worse than running
+over. **The defect was the CHAIN, not a long word** — and two passes of reasoning about it produced
+a regression before one measurement produced the fix. Carry that: for a margin overflow, measure the
+atoms against the measure before rewriting anything.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`
