@@ -95,6 +95,64 @@ it is referenced. F-123's plan text is annotated accordingly.
 carries a column for each) and returned 0 for `font`, `glyph`, `sine`/`sin_` and `log2` in both, so
 its conclusion does not rest on the file this finding re-picks.
 
+## Auto-shrunk table columns reserve a FIXED 0.93 of \linewidth while colsep scales with column count, so every wide table overruns by a predictable amount (2026-09-11, IOSP v1.0.10 certification) — F-423
+
+### F-423 — `p2kb-platform-tables.lua` uses a constant `usable = 0.93`; the correct value depends on the column count — `CONFIRMED, arithmetic reproduced on three sites across two documents`
+
+**The mechanism, and it is exact.** The auto-shrink branch computes per-column fractions, then
+distributes `leftover = usable - summ` to columns with wrappable prose, so the emitted widths
+**always sum to exactly `usable`** whenever any column can wrap. `usable` is hardcoded:
+
+```lua
+local usable = 0.93      -- fraction of \linewidth available to column bodies
+```
+
+But tabularray adds `colsep` on BOTH sides of EVERY column, so the space colsep consumes is
+`2 x colsep x num_cols` — it scales with the column count, and 0.93 does not. With the
+~468pt measure these manuals use and the 5pt colsep the filter emits:
+
+| columns | usable should be | filter uses | overrun |
+|--:|--:|--:|--:|
+| 6 | 0.872 | 0.930 | **27.2pt** |
+| 7 | 0.850 | 0.930 | **37.2pt** |
+
+**Measured against that prediction, on three sites in two independently-rendered documents:**
+
+| document | site | columns | predicted | MEASURED |
+|---|---|--:|--:|--:|
+| Streamer Guide v1.1.1 | §6.2 and §8.1 mode tables | 6 | 27.2pt | **26.64pt** |
+| I/O & Smart Pins v1.0.10 | p246 | 6 | 27.2pt | **27.12pt** |
+| I/O & Smart Pins v1.0.10 | p328 | 7 | 37.2pt | **37.12pt** |
+
+Within half a point on every one. This is not a heuristic that occasionally misfires; it is a
+constant that is wrong by a computable amount.
+
+**Whether it SHOWS depends on content, which is why it survived.** An overrun only crosses the
+right margin if the last column's text actually fills its reserved width. Streamer's tables
+overrun by 26.64pt and print clean — pages 30, 33 and 34 were rendered and inspected during that
+release. I/O & Smart Pins' Appendix D "All Output Modes at a Glance" (p330) does fill it, and four
+spans cross the margin by 20.3-24.1pt. The published v1.0.9 measures the same four spans at the
+same magnitudes, so it has shipped this way.
+
+**THERE IS NO DOCUMENT-LEVEL WORKAROUND, and that is the load-bearing fact.** Shortening cells or
+headers does not help: the leftover-distribution step scales the columns back up to fill 0.93
+regardless. Only the platform constant can fix it.
+
+**The fix** is to derive `usable` from the column count and the chosen colsep rather than hardcode
+it — `usable = 1.0 - (2 * colsep_pt * num_cols) / linewidth_pt` — or to emit widths against
+`\dimexpr\linewidth - <total colsep>\relax` so the arithmetic is exact rather than nominal.
+
+**Why it is not applied in this pass.** `p2kb-platform-tables.lua` is loaded by every document in
+the set. Narrowing columns re-flows every auto-shrunk table in all of them, so it needs its own
+change with a before/after render comparison — the same reasoning that carved F-319 out of
+Assembly v3.1.7, and the same reasoning that says a shared-file fix lands with a verification pass
+rather than inside someone else's release. **It blocks I/O & Smart Pins v1.0.10 specifically**,
+because that document is the one whose table actually crosses the margin and it cannot be fixed
+locally. Stephen's call: land the platform fix and re-render, or ship the pre-existing overrun
+and fix the platform after the wave.
+
+---
+
 ## A release gate could not reach a fixpoint: satisfying it re-broke it, because its own fix is a commit it reads (2026-09-10, manual-head gate-runner wiring) — F-420
 
 ### F-420 — `sync-manual-examples.py` derives `Updated` from the file's git mtime, so committing its own fix re-breaks the gate — `RESOLVED 2026-09-11 (c42acd95) — fix applied, both controls verified on real history`
