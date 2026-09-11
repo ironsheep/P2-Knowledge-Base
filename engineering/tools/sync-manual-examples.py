@@ -198,6 +198,51 @@ def blocks_with_context(md: Path):
             i += 1
 
 
+def body_updated_month(basename):
+    """Month of the newest commit that changed this example's BODY (F-420).
+
+    Walks the file's history newest-first, strips each revision's generated
+    header + licence footer, and returns the first revision whose body differs
+    from its predecessor's. A header-only commit -- a re-sync -- is therefore
+    invisible here, which is what lets the gate reach a fixpoint.
+
+    Matched on basename for the same reason the rest of this tool is: a `git mv`
+    changes the path but never the name, and --follow cannot trace a rename that
+    is not committed yet.
+
+    Returns "" when git has no answer (a never-committed file) -- a legitimate
+    empty, distinct from git being unable to RUN, which `git()` still raises on.
+    """
+    log = git("log", "--format=%H %ad", "--date=format:%b %Y",
+              "--", f"*/{basename}", default="")
+    if not log:
+        return ""
+    revs = [ln.split(" ", 1) for ln in log.split("\n") if ln.strip()]
+
+    def body_at(sha):
+        path = ""
+        for ln in git("ls-tree", "-r", "--name-only", sha, default="").split("\n"):
+            if ln.rsplit("/", 1)[-1] == basename:
+                path = ln
+                break
+        if not path:
+            return None
+        blob = git("show", f"{sha}:{path}", default=None)
+        return None if blob is None else split_file(blob)[1]
+
+    newer = None
+    for sha, when in revs:
+        cur = body_at(sha)
+        if newer is not None and cur != newer:
+            # `newer` is the revision AFTER this one, and it differs -> that is
+            # where the body last changed.
+            return prev_when
+        prev_when, newer = when, cur
+    # Fell through: the body never changed after its introduction, so the
+    # introducing commit is the answer.
+    return revs[-1][1] if revs else ""
+
+
 def split_file(text):
     """Return (header_or_None, body, footer_or_None) for an example file."""
     header = None
@@ -377,12 +422,23 @@ def main():
         hist = git("log", "--diff-filter=A", "--format=%ad", "--date=format:%b %Y",
                    "--", f"*/{f.name}", default="")
         started = hist.split("\n")[-1] if hist else "Aug 2026"
-        # Month granularity on purpose. A day-precise mtime would advance every
-        # time the header itself was regenerated and committed, so the tool
-        # would not be idempotent across a commit; a month changes rarely and
-        # only when the body actually changed in a new month.
-        updated = git("log", "-1", "--format=%ad", "--date=format:%b %Y",
-                      "--", f"*/{f.name}", default="") or started
+        # F-420 FIXED 2026-09-11. `Updated` is the last commit that changed the
+        # file's BODY -- not the last commit that touched the file.
+        #
+        # It used to be `git log -1 -- */<name>`, which counts a header-only
+        # re-sync as an update. That gate could not reach a fixpoint: satisfying
+        # it (sync, then commit) re-broke it, because the fixing commit is one it
+        # reads. Month granularity was the mitigation and its premise was false --
+        # the field moves whenever a re-sync crosses a month boundary, which is
+        # exactly what a release does, since a release is when the version bumps.
+        # A blocking gate that goes red immediately after being satisfied teaches
+        # an operator to skip it.
+        #
+        # Reading the body also makes the ALREADY-PUBLISHED headers right rather
+        # than forcing a re-release: P2AN001/002 shipped Jun/Jul/Aug dates, which
+        # is when their code was actually last written, and the old rule wanted
+        # to rewrite them to September purely because the header was added then.
+        updated = body_updated_month(f.name) or started
         new = build_header(f.name, purpose, title, version, where,
                            started or "unknown", updated or "unknown")
         if not new.isascii():
