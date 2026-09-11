@@ -341,10 +341,20 @@ fetch_single_key() {
     if [[ ! -f "$cache_file" ]]; then
         log "Fetching: $BASE_URL/$path"
         curl -sS "$BASE_URL/$path" | filter_metadata > "$cache_file.tmp"
+        if [[ ! -s "$cache_file.tmp" ]]; then
+            error "Fetch for '$key' returned no content ($BASE_URL/$path) — not caching an empty result"
+            rm -f "$cache_file.tmp"
+            return 1
+        fi
         mv "$cache_file.tmp" "$cache_file"
         log "Cached to: $cache_file"
     else
         log "Using cached: $cache_file"
+    fi
+
+    if [[ ! -s "$cache_file" ]]; then
+        error "Cached entry for '$key' is empty — refusing a silent success"
+        return 1
     fi
 
     # Output content
@@ -383,6 +393,7 @@ cmd_fetch() {
         fi
 
         local first=1
+        local any_failed=0
         while IFS= read -r key; do
             if [[ -n "$key" ]]; then
                 if [[ $first -eq 0 ]]; then
@@ -392,11 +403,12 @@ cmd_fetch() {
                     echo "# Next entry: $key"
                     echo "# ========================================"
                 fi
-                fetch_single_key "$key"
+                fetch_single_key "$key" || any_failed=1
                 first=0
             fi
         done <<< "$alias_keys"
-        return 0
+        # A fetch that returned no content must not read back as success.
+        return $any_failed
     fi
 
     # 3. Not found - show error with suggestions
@@ -435,8 +447,12 @@ while [[ $# -gt 0 ]]; do
             show_help
             ;;
         --verbose|-v)
+            # Do NOT shift here — the unconditional `shift` at the bottom of
+            # this loop already advances past this flag. Shifting twice
+            # silently ate the KEY argument in `-v <KEY>`: VERBOSE got set,
+            # the key was discarded before cmd_fetch ever ran, the loop
+            # exhausted $# and the script exited 0 having fetched nothing.
             VERBOSE=1
-            shift
             ;;
         --cached)
             cmd_cached
@@ -460,7 +476,7 @@ while [[ $# -gt 0 ]]; do
         *)
             # Assume it's a key to fetch
             cmd_fetch "$1"
-            exit 0
+            exit $?
             ;;
     esac
     shift 2>/dev/null || true

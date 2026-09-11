@@ -24,6 +24,7 @@ import re
 import sys
 import gzip
 import subprocess
+import yaml
 from pathlib import Path
 from collections import Counter
 from datetime import datetime
@@ -349,6 +350,35 @@ def validate_timestamps(verbose: bool = False) -> ValidationResult:
     return result
 
 
+def _find_filter_induced_nulls(original_obj, filtered_obj, path: str = "") -> List[str]:
+    """Walk the FILTERED payload (the artifact, not the declaration) and report
+    any key whose value collapsed to None as a side effect of line-filtering.
+
+    Line-based filtering removes a `key:` line without regard for whether that
+    key had siblings. When every child of a mapping key was itself a filtered
+    field, the parent key survives with nothing under it — `yaml.safe_load`
+    reads that as `key: null`, and a consumer sees a live key holding no data.
+    Diffing REMOVED LINES against an expected-field list never catches this:
+    every removed line IS an expected field. Only re-parsing the delivered
+    payload and comparing it back to the source catches the collapse.
+    """
+    bad: List[str] = []
+    if isinstance(filtered_obj, dict):
+        if not isinstance(original_obj, dict):
+            return bad
+        for k, fv in filtered_obj.items():
+            new_path = f"{path}.{k}" if path else str(k)
+            ov = original_obj.get(k, None)
+            if fv is None and isinstance(ov, (dict, list)) and ov:
+                bad.append(new_path)
+            else:
+                bad.extend(_find_filter_induced_nulls(ov, fv, new_path))
+    elif isinstance(filtered_obj, list) and isinstance(original_obj, list):
+        for i, (ov, fv) in enumerate(zip(original_obj, filtered_obj)):
+            bad.extend(_find_filter_induced_nulls(ov, fv, f"{path}[{i}]"))
+    return bad
+
+
 def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     """Comprehensive audit of metadata filtering."""
     result = ValidationResult("Metadata Filter")
@@ -360,6 +390,7 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     files_with_changes = 0
     field_removals = Counter()
     unexpected_changes = []
+    structural_failures = []
 
     for key, entry in idx['files'].items():
         path = Path(entry['path'])
@@ -394,6 +425,19 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
                 if not matched:
                     unexpected_changes.append((key, line))
 
+            # Read the ARTIFACT, not the declaration: does the payload the
+            # consumer actually receives still parse, and did filtering
+            # collapse any key to null?
+            try:
+                original_obj = yaml.safe_load(original)
+                filtered_obj = yaml.safe_load(filtered)
+            except yaml.YAMLError as e:
+                structural_failures.append((key, f"filtered payload does not parse: {e}"))
+                continue
+            for bad_path in _find_filter_induced_nulls(original_obj, filtered_obj):
+                structural_failures.append(
+                    (key, f"key '{bad_path}' became null — every child was a filtered field"))
+
     result.info(f"Files analyzed: {total_files}")
     result.info(f"Files with metadata: {files_with_changes}")
 
@@ -407,6 +451,14 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
             result.info(f"  {key}: {repr(line[:50])}")
     else:
         result.ok("All filtered lines are expected metadata fields")
+
+    if structural_failures:
+        result.fail(f"{len(structural_failures)} file(s) deliver a structurally "
+                    f"broken payload after filtering")
+        for key, msg in structural_failures[:10]:
+            result.info(f"  {key}: {msg}")
+    else:
+        result.ok("Filtered payload re-parses cleanly with no filter-induced null keys")
 
     return result
 
@@ -556,6 +608,24 @@ def validate_claim_sourcing(verbose: bool = False) -> ValidationResult:
     return result
 
 
+def validate_duplicate_keys(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Does any shipped YAML mapping carry the same key twice?
+
+    `yaml.safe_load` keeps the LAST occurrence of a duplicate key and discards
+    the first silently — no parse error, no warning. F-360 lost a corrective
+    sentence to exactly this on 2026-08-25 while every other gate stayed
+    green. This walks the composed node tree, not the loaded object, because
+    by the time you have a dict the evidence is already gone.
+    """
+    result = ValidationResult("Duplicate YAML Keys")
+    script = Path("engineering/tools/validation/audit-yaml-duplicate-keys.py")
+    _run_gate(result, script, ['--negative-control'], "negative control", verbose)
+    _run_gate(result, script, [], "audit", verbose)
+    result.info("Scope: DUPLICATE MAPPING KEYS only. A file free of them can "
+                "still be wrong in every other way.")
+    return result
+
+
 def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
     """Verify bash and PowerShell scripts have matching behavior."""
     result = ValidationResult("Fetch Script Parity")
@@ -670,6 +740,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_cross_references,
         validate_constant_fidelity,
         validate_claim_sourcing,
+        validate_duplicate_keys,
         validate_fetch_script_parity,
     ]
 
