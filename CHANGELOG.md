@@ -20,6 +20,27 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.18.2] - 2026-09-11
+
+**Board and example entries answer with facts you can act on**
+
+### Changed
+
+- Board and carrier combinations describe what each one gives you: the free pin range, which
+  pins reach headers and which must be picked up another way, and the use case the pairing
+  serves.
+- Add-on board entries state a complexity level and the concepts each board exercises —
+  Charlieplexing and persistence-of-vision timing for the LED matrix, USB host enumeration
+  and current limiting for the serial host, DAC audio and ADC microphone input for the AV
+  breakout.
+- The P2 Eval Board's audience notes say what the board offers each kind of user: one part
+  rather than a module-and-carrier choice, teaching aids built in so no add-on is needed to
+  demonstrate, all 64 pins at accessory headers, and the Edge modules as the deployable
+  form factor.
+- The system clock range is stated as the P2 Datasheet's AC Characteristics give it — 180 MHz
+  typical, 320 MHz maximum.
+- Each figure in the application-note companions names the source that states it.
+
 ## [1.18.1] - 2026-09-10
 
 **The CORDIC solver's result formats, as the Silicon Doc states them**
