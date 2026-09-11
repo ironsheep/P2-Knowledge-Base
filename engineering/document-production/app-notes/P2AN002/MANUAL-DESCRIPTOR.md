@@ -14,7 +14,11 @@ high_risk_quant:
   - "Pipeline geometry: 54-stage pipeline, 55-clock result latency, issue every 8 clocks, ~6-7 in flight (54/8) — F-171 territory; mirror the Silicon 'several' framing, no hard in-flight count"
   - "Binary angle convention: full circle = 2^32; $4000_0000=90, $8000_0000=180, $C000_0000=270, $5555_5555=120, $AAAA_AAAA=240"
   - "QLOG/QEXP = 5.27 fixed-point (5 whole + 27 fractional)"
-  - "Trig precision ~28 bits; integer ops (QMUL/QDIV/QSQRT) exact"
+  - "Trig precision: NO Parallax source states a bit count. Rotate, polar-to-cartesian and
+    cartesian-to-polar are iterative, so a result's low bits are approximate and the magnitude
+    scale factor is corrected in hardware — state the mechanism, never a figure. A bit count
+    would need a bench measurement and an EF entry (F-416, KB v1.18.1). Integer ops
+    (QMUL/QDIV/QSQRT) exact."
   - "Worked numbers: XYPOL(3,4)=5 heading ~$25C8 (~53); muldiv64(123456,789012,1000)=97,408,265; mag(123456,789012)=798,612; log2(123456) whole part 16"
 fragile_areas:
   - "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED; QVECTOR/QROTATE are signed — must not swap (register F-166/F-171 history)"
