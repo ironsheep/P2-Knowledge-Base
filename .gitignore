@@ -308,3 +308,6 @@ engineering/planning/yaml-audit-report.yaml
 
 # Forum-discussion working material — local only, never committed.
 /engineering/document-production/FORUM-NO-COMMMIT
+
+# fetch-kb-file.sh writes its downloaded index + cache here; regenerable, never committed
+engineering/tools/p2kb/.p2kb/
