@@ -3472,7 +3472,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > F-321 class after F-341's derived-analysis documents, and the first in a *published Parallax
 > document* rather than one of ours.
 
-### F-343 — the KB credited the 64006A Control Board with pull-up resistors its own board guide does not give it — `PENDING-VALIDATION`
+### F-343 — the KB credited the 64006A Control Board with pull-up resistors its own board guide does not give it — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Where:** `deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml:141` —
 > `special_features: "Current limiting resistors, pull-up resistors"`.
@@ -3489,6 +3489,8 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > **APPLIED 2026-08-25 by «#296» §5**, by deleting the unsupported half:
 > `special_features: "Current limiting resistors (470 ohm in series with each LED and each switch)"`.
 
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree, not from a status line. `hardware/addon-control-board.yaml` now contains no `pull` string at all — the fabricated pull-up credit is gone rather than reworded, which is the right disposition for a claim the board's own guide never made.
 ### F-344 — the derived board extract contradicts itself in one sentence about switch polarity — `CONFIRMED`
 
 > **Where:** `engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-control-64006a.md:9-11`
@@ -3506,7 +3508,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > **What is owed:** re-read the #64006A Product Guide v2.0 page and correct the extract's summary
 > sentence, or record why the guide itself says both.
 
-### F-345 — a worked example read a button with inverted flag polarity, under a comment asserting the opposite — `PENDING-VALIDATION`
+### F-345 — a worked example read a button with inverted flag polarity, under a comment asserting the opposite — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Where:** `deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml`, `common_patterns.button_read`
 > (`:243` before the fix): `TESTP #button_pin WZ      ' Z=1 if button pressed (low)`.
@@ -3525,6 +3527,8 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > #button_action ' a press shorts the pin to ground`. Swept: `TESTP`/`TESTPN` with a
 > polarity-claiming comment appears nowhere else in the shipped set.
 
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree, not from a status line. `code-examples/smart-pins-002-button-reading.yaml` now reads `if INA[BUTTON]` -> *"Button is pressed (high)"* with `else` -> *"Button is not pressed (low)"*. The comment asserts what the code does; the inversion is gone.
 ### F-346 — three worked examples were structurally unrunnable, and one rule contradicted its own two examples — `PENDING-VALIDATION`
 
 > **All four found by reading examples I had just compiled successfully.** None was caught by any
@@ -3596,7 +3600,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > **Owed:** «#299» decides whether anything returns in their place, source-first from the datasheet
 > lines above. Nothing may return that states a per-pin current above ±30 mA.
 
-### F-349 — PLL lock time is stated as ~10 microseconds in one place and ~10 milliseconds in four others; it is a delay an agent emits — `PENDING-VALIDATION`
+### F-349 — PLL lock time is stated as ~10 microseconds in one place and ~10 milliseconds in four others; it is a delay an agent emits — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **The outlier:** `architecture/clock_system.yaml` `stabilization_timing` — `pll_lock: "~10 microseconds"`.
 > Removed by «#293» (`15c84de5`), so it is **not currently shipping** — but it is a Population-2
@@ -3645,6 +3649,8 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 >
 > `PENDING-VALIDATION` — the KB edit is applied and gate-verified; only the YAML release is owed.
 
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree, not from a status line. every site now states **10 ms**: `clkmode.yaml:113` quotes the Silicon Doc verbatim at `silicon-doc-text.txt:2635` (*"Allow 10ms for crystal+PLL to stabilize"*), `hubset.yaml` :60/:73/:97 and `clock_system.yaml` :93/:172 agree, and `clkset.yaml:43`'s `~10-20ms` is a consistent range rather than the microsecond error. `clock_system.yaml:177` carries the adjudication in place: *"An earlier form of this block stated pll_lock as ~10 microseconds. Three Parallax sources state 10ms, each via two independent extraction paths (raw text and reconstructed table); the microsecond figure has no source."* The wrong figure is not merely replaced — the file records why it lost.
 ### F-350 — the F-328(b) eval-board fabrication class is not confined to `p2-eval-board.yaml` — `PENDING-VALIDATION`
 
 > **Where:** `deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml`,
