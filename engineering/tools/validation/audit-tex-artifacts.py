@@ -122,6 +122,25 @@ CHECKS = [
      re.compile(r"(?<![?\\])\?\?(?!\?)"),
      False),
 
+    # A control sequence EATS the space that follows it, so `\DocVersion — x`
+    # sets as "1.0.4— x" with the space gone. Found 2026-09-11 on the cover of
+    # Getting Started v1.0.4: every other em dash on that page is spaced, and
+    # that one was not. It is specific to the metadata single-sourcing
+    # conversion -- the literal it replaced ("Version 1.0.3 — Community Review
+    # Edition") had no macro and rendered correctly for three releases.
+    #
+    # Nine documents were swept and use the safe `\DocVersion\par` form, where
+    # there is no following space to lose. This catches the other shape as the
+    # remaining documents convert -- Debug Window, Architect's Guide, XBYTE and
+    # app notes 003/005/006/007 have yet to, and each will meet the same hazard.
+    # The fix is `\DocVersion{}`, which terminates the control sequence.
+    ("macro-eats-space",
+     "a \\Doc* macro followed by a space: TeX swallows it, gluing the next word "
+     "on. Write \\DocVersion{} to keep the space",
+     re.compile(r"\\Doc(?:Title|Subtitle|Version|Date|Author|Copyright|License)"
+                r"[ ]+(?![\\%])\S"),
+     False),
+
     # Authoring markers that must never ship.
     ("todo-marker",
      "TODO/FIXME/XXX marker in shipped text",

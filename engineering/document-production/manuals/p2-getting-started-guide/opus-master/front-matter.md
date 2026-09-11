@@ -23,7 +23,7 @@
 \vspace{0.35cm}
 {\large \DocDate\par}
 \vspace{0.2cm}
-{\large\color{blue}Version \DocVersion — Community Review Edition\par}
+{\large\color{blue}Version \DocVersion{} — Community Review Edition\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
