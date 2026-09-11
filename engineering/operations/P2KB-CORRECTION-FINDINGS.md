@@ -268,7 +268,7 @@ mnemonics (`RDCOGID`, `RDLUTS`, `NIXINT0`, `TRGINT0`) appear anywhere; no boot-R
 claim survives; no document states a `WAITMS` ceiling; and **of 95 shipped `examples-library/*.spin2`
 files, none carries a pull idiom or a `-1` cog launch.**
 
-### F-408 — the Assembly manual's own feature list says the P2 has "programmable pull-up/down resistors" — `PENDING-VALIDATION`
+### F-408 — the Assembly manual's own feature list says the P2 has "programmable pull-up/down resistors" — `RESOLVED — validated on the released PDF 2026-09-11`
 
 `p2-assembly-language-manual/opus-master/part-i/chapter-05-hardware.md:231`. The sprint's origin
 class (ledger §1.4) in ALM's capability summary. `P_HIGH_*`/`P_LOW_*` select **drive strength**.
@@ -282,7 +282,9 @@ is a property of **driving**, so **DIR must stay high**. Source:
 **APPLIED 2026-09-10** — ALM v3.1.8: the bullet now reads *"Independently selectable drive strength for the high and low side of the output driver"*, and a new paragraph after the component list carries the eight-rung ladder, the independent high/low sides, `P_HIGH_15K`+`DIR=1`+`OUT=1` as a 15 kΩ path to VIO, and the DIR caveat. The word "pull-up" is KEPT, per §1.24. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
 
 
-### F-409 — ADDSX's C-flag prose contradicts its own Operation line and encoding row — `PENDING-VALIDATION`
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2-Assembly-Language-Manual.pdf p98`, not from the opus-master source and not from the compile log. reads "the P2 has **no separate** programmable pull-up or pull-down resistors. The high side and the low side of each pin's driver each select one rung of the same eight-rung ladder, running from a fast digital drive down to float, and the two sides are selected independently." The repair is the explanation the finding asked for, not a deletion. (A naive grep for `programmable pull-up` still hits -- inside the negation that IS the fix; the artifact had to be read, not counted.)
+### F-409 — ADDSX's C-flag prose contradicts its own Operation line and encoding row — `RESOLVED — validated on the released PDF 2026-09-11`
 
 `part-ii/instructions-a.md:228` reads *"the C flag is set (1) if the result is negative
 (**Result[31] = 1**)"* while `:208` and `:219` in the same file both give **`C = true sign of
@@ -300,7 +302,9 @@ if the two were one thing. It recovers in the next sentence, so fix the parenthe
 **APPLIED 2026-09-10** — ALM v3.1.8: both `:191` (ADDS) and `:228` (ADDSX) now state C as the true sign at full precision and say plainly it is **not** `Result[31]`; ADDSX cites `TJV` as the case that separates them. **Independently re-verified the "lone outlier" claim** — the only surviving `Result[31]` in ALM is `appendix-a:74` for **CMPM**, where it is CORRECT (`cmpm.yaml`: *"C: Set to MSB of (D - S), i.e., Result[31]"*) — that IS the instruction. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
 
 
-### F-410 — ALM says GETBRK's flag effect is optional; it is required, and the sibling manual says so — `PENDING-VALIDATION`
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2-Assembly-Language-Manual.pdf, ADDSX entry`, not from the opus-master source and not from the compile log. `Operation: D = D + S + C; C = true sign of (D + S + C)` and the encoding row's C column both read `true sign of (D + S + C)`. Prose, Operation line and encoding row now agree.
+### F-410 — ALM says GETBRK's flag effect is optional; it is required, and the sibling manual says so — `RESOLVED — validated on the released PDF 2026-09-11`
 
 `part-ii/instructions-g.md:14` (`{WC|WZ|WCZ}` braces) and `:19` (*"optional effects"*). The shipped
 KB, `language/pasm2/getbrk.yaml:13`: *"GETBRK **REQUIRES** a flag effect (WC, WZ, or WCZ); the
@@ -314,7 +318,9 @@ wrong as well as its prose.
 **APPLIED 2026-09-10** — ALM v3.1.8: syntax line is now `**GETBRK**  *Dest*  **WC|WZ|WCZ**` (braces dropped — 166 other syntax lines legitimately use `{}`, GETBRK being the lone required-flag instruction), and the bullet states the flag is **required** and *selects which of three different results* is returned. **Narrower than filed:** the entry's own **Explanation** body was ALREADY correct (*"A flag effect is required … does not assemble"*), so the manual was contradicting itself three paragraphs apart, not simply wrong. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
 
 
-### F-411 — ALM's clock row attributes to the P2 Datasheet two figures the datasheet does not contain, and contradicts its own Chapter 4 — `PENDING-VALIDATION`
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2-Assembly-Language-Manual.pdf, GETBRK entry`, not from the opus-master source and not from the compile log. the signature reads `GETBRK Dest WC|WZ|WCZ` -- the flag effect carries no optional brackets, and the Result line says the status retrieved depends on "the flag effect specified". Required, as the sibling manual has it.
+### F-411 — ALM's clock row attributes to the P2 Datasheet two figures the datasheet does not contain, and contradicts its own Chapter 4 — `RESOLVED — validated on the released PDF 2026-09-11`
 
 `front-matter.md:144`: *"180 MHz recommended; **250 MHz typical overclock; 350 MHz absolute max**¹"*,
 footnoted at `:153` *"¹ **Per P2 Datasheet.**"*
@@ -336,7 +342,9 @@ whether it is the compiler's, the datasheet's, or an overclock ceiling.
 **APPLIED 2026-09-10** — ALM v3.1.8: the row now reads *"180 MHz typical; 320 MHz datasheet maximum"* and the footnote gives min 3.33 / typ 180 / max 320 with the 105 °C condition, attributing 350 MHz to the Silicon Documentation as the VCO/1 overclock ceiling. Datasheet re-verified live: 250 and 350 appear nowhere as clock figures (the only hits are *"~350 unique instructions"* and a `250 ms` code example). **A second defect found at the same time, NOT in this finding:** `ch04:20` gave 320 MHz as the **XI external-input** ceiling; the datasheet rates direct drive into XI at **DC–200 MHz**, and 320 is the PLL *output* max. Rewritten to keep the two limits apart. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
 
 
-### F-412 — the IOSP states the input threshold as fixed volts; the datasheet gives it as a fraction of the I/O supply — `PENDING-VALIDATION`
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2-Assembly-Language-Manual.pdf, For P1 Developers table + footnote 1`, not from the opus-master source and not from the compile log. the row reads `180 MHz typical; 320 MHz datasheet maximum`, and the footnote now attributes correctly: "The P2 Datasheet's AC Characteristics give the PLL system clock as 3.33 MHz minimum, 180 MHz typical, 320 MHz maximum, with the nominal 180 MHz rating specified up to 105 C. Beyond the datasheet, the Silicon Documentation notes..." -- datasheet figures are now the datasheet's, and the non-datasheet claim is attributed separately.
+### F-412 — the IOSP states the input threshold as fixed volts; the datasheet gives it as a fraction of the I/O supply — `RESOLVED — validated on the released PDF 2026-09-11`
 
 `p2-io-and-smart-pins-user-guide/.../chapter-12-digital-input.md:25` and `:95` — *"approximately
 **1.65V** threshold"*.
@@ -351,7 +359,9 @@ supplies do not share thresholds. Same chapter, same class: `:156` hard-codes
 **APPLIED 2026-09-10** — IOSP v1.0.10: §12.1 now states `Vih` as `Vxxyy * 0.3 / * 0.5 / * 0.7`, spells out the 0.99–2.31 V band at 3.3 V, says the threshold moves with the supply, and instructs that 1.65 V is the typical value and not the switching point. The level-comparator formula reads `(level / 256) * Vxxyy`, its voltage table names the 3.3 V supply its rows assume, the TTL level-108 derivation says to recompute for another `Vxxyy`, and the Example-4 block declares the assumption. `:95`'s restatement now points at §12.1 instead of repeating a number. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
 
 
-### F-413 — P2AN001's clock pitfall states a 300 MHz maximum that exists in no source, and contradicts its own YAML companion — `PENDING-VALIDATION`
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2-IO-and-Smart-Pins-User-Guide.pdf p184`, not from the opus-master source and not from the compile log. "a fraction of the I/O supply Vxxyy: minimum Vxxyy * 0.3, typical Vxxyy * 0.5, maximum Vxxyy * 0.7 ... The threshold is a band, not a point. At a 3.3 V supply it spans 0.99 V to 2.31 V, with 1.65 V as the typical value ... The threshold moves with the supply ... **Quote 1.65 V as the typical value at 3.3 V, never as the switching point.**" The remaining `1.65V` hits in the manual are DAC OUTPUT arithmetic (128/256 x 3.3 V), a different quantity, and p187 states the scaling rule for those too.
+### F-413 — P2AN001's clock pitfall states a 300 MHz maximum that exists in no source, and contradicts its own YAML companion — `RESOLVED — validated on the released PDF 2026-09-11`
 
 `app-notes/P2AN001/opus-master/P2AN001.md:638` — *"The P2's **specified maximum is 300 MHz**; the
 original research code ran at 320 MHz, **which is over spec**."*
@@ -364,7 +374,9 @@ so **the note and its own companion now disagree**, which the four-artifact mode
 **APPLIED 2026-09-10** — P2AN001 v1.0.5: the pitfall now gives min 3.33 / typ 180 / max 320 MHz with the 105 °C footnote, and states that the research code's 320 MHz sat *at* the datasheet maximum rather than beyond it, though above the typical rating. Note and companion agree. Render owed, so this stays `PENDING-VALIDATION` until the rebuilt PDF is read.
 
 
-### F-414 — P2AN001 carries the unreproduced 15 mV designer figure and not the measured ≤9 mV result — `PENDING-VALIDATION`
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2AN001.pdf`, not from the opus-master source and not from the compile log. the string `300 MHz` does not occur anywhere in the released PDF.
+### F-414 — P2AN001 carries the unreproduced 15 mV designer figure and not the measured ≤9 mV result — `RESOLVED — validated on the released PDF 2026-09-11`
 
 `P2AN001.md:626`. The note qualifies 15 mV correctly as designer-stated, but the companion has moved
 past it: *"Hardware-verified 2026-07-07 on real P2: the ratiometric single-pin absolute error was
@@ -377,6 +389,8 @@ first-class here and outrank a designer report.
 
 ---
 
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2AN001.pdf`, not from the opus-master source and not from the compile log. "Measured on real P2 silicon (2026-07-07), the single-pin ratiometric absolute error was <=9 mV, reproducible" -- and the designer figure is demoted in the same paragraph: "The P2's designer separately reports having seen pins read as much as 15 mV apart pin-to-pin (Reference 2). Treat that as a designer report, not a specification -- the bench has not yet reproduced it ... Design to the measured <=9 mV single-pin floor, and do not quote 15 mV as a specification."
 ### Re-adjudicated, not newly filed — F-356's DeSilva disposition
 
 F-356 records `p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md:2881` as *"checked and left
@@ -386,7 +400,7 @@ default**"* implies a non-default internal pull exists, and it sends the reader 
 modes** when the mechanism is **drive strength**. Not re-filed as a correction — nothing here makes
 a reader's code fail — but F-356's disposition should not be read as settling it.
 
-### F-416 — `cordic.yaml` states a ~28-bit trig precision that no source gives, and that the P2AN002 companion already dropped — `PENDING-VALIDATION`
+### F-416 — `cordic.yaml` states a ~28-bit trig precision that no source gives, and that the P2AN002 companion already dropped — `RESOLVED — validated on the served KB 2026-09-11`
 
 `deliverables/ai/P2/architecture/cordic.yaml:183` — `trig_functions: "~28 bits of precision"`.
 
@@ -433,7 +447,9 @@ remains owed here.
 > `cordic_solver.yaml` and `p2kbAppNoteP2an002CordicForRealWork` for the pipeline-optimization
 > concept. `validate-crossref-keys.py` CLEAN.
 
-### F-419 — `cordic.yaml`'s `accuracy:` block contradicted its own `operations:` block on three quantities — `PENDING-VALIDATION`
+
+**VALIDATED ON THE PUBLISHED ARTIFACT 2026-09-11.** KB v1.18.1 is on the remote and `p2kb-mcp` is serving it, so the release-yamls §7b CONTENT PROBE was finally runnable — and it was run against the *served* entry (`p2kb_get p2kbArchCordic`), not against the repo tree and not against a refresh reporting OK, which is the distinction this finding was held open for. The live `accuracy:` block reads `logarithm: 32-bit unsigned -> 5.27 fixed-point`, `exponential: 5.27 fixed-point logarithm -> 32-bit unsigned`, `square_root: 64-bit -> 32-bit square root`, and a `trigonometric:` entry that states plainly that NO Parallax source gives a bit count. The `~28 bits` figure and both `5.32` values are absent from the served content. `source:` cites `silicon-doc-text.txt:175-182`.
+### F-419 — `cordic.yaml`'s `accuracy:` block contradicted its own `operations:` block on three quantities — `RESOLVED — validated on the served KB 2026-09-11`
 
 Found 2026-09-10 while repairing F-416, by removing the uncited block instead of citing it in place.
 
@@ -458,7 +474,9 @@ and no gate we run compares two blocks inside one file for agreement.
 naming the per-instruction file that owns the detail rather than restating it. `verify-yaml-format`
 clean, `validate-crossref-keys` clean. Stays `PENDING-VALIDATION` until a KB release publishes it.
 
-### F-417 — two open-drain configurations name the wrong side of the driver, in a released manual and a released appendix — `PENDING-VALIDATION`
+
+**VALIDATED ON THE PUBLISHED ARTIFACT 2026-09-11.** KB v1.18.1 is on the remote and `p2kb-mcp` is serving it, so the release-yamls §7b CONTENT PROBE was finally runnable — and it was run against the *served* entry (`p2kb_get p2kbArchCordic`), not against the repo tree and not against a refresh reporting OK, which is the distinction this finding was held open for. The live `accuracy:` block reads `logarithm: 32-bit unsigned -> 5.27 fixed-point`, `exponential: 5.27 fixed-point logarithm -> 32-bit unsigned`, `square_root: 64-bit -> 32-bit square root`, and a `trigonometric:` entry that states plainly that NO Parallax source gives a bit count. The `~28 bits` figure and both `5.32` values are absent from the served content. `source:` cites `silicon-doc-text.txt:175-182`.
+### F-417 — two open-drain configurations name the wrong side of the driver, in a released manual and a released appendix — `RESOLVED — validated on the released PDF 2026-09-11`
 
 Neither was on the v1.18.0 sweep list; both surfaced while applying it, by asking of every
 pull-vocabulary site the question §1.24 asks. Both are **fixed**; renders are owed.
@@ -481,6 +499,8 @@ scanned and copied rather than read.
 the vocabulary being acceptable does not make a **composition** correct. The remaining question at
 every site is *which side drives, and does DIR let it*.
 
+
+**VALIDATED ON THE RELEASED ARTIFACT 2026-09-11** — read from `P2-Assembly-Language-Manual.pdf, open-drain example`, not from the opus-master source and not from the compile log. `P_HIGH_FLOAT | P_LOW_1K5` with the comment "Open-drain: floats when OUT=1, sinks through 1.5k when OUT=0. The bus pull-up is external -- the 1.5k here is the LOW-side drive." The sinking side is named correctly and the external pull-up is stated.
 ### F-418 — the layout torture test is built on 44 constant names that exist in no Parallax source — `CONFIRMED` (scope decision owed)
 
 `p2-layout-torture-test/opus-master/P2-Layout-Torture-Test.md`. Measured 2026-09-10 against **every**
@@ -6280,6 +6300,48 @@ number**.
 > **The half that is NOT version-coupled remains this entry's only record**, and is unaffected by the hold:
 > `SYMBOL INDEX` stores symbols **per source file**, so a forked file's second image has no row there. That
 > survives 1.55.4 and is documented nowhere else.
+
+## An ADC comparator example still states the input threshold in fixed volts, in the manual F-412 just repaired (2026-09-11) — F-424
+
+### F-424 — IOSP §2.5's ADC comparator example quotes `~1.65V` as an input threshold without the supply-fraction caveat the same manual now carries everywhere else — `CONFIRMED`
+
+Found 2026-09-11 while **validating F-412 on the released PDF** — which is the point worth
+recording: the validation pass for one finding is where the residual sites of its class surface,
+because it is the only pass that reads the whole artifact looking for that exact shape.
+
+`P2-IO-and-Smart-Pins-User-Guide.pdf` **page 59** (§2.5 ADC modes), in the worked example:
+
+```
+' Detect when analog input exceeds ~1.65V (mid-scale)
+WRPIN(adc_pin, P_ADC_1X)
+PINFLOAT(adc_pin)
+```
+
+**Why this is the F-412 class and not a duplicate of it.** F-412 named
+`chapter-12-digital-input.md:25` and `:95` and was repaired there — p184 now states the threshold
+as a fraction of `Vxxyy` (0.3 / 0.5 / 0.7), calls it a band rather than a point, and ends
+*"Quote 1.65 V as the typical value at 3.3 V, never as the switching point."* This site is a
+**different chapter** and states a comparator trip point as a fixed voltage with no supply
+reference at all. `(mid-scale)` carries the fraction implicitly for a reader who already knows
+the rule; the reader who meets this page first does not.
+
+**It is genuinely wrong off-nominal, which is what makes it a finding rather than a style note.**
+`Vxxyy` is specified 3.15 V - 3.45 V, so mid-scale spans roughly 1.58 V - 1.73 V, and pin groups
+on different supplies do not share a threshold. The manual states this itself at p184 and again at
+p187 (*"the fraction is what the level fixes"*) and p195 (*"Levels below assume Vxxyy = 3.3V;
+scale them to your I/O supply"*) — three sites carry the caveat and this one does not.
+
+**Fix.** One line, in
+`engineering/document-production/workspace/p2-io-and-smart-pins-user-guide/opus-master/` §2.5:
+state the trip point as mid-supply and give 1.65 V as the value at a nominal 3.3 V, matching the
+vocabulary p184 already established. Do not delete the number — the reader needs a figure to
+aim at; it needs the supply attached to it.
+
+**Class sweep owed with the fix** (`feedback_classwide_sweep_on_every_finding`): re-read every
+site in the IOSP that names an input threshold or comparator trip point in volts and confirm each
+carries the supply. This entry records only the site the F-412 validation pass happened to cross.
+
+---
 
 ## The rights guard fails open, so an unadopted document emits a malformed rights string (2026-08-22) — F-319
 
