@@ -108,9 +108,19 @@ def norm_rights(s):
 
 
 def norm(s):
-    """Compare on visible content: collapse whitespace, unify dashes and quotes."""
+    """Compare on visible content: collapse whitespace, unify dashes and quotes.
+
+    LaTeX escapes are stripped too. A value in request.json reaches the PDF through
+    `\\renewcommand{\\DocTitle}{$title$}`, which drops it into a macro body verbatim --
+    so a LaTeX special has to arrive already escaped or it is mangled. I/O & Smart
+    Pins v1.0.10 shipped `Title: "P2 I/O  Smart Pins User Guide"`: the bare `&` is
+    an alignment tab, and hyperref silently swallowed it. Escaping it in request.json
+    is what fixes the PDF, and this keeps the gate comparing the TITLE rather than
+    the escaping -- otherwise the fix would trade one false verdict for another.
+    """
     s = (s or "").replace("—", "-").replace("–", "-")
     s = s.replace("’", "'").replace("“", '"').replace("”", '"')
+    s = re.sub(r"\\([&%#_$])", r"\1", s)
     return re.sub(r"\s+", " ", s).strip()
 
 

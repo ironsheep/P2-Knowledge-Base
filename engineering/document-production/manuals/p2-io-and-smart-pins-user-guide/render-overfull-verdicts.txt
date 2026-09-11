@@ -1,0 +1,40 @@
+# Render-overfull verdicts — P2 I/O & Smart Pins User Guide
+#
+# Read by audit-render-overfulls.py --verdicts. One "page: verdict" line each.
+# Every line here is a page that was RENDERED AND LOOKED AT, not inferred.
+#
+# v1.0.10, 2026-09-11. All three sites are the same defect: F-423, the auto-shrink
+# table filter reserving a FIXED 0.93 of \linewidth while colsep scales with the
+# column count. The overrun is arithmetic, not chance:
+#     6 columns -> 27.2pt predicted     7 columns -> 37.2pt predicted
+# and the measured magnitudes below land within half a point of that, as do the
+# Streamer guide's two 6-column sites (26.64pt). See F-423 in the corrections
+# register for the full derivation.
+#
+# ACCEPTED FOR THIS RELEASE (Stephen, 2026-09-11) after reviewing the pages. The
+# overrun is PRE-EXISTING — the published v1.0.9 measures the p330 spans at the
+# same magnitudes — and there is NO document-level workaround: shortening cells
+# does not help, because the leftover-distribution step scales the columns back up
+# to fill 0.93 regardless. Only the platform constant can fix it, and that change
+# re-flows every auto-shrunk table in all 18 documents, so it gets its own pass.
+
+328: ACCEPTED — Appendix C, Formulas Reference. 37.12pt, a 7-column table, which is
+     exactly F-423's prediction for seven columns. Rendered and inspected: the text
+     does not cross the right margin (audit-pdf-margin-overflow measures all 396
+     pages and flags nothing here), because the last column's content does not fill
+     its reserved width. Cosmetic; the table prints inside its rules.
+
+330: ACCEPTED WITH A KNOWN DEFECT — Appendix D, "All Output Modes at a Glance",
+     7 columns. This is the one site where the F-423 overrun SHOWS: four cells in
+     the Primary Use column cross the right margin by 20.3-24.1pt ("On/off control",
+     "Single pulses,", "Power supply", "Variable duty"). Rendered and inspected, and
+     reviewed by Stephen. Ships as-is this release because it is pre-existing and
+     unfixable inside the document; it clears when F-423 lands.
+
+246: ACCEPTED — Chapter 16, ADC (Analog Input). 27.12pt, a 6-column table, exactly
+     F-423's six-column prediction and within half a point of the Streamer guide's
+     independent 26.64pt. Does not cross the margin.
+
+# The same 6-column counter-mode table also sets on p226 (Ch 14) and p333
+# (Appendix D) without being flagged, which is the content-dependence F-423
+# describes: the overrun is constant, whether it SHOWS is not.

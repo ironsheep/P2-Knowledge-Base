@@ -794,7 +794,25 @@ local function handle_auto_shrink_table(el)
     -- Leave headroom below 1.0 for the inter-column colsep: tblr forces the table
     -- to width=\linewidth, so if the Q widths + colseps exceed it the columns get
     -- silently compressed below their computed widths and identifiers overrun.
-    local usable = 0.93      -- fraction of \linewidth available to column bodies
+    --
+    -- F-423. This was a CONSTANT 0.93, and the leftover-distribution step below
+    -- fills whatever it is -- so every auto-shrunk table came out summing to
+    -- exactly 0.93 of \linewidth. But tblr puts colsep on BOTH sides of EVERY
+    -- column, so the space colsep eats scales with the column count and 0.93 did
+    -- not. On the ~468pt measure these manuals use, at the 5pt colsep of \small:
+    --     6 columns  -> should be 0.872, was 0.930  -> 27.2pt overrun
+    --     7 columns  -> should be 0.850, was 0.930  -> 37.2pt overrun
+    -- Measured against that: Streamer's two 6-column tables overran 26.64pt, and
+    -- I/O & Smart Pins' 6- and 7-column tables 27.12pt and 37.12pt. Within half a
+    -- point every time -- a constant wrong by a computable amount, not a heuristic
+    -- that misfires. Whether it SHOWED depended on whether the last column's text
+    -- filled its reserved width, which is how it survived: most tables overran
+    -- invisibly, and IOSP's Appendix D crossed the margin on four cells.
+    --
+    -- Derive it per table instead. LINEWIDTH_PT is nominal (these manuals share a
+    -- ~468pt measure); it only needs to be close, because it is reserving space
+    -- that colsep genuinely consumes rather than guessing at a safety margin.
+    local LINEWIDTH_PT = 468.0
     local chosen, minfrac
     for _, f in ipairs(fonts) do
       local frac = {}
@@ -803,9 +821,14 @@ local function handle_auto_shrink_table(el)
         frac[i] = (maxtok[i] + pad) / f.cpl
         summ = summ + frac[i]
       end
-      if summ <= usable then chosen = f; minfrac = frac; break end
+      local cs = tonumber(f.cs:match("%d+")) or 5
+      local usable_f = 1.0 - (2 * cs * num_cols) / LINEWIDTH_PT
+      if summ <= usable_f then chosen = f; minfrac = frac; break end
       chosen = f; minfrac = frac   -- keep smallest font as fallback
     end
+    -- Recompute for the font actually chosen: colsep differs per tier.
+    local chosen_cs_pt = tonumber(chosen.cs:match("%d+")) or 5
+    local usable = 1.0 - (2 * chosen_cs_pt * num_cols) / LINEWIDTH_PT
     -- Distribute leftover width to columns with wrappable excess (prose).
     local summ = 0
     for i = 1, num_cols do summ = summ + minfrac[i] end

@@ -97,7 +97,7 @@ its conclusion does not rest on the file this finding re-picks.
 
 ## Auto-shrunk table columns reserve a FIXED 0.93 of \linewidth while colsep scales with column count, so every wide table overruns by a predictable amount (2026-09-11, IOSP v1.0.10 certification) — F-423
 
-### F-423 — `p2kb-platform-tables.lua` uses a constant `usable = 0.93`; the correct value depends on the column count — `CONFIRMED, arithmetic reproduced on three sites across two documents`
+### F-423 — `p2kb-platform-tables.lua` uses a constant `usable = 0.93`; the correct value depends on the column count — `FIX APPLIED 2026-09-11 — awaiting verification on the IOSP re-render`
 
 **The mechanism, and it is exact.** The auto-shrink branch computes per-column fractions, then
 distributes `leftover = usable - summ` to columns with wrappable prose, so the emitted widths
@@ -142,7 +142,29 @@ regardless. Only the platform constant can fix it.
 it — `usable = 1.0 - (2 * colsep_pt * num_cols) / linewidth_pt` — or to emit widths against
 `\dimexpr\linewidth - <total colsep>\relax` so the arithmetic is exact rather than nominal.
 
-**Why it is not applied in this pass.** `p2kb-platform-tables.lua` is loaded by every document in
+**FIX APPLIED 2026-09-11.** `usable` is now derived per table — `1.0 - (2 * colsep_pt * num_cols)
+/ LINEWIDTH_PT`, computed inside the font-tier loop (each tier has its own colsep) and recomputed
+for the tier actually chosen. LINEWIDTH_PT is nominal at 468pt, which is enough: it reserves space
+colsep genuinely consumes rather than guessing a safety margin.
+
+**Why it landed now rather than after the wave, reversing the recommendation below.** The deferral
+argument was that a shared-file change needs its own render to verify, and should not ride inside
+someone else's release. That reasoning expired: **I/O & Smart Pins had to re-render anyway** for an
+unrelated defect (its PDF Title lost the `&`), so the verification render is free rather than
+extra. Stephen had agreed to ship the overrun as-is — this supersedes that only in the sense that
+the cost which justified accepting it no longer exists.
+
+**It also could not have shipped as-is.** `audit-pdf-margin-overflow.py` is BLOCKING and its
+tolerance IS its verdict — there is no per-site acceptance path, by design. Releasing IOSP with
+the p330 overrun would have meant inventing one, which is how a gate stops meaning anything.
+
+**Expect tables to change.** 0.93 was generous; the derived value is 0.850-0.872 at six and seven
+columns, so some tables that previously fit at `\small` will now fall through to a smaller tier.
+That is correct — they genuinely did not fit — but it is a visible change, and the IOSP render is
+where it gets checked. The already-published documents are untouched as published; their tables
+change only at their next render.
+
+**Original reasoning, kept for the record — why it was not applied in the first pass.** `p2kb-platform-tables.lua` is loaded by every document in
 the set. Narrowing columns re-flows every auto-shrunk table in all of them, so it needs its own
 change with a before/after render comparison — the same reasoning that carved F-319 out of
 Assembly v3.1.7, and the same reasoning that says a shared-file fix lands with a verification pass
