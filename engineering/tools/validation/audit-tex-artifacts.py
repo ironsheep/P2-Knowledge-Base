@@ -150,14 +150,22 @@ CHECKS = [
     # only on the operand names short enough to collide, and it shipped in v3.0.6
     # and earlier with nothing to catch it.
     #
-    # A real anchor is a slug. A one- or two-character target is the signature of
-    # an accidental reference, never of a deliberate cross-reference: the 183
-    # genuine links in the Streamer guide all target slugs like `app-a` and
-    # `adc-configuration-example`.
+    # SINGLE-character targets only, and the narrowing is the lesson. This first
+    # shipped matching 1-2 characters on the reasoning that "a real anchor is a
+    # slug." That is false for a manual whose SUBJECT has two-character names: the
+    # Assembly Language Reference legitimately links `\\hyperlink{pa}{PA}`,
+    # `{pb}{PB}` and `{or}{OR}` -- PA and PB are P2 registers and OR is a PASM2
+    # instruction, each with its own page. The gate blocked that manual's release
+    # with 15 false positives the day after it was added.
+    #
+    # One character survives as a signature because a heading almost never slugs
+    # to a single letter, while single-letter OPERANDS in brackets -- [S], [D] --
+    # are exactly the PASM2 notation that collides. That is the shape deSilva hit.
+    # Two characters is where real anchors begin, so the gate stops there.
     ("implicit-reference-link",
-     "a \\hyperlink to a 1-2 character target: pandoc turned a bracketed span "
+     "a \\hyperlink to a SINGLE-character target: pandoc turned a bracketed span "
      "into a link and swallowed the brackets. Escape them (LUT\\[S\\])",
-     re.compile(r"\\hyperlink\{[A-Za-z0-9]{1,2}\}\{"),
+     re.compile(r"\\hyperlink\{[A-Za-z0-9]\}\{"),
      False),
 
     # Authoring markers that must never ship.

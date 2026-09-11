@@ -13810,7 +13810,7 @@ Skip Instructions
 
 **SKIP**  *{#}Dest*
 
-**Operation:** cancel each of next instructions 0..31 where D[n] = 1
+**Operation:** cancel each of next instructions 0..31 where D\[n\] = 1
 
 **Result:** Subsequent instructions 0-31 are cancelled for each '1' bit in Dest[0]-Dest[31].
 
