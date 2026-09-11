@@ -4662,7 +4662,7 @@ needs a source that states it or a rewrite that does not compute.
 > `KNOWLEDGE-GAPS.md` **G-001** and **G-008**. Both defects below were found while doing that
 > reading. **Nothing is fixed in this filing.**
 
-### F-331 — `pasm2/wrpin.yaml` mislabels three of the six WRPIN D-operand fields; two agreeing Parallax sources and the YAML's own sibling file all say otherwise — `PENDING-VALIDATION`
+### F-331 — `pasm2/wrpin.yaml` mislabels three of the six WRPIN D-operand fields; two agreeing Parallax sources and the YAML's own sibling file all say otherwise — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **APPLIED 2026-08-25 by «#295» phase 2 — REPOINTED, not re-worded.** The `d_operand_format.fields:`
 > map no longer restates the six fields at all. It now carries three pointers:
@@ -4712,6 +4712,8 @@ mode; `TT` = pin DIR/OUT control, default `%00`; `SSSSS` = smart mode), keeping 
 bit-range annotations from the Spin2 sibling. **Closes the last open half of `KNOWLEDGE-GAPS`
 G-008.**
 
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree (v1.18.1, on the remote), not from a status line. same structural repair as F-326 — the three mislabelled fields were not corrected in place, the restatement that allowed them to drift was removed and replaced by a pointer to the single home. The file says so itself at the redirect.
 ### F-332 — the P2 Hardware Manual's table artifact carries ten six-digit `%SSSSS` values for a five-bit field, with no reconciliation note — `CONFIRMED`
 
 **Location:** `engineering/ingestion/sources/p2-hardware-manual/complete-tables-reference.md:287-314`
@@ -5116,7 +5118,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > the predefined-label tables at lines ~150–195, plus
 > `engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt` for the DIR/output rule.
 
-### F-321 — the 16 `P_HIGH_*` / `P_LOW_*` drive-strength selectors are documented as pull-up/pull-down resistors — `PENDING-VALIDATION`
+### F-321 — the 16 `P_HIGH_*` / `P_LOW_*` drive-strength selectors are documented as pull-up/pull-down resistors — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Where:** `language/spin2/concepts/basic-io.yaml:203-213` (`pull_up_modes:` / `pull_down_modes:`)
 > and `language/pasm2/concepts/basic-io.yaml:271-281` (same two blocks, same values).
@@ -5195,7 +5197,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > `[CONTRADICT]` rows, and the files were restored (`git status --short deliverables/ai/P2` back to
 > the 12 intended files). A gate that cannot fail has not been verified.
 
-### F-322 — every worked pull-up example disables the drive it just configured, so none of them work — `PENDING-VALIDATION`
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree (v1.18.1, on the remote), not from a status line. `architecture/pin-drive-configuration.yaml` is now the single home and states the ladder as DRIVE STRENGTH by encoding (%000 Fast, %001 1.5k, %010 15k, %011 150k, %100 1mA, %101 100uA, %110 10uA, %111 Float) with both P_HIGH_*/P_LOW_* constant names per rung. The words `pull-up resistor` / `pull-down resistor` / `bias resistor` survive ONLY as `aliases:` — deliberately, so an agent searching the wrong-but-common term lands on the correct page. That is the findability mechanism working, not a residual defect.
+### F-322 — every worked pull-up example disables the drive it just configured, so none of them work — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Where — 8 sites, 3 files:**
 > `language/spin2/concepts/basic-io.yaml:218-219, 229-230, 296-297, 377-378` ·
@@ -5277,7 +5281,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > of the compiled binaries against `##$1000` — and against `##($C0 | $1000)` for `P_TT_11`, so the
 > control has a non-zero left operand.
 
-### F-323 — the two `basic-io.yaml` files give contradictory mechanisms for the same feature — `PENDING-VALIDATION`
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree (v1.18.1, on the remote), not from a status line. the worked examples now pair the configuration with `DRVH` and say why: *"DIR = 1, OUT = 1 -- REQUIRED; DIRL here floats the pin"* and *"a drive is live only while DIR is high"*. The Spin2 file additionally documents the original error in place: *"PINFLOAT(16) as 'input with pull-up' ... Both are wrong: PINFLOAT drops DIR, which deactivates [the drive]"*.
+### F-323 — the two `basic-io.yaml` files give contradictory mechanisms for the same feature — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Where:** `language/spin2/concepts/basic-io.yaml:197-201` says internal bias is enabled
 > *"via **PINSTART()** with special modes"*; `language/pasm2/concepts/basic-io.yaml:265-269` says
@@ -5317,7 +5323,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 >
 > `validate-crossref-keys.py`: **3149 → 3156** references, **0 unresolved**, 100.0%.
 
-### F-324 — `bits_M_6_0: "Control drive strength"` is wrong at both ends — `PENDING-VALIDATION`
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree (v1.18.1, on the remote), not from a status line. both `basic-io.yaml` files now give the SAME mechanism — drive-strength configuration, each redirecting to `architecture/pin-drive-configuration.yaml`. They remain non-identical by design (one states Spin2 method syntax, the other PASM2 instruction syntax); the MECHANISM no longer differs.
+### F-324 — `bits_M_6_0: "Control drive strength"` is wrong at both ends — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Where:** `language/pasm2/concepts/basic-io.yaml:262`.
 >
@@ -5361,7 +5369,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > - **Nothing in «#296» re-states it.** Per R4 the touched files point at that home rather than
 >   carrying a second copy of the bit ranges.
 
-### F-325 — the drive-strength ladder is fully documented in the ingestion tree and entirely absent from the shipped KB — `PENDING-VALIDATION`
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree (v1.18.1, on the remote), not from a status line. resolved by relocation rather than rewording — the mislabelled field no longer exists in `wrpin.yaml`. The %M sub-fields, their bit ranges and the drive ladder live once in `architecture/pin-drive-configuration.yaml`.
+### F-325 — the drive-strength ladder is fully documented in the ingestion tree and entirely absent from the shipped KB — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **APPLIED 2026-08-25 by «#295» phase 2, in two homes with a boundary between them.**
 >
@@ -5411,7 +5421,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > The pull-up/pull-down *idiom* belongs here too, stated as a composition of drive settings
 > (`P_HIGH_15K | P_LOW_FLOAT`, DIR high) rather than as a component the chip does not have.
 
-### F-326 — `wrpin.yaml` expands three of its six D-operand fields and stubs the one that carries the pin configuration — `PENDING-VALIDATION`
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree (v1.18.1, on the remote), not from a status line. the ladder is present in the shipped KB in full — eight rows, each with its %HHH/%LLL encoding, its drive, and both constant names — plus a `no_other_rungs:` guard reading *"The legend enumerates these eight and no others."*
+### F-326 — `wrpin.yaml` expands three of its six D-operand fields and stubs the one that carries the pin configuration — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **APPLIED 2026-08-25 by «#295» phase 2. The deferral now has somewhere to go.** The stub
 > `M: "13-bit low-level pin control + smart-pin mode"` is gone; `pasm2/wrpin.yaml`'s
@@ -5448,7 +5460,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > does not exist. **A deferral in a source is a work item, not an answer**, and this sweep is the
 > cost of treating one as an answer.
 
-### F-327 — `io_pin_timing.yaml` documents a pin drive-strength system, and a slew-rate control, that no source describes — `PENDING-VALIDATION`
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree (v1.18.1, on the remote), not from a status line. `wrpin.yaml`'s `d_operand_format.fields` no longer expands ANY of the six — it redirects all six to `architecture/smart_pins.yaml` and the 13-bit %M internals to `pin-drive-configuration.yaml`, under the comment *"One home per fact ... Restating them here is what let three of the six drift wrong (F-331)."* The stub-vs-expansion asymmetry the finding named is gone because nothing is expanded here now.
+### F-327 — `io_pin_timing.yaml` documents a pin drive-strength system, and a slew-rate control, that no source describes — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Where:** `architecture/io_pin_timing.yaml:200-233` (`drive_strength_configurations:`)
 > and `:234-246` (`slew_rate_control:`).
@@ -5537,6 +5551,10 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > `PENDING-VALIDATION` — the removal is applied, the repopulation question is answered, and only
 > the YAML release is owed.
 
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — `p2kb_get p2kbArchIoPinTiming` against the published index (v1.18.1, now on the remote), not the repo tree. The served file's top-level `description:` — the exact field F-333 named as the place no instrument could see — now carries an explicit *"What it deliberately does NOT carry"* section reading: *"Slew rate. There is none to document. 'slew' returns zero hits across every ingested Parallax source ... A prior form of this description asserted configurable slew rates; it was fabrication (F-327, F-333) and is not restored."* Drive strength is likewise redirected to `architecture/pin-drive-configuration.yaml` rather than restated.
+
+**Class sweep run at the same time** (`feedback_classwide_sweep_on_every_finding`): every `slew` occurrence remaining in `deliverables/ai/P2/` is either a NEGATION of the fabricated claim (`basic-io.yaml` x2: *"no programmable slew rate exists"*) or the unrelated Spin2 **slew/easing engine** decomposition pattern, which is a software shaping construct and not a pin electrical claim. No residual assertion survives.
 ### F-329 — the SAME fabricated drive ladder stands twice more in `io_pin_timing.yaml`, in blocks F-327 does not name, alongside ~20 nanosecond quantities that NEITHER of the sprint's two extraction paths carries — `PARTIAL`
 
 > **Found:** 2026-08-24, by the DOCX-primary re-ingestion of `p2-hardware-manual` (the source
@@ -5645,7 +5663,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 >
 > `PARTIAL` because the removals are applied and the `instruction_to_pin_timing:` citation is owed.
 
-### F-333 — the fabricated slew-rate claim ALSO stood in `io_pin_timing.yaml`'s top-level `description:`, where no instrument could see it, because it carries no unit — `PENDING-VALIDATION`
+### F-333 — the fabricated slew-rate claim ALSO stood in `io_pin_timing.yaml`'s top-level `description:`, where no instrument could see it, because it carries no unit — `RESOLVED — validated on the served KB 2026-09-11`
 
 > **Found:** 2026-08-24, by «#293», *after* removing every block F-327 and F-329 name. A residual
 > `grep -i slew` over the file — run because F-329's lesson says to sweep the file, not the line
@@ -5696,6 +5714,10 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 
 ---
 
+
+**VALIDATED ON THE SERVED KB 2026-09-11** — `p2kb_get p2kbArchIoPinTiming` against the published index (v1.18.1, now on the remote), not the repo tree. The served file's top-level `description:` — the exact field F-333 named as the place no instrument could see — now carries an explicit *"What it deliberately does NOT carry"* section reading: *"Slew rate. There is none to document. 'slew' returns zero hits across every ingested Parallax source ... A prior form of this description asserted configurable slew rates; it was fabrication (F-327, F-333) and is not restored."* Drive strength is likewise redirected to `architecture/pin-drive-configuration.yaml` rather than restated.
+
+**Class sweep run at the same time** (`feedback_classwide_sweep_on_every_finding`): every `slew` occurrence remaining in `deliverables/ai/P2/` is either a NEGATION of the fabricated claim (`basic-io.yaml` x2: *"no programmable slew rate exists"*) or the unrelated Spin2 **slew/easing engine** decomposition pattern, which is a software shaping construct and not a pin electrical claim. No residual assertion survives.
 ## Open — CONFIRMED corrections (2026-08-11, DeSilva reader-report sweep)
 
 > **Sweep origin:** a reader reported that the DeSilva tutorial's Ch.1 "Experiment 3:
