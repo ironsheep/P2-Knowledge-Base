@@ -6323,6 +6323,62 @@ number**.
 > `SYMBOL INDEX` stores symbols **per source file**, so a forked file's second image has no row there. That
 > survives 1.55.4 and is documented nowhere else.
 
+## F-374's class survives under three key names the sweep was scoped not to touch (2026-09-11) — F-425
+
+### F-425 — `cost_efficiency`, `production_readiness: "excellent"` and two prose lines carry the same unsourced quality judgement F-374 removed — `CONFIRMED`
+
+Found 2026-09-11 by the F-374 sweep itself. F-374 was deliberately scoped to five key
+shapes, because an earlier pass matching the bare key `value` returned 299 sites and was
+thrown out as over-broad. That boundary was correct and it is also why these survived: they
+are the same defect wearing key names the narrowed class did not name.
+
+**(a) `cost_efficiency` — 6 sites, all `hardware/hardware-compatibility-matrix.yaml`**
+
+```
+cost_efficiency: "optimal"                    :55
+cost_efficiency: "underutilized"              :62
+cost_efficiency: "professional_premium"       :69
+cost_efficiency: "acceptable_but_oversized"   :76
+cost_efficiency: "optimal_memory_solution"    :83
+cost_efficiency: "expensive_overkill"         :90
+```
+
+Both of F-374's tests fail here. **Nothing sources it** — no Parallax document grades a
+board's cost efficiency, and we hold no price data at all. **The consumer cannot act on
+it** — an agent choosing a board cannot do anything with `expensive_overkill`; it needs the
+pin count, the memory and the price, and the first two are already in the same row.
+`expensive_overkill` is not a borderline call: it is an opinion about someone else's
+product, shipped as knowledge-base fact.
+
+**(b) `production_readiness` — 2 of 6 sites, and the split is the point**
+
+`"prototype_platform"` (:167 breakout, :254 carrier, :200 mini) and `"not_applicable"`
+(:243 eval board) are **categorical facts** — they say what the board is FOR, which is
+utility and stays. `"excellent"` (`edge-standard-module.yaml:397`,
+`edge-32mb-module.yaml:527`) is a grade and carries nothing a consumer can use. Fix only
+the two; do not touch the four.
+
+**(c) two prose lines, `hardware/p2-eval-board.yaml:224-225`** — these are the
+REPLACE-WITH-THE-FACT case rather than the delete case:
+
+```
+beginners: "Ideal - no hardware selection needed"
+educators: "Perfect - built-in teaching aids"
+```
+
+The adjective is the defect; the clause after the dash is a genuine fact. Strip `Ideal - `
+and `Perfect - ` and keep the rest.
+
+**Why this is filed rather than swept.** The F-374 task carried an explicit scope boundary —
+*do NOT widen this sweep* — because the over-broad version of it had already been thrown out
+once. Widening on my own authority would have re-made that mistake; the register is where a
+newly-recognised member of a class goes (`feedback_corrections_routed_only_via_register`).
+
+**Scope when this is worked:** the three shapes above ONLY, re-derived at the time. Do not
+re-open the bare-`value` class — 299 sites, overwhelmingly legitimate utility.
+
+---
+
 ## An ADC comparator example still states the input threshold in fixed volts, in the manual F-412 just repaired (2026-09-11) — F-424
 
 ### F-424 — IOSP §2.5's ADC comparator example quotes `~1.65V` as an input threshold without the supply-fraction caveat the same manual now carries everywhere else — `CONFIRMED`

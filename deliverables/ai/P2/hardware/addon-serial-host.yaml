@@ -161,7 +161,6 @@ applications:
     - "Configuration file loading"
 
 educational:
-  value: "high"
   complexity_level: "advanced"
   concepts_taught:
     - "USB host vs device concepts"

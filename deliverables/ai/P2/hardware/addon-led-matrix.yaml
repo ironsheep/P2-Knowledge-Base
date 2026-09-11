@@ -185,7 +185,6 @@ documentation:
   primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
 
 educational:
-  value: "very_high"
   complexity_level: "intermediate"
   concepts_taught:
     - "Charlieplexing (tri-state LED multiplexing)"

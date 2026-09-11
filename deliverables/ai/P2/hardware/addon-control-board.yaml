@@ -205,7 +205,6 @@ compatibility:
     edge_carriers: "Compatible with 2x6 headers"
 
 educational:
-  value: "high"
   complexity_level: "beginner_friendly"
   concepts_taught:
     - "Digital I/O control"

@@ -112,11 +112,9 @@ module_compatibility:
   excellent_pairing:
     - module: "P2-EC"
       efficiency: "Perfect - 100% pin utilization"
-      rating: "5_stars"
       use_case: "Complex prototyping and education"
     - module: "P2-EC32MB"
       efficiency: "Professional memory platform"
-      rating: "5_stars"
       use_case: "Advanced development with memory"
       
 use_cases:
@@ -253,8 +251,6 @@ availability:
   distributor_network: "Yes"
   target_market: "Educational and professional"
   
-quality_rating: "professional_platform"
-recommendation_score: 5
 production_readiness: "prototype_platform"
 size_class: "professional_platform"
 complexity_handling: "maximum"

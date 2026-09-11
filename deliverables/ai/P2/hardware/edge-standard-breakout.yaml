@@ -58,13 +58,11 @@ module_compatibility:
   optimal_pairing:
     - module: "P2-EC"
       efficiency: "Perfect - 100% pin utilization"
-      rating: "5_stars"
       use_case: "Full P2 development"
   
   functional_pairing:
     - module: "P2-EC32MB" 
       efficiency: "Oversized - only 40 pins used effectively"
-      rating: "3_stars"
       use_case: "When standard form factor required"
       
 use_cases:
@@ -166,9 +164,6 @@ availability:
   distributor_network: "Yes"
   bundle_options: "Often sold with Edge modules"
   
-quality_rating: "professional"
-recommendation_score: 5
-educational_value: "high"
 production_readiness: "prototype_platform"
 
 # Cross-references

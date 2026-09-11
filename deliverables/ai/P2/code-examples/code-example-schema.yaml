@@ -228,12 +228,6 @@ code_example_schema:
       range: [1, 10]
       description: "How clear and well-commented the example is"
       
-    educational_value:
-      type: "integer"
-      required: true
-      range: [1, 10]
-      description: "How valuable for learning P2 programming"
-      
     authority_level:
       type: "string"
       required: true
@@ -332,8 +326,7 @@ validation:
   quality_thresholds:
     minimum_completeness: 6
     minimum_clarity: 6
-    minimum_educational_value: 5
-    
+
   authority_requirements:
     official: "Must come from Parallax documentation"
     community_verified: "Must have peer review"

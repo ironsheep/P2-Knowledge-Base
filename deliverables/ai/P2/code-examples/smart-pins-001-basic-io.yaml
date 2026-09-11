@@ -80,7 +80,6 @@ cross_references:
 quality_metrics:
   completeness_score: 8
   clarity_score: 9
-  educational_value: 10
   authority_level: "official"
 
 extraction_metadata:

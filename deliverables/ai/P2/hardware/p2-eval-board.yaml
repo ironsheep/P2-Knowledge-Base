@@ -240,9 +240,6 @@ availability:
   distributor_network: "Yes"
   bundle_options: "Often bundled with add-on kit"
   
-quality_rating: "educational_excellent"
-recommendation_score: 5
-educational_value: "excellent"
 production_readiness: "not_applicable"
 
 # Cross-references

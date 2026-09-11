@@ -108,7 +108,6 @@ compatibility:
     embedded_hosts: "Any system with USB host capability"
 
 educational:
-  value: "very_high"
   complexity_level: "advanced"
   programming_requirements: "usb_protocol_stack"
   concepts_taught:

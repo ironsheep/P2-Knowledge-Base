@@ -524,9 +524,6 @@ availability:
 # =============================================================================
 # QUALITY RATINGS
 # =============================================================================
-quality_rating: "production"
-recommendation_score: 5
-educational_value: "high"
 production_readiness: "excellent"
 memory_class: "high_capacity"
 

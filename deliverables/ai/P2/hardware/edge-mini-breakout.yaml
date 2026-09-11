@@ -68,14 +68,12 @@ module_compatibility:
   optimal_pairing:
     - module: "P2-EC32MB"
       efficiency: "Perfect - 87% pin utilization (40/46 available)"
-      rating: "5_stars"
       use_case: "Compact memory-intensive projects"
       size_match: "Ideal - no wasted board space"
   
   functional_pairing:
     - module: "P2-EC" 
       efficiency: "Pin limited - 62% utilization (40/64 available)"
-      rating: "2_stars"
       use_case: "Simple projects with <40 pin requirement"
       limitation: "Wastes standard module capability"
       
@@ -199,9 +197,6 @@ availability:
   distributor_network: "Yes"
   bundle_recommendations: "Often bundled with 32MB module"
   
-quality_rating: "specialized_excellent"
-recommendation_score: 5
-educational_value: "good"
 production_readiness: "prototype_platform"
 size_class: "compact"
 

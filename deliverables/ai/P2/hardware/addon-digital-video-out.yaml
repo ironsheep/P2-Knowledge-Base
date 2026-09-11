@@ -188,7 +188,6 @@ compatibility:
     custom_protocols: "Best suited for custom video standards"
 
 educational:
-  value: "high"
   complexity_level: "advanced"
   concepts_taught:
     - "Differential signaling principles"

@@ -49,7 +49,6 @@ edge_module_carrier_compatibility:
   combinations:
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64029 (Standard Breakout)"
-      rating: "5_stars_perfect"
       module_free_pins: "P0-P55 (56 fully free; P56-P63 routed to peripherals)"
       carrier_header_pins: "all 64 at eight 2x6 accessory headers"
       use_case: "Full P2 development platform"
@@ -57,7 +56,6 @@ edge_module_carrier_compatibility:
 
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64019 (Mini Breakout)"
-      rating: "2_stars_limited"
       module_free_pins: "P0-P55 (56 fully free; P56-P63 routed to peripherals)"
       carrier_header_pins: "P0-P31 and P56-P63 (40) at four 2x6 accessory headers plus one programming header; P32-P55 reach no header but may be picked up with jumper wires on the bottom side of the PCB"
       use_case: "Simple projects only"
@@ -65,7 +63,6 @@ edge_module_carrier_compatibility:
 
     - module: "P2-EC (Standard Edge Module)"
       carrier: "64020 (Breadboard Carrier)"
-      rating: "5_stars_professional"
       module_free_pins: "P0-P55 (56 fully free; P56-P63 routed to peripherals)"
       carrier_header_pins: "all 64 at 0.1 inch pin sockets and eight 2x6 accessory headers"
       use_case: "Complex prototyping and education"
@@ -73,7 +70,6 @@ edge_module_carrier_compatibility:
 
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64029 (Standard Breakout)"
-      rating: "3_stars_oversized"
       module_free_pins: "P0-P39 (40 fully free; P40-P57 routed to the on-module PSRAM, P58-P63 to peripherals and boot)"
       carrier_header_pins: "all 64 at eight 2x6 accessory headers -- the PSRAM pins reach the headers but are dedicated"
       use_case: "Standard form factor with memory"
@@ -81,7 +77,6 @@ edge_module_carrier_compatibility:
 
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64019 (Mini Breakout)"
-      rating: "5_stars_perfect"
       module_free_pins: "P0-P39 (40 fully free; P40-P57 routed to the on-module PSRAM, P58-P63 to peripherals and boot)"
       carrier_header_pins: "P0-P31 and P56-P63 (40) at four 2x6 accessory headers plus one programming header. P40-P55 reach no header on this carrier; P56/P57 do, but are PSRAM CLK/CE."
       use_case: "Compact memory-intensive projects"
@@ -89,7 +84,6 @@ edge_module_carrier_compatibility:
 
     - module: "P2-EC32MB (32MB Edge Module)"
       carrier: "64020 (Breadboard Carrier)"
-      rating: "2_stars_overkill"
       module_free_pins: "P0-P39 (40 fully free; P40-P57 routed to the on-module PSRAM, P58-P63 to peripherals and boot)"
       carrier_header_pins: "all 64 at 0.1 inch pin sockets and eight 2x6 accessory headers -- the PSRAM pins reach the headers but are dedicated"
       use_case: "Educational memory platform"
