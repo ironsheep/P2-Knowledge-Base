@@ -97,7 +97,7 @@ its conclusion does not rest on the file this finding re-picks.
 
 ## A release gate could not reach a fixpoint: satisfying it re-broke it, because its own fix is a commit it reads (2026-09-10, manual-head gate-runner wiring) — F-420
 
-### F-420 — `sync-manual-examples.py` derives `Updated` from the file's git mtime, so committing its own fix re-breaks the gate — `CONFIRMED`
+### F-420 — `sync-manual-examples.py` derives `Updated` from the file's git mtime, so committing its own fix re-breaks the gate — `RESOLVED 2026-09-11 (c42acd95) — fix applied, both controls verified on real history`
 
 Found 2026-09-10 while wiring the manual-head gate runner. Not a content defect: a **gate that
 cannot reach a fixpoint**, which trains people to ignore it.
@@ -135,9 +135,33 @@ newest-first, strip each revision's header, and take the first commit whose body
 parent's. Prove it with a negative control — a body-only change must move the field, a header-only
 commit must not.
 
-**Interim state:** the 22 headers were re-synced to `Sep 2026` and committed, so the gate is green
-and stays green for the remainder of September 2026. It will go red again at the first release
-that crosses into October.
+**RESOLVED 2026-09-11, commit `c42acd95`** — the specified fix, applied as written: `Updated`
+now comes from the newest revision whose **body** differs from its predecessor's, so a header-only
+re-sync is invisible to it and the gate reaches a fixpoint. The October relapse the interim state
+predicted cannot occur.
+
+**The first control was worthless, and that is the part worth carrying forward.** A throwaway git
+repo was built in a scratch directory and "passed" a negative control there. It proved nothing:
+`git()` runs `git -C str(REPO)` with REPO derived from the script's own path, so every query went
+to *this* repo and the scratch commits were never read — the same shape as
+`backups-copy-breaks-path-derived-repo`. **A tool that pins its own repo root cannot be controlled
+from outside that repo.** The controls that count are real commits here:
+
+| file | history | result |
+|---|---|---|
+| `adc-single-pin-base.spin2` | Sep header-only commit over two body commits (Jun, Aug) | **Aug 2026** — header-only skipped, and the NEWER of the two body commits chosen, which is the positive half |
+| `cordic-sine-cosine.spin2` | Sep header-only over one body commit | **Jun 2026** |
+| `ch03-blink-led.spin2` | **five consecutive header-only commits** (Jun/Jul/Aug/Sep/Sep) over one body commit | **Jun 2026** — the old rule's churn made visible |
+
+**Consequence, and the reason this was worth doing properly rather than re-syncing again:** reading
+the body makes the **already-published** headers right instead of forcing a re-release. P2AN001 and
+P2AN002 had shipped hours earlier carrying Jun/Jul/Aug — when their code was actually last written —
+and the old rule wanted them rewritten to September purely because the header was added then.
+Re-syncing all eight adopted documents rewrote 23 files and left those two at **zero rewritten**;
+their public ZIPs are correct as shipped. It also cleared a standing RED nobody had filed:
+`p2-debug-window-manual`'s 34 examples read out-of-sync before the change and GREEN after, without
+a byte moving. `p2-xbyte-programming-guide` was the one released document whose corpus did change
+(one header line), so its published ZIP was repacked to match.
 
 ## The manuals were audited against the v1.18.0 delta at the FACT level, not the path level, and eight corrections were located that the path intersection could not see (2026-09-09, post-release manual sweep, applied 2026-09-10) — F-408…F-419
 
