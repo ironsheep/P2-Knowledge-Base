@@ -1,0 +1,28 @@
+# Render-overfull verdicts — P2 Streamer Programming Guide
+#
+# Read by audit-render-overfulls.py --verdicts. One "page: verdict" line each.
+# An overfull is a POINTER TO A PAGE, not a defect: the magnitude is the badness
+# of the line-break, not the size of what shows. Every line here is a page that
+# was RENDERED AND LOOKED AT, not inferred from the number.
+#
+# v1.1.1, 2026-09-11. Two sites at 26.64pt, both the END of a tabularray table
+# (`\end{tblr}`), which is where TeX reports a table's overfull.
+
+30: CLEAN — §6.2 RDFAST -> Pins/DACs, the 12-row 6-column mode table. Rendered and
+    inspected: every column inside the rule, the rightmost (DAC Bits) values well
+    clear of the right edge, no row running past the border. tabularray absorbed the
+    26.64pt within its declared width=\linewidth colspec, so nothing reaches the page.
+
+33: CLEAN — §7.3 RGB Mode Example. Named by the resolver for the §8.1 site because the
+    only phrase it could resolve UNAMBIGUOUSLY sits 70 source lines above the break;
+    the table's own header row appears on both p30 and p34, so the resolver correctly
+    refused to guess between them. Page inspected anyway: code block and TIP box both
+    well inside the margins.
+
+34: CLEAN — §8.1 Pin Capture Modes, the 12-row 6-column table that is the actual site
+    for the tex 1696 overfull. Rendered and inspected: six columns aligned, the Hub
+    Write column inside the rule, nothing spilling.
+
+# Independent corroboration: audit-pdf-margin-overflow.py measured ALL 91 pages and
+# reports ZERO spans crossing the right margin. Two instruments, same verdict, one of
+# them measuring the artifact rather than the log.

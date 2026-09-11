@@ -63,11 +63,11 @@ This tutorial follows in the footsteps of deSilva's legendary P1 Assembly Tutori
 *August 2026 - Community Review Edition* | [Changelog](DOCs/p2-pasm-desilva-style-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-pasm-desilva-style-src.zip)
 
 ### [P2 Streamer Programming Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Streamer-Programming-Guide.pdf)
-**Comprehensive Reference for Propeller 2 Streamer Hardware** · *Version 1.1.0*
+**Comprehensive Reference for Propeller 2 Streamer Hardware** · *Version 1.1.1*
 
 An introduction to the P2 streamer, the DMA-like engine that moves data between hub RAM, pins, and DACs, built to make a genuinely tricky part of the chip make sense. Covers every streamer mode (immediate, RDFAST/WRFAST, RGB video, ADC sampling, DDS/Goertzel), NCO timing and frequency calculation, DAC channel routing and pin control, and application patterns for video output, high-speed serial, and signal processing. Includes a complete mode encoding table and a clickable index.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2-streamer-programming-guide-changelog.md)
+*September 2026 - Community Review Edition* | [Changelog](DOCs/p2-streamer-programming-guide-changelog.md)
 
 ### [P2 Debug Window Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Debug-Window-Manual.pdf)
 **See What Your Program Is Doing: Nine Display Windows for the Propeller 2** · *Version 1.1.3*

@@ -1,5 +1,15 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.1.1 (2026-09-10)
+
+**The SETXFRQ word is a truncation with a conditional increment, and every printed value now carries it.**
+
+### Changed
+
+- **The SETXFRQ rule is stated as the Silicon Documentation states it** (§3.4, Appendix C): compute `$8000_0000 * pixel_rate / sysclk`, **truncate**, then **add 1 whenever that division leaves a remainder**. This is not rounding to nearest — a remainder well below half still increments
+- **Both worked examples show the rule operating**: the SVGA 40 MHz case divides exactly and takes no increment; the VGA 25.175 MHz case carries a remainder and increments to `$0CE3_BCD4`
+- **Appendix C's pixel-rate table reads per that rule at all eighteen entries**, and the caption names the three that divide exactly and take no increment — 25.000, 40.000 and 65.000 MHz, each at 320 MHz
+
 ## v1.1.0 (2026-08-22)
 
 **Getting the signal out of the chip** — the pin-side setup every DAC example depends on, the LUT window's eight loop sizes, and streamer behavior confirmed on P2 silicon.
