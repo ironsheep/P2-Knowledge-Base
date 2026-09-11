@@ -6179,7 +6179,7 @@ number**.
 
 ## The rights guard fails open, so an unadopted document emits a malformed rights string (2026-08-22) — F-319
 
-### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `CONFIRMED — carved out of v3.1.7 deliberately; see "Why not fixed here"`
+### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `FIX LANDED 2026-09-10 — POSITIVE control proven on the artifact; NEGATIVE control still owed`
 
 **How it surfaced.** The Assembly Language Reference v3.1.7 render (2026-08-22) came back with
 `Keywords: "; licensed under "` — the both-values-present branch, with both values empty.
@@ -6257,6 +6257,38 @@ Assembly can no longer provide. Render an *unadopted* document (the layout tortu
 natural candidate) and confirm the returned PDF carries **no** Keywords at all. A fix validated only
 against an adopted document proves nothing, because an adopted document never takes the guarded
 branch. (`a gate must read the artifact`; `prove with a negative control`.)
+
+---
+
+**FIX LANDED 2026-09-10 — commit `44c29ba8`, riding the P2AN001 v1.0.5 bundle.** The `\edef`
+normalisation proposed above, verbatim: the guard now tests `\edef`'d copies (`\DocRightsHolder`,
+`\DocRightsGrant`), which are not `\long`, so the comparison means what it says regardless of how
+the default was declared. The stale comment claiming an unconverted document is "unchanged" was
+replaced with the mechanism and this finding's evidence.
+
+**Why it landed here rather than waiting for its own change.** The carve-out reasoning above was
+sound in August and expired: the fixed `.sty` had to travel to the Forge's manual store with SOME
+bundle, and P2AN001 was the next one out. Holding a corrected shared file in the repo while the
+store keeps the broken one is the drift that produced this evening's other failure (the app-note
+template staged with P2AN002 while P2AN001 built first). The repo does not run ahead of the store.
+
+**POSITIVE control — PROVEN on the returned artifact, 2026-09-10 23:37.** P2AN001 v1.0.5 rendered
+with the changed foundation and came back with
+`Keywords: "Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"`,
+`audit-pdf-metadata.py` CLEAN, all seven declared fields round-tripped. So the risk named in the
+carve-out — *"landing it blind risks breaking rights emission for Streamer and the Single-Step
+Debugger, which are proven working today"* — is **retired**: the adopted branch is unchanged, and
+that is now measured on a real PDF rather than argued. The remaining seven documents in this
+release wave are all adopted and will each re-confirm it.
+
+**NEGATIVE control — STILL OWED. This finding is not closed.** An adopted document never enters
+the guarded branch, so P2AN001 proves nothing about the half that was broken. The requirement
+above stands unchanged: render an **unadopted** document and confirm the returned PDF carries
+**no** Keywords at all. Candidates, verified 2026-09-10 as declaring no `copyright`/`license` in
+their `request.json`: `p2-layout-torture-test` (the named candidate, and the cheapest — an
+instrument, no release attached), `p2-architect-guide`, `p2-debug-window-manual`,
+`p2-xbyte-programming-guide`, and app notes P2AN003 / P2AN005 / P2AN006 / P2AN007. Whichever
+renders first settles it; until one does, the fix is proven safe but not proven effective.
 
 ## Appendix G's mode tables misdecode the naming convention the same appendix documents (2026-08-22) — F-318
 

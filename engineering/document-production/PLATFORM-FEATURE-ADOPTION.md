@@ -50,7 +50,8 @@ each feature's *mechanism* stays in its own document, linked below.
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
-| P2AN001 · P2AN002 · P2AN004 | app-note | 🔧 ⁴ ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | ⏳ ⁵ |
+| **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
+| P2AN002 · P2AN004 | app-note | 🔧 ⁴ ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁸ |
 | P2AN003 · P2AN005 · P2AN006 · P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
@@ -297,6 +298,95 @@ on the cover by convention, as they do on every converted document). Costs no te
 Assembly's `p2kb-pasm2-reference.latex` has bound `\DocVersion`/`\DocDate` since August and is
 already in the manual store. Flips back to ✅ when `release-manual` Phase 3e reads
 `September 2026` / `Version 3.1.8` off the returned v3.1.8 PDF.
+
+¹⁷ **P2AN001 — all three PROVEN on the returned v1.0.5 PDF, 2026-09-10 23:37, and split out of the
+shared app-note row because the three documents now diverge.** P2AN002 and P2AN004 are staged but
+unrendered, and a row may not carry a ✅ its artifact has not earned.
+
+**Metadata single-source + rights.** `audit-pdf-metadata.py` CLEAN, all seven declared fields
+round-tripped: cover page 1 reads `September 2026` / `Version 1.0.5`, the info dictionary carries
+Title, Subject and Author where v1.0.4 carried **none of the three**, and `Keywords` reads
+*"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*
+where v1.0.4 carried no machine-readable rights at all.
+
+**The first render is why this footnote exists.** At 23:02 the same document came back with the
+cover reading `Version` and nothing after it, the date gone, and all four identity fields EMPTY —
+because the Forge still held the OLD shared `p2kb-appnote-reference.latex`. The wave staged that
+template ONCE, with P2AN002, and this note was built third. Footnote 9's rule proved itself again,
+with a new edge: **adoption takes two parts, and the second part must physically reach the manual
+store before any document that depends on it renders.** Staging a shared file with one manual
+assumes the build order is followed; it is not a guarantee. Written up as Trap 3 in the
+`prepare-manual` project overlay.
+
+**Cross-ref filter — adopted, audited, and a correct NO-OP here; the negative half is the whole
+result.** `p2kb-platform-crossref` sits between `figures` and `tables` in `request.json`. Measured
+on the artifact: **4 link annotations, all URI** (two to the Parallax forum thread, two to the CC
+licence) and **zero internal GOTO** — identical to the v1.0.4 render. All **4** prose `Chapter N`
+occurrences name the *I/O & Smart Pins User Guide*, an external document, and the filter correctly
+left **every one** plain. The note has no numbered chapters of its own — it is organised by Recipe
+— so there is nothing here for the filter to link, and a link would have been a defect. Adoption
+verified as behaving correctly, not as producing a number.
+
+**Generated example headers stay ⏳, and the blocker is footnote 5's prerequisite: fence captions.**
+This release did NOT take them, and that is a miss against footnote 5's own directive (*"at each app
+note's next adjustment or update, add the captions"*) — v1.0.5 was such an update. Recorded rather
+than glossed: the captions are reader-visible (the code-coloring filter emits them into the rendered
+listing, `p2kb-platform-code-coloring.lua:510`), so they cannot be added to an already-rendered PDF
+and would cost this note a second render cycle. 31 of the 32 app-note corpus files are already
+byte-identical to a printed fence, so the work is annotation only. **Decision owed:** take captions
+on P2AN001/002/004 now at the cost of re-rendering, or at the app notes' next content touch.
+
+¹⁸ **App-note fence captions + generated example headers — the prerequisite taken 2026-09-10, on
+Stephen's call: *"we can't miss things, we have the roster so we don't."*** Footnote 5 recorded
+this as blocked and said to take it *"at each app note's next adjustment or update"*; the v1.18.0
+wave was such an update for P2AN001/002/004, so it was taken here rather than carried.
+
+**Captions.** 12 fences across the three notes now carry `caption="<file>.spin2"`. Each was matched
+to its corpus file by **byte-identity of the fence body**, never by name or position — every one of
+the 12 corpus files matched exactly one fence, with zero orphans on either side. Result:
+`verify-example-corpus-identity.py` **GREEN** on all three (3/3, 6/6, 3/3, zero mismatched, zero
+orphan, zero duplicate captions), and the prepare gate runner moved from *8 passed · 1 known-gap*
+to **9 passed · 0 known-gap**. The KNOWN gap that printed on every app-note prepare is closed.
+
+**Generated headers.** Adopted via `sync-manual-examples.py --adopt` against a new
+`examples-library/PURPOSES.md` per note (the tool refuses to invent a Purpose). Headers carry
+`Version.... v1.0.5 (2026-09-10)` — derived from the CHANGELOG, which is a *second* identity source
+beside `request.json`; the two were checked and agree across all eight wave documents. ZIPs
+repacked; `verify-published-zip-currency.py` **GREEN** 4/4, 7/7, 4/4, with `PURPOSES.md` correctly
+excluded from the shipped archive.
+
+**Two defects in the generated header itself, found by reading the first one produced and fixed in
+`sync-manual-examples.py`:**
+1. `Manual..... P2AN001` — the slug, not the title. All seven app-note changelogs use a **fourth**
+   H1 shape, `# P2AN00N Changelog: <Title>`, matching neither pattern, so `doc_meta` fell back to
+   the directory name. This is the *same failure* the loop was widened for in August (when Getting
+   Started, Debug Window and IOSP silently fell back to their slugs) — the widening just did not
+   reach far enough. An optional prefix before the keyword closes it. Verified across **all 17**
+   documents: every title now derives correctly and none of the previously-working shapes moved.
+2. `Appears in.  -- The Base Build` — a leading separator, because `where` was built as
+   `chapter + " -- " + heading` and app notes have no `# Chapter N` headings at all. Now joins only
+   the parts that exist.
+
+**P2AN001 ✅ — PROVEN ON THE RETURNED PDF, 2026-09-11 00:00 (render 3).** The header half was
+already proven off the repacked ZIP; the caption half is now proven on the page. All three captions
+read in the artifact — `adc-single-pin-base.spin2` p7, `adc-three-pin.spin2` p11,
+`adc-filter-cascade.spin2` p14 — and pages 7 and 14 were rendered and inspected: a small grey
+right-aligned filename closing each listing inside its Spin2Block, code alignment and margins
+unchanged. Still **20pp**, gates 8 PASS, cover and all seven metadata fields unmoved.
+
+**The word-count delta was accounted rather than accepted**, and it is the reason to record this
+at all: 6805 → 6803 looked like a *loss* while three captions had been added. A token-multiset
+comparison against render 2 resolved it exactly — **+3 gained** (the captions), **−5 lost**, and
+those five are one complete `continued from previous page` banner that a re-flowed listing no
+longer needs. **Zero prose or code tokens moved in either direction.** A page-count check would
+have read 20 = 20 and said nothing; the multiset is what proves no content left.
+
+**P2AN002 · P2AN004 stay 🔧** — wired identically and staged, but neither has rendered. Each flips
+on its own returned PDF.
+
+**P2AN003 / P2AN005 / P2AN006 / P2AN007 keep ⏳ ⁵ deliberately** — they are not in this wave, and
+captioning them now would put their opus-master ahead of their published PDFs. They take it at
+their own next update, exactly as footnote 5 directs.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`

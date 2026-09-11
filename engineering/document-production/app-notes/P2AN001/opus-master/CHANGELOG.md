@@ -10,6 +10,7 @@
 - **The error floor leads with the measured figure**: hardware-verified on real P2 silicon, the single-pin ratiometric absolute error is ≤9 mV, reproducible, appearing as a small positive offset at low voltages and near zero at mid and high scale
 - **The 15 mV pin-to-pin figure is marked as a designer report the bench has not reproduced**, with the instruction not to quote it as a specification
 - **The pin's input resistance is stated as unpublished** — no Parallax source gives a figure — so Recipe 4's divider constants are a starting point for calibration rather than values to compute from
+- **Each printed program carries its filename from `P2AN001-src.zip`**, and each file in that ZIP names the note and the version it belongs to — so a listing on the page and the file you downloaded identify each other
 
 ## v1.0.4 (2026-08-16)
 

@@ -109,11 +109,11 @@ A complete working guide to the Propeller 2's built-in single-step debugger — 
 Worked, task-specific companions to the reference manuals. Each pairs a focused technique with compile-clean, runnable code.
 
 #### [Measure an Absolute Voltage in Microvolts on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN001.pdf)
-**Application Note P2AN001 · Single-Pin Instrumentation ADC** · *Version 1.0.4*
+**Application Note P2AN001 · Single-Pin Instrumentation ADC** · *Version 1.0.5*
 
 Read an absolute voltage in microvolts on a single P2 pin using only the built-in smart-pin sigma-delta ADC, no external converter. It measures the chip's own internal references alongside the pin and takes a ratio, so supply and temperature drift divide out and the reading is absolute. One clean base measurement comes first, then a small catalog of techniques to choose among: three pins for lower noise, a filter cascade that hands you every rate at once, a series resistor to read above 3.3 V, and mains-cycle averaging to erase 50/60 Hz hum, plus a reference eight-channel design. Every worked program compiles clean and runs on a bare P2 board with a single jumper wire.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2an001-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN001-src.zip)
+*September 2026 - Community Review Edition* | [Changelog](DOCs/p2an001-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN001-src.zip)
 
 #### [CORDIC for Real Work](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002.pdf)
 **Application Note P2AN002 · Hardware Math on the P2** · *Version 1.0.3*
