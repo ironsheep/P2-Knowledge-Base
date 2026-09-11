@@ -43,7 +43,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ |
 | I/O & Smart Pins | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹ ¹⁵ | 🔧 ¹¹ |
 | **Assembly Reference** | manual | 🔧 ⁹ ¹⁶ | **✅** ⁹ | **✅** ⁹ | — |
-| DeSilva Tutorial | manual | 🔧 ² ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | **✅** ¹⁰ |
+| **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
@@ -466,6 +466,28 @@ here.**
 `Version \DocVersion — …` set as *"1.0.4— …"*, because a TeX control sequence eats the space that
 terminates it. See the `macro-eats-space` gate added to `audit-tex-artifacts.py` the same day; every
 document still to convert will meet that hazard at the same line.
+
+²² **DeSilva Tutorial — all three PROVEN on the returned v3.0.7 PDF, 2026-09-11 03:44.**
+Footnote 2's blocker (its template declared no `\title`/`\author`, and cover vs `request.json`
+disagreed on both title and subtitle) was resolved in the v1.18.0 wave, the cover winning; the
+artifact now confirms it.
+
+**Metadata single-source + rights.** `audit-pdf-metadata.py` CLEAN, all seven declared fields
+round-tripped: Title *"P2 Assembly Programming"*, Subject *"A Human-Centered Approach to Parallel
+Processing"* — both matching the cover, which is what footnote 2 required — and Keywords carrying
+the **2025-2026 year RANGE** sourced from this manual's own licence page, not the 2026 the rest of
+the set uses.
+
+**Cross-ref filter — measured.** The generated `.tex` carries **28 `\hyperlink`** calls, every one
+to a real chapter or appendix slug, and the artifact went **469 → 494 link annotations**. Recorded
+honestly: there is a consistent offset of 3 between `.tex` calls and PDF annotations, present in the
+previous render too, so it is structural rather than introduced here. I did not run it to ground, so
+this is a measurement, not a one-to-one accounting.
+
+**Three renders, and the two extra ones were for defects v3.0.6 had already shipped** — see the
+roster PUBLISH line. Both are now gated: the margin overflow taught that a chain of long atoms, not
+any single one, is what forces an overfull; and `LUT[S]` printing as `LUTS` produced the
+`implicit-reference-link` check in `audit-tex-artifacts.py`.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`
