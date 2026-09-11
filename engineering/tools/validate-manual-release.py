@@ -228,6 +228,19 @@ def build_gates(slug: str, phase: str, pdf: str | None):
                   ["--critical-only"], "advisory",
                   "ingestion rows whose ✅ has no artifact behind it"))
 
+        # ADVISORY for the same reason, and it belongs at a RELEASE specifically:
+        # this is the moment someone is thinking about publishing. KB v1.18.1 was
+        # tagged 2026-09-10 and sat local-only for a day while manual releases ran
+        # on top of it -- p2kb-mcp kept serving v1.18.0, so every agent read the
+        # superseded CORDIC formats. `release-yamls` was right to leave the push to
+        # Stephen (irreversible, sprint stop 2) and wrong to END there: the release's
+        # unfinished half became a line in a resume note, which is the F-301 shape.
+        # Advisory, never blocking -- an unpushed KB tag is not a reason to hold a
+        # manual, but it must never again be something only a note remembers.
+        G.append(("unpushed-releases", f"{V}/audit-unpushed-releases.py",
+                  [], "advisory",
+                  "release tags that exist locally but not on the remote"))
+
     # --head manual on purpose: a YAML- or ingestion-head gate left unwired must
     # not block a manual release, or the meta-gate becomes the thing everyone
     # routes around -- which is how gates die in the first place.
