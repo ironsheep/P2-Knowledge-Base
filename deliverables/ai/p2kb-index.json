@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-10T22:07:06.963003",
+    "generated": "2026-09-11T23:37:29.810213",
     "total_entries": 1133,
     "total_categories": 59,
     "total_aliases": 2950,
@@ -9771,8 +9771,8 @@
   "files": {
     "p2kbAppNoteP2an001SinglePinInstrumentationAdc": {
       "path": "deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml",
-      "mtime": 1788981443,
-      "sha256": "4844d33f63fad4bbf5ab7bcd214b8d0f75815f468e54be8c22b0a7d4430fec74"
+      "mtime": 1789166663,
+      "sha256": "c51b4ce6e2b19e080d6cac75d8e2811620074f4b2587afe14fe40fda42c8ca57"
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
@@ -9786,8 +9786,8 @@
     },
     "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement": {
       "path": "deliverables/ai/P2/application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml",
-      "mtime": 1787781755,
-      "sha256": "c1f8db3c94b955fdf0edfe072855dade8956e9dc53e5eaaac726364fe8dfcbc7"
+      "mtime": 1789166663,
+      "sha256": "4b7d17b88094fbec59551219ca56c46727e03f4888cabbe605a85cd657e1283b"
     },
     "p2kbAppNoteP2an005CooperativeMultitaskingTasks": {
       "path": "deliverables/ai/P2/application-notes/p2an005-cooperative-multitasking-tasks.yaml",
@@ -10281,8 +10281,8 @@
     },
     "p2kbExampleCodeExampleSchema": {
       "path": "deliverables/ai/P2/code-examples/code-example-schema.yaml",
-      "mtime": 1788646757,
-      "sha256": "5cdc796b83931a6692371fe3c8d3fa7e881d57231f3c98f895f4046753d0bec5"
+      "mtime": 1789166348,
+      "sha256": "754431217a13206b9a254def778f9d91e22fb1092182907b2de00b59b05f2b4f"
     },
     "p2kbExampleFlashLoaderCaseStudy": {
       "path": "deliverables/ai/P2/code-examples/flash-loader-case-study.yaml",
@@ -10291,13 +10291,13 @@
     },
     "p2kbExampleSmartPins001BasicIo": {
       "path": "deliverables/ai/P2/code-examples/smart-pins-001-basic-io.yaml",
-      "mtime": 1764449566,
-      "sha256": "0d90c516e46a56243379ccb09146f559d1029d09a37b38e0c4c0f75620a34f58"
+      "mtime": 1789166348,
+      "sha256": "4d860d1922cc7871fc642ca13ebafce3484b11badad9f77e1cbd0463233d361d"
     },
     "p2kbExampleSmartPins002ButtonReading": {
       "path": "deliverables/ai/P2/code-examples/smart-pins-002-button-reading.yaml",
-      "mtime": 1787645736,
-      "sha256": "5fefae3aee8a24b9cace919a67060c31b641e0b31feddcb1304f1620ef2094f2"
+      "mtime": 1789166348,
+      "sha256": "d473a24c062c3b9e28be884edf52557f8188fc9a7cfcdcc2ba2ad2fc28fe365e"
     },
     "p2kbCommunity2811": {
       "path": "deliverables/ai/P2/community/obex/objects/2811.yaml",
@@ -11181,8 +11181,8 @@
     },
     "p2kbHwAddonAvBreakoutAddonAvBreakout": {
       "path": "deliverables/ai/P2/hardware/addon-av-breakout.yaml",
-      "mtime": 1787695381,
-      "sha256": "41c2f96980d8c585bb98a642e1094db955738ea57ba5025cd3cad56272d74742"
+      "mtime": 1789166348,
+      "sha256": "023b545fbce283c2fe5d1b67c118dc0b0eb51aeb1f04d8fb973d17382c15840c"
     },
     "p2kbHwAddonClickAdapterAddonClickAdapter": {
       "path": "deliverables/ai/P2/hardware/addon-click-adapter.yaml",
@@ -11191,18 +11191,18 @@
     },
     "p2kbHwAddonControlBoardAddonControlBoard": {
       "path": "deliverables/ai/P2/hardware/addon-control-board.yaml",
-      "mtime": 1787695381,
-      "sha256": "2da8d14802d85ff3bbe6e7a86e4cd52a37e2c934c55833a0ff6c8239eaf8124b"
+      "mtime": 1789166348,
+      "sha256": "8971a1523c50f66d0889a990aa3f7e8acd912534009622c05c5e895a2d61f911"
     },
     "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut": {
       "path": "deliverables/ai/P2/hardware/addon-digital-video-out.yaml",
-      "mtime": 1787695381,
-      "sha256": "8072a3c4253407ab41ce0833c8d26f9021f83986d362f482330966911951f474"
+      "mtime": 1789166348,
+      "sha256": "f7809e0a386cdc36fa510be61400587be1a7d21fdd5d1f8a27a846b7370e73b4"
     },
     "p2kbHwAddonGoertzelTouchAddonGoertzelTouch": {
       "path": "deliverables/ai/P2/hardware/addon-goertzel-touch.yaml",
-      "mtime": 1787686929,
-      "sha256": "730e255c773df110fb9d10bf2bbb22dd870e64a2b8dbd7ff8fabc47f7a6a3647"
+      "mtime": 1789166348,
+      "sha256": "73d95a4f179caffc20a8a26ef7b7daec641e18404a0ebcacbc168e7deb7d30da"
     },
     "p2kbHwAddonHdAudioAddonHdAudio": {
       "path": "deliverables/ai/P2/hardware/addon-hd-audio.yaml",
@@ -11216,8 +11216,8 @@
     },
     "p2kbHwAddonLedMatrixAddonLedMatrix": {
       "path": "deliverables/ai/P2/hardware/addon-led-matrix.yaml",
-      "mtime": 1787695381,
-      "sha256": "8c8f3523de97aa540f8680194537842693e9831c860c19bec78647be6d92944e"
+      "mtime": 1789166348,
+      "sha256": "da28b31ea8096d35842629fa46d6ee90d087f9cb42db2c5dc83dbae704d09b3b"
     },
     "p2kbHwAddonMicrosdAddonMicrosd": {
       "path": "deliverables/ai/P2/hardware/addon-microsd.yaml",
@@ -11226,8 +11226,8 @@
     },
     "p2kbHwAddonMiniPrototypingAddonMiniPrototyping": {
       "path": "deliverables/ai/P2/hardware/addon-mini-prototyping.yaml",
-      "mtime": 1787695381,
-      "sha256": "a2782e128639a094dc2504b4a10413abc892a0ac0d52abc0f750879ad19ddf3e"
+      "mtime": 1789166348,
+      "sha256": "5af9ff21cde6a7d22a7b6c3bf7adeb8270080f6a6e58b85773c89733ddb9f537"
     },
     "p2kbHwAddonMotorDriverAddonMotorDriver": {
       "path": "deliverables/ai/P2/hardware/addon-motor-driver.yaml",
@@ -11241,13 +11241,13 @@
     },
     "p2kbHwAddonSerialDeviceAddonSerialDevice": {
       "path": "deliverables/ai/P2/hardware/addon-serial-device.yaml",
-      "mtime": 1787686929,
-      "sha256": "e04a76446cbbb75babe4b10290c4a706b0824f6c4af826a9e92e10dbaca6626e"
+      "mtime": 1789166348,
+      "sha256": "ca05caeb1acdc39aee592e2b0cf62f77a96ce5f4eebbdc70ff57a40ff74fd6cd"
     },
     "p2kbHwAddonSerialHostAddonSerialHost": {
       "path": "deliverables/ai/P2/hardware/addon-serial-host.yaml",
-      "mtime": 1787783019,
-      "sha256": "45a471e4c595e0288f18cdb73857f5ba04c3fcc6515d0053331bd8532d10c2e1"
+      "mtime": 1789166348,
+      "sha256": "e31963fa6de5a9fb7d856056a16cbf226091673c5959b0b3780d28154c9a06cb"
     },
     "p2kbHwAddonWxAdapterAddonWxAdapter": {
       "path": "deliverables/ai/P2/hardware/addon-wx-adapter.yaml",
@@ -11261,33 +11261,33 @@
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
-      "mtime": 1788115079,
-      "sha256": "d6fe50d927af28478d240f541fb27344a8ff7f93da604629ec487d44bcd16e86"
+      "mtime": 1789167411,
+      "sha256": "905f6772a50ab4d327fabf356e6ffd0dc884fa631798e8ecdaa891a3379d36b8"
     },
     "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier": {
       "path": "deliverables/ai/P2/hardware/edge-breadboard-carrier.yaml",
-      "mtime": 1788638815,
-      "sha256": "e98be970b7a12f3bc09867720b0dda478c0f241a9d9a0b9054da175969783416"
+      "mtime": 1789166348,
+      "sha256": "98da189866071301fe47681645a8082f78b04d67a328209939109e792544ae9a"
     },
     "p2kbHwEdgeMiniBreakoutEdgeMiniBreakout": {
       "path": "deliverables/ai/P2/hardware/edge-mini-breakout.yaml",
-      "mtime": 1787686929,
-      "sha256": "1398d08900483f0215c0fc03cee9ff53eb6ebbd280f39d7090b02235c6917f77"
+      "mtime": 1789166348,
+      "sha256": "b9dd16bbe17bb81c4c61606bd81176634f7d4a526e8b8715de07a5abb376a02d"
     },
     "p2kbHwEdgeStandardBreakoutEdgeStandardBreakout": {
       "path": "deliverables/ai/P2/hardware/edge-standard-breakout.yaml",
-      "mtime": 1787686929,
-      "sha256": "24463fcc717dc47a56f12deaa81e8bc10553430e250c6df41e38c736279d5462"
+      "mtime": 1789166348,
+      "sha256": "0374f32b0a897b1675646efc0b8c20d3a2dcc4c8a5d46c39b280f8f5f77b5da3"
     },
     "p2kbHwEdgeStandardModuleEdgeStandardModule": {
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
-      "mtime": 1788115079,
-      "sha256": "73541afe4b05e384f06af8ade5970752ef20734cb93add581c1e789acb3e17e9"
+      "mtime": 1789167411,
+      "sha256": "638876965e2000d33c15ae4c7dde48a41903613bf2fcc4df7c4d2c46a384d182"
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
-      "mtime": 1788114448,
-      "sha256": "c7f8686134cb4e4726e089f044531b45f5054959c56de2b29987af1f591ed354"
+      "mtime": 1789167411,
+      "sha256": "8f7c5125cb51a46b8bec16ec7463efd43bb9ed2899e4bbeb0830dfde43cd36fc"
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
@@ -11301,8 +11301,8 @@
     },
     "p2kbHwP2EvalBoardP2EvalBoard": {
       "path": "deliverables/ai/P2/hardware/p2-eval-board.yaml",
-      "mtime": 1787686929,
-      "sha256": "e2a689af25b1e031e60f594c485b37ecb61cdfa64e9ba56956eb92765cdfb411"
+      "mtime": 1789167411,
+      "sha256": "14163b1aa10e1aaad00137945add03224626976403e7325ed3f4c91aa92b4991"
     },
     "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison": {
       "path": "deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml",
