@@ -116,11 +116,11 @@ Read an absolute voltage in microvolts on a single P2 pin using only the built-i
 *September 2026 - Community Review Edition* | [Changelog](DOCs/p2an001-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN001-src.zip)
 
 #### [CORDIC for Real Work](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002.pdf)
-**Application Note P2AN002 · Hardware Math on the P2** · *Version 1.0.3*
+**Application Note P2AN002 · Hardware Math on the P2** · *Version 1.0.4*
 
 Put the Propeller 2's shared hardware CORDIC solver to real work, the engine that turns a rotation, a sine, a square root, or a full 64-bit multiply into a single queued operation with a fixed latency. Six runnable recipes to choose among: distance and heading, point rotation, circle layout, sine and cosine waves, 64-bit-safe fixed-point scaling, and pipelining to retire one result every eight clocks, plus a field-oriented motor-control reference design. Because the CORDIC computes exact, deterministic math, every recipe checks against a closed-form answer you can derive by hand, with no bench instruments.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2an002-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002-src.zip)
+*September 2026 - Community Review Edition* | [Changelog](DOCs/p2an002-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002-src.zip)
 
 #### [Generate Analog Waveforms and Audio on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003.pdf)
 **Application Note P2AN003 · DAC & Analog Signal Generation** · *Version 1.0.2*

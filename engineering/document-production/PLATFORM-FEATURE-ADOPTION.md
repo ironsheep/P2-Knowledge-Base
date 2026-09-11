@@ -51,7 +51,8 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
-| P2AN002 · P2AN004 | app-note | 🔧 ⁴ ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁸ |
+| **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ |
+| P2AN004 | app-note | 🔧 ⁴ ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁸ |
 | P2AN003 · P2AN005 · P2AN006 · P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
@@ -387,6 +388,30 @@ on its own returned PDF.
 **P2AN003 / P2AN005 / P2AN006 / P2AN007 keep ⏳ ⁵ deliberately** — they are not in this wave, and
 captioning them now would put their opus-master ahead of their published PDFs. They take it at
 their own next update, exactly as footnote 5 directs.
+
+¹⁹ **P2AN002 — all four PROVEN on the returned v1.0.4 PDF, 2026-09-11 00:01**, and split out for the
+same reason P2AN001 was: the row's documents diverged. P2AN004 is staged and unrendered.
+
+Unlike P2AN001, this note needed only ONE render. It carried the fixed app-note template, the
+corrected `foundation.sty` and the fence captions in a single bundle, because P2AN001 paid for all
+three first. That is what the wave order was supposed to buy and, on the second document, did.
+
+**Metadata single-source + rights.** `audit-pdf-metadata.py` CLEAN, all seven declared fields
+round-tripped: cover `September 2026` / `Version 1.0.4`, Title *"CORDIC for Real Work"*, Subject
+*"Application Note P2AN002 - Hardware Math on the P2"*, Author, and Keywords carrying the full
+rights string. v1.0.3 carried none of the four.
+
+**Cross-ref filter - wired, and correctly silent.** Same result as P2AN001 and for the same
+structural reason: the note is organised by Recipe, not by numbered chapter, so it holds no
+self-reference for the filter to link. Verified rather than assumed.
+
+**Captions + generated headers.** All six captions read on the artifact - pages 5, 5, 6, 7, 8, 10 -
+and page 5 was rendered and inspected: two listings, each closing with its filename in small grey
+right-aligned monospace inside its Spin2Block. `verify-example-corpus-identity.py` 6/6 GREEN,
+`verify-published-zip-currency.py` 7/7 GREEN, headers reading `v1.0.4 (2026-09-10)`.
+
+**Max overfull 0.62pt**, three orders of magnitude below the 20pt open-the-page threshold, and the
+same box on both xelatex passes rather than two distinct ones.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`

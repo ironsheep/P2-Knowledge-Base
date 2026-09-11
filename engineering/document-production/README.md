@@ -32,7 +32,7 @@ prose), with all per-publication detail in the roster.*
 | Architect's Guide | manual | 1.0.3 | 52 | ✅ |
 | Interpreters & Emulators (XBYTE) | manual | 1.1.0 | 114 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.5 | 20 | ✅ |
-| P2AN002 — CORDIC for Real Work | app-note | 1.0.3 | 15 | ✅ |
+| P2AN002 — CORDIC for Real Work | app-note | 1.0.4 | 15 | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.2 | 19 | ✅ |
 | P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.2 | 15 | ✅ |
 | P2AN005 — Cooperative Multitasking / TASK | app-note | 1.0.2 | 12 | ✅ |
