@@ -41,7 +41,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers |
 |---|---|:--:|:--:|:--:|:--:|
 | **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ |
-| I/O & Smart Pins | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹ ¹⁵ | 🔧 ¹¹ |
+| **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ |
 | **Assembly Reference** | manual | 🔧 ⁹ ¹⁶ | **✅** ⁹ | **✅** ⁹ | — |
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
@@ -488,6 +488,36 @@ this is a measurement, not a one-to-one accounting.
 roster PUBLISH line. Both are now gated: the margin overflow taught that a chain of long atoms, not
 any single one, is what forces an overfull; and `LUT[S]` printing as `LUTS` produced the
 `implicit-reference-link` check in `audit-tex-artifacts.py`.
+
+²³ **I/O & Smart Pins — all four PROVEN on the returned v1.0.10 PDF, 2026-09-11 04:22.** This
+also closes footnote 1, which had left the cross-ref column marked "wired but no visual audit
+recorded — close it at its next release." Closed here, on the artifact.
+
+**Metadata single-source + rights.** All seven declared fields round-tripped — and this document
+is why `norm()` in `audit-pdf-metadata.py` now strips LaTeX escapes. Its first render shipped
+`Title: "P2 I/O  Smart Pins User Guide"`: `request.json` reaches
+`\renewcommand{\DocTitle}{$title$}` **verbatim**, so the bare `&` was an alignment tab and hyperref
+swallowed it. The cover was always right; only the machine-readable field was mangled, which is
+the F-300 class exactly. Escaping it in `request.json` is what fixes the PDF, and the gate had to
+learn to compare the title rather than the escaping or the fix would have traded one false verdict
+for another. **XBYTE will meet this** — "P2 Interpreters & Emulators Guide" — when it converts.
+
+**Generated example headers** ✅, corpus identity 15/15 and published-ZIP currency 16/16 GREEN.
+
+**This release is where F-423 was fixed and verified**, which is the part worth carrying forward.
+`p2kb-platform-tables.lua` reserved a CONSTANT 0.93 of `\linewidth` for column bodies while
+tabularray's colsep scales with the column count — an error of a computable size, 27.2pt at six
+columns and 37.2pt at seven, reproduced to within half a point on three sites across two
+documents. Appendix D's 7-column *All Output Modes at a Glance* was the one place it SHOWED,
+crossing the right margin on four cells by 20.3-24.1pt; v1.0.9 measures the same four identically,
+so it had been shipping. **Measured on this artifact: that page's maximum right edge went from
+564.1pt to 540.2pt against a 540.0pt text block** — a 0.2pt justification rounding where there had
+been 24.1pt of overhang. The table also reads better: *Clock generation*, *Voltage reference* and
+*Audio, precision* no longer wrap.
+
+**Every other document's tables change at their next render**, not before. Published PDFs are
+untouched as published. Expect some tables that fit at `\small` under the old 0.93 to drop a tier,
+because they genuinely did not fit.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`

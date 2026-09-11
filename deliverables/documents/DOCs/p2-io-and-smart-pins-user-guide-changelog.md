@@ -1,5 +1,19 @@
 # P2 I/O & Smart Pins User Guide: Change Log
 
+## v1.0.10 (2026-09-10)
+
+**An input threshold is a fraction of the supply, and a pull-up is a driven pin.**
+
+- **Input logic threshold (Chapter 12 §12.1)**: the datasheet states it against the I/O supply — `Vxxyy * 0.3` minimum, `* 0.5` typical, `* 0.7` maximum — so at 3.3V the band spans 0.99V to 2.31V and shifts with `Vxxyy`; 1.65V is the typical value, not the switching point
+- **Level comparator (Chapter 12)**: the eight bits are a DAC level, so the threshold is a fraction of `Vxxyy`, and the voltage table names the 3.3V supply its rows assume
+- **TTL crossing (Chapter 12)**: level 108 expresses 1.4V against a nominal 3.3V supply, and is recomputed for any other `Vxxyy`
+- **Drive strength (Chapter 2, Appendix B)**: the resistive rungs are drive strengths rather than switchable resistors — each acts only while `DIR = 1`, and the pull-up rungs need `OUT = 1` to select the high side
+- **Pull-up examples (Chapter 2, Appendix B)**: each carries the `PINHIGH`/`DRVH` step that makes the pull live
+- **Weak-high / strong-low (Chapter 6)**: `P_HIGH_15K | P_LOW_FAST` is named as the open-drain substitute it is, since its high side drives through 15kΩ rather than floating; a genuine multi-master bus wants `P_HIGH_FLOAT` and an external pull-up
+- **Clock tiers (Chapter 7 §7.5)**: the datasheet's 180 MHz typical and 320 MHz maximum, with 350 MHz attributed to the Silicon Documentation as the VCO/1 overclock ceiling
+- **Duty-cycle rows name two measurements, not one expression** (Chapter 15, Appendix D): `P_PERIODS_HIGHS` and `P_PERIODS_TICKS` are mutually exclusive `%SSSSS` mode values (`%10100` and `%10011`), so the tables ask for both measurements on two pins rather than joining the constants with an operator
+- **Smart-pin state (Chapter 3 §3.2)**: each smart pin holds 126 bits of state separate from its `WRPIN` word, and `WRPIN` multiplexes those bits onto the subcircuit the mode selects — which is why configuration happens with `DIR` low
+
 ## v1.0.9 (2026-08-18)
 
 **Bus power is the board's job, not the P2's — and the oversampling rule now names what it depends on.**
