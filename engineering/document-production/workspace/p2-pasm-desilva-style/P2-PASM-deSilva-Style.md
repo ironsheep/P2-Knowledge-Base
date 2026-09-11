@@ -5912,7 +5912,7 @@ No interrupt priority juggling. No RTOS configuration. Each task owns its proces
 
 ### Smart Pins: Peripherals on Every Pin
 
-Traditional MCUs have fixed peripheral assignments: UART1 is on PA9/PA10, SPI1 is on PB3/PB4/PB5, and if you need those pins for something else, you're stuck rerouting your PCB.
+Traditional MCUs bind peripherals to fixed pins — UART1 on PA9/PA10, SPI1 on PB3/PB4/PB5 — and if you need those pins for something else, you're stuck rerouting your PCB.
 
 On P2, every pin contains a programmable state machine. Any pin can become a UART, SPI, PWM, ADC, quadrature decoder, or 27 other modes. The peripheral comes to your pin, not the other way around.
 
