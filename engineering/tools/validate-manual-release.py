@@ -201,8 +201,25 @@ def build_gates(slug: str, phase: str, pdf: str | None):
                   "markup that leaked into LaTeX: F-284 ate an AND, F-285 printed "
                   "&nbsp; 16 times, both with a CLEAN compile log"
                   if tex else "no .tex hand-back in outbound"))
+        # --tex/--pdf resolve each site to a printed page; --verdicts carries the
+        # judgements forward. Without all three the gate could not be SATISFIED
+        # through this runner: it reported page=? for every site and had no file
+        # to read a verdict from, so any document with a >=20pt overfull was a
+        # permanent RED here -- the same could-not-reach-a-fixpoint shape as F-420.
+        # The verdicts file is per document and lives in its audit/ folder.
+        ovf = [str(log)] if log else None
+        if ovf:
+            if tex:
+                ovf += ["--tex", str(tex)]
+            if pdf:
+                ovf += ["--pdf", pdf]
+            # Doc ROOT, not audit/ -- `manuals/*/audit/` is gitignored (those
+            # folders are workspace history). A verdict recorded there would be
+            # local-only, so the next machine or session would re-adjudicate the
+            # same sites, which is the exact "moving bar" this gate exists to stop.
+            ovf += ["--verdicts", str(doc / "render-overfull-verdicts.txt")]
         G.append(("render-overfulls", f"{V}/audit-render-overfulls.py",
-                  [str(log)] if log else None, True,
+                  ovf, True,
                   "overfull boxes exist only in the render, in no markdown"
                   if log else "no compile log in outbound"))
         if pdf:

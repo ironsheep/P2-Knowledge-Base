@@ -124,9 +124,16 @@ def probe_phrases(chunk):
         s = re.sub(r'\\[a-zA-Z]+\*?(\[[^]]*\])?(\{[^}]*\})?', ' ', s)
         s = s.replace('---', '—').replace('``', '"').replace("''", '"')
         s = re.sub(r'[{}\\]', ' ', s)
-        words = [w for w in ' '.join(s.split()).split() if len(w) > 3]
-        if len(words) >= 4:
-            cands.append(' '.join(words[:5]))
+        # Keep the wording INTACT. An earlier version kept only words longer
+        # than 3 characters, so "Hub data drives pins and DACs directly" became
+        # the probe "data drives pins DACs directly" -- a string that appears on
+        # NO page, because the real text still has its "and". Exact matching
+        # therefore failed as a matter of course and the weak prefix fallback
+        # below became the normal path, which is how a site on page 30 was
+        # reported as page 27 (2026-09-11, Streamer v1.1.1).
+        words = ' '.join(s.split()).split()
+        if len([w for w in words if len(w) > 3]) >= 4:
+            cands.append(' '.join(words[:8]))
     return cands
 
 
@@ -137,18 +144,34 @@ def pdf_pages(pdf):
 
 
 def find_page(pages, phrase):
+    """The page carrying this phrase, or None when it is not UNAMBIGUOUS.
+
+    Both lookups require exactly one matching page. The fallback used to take
+    the FIRST page containing a 3-word prefix, with no check that the prefix was
+    distinctive and nothing in the output to say a fallback had fired -- so
+    "data drives pins" resolved to page 27 while the site was on page 30, and
+    the report stated the wrong page with total confidence. A wrong page number
+    is worse than "page=?": it sends the reader to a clean page, where the
+    honest verdict is "nothing wrong here."
+    """
     if not pages or not phrase:
         return None
     norm = lambda s: ' '.join(s.split())
     target = norm(phrase)
-    for i, pg in enumerate(pages, 1):
-        if target in norm(pg):
-            return i
-    # fall back to a shorter prefix - line-wrapping can split the phrase
-    short = ' '.join(target.split()[:3])
-    for i, pg in enumerate(pages, 1):
-        if short in norm(pg):
-            return i
+    hits = [i for i, pg in enumerate(pages, 1) if target in norm(pg)]
+    if len(hits) == 1:
+        return hits[0]
+    if hits:
+        return None                      # ambiguous: say nothing, never guess
+    # Line-wrapping can split a phrase across lines, so retry on a prefix --
+    # but only accept it when it lands on exactly one page.
+    for n in (6, 5, 4):
+        short = ' '.join(target.split()[:n])
+        if len(short.split()) < n:
+            continue
+        hits = [i for i, pg in enumerate(pages, 1) if short in norm(pg)]
+        if len(hits) == 1:
+            return hits[0]
     return None
 
 
@@ -203,10 +226,25 @@ def main():
             if in_code:
                 note = '  [spans a code environment — code does not wrap]'
                 code_hits += 1
-            for cand in probe_phrases(chunk):
-                page = find_page(pages, cand)
+            # TeX reports a table's overfull at its END, where the source is
+            # `\end{tblr}` and a blank line -- no text to find, so the exact
+            # range resolves nothing and every table site printed "page=?".
+            # That is not a hard case: the identifying content sits just ABOVE.
+            # Widen backwards until a phrase resolves. Found 2026-09-11 on the
+            # Streamer guide, whose two >=20pt sites are both table ends; the
+            # pages had to be located by hand, which is exactly the work a
+            # resolver exists to remove.
+            for back in (0, 12, 30, 70):
+                wide = tex_context(tex_lines, max(1, r['start'] - back),
+                                   r['end'])[0] if back else chunk
+                for cand in probe_phrases(wide):
+                    page = find_page(pages, cand)
+                    if page:
+                        phrase = cand
+                        break
                 if page:
-                    phrase = cand
+                    if back:
+                        note += f'  [located {back} lines above the break]'
                     break
             if phrase is None:
                 phrase = next(iter(probe_phrases(chunk)), None)
