@@ -42,7 +42,7 @@ each feature's *mechanism* stays in its own document, linked below.
 |---|---|:--:|:--:|:--:|:--:|
 | **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ |
 | **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ |
-| **Assembly Reference** | manual | 🔧 ⁹ ¹⁶ | **✅** ⁹ | **✅** ⁹ | — |
+| **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — |
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
@@ -518,6 +518,31 @@ been 24.1pt of overhang. The table also reads better: *Clock generation*, *Volta
 **Every other document's tables change at their next render**, not before. Published PDFs are
 untouched as published. Expect some tables that fit at `\small` under the old 0.93 to drop a tier,
 because they genuinely did not fit.
+
+²⁴ **Assembly Reference — metadata single-source CLOSED on the returned v3.1.8 PDF, 2026-09-11
+08:27**, completing what footnote 16 re-opened. Its cover had kept literal `September 2026` /
+`Version 3.1.8` strings because it earned its ✅ in August, under a bar that did not yet require
+the cover to read `\DocDate` / `\DocVersion`. Converted 2026-09-11 and now proven: the artifact's
+cover reads both from the macros, and all seven declared fields round-trip with the 2025-2026
+rights range this manual takes from its own licence page.
+
+**With this row closed, every document released in the v1.18.0 wave carries every feature
+applicable to it.**
+
+**This is also the 505-page confirmation F-423 needed.** Assembly is the first full-size document
+rendered after the table-width fix landed; its tables re-flowed, the page count moved 505 → 506,
+and `render-overfulls` and `pdf-margin-overflow` are both clean. A platform change that behaves on
+a 20-page app note proves much less than one that behaves here.
+
+**And it is where the `implicit-reference-link` gate learned its limits.** Added hours earlier
+matching one- OR two-character targets, it blocked this release with **15 false positives** — every
+one correct markup, because `\hyperlink{pa}{PA}`, `{pb}{PB}` and `{or}{OR}` are the PA and PB
+registers and the OR instruction, each with its own page. "A real anchor is a slug" is simply false
+for a manual whose subject has two-character names. Narrowed to single-character targets, it then
+found a genuine defect on the same document: SKIP's operation line printed *"where Dn = 1"* because
+pandoc matched a heading slugged `n`, linked the bracketed operand and swallowed the brackets — on
+the page about per-bit behaviour. **A gate's first real corpus is what calibrates it**; this one
+cost a 24-minute render to learn that.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`
