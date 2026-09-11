@@ -42,11 +42,11 @@ Two short companion reads go deeper on the questions every reviewer asks:
 Nine documents are available now for community technical review, along with seven application notes. We welcome feedback on accuracy, completeness, and clarity. (PDF links download the file directly.)
 
 ### [Getting Started with the Propeller 2](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Getting-Started-Guide.pdf)
-**Meet the Chip, Read Its Code, Put It to Work** · *Version 1.0.3*
+**Meet the Chip, Read Its Code, Put It to Work** · *Version 1.0.4*
 
 The friendly on-ramp to the Propeller 2, the orientation layer that sits below the reference manuals. It builds a mental model of the chip (eight cogs, smart pins, the CORDIC solver, the streamer, the memory tiers, and boot), teaches you to read P2 code (Spin2 and PASM2 structure), and puts it to work with hands-on, compile-clean examples, then points you to the reference manuals for depth and to the *P2 Architect's Guide* for whole-system design. Migration sidebars throughout call out what's the same, changed, or new coming from the Propeller 1.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2-getting-started-guide-changelog.md)
+*September 2026 - Community Review Edition* | [Changelog](DOCs/p2-getting-started-guide-changelog.md)
 
 ### [P2 Assembly Language Reference Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Assembly-Language-Manual.pdf)
 **Complete PASM2 Instruction Set Documentation** · *Version 3.1.7*

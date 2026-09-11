@@ -10,6 +10,17 @@ commits). Newest entry first.
 
 ---
 
+## v1.0.4 (2026-09-10)
+
+**The one cog-launch value that means the opposite of what it looks like.**
+
+### Added
+
+- **One board check before the first program runs** (Putting It to Work): P56 is the LED on a P2 Eval Board and on the standard P2 Edge Module, but the **P2 Edge 32MB Module** carries its two LEDs on **P38 and P39**, and P56 there is a PSRAM clock line — so the program as printed lights nothing and writes to the memory bus. Change `LED` to match your board
+- **The `-1` return travels in one direction only** (Running Code on Another Cog): it is what `cogspin` returns on failure, never a value you pass in. `coginit(-1, ...)` — the idiom carried over from P1 code — arrives as `$FFFF_FFFF`, whose low six bits read `%111111`, and starts an even/odd **pair** of cogs, quietly spending two where one was meant. `NEWCOG` is the symbol that means "any free cog"
+
+---
+
 ## v1.0.3 (2026-08-08)
 
 A licensing change. No technical content changed.

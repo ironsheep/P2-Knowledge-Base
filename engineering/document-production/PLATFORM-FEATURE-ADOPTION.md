@@ -40,7 +40,7 @@ each feature's *mechanism* stays in its own document, linked below.
 
 | Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers |
 |---|---|:--:|:--:|:--:|:--:|
-| Getting Started | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | **✅** ¹⁰ |
+| **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ |
 | I/O & Smart Pins | manual | 🔧 ¹⁵ | 🔧 ¹⁵ | 🔧 ¹ ¹⁵ | 🔧 ¹¹ |
 | **Assembly Reference** | manual | 🔧 ⁹ ¹⁶ | **✅** ⁹ | **✅** ⁹ | — |
 | DeSilva Tutorial | manual | 🔧 ² ¹⁵ | 🔧 ¹⁵ | 🔧 ¹⁵ | **✅** ¹⁰ |
@@ -439,6 +439,33 @@ are ~396pt of unbreakable text in a 440pt line, so every candidate break scores 
 over. **The defect was the CHAIN, not a long word** — and two passes of reasoning about it produced
 a regression before one measurement produced the fix. Carry that: for a margin overflow, measure the
 atoms against the measure before rewriting anything.
+
+²¹ **Getting Started — all three PROVEN on the returned v1.0.4 PDF, 2026-09-11 03:01**, the first
+MANUAL in the v1.18.0 wave to complete its row (the four before it were app notes and the Streamer
+guide, which was already green).
+
+**Metadata single-source + rights.** `audit-pdf-metadata.py` CLEAN, all seven declared fields
+round-tripped: Title *"Getting Started with the Propeller 2"*, Subject, Author, and Keywords
+carrying the full rights string, where v1.0.3 carried none of the four. Cover reads `September 2026`
+/ `Version 1.0.4 — Community Review Edition` from `\DocDate` and `\DocVersion`.
+
+**Cross-ref filter — MEASURED, and this one actually links.** Unlike the app notes, this guide is
+organised in numbered chapters, so it has real self-references: the source carries 22 `Chapter N`
+occurrences, three of which are the chapter headings themselves, leaving **19 reachable prose
+references**. The generated `.tex` carries **19 hyperlinks**, and the artifact grew from
+**64 `/Link` · 96 `/GoTo` to 84 · 116 — exactly +20**. Every reachable reference links.
+
+**The instrument mattered, so record it.** PyMuPDF's `page.get_links()` reported **zero** internal
+links on this PDF, before and after, which would have been read as "the filter did nothing" and
+either blocked the flip or produced a false no-op verdict. The links are plainly there: `qpdf --qdf
+--object-streams=disable` then counting `/Link` and `/GoTo` shows them, and that is the method the
+earlier rows in this table used. **Use the qpdf count for link evidence; do not trust get_links()
+here.**
+
+**Two renders.** The first carried a cover defect this very conversion introduced —
+`Version \DocVersion — …` set as *"1.0.4— …"*, because a TeX control sequence eats the space that
+terminates it. See the `macro-eats-space` gate added to `audit-tex-artifacts.py` the same day; every
+document still to convert will meet that hazard at the same line.
 
 ¹³ **Single-Step Debugger — rights wired and VERIFIED ON THE ARTIFACT 2026-09-09.** Its template
 `p2kb-ssdbg.latex` bound `\DocTitle`/`\DocVersion`/`\DocDate` and **not** `\DocCopyright`/`\DocLicense`
