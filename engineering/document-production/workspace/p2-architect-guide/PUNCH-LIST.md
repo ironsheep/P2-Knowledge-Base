@@ -7,7 +7,23 @@ each closeout; the list above carries only **outstanding** work.
 
 ## Outstanding
 
-- [ ] **Emoji / marker glyph drop (cosmetic, guide-wide).** The 💡 (U+1F4A1), ⚠ (U+26A0),
+- [ ] **`audit-font-glyphs.py` reads the authored source, not the post-filter stream — so it
+      FAILS this manual on every run, by design-accident.** The 💡 / ⚠️ / U+FE0F markers are
+      deliberately left in the markdown because `filters/p2kb-architect-local.lua` `Str()`
+      converts them to `\WatchoutIcon{}` / `\TipIcon{}` **before** they reach xelatex (see
+      AG-14 below, and the filter's own comment explaining why the conversion lives there
+      rather than in an inline `{=latex}` span). The characters never reach the font, so the
+      gate's verdict is false for this document — verified 2026-09-12 twice over: by reading
+      the filter, and then by finding the icons actually present in the released PDF. **Why this matters:** a gate that fails every run stops being read, and
+      this one is the project's only guard against xelatex *silently* leaving a hole in the
+      page. It is also the exact class the doctrine names — a gate reading the declaration
+      side rather than the produced artifact.
+      **Proposed fix (needs a call — it touches a shared validator every manual uses):** either
+      teach the gate to apply each manual's declared glyph-converting filters before judging,
+      or give it a per-manual suppression list keyed to the converting filter, so a
+      *genuinely* missing glyph still fails loudly. Raised from the 2026-09-12 structure pass.
+
+- [x] **Emoji / marker glyph drop — RESOLVED, confirmed in the artifact 2026-09-12.** The 💡 (U+1F4A1), ⚠ (U+26A0),
       and the U+FE0F variation selector are **dropped as missing glyphs** by the platform
       fonts (emoji only — no other glyph missing). They degrade **gracefully**: the bold
       `**Tip:**` / `**Watch out:**` label still renders, no tofu box. Guide-wide (every
@@ -16,8 +32,11 @@ each closeout; the list above carries only **outstanding** work.
       **fontawesome** icons (`\WatchoutIcon` / `\TipIcon` in `p2kb-architect-local.sty`) via an
       `\IfFileExists{fontawesome5.sty}` guard that falls back to bold `[!]` / `[*]` text if the
       package is absent — either way, **no tofu**. The emoji stay in the markdown; a Str handler in
-      `p2kb-architect-local.lua` converts them (survives the latex-escape pass). **Confirm the icons
-      render in the v1.0.0 PDF, then close.** (Guide-local for now; promoting the fallback-font
+      `p2kb-architect-local.lua` converts them (survives the latex-escape pass). **CONFIRMED in the released v1.0.3 PDF
+      (2026-09-12):** all four marker sites render as fontawesome glyphs — the two Ch7
+      "Watch out" callouts, the Ch8 "Tip", and the Conventions line in front matter. No tofu,
+      no holes. (Text extraction shows them transliterated as `Á` / `Ď`, which is what
+      fontawesome5's private-use codepoints yield — presence, not absence.) Closed. (Guide-local for now; promoting the fallback-font
       approach platform-wide for the other manuals stays a style-pass call.)
 
 - [ ] **Platform: tall non-encoding tables silently drop overflow rows** (flagged for

@@ -17,13 +17,13 @@
 
 \begin{center}
 \vspace{0.35cm}
-{\fontsize{36}{42}\selectfont\bfseries The P2 Architect's Guide\par}
+{\fontsize{36}{42}\selectfont\bfseries \DocTitle\par}
 \vspace{0.3cm}
-{\Large\itshape Thinking in Cogs, Pins, and Forces\par}
+{\Large\itshape \DocSubtitle\par}
 \vspace{0.35cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.2cm}
-{\large Version 1.0.3\par}
+{\large Version \DocVersion\par}
 
 \vspace{0.25cm}
 \begin{tcolorbox}[
@@ -41,11 +41,11 @@
 \vspace{0.1cm}
 {\footnotesize
 \begin{minipage}[t]{0.46\textwidth}
-\textbf{The Three Acts}
+\textbf{The Three Parts}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
-\item Act I — Getting a Project Off the Ground
-\item Act II — Thinking in P2 (Functional Decomposition)
-\item Act III — The Same Work, with an Agent
+\item Part I — Getting a Project Off the Ground
+\item Part II — Thinking in P2 (Functional Decomposition)
+\item Part III — The Same Work, with an Agent
 \end{itemize}
 \end{minipage}%
 \hfill%
@@ -62,7 +62,7 @@
 \end{tcolorbox}
 \vspace{0.1cm}
 
-{\small Iron Sheep Productions, LLC\par}
+{\small \DocAuthor\par}
 {\small P2 Knowledge Base Project\par}
 \end{center}
 
@@ -110,14 +110,36 @@ This guide stands on work done by others:
 This guide is a distillation, not a primary source. It draws on, and points you back to, these trusted P2 documents:
 
 - **Getting Started with the Propeller 2** — this guide's companion and **prerequisite**; it teaches the orientation (the chip, and how to read its code) that this guide assumes.
-- **The Parallax Propeller 2 Documentation (v35, Rev B/C)** (Chip Gracey, Parallax Inc.) — the architectural ground truth behind the hardware design of Act I and the decomposition of Act II.
+- **The Parallax Propeller 2 Documentation (v35, Rev B/C)** (Chip Gracey, Parallax Inc.) — the architectural ground truth behind the hardware design of Part I and the decomposition of Part II.
 - **The P2 reference manuals** (Assembly Language, I/O & Smart Pins, Streamer, Debug) — the depth this guide deliberately leaves to them (see *Where to Next*).
+
+# Preface
+
+The Propeller 2 is well documented at the level of its parts. There is a reference for the Spin2 language and one for the PASM2 instruction set, a user guide for the smart pins, one for the streamer, manuals for the debug windows and the single-step debugger, and Parallax's own documentation for the silicon underneath all of them. Between them they will tell you what every instruction does, what every pin mode does, and what each one costs in time.
+
+None of them will tell you which cog should own what.
+
+That question — how a whole embedded application gets carved across eight independent cogs and sixty-four smart pins — is the one the reference shelf cannot answer, and it is where a P2 design most often goes wrong. It cannot be answered there because the answer is different for every application: it comes from *that* application's wires, rates, and deadlines. What generalizes is not the answer but the **method for deriving one**. Teaching that method is what this book is for.
+
+By the end of it you should be able to sit down with hardware you have never seen — a new sensor, an unfamiliar bus, a deadline tighter than the last one — and derive a sound architecture for it: which cog owns which resource, what each seam between cogs promises, what adapts where two cadences meet, how deep each branch layers, and whether the whole thing fits on the chip. Not recall an architecture that resembles it. Derive one.
+
+The book walks a single journey three times.
+
+**Part I** is the front of a real project — deciding what to build, learning parts nobody documented well, wiring them, proving they talk, making them fast, and shipping them so someone else can pick them up. Not one cog is assigned anywhere in it. It is the work that hands the decomposition its raw material: the parts, the pin map, the rates, and the deadlines.
+
+**Part II** takes that wired-up, understood application and derives its software architecture from it. Four forces do the cutting; a handful of objects guard the whole application rather than sitting in it; a resource budget says when a cut is wrong; four tools judge one candidate cut against another; and a nine-step procedure puts them in order, watched running end to end on two deliberately different applications.
+
+**Part III** walks both of those again with an AI agent in the loop, asking one question at each step: what changes when you have one? The answer is never that the agent decides. It is that most steps get cheaper, and a few things that were out of reach come within it.
+
+Three parts, three acts of one story — but not three equal ones. **Part II is the book's center of gravity**, and considerably its longest; Part I is its approach and Part III its amplifier. That proportion is deliberate, and it is worth knowing before you start.
+
+A few things this book deliberately is not. It is not an orientation manual: **Getting Started with the Propeller 2** is its prerequisite, and this book opens where that one ends — it assumes you can already launch a cog, drive a pin, share data through hub, and choose between Spin2 and PASM2 for a given job. It is not a Spin2 or PASM2 reference and it does not duplicate the subsystem manuals; where you need depth, it names the manual that carries it. It contains no code at all, by design — the mechanics belong to those manuals, and the design reasoning is what this one is for. And it is not prescriptive: it will not tell you what to build, or hand you an architecture to copy. Every worked example in it is one application's answer, shown to make the method visible.
 
 ## How to Use This Guide
 
-This is a short, narrative guide, not a reference manual — it is meant to be *read*. It assumes you have already met the Propeller 2; if you haven't, its companion **Getting Started with the Propeller 2** is the place to begin. This guide moves in **three acts**, and different readers can enter at different doors:
+This is a short, narrative guide, not a reference manual — it is meant to be *read*. It assumes you have already met the Propeller 2; if you haven't, its companion **Getting Started with the Propeller 2** is the place to begin. Different readers can enter at different doors:
 
-- **Building a real system?** Read straight through. **Act I** gets the project off the ground — choosing the hardware and buses, spending the pin budget, getting the parts to talk. **Act II** derives the software architecture — which cog owns what, how the pieces talk. **Act III** walks the whole process again with an AI agent at your side.
+- **Building a real system?** Read straight through. **Part I** gets the project off the ground — choosing the hardware and buses, spending the pin budget, getting the parts to talk. **Part II** derives the software architecture — which cog owns what, how the pieces talk. **Part III** walks the whole process again with an AI agent at your side.
 - **Already have a hardware design and need the software architecture?** Go straight to **Part II** (Chapter 5) — the functional-decomposition method — and use Part I as reference.
 - **Curious how an AI agent changes the work?** **Part III** (Chapters 10–14) revisits every step of the process with an agent in the loop — where it helps, and where judgment stays yours.
 - **Coming from the Propeller 1?** Follow the bronze **"P1 note"** sidebars wherever a design decision differs from the P1.

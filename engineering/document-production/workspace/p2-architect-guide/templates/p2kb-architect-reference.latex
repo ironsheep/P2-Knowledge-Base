@@ -30,11 +30,24 @@
 % ==================== LOAD PER-MANUAL DIAGRAMS ====================
 \usepackage{p2kb-architect-diagrams}
 
-% ==================== DOCUMENT METADATA ====================
-% These can be overridden by pandoc metadata
-\title{The P2 Architect's Guide}
-\author{Iron Sheep Productions, LLC}
-\date{June 2026}
+% ==================== DOCUMENT METADATA (single source: request.json) ====================
+% F-300 / F-316. Every identity string lives once, in request.json, and reaches BOTH
+% the PDF info dictionary and the cover page from here. p2kb-platform-foundation
+% populates the info dictionary from \Doc* and deliberately NOT from \@title/\@author,
+% so a document that sets metadata in request.json without binding these macros ships
+% with Title, Subject and Author EMPTY.
+% Rights are NOT authorship: \DocAuthor wrote it, \DocCopyright holds it.
+\renewcommand{\DocTitle}{$title$}
+\renewcommand{\DocSubtitle}{$subtitle$}
+\renewcommand{\DocVersion}{$version$}
+\renewcommand{\DocDate}{$date$}
+\renewcommand{\DocAuthor}{$author$}
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
+
+\title{\DocTitle}
+\author{\DocAuthor}
+\date{\DocDate}
 
 % ==================== ADDITIONAL SETUP ====================
 
