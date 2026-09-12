@@ -99,11 +99,11 @@ PART II — THINKING IN P2: FUNCTIONAL DECOMPOSITION     (the capstone method)
                  \RobotDecompositionDiagram · \StreamingPipelineDiagram)
 
 PART III — THE SAME WORK, WITH AN AGENT       (the same work, walked a third time)
-├── Chapter 10 — The Mindset: Sufficient Guidance, Not the Perfect Prompt
+├── Chapter 10 — Sufficient Guidance, Not the Perfect Prompt
 ├── Chapter 11 — Deciding and Learning, with an Agent
 ├── Chapter 12 — Building and Shipping, with an Agent
 ├── Chapter 13 — Through the Decomposition, with an Agent
-└── Chapter 14 — New Reach: Beyond What You Could Build Alone
+└── Chapter 14 — Beyond What You Could Build Alone
 
 IN CLOSING                                     (the send-off; distance covered; catalogue-vs-craft)
 

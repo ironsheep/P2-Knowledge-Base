@@ -18,6 +18,7 @@ An orientation and structure release. No technical content changed.
 - **Part I navigation**: every chapter carries section headings, so the front-of-project work can be skimmed and returned to. The four-phase project spine opens Chapter 1. The part states its provenance plainly — twelve projects, each built, debugged against hardware, and released.
 - **Part II in the contents**: the four forces are listed in the table of contents. The five cross-cutting concerns carry the C1–C5 labels the glossary and the appendices refer to. The part closes by naming the work it leaves unfinished — the smart-pin triage that rests on recall, the reconciliation that has no formula, the as-built audit, and the tier whose mathematics can outrun its author — and hands each one to Part III.
 - **Chapter 13**: the decomposition is walked with an agent through the same nine-step procedure and the same walking robot Chapter 9 derives — what changes at each step, what stays the same, and where the judgment remains the reader's. The chapter closes on the as-built audit.
+- **Chapter titles**: Chapters 10 and 14 read *Sufficient Guidance, Not the Perfect Prompt* and *Beyond What You Could Build Alone*. All fourteen chapters now carry a single descriptive title, so the contents page and the running heads say what each chapter is about.
 - **Naming**: the guide's three divisions are called Parts throughout, on the cover as well as in the text.
 
 ---

@@ -1127,7 +1127,7 @@ saved and ceilings lifted. This is an additive lens on a process you already und
 process. It begins, though, with a shift in how you *think about the agent itself* — so we start
 there, then walk the work.
 
-# Chapter 10: The Mindset — Sufficient Guidance, Not the Perfect Prompt
+# Chapter 10: Sufficient Guidance, Not the Perfect Prompt
 
 There is a popular idea that working with an agent is about finding the right *prompt* — the magic
 phrasing that unlocks a good answer. That is not the mindset this chapter teaches. The question
@@ -1442,7 +1442,7 @@ On the real build, the dog was reverse-engineered off its original Arduino, deco
 and coded with agent help in a week or two rather than a month or two — with all nine steps run,
 and none of them removed.
 
-# Chapter 14: New Reach — Beyond What You Could Build Alone
+# Chapter 14: Beyond What You Could Build Alone
 
 Every phase you've just walked with an agent got cheaper, and that is the smaller half of the
 story. The change worth ending this part on is not the speed — it's the **reach**. The most
