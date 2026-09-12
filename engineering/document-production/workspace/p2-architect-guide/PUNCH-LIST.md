@@ -7,6 +7,31 @@ each closeout; the list above carries only **outstanding** work.
 
 ## Outstanding
 
+- [ ] **Appendix B's Carloni citation overflows the right margin by 24.1pt — and has in every
+      release.** `audit-pdf-margin-overflow.py` **exits 1** on it (tolerance 20pt, so 4.1pt
+      beyond). Measured 2026-09-12 on both the v1.1.0 daemon render (p57) and the **released
+      v1.0.3** (p49) — byte-identical overflow, so this is not new work, it is a defect that has
+      been shipping.
+      **The line:** `Carloni, L.P., McMillan, K.L. & Sangiovanni-Vincentelli, A.L. — "Theory of
+      Latency-Insensitive` — bold IBM Plex Sans in a justified measure. TeX already broke inside
+      *Sangiovanni-Vinc|entelli* and then preferred an overfull box to the badness of breaking
+      after `A.L. —`. It is the longest bold author run in the appendix; the other eleven
+      citations are clean.
+      **Why it was NOT fixed in the v1.1.0 pass** (a dated carve-out, not a deferral): the two
+      available local fixes are both worse than the defect. (a) Editing the citation — shortening
+      the author list to *et al.*, or splitting the bold span — alters verified bibliographic
+      text, which this project does not trade against cosmetics. (b) Inline raw LaTeX
+      (`\allowbreak`, a discretionary `\-`) is **not safe in this pipeline**: the latex-escape
+      pre-pass mangles inline `{=latex}` attributes, which is the documented reason
+      `p2kb-architect-local.lua` converts emoji in a filter rather than in the markdown.
+      **The correct fix is platform-level and belongs to its own change:** `\emergencystretch`
+      (or a modest `\tolerance` lift) in `p2kb-platform-foundation.sty`, which engages only where
+      a line would otherwise go overfull. That file is loaded by **every** manual, so it must be
+      proven across the family on `p2-layout-torture-test`, not slipped into a content release.
+      **What expires this carve-out:** the next platform-stack change that touches
+      `p2kb-platform-foundation.sty` — fix it in that pass and re-run this gate on the Architect's
+      Guide and at least two other manuals. Raised from the 2026-09-12 structure pass.
+
 - [ ] **`audit-font-glyphs.py` reads the authored source, not the post-filter stream — so it
       FAILS this manual on every run, by design-accident.** The 💡 / ⚠️ / U+FE0F markers are
       deliberately left in the markdown because `filters/p2kb-architect-local.lua` `Str()`
