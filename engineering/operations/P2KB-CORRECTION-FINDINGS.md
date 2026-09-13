@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-422`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-429`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,70 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## LUT memory — code that does not assemble, content nobody sourced, and three sourced facts the LUT page never carried (2026-09-13, LUT app-note research) — F-422, F-427, F-428
+
+Found while researching whether LUT memory deserves its own app note. Stephen chose **option A**:
+no LUT app note; route every gap to the document that owns it (the stand-alone note is parked on
+`document-production/PUNCH-LIST.md`, the silicon questions are **VO-J-006**). F-359 re-derived
+`architecture/lookup_ram.yaml`'s header, encodings and sharing direction on 2026-08-26; **it did not
+reach the file's patterns, performance or applications sections**, and this batch is what was left.
+Every code verdict below was compiled with `pnut-ts` v1.55.5 — which proves **legality only**; the
+semantic verdicts cite their sources.
+
+### F-422 — LUT code in four KB files and the Assembly manual does not assemble, or states the wrong prefix, literal range or timing — `CONFIRMED`
+
+| Site | Says | Verdict | Source / proof |
+|---|---|---|---|
+| `architecture/lookup_ram.yaml:105`, `:123` | `S may be an immediate #0..#511` | **Wrong** — a literal LUT address reaches `#0..#255` | `RDLUT r0,#256` and `#511` → `Constant must be from 0 to 255`. The Assembly manual already states it (`part-i/chapter-01-execution-model.md:101`, `part-ii/instructions-r.md:325`, `instructions-w.md:714`). |
+| `lookup_ram.yaml:127`, `:341` | `WRLUT #$12345678, …` | **Does not assemble** | `Constant must be from 0 to 511 (m130)`; `WRLUT ##$12345678, r0` assembles. |
+| `lookup_ram.yaml:197` | `CMP index, #512 WZ` | **Does not assemble** | `Constant must be from 0 to 511 (m130)`. |
+| `lookup_ram.yaml:179`, `:335`; `pasm2/concepts/execution_modes.yaml:192`; `pasm2/idioms/hub-memory.yaml:71` | `RDLONG $200, …` / `WRLONG $200, …` after `SETQ2` | **Does not assemble** — the block form addresses the LUT as `$000..$1FF` | `Register cannot exceed $1FF`; `SETQ2 #127` + `RDLONG 0, r1` assembles. Silicon Doc: `RDLONG first_lut,S/#/PTRx` (`silicon-doc-text.txt:3264-3267`, `:3278-3281`). `pasm2/concepts/setq_block_ops.yaml:97` already has it right (`rdlong 0, ptra`). |
+| `pasm2/concepts/execution_modes.yaml:187-189` | `to_cog:` → `SETQ2 #511` / `RDLONG 0, hub_addr ' Load cog RAM from hub` | **Wrong prefix** — `SETQ2` loads the **LUT**; `SETQ` loads register RAM | `silicon-doc-text.txt:3257-3267`. |
+| `pasm2/concepts/setq_block_ops.yaml:99` | `rdlut value, phase ' Single-cycle lookup` | **Wrong** — `RDLUT` is 3 clocks | P2 Datasheet `p2-datasheet-text.txt:2061`. |
+| `architecture/event_system.yaml:514` | interrupt source `13=LUT $1FF read` | **Drops the subject** — it is the *streamer's* read, not a cog's `RDLUT` | `silicon-doc-text.txt:2289`: `13 Streamer read location $1FF of lookup RAM`. |
+| Assembly manual `part-i/chapter-01-execution-model.md:103` | load the LUT from hub "using `SETQ` for burst transfers" | **Wrong prefix** — `SETQ2` | `silicon-doc-text.txt:3264`; the same manual's `part-ii/instructions-r.md:284` states it correctly. |
+
+**Correction:** align each site to its source. The two block-load examples take the Silicon Doc's own
+`SETQ2`+`RDLONG first_lut` / `SETQ2`+`WRLONG first_lut` forms. Class sweep run 2026-09-13 across
+`deliverables/ai/P2/`, every `manuals/*/opus-master/` and `app-notes/` for `#0..#511` LUT claims,
+`RDLONG`/`WRLONG`/`WMLONG $200`/`$3FF`, over-range `#` immediates on LUT code, and `SETQ` used for a LUT
+load; the sites above are all it returned. (`xbyte_engine.yaml:253` and Assembly manual
+`appendix-b-condition-codes.md:143,146` use `_RET_ SETQ` to set the **XBYTE** LUT base — a different,
+correct use, per `silicon-doc-text.txt:969`.)
+
+### F-427 — `lookup_ram.yaml` carries content no source states, some of it contradicting the file itself; the Assembly manual carries one such claim — `CONFIRMED`
+
+| Site | Claim | Why it goes |
+|---|---|---|
+| `lookup_ram.yaml:298` | `shared_read: "3 clock cycles"` | **Contradicts `:58-59`** of the same file ("there is no instruction that reads another cog's LUT"). |
+| `lookup_ram.yaml:300-306` | `bandwidth.streaming: "32 bits per clock"`, `power_consumption` | No source. |
+| `lookup_ram.yaml:90-92`, `:348-349` | `FIFO_mode` "can be used with hub FIFO"; "LUT often used with hub FIFO" | No source. |
+| `lookup_ram.yaml:187-204` (`waveform_generation`) | `WXPIN #512, #0 ' 512 samples`, `XINIT lut_stream_mode` | No source ties `WXPIN` to a streamer sample count, and the streamer's LUT window is **eight selectable sizes, not a flat 512** (F-302; `silicon-doc-text.txt:1586-1600`). Also carries F-422's `#512`. |
+| `lookup_ram.yaml:226-260` (`fast_buffer`, `fast_stack`) | a LUT circular buffer and stack | No source. Mixes cog-space `$200`/`$2FF`/`$3FF` into `RDLUT`/`WRLUT` addressing, which is `$000..$1FF` (`:30`); `MOV buffer_ptr, #$200` → `Constant must be from 0 to 511 (m130)`. |
+| `lookup_ram.yaml:262-292` (`common_applications`) | benefit bullets such as "Smooth, high-frequency waveforms", "No hub bandwidth needed" | No source for the bullets. |
+| `lookup_ram.yaml:380` | `last_updated: "2024-12-30"` | The file was re-derived 2026-08-26 (its own `:369-370`). |
+| Assembly manual `chapter-01-execution-model.md:95` | "The LUT integrates with the P2's streamer and **CORDIC** subsystems … **CORDIC operations can store results in LUT memory**" | No source links CORDIC to the LUT. A CORDIC result reaches the LUT only as any value does, through `WRLUT`. The paletted-display sentence that follows **is** sourced (8-bit values offset into the LUT at base `%bbbb00000`, `silicon-doc-text.txt:1464`, `:1472`) and stays. |
+
+**Correction:** delete the unsourced content outright — this project does not keep a claim no source
+states, and a pattern that does not assemble cannot be "illustrative". The sourced remainder
+(`lookup_table` with the corrected block load, `shared_data_exchange`, `lut_dump` corrected,
+`verify_sharing` with `##`) stays.
+
+### F-428 — three sourced LUT facts are missing from the page a reader goes to for LUT memory — `CONFIRMED`
+
+Not wrong: **absent where they are needed.** Each is carried elsewhere in the KB, but neither
+`architecture/lookup_ram.yaml` nor Assembly manual §1.3 states or links it.
+
+| Fact | Source | Where the KB already has it |
+|---|---|---|
+| **A Spin2 cog has 16 free LUT longs.** The interpreter occupies LUT `$010..$1FF`; `$000..$00F` is free and "ideal for streamer modes which use the LUT" | `spin2-v55-text.txt:805-806`, `:833-834` (identical in `spin2-v51/spin2-language-section.txt:3114-3118`, `:3182-3191`) | `spin2/constructs/inline_pasm.yaml:54`, `spin2/concepts/inline_pasm2.yaml:31` |
+| **Sharing has a handshake:** `SETSE1..4` arm LUT read/write events on `$1FC..$1FF`, including the companion cog's writes | `silicon-doc-text.txt:504`, `:2246-2249`; P2 Datasheet `p2-datasheet-text.txt:613-614` | `pasm2/setse1.yaml:14-25` (and `setse2..4`) |
+| **`COGINIT` can start a sharing pair:** `%x_1_xxx1` finds and starts an even/odd pair | `silicon-doc-text.txt:413`, `:502` | `pasm2/coginit.yaml:5`, `:65-68` |
+
+**Correction:** state each in `lookup_ram.yaml` (with `related:` to the file that already carries it,
+by full path) and in Assembly manual §1.3 / §1.3.3. **The Spin2 fact matters most** — a reader planning
+LUT use from a Spin2 program otherwise learns it only by reading the inline-PASM pages.
 
 ## The two ROM listings are different BUILD TARGETS, and F-123's grounding plan names the FPGA one (2026-09-10, ROM-asset mining) — F-421
 
@@ -97,7 +161,19 @@ its conclusion does not rest on the file this finding re-picks.
 
 ## Auto-shrunk table columns reserve a FIXED 0.93 of \linewidth while colsep scales with column count, so every wide table overruns by a predictable amount (2026-09-11, IOSP v1.0.10 certification) — F-423
 
-### F-423 — `p2kb-platform-tables.lua` uses a constant `usable = 0.93`; the correct value depends on the column count — `FIX APPLIED 2026-09-11 — awaiting verification on the IOSP re-render`
+### F-423 — `p2kb-platform-tables.lua` uses a constant `usable = 0.93`; the correct value depends on the column count — `RESOLVED — fixed 2026-09-11; VALIDATED ON BOTH RELEASED ARTIFACTS, re-measured 2026-09-13`
+
+**Validation (added 2026-09-13).** The status above had read *"FIX APPLIED — awaiting verification"*,
+which is not a legend token, so the hygiene gate flagged it — and it was stale: the verification it
+waited for had landed the same day. Re-measured on the released PDFs rather than taken from
+`PLATFORM-FEATURE-ADOPTION.md`'s record: `audit-pdf-margin-overflow.py` reports **CLEAN** on
+*P2 I/O & Smart Pins User Guide* v1.0.10 (397 pages) — the document whose Appendix D table crossed the
+margin — and on *P2 Assembly Language Reference Manual* v3.1.8 (506 pages), the first full-size
+render after the fix, whose tables re-flowed (505 → 506pp). Tightened to a **1pt** tolerance over
+IOSP pp328-332, the only span left anywhere near the margin is **p330 +2.1pt, a justified prose line**
+("see Appendix B. For application ex-") — not a table cell. The four Appendix D table spans that
+measured +20.3 to +24.1pt are gone, and 2.1pt is well inside the 20pt tolerance that is the gate's
+verdict.
 
 **The mechanism, and it is exact.** The auto-shrink branch computes per-column fractions, then
 distributes `leftover = usable - summ` to columns with wrappable prose, so the emitted widths

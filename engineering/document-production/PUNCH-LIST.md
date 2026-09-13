@@ -887,3 +887,37 @@ structural version of that fix.
 **Why it might not.** 101 files is real authoring, the per-method pages are already reachable by name
 through the index (all 560 mnemonic/method names resolve, measured 2026-09-05), and a decision tree
 that is merely a sorted list would add a maintenance surface without adding retrieval.
+
+## Revisit a stand-alone LUT-memory app note (option B) — OPEN
+
+**Status:** Open — parked 2026-09-13. **Stephen: "A for now … punch list the need to revisit B."**
+Not owed, not scheduled, not a release gate. **Trigger to revisit: the result of `VO-J-006`**
+(paired-cog `SETLUTS` on silicon, `hardware-verification/VERIFICATION-OPPORTUNITIES.md`).
+
+**The question asked:** is LUT memory, and the techniques it serves, worth its own app note?
+
+**What was decided (option A).** Not as a LUT-memory note. The project's placement rubric says
+*"An app note solves a **problem** by composing subsystems. A manual section documents a
+**subsystem** completely"* (`standards/documentation-standards/artifact-placement-rubric.md:55`),
+and "LUT memory and its techniques" is subsystem-shaped. Its reference material is already owned
+three times over — the Assembly manual §1.3 (general model, sharing, LUT execution), the Streamer
+Programming Guide (LUT modes, the DDS/Goertzel LUT window), the XBYTE Programming Guide Ch. 6 (LUT
+dispatch). The app-note roster never listed LUT, and it routes "Streamer applications" to the
+Streamer guide (`analysis/p2-app-note-roster.md:125`). So the gaps the research found went to their
+owners instead: **F-422 / F-427 / F-428** (register), **VO-J-006** (bench).
+
+**What option B would be.** A *problem*-shaped P2AN, which would pass the rubric — working title
+*"Hardware-speed paths from Spin2: the 16 free LUT longs, the streamer, and paired-cog sharing."*
+It composes LUT memory + the streamer + cog pairing for a reader who wants LUT speed without leaving
+Spin2. Next free number at filing: P2AN008.
+
+**Why it is parked, not rejected.** Its source material is thin exactly where it would need to be
+thick: the Silicon Doc's own *STREAMER ACCESS* and *BYTECODE EXECUTION LOOKUP TABLE* subsections
+read "(to be completed.)" (`ingestion/sources/silicon-doc/silicon-doc-text.txt:487-490`), no EF entry
+has exercised `SETLUTS`, and no source says whether sharing is usable with a Spin2 cog in the pair.
+B cannot be authored before VO-J-006 runs, so deciding it now would be deciding on no evidence.
+
+**Revisit when VO-J-006 lands.** If sharing yields **more than one** worked, silicon-proven
+technique a Spin2 programmer can use — and arm F says a Spin2 cog can sit in the pair — B has
+material the owning documents cannot hold, and this item becomes a roster candidate. If it yields
+one recipe, that recipe goes to **P2AN007** as a cross-cog technique and this item closes.

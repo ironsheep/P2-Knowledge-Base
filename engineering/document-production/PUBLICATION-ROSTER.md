@@ -222,6 +222,7 @@ pipeline at a glance (blank gates = not started).
 | Document | Type | Ver | Draft | Assets | Platform | Chip | Comm | Released |
 |----------|------|-----|:--:|:--:|:--:|:--:|:--:|:--:|
 | Spin2 Reference Manual | manual | — | | | | | | |
+| P2 Errata | manual | — | | | | | | |
 | Extended-Precision Integer Math (B2) | app-note | — | | | | | | |
 | Fixed-Point Math (B3) | app-note | — | | | | | | |
 | USB Device/Host, standalone | app-note | — | | | | | | |
@@ -229,6 +230,8 @@ pipeline at a glance (blank gates = not started).
 ### Detail
 
 **Spin2 Reference Manual** · `spin2-reference-manual` · manual — parked; may go forward.
+
+**P2 Errata** · `p2-errata` · manual — added 2026-09-13 (Stephen). Working title; no folder yet. One entry per erratum, each built the same way: **what the defect is**, **example code that demonstrates it**, and — where a workaround exists — **example code for the correct workaround**. Ships an examples ZIP, like the other code-carrying manuals. **Source:** a new P2 errata source Stephen is preparing, together with his documentation of every errata source (the new one and the existing ones) and how to reproduce each. That documentation is ingested first (the ingestion head), so the manual is authored from trusted sources rather than from a hand-off. Each demonstration and each workaround is a candidate for a run on real silicon (`hardware-verification/VERIFICATION-OPPORTUNITIES.md` → EF ledger) — for this document, a defect demo that has not been run is a claim, not evidence. The community errata list at `ingestion/sources/p2docs-github-io/p2docs-validation-report.md` §1 is marked UNVERIFIED there and is an upstream lead only, never a citation.
 
 **App-note candidates** (full detail + production sequence → the [planning register](../analysis/p2-app-note-roster.md)):
 - **B2 · Extended-Precision Integer Math** — 64/96/128-bit composed from carry-chain ADDX/SUBX + `muldiv64` (OBEX #5189).
