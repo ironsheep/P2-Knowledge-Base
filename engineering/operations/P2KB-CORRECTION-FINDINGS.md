@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-431`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-432`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,40 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Five clock "built-in symbols" that Spin2 does not have — found by measuring what F-340's nested walk would report (2026-09-13) — F-431
+
+### F-431 — `spin2-builtin-symbols-complete.yaml` ships five clock constants with invented values; the compiler rejects every one — `CONFIRMED`
+
+**How it was found, which is the point.** Stephen asked what a full cross-reference check would take
+(F-340). Running a scratch copy of `validate-crossref-keys.py` with the nested walk enabled reports
+**40** unresolved references the shipped validator cannot see. Six of them are `related_symbols`
+entries naming `XDIV1`/`XDIV2`/`XDIV4`/`XMUL2`/`XMUL3`/`XMUL4` — and chasing those showed the file does
+not merely *reference* invented names, it *defines* some. **Exactly F-338's shape, in the same file,
+in the same field the validator does not read.**
+
+**Sites** — `language/spin2/symbols/spin2-builtin-symbols-complete.yaml`, block `# Clock Setup Symbols`:
+`RCFAST` (`:1784`, value `$0000_0000`), `XI` (`:1796`, `$0000_0001`), `PLL` (`:1808`, `$0000_0002`),
+`XDIV1` (`:1820`, `$0000_0000`), `XMUL2` (`:1832`, `$0000_0040`), plus `related_symbols` naming the
+further non-entries `RCSLOW`, `XDIV2`, `XDIV4`, `XMUL3`, `XMUL4` (`:1792`, `:1804`, `:1816`, `:1828`, `:1840`).
+
+**Evidence, three ways.**
+- **Compiler:** `pnut-ts` v1.55.5 rejects all five as `CON x = NAME`. **Controls:** it accepts `P_ADC`
+  and `CLKFREQ_` and rejects `NOT_A_SYMBOL`, so the harness discriminates.
+- **Spin2 v55:** `XDIV1`/`XMUL2` appear **0** times. `RCFAST`, `XI` and `PLL` appear only as *words* —
+  "internal RCFAST oscillator", "XI/XO-crystal-plus-PLL mode" (`spin2-v55-text.txt:1711-1719`,
+  `:1740`, `:899`) — never as constants. Spin2's clock is configured by the `_clkfreq`, `_xtlfreq`,
+  `_xinfreq`, `_errfreq`, `_rcfast`, `_rcslow` CON symbols and read back through `clkmode_`/`clkfreq_`
+  (`:1711-1725`).
+- **The values have no source.** No Parallax document assigns `XI = 1`, `PLL = 2` or `XMUL2 = $40`.
+
+**Correction (source-first).** Delete the five entries and the `related_symbols` that name them,
+**substituting nothing** — per F-338, a substitution would be an inference about what the author
+meant. Clock setup is already documented from source in
+`language/spin2/constants/special-configuration-symbols.yaml`; any inbound reference is redirected
+there (Sacred Rule #7). Then sweep the **whole file** for the class, not these five: its 135-plus
+nested records were never read by any gate until F-340's walk lands — which is the argument for
+landing it.
 
 ## Two KB-wide classes surfaced by the LUT fix, carved out because each needs its own per-site pass (2026-09-13) — F-429, F-430
 
