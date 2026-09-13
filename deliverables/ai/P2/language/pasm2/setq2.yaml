@@ -18,10 +18,6 @@ description: 'Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block trans
 
   - SETQ2 + WRLONG: Block write from LUT to HUB
 
-  - Fast bulk data movement for lookup tables
-
-  - Essential for waveform tables and large datasets
-
   '
 flags_affected:
   C: No effect
@@ -36,7 +32,7 @@ examples:
     \         ' Transfer 512 longs\n        rdlong  0, ptra                  ' Load\
     \ to LUT[0..511]\n        ret\n        \n' Later, read from LUT for waveform generation\n\
     \        rdlut   amplitude, phase         ' Direct LUT access\n"
-  source: waveform_generation
+  source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 (SETQ2 + RDLONG reads hub longs into lookup RAM)"
 - name: Buffer Management
   description: Use LUT as intermediate buffer for data processing
   code: "' Copy data block from HUB to LUT for processing\n        setq2   #128-1\
@@ -48,28 +44,12 @@ examples:
     \ tjnz    index, #.loop\n        \n' Write processed data back to HUB\n      \
     \  setq2   #128-1                   ' 128 longs\n        wrlong  0, dest_addr\
     \             ' Write from LUT[0..127]\n"
-  source: data_processing
-- name: Debug Data Capture
-  description: Use LUT as circular buffer for debug trace
-  code: "' Save debug trace to LUT then dump to HUB\nsave_trace\n        setq2   #256-1\
-    \                   ' Save 256 samples\n        wrlong  0, trace_buffer      \
-    \    ' LUT[0..255] to HUB\n        ret\n        \n' During execution, write samples\
-    \ to LUT\ntrace_write\n        wrlut   sample, trace_index      ' Write to LUT\n\
-    \        incmod  trace_index, #255        ' Circular buffer\n        ret\n"
-  source: Spin2_debugger.spin2
-- name: Lookup Table Initialization
-  description: Initialize commutation lookup table in LUT
-  code: "' Load motor commutation patterns to LUT\n        loc     ptra, #\\commutation_data\
-    \ ' HUB address\n        setq2   #64-1                    ' 64 patterns\n    \
-    \    rdlong  0, ptra                  ' Load to LUT[0..63]\n        \n' Access\
-    \ during motor control\n        shl     hall_state, #3           ' 8 bytes per\
-    \ state\n        rdlut   pattern, hall_state      ' Get pattern from LUT\n"
-  source: motor_control
+  source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 and :3278-3281 (SETQ2 block transfer into and out of lookup RAM)"
 notes:
 - SETQ2 specifically targets LUT RAM (512 longs)
 - SETQ targets COG RAM for block transfers
-- Block transfers are significantly faster than loops
-- LUT access is single-cycle, making it ideal for tables
+- A block transfer moves one long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle
+- After loading, RDLUT reads a LUT long in 3 clocks and WRLUT writes one in 2
 - "XBYTE role: besides LUT block transfers, SETQ2 also serves as the ONE-SHOT XBYTE mode control. '_RET_ SETQ2 #mode' configures the XBYTE dispatch-table base / compression threshold / flag-write for ONLY the next bytecode, after which XBYTE automatically reverts to the mode last set by SETQ (no switch-back instruction needed). SETQ sets the persistent XBYTE mode; SETQ2 sets the transient one. See architecture/xbyte_engine.yaml."
 compiler_operand_format:
   name: operand_l

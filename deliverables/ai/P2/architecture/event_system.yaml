@@ -511,7 +511,7 @@ critical_distinction:
        - 4-bit code selecting from 16 interrupt sources:
          0=off, 1=CT1, 2=CT2, 3=CT3, 4=SE1, 5=SE2, 6=SE3, 7=SE4,
          8=pattern, 9=FIFO, 10=streamer ready, 11=streamer done,
-         12=NCO roll, 13=LUT $1FF read, 14=ATN, 15=CORDIC empty
+         12=NCO roll, 13=streamer reads LUT $1FF, 14=ATN, 15=CORDIC empty
        - Example: SETINT1 #4 = INT1 triggered by SE1 event
 
     To wait for timer/ATN/pattern events without interrupts, use dedicated instructions:

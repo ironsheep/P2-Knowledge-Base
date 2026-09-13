@@ -97,8 +97,8 @@ block_operations:
               ret
       
       ' Later access via RDLUT
-              rdlut   value, phase    ' Single-cycle lookup
-    source: waveform_generation
+              rdlut   value, phase    ' 3-clock lookup
+    source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 (SETQ2 + RDLONG reads hub longs into lookup RAM)"
 
   lut_to_hub_transfer:
     instruction: "SETQ2 + WRLONG"
@@ -107,32 +107,19 @@ block_operations:
       SETQ2 #count-1
       WRLONG 0, hub_address  ' Use 0 for LUT start!
     debug_pattern: |
-      ' Save debug trace from LUT to HUB
-      save_trace
-              setq2   #256-1          ' 256 trace entries
-              wrlong  0, trace_buffer ' LUT[0..255] to HUB
-              ret
-    source: Spin2_debugger.spin2
+      ' Spin2 debugger: move hub longs in blocks of up to $100 through this cog's LUT
+      .block  decod   pb,#8           'determine number of longs in block ($100 max)
+              fle     pb,pa
+              sub     pa,pb           'adjust remaining-longs count
+              sub     pb,#1           'get long count - 1
+              setq2   pb              'read block of longs
+              rdlong  0,ptra++
+              setq2   pb              'write block of longs
+              wrlong  0,ptrb++
+              _ret_   tjnz    pa,#.block      'another block?
+    source: "Spin2 debugger v51 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:151-162"
 
 production_patterns:
-  motor_commutation_tables:
-    description: "Load motor control patterns to LUT"
-    code: |
-      ' Load commutation patterns for BLDC motor
-      load_commutation
-              loc     ptra, #\motor_patterns
-              setq2   #64-1           ' 64 patterns
-              rdlong  0, ptra         ' Load to LUT[0..63]
-              
-      ' Access during motor control
-              shl     hall_state, #3  ' 8 bytes per state
-              rdlut   pattern, hall_state
-              
-              ' Apply pattern to PWM outputs
-              and     pattern, #$3F
-              call    #set_pwm_outputs
-    source: isp_bldc_motor.spin2
-    
   debug_state_preservation:
     description: "Complete COG state save/restore"
     code: |
@@ -189,7 +176,7 @@ production_patterns:
               ' Write processed data back
               setq2   #128-1
               wrlong  0, output_ptr
-    source: audio_processing
+    source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 and :3278-3281 (SETQ2 block transfer into and out of lookup RAM)"
     
   flash_loader_buffers:
     description: "Fast flash programming buffers"
@@ -255,17 +242,9 @@ block_fill:
     note: "Use FBLOCK for faster hub fills"
 
 performance:
-  transfer_rates:
-    hub_to_cog: "1 long per cycle after 2-cycle setup"
-    cog_to_hub: "1 long per cycle after 2-cycle setup"
-    hub_to_lut: "1 long per cycle after 2-cycle setup"
-    lut_to_hub: "1 long per cycle after 2-cycle setup"
-
-  efficiency:
-    small_transfers: "2 + N cycles for N longs"
-    large_transfers: "Approaches 1 cycle per long"
-    vs_loop: "10-20x faster than RDLONG/WRLONG loop"
-    lut_advantage: "LUT access is single-cycle after load"
+  transfer_rate: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (the FIFO gets priority and the block move waits for the slice to come around again)"
+  transfer_rate_source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3257"
+  lut_advantage: "After load, RDLUT reads a LUT long in 3 clocks and WRLUT writes one in 2"
 
   limitations:
     - "Maximum 512 longs per operation"
@@ -375,7 +354,6 @@ references:
   - instruction_set: SETQ/SETQ2 encoding
   - flash_loader.spin2: Buffer management
   - Spin2_debugger.spin2: State preservation
-  - isp_bldc_motor.spin2: LUT table usage
   - optimization_guide: Fast memory transfers
 
 related:

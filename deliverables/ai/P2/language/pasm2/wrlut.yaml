@@ -65,3 +65,7 @@ immediate_address_limit:
     Compiler-enforced in PNut-TS v1.55 (Spin2 v55), verified by compiling the
     over-range case; corroborated by the Silicon Doc hub-operand bit-table
     (0-prefixed literal vs 1-prefixed PTR expression).
+related:
+- architecture/lookup_ram.yaml
+- language/pasm2/rdlut.yaml
+- language/pasm2/setq2.yaml

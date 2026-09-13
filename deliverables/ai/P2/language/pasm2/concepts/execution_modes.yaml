@@ -185,11 +185,11 @@ code_organization:
 
   loading_code:
     to_cog: |
-      SETQ2 #511              ' Load 512 longs
-      RDLONG 0, hub_addr      ' Load cog RAM from hub
+      SETQ #x                 ' x = number of longs, minus 1
+      RDLONG first_reg, hub_addr ' read x+1 longs into register RAM from first_reg
     to_lut: |
       SETQ2 #511              ' Load 512 longs  
-      RDLONG $200, hub_addr   ' Load LUT RAM from hub
+      RDLONG 0, hub_addr      ' LUT[0..511] from hub (first LUT long is 0, not $200)
 
 best_practices:
   mode_selection:

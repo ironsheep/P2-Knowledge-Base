@@ -12,17 +12,28 @@
 #     row at :1830-1832 ("Prior SETQ/SETQ2 invokes cog/LUT block transfer").
 #     The header previously cited :1831 alone as if it were a LUT instruction row;
 #     it is RDLONG. Corrected 2026-08-30, F-399.
+#   Spin2 Language Documentation v55, inline PASM2 cog register and LUT areas --
+#     engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:805-806, :833-834
 
 component_name: "Lookup RAM (LUT)"
 
 component_type: "dual_port_memory"
 
+aliases:
+  - "LUT"
+  - "LUT RAM"
+  - "Lookup RAM"
+  - "LUT sharing"
+  - "Paired-Cog communication mechanism"
+  - "RAM sharing between paired cogs"
+
 description: |
   Each COG contains a secondary 512 x 32-bit dual-port Lookup RAM (LUT) that serves as
   fast local storage and enables special operations like streaming waveform data to DACs,
   write-sharing between adjacent COG pairs, and execution of code. RDLUT takes 3 clocks
-  and WRLUT takes 2; the LUT can be used for lookup tables, waveform data, FIFO buffers,
-  or general data storage.
+  and WRLUT takes 2. Its documented uses are scratch space, streamer access, a bytecode
+  execution lookup table, a smart pin data source, paired-cog communication, and code
+  execution.
 
 architecture:
   size: "512 longs (2048 bytes)"
@@ -63,7 +74,7 @@ architecture:
     
     - mode: "streamer"
       description: "The streamer can use the LUT as a source or destination"
-      timing: "Runs in the streamer's 2nd LUT port; consumes no cog instruction cycles"
+      timing: "Uses the LUT's 2nd port, which adjacent-cog writes also use"
       source: >-
         Propeller 2 Documentation v35 (Rev B/C), LOOKUP RAM --
         engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:474, :500.
@@ -72,6 +83,10 @@ architecture:
     - feature: "LUT_to_DAC_streaming"
       description: "Streamer can read LUT contents and output to DACs"
       use_case: "Arbitrary waveform generation using streamer with LUT as source"
+      source: >-
+        Propeller 2 Documentation v35 (Rev B/C) feature list ("Ability to stream hub RAM
+        and/or lookup RAM to DACs and pins or HDMI modulator") --
+        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:159.
     
     - feature: "LUT_sharing"
       description: >-
@@ -86,10 +101,32 @@ architecture:
         COGS -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:491-500; P2
         Datasheet 2022/11/01 "Paired-Cog Communication Mechanism" --
         engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:610-616.
-    
-    - feature: "FIFO_mode"
-      description: "Can be used with hub FIFO for buffering"
-      use_case: "High-speed data streaming"
+
+    - feature: "LUT_events"
+      description: >-
+        For handshaking between cogs sharing lookup RAM, SETSE1..SETSE4 can raise an event
+        when this cog, or its odd/even companion cog, reads or writes LUT address %1111111AA.
+      source: >-
+        Propeller 2 Documentation v35 (Rev B/C) --
+        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:504, :2246-2249.
+
+    - feature: "pair_start"
+      description: >-
+        COGINIT with %x_1_xxx1 as its D operand finds a free even/odd cog pair and starts both
+        with the same parameters; the program must then tell the even cog from the odd one,
+        and possibly restart one or both.
+      source: >-
+        Propeller 2 Documentation v35 (Rev B/C) --
+        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:413, :502.
+
+    - feature: "spin2_lut_area"
+      description: >-
+        In a cog running the Spin2 interpreter, LUT $000..$00F is available for any use and
+        ideal for streamer modes which use the LUT; avoid writing LUT $010..$1FF, which the
+        interpreter occupies.
+      source: >-
+        Spin2 Language Documentation v55 --
+        engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:805-806, :833-834.
 
 instructions:
   - instruction: "RDLUT"
@@ -102,7 +139,8 @@ instructions:
       engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2061.
     operation: |
       D := LUT[S[8:0]]
-      S may be an immediate #0..#511, a register, or a PTRx expression.
+      A literal S reaches only #0..#255; use a register or a PTRx expression to reach
+      any of the 512 longs.
     timing: "3 clocks"
     flags_affected: "C = MSB of data, Z = (result == 0)"
     usage_example: |
@@ -120,11 +158,12 @@ instructions:
     operation: |
       LUT[S[8:0]] := D
       D carries the DATA, S carries the ADDRESS -- syntax is `WRLUT {#}D,{#}S/PTRx`.
-      S may be an immediate #0..#511, a register, or a PTRx expression.
+      A literal S reaches only #0..#255; use a register or a PTRx expression to reach
+      any of the 512 longs.
     timing: "2 clocks"
     usage_example: |
       WRLUT   value, #100     ' Write value to LUT[100]
-      WRLUT   #$12345678, index ' Write immediate to LUT[index]
+      WRLUT   ##$12345678, index ' Write immediate to LUT[index]
   
   - instruction: "SETLUTS"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000110111"
@@ -142,10 +181,8 @@ instructions:
       SETLUTS #1              ' Accept lookup-RAM writes from our paired cog
 
   # Note: LUT-to-DAC streaming is done via Streamer configuration (XINIT/XCONT),
-  # not a dedicated instruction, so it has no entry in this list. The streamer
-  # setup and a worked example live in architecture.access_modes (mode: streamer),
-  # architecture.special_features (feature: LUT_to_DAC_streaming), and
-  # programming_patterns (pattern: waveform_generation) below.
+  # not a dedicated instruction, so it has no entry in this list. The streamer's
+  # LUT modes and a worked example live in architecture/streamer/dds-goertzel.yaml.
 
 
 memory_map:
@@ -172,36 +209,17 @@ memory_map:
 
 programming_patterns:
   - pattern: "lookup_table"
-    description: "Classic lookup table implementation"
+    description: "Load a table from hub into the LUT, then read it with RDLUT"
     code: |
-      ' Load sine table into LUT
-              SETQ2   #127            ' Load 128 longs
-              RDLONG  $200, sine_table_ptr
-              
+      ' Load 128 longs from hub into LUT[0..127]
+              SETQ2   #128-1            ' number of longs, minus 1
+              RDLONG  0, sine_table_ptr ' first LUT long is 0, not $200
+
       ' Use sine lookup
-      get_sine:
-              AND     angle, #$7F     ' 0-127 index
-              RDLUT   sine_val, angle ' Get sine value
+      get_sine
+              AND     angle, #$7F       ' 0-127 index
+              RDLUT   sine_val, angle   ' 3 clocks
               RET
-  
-  - pattern: "waveform_generation"
-    description: "Generate waveform using Streamer with LUT source"
-    code: |
-      ' Fill LUT with waveform data
-              MOV     index, #0
-      .fill_loop:
-              MOV     value, index
-              SHL     value, #24      ' Scale to 32-bit
-              WRLUT   value, index
-              ADD     index, #1
-              CMP     index, #512 WZ
-      IF_NZ   JMP     #.fill_loop
-              
-      ' Configure for LUT streaming
-              WRPIN   ##P_DAC_124R_3V, #0  ' DAC mode
-              WXPIN   #512, #0             ' 512 samples
-              DIRH    #0                   ' Enable DAC
-              XINIT   lut_stream_mode, #0  ' Start streaming
   
   - pattern: "shared_data_exchange"
     description: >-
@@ -210,100 +228,45 @@ programming_patterns:
       The receiver then reads its own LUT normally with RDLUT.
     code: |
       ' COG 1 (odd) -- receiver: accept writes from our paired cog
-      cog1_code:
+      cog1_code
               SETLUTS #1              ' Allow the paired cog to write our LUT
-      .wait:
+      .wait
               RDLUT   flag, #1        ' Read OUR OWN LUT[1]
               CMP     flag, #1 WZ
       IF_NZ   JMP     #.wait
               RDLUT   data, #0        ' Read the message the paired cog wrote
 
       ' COG 0 (even) -- sender: ordinary local LUT writes reach the paired cog
-      cog0_code:
+      cog0_code
               WRLUT   message, #0     ' Data first
               WRLUT   #1, #1          ' Then the flag
-  
-  - pattern: "fast_buffer"
-    description: "Use LUT as high-speed buffer"
-    code: |
-      ' Circular buffer in LUT
-      buffer_ptr    LONG    $200
-      buffer_end    LONG    $2FF
-      
-      write_buffer:
-              WRLUT   data, buffer_ptr
-              ADD     buffer_ptr, #1
-              CMP     buffer_ptr, buffer_end WZ
-      IF_Z    MOV     buffer_ptr, #$200    ' Wrap
-              RET
-              
-      read_buffer:
-              RDLUT   data, buffer_ptr
-              ADD     buffer_ptr, #1
-              CMP     buffer_ptr, buffer_end WZ
-      IF_Z    MOV     buffer_ptr, #$200    ' Wrap
-              RET
 
-  - pattern: "fast_stack"
-    description: "Implement stack in LUT for speed"
-    code: |
-      stack_ptr     LONG    $3FF    ' Start at top of LUT
-      
-      push:
-              WRLUT   value, stack_ptr
-              SUB     stack_ptr, #1
-              RET
-              
-      pop:
-              ADD     stack_ptr, #1
-              RDLUT   value, stack_ptr
-              RET
-
-common_applications:
-  - application: "sine_cosine_tables"
-    description: "Fast trigonometric lookups for DSP"
-    complexity: "intermediate"
-    benefits:
-      - "3-cycle access vs hub memory"
-      - "No hub bandwidth consumption"
-      - "Deterministic timing"
-  
-  - application: "waveform_synthesis"
-    description: "Arbitrary waveform generation via Streamer reading from LUT"
-    complexity: "advanced"
-    benefits:
-      - "Hardware-driven output"
-      - "No COG cycles during playback"
-      - "Smooth, high-frequency waveforms"
-  
-  - application: "data_transformation"
-    description: "Fast data encoding/decoding tables"
-    complexity: "beginner"
-    benefits:
-      - "3-clock table read, no hub access"
-      - "Complex mappings simplified"
-  
-  - application: "inter_cog_communication"
-    description: "Fast data exchange between COG pairs"
-    complexity: "intermediate"
-    benefits:
-      - "No hub bandwidth needed"
-      - "Deterministic access timing"
-      - "512 longs of shared space"
+uses:
+  source: >-
+    P2 Datasheet 2022/11/01 "Lookup RAM" --
+    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:596-601.
+  list:
+    - use: "Scratch space"
+      see: "this file -- RDLUT/WRLUT and the SETQ2 block transfer"
+    - use: "Streamer access"
+      see: "architecture/streamer/dds-goertzel.yaml"
+    - use: "Bytecode execution lookup table"
+      see: "architecture/xbyte_engine.yaml"
+    - use: "Smart pin data source"
+      see: "listed by the source; its mechanism is not described"
+    - use: "Paired-Cog communication mechanism"
+      see: "this file -- special_features LUT_sharing, LUT_events, pair_start"
+    - use: "Code execution"
+      see: "language/pasm2/concepts/execution_modes.yaml"
 
 performance_characteristics:
   access_timing:
     read: "3 clock cycles"
     write: "2 clock cycles"
-    shared_read: "3 clock cycles"
-  
-  bandwidth:
-    internal: "32 bits per 2-3 clocks"
-    streaming: "32 bits per clock (via streamer)"
-  
-  power_consumption:
-    active: "Similar to COG RAM access"
-    idle: "Static power only"
+    block_transfer: "one long per clock via SETQ2 + RDLONG/WRLONG/WMLONG, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
+    block_transfer_source: >-
+      Propeller 2 Documentation v35 (Rev B/C) --
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3257.
   
   comparison_to_hub:
     lut_read: "3 clocks fixed (RDLUT)"
@@ -332,27 +295,28 @@ debugging_considerations:
     description: "Dump LUT contents to hub for examination"
     code: |
       SETQ2   #511            ' Dump all 512 longs
-      WRLONG  $200, dump_ptr  ' Write LUT to hub
+      WRLONG  0, dump_ptr     ' LUT[0..511] to hub (first LUT long is 0)
   
   - tip: "verify_sharing"
     description: "Test LUT write-sharing between paired COGs"
     code: |
       ' Receiving cog:  SETLUTS #1
-      ' Sending cog:    WRLUT   #$12345678, #0
+      ' Sending cog:    WRLUT   ##$12345678, #0
       ' Receiving cog:  RDLUT   x, #0     -- its OWN LUT[0] should now hold $12345678
 
-related_topics:
-  - topic: "streamer"
-    relationship: "Streamer can read LUT contents and output to DACs for waveform generation"
-  
-  - topic: "hub_fifo"
-    relationship: "LUT often used with hub FIFO for buffering"
-  
-  - topic: "cog_pairing"
-    relationship: "Even/odd COG pairs can write into each other's LUT (SETLUTS)"
-  
-  - topic: "dac_operations"
-    relationship: "LUT-to-DAC streaming for waveform generation"
+related:
+  - language/pasm2/rdlut.yaml
+  - language/pasm2/wrlut.yaml
+  - language/pasm2/setluts.yaml
+  - language/pasm2/setq2.yaml
+  - language/pasm2/setse1.yaml
+  - language/pasm2/coginit.yaml
+  - language/pasm2/concepts/setq_block_ops.yaml
+  - language/pasm2/concepts/execution_modes.yaml
+  - language/spin2/constructs/inline_pasm.yaml
+  - architecture/streamer/dds-goertzel.yaml
+  - architecture/xbyte_engine.yaml
+  - architecture/fifo.yaml
 
 extraction_metadata:
   source_documents:
@@ -361,11 +325,17 @@ extraction_metadata:
       sections:
         - "LOOKUP RAM, incl. LOAD/STORE ACCESS and RAM SHARING BETWEEN PAIRED COGS -- lines 471-504"
         - "PASM2 encoding table -- lines 5140 (RDLUT), 5209 (WRLUT), 5340 (SETLUTS)"
+        - "COGINIT pair start -- lines 413, 502; SETSE LUT events -- lines 504, 2246-2249"
+        - "SETQ2 block transfer to and from lookup RAM -- lines 3257-3281"
     - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
       path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "Lookup RAM, p.14 -- lines 592-616"
         - "PASM2 instruction table -- lines 1831 (RDLONG), 2061-2065 (RDLUT/SETLUTS/WRLUT)"
+    - document: "Spin2 Language Documentation v55"
+      path: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt"
+      sections:
+        - "Inline PASM2 cog register and LUT areas -- lines 805-806, 833-834"
   re_derivation_note: >-
     Re-derived 2026-08-26 under F-359. The header this file shipped with cited
     `part1-cog.txt` (a file that has never existed) and datasheet pages 67-68 (the
@@ -376,5 +346,11 @@ extraction_metadata:
     WRLUT 2); and three invented LUT "regions" presented as a memory map. The fabricated
     mnemonic RDLUTS was removed -- it is in no Parallax source, in no other file of this
     knowledge base, and pnut-ts does not accept it as an instruction.
+    Re-derived again 2026-09-13 under F-422, F-427 and F-428: the literal LUT address range
+    corrected to #0..#255; the block-transfer examples corrected to the Silicon Doc's
+    SETQ2 + RDLONG/WRLONG first_lut form, which addresses the LUT from 0; the unsourced
+    waveform_generation, fast_buffer and fast_stack patterns removed, with the shared_read
+    timing, bandwidth, power and FIFO claims; the Spin2 LUT area, the LUT events and the
+    paired-cog start added from their sources.
   confidence: "high"
-  last_updated: "2024-12-30"
+  last_updated: "2026-09-13"

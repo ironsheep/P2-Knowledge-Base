@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-429`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-431`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,6 +50,56 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## Two KB-wide classes surfaced by the LUT fix, carved out because each needs its own per-site pass (2026-09-13) — F-429, F-430
+
+Both were found while applying F-422/F-427 and **fixed inside the LUT neighbourhood**; what remains is
+outside it. Carved out, named here, rather than folded into a LUT change: each touches 13-14 files
+nobody asked about, and each needs a per-site read (F-429) or a YAML-aware edit (F-430) — a text
+regex for F-430 would also match YAML mapping keys.
+
+### F-429 — `source:` provenance labels in 14 KB files name programs that do not contain the code, or name no file at all — `NEEDS-VERIFICATION — 43 sites; 3 CONFIRMED fabricated (no such file), 40 to check against the file they name`
+
+**The class.** Example blocks carry a bare `source:` naming where the code came from. Seven label
+values recur: four name **no file anywhere** — `waveform_generation`, `audio_processing`,
+`motor_control`, `data_processing` — and three name real files held in ingestion —
+`isp_bldc_motor.spin2` (`external-inputs/source-code/obex-projects/2874-ISP_BLDC_Motor_Control/`),
+`flash_loader.spin2` (`sources/flash-loader/`) and `Spin2_debugger.spin2`
+(`external-inputs/source-code/spin-debugger/v51/`).
+
+**Why the real-file labels are not evidence either.** The two checked in the LUT pass were both false:
+the motor-commutation LUT example credited to `isp_bldc_motor.spin2` — a file with no LUT instruction in
+it — and a "debug trace" example credited to `Spin2_debugger.spin2` that is not the debugger's code. A
+label naming a real file is a claim, and 2 of 2 checked were wrong.
+
+**Sites** (measured 2026-09-13, after the LUT fixes; `grep -rn -E '^\s*source: (waveform_generation|audio_processing|motor_control|data_processing|isp_bldc_motor\.spin2|flash_loader\.spin2|Spin2_debugger\.spin2)\s*$' deliverables/ai/P2`):
+- **No such file (CONFIRMED):** `pasm2/rdfast.yaml:55` (`audio_processing`), `pasm2/altgb.yaml:90` (`waveform_generation`), `architecture/smart_pin_patterns.yaml:187` (`motor_control`).
+- **Names a real file — verify:** `pasm2/xinit.yaml` 37, 54, 72 · `pasm2/rdfast.yaml` 46 · `pasm2/brk.yaml` 24, 43 · `pasm2/wypin.yaml` 47, 62, 79, 91 · `pasm2/altgb.yaml` 72 · `pasm2/locktry.yaml` 47 · `pasm2/lockrel.yaml` 51 · `pasm2/testp.yaml` 59 · `pasm2/concepts/setq_block_ops.yaml` 71, 158, 200 · `pasm2/concepts/multi_cog_synchronization.yaml` 117 · `pasm2/concepts/cog_hub_execution.yaml` 157, 278, 301 · `pasm2/concepts/event_interrupt_config.yaml` 59, 120, 138, 155, 334 · `architecture/smart_pin_patterns.yaml` 27, 45, 65, 169, 249 · `pasm2/concepts/streamer_smartpin_control.yaml` 39, 100, 112, 157, 193, 232, 284, 320, 342.
+
+**Correction (source-first).** Per site, open the named file and find the code. Present → cite it by
+path and line, as `setq_block_ops.yaml`'s debugger loop now does. Absent → remove the example; if the
+concept needs one, re-derive it from the named file's real code or from a Parallax source. **Never
+re-label an example in place with a plausible source** — that is the claim-first repair
+`SOURCE-REPAIR-ORDER.md` exists to stop.
+
+### F-430 — PASM2 labels written with a trailing colon do not assemble: 70 lines in 13 KB files — `CONFIRMED`
+
+`pnut-ts` v1.55.5 rejects both `label:` and `.label:` in a `DAT` block — `Expected a unique name, BYTE,
+WORD, LONG, or assembly instruction` — so every code block carrying one fails at its first label. PNut
+is the compiler this KB targets. Measured 2026-09-13 by parsing each YAML and scanning only multi-line
+strings that contain PASM2 mnemonics, after `lookup_ram.yaml`'s four were fixed under F-427:
+
+`spin2/integration/spin2-pasm2-integration.yaml` 21 · `architecture/cog_attention.yaml` 10 ·
+`spin2/patterns/applications/dual_communication.yaml` 10 · `architecture/debug_interrupt.yaml` 7 ·
+`architecture/event_system.yaml` 6 · `architecture/locks.yaml` 4 · `architecture/interrupts.yaml` 3 ·
+`pasm2/concepts/execution_modes.yaml` 2 · `pasm2/concepts/stack_operations.yaml` 2 ·
+`spin2/constructs/repeat.yaml` 2 · `architecture/xbyte_engine.yaml` 1 · `spin2/constructs/case.yaml` 1 ·
+`spin2/conventions/p2-source-file-organization-standard.yaml` 1.
+
+**Correction:** drop the colon from each label, then compile each touched block. Edit YAML-aware (locate
+the line through the parsed string), never with a line regex over the raw file: `^\s*\w+:\s*$` is
+also the shape of a YAML mapping key. **Check the scan's scope first** — a block that is Spin2 rather
+than PASM2, or one written for a different assembler on purpose, is not a defect; confirm per file.
+
 ## LUT memory — code that does not assemble, content nobody sourced, and three sourced facts the LUT page never carried (2026-09-13, LUT app-note research) — F-422, F-427, F-428
 
 Found while researching whether LUT memory deserves its own app note. Stephen chose **option A**:
@@ -60,7 +110,19 @@ reach the file's patterns, performance or applications sections**, and this batc
 Every code verdict below was compiled with `pnut-ts` v1.55.5 — which proves **legality only**; the
 semantic verdicts cite their sources.
 
-### F-422 — LUT code in four KB files and the Assembly manual does not assemble, or states the wrong prefix, literal range or timing — `CONFIRMED`
+### F-422 — LUT code in four KB files and the Assembly manual does not assemble, or states the wrong prefix, literal range or timing — `PENDING-VALIDATION — KB and manual source fixed 2026-09-13; owed: the served KB after the next YAML release, and the Assembly manual's next render`
+
+> **Applied 2026-09-13.** Every site in the table below corrected to its source. The class sweep run
+> while fixing **widened** it by three sites the filing did not carry, all the same defect:
+> `pasm2/setq2.yaml` notes ("LUT access is single-cycle"), `pasm2/concepts/setq_block_ops.yaml`
+> (`lut_advantage` "single-cycle", and a `performance` block of transfer rates no source states —
+> "2 + N cycles", "10-20x faster than a loop" — replaced by the Silicon Doc's "one long per clock"
+> rule, `silicon-doc-text.txt:3257`), and `pasm2/concepts/streamer_smartpin_control.yaml` ("Single-cycle
+> LUT access", removed). Assembly manual §1.3.2 now teaches `SETQ2 #count-1` + `RDLONG 0, hubaddr` and
+> names the `0`-not-`$200` pitfall. **Verified:** every code block remaining in
+> `architecture/lookup_ram.yaml` compiled together clean under `pnut-ts` v1.55.5; the replacement
+> block-load, dump, event and pair-start forms each compiled; all 10 edited YAMLs parse; cross-refs
+> resolve.
 
 | Site | Says | Verdict | Source / proof |
 |---|---|---|---|
@@ -81,7 +143,30 @@ load; the sites above are all it returned. (`xbyte_engine.yaml:253` and Assembly
 `appendix-b-condition-codes.md:143,146` use `_RET_ SETQ` to set the **XBYTE** LUT base — a different,
 correct use, per `silicon-doc-text.txt:969`.)
 
-### F-427 — `lookup_ram.yaml` carries content no source states, some of it contradicting the file itself; the Assembly manual carries one such claim — `CONFIRMED`
+### F-427 — `lookup_ram.yaml` carries content no source states, some of it contradicting the file itself; the Assembly manual carries one such claim — `PENDING-VALIDATION — removed/re-derived 2026-09-13; owed: the served KB after the next YAML release, and the Assembly manual's next render`
+
+> **Applied 2026-09-13, source-first** (`SOURCE-REPAIR-ORDER.md`). Removals: `shared_read`, bandwidth,
+> power, `FIFO_mode`, the `waveform_generation`, `fast_buffer` and `fast_stack` patterns, the
+> `common_applications` benefit bullets, and "FIFO buffers" from the description. Re-derived from
+> source: the `lookup_table` load, `lut_dump`, a `uses:` list taken from the datasheet's own
+> enumeration (`p2-datasheet-text.txt:596-601`), and a source for `LUT_to_DAC_streaming`
+> (`silicon-doc-text.txt:159`). The waveform pattern was **deleted, not rebuilt** (Stephen,
+> 2026-09-13) — its sourced home is `architecture/streamer/dds-goertzel.yaml`, now linked. Two
+> defects the filing missed, fixed in the same pass: the four `label:` lines in the file's own
+> patterns do not assemble (`pnut-ts` rejects the colon — the class is **F-430**), and the bare-name
+> `related_topics` block became a full-path `related:` block (Sacred Rule #7: redirected, none dropped).
+> **The same fabricated-example class sat in the LUT neighbourhood and was fixed with it:**
+> `pasm2/setq2.yaml` and `pasm2/concepts/setq_block_ops.yaml` each carried a motor-commutation LUT
+> example that indexes the LUT as if it held bytes ("8 bytes per state") and credits
+> `isp_bldc_motor.spin2`, which contains **no** `SETQ2`, `RDLUT`, `WRLUT` or `SETLUTS` at all — removed;
+> and a "debug trace" example credited to `Spin2_debugger.spin2`, which is not the debugger's code —
+> `setq_block_ops.yaml` now carries the debugger's actual `SETQ2` block loop
+> (`spin-debugger/v51/Spin2_debugger.spin2:151-162`, compiled clean), `setq2.yaml`'s copy was removed.
+> Invented `source:` labels on the two surviving LUT examples now cite the Silicon Doc mechanism. The
+> rest of that provenance class, outside LUT, is **F-429**. Assembly manual §1.3.1: the CORDIC sentence
+> removed; the paletted-display sentence kept (sourced). **Line budget:** `lookup_ram.yaml` is 356
+> lines against the 200-line ceiling for an architecture entry — down from 379, still over; a split is
+> not in this finding's scope.
 
 | Site | Claim | Why it goes |
 |---|---|---|
@@ -99,7 +184,16 @@ states, and a pattern that does not assemble cannot be "illustrative". The sourc
 (`lookup_table` with the corrected block load, `shared_data_exchange`, `lut_dump` corrected,
 `verify_sharing` with `##`) stays.
 
-### F-428 — three sourced LUT facts are missing from the page a reader goes to for LUT memory — `CONFIRMED`
+### F-428 — three sourced LUT facts are missing from the page a reader goes to for LUT memory — `PENDING-VALIDATION — added 2026-09-13; owed: the served KB after the next YAML release, and the Assembly manual's next render`
+
+> **Applied 2026-09-13.** `architecture/lookup_ram.yaml` gains `special_features` `spin2_lut_area`,
+> `LUT_events` and `pair_start`, each with its source, and `related:` full paths to
+> `spin2/constructs/inline_pasm.yaml`, `pasm2/setse1.yaml` and `pasm2/coginit.yaml`. Findability, in the
+> same pass: the file had **no `aliases:`** (the index harvests aliases, not keywords), so "LUT", "LUT
+> RAM", "Lookup RAM", "LUT sharing" and the datasheet's "Paired-Cog communication mechanism" resolved to
+> nothing — added, collision-checked against the index first; `rdlut.yaml`, `wrlut.yaml` and
+> `setluts.yaml` had no `related:` back to the LUT page — added. Assembly manual: §1.3.2 gains the
+> Spin2 16-long paragraph, §1.3.3 the `COGINIT` pair start and the `SETSE` handshake.
 
 Not wrong: **absent where they are needed.** Each is carried elsewhere in the KB, but neither
 `architecture/lookup_ram.yaml` nor Assembly manual §1.3 states or links it.

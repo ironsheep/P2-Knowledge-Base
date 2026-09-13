@@ -92,7 +92,7 @@ LUT memory occupies a separate address space from cog RAM, addressed at $200-$3F
 
 LUT RAM can also execute code at the same speed as cog RAM (2 clocks per instruction), making it valuable "overflow" code space when programs exceed cog RAM capacity. When the program counter is in the range $200-$3FF, the cog fetches instructions from LUT memory with the same deterministic timing as cog execution.
 
-The LUT integrates with the P2's streamer and CORDIC subsystems. The streamer can output LUT contents to pins for waveform generation, and CORDIC operations can store results in LUT memory. For example, in paletted VGA display the LUT holds a 256-color palette and the streamer translates 8-bit pixel values to RGB output in real time.
+The streamer can read LUT contents and output them to pins and DACs for waveform generation. For example, in paletted VGA display the LUT holds a 256-color palette and the streamer translates 8-bit pixel values to RGB output in real time.
 
 ### 1.3.2 LUT Instructions
 
@@ -100,7 +100,9 @@ The LUT integrates with the P2's streamer and CORDIC subsystems. The streamer ca
 
 **Pitfall:** A literal LUT address reaches only the lower half—`RDLUT d, #0` through `RDLUT d, #255`. `RDLUT d, #256` and above do not assemble (the compiler reports `Constant must be from 0 to 255`). To reach any of the 512 LUT longs, use a register holding the address, or a `PTRA`/`PTRB` pointer with an optional index: `RDLUT d, addr` or `RDLUT d, PTRB[4]`. The 9-bit address field's top bit selects the pointer form, so a plain literal spans only 8 bits; pointers carry the full range.
 
-Programs often load the LUT with data from hub memory at initialization using `SETQ` for burst transfers, then access the LUT repeatedly during time-critical operations. This pattern keeps frequently-accessed data in fast LUT memory while larger datasets remain in hub memory.
+Programs often load the LUT with data from hub memory at initialization using a `SETQ2` block transfer, then access the LUT repeatedly during time-critical operations. `SETQ2 #count-1` followed by `RDLONG 0, hubaddr` loads `count` longs into the LUT starting at its first long; the block form names that long `0`, not `$200`. This pattern keeps frequently-accessed data in fast LUT memory while larger datasets remain in hub memory.
+
+In a cog running the Spin2 interpreter, only LUT `$000`-`$00F` is free. Those 16 longs are available for any use and suit streamer modes that read the LUT; the interpreter occupies LUT `$010`-`$1FF`, so inline PASM2 code must not write there.
 
 ### 1.3.3 LUT Sharing Between Cogs
 
@@ -113,6 +115,8 @@ Figure 1.4: Eight-Cog Architecture with LUT Write Sharing
 :::
 
 The `SETLUTS` instruction activates write-sharing of LUT memory between adjacent cog pairs. When a cog executes `SETLUTS #1`, the paired cog's `WRLUT` writes are copied into this cog's LUT via the LUT's second port. This is one-directional; for two-way mirroring both cogs of the pair must execute `SETLUTS #1`. Adjacent pairs are cogs 0-1, 2-3, 4-5, and 6-7. Each cog retains its own 512-long LUT; SETLUTS activates cross-cog write access rather than expanding LUT size. This supports producer-consumer patterns: one cog writes data the paired cog reads directly, without a hub round-trip.
+
+`COGINIT` can start such a pair: with `%x_1_xxx1` as its first operand, it finds a free even/odd pair and starts both cogs with the same parameters, after which the program must tell the even cog from the odd one. For handshaking across the pair, `SETSE1`-`SETSE4` can raise an event when this cog, or its companion, reads or writes LUT address `%1_1111_11AA` (`$1FC`-`$1FF`).
 
 
 ## 1.4 Hub Memory

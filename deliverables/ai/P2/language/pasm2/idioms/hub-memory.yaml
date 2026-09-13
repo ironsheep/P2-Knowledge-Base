@@ -68,7 +68,7 @@ idioms:
         rdlong  buf, ptra           ' buf..buf+15 filled from hub
       - |
         setq2   #128-1              ' transfer 128 longs to LUT
-        rdlong  $200, hub_ptr       ' LUT registers 0..127 filled
+        rdlong  0, hub_ptr          ' LUT[0..127] filled (LUT is $000-based here)
     context: |
       The canonical fast memcpy substitute for cog code. Up to 16 longs
       per single setq+rdlong pair (or up to 512 longs per single
