@@ -93,34 +93,6 @@ hardware_primitives:
               ' Process request
               wrlong  #0, ##mailbox_base+4     ' Clear flag
 
-debug_monitor_pattern:
-  description: "Singleton debug monitor using lock[15]"
-  implementation: |
-    ' Only one COG can be debug monitor
-    debug_init
-            locktry #15             wc   ' Try for debug lock
-    if_nc   jmp     #not_debug_cog       ' Another COG is monitor
-            
-            ' We are the debug monitor
-            loc     pa, #\debug_isr_code
-            setq    #255                 ' Load ISR
-            rdlong  0, pa
-            
-            mov     ijmp3, ##debug_isr
-            setint3 #BRK_EVENT           ' Enable debug interrupts
-            
-            ' Never release lock[15] - we own debug
-    
-    not_debug_cog
-            ' Regular COG operation
-            ' Can use BRK to trigger debug
-  source: Spin2_debugger.spin2
-  critical_aspects:
-    - "Lock[15] ensures single monitor"
-    - "First COG to acquire becomes monitor"
-    - "Other COGs become clients"
-    - "Monitor never releases lock"
-
 resource_protection_patterns:
   simple_mutex:
     description: "Basic mutual exclusion"
@@ -372,14 +344,14 @@ synchronization_hazards:
     solution: "Always acquire locks in same order"
     example: |
       ' WRONG - can deadlock
-      cog_a:  locktry #LOCK_1
+      cog_a   locktry #LOCK_1
               locktry #LOCK_2
       
-      cog_b:  locktry #LOCK_2    ' Different order!
+      cog_b   locktry #LOCK_2    ' Different order!
               locktry #LOCK_1
       
       ' RIGHT - consistent order
-      both:   locktry #LOCK_1
+      both    locktry #LOCK_1
               locktry #LOCK_2
     
   priority_inversion:

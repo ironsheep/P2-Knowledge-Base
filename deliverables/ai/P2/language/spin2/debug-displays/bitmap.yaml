@@ -25,7 +25,7 @@ syntax:
 configuration_directives:
   note: "Accepted in BITMAP_Configure (window creation)."
   TITLE: "TITLE 'string' -- window caption. Default caption is '<name> - BITMAP', not a bare type name."
-  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See language/spin2/statements/debug.yaml string_quoting."
   POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
   SIZE: "SIZE w h -- pixels, each 1..2048 (default 256x256)"
   DOTSIZE: "DOTSIZE x {y} -- pixel magnification, each 1..256 (default 1x1; y copies x). Client size = w*x by h*y."

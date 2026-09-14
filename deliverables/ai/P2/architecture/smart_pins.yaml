@@ -479,7 +479,7 @@ in_flag:
       waitse1                   ' Sleep until ready
       rdpin   result, #pin      ' Read result
     vs_polling: "Eliminates busy-wait loops, COG sleeps during wait"
-    see_also: "event_system.yaml"
+    see_also: "architecture/event_system.yaml"
 
 adc_capabilities:
   resolution: "12 bits"

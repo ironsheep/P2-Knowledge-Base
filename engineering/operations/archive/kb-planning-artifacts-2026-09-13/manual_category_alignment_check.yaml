@@ -18,7 +18,7 @@ manual_categories_vs_our_files:
       - "REP, SKIP, SKIPF, EXECF"
       - "RETI0-3, RESI0-3"
     our_coverage:
-      branch_addressing.yaml: "✅ Covers JMP, CALL variants"
+      language/pasm2/concepts/branch_addressing.yaml: "✅ Covers JMP, CALL variants"
       stack_operations.yaml: "✅ Covers CALL/RET with stack details"
       rep_instruction.yaml: "✅ Dedicated REP coverage"
       instruction_skipping.yaml: "✅ Covers SKIP, SKIPF"
@@ -158,7 +158,7 @@ critical_gaps_identified:
   3_test_and_jump:
     priority: "HIGH"
     reason: "DJZ, DJNZ, TJx family not covered"
-    action: "Add to branch_addressing.yaml or new test_and_jump.yaml"
+    action: "Add to language/pasm2/concepts/branch_addressing.yaml or new test_and_jump.yaml"
     
   4_hub_atomics:
     priority: "HIGH"
@@ -187,7 +187,7 @@ recommendations:
   immediate_action:
     1: "Create math_operations.yaml - Covers ADD/SUB/MUL/DIV/CMP"
     2: "Create cordic_operations.yaml - Hardware math engine"
-    3: "Extend branch_addressing.yaml with test-and-jump operations"
+    3: "Extend language/pasm2/concepts/branch_addressing.yaml with test-and-jump operations"
     
   validation_result: |
     Our concept organization is VALID and aligns well with the manual.

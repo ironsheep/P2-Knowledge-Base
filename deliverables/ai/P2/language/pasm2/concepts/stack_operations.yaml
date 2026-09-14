@@ -18,13 +18,13 @@ hardware_stacks:
       PUSHA:
         syntax: "PUSHA value"
         operation: "hub[--PTRA] = value"
-        timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per pusha.yaml encoding)"
+        timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pusha.yaml encoding)"
         description: "Pre-decrement push"
       
       POPA:
         syntax: "POPA dest"
         operation: "dest = hub[PTRA++]"
-        timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per popa.yaml encoding)"
+        timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popa.yaml encoding)"
         description: "Post-increment pop"
       
       manual:
@@ -41,12 +41,12 @@ hardware_stacks:
       PUSHB:
         syntax: "PUSHB value"
         operation: "hub[--PTRB] = value"
-        timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per pushb.yaml encoding)"
+        timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pushb.yaml encoding)"
       
       POPB:
         syntax: "POPB dest"
         operation: "dest = hub[PTRB++]"
-        timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per popb.yaml encoding)"
+        timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popb.yaml encoding)"
 
   call_stack:
     type: "Internal hardware stack"
@@ -130,7 +130,7 @@ auto_increment_modes:
 common_patterns:
   function_prologue:
     code: |
-      function:
+      function
         PUSHA old_ptra      ' Save registers
         PUSHA work_reg1
         PUSHA work_reg2
@@ -155,7 +155,7 @@ common_patterns:
       ADD PTRA, #12       ' Clean up 3 parameters
       
       ' Callee
-      function:
+      function
         RDLONG param1, PTRA[1]  ' Access parameters
         RDLONG param2, PTRA[2]
         RDLONG param3, PTRA[3]
@@ -163,7 +163,7 @@ common_patterns:
 
   local_variables:
     code: |
-      function:
+      function
         SUB PTRA, #16       ' Allocate 4 locals
         ' Use PTRA[0..3] for locals
         ' Function body

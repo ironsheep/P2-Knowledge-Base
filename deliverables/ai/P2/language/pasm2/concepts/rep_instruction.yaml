@@ -41,7 +41,7 @@ syntax:
         ADD sum, value
         SHL value, #1
         .loop_end
-    - note: "Label must be within same local scope. See concepts/labels.yaml for scoping rules."
+    - note: "Label must be within same local scope. See language/pasm2/concepts/labels.yaml for scoping rules."
 
   memory_mode_constraints:
     - cog_only: "@label must be within $000-$1FF (512 longs) AND 511 instructions"

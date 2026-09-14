@@ -68,7 +68,7 @@ underlying_implementation:
   description: |
     Internally calculates: WAITX((CLKFREQ/1000) * milliseconds - 1)
     Automatically adjusts for system clock frequency.
-  related_pasm: "WAITX instruction"
+  related_pasm: "language/pasm2/waitx.yaml"
 
 common_uses:
   - "LED blinking and indicators"

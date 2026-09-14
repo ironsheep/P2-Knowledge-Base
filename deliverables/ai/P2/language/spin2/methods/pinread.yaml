@@ -41,7 +41,7 @@ timing:
     the method-call path because we do not have a verifiable measurement.
   underlying_pasm: "TESTP"
   underlying_pasm_timing: "2 clocks (fixed; same in cogexec/lutexec/hubexec — pin instructions have no execution-mode distinction per per-instruction YAMLs)"
-  pin_sampling: "TESTP samples pin state 2 clocks before instruction; reads via INA register lag by 3 clocks (per testp.yaml / io_pin_timing.yaml)"
+  pin_sampling: "TESTP samples pin state 2 clocks before instruction; reads via INA register lag by 3 clocks (per language/pasm2/testp.yaml / architecture/io_pin_timing.yaml)"
 
 examples:
   - code: |

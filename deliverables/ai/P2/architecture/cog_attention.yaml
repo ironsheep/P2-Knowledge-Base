@@ -178,7 +178,7 @@ event_configuration:
       MOV     IJMP1, #atn_handler  ' Set ISR address
       SETINT1 #14                  ' INT1 event source 14 = attention requested
       
-      atn_handler:
+      atn_handler
           ' Handle attention signal
           ' ATN flag auto-cleared by WAITATN
           RETI1
@@ -195,7 +195,7 @@ programming_patterns:
     description: "Master COG coordinates slave COGs"
     code: |
       ' Master COG
-      master:
+      master
           ' Signal all slaves to start
           COGATN  #%11111110      ' Signal COGs 1-7
           
@@ -205,11 +205,11 @@ programming_patterns:
           COGATN  #%00000100      ' Signal COG 2 only
       
       ' Slave COG
-      slave:
+      slave
           WAITATN                 ' Wait for start signal
           ' Begin slave operation
           
-      .loop:
+      .loop
           ' Do work...
           POLLATN WC              ' Check for new command
           IF_C    JMP #new_command
@@ -219,7 +219,7 @@ programming_patterns:
     description: "Synchronize multiple COGs"
     code: |
       ' Synchronization point
-      sync_point:
+      sync_point
           COGID   my_id
           ' All COGs signal readiness
           MOV     mask, #1
@@ -228,7 +228,7 @@ programming_patterns:
           
           ' Wait for all COGs to be ready
           MOV     count, #7       ' Wait for 7 signals
-      .wait_all:
+      .wait_all
           WAITATN                 ' Wait for each COG
           DJNZ    count, #.wait_all
           
@@ -238,7 +238,7 @@ programming_patterns:
     description: "Producer signals consumer when data ready"
     code: |
       ' Producer COG
-      producer:
+      producer
           ' Produce data
           WRLONG  data, buffer_ptr
           ADD     buffer_ptr, #4
@@ -247,7 +247,7 @@ programming_patterns:
           COGATN  consumer_mask   ' Signal consumer COG(s)
       
       ' Consumer COG
-      consumer:
+      consumer
           WAITATN                 ' Wait for data signal
           RDLONG  data, buffer_ptr
           ADD     buffer_ptr, #4
@@ -261,12 +261,12 @@ programming_patterns:
               SETINT3 #14             ' INT3 event source 14 = attention requested
               
       ' Main code continues normally
-      main_loop:
+      main_loop
               ' Regular processing
               JMP     #main_loop
               
       ' Attention handler
-      atn_isr:
+      atn_isr
               ' High-priority attention handling
               RDLONG  command, mailbox
               ' Process command
@@ -282,7 +282,7 @@ programming_patterns:
       ALL_COGS = %11111111    ' All COGs
       
       ' Signal specific group
-      signal_group:
+      signal_group
               COGATN  #GROUP_A        ' Signal group A
               ' or
               COGATN  #GROUP_B        ' Signal group B
@@ -295,7 +295,7 @@ common_applications:
     complexity: "intermediate"
     example: |
       ' Dispatcher finds idle worker and assigns task
-      dispatcher:
+      dispatcher
           RDLONG  task, task_queue
           COGATN  idle_worker_mask
   

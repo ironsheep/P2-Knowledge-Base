@@ -112,9 +112,9 @@ performance_comparison:
     
     For deterministic per-instruction timing, see the underlying PASM ops:
     - Integer add/sub/mul/and/or/xor/shift: 2 clocks each (per ADD/SUB/MUL/etc. YAMLs)
-    - QMUL via CORDIC: 55-clock latency, 8-clock issue interval (per qmul.yaml + Silicon Doc v35)
-    - Hardware divide via CORDIC (QDIV): 55-clock latency (per qdiv.yaml)
-    - Hardware square root via CORDIC (QSQRT): 55-clock latency (per qsqrt.yaml)
+    - QMUL via CORDIC: 55-clock latency, 8-clock issue interval (per language/pasm2/qmul.yaml + Silicon Doc v35)
+    - Hardware divide via CORDIC (QDIV): 55-clock latency (per language/pasm2/qdiv.yaml)
+    - Hardware square root via CORDIC (QSQRT): 55-clock latency (per language/pasm2/qsqrt.yaml)
 
 when_to_use:
   use_float:

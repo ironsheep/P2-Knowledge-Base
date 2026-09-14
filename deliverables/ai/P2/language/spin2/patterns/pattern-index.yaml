@@ -4,55 +4,55 @@ pattern_categories:
   structural:
     description: "Object structure and composition patterns"
     patterns:
-      - no_objects.yaml
-      - single_object.yaml
-      - few_objects.yaml
-      - several_objects.yaml
-      - framework_pattern.yaml
+      - language/spin2/patterns/structural/no_objects.yaml
+      - language/spin2/patterns/structural/single_object.yaml
+      - language/spin2/patterns/structural/few_objects.yaml
+      - language/spin2/patterns/structural/several_objects.yaml
+      - language/spin2/patterns/structural/framework_pattern.yaml
       
   implementation:
     description: "Spin2 implementation patterns"
     patterns:
-      - spin2_buffer_management.yaml
-      - spin2_timing_control.yaml
-      - spin2_protocol_implementation.yaml
-      - spin2_pin_control.yaml
-      - spin2_state_machine.yaml
-      - spin2_error_handling.yaml
-      - spin2_memory_allocation.yaml
-      - spin2_cog_management.yaml
-      - spin2_diagnostic_output.yaml
-      - spin2_event_dispatcher.yaml
-      - spin2_layered_architecture.yaml
-      - spin2_mailbox_communication.yaml
-      - spin2_plugin_system.yaml
-      - spin2_resource_pool.yaml
-      - spin2_shared_memory.yaml
-      - spin2_latest_wins_mailbox.yaml
-      - spin2_rate_domain_decoupler.yaml
-      - spin2_slew_easing_engine.yaml
-      - spin2_cooperative_tasking.yaml
+      - language/spin2/patterns/implementation/spin2_buffer_management.yaml
+      - language/spin2/patterns/implementation/spin2_timing_control.yaml
+      - language/spin2/patterns/implementation/spin2_protocol_implementation.yaml
+      - language/spin2/patterns/implementation/spin2_pin_control.yaml
+      - language/spin2/patterns/implementation/spin2_state_machine.yaml
+      - language/spin2/patterns/implementation/spin2_error_handling.yaml
+      - language/spin2/patterns/implementation/spin2_memory_allocation.yaml
+      - language/spin2/patterns/implementation/spin2_cog_management.yaml
+      - language/spin2/patterns/implementation/spin2_diagnostic_output.yaml
+      - language/spin2/patterns/implementation/spin2_event_dispatcher.yaml
+      - language/spin2/patterns/implementation/spin2_layered_architecture.yaml
+      - language/spin2/patterns/implementation/spin2_mailbox_communication.yaml
+      - language/spin2/patterns/implementation/spin2_plugin_system.yaml
+      - language/spin2/patterns/implementation/spin2_resource_pool.yaml
+      - language/spin2/patterns/implementation/spin2_shared_memory.yaml
+      - language/spin2/patterns/implementation/spin2_latest_wins_mailbox.yaml
+      - language/spin2/patterns/implementation/spin2_rate_domain_decoupler.yaml
+      - language/spin2/patterns/implementation/spin2_slew_easing_engine.yaml
+      - language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml
 
   applications:
     description: "Application-level patterns"
     patterns:
-      - display_driver.yaml
-      - sensor_reader.yaml
-      - motor_controller.yaml
-      - communication_handler.yaml
-      - data_logger.yaml
-      - audio_processor.yaml
-      - test_harness.yaml
-      - configuration_manager.yaml
-      - utility_library.yaml
+      - language/spin2/patterns/applications/display_driver.yaml
+      - language/spin2/patterns/applications/sensor_reader.yaml
+      - language/spin2/patterns/applications/motor_controller.yaml
+      - language/spin2/patterns/applications/communication_handler.yaml
+      - language/spin2/patterns/applications/data_logger.yaml
+      - language/spin2/patterns/applications/audio_processor.yaml
+      - language/spin2/patterns/applications/test_harness.yaml
+      - language/spin2/patterns/applications/configuration_manager.yaml
+      - language/spin2/patterns/applications/utility_library.yaml
       
   archetypes:
     description: "Canonical object archetype reference"
     patterns:
-      - "../concepts/object_archetypes.yaml"
+      - "language/spin2/concepts/object_archetypes.yaml"
 
 selection_guide: |
-  1. First, identify your object archetype from concepts/object_archetypes.yaml:
+  1. First, identify your object archetype from language/spin2/concepts/object_archetypes.yaml:
      - Top-Level Application: Entry point with _clkfreq and main()
      - Driver Object: Hardware abstraction with start/stop lifecycle
      - Library Object: Stateless utility functions

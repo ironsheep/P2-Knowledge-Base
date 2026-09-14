@@ -247,6 +247,6 @@ resources:
 documentation:
   primary: "GitHub repository documentation"
   obex: "P2 Object Exchange (OBEX)"
-  related:
+  references:
     - "HUB75 protocol specification"
     - "Panel-specific LED driver datasheets"

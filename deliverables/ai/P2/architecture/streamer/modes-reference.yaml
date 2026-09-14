@@ -385,13 +385,13 @@ modes:
     symbol: X_DDS_GOERTZEL_SINC1
     description: "DDS output + Goertzel SINC1"
     d_19_16: "%p111"
-    details: dds-goertzel.yaml
+    details: architecture/streamer/dds-goertzel.yaml
     
   - mode: "%1111"
     symbol: X_DDS_GOERTZEL_SINC2
     description: "DDS output + Goertzel SINC2"
     d_19_16: "%p111 (with D[23]=1 — SINC2 select)"
-    details: dds-goertzel.yaml
+    details: architecture/streamer/dds-goertzel.yaml
 
 # Quick mode selection guide
 selection_guide:

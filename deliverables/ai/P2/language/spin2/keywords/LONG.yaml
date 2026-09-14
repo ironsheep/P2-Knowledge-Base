@@ -70,7 +70,7 @@ notes:
   - "Long addresses should be long-aligned (divisible by 4) for optimal performance"
   - "LONG is the implicit default type — omitting a type specifier means LONG"
   - "All pointers are LONG-sized regardless of what they point to"
-  - "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See concepts/struct-bitfields.yaml"
+  - "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See language/spin2/concepts/struct-bitfields.yaml"
 
 related:
   - language/spin2/keywords/BYTE.yaml

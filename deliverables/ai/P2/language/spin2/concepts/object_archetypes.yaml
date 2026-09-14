@@ -368,7 +368,7 @@ archetypes:
           value := result
     related_patterns:
       - "language/spin2/constructs/inline_pasm.yaml"
-      - "language/pasm2/concepts/cog-ram-organization.yaml"
+      - "architecture/cog.yaml"
 
 data_sharing_patterns:
   - pattern: "pointer_passing"

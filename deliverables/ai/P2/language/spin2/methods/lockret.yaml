@@ -41,7 +41,7 @@ timing:
     engineered to run at minimum cost. We do not publish a clock count for
     the method-call path because we do not have a verifiable measurement.
   underlying_pasm: "LOCKRET"
-  underlying_pasm_timing: "2 clocks (range 2...9; per lockret.yaml encoding)"
+  underlying_pasm_timing: "2 clocks (range 2...9; per language/spin2/methods/lockret.yaml encoding)"
 
 related:
   - LOCKNEW

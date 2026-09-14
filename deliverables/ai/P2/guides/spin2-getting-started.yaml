@@ -1,7 +1,7 @@
 title: Spin2 Getting Started - Core Language Essentials
 id: spin2-getting-started
 version: 1.2.0
-content_base: "/deliverables/ai/P2/language/spin2"
+content_base: "language/spin2"
 # content_base names where this guide's subject content lives; it is NOT a resolution
 # base. Every path in this file is repo-absolute and resolves on its own. Do not write a
 # path relative to content_base: entries here point outside it (architecture/), so a
@@ -26,7 +26,7 @@ knowledge_progression:
   pre_requisite:
     ESSENTIAL:
       - name: "P2 Architecture Mental Model"
-        content: "/deliverables/ai/P2/architecture/p2-architecture-mental-model.yaml"
+        content: "architecture/p2-architecture-mental-model.yaml"
         key: p2kbArchP2ArchitectureMentalModel
         why: "Understand COG independence, Spin2 vs PASM2 execution models, shared resources, and when to use inline PASM2. Must read BEFORE writing code."
         when: "Read first, before this guide"
@@ -34,13 +34,13 @@ knowledge_progression:
   immediate_next_steps:
     REQUIRED:
       - name: "Basic I/O Concepts"
-        content: "/deliverables/ai/P2/language/spin2/concepts/basic-io.yaml"
+        content: "language/spin2/concepts/basic-io.yaml"
         why: "Essential for any pin I/O - covers pin groups, ADDPINS, registers, and drive strength"
         when: "Read immediately after Getting Started, before writing I/O code"
         
     RECOMMENDED:
       - name: "Formatting Standards"
-        content: "/deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml"
+        content: "language/spin2/conventions/spin2-formatting-standards.yaml"
         when: "Want consistent, professional code structure"
       - name: "Documentation Styles"
         when: "Need inline documentation (JonnyMac or VS Code style)"
@@ -67,11 +67,11 @@ core_block_types:
       see_also:
         full_declaration_table:
           key: p2kbGuidePasm2GettingStarted
-          path: deliverables/ai/P2/guides/pasm2-getting-started.yaml
+          path: guides/pasm2-getting-started.yaml
           description: "file_structure.clock_setup -- all nine CON declaration combinations with their effects and HUBSET %CC_SS values, plus ASMCLK and _AUTOCLK"
         per_symbol_reference:
           key: p2kbSpin2SpecialConfigurationSymbols
-          path: deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml
+          path: language/spin2/constants/special-configuration-symbols.yaml
           description: "_clkfreq, _xtlfreq, _xinfreq, _errfreq, _rcfast, _rcslow, _AUTOCLK -- one entry per symbol"
       correction_2026_08_27: "This entry previously sat under a key named required_constant and read 'System clock frequency in Hz - REQUIRED for timing', and the example below repeated ' Required: system clock frequency'. v55:1718 states the opposite -- no clock symbol is required. Corrected source-first here; the same claim was corrected in guides/pasm2-getting-started.yaml in the same pass."
     common_uses:
@@ -515,12 +515,12 @@ debugging_support:
 
 next_steps:
   essential_reading:
-    - "/deliverables/ai/P2/language/spin2/concepts/basic-io.yaml - REQUIRED before any I/O work"
+    - "language/spin2/concepts/basic-io.yaml - REQUIRED before any I/O work"
     - "Full Spin2 method reference - for complete language details"
 
   code_style:
-    - "/deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml - professional structure"
-    - "/deliverables/ai/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml or /deliverables/ai/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml - documentation style"
+    - "language/spin2/conventions/spin2-formatting-standards.yaml - professional structure"
+    - "language/spin2/conventions/spin2-docs-jonnymac.yaml or language/spin2/conventions/vscode-pnut-documentation-style.yaml - documentation style"
   
   advanced_features:
     - "Smart Pin methods - hardware-assisted operations"

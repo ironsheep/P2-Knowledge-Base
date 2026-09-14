@@ -91,7 +91,7 @@ formatting_functions:
     - "LSTR(address, length) - length-specified string"
   special:
     - "DLY(ms) - inter-update pacing delay. MUST be the LAST element in the DEBUG() statement. It RELEASES LOCK[15] while it waits, so other cogs can emit DEBUG output during the delay."
-    - "PC_KEY / PC_MOUSE - read host keyboard / mouse (see debug-commands/pc_key.yaml, pc_mouse.yaml)"
+    - "PC_KEY / PC_MOUSE - read host keyboard / mouse (see language/spin2/debug-commands/pc_key.yaml, language/spin2/debug-commands/pc_mouse.yaml)"
     
 control_characters:
   - "13 - Carriage return (new line)"
@@ -162,7 +162,7 @@ examples:
       ' packed long per call (a single packed long advances the window one column).
       DEBUG(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
       DEBUG(`Pair `uhex_long_array_(@buff, 16))   ' whole window: 16 longs = 256 pairs
-    description: "Packed scrolling-window array feed (details in debug-displays/logic.yaml, scope.yaml)"
+    description: "Packed scrolling-window array feed (details in language/spin2/debug-displays/logic.yaml, language/spin2/debug-displays/scope.yaml)"
     
   - code: |
       ' Hexadecimal display with formatting

@@ -153,6 +153,9 @@ optimal_configurations:
 documentation:
   primary: "64029-P2-Edge-Breakout-Board-Guide"
   related:
+    - "hardware/edge-standard-module.yaml"
+    - "hardware/edge-32mb-module.yaml"
+  references:
     - "Edge module documentation"
     - "P2 Silicon Documentation"
     - "Pin mapping references"

@@ -16,12 +16,6 @@ flags_affected:
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:
-- name: Software Breakpoint
-  description: Insert breakpoint for debugger
-  code: "' Hit breakpoint with specific code\n        brk     #1                 \
-    \      ' Breakpoint code 1\n        ' Execution stops here if debugger attached\n\
-    \        ' Debugger can inspect state\n"
-  source: Spin2_debugger.spin2
 - name: Conditional Breakpoint
   description: Break only when condition met
   code: "' Check condition and break if true\n        cmp     value, limit    wc \
@@ -34,13 +28,6 @@ examples:
     \       ' Value to report\n        brk     debug_val                ' Pass to\
     \ debugger\n        \n        ' Debugger logs value and continues\n"
   source: debug_logging
-- name: Assert Implementation
-  description: Implement assertion that breaks on failure
-  code: "' Assert macro implementation\nassert_not_zero\n        tjz     value, #.fail\
-    \            ' Test assertion\n        ret                              ' Success\
-    \ - return\n.fail   brk     #ASSERT_FAILED           ' Break with assert code\n\
-    \        ' Debugger shows assertion failure\n"
-  source: Spin2_debugger.spin2
 - name: Multi-Level Debug
   description: Different debug levels with codes
   code: "' Debug level codes\nDEBUG_TRACE     = 1\nDEBUG_INFO      = 2  \nDEBUG_WARNING\

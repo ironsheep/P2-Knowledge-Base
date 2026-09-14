@@ -138,7 +138,7 @@ interrupt_protection: |
     GETQY result_hi
     .protect
   Note: Spin2 operators are already protected by the interpreter.
-  See concepts/cordic_solver.yaml for detailed patterns.
+  See language/pasm2/concepts/cordic_solver.yaml for detailed patterns.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 compiler_operand_format:

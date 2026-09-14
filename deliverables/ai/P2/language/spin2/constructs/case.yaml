@@ -240,7 +240,7 @@ pasm_equivalent:
     ADD x, #jump_table
     JMP x
     
-    jump_table:
+    jump_table
     JMP #case_0
     JMP #case_1
     JMP #case_2

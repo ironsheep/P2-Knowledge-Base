@@ -31,5 +31,5 @@ notes:
   - "No floating-point variant; use FSQRT() for floats"
   - "Priority 2 operator (unary)"
 related:
-  - "methods/abs.yaml"
-  - "methods/rotxy.yaml"
+  - "language/spin2/methods/abs.yaml"
+  - "language/spin2/methods/rotxy.yaml"

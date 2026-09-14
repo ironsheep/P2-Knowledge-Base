@@ -30,7 +30,7 @@ last_updated: '2025-09-19T16:04:17.730769'
 brief_description: Jump if selector 1 event flag is set
 group_membership:
   group_id: selector_event_jumps
-  group_file: groups/selector_event_jumps.yaml
+  group_file: language/pasm2/groups/selector_event_jumps.yaml
   related:
   - jse2
   - jse3

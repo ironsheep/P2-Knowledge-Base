@@ -51,13 +51,7 @@ interrupt_system:
     SETINT3:
       syntax: "SETINT3 #event"
       operation: "Configure INT3 event source"
-      debug_use: |
-        ' Debug monitor setup
-        setint3 #0              ' Disable initially
-        mov     ijmp3, ##debug_isr
-        setint3 #BRK_EVENT     ' Enable on BRK
-      source: Spin2_debugger.spin2
-      
+
     STALLI:
       syntax: "STALLI"
       operation: "Stall interrupts (disable)"
@@ -85,74 +79,6 @@ interrupt_system:
       operation: "Resume from interrupt (continue interrupted code)"
       behavior: "Like RETI but continues interrupted instruction"
       use: "For interrupts that don't fully handle event"
-
-debug_isr_architecture:
-  complete_preservation:
-    description: "Debug ISR must preserve ALL state"
-    code: |
-      debug_isr
-              ' Save every single register (comprehensive)
-              setq    #$1F            ' Save 32 registers
-              wrlong  0, ptra++       ' Save $000-$01F
-              
-              ' Save special registers
-              mov     save_pa, pa
-              mov     save_pb, pb
-              mov     save_ptra, ptra
-              mov     save_ptrb, ptrb
-              
-              ' Save interrupt state
-              getbrk  save_brk   wcz  ' Get break info
-              
-              ' Debug processing...
-              
-              ' Restore everything in reverse
-              sub     ptra, #32*4
-              setq    #$1F
-              rdlong  0, ptra
-              
-              mov     pa, save_pa
-              mov     pb, save_pb
-              mov     ptra, save_ptra
-              mov     ptrb, save_ptrb
-              
-              reti3   wcz             ' Return with flags
-    source: Spin2_debugger.spin2
-  
-  breakpoint_handling:
-    description: "Process breakpoints and debug commands"
-    code: |
-      ' Identify breakpoint type
-              getbrk  brk_code   wz   ' Get breakpoint code
-              
-              ' Dispatch on code
-              cmp     brk_code, #BP_TRACE    wz
-      if_z    jmp     #handle_trace
-              cmp     brk_code, #BP_WATCH    wz
-      if_z    jmp     #handle_watch
-              cmp     brk_code, #BP_STEP     wz
-      if_z    jmp     #handle_step
-              
-              ' Default: halt for debugger
-              jmp     #debug_prompt
-    source: Spin2_debugger.spin2
-  
-  dynamic_code_overlay:
-    description: "Load debug commands dynamically"
-    challenge: "Limited COG RAM requires overlays"
-    solution: |
-      ' Load debug command handler overlay
-      load_debug_cmd
-              loc     ptra, #\debug_cmd_table
-              add     ptra, cmd_offset
-              setq    #16-1           ' Load 16 longs
-              rdlong  overlay_area, ptra
-              
-              ' Execute overlay
-              call    #overlay_area
-              
-              ' Return to main debug loop
-    source: Spin2_debugger.spin2
 
 event_sources:
   selectable_events:
@@ -265,7 +191,7 @@ interrupt_context:
 
   context_preservation:
     code: |
-      isr1:
+      isr1
         ' Save registers if needed
         PUSHA work_reg
         ' ISR body
@@ -281,7 +207,7 @@ common_patterns:
       MOV IJMP1, ##timer_isr
       SETINT1 #1       ' CT >= CT1
       
-      timer_isr:
+      timer_isr
         ' Handle timer
         ADDCT1 base_time, ##period  ' Next interval
         ' Timer processing
@@ -295,7 +221,7 @@ common_patterns:
       MOV IJMP2, ##pin_handler
       SETINT2 #4       ' SE1 event
       
-      pin_handler:
+      pin_handler
         ' Handle pin event
         AKPIN pin        ' Acknowledge Smart Pin
         RETI2
@@ -307,31 +233,12 @@ common_patterns:
       MOV IJMP3, ##atn_handler
       SETINT3 #12      ' ATN event
       
-      atn_handler:
+      atn_handler
         ' Check which cog sent ATN
         POLLATN WC
         ' Process message
         RETI3
     description: "Inter-cog communication"
-
-  debug_monitor:
-    description: "Complete debug monitor setup"
-    code: |
-      ' Claim debug lock
-      locktry #15         wc
-      if_nc   jmp #debug_in_use
-      
-      ' Setup debug ISR
-      loc     pa, #\debug_isr_hub
-      setq    #256-1
-      rdlong  debug_isr_cog, pa
-      
-      ' Configure INT3 for debug
-      mov     ijmp3, ##debug_isr_cog
-      setint3 #BRK_EVENT
-      
-      ' Debug monitor ready
-    source: Spin2_debugger.spin2
 
   critical_section:
     code: |
@@ -361,7 +268,7 @@ priority_and_nesting:
       by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
       while holding the program counter at its current value, so that the
       interrupt later returns to the address saved in IRETx."
-    entry_overhead_cogexec: "4 clocks (per calld.yaml encoding)"
+    entry_overhead_cogexec: "4 clocks (per language/pasm2/calld.yaml encoding)"
     entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
     exit_overhead: "Same as entry (RETIx/RESIx are CALLD instructions)"
     deferral_conditions: "See architecture/interrupts.yaml deferral_conditions; the branch is held off during ALTxx/SETQ/SETQ2/REP/STALLI/WAITx/AUGS/AUGD/XBYTE/etc."
@@ -405,5 +312,4 @@ limitations:
 references:
   - silicon_doc: Events and Interrupts section
   - instruction_set: Event/Interrupt instructions
-  - Spin2_debugger.spin2: Complete debug ISR implementation
   - application_notes: Interrupt handling patterns

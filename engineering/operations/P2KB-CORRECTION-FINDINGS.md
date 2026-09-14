@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-432`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-435`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,9 +50,81 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## The first run of the full cross-reference gate (2026-09-13) — F-432, F-433, F-434
+
+### F-434 — 246 references in the served KB did not resolve once every string and every depth was read — `PENDING-VALIDATION — 242 repaired 2026-09-13; 2 held for the F-429 pass; owed: the next YAML release run clean`
+
+What the F-340 gate found on its first full run, by kind: **217** paths written short (a bare
+`calld.yaml`, a partial `groups/counter_event_jumps.yaml`) that an agent cannot follow as written;
+**18** paths to files that do not exist; **8** root-prefixed (`/deliverables/ai/P2/…`); **3** `../`
+relative. Plus, from the nested reference walk before it: prose document titles sitting in hardware
+`documentation.related` lists, a `"WAITX instruction"` where a path belonged, and three
+`combines_with` entries written as `name: description`.
+
+**Repairs (Sacred Rule #7 — every reference redirected, none dropped):**
+- **225 short / relative / root-prefixed paths in 97 files** rewritten to their full KB path, mapped
+  only where the target was unique (the containing directory, or a basename held by exactly one
+  file); every file re-parsed clean after.
+- **Ambiguous by hand:** `architecture/locks.yaml` "per `lockrel.yaml` encoding" (PASM2 and Spin2
+  both have one — the clock counts are the PASM2 encodings) → `language/pasm2/lock*.yaml`;
+  `debug-displays/*` `statements/debug.yaml` → `language/spin2/statements/debug.yaml`.
+- **Shorthand that named no file:** `reti1/2/3.yaml` and `resi1/2/3.yaml` (`architecture/cog.yaml`,
+  `architecture/interrupts.yaml`) → `language/pasm2/reti1.yaml` (likewise reti2, reti3) etc.;
+  `fundamentals-manifest.yaml` (a retired scheme) → the `language/fundamentals/` directory, with the
+  retirement stated.
+- **Wrong field, not wrong text:** seven hardware files' `documentation.related` held external
+  document titles ("P2 Silicon Documentation", vendor datasheets) — moved to `references:`, and where
+  the title named a KB entry ("Edge module documentation") a real `related:` path added.
+  `waitms`/`waitus` `related_pasm` → `language/pasm2/waitx.yaml`; `asm_integration_analysis.yaml`
+  `combines_with` → the three `*_analysis.yaml` paths, descriptions kept as comments;
+  `object_archetypes.yaml` → `architecture/cog.yaml` (its `cog-ram-organization.yaml` never existed).
+- **Two files that were never knowledge:** `language/pasm2/concepts/additional_concepts_needed.yaml`
+  (`category: planning`) and `manual_category_alignment_check.yaml` (`category: validation`) are
+  internal gap analyses naming nine planned files that do not exist, and asserting gaps since
+  closed (CORDIC is documented). No file referenced either. **Moved out of the served tree** to
+  `engineering/operations/archive/kb-planning-artifacts-2026-09-13/` — kept, not deleted.
+- **Neighbourhood, same pass:** `language/pasm2/idioms/hub-memory.yaml` said a SETQ block read moves
+  "up to 16 longs" and is "atomic from the hub's perspective"; the Silicon Doc states no 16-long cap
+  and says the hub FIFO takes priority and the block move **waits** (`silicon-doc-text.txt:3257`) —
+  the opposite of atomic. Replaced with the source's rule; the `flash_loader.spin2 lines 148-151`
+  citation, attached to a cog-register example the loader does not contain, now sits only on the
+  LUT-chained pattern those lines actually are (`sources/flash-loader/flash_loader.spin2:148-152`).
+
+**Held:** `language/pasm2/concepts/event_interrupt_config.yaml` (`calld.yaml`) and
+`language/pasm2/xinit.yaml` (`streamer_smartpin_control.yaml`) — both files are being edited by the
+F-429 pass; repaired when it lands.
+
+### F-432 — debug-ISR examples use `IJMP0`/`IRET0` as register names, which do not assemble — `PENDING-VALIDATION — fixed 2026-09-13; owed: the next YAML release`
+
+The Silicon Doc names them, but as roles: *"During a debug ISR, INA and INB … become readable/writable
+RAM registers named IJMP0 and IRET0"* (`silicon-doc-text.txt:2423`). `pnut-ts` v1.55.5 has no such
+symbols — `MOV IJMP0, #5` → `Undefined symbol`, while `MOV INA, #5` assembles. So
+`architecture/debug_interrupt.yaml`'s `execution_tracer` and target-handler examples could not
+assemble. **Fixed:** the code writes `INA`/`INB`, each commented with the IJMP0/IRET0 role it plays
+inside the ISR. Prose that *names* the roles is correct and unchanged. Found by the F-430 pass.
+
+### F-433 — `spin2-pasm2-integration.yaml` teaches Propeller 1 code as P2 — `CONFIRMED — repair dispatched 2026-09-13`
+
+Its cog-startup example waits with `WAITCNT cnt, ##160_000_000` and writes `MOV outa, cnt`; the next
+example reads its parameter with `MOV ptra, par`. `WAITCNT`, `cnt` and `PAR` are Propeller 1; P2 has
+none of them (`pnut-ts` rejects `WAITCNT`), and a P2 cog receives its parameter in PTRA/PTRB via
+COGINIT (`silicon-doc-text.txt:370-415`). Found by the F-430 pass's compile check. Every example in
+the file is being compiled and repaired source-first.
+
 ## Five clock "built-in symbols" that Spin2 does not have — found by measuring what F-340's nested walk would report (2026-09-13) — F-431
 
-### F-431 — `spin2-builtin-symbols-complete.yaml` ships five clock constants with invented values; the compiler rejects every one — `CONFIRMED`
+### F-431 — `spin2-builtin-symbols-complete.yaml` ships five clock constants with invented values; the compiler rejects every one — `PENDING-VALIDATION — fixed 2026-09-13; owed: the served KB after the next YAML release`
+
+> **Applied 2026-09-13, source-first.** The five clock entries deleted, substituting nothing; no
+> `XDIV`/`XMUL` name remains anywhere in the KB. **Widened:** the same file's event section defined
+> only three of Spin2 v55's seventeen event/interrupt symbols, and one of the three was wrong —
+> `EVENT_INT` described as a "Pin edge/level interrupt event", where v55 says *"Interrupt-occurred
+> event or interrupts off"*. The section was **rebuilt from the v55 table**
+> (`spin2-v55-text.txt:1638-1656`): all 17 names (`EVENT_INT`/`INT_OFF`, `EVENT_CT1..3`, `EVENT_SE1..4`,
+> `EVENT_PAT`, `EVENT_FBW`, `EVENT_XMT`/`XFI`/`XRO`/`XRL`, `EVENT_ATN`, `EVENT_QMT`), value = the table's
+> number, description = the table's text, scoped PASM per its heading; the unsourced
+> `usage_context`/`hardware_relationship` flavour text was not carried. `pnut-ts` accepts all 17 and
+> rejects a planted `EVENT_NOT_REAL`.
 
 **How it was found, which is the point.** Stephen asked what a full cross-reference check would take
 (F-340). Running a scratch copy of `validate-crossref-keys.py` with the nested walk enabled reports
@@ -91,7 +163,45 @@ outside it. Carved out, named here, rather than folded into a LUT change: each t
 nobody asked about, and each needs a per-site read (F-429) or a YAML-aware edit (F-430) — a text
 regex for F-430 would also match YAML mapping keys.
 
-### F-429 — `source:` provenance labels in 14 KB files name programs that do not contain the code, or name no file at all — `NEEDS-VERIFICATION — 43 sites; 3 CONFIRMED fabricated (no such file), 40 to check against the file they name`
+### F-429 — `source:` provenance labels in 14 KB files name programs that do not contain the code, or name no file at all — `PENDING-VALIDATION — 43/43 sites repaired 2026-09-13 (dispatched, arbiter-verified); owed: the served KB after the next YAML release`
+
+> **Applied 2026-09-13.** All 43 sites across the 14 named files resolved source-first (open the
+> named file, search for the distinctive instruction sequence, cite or replace/remove — never
+> cite-in-place). **21 grounded (cited to real `file:line`, code replaced with the file's actual
+> lines where the KB's version differed in meaning) · 22 removed (label named no file, or the
+> named file's real code did not match the claimed mechanism) · 0 gaps.** Evidence widened past
+> the 3 originally-confirmed fabrications: `pasm2/event_interrupt_config.yaml`'s five
+> `Spin2_debugger.spin2`-labeled examples (SETINT3/IJMP3/RETI3-based "debug ISR" patterns) were
+> all fabricated — `SETINT3`, `IJMP3`, `RETI3`, and `BRK_EVENT` never appear anywhere in
+> `Spin2_debugger.spin2`; P2's BRK-triggered debug interrupt is a separate hardware channel from
+> the cog INT1-3 mechanism the examples invented. Similarly `multi_cog_synchronization.yaml`'s
+> "singleton debug monitor" pattern (never-release-the-lock, elect-one-monitor-cog) does not
+> match the real mechanism (a lock held briefly by whichever cog is mid-debug-interrupt, released
+> on exit). Two per-instruction YAMLs (`altgb.yaml`, `smart_pin_patterns.yaml`) had a motor-
+> commutation / quadrature-decoder example matching the earlier LUT-pass finding's pattern:
+> plausible-sounding code the named file does not contain. Grounded citations point at
+> `engineering/ingestion/sources/flash-loader/flash_loader.spin2`,
+> `engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2`, and
+> `engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2`
+> (the OBEX-2874 copy of `isp_bldc_motor.spin2` is a 0-byte placeholder — the external-projects
+> copy is the only one with content). `cog_hub_execution.yaml`'s bare-filename
+> `per_instruction_yamls` reference entry was rewritten to full KB paths in the same pass.
+> Verified: `verify-yaml-format.py` clean on all 14 files; `validate-crossref-keys.py` shows the
+> same pre-existing 15 unresolved references present before this pass (none introduced by it).
+>
+> **Arbiter verification, 2026-09-13.** Status set to `PENDING-VALIDATION`, not `DONE`: the fix is
+> applied, the served KB is not yet released. Every example now carrying a `.spin2` citation was
+> checked mechanically — each code line, whitespace-insensitive, looked up in the cited source line
+> range ±3: **26 code blocks, 25 match**; the one miss was a scope artefact (a generic
+> `SETQ #31` example sharing a node with the debugger excerpt the citation belongs to) and the key
+> was renamed `debug_use_source` so the citation cannot be read as covering the generic example.
+> No bogus label remains anywhere in the KB (the finding's grep returns 0). The dispatched agent
+> ran `git stash`/`git stash pop` mid-pass with other repairs in flight; every concurrent edit was
+> checked present afterwards. **Two unlabeled blocks it flagged but did not own** —
+> `cog_hub_execution.yaml` `overlay_table_structure`/`overlay_management` — describe an overlay
+> table and a 32/128-long overlay layout the Spin2 debugger does not have (its overlays load with one
+> `SETQ #overlay_end-overlay_begin` + `RDLONG overlay_begin,pb`,
+> `spin-debugger/v51/Spin2_debugger.spin2:382-384`); removed in the same pass, source-first.
 
 **The class.** Example blocks carry a bare `source:` naming where the code came from. Seven label
 values recur: four name **no file anywhere** — `waveform_generation`, `audio_processing`,
@@ -115,7 +225,19 @@ concept needs one, re-derive it from the named file's real code or from a Parall
 re-label an example in place with a plausible source** — that is the claim-first repair
 `SOURCE-REPAIR-ORDER.md` exists to stop.
 
-### F-430 — PASM2 labels written with a trailing colon do not assemble: 70 lines in 13 KB files — `CONFIRMED`
+### F-430 — PASM2 labels written with a trailing colon do not assemble: 70 lines in 13 KB files — `PENDING-VALIDATION — 76 labels fixed in 16 files 2026-09-13; owed: the served KB after the next YAML release`
+
+> **Applied 2026-09-13 (dispatched, arbiter-verified).** Every changed line diffed against `HEAD`:
+> colon-only, line counts unchanged. The filing's counts were a heuristic and were wrong both ways:
+> **widened** in `cog_attention.yaml` (10→12), `debug_interrupt.yaml` (7→8), `interrupts.yaml` (3→6),
+> `stack_operations.yaml` (2→3); **false positives** in `dual_communication.yaml` (all 10 are Spin2
+> `CASE` branch labels, legal) and `p2-source-file-organization-standard.yaml` (MIT licence text).
+> A tree-wide rescan found the class **outside the filed list**: `pasm2/groups/interrupt_resume.yaml`
+> and `interrupt_return.yaml` (fixed — their example also used `;` comments, which Spin2 does not
+> have, now `'`, compiled clean), and `pasm2/concepts/event_interrupt_config.yaml` (4),
+> `pasm2/concepts/multi_cog_synchronization.yaml` (3), `pasm2/testp.yaml` (1) — fixed once the F-429
+> pass on those files landed, each edit verified by parsing the file before and after and requiring
+> the two documents to be identical except for the removed colons.
 
 `pnut-ts` v1.55.5 rejects both `label:` and `.label:` in a `DAT` block — `Expected a unique name, BYTE,
 WORD, LONG, or assembly instruction` — so every code block carrying one fails at its first label. PNut
@@ -2387,7 +2509,13 @@ Recorded here so they are not rediscovered.
 
 ## `validate-crossref-keys.py` exempts three top-level fields from resolving, and 14 shipped file paths sitting in them point at nothing (2026-08-26, «#321» verification) — F-373
 
-### F-373 — `see_also`, `references` and `related_concepts` are typed `'text'`, so a file path in any of them is never resolved and the gate stays green — `PARTIAL`
+### F-373 — `see_also`, `references` and `related_concepts` are typed `'text'`, so a file path in any of them is never resolved and the gate stays green — `PENDING-VALIDATION — gate half landed 2026-09-13 with F-340; owed: the next YAML release run clean against it`
+
+> **GATE HALF LANDED 2026-09-13.** A file path in `see_also`, `references` or `related_concepts` — or
+> in any other string — is now resolved and fails the gate if it does not exist or is not written
+> KB-root-relative. Prose in those fields stays informational. The content this finding repaired
+> on 2026-09-09 is now defended, and the first run found it had already regressed in two places
+> (`language/spin2/conventions/spin2-*-jonnymac.yaml` root-prefixed `see_also`) — fixed under F-434.
 
 > **CONTENT HALF CLOSED 2026-09-09 (task «#335»).** Every unresolvable file reference in those three
 > fields has been repaired across the shipped set. Re-measured after the sweep: **159 file references
@@ -5125,7 +5253,23 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > ("Select A | B, B") does, the tool truncates both sides identically, and it self-cancels. The
 > shipped record is correct as written; do not align it to the tool's displayed `"B, B"`.
 
-### F-340 — `validate-crossref-keys.py` validates TOP-LEVEL keys only, so 67 nested `related_symbols:` lists in one file are never checked at all — `PARTIAL`
+### F-340 — `validate-crossref-keys.py` validates TOP-LEVEL keys only, so 67 nested `related_symbols:` lists in one file are never checked at all — `PENDING-VALIDATION — traversal landed 2026-09-13; owed: the next YAML release run clean against it`
+
+> **TRAVERSAL LANDED 2026-09-13 (Stephen: "our gate has to be that all references resolve").**
+> `validate-crossref-keys.py` no longer reads the top level. It checks **every KB path token in any
+> string at any depth** (must be a KB-root-relative path to a file that exists; `engineering/…`
+> tokens must exist in the repo; only an `_index.yaml` may list siblings by bare name) and walks
+> **every reference field at every depth** — the fifteen typed fields plus any `related_*`,
+> `prerequisites`, `next_steps`, `knowledge_progression`, `canonical_entries` — resolving named
+> entries against index keys, aliases, and every `symbol_name:` defined in the KB. JSON-schema
+> field descriptors are skipped and counted. The F-340 scope banner is gone because there is no
+> unread share left to disclose. **Negative control** (`--negative-control`) plants eight defects —
+> nested missing path, bogus nested symbol, missing `see_also` path, root-prefixed `next_steps`,
+> missing path in an undeclared field, prose in `related`, a bare filename in prose, a `../` path —
+> plus a positive control; all eight caught, positive clean. `validate-dod-release.py` now runs the
+> negative control as part of the gate, and `release-yamls` states the gate as **0**, not a rate.
+> **First run of the full gate: 246 references did not resolve** (F-434) and it surfaced **F-431**;
+> the nested walk alone would have caught F-338 in August.
 
 > **Location:** `engineering/tools/validate-crossref-keys.py:491-492` —
 > `if field_name not in content or not content[field_name]: continue`, where `content` is the
@@ -5179,8 +5323,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > references** (3161 seen / 688 unseen, 82%). Same defect, same dominant field
 > (`related_symbols`), different denominators — do not treat one as correcting the other.
 >
-> Status: `PARTIAL` — scope stated, measured and printed; the nested traversal + its negative
-> control remain owed, with the 54 unresolved references above as the known entry cost.
+> Status: `PENDING-VALIDATION` — scope half 2026-08-25; the nested traversal and its negative
+> control landed 2026-09-13 (see the TRAVERSAL LANDED note under the headline). Owed: the next
+> YAML release run clean against the full gate.
 
 ### F-341 — six of our own derived analysis documents sit at the root of `engineering/ingestion/sources/`, repeat the pull-up mislabel F-321 exists to kill, and are inside the fidelity gate's declared *Parallax documentary* truth root — `PARTIAL`
 

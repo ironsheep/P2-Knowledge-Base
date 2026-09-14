@@ -10,7 +10,7 @@
 #     silicon-doc-text.txt:5302-5315 (ALLOWI/STALLI/TRGINTx/NIXINTx/SETINTx)
 #     and :5478-5486 (RESIx/RETIx alias definitions)
 #   Per-instruction encodings for the RETIx aliases are carried in this knowledge
-#     base's own language/pasm2/reti0.yaml, reti1.yaml, reti2.yaml and reti3.yaml
+#     base's own language/pasm2/reti0.yaml, language/pasm2/reti1.yaml, language/pasm2/reti2.yaml and language/pasm2/reti3.yaml
 #     (the RESIx counterparts are resi0.yaml .. resi3.yaml). Written out rather
 #     than abbreviated: "reti0..3.yaml" is not a path any reader can resolve.
 #   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has NO interrupt section; it
@@ -359,7 +359,7 @@ programming_patterns:
               ADDCT1  timeout, ##160_000   ' 1ms at 160MHz
               SETINT1 #%0001               ' CT >= CT1
               
-      timer_isr:
+      timer_isr
               ' Interrupt code here
               ADDCT1  timeout, ##160_000   ' Setup next interrupt
               RETI1                        ' Return from interrupt
@@ -372,7 +372,7 @@ programming_patterns:
               SETSE1  #%001_000000 + PIN   ' SE1 = INA/INB bit of PIN rises
               SETINT2 #%0100               ' INT2 from SE1
               
-      pin_isr:
+      pin_isr
               ' Handle pin change. POLLSE1 clears the SE1 event flag.
               POLLSE1
               RETI2                        ' Return
@@ -390,15 +390,15 @@ programming_patterns:
               SETINT3 #%1110              ' ATN event (source 14)
               
       ' ISRs can interrupt each other based on priority
-      int1_isr:
+      int1_isr
               ' INT1 - highest; cannot be interrupted by INT2 or INT3
               RETI1
               
-      int2_isr:
+      int2_isr
               ' INT2 - can be interrupted by INT1 only
               RETI2
               
-      int3_isr:
+      int3_isr
               ' INT3 - lowest; can be interrupted by INT1 or INT2
               RETI3
 
@@ -440,13 +440,13 @@ performance_characteristics:
     interrupt later returns to the address saved in IRETx."
   
   entry_overhead:
-    cogexec: "4 clocks for the dispatched CALLD (per calld.yaml encoding 4 / 13-20)"
+    cogexec: "4 clocks for the dispatched CALLD (per language/pasm2/calld.yaml encoding 4 / 13-20)"
     hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch)"
     note: "Minimum overhead assuming none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
   
   exit_overhead:
     description: "RETIx / RESIx are themselves CALLD instructions and follow the same timing"
-    cogexec: "4 clocks (per reti1/2/3.yaml and resi1/2/3.yaml encoding)"
+    cogexec: "4 clocks (per language/pasm2/reti1.yaml (likewise reti2, reti3) and language/pasm2/resi1.yaml (likewise resi2, resi3) encoding)"
     hubexec: "13-20 clocks"
   
   round_trip_minimum:
@@ -480,7 +480,7 @@ debugging_considerations:
   - consideration: "interrupt_timing"
     description: "Use CT registers to measure ISR execution time"
     code: |
-      isr:
+      isr
           GETCT   start_time
           ' ... ISR code ...
           GETCT   end_time
@@ -523,7 +523,7 @@ extraction_metadata:
     - document: "This knowledge base's own per-instruction YAMLs"
       path: "deliverables/ai/P2/language/pasm2/"
       sections:
-        - "reti0.yaml, reti1.yaml, reti2.yaml, reti3.yaml -- alias encodings"
+        - "language/pasm2/reti0.yaml, language/pasm2/reti1.yaml, language/pasm2/reti2.yaml, language/pasm2/reti3.yaml -- alias encodings"
   re_derivation_note: >-
     Re-derived 2026-08-26 under F-359. The header this file shipped with cited
     `part1-cog.txt` (a file that has never existed) and datasheet pages 71-72 (the

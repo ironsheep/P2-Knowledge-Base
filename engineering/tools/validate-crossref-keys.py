@@ -2,6 +2,19 @@
 """
 Validate that all cross-references in YAML files can be resolved to valid index keys.
 
+SCOPE (F-340 / F-373, 2026-09-13): the release gate is that EVERY reference an agent
+can follow resolves. So this validator reads the whole document, not the top level:
+  * every string value, at every depth, is scanned for KB path tokens (`*.yaml`);
+    each must be a KB-root-relative path to a file that exists (`engineering/...`
+    tokens must exist in the repo; `_index.yaml` files may list siblings by bare name);
+  * every reference field (`related*`, `see_also`, `references`, `cross_references`,
+    `combines_with`, `grouped_with`, `prerequisites`, `next_steps`,
+    `knowledge_progression`, `canonical_entries`) is walked at every depth, and its
+    non-path entries in must-resolve fields must resolve to an index key, alias, or a
+    symbol defined somewhere in the KB (`symbol_name:`);
+  * `--negative-control` plants one defect of every kind and proves each is caught.
+Nothing is reported as "not checked": there is no scope caveat left to print.
+
 This script:
 1. Loads the p2kb-index.json
 2. Scans all YAML files for cross-reference fields
@@ -424,408 +437,302 @@ def extract_refs_from_value(value, field_name: str, ref_type: str) -> List[Tuple
     return refs
 
 
-def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
-    """
-    Validate all cross-references in YAML files.
+PATH_TOKEN = re.compile(r'(?<![\w@/.-])(/?(?:\.{1,2}/)?(?:[\w.-]+/)*[\w.-]+\.ya?ml)(?![\w-])')
+REF_FIELD_RE = re.compile(r'^(related(_[a-z0-9_]+)?|see_also|references|prerequisites|next_steps|'
+                          r'knowledge_progression|canonical_entries|cross_references|combines_with|grouped_with)$')
 
-    Returns a dict with validation results.
-    """
-    # Build set of valid keys
-    valid_keys = set(index.get('files', {}).keys())
+# How each KNOWN reference field's non-path entries are handled. Path-shaped
+# entries are checked for every field by the path-token pass, whatever the type.
+CROSS_REF_FIELDS = {
+    'related': 'mnemonic',
+    'related_components': 'component',
+    'cross_references': 'nested_dict',
+    'see_also': 'text',
+    'references': 'text',
+    'related_documentation': 'mnemonic',
+    'related_concepts': 'text',
+    'related_constructs': 'mnemonic',
+    'related_operators': 'mnemonic',
+    'related_pasm': 'mnemonic',
+    'related_methods': 'mnemonic',
+    'related_instructions': 'mnemonic',
+    'combines_with': 'mnemonic',
+    'grouped_with': 'mnemonic',
+    'related_symbols': 'mnemonic',
+}
 
-    # Load aliases for resolution (v3.3.0+)
-    aliases = index.get('aliases', {})
 
-    # Fields to scan - categorized by how to handle them
-    # 'mnemonic' - instruction names, validate as keys
-    # 'component' - architecture component names
-    # 'path' - file paths to be transformed to keys
-    # 'text' - descriptive text, skip validation (informational)
-    # 'mixed' - could be either, try to resolve but don't fail if not
-    # 'nested_dict' - contains nested structure with paths, extract and validate
-    # Extended field list - now covers 15 reference field types
-    CROSS_REF_FIELDS = {
-        'related': 'mnemonic',              # Instruction mnemonics - MUST resolve
-        'related_components': 'component',   # Component names - SHOULD resolve
-        'cross_references': 'nested_dict',   # Nested dicts with file paths
-        'see_also': 'text',                  # Descriptive text - informational only
-        'references': 'text',                # External references - informational only
-        # NEW FIELDS for comprehensive validation:
-        'related_documentation': 'mnemonic', # Doc references - MUST resolve
-        'related_concepts': 'text',           # Conceptual tags - informational only
-        'related_constructs': 'mnemonic',    # Construct references - MUST resolve
-        'related_operators': 'mnemonic',     # Operator references - MUST resolve
-        'related_pasm': 'mnemonic',          # PASM references - MUST resolve
-        'related_methods': 'mnemonic',       # Method references - MUST resolve
-        'related_instructions': 'mnemonic',  # Instruction references - MUST resolve
-        'combines_with': 'mnemonic',         # Pattern combination refs - MUST resolve
-        'grouped_with': 'mnemonic',          # Grouping references - MUST resolve
-        'related_symbols': 'mnemonic',       # Symbol references - MUST resolve
-    }
+def is_schema_descriptor(value) -> bool:
+    """A JSON-schema-style field descriptor ({type: array, items: ...}) documents a
+    field; it is not a reference list. Schema-definition files carry these."""
+    return (isinstance(value, dict) and 'type' in value
+            and any(k in value for k in ('items', 'description', 'required', 'properties')))
 
-    results = {
-        'total_files': 0,
-        'files_with_refs': 0,
-        'total_refs': 0,
-        'resolved_refs': 0,
-        'unresolved_refs': [],
-        'resolved_by_field': defaultdict(int),
-        'unresolved_by_field': defaultdict(list),
-    }
 
-    yaml_dir = base_path / "deliverables" / "ai" / "P2"
+def iter_strings(node, path=()):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield from iter_strings(v, path + (str(k),))
+    elif isinstance(node, list):
+        for i, x in enumerate(node):
+            yield from iter_strings(x, path + (f'[{i}]',))
+    elif isinstance(node, str):
+        yield '.'.join(path), node
 
-    for yaml_file in yaml_dir.rglob("*.yaml"):
-        results['total_files'] += 1
-        rel_path = str(yaml_file.relative_to(yaml_dir))
 
-        try:
-            with open(yaml_file, 'r') as f:
-                content = yaml.safe_load(f)
+def iter_ref_fields(node, path=()):
+    """Every reference field at every depth. Does not descend into a reference
+    field's own value (its strings are covered by the path-token pass)."""
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if isinstance(k, str) and (k in CROSS_REF_FIELDS or REF_FIELD_RE.match(k)):
+                yield '.'.join(path + (k,)), k, v
+            else:
+                yield from iter_ref_fields(v, path + (str(k),))
+    elif isinstance(node, list):
+        for i, x in enumerate(node):
+            yield from iter_ref_fields(x, path + (f'[{i}]',))
 
-            if not isinstance(content, dict):
+
+class CrossRefChecker:
+    def __init__(self, base_path: Path, index: Dict):
+        self.repo_root = base_path
+        self.yaml_dir = base_path / "deliverables" / "ai" / "P2"
+        self.valid_keys = set(index.get('files', {}).keys())
+        self.aliases = index.get('aliases', {})
+        self.defined_symbols: Set[str] = set()
+        self.by_basename = defaultdict(list)
+        self.results = {
+            'total_files': 0, 'files_with_refs': 0,
+            'path_tokens': 0, 'path_ok': 0,
+            'name_refs': 0, 'name_ok': 0, 'informational': 0,
+            'schema_descriptors_skipped': 0,
+            'issues': [],
+            'resolved_by_field': defaultdict(int),
+            'unlisted_fields': defaultdict(int),
+        }
+
+    # -- setup ---------------------------------------------------------------
+    def load_corpus(self):
+        docs = []
+        for yaml_file in sorted(self.yaml_dir.rglob("*.yaml")):
+            rel = str(yaml_file.relative_to(self.yaml_dir))
+            self.by_basename[yaml_file.name].append(rel)
+            try:
+                with open(yaml_file, 'r') as f:
+                    content = yaml.safe_load(f)
+            except Exception as e:
+                self.issue(rel, '', '', 'parse_error', str(e)[:200])
                 continue
+            docs.append((rel, content))
+            self._collect_symbols(content)
+        return docs
 
-            has_refs = False
+    def _collect_symbols(self, node):
+        if isinstance(node, dict):
+            name = node.get('symbol_name')
+            if isinstance(name, str):
+                self.defined_symbols.add(name)
+            for v in node.values():
+                self._collect_symbols(v)
+        elif isinstance(node, list):
+            for x in node:
+                self._collect_symbols(x)
 
-            # F-340 — MEASURE WHAT THIS TRAVERSAL CANNOT SEE, AND PRINT IT.
-            #
-            # Every CROSS_REF_FIELDS entry is looked up in the file's TOP-LEVEL
-            # mapping and nowhere else. Reference sites nested inside records are
-            # invisible, and that is not a corner case: measured 2026-08-25,
-            # `language/spin2/symbols/spin2-builtin-symbols-complete.yaml` holds
-            # 135 `related_symbols:` lists, every one nested, and this validator
-            # reports `related_symbols: 7 resolved` for the whole corpus -- the
-            # seven entries of the ONE top-level occurrence in the KB. That is
-            # exactly how F-338's two fabricated constant names survived: they sat
-            # in a field this tool NAMES in its own vocabulary, in the file
-            # holding 99% of that field's instances.
-            #
-            # Walking them is owed (F-340) and is NOT done here: with the walk
-            # enabled, 54 nested references do not resolve today, and triaging
-            # those is content work, not instrument work. Until then the honest
-            # move is to stop the number reading as total coverage -- so the
-            # unseen sites are COUNTED and REPORTED, and "0 unresolved" is
-            # reported with its scope attached rather than as "clean".
-            def _count_nested(node, depth=0):
-                n = 0
-                if isinstance(node, dict):
-                    for k, v in node.items():
-                        if k in CROSS_REF_FIELDS and v and depth > 0:
-                            n += len(v) if isinstance(v, (list, dict)) else 1
-                        else:
-                            n += _count_nested(v, depth + 1)
-                elif isinstance(node, list):
-                    for x in node:
-                        n += _count_nested(x, depth + 1)
-                return n
-            results['unseen_nested_refs'] = (results.get('unseen_nested_refs', 0)
-                                             + _count_nested(content))
+    def issue(self, rel, keypath, ref, kind, detail=''):
+        self.results['issues'].append({'file': rel, 'where': keypath, 'reference': ref,
+                                       'kind': kind, 'detail': detail})
 
-            for field_name, field_type in CROSS_REF_FIELDS.items():
-                if field_name not in content or not content[field_name]:
+    # -- path tokens -----------------------------------------------------------
+    def check_path_token(self, rel, keypath, tok):
+        r = self.results
+        r['path_tokens'] += 1
+        if tok.startswith('/') or 'deliverables/ai/P2/' in tok:
+            return self.issue(rel, keypath, tok, 'root_prefixed',
+                              'write KB-root-relative: ' + tok.split('deliverables/ai/P2/')[-1].lstrip('/'))
+        if tok.startswith('./') or tok.startswith('../'):
+            return self.issue(rel, keypath, tok, 'relative_path', self._suggest(rel, tok))
+        if tok.startswith('engineering/'):
+            if (self.repo_root / tok).is_file():
+                r['path_ok'] += 1
+                return
+            return self.issue(rel, keypath, tok, 'missing_repo_file')
+        if (self.yaml_dir / tok).is_file():
+            r['path_ok'] += 1
+            return
+        if Path(rel).name == '_index.yaml' and (self.yaml_dir / Path(rel).parent / tok).is_file():
+            r['path_ok'] += 1   # a directory index may list its own files by bare name
+            return
+        sugg = self._suggest(rel, tok)
+        self.issue(rel, keypath, tok, 'not_full_path' if sugg else 'missing', sugg)
+
+    def _suggest(self, rel, tok):
+        cand = os.path.normpath(str(Path(rel).parent / tok))
+        if (self.yaml_dir / cand).is_file():
+            return cand
+        hits = self.by_basename.get(Path(tok).name, [])
+        if len(hits) == 1:
+            return hits[0]
+        if len(hits) > 1:
+            return 'ambiguous: ' + ', '.join(hits)
+        return ''
+
+    # -- names -------------------------------------------------------------------
+    def resolve_name(self, ref, ref_type, rel):
+        aliases, valid_keys = self.aliases, self.valid_keys
+        if ref in self.defined_symbols:
+            return True
+        for cand in (ref, ref.upper(), ref.lower()):
+            targets = aliases.get(cand)
+            if isinstance(targets, list) and any(t in valid_keys for t in targets):
+                return True
+            if isinstance(targets, str) and targets in valid_keys:
+                return True
+        if ref_type == 'mnemonic':
+            if is_informational_reference(ref):
+                return True
+            if len(ref) <= 20 and ref.replace('_', '').replace('-', '').isalnum():
+                keys = transform_mnemonic_to_key(ref, rel, valid_keys)
+                if '__INFORMATIONAL__' in keys or any(k in valid_keys for k in keys):
+                    return True
+        if ref_type == 'component' and transform_component_to_key(ref, valid_keys):
+            return True
+        return ref in valid_keys or f"p2kb{ref}" in valid_keys
+
+    # -- per document --------------------------------------------------------------
+    def check_document(self, rel, content):
+        r = self.results
+        r['total_files'] += 1
+        if content is None:
+            return
+        for keypath, s in iter_strings(content):
+            for m in PATH_TOKEN.finditer(s):
+                self.check_path_token(rel, keypath, m.group(1))
+        has_refs = False
+        for keypath, field, value in iter_ref_fields(content):
+            if not value:
+                continue
+            if is_schema_descriptor(value):
+                r['schema_descriptors_skipped'] += 1
+                continue
+            has_refs = True
+            ftype = CROSS_REF_FIELDS.get(field)
+            if ftype is None:
+                r['unlisted_fields'][field] += 1
+                ftype = 'text'
+            for ref, rtype in extract_refs_from_value(value, field, ftype):
+                if not isinstance(ref, str) or not ref.strip():
                     continue
+                ref = ref.strip()
+                if PATH_TOKEN.search(ref):
+                    continue            # validated by the path-token pass
+                if rtype in ('text', 'path'):
+                    r['informational'] += 1
+                    continue
+                r['name_refs'] += 1
+                if self.resolve_name(ref, rtype, rel):
+                    r['name_ok'] += 1
+                    r['resolved_by_field'][field] += 1
+                else:
+                    self.issue(rel, keypath, ref, 'unresolved_name', f'field {field} ({rtype})')
+        if has_refs:
+            r['files_with_refs'] += 1
 
-                has_refs = True
-                refs = extract_refs_from_value(content[field_name], field_name, field_type)
 
-                for ref_tuple in refs:
-                    if not ref_tuple or len(ref_tuple) != 2:
-                        continue
+def validate_crossrefs(base_path: Path, index: Dict) -> Dict:
+    checker = CrossRefChecker(base_path, index)
+    for rel, content in checker.load_corpus():
+        checker.check_document(rel, content)
+    return checker.results
 
-                    ref, ref_type = ref_tuple
-                    if not ref or not isinstance(ref, str):
-                        continue
 
-                    results['total_refs'] += 1
-                    ref = ref.strip()
-
-                    # Skip descriptive text (see_also, references fields)
-                    if ref_type == 'text':
-                        # Informational text - count as resolved (not an error)
-                        results['resolved_refs'] += 1
-                        results['resolved_by_field'][field_name] += 1
-                        continue
-
-                    # Try to resolve the reference
-                    resolved = False
-                    tried_keys = []
-                    is_bad_format = False
-
-                    # 0. Check for bad reference formats (bare filenames, relative paths)
-                    if ref.endswith('.yaml'):
-                        if ref.startswith('../') or ref.startswith('./'):
-                            # Relative path - BAD FORMAT
-                            is_bad_format = True
-                            results.setdefault('bad_format_refs', []).append({
-                                'file': rel_path,
-                                'field': field_name,
-                                'reference': ref,
-                                'issue': 'relative_path'
-                            })
-                        elif '/' not in ref:
-                            # Bare filename - BAD FORMAT
-                            is_bad_format = True
-                            results.setdefault('bad_format_refs', []).append({
-                                'file': rel_path,
-                                'field': field_name,
-                                'reference': ref,
-                                'issue': 'bare_filename'
-                            })
-
-                    # 1. Try alias lookup first (v3.4.0+ index feature - array-based)
-                    if not resolved and aliases:
-                        # Helper to check alias array
-                        def check_alias(alias_name):
-                            if alias_name in aliases:
-                                target_keys = aliases[alias_name]
-                                # v3.4.0: aliases are arrays, check if ANY key is valid
-                                if isinstance(target_keys, list):
-                                    for tk in target_keys:
-                                        if tk in valid_keys:
-                                            return True, f"alias:{alias_name}->{tk}"
-                                # Backward compat: single string (pre-3.4.0)
-                                elif target_keys in valid_keys:
-                                    return True, f"alias:{alias_name}->{target_keys}"
-                            return False, None
-
-                        # Try exact match
-                        ok, msg = check_alias(ref)
-                        if ok:
-                            resolved = True
-                            tried_keys.append(msg)
-                        else:
-                            # Try uppercase
-                            ok, msg = check_alias(ref.upper())
-                            if ok:
-                                resolved = True
-                                tried_keys.append(msg)
-                            else:
-                                # Try lowercase
-                                ok, msg = check_alias(ref.lower())
-                                if ok:
-                                    resolved = True
-                                    tried_keys.append(msg)
-
-                    # 2. Try as file path
-                    if not resolved and (ref_type == 'path' or '.yaml' in ref or '/' in ref):
-                        key = transform_path_to_key(ref)
-                        if key:
-                            tried_keys.append(key)
-                            if key in valid_keys:
-                                resolved = True
-
-                        # Also try searching for the key by partial match for hardware refs
-                        if not resolved and '.yaml' in ref:
-                            yaml_name = ref.replace('.yaml', '').replace('-', '').replace('_', '').lower()
-                            for vk in valid_keys:
-                                vk_lower = vk.lower()
-                                # Match patterns like p2kbHwAddonControlBoardAddonControlBoard
-                                if yaml_name in vk_lower and ('hw' in vk_lower or 'hardware' in vk_lower):
-                                    resolved = True
-                                    break
-
-                    # 3. Try as mnemonic
-                    if not resolved and ref_type == 'mnemonic':
-                        # First check if it's an informational reference
-                        if is_informational_reference(ref):
-                            resolved = True
-                        # Check if it's a .yaml file reference - transform to key
-                        elif '.yaml' in ref:
-                            # Extract path components
-                            yaml_path = ref.strip()
-                            yaml_name = yaml_path.split('/')[-1].replace('.yaml', '')
-
-                            # Determine prefix from path context
-                            prefixes = ['p2kbPasm2', 'p2kbSpin2', 'p2kbArch']
-                            if 'operators' in yaml_path or 'op_' in yaml_name:
-                                prefixes = ['p2kbSpin2Op', 'p2kbSpin2', 'p2kbPasm2']
-                            elif 'methods' in yaml_path:
-                                prefixes = ['p2kbSpin2', 'p2kbPasm2']
-                            elif 'debug' in yaml_path or 'debug' in yaml_name:
-                                prefixes = ['p2kbSpin2Dbg', 'p2kbSpin2', 'p2kbPasm2']
-                            elif 'constants' in yaml_path:
-                                prefixes = ['p2kbSpin2', 'p2kbPasm2']
-
-                            # Clean up the name
-                            name_parts = yaml_name.replace('op_', '').replace('-', '_').split('_')
-                            camel_name = ''.join(p.capitalize() for p in name_parts)
-
-                            # Try various key constructions
-                            for prefix in prefixes:
-                                test_key = f"{prefix}{camel_name}"
-                                if test_key in valid_keys:
-                                    resolved = True
-                                    break
-                                tried_keys.append(test_key)
-
-                            # Also try with just capitalized name
-                            if not resolved:
-                                simple_name = yaml_name.replace('-', '').replace('_', '').capitalize()
-                                for prefix in prefixes:
-                                    test_key = f"{prefix}{simple_name}"
-                                    if test_key in valid_keys:
-                                        resolved = True
-                                        break
-                        elif len(ref) <= 20 and ref.replace('_', '').replace('-', '').isalnum():
-                            possible_keys = transform_mnemonic_to_key(ref, rel_path, valid_keys)
-
-                            # Check for informational marker
-                            if '__INFORMATIONAL__' in possible_keys:
-                                resolved = True
-                            else:
-                                for key in possible_keys:
-                                    tried_keys.append(key)
-                                    if key in valid_keys:
-                                        resolved = True
-                                        break
-
-                    # 4. Try as component name
-                    if not resolved and ref_type == 'component':
-                        key = transform_component_to_key(ref, valid_keys)
-                        if key:
-                            tried_keys.append(key)
-                            resolved = True  # transform_component_to_key already checks valid_keys
-
-                    # 5. Direct key lookup (maybe it's already a key)
-                    if not resolved:
-                        if ref in valid_keys:
-                            resolved = True
-                        elif f"p2kb{ref}" in valid_keys:
-                            resolved = True
-
-                    if resolved:
-                        results['resolved_refs'] += 1
-                        results['resolved_by_field'][field_name] += 1
-                    else:
-                        results['unresolved_refs'].append({
-                            'file': rel_path,
-                            'field': field_name,
-                            'reference': ref,
-                            'ref_type': ref_type,
-                            'tried_keys': tried_keys[:3],  # First 3 attempted
-                        })
-                        results['unresolved_by_field'][field_name].append({
-                            'file': rel_path,
-                            'reference': ref,
-                            'ref_type': ref_type,
-                        })
-
-            if has_refs:
-                results['files_with_refs'] += 1
-
-        except Exception as e:
-            print(f"Error processing {yaml_file}: {e}")
-
-    return results
+def run_negative_control(base_path: Path, index: Dict) -> int:
+    """Plant one defect of every kind the gate claims to catch, plus a positive
+    control that must stay clean. A gate that cannot fail on these proves nothing."""
+    checker = CrossRefChecker(base_path, index)
+    checker.load_corpus()                       # symbols + basenames from the real KB
+    checker.results['issues'] = []
+    cases = [
+        ('nc/nested_related_missing.yaml', {'s': {'related': ['language/pasm2/no_such_file.yaml']}}, 'missing'),
+        ('nc/nested_symbol_bogus.yaml', {'items': [{'related_symbols': ['NOT_A_REAL_SYMBOL_XYZ']}]}, 'unresolved_name'),
+        ('nc/see_also_missing.yaml', {'see_also': ['architecture/no_such_file.yaml']}, 'missing'),
+        ('nc/root_prefixed.yaml', {'next_steps': ['/deliverables/ai/P2/architecture/cog.yaml - read first']}, 'root_prefixed'),
+        ('nc/unlisted_field_missing.yaml', {'a': {'related_patterns': ['language/spin2/nope.yaml']}}, 'missing'),
+        ('nc/prose_in_related.yaml', {'documentation': {'related': ['Some Vendor Datasheet Title']}}, 'unresolved_name'),
+        ('nc/bare_in_prose.yaml', {'note': 'see cog.yaml for details'}, 'not_full_path'),
+        ('nc/relative_path.yaml', {'related': ['../pasm2/mov.yaml']}, 'relative_path'),
+        ('nc/positive_control.yaml', {
+            'related': ['language/pasm2/mov.yaml', 'MOV'],
+            'x': {'related_symbols': ['EVENT_CT1']},
+            'see_also': ['architecture/cog.yaml', 'free prose is informational'],
+            'schema': {'related_symbols': {'type': 'array', 'items': {'type': 'string'}}},
+            'next_steps': ['architecture/hub.yaml - the hub'],
+        }, None),
+    ]
+    ok = True
+    print("NEGATIVE CONTROL — each planted defect must be caught; the positive control must stay clean")
+    for rel, doc, expect in cases:
+        before = len(checker.results['issues'])
+        checker.check_document(rel, doc)
+        got = [i['kind'] for i in checker.results['issues'][before:]]
+        passed = (expect in got) if expect else (got == [])
+        ok &= passed
+        print(f"  {'PASS' if passed else 'FAIL'}  {rel:38s} expect={expect or 'clean'} got={got or 'clean'}")
+    print("NEGATIVE CONTROL: " + ("PASS" if ok else "FAIL — the gate cannot see a defect it claims to catch"))
+    return 0 if ok else 1
 
 
 def print_report(results: Dict):
-    """Print a formatted validation report."""
     print("\n" + "=" * 70)
     print("P2KB CROSS-REFERENCE VALIDATION REPORT")
     print("=" * 70)
-
-    print(f"\n📁 Files scanned: {results['total_files']}")
-    print(f"📁 Files with cross-references: {results['files_with_refs']}")
-    bad_format_count = len(results.get('bad_format_refs', []))
-    print(f"\n🔗 Total references: {results['total_refs']}")
-    print(f"✅ Resolved references: {results['resolved_refs']}")
-    print(f"❌ Unresolved references: {len(results['unresolved_refs'])}")
-    if bad_format_count > 0:
-        print(f"⚠️  Bad format references: {bad_format_count}")
-
-    resolution_rate = (results['resolved_refs'] / results['total_refs'] * 100) if results['total_refs'] > 0 else 0
-    print(f"\n📊 Resolution rate: {resolution_rate:.1f}%")
-
-    # SCOPE, PRINTED WITH THE NUMBER IT QUALIFIES (F-340). A rate computed over
-    # the sites this traversal can see must never be read as "cross-references
-    # are clean" -- it means "the share this instrument looks at resolves".
-    unseen = results.get('unseen_nested_refs', 0)
-    seen = results['total_refs']
-    if unseen:
-        cover = seen / (seen + unseen) * 100
-        print(f"⚠️  SCOPE: this traversal reads TOP-LEVEL fields only. "
-              f"{unseen} nested reference site(s) were NOT checked "
-              f"({cover:.0f}% of {seen + unseen} coverage).")
-        print("    A 100% rate above means the top-level share resolves. It is "
-              "not a statement about the nested share (F-340).")
-
-    print("\n" + "-" * 70)
-    print("RESOLUTION BY FIELD:")
-    print("-" * 70)
-    for field, count in sorted(results['resolved_by_field'].items()):
-        print(f"  {field}: {count} resolved")
-
-    # Report bad format references (bare filenames, relative paths)
-    bad_format_refs = results.get('bad_format_refs', [])
-    if bad_format_refs:
+    r = results
+    issues = r['issues']
+    checked = r['path_tokens'] + r['name_refs']
+    ok = r['path_ok'] + r['name_ok']
+    print(f"\n📁 Files scanned: {r['total_files']}   (files with reference fields: {r['files_with_refs']})")
+    print(f"🔗 KB path tokens checked (every string, every depth): {r['path_tokens']}  — resolved {r['path_ok']}")
+    print(f"🔗 Named references checked (reference fields, every depth): {r['name_refs']}  — resolved {r['name_ok']}")
+    print(f"   informational entries (prose in text-typed fields): {r['informational']}")
+    print(f"   schema field descriptors skipped: {r['schema_descriptors_skipped']}")
+    if r['unlisted_fields']:
+        print("   reference-shaped fields with no declared type (paths checked, prose informational): "
+              + ', '.join(f"{k}={v}" for k, v in sorted(r['unlisted_fields'].items())))
+    rate = (ok / checked * 100) if checked else 0
+    print(f"\n📊 Resolution rate: {rate:.1f}%")
+    if issues:
         print("\n" + "-" * 70)
-        print("BAD FORMAT REFERENCES (require fixes):")
+        print(f"REFERENCES THAT DO NOT RESOLVE — COMPLETE LIST ({len(issues)})")
         print("-" * 70)
-        # Group by issue type
-        relative_paths = [r for r in bad_format_refs if r['issue'] == 'relative_path']
-        bare_filenames = [r for r in bad_format_refs if r['issue'] == 'bare_filename']
-
-        if relative_paths:
-            print(f"\n🔸 Relative paths ({len(relative_paths)}):")
-            for ref_info in relative_paths[:10]:
-                print(f"   {ref_info['file']} [{ref_info['field']}]")
-                print(f"      → \"{ref_info['reference']}\"")
-            if len(relative_paths) > 10:
-                print(f"   ... and {len(relative_paths) - 10} more")
-
-        if bare_filenames:
-            print(f"\n🔸 Bare filenames ({len(bare_filenames)}):")
-            for ref_info in bare_filenames[:10]:
-                print(f"   {ref_info['file']} [{ref_info['field']}]")
-                print(f"      → \"{ref_info['reference']}\"")
-            if len(bare_filenames) > 10:
-                print(f"   ... and {len(bare_filenames) - 10} more")
-
-    if results['unresolved_refs']:
-        print("\n" + "-" * 70)
-        print("UNRESOLVED REFERENCES:")
-        print("-" * 70)
-
-        # Group by field type
-        for field, refs in sorted(results['unresolved_by_field'].items()):
-            print(f"\n🔸 {field} ({len(refs)} unresolved):")
-            for ref_info in refs[:10]:  # Show first 10
-                print(f"   {ref_info['file']}")
-                print(f"      → \"{ref_info['reference']}\"")
-            if len(refs) > 10:
-                print(f"   ... and {len(refs) - 10} more")
-
+        by_kind = defaultdict(list)
+        for i in issues:
+            by_kind[i['kind']].append(i)
+        for kind in sorted(by_kind):
+            print(f"\n🔸 {kind} ({len(by_kind[kind])}):")
+            for i in by_kind[kind]:
+                print(f"   {i['file']}  [{i['where']}]")
+                print(f"      → \"{i['reference']}\"" + (f"   ({i['detail']})" if i['detail'] else ''))
     print("\n" + "=" * 70)
-    total_issues = len(results['unresolved_refs']) + len(bad_format_refs)
-    if total_issues == 0:
-        unseen = results.get('unseen_nested_refs', 0)
-        print("✅ ALL TOP-LEVEL CROSS-REFERENCES RESOLVE"
-              + (f"  —  {unseen} nested site(s) NOT checked (F-340)" if unseen else ""))
+    if not issues and checked:
+        print(f"✅ ALL CROSS-REFERENCES RESOLVE — {checked} checked, every field, every depth")
     else:
-        print(f"⚠️  {total_issues} REFERENCES NEED ATTENTION")
-        if bad_format_refs:
-            print(f"   ({len(bad_format_refs)} bad format, {len(results['unresolved_refs'])} unresolved)")
+        print(f"❌ {len(issues)} REFERENCE(S) DO NOT RESOLVE")
     print("=" * 70)
 
 
 def main():
-    """Main entry point."""
+    import sys
     base_path = Path.cwd()
     index_path = base_path / "deliverables" / "ai" / "p2kb-index.json"
-
     print("Loading index...")
     index = load_index(index_path)
     print(f"  Found {len(index.get('files', {}))} keys in index")
-
+    if '--negative-control' in sys.argv:
+        return run_negative_control(base_path, index)
     print("\nScanning YAML files for cross-references...")
     results = validate_crossrefs(base_path, index)
-
     print_report(results)
-
-    # Return exit code based on unresolved refs
-    return 0 if len(results['unresolved_refs']) == 0 else 1
+    return 0 if not results['issues'] and (results['path_tokens'] + results['name_refs']) else 1
 
 
 if __name__ == "__main__":

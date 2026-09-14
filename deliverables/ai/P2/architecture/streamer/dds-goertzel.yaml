@@ -201,7 +201,7 @@ frequency:
   note: |
     Set via SETXFRQ — the streamer NCO masks its MSB before each add, so the
     multiplier is $8000_0000 (2^31), not 2^32. Sub-Hz resolution at typical
-    system clocks. (See pasm2/setxfrq.yaml and streamer/nco-timing.yaml.)
+    system clocks. (See language/pasm2/setxfrq.yaml and architecture/streamer/nco-timing.yaml.)
 
   example: |
     ' Detect 40 kHz at 200 MHz clock:

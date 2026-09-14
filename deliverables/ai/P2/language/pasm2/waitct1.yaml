@@ -31,7 +31,7 @@ last_updated: '2025-09-19'
 brief_description: Wait for CT1 event flag
 group_membership:
   group_id: counter_event_waits
-  group_file: groups/counter_event_waits.yaml
+  group_file: language/pasm2/groups/counter_event_waits.yaml
   related:
   - waitct2
   - waitct3

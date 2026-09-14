@@ -35,24 +35,11 @@ documentation_source: enhanced
 documentation_level: comprehensive
 examples:
 - name: Fast Checksum Calculation
-  description: Calculate checksum over HUB memory block
-  code: "' Calculate checksum over data block\ncalc_checksum\n        rdfast  #0,\
-    \ data_start           ' Start FIFO read, max size\n        mov     checksum,\
-    \ #0             ' Clear checksum\n        mov     count, data_size         '\
-    \ Bytes to process\n        \n.loop   rfbyte  byte_val                 ' Read\
-    \ next byte via FIFO\n        add     checksum, byte_val       ' Add to checksum\n\
-    \        djnz    count, #.loop            ' Continue until done\n        \n  \
-    \      and     checksum, #$FF           ' Keep only low byte\n        ret\n"
-  source: flash_loader.spin2
-- name: Data Stream Processing
-  description: Process continuous data stream from HUB
-  code: "' Process audio samples from HUB buffer\n        rdfast  ##$8000_0000|512,\
-    \ buffer_addr ' No-wait, 512*64 bytes\n        \n.process\n        rflong  sample\
-    \                   ' Get next sample\n        ' Apply DSP operations\n      \
-    \  sar     sample, #1               ' Reduce volume by half\n        add     sample,\
-    \ offset           ' DC offset correction\n        ' Output to DAC\n        wrpin\
-    \   sample, dac_pin\n        jmp     #.process                ' Continue streaming\n"
-  source: audio_processing
+  description: Verify application checksum by summing FIFO-read longs
+  code: "' Verify application checksum\n        rdfast  #0, #0                  ' Sum\
+    \ all application longs\n        rep     #2, app_longs2\n        rflong  x\n\
+    \        add     app_sum, x        wz    ' z=1 if verified\n"
+  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:270-273"
 - name: Block Copy with FIFO
   description: Fast block copy using FIFO for reading
   code: "' Copy block using FIFO read and sequential write\n        rdfast  #0, source_addr\

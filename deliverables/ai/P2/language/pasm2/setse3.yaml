@@ -14,9 +14,9 @@ description: |
   on the specified pin, LUT, or lock condition. Also clears the SE3 event flag.
 
   IMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.
-  See setse1.yaml for complete D[8:0] encoding table.
+  See language/pasm2/setse1.yaml for complete D[8:0] encoding table.
 d_encoding_summary: |
-  D[8:0] encoding (see setse1.yaml for full details):
+  D[8:0] encoding (see language/pasm2/setse1.yaml for full details):
   %000_xx_xxxx = LUT access events
   %000_01_LLLL = Lock rises, %000_10_LLLL = Lock falls, %000_11_LLLL = Lock changes
   %001_PPPPPP = Pin rises, %010_PPPPPP = Pin falls, %011_PPPPPP = Pin changes

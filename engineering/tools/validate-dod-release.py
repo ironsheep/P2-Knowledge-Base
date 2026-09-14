@@ -489,12 +489,10 @@ def validate_cross_references(verbose: bool = False) -> ValidationResult:
                 rate_seen = True
                 result.info(line.strip())
                 if '100.0%' in line:
-                    # SCOPE, NOT A CLEAN BILL (F-340). This validator walks
-                    # TOP-LEVEL fields only; nested reference sites are not read
-                    # at all — which is how two fabricated constant names sat in
-                    # a `related_symbols:` list the tool names in its own
-                    # vocabulary. Say what resolved, never "references are clean".
-                    result.ok("All TOP-LEVEL cross-references resolve")
+                    # F-340/F-373 closed 2026-09-13: the validator now reads every
+                    # string (KB path tokens) and every reference field at every
+                    # depth, so 100% is a statement about ALL references.
+                    result.ok("All cross-references resolve (every string, every reference field, every depth)")
                 else:
                     result.fail("Some cross-references failed to resolve")
                 break
@@ -503,6 +501,18 @@ def validate_cross_references(verbose: bool = False) -> ValidationResult:
         if not rate_seen:
             result.fail("Cross-reference validator printed no resolution rate — "
                         "nothing audited, which is not a pass")
+
+        # A gate must be shown able to fail: plant one defect of every kind it
+        # claims to catch, and require each to be caught.
+        nc = subprocess.run(['python3', str(script_path), '--negative-control'],
+                            capture_output=True, text=True, timeout=120)
+        if nc.returncode == 0 and 'NEGATIVE CONTROL: PASS' in nc.stdout:
+            result.ok("Cross-reference negative control: every planted defect caught")
+        else:
+            result.fail("Cross-reference negative control FAILED — the gate cannot see a defect it claims to catch")
+            for line in nc.stdout.split('\n'):
+                if 'FAIL' in line:
+                    result.info(line.strip())
 
         if proc.returncode != 0 and 'Resolution rate: 100.0%' not in proc.stdout:
             result.fail("Cross-reference validation failed")

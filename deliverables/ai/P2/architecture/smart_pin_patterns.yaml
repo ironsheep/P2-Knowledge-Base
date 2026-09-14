@@ -19,50 +19,12 @@ spi_patterns:
     description: Generate continuous SPI clock using transition mode
     mode: P_TRANSITION
     setup: |
-      ' Configure SPI clock pin (e.g., pin 40)
-      wrpin   ##P_TRANSITION | P_OE, #SPI_CLK_PIN
-      wxpin   ##clk_period, #SPI_CLK_PIN  ' Clock period in sysclks
-      dirh    #SPI_CLK_PIN                 ' Enable smart pin
-      wypin   #16, #SPI_CLK_PIN            ' Generate 16 transitions (8 bits)
-    source: flash_loader.spin2
-
-  spi_data_output:
-    description: SPI MOSI using synchronous serial transmit
-    mode: P_SYNC_TX
-    critical: |
-      MUST use P_PLUS1_B or P_MINUS1_B to route clock from adjacent pin!
-      Example pin layout: MOSI=41, CLK=40 → use P_MINUS1_B (clock is pin-1)
-    setup: |
-      ' Configure MOSI pin (pin 41, clock on pin 40)
-      ' P_MINUS1_B routes B-input from pin-1 (the clock pin)
-      wrpin   ##P_SYNC_TX | P_OE | P_MINUS1_B, #SPI_MOSI_PIN
-      wxpin   #%1_00111, #SPI_MOSI_PIN    ' Start-stop mode, 8 bits
-      dirh    #SPI_MOSI_PIN
-
-      ' Send byte
-      wypin   data_byte, #SPI_MOSI_PIN
-      ' Clock pin generates transitions, MOSI shifts data
-    source: flash_loader.spin2
-
-  spi_data_input:
-    description: SPI MISO using synchronous serial receive
-    mode: P_SYNC_RX
-    critical: |
-      MUST use P_PLUS1_B or P_MINUS1_B to route clock from adjacent pin!
-      Example pin layout: MISO=42, CLK=40 → use P_MINUS2_B (clock is pin-2)
-    setup: |
-      ' Configure MISO pin (pin 42, clock on pin 40)
-      ' P_MINUS2_B routes B-input from pin-2 (the clock pin)
-      wrpin   ##P_SYNC_RX | P_MINUS2_B, #SPI_MISO_PIN
-      wxpin   #%0_00111, #SPI_MISO_PIN    ' Pre-edge sampling, 8 bits
-      dirh    #SPI_MISO_PIN
-
-      ' Receive byte (clock pin triggers reception)
-      ' Wait for IN flag then read
-      testp   #SPI_MISO_PIN         wc
-      rdpin   data_byte, #SPI_MISO_PIN   ' Read and acknowledge
-      shr     data_byte, #24              ' Right-justify 8-bit data
-    source: flash_loader.spin2
+      ' Configure SPI clock pin
+      wrpin   #%01_00101_0, #spi_ck    ' transition output, starts out low
+      wxpin   #1, #spi_ck              ' timebase = 1 clock per transition
+      drvl    #spi_ck                  ' enable smart pin
+      wypin   #16, #spi_ck             ' start 16 clock transitions
+    source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:101-103,167"
 
   spi_full_duplex:
     description: Complete SPI master with CLK, MOSI, MISO on adjacent pins
@@ -142,49 +104,25 @@ adc_patterns:
     description: ADC with calibration sequence
     mode: P_ADC_1X
     calibration: |
-      ' Calibrate ADC (must be done once)
-      wrpin   ##P_ADC_GIO, adc_pin     ' Ground calibration
-      wxpin   #%10_0111, adc_pin       ' 128 samples
-      dirh    adc_pin
-      waitx   ##2000                   ' Wait for cal
-      rdpin   gnd_level, adc_pin       ' Read ground level
-      
-      wrpin   ##P_ADC_VIO, adc_pin     ' VIO calibration
-      waitx   ##2000                   ' ADC samples continuously once enabled
-      rdpin   vio_level, adc_pin       ' Read VIO level
-      
-      ' Calculate scale factor
-      sub     vio_level, gnd_level
-      ' scale = vio_level - gnd_level
-    measurement: |
-      ' Normal ADC reading
-      wrpin   ##P_ADC_1X, adc_pin      ' Normal mode
-      waitx   #100                     ' ADC samples continuously; wait one period
-      rdpin   raw_value, adc_pin
-      
-      ' Apply calibration
-      sub     raw_value, gnd_level
-      mul     raw_value, ##4096
-      div     raw_value, scale
-    source: isp_bldc_motor.spin2
+      ' ADC setup - GIO level
+      wrpin   adc_modes+0, adc_pins           ' switch ADC to GIO calibration
+      wxpin   adc_fram, adc_pins              ' set count period to match PWM frame width
+      wypin   #0, adc_pins
+      dirh    adc_pins                        ' enable ADC pins to use adc
+      ' ... wait for sample ready ...
+      rdpin   gio_levels+0, pin_adc_u_i       ' GIO samples done, read them
 
-encoder_patterns:
-  quadrature_decoder:
-    description: Hardware quadrature decoder for encoders
-    mode: P_QUADRATURE
-    setup: |
-      ' A/B quadrature decoder
-      wrpin   ##P_QUADRATURE, encoder_pin_a
-      wxpin   #0, encoder_pin_a        ' No period
-      dirh    encoder_pin_a             ' Enable
-      
-      ' Read position
-      rdpin   position, encoder_pin_a  ' Get count
-      
-      ' Reset position — pulse DIR low to zero the counter
-      dirl    encoder_pin_a            ' Zero count
-      dirh    encoder_pin_a            ' Re-enable encoder
-    source: motor_control
+      ' ADC setup - VIO level
+      dirl    adc_pins                        ' disable ADC pins for configuration
+      wrpin   adc_modes+1, adc_pins           ' switch ADC to VIO calibration
+      dirh    adc_pins                        ' enable ADC to use adc
+      ' ... wait for sample ready ...
+      rdpin   vio_levels+0, pin_adc_u_i       ' VIO samples done, read them
+
+      sub     vio_levels+0, gio_levels+0      ' sub gio from vio to get range
+    measurement: |
+      qdiv    numerator, vio_levels+0         ' CORDIC divide to get calibrated value
+    source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:1610-1642"
 
 timing_patterns:
   pulse_width_measurement:
@@ -235,18 +173,16 @@ repository_patterns:
 
 synchronization:
   streamer_smartpin_sync:
-    description: Synchronize streamer with smart pin SPI
+    description: Synchronize streamer with smart pin SPI clock
     critical_pattern: |
-      ' Critical: Start smart pins BEFORE streamer
-      dirh    #SPI_CLK_PIN             ' Start clock
-      dirh    #SPI_MOSI_PIN            ' Start MOSI
-      dirh    #SPI_MISO_PIN            ' Start MISO
-      
-      ' Then start streamer
-      xinit   xfer_config, #0          ' Begin transfer
-      
-      ' This order prevents data corruption
-    source: flash_loader.spin2
+      ' Critical: enable the smart pin BEFORE the streamer
+      wrpin   #%01_00101_0,#spi_ck     ' set spi_ck for transition output
+      wxpin   #1,#spi_ck               ' set timebase to 1 clock per transition
+      drvl    #spi_ck                  ' enable smart pin
+
+      ' ... later, start the streamer ...
+      xinit   rmode, pa                ' start outputting bits via streamer
+    source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:100-103,126"
     
 notes:
   - "Each smart pin has an outgoing 33-bit bus which conveys its Z result and a special flag. RDPIN and RQPIN are used to multiplex and read these buses, so that a pin's Z result is read into D and its special flag can be read into C. -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:1-3"

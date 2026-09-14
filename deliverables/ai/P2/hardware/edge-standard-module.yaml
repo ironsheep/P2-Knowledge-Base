@@ -235,7 +235,7 @@ resources:
       title: "P2-EC Edge Module Rev D Product Guide v3.0"
       date: "2022-06-03"
       publisher: "Parallax Inc."
-    related:
+    references:
       - "P2 Silicon Documentation (Propeller 2 Datasheet)"
       - "Winbond W25Q128JV Flash Datasheet"
 

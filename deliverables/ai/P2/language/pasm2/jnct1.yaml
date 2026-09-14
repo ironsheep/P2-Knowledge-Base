@@ -30,7 +30,7 @@ last_updated: '2025-09-19T16:04:17.043235'
 brief_description: Jump if counter 1 event flag is NOT set
 group_membership:
   group_id: counter_event_jumps
-  group_file: groups/counter_event_jumps.yaml
+  group_file: language/pasm2/groups/counter_event_jumps.yaml
   related:
   - jct1
   - jct2

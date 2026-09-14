@@ -45,7 +45,7 @@ syntax:
 configuration_directives:
   note: "Accepted in LOGIC_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title. Default caption is '<name> - LOGIC', not a bare type name."
-  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See statements/debug.yaml string_quoting."
+  string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See language/spin2/statements/debug.yaml string_quoting."
   POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
   SAMPLES: "SAMPLES n -- number of samples across the window, 4..2047 (default 32). A single integer -- LOGIC has NO {first last} form (that shape belongs to FFT/SPECTRO)."
   SPACING: "SPACING n -- HORIZONTAL pixel spacing between successive samples (the X-axis time base), 1..32 (default 8). This is NOT vertical channel spacing -- the per-channel vertical pitch is fixed at the font cell height."
@@ -66,8 +66,8 @@ display_directives:
   CLEAR: "CLEAR -- clear the display and reset the sample population and rate counters"
   SAVE: "SAVE {WINDOW} 'filename' -- write a .bmp of the display area, or of the entire window if WINDOW is given, to <filename>.bmp. filename is REQUIRED; WINDOW optional. (A 'l t w h' region variant selects a sub-rectangle.)"
   CLOSE: "CLOSE -- close (free) this named window; reclaims one of the 32 display slots. It is a COMMAND ONLY (takes no arguments), accepts MORE THAN ONE window name in a message, and is UPDATE-FIRST/CLOSE-SECOND: the rest of the message executes before the close, so `Win SAVE 'shot' CLOSE saves and THEN closes. Distinct from ending the whole DEBUG session via DEBUG(DEBUG_END_SESSION); see language/spin2/constants/debug-end-session.yaml"
-  PC_KEY: "`PC_KEY(@key) -- REQUIRES ITS OWN BACKTICK inside the display message; transmit the latched keypress LONG to the P2 (see pc_key.yaml)"
-  PC_MOUSE: "`PC_MOUSE(@buf7) -- REQUIRES ITS OWN BACKTICK inside the display message; transmit the mouse position+buttons LONG pair to the P2 (see pc_mouse.yaml)"
+  PC_KEY: "`PC_KEY(@key) -- REQUIRES ITS OWN BACKTICK inside the display message; transmit the latched keypress LONG to the P2 (see language/spin2/debug-commands/pc_key.yaml)"
+  PC_MOUSE: "`PC_MOUSE(@buf7) -- REQUIRES ITS OWN BACKTICK inside the display message; transmit the mouse position+buttons LONG pair to the P2 (see language/spin2/debug-commands/pc_mouse.yaml)"
 
 input:
   model: "Shared form-level input model (identical across all nine DEBUG display windows)."

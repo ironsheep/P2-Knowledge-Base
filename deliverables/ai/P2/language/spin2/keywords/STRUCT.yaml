@@ -365,7 +365,7 @@ notes:
   - "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters"
   - "V49+: Structure layout (size, alignment) is preserved exactly when imported"
   - "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
-  - "V54+: Named bitfields on BYTE/WORD/LONG members — see v54_enhancements section and concepts/struct-bitfields.yaml"
+  - "V54+: Named bitfields on BYTE/WORD/LONG members — see v54_enhancements section and language/spin2/concepts/struct-bitfields.yaml"
   - "V54+: Nameless single BYTE/WORD/LONG member form — struct_var.bitfield without intermediate member name"
   - "V54+: Bitfield syntax is NOT enforced by a version directive; {Spin2_v54} is recommended as declaration of intent"
   - "V54+: No new interpreter mechanism — reuses the existing variable-bitfield setup paths"

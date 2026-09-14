@@ -30,13 +30,11 @@ streamer_system:
         mode: "32-bit mode configuration"
         count: "Transfer count"
       critical_timing: |
-        ' CRITICAL: Start Smart Pins BEFORE XINIT!
-        dirh    #SPI_CLK_PIN      ' Start clock first
-        dirh    #SPI_MOSI_PIN     ' Then MOSI
-        dirh    #SPI_MISO_PIN     ' Then MISO
-        xinit   xfer_config, #0   ' Finally start streamer
+        ' CRITICAL: Start Smart Pin BEFORE XINIT!
+        drvl    #spi_ck           ' enable smart pin (clock) first
+        xinit   rmode, pa         ' then start streamer outputting bits
         ' This order prevents data corruption
-      source: flash_loader.spin2
+      source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:103,126"
     
     XSTOP:
       syntax: "XSTOP"
@@ -96,8 +94,8 @@ smart_pin_system:
       use: "Set baud rate, period, clock source, etc."
       spi_clock_example: |
         ' For SPI clock generation
-        wxpin   #1, #SPI_CLK_PIN  ' Timebase = sysclk/2
-      source: flash_loader.spin2
+        wxpin   #1, #spi_ck       ' set timebase to 1 clock per transition
+      source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:102"
     
     WYPIN:
       syntax: "WYPIN value, #pin"
@@ -105,11 +103,10 @@ smart_pin_system:
       use: "Send data, set count, trigger operations"
       multiple_uses: |
         ' Y register serves different purposes:
-        wypin   pwm_period, pwm_pin      ' PWM: Set base period
-        wypin   data_byte, spi_pin       ' SPI: Transmit data
-        wypin   #1, adc_pin              ' ADC: Trigger conversion
-        wypin   #0, any_pin              ' Universal: Acknowledge
-      source: isp_bldc_motor.spin2
+        wypin   #0, drive_pins           ' PWM: force outputs off
+        wypin   drive_u_, pin_pwm_u_l    ' PWM: set duty on a driven pin
+        wypin   #0, adc_pins             ' ADC: start/acknowledge sampling
+      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2025,2027,1613"
     
     DIRH:
       syntax: "DIRH #pin"
@@ -146,15 +143,14 @@ smart_pin_system:
       flags: "C = pin state, Z = !pin state"
       hall_sensor_example: |
         ' Build Hall sensor state for motor control
-        mov     hall_state, #0
-        testp   #HALL_A_PIN    wc
-        rcl     hall_state, #1
-        testp   #HALL_B_PIN    wc
-        rcl     hall_state, #1
-        testp   #HALL_C_PIN    wc
-        rcl     hall_state, #1
-        ' hall_state = 3-bit Hall pattern
-      source: isp_bldc_motor.spin2
+        testp   pin_hall_w      wc  ' read hall effect sensor
+        rcl     hall_, #1
+        testp   pin_hall_v      wc
+        rcl     hall_, #1
+        testp   pin_hall_u      wc
+        rcl     hall_, #1
+        ' hall_ = 3-bit Hall pattern
+      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2041-2046"
 
 smart_pin_modes:
   serial_modes:
@@ -186,11 +182,10 @@ smart_pin_modes:
         mode: "P_TRANSITION"
         description: "Generate continuous SPI clock"
         code: |
-          wrpin   ##P_TRANSITION | P_OE, #SPI_CLK_PIN
-          wxpin   #1, #SPI_CLK_PIN        ' sysclk/2
-          wypin   #0, #SPI_CLK_PIN        ' Start transitions
-          dirh    #SPI_CLK_PIN
-        source: flash_loader.spin2
+          wrpin   #%01_00101_0, #spi_ck   ' transition output, starts out low
+          wxpin   #1, #spi_ck             ' timebase = 1 clock per transition
+          drvl    #spi_ck                 ' enable smart pin
+        source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:101-103"
       
       sync_tx:
         mode: "P_SYNC_TX"
@@ -227,9 +222,11 @@ smart_pin_modes:
       dead_time_critical: |
         ' Dead-time (shoot-through prevention) is a TWO-PIN, software technique:
         ' offset the high- and low-side duty so their active intervals never overlap.
-        sub     high_duty, dead_time    ' high side switches on later
-        add     low_duty,  dead_time    ' low side switches off earlier
-      source: isp_bldc_motor.spin2
+        add     drive_u_, dead_gap_             ' low side turns off (inverted) earlier
+        if_nc   wypin   drive_u_, pin_pwm_u_l
+        sub     drive_u_, dead_gap_             ' high side turns on later
+        if_nc   wypin   drive_u_, pin_pwm_u_h
+      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2026-2029"
       
     nco_frequency:
       mode: "P_NCO_FREQ"
@@ -268,20 +265,22 @@ smart_pin_modes:
       mode: "P_ADC_1X"
       calibration_sequence: |
         ' CRITICAL: Calibrate ADC for accuracy
-        wrpin   ##P_ADC_GIO, adc_pin    ' Ground cal
-        wxpin   #%10_0111, adc_pin      ' 128 samples
-        dirh    adc_pin
-        waitx   ##2000
-        rdpin   gnd_level, adc_pin
-        
-        wrpin   ##P_ADC_VIO, adc_pin    ' VIO cal
-        wypin   #0, adc_pin
-        waitx   ##2000
-        rdpin   vio_level, adc_pin
-        
+        wrpin   adc_modes+0, adc_pins   ' switch ADC to GIO calibration
+        wxpin   adc_fram, adc_pins      ' set count period to match PWM frame width
+        wypin   #0, adc_pins
+        dirh    adc_pins                ' enable ADC pins to use adc
+        ' ... wait for sample ready ...
+        rdpin   gio_levels+0, pin_adc_u_i
+
+        dirl    adc_pins                ' disable ADC pins for configuration
+        wrpin   adc_modes+1, adc_pins   ' switch ADC to VIO calibration
+        dirh    adc_pins
+        ' ... wait for sample ready ...
+        rdpin   vio_levels+0, pin_adc_u_i
+
         ' Calculate scale factor
-        sub     vio_level, gnd_level
-      source: isp_bldc_motor.spin2
+        sub     vio_levels+0, gio_levels+0
+      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:1610-1642"
   
   repository_mode:
     data_mailbox:
@@ -299,47 +298,33 @@ smart_pin_modes:
 
 common_patterns:
   spi_flash_access:
-    description: "Complete SPI flash read with streamer"
+    description: "SPI flash read with streamer (single clock smart pin; data moves through the streamer, not per-line smart pins)"
     code: |
-      ' Setup pins (ORDER CRITICAL!)
-      wrpin   spi_ck_mode, #SPI_CK
-      wxpin   #1, #SPI_CK
-      wypin   #0, #SPI_CK
-      wrpin   spi_tx_mode, #SPI_TX
-      wxpin   x_config, #SPI_TX
-      wrpin   spi_rx_mode, #SPI_RX
-      wxpin   x_config, #SPI_RX
-      
-      ' Start pins BEFORE streamer!
-      dirh    #SPI_CK
-      dirh    #SPI_TX
-      dirh    #SPI_RX
-      
-      ' Now start streamer
-      xinit   xfer_config, #0
-    source: flash_loader.spin2
-  
+      ' Setup the clock smart pin (ORDER CRITICAL!)
+      wrpin   #%01_00101_0, #spi_ck    ' transition output, starts out low
+      wxpin   #1, #spi_ck              ' timebase = 1 clock per transition
+      drvl    #spi_ck                  ' enable smart pin BEFORE the streamer
+
+      ' Now start streamer to move the actual data
+      wypin   x, #spi_ck               ' start spi_ck transitions
+      waitx   #3                       ' align spi_ck transitions with sampling
+      xinit   wmode, #0                ' start inputting bits to hub via streamer
+    source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:101-103,258-260"
+
   motor_control_pwm:
-    description: "3-phase motor control with dead-time"
+    description: "3-phase motor control PWM with dead-time (Smart Pin per side, high side true / low side inverted)"
     code: |
-      ' Setup PWM pins with dead-time
-      mov     pa, pwm_config
-      or      pa, #P_OE
-      wrpin   pa, #PWM_A_HIGH
-      wrpin   pa, #PWM_A_LOW
-      wrpin   pa, #PWM_B_HIGH
-      wrpin   pa, #PWM_B_LOW
-      wrpin   pa, #PWM_C_HIGH
-      wrpin   pa, #PWM_C_LOW
-      
-      ' Set base period
-      wxpin   pwm_period, #PWM_A_HIGH
-      ' ... repeat for all pins ...
-      
-      ' Update with commutation pattern
-      wxpin   phase_a_duty, #PWM_A_HIGH
-      wypin   #1, #PWM_A_HIGH  ' Trigger update
-    source: isp_bldc_motor.spin2
+      ' Setup PWM pins with dead-time (per phase; shown for phase U)
+      wrpin   pwmn, pin_pwm_u_l         ' low side is inverted
+      wrpin   pwmt, pin_pwm_u_h         ' high side is not inverted
+      wxpin   fram, drive_pins          ' set PWM frame width
+
+      ' Update with commutation pattern (dead-gap offsets applied)
+      add     drive_u_, dead_gap_       ' low side turns off earlier
+      wypin   drive_u_, pin_pwm_u_l
+      sub     drive_u_, dead_gap_       ' high side turns on later
+      wypin   drive_u_, pin_pwm_u_h
+    source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:1600-1608,2026-2029"
 
 coordination:
   streamer_smartpin:

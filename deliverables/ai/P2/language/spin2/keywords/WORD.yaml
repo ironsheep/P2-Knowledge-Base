@@ -58,7 +58,7 @@ notes:
   - "Signed range: -32,768 to 32,767"
   - "Word addresses should be word-aligned (even addresses) for optimal performance"
   - "Default type is LONG if no type specifier given"
-  - "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See concepts/struct-bitfields.yaml"
+  - "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See language/spin2/concepts/struct-bitfields.yaml"
 
 related:
   - language/spin2/keywords/BYTE.yaml

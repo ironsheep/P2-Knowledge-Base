@@ -67,4 +67,4 @@ essential_patterns:
   error_with_context: 'DEBUG("ERROR at address ", UHEX_(addr), ": ", SDEC_(error_code))'
   sensor_reading: 'DEBUG("Sensor: ", FDEC_(value), " volts")'
 
-detailed_reference: "debug-formatters-complete.yaml"
+detailed_reference: "language/spin2/debug-commands/debug-formatters-complete.yaml"

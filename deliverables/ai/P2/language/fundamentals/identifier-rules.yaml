@@ -24,7 +24,7 @@ core_rules:
     first_character: ["letter", "underscore"]
     subsequent_characters: ["letter", "digit", "underscore"]
     
-  case_sensitivity: "Case-insensitive (see case-sensitivity.yaml)"
+  case_sensitivity: "Case-insensitive (see language/fundamentals/case-sensitivity.yaml)"
 
 detailed_specification:
   character_rules:

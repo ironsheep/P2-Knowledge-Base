@@ -74,7 +74,7 @@ key_parameters:
   api: "all take (pStack, nStackLongCt) in LONGS: prepStackForCheck(fill+sentinel, call before launch); checkStack(halts + reports if the sentinel was overwritten); getStackDepth(high-water count, bottom-up to first untouched long); reportStackUse(prints 'STACK used N of M')"
   placement_rule: "the sentinel long (endStackMark) MUST abut the stack buffer with no gap — declare it immediately after the stack in the SAME DAT block; prepStackForCheck writes it"
   sizing_method: "start at 128 longs (can't overflow while measuring) -> exercise the DEEPEST call path -> reportStackUse reads N -> set buffer to ~1.5xN -> keep a checkStack guard in a slow loop"
-  cog_stack_defaults: "cog stack floor ~32 longs, typical 64-128 for moderate Spin2 code (cogspin.yaml); a task usually needs less than a full cog (one focused job)"
+  cog_stack_defaults: "cog stack floor ~32 longs, typical 64-128 for moderate Spin2 code (language/spin2/methods/cogspin.yaml); a task usually needs less than a full cog (one focused job)"
   stack_consumption: "params -> results -> locals packed in declaration order, plus nested-call depth (Spin2 v55 text:284)"
   two_contexts: "new-cog stack (cogspin, one call stack per cog) and intra-cog task stack (TASKSPIN, one per task) — same sizing job; the instrument only watches a hub buffer"
 
@@ -115,7 +115,7 @@ provenance:
   tool_ground_truth:
     - "pnut_ts — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
   cross_check_sources:
-    - "P2 Knowledge Base cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
+    - "P2 Knowledge Base language/spin2/methods/cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; language/pasm2/concepts/stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
   community_examples:
     - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC) — the sentinel-fill stack-overflow utility the note is built around; shipped verbatim in the example library"
   companion_publication:

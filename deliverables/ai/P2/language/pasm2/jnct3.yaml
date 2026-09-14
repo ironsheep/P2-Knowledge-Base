@@ -36,7 +36,7 @@ long_description: 'If CT3 event flag is clear, PC is set to a new relative (#Src
   or absolute (Src) address.'
 group_membership:
   group_id: counter_event_jumps
-  group_file: groups/counter_event_jumps.yaml
+  group_file: language/pasm2/groups/counter_event_jumps.yaml
   related:
   - jct1
   - jct2

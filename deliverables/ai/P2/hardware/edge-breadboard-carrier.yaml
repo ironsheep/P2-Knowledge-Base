@@ -239,6 +239,9 @@ educational_value:
 documentation:
   primary: "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB"
   related:
+    - "hardware/edge-standard-module.yaml"
+    - "hardware/edge-32mb-module.yaml"
+  references:
     - "Edge module documentation"
     - "Servo control programming guides"
     - "P2 Silicon Documentation"

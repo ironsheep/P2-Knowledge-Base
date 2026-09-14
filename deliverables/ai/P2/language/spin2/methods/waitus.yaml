@@ -75,7 +75,7 @@ underlying_implementation:
     Internally calculates: WAITX((CLKFREQ/1_000_000) * microseconds - 1)
     Automatically adjusts for system clock frequency.
     At lower frequencies, resolution degrades.
-  related_pasm: "WAITX instruction"
+  related_pasm: "language/pasm2/waitx.yaml"
 
 common_uses:
   - "Pulse width generation"

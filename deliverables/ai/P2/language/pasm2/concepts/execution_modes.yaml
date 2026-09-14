@@ -172,14 +172,14 @@ code_organization:
     strategy: "Combine modes for optimal performance"
     example: |
       ' Hub execution for main logic
-      main_loop:
+      main_loop
         CALL #\critical_driver  ' Call cog routine
         ' Non-critical processing
         JMP #@main_loop
       
       ' Cog execution for timing-critical
       ORG 0
-      critical_driver:
+      critical_driver
         ' Deterministic code here
         RET
 

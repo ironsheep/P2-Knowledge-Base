@@ -54,22 +54,6 @@ last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter subsequent GETBYTE / ROLBYTE instruction
 examples:
-- name: Motor Commutation Table Lookup
-  description: Use Hall sensor state to lookup commutation pattern
-  code: "' Commutation lookup table in COG RAM\ncommutation_table\n        long  \
-    \  $00_00_00_00    ' Invalid state 0\n        long    $00_14_10_04    ' State\
-    \ 1: Phase pattern\n        long    $00_04_14_10    ' State 2: Phase pattern\n\
-    \        long    $00_10_04_14    ' State 3: Phase pattern\n        long    $00_10_14_04\
-    \    ' State 4: Phase pattern  \n        long    $00_04_10_14    ' State 5: Phase\
-    \ pattern\n        long    $00_14_04_10    ' State 6: Phase pattern\n        long\
-    \    $00_00_00_00    ' Invalid state 7\n        \n' Use Hall state as index\n\
-    \        mov     index, hall_state        ' Hall state (0-7)\n        altgb  \
-    \ index, #commutation_table\n        getbyte phase_a, 0-0, #0         ' Get phase\
-    \ A pattern\n        add     index, #1\n        altgb   index, #commutation_table\
-    \  \n        getbyte phase_b, 0-0, #0         ' Get phase B pattern\n        add\
-    \     index, #1\n        altgb   index, #commutation_table\n        getbyte phase_c,\
-    \ 0-0, #0         ' Get phase C pattern\n"
-  source: isp_bldc_motor.spin2
 - name: String Processing with Auto-Increment
   description: Process string bytes with automatic pointer advance
   code: "' Process null-terminated string\nprocess_string\n        mov     ptr, string_addr\
@@ -79,15 +63,6 @@ examples:
     \      ' Process character\n        call    #process_char\n        jmp     #.loop\n\
     .done   ret\n"
   source: common_pattern
-- name: Sine Table Lookup
-  description: Access sine lookup table for waveform generation
-  code: "' 256-entry sine table (0-255 degrees)\n' Each entry is a byte (0-255 amplitude)\n\
-    \        mov     angle, phase             ' Current phase angle\n        and \
-    \    angle, #$FF              ' Wrap to 0-255\n        altgb   angle, #sine_table\
-    \       ' Point to table entry\n        getbyte amplitude, 0-0, #0       ' Get\
-    \ sine value\n        \n        ' Scale amplitude for PWM\n        mul     amplitude,\
-    \ max_duty\n        shr     amplitude, #8            ' Scale to duty range\n"
-  source: waveform_generation
 - name: Character Translation Table
   description: Translate characters using lookup table
   code: "' ASCII to custom encoding table\nxlate_table\n        byte    0,1,2,3,4,5,6,7\

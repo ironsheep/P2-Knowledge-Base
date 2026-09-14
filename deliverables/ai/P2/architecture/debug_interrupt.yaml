@@ -208,7 +208,7 @@ debug_modes:
       BRK     #%0000_0000_0001
     
     handler: |
-      debug_isr:
+      debug_isr
           ' Save any additional context
           WRLONG  PC, trace_ptr
           ADD     trace_ptr, #4
@@ -226,7 +226,7 @@ debug_modes:
       BRK     ##(break_addr << 12) | (1 << 10)
     
     handler: |
-      debug_isr:
+      debug_isr
           ' Hit breakpoint
           WRLONG  PC, break_log
           ' Examine state
@@ -245,7 +245,7 @@ debug_modes:
       BRK     #%0000_0001_0000
     
     handler: |
-      debug_isr:
+      debug_isr
           GETBRK  status WCZ           ' D[31:24] = the 8-bit code the BRK carried
           SHR     status, #24
           ' dispatch on the code
@@ -264,12 +264,12 @@ programming_patterns:
     code: |
       ' All of this runs INSIDE a debug ISR -- IJMP0/IRET0 exist only there,
       ' as INA/INB remapped, and BRK's condition bits are cleared on ISR entry.
-              MOV     IJMP0, #trace_isr    ' Redirect subsequent debug ISRs
+              MOV     INA, #trace_isr      ' INA is IJMP0 here: redirect subsequent debug ISRs
               MOV     trace_ptr, ##TRACE_BUFFER
               BRK     #%0000_0000_0001     ' Single-step non-ISR code (%A)
               
-      trace_isr:
-              WRLONG  IRET0, trace_ptr     ' Save PC
+      trace_isr
+              WRLONG  INB, trace_ptr       ' INB is IRET0 here: save the return PC
               ADD     trace_ptr, #4
               CMP     trace_ptr, ##TRACE_END WZ
       IF_Z    MOV     trace_ptr, ##TRACE_BUFFER ' Wrap
@@ -279,7 +279,7 @@ programming_patterns:
     description: "Break only when conditions are met"
     code: |
       ' Conditional breakpoint handler
-      debug_isr:
+      debug_isr
               RDLONG  value, watch_var     ' Check variable
               CMP     value, break_value WZ
       IF_NZ   RETI0                        ' Continue if no match
@@ -295,7 +295,7 @@ programming_patterns:
     description: "Profile code execution timing"
     code: |
       ' Instruction profiler
-      profile_isr:
+      profile_isr
               GETCT   current_time
               SUB     current_time, last_time
               ADD     total_time, current_time
@@ -308,7 +308,7 @@ programming_patterns:
     code: |
       ' Debugger COG -- COGBRK is legal only from inside our OWN debug ISR,
       ' and the target must have its asynchronous-breakpoint bit (%I) enabled.
-      debug_control:
+      debug_control
               COGBRK  #target_cog          ' Break target
               ' Wait for target to hit breakpoint
               WAITX   ##1000
@@ -316,8 +316,8 @@ programming_patterns:
               RDLONG  target_pc, debug_data
               
       ' Target COG debug handler
-      target_debug_isr:
-              WRLONG  IRET0, debug_data    ' Share PC
+      target_debug_isr
+              WRLONG  INB, debug_data      ' INB is IRET0 here: share the return PC
               WRLONG  some_var, debug_data+4
               ' Wait for debugger commands
               RETI0

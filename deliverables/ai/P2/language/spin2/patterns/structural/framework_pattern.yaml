@@ -1,7 +1,7 @@
 pattern_id: "framework_pattern"
 description: |
   Full application framework pattern with layered architecture.
-  See object_archetypes.yaml for detailed archetype templates.
+  See language/spin2/concepts/object_archetypes.yaml for detailed archetype templates.
 
 when_use:
   - "8+ objects with hierarchy"

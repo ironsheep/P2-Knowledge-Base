@@ -39,12 +39,10 @@ examples:
     \        ret\n"
   source: multi_cog_pattern
 - name: Debug Monitor Lock
-  description: Ensure single debugger instance
-  code: "' Lock[15] reserved for debug monitor\ndebug_init\n        locktry #15  \
-    \               wc   ' Try to get debug lock\nif_nc   jmp     #debug_already_running\n\
-    \        \n        ' We are the debug monitor\n        call    #setup_debug_isr\n\
-    \        ' Keep lock until shutdown\n"
-  source: Spin2_debugger.spin2
+  description: Spin-wait for lock[15] to own the debugger's save buffer and tx/rx pins
+  code: "' Wait for lock[15] so that we own the save buffer and tx/rx pins\n.wait\
+    \   locktry #15                  wc\nif_nc   jmp     #.wait\n"
+  source: "Spin2_debugger.spin2 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:201-202"
 - name: Spin Lock Implementation
   description: Wait until lock acquired
   code: "' Spin until lock acquired\nspin_lock\n        locktry lock_num         \

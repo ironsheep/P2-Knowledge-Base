@@ -2,7 +2,7 @@ title: Spin2 JonnyMac Documentation Style
 id: spin2-docs-jonnymac
 version: 1.0.0
 layer: "Layer 3 - Documentation Style (JonnyMac)"
-derived_from: johnny-mac-documentation-style.yaml v2.0.0
+derived_from: language/spin2/conventions/johnny-mac-documentation-style.yaml v2.0.0
 purpose: Plain English documentation style without formal tags
 applies_to: Projects using JonnyMac community documentation conventions
 
@@ -310,11 +310,11 @@ why_this_style_works:
 
 integration_notes:
   combine_with:
-    layer_1: "spin2-getting-started.yaml (language mechanics)"
-    layer_2: "spin2-formatting-standards.yaml (professional structure)"
+    layer_1: "guides/spin2-getting-started.yaml (language mechanics)"
+    layer_2: "language/spin2/conventions/spin2-formatting-standards.yaml (professional structure)"
     
   optional:
-    layer_4: "spin2-naming-jonnymac.yaml (full JonnyMac standard)"
+    layer_4: "language/spin2/conventions/spin2-naming-jonnymac.yaml (full JonnyMac standard)"
     
   standalone_usage:
     - "Can use JonnyMac docs with any naming style"
@@ -322,5 +322,5 @@ integration_notes:
     - "Compatible with team preferences on indentation"
 
 see_also:
-  full_standard: deliverables/ai/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml
-  organization_standard: deliverables/ai/P2/language/spin2/conventions/p2-source-file-organization-standard.yaml
+  full_standard: language/spin2/conventions/johnny-mac-documentation-style.yaml
+  organization_standard: language/spin2/conventions/p2-source-file-organization-standard.yaml

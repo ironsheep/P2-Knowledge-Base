@@ -259,7 +259,7 @@ programming_examples:
       ' which would yield a HUB address that EXECF cannot use).
       LONG    push_routine | (%0 << 10)   ' no instructions skipped
 
-      push_routine:
+      push_routine
       RFLONG  data              ' Read inline parameter
       WRLONG  data, stack_ptr   ' Push to VM stack
       _RET_   ADD  stack_ptr, #4   ' Adjust, and return to XBYTE

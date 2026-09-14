@@ -108,7 +108,7 @@ timing:
     engineered to run at minimum cost. We do not publish a clock count for
     the method-call path because we do not have a verifiable measurement.
   underlying_pasm: "LOCKNEW"
-  underlying_pasm_timing: "4 clocks (range 4...11 hub-window dependent; per locknew.yaml encoding)"
+  underlying_pasm_timing: "4 clocks (range 4...11 hub-window dependent; per language/spin2/methods/locknew.yaml encoding)"
 
 
 related:

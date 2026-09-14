@@ -19,7 +19,6 @@ related_instructions:
 - SETINT3
 examples:
 - title: Interrupt handler pattern
-  code: "INT0_handler:\n    ; save state\n    ; handle interrupt\n    RESI0  ; or\
-    \ RETI0 to return"
+  code: "debug_isr\n    ' save state\n    ' handle the debug interrupt\n    RESI0   ' or RETI0 to return"
 created: '2025-09-19T15:11:04.926035'
 source: PASM2 Manual 2022-11-01

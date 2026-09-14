@@ -143,7 +143,7 @@ related_operators:
   - "&": AND mask (alternative for power-of-2)
 related_operators_source: >-
   engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:62 and :103.
-  The pre-merge form of this block (in modulo_add.yaml) called `//` the UNSIGNED
+  The pre-merge form of this block (in language/spin2/operators/modulo_add.yaml) called `//` the UNSIGNED
   remainder, inverting the single distinction this file exists to draw, and listed
   `%%` as "Signed modulo" -- `%%` is not a Spin2 operator and appears in neither
   operator reference, so it is removed rather than relabelled.

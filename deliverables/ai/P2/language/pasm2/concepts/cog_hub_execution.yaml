@@ -130,79 +130,16 @@ dynamic_overlay_system:
   use_case: "Debug monitors, complex algorithms, multi-function systems"
   
   debug_overlay_implementation:
-    description: "Spin2 debugger uses overlays for debug commands"
+    description: "Spin2 debugger loads its breakpoint-handler overlay into the shared overlay area on demand"
     architecture: |
-      ' Debug ISR with overlay loading
-      debug_isr
-              ' Determine which debug command needed
-              getbrk  cmd_code    wz
-              
-              ' Calculate overlay to load
-              shr     cmd_code, #4        ' Get overlay index
-              shl     cmd_code, #2        ' Convert to long offset
-              loc     ptra, #\overlay_table
-              add     ptra, cmd_code
-              rdlong  overlay_addr, ptra  ' Get overlay HUB address
-              
-              ' Load overlay to COG RAM
-              mov     ptra, overlay_addr
-              setq    #OVERLAY_SIZE-1     ' Load N longs
-              rdlong  overlay_base, ptra  ' Load to COG
-              
-              ' Execute overlay
-              call    #overlay_base
-              
-              ' Return from debug ISR
-              reti3   wcz
-    source: Spin2_debugger.spin2
+      ' Load breakpoint handler overlay and run it
+      .breakpoint  loc     pb, #\dbg_addr+(@bp_handler-@debugger)  ' load breakpoint handler overlay
+                   setq    #overlay_end-overlay_begin              ' read in overlay code and execute it
+                   rdlong  overlay_begin, pb
+
+                   jmp     #bp_handler
+    source: "Spin2 debugger v51 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:382-386"
     
-  overlay_table_structure:
-    description: "HUB-based table of overlay addresses"
-    code: |
-      overlay_table
-              long    @trace_overlay      ' Overlay 0: Trace commands
-              long    @watch_overlay      ' Overlay 1: Watch commands
-              long    @break_overlay      ' Overlay 2: Breakpoint commands
-              long    @dump_overlay       ' Overlay 3: Memory dump
-              long    @step_overlay       ' Overlay 4: Single-step
-              ' ... more overlays ...
-      
-      ' Each overlay is self-contained code
-      trace_overlay
-              org     overlay_base        ' Same COG address
-              ' Trace implementation
-              ret
-              
-      watch_overlay
-              org     overlay_base        ' Reuse same space
-              ' Watch implementation
-              ret
-    
-  overlay_management:
-    allocation: |
-      ' Reserve COG space for overlays
-      overlay_base    res     32          ' 32 longs for overlay
-      overlay_stack   res     8           ' Local stack
-      overlay_data    res     16          ' Working data
-    
-    loading_pattern: |
-      load_overlay
-              ' PA = overlay number
-              shl     pa, #7              ' 128 longs per overlay
-              add     pa, overlay_hub_base
-              setq    #32-1               ' Load 32 longs
-              rdlong  overlay_base, pa
-              ret
-    
-    caching_strategy: |
-      ' Track loaded overlay to avoid reload
-      current_overlay long    -1
-      
-      smart_load
-              cmp     pa, current_overlay wz
-      if_z    ret                     ' Already loaded
-              mov     current_overlay, pa
-              jmp     #load_overlay
 
 execution_control:
   switching_modes:
@@ -258,47 +195,6 @@ instruction_availability:
     Separately, FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT
     /XZERO/XCONT) are FORBIDDEN in hubexec because the FIFO is dedicated to
     instruction prefetch — they don't run slowly, they don't run at all.
-
-practical_examples:
-  multi_stage_loader:
-    description: "Flash loader uses staged loading"
-    code: |
-      ' Stage 1: Minimal loader in COG
-      stage1  org     0
-              setq    #16-1           ' Load stage 2
-              rdlong  $100, ##stage2_hub
-              jmp     #$100
-              
-      ' Stage 2: Extended loader
-              org     $100
-              ' More complex loading logic
-              setq    #128-1          ' Load main app
-              rdlong  0, ##main_app
-              jmp     #0
-    source: flash_loader.spin2
-  
-  spi_driver_optimization:
-    description: "Critical SPI code in COG, management in HUB"
-    code: |
-      ' HUB: High-level SPI management
-      hub_spi_read
-              mov     cmd, #SPI_READ
-              mov     addr, pa
-              mov     count, pb
-              call    #load_spi_driver
-              call    #0              ' Call COG driver
-              ret
-              
-      ' COG: Time-critical SPI bit-banging
-      cog_spi_driver
-              org     0
-              rep     #4, count       ' Fast loop
-              rol     data, #1    wc
-              muxc    outa, spi_mosi_mask
-              xor     outa, spi_clk_mask
-              testp   spi_miso    wc
-              ret
-    source: flash_loader.spin2
 
 performance_comparison:
   timing_critical:
@@ -597,6 +493,5 @@ related:
 references:
   - silicon_doc_v35: "HUB EXECUTION section. Verbatim: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Verbatim FIFO depth: 'The FIFO contains (cogs+11) stages.' Verbatim forbidden list: 'While in hub execution mode, the FIFO cannot be used for anything else. So, during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO.'"
   - chip_gracey_clarification_2026: "Sequential hubexec instructions stream through the FIFO at 2 clocks each (same as cogexec). Silicon Doc describes the mechanism but doesn't print this exact figure for the sequential case; Chip's clarification fills that gap."
-  - per_instruction_yamls: "jmp.yaml: clocks 4 (cog), range 4 / 13...20. call.yaml: cycles 4, notes '4 cycles for Cog/LUT, 13-20 cycles for Hub execution'. ret.yaml: range 4 / 13...20. djnz.yaml: clocks '2 or 4', range 13...20. add.yaml: cycles 2 fixed. mov.yaml: cycles 2."
+  - per_instruction_yamls: "language/pasm2/jmp.yaml: clocks 4 (cog), range 4 / 13...20. language/pasm2/call.yaml: cycles 4, notes '4 cycles for Cog/LUT, 13-20 cycles for Hub execution'. language/pasm2/ret.yaml: range 4 / 13...20. language/pasm2/djnz.yaml: clocks '2 or 4', range 13...20. language/pasm2/add.yaml: cycles 2 fixed. language/pasm2/mov.yaml: cycles 2."
   - Spin2_debugger.spin2: Overlay implementation
-  - flash_loader.spin2: Multi-stage loading

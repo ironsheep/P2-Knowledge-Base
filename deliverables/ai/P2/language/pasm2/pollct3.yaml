@@ -43,7 +43,7 @@ oneliner: Retrieve and clear CT3 event flag
 long_description: CT3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
 group_membership:
   group_id: counter_event_polls
-  group_file: groups/counter_event_polls.yaml
+  group_file: language/pasm2/groups/counter_event_polls.yaml
   related:
   - pollct1
   - pollct2

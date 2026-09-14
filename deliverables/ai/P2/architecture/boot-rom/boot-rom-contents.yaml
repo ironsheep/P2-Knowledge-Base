@@ -37,7 +37,7 @@ residents:
     description: |
       First code that executes on power-up or reset. Handles initial chip
       configuration, clock setup, memory initialization, and boot source
-      detection. Reads the P59-P61 pattern (see boot-pattern-selection.yaml),
+      detection. Reads the P59-P61 pattern (see architecture/boot-rom/boot-pattern-selection.yaml),
       selects a boot path (serial / SPI flash / SD card), and either loads
       and jumps to user code or hands off to one of the interactive
       interfaces (Monitor or TAQOZ) on the appropriate keystroke trigger.

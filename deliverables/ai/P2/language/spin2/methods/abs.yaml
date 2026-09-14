@@ -31,5 +31,5 @@ notes:
   - "No floating-point variant; use FABS() for floats"
   - "Priority 2 operator (unary)"
 related:
-  - "operators/op_sub.yaml"
-  - "methods/sqrt.yaml"
+  - "language/spin2/operators/op_sub.yaml"
+  - "language/spin2/methods/sqrt.yaml"

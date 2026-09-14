@@ -133,11 +133,11 @@ decision_tree:
   "How does flash boot work step-by-step?": spi-flash-boot.yaml
   "What does the ROM do before handing off to user code?": spi-flash-boot.yaml
   "How does SD card boot work?": sd-card-boot.yaml
-  "How do I use the serial loader protocol?": ../serial_loader.yaml
+  "How do I use the serial loader protocol?": architecture/serial_loader.yaml
   "How do I enter the debug monitor?": p2-monitor.yaml
   "How do I enter the Forth interpreter?": taqoz-forth.yaml
   "What's the difference between ROM TAQOZ and TAQOZ Reloaded?": taqoz-forth.yaml
-  "Where is the flash loader source?": ../../code-examples/flash-loader-case-study.yaml
+  "Where is the flash loader source?": code-examples/flash-loader-case-study.yaml
 
 # Related resources outside this directory
 related:

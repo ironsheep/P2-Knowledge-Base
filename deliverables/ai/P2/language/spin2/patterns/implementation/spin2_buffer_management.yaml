@@ -1,7 +1,7 @@
 pattern_id: "buffer_management"
 description: |
   Circular buffer pattern for producer-consumer communication.
-  See object_archetypes.yaml buffered_io_object archetype for complete examples.
+  See language/spin2/concepts/object_archetypes.yaml buffered_io_object archetype for complete examples.
 
 when_use:
   - "Data streaming between cogs"

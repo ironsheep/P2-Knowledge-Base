@@ -25,7 +25,7 @@ metadata:
     This index carries the full content for every register it lists -- address, normal and
     special function, description, access, category and key features -- inline. It is
     self-sufficient; nothing here defers to a per-register file. Three per-register files
-    exist alongside it (ptra-register.yaml, dira-dirb-registers.yaml) and are pointed to
+    exist alongside it (architecture/system-registers/ptra-register.yaml, architecture/system-registers/dira-dirb-registers.yaml) and are pointed to
     by `yaml_file:` where they do. Thirteen further `yaml_file:` pointers, naming eleven
     files that were never written, were removed on 2026-08-26 under F-364 rather than
     satisfied by writing thin stubs: that would put one fact in two homes. If per-register
@@ -123,7 +123,7 @@ special_purpose_registers:
     description: "Pointer A to hub RAM"
     access: "Read/Write"
     category: "hub_access"
-    yaml_file: "ptra-register.yaml"
+    yaml_file: "architecture/system-registers/ptra-register.yaml"
     key_features:
       - "32-bit hub RAM pointer"
       - "Auto-increment/decrement support"  
@@ -146,7 +146,7 @@ special_purpose_registers:
     description: "Output enables for P31..P0"
     access: "Read/Write"
     category: "io_control"
-    yaml_file: "dira-dirb-registers.yaml"
+    yaml_file: "architecture/system-registers/dira-dirb-registers.yaml"
     key_features:
       - "Controls output enable for pins P31-P0"
       - "1=output enabled, 0=input/high-Z"
@@ -158,7 +158,7 @@ special_purpose_registers:
     description: "Output enables for P63..P32"
     access: "Read/Write"
     category: "io_control"
-    yaml_file: "dira-dirb-registers.yaml"
+    yaml_file: "architecture/system-registers/dira-dirb-registers.yaml"
     key_features:
       - "Controls output enable for pins P63-P32"
       - "1=output enabled, 0=input/high-Z"

@@ -144,8 +144,8 @@ recommendations:
     4: "Create fifo_operations.yaml - Critical for streaming"
 
   integration_needs:
-    - "Link CORDIC with Q register in special_registers.yaml"
-    - "Connect FIFO with streamer in streamer_smartpin_control.yaml"
+    - "Link CORDIC with Q register in language/pasm2/concepts/special_registers.yaml"
+    - "Connect FIFO with streamer in language/pasm2/concepts/streamer_smartpin_control.yaml"
     - "Relate locks to hub memory operations"
     - "Connect attention signals to event system"
 

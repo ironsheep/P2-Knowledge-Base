@@ -152,7 +152,7 @@ common_patterns:
         ' Loop body
         DJNZ counter, #.loop    ' Decrement and jump if not zero
     description: "Efficient loop with local label counter"
-    note: "Local labels (.loop) can be reused in different routines. See concepts/labels.yaml"
+    note: "Local labels (.loop) can be reused in different routines. See language/pasm2/concepts/labels.yaml"
 
   subroutine_call:
     code: |

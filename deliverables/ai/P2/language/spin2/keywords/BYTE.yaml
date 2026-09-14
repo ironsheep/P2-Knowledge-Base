@@ -57,7 +57,7 @@ notes:
   - "Unsigned range: 0 to 255"
   - "Signed range: -128 to 127"
   - "Default type is LONG if no type specifier given"
-  - "V54+: BYTE struct members may carry named bitfields (bits 0..7), and a STRUCT may contain a single nameless BYTE member. See concepts/struct-bitfields.yaml"
+  - "V54+: BYTE struct members may carry named bitfields (bits 0..7), and a STRUCT may contain a single nameless BYTE member. See language/spin2/concepts/struct-bitfields.yaml"
 
 related:
   - language/spin2/keywords/WORD.yaml

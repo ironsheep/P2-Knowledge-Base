@@ -165,7 +165,7 @@ timing:
     engineered to run at minimum cost. We do not publish a clock count for
     the method-call path because we do not have a verifiable measurement.
   underlying_pasm: "LOCKTRY"
-  underlying_pasm_timing: "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
+  underlying_pasm_timing: "2 clocks (range 2...9, +2 if WC; per language/spin2/methods/locktry.yaml encoding)"
 
 
 related:

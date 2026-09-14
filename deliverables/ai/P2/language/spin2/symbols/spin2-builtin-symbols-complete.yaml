@@ -1701,44 +1701,157 @@ spin2_builtin_symbols:
       hardware_relationship: "SmartPin operating mode selector"
 
     # Event and Interrupt Symbols
+    # Source: Spin2 Language Documentation v55, "Built-In Symbols for Events and Interrupt Sources
+    # (PASM only, see silicon doc)" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1638-1656.
+    # Value = the event number (also the SETINTx interrupt-source code); description = the table's text.
     - symbol_id: "event_int"
       symbol_name: "EVENT_INT"
       category: "events"
       subcategory: "event_sources"
       value: "$0000_0000"
-      bit_pattern: "%0000"
-      description: "Pin edge/level interrupt event"
-      usage_context:
-        - "Interrupt configuration"
-        - "Pin-based event triggering"
-      related_symbols: ["EVENT_CT1", "EVENT_PAT"]
-      hardware_relationship: "Pin interrupt event source"
-    
+      description: "Interrupt-occurred event or interrupts off"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["INT_OFF"]
+
+    - symbol_id: "int_off"
+      symbol_name: "INT_OFF"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0000"
+      description: "Interrupt-occurred event or interrupts off"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_INT"]
+
     - symbol_id: "event_ct1"
       symbol_name: "EVENT_CT1"
       category: "events"
       subcategory: "event_sources"
       value: "$0000_0001"
-      bit_pattern: "%0001"
-      description: "CT = CT1 timer event"
-      usage_context:
-        - "Timer-based events"
-        - "Periodic interrupt generation"
-      related_symbols: ["EVENT_CT2", "EVENT_CT3", "EVENT_INT"]
-      hardware_relationship: "Counter CT1 comparison event"
-    
+      description: "CT-passed-CT1 event"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_CT2", "EVENT_CT3"]
+
+    - symbol_id: "event_ct2"
+      symbol_name: "EVENT_CT2"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0002"
+      description: "CT-passed-CT2 event"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_CT1", "EVENT_CT3"]
+
+    - symbol_id: "event_ct3"
+      symbol_name: "EVENT_CT3"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0003"
+      description: "CT-passed-CT3 event"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_CT1", "EVENT_CT2"]
+
+    - symbol_id: "event_se1"
+      symbol_name: "EVENT_SE1"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0004"
+      description: "Selectable event 1"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_SE2", "EVENT_SE3", "EVENT_SE4"]
+
+    - symbol_id: "event_se2"
+      symbol_name: "EVENT_SE2"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0005"
+      description: "Selectable event 2"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_SE1", "EVENT_SE3", "EVENT_SE4"]
+
+    - symbol_id: "event_se3"
+      symbol_name: "EVENT_SE3"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0006"
+      description: "Selectable event 3"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_SE1", "EVENT_SE2", "EVENT_SE4"]
+
+    - symbol_id: "event_se4"
+      symbol_name: "EVENT_SE4"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0007"
+      description: "Selectable event 4"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_SE1", "EVENT_SE2", "EVENT_SE3"]
+
+    - symbol_id: "event_pat"
+      symbol_name: "EVENT_PAT"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0008"
+      description: "INA/INB pattern match/mismatch event"
+      language_scope: "PASM (per the v55 table heading)"
+
+    - symbol_id: "event_fbw"
+      symbol_name: "EVENT_FBW"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_0009"
+      description: "Hub FIFO block-wrap event"
+      language_scope: "PASM (per the v55 table heading)"
+
+    - symbol_id: "event_xmt"
+      symbol_name: "EVENT_XMT"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_000A"
+      description: "Streamer command-empty event"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_XFI", "EVENT_XRO", "EVENT_XRL"]
+
+    - symbol_id: "event_xfi"
+      symbol_name: "EVENT_XFI"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_000B"
+      description: "Streamer command-finished event"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_XMT", "EVENT_XRO", "EVENT_XRL"]
+
+    - symbol_id: "event_xro"
+      symbol_name: "EVENT_XRO"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_000C"
+      description: "Streamer NCO-rollover event"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_XMT", "EVENT_XFI", "EVENT_XRL"]
+
+    - symbol_id: "event_xrl"
+      symbol_name: "EVENT_XRL"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_000D"
+      description: "Streamer-read-last-LUT-location event"
+      language_scope: "PASM (per the v55 table heading)"
+      related_symbols: ["EVENT_XMT", "EVENT_XFI", "EVENT_XRO"]
+
     - symbol_id: "event_atn"
       symbol_name: "EVENT_ATN"
       category: "events"
       subcategory: "event_sources"
       value: "$0000_000E"
-      bit_pattern: "%1110"
-      description: "Attention from another cog"
-      usage_context:
-        - "Inter-cog signaling"
-        - "Attention-based task coordination"
-      related_symbols: ["EVENT_INT", "EVENT_QMT"]
-      hardware_relationship: "Cog attention signaling mechanism"
+      description: "Attention-requested event"
+      language_scope: "PASM (per the v55 table heading)"
+
+    - symbol_id: "event_qmt"
+      symbol_name: "EVENT_QMT"
+      category: "events"
+      subcategory: "event_sources"
+      value: "$0000_000F"
+      description: "GETQX/GETQY-on-empty event"
+      language_scope: "PASM (per the v55 table heading)"
 
     # COG and Task Control Symbols
     - symbol_id: "cogexec"
@@ -1778,67 +1891,6 @@ spin2_builtin_symbols:
         - "Automatic cog allocation"
       related_symbols: ["NEWTASK", "COGEXEC_NEW"]
       hardware_relationship: "Automatic cog selection"
-
-    # Clock Setup Symbols
-    - symbol_id: "rcfast"
-      symbol_name: "RCFAST"
-      category: "clock"
-      subcategory: "clock_sources"
-      value: "$0000_0000"
-      description: "Internal ~20MHz RC oscillator"
-      usage_context:
-        - "Clock source selection"
-        - "Default startup clock"
-      related_symbols: ["RCSLOW", "XI", "PLL"]
-      hardware_relationship: "Internal RC oscillator"
-    
-    - symbol_id: "xi"
-      symbol_name: "XI"
-      category: "clock"
-      subcategory: "clock_sources"
-      value: "$0000_0001"
-      description: "External crystal input"
-      usage_context:
-        - "Clock source selection"
-        - "Precise external timing"
-      related_symbols: ["RCFAST", "PLL", "XDIV1"]
-      hardware_relationship: "External crystal oscillator input"
-    
-    - symbol_id: "pll"
-      symbol_name: "PLL"
-      category: "clock"
-      subcategory: "clock_sources"
-      value: "$0000_0002"
-      description: "PLL output as clock source"
-      usage_context:
-        - "High-frequency operation"
-        - "Crystal frequency multiplication"
-      related_symbols: ["XI", "XMUL2", "XDIV1"]
-      hardware_relationship: "Phase-locked loop output"
-    
-    - symbol_id: "xdiv1"
-      symbol_name: "XDIV1"
-      category: "clock"
-      subcategory: "crystal_dividers"
-      value: "$0000_0000"
-      description: "Crystal divide by 1 (no division)"
-      usage_context:
-        - "Crystal pre-scaling"
-        - "Direct crystal frequency use"
-      related_symbols: ["XDIV2", "XDIV4", "XI"]
-      hardware_relationship: "Crystal input divider"
-    
-    - symbol_id: "xmul2"
-      symbol_name: "XMUL2"
-      category: "clock"
-      subcategory: "pll_multipliers"
-      value: "$0000_0040"
-      description: "PLL multiply by 2"
-      usage_context:
-        - "PLL frequency multiplication"
-        - "2x crystal frequency"
-      related_symbols: ["XMUL3", "XMUL4", "PLL"]
-      hardware_relationship: "PLL frequency multiplier"
 
     # System Constants and Limits
     - symbol_id: "false"

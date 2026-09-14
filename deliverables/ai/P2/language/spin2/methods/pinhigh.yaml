@@ -32,7 +32,7 @@ timing:
     the method-call path because we do not have a verifiable measurement.
   underlying_pasm: "DRVH"
   underlying_pasm_timing: "2 clocks (fixed; same in cogexec/lutexec/hubexec — pin instructions have no execution-mode distinction per per-instruction YAMLs)"
-  pin_propagation: "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
+  pin_propagation: "+3 clocks after instruction completes before output pin physically transitions (per language/pasm2/drvh.yaml pin_output_latency)"
 
 examples:
   - code: "PINHIGH(56)"

@@ -36,7 +36,7 @@ last_updated: '2025-09-19'
 brief_description: Poll CT2 event flag
 group_membership:
   group_id: counter_event_polls
-  group_file: groups/counter_event_polls.yaml
+  group_file: language/pasm2/groups/counter_event_polls.yaml
   related:
   - pollct1
   - pollct3

@@ -162,7 +162,7 @@ when_to_use_field:
     - "Named single slices of one backing byte/word/long (e.g., hardware register wrappers)"
     - "Fixed-layout status words where each bit/range has a well-known name"
     - "C-style bitfield types where only one backing value is needed"
-    - "See concepts/struct-bitfields.yaml for syntax and semantics"
+    - "See language/spin2/concepts/struct-bitfields.yaml for syntax and semantics"
 
 notes:
   - "Part of base Spin2 language - no version directive required"
@@ -170,7 +170,7 @@ notes:
   - "Use BYTE storage for fields up to 8 bits"
   - "Use WORD storage for fields 9-16 bits"
   - "Fields are NOT aligned - they pack contiguously"
-  - "V54+: For named bitfields on a single backing byte/word/long (rather than an indexed array), prefer STRUCT named bitfields — see concepts/struct-bitfields.yaml"
+  - "V54+: For named bitfields on a single backing byte/word/long (rather than an indexed array), prefer STRUCT named bitfields — see language/spin2/concepts/struct-bitfields.yaml"
 
 related:
   - language/spin2/keywords/BYTE.yaml

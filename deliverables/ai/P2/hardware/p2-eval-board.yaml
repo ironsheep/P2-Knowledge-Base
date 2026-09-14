@@ -228,7 +228,7 @@ target_audience:
   
 documentation:
   primary: "64000 Propeller 2 Eval Board Rev C Guide"
-  related:
+  references:
     - "P2 Silicon Documentation"
     - "Add-on board documentation (#64006)"
     - "PASM2/Spin2 language references"

@@ -101,7 +101,7 @@ edge_module_note:
     SD boot) is not cleanly extractable from the PDF-derived narratives
     we have. It is likely tied to SD card socket presence-detect or one
     of the SD signal lines. Verification pending — see
-    boot-pattern-selection.yaml for the full note.
+    architecture/boot-rom/boot-pattern-selection.yaml for the full note.
 
 # Comparison to other boot paths
 boot_path_comparison:

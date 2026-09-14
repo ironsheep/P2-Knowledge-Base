@@ -30,7 +30,7 @@ last_updated: '2025-09-19T16:04:17.324530'
 brief_description: Return from interrupt 1
 group_membership:
   group_id: interrupt_return
-  group_file: groups/interrupt_return.yaml
+  group_file: language/pasm2/groups/interrupt_return.yaml
   related:
   - reti0
   - reti2

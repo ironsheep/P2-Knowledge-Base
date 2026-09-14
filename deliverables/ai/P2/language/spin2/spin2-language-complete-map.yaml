@@ -199,14 +199,14 @@ spin2_language_complete_map:
       - "special-symbols/ - Special syntax symbols"
       - "system-variables/ - System state variables"
     fundamentals_files:
-      - "case-sensitivity.yaml - Case insensitivity rules"
-      - "identifier-rules.yaml - Naming rules and limits"
-      - "variable-scoping-best-practices.yaml - Scope hierarchy and conflict prevention"
-      - "fundamentals-manifest.yaml - Fundamentals index"
+      - "language/fundamentals/case-sensitivity.yaml - Case insensitivity rules"
+      - "language/fundamentals/identifier-rules.yaml - Naming rules and limits"
+      - "language/fundamentals/variable-scoping-best-practices.yaml - Scope hierarchy and conflict prevention"
+      - "language/fundamentals/ - the fundamentals directory (the per-directory manifest scheme was retired; no index file replaces it)"
     existing_enhanced:
       - "operators/ - Enhanced with missing operators"
       - "methods/ - Enhanced with compiler metadata"
-      - "constructs/method_definition.yaml - Added explicit method limits (127 params, 15 returns, 64KB locals)"
+      - "language/spin2/constructs/method_definition.yaml - Added explicit method limits (127 params, 15 returns, 64KB locals)"
       - "conventions/ - Comment style documentation (2 styles)"
       
   # Next Steps

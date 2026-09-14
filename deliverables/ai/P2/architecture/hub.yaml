@@ -91,22 +91,22 @@ memory_instructions:
   byte_access:
     rdbyte: "Read byte from hub"
     wrbyte: "Write byte to hub"
-    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdbyte.yaml encoding"
-    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrbyte.yaml encoding"
+    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per language/pasm2/rdbyte.yaml encoding"
+    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per language/pasm2/wrbyte.yaml encoding"
     
   word_access:
     rdword: "Read word (16-bit) from hub"
     wrword: "Write word to hub"
     alignment: "Must be word-aligned"
-    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdword.yaml encoding"
-    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrword.yaml encoding"
+    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per language/pasm2/rdword.yaml encoding"
+    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per language/pasm2/wrword.yaml encoding"
     
   long_access:
     rdlong: "Read long (32-bit) from hub"
     wrlong: "Write long to hub"
     alignment: "Must be long-aligned"
-    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per rdlong.yaml encoding"
-    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per wrlong.yaml encoding"
+    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per language/pasm2/rdlong.yaml encoding"
+    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per language/pasm2/wrlong.yaml encoding"
     
   block_transfers:
     setq_rdlong: "Block read using SETQ + RDLONG"

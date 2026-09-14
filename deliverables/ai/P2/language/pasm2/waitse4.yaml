@@ -37,7 +37,7 @@ oneliner: Wait for and clear SE4 event flag
 long_description: Waits for SE4 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z flags are set on abort.
 group_membership:
   group_id: selector_event_waits
-  group_file: groups/selector_event_waits.yaml
+  group_file: language/pasm2/groups/selector_event_waits.yaml
   related:
   - waitse1
   - waitse2

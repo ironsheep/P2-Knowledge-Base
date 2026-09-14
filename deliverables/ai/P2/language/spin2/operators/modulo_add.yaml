@@ -13,7 +13,7 @@
 # and it now says one true thing instead of a conflicting definition.
 
 operator: "+//"
-name: Unsigned Remainder (see op_addmodulo.yaml)
+name: Unsigned Remainder (see language/spin2/operators/op_addmodulo.yaml)
 type: operator_redirect
 category: Arithmetic
 description: |

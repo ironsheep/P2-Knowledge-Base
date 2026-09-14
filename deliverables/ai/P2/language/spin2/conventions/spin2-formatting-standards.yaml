@@ -352,15 +352,15 @@ why_these_standards:
 
 integration_with_other_layers:
   layer_1:
-    file: "spin2-getting-started.yaml"
+    file: "guides/spin2-getting-started.yaml"
     provides: "Language mechanics"
     
   layer_3_options:
-    jonnymac: "spin2-docs-jonnymac.yaml (plain English)"
-    vscode: "vscode-pnut-documentation-style.yaml (VSCode toolchain documentation)"
+    jonnymac: "language/spin2/conventions/spin2-docs-jonnymac.yaml (plain English)"
+    vscode: "language/spin2/conventions/vscode-pnut-documentation-style.yaml (VSCode toolchain documentation)"
     
   layer_4_optional:
-    jonnymac_full: "spin2-naming-jonnymac.yaml (naming + 2-space indent)"
+    jonnymac_full: "language/spin2/conventions/spin2-naming-jonnymac.yaml (naming + 2-space indent)"
 
 next_steps:
   documentation: "Choose documentation style (Layer 3)"

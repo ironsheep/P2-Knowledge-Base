@@ -38,7 +38,7 @@ long_description: 'If selectable event 1, 2, 3, or 4 flag is set (or is clear in
   absolute (Src) address.'
 group_membership:
   group_id: selector_event_jumps
-  group_file: groups/selector_event_jumps.yaml
+  group_file: language/pasm2/groups/selector_event_jumps.yaml
   related:
   - jse1
   - jse2

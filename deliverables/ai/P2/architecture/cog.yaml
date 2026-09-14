@@ -146,12 +146,12 @@ interrupts:
     interrupt later returns to the address saved in IRETx."
   
   entry_overhead:
-    cogexec: "4 clocks for the dispatched CALLD (per calld.yaml encoding)"
-    hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch; per calld.yaml encoding)"
+    cogexec: "4 clocks for the dispatched CALLD (per language/pasm2/calld.yaml encoding)"
+    hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch; per language/pasm2/calld.yaml encoding)"
     note: "This is the minimum entry overhead, assuming none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
   
   exit_overhead:
-    reti_resi: "4 clocks (cog) / 13-20 clocks (hub) per reti1/2/3.yaml and resi1/2/3.yaml"
+    reti_resi: "4 clocks (cog) / 13-20 clocks (hub) per language/pasm2/reti1.yaml (likewise reti2, reti3) and language/pasm2/resi1.yaml (likewise resi2, resi3)"
     note: "RETI1/2/3 and RESI1/2/3 are themselves CALLD instructions (RETIx = CALLD INB,IRETx WCZ; RESIx = CALLD IJMPx,IRETx WCZ)."
   
   round_trip_overhead:

@@ -74,7 +74,7 @@ instructions:
   SETXFRQ:
     syntax: "SETXFRQ {#}D"
     purpose: "Set NCO frequency (timing rate)"
-    details: nco-timing.yaml
+    details: architecture/streamer/nco-timing.yaml
     
   XINIT:
     syntax: "XINIT {#}D,{#}S"
@@ -99,7 +99,7 @@ instructions:
   GETXACC:
     syntax: "GETXACC D"
     purpose: "Get Goertzel accumulators"
-    details: dds-goertzel.yaml
+    details: architecture/streamer/dds-goertzel.yaml
 
 # Command word structure (D operand)
 command_format:
@@ -109,7 +109,7 @@ command_format:
     e.g. in DDS/Goertzel D[23] selects SINC1/SINC2 (not pin-output enable) and the
     four-pin input BLOCK sits in D[22:19]; in X_1ADC8_0P_1DAC8_WFBYTE D[22:20] are
     fixed zeros with NO pin field at all, and the channel is chosen in S[1:0].
-    Check the mode's own template in modes-reference.yaml before composing a command,
+    Check the mode's own template in architecture/streamer/modes-reference.yaml before composing a command,
     and compose with `|` rather than `+` — adding a shifted value into bits the mode
     already defines silently selects A DIFFERENT MODE instead of raising an error.
   D_31_28: "Mode selector"
@@ -120,9 +120,9 @@ command_format:
   D_15_0: "Count (NCO rollovers)"
   
   details:
-    modes: modes-reference.yaml
-    dac: dac-routing.yaml
-    pins: pin-selection.yaml
+    modes: architecture/streamer/modes-reference.yaml
+    dac: architecture/streamer/dac-routing.yaml
+    pins: architecture/streamer/pin-selection.yaml
 
 # Typical usage pattern
 usage_pattern:

@@ -48,15 +48,13 @@ documentation_source: enhanced
 documentation_level: comprehensive
 examples:
 - name: Hall Sensor Reading
-  description: Read Hall sensor state for BLDC motor commutation
-  code: "' Read all 3 Hall sensors and build state value\nmov     hall_state, #0 \
-    \          ' Clear state register\ntestp   #HALL_A_PIN         wc   ' Test Hall\
-    \ A\nrcl     hall_state, #1           ' Shift in bit\ntestp   #HALL_B_PIN    \
-    \     wc   ' Test Hall B  \nrcl     hall_state, #1           ' Shift in bit\n\
-    testp   #HALL_C_PIN         wc   ' Test Hall C\nrcl     hall_state, #1       \
-    \    ' Shift in bit\n\n' hall_state now contains 3-bit Hall pattern (0-7)\n' Use\
-    \ for commutation table lookup\n"
-  source: isp_bldc_motor.spin2
+  description: Read three Hall-effect sensors and build a 3-bit commutation state
+  code: "' Read hall effect sensors and build state value\n        testp   pin_hall_w\
+    \                  wc  ' read hall effect sensor\n        rcl     hall_, #1\n\
+    \        testp   pin_hall_v                  wc\n        rcl     hall_, #1\n\
+    \        testp   pin_hall_u                  wc\n        rcl     hall_, #1\n\
+    \        and     hall_, #%111_111                ' (old << 3 | new) [_x_:ooo:nnn]\n"
+  source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2041-2047"
 - name: Edge Detection
   description: Detect rising edge on input pin
   code: ''' Detect rising edge (0->1 transition)
@@ -68,7 +66,7 @@ examples:
     muxz    flag_reg, #1             '' Store current state
 
 
-    edge_detected:
+    edge_detected
 
     '' Handle rising edge event
 

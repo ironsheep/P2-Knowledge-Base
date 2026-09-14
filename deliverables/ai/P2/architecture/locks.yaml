@@ -64,7 +64,7 @@ instructions:
       C := 0 if it was not taken -- another cog holds it, or it is not allocated
       D is not written by LOCKTRY.
     flags_affected: "C"
-    timing: "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
+    timing: "2 clocks (range 2...9, +2 if WC; per language/pasm2/locktry.yaml encoding)"
     usage_example: |
       LOCKTRY lock_num         ' Try to get lock
       IF_C    JMP #got_lock    ' Jump if successful
@@ -87,7 +87,7 @@ instructions:
       current owner (if held) or the last owner (if released).
       A cog that is itself holding the lock still releases it in this form.
     flags_affected: "C"
-    timing: "2 clocks (range 2...9, +2 if WC; per lockrel.yaml encoding)"
+    timing: "2 clocks (range 2...9, +2 if WC; per language/pasm2/lockrel.yaml encoding)"
     usage_example: |
       LOCKREL lock_num         ' Release lock
       IF_NC   JMP #not_owner   ' Jump if we didn't own it
@@ -106,7 +106,7 @@ instructions:
       With WC: C := 0 if a lock was allocated, 1 if all locks are already allocated.
       A cog may allocate more than one lock.
     flags_affected: "C"
-    timing: "4 clocks (range 4...11; per locknew.yaml encoding)"
+    timing: "4 clocks (range 4...11; per language/pasm2/locknew.yaml encoding)"
     usage_example: |
       LOCKNEW my_lock WC       ' Get any available lock
       IF_C    JMP #no_locks    ' Jump if none available (C=1)
@@ -126,7 +126,7 @@ instructions:
       Return lock D[3:0] to the unallocated lock pool. Any cog can return an
       allocated lock, even one it did not allocate with LOCKNEW.
       D is not written by LOCKRET.
-    timing: "2 clocks (range 2...9; per lockret.yaml encoding)"
+    timing: "2 clocks (range 2...9; per language/pasm2/lockret.yaml encoding)"
     usage_example: |
       LOCKRET lock_num         ' Force release lock
       ' Previous owner (if any) is returned in lock_num
@@ -146,7 +146,7 @@ instructions:
       NOTE: this is not a passive query -- if the cog executing it is holding the
       lock, the normal LOCKREL behaviour still happens and the lock IS released.
     flags_affected: "C"
-    timing: "2 clocks (range 2...9, +2 if result; per lockrel.yaml encoding)"
+    timing: "2 clocks (range 2...9, +2 if result; per language/pasm2/lockrel.yaml encoding)"
     usage_example: |
       LOCKREL lock_num WC      ' Read lock status/owner (and release if we hold it)
       IF_NC   JMP #lock_free   ' C=0 means the lock is not currently taken
@@ -159,7 +159,7 @@ programming_patterns:
       LOCK_RESOURCE = 5
       
       ' Critical section entry
-      .retry_lock:
+      .retry_lock
           LOCKTRY #LOCK_RESOURCE WC
           IF_NC   JMP #.retry_lock     ' Spin until acquired
       
@@ -175,7 +175,7 @@ programming_patterns:
           GETCT   timeout
           ADD     timeout, ##1_000_000  ' 1 million clock timeout
       
-      .try_loop:
+      .try_loop
           LOCKTRY #LOCK_NUM WC
           IF_C    JMP #.got_lock
           GETCT   current
@@ -183,7 +183,7 @@ programming_patterns:
           IF_C    JMP #.try_loop
           JMP     #.timeout_error
       
-      .got_lock:
+      .got_lock
       ' ... protected code ...
           LOCKREL #LOCK_NUM
   
@@ -226,7 +226,7 @@ common_applications:
       BUFFER_LOCK = 0
       
       ' Writer COG
-      .write_data:
+      .write_data
           LOCKTRY #BUFFER_LOCK WC
           IF_NC   JMP #$-1
           WRLONG  data, buffer_ptr
@@ -239,7 +239,7 @@ common_applications:
       ' Shared pin group access control
       PIN_GROUP_LOCK = 1
 
-      .use_pins:
+      .use_pins
           LOCKTRY #PIN_GROUP_LOCK WC
           IF_NC   JMP #$-1
           DRVH    #LED_PIN      ' Use shared pins
@@ -255,7 +255,7 @@ common_applications:
       QUEUE_LOCK = 2
       
       ' Producer adds item
-      .produce:
+      .produce
           LOCKTRY #QUEUE_LOCK WC
           IF_NC   JMP #$-1
           ' Add item to queue

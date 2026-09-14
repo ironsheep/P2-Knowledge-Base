@@ -410,7 +410,7 @@ resources:
       title: "P2-EC32MB Edge Module Rev B Guide v2.0"
       date: "2022-05-23"
       publisher: "Parallax Inc."
-    related:
+    references:
       - "P2 Silicon Documentation (Propeller 2 Datasheet)"
       - "AP Memory APS6404L PSRAM Datasheet"
       - "Winbond W25Q128JV Flash Datasheet"

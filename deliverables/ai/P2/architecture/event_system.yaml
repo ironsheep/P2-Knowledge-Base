@@ -61,7 +61,7 @@ architecture:
     - destination: "interrupts"
       description: "Events can trigger INT1/2/3"
       dispatch_mechanism: "Hardware inserts 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline (Silicon Doc v35 verbatim)"
-      entry_overhead_cogexec: "4 clocks (per calld.yaml encoding)"
+      entry_overhead_cogexec: "4 clocks (per language/pasm2/calld.yaml encoding)"
       entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
       deferral_conditions: "See architecture/interrupts.yaml deferral_conditions; the branch is held off during ALTxx/SETQ/REP/STALLI/WAITx etc."
     
@@ -288,7 +288,7 @@ programming_patterns:
       GETCT   timeout
       ADDCT1  timeout, ##160_000
 
-      event_loop:
+      event_loop
           POLLSE1 WC
           IF_C    CALL #handle_pin1
 
@@ -312,7 +312,7 @@ programming_patterns:
   - pattern: "event_driven_state_machine"
     description: "State machine triggered by events"
     code: |
-      state_machine:
+      state_machine
           CMP     state, #STATE_IDLE WZ
           IF_Z    JMP #idle_state
           CMP     state, #STATE_ACTIVE WZ
@@ -320,13 +320,13 @@ programming_patterns:
           CMP     state, #STATE_DONE WZ
           IF_Z    JMP #done_state
 
-      idle_state:
+      idle_state
           SETSE1  #%001_000000     ' Pin 0 rises (start button positive edge)
           WAITSE1
           MOV     state, #STATE_ACTIVE
           JMP     #state_machine
 
-      active_state:
+      active_state
           ' Timer events use WAITCT directly (not SETSE)
           GETCT   timeout
           ADDCT1  timeout, ##16_000_000
@@ -341,7 +341,7 @@ programming_patterns:
       RDPIN   last_state, #0
       AND     last_state, #$FF
       
-      monitor_loop:
+      monitor_loop
           RDPIN   current, #0
           AND     current, #$FF
           XOR     current, last_state WZ
@@ -353,7 +353,7 @@ programming_patterns:
     description: "Sample multiple inputs on timer event"
     code: |
       ' Sample every 100us
-      sample_loop:
+      sample_loop
           GETCT   next_sample
           ADDCT2  next_sample, ##16_000  ' 100us
           WAITCT2                        ' Wait for timer (dedicated instruction)
@@ -466,7 +466,7 @@ performance_characteristics:
   response_latency:
     polling: "POLLxxx: 2 clocks (per per-instruction YAMLs)"
     waiting: "WAITxxx releases on the same clock the event flag becomes set"
-    interrupt: "4 clocks cog / 13-20 clocks hub for the dispatched CALLD (per calld.yaml; Silicon Doc v35 dispatch mechanism)"
+    interrupt: "4 clocks cog / 13-20 clocks hub for the dispatched CALLD (per language/pasm2/calld.yaml; Silicon Doc v35 dispatch mechanism)"
   
   simultaneous_events: "All 4 SE events tracked independently"
   

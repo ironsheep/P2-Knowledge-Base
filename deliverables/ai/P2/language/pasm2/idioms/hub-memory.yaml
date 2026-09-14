@@ -59,9 +59,9 @@ idioms:
       setq #{count - 1}
       rdlong {first_cog_reg}, {hub_ptr}
     description: |
-      Block-transfer up to 16 longs from hub to cog registers in a single
-      RDLONG, using SETQ to set the count. Equivalent to memcpy from hub
-      to cog. SETQ2 variant targets LUT registers instead.
+      Block-transfer a run of longs from hub into contiguous cog registers
+      with one RDLONG, using SETQ to set the count (number of longs minus 1).
+      SETQ2 targets LUT RAM instead, addressed from 0.
     examples:
       - |
         setq    #16-1               ' transfer 16 longs
@@ -70,15 +70,13 @@ idioms:
         setq2   #128-1              ' transfer 128 longs to LUT
         rdlong  0, hub_ptr          ' LUT[0..127] filled (LUT is $000-based here)
     context: |
-      The canonical fast memcpy substitute for cog code. Up to 16 longs
-      per single setq+rdlong pair (or up to 512 longs per single
-      setq2+rdlong pair when staging through LUT). Used heavily in
-      cog-resident loaders and DSP routines.
+      The block moves one long per clock, unless the hub FIFO is accessing the
+      same hub RAM slice on the same cycle, in which case the FIFO gets priority
+      and the block move waits for the slice to come around again.
     constraints:
       - "SETQ count = N-1 (zero-based) — count of 0 transfers 1 long"
       - "Destination cog registers must be contiguous"
-      - "Transfer is atomic from the hub's perspective once started"
-    source_example: "Parallax P2 flash_loader.spin2 lines 148-151"
+    source: "Propeller 2 Documentation v35, FAST BLOCK MOVES -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3257-3267"
     related_instructions:
       - language/pasm2/setq.yaml
       - language/pasm2/setq2.yaml
@@ -90,8 +88,9 @@ idioms:
       setq #{count - 1}
       wrlong {first_cog_reg}, {hub_ptr}
     description: |
-      Block-transfer up to 16 longs from cog registers to hub in a single
-      WRLONG. SETQ2 variant transfers from LUT instead.
+      Block-transfer a run of contiguous cog registers to hub with one WRLONG.
+      SETQ2 transfers from LUT RAM instead. Registers $1F8..$1FF cannot be
+      transferred to hub this way (silicon-doc-text.txt:3276).
     examples:
       - |
         setq    #16-1
@@ -115,9 +114,9 @@ idioms:
       block copy is needed.
     context: |
       The production flash loader uses this exact pattern for the
-      application copy phase. See flash-loader-case-study.yaml for
+      application copy phase. See code-examples/flash-loader-case-study.yaml for
       the full sequence.
-    source_example: "Parallax P2 flash_loader.spin2 lines 148-151"
+    source_example: "Parallax P2 flash loader -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:148-152"
     related: code-examples/flash-loader-case-study.yaml
 
 related:

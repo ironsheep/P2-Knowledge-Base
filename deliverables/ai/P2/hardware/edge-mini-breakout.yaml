@@ -186,6 +186,8 @@ physical_advantages:
 documentation:
   primary: "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1"
   related:
+    - "hardware/edge-32mb-module.yaml"
+  references:
     - "32MB Edge module documentation (optimal pairing)"
     - "P2 Silicon Documentation"  
     - "Pin mapping and limitations guide"

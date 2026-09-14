@@ -131,6 +131,6 @@ provenance:
   tool_ground_truth:
     - "pnut_ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword (F-196)"
   cross_check_sources:
-    - "P2 Knowledge Base cooperative-tasking pattern (patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
+    - "P2 Knowledge Base cooperative-tasking pattern (language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
   companion_publication:
     - "P2AN006 Sizing Cog & Task Stacks; P2AN007 Data Structures with the New Language Facilities (companion P2 Knowledge Base publications)"

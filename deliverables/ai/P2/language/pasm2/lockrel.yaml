@@ -42,13 +42,12 @@ examples:
     \ for others\n        ret\n"
   source: resource_protection
 - name: Debug Lock Management
-  description: Release debug lock with owner check
-  code: "' Release debug lock and check who had it\ndebug_cleanup\n        mov   \
-    \  lock_info, #15       ' Lock 15 (debug)\n        lockrel lock_info         \
-    \ wc   ' Release and get info\n        \n        ' lock_info now contains previous\
-    \ owner COG ID\n        ' C = 1 if lock was held\nif_c    call    #log_debug_release\
-    \   ' Log who released\n        ret\n"
-  source: Spin2_debugger.spin2
+  description: Release lock[15] so other cogs can own the save buffer and tx/rx pins
+  code: "' Restore registers, then release lock[15]\ndebug_exit\n        setq  \
+    \  #$1F7-$010          ' Restore registers $010..$1F7 to free the save buffer\n\
+    \        rdlong  $010, regh\n\n        lockrel #15                 ' Release\
+    \ lock[15] so other cogs can own the save buffer and tx/rx pins\n"
+  source: "Spin2_debugger.spin2 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:232-235"
 - name: Error Recovery
   description: Release all locks on error
   code: "' Emergency release of all held locks\nemergency_release\n        mov   \

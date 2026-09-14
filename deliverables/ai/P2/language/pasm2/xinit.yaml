@@ -34,7 +34,7 @@ examples:
     '' tranp = 256 * 8 * 2              '' Number of clock transitions
 
     '
-  source: flash_loader.spin2
+  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:126-128"
 - context: SPI Command Transmission
   code: ''' Single byte command
 
@@ -51,7 +51,7 @@ examples:
     S
 
     '
-  source: flash_loader.spin2
+  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:166-168"
 - context: High-Speed Data Reception
   code: ''' Receive data from SPI flash to hub
 
@@ -69,7 +69,7 @@ examples:
     '' wmode = $C081_0000 + spi_do<<17  '' 1-pin input, bytes-msb-first, to hub
 
     '
-  source: flash_loader.spin2
+  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:258-261"
 patterns:
 - name: Streamer-SmartPin Synchronization
   description: 'Combines streamer for data transfer with smart pin for clock generation,
@@ -120,7 +120,7 @@ large_transfer_chunking:
                 setword mode, x, #0         ' patch into streamer mode word
                 shl     x, #1               ' edges = 2 * bits for SCK pin
                 wypin   x, #clk_pin         ' kick the SCK smart pin
-                waitx   #3                  ' alignment pad — see streamer_smartpin_control.yaml
+                waitx   #3                  ' alignment pad — see language/pasm2/concepts/streamer_smartpin_control.yaml
                 xinit   mode, #0            ' start streamer with patched count
                 waitxfi                     ' wait for chunk to complete
                 tjnz    count, #.block      ' loop until all chunks done

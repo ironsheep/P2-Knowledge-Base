@@ -2,7 +2,7 @@ title: Spin2 JonnyMac Naming Conventions
 id: spin2-naming-jonnymac
 version: 1.0.0
 layer: "Layer 4 - Naming Conventions (JonnyMac)"
-derived_from: johnny-mac-documentation-style.yaml v2.0.0
+derived_from: language/spin2/conventions/johnny-mac-documentation-style.yaml v2.0.0
 purpose: Complete JonnyMac naming and indentation standard
 applies_to: Projects adopting full JonnyMac community standard
 
@@ -190,7 +190,7 @@ code_structure_requirements:
   line_length:
     maximum: 100
     includes: "Code with end-of-line comments"
-    inherited_from: "Layer 2 (spin2-formatting-standards.yaml)"
+    inherited_from: "Layer 2 (language/spin2/conventions/spin2-formatting-standards.yaml)"
     
   symbol_names:
     maximum_length: 30
@@ -199,7 +199,7 @@ code_structure_requirements:
   method_spacing:
     blank_lines: 2
     between: "All method definitions"
-    inherited_from: "Layer 2 (spin2-formatting-standards.yaml)"
+    inherited_from: "Layer 2 (language/spin2/conventions/spin2-formatting-standards.yaml)"
     
   keywords:
     case: "lowercase"
@@ -387,15 +387,15 @@ why_these_conventions:
 
 integration_notes:
   requires:
-    layer_1: "spin2-getting-started.yaml (language mechanics)"
-    layer_2: "spin2-formatting-standards.yaml (professional structure)"
-    layer_3: "spin2-docs-jonnymac.yaml (documentation style)"
+    layer_1: "guides/spin2-getting-started.yaml (language mechanics)"
+    layer_2: "language/spin2/conventions/spin2-formatting-standards.yaml (professional structure)"
+    layer_3: "language/spin2/conventions/spin2-docs-jonnymac.yaml (documentation style)"
     
   creates:
     complete_standard: "Full JonnyMac programming standard (all 4 layers)"
     
   alternative_layer_3:
-    note: "Can combine with vscode-pnut-documentation-style.yaml instead of spin2-docs-jonnymac.yaml"
+    note: "Can combine with language/spin2/conventions/vscode-pnut-documentation-style.yaml instead of language/spin2/conventions/spin2-docs-jonnymac.yaml"
     result: "JonnyMac naming + VSCode documentation style"
 
 adoption_decision:
@@ -412,7 +412,7 @@ adoption_decision:
     - "You have existing codebase with different conventions"
 
 see_also:
-  full_standard: deliverables/ai/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml
-  layer_1: deliverables/ai/P2/guides/spin2-getting-started.yaml
-  layer_2: deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml
-  layer_3: deliverables/ai/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml
+  full_standard: language/spin2/conventions/johnny-mac-documentation-style.yaml
+  layer_1: guides/spin2-getting-started.yaml
+  layer_2: language/spin2/conventions/spin2-formatting-standards.yaml
+  layer_3: language/spin2/conventions/spin2-docs-jonnymac.yaml

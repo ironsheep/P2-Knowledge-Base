@@ -30,7 +30,7 @@ last_updated: '2025-09-19T16:04:17.346362'
 brief_description: Resume from interrupt 3
 group_membership:
   group_id: interrupt_resume
-  group_file: groups/interrupt_resume.yaml
+  group_file: language/pasm2/groups/interrupt_resume.yaml
   related:
   - resi0
   - resi1
