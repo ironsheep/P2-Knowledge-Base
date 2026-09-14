@@ -103,7 +103,23 @@ symbols — `MOV IJMP0, #5` → `Undefined symbol`, while `MOV INA, #5` assemble
 assemble. **Fixed:** the code writes `INA`/`INB`, each commented with the IJMP0/IRET0 role it plays
 inside the ISR. Prose that *names* the roles is correct and unchanged. Found by the F-430 pass.
 
-### F-433 — `spin2-pasm2-integration.yaml` teaches Propeller 1 code as P2 — `CONFIRMED — repair dispatched 2026-09-13`
+### F-433 — `spin2-pasm2-integration.yaml` teaches Propeller 1 code as P2 — `PENDING-VALIDATION — all 13 examples repaired and compiling 2026-09-13; owed: the served KB after the next YAML release`
+
+> **Applied 2026-09-13 (dispatched, arbiter-verified by re-extracting and compiling every example:
+> 13/13 clean under `pnut-ts` v1.55.5).** Compiling the whole file widened the finding from two P1
+> constructs to **every one of its 13 examples but one**: `WAITCNT`/`cnt` → the P2 periodic-timer idiom
+> `GETCT`/`ADDCT1`/`WAITCT1`; `MOV ptra, par` removed, since COGINIT's third argument arrives in the new
+> cog's PTRA (`spin2-v55-text.txt:517`), with the missing `ORG 0` added; bare `_RET_` (a condition
+> prefix, not an instruction, `silicon-doc-text.txt:858-861`) → `RET`, in four examples and in the
+> constructs list; `CALL(#$080)` (crashes the compiler) and `result := CALL(...)` (CALL is a statement
+> and blocks until RET, `spin2-v55-text.txt:556`) rewritten around a real label call — the "start it,
+> let it run, stop it" narrative was impossible for a blocking call and was replaced; `WAITUS` used as a
+> PASM2 instruction → `WAITX`; `IF … THEN` (Spin2 has no `THEN`); an invented `point.FIELD[LONG][x, y]`
+> syntax → a real `{Spin2_v45}` `STRUCT` (`spin2-v55-text.txt:147`); `#1000` and `#-1` immediates past
+> the 9-bit range → `##`; undefined `result`/`temp`/`complexMath`; trailing-colon labels; and an
+> interrupt example whose PASM handler wrote to hub address 0 because the Spin2 side never passed
+> `@shared_flag` — the file's own `hub_address_resolution` gotcha, now demonstrated rather than
+> violated. `COGINIT(16, …)` now reads `COGINIT(COGEXEC_NEW, …)`.
 
 Its cog-startup example waits with `WAITCNT cnt, ##160_000_000` and writes `MOV outa, cnt`; the next
 example reads its parameter with `MOV ptra, par`. `WAITCNT`, `cnt` and `PAR` are Propeller 1; P2 has

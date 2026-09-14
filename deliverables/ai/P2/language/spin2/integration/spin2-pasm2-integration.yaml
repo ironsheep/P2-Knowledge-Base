@@ -28,17 +28,16 @@ spin2_pasm2_integration:
     - integration_id: "inline_pasm_org_end"
       integration_type: "inline_pasm"
       description: "Direct inline assembly within Spin2 methods using ORG...END blocks"
-      spin2_constructs: ["ORG", "END", "_RET_", "method variables"]
+      spin2_constructs: ["ORG", "END", "RET", "method variables"]
       pasm2_instructions: ["MOV", "ADD", "SHL", "RET", "CALL"]
       syntax_examples:
         - spin2_code: |
             PUB calculate(a, b) : result | temp
-              x := 100
               ORG
                 MOV result, a      ' Access Spin2 variables directly
                 ADD result, b      ' First 16 variables mapped to $1E0-$1EF
                 SHL result, #2     ' Shift left by 2
-                _RET_              ' Return to Spin2
+                RET                ' Return to Spin2
               END
               return result        ' Modified by PASM
           pasm2_code: |
@@ -67,7 +66,7 @@ spin2_pasm2_integration:
                 MOV r1, p1
                 ADD r1, p2
                 MOV local1, #100
-                _RET_
+                RET
               END
           pasm2_code: |
             ' All symbolic names resolve to $1E0-$1EF registers
@@ -107,28 +106,24 @@ spin2_pasm2_integration:
     - integration_id: "call_cog_registers"
       integration_type: "method_calls"
       description: "Call PASM code loaded in cog registers using # addressing"
-      spin2_constructs: ["CALL(#address)"]
-      pasm2_instructions: ["RET", "_RET_", "any PASM code"]
+      spin2_constructs: ["CALL(#label)"]
+      pasm2_instructions: ["RET", "REP", "any PASM code"]
       syntax_examples:
         - spin2_code: |
             PUB setup()
-              ' Load PASM code into registers
+              CALL(#fastLoop)       ' Blocks until the PASM code below returns
+
+            DAT
               ORG $080
-              fastLoop:
-                MOV OUTA, INA
-                JMP #fastLoop
-              stopCode:
-                _RET_
-              END
-              
-              ' Call the code
-              CALL(#$080)           ' Start fast loop
-              WAITUS(1000)          ' Let it run
-              CALL(#stopCode)       ' Stop and return
+            fastLoop
+              REP #1, ##1000        ' repeat next instruction 1000 times
+              MOV OUTA, INA
+              RET
           pasm2_code: |
-            ' Code at $080 runs independently
-            ' stopCode address calculated by compiler
-          explanation: "# prefix indicates cog register address"
+            ' Code loaded at $080 in cog register space
+            ' CALL(#label) is a blocking call: execution does not
+            ' return to the caller until the PASM code executes RET
+          explanation: "# prefix with a label calls PASM code by cog register address. CALL(#label) with a bare numeric literal (e.g. CALL(#$080)) is not accepted by the compiler -- always call through a label. CALL blocks the calling code until the target returns; it does not start a background task (use COGINIT for that)."
       use_cases:
         - "Background processing loops"
         - "Interrupt service routine setup"
@@ -142,12 +137,12 @@ spin2_pasm2_integration:
       syntax_examples:
         - spin2_code: |
             DAT
-            hubCode:
+            hubCode
               MOV OUTA, #$FF
-              WAITUS #10
+              WAITX ##1000          ' delay in clock cycles (WAITUS is Spin2-only, not a PASM instruction)
               MOV OUTA, #$00
-              RET                   ' RET not _RET_ for hub code
-              
+              RET                   ' return to the calling Spin2 code
+
             PUB example()
               CALL(@hubCode)        ' Call hub-based PASM
           pasm2_code: |
@@ -169,23 +164,26 @@ spin2_pasm2_integration:
       syntax_examples:
         - spin2_code: |
             PUB loadCode()
-              REGLOAD(@mathChunk)   ' Load into specified registers
-              result := CALL(#$100) ' Call loaded code
-              
+              REGLOAD(@mathChunk)    ' Load into specified registers
+              CALL(#codeStart)       ' Call loaded code (CALL does not return a value;
+                                      ' read mresult separately if you need it)
+
             DAT
-            mathChunk:
+            mathChunk
               WORD $100, codeEnd-codeStart-1    ' Load at $100
               ORG $100
-            codeStart:
+            codeStart
               MOV temp, #42
               MUL temp, #17
-              MOV result, temp
-              _RET_
-            codeEnd:
+              MOV mresult, temp
+              RET
+            temp long 0
+            mresult long 0
+            codeEnd
           pasm2_code: |
             ' Chunk format: WORD startReg, numRegs-1
             ' Followed by actual code/data
-          explanation: "Load arbitrary code/data to any cog registers"
+          explanation: "Load arbitrary code/data to any cog registers. CALL() is a statement, not a function -- it cannot be used in an assignment (`x := CALL(...)` fails to compile); call it as a statement and read any result through a register the PASM code writes to."
       use_cases:
         - "Dynamic code loading"
         - "Multiple PASM routines in single method"
@@ -195,28 +193,28 @@ spin2_pasm2_integration:
       integration_type: "register_access"
       description: "Load and immediately execute PASM chunks"
       spin2_constructs: ["REGEXEC(@chunk)"]
-      pasm2_instructions: ["setup code", "_RET_"]
+      pasm2_instructions: ["setup code", "RET"]
       syntax_examples:
         - spin2_code: |
             PUB setupTimer()
               REGEXEC(@timerChunk)  ' Load and execute immediately
               ' Returns here after setup
-              
+
             DAT
-            timerChunk:
+            timerChunk
               WORD $118, setupEnd-setupStart-1
               ORG $118
-            setupStart:
+            setupStart
               MOV IJMP1, #timerISR
               GETCT PA
               ADDCT1 PA, ##1_000_000
               SETINT1 #1
-              _RET_                 ' Return to Spin2
-            timerISR:
+              RET                   ' Return to Spin2
+            timerISR
               DRVNOT #56
               ADDCT1 PA, ##1_000_000  
               RETI1
-            setupEnd:
+            setupEnd
           explanation: "Combines REGLOAD and CALL for setup operations"
       use_cases:
         - "Interrupt handler installation"
@@ -239,7 +237,7 @@ spin2_pasm2_integration:
               status.[31] := 0             ' Clear bit 31
               config.[15..8] := $FF        ' Set bits 15-8
               
-              IF status.[5] THEN           ' Test bit 5
+              IF status.[5]                ' Test bit 5 (Spin2 has no THEN keyword)
                 config.[23..16] := status.[7..0]  ' Copy bit range
           pasm2_code: |
             ' Equivalent PASM operations:
@@ -254,52 +252,52 @@ spin2_pasm2_integration:
     
     - integration_id: "struct_field_access"
       integration_type: "data_sharing"
-      description: "Access structure fields using field pointers"
-      spin2_constructs: ["@variable.field", "FIELD definitions"]
+      description: "Access named structure fields and pass a field's address by reference"
+      spin2_constructs: ["{Spin2_v45}", "CON STRUCT name(fields)", "structvar.field", "@structvar.field"]
       pasm2_instructions: ["RDLONG", "WRLONG", "address arithmetic"]
       syntax_examples:
         - spin2_code: |
-            PUB example() | point[2]
-              point.FIELD[LONG][x, y]     ' Define structure
-              
-              point.x := 100
-              point.y := 200
-              
-              processPoint(@point.x)      ' Pass field address
-              
+            {Spin2_v45}
+            CON
+              STRUCT point(x, y)         ' Define a named structure (v45+)
+
+            PUB example() | point p
+              p.x := 100
+              p.y := 200
+
+              processPoint(@p.x)         ' Pass field address by reference
+
             PUB processPoint(px)
               LONG[px] += 50              ' Modify through pointer
-          explanation: "FIELD creates named offsets for structure access"
-      use_cases:
-        - "Complex data structure manipulation"
-        - "Efficient parameter passing by reference"
-        - "Hardware register structure access"
+          explanation: "STRUCT (introduced in Spin2 v45, requires the {Spin2_v45} version-gate comment) defines named fields on a structure variable; @structvar.field yields the field's hub address for pass-by-reference. This is unrelated to the separate FIELD-pointer mechanism (^@variable / FIELD[fieldpointer]), which addresses arbitrary bit-ranges, not named structure fields, and does not use dot-field syntax."
 
     # Cog Interface Integration
     - integration_id: "cog_startup_pasm"
       integration_type: "cog_interface"
       description: "Start dedicated PASM cogs from Spin2"
       spin2_constructs: ["COGINIT", "COGSTOP", "@pasm_code"]
-      pasm2_instructions: ["full PASM program", "cog initialization"]
+      pasm2_instructions: ["full PASM program", "cog initialization", "GETCT", "ADDCT1", "WAITCT1"]
       syntax_examples:
         - spin2_code: |
             DAT
-            pasmCog:
+            pasmCog
               ORG 0
               MOV dira, ##$FF000000
-            mainLoop:
-              MOV outa, cnt
+            mainLoop
+              GETCT ctval
               ADD outa, #1
-              WAITCNT cnt, ##160_000_000
+              ADDCT1 ctval, ##160_000_000
+              WAITCT1
               JMP #mainLoop
-              
+            ctval long 0
+
             PUB startPasmCog() : cognum
-              cognum := COGINIT(16, @pasmCog, 0)
+              cognum := COGINIT(COGEXEC_NEW, @pasmCog, 0)
               return cognum
           pasm2_code: |
             ' Full PASM cog running independently
             ' Starts at hub address, copies to cog
-          explanation: "Dedicated PASM cogs for parallel processing"
+          explanation: "Dedicated PASM cogs for parallel processing. P2 has no WAITCNT instruction and no 'cnt' system register (both are P1-only) -- periodic timing on P2 uses GETCT to sample the free-running system counter, ADDCT1 to set the next CT1 target, and WAITCT1 to wait for it."
       use_cases:
         - "Parallel processing tasks"
         - "Real-time signal processing"
@@ -317,23 +315,25 @@ spin2_pasm2_integration:
               LONG command, status
               
             PUB startWorker()
-              COGINIT(16, @workerCog, @shared_buffer)
+              COGINIT(COGEXEC_NEW, @workerCog, @shared_buffer)
               
             DAT
-            workerCog:
-              MOV ptra, par           ' par = @shared_buffer
-              MOV ptr_cmd, ptra
+            workerCog
+              ORG 0                   ' Required: cog-exec code loaded by COGINIT
+              MOV ptr_cmd, ptra       ' PTRA already holds @shared_buffer, passed by COGINIT
               ADD ptr_cmd, #16*4      ' command offset
-              
-            loop:
+
+            loop
               RDLONG temp, ptr_cmd
               CMP temp, #0 WZ
               IF_Z JMP #loop          ' Wait for command
-              
+
               ' Process buffer...
               WRLONG #0, ptr_cmd      ' Clear command
               JMP #loop
-          explanation: "Hub RAM variables accessible to all cogs"
+            ptr_cmd long 0
+            temp long 0
+          explanation: "Hub RAM variables accessible to all cogs. COGINIT's third argument is delivered directly into the new cog's PTRA register (Spin2 v55 COGINIT(CogNum,PASMaddr,PTRAvalue)) -- there is no 'par' register on P2 (that is a P1-only concept), so PTRA is used as-is rather than copied from anything."
       use_cases:
         - "Inter-cog communication"
         - "Shared data processing"
@@ -344,24 +344,27 @@ spin2_pasm2_integration:
       integration_type: "cog_interface"
       description: "Combine cog execution and hub execution in same program"
       spin2_constructs: ["COGEXEC", "HUBEXEC", "execution mode control"]
-      pasm2_instructions: ["cog-specific", "hub-compatible"]
+      pasm2_instructions: ["cog-specific", "hub-compatible", "REP"]
       syntax_examples:
         - spin2_code: |
             DAT
-            fastCode:     ' Loads into cog registers
+            fastCode     ' Loads into cog registers
               ORG 0
-              REP @endFast, #1000
+              REP @endFast, ##1000  ' repeat the instructions up to endFast, 1000 times
                 MOV outa, ina
-            endFast:
+            endFast
               JMP @slowCode         ' Jump to hub
-              
-            slowCode:     ' Runs from hub
+
+            slowCode     ' Runs from hub
               CALL @complexMath     ' Hub subroutine
               JMP @fastCode         ' Back to cog
-              
+
+            complexMath
+              RET
+
             PUB start()
               COGINIT(COGEXEC, @fastCode, 0)  ' Start in cog mode
-          explanation: "Strategic use of both execution modes for optimization"
+          explanation: "Strategic use of both execution modes for optimization. REP's repeat-count (S) operand needs the ## prefix for values above 511 (a single # only encodes a 9-bit immediate); complexMath must be a defined label, since RET has nothing to return to otherwise."
       use_cases:
         - "Performance optimization"
         - "Memory usage optimization"
@@ -374,33 +377,41 @@ spin2_pasm2_integration:
       pasm2_instructions: ["SETINT1-3", "RETI1-3", "interrupt vectors"]
       syntax_examples:
         - spin2_code: |
+            VAR
+              LONG shared_flag
+
             PUB setupCoordinatedInt()
-              ' Spin2 sets up interrupt
+              ' Pass the hub address of shared_flag into the PASM handler
+              LONG[@shared_flag_addr] := @shared_flag
               REGEXEC(@intSetup)
-              
+
               ' Main processing continues
               REPEAT
                 ' Check shared status
-                IF shared_flag THEN
+                IF shared_flag
                   processInterruptData()
                   shared_flag := 0
-                  
+
+            PUB processInterruptData()
+
             DAT
-            intSetup:
+            intSetup
               WORD $110, intEnd-intStart-1
               ORG $110
-            intStart:
+            intStart
               MOV IJMP1, #handler
               SETINT1 #EVENT_CT1
-              _RET_
-              
-            handler:
+              RET
+
+            handler
               ' Set flag for Spin2
-              MOV temp, #-1
+              MOV temp, ##-1
               WRLONG temp, shared_flag_addr
               RETI1
-            intEnd:
-          explanation: "Interrupts handled in PASM, communicate with Spin2"
+            intEnd
+            temp long 0
+            shared_flag_addr long 0
+          explanation: "Interrupts handled in PASM, communicate with Spin2. A DAT-block PASM fragment cannot reach a Spin2 VAR by its bare name or by ##hubsymbol (see hub_address_resolution below) -- the caller pokes the real hub address of shared_flag into shared_flag_addr before REGEXEC starts the handler. A single # cannot hold a negative immediate (0..511 only); ##-1 is required."
       use_cases:
         - "Real-time event processing"
         - "Hardware interrupt handling"
