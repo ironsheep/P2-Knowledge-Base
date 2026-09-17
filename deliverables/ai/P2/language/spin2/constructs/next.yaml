@@ -55,3 +55,4 @@ related:
   - language/spin2/constructs/repeat.yaml
   - language/spin2/constructs/quit.yaml
   - language/spin2/keywords/NEXT.yaml
+  - language/spin2/constructs/abort.yaml

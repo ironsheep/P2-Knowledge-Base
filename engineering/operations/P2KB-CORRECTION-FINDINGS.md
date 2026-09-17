@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-435`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-438`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,127 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Two upstream P2KB update requests, probed 2026-09-17 — F-435, F-436, F-437
+
+Both arrived as documents in `engineering/ingestion/external-inputs/p2kb-update-requests/`. An
+upstream request is a **lead, never an authority** (D3), so each claim below was re-derived from
+sources this project holds before anything was applied. The two requests came out differently, and
+the difference is the point: one was confirmed by our own sources and applied; one was held.
+
+### F-435 — the ABORT entries teach that a trapped call returns the method's result; it returns 0 — `PENDING-VALIDATION — applied 2026-09-17; owed: the next YAML release`
+
+`language/spin2/constructs/abort.yaml` `trap_operator.expression_context` says `result := \method()`
+returns *"the method's normal return value (if no ABORT)"*. It does not. The value trap discards the
+method's results and supplies **0** on normal completion, so the only values a trap can produce are
+the abort value and 0.
+
+**Confirmed from our own ingestion tree, not from the request.** The Spin2 interpreter source we
+hold (`engineering/ingestion/external-inputs/source-code/spin-interpreter/v51/Spin2_interpreter.spin2`)
+states the return path as a case table over the frame's two flags, at `:1385-1389`:
+
+```
+'  case {trap_flag, push_flag}
+'    %00: restore caller stack
+'    %01: return (Z ? stack_args : results)
+'    %10: restore caller stack
+'    %11: return 0
+```
+
+and implements it at `:1399-1401` — `rczr pbase wcz` / `if_c_and_z mov v,#0`. `%11` is exactly a
+*value* trap (trap_flag AND push_flag): return 0. Only `%01` — push without trap — returns results.
+The request cites the v55 interpreter; we hold v51 and it already says this, which makes the two
+readings independent. **Compiler corroboration:** `pnut-ts` v1.55.5 accepts `v := \no_results()` for
+a method declaring **no** results — meaningless if results passed through a trap.
+
+**Second defect, same entries.** `propagation_behavior` and `anti_patterns.uncaught_abort` say an
+untrapped ABORT *"terminates the program"*. It ends the **task**, or the cog when no other task runs
+in it; other cogs continue. Same source: `launch_method` sets the trap flag on every cog/task top
+frame (`:1997`, `or pbase,#%10`) with the frame's return pointer documented as `@TASKSTOP()`
+(`:1972`), and the abort handler pops *"while !trap_flag"* (`:1446`, `:1459-1460`) — so it lands on
+that pre-set trap rather than running off the bottom.
+
+**Blast radius — this is the agent-consumer failure mode, not a wording nit.** Five of the entry's
+six `patterns` are built on the false premise and are wrong as written (`error_code_pattern`'s
+`safe_operation`, `try_finally_pattern`, `retry_pattern`, `graceful_degradation`,
+`resource_cleanup`), as is the `expression_context` example itself. An agent that emits
+`level := \read_level()` gets 0 on every success and nothing says so. A fourth gap: bare `ABORT` and
+`ABORT 0` cannot be told from success by value, and the entries never say to use non-zero codes.
+
+**Where it came from.** `abort.yaml`'s own header names its source: *"Spin2 v51 documentation,
+pnut_ts Error-Handling-Usage-Guide.md"*. The usage guide carried the same two errors and has been
+corrected upstream. This is [[feedback_upstream_input_docs_not_authority]]'s exact shape — a
+usage-guide claim carried into the KB without probing the interpreter.
+
+**Applied:** `expression_context`, `propagation_behavior.description`, `return_vs_abort.ABORT`, the
+`patterns` block, `anti_patterns.uncaught_abort` + a new `reading_result_through_trap`,
+`error_handling_strategy.top_level`, and the whole `behavior`/`trap_operator`/`notes` of
+`language/spin2/keywords/ABORT.yaml`. Every replacement example compiled with `pnut-ts -d` before
+shipping — which caught one defect in the request itself: its `supervise_a_cog` example calls an
+undefined `worker_body()` and does not assemble (`Expected a method, object, or variable`). Given a
+body here rather than shipped broken.
+
+### F-437 — `validation_chain` swallowed every failure it claimed to catch — `PENDING-VALIDATION — found and fixed 2026-09-17 while applying F-435; owed: the next YAML release`
+
+Found while fixing F-435, and **not** part of that request — the upstream doc proposed dropping this
+pattern rather than correcting it, so a straight application would have removed the evidence without
+recording the defect. `abort.yaml`'s `validation_chain` read:
+
+```
+PUB validate_all(data) : valid
+  \validate_range(data)
+  \validate_checksum(data)
+  \validate_format(data)
+  valid := TRUE                ' All passed
+```
+
+described as *"Run multiple validations, fail on any."* It does the exact opposite. Each bare `\`
+is an **instruction-context** trap: it catches the abort, discards the value, and execution
+continues on the very next line — so a failing `validate_range` is swallowed, the remaining
+validations still run, and `valid := TRUE` always executes. The pattern reports success on every
+input, including the ones it exists to reject.
+
+Distinct from F-435: that one is *results do not pass a trap*; this one is *an untested trap is a
+silent catch*. A reader could absorb F-435's correction completely and still write this.
+
+**Applied:** pattern rewritten to test each trap and return early, and the rule stated in the
+pattern's own description so the shape is named where someone would copy it. The related caution is
+now on `trap_operator.instruction_context` too, which previously read only "Result is discarded."
+Compiled with `pnut-ts -d` before shipping.
+
+### F-436 — the `map_caveat` retraction is right about the compiler and wrong in shape; held — `NEEDS-VERIFICATION — held 2026-09-17, pending one question to Stephen`
+
+`language/spin2/concepts/object-image-dedup.yaml` `map_caveat` tells readers the multi-instance
+`.map`'s instance-name/source-name columns are unreliable and to *"do NOT trust those labels."* The
+upstream request retracts that: the bug was fixed at 1.55.4, three further defect classes were fixed
+for 1.55.8, and 15/15 verification cases pass. The retraction is very likely correct — **and the
+replacement text must not be applied as written.** Two reasons, neither about whether the compiler
+was fixed:
+
+1. **Shape.** The proposed replacement is a three-era build history — *"Through 1.55.3 … 1.55.4
+   through 1.55.7 … From 1.55.8 …"*. This project ruled on exactly this (Stephen, 2026-08-21):
+   **cite the EDITION, never the BUILD** ([[reference_kb_is_always_latest_no_version_citations]]).
+   The KB ships one edition — the current one — and that memory names **this very file** as the one
+   found carrying a rotting build stamp (*"re-verify on a compiler version bump"* pinned at v1.55.0
+   while v1.55.3 was installed). Replacing one build stamp with three build ranges is more of the
+   shape that ruling removed. An agent reading the entry cannot tell which compiler its user runs,
+   so a version-ranged caveat gives it no decidable answer.
+2. **We cannot reproduce it, and the target build may not exist yet.** The measurements are against
+   an unreleased *"pre-1.55.8 sprint build"* in the upstream repo, via a script that lives there
+   (`npm run p2kb-verify`). This container has **pnut-ts v1.55.5**. The amendment would also have
+   the KB instruct readers to read a `SUMMARY` sentence in place of the `Objects:` line — a format
+   change the request dates to 1.55.8, which is *not* what our installed compiler emits.
+
+**Not "leave it alone" either.** The live text is a defect report about our own compiler, published
+to agents, telling them to route around a bug that is fixed. It should go. What replaces it should
+state what is true of the current released compiler with no build ranges, keep the entry's
+`Compiler-coupled behaviour: re-measure` instruction, and update `verification.method` to whatever
+the released `.map` actually emits. All the entry's *mechanism* claims stay — the request agrees
+they were not touched, and its re-measurement reproduced all seven published cases.
+
+**The question that unblocks it (queued for Stephen):** is 1.55.8 released? If yes, the entry is
+rewritten against it edition-free. If not, the caveat is rewritten to what 1.55.5 does and the
+format change waits for the release that ships it.
 
 ## The first run of the full cross-reference gate (2026-09-13) — F-432, F-433, F-434
 

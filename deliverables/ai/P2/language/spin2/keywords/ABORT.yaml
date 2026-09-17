@@ -11,9 +11,10 @@ syntax:
   - "ABORT expression"   # Returns expression value to trapping caller
 
 behavior:
-  - "Unwinds call stack until trap point (\\ operator) is found"
-  - "If no trap exists, program terminates"
-  - "Returns abort value to the trapping caller"
+  - "Unwinds the call stack to the nearest call made with the \\ trap operator"
+  - "A value trap receives the ABORT value; bare ABORT gives 0"
+  - "A trapped call that completes normally also gives 0 - its results never pass a trap"
+  - "If nothing traps it, the task stops (or the cog, if no other task runs in it); other cogs continue"
 
 examples:
   - description: "Simple abort"
@@ -30,16 +31,17 @@ examples:
 
 trap_operator:
   description: "Use backslash (\\) to catch ABORT"
-  syntax: "result := \\method_call()"
+  syntax: "err := \\method_call()"
   example: |
-    err := \risky_operation()
-    if err < 0
+    err := \risky_operation()     ' 0 on success, abort code on failure
+    if err
       handle_error(err)
 
 notes:
   - "Use ABORT for error signaling, not normal flow"
-  - "Always trap at top level to prevent program termination"
-  - "Negative values conventionally indicate errors"
+  - "Use non-zero abort codes - a trap cannot tell ABORT 0 from success"
+  - "Return data by pointer or VAR; a trap replaces the method's results with 0"
+  - "Trap below each cog/task top method - an untrapped ABORT stops it silently"
 
 related:
   - language/spin2/constructs/abort.yaml
