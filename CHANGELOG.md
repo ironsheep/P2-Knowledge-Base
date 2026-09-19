@@ -20,6 +20,19 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.19.2] - 2026-09-19
+
+**A published index that pointed at content it could not verify**
+
+### Fixed
+
+- The v1.19.1 index carried the **pre-change** SHA-256 for the two files that release edited,
+  so the MCP's cache-integrity check correctly refused to serve them: *"Content for
+  'p2kbPasm2Xinit' is temporarily unavailable — verification failed."* The index is derived
+  from the **committed** state, and it had been regenerated while those edits were still only
+  in the working tree. Two entries affected — `p2kbPasm2Xinit` and `p2kbArchOverview` — both
+  now verify. No content changed in this release; only the derived index and its gzip.
+
 ## [1.19.1] - 2026-09-19
 
 **The streamer's perpetual count, which v1.19.0 said it had corrected and had not**
