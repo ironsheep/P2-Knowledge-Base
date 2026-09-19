@@ -142,7 +142,8 @@ debug_cogs_interaction:
       effect: "If bit N is NOT set, no code is generated - zero runtime overhead"
     DEBUG_COGS:
       level: "Runtime"
-      controls: "Whether a cog can trigger debug output"
+      controls: "The per-cog debug INTERRUPT enable. An enabled cog takes a debug interrupt at every COGINIT whether or not it ever prints, so this is not merely an output filter — see language/spin2/constants/special-configuration-symbols.yaml"
+      not_the_same_question: "DEBUG_MASK = 0 in an object does NOT take that object's cog out of the debug mechanism. The compile-time code mask and the runtime interrupt enable are independent, which is exactly why both are listed here"
       effect: "If cog's bit is NOT set, debug statements on that cog produce no output"
   combined_behavior: |
     1. Compile-time: Bit N must be set in DEBUG_MASK (otherwise no code is generated)

@@ -1,5 +1,14 @@
 operator: "<="
 type: operator
 description: |
-  Signed/unsigned compare
+  SIGNED less than or equal. Returns -1 (true) or 0 (false).
+  This operator is signed - it is not a signedness-agnostic compare. The UNSIGNED
+  form is a separate operator, `+<=`, and the floating-point form is `<=.`.
+  Reaching for `<=` on values that can exceed $7FFF_FFFF compares them as negative.
+  In a CON block applied to floating-point constants or symbols, the relational
+  operators return 1.0 or 0.0 rather than the integer -1 or 0.
 category: Comparison
+
+related:
+  - language/spin2/operators/op_addlteq.yaml
+  - language/spin2/operators/op_lteqdot.yaml

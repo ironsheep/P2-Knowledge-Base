@@ -40,6 +40,7 @@ examples:
 
 constraints:
   - "Range cannot cross a 32-pin port boundary (wraps within the same group of 32)"
+  - "A NEGATIVE operand is a legal pin field, and this is the trap: -1 is all ones, so bits [5:0] = 63 (base pin 63) and bits [10:6] = 31 (31 additional pins) — 32 pins, wrapping within the upper port, i.e. P32..P63. Passing -1 to a pin method as a 'no pin' sentinel therefore acts on half the chip rather than on nothing. Test the pin before use (`if pin >= 0`), with a SIGNED compare"
   - "9-bit immediate operand encoding limits ADDPINS to 7 with #base syntax; for ranges 8-31, use ##base ADDPINS N (compiler emits AUGD)"
   - "Counting is INCLUSIVE: ADDPINS N affects N+1 pins (not N pins)"
   - "The base pin must be specified as the LOWEST pin in the range; ADDPINS extends upward"

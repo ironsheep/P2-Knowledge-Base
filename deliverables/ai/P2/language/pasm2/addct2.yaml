@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Set CT2 event to trigger on CT = D + S. ADDCT2 sets the hidden CT2 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT2, WAITCT2, JCT2, and JNCT2 instructions to process CT2 time-based events.
+description: Set the CT2 event target to D + S. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT2) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too. ADDCT2 sets the hidden CT2 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT2, WAITCT2, JCT2, and JNCT2 instructions to process CT2 time-based events.
 flags_affected:
   C: No effect
   Z: No effect

@@ -277,7 +277,7 @@ debug_architecture:
       These constants configure the debug output system that handles ALL debug() output.
       They affect how debug messages are transmitted and formatted at runtime.
     symbols:
-      - "DEBUG_COGS - Which cogs can produce debug output"
+      - "DEBUG_COGS - the per-cog debug INTERRUPT enable (not just an output filter); default all eight"
       - "DEBUG_DELAY - Startup delay before debug begins"
       - "DEBUG_TIMESTAMP - Enable timestamps in output"
       - "DEBUG_PIN_TX/RX - Serial communication pins"
@@ -387,10 +387,23 @@ debug_debugger_control:
     
   DEBUG_COGS:
     description: |
-      8-bit mask specifying which cogs have debug capability enabled at runtime.
-      Each bit corresponds to a cog (bit 0 = cog 0, bit 7 = cog 7). If a cog's
-      bit is clear, debug() statements running on that cog will NOT produce output,
-      even if the code was compiled.
+      8-bit mask of the per-cog DEBUG INTERRUPT enable. Each bit corresponds to a
+      cog (bit 0 = cog 0, bit 7 = cog 7).
+      It is NOT only an output filter. An enabled cog takes the P2's highest-priority
+      interrupt at EVERY COGINIT exercised upon it, with the register save and restore
+      that implies, whether or not that cog ever prints anything
+      (architecture/debug_interrupt.yaml). Clearing a cog's bit removes the cog from the
+      debug mechanism; setting it opts the cog into an interrupt, not just into output.
+      THE DEFAULT IS ALL EIGHT COGS, so a program that never chose gets the interrupt in
+      every cog it starts - including a cog running timing-critical work.
+      Restrict it to the reporting cog when measuring anything: see
+      architecture/streamer/pin-capture.yaml `measurement_hygiene`, where leaving it at
+      the default corrupted streamer accumulators by 1,000,000-7,000,000 (EF-057).
+      A child object compiled with DEBUG_MASK = 0 is NOT removed from the debug
+      mechanism by that - DEBUG_MASK is a compile-time code mask, DEBUG_COGS is the
+      runtime interrupt enable. They are different questions.
+      The debugger applies these enables with HUBSET, whose L bit locks them until
+      reset, so this is not changeable on the fly later in the run.
     default: "%11111111 (all cogs)"
     bit_mapping:
       bit_0: "Cog 0"

@@ -24,6 +24,12 @@ parameters:
       - Multiple pins using ADDPINS operator
       - Variable or expression that evaluates to a pin field
 
+      WARNING - a NEGATIVE value is a legal pin field, not a "no pin" marker.
+      -1 is all ones: base pin 63 with 31 additional pins, which wraps within the
+      upper port and therefore means P32..P63. PINFLOAT(-1) acts on half the chip.
+      The -1-as-no-pin idiom is near-universal in driver code, so a pin held in a
+      variable is tested before use: `if pin >= 0`. Note the guard itself must be a
+      SIGNED compare - see language/spin2/operators/op_gteq.yaml.
 returns: "none"
 
 timing:

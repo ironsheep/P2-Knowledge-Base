@@ -72,7 +72,12 @@ examples:
 
 underlying_implementation:
   description: |
-    Internally calculates: WAITX((CLKFREQ/1_000_000) * microseconds - 1)
+    NOT a WAITX. The interpreter reads the system counter, computes
+    (CLKFREQ/1_000_000) * microseconds, ADDS the current counter to make an ABSOLUTE
+    TARGET, and then waits the way WAITCT does - looping while the MSB of
+    (CT - target) is set.
+    That distinction is the whole reason the $8000_0000-clock bound exists, and
+    it is what the method does when you exceed it: see limitations.past_the_bound.
     Automatically adjusts for system clock frequency.
     At lower frequencies, resolution degrades.
   related_pasm: "language/pasm2/waitx.yaml"
@@ -104,6 +109,16 @@ limitations:
   source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550"
   hard_bound: "duration must not exceed $8000_0000 clocks"
   ceiling_formula: "max Microseconds = $8000_0000 / (CLKFREQ / 1_000_000)"
+  past_the_bound: |
+    Exceeding the bound does NOT clamp, and does not wait a partial time - the call
+    RETURNS IMMEDIATELY, with no error and nothing in the build to say so. Code that
+    asks for 10 s at 350 MHz gets no wait at all and looks exactly like code that works.
+    WHY, and it follows from the implementation above: the wait is against an absolute
+    COUNTER TARGET tested by the MSB rule, so a target more than 2^31 clocks ahead reads
+    as ALREADY PASSED on the first comparison.
+  long_waits: |
+    For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in
+    slices of at most a second, rather than asking for the whole span at once.
   resolution: "1 µs -- the argument's unit"
   correction_2026_08_25: "The pre-purge form of this block claimed a range of 1-4,294,967,295 microseconds. That is the 32-bit unsigned range of the argument, not the wait the chip performs; the source's bound is $8000_0000 CLOCKS. Not restored."
 
