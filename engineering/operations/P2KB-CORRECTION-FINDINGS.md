@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-441`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-442`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,7 +50,40 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## A released CHANGELOG claimed a fix the release did not carry — F-440
+## Two release-path defects, one root cause — F-440, F-441
+
+### F-441 — v1.19.1 published an index the integrity check could not verify — `RESOLVED — v1.19.2, 2026-09-19; published state re-verified against raw.githubusercontent.com`
+
+v1.19.1's index carried the **pre-change** SHA-256 for the two files that release edited, so the
+MCP refused to serve them: *"Content for 'p2kbPasm2Xinit' is temporarily unavailable — verification
+failed."* The release was live and broken for `p2kbPasm2Xinit` and `p2kbArchOverview`.
+
+**Cause: step ordering.** `release-yamls` §6b regenerates derived artifacts **against the committed
+state**, and it is a separate step for exactly this reason — the generator hashes the **git blob**,
+so an index built while the edits are still uncommitted records the OLD hashes. This pass collapsed
+6a/6b and regenerated before committing content. The gates could not catch it: `validate-dod-release`
+checks index/gzip parity and structure, not whether each entry's sha256 matches its committed blob.
+
+**Same root cause as F-440**, one release apart: both are *reading from what I had done rather than
+from what was committed* — once into a release note, once into a derived artifact. The first was
+caught by auditing claims against the tree; the second by the consumer's own integrity check, which
+is the only reason it surfaced at all.
+
+**Fixed and verified on the artifact, not the gate:** index regenerated post-commit, then every
+entry's sha256 compared against `git cat-file blob HEAD:<path>` — **0 of 1131 mismatch**. Published
+state confirmed from outside: `raw.githubusercontent.com` serves the corrected `xinit.yaml`, its
+sha256 equals the published index's entry, and the content carries the fix.
+
+**Owed — the gate that would have caught it:** a release check asserting every index entry's sha256
+matches the committed blob it names. Cheap (one `git cat-file` per entry), and it makes the
+6a→6b ordering self-enforcing rather than a rule someone has to remember. Pairs with F-440's
+CHANGELOG-vs-diff check; both belong in `validate-dod-release.py`.
+
+**Not a defect, recorded so it is not chased:** `p2kb-mcp` still reports the failure in this session
+after the fix. It serves a boot-time snapshot and does not reload on republish — a stale read needs
+an MCP restart, not `p2kb_refresh`.
+
+
 
 ### F-440 — v1.19.0's CHANGELOG and ledger both state the `$FFFF`-perpetual correction; it was never applied — `PENDING-VALIDATION — applied 2026-09-19 after the tag; owed: the v1.19.1 release`
 
