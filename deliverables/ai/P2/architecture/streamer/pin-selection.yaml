@@ -1,5 +1,5 @@
 # Pin Selection and Control
-# D[22:20] pin group and D[19:16] sub-pin selection
+# D[22:20] pin group; D[19:17] sub-pin selection (D[16] is the %a alternate-bit-order bit, NOT part of the sub-pin field — the whole pin number is D[22:17])
 #
 # NOT a definition home for any constant. Per-constant definitions live in
 # language/spin2/symbols/streamer-symbols.yaml and
@@ -214,7 +214,18 @@ alt_bit_order:
       symbol: X_ALT_ON
       order: "MSB first"
       
-  use_case: "Use X_ALT_ON for SPI protocols that transmit MSB first"
+  use_case: "Use X_ALT_ON for MSB-first SPI *within the 1/2/4-bit modes* — the scope on the line above is the whole rule, and this recommendation does not reach past it."
+  scope_warning: |
+    The %a bit reorders bits WITHIN a sub-byte group, so it has an effect only in the
+    1-, 2- and 4-bit modes. An 8-bit-per-transfer SPI capture is NOT one of those: a
+    whole byte per transfer has no sub-byte grouping to reorder, so X_ALT_ON does not
+    make it MSB-first. Reading the use_case without its scope is how an 8-bit SPI
+    capture gets built on a bit that does nothing to it.
+  what_to_do_in_8_bit_modes: |
+    Reorder the byte after capture (REV / MOVBYTS), or select a mode whose grouping the
+    %a bit actually reaches. NOT STATED HERE: which of those two is cheaper in a given
+    pipeline — no source we hold compares them, and this page will not invent a
+    recommendation it cannot ground.
 
 # Pin base calculation
 #

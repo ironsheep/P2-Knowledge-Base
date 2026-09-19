@@ -61,11 +61,26 @@ code_examples:
         dirl    #counter_pin                     ' Reset smart pin
         wrpin   ##P_COUNT_RISES, #counter_pin    
         wxpin   #0, #counter_pin                 ' Continuous mode
-        wypin   #0, #counter_pin                 ' Count A only
         dirh    #counter_pin                     ' Enable counter
+        wypin   #0, #counter_pin                 ' Count A only - Y AFTER DIRH
       .loop
         rdpin   count, #counter_pin              ' Read A edge count
         jmp     #.loop
+
+configuration_order:
+  follows_the_universal_rule: |
+    The PASM2 example above writes Y with WYPIN AFTER raising DIR, which is
+    architecture/smart_pins.yaml's reset_before_configure order:
+    DIRL -> WRPIN -> WXPIN -> DIRH -> WYPIN. That order is correct for EVERY mode,
+    so the examples here use it rather than relying on this mode tolerating another.
+    (This page previously showed WYPIN before DIRH.)
+  about_pinstart: |
+    The Spin2 example uses pinstart(), which writes Y BEFORE raising DIR. The general
+    page names that unsafe for the TRIGGER modes (%00100 pulse, %00101 transition).
+    %01110 is a counting mode, not a trigger mode, so pinstart() is not excluded by
+    that rule -- but NOT STATED, by this page or any source we hold: whether %01110 is
+    positively immune to the early Y write. If that matters to your design, use the
+    explicit five-step sequence, which is safe either way.
 
 common_applications:
   - "Event counting with separate increment/decrement inputs"

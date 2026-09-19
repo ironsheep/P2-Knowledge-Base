@@ -414,7 +414,7 @@ pin_control:
   - symbol: X_PINS_ON
     value: "$0080_0000"
     encoding: "%1 << 23"
-    description: "Enable pin output"
+    description: "Enable pin output. SAME BIT as X_WRITE_ON — D[23] is one enable whose meaning follows the mode: pin output in output modes, WRFAST in capture modes. They are not two independent controls, and setting 'both' sets one bit once. See architecture/streamer/pin-selection.yaml enable_control"
 
 # Control symbols - Write enable
 write_control:
@@ -426,7 +426,7 @@ write_control:
   - symbol: X_WRITE_ON
     value: "$0080_0000"
     encoding: "%1 << 23"
-    description: "Enable WRFAST"
+    description: "Enable WRFAST. SAME BIT as X_PINS_ON — D[23] is one enable whose meaning follows the mode: WRFAST in capture modes, pin output in output modes. See architecture/streamer/pin-selection.yaml enable_control"
 
 # Control symbols - Bit order
 bit_order:
@@ -524,8 +524,12 @@ dac_routing:
 
 # Usage example
 usage_example: |
-  ' Compose streamer command using symbols:
-  mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + base<<17 + 640
+  ' Compose streamer command using symbols.
+  ' COMPOSE WITH | THROUGHOUT — never +. A base that is not aligned for its mode
+  ' CARRIES into the mode field when added, silently selecting a different mode at a
+  ' different pin group; with | it cannot carry. Check the alignment rule first:
+  ' architecture/streamer/pin-selection.yaml (alignment_rule, composition_rule).
+  mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 | (base << 17) | 640
   
   ' This creates:
   ' - Mode: RGB 5:6:5 from Hub
