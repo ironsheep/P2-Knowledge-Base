@@ -275,7 +275,7 @@ include_search_order:
 notes:
   - "Available in v48+ compilers"
   - "-D symbols are case-insensitive, like all Spin2 symbols"
-  - "There is NO -D symbol=value form in either compiler. PNut-TS accepts the text without complaint and defines NOTHING -- pnut_ts -D VERS=200 leaves VERS undefined, with no diagnostic. To carry a value, use a source #DEFINE (PNut-TS only)"
+  - "There is NO -D symbol=value form in either compiler. PNut-TS REJECTS the attempt: `-D VERS=200` gives `-D VERS=200 is not supported; -D takes a presence-only symbol name (use -D VERS)`, exits non-zero, and writes no output files. It rejects an illegal symbol name the same way (`-D 9BAD`, `-D BAD-NAME`). Older PNut-TS builds accepted the text silently and left the symbol undefined, so a build script carrying `=value` used to compile and quietly take the #ELSE branch -- if you meet that, the script was always wrong. To carry a value, use a source #DEFINE (PNut-TS only)"
   - "PNut accepts up to 16 external symbols via -D; PNut-TS does not enforce that cap -- keep to 16 for portability"
   - "Maximum symbol name length is 32 characters"
   - "-D symbols CAN be undefined with #UNDEF in source -- they are ordinary user symbols. Only the predefined __*__ symbols are protected from #UNDEF"

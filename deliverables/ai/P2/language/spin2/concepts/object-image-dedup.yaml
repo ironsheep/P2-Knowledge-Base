@@ -105,25 +105,40 @@ cascade_through_tiers:
 
 verification:
   method: |
-    Compile with -m and read the .map `Objects:` count and the DAT symbol addresses.
+    Compile with -m. The .map's SUMMARY sentence states the image count directly
+    ("...became N instances, built from I images; S images are shared by more than one
+    instance"); OBJECT TREE gives each instance its image, source and effective overrides;
+    MEMORY LAYOUT and OBJECT DETAILS give the per-image DAT addresses and the per-instance
+    VAR bases. The image count is what decides the question below - two instances on one
+    image share its DAT; two images do not.
     Compiler-coupled behaviour: re-measure rather than assume if a result surprises you.
   measured: |
-      - identical overrides (100,100), seeded probe         -> Objects: 2, one shared DAT
-      - differing overrides (100,200), seeded probe         -> Objects: 3, two independent DAT
-      - differing overrides (100,200), override unreferenced -> Objects: 2, silently merged
-      - one top override through a 3-tier seeded+forwarding chain -> Objects: 5 (every DAT tier forked)
-      - two DIFFERING overrides of a CON the object never references -> Objects: 2, ONE image,
+      Image counts, as the .map's SUMMARY reports them:
+      - identical overrides (100,100), seeded probe          -> 2 images, one shared DAT
+      - differing overrides (100,200), seeded probe          -> 3 images, two independent DAT
+      - differing overrides (100,200), override unreferenced -> 2 images, silently merged
+      - one top override through a seeded+forwarding chain   -> every DAT tier below it forks;
+        the un-overridden sibling keeps its own chain of images at the original sizes
+      - two DIFFERING overrides of a CON the object never references -> 2 images, ONE shared,
         and the binaries are md5-identical to the same program with the overrides made equal.
         This is why the rule is stated over EFFECTIVE OVERRIDE SETS while the mechanism is
         image-byte identity: differing overrides are not sufficient to fork.
-      - one declaration overridden, its sibling not -> Objects: 3, 348 bytes (the mirror trap);
-        the same override applied to both -> Objects: 2, 216 bytes
-      - a tier forwarding one of the object's TWO DAT-sizing CONs -> Objects: 4, 372 bytes, two
-        driver images; adding the missing forwarding constant -> Objects: 3, 240 bytes, one
+      - one declaration overridden, its sibling not (the mirror trap) -> every tier of the
+        overridden branch forks, and the program costs MORE code/DAT than the same program
+        with the override applied to both, which shares those images instead
+      - a tier forwarding one of the object's TWO DAT-sizing CONs -> two driver images;
+        adding the missing forwarding constant collapses them to one
   map_caveat: |
-    In the multi-instance .map, the instance-name / source-name columns can be internally
-    inconsistent — do NOT trust those labels. The reliable signals are the Objects: count
-    and the DAT symbol addresses.
+    The .map format changed at pnut-ts 1.55.8: there is no `Objects:` line. Read the image
+    count from the SUMMARY sentence instead.
+    Its labels are reliable. Every instance appears, named by access path (A, A.LEAF, D[1],
+    A.D[1].LEAF) with its source object and its own VAR base; each element of an OBJ array
+    gets its own row; instances sharing an image are listed together against the shared
+    code/DAT range while keeping separate VAR blocks; and ADDRESS INDEX names the owning
+    image for every symbol.
+    On a compiler old enough to print an `Objects:` line, trust that count and the DAT
+    symbol addresses but not the instance/source labels beside them - identical copies,
+    nested children, OBJ arrays and any OBJ declared after an array were mislabelled there.
 
 when_it_matters: |
   Replicating one complex object tree onto N independent, identical shared buses (e.g. two

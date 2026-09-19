@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-438`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-439`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,7 +50,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Two upstream P2KB update requests, probed 2026-09-17 — F-435, F-436, F-437
+## Two upstream P2KB update requests, probed 2026-09-17 — F-435, F-436, F-437, F-438
 
 Both arrived as documents in `engineering/ingestion/external-inputs/p2kb-update-requests/`. An
 upstream request is a **lead, never an authority** (D3), so each claim below was re-derived from
@@ -137,7 +137,34 @@ pattern's own description so the shape is named where someone would copy it. The
 now on `trap_operator.instruction_context` too, which previously read only "Result is discarded."
 Compiled with `pnut-ts -d` before shipping.
 
-### F-436 — the `map_caveat` retraction is right about the compiler and wrong in shape; held — `NEEDS-VERIFICATION — held 2026-09-17, pending one question to Stephen`
+### F-438 — the preprocessor entry states pre-1.55.8 `-D` behaviour as fact — `PENDING-VALIDATION — fixed 2026-09-19; owed: the next YAML release`
+
+Found by sweeping the KB for what the 1.55.8 upgrade invalidates, which is the half of an upgrade
+nobody is prompted to do. `language/spin2/preprocessor/external-symbols.yaml:278` read:
+
+> *"There is NO -D symbol=value form in either compiler. PNut-TS accepts the text without complaint
+> and defines NOTHING — pnut_ts -D VERS=200 leaves VERS undefined, with no diagnostic."*
+
+True when written against v1.55.3 (F-235). **False from 1.55.8**, measured here on the release
+binary — v1.55.5 for contrast, both run on the same source:
+
+| | v1.55.5 | v1.55.8 |
+|---|---|---|
+| `-D VERS=200` | exit **0**, no diagnostic, symbol undefined, `p.bin` written | `ERROR- -D VERS=200 is not supported; -D takes a presence-only symbol name (use -D VERS)`, exit **1**, **no output file** |
+| `-D 9BAD` / `-D BAD-NAME` | accepted | rejected, exit 1 |
+
+**The durable half of the entry was right and stays**: there is still no value-carrying
+command-line define in either compiler, and the symbol is still presence-only. What changed is that
+the attempt is now diagnosed instead of ignored, so the sentence describing the silence had to go.
+Rewritten to state the rejection and its message, with the old silence named as what an older
+compiler does — not as three version eras (**cite the edition, never the build**).
+
+**Same sweep, nothing else exposed:** no `.spin2` in the repo uses `#if`/`#elseif` (now an error), no
+script passes `-D SYM=value` to the compiler, and nothing in `engineering/tools/` or the skills parses
+a `.map`. The two open items on `DRAFTS/PNUT-TS-PUNCH-LIST.md` are both fixed by this release and
+were moved to *Shipped* with the evidence.
+
+### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `PENDING-VALIDATION — applied 2026-09-19; owed: the next YAML release`
 
 `language/spin2/concepts/object-image-dedup.yaml` `map_caveat` tells readers the multi-instance
 `.map`'s instance-name/source-name columns are unreliable and to *"do NOT trust those labels."* The
@@ -154,22 +181,46 @@ was fixed:
    while v1.55.3 was installed). Replacing one build stamp with three build ranges is more of the
    shape that ruling removed. An agent reading the entry cannot tell which compiler its user runs,
    so a version-ranged caveat gives it no decidable answer.
-2. **We cannot reproduce it, and the target build may not exist yet.** The measurements are against
-   an unreleased *"pre-1.55.8 sprint build"* in the upstream repo, via a script that lives there
-   (`npm run p2kb-verify`). This container has **pnut-ts v1.55.5**. The amendment would also have
-   the KB instruct readers to read a `SUMMARY` sentence in place of the `Objects:` line — a format
-   change the request dates to 1.55.8, which is *not* what our installed compiler emits.
+2. **We could not reproduce it.** The measurements were against an unreleased *"pre-1.55.8 sprint
+   build"* in the upstream repo, via a script that lives there (`npm run p2kb-verify`), while this
+   container had **v1.55.5**.
 
-**Not "leave it alone" either.** The live text is a defect report about our own compiler, published
-to agents, telling them to route around a bug that is fixed. It should go. What replaces it should
-state what is true of the current released compiler with no build ranges, keep the entry's
-`Compiler-coupled behaviour: re-measure` instruction, and update `verification.method` to whatever
-the released `.map` actually emits. All the entry's *mechanism* claims stay — the request agrees
-they were not touched, and its re-measurement reproduced all seven published cases.
+**RESOLVED 2026-09-19 — reason 2 evaporated and reason 1 still decided the text.** The 1.55.8
+release landed in `.devcontainer/` (`pnut-ts-linux-arm64-015508.zip`); installed for session use and
+**every claim re-measured here, on fixtures built from this entry's own prose, reading the `.map`
+rather than any changelog:**
 
-**The question that unblocks it (queued for Stephen):** is 1.55.8 released? If yes, the entry is
-rewritten against it edition-free. If not, the caveat is rewritten to what 1.55.5 does and the
-format change waits for the release that ships it.
+- **The format did change.** No `Objects:` line. `SUMMARY` states it directly — *"The top object and
+  2 OBJ declarations became 3 instances, built from 2 images; 1 image is shared by more than one
+  instance."*
+- **The entry's mechanism cases reproduce exactly.** identical overrides (100,100) → 2 images, one
+  shared · differing (100,200) → 3 images, none shared · differing-but-unreferenced → 2 images,
+  silently merged, **and the two binaries are md5-identical** (`ae060796…` both ways), which is the
+  entry's own md5 claim · a top override through a forwarding chain forks every tier below it while
+  the un-overridden sibling keeps its own chain · the mirror trap: one declaration overridden and
+  its sibling not costs **536** Code/DAT bytes against **420** when both are overridden and the
+  images are shared.
+- **The four shapes the caveat was written about are fixed.** Identical copies with nested children
+  get four distinct, correctly-nested VAR bases (LEFT `$54`, LEFT.LG `$60`, RIGHT `$74`, RIGHT.LG
+  `$80`) · an `OBJ` array gives every element its own row and VAR base with the shared image's
+  Instances cell reading `D[0..2]` · an `OBJ` declared after an array gets its own image, its own
+  source file and its own address · a DAT-layout fork shows per-image DAT addresses (MARKER at
+  `$00090` in one image, `$0016C` in the other) with an `ADDRESS INDEX` naming the owning image.
+
+**What was applied is not the request's text.** `map_caveat` now states what the `.map` contains and
+that its labels are reliable, names 1.55.8 **once** as the release where the format changed — an
+edition fact a reader needs to explain a differently-shaped file, not a build stamp — and closes
+with one sentence for anyone on a compiler old enough to print `Objects:`. The three-era bug history
+is not carried. `verification.method` now says to read the `SUMMARY` count and the `MEMORY LAYOUT` /
+`OBJECT DETAILS` addresses.
+
+**Evidence-scoping, since the request offered more than was taken.** Two absolute byte pairs the
+entry carried (348/216 and 372/240) were **dropped rather than restated**: they belong to fixtures
+nobody still has, the request itself says they are not expected to match, and neither it nor this
+pass reproduced them. What replaced them is the *relation* — forked costs more than shared — which
+was measured here. The mechanism claims, `THE RULE`, `singleton_rule`, `forking_a_dat_region`, the
+two silent traps and `cascade_through_tiers` were not touched; this release changed only how the
+`.map` reports the result.
 
 ## The first run of the full cross-reference gate (2026-09-13) — F-432, F-433, F-434
 
