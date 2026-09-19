@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-443`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-445`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -208,6 +208,81 @@ note that this server is the ungated third implementation.
 MCP consumers receive provenance; script consumers do not. Worth considering at that rebuild:
 whether the server should apply the strip at fetch (as now) or whether the gate should reach it,
 since a contract in a document is exactly the enforcement tier this project distrusts.
+
+## The P2X8C4M64P handoff, applied — F-443, F-444
+
+### F-443 — the handoff's remaining actionable items, applied — `PENDING-VALIDATION — applied 2026-09-19; owed: the next YAML release`
+
+Each settled against a source this project already holds, not against the report.
+
+- **GAP-8 / AMBIGUOUS-8.** `waitms`/`waitus` claimed *"Internally calculates: WAITX(...)"*. The
+  interpreter reads CT, computes the span, **adds the current counter to make an absolute target**,
+  and waits via `pwct` — `getct` / `cmpm w,x wc` / `if_c jmp`, the MSB rule. So the `$8000_0000`
+  bound exists *because* it is a counter-target wait, and past it the call **returns immediately**
+  with no error and no partial wait. The same rule settles `ADDCT1/2/3`, which said the event fires
+  *"on CT = D + S"*: it fires once the counter has **passed** the target, so a target in the recent
+  past fires at once. Both stated, with the long-wait pattern.
+- **AMBIGUOUS-9.** All four signed comparison stubs read *"Signed/unsigned compare"* — the report
+  named two; the siblings had it too. The v55 table commits plainly (`spin2-v55-text.txt:472-486`):
+  `<`, `<=`, `>=`, `>` signed; `+<`, `+<=`, `+>=`, `+>` unsigned. Each stub now says signed, names
+  its unsigned and floating-point siblings, and carries the CON-block rule that relational
+  operators return `1.0`/`0.0` on float constants. **Not documented: the PNut-TS constant-fold
+  defect** they hit — it is fixed in 1.55.8 and the KB does not carry per-version tool bug state.
+- **GAP-6.** `-1` is a legal pin field, derivable from our own ADDPINS encoding: bits [5:0] = 63,
+  bits [10:6] = 31, wrapping within the upper port = **P32..P63**. `PINLOW(-1)` acts on half the
+  chip. Warned on seven pin methods and on `ADDPINS`, with the guard — and the guard must be a
+  **signed** compare, which is where this finding and AMBIGUOUS-9 meet.
+- **GAP-5.** `DEBUG_COGS` was documented as an output filter on both definition pages while our own
+  `debug_interrupt.yaml` and `pin-capture.yaml` already called it the per-cog debug **interrupt**
+  enable. Corrected, with the default-all-eight consequence and the `DEBUG_MASK = 0` distinction.
+- **AMBIGUOUS-1 / -2 / -3 / -5.** `X_PINS_ON` and `X_WRITE_ON` are one bit (D[23]); the symbols
+  example composed the pin base with `+`, the carry hazard F-361 already cost us; `X_ALT_ON`'s SPI
+  advice reached past its own 1/2/4-bit scope; the `%01110` page wrote Y before DIR and used
+  `pinstart()`. All corrected — and where no source settles it (whether `%01110` is positively
+  immune to an early Y write), the page now says so rather than reasoning to an answer.
+- **AMBIGUOUS-4.** `xinit`'s *"may have different effective limits; verify against the Silicon Doc"*
+  was unactionable, and the Silicon Doc answers it: `D[15:0]` counts **NCO rollovers**, same
+  16-bit field and same `$FFFE` maximum in every mode (`part2-pixel-ops.txt:228-234`). Granularity
+  changes data-per-rollover, not the count limit.
+- **GAP-4, qualitative half only.** The byte cap fails **silently**, counts the literal format
+  strings inside `debug()` plus overhead, does **not** count DAT strings, and is measured by the
+  two-compile subtraction. The two budgets have non-overlapping remedies. **Their numeric ceiling is
+  not published** — they state it is unbisected and measured by a quantity that may not be what the
+  limit counts, and that scope is recorded on the page.
+- **GAP-7.** What a `-d` build takes — top 16 KB of hub, `LOCK[15]`, P62/P63, **P62 reconfigured by
+  every `debug()`**, cog-start traffic, a debug interrupt per enabled cog, `HUBSET` enables locked
+  until reset, `RCFAST`/`RCSLOW` illegal — assembled in one place for the first time. They built
+  that list from research we delivered them; it did not exist here.
+- **FINDABLE-3.** Aliases added for the words a developer actually arrives with: the compiler's own
+  error strings (*"DEBUG data is too long"*, *"within first 16 longs"*), the symptom (*"board prints
+  nothing"*, *"mute board"*), and the neighbour-routing phrasings.
+
+**Not applied, and why:** `META-1` (the index version does not move on content change) is reframed
+rather than actioned — the index already ships per-entry `mtime` and `sha256` of the git blob, which
+is the per-page change signal asked for; the defect is that nothing tells a consumer so. `FIELD-1`
+(the ~98 s-per-character stall) is declined: they offer it as a question and we have no mechanism
+either. Both recorded in the triage.
+
+### F-444 — a `count_field` block closed the `instructions:` map, and `GETXACC` fell inside it — `PENDING-VALIDATION — found and fixed 2026-09-19; owed: the next YAML release`
+
+Mine, and it shipped in v1.19.1/v1.19.2. Adding `count_field:` at column 0 between `XSTOP` and
+`GETXACC` in `architecture/streamer/overview.yaml` **closed the `instructions:` mapping**, so
+`GETXACC` became a child of `count_field` and left the instruction list an agent reads:
+
+    instructions: [SETXFRQ, XINIT, XCONT, XZERO, XSTOP]        <- GETXACC gone
+    count_field:  [location, terminating, perpetual, ..., GETXACC]
+
+**Every gate passed.** The file parses, every cross-reference resolves, the DoD suite is green — the
+YAML is *valid*, it is just wrong about what the streamer's instructions are. No instrument we have
+reads meaning.
+
+**Found by sweeping my own session's edits** for the defect class after catching this one by eye,
+comparing every file's top-level key set at `v1.18.2` against now. Six files lost a top-level key;
+**five were deliberate** and documented (F-429's *"22 examples removed because the code was never
+there"*, F-427's unsourced-content purge). This was the only accident.
+
+**The gate this argues for:** a structural diff at release — a top-level key that disappears from a
+published entry should have to be declared, the way a removed cross-reference already is.
 
 ## Two upstream P2KB update requests, probed 2026-09-17 — F-435, F-436, F-437, F-438
 

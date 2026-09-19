@@ -15,6 +15,11 @@ aliases:
   - "SETXFRQ"
   - "hub FIFO streaming"
   - "background I/O"
+  - perpetual streaming
+  - continuous streaming
+  - streamer runs forever
+  - streamer count field
+  - streamer never stops
 
 description: |
   High-speed data streaming engine with NCO timing control. Operates 
@@ -96,6 +101,11 @@ instructions:
     purpose: "Stop immediately"
     note: "Equivalent to XINIT #0,#0. Also the way a PERPETUAL command ends — see count_field."
 
+  GETXACC:
+    syntax: "GETXACC D"
+    purpose: "Get Goertzel accumulators"
+    details: architecture/streamer/dds-goertzel.yaml
+
 count_field:
   location: "D[15:0] of the streamer command"
   terminating: "Counts down to zero, then the command completes. Largest terminating count: $FFFE."
@@ -111,10 +121,6 @@ count_field:
     - language/pasm2/xinit.yaml
     - language/pasm2/xstop.yaml
     
-  GETXACC:
-    syntax: "GETXACC D"
-    purpose: "Get Goertzel accumulators"
-    details: architecture/streamer/dds-goertzel.yaml
 
 # Command word structure (D operand)
 command_format:

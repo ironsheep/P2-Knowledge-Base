@@ -35,6 +35,15 @@ aliases:
   - "nearest neighbor capture"
   - "neighbour pin capture"
   - "STREAMER_PIN_CAPTURE"
+  - "relative pin read state"
+  - "AAAA neighbour"
+  - "AAAA neighbor"
+  - "neighbour routing"
+  - "neighbor routing"
+  - "read a pin that runs a smart pin"
+  - "capture a bus pin"
+  - "streamer capture"
+  - "pins to WRFAST"
 
 description: |
   The streamer can record digital pin state into hub RAM at up to one sample set

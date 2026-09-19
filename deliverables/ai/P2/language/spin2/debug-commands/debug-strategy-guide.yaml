@@ -8,6 +8,18 @@ aliases:
   - debug_strategy_guide
   - debug_record_limit
   - debug_255_limit
+  - "DEBUG data is too long"
+  - "too many records: max 255"
+  - "debug data too long"
+  - "board prints nothing"
+  - "no debug output at all"
+  - "debug output stops partway"
+  - "debug output dies mid-report"
+  - "16KB debug limit"
+  - "debug byte budget"
+  - "what a debug build costs"
+  - "debug resource usage"
+  - "mute board"
 
 description: |
   Strategic guide for choosing the right debug mechanism in P2 projects.
@@ -22,13 +34,64 @@ hard_limits:
   unique_debug_records:
     limit: 255
     description: "Each distinct debug() call uses one slot"
-    note: "This is the limit you hit first in non-trivial projects"
+    fails: "LOUDLY, at compile time: 255 statements compile, 256 fail with 'DEBUG data is too long: too many records: max 255'."
+    note: "Which limit you hit first depends on the SHAPE of your debug output, not on project size. Many short statements reach 255 records first; a few long formatted diagnostic lines reach the byte cap first — and that one is silent. Watch whichever your program is made of."
   single_record_size:
     limit: "255 bytes"
     description: "One debug statement cannot exceed 255 bytes of encoded data"
   total_debug_data:
     limit: "16 KB"
     description: "All debug records combined cannot exceed 16,384 bytes"
+    fails: |
+      SILENTLY. There is no compiler error and no warning. Over the cap, output dies
+      partway through a report with no end marker, or never starts at all — not even a
+      banner placed before every other statement. A mute board is indistinguishable
+      from a dead one, and every mechanical check (the define reached the compiler, the
+      arms built differently, clock, baud, clean tree) passes while it happens.
+      TREAT 16,384 AS AN UPPER BOUND, NOT A BUDGET: the usable ceiling is lower by an
+      amount that depends on the program, and it has not been bisected.
+    what_it_counts: |
+      The literal FORMAT STRINGS inside debug() calls, plus per-statement overhead.
+      DAT strings are NOT counted — this is the lever that matters, because it means
+      prose moved into DAT and emitted with zstr_() costs nothing against this cap.
+    how_to_measure: |
+      Build once WITHOUT -d, once WITH -d, and subtract the two binary sizes. That
+      difference is the DEBUG data. It is deliberately crude: nothing to parse, and
+      nothing that can drift from what the compiler actually did. (Counting literals
+      with a regex and subtracting gives a confident wrong answer.)
+    fixed_overhead: "About 2,945 bytes are consumed before the first debug() — measured twice, on a bare vehicle and on one including a whole driver compiled with DEBUG_MASK = 0. A child object at DEBUG_MASK = 0 contributes ZERO bytes, not merely zero records, which is what decides whether a large library is safe to include."
+    scope: "The byte figures above are what -d adds to the binary, measured on one project's vehicle (external-hardware-findings: P2X8C4M64P / uSD-FAT32). Whether that is the same quantity the 16,384 limit counts is NOT established — which is exactly why the guidance is 'treat it as an upper bound'."
+
+the_two_budgets_are_reduced_by_different_means:
+  description: |
+    Over on BYTES and over on RECORDS are different problems with non-overlapping
+    remedies, and applying the wrong one changes nothing while looking like work.
+  over_on_bytes:
+    fix: "Move prose into DAT and emit it with zstr_()."
+    does_not_help: "Merging statements — it may not shed a single byte."
+  over_on_records:
+    fix: "Merge statements: format several values into one line and emit once."
+    does_not_help: "Moving prose to DAT — the record count is unchanged."
+
+
+what_a_debug_build_takes_from_your_program:
+  why_this_is_here: |
+    A -d build is not free and its costs are not in one place. Each line below is a
+    resource the debugger takes that your program may already be using; every one of
+    them has cost somebody a debugging session that was chasing the wrong thing.
+  hub_memory: "The top 16 KB, $7C000..$7FFFF, remapped to $FC000..$FFFFF and write-protected. A buffer placed there works in a non-debug build and its writes are SILENTLY DROPPED in a debug build. See architecture/hub.yaml."
+  a_lock: "LOCK[15] is held, so LOCKNEW has one fewer lock available — only when debugging. See architecture/locks.yaml."
+  pins_62_63: "P62 (TX) and P63 (the clock-frequency repository). A clock change that does not rewrite P63 makes the debugger emit garbage."
+  p62_is_reconfigured_by_every_debug_call: |
+    Not merely occupied — RECONFIGURED. A smart pin placed on P62 is destroyed by the
+    next debug() call. A counter on P62 can count correctly and still read as dead,
+    because the print that reports it is what destroyed it: read such a pin BEFORE the
+    program's first debug(), or do not put it on P62.
+  cog_start_traffic: "A debug-enabled cog emits frames on P62 as it starts, which corrupts serial output from a program sharing that pin. A demo or shell that owns the serial line should not be built with -d."
+  a_debug_interrupt_per_enabled_cog: "Every enabled cog takes the highest-priority interrupt at every COGINIT, with the register save and restore that implies — see DEBUG_COGS in language/spin2/constants/special-configuration-symbols.yaml. The default is all eight cogs."
+  hubset_enables_locked: "The debugger applies the per-cog enables with HUBSET, whose L bit locks them until reset."
+  clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived clock of at least 10 MHz."
+  measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000 (EF-057)."
 
 deduplication:
   description: |

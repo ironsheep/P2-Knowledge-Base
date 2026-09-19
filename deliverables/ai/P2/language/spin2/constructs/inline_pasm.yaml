@@ -3,6 +3,13 @@
 # Critical for: Performance optimization and hardware control
 # Canonical entry. Concept-side stub: language/spin2/concepts/inline_pasm2.yaml
 
+aliases:
+  - "Local variable must be LONG and within first 16 longs"
+  - "within first 16 longs"
+  - "inline PASM local limit"
+  - "inline assembly locals"
+  - "ORG END inline"
+
 construct: "Inline PASM2"
 category: "program_structure"
 type: "assembly_integration"
