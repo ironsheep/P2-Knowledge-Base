@@ -291,7 +291,7 @@ upstream request is a **lead, never an authority** (D3), so each claim below was
 sources this project holds before anything was applied. The two requests came out differently, and
 the difference is the point: one was confirmed by our own sources and applied; one was held.
 
-### F-435 — the ABORT entries teach that a trapped call returns the method's result; it returns 0 — `PENDING-VALIDATION — applied 2026-09-17; owed: the next YAML release`
+### F-435 — the ABORT entries teach that a trapped call returns the method's result; it returns 0 — `RESOLVED — applied 2026-09-17; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 `language/spin2/constructs/abort.yaml` `trap_operator.expression_context` says `result := \method()`
 returns *"the method's normal return value (if no ABORT)"*. It does not. The value trap discards the
@@ -343,7 +343,7 @@ shipping — which caught one defect in the request itself: its `supervise_a_cog
 undefined `worker_body()` and does not assemble (`Expected a method, object, or variable`). Given a
 body here rather than shipped broken.
 
-### F-437 — `validation_chain` swallowed every failure it claimed to catch — `PENDING-VALIDATION — found and fixed 2026-09-17 while applying F-435; owed: the next YAML release`
+### F-437 — `validation_chain` swallowed every failure it claimed to catch — `RESOLVED — found and fixed 2026-09-17 while applying F-435; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 Found while fixing F-435, and **not** part of that request — the upstream doc proposed dropping this
 pattern rather than correcting it, so a straight application would have removed the evidence without
@@ -371,7 +371,7 @@ pattern's own description so the shape is named where someone would copy it. The
 now on `trap_operator.instruction_context` too, which previously read only "Result is discarded."
 Compiled with `pnut-ts -d` before shipping.
 
-### F-438 — the preprocessor entry states pre-1.55.8 `-D` behaviour as fact — `PENDING-VALIDATION — fixed 2026-09-19; owed: the next YAML release`
+### F-438 — the preprocessor entry states pre-1.55.8 `-D` behaviour as fact — `RESOLVED — fixed 2026-09-19; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 Found by sweeping the KB for what the 1.55.8 upgrade invalidates, which is the half of an upgrade
 nobody is prompted to do. `language/spin2/preprocessor/external-symbols.yaml:278` read:
@@ -398,7 +398,7 @@ script passes `-D SYM=value` to the compiler, and nothing in `engineering/tools/
 a `.map`. The two open items on `DRAFTS/PNUT-TS-PUNCH-LIST.md` are both fixed by this release and
 were moved to *Shipped* with the evidence.
 
-### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `PENDING-VALIDATION — applied 2026-09-19; owed: the next YAML release`
+### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `RESOLVED — applied 2026-09-19; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 `language/spin2/concepts/object-image-dedup.yaml` `map_caveat` tells readers the multi-instance
 `.map`'s instance-name/source-name columns are unreliable and to *"do NOT trust those labels."* The
@@ -458,7 +458,7 @@ two silent traps and `cascade_through_tiers` were not touched; this release chan
 
 ## The first run of the full cross-reference gate (2026-09-13) — F-432, F-433, F-434
 
-### F-434 — 246 references in the served KB did not resolve once every string and every depth was read — `PENDING-VALIDATION — 242 repaired 2026-09-13; 2 held for the F-429 pass; owed: the next YAML release run clean`
+### F-434 — 246 references in the served KB did not resolve once every string and every depth was read — `RESOLVED — 242 repaired 2026-09-13; 2 held for the F-429 pass; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 What the F-340 gate found on its first full run, by kind: **217** paths written short (a bare
 `calld.yaml`, a partial `groups/counter_event_jumps.yaml`) that an agent cannot follow as written;
@@ -500,7 +500,7 @@ relative. Plus, from the nested reference walk before it: prose document titles 
 `language/pasm2/xinit.yaml` (`streamer_smartpin_control.yaml`) — both files are being edited by the
 F-429 pass; repaired when it lands.
 
-### F-432 — debug-ISR examples use `IJMP0`/`IRET0` as register names, which do not assemble — `PENDING-VALIDATION — fixed 2026-09-13; owed: the next YAML release`
+### F-432 — debug-ISR examples use `IJMP0`/`IRET0` as register names, which do not assemble — `RESOLVED — fixed 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 The Silicon Doc names them, but as roles: *"During a debug ISR, INA and INB … become readable/writable
 RAM registers named IJMP0 and IRET0"* (`silicon-doc-text.txt:2423`). `pnut-ts` v1.55.5 has no such
@@ -509,7 +509,7 @@ symbols — `MOV IJMP0, #5` → `Undefined symbol`, while `MOV INA, #5` assemble
 assemble. **Fixed:** the code writes `INA`/`INB`, each commented with the IJMP0/IRET0 role it plays
 inside the ISR. Prose that *names* the roles is correct and unchanged. Found by the F-430 pass.
 
-### F-433 — `spin2-pasm2-integration.yaml` teaches Propeller 1 code as P2 — `PENDING-VALIDATION — all 13 examples repaired and compiling 2026-09-13; owed: the served KB after the next YAML release`
+### F-433 — `spin2-pasm2-integration.yaml` teaches Propeller 1 code as P2 — `RESOLVED — all 13 examples repaired and compiling 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **Applied 2026-09-13 (dispatched, arbiter-verified by re-extracting and compiling every example:
 > 13/13 clean under `pnut-ts` v1.55.5).** Compiling the whole file widened the finding from two P1
@@ -535,7 +535,7 @@ the file is being compiled and repaired source-first.
 
 ## Five clock "built-in symbols" that Spin2 does not have — found by measuring what F-340's nested walk would report (2026-09-13) — F-431
 
-### F-431 — `spin2-builtin-symbols-complete.yaml` ships five clock constants with invented values; the compiler rejects every one — `PENDING-VALIDATION — fixed 2026-09-13; owed: the served KB after the next YAML release`
+### F-431 — `spin2-builtin-symbols-complete.yaml` ships five clock constants with invented values; the compiler rejects every one — `RESOLVED — fixed 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **Applied 2026-09-13, source-first.** The five clock entries deleted, substituting nothing; no
 > `XDIV`/`XMUL` name remains anywhere in the KB. **Widened:** the same file's event section defined
@@ -585,7 +585,7 @@ outside it. Carved out, named here, rather than folded into a LUT change: each t
 nobody asked about, and each needs a per-site read (F-429) or a YAML-aware edit (F-430) — a text
 regex for F-430 would also match YAML mapping keys.
 
-### F-429 — `source:` provenance labels in 14 KB files name programs that do not contain the code, or name no file at all — `PENDING-VALIDATION — 43/43 sites repaired 2026-09-13 (dispatched, arbiter-verified); owed: the served KB after the next YAML release`
+### F-429 — `source:` provenance labels in 14 KB files name programs that do not contain the code, or name no file at all — `RESOLVED — 43/43 sites repaired 2026-09-13 (dispatched, arbiter-verified); validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **Applied 2026-09-13.** All 43 sites across the 14 named files resolved source-first (open the
 > named file, search for the distinctive instruction sequence, cite or replace/remove — never
@@ -647,7 +647,7 @@ concept needs one, re-derive it from the named file's real code or from a Parall
 re-label an example in place with a plausible source** — that is the claim-first repair
 `SOURCE-REPAIR-ORDER.md` exists to stop.
 
-### F-430 — PASM2 labels written with a trailing colon do not assemble: 70 lines in 13 KB files — `PENDING-VALIDATION — 76 labels fixed in 16 files 2026-09-13; owed: the served KB after the next YAML release`
+### F-430 — PASM2 labels written with a trailing colon do not assemble: 70 lines in 13 KB files — `RESOLVED — 76 labels fixed in 16 files 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **Applied 2026-09-13 (dispatched, arbiter-verified).** Every changed line diffed against `HEAD`:
 > colon-only, line counts unchanged. The filing's counts were a heuristic and were wrong both ways:
@@ -688,7 +688,7 @@ reach the file's patterns, performance or applications sections**, and this batc
 Every code verdict below was compiled with `pnut-ts` v1.55.5 — which proves **legality only**; the
 semantic verdicts cite their sources.
 
-### F-422 — LUT code in four KB files and the Assembly manual does not assemble, or states the wrong prefix, literal range or timing — `PENDING-VALIDATION — KB and manual source fixed 2026-09-13; owed: the served KB after the next YAML release, and the Assembly manual's next render`
+### F-422 — LUT code in four KB files and the Assembly manual does not assemble, or states the wrong prefix, literal range or timing — `RESOLVED — KB and manual source fixed 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **Applied 2026-09-13.** Every site in the table below corrected to its source. The class sweep run
 > while fixing **widened** it by three sites the filing did not carry, all the same defect:
@@ -721,7 +721,7 @@ load; the sites above are all it returned. (`xbyte_engine.yaml:253` and Assembly
 `appendix-b-condition-codes.md:143,146` use `_RET_ SETQ` to set the **XBYTE** LUT base — a different,
 correct use, per `silicon-doc-text.txt:969`.)
 
-### F-427 — `lookup_ram.yaml` carries content no source states, some of it contradicting the file itself; the Assembly manual carries one such claim — `PENDING-VALIDATION — removed/re-derived 2026-09-13; owed: the served KB after the next YAML release, and the Assembly manual's next render`
+### F-427 — `lookup_ram.yaml` carries content no source states, some of it contradicting the file itself; the Assembly manual carries one such claim — `RESOLVED — removed/re-derived 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **Applied 2026-09-13, source-first** (`SOURCE-REPAIR-ORDER.md`). Removals: `shared_read`, bandwidth,
 > power, `FIFO_mode`, the `waveform_generation`, `fast_buffer` and `fast_stack` patterns, the
@@ -762,7 +762,7 @@ states, and a pattern that does not assemble cannot be "illustrative". The sourc
 (`lookup_table` with the corrected block load, `shared_data_exchange`, `lut_dump` corrected,
 `verify_sharing` with `##`) stays.
 
-### F-428 — three sourced LUT facts are missing from the page a reader goes to for LUT memory — `PENDING-VALIDATION — added 2026-09-13; owed: the served KB after the next YAML release, and the Assembly manual's next render`
+### F-428 — three sourced LUT facts are missing from the page a reader goes to for LUT memory — `RESOLVED — added 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **Applied 2026-09-13.** `architecture/lookup_ram.yaml` gains `special_features` `spin2_lut_area`,
 > `LUT_events` and `pair_start`, each with its source, and `related:` full paths to
@@ -2931,7 +2931,7 @@ Recorded here so they are not rediscovered.
 
 ## `validate-crossref-keys.py` exempts three top-level fields from resolving, and 14 shipped file paths sitting in them point at nothing (2026-08-26, «#321» verification) — F-373
 
-### F-373 — `see_also`, `references` and `related_concepts` are typed `'text'`, so a file path in any of them is never resolved and the gate stays green — `PENDING-VALIDATION — gate half landed 2026-09-13 with F-340; owed: the next YAML release run clean against it`
+### F-373 — `see_also`, `references` and `related_concepts` are typed `'text'`, so a file path in any of them is never resolved and the gate stays green — `RESOLVED — gate half landed 2026-09-13 with F-340; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **GATE HALF LANDED 2026-09-13.** A file path in `see_also`, `references` or `related_concepts` — or
 > in any other string — is now resolved and fails the gate if it does not exist or is not written
@@ -5675,7 +5675,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > ("Select A | B, B") does, the tool truncates both sides identically, and it self-cancels. The
 > shipped record is correct as written; do not align it to the tool's displayed `"B, B"`.
 
-### F-340 — `validate-crossref-keys.py` validates TOP-LEVEL keys only, so 67 nested `related_symbols:` lists in one file are never checked at all — `PENDING-VALIDATION — traversal landed 2026-09-13; owed: the next YAML release run clean against it`
+### F-340 — `validate-crossref-keys.py` validates TOP-LEVEL keys only, so 67 nested `related_symbols:` lists in one file are never checked at all — `RESOLVED — traversal landed 2026-09-13; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
 
 > **TRAVERSAL LANDED 2026-09-13 (Stephen: "our gate has to be that all references resolve").**
 > `validate-crossref-keys.py` no longer reads the top level. It checks **every KB path token in any
