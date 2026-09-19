@@ -14,6 +14,13 @@ document. Cite these when grounding a YAML or manual change. Format per entry: t
 disproved the claim) · `NOT-OBSERVED` (could not reproduce; not asserted) ·
 `HOST` (a toolchain/host behavior, not silicon).
 
+> **Sibling ledger.** Hardware results from a PARTNER PROJECT's bench live in
+> [`EXTERNAL-HARDWARE-FINDINGS.md`](EXTERNAL-HARDWARE-FINDINGS.md) as `XF-NNN`. They are
+> **equal in kind** to these entries — silicon answered there too. They are kept separate
+> because `EF-NNN` carries a promise this ledger can keep and that one cannot: *we* built the
+> test, *we* ran it, so its rig, its scope and its failure modes are ours to answer for. An
+> `XF` entry names whose bench it was and carries that project's own scope statement verbatim.
+
 **Campaigns:** [2026-06 — DEBUG windows & smart pins](campaigns/2026-06-debug-windows-and-smart-pins/README.md) · [2026-08 — manual corrections](campaigns/2026-08-manual-corrections/README.md)
 
 ---

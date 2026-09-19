@@ -18,6 +18,7 @@ it or catalog it:
 |-------|--------------|--------|
 | **Jumper-only** | Nothing beyond the P2 board + jumper wires. On-chip DAC→pin loopback, pin-to-pin routing, a pin's own IN flag, internal references (GIO/VIO). | **We do these.** Cheap, always available — write the `.spin2`, run it, accept → EF ledger. Fold into the normal verification flow. |
 | **External-hardware** | Anything *added* to the device: a calibrated voltage/frequency reference, a precision meter, a sensor/transducer, an external bias network, a signal generator, a scope-as-source. | **We catalog, we do not commit** (short term). Record it here with the **benefit** doing it would provide, so it's never lost. Do it only when the payoff justifies standing up the rig. |
+| **External-project** | A rig a PARTNER PROJECT already has standing and running — its board, its peripherals, its driver, its cards. | **We specify, they run** (Stephen, 2026-09-19). Write a buildable specification with its controls and its predictions; the partner project builds and runs it; results return as `XF-NNN` in [`EXTERNAL-HARDWARE-FINDINGS.md`](EXTERNAL-HARDWARE-FINDINGS.md). The rig already exists, so the cost is the specification, not the bench. |
 
 **Why the split:** a jumper-only test costs a minute of the maintainer's time and is
 always reproducible; an external-hardware test costs a bench setup and calibrated gear
@@ -99,6 +100,24 @@ release cadence — hence the external-hardware classification. §16.8 stands as
 correct) until VO-X-002 is ever run.
 
 ---
+
+## Section 3 — External-project queue (specified here; run on a partner rig)
+
+These need a rig we do not have and a partner project does. **The deliverable on our side is an
+accurate specification** — what to measure, what decision each measurement feeds, what controls
+make it falsifiable, and what we will write from each outcome. Results come back as `XF-NNN`.
+
+| ID | Question | Spec | Rig it needs | Status |
+|----|----------|------|--------------|--------|
+| **VO-P-001** | The SPI alignment pad: is the safe pad a **phase of period `hp`** on both the read and write sides, and is it counted in **sysclks, absolute time, or SCK periods**? Settles whether any published pad value — including the KB's GOLDEN `waitx #3` — is portable across clock frequencies. Extends `XF-001` from a five-point fit to a complete map. | [`test-specs/SPEC-VO-P-001-spi-pad-phase.md`](test-specs/SPEC-VO-P-001-spi-pad-phase.md) | P2 Edge + SD card + a working SPI driver — the P2X8C4M64P / uSD-FAT32 bench. The card is the ground truth: the failure is silent at the protocol level, so only the card's stored content says what it actually received. | **SPECIFIED 2026-09-19, not built.** Sweep is exhaustive by construction (`hp` phases exist, all are tested), two frequency axes separate the three hypotheses, controls include a pattern that must pass at every phase. |
+| **VO-P-002** | `VO-J-005` itself — the streamer's digital pin-capture path, and the IN contrast on a pin running a smart-pin mode. **The rig is already written.** | `…/p2-io-and-smart-pins-user-guide/audit/verification-tests/test-vo-j-005-streamer-pin-capture.spin2` (699 lines) | **Bare board — no jumper, no instrument.** Verified 2026-09-19: compiles clean under `pnut-ts -d` v1.55.8, and deliberately stays clear of P58..P63, so the partner project's own P62/`-d` warning does not apply to it. | **AUTHORED, NOT RUN** (2026-08-26). Offered to the partner rig because it is bare-board and they run hardware continuously. Arms A–E with predictions and falsifying outcomes written into the program. |
+
+**Why `VO-P-002` is not simply closed by `XF-002`/`XF-003`.** Those prove neighbour routing works
+from a *plain driven* pin, and that a live smart pin interferes with a direct read. Neither
+measures routing or capture from a pin **while it runs an output smart-pin mode**, and neither puts
+the two lanes in the **same buffer** — which is the whole point of the rig, because a contrast read
+from one buffer is one result rather than two runs compared. The partner project says this
+explicitly in their own handoff.
 
 ## Lifecycle
 
