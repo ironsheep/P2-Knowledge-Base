@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-439`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-440`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,41 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The provenance strip reaches two of its three consumers — F-439
+
+### F-439 — the MCP serves provenance the fetch scripts no longer send — `CONFIRMED — found 2026-09-19 at the v1.19.0 publish verification; the fix is in the MCP server, not this repo`
+
+v1.19.0 stripped provenance at delivery: `source`, `sources`, `source_reference`, `verified_against`
+and provenance comments, joining the five metadata fields already filtered. Both fetch scripts were
+updated and the release gate now runs the shipped filter over all 1131 files.
+
+**It does not reach MCP consumers.** Verified against the live server immediately after the
+release, which returned `p2kbHwAddonMotorDriverAddonMotorDriver` carrying four intact `source: >-`
+blocks, including:
+
+```
+engineering/ingestion/sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md:138-152
+```
+
+— a path that exists only inside this repository, delivered to an agent that cannot open it. That is
+precisely the class the strip exists to remove, still live on the path most consumers actually use.
+
+**Why it was missed, which is the part worth keeping.** There are **three** implementations of one
+filter: `fetch-kb-file.sh`, `fetch-kb-file.ps1`, and the MCP server's `filter/filter.go`. The
+release gate compares the first two and has no knowledge of the third — the server is built from a
+different repository, so nothing in this one can run it. A rule with three implementations and two
+gated will drift at the ungated one, every time.
+
+**Done here:** `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md` §Content Filtering — the
+contract the server is built from — now carries the full field set, the comment pattern, the
+indentation-aware rule with the measured reason (a line-based strip breaks 50 files), and a standing
+note that this server is the ungated third implementation.
+
+**Owed, and it is not in this repo:** rebuild the MCP server against the updated spec. Until then
+MCP consumers receive provenance; script consumers do not. Worth considering at that rebuild:
+whether the server should apply the strip at fetch (as now) or whether the gate should reach it,
+since a contract in a document is exactly the enforcement tier this project distrusts.
 
 ## Two upstream P2KB update requests, probed 2026-09-17 — F-435, F-436, F-437, F-438
 

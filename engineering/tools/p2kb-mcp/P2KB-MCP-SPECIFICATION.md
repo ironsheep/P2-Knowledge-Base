@@ -97,7 +97,12 @@ The index (`p2kb-index.json`) has this structure:
 
 ## Content Filtering
 
-**CRITICAL**: All YAML content MUST be filtered before caching/returning. Remove these metadata lines (saves tokens, removes internal tracking data):
+**CRITICAL**: All YAML content MUST be filtered before caching/returning. What is removed is
+**provenance** — how this project knows a claim is true. Its readers are our release gates and
+whoever audits a claim later; a consuming agent can act on none of it, and much of it cites paths
+that exist only inside the P2-Knowledge-Base repository.
+
+Remove these fields:
 
 ```
 last_updated:
@@ -105,12 +110,44 @@ enhancement_source:
 documentation_source:
 documentation_level:
 manual_extraction_date:
+source:                 # added 2026-09-19
+sources:                # added 2026-09-19
+source_reference:       # added 2026-09-19
+verified_against:       # added 2026-09-19
 ```
 
-Filter regex pattern:
+...and provenance written as a **comment**, which no field filter reaches (61 files carry one):
+
 ```
-^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):
+^#\s*(Source|Sources|Extracted from|Verified against)
 ```
+plus the indented comment lines that continue it (`^#\s+`).
+
+### The filter is INDENTATION-AWARE, not line-based
+
+⚠ **A line-based `grep -v` on these field names is wrong and will ship broken YAML.** 141 of the
+KB's `source:` values are block scalars (`source: >-`); removing only the field's own line leaves
+the continuation lines behind, and they parse as garbage. Measured 2026-09-19 across all 1131
+files: a naive line filter delivers **50 files** that do not load
+(*"mapping values are not allowed here"*). The indentation-aware rule delivers **0**.
+
+The rule:
+
+1. On a line matching a provenance field, record its indent, drop it, and enter drop mode.
+2. In drop mode, drop every following line whose indent is **greater** than the recorded indent,
+   and drop blank lines. A line at the same or shallower indent ends drop mode and is kept.
+3. On a line matching the comment pattern, drop it and every immediately following `^#\s+` line.
+
+Reference implementation: `filter_metadata()` in `engineering/tools/p2kb/fetch-kb-file.sh`, with a
+behaviourally identical copy in `fetch-kb-file.ps1`. `validate-dod-release.py` runs the shipped
+shell filter over every KB file at release and compares it against an independent prediction of the
+same rule, so the two cannot drift silently.
+
+⚠ **THIS SERVER IS THE THIRD IMPLEMENTATION AND THE ONLY UNGATED ONE.** The release gate sees the
+two fetch scripts; it cannot see `filter/filter.go`. Until this server is rebuilt against the rule
+above, MCP consumers still receive provenance that the script path no longer sends — verified
+2026-09-19 against the live server, which returned `p2kbHwAddonMotorDriverAddonMotorDriver` with
+four `source:` blocks citing `engineering/ingestion/sources/...` paths. Tracked as **F-439**.
 
 ---
 
