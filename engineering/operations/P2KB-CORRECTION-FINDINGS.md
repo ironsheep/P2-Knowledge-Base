@@ -5745,9 +5745,10 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > references** (3161 seen / 688 unseen, 82%). Same defect, same dominant field
 > (`related_symbols`), different denominators — do not treat one as correcting the other.
 >
-> Status: `PENDING-VALIDATION` — scope half 2026-08-25; the nested traversal and its negative
-> control landed 2026-09-13 (see the TRAVERSAL LANDED note under the headline). Owed: the next
-> YAML release run clean against the full gate.
+> Status: `RESOLVED` — scope half 2026-08-25; the nested traversal and its negative
+> control landed 2026-09-13 (see the TRAVERSAL LANDED note under the headline). The owed
+> validation — a YAML release running clean against the full gate — ran on 2026-09-19:
+> v1.19.0, and again at v1.19.1 and v1.19.2, each with the gate green at 3,7xx references.
 
 ### F-341 — six of our own derived analysis documents sit at the root of `engineering/ingestion/sources/`, repeat the pull-up mislabel F-321 exists to kill, and are inside the fidelity gate's declared *Parallax documentary* truth root — `PARTIAL`
 
