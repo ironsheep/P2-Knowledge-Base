@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-19T21:43:34.233779",
+    "generated": "2026-09-19T21:45:27.670117",
     "total_entries": 1131,
     "total_categories": 59,
     "total_aliases": 2971,
@@ -10309,8 +10309,8 @@
     },
     "p2kbArchOverview": {
       "path": "deliverables/ai/P2/architecture/streamer/overview.yaml",
-      "mtime": 1789344232,
-      "sha256": "6bbbd7f94dd3853f53daf75b2fb0bce30e87869352c7187a449d5622e008cdb4"
+      "mtime": 1789854248,
+      "sha256": "0481f688b67a1f9ed23e1092a7f7356d61a9d6d34cb20d32e44ed9659bd66738"
     },
     "p2kbArchPinCapture": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-capture.yaml",
@@ -13474,8 +13474,8 @@
     },
     "p2kbPasm2Xinit": {
       "path": "deliverables/ai/P2/language/pasm2/xinit.yaml",
-      "mtime": 1789344232,
-      "sha256": "922c9c6c420e03dfbc509834233081f2471e9a168a34c3c555825f581f35c2f9"
+      "mtime": 1789854248,
+      "sha256": "0901269ef5d2e17af9f2f0cc55c068b5fbf875b35c9e7b7590c7f4a470415d51"
     },
     "p2kbPasm2Xor": {
       "path": "deliverables/ai/P2/language/pasm2/xor.yaml",
