@@ -36,7 +36,6 @@ hardware_primitives:
                   ' ...
                   lockrel #RESOURCE_LOCK
                   ret
-        source: multi_cog_pattern
       
       LOCKREL:
         syntax: "LOCKREL {#}lock_num {WC}"

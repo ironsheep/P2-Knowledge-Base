@@ -72,7 +72,6 @@ examples:
     ' Example: Update bits 4-7 only
             setq    #$F0             ' Mask for bits 4-7
             muxq    config, #$50     ' Set bits 4-7 to $5
-  source: common_pattern
 - name: SETQ Block Operation Modifier
   description: SETQ + MUXQ for masked merge
   code: |

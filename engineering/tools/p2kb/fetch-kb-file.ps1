@@ -218,13 +218,51 @@ function Find-SimilarKeys {
     return $similar
 }
 
+# Filter metadata from YAML content.
+#
+# INDENTATION-AWARE, not line-based. Dropping only the field's own line leaves a
+# block scalar's continuation lines behind, and they parse as garbage: 141 of the
+# KB's `source:` values are written `source: >-`. So: drop the matched line, then
+# drop every following line indented deeper than it, plus blank lines inside that
+# span. Must stay behaviourally identical to fetch-kb-file.sh -- validate-dod-release.py
+# blocks the release if the two scripts' field sets differ.
+#
+# WHAT IS STRIPPED AND WHY: everything here is PROVENANCE -- how we know a claim
+# is true. Its readers are this project's release gates and whoever audits a claim
+# later; a consuming agent can act on none of it. It stays in the repo and is
+# removed on the way out. Public document citations are stripped too: an agent
+# cannot open the Silicon Doc either.
 function Filter-Metadata {
     param([string]$Content)
     $lines = $Content -split "`n"
-    $filtered = $lines | Where-Object {
-        $_ -notmatch '^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):'
+    $out = New-Object System.Collections.Generic.List[string]
+    $dropping = $false
+    $dropIndent = 0
+    $commentDrop = $false
+    foreach ($line in $lines) {
+        if ($dropping) {
+            if ($line -match '^\s*$') { continue }
+            $indent = ($line -replace '^(\s*).*$', '$1').Length
+            if ($indent -gt $dropIndent) { continue }
+            $dropping = $false
+        }
+        # Provenance carried as a COMMENT -- same thing by another spelling.
+        if ($line -match '^#\s*(Source|Sources|Extracted from|Verified against)') {
+            $commentDrop = $true
+            continue
+        }
+        if ($commentDrop) {
+            if ($line -match '^#\s+') { continue }   # indented continuation comment
+            $commentDrop = $false
+        }
+        if ($line -match '^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date|source|sources|source_reference|verified_against):') {
+            $dropIndent = ($line -replace '^(\s*).*$', '$1').Length
+            $dropping = $true
+            continue
+        }
+        $out.Add($line)
     }
-    return $filtered -join "`n"
+    return ($out -join "`n")
 }
 
 # =============================================================================

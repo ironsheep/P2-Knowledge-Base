@@ -294,7 +294,6 @@ smart_pin_modes:
         
         ' COG B reads
         rdpin   received, repo_pin
-      source: multi_cog_pattern
 
 common_patterns:
   spi_flash_access:

@@ -184,9 +184,53 @@ find_similar_keys() {
     fi
 }
 
-# Filter metadata from YAML content
+# Filter metadata from YAML content.
+#
+# INDENTATION-AWARE, not line-based. A `grep -v` on the field name removes the
+# field's OWN line and leaves the continuation lines of a block scalar behind,
+# which then parse as garbage: 141 of the KB's `source:` values are written
+# `source: >-`, and a line-based strip of those delivers YAML that does not load
+# ("mapping values are not allowed here"). So: drop the matched line, then drop
+# every following line indented deeper than it, plus blank lines inside that
+# span. That covers block scalars, nested maps and lists without needing a YAML
+# parser on the consumer's machine.
+#
+# WHAT IS STRIPPED AND WHY: everything here is PROVENANCE -- how we know a claim
+# is true. Its readers are this project's release gates and whoever audits a
+# claim later; a consuming agent can act on none of it. It stays in the repo
+# (audit-yaml-claim-sourcing.py reads the repo tree, not this payload) and is
+# removed on the way out. Public document citations are stripped too: an agent
+# cannot open the Silicon Doc either, and "see the PASM2 Manual" belongs in
+# prose where it helps a human, not in a metadata field on every download.
 filter_metadata() {
-    grep -v -E "^[[:space:]]*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):"
+    awk '
+        # A line at indent <= the span we are dropping ends the span.
+        dropping {
+            if ($0 ~ /^[[:space:]]*$/) next          # blank line inside the span
+            match($0, /^[[:space:]]*/)
+            if (RLENGTH > drop_indent) next          # deeper: still the field value
+            dropping = 0                             # same or shallower: span ended
+        }
+        # Provenance carried as a COMMENT. No field filter can reach these, and
+        # they are the same thing by another spelling -- 61 files carry one.
+        # Continuation lines of a multi-line "# Sources:" block are indented
+        # comments, so they are dropped with it.
+        /^#[[:space:]]*(Source|Sources|Extracted from|Verified against)/ {
+            comment_drop = 1
+            next
+        }
+        comment_drop {
+            if ($0 ~ /^#[[:space:]]+/) next          # indented continuation comment
+            comment_drop = 0
+        }
+        /^[[:space:]]*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date|source|sources|source_reference|verified_against):/ {
+            match($0, /^[[:space:]]*/)
+            drop_indent = RLENGTH
+            dropping = 1
+            next
+        }
+        { print }
+    '
 }
 
 # =============================================================================

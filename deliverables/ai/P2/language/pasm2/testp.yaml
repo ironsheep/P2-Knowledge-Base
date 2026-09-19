@@ -71,7 +71,6 @@ examples:
     '' Handle rising edge event
 
     '
-  source: common_pattern
 - name: Conditional Pin Test
   description: Test pin based on condition flag
   code: ''' Test pin with XOR based on previous condition
@@ -93,7 +92,6 @@ examples:
     \   jmp #not_ready\ntestp   #PIN_B              wc  \nif_nc   jmp #not_ready\n\
     testp   #PIN_C              wc\nif_nc   jmp #not_ready\n\n' All pins are high,\
     \ proceed\n"
-  source: common_pattern
 related_instructions:
 - TESTB: Test bit in register
 - TESTBN: Test bit not in register

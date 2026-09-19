@@ -62,7 +62,6 @@ examples:
     \  tjz     char, #.done             ' Check for null terminator\n        \n  \
     \      ' Process character\n        call    #process_char\n        jmp     #.loop\n\
     .done   ret\n"
-  source: common_pattern
 - name: Character Translation Table
   description: Translate characters using lookup table
   code: "' ASCII to custom encoding table\nxlate_table\n        byte    0,1,2,3,4,5,6,7\

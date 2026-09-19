@@ -37,7 +37,6 @@ examples:
     \  value, shared_addr\n        add     value, #1\n        wrlong  value, shared_addr\n\
     \        \n        ' Release lock when done\n        lockrel #RESOURCE_LOCK\n\
     \        ret\n"
-  source: multi_cog_pattern
 - name: Debug Monitor Lock
   description: Spin-wait for lock[15] to own the debugger's save buffer and tx/rx pins
   code: "' Wait for lock[15] so that we own the save buffer and tx/rx pins\n.wait\

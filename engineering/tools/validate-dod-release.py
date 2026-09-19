@@ -39,8 +39,13 @@ HISTORY_FILE = Path("engineering/tools/.dod-validation-history.json")
 # Metadata filter pattern (must match fetch scripts exactly)
 # Update this if fetch scripts change!
 FILTER_PATTERN = re.compile(
-    r'^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):'
+    r'^\s*(last_updated|enhancement_source|documentation_source|documentation_level|'
+    r'manual_extraction_date|source|sources|source_reference|verified_against):'
 )
+
+# Provenance written as a comment -- stripped by the same filter, for the same
+# reason, and classified here so an expected removal is not reported as a surprise.
+COMMENT_PROVENANCE_PATTERN = re.compile(r'^#\s*(Source|Sources|Extracted from|Verified against)')
 
 # Expected metadata fields that get filtered
 EXPECTED_FILTER_FIELDS = {
@@ -48,7 +53,15 @@ EXPECTED_FILTER_FIELDS = {
     'enhancement_source',
     'documentation_source',
     'documentation_level',
-    'manual_extraction_date'
+    'manual_extraction_date',
+    # Added 2026-09-19: provenance is for this project's gates and auditors, never
+    # for the consuming agent. `source` is the one that was actually reaching
+    # consumers -- 177 files, 91 of them citing `engineering/` paths no consumer
+    # has. Public citations go too: an agent cannot open the Silicon Doc either.
+    'source',
+    'sources',
+    'source_reference',
+    'verified_against',
 }
 
 
@@ -379,6 +392,80 @@ def _find_filter_induced_nulls(original_obj, filtered_obj, path: str = "") -> Li
     return bad
 
 
+def _predicted_filtered(original: str) -> str:
+    """An INDEPENDENT prediction of what the shipped filter should produce.
+
+    This is deliberately a second implementation of the same rule, and it is NOT
+    used to build the payload -- `_apply_shipped_filter` does that, by running the
+    real thing. This one exists so the two can be COMPARED: agreement between two
+    independent readings is evidence, and a disagreement is a finding about one of
+    them. What it must never become again is the single source of the answer, which
+    is what let the Python line-model and the shipped filter drift apart.
+    """
+    lines = original.split('\n')
+    kept = []
+    dropping = False
+    drop_indent = 0
+    comment_drop = False
+    for line in lines:
+        if comment_drop:
+            if re.match(r'^#\s+', line):
+                continue
+            comment_drop = False
+        if dropping:
+            if line.strip() == '':
+                continue
+            indent = len(line) - len(line.lstrip())
+            if indent > drop_indent:
+                continue
+            dropping = False
+        if COMMENT_PROVENANCE_PATTERN.match(line):
+            comment_drop = True
+            continue
+        if FILTER_PATTERN.match(line):
+            drop_indent = len(line) - len(line.lstrip())
+            dropping = True
+            continue
+        kept.append(line)
+    return '\n'.join(kept)
+
+
+def _apply_shipped_filter(paths):
+    """Run the SHIPPED filter -- fetch-kb-file.sh's own `filter_metadata` -- over
+    every path, in ONE subprocess, and return {path: filtered_text}.
+
+    WHY THIS SHELLS OUT (2026-09-19). This check used to re-implement the filter
+    in Python as a line regex (`FILTER_PATTERN.match`). That was a MODEL of the
+    filter, and on 2026-09-19 the model and the artifact diverged: the shipped
+    filter became indentation-aware so it could strip block scalars, and the
+    Python line-model kept reporting 50 files broken that the real filter handles
+    correctly. A gate must read the produced artifact, never a declaration of it
+    -- and a gate that models the thing it checks will eventually check the model.
+    `FILTER_PATTERN` is retained only to classify WHICH field a removed line
+    belonged to, never to decide what gets removed.
+    """
+    sh = Path("engineering/tools/p2kb/fetch-kb-file.sh").read_text()
+    start = sh.index("filter_metadata() {")
+    end = sh.index("\n}\n", start) + 3
+    delim = "@@P2KB-FILTER-DELIM@@"
+    driver = sh[start:end] + f'\nfor f in "$@"; do echo "{delim}$f"; filter_metadata < "$f"; done\n'
+    proc = subprocess.run(["bash", "-c", driver, "bash"] + [str(x) for x in paths],
+                          capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise RuntimeError(f"shipped filter failed: {proc.stderr[:200]}")
+    out, cur, buf = {}, None, []
+    for line in proc.stdout.split("\n"):
+        if line.startswith(delim):
+            if cur is not None:
+                out[cur] = "\n".join(buf)
+            cur, buf = line[len(delim):], []
+        else:
+            buf.append(line)
+    if cur is not None:
+        out[cur] = "\n".join(buf)
+    return out
+
+
 def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     """Comprehensive audit of metadata filtering."""
     result = ValidationResult("Metadata Filter")
@@ -392,38 +479,40 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     unexpected_changes = []
     structural_failures = []
 
-    for key, entry in idx['files'].items():
-        path = Path(entry['path'])
-        if not path.exists():
-            continue
+    live = [(key, Path(entry['path'])) for key, entry in idx['files'].items()
+            if Path(entry['path']).exists()]
+    shipped = _apply_shipped_filter([p for _, p in live])
 
+    for key, path in live:
         total_files += 1
 
         with open(path) as f:
             original = f.read()
 
-        # Apply filter
-        lines = original.split('\n')
-        filtered_lines = [l for l in lines if not FILTER_PATTERN.match(l)]
-        filtered = '\n'.join(filtered_lines)
+        # The payload the consumer actually receives, produced by the shipped
+        # filter itself rather than a Python model of it.
+        filtered = shipped[str(path)]
 
         if original != filtered:
             files_with_changes += 1
 
-            original_lines = set(original.split('\n'))
-            filtered_lines_set = set(filtered.split('\n'))
-            removed_lines = original_lines - filtered_lines_set
+            # Did the shipped filter remove exactly what this project intends it
+            # to remove? Compared against an independent prediction, not against a
+            # line-by-line heuristic -- a block scalar's continuation lines are a
+            # legitimate removal and a per-line classifier calls them a surprise.
+            if filtered.rstrip('\n') != _predicted_filtered(original).rstrip('\n'):
+                unexpected_changes.append(
+                    (key, 'shipped filter and the expected rule disagree on this file'))
 
-            for line in removed_lines:
+            for line in original.split('\n'):
                 line_stripped = line.strip()
-                matched = False
+                if COMMENT_PROVENANCE_PATTERN.match(line):
+                    field_removals['#provenance-comment'] += 1
+                    continue
                 for field in EXPECTED_FILTER_FIELDS:
                     if line_stripped.startswith(f'{field}:'):
                         field_removals[field] += 1
-                        matched = True
                         break
-                if not matched:
-                    unexpected_changes.append((key, line))
 
             # Read the ARTIFACT, not the declaration: does the payload the
             # consumer actually receives still parse, and did filtering
@@ -446,11 +535,12 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
             result.info(f"  {field}: {count} removals")
 
     if unexpected_changes:
-        result.fail(f"{len(unexpected_changes)} unexpected line removals")
+        result.fail(f"{len(unexpected_changes)} file(s) where the shipped filter "
+                    f"and the expected rule disagree")
         for key, line in unexpected_changes[:5]:
-            result.info(f"  {key}: {repr(line[:50])}")
+            result.info(f"  {key}: {line}")
     else:
-        result.ok("All filtered lines are expected metadata fields")
+        result.ok("Shipped filter agrees with the expected rule on every file")
 
     if structural_failures:
         result.fail(f"{len(structural_failures)} file(s) deliver a structurally "
@@ -666,8 +756,7 @@ def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
             result.fail(f"Version mismatch: bash={bash_version.group(1)}, ps={ps_version.group(1)}")
 
     # Check same metadata fields filtered (must include all 5 fields)
-    expected_fields = ['last_updated', 'enhancement_source', 'documentation_source',
-                       'documentation_level', 'manual_extraction_date']
+    expected_fields = sorted(EXPECTED_FILTER_FIELDS)
 
     bash_has_all = all(field in bash_content for field in expected_fields)
     ps_has_all = all(field in ps_content for field in expected_fields)

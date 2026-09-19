@@ -1,7 +1,4 @@
 # Spin2 Language Construct: ABORT and Trap Operator
-# Source: the Spin2 interpreter's own return/abort paths (Spin2_interpreter.spin2 - the
-#   {trap_flag, push_flag} case table at the method return, the abort unwind loop, and the
-#   trap flag set on every cog/task top frame), confirmed on P2 silicon.
 # Critical for: Exception-like error handling mechanism
 
 construct: "ABORT"
