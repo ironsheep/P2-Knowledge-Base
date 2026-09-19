@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-442`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-443`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,59 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## COGSTOP and the lock system — F-442
+
+### F-442 — `COGSTOP` frees a held lock and leaks its number; the KB said neither — `PENDING-VALIDATION — applied 2026-09-19; owed: the next YAML release`
+
+`p2kbSpin2Cogstop` stated *"Locks owned by cog are NOT released"*, with matching notes and
+best-practice lines. The opposite is true of the held state, and the half that actually costs
+something was absent entirely.
+
+**Two independent pieces of state, freed by different things:**
+
+| | cleared by |
+|---|---|
+| the **held** state (taken / by which cog) | the owner's `LOCKREL`, **or the owner cog becoming inactive — for any cause, including `COGSTOP`**, or the lock being unallocated |
+| the **allocation** (whether the number is issued) | **`LOCKRET`, and nothing else** |
+
+So stopping a cog that holds a lock frees the lock **and leaks its number**: anyone can now take
+it, nobody can ever be issued it again, and after sixteen leaks `LOCKNEW` returns nothing for the
+rest of the run — surfacing at some later `LOCKNEW` in code that never touched the lock that leaked.
+
+**The page's advice was right and its reason was wrong.** Release, and more importantly `LOCKRET`,
+before stopping — not because the lock would otherwise stay held, but because `LOCKRET` is the only
+thing that reclaims the number. Kept the advice, replaced the reason.
+
+**Authority (Stephen, 2026-09-19): his own reading of the hub RTL**, `lock_ena[i] = cog_ena[lock_cog[i]]`
+(`hub.sv:670`) with allocation cleared only by `LOCKNEW`/`LOCKRET` (`hub.sv:658-660`), ruled correct
+by him in those words — *"the RTL (my reading of the RTL) is correct and we do leak locks."*
+Corroborated two ways: the reporting project measured it 3/3 byte-identical with a passing control
+and zero inconclusive runs (P2 Edge, 2026-08-31), and **this page already documented half the
+consequence** — `LOCKREL … WC` returns *"the cog ID of the current owner (if held) or the last owner
+(if released)"*, which is exactly the stale owner field their capture saw.
+
+**None of that provenance is in the YAML**, per his ruling the same day: the entry states the fact,
+the register holds how we know it.
+
+**Applied:**
+- `language/spin2/methods/cogstop.yaml` — `effects.resources` now carries both halves and the leak;
+  the note, best-practice and warning lines give the true reason; `related:` added to
+  `architecture/locks.yaml` and `lockret.yaml`, which a reader of this page had no way to reach.
+- `architecture/locks.yaml` — new `state_versus_allocation` section, with the rule that every
+  `LOCKNEW` needs a `LOCKRET` on every path out including error and shutdown paths.
+
+**Swept the same page's example family (their AMBIGUOUS-7), because it is the same defect:** every
+pattern took a hard-coded lock number that `LOCKNEW` never issued, and by this page's own `LOCKTRY`
+definition an unallocated lock can never be taken — so `basic_mutex`, `timeout_lock`, `multi_lock`,
+`shared_memory_protection`, `resource_arbitration`, `producer_consumer` and
+`initialization_synchronization` spin forever as written, and the last never initialises. All now use
+an allocated `lock_num`, under a new `pattern_prerequisite` section that states the requirement once
+and warns off lock 15 specifically (a DEBUG build holds it).
+
+**Also fixed, same entry:** the first example used `IF driver_cog => 0`. `=>` is P1 syntax and does
+not compile in Spin2 — verified, `pnut-ts` exits 1 with *"Expected end of line"*, which does not point
+at the operator. Now `>=`, and the example was compiled.
 
 ## Two release-path defects, one root cause — F-440, F-441
 

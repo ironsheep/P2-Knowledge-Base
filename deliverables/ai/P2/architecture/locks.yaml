@@ -49,6 +49,55 @@ architecture:
       description: "Free a lock that current COG owns"
       safety: "Only owning COG can release its lock"
 
+state_versus_allocation:
+  summary: >-
+    A lock has TWO independent pieces of state and they are freed by different things.
+    Confusing them is the most expensive mistake available with locks, because the
+    consequence appears in unrelated code much later.
+  held_state:
+    what: "Whether the lock is currently taken, and by which cog."
+    cleared_by:
+      - "The owner's LOCKREL."
+      - "The owner cog becoming INACTIVE - for any cause, including COGSTOP. Ownership stops holding; nothing has to release it."
+      - "The lock being unallocated."
+  allocation:
+    what: "Whether the lock number is issued at all - what LOCKNEW hands out."
+    cleared_by:
+      - "LOCKRET, and nothing else."
+    note: "COGSTOP does NOT return the number, and neither does the cog ending any other way."
+  the_leak: >-
+    Stopping a cog that owns a lock therefore frees the lock and LEAKS its number.
+    Anyone can now take that lock, but nobody can ever be ISSUED it again. Sixteen such
+    leaks and LOCKNEW returns nothing for the rest of the run, and the failure appears at
+    some later LOCKNEW in code that never touched the lock that leaked.
+  the_rule: >-
+    Every LOCKNEW needs a LOCKRET on EVERY path out, including error and shutdown paths.
+    Releasing is not enough, and stopping the cog is not enough.
+  corroboration: >-
+    This page's own LOCKREL WC behaviour shows the stale-owner half already: it reports the
+    cog ID of the current owner if held, or of the LAST owner if released, so the owner
+    field still reads the stopped cog after its lock has gone free.
+
+pattern_prerequisite:
+  summary: >-
+    Every pattern below assumes an ALLOCATED lock, and the number must come from LOCKNEW.
+    LOCKTRY on an unallocated lock never succeeds - "not allocated" is one of the
+    conditions under which it reports failure - so a pattern that hard-codes a number it
+    never allocated spins forever, or in an initialisation barrier never initialises.
+  in_the_patterns: >-
+    Each pattern shows the critical section only. Its lock_num is a number LOCKNEW
+    returned, held in a register or a VAR, and LOCKRET'd on every path out. Do not
+    substitute a literal lock number.
+  lock_15: >-
+    Do not use lock 15 in examples or code: a DEBUG build holds it, so it may not be
+    allocatable at all.
+  allocate_first: |
+    ' every pattern below depends on this having run
+            LOCKNEW lock_num  WC         ' C=1 means none were available
+    IF_C    JMP     #no_locks_left       ' handle it; do not proceed with a guess
+    ' ... use lock_num in the patterns below ...
+            LOCKRET lock_num             ' on EVERY path out, including errors
+
 instructions:
   - instruction: "LOCKTRY"
     encoding: "EEEE 1101011 C0L DDDDDDDDD 000000110"
@@ -155,18 +204,16 @@ programming_patterns:
   - pattern: "basic_mutex"
     description: "Standard mutual exclusion pattern"
     code: |
-      ' Define lock number
-      LOCK_RESOURCE = 5
       
       ' Critical section entry
       .retry_lock
-          LOCKTRY #LOCK_RESOURCE WC
+          LOCKTRY lock_num WC
           IF_NC   JMP #.retry_lock     ' Spin until acquired
       
       ' ... critical section code here ...
       
       ' Critical section exit
-          LOCKREL #LOCK_RESOURCE       ' Release the lock
+          LOCKREL lock_num       ' Release the lock
   
   - pattern: "timeout_lock"
     description: "Try lock with timeout"
@@ -176,7 +223,7 @@ programming_patterns:
           ADD     timeout, ##1_000_000  ' 1 million clock timeout
       
       .try_loop
-          LOCKTRY #LOCK_NUM WC
+          LOCKTRY lock_num WC
           IF_C    JMP #.got_lock
           GETCT   current
           CMP     current, timeout WC
@@ -185,7 +232,7 @@ programming_patterns:
       
       .got_lock
       ' ... protected code ...
-          LOCKREL #LOCK_NUM
+          LOCKREL lock_num
   
   - pattern: "multi_lock"
     description: "Acquire multiple locks in order to prevent deadlock"
@@ -223,54 +270,50 @@ common_applications:
     complexity: "intermediate"
     example: |
       ' Protect shared buffer access
-      BUFFER_LOCK = 0
       
       ' Writer COG
       .write_data
-          LOCKTRY #BUFFER_LOCK WC
+          LOCKTRY lock_num WC
           IF_NC   JMP #$-1
           WRLONG  data, buffer_ptr
-          LOCKREL #BUFFER_LOCK
+          LOCKREL lock_num
   
   - application: "resource_arbitration"
     description: "Manage access to shared hardware resources like pins or hub peripherals"
     complexity: "intermediate"
     example: |
       ' Shared pin group access control
-      PIN_GROUP_LOCK = 1
 
       .use_pins
-          LOCKTRY #PIN_GROUP_LOCK WC
+          LOCKTRY lock_num WC
           IF_NC   JMP #$-1
           DRVH    #LED_PIN      ' Use shared pins
           WAITX   ##1000
           DRVL    #LED_PIN
-          LOCKREL #PIN_GROUP_LOCK
+          LOCKREL lock_num
   
   - application: "producer_consumer"
     description: "Synchronize producer/consumer queues"
     complexity: "advanced"
     example: |
       ' Queue lock for FIFO access
-      QUEUE_LOCK = 2
       
       ' Producer adds item
       .produce
-          LOCKTRY #QUEUE_LOCK WC
+          LOCKTRY lock_num WC
           IF_NC   JMP #$-1
           ' Add item to queue
           WRLONG  item, queue_tail
           ADD     queue_tail, #4
-          LOCKREL #QUEUE_LOCK
+          LOCKREL lock_num
 
   - application: "initialization_synchronization"
     description: "Ensure single COG performs system initialization"
     complexity: "beginner"
     example: |
       ' First COG to get lock does init
-      INIT_LOCK = 15
       
-          LOCKTRY #INIT_LOCK WC
+          LOCKTRY lock_num WC
           IF_C    CALL #do_initialization
           ' All COGs continue here after init
 
