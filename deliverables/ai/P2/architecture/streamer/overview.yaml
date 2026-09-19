@@ -94,7 +94,22 @@ instructions:
   XSTOP:
     syntax: "XSTOP"
     purpose: "Stop immediately"
-    note: "Equivalent to XINIT #0,#0"
+    note: "Equivalent to XINIT #0,#0. Also the way a PERPETUAL command ends — see count_field."
+
+count_field:
+  location: "D[15:0] of the streamer command"
+  terminating: "Counts down to zero, then the command completes. Largest terminating count: $FFFE."
+  perpetual: >-
+    A count of $FFFF runs the command PERPETUALLY — the counter does not decrement and
+    the command never completes on its own. It ends when a new command is issued or XSTOP
+    stops it.
+  the_trap: >-
+    $FFFF is the top of the field, so a transfer sized to "the maximum count" becomes an
+    endless command rather than the largest possible transfer, and a chunked chain built
+    that way collapses into its first chunk. Size terminating transfers to $FFFE or below.
+  related:
+    - language/pasm2/xinit.yaml
+    - language/pasm2/xstop.yaml
     
   GETXACC:
     syntax: "GETXACC D"

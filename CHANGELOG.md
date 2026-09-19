@@ -20,6 +20,29 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.19.1] - 2026-09-19
+
+**The streamer's perpetual count, which v1.19.0 said it had corrected and had not**
+
+### Fixed
+
+- A streamer count of `$FFFF` selects **perpetual** streaming: the command runs without
+  decrementing its counter until a new command is issued or `XSTOP` stops it. `XINIT`'s
+  documented bound read `longs * 32 < 65536`, which admits exactly that value — so a transfer
+  sized to "the maximum count", or a chunk chain built to that ceiling, silently became one
+  endless command instead of the largest possible transfer. The largest **terminating** count
+  is `$FFFE`, and the bit-granularity bound is `longs * 32 <= 65534`. The streamer overview
+  now carries the terminating/perpetual split as its own `count_field` entry.
+
+### Note on 1.19.0
+
+The 1.19.0 entry below claims this correction. **It was not in that release.** The finding was
+confirmed against our own Silicon Doc and then written into the release notes from the analysis
+rather than from the diff, so the note described work that had not been done. Every other claim
+in that entry was checked against the tree afterwards and holds. Recorded as F-440, along with
+the gate this argues for: nothing in the release path compares a CHANGELOG claim against the
+release's own changes.
+
 ## [1.19.0] - 2026-09-19
 
 **Code you copy out of the knowledge base now assembles, and the answers it gives about error handling are the ones the chip gives**

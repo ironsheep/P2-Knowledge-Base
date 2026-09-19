@@ -102,7 +102,8 @@ notes:
 - Streamer and smart pins can work in parallel for maximum efficiency
 - Mode word in D configures transfer direction, pin count, and data format
 - Source in S typically contains data or hub address
-- "Maximum block per XINIT for bit-counted streamer modes: 2047 longs (65504 bits). The streamer's bit-count field is 16 bits, so transfers in bit-granularity modes must satisfy `longs * 32 < 65536`. For larger payloads, chunk by looping with successive XINIT calls — the hub FIFO is configured once via RDFAST/WRFAST and does not need to be reissued per chunk. See pattern `large_transfer_chunking` below. (Note: byte/word/long-granularity modes may have different effective limits; verify against the Silicon Doc streamer modes-reference for the specific mode.)"
+- "A count of `$FFFF` selects PERPETUAL streaming: the command runs without decrementing its counter until a new command is issued or XSTOP stops it. So `$FFFF` is not the largest finite transfer — it is not a transfer at all, and a chunk chain sized to it collapses into one endless command. The largest TERMINATING count is `$FFFE`."
+- "Maximum block per XINIT for bit-counted streamer modes: 2047 longs (65504 bits). The streamer's bit-count field is 16 bits, and `$FFFF` is reserved for perpetual streaming, so a terminating transfer in a bit-granularity mode must satisfy `longs * 32 <= 65534`. For larger payloads, chunk by looping with successive XINIT calls — the hub FIFO is configured once via RDFAST/WRFAST and does not need to be reissued per chunk. See pattern `large_transfer_chunking` below. (Note: byte/word/long-granularity modes may have different effective limits; verify against the Silicon Doc streamer modes-reference for the specific mode.)"
 
 large_transfer_chunking:
   name: Large-transfer chunking

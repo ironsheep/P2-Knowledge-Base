@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-440`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-441`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,44 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## A released CHANGELOG claimed a fix the release did not carry — F-440
+
+### F-440 — v1.19.0's CHANGELOG and ledger both state the `$FFFF`-perpetual correction; it was never applied — `PENDING-VALIDATION — applied 2026-09-19 after the tag; owed: the v1.19.1 release`
+
+**This is a record that lies about the artifact, and it shipped.** The v1.19.0 CHANGELOG says:
+
+> *"A streamer count of `$FFFF` selects **continuous** streaming. The documented bound read
+> `longs * 32 < 65536`, which admits exactly that value... The terminating maximum is `$FFFE`."*
+
+and the YAML-head ledger row says *"GAP-3 from the P2X8C4M64P handoff closed from our own Silicon
+Doc."* Neither was true at the tag. `xinit.yaml` still carried `longs * 32 < 65536` with no mention
+of `$FFFF`; the fix was **confirmed and then never written**.
+
+**How it happened, because the shape is what matters.** GAP-3 was verified against our own source
+(`silicon-doc/part2-pixel-ops.txt:234` — *"By setting the D[15:0] count to its maximal value of
+$FFFF, a streamer command will run perpetually"*), written up in the triage as Tier-1/confirmed, and
+then carried into the release notes from **the triage** rather than from the diff. Every other claim
+in that CHANGELOG had a commit behind it; this one had a conclusion behind it. A release note
+assembled from what was decided instead of from what changed will do this, and nothing in the
+release path compares the two.
+
+**Found by auditing my own release claims against the tree** when asked where the handoff stood —
+not by any gate. All other v1.19.0 claims were checked the same way and hold: ABORT/trap (verified
+on the live MCP), `validation_chain`, `map_caveat`, the `-D` correction, the five invented clock
+constants (the three surviving `XMUL` hits are the real `XMUL1..XMUL1024` PLL multipliers),
+`IJMP0`/`IRET0`, and the trailing-colon labels.
+
+**Applied now:** `xinit.yaml` states that `$FFFF` selects perpetual streaming, that the largest
+terminating count is `$FFFE`, and restates the bit-granularity bound as `longs * 32 <= 65534`.
+`architecture/streamer/overview.yaml` gains a `count_field` block carrying the terminating/perpetual
+split and the trap, cross-linked from `XSTOP`.
+
+**Owed:** v1.19.1, whose CHANGELOG must say plainly that v1.19.0 claimed this and did not carry it.
+Correcting the claim quietly would be the same defect a second time.
+
+**Worth building (not built here):** the release path has no check that a CHANGELOG claim
+corresponds to a change in the release diff. That is the gate this finding argues for.
 
 ## The provenance strip reaches two of its three consumers — F-439
 
