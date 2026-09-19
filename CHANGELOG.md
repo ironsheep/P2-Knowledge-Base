@@ -20,6 +20,54 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.19.0] - 2026-09-19
+
+**Code you copy out of the knowledge base now assembles, and the answers it gives about error handling are the ones the chip gives**
+
+### Fixed
+
+- `ABORT` and the `\` trap operator are described the way the Spin2 interpreter actually
+  behaves. A trapped call yields the abort value, or **0** — never the called method's
+  results, whatever its result count. The entries said the opposite, so `level := \read_level()`
+  read 0 on every success with nothing to indicate it; five of the six worked patterns were
+  built on that. Data leaves an abortable method by pointer or VAR, and abort codes must be
+  non-zero, because a trap cannot tell `ABORT 0` from success.
+- An untrapped `ABORT` stops the task — or the cog, when no other task runs in it — rather
+  than "terminating the program". Other cogs keep running.
+- A validation chain built from bare `\` calls reported success on every input, including the
+  ones it existed to reject: an instruction-context trap catches the abort and falls through
+  to the next line. The pattern now tests each trap, and says why.
+- A streamer count of `$FFFF` selects **continuous** streaming. The documented bound read
+  `longs * 32 < 65536`, which admits exactly that value, so a chunk chain sized at the
+  documented ceiling silently became one perpetual transfer. The terminating maximum is `$FFFE`.
+- The `.map` guidance for object-image deduplication no longer warns you away from labels that
+  have been correct for four compiler releases, and it says how to read the file the current
+  compiler writes.
+- The preprocessor entry said `-D SYM=value` is accepted in silence. The current compiler
+  rejects it, exits non-zero and writes no output; the durable half — there is no
+  value-carrying command-line define — is unchanged.
+- PASM2 labels written with a trailing colon, LUT examples that could not assemble, debug-ISR
+  examples using `IJMP0`/`IRET0` as register names, and a Spin2/PASM2 integration page teaching
+  Propeller 1 code: all corrected, and every example compiled before shipping.
+- Five Spin2 clock constants that do not exist were removed from the symbol listing.
+- 246 cross-references did not resolve once every string and every nesting depth was read.
+  242 were repaired by pointing them at the entry that documents the concept; none was deleted.
+
+### Changed
+
+- Downloads no longer carry provenance. Fields recording *how we know* a claim is true —
+  `source`, `sources`, `source_reference`, `verified_against`, and the same thing written as a
+  comment — are stripped on the way out, as five metadata fields already were. They exist for
+  this project's release gates and for whoever audits a claim later; a consuming agent can act
+  on none of them, and many pointed into paths only this repository has.
+
+### Removed
+
+- Two PASM2 pages that were never knowledge: a planning to-do list and a coverage audit, both
+  asserting gaps that closed months ago — one of them still reporting the knowledge base as
+  "approximately 45%" complete. Nothing referenced either, and the one real fact either
+  carried is documented where a reader looks for it.
+
 ## [1.18.2] - 2026-09-11
 
 **Board and example entries answer with facts you can act on**
