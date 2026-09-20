@@ -52,7 +52,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## COGSTOP and the lock system — F-442
 
-### F-442 — `COGSTOP` frees a held lock and leaks its number; the KB said neither — `PENDING-VALIDATION — applied 2026-09-19; owed: the next YAML release`
+### F-442 — `COGSTOP` frees a held lock and leaks its number; the KB said neither — `RESOLVED — applied 2026-09-19; validated by the v1.20.0 release, 2026-09-20`
 
 `p2kbSpin2Cogstop` stated *"Locks owned by cog are NOT released"*, with matching notes and
 best-practice lines. The opposite is true of the held state, and the half that actually costs
@@ -211,7 +211,7 @@ since a contract in a document is exactly the enforcement tier this project dist
 
 ## The P2X8C4M64P handoff, applied — F-443, F-444
 
-### F-443 — the handoff's remaining actionable items, applied — `PENDING-VALIDATION — applied 2026-09-19; owed: the next YAML release`
+### F-443 — the handoff's remaining actionable items, applied — `RESOLVED — applied 2026-09-19; validated by the v1.20.0 release, 2026-09-20`
 
 Each settled against a source this project already holds, not against the report.
 
@@ -263,7 +263,7 @@ is the per-page change signal asked for; the defect is that nothing tells a cons
 (the ~98 s-per-character stall) is declined: they offer it as a question and we have no mechanism
 either. Both recorded in the triage.
 
-### F-444 — a `count_field` block closed the `instructions:` map, and `GETXACC` fell inside it — `PENDING-VALIDATION — found and fixed 2026-09-19; owed: the next YAML release`
+### F-444 — a `count_field` block closed the `instructions:` map, and `GETXACC` fell inside it — `RESOLVED — found and fixed 2026-09-19; validated by the v1.20.0 release, 2026-09-20`
 
 Mine, and it shipped in v1.19.1/v1.19.2. Adding `count_field:` at column 0 between `XSTOP` and
 `GETXACC` in `architecture/streamer/overview.yaml` **closed the `instructions:` mapping**, so

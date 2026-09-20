@@ -251,3 +251,5 @@ All 314 entries updated with appropriate color bars.
 - ✅ Missing Diagrams - Part I (2025-12-04)
 - ✅ DEBUG Instruction Chapter (2025-12-04)
 - ⊘ FIFO Knowledge Base Content - Not for this manual (YAML upgrade task)
+- [ ] **RE-AUDIT AGAINST HEAD — KB v1.20.0 (2026-09-20).** `part-iii/appendix-c-categorical-index.md:332-334` describes all three CT instructions as *"Set CT1/CT2/CT3 event to trigger on CT = D + S"*. Corrected in the KB this release: the event fires once the System Counter has **PASSED** the target, by the MSB rule `WAITCT1` already stated — so a target already in the recent past fires **at once** rather than waiting for the counter to come round, and a target more than 2^31 clocks ahead reads as already passed. The two readings disagree about exactly one thing, and it is what a missed deadline does. See `language/pasm2/addct1.yaml` (F-443).
+  Flagged by `release-yamls` §8 at the v1.20.0 publish. Not re-rendered or re-audited here.
