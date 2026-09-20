@@ -20,6 +20,78 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.20.0] - 2026-09-20
+
+**Five things the knowledge base said that the silicon and the sources do not**
+
+### Fixed
+
+- `WAITMS` and `WAITUS` are not implemented as `WAITX`. The interpreter reads the system
+  counter, computes the span, **adds the counter to make an absolute target**, and waits the way
+  `WAITCT` does. That is why the `$8000_0000`-clock bound exists — and what happens past it:
+  the call **returns immediately**, with no error, no clamp and no partial wait. A target more
+  than 2³¹ clocks ahead reads as already passed on the first comparison. Code that asks for ten
+  seconds gets no wait at all and looks exactly like code that works. The pattern for longer
+  waits is given.
+- `ADDCT1`, `ADDCT2` and `ADDCT3` said the event triggers *"on CT = D + S"*. It fires once the
+  counter has **passed** the target, by the same MSB rule — so a target already in the recent
+  past fires **at once** rather than waiting for the counter to come round. The two readings
+  disagree about exactly one thing, which is what a missed deadline does.
+- `>`, `>=`, `<` and `<=` each read *"Signed/unsigned compare"*, committing to neither. They are
+  **signed**. Each now says so, names its unsigned form (`+>`, `+>=`, `+<`, `+<=`) and its
+  floating-point form, and carries the rule that in a `CON` block the relational operators
+  return `1.0`/`0.0` on floating-point constants rather than `-1`/`0`.
+- **A negative pin field is not "no pin".** `-1` is all ones: base pin 63 with 31 additional
+  pins, which wraps within the upper port and means **P32..P63**. `PINLOW(-1)` acts on half the
+  chip. The `-1`-as-sentinel idiom is near-universal in driver code, so the warning is now on
+  every pin method that takes a field and on `ADDPINS` where the encoding lives — along with the
+  guard that catches it, and the note that the guard itself must be a signed compare.
+- `DEBUG_COGS` was documented as an output filter. It is the per-cog debug **interrupt** enable,
+  defaulting to all eight cogs, and an enabled cog takes the P2's highest-priority interrupt at
+  every `COGINIT` whether or not it ever prints. `DEBUG_MASK = 0` in an object does not remove
+  that object's cog from the debug mechanism — the compile-time code mask and the runtime
+  interrupt enable are different questions.
+- `COGSTOP` **frees a held lock and leaks its number.** The held state clears when the cog goes
+  inactive, for any cause; the allocation does not, and only `LOCKRET` returns a number to the
+  pool. Sixteen leaks and `LOCKNEW` returns nothing for the rest of the run, failing in code
+  that never touched the lock that leaked. The advice to release before stopping was right and
+  its stated reason was wrong.
+- The locks page's own examples took hard-coded lock numbers that `LOCKNEW` never issued — which
+  by that page's own `LOCKTRY` definition can never be taken, so they spin forever and the
+  initialisation barrier never initialises. All now use an allocated lock, with the requirement
+  stated once and lock 15 called out, since a DEBUG build holds it.
+- `X_PINS_ON` and `X_WRITE_ON` are the **same bit** (D[23]), listed as two independent controls.
+  The streamer symbols example composed the pin base with `+` while using `|` elsewhere; an
+  unaligned base carries into the mode field when added, silently selecting a different mode at
+  a different pin group.
+- `X_ALT_ON` is scoped to the 1/2/4-bit modes and was recommended for SPI on the next line
+  without that scope. An 8-bit SPI capture has no sub-byte grouping for it to reorder.
+- `XINIT`'s *"byte/word/long-granularity modes may have different effective limits; verify
+  against the Silicon Doc"* is replaced by what the Silicon Doc states: `D[15:0]` counts **NCO
+  rollovers**, the same 16-bit field with the same `$FFFE` terminating maximum in every mode.
+  Granularity changes how much data one rollover moves, not the count limit.
+- `GETXACC` had fallen out of the streamer's instruction list — a block added in v1.19.1 closed
+  the mapping above it. The file parsed and every reference resolved; it was simply wrong about
+  what the streamer's instructions are.
+
+### Added
+
+- **What a debug build takes from your program**, in one place for the first time: the top 16 KB
+  of hub (writes there are silently dropped), `LOCK[15]`, P62 and P63 — and P62 is
+  **reconfigured by every `debug()`**, so a smart pin placed there is destroyed by the next
+  print. Plus cog-start traffic on P62, a debug interrupt per enabled cog, the `HUBSET` enables
+  locked until reset, and `RCFAST`/`RCSLOW` becoming illegal.
+- The DEBUG byte cap now states that it fails **silently** — output dies partway through a
+  report or never starts, with nothing in the build to say so — what it counts (the literal
+  format strings inside `debug()`, not `DAT` strings), and how to measure it: build twice, with
+  and without `-d`, and subtract. The record cap fails loudly; the byte cap does not, and which
+  one you meet first depends on the shape of your output rather than the size of your project.
+- Lock state versus lock allocation as its own section, with the rule that every `LOCKNEW` needs
+  a `LOCKRET` on every path out, error and shutdown paths included.
+- Aliases keyed to what a developer actually types — the compiler's own error strings
+  (*"DEBUG data is too long"*, *"within first 16 longs"*) and the symptom (*"board prints
+  nothing"*), which is usually all they have when they start looking.
+
 ## [1.19.2] - 2026-09-19
 
 **A published index that pointed at content it could not verify**
