@@ -7,7 +7,7 @@
 >
 > **None of these versions was ever released or tagged.** For a reader of the guide
 > they never existed, which is why they are not in the public changelog
-> (`changelog-style-guide.md` — *Never-shipped versions are never mentioned*).
+> (`central:changelog-voicing` §1.7 — *never-shipped versions are never mentioned*).
 >
 > **This file is NOT governed by the changelog style guide and is not maintained.**
 > It is a record of how the work actually went, written under the rules that applied
