@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-445`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-447`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,84 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Two findings where the manual was right and the KB was wrong (2026-09-21, Streamer Guide deep audit) — F-445, F-446
+
+Both surfaced by the `document-audit` deep pass on the P2 Streamer Programming Guide
+(`engineering/document-production/manuals/p2-streamer-programming-guide/audit/periodic-audit-2026-09-21.md`).
+Filed here rather than fixed in the manual because the manual states both facts correctly; the
+defect is in the shipped YAML. **Neither carries a manual edit** — the audit report records both
+sites as verified-correct so a later pass does not "correct" them.
+
+### F-445 — `clkfreq` lives at hub long `$44`, and nine shipped KB files say `$14` — `CONFIRMED`
+
+Nine files in `deliverables/ai/P2/` carry the PASM2 line `rdlong clkf, #$14` with the comment
+*"clkfreq lives at hub long $14"*. The address is wrong.
+
+**Authority — the Spin2 v55 language reference, which states it twice:**
+- `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:358` —
+  `Hub Locations | CLKMODE  CLKFREQ | $00040  $00044 | Clock mode value  Clock frequency value`
+- `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1731` —
+  *"clkfreq | The current clock frequency, **located at LONG[$44]**. Initialized with the
+  'clkfreq_' value."*
+- `:1732` also gives the canonical PASM idiom under Spin2: `RDLONG x,#@clkfreq`.
+
+**Sites (all `rdlong clkf, #$14` unless noted):**
+
+```
+language/pasm2/hubset.yaml:70
+architecture/streamer/dds-goertzel.yaml:209
+architecture/streamer/dds-goertzel.yaml:268
+architecture/smart-pins/smart-pin-01101-a-rise-inc-dec-by-b.yaml:64
+architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml:72
+architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml:75
+architecture/smart-pins/smart-pin-10010-time-x-a-events.yaml:60
+architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml:74
+architecture/smart-pins/smart-pin-00110-nco-frequency.yaml:114   (prose: "or RDLONG hub $14")
+```
+
+**Impact.** This is served YAML. Any agent composing P2 code from the KB reads garbage into `clkf`
+and then computes a wrong NCO / baud / period word — silently. It compiles clean; no gate in this
+repo reads meaning. The defect spans two domains (`pasm2/` and seven smart-pin mode pages), so treat
+it as a **class**: while fixing, sweep every hard-coded hub-address constant in KB example code
+rather than only these nine lines.
+
+**Proposed correction:** `rdlong clkf, #$44   ' clkfreq lives at hub long $44` at each site, and the
+matching prose at `smart-pin-00110-nco-frequency.yaml:114`.
+
+> ⚠️ **Method note, worth keeping.** A dispatched audit agent returned this as a *manual* defect,
+> reasoning that the KB is unanimous across nine files and the manual therefore wrong, and proposed
+> changing the manual's two correct lines to `$14`. **Nine copies of one derivation are still one
+> derivation.** A peer derivation is not an authority for another peer derivation, and unanimity
+> inside a derived tier is correlated error rather than evidence. The agent ran a sound grep control
+> and still reached the wrong verdict, because the control tested its *search*, not its *truth root*.
+> Applying the returned fix would have broken two working programs that readers copy.
+
+### F-446 — the colorspace converter is not in the streamer's RGB data path — `CONFIRMED`
+
+`architecture/streamer/modes-reference.yaml:89` describes the RGB video family as
+*"Hub FIFO → **Colorspace converter** → Pins/DACs"*, and `architecture/streamer/overview.yaml:69-70`
+repeats it (*"Hub data through colorspace converter"* / `setup: "RDFAST + colorspace converter config"`).
+The streamer unpacks RGB itself; the colorspace converter is a separate downstream cog unit.
+
+**Authority — Propeller 2 Documentation v35:**
+- `engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1478` heads the path
+  `RDFAST ⇢ RGB ⇢ Pins/DACs` and states that the streamer translates the pixel values
+  *"into {R[7:0], G[7:0], B[7:0], 8'b0} values and output to X3, X2, X1, and X0"* — no converter
+  in that path.
+- `silicon-doc-text.txt:1849` — *"Each cog has a colorspace converter which can perform ongoing
+  matrix transformations and modulation of the cog's 8-bit DAC channels"*, configured by
+  `SETCY`/`SETCI`/`SETCQ`/`SETCFRQ` (`:1855-1858`).
+
+**Corroboration.** The Streamer Guide's §15.1 is a complete, compiling VGA program that uses
+`X_RFWORD_RGB16` and **never calls `SETCMOD`**. If an RGB mode required converter configuration that
+program would not function. Found independently by two audit agents working different themes.
+
+**Proposed correction:** `modes-reference.yaml:89` → `"Hub FIFO → RGB unpack → Pins/DACs"`;
+`overview.yaml:69-70` → drop the converter from the description and the `setup:` line. If a pointer
+to the converter is wanted, state it as a separate downstream stage, not a step in this path.
+
+---
 
 ## COGSTOP and the lock system — F-442
 
