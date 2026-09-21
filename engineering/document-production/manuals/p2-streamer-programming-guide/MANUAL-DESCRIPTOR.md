@@ -2,7 +2,7 @@
 manual_slug: p2-streamer-programming-guide
 doc_class: reference                              # YAML-backed + Silicon-Doc-backed reference (§3 grounding model)
 code_line_budget_K: 76                            # inherits platform reference K (creation-guide §Code Line Budget); Dimension #3b
-last_published_tag: p2-streamer-programming-guide-v1.1.0   # baseline for Dimension #15 (released 2026-08-22, 91pp)
+last_published_tag: p2-streamer-programming-guide-v1.1.1   # baseline for Dimension #15 (released 2026-09-10)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md

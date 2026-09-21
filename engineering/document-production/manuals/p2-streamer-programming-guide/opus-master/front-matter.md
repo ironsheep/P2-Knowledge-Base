@@ -145,7 +145,6 @@ This guide draws on the following primary and community sources:
 
 - **Parallax Propeller 2 Documentation v35 - Rev B/C** (Chip Gracey, Parallax Inc.) — streamer architecture, mode encodings, NCO and DDS/Goertzel behavior
 - **Spin2 Reference Manual v51** (Parallax Inc.) — built-in streamer symbols and language integration
-- **P2 Flash Loader source** (official P2 ROM) — verified instruction usage
 - **Community video and Goertzel drivers** (Parallax OBEX) — application patterns
 
 ## How to Use This Guide
