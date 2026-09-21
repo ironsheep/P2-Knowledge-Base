@@ -4406,7 +4406,26 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 
 
 **VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree, not from a status line. `code-examples/smart-pins-002-button-reading.yaml` now reads `if INA[BUTTON]` -> *"Button is pressed (high)"* with `else` -> *"Button is not pressed (low)"*. The comment asserts what the code does; the inversion is gone.
-### F-346 — three worked examples were structurally unrunnable, and one rule contradicted its own two examples — `PENDING-VALIDATION`
+### F-346 — three worked examples were structurally unrunnable, and one rule contradicted its own two examples — `RESOLVED — VALIDATED IN THE SERVED KB, 2026-09-21`
+
+> **VALIDATED IN THE SERVED KB 2026-09-21** («#344») — all four sites read back from `p2kb-mcp`
+> (`p2kbPasm2BasicIo`, `p2kbArchSmartPin00000NormalMode`), which is what an agent actually receives,
+> not from the repo tree and not from this register's status line. `led_blink` carries the `blink`
+> label and `JMP #blink`; both patterns carry `CON`/`DAT` headers; `button_read` has its `poll` loop
+> and a defined `button_action` stub; the smart-pin listing opens on `CALL #setup_pins` / `JMP
+> #main_loop` with the two `LONG`s moved below the code beside `pin RES 1`.
+>
+> **Recompiled from the served bytes**, not from the repo: `led_blink` 28 bytes, `button_read`
+> 32 bytes, smart-pin `pasm2_complete` 96 bytes, all exit 0 on `pnut-ts` 1.55.5.
+>
+> ⚠️ **And the compile validates only half of this finding — the control says so.** Feeding the
+> ORIGINAL pre-fix form back through `pnut-ts` fails at `m211` ("Expected a unique constant name"),
+> so the compiler does catch the missing `CON`/`DAT`. It does **not** catch `JMP #$`, execution
+> beginning on data, or a `rule:` string contradicting its own examples — all three are legal. Those
+> were re-validated by reading. The repaired rule now reads *"Set OUT to the desired state while the
+> pin is still floating, then raise DIR"*, and its two examples agree with it: the `wrong:` limb sets
+> OUT to the **un**desired state before raising DIR, which is the actual failure, rather than
+> differing in ordering as the old pair did.
 
 > **All four found by reading examples I had just compiled successfully.** None was caught by any
 > gate; `pnut-ts` is the legality half only.
@@ -4528,7 +4547,28 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 
 
 **VALIDATED ON THE SERVED KB 2026-09-11** — read from the published tree, not from a status line. every site now states **10 ms**: `clkmode.yaml:113` quotes the Silicon Doc verbatim at `silicon-doc-text.txt:2635` (*"Allow 10ms for crystal+PLL to stabilize"*), `hubset.yaml` :60/:73/:97 and `clock_system.yaml` :93/:172 agree, and `clkset.yaml:43`'s `~10-20ms` is a consistent range rather than the microsecond error. `clock_system.yaml:177` carries the adjudication in place: *"An earlier form of this block stated pll_lock as ~10 microseconds. Three Parallax sources state 10ms, each via two independent extraction paths (raw text and reconstructed table); the microsecond figure has no source."* The wrong figure is not merely replaced — the file records why it lost.
-### F-350 — the F-328(b) eval-board fabrication class is not confined to `p2-eval-board.yaml` — `PENDING-VALIDATION`
+### F-350 — the F-328(b) eval-board fabrication class is not confined to `p2-eval-board.yaml` — `RESOLVED — VALIDATED IN THE SERVED KB, 2026-09-21`
+
+> **VALIDATED IN THE SERVED KB 2026-09-21** («#344») — `p2kbHwP2HardwareFeatureComparisonP2Hardware
+> FeatureComparison` read back from `p2kb-mcp`, not from the repo tree. All five keys carry the
+> re-derived values (`3.55 x 3.55 in` · two micro-USB, *"No USB-C and no barrel jack"* · eight I/O
+> Pin Breakout Edge Headers in 8 groups of 8 · 16 MB flash with the P2 *"soldered on the board --
+> this is NOT an edge-module carrier"* · `eval_board_addons` rewritten with its `correction_note`),
+> the three fabrications are absent, and 64006G is the Goertzel board.
+>
+> **THE CLASS WAS SWEPT, NOT THE FILE** (D5), and the sweep carried a control, because an absence
+> found by one search is not an absence. Pattern — `USB-C`, `127x89`, `Up to 2 add-on`, `A-side`/
+> `B-side`, the three invented `P2-EVAL-*` part numbers, `Combined Digital I/O`, `Stereo DAC
+> output`, `27x40` — run over the whole shipped tree: **zero live occurrences.** The same pattern
+> run over the pre-fix backups **hits every term**, which is what makes the live zero mean
+> something rather than meaning the search was broken.
+>
+> Every live hit was read rather than counted, and all are benign: the `corrections_applied_2026_08_25`
+> and `correction_note` blocks recording what was removed; `p2-hardware-selection-guide.yaml:218-219`,
+> which is the *repair* (*"the #64000 has neither a USB-C socket nor a barrel jack"*); and
+> `addon-serial-device.yaml:97` (*"microUSB connectors (not USB-C)"*, correct). One hit was an
+> artifact of the search itself — `USB-C` matching inside **USB-c**apable at `:24` — the same
+> count-versus-read trap this task was told to expect.
 
 > **Where:** `deliverables/ai/P2/hardware/p2-hardware-feature-comparison.yaml`,
 > `development_boards.p2_eval_board` and `compatibility_matrix.eval_board_addons`. Backup at
@@ -4570,7 +4610,8 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > in a file F-121 never named. Full list in the file's own `corrections_applied_2026_08_25` keys and
 > in **F-353**. The file now cites per block; its six Tier-2 blocks left the advisory lane.
 >
-> Status: `PENDING-VALIDATION` — applied and gate-verified; only the YAML release is owed.
+> Status: `RESOLVED` — applied, gate-verified, released, and read back from the served KB on
+> 2026-09-21 («#344»). The YAML release that was owed here has landed.
 
 ### F-351 — the sourcing gate reads Parallax part numbers, Unicode code points and an ISO designator as amperes; 12 blocks are pure instrument artifacts — `RESOLVED`
 
@@ -4681,7 +4722,31 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > `language/spin2/methods/getct.yaml description` — is outside this tree and belongs to «#299», so
 > **58** were in scope here. Every line number below was read off disk 2026-08-25.
 
-### F-353 — the 58 in-scope blocks: 34 returned cited, 24 held in the ingestion tree, 0 whole-block gaps — and six wrong scalars in SURVIVING blocks that only a source-first read could find — `PENDING-VALIDATION`
+### F-353 — the 58 in-scope blocks: 34 returned cited, 24 held in the ingestion tree, 0 whole-block gaps — and six wrong scalars in SURVIVING blocks that only a source-first read could find — `RESOLVED — VALIDATED IN THE SERVED KB, 2026-09-21`
+
+> **VALIDATED 2026-09-21** («#344»), all three limbs, exhaustively rather than by sample.
+>
+> **(a) + (b) — 34 of 34 blocks present, 34 of 34 carrying their OWN citation.** Checked
+> mechanically across all 15 files; every one names an `engineering/ingestion/sources/` path inside
+> the block itself, so none of them leans on a file-level or sibling citation.
+> ⚠️ **The checker was falsified before its result was believed.** Its first form accepted a
+> file-level `source:` anywhere as citation for any block, which would have passed all 34 whatever
+> the truth. Re-run with that fallback removed: same 34/34. Control, by the same method: three
+> blocks the KB itself declares authored-here guidance (`summary_recommendations`, `notes`,
+> `comparison_categories`) return NO CITATION REACHABLE, and two known-cited blocks return cited —
+> so the instrument discriminates.
+>
+> **(c) — all six scalars corrected**, each read in place: `edge-32mb-module` is `P2-EC32MB`
+> throughout with a note recording that **#64000-ES is a different product** · `edge-standard-module`
+> `ec32mb_module.fully_free_pins: 40` (with `accessible_pins: 46`) · all three Edge carriers state
+> they have **no** on-board USB-to-serial and name the Prop Plug as the only wired path, the
+> breadboard carrier with the guide citation at its `connectivity.programming` · `edge-mini-breakout`
+> `blocked_pins` now says P32-P55 *"may be reached by adding jumper wires"* rather than "not
+> accessible". `p2-eval-board.yaml:190` still reads "USB (primary method)" and is **correct** — the
+> #64000 does carry built-in FTDI — exactly as this finding predicted.
+>
+> **Gate effect re-measured, not quoted:** `audit-yaml-claim-sourcing.py` Tier 1 remains **0** across
+> 1131 files, and Tier 2 now reads **27** advisory blocks — down from the 78 recorded here at filing.
 
 > **THE THREE NUMBERS.** **34 restored with a trace · 24 held in ingestion · 0 gap.** 34 + 24 = 58;
 > plus «#299»'s `getct.yaml description` = F-334's 59. Every ACTIONABLE block came back; no
@@ -4758,7 +4823,8 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > lane because that file now cites. The `hardware/` share went 39 → 33. Nothing changed tier in the
 > other direction, and no block was demoted.
 >
-> Status: `PENDING-VALIDATION` — every edit is applied and gate-verified; only the YAML release is owed.
+> Status: `RESOLVED` — every edit is applied, gate-verified, released, and read back from the served
+> KB on 2026-09-21 («#344»). The YAML release that was owed here has landed.
 
 ### F-354 — seven content-level holes inside blocks that DID come back, and one held block whose content is only three-quarters in the ingestion tree — `CONFIRMED`
 
@@ -9975,7 +10041,22 @@ that has not been shortcut, only made visible. **ssdb and pnut-term-ts release n
 > `request.json`s), and **the visual audit on the returned PDF is the half that matters**, because
 > a mis-fired auto-link is exactly what it exists to catch.
 
-### F-300 — every published PDF in the set ships with empty Title and Author properties. `PENDING-VALIDATION` — **MECHANISM LANDED + PROVEN 2026-08-19; 2 of the 15 published PDFs have adopted, 13 owed at their next render (measured 2026-08-25, «#302»)**
+### F-300 — every published PDF in the set ships with empty Title and Author properties. `PARTIAL` — **MECHANISM LANDED + PROVEN 2026-08-19; 10 of the 17 published PDFs have adopted, 7 owed at their next render (re-measured 2026-09-21, «#344»)**
+
+> **RE-MEASURED ON THE RELEASED ARTIFACTS 2026-09-21** («#344») — `pdfinfo` over every PDF in
+> `deliverables/documents/DOCs/`, read from the shipped files themselves, not from a render log and
+> not from this register. **10 of 17 now carry both Title and Author** (all `Iron Sheep Productions,
+> LLC`), against 2 of 15 at the 2026-08-25 measurement. The set grew by two documents in the
+> interval, so the denominator moved as well as the numerator.
+>
+> **Still empty, and each resolves at that document's next render — this is the expected shape of
+> this finding, not debt:** `P2AN003` · `P2AN005` · `P2AN006` · `P2AN007` ·
+> `P2-Architect-Guide` · `P2-Debug-Window-Manual` · `P2-XBYTE-Programming-Guide`.
+>
+> Status stays open deliberately: it is manual-head and per-document, so it cannot close until the
+> last of those seven re-renders. It is `PARTIAL` rather than `PENDING-VALIDATION` because the
+> mechanism is proven and adopting is now routine — what remains is render scheduling, not
+> validation.
 
 > **ADOPTION MEASURED ON THE ARTIFACTS, 2026-08-25 («#302») — `pdfinfo` over every file in
 > `deliverables/documents/DOCs/`, not read off the tracker.**
