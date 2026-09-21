@@ -145,7 +145,6 @@ This guide draws on the following primary and community sources:
 
 - **Parallax Propeller 2 Documentation v35 - Rev B/C** (Chip Gracey, Parallax Inc.) — streamer architecture, mode encodings, NCO and DDS/Goertzel behavior
 - **Spin2 Reference Manual v51** (Parallax Inc.) — built-in streamer symbols and language integration
-- **P2 Flash Loader source** (official P2 ROM) — verified instruction usage
 - **Community video and Goertzel drivers** (Parallax OBEX) — application patterns
 
 ## How to Use This Guide
@@ -203,7 +202,7 @@ Before the mode tables and bit fields, it helps to know what the streamer *is*, 
 
 Every cog on the P2 has its own **streamer**: a small, tireless engine that moves data between hub memory and the outside world — the pins, the DAC channels, the ADC inputs — entirely on its own, at a rate you choose. Once you start it, it runs without the cog's help. Your code can compute, make decisions, or sleep while the streamer keeps feeding pixels to a display or pulling samples off a wire.
 
-The detail that makes the streamer special is that it carries **its own clock — and you set its rate**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) is the streamer's adjustable metronome: it ticks at whatever rate your application needs, and the streamer moves one piece of data on each tick. You dial that rate in directly — a ~25 MHz pixel rate for VGA, a 48 kHz sample rate for audio, or anything else — and it stays rock-steady and exact. That precise, self-kept timing is what lets a single cog produce a clean video picture or an unwavering audio stream without ever having to babysit the timing in software.
+The detail that makes the streamer special is that it carries **its own clock — and you set its rate**. A piece of hardware called the NCO (Numerically-Controlled Oscillator) is the streamer's adjustable metronome: it ticks at whatever rate your application needs, and the streamer moves one piece of data on each tick. You dial that rate in directly — a ~25 MHz pixel rate for VGA, a 48 kHz sample rate for audio, or anything else — and its average rate holds to better than a part in ten million. (How evenly the individual ticks fall is a separate matter, and §3.4 shows how to make them identical.) That precise, self-kept timing is what lets a single cog produce a clean video picture or an unwavering audio stream without ever having to babysit the timing in software.
 
 And because the streamer lives *inside* the cog, **each cog has its own streamer and its own NCO** — so the eight streamers are clocked independently. They do not share a rate. One cog can push video pixels at 25 MHz while another streams audio at 48 kHz and a third samples an ADC at some other rate entirely, all at the same moment, each running at exactly the rate its job requires.
 
@@ -269,7 +268,7 @@ You usually arrive at the streamer with an application already in mind. Find it 
 | Detecting a specific tone or frequency | Goertzel analysis | Ch. 10, Ch. 17 |
 | High-speed serial (fast SPI) | timed bit output, clocked by a smart pin | Ch. 16 |
 
-## 1.8 What each Cog actually has
+## 1.8 What each cog actually has
 
 For all that capability, the hardware budget is modest. Each cog contains exactly one streamer, with:
 
@@ -397,7 +396,7 @@ frequency = $8000_0000 × (desired_rate / clock_frequency)
 A **power-of-two ratio** divides `$8000_0000` evenly, so its word is exact; every other ratio must be rounded up (the +1 convention below). A power-of-two ratio also makes the sysclk an exact integer multiple of the pixel rate, and that integer ratio — not the word's exactness — is what removes per-pixel jitter (see [§3.4](#sec-3-4) for choosing a rate around it). [Appendix C](#app-c) lists the full set of ratio and pixel-rate values.
 
 ::: caution
-**Round up, and never let the value reach zero.** Truncating `$8000_0000 * rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or simply add 1 to a truncated value. This is the **+1 convention** from the *Parallax Propeller 2 Documentation v35 - Rev B/C*: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
+**Round up, and never let the value reach zero.** Truncating `$8000_0000 * rate/clock` leaves the frequency word a hair short of a clean rollover, so the streamer's *first* rollover lands one clock late and the timing is skewed from there. Round the result up instead — or add 1 to a truncated value. This is the **+1 convention** from the *Parallax Propeller 2 Documentation v35 - Rev B/C*: its HDMI example sets the 1/10 rate as `$0CCC_CCCC + 1`, because *"the +1 forces initial NCO rollover on the 10th clock."* The same habit guards against a second, nastier failure — a frequency word of **zero never rolls over at all, so the streamer stalls forever**. When a calculation could land low (or on zero), round up. The common-values table above already includes the +1 where the exact ratios need it.
 :::
 
 ## 3.3 Setting NCO Frequency {#sec-3-3}
@@ -437,7 +436,7 @@ The jitter-free sysclks below are the integer multiples the P2 PLL can actually 
 | XGA 1024×768 | 65.0 MHz | 130 / 195 / 260 / 325 (×2–×5) | 3.85 cyc/px → ~26% jitter |
 | 720p 1280×720 | 74.25 MHz | 148.5 (×2), 297 (×4) | 3.37 cyc/px → ~30% jitter |
 
-> **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. DVI/HDMI tops out near this rate; 1080p needs a 1.485 GHz serial clock and is out of the streamer's reach.
+> **VGA note:** 25.175 MHz's exact multiples (201.4, 251.75 MHz) cannot be produced by the P2 PLL from a 20 MHz crystal. Standard practice is a **25.0 MHz pixel clock at 250 MHz sysclk** — exactly 10 cycles per pixel (jitter-free), with the clock 0.7% slow, which monitors absorb. The streamer's DVI output needs a sysclk of ten times the pixel rate (§15.2), which caps it near the low tens of MHz of pixel clock; 1080p would need a 1.485 GHz serial clock and is out of reach.
 
 The **SETXFRQ** word for any combination is `$8000_0000 * pixel_clock / sysclk`, truncated, and then incremented by 1 if that division left a remainder — the lookup tables in [Appendix C](#app-c) list common values. Worked both ways:
 
@@ -467,7 +466,7 @@ Accuracy and jitter are independent. The jitter in §3.4 comes from the sysclk-t
 If you build on a Parallax **P2 Edge module**, this is already handled for you.
 
 ::: hardware
-**The P2 Edge modules carry a 20 MHz TCXO rated ±0.5 ppm** (temperature-compensated). Every clock the P2 derives is referenced to it, so your pixel clocks, sample rates, and color subcarriers come out accurate to ~0.5 ppm and hold that across temperature — with no effort on your part. The module guide calls it "higher precision than most applications require," which makes the Edge a safe default for accurate-timing work as well as general projects.
+**The P2 Edge modules carry a 20 MHz TCXO rated ±0.5 ppm** (temperature-compensated). Every clock the P2 derives is referenced to it, so your pixel clocks, sample rates, and color subcarriers come out accurate to ~0.5 ppm and hold that across temperature — with no effort on your part. The Parallax module guides specify it as a high-precision oscillator, which makes the Edge a safe default for accurate-timing work as well as general projects.
 :::
 
 On an **externally designed board** the P2 runs from whatever crystal you fit, and the PLL can only multiply that reference — it cannot make the clock more accurate than its source. A general-purpose crystal is typically tens of ppm, with additional drift over temperature, and that error flows straight through to every streamer rate.
@@ -499,7 +498,7 @@ The D operand to **XINIT**, **XCONT**, and **XZERO** contains:
 | `%1111` | ADC | ADC | DACs/WRFAST |
 | `%1111_x111` | DDS/Goertzel | LUT | DACs + Analysis |
 
-> **Note:** Every row except the last shows only the 4-bit **mode nibble** D[31:28]. DDS/Goertzel is the exception: it is mode `%1111` (D[31:28]) *combined with* config field D[19:16] = `%x111`, so it is written here as `%1111_x111` to distinguish it from the other `%1111` rows. Separately — outside that config field — bit D[23] selects SINC1 (`0`) or SINC2 (`1`).
+> **Note:** Rows show the 4-bit **mode nibble** D[31:28]. Several nibbles serve more than one family and are separated by the config field D[19:16] — `%0111`, `%1011` and `%1111` each appear twice above. DDS/Goertzel is written `%1111_p111` to show both fields at once; [Appendix A](#app-a) gives every mode's full template. Separately — outside that config field — bit D[23] selects SINC1 (`0`) or SINC2 (`1`).
 
 ## 4.3 DAC Routing Field D[27:24]
 
@@ -629,7 +628,7 @@ The S operand drives pins and DACs directly without LUT lookup. The DAC-channel 
 ```pasm2
 ' Output 4 bytes to an 8-pin group, 8 bits each
         drvl    #7<<6 + pin               ' enable those 8 pins (11.0)
-        xinit   ##X_IMM_4X8_1DAC8 | X_PINS_ON + pin<<17 + 4, ##$12345678
+        xinit   ##X_IMM_4X8_1DAC8 | X_PINS_ON | (pin<<17) | 4, ##$12345678
 ```
 
 # Chapter 6: RDFAST Modes {#ch-6}
@@ -655,9 +654,9 @@ Hub data serves as LUT index values. As in Chapter 5, the DAC side of these mode
 
 **S[3:0]:** LUT base address bits [8:5]
 
-**%a bit:** Alternate bit order (0 = LSB first, 1 = MSB first)
+**%a bit:** bit order *within each byte* — 0 = bottom-first, 1 = top-first. It reorders bits inside a sub-byte group, so it acts only on the 1-, 2- and 4-bit rows above; the 4×8 row has no `%a` bit and nothing for it to reorder.
 
-**Example.** **Pattern** — supply `bitmap_addr`, `base` and the LUT palette.
+**Example.** **Pattern** — supply `bitmap_addr`, `base` — a multiple of 8 (§12.0) — and the LUT palette.
 
 ```pasm2
 ' Setup FIFO
@@ -665,7 +664,7 @@ Hub data serves as LUT index values. As in Chapter 5, the DAC side of these mode
 
 ' Stream 640 pixels through 256-color palette at LUT $000
         drvl    ##31<<6 + base            ' enable the 32-pin window (11.0)
-        xinit   ##X_RFLONG_4X8_LUT | X_PINS_ON + base<<17 + 640, #0
+        xinit   ##X_RFLONG_4X8_LUT | X_PINS_ON | (base<<17) | 640, #0
 ```
 
 ## 6.2 RDFAST → Pins/DACs
@@ -693,7 +692,7 @@ Hub data drives pins and DACs directly. The DAC-channel columns below reach a pi
 ' Stream bytes to 8 pins
         rdfast  #0, ##buffer
         drvl    #7<<6 + base              ' enable those 8 pins (11.0)
-        xinit   ##X_RFBYTE_8P_1DAC8 | X_PINS_ON + base<<17 + 256, #0
+        xinit   ##X_RFBYTE_8P_1DAC8 | X_PINS_ON | (base<<17) | 256, #0
 ```
 
 # Chapter 7: RGB Video Modes {#ch-7}
@@ -737,7 +736,7 @@ Video earns its own family of modes because pixels are not just bytes. A color p
 
 ## 7.3 RGB Mode Example
 
-This one routes all four DAC channels (`X_DACS_3_2_1_0`), so the four pins carrying R, G, B and sync must each be configured for DAC output per §11.0 before any of it appears as a voltage. **Pattern** — supply `base`, `framebuffer` and `cmd`; §15.1 works the same arrangement through as a complete program.
+This one routes all four DAC channels (`X_DACS_3_2_1_0`), so the four pins carrying R, G, B and sync must each be configured for DAC output per §11.0 before any of it appears as a voltage. **Pattern** — supply `base` (a multiple of 8, §12.0), `framebuffer` and `cmd`; §15.1 works the same arrangement through as a complete program.
 
 ```pasm2
 ' VGA 640×480 RGB16 output (assumes 250 MHz sysclk)
@@ -745,20 +744,56 @@ This one routes all four DAC channels (`X_DACS_3_2_1_0`), so the four pins carry
         setxfrq ##$0CCC_CCCC+1                    ' 25 MHz pixel rate
 
         mov     cmd, ##X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0
-        add     cmd, ##base<<17 + 640
+        or      cmd, ##(base<<17) | 640
         xinit   cmd, #0  ' XINIT starts from a zeroed phase
 ```
 
 ::: tip
-RGB16 (`X_RFWORD_RGB16`) provides the best balance of color depth and memory efficiency for most video applications.
+RGB16 (`X_RFWORD_RGB16`) costs 2 bytes per pixel, so a full 640×480 frame is 600 KB and does not fit in hub RAM (§7.1). Use it for regions, sprites, or a reduced height; use a 1-byte format for full-screen video on a 512 KB P2.
 :::
 
 # Chapter 8: WRFAST Input Modes {#ch-8}
 
-Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a cog into a logic analyzer, capturing fast digital activity that software could never sample quickly enough. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
+Here the pipe runs the other way. Instead of driving the pins, these modes *watch* them: on every NCO beat the streamer samples a group of pins and writes the result into hub memory. That turns a cog into a logic analyzer, capturing fast digital activity that software could never sample quickly enough — provided you aim it at pins whose IN carries a logic level, which is what §8.0 is about. The captured data flows out through the write FIFO, which — like its read counterpart — must be primed first.
 
 ::: caution
 **Run WRFAST before any capture command.** It primes that same hub FIFO to *receive* data (streamer → hub); until it does, captured data has no valid destination. This is the exact mirror of RDFAST (Chapter 6) — one FIFO, opposite direction.
+:::
+
+## 8.0 What the Capture Path Actually Reads {#sec-8-0}
+
+Read this before designing a capture. The mechanism is simple and the trap in it is not.
+
+**The streamer reads `{INB, INA}` — the cog's input registers — not the pads.** For a plain input pin those are the same thing, and everything below is unnecessary. For a pin that is running a smart pin they are not: when a smart pin has a mode-related event it raises its IN signal to tell the cog that data is ready, data can be loaded, or a process has finished. On such a pin, **IN is the smart pin's handshake, not the wire's logic level**, and it is lowered by a `WRPIN`, `WXPIN`, `WYPIN`, `RDPIN` or `AKPIN` on that pin — not by anything the wire does.
+
+::: caution
+**Pointing a capture straight at a working SPI, serial or I²C bus records the wrong thing.** You get one bit per bus pin that sits low while a transfer is in flight and pulses high at each byte boundary — a transaction-completion trace. It is real data about the smart pin, and it is not the bus.
+
+Nothing errors. The command assembles, the streamer runs, and the hub buffer fills with plausible-looking bytes at exactly the expected rate. The only tell is that the data does not look like the protocol — which, without this rule, reads as a clocking or alignment mistake and costs a long afternoon.
+:::
+
+### Capturing a pin that is busy being a smart pin
+
+The fix is the mechanism, not a workaround. The `%AAAA` input selector exists so that a pin's logic can take its 'A' input from a neighbour — that is how P2 SPI is wired in the first place, with a data pin taking its clock from the pin next door. Capture uses the same routing in the same direction. The monitor pin is not a substitute for the bus pin; it is the only pin whose IN can carry the bus pin's level while the bus pin is busy.
+
+1. **Pick a monitor pin within ±3 of the bus pin.** That is the whole reach of the input selector; there is no way to route further.
+2. **Configure the monitor with its smart-pin mode off** — `%SSSSS` = `%00000` — and its A-input selector pointing back at the bus pin. Mode off is the condition under which the resultant 'A' drives IN at all.
+3. **Leave the monitor's `DIR` low.** It is an input and must not drive the net it is watching.
+4. **`WRFAST` from cog RAM to aim the FIFO at your buffer**, then start a Pins→WRFAST mode with `%w` set and the base pin at the monitor (or at the aligned base of the block containing it).
+5. **Read the buffer.** Each captured bit is the bus pin's level as the monitor's IN saw it.
+
+The selector constant names the offset **from the monitor to the bus pin**: a monitor at `bus_pin+1` selects relative −1 (`P_MINUS1_A`), a monitor at `bus_pin-2` selects relative +2 (`P_PLUS2_A`). The set runs `P_MINUS3_A`…`P_PLUS3_A`. `%BBBB` is untouched, so the monitor can still take a second signal on 'B' if something else needs it.
+
+::: hardware
+**`DIR` high is the output rule, not the capture rule.** §11.0 and §16.1 require `DIRH` because they *drive* pins — that is the streamer's output path. Capture is the input path: the monitor pin's `DIR` stays **low**. Raising it makes your monitor drive the net it is supposed to be watching.
+:::
+
+**Laying out more than one channel.** A four-wire bus needs four monitors, and the streamer captures one contiguous, aligned block. Place the monitors so they form a single aligned block of the width the capture mode needs — four monitors on an address that is a multiple of 4 for a 4-pin mode. Interleaving bus and monitor pins one-for-one wastes half the capture width on pins whose IN carries flags. The alignment is not advisory: §12.0's rule applies here, and an unaligned base neither rounds nor errors.
+
+`%FFF` applies input logic and any global filtering **after** the A/B selectors, and the resultant 'A' is what drives IN. Left at its default `%000` the path is unfiltered; any filter setting inserts flipflops in the sampled path.
+
+::: tip
+**What this guide does not establish.** We have no measured ceiling for sustained capture rate, and no figure for whether a filter selection delays one channel enough to skew it against another. Neither is stated here rather than estimated. Displaying a capture — the DEBUG `LOGIC` window, `LONGS_2BIT` unpacking, mask/match triggers — belongs to the *P2 Debug Window Manual*; note only that it offers **no protocol decoders**, so an I²C, SPI, UART or CAN trace is yours to interpret.
 :::
 
 ## 8.1 Pin Capture Modes
@@ -780,14 +815,18 @@ Here the pipe runs the other way. Instead of driving the pins, these modes *watc
 
 **D[23] = %w:** Must be 1 to enable WRFAST writes
 
-**Example.** **Pattern** — supply `capture_buffer` and `base`, and size the buffer for 1000 longs.
+::: hardware
+**Samples pack before they are written.** In the 1-, 2- and 4-pin modes a WFBYTE is done each time **8 bits of pin data accrue** — so a 1-pin mode writes one byte per 8 NCO rollovers, a 2-pin mode one per 4, a 4-pin mode one per 2. Size the buffer from that packed rate, not from the count field, or a 1-pin capture will over-allocate eightfold.
+:::
+
+**Example.** **Pattern** — supply `capture_buffer` and `base`, a multiple of 8 (§12.0), and size the buffer for 1000 longs.
 
 ```pasm2
 ' Capture 32 pins to Hub at 10 MHz
         wrfast  #0, ##capture_buffer
         setxfrq ##$0CCC_CCCC+1
 
-        xinit   ##X_32P_4DAC8_WFLONG | X_WRITE_ON + base<<17 + 1000, #0
+        xinit   ##X_32P_4DAC8_WFLONG | X_WRITE_ON | (base<<17) | 1000, #0
         waitxfi
 ```
 
@@ -820,7 +859,7 @@ These modes take their input from the cog's **four-channel scope**, so the pins 
         setscp  #%100_0000      ' D[6]=1 enable, D[5:2]=%0000 -> pin base 0
 
 ' Configure the ADC pin and ENABLE it
-        wrpin   ##P_ADC_1X, #adc_pin    ' gain matched to the coupling
+        wrpin   ##P_ADC_1X | P_ADC_SCOPE, #adc_pin  ' gain + ADC scope mode
         dirh    #adc_pin
 
 ' Capture 1024 ADC samples from scope channel 0
@@ -890,7 +929,7 @@ cos_acc += cos × m
 
 ## 10.3 The LUT Window {#sec-10-3}
 
-§10.2 gave the index as `LUT[NCO[30:22]]`. That is one case of eight. The `S[11:0]` field of the streamer command selects **how much** of the lookup RAM the NCO walks, **which part** of it, and **where in that part playback starts** — and the last of those is the field that performs the modulation this chapter's applications advertise.
+§10.2 gave the index as `LUT[NCO[30:22]]`. That is one case of eight. `S` carries three things: `S[19:16]` selects which block pins are **inverted**, `S[15:12]` selects which are **summed** — leave it zero and the analyzer accumulates zero, which §17.1 works through — and `S[11:0]`, the subject of this section, selects **how much** of the lookup RAM the NCO walks, **which part** of it, and **where in that part playback starts** — and the last of those is the field that performs the modulation this chapter's applications advertise.
 
 The top three bits pick the loop size. The nine bits below them split into region bits `%A` and offset bits `%T`, and the split moves as the loop size changes:
 
@@ -948,7 +987,7 @@ repeat i from 0 to 511
 :::
 
 ::: caution
-**SINC2 requires a *constant* iteration count per Goertzel cycle — a silicon limitation reported by the P2's designer.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise in the output. (Chip Gracey, the P2's designer, reported this constraint on 2024-12-16. It has not reached the released *Parallax Propeller 2 Documentation*, so do not expect to find it there.)
+**SINC2 requires a *constant* iteration count per Goertzel cycle — a silicon limitation reported by the P2's designer.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise in the output. (Chip Gracey, the P2's designer, reported this constraint on 2024-12-16; it is stated in the *Parallax Propeller 2 Documentation*, in its note of that date on Goertzel SINC2 mode.)
 
 Three ways to avoid it, most robust first:
 
@@ -958,6 +997,8 @@ Three ways to avoid it, most robust first:
 :::
 
 ## 10.6 Reading Results {#sec-10-6}
+
+`GETXACC` captures and clears both accumulators into holding registers, and the sine half arrives in the **next instruction's `S` operand** — which is what the `0-0` placeholder below receives. One read per streamer command is the contract: a second read with no command in between returns the same numbers, and a read taken *before* a command belongs to the previous one. §17.1 works the consequence through.
 
 **Pattern** — supply the `cos_result`, `sin_result`, `magnitude` and `phase` registers.
 
@@ -1096,7 +1137,7 @@ mode := X_RFBYTE_1P_1DAC1 | X_DACS_0_0_0_0 | X_PINS_ON + pin<<17 + count
 
 **Stereo Audio (two channels).** **Pattern** — supply `pin` and `count`. DAC3 and DAC2 are left at their `SETDACS` values.
 ```spin2
-mode := X_RFWORD_16P_2DAC8 | X_DACS_X_X_1_0 | X_PINS_ON + pin<<17 + count
+mode := X_RFWORD_16P_2DAC8 | X_DACS_X_X_1_0 | X_PINS_ON | (pin<<17) | count
 ```
 
 **Differential Output (noise rejection).** **Pattern** — supply `pin` and `count`. Both pins of the pair need §11.0 setup, and their low two bits must select DAC1 and DAC0.
@@ -1106,7 +1147,7 @@ mode := X_RFBYTE_1P_1DAC1 | X_DACS_X_X_0N0 | X_PINS_ON + pin<<17 + count
 
 **Four-Channel Video (RGB + sync).** **Pattern** — supply `pin` and `count`. All four pins need §11.0 setup; §15.1 works this arrangement through completely.
 ```spin2
-mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON + pin<<17 + count
+mode := X_RFLONG_32P_4DAC8 | X_DACS_3_2_1_0 | X_PINS_ON | (pin<<17) | count
 ```
 
 # Chapter 12: Pin Selection and Control {#ch-12}
@@ -1124,7 +1165,18 @@ Two rules govern every pin field in this chapter. Both are easier to state here,
 ::: caution
 **The shift is arithmetic, not a pin-field operator.** `pin<<17` is correct only when the low bits it lands in are pin bits *for that mode*. In the fewer-than-8-pin modes some of `D[19:17]` are DAC-configuration bits rather than pin bits (§12.2 gives the split per pin count), and in DDS/Goertzel the field is `D[22:19]` holding a four-pin block number — where `base<<17` sets that field correctly only when `base` is a multiple of four (§13.4). Check the field before reusing the shift.
 
-**At eight pins and wider, `D[19:17]` holds no pin bits at all**, so the operand must be a **multiple of 8** — a window base, not an arbitrary pin. An unaligned value there does not merely land on the wrong pins. Its low three bits fall into the mode's own `D[19:16]` template, and because the idiom composes with `+`, they *carry*: a 640-pixel `X_IMM_4X8_1DAC8` written with `pin = 20` assembles to a **different mode** (`X_IMM_4X8_4DAC2`) driving a **different window** (pins 31..24, not 23..16). Nothing warns you — both forms are legal arithmetic and both compile. Prefer `|` over `+` when composing a mode word, and use `+` only for a field you have checked is clear.
+**At eight pins and wider, `D[19:17]` holds no pin bits at all**, so the operand must be a **multiple of 8** — a window base, not an arbitrary pin. An unaligned value there does not merely land on the wrong pins. Its low three bits fall into the mode's own `D[19:16]` template, and because the idiom composes with `+`, they *carry*: a 640-pixel `X_IMM_4X8_1DAC8` written with `pin = 20` assembles to a **different mode** (`X_IMM_4X8_4DAC2`) driving a **different window** (pins 31..24, not 23..16). Nothing warns you — both forms are legal arithmetic and both compile.
+
+**The alignment rule, in full.** The base must be a multiple of the mode's pin width: **any pin** for the 1-pin modes, an **even** pin for 2-pin, a multiple of **4** for 4-pin, and a multiple of **8** for 8-pin and wider. DDS/Goertzel is the separate case above — a four-pin block number in `D[22:19]`, so a multiple of four.
+
+**Compose with `|`, and only after checking the alignment.** The two operators fail differently, and neither one rescues a base that is misaligned:
+
+| | What an unaligned base does |
+|---|---|
+| `+` | **carries** into `D[19:16]` — a different mode, at a different pin group |
+| `\|` | cannot carry, so the stray bits set bits the template already sets and the base **silently vanishes** — the transfer runs at the aligned address instead |
+
+So `|` is the *safer* operator and not a safe one: with `+` you get the wrong thing, with `|` you get the right thing for the wrong reason and learn nothing. Check the alignment first; then compose with `|` so a mistake cannot change the mode.
 :::
 
 ## 12.1 Pin Group Selection {#sec-12-1}
@@ -1165,7 +1217,7 @@ Within the 32-pin window chosen by the group field (§12.1), the D[19:17] region
 | `%110` | Pin 6 |
 | `%111` | Pin 7 |
 
-**2-Pin modes** — only D[19:18] select the pin pair; **D[17] is a DAC-config bit** (2DAC1 vs 1DAC2), not a pin bit:
+**2-Pin modes** — only D[19:18] select the pin pair; **D[17] is part of the mode template**, not a pin bit — it is what distinguishes `X_RFBYTE_2P_2DAC1` from `X_RFBYTE_2P_1DAC2`, so writing into it selects a different mode:
 
 | D[19:18] | Pin pair |
 |----------|----------|
@@ -1174,7 +1226,7 @@ Within the 32-pin window chosen by the group field (§12.1), the D[19:17] region
 | `%10` | Pins 5..4 |
 | `%11` | Pins 7..6 |
 
-**4-Pin modes** — only D[19] selects the pin group; **D[18:17] are DAC-config bits** (4DAC1 / 2DAC2 / 1DAC4), not pin bits:
+**4-Pin modes** — only D[19] selects the pin group; **D[18:17] are mode-template bits** (4DAC1 / 2DAC2 / 1DAC4), not pin bits — writing into them selects a different mode:
 
 | D[19] | Pin group |
 |-------|-----------|
@@ -1191,20 +1243,20 @@ Within the 32-pin window chosen by the group field (§12.1), the D[19:17] region
 
 ```spin2
 ' Pin output enabled
-mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON + pin<<17 + count
+mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON | (pin<<17) | count
 
 ' Pin output disabled (DACs only)
-mode := X_RFBYTE_8P_1DAC8 | X_PINS_OFF + pin<<17 + count
+mode := X_RFBYTE_8P_1DAC8 | X_PINS_OFF | (pin<<17) | count
 ```
 
 **Input Modes.** D[23] must be 1 to write to hub. **Pattern** — supply `pin` and `count`.
 
 ```spin2
 ' WRFAST enabled
-mode := X_32P_4DAC8_WFLONG | X_WRITE_ON + pin<<17 + count
+mode := X_32P_4DAC8_WFLONG | X_WRITE_ON | (pin<<17) | count
 
 ' WRFAST disabled (DACs only)
-mode := X_32P_4DAC8_WFLONG | X_WRITE_OFF + pin<<17 + count
+mode := X_32P_4DAC8_WFLONG | X_WRITE_OFF | (pin<<17) | count
 ```
 
 ## 12.4 Alternate Bit Order {#sec-12-4}
@@ -1217,12 +1269,12 @@ The %a bit in D[16] controls bit ordering for 1/2/4-bit modes:
 | 1 | MSB first | `X_ALT_ON` |
 
 ::: tip
-Use MSB-first (`X_ALT_ON`) for SPI protocols that transmit MSB first.
+Use MSB-first (`X_ALT_ON`) for SPI protocols that transmit MSB first — **but only in the 1-, 2- and 4-bit-per-sample modes**. The `%a` bit reorders bits *within* a sub-byte group, and an 8-bit-per-transfer capture has no such grouping, so `X_ALT_ON` does nothing to it. In an 8-bit mode, reorder after the fact (`REV` or `MOVBYTS`) or pick a mode whose grouping `%a` reaches.
 :::
 
 # Chapter 13: Programming Constants
 
-You rarely build a command word bit by bit. Instead you OR together named constants, such as `X_RFWORD_RGB16`, `X_PINS_ON` and `X_DACS_3_2_1_0`, and the compiler assembles the value for you. This chapter is the catalog of those built-in symbols and shows how they compose. Skim it once to learn the naming pattern; after that the names read almost like sentences.
+You rarely build a command word bit by bit. Instead you OR together named constants, such as `X_RFWORD_RGB16`, `X_PINS_ON` and `X_DACS_3_2_1_0`, and the compiler assembles the value for you. This chapter covers the symbols this book uses and shows how they compose; [Appendix A](#app-a) and [Appendix B](#app-b) carry the complete set. Skim it once to learn the naming pattern; after that the names read almost like sentences.
 
 ## 13.1 Mode Symbols {#sec-13-1}
 
@@ -1239,12 +1291,12 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 
 | Symbol | Value | Description |
 |--------|-------|-------------|
-| `X_IMM_32X1_1DAC1` | `%0100 << 28` | 32×1-bit, 1-pin |
-| `X_IMM_16X2_2DAC1` | `%0101 << 28` | 16×2-bit, 2-pin |
-| `X_IMM_16X2_1DAC2` | `%0101 << 28 + 2<<16` | 16×2-bit, 2-pin |
-| `X_IMM_8X4_4DAC1` | `%0110 << 28` | 8×4-bit, 4-pin |
-| `X_IMM_8X4_2DAC2` | `%0110 << 28 + 2<<16` | 8×4-bit, 4-pin |
-| `X_IMM_8X4_1DAC4` | `%0110 << 28 + 4<<16` | 8×4-bit, 4-pin |
+| `X_IMM_32X1_1DAC1` | `%0100 << 28` | 32×1-bit → 1 pin, 1 DAC ch × 1 bit |
+| `X_IMM_16X2_2DAC1` | `%0101 << 28` | 16×2-bit → 2 pins, 2 DAC ch × 1 bit |
+| `X_IMM_16X2_1DAC2` | `%0101 << 28 + 2<<16` | 16×2-bit → 2 pins, 1 DAC ch × 2 bits |
+| `X_IMM_8X4_4DAC1` | `%0110 << 28` | 8×4-bit → 4 pins, 4 DAC ch × 1 bit |
+| `X_IMM_8X4_2DAC2` | `%0110 << 28 + 2<<16` | 8×4-bit → 4 pins, 2 DAC ch × 2 bits |
+| `X_IMM_8X4_1DAC4` | `%0110 << 28 + 4<<16` | 8×4-bit → 4 pins, 1 DAC ch × 4 bits |
 
 **RDFAST → Pins/DACs:**
 
@@ -1286,6 +1338,8 @@ You rarely build a command word bit by bit. Instead you OR together named consta
 | `X_ALT_OFF` | `%0 << 16` | LSB first |
 | `X_ALT_ON` | `%1 << 16` | MSB first |
 
+`X_PINS_ON` and `X_WRITE_ON` are the **same bit**. D[23] is one enable whose meaning follows the mode — pin output in the output modes, WRFAST in the capture modes — so they are not two independent controls, and setting "both" sets one bit once.
+
 ## 13.3 DAC Symbols {#sec-13-3}
 
 | Symbol | Value | Configuration |
@@ -1315,7 +1369,7 @@ Build complete commands by combining symbols:
 
 ```spin2
 ' VGA 640-pixel visible line
-mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 + vga_base<<17 + 640
+mode := X_RFWORD_RGB16 | X_PINS_ON | X_DACS_3_2_1_0 | (vga_base<<17) | 640
 
 ' SPI byte output (MSB first)
 mode := X_IMM_32X1_1DAC1 | X_PINS_ON | X_ALT_ON + spi_pin<<17 + 8
@@ -1643,7 +1697,7 @@ blank           call    #hsync
 ' #0 = blank (0 V); #1 is a PLACEHOLDER sync level — replace #0/#1 with
 ' your hardware's calibrated blank and sync DAC values.
 hsync           xcont   m_front, #0               ' 16px front porch
-                xcont   m_sync,  #1               ' 96px hsync pulse
+                xzero   m_sync,  #1               ' 96px hsync, phase zero
           _ret_ xcont   m_back,  #0               ' 48px back porch
 
 ' Immediate level mode X_IMM_1X32_4DAC8 ($7001_0000) | X_DACS_3_2_1_0
@@ -1668,7 +1722,7 @@ y               res     1
 framebuffer     long    0[640*350/2]
 ```
 
-> For a worked reference using this general approach, see Eric R. Smith's VGA driver (Parallax OBEX #2847).
+> For a worked reference using this general approach, see Eric R. Smith's *VGA Text routines* (Parallax OBEX #2847).
 
 ## 15.2 HDMI/DVI Output {#sec-15-2}
 
@@ -1893,7 +1947,7 @@ Goertzel analysis reports how much of one chosen frequency is present in an inco
 
 ### The input is a four-pin block, not a pin
 
-The command's `D[22:19]` field selects a **block of four pins**; the block's base pin is `%pppp` × 4 (documented behaviour — the P2 datasheet and the *Parallax Propeller 2 Documentation v35 - Rev B/C* state the block arithmetic). The block is only half the selection. The **`S` operand chooses what happens to those four pins**:
+The command's `D[22:19]` field selects a **block of four pins**; the block's base pin is `%pppp` × 4 (documented behaviour — the *Parallax Propeller 2 Documentation v35 - Rev B/C* states the block arithmetic). The block is only half the selection. The **`S` operand chooses what happens to those four pins**:
 
 | `S` field | Purpose |
 |-----------|---------|
@@ -1901,7 +1955,7 @@ The command's `D[22:19]` field selects a **block of four pins**; the block's bas
 | `S[19:16]` | which of the four are **inverted** (lets a channel be subtracted) |
 | `S[11:0]` | loop size and LUT window |
 
-**`S[15:12]` = 0 sums nothing, and the analyzer accumulates zero.** This is the single most common way to build a Goertzel detector that appears completely dead: everything else is correct, the command issues, the loop runs, and every magnitude is noise. Supplying `S` is not optional.
+**`S[15:12]` = 0 sums nothing, and the analyzer accumulates zero.** It is an easy detector to build and a hard one to diagnose: everything else is correct, the command issues, the loop runs, and every magnitude is noise. Supplying `S` is not optional.
 
 Each selected pin contributes ±1 per clock — an input `0` counts as −1 and a `1` as +1. Where two or four channels are summed, the total is always even and is shifted right one bit.
 
@@ -2315,7 +2369,7 @@ Values are `$8000_0000 * pixel_rate / clock_frequency`, **truncated, then increm
 
 **Check:**
 
-1. **`S[15:12]`, the summed-pins field, is not zero.** Zero sums nothing, so the accumulators never move and every magnitude reads as noise — the single most common way to build a detector that appears completely dead, with everything else correct and the loop running (§17.1)
+1. **`S[15:12]`, the summed-pins field, is not zero.** Zero sums nothing, so the accumulators never move and every magnitude reads as noise, with everything else correct and the loop running (§17.1)
 2. **The input pin is RAW — do not enable it.** Goertzel reads a raw delta-sigma bitstream: **WRPIN** an ADC gain constant with the smart-pin mode field at `%00000`, and **leave DIR low**. A smart pin left enabled there accumulates nothing at all. That is the reverse of §9.2's scope-fed ADC modes, which read a smart pin's result and *do* require `DIRH` — so a pin configured the §9.2 way produces exactly this symptom (§17.1)
 3. **Gain matches the coupling.** A high-gain constant such as `P_ADC_100X` saturates on a directly-wired signal and reads a constant; it suits a capacitively-coupled touch pad. A directly-coupled signal wants low gain (§17.1)
 4. LUT contains signed sine/cosine values

@@ -340,6 +340,37 @@ owed for it alone.
 
 ---
 
+## `fancyhdr` headheight is 12pt where the package needs 13.6pt (cross-manual, platform) — OPEN
+
+**Found 2026-09-21** during the Streamer Guide v1.1.2 prepare, by reading the compile log rather than
+trusting its exit code. The v1.1.1 build's log carries the warning **267 times** — once per page that
+sets a header:
+
+```
+Package fancyhdr Warning: \headheight is too small (12.0pt):
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+```
+
+The build succeeds and the PDF renders, so this has been shipping quietly. It was on **no punch list**
+— the first thing to establish is whether it is cosmetic (fancyhdr reserving less box than it draws
+into, usually invisible) or whether a header is actually clipping on some page. Read a rendered page,
+do not reason about it from the log.
+
+**Why it was NOT fixed inside the v1.1.2 content release.** The fix is one line in a **shared**
+platform `.sty`, and it moves page geometry (`\headheight` up, `\topmargin` compensated down) for
+**every manual at once**. Changing shared geometry unverified, in the middle of a content-correctness
+release, is the shape of change that damages a working thing. It needs its own render and its own
+before/after page comparison.
+
+**Expiry (this is a carve-out, not a deferral):** the next deliberate `platform/` change, or the next
+platform-verification render, whichever comes first. At that point: raise `\headheight`, compensate
+`\topmargin`, render one manual, compare page count and header placement before/after, then re-stage
+the platform to the manual store (which will re-hash and re-deploy it to every manual on their next
+build).
+
 ## Front-matter `\markboth{}{}` missing in four manuals — OPEN
 
 **Status:** ⏳ Open — relocated here 2026-08-15 from a stale auto-memory during the Sprint-2
