@@ -16,7 +16,7 @@
 | **Stage a manual for PDF** | **`prepare-manual`** skill | refresh from opus-master → LaTeX-escape → stage only changed files to outbound |
 | **Test a template / layout / diagram** | **`forge-test`** skill | interactive daemon round-trip; read the compile log + render pages yourself |
 | **Generate the production PDF** | PDF Forge (user deploys `outbound/` → the manual store) | two separate Forge stores — interactive vs. manual-production |
-| **Changelog** | **`audit-changelog`** skill + `methodology/changelog-style-guide.md` | voice + commit-traceability |
+| **Changelog** | **`audit-changelog`** skill + `central:changelog-voicing` §1–§4 (voice) + `methodology/changelog-style-guide.md` (class-3 shape) | voice + commit-traceability |
 | **Release to deliverables** | **`release-manual`** skill | verify the PDF (silent-drop guard) → promote CHANGELOG + README index → record ledger/roster → suggest git |
 | **Model choice** | **`model-strategy`** skill / `pipelines/claude-model-selection-strategy.md` | (the old "Opus 4.1 / Sonnet 4 / Haiku 3.5" note here was obsolete) |
 

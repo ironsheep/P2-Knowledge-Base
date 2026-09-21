@@ -1,57 +1,31 @@
-# Changelog Style Guide
+# Changelog Style Guide — the class-3 profile
 
 Style conventions for all changelog entries in the P2 Knowledge Base. Applies to every manual's `CHANGELOG.md`, the repo's top-level `CHANGELOG.md`, and any other release-tracked changelog in this project.
 
----
+## What this file is, and what it is not
 
-## Core Principles
+**The voice rules are not here. They are in `~/.claude/skills-docs/guides/changelog-voicing.md` §1–§4, and that guide governs.** This file is the **class-3 (published document) profile** — the part `changelog-voicing.md` §5 declares an *unauthored stub* and explicitly delegates to the project:
 
-1. **Optimistic, forward-looking voice** - Changelogs describe what users have NOW, not what was wrong before. The doc tells readers what they're getting; it doesn't recount internal history. Tone is marketing copy, not a confession booth.
-2. **Terse over verbose** - State what the document delivers, not commentary about it
-3. **User-focused** - Include only what users care about
-4. **No implementation details** - Omit root causes, debugging info, internal processes
-5. **Aggregate corrections** - Group related improvements into themes rather than itemizing each one
+> "A class-3 project therefore keeps its local guide. Take a `central:changelog-voicing` row for the shared core (§1–§4), keep the local file as the class-3 profile under its own row, and trim it to what this guide does not carry."
 
----
+So: **read both.** Central for how a changelog sounds and what qualifies; this file for the shape a *document's* changelog takes — its Part-based sections, its entry formats, its length budget, and the handful of exclusions that only exist because the artifact is a manual rather than a program.
 
-## Never describe prior wrong state
+**Rules that used to live here and now live in central** — deleted rather than duplicated, because two copies of a rule are two rules that will disagree:
 
-Even when an entry documents work that corrected or refined something, the bullet describes the CURRENT state — never the prior state, never the delta. Banned phrases include:
+| Was here | Now |
+|---|---|
+| Never describe prior wrong state | §4.4 Prior state — and it is **stronger** there: it rules on "no longer" per class (banned for class 3, required for code classes) |
+| Never-shipped versions are never mentioned | §1.7 — also covers `[Unreleased]` sections |
+| Initial releases describe the document, not a delta | §3.1 The initial-release entry |
+| Aggregate into themes | §1.2 |
+| Use current-state language | §4.4 |
+| The two-question gate | §4.1 The gate |
+| Core principles (voice, terseness, user focus, no implementation detail) | §1.1, §4.2, §4.6, §4.7 |
 
-- "corrected from X to Y"
-- "previously incorrectly stated"
-- "was misrepresented as"
-- "had drift"
-- "before this fix"
-- "fixed where wrong"
-- "no longer ..."
-- "removed incorrect ..."
+**Class-3 specialisations of those central rules**, which central states generically and this class states concretely:
 
-If the only way you can describe a change is by reference to what it WAS, the change doesn't belong in the changelog. Either reframe as a current capability ("X behavior documented", "Y is N") or omit.
-
----
-
-## Never-shipped versions are never mentioned
-
-Drafts, planning entries, "Upcoming" markers, internal alpha versions, and version numbers assigned but never tagged for release do NOT appear in the public changelog. For users, they never existed. Skipped semver numbers (e.g., 1.0 → 1.4 with no 1.1/1.2/1.3 entries) need no explanation — users don't track our internal numbering.
-
-Corollary: never write a `[X.Y.Z-skipped]` or `(Upcoming)` entry. If a version number was never released, delete any artifact referencing it.
-
----
-
-## Initial releases describe the document, not a delta
-
-A first / initial release has no prior published baseline to change against. Two consequences:
-
-1. **No delta section headings.** Do NOT use `### Added`, `### Changed`, or `### Fixed` — they describe a *delta* from a previous release, and there is nothing before an initial entry. The entry simply **IS** the document.
-2. **No table-of-contents recitation.** Do NOT itemize the chapters/sections one by one — the document's own ToC already does that, and repeating it adds nothing for the reader. State **holistically** what the document is: its purpose, who it's for, and its scope.
-
-So an initial-release entry is a short, current-state **description of the document** — a release theme, plus at most a line on what makes it distinctive — not a delta and not a chapter list.
-
-- ✅ Initial: `**Initial release for community review.** <one–three sentences: what the document is, its role, what's distinctive>.`
-- ❌ Initial: an `### Added` heading; a bullet per chapter.
-
-Delta sections (`### Added` / `### Changed` / `### Fixed`) and per-item bullets belong only on a release that **follows** a prior published version, where they describe what changed since it. (An initial entry is identified as the **only** `## v...` entry in the file, or the one whose predecessor has no public README/tag baseline.)
+- §3.1's *"no feature recitation"* is, for a document, **no table-of-contents recitation** — do not itemize chapters; the document's own ToC already does that. State holistically what the document is.
+- §3.1's delta headings, in this project's vocabulary, are `### Added` / `### Changed` / `### Fixed`. An initial entry uses none of them. It is identified as the **only** `## v…` entry in the file, or the one whose predecessor has no public README/tag baseline.
 
 ---
 
@@ -65,18 +39,13 @@ Delta sections (`### Added` / `### Changed` / `### Fixed`) and per-item bullets 
 
 ## What to Exclude
 
+Central §4.2 carries the generic exclusions — root causes, debugging detail, before/after comparisons, internal regressions fixed before release, and anything a user could not have hit in a shipped release. Not repeated here. **What follows exists only because the artifact is a document:**
+
 - Voice/style consistency audits
-- Root cause explanations
-- Before/after comparisons (just state current state)
 - "Key finding" editorial statements
-- Internal process notes
-- Debugging details
 - Pipeline/tooling implementation details (Lua filters, LaTeX workarounds)
 - Trivial visual changes (symbol standardization, minor formatting)
-- Internal regressions fixed before release (if v1.2 worked, v1.3 works, no entry needed)
 - **Internal housekeeping** — broken cross-reference fixes, drift between artifacts (badges, version files, manifests), file reorganization, deduplication
-- **Corrections with no user-discoverable impact** — if a user couldn't have hit the problem in shipped material, the fix doesn't belong here
-- **Never-shipped planning artifacts** — see "Never-shipped versions" above
 - **Style/voice/discipline changes to internal documentation** — methodology refinements, internal process notes
 - **Skill / tooling updates that only affect authoring workflow** — unless they produced user-visible improvement worth naming on its own terms
 
@@ -105,37 +74,7 @@ Many releases have nothing that qualifies for `### Fixed`. An empty `### Fixed` 
 
 ---
 
-## Framing Corrections
-
-Changelogs communicate strength: what users now have. Aggregate by theme; describe current capability.
-
-### Aggregate into Themes
-
-Instead of listing each item, summarize the area:
-
-```markdown
-# Avoid - itemizes prior problems
-- LUT timing: "single-cycle" → "3 clock cycles"
-- CALLA/CALLB timing: "14-32" → "13+ cycles"
-- Hub access timing: "9-16" → "9-26 clocks"
-
-# Prefer - describes the result
-- Timing values aligned with silicon documentation
-```
-
-### Use Current-State Language
-
-```markdown
-# Avoid - exposes prior state
-- REP cannot nest (was incorrectly documented as nestable)
-- Removed incorrect "Hub Slot Synchronization" section
-
-# Prefer - states current reality
-- REP: Hardware constraints documented
-- (omit removed content - users never saw it)
-```
-
-### Section Structure for Mixed Releases
+## Section Structure for Mixed Releases
 
 When a release has both new content and accuracy improvements:
 
@@ -223,6 +162,8 @@ Examples:
 
 ## Length Guidelines
 
+**This table narrows central §4.7 for class 3; where they differ, this one governs for a document's changelog.** Central's "with detail" tier is 10–30 words because §4.5 (name the trigger) makes it structurally two clauses, and it exempts breaking changes up to 45. Neither applies here: a published document has no breaking changes to recover from and no runtime exposure to date, so the tier collapses back to 10–20 and the 25-word maximum is absolute.
+
 | Entry Type | Target Length |
 |------------|---------------|
 | Simple addition | 5-10 words |
@@ -250,17 +191,8 @@ Parenthetical explanations: 10 words maximum.
 
 ---
 
-## Two-question gate before including any entry
-
-Before adding an entry to the changelog, ask:
-
-1. **Does this describe a current capability or quality the document HAS?** (Not "had", not "now has after a fix" — just IS.)
-2. **Could a user have been positively affected by this change appearing?**
-
-If you can't answer YES to both, exclude the entry.
-
----
-
 ## Reference
 
 Model entry: most recent semver entry in the top-level `CHANGELOG.md`.
+
+**The gate before including any entry is central §4.1**, and it is the last thing to run over a drafted entry. It is not restated here.

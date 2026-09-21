@@ -393,6 +393,44 @@ does not re-open it.
 
 ---
 
+## `DOC_AUDIT_COMMAND` has been RED at 1 finding, and the finding may be the instrument — OPEN
+
+**Status:** ⏳ Open — surfaced 2026-09-21 by «#216» (the changelog-guide trim), which had to take
+the gate's baseline before editing and found it already failing. **Not caused by that task, and
+its delta was zero** — the finding is byte-identical before and after.
+
+```
+D1 — RESTATED VOICE RULE
+  engineering/document-production/app-notes/APP-NOTE-VOICE-GUIDE.md:185
+      voice-comparison cell states a blanket hedging verdict
+```
+
+**Why this needs a ruling rather than an edit.** The cited line is inside the guide's **per-note
+audit-record table** — a row recording what the P2AN002 audit found (*"R1 exemplary throughout —
+'roughly seven' is the model: a hedge that names its own arithmetic"*), together with the lesson
+that two of the three originally-quoted phrases were later withdrawn. So either:
+
+- **the guide is at fault** — an audit record that explains *why* a hedge was good is restating R1
+  outside the catalog, which is exactly what D1 forbids, and the cell should be reduced to the
+  verdict plus a catalog pointer; **or**
+- **the instrument is at fault** — D1's scope should exclude audit-record tables, which report a
+  past *decision* rather than stating a rule, the same shape as the ADC gate reading mode 11010's
+  `X[1:0]` map as an X[5:4] binding («#346»).
+
+D2 says suspect the measurement first, and that is the order to take it in. **Do not "fix" it by
+rewording the record** until that question is answered — the cell is history, and rewriting history
+to satisfy a detector is the worse of the two outcomes.
+
+**Why it matters beyond one line:** `DOC_AUDIT_COMMAND` is a **gated surface** — `skill-conventions.md`
+marks it `strength: gate` and requires 0 findings. A gate that has been red for some time is a gate
+everyone has learned to read past, which is the *running and disbelieved* state that costs more than
+a deleted gate, because a deleted gate is visible in the diff.
+
+**Trigger:** take it with the next app-note voice pass, or with «#217» if that task ends up in the
+same instrument family. Settle the scope question first, then act on whichever side is wrong.
+
+---
+
 ## Guide-conformance instrument — standards-tree coverage — OPEN
 
 **Status:** ⏳ Open — deferred 2026-08-15 by Stephen's decision on the Sprint-2 planning
