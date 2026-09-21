@@ -111,7 +111,7 @@ pasm2_complete: |
   nco_pin       LONG  48
   nco_mode      LONG  P_NCO_FREQ | P_OE
   clkf          LONG  200_000_000  ' `clkfreq` is RESERVED and cannot name a symbol;
-                                   ' keep this equal to _clkfreq, or RDLONG hub $14
+                                   ' keep this equal to _clkfreq, or RDLONG hub $44
   
   ' Generate specific frequency
   gen_frequency

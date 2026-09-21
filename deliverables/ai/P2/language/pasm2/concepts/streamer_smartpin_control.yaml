@@ -19,7 +19,7 @@ streamer_system:
     modes:
       - "Hub to pins (output)"
       - "Pins to hub (input)"
-      - "LUT to pins (via colorspace)"
+      - "LUT to pins (the streamer indexes lookup RAM)"
       - "NCO frequency generation"
     
   streamer_commands:

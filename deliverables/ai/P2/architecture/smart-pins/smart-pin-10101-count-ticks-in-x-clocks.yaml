@@ -71,7 +71,7 @@ code_examples:
         org
         dirl    #signal_pin                      ' Reset smart pin
         wrpin   ##P_COUNTER_TICKS, #signal_pin
-        rdlong  clkf, #$14                       ' clkfreq lives at hub long $14
+        rdlong  clkf, #$44                       ' clkfreq lives at hub long $44
         qdiv    clkf, #10
         getqx   window                           ' 100ms minimum window
         wxpin   window, #signal_pin

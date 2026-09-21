@@ -65,9 +65,12 @@ data_paths:
     setup: "WRFAST instruction before streamer command"
     
   rgb_video:
-    description: "Hub data through colorspace converter"
+    description: "Hub pixels unpacked by the streamer into R, G, B on the way to
+      the pins. The cog's colorspace converter is a SEPARATE downstream stage that
+      transforms the DAC channels; it is not part of this path and needs no
+      configuration for these modes."
     modes: "RGB modes (%1011 with config)"
-    setup: "RDFAST + colorspace converter config"
+    setup: "RDFAST before the streamer command"
     
   dds_goertzel:
     description: "Waveform synthesis with frequency analysis"

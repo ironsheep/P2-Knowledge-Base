@@ -206,7 +206,7 @@ frequency:
   example: |
     ' Detect 40 kHz at 200 MHz clock:
     ' frequency = $8000_0000 * 40000 / 200000000
-    rdlong  clkf, #$14         ' clkfreq lives at hub long $14
+    rdlong  clkf, #$44         ' clkfreq lives at hub long $44
     qfrac   ##40000, clkf      ' QFRAC = 2^32 * 40000/clkfreq
     getqx   xfrq
     shr     xfrq, #1           ' halve to 2^31 scaling for the NCO
@@ -265,7 +265,7 @@ usage_pattern:
     wrpin   ##P_ADC_1X, #adc_pin
 
     ' 3. Set the streamer NCO frequency (2^31 scaling — see `frequency:` above)
-    rdlong  clkf, #$14             ' clkfreq lives at hub long $14
+    rdlong  clkf, #$44             ' clkfreq lives at hub long $44
     qfrac   target_freq, clkf      ' 2^32 * target/clkfreq
     getqx   xfrq
     shr     xfrq, #1               ' halve to the NCO's 2^31 scaling

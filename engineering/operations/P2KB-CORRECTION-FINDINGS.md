@@ -58,7 +58,19 @@ Filed here rather than fixed in the manual because the manual states both facts 
 defect is in the shipped YAML. **Neither carries a manual edit** — the audit report records both
 sites as verified-correct so a later pass does not "correct" them.
 
-### F-445 — `clkfreq` lives at hub long `$44`, and nine shipped KB files say `$14` — `CONFIRMED`
+### F-445 — `clkfreq` lives at hub long `$44`, and nine shipped KB files say `$14` — `PENDING-VALIDATION — applied 2026-09-21; validation is the next KB release`
+
+> **Applied 2026-09-21.** All nine sites corrected to `#$44` / `hub long $44` (eight PASM2 code
+> lines + the one prose line in `smart-pin-00110-nco-frequency.yaml:114`). Source trace:
+> `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:358` and `:1731`.
+> **Class swept, not just the reported sites:** grepped `deliverables/ai/P2/` for every other
+> hard-coded hub-address constant in example code — `rdlong`/`wrlong` against a low hub address,
+> and any `clkmode` constant. **None found**, so the class is exactly these nine. Control: the
+> same grep shape located all nine `#$14` sites, and returned zero `#$44` sites, confirming the KB
+> was uniformly wrong rather than mixed. Gates after the edit: `verify-yaml-format` 10/10 clean;
+> `validate-crossref-keys` 3780/3780, 100%. **No manual edit** — the Streamer Guide's
+> `:1748`/`:1820` were already correct and are recorded as verified-correct in
+> `audit/periodic-audit-2026-09-21.md` §0 so a later pass does not "correct" them.
 
 Nine files in `deliverables/ai/P2/` carry the PASM2 line `rdlong clkf, #$14` with the comment
 *"clkfreq lives at hub long $14"*. The address is wrong.
@@ -102,7 +114,28 @@ matching prose at `smart-pin-00110-nco-frequency.yaml:114`.
 > and still reached the wrong verdict, because the control tested its *search*, not its *truth root*.
 > Applying the returned fix would have broken two working programs that readers copy.
 
-### F-446 — the colorspace converter is not in the streamer's RGB data path — `CONFIRMED`
+### F-446 — the colorspace converter is not in the streamer's RGB data path — `PENDING-VALIDATION — applied 2026-09-21; validation is the next KB release`
+
+> **Applied 2026-09-21.** `modes-reference.yaml:89` → `"Hub FIFO → RGB unpack → Pins/DACs"`.
+> `overview.yaml` `rgb_video` rewritten to state that the streamer does the unpack and that the
+> cog's colorspace converter is a **separate downstream stage** which these modes do not configure;
+> its `setup:` line dropped the converter and now reads `"RDFAST before the streamer command"`.
+> Source trace: `silicon-doc-text.txt:1478` (the `RDFAST ⇢ RGB ⇢ Pins/DACs` path, streamer does the
+> `{R,G,B,0}` translation) and `:1849`/`:1855-1858` (converter is a per-cog DAC-channel stage set by
+> `SETCY`/`SETCI`/`SETCQ`/`SETCFRQ`).
+>
+> **Evidence scoping — the finding was WIDENED from two files to three.** The audit named two;
+> sweeping `deliverables/ai/P2/` for "colorspace" found a third carrying the same conflation:
+> `language/pasm2/concepts/streamer_smartpin_control.yaml:22` listed a streamer mode as
+> `"LUT to pins (via colorspace)"`. The LUT family reaches the pins by the streamer indexing lookup
+> RAM, not through the converter; corrected to `"LUT to pins (the streamer indexes lookup RAM)"`.
+> All other "colorspace" hits are correct and were left untouched — the five `SETCx` instruction
+> pages and `PASM2-ENCODING-REFERENCE.md` describe it as its own unit, and `getbrk.yaml:21` /
+> `debug_interrupt.yaml:190` in fact **corroborate** this finding by giving the cog status register
+> **separate** bits for `D[22] colorspace converter active` and `D[21] streamer active`.
+>
+> Gates after the edit: `verify-yaml-format` clean; `validate-crossref-keys` 3780/3780. **No manual
+> edit** — the Streamer Guide's `:508` was already correct.
 
 `architecture/streamer/modes-reference.yaml:89` describes the RGB video family as
 *"Hub FIFO → **Colorspace converter** → Pins/DACs"*, and `architecture/streamer/overview.yaml:69-70`

@@ -86,7 +86,7 @@ categories:
     
   rgb_video:
     range: "%1011 + config"
-    description: "Hub FIFO → Colorspace converter → Pins/DACs"
+    description: "Hub FIFO → RGB unpack → Pins/DACs"
     
   capture:
     range: "%1100-%1111"

@@ -61,7 +61,7 @@ code_examples:
         org
         dirl    #step_pin                        ' Reset smart pin
         wrpin   ##P_REG_UP_DOWN | P_PLUS1_B, #step_pin
-        rdlong  clkf, #$14                       ' clkfreq lives at hub long $14
+        rdlong  clkf, #$44                       ' clkfreq lives at hub long $44
         qdiv    clkf, #10
         getqx   window                           ' 100ms periods
         wxpin   window, #step_pin
