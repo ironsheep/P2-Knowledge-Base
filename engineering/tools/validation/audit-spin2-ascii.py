@@ -66,6 +66,7 @@ FIX
 
 import argparse
 import pathlib
+import re
 import sys
 import unicodedata
 
@@ -232,6 +233,77 @@ def context_mask(text):
     return mask
 
 
+# ---------------------------------------------------------------------------
+# Sec 2.1 -- No single-letter variable names.  ADVISORY, not blocking.  («#217»)
+#
+# WHY ADVISORY AND NOT A GATE.  Measured 2026-09-21 before arming: **168
+# single-letter identifiers across 79 of 145 audited files**, and 77 of those
+# sit in `examples-library/` -- a tree whose files are BYTE-IDENTICAL to the
+# code blocks printed in released PDFs (the identity gate asserts it). Arming
+# this as blocking would therefore either break that identity or force renames
+# inside published manual pages. That is a scope decision Stephen owns, not one
+# an instrument makes for him, so the check REPORTS and the exit code ignores it
+# until he rules.
+#
+# The guide's own exceptions need no code: PASM2 register names (`pa`, `pb`,
+# `ptra`), type-prefixed shorts (`pStr`, `pBuf`) and `idx` are all longer than
+# one character, so "length == 1" is the whole mechanical rule.
+#
+# This project also carries a recorded carve-out (`skill-conventions.md`): Sec 2.1
+# yields to cross-chapter continuity where a later chapter grows an earlier
+# chapter's program. A file may declare that with a waiver comment:
+#     ' {spin2-2.1-waiver: <reason>}
+SIG_RE = re.compile(
+    r"^(PUB|PRI)\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^|]*))?\s*(?:\|(.*))?$")
+WAIVER_RE = re.compile(r"\{spin2-2\.1-waiver:", re.IGNORECASE)
+
+
+def audit_single_letter_names(path: pathlib.Path):
+    """Return [(lineno, name, signature)] for Sec 2.1. Advisory."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return []
+    if WAIVER_RE.search(text):
+        return []
+    out = []
+    for lineno, line in enumerate(text.splitlines(), 1):
+        m = SIG_RE.match(line.strip())
+        if not m:
+            continue
+        names = []
+        for grp in (m.group(3), m.group(4), m.group(5)):
+            if grp:
+                names += [n.strip() for n in grp.split(",")]
+        for n in names:
+            n = n.split("[")[0].strip()
+            if len(n) == 1 and n.isalpha():
+                out.append((lineno, n, line.strip()[:88]))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# T1 COVERAGE -- what this instrument does NOT check, said out loud.
+#
+# `central:spin2-authoring-guide` tiers every rule on its own heading. T1 means
+# script-checkable, which is what a gate command runs. The guide carries **31**
+# T1 rules; this instrument implements **two** of them. Central v12's ruling is
+# that a gate reports three things -- what passed, what it did not check, and
+# **which assigned-T1 rules are still unimplemented** -- because that third one
+# hides: an unimplemented T1 rule looks exactly like a rule with nothing to say.
+T1_IMPLEMENTED = {
+    "1.1": "ASCII only (blocking)",
+    "2.1": "no single-letter names (ADVISORY -- see the note above)",
+}
+T1_NOT_IMPLEMENTED = {
+    "3.1.1": "{Spin2_v##} directive -- NOT derivable today; see the finding below",
+    "6.2": "no local redefinition of an object constant -- population is 4 files "
+           "in this corpus (examples, not a driver library); central's reference "
+           "implementation assumes a driver+test repo shape this project is not",
+    "other": "26 further T1 rules carry no instrument here",
+}
+
+
 def audit_file(path: pathlib.Path):
     """Return a list of (lineno, col, char, reason, suggestion)."""
     hits = []
@@ -312,7 +384,9 @@ def main() -> int:
 
     total = 0
     by_ctx = {}
+    advisory = []          # Sec 2.1 -- reported, never added to `total`
     for f in files:
+        advisory += [(f,) + h for h in audit_single_letter_names(f)]
         hits = audit_file(f)
         if not hits:
             continue
@@ -336,6 +410,36 @@ def main() -> int:
             for g in roots_used:
                 print(f"  {g}")
             print("excluded by rule: " + ", ".join(p.strip('/') for p in EXCLUDE_PARTS))
+    # Sec 2.1 -- ADVISORY. Printed in full, counted separately, and deliberately
+    # NOT folded into `total`: it must not flip this gate red until Stephen has
+    # ruled on arming it (see the note beside audit_single_letter_names).
+    if advisory and not args.quiet:
+        shown = advisory if args.list_files else advisory[:15]
+        print(f"\nADVISORY -- Sec 2.1 single-letter names: "
+              f"{len(advisory)} site(s) across "
+              f"{len({a[0] for a in advisory})} file(s). NOT blocking.")
+        for f, lineno, name, sig in shown:
+            rel = f.relative_to(root) if root in f.resolve().parents else f
+            print(f"  {rel}:{lineno}: {name!r}  |  {sig}")
+        if len(shown) < len(advisory):
+            print(f"  ... {len(advisory) - len(shown)} more "
+                  f"(use --list-files to see every site)")
+        print("  Arming this as blocking is a scope decision: most sites are in "
+              "examples-library/,")
+        print("  whose files are byte-identical to code printed in released "
+              "PDFs.")
+
+    # Coverage. A gate that reports only what it caught invites the reader to
+    # believe it looked at everything.
+    if not args.quiet:
+        print("\nT1 COVERAGE (central:spin2-authoring-guide tiers its own rules; "
+              "31 are T1):")
+        for sec, what in T1_IMPLEMENTED.items():
+            print(f"  implemented    Sec {sec:<6} {what}")
+        for sec, what in T1_NOT_IMPLEMENTED.items():
+            label = "" if sec == "other" else f"Sec {sec:<6}"
+            print(f"  NOT checked    {label:<11}{what}")
+
     if total:
         # Severity is a property of WHERE the byte sits, not of the count. A
         # debug string reaches the terminal at runtime; a comment never leaves
