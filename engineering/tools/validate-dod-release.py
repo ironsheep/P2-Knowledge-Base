@@ -726,6 +726,30 @@ def validate_duplicate_keys(verbose: bool = False) -> ValidationResult:
     return result
 
 
+def validate_adc_encoding(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Does the shipped ADC X[5:4] sub-mode map still match silicon?
+
+    F-170: this four-row map was inverted for 6.5 months because no checklist
+    read it, and the defect survived a downstream-only fix. The instrument
+    existed from 2026-06-28 and nothing in the repo ever ran it — it was the
+    only gate `audit-gate-arming.py` reported UNWIRED — so a re-inversion today
+    would have turned nothing red. Wired here «#346», 2026-09-21.
+
+    Its `--negative-control` mutates a scratch copy per limb and asserts each
+    verdict, including the case that must stay GREEN: mode 11010's X[1:0]
+    filter select uses the same `%NN` notation and is not an ADC sub-mode.
+    """
+    result = ValidationResult("ADC X[5:4] Sub-mode Encoding (F-170)")
+    script = Path("engineering/tools/validation/audit-adc-encoding.py")
+    _run_gate(result, script, ['--negative-control'], "negative control", verbose)
+    _run_gate(result, script, [], "audit", verbose)
+    result.info("Scope: the X[5:4] sub-mode map in the three published ADC "
+                "YAMLs, against the Silicon Doc row. Nothing here reads the "
+                "ingestion tree — that donor limb retired with the superseded "
+                "smart-pins-catalog (see the instrument's header).")
+    return result
+
+
 def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
     """Verify bash and PowerShell scripts have matching behavior."""
     result = ValidationResult("Fetch Script Parity")
@@ -840,6 +864,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_constant_fidelity,
         validate_claim_sourcing,
         validate_duplicate_keys,
+        validate_adc_encoding,
         validate_fetch_script_parity,
     ]
 
