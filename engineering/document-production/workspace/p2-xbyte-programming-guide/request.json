@@ -22,7 +22,7 @@
         "title": "P2 Interpreters & Emulators Guide",
         "subtitle": "Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2",
         "author": "Iron Sheep Productions, LLC",
-        "version": "v1.1.0",
+        "version": "1.1.0",
         "date": "August 2026"
       }
     }

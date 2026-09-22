@@ -111,6 +111,50 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
 
+## The changelog/cover version drift, and the gate that now catches it (2026-09-22) — F-461
+
+### F-461 — nothing checked that a manual's rendered version had a changelog entry — `RESOLVED — gate built, wired and armed 2026-09-22`
+
+**Three manuals released in one evening, and ALL THREE reached the promote step with a changelog
+that did not describe the version printed on their own cover.**
+
+| Manual | `request.json` | CHANGELOG top entry |
+|---|---|---|
+| Assembly | 3.1.10 | v3.1.9 — and carrying none of the twelve batch-2 corrections that caused the bump |
+| deSilva | 3.0.8 | v3.0.7 — the already-tagged release. No v3.0.8 entry existed at all |
+| Single-Step Debugger | 1.0.1 | none — caught only because the two before it had made the pattern obvious |
+
+**The mechanism is the same every time, and it is structural, not careless.** A render needs a
+version; `request.json` is where the version lives, so it gets bumped. The changelog is a different
+file, and nothing requires touching it. The two drift silently and agree again only by accident.
+
+**Why no existing gate saw it.** `audit-changelog` reads the top entry well — but `release-manual`
+runs it at **promote**, after the Forge render is already spent. Every prepare-phase gate reads the
+markdown body and has no opinion about the directive. So the defect was free to travel to the last
+step before publication three times in one evening, and each repair was made under time pressure at
+exactly the wrong moment.
+
+**The instrument:** `engineering/tools/validation/audit-changelog-version-sync.py`, wired into
+`validate-manual-release.py --phase prepare` as `changelog-version-sync` (blocking), where the fix
+is free. `audit-gate-arming.py` confirms it is armed. `--negative-control` proves both checks
+distinguish both ways, including that a decorated value still compares equal so a shape defect
+cannot masquerade as a changelog mismatch.
+
+**The first fleet sweep it ever ran found two more, of a different class.** Two of the ten manuals
+carried a *decorated* `metadata.version` — `p2-debug-window-manual` at `"Version 1.1.3"` and
+`p2-xbyte-programming-guide` at `"v1.1.0"`. The cover supplies the word "Version" itself, so an
+adopted document renders **"Version Version 1.1.3"**. Both were invisible because neither manual has
+adopted metadata single-sourcing yet: their covers come from hardcoded markdown and the value only
+reached the PDF properties. **A landmine, not a defect — until the release at which that manual
+adopts single-sourcing, which the standing rule requires.** Both `request.json` values corrected to
+bare numbers in the same pass; the fleet is green, ten of ten.
+
+**What this says about the gate set generally.** The value here was not the rule, which is obvious
+once stated. It was that nothing *ran* it at the moment it was cheap — the same shape as F-301's
+tracker that was read and never written, and as `audit-backtick-balance.py` sitting on disk, clean,
+invoked by nothing. The question to ask of any rule is not "is it written down" but "what executes
+it, and when".
+
 ## Shipped-artifact fallout of the Assembly v3.1.10 release (2026-09-22) — F-460
 
 ### F-460 — the Single-Step Debugger manual's shipped PDF labels PA and PB as COGINIT parameters — `RESOLVED — proven on the artifact 2026-09-22`

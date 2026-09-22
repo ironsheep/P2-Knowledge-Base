@@ -147,6 +147,19 @@ def build_gates(slug: str, phase: str, pdf: str | None):
             ("inline-run-width", f"{V}/audit-inline-run-width.py", srcs, True,
              "glued inline spans form one unbreakable box that runs past the margin"),
         ]
+        # 2026-09-22: three manuals released in one evening, and all three
+        # reached the PROMOTE step with a changelog that did not describe the
+        # version on their own cover. The version lives in request.json because
+        # the render needs it; the changelog is a different file nothing forces
+        # you to touch. audit-changelog reads the entry well but runs at promote,
+        # after the render is spent -- so the defect travelled to the last step
+        # before publication, three times, each fix made under time pressure at
+        # the wrong moment. Here it is free.
+        G.append(("changelog-version-sync",
+                  f"{V}/audit-changelog-version-sync.py", ["--slug", slug], True,
+                  "the version the cover renders must have a changelog entry, "
+                  "and metadata.version must be a bare number (the cover "
+                  "supplies the word 'Version' itself)"))
         if wsmd:
             G.append(("font-glyphs", f"{V}/audit-font-glyphs.py",
                       [wsmd, "--source-dir", str(doc / "opus-master"),
