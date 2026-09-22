@@ -708,6 +708,37 @@ def validate_claim_sourcing(verbose: bool = False) -> ValidationResult:
     return result
 
 
+def validate_source_lock(verbose: bool = False) -> ValidationResult:
+    """ADVISORY (ratchet). Is every claim-bearing shipped YAML locked to a source
+    that can still be FOLLOWED — and has that lock got worse since the baseline?
+
+    This is the companion to the claim-sourcing gate above, and it exists because
+    that gate answers a deliberately narrow question: is a citation PRESENT on a
+    quantitative block. Presence is not correctness. `source: enhanced` satisfies
+    presence while naming no document, which is how F-348's pin-current limit —
+    five times the datasheet's absolute maximum — survived two purges wearing a
+    citation.
+
+    So this gate tiers provenance by how far it can be followed (RESOLVABLE /
+    NAMED / WEAK / ABSENT) and runs as a RATCHET against a recorded baseline: it
+    blocks a REGRESSION, not the standing backlog. A gate that is permanently red
+    over ~44% of the set would be a gate people learn to scroll past, and the
+    backlog is the study's job to shrink, not this gate's job to shout about.
+    """
+    result = ValidationResult("Golden-source lock (ratchet vs baseline)")
+    script = Path("engineering/tools/validation/audit-yaml-source-lock.py")
+    baseline = Path("engineering/tools/validation/baselines/yaml-source-lock.json")
+    if baseline.exists():
+        _run_gate(result, script, ['--baseline', str(baseline)], "regression gate", verbose)
+    else:
+        result.info(f"no baseline at {baseline} — reporting only; "
+                    f"record one with --write-baseline to arm the ratchet")
+        _run_gate(result, script, [], "report", verbose)
+    result.info("Scope: can the citation be FOLLOWED. Complements claim-sourcing, "
+                "which asks only whether one is PRESENT.")
+    return result
+
+
 def validate_duplicate_keys(verbose: bool = False) -> ValidationResult:
     """BLOCKING. Does any shipped YAML mapping carry the same key twice?
 
@@ -863,6 +894,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_cross_references,
         validate_constant_fidelity,
         validate_claim_sourcing,
+        validate_source_lock,
         validate_duplicate_keys,
         validate_adc_encoding,
         validate_fetch_script_parity,
