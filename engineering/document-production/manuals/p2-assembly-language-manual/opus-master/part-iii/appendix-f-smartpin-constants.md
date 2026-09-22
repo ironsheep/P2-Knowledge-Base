@@ -303,7 +303,7 @@ Constants are combined using OR operations to build the complete configuration:
         mov     mode, ##P_ADC | P_ADC_10X
         wrpin   mode, #32
         wxpin   ##14, #32           ' 14-bit resolution
-        dirl    #32                 ' Input mode
+        dirh    #32                 ' DIR high releases the reset
 ```
 
 ### Open-Drain Output (I2C-style)

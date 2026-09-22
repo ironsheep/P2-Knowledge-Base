@@ -35,7 +35,8 @@ DAT
 | Address Range | Memory | Notes |
 |---------------|--------|-------|
 | $000 - $1EF | Cog RAM | General purpose registers |
-| $1F0 - $1FF | Cog RAM | Special purpose registers (PTRA, DIRA, etc.) |
+| $1F0 - $1F7 | Cog RAM | Dual-purpose registers (IJMP/IRET 1-3, PA, PB) |
+| $1F8 - $1FF | Cog RAM | Special-purpose registers (PTRA, PTRB, DIRA/B, OUTA/B, INA/B) |
 | $200 - $3FF | LUT RAM | Lookup table / additional code space |
 
 ::: dirheader
@@ -57,7 +58,7 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
 #### Parameters
 | Parameter | Range | Description |
 |-----------|-------|-------------|
-| address | 0 to $400 | Starting Cog/LUT address (in longs) |
+| address | 0 to $3FF | Starting cog/LUT address (in longs; cog $000-$1FF, LUT $200-$3FF) |
 | limit | 0 to $400 | Maximum address for FIT checking (optional) |
 
 #### Auto-Limit Behavior
@@ -384,7 +385,7 @@ The repetition syntax `value[count]` creates multiple copies of the same value, 
 ```pasm2
 counter long    0               ' Single long
 table   long    $1234_5678      ' Hex value with underscores for readability
-ptrs    long    @start, @end    ' Address pointers
+ptrs    long    @buf_head, @buf_tail  ' Address pointers
 buffer  long    0[32]           ' 32 zero longs (128 bytes)
 rates   long    160_000_000[8]  ' Eight entries, same value
 ```
@@ -1118,7 +1119,7 @@ DAT
 #### Notes
 - FIT generates an assembly error if the limit is exceeded
 - Used for cog code size verification
-- Special registers occupy cog addresses $1F0-$1FF
+- Registers $1F0-$1F7 are dual-purpose; the eight fixed special-purpose registers occupy $1F8-$1FF
 - Use FIT $1F0 to ensure code does not overwrite special registers
 - FIT works in both cog mode and hub mode
 
@@ -1351,6 +1352,8 @@ PUB Example() | value, result
 - Inline assembly is limited in scope—complex PASM routines belong in DAT blocks
 - Local variables declared in the method are accessible by name within inline PASM
 - END does not apply to DAT blocks—DAT assembly has no explicit terminator
+- Inline PASM may use up to **5 levels** of the cog's 8-level hardware stack for nested CALLs, including CALLs into hub RAM; the Spin2 interpreter holds the remainder for its own return path
+- Within a method, a bare `ORG` defaults to start $000 and limit $120 — not the $1F8 DAT-block default — which is why the inline code area is $000..$11F
 
 #### Variable vs Code Limits in Inline PASM
 

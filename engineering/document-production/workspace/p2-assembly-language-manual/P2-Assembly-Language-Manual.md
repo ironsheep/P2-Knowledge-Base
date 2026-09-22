@@ -4336,7 +4336,7 @@ This chapter defines the instruction categories used throughout Part II. Each ca
 
 Arithmetic instructions perform mathematical and logical operations on register values. This includes addition, subtraction, multiplication, comparisons, bitwise operations (AND, OR, XOR), bit manipulation, shifts, rotates, and data movement. This is the largest instruction category.
 
-**Data Movement:** [MOV](#mov), [LOC](#loc)
+**Data Movement:** [MOV](#mov)
 
 **Addition/Subtraction:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
 
@@ -4384,7 +4384,7 @@ Arithmetic instructions perform mathematical and logical operations on register 
 
 Branch instructions control program flow by modifying the program counter. This category includes conditional and unconditional jumps, subroutine calls using stack or pointer registers, returns from subroutines and interrupts, and instruction skipping/repeating mechanisms.
 
-[CALL](#call), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb), [DJF](#djf), [DJNF](#djnf), [DJNZ](#djz), [DJZ](#djz), [EXECF](#execf), [IJNZ](#ijz), [IJZ](#ijz), [JMP](#jmp), [JMPREL](#jmprel), [REP](#rep), [RESI0](#resi0), [RESI1](#resi0), [RESI2](#resi0), [RESI3](#resi0), [RET](#ret), [RETA](#reta), [RETB](#retb), [RETI0](#reti0), [RETI1](#reti0), [RETI2](#reti0), [RETI3](#reti0), [SKIP](#skip), [SKIPF](#skipf), [TJF](#tjf), [TJNF](#tjf), [TJNS](#tjs), [TJNZ](#tjz), [TJS](#tjs), [TJV](#tjv), [TJZ](#tjz)
+[CALL](#call), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb), [LOC](#loc), [DJF](#djf), [DJNF](#djnf), [DJNZ](#djz), [DJZ](#djz), [EXECF](#execf), [IJNZ](#ijz), [IJZ](#ijz), [JMP](#jmp), [JMPREL](#jmprel), [REP](#rep), [RESI0](#resi0), [RESI1](#resi0), [RESI2](#resi0), [RESI3](#resi0), [RET](#ret), [RETA](#reta), [RETB](#retb), [RETI0](#reti0), [RETI1](#reti0), [RETI2](#reti0), [RETI3](#reti0), [SKIP](#skip), [SKIPF](#skipf), [TJF](#tjf), [TJNF](#tjf), [TJNS](#tjs), [TJNZ](#tjz), [TJS](#tjs), [TJV](#tjv), [TJZ](#tjz)
 
 ---
 
@@ -4787,7 +4787,7 @@ Acknowledge smart pin
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | --- | --- | --- | 2 |
+| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | --- | --- | Ack Bus | 2 |
 
 
 **Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin)
@@ -5083,7 +5083,7 @@ Alter Instruction
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
-| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | D | 2 |
+| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
 
 
 **Related:** [SETD](#setd), [SETS](#sets), [SETR](#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
@@ -5502,7 +5502,7 @@ Augment Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | --- | --- | --- | 2 |
+| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | --- | --- | Hidden D queue | 2 |
 
 
 **Related:** [AUGS](#augs)
@@ -5538,7 +5538,7 @@ Augment Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | --- | --- | --- | 2 |
+| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | --- | --- | Hidden S queue | 2 |
 
 
 **Related:** [AUGD](#augd)
@@ -5906,8 +5906,8 @@ Call Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | D[31] | D[30] | --- | 4 / 13-20 |
+| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | K and PC | 4 / 13-20 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | D[31] | D[30] | K and PC | 4 / 13-20 |
 
 
 **Related:** [RET](#ret), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
@@ -6040,8 +6040,8 @@ Call with Destination register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
-| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | --- | 4 / 13-20 |
+| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PA/PB/PTRA/PTRB and PC | 4 / 13-20 |
+| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | D and PC | 4 / 13-20 |
 
 
 **Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
@@ -9207,7 +9207,7 @@ Load Address
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 2 |
+| EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PA/PB/PTRA/PTRB (per W) | 2 |
 
 
 **Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
@@ -15873,7 +15873,8 @@ DAT
 | Address Range | Memory | Notes |
 |---------------|--------|-------|
 | $000 - $1EF | Cog RAM | General purpose registers |
-| $1F0 - $1FF | Cog RAM | Special purpose registers (PTRA, DIRA, etc.) |
+| $1F0 - $1F7 | Cog RAM | Dual-purpose registers (IJMP/IRET 1-3, PA, PB) |
+| $1F8 - $1FF | Cog RAM | Special-purpose registers (PTRA, PTRB, DIRA/B, OUTA/B, INA/B) |
 | $200 - $3FF | LUT RAM | Lookup table / additional code space |
 
 ::: dirheader
@@ -15895,7 +15896,7 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
 #### Parameters
 | Parameter | Range | Description |
 |-----------|-------|-------------|
-| address | 0 to $400 | Starting Cog/LUT address (in longs) |
+| address | 0 to $3FF | Starting cog/LUT address (in longs; cog $000-$1FF, LUT $200-$3FF) |
 | limit | 0 to $400 | Maximum address for FIT checking (optional) |
 
 #### Auto-Limit Behavior
@@ -16222,7 +16223,7 @@ The repetition syntax `value[count]` creates multiple copies of the same value, 
 ```pasm2
 counter long    0               ' Single long
 table   long    $1234_5678      ' Hex value with underscores for readability
-ptrs    long    @start, @end    ' Address pointers
+ptrs    long    @buf_head, @buf_tail  ' Address pointers
 buffer  long    0[32]           ' 32 zero longs (128 bytes)
 rates   long    160_000_000[8]  ' Eight entries, same value
 ```
@@ -16956,7 +16957,7 @@ DAT
 #### Notes
 - FIT generates an assembly error if the limit is exceeded
 - Used for cog code size verification
-- Special registers occupy cog addresses $1F0-$1FF
+- Registers $1F0-$1F7 are dual-purpose; the eight fixed special-purpose registers occupy $1F8-$1FF
 - Use FIT $1F0 to ensure code does not overwrite special registers
 - FIT works in both cog mode and hub mode
 
@@ -17189,6 +17190,8 @@ PUB Example() | value, result
 - Inline assembly is limited in scope—complex PASM routines belong in DAT blocks
 - Local variables declared in the method are accessible by name within inline PASM
 - END does not apply to DAT blocks—DAT assembly has no explicit terminator
+- Inline PASM may use up to **5 levels** of the cog's 8-level hardware stack for nested CALLs, including CALLs into hub RAM; the Spin2 interpreter holds the remainder for its own return path
+- Within a method, a bare `ORG` defaults to start $000 and limit $120 — not the $1F8 DAT-block default — which is why the inline code area is $000..$11F
 
 #### Variable vs Code Limits in Inline PASM
 
@@ -17704,13 +17707,13 @@ Several critical registers exist outside the cog RAM address space and are acces
 
 ### Program Counter (PC)
 
-The program counter is a 20-bit register that holds the hub RAM address of the currently executing instruction.
+The program counter is a 20-bit register holding the address of the currently executing instruction. Its value also selects the execution domain: $00000-$001FF fetches from cog register RAM, $00200-$003FF from lookup RAM, and $00400 and above from hub RAM.
 
 **Access**: No dedicated read instruction; the PC value is captured implicitly as the return address a call saves (`CALLD`, `CALL`, `CALLPA`, `CALLPB`), and is modified by jumps and calls
 
 **Range**: $00000-$FFFFF (full hub address space)
 
-**Usage**: The PC automatically increments by 4 after each instruction execution, pointing to the next long-aligned instruction in hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
+**Usage**: In cog-exec and LUT-exec the PC increments by 1 after each instruction, addressing the next register. In hub-exec it increments by 4, addressing the next long-aligned instruction in hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
 
 **Example**:
 ```pasm2
@@ -17726,19 +17729,19 @@ The program counter is a 20-bit register that holds the hub RAM address of the c
 
 
 
-### Q Register
+### The Q Register and CORDIC Results
 
-The Q register is a 32-bit auxiliary register used for CORDIC operations, division results, and block transfer setup.
+These are two separate mechanisms that are easily conflated, because SETQ supplies an operand to the CORDIC and GETQX/GETQY retrieve its results. They are not the same storage.
 
-**Access**: Read via GETQX/GETQY, write via SETQ/SETQ2
+**The Q register** is a 32-bit value written by SETQ or SETQ2 to modify the instruction that immediately follows. It is write-only from the cog's point of view — there is no instruction that reads it back. Its value persists until the companion instruction consumes it. It supplies:
 
-**Usage**: The Q register serves multiple purposes:
+1. **Block transfer counts**: SETQ or SETQ2 before RDLONG/WRLONG/WMLONG converts the transfer into a multi-long block move.
+2. **The CORDIC's second operand**: SETQ before a CORDIC command supplies the 64-bit operand's upper long.
+3. **The PTRA value** passed to a cog started by the COGINIT that follows.
 
-1. **CORDIC results**: After CORDIC operations (QROTATE, QVECTOR, etc.), results are read from Q using GETQX and GETQY.
-2. **Division quotient**: Division instructions place the quotient in Q.
-3. **Block operations**: SETQ and SETQ2 configure the Q register to enable multi-long transfers with RDxxxx/WRxxxx instructions.
+**CORDIC results** are held in the CORDIC solver's own result pipeline, not in Q. A CORDIC command's two 32-bit results become available 55 clocks after the command is issued, and are retrieved with GETQX (the X result) and GETQY (the Y result). Both instructions stall until the results arrive, so no explicit wait is needed. QDIV places its quotient in the X result and its remainder in the Y result.
 
-The Q register contents are volatile—CORDIC and division operations overwrite previous values. Read results immediately after the operation completes.
+Reading a result when none is available and none is in progress completes in two clocks and raises the QMT event flag — which is how a premature read is detected, since the instruction does not fault.
 
 **Example**:
 ```pasm2
@@ -17942,11 +17945,11 @@ Timeout detection:
 
 **Multi-Cog Pin Control**: When multiple cogs drive the same pin as an output, the pin outputs are OR'd together. If any cog outputs high, the pin goes high. This enables cooperative control but requires coordination to avoid conflicts.
 
-**Smart Pin Override**: When a pin is configured for smart pin operation, the smart pin mode overrides the basic DIRA/OUTA/INA functions for that pin. The pin is controlled through smart pin registers and commands rather than the basic I/O registers.
+**Smart Pin Interaction**: When a pin has a smart pin mode selected, DIR no longer controls the pin's output enable — it becomes an active-low **reset** for the smart pin circuitry. A smart pin is configured with WRPIN/WXPIN/WYPIN while its DIR bit is low, then started by raising DIR, and can be reset at any time by lowering and re-raising DIR. The output enable is then governed by a WRPIN configuration field, the smart pin may drive the output state directly, and IN becomes a completion or event flag rather than the pin's input level.
 
 **Immediate Effect**: Changes to DIR and OUT registers take effect immediately—the hardware updates pin states on the same clock cycle as the register write.
 
-**Input Reading**: INA and INB always return actual pin states, regardless of direction settings. This allows outputs to be read back for verification.
+**Input Reading**: For a pin with no smart pin mode selected, INA and INB return the actual pin state regardless of direction settings, which allows an output to be read back for verification. When a smart pin mode is selected, that pin's IN bit instead serves as a completion or event flag raised by the smart pin.
 
 **Pointer Auto-Modification**: When using PTRA++ or PTRB++ addressing modes, the pointer update occurs after the memory access completes. The modification affects subsequent operations using that pointer.
 
@@ -18024,8 +18027,8 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | BMASK | `1001110` | — | 2 | — | — |
 | BRK | `1101011` | — | 2 | — | — |
 | CALL | `1101101` | — | 4 / 13-20 | — | — |
-| CALLA | `1101011` | CZ | 5...12 * | D[31] | D[30] |
-| CALLB | `1101011` | CZ | 5...12 * | D[31] | D[30] |
+| CALLA | `1101011` | CZ | 5...12 * / 14...32 * | D[31] | D[30] |
+| CALLB | `1101011` | CZ | 5...12 * / 14...32 * | D[31] | D[30] |
 | CALLD | `1011001` | CZI | 4 / 13-20 | — | — |
 | CALLPA | `1011010` | — | 4 / 13–20 | — | — |
 | CALLPB | `1011010` | — | 4 / 13–20 | — | — |
@@ -18295,13 +18298,13 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | TESTN | `0111111` | CZI | 2 | Parity of (D & !S) | (D & !S) == 0 |
 | TESTP | `1101011` | CZ | 2 | IN[D[5:0]] | IN[D[5:0]] |
 | TESTPN | `1101011` | CZ | 2 | !IN[D[5:0]] | !IN[D[5:0]] |
-| TJF | `1011101` | — | 2 or 4 | — | — |
+| TJF | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TJNF | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
-| TJNS | `1011101` | — | 2 or 4 | — | — |
-| TJNZ | `1011100` | — | 2 or 4 | — | — |
+| TJNS | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
+| TJNZ | `1011100` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TJS | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TJV | `1011110` | — | 2 or 4 / 2 or 13–20 | — | — |
-| TJZ | `1011100` | — | 2 or 4 | — | — |
+| TJZ | `1011100` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TRGINT1 | `1101011` | — | 2 | — | — |
 | TRGINT2 | `1101011` | — | 2 | — | — |
 | TRGINT3 | `1101011` | — | 2 | — | — |
@@ -18373,7 +18376,7 @@ Every instruction can be made conditional by prefixing it with one of these cond
 
 | EEEE | Primary Mnemonic | Condition | All Aliases |
 |:-----|:-----------------|:----------|:------------|
-| 0000 | _RET_ | Always + return | — |
+| 0000 | _RET_ | Always + return | IF_RET |
 | 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 |
 | 0010 | IF_NC_AND_Z | C=0 AND Z=1 | IF_Z_AND_NC, IF_01 |
 | 0011 | IF_NC | C=0 | IF_GE, IF_AE, IF_0X |
@@ -18507,10 +18510,10 @@ The `_RET_` prefix with SETQ and SETQ2 is essential for the XBYTE bytecode execu
         _ret_   setq    #$100           ' LUT base $100, then return
 
 ' Change XBYTE mode permanently
-        _ret_   setq    ##$200           ' New LUT base for all bytecodes
+        _ret_   setq    #$000            ' New LUT base for all bytecodes
 
 ' Change XBYTE mode for next bytecode only
-        _ret_   setq2   ##$300           ' Temp LUT base for one bytecode
+        _ret_   setq2   #$100            ' Temp LUT base for one bytecode
 ```
 
 ### B.3.5 SKIP/SKIPF with _RET_
@@ -18608,7 +18611,6 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [GETNIB](#getnib) | Get nibble established by prior ALTGN instruction into D |
 | [GETWORD](#getword) | Get word established by prior ALTGW instruction into D |
 | [INCMOD](#incmod) | Increment with modulus |
-| [LOC](#loc) | Get {12'b0, address[19:0]} into PA/PB/PTRA/PTRB (per W) |
 | [MERGEB](#mergeb) | Merge bits of bytes in D |
 | [MERGEW](#mergew) | Merge bits of words in D |
 | [MODC](#modc) | Modify C according to cccc |
@@ -18703,6 +18705,7 @@ Branch instructions control program flow by modifying the program counter. This 
 | [CALLA](#calla) | Call to A by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRA++ |
 | [CALLB](#callb) | Call to A by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRB++ |
 | [CALLD](#calld) | Call to A by writing {C, Z, 10'b0, PC[19:0]} to PA/PB/PTRA/PTRB (per W) |
+| [LOC](#loc) | Get {12'b0, address[19:0]} into PA/PB/PTRA/PTRB (per W) |
 | [CALLPA](#callpa) | Call to S by pushing return onto stack, copy D to PA |
 | [CALLPB](#callpb) | Call to S by pushing return onto stack, copy D to PB |
 
@@ -20498,7 +20501,7 @@ Constants are combined using OR operations to build the complete configuration:
         mov     mode, ##P_ADC | P_ADC_10X
         wrpin   mode, #32
         wxpin   ##14, #32           ' 14-bit resolution
-        dirl    #32                 ' Input mode
+        dirh    #32                 ' DIR high releases the reset
 ```
 
 ### Open-Drain Output (I2C-style)
@@ -20949,7 +20952,7 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether the source is pure PASM2 or mixed Spin2/PASM2 code.
 
-**Total Reserved Words: 852+** (456 PASM2 + 396 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
+**Total Reserved Words: 859+** (456 PASM2 + 403 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
 ## Quick Reference Index
 
@@ -21542,25 +21545,25 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Effects | 9 | Flag modification suffixes |
 | **PASM2 Subtotal** | **456** | |
 
-**Spin2-Specific Reserved Words (396):**
+**Spin2-Specific Reserved Words (403):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
 | Language Keywords | 20 | Core Spin2 constructs |
-| DEBUG Parameters | 120 | Debug output formatting |
+| DEBUG Parameters | 121 | Debug output formatting |
 | Graphics/Color | 34 | Color names and display |
 | String/Data Methods | 22 | Memory/string manipulation |
 | Math/Conversion | 11 | Math functions |
 | Event Constants | 16 | Event source identifiers |
 | Pin Methods | 14 | High-level pin control |
 | Condition Shortcuts | 32 | Underscore-prefixed conditions |
-| IF_ Variants | 28 | Extended condition patterns |
+| IF_ Variants | 32 | Extended condition patterns |
 | Shared Registers | 8 | PR0-PR7 communication |
-| System/I/O | 27 | System control methods |
-| Graphics Drawing | 32 | Graphics primitives |
-| Text/Display | 12 | Text rendering |
-| Lookup/Misc | 20 | Table lookup and other |
-| **Spin2 Subtotal** | **396** | |
+| System/I/O | 26 | System control methods |
+| Graphics Drawing | 31 | Graphics primitives |
+| Text/Display | 13 | Text rendering |
+| Lookup/Misc | 23 | Table lookup and other |
+| **Spin2 Subtotal** | **403** | |
 
 **Hardware Constants (194+):**
 
@@ -21570,7 +21573,7 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Streamer (X_*) | ~78 | Streamer modes |
 | **Constants Subtotal** | **~194** | |
 
-**Grand Total: 1,046+ reserved identifiers**
+**Grand Total: 1,053+ reserved identifiers**
 
 **Cross-References:**
 
@@ -21586,7 +21589,7 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 
 Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. None of these identifiers can be used as labels, symbols, or variable names in assembly code, even in pure PASM2.
 
-**Total Spin2-Only Reserved Words: 396**
+**Total Spin2-Only Reserved Words: 403**
 
 The following sections list Spin2 reserved words organized by category.
 
@@ -21607,7 +21610,7 @@ WHILE       WITH
 
 
 
-### DEBUG Command Parameters (120 words)
+### DEBUG Command Parameters (121 words)
 
 Debug output formatting commands and their variants:
 
@@ -21810,7 +21813,7 @@ These mnemonics are used with the MODCZ instruction to modify C and Z flags. Eac
 
 
 
-### Additional IF_ Condition Variants (28 words)
+### Additional IF_ Condition Variants (32 words)
 
 Extended condition code patterns for bit-testing:
 
@@ -21836,21 +21839,21 @@ PR6         PR7
 
 
 
-### System and I/O Methods (27 words)
+### System and I/O Methods (26 words)
 
 System control and I/O operations (FILE is listed under PASM2 Assembly Directives):
 
 ```
 CLKFREQ     CLKMODE     CLKSET      CLOSE       COGCHK      COGSPIN
 GETCRC      GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
-NEWCOG      RECV        REG         REGEXEC     REGLOAD     SEND
-SETREGS     UPDATE      VARBASE     WAITCT      WAITMS      WAITUS
-WINDOW
+NEWCOG      POLLCT      RECV        REG         REGEXEC     REGLOAD
+SEND        SETREGS     UPDATE      VARBASE     WAITCT      WAITMS
+WAITUS      WINDOW
 ```
 
 
 
-### Graphics Drawing Methods (32 words)
+### Graphics Drawing Methods (31 words)
 
 Graphics primitives and display control:
 
@@ -21858,14 +21861,14 @@ Graphics primitives and display control:
 BITMAP      BOX         CARTESIAN   CIRCLE      CLEAR       DOT
 DOTSIZE     FFT         HIDEXY      HOLDOFF     LINE        LINESIZE
 LOGIC       OBOX        ORIGIN      OVAL        PC_KEY      PC_MOUSE
-PLOT        POLAR       POLLCT      POLXY       POS         RANGE
+PLOT        POLAR       POLXY       POS         RANGE
 ROTXY       SAMPLES     SAVE        SCOPE       SCOPE_XY    SCROLL
 SPECTRO     XYPOL
 ```
 
 
 
-### Text and Display (12 words)
+### Text and Display (13 words)
 
 Text rendering parameters:
 
@@ -21877,7 +21880,7 @@ ZSTR_
 
 
 
-### Lookup and Miscellaneous (20 words)
+### Lookup and Miscellaneous (23 words)
 
 Table lookup and other Spin2 features:
 
@@ -21950,7 +21953,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 : When set (I=1), the S field contains a literal value rather than a register address. When clear (I=0), the S field is a register address and the instruction reads from that register. The `#` prefix in source code sets this bit.
 
 **K / Stack**
-: The 8-level hardware stack used for subroutine calls and temporary storage. On CALL, the stack stores C, Z, and PC (return address). PUSH and POP provide general-purpose 32-bit value storage. Stack overflow/underflow wraps silently—there is no trap or error indication.
+: The 8-level hardware stack used for subroutine calls and temporary storage. On CALL, the stack stores C, Z, and PC (return address). Under the Spin2 interpreter, inline PASM may use only 5 of these levels. PUSH and POP provide general-purpose 32-bit value storage. Stack overflow/underflow wraps silently—there is no trap or error indication.
 
 **L / Literal flag**
 : When set (L=1), the D field contains a literal value rather than a register address. This is less common than immediate S operands and appears in specific instructions. The `#` prefix on the destination in source code sets this bit where valid.

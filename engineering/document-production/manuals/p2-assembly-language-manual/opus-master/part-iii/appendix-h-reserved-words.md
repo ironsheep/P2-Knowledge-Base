@@ -4,7 +4,7 @@ This appendix lists all reserved words recognized by the Propeller 2 compiler. T
 
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether the source is pure PASM2 or mixed Spin2/PASM2 code.
 
-**Total Reserved Words: 852+** (456 PASM2 + 396 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
+**Total Reserved Words: 859+** (456 PASM2 + 403 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
 ## Quick Reference Index
 
@@ -597,25 +597,25 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Effects | 9 | Flag modification suffixes |
 | **PASM2 Subtotal** | **456** | |
 
-**Spin2-Specific Reserved Words (396):**
+**Spin2-Specific Reserved Words (403):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
 | Language Keywords | 20 | Core Spin2 constructs |
-| DEBUG Parameters | 120 | Debug output formatting |
+| DEBUG Parameters | 121 | Debug output formatting |
 | Graphics/Color | 34 | Color names and display |
 | String/Data Methods | 22 | Memory/string manipulation |
 | Math/Conversion | 11 | Math functions |
 | Event Constants | 16 | Event source identifiers |
 | Pin Methods | 14 | High-level pin control |
 | Condition Shortcuts | 32 | Underscore-prefixed conditions |
-| IF_ Variants | 28 | Extended condition patterns |
+| IF_ Variants | 32 | Extended condition patterns |
 | Shared Registers | 8 | PR0-PR7 communication |
-| System/I/O | 27 | System control methods |
-| Graphics Drawing | 32 | Graphics primitives |
-| Text/Display | 12 | Text rendering |
-| Lookup/Misc | 20 | Table lookup and other |
-| **Spin2 Subtotal** | **396** | |
+| System/I/O | 26 | System control methods |
+| Graphics Drawing | 31 | Graphics primitives |
+| Text/Display | 13 | Text rendering |
+| Lookup/Misc | 23 | Table lookup and other |
+| **Spin2 Subtotal** | **403** | |
 
 **Hardware Constants (194+):**
 
@@ -625,7 +625,7 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Streamer (X_*) | ~78 | Streamer modes |
 | **Constants Subtotal** | **~194** | |
 
-**Grand Total: 1,046+ reserved identifiers**
+**Grand Total: 1,053+ reserved identifiers**
 
 **Cross-References:**
 
@@ -641,7 +641,7 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 
 Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. None of these identifiers can be used as labels, symbols, or variable names in assembly code, even in pure PASM2.
 
-**Total Spin2-Only Reserved Words: 396**
+**Total Spin2-Only Reserved Words: 403**
 
 The following sections list Spin2 reserved words organized by category.
 
@@ -662,7 +662,7 @@ WHILE       WITH
 
 
 
-### DEBUG Command Parameters (120 words)
+### DEBUG Command Parameters (121 words)
 
 Debug output formatting commands and their variants:
 
@@ -865,7 +865,7 @@ These mnemonics are used with the MODCZ instruction to modify C and Z flags. Eac
 
 
 
-### Additional IF_ Condition Variants (28 words)
+### Additional IF_ Condition Variants (32 words)
 
 Extended condition code patterns for bit-testing:
 
@@ -891,21 +891,21 @@ PR6         PR7
 
 
 
-### System and I/O Methods (27 words)
+### System and I/O Methods (26 words)
 
 System control and I/O operations (FILE is listed under PASM2 Assembly Directives):
 
 ```
 CLKFREQ     CLKMODE     CLKSET      CLOSE       COGCHK      COGSPIN
 GETCRC      GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
-NEWCOG      RECV        REG         REGEXEC     REGLOAD     SEND
-SETREGS     UPDATE      VARBASE     WAITCT      WAITMS      WAITUS
-WINDOW
+NEWCOG      POLLCT      RECV        REG         REGEXEC     REGLOAD
+SEND        SETREGS     UPDATE      VARBASE     WAITCT      WAITMS
+WAITUS      WINDOW
 ```
 
 
 
-### Graphics Drawing Methods (32 words)
+### Graphics Drawing Methods (31 words)
 
 Graphics primitives and display control:
 
@@ -913,14 +913,14 @@ Graphics primitives and display control:
 BITMAP      BOX         CARTESIAN   CIRCLE      CLEAR       DOT
 DOTSIZE     FFT         HIDEXY      HOLDOFF     LINE        LINESIZE
 LOGIC       OBOX        ORIGIN      OVAL        PC_KEY      PC_MOUSE
-PLOT        POLAR       POLLCT      POLXY       POS         RANGE
+PLOT        POLAR       POLXY       POS         RANGE
 ROTXY       SAMPLES     SAVE        SCOPE       SCOPE_XY    SCROLL
 SPECTRO     XYPOL
 ```
 
 
 
-### Text and Display (12 words)
+### Text and Display (13 words)
 
 Text rendering parameters:
 
@@ -932,7 +932,7 @@ ZSTR_
 
 
 
-### Lookup and Miscellaneous (20 words)
+### Lookup and Miscellaneous (23 words)
 
 Table lookup and other Spin2 features:
 

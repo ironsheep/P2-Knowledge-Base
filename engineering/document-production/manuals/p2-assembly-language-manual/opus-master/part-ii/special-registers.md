@@ -472,13 +472,13 @@ Several critical registers exist outside the cog RAM address space and are acces
 
 ### Program Counter (PC)
 
-The program counter is a 20-bit register that holds the hub RAM address of the currently executing instruction.
+The program counter is a 20-bit register holding the address of the currently executing instruction. Its value also selects the execution domain: $00000-$001FF fetches from cog register RAM, $00200-$003FF from lookup RAM, and $00400 and above from hub RAM.
 
 **Access**: No dedicated read instruction; the PC value is captured implicitly as the return address a call saves (`CALLD`, `CALL`, `CALLPA`, `CALLPB`), and is modified by jumps and calls
 
 **Range**: $00000-$FFFFF (full hub address space)
 
-**Usage**: The PC automatically increments by 4 after each instruction execution, pointing to the next long-aligned instruction in hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
+**Usage**: In cog-exec and LUT-exec the PC increments by 1 after each instruction, addressing the next register. In hub-exec it increments by 4, addressing the next long-aligned instruction in hub RAM. Jump and call instructions modify the PC to change program flow. The PC wraps at the 20-bit boundary when incremented beyond $FFFFF.
 
 **Example**:
 ```pasm2
@@ -710,11 +710,11 @@ Timeout detection:
 
 **Multi-Cog Pin Control**: When multiple cogs drive the same pin as an output, the pin outputs are OR'd together. If any cog outputs high, the pin goes high. This enables cooperative control but requires coordination to avoid conflicts.
 
-**Smart Pin Override**: When a pin is configured for smart pin operation, the smart pin mode overrides the basic DIRA/OUTA/INA functions for that pin. The pin is controlled through smart pin registers and commands rather than the basic I/O registers.
+**Smart Pin Interaction**: When a pin has a smart pin mode selected, DIR no longer controls the pin's output enable — it becomes an active-low **reset** for the smart pin circuitry. A smart pin is configured with WRPIN/WXPIN/WYPIN while its DIR bit is low, then started by raising DIR, and can be reset at any time by lowering and re-raising DIR. The output enable is then governed by a WRPIN configuration field, the smart pin may drive the output state directly, and IN becomes a completion or event flag rather than the pin's input level.
 
 **Immediate Effect**: Changes to DIR and OUT registers take effect immediately—the hardware updates pin states on the same clock cycle as the register write.
 
-**Input Reading**: INA and INB always return actual pin states, regardless of direction settings. This allows outputs to be read back for verification.
+**Input Reading**: For a pin with no smart pin mode selected, INA and INB return the actual pin state regardless of direction settings, which allows an output to be read back for verification. When a smart pin mode is selected, that pin's IN bit instead serves as a completion or event flag raised by the smart pin.
 
 **Pointer Auto-Modification**: When using PTRA++ or PTRB++ addressing modes, the pointer update occurs after the memory access completes. The modification affects subsequent operations using that pointer.
 
