@@ -28,7 +28,9 @@ The values shown below are the base constants that get combined with control fla
 
 Two fields inside that control range apply to every mode and appear in none of the constants:
 
-- **`D[22:20]` selects the pin group**, in 8-pin increments, for transfers of up to 32 pins; the selection wraps around. Every constant in this appendix leaves those bits zero, so every example below works on the group starting at pin 0. Streaming anywhere else means OR-ing the group number in.
+- **`D[22:20]` selects the pin group**, in 8-pin increments, for transfers of up to 32 pins; the selection wraps around. Every constant in this appendix leaves those bits zero, so every example below works on the group starting at pin 0. Streaming anywhere else means OR-ing the pin base in as `base << 17`.
+
+  **The base must be aligned to the mode's pin width.** The base and the group select are one six-bit field, `D[22:17]`, and its low bits `D[19:17]` overlap the mode template in `D[19:16]`. A base must therefore be a multiple of the mode's width: 8 for the 8-pin and wider modes, 4 for the 4-pin modes, 2 for the 2-pin modes. A misaligned base neither errors nor rounds. Composed with `+` it carries into the mode field and selects a different mode at a different group; composed with `|` it sets a bit the template already sets and simply vanishes, leaving the transfer on the wrong pins. This is measured behavior on P2 silicon, and it is why `|` is the safer operator without being a safe one — alignment is the rule, and the operator is secondary.
 - **`D[23]` is the pin-output or hub-write enable**, depending on the mode's direction. `X_PINS_ON` and `X_WRITE_ON` are its two names — see "Pin Output and Hub Write Control" below.
 
 
@@ -157,7 +159,7 @@ These modes read words or longs from hub RAM for higher bandwidth applications.
 
 ## Video and Color Modes
 
-These modes perform color space conversion for video generation. All five expand the hub data into the same 32-bit output word, `%rrrrrrrr_gggggggg_bbbbbbbb_00000000` — so all five carry **24 bits of color** across a 32-pin group, and place the same red, green and blue bytes on DAC channels X3, X2 and X1, with X0 receiving zero. They differ only in how the hub data is expanded into those three bytes.
+These modes expand packed hub pixel data into full 24-bit color for video generation. All five expand the hub data into the same 32-bit output word, `%rrrrrrrr_gggggggg_bbbbbbbb_00000000` — so all five carry **24 bits of color** across a 32-pin group, and place the same red, green and blue bytes on DAC channels X3, X2 and X1, with X0 receiving zero. They differ only in how the hub data is expanded into those three bytes.
 
 **LUMA8 and RGBI8 look alike and take their color from opposite places.** Both spend 8 bits per pixel, and both give one color at varying brightness. LUMA8 takes the color from the streamer command's S operand and spends all 8 pixel bits on luminance — one color at 256 levels. RGBI8 takes the color from the pixel itself, spending its top 3 bits on the color select and the remaining 5 on intensity — 8 colors at 32 levels each. Neither carries separate red, green and blue fields.
 
@@ -287,7 +289,7 @@ The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) 
 A working streamer command carries three things the mode constant does not, and each has its own home:
 
 - **The data rate** belongs to `SETXFRQ` — a per-clock NCO increment, not a frequency in hertz, where the cog-start default `$8000_0000` produces one streamer event every two clocks. (A `SETQ` immediately before the streamer instruction sets it too.) `XINIT`'s second operand is **not** the rate.
-- **The duration** belongs to `D[15:0]`, the number of NCO rollovers the command runs for. The constants below occupy only `D[31:16]`, so a mode ORed with nothing else leaves the count at zero — and a count of zero stops the streamer immediately. OR the count in.
+- **The duration** belongs to `D[15:0]`, the number of NCO rollovers the command runs for. The constants below occupy only `D[31:16]`, so a mode ORed with nothing else leaves the count at zero — and a count of zero stops the streamer immediately. OR the count in. The other end of the range is reserved: a count of `$FFFF` runs the command perpetually, without decrementing, until XSTOP or a buffered command replaces it. The largest terminating count is therefore `$FFFE`.
 - **The pins** must be able to drive. `X_PINS_ON` enables the streamer's contribution to a pin's output *state*; `DIRH` is still what enables the pin's output.
 
 `XINIT`'s `S` operand supplies mode-specific data — a LUT base, an ADC channel select — or is ignored. Each example says which.

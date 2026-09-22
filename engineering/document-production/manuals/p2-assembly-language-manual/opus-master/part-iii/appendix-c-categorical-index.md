@@ -111,8 +111,8 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [SUMNZ](#sumnz) | Sum +/-S into D by !Z |
 | [SUMZ](#sumz) | Sum +/-S into D by Z |
 | [TEST](#test) | Test D |
-| [TESTB](#testb) | Test bit S[4:0] of D, XOR into C/Z |
-| [TESTBN](#testbn) | Test bit S[4:0] of !D, XOR into C/Z |
+| [TESTB](#testb) | Test bit S[4:0] of D, write to C/Z (or combine per ANDC/ORC/XORC) |
+| [TESTBN](#testbn) | Test bit S[4:0] of !D, write to C/Z (or combine per ANDC/ORC/XORC) |
 | [TESTN](#testn) | Test D with !S |
 | [WRC](#wrc) | Write 0 or 1 to D, according to C |
 | [WRNC](#wrnc) | Write 0 or 1 to D, according to !C |
@@ -303,8 +303,8 @@ Pin instructions control the P2's 64 I/O pins. Basic pin operations set directio
 
 | Instruction | Description |
 |-------------|-------------|
-| [TESTP](#testp) | Test IN bit of pin, XOR into C/Z |
-| [TESTPN](#testpn) | Test !IN bit of pin, XOR into C/Z |
+| [TESTP](#testp) | Test IN bit of pin, write to C/Z (or combine per ANDC/ORC/XORC) |
+| [TESTPN](#testpn) | Test !IN bit of pin, write to C/Z (or combine per ANDC/ORC/XORC) |
 
 ### Smart Pin Control
 
@@ -329,9 +329,9 @@ Event instructions monitor and respond to system events including counter/timer 
 
 | Instruction | Description |
 |-------------|-------------|
-| [ADDCT1](#addct1) | Set CT1 event to trigger on CT = D + S |
-| [ADDCT2](#addct2) | Set CT2 event to trigger on CT = D + S |
-| [ADDCT3](#addct3) | Set CT3 event to trigger on CT = D + S |
+| [ADDCT1](#addct1) | Set the CT1 event target to D + S; fires once CT has passed it |
+| [ADDCT2](#addct2) | Set the CT2 event target to D + S; fires once CT has passed it |
+| [ADDCT3](#addct3) | Set the CT3 event target to D + S; fires once CT has passed it |
 | [SETPAT](#setpat) | Set pin pattern for PAT event |
 | [SETSE1](#setse1) | Set SE1 event configuration |
 | [SETSE2](#setse2) | Set SE2 event configuration |
@@ -586,7 +586,7 @@ Not all instructions support all flag effect modifiers (WC, WZ, WCZ). This secti
 |----------|-------|--------------|
 | **Full (WC/WZ/WCZ)** | ~300 | ADD, SUB, CMP, AND, OR, XOR, MOV, SHL, SHR, and most other ALU operations |
 | **WCZ only** | 40 | BITC, BITH, BITL, BITNC, BITNOT, BITNZ, BITRND, BITZ, DIRC, DIRH, DIRL, DIRNC, DIRNOT, DIRNZ, DIRRND, DIRZ, DRVC, DRVH, DRVL, DRVNC, DRVNOT, DRVNZ, DRVRND, DRVZ, FLTC, FLTH, FLTL, FLTNC, FLTNOT, FLTNZ, FLTRND, FLTZ, OUTC, OUTH, OUTL, OUTNC, OUTNOT, OUTNZ, OUTRND, OUTZ |
-| **WC only** | 9 | COGID, COGINIT, GETCT, LOCKNEW, LOCKREL, LOCKTRY, MODC, RDPIN, RQPIN |
+| **WC only** | 8 | COGID, COGINIT, LOCKNEW, LOCKREL, LOCKTRY, MODC, RDPIN, RQPIN |
 | **WZ only** | 5 | MODZ, MUL, MULS, SCA, SCAS |
 | **Extended** | 4 | TESTP, TESTPN, TESTB, TESTBN |
 
@@ -618,6 +618,8 @@ These eight instructions produce meaningful output only for the C flag:
 | MODC | Result of cccc expression |
 | RDPIN | Modal result (depends on Smart Pin mode) |
 | RQPIN | Modal result (depends on Smart Pin mode) |
+
+GETCT also accepts WC, but its WC is an input selector rather than a flag result: it chooses which half of the 64-bit System Counter is returned, and C itself is not written. It is therefore not listed here.
 
 ### WZ-Only Instructions
 

@@ -1,5 +1,42 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.9 (2026-09-22)
+
+**A counter event fires once the counter has passed its target, the interrupt levels run the way the silicon runs them, and the streamer section says what the streamer does.**
+
+### Fixed
+
+- **A CT event fires once the System Counter has *passed* its target**, not on the single cycle where the counter equals it: the flag is set whenever the MSB of (CT - CTn) is 0. A deadline already in the recent past therefore fires at once instead of waiting for the counter to come round, and one more than 2^31 clocks ahead reads as already passed. Corrected at every site that stated it — the ADDCT1/2/3 entry, the JCT/JNCT entry, the categorical index, the timing chapter and the CT register page — where the WAITCT and POLLCT entries had it right all along
+- **The interrupt priorities were stated upside down** in the RETI entry: INT1 is the highest of the three program-visible interrupts and INT3 the lowest, and the debug interrupt is a hidden fourth, INT0, with priority over all three. The hardware chapter already said so
+- **`XZERO` does not stream zeros** — it buffers a new streamer command and clears the NCO phase accumulator, which is what keeps line-to-line timing identical when the NCO fraction is inexact. The instruction reference and the categorical index already described it correctly
+- **There is no radio-frequency streamer mode**: `RF` in the streamer constant names is *Read FIFO*. The streamer mode table is rebuilt on the eight mode families the silicon documentation defines, in place of the four it previously listed
+- **`WYPIN` sets a PWM mode's output value — the duty — not its base period**; the period and frame count come from `WXPIN`. The hardware chapter, Appendix F and the entry's own code comment all had it right
+- **Appendix A left the C Effect column empty on 35 rows** — the BIT, DIR, DRV, FLT and OUT families — where both flags receive the same value, which is the rule Appendix C states and the five `*RND` rows already followed
+- **The Result column named a flag value instead of the write target** on 23 DIR, DRV and FLT rows, where the neighbouring `DRVRND` row already named it correctly
+- **A DAT example defined a label named `clkfreq`**, which is a reserved built-in symbol; the block did not assemble
+- **Augmentation is not consumed by any intervening instruction.** `AUGS`/`AUGD` attach to the next instruction supplying a matching immediate operand; the real hazard, which the silicon documentation records, is an intervening `ALTx` with an immediate `#S`, which uses the augment without cancelling it. The previous `NOP` demonstration was wrong
+- **A taken branch costs at least four clocks**, not five, and hub execution runs to `$FFFFF`, not `$7FFFF`
+- **Cog RAM access is two clocks**, stated as single-cycle in two places, against the rest of the manual
+- **A smart pin holds one mode at a time**: asynchronous serial transmit and receive are separate modes, so a UART takes two pins
+- **`LOCKTRY` also fails on an unallocated lock**, so a spin-wait on a lock number that `LOCKNEW` never issued loops forever; only the holding cog can `LOCKREL`, while any cog may `LOCKRET`; and lock 15 is held by a DEBUG build rather than merely conventional
+- **Stopping a cog releases its lock but leaks the lock number** — ownership ends when the cog goes inactive, allocation ends only at `LOCKRET` — stated at `COGSTOP`, in the execution model and in the lock section
+- **`DEBUG_COGS` is the per-cog debug interrupt enable**, not an output filter: a disabled cog does not take the interrupt at all
+- **The FIFO cannot be outrun by reads** — the silicon guarantees no underflow — and a SETQ block moves one long per clock only when the hub FIFO is not contending for the same slice
+- **Elapsed-time subtraction is correct below 2^32 cycles**, not 2^31
+- Appendix A no longer prints data bits as zeros on `AUGD`, `AUGS`, `LOC`, `GETNIB`, `ROLNIB` and `SETNIB`, denies WZ on `MUL`, `MULS`, `SCA` and `SCAS`, drops "true" from the four signed-extended C effects, or carries the corrupted `SUMC`/`SUMNC`/`SUMNZ`/`SUMZ`, `INCMOD`, `RCR`, `GETCT` and `POLLXRL` cells
+- The WC-only list and the table beneath it no longer disagree about their own count; `GETCT` is named as the exception, since its WC selects which half of the counter is returned rather than reporting a result
+
+### Added
+
+- **The streamer pin base must be aligned to the mode's pin width.** The base and the group select are one field, `D[22:17]`, overlapping the mode template; a misaligned base neither errors nor rounds — composed with `+` it carries into the mode field, composed with `|` it vanishes. Measured on P2 silicon
+- **A streamer count of `$FFFF` runs perpetually** without decrementing, so the largest terminating count is `$FFFE` — in Appendix G and in the XINIT entry, which previously documented no count field at all
+- The LUT page's `SETQ2` block form, which names the first LUT long as `0`, now reads the same way in the addressing-modes chapter
+
+### Changed
+
+- The About-this-manual paragraph states what was verified against which source, in place of a blanket claim that everything was verified against official sources and tested on hardware
+- Second and first person removed from the chapters and front matter, and "cog" lowercased in running prose, per the voice guide
+
 ## v3.1.8 (2026-09-10)
 
 **Every clock figure, flag effect and special-register role names what it actually is**, and the smart-pin section says how a pull is really made.

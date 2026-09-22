@@ -90,7 +90,7 @@ PC is written only when the condition is met (flag set for JCTn, flag clear for 
 
 **Explanation:**
 
-JCT1, JCT2, and JCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is set. JNCT1, JNCT2, and JNCT3 perform the opposite test, jumping if the flag is clear. Each CTn event flag is automatically set when the system counter reaches the CTn target value that was previously configured using the corresponding ADDCTn instruction.
+JCT1, JCT2, and JCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is set. JNCT1, JNCT2, and JNCT3 perform the opposite test, jumping if the flag is clear. Each CTn event flag is set whenever the System Counter has passed the CTn target value configured by the corresponding ADDCTn instruction — that is, whenever the MSB of (CT - CTn) is 0.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 

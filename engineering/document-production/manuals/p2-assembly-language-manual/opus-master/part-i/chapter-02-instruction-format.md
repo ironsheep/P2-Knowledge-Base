@@ -91,7 +91,7 @@ toggle_pin0                             ' Subroutine: toggle pin 0
         _ret_   drvnot  #0              ' 2 + 2 return = 4 cycles
 ```
 
-This is significantly faster than a separate instruction followed by RET.
+This is faster than a separate instruction followed by RET, which costs two additional clocks.
 
 **Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in cog/LUT mode. In hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles (ret.yaml).
 
@@ -136,7 +136,7 @@ The distinction that matters is the **compare instruction**, not the alias style
 - **CMP** performs unsigned subtraction (for setting flags)
 - **CMPS** performs signed subtraction (for setting flags)
 
-After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either condition code terminology (magnitude aliases like IF_A/IF_B, or arithmetic aliases like IF_GT/IF_LT—see Section 2.2.3) works correctly with either instruction:
+After CMP, the flags reflect unsigned ordering. After CMPS, the flags reflect signed ordering. Either condition code terminology (magnitude aliases like IF_A/IF_B, or arithmetic aliases like IF_GT/IF_LT) works correctly with either instruction:
 
 ```pasm2
 ' Unsigned comparison - either style works
@@ -259,7 +259,7 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 | `D` | Destination register is written |
 | `D and PC` | Both destination and program counter written (for jumps/calls); rendered `D + PC*` in the tables |
 | `PC` | Only PC written |
-| `---` | Nothing written, or output goes to Hub/LUT memory rather than a Cog register (compare, test, and memory-write instructions) |
+| `---` | Nothing written, or output goes to Hub/LUT memory rather than a cog register (compare, test, and memory-write instructions) |
 | `OUTx` | Pin output state written |
 | `DIR bit` | A pin direction bit is written |
 | `OUT bit` | A pin output bit is written |
@@ -339,7 +339,7 @@ The 9-bit D field (bits 17-9) addresses a cog register from $000 to $1FF:
 
 The D field can also specify:
 
-- Indirect Cog/LUT register addresses (for ALTD-modified instructions, which rewrite the next instruction's 9-bit D field to a value masked to $1FF — a register address, not a 20-bit Hub address)
+- Indirect cog/LUT register addresses (for ALTD-modified instructions, which rewrite the next instruction's 9-bit D field to a value masked to $1FF — a register address, not a 20-bit Hub address)
 - LUT addresses (for LUT instructions)
 - Pin numbers (for certain I/O instructions)
 
@@ -395,9 +395,9 @@ When `#` is used:
 9-bit immediates can represent:
 
 - Unsigned: 0 to 511 ($000 to $1FF)
-- Signed (when interpreted): -256 to +255
+- Signed, relative-branch instructions only: -256 to +255
 
-Values outside this range require augmentation (see Section 2.7).
+For data instructions the 9-bit immediate field is always zero-extended; sign extension applies only to relative-branch instructions (see Section 6.2.2). Values outside this range require augmentation (see Section 2.7).
 
 ### 2.6.3 The $ Prefix for Current Address
 
@@ -800,7 +800,7 @@ PASM2 provides several operators for referencing labels in different contexts:
 |----------|---------|---------|
 | `#label` | Immediate value (Cog address) | PASM instructions |
 | `#.local` | Immediate reference to local label | PASM instructions |
-| `#\label` | Absolute address (non-PC-relative) | Forces 9-bit Cog address |
+| `#\label` | Absolute address (non-PC-relative) | Forces the branch's 20-bit address field to be absolute rather than PC-relative |
 | `@label` | Hub address of label | Spin2 or PASM |
 | `@@label` | Object-relative address | Spin2 or PASM |
 | `$` | Current assembly address | PASM (ORG → Cog address, ORGH → Hub address) |

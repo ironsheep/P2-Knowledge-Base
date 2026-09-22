@@ -156,7 +156,7 @@ Results overwrite the input buffer in place, which is safe because the output cu
 ::: hardware
 **Keep hub access out of both CORDIC loops.** This is the difference between a pipeline that works and one that silently returns wrong numbers. Measured on real P2 silicon at 200 MHz: a `RDLONG` inside the fill loop began losing results at a fill depth of **2**; a register-only fill with a `WRLONG` in the drain began losing them at **3**; register-only fill *and* drain, with hub I/O batched outside, stayed correct through a depth of **7**.
 
-The failure is silent and it is not a missing result — it is a *wrong* one. You get a full array of plausible-looking coordinates, some fraction of which are stale. Nothing faults, no flag is set, and `QMT` does not help: it records an erroneous early read after the fact rather than warning you first.
+The failure is silent and it is not a missing result — it is a *wrong* one. The result is a full array of plausible-looking coordinates, some fraction of which are stale. Nothing faults, no flag is set, and `QMT` does not help: it records an erroneous early read after the fact rather than warning of it in advance.
 
 The cause is throughput, not a hardware limit on results in flight. Deep pipelining genuinely works — six or seven operations in flight is real. What breaks is a fill or drain loop that cannot keep up with the CORDIC's cadence, so issue and retrieve back-to-back and do the hub work outside the loops.
 :::
@@ -222,7 +222,7 @@ The large instruction count (99) creates an interrupt-free zone that terminates 
 
 ## 5.2 Smart Pins
 
-The P2 provides 64 smart pins, one per I/O pin, each containing a complete programmable peripheral. A single smart pin can implement a UART transmitter and receiver, generate PWM signals, measure pulse widths, read quadrature encoders, or convert analog signals. Each smart pin contains local state machines, DAC and ADC hardware, timing circuits, and configuration registers, all controlled through PASM2 instructions. The smart pin architecture offloads I/O processing from the cog, allowing precise timing and continuous operation without software intervention.
+The P2 provides 64 smart pins, one per I/O pin, each containing a complete programmable peripheral. A single smart pin holds one mode at a time: it can implement a UART transmitter or a UART receiver — asynchronous serial transmit and asynchronous serial receive are separate modes, so a full UART takes two pins — generate PWM signals, measure pulse widths, read quadrature encoders, or convert analog signals. Each smart pin contains local state machines, DAC and ADC hardware, timing circuits, and configuration registers, all controlled through PASM2 instructions. The smart pin architecture offloads I/O processing from the cog, allowing precise timing and continuous operation without software intervention.
 
 ### 5.2.1 Smart Pin Architecture
 
@@ -319,22 +319,26 @@ Streamer operation involves configuration, initiation, and control. The instruct
 
 - **SETXFRQ** - Set streamer frequency (controls output sample rate)
 - **XINIT** - Initialize streamer transfer (configures mode and starts first transfer)
-- **XCONT** - Continue streamer operation (starts next transfer using current configuration)
-- **XZERO** - Zero-fill streamer output (outputs zeros without fetching hub data)
+- **XCONT** - Buffer a new streamer command to issue on the current command's final NCO rollover, continuing the phase accumulator
+- **XZERO** - Buffer a new streamer command to issue on the current command's final NCO rollover, zeroing the phase accumulator
 - **XSTOP** - Stop streamer (halts transfer operation)
 
-The typical pattern initializes the streamer with XINIT for the first buffer, then uses XCONT to chain subsequent buffers. SETXFRQ establishes the output timing, critical for audio sample rates or display refresh timing. XZERO allows inserting silence in audio streams or blanking periods in video signals without transferring hub data.
+The typical pattern initializes the streamer with XINIT for the first buffer, then uses XCONT to chain subsequent buffers. SETXFRQ establishes the output timing, critical for audio sample rates or display refresh timing. XZERO resets the NCO phase at a command boundary, which keeps line-to-line timing identical when the NCO fraction is inexact — at 1/3 of the system clock the fraction `%5555_5555` is not exact, and clearing the phase each line prevents the one-clock glitch that would otherwise appear as the error accumulates. XCONT is used for segments within a line.
 
 ### 5.3.3 Streamer Modes
 
 The streamer supports multiple operating modes, each optimized for specific data transfer patterns:
 
-| Mode | Purpose | Typical Application |
+| Mode family | Data path | Typical Application |
 |------|---------|---------------------|
-| LUT mode | Transfer data through lookup table | Color palette mapping, gamma correction |
-| NCO mode | Numerically controlled oscillator | Waveform synthesis, signal generation |
-| RF mode | Radio frequency output generation | RF signal generation, modulation |
-| Goertzel mode | DSP filtering during transfer | Frequency detection, tone decoding |
+| Immediate to LUT to pins/DACs | The command's own long is unpacked, each field indexes the LUT | Small repeating patterns through a palette |
+| Immediate to pins/DACs | The command's own long is unpacked straight across pins and DAC channels | Fixed test patterns, static drive |
+| RDFAST to LUT to pins/DACs | Hub data via the FIFO, each field indexing the LUT | Paletted video, gamma correction |
+| RDFAST to pins/DACs | Hub data via the FIFO, split straight across pins and DAC channels | Parallel data output, audio to DACs |
+| RDFAST to RGB to pins/DACs | Hub pixels expanded to red/green/blue bytes | Component and digital video output |
+| Pins to DACs/WRFAST | Pin states captured to hub via the FIFO | Logic capture, parallel data input |
+| ADCs/pins to DACs/WRFAST | ADC samples captured to hub via the FIFO | Analog acquisition, scope capture |
+| DDS/Goertzel | LUT-driven synthesis with SINC1 or SINC2 filtering on the ADC input | Frequency detection, tone decoding |
 
 Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets its data differently: the LUT modes use each field as a lookup index, the RGB modes expand each pixel into red, green and blue bytes, and the plain pin/DAC modes split the data straight across pins and DAC channels.
 
@@ -356,7 +360,7 @@ The naming pattern `X_[source][size]_[pins]P_[dacs]DAC[bits]` describes the comp
 
 ## 5.4 Events and Interrupts
 
-The P2 supports event-driven programming through a comprehensive event system. Events notify code when specific conditions occur: counters reach target values, I/O pins match patterns, the streamer completes transfers, the CORDIC finishes computations, or other cogs request attention. The P2 provides two response mechanisms: polling (checking event flags in code) and interrupts (automatic vectoring to handler code). The architecture favors polling—with 8 cogs available, dedicating one cog to event monitoring often provides better response than interrupt overhead. Interrupts remain available when needed, offering three priority levels for nested interrupt handling.
+The P2 supports event-driven programming through a comprehensive event system. Events notify code when specific conditions occur: the System Counter passes target values, I/O pins match patterns, the streamer completes transfers, the CORDIC finishes computations, or other cogs request attention. The P2 provides two response mechanisms: polling (checking event flags in code) and interrupts (automatic vectoring to handler code). The architecture favors polling—with 8 cogs available, dedicating one cog to event monitoring often provides better response than interrupt overhead. Interrupts remain available when needed, offering three priority levels for nested interrupt handling.
 
 ### 5.4.1 Event Sources
 
@@ -373,7 +377,7 @@ A cog monitors sixteen background events, numbered 0 through 15. The numbers mat
 | 11 — XFI | Streamer finished (no pending command) | Wait for streamer completion / streamer idle |
 | 12 — XRO | Streamer NCO rollover | Waveform/DDS timing (phase-accumulator overflow) |
 | 13 — XRL | Streamer read LUT $1FF | LUT-wrap timing event |
-| 14 — ATN | Attention from another Cog | Inter-Cog communication |
+| 14 — ATN | Attention from another cog | Inter-cog communication |
 | 15 — QMT | CORDIC read with no result available (pipeline-empty) | Detecting a premature/erroneous GETQX/GETQY read |
 
 Only events 4-7 are programmable—those are the selectable events, configured by SETSE1-SETSE4. Events 0-3 and 8-15 are fixed sensors wired to specific hardware conditions.
@@ -462,9 +466,11 @@ Four instructions manage the complete lock lifecycle: allocation, acquisition, r
 | LOCKNEW | Allocate a new lock from the pool | C=0 if lock allocated, C=1 if pool empty |
 | LOCKRET | Return a lock to the pool | Lock becomes available for reallocation |
 | LOCKTRY | Try to acquire a lock | C=0 if already held/failed, C=1 if now acquired |
-| LOCKREL | Release a held lock | Lock becomes available for other Cogs |
+| LOCKREL | Release a held lock | Lock becomes available for other cogs |
 
-The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from the pool of available locks; LOCKRET returns the lock for reuse. This ensures lock IDs remain valid—if Cog A uses lock 5, no other cog receives lock 5 from LOCKNEW until Cog A returns it via LOCKRET.
+The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from the pool of available locks; LOCKRET returns the lock for reuse. This ensures lock IDs remain valid—if cog A uses lock 5, no other cog receives lock 5 from LOCKNEW until cog A returns it via LOCKRET.
+
+A lock's *held* state and its *allocation* are separate, and different things clear them. The held state ends when the owner executes LOCKREL, or when the owner cog goes inactive for any reason, including COGSTOP and COGINIT. The allocation ends only at LOCKRET. A cog that allocates a lock and then stops without LOCKRET therefore leaves the lock free to take but permanently unallocatable: the number is leaked. Sixteen such leaks and LOCKNEW has nothing left to hand out. Every LOCKNEW needs a matching LOCKRET on every path out of the cog, error and shutdown paths included.
 
 ### 5.5.2 Lock Usage Pattern
 
@@ -479,7 +485,7 @@ critical_section
         if_nc   jmp     #critical_section       ' Retry if lock held
 
                 ' ... exclusive access to shared resource ...
-                wrlong  data, hub_addr          ' Safe: we hold the lock
+                wrlong  data, hub_addr          ' Safe: lock is held
 
                 lockrel lock_id                 ' Release for other cogs
 
@@ -554,7 +560,7 @@ Each 32-bit LUT entry contains:
 
 | Bits | Content |
 |------|---------|
-| [9:0] | Handler address in Cog/LUT RAM |
+| [9:0] | Handler address in cog/LUT RAM |
 | [31:10] | SKIPF pattern (22 bits) |
 
 EXECF simultaneously branches and applies the skip pattern.
@@ -593,7 +599,7 @@ At reset, the P2 initializes to a known state before any user code executes:
 | Resource | Initial State |
 |----------|---------------|
 | Clock source | RCFAST (~20 MHz+ (nominally ~24 MHz) internal RC oscillator) |
-| All Cogs | Stopped (except Cog 0) |
+| All cogs | Stopped (except cog 0) |
 | Hub RAM | Undefined contents |
 | I/O pins | High-impedance (floating) |
 | 64-bit counter | Cleared to zero |
@@ -835,7 +841,7 @@ DEBUG_MASK and DEBUG_COGS operate at different levels:
 | Constant | Level | Controls |
 |----------|-------|----------|
 | DEBUG_MASK | Compile-time | Whether `debug[N]()` generates code |
-| DEBUG_COGS | Runtime | Whether a Cog can produce debug output |
+| DEBUG_COGS | Runtime | Whether a cog takes the debug interrupt, and so whether it can produce output |
 
 For a debug statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK permits it), and the executing cog must have its bit set in DEBUG_COGS.
 

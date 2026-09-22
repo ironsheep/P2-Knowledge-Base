@@ -1,13 +1,15 @@
 concept: event_interrupt_configuration
 title: Event and Interrupt Configuration
 category: event_handling
-description: Hardware event detection and interrupt handling with 4 interrupt levels and 16 event sources
+description: Hardware event detection and interrupt handling with three program-visible interrupts, a hidden debug interrupt, and 16 event sources
 documentation_source: enhanced
 documentation_level: comprehensive
 
 overview: |
   P2 provides sophisticated event and interrupt handling with 16 selectable event sources per cog,
-  4 interrupt levels with dedicated vectors, and both polling and interrupt-driven responses.
+  three program-visible interrupts with dedicated vectors, and both polling and interrupt-driven
+  responses. A fourth, hidden debug interrupt sits above all three and is inaccessible to normal
+  cog programs.
   Events can trigger interrupts, wake from WAIT, or be polled. Each cog has independent event configuration.
   
   Debug infrastructure uses interrupts extensively for breakpoints and single-stepping.
@@ -15,28 +17,33 @@ overview: |
 interrupt_system:
   interrupt_levels:
     INT0:
-      priority: "Lowest"
+      priority: "Highest - above all three program-visible interrupts"
       vector: "IJMP0"
       return: "RETI0 or RESI0"
-      
+      reserved_use: "The hidden debug interrupt"
+      critical_note: >-
+        INT0 is NOT a program-visible interrupt level. It is the debug interrupt, inaccessible to
+        normal cog programs and enabled per cog via HUBSET. During a debug ISR the read-only INA
+        and INB registers become readable/writable and are named IJMP0 and IRET0; IJMP0 is
+        initialized to $1F8 on COGINIT, the debug-ISR-entry routine in the cog-register ROM.
+        Used by the Spin2 debugger infrastructure.
+
     INT1:
-      priority: "Low"
+      priority: "Highest of the three program-visible interrupts - can interrupt INT2 and INT3"
       vector: "IJMP1"
       return: "RETI1 or RESI1"
       typical_use: "Timer interrupts"
-      
+
     INT2:
-      priority: "High"
+      priority: "Middle - can interrupt INT3"
       vector: "IJMP2"
       return: "RETI2 or RESI2"
       typical_use: "Pin events, Smart Pin ready"
-      
+
     INT3:
-      priority: "Highest (Debug)"
+      priority: "Lowest - can interrupt only non-interrupt code"
       vector: "IJMP3"
       return: "RETI3 or RESI3"
-      reserved_use: "Debug monitor ISR"
-      critical_note: "Used by Spin2 debugger infrastructure"
 
   interrupt_operations:
     SETINT1:
@@ -90,15 +97,14 @@ event_sources:
     5: "SE2 event occurred"
     6: "SE3 event occurred"
     7: "SE4 event occurred"
-    8: "Pin pattern matched"
-    9: "Pin pattern not matched"
-    10: "Hub FIFO ready"
-    11: "Hub FIFO empty"
-    12: "ATN from other cog"
-    13: "LOCK acquired"
-    14: "LOCK lost"
-    15: "External event"
-    16_debug: "BRK instruction (INT3)"
+    8: "Pin pattern match or mismatch occurred, established by SETPAT"
+    9: "Hub RAM FIFO interface wrapped and reloaded, established by RDFAST/WRFAST/FBLOCK"
+    10: "Streamer is ready for another command, established by XINIT/XZERO/XCONT"
+    11: "Streamer ran out of commands, established by XINIT/XZERO/XCONT"
+    12: "Streamer NCO rolled over, established by XINIT/XZERO/XCONT"
+    13: "Streamer read location $1FF of lookup RAM"
+    14: "Attention requested by other cog(s)"
+    15: "GETQX/GETQY executed without any CORDIC results available or in progress"
 
   event_configuration:
     SETSE1:
@@ -250,14 +256,14 @@ common_patterns:
 
 priority_and_nesting:
   priority_rules:
-    - "INT3 highest priority, can interrupt INT2/1/0"
-    - "INT2 can interrupt INT1/0"
-    - "INT1 can interrupt INT0"
+    - "INT1 has the highest program-visible priority and can interrupt INT2 and INT3"
+    - "INT2 has the middle priority and can interrupt INT3"
+    - "INT3 has the lowest priority and can interrupt only non-interrupt code"
     - "Same level cannot interrupt itself"
-    - "Debug (INT3) can interrupt everything"
+    - "The hidden debug interrupt (INT0) has priority over all three"
     
   nesting_depth:
-    - "Maximum 4 levels deep (one per interrupt)"
+    - "Maximum 4 levels deep - the three program-visible interrupts plus the debug interrupt"
     - "Each level has own return address"
     - "Flags saved per level"
     - "Debug ISR must handle full nesting"
@@ -284,7 +290,7 @@ best_practices:
     - "Use CALLA/CALLB in ISR for leaf functions"
     - "Clear event sources in ISR"
     - "Test with all interrupt combinations"
-    - "Reserve INT3 for debug infrastructure"
+    - "Leave the debug interrupt to the debugger: it is the hidden INT0, not INT3, and is enabled per cog via HUBSET"
     
   event_selection:
     - "Use polling for non-critical events"

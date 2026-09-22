@@ -212,10 +212,10 @@ Float with Output Preset by Flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit† | OUT bit† | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit† | OUT bit† | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit† | OUT bit† | OUTx | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010010 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010011 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010100 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010101 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -259,7 +259,7 @@ Float High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010001 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -300,7 +300,7 @@ Float Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010000 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -341,7 +341,7 @@ Float Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010111 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -384,7 +384,7 @@ Float Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit† | OUT bit† | OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001010110 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 

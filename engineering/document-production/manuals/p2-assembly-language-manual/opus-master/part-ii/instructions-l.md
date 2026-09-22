@@ -108,7 +108,7 @@ LOCKREL releases a lock that was previously acquired with LOCKTRY, making it ava
 
 When D is a register (not an immediate) and the WC effect is specified, LOCKREL performs an additional operation: it writes the cog ID of the previous lock owner into D and sets the C flag based on whether the lock was held. This diagnostic feature allows verification of lock ownership and debugging of synchronization issues.
 
-LOCKREL is safe to call even if the lock was not held by the current cog. Releasing an unheld lock has no effect. This property simplifies error recovery code, as locks can be released without checking ownership first.
+Only the cog holding a lock can release it. LOCKREL executed by a cog that does not hold the lock does not release it and has no effect on lock state, so the instruction is safe to issue on an error path without first checking ownership — but a cog cannot use LOCKREL to recover a lock stranded by another cog. LOCKRET does that: any cog may return an allocated lock to the pool, even one it did not allocate.
 
 Proper lock management requires that every LOCKTRY that successfully acquires a lock is balanced with a corresponding LOCKREL. Failure to release locks leads to deadlocks and resource starvation. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if the result is written back to D.
 
@@ -175,11 +175,11 @@ Try To Acquire Lock
 
 LOCKTRY attempts to acquire a lock using an atomic test-and-set operation. The lock to acquire is specified by the lower 4 bits of D (D[3:0]), allowing lock numbers 0 through 15. The P2 provides 16 hardware locks for inter-cog synchronization and resource protection.
 
-If the WC effect is specified, the C flag is set (1) if the lock was successfully acquired, or cleared (0) if the lock is already held by another cog. This non-blocking behavior allows the calling code to make immediate decisions: proceed with the protected operation if the lock was acquired, or take alternative action if it was not.
+If the WC effect is specified, the C flag is set (1) if the lock was successfully acquired, or cleared (0) if it was not — either because another cog holds it, or because the lock number is not allocated. A hard-coded lock number that LOCKNEW never issued can never be taken, so a spin-wait on an unallocated lock loops forever. This non-blocking behavior allows the calling code to make immediate decisions: proceed with the protected operation if the lock was acquired, or take alternative action if it was not.
 
 LOCKTRY implements the critical section entry point in the standard lock pattern: try to acquire the lock, and only proceed if successful. The lock must be released with LOCKREL when the critical section completes. LOCKTRY/LOCKREL bound the critical section so only the holding cog accesses the shared resource.
 
-The instruction is non-blocking and returns immediately regardless of lock availability. For spin-lock behavior (waiting until the lock is acquired), LOCKTRY must be called repeatedly in a loop. Lock 15 is traditionally reserved for debug monitor use. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if a result is returned.
+The instruction is non-blocking and returns immediately regardless of lock availability. For spin-lock behavior (waiting until the lock is acquired), LOCKTRY must be called repeatedly in a loop. Lock 15 is used by the Spin2 debugger: in a DEBUG build it is already allocated and held, so it may not be available to application code at all. Allocate lock numbers with LOCKNEW rather than hard-coding 15. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if a result is returned.
 
 
 

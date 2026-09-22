@@ -537,13 +537,13 @@ The system counter is a free-running 64-bit counter (Rev B/C silicon) that incre
 
 **Resolution**: System clock cycles (typically 200 MHz = 5ns resolution)
 
-**Usage**: CT provides precise timing for delays, timeouts, and event synchronization. The lower 32 bits wrap approximately every 21.5 seconds at 200 MHz. For precise waits, read the current CT value, add the desired delay to compute a target time, and wait for CT to reach that target. This approach compensates for instruction execution time between reading CT and initiating the wait.
+**Usage**: CT provides precise timing for delays, timeouts, and event synchronization. The lower 32 bits wrap approximately every 21.5 seconds at 200 MHz. For precise waits, read the current CT value, add the desired delay to compute a target time, and wait until CT has passed that target. This approach compensates for instruction execution time between reading CT and initiating the wait.
 
 **Example**:
 ```pasm2
                 getct   target                  ' Get current time
                 addct1  target, ##delay_cycles  ' target = now + delay
-                waitct1                         ' Wait for CT to reach it
+                waitct1                         ' Wait til CT passes it
 
                 ' Timeout pattern
                 getct   timeout

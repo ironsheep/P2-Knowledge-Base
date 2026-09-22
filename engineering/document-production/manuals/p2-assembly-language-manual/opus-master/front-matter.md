@@ -112,7 +112,7 @@ This manual would not exist without the contributions of many individuals and or
 
 **Chip Gracey** for the brilliant design of the P2 architecture and for maintaining detailed technical specifications.
 
-**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the instruction set and identified critical details worth documenting.
+**The P2 Community** for extensive testing, feedback, and real-world usage that has refined the documented understanding of the instruction set and identified critical details worth documenting.
 
 **Open Source Contributors** who have developed tools, compilers, and applications built with PASM2.
 
@@ -125,7 +125,7 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 ## For Different Reader Types
 
-**New to P2**: Start with Part I, Chapters 1-2 to understand the P2 architecture and instruction format fundamentals. These chapters provide essential context for understanding how PASM2 instructions work. Then explore Part II selectively based on what you need to accomplish.
+**New to P2**: Start with Part I, Chapters 1-2 to understand the P2 architecture and instruction format fundamentals. These chapters provide essential context for understanding how PASM2 instructions work. Then explore Part II selectively, as the task requires.
 
 **Experienced P1 Users**: See "For P1 Developers" below for a specification comparison and overview of new capabilities. Then use Part II as the primary reference—the instruction-by-instruction format will feel familiar.
 
@@ -147,7 +147,7 @@ The Propeller 2 preserves the core Propeller philosophy—eight symmetric cogs s
 | Cog RAM | 512 longs | 512 + 512 LUT |
 | I/O | 32 pins | 64 Smart Pins |
 | Math | Software | CORDIC |
-| Interrupts | None | 3 per Cog |
+| Interrupts | None | 3 per cog |
 | Instructions | ~60 | ~380 |
 
 ¹ The P2 Datasheet's AC Characteristics give the PLL system clock as 3.33 MHz minimum, 180 MHz typical, 320 MHz maximum, with the nominal 180 MHz rating specified up to 105 °C. Beyond the datasheet, the Silicon Documentation notes that the PLL can be pushed to 350 MHz using VCO/1 mode (%PPPP = 15) for fastest overclocking — that figure is an overclock ceiling, not a rated maximum, and stability there is application-dependent. Higher frequencies require adequate thermal management. Chapter 4 covers clock configuration in full.
@@ -319,6 +319,6 @@ This manual uses consistent cross-reference formats:
 
 This manual documents the P2 Assembly Language (PASM2) in a format suited to both human reading and AI-assisted development. The content is derived from official Parallax documentation, community expertise, and verification against P2 silicon behavior.
 
-It covers every documented instruction, directive, constant, and special register, verified against official sources and tested on P2 hardware. The consistent structure supports both human reading and programmatic parsing.
+It covers every instruction, directive, constant, and special register documented in the P2 Documentation v35 and the Parallax P2 Instructions v35 spreadsheet. Instruction encodings, flag effects, and cycle counts are verified against those sources; a subset of behaviors is additionally confirmed on P2 silicon, and those are cited where they appear. The consistent structure supports both human reading and programmatic parsing.
 
 We welcome feedback, corrections, and suggestions for improvement. This is a living document that will evolve with the P2 community's growing expertise.

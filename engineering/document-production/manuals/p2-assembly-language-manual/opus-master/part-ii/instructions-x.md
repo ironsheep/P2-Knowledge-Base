@@ -68,6 +68,8 @@ The streamer operates as a hardware DMA engine, transferring data without cog in
 - Number of pins involved in the transfer
 - Data formatting (bit order, byte packing, word sizes)
 
+Dest[15:0] is the transfer count, in NCO rollovers. A count of zero stops the streamer immediately; a count of `$FFFF` runs the command perpetually without decrementing, so the largest terminating count is `$FFFE`.
+
 The Src parameter provides either the data source (for immediate transfers) or a hub memory address (for hub-based transfers).
 
 XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:

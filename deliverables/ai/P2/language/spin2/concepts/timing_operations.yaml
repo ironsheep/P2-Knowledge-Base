@@ -62,12 +62,12 @@ timing_functions:
 
   - function: "WAITCT(target)"
     parameters: "target counter value"
-    description: "Block until counter reaches target"
+    description: "Block until the System Counter has passed target (MSB of (CT - target) is 0); a target already in the past returns at once"
     use_for: "Precise delays, periodic execution"
 
   - function: "POLLCT(target)"
-    returns: "Non-zero if target reached"
-    description: "Non-blocking check if counter reached target"
+    returns: "Non-zero if the System Counter has passed target"
+    description: "Non-blocking check whether the System Counter has passed target"
     use_for: "Timeout checks, background work while waiting"
 
   - function: "WAITMS(ms)"

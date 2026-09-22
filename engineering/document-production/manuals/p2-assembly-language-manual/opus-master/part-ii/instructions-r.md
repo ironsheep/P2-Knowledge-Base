@@ -799,7 +799,7 @@ Return From Interrupt
 
 RETI0, RETI1, RETI2, and RETI3 return from their respective interrupt handlers. Each instruction is functionally equivalent to a CALLD instruction that restores the program counter, C flag, and Z flag from the corresponding interrupt return address registers.
 
-The P2 provides four interrupt levels (INT0-INT3), with INT0 being the lowest priority and INT3 being the highest. Each RETI instruction completes its interrupt handler and resumes normal execution at the point where the interrupt occurred.
+The P2 provides three program-visible interrupts, INT1 through INT3, plus the hidden debug interrupt INT0. INT1 has the highest priority and can interrupt INT2 and INT3; INT2 can interrupt INT3; INT3 can interrupt only non-interrupt code. INT0, the debug interrupt, has priority over all three and is inaccessible to normal cog programs. Each RETI instruction completes its interrupt handler and resumes execution at the point where the interrupt occurred.
 
 
 

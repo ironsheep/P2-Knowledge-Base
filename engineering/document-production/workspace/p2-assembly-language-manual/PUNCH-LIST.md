@@ -96,16 +96,15 @@ All 314 entries updated with appropriate color bars.
 
 ---
 
-## PASM Code Examples - Right Edge Comments
+## ~~PASM Code Examples - Right Edge Comments~~ ✅ CLOSED
 
-**Location:** All Part II instruction entries with `::: pasm2` code examples
+**Status:** ✅ Closed 2026-09-22 («#348») — superseded by an automated gate.
 
-**Current state:** Some code examples may have comments that run too long and could wrap or be truncated in the PDF.
-
-**Needed:** Audit all PASM2 code examples for:
-- Comments exceeding reasonable line length (~60 chars for comment portion)
-- Reformat long comments to wrap to next line or abbreviate
-- Ensure consistent comment alignment within each example
+This item predates the code-line-length gate. `audit-code-line-length.py` now measures every code
+line in every master against this manual's `code_line_budget_K` (76, from `MANUAL-DESCRIPTOR.md`),
+and it is **GREEN across all 44 files**. An over-long code line is now caught mechanically at
+prepare time rather than by eye, and the standing rule is to shorten the content — never to
+reintroduce wrapping.
 
 ---
 
@@ -251,5 +250,10 @@ All 314 entries updated with appropriate color bars.
 - ✅ Missing Diagrams - Part I (2025-12-04)
 - ✅ DEBUG Instruction Chapter (2025-12-04)
 - ⊘ FIFO Knowledge Base Content - Not for this manual (YAML upgrade task)
-- [ ] **RE-AUDIT AGAINST HEAD — KB v1.20.0 (2026-09-20).** `part-iii/appendix-c-categorical-index.md:332-334` describes all three CT instructions as *"Set CT1/CT2/CT3 event to trigger on CT = D + S"*. Corrected in the KB this release: the event fires once the System Counter has **PASSED** the target, by the MSB rule `WAITCT1` already stated — so a target already in the recent past fires **at once** rather than waiting for the counter to come round, and a target more than 2^31 clocks ahead reads as already passed. The two readings disagree about exactly one thing, and it is what a missed deadline does. See `language/pasm2/addct1.yaml` (F-443).
-  Flagged by `release-yamls` §8 at the v1.20.0 publish. Not re-rendered or re-audited here.
+- [x] ~~**RE-AUDIT AGAINST HEAD — KB v1.20.0 (2026-09-20).**~~ ✅ **Done 2026-09-22 («#348»)** — and the class was far wider than this line. The CT-event proposition was stated at **twelve** sites across five files, four of them already correct; the eight wrong ones are fixed. The KB carried the same defect at **eight more sites in six files** that F-443 never reached (`addct3.long_description`, `jct1/2/3`, and four Spin2 timing entries) — filed and applied as F-447, because fixing the manual alone would have left the correction one regeneration deep. Full findings: `audit/periodic-audit-2026-09-22.md`.
+
+### Open, carried to the next Assembly release (named expiry)
+
+- [ ] **F7-8 — Appendix A drops hub-exec timing on ~50 branch rows.** Rows for J\*/TJ\*/DJ\*/IJ\*, JMP, RET, CALLA/CALLB and RESI/RETI give `2 or 4` where Part II *and* the YAML both give `2 or 4 / 2 or 13-20`. Appendix A is internally inconsistent about it too — TJNF and TJS already carry the full form. Mechanical and bounded; deferred only for size. **Expiry: the next Assembly release.**
+- [ ] **F7-5 — Result cell reads `---` though the instruction writes.** CALLD (`instructions-c.md:163,164`, which contradicts that entry's own Operation line), ALTI (`instructions-a.md:585`, which contradicts its own Explanation), CALL, LOC, AKPIN, AUGD/AUGS. **Expiry: the next Assembly release.**
+- [ ] **Unaudited surface from the 2026-09-22 deep pass**: `part-ii/special-registers.md` (723 lines) and `part-ii/directives.md` (1,393) were never row-audited; appendices B, D, F, H, I, J were not opened; Part II prose was read only where it adjoined a table; `style-guide.md` structural conformance (#10) is unverified. **Expiry: the next deep audit.**

@@ -13,9 +13,9 @@ The P2 provides four clock source options, each suited to different application 
 
 **RCFAST** is the internal fast RC oscillator, running at 20 MHz or higher (nominally ~24 MHz, characterized 20-30 MHz across process, voltage, and temperature). This is the default clock source at power-on and reset. RCFAST requires no external components and provides immediate operation, though its frequency varies with temperature and process. Use RCFAST for applications where precise timing is not critical or as a bootstrap clock while configuring a more accurate source.
 
-**RCSLOW** is the internal slow RC oscillator, running at approximately 20 kHz. This ultra-low-power clock serves sleep modes and real-time clock applications. RCSLOW frequency varies significantly with temperature (±50%), making it unsuitable for precision timing but ideal for power-sensitive applications.
+**RCSLOW** is the internal slow RC oscillator, running at approximately 20 kHz. This ultra-low-power clock serves sleep modes and real-time clock applications. RCSLOW frequency varies significantly with temperature (±50%), making it unsuitable for precision timing but usable where power draw is the constraint.
 
-**Crystal oscillator** mode connects an external crystal (typically 10-20 MHz) between the XI and XO pins. The P2 includes internal feedback resistors and programmable loading capacitors, simplifying crystal circuit design. Crystal sources provide the stability needed for precise timing, communication protocols, and frequency synthesis.
+**Crystal oscillator** mode connects an external crystal (typically 10-20 MHz) between the XI and XO pins. The P2 includes internal feedback resistors and programmable loading capacitors, simplifying crystal circuit design. Crystal sources hold a far tighter frequency tolerance than either RC oscillator.
 
 **External clock** mode accepts an external clock signal on the XI pin. Two different limits apply here and it is worth keeping them apart: the P2 Datasheet rates *direct drive into XI* at DC–200 MHz, while the *system clock* the PLL produces from that input is rated 180 MHz typical and 320 MHz maximum. The input ceiling is the lower of the two. Note that 350 MHz is the PLL overclock ceiling (VCO/1 mode, see §4.1.2) — neither a datasheet rating nor the direct external-input range. This mode allows the P2 to synchronize with external timing sources or use specialized oscillators.
 
@@ -182,7 +182,7 @@ The SETQ instruction takes one parameter specifying how many additional longs to
         rdlong  buffer, ptr             ' Burst read from Hub
 ```
 
-This code reads 16 consecutive longs from hub memory starting at address `ptr` and stores them in cog RAM starting at address `buffer`. The first long experiences the normal hub access (9...16 clocks, including its slot-wait), but each subsequent long transfers in just one additional cycle. The whole burst completes in roughly 2 (SETQ) + 9...16 (first RDLONG) + 15 (subsequent longs) ≈ 26-33 cycles—far faster than 16 separate RDLONG instructions, each of which costs 9...16 clocks for a total on the order of 144-256 clocks (nominally ~10-12 each).
+This code reads 16 consecutive longs from hub memory starting at address `ptr` and stores them in cog RAM starting at address `buffer`. The first long experiences the normal hub access (9...16 clocks, including its slot-wait), but each subsequent long transfers in just one additional cycle, unless the hub FIFO reaches the same hub RAM slice on the same cycle, in which case the FIFO takes priority and the block move waits for that slice to come around again. The whole burst completes in roughly 2 (SETQ) + 9...16 (first RDLONG) + 15 (subsequent longs) ≈ 26-33 cycles—far faster than 16 separate RDLONG instructions, each of which costs 9...16 clocks for a total on the order of 144-256 clocks (nominally ~10-12 each).
 
 Burst transfers work because the egg-beater presents the next sequential long from the next RAM slice on each successive clock. After the first long pays the initial slot-wait, each subsequent slice is available on the very next clock, so the cog transfers one long per clock. The burst does not lock the hub—other cogs continue accessing their own slices concurrently throughout.
 
@@ -298,7 +298,7 @@ The streamer subsystem (described in Chapter 5) uses the FIFO for high-bandwidth
 
 **Performance Considerations:**
 
-FIFO access provides near-instantaneous data transfer from the program's perspective—no hub window waiting, no variable latency. However, the FIFO has finite depth. If a program reads faster than the FIFO can refill (or writes faster than it can drain), the FIFO stalls waiting for hub access. For sustained maximum throughput, balance data production/consumption rate with the hub's aggregate bandwidth.
+FIFO access provides near-instantaneous data transfer from the program's perspective—no hub window waiting, no variable latency. The FIFO's depth and refill threshold are sized so that reads cannot outrun it: the silicon guarantees no underflow under any reading scenario. A write stream can still stall waiting for hub access if it outruns the drain, and sustained aggregate throughput is in every case bounded by the hub bandwidth shared across cogs.
 
 The FIFO access instructions (RFLONG, RFWORD, RFBYTE, WFLONG, WFWORD, WFBYTE) complete in 2 cycles when the FIFO has data or space available, so they sustain streaming throughput.
 
@@ -313,7 +313,7 @@ Determinism provides several critical benefits for embedded systems programming:
 
 **Predictable performance:** When a routine takes 1,000 cycles during testing, it takes 1,000 cycles in production. Performance measurements made during development remain accurate in the deployed system.
 
-**Reliable timing:** Real-time systems can meet hard timing deadlines because worst-case execution time equals actual execution time. If an interrupt handler must complete within 500 cycles, testing that it does so once proves it always will.
+**Reliable timing:** Real-time systems can meet hard timing deadlines because worst-case execution time equals actual execution time. Worst-case execution time equals actual execution time for any path whose hub-access phase is fixed; where a path contains an unaligned hub access, the 0...7 cycle slot-wait bounds the variation, and the worst case is the measured time plus that wait per access (§4.4.2).
 
 **Reproducible behavior:** Timing-related bugs are reproducible because timing is consistent. A race condition that appears during development will appear in the same way in production, making debugging practical.
 
@@ -366,7 +366,7 @@ The conditional execution approach provides constant timing:
 
 This code takes 2 (CMP) + 2 (first MOV, executed if Z set) + 2 (second MOV, executed if Z clear) = 6 cycles when Z is set, or 2 (CMP) + 2 (first MOV, skipped) + 2 (second MOV, executed) = 6 cycles when Z is clear. Both paths take exactly 6 cycles.
 
-The key insight is that conditionally-skipped instructions still consume their execution time slot—the processor evaluates the condition and skips the instruction's effect, but the instruction still occupies 2 cycles. This behavior ensures that all execution paths through conditionally-executed code take the same time.
+Conditionally-skipped instructions still consume their execution time slot—the processor evaluates the condition and skips the instruction's effect, but the instruction still occupies 2 cycles. This behavior ensures that all execution paths through conditionally-executed code take the same time.
 
 Conditional execution works for simple cases where both branches are short. For longer code sequences or cases where only one branch performs work, traditional branching may be more efficient despite the timing variation. The choice depends on whether consistent timing or shorter average time is more important for the specific application.
 
@@ -389,13 +389,13 @@ WAITX delays are relative to when the instruction executes. If a program needs t
 
 The P2 provides a global cycle counter that increments every clock cycle. Cogs can read this counter with GETCT and wait for specific counter values using the WAITCT family of instructions. This mechanism enables drift-free periodic timing.
 
-Each cog has three independent counter match registers (CT1, CT2, CT3). Programs load target counter values into these registers using ADDCT1, ADDCT2, or ADDCT3, then wait for the counter to reach those values using WAITCT1, WAITCT2, or WAITCT3:
+Each cog has three independent counter match registers (CT1, CT2, CT3). Programs load target counter values into these registers using ADDCT1, ADDCT2, or ADDCT3, then wait until the System Counter has passed those values using WAITCT1, WAITCT2, or WAITCT3:
 
 ```pasm2
         getct   time                    ' Read current time
         addct1  time, ##1000            ' Set CT1 = time + 1000
         ' ... do work ...
-        waitct1                         ' Wait until counter reaches CT1
+        waitct1                         ' Wait until CT has passed CT1
 ```
 
 This pattern ensures that the wait completes exactly 1,000 cycles after the GETCT instruction, regardless of how long the intervening work takes. If the work completes in 800 cycles, WAITCT1 waits 200 more cycles. If the work takes 1,200 cycles, WAITCT1 returns immediately (the deadline has already passed).
@@ -473,7 +473,7 @@ Once the loop stabilizes—after its first iteration—RDLONG sees a constant 5 
 A plain RDLONG or WRLONG stalls the cog until the transfer completes—9...16 clocks in cog mode (§4.3.2)—and because a stalled instruction stalls every following instruction in the pipeline, the cog cannot compute in parallel with a scalar hub read. There is no non-blocking scalar hub access; issuing an RDLONG and expecting the next instructions to run "while the read proceeds" does not work. Hiding hub latency requires hardware built for it:
 
 - **The FIFO (RDFAST/RFLONG, §4.3.4)** refills in the background using spare hub windows, so RFLONG/RFWORD/RFBYTE reads complete in about 2 clocks while the hardware fetches ahead. This is the mechanism that genuinely overlaps hub transfer with cog computation.
-- **SETQ block bursts (§4.3.3)** amortize the hub-window wait across many longs—one long per clock after the first—but the burst is itself a single blocking transfer: the cog resumes only after the whole block has moved, so it does not overlap the transfer with the ALU.
+- **SETQ block bursts (§4.3.3)** amortize the hub-window wait across many longs—one long per clock after the first, except where the hub FIFO contends for the same slice—but the burst is itself a single blocking transfer: the cog resumes only after the whole block has moved, so it does not overlap the transfer with the ALU.
 
 Genuine compute-in-parallel does exist elsewhere on the P2—the CORDIC solver (§4.6.3): its start instruction returns in 2...9 clocks and the 55-clock computation runs in the background while the cog does other work. That property belongs to the CORDIC pipeline, not to scalar hub reads.
 
@@ -522,18 +522,20 @@ A WS2812 LED protocol example demonstrates the precision required:
 send_bit
         testb   data, #31       wc      ' Get high bit (bit 31) into C flag
         drvh    pin                     ' Start pulse (high)
-        if_c    waitx   ##160           ' 1-bit: wait 160 cycles
-        if_nc   waitx   ##80            ' 0-bit: wait 80 cycles
+        if_c    waitx   ##160-K_HI      ' 1-bit: 160-cycle high phase
+        if_nc   waitx   ##80-K_HI       ' 0-bit: 80-cycle high phase
         drvl    pin                     ' End pulse (low)
-        if_c    waitx   ##90            ' 1-bit: wait 90 cycles
-        if_nc   waitx   ##170           ' 0-bit: wait 170 cycles
+        if_c    waitx   ##90-K_LO       ' 1-bit: 90-cycle low phase
+        if_nc   waitx   ##170-K_LO      ' 0-bit: 170-cycle low phase
         rol     data, #1                ' Shift to next bit
         djnz    count, #send_bit
 ```
 
-This code generates precise pulse widths using WAITX for delays and conditional execution to avoid branch timing variation. The DRVH and DRVL instructions change pin states, and the WAITX instructions maintain exact timing between transitions.
+This code generates the pulse widths using WAITX for the delays and conditional execution to avoid branch timing variation. The DRVH and DRVL instructions change pin states, and because every path through the loop issues the same instructions, the phase lengths do not vary from bit to bit.
 
-Deterministic timing eliminates the jitter and uncertainty common in systems with caches or interrupts. Each pulse width is exactly the specified duration, enabling reliable communication with timing-sensitive devices.
+The `K_HI` and `K_LO` terms are what makes the phases come out at their stated lengths. A WAITX occupies 2 + D clocks, not D (§4.5.1), a conditionally cancelled instruction still costs its 2 clocks, and the DRVH, DRVL, ROL and DJNZ that bracket the waits cost their own. Each phase therefore runs longer than its WAITX value by a fixed amount, and that amount is what the constant subtracts. Count the instructions on each phase's path for the loop as written, and confirm the resulting widths against the device's timing window before relying on them.
+
+Deterministic timing removes the jitter that caches and interrupts introduce: each phase is the WAITX value plus the fixed cost of the instructions bracketing it, and that cost is identical on every iteration.
 
 
 ## 4.7 Measuring Execution Time
@@ -569,7 +571,7 @@ Subtraction using unsigned arithmetic naturally handles wrap-around. When end_ti
         sub     end_time, start_time      ' Result: $20 (32 cycles)
 ```
 
-This automatic wrap-around handling works for elapsed times up to 2³¹ cycles (half the counter range). For longer measurements, code must count wrap-around events explicitly or use multiple counter values.
+Unsigned subtraction returns the correct elapsed count for any interval shorter than 2³² cycles. Beyond that the difference is ambiguous, so longer measurements must count wrap-around events explicitly or read the upper 32 bits with `GETCT WC`.
 
 ### 4.7.3 Profiling Techniques
 

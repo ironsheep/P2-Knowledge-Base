@@ -871,7 +871,7 @@ Write Pin Y Parameter
 
 WYPIN sets the Y parameter of one or more smart pins. The Y register serves multiple purposes depending on smart pin mode:
 
-- For PWM modes: Sets the base period
+- For PWM modes: Sets the output value, captured at the start of every PWM frame and compared against the frame counter — the duty. The base period and frame count come from WXPIN
 - For SPI/serial modes: Controls data to transmit
 - For counter modes: Sets count value
 - For ADC modes: Initiates conversions

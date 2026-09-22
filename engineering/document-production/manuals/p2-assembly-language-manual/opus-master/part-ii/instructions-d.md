@@ -114,8 +114,8 @@ Set Pin Direction by C flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit† | DIR bit† | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | DIR bit† | DIR bit† | DIRx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | DIR bit† | DIR bit† | DIRx | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -158,7 +158,7 @@ Set Pin Direction High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | DIR bit† | DIR bit† | DIRx | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -195,7 +195,7 @@ Set Pin Direction Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | DIR bit† | DIR bit† | DIRx | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -232,7 +232,7 @@ Direction Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | DIR bit† | DIR bit† | DIRx | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -276,8 +276,8 @@ Set Pin Direction by Z flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit† | DIR bit† | DIR bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | DIR bit† | DIR bit† | DIRx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | DIR bit† | DIR bit† | DIRx | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -320,7 +320,7 @@ Direction Random
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit† | DIR bit† | DIR bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | DIR bit† | DIR bit† | DIRx | 2 |
 
 † Original direction state of the base pin (D[5:0]) before instruction executes.
 
@@ -486,8 +486,8 @@ Drive Pins by C flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit† | OUT bit† | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit† | OUT bit† | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011010 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011011 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -528,7 +528,7 @@ Drive Pins High
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit† | OUT bit† | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011001 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -567,7 +567,7 @@ Drive Pins Low
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit† | OUT bit† | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011000 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -608,7 +608,7 @@ Drive Not
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit† | OUT bit† | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011111 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 
@@ -654,8 +654,8 @@ Drive Pins by Z flag
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit† | OUT bit† | OUT bit | 2 |
-| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit† | OUT bit† | OUT bit | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011100 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
+| EEEE | 1101011 | CZL | DDDDDDDDD | 001011101 | OUT bit† | OUT bit† | DIRx, OUTx | 2 |
 
 † Original output state of the base pin (D[5:0]) before instruction executes.
 

@@ -2,7 +2,7 @@
 manual_slug: p2-assembly-language-manual
 doc_class: reference                              # YAML-backed (PASM2 instruction reference)
 code_line_budget_K: 76                            # platform-inherited; LM-Mono calibrated (creation-guide v1.2)
-last_published_tag: p2-assembly-language-manual-v3.1.7   # baseline for Dimension #15 (released 2026-08-22, 505pp)
+last_published_tag: p2-assembly-language-manual-v3.1.8   # baseline for Dimension #15 (released 2026-09-11)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md                   # v1.1 (user-suggestions sprint)
@@ -41,13 +41,21 @@ from the central `document-audit` skill body + the guides referenced above.
 index). Tutorial voice is NOT permitted here (Dimension #9).
 
 **Unreleased efforts since `last_published_tag`** (the changeset-integrity baseline, Dimension #15):
-**IN FLIGHT — streamer-correctness co-release (v3.1.7, opened 2026-08-22).** The Assembly
-half of the Streamer Guide v1.1.0 sweep: F-303 (RGBI8), F-305 (DAC pin setup) and F-308
-(`X_PINS_ON` needs `DIRH`), plus F-318 — the Appendix G mode-table decode defect those
-three surfaced. Also adopts three platform features owed at this release: metadata
-single-sourcing (F-300), rights metadata (F-316) and the cross-reference filter (F-301).
-Next release deltas against the **v3.1.6** tag. Inventory:
-`engineering/analysis/2026-08-22-assembly-v3.1.7-finalize-inventory.md`.
+**IN FLIGHT — the KB v1.20.0 drift drain (v3.1.9, opened 2026-09-22, «#348»).** A re-audit of the
+whole manual against KB HEAD across the 12 YAML commits / 137 changed files that landed after
+v3.1.8. Carries: the CT-event PASSED rule (F-443) at every site that states it; the inverted
+interrupt-priority statement in the RETI entry; the §5.3 streamer fabrications (XZERO, "RF mode",
+XCONT); the WYPIN/PWM role inversion; the lock ownership-versus-allocation rule and the COGSTOP
+leak; and the new KB facts the manual had not absorbed ($FFFF-perpetual, the SETQ-burst FIFO
+exception, the streamer pin-base alignment rule). Also carries c51876579 (the LUT page), which
+landed after the v3.1.8 tag and had no changelog entry. Findings report:
+`./audit/periodic-audit-2026-09-22.md`.
 
-The 2026-07-09 fabrication-audit sprint referenced here previously **shipped** in v3.1.3–v3.1.6;
-its "deltas against the v3.1.2 tag" line was stale from v3.1.3 onward.
+**Baseline corrections made 2026-09-22:** this field said `v3.1.7` until «#348» found that
+**v3.1.8 shipped 2026-09-11** — the stale value would have had Dimension #15 audit the wrong
+range. The v3.1.7 streamer-correctness effort formerly described here **shipped** in v3.1.7, and
+the three platform features it adopted (F-300 metadata single-sourcing, F-316 rights metadata,
+F-301 cross-reference filter) are all recorded ✅ for this manual in `PLATFORM-FEATURE-ADOPTION.md`.
+Likewise the 2026-07-09 fabrication-audit sprint shipped in v3.1.3–v3.1.6. Each of those lines was
+left standing past its release; the pattern to watch is that this field is only ever corrected when
+someone trips over it.

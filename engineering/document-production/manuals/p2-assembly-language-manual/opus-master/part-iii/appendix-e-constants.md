@@ -587,7 +587,7 @@ Runtime constant controlling which cogs can trigger debug output.
 
 #### Description
 
-DEBUG_COGS controls runtime debug capability per cog. If a cog's bit is clear, DEBUG statements executing on that cog produce no output—the debug interrupt is ignored. This operates independently from DEBUG_MASK: DEBUG_MASK controls compile-time code generation, while DEBUG_COGS controls runtime output permission.
+DEBUG_COGS is the per-cog debug interrupt enable; each bit enables the debug interrupt in the corresponding cog, and the default enables all eight. A cog whose bit is clear does not take a debug interrupt at a DEBUG statement at all — the statement still pops its DEBUG-intended values from the stack, which is harmless, but no output is produced, and a PASM `BRK #code` in such a cog does nothing and costs two clocks. This operates independently from DEBUG_MASK: DEBUG_MASK controls compile-time code generation, while DEBUG_COGS is the runtime interrupt enable.
 
 For a DEBUG statement to produce output, both conditions must be met: the statement must compile (DEBUG_MASK allows it or it's a standard `debug()`), and the executing cog must have its bit set in DEBUG_COGS.
 

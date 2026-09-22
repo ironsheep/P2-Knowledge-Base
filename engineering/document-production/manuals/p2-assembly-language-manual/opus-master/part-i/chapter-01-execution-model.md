@@ -40,7 +40,7 @@ Cogs can communicate with each other through shared hub memory, hardware locks, 
 
 The `COGINIT` instruction starts a new cog or restarts an existing one. COGINIT specifies which cog to start (0-7), where the code resides in hub memory, and optionally passes a parameter to the new cog. The start address is written to the new cog's PTRB register; the optional parameter—supplied via a `SETQ` executed immediately before COGINIT—is written to the new cog's PTRA register, providing a simple mechanism for initialization data.
 
-The `COGSTOP` instruction halts a running cog. A cog can stop itself or another cog by specifying the target cog number. Stopped cogs consume no power and can be restarted later with different code.
+The `COGSTOP` instruction halts a running cog. A cog can stop itself or another cog by specifying the target cog number. A stopped cog is clock-gated and draws no dynamic power; it can be restarted later with different code. Any lock that cog was holding is implicitly released when it stops, but the lock number itself stays allocated — see §5.5.
 
 
 ## 1.2 Cog Memory
@@ -53,7 +53,7 @@ The `COGSTOP` instruction halts a running cog. A cog can stop itself or another 
 Figure 1.2: Cog Memory Map
 :::
 
-Each cog has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each cog and provides single-cycle read and write access. Unlike hub memory, cog memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
+Each cog has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each cog and provides two-clock read and write access, the fastest operand path the cog has. Unlike hub memory, cog memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
 
 ### 1.2.1 General Purpose Registers ($000-$1EF)
 
@@ -169,7 +169,7 @@ The CORDIC coprocessor also interacts with hub memory. CORDIC operations can rea
 
 The hub instructions above are *cog-driven*: the cog issues each RDLONG or WRLONG and waits for its hub window, so the transfer occupies—blocks—the cog while it runs. A SETQ burst (§1.4.3) is the fast cog-driven path, moving one long per clock after the initial window. Wrapping a transfer loop in a `REP` block (Chapter 4) makes it interrupt-atomic: REP shields its repeated instructions from interrupts—including debug interrupts that ordinary masking cannot hold off—so the whole block runs uninterrupted, at the cost of added interrupt latency for its duration.
 
-Alongside this cog-driven path, each cog has its own **streamer**: a small engine that moves data between hub memory and the pins, DACs, or ADC inputs on its own, at a rate the program sets, without the cog's further involvement. If you have used DMA before, the streamer is a close cousin of a DMA channel—with the additions that it paces transfers to an exact rate and can reshape data as it moves; if you have not, it is simply hardware that moves a stream of data while the cog does other work. The streamer shares the cog's FIFO with hub execution and the RDFAST/WRFAST instructions, so only one of those uses is active at a time. The streamer is covered in Chapter 4 and, in depth, in the *P2 Streamer Programming Guide*.
+Alongside this cog-driven path, each cog has its own **streamer**: a small engine that moves data between hub memory and the pins, DACs, or ADC inputs on its own, at a rate the program sets, without the cog's further involvement. The streamer is a close cousin of a DMA channel, with the additions that it paces transfers to an exact rate and can reshape data as it moves. The streamer shares the cog's FIFO with hub execution and the RDFAST/WRFAST instructions, so only one of those uses is active at a time. The streamer is covered in Chapter 4 and, in depth, in the *P2 Streamer Programming Guide*.
 
 
 ## 1.5 The Execution Pipeline
@@ -182,7 +182,7 @@ Hub memory instructions add variable delays waiting for hub access windows. The 
 
 When executing from hub RAM (hub execution mode), the cog uses its FIFO hardware to prefetch instructions rather than rotating hub access. The FIFO queues instructions ahead of execution, providing smoother instruction flow. However, this dedicates the FIFO to instruction fetch, making it unavailable for RDFAST/WRFAST streaming operations during hub execution.
 
-Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch causes the pipeline to be flushed, so the first instruction following the branch takes at least five clock cycles as the pipeline refills from the branch target address.
+Branch instructions incur additional overhead when taken. A conditional branch that is not taken completes in two clocks like other instructions. A taken branch causes the pipeline to be flushed, so the first instruction following the branch takes at least four clock cycles as the pipeline refills from the branch target address.
 
 The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding removes a major class of pipeline hazards present in simpler architectures (see Chapter 4 for timing detail).
 
@@ -197,7 +197,7 @@ The P2 names three execution modes by the program counter's address range. The f
 |------|----------|----------------|
 | Cog Execution | $00000-$001FF | Fast: 2 clocks/instruction, 512 longs |
 | LUT Execution | $00200-$003FF | Fast: 2 clocks/instruction, continuous with cog RAM |
-| Hub Execution | $00400-$7FFFF | Largest capacity, variable timing, uses FIFO |
+| Hub Execution | $00400-$FFFFF | Largest capacity, variable timing, uses FIFO |
 
 Cog and LUT execution differ only in which half of the fast space holds the code; they carry no speed or behavioral distinction, and branching freely between them costs nothing. What changes performance is crossing into hub execution: a branch to a hub address takes at least 13 clocks while the FIFO refills and the pipeline reloads. The `REP` instruction sidesteps even ordinary branch overhead—it repeats a block of cog or LUT instructions with no per-iteration branch at all (Chapter 4).
 

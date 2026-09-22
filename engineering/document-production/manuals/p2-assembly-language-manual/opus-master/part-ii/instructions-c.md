@@ -795,7 +795,9 @@ To stop the current cog (terminate self):
         cogstop myid                  ' Stop myself
 ```
 
-COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Note that stopping a cog does not free any hub memory it may have been using.
+COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Stopping a cog does not free any hub memory it may have been using.
+
+Any lock the stopped cog was holding is implicitly released — ownership ends when the cog goes inactive — but the lock's *allocation* is not returned: only LOCKRET returns a lock number to the pool. A cog stopped while holding a lock therefore leaks that lock number, and after sixteen such leaks LOCKNEW can allocate nothing. Execute LOCKRET on every path out of a cog, including error and shutdown paths.
 
 
 

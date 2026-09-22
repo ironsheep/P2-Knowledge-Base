@@ -37,7 +37,7 @@ When the I bit (bit 18) is clear, the source field (S) specifies a register addr
         cmp     a, b            wc      ' b is source register (I=0)
 ```
 
-Direct register addressing provides single-cycle access to cog RAM. Both operands are read simultaneously during instruction execution, making register-to-register operations the fastest possible.
+Direct register addressing provides two-clock access to cog RAM, the fastest operand path the cog has. Both operands are read simultaneously during instruction execution, making register-to-register operations the fastest possible.
 
 ### 6.1.3 Special Register Addresses
 
@@ -175,19 +175,19 @@ Each AUG instruction adds **+2 clock cycles** to execution:
 
 ### 6.3.5 Augmentation is One-Shot
 
-The augmented value applies only to the immediately following instruction. If any instruction intervenes (including a conditional instruction that doesn't execute), the augmentation is consumed:
+The augmented value attaches to the next instruction that supplies a matching immediate operand — `#S` for AUGS, `#D` for AUGD — and that instruction consumes it. An instruction with no matching immediate operand does not consume the queued value.
+
+The hazard is an *intervening* instruction that does supply a matching immediate, because it will use the augment meant for the instruction after it:
 
 ```pasm2
-        augs    #$12345678
-        nop                             ' This consumes the AUGS!
-        mov     x, #$078                ' Gets only $078, NOT $12345678
-
-        augs    #$12345678
-        if_z    mov     x, #$078        ' Even if Z=0, MOV skipped,
-                                        '  AUGS is still consumed
+        augs    #$FFFFF123              ' Intended for the ADD below
+        altd    index, #base            ' Uses the AUGS too, on #base
+        add     0-0, #$123              ' Augmented, and clears the AUGS
 ```
 
-The assembler handles this automatically when `##` notation is used. Manual AUGS/AUGD usage requires careful attention to instruction sequencing.
+Per the silicon documentation, an intervening ALTx with an immediate `#S` operand uses the AUGS value but does not cancel it, so the intended target still receives and clears it — but the ALTx has been augmented as well, which is almost never what was meant. Give the ALTx a register S operand rather than an immediate to avoid it.
+
+The assembler handles augmentation automatically when `##` notation is used. Manual AUGS/AUGD usage requires careful attention to which instruction supplies the next matching immediate.
 
 
 ## 6.4 Pointer Register Addressing (PTRA/PTRB)
@@ -238,7 +238,7 @@ Post-modify modes use the current pointer value for the memory access, then upda
 2. Store value in register x
 3. Add 4 (SCALE for long) to PTRA
 
-Post-modify is ideal for sequential forward or backward traversal:
+Post-modify suits sequential forward or backward traversal:
 
 ```pasm2
 ' Read 10 bytes sequentially
@@ -306,7 +306,7 @@ The index is multiplied by SCALE:
 
 **Index Range (non-updating):** -32 to +31 (6-bit signed)
 
-Indexed mode is ideal for accessing structure fields or array elements:
+Indexed mode addresses structure fields or array elements at a fixed offset:
 
 ```pasm2
 ' Access structure fields
@@ -436,9 +436,11 @@ When using PTRx with SETQ block transfers, the pointer updates by the **total tr
 SETQ2 works like SETQ but transfers to/from LUT RAM instead of cog RAM:
 
 ```pasm2
-        setq2   #31                     ' Transfer 32 longs
-        rdlong  lut_addr, ptra++        ' Read 32 longs into LUT
+        setq2   #32-1                   ' Transfer 32 longs
+        rdlong  0, ptra++               ' Read 32 longs into LUT[0..31]
 ```
+
+In the SETQ2 block form the D operand names the first LUT long directly, counting from 0 — not a cog register holding an address, and not `$200`.
 
 ### 6.5.4 Hardware Bug: ALTx/AUGS Between SETQ and Transfer
 

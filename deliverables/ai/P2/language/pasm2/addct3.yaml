@@ -36,7 +36,7 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Set CT3 counter event trigger time
-long_description: The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register. The event triggers when System Counter (CT) = original Dest + Src.
+long_description: The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT3) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too.
 related:
 - POLLCTx
 - WAITCTx

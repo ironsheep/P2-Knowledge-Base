@@ -1,7 +1,11 @@
 method: WAITCT
 type: method
 description: |
-  Wait until system counter reaches specified tick value
+  Wait until the System Counter has passed the specified tick value. The wait ends
+  once the MSB of (CT - Tick) is 0, not only on the single cycle where CT equals
+  Tick, so the comparison stays correct across counter wraparound. A target already
+  in the recent past therefore returns AT ONCE, and a target more than 2^31 clocks
+  ahead reads as already passed and also returns at once.
 category: Timing Operations
 syntax: "WAITCT(Tick)"
 parameters:

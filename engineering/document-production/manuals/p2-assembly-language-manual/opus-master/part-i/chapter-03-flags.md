@@ -61,7 +61,7 @@ Every instruction can optionally specify which flags to update using effect modi
 
 When WC (Write C) is specified, the instruction updates the C flag according to its specific C condition while leaving Z unchanged. For ADD, this means C is set if the addition produces a carry out of bit 31. For CMP, this means C is set if the first operand is less than the second. Each instruction defines its own C condition as documented in the instruction reference.
 
-The key insight: WC means "update C according to this instruction's C rule." The rule varies by instruction, but the WC effect itself is consistent—it enables C modification.
+WC means "update C according to this instruction's C rule." The rule varies by instruction, but the WC effect itself is consistent—it enables C modification.
 
 ### 3.2.2 The WZ Effect
 
@@ -429,7 +429,7 @@ Computing the absolute value of a signed number is a single instruction:
 
 ABS computes the absolute value for every input. The one unavoidable edge case is a property of two's complement, not of the instruction: the most negative value (-2,147,483,648 or $8000_0000) has no positive counterpart in 32 bits, so ABS leaves it unchanged. No conditional code can repair this—the true magnitude is simply unrepresentable.
 
-Add WC when you need to remember the original sign. ABS sets C to the source's sign bit—C=1 whenever the source was negative, for every negative input:
+Add WC to retain the original sign. ABS sets C to the source's sign bit—C=1 whenever the source was negative, for every negative input:
 
 ```pasm2
                 ' result = |value|, C = source was negative

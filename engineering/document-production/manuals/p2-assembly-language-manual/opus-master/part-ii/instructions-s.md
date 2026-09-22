@@ -96,7 +96,7 @@ Scale
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | Product = 0 | --- | 2 |
+| EEEE | 1010001 | 0ZI | DDDDDDDDD | SSSSSSSSS | --- | Product == 0 | --- | 2 |
 
 
 **Related:** [SCAS](#scas)
@@ -134,7 +134,7 @@ Scale Signed
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | Product = 0 (before scaling) | --- | 2 |
+| EEEE | 1010001 | 1ZI | DDDDDDDDD | SSSSSSSSS | --- | Product == 0 (before scaling) | --- | 2 |
 
 
 **Related:** [SCA](#sca)
@@ -619,7 +619,7 @@ Set Q For LUT Transfers
 
 **Explanation:**
 
-Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. Use SETQ2 + RDLONG/WRLONG to block-transfer between hub and LUT RAM for lookup tables, waveform tables, and large datasets.
+Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. Use SETQ2 + RDLONG/WRLONG to block-transfer between hub and LUT RAM. The block moves one long per clock unless the hub FIFO is accessing the same hub RAM slice on the same cycle, in which case the FIFO has priority and the block move waits for that slice to come around again.
 
 ```pasm2
         SETQ2   #256-1         ' Set up for 256-long LUT transfer

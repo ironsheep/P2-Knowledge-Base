@@ -386,7 +386,7 @@ counter long    0               ' Single long
 table   long    $1234_5678      ' Hex value with underscores for readability
 ptrs    long    @start, @end    ' Address pointers
 buffer  long    0[32]           ' 32 zero longs (128 bytes)
-clkfreq long    160_000_000[8]  ' Initialize 8 entries with clock frequency
+rates   long    160_000_000[8]  ' Eight entries, same value
 ```
 
 #### Notes

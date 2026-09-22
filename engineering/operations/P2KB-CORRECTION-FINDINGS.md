@@ -50,6 +50,102 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## KB defects surfaced by the Assembly Manual deep audit (2026-09-22, «#348») — F-447 … F-452
+
+All six surfaced by the `document-audit` deep pass on the P2 Assembly Language Reference Manual
+(`engineering/document-production/manuals/p2-assembly-language-manual/audit/periodic-audit-2026-09-22.md`).
+Every one was verified by the arbiter against a primary source, not taken from a subagent's report.
+**F-447 and F-448 are applied in this pass**; the rest are open.
+
+### F-447 — F-443's CT-event correction reached three files and stopped; eight sites in six files still said "reaches" — `PENDING-VALIDATION — applied 2026-09-22; validation is the next KB release`
+
+> **Applied 2026-09-22.** F-443 (v1.20.0) corrected `addct1/2/3.yaml` `description:` to the
+> PASSED/MSB rule and went no further. Still carrying the pre-correction claim, all now fixed:
+> `pasm2/addct3.yaml:39` `long_description` (*"The event triggers when System Counter (CT) =
+> original Dest + Src"* — `addct1`/`addct2` have no `long_description`, so `addct3` was the lone
+> survivor, a valid-YAML/wrong-content instance no gate reads); `pasm2/jct1.yaml:15`,
+> `jct2.yaml:15`, `jct3.yaml:15` (*"the system counter reaches the CTn target value"*);
+> `spin2/methods/waitct.yaml:4`; `spin2/idioms/timing-delays.yaml:29`;
+> `spin2/concepts/timing_operations.yaml:65` and `:70`.
+> **Source:** `pasm2/waitct1.yaml` and `pollct1.yaml` `description:` both already carried the MSB
+> rule, and the manual states it correctly in four places including a full wraparound justification.
+> ⚠ **Evidence tier:** F-443 is a DOCUMENTARY correction — `addct1.yaml` carries no `EF-NNN`
+> citation for it. It is corroborated from two independent directions but is not hardware-verified.
+> **Why it matters beyond the KB:** `instructions-j.md:93` in the manual was not drift — it was the
+> manual faithfully mirroring `jct1.yaml`. Fixing the manual alone would have left the correction
+> one regeneration deep.
+
+### F-448 — `event_interrupt_config.yaml` inverts the interrupt priorities, fabricates INT3 as the debug interrupt, and its event-source table is offset from row 9 on — `PENDING-VALIDATION — applied 2026-09-22; validation is the next KB release`
+
+> Four defects in one shipped file, `deliverables/ai/P2/language/pasm2/concepts/event_interrupt_config.yaml`.
+> **Applied 2026-09-22.**
+>
+> 1. **Priority inverted.** `interrupt_levels` gave INT0 `priority: "Lowest"` and INT3
+>    `"Highest (Debug)"`, and `priority_and_nesting.priority_rules` said *"INT3 highest priority,
+>    can interrupt INT2/1/0"*. **Source (read):** `silicon-doc-text.txt:2264-2270` — *"Each cog has
+>    three interrupts: INT1, INT2, and INT3. INT1 has the highest priority and can interrupt INT2
+>    and INT3 … INT3 has the lowest priority and can only interrupt non-interrupt code."*
+> 2. **INT3 fabricated as the debug interrupt**, in three places. `silicon-doc-text.txt:2395`: the
+>    debug interrupt is a hidden **fourth** *"that has priority over all the others"*, reached via
+>    `IJMP0`/`IRET0` (INA/INB remapped during the debug ISR, `:2423`), `IJMP0` initialized to `$1F8`
+>    on COGINIT.
+> 3. ⭐ **`event_sources.selectable_events` was offset/fabricated from row 9 onward** — eight wrong
+>    rows plus a fabricated sixteenth (`16_debug: "BRK instruction (INT3)"`; there are only 16
+>    sources, 0-15). It had 9="Pin pattern not matched", 10="Hub FIFO ready", 11="Hub FIFO empty",
+>    12="ATN from other cog", 13="LOCK acquired", 14="LOCK lost", 15="External event".
+>    **Source:** `silicon-doc-text.txt:2276-2291`. **THE MANUAL WAS RIGHT AND RICHER** —
+>    `chapter-05-hardware.md:361-383` has all sixteen correct and additionally carries the
+>    event-0-versus-SETINTx-code-0 distinction. A genuine KB-wrong / manual-right inversion.
+> 4. `interrupt_design` advised *"Reserve INT3 for debug infrastructure"*, which follows from (2).
+>
+> ⚠ **The KB had two contradictory homes for this fact**: `architecture/interrupts.yaml:36-41` was
+> **correct** the whole time. An agent's answer depended on which file it read. That is the
+> two-homes-drift mechanism «#349» exists to measure — recorded here as an instance.
+
+### F-449 — `sumnc.yaml` and `sumnz.yaml` carry behavior prose in their flag fields — `CONFIRMED`
+
+> `pasm2/sumnc.yaml:29` and `pasm2/sumnz.yaml:30` hold *"0 then D = D - S, else D = D + S"* where a
+> C (resp. Z) effect belongs. Correct values, from the manual's Part II entry
+> (`instructions-s.md:1332-1335`) and from `sumc.yaml:6`/`sumz.yaml:7`: C = `true sign of (D +/- S)`,
+> Z = `Result == 0`. **The manual is right; the YAML is wrong.** The manual's Appendix A had
+> inherited the corruption and was corrected in this pass.
+
+### F-450 — `incmod.yaml` C effect is a corrupted string — `CONFIRMED`
+
+> `pasm2/incmod.yaml:39` reads *"1, else D = D + 1 and C = 0"*. The manual's Part II entry
+> (`instructions-i.md:81`) has it right: `D was S (wrapped)`. Manual right, YAML wrong; Appendix A
+> had inherited it and was corrected in this pass.
+
+### F-451 — four more shipped flag/oneliner strings are garbage or wrong-shaped — `CONFIRMED`
+
+> - `pasm2/rcr.yaml:28` — C effect `Last bit out1` (stray footnote digit). Every sibling uses
+>   `last bit shifted out if S[4:0] > 0, else D[31]`.
+> - `pasm2/getct.yaml:6` — C effect `same`, which is meaningless. Part II correctly shows `---`:
+>   GETCT's WC is an **input selector** choosing which half of the 64-bit counter is returned, and
+>   C is not written. (This also corrects a subagent proposal to *add* GETCT to the manual's
+>   "WC only" list — it does not belong there, and the manual's own count was fixed the other way.)
+> - `pasm2/getct.yaml:36` — `oneliner: T=0 on reset, CT++ on every clock` describes the **register**,
+>   not the instruction. The manual's Appendix C is right: `Get CT[31:0] or CT[63:32] if WC into D`.
+> - `pasm2/pollxrl.yaml:30` — Z effect `XRLEvent`, missing the space; the manual has `XRL Event`.
+
+### F-452 — `loc.yaml` categorizes LOC as Math and Logic — `CONFIRMED`
+
+> `pasm2/loc.yaml:31` says `category: Math and Logic`, which places LOC under Arithmetic in the
+> manual's categorical index and `instruction-categories.md`. LOC loads an address (the manual's own
+> entry title is *Load Address*), and the identical `(per W)` PA/PB/PTRA/PTRB mechanism puts CALLD
+> under Branching. **The manual is faithfully following its source here, so the manual needs no
+> edit** — the YAML category is the defect, and the manual's grouping will follow once it is fixed.
+
+### F-453 — `architecture/locks.yaml`'s `state_versus_allocation` block carries no `source:` — `CONFIRMED`
+
+> The block is **correct** — `silicon-doc-text.txt:3698` states it plainly (*"A lock will also be
+> implicitly released if the cog that's holding the lock is stopped (COGSTOP) or restarted
+> (COGINIT), or if LOCKRET is executed for that lock"*) and `:3686`/`:3696` give the
+> allocation-versus-held split. But it ships with no provenance, and the claim-sourcing gate reads
+> that field. **This cost a round-trip in this very audit:** one subagent declined to carry the fact
+> into the manual *because* it could not corroborate it, while another had already cited the Silicon
+> Doc for it. A correct fact with no source behaves like an unsourced one.
+
 ## Two findings where the manual was right and the KB was wrong (2026-09-21, Streamer Guide deep audit) — F-445, F-446
 
 Both surfaced by the `document-audit` deep pass on the P2 Streamer Programming Guide

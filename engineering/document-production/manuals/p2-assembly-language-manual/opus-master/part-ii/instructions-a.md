@@ -98,7 +98,7 @@ Add and Set Counter Event Trigger
 **ADDCT2**  *Dest, {#}Src*\
 **ADDCT3**  *Dest, {#}Src*
 
-**Operation:** `D = D + S`; arms the CTn event to fire when CT reaches the new D
+**Operation:** `D = D + S`; arms the CTn event to fire once CT has passed the new D
 
 **Result:** The Src value is added into Dest and the result is also stored in the hidden CTn event trigger register.
 
@@ -117,7 +117,7 @@ Add and Set Counter Event Trigger
 
 **Explanation:**
 
-ADDCT1, ADDCT2, and ADDCT3 set their respective hidden counter event trigger registers to the value of Dest + Src. The result is also written to Dest. These instructions are used to schedule time-based events that will trigger when the System Counter (CT) reaches the specified value.
+ADDCT1, ADDCT2, and ADDCT3 set their respective hidden counter event trigger registers to the value of Dest + Src. The result is also written to Dest. These instructions are used to schedule time-based events. The event flag is set once the System Counter (CT) has passed the trigger value — specifically, whenever the MSB of (CT - CTn) is 0, so the comparison stays correct across counter wraparound, and not only on the single cycle where CT equals it. A target already in the recent past therefore fires at once rather than waiting for the counter to come round, and a target more than 2^31 clocks ahead reads as already passed and also fires at once.
 
 The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowing a cog to manage multiple simultaneous time-based operations. Use the corresponding POLLCTn, WAITCTn, JCTn, and JNCTn instructions to process each counter's time-based events. This enables precise timing control for periodic operations, delays, and synchronized activities.
 
