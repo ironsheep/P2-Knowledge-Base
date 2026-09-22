@@ -20,6 +20,31 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.21.0] - 2026-09-22
+
+**Board revisions, stack budgets and transport classifications — the facts a build needs that no instruction page carries.**
+
+### Added
+
+- **The P2 Edge Standard Module carries its revision history.** VIN maximum is 16 V on Rev C and later and 5.5 V on Rev A and Rev B, stated on both the rating and the input-voltage entry, with the Rev B/C/D deltas: copper plating, the microSD socket, the TCXO, supply current, switching frequency and layer count
+- **The RTC add-on's VIO3V3 supply trickle-charges its backup cell**, which is how the clock survives a power failure, with the 150 nA typical backup current
+- **The RTC add-on carries its cell and shipping data** — Seiko MS421R, 1.5 mAh, board dimensions, −20 to +60 °C, and the UN 38.3 / Class 9 Dangerous Goods classification a product integrator needs
+- **The HyperRAM & HyperFlash add-on states its jumper position**: it draws no power through the pass-through header's 5 V socket, so the Eval Board Rev B's ACC HDR jumper stays in its default off position — the opposite of the Serial Host board, and now said so
+- **Inline PASM states its hardware-stack budget**: 5 of the cog's 8 levels for nested CALLs including CALLs to hub RAM, plus the CALL entry and appended-RET exit contract
+- **The DEBUG cost list covers interrupt retriggering.** An interrupt requested during a DEBUG command runs after it completes, and the skew can be large enough that a cyclical smart-pin ISR misses its re-arm window and stops cycling; CT-based interrupts are unaffected
+- **`LOCKNEW` points at the debug-build cost list**, since a DEBUG build holds one of the sixteen locks before a program runs
+
+### Changed
+
+- **`SUMC`, `SUMNC`, `SUMZ`, `SUMNZ`, `INCMOD` and `RCR` state their flag effects** as flag effects: C is the true sign of the sum, Z is the zero result, `INCMOD` reports the wrap, and `RCR` gives the shifted-out bit with its `S[4:0] = 0` case
+- **`GETCT` describes its WC as the input selector it is** — it chooses `CT[63:32]` over `CT[31:0]`, and C is not written
+- **`LOC` sits with the branch instructions**, alongside `CALLD`, `CALLPA`, `CALLPB` and `JMP`, which share its PA/PB/PTRA/PTRB target mechanism
+- **The Spin2 operator table marks `||` as a P1 difference**: on P2 it is logical OR, where P1 used it for absolute value — `ABS` is the P2 spelling
+- **`COGSPIN` stack figures read as the heuristics they are.** No Parallax document states a stack size, so the 32-long floor and 64-128 typical range are marked as working rules of thumb, with the high-water-mark measurement given as the way to settle a size for real code
+- **The Spin2 built-in symbol summary states which counts describe the source document** rather than this file's own records, and points clock configuration at the clock-system and configuration-symbol pages
+- **The lock ownership-versus-allocation rule cites the Silicon Doc** passages that establish it
+- **The USB host/device smart pin names its documentation boundary**: the J/K/SE0/SE1 receiver thresholds are stated by no source we hold, and the programming interface above them is complete
+
 ## [1.20.0] - 2026-09-20
 
 **Five things the knowledge base said that the silicon and the sources do not**
