@@ -2,7 +2,7 @@
 manual_slug: p2-pasm-desilva-style
 doc_class: tutorial                               # deSilva teaching voice — tutorial voice IS permitted (Dimension #9)
 code_line_budget_K: 76                            # platform-inherited (creation-guide "Code Line Budget"); LM-Mono calibrated
-last_published_tag: p2-pasm-desilva-style-v3.0.7   # baseline for Dimension #15 (released 2026-09-11)
+last_published_tag: p2-pasm-desilva-style-v3.0.8   # baseline for Dimension #15 (released 2026-09-22)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md                   # thin per-document guide: ADOPT/ADAPT/REJECT against house rules R1-R4 (added 2026-08-15); voice rationale in ./why-desilva-voice-works.md
@@ -39,10 +39,13 @@ permits tutorial voice** — the deSilva voice (encouragement, "Your Turn", Medi
 celebration moments) is intentional per `./desilva-style-guide.md` and is NOT a finding.
 
 **Unreleased efforts since `last_published_tag`** (the changeset-integrity baseline, Dimension #15):
-**IN FLIGHT — the KB-HEAD drain co-release with the Assembly Reference (opened 2026-09-22, «#352»).**
-This manual and the Assembly Reference are the project's two core PASM2 references, and this is the
-first deep audit this one has had against KB HEAD. Baseline is **v3.0.7** (2026-09-11); the manual
-tree has not moved since that tag, while **16 KB commits** have landed, through KB v1.21.0.
+**None. The baseline is clean** — the effort below shipped in **v3.0.8 on 2026-09-22**, alongside
+Assembly v3.1.10.
+
+**SHIPPED in v3.0.8 — the KB-HEAD drain co-release with the Assembly Reference («#352»).**
+This manual and the Assembly Reference are the project's two core PASM2 references, and this was the
+first deep audit this one has had against KB HEAD. It ran from **v3.0.7** (2026-09-11), across the
+**16 KB commits** that had landed through KB v1.21.0.
 
 **Baseline corrections made 2026-09-22:** this field said `v3.0.6` while `v3.0.7` was tagged, and the
 narrative below it still described `v3.0.1` as the baseline — two different stale values in one

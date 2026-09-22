@@ -485,6 +485,15 @@ Processing"* — both matching the cover, which is what footnote 2 required — 
 the **2025-2026 year RANGE** sourced from this manual's own licence page, not the 2026 the rest of
 the set uses.
 
+**Re-proven on v3.0.8, 2026-09-22.** All four columns hold on the returned PDF: the cover reads
+`Version 3.0.8` from `\DocVersion` with nothing bumped but `request.json`, the seven metadata
+fields and the 2025-2026 rights range round-trip again, and `validate-manual-release.py --phase
+release` returned GREEN on **8 of 8** — this manual's set includes `zip-currency`, which Assembly's
+does not, because it ships an example source ZIP. Worth recording for the next release: the
+`pdf-margin-overflow` gate turned this release RED on its first render, at +54.2pt on p44, for an
+overflow that existed in no source artifact — the source gates read fenced code and this was an
+inline span. The gate reading the artifact is the only reason it was caught.
+
 **Cross-ref filter — measured.** The generated `.tex` carries **28 `\hyperlink`** calls, every one
 to a real chapter or appendix slug, and the artifact went **469 → 494 link annotations**. Recorded
 honestly: there is a consistent offset of 3 between `.tex` calls and PDF annotations, present in the

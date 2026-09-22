@@ -1,5 +1,24 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.8 (2026-09-22)
+
+**A lock nobody claimed spins forever, a counter target fires once the counter has passed it, and the Eval board lights its LED the other way round.**
+
+### Added
+
+- **Claiming a lock comes before using one** (Chapter 16): one cog calls `LOCKNEW`, checks C for an empty pool, and publishes the number it got through a mailbox, and every cog — including that one — works from the number it was given
+- **`LOCKTRY` clears C for two different reasons** — somebody else holds the lock, *or* the lock was never allocated — and the code cannot tell them apart, so a retry loop on an invented lock number spins quietly forever. Only the holding cog may `LOCKREL`; any cog may `LOCKRET` it to the pool; and a DEBUG build has already taken lock 15
+- **The Edge modules and the Eval board light their LEDs the opposite way round** (Chapter 1): driving the pin high lights an Edge module's LED, while the Eval board's buffer inverts, so a low drives it on. The blinker works either way, and every `drvh #56  ' LED on` in the book reads as "LED off" on an Eval board
+- **`coginit(-1, ...)` also asks for hub-exec** — bit 5 is set along with the pair request — so the two cogs it spends begin executing the address handed to them as though it were a hub program, which a cog-exec DAT blob is not
+
+### Changed
+
+- **`WAITCT1`/`WAITCT2`/`WAITCT3` wait until CT has *passed* the target**, the hardware asking whether CT minus CT1 has gone positive: a target set in the past fires the instant it is waited on, and one more than 2³¹ clocks away reads as already gone by. Build targets with `ADDCT1` from a fresh `GETCT` and keep them modest
+- **A symbol may be up to 32 characters**, demonstrated on a name that is exactly 32 and squeaks through
+- **A taken branch costs at least four clocks**, the pipeline having to refill, in the cog-execution comparison
+- **The fade example's `WAITX` comment states the per-step delay** — 5 ms, and about 1.3 s across all 256 steps — and the async-serial `bit_time` divides the 200 MHz clock the chapter runs at
+- **Each example's labels are unique within it**, so the `_RET_`, PTR-expression and FIFO listings assemble as printed
+
 ## v3.0.7 (2026-09-10)
 
 **How you actually pull a line high on this chip, and the cog-launch idiom that costs you a second cog.**
