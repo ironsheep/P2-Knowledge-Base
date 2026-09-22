@@ -575,6 +575,12 @@ because the platform's `\providecommand` defaults them to empty and the build st
 PDF's metadata, not by the declaration: `Keywords` = *"Copyright 2026 Iron Sheep Productions, LLC
 and Parallax Inc.; licensed under CC BY-SA 4.0"*.
 
+**Re-proven on v1.0.1, 2026-09-22.** The same `Keywords` string round-tripped, and the metadata
+single-source held under the lightest possible test: the *only* edit to this release's directive
+was `version` `1.0` → `1.0.1`, and the cover moved with it — nothing in the markdown names a
+version. Gates 7 of 7. The *Generated example headers* column stays `—`: this manual ships no
+example source ZIP, so the feature has no surface here.
+
 ¹⁴ **Single-Step Debugger — cross-ref filter adopted and AUDITED ON THE RENDER 2026-09-09.**
 The audit *is* the adoption, so it was measured rather than assumed, before/after on the same
 document: **NAMED internal links 127 → 147, +20** — and the source carries **exactly 20 reachable

@@ -2,7 +2,7 @@
 manual_slug: p2-single-step-debugger-manual
 doc_class: behavior                               # documents the on-chip debugger's behavior — grounds against the debugger implementation + hardware, NOT language YAML
 code_line_budget_K: 76                            # platform-inherited reference K (creation-guide.md §5b); this manual consumes the platform code boxes unchanged
-last_published_tag: p2-single-step-debugger-manual-v1.0.0   # released 2026-09-10
+last_published_tag: p2-single-step-debugger-manual-v1.0.1   # released 2026-09-22
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
@@ -65,8 +65,16 @@ same filename (region-oriented, mechanism-accurate; the root copy is
 feature-oriented). Neither supersedes the other cleanly and neither is the master —
 the Opus Master is the blend. Keep both; cite neither.
 
-**Baseline note:** `last_published_tag` = `p2-single-step-debugger-manual-v1.0.0`, set at the
-2026-09-10 initial release. **That release itself had no prior baseline** — no tag, no
+**Baseline note:** `last_published_tag` = `p2-single-step-debugger-manual-v1.0.1`, set at the
+2026-09-22 release. The 2026-09-10 **initial** release had no prior baseline — no tag, no
 README entry — so its audit ran under the initial-release form (a description of the
-document, not a delta) and the changeset-integrity gate did not apply. **From the next
-release onward both apply**, diffing against that tag.
+document, not a delta) and the changeset-integrity gate did not apply. **From v1.0.1 onward
+both apply**, diffing against this tag.
+
+**v1.0.1 (2026-09-22) — F-460.** Nothing in this manual's own source changed. The defect was in
+the shared `p2kb-platform-diagrams.sty` macro `\SpecialRegistersMapDiagram`, which labelled `PA`
+and `PB` as COGINIT parameters; it was found while auditing the Assembly Reference and fixed in the
+platform file this manual consumes. **The lesson for Dimension #15 here:** a diff of
+`opus-master/` across this release is EMPTY, and the release is still real and reader-visible. A
+changeset-integrity audit scoped to the manual's own tree would have reported no change at all.
+When the shared platform stack moves, the manual's rendered output moves with it.

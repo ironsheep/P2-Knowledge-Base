@@ -39,7 +39,7 @@ prose), with all per-publication detail in the roster.*
 | P2AN006 — Sizing Cog & Task Stacks | app-note | 1.0.1 | 13 | ✅ |
 | P2AN007 — Data Structures (STRUCT, cross-cog) | app-note | 1.0.1 | 16 | ✅ |
 | AI Privacy Guide | guide | — | — | ✅ |
-| Single-Step Debugger | manual | 1.0.0 | 47 | ✅ |
+| Single-Step Debugger | manual | 1.0.1 | 47 | ✅ |
 | PNut-Term-TS User Guide | tool-guide | 1.0.0 | 47 | ✅ |
 
 ## In progress

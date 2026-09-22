@@ -98,7 +98,7 @@ The complete guide to the Propeller 2's XBYTE hardware bytecode engine: the skip
 *August 2026 - Community Review Edition* | [Changelog](DOCs/p2-xbyte-programming-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-xbyte-programming-guide-src.zip)
 
 ### [P2 Single-Step Debugger Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Single-Step-Debugger-Manual.pdf)
-**Observe and Control Your Running P2 Code** · *Version 1.0.0*
+**Observe and Control Your Running P2 Code** · *Version 1.0.1*
 
 A complete working guide to the Propeller 2's built-in single-step debugger — the on-chip debugger that halts your program at an exact instruction and shows you every register, flag, and byte of memory as it stands at that moment. Written for anyone building with `pnut-ts -d` and running in PNut-Term-TS, from a first breakpoint through multi-cog and interrupt work. It teaches the debugger window twice over, deliberately: a guided tour walks the display region by region so the wall of numbers becomes a set of places you know, then a command reference gathers the whole interaction set in one place to look up — every key and Ctrl combination, every left- and right-click by region, and every wheel step in both cog and hub modes. That interaction set is stated from the debugger's own code and confirmed on real P2 silicon, down to the details that cost an afternoon when they are missing: which four regions actually read the mouse button, why `Ctrl+D` is not the DEBUG toggle, and why some hover hints are deliberately blank.
 

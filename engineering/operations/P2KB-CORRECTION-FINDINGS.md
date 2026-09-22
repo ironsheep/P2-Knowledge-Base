@@ -113,7 +113,7 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 
 ## Shipped-artifact fallout of the Assembly v3.1.10 release (2026-09-22) — F-460
 
-### F-460 — the Single-Step Debugger manual's shipped PDF labels PA and PB as COGINIT parameters — `CONFIRMED — re-render owed`
+### F-460 — the Single-Step Debugger manual's shipped PDF labels PA and PB as COGINIT parameters — `RESOLVED — proven on the artifact 2026-09-22`
 
 **Not a YAML finding; it does not gate the YAML head.** Recorded here so it is not lost.
 
@@ -128,13 +128,20 @@ Fixed 2026-09-22 (b811fd930) in **both** copies — the platform file and Assemb
 proven on the returned Assembly v3.1.10 PDF (`CALLD ret / CALLPA / LOC` present ×1, `Parameter A
 (COGINIT)` absent).
 
-**The open half:** `p2-single-step-debugger-manual` is the *only* other document that draws this
-macro (grep for `SpecialRegistersMapDiagram` across `workspace/` and `manuals/` returns exactly
-these two). It last published v1.0.0 on 2026-09-10 04:23, before the fix, so its shipped 47-page
-PDF still carries the wrong labels. Reader-visible. Clearing it needs nothing but a Forge
-re-render — the source fix is already in the platform file it consumes. Recorded as a `PLATFORM`
-line at 2026-09-22 05:30 in the Platform Freshness Ledger, with the SSD row moved to
-`⏳ behind 09-22`.
+**The second half — CLOSED the same day.** `p2-single-step-debugger-manual` was the *only* other
+document that draws this macro (grep for `SpecialRegistersMapDiagram` across `workspace/` and
+`manuals/` returns exactly these two), and its v1.0.0 of 2026-09-10 predated the fix. It
+re-rendered as **v1.0.1 on 2026-09-22 06:48** and was **verified on the page, not on the diff**:
+p39 rendered at 105 dpi and read — `$1F6 PA — CALLD ret / CALLPA / LOC`, `$1F7 PB — CALLD ret /
+CALLPB / LOC` — with `Parameter A (COGINIT)` and `Parameter B (COGINIT)` absent from the whole
+document. 47pp, unchanged, which is the expected result for a figure-label fix.
+
+**Worth keeping from how the bundle was built.** The content-hash diff against
+`manual_store_platform_hashes` found exactly ONE of this manual's ten platform files stale in the
+Forge manual store — `diagrams.sty`, `e900593a…` → `5b3d2f2b…` — so the deploy carried the body
+`.md`, that one `.sty`, and a force-staged `request.json` for the document switch. The hash map
+turned "which shared files does this re-render actually need?" from a judgement call into a
+measurement, and it named the right file without being told what the defect was.
 
 ## Content-trust study: what the Aug/Sep change set lost (2026-09-22, «#350») — F-454 … F-459
 
