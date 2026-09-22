@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-447`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-460`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,7 +50,107 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## KB defects surfaced by the Assembly Manual deep audit (2026-09-22, «#348») — F-447 … F-452
+## Content-trust study: what the Aug/Sep change set lost (2026-09-22, «#350») — F-454 … F-459
+
+All six surfaced by the content-trust study
+(`engineering/analysis/2026-09-22-p2kb-content-trust-study.md`), which classified 660 of 660
+deleted/replaced hunks since 2026-08-01. **The headline is that the window did NOT weaken the KB**
+— 0 of 518 replacements were weaker, and 380 were verified stronger. These are the exceptions.
+
+**F-454 through F-457 are all collateral of ONE commit — the hardware-tree purge.** The language
+and architecture trees lost nothing across 94 delete-only hunks. The purge was mostly right (it
+removed fabricated electricals, and 27 of its 48 hunks were delete-then-repopulate-with-citations
+inside the same file); it took four real facts with it. All four were confirmed verbatim in sources
+already held, so restoring them was transcription, not research.
+
+### F-454 — `edge-standard-module.yaml` lost its revision history, leaving a VIN maximum that destroys Rev A/B boards — `RESOLVED — applied 2026-09-22`
+
+> **SEVERITY: BREAKS USERS (hardware damage).** The purge deleted the board's revision history. What
+> remained read `input_voltage: "5-16 VDC"` and `ratings.vin: "5 V recommended, 16 V maximum"` with
+> **no revision qualifier**. Per the Product Guide's Revision History
+> (`edge-standard-module-narrative.txt:519-549`), VIN maximum was **5.5 V on Rev A and Rev B** and
+> was "increased from 5.5V to 16V" only at **Rev C**. A user holding a Rev B module was being told
+> by the shipped KB that 16 V is acceptable — roughly three times their board's maximum.
+>
+> **Applied 2026-09-22:** both fields now carry the revision scope, and a `board_revisions:` block
+> restores the full Rev B / Rev C / Rev D deltas (copper 1.5→2 oz, microSD added, crystal→TCXO,
+> 2 A→3 A, 2.5 MHz→750 kHz, 4→6 layers) with the source locator.
+>
+> ⭐ **THE MECHANISM IS NEW AND DESERVES ITS OWN GATE.** This is F-348's shape (a figure beyond an
+> absolute maximum) reached by a different route: **not a fabricated number, but a CORRECT
+> current-revision number stripped of the revision scope that made it correct.** Deleting a revision
+> history silently converts a true claim into a destructive one, and no instrument we have looks for
+> it. A gate that flags a shipped absolute-maximum stated without its board revision is owed.
+
+### F-455 — `addon-rtc.yaml` lost the VIO3V3 trickle-charge mechanism — `RESOLVED — applied 2026-09-22`
+
+> Deleted: `VIO3V3: "3.3V supply; powers the RTC and trickle-charges the backup battery."`
+> **Source:** `P2-RTC-Add-on-text.txt:56` — "3.3V voltage required to power the RTC board and
+> trickle-charge the on-board battery". A tree-wide grep for `trickle|charge` returned only
+> RC-capacitor text in an app note: the mechanism by which the RTC survives power loss was absent
+> from the entire KB. Restored with the 150 nA typical backup current and the consequence for a
+> board left unpowered.
+
+### F-456 — `addon-rtc.yaml` lost the cell specification and the UN 38.3 transport classification — `RESOLVED — applied 2026-09-22`
+
+> Deleted: Seiko MS421R 1.5 mAh / 0.11 g, 3.2 mm mounting hole, 0.8 x 1 in PCB, −20…+60 °C, and the
+> **UN Manual of Tests and Criteria Part III §38.3 → Class 9 Dangerous Goods** classification.
+> **Source:** `complete-P2-RTC-Add-on-reference.md:54-67`. Only the cell part number survived, as a
+> datasheet pointer. The transport classification is a fact a product integrator needs and cannot
+> derive from the electrical specification. Restored in full.
+
+### F-457 — `addon-hyperram-hyperflash.yaml` lost its ACC HDR jumper instruction, and the surviving text says the opposite — `RESOLVED — applied 2026-09-22`
+
+> Deleted: "the board does NOT source power via the pass-through header's 5V socket, so the P2-ES
+> Eval Board Rev B's ACC HDR jumper can remain in its default off position."
+> **Source:** `hyperram-hyperflash-text.txt:57`, verbatim.
+> ⚠ **What made this worse than a plain omission:** after the deletion, the only `ACC HDR` text left
+> in the shipped KB was `addon-serial-host.yaml:78,89`, which states the **opposite** — that board
+> *requires* the jumper fitted. A reader carrying that instruction across would fit a jumper this
+> board does not want. Restored, with an explicit warning not to carry the Serial Host rule over.
+
+### F-458 — `smart-pin-11011-usb-host-device.yaml` replaced an honest gap statement with a pointer to a document that does not contain the fact — `RESOLVED — applied 2026-09-22`
+
+> A commit deleted an explicit "not stated in any primary source" note about the J/K/SE0/SE1
+> line-state detector thresholds and replaced it with `"...are electrical characteristics — see the
+> P2 datasheet."` **The datasheet contains ZERO occurrences of `SE0` or line-state** (it names USB
+> twice, as a capability). Restored as a NOT-STATED entry that names where it is not stated and says
+> the closer is Chip Gracey or a bench measurement, not further reading.
+>
+> ⭐ **Shared mechanism, worth naming alongside F-454:** this did not *soften* a claim, it replaced
+> an accurate statement with a confident wrong one. That is why the study's "weakened" class was
+> empty (0 of 518) while real damage existed — **the failure mode in this window is over-confident
+> replacement, not hedging.** Same family as the manuals' payoff-sentence defect.
+
+### F-459 — `spin2-builtin-symbols-complete.yaml` advertises 1,024 symbol records it does not carry — `RESOLVED — applied 2026-09-22`
+
+> `category_summary.clock` claims `pll_multipliers: 1024 symbols (XMUL1-XMUL1024)`,
+> `clock_sources: 5 symbols` and `crystal_dividers: 7 symbols`. The file carries **zero** records in
+> all three, and an inline comment still said "exactly one XMUL record is carried here" after the
+> last one was removed on 2026-09-14. An agent reading the summary is promised 1,024 lookups that do
+> not exist. "Valid YAML, wrong content" — no gate reads a summary block against its own file.
+>
+> **Applied:** the summary is now explicitly labelled as the SOURCE DOCUMENT's tally rather than
+> this file's inventory, the zero-record categories are named, and the reader is redirected to
+> `architecture/clock_system.yaml`. **The record deletion itself was CORRECT and is not reopened:**
+> `XMUL`/`XDIV`/`XSEL` appear nowhere in Spin2 v55; they survive only in the superseded v51
+> extraction.
+
+> ⚠️ **DO NOT RE-RAISE: the `-D symbol=value` entry in
+> `language/spin2/preprocessor/external-symbols.yaml:278` is CORRECT.** No finding is filed for it.
+> The study initially flagged it as asserting compiler behaviour the compiler contradicts — it says
+> PNut-TS **rejects** `-D symbol=value` with a quoted error and a non-zero exit, and the container's
+> `pnut-ts` accepted it silently. **The YAML is right and the finding was wrong.** The container
+> ships **v1.55.5**; v1.55.8 lives under `~/.local/pnut/`. Tested there with a clean control:
+> `-D VERS=200` → `ERROR- -D VERS=200 is not supported; -D takes a presence-only symbol name (use -D VERS)`,
+> **exit 1, no output file** — matching the YAML's quoted string and both sub-claims exactly.
+> `-D 9BAD` and `-D BAD-NAME` are likewise rejected; `-D VERS` compiles.
+> 🔴 **The general lesson, which applies to every compiler-settled finding taken in this container:
+> `/usr/local/bin/pnut-ts` is a RELEASE BEHIND (1.55.5 vs 1.55.8). Re-run on the 1.55.8 path before
+> trusting any `pnut-ts` verdict.** The install cannot be overwritten without root and is awaiting
+> the container rebuild.
+
+## KB defects surfaced by the Assembly Manual deep audit (2026-09-22, «#348») — F-447 … F-453
 
 All six surfaced by the `document-audit` deep pass on the P2 Assembly Language Reference Manual
 (`engineering/document-production/manuals/p2-assembly-language-manual/audit/periodic-audit-2026-09-22.md`).

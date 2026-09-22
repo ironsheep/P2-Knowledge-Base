@@ -42,6 +42,15 @@ pin_group:
     plugs into. base_pin is the first pin of that group.
   base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
 
+power:
+  source: "64013 P2 RTC Add-on Guide, pin table -- engineering/ingestion/sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:56"
+  VIO3V3: >-
+    3.3 V supply voltage. It powers the RTC board AND trickle-charges the on-board
+    backup battery. The trickle charge is why the cell holds time across a power
+    failure, so a board left unpowered for long periods will eventually lose its
+    backup reserve.
+  backup_current: "150 nA typical"
+
 signal_map:
   - offset: 0
     signal: "SCL / INT / CLKOUT (shared)"
@@ -157,6 +166,20 @@ resources:
   rtc_datasheet: "NXP PCF8523 datasheet (www.nxp.com) - authoritative for I2C address + register map"
   example_driver: "Parallax 64013 RTC Driver/Example (Spin2) - on the 64013 product page; uses jm_i2c at 400 kHz with that library's 3.3K pull-up setting (see pin_mode_tip for what the P2 actually does)"
   battery_datasheet: "Seiko MS421R (https://www.sii.co.jp/en/)"
+
+physical_and_battery:
+  source: "64013 P2 RTC Add-on reference -- engineering/ingestion/sources/P2-RTC-Add-on/complete-P2-RTC-Add-on-reference.md:54-67"
+  cell: "Seiko MS421R rechargeable lithium-metal, built-in and non-removable"
+  cell_capacity: "1.5 mAh nominal, 0.11 g"
+  pcb_dimensions: "0.8 x 1 in (20.32 x 25.4 mm)"
+  mounting_hole: "3.2 mm diameter"
+  headers: "dual 2x6-pin female passthrough, 0.1 inch spacing (passthrough = stackable)"
+  operating_temperature: "-20 to +60 C (-4 to +140 F)"
+  transport_classification: >-
+    The built-in non-removable lithium-metal cell contains <= 1 g lithium and meets
+    UN Manual of Tests and Criteria Part III section 38.3, so the board is
+    transportable as Class 9 Dangerous Goods. A product integrator shipping this
+    board needs this and cannot derive it from the electrical specification.
 
 see_also:
   - language/spin2/methods/wrpin.yaml

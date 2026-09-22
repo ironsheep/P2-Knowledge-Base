@@ -73,7 +73,14 @@ flags:
   c_flag: "On RDPIN/RQPIN of the lower pin, C = receiver error flag"
   out_override: "OUT signals overridden for USB differential control"
 
-electrical_characteristics: "Receiver front-end thresholds for the J / K / SE0 / SE1 line-state detectors are electrical characteristics — see the P2 datasheet. The programming interface (baud, host/device, FS/LS, line-state sends, 16-bit status word) is complete above."
+electrical_characteristics: >-
+  NOT STATED BY ANY SOURCE WE HOLD. The receiver front-end thresholds for the
+  J / K / SE0 / SE1 line-state detectors are not in the P2 datasheet -- the datasheet
+  names USB only twice, as a capability, and contains no line-state or SE0 material --
+  nor in the Silicon Doc. Do not point a reader at the datasheet for them.
+  The programming interface (baud, host/device, FS/LS, line-state sends, 16-bit status
+  word) IS complete above; it is only the analog thresholds that are undocumented.
+  Closing this needs Chip Gracey or a bench measurement, not further reading.
 
 code_examples:
   - title: "USB Pin Pair Configuration"

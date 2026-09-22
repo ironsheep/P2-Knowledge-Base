@@ -66,7 +66,7 @@ specifications:
   smart_io_pins: "64 accessible at the edge connector, 56 fully free, grouped in 8 sets of 8 I/Os"
   io_logic_voltage: "3.3 V"
   power:
-    input_voltage: "5-16 VDC, with reverse-polarity protection"
+    input_voltage: "5-16 VDC on Rev C and later, with reverse-polarity protection. On Rev A and Rev B the VIN maximum is 5.5 VDC -- see board_revisions below before applying more than 5.5 V to any module."
     input_current: "recommended minimum 100 mA; typical experimentation 500-1000 mA; maximum according to customer application"
     vdd_supply: "1.8 V up to 3 A, 750 kHz nominal switching frequency (switching buck regulator for the P2 core)"
     io_preregulator: "an additional 3 A switcher supplies conditioned voltage to the 3.3 V VIO LDO regulators (3.8 V rail)"
@@ -81,9 +81,43 @@ specifications:
   operating_temperature: "-40 to +85 C (-40 to +185 F)"
   pcb: "1.45 in x 2.04 in (37 mm x 51.7 mm); 6-layer with integrated thermal planes"
   ratings:
-    vin: "5 V recommended, 16 V maximum"
+    vin: "5 V recommended. Maximum 16 V on Rev C and later; maximum 5.5 V on Rev A and Rev B. Applying 16 V to a Rev A or Rev B module exceeds its absolute maximum by roughly three times."
     any_io_pin_p0_p63: "3.3 V recommended, 3.6 V maximum"
     resn: "3.3 V recommended, 3.6 V maximum"
+
+  # The figures above describe the CURRENT revision. Several of them changed across
+  # revisions, and one of those changes is destructive if applied to the wrong board:
+  # VIN maximum was 5.5 V until Rev C. A module in hand is not necessarily Rev D.
+  board_revisions:
+    source: "P2 Edge Module (#P2-EC) Product Guide v3.0, Revision History -- engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:519-549"
+    why_this_matters: >-
+      Every rating in this file is a Rev D rating unless it says otherwise. The VIN
+      maximum in particular rose from 5.5 V to 16 V only at Rev C, so a Rev A or Rev B
+      module driven at the 16 V figure is being run at about three times its maximum.
+    rev_b:
+      guide_version: "1.5"
+      changes:
+        - "Silk screen markings added/improved"
+        - "Edge pads narrowed/adjusted to allow for thicker copper plating"
+        - "Copper plating increased from 1.5 oz to 2 oz"
+        - "On-board LEDs P56/P57 changed from green to white"
+      vin_maximum: "5.5 V"
+    rev_c:
+      guide_version: "2.0"
+      changes:
+        - "microSD card socket added"
+        - "Power supply VIN voltage maximum increased from 5.5 V to 16 V"
+        - "On-board clock source changed from a low-precision crystal to a high-precision oscillator"
+      vin_maximum: "16 V"
+    rev_d:
+      guide_version: "3.0"
+      changes:
+        - "On-board switching power supplies changed (supply issues)"
+        - "Switching supply maximum output current increased from 2 A to 3 A"
+        - "Switching frequency changed from 2.5 MHz (Rev C) to 750 kHz (Rev D)"
+        - "Layer count increased from 4 layers (Rev C) to 6 layers (Rev D)"
+        - "Additional thermal PCB layer for improved thermal performance"
+      vin_maximum: "16 V"
 
 # =============================================================================
 # EDGE CONNECTOR PIN ASSIGNMENTS

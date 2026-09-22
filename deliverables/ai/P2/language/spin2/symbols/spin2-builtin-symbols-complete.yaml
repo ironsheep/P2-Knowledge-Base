@@ -136,9 +136,10 @@ spin2_builtin_symbols:
   # This field read 1224 until 2026-08-26; 1224 is the sum of
   # the top-level `category_summary.*.total_symbols` (the source document's own
   # tally of every symbol it names). The `clock` category alone accounts for 1044
-  # of that, of which 1024 are the XMUL1..XMUL1024 PLL multipliers; exactly one
-  # XMUL record is carried here, so the old tally contradicted the 136 records
-  # sitting directly underneath it.
+  # of that, of which 1024 are the XMUL1..XMUL1024 PLL multipliers; ZERO XMUL records
+  # are carried here (the last one was removed 2026-09-14 -- XMUL/XDIV/XSEL appear
+  # nowhere in Spin2 v55), so the old tally contradicted the records sitting directly
+  # underneath it.
   total_symbols: 136
   # 6 categories are described in `category_summary`; 5 of them have records here
   # (`math` is described but has no symbol records yet).
@@ -1954,6 +1955,16 @@ spin2_builtin_symbols:
       hardware_relationship: "System clock frequency register"
 
 # Category Summary Statistics
+# ⚠ THESE COUNTS DESCRIBE THE SOURCE DOCUMENT, NOT THIS FILE'S INVENTORY.
+# `total_symbols` and the `subcategories` counts below are the Spin2 documentation's own
+# tally of every symbol it names. They are NOT a promise that a record exists here for
+# each one, and for the `clock` category no record exists at all: `clock_sources`,
+# `crystal_dividers` and `pll_multipliers` each carry ZERO records in this file.
+# The XMUL/XDIV/XSEL symbol records were removed because those names appear nowhere in
+# Spin2 v55, our current source -- they survive only in the superseded v51 extraction.
+# Do not read "pll_multipliers: 1024 symbols" as 1024 lookups you can perform here.
+# Clock configuration is documented in architecture/clock_system.yaml and
+# language/spin2/constants/special-configuration-symbols.yaml.
 category_summary:
   smartpin:
     total_symbols: 59
