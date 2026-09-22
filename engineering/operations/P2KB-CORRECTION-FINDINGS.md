@@ -50,6 +50,31 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## Impact survey — v1.21.0 (`release-yamls` §8, run 2026-09-22)
+
+The v1.21.0 delta (38 files: `hardware/`, `architecture/smart-pins|streamer|locks`,
+`language/pasm2`, `language/spin2`, one app note) was intersected against every live manual's
+`MANUAL-DESCRIPTOR.md` declared sources. **Two manuals intersect; eight do not.**
+
+- **Assembly Reference — intersects `language/pasm2/`, `language/spin2/`, and is ALREADY ALIGNED.**
+  Every flag-field correction this release shipped (`SUMC`/`SUMNC`/`SUMZ`/`SUMNZ` true-sign,
+  `INCMOD`'s wrap, `RCR`'s shifted-out bit, `GETCT`'s WC-as-selector) was applied to the manual in
+  «#348» *before* the YAML caught up, so the two trees now agree — verified in `appendix-a`
+  (4 / 1 / 8 occurrences). **One row lags and is already recorded:** `LOC` moved to `category: Branch`
+  here, and the manual still groups it under Arithmetic. That is on
+  `workspace/p2-assembly-language-manual/PUNCH-LIST.md` with an expiry of the next Assembly release,
+  including the note that Appendix C's per-category counts must be recomputed when the row moves.
+  **No new flag needed.**
+- **deSilva Tutorial — intersects `language/pasm2/`, `language/spin2/`; flag recorded here** because
+  that manual has no punch list of its own. **Re-audit against HEAD at its next pass**, specifically
+  for: the `SUM*`/`INCMOD`/`RCR` flag effects, `GETCT`'s WC (a selector, not a flag write), `LOC`'s
+  category, and — most likely to bite a tutorial — the Spin2 `||` operator, which on P1 meant
+  absolute value and on P2 means logical OR. A tutorial aimed at P1 refugees is exactly where that
+  one does damage.
+- **No impact:** Architect Guide, Debug Window, Getting Started, I/O & Smart Pins, Single-Step
+  Debugger, Streamer Guide, XBYTE Guide, PNut-TS Terminal Guide. Recorded so the survey is visibly
+  done rather than skipped.
+
 ## ✅ YAML-HEAD DRAIN GATE — evaluated 2026-09-22 («#351»): **GREEN**
 
 The gate (`document-audit` §2) asks one question: are there **actionable** pending YAML corrections —
