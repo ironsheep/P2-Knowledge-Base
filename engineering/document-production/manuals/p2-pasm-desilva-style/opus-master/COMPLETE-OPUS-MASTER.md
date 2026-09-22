@@ -1280,7 +1280,13 @@ This is wonderfully useful - your utility routines can all use `.loop` and `.don
 
 2. **Scope surprise**: Data definitions (`LONG`, `WORD`, `BYTE`) also start new scopes. If you put data between two parts of a routine, your local labels won't work!
 
-3. **The 32-character limit**: A symbol may be up to 32 characters long. `this_is_a_really_long_label_name` is exactly 32 and squeaks through; add one more character and the compiler stops being friendly. This is rarely a real constraint — it is, however, an excellent way to lose ten minutes to a typo you cannot see.
+3. **The 32-character limit**: A symbol may be up to 32 characters long. This one is exactly 32, and it squeaks through:
+
+```pasm2
+this_is_a_really_long_label_name
+```
+
+   Add one more character and the compiler stops being friendly. It is rarely a real constraint — it is, however, an excellent way to lose ten minutes to a typo you cannot see.
 
 ## Data in DAT Blocks: Your Program's Pantry
 
