@@ -2,7 +2,7 @@
 manual_slug: p2-assembly-language-manual
 doc_class: reference                              # YAML-backed (PASM2 instruction reference)
 code_line_budget_K: 76                            # platform-inherited; LM-Mono calibrated (creation-guide v1.2)
-last_published_tag: p2-assembly-language-manual-v3.1.8   # baseline for Dimension #15 (released 2026-09-11)
+last_published_tag: p2-assembly-language-manual-v3.1.10  # baseline for Dimension #15 (released 2026-09-22)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md                   # v1.1 (user-suggestions sprint)
@@ -41,7 +41,11 @@ from the central `document-audit` skill body + the guides referenced above.
 index). Tutorial voice is NOT permitted here (Dimension #9).
 
 **Unreleased efforts since `last_published_tag`** (the changeset-integrity baseline, Dimension #15):
-**IN FLIGHT — the KB v1.20.0 drift drain (v3.1.9, opened 2026-09-22, «#348»).** A re-audit of the
+**None. The baseline is clean** — everything below shipped in **v3.1.10 on 2026-09-22**, and the
+version it was opened under, v3.1.9, was never tagged. The batch-2 sweep that followed the audit
+(b811fd930, 62d8a9629) shipped in the same release.
+
+**SHIPPED in v3.1.10 — the KB v1.20.0 drift drain (opened 2026-09-22 as v3.1.9, «#348»).** A re-audit of the
 whole manual against KB HEAD across the 12 YAML commits / 137 changed files that landed after
 v3.1.8. Carries: the CT-event PASSED rule (F-443) at every site that states it; the inverted
 interrupt-priority statement in the RETI entry; the §5.3 streamer fabrications (XZERO, "RF mode",

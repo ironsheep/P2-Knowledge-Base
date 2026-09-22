@@ -111,6 +111,31 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
 
+## Shipped-artifact fallout of the Assembly v3.1.10 release (2026-09-22) — F-460
+
+### F-460 — the Single-Step Debugger manual's shipped PDF labels PA and PB as COGINIT parameters — `CONFIRMED — re-render owed`
+
+**Not a YAML finding; it does not gate the YAML head.** Recorded here so it is not lost.
+
+The cog-register figure macro `\SpecialRegistersMapDiagram` lives in
+`engineering/document-production/platform/templates/p2kb-platform-diagrams.sty` and labelled `PA`
+and `PB` as *"Parameter A (COGINIT)"* / *"Parameter B (COGINIT)"*. They are not: PA and PB receive
+an address from `CALLD`'s return form, from `CALLPA`/`CALLPB`, and from `LOC`. Assembly's own prose
+two lines beneath the figure said so, which is how it was caught.
+
+Fixed 2026-09-22 (b811fd930) in **both** copies — the platform file and Assembly's
+`p2kb-pasm2-diagrams.sty` workspace fork, which is the one Assembly actually renders from — and
+proven on the returned Assembly v3.1.10 PDF (`CALLD ret / CALLPA / LOC` present ×1, `Parameter A
+(COGINIT)` absent).
+
+**The open half:** `p2-single-step-debugger-manual` is the *only* other document that draws this
+macro (grep for `SpecialRegistersMapDiagram` across `workspace/` and `manuals/` returns exactly
+these two). It last published v1.0.0 on 2026-09-10 04:23, before the fix, so its shipped 47-page
+PDF still carries the wrong labels. Reader-visible. Clearing it needs nothing but a Forge
+re-render — the source fix is already in the platform file it consumes. Recorded as a `PLATFORM`
+line at 2026-09-22 05:30 in the Platform Freshness Ledger, with the SSD row moved to
+`⏳ behind 09-22`.
+
 ## Content-trust study: what the Aug/Sep change set lost (2026-09-22, «#350») — F-454 … F-459
 
 All six surfaced by the content-trust study

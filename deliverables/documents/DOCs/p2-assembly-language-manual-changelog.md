@@ -1,5 +1,46 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.10 (2026-09-22)
+
+**A counter event fires once the counter has passed its target, the interrupt levels run in the silicon's order, and the Q register is told apart from the CORDIC results.**
+
+### Added
+
+- **The streamer pin base is aligned to the mode's pin width**: the base and the group select share `D[22:17]`, overlapping the mode template, so a misaligned base composed with `+` carries into the mode field and composed with `|` vanishes. Measured on P2 silicon
+- **A streamer count of `$FFFF` runs perpetually** without decrementing, making `$FFFE` the largest terminating count — in Appendix G and in the `XINIT` entry, which carries the count field
+- **Inline PASM under the Spin2 interpreter may use five of the eight hardware stack levels**, stated with the stack's depth in the glossary
+- **Appendix A carries the C Effect on the `BIT`, `DIR`, `DRV`, `FLT` and `OUT` families**, where both flags receive the same value, and names the write target on the `DIR`, `DRV` and `FLT` rows
+- **Appendix A names what `CALL`, `CALLA`, `CALLB`, `CALLD`, `LOC`, `AUGS`, `AUGD` and `AKPIN` write**, and gives `CALLA`, `CALLB` and the four `TJ` forms their hub-exec timing beside their cog-exec timing
+- **The condition table carries `IF_RET`** as the second spelling of `_RET_`
+- The addressing-modes chapter reads the `SETQ2` block form the way the LUT page does, naming the first LUT long as `0`
+
+### Changed
+
+- **A CT event fires once the System Counter has *passed* its target**, not on the cycle where the two are equal: the flag is set whenever the MSB of (CT − CTn) is 0. A deadline in the recent past fires at once, and one more than 2^31 clocks ahead reads as already passed — at `ADDCT1/2/3`, at `JCT/JNCT`, in the categorical index, in the timing chapter and on the CT register page
+- **`INT1` is the highest of the three program-visible interrupts and `INT3` the lowest**, with the debug interrupt a hidden fourth, `INT0`, taking priority over all three
+- **The Q register and the CORDIC results are separate mechanisms.** Q is written by `SETQ`/`SETQ2` to modify the instruction that follows and is write-only from the cog; the CORDIC's results live in the solver's own pipeline, arrive 55 clocks after the command, and are read by `GETQX`/`GETQY`, which stall until they do. A read with no result available and none in progress returns in two clocks and raises `QMT`
+- **A selected smart pin mode makes DIR an active-low reset** rather than an output enable: the pin is configured with `WRPIN`/`WXPIN`/`WYPIN` while DIR is low and started by raising it, and that pin's `IN` bit becomes a completion or event flag. `INA`/`INB` read the actual pin state on pins with no mode selected
+- **`PA` and `PB` receive an address** from `CALLD`'s return form, from `CALLPA`/`CALLPB` and from `LOC` — in the register-layout figure as well as the prose beneath it
+- **The PC's value selects the execution domain** — `$00000`–`$001FF` fetches from cog register RAM, `$00200`–`$003FF` from lookup RAM, `$00400` and above from hub RAM — and it increments by 1 in cog-exec and LUT-exec, by 4 in hub-exec
+- **`LOC` is a branch instruction**, in the categories chapter and the categorical index
+- **`XZERO` buffers a new streamer command and clears the NCO phase accumulator**, which is what holds line-to-line timing identical when the NCO fraction is inexact
+- **`RF` in the streamer constant names is *Read FIFO***, and the streamer mode table is built on the eight mode families the silicon documentation defines
+- **`WYPIN` sets a PWM mode's output value — the duty**; the period and frame count come from `WXPIN`
+- **`AUGS`/`AUGD` attach to the next instruction supplying a matching immediate operand** and survive the instructions between; the hazard the silicon documentation records is an intervening `ALTx` with an immediate `#S`, which uses the augment without cancelling it
+- **A taken branch costs at least four clocks**, cog RAM access two, and hub execution runs to `$FFFFF`
+- **A smart pin holds one mode at a time**, so asynchronous serial transmit and receive are separate modes and a UART takes two pins
+- **`LOCKTRY` fails on an unallocated lock as well as a held one**, so a spin-wait on a number `LOCKNEW` never issued loops forever; only the holding cog can `LOCKREL`, any cog may `LOCKRET`, and lock 15 is held by a DEBUG build
+- **Stopping a cog releases its lock and leaves the number allocated** — ownership ends when the cog goes inactive, allocation only at `LOCKRET` — at `COGSTOP`, in the execution model and in the lock section
+- **`DEBUG_COGS` is the per-cog debug interrupt enable**: a cog outside the mask does not take the interrupt
+- **The FIFO cannot be outrun by reads** — the silicon guarantees no underflow — and a `SETQ` block moves one long per clock while the hub FIFO is not contending for the same slice
+- **Elapsed-time subtraction is correct below 2^32 cycles**
+- **The cog RAM map separates `$1F0`–`$1F7`**, the dual-purpose registers (`IJMP`/`IRET` 1–3, `PA`, `PB`), from `$1F8`–`$1FF`, the special-purpose ones, and `ORG` takes an address of `$000`–`$3FF`
+- **Appendix H counts 859 reserved words** across PASM2 and Spin2, 1,053 including the `P_*`/`X_*` hardware constants, and lists `POLLCT` with the Spin2 System and I/O methods
+- **Appendix A prints the data bits of `AUGD`, `AUGS`, `LOC`, `GETNIB`, `ROLNIB` and `SETNIB`**, allows WZ on `MUL`, `MULS`, `SCA` and `SCAS`, and carries clean `SUMC`/`SUMNC`/`SUMNZ`/`SUMZ`, `INCMOD`, `RCR`, `GETCT` and `POLLXRL` cells
+- **The WC-only list agrees with the table beneath it**, and names `GETCT` as the exception, since its WC selects which half of the counter is returned rather than reporting a result
+- **The examples assemble**: the smart-pin ADC example starts its pin with `DIRH`, the `DAT` examples take their labels from names the compiler does not reserve, and the XBYTE `SETQ`/`SETQ2` example uses LUT bases inside the LUT's address range
+- The About-this-manual paragraph states what was verified against which source
+
 ## v3.1.8 (2026-09-10)
 
 **Every clock figure, flag effect and special-register role names what it actually is**, and the smart-pin section says how a pull is really made.

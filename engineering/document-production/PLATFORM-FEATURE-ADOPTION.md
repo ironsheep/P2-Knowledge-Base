@@ -531,7 +531,13 @@ because they genuinely did not fit.
 `Version 3.1.8` strings because it earned its ✅ in August, under a bar that did not yet require
 the cover to read `\DocDate` / `\DocVersion`. Converted 2026-09-11 and now proven: the artifact's
 cover reads both from the macros, and all seven declared fields round-trip with the 2025-2026
-rights range this manual takes from its own licence page.
+rights range this manual takes from its own licence page. **Re-proven on v3.1.10, 2026-09-22**:
+the cover reads `Version 3.1.10` with nothing bumped but `request.json`, and
+`validate-manual-release.py --phase release` returned GREEN on 7 of 7 — `pdf-metadata`,
+`pdf-margin-overflow`, `license-block`, `review-scaffolding`, `tex-artifacts`,
+`render-overfulls` and `gate-arming`. The *Generated example headers* column stays `—`: this
+manual ships no example source ZIP, so the feature has no surface here — a genuine
+not-applicable, not a deferral.
 
 **With this row closed, every document released in the v1.18.0 wave carries every feature
 applicable to it.**
