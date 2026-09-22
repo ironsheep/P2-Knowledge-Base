@@ -74,7 +74,7 @@ key_parameters:
   api: "all take (pStack, nStackLongCt) in LONGS: prepStackForCheck(fill+sentinel, call before launch); checkStack(halts + reports if the sentinel was overwritten); getStackDepth(high-water count, bottom-up to first untouched long); reportStackUse(prints 'STACK used N of M')"
   placement_rule: "the sentinel long (endStackMark) MUST abut the stack buffer with no gap — declare it immediately after the stack in the SAME DAT block; prepStackForCheck writes it"
   sizing_method: "start at 128 longs (can't overflow while measuring) -> exercise the DEEPEST call path -> reportStackUse reads N -> set buffer to ~1.5xN -> keep a checkStack guard in a slow loop"
-  cog_stack_defaults: "cog stack floor ~32 longs, typical 64-128 for moderate Spin2 code (language/spin2/methods/cogspin.yaml); a task usually needs less than a full cog (one focused job)"
+  cog_stack_defaults: "cog stack floor ~32 longs, typical 64-128 for moderate Spin2 code -- these are HEURISTICS carried by language/spin2/methods/cogspin.yaml, not figures any Parallax source states, so do not treat them as a specification; a task usually needs less than a full cog (one focused job), and the only way to settle a size is to measure the high-water mark of your own code"
   stack_consumption: "params -> results -> locals packed in declaration order, plus nested-call depth (Spin2 v55 text:284)"
   two_contexts: "new-cog stack (cogspin, one call stack per cog) and intra-cog task stack (TASKSPIN, one per task) — same sizing job; the instrument only watches a hub buffer"
 

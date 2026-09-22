@@ -99,6 +99,7 @@ operator_categories:
         type: "Logical AND"
       - symbols: ["||", "OR"]
         type: "Logical OR"
+        note: "P2 Spin2 semantics; not P1 absolute value. In P1 '||' was the Absolute Value operator. For absolute value on P2 use ABS."
       - symbols: ["^^", "XOR"]
         type: "Logical XOR"
       - symbols: ["!!", "NOT"]

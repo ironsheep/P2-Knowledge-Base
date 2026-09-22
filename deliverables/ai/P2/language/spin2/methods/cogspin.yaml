@@ -71,8 +71,22 @@ returns:
     - -1: Failed (no cog available when using NEWCOG)
 
 stack_requirements:
-  minimum: "32 longs (128 bytes)"
-  typical: "64-128 longs (256-512 bytes)"
+  # ⚠ THESE TWO FIGURES ARE HEURISTICS, NOT MEASUREMENTS, AND NOT A SPECIFICATION.
+  # No Parallax source states a stack size for COGSPIN: the Spin2 v55 documentation
+  # contains no _STACK, no _FREE and no stack-sizing guidance of any kind. They are
+  # working rules of thumb carried by this knowledge base.
+  # Do not cite them as authority. `application-notes/p2an006-sizing-cog-task-stacks.yaml`
+  # currently cites this file for them, which makes the authority circular -- the only
+  # way to settle a stack size is to measure the high-water mark of YOUR code.
+  provenance: "heuristic, unsourced -- no Parallax document states these"
+  minimum: "32 longs (128 bytes) -- heuristic floor, not a specified minimum"
+  typical: "64-128 longs (256-512 bytes) -- heuristic for moderate Spin2 code"
+  how_to_settle_it: >-
+    Fill the stack with a known pattern before COGSPIN, run the worst-case path, then
+    look for the deepest disturbed long. That measurement beats any figure on this page.
+  p1_symbols_do_not_apply: >-
+    P1's _STACK and _FREE declarations do not exist in Spin2 and have no effect if
+    written. Sizing is the programmer's responsibility, not the compiler's.
   factors:
     - "Method call depth"
     - "Local variable count"

@@ -90,6 +90,18 @@ what_a_debug_build_takes_from_your_program:
   cog_start_traffic: "A debug-enabled cog emits frames on P62 as it starts, which corrupts serial output from a program sharing that pin. A demo or shell that owns the serial line should not be built with -d."
   a_debug_interrupt_per_enabled_cog: "Every enabled cog takes the highest-priority interrupt at every COGINIT, with the register save and restore that implies — see DEBUG_COGS in language/spin2/constants/special-configuration-symbols.yaml. The default is all eight cogs."
   hubset_enables_locked: "The debugger applies the per-cog enables with HUBSET, whose L bit locks them until reset."
+  interrupt_retrigger_can_stop_for_good: >-
+    An interrupt requested during a DEBUG command runs after the DEBUG completes, but the
+    response may be skewed so far that the ISR's own RETRIGGER SETUP does not happen
+    properly -- and then the interrupt cycling stops permanently, not just late. High-
+    frequency cyclical smart-pin interrupts are the prone case: an ISR that does AKPIN to
+    drop the INA/INB signal so the next edge can re-arm it can miss that window entirely.
+    This is the DEBUG cost that does not look like a timing cost, because the symptom is a
+    working ISR that simply ceases. The fail-safe is to issue DEBUG commands only from
+    cogs that are not running ISRs in the background; if the ISRs tolerate skew and
+    nothing depends on the interrupt continuing to cycle, DEBUG is usable with understood
+    timing degradation. CT-based interrupts are not prone to it.
+    (Source: engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071)
   clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived clock of at least 10 MHz."
   measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000 (EF-057)."
 

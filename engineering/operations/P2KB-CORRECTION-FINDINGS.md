@@ -50,6 +50,42 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## ✅ YAML-HEAD DRAIN GATE — evaluated 2026-09-22 («#351»): **GREEN**
+
+The gate (`document-audit` §2) asks one question: are there **actionable** pending YAML corrections —
+information not reaching the agents that consume this KB live? It had never been evaluated. All 61
+open findings were classified, each **verified against the tree rather than read off its status**,
+because the register lags reality and a stale `CONFIRMED` is indistinguishable from a live defect.
+
+**Result: no actionable YAML correction remains open. The gate is GREEN.**
+
+| Classification | n | Meaning |
+|---|--:|---|
+| **Landed this pass** | 13 | F-449, F-450, F-451, F-452, F-453, F-387, F-392(part), F-393, F-394, plus F-454…F-459 from «#350» |
+| **Already done, status was lagging** | 8 | F-382, F-383, F-386(part), F-388, F-329, F-348, F-374, F-352 |
+| **Blocked on external — parked, does NOT gate** | 7 | F-372, F-354, F-400, F-336, F-337, F-202, F-208 |
+| **Not YAML — outside this gate's scope** | 15+ | tooling (F-405, F-439, F-376, F-389, F-381), ingestion (F-421, F-367, F-332, F-344, F-341), manuals (F-356, F-274, F-276, F-278, F-280, F-424, F-207, F-203, F-218), platform/PDF (F-316, F-317, F-300, F-301, F-299, F-319) |
+
+**Why the parked set does not gate, individually:**
+- **F-372** (`%11011` says a new WRPIN needs no reset, against the same document's general rule) —
+  settles only on a bench: configure a USB pair, WRPIN with DIR high, observe. Jumper-only, so it is
+  a *runnable* test, not an out-of-scope one. Class B periphery.
+- **F-354** — six of eight items need an acquisition this repo does not hold (a level-shifter
+  datasheet, ISP HUB75 driver docs, the #64013 and #64006 schematics, OBEX `psram.spin2` docs). Two
+  of the eight have since resolved themselves via the HUB75 official-specs ingestion.
+- **F-400** — a definition call on citation shorthand, Stephen's ruling. Worth knowing: expanding
+  every shorthand is now **15 sites in 2 files**, not the 55 the entry was written against.
+- **F-336, F-337, F-202, F-208** — bench or Chip Gracey. These are the hardware periphery.
+
+⚠️ **Three things this pass proved about the register itself, which matter more than any single row:**
+1. **Eight findings were already fixed and still read `CONFIRMED`.** A register whose statuses lag
+   the tree invites re-chasing work that is done. Every row touched here was re-verified and flipped
+   in the same pass.
+2. **One finding's sub-claim was REFUTED** (F-394's C/Z entry condition, which is absent from the
+   source it cites). A register entry is a claim like any other.
+3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
+   files agreeing is not provenance; it is a loop.
+
 ## Content-trust study: what the Aug/Sep change set lost (2026-09-22, «#350») — F-454 … F-459
 
 All six surfaced by the content-trust study
@@ -2101,7 +2137,25 @@ on ordering, not amounts.
 
 ## Inline PASM's real stack rule is "5 of the 8 hardware levels", and our page says "PASM doesn't use Spin2 stack" — the one number a nested inline routine needs is the one we omit (2026-08-30, debug/stack research) — F-394
 
-### F-394 — `inline_pasm.yaml` omits the 5-level hardware-stack budget, the CALL-based entry/exit contract, and the interpreter's PTRA/PB save-restore — `CONFIRMED`
+### F-394 — `inline_pasm.yaml` omits the 5-level hardware-stack budget, the CALL-based entry/exit contract, and the interpreter's PTRA/PB save-restore — `RESOLVED — applied 2026-09-22 («#351»), with one sub-claim REFUTED`
+
+> **Applied 2026-09-22.** `language/spin2/constructs/inline_pasm.yaml` now carries:
+> a `hardware_stack_budget:` block — **5 of the 8 levels**, sourced verbatim to
+> `spin2-v55-text.txt:812` AND `:837` ("Use up to 5 levels of the hardware stack for nested CALLs,
+> including CALLs to hub RAM"), noting v55 states it on both the ORG/END and the `CALL()` surface;
+> a rewritten `stack_usage` consideration explaining that exceeding it corrupts the interpreter's
+> own return path and fails AFTER the block returns; and a new `entry_exit_contract` consideration
+> carrying the appended-RET rule from `spin2-v55-text.txt:790` ("Your PASM code will be assembled
+> with a RET instruction added at the end…") and `:796`.
+>
+> 🔴 **ONE SUB-CLAIM OF THIS FINDING IS REFUTED AND WAS NOT WRITTEN.** The finding asserted a
+> **C/Z = 0 entry condition** attributed to v55:812. It is not there: `:788-840` — the whole
+> inline-PASM section — contains no C/Z statement at all. Checked independently by the dispatched
+> agent and by the arbiter. Rather than assert it, the file now carries an explicit
+> `not_stated_by_any_source_we_hold:` entry telling the reader NOT to assume C or Z are cleared,
+> set, or carried in. **Do not restore the C/Z claim without a source.** The PTRA/PB save-restore
+> half is likewise unwritten: its only evidence is the interpreter listing, and the copy in this
+> repo is **v51, not the v55 the finding quotes**.
 
 **Class: OMISSION — three facts, each stated plainly in a source, each load-bearing for anyone writing
 inline PASM that nests, parks, or touches the pointer registers.**
@@ -2269,7 +2323,24 @@ automatically" — sourced to `:2427-2431` and `:2437-2439`. The two pages are l
 
 ## The whole top-level cog stack is missing from the KB — no entry says cog 0 has one, where it starts, which way it grows, or that nothing checks it (2026-08-30, debug/stack research) — F-392
 
-### F-392 — the KB documents `cogspin`/`TASKSPIN` stacks and is silent on the stack every Spin2 program already has; the sizing numbers it does ship are unsourced and are cited back as authority — `CONFIRMED`
+### F-392 — the KB documents `cogspin`/`TASKSPIN` stacks and is silent on the stack every Spin2 program already has; the sizing numbers it does ship are unsourced and are cited back as authority — `PARTIAL — the circular-authority half fixed 2026-09-22 («#351»); the top-level-stack documentation is carved out with an expiry`
+
+> **The dangerous half is fixed.** `language/spin2/methods/cogspin.yaml`'s `stack_requirements`
+> shipped `minimum: "32 longs"` and `typical: "64-128 longs"` with no source, and
+> `application-notes/p2an006-sizing-cog-task-stacks.yaml:77` cited **this file** back as the
+> authority for them — a closed loop in which a heuristic became a specification by being written
+> down twice. Verified 2026-09-22: **Spin2 v55 contains no `_STACK`, no `_FREE`, and no stack-sizing
+> guidance of any kind.** Both sites now mark the figures as heuristics explicitly, say that no
+> Parallax document states them, name the circularity, give the high-water-mark measurement as the
+> only way to settle a size, and record that P1's `_STACK`/`_FREE` do not exist in Spin2 and have no
+> effect if written.
+>
+> ⏳ **CARVED OUT, expiry: the next Spin2-interpreter ingestion.** Documenting the stack that every
+> Spin2 program already has (the top-level cog's, its `DBASE` frame and the 6-long *Drop anchor*
+> entry) requires reading the interpreter listing, and **the copy in this repo is v51 while the
+> shipped KB targets v55**. Writing v51 internals as current v55 behaviour is precisely the
+> tier-mismatch this register exists to prevent, so it waits for a v55 interpreter source rather
+> than being guessed. That is the named expiry, not an open-ended deferral.
 
 **Class: OMISSION + UNSOURCED CLAIM.**
 
@@ -2345,7 +2416,28 @@ cog. The page must not imply that cog 0 is a place to evacuate.
 
 ## DEBUG's cost to the running application is nowhere in the KB: 16KB of hub gone, the protection LOCKED until reset, `LOCK[15]` taken, two pins consumed (2026-08-30, debug/stack research) — F-393
 
-### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `CONFIRMED`
+### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `RESOLVED — the load-bearing residue applied 2026-09-22 («#351»)`
+
+> Most of this had already landed (`debug-strategy-guide.yaml:77-94` carries the hub `$7C000..$7FFFF`
+> reservation, `LOCK[15]`, P62/P63, the HUBSET `L`-bit lock, the ≥10 MHz crystal requirement and the
+> per-cog debug interrupt). **Two residues were still open and are now applied:**
+>
+> 1. ⭐ **The interrupt-retrigger hazard, which is the one that does not look like a timing cost.**
+>    `spin2-v55-text.txt:1070-1071`: an interrupt requested during a DEBUG command runs after the
+>    DEBUG completes, but the response can be skewed so far that the ISR's own RETRIGGER SETUP does
+>    not happen — and the interrupt cycling then stops **permanently**, not merely late.
+>    High-frequency cyclical smart-pin interrupts are the prone case (an ISR doing `AKPIN` to drop
+>    INA/INB so the next edge re-arms it can miss the window). CT-based interrupts are immune. The
+>    fail-safe — issue DEBUG only from cogs not running background ISRs — is carried with it. A
+>    working ISR that simply ceases is the hardest DEBUG symptom to attribute, which is why this
+>    item mattered more than its size suggests.
+> 2. **The cross-link from `LOCKNEW`.** An agent reading `language/spin2/methods/locknew.yaml` was
+>    never told a DEBUG build takes one of the sixteen locks before the program runs. It now points
+>    at the debug-build cost list.
+>
+> ⏳ **Not done, low value, expiry: the next DEBUG touch** — the protected-region layout
+> (`$FC000`/`$FEA00`/`$FF1A0`/`$FFC00`) is still absent from `architecture/debug_interrupt.yaml`
+> and `architecture/hub.yaml`.
 
 **Class: OMISSION — every item here changes what an application may legally do, and each one fails
 silently when violated.**
@@ -2392,7 +2484,11 @@ gets cost and limits on one page.
 
 ## A streamer count of `$FFFF` is PERPETUAL, and our own stated bound points a reader straight at it (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-3) — F-382
 
-### F-382 — `p2kbPasm2Xinit` gives the chunk bound as `longs * 32 < 65536`, which admits the one value that means "never terminate" — `CONFIRMED`
+### F-382 — `p2kbPasm2Xinit` gives the chunk bound as `longs * 32 < 65536`, which admits the one value that means "never terminate" — `RESOLVED — verified applied 2026-09-22 («#351» drain)`
+
+> **Verified in the tree 2026-09-22, not from the record.** `language/pasm2/xinit.yaml:105-107` now
+> states `$FFFF` = PERPETUAL streaming and "The largest TERMINATING count is `$FFFE`", and the bound
+> reads `longs * 32 <= 65534`. The `CONFIRMED` status had been lagging the tree.
 
 **Class: BEHAVIOUR — measured by the reporter, re-verified here against the tree.**
 
@@ -2626,7 +2722,22 @@ is aligned, which is precisely why it does not disambiguate.
 
 ## An improvement to the general smart-pin page made a contradiction with the mode page SHARPER (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-5) — F-386
 
-### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `CONFIRMED`
+### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `PARTIAL — the named page fixed and verified 2026-09-22 («#351»); the class sweep is owed`
+
+> **The named page is done, verified in the tree 2026-09-22.**
+> `architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml:64-65` now runs `dirh`
+> before `wypin` with the comment `' Count A only - Y AFTER DIRH`; `:70-83` adds a
+> `configuration_order:` block stating the universal order and recording "(This page previously
+> showed WYPIN before DIRH.)"; `:77-83` explains that `%01110` is a counting rather than a trigger
+> mode, so the general page's exclusion does not apply, and marks the immunity question as NOT
+> STATED by any source we hold.
+>
+> ⏳ **OWED, with a named expiry — the next smart-pin touch:** the finding also required sweeping
+> the other ~30 mode pages under `architecture/smart-pins/` for the same shape (`wypin` before
+> `dirh`, and `pinstart(...)` used in a trigger mode). That sweep has NOT been run. It is
+> mechanical and bounded; it is not a blocker for the current release because the demonstrated
+> defect is fixed, but it is exactly the "whole family, not the site you tripped over" rule and it
+> must not be left to be rediscovered.
 
 **Class: AMBIGUITY — and a regression created by a good change, which is the notable part.**
 
@@ -2653,7 +2764,23 @@ this one differs and that it is safe. Then sweep every other mode page for the s
 
 ## `||` means logical OR in P2 and absolute value in P1, and the page that flags exactly this hazard twice does not flag it (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-6) — F-387
 
-### F-387 — `language/spin2/concepts/operators.yaml` annotates `~` and `~~` as P1 differences and leaves `||` unmarked — `CONFIRMED`
+### F-387 — `language/spin2/concepts/operators.yaml` annotates `~` and `~~` as P1 differences and leaves `||` unmarked — `PARTIAL — the `||` note applied 2026-09-22 («#351»); the P1-changed-operator class sweep is owed`
+
+> **Applied 2026-09-22.** The `["||", "OR"]` entry now carries the same shape of note the `~`/`~~`
+> entries already had: *"P2 Spin2 semantics; not P1 absolute value. In P1 '||' was the Absolute
+> Value operator. For absolute value on P2 use ABS."*
+> **Sources:** P1 `p1-propeller-manual-v1.2-layout-text.txt:5417-5419` ("The Absolute Value
+> operator… returns the absolute value (the positive form) of a number"); P2
+> `spin2-v55-text.txt:491` (`||, OR … Logical OR`).
+> ⚠ **A caveat was raised and resolved before writing:** v55's `ABS` row (`:432`) is annotated
+> "CON only *", which looked like it barred recommending ABS. It does not — that column's header is
+> **"Floating-Point Operator"** (`:427`), so the marker scopes the operator's FLOATING-POINT
+> behaviour to CON blocks. `-` (negate) and `*` (signed multiply) carry the identical marker. ABS is
+> an ordinary runtime operator.
+>
+> ⏳ **OWED, expiry: the next Spin2 operator touch** — the finding's second half asks for the full
+> class of operators that changed meaning from P1 (`=>`, `=<` and others) to be swept and annotated.
+> Only `||` was done.
 
 **Class: AMBIGUITY, with a near-miss cost recorded.**
 
@@ -2679,7 +2806,12 @@ unlikely to be the only two, and this should be a class sweep, not a single edit
 
 ## `X_PINS_ON` and `X_WRITE_ON` are one bit listed as two controls, and the file that resolves it is a different file (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-2/3) — F-388
 
-### F-388 — `streamer-symbols.yaml` lists both at `$0080_0000` under separate headings with no cross-note — `CONFIRMED`
+### F-388 — `streamer-symbols.yaml` lists both at `$0080_0000` under separate headings with no cross-note — `RESOLVED — verified applied 2026-09-22 («#351» drain)`
+
+> **Verified in the tree 2026-09-22.** `language/spin2/symbols/streamer-symbols.yaml:417` and `:429`
+> each carry the reciprocal cross-note ("SAME BIT as X_WRITE_ON — D[23] is one enable whose meaning
+> follows the mode… They are not two independent controls"), and both symbols were retained as the
+> finding required.
 
 **Class: AMBIGUITY.**
 
@@ -3209,7 +3341,15 @@ Recorded here so they are not rediscovered.
 
 ## The shipped set scores and star-rates hardware, which the KB entry rule excludes and no source authorises (2026-08-26, «#322» verification) — F-374
 
-### F-374 — 40 quality-score sites across 18 shipped files state a judgement, not a fact — `CONFIRMED`
+### F-374 — 40 quality-score sites across 18 shipped files state a judgement, not a fact — `RESOLVED — verified applied 2026-09-22 («#351» drain)`
+
+> **Verified in the tree 2026-09-22.** All five named score keys return zero hits corpus-wide:
+> `rating: 5_stars_*`, `educational.value`, `educational_value: 10/9`, `quality_rating:`,
+> `recommendation_score:`. The surviving near-misses were checked and are legitimate under this
+> finding's own scope: `educational:` blocks carrying `complexity_level`/`concepts_taught` (utility,
+> not a score), `educational_value:` used as a CONTAINER for `learning_objectives`, the string
+> `"educational_value"` as a comparison DIMENSION NAME, and `addon-motor-driver.yaml:155`'s
+> `rating: "…32 A / 400 V"`, which is an electrical rating.
 
 **The rule this violates** (Stephen, 2026-08-26, saved as `feedback_kb_entries_state_existence_access_utility`): a KB entry states **existence, access and utility**. Never quality commentary, never version comparison. It was given while re-scoping F-370, which had wanted to call ROM TAQOZ *"cut-down"* — and the same shape turns out to be spread across the hardware tree.
 

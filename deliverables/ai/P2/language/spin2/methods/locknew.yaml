@@ -118,3 +118,6 @@ related:
   - language/spin2/methods/lockchk.yaml
   - architecture/locks.yaml
   - language/spin2/patterns/implementation/spin2_cog_management.yaml
+  # A DEBUG build takes one of the sixteen locks before your program runs, so LOCKNEW
+  # has one fewer available under -d than without it. See the debug-build cost list.
+  - language/spin2/debug-commands/debug-strategy-guide.yaml
