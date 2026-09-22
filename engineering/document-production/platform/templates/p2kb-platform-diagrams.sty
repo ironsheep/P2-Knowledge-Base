@@ -90,8 +90,8 @@
   \node[addr] at (-2.5, 0.8) {\$1F4}; \node[regbox, fill=reg-vector] at (0, 0.8) {IJMP1}; \node[desc] at (1.8, 0.8) {Interrupt 1 jump address};
   \node[addr] at (-2.5, 0.1) {\$1F5}; \node[regbox, fill=reg-vector] at (0, 0.1) {IRET1}; \node[desc] at (1.8, 0.1) {Interrupt 1 return address};
   % Pointers / parameters (green)
-  \node[addr] at (-2.5, -0.6) {\$1F6}; \node[regbox, fill=diagram-highlight] at (0, -0.6) {PA};   \node[desc] at (1.8, -0.6) {Parameter A (COGINIT)};
-  \node[addr] at (-2.5, -1.3) {\$1F7}; \node[regbox, fill=diagram-highlight] at (0, -1.3) {PB};   \node[desc] at (1.8, -1.3) {Parameter B (COGINIT)};
+  \node[addr] at (-2.5, -0.6) {\$1F6}; \node[regbox, fill=diagram-highlight] at (0, -0.6) {PA};   \node[desc] at (1.8, -0.6) {CALLD ret / CALLPA / LOC};
+  \node[addr] at (-2.5, -1.3) {\$1F7}; \node[regbox, fill=diagram-highlight] at (0, -1.3) {PB};   \node[desc] at (1.8, -1.3) {CALLD ret / CALLPB / LOC};
   \node[addr] at (-2.5, -2.0) {\$1F8}; \node[regbox, fill=diagram-highlight] at (0, -2.0) {PTRA}; \node[desc] at (1.8, -2.0) {Hub pointer A};
   \node[addr] at (-2.5, -2.7) {\$1F9}; \node[regbox, fill=diagram-highlight] at (0, -2.7) {PTRB}; \node[desc] at (1.8, -2.7) {Hub pointer B};
   % I/O registers (peach)

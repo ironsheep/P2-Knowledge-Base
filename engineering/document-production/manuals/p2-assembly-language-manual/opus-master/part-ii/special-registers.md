@@ -494,19 +494,19 @@ The program counter is a 20-bit register that holds the hub RAM address of the c
 
 
 
-### Q Register
+### The Q Register and CORDIC Results
 
-The Q register is a 32-bit auxiliary register used for CORDIC operations, division results, and block transfer setup.
+These are two separate mechanisms that are easily conflated, because SETQ supplies an operand to the CORDIC and GETQX/GETQY retrieve its results. They are not the same storage.
 
-**Access**: Read via GETQX/GETQY, write via SETQ/SETQ2
+**The Q register** is a 32-bit value written by SETQ or SETQ2 to modify the instruction that immediately follows. It is write-only from the cog's point of view — there is no instruction that reads it back. Its value persists until the companion instruction consumes it. It supplies:
 
-**Usage**: The Q register serves multiple purposes:
+1. **Block transfer counts**: SETQ or SETQ2 before RDLONG/WRLONG/WMLONG converts the transfer into a multi-long block move.
+2. **The CORDIC's second operand**: SETQ before a CORDIC command supplies the 64-bit operand's upper long.
+3. **The PTRA value** passed to a cog started by the COGINIT that follows.
 
-1. **CORDIC results**: After CORDIC operations (QROTATE, QVECTOR, etc.), results are read from Q using GETQX and GETQY.
-2. **Division quotient**: Division instructions place the quotient in Q.
-3. **Block operations**: SETQ and SETQ2 configure the Q register to enable multi-long transfers with RDxxxx/WRxxxx instructions.
+**CORDIC results** are held in the CORDIC solver's own result pipeline, not in Q. A CORDIC command's two 32-bit results become available 55 clocks after the command is issued, and are retrieved with GETQX (the X result) and GETQY (the Y result). Both instructions stall until the results arrive, so no explicit wait is needed. QDIV places its quotient in the X result and its remainder in the Y result.
 
-The Q register contents are volatile—CORDIC and division operations overwrite previous values. Read results immediately after the operation completes.
+Reading a result when none is available and none is in progress completes in two clocks and raises the QMT event flag — which is how a premature read is detected, since the instruction does not fault.
 
 **Example**:
 ```pasm2

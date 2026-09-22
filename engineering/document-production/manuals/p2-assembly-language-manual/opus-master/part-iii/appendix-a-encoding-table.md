@@ -65,8 +65,8 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | BMASK | `1001110` | — | 2 | — | — |
 | BRK | `1101011` | — | 2 | — | — |
 | CALL | `1101101` | — | 4 / 13-20 | — | — |
-| CALLA | `1101011` | CZ | 5...12 * | D[31] | D[30] |
-| CALLB | `1101011` | CZ | 5...12 * | D[31] | D[30] |
+| CALLA | `1101011` | CZ | 5...12 * / 14...32 * | D[31] | D[30] |
+| CALLB | `1101011` | CZ | 5...12 * / 14...32 * | D[31] | D[30] |
 | CALLD | `1011001` | CZI | 4 / 13-20 | — | — |
 | CALLPA | `1011010` | — | 4 / 13–20 | — | — |
 | CALLPB | `1011010` | — | 4 / 13–20 | — | — |
@@ -336,13 +336,13 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | TESTN | `0111111` | CZI | 2 | Parity of (D & !S) | (D & !S) == 0 |
 | TESTP | `1101011` | CZ | 2 | IN[D[5:0]] | IN[D[5:0]] |
 | TESTPN | `1101011` | CZ | 2 | !IN[D[5:0]] | !IN[D[5:0]] |
-| TJF | `1011101` | — | 2 or 4 | — | — |
+| TJF | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TJNF | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
-| TJNS | `1011101` | — | 2 or 4 | — | — |
-| TJNZ | `1011100` | — | 2 or 4 | — | — |
+| TJNS | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
+| TJNZ | `1011100` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TJS | `1011101` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TJV | `1011110` | — | 2 or 4 / 2 or 13–20 | — | — |
-| TJZ | `1011100` | — | 2 or 4 | — | — |
+| TJZ | `1011100` | — | 2 or 4 / 2 or 13-20 | — | — |
 | TRGINT1 | `1101011` | — | 2 | — | — |
 | TRGINT2 | `1101011` | — | 2 | — | — |
 | TRGINT3 | `1101011` | — | 2 | — | — |

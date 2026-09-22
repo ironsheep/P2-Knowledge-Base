@@ -26,8 +26,8 @@ Call Subroutine
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
-| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | D[31] | D[30] | --- | 4 / 13-20 |
+| EEEE | 1101101 | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | K and PC | 4 / 13-20 |
+| EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101101 | D[31] | D[30] | K and PC | 4 / 13-20 |
 
 
 **Related:** [RET](#ret), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)
@@ -160,8 +160,8 @@ Call with Destination register
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 4 / 13-20 |
-| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | --- | 4 / 13-20 |
+| EEEE | 11100WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PA/PB/PTRA/PTRB and PC | 4 / 13-20 |
+| EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | D and PC | 4 / 13-20 |
 
 
 **Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)

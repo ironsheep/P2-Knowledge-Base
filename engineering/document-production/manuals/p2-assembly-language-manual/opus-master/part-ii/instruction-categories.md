@@ -10,7 +10,7 @@ This chapter defines the instruction categories used throughout Part II. Each ca
 
 Arithmetic instructions perform mathematical and logical operations on register values. This includes addition, subtraction, multiplication, comparisons, bitwise operations (AND, OR, XOR), bit manipulation, shifts, rotates, and data movement. This is the largest instruction category.
 
-**Data Movement:** [MOV](#mov), [LOC](#loc)
+**Data Movement:** [MOV](#mov)
 
 **Addition/Subtraction:** [ADD](#add), [ADDS](#adds), [ADDSX](#addsx), [ADDX](#addx), [SUB](#sub), [SUBR](#subr), [SUBS](#subs), [SUBSX](#subsx), [SUBX](#subx)
 
@@ -58,7 +58,7 @@ Arithmetic instructions perform mathematical and logical operations on register 
 
 Branch instructions control program flow by modifying the program counter. This category includes conditional and unconditional jumps, subroutine calls using stack or pointer registers, returns from subroutines and interrupts, and instruction skipping/repeating mechanisms.
 
-[CALL](#call), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb), [DJF](#djf), [DJNF](#djnf), [DJNZ](#djz), [DJZ](#djz), [EXECF](#execf), [IJNZ](#ijz), [IJZ](#ijz), [JMP](#jmp), [JMPREL](#jmprel), [REP](#rep), [RESI0](#resi0), [RESI1](#resi0), [RESI2](#resi0), [RESI3](#resi0), [RET](#ret), [RETA](#reta), [RETB](#retb), [RETI0](#reti0), [RETI1](#reti0), [RETI2](#reti0), [RETI3](#reti0), [SKIP](#skip), [SKIPF](#skipf), [TJF](#tjf), [TJNF](#tjf), [TJNS](#tjs), [TJNZ](#tjz), [TJS](#tjs), [TJV](#tjv), [TJZ](#tjz)
+[CALL](#call), [CALLA](#calla), [CALLB](#callb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb), [LOC](#loc), [DJF](#djf), [DJNF](#djnf), [DJNZ](#djz), [DJZ](#djz), [EXECF](#execf), [IJNZ](#ijz), [IJZ](#ijz), [JMP](#jmp), [JMPREL](#jmprel), [REP](#rep), [RESI0](#resi0), [RESI1](#resi0), [RESI2](#resi0), [RESI3](#resi0), [RET](#ret), [RETA](#reta), [RETB](#retb), [RETI0](#reti0), [RETI1](#reti0), [RETI2](#reti0), [RETI3](#reti0), [SKIP](#skip), [SKIPF](#skipf), [TJF](#tjf), [TJNF](#tjf), [TJNS](#tjs), [TJNZ](#tjz), [TJS](#tjs), [TJV](#tjv), [TJZ](#tjz)
 
 ---
 

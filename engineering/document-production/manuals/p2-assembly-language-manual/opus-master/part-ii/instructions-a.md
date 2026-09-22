@@ -286,7 +286,7 @@ Acknowledge smart pin
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | --- | --- | --- | 2 |
+| EEEE | 1100000 | 01I | 000000001 | SSSSSSSSS | --- | --- | Ack Bus | 2 |
 
 
 **Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin)
@@ -582,7 +582,7 @@ Alter Instruction
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 1001101 | 00I | DDDDDDDDD | SSSSSSSSS | --- | --- | D | 2 |
-| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | D | 2 |
+| EEEE | 1001101 | 001 | DDDDDDDDD | 101100100 | --- | --- | --- | 2 |
 
 
 **Related:** [SETD](#setd), [SETS](#sets), [SETR](#setr), [ALTD](#altd), [ALTS](#alts), [ALTR](#altr)
@@ -1001,7 +1001,7 @@ Augment Destination
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | --- | --- | --- | 2 |
+| EEEE | 11111DD | DDD | DDDDDDDDD | DDDDDDDDD | --- | --- | Hidden D queue | 2 |
 
 
 **Related:** [AUGS](#augs)
@@ -1037,7 +1037,7 @@ Augment Source
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | --- | --- | --- | 2 |
+| EEEE | 11110SS | SSS | SSSSSSSSS | SSSSSSSSS | --- | --- | Hidden S queue | 2 |
 
 
 **Related:** [AUGD](#augd)

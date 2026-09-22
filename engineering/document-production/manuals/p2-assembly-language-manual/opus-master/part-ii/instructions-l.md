@@ -25,7 +25,7 @@ Load Address
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | --- | 2 |
+| EEEE | 11101WW | RAA | AAAAAAAAA | AAAAAAAAA | --- | --- | PA/PB/PTRA/PTRB (per W) | 2 |
 
 
 **Related:** [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb), [CALLD](#calld), [CALLPA](#callpa), [CALLPB](#callpb)

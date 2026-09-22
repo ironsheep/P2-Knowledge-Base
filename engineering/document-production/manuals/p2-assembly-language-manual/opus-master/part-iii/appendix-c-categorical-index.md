@@ -47,7 +47,6 @@ Arithmetic instructions perform mathematical and logical operations on register 
 | [GETNIB](#getnib) | Get nibble established by prior ALTGN instruction into D |
 | [GETWORD](#getword) | Get word established by prior ALTGW instruction into D |
 | [INCMOD](#incmod) | Increment with modulus |
-| [LOC](#loc) | Get {12'b0, address[19:0]} into PA/PB/PTRA/PTRB (per W) |
 | [MERGEB](#mergeb) | Merge bits of bytes in D |
 | [MERGEW](#mergew) | Merge bits of words in D |
 | [MODC](#modc) | Modify C according to cccc |
@@ -142,6 +141,7 @@ Branch instructions control program flow by modifying the program counter. This 
 | [CALLA](#calla) | Call to A by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRA++ |
 | [CALLB](#callb) | Call to A by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRB++ |
 | [CALLD](#calld) | Call to A by writing {C, Z, 10'b0, PC[19:0]} to PA/PB/PTRA/PTRB (per W) |
+| [LOC](#loc) | Get {12'b0, address[19:0]} into PA/PB/PTRA/PTRB (per W) |
 | [CALLPA](#callpa) | Call to S by pushing return onto stack, copy D to PA |
 | [CALLPB](#callpb) | Call to S by pushing return onto stack, copy D to PB |
 

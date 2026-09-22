@@ -272,6 +272,10 @@ The P2 Edge modules put their two buffered LEDs on different pins depending on w
 | P2 Edge 32MB PSRAM Module (P2-EC32MB) | **P38, P39** |
 | P2 Eval Board (#64000) | P56-P63 (P56, P57 free) |
 
+And now a small cruelty of the universe, which you should hear from me rather than discover at midnight: **the two boards light their LEDs the opposite way round.** On the Edge modules, driving the pin *high* lights the LED. On the Eval board the buffer is an inverting one, so driving the pin *low* lights it.
+
+Our blinker blinks happily on either — it is, after all, only going back and forth. But if you are on an Eval board, read every `drvh #56  ' LED on` in this book as "LED off", and swap them in your head. Or better: swap `drvh` and `drvl` in the code and stop thinking about it. Well - you did want to know how the hardware really works.
+
 That difference is not cosmetic. On the 32MB module, P56 and P57 are the PSRAM **clock** and **chip-enable** lines - so `drvh #56` there doesn't light anything, and it *does* stamp on the memory bus. Change the pin number, don't fight it.
 
 Two more things that will save you an evening:
@@ -451,7 +455,7 @@ This one's a bit tricky - we'll use PWM to fade the LED:
         dirh    #56                    ' Enable the pin
         
 .fade   wypin   level, #56             ' Set duty cycle
-        waitx   ##1_000_000            ' ~1.3 s per ramp at 200 MHz
+        waitx   ##1_000_000            ' 5 ms per step (256 steps ~ 1.3 s)
         add     level, #1              ' Increment brightness
         and     level, #$FF            ' Wrap at 256
         jmp     #.fade
@@ -507,7 +511,7 @@ Before we move on, let me save you some debugging time:
 
 4. **Cog already running** - If you `coginit` to a specific cog that's already running something else, it will be stopped and replaced. Use `COGEXEC_NEW` to automatically find a free cog.
 
-5. **`-1` is not "any free cog"** - You may meet `coginit(-1, ...)` in older code, or in code carried over from the P1, where that was the idiom. It does not mean what it looks like here. `-1` reaches COGINIT as `$FFFF_FFFF`, and the silicon reads only the low six bits — `%111111` — which asks for a free even/odd *pair* of cogs and hands you back the even one. You quietly spend two cogs where you wanted one. Say `COGEXEC_NEW` when you mean "any free cog"; `-1` is what you get *back* when the launch fails.
+5. **`-1` is not "any free cog"** - You may meet `coginit(-1, ...)` in older code, or in code carried over from the P1, where that was the idiom. It does not mean what it looks like here. `-1` reaches COGINIT as `$FFFF_FFFF`, and the silicon reads only the low six bits — `%111111` — which asks for a free even/odd *pair* of cogs — and, because bit 5 is set too, asks them to start in **hub-exec** mode, beginning execution at the address you passed as though it were code sitting in hub RAM. So you do not merely spend two cogs where you wanted one; you spend two cogs *not running your program*, because a cog-exec DAT blob is not a hub program. Say `COGEXEC_NEW` when you mean "any free cog"; `-1` is what you get *back* when the launch fails, not what you send in.
 
 ## What We've Learned
 
@@ -1122,7 +1126,7 @@ add_and_return
         ret                     ' Then return (RET is a ~4-cycle branch)
 
 ' _RET_ way: One instruction!
-add_and_return
+add_and_ret2
         _ret_   add     x, y    ' Add AND return (saves 2 cycles)
 ```
 
@@ -1276,7 +1280,7 @@ This is wonderfully useful - your utility routines can all use `.loop` and `.don
 
 2. **Scope surprise**: Data definitions (`LONG`, `WORD`, `BYTE`) also start new scopes. If you put data between two parts of a routine, your local labels won't work!
 
-3. **The 30-character limit**: Keep label names to 30 characters or fewer—the compiler rejects any name longer than 30. `this_is_a_really_long_label_name` (32 characters) will be rejected.
+3. **The 32-character limit**: A symbol may be up to 32 characters long. `this_is_a_really_long_label_name` is exactly 32 and squeaks through; add one more character and the compiler stops being friendly. This is rarely a real constraint — it is, however, an excellent way to lose ten minutes to a typo you cannot see.
 
 ## Data in DAT Blocks: Your Program's Pantry
 
@@ -2770,7 +2774,7 @@ tx_loop
         djnz    bits, #tx_loop
         ret
         
-bit_time long   100_000_000 / 115200  ' Clock cycles per bit
+bit_time long   200_000_000 / 115200  ' Clock cycles per bit at 200 MHz
 ```
 
 ## Your Turn: I/O Experiments
@@ -3308,7 +3312,7 @@ Let's be honest about the differences:
 
 **Cog Execution** (traditional):
 
-- ✅ Fast: most simple instructions run in 2 clocks (hub accesses are 9–16, taken branches 5+)
+- ✅ Fast: most simple instructions run in 2 clocks (hub accesses are 9–16, and a taken branch costs at least 4 — the pipeline has to refill)
 - ✅ Deterministic: perfect for real-time
 - ❌ Limited: only 496 instructions
 - ✅ Self-contained: runs independently
@@ -3964,10 +3968,10 @@ Let me show you a loop that looks fine — until you realize you're paying for t
         djnz    count, #.loop    ' 2/4 (cog-exec) / 2/13-20 (hub-exec)
 
 ' After optimization using PTR expressions:
-.loop   rdlong  value, ptra      ' Read from current address
+.tight  rdlong  value, ptra      ' Read from current address
         add     value, #1        ' Process
         wrlong  value, ptra++    ' Write and increment in one!
-        djnz    count, #.loop    ' Saved the ADD instruction
+        djnz    count, #.tight   ' Saved the ADD instruction
 ```
 
 That trims one instruction (2 clocks) per iteration—a modest ~10% off this hub-bound loop, and it's free. The secret? Understanding how P2 really works.
@@ -4078,9 +4082,9 @@ For ultimate speed, use the FIFO:
 
 ' FIFO reading: RFLONG is always 2 clocks
         rdfast  #0, ptra        ' Start FIFO
-.loop   rflong  value           ' 2 clocks, always!
+.fast   rflong  value           ' 2 clocks, always!
         add     sum, value      ' 2 clocks
-        djnz    count, #.loop   ' 4 clocks when it branches back
+        djnz    count, #.fast   ' 4 clocks when it branches back
         ' ~2x faster for sequential reads!
 ```
 
@@ -5110,7 +5114,7 @@ For precise timing, use the counter comparison events:
         getct   target          ' Current time
         add     target, ##200_000  ' +1ms at 200MHz
         addct1  target, #0      ' Set CT1 target
-        waitct1                  ' Sleep until CT >= CT1
+        waitct1                  ' Sleep until CT has passed CT1
 
 ' Alternative using WAITX (simpler but less precise)
         waitx   ##200_000       ' Wait ~1ms at 200MHz
@@ -5119,7 +5123,7 @@ For precise timing, use the counter comparison events:
 The timer events are:
 
 - **ADDCT1/ADDCT2/ADDCT3**: Set the comparison target
-- **WAITCT1/WAITCT2/WAITCT3**: Wait until CT reaches target
+- **WAITCT1/WAITCT2/WAITCT3**: Wait until CT has *passed* the target — not until it "equals" it. The hardware asks whether CT minus CT1 has gone positive, which means a target you set in the past fires the instant you wait on it, and a target more than half a counter-cycle away (2³¹ clocks) looks to the hardware like it already went by. Build your targets with **ADDCT1** from a fresh **GETCT** and keep them modest.
 - **POLLCT1/POLLCT2/POLLCT3**: Check (non-blocking) if target reached
 
 ## Waiting vs Polling
@@ -5531,20 +5535,33 @@ Sometimes communication isn't enough — you need two or more cogs to *agree* on
 
 ### Using Locks
 
-When multiple cogs need atomic access to the same piece of data, P2 gives you 16 hardware locks. They're tiny and they're fast:
+When multiple cogs need atomic access to the same piece of data, P2 gives you 16 hardware locks. They're tiny and they're fast — but there is one step people skip, and it costs them an afternoon. A lock number is not yours just because you wrote it down. Somebody has to *claim* it first, with **LOCKNEW**, and tell the other cogs which number came back:
+
+```pasm2
+' ONE cog does this at startup, then publishes the number
+        locknew ctr_lock        wc    ' C=1 means the pool was empty
+  if_c  jmp     #no_locks_left
+        wrlong  ctr_lock, ##LOCK_MBOX ' tell the other cogs
+```
+
+Now every cog — including that one — uses the number it was given:
 
 ```pasm2
 ' Atomic increment using lock
 atomic_increment
-        locktry #COUNTER_LOCK wc      ' C=1 if we got the lock
+        locktry ctr_lock        wc    ' C=1 if we got the lock
   if_nc jmp     #atomic_increment     ' Retry until we get it
-        
+
         rdlong  value, ##COUNTER
         add     value, #1
         wrlong  value, ##COUNTER
-        
-        lockrel #COUNTER_LOCK
+
+        lockrel ctr_lock              ' Only the HOLDER may do this
 ```
+
+Uff! And here is the trap, so you never fall into it. `LOCKTRY` clears C for *two* different reasons: somebody else is holding the lock, **or the lock was never allocated at all**. Your code cannot tell those apart. So a retry loop on a lock number you invented does not fail — it spins forever, quietly, while you sit there wondering which cog died. Claim it with **LOCKNEW** first.
+
+Two more things worth knowing. Only the cog *holding* a lock may `LOCKREL` it — but *any* cog may `LOCKRET` it back to the pool when you are truly finished. And if you build with DEBUG, lock 15 is already spoken for, so do not go hunting for it.
 
 ### Event Synchronization
 
