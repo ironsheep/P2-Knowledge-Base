@@ -1,5 +1,13 @@
 # P2 Single-Step Debugger Manual Changelog
 
+## v1.0.1 (2026-09-22)
+
+**The cog register map names the instructions that write PA and PB.**
+
+### Changed
+
+- **`PA` and `PB` receive an address** from `CALLD`'s return form, from `CALLPA`/`CALLPB` and from `LOC`, in the special-registers map diagram
+
 ## v1.0.0 (2026-09-10): Initial public release
 
 **Initial release.** A complete working guide to the Propeller 2's built-in
