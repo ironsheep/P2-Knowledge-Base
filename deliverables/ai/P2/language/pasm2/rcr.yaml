@@ -25,7 +25,7 @@ timing:
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: Last bit out1
+  c: last bit shifted out if S[4:0] > 0, else D[31]
   z: Result == 0
   clocks: '2'
 encoding_notes:

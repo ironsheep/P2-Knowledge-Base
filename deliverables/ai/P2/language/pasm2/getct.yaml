@@ -3,7 +3,7 @@ syntax: GETCT   D               {WC}
 encoding:
 - bits: EEEE 1101011 C00 DDDDDDDDD 000011010
   write: D
-  c: same
+  c: "— (WC is an INPUT SELECTOR here, not a flag result: it selects CT[63:32] instead of CT[31:0]. C is not written.)"
   z: —
   clocks: '2'
 timing:
@@ -33,4 +33,4 @@ syntax_variants:
 - GETCT D
 last_updated: '2025-09-19T16:04:16.908732'
 category: Miscellaneous
-oneliner: T=0 on reset, CT++ on every clock
+oneliner: Get CT[31:0], or CT[63:32] if WC, into D

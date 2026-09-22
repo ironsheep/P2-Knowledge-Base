@@ -50,6 +50,7 @@ architecture:
       safety: "Only owning COG can release its lock"
 
 state_versus_allocation:
+  source: "Propeller 2 Documentation v35, Locks -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3686 (LOCKRET returns an allocated lock, any cog may), :3696 (only the cog that has taken the lock can release it), :3698 (a lock is implicitly released if the holding cog is stopped via COGSTOP or restarted via COGINIT, or if LOCKRET is executed for it)"
   summary: >-
     A lock has TWO independent pieces of state and they are freed by different things.
     Confusing them is the most expensive mistake available with locks, because the
