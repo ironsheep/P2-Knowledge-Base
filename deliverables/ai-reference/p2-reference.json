@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-09-11",
-    "last_updated": "2026-09-11T23:37:29.861533",
+    "release_date": "2026-09-22",
+    "last_updated": "2026-09-22T04:42:25.895879",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,10 +11,10 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-09-11T23:37:29.861533",
+    "extraction_date": "2026-09-22T04:42:25.895879",
     "categories": {
       "Math and Logic": {
-        "count": 110,
+        "count": 109,
         "description": "Math and Logic",
         "instructions": {
           "CRCBIT": {
@@ -1017,7 +1017,7 @@
                 "bits": "EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
                 "c": "true sign of (D +/- S)",
-                "z": "0 then D = D - S, else D = D + S",
+                "z": "Result == 0",
                 "clocks": "2"
               }
             ],
@@ -1430,7 +1430,7 @@
               {
                 "bits": "EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "0 then D = D - S, else D = D + S. C = true sign of (D +/- S)",
+                "c": "true sign of (D +/- S)",
                 "z": "Result == 0",
                 "clocks": "2"
               }
@@ -4869,7 +4869,7 @@
               {
                 "bits": "EEEE 0111000 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "1, else D = D + 1 and C = 0",
+                "c": "D was S (wrapped)",
                 "z": "Result == 0",
                 "clocks": "2"
               }
@@ -4921,7 +4921,7 @@
               {
                 "bits": "EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS",
                 "write": "D",
-                "c": "Last bit out1",
+                "c": "last bit shifted out if S[4:0] > 0, else D[31]",
                 "z": "Result == 0",
                 "clocks": "2"
               }
@@ -5214,58 +5214,6 @@
             },
             "documentation_source": "PASM2 Manual 2022/11/01 Pages 31-147",
             "documentation_level": "comprehensive"
-          },
-          "LOC": {
-            "mnemonic": "LOC",
-            "syntax": "LOC     PA/PB/PTRA/PTRB,#{\\}A",
-            "brief_description": "",
-            "oneliner": "Load address into PA/PB/PTRA/PTRB",
-            "encoding": [
-              {
-                "bits": "EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA",
-                "write": "Per W",
-                "c": "\u2014",
-                "z": "\u2014",
-                "clocks": "2"
-              }
-            ],
-            "description": "Load address into PA, PB, PTRA, or PTRB. If the R bit is 1 (default for relative addressing), address = PC + A. If R = 0 (forced with \\ prefix), address = A. Used to set up pointer registers for memory operations.",
-            "result": "",
-            "timing": {
-              "cycles": 2,
-              "type": "fixed"
-            },
-            "flags_affected": {
-              "C": "No effect",
-              "Z": "No effect"
-            },
-            "parameters": [],
-            "syntax_variants": [],
-            "related": [
-              "PA",
-              "PB",
-              "PTRA",
-              "PTRB",
-              "CALLD",
-              "CALLPA",
-              "CALLPB"
-            ],
-            "compiler_info": {
-              "syntax": "",
-              "encoding": {
-                "operandFormat": 22
-              },
-              "category": "",
-              "effects": [],
-              "operand_format": {
-                "name": "operand_loc",
-                "pattern": "D,#S{\\}",
-                "description": "Load address: destination register, immediate address (optional \\ for absolute)",
-                "valueType": 22
-              }
-            },
-            "documentation_source": "original",
-            "documentation_level": "minimal"
           },
           "MUXQ": {
             "mnemonic": "MUXQ",
@@ -7507,7 +7455,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set CT1 event to trigger on CT = D + S. ADDCT1 sets the hidden CT1 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT1, WAITCT1, JCT1, and JNCT1 instructions to process CT1 time-based events.",
+            "description": "Set the CT1 event target to D + S. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT1) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too. ADDCT1 sets the hidden CT1 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT1, WAITCT1, JCT1, and JNCT1 instructions to process CT1 time-based events.",
             "result": "The Src value is added into Dest and the result is also stored in the hidden CT1 event trigger register.",
             "timing": {
               "cycles": 2,
@@ -8129,7 +8077,7 @@
                 "clocks": "2 or 4"
               }
             ],
-            "description": "Jump to S if CT1 (counter 1) event flag is set. The CT1 event flag is set when the system counter reaches the CT1 target value set by ADDCT1.",
+            "description": "Jump to S if CT1 (counter 1) event flag is set. The CT1 event flag is set once the System Counter has PASSED the CT1 target value set by ADDCT1 - the flag is set whenever the MSB of (CT - CT1) is 0, so the comparison stays correct across counter wraparound, and it is NOT limited to the single cycle where CT equals the target. A target already in the recent past therefore reads as passed and the flag is already set.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -8467,7 +8415,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set CT3 event to trigger on CT = D + S. ADDCT3 sets the hidden CT3 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based events.",
+            "description": "Set the CT3 event target to D + S. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT3) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too. ADDCT3 sets the hidden CT3 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based events.",
             "result": "The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register.",
             "timing": {
               "cycles": 2,
@@ -8627,7 +8575,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set SE2 event configuration to D[8:0]. Configures selectable event 2 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE2 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee setse1.yaml for complete D[8:0] encoding table.\n",
+            "description": "Set SE2 event configuration to D[8:0]. Configures selectable event 2 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE2 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee language/pasm2/setse1.yaml for complete D[8:0] encoding table.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -8830,7 +8778,7 @@
                 "clocks": "2 or 4"
               }
             ],
-            "description": "Jump to S if CT2 (counter 2) event flag is set. The CT2 event flag is set when the system counter reaches the CT2 target value set by ADDCT2.",
+            "description": "Jump to S if CT2 (counter 2) event flag is set. The CT2 event flag is set once the System Counter has PASSED the CT2 target value set by ADDCT2 - the flag is set whenever the MSB of (CT - CT2) is 0, so the comparison stays correct across counter wraparound, and it is NOT limited to the single cycle where CT equals the target. A target already in the recent past therefore reads as passed and the flag is already set.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -8926,7 +8874,7 @@
                 "clocks": "2 or 4"
               }
             ],
-            "description": "Jump to S if CT3 (counter 3) event flag is set. The CT3 event flag is set when the system counter reaches the CT3 target value set by ADDCT3.",
+            "description": "Jump to S if CT3 (counter 3) event flag is set. The CT3 event flag is set once the System Counter has PASSED the CT3 target value set by ADDCT3 - the flag is set whenever the MSB of (CT - CT3) is 0, so the comparison stays correct across counter wraparound, and it is NOT limited to the single cycle where CT equals the target. A target already in the recent past therefore reads as passed and the flag is already set.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -9075,7 +9023,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set SE3 event configuration to D[8:0]. Configures selectable event 3 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE3 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee setse1.yaml for complete D[8:0] encoding table.\n",
+            "description": "Set SE3 event configuration to D[8:0]. Configures selectable event 3 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE3 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee language/pasm2/setse1.yaml for complete D[8:0] encoding table.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -9174,7 +9122,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set CT2 event to trigger on CT = D + S. ADDCT2 sets the hidden CT2 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT2, WAITCT2, JCT2, and JNCT2 instructions to process CT2 time-based events.",
+            "description": "Set the CT2 event target to D + S. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT2) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too. ADDCT2 sets the hidden CT2 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT2, WAITCT2, JCT2, and JNCT2 instructions to process CT2 time-based events.",
             "result": "The Src value is added into Dest and the result is also stored in the hidden CT2 event trigger register.",
             "timing": {
               "cycles": 2,
@@ -9277,7 +9225,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set SE4 event configuration to D[8:0]. Configures selectable event 4 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE4 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee setse1.yaml for complete D[8:0] encoding table.\n",
+            "description": "Set SE4 event configuration to D[8:0]. Configures selectable event 4 to trigger\non the specified pin, LUT, or lock condition. Also clears the SE4 event flag.\n\nIMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.\nSee language/pasm2/setse1.yaml for complete D[8:0] encoding table.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -9880,7 +9828,7 @@
                 "bits": "EEEE 1101011 CZ0 000001101 000100100",
                 "write": "\u2014",
                 "c": "XRL Event",
-                "z": "XRLEvent",
+                "z": "XRL Event",
                 "clocks": "2"
               }
             ],
@@ -12040,12 +11988,12 @@
             "mnemonic": "GETCT",
             "syntax": "GETCT   D               {WC}",
             "brief_description": "",
-            "oneliner": "T=0 on reset, CT++ on every clock",
+            "oneliner": "Get CT[31:0], or CT[63:32] if WC, into D",
             "encoding": [
               {
                 "bits": "EEEE 1101011 C00 DDDDDDDDD 000011010",
                 "write": "D",
-                "c": "same",
+                "c": "\u2014 (WC is an INPUT SELECTOR here, not a flag result: it selects CT[63:32] instead of CT[31:0]. C is not written.)",
                 "z": "\u2014",
                 "clocks": "2"
               }
@@ -12096,7 +12044,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.\n\nSETQ2 enables block transfers to/from LUT RAM instead of COG RAM:\n- SETQ2 + RDLONG: Block read from HUB to LUT\n- SETQ2 + WRLONG: Block write from LUT to HUB\n- Fast bulk data movement for lookup tables\n- Essential for waveform tables and large datasets\n",
+            "description": "Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.\n\nSETQ2 enables block transfers to/from LUT RAM instead of COG RAM:\n- SETQ2 + RDLONG: Block read from HUB to LUT\n- SETQ2 + WRLONG: Block write from LUT to HUB\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -13112,7 +13060,7 @@
         }
       },
       "Branch": {
-        "count": 36,
+        "count": 37,
         "description": "Branch",
         "instructions": {
           "TJNZ": {
@@ -14739,6 +14687,58 @@
             },
             "documentation_source": "PASM2 Manual 2022/11/01",
             "documentation_level": "comprehensive"
+          },
+          "LOC": {
+            "mnemonic": "LOC",
+            "syntax": "LOC     PA/PB/PTRA/PTRB,#{\\}A",
+            "brief_description": "",
+            "oneliner": "Load address into PA/PB/PTRA/PTRB",
+            "encoding": [
+              {
+                "bits": "EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA",
+                "write": "Per W",
+                "c": "\u2014",
+                "z": "\u2014",
+                "clocks": "2"
+              }
+            ],
+            "description": "Load address into PA, PB, PTRA, or PTRB. If the R bit is 1 (default for relative addressing), address = PC + A. If R = 0 (forced with \\ prefix), address = A. Used to set up pointer registers for memory operations.",
+            "result": "",
+            "timing": {
+              "cycles": 2,
+              "type": "fixed"
+            },
+            "flags_affected": {
+              "C": "No effect",
+              "Z": "No effect"
+            },
+            "parameters": [],
+            "syntax_variants": [],
+            "related": [
+              "PA",
+              "PB",
+              "PTRA",
+              "PTRB",
+              "CALLD",
+              "CALLPA",
+              "CALLPB"
+            ],
+            "compiler_info": {
+              "syntax": "",
+              "encoding": {
+                "operandFormat": 22
+              },
+              "category": "",
+              "effects": [],
+              "operand_format": {
+                "name": "operand_loc",
+                "pattern": "D,#S{\\}",
+                "description": "Load address: destination register, immediate address (optional \\ for absolute)",
+                "valueType": 22
+              }
+            },
+            "documentation_source": "original",
+            "documentation_level": "minimal"
           },
           "DJNZ": {
             "mnemonic": "DJNZ",
@@ -17453,7 +17453,11 @@
             "syntax_variants": [
               "WRLUT {#}D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "architecture/lookup_ram.yaml",
+              "language/pasm2/rdlut.yaml",
+              "language/pasm2/setq2.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -17499,7 +17503,11 @@
             "syntax_variants": [
               "RDLUT D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "architecture/lookup_ram.yaml",
+              "language/pasm2/wrlut.yaml",
+              "language/pasm2/setq2.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -17543,7 +17551,11 @@
             },
             "parameters": [],
             "syntax_variants": [],
-            "related": [],
+            "related": [
+              "architecture/lookup_ram.yaml",
+              "language/pasm2/coginit.yaml",
+              "language/pasm2/setse1.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -18397,7 +18409,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-09-11T23:37:29.861533",
+    "extraction_date": "2026-09-22T04:42:25.895879",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18743,7 +18755,7 @@
               "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters",
               "V49+: Structure layout (size, alignment) is preserved exactly when imported",
               "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries",
-              "V54+: Named bitfields on BYTE/WORD/LONG members \u2014 see v54_enhancements section and concepts/struct-bitfields.yaml",
+              "V54+: Named bitfields on BYTE/WORD/LONG members \u2014 see v54_enhancements section and language/spin2/concepts/struct-bitfields.yaml",
               "V54+: Nameless single BYTE/WORD/LONG member form \u2014 struct_var.bitfield without intermediate member name",
               "V54+: Bitfield syntax is NOT enforced by a version directive; {Spin2_v54} is recommended as declaration of intent",
               "V54+: No new interpreter mechanism \u2014 reuses the existing variable-bitfield setup paths"
@@ -19034,7 +19046,7 @@
               "Unsigned range: 0 to 255",
               "Signed range: -128 to 127",
               "Default type is LONG if no type specifier given",
-              "V54+: BYTE struct members may carry named bitfields (bits 0..7), and a STRUCT may contain a single nameless BYTE member. See concepts/struct-bitfields.yaml"
+              "V54+: BYTE struct members may carry named bitfields (bits 0..7), and a STRUCT may contain a single nameless BYTE member. See language/spin2/concepts/struct-bitfields.yaml"
             ],
             "related": [
               "language/spin2/keywords/WORD.yaml",
@@ -19059,9 +19071,10 @@
               "ABORT expression"
             ],
             "behavior": [
-              "Unwinds call stack until trap point (\\ operator) is found",
-              "If no trap exists, program terminates",
-              "Returns abort value to the trapping caller"
+              "Unwinds the call stack to the nearest call made with the \\ trap operator",
+              "A value trap receives the ABORT value; bare ABORT gives 0",
+              "A trapped call that completes normally also gives 0 - its results never pass a trap",
+              "If nothing traps it, the task stops (or the cog, if no other task runs in it); other cogs continue"
             ],
             "examples": [
               {
@@ -19079,13 +19092,14 @@
             ],
             "trap_operator": {
               "description": "Use backslash (\\) to catch ABORT",
-              "syntax": "result := \\method_call()",
-              "example": "err := \\risky_operation()\nif err < 0\n  handle_error(err)\n"
+              "syntax": "err := \\method_call()",
+              "example": "err := \\risky_operation()     ' 0 on success, abort code on failure\nif err\n  handle_error(err)\n"
             },
             "notes": [
               "Use ABORT for error signaling, not normal flow",
-              "Always trap at top level to prevent program termination",
-              "Negative values conventionally indicate errors"
+              "Use non-zero abort codes - a trap cannot tell ABORT 0 from success",
+              "Return data by pointer or VAR; a trap replaces the method's results with 0",
+              "Trap below each cog/task top method - an untrapped ABORT stops it silently"
             ],
             "related": [
               "language/spin2/constructs/abort.yaml",
@@ -19276,7 +19290,7 @@
               "Signed range: -32,768 to 32,767",
               "Word addresses should be word-aligned (even addresses) for optimal performance",
               "Default type is LONG if no type specifier given",
-              "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See concepts/struct-bitfields.yaml"
+              "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See language/spin2/concepts/struct-bitfields.yaml"
             ],
             "related": [
               "language/spin2/keywords/BYTE.yaml",
@@ -19407,7 +19421,7 @@
               "Long addresses should be long-aligned (divisible by 4) for optimal performance",
               "LONG is the implicit default type \u2014 omitting a type specifier means LONG",
               "All pointers are LONG-sized regardless of what they point to",
-              "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See concepts/struct-bitfields.yaml"
+              "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See language/spin2/concepts/struct-bitfields.yaml"
             ],
             "related": [
               "language/spin2/keywords/BYTE.yaml",
@@ -19836,8 +19850,12 @@
           ">=": {
             "operator": ">=",
             "type": "operator",
-            "description": "Signed/unsigned compare\n",
-            "category": "Comparison"
+            "description": "SIGNED greater than or equal. Returns -1 (true) or 0 (false).\nThis operator is signed - it is not a signedness-agnostic compare. The UNSIGNED\nform is a separate operator, `+>=`, and the floating-point form is `>=.`.\nReaching for `>=` on values that can exceed $7FFF_FFFF compares them as negative.\nIn a CON block applied to floating-point constants or symbols, the relational\noperators return 1.0 or 0.0 rather than the integer -1 or 0.\n",
+            "category": "Comparison",
+            "related": [
+              "language/spin2/operators/op_addgteq.yaml",
+              "language/spin2/operators/op_gteqdot.yaml"
+            ]
           },
           "/.": {
             "operator": "/.",
@@ -19890,8 +19908,12 @@
           ">": {
             "operator": ">",
             "type": "operator",
-            "description": "Signed/unsigned compare\n",
-            "category": "Comparison"
+            "description": "SIGNED greater than. Returns -1 (true) or 0 (false).\nThis operator is signed - it is not a signedness-agnostic compare. The UNSIGNED\nform is a separate operator, `+>`, and the floating-point form is `>.`.\nReaching for `>` on values that can exceed $7FFF_FFFF compares them as negative.\nIn a CON block applied to floating-point constants or symbols, the relational\noperators return 1.0 or 0.0 rather than the integer -1 or 0.\n",
+            "category": "Comparison",
+            "related": [
+              "language/spin2/operators/op_addgt.yaml",
+              "language/spin2/operators/op_gtdot.yaml"
+            ]
           },
           "+<=>": {
             "operator": "+<=>",
@@ -20106,8 +20128,12 @@
           "<=": {
             "operator": "<=",
             "type": "operator",
-            "description": "Signed/unsigned compare\n",
-            "category": "Comparison"
+            "description": "SIGNED less than or equal. Returns -1 (true) or 0 (false).\nThis operator is signed - it is not a signedness-agnostic compare. The UNSIGNED\nform is a separate operator, `+<=`, and the floating-point form is `<=.`.\nReaching for `<=` on values that can exceed $7FFF_FFFF compares them as negative.\nIn a CON block applied to floating-point constants or symbols, the relational\noperators return 1.0 or 0.0 rather than the integer -1 or 0.\n",
+            "category": "Comparison",
+            "related": [
+              "language/spin2/operators/op_addlteq.yaml",
+              "language/spin2/operators/op_lteqdot.yaml"
+            ]
           },
           ">=.": {
             "operator": ">=.",
@@ -20336,7 +20362,7 @@
           },
           "+//": {
             "operator": "+//",
-            "name": "Unsigned Remainder (see op_addmodulo.yaml)",
+            "name": "Unsigned Remainder (see language/spin2/operators/op_addmodulo.yaml)",
             "type": "operator_redirect",
             "category": "Arithmetic",
             "description": "Unsigned remainder (modulo). Defined in full at\nlanguage/spin2/operators/op_addmodulo.yaml -- including the circular-buffer and\nring-index patterns that used to live here.\n",
@@ -20447,8 +20473,12 @@
           "<": {
             "operator": "<",
             "type": "operator",
-            "description": "Signed/unsigned compare\n",
-            "category": "Comparison"
+            "description": "SIGNED less than. Returns -1 (true) or 0 (false).\nThis operator is signed - it is not a signedness-agnostic compare. The UNSIGNED\nform is a separate operator, `+<`, and the floating-point form is `<.`.\nReaching for `<` on values that can exceed $7FFF_FFFF compares them as negative.\nIn a CON block applied to floating-point constants or symbols, the relational\noperators return 1.0 or 0.0 rather than the integer -1 or 0.\n",
+            "category": "Comparison",
+            "related": [
+              "language/spin2/operators/op_addlt.yaml",
+              "language/spin2/operators/op_ltdot.yaml"
+            ]
           },
           ":=:": {
             "operator": ":=:",
@@ -20729,6 +20759,7 @@
             ],
             "constraints": [
               "Range cannot cross a 32-pin port boundary (wraps within the same group of 32)",
+              "A NEGATIVE operand is a legal pin field, and this is the trap: -1 is all ones, so bits [5:0] = 63 (base pin 63) and bits [10:6] = 31 (31 additional pins) \u2014 32 pins, wrapping within the upper port, i.e. P32..P63. Passing -1 to a pin method as a 'no pin' sentinel therefore acts on half the chip rather than on nothing. Test the pin before use (`if pin >= 0`), with a SIGNED compare",
               "9-bit immediate operand encoding limits ADDPINS to 7 with #base syntax; for ranges 8-31, use ##base ADDPINS N (compiler emits AUGD)",
               "Counting is INCLUSIVE: ADDPINS N affects N+1 pins (not N pins)",
               "The base pin must be specified as the LOWEST pin in the range; ADDPINS extends upward"
@@ -21570,8 +21601,11 @@
               "description": "- 0-7: Successfully started cog number\n- -1: Failed (no cog available when using NEWCOG)\n"
             },
             "stack_requirements": {
-              "minimum": "32 longs (128 bytes)",
-              "typical": "64-128 longs (256-512 bytes)",
+              "provenance": "heuristic, unsourced -- no Parallax document states these",
+              "minimum": "32 longs (128 bytes) -- heuristic floor, not a specified minimum",
+              "typical": "64-128 longs (256-512 bytes) -- heuristic for moderate Spin2 code",
+              "how_to_settle_it": "Fill the stack with a known pattern before COGSPIN, run the worst-case path, then look for the deepest disturbed long. That measurement beats any figure on this page.",
+              "p1_symbols_do_not_apply": "P1's _STACK and _FREE declarations do not exist in Spin2 and have no effect if written. Sizing is the programmer's responsibility, not the compiler's.",
               "factors": [
                 "Method call depth",
                 "Local variable count",
@@ -21755,7 +21789,7 @@
               {
                 "name": "PinField",
                 "type": "pin_field",
-                "description": "Specifies which pin(s) to drive high. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n"
+                "description": "Specifies which pin(s) to drive high. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n\nWARNING - a NEGATIVE value is a legal pin field, not a \"no pin\" marker.\n-1 is all ones: base pin 63 with 31 additional pins, which wraps within the\nupper port and therefore means P32..P63. PINHIGH(-1) acts on half the chip.\nThe -1-as-no-pin idiom is near-universal in driver code, so a pin held in a\nvariable is tested before use: `if pin >= 0`. Note the guard itself must be a\nSIGNED compare - see language/spin2/operators/op_gteq.yaml.\n"
               }
             ],
             "returns": "none",
@@ -21763,7 +21797,7 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "DRVH",
               "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
-              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per language/pasm2/drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -21985,7 +22019,7 @@
             },
             "examples": [
               {
-                "code": "VAR\n  LONG driver_cog\n  \nPUB stop_driver()\n  IF driver_cog => 0\n    COGSTOP(driver_cog)\n    driver_cog := -1\n",
+                "code": "VAR\n  LONG driver_cog\n  LONG driver_lock\n\nPUB stop_driver()\n  IF driver_cog >= 0\n    COGSTOP(driver_cog)       ' a lock it HELD is free now\n    LOCKRET(driver_lock)      ' ...but only this returns the NUMBER\n    driver_cog := -1\n",
                 "description": "Stop a driver cog and mark as stopped"
               },
               {
@@ -22013,7 +22047,9 @@
                 "Pin states float"
               ],
               "resources": [
-                "Locks owned by cog are NOT released",
+                "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it",
+                "The lock's ALLOCATION does not go free. The number stays issued and LOCKNEW will not hand it out again. Only LOCKRET returns a lock number to the pool",
+                "So stopping a cog that holds locks LEAKS lock numbers: sixteen leaks and LOCKNEW returns nothing, ever, and the failure surfaces at some later LOCKNEW in unrelated code",
                 "Hub RAM is NOT affected",
                 "Other cogs continue running"
               ]
@@ -22036,17 +22072,17 @@
               "Cannot stop cog -1 (no effect)",
               "Stopping current cog ends execution immediately",
               "No cleanup code runs in stopped cog",
-              "Locks must be manually released before stopping"
+              "LOCKRET every lock the cog owns before stopping it. Not to free the lock - stopping frees the held state by itself - but because LOCKRET is the only thing that returns the NUMBER to the pool"
             ],
             "best_practices": [
               "Track cog numbers in variables",
               "Set cog variable to -1 after stopping",
-              "Release locks before stopping cog",
+              "LOCKRET before stopping a cog, on every path including error and shutdown paths - every LOCKNEW needs a matching LOCKRET or the number is gone until reset",
               "Stop dependent cogs in correct order",
               "Ensure pins are in safe state first"
             ],
             "warnings": [
-              "Stopping a cog doesn't clean up its resources",
+              "Stopping a cog does not clean up its resources, and the one it appears to clean up it does not: a held lock reads free afterwards while its number stays permanently allocated",
               "Pins float - may need external pull-up/down resistors",
               "Cannot recover cog state after stopping",
               "No notification to other cogs"
@@ -22055,6 +22091,10 @@
               "language/spin2/methods/coginit.yaml",
               "language/spin2/methods/cogid.yaml",
               "language/spin2/methods/cogchk.yaml"
+            ],
+            "related": [
+              "architecture/locks.yaml",
+              "language/spin2/methods/lockret.yaml"
             ]
           },
           "BYTEMOVE": {
@@ -22193,8 +22233,8 @@
               }
             ],
             "underlying_implementation": {
-              "description": "Internally calculates: WAITX((CLKFREQ/1000) * milliseconds - 1)\nAutomatically adjusts for system clock frequency.\n",
-              "related_pasm": "WAITX instruction"
+              "description": "NOT a WAITX. The interpreter reads the system counter, computes\n(CLKFREQ/1000) * milliseconds, ADDS the current counter to make an ABSOLUTE\nTARGET, and then waits the way WAITCT does - looping while the MSB of\n(CT - target) is set.\nThat distinction is the whole reason the $8000_0000-clock bound exists, and\nit is what the method does when you exceed it: see limitations.past_the_bound.\nAutomatically adjusts for system clock frequency.\n",
+              "related_pasm": "language/pasm2/waitx.yaml"
             },
             "common_uses": [
               "LED blinking and indicators",
@@ -22224,6 +22264,8 @@
               "source": "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:551",
               "hard_bound": "duration must not exceed $8000_0000 clocks",
               "ceiling_formula": "max Milliseconds = $8000_0000 / (CLKFREQ / 1000)",
+              "past_the_bound": "Exceeding the bound does NOT clamp, and does not wait a partial time - the call\nRETURNS IMMEDIATELY, with no error and nothing in the build to say so. Code that\nasks for 10 s at 350 MHz gets no wait at all and looks exactly like code that works.\nWHY, and it follows from the implementation above: the wait is against an absolute\nCOUNTER TARGET tested by the MSB rule, so a target more than 2^31 clocks ahead reads\nas ALREADY PASSED on the first comparison.\n",
+              "long_waits": "For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in\nslices of at most a second, rather than asking for the whole span at once.\n",
               "resolution": "1 ms -- the argument's unit",
               "correction_2026_08_25": "The pre-purge form of this block claimed a maximum delay of ~4,294 seconds (71 minutes). That is 2^32 milliseconds; the source states the bound in CLOCKS ($8000_0000), which is three orders of magnitude smaller at any realistic clock frequency. Not restored."
             },
@@ -22341,7 +22383,7 @@
               {
                 "name": "PinField",
                 "type": "pin_field",
-                "description": "Specifies which pin(s) to float. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n"
+                "description": "Specifies which pin(s) to float. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n\nWARNING - a NEGATIVE value is a legal pin field, not a \"no pin\" marker.\n-1 is all ones: base pin 63 with 31 additional pins, which wraps within the\nupper port and therefore means P32..P63. PINFLOAT(-1) acts on half the chip.\nThe -1-as-no-pin idiom is near-universal in driver code, so a pin held in a\nvariable is tested before use: `if pin >= 0`. Note the guard itself must be a\nSIGNED compare - see language/spin2/operators/op_gteq.yaml.\n"
               }
             ],
             "returns": "none",
@@ -22415,7 +22457,7 @@
               {
                 "name": "PinField",
                 "type": "pin_field",
-                "description": "Pin number (0-63) or pin field expression.\nUse ADDPINS to specify multiple consecutive pins:\n- Single pin: 16\n- Pin range: 16 ADDPINS 3 (pins 16-19)\n- Pin group: BASE_PIN ADDPINS (COUNT-1)\n"
+                "description": "Pin number (0-63) or pin field expression.\nUse ADDPINS to specify multiple consecutive pins:\n- Single pin: 16\n- Pin range: 16 ADDPINS 3 (pins 16-19)\n- Pin group: BASE_PIN ADDPINS (COUNT-1)\n\nWARNING - a NEGATIVE value is a legal pin field, not a \"no pin\" marker.\n-1 is all ones: base pin 63 with 31 additional pins, which wraps within the\nupper port and therefore means P32..P63. PINSTART(-1) acts on half the chip.\nThe -1-as-no-pin idiom is near-universal in driver code, so a pin held in a\nvariable is tested before use: `if pin >= 0`. Note the guard itself must be a\nSIGNED compare - see language/spin2/operators/op_gteq.yaml.\n"
               },
               {
                 "name": "Mode",
@@ -22927,7 +22969,7 @@
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "LOCKREL",
-              "underlying_pasm_timing": "2 clocks (range 2...9, +2 if WC; per lockrel.yaml encoding)"
+              "underlying_pasm_timing": "2 clocks (range 2...9, +2 if WC; per language/spin2/methods/lockrel.yaml encoding)"
             },
             "related": [
               "LOCKTRY",
@@ -22954,7 +22996,7 @@
               {
                 "name": "PinField",
                 "type": "pin_field",
-                "description": "Specifies which pin(s) to toggle. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n"
+                "description": "Specifies which pin(s) to toggle. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n\nWARNING - a NEGATIVE value is a legal pin field, not a \"no pin\" marker.\n-1 is all ones: base pin 63 with 31 additional pins, which wraps within the\nupper port and therefore means P32..P63. PINTOGGLE(-1) acts on half the chip.\nThe -1-as-no-pin idiom is near-universal in driver code, so a pin held in a\nvariable is tested before use: `if pin >= 0`. Note the guard itself must be a\nSIGNED compare - see language/spin2/operators/op_gteq.yaml.\n"
               }
             ],
             "returns": "none",
@@ -22962,7 +23004,7 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "DRVNOT",
               "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
-              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per language/pasm2/drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -23477,8 +23519,8 @@
               }
             ],
             "underlying_implementation": {
-              "description": "Internally calculates: WAITX((CLKFREQ/1_000_000) * microseconds - 1)\nAutomatically adjusts for system clock frequency.\nAt lower frequencies, resolution degrades.\n",
-              "related_pasm": "WAITX instruction"
+              "description": "NOT a WAITX. The interpreter reads the system counter, computes\n(CLKFREQ/1_000_000) * microseconds, ADDS the current counter to make an ABSOLUTE\nTARGET, and then waits the way WAITCT does - looping while the MSB of\n(CT - target) is set.\nThat distinction is the whole reason the $8000_0000-clock bound exists, and\nit is what the method does when you exceed it: see limitations.past_the_bound.\nAutomatically adjusts for system clock frequency.\nAt lower frequencies, resolution degrades.\n",
+              "related_pasm": "language/pasm2/waitx.yaml"
             },
             "common_uses": [
               "Pulse width generation",
@@ -23508,6 +23550,8 @@
               "source": "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550",
               "hard_bound": "duration must not exceed $8000_0000 clocks",
               "ceiling_formula": "max Microseconds = $8000_0000 / (CLKFREQ / 1_000_000)",
+              "past_the_bound": "Exceeding the bound does NOT clamp, and does not wait a partial time - the call\nRETURNS IMMEDIATELY, with no error and nothing in the build to say so. Code that\nasks for 10 s at 350 MHz gets no wait at all and looks exactly like code that works.\nWHY, and it follows from the implementation above: the wait is against an absolute\nCOUNTER TARGET tested by the MSB rule, so a target more than 2^31 clocks ahead reads\nas ALREADY PASSED on the first comparison.\n",
+              "long_waits": "For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in\nslices of at most a second, rather than asking for the whole span at once.\n",
               "resolution": "1 \u00b5s -- the argument's unit",
               "correction_2026_08_25": "The pre-purge form of this block claimed a range of 1-4,294,967,295 microseconds. That is the 32-bit unsigned range of the argument, not the wait the chip performs; the source's bound is $8000_0000 CLOCKS. Not restored."
             },
@@ -23857,7 +23901,7 @@
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "LOCKRET",
-              "underlying_pasm_timing": "2 clocks (range 2...9; per lockret.yaml encoding)"
+              "underlying_pasm_timing": "2 clocks (range 2...9; per language/spin2/methods/lockret.yaml encoding)"
             },
             "related": [
               "LOCKNEW",
@@ -24012,8 +24056,8 @@
               "Priority 2 operator (unary)"
             ],
             "related": [
-              "operators/op_sub.yaml",
-              "methods/sqrt.yaml"
+              "language/spin2/operators/op_sub.yaml",
+              "language/spin2/methods/sqrt.yaml"
             ]
           },
           "GETREGS": {
@@ -24355,8 +24399,8 @@
               "Priority 2 operator (unary)"
             ],
             "related": [
-              "methods/abs.yaml",
-              "methods/rotxy.yaml"
+              "language/spin2/methods/abs.yaml",
+              "language/spin2/methods/rotxy.yaml"
             ]
           },
           "OFFSETOF": {
@@ -24952,7 +24996,7 @@
               {
                 "name": "PinField",
                 "type": "pin_field",
-                "description": "Specifies which pin(s) to write. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n"
+                "description": "Specifies which pin(s) to write. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n\n\nWARNING - a NEGATIVE value is a legal pin field, not a \"no pin\" marker.\n-1 is all ones: base pin 63 with 31 additional pins, which wraps within the\nupper port and therefore means P32..P63. PINWRITE(-1) acts on half the chip.\nThe -1-as-no-pin idiom is near-universal in driver code, so a pin held in a\nvariable is tested before use: `if pin >= 0`. Note the guard itself must be a\nSIGNED compare - see language/spin2/operators/op_gteq.yaml.\n"
               },
               {
                 "name": "Data",
@@ -24965,7 +25009,7 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "OUTNOT or DRVH/DRVL",
               "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
-              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per language/pasm2/drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -25364,7 +25408,7 @@
           "WAITCT": {
             "method": "WAITCT",
             "type": "method",
-            "description": "Wait until system counter reaches specified tick value\n",
+            "description": "Wait until the System Counter has passed the specified tick value. The wait ends\nonce the MSB of (CT - Tick) is 0, not only on the single cycle where CT equals\nTick, so the comparison stays correct across counter wraparound. A target already\nin the recent past therefore returns AT ONCE, and a target more than 2^31 clocks\nahead reads as already passed and also returns at once.\n",
             "category": "Timing Operations",
             "syntax": "WAITCT(Tick)",
             "parameters": [
@@ -25540,7 +25584,7 @@
               {
                 "name": "PinField",
                 "type": "pin_field",
-                "description": "Specifies which pin(s) to read. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n"
+                "description": "Specifies which pin(s) to read. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n\nWARNING - a NEGATIVE value is a legal pin field, not a \"no pin\" marker.\n-1 is all ones: base pin 63 with 31 additional pins, which wraps within the\nupper port and therefore means P32..P63. PINREAD(-1) acts on half the chip.\nThe -1-as-no-pin idiom is near-universal in driver code, so a pin held in a\nvariable is tested before use: `if pin >= 0`. Note the guard itself must be a\nSIGNED compare - see language/spin2/operators/op_gteq.yaml.\n"
               }
             ],
             "returns": {
@@ -25552,7 +25596,7 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "TESTP",
               "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
-              "pin_sampling": "TESTP samples pin state 2 clocks before instruction; reads via INA register lag by 3 clocks (per testp.yaml / io_pin_timing.yaml)"
+              "pin_sampling": "TESTP samples pin state 2 clocks before instruction; reads via INA register lag by 3 clocks (per language/pasm2/testp.yaml / architecture/io_pin_timing.yaml)"
             },
             "examples": [
               {
@@ -27140,7 +27184,7 @@
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "LOCKTRY",
-              "underlying_pasm_timing": "2 clocks (range 2...9, +2 if WC; per locktry.yaml encoding)"
+              "underlying_pasm_timing": "2 clocks (range 2...9, +2 if WC; per language/spin2/methods/locktry.yaml encoding)"
             },
             "related": [
               "language/spin2/methods/lockrel.yaml",
@@ -27611,7 +27655,7 @@
               {
                 "name": "PinField",
                 "type": "pin_field",
-                "description": "Specifies which pin(s) to drive low. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n"
+                "description": "Specifies which pin(s) to drive low. Can be:\n- Single pin number (0-63)\n- Pin range using '..' operator (Bottom..Top)\n- Multiple pins using ADDPINS operator\n- Variable or expression that evaluates to a pin field\n\nWARNING - a NEGATIVE value is a legal pin field, not a \"no pin\" marker.\n-1 is all ones: base pin 63 with 31 additional pins, which wraps within the\nupper port and therefore means P32..P63. PINLOW(-1) acts on half the chip.\nThe -1-as-no-pin idiom is near-universal in driver code, so a pin held in a\nvariable is tested before use: `if pin >= 0`. Note the guard itself must be a\nSIGNED compare - see language/spin2/operators/op_gteq.yaml.\n"
               }
             ],
             "returns": "none",
@@ -27619,7 +27663,7 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "DRVL",
               "underlying_pasm_timing": "2 clocks (fixed; same in cogexec/lutexec/hubexec \u2014 pin instructions have no execution-mode distinction per per-instruction YAMLs)",
-              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per drvh.yaml pin_output_latency)"
+              "pin_propagation": "+3 clocks after instruction completes before output pin physically transitions (per language/pasm2/drvh.yaml pin_output_latency)"
             },
             "examples": [
               {
@@ -27913,7 +27957,7 @@
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthe method-call path because we do not have a verifiable measurement.\n",
               "underlying_pasm": "LOCKNEW",
-              "underlying_pasm_timing": "4 clocks (range 4...11 hub-window dependent; per locknew.yaml encoding)"
+              "underlying_pasm_timing": "4 clocks (range 4...11 hub-window dependent; per language/spin2/methods/locknew.yaml encoding)"
             },
             "related": [
               "language/spin2/methods/lockret.yaml",
@@ -27921,7 +27965,8 @@
               "language/spin2/methods/lockrel.yaml",
               "language/spin2/methods/lockchk.yaml",
               "architecture/locks.yaml",
-              "language/spin2/patterns/implementation/spin2_cog_management.yaml"
+              "language/spin2/patterns/implementation/spin2_cog_management.yaml",
+              "language/spin2/debug-commands/debug-strategy-guide.yaml"
             ]
           },
           "QCOS": {
