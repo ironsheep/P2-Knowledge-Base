@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-469`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-471`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -110,6 +110,29 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
    source it cites). A register entry is a claim like any other.
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
+
+## Two KB statements contradicted by our own sources, found while building the SINC2 test (2026-09-25, VO-J-013) — F-469, F-470
+
+### F-469 — `getxacc.yaml`'s `sinc2_constraint` says Chip's SINC2 note is "not yet in the released Silicon Doc"; the Silicon Doc carries it — `CONFIRMED`
+
+**Where:** `language/pasm2/getxacc.yaml` `sinc2_constraint` — "Reported by Chip Gracey (P2 designer),
+2024-12-16; not yet in the released Silicon Doc."
+**Against:** `silicon-doc-text.txt` ≈ :1704 — "NOTE ABOUT GOERTZEL SINC2 MODE (2024.12.16) It has just
+been discovered that the Goertzel SINC2 mode generates periodic problematic GETXACC readings when the
+number of iterations in a Goertzel cycle varies …". The note is in the document we ingested.
+**Correction:** cite the Silicon Doc note as the source (Tier 1) and drop "not yet in the released
+Silicon Doc". **Hold the rest of the entry** until VO-J-013 runs: whether this constraint is a silicon
+erratum or a documented behaviour is being decided on the bench and by the clean-room classification.
+
+### F-470 — `muldiv64.yaml` calls every parameter "32-bit signed"; Spin2 v55 says MULDIV64 is an unsigned operation — `CONFIRMED`
+
+**Where:** `language/spin2/methods/muldiv64.yaml` — lines 10, 13, 16 ("32-bit signed") and 40 ("All
+parameters are 32-bit signed").
+**Against:** `spin2-v55-text.txt:566` — "MULDIV64(mult1,mult2,divisor) : quotient | Divide the 64-bit
+product of 'mult1' and 'mult2' by 'divisor', return quotient (**unsigned operation**)."
+**Correction:** state unsigned operands and quotient, citing v55. **Sweep** the manuals and app notes
+that teach MULDIV64 (fixed-point and CORDIC material) for the signed claim — a signed reading changes
+results for any operand with bit 31 set.
 
 ## Two hub-FIFO facts the KB states wrongly, found while building the RDFAST readiness test (2026-09-25, VO-J-012) — F-467, F-468
 
