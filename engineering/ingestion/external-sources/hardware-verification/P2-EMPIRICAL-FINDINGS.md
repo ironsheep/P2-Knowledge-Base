@@ -881,6 +881,116 @@ correct and was not changed** — §12.0 explains that `pin<<17` splits a plain 
 
 ---
 
+## P2 errata predictions (silicon — 2026-09 campaign, VO-J-007..011)
+
+Five predicted silicon defects from an HDL-reading study, each decided by a test written from the
+prediction alone and run on real P2 silicon. **All five held.** Two had been published by the vendor
+(EF-066, EF-067) and are grounded on silicon here for the first time; **three had never been observed
+on a part** (EF-068, EF-069, EF-070). Every test measures in a launched PASM cog with the debugger
+kept out of it (`DEBUG_COGS = %0000_0001`, EF-057), gates its verdict on in-run controls, and fixed
+both outcomes in the program before the run. Each verdict below was re-derived from the raw log
+lines, not taken from the program's own `VERDICT` line. *Rig for all five:* bare P2 board, 200 MHz,
+`pnut-ts` 1.55.8 `-d`, RAM download with reset, 2026-09-24 (Stephen). **Run twice**, from two builds
+(as authored, then style-conformed with identical measuring engines): every measured value matched.
+Each is N=1 real silicon; all five are structural yes/no behaviours, so one part is dispositive.
+Campaign: `campaigns/2026-09-p2-errata-predictions/`.
+
+### EF-066 · An `ALTx` with an immediate `#S` between `AUGS` and its target is itself augmented, and the target still gets the augment — `CONFIRMED`
+The pending `AUGS` value fills bits 31:9 of the intervening `ALTx`'s own `S` and is **not** cancelled,
+so the intended target receives it as well. **Where the damage lands:** an `ALTx` takes its base from
+`S[8:0]` and its auto-increment from `S[17:9]`. The augment leaves `S[8:0]` alone, so the substituted
+register is the one aimed at. What changes is the **auto-increment**, now taken from the `AUGS` value,
+which silently moves the `ALTx`'s D register. *How proven:* `test-o1-altx-imm-s-steals-augs` —
+`AUGS #$3C5C0A55` (`S[17:9]` = 5) then an immediate-`S` `ALTx` then `MOV 0-0,#$55`, against a
+sentinel-filled register window; three passes in fresh cogs. *Result:* **A6** `ALTD idx,#0` →
+`win[8]=$3C5C_0A55 dIdx=5` · **A7** `ALTR idx,#3` → `win[11]=$3C5C_0A55 dIdx=5`. Controls exact:
+bare `MOV` `$0000_0055`; `AUGS`+`MOV` `$3C5C_0A55`; `ALTD` with a register `S` of `$A00` → `dIdx=5`
+(the same auto-increment path, driven deliberately). **Workaround proven:** a register `S` on the
+`ALTx` (**A5**) → `win[12]=$3C5C_0A55 dIdx=0`. **`AUGD` survives an intervening immediate-`S`
+`ALTx`:** `AUGD` / `ALTS idxs,#0` / `WRLONG #$13C` wrote `$1357_9B3C` with `idxs` unchanged
+(`$61`→`$61`). An `ALTx` has no immediate-`D` form, so it cannot consume a pending `AUGD`. One `ALTx`
+variant was tested for this half. All 3 passes bit-identical. *Grounds:* `pasm2/augs.yaml`
+`intervening_altx_immediate_s_consumes_augs` — the erratum, its workaround, where the effect lands, and
+the `AUGD` half of its `scope_note`. *Source:* `…/tests/test-o1-altx-imm-s-steals-augs.spin2`.
+
+### EF-067 · `SETQ`/`SETQ2` then `ALTD` then a block `RDLONG`/`WRLONG` with a `PTRx` update: the whole block moves, but `PTRx` takes the ordinary expression's step — `CONFIRMED`
+The block transfer is unaffected — every long lands at the `ALTD`-redirected destination — but the
+pointer update ignores the block size and applies the **plain `PTRx` expression's own step**. That is
++4 for `ptra++`, but **+12 for `ptra++[3]`**: the step is not "one long", it is whatever the
+expression would do without `SETQ`. *How proven:* `test-o17-setq-altd-block-ptr-delta` — 15 arms ×
+4 interleaved rounds; destination and a trap region pre-filled with `$5E5E_5E5E`; source long *k* =
+`$A5A0_0000+k`. *Result (every round identical; trap region untouched in every arm):*
+
+| Arm | Control Δ (no `ALTD`) | Hazard Δ (with `ALTD`) | Data |
+|---|---|---|---|
+| `setq #3` + `rdlong …, ptra++` | +16 | **+4** | 4/4 at the `ALTD` destination |
+| `setq #7` + `rdlong …, ptra++` | +32 | **+4** | 8/8 |
+| `setq #3` + `rdlong …, ptra++[3]` | +16 | **+12** | 4/4 |
+| `setq #3` + `rdlong …, ptrb++` | +16 | **+4** | 4/4 |
+| `setq #3` + `wrlong …, ptra++` | +16 | **+4** | 4/4 |
+| `setq2 #3` + `rdlong` (LUT) `…, ptra++` | +16 | **+4** | 4/4 |
+
+Controls also exact: plain `rdlong ptra++` +4, `ALTD` alone +4, plain `ptra++[3]` +12. **Workaround
+proven:** keep `SETQ` adjacent to the transfer (the control column). Only `ALTD` was tested as the
+intervening instruction; `AUGS`/`AUGD` and the other `ALTx` are named by the vendor, not tested here.
+*Grounds:* `pasm2/setq.yaml` `block_transfer_ptrx_delta` (its "+4 for one long" is only the `[1]`
+case), `concepts/setq_block_ops.yaml`, `pasm2/augs.yaml`; the Assembly Reference's Appendix J.
+*Source:* `…/tests/test-o17-setq-altd-block-ptr-delta.spin2`.
+
+### EF-068 · `GETCT WC` in a group of four cogs that had no running cog when the low `CT` long wrapped returns a **stale upper long** — `CONFIRMED` (new; not in any vendor source)
+Cogs 0–3 and 4–7 each read their own copy of the 64-bit counter. A group's copy of the **upper** long
+advances only at a wrap of the lower long **while at least one cog of that group is running**; the
+lower long is always current. A cog started in a group that missed wraps reads an upper long **behind
+by one per missed wrap**, until its group runs through the next wrap. From reset only cog 0 runs, so a
+program whose first cog in 4–7 starts after the first wrap (2³² clocks — **21.5 s at 200 MHz**) gets a
+wrong 64-bit time from that cog. *How proven:* `test-o18-getct-upper-stale-runA` / `-runB` — cog 0
+brackets each sampler read with its own `GETCT WC`/`GETCT` pair (10 valid pairs per reading, all lower
+longs between `$1000_0000` and `$F000_0000`); D = cog 0's upper long minus the sampler's. *Result:*
+**Run A** (cog 4 first started after wrap 1): **D = 1** at hi=1, early and late (sampler reads
+`$0000_0000_$1020_D8B3` beside cog 0's `$0000_0001_…`, lower long current); **D = 0** at hi=2 (its
+group ran through the wrap); cog 4 then stopped and restarted after two missed wraps → **D = 2**
+(sampler `$0000_0002_…` beside `$0000_0004_…`). **Run B** (cog 4 running from the start — the
+workaround): **D = 0** at hi=0, 1 and 2. **Control:** cog 1 (group 0) **D = 0** in every reading of
+both runs; running-cog mask and lower-long bracket held throughout. **Workaround proven:** keep a cog
+of each group in use running from before the first wrap. *Grounds:* `pasm2/getct.yaml` — a new
+`silicon_errata` entry. *Source:* `…/tests/test-o18-getct-upper-stale-runA.spin2`, `…-runB.spin2`.
+
+### EF-069 · `GETXACC` does not clear the Goertzel accumulators unless the streamer is running in Goertzel mode; mid-burst, it neither drops nor double-counts a term — `CONFIRMED` (new; contradicts `getxacc.yaml`)
+**Idle, or in any other streamer mode, `GETXACC` clears nothing:** it returns the live accumulator and
+leaves it as it was, so repeated reads — including across a new non-Goertzel streamer command — return
+the same value, and the accumulator keeps growing from burst to burst. **During a Goertzel burst** the
+clear does act, and exactly partitions the burst: the read plus the next read sum to what one unread
+burst gives. *How proven:* `test-so80-getxacc-clear-gating` — one engine cog drives P3 low (no jumper),
+every LUT long `$173D_0000` so each active clock adds C = ±61 (sine ±23); 8 reps, each from a
+measured baseline B. *Result:* **Half A** — `GETXACC` idle (G1), as the next instruction after
+`XINIT` of a non-Goertzel mode `$4000_0400` (G2), ~100 clocks into it (G2L), and after it (G3):
+**50 of 50 reads equal B bit-for-bit** (e.g. rep 0: B = G1 = G2 = G2L = G3 = 488). B itself grows
+across reps (488 → 14,335) with no clear between them. **Half B** — rep 0: unread 256-clock burst
+dA = 15,555 = **255 × 61**; with one read inside, R1 − P = 1,769 = **29 × 61**, then R2 = 13,786 =
+**226 × 61**; 29 + 226 = 255, so **dd = 0**. All 8 reps dd = 0 as the read point moved from clock 29
+to 189 (k1 = waitx − 1 every time). Controls: CAL sign flips with P3 (+3,843 / −3,843 = ±63 × 61),
+LUT, streamer-finished flag and P3 level all held. *Grounds:* **`pasm2/getxacc.yaml` is wrong** where
+it says `GETXACC` captures into holding registers and **clears** them and that values hold "until a new
+streamer command executes" — idle reads never clear, and a new streamer command does not reset the
+value either. Its read-before-and-after, take-the-difference rule is exactly what this behaviour
+requires. *Source:* `…/tests/test-so80-getxacc-clear-gating.spin2`.
+
+### EF-070 · The Goertzel accumulators trail their term by one active clock: a burst's last term lands in the **next** Goertzel burst — `CONFIRMED` (new)
+A reading taken after a burst of N clocks holds **N − 1** terms; the last one waits in an internal
+register no instruction reads, and is added on the first active clock of the next Goertzel burst.
+Waiting does not deliver it. **Workaround proven:** follow each burst with a short zero-term burst
+(same mode, input enables `imm[15:12]` clear) before reading — the reading then holds all N terms and
+nothing spills into the next burst. *How proven:* `test-so84-goertzel-last-term-lag` — P3 driven by
+the engine cog, every LUT long `$2513_0000` (C = ±19, sine ±37); N = 64 and 65, P3 low and high,
+4 reps each = 16 sequences. *Result:* every sequence reads **d1 = (N−1)·C** after the burst (N=64,
+C=−19: −1,197), **R1b − R1 = 0** 1,000 clocks later, and **d2 = C** after the zero burst (−19); the
+carry arm reads (N−1)C, then **N·C** (carrying the stranded term), then C. 16 of 16; sign flips with
+P3; the sine channel shows the same pattern with |C| = 37. Controls: measured C = −19 ×4 / +19 ×4,
+every delta a whole multiple of 19, zero-after-zero moves 0. *Grounds:* `pasm2/getxacc.yaml` — a new
+`silicon_errata` entry. *Source:* `…/tests/test-so84-goertzel-last-term-lag.spin2`.
+
+---
+
 
 ## Open / pending empirical questions
 

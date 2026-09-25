@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-460`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-467`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -110,6 +110,82 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
    source it cites). A register entry is a claim like any other.
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
+
+## Five silicon errata decided on the bench, and what they change in the KB (2026-09-25, P2 Errata campaign) — F-462 … F-466
+
+All five predictions of the P2 Errata campaign held on real silicon (EF-066 … EF-070,
+`hardware-verification/P2-EMPIRICAL-FINDINGS.md`; VO-J-007..011). Each finding below is what that
+evidence requires of a shipped YAML. **Evidence tier:** EF — the top of the authority order, above
+the Silicon Doc; each is a structural yes/no result, so N=1 is dispositive. **The counter above read
+`F-460` while F-460 and F-461 were already allocated (2026-09-22)** — corrected to `F-467` in this pass.
+
+### F-462 — `getxacc.yaml` says `GETXACC` clears the accumulators and that values hold until a new streamer command; silicon does neither outside a Goertzel burst — `CONFIRMED`
+
+**Where:** `language/pasm2/getxacc.yaml` — `description` ("Capture the streamer's Goertzel
+accumulators into holding registers and clear them … SUBSEQUENT GETXACC INSTRUCTIONS RETURN THE SAME
+CAPTURED VALUES UNTIL A NEW STREAMER COMMAND EXECUTES"), `reading_protocol` ("captured and cleared at
+the GETXACC … until a new streamer command executes"), `notes` ("captured into holding registers and
+cleared by GETXACC").
+**What silicon does (EF-069):** with the streamer idle, or running any non-Goertzel mode, `GETXACC`
+returns the live accumulator and **clears nothing** — 50 of 50 reads equal the prior value, including
+reads taken right after `XINIT` of a new non-Goertzel command; the accumulator keeps growing from one
+burst to the next. The clear acts only **during** a Goertzel burst, and there it partitions the burst
+exactly (read + next read = one unread burst; 8 of 8).
+**Correction:** state that `GETXACC` clears only while the streamer is running in Goertzel mode, that
+an idle read returns and preserves the running total, and that a new streamer command does not reset
+it. **Keep** the read-before-and-after, take-the-difference rule — it is exactly what this behaviour
+requires, and now has its reason. Add a `silicon_errata` entry citing EF-069.
+
+### F-463 — `getct.yaml` omits the stale upper long a four-cog group reads after missing a counter wrap — `CONFIRMED`
+
+**Where:** `language/pasm2/getct.yaml` — no `silicon_errata`; the description presents `GETCT WC`
+then `GETCT` as reading "the full 64-bit value" with no condition.
+**What silicon does (EF-068):** cogs 0–3 and 4–7 each read their own copy of the counter. A group's
+upper long advances only at a wrap of the lower long while at least one cog of that group is running;
+a cog started in a group that missed wraps reads an upper long behind by one per missed wrap until its
+group runs through the next wrap. From reset only cog 0 runs, so a program's first cog in 4–7, started
+after the first wrap (2³² clocks, ~21.5 s at 200 MHz), reads a wrong 64-bit time. Measured D = 1, 0,
+2 in the three predicted states; D = 0 throughout with the group kept running.
+**Correction:** add a `silicon_errata` entry (condition, effect, workaround: keep one cog of each group
+in use running from before the first wrap, or take the upper long from a group-0 cog) citing EF-068,
+and qualify the "full 64-bit value" sentence. **Also check** `language/spin2/methods/getct.yaml` and
+any KB text that builds 64-bit time from `GETCT WC` in a cog of 4–7.
+
+### F-464 — `getxacc.yaml` omits the one-clock lag that leaves each Goertzel burst's last term for the next burst — `CONFIRMED`
+
+**Where:** `language/pasm2/getxacc.yaml` — no statement of it anywhere.
+**What silicon does (EF-070):** a read after a burst of N clocks holds N − 1 terms; the last term
+waits in an internal register no instruction reads and is added on the first active clock of the
+**next** Goertzel burst. Waiting does not deliver it. A trailing zero-term burst (same mode, input
+enables clear) delivers it — 16 of 16 sequences, N = 64 and 65, both signs.
+**Correction:** add a `silicon_errata` entry with the effect and the proven workaround, citing EF-070;
+reconcile with the existing `sinc2_constraint` note (Chip Gracey's off-by-one) — related path,
+different condition, so neither replaces the other.
+
+### F-465 — `setq.yaml` says the cancelled block delta leaves `PTRx` at "+4 for one long"; silicon applies the plain expression's own step — `CONFIRMED`
+
+**Where:** `language/pasm2/setq.yaml` `silicon_errata.block_transfer_ptrx_delta` — "(PTRx advances by
++4 for one long, NOT by N*4)".
+**What silicon does (EF-067):** `ptra++` → +4, but **`ptra++[3]` → +12**: the step is whatever the
+PTRx expression does without `SETQ`, not one long. `concepts/setq_block_ops.yaml` ("only by the normal
+PTRx expression") and `augs.yaml` are already right. Confirmed across `ptra`, `ptrb`, `RDLONG`,
+`WRLONG`, `SETQ2` and an 8-long block, every long delivered to the `ALTD` destination.
+**Correction:** replace "+4 for one long" with "the plain PTRx expression's step (e.g. +4 for
+`ptra++`, +12 for `ptra++[3]`)", citing EF-067. Only `ALTD` was tested as the intervening instruction.
+
+### F-466 — `augs.yaml`'s intervening-`ALTx` erratum can now say where the damage lands and settle its `AUGD` scope note — `CONFIRMED`
+
+**Where:** `language/pasm2/augs.yaml` `silicon_errata.intervening_altx_immediate_s_consumes_augs` —
+its `description`/`example`, and its `scope_note` ("Whether THIS specific intervening-#S errata also
+applies to AUGD … is not stated in any golden source and is deliberately not asserted here").
+**What silicon does (EF-066):** confirmed as described (the `ALTx` is augmented, the target still gets
+the augment). **Where it lands:** an `ALTx` takes its base from `S[8:0]` and its auto-increment from
+`S[17:9]`; the augment leaves the base alone, so the substituted register is the one aimed at — the
+damage is the `ALTx` D register's auto-increment, taken from the `AUGS` value (`AUGS #$3C5C0A55` →
++5). **`AUGD`:** a pending `AUGD` survived an intervening immediate-`S` `ALTS` and reached its `#D`
+target intact; an `ALTx` has no immediate-`D` form to consume it.
+**Correction:** add the observable effect to the description, and replace the scope note's "not
+asserted" with the EF-066 result, scoped as tested (one `ALTx` variant for the `AUGD` half).
 
 ## The changelog/cover version drift, and the gate that now catches it (2026-09-22) — F-461
 

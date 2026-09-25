@@ -1,0 +1,716 @@
+'' =====================================================================
+''
+''   File....... test-o17-setq-altd-block-ptr-delta.spin2
+''   Purpose.... Hardware-verification rig deciding P2 Errata prediction O17
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 25 Sep 2026
+''
+'' =====================================================================
+
+{ WHAT IS TESTED
+    Prediction O17: a SETQ block RDLONG whose D field is redirected by an
+    ALTD placed BETWEEN the SETQ and the RDLONG still transfers the whole
+    block to the ALTD-redirected registers, but the PTRx post-update takes
+    the ordinary single-transfer step (ptra++ => +4) instead of the
+    block-size step (+N*4).
+
+      setq    #N-1            ' block of N longs
+      altd    idx             ' redirect rdlong's D field
+      rdlong  0-0, ptra++     ' predicted: N longs land at idx, PTRA += 4
+
+    WHAT WOULD PROVE THE PREDICTION WRONG (written before the run):
+      the hazard arm advances PTRA by the same block-sized amount as its
+      no-ALTD control (16 for N=4), or by any value other than 4, or the
+      block does not land in full at the ALTD-redirected registers.
+
+  RIG
+    Bare P2 board (P2 Edge / EVAL).  No pins, no jumpers, no instruments.
+    The measurement runs in a DEDICATED PASM cog started with COGINIT from
+    the DAT block below: the Spin2 interpreter in cog 0 uses PTRA as its
+    stack pointer (Spin2_interpreter.spin2 v51 :510 "wrlong v,ptra++"), so
+    PTRA cannot be manipulated from cog 0.  DEBUG_COGS = %0000_0001 keeps
+    the debugger's interrupt out of the measuring cog (EF-057).  Cog 0
+    reads the hub records and does all checking and printing.
+
+  ARMS (run in this order, as one ROUND; NREPS = 4 rounds, interleaved)
+    Before every arm the destination/trap areas are refilled with the
+    sentinel $5E5E_5E5E and the pointer is reloaded, so no arm can inherit
+    a previous arm's data.
+
+    id  name      sequence                                     n  TRUE  FALSE
+    --  --------  -------------------------------------------  -  ----  -----
+     0  K_SINGLE  rdlong dst+2, ptra++                         1   4    (ctl)
+     1  K_ALTD1   altd hidx / rdlong trp+2, ptra++              1   4    (ctl)
+     2  K_BLK4    setq #3 / rdlong dst+2, ptra++                4  16    (ctl)
+     3  H_BLK4    setq #3 / altd hidx / rdlong trp+2, ptra++    4   4    16   <== PRIMARY
+     4  K_BLK8    setq #7 / rdlong dst+2, ptra++                8  32    (ctl)
+     5  H_BLK8    setq #7 / altd hidx / rdlong trp+2, ptra++    8   4    32
+     6  K_IDX1    rdlong dst+2, ptra++[3]                      1  12    (ctl)
+     7  K_IDX3    setq #3 / rdlong dst+2, ptra++[3]            4  16    (ctl)
+     8  H_IDX3    setq #3 / altd hidx / rdlong trp+2,ptra++[3] 4  12    16
+     9  K_PTRB    setq #3 / rdlong dst+2, ptrb++               4  16    (ctl)
+    10  H_PTRB    setq #3 / altd hidx / rdlong trp+2, ptrb++    4   4    16
+    11  K_WR      setq #3 / wrlong wsrc+2, ptra++              4  16    (ctl)
+    12  H_WR      setq #3 / altd widx / wrlong wtrp+2, ptra++   4   4    16
+    13  K_Q2      setq2 #3 / rdlong LUT[2], ptra++             4  16    (ctl)
+    14  H_Q2      setq2 #3 / altd lidx / rdlong LUT[18],ptra++  4   4    16
+
+    (ctl) rows are controls: the number is the delta they MUST read.
+    H rows: TRUE = PTRx delta if O17 is right; FALSE = the block delta
+    (what an unaffected part does).  hidx/widx/lidx hold dst+2 / wsrc+2 /
+    LUT 2, so a working ALTD sends the block to the SAME place the
+    matching control uses; the H rows' literal D field points at a
+    sentinel-filled TRAP area instead, so "ALTD ignored" is visible.
+
+  WHAT EACH CONTROL PROVES
+    K_SINGLE  the harness: pointer load/capture, hub source, the dump path,
+              and that a plain ptra++ RDLONG steps +4 (the ptr_indx step)
+    K_ALTD1   ALTD redirects a RDLONG's D field on this part and does not
+              itself disturb the ptra++ step (+4, one long at dst+2)
+    K_BLK4    = the brief's workaround (a).  The part's normal block rule:
+              SETQ immediately before RDLONG => +16, 4 longs at dst+2
+    K_BLK8    same at N=8 (+32), so H_BLK8 separates "one scaled unit"
+              from "some fraction of the block"
+    K_IDX1    a plain ptra++[3] steps +12 on this part (normal index rule)
+    K_IDX3    a block ptra++[3] steps +16: the index is overridden by the
+              block count (Silicon Doc v35, FAST BLOCK MOVES: "the index
+              will be overridden with the number of longs")
+    K_PTRB / K_WR / K_Q2   block controls for the three sibling arms
+    All controls must read their delta AND full, correctly placed data in
+    EVERY round, or the program prints RIG FAIL and gives no verdict for
+    the arms that depend on them.  Every arm must also show the pointer-
+    before value equal to the address the PASM loaded (harness check).
+
+  DISCRIMINATORS (fixed before the run)
+    PRIMARY  H_BLK4  delta TRUE = +4   FALSE = +16   (and data FULL at dst+2)
+    H_BLK8   delta TRUE = +4   FALSE = +32
+    H_IDX3   delta TRUE = +12  FALSE = +16  -- TRUE here is derived from
+             the brief's mechanism (ptr_indx = the plain scaled index) plus
+             the Silicon Doc's "normal PTRx expression behavior"; the brief
+             itself states the value only for ptra++ (+4).  See NOTE A.
+    H_PTRB / H_WR / H_Q2   TRUE = +4   FALSE = +16
+    DATA half (every arm): the block region A (2 guard longs, 8 block
+    slots, 2 guard longs) and the trap region B are dumped raw.
+      read arms: A[2+i] must equal hub source long (RS_START+i) =
+        $A5A0_0004+i for i < n; every other A slot and all of B must still
+        hold the sentinel $5E5E_5E5E.
+      H_WR: hub area A[2+i] must equal wsrc[2+i] = $C0C0_0002+i; B (the
+        cog wtrp area) must still hold $7E7E_0000+k.  If A holds
+        $7E7E_0002+i the ALTD was ignored (class TRAP).
+    Data classes: FULL (exactly as predicted) / SINGLE (only the first
+    long landed: SETQ lost) / TRAP (block landed at the literal D field:
+    ALTD lost) / NONE (nothing landed) / OTHER.
+
+  VERDICT RULE (per H arm, after its gates pass)
+    reps disagree (delta or data class)        -> INCONCLUSIVE
+    delta == TRUE  and data FULL               -> CONFIRMED
+    delta == FALSE (block delta)               -> REFUTED (pointer took the block step)
+    delta == TRUE  but data not FULL           -> REFUTED (pointer as predicted,
+                                                  transfer not as predicted)
+    any other delta                            -> REFUTED (neither value)
+    The PRIMARY verdict prints last as "VERDICT: ...".  Sibling arms print
+    "ARM-VERDICT <name>: ..." and do not feed the primary verdict.
+
+  NOTE A (inferred / undetermined items this test leans on -- see brief)
+    * Brief Part 2 marks as UNDETERMINED the value ptr_indx takes when the
+      intervening instruction is ALTD.  The primary discriminator does not
+      need it: TRUE=+4 comes from the brief's own Part 5 statement, and
+      ANY delta other than +4 is reported as REFUTED with the raw value.
+      K_SINGLE/K_ALTD1 establish that +4 is this part's ordinary ptra++
+      step with and without ALTD.
+    * Brief Part 2 marks as UNDETERMINED whether the ordinary step can
+      coincide with the block delta; the only coincidence is N=1 (4 = 4),
+      so no hazard arm uses N=1.  H_BLK8 (4 vs 32) and H_IDX3 (12 vs 16)
+      move the two values apart in two independent directions.
+    * H_WR, H_PTRB, H_Q2 rest on the brief's reading that ptr_bx covers
+      setq2 and WRLONG/WMLONG and both pointers (traced, cog.sv:1131 and
+      :1124-1126); they are siblings and never gate the primary verdict.
+
+  VERIFIED OPCODES (pnut-ts -d -l, v1.55.8 build 9/19/2026, read from the
+  .lst hub image; cog addresses: dst=$0C6 trp=$0D2 wsrc=$0DE wtrp=$0EA
+  c_hidx=$0FB c_widx=$0FC c_lidx=$0FD).  Field layout
+  EEEE OOOOOOO CZI DDDDDDDDD SSSSSSSSS.
+    setq  #3            $FD640628  [27:21]=1101011, D=3,  S=%000101000 (SETQ)
+    setq  #7            $FD640E28  same, D=7
+    setq2 #3            $FD640629  [27:21]=1101011, D=3,  S=%000101001 (SETQ2)
+    altd  c_hidx        $F98DF600  [27:19]=100110001 (ALTD), I=1, D=$0FB, S=0
+    altd  c_widx        $F98DF800  ALTD, D=$0FC ; altd c_lidx $F98DFA00 D=$0FD
+    rdlong dst+2,ptra++ $FB059161  [27:21]=1011000 (RDLONG), I=1, D=$0C8,
+                                   S=$161=%1_0_1_1_00001 = PTRA++ (S=0 PTRA,
+                                   U=1 update, P=1 post, NNNNN=1)
+    rdlong trp+2,ptra++ $FB05A961  RDLONG, D=$0D4 (trap), S=$161 PTRA++
+    rdlong dst+2,ptra++[3] $FB059163   S=$163 = PTRA++[3]
+    rdlong trp+2,ptra++[3] $FB05A963   S=$163
+    rdlong dst+2,ptrb++ $FB0591E1  S=$1E1=%1_1_1_1_00001 = PTRB++
+    rdlong trp+2,ptrb++ $FB05A9E1  S=$1E1
+    wrlong wsrc+2,ptra++ $FC65C161 [27:21]=1100011 (WRLONG), L=0, I=1,
+                                   D=$0E0, S=$161
+    wrlong wtrp+2,ptra++ $FC65D961 D=$0EC, S=$161
+    rdlong 2,ptra++     $FB040561  (after setq2) D=2 = LUT[2], S=$161
+    rdlong 18,ptra++    $FB042561  (after setq2) D=$012 = LUT[18], S=$161
+    In every H arm the three words SETQ/ALTD/RDLONG(WRLONG) are at
+    consecutive hub longs (e.g. PRIMARY at image offsets $0F4/$0F8/$0FC),
+    so nothing else sits between them.
+
+  HOW TO RUN
+    Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10 /
+    "Run with DEBUG").  Runs once, well under a second; all output is on
+    the DEBUG terminal.  Nothing is written to flash.  Expected output:
+    a raw block of 15 arms x 4 rounds (before/after/delta/data class and
+    the A and B rows), then any RIG FAIL lines, then five ARM-VERDICT
+    lines, then the single PRIMARY line "VERDICT: ...".
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq      = 200_000_000
+  DEBUG_COGS    = %0000_0001            ' debug interrupt in cog 0 ONLY (EF-057)
+
+  NARMS         = 15
+  NREPS         = 4                     ' interleaved rounds (sampling plan)
+  REGN          = 12                    ' region: 2 guard + 8 block + 2 guard
+  RECLEN        = 2 + 2 * REGN          ' before, after, A[12], B[12]
+
+  SENTINEL      = $5E5E_5E5E            ' "nothing written here"
+  RS_BASE       = $A5A0_0000            ' hub source long k = RS_BASE + k
+  RS_START      = 4                     ' pointer starts at hub source long 4
+  RS_LEN        = 48
+  WS_BASE       = $C0C0_0000            ' cog wsrc[k]  = WS_BASE + k
+  WT_BASE       = $7E7E_0000            ' cog wtrp[k]  = WT_BASE + k
+  LUT_DST       = 0                     ' LUT region A = LUT[0..11]
+  LUT_TRP       = 16                    ' LUT region B = LUT[16..27]
+
+  STAT_RUN      = $0000_0A11
+  STAT_DONE     = $0000_600D
+
+  ' arm ids (order == run order inside one round)
+  #0, A_SINGLE, A_ALTD1, A_KBLK4, A_HBLK4, A_KBLK8, A_HBLK8, A_KIDX1, A_KIDX3, A_HIDX3, A_KPTRB, A_HPTRB, A_KWR, A_HWR, A_KQ2, A_HQ2
+
+  ' arm kinds
+  #0, K_COG, K_WR, K_LUT
+
+  ' data classes
+  #0, C_FULL, C_SINGLE, C_TRAP, C_NONE, C_OTHER
+
+  ' hazard outcomes
+  #0, O_NOGATE, O_CONFIRMED, O_REF_BLOCK, O_REF_DATA, O_REF_OTHER, O_INCONCL
+
+VAR ' ---- Rig State ----
+  long mbox[4]                          ' [0] status  [1] @hsrc  [2] @hw  [3] @rec
+  long hsrc[RS_LEN]                     ' hub source block for the read arms
+  long hw[REGN]                         ' hub destination area for the write arms
+  long rec[NARMS * NREPS * RECLEN]      ' raw records, round-major, arm-minor
+  long hok[NARMS]                       ' harness check per arm
+  long stab[NARMS]                      ' reps agree per arm
+  long gok[NARMS]                       ' arm reads its TRUE/expected delta + FULL data every rep
+  long frep[NARMS]                      ' first rep that broke gok (-1 = none)
+
+PUB main() | idx, cog, t0, armIdx, rigfail
+
+  repeat idx from 0 to RS_LEN - 1
+    hsrc[idx] := RS_BASE + idx
+  repeat idx from 0 to REGN - 1
+    hw[idx] := 0
+  mbox[0] := 0
+  mbox[1] := @hsrc
+  mbox[2] := @hw
+  mbox[3] := @rec
+
+  debug("=== O17: SETQ + ALTD + block RDLONG PTRx delta  (pnut-ts v1.55.8, clk 200 MHz) ===")
+
+  cog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if cog < 0
+    debug("RIG FAIL: coginit expected a free cog (0..7), got ", sdec_(cog))
+    finish()
+
+  t0 := getct()
+  repeat until mbox[0] == STAT_DONE
+    if getct() - t0 > clkfreq
+      debug("RIG FAIL: measuring cog status expected $0000_600D within 1 s, got ", uhex_long_(mbox[0]))
+      finish()
+
+  debug("measuring cog ", udec_(cog), " done. sentinel=$5E5E_5E5E  src long k=$A5A0_0000+k  ptr starts at src long 4")
+  debug("RAW (A = destination region, B = trap region; slots 0,1,10,11 are guards; block at A[2..])")
+  repeat armIdx from 0 to NARMS - 1
+    report_arm(armIdx)
+
+  ' ---- gates -------------------------------------------------------------
+  rigfail := FALSE
+  repeat armIdx from 0 to NARMS - 1
+    hok[armIdx], stab[armIdx], gok[armIdx], frep[armIdx] := eval_arm(armIdx)
+    if not hok[armIdx]
+      rigfail := TRUE
+      debug("RIG FAIL: harness, arm ", zstr_(armname(armIdx)), " pointer-before expected ", uhex_long_(startaddr(armIdx)), " in every rep; see raw rows")
+    if armctl(armIdx) == -1 and not gok[armIdx]
+      rigfail := TRUE
+      rigfail_ctl(armIdx)
+    gok[armIdx] := gok[armIdx] and hok[armIdx]         ' a control with a bad harness check gates nothing
+  if not rigfail
+    debug("RIG OK: every control read its expected delta and FULL data in all ", udec_(NREPS), " rounds")
+
+  ' ---- sibling verdicts (never feed the primary) -------------------------
+  debug("--- sibling arms (reported separately; do not feed the primary verdict) ---")
+  print_verdict(A_HBLK8, FALSE)
+  print_verdict(A_HIDX3, FALSE)
+  print_verdict(A_HPTRB, FALSE)
+  print_verdict(A_HWR, FALSE)
+  print_verdict(A_HQ2, FALSE)
+
+  ' ---- primary verdict ---------------------------------------------------
+  debug("--- PRIMARY: H_BLK4  setq #3 / altd / rdlong 0-0, ptra++   TRUE delta +4, FALSE delta +16 ---")
+  print_verdict(A_HBLK4, TRUE)
+
+  finish()
+
+PRI finish()
+'' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+'' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' arm tables
+' ---------------------------------------------------------------------------
+PRI armname(armIdx) : pArmName
+  pArmName := lookupz(armIdx: string("K_SINGLE"), string("K_ALTD1"), string("K_BLK4"), string("H_BLK4"), string("K_BLK8"), string("H_BLK8"), string("K_IDX1"), string("K_IDX3"), string("H_IDX3"), string("K_PTRB"), string("H_PTRB"), string("K_WR"), string("H_WR"), string("K_Q2"), string("H_Q2"))
+
+PRI armn(armIdx) : longCount            ' longs in the transfer
+  longCount := lookupz(armIdx: 1, 1, 4, 4, 8, 8, 1, 4, 4, 4, 4, 4, 4, 4, 4)
+
+PRI armkind(armIdx) : kind
+  kind := lookupz(armIdx: K_COG, K_COG, K_COG, K_COG, K_COG, K_COG, K_COG, K_COG, K_COG, K_COG, K_COG, K_WR, K_WR, K_LUT, K_LUT)
+
+PRI armexp(armIdx) : expDelta           ' control: required delta / hazard: delta if O17 TRUE
+  expDelta := lookupz(armIdx: 4, 4, 16, 4, 32, 4, 12, 16, 12, 16, 4, 16, 4, 16, 4)
+
+PRI armfalse(armIdx) : falseDelta       ' hazard: delta if O17 FALSE (the block delta); 0 = control
+  falseDelta := lookupz(armIdx: 0, 0, 0, 16, 0, 32, 0, 0, 16, 0, 16, 0, 16, 0, 16)
+
+PRI armctl(armIdx) : ctlArmIdx          ' hazard: its own control arm;  -1 = this arm IS a control
+  ctlArmIdx := lookupz(armIdx: -1, -1, -1, A_KBLK4, -1, A_KBLK8, -1, -1, A_KIDX3, -1, A_KPTRB, -1, A_KWR, -1, A_KQ2)
+
+PRI clsname(clsId) : pClsName
+  pClsName := lookupz(clsId: string("FULL"), string("SINGLE"), string("TRAP"), string("NONE"), string("OTHER"))
+
+PRI startaddr(armIdx) : ptrStart        ' the pointer value the PASM loads before the arm
+  if armkind(armIdx) == K_WR
+    ptrStart := @hw + 2 * 4
+  else
+    ptrStart := @hsrc + RS_START * 4
+
+PRI recaddr(armIdx, rp) : pRec
+  pRec := @rec + ((rp * NARMS + armIdx) * RECLEN) * 4
+
+PRI aexp(armIdx, slotIdx) : expVal | longCount   ' expected A-region slot i
+  longCount := armn(armIdx)
+  if slotIdx < 2 or slotIdx >= 2 + longCount
+    expVal := SENTINEL
+  elseif armkind(armIdx) == K_WR
+    expVal := WS_BASE + slotIdx
+  else
+    expVal := RS_BASE + RS_START + (slotIdx - 2)
+
+PRI bexp(armIdx, slotIdx) : expVal      ' expected (untouched) B-region slot i
+  if armkind(armIdx) == K_WR
+    expVal := WT_BASE + slotIdx
+  else
+    expVal := SENTINEL
+
+' ---------------------------------------------------------------------------
+' data classification of one record
+' ---------------------------------------------------------------------------
+PRI classify(armIdx, rp) : cls, landed, abad, bbad | pRec, slotIdx, longCount, asent, tr
+  pRec := recaddr(armIdx, rp) + 8
+  longCount := armn(armIdx)
+  landed := abad := bbad := asent := tr := 0
+  repeat slotIdx from 0 to REGN - 1
+    if long[pRec][slotIdx] <> aexp(armIdx, slotIdx)
+      abad++
+    if long[pRec][slotIdx] == SENTINEL
+      asent++
+    if long[pRec][REGN + slotIdx] <> bexp(armIdx, slotIdx)
+      bbad++
+  repeat slotIdx from 0 to longCount - 1
+    if long[pRec][2 + slotIdx] == aexp(armIdx, 2 + slotIdx)
+      landed++
+    if armkind(armIdx) == K_WR
+      if long[pRec][2 + slotIdx] == WT_BASE + 2 + slotIdx
+        tr++
+    elseif long[pRec][REGN + 2 + slotIdx] == RS_BASE + RS_START + slotIdx
+      tr++
+  if abad == 0 and bbad == 0
+    cls := C_FULL
+  elseif longCount > 1 and landed == 1 and long[pRec][2] == aexp(armIdx, 2) and asent == REGN - 1 and bbad == 0
+    cls := C_SINGLE
+  elseif tr == longCount
+    cls := C_TRAP
+  elseif asent == REGN
+    cls := C_NONE
+  else
+    cls := C_OTHER
+
+PRI delta(armIdx, rp) : deltaVal | pRec
+  pRec := recaddr(armIdx, rp)
+  deltaVal := long[pRec][1] - long[pRec][0]
+
+' ---------------------------------------------------------------------------
+' per-arm evaluation: harness ok, reps stable, delta==armexp and FULL every rep
+' ---------------------------------------------------------------------------
+PRI eval_arm(armIdx) : ok_h, stable, ok_g, first_bad | rp, cls, firstCls, deltaVal, firstDelta, landed, abad, bbad
+  ok_h := stable := ok_g := TRUE
+  first_bad := -1
+  repeat rp from 0 to NREPS - 1
+    if long[recaddr(armIdx, rp)][0] <> startaddr(armIdx)
+      ok_h := FALSE
+    cls, landed, abad, bbad := classify(armIdx, rp)
+    deltaVal := delta(armIdx, rp)
+    if rp == 0
+      firstDelta := deltaVal
+      firstCls := cls
+    elseif deltaVal <> firstDelta or cls <> firstCls
+      stable := FALSE
+    if deltaVal <> armexp(armIdx) or cls <> C_FULL
+      if ok_g
+        first_bad := rp
+      ok_g := FALSE
+
+PRI rigfail_ctl(armIdx) | cls, landed, abad, bbad, rp
+  rp := frep[armIdx]
+  cls, landed, abad, bbad := classify(armIdx, rp)
+  debug("RIG FAIL: control ", zstr_(armname(armIdx)), " expected delta ", sdec_(armexp(armIdx)), " + data FULL in every round; round ", udec_(rp), " got delta ", sdec_(delta(armIdx, rp)), " data ", zstr_(clsname(cls)), " landed ", udec_(landed), "/", udec_(armn(armIdx)))
+
+' ---------------------------------------------------------------------------
+' raw report
+' ---------------------------------------------------------------------------
+PRI report_arm(armIdx) | rp, pRec, cls, landed, abad, bbad
+  if armctl(armIdx) == -1
+    debug("ARM ", udec_(armIdx), " ", zstr_(armname(armIdx)), " (control)  n=", udec_(armn(armIdx)), "  required delta=", sdec_(armexp(armIdx)))
+  else
+    debug("ARM ", udec_(armIdx), " ", zstr_(armname(armIdx)), " (hazard)   n=", udec_(armn(armIdx)), "  TRUE delta=", sdec_(armexp(armIdx)), "  FALSE delta=", sdec_(armfalse(armIdx)))
+  repeat rp from 0 to NREPS - 1
+    pRec := recaddr(armIdx, rp)
+    cls, landed, abad, bbad := classify(armIdx, rp)
+    debug("  round ", udec_(rp), " before=", uhex_long_(long[pRec][0]), " after=", uhex_long_(long[pRec][1]), " delta=", sdec_(long[pRec][1] - long[pRec][0]), " data=", zstr_(clsname(cls)), " landed=", udec_(landed), "/", udec_(armn(armIdx)), " abad=", udec_(abad), " bbad=", udec_(bbad))
+    debug("    A: ", uhex_long_array_(pRec + 8, REGN))
+    debug("    B: ", uhex_long_array_(pRec + 8 + REGN * 4, REGN))
+
+' ---------------------------------------------------------------------------
+' hazard outcome + verdict line
+' ---------------------------------------------------------------------------
+PRI hazard_outcome(armIdx) : oc, deltaVal, cls, landed, bbad | ctl, gates, abad
+  ctl := armctl(armIdx)
+  gates := gok[A_SINGLE] and gok[A_ALTD1] and gok[ctl] and hok[armIdx]
+  if armIdx == A_HIDX3
+    gates := gates and gok[A_KIDX1]
+  deltaVal := delta(armIdx, 0)
+  cls, landed, abad, bbad := classify(armIdx, 0)
+  if not gates
+    oc := O_NOGATE
+  elseif not stab[armIdx]
+    oc := O_INCONCL
+  elseif deltaVal == armexp(armIdx) and cls == C_FULL
+    oc := O_CONFIRMED
+  elseif deltaVal == armfalse(armIdx)
+    oc := O_REF_BLOCK
+  elseif deltaVal == armexp(armIdx)
+    oc := O_REF_DATA
+  else
+    oc := O_REF_OTHER
+
+PRI print_verdict(armIdx, primary) | oc, deltaVal, cls, landed, bbad, pfx
+  oc, deltaVal, cls, landed, bbad := hazard_outcome(armIdx)
+  if primary
+    pfx := string("VERDICT")
+  else
+    pfx := lookupz(armIdx: 0, 0, 0, 0, 0, string("ARM-VERDICT H_BLK8"), 0, 0, string("ARM-VERDICT H_IDX3"), 0, string("ARM-VERDICT H_PTRB"), 0, string("ARM-VERDICT H_WR"), 0, string("ARM-VERDICT H_Q2"))
+  case oc
+    O_NOGATE:
+      debug("NO VERDICT for ", zstr_(armname(armIdx)), ": a gating control or the harness check failed - see RIG FAIL lines")
+    O_INCONCL:
+      debug(zstr_(pfx), ": INCONCLUSIVE - the ", udec_(NREPS), " rounds disagree (delta or data class); see raw rows for ", zstr_(armname(armIdx)))
+    O_CONFIRMED:
+      debug(zstr_(pfx), ": CONFIRMED - pointer delta ", sdec_(deltaVal), " (TRUE value) while all ", udec_(armn(armIdx)), " longs landed at the ALTD destination, in all ", udec_(NREPS), " rounds; control delta ", sdec_(armfalse(armIdx)))
+    O_REF_BLOCK:
+      debug(zstr_(pfx), ": REFUTED - pointer took the BLOCK delta ", sdec_(deltaVal), " (FALSE value) despite the ALTD; data=", zstr_(clsname(cls)), " landed ", udec_(landed), "/", udec_(armn(armIdx)), " trap-slots-changed ", udec_(bbad))
+    O_REF_DATA:
+      debug(zstr_(pfx), ": REFUTED - pointer delta ", sdec_(deltaVal), " as predicted, but the block did NOT transfer as predicted: data=", zstr_(clsname(cls)), " landed ", udec_(landed), "/", udec_(armn(armIdx)), " trap-slots-changed ", udec_(bbad))
+    O_REF_OTHER:
+      debug(zstr_(pfx), ": REFUTED - pointer delta ", sdec_(deltaVal), " is neither TRUE ", sdec_(armexp(armIdx)), " nor FALSE ", sdec_(armfalse(armIdx)), "; data=", zstr_(clsname(cls)), " landed ", udec_(landed), "/", udec_(armn(armIdx)))
+
+' ===========================================================================
+' MEASURING COG (PASM, cog exec).  PTRA on entry = @mbox (from COGINIT).
+' No debug() in here: this cog has no debug interrupt (DEBUG_COGS).
+' ===========================================================================
+DAT             org     0        ' ---- Measuring Cog ----
+pasm            mov     c_mbx, ptra                     ' save @mbox before PTRA is used
+                mov     c_t, c_mbx
+                add     c_t, #4
+                rdlong  c_rsrc, c_t                     ' @hsrc
+                add     c_rsrc, #RS_START * 4           ' read arms start at src long 4
+                add     c_t, #4
+                rdlong  c_hwbase, c_t                   ' @hw
+                mov     c_hwst, c_hwbase
+                add     c_hwst, #2 * 4                  ' write arms start after 2 guard longs
+                add     c_t, #4
+                rdlong  c_recp, c_t                     ' @rec
+                mov     c_hidx, #dst + 2                ' ALTD targets: the SAME place the
+                mov     c_widx, #wsrc + 2               '  matching control uses
+                mov     c_lidx, #LUT_DST + 2
+                mov     c_t, ##STAT_RUN
+                wrlong  c_t, c_mbx
+                mov     c_rnd, #NREPS
+
+one_round
+'--- arm 0  K_SINGLE : plain rdlong, ptra++ (ordinary step)
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                rdlong  dst + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 1  K_ALTD1 : ALTD-redirected single rdlong, ptra++
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                altd    c_hidx
+                rdlong  trp + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 2  K_BLK4 : workaround (a) -- SETQ immediately before RDLONG
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq    #4 - 1
+                rdlong  dst + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 3  H_BLK4 : PRIMARY hazard -- SETQ / ALTD / RDLONG ptra++
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq    #4 - 1
+                altd    c_hidx
+                rdlong  trp + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 4  K_BLK8
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq    #8 - 1
+                rdlong  dst + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 5  H_BLK8
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq    #8 - 1
+                altd    c_hidx
+                rdlong  trp + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 6  K_IDX1 : plain rdlong, ptra++[3] (ordinary step = 3*4)
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                rdlong  dst + 2, ptra++[3]
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 7  K_IDX3 : block rdlong, ptra++[3] (index overridden by count)
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq    #4 - 1
+                rdlong  dst + 2, ptra++[3]
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 8  H_IDX3
+                call    #prep_cog
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq    #4 - 1
+                altd    c_hidx
+                rdlong  trp + 2, ptra++[3]
+                mov     c_after, ptra
+                call    #dump_cog
+'--- arm 9  K_PTRB
+                call    #prep_cog
+                mov     ptrb, c_rsrc
+                mov     c_before, ptrb
+                setq    #4 - 1
+                rdlong  dst + 2, ptrb++
+                mov     c_after, ptrb
+                call    #dump_cog
+'--- arm 10 H_PTRB
+                call    #prep_cog
+                mov     ptrb, c_rsrc
+                mov     c_before, ptrb
+                setq    #4 - 1
+                altd    c_hidx
+                rdlong  trp + 2, ptrb++
+                mov     c_after, ptrb
+                call    #dump_cog
+'--- arm 11 K_WR : block wrlong from cog wsrc[2..5] to hub
+                call    #prep_wr
+                mov     ptra, c_hwst
+                mov     c_before, ptra
+                setq    #4 - 1
+                wrlong  wsrc + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_wr
+'--- arm 12 H_WR
+                call    #prep_wr
+                mov     ptra, c_hwst
+                mov     c_before, ptra
+                setq    #4 - 1
+                altd    c_widx
+                wrlong  wtrp + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_wr
+'--- arm 13 K_Q2 : setq2 block rdlong into LUT[2..5]
+                call    #prep_lut
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq2   #4 - 1
+                rdlong  LUT_DST + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_lut
+'--- arm 14 H_Q2
+                call    #prep_lut
+                mov     ptra, c_rsrc
+                mov     c_before, ptra
+                setq2   #4 - 1
+                altd    c_lidx
+                rdlong  LUT_TRP + 2, ptra++
+                mov     c_after, ptra
+                call    #dump_lut
+
+                djnz    c_rnd, #one_round
+                mov     c_t, ##STAT_DONE
+                wrlong  c_t, c_mbx
+                cogid   c_t
+                cogstop c_t
+
+'--- fill cog dst[] and trp[] (contiguous, 2*REGN longs) with the sentinel
+prep_cog        mov     c_i, #0
+.lp             altd    c_i, #dst
+                mov     0-0, c_sent
+                add     c_i, #1
+                cmp     c_i, #2 * REGN          wz
+        if_nz   jmp     #.lp
+                ret
+
+'--- fill the hub write area (REGN longs) with the sentinel
+prep_wr         mov     c_p, c_hwbase
+                mov     c_i, #REGN
+.lp             wrlong  c_sent, c_p
+                add     c_p, #4
+                djnz    c_i, #.lp
+                ret
+
+'--- fill LUT[0..LUT_TRP+REGN-1] with the sentinel
+prep_lut        mov     c_i, #0
+.lp             wrlut   c_sent, c_i
+                add     c_i, #1
+                cmp     c_i, #LUT_TRP + REGN    wz
+        if_nz   jmp     #.lp
+                ret
+
+'--- record header: before, after
+dump_hdr        wrlong  c_before, c_recp
+                add     c_recp, #4
+                wrlong  c_after, c_recp
+        _ret_   add     c_recp, #4
+
+'--- record: header, A = cog dst[0..11], B = cog trp[0..11]
+dump_cog        call    #dump_hdr
+                mov     c_i, #0
+.lp             altd    c_i, #dst
+                wrlong  0-0, c_recp
+                add     c_recp, #4
+                add     c_i, #1
+                cmp     c_i, #2 * REGN          wz
+        if_nz   jmp     #.lp
+                ret
+
+'--- record: header, A = hub write area[0..11], B = cog wtrp[0..11]
+dump_wr         call    #dump_hdr
+                mov     c_p, c_hwbase
+                mov     c_i, #REGN
+.a              rdlong  c_t, c_p
+                wrlong  c_t, c_recp
+                add     c_p, #4
+                add     c_recp, #4
+                djnz    c_i, #.a
+                mov     c_i, #0
+.b              altd    c_i, #wtrp
+                wrlong  0-0, c_recp
+                add     c_recp, #4
+                add     c_i, #1
+                cmp     c_i, #REGN              wz
+        if_nz   jmp     #.b
+                ret
+
+'--- record: header, A = LUT[0..11], B = LUT[16..27]
+dump_lut        call    #dump_hdr
+                mov     c_i, #LUT_DST
+.a              rdlut   c_t, c_i
+                wrlong  c_t, c_recp
+                add     c_recp, #4
+                add     c_i, #1
+                cmp     c_i, #LUT_DST + REGN    wz
+        if_nz   jmp     #.a
+                mov     c_i, #LUT_TRP
+.b              rdlut   c_t, c_i
+                wrlong  c_t, c_recp
+                add     c_recp, #4
+                add     c_i, #1
+                cmp     c_i, #LUT_TRP + REGN    wz
+        if_nz   jmp     #.b
+                ret
+
+'--- cog data
+c_sent          long    SENTINEL
+dst             long    0[REGN]                         ' region A for cog read arms
+trp             long    0[REGN]                         ' region B (trap) -- MUST follow dst
+wsrc            long    WS_BASE + 0, WS_BASE + 1, WS_BASE + 2,  WS_BASE + 3
+                long    WS_BASE + 4, WS_BASE + 5, WS_BASE + 6,  WS_BASE + 7
+                long    WS_BASE + 8, WS_BASE + 9, WS_BASE + 10, WS_BASE + 11
+wtrp            long    WT_BASE + 0, WT_BASE + 1, WT_BASE + 2,  WT_BASE + 3
+                long    WT_BASE + 4, WT_BASE + 5, WT_BASE + 6,  WT_BASE + 7
+                long    WT_BASE + 8, WT_BASE + 9, WT_BASE + 10, WT_BASE + 11
+c_mbx           long    0
+c_rsrc          long    0
+c_hwbase        long    0
+c_hwst          long    0
+c_recp          long    0
+c_hidx          long    0
+c_widx          long    0
+c_lidx          long    0
+c_rnd           long    0
+c_i             long    0
+c_t             long    0
+c_p             long    0
+c_before        long    0
+c_after         long    0
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

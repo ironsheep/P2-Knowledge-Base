@@ -1,0 +1,99 @@
+# Campaign — 2026-09 P2 errata predictions (VO-J-007..011)
+
+**Purpose:** decide, on real silicon, five predicted P2 silicon defects that an HDL-reading study
+derived from the design source. Two had been published by the vendor; three had never been
+observed on a part. The outcome decides which of them the **P2 Errata** manual carries: a
+`CONFIRMED` item enters the manual and the KB; a disproved one stays out.
+
+**Result: all five `CONFIRMED` → EF-066 … EF-070**, each on its first run, 2026-09-24 (Stephen).
+
+| # | Test (`tests/`) | Prediction | VO | Verdict | EF |
+|---|---|---|---|---|---|
+| 1 | `test-o1-altx-imm-s-steals-augs.spin2` | an immediate-`#S` `ALTx` between `AUGS` and its target is itself augmented; the target still gets the augment; `AUGD` is immune | VO-J-007 | `CONFIRMED` | EF-066 |
+| 2 | `test-o17-setq-altd-block-ptr-delta.spin2` | `SETQ` → `ALTD` → block `RDLONG … ptra++`: whole block moves, `PTRx` takes the plain step | VO-J-008 | `CONFIRMED` | EF-067 |
+| 3 | `test-o18-getct-upper-stale-runA.spin2` + `…-runB.spin2` | `GETCT WC` in a four-cog group that missed a counter wrap reads a stale upper long | VO-J-009 | `CONFIRMED` | EF-068 |
+| 4 | `test-so80-getxacc-clear-gating.spin2` | `GETXACC` clears only during a Goertzel burst; mid-burst it partitions the terms exactly | VO-J-010 | `CONFIRMED` | EF-069 |
+| 5 | `test-so84-goertzel-last-term-lag.spin2` | the Goertzel accumulators lag by one clock; a burst's last term lands in the next burst | VO-J-011 | `CONFIRMED` | EF-070 |
+
+## How the tests were built — independence is the point
+
+Each test was written by an agent given **only its prediction**, with no access to the study's
+reasoning, and told to design for refutation: an in-run control that gates the verdict, and both
+outcomes written into the program before the run. Every verdict below was then **re-derived from the
+raw log lines**, not taken from the program's own `VERDICT` line. The study's briefs are internal
+material and are not in this repository; nothing here depends on them.
+
+**Common rig:** bare P2 board (SO80/SO84 drive P3 from the measuring cog — no jumper), 200 MHz,
+`pnut-ts` 1.55.8 `-d`, RAM download with reset. Every test measures in a launched PASM cog and
+reports from cog 0 only (`DEBUG_COGS = %0000_0001`, EF-057).
+
+## What ran is what is committed — two runs, two builds
+
+**Run 1** (2026-09-24, 20:46–20:51) used the programs as first authored. Before committing, they
+were changed in two ways:
+
+1. **End of session.** Every terminal path now calls `finish()`, which prints `DEBUG_END_SESSION` —
+   the phrase `pnut-term-ts` watches for to end a headless or `--exit-on-end-session` run.
+2. **Style.** Conformed to `central:spin2-authoring-guide`: 133 §2.1 single-letter names renamed,
+   header/footer/doc comments, block labels, and single-exit restructuring of the reporting methods
+   (§5.1–§5.3). Every PASM measuring engine is byte-identical to run 1's, and every debug string is
+   identical apart from the added `DEBUG_END_SESSION`.
+
+**Run 2** (2026-09-24, 23:17–23:21) ran **the files committed here**. Every measured line matches
+run 1: O1, SO80 and SO84 line for line (only the loader's start address moved, with the program
+size); O17 every pointer step, data pattern and classification (only absolute hub addresses moved);
+O18 A and B every `D`, status and bracket result (only the absolute counter timestamps differ, as they
+must). Each session ended on its own marker within a second of its last line.
+
+The deciding lines below are from run 1; run 2 prints the same values.
+
+## Deciding lines (verbatim, from the run logs)
+
+**1 — O1.**
+```
+A5 ctrl WORKAROUND AUGS / ALTD idx,reg 4 / MOV : nchg=1 first win[12]=$3C5C_0A55 dIdx=0
+A6 TEST AUGS / ALTD idx,#0 / MOV : nchg=1 first win[8]=$3C5C_0A55 dIdx=5
+A7 TEST AUGS / ALTR idx,#3 / MOV : nchg=1 first win[11]=$3C5C_0A55 dIdx=5
+D1 ctrl hub=$1357_9B3C  D2 test hub=$1357_9B3C  idxs before=$0000_0061 after=$0000_0061
+passes differing longs vs pass 0: 0
+```
+
+**2 — O17** (every arm, all 4 rounds identical; trap region untouched throughout).
+```
+ARM 2 K_BLK4 (control)  n=4  required delta=16   ... delta=16 data=FULL landed=4/4
+ARM 3 H_BLK4 (hazard)   n=4  TRUE delta=4  FALSE delta=16   ... delta=4 data=FULL landed=4/4
+ARM 8 H_IDX3 (hazard)   n=4  TRUE delta=12  FALSE delta=16  ... delta=12 data=FULL landed=4/4
+```
+
+**3 — O18.** Run A, cog 4 first started after wrap 1, then restarted after two missed wraps:
+```
+A1a cog4 hi=1 p1 ref=$0000_0001_$1020_D896 smp=$0000_0000_$1020_D8B3 ref2=$0000_0001_$1020_D903 D=1
+A2  cog4 hi=2 p1 ref=$0000_0002_$1001_40CE smp=$0000_0002_$1001_40F3 ref2=$0000_0002_$1001_413B D=0
+A4a cog4 hi=4 p1 ref=$0000_0004_$1020_B1F6 smp=$0000_0002_$1020_B213 ref2=$0000_0004_$1020_B263 D=2
+```
+Run B (cog 4 running from the start): `D=0` at hi = 0, 1, 2. Group-0 control (cog 1): `D=0` in every
+reading of both runs.
+
+**4 — SO80.**
+```
+rep 0 (i)  B=488 G1=488 G2=488 G2L=488 G3=488 tries=1
+rep 0 runA B=976 P=976 RA=16_531
+rep 0 runB B=17_080 P=17_080 R1=18_849 R2=13_786 waitx=30 tries=1
+Half A: 50 reads; moved 0 (non-Goertzel-active 0); read exactly 0 0
+rep 0: waitx=30 kA=255 k1=29 k1-waitx=-1 dA=15_555 dB=15_555 dd=0 class=0
+```
+
+**5 — SO84** (sequence #0, N = 64, C = −19):
+```
+accx B0=0 B=0 R1=-1_197 R1b=-1_197 R2=-1_216 R3=-2_413 R4=-3_629 R5=-3_648
+dx: B-B0=0 d1=-1_197 R1b-R1=0 d2=-19 d3=-1_197 d4=-1_216 d5=-19
+counts over 16 sequences: TRUE 16  no-lag 0  lost 0  other 0
+```
+
+## What it changes
+
+- **KB:** F-462 … F-466 in `engineering/operations/P2KB-CORRECTION-FINDINGS.md` — `getxacc.yaml` is
+  wrong about clearing (F-462) and lacks the lag (F-464); `getct.yaml` lacks the stale-upper-long
+  erratum (F-463); `setq.yaml`'s "+4" is only the `[1]` case (F-465); `augs.yaml` gains where the
+  damage lands and loses its open `AUGD` scope note (F-466).
+- **P2 Errata manual:** all five enter it, three of them as errata no vendor document carries.

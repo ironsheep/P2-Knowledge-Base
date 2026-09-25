@@ -263,9 +263,10 @@ engineering/document-production/**/*.bin
 # P2 Errata test briefs (Stephen 2026-09-25): an HDL study's briefs, marked Internal
 # and carrying HDL fragments under that study's custody rule. They stay in this
 # working tree ONLY and are never committed. The .spin2 tests built from them are
-# committed once a hardware run has produced a finding; their listings regenerate.
+# authored in the manual's audit/verification-tests/ (ignored above, like every
+# manual's) and committed by replication to hardware-verification/campaigns/ once a
+# hardware run has produced a finding.
 engineering/document-production/manuals/p2-errata/code-validation/test-briefs/
-engineering/document-production/manuals/p2-errata/code-validation/**/*.lst
 
 # Color bar test directory (temporary testing)
 engineering/document-production/workspace/p2-assembly-language-manual/color-bar-test/

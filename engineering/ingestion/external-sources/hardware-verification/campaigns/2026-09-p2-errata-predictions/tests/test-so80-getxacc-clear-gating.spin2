@@ -1,0 +1,750 @@
+'' =============================================================================
+''
+''   File....... test-so80-getxacc-clear-gating.spin2
+''   Purpose.... SO80: does GETXACC's clear reach the Goertzel accumulators
+''               only while the streamer runs in DDS/Goertzel mode (Half A),
+''               and even then leave the one held term behind instead of a
+''               true zero (Half B)?
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 25 Sep 2026
+''
+'' =============================================================================
+
+{ THE PREDICTION UNDER TEST (brief BRIEF-SO80, read off the HDL, never observed
+  on a part):
+    Half A  With the streamer idle, or running in any mode other than
+            DDS/Goertzel, GETXACC does NOT clear X/Y. The accumulators are
+            frozen: repeat idle reads return bit-identical values.
+    Half B  With a Goertzel burst running, GETXACC returns the running sum and
+            leaves accx = the one term acca holds on that clock (the "held
+            term"), not zero. Readings taken during one burst therefore add up
+            to exactly what one read at its end returns.
+
+  WHAT WOULD SHOW IT WRONG (written before the run, encoded in judge()):
+    Half A  any idle/non-Goertzel read G differs from the preamble's B.
+            G = 0 (dG = -B) specifically means the clear reached accx.
+    Half B  dd = dB - dA nonzero:  dd = R1  -> clear did not reach accx while
+            running;  dd = -C -> true zero, held term lost;  dd = +C -> held
+            term counted twice;  other whole multiple of C -> refuted, other.
+            dd not a whole multiple of C -> construction failed: INCONCLUSIVE.
+
+  RIG
+    P2 Edge (or any P2), NO JUMPER, nothing connected to P0..P7.
+    The engine cog drives P3 (pin 4g+3, g = 0) itself as a PLAIN output, low,
+    with its WRPIN config at 0 (smart pin off, A input = this pin's own read
+    state). With the smart pin off, IN carries the pin's logic level
+    (p2kb architecture/smart_pins.yaml in_signal_semantics.when_smart_pin_mode
+    _is_OFF), so the streamer's input bit for P3 reads the driven 0. Checked
+    in-run by TESTP at every block. P0 is named by the non-Goertzel mode's
+    pin field, but that mode's output enable (D[23]) is 0 and its data is 0.
+    No DAC is enabled anywhere (Goertzel D[27:24] = 0, imm-mode D[27:24] = 0).
+    _clkfreq = 200 MHz. Run time well under 10 ms of engine time.
+
+  DEBUGGER CONFOUND (EF-057): DEBUG_COGS = %0000_0001. All streamer work and
+  every GETXACC runs in a dedicated PASM cog started by COGINIT from DAT; cog 0
+  (Spin2) only waits on the hub mailbox and prints.
+
+  CONSTRUCTION (brief Part 2 "constructing a burst")
+    NCO frequency $8000_0000 (SETXFRQ once, thousands of clocks before any
+      XINIT; no SETQ ever precedes an XINIT).
+    Goertzel D = $F007_0000 | count: mode bits [15:12]=1111, [11:8]=0000 (no
+      DAC), [7]=0 (sinc1: acca REPLACED each clock), [6:3]=0000 (pins 0..3),
+      [2:0]=111.
+    S_ON   = $0008_80A5: imm[19]=1 (invert P3), imm[15]=1 (sum P3 only),
+             imm[14:12]=0, imm[11:9]=000, imm[8:0]=$0A5 (LUT address).
+    S_ZERO = $0008_00A5: imm[15:12]=0 -> every term zero (the "zero burst").
+    LUT long $173D_0000 written to ALL 512 LUT longs once, before the first
+      burst, then read back (control). bits[23:16] = $3D = 61 = g (cosine,
+      feeds X); bits[31:24] = $17 = 23 (sine, feeds Y -- NOT traced by the
+      brief, Y is informational only).
+    P3 low, imm[19]=1  -> bit differs from imm[19] -> term = +g -> C = +61.
+    P3 high (CAL only) -> bit matches imm[19]      -> term = -g -> C = -61.
+
+  RUN ORDER (one engine cog, all of it)
+    CAL      preamble + 64-count burst with P3 LOW, then again with P3 HIGH,
+             then P3 back LOW for the rest. Control: both deltas whole
+             multiples of 61, low one positive, high one its exact negative
+             -> proves C = +61 comes from P3 through the constructed term.
+    x8 reps, each:
+      phase (i)  Half A: preamble -> B; G1 idle; XINIT $4000_0400 (1-pin imm
+                 mode, output off, count $0400) and G2 as the NEXT instruction;
+                 G2L ~100 clocks into that imm burst (XFI must still be 0);
+                 wait idle; G3.
+      run A      preamble -> B; P idle read; Goertzel burst N=256, no read;
+                 wait idle; RA.  dA = RA - P.
+      run B      preamble -> B; P idle read; same burst; WAITX dly; R1 mid
+                 burst (XFI must still be 0); wait idle; R2.
+                 dB = R1 + R2 - P.  Scored only if (R1-P) is a whole
+                 multiple of C with 1 <= k1 < kA (read landed inside).
+      dly schedule (WAITX operand): 30,30,30,30 (= brief's ~32 clocks, four
+      repeats) then 62,94,126,190 (sampling plan: the read point moves, the
+      verdict must not).
+    Preamble = (a) charge burst count 8 S_ON, wait idle; (b) zero burst count
+      4 S_ZERO, wait idle; (c) GETXACC -> B.  Retried up to 3x if B = 0.
+    "Wait idle" = WAITX 4000 (> count + 16 for every burst, incl. $0400),
+      then POLLXFI must report the streamer finished (control).
+
+  WHY P AS THE HALF-B BASELINE (improvement on the brief): the brief uses B.
+  P is one more idle GETXACC immediately before the XINIT. If Half A holds,
+  P = B exactly (and P-B is scored as more Half A evidence). If Half A is
+  wrong (idle clear works), B's own read zeroed accx and P reads that 0 --
+  so P is the true starting accx in BOTH worlds and Half B's arithmetic does
+  not silently inherit a Half A failure.
+
+  EXPECTED VALUES IF THE PREDICTION IS TRUE
+    CAL: kLO = +k, kHI = -k, k near 64 (my derivation: N-1 = 63; first-term
+         timing is `inferred` in the brief, so gated only to 56..72).
+    Half A: every G1, G2, G2L, G3, P equals its B exactly -> 50/50 zero diffs.
+    Half B: dA = kA*61 with kA near 256 (gated 248..264), identical every rep;
+            k1 grows 1:1 with dly; dd = 0 in every scored rep.
+
+  IN-RUN CONTROLS (any failure prints "RIG FAIL: ..." and withholds verdicts)
+    LUT readback 512/512; P3 level at every block; XFI finished after every
+    wait-idle and NOT finished at every mid-burst read; every preamble B <> 0
+    (gates Half A); CAL sign/multiple/negation (gates both); every dA a whole
+    positive multiple of C inside 248..264 (gates Half B).
+
+  VERIFIED ENCODINGS (pnut-ts v1.55.8, `pnut-ts -d -l`, decoded from the .lst
+  object hex dump; engine at object offset $032 = cog $000):
+    GETXACC b_   $FD61C41E   [27:21]=1101011 [20:18]=000 [8:0]=000011110
+    GETXACC p_   $FD61C81E   GETXACC g1_ $FD61D01E   GETXACC g2_ $FD61D41E
+    GETXACC g2l_ $FD61D81E   GETXACC r1_ $FD61E01E   (each followed by
+                              MOV x,0-0 = $F601xx00, S field 0, takes Y)
+    XINIT dch_,son_     $FCA184C7   [27:19]=110010100, L=I=0, D=$0C2 S=$0C7
+    XINIT dzero_,szero_ $FCA186C8   D=$0C3 S=$0C8
+    XINIT dcal_,son_    $FCA188C7   D=$0C4 S=$0C7
+    XINIT drun_,son_    $FCA18AC7   D=$0C5 S=$0C7
+    XINIT dimm_,simm_   $FCA18CC9   D=$0C6 S=$0C9; next word = GETXACC g2_
+    SETXFRQ frq_        $FD61961D   [8:0]=000011101, D=$0CB (frq_), L=0
+    WRLUT lutv_,z_      $FC3194E1   [27:20]=11000011, D=$0CA S=$0E1
+    SETLUTS #0 $FD640037 | WRPIN #0,#3 $FC0C0003 | DRVL #3 $FD640658
+    DRVH #3 $FD640659 | TESTP #3 WC $FD740640 | POLLXFI WC $FD701624
+    WAITX dly_ $FD61BE1F (register) | ALTS rep_,#dlytab $F995B6CC
+    WAITX ##4000 = AUGD $FF800007 + $FD67401F -> (7<<9)|$1A0 = 4000
+    DAT data longs, byte-for-byte from the dump:
+    dch_  = $F007_0008   dzero_ = $F007_0004   dcal_ = $F007_0040
+    drun_ = $F007_0100   dimm_  = $4000_0400   son_  = $0008_80A5
+    szero_= $0008_00A5   simm_  = $0000_0000   lutv_ = $173D_0000
+    frq_  = $8000_0000   dlytab = 30,30,30,30,62,94,126,190
+    Goertzel mode bits (D[31:16] = $F007): [15:12]=1111 [11:8]=0000 (no DAC)
+      [7]=0 (sinc1) [6:3]=0000 (group 0, pins 0..3) [2:0]=111.
+    Non-Goertzel (D[31:16] = $4000): [15:12]=0100 [11:8]=0000 [7]=0 (%e off).
+    son_: bit19=1 bit15=1 bits14:12=000 bits11:9=000 bits8:0=$0A5.
+    szero_: bit19=1 bits15:12=0000 bits8:0=$0A5.
+
+  DEPENDS ON CLAIMS THE BRIEF MARKS inferred / undetermined
+    - first term of a burst (LUT read latency): inferred. Protected: every
+      LUT long is identical, and all comparisons are between identically
+      constructed bursts (dA vs dB; CAL lo vs hi), so a stale first term
+      cancels. Only the absolute k is affected, and it is only range-gated.
+    - what the pin input bus carries / what a floating pin reads:
+      undetermined. Protected: P3 is driven, never floating; TESTP checks it;
+      CAL proves the term follows P3 (sign flip); every delta must be a whole
+      multiple of 61.
+    - XINIT-to-first-active-clock and GETXACC pipeline length: undetermined.
+      Protected: no prediction of the landing clock; the landing is checked
+      from R1 itself (brief Part 5) and by XFI still 0 after the read.
+    - Part 4 "zero burst with a read inside leaves both zero": inferred, NOT
+      used.
+
+  HOW TO RUN: load with pnut-term-ts (or PNut) with DEBUG enabled, i.e. a
+  `pnut-ts -d` build (without -d every debug() is dropped and a clean compile
+  is a false pass). Output ends with "@@@ TEST COMPLETE @@@". The verdict
+  lines are "VERDICT HALF A: ..." and "VERDICT HALF B: ...".
+
+  Build: pnut-ts -d -l test-so80-getxacc-clear-gating.spin2
+}
+
+CON  ' ---- Rig Parameters ----
+  _clkfreq   = 200_000_000
+  DEBUG_COGS = %0000_0001                 ' EF-057: debugger in cog 0 ONLY
+
+  PIN        = 3                          ' 4g+3, g = 0
+  G_COS      = 61                         ' LUT bits[23:16] -> C for X
+  G_SIN      = 23                         ' LUT bits[31:24] -> Y (informational)
+  LUTADDR    = $0A5
+  LUTVAL     = (G_SIN << 24) | (G_COS << 16)
+
+  MODE_G     = $F007_0000                 ' Goertzel sinc1, no DAC, pins 0..3
+  N_CHARGE   = 8
+  N_ZERO     = 4
+  N_CAL      = 64
+  N_RUN      = 256
+  S_ON       = (1 << 19) | (1 << 15) | LUTADDR
+  S_ZERO     = (1 << 19) | LUTADDR
+  D_IMM      = $4000_0400                 ' 1-pin immediate, D[23]=0, no DAC, count $400
+  FRQ        = $8000_0000
+  WAIT_IDLE  = 4000                       ' > $0400 + 16
+  G2L_WAIT   = 100
+  REPS       = 8
+  MAXTRY     = 3
+  K_TOL      = 8
+
+  ' mailbox layout (longs)
+  CAL_LO     = 0
+  CAL_HI     = 7
+  CAL_REC    = 7                          ' fields per CAL record (CB..CT)
+  CB = 0, CBY = 1, CP = 2, CPY = 3, CR = 4, CRY = 5, CT = 6
+  REP0       = 14
+  REC        = 28
+  O_B1 = 0, O_B1Y = 1, O_G1 = 2, O_G1Y = 3, O_G2 = 4, O_G2Y = 5
+  O_G2L = 6, O_G2LY = 7, O_G3 = 8, O_G3Y = 9, O_T1 = 10
+  O_BA = 11, O_BAY = 12, O_PA = 13, O_PAY = 14, O_RA = 15, O_RAY = 16, O_TA = 17
+  O_BB = 18, O_BBY = 19, O_PB = 20, O_PBY = 21, O_R1 = 22, O_R1Y = 23
+  O_R2 = 24, O_R2Y = 25, O_DLY = 26, O_TB = 27
+  CTRL       = REP0 + REPS * REC
+  C_XFIF = 0, C_XFIL = 1, C_PINF = 2, C_PINL = 3, C_LUTF = 4, C_DONE = 5
+  MBLEN      = CTRL + 8
+
+VAR  ' ---- Mailbox & Scoring State ----
+  long mb[MBLEN]
+  long rigA, rigB, klo
+  long nObs, nMoved, nZeroed, nMovedImm
+  long cls[10], nScored
+
+PUB main() | cogn, t0
+'' Run the SO80 rig: launch the engine cog, wait for it, then print raw data,
+'' controls, and both verdicts.
+''
+
+  longfill(@mb, 0, MBLEN)
+  debug("=== SO80: GETXACC clear gating (Half A) + held-term residue (Half B) ===")
+  debug("rig: NO jumper; engine cog drives P3 low; clk 200 MHz; reps ", udec_(REPS))
+  cogn := coginit(NEWCOG, @engine, @mb)
+  t0 := getct()
+  repeat until mb[CTRL + C_DONE] == 1 or (getct() - t0) > clkfreq * 2
+  if mb[CTRL + C_DONE] <> 1
+    debug("RIG FAIL: engine done flag: expected 1, got ", sdec_(mb[CTRL + C_DONE]), " -- no verdicts")
+    cogstop(cogn)
+    finish()
+  show_raw()
+  controls()
+  half_a()
+  half_b()
+  info_y()
+  debug("@@@ TEST COMPLETE @@@")
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+
+PRI at(repIdx, fieldOffset) : fieldVal
+' Read one field from a rep record in the mailbox.
+'
+' @param repIdx - Rep index (0..REPS-1)
+' @param fieldOffset - Field offset within one rep record (an O_* constant)
+' @returns fieldVal - The mailbox long at that rep/field location
+
+  fieldVal := mb[REP0 + repIdx * REC + fieldOffset]
+
+
+PRI fail_both()
+' Mark both Half A and Half B verdicts as rig-failed (a shared control tripped).
+
+  rigA := TRUE
+  rigB := TRUE
+
+
+' ---------------------------------------------------------------- raw data --
+PRI show_raw() | repIdx, calSide
+' Print every raw mailbox field before any interpretation, for hand audit.
+
+  debug("--- RAW (X = cos accumulator, Y = sin accumulator; all SIGNED) ---")
+  repeat calSide from 0 to 1
+    debug("CAL pin ", zstr_(calSide ? @s_hi : @s_lo), ": B=", sdec_(mb[calSide*CAL_REC+CB]), " P=", sdec_(mb[calSide*CAL_REC+CP]), " R=", sdec_(mb[calSide*CAL_REC+CR]), "  Y: B=", sdec_(mb[calSide*CAL_REC+CBY]), " P=", sdec_(mb[calSide*CAL_REC+CPY]), " R=", sdec_(mb[calSide*CAL_REC+CRY]), " tries=", udec_(mb[calSide*CAL_REC+CT]))
+  repeat repIdx from 0 to REPS - 1
+    debug("rep ", udec_(repIdx), " (i)  B=", sdec_(at(repIdx,O_B1)), " G1=", sdec_(at(repIdx,O_G1)), " G2=", sdec_(at(repIdx,O_G2)), " G2L=", sdec_(at(repIdx,O_G2L)), " G3=", sdec_(at(repIdx,O_G3)), " tries=", udec_(at(repIdx,O_T1)))
+    debug("rep ", udec_(repIdx), " (i)Y B=", sdec_(at(repIdx,O_B1Y)), " G1=", sdec_(at(repIdx,O_G1Y)), " G2=", sdec_(at(repIdx,O_G2Y)), " G2L=", sdec_(at(repIdx,O_G2LY)), " G3=", sdec_(at(repIdx,O_G3Y)))
+    debug("rep ", udec_(repIdx), " runA B=", sdec_(at(repIdx,O_BA)), " P=", sdec_(at(repIdx,O_PA)), " RA=", sdec_(at(repIdx,O_RA)), "  Y: B=", sdec_(at(repIdx,O_BAY)), " P=", sdec_(at(repIdx,O_PAY)), " RA=", sdec_(at(repIdx,O_RAY)), " tries=", udec_(at(repIdx,O_TA)))
+    debug("rep ", udec_(repIdx), " runB B=", sdec_(at(repIdx,O_BB)), " P=", sdec_(at(repIdx,O_PB)), " R1=", sdec_(at(repIdx,O_R1)), " R2=", sdec_(at(repIdx,O_R2)), " waitx=", udec_(at(repIdx,O_DLY)), " tries=", udec_(at(repIdx,O_TB)))
+    debug("rep ", udec_(repIdx), " runBY B=", sdec_(at(repIdx,O_BBY)), " P=", sdec_(at(repIdx,O_PBY)), " R1=", sdec_(at(repIdx,O_R1Y)), " R2=", sdec_(at(repIdx,O_R2Y)))
+
+
+' ------------------------------------------------------- in-run controls --
+PRI controls() | ctrlVal, repIdx, dlo, dhi, khi, badCount
+' Check every in-run control the engine recorded and set rigA/rigB on failure.
+
+  rigA := FALSE
+  rigB := FALSE
+  debug("--- IN-RUN CONTROLS ---")
+  ctrlVal := mb[CTRL + C_LUTF]
+  if ctrlVal <> 0
+    debug("RIG FAIL: LUT readback: expected 0 mismatches of 512, got ", udec_(ctrlVal))
+    fail_both()
+  ctrlVal := mb[CTRL + C_XFIF]
+  if ctrlVal <> 0
+    debug("RIG FAIL: streamer XFI (finished) flag wrong ", udec_(ctrlVal), " times; last at site ", udec_(mb[CTRL + C_XFIL]), " (expected finished after each wait-idle, running at each mid-burst read)")
+    fail_both()
+  ctrlVal := mb[CTRL + C_PINF]
+  if ctrlVal <> 0
+    debug("RIG FAIL: P3 level wrong ", udec_(ctrlVal), " times; last at site ", udec_(mb[CTRL + C_PINL]), " (expected the driven level)")
+    fail_both()
+
+  ' every preamble B must be nonzero, or a clear that wrongly reached accx
+  ' would be invisible (brief Part 5 preamble)
+  badCount := 0
+  repeat ctrlVal from 0 to 1
+    if mb[ctrlVal*CAL_REC + CB] == 0
+      badCount++
+  repeat repIdx from 0 to REPS - 1
+    if at(repIdx,O_B1) == 0 or at(repIdx,O_BA) == 0 or at(repIdx,O_BB) == 0
+      badCount++
+  if badCount
+    debug("RIG FAIL: preamble B = 0 after ", udec_(MAXTRY), " tries in ", udec_(badCount), " place(s): expected nonzero (gates Half A)")
+    rigA := TRUE
+
+  ' CAL: the term must follow P3 and be exactly +-61 per active clock
+  dlo := mb[CAL_LO + CR] - mb[CAL_LO + CP]
+  dhi := mb[CAL_HI + CR] - mb[CAL_HI + CP]
+  debug("CAL: dLO=", sdec_(dlo), " dHI=", sdec_(dhi), "  (expect dLO = +k*61, dHI = -k*61, k in ", udec_(N_CAL - K_TOL), "..", udec_(N_CAL + K_TOL), ")")
+  if (dlo // G_COS) <> 0 or (dhi // G_COS) <> 0
+    debug("RIG FAIL: CAL deltas not whole multiples of g=61: dLO=", sdec_(dlo), " dHI=", sdec_(dhi))
+    fail_both()
+  else
+    klo := dlo / G_COS
+    khi := dhi / G_COS
+    debug("CAL: kLO=", sdec_(klo), " kHI=", sdec_(khi), "  (my derivation N-1 = ", udec_(N_CAL - 1), "; first term is inferred)")
+    if klo < N_CAL - K_TOL or klo > N_CAL + K_TOL
+      debug("RIG FAIL: CAL pin-LOW k: expected ", udec_(N_CAL - K_TOL), "..", udec_(N_CAL + K_TOL), ", got ", sdec_(klo))
+      fail_both()
+    if khi <> -klo
+      debug("RIG FAIL: CAL pin-HIGH k must be the exact negative: expected ", sdec_(-klo), ", got ", sdec_(khi))
+      fail_both()
+
+  ' Half B construction: every dA a whole positive multiple of C, k near N
+  badCount := 0
+  repeat repIdx from 0 to REPS - 1
+    ctrlVal := at(repIdx,O_RA) - at(repIdx,O_PA)
+    if (ctrlVal // G_COS) <> 0 or ctrlVal / G_COS < N_RUN - K_TOL or ctrlVal / G_COS > N_RUN + K_TOL
+      debug("RIG FAIL: rep ", udec_(repIdx), " dA=", sdec_(ctrlVal), ": expected k*61 with k in ", udec_(N_RUN - K_TOL), "..", udec_(N_RUN + K_TOL), " (C not constant / burst not as constructed)")
+      badCount++
+  if badCount
+    rigB := TRUE
+  if not rigA and not rigB
+    debug("controls: all passed (LUT, XFI, P3 level, B<>0, CAL sign+negation, dA)")
+
+
+' ------------------------------------------------------------------ Half A --
+PRI half_a() | repIdx, calSide
+' Tally every idle/non-Goertzel GETXACC read against its preamble B and print
+' the Half A verdict.
+
+  nObs := 0
+  nMoved := 0
+  nZeroed := 0
+  nMovedImm := 0
+  debug("--- HALF A: idle / non-Goertzel reads vs preamble B (TRUE: every d = 0; FALSE: d <> 0, d = -B means cleared) ---")
+  repeat calSide from 0 to 1
+    tallyA(mb[calSide*CAL_REC + CP], mb[calSide*CAL_REC + CB], FALSE)
+  repeat repIdx from 0 to REPS - 1
+    tallyA(at(repIdx,O_G1),  at(repIdx,O_B1), FALSE)
+    tallyA(at(repIdx,O_G2),  at(repIdx,O_B1), TRUE)
+    tallyA(at(repIdx,O_G2L), at(repIdx,O_B1), TRUE)
+    tallyA(at(repIdx,O_G3),  at(repIdx,O_B1), FALSE)
+    tallyA(at(repIdx,O_PA),  at(repIdx,O_BA), FALSE)
+    tallyA(at(repIdx,O_PB),  at(repIdx,O_BB), FALSE)
+    debug("rep ", udec_(repIdx), ": dG1=", sdec_(at(repIdx,O_G1)-at(repIdx,O_B1)), " dG2=", sdec_(at(repIdx,O_G2)-at(repIdx,O_B1)), " dG2L=", sdec_(at(repIdx,O_G2L)-at(repIdx,O_B1)), " dG3=", sdec_(at(repIdx,O_G3)-at(repIdx,O_B1)), " dPA=", sdec_(at(repIdx,O_PA)-at(repIdx,O_BA)), " dPB=", sdec_(at(repIdx,O_PB)-at(repIdx,O_BB)))
+  debug("Half A: ", udec_(nObs), " reads; moved ", udec_(nMoved), " (non-Goertzel-active ", udec_(nMovedImm), "); read exactly 0 ", udec_(nZeroed))
+  if rigA
+    debug("VERDICT HALF A: NO VERDICT -- RIG FAIL above")
+  elseif nMoved == 0
+    debug("VERDICT HALF A: CONFIRMED -- all ", udec_(nObs), " idle/non-Goertzel GETXACC reads equal their B bit-for-bit")
+  elseif nZeroed
+    debug("VERDICT HALF A: REFUTED -- ", udec_(nZeroed), " read(s) returned 0 (d = -B): the clear reached accx idle/outside Goertzel; ", udec_(nMoved), " moved in all")
+  else
+    debug("VERDICT HALF A: REFUTED -- ", udec_(nMoved), " read(s) differ from B (not zero): accx moved while idle/outside Goertzel")
+
+
+PRI tallyA(readVal, baselineVal, bImm)
+' Count one Half A observation: did the GETXACC read move away from baseline?
+'
+' @param readVal - The GETXACC (or idle) reading being scored
+' @param baselineVal - The preamble B this reading is compared against
+' @param bImm - TRUE when this read is inside a non-Goertzel-active burst
+
+  nObs++
+  if readVal <> baselineVal
+    nMoved++
+    if bImm
+      nMovedImm++
+    if readVal == 0
+      nZeroed++
+
+
+' ------------------------------------------------------------------ Half B --
+' class: 0 confirmed, 1 dd=R1, 2 dd=-C, 3 dd=+C, 4 other multiple,
+'        5 not a multiple (inconclusive), 9 unscored (read not inside burst)
+PRI half_b() | repIdx, termC, dA, kA, baselineP, k1, dB, dd, classCode
+' Score every rep's mid-burst read against its no-read counterpart and print
+' the Half B verdict.
+
+  longfill(@cls, 0, 10)
+  nScored := 0
+  termC := G_COS                           ' C = +61 with P3 low (CAL-checked)
+  debug("--- HALF B: dd = dB - dA (TRUE: 0; FALSE: R1 | -C | +C | other multiple of C) ---")
+  repeat repIdx from 0 to REPS - 1
+    baselineP := at(repIdx,O_PB)
+    dA := at(repIdx,O_RA) - at(repIdx,O_PA)
+    kA := dA / termC
+    dB := at(repIdx,O_R1) + at(repIdx,O_R2) - baselineP
+    dd := dB - dA
+    if ((at(repIdx,O_R1) - baselineP) // termC) <> 0
+      classCode := 9
+      k1 := 0
+    else
+      k1 := (at(repIdx,O_R1) - baselineP) / termC
+      if k1 < 1 or k1 >= kA
+        classCode := 9
+      elseif dd == 0
+        classCode := 0
+      elseif dd == at(repIdx,O_R1)
+        classCode := 1
+      elseif dd == -termC
+        classCode := 2
+      elseif dd == termC
+        classCode := 3
+      elseif (dd // termC) == 0
+        classCode := 4
+      else
+        classCode := 5
+    cls[classCode]++
+    if classCode <> 9
+      nScored++
+    debug("rep ", udec_(repIdx), ": waitx=", udec_(at(repIdx,O_DLY)), " kA=", sdec_(kA), " k1=", sdec_(k1), " k1-waitx=", sdec_(k1 - at(repIdx,O_DLY)), " dA=", sdec_(dA), " dB=", sdec_(dB), " dd=", sdec_(dd), " class=", udec_(classCode))
+  debug("classes: 0 conf=", udec_(cls[0]), " 1 dd=R1=", udec_(cls[1]), " 2 dd=-C=", udec_(cls[2]), " 3 dd=+C=", udec_(cls[3]), " 4 other=", udec_(cls[4]), " 5 non-multiple=", udec_(cls[5]), " 9 unscored=", udec_(cls[9]))
+  debug("(k1-waitx should be the same number in every scored rep: the read point is deterministic)")
+  if rigB
+    debug("VERDICT HALF B: NO VERDICT -- RIG FAIL above")
+  elseif nScored < 4
+    debug("VERDICT HALF B: INCONCLUSIVE -- only ", udec_(nScored), " of ", udec_(REPS), " mid-burst reads landed inside the burst (need 4); move the read")
+  elseif cls[5]
+    debug("VERDICT HALF B: INCONCLUSIVE -- dd not a whole multiple of C in ", udec_(cls[5]), " rep(s): the Part 2 construction did not hold")
+  elseif cls[0] == nScored
+    debug("VERDICT HALF B: CONFIRMED -- dd = 0 in all ", udec_(nScored), " scored reps: the mid-burst read leaves exactly the held term")
+  elseif cls[1] == nScored
+    debug("VERDICT HALF B: REFUTED -- dd = R1 in all scored reps: GETXACC did not clear accx even while the Goertzel streamer ran")
+  elseif cls[2] == nScored
+    debug("VERDICT HALF B: REFUTED -- dd = -C in all scored reps: the clear left a TRUE zero (held term lost)")
+  elseif cls[3] == nScored
+    debug("VERDICT HALF B: REFUTED -- dd = +C in all scored reps: the held term was counted twice")
+  elseif cls[4] == nScored
+    debug("VERDICT HALF B: REFUTED -- dd a nonzero multiple of C other than R1/-C/+C in all scored reps (see dd above)")
+  else
+    debug("VERDICT HALF B: INCONCLUSIVE -- mixed classes across scored reps (see class counts); the result did not repeat")
+
+
+' -------------------------------------------- Y channel, informational only --
+PRI info_y() | repIdx, dlo, dhi, dA, dB, moved
+' Print the Y (sine) channel deltas alongside X, for the record only -- the
+' brief does not trace Y and no verdict is scored on it.
+
+  debug("--- Y (sine, LUT bits[31:24]=23) -- INFORMATIONAL, not traced by the brief ---")
+  dlo := mb[CAL_LO + CRY] - mb[CAL_LO + CPY]
+  dhi := mb[CAL_HI + CRY] - mb[CAL_HI + CPY]
+  debug("Y CAL: dLO=", sdec_(dlo), " dHI=", sdec_(dhi), " (as X, expect +-k*23)")
+  moved := 0
+  repeat repIdx from 0 to REPS - 1
+    if at(repIdx,O_G1Y) <> at(repIdx,O_B1Y) or at(repIdx,O_G2Y) <> at(repIdx,O_B1Y) or at(repIdx,O_G2LY) <> at(repIdx,O_B1Y) or at(repIdx,O_G3Y) <> at(repIdx,O_B1Y)
+      moved++
+    if at(repIdx,O_PAY) <> at(repIdx,O_BAY) or at(repIdx,O_PBY) <> at(repIdx,O_BBY)
+      moved++
+    dA := at(repIdx,O_RAY) - at(repIdx,O_PAY)
+    dB := at(repIdx,O_R1Y) + at(repIdx,O_R2Y) - at(repIdx,O_PBY)
+    debug("Y rep ", udec_(repIdx), ": dA=", sdec_(dA), " dB=", sdec_(dB), " dd=", sdec_(dB - dA))
+  debug("Y Half-A-style checks that moved: ", udec_(moved), " (0 expected if accy behaves as accx)")
+
+
+DAT  ' ---- CAL Label Strings ----
+s_lo            byte    "LOW ", 0
+s_hi            byte    "HIGH", 0
+
+' ===========================================================================
+'  ENGINE -- the only cog that touches the streamer or GETXACC
+' ===========================================================================
+DAT             org     0        ' ---- Streamer Engine Cog ----
+engine
+                mov     mbase_, ptra
+                setluts #0                      ' LUT sharing OFF, explicitly
+                wrpin   #0, #PIN                ' P3: smart pin off, reset config
+                drvl    #PIN                    ' P3 plain output, driven low
+                mov     pinexp_, #0
+                setxfrq frq_                    ' NCO frequency $8000_0000
+
+                mov     z_, #$1FF               ' same long in every LUT entry
+.fill           wrlut   lutv_, z_
+                djnf    z_, #.fill
+                mov     z_, #$1FF               ' control: read all 512 back
+.chk            rdlut   t_, z_
+                cmp     t_, lutv_               wz
+        if_nz   add     lutfail_, #1
+                djnf    z_, #.chk
+                waitx   ##WAIT_IDLE             ' pin settles; SETXFRQ long past
+
+' ---- CAL: P3 low, then P3 high, then back low ------------------------------
+                mov     ptra, mbase_            ' CAL_LO record
+                mov     site_, #1
+                call    #pin_check
+                call    #preamble
+                getxacc p_
+                mov     py_, 0-0
+                xinit   dcal_, son_
+                waitx   ##WAIT_IDLE
+                mov     site_, #2
+                call    #xfi_end
+                getxacc r_
+                mov     ry_, 0-0
+                call    #put_cal
+
+                drvh    #PIN                    ' CAL_HI record follows
+                mov     pinexp_, #1
+                waitx   ##WAIT_IDLE
+                mov     site_, #3
+                call    #pin_check
+                call    #preamble
+                getxacc p_
+                mov     py_, 0-0
+                xinit   dcal_, son_
+                waitx   ##WAIT_IDLE
+                mov     site_, #4
+                call    #xfi_end
+                getxacc r_
+                mov     ry_, 0-0
+                call    #put_cal
+
+                drvl    #PIN                    ' P3 low for everything below
+                mov     pinexp_, #0
+                waitx   ##WAIT_IDLE
+                mov     site_, #5
+                call    #pin_check
+
+' ---- repetitions -------------------------------------------------------------
+                mov     rep_, #0
+                mov     recp_, mbase_
+                add     recp_, ##REP0 * 4
+rep_loop        mov     ptra, recp_
+
+                ' -- phase (i): Half A, mode gating --
+                mov     site_, #10
+                call    #pin_check
+                call    #preamble
+                getxacc g1_                     ' G1: idle
+                mov     g1y_, 0-0
+                xinit   dimm_, simm_            ' non-Goertzel mode, drives nothing
+                getxacc g2_                     ' G2: the very next instruction
+                mov     g2y_, 0-0
+                waitx   #G2L_WAIT
+                getxacc g2l_                    ' G2L: well inside the imm burst
+                mov     g2ly_, 0-0
+                mov     site_, #11
+                call    #xfi_mid                ' imm streamer must still be running
+                waitx   ##WAIT_IDLE
+                mov     site_, #12
+                call    #xfi_end
+                getxacc g3_                     ' G3: idle again
+                mov     g3y_, 0-0
+                wrlong  b_, ptra++
+                wrlong  by_, ptra++
+                wrlong  g1_, ptra++
+                wrlong  g1y_, ptra++
+                wrlong  g2_, ptra++
+                wrlong  g2y_, ptra++
+                wrlong  g2l_, ptra++
+                wrlong  g2ly_, ptra++
+                wrlong  g3_, ptra++
+                wrlong  g3y_, ptra++
+                wrlong  tries_, ptra++
+
+                ' -- run A: burst N, no read inside --
+                mov     site_, #20
+                call    #pin_check
+                call    #preamble
+                getxacc p_                      ' P: last idle read before XINIT
+                mov     py_, 0-0
+                xinit   drun_, son_
+                waitx   ##WAIT_IDLE
+                mov     site_, #21
+                call    #xfi_end
+                getxacc r_                      ' RA
+                mov     ry_, 0-0
+                wrlong  b_, ptra++
+                wrlong  by_, ptra++
+                wrlong  p_, ptra++
+                wrlong  py_, ptra++
+                wrlong  r_, ptra++
+                wrlong  ry_, ptra++
+                wrlong  tries_, ptra++
+
+                ' -- run B: same burst, one GETXACC inside it --
+                mov     site_, #30
+                call    #pin_check
+                alts    rep_, #dlytab
+                mov     dly_, 0-0               ' delay chosen BEFORE the burst
+                call    #preamble
+                getxacc p_
+                mov     py_, 0-0
+                xinit   drun_, son_
+                waitx   dly_
+                getxacc r1_                     ' R1: mid-burst
+                mov     r1y_, 0-0
+                mov     site_, #31
+                call    #xfi_mid                ' streamer must still be running
+                waitx   ##WAIT_IDLE
+                mov     site_, #32
+                call    #xfi_end
+                getxacc r2_                     ' R2: after idle
+                mov     r2y_, 0-0
+                wrlong  b_, ptra++
+                wrlong  by_, ptra++
+                wrlong  p_, ptra++
+                wrlong  py_, ptra++
+                wrlong  r1_, ptra++
+                wrlong  r1y_, ptra++
+                wrlong  r2_, ptra++
+                wrlong  r2y_, ptra++
+                wrlong  dly_, ptra++
+                wrlong  tries_, ptra++
+                mov     site_, #33
+                call    #pin_check
+
+                add     recp_, ##REC * 4
+                add     rep_, #1
+                cmp     rep_, #REPS             wz
+        if_nz   jmp     #rep_loop
+
+' ---- controls, then done (done is always the last hub write) ----------------
+                mov     site_, #99
+                call    #pin_check
+                mov     ptra, mbase_
+                add     ptra, ##CTRL * 4
+                wrlong  xfifail_, ptra++
+                wrlong  xfilast_, ptra++
+                wrlong  pinfail_, ptra++
+                wrlong  pinlast_, ptra++
+                wrlong  lutfail_, ptra++
+                wrlong  #1, ptra                ' C_DONE
+                cogid   t_
+                cogstop t_
+
+' ---- preamble: charge burst, zero burst, read B (retry while B = 0) --------
+preamble
+                mov     tries_, #0
+.again          add     tries_, #1
+                xinit   dch_, son_              ' (a) charge: count 8, imm[15] set
+                waitx   ##WAIT_IDLE
+                call    #xfi_end
+                xinit   dzero_, szero_          ' (b) zero: count 4, imm[15:12] = 0
+                waitx   ##WAIT_IDLE
+                call    #xfi_end
+                getxacc b_                      ' (c) B
+                mov     by_, 0-0
+                tjnz    b_, #.done
+                cmp     tries_, #MAXTRY         wz
+        if_nz   jmp     #.again
+.done           ret
+
+put_cal
+                wrlong  b_, ptra++
+                wrlong  by_, ptra++
+                wrlong  p_, ptra++
+                wrlong  py_, ptra++
+                wrlong  r_, ptra++
+                wrlong  ry_, ptra++
+                wrlong  tries_, ptra++
+                ret
+
+' expect the streamer FINISHED (XFI set) -- after a wait-idle
+xfi_end
+                pollxfi                         wc
+        if_nc   add     xfifail_, #1
+        if_nc   mov     xfilast_, site_
+                ret
+
+' expect the streamer still RUNNING (XFI clear) -- right after a mid-burst read
+xfi_mid
+                pollxfi                         wc
+        if_c    add     xfifail_, #1
+        if_c    mov     xfilast_, site_
+                ret
+
+' expect P3 at the driven level
+pin_check
+                testp   #PIN                    wc
+                wrc     t_
+                cmp     t_, pinexp_             wz
+        if_nz   add     pinfail_, #1
+        if_nz   mov     pinlast_, site_
+                ret
+
+' ---- constants (verified in the .lst) ----------------------------------------
+dch_            long    MODE_G | N_CHARGE
+dzero_          long    MODE_G | N_ZERO
+dcal_           long    MODE_G | N_CAL
+drun_           long    MODE_G | N_RUN
+dimm_           long    D_IMM
+son_            long    S_ON
+szero_          long    S_ZERO
+simm_           long    0
+lutv_           long    LUTVAL
+frq_            long    FRQ
+dlytab          long    30, 30, 30, 30, 62, 94, 126, 190
+
+' ---- counters: initialised to 0 by the COGINIT load (long, not res) --------
+xfifail_        long    0
+xfilast_        long    0
+pinfail_        long    0
+pinlast_        long    0
+lutfail_        long    0
+
+mbase_          res     1
+recp_           res     1
+rep_            res     1
+site_           res     1
+pinexp_         res     1
+tries_          res     1
+dly_            res     1
+t_              res     1
+z_              res     1
+b_              res     1
+by_             res     1
+p_              res     1
+py_             res     1
+r_              res     1
+ry_             res     1
+g1_             res     1
+g1y_            res     1
+g2_             res     1
+g2y_            res     1
+g2l_            res     1
+g2ly_           res     1
+g3_             res     1
+g3y_            res     1
+r1_             res     1
+r1y_            res     1
+r2_             res     1
+r2y_            res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

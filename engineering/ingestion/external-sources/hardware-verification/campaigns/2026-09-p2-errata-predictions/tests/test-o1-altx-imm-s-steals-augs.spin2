@@ -1,0 +1,563 @@
+'' =====================================================================
+''
+''   File....... test-o1-altx-imm-s-steals-augs.spin2
+''   Purpose.... Decide prediction O1 on SILICON
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 25 Sep 2026
+''
+'' =====================================================================
+
+{ WHAT IS TESTED
+    O1 predicts: an ALTx instruction carrying an IMMEDIATE #S, placed between
+    an AUGS and the #S instruction the AUGS was written for, is itself served
+    the augmented 32-bit S ("steals" it) AND does not cancel it, so the
+    intended target ALSO still receives the full augmented value.  The damage
+    is in the ALTx.  A register-S ALTx in the same slot is safe (workaround).
+    AUGD is predicted immune: an AUGD pending across an ALTx still reaches its
+    #D target.
+
+  THE OBSERVABLE (and why it is not the brief's "destination" criterion)
+    Every ALTx (ALTD/ALTR/ALTS...) uses its S operand as two fields (p2kb
+    p2kbPasm2Altd / p2kbPasm2Altr / p2kbPasm2Alts):
+      S[8:0]  = base  -> next instruction's field = (D + S) & $1FF
+      S[17:9] = signed auto-indexer -> D register += signx(S[17:9])
+    The augmented S is {AUGS[31:9], ALTx's own 9-bit #S}, so its low 9 bits
+    are the ALTx's own field: a steal CANNOT move the substituted index.  The
+    only place the stolen upper bits can show up is the auto-indexer.  So the
+    discriminator is: does the ALTx's D register (idx) move by
+    signx(AUGV[17:9]) = +5 after the sequence?  A bare #0 moves it by 0.
+    The AUGS payload below is chosen so that AUGV[17:9] = 5.
+
+  RIG: bare P2 board, no pins, no jumpers.  Measuring cog = a fresh PASM cog
+    (COGINIT from DAT) with the debug interrupt OFF (DEBUG_COGS = cog 0 only,
+    EF-057).  Cog 0 (Spin2) only reads the hub mailbox and prints.
+
+  ARMS (run in this order, in one cog, at one clock; window of 32 cog longs
+    pre-filled with sentinel $5E5E_AA00+i  (AA = arm number, i = 0..31),
+    idx = cog address of win[8] before every arm)
+    A0 ctrl  MOV win[8],#$055                     -> win[8]=$00000055 dIdx 0
+    A1 ctrl  AUGS #AUGV / MOV win[8],#$055        -> win[8]=$3C5C0A55 dIdx 0
+    A2 ctrl  ALTD idx,#0 / MOV 0-0,#$055          -> win[8]=$00000055 dIdx 0
+    A3 ctrl  ALTD idx,sinc(reg=$A00) / MOV 0-0,#$055
+                                                  -> win[8]=$00000055 dIdx +5
+             (proves the auto-indexer works on this part with EXACTLY the
+              S[17:9]=5 a stolen AUGV would carry)
+    A4 ctrl  ALTR idx,#3 / MOV win[0],#$055       -> win[11]=$00000055 dIdx 0
+             (grounds the ALTR test arm; win[0] must stay sentinel)
+    A5 ctrl  WORKAROUND (brief Part 4 / Part 5, run BEFORE the test arms):
+             AUGS #AUGV / ALTD idx,s4(reg=4) / MOV 0-0,#$055
+                                                  -> win[12]=$3C5C0A55 dIdx 0
+    A6 TEST  AUGS #AUGV / ALTD idx,#0 / MOV 0-0,#$055     (brief Part 3 shape)
+    A7 TEST  AUGS #AUGV / ALTR idx,#3 / MOV win[0],#$055  (a second ALTx kind)
+    D1 ctrl  AUGD #AUGVD / WRLONG #$13C,hub       -> hub = $13579B3C
+    D2 TEST  AUGD #AUGVD / ALTS idxs,#0 / WRLONG #$13C,hub
+             (idxs = cog address of the hub-pointer register, so the ALTS
+              substitution is the identity and only the AUGD question remains)
+    Any control wrong (on any pass) -> "RIG FAIL: ..." and NO verdict.
+
+  PREDICTIONS, BOTH OUTCOMES FIXED BEFORE THE RUN
+    A6 (ALTD) and A7 (ALTR), each:
+      O1 TRUE  (steal, not cancelled): dIdx = +5, target = $3C5C0A55
+               (A6 at win[8], A7 at win[11]; exactly one window long changed)
+      FALSE-a  (ALTx ignored the AUGS): dIdx =  0, target = $3C5C0A55
+      FALSE-b  (ALTx took AND cancelled it -- documented idiom, no bug):
+                                         dIdx = +5, target = $00000055
+      FALSE-c  (augment vanished):       dIdx =  0, target = $00000055
+      dIdx = +5 but the write is none of the above (e.g. a moved
+               destination, as the brief's Part 5 expects) -> INCONCLUSIVE:
+               the steal is seen but the target half fits no fixed outcome
+      anything else (dIdx not 0/+5, >1 write, ...) -> REFUTED + raw values
+    D2:
+      O1 TRUE  (AUGD immune): hub = $13579B3C and idxs unchanged
+      FALSE    (AUGD lost):   hub = $0000013C  (or anything else, or idxs moved)
+    VERDICT: CONFIRMED only if A6 = A7 = TRUE and D2 = TRUE.
+
+  SAMPLING: nothing here moves with time (pipeline decode), so the plan is
+    repetition: the whole battery runs in NPASS=3 freshly COGINIT-ed cogs; the
+    three 280-long hub records must be bit-identical, else INCONCLUSIVE.
+    The hub record is pre-filled by cog 0 with $DEAD5A5A so "never written"
+    is distinguishable from "written zero"; the AUGD hub slots are pre-filled
+    by the measuring cog with $D5D5D5D5 just before each AUGD arm.
+
+  WHAT THE BRIEF LEAVES OPEN, AND HOW THIS TEST HOLDS IT
+    - "Undetermined" in the brief: what an ALTx does with a stolen 32-bit S.
+      This test uses the DOCUMENTED ALTx field split instead (p2kb, above),
+      and control A3 proves on this part that S[17:9]=5 moves idx by +5 and
+      leaves the substituted index at win[8].  If a stolen S reached the ALTx
+      but did NOT drive the auto-indexer, A6/A7 would read "no-steal"; the
+      report says so -- a steal with no effect on any ALTx output.
+    - The brief's Part 5 "proven when" (the write lands at a destination
+      derived from the stolen value) cannot occur under the documented
+      (D + S) & $1FF rule, because the stolen bits sit above bit 8.  That
+      outcome is kept as a pre-registered INCONCLUSIVE, not dropped.
+    - The brief's Part 4 example "altd s_index" is NOT a register-S form: the
+      one-operand ALTD assembles as "altd s_index,#0" with I=1 (see the
+      brief's own Appendix A: $F98C1600 has bit 18 set).  A5 uses the
+      two-operand register form "altd idx,sreg4" (I=0, verified above).
+    - The brief's Part 3 line "altd #0" does not assemble (pnut-ts 1.55.8:
+      "Expected a constant, unary operator, or ("); A6 uses "altd idx,#0".
+    - pnut-ts 1.55.8 assembles "augs #$FFFFFE00" as $FF7FFFFF (AUGS), not
+      AUGD as the brief reports for 1.55.5.  This test keeps bit 31 clear
+      anyway and every AUGS/AUGD opcode is read back below.
+
+  ASSEMBLED OPCODES VERIFIED (pnut-ts 1.55.8, `pnut-ts -d -l`, read from the
+    .lst hex dump, little-endian; cog address in brackets)
+    Symbols: idx=$05D  idxs=$05E  sinc=$058  sreg4=$059  hubd1=$060
+             hubd2=$061  win=$062 (so win[8]=$06A, win[11]=$06D, win[12]=$06E)
+    [$0F][$23][$29][$2F] augs #AUGV  = $FF1E2E05  [27:23]=11110 = AUGS,
+                           field $1E2E05 = AUGV>>9 (bit 31 of AUGV clear)
+    [$34][$39]  augd #AUGVD          = $FF89ABCD  [27:23]=11111 = AUGD,
+                           field $09ABCD = AUGVD>>9
+    [$14][$2A]  altd idx,#0          = $F98CBA00  [27:19]=100110001 ALTD,
+                           I(bit18)=1 immediate S, S=0, D=$05D
+    [$19]       altd idx,sinc        = $F988BA58  ALTD, I=0 register S=$058
+    [$24]       altd idx,sreg4       = $F988BA59  ALTD, I=0 register S=$059
+    [$1E][$30]  altr idx,#3          = $F984BA03  [27:19]=100110000 ALTR, I=1
+    [$3A]       alts idxs,#0         = $F994BC00  [27:18]=1001100101 ALTS,I=1
+    [$10]       mov win+8,#$055      = $F604D455  (A1 target, I=1)
+    [$15][$1A][$25][$2B] mov 0-0,#$055 = $F6040055 (ALTD targets, I=1)
+    [$1F][$31]  mov win+0,#$055      = $F604C455  (ALTR targets, I=1)
+    [$35][$3B]  wrlong #$13C,hubd1/2 = $FC6A7860/$FC6A7861  L(bit19)=1, I=0
+    If you edit this file, recompile with -l and re-read every row above.
+
+  HOW TO RUN: load with pnut-term-ts (or PNut) with DEBUG enabled, e.g.
+    pnut-ts -d test-o1-altx-imm-s-steals-augs.spin2 then download/run with
+    the debug terminal open.  Runs in well under a second; output is ~40
+    lines ending in one "VERDICT:" line (or a "RIG FAIL:" line, no verdict).
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq   = 200_000_000
+  DEBUG_COGS = %0000_0001          ' debug interrupt in cog 0 ONLY (EF-057)
+
+  ' ---- augment payloads: bit 31 CLEAR on both (pnut-ts AUGS/AUGD note) ----
+  AUGV       = $3C5C_0A55          ' AUGS payload: [17:9] = 5, [8:0] = $055
+  LO         = AUGV & $1FF         ' $055 = the target's own 9-bit #S
+  AUTOINC    = (AUGV >> 9) & $1FF  ' 5 (bit 8 clear -> +5 after sign-extend)
+  AUGVD      = $1357_9B3C          ' AUGD payload
+  LOD        = AUGVD & $1FF        ' $13C = the target's own 9-bit #D
+
+  ' ---- window / arms ----
+  WIN_N      = 32
+  P_OFF      = 8                   ' idx points at win[8]
+  S4         = 4                   ' register-S base for the workaround arm
+  ALTR_BASE  = 3                   ' #S base for the ALTR arms -> win[11]
+  NARMS      = 8
+  REC        = WIN_N + 2           ' window + idx + arm tag
+  N_CTRL     = 6                   ' arms 0..5 are controls
+
+  ARM_TD     = 6                   ' test: AUGS / ALTD idx,#0 / MOV
+  ARM_TR     = 7                   ' test: AUGS / ALTR idx,#3 / MOV
+
+  ' ---- hub record layout (longs) ----
+  H_MAGIC    = 0
+  H_WIN      = 1
+  H_DONE     = 2
+  H_D1       = 3
+  H_D2       = 4
+  H_IDXS     = 5
+  H_IDXS0    = 6
+  H_ARMS     = 8
+  PASS_L     = H_ARMS + NARMS * REC   ' 280
+  NPASS      = 3
+
+  BUF_SENT   = $DEAD_5A5A          ' cog 0 pre-fill: "never written"
+  SENT_WIN   = $5E5E_0000          ' window sentinel base (| arm<<8 | i)
+  SENT_D     = $D5D5_D5D5          ' AUGD hub-slot sentinel (measuring cog)
+  MAGIC_V    = $0100_A1A1
+  DONE_V     = $0D0E_0D0E
+
+  ' ---- classifications ----
+  C_TRUE     = 1                   ' steal, not cancelled (O1)
+  C_NOSTEAL  = 2
+  C_CANCEL   = 3
+  C_LOST     = 4
+  C_OTHER    = 5
+  C_ODD      = 6                   ' idx +5 (took the AUGS) but the write matches no outcome
+
+VAR ' ---- Rig State ----
+  long buf[NPASS * PASS_L]
+
+PUB main() | pass, base, cog, tstart, arm, nChg, fi, fv, dIdx, tag, chkIdx, ndiff, clsAltd, clsAltr, d2ok, rigok
+'' Run the O1 verification battery across NPASS freshly-COGINIT-ed cogs
+'' and print the VERDICT line (see the file header for the full rig).
+''
+
+  debug("=== O1: ALTx with immediate #S between AUGS and its target ===")
+  debug("AUGV=", uhex_long_(AUGV), " LO=", uhex_long_(LO), " autoinc=", sdec_(AUTOINC), " AUGVD=", uhex_long_(AUGVD), " LOD=", uhex_long_(LOD))
+  debug("PREDICT A6/A7  TRUE: dIdx=+5 target=$3C5C0A55 | FALSE-a no-steal: dIdx=0 target=$3C5C0A55")
+  debug("               FALSE-b steal+cancel: dIdx=+5 target=$00000055 | FALSE-c lost: dIdx=0 target=$00000055")
+  debug("PREDICT D2     TRUE: hub=$13579B3C idxs unchanged | FALSE: hub=$0000013C or other")
+
+  ' ---- run the battery NPASS times, each in a freshly started cog ----
+  repeat pass from 0 to NPASS - 1
+    base := @buf[pass * PASS_L]
+    longfill(base, BUF_SENT, PASS_L)
+    cog := coginit(COGEXEC_NEW, @entry, base)
+    if cog < 0
+      debug("RIG FAIL: coginit expected a cog id 0..7, got ", sdec_(cog))
+      finish()
+    tstart := getct()
+    repeat until long[base][H_DONE] == DONE_V
+      if getct() - tstart > clkfreq / 10
+        debug("RIG FAIL: pass ", udec_(pass), " DONE expected ", uhex_long_(DONE_V), ", got ", uhex_long_(long[base][H_DONE]))
+        finish()
+    debug("pass ", udec_(pass), " ran in cog ", udec_(cog))
+
+  ' ---- raw values, pass 0 (re-derive the verdict from these by hand) ----
+  base := @buf[0]
+  debug("pass0 magic=", uhex_long_(long[base][H_MAGIC]), " win cog addr=", uhex_long_(long[base][H_WIN]), " idx0 = win addr + ", udec_(P_OFF))
+  repeat arm from 0 to NARMS - 1
+    nChg, fi, fv, dIdx, tag := scan(base, arm)
+    debug(zstr_(armname(arm)), " : nchg=", udec_(nChg), " first win[", sdec_(fi), "]=", uhex_long_(fv), " dIdx=", sdec_(dIdx), " idxRaw=", uhex_long_(long[armrec(base, arm)][WIN_N]), " tag=", udec_(tag))
+    repeat chkIdx from 0 to WIN_N - 1
+      if long[armrec(base, arm)][chkIdx] <> sentinel(arm, chkIdx)
+        debug("     changed win[", udec_(chkIdx), "] = ", uhex_long_(long[armrec(base, arm)][chkIdx]), "  (sentinel was ", uhex_long_(sentinel(arm, chkIdx)), ")")
+  debug("D1 ctrl hub=", uhex_long_(long[base][H_D1]), "  D2 test hub=", uhex_long_(long[base][H_D2]), "  idxs before=", uhex_long_(long[base][H_IDXS0]), " after=", uhex_long_(long[base][H_IDXS]))
+
+  ' ---- controls gate the verdict (every pass) ----
+  rigok := TRUE
+  repeat pass from 0 to NPASS - 1
+    base := @buf[pass * PASS_L]
+    if long[base][H_MAGIC] <> MAGIC_V
+      debug("RIG FAIL: pass ", udec_(pass), " magic expected ", uhex_long_(MAGIC_V), ", got ", uhex_long_(long[base][H_MAGIC]))
+      rigok := FALSE
+    repeat arm from 0 to NARMS - 1
+      nChg, fi, fv, dIdx, tag := scan(base, arm)
+      if tag <> arm
+        debug("RIG FAIL: pass ", udec_(pass), " record ", udec_(arm), " tag expected ", udec_(arm), ", got ", uhex_long_(tag))
+        rigok := FALSE
+      if arm < N_CTRL
+        if nChg <> 1 or fi <> expi(arm) or fv <> expv(arm) or dIdx <> expd(arm)
+          debug("RIG FAIL: pass ", udec_(pass), " ", zstr_(armname(arm)), " expected nchg=1 win[", udec_(expi(arm)), "]=", uhex_long_(expv(arm)), " dIdx=", sdec_(expd(arm)), "; got nchg=", udec_(nChg), " win[", sdec_(fi), "]=", uhex_long_(fv), " dIdx=", sdec_(dIdx))
+          rigok := FALSE
+    if long[base][H_D1] <> AUGVD
+      debug("RIG FAIL: pass ", udec_(pass), " D1 ctrl (AUGD direct) expected ", uhex_long_(AUGVD), ", got ", uhex_long_(long[base][H_D1]))
+      rigok := FALSE
+  if not rigok
+    debug("RIG FAIL: at least one control is wrong -- no verdict issued")
+    finish()
+
+  ' ---- sampling: all passes must be bit-identical ----
+  ndiff := 0
+  repeat pass from 1 to NPASS - 1
+    repeat chkIdx from 0 to PASS_L - 1
+      if buf[pass * PASS_L + chkIdx] <> buf[chkIdx]
+        if ndiff == 0
+          debug("pass ", udec_(pass), " differs from pass 0 at long ", udec_(chkIdx), ": ", uhex_long_(buf[pass * PASS_L + chkIdx]), " vs ", uhex_long_(buf[chkIdx]))
+        ndiff++
+  debug("passes differing longs vs pass 0: ", udec_(ndiff))
+  if ndiff
+    debug("VERDICT: INCONCLUSIVE - the ", udec_(NPASS), " passes did not agree (", udec_(ndiff), " longs differ); the result is not deterministic")
+    finish()
+
+  ' ---- classify the test arms (pass 0; all passes identical) ----
+  base := @buf[0]
+  clsAltd := classify(base, ARM_TD, P_OFF)
+  clsAltr := classify(base, ARM_TR, P_OFF + ALTR_BASE)
+  d2ok := long[base][H_D2] == AUGVD and long[base][H_IDXS] == long[base][H_IDXS0]
+  debug("A6 ALTD class=", zstr_(clsname(clsAltd)), "  A7 ALTR class=", zstr_(clsname(clsAltr)), "  D2 AUGD immune=", zstr_(d2ok ? @s_yes : @s_no))
+
+  if clsAltd == C_TRUE and clsAltr == C_TRUE and d2ok
+    debug("VERDICT: CONFIRMED - immediate-#S ALTD and ALTR both took the AUGS (idx +5) and the target still got $3C5C0A55; AUGD survived ALTS")
+  elseif clsAltd == C_TRUE and clsAltr == C_TRUE
+    debug("VERDICT: REFUTED - AUGS steal confirmed, but AUGD was NOT immune: D2 hub=", uhex_long_(long[base][H_D2]), " idxs ", uhex_long_(long[base][H_IDXS0]), "->", uhex_long_(long[base][H_IDXS]))
+  elseif clsAltd == C_ODD or clsAltr == C_ODD
+    debug("VERDICT: INCONCLUSIVE - an ALTx took the AUGS (idx +5) but its target write fits neither pre-registered outcome: ALTD=", zstr_(clsname(clsAltd)), " ALTR=", zstr_(clsname(clsAltr)))
+  elseif clsAltd == clsAltr
+    debug("VERDICT: REFUTED - both ALTx arms read ", zstr_(clsname(clsAltd)), " instead of steal-not-cancelled; D2 AUGD immune=", zstr_(d2ok ? @s_yes : @s_no))
+  else
+    debug("VERDICT: REFUTED - ALTx-variant dependent: ALTD=", zstr_(clsname(clsAltd)), " ALTR=", zstr_(clsname(clsAltr)), "; D2 AUGD immune=", zstr_(d2ok ? @s_yes : @s_no))
+
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+  debug("DEBUG_END_SESSION")
+  repeat
+
+PRI armrec(base, arm) : pRec
+' Cog address of arm's hub-relayed record within a pass's PASS_L-long block.
+'
+' @param base - hub address of this pass's record block
+' @param arm - arm number (0..NARMS-1)
+' @returns pRec - hub address of the arm's record (window + idx + tag)
+
+  pRec := base + (H_ARMS + arm * REC) * 4
+
+PRI sentinel(arm, winIdx) : sentVal
+' Expected fill pattern for window long winIdx before arm runs.
+'
+' @param arm - arm number (0..NARMS-1)
+' @param winIdx - window long index (0..WIN_N-1)
+' @returns sentVal - the sentinel value fill() wrote at that slot
+
+  sentVal := SENT_WIN | (arm << 8) | winIdx
+
+PRI scan(base, arm) : nChg, fi, fv, dIdx, tag | pRec, winIdx, winVal
+' Compare arm's recorded window against its sentinel fill and report the diff.
+'
+' @param base - hub address of this pass's record block
+' @param arm - arm number (0..NARMS-1)
+' @returns nChg - window longs not equal to their sentinel
+' @returns fi - index of the first such long (-1 if none)
+' @returns fv - value of the first such long
+' @returns dIdx - idx after the arm minus idx before (cog addr of win[P_OFF])
+' @returns tag - the arm tag recorded with this record
+
+' Local Variables:
+' @local pRec - hub address of the arm's record
+' @local winIdx - window long index being scanned
+' @local winVal - window long value being scanned
+
+  pRec := armrec(base, arm)
+  nChg := 0
+  fi := -1
+  fv := 0
+  repeat winIdx from 0 to WIN_N - 1
+    winVal := long[pRec][winIdx]
+    if winVal <> sentinel(arm, winIdx)
+      nChg++
+      if fi < 0
+        fi := winIdx
+        fv := winVal
+  dIdx := long[pRec][WIN_N] - (long[base][H_WIN] + P_OFF)
+  tag := long[pRec][WIN_N + 1]
+
+PRI classify(base, arm, want_i) : cls | nChg, fi, fv, dIdx, tag
+' Classify a test arm's outcome against the four pre-registered predictions.
+'
+' @param base - hub address of this pass's record block
+' @param arm - arm number (ARM_TD or ARM_TR)
+' @param want_i - window index the arm's single write is expected at
+' @returns cls - C_TRUE / C_NOSTEAL / C_CANCEL / C_LOST / C_ODD / C_OTHER
+
+' Local Variables:
+' @local nChg, fi, fv, dIdx, tag - scan() results for this arm
+
+  nChg, fi, fv, dIdx, tag := scan(base, arm)
+  cls := C_OTHER
+  if nChg == 1 and fi == want_i
+    if dIdx == AUTOINC and fv == AUGV
+      cls := C_TRUE
+    elseif dIdx == 0 and fv == AUGV
+      cls := C_NOSTEAL
+    elseif dIdx == AUTOINC and fv == LO
+      cls := C_CANCEL
+    elseif dIdx == 0 and fv == LO
+      cls := C_LOST
+  if cls == C_OTHER and dIdx == AUTOINC
+    cls := C_ODD                        ' took the AUGS, but the write is off-script
+
+PRI expi(arm) : expIdx
+' Expected window index of a control arm's single write.
+'
+' @param arm - control arm number (0..N_CTRL-1)
+' @returns expIdx - the window index that arm is expected to write
+
+  expIdx := lookupz(arm : P_OFF, P_OFF, P_OFF, P_OFF, P_OFF + ALTR_BASE, P_OFF + S4)
+
+PRI expv(arm) : expVal
+' Expected value of a control arm's single write.
+'
+' @param arm - control arm number (0..N_CTRL-1)
+' @returns expVal - the value that arm is expected to write
+
+  expVal := lookupz(arm : LO, AUGV, LO, LO, LO, AUGV)
+
+PRI expd(arm) : expDelta
+' Expected idx delta (cog-address movement) for a control arm.
+'
+' @param arm - control arm number (0..N_CTRL-1)
+' @returns expDelta - the idx delta that arm is expected to produce
+
+  expDelta := lookupz(arm : 0, 0, 0, AUTOINC, 0, 0)
+
+PRI armname(arm) : pName
+' Address of the arm's printable name string.
+'
+' @param arm - arm number (0..NARMS-1)
+' @returns pName - address of the null-terminated arm name
+
+  pName := lookupz(arm : @n0, @n1, @n2, @n3, @n4, @n5, @n6, @n7)
+
+PRI clsname(clsCode) : pName
+' Address of a classification code's printable name string.
+'
+' @param clsCode - one of C_TRUE / C_NOSTEAL / C_CANCEL / C_LOST / C_OTHER / C_ODD
+' @returns pName - address of the null-terminated classification name
+
+  pName := lookup(clsCode : @k1, @k2, @k3, @k4, @k5, @k6)
+
+DAT ' ---- Label Strings ----
+n0      byte    "A0 ctrl bare MOV #$055", 0
+n1      byte    "A1 ctrl AUGS / MOV", 0
+n2      byte    "A2 ctrl ALTD idx,#0 (no AUGS)", 0
+n3      byte    "A3 ctrl ALTD idx,reg $A00 (autoinc +5)", 0
+n4      byte    "A4 ctrl ALTR idx,#3 (no AUGS)", 0
+n5      byte    "A5 ctrl WORKAROUND AUGS / ALTD idx,reg 4 / MOV", 0
+n6      byte    "A6 TEST AUGS / ALTD idx,#0 / MOV", 0
+n7      byte    "A7 TEST AUGS / ALTR idx,#3 / MOV", 0
+k1      byte    "steal-not-cancelled (O1 TRUE)", 0
+k2      byte    "no-steal (ALTx ignored AUGS)", 0
+k3      byte    "steal-and-cancel (target got bare $055)", 0
+k4      byte    "augment-lost (idx 0, target bare)", 0
+k5      byte    "unanticipated (see raw values)", 0
+k6      byte    "took AUGS (idx +5) but write off-script (see raw)", 0
+s_yes   byte    "yes", 0
+s_no    byte    "NO", 0
+
+' =====================================================================
+' Measuring cog.  PTRA = hub record base.  No interrupts are enabled here
+' and DEBUG_COGS excludes this cog, so nothing can split a sequence.
+' =====================================================================
+DAT             alignl                  ' ---- Measuring Cog ---- (the byte strings above leave hub unaligned)
+                org     0
+entry           wrlong  magic, ptra[H_MAGIC]
+                mov     t0, #win
+                wrlong  t0, ptra[H_WIN]
+                mov     hubd1, ptra
+                add     hubd1, #H_D1 * 4
+                mov     hubd2, ptra
+                add     hubd2, #H_D2 * 4
+                mov     bufp, ptra
+                add     bufp, #H_ARMS * 4
+
+' ---- A0 ctrl: bare #S, no AUGS ----
+                mov     armn, #0
+                call    #fill
+                mov     win + P_OFF, #LO
+                call    #dump
+
+' ---- A1 ctrl: AUGS directly before its target ----
+                mov     armn, #1
+                call    #fill
+                augs    #AUGV
+                mov     win + P_OFF, #LO
+                call    #dump
+
+' ---- A2 ctrl: ALTD with #0, no AUGS pending ----
+                mov     armn, #2
+                call    #fill
+                altd    idx, #0
+                mov     0-0, #LO
+                call    #dump
+
+' ---- A3 ctrl: ALTD with register S carrying S[17:9]=5 (auto-indexer) ----
+                mov     armn, #3
+                call    #fill
+                altd    idx, sinc
+                mov     0-0, #LO
+                call    #dump
+
+' ---- A4 ctrl: ALTR with #3, no AUGS pending ----
+                mov     armn, #4
+                call    #fill
+                altr    idx, #ALTR_BASE
+                mov     win + 0, #LO
+                call    #dump
+
+' ---- A5 ctrl: WORKAROUND -- register-S ALTD between AUGS and target ----
+                mov     armn, #5
+                call    #fill
+                augs    #AUGV
+                altd    idx, sreg4
+                mov     0-0, #LO
+                call    #dump
+
+' ---- A6 TEST: immediate-#S ALTD between AUGS and target ----
+                mov     armn, #6
+                call    #fill
+                augs    #AUGV
+                altd    idx, #0
+                mov     0-0, #LO
+                call    #dump
+
+' ---- A7 TEST: immediate-#S ALTR between AUGS and target ----
+                mov     armn, #7
+                call    #fill
+                augs    #AUGV
+                altr    idx, #ALTR_BASE
+                mov     win + 0, #LO
+                call    #dump
+
+' ---- D1 ctrl: AUGD directly before its #D target ----
+                wrlong  sentd, hubd1
+                augd    #AUGVD
+                wrlong  #LOD, hubd1
+
+' ---- D2 TEST: immediate-#S ALTS between AUGD and its #D target ----
+                wrlong  sentd, hubd2
+                mov     idxs, #hubd2
+                wrlong  idxs, ptra[H_IDXS0]
+                augd    #AUGVD
+                alts    idxs, #0
+                wrlong  #LOD, hubd2
+                wrlong  idxs, ptra[H_IDXS]
+
+                wrlong  donev, ptra[H_DONE]
+                cogid   t0
+                cogstop t0
+
+' ---- fill: win[i] := SENT_WIN | armn<<8 | i ; idx := #win + P_OFF ----
+fill            mov     t0, #0
+.lp             mov     t1, armn
+                shl     t1, #8
+                or      t1, t0
+                or      t1, sentw
+                altd    t0, #win
+                mov     0-0, t1
+                add     t0, #1
+                cmp     t0, #WIN_N      wz
+        if_nz   jmp     #.lp
+                mov     idx, #win + P_OFF
+                ret
+
+' ---- dump: window, idx, arm tag -> hub; advance bufp by REC longs ----
+dump            setq    #WIN_N - 1
+                wrlong  win, bufp
+                add     bufp, #WIN_N * 4
+                wrlong  idx, bufp
+                add     bufp, #4
+                wrlong  armn, bufp
+                add     bufp, #4
+                ret
+
+magic           long    MAGIC_V
+donev           long    DONE_V
+sentw           long    SENT_WIN
+sentd           long    SENT_D
+sinc            long    AUTOINC << 9     ' register S: base 0, auto-index +5
+sreg4           long    S4               ' register S: base 4, auto-index 0
+t0              long    0
+t1              long    0
+armn            long    0
+idx             long    0
+idxs            long    0
+bufp            long    0
+hubd1           long    0
+hubd2           long    0
+win             res     WIN_N
+                fit     $1F0
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

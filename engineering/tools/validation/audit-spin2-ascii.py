@@ -374,7 +374,7 @@ def main() -> int:
 
     if args.list_files:
         for f in files:
-            print(f.relative_to(root) if root in f.resolve().parents else f)
+            print(f.resolve().relative_to(root) if root in f.resolve().parents else f)
         print(f"\n{len(files)} file(s)")
         return 0
 
@@ -391,7 +391,7 @@ def main() -> int:
         if not hits:
             continue
         total += len(hits)
-        rel = f.relative_to(root) if root in f.resolve().parents else f
+        rel = f.resolve().relative_to(root) if root in f.resolve().parents else f
         for lineno, col, ch, ctx, why, fix in hits:
             if not ch:                      # file-level problem (bad encoding)
                 print(f"{rel}: {why}")
@@ -419,7 +419,7 @@ def main() -> int:
               f"{len(advisory)} site(s) across "
               f"{len({a[0] for a in advisory})} file(s). NOT blocking.")
         for f, lineno, name, sig in shown:
-            rel = f.relative_to(root) if root in f.resolve().parents else f
+            rel = f.resolve().relative_to(root) if root in f.resolve().parents else f
             print(f"  {rel}:{lineno}: {name!r}  |  {sig}")
         if len(shown) < len(advisory):
             print(f"  ... {len(advisory) - len(shown)} more "
