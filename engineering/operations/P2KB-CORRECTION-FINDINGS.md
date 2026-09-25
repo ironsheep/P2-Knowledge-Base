@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-467`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-469`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -110,6 +110,31 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
    source it cites). A register entry is a claim like any other.
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
+
+## Two hub-FIFO facts the KB states wrongly, found while building the RDFAST readiness test (2026-09-25, VO-J-012) — F-467, F-468
+
+### F-467 — `architecture/hub.yaml` says a hub slice is `address & 7`; the Silicon Doc says each slice holds every 8th long (address bits [4:2]) — `CONFIRMED`
+
+**Where:** `architecture/hub.yaml` `slicing.concept` — "Each slice corresponds to addresses where
+(address & 7) equals slice number" — and the `slice_assignment` block beneath it ("Addresses ending
+in 000 binary" …).
+**Against:** `silicon-doc-text.txt` §THE COG -to- HUB RAM INTERFACE (≈ :2999) — "Each RAM slice holds
+every single/2nd/4th/8th/16th (depending on number of cogs) set of 4 bytes". A slice is a **long**
+granularity: slice = address bits [4:2] on the 8-cog part, not bits [2:0]. `address & 7` would put
+the four bytes of one long in four different slices.
+**Correction:** state slice = `(address >> 2) & 7` (bits [4:2]) on the P2X8C4M64P, rewrite
+`slice_assignment` in terms of long addresses, cite the Silicon Doc. **Sweep** for the same claim in
+the other hub/egg-beater YAMLs and the manuals (Architect's Guide, Assembly Reference hub chapter).
+
+### F-468 — `pasm2/rdfast.yaml` lists FBLOCK as "Wait for FIFO block wrap"; FBLOCK sets the next start address and block count — `CONFIRMED`
+
+**Where:** `language/pasm2/rdfast.yaml:68` — "FBLOCK: Wait for FIFO block wrap".
+**Against:** `silicon-doc-text.txt` :3022 — "The FBLOCK instruction provides a way to set a new start
+address and a new 64-byte block count for when the current blocks are fully read or written"; and
+:3045 "FBLOCK doesn't need to wait for anything, so it always takes two clocks."
+**Correction:** replace with FBLOCK's actual role (queue the next start address and block count,
+taken at the next wrap; 2 clocks, never waits), citing the Silicon Doc; check `wrfast.yaml` and
+`fblock.yaml` for the same wording.
 
 ## Five silicon errata decided on the bench, and what they change in the KB (2026-09-25, P2 Errata campaign) — F-462 … F-466
 
