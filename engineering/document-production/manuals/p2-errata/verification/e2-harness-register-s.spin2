@@ -1,0 +1,36 @@
+'' =====================================================================
+''
+''   File....... e2-harness-register-s.spin2
+''   Purpose.... Compile harness for P2 Errata Chapter 2 (E2): the
+''               workaround snippet (lines marked SNIPPET, byte-identical
+''               to the chapter's code block) and an encoding check of
+''               the one-operand ALTD form against ALTD D,#0.
+''   Compile.... pnut-ts 1.55.8 (no debug() here, so no -d).  pnut-ts
+''               writes .lst/.bin beside its input, so copy this file to
+''               a scratch directory and run  pnut-ts -l <copy>  there.
+''
+'' =====================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  coginit(COGEXEC_NEW, @entry, 0)
+  repeat
+
+DAT             org     0
+entry
+' ---- SNIPPET begin (Chapter 2, The workaround) ----
+                augs    #$3C5C_0A55     ' meant for the MOV below
+                altd    idx, rbase      ' S from a register: no augment
+                mov     0-0, #$055      ' table[idx] := $3C5C_0A55
+                jmp     #$
+
+rbase           long    table           ' S[8:0] = table, S[17:9] = 0
+idx             long    3               ' index into table
+table           long    0[8]
+' ---- SNIPPET end ----
+
+' ---- encoding check (not in the chapter): read both words in the .lst ----
+enc1            altd    idx             ' one-operand form
+enc2            altd    idx, #0         ' two-operand form, immediate S

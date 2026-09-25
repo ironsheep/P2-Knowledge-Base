@@ -48,6 +48,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
+| P2 Errata | manual | ⏳ ²⁵ | ⏳ ²⁵ | ⏳ ²⁵ | ⏳ ²⁵ |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
@@ -595,6 +596,15 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+²⁵ **P2 Errata — stood up 2026-09-25 («#357»), all four owed at its first release.** The workspace
+was cloned from XBYTE, which has adopted none of the three metadata/rights/cross-ref features, so it
+starts with XBYTE's hardcoded cover (title, subtitle, version, date typed in `front-matter.md` and
+repeated in `request.json` metadata). v0.1.0 is a **community-review draft, not a release**, so the
+standing rule's trigger has not fired. Owed at the first release: `\DocVersion`/`\DocDate` cover
+binding, rights metadata, `p2kb-platform-crossref` in `request.json` (the chapters already use
+`[Chapter 4](#ch-e4)`-style links), and generated example headers for the examples archive (not
+yet built; its reader copies of the rigs are part of the same release).
 
 ---
 

@@ -1,0 +1,22 @@
+' Compile harness for the E3 workaround snippet (Chapter 3, "The workaround").
+' The lines between the BEGIN and END markers are the chapter's snippet,
+' byte for byte. Compile check only; not a bench rig.
+
+CON
+  _clkfreq = 200_000_000
+
+' ---- BEGIN SNIPPET ----
+PUB main()
+  ' start the cog that reads the counter in cogs 4-7 at once,
+  ' before 2^32 clocks have run, and never stop it
+  coginit(4, @worker, 0)
+
+DAT
+                org
+worker          getct   hi      wc      ' upper long: current
+                getct   lo              ' lower long
+                ' ... the cog's work ...
+                jmp     #worker
+hi              res     1
+lo              res     1
+' ---- END SNIPPET ----

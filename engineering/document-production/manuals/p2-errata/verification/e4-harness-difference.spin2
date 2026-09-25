@@ -1,0 +1,70 @@
+'' =============================================================================
+''
+''   File....... e4-harness-difference.spin2
+''   Purpose.... Compile harness for the Chapter 4 workaround snippet (GETXACC
+''               read idle before and after a Goertzel burst, take the
+''               difference). Compile check only: this is not a test program
+''               and it has not been run on a part.
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 25 Sep 2026
+''
+''   The lines between the SNIPPET markers are byte-identical to the pasm2
+''   fence in opus-master/e4-getxacc-clear-gating.md, "The workaround".
+''   The values in gmode and gsel are the test program's drun_ and son_
+''   (test-so80-getxacc-clear-gating.spin2 lines 689 and 691).
+''
+''   Build: pnut-ts e4-harness-difference.spin2   (no debug(), so no -d)
+''
+'' =============================================================================
+
+CON  ' ---- Harness Parameters ----
+  _clkfreq = 200_000_000
+
+PUB main()
+'' Start the snippet in its own cog, then idle.
+
+  coginit(NEWCOG, @entry, 0)
+  repeat
+
+DAT             org     0        ' ---- Snippet Cog ----
+entry
+' ---- SNIPPET BEGIN ----
+' Per-burst sums: read idle before and after, take the difference
+        getxacc x0                ' idle: the running total so far
+        mov     y0, 0-0           ' sine arrives as this S value
+        xinit   gmode, gsel       ' one Goertzel burst
+        waitx   ##4000            ' wait until well past its end
+        getxacc x1                ' idle again
+        mov     y1, 0-0
+        sub     x1, x0            ' cosine sum of this burst
+        sub     y1, y0            ' sine sum of this burst
+
+gmode   long    $F007_0100        ' Goertzel, SINC1, P0-P3, count 256
+gsel    long    $0008_80A5        ' P3 inverted, summed; LUT offset $0A5
+' ---- SNIPPET END ----
+
+x0      res     1
+y0      res     1
+x1      res     1
+y1      res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

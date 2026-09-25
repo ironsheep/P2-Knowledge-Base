@@ -1,0 +1,40 @@
+'' =====================================================================
+''
+''   File....... e1-harness-workaround.spin2
+''   Purpose.... Compile harness for the P2 Errata Chapter 1 (E1)
+''               workaround snippets. Compiled only; never run.
+''   Authors.... Iron Sheep Productions, LLC
+''   Started.... Sep 2026
+''
+'' =====================================================================
+''
+'' The lines between each "snippet" marker pair are byte-identical to
+'' the code blocks in opus-master/e1-setq-block-pointer-step.md,
+'' section "The workaround". Compile with pnut-ts 1.55.8 (no debug()
+'' present, so no -d):
+''   pnut-ts e1-harness-workaround.spin2
+
+CON
+  _clkfreq      = 200_000_000
+  NLONGS        = 4                     ' block length used by the snippets
+
+PUB main()
+  coginit(COGEXEC_NEW, @entry, 0)
+  repeat
+
+DAT             org     0
+entry           mov     idx, #buf               ' harness: the ALTD target
+' ---- snippet 1 begin ----
+        setq    #NLONGS - 1         ' block of NLONGS longs
+        rdlong  buf, ptra++         ' PTRA += NLONGS * 4
+' ---- snippet 1 end ----
+' ---- snippet 2 begin ----
+        setq    #NLONGS - 1         ' block of NLONGS longs
+        altd    idx                 ' redirect the first register
+        rdlong  0-0, ptra           ' plain PTRA: no update
+        add     ptra, #NLONGS * 4   ' step PTRA past the block
+' ---- snippet 2 end ----
+                jmp     #$
+
+idx             long    0
+buf             long    0[NLONGS]

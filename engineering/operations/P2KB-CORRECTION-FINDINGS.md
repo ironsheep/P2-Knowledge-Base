@@ -213,13 +213,19 @@ different condition, so neither replaces the other.
 ### F-465 — `setq.yaml` says the cancelled block delta leaves `PTRx` at "+4 for one long"; silicon applies the plain expression's own step — `CONFIRMED`
 
 **Where:** `language/pasm2/setq.yaml` `silicon_errata.block_transfer_ptrx_delta` — "(PTRx advances by
-+4 for one long, NOT by N*4)".
++4 for one long, NOT by N*4)". **Widened 2026-09-25 (P2 Errata E1 drafting, «#357»):** the same
+wording is in four more places, all read on disk — `rdlong.yaml:28`, `wrlong.yaml:27`, `wmlong.yaml:19`
+(`setq_block_ptrx_delta`: "PTRx advances by +4, NOT N*4") and `concepts/setq_block_ops.yaml:23`
+("the normal PTRx expression amount (+4 for one long), NOT by N*4"). **This entry previously called
+`setq_block_ops.yaml` "already right"; it is not** — it says "normal PTRx expression" and then pins
+the amount to one long in the same sentence. Its line-27 example (`ptra++`, "+4") is correct as an
+example and stays.
 **What silicon does (EF-067):** `ptra++` → +4, but **`ptra++[3]` → +12**: the step is whatever the
-PTRx expression does without `SETQ`, not one long. `concepts/setq_block_ops.yaml` ("only by the normal
-PTRx expression") and `augs.yaml` are already right. Confirmed across `ptra`, `ptrb`, `RDLONG`,
-`WRLONG`, `SETQ2` and an 8-long block, every long delivered to the `ALTD` destination.
-**Correction:** replace "+4 for one long" with "the plain PTRx expression's step (e.g. +4 for
-`ptra++`, +12 for `ptra++[3]`)", citing EF-067. Only `ALTD` was tested as the intervening instruction.
+PTRx expression does without `SETQ`, not one long. `augs.yaml` is right. Confirmed across `ptra`,
+`ptrb`, `RDLONG`, `WRLONG`, `SETQ2` and an 8-long block, every long delivered to the `ALTD` destination.
+**Correction:** in all five places, replace "+4 for one long" / "+4" with "the plain PTRx
+expression's step (e.g. +4 for `ptra++`, +12 for `ptra++[3]`)", citing EF-067. Only `ALTD` was tested
+as the intervening instruction.
 
 ### F-466 — `augs.yaml`'s intervening-`ALTx` erratum can now say where the damage lands and settle its `AUGD` scope note — `CONFIRMED`
 

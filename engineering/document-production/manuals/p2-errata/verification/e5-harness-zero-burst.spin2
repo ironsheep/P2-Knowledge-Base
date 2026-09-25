@@ -1,0 +1,90 @@
+'' =============================================================================
+''
+''   File....... e5-harness-zero-burst.spin2
+''   Purpose.... Compile harness for the Chapter 5 workaround snippet
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 25 Sep 2026
+''
+'' =============================================================================
+'
+' Compile-only harness. The lines between the SNIPPET markers are the
+' Chapter 5 workaround snippet, byte for byte. The setup around them
+' mirrors the test program's construction (SETXFRQ $8000_0000, every LUT
+' long $2513_0000, P3 driven, one zero burst to prime) so the snippet's
+' names resolve to the same values the test used.
+'
+' Compile: pnut-ts e5-harness-zero-burst.spin2 (no debug() present)
+
+CON
+  _clkfreq = 200_000_000
+
+  PIN      = 3                          ' base pin +3 of pin group 0
+  N        = 64                         ' burst length in clocks
+  MODE_G   = $F007_0000                 ' DDS/Goertzel SINC1, no DACs
+  ZCOUNT   = 4                          ' zero-burst length
+
+PUB main()
+
+  coginit(COGEXEC_NEW, @engine, 0)
+  repeat
+
+DAT             org     0
+engine          setluts #0                      ' LUT sharing off
+                setxfrq freq80                  ' one NCO rollover per clock
+                wrpin   #0, #PIN
+                mov     ii, #$1FF
+.fill           wrlut   lutv, ii                ' every LUT long the same
+                djnf    ii, #.fill
+                drvl    #PIN
+                xinit   dzero, imm_off          ' prime: nothing held
+                waitx   ##500
+
+' ---- SNIPPET (Chapter 5, The workaround) ----
+        getxacc base_x          ' reading before the burst
+        mov     base_y, 0-0     ' sine accumulation follows
+        xinit   dburst, imm_on  ' N-clock burst, pin inputs on
+        waitx   ##500           ' wait until the burst has ended
+        xinit   dzero, imm_off  ' zero-term burst: S[15:12] = 0
+        waitx   ##500           ' adds the held term; leaves 0 held
+        getxacc x               ' now all N terms are in
+        mov     y, 0-0
+        sub     x, base_x       ' cosine sum of the N clocks
+        sub     y, base_y       ' sine sum of the N clocks
+' ---- END SNIPPET ----
+
+                cogid   ii
+                cogstop ii
+
+freq80          long    $8000_0000
+lutv            long    $2513_0000
+dburst          long    MODE_G | N              ' $F007_0040
+dzero           long    MODE_G | ZCOUNT         ' $F007_0004
+imm_on          long    $0000_80C3              ' S[15]=1: pin +3 summed
+imm_off         long    $0000_00C3              ' S[15:12]=0: every term 0
+
+ii              res     1
+base_x          res     1
+base_y          res     1
+x               res     1
+y               res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

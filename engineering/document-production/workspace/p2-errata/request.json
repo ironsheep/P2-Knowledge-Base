@@ -1,0 +1,30 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Errata.md",
+      "output": "P2-Errata.pdf",
+      "template": "p2kb-errata-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-platform-figures",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
+      ],
+      "metadata": {
+        "title": "P2 Errata",
+        "subtitle": "Silicon Defects of the Propeller 2 Found So Far, Proven on Real Parts",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "0.1.0",
+        "date": "September 2026"
+      }
+    }
+  ]
+}
