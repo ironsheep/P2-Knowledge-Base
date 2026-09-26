@@ -48,7 +48,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
-| P2 Errata | manual | **✅** ²⁵ | **✅** ²⁵ | 🔧 ²⁵ | **✅** ²⁵ |
+| **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
@@ -623,8 +623,9 @@ archive mode), `sync-manual-examples.py --check` GREEN, the published zip byte-i
 reviewed") — `p2kb-platform-crossref` taught *Erratum EN* → the `# Erratum EN:` heading (additive:
 no other manual writes "Erratum E<n>"), wired into `request.json` ahead of the tables filter.
 Daemon render `p2-errata-xref-v1`: **18 links = 18 prose references** in the assembled manual
-(E4 7, E5 9, E3 1, E7 1; the CHANGELOG's mention is not in the PDF), margins CLEAN. ✅ when the
-returned manual-store PDF shows the same.
+(E4 7, E5 9, E3 1, E7 1; the CHANGELOG's mention is not in the PDF), margins CLEAN. **PROVEN on
+the returned manual-store PDF, 2026-09-26 22:46**: the same 18 `\hyperlink{ch-eN}` targets, release
+gates 8/8. **The row is complete** — all four features adopted at v0.2.0, ahead of the release.
 
 ---
 
