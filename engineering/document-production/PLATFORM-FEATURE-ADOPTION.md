@@ -48,7 +48,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
-| P2 Errata | manual | 🔧 ²⁵ | 🔧 ²⁵ | ⏳ ²⁵ | **✅** ²⁵ |
+| P2 Errata | manual | **✅** ²⁵ | **✅** ²⁵ | ⏳ ²⁵ | **✅** ²⁵ |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
@@ -612,7 +612,11 @@ yet built; its reader copies of the rigs are part of the same release).
 `license`), and the cover reads all four identity lines from `\Doc*`. Proven on the daemon render
 `p2-errata-meta-v2`: `audit-pdf-metadata.py --require-rights` CLEAN, all seven declared fields
 round-tripped (Title, Subject, Author, Keywords = copyright + CC BY-SA 4.0; date and version on
-page 1). Stays 🔧 until the returned MANUAL-store PDF shows the same (the rule above). **Generated
+page 1). **PROVEN on the returned manual-store PDF, 2026-09-26 22:20** (outbound v0.2.0 build):
+`audit-pdf-metadata.py --require-rights` CLEAN — Title *P2 Errata*, the subtitle as Subject, Author,
+and Keywords *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA
+4.0"*; the cover reads title, subtitle, `September 2026` and `Version 0.2.0` from `\Doc*`; every
+page's text identical to the daemon proof render. **Generated
 example headers ✅** — the examples archive exists (`examples-library/`, 12 programs, whole-program
 archive mode), `sync-manual-examples.py --check` GREEN, the published zip byte-identical.
 **Cross-ref ⏳** — not wired: the chapters now cross-reference by *Erratum EN*, which
