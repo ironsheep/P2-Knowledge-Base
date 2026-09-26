@@ -1749,7 +1749,7 @@ This chapter returns to the DDS and Goertzel capabilities of Chapter 10 and puts
 
 ## 17.1 Goertzel Frequency Detection {#sec-17-1}
 
-Goertzel analysis reports how much of one chosen frequency is present in an incoming signal. It is the narrowest measurement the streamer offers, and it is sharp: a 1 MHz detector run against a 1 MHz tone on real silicon returned a magnitude of **1,059,000**, while the same detector against the same signal path returned **2,575** at twice the frequency, **286** at half, and **430** with no tone at all — selectivity of roughly **411:1**, **3,700:1**, and a **2,460:1** null.
+Goertzel analysis reports how much of one chosen frequency is present in an incoming signal. It is the narrowest measurement the streamer offers, and it is sharp: a 1 MHz detector run against a 1 MHz tone on silicon returned a magnitude of **1,059,000**, while the same detector against the same signal path returned **2,575** at twice the frequency, **286** at half, and **430** with no tone at all — selectivity of roughly **411:1**, **3,700:1**, and a **2,460:1** null.
 
 **Application:** Ultrasonic distance measurement, DTMF decoding, tone detection
 

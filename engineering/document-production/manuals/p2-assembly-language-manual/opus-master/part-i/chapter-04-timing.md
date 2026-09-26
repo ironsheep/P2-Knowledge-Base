@@ -553,7 +553,7 @@ Measuring code execution time involves reading the counter before and after the 
         sub     end_time, start_time    ' Elapsed cycles
 ```
 
-The difference between the two readings gives the number of cycles elapsed, plus a fixed **2-cycle measurement overhead** — the cost of the GETCT pair itself, confirmed on real P2 silicon. Subtract 2 cycles for a precise figure.
+The difference between the two readings gives the number of cycles elapsed, plus a fixed **2-cycle measurement overhead** — the cost of the GETCT pair itself, confirmed on P2 silicon. Subtract 2 cycles for a precise figure.
 
 For short code sequences, the measurement overhead matters. Measuring a 10-cycle sequence with two GETCT instructions reports 12 cycles (2-cycle overhead + 10). For longer sequences, the 2-cycle overhead becomes negligible.
 

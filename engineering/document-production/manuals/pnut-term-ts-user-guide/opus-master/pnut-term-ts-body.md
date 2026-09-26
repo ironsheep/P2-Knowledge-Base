@@ -253,7 +253,7 @@ pnut-term-ts -r myprogram.bin   # open the GUI and download this file
 Launch it with `--headless` and there is **no graphical interface at all**. The
 tool downloads your program, captures everything the P2 sends to a timestamped log
 file, and exits on a signal you define. This is the mode built for **continuous
-integration pipelines, containers, and scripted test runs** on real hardware —
+integration pipelines, containers, and scripted test runs** on P2 hardware —
 anywhere a program, not a person, is watching.
 
 ```command
@@ -1078,7 +1078,7 @@ it closed.
 
 This part is for running PNut-Term-TS where **no person is watching** — a
 continuous-integration pipeline, a container, or an AI coding assistant running
-programs on real P2 silicon and reading back the results. There is no graphical
+programs on P2 silicon and reading back the results. There is no graphical
 interface here; the **log file is how the run is seen**. If you are working at
 your desk, *Part 2 — Using the GUI* is your part; both rejoin in *Part 4 —
 Reference*.
@@ -1277,12 +1277,12 @@ things:
    assistant that wrote the program.
 
 That download → run → marker → read cycle is the loop that lets a program, rather
-than a person, develop and verify P2 code on real silicon.
+than a person, develop and verify P2 code on silicon.
 
 ## The agent in the loop
 
 That cycle is what makes this tool the runtime end of an *agentic* P2 workflow —
-an assistant that writes P2 code, compiles it, runs it on real silicon, and reads
+an assistant that writes P2 code, compiles it, runs it on silicon, and reads
 the log back to decide what to do next. Seen that way, the tool chain of Chapter 1
 gains one more member, because an assistant needs a source for what it is writing
 about:

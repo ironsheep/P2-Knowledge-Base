@@ -223,7 +223,7 @@ announce that it exists.* Skip any of the three and you've wasted the work.
 ## Documenting so the work is usable
 
 Documentation here means more than prose. It's photographs of the actual devices you drove, short
-videos so people can watch the thing move, and — a signature of real hardware work — the
+videos so people can watch the thing move, and — a signature of hardware work — the
 logic-analyzer traces themselves, published as proof of how the communication behaves. If you want
 the work to outlive the project, you make it *reusable and configurable*: pull the general part out
 of the specific one, let it be configured per device instead of hard-coded, record which channel
@@ -853,7 +853,7 @@ The four tools help you *judge* a cut, but they carry one honest caveat: a decom
 *starting* structure, derived from what you knew when you drew it — and you rarely know everything
 then. As the system actually comes together, you'll see things the derivation couldn't: a seam that
 looked clean on paper turns awkward in the code, a side effect surfaces that no force predicted, a
-cadence you estimated proves faster or slower on real silicon. Any of those is reason enough to go
+cadence you estimated proves faster or slower on silicon. Any of those is reason enough to go
 back and *re-balance* — to change how you resolved one of the forces, redraw a single boundary, or
 move a job to a different cog.
 
@@ -869,7 +869,7 @@ Experience shifts the odds. The more decompositions you've derived, the fewer ti
 rip one up and lay it down again — you learn to see the awkward seam or the hidden cadence *before*
 it reaches code. But no amount of experience closes the door entirely: a genuinely new element can
 still hand you a fact your instinct hadn't met, and force a rethink. That isn't a failure of skill;
-it's the nature of designing against real hardware. (The retrospective form of this discipline —
+it's the nature of designing against hardware. (The retrospective form of this discipline —
 comparing what you *derived* against what you actually *built*, once the code ships — is the
 as-built audit in the next chapter.)
 
@@ -1254,9 +1254,9 @@ application it's a *tested component* and no longer a suspect when something bre
 
 There's a deeper shift underneath all of this. A **hosted** agent that holds the whole P2 toolchain
 — the `pnut-ts` compiler, the `pnut-term-ts` terminal-and-debug host, and the P2 Knowledge Base on
-tap — can close the *entire* loop by itself: write the code, compile it, download it to a real P2,
+tap — can close the *entire* loop by itself: write the code, compile it, download it to a P2,
 run it, read the `DEBUG` output and logs that come back, and go around again. It isn't drafting code
-for you to run and report back on; it is running its own experiment on real silicon and reading its
+for you to run and report back on; it is running its own experiment on silicon and reading its
 own result, round-trip after round-trip. That autonomy is what lets the isolation tests above
 actually get written *and passed* without you in the loop for every cycle — and it's the line
 between an agent that merely *suggests* and one that *converges*: you set the target and the check
@@ -1389,7 +1389,7 @@ being redrawn.
 lives is a review, and a second reader helps with a review. Two of the five change materially. The
 testability seams (C4) are where agent-written regression tests land: build each layer standalone,
 have the agent write the test that proves it, and — with a hosted agent holding the compiler, the
-terminal, and a real P2 — let it run that test on silicon and iterate until it passes. Each layer
+terminal, and a P2 — let it run that test on silicon and iterate until it passes. Each layer
 then enters the assembled application as a tested component rather than a suspect. The safety
 override (C1) moves the other way: a hard-halt latch is built from limits only you can measure —
 the travel a mounted servo actually has, the current the platform actually draws — so it is a place

@@ -160,7 +160,7 @@ Two independent fields in bits [27:24]: the polarity bit (bit 27) combines with 
 | P_ADC_30X | 31.6x | ~1.57-1.71V | Gain, centered on ~VIO/2 (measured) |
 | P_ADC_100X | 100x | ~1.61-1.66V | Gain, centered on ~VIO/2 (measured) |
 
-> Gain-mode windows are **centered on ~VIO/2 (mid-supply)** — measured on a real P2 (representative single sample; vary part-to-part and with VIO/temperature). GIO/VIO are calibration references, not signal inputs. See Chapter 16, §16.2.
+> Gain-mode windows are **centered on ~VIO/2 (mid-supply)** — measured on P2 hardware (representative single sample; vary part-to-part and with VIO/temperature). GIO/VIO are calibration references, not signal inputs. See Chapter 16, §16.2.
 
 
 ## DAC Output Modes (pick one)

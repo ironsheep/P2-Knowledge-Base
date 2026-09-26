@@ -198,7 +198,7 @@ One entry deserves saying twice, in the chapter that just explained what the eng
 
 If your project is a **CPU emulator**, read Chapters 7 and 8 before you write a line. They will tell you which of the engine's two assets you can actually take — and for a good number of guests, the honest answer is *one of them*. That is not a caveat on the way to using XBYTE; for many guest CPUs it is the finding, and acting on it early saves rewriting an interpreter around an engine that was never going to fit.
 
-To see what the engine makes possible on real silicon — and, just as usefully, where working emulators have chosen *not* to use it — see **Appendix C: Further Implementations**.
+To see what the engine makes possible on silicon — and, just as usefully, where working emulators have chosen *not* to use it — see **Appendix C: Further Implementations**.
 
 # Chapter 4: The Skip Family {#ch-4}
 
@@ -821,7 +821,7 @@ The Z80's three interrupt modes and the 68000's seven vectored levels are more *
 
 Ask this question early, because the answer changes your architecture.
 
-**If the guest drives real hardware whose timing is visible** — a video signal, an audio channel, a raster interrupt — then instruction-level timing is not enough. You must count the guest's cycles and *pace* the emulation to them. Real implementations do this by computing elapsed time against the guest's cycle budget and using `WAITX` to throttle the P2 **down** to the guest's speed, once per instruction.
+**If the guest drives hardware whose timing is visible** — a video signal, an audio channel, a raster interrupt — then instruction-level timing is not enough. You must count the guest's cycles and *pace* the emulation to them. Real implementations do this by computing elapsed time against the guest's cycle budget and using `WAITX` to throttle the P2 **down** to the guest's speed, once per instruction.
 
 And now the catch: **that per-instruction pacing has no cheap home under XBYTE** (§7.4). It is the one kind of cross-cutting work that cannot be confined to a family of handlers — by definition it runs on every instruction — so it is paid on every dispatch, which is most of what the software loop was charging for in the first place. This is why cycle accuracy and rung 3 pull against each other, and why the Z80 row in §8.2 carries the caveat it does.
 
@@ -1764,7 +1764,7 @@ The helper's own instructions are safe from the caller's skip pattern, because t
 
 Parallax's instruction table (*P2 Instructions v35 – Rev B/C Silicon*, row 410) defines `_RET_` as *"execute `<inst>` always and return **if no branch**."* `CALL` branches. The return is therefore suppressed, and the line is silently a plain `CALL`: the helper returns to the instruction *after* the call, and execution runs on out of the handler into whatever the assembler happened to place next.
 
-Nothing faults and no flag is set. On real P2 silicon this was measured running an **entire adjacent handler** — code whose bytecode was never in the stream — after which *that* handler's own `RET` returned to `$1FF` and dispatch carried on as if nothing had happened. The program finished, having silently done work it was never asked to do. Because what executes is simply whatever sits next in cog memory, the symptom turns up nowhere near the cause.
+Nothing faults and no flag is set. On P2 silicon this was measured running an **entire adjacent handler** — code whose bytecode was never in the stream — after which *that* handler's own `RET` returned to `$1FF` and dispatch carried on as if nothing had happened. The program finished, having silently done work it was never asked to do. Because what executes is simply whatever sits next in cog memory, the symptom turns up nowhere near the cause.
 
 **End the handler with an explicit `RET` after the call.**
 :::

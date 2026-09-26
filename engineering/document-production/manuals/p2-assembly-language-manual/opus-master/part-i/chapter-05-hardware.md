@@ -154,7 +154,7 @@ rotate_points
 Results overwrite the input buffer in place, which is safe because the output cursor `kk` trails the input cursor `ii` by six pairs for the whole run — every long is read before it is rewritten.
 
 ::: hardware
-**Keep hub access out of both CORDIC loops.** This is the difference between a pipeline that works and one that silently returns wrong numbers. Measured on real P2 silicon at 200 MHz: a `RDLONG` inside the fill loop began losing results at a fill depth of **2**; a register-only fill with a `WRLONG` in the drain began losing them at **3**; register-only fill *and* drain, with hub I/O batched outside, stayed correct through a depth of **7**.
+**Keep hub access out of both CORDIC loops.** This is the difference between a pipeline that works and one that silently returns wrong numbers. Measured on P2 silicon at 200 MHz: a `RDLONG` inside the fill loop began losing results at a fill depth of **2**; a register-only fill with a `WRLONG` in the drain began losing them at **3**; register-only fill *and* drain, with hub I/O batched outside, stayed correct through a depth of **7**.
 
 The failure is silent and it is not a missing result — it is a *wrong* one. The result is a full array of plausible-looking coordinates, some fraction of which are stale. Nothing faults, no flag is set, and `QMT` does not help: it records an erroneous early read after the fact rather than warning of it in advance.
 

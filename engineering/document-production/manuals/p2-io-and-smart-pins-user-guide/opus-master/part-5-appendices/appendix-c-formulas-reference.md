@@ -208,7 +208,7 @@ voltage_mv = (128 × 3300) / 255 = 1656 mV
 
 ### ADC with Gain
 
-Gain modes measure a window **centered on the ADC's mid-supply bias point (~VIO/2)**, narrowing ~3.16x per gain step — NOT a ground-referenced 0-to-max range. The windows below were **measured on a real P2** (representative single sample; vary part-to-part and with VIO/temperature — calibrate for absolute work). See Chapter 16, §16.2.
+Gain modes measure a window **centered on the ADC's mid-supply bias point (~VIO/2)**, narrowing ~3.16x per gain step — NOT a ground-referenced 0-to-max range. The windows below were **measured on P2 hardware** (representative single sample; vary part-to-part and with VIO/temperature — calibrate for absolute work). See Chapter 16, §16.2.
 
 | Gain Mode | Gain Factor | Input window (measured, VIO ~3.3 V) |
 |-----------|-------------|-------------------------------------|

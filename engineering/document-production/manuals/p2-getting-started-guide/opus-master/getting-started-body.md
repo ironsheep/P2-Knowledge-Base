@@ -306,7 +306,7 @@ clock to set, and a ROM that boots you. You don't need to remember every detail 
 just need the picture. With it in hand, the next chapter makes sure you can *read* a P2
 program — the handful of structural rules that turn Spin2 and PASM2 from a wall of
 symbols into something legible — and the chapter after that puts these parts to work:
-we'll launch a cog, drive a pin, and see how a real P2 program is actually shaped.
+we'll launch a cog, drive a pin, and see how a P2 program is shaped.
 
 # Chapter 2: Reading P2 Code {#ch-2}
 
@@ -461,7 +461,7 @@ When you see a trailing `...`, just read on to the next line as one statement.
 
 ## Objects — building from other files
 
-Back to `OBJ`, because composing objects is how real P2 programs are built. An `OBJ`
+Back to `OBJ`, because composing objects is how P2 programs are built. An `OBJ`
 block pulls in *another* Spin2 file and gives it a name; you then call that file's public
 methods through the name:
 
@@ -770,7 +770,7 @@ program spreads itself across as many of the eight cogs as it needs.
 
 ## Where this leaves us
 
-You can now read and shape a real P2 program: set the clock, drive a pin, launch a cog,
+You can now read and shape a P2 program: set the clock, drive a pin, launch a cog,
 share data through hub, choose Spin2 or PASM2 for a given job, and compose objects. That
 is genuinely enough to build things. What it doesn't yet tell you is *how to decide what
 goes on which cog* in the first place — how to look at a whole problem and carve it into

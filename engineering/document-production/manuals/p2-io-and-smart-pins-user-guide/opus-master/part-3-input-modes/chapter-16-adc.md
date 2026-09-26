@@ -47,7 +47,7 @@ ADC operation requires specific pin mode bits. Set P[12:10] = %100 in the WRPIN 
 
 > **Gain modes measure *around* the ADC's mid-supply bias point (~VIO/2) — not up from ground.** A higher gain narrows the measurable window *symmetrically about mid-supply*; it does not rescale a 0 V-referenced range. A ground-referenced small signal (a 0-100 mV sensor sitting near 0 V) cannot be read directly by a gain mode — bias it to mid-supply first, or use the ratiometric reference method in §16.3.
 
-The per-gain input windows below were **measured on a real P2** (one sample; the on-chip DAC driven through a pin-to-pin loopback into the ADC). Every gain centers on ~VIO/2, and the windows narrow ~3.16x per gain step. Treat them as **representative** — the exact endpoints vary part-to-part and with VIO and temperature, so calibrate for absolute work.
+The per-gain input windows below were **measured on P2 hardware** (one sample; the on-chip DAC driven through a pin-to-pin loopback into the ADC). Every gain centers on ~VIO/2, and the windows narrow ~3.16x per gain step. Treat them as **representative** — the exact endpoints vary part-to-part and with VIO and temperature, so calibrate for absolute work.
 
 | Mode | Gain | Input window (measured, VIO ~3.3 V) |
 |------|------|-------------------------------------|
@@ -596,7 +596,7 @@ threshold     long      128                   ' Mid-scale threshold
 Some bounds come from the analog front end itself and **cannot be averaged away** — know them before promising absolute accuracy:
 
 - **High input impedance.** The 1× range presents a high input impedance, so a low-impedance source loads it lightly. A high-impedance source — or a large external series resistor — forms a divider with it that shifts the reading. Buffer high-Z sources, or account for the divider.
-- **Absolute-error floor.** A single pin's absolute error is small — a few millivolts (≤ ~9 mV measured on real P2 silicon; representative, not a guaranteed spec). The larger concern is **pin-to-pin spread**: the GIO, VIO, and pin paths use three *separate* matched on-chip resistors that do not match perfectly, so different pins can read a bit apart in absolute terms. This is a design limit, not noise — more averaging will not remove it. Where absolute accuracy matters, self-calibrate by driving the pin to each rail and measuring the result, or characterize the per-pin offset once.
+- **Absolute-error floor.** A single pin's absolute error is small — a few millivolts (≤ ~9 mV measured on P2 silicon; representative, not a guaranteed spec). The larger concern is **pin-to-pin spread**: the GIO, VIO, and pin paths use three *separate* matched on-chip resistors that do not match perfectly, so different pins can read a bit apart in absolute terms. This is a design limit, not noise — more averaging will not remove it. Where absolute accuracy matters, self-calibrate by driving the pin to each rail and measuring the result, or characterize the per-pin offset once.
 - **Supply and temperature sensitivity.** The internal references track the VIO supply, so a noisy switch-mode VIO degrades precision — feed VIO from a clean LDO for instrumentation work. GIO and VIO also drift with temperature (VIO is the more stable of the two), giving each chip a per-pin fingerprint; periodic re-referencing handles the slow drift.
 - **Power-of-2 sample period.** In SINC2 sampling mode the period must be a power of two (`2^X[3:0]`) and cannot be freely dithered (§16.3, Resolution and Sample Rate).
 
