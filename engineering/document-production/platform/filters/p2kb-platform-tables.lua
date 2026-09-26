@@ -326,6 +326,18 @@ local function handle_encoding_table(el)
   end
 end
 
+-- Detect a 9-column instruction encoding table: its first header cell is EEEE
+local function is_encoding_table(el)
+  if el.head and el.head.rows and #el.head.rows > 0 then
+    local header_row = el.head.rows[1]
+    if header_row.cells and #header_row.cells >= 1 then
+      local h1 = pandoc.utils.stringify(header_row.cells[1].contents)
+      return h1:match("^%s*EEEE%s*$") ~= nil
+    end
+  end
+  return false
+end
+
 -- Detect if this is a 6-column encoding master table (Appendix A pattern)
 -- Headers: Instruction | Opcode | CZI | Cycles | C Effect | Z Effect
 local function is_encoding_master_table(el)
@@ -1268,8 +1280,13 @@ function Table(el)
   -- Get number of columns
   local num_cols = #el.colspecs
 
-  -- Handle 9-column encoding tables specially (fixed widths with colored headers)
-  if num_cols == 9 then
+  -- Handle 9-column encoding tables specially (fixed widths with colored headers).
+  -- Recognised by the header, not the column count alone: every encoding table
+  -- opens with an EEEE column, and its header colours are defined only by the
+  -- PASM2 manual's local .sty. An ordinary 9-column table in another manual (P2
+  -- Errata E7's hub-alignment table, 2026-09-26) otherwise took this path and
+  -- aborted xelatex with "Undefined color `iosp-enc-instruction'".
+  if num_cols == 9 and is_encoding_table(el) then
     return handle_encoding_table(el)
   end
 
