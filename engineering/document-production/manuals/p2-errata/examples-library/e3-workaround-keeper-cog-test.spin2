@@ -1,9 +1,10 @@
 '' ===========================================================================
 ''
-''   File.......  e3-getct-stale-upper-long-runA.spin2
-''   Purpose....  Erratum E3 test, Run A: the upper long GETCT WC returns
-''                in cogs 4-7 after that group has missed one wrap, and
-''                after it has missed two
+''   File.......  e3-workaround-keeper-cog-test.spin2
+''   Purpose....  Erratum E3 workaround test: with the keeper cog started
+''                first, whether cogs of 4-7 started after one and after
+''                two wraps read the current upper long; then, with the
+''                keeper stopped, that the erratum returns
 ''   Manual.....  P2 Errata
 ''   Version....  v0.2.0 (2026-09-26)
 ''   Appears in.  Erratum E3: GETCT Returns a Stale Upper Long; Appendix
@@ -21,7 +22,7 @@
 
 CON ' ---- Test Configuration ----
   _clkfreq    = 200_000_000
-  DEBUG_COGS  = %0000_0001        ' debugger only in cog 0; cogs 1/4 never take a debug interrupt
+  DEBUG_COGS  = %0000_0001        ' debugger only in cog 0; no other cog takes a debug interrupt
 
   LOWIN   = $1000_0000            ' sample window: lowest CT lower long a pair may use
   HIWIN   = $F000_0000            ' sample window: highest CT lower long a pair may use
@@ -29,7 +30,8 @@ CON ' ---- Test Configuration ----
   NPAIRS  = 10                    ' valid pairs per reading
   MAXTRY  = 30                    ' request attempts per reading
 
-  ACK_TIMEOUTS_PER_SEC = 10       ' C5: a sampler must ack within clkfreq / 10 clocks (100 ms)
+  ACK_TIMEOUT_MS = 100            ' C5: a sampler must ack within this
+  MS_PER_SEC     = 1000           ' milliseconds per second: clkfreq / MS_PER_SEC = clocks per ms
   COG_SETTLE_MS  = 10             ' wait after a COGINIT/COGSTOP before checking the mask
   COG_COUNT      = 8              ' cogs 0..7 on a P2
   LONG_BITS      = 32             ' bits in a long
@@ -46,15 +48,18 @@ CON ' ---- Test Configuration ----
   MB_LO_OFS  = MB_LO_IDX * 4
   MB_ACK_OFS = MB_ACK_IDX * 4
 
-  ' the rig's cogs, each started by its explicit number
+  ' the rig's own cogs (the keeper's cog, KEEPER_COG, is in the drop-in)
   MAIN_COG  = 0                   ' runs main(), the pair transactions and every check
   CTRL_COG  = 1                   ' group-0 control sampler
-  SMP_COG   = 4                   ' group-1 sampler under test
+  SMP_COG_A = 4                   ' group-1 samplers, each started for one reading
+  SMP_COG_B = 5
+  SMP_COG_C = 6
 
   ' expected running-cog masks
-  M_BOOT  = 1 << MAIN_COG                 ' cog 0 alone
-  M_C1    = M_BOOT | (1 << CTRL_COG)      ' cog 0 + the control sampler
-  M_C1C4  = M_C1 | (1 << SMP_COG)         ' cog 0 + both samplers
+  M_MAIN    = 1 << MAIN_COG                               ' cog 0 alone
+  M_BOOT    = M_MAIN | (1 << KEEPER_COG)                  ' boot: cog 0 + keeper
+  M_KEEP    = M_MAIN | (1 << CTRL_COG) | (1 << KEEPER_COG) ' workaround arms, between readings
+  M_NOKEEP  = M_MAIN | (1 << CTRL_COG)                    ' positive control: group 1 idle
 
   ' reading status codes (readStatus[] value per slot)
   '  ST_OK      - status ok, D consistent across all valid pairs
@@ -64,43 +69,39 @@ CON ' ---- Test Configuration ----
   '  ST_TIMEOUT - sampler never acked a request
   ST_OK = 0, ST_BRACKET = 1, ST_MIXED = 2, ST_SHORT = 3, ST_TIMEOUT = 4
 
-  ' take_pair() ack status (a status code, not a boolean):
-  '  ACK_NONE - the sampler did not ack within the timeout
-  '  ACK_SEEN - the sampler acked
-  #0, ACK_NONE, ACK_SEEN
-
   ' reading slots (index into readStatus[], readD[] and readBracketFails[]):
-  '  R_C0  - R0: cog 1 at hi=0, control (C1)
-  '  R_A1A - A1a: cog 4 at hi=1, started after group 1 missed wrap 0->1
-  '  R_C1A - C1a: cog 1 at hi=1, control (C1)
-  '  R_A1B - A1b: cog 4 at hi=1 late
-  '  R_C1B - C1b: cog 1 at hi=1 late, control (C1)
-  '  R_A2  - A2: cog 4 at hi=2, after it ran through wrap 1->2
+  '  R_K0  - K0: cog 4 at hi=0, group-1 harness control (C6)
+  '  R_C0  - C0: cog 1 at hi=0, control (C1)
+  '  R_W1  - W1: cog 5 at hi=1, workaround arm
+  '  R_C1  - C1: cog 1 at hi=1, control (C1)
+  '  R_W1L - W1L: cog 6 at hi=1 late, workaround arm
+  '  R_C1L - C1L: cog 1 at hi=1 late, control (C1)
+  '  R_W2  - W2: cog 4 at hi=2, workaround arm
   '  R_C2  - C2: cog 1 at hi=2, control (C1)
-  '  R_A4A - A4a: cog 4 at hi=4, restarted after group 1 missed wraps 2->3 and 3->4
-  '  R_C4A - C4a: cog 1 at hi=4, control (C1)
-  '  R_A4B - A4b: cog 4 at hi=4 late
-  '  R_C4B - C4b: cog 1 at hi=4 late, control (C1)
+  '  R_W2L - W2L: cog 5 at hi=2 late, workaround arm
+  '  R_C2L - C2L: cog 1 at hi=2 late, control (C1)
+  '  R_P3  - P3: cog 6 at hi=3 with the keeper stopped, positive control (C7)
+  '  R_C3  - C3: cog 1 at hi=3, control (C1)
   '  NREAD - number of reading slots
-  R_C0 = 0, R_A1A = 1, R_C1A = 2, R_A1B = 3, R_C1B = 4, R_A2 = 5, R_C2 = 6
-  R_A4A = 7, R_C4A = 8, R_A4B = 9, R_C4B = 10, NREAD = 11
+  R_K0 = 0, R_C0 = 1, R_W1 = 2, R_C1 = 3, R_W1L = 4, R_C1L = 5
+  R_W2 = 6, R_C2 = 7, R_W2L = 8, R_C2L = 9, R_P3 = 10, R_C3 = 11
+  NREAD = 12
 
   ' CT upper-long epochs the arms read in:
-  '  HI_BOOT - before the first wrap (R0)
-  '  HI_A1   - after wrap 0->1, cogs 4-7 idle across it (A1a, A1b)
-  '  HI_A2   - after wrap 1->2, cog 4 running through it (A2)
-  '  HI_A4   - after wraps 2->3 and 3->4, cogs 4-7 idle across both (A4a, A4b)
-  HI_BOOT = 0, HI_A1 = 1, HI_A2 = 2, HI_A4 = 4
+  '  HI_BOOT - before the first wrap (K0, C0)
+  '  HI_WKR1 - after wrap 0->1, the keeper alone in cogs 4-7 (W1, W1L)
+  '  HI_WKR2 - after wrap 1->2, the keeper alone in cogs 4-7 (W2, W2L)
+  '  HI_POS  - after wrap 2->3, the keeper stopped (P3)
+  HI_BOOT = 0, HI_WKR1 = 1, HI_WKR2 = 2, HI_POS = 3
 
   ' predictions, fixed before the run
-  P_A1_TRUE = 1, P_A1_FALSE = 0   ' copy stale by the 1 missed wrap / loaded at start
-  P_A2_TRUE = 0, P_A2_FALSE = 1   ' copy reloads at a wrap group 1 runs through / does not
-  P_A4_TRUE = 2                   ' FALSE: 0 (loaded at restart) or 1 (lag capped at one)
-  P_CTRL    = 0                   ' cog 1 (group 0): always 0, else RIG FAIL
+  P_WKR     = 0                   ' keeper running: every group-1 cog reads cog 0's upper long
+  P_POS     = 1                   ' keeper stopped, one wrap missed: behind by one (the erratum)
+  P_CTRL    = 0                   ' cog 1 always, and cog 4 at hi=0: else RIG FAIL
 
-VAR ' ---- Test State ----
+VAR ' ---- Shared Run State ----
   long mailboxControl[MB_LONGS]   ' cog 1's mailbox
-  long mailboxGroup1[MB_LONGS]    ' cog 4's mailbox (the group-1 sampler under test)
+  long mailboxGroup1[MB_LONGS]    ' the group-1 sampler's mailbox (one sampler at a time)
   long requestSeq                 ' request counter, never 0 once used
   long wrapsSeen                  ' lower-long wraps cog 0 watched since boot (C2)
   long prevCtLo                   ' last CT lower long cog 0 saw (C2)
@@ -110,23 +111,40 @@ VAR ' ---- Test State ----
   long readBracketFails[NREAD]    ' per slot: LO-BRACKET failure count
   long bHalted                    ' TRUE once a RIG FAIL has halted the run: later steps are skipped
 
-PUB main() | ctHi, ctLo, cogMask
-'' Run E3 RUN A: hold group 1 (cogs 4-7) idle until cog 0's CT upper
-'' long reaches 1, then bring cog 4 up and compare its GETCT reads
-'' against cog 0's and cog 1's, per the arm sequence below.
+' ---- BEGIN DROP-IN ----
+CON ' ---- E3 Workaround: Keeper Cog ----
+  KEEPER_COG = 7                ' a cog of 4-7 the program never uses
+
+DAT ' ---- E3 Workaround: Keeper Code ----
+                org
+keeper          jmp     #keeper         ' loop forever; never stop this cog
+
+PUB main()
+'' Start the keeper before anything else, then run the program.
 ''
+
+  coginit(KEEPER_COG, @keeper, 0)       ' first line: before the first wrap
+' ---- END DROP-IN ----
+  run_rig()
+
+' ---------------------------------------------------------------------
+PRI run_rig() | ctHi, ctLo, cogMask
+' Run the E3 workaround protocol end to end: boot check, control sampler,
+' group-1 readings across wraps 0->1 and 1->2 with the keeper alone in
+' group 1, then the positive control with the keeper stopped. A RIG FAIL
+' halts the run (bHalted): a guard follows every step that can halt
+' (wait_until, arm, expect_mask), so every path ends at the one finish().
+'
 
 ' Local Variables:
 ' @local ctHi - cog 0's own CT upper long, from ct64()
 ' @local ctLo - cog 0's own CT lower long, from ct64()
 ' @local cogMask - running-cog bitmask, from runmask()
 
-  ' A RIG FAIL halts the run (bHalted): a guard follows every step that
-  ' can halt (wait_until, expect_mask), so every path ends at finish().
-  debug("=== Erratum E3 RUN A (hazard): group 1 idle until cog 0 CT hi = 1 ===")
-  debug("predictions: A1a/A1b D=1 (FALSE 0), A2 D=0 (FALSE 1), A4a/A4b D=2 (FALSE 0 or 1), cog1 D=0 always")
+  debug("=== E3 WORKAROUND: keeper in cog 7 from main()'s first line ===")
+  debug("predictions: K0 D=0 (control), W1/W1L/W2/W2L D=0 (FALSE 1 or 2), P3 D=1 (positive control), cog1 D=0 always")
 
-  ' ---- C4: boot state -------------------------------------------------
+  ' ---- C4: boot state (the drop-in has already started the keeper) ----
   ctHi, ctLo := ct64()
   cogMask := runmask()
   prevCtLo := ctLo
@@ -136,79 +154,100 @@ PUB main() | ctHi, ctLo, cogMask
     debug("RIG FAIL: CT hi at boot expected 0, got ", uhex_long_(ctHi), " - no fresh reset; reload with reset")
     halt()
   elseif cogMask <> M_BOOT
-    debug("RIG FAIL: running cogs at boot expected ", ubin_byte_(M_BOOT), ", got ", ubin_byte_(cogMask))
+    debug("RIG FAIL: running cogs at boot expected ", ubin_byte_(M_BOOT), " (cog 0 + keeper), got ", ubin_byte_(cogMask))
     halt()
 
-  ' ---- control sampler: cog 1 (group 0) from program start ------------
+  ' ---- control sampler: cog 1 (group 0) to the end ---------------------
   if bHalted == FALSE
-    start_cog1(@mailboxControl)
+    longfill(@mailboxControl, 0, MB_LONGS)
+    coginit(CTRL_COG, @sampler, @mailboxControl)
     waitms(COG_SETTLE_MS)
-    expect_mask(M_C1)
+    expect_mask(M_KEEP)
+
+  ' ---- K0: group-1 harness control before any wrap ----------------------
+  if bHalted == FALSE
+    wait_until(HI_BOOT, LOWIN, M_KEEP)
+  if bHalted == FALSE
+    arm(R_K0, string("K0  cog4 hi=0"), SMP_COG_A, M_KEEP)
+  if bHalted == FALSE
+    reading(R_C0, string("C0  cog1 hi=0"), @mailboxControl)
+
+  ' ---- workaround: group 1 = the keeper alone through wrap 0->1 ---------
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=1 with the keeper ALONE in cogs 4-7 (~21 s) ---")
+    wait_until(HI_WKR1, LOWIN, M_KEEP)
+  if bHalted == FALSE
+    arm(R_W1, string("W1  cog5 hi=1"), SMP_COG_B, M_KEEP)
+  if bHalted == FALSE
+    reading(R_C1, string("C1  cog1 hi=1"), @mailboxControl)
 
   if bHalted == FALSE
-    wait_until(HI_BOOT, LOWIN, M_C1)
+    wait_until(HI_WKR1, LATE, M_KEEP)
   if bHalted == FALSE
-    reading(R_C0, string("R0  cog1 hi=0"), @mailboxControl)
+    arm(R_W1L, string("W1L cog6 hi=1 late"), SMP_COG_C, M_KEEP)
+  if bHalted == FALSE
+    reading(R_C1L, string("C1L cog1 hi=1 late"), @mailboxControl)
 
-  ' ---- hazard: group 1 idle across wrap 0->1 --------------------------
+  ' ---- workaround: group 1 = the keeper alone through wrap 1->2 ---------
   if bHalted == FALSE
-    debug("--- waiting for CT hi=1 with cogs 4-7 idle (~21 s) ---")
-    wait_until(HI_A1, LOWIN, M_C1)
+    debug("--- waiting for CT hi=2 with the keeper ALONE in cogs 4-7 (~3 s) ---")
+    wait_until(HI_WKR2, LOWIN, M_KEEP)
   if bHalted == FALSE
-    start_cog4(@mailboxGroup1)
-    waitms(COG_SETTLE_MS)
-    expect_mask(M_C1C4)
+    arm(R_W2, string("W2  cog4 hi=2"), SMP_COG_A, M_KEEP)
   if bHalted == FALSE
-    debug("--- cog 4 started (first group-1 cog since reset) ---")
-    reading(R_A1A, string("A1a cog4 hi=1"), @mailboxGroup1)
-    reading(R_C1A, string("C1a cog1 hi=1"), @mailboxControl)
-
-  if bHalted == FALSE
-    wait_until(HI_A1, LATE, M_C1C4)
-  if bHalted == FALSE
-    reading(R_A1B, string("A1b cog4 hi=1 late"), @mailboxGroup1)
-    reading(R_C1B, string("C1b cog1 hi=1 late"), @mailboxControl)
-
-  ' ---- cog 4 runs through wrap 1->2 -----------------------------------
-  if bHalted == FALSE
-    debug("--- waiting for CT hi=2 with cog 4 running (~21 s) ---")
-    wait_until(HI_A2, LOWIN, M_C1C4)
-  if bHalted == FALSE
-    reading(R_A2, string("A2  cog4 hi=2"), @mailboxGroup1)
     reading(R_C2, string("C2  cog1 hi=2"), @mailboxControl)
 
-  ' ---- extension: stop cog 4, group 1 idle across wraps 2->3, 3->4 ----
   if bHalted == FALSE
-    cogstop(SMP_COG)
-    waitms(COG_SETTLE_MS)
-    expect_mask(M_C1)
+    wait_until(HI_WKR2, LATE, M_KEEP)
   if bHalted == FALSE
-    longfill(@mailboxGroup1, 0, MB_LONGS)
-    debug("--- cog 4 stopped; waiting for CT hi=4 with cogs 4-7 idle (~43 s) ---")
-    wait_until(HI_A4, LOWIN, M_C1)
+    arm(R_W2L, string("W2L cog5 hi=2 late"), SMP_COG_B, M_KEEP)
   if bHalted == FALSE
-    start_cog4(@mailboxGroup1)
-    waitms(COG_SETTLE_MS)
-    expect_mask(M_C1C4)
-  if bHalted == FALSE
-    debug("--- cog 4 restarted after 2 missed wraps ---")
-    reading(R_A4A, string("A4a cog4 hi=4"), @mailboxGroup1)
-    reading(R_C4A, string("C4a cog1 hi=4"), @mailboxControl)
+    reading(R_C2L, string("C2L cog1 hi=2 late"), @mailboxControl)
 
+  ' ---- positive control: no cog of 4-7 through wrap 2->3 ----------------
   if bHalted == FALSE
-    wait_until(HI_A4, LATE, M_C1C4)
+    cogstop(KEEPER_COG)
+    waitms(COG_SETTLE_MS)
+    expect_mask(M_NOKEEP)
   if bHalted == FALSE
-    reading(R_A4B, string("A4b cog4 hi=4 late"), @mailboxGroup1)
-    reading(R_C4B, string("C4b cog1 hi=4 late"), @mailboxControl)
+    ctHi, ctLo := ct64()
+    debug("--- keeper STOPPED at CT=", uhex_long_(ctHi), "_", uhex_long_(ctLo), "; waiting for CT hi=3 with cogs 4-7 idle (~3 s) ---")
+    wait_until(HI_POS, LOWIN, M_NOKEEP)
+  if bHalted == FALSE
+    arm(R_P3, string("P3  cog6 hi=3"), SMP_COG_C, M_NOKEEP)
+  if bHalted == FALSE
+    reading(R_C3, string("C3  cog1 hi=3"), @mailboxControl)
 
   if bHalted == FALSE
     verdict()
   finish()
 
+PRI arm(slotIdx, pLabel, smpCog, baseMask)
+' Start a group-1 sampler in cog smpCog, take one reading from it into
+' slot slotIdx, stop it again; RIG FAIL (and halt) if the running-cog mask
+' is not exactly baseMask plus the sampler while it runs, and baseMask
+' after it stops. Nothing after a halting mask check runs.
+'
+' @param slotIdx - reading-slot index (an R_* constant)
+' @param pLabel - address of the reading's zero-terminated label, printed by zstr_()
+' @param smpCog - the cog of 4-7 to run the sampler in
+' @param baseMask - running-cog bitmask expected without the sampler
+
+  longfill(@mailboxGroup1, 0, MB_LONGS)
+  coginit(smpCog, @sampler, @mailboxGroup1)
+  waitms(COG_SETTLE_MS)
+  expect_mask(baseMask | (1 << smpCog))
+  if bHalted == FALSE
+    reading(slotIdx, pLabel, @mailboxGroup1)
+    cogstop(smpCog)
+    waitms(COG_SETTLE_MS)
+    expect_mask(baseMask)
+
 ' ---------------------------------------------------------------------
 PRI verdict() | slotIdx
-' Print every reading slot's status, then apply the control checks (C1/C5)
-' and the prediction comparisons to produce the one-line VERDICT.
+' Print the per-slot summary table, judge the gating controls (C1, C5,
+' C6, C7), then decide and print CONFIRMED / REFUTED / INCONCLUSIVE from
+' the four workaround-arm readings.
 '
 
 ' Local Variables:
@@ -218,49 +257,52 @@ PRI verdict() | slotIdx
   repeat slotIdx from 0 to NREAD - 1
     debug("slot ", udec_(slotIdx), ": D=", sdec_(readD[slotIdx]), " st=", udec_(readStatus[slotIdx]), " lo-bracket-fails=", udec_(readBracketFails[slotIdx]))
 
-  ' ---- C1: every cog-1 control reading must be ok with D = 0 ----------
-  ctrl(R_C0, string("R0"))
-  ctrl(R_C1A, string("C1a"))
-  ctrl(R_C1B, string("C1b"))
-  ctrl(R_C2, string("C2"))
-  ctrl(R_C4A, string("C4a"))
-  ctrl(R_C4B, string("C4b"))
-  ' ---- C5: cog 4 must have answered -----------------------------------
-  if readStatus[R_A1A] == ST_TIMEOUT or readStatus[R_A1B] == ST_TIMEOUT or readStatus[R_A2] == ST_TIMEOUT or readStatus[R_A4A] == ST_TIMEOUT or readStatus[R_A4B] == ST_TIMEOUT
-    debug("RIG FAIL: cog 4 sampler did not answer in A1a/A1b/A2/A4a/A4b")
+  ' ---- C1: every cog-1 control reading ok with D = 0 --------------------
+  ctrl(R_C0, string("C0 (cog 1)"), P_CTRL)
+  ctrl(R_C1, string("C1 (cog 1)"), P_CTRL)
+  ctrl(R_C1L, string("C1L (cog 1)"), P_CTRL)
+  ctrl(R_C2, string("C2 (cog 1)"), P_CTRL)
+  ctrl(R_C2L, string("C2L (cog 1)"), P_CTRL)
+  ctrl(R_C3, string("C3 (cog 1)"), P_CTRL)
+  ' ---- C6: group-1 harness control, before any wrap ---------------------
+  ctrl(R_K0, string("K0 (cog 4, hi=0)"), P_CTRL)
+  ' ---- C7: POSITIVE CONTROL, keeper stopped across one wrap --------------
+  if readStatus[R_P3] <> ST_OK or readD[R_P3] <> P_POS
+    debug("RIG FAIL: POSITIVE CONTROL P3 (keeper stopped, wrap 2->3 missed) expected D=1 st=0, got D=", sdec_(readD[R_P3]), " st=", udec_(readStatus[R_P3]), " - this rig did not see the erratum, so a D=0 workaround arm proves nothing")
+    bRigBad := TRUE
+  ' ---- C5: every workaround-arm sampler answered -------------------------
+  if readStatus[R_W1] == ST_TIMEOUT or readStatus[R_W1L] == ST_TIMEOUT or readStatus[R_W2] == ST_TIMEOUT or readStatus[R_W2L] == ST_TIMEOUT
+    debug("RIG FAIL: a group-1 sampler did not answer in W1/W1L/W2/W2L")
     bRigBad := TRUE
 
   if bRigBad == TRUE
     debug("NO VERDICT: rig failed (see RIG FAIL lines)")
-  elseif readStatus[R_A1A] >= ST_MIXED or readStatus[R_A1B] >= ST_MIXED or readStatus[R_A2] >= ST_MIXED or readStatus[R_A4A] >= ST_MIXED or readStatus[R_A4B] >= ST_MIXED
-    debug("VERDICT: INCONCLUSIVE - a cog-4 reading had disagreeing pairs or too few valid pairs (st>=2 above)")
-  elseif readStatus[R_A1A] == ST_BRACKET or readStatus[R_A1B] == ST_BRACKET or readStatus[R_A2] == ST_BRACKET or readStatus[R_A4A] == ST_BRACKET or readStatus[R_A4B] == ST_BRACKET
-    debug("VERDICT: REFUTED - cog 4 plain GETCT fell outside cog 0's bracket: group-1 LOWER copy not current (predicted current)")
-  elseif readD[R_A1A] == P_A1_TRUE and readD[R_A1B] == P_A1_TRUE and readD[R_A2] == P_A2_TRUE and readD[R_A4A] == P_A4_TRUE and readD[R_A4B] == P_A4_TRUE
-    debug("VERDICT: CONFIRMED - cog 4 D=1 at hi=1, 0 at hi=2, 2 after two missed wraps; cog 1 D=0 throughout")
-  elseif readD[R_A1A] == P_A1_TRUE and readD[R_A1B] == P_A1_TRUE and readD[R_A2] == P_A2_TRUE
-    debug("VERDICT: REFUTED (extension only) - one-missed-wrap criteria met (A1=1, A2=0) but after 2 missed wraps cog 4 D: A4a=", sdec_(readD[R_A4A]), " A4b=", sdec_(readD[R_A4B]), ", predicted 2 (one per missed wrap)")
-  elseif readD[R_A1A] == P_A1_FALSE and readD[R_A1B] == P_A1_FALSE
-    debug("VERDICT: REFUTED - cog 4 D=0 at hi=1: group-1 upper copy was current when cog 4 started (A2=", sdec_(readD[R_A2]), " A4a=", sdec_(readD[R_A4A]), " A4b=", sdec_(readD[R_A4B]), ")")
+  elseif readStatus[R_W1] >= ST_MIXED or readStatus[R_W1L] >= ST_MIXED or readStatus[R_W2] >= ST_MIXED or readStatus[R_W2L] >= ST_MIXED
+    debug("VERDICT: INCONCLUSIVE - a workaround-arm reading had disagreeing pairs or too few valid pairs (st>=2 above)")
+  elseif readStatus[R_W1] == ST_BRACKET or readStatus[R_W1L] == ST_BRACKET or readStatus[R_W2] == ST_BRACKET or readStatus[R_W2L] == ST_BRACKET
+    debug("VERDICT: REFUTED - with the keeper running, a group-1 cog plain GETCT fell outside cog 0's bracket: its 64-bit read is not current")
+  elseif readD[R_W1] == P_WKR and readD[R_W1L] == P_WKR and readD[R_W2] == P_WKR and readD[R_W2L] == P_WKR
+    debug("VERDICT: CONFIRMED - keeper running: cogs 4/5/6 started after 1 and 2 wraps read D=0 in every reading; keeper stopped: D=1 (positive control); cog 1 D=0 throughout")
   else
-    debug("VERDICT: REFUTED - cog 4 D: A1a=", sdec_(readD[R_A1A]), " A1b=", sdec_(readD[R_A1B]), " (pred 1)  A2=", sdec_(readD[R_A2]), " (pred 0)  A4a=", sdec_(readD[R_A4A]), " A4b=", sdec_(readD[R_A4B]), " (pred 2)")
+    debug("VERDICT: REFUTED - keeper running, group-1 D: W1=", sdec_(readD[R_W1]), " W1L=", sdec_(readD[R_W1L]), " W2=", sdec_(readD[R_W2]), " W2L=", sdec_(readD[R_W2L]), " (all predicted 0)")
 
-PRI ctrl(slotIdx, pLabel)
-' Check the cog-1 (group 0) control reading in slot slotIdx: st must be
-' ST_OK and D must be P_CTRL (0), else RIG FAIL.
+PRI ctrl(slotIdx, pLabel, expD)
+' RIG FAIL check for the control reading in slot slotIdx: expects status
+' ST_OK and D == expD. Sets bRigBad on the FAIL.
 '
 ' @param slotIdx - reading-slot index (an R_* constant)
 ' @param pLabel - address of the reading's zero-terminated label, printed by zstr_()
+' @param expD - the D value the control must read
 
-  if readStatus[slotIdx] <> ST_OK or readD[slotIdx] <> P_CTRL
-    debug("RIG FAIL: control cog 1 reading ", zstr_(pLabel), " expected D=0 st=0, got D=", sdec_(readD[slotIdx]), " st=", udec_(readStatus[slotIdx]))
+  if readStatus[slotIdx] <> ST_OK or readD[slotIdx] <> expD
+    debug("RIG FAIL: control reading ", zstr_(pLabel), " expected D=", sdec_(expD), " st=0, got D=", sdec_(readD[slotIdx]), " st=", udec_(readStatus[slotIdx]))
     bRigBad := TRUE
 
 ' ---------------------------------------------------------------------
-PRI reading(slotIdx, pLabel, pMailbox) | tries, validPairs, ackStatus, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter, diffHi, bBracket, bMixed, baseD, bTimedOut
-' One reading: NPAIRS valid request/answer pairs from one sampler.  Stores
-' the agreed D, the status and the LO-BRACKET failure count into slot
-' slotIdx.  Every pair is printed raw as it is taken.
+PRI reading(slotIdx, pLabel, pMailbox) | tries, validPairs, bAcked, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter, diffHi, bBracket, bMixed, baseD, bTimedOut
+' One reading: NPAIRS valid pairs from one sampler.  Stores D, status, and
+' the LO-BRACKET failure count into slot slotIdx.  Every pair is printed
+' raw as it is taken.
 '
 ' @param slotIdx - reading-slot index (an R_* constant)
 ' @param pLabel - address of the reading's zero-terminated label, printed by zstr_()
@@ -269,7 +311,7 @@ PRI reading(slotIdx, pLabel, pMailbox) | tries, validPairs, ackStatus, refHiBefo
 ' Local Variables:
 ' @local tries - request attempts made so far, up to MAXTRY
 ' @local validPairs - valid (in-window) pairs taken so far, target NPAIRS
-' @local ackStatus - take_pair() ack status for the current attempt (ACK_SEEN or ACK_NONE)
+' @local bAcked - take_pair() ack flag for the current attempt
 ' @local refHiBefore - cog 0's own CT upper long, before the request (refB)
 ' @local refLoBefore - cog 0's own CT lower long, before the request (refB)
 ' @local smpHi - sampler's CT upper long for the current attempt
@@ -289,8 +331,8 @@ PRI reading(slotIdx, pLabel, pMailbox) | tries, validPairs, ackStatus, refHiBefo
   repeat while validPairs < NPAIRS and tries < MAXTRY
     tries++
     requestSeq++
-    ackStatus, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter := take_pair(pMailbox, requestSeq, clkfreq / ACK_TIMEOUTS_PER_SEC)
-    if ackStatus == ACK_NONE
+    bAcked, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter := take_pair(pMailbox, requestSeq, clkfreq / MS_PER_SEC * ACK_TIMEOUT_MS)
+    if bAcked == FALSE
       debug(zstr_(pLabel), " TIMEOUT: sampler did not ack request ", udec_(requestSeq))
       readStatus[slotIdx] := ST_TIMEOUT
       readD[slotIdx] := 0
@@ -331,16 +373,16 @@ PRI isInWindow(loVal) : bInWindow
   bInWindow := (loVal +>= LOWIN) and (loVal +<= HIWIN)
 
 ' ---------------------------------------------------------------------
-PRI take_pair(pMailbox, reqSeq, tmo) : ackStatus, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter | tmoStart, tmoNow, pAck, ackSeq, pHi, pLo
+PRI take_pair(pMailbox, reqSeq, tmo) : bAcked, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter | tmoStart, tmoNow, pAck, ackSeq, pHi, pLo
 ' One request/answer transaction with the sampler at pMailbox, entirely
-' in cog-0 PASM (cog-exec), waiting at most tmo clocks for the ack.
-' Causal order: refB -> req write -> (sampler GETCT WC, GETCT, writes,
-' ack) -> ack seen -> sampler longs read -> refA.
+' in cog-0 PASM (cog-exec). Causal order: refB -> req write -> (sampler
+' GETCT WC, GETCT, writes, ack) -> ack seen -> sampler longs read ->
+' refA -- so no torn or stale pair can pass.
 '
 ' @param pMailbox - sampler mailbox base address ([0]=req [1]=hi [2]=lo [3]=ack)
 ' @param reqSeq - request sequence number to write, and to wait for as the ack
 ' @param tmo - timeout, in clocks, to wait for the ack
-' @returns ackStatus - ACK_SEEN if the sampler acked within tmo, else ACK_NONE (rest of the returns 0)
+' @returns bAcked - TRUE if acked within tmo, FALSE (rest of the returns 0) on timeout
 ' @returns refHiBefore - cog 0's own CT upper long, read before the request (refB)
 ' @returns refLoBefore - cog 0's own CT lower long, read before the request (refB)
 ' @returns smpHi - sampler's CT upper long
@@ -356,7 +398,7 @@ PRI take_pair(pMailbox, reqSeq, tmo) : ackStatus, refHiBefore, refLoBefore, smpH
 ' @local pHi - hub address of the mailbox hi long
 ' @local pLo - hub address of the mailbox lo long
 
-  ackStatus := ACK_NONE
+  bAcked := FALSE
   refHiBefore := 0
   refLoBefore := 0
   smpHi := 0
@@ -378,29 +420,31 @@ PRI take_pair(pMailbox, reqSeq, tmo) : ackStatus, refHiBefore, refLoBefore, smpH
                 sub     tmoNow, tmoStart
                 cmp     tmoNow, tmo     wc
         if_c    jmp     #.wait
-                ret                             ' timeout: ackStatus stays ACK_NONE
+                ret                             ' timeout: bAcked stays FALSE
 .got            rdlong  smpHi, pHi
                 rdlong  smpLo, pLo
                 getct   refHiAfter      wc      ' cog 0 upper long (reference, after)
                 getct   refLoAfter
-                mov     ackStatus, #ACK_SEEN
+                not     bAcked                  ' FALSE -> TRUE
   end
 
 PRI ct64() : ctHi, ctLo
-' cog 0's own 64-bit CT, read GETCT WC (upper long) then GETCT (lower
-' long), the order the sampler uses.
+' cog 0's own 64-bit CT, read GETCT WC then GETCT.
 '
 ' @returns ctHi - cog 0's own CT upper long
 ' @returns ctLo - cog 0's own CT lower long
 
+  ctHi := 0
+  ctLo := 0
   org
                 getct   ctHi            wc
                 getct   ctLo
   end
 
 PRI ct_track() : ctHi, ctLo
-' ct64() plus control C2: RIG FAIL if cog 0's upper long ever disagrees
-' with the number of lower-long wraps cog 0 itself watched since boot.
+' ct64() plus control C2: track lower-long wraps cog 0 has itself watched
+' happen since boot, and RIG FAIL if cog 0's own upper long disagrees with
+' that count while inside the sample window.
 '
 ' @returns ctHi - cog 0's own CT upper long
 ' @returns ctLo - cog 0's own CT lower long
@@ -478,58 +522,27 @@ PRI runmask() : cogMask | cogIdx
       cogMask |= 1 << cogIdx
 
 PRI halt()
-' RIG FAIL exit: print the HALTED line and set bHalted, so every later step
-' of main() is skipped and the run ends at its one finish() (no verdict is
-' printed).
+' Print the HALTED line and set bHalted: every later step of run_rig() is
+' skipped, so a RIG FAIL too ends at the one finish() and its
+' DEBUG_END_SESSION line.
 '
 
   debug("HALTED - no verdict")
   bHalted := TRUE
 
 PRI finish()
-' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
-' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+' Every terminal path ends here. pnut-term-ts ends the run when
+' END_SESSION or DEBUG_END_SESSION appears in the output (--headless or
+' --exit-on-end-session).
 '
 
   debug("DEBUG_END_SESSION")
   repeat
 
-' ---------------------------------------------------------------------
-' Explicit-cog-number starts (COGINIT #n, never the free-cog form).
-' SETQ puts the mailbox address in the new cog's PTRA.
-PRI start_cog1(pMailbox) | pSampler
-' Start cog 1 (CTRL_COG, the group-0 control sampler) at the sampler
-' entry point, with pMailbox loaded into its PTRA via SETQ.
-'
-' @param pMailbox - sampler mailbox base address ([0]=req [1]=hi [2]=lo [3]=ack)
-
-' Local Variables:
-' @local pSampler - address of the sampler entry point
-
-  pSampler := @sampler
-  org
-                setq    pMailbox
-                coginit #CTRL_COG, pSampler
-  end
-
-PRI start_cog4(pMailbox) | pSampler
-' Start cog 4 (SMP_COG, the group-1 sampler under test) at the sampler
-' entry point, with pMailbox loaded into its PTRA via SETQ.
-'
-' @param pMailbox - sampler mailbox base address ([0]=req [1]=hi [2]=lo [3]=ack)
-
-' Local Variables:
-' @local pSampler - address of the sampler entry point
-
-  pSampler := @sampler
-  org
-                setq    pMailbox
-                coginit #SMP_COG, pSampler
-  end
-
-DAT ' ---- Sampler Cog Code ----
-' Sampler (cog-exec).  PTRA = mailbox.  On each NEW request number it
-' reads GETCT WC then GETCT (upper long first), writes hi, lo, then ack.
+DAT ' ---- Sampler (cog-exec) ----
+' PTRA = mailbox.  On each NEW request number it reads GETCT WC then
+' GETCT, writes hi, lo, then ack.  Same code as the sampler of
+' e3-getct-stale-upper-long-runA/B.
                 org     0
 sampler         mov     s_last, #0
 s_loop          rdlong  s_req, ptra
@@ -538,9 +551,9 @@ s_loop          rdlong  s_req, ptra
                 mov     s_last, s_req
                 getct   s_hi            wc      ' this group's UPPER copy
                 getct   s_lo                    ' this group's LOWER copy
-                wrlong  s_hi, ptra[MB_HI_IDX]
-                wrlong  s_lo, ptra[MB_LO_IDX]
-                wrlong  s_req, ptra[MB_ACK_IDX] ' ack last: hi/lo already in hub
+                wrlong  s_hi, ptra[MB_HI_IDX]   ' mailbox hi long
+                wrlong  s_lo, ptra[MB_LO_IDX]   ' mailbox lo long
+                wrlong  s_req, ptra[MB_ACK_IDX] ' mailbox ack long, last: hi/lo already in hub
                 jmp     #s_loop
 s_last          long    0
 s_req           res     1

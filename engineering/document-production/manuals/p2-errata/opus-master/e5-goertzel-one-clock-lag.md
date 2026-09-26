@@ -5,7 +5,7 @@
 
 **Actual:** It holds the first N-1; the last term is held back and added on the first clock of the next Goertzel burst.
 
-**Fix:** Run each SINC1 burst through the `burst_sums` helper routine, which ends every burst with a zero-term burst before reading; see *The fix*.
+**Workaround:** Deliver the burst's held last term to the accumulators before you read them (SINC1 mode); see *A proven workaround*.
 :::
 
 The erratum affects PASM code that runs DDS/Goertzel bursts and reads the accumulators with `GETXACC` after each one: every reading is short by the burst's last term, and the next burst's reading carries it. The erratum was predicted by the clean-room design study and confirmed on silicon.
@@ -44,41 +44,50 @@ When every term is the same (a steady input and one lookup value), the carried t
 
 The shortfall was one term at both burst lengths tested. The idle reading is stable, and every term reaches the accumulator eventually.
 
-The difference of two idle readings is still needed as well, because `GETXACC` does not clear the accumulators while the streamer is idle; that is Erratum E4, and the fix below removes both.
+The difference of two idle readings is still needed as well, because `GETXACC` does not clear the accumulators while the streamer is idle; that is Erratum E4, and the workaround below steps around both.
 
-## The fix {#sec-e5-fix}
+## A proven workaround {#sec-e5-workaround}
+
+**What any workaround must do:** deliver the burst's held last term to the accumulators before reading them, in SINC1 mode.
+
+**One way, proven on a real P2:** the `burst_sums` helper routine, which ends every burst with a zero-term burst before reading and also steps around Erratum E4.
 
 ```pasm2
-' Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
-' sums. Put your XINIT D and S in burst_mode and burst_sel, then
-' CALL #burst_sums with the streamer idle. It leaves the burst's
-' cosine sum in cos_sum and its sine sum in sin_sum.
-burst_sums  mov     zero_mode, burst_mode   ' zero burst: your mode,
-            setword zero_mode, #4, #0       '   count 4,
-            mov     zero_sel, burst_sel     '   your S with every
-            setnib  zero_sel, #0, #3        '   input off: S[15:12]=0
-            xinit   zero_mode, zero_sel     ' adds any held term
+{ Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
+  sums. Put your XINIT D and S in burst_mode and burst_sel, then
+  CALL #burst_sums with the streamer idle. It leaves the burst's
+  cosine sum in cos_sum and its sine sum in sin_sum.
+}
+CON
+  ZERO_COUNT = 4    ' each zero burst: a count of 4
+  INPUT_NIB  = 3    ' S nibble 3 = S[15:12], the summed inputs
+DAT
+burst_sums  mov     zero_mode, burst_mode       ' zero burst: your mode,
+            setword zero_mode, #ZERO_COUNT, #0  '   count 4,
+            mov     zero_sel, burst_sel         '   your S with every
+            setnib  zero_sel, #0, #INPUT_NIB    '   input off: S[15:12]=0
+            xinit   zero_mode, zero_sel         ' adds any held term
             waitxfi
-            getxacc cos_base                ' idle read: no clear
+            getxacc cos_base                    ' idle read: no clear
             mov     sin_base, 0-0
-            xinit   burst_mode, burst_sel   ' your burst
+            xinit   burst_mode, burst_sel       ' your burst
             waitxfi
-            xinit   zero_mode, zero_sel     ' adds its last term
+            xinit   zero_mode, zero_sel         ' adds its last term
             waitxfi
-            getxacc cos_sum                 ' idle read again
+            getxacc cos_sum                     ' idle read again
             mov     sin_sum, 0-0
-            sub     cos_sum, cos_base       ' cosine sum, all N terms
-            sub     sin_sum, sin_base       ' sine sum, all N terms
+            sub     cos_sum, cos_base           ' cosine sum, all N terms
+            sub     sin_sum, sin_base           ' sine sum, all N terms
             ret
 
-burst_mode  long    $F007_0100              ' your D (count 256 here)
-burst_sel   long    $0008_80A5              ' your S
-zero_mode   long    0
-zero_sel    long    0
-cos_base    long    0
-sin_base    long    0
-cos_sum     long    0
-sin_sum     long    0
+burst_mode  long    $F007_0100                  ' your D (count 256 here)
+burst_sel   long    $0008_80A5                  ' your S
+zero_mode   long    0                           ' built: the zero burst's D
+zero_sel    long    0                           ' built: the zero burst's S
+cos_base    long    0                           ' before reading, cosine
+sin_base    long    0                           ' before reading, sine
+cos_sum     long    0                           ' result: cosine sum
+sin_sum     long    0                           ' result: sine sum
 ```
 
 Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, and leaves no term held for the next burst: a *helper routine*, for SINC1 mode.
@@ -87,16 +96,18 @@ On silicon, this block returned exactly N terms on both sums in all 60 calls of 
 
 The routine is for SINC1 mode. In SINC2 mode its zero burst has not been tested as a flush, and the routine is not recommended there. SINC2 has its own, separate constraint, which is documented and is not this erratum: the P2 Documentation's note on Goertzel SINC2 mode, by Chip Gracey (2024.12.16), states that a varying number of iterations in a Goertzel cycle corrupts the current and next samples. Its two remedies held on a real P2 in the test program `e5-goertzel-sinc2-iteration-count-test.spin2` (2026-09-25, at 200 MHz, run twice). With every NCO cycle the same length (`SETXFRQ` of `$0080_0000`, 256 clocks per cycle, 2,048-clock commands chained with `XCONT`), 0 of 1,020 SINC2 samples were off. With each command issued by `XZERO`, at a `SETXFRQ` value of `$0080_0040` with 8 NCO cycles per command and of `$00A3_D70C` with 100 and with 25,000, every command kept one length and 0 of 1,020, 0 of 2,044 and 0 of 12 samples changed, where `XCONT` at the same settings gave 30, 12 and 4 corrupted samples.
 
-This is the same routine Erratum E4 prints, because one call removes both errata. To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's.
+This is the same routine Erratum E4 prints, because one call steps around both errata. To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's.
 
-The zero bursts are your mode word with a count of 4 and S[15:12] clear, so every term they form is zero. The first one's first clock adds whatever term an earlier burst left held, so the before reading is complete; the second adds your burst's last term, and leaves a zero term held. Both readings are taken with the streamer idle, where `GETXACC` clears nothing (Erratum E4), so their difference is your burst.
+The zero bursts are your mode word with a count of `ZERO_COUNT` (4) and `S` nibble `INPUT_NIB` ([15:12]) clear, so every term they form is zero. The first one's first clock adds whatever term an earlier burst left held, so the before reading is complete; the second adds your burst's last term, and leaves a zero term held. Both readings are taken with the streamer idle, where `GETXACC` clears nothing (Erratum E4), so their difference is your burst.
+
+**Other ways that meet the condition.** By the mechanism under *Why it happens*, a Goertzel burst whose terms are all zero, run after your burst and before the reading, delivers the held term without the rest of the routine. The kind measured is the routine's own, a count of 4 with S[15:12] clear: in the erratum test such a zero burst, started by `XINIT` and read after a wait of 500 clocks rather than after `WAITXFI`, left the reading exactly N terms above the reading taken before the measured burst, in all 16 sequences. Other zero bursts were not tested.
 
 **Cost.** Each call runs two zero bursts of 4 NCO rollovers each, at your `SETXFRQ` rate, besides your burst, and the cog waits in `WAITXFI` until each command has finished. The routine is 17 instructions, and 8 longs of cog RAM hold its operands and results.
 
 **Limits.**
 
 - **One burst at a time, from an idle streamer.** The routine starts every command with `XINIT`, which issues it at once, so it does not fit a continuous stream of commands chained with `XCONT`.
-- **Conditions of the test.** The fix's test program ran the routine once, from cog RAM on a P2 board at 200 MHz, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks, the first call of each record made with an earlier burst's term still held. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies and hub execution were not tested.
+- **Conditions of the test.** The workaround's test program ran the routine once, from cog RAM on a P2 board at 200 MHz, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks, the first call of each record made with an earlier burst's term still held. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies and hub execution were not tested.
 
 ## Why it happens {#sec-e5-why}
 
@@ -161,13 +172,13 @@ A nonzero `R1b-R1` under any of them would mean the accumulator moved while the 
 
 The other three repetitions of each row read the same values. All 16 sequences match the one-clock-lag row of the outcomes table: `d1 = (N-1)*C`, `d2 = C`, `R1b-R1 = 0`, and the carry steps `(N-1)*C`, `N*C`, `C`. The sine accumulation shows the same pattern with a term of 37: at P3 low and N = 64 it read `d1=-2_331`, `d2=-37`, `d3=-2_331`, `d4=-2_368`, `d5=-37`, and it read the lag pattern and the carry pattern in 16 of 16 sequences.
 
-The zero burst of step 3 is the kind the fix uses: a count of 4 with S[15:12] clear. In all 16 sequences the reading after it had gained exactly N terms over the reading before the measured burst, and the next burst read `(N-1)*C`, so no term was carried past the zero burst. This test waited a fixed 500 clocks after each `XINIT` rather than using `WAITXFI`, and had no DAC output enabled.
+The zero burst of step 3 is the kind the workaround uses: a count of 4 with S[15:12] clear. In all 16 sequences the reading after it had gained exactly N terms over the reading before the measured burst, and the next burst read `(N-1)*C`, so no term was carried past the zero burst. This test waited a fixed 500 clocks after each `XINIT` rather than using `WAITXFI`, and had no DAC output enabled.
 
 The test ran on 2026-09-24, twice, from two builds of the same program with identical measuring code. Every measured value matched between the two runs.
 
-### The fix's test {#sec-e5-fix-proof}
+### The workaround's test {#sec-e5-workaround-proof}
 
-The fix ran in the test program described in Erratum E4, which calls the printed routine byte for byte. For this erratum its checks are these. The uncorrected part of each record must show the lag in the same run: a 64-clock burst read 63 × C, the 65-clock burst right after it read 65 × C, a zero burst alone read C, and a 7-clock burst read 6 × C, with its last term left held. The first call of `burst_sums` in each record starts with that term held, so its before reading must have gained exactly C, and every later call's nothing; every call must return N × C, for N = 1 to 1001. A result of (N-1) × C would mean the zero burst did not deliver the last term.
+The workaround ran in the test program described in Erratum E4, which calls the printed routine byte for byte. For this erratum its checks are these. The uncorrected part of each record must show the lag in the same run: a 64-clock burst read 63 × C, the 65-clock burst right after it read 65 × C, a zero burst alone read C, and a 7-clock burst read 6 × C, with its last term left held. The first call of `burst_sums` in each record starts with that term held, so its before reading must have gained exactly C, and every later call's nothing; every call must return N × C, for N = 1 to 1001. A result of (N-1) × C would mean the zero burst did not deliver the last term.
 
 **The results.** Every control passed, and the per-clock term measured C = 61 on the cosine sum and 23 on the sine sum at P3 low, -61 and -23 at P3 high, in every record. The uncorrected part showed the lag in all 12 rows (6 records, cosine and sine): at P3 low, on the cosine sum, the 64-clock burst read 3,843 (63 × 61), the 65-clock burst right after it 3,965 (65 × 61), the zero burst alone 61, and the 7-clock burst 366 (6 × 61); on the sine sum 1,449, 1,495, 23 and 138; at P3 high the same values negated. The first call of each record found exactly C waiting: its before reading was 61 above the 7-clock burst's reading at P3 low (77,165 against 77,104 in the first record) and 61 below it at P3 high (396,744 against 396,805 in the fourth). Every later call's before reading equalled the program's own reading after the previous call, so no call left a term behind. Every one of the 60 calls returned N × C on both sums, from 61 for N = 1 to 61,061 for N = 1001 on the cosine sum at P3 low, and -23 to -23,023 on the sine sum at P3 high; none returned (N-1) × C.
 
@@ -217,7 +228,7 @@ The carry steps follow directly, with no zero burst between the two term bursts:
 
 To run it, compile with `pnut-ts -d` and load it with DEBUG enabled (2 Mbaud). P3 must be free: the program drives it. A run that decides the question prints no `RIG FAIL` lines, a `C measured` line showing -19 and 19, and one `VERDICT:` line. Every raw reading is printed as well, so the verdict can be re-derived from the output rather than taken from the program.
 
-The fix's test program is `e4-e5-fix-read-sums-test.spin2`, described in Erratum E4. Its uncorrected part shows this erratum in the same run as the fix; the second half of it reads like this, a `GETXACC` "to clear" followed by the 65-clock burst, whose reading carries the 64-clock burst's held term:
+The workaround's test program is `e4-e5-workaround-read-sums-test.spin2`, described in Erratum E4. Its uncorrected part shows this erratum in the same run as the workaround; the second half of it reads like this, a `GETXACC` "to clear" followed by the 65-clock burst, whose reading carries the 64-clock burst's held term:
 
 ```pasm2
                 mov     dk_, dmode_
@@ -234,7 +245,7 @@ The fix's test program is `e4-e5-fix-read-sums-test.spin2`, described in Erratum
                 wrlong  by_, ptrb++
 ```
 
-The test program `e5-goertzel-sinc2-iteration-count-test.spin2`, cited in *The fix*, is the check of the P2 Documentation's separate SINC2 constraint, not of this erratum.
+The test program `e5-goertzel-sinc2-iteration-count-test.spin2`, cited in *A proven workaround*, is the check of the P2 Documentation's separate SINC2 constraint, not of this erratum.
 
 ## Status {#sec-e5-status}
 
@@ -244,6 +255,6 @@ The test program `e5-goertzel-sinc2-iteration-count-test.spin2`, cited in *The f
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; helper routine (SINC1) |
+| Workaround proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; helper routine (SINC1) |
 | Affects | `GETXACC` readings after a DDS/Goertzel burst in SINC1 mode, sine and cosine; tested with bursts of 64 and 65 clocks started by `XINIT` |
-| Test program | `e5-goertzel-one-clock-lag-test.spin2`; the fix: `e4-e5-fix-read-sums-test.spin2` |
+| Test program | `e5-goertzel-one-clock-lag-test.spin2`; the workaround: `e4-e5-workaround-read-sums-test.spin2` |

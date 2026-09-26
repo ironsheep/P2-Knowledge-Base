@@ -3,7 +3,7 @@
 ''   File.......  e6-dac-mode-adc-enable-test.spin2
 ''   Purpose....  Erratum E6 test: whether raising OUT runs the ADC in a
 ''                DAC smart-pin mode with TT = %00 and with TT = %01; the
-''                TT = %01 word is the fix
+''                TT = %01 word is the workaround
 ''   Manual.....  P2 Errata
 ''   Version....  v0.2.0 (2026-09-26)
 ''   Appears in.  Erratum E6: In a DAC Smart-Pin Mode, OUT Needs TT Bit 0
@@ -20,15 +20,17 @@
 '' ===========================================================================
 
 CON ' ---- Rig Parameters ----
-  _clkfreq          = 200_000_000
+  _clkfreq          = 200_000_000       ' system clock: 200 MHz
   DEBUG_COGS        = %0000_0001        ' debugger in cog 0 ONLY
 
   PIN_P             = 4                 ' pin under test (DAC smart mode)
   PIN_NBR           = PIN_P + 1         ' observer pin: A input = relative -1 pin = PIN_P
-  PIN_P_MIN         = 0
+  PIN_PAIR          = PIN_P addpins (PIN_NBR - PIN_P)  ' pins P and P+1 as one pin field
+  PIN_P_MIN         = 0                 ' lowest pin P allowed
   PIN_P_MAX         = 30                ' PIN_NBR must be a pin of INA (0..31)
 
   ROUNDS            = 5                 ' C1..C4 in order, five times over
+  FIRST_ROUND       = 0                 ' the round that seeds each condition's min and max
   READS_PER_SAMPLE  = 4096              ' INA reads per sample
   SETTLE_CLK        = 10_000            ' WAITX after every change
   RIG_TIMEOUT_SEC   = 2                 ' host wait cap; the engine runs about 5 ms
@@ -53,34 +55,34 @@ CON ' ---- Configuration Words ----
   SYM_NBR           = P_MINUS1_A | P_LOGIC_A | P_TT_00 | P_NORMAL
 
   ' WRPIN D field positions and widths (P2 Documentation)
-  SHIFT_AAAA        = 28
+  SHIFT_AAAA        = 28                ' %AAAA = D[31:28], A input selector
   MASK_AAAA         = %1111
-  SHIFT_BBBB        = 24
+  SHIFT_BBBB        = 24                ' %BBBB = D[27:24], B input selector
   MASK_BBBB         = %1111
-  SHIFT_FFF         = 21
+  SHIFT_FFF         = 21                ' %FFF = D[23:21], A/B logic or filter
   MASK_FFF          = %111
-  SHIFT_M           = 8
+  SHIFT_M           = 8                 ' %M = D[20:8], pin mode
   MASK_M            = %1_1111_1111_1111
   SHIFT_M_TOP       = 10                ' M[12:10] within M
   MASK_M_TOP        = %111
-  SHIFT_TT          = 6
+  SHIFT_TT          = 6                 ' %TT = D[7:6]
   MASK_TT           = %11
-  SHIFT_SSSSS       = 1
+  SHIFT_SSSSS       = 1                 ' %SSSSS = D[5:1], smart-pin mode
   MASK_SSSSS        = %1_1111
-  MASK_BIT0         = 1
+  MASK_BIT0         = 1                 ' D[0]
 
   ' expected field values
   AAAA_THIS_PIN     = %0000             ' true, this pin's read state
   AAAA_MINUS1       = %0111             ' true, relative -1 pin's read state
-  BBBB_DEFAULT      = %0000
-  FFF_PASS_AB       = %000
+  BBBB_DEFAULT      = %0000             ' true, this pin's read state (B unused)
+  FFF_PASS_AB       = %000              ' A, B passed through, no logic or filter
   M_DAC_990R        = %1_0100_0000_0000 ' M[12:10] = %101 DAC_MODE, M[9:0] = 0
   M_LOGIC_A         = 0                 ' logic level A -> IN
   TT_OUTPUT_OFF     = %00               ' smart modes: x0 = output disabled
   TT_OUTPUT_ON      = %01               ' smart modes: x1 = output enabled
   SSSSS_OFF         = %00000            ' smart pin off
   SSSSS_DAC_NOISE   = %00001            ' DAC noise (with DAC_MODE)
-  BIT0_REQUIRED     = 0
+  BIT0_REQUIRED     = 0                 ' D[0] must be clear
 
 CON ' ---- Mailbox Layout ----
   ' Conditions, in run order within a round:
@@ -89,7 +91,7 @@ CON ' ---- Mailbox Layout ----
   '  COND_C3 - TT = %00, OUT low
   '  COND_C4 - TT = %00, OUT high
   #0, COND_C1, COND_C2, COND_C3, COND_C4
-  COND_COUNT        = 4
+  COND_COUNT        = COND_C4 + 1       ' conditions per round
 
   ' mailbox longs, in the order the measuring cog writes them:
   '  MB_DONE      - MBOX_DONE once the engine has finished and released the pins
@@ -142,7 +144,7 @@ PUB main() | engineCog, startTick
       repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
       if mailbox[MB_DONE] <> MBOX_DONE
         cogstop(engineCog)
-        pinclear(PIN_P addpins 1)
+        pinclear(PIN_PAIR)
         debug("RIG FAIL: measuring cog did not report done within ", udec_(RIG_TIMEOUT_SEC), " s (expected about 5 ms); pins P and P+1 cleared by cog 0")
         debug("NO VERDICT: the measurement did not complete")
       else
@@ -332,9 +334,9 @@ PRI compute_ranges() | condIdx, roundIdx, readCount
 ' @local readCount - the sample under inspection
 
   repeat condIdx from COND_C1 to COND_C4
-    sample_min[condIdx] := sample_at(0, condIdx)
+    sample_min[condIdx] := sample_at(FIRST_ROUND, condIdx)
     sample_max[condIdx] := sample_min[condIdx]
-    repeat roundIdx from 1 to ROUNDS - 1
+    repeat roundIdx from FIRST_ROUND + 1 to ROUNDS - 1
       readCount := sample_at(roundIdx, condIdx)
       if readCount < sample_min[condIdx]
         sample_min[condIdx] := readCount
@@ -387,32 +389,32 @@ PRI separates(xCond, yCond) : bSeparates | roundIdx, readCount
       quit
 
 
-PRI decide_verdict() | bSep21, bSep43, bSep42
+PRI decide_verdict() | bSepC2C1, bSepC4C3, bSepC4C2
 ' Run the three separation tests and print the one VERDICT line.
 '
 
 ' Local Variables:
-' @local bSep21 - C2 separates from C1 (the control)
-' @local bSep43 - C4 separates from C3
-' @local bSep42 - C4 separates from C2
+' @local bSepC2C1 - C2 separates from C1 (the control)
+' @local bSepC4C3 - C4 separates from C3
+' @local bSepC4C2 - C4 separates from C2
 
-  bSep21 := separates(COND_C2, COND_C1)
-  bSep43 := separates(COND_C4, COND_C3)
-  bSep42 := separates(COND_C4, COND_C2)
+  bSepC2C1 := separates(COND_C2, COND_C1)
+  bSepC4C3 := separates(COND_C4, COND_C3)
+  bSepC4C2 := separates(COND_C4, COND_C2)
   debug("--- SEPARATION TESTS (X separates from Y: every X sample outside [min Y, max Y]) ---")
-  debug("  C2 separates from C1: ", zstr_(yes_no(bSep21)), "   control; YES = the reading sees the ADC at TT = %01")
-  debug("  C4 separates from C3: ", zstr_(yes_no(bSep43)), "   prediction NO;  published table YES")
-  debug("  C4 separates from C2: ", zstr_(yes_no(bSep42)), "   prediction YES; published table NO")
+  debug("  C2 separates from C1: ", zstr_(yes_no(bSepC2C1)), "   control; YES = the reading sees the ADC at TT = %01")
+  debug("  C4 separates from C3: ", zstr_(yes_no(bSepC4C3)), "   prediction NO;  published table YES")
+  debug("  C4 separates from C2: ", zstr_(yes_no(bSepC4C2)), "   prediction YES; published table NO")
   debug(" ")
-  if bSep21 == FALSE
+  if bSepC2C1 == FALSE
     debug("VERDICT: INCONCLUSIVE - C2 does not separate from C1: the neighbour reading does not show the ADC at TT = %01, so C3 and C4 decide nothing (samples above)")
-  elseif bSep43 == FALSE and bSep42 == TRUE
+  elseif bSepC4C3 == FALSE and bSepC4C2 == TRUE
     debug("VERDICT: CONFIRMED - at TT = %00 OUT high reads as OUT low (C4 not sep C3) and not as the running ADC (C4 sep C2); at TT = %01 OUT runs the ADC (C2 sep C1)")
     debug("  OUT does not switch the ADC unless TT bit 0 enables the output")
-  elseif bSep43 == TRUE and bSep42 == FALSE
+  elseif bSepC4C3 == TRUE and bSepC4C2 == FALSE
     debug("VERDICT: REFUTED - at TT = %00 OUT high separates from OUT low (C4 sep C3) and falls with the running ADC (C4 not sep C2)")
     debug("  OUT enables the ADC at TT = %00, as the published %TT table states")
-  elseif bSep43 == TRUE and bSep42 == TRUE
+  elseif bSepC4C3 == TRUE and bSepC4C2 == TRUE
     debug("VERDICT: INCONCLUSIVE - unpredicted pattern: C4 separates from both C3 and C2 (falls neither with OUT low nor with the running ADC); samples above")
   else
     debug("VERDICT: INCONCLUSIVE - C4 separates from neither C3 nor C2: the ranges do not discriminate; samples above")
@@ -483,18 +485,18 @@ do_cond         dirl    #PIN_P                  ' configure with DIR low (smart 
 ' One sample: settle, then READS_PER_SAMPLE reads of INA, counting bit P+1.
 sample          waitx   ##SETTLE_CLK
                 mov     count_, #0
-                rep     #3, reads_
+                rep     @.read_end, reads_
                 mov     insnap_, ina
                 testb   insnap_, #PIN_NBR       wc
         if_c    add     count_, #1
-                wrlong  count_, ptrb
+.read_end       wrlong  count_, ptrb
                 add     ptrb, #4
                 ret
 
-cfg_tt00_       long    CFG_DAC_TT00
-cfg_tt01_       long    CFG_DAC_TT01
-cfg_nbr_        long    CFG_NBR
-reads_          long    READS_PER_SAMPLE
+cfg_tt00_       long    CFG_DAC_TT00    ' WRPIN word for C3, C4
+cfg_tt01_       long    CFG_DAC_TT01    ' WRPIN word for C1, C2
+cfg_nbr_        long    CFG_NBR         ' WRPIN word for the observer P+1
+reads_          long    READS_PER_SAMPLE  ' REP count: INA reads per sample
 
 cfg_            res     1               ' WRPIN word for the current condition
 outlvl_         res     1               ' OUT_LOW / OUT_HIGH for the current condition

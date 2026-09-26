@@ -5,7 +5,7 @@
 
 **Actual:** issued 8 to 15 clocks after a no-wait `RDFAST` (`D[31]` = 1), at one spacing that depends on the hub alignment, the blocking `RDFAST` takes 2 clocks without waiting, and the next `RFLONG` returns `$0000_0000`.
 
-**Fix:** let at least 16 clocks pass from the start of the no-wait `RDFAST` to the start of the blocking one (`WAITX #12` directly after the no-wait `RDFAST`); see *The fix*.
+**Workaround:** at least 16 clocks must pass from the start of the no-wait `RDFAST` to the start of the blocking one; see *A proven workaround*.
 :::
 
 This erratum affects a cog that starts the hub FIFO with a no-wait `RDFAST` and then, a few clocks later, restarts it at another address with a blocking `RDFAST` and reads in the next instruction. The failure needs both instructions, in that order, 8 to 15 clocks apart; a cog that uses only blocking `RDFAST`s, or only no-wait ones, does not meet it. It was measured in cog execution, with `RFLONG` as the read.
@@ -46,20 +46,29 @@ Whether it happens depends on the spacing and on the hub alignment at the moment
 
 The long after the zero is not the second long either. The test printed the second `RFLONG` for one trial in each failing alignment: where the new address lay in hub slice 0, 1 or 2, it returned the first long at that address; in slices 3 to 7 it returned `$0000_0000` again. Reads past the second were not made. The test's data regions in hub RAM were unchanged: it re-checked them after every alignment.
 
-## The fix {#sec-e7-fix}
+## A proven workaround {#sec-e7-workaround}
+
+**What any workaround must do:** let at least 16 clocks pass from the start of the no-wait `RDFAST` to the start of the blocking one.
+
+**One way, proven on a real P2:** a `WAITX #RDFAST_SPACING_WAITX` (12) directly after the no-wait `RDFAST`.
 
 ```pasm2
-        rdfast  nowait, hub_first   ' no-wait RDFAST (D[31] = 1)
-        waitx   #12                 ' E7: >= 16 clocks, RDFAST to RDFAST
-        rdfast  #0, hub_next        ' blocking RDFAST: now it waits
-        rflong  first_long          ' reads hub_next's first long
+CON
+  RDFAST_SPACING_WAITX = 12            ' RDFAST 2 + WAITX 2+12 = 16 clocks
+DAT
+        rdfast  nowait, hub_first      ' no-wait RDFAST (D[31] = 1)
+        waitx   #RDFAST_SPACING_WAITX  ' E7: >= 16 clocks, RDFAST to RDFAST
+        rdfast  #0, hub_next           ' blocking RDFAST: now it waits
+        rflong  first_long             ' reads hub_next's first long
 ```
 
-The `WAITX #12` makes the spacing from the start of the no-wait `RDFAST` to the start of the blocking one 16 clocks, one more than the largest failing spacing measured, so that the blocking `RDFAST` waits and the `RFLONG` after it reads the first long at `hub_next`; it is a rule at each use, applied wherever your code issues a blocking `RDFAST` after a no-wait one.
+The `WAITX #RDFAST_SPACING_WAITX` (12) makes the spacing from the start of the no-wait `RDFAST` to the start of the blocking one 16 clocks, one more than the largest failing spacing measured, so that the blocking `RDFAST` waits and the `RFLONG` after it reads the first long at `hub_next`; it is a rule at each use, applied wherever your code issues a blocking `RDFAST` after a no-wait one.
 
 In your code, `nowait` is a register holding `$8000_0000` (`D[31]` = 1, and a block count of 0, so no wrap); `hub_first` and `hub_next` hold the two hub addresses, and `first_long` receives the first long at `hub_next`.
 
-The rule is the spacing: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one. The no-wait `RDFAST` takes 2 clocks and `WAITX #12` takes 2 + 12 = 14. The basis is measured: in the erratum test, every spacing from 16 to 44 clocks read correctly in all 64 alignments and all 16 trials of each, and the blocking `RDFAST` then waited its usual 10 to 17 clocks. There the spacing was set by a `WAITX` whose register operand held 12 to 40. The block above, with `#12`, ran in the fix test on 2026-09-26: in all 64 alignments, 16 trials each, `first_long` received the first long at `hub_next`, and the next `RFLONG` the long after it, in 1,024 of 1,024 trials, with the blocking `RDFAST` waiting 10 to 17 clocks. In the same run the unfixed arrangement failed as described above in all 64 alignments.
+The rule is the spacing: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one. The no-wait `RDFAST` takes 2 clocks and `WAITX #RDFAST_SPACING_WAITX` takes 2 + 12 = 14. The basis is measured: in the erratum test, every spacing from 16 to 44 clocks read correctly in all 64 alignments and all 16 trials of each, and the blocking `RDFAST` then waited its usual 10 to 17 clocks. There the spacing was set by a `WAITX` whose register operand held 12 to 40. The block above, with `RDFAST_SPACING_WAITX` = 12, ran in the workaround test on 2026-09-26: in all 64 alignments, 16 trials each, `first_long` received the first long at `hub_next`, and the next `RFLONG` the long after it, in 1,024 of 1,024 trials, with the blocking `RDFAST` waiting 10 to 17 clocks. In the same run the unspaced arrangement failed as described above in all 64 alignments.
+
+**Other ways that meet the condition.** Other instructions that fill at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one meet the same condition, since the measurements tie the failure to the spacing, not to the `WAITX`. They have not been run: only `WAITX` was placed between the two `RDFAST`s, and instructions that wait for hub RAM there were not tested (limits below).
 
 The cost is the 14 clocks of the `WAITX`, each time a blocking `RDFAST` follows a no-wait one.
 
@@ -67,7 +76,7 @@ The limits of the proof:
 
 - Only `WAITX` was tested between the two `RDFAST`s. Other instructions there, in particular instructions that wait for hub RAM, were not.
 - The `WRFAST` counterpart of this arrangement was not tested.
-- Making the first `RDFAST` blocking, in place of the spacing, was not tested as a fix.
+- Making the first `RDFAST` blocking, in place of the spacing, was not tested as a workaround.
 - Only `RFLONG` was tested as the read after the blocking `RDFAST`. The streamer was not used.
 - The no-wait `RDFAST`'s address was a long in hub slice 0 in every trial; the blocking `RDFAST`'s address was a long in each of the 8 slices. Both used a block count of 0.
 - Spacings above 44 clocks were not tested.
@@ -122,11 +131,11 @@ At each failing spacing, all 16 trials read `$0000_0000`, and the blocking `RDFA
 
 The test ran on 2026-09-25, twice. The two runs printed the same result for every alignment and spacing.
 
-**The fix.** The fix test ran on 2026-09-26, once, on a P2 board at 200 MHz, with the same regions, the same loading of the FIFO before every trial and the same 64 alignments.
+**The workaround.** The workaround test ran on 2026-09-26, once, on a P2 board at 200 MHz, with the same regions, the same loading of the FIFO before every trial and the same 64 alignments.
 
-- Its controls were the four above and one more: `WAITX #12` between two `GETCT`s measured 16 clocks, 2 for the `GETCT` pair and 14 for the `WAITX`, in every trial. Every control was correct in every trial.
-- As a positive control, the same run swept the unfixed arrangement over the same 42 spacings. It failed at exactly one spacing in each of the 64 alignments, at the same spacings as in the erratum test (table above), with all 16 trials reading `$0000_0000` and the blocking `RDFAST` taking 2 clocks: 1,024 of 43,008 reads wrong. At every spacing from 16 to 44 clocks, the first read and the long after it were correct in all 29,696 trials.
-- The block printed in *The fix*, with nothing else between its lines, read the first long at `hub_next` and then the long after it in 1,024 of 1,024 trials. Its blocking `RDFAST` waited 10 to 17 clocks, taking 8 different times over the 8 starting points in every slice.
+- Its controls were the four above and one more: `WAITX #RDFAST_SPACING_WAITX` (12) between two `GETCT`s measured 16 clocks, 2 for the `GETCT` pair and 14 for the `WAITX`, in every trial. Every control was correct in every trial.
+- As a positive control, the same run swept the unspaced arrangement over the same 42 spacings. It failed at exactly one spacing in each of the 64 alignments, at the same spacings as in the erratum test (table above), with all 16 trials reading `$0000_0000` and the blocking `RDFAST` taking 2 clocks: 1,024 of 43,008 reads wrong. At every spacing from 16 to 44 clocks, the first read and the long after it were correct in all 29,696 trials.
+- The block printed in *A proven workaround*, with nothing else between its lines, read the first long at `hub_next` and then the long after it in 1,024 of 1,024 trials. Its blocking `RDFAST` waited 10 to 17 clocks, taking 8 different times over the 8 starting points in every slice.
 
 ## The test program {#sec-e7-program}
 
@@ -164,7 +173,7 @@ The next three lines, whose comments run past this page's width, are `rdfast c_n
 
 To run it, compile with `pnut-ts -d` and load it to RAM with DEBUG enabled. It uses no pins. A run that decides the question prints no `RIG FAIL` lines; this erratum shows as the second `ARM-VERDICT` line, which reads `DEVIATES` with 1,024 of 43,008 reads wrong. Every row is printed, so the result can be re-derived from the output rather than taken from the program.
 
-The fix test is `e7-fix-rdfast-spacing-test.spin2`. It uses the same construction and the same trial, and runs the block printed in *The fix*, between two marker comments, in all 64 alignments. Alongside, it runs this erratum's arrangement at every spacing from 2 to 44 clocks: a clean result for the block counts only if that sweep shows the erratum in every alignment, and otherwise the program reports the fix as inconclusive. Its controls include that `WAITX #12` takes 14 clocks. It ends with a `VERDICT E7 FIX:` line.
+The workaround test is `e7-workaround-rdfast-spacing-test.spin2`. It uses the same construction and the same trial, and runs the block printed in *A proven workaround*, between two marker comments, in all 64 alignments. Alongside, it runs this erratum's arrangement at every spacing from 2 to 44 clocks: a clean result for the block counts only if that sweep shows the erratum in every alignment, and otherwise the program reports the workaround as inconclusive. Its controls include that `WAITX #RDFAST_SPACING_WAITX` (12) takes 14 clocks. It ends with a `VERDICT E7 WORKAROUND:` line.
 
 ## Status {#sec-e7-status}
 
@@ -174,6 +183,6 @@ The fix test is `e7-fix-rdfast-spacing-test.spin2`. It uses the same constructio
 | Published by Parallax | No |
 | Found by | Found on the bench here, by a test built to measure something else |
 | Confirmed on silicon | Yes — 2026-09-25, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a rule at each use: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one |
+| Workaround proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a rule at each use: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one |
 | Affects | a blocking `RDFAST` issued 8 to 15 clocks after a no-wait `RDFAST`, at the one spacing its hub alignment selects: the next `RFLONG` returns `$0000_0000`. Tested in cog execution, with `RFLONG` as the read |
-| Test program | `e7-rdfast-blocking-after-no-wait-test.spin2`; the fix: `e7-fix-rdfast-spacing-test.spin2` |
+| Test program | `e7-rdfast-blocking-after-no-wait-test.spin2`; the workaround: `e7-workaround-rdfast-spacing-test.spin2` |

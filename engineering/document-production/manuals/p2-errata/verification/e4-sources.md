@@ -14,8 +14,8 @@ document: ids and paths are allowed here, never in the chapter.
 | **RIG** | `engineering/document-production/manuals/p2-errata/audit/verification-tests/test-so80-getxacc-clear-gating.spin2` (reader name `e4-getxacc-clear-gating-test.spin2`) |
 | **L2** | `.../audit/verification-tests/logs/debug_260924-231817.log` (run 2, style-conformed build, `.bin` 15616 bytes, L2:14) |
 | **L1** | `.../audit/verification-tests/logs-orig/debug_260924-204741.log` (run 1, as-authored build, `.bin` 15581 bytes, L1:14) |
-| **FIX** | `engineering/document-production/manuals/p2-errata/audit/verification-tests/e4-e5-fix-read-sums-test.spin2` (reader name `e4-e5-fix-read-sums-test.spin2`; 871 lines, header "Updated.... 26 Sep 2026"; ran once on silicon 2026-09-26, log FL below; not yet replicated to the campaign `tests/` folder at this writing) |
-| **FL** | `.../audit/verification-tests/logs/debug_260926-015810.log` (the fix run; see "The fix run (FL)") |
+| **FIX** | `engineering/document-production/manuals/p2-errata/audit/verification-tests/e4-e5-fix-read-sums-test.spin2` (the as-run name; the reader's copy is `e4-e5-workaround-read-sums-test.spin2` since #360; 871 lines, header "Updated.... 26 Sep 2026"; ran once on silicon 2026-09-26, log FL below; not yet replicated to the campaign `tests/` folder at this writing) |
+| **FL** | `.../audit/verification-tests/logs/debug_260926-015810.log` (the workaround run; see "The workaround run (FL)") |
 | **S2R** | `.../audit/verification-tests/test-goertzel-sinc2-iteration-count.spin2` (reader name `e5-goertzel-sinc2-iteration-count-test.spin2`) |
 | **S2L1** | `.../audit/verification-tests/logs/debug_260925-214001.log` (SINC2 test, run 1) |
 | **HAR** | `engineering/document-production/manuals/p2-errata/verification/e4-harness-difference.spin2` (v0.1.0 workaround harness; superseded, see below) |
@@ -27,21 +27,46 @@ final `DEBUG_END_SESSION` line, present only in L2. Command used to check this (
 `diff <(grep -o "Cog0 .*" L2) <(grep -o "Cog0 .*" L1)` with the full paths above; output was
 exactly those two differences.
 
-## The drop-in block (*The fix*)
+**Workaround wording (2026-09-26, task #360; Stephen's decision, voice-guide §2).** The reader's
+change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
+(`{#sec-e4-fix}`) is now *A proven workaround* (`{#sec-e4-workaround}`), rule-first: *What any
+workaround must do* (the condition, as in the front matter's summary table), *One way, proven
+on a real P2* and the block, then *Other ways that meet the condition*; the subsection *The
+fix's test* is now *The workaround's test* (`{#sec-e4-workaround-proof}`). The CAUTION box's
+third line is *Workaround* (the condition); the status row is *Workaround proven on silicon*.
+The archive copy of FIX is renamed `e4-e5-workaround-read-sums-test.spin2` (ARCHIVE-WKR below);
+its identifiers `FIX_N0..9`/`FIX_CALLS`/`R_FIX`/`F_*`/`fixval`/`score_fix`/`fix_arm`/`fidx_`/
+`fixn_` are renamed `WKR_N0..9`/`WKR_CALLS`/`R_WKR`/`W_*`/`wkrval`/`score_wkr`/`wkr_arm`/`widx_`/
+`wkrn_`, and comments and `debug()` text say *workaround*: no line added or removed, so every
+ARCHIVE-WKR line number below still holds, and the object image is byte-identical to the
+pre-#360 archive (pnut-ts 1.55.8, `-d` and without; the `-d` binary differs only in its DEBUG
+data). FIX and FL are the as-run record and keep their own wording.
+
+## The drop-in block (*A proven workaround*)
+
+**Printed code now mirrors the conformed archive copy (2026-09-26, «#360»); the measuring PASM
+is byte-identical to the as-run rig.** ARCHIVE-WKR = `examples-library/e4-e5-workaround-read-sums-test.spin2`
+(renamed from `e4-e5-fix-read-sums-test.spin2` later in #360, lines unchanged; conformed 2026-09-26, task #360: the block's `'` line comments became a `{ }` block comment, and
+a new `CON` part names `ZERO_COUNT` (4) and `INPUT_NIB` (3) in place of the literals `#4`/`#3`;
+same instructions, same PASM measuring image, byte-identical to FIX's).
 
 | Item | Source |
 |---|---|
-| The 30-line `pasm2` block that opens *The fix* | FIX:808–837, byte-identical: the lines strictly between the markers `' ---- DROP-IN BEGIN ----` (FIX:807) and `' ---- DROP-IN END ----` (FIX:838). The same block is printed in Erratum E5's *The fix* |
-| Widths | 15–69 columns on non-blank lines (FIX:808–837; widest FIX:815, FIX:826 and FIX:830, 69), all ≤ 76 (`awk "NR>=775 && NR<=838 { printf \"%d|%d|%s|\\n\", NR, length(\$0), \$0 }" FIX`); no tab and no non-ASCII byte anywhere in FIX (`grep -n -P "[^\x20-\x7E]" FIX` returns nothing) |
-| Byte-identity check | `awk 'NR==FNR { if (FNR>=808 && FNR<=837) r[++n]=$0; next } /^## The fix/ { f=1 } f && /^```pasm2/ { inb=1; next } inb && /^```/ { exit } inb { m++; if ($0 != r[m]) print "DIFF " m ": " $0 } END { print "compared " m " chapter lines with " n " rig lines" }' FIX <chapter>` → `compared 30 chapter lines with 30 rig lines`, no `DIFF` line |
+| The 35-line `pasm2` block under *One way, proven on a real P2* in *A proven workaround* (30 lines pre-#360) | ARCHIVE-WKR:683–717 (post-#360), byte-identical: the lines strictly between the markers `' ---- DROP-IN BEGIN ----` (ARCHIVE-WKR:682) and `' ---- DROP-IN END ----` (ARCHIVE-WKR:718). Pre-#360: FIX:808–837, between FIX:807/FIX:838. The same block is printed in Erratum E5's *A proven workaround* |
+| Widths | ARCHIVE-WKR:683–717: widest lines 73 columns (`burst_sums`/`sub` operand lines), all ≤ 76 (`awk` width pass); pre-#360, FIX:808–837 ran 15–69 columns; no tab and no non-ASCII byte in either file (`grep -n -P "[^\x20-\x7E]"` returns nothing) |
+| Byte-identity check | post-#360: the chapter's *A proven workaround* fence (chapter 61–95) equals ARCHIVE-WKR:683–717 (verified by `engineering/tools/verify-example-corpus-identity.py`, GREEN). Pre-#360 check (history): `awk 'NR==FNR { if (FNR>=808 && FNR<=837) r[++n]=$0; next } /^## The fix/ { f=1 } f && /^```pasm2/ { inb=1; next } inb && /^```/ { exit } inb { m++; if ($0 != r[m]) print "DIFF " m ": " $0 } END { print "compared " m " chapter lines with " n " rig lines" }' FIX <chapter>` → `compared 30 chapter lines with 30 rig lines`, no `DIFF` line |
 | Kind: helper routine | creation-guide §4.6; FIX:4–6 ("drop-in fix burst_sums: one routine that runs a DDS/Goertzel burst and returns its exact cosine and sine sums") |
-| **The run that proved it** | FL, 2026-09-26, run once, 200 MHz: 60 of 60 calls S = N × C on cosine and sine, re-derived from the raw lines (§"The fix run (FL)") |
+| **The run that proved it** | FL, 2026-09-26, run once, 200 MHz: 60 of 60 calls S = N × C on cosine and sine, re-derived from the raw lines (§"The workaround run (FL)"); FL ran the FIX build (pre-#360 names), and the #360 renames left the measuring PASM byte-identical, so the verdict still applies to ARCHIVE-WKR |
 
 ### What the chapter says about the block, and where it comes from
 
 | Chapter text | Source |
 |---|---|
-| guarantee: sums of your burst alone, all N terms, whatever the accumulators held before | FIX:24–28 and FIX:127–128 (the pre-registered CONFIRMED outcome), met in FL (re-derived: §"The fix run (FL)") |
+| *What any workaround must do*: each burst's sums as the difference of two idle readings, before and after; an idle `GETXACC` clears nothing | the erratum itself (L2:78–79; idle reads equal B, §Proof); front matter summary table |
+| *One way*: `burst_sums`, which also steps around E5 | the block (above); E5's zero bursts: FIX:38–40 |
+| guarantee: sums of your burst alone, all N terms, whatever the accumulators held before | FIX:24–28 and FIX:127–128 (the pre-registered CONFIRMED outcome), met in FL (re-derived: §"The workaround run (FL)") |
+| *Other ways*: any code that takes the two idle readings and subtracts meets E4's condition; run A did so: 15,555 for a 256-clock burst in all eight repetitions, from five different starting values | L2:81–88 (`dA=15_555` on every line); starting values L2:27, 32, 52, 57, 62 (976, 14,823, 12,871, 10,919, 8,967; five distinct) |
+| *Other ways*: that difference is 255 terms, not 256, because of E5; the held term only a later Goertzel burst delivers; the zero bursts add it | L2:81 (`kA=255`); LED:979–983 (EF-070: N − 1 terms; the held term arrives with the next burst); FL:42 vs L2:81 (15,616 with the routine, 15,555 without) |
 | put your `XINIT` D in `burst_mode`, S in `burst_sel`, `CALL #burst_sums` with the streamer idle | FIX:809–810 (the block's own comment); FIX:34 ("with the streamer idle at entry") |
 | example values: SINC1, no DAC, pins P0–P3, count 256, P3 inverted and summed, LUT offset `$0A5` | FIX:830–831 (`$F007_0100`, `$0008_80A5`); decode FIX:64–66 ("[11:8]=0 (no DAC), [7]=0 (SINC1), [6:3]=0 (pins P0..P3)"; "S[19]=1 (invert), S[15]=1 (sum P3 only), LUT $0A5"); count `$0100` = 256; DOC:4035–4044 (summation table) |
 | two idle readings; `GETXACC` clears nothing idle | FIX:39–41; the erratum itself (this chapter, L2:78–79) |
@@ -50,7 +75,7 @@ exactly those two differences.
 | two zero bursts of 4 NCO rollovers each, at your `SETXFRQ` rate | FIX:813 (count 4); D[15:0] counts NCO rollovers (DOC:3500–3501) |
 | cog waits in `WAITXFI` until each command has finished | FIX:817, 821, 823; `WAITXFI` = "Wait for the streamer-finished event flag" (SDT:2097), flag "Set whenever the streamer runs out of commands" (SDT:2182) |
 | 17 instructions, 8 longs | counted: FIX:812–828 (17 instruction lines), FIX:830–837 (8 `long` lines) |
-| SINC1 only; in SINC2 the zero burst is not tested as a flush and the routine is not recommended; E5's *The fix* notes the separate, documented SINC2 constraint | FIX:5–6, FIX:28–29 ("SINC1 only: EF-072's scope note (untested) is that in SINC2 the zero burst does not flush the first stage ... nothing here runs SINC2"); LED:1051–1052 (scope note, study reading, untested). The SINC2 constraint is the P2 Documentation's note (SDT:1704–1705); arbiter ruling 2026-09-26: documented behaviour, not an erratum, not part of E5 (see `e5-sources.md` head) |
+| SINC1 only; in SINC2 the zero burst is not tested as a flush and the routine is not recommended; E5's *A proven workaround* notes the separate, documented SINC2 constraint | FIX:5–6, FIX:28–29 ("SINC1 only: EF-072's scope note (untested) is that in SINC2 the zero burst does not flush the first stage ... nothing here runs SINC2"); LED:1051–1052 (scope note, study reading, untested). The SINC2 constraint is the P2 Documentation's note (SDT:1704–1705); arbiter ruling 2026-09-26: documented behaviour, not an erratum, not part of E5 (see `e5-sources.md` head) |
 | `XINIT` issues at once; does not fit an `XCONT` stream | DOC:2742 / SDT:1282 ("Issue command immediately, zeroing phase"); SDT:1284 (XCONT waits for the final NCO rollover) |
 | test conditions: cog RAM, NCO `$8000_0000`, one input pin, no DAC output, bursts 1 to 1001 | FIX:47–54 (P3 only; no DAC), FIX:63 (`SETXFRQ $8000_0000`), FIX:189–198 (N list), FIX:647 (`DAT org 0`, cog exec); "ran ... once" and 200 MHz: FL:1, FL:13 |
 | DAC channels output on every clock of a DDS/Goertzel command | DOC:3985 / SDT:1555 ("outputs and inputs on every clock in which the command is active") |
@@ -59,7 +84,7 @@ exactly those two differences.
 ### Superseded v0.1.0 workaround snippet
 
 The v0.1.0 chapter printed a 10-line before-and-after snippet compiled in HAR (see the v0.1.0
-record below). At v0.2.0 it is no longer printed: the printed fix is the FIX drop-in block,
+record below). At v0.2.0 it is no longer printed: the printed workaround is the FIX drop-in block,
 which runs on a part (task «#359» decision 4). HAR is left in place, unchanged, as the record
 of what v0.1.0 printed. The measurement behind the old snippet (run A, before-and-after
 difference) remains in the chapter's proof as evidence.
@@ -108,15 +133,15 @@ END` block (widths 23–72) and compiled with `/usr/local/bin/pnut-ts -l <scratc
 | 29 terms, started from 17,080, returned 18,849 | Sees | L2:28 `rep 0 runB B=17_080 P=17_080 R1=18_849 R2=13_786 waitx=30`; L2:81 `k1=29` |
 | 15,555 in all eight repetitions | Proof | L2:81–88, `dA=15_555` on every line |
 | starting values 976, 14,823, 12,871, 10,919, 8,967 | Proof (run A paragraph) | run A `P=` at L2:27 (976), L2:32/37/42/47 (14_823), L2:52 (12_871), L2:57 (10_919), L2:62 (8_967) |
-| `$F007_0100`, `$0008_80A5` | The fix (printed values) | FIX:830–831; the same values as RIG:128–129 ("drun_ = $F007_0100", "son_ = $0008_80A5") |
+| `$F007_0100`, `$0008_80A5` | A proven workaround (printed values) | FIX:830–831; the same values as RIG:128–129 ("drun_ = $F007_0100", "son_ = $0008_80A5") |
 | 4,000-clock wait | Proof | RIG:179 `WAIT_IDLE = 4000`; RIG:125; RIG:86 |
-| NCO frequency `$8000_0000` | The fix (limits), Proof | FIX:63, FIX:178, FIX:651; RIG:178 `FRQ = $8000_0000`, RIG:478 `setxfrq frq_`, RIG:130 |
+| NCO frequency `$8000_0000` | A proven workaround (limits), Proof | FIX:63, FIX:178, FIX:651; RIG:178 `FRQ = $8000_0000`, RIG:478 `setxfrq frq_`, RIG:130 |
 | 36,600 (largest value read) | Proof (run A paragraph) | L2:63 `rep 7 runB ... R1=36_600`; the largest value on any raw line L2:23–64 (sine values are smaller) |
 | 200 MHz | Proof, Status | RIG:161; L2:21 `clk 200 MHz`; LED:892 |
 | nothing connected to P0 to P7 | Proof | RIG:34 "NO JUMPER, nothing connected to P0..P7"; L2:21 "NO jumper" |
 | debugger confined to cog 0 | Proof | RIG:162 `DEBUG_COGS = %0000_0001`; RIG:45–47 |
 | P3 driven low, smart pin off | Proof | RIG:35–37, RIG:475–476 |
-| 512 LUT longs, `$173D_0000` | Proof | RIG:58, RIG:129 (`lutv_ = $173D_0000`), RIG:480–487 (fill + readback); FIX:69–70 (same in the fix program) |
+| 512 LUT longs, `$173D_0000` | Proof | RIG:58, RIG:129 (`lutv_ = $173D_0000`), RIG:480–487 (fill + readback); FIX:69–70 (same in the workaround program) |
 | 61 (cosine), 23 (sine) per active clock | Proof | RIG:59–63, RIG:165–166; confirmed by CAL L2:66–67 and Y CAL L2:93 (1_449 = 63 × 23) |
 | 8-clock, 4-clock preamble bursts; zero-term `S` `$0008_00A5` | Proof | RIG:84–85, RIG:171–172, RIG:129 (`szero_ = $0008_00A5`), RIG:636–650 |
 | +3,843 / -3,843, 63 × 61 | Proof | L2:66 `CAL: dLO=3_843 dHI=-3_843`; L2:67 `CAL: kLO=63 kHI=-63` |
@@ -136,11 +161,11 @@ END` block (widths 23–72) and compiled with `/usr/local/bin/pnut-ts -l <scratc
 | R2 = 13,786 in first four repetitions; run B started at 17,080 then 30,927 | Proof | L2:28, 33, 38, 43 (`R2=13_786`; `P=17_080`, then `P=30_927` ×3) |
 | sine: moved on no idle read; 5,865 both runs every repetition | Proof | L2:94–101 `Y rep n: dA=5_865 dB=5_865 dd=0`; L2:102 `Y Half-A-style checks that moved: 0` |
 | run twice, 2026-09-24, two builds, identical values | Proof, Status | LED:892–894; log timestamps L1:1 (20:47), L2:1 (23:18); the diff above |
-| outcomes fixed before the run (dd = R1, -C, +C) | Proof | RIG:25–31 (written before the run), RIG:405–416 (classes) |
+| outcomes written into the program before the run (dd = R1, -C, +C) | Proof | RIG:25–31 (written before the run), RIG:405–416 (classes) |
 | `POLLXFI` finished / still running | Proof | RIG:663–674 (`xfi_end`, `xfi_mid`); L2:68 |
 | 255 terms, not 256 = Erratum E5 | Sees, Proof | LED:979–980 (EF-070: "A reading taken after a burst of N clocks holds N − 1 terms") |
 
-## The fix's test (*How it was proven*, subsection) — design facts (results: §"The fix run (FL)")
+## The workaround's test (*How it was proven*, subsection) — design facts (results: §"The workaround run (FL)")
 
 | Chapter text | Source |
 |---|---|
@@ -155,7 +180,7 @@ END` block (widths 23–72) and compiled with `/usr/local/bin/pnut-ts -l <scratc
 | ten consecutive calls, N = 1, 2, 3, 4, 7, 64, 65, 255, 256, 1001, set with `SETWORD`, first call with the 7-clock term held | FIX:90–92, FIX:189–198, FIX:774–793 (`setword burst_mode, nn_, #0` at FIX:778); FIX:88–89 |
 | program waits 1,000 clocks and takes its own idle reading | FIX:91–92; FIX:206 `WAIT_REREAD = 1000`; FIX:780–782 |
 | pin checks before and after each record | FIX:111; FIX:677–679, 683–685 |
-| outcome fixed before the run: 60 calls N × C both sums; lead C on first call, 0 else; idle = before + sum | FIX:95–103, FIX:126–128; FIX:248 (`TOTAL_CALLS = NREC * FIX_CALLS` = 6 × 10) |
+| outcome written into the program before the run: 60 calls N × C both sums; lead C on first call, 0 else; idle = before + sum | FIX:95–103, FIX:126–128; FIX:248 (`TOTAL_CALLS = NREC * FIX_CALLS` = 6 × 10) |
 | -C: zero burst did not deliver; +C: an older term counted | FIX:129–132 |
 
 ## Measured-vs-derived labels
@@ -171,23 +196,32 @@ END` block (widths 23–72) and compiled with `/usr/local/bin/pnut-ts -l <scratc
 The ledger (LED:975) says `getxacc.yaml`'s read-before-and-after rule "is exactly what this
 behaviour requires"; the chapter states only what run A measured.
 
-## Code excerpts (verbatim, contiguous)
+## Code excerpts (verbatim, contiguous; printed lines now mirror ARCHIVE)
 
-| Chapter excerpt | Source lines | Max width |
-|---|---|---|
-| The drop-in block (*The fix*) | FIX:808–837 | 69 |
-| Command words `dch_` ... `dlytab` | RIG:686–696 | 56 |
-| Calibration before-and-after block `call #preamble` ... `mov ry_, 0-0` | RIG:494–502 | 35 |
-| Run B read inside the burst `call #preamble` ... `mov r1y_, 0-0` | RIG:589–595 | 63 |
-| Fix program's call loop `fix_arm` ... `mov qy_, 0-0` | FIX:775–782 | 76 (FIX:781) |
-| Prose description of phase (i) (not excerpted: RIG:539, 540, 543, 546 exceed 76 columns) | RIG:533–551 | n/a |
+**Printed code now mirrors the conformed archive copy (2026-09-26, «#360»); the measuring PASM
+is byte-identical to the as-run rig.** ARCHIVE = `examples-library/e4-getxacc-clear-gating-test.spin2`,
+ARCHIVE-WKR = `examples-library/e4-e5-workaround-read-sums-test.spin2` (conformed 2026-09-26, task #360:
+named `SITE_CAL_LO_END` in place of the literal `#2`; PASM measuring image byte-identical to
+RIG/FIX's; ARCHIVE-WKR's workaround renames: see the note at the top).
 
-Check run at v0.2.0 (one awk over FIX, RIG, the E5 rig and both chapters) located every fence
-of the chapter as a contiguous rig range (the five rows above) and found no fence line over 76
-columns and none absent from a rig.
+| Chapter excerpt | RIG lines (as-run, history) | ARCHIVE lines (printed) | Max width |
+|---|---|---|---|
+| The drop-in block (*A proven workaround*) | FIX:808–837 | ARCHIVE-WKR:683–717 (see the drop-in section above) | 73 |
+| Command words `dch_` ... `dlytab` (now includes the `dlytab` header comment, 13 lines) | RIG:686–696 | ARCHIVE:656–668 | 74 |
+| Calibration before-and-after block `call #preamble` ... `mov ry_, 0-0` (now `mov site_, #SITE_CAL_LO_END` in place of `#2`) | RIG:494–502 | ARCHIVE:464–472 | 47 |
+| Run B read inside the burst `call #preamble` ... `mov r1y_, 0-0` (unchanged by #360) | RIG:589–595 | ARCHIVE:559–565 | 63 |
+| Workaround program's call loop `wkr_arm` ... `mov qy_, 0-0` (FIX's `fix_arm`/`fidx_`/`fixn_` renamed `wkr_arm`/`widx_`/`wkrn_` in #360; same widths) | FIX:775–782 | ARCHIVE-WKR:650–657 | 76 (`waitx ##WAIT_REREAD`) |
+| Prose description of phase (i) (not excerpted: RIG:539, 540, 543, 546 exceed 76 columns) | RIG:533–551 | n/a | n/a |
 
-Prose about the fix program's `DAT` block: markers FIX:807/838; `fixn_` holds the ten lengths
-(FIX:803–804); `WAIT_REREAD` = 1,000 (FIX:206); prints raw readings, controls, uncorrected
+Re-check (post-#360): the chapter's fences equal the ARCHIVE/ARCHIVE-WKR spans above (verified
+by `engineering/tools/verify-example-corpus-identity.py`, GREEN). Pre-#360 check (history): one
+awk over FIX, RIG, the E5 rig and both chapters located every fence of the chapter as a
+contiguous rig range (the five rows above) and found no fence line over 76 columns and none
+absent from a rig. RIG and FIX are kept as the as-run record; the measuring PASM itself is
+unchanged by the #360 rename.
+
+Prose about the workaround program's `DAT` block: markers FIX:807/838 (ARCHIVE-WKR:682/718);
+`fixn_` holds the ten lengths (FIX:803–804; printed as ARCHIVE-WKR's `wkrn_`, :678–679); `WAIT_REREAD` = 1,000 (FIX:206); prints raw readings, controls, uncorrected
 readings in units of C, one line per call, one `VERDICT:` line (FIX:372–397, 583, 627–639);
 drives P3 and releases it (FIX:693–694).
 
@@ -214,13 +248,14 @@ Unchanged from v0.1.0 except "Chapter 5" → "Erratum E5".
   Run B's read inside the burst does clear between repetitions (R2 = 13,786 whatever the
   starting value), so the chapter uses run A's P → RA growth instead.
 
-## The fix run (FL), 2026-09-26 — every placeholder filled from it
+## The workaround run (FL), 2026-09-26 — every placeholder filled from it
 
 **FL** = `engineering/document-production/manuals/p2-errata/audit/verification-tests/logs/debug_260926-015810.log`
 (208 lines). FL:6 `[DOWNLOAD TO RAM] File: e4-e5-fix-read-sums-test.bin | Size: 16378 bytes`;
 FL:13 `clk 200 MHz; 3 records per level; 10 fix calls per record`. Run **once**, 2026-09-26
 (FL:1). The coordinator states the `.bin` is the rig on disk (FIX); the drop-in block in the
-chapter is byte-identical to FIX:808–837 (§"The drop-in block").
+chapter was byte-identical to FIX:808–837 before #360 and now equals ARCHIVE-WKR:683–717, the
+same instructions (§"The drop-in block").
 
 **Re-derivation, from the raw lines FL:24–113 only** (the program's own analysis lines
 FL:116–204 were read only afterwards, as a cross-check; they agree):
@@ -237,7 +272,7 @@ FL:116–204 were read only afterwards, as a cross-check; they agree):
   every row; R1 - P = ±3,843 (X) / ±1,449 (Y) = 63 × C; R2 - P2 = ±3,965 / ±1,495 = 65 × C;
   R3 - R2 = ±61 / ±23 = C; RD - R3 = ±366 / ±138 = 6 × C. First record X (FL:32): 72,712 - 68,869
   = 3,843; 76,677 - 72,712 = 3,965; 76,738 - 76,677 = 61; 77,104 - 76,738 = 366.
-- **Fix, 60 calls** (FL:34–43, 48–57, 62–71, 76–85, 90–99, 104–113): every `S=` equals N × C:
+- **Workaround, 60 calls** (FL:34–43, 48–57, 62–71, 76–85, 90–99, 104–113): every `S=` equals N × C:
   X 61, 122, 183, 244, 427, 3_904, 3_965, 15_555, 15_616, 61_061 and Y 23, 46, 69, 92, 161,
   1_472, 1_495, 5_865, 5_888, 23_023 for N = 1, 2, 3, 4, 7, 64, 65, 255, 256, 1_001 in records
   0–2, negated in records 3–5. **lead** (call 0 B - RD): +61/+23 in records 0–2 (e.g. FL:34

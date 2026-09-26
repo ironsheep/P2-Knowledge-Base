@@ -5,7 +5,7 @@
 
 **Actual:** with `TT` = `%00`, raising `OUT` runs nothing: the ADC stays off, and the pin reads exactly as it does with `OUT` low.
 
-**Fix:** set `TT` bit 0 in your `WRPIN` word (`$0014_0042` in place of `$0014_0002`) and let the pin's DAC drive the pin while the ADC runs; see *The fix*.
+**Workaround:** `TT` bit 0 must be set in your `WRPIN` word (`$0014_0042` in place of `$0014_0002`), and the pin's DAC then drives the pin while the ADC runs; see *A proven workaround*.
 :::
 
 This erratum affects a program that configures a pin for one of the DAC smart-pin modes (`%SSSSS` = `%00001` to `%00011`, with `M[12:10]` = `%101`) with `TT` bit 0 clear, and relies on `OUT` to run the pin's ADC. A pin configured with `TT` = `%01`, the value of the Spin2 symbols `P_TT_01` and `P_OE`, is not affected. Of the three DAC smart-pin modes, only DAC noise (`%00001`) was tested.
@@ -53,7 +53,11 @@ If your program configures a DAC smart-pin mode with `TT` = `%00` and raises `OU
 
 The test program read the pin's state through its neighbouring pin, and did not issue `RDPIN` or `RQPIN`. What `RDPIN` returns in DAC noise mode at `TT` = `%00` with `OUT` high was not measured here.
 
-## The fix {#sec-e6-fix}
+## A proven workaround {#sec-e6-workaround}
+
+**What any workaround must do:** set `TT` bit 0 in the `WRPIN` word of a pin in a DAC smart-pin mode whose ADC you switch with `OUT`.
+
+**One way, proven on a real P2:** the tested DAC noise word with `TT` = `%01`.
 
 ```spin2
   CFG_DAC_TT01      = $0014_0042        ' DAC_MODE, DAC noise, TT = %01
@@ -62,6 +66,8 @@ The test program read the pin's state through its neighbouring pin, and did not 
 Written to the pin with `WRPIN` in place of `$0014_0002`, this word makes `OUT` run the pin's ADC; it is a rule at each use, applied wherever you configure a pin for a DAC smart-pin mode and switch its ADC with `OUT`.
 
 The change is one bit: bit 6 of the `WRPIN` word, `TT` bit 0, value `$40`. In Spin2 symbols the word is `P_DAC_990R_3V | P_TT_01 | P_DAC_NOISE`; `P_OE` is another name for the same value as `P_TT_01`. The test program checked at run time that this composition equals `$0014_0042`. In another DAC smart-pin word the corresponding change is the same bit 6; only the word above was tested (limits below).
+
+**Other ways that meet the condition.** Written with the Spin2 symbols above, or as the literal, the word is the same change. `TT` = `%11` also sets bit 0, but by the table it gives the ADC switch to `OTHER` in place of `OUT`, and it was not tested.
 
 The cost is the pin's output. With `TT` bit 0 set, the table's first rule enables the pin's output regardless of `DIR`, and in DAC noise mode the P2 Documentation says the mode feeds "the pin's 8-bit DAC pseudo-random data on every clock". While the ADC runs, the pin is driven by its DAC. Use a pin that nothing else drives. The test pin had nothing attached, so the drive itself was not observed on the bench.
 
@@ -83,7 +89,7 @@ In every smart-pin mode, `TT` bit 0 is the pin's output enable, as the table's f
 
 In the DAC pin state (`M[12:10]` = `%101`), the I/O pin circuit runs its DAC only while the output enable is high, and runs its ADC only while the output enable and the output bit are both high. With the output enable low, nothing in the circuit runs. The table's second rule describes the ADC switch as depending only on the bit that `TT` bit 1 selects; the circuit adds the output enable as a second condition. With `TT` = `%00`, raising `OUT` sets the output bit, but the output enable stays low, and the ADC does not start.
 
-The same reading gives the cost of the fix. Setting `TT` bit 0 raises the output enable, which turns on the DAC as well, so the ADC runs only while the DAC drives the pin.
+The same reading gives the cost of the workaround. Setting `TT` bit 0 raises the output enable, which turns on the DAC as well, so the ADC runs only while the DAC drives the pin.
 
 The study left open what the pin's read state carries in the DAC pin state while the ADC is off. The test measured it rather than assuming it; the values are in the next section.
 
@@ -131,7 +137,7 @@ No value was predicted for C1 and C3; they were measured and printed.
 
 In both runs, C2 separated from C1, C4 did not separate from C3, and C4 separated from C2: the pattern written down in advance for the defect. With `TT` = `%00`, `OUT` high read the same as `OUT` low in every sample, and never as the running ADC.
 
-The same run proves the fix. C2 is the fix: with `$0014_0042`, `OUT` high ran the ADC in all ten samples of the two runs, and with `OUT` low (C1) the ADC was off in all ten.
+The same run proves the workaround. C2 is the workaround: with `$0014_0042`, `OUT` high ran the ADC in all ten samples of the two runs, and with `OUT` low (C1) the ADC was off in all ten.
 
 The test ran on 2026-09-25, twice. Apart from the C2 samples and the C2 range computed from them, the two runs printed the same values.
 
@@ -162,11 +168,11 @@ The measuring cog runs the four conditions in a loop of five rounds. `cfg_` hold
 ' One sample: settle, then READS_PER_SAMPLE reads of INA, counting bit P+1.
 sample          waitx   ##SETTLE_CLK
                 mov     count_, #0
-                rep     #3, reads_
+                rep     @.read_end, reads_
                 mov     insnap_, ina
                 testb   insnap_, #PIN_NBR       wc
         if_c    add     count_, #1
-                wrlong  count_, ptrb
+.read_end       wrlong  count_, ptrb
                 add     ptrb, #4
                 ret
 ```
@@ -197,6 +203,6 @@ To run it, compile with `pnut-ts -d` and load it with DEBUG enabled. P4 and P5 m
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-25, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | Yes — 2026-09-25; a rule at each use: set `TT` bit 0 in the `WRPIN` word |
+| Workaround proven on silicon | Yes — 2026-09-25; a rule at each use: set `TT` bit 0 in the `WRPIN` word |
 | Affects | a pin in a DAC smart-pin mode with `TT` = `%00`: raising `OUT` does not run its ADC. Tested in DAC noise mode (`%00001`), `P_DAC_990R_3V`, `TT` = `%00` and `%01` only |
 | Test program | `e6-dac-mode-adc-enable-test.spin2` |

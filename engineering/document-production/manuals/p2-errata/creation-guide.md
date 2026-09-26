@@ -67,7 +67,9 @@ Current numbering (decided 2026-09-25):
 
 Every erratum chapter has the same parts, in this order, with these headings. The reader
 decides from the first screen whether the erratum touches their program and what to change;
-everything below *The fix* is the evidence. Voice by section: `voice-guide.md` §2a.
+everything below *A proven workaround* is the evidence. Voice by section: `voice-guide.md` §2a.
+Terminology (Stephen, 2026-09-26): the reader's change is a **workaround**, never a *fix* (a
+fix is a silicon revision), and the manual offers **a** proven workaround, never *the* only one.
 
 1. **CAUTION box** (no heading), the first thing under the chapter heading, in the platform's
    existing amber box, unchanged:
@@ -78,7 +80,8 @@ everything below *The fix* is the evidence. Voice by section: `voice-guide.md` �
 
    **Actual:** what the part does instead, in one sentence.
 
-   **Fix:** the change that removes it, in one sentence, naming *The fix*.
+   **Workaround:** the condition any workaround must meet, in one sentence, pointing to
+   *A proven workaround*.
    :::
    ```
 
@@ -92,21 +95,23 @@ everything below *The fix* is the evidence. Voice by section: `voice-guide.md` �
    arrangement, with what result.
 5. `## What your program sees`: the defect as it shows up in a program, including what does
    **not** go wrong (e.g. "the data lands correctly; only the pointer is wrong").
-6. `## The fix`: **opens with the drop-in code block**, byte-identical to the block a test
-   program ran on silicon, then one sentence of guarantee naming its kind: *one-time startup
-   fix*, *rule at each use*, or *helper routine*. Then its cost and its limits. Only a fix
-   proven on a part is printed as the fix; if none is proven, say so plainly and give the
-   unproven change as a *workaround*, named as unproven.
+6. `## A proven workaround`: **rule-first.** Open with the condition any workaround must
+   meet (**What any workaround must do:** …), then **One way, proven on a real P2:** and the
+   drop-in code block, byte-identical to the block a test program ran on silicon, then one
+   sentence of guarantee naming its kind: *one-time startup workaround*, *rule at each use*,
+   or *helper routine*. Then, where they exist, other ways that meet the same condition; then
+   its cost and its limits. Only a block proven on a part is printed as the proven
+   workaround; if none is proven, say so plainly and name any change given as unproven.
 7. `## Why it happens`: the theory of operation, **in our own words** (§6).
 8. `## How it was proven on a real P2`: the test on real silicon: what it arranges, its
    controls, what it measured, and the numbers. Stated so a reader could rebuild the test. The
-   run that proved the fix is reported here too.
+   run that proved the workaround is reported here too.
 9. `## The test program`: a walkthrough of the rig with short excerpts, and the filename in
-   the examples archive (and the fix's test program, if separate).
+   the examples archive (and the workaround's test program, if separate).
 10. `## Status`: the status table (§5).
 
 Section anchors: `{#sec-eN-documented}`, `{#sec-eN-actual}`, `{#sec-eN-sees}`,
-`{#sec-eN-fix}`, `{#sec-eN-why}`, `{#sec-eN-proof}`, `{#sec-eN-program}`,
+`{#sec-eN-workaround}`, `{#sec-eN-why}`, `{#sec-eN-proof}`, `{#sec-eN-program}`,
 `{#sec-eN-status}`.
 
 ## 5. The status table
@@ -119,9 +124,9 @@ Every chapter ends with the same two-column table:
 | Published by Parallax | Yes, with where (e.g. *P2 Documentation, KNOWN BUGS*) · or No |
 | Found by | Parallax · a prediction from the clean-room design study, confirmed here · or found on the bench here |
 | Confirmed on silicon | Yes, with the date and the conditions (board, clock) |
-| Fix proven on silicon | Yes, with the date and its kind (one-time startup fix / rule at each use / helper routine) · No · None known |
+| Workaround proven on silicon | Yes, with the date and its kind (one-time startup workaround / rule at each use / helper routine) · No · None known |
 | Affects | the instructions and conditions, briefly |
-| Test program | the filename(s) in the examples archive: the erratum's, and the fix's if separate |
+| Test program | the filename(s) in the examples archive: the erratum's, and the workaround's if separate |
 
 **No internal identifiers in reader text:** no `EF-NNN`, `VO-*`, `O17`, `SO80`, `F-NNN`,
 brief names or ledger names. The chip revision is stated once, in the front matter, once it
@@ -158,8 +163,8 @@ Hallucinations happen at the moment of writing. Before a sentence goes into a ch
   file and line range are recorded in the sidecar.
 - Every **workaround snippet** not taken verbatim from a rig is compiled inside a harness with
   `pnut-ts` **1.55.8** (`/usr/local/bin/pnut-ts`; confirm with `pnut-ts --version`; add `-d`
-  if it carries `debug()`), and the harness is kept beside the sidecar. **The fix block is
-  not a harness snippet:** it is byte-identical to the marked block inside the fix's test
+  if it carries `debug()`), and the harness is kept beside the sidecar. **The proven
+  workaround block is not a harness snippet:** it is byte-identical to the marked block inside the workaround's test
   program, which ran on silicon; the sidecar records both line ranges.
 - Red-flag words (*also provides*, *automatically*, *eliminates*, *synchronizes*, *enables*)
   are either sourced or cut.

@@ -102,6 +102,25 @@ def workspace_md(ws: Path):
     return str(p) if p.is_file() else None
 
 
+def spin2_blocking_rules(doc: Path):
+    """The style-guide rules a manual arms as BLOCKING for its own example corpus.
+
+    Read from MANUAL-DESCRIPTOR.md `spin2_blocking_rules:` (comma list of section
+    numbers). Arming is per manual on purpose: a rule is armed only where it has
+    been measured at 0 sites, so the fleet's un-conformed corpora are not turned
+    RED by a rule nobody has worked through yet (the §2.1 lesson, «#217»/«#360»).
+    """
+    desc = doc / "MANUAL-DESCRIPTOR.md"
+    if not desc.is_file():
+        return None
+    for ln in desc.read_text(encoding="utf-8").split("\n"):
+        if ln.startswith("spin2_blocking_rules:"):
+            val = ln.split(":", 1)[1].split("#", 1)[0]
+            rules = [r.strip() for r in val.split(",") if r.strip()]
+            return ",".join(rules) or None
+    return None
+
+
 def has_corpus(doc: Path):
     d = doc / "examples-library"
     return d.is_dir() and any(d.glob("*.spin2"))
@@ -190,6 +209,14 @@ def build_gates(slug: str, phase: str, pdf: str | None):
                 ("spin2-ascii", f"{V}/audit-spin2-ascii.py",
                  [str(doc / "examples-library")], True,
                  "non-ASCII in a shipped .spin2 is a portability defect"),
+            ]
+            armed = spin2_blocking_rules(doc)
+            if armed:
+                G.append(("spin2-style", f"{V}/audit-spin2-ascii.py",
+                          ["--quiet", "--blocking", armed, str(doc / "examples-library")], True,
+                          "the shipped programs must conform to the authoring guide; "
+                          "these rules were measured at 0 sites for this manual and armed"))
+            G += [
                 ("example-headers", "engineering/tools/sync-manual-examples.py",
                  ["--doc", str(doc), "--check"], True,
                  "generated headers carry the released version; they re-sync on a bump"),

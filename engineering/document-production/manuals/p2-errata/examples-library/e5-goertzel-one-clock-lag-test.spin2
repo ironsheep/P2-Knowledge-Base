@@ -25,27 +25,69 @@ CON ' ---- Rig Parameters ----
   PIN        = 3                         ' Goertzel input 4g+3, pin group g = 0
   G_COS      = $13                       ' LUT bits [23:16] -> |Cx| = 19
   G_SIN      = $25                       ' LUT bits [31:24] -> |Cy| = 37 (corroborating)
-  LUT_ADDR   = $0C3
+  LUT_ADDR   = $0C3                      ' lookup offset in S[8:0]; one of the LUT readbacks
+  LUT_LAST   = $1FF                      ' last LUT address (512 longs)
   LUTV       = (G_SIN << 24) | (G_COS << 16)     ' $2513_0000
+  NCO_FREQ   = $8000_0000                ' SETXFRQ value (the reset value)
   MODE_G     = $F007_0000                ' Goertzel sinc1, DACs off, pin group 0
   IMM_K      = $0000_8000 | LUT_ADDR     ' imm[15]=1, imm[19]=0, imm[11:9]=0
   IMM_Z      = LUT_ADDR                  ' imm[15:12]=0 -> every term zero
-  ZCOUNT     = 4
-  N_A        = 64
-  N_B        = 65
-  REPS       = 4
+  ZCOUNT     = 4                         ' zero burst, clocks
+  N_A        = 64                        ' first burst length, clocks
+  N_B        = 65                        ' second burst length, clocks
+  REPS       = 4                         ' repetitions per P3 level and length
   WAIT_IDLE  = 500                       ' > N + 16 clocks after XINIT
   WAIT_R1B   = 1000                      ' a further 1000 clocks
   WAIT_PIN   = 10_000                    ' settle after changing P3
-  HDR        = 4                         ' mailbox header longs
-  RECL       = 20                        ' longs per recorded sequence
-  NREC       = 2 * REPS * 2              ' levels x reps x lengths = 16
-  MBOX_DONE  = 1                         ' mbox[0] sentinel: engine cog finished
-  RIG_TIMEOUT_SEC = 2                    ' host wait cap; engine finishes in << 1 ms
-  DELTA_COUNT = 5                        ' d1..d5 checked by check_multiples()
+  STILL_MOVING_TERMS = WAIT_R1B / 2      ' half the R1b wait: |R1b-R1| of this many terms or more = still accumulating
 
-  ' record layout -- MUST match the RES order rlevel_..r5y_ in the DAT
+  ' run shape: NLEVELS P3 levels x REPS x NLENGTHS burst lengths (N_A, N_B)
+  NLEVELS    = 2                         ' LEVEL_LOW, LEVEL_HIGH
+  NLENGTHS   = 2                         ' N_A, N_B: records alternate N_A (even), N_B (odd)
+  NCH        = 2                         ' CH_X, CH_Y
+  REF_SEQ_A  = 0                         ' first N_A record: reference for every N_A record
+  REF_SEQ_B  = 1                         ' first N_B record: reference for every N_B record
+
+  ' mailbox: HDR header longs, then NREC records of RECL longs
+  HDR        = 4                         ' mailbox header longs
+  MB_STATUS  = 0                         ' header: MBOX_DONE once the engine has finished
+  MB_LUT_A   = 1                         ' header: LUT readback at LUT_ADDR
+  MB_LUT_0   = 2                         ' header: LUT readback at address 0
+  MB_LUT_LAST = 3                        ' header: LUT readback at LUT_LAST
+  RECL       = 20                        ' longs per recorded sequence
+  NREC       = NLEVELS * REPS * NLENGTHS ' levels x reps x lengths = 16
+  MBOX_DONE  = 1                         ' mailbox[MB_STATUS] sentinel: engine cog finished
+  RIG_TIMEOUT_SEC = 2                    ' host wait cap; engine finishes in << 1 ms
+
+  ' record layout -- MUST match the RES order rlevel_..r5y_ in the DAT:
+  '  O_LEVEL, O_N      - P3 level, burst length N
+  '  O_PINB, O_PINA    - TESTP of P3 before / after the sequence
+  '  O_B0X/O_B0Y       - read before the first zero burst
+  '  O_BX/O_BY         - B: read after the zero burst
+  '  O_R1X/O_R1Y       - R1: read after the burst of N
+  '  O_R1BX/O_R1BY     - R1b: read WAIT_R1B clocks after R1
+  '  O_R2X/O_R2Y       - R2: read after the next zero burst
+  '  O_R3X/O_R3Y       - R3: read after the carry arm's first burst of N
+  '  O_R4X/O_R4Y       - R4: read after the second burst of N, right after
+  '  O_R5X/O_R5Y       - R5: read after the flushing zero burst
   #0, O_LEVEL, O_N, O_PINB, O_PINA, O_B0X, O_B0Y, O_BX, O_BY, O_R1X, O_R1Y, O_R1BX, O_R1BY, O_R2X, O_R2Y, O_R3X, O_R3Y, O_R4X, O_R4Y, O_R5X, O_R5Y
+  X_FIELD_OFF = 0                        ' an xsum field's offset from the O_...X constant
+  Y_FIELD_OFF = 1                        ' a ysum field follows its xsum field
+
+  ' deltas d1..d5, the index checked by check_multiples():
+  '  DI_D1 - d1 = R1 - B     DI_D2 - d2 = R2 - R1    DI_D3 - d3 = R3 - R2
+  '  DI_D4 - d4 = R4 - R3    DI_D5 - d5 = R5 - R4
+  #0, DI_D1, DI_D2, DI_D3, DI_D4, DI_D5
+  DELTA_COUNT = DI_D5 + 1                ' d1..d5 checked by check_multiples()
+
+  ' predicted outcomes, fixed before the run, in units of C: the main pair
+  ' as d1/C - N and d2/C, the carry arm as d3/C - N, d4/C - N and d5/C:
+  '  LAG_*   - TRUE, one-clock lag:  d1 (N-1)C, d2 C;  d3 (N-1)C, d4 N*C, d5 C
+  '  NOLAG_* - FALSE, no lag:        d1 N*C, d2 0;     d3 N*C, d4 N*C, d5 0
+  '  LOST_*  - FALSE, lost term:     d1 (N-1)C, d2 0;  d3 (N-1)C, d4 (N-1)C, d5 0
+  LAG_D1 = -1, LAG_D2 = 1, LAG_D3 = -1, LAG_D4 = 0, LAG_D5 = 1
+  NOLAG_D1 = 0, NOLAG_D2 = 0, NOLAG_D3 = 0, NOLAG_D4 = 0, NOLAG_D5 = 0
+  LOST_D1 = -1, LOST_D2 = 0, LOST_D3 = -1, LOST_D4 = -1, LOST_D5 = 0
 
   ' channel selectors for the analysis
   CH_X       = 0
@@ -55,40 +97,53 @@ CON ' ---- Rig Parameters ----
   LEVEL_LOW  = 0
   LEVEL_HIGH = 1
 
+  ' measuredC[] and acceptedC[] geometry
+  C_PER_CH   = NLEVELS * REPS            ' measuredC[] longs per channel
+  AC_Y_BASE  = CH_Y * NLEVELS            ' acceptedC[] slot of ysum at LEVEL_LOW
+
 VAR ' ---- Mailbox & Scoring State ----
-  long mbox[HDR + NREC * RECL]           ' [0] done [1..3] LUT readbacks, then records
-  long cm[2 * 2 * REPS]                  ' measured C: [ch*8 + level*4 + rep]
-  long cmeas[2 * 2]                      ' accepted C: [ch*2 + level]
-  long ka[NREC], kb[NREC]                ' main pair: d1/C - N, d2/C
-  long k3[NREC], k4[NREC], k5[NREC]      ' carry arm: d3/C - N, d4/C - N, d5/C
-  long nfail
+  long mailbox[HDR + NREC * RECL]        ' MB_STATUS, the LUT readbacks, then records
+  ' measured C, [ch * C_PER_CH + level * REPS + rep]: slots 0-3 xsum P3 low
+  ' reps 0-3, 4-7 xsum P3 high, 8-11 ysum P3 low, 12-15 ysum P3 high
+  long measuredC[NCH * C_PER_CH]
+  long acceptedC[NCH * NLEVELS]          ' accepted C: [ch * NLEVELS + level]
+  long d1TermsVsN[NREC], d2Terms[NREC]   ' main pair: d1/C - N, d2/C
+  long d3TermsVsN[NREC], d4TermsVsN[NREC], d5Terms[NREC]   ' carry arm: d3/C - N, d4/C - N, d5/C
+  long failCount                         ' rig/construction controls that failed
 
 
 PUB main() | engineCog, tstart
 '' Run the E5 rig: start the measuring engine cog, wait for its mailbox
 '' done-flag, then print the full report and verdict.
+''
 
-  longfill(@mbox, 0, HDR + NREC * RECL)
+' Local Variables:
+' @local engineCog - the engine cog's number, from COGINIT
+' @local tstart - GETCT at the start of the wait for MBOX_DONE
+
+  longfill(@mailbox, 0, HDR + NREC * RECL)
   debug("=== Erratum E5: does xsum trail xterm by one active clock? ===")
   predictions()
-  engineCog := coginit(COGEXEC_NEW, @engine, @mbox)
+  engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
   if engineCog < 0
     debug("RIG FAIL: no free cog for the measuring engine")
-    finish()
-  tstart := getct()
-  repeat until mbox[0] == MBOX_DONE or (getct() - tstart) > clkfreq * RIG_TIMEOUT_SEC
-  if mbox[0] <> MBOX_DONE
-    cogstop(engineCog)
-    debug("RIG FAIL: measuring cog did not report done within 2 s (expected < 1 ms)")
-    finish()
-  debug("measuring cog = ", udec_(engineCog), " (debugger restricted to cog 0)")
-  report()
+  else
+    tstart := getct()
+    repeat until mailbox[MB_STATUS] == MBOX_DONE or (getct() - tstart) > clkfreq * RIG_TIMEOUT_SEC
+    if mailbox[MB_STATUS] <> MBOX_DONE
+      cogstop(engineCog)
+      debug("RIG FAIL: measuring cog did not report done within 2 s (expected < 1 ms)")
+    else
+      debug("measuring cog = ", udec_(engineCog), " (debugger restricted to cog 0)")
+      report()
   finish()
 
 
 PRI finish()
-' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
-' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+' End the run: every terminal path ends here. pnut-term-ts ends the run when
+' END_SESSION or DEBUG_END_SESSION appears in the output (--headless or
+' --exit-on-end-session).
+'
 
   debug("=== END ===")
   debug("DEBUG_END_SESSION")
@@ -96,7 +151,7 @@ PRI finish()
 
 
 PRI cpred(ch, lvl) : termC
-' Predicted per-clock term C for a channel at a given P3 level.
+' Compute the predicted per-clock term C for a channel at a given P3 level.
 '
 ' @param ch - channel selector (CH_X or CH_Y)
 ' @param lvl - P3 level (LEVEL_LOW or LEVEL_HIGH)
@@ -113,6 +168,12 @@ PRI cpred(ch, lvl) : termC
 PRI predictions() | lvl, burstN, predC
 ' Print the fixed-before-the-run prediction table for every (P3 level, N)
 ' combination, under each named hypothesis.
+'
+
+' Local Variables:
+' @local lvl - P3 level (LEVEL_LOW or LEVEL_HIGH)
+' @local burstN - burst length N (N_A or N_B)
+' @local predC - predicted per-clock xsum term C at this level
 
   debug("PREDICTIONS for xsum, fixed before the run (C = per-clock term):")
   debug("  predicted sign rule, imm[19]=0: C = -19 with P3 LOW, +19 with P3 HIGH")
@@ -134,11 +195,12 @@ PRI rv(seqIdx, fieldOff) : fieldVal
 ' @param fieldOff - record field offset (an O_xxx constant)
 ' @returns fieldVal - the recorded value
 
-  fieldVal := mbox[HDR + seqIdx * RECL + fieldOff]
+  fieldVal := mailbox[HDR + seqIdx * RECL + fieldOff]
 
 
 PRI dd(seqIdx, offLater, offEarlier) : deltaVal
-' Delta between two fields of the same recorded sequence (later - earlier).
+' Compute the delta between two fields of the same recorded sequence
+' (later - earlier).
 '
 ' @param seqIdx - sequence index, 0..NREC-1
 ' @param offLater - record field offset of the later reading
@@ -152,8 +214,13 @@ PRI report() | seqIdx, bContinue
 ' Print every raw record, run the gating controls and premise checks in
 ' order, and print the verdict if every gate upstream of it passed. Single
 ' exit: bContinue gates each stage instead of returning early.
+'
 
-  nfail := 0
+' Local Variables:
+' @local seqIdx - sequence index, 0..NREC-1
+' @local bContinue - TRUE while every gate so far has passed
+
+  failCount := 0
   check_lut()
   debug(" ")
   debug("--- RAW DATA (signed decimal; every sequence) ---")
@@ -162,20 +229,20 @@ PRI report() | seqIdx, bContinue
   debug(" ")
   debug("--- CONTROLS ---")
   check_pins()
-  bContinue := (nfail == 0)
-  if not bContinue
+  bContinue := (failCount == 0)
+  if bContinue == FALSE
     debug("NO VERDICT: a rig control failed (see RIG FAIL lines above)")
-  if bContinue
+  if bContinue == TRUE
     bContinue := idle_premise()
-  if bContinue
+  if bContinue == TRUE
     bContinue := runon_premise()
-  if bContinue
+  if bContinue == TRUE
     check_multiples(CH_X)
     measure_c(CH_X)
-    bContinue := (nfail == 0)
-    if not bContinue
+    bContinue := (failCount == 0)
+    if bContinue == FALSE
       debug("NO VERDICT: a construction control failed (see RIG FAIL lines above)")
-  if bContinue
+  if bContinue == TRUE
     debug("controls: LUT ok, pin ok, idle ok (R1b-R1 = 0), zero-after-zero ok, all deltas whole multiples of 19, C ok")
     debug(" ")
     ysum_summary()
@@ -186,11 +253,12 @@ PRI report() | seqIdx, bContinue
 PRI check_lut()
 ' Verify the LUT readback (all three sampled addresses) matches what the
 ' engine wrote; a mismatch is a rig construction failure, not a data point.
+'
 
-  debug("LUT readback [$0C3]=", uhex_long_(mbox[1]), " [0]=", uhex_long_(mbox[2]), " [$1FF]=", uhex_long_(mbox[3]), "  expected ", uhex_long_(LUTV))
-  if mbox[1] <> LUTV or mbox[2] <> LUTV or mbox[3] <> LUTV
+  debug("LUT readback [$0C3]=", uhex_long_(mailbox[MB_LUT_A]), " [0]=", uhex_long_(mailbox[MB_LUT_0]), " [$1FF]=", uhex_long_(mailbox[MB_LUT_LAST]), "  expected ", uhex_long_(LUTV))
+  if mailbox[MB_LUT_A] <> LUTV or mailbox[MB_LUT_0] <> LUTV or mailbox[MB_LUT_LAST] <> LUTV
     debug("RIG FAIL: LUT readback, expected ", uhex_long_(LUTV), " at all three addresses")
-    nfail++
+    failCount++
 
 
 PRI print_record(seqIdx)
@@ -199,7 +267,7 @@ PRI print_record(seqIdx)
 '
 ' @param seqIdx - sequence index, 0..NREC-1
 
-  debug("#", udec_(seqIdx), " P3=", udec_(rv(seqIdx, O_LEVEL)), " rep=", udec_((seqIdx / 2) // REPS), " N=", udec_(rv(seqIdx, O_N)), " pin IN before/after=", udec_(rv(seqIdx, O_PINB)), "/", udec_(rv(seqIdx, O_PINA)))
+  debug("#", udec_(seqIdx), " P3=", udec_(rv(seqIdx, O_LEVEL)), " rep=", udec_((seqIdx / NLENGTHS) // REPS), " N=", udec_(rv(seqIdx, O_N)), " pin IN before/after=", udec_(rv(seqIdx, O_PINB)), "/", udec_(rv(seqIdx, O_PINA)))
   debug("   xsum B0=", sdec_long_(rv(seqIdx, O_B0X)), " B=", sdec_long_(rv(seqIdx, O_BX)), " R1=", sdec_long_(rv(seqIdx, O_R1X)), " R1b=", sdec_long_(rv(seqIdx, O_R1BX)), " R2=", sdec_long_(rv(seqIdx, O_R2X)), " R3=", sdec_long_(rv(seqIdx, O_R3X)), " R4=", sdec_long_(rv(seqIdx, O_R4X)), " R5=", sdec_long_(rv(seqIdx, O_R5X)))
   debug("   ysum B0=", sdec_long_(rv(seqIdx, O_B0Y)), " B=", sdec_long_(rv(seqIdx, O_BY)), " R1=", sdec_long_(rv(seqIdx, O_R1Y)), " R1b=", sdec_long_(rv(seqIdx, O_R1BY)), " R2=", sdec_long_(rv(seqIdx, O_R2Y)), " R3=", sdec_long_(rv(seqIdx, O_R3Y)), " R4=", sdec_long_(rv(seqIdx, O_R4Y)), " R5=", sdec_long_(rv(seqIdx, O_R5Y)))
   debug("   dx: B-B0=", sdec_(dd(seqIdx, O_BX, O_B0X)), " d1=", sdec_(dd(seqIdx, O_R1X, O_BX)), " R1b-R1=", sdec_(dd(seqIdx, O_R1BX, O_R1X)), " d2=", sdec_(dd(seqIdx, O_R2X, O_R1X)), " d3=", sdec_(dd(seqIdx, O_R3X, O_R2X)), " d4=", sdec_(dd(seqIdx, O_R4X, O_R3X)), " d5=", sdec_(dd(seqIdx, O_R5X, O_R4X)))
@@ -208,19 +276,30 @@ PRI print_record(seqIdx)
 
 PRI check_pins() | seqIdx, lvl
 ' Verify TESTP read the driven level, before and after, on every sequence.
+'
+
+' Local Variables:
+' @local seqIdx - sequence index, 0..NREC-1
+' @local lvl - the P3 level this sequence drove
 
   repeat seqIdx from 0 to NREC - 1
     lvl := rv(seqIdx, O_LEVEL)
     if rv(seqIdx, O_PINB) <> lvl or rv(seqIdx, O_PINA) <> lvl
       debug("RIG FAIL: pin control, seq #", udec_(seqIdx), " expected P3 IN = ", udec_(lvl), " got before/after ", udec_(rv(seqIdx, O_PINB)), "/", udec_(rv(seqIdx, O_PINA)))
-      nfail++
+      failCount++
 
 
 PRI idle_premise() : bIdleOk | seqIdx, deltaVal, nbad, worst
-' The premise: xsum does not move while the streamer is idle.
+' Check the premise that xsum does not move while the streamer is idle.
 '
 ' @returns bIdleOk - TRUE when R1b = R1 in every sequence; FALSE prints the
 '   verdict (INCONCLUSIVE or REFUTED) before returning
+
+' Local Variables:
+' @local seqIdx - sequence index, 0..NREC-1
+' @local deltaVal - this sequence's R1b - R1
+' @local nbad - sequences with R1b <> R1
+' @local worst - largest |R1b - R1| seen
 
   nbad := 0
   worst := 0
@@ -231,21 +310,28 @@ PRI idle_premise() : bIdleOk | seqIdx, deltaVal, nbad, worst
       if abs deltaVal > worst
         worst := abs deltaVal
   bIdleOk := (nbad == 0)
-  if not bIdleOk
+  if bIdleOk == FALSE
     debug("PREMISE FAIL: R1b-R1 nonzero in ", udec_(nbad), " of 16 sequences, largest |R1b-R1| = ", udec_(worst))
-    if worst >= (WAIT_R1B / 2) * G_COS
+    if worst >= STILL_MOVING_TERMS * G_COS
       debug("VERDICT: INCONCLUSIVE - xsum still moving ~1000 clocks after the burst: the count-down (burst end) of the construction did not hold")
     else
       debug("VERDICT: REFUTED - xsum moved while the streamer was idle (R1b-R1 <> 0); the premise every reading rests on fails")
 
 
 PRI runon_premise() : bRunonOk | seqIdx, nbad, nclr, nb0
-' ZZ control: a zero burst after a zero burst adds nothing (every hypothesis).
-' If it fails ONLY because B reads 0 after a nonzero B0, xsum is being cleared
-' by a read (not running totals) -- the predicted idle-read behaviour fails.
+' Run the ZZ control: a zero burst after a zero burst adds nothing (every
+' hypothesis). If it fails ONLY because B reads 0 after a nonzero B0, xsum is
+' being cleared by a read (not running totals) -- the predicted idle-read
+' behaviour fails.
 '
 ' @returns bRunonOk - TRUE when the ZZ control holds in every sequence; FALSE
 '   prints the verdict before returning
+
+' Local Variables:
+' @local seqIdx - sequence index, 0..NREC-1
+' @local nbad - sequences with B <> B0
+' @local nclr - of those, sequences where B read 0
+' @local nb0 - sequences with B0 <> 0
 
   nbad := 0
   nclr := 0
@@ -258,7 +344,7 @@ PRI runon_premise() : bRunonOk | seqIdx, nbad, nclr, nb0
       if rv(seqIdx, O_BX) == 0
         nclr++
   bRunonOk := (nbad == 0)
-  if not bRunonOk
+  if bRunonOk == FALSE
     if nclr == nbad and nclr == nb0
       debug("PREMISE FAIL: in every sequence with B0 <> 0 (", udec_(nb0), ") a zero burst then read B = 0")
       debug("  Under clear-on-read semantics read d1 = R1 and d2 = R2 directly from the raw rows above.")
@@ -268,108 +354,126 @@ PRI runon_premise() : bRunonOk | seqIdx, nbad, nclr, nb0
       debug("NO VERDICT: the zero burst does not behave as constructed")
 
 
-PRI check_multiples(ch) : nbad | seqIdx, magC, chOff, deltaIdx, deltaVal
+PRI check_multiples(ch) : badCount | seqIdx, magC, chOff, deltaIdx, deltaVal
 ' Verify d1..d5 are whole multiples of the channel's term magnitude, in
-' every sequence. Only channel CH_X's failures fold into nfail (gating);
+' every sequence. Only channel CH_X's failures fold into failCount (gating);
 ' CH_Y (ysum) is corroborating only.
 '
 ' @param ch - channel selector (CH_X or CH_Y)
-' @returns nbad - count of non-multiple deltas found for this channel
+' @returns badCount - count of non-multiple deltas found for this channel
+
+' Local Variables:
+' @local seqIdx - sequence index, 0..NREC-1
+' @local magC - the channel's term magnitude |C|
+' @local chOff - the channel's field offset (X_FIELD_OFF or Y_FIELD_OFF)
+' @local deltaIdx - which delta, d1..d5 (a DI_* constant)
+' @local deltaVal - that delta's value
 
   if ch == CH_X
     magC := G_COS
-    chOff := 0
+    chOff := X_FIELD_OFF
   else
     magC := G_SIN
-    chOff := 1
-  nbad := 0
+    chOff := Y_FIELD_OFF
+  badCount := 0
   repeat seqIdx from 0 to NREC - 1
     repeat deltaIdx from 0 to DELTA_COUNT - 1
       case deltaIdx
-        0: deltaVal := dd(seqIdx, O_R1X + chOff, O_BX + chOff)
-        1: deltaVal := dd(seqIdx, O_R2X + chOff, O_R1X + chOff)
-        2: deltaVal := dd(seqIdx, O_R3X + chOff, O_R2X + chOff)
-        3: deltaVal := dd(seqIdx, O_R4X + chOff, O_R3X + chOff)
-        4: deltaVal := dd(seqIdx, O_R5X + chOff, O_R4X + chOff)
+        DI_D1: deltaVal := dd(seqIdx, O_R1X + chOff, O_BX + chOff)
+        DI_D2: deltaVal := dd(seqIdx, O_R2X + chOff, O_R1X + chOff)
+        DI_D3: deltaVal := dd(seqIdx, O_R3X + chOff, O_R2X + chOff)
+        DI_D4: deltaVal := dd(seqIdx, O_R4X + chOff, O_R3X + chOff)
+        DI_D5: deltaVal := dd(seqIdx, O_R5X + chOff, O_R4X + chOff)
       if deltaVal // magC
-        nbad++
+        badCount++
         if ch == CH_X
           debug("RIG FAIL: multiple-of-C control, seq #", udec_(seqIdx), " d", udec_(deltaIdx + 1), " = ", sdec_(deltaVal), " is not a whole multiple of ", udec_(magC))
   if ch == CH_X
-    nfail += nbad
+    failCount += badCount
 
 
-PRI measure_c(ch) : bad | lvl, rp, seqIdx, chOff, magC, measC, measC0
-' C_meas = (R2-B)[N=65] - (R2-B)[N=64], same level and repetition: one term
-' under every named hypothesis. Gate (xsum only): |C| = 19, constant per level,
-' sign flips with P3.
+PRI measure_c(ch) : badCount | lvl, rp, seqIdx, chOff, magC, measC, measC0
+' Measure C without assuming a hypothesis: C_meas = (R2-B)[N=65] -
+' (R2-B)[N=64], same level and repetition, is one term under every named
+' hypothesis. Gate (xsum only): |C| = 19, constant per level, sign flips
+' with P3.
 '
 ' @param ch - channel selector (CH_X or CH_Y)
-' @returns bad - count of C-control failures found for this channel
+' @returns badCount - count of C-control failures found for this channel
+
+' Local Variables:
+' @local lvl - P3 level (LEVEL_LOW or LEVEL_HIGH)
+' @local rp - repetition index, 0..REPS-1
+' @local seqIdx - the N_A record of this level and repetition (N_B is next)
+' @local chOff - the channel's field offset (X_FIELD_OFF or Y_FIELD_OFF)
+' @local magC - the channel's term magnitude |C|
+' @local measC - this repetition's C_meas
+' @local measC0 - repetition 0's C_meas at this level (the accepted C)
 
   if ch == CH_X
     magC := G_COS
-    chOff := 0
+    chOff := X_FIELD_OFF
   else
     magC := G_SIN
-    chOff := 1
-  bad := 0
+    chOff := Y_FIELD_OFF
+  badCount := 0
   repeat lvl from LEVEL_LOW to LEVEL_HIGH
     repeat rp from 0 to REPS - 1
-      seqIdx := (lvl * REPS + rp) * 2
+      seqIdx := (lvl * REPS + rp) * NLENGTHS
       measC := dd(seqIdx + 1, O_R2X + chOff, O_BX + chOff) - dd(seqIdx, O_R2X + chOff, O_BX + chOff)
-      cm[ch * 8 + lvl * 4 + rp] := measC
+      measuredC[ch * C_PER_CH + lvl * REPS + rp] := measC
       if rp == 0
         measC0 := measC
       if abs measC <> magC or measC <> measC0
-        bad++
+        badCount++
         if ch == CH_X
           debug("RIG FAIL: C control, P3=", udec_(lvl), " rep ", udec_(rp), " C_meas = ", sdec_(measC), " (expected |C| = ", udec_(magC), ", same in every rep)")
-    cmeas[ch * 2 + lvl] := measC0
-  if cmeas[ch * 2 + 0] <> -cmeas[ch * 2 + 1]
-    bad++
+    acceptedC[ch * NLEVELS + lvl] := measC0
+  if acceptedC[ch * NLEVELS + LEVEL_LOW] <> -acceptedC[ch * NLEVELS + LEVEL_HIGH]
+    badCount++
     if ch == CH_X
-      debug("RIG FAIL: C control, sign did not flip with P3: C(LOW) = ", sdec_(cmeas[0]), " C(HIGH) = ", sdec_(cmeas[1]))
+      debug("RIG FAIL: C control, sign did not flip with P3: C(LOW) = ", sdec_(acceptedC[CH_X * NLEVELS + LEVEL_LOW]), " C(HIGH) = ", sdec_(acceptedC[CH_X * NLEVELS + LEVEL_HIGH]))
   if ch == CH_X
-    debug("C measured, xsum: P3 LOW reps ", sdec_(cm[0]), " ", sdec_(cm[1]), " ", sdec_(cm[2]), " ", sdec_(cm[3]), " | P3 HIGH reps ", sdec_(cm[4]), " ", sdec_(cm[5]), " ", sdec_(cm[6]), " ", sdec_(cm[7]), "  (predicted -19 / +19)")
-    if bad == 0
-      if cmeas[0] == -G_COS
+    ' measuredC[] slots 0-3 = xsum P3 low reps 0-3, 4-7 = xsum P3 high reps 0-3
+    debug("C measured, xsum: P3 LOW reps ", sdec_(measuredC[0]), " ", sdec_(measuredC[1]), " ", sdec_(measuredC[2]), " ", sdec_(measuredC[3]), " | P3 HIGH reps ", sdec_(measuredC[4]), " ", sdec_(measuredC[5]), " ", sdec_(measuredC[6]), " ", sdec_(measuredC[7]), "  (predicted -19 / +19)")
+    if badCount == 0
+      if acceptedC[CH_X * NLEVELS + LEVEL_LOW] == -G_COS
         debug("  sign rule: as predicted (term = +g when imm[19] differs from the pin bit)")
       else
         debug("  sign rule: INVERTED relative to the prediction (not gating; classification uses the measured C)")
-    nfail += bad
+    failCount += badCount
 
 
 PRI class_name(d1Code, d2Code) : pLabel
-' Human-readable label for a main-pair classification.
+' Return the human-readable label for a main-pair classification.
 '
-' @param d1Code - d1/C - N (should be -1 under TRUE, 0 under no-lag/lost)
-' @param d2Code - d2/C (should be 1 under TRUE, 0 under no-lag/lost)
+' @param d1Code - d1/C - N (LAG_D1 under TRUE, NOLAG_D1 / LOST_D1 under the FALSE hypotheses)
+' @param d2Code - d2/C (LAG_D2 under TRUE, NOLAG_D2 / LOST_D2 under the FALSE hypotheses)
 ' @returns pLabel - address of the matching label string
 
-  if d1Code == -1 and d2Code == 1
+  if d1Code == LAG_D1 and d2Code == LAG_D2
     pLabel := string("TRUE (lag): d1=(N-1)C d2=C")
-  elseif d1Code == 0 and d2Code == 0
+  elseif d1Code == NOLAG_D1 and d2Code == NOLAG_D2
     pLabel := string("FALSE (no lag): d1=N*C d2=0")
-  elseif d1Code == -1 and d2Code == 0
+  elseif d1Code == LOST_D1 and d2Code == LOST_D2
     pLabel := string("FALSE (lost term): d1=(N-1)C d2=0")
   else
     pLabel := string("OTHER")
 
 
 PRI carry_name(d3Code, d4Code, d5Code) : pLabel
-' Human-readable label for the carry-arm classification.
+' Return the human-readable label for the carry-arm classification.
 '
 ' @param d3Code - d3/C - N
 ' @param d4Code - d4/C - N
 ' @param d5Code - d5/C
 ' @returns pLabel - address of the matching label string
 
-  if d3Code == -1 and d4Code == 0 and d5Code == 1
+  if d3Code == LAG_D3 and d4Code == LAG_D4 and d5Code == LAG_D5
     pLabel := string("TRUE (lag)")
-  elseif d3Code == 0 and d4Code == 0 and d5Code == 0
+  elseif d3Code == NOLAG_D3 and d4Code == NOLAG_D4 and d5Code == NOLAG_D5
     pLabel := string("no-lag")
-  elseif d3Code == -1 and d4Code == -1 and d5Code == 0
+  elseif d3Code == LOST_D3 and d4Code == LOST_D4 and d5Code == LOST_D5
     pLabel := string("lost")
   else
     pLabel := string("OTHER")
@@ -378,6 +482,21 @@ PRI carry_name(d3Code, d4Code, d5Code) : pLabel
 PRI classify_and_verdict() | seqIdx, burstN, measC, same64, same65, idx64, idx65, allcarry, ntrue, nnolag, nlost, nother
 ' Classify every sequence's main pair and carry arm against the named
 ' hypotheses, then print the final VERDICT line.
+'
+
+' Local Variables:
+' @local seqIdx - sequence index, 0..NREC-1
+' @local burstN - this sequence's burst length N
+' @local measC - the accepted C for this sequence's P3 level
+' @local same64 - TRUE while every N_A record matches the first (REF_SEQ_A)
+' @local same65 - TRUE while every N_B record matches the first (REF_SEQ_B)
+' @local idx64 - the N_A reference record (REF_SEQ_A)
+' @local idx65 - the N_B reference record (REF_SEQ_B)
+' @local allcarry - TRUE while every carry arm reads the LAG pattern
+' @local ntrue - sequences whose main pair reads LAG
+' @local nnolag - sequences whose main pair reads NOLAG
+' @local nlost - sequences whose main pair reads LOST
+' @local nother - sequences whose main pair reads none of them
 
   debug("--- CLASSIFICATION (xsum, units of measured C) ---")
   allcarry := TRUE
@@ -387,20 +506,20 @@ PRI classify_and_verdict() | seqIdx, burstN, measC, same64, same65, idx64, idx65
   nother := 0
   repeat seqIdx from 0 to NREC - 1
     burstN := rv(seqIdx, O_N)
-    measC := cmeas[rv(seqIdx, O_LEVEL)]
-    ka[seqIdx] := dd(seqIdx, O_R1X, O_BX) / measC - burstN
-    kb[seqIdx] := dd(seqIdx, O_R2X, O_R1X) / measC
-    k3[seqIdx] := dd(seqIdx, O_R3X, O_R2X) / measC - burstN
-    k4[seqIdx] := dd(seqIdx, O_R4X, O_R3X) / measC - burstN
-    k5[seqIdx] := dd(seqIdx, O_R5X, O_R4X) / measC
-    debug("#", udec_(seqIdx), " N=", udec_(burstN), " C=", sdec_(measC), "  d1=(N", sdec_(ka[seqIdx]), ")C d2=", sdec_(kb[seqIdx]), "C -> ", zstr_(class_name(ka[seqIdx], kb[seqIdx])), " | carry d3=(N", sdec_(k3[seqIdx]), ")C d4=(N", sdec_(k4[seqIdx]), ")C d5=", sdec_(k5[seqIdx]), "C -> ", zstr_(carry_name(k3[seqIdx], k4[seqIdx], k5[seqIdx])))
-    if not (k3[seqIdx] == -1 and k4[seqIdx] == 0 and k5[seqIdx] == 1)
+    measC := acceptedC[rv(seqIdx, O_LEVEL)]
+    d1TermsVsN[seqIdx] := dd(seqIdx, O_R1X, O_BX) / measC - burstN
+    d2Terms[seqIdx] := dd(seqIdx, O_R2X, O_R1X) / measC
+    d3TermsVsN[seqIdx] := dd(seqIdx, O_R3X, O_R2X) / measC - burstN
+    d4TermsVsN[seqIdx] := dd(seqIdx, O_R4X, O_R3X) / measC - burstN
+    d5Terms[seqIdx] := dd(seqIdx, O_R5X, O_R4X) / measC
+    debug("#", udec_(seqIdx), " N=", udec_(burstN), " C=", sdec_(measC), "  d1=(N", sdec_(d1TermsVsN[seqIdx]), ")C d2=", sdec_(d2Terms[seqIdx]), "C -> ", zstr_(class_name(d1TermsVsN[seqIdx], d2Terms[seqIdx])), " | carry d3=(N", sdec_(d3TermsVsN[seqIdx]), ")C d4=(N", sdec_(d4TermsVsN[seqIdx]), ")C d5=", sdec_(d5Terms[seqIdx]), "C -> ", zstr_(carry_name(d3TermsVsN[seqIdx], d4TermsVsN[seqIdx], d5Terms[seqIdx])))
+    if (d3TermsVsN[seqIdx] == LAG_D3 and d4TermsVsN[seqIdx] == LAG_D4 and d5Terms[seqIdx] == LAG_D5) == FALSE
       allcarry := FALSE
-    if ka[seqIdx] == -1 and kb[seqIdx] == 1
+    if d1TermsVsN[seqIdx] == LAG_D1 and d2Terms[seqIdx] == LAG_D2
       ntrue++
-    elseif ka[seqIdx] == 0 and kb[seqIdx] == 0
+    elseif d1TermsVsN[seqIdx] == NOLAG_D1 and d2Terms[seqIdx] == NOLAG_D2
       nnolag++
-    elseif ka[seqIdx] == -1 and kb[seqIdx] == 0
+    elseif d1TermsVsN[seqIdx] == LOST_D1 and d2Terms[seqIdx] == LOST_D2
       nlost++
     else
       nother++
@@ -408,42 +527,55 @@ PRI classify_and_verdict() | seqIdx, burstN, measC, same64, same65, idx64, idx65
   ' records alternate N=64 (even index) and N=65 (odd index)
   same64 := TRUE
   same65 := TRUE
-  repeat seqIdx from 2 to NREC - 1
+  repeat seqIdx from REF_SEQ_B + 1 to NREC - 1
     if seqIdx & 1
-      if ka[seqIdx] <> ka[1] or kb[seqIdx] <> kb[1]
+      if d1TermsVsN[seqIdx] <> d1TermsVsN[REF_SEQ_B] or d2Terms[seqIdx] <> d2Terms[REF_SEQ_B]
         same65 := FALSE
     else
-      if ka[seqIdx] <> ka[0] or kb[seqIdx] <> kb[0]
+      if d1TermsVsN[seqIdx] <> d1TermsVsN[REF_SEQ_A] or d2Terms[seqIdx] <> d2Terms[REF_SEQ_A]
         same64 := FALSE
-  idx64 := 0
-  idx65 := 1
+  idx64 := REF_SEQ_A
+  idx65 := REF_SEQ_B
   debug("counts over 16 sequences: TRUE ", udec_(ntrue), "  no-lag ", udec_(nnolag), "  lost ", udec_(nlost), "  other ", udec_(nother))
   debug(" ")
   if ntrue == NREC
-    if allcarry
+    if allcarry == TRUE
       debug("VERDICT: CONFIRMED - all 16 sequences (N=64,65; P3 low,high; 4 reps) read d1=(N-1)C, d2=C, R1b-R1=0, and the carry arm read (N-1)C, N*C, C")
     else
       debug("VERDICT: INCONCLUSIVE - main pair is TRUE in all 16 sequences but the carry arm (two K bursts back to back) did not read (N-1)C, N*C, C in every one")
-  elseif same64 and same65
-    if ka[idx64] == ka[idx65] and kb[idx64] == kb[idx65]
-      if ka[idx64] == 0 and kb[idx64] == 0
+  elseif same64 == TRUE and same65 == TRUE
+    if d1TermsVsN[idx64] == d1TermsVsN[idx65] and d2Terms[idx64] == d2Terms[idx65]
+      if d1TermsVsN[idx64] == NOLAG_D1 and d2Terms[idx64] == NOLAG_D2
         debug("VERDICT: REFUTED - no lag: d1 = N*C and d2 = 0 at both lengths, every sequence")
-      elseif ka[idx64] == -1 and kb[idx64] == 0
+      elseif d1TermsVsN[idx64] == LOST_D1 and d2Terms[idx64] == LOST_D2
         debug("VERDICT: REFUTED - last term LOST, not late: d1 = (N-1)*C and d2 = 0 at both lengths, every sequence")
       else
-        debug("VERDICT: REFUTED - neither lag, no-lag nor lost: every sequence reads d1 = (N", sdec_(ka[idx64]), ")*C, d2 = ", sdec_(kb[idx64]), "*C")
+        debug("VERDICT: REFUTED - neither lag, no-lag nor lost: every sequence reads d1 = (N", sdec_(d1TermsVsN[idx64]), ")*C, d2 = ", sdec_(d2Terms[idx64]), "*C")
     else
-      debug("VERDICT: REFUTED - length-dependent: N=64 reads d1=(N", sdec_(ka[idx64]), ")C d2=", sdec_(kb[idx64]), "C; N=65 reads d1=(N", sdec_(ka[idx65]), ")C d2=", sdec_(kb[idx65]), "C (repeatable per length)")
+      debug("VERDICT: REFUTED - length-dependent: N=64 reads d1=(N", sdec_(d1TermsVsN[idx64]), ")C d2=", sdec_(d2Terms[idx64]), "C; N=65 reads d1=(N", sdec_(d1TermsVsN[idx65]), ")C d2=", sdec_(d2Terms[idx65]), "C (repeatable per length)")
   else
     debug("VERDICT: INCONCLUSIVE - not repeatable across repetitions/levels: TRUE ", udec_(ntrue), " no-lag ", udec_(nnolag), " lost ", udec_(nlost), " other ", udec_(nother), " of 16")
 
 
-PRI ysum_summary() | seqIdx, burstN, measC, nidle, nzz, nmul, bad, nTrue, nCarry
-' ysum: corroborating only. yterm/ysum are predicted to behave "identically";
-' the sin byte's LUT position ([31:24]) comes from the KB, not the prediction.
+PRI ysum_summary() | seqIdx, burstN, measC, nidle, nzz, nmul, cFailCnt, nTrue, nCarry
+' Summarise ysum, corroborating only. yterm/ysum are predicted to behave
+' "identically"; the sin byte's LUT position ([31:24]) comes from the KB, not
+' the prediction.
 '
 ' Single exit: the TRUE/carry classification loop runs only when the ysum
 ' construction checks passed; either way the method falls through to the end.
+'
+
+' Local Variables:
+' @local seqIdx - sequence index, 0..NREC-1
+' @local burstN - this sequence's burst length N
+' @local measC - the accepted ysum C for this sequence's P3 level
+' @local nidle - sequences with ysum R1b <> R1
+' @local nzz - sequences with ysum B <> B0
+' @local nmul - ysum deltas that are not whole multiples of |C|
+' @local cFailCnt - ysum C-control failures, from measure_c()
+' @local nTrue - sequences whose ysum main pair reads LAG
+' @local nCarry - sequences whose ysum carry arm reads LAG
 
   debug("--- YSUM (corroborating only, not gating; predicted |C| = 37) ---")
   nidle := 0
@@ -454,36 +586,37 @@ PRI ysum_summary() | seqIdx, burstN, measC, nidle, nzz, nmul, bad, nTrue, nCarry
     if dd(seqIdx, O_BY, O_B0Y)
       nzz++
   nmul := check_multiples(CH_Y)
-  bad := measure_c(CH_Y)
-  debug("ysum: idle moves ", udec_(nidle), ", zero-after-zero moves ", udec_(nzz), ", non-multiples of 37: ", udec_(nmul), ", C_meas P3 LOW ", sdec_(cm[8]), " ", sdec_(cm[9]), " ", sdec_(cm[10]), " ", sdec_(cm[11]), " HIGH ", sdec_(cm[12]), " ", sdec_(cm[13]), " ", sdec_(cm[14]), " ", sdec_(cm[15]))
-  if nidle or nzz or nmul or bad
+  cFailCnt := measure_c(CH_Y)
+  ' measuredC[] slots 8-11 = ysum P3 low reps 0-3, 12-15 = ysum P3 high reps 0-3
+  debug("ysum: idle moves ", udec_(nidle), ", zero-after-zero moves ", udec_(nzz), ", non-multiples of 37: ", udec_(nmul), ", C_meas P3 LOW ", sdec_(measuredC[8]), " ", sdec_(measuredC[9]), " ", sdec_(measuredC[10]), " ", sdec_(measuredC[11]), " HIGH ", sdec_(measuredC[12]), " ", sdec_(measuredC[13]), " ", sdec_(measuredC[14]), " ", sdec_(measuredC[15]))
+  if nidle or nzz or nmul or cFailCnt
     debug("YSUM: construction checks failed on ysum; no ysum classification (xsum verdict unaffected)")
   else
     nTrue := 0
     nCarry := 0
     repeat seqIdx from 0 to NREC - 1
       burstN := rv(seqIdx, O_N)
-      measC := cmeas[2 + rv(seqIdx, O_LEVEL)]
-      if dd(seqIdx, O_R1Y, O_BY) / measC - burstN == -1 and dd(seqIdx, O_R2Y, O_R1Y) / measC == 1
+      measC := acceptedC[AC_Y_BASE + rv(seqIdx, O_LEVEL)]
+      if dd(seqIdx, O_R1Y, O_BY) / measC - burstN == LAG_D1 and dd(seqIdx, O_R2Y, O_R1Y) / measC == LAG_D2
         nTrue++
-      if dd(seqIdx, O_R3Y, O_R2Y) / measC - burstN == -1 and dd(seqIdx, O_R4Y, O_R3Y) / measC - burstN == 0 and dd(seqIdx, O_R5Y, O_R4Y) / measC == 1
+      if dd(seqIdx, O_R3Y, O_R2Y) / measC - burstN == LAG_D3 and dd(seqIdx, O_R4Y, O_R3Y) / measC - burstN == LAG_D4 and dd(seqIdx, O_R5Y, O_R4Y) / measC == LAG_D5
         nCarry++
     debug("YSUM: TRUE (lag) pair in ", udec_(nTrue), " of 16, carry arm TRUE in ", udec_(nCarry), " of 16 (see dy rows for the rest)")
 
 
 { MEASURING ENGINE -- runs in its own cog; the ONLY code that touches the
   streamer. No debug() here (DEBUG_COGS excludes this cog anyway).
-  PTRA = @mbox on entry.
+  PTRA = @mailbox on entry.
 }
 DAT             org     0        ' ---- Measuring Engine ----
 engine          mov     ptrb, ptra
-                add     ptrb, #HDR * 4          ' records start at mbox[HDR]
+                add     ptrb, #HDR * 4          ' records start at mailbox[HDR]
                 setluts #0                      ' LUT sharing OFF (reset state)
                 setxfrq freq80_                 ' $8000_0000 = reset value; no SETQ anywhere
                 wrpin   #0, #PIN                ' P3: reset config (smart pin off, logic input)
 
                 ' write the LUT long at ALL 512 addresses, once, before any burst
-                mov     ii_, #$1FF
+                mov     ii_, #LUT_LAST
 .fill           wrlut   lutv_, ii_
                 djnf    ii_, #.fill
 
@@ -492,11 +625,11 @@ engine          mov     ptrb, ptra
                 rdlut   t2_, a000_
                 rdlut   t3_, a1ff_
                 mov     t0_, ptra
-                add     t0_, #4
+                add     t0_, #4                 ' next header long: MB_LUT_A
                 wrlong  t1_, t0_
-                add     t0_, #4
+                add     t0_, #4                 ' next header long: MB_LUT_0
                 wrlong  t2_, t0_
-                add     t0_, #4
+                add     t0_, #4                 ' next header long: MB_LUT_LAST
                 wrlong  t3_, t0_
 
                 drvl    #PIN                    ' DIR=1, OUT=0
@@ -507,8 +640,8 @@ engine          mov     ptrb, ptra
                 xinit   dz_, imz_
                 waitx   ##WAIT_IDLE
 
-                mov     level_, #0
-.lvl            cmp     level_, #0              wz
+                mov     level_, #LEVEL_LOW
+.lvl            cmp     level_, #LEVEL_LOW      wz
         if_z    drvl    #PIN                    ' P3 LOW  -> predicted C = -g
         if_nz   drvh    #PIN                    ' P3 HIGH -> predicted C = +g
                 waitx   ##WAIT_PIN
@@ -519,15 +652,15 @@ engine          mov     ptrb, ptra
                 call    #do_seq
                 djnz    rep_, #.rep
                 add     level_, #1
-                cmp     level_, #2              wz
+                cmp     level_, #NLEVELS        wz
         if_nz   jmp     #.lvl
 
                 wrlong  #MBOX_DONE, ptra         ' done -- always the last write
                 cogid   t1_
                 cogstop t1_                     ' releases P3
 
-'' One sequence for burst length nn_. Every GETXACC is issued with the streamer
-'' idle (WAIT_IDLE clocks after the XINIT). "mov y, 0-0" receives ysum.
+' One sequence for burst length nn_. Every GETXACC is issued with the streamer
+' idle (WAIT_IDLE clocks after the XINIT). "mov y, 0-0" receives ysum.
 do_seq          mov     dk_, dmode_
                 or      dk_, nn_                ' D = $F007_0000 + N
                 testp   #PIN                    wc
@@ -578,11 +711,11 @@ do_seq          mov     dk_, dmode_
                 add     ptrb, #RECL * 4
                 ret
 
-freq80_         long    $8000_0000
+freq80_         long    NCO_FREQ
 lutv_           long    LUTV
 laddr_          long    LUT_ADDR
 a000_           long    0
-a1ff_           long    $1FF
+a1ff_           long    LUT_LAST
 dmode_          long    MODE_G
 dz_             long    MODE_G | ZCOUNT
 imz_            long    IMM_Z

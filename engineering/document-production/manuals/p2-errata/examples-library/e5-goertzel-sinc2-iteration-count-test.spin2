@@ -2,11 +2,11 @@
 ''
 ''   File.......  e5-goertzel-sinc2-iteration-count-test.spin2
 ''   Purpose....  Erratum E5 scope test, not an erratum test: the
-''                documented SINC2 constraint that E5's fix does not
-''                cover; which samples a varying iteration count corrupts,
-''                whether one clock of read jitter does the same, and
-''                whether XZERO or a constant count keeps every sample
-''                clean
+''                documented SINC2 constraint that E5's workaround does
+''                not cover; which samples a varying iteration count
+''                corrupts, whether one clock of read jitter does the
+''                same, and whether XZERO or a constant count keeps every
+''                sample clean
 ''   Manual.....  P2 Errata
 ''   Version....  v0.2.0 (2026-09-26)
 ''   Appears in.  Erratum E4: GETXACC Clears Only During a Goertzel Burst;
@@ -32,9 +32,11 @@ CON ' ---- Rig Parameters ----
   G_COS           = 1                     ' LUT bits [23:16] -> |C_X| = 1: X counts terms
   G_SIN           = 3                     ' LUT bits [31:24] -> |C_Y| = 3 (corroborating)
   Y_RATIO         = G_SIN / G_COS         ' every Y reading = 3 x its X reading
-  LUTV            = (G_SIN << 24) | (G_COS << 16)       ' $0301_0000
+  LUT_SIN_SHIFT   = 24                    ' LUT bits [31:24] hold the sine (Y) weight
+  LUT_COS_SHIFT   = 16                    ' LUT bits [23:16] hold the cosine (X) weight
+  LUTV            = (G_SIN << LUT_SIN_SHIFT) | (G_COS << LUT_COS_SHIFT)       ' $0301_0000
   LUT_LAST        = $1FF                  ' LUT addresses 0..$1FF
-  LUT_LONGS       = LUT_LAST + 1
+  LUT_LONGS       = LUT_LAST + 1          ' longs in the LUT
 
   MODE_S1         = $F007_0000            ' Goertzel SINC1, DACs off, pin group 0
   MODE_S2         = $F087_0000            ' the same with D[23] = 1: SINC2
@@ -50,23 +52,27 @@ CON ' ---- Rig Parameters ----
   FREQ_NPS        = $0080_0040            ' 2^23 + 64: an occasional 255-clock cycle
   FREQ_NPL        = $007F_FFC0            ' 2^23 - 64: an occasional 257-clock cycle
   FREQ_CHIP       = $00A3_D70C            ' 1,000,000.19 Hz at 200 MHz (~200 clk/cycle)
-  P2_CYCLE_CLKS   = 256
+  P2_CYCLE_CLKS   = 256                   ' clocks per NCO cycle at FREQ_P2
   CYC_FAST        = 8                     ' NCO cycles per command (fast arms)
   CYC_CHIP        = 100                   ' Chip's 100-cycle measurement
   CYC_LONG        = 25_000                ' ~25 ms per measurement (beyond 20 ms)
   P2_WINDOW       = P2_CYCLE_CLKS * CYC_FAST            ' 2048 clocks
-  JIT_MASK        = 1                     ' WAITX #1 WC -> 2 + (1 AND RND) clocks
+  ' the WAITX operand before GETXACC in every read loop: WAITX #1 waits a
+  ' fixed 3 clocks; WAITX #1 WC (the jitter loop) waits 2 + (1 AND RND)
+  READ_WAITX      = 1
 
   NS_FAST         = 1024                  ' samples per fast arm (10.5 ms)
   NS_CHIP         = 2048                  ' samples per CHP arm (204.8 ms)
   NS_LONG         = 16                    ' samples per 25 ms arm (400 ms)
-  NS_MAX          = NS_CHIP
-  ' 9 fast arms, 3 CHP arms, 2 long arms (see the arm table)
-  TOTAL_SAMPLES   = 9 * NS_FAST + 3 * NS_CHIP + 2 * NS_LONG
+  NS_MAX          = NS_CHIP               ' samples in the largest arm
+  FAST_ARMS       = 9                     ' arms of NS_FAST samples (see the arm table)
+  CHIP_ARMS       = 3                     ' arms of NS_CHIP samples
+  LONG_ARMS       = 2                     ' arms of NS_LONG samples
+  TOTAL_SAMPLES   = FAST_ARMS * NS_FAST + CHIP_ARMS * NS_CHIP + LONG_ARMS * NS_LONG
 
   WAIT_IDLE       = 500                   ' clocks: > any zero/CAL burst + 16
   WAIT_PIN        = 10_000                ' settle after changing P3
-  MBOX_DONE       = 1                     ' mbox[MB_DONE] sentinel: engine finished
+  MBOX_DONE       = 1                     ' mailbox[MB_DONE] sentinel: engine finished
   RIG_TIMEOUT_SEC = 5                     ' host wait cap; engine needs ~1.6 s
 
 CON ' ---- Arms, Loop Kinds and Mailbox Layout ----
@@ -76,40 +82,68 @@ CON ' ---- Arms, Loop Kinds and Mailbox Layout ----
   '  KIND_XZERO  - XZERO, fixed WAITX #1 before GETXACC
   #0, KIND_XCONT, KIND_JITTER, KIND_XZERO
 
-  ' arms, in run order (the table in the engine DAT has one row per arm):
-  '  ARM_P2_S1 .. ARM_XCL_S2 - see arm_tab in the engine DAT; NARMS = 14
+  ' arms, in run order (arm_tab in the engine DAT has one row per arm, in
+  ' this order; S1 = SINC1, S2 = SINC2; SINC1/SINC2 twins sit side by side):
+  '  ARM_P2_S1  - SETXFRQ 2^23 (256 clk/cycle), 8 cycles, XCONT, SINC1
+  '  ARM_P2_S2  - the same, SINC2
+  '  ARM_NPS_S1 - SETXFRQ 2^23+64 (an occasional 255-clock cycle), 8 cycles, XCONT, SINC1
+  '  ARM_NPS_S2 - the same, SINC2
+  '  ARM_NPL_S1 - SETXFRQ 2^23-64 (an occasional 257-clock cycle), 8 cycles, XCONT, SINC1
+  '  ARM_NPL_S2 - the same, SINC2
+  '  ARM_CHP_S1 - 1 MHz, 100 cycles (Chip's measurement), XCONT, SINC1
+  '  ARM_CHP_S2 - the same, SINC2
+  '  ARM_JIT_S1 - SETXFRQ 2^23, 8 cycles, XCONT, WAITX #1 WC read jitter, SINC1
+  '  ARM_JIT_S2 - the same, SINC2
+  '  ARM_XZS_S2 - SETXFRQ 2^23+64, 8 cycles, XZERO, SINC2
+  '  ARM_XZC_S2 - 1 MHz, 100 cycles, XZERO, SINC2
+  '  ARM_XZL_S2 - 1 MHz, 25,000 cycles, XZERO, SINC2
+  '  ARM_XCL_S2 - 1 MHz, 25,000 cycles, XCONT, SINC2 (ARM_XZL_S2's XCONT twin)
+  '  NARMS      - number of arms
   #0, ARM_P2_S1, ARM_P2_S2, ARM_NPS_S1, ARM_NPS_S2, ARM_NPL_S1, ARM_NPL_S2, ARM_CHP_S1, ARM_CHP_S2, ARM_JIT_S1, ARM_JIT_S2, ARM_XZS_S2, ARM_XZC_S2, ARM_XZL_S2, ARM_XCL_S2, NARMS
+  ARMS_PER_PAIR   = 2                     ' a SINC1/SINC2 twin: step over one to reach the next S1 (or S2)
 
   ' arm-table fields:
   '  AF_FREQ - SETXFRQ value   AF_CMD - streamer D (mode | count)
   '  AF_KIND - read-loop kind  AF_NS  - samples recorded
+  '  ARM_FIELDS - longs per arm-table row
   #0, AF_FREQ, AF_CMD, AF_KIND, AF_NS, ARM_FIELDS
 
-  ' mailbox header longs
-  MB_DONE         = 0
-  MB_LUTBAD       = 1
-  MB_CAL          = 4
-  HDR             = 16
+  ' mailbox header, as mailbox[] long indexes
+  MB_DONE         = 0                     ' MBOX_DONE once the engine has finished
+  MB_LUTBAD       = 1                     ' LUT longs that read back wrong
+  MB_CAL          = 4                     ' first of the two calibration records (LOW, then HIGH)
+  HDR             = 16                    ' longs in the mailbox header: the first arm header's index
   ' calibration record, one per P3 level:
   '  CR_PIN - TESTP level  CR_B/CR_BY - X/Y before  CR_R/CR_RY - X/Y after
+  '  CAL_REC - longs per calibration record
   #0, CR_PIN, CR_B, CR_BY, CR_R, CR_RY, CAL_REC
   ' arm header:
   '  AH_CT0 - CT just before XINIT  AH_PINB/AH_PINA - P3 at start/end
   '  AH_NS  - sample count echoed by the engine
+  '  ARM_HDR - longs per arm header
   #0, AH_CT0, AH_PINB, AH_PINA, AH_NS, ARM_HDR
   ' sample record:
   '  SR_X - GETXACC X  SR_Y - GETXACC Y  SR_CT - GETCT 4 clocks after it
+  '  REC  - longs per sample record
   #0, SR_X, SR_Y, SR_CT, REC
-  MBOX_LONGS      = HDR + NARMS * ARM_HDR + REC * TOTAL_SAMPLES
+  MBOX_LONGS      = HDR + NARMS * ARM_HDR + REC * TOTAL_SAMPLES   ' longs in mailbox[]
 
   ' P3 levels
-  LEVEL_LOW       = 0
-  LEVEL_HIGH      = 1
+  LEVEL_LOW       = 0                     ' P3 driven low
+  LEVEL_HIGH      = 1                     ' P3 driven high
+  LEVEL_COUNT     = LEVEL_HIGH + 1        ' P3 levels calibrated
 
   ' model-fit states:
   '  FIT_NONE - not attempted (x at k = WARM would exceed 31 bits)
   '  FIT_OK   - exact fit       FIT_FAIL - the division was not exact
   #0, FIT_NONE, FIT_OK, FIT_FAIL
+
+  ' window-length buckets, as the offset of a window's length above the
+  ' arm's shortest window (arm_windows() histogram):
+  '  LEN_AT_MIN     - the shortest window length
+  '  LEN_MIN_PLUS_1 - one clock longer
+  '  LEN_MIN_PLUS_2 - two clocks longer
+  #0, LEN_AT_MIN, LEN_MIN_PLUS_1, LEN_MIN_PLUS_2
 
   ' analysis
   WARM            = 3                     ' first analysed sample (start-up excluded)
@@ -117,38 +151,80 @@ CON ' ---- Arms, Loop Kinds and Mailbox Layout ----
   SPREAD_STEADY   = 1                     ' window max - min allowed, non-jitter arms
   SPREAD_JITTER   = 2                     ' ... jitter arms (D-1 .. D+1)
   HUGE_TERMS      = 1000                  ' Q3: |e| >= 1000 terms is "huge"
-  JIT_CONFIRM_PCT = 25
-  JIT_REFUTE_PCT  = 5
-  PCT             = 100
+  JIT_CONFIRM_PCT = 25                    ' Q3: CONFIRMED needs >= this % of SINC2 samples huge
+  JIT_REFUTE_PCT  = 5                     ' Q3: REFUTED below this % huge
+  PCT             = 100                   ' percent scale
+  MIN_DIVISOR     = 1                     ' floor for a divisor (#>) so a percentage never divides by 0
   X100            = 100                   ' fixed-point scale for periods
   JIT_PRINT       = 48                    ' jitter arms: rows printed
   RAW_PRINT       = 6                     ' raw rows printed per arm
   MIN_RUNS        = 2                     ' Q1: complete runs needed per arm
   MIN_OUT_Q5      = 16                    ' Q5: outliers needed across decisive arms
-  PAIR_LEN        = 2
+  PAIR_LEN        = 2                     ' samples in an adjacent-pair outlier run
   ONE_CLOCK       = 1                     ' a window one clock longer or shorter
   Q4_PAIRS        = 3                     ' XZERO arms, each with an XCONT twin
   NCO_HALF        = $4000_0000            ' 2^30: (2*M) * 2^30 = M * 2^31, both positive
-  NO_INDEX        = -1
+  NO_INDEX        = -1                    ' sentinel: no sample index recorded
+
+DAT ' ---- Labels ----
+nm_p2s1         byte    "P2-S1 (SINC1, 256 clk/cycle, XCONT)", 0
+nm_p2s2         byte    "P2-S2 (SINC2, 256 clk/cycle, XCONT)", 0
+nm_nps1         byte    "NPS-S1 (SINC1, 2^23+64, XCONT)", 0
+nm_nps2         byte    "NPS-S2 (SINC2, 2^23+64, XCONT)", 0
+nm_npl1         byte    "NPL-S1 (SINC1, 2^23-64, XCONT)", 0
+nm_npl2         byte    "NPL-S2 (SINC2, 2^23-64, XCONT)", 0
+nm_chp1         byte    "CHP-S1 (SINC1, 1 MHz, 100 cycles, XCONT)", 0
+nm_chp2         byte    "CHP-S2 (SINC2, 1 MHz, 100 cycles, XCONT)", 0
+nm_jit1         byte    "JIT-S1 (SINC1, 256 clk/cycle, WAITX #1 WC)", 0
+nm_jit2         byte    "JIT-S2 (SINC2, 256 clk/cycle, WAITX #1 WC)", 0
+nm_xzs2         byte    "XZS-S2 (SINC2, 2^23+64, XZERO)", 0
+nm_xzc2         byte    "XZC-S2 (SINC2, 1 MHz, 100 cycles, XZERO)", 0
+nm_xzl2         byte    "XZL-S2 (SINC2, 1 MHz, 25000 cycles, XZERO)", 0
+nm_xcl2         byte    "XCL-S2 (SINC2, 1 MHz, 25000 cycles, XCONT)", 0
+s_match         byte    "MATCH", 0
+s_mismatch      byte    "MISMATCH", 0
+s_nofit         byte    "NO-FIT", 0
+s_cleanmis      byte    "CLEAN-MISMATCH", 0
+s_outmis        byte    "OUTLIER-MISMATCH", 0
+s_modelok       byte    "MODEL-MATCH", 0
 
 VAR ' ---- Mailbox & Analysis State ----
-  long mbox[MBOX_LONGS]                   ' engine output (see the layout CONs)
+  long mailbox[MBOX_LONGS]                ' engine output (see the layout CONs)
   long modelX[NS_MAX]                     ' model x^ per sample, current SINC2 arm
-  long modelXterm[NS_MAX]                  ' model J per sample, current SINC2 arm
-  long armBase[NARMS]                     ' mbox index of each arm header
-  long armOk[NARMS]                       ' window-spread control passed
-  long normLen[NARMS], lenMin[NARMS], lenMax[NARMS]
-  long nOddWin[NARMS], firstOddK[NARMS], lastOddK[NARMS]
-  long nDsamp[NARMS], nOut[NARMS], nHuge[NARMS], maxAbsErr[NARMS], nDvar[NARMS]
-  long nRuns[NARMS], nPairs[NARMS], nEdge[NARMS], nOpen[NARMS]
-  long nUnlinked[NARMS], nMissed[NARMS], nChanged[NARMS]
-  long nAcctBad[NARMS], nDev1[NARMS], maxDev1[NARMS]
-  long fitState[NARMS], fitXterm[NARMS]
-  long nMisClean[NARMS], nMisOut[NARMS], firstMisK[NARMS]
-  long nYbad[NARMS]
-  long calCx, calCy                       ' measured per-clock terms, P3 HIGH
+  long modelXterm[NS_MAX]                 ' model J per sample, current SINC2 arm
+  long armMailboxBase[NARMS]              ' mailbox index of each arm header
+  long armWindowsOk[NARMS]                ' window-spread control passed
+  long usualWindowLen[NARMS]              ' the usual (most common) window length, clocks
+  long windowLenMin[NARMS]                ' shortest window from k = WARM, clocks
+  long windowLenMax[NARMS]                ' longest window from k = WARM, clocks
+  long oddWindowCount[NARMS]              ' windows not of the usual length
+  long firstOddSample[NARMS]              ' sample index of the first odd window, or NO_INDEX
+  long lastOddSample[NARMS]               ' sample index of the last odd window, or NO_INDEX
+  long diffSampleCount[NARMS]             ' SINC2 difference samples d analysed
+  long outlierCount[NARMS]                ' SINC2 samples with d <> C*n^2
+  long hugeOutlierCount[NARMS]            ' outliers off by >= HUGE_TERMS terms
+  long maxAbsError[NARMS]                 ' largest |d - C*n^2|
+  long diffChangedCount[NARMS]            ' samples whose d differs from d at k = WARM+1
+  long outlierRunCount[NARMS]             ' outlier runs
+  long pairRunCount[NARMS]                ' runs that are an adjacent pair
+  long edgeRunCount[NARMS]                ' runs truncated at the start edge
+  long openRunCount[NARMS]                ' runs still open at the arm's end
+  long unlinkedOutlierCount[NARMS]        ' outliers with no window change
+  long missedChangeCount[NARMS]           ' window-changed samples that read clean
+  long changedWindowCount[NARMS]          ' samples whose window or the one before is odd
+  long accountingFailCount[NARMS]         ' SINC1 samples <> C*(L-g)
+  long sinc1DeviationCount[NARMS]         ' SINC1 samples off the usual value
+  long sinc1MaxDeviation[NARMS]           ' SINC1 largest |x - x_usual|
+  long fitState[NARMS]                    ' FIT_* state of the carry-model fit
+  long fitXterm[NARMS]                    ' J fitted at k = WARM
+  long cleanMismatchCount[NARMS]          ' model mismatches where no window changed
+  long changedMismatchCount[NARMS]        ' model mismatches where a window changed
+  long firstMismatchSample[NARMS]         ' sample index of the first model mismatch, or NO_INDEX
+  long yMismatchCount[NARMS]              ' samples where y <> (C_Y/C_X) * x
+  long calTermX                           ' measured per-clock X term, P3 HIGH
+  long calTermY                           ' measured per-clock Y term, P3 HIGH
   long gapClocks                          ' g: clocks per window adding no term
-  long nRigFail
+  long rigFailCount                       ' rig controls failed
 
 
 PUB main() | engineCog, tstart
@@ -160,21 +236,21 @@ PUB main() | engineCog, tstart
 ' @local engineCog - cog the measuring engine runs in
 ' @local tstart - CT when the wait for the engine began
 
-  longfill(@mbox, 0, MBOX_LONGS)
+  longfill(@mailbox, 0, MBOX_LONGS)
   debug("=== Goertzel SINC2 iteration-count corruption: reproduce, measure, explain ===")
   print_predictions()
-  engineCog := coginit(COGEXEC_NEW, @engine, @mbox)
+  engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
   if engineCog < 0
     debug("RIG FAIL: no free cog for the measuring engine")
-    finish()
-  tstart := getct()
-  repeat until mbox[MB_DONE] == MBOX_DONE or (getct() - tstart) > clkfreq * RIG_TIMEOUT_SEC
-  if mbox[MB_DONE] <> MBOX_DONE
-    cogstop(engineCog)
-    debug("RIG FAIL: measuring cog did not report done within 5 s (expected ~1.6 s)")
-    finish()
-  debug("measuring cog = ", udec_(engineCog), " (debugger restricted to cog 0)")
-  report()
+  else
+    tstart := getct()
+    repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - tstart) > clkfreq * RIG_TIMEOUT_SEC
+    if mailbox[MB_DONE] <> MBOX_DONE
+      cogstop(engineCog)
+      debug("RIG FAIL: measuring cog did not report done within 5 s (expected ~1.6 s)")
+    else
+      debug("measuring cog = ", udec_(engineCog), " (debugger restricted to cog 0)")
+      report()
   finish()
 
 
@@ -189,33 +265,33 @@ PRI finish()
 
 
 ' ------------------------------------------------------------ accessors --
-PRI arm_field(armIdx, fieldOff) : fieldVal
+PRI arm_field(armIdx, armFieldOff) : fieldVal
 ' Read one field of the arm table (the engine's own DAT copy, in hub).
 '
 ' @param armIdx - arm index, 0..NARMS-1
-' @param fieldOff - an AF_xxx field offset
+' @param armFieldOff - an AF_xxx arm-table field offset
 ' @returns fieldVal - the table value
 
-  fieldVal := long[@arm_tab][armIdx * ARM_FIELDS + fieldOff]
+  fieldVal := long[@arm_tab][armIdx * ARM_FIELDS + armFieldOff]
 
 
-PRI smp(armIdx, sampIdx, fieldOff) : smpVal
+PRI smp(armIdx, sampIdx, recFieldOff) : smpVal
 ' Read one field of one recorded sample.
 '
 ' @param armIdx - arm index, 0..NARMS-1
 ' @param sampIdx - sample index within the arm
-' @param fieldOff - an SR_xxx field offset
+' @param recFieldOff - an SR_xxx sample-record field offset
 ' @returns smpVal - the recorded value
 
-  smpVal := mbox[armBase[armIdx] + ARM_HDR + sampIdx * REC + fieldOff]
+  smpVal := mailbox[armMailboxBase[armIdx] + ARM_HDR + sampIdx * REC + recFieldOff]
 
 
 PRI win_len(armIdx, sampIdx) : winClks
-' Clocks between read sampIdx-1 and read sampIdx (both GETCTs sit the same
-' fixed distance after their GETXACC).
+' Clocks between read sampIdx-1 and read sampIdx, for sampIdx >= 1 (both
+' GETCTs sit the same fixed distance after their GETXACC).
 '
 ' @param armIdx - arm index, 0..NARMS-1
-' @param sampIdx - sample index within the arm (>= 1)
+' @param sampIdx - sample index within the arm
 ' @returns winClks - the read-to-read window in clocks
 
   winClks := smp(armIdx, sampIdx, SR_CT) - smp(armIdx, sampIdx - 1, SR_CT)
@@ -231,7 +307,8 @@ PRI is_sinc2(armIdx) : bSinc2
 
 
 PRI arm_name(armIdx) : pName
-' Printable arm label.
+' Printable arm label. The lookupz table holds one nm_xxx label per arm, in
+' the order of the ARM_xxx enum (position armIdx = arm ARM_xxx).
 '
 ' @param armIdx - arm index, 0..NARMS-1
 ' @returns pName - address of the zero-terminated label
@@ -267,7 +344,7 @@ PRI pred_windows(freqVal, cycles) : normClk, oddClk, periodX100, zeroClk | quo, 
 ' @local quo - floor(cycles*2^31/freqVal)
 ' @local remd - cycles*2^31 - quo*freqVal (exact: it is < freqVal)
 
-  quo := muldiv64(cycles * 2, NCO_HALF, freqVal)        ' both operands positive
+  quo := muldiv64(cycles * 2, NCO_HALF, freqVal)        ' (2*cycles) * 2^30 = cycles * 2^31, both operands positive
   remd := cycles * FREQ_1TO1 - quo * freqVal            ' low 32 bits are exact
   normClk := quo
   oddClk := quo
@@ -297,7 +374,7 @@ PRI pair_consts(nWin, deltaLen) : constFirst, constNext
 
 
 ' ---------------------------------------------------------- predictions --
-PRI print_predictions() | armIdx, normClk, oddClk, perX100, zeroClk, perUs, constFirst, constNext
+PRI print_predictions() | armIdx, normClk, oddClk, periodX100, zeroClk, perUs, constFirst, constNext
 ' Print the model and every arm's predicted windows and pair errors, all
 ' computed from the arm table before any measured value is read.
 '
@@ -306,7 +383,7 @@ PRI print_predictions() | armIdx, normClk, oddClk, perX100, zeroClk, perUs, cons
 ' @local armIdx - arm index
 ' @local normClk - predicted usual XCONT window
 ' @local oddClk - predicted odd XCONT window
-' @local perX100 - predicted odd-window period, commands x100
+' @local periodX100 - predicted odd-window period, commands x100
 ' @local zeroClk - predicted XZERO window
 ' @local perUs - predicted odd-window period, microseconds
 ' @local constFirst - J-free part of the predicted e_k
@@ -322,10 +399,10 @@ PRI print_predictions() | armIdx, normClk, oddClk, perX100, zeroClk, perUs, cons
   debug("    e_k = dl*J_(k-1) + 2*C*n*dl + C*(dl^2-dl)/2   e_(k+1) = -dl*J_(k-1) - dl*n*C - C*(dl^2-dl)/2   e_(k+2) = 0")
   debug("    SINC1: x_k = C*n_k -> the odd window reads exactly dl*C off, alone")
   repeat armIdx from 0 to NARMS - 1
-    normClk, oddClk, perX100, zeroClk := pred_windows(arm_field(armIdx, AF_FREQ), arm_field(armIdx, AF_CMD) & COUNT_MASK)
-    perUs := muldiv64(perX100, normClk, CLK_MHZ * X100)
-    debug("  ", zstr_(arm_name(armIdx)), ": F=", uhex_long_(arm_field(armIdx, AF_FREQ)), " M=", udec_(arm_field(armIdx, AF_CMD) & COUNT_MASK), " | XCONT windows ", udec_(normClk), ", odd ", udec_(oddClk), " every x100 = ", udec_(perX100), " cmds (", udec_(perUs), " us) | XZERO window ", udec_(zeroClk))
-    if oddClk <> normClk and is_sinc2(armIdx) and arm_field(armIdx, AF_KIND) == KIND_XCONT
+    normClk, oddClk, periodX100, zeroClk := pred_windows(arm_field(armIdx, AF_FREQ), arm_field(armIdx, AF_CMD) & COUNT_MASK)
+    perUs := muldiv64(periodX100, normClk, CLK_MHZ * X100)
+    debug("  ", zstr_(arm_name(armIdx)), ": F=", uhex_long_(arm_field(armIdx, AF_FREQ)), " M=", udec_(arm_field(armIdx, AF_CMD) & COUNT_MASK), " | XCONT windows ", udec_(normClk), ", odd ", udec_(oddClk), " every x100 = ", udec_(periodX100), " cmds (", udec_(perUs), " us) | XZERO window ", udec_(zeroClk))
+    if oddClk <> normClk and is_sinc2(armIdx) == TRUE and arm_field(armIdx, AF_KIND) == KIND_XCONT
       constFirst, constNext := pair_consts(normClk, oddClk - normClk)
       debug("    SINC2 pair (C=+1): d0 = ", sdec_(G_COS * normClk * normClk), ", e_k = ", sdec_(oddClk - normClk), "*J + ", sdec_(constFirst), ", e_(k+1) = ", sdec_(normClk - oddClk), "*J + ", sdec_(constNext), ", sum = ", sdec_(constFirst + constNext))
   debug("  Q3: JIT windows 2047/2048/2049; SINC2 corrupted where n_k <> n_(k-1) (~75 %), |e| ~ J >> 1000; SINC1 +-1 term (~50 %)")
@@ -337,21 +414,22 @@ PRI print_predictions() | armIdx, normClk, oddClk, perX100, zeroClk, perUs, cons
 PRI report() | armIdx, bGo
 ' Run the controls in order; if every one passed, analyse every arm and print
 ' the verdicts, else print the raw head of every arm and withhold verdicts.
+'
 
 ' Local Variables:
 ' @local armIdx - arm index
 ' @local bGo - TRUE while every control upstream has passed
 
-  nRigFail := 0
+  rigFailCount := 0
   locate_arms()
   check_lut()
   check_cal()
   check_pins()
-  bGo := (nRigFail == 0)
-  if bGo
+  bGo := (rigFailCount == 0)
+  if bGo == TRUE
     check_lock()
-    bGo := (nRigFail == 0)
-  if bGo
+    bGo := (rigFailCount == 0)
+  if bGo == TRUE
     debug("controls: LUT ok, CAL ok (C sign flips with P3, C_Y = 3*C_X), pins ok, loop locked, g ok, sizes ok")
     repeat armIdx from 0 to NARMS - 1
       analyze_arm(armIdx)
@@ -366,6 +444,7 @@ PRI report() | armIdx, bGo
 PRI locate_arms() | armIdx, offs
 ' Compute each arm's mailbox offset by walking the table the engine walks,
 ' and check the total against the mailbox size.
+'
 
 ' Local Variables:
 ' @local armIdx - arm index
@@ -373,26 +452,27 @@ PRI locate_arms() | armIdx, offs
 
   offs := HDR
   repeat armIdx from 0 to NARMS - 1
-    armBase[armIdx] := offs
+    armMailboxBase[armIdx] := offs
     offs += ARM_HDR + REC * arm_field(armIdx, AF_NS)
   if offs <> MBOX_LONGS
     debug("RIG FAIL: arm table needs ", udec_(offs), " mailbox longs, mailbox has ", udec_(MBOX_LONGS))
-    nRigFail++
+    rigFailCount++
 
 
 PRI check_lut()
 ' LUT control: the engine read all 512 LUT longs back after writing them.
 '
 
-  debug("LUT readback: ", udec_(mbox[MB_LUTBAD]), " of ", udec_(LUT_LONGS), " longs differ from ", uhex_long_(LUTV))
-  if mbox[MB_LUTBAD] <> 0
-    debug("RIG FAIL: LUT readback, expected 0 mismatches, got ", udec_(mbox[MB_LUTBAD]))
-    nRigFail++
+  debug("LUT readback: ", udec_(mailbox[MB_LUTBAD]), " of ", udec_(LUT_LONGS), " longs differ from ", uhex_long_(LUTV))
+  if mailbox[MB_LUTBAD] <> 0
+    debug("RIG FAIL: LUT readback, expected 0 mismatches, got ", udec_(mailbox[MB_LUTBAD]))
+    rigFailCount++
 
 
-PRI check_cal() | lvl, calBase, deltaX, deltaY, cxLvl[2], cyLvl[2], nBad
+PRI check_cal() | lvl, calBase, deltaX, deltaY, cxLvl[LEVEL_COUNT], cyLvl[LEVEL_COUNT], nBad
 ' CAL control: R - B = N_CAL * C on both channels at both P3 levels; |C_X| =
 ' G_COS, C_Y = Y_RATIO * C_X, and C flips sign with P3.
+'
 
 ' Local Variables:
 ' @local lvl - P3 level
@@ -406,13 +486,13 @@ PRI check_cal() | lvl, calBase, deltaX, deltaY, cxLvl[2], cyLvl[2], nBad
   nBad := 0
   repeat lvl from LEVEL_LOW to LEVEL_HIGH
     calBase := MB_CAL + lvl * CAL_REC
-    deltaX := mbox[calBase + CR_R] - mbox[calBase + CR_B]
-    deltaY := mbox[calBase + CR_RY] - mbox[calBase + CR_BY]
-    debug("CAL P3 set ", udec_(lvl), " read ", udec_(mbox[calBase + CR_PIN]), ": X B=", sdec_(mbox[calBase + CR_B]), " R=", sdec_(mbox[calBase + CR_R]), " R-B=", sdec_(deltaX), " | Y B=", sdec_(mbox[calBase + CR_BY]), " R=", sdec_(mbox[calBase + CR_RY]), " R-B=", sdec_(deltaY))
+    deltaX := mailbox[calBase + CR_R] - mailbox[calBase + CR_B]
+    deltaY := mailbox[calBase + CR_RY] - mailbox[calBase + CR_BY]
+    debug("CAL P3 set ", udec_(lvl), " read ", udec_(mailbox[calBase + CR_PIN]), ": X B=", sdec_(mailbox[calBase + CR_B]), " R=", sdec_(mailbox[calBase + CR_R]), " R-B=", sdec_(deltaX), " | Y B=", sdec_(mailbox[calBase + CR_BY]), " R=", sdec_(mailbox[calBase + CR_RY]), " R-B=", sdec_(deltaY))
     cxLvl[lvl] := 0
     cyLvl[lvl] := 0
-    if mbox[calBase + CR_PIN] <> lvl
-      debug("RIG FAIL: CAL pin, expected P3 = ", udec_(lvl), ", got ", udec_(mbox[calBase + CR_PIN]))
+    if mailbox[calBase + CR_PIN] <> lvl
+      debug("RIG FAIL: CAL pin, expected P3 = ", udec_(lvl), ", got ", udec_(mailbox[calBase + CR_PIN]))
       nBad++
     if (deltaX // N_CAL) <> 0 or (deltaY // N_CAL) <> 0
       debug("RIG FAIL: CAL deltas not whole multiples of ", udec_(N_CAL), " at P3 = ", udec_(lvl))
@@ -426,15 +506,16 @@ PRI check_cal() | lvl, calBase, deltaX, deltaY, cxLvl[2], cyLvl[2], nBad
   if cxLvl[LEVEL_LOW] <> -cxLvl[LEVEL_HIGH] or cxLvl[LEVEL_HIGH] == 0
     debug("RIG FAIL: CAL sign did not flip with P3: C_X(LOW) = ", sdec_(cxLvl[LEVEL_LOW]), " C_X(HIGH) = ", sdec_(cxLvl[LEVEL_HIGH]))
     nBad++
-  calCx := cxLvl[LEVEL_HIGH]
-  calCy := cyLvl[LEVEL_HIGH]
+  calTermX := cxLvl[LEVEL_HIGH]
+  calTermY := cyLvl[LEVEL_HIGH]
   debug("C measured: X LOW ", sdec_(cxLvl[LEVEL_LOW]), " HIGH ", sdec_(cxLvl[LEVEL_HIGH]), " | Y LOW ", sdec_(cyLvl[LEVEL_LOW]), " HIGH ", sdec_(cyLvl[LEVEL_HIGH]), "  (predicted -1 / +1, -3 / +3); the arms use the HIGH values")
-  nRigFail += nBad
+  rigFailCount += nBad
 
 
 PRI check_pins() | armIdx, nBad
 ' PIN and SIZE controls: P3 HIGH at every arm's start and end, and the
 ' engine's sample-count echo equals the table.
+'
 
 ' Local Variables:
 ' @local armIdx - arm index
@@ -442,54 +523,55 @@ PRI check_pins() | armIdx, nBad
 
   nBad := 0
   repeat armIdx from 0 to NARMS - 1
-    if mbox[armBase[armIdx] + AH_PINB] <> LEVEL_HIGH or mbox[armBase[armIdx] + AH_PINA] <> LEVEL_HIGH
-      debug("RIG FAIL: pin control, ", zstr_(arm_name(armIdx)), " P3 start/end = ", udec_(mbox[armBase[armIdx] + AH_PINB]), "/", udec_(mbox[armBase[armIdx] + AH_PINA]), " (expected 1/1)")
+    if mailbox[armMailboxBase[armIdx] + AH_PINB] <> LEVEL_HIGH or mailbox[armMailboxBase[armIdx] + AH_PINA] <> LEVEL_HIGH
+      debug("RIG FAIL: pin control, ", zstr_(arm_name(armIdx)), " P3 start/end = ", udec_(mailbox[armMailboxBase[armIdx] + AH_PINB]), "/", udec_(mailbox[armMailboxBase[armIdx] + AH_PINA]), " (expected 1/1)")
       nBad++
-    if mbox[armBase[armIdx] + AH_NS] <> arm_field(armIdx, AF_NS)
-      debug("RIG FAIL: size control, ", zstr_(arm_name(armIdx)), " engine echoed ", udec_(mbox[armBase[armIdx] + AH_NS]), " samples, table has ", udec_(arm_field(armIdx, AF_NS)))
+    if mailbox[armMailboxBase[armIdx] + AH_NS] <> arm_field(armIdx, AF_NS)
+      debug("RIG FAIL: size control, ", zstr_(arm_name(armIdx)), " engine echoed ", udec_(mailbox[armMailboxBase[armIdx] + AH_NS]), " samples, table has ", udec_(arm_field(armIdx, AF_NS)))
       nBad++
-  nRigFail += nBad
+  rigFailCount += nBad
 
 
-PRI check_lock() | sampIdx, nsArm, xRef, nBadWin1, nBadWin2, nBadX
-' LOCK control: in both power-of-two arms every window is exactly 2048 clocks
-' (reads locked to command boundaries); in P2-S1 every x is equal and whole
-' in C, which measures g.
+PRI check_lock() | sampIdx, nsArm, xRef, nBadWinS1, nBadWinS2, nBadX
+' LOCK control: in both power-of-two arms every window is exactly
+' P2_WINDOW (2048) clocks (reads locked to command boundaries); in P2-S1
+' every x is equal and whole in C, which measures g.
+'
 
 ' Local Variables:
 ' @local sampIdx - sample index
 ' @local nsArm - samples in the arm
 ' @local xRef - P2-S1 x at k = WARM
-' @local nBadWin1 - P2-S1 windows <> 2048
-' @local nBadWin2 - P2-S2 windows <> 2048
+' @local nBadWinS1 - P2-S1 windows <> P2_WINDOW
+' @local nBadWinS2 - P2-S2 windows <> P2_WINDOW
 ' @local nBadX - P2-S1 samples <> xRef
 
   nsArm := arm_field(ARM_P2_S1, AF_NS)
   xRef := smp(ARM_P2_S1, WARM, SR_X)
-  nBadWin1 := 0
-  nBadWin2 := 0
+  nBadWinS1 := 0
+  nBadWinS2 := 0
   nBadX := 0
   repeat sampIdx from WARM to nsArm - 1
     if win_len(ARM_P2_S1, sampIdx) <> P2_WINDOW
-      nBadWin1++
+      nBadWinS1++
     if win_len(ARM_P2_S2, sampIdx) <> P2_WINDOW
-      nBadWin2++
+      nBadWinS2++
     if smp(ARM_P2_S1, sampIdx, SR_X) <> xRef
       nBadX++
-  debug("LOCK: P2-S1 windows <> ", udec_(P2_WINDOW), ": ", udec_(nBadWin1), ", P2-S2: ", udec_(nBadWin2), " (of ", udec_(nsArm - WARM), " each); P2-S1 x <> ", sdec_(xRef), ": ", udec_(nBadX))
+  debug("LOCK: P2-S1 windows <> ", udec_(P2_WINDOW), ": ", udec_(nBadWinS1), ", P2-S2: ", udec_(nBadWinS2), " (of ", udec_(nsArm - WARM), " each); P2-S1 x <> ", sdec_(xRef), ": ", udec_(nBadX))
   gapClocks := 0
-  if nBadWin1 or nBadWin2 or nBadX
+  if nBadWinS1 <> 0 or nBadWinS2 <> 0 or nBadX <> 0
     debug("RIG FAIL: LOCK, the power-of-two stream is not perfectly steady (expected 0 / 0 / 0)")
-    nRigFail++
-  elseif (xRef // calCx) <> 0
-    debug("RIG FAIL: LOCK, P2-S1 x = ", sdec_(xRef), " is not a whole multiple of C = ", sdec_(calCx))
-    nRigFail++
+    rigFailCount++
+  elseif (xRef // calTermX) <> 0
+    debug("RIG FAIL: LOCK, P2-S1 x = ", sdec_(xRef), " is not a whole multiple of C = ", sdec_(calTermX))
+    rigFailCount++
   else
-    gapClocks := P2_WINDOW - xRef / calCx
+    gapClocks := P2_WINDOW - xRef / calTermX
     debug("  g = 2048 - x/C = ", sdec_(gapClocks), " clocks per window adding no term (seamless XCONT: expected 0)")
     if abs gapClocks > G_MAX
       debug("RIG FAIL: LOCK, |g| = ", udec_(abs gapClocks), " exceeds ", udec_(G_MAX))
-      nRigFail++
+      rigFailCount++
 
 
 ' ------------------------------------------------------------- per arm --
@@ -502,14 +584,14 @@ PRI analyze_arm(armIdx)
   debug(" ")
   arm_windows(armIdx)
   print_raw_head(armIdx)
-  if is_sinc2(armIdx)
+  if is_sinc2(armIdx) == TRUE
     analyze_sinc2(armIdx)
   else
     analyze_sinc1(armIdx)
   check_y(armIdx)
 
 
-PRI arm_windows(armIdx) | nsArm, sampIdx, winClks, cntAt0, cntAt1, cntAt2, maxSpread, normClk, oddClk, perX100, zeroClk, spacingX100
+PRI arm_windows(armIdx) | nsArm, sampIdx, winClks, cntAtMin, cntAtMinPlus1, cntAtMinPlus2, maxSpread, normClk, oddClk, periodX100, zeroClk, spacingX100
 ' Window-length histogram, usual window, odd windows and their spacing, the
 ' predicted values beside them, and the SPREAD control for one arm.
 '
@@ -519,58 +601,58 @@ PRI arm_windows(armIdx) | nsArm, sampIdx, winClks, cntAt0, cntAt1, cntAt2, maxSp
 ' @local nsArm - samples in the arm
 ' @local sampIdx - sample index
 ' @local winClks - one window length
-' @local cntAt0 - windows of length min
-' @local cntAt1 - windows of length min+1
-' @local cntAt2 - windows of length min+2
+' @local cntAtMin - windows of length min (bucket LEN_AT_MIN)
+' @local cntAtMinPlus1 - windows of length min+1 (bucket LEN_MIN_PLUS_1)
+' @local cntAtMinPlus2 - windows of length min+2 (bucket LEN_MIN_PLUS_2)
 ' @local maxSpread - SPREAD limit for this arm
 ' @local normClk - predicted usual window
 ' @local oddClk - predicted odd window
-' @local perX100 - predicted odd-window period, commands x100
+' @local periodX100 - predicted odd-window period, commands x100
 ' @local zeroClk - predicted XZERO window
 ' @local spacingX100 - measured odd-window spacing, samples x100
 
   nsArm := arm_field(armIdx, AF_NS)
-  lenMin[armIdx] := POSX
-  lenMax[armIdx] := NEGX
-  cntAt0 := 0
-  cntAt1 := 0
-  cntAt2 := 0
+  windowLenMin[armIdx] := POSX
+  windowLenMax[armIdx] := NEGX
+  cntAtMin := 0
+  cntAtMinPlus1 := 0
+  cntAtMinPlus2 := 0
   repeat sampIdx from WARM to nsArm - 1
     winClks := win_len(armIdx, sampIdx)
-    lenMin[armIdx] := lenMin[armIdx] <# winClks
-    lenMax[armIdx] := lenMax[armIdx] #> winClks
+    windowLenMin[armIdx] := windowLenMin[armIdx] <# winClks
+    windowLenMax[armIdx] := windowLenMax[armIdx] #> winClks
   repeat sampIdx from WARM to nsArm - 1
-    case win_len(armIdx, sampIdx) - lenMin[armIdx]
-      0: cntAt0++
-      1: cntAt1++
-      2: cntAt2++
-  normLen[armIdx] := lenMin[armIdx]
-  if cntAt1 > cntAt0 and cntAt1 >= cntAt2
-    normLen[armIdx] := lenMin[armIdx] + 1
-  elseif cntAt2 > cntAt0 and cntAt2 > cntAt1
-    normLen[armIdx] := lenMin[armIdx] + 2
-  nOddWin[armIdx] := 0
-  firstOddK[armIdx] := NO_INDEX
-  lastOddK[armIdx] := NO_INDEX
+    case win_len(armIdx, sampIdx) - windowLenMin[armIdx]
+      LEN_AT_MIN: cntAtMin++
+      LEN_MIN_PLUS_1: cntAtMinPlus1++
+      LEN_MIN_PLUS_2: cntAtMinPlus2++
+  usualWindowLen[armIdx] := windowLenMin[armIdx]
+  if cntAtMinPlus1 > cntAtMin and cntAtMinPlus1 >= cntAtMinPlus2
+    usualWindowLen[armIdx] := windowLenMin[armIdx] + LEN_MIN_PLUS_1
+  elseif cntAtMinPlus2 > cntAtMin and cntAtMinPlus2 > cntAtMinPlus1
+    usualWindowLen[armIdx] := windowLenMin[armIdx] + LEN_MIN_PLUS_2
+  oddWindowCount[armIdx] := 0
+  firstOddSample[armIdx] := NO_INDEX
+  lastOddSample[armIdx] := NO_INDEX
   repeat sampIdx from WARM to nsArm - 1
-    if win_len(armIdx, sampIdx) <> normLen[armIdx]
-      nOddWin[armIdx]++
-      if firstOddK[armIdx] == NO_INDEX
-        firstOddK[armIdx] := sampIdx
-      lastOddK[armIdx] := sampIdx
+    if win_len(armIdx, sampIdx) <> usualWindowLen[armIdx]
+      oddWindowCount[armIdx]++
+      if firstOddSample[armIdx] == NO_INDEX
+        firstOddSample[armIdx] := sampIdx
+      lastOddSample[armIdx] := sampIdx
   maxSpread := SPREAD_STEADY
   if arm_field(armIdx, AF_KIND) == KIND_JITTER
     maxSpread := SPREAD_JITTER
-  armOk[armIdx] := (lenMax[armIdx] - lenMin[armIdx]) <= maxSpread
-  normClk, oddClk, perX100, zeroClk := pred_windows(arm_field(armIdx, AF_FREQ), arm_field(armIdx, AF_CMD) & COUNT_MASK)
+  armWindowsOk[armIdx] := (windowLenMax[armIdx] - windowLenMin[armIdx]) <= maxSpread
+  normClk, oddClk, periodX100, zeroClk := pred_windows(arm_field(armIdx, AF_FREQ), arm_field(armIdx, AF_CMD) & COUNT_MASK)
   spacingX100 := 0
-  if nOddWin[armIdx] > 1
-    spacingX100 := (lastOddK[armIdx] - firstOddK[armIdx]) * X100 / (nOddWin[armIdx] - 1)
+  if oddWindowCount[armIdx] > 1                         ' spacing needs two odd windows: N-1 gaps
+    spacingX100 := (lastOddSample[armIdx] - firstOddSample[armIdx]) * X100 / (oddWindowCount[armIdx] - 1)
   debug("=== ARM ", zstr_(arm_name(armIdx)), "  F=", uhex_long_(arm_field(armIdx, AF_FREQ)), " D=", uhex_long_(arm_field(armIdx, AF_CMD)), " samples ", udec_(nsArm), " ===")
-  debug("  windows k>=3: min ", udec_(lenMin[armIdx]), " x", udec_(cntAt0), ", min+1 x", udec_(cntAt1), ", min+2 x", udec_(cntAt2), "; usual ", udec_(normLen[armIdx]), "; odd windows ", udec_(nOddWin[armIdx]), " (first k=", sdec_(firstOddK[armIdx]), ", last k=", sdec_(lastOddK[armIdx]), ")")
-  debug("  measured odd spacing x100 = ", udec_(spacingX100), " samples (", udec_(muldiv64(spacingX100, normLen[armIdx], CLK_MHZ * X100)), " us) | predicted XCONT ", udec_(normClk), "/", udec_(oddClk), " every x100 = ", udec_(perX100), " cmds, XZERO ", udec_(zeroClk))
-  if not armOk[armIdx]
-    debug("RIG FAIL (arm ", zstr_(arm_name(armIdx)), "): window spread ", udec_(lenMax[armIdx] - lenMin[armIdx]), " clocks, allowed ", udec_(maxSpread), " -- the loop is not locked to command boundaries; verdicts using this arm are withheld")
+  debug("  windows k>=3: min ", udec_(windowLenMin[armIdx]), " x", udec_(cntAtMin), ", min+1 x", udec_(cntAtMinPlus1), ", min+2 x", udec_(cntAtMinPlus2), "; usual ", udec_(usualWindowLen[armIdx]), "; odd windows ", udec_(oddWindowCount[armIdx]), " (first k=", sdec_(firstOddSample[armIdx]), ", last k=", sdec_(lastOddSample[armIdx]), ")")
+  debug("  measured odd spacing x100 = ", udec_(spacingX100), " samples (", udec_(muldiv64(spacingX100, usualWindowLen[armIdx], CLK_MHZ * X100)), " us) | predicted XCONT ", udec_(normClk), "/", udec_(oddClk), " every x100 = ", udec_(periodX100), " cmds, XZERO ", udec_(zeroClk))
+  if armWindowsOk[armIdx] == FALSE
+    debug("RIG FAIL (arm ", zstr_(arm_name(armIdx)), "): window spread ", udec_(windowLenMax[armIdx] - windowLenMin[armIdx]), " clocks, allowed ", udec_(maxSpread), " -- the loop is not locked to command boundaries; verdicts using this arm are withheld")
 
 
 PRI print_raw_head(armIdx) | sampIdx
@@ -581,10 +663,10 @@ PRI print_raw_head(armIdx) | sampIdx
 ' Local Variables:
 ' @local sampIdx - sample index
 
-  debug("  raw ", zstr_(arm_name(armIdx)), " CT at XINIT = ", uhex_long_(mbox[armBase[armIdx] + AH_CT0]))
+  debug("  raw ", zstr_(arm_name(armIdx)), " CT at XINIT = ", uhex_long_(mailbox[armMailboxBase[armIdx] + AH_CT0]))
   repeat sampIdx from 0 to RAW_PRINT - 1
     if sampIdx == 0
-      debug("  raw k=0 x=", sdec_(smp(armIdx, 0, SR_X)), " y=", sdec_(smp(armIdx, 0, SR_Y)), " ct-ct0=", sdec_(smp(armIdx, 0, SR_CT) - mbox[armBase[armIdx] + AH_CT0]))
+      debug("  raw k=0 x=", sdec_(smp(armIdx, 0, SR_X)), " y=", sdec_(smp(armIdx, 0, SR_Y)), " ct-ct0=", sdec_(smp(armIdx, 0, SR_CT) - mailbox[armMailboxBase[armIdx] + AH_CT0]))
     else
       debug("  raw k=", udec_(sampIdx), " x=", sdec_(smp(armIdx, sampIdx, SR_X)), " y=", sdec_(smp(armIdx, sampIdx, SR_Y)), " L=", udec_(win_len(armIdx, sampIdx)), " d=", sdec_(smp(armIdx, sampIdx, SR_X) - smp(armIdx, sampIdx - 1, SR_X)))
 
@@ -605,9 +687,9 @@ PRI analyze_sinc1(armIdx) | nsArm, sampIdx, winClks, xVal, predVal, devVal, prin
 ' @local printLimit - rows past this index are not printed (jitter arm)
 
   nsArm := arm_field(armIdx, AF_NS)
-  nAcctBad[armIdx] := 0
-  nDev1[armIdx] := 0
-  maxDev1[armIdx] := 0
+  accountingFailCount[armIdx] := 0
+  sinc1DeviationCount[armIdx] := 0
+  sinc1MaxDeviation[armIdx] := 0
   printLimit := nsArm
   if arm_field(armIdx, AF_KIND) == KIND_JITTER
     printLimit := WARM + JIT_PRINT
@@ -615,16 +697,16 @@ PRI analyze_sinc1(armIdx) | nsArm, sampIdx, winClks, xVal, predVal, devVal, prin
   repeat sampIdx from WARM to nsArm - 1
     winClks := win_len(armIdx, sampIdx)
     xVal := smp(armIdx, sampIdx, SR_X)
-    predVal := calCx * (winClks - gapClocks)
-    devVal := xVal - calCx * (normLen[armIdx] - gapClocks)
+    predVal := calTermX * (winClks - gapClocks)
+    devVal := xVal - calTermX * (usualWindowLen[armIdx] - gapClocks)
     if xVal <> predVal
-      nAcctBad[armIdx]++
+      accountingFailCount[armIdx]++
     if devVal <> 0
-      nDev1[armIdx]++
-    maxDev1[armIdx] := maxDev1[armIdx] #> abs devVal
-    if xVal <> predVal or (winClks <> normLen[armIdx] and sampIdx < printLimit)
+      sinc1DeviationCount[armIdx]++
+    sinc1MaxDeviation[armIdx] := sinc1MaxDeviation[armIdx] #> abs devVal
+    if xVal <> predVal or (winClks <> usualWindowLen[armIdx] and sampIdx < printLimit)
       debug("  k=", udec_(sampIdx), " L=", udec_(winClks), " x=", sdec_(xVal), " x-C*(L-g)=", sdec_(xVal - predVal), " dev=x-x_usual=", sdec_(devVal))
-  debug("  SINC1: ", udec_(nsArm - WARM), " samples; x <> C*(L-g) in ", udec_(nAcctBad[armIdx]), "; off the usual value in ", udec_(nDev1[armIdx]), "; max |dev| = ", udec_(maxDev1[armIdx]), " (one term = ", udec_(abs calCx), ", usual x = ", sdec_(calCx * (normLen[armIdx] - gapClocks)), ")")
+  debug("  SINC1: ", udec_(nsArm - WARM), " samples; x <> C*(L-g) in ", udec_(accountingFailCount[armIdx]), "; off the usual value in ", udec_(sinc1DeviationCount[armIdx]), "; max |dev| = ", udec_(sinc1MaxDeviation[armIdx]), " (one term = ", udec_(abs calTermX), ", usual x = ", sdec_(calTermX * (usualWindowLen[armIdx] - gapClocks)), ")")
 
 
 PRI fit_model(armIdx) | nsArm, clocksToFit, nWin, numer, xtermRun, sampIdx, nWinK
@@ -646,10 +728,10 @@ PRI fit_model(armIdx) | nsArm, clocksToFit, nWin, numer, xtermRun, sampIdx, nWin
   fitState[armIdx] := FIT_NONE
   fitXterm[armIdx] := 0
   nWin := win_len(armIdx, WARM) - gapClocks
-  clocksToFit := smp(armIdx, WARM - 1, SR_CT) - mbox[armBase[armIdx] + AH_CT0]
+  clocksToFit := smp(armIdx, WARM - 1, SR_CT) - mailbox[armMailboxBase[armIdx] + AH_CT0]
   numer := 0
-  if (clocksToFit + nWin) < (POSX / nWin) / abs calCx
-    numer := smp(armIdx, WARM, SR_X) - calCx * tri(nWin)
+  if (clocksToFit + nWin) < (POSX / nWin) / abs calTermX
+    numer := smp(armIdx, WARM, SR_X) - calTermX * tri(nWin)
     if (numer // nWin) == 0
       fitState[armIdx] := FIT_OK
       fitXterm[armIdx] := numer / nWin
@@ -660,9 +742,9 @@ PRI fit_model(armIdx) | nsArm, clocksToFit, nWin, numer, xtermRun, sampIdx, nWin
     repeat sampIdx from WARM to nsArm - 1
       nWinK := win_len(armIdx, sampIdx) - gapClocks
       modelXterm[sampIdx] := xtermRun
-      modelX[sampIdx] := nWinK * xtermRun + calCx * tri(nWinK)
-      xtermRun += calCx * nWinK
-    debug("  model fit at k=3: J = (x - C*n(n-1)/2)/n = ", sdec_(fitXterm[armIdx]), " = ", sdec_(fitXterm[armIdx] / calCx), " terms; clocks XINIT -> read 2 = ", udec_(clocksToFit), " (J/C - clocks = ", sdec_(fitXterm[armIdx] / calCx - clocksToFit), ": start offset)")
+      modelX[sampIdx] := nWinK * xtermRun + calTermX * tri(nWinK)
+      xtermRun += calTermX * nWinK
+    debug("  model fit at k=3: J = (x - C*n(n-1)/2)/n = ", sdec_(fitXterm[armIdx]), " = ", sdec_(fitXterm[armIdx] / calTermX), " terms; clocks XINIT -> read 2 = ", udec_(clocksToFit), " (J/C - clocks = ", sdec_(fitXterm[armIdx] / calTermX - clocksToFit), ": start offset)")
   elseif fitState[armIdx] == FIT_FAIL
     debug("  model fit FAILED at k=3: x - C*n(n-1)/2 = ", sdec_(numer), " is not a multiple of n = ", udec_(nWin))
   else
@@ -694,25 +776,25 @@ PRI analyze_sinc2(armIdx) | nsArm, kindVal, nNorm, dClean, dFirst, sampIdx, dVal
 
   nsArm := arm_field(armIdx, AF_NS)
   kindVal := arm_field(armIdx, AF_KIND)
-  nNorm := normLen[armIdx] - gapClocks
-  dClean := calCx * nNorm * nNorm
+  nNorm := usualWindowLen[armIdx] - gapClocks
+  dClean := calTermX * nNorm * nNorm
   fit_model(armIdx)
-  nDsamp[armIdx] := 0
-  nOut[armIdx] := 0
-  nHuge[armIdx] := 0
-  maxAbsErr[armIdx] := 0
-  nDvar[armIdx] := 0
+  diffSampleCount[armIdx] := 0
+  outlierCount[armIdx] := 0
+  hugeOutlierCount[armIdx] := 0
+  maxAbsError[armIdx] := 0
+  diffChangedCount[armIdx] := 0
   dFirst := smp(armIdx, WARM + 1, SR_X) - smp(armIdx, WARM, SR_X)
-  nRuns[armIdx] := 0
-  nPairs[armIdx] := 0
-  nEdge[armIdx] := 0
-  nOpen[armIdx] := 0
-  nUnlinked[armIdx] := 0
-  nMissed[armIdx] := 0
-  nChanged[armIdx] := 0
-  nMisClean[armIdx] := 0
-  nMisOut[armIdx] := 0
-  firstMisK[armIdx] := NO_INDEX
+  outlierRunCount[armIdx] := 0
+  pairRunCount[armIdx] := 0
+  edgeRunCount[armIdx] := 0
+  openRunCount[armIdx] := 0
+  unlinkedOutlierCount[armIdx] := 0
+  missedChangeCount[armIdx] := 0
+  changedWindowCount[armIdx] := 0
+  cleanMismatchCount[armIdx] := 0
+  changedMismatchCount[armIdx] := 0
+  firstMismatchSample[armIdx] := NO_INDEX
   printLimit := nsArm
   if kindVal == KIND_JITTER
     printLimit := WARM + JIT_PRINT
@@ -723,52 +805,53 @@ PRI analyze_sinc2(armIdx) | nsArm, kindVal, nNorm, dClean, dFirst, sampIdx, dVal
     dVal := smp(armIdx, sampIdx, SR_X) - smp(armIdx, sampIdx - 1, SR_X)
     errVal := dVal - dClean
     bOut := (dVal <> dClean)
-    bChanged := win_len(armIdx, sampIdx) <> normLen[armIdx] or win_len(armIdx, sampIdx - 1) <> normLen[armIdx]
+    bChanged := win_len(armIdx, sampIdx) <> usualWindowLen[armIdx] or win_len(armIdx, sampIdx - 1) <> usualWindowLen[armIdx]
     bMis := FALSE
-    nDsamp[armIdx]++
+    diffSampleCount[armIdx]++
     if dVal <> dFirst
-      nDvar[armIdx]++
-    if bChanged
-      nChanged[armIdx]++
-    if bOut
-      nOut[armIdx]++
-      maxAbsErr[armIdx] := maxAbsErr[armIdx] #> abs errVal
-      if abs errVal >= HUGE_TERMS * abs calCx
-        nHuge[armIdx]++
-      if not bChanged
-        nUnlinked[armIdx]++
-    elseif bChanged
-      nMissed[armIdx]++
+      diffChangedCount[armIdx]++
+    if bChanged == TRUE
+      changedWindowCount[armIdx]++
+    if bOut == TRUE
+      outlierCount[armIdx]++
+      maxAbsError[armIdx] := maxAbsError[armIdx] #> abs errVal
+      if abs errVal >= HUGE_TERMS * abs calTermX
+        hugeOutlierCount[armIdx]++
+      if bChanged == FALSE
+        unlinkedOutlierCount[armIdx]++
+    elseif bChanged == TRUE
+      missedChangeCount[armIdx]++
     if fitState[armIdx] == FIT_OK
       if smp(armIdx, sampIdx, SR_X) <> modelX[sampIdx]
         bMis := TRUE
-        if firstMisK[armIdx] == NO_INDEX
-          firstMisK[armIdx] := sampIdx
-        if bChanged
-          nMisOut[armIdx]++
+        if firstMismatchSample[armIdx] == NO_INDEX
+          firstMismatchSample[armIdx] := sampIdx
+        if bChanged == TRUE
+          changedMismatchCount[armIdx]++
         else
-          nMisClean[armIdx]++
-    if bOut and runStart == NO_INDEX
+          cleanMismatchCount[armIdx]++
+    if bOut == TRUE and runStart == NO_INDEX
       runStart := sampIdx
       if kindVal <> KIND_JITTER
         print_pair_formula(armIdx, sampIdx)
-    elseif not bOut and runStart <> NO_INDEX
+    elseif bOut == FALSE and runStart <> NO_INDEX
       close_run(armIdx, runStart, sampIdx - runStart, TRUE)
       runStart := NO_INDEX
-    if bMis or (sampIdx < printLimit and (bOut or is_out(armIdx, sampIdx - 1, dClean) or is_out(armIdx, sampIdx + 1, dClean)))
+    if bMis == TRUE or (sampIdx < printLimit and (bOut == TRUE or is_out(armIdx, sampIdx - 1, dClean) == TRUE or is_out(armIdx, sampIdx + 1, dClean) == TRUE))
       print_s2_row(armIdx, sampIdx, dClean)
   if runStart <> NO_INDEX
     close_run(armIdx, runStart, nsArm - runStart, FALSE)
-  debug("  SINC2: ", udec_(nDsamp[armIdx]), " samples; outliers ", udec_(nOut[armIdx]), " (huge >= 1000 terms: ", udec_(nHuge[armIdx]), ", max |e| ", udec_(maxAbsErr[armIdx]), "); window-changed samples ", udec_(nChanged[armIdx]), ", of them clean ", udec_(nMissed[armIdx]), "; outliers with no window change ", udec_(nUnlinked[armIdx]))
-  debug("  runs ", udec_(nRuns[armIdx]), ": pairs ", udec_(nPairs[armIdx]), ", start-edge ", udec_(nEdge[armIdx]), ", open at end ", udec_(nOpen[armIdx]), " | model mismatches: clean-window ", udec_(nMisClean[armIdx]), ", window-changed ", udec_(nMisOut[armIdx]), " (first k=", sdec_(firstMisK[armIdx]), ")")
-  debug("  constancy: d differs from d(k=4) = ", sdec_(dFirst), " in ", udec_(nDvar[armIdx]), " samples")
+  debug("  SINC2: ", udec_(diffSampleCount[armIdx]), " samples; outliers ", udec_(outlierCount[armIdx]), " (huge >= 1000 terms: ", udec_(hugeOutlierCount[armIdx]), ", max |e| ", udec_(maxAbsError[armIdx]), "); window-changed samples ", udec_(changedWindowCount[armIdx]), ", of them clean ", udec_(missedChangeCount[armIdx]), "; outliers with no window change ", udec_(unlinkedOutlierCount[armIdx]))
+  debug("  runs ", udec_(outlierRunCount[armIdx]), ": pairs ", udec_(pairRunCount[armIdx]), ", start-edge ", udec_(edgeRunCount[armIdx]), ", open at end ", udec_(openRunCount[armIdx]), " | model mismatches: clean-window ", udec_(cleanMismatchCount[armIdx]), ", window-changed ", udec_(changedMismatchCount[armIdx]), " (first k=", sdec_(firstMismatchSample[armIdx]), ")")
+  debug("  constancy: d differs from d(k=4) = ", sdec_(dFirst), " in ", udec_(diffChangedCount[armIdx]), " samples")
 
 
 PRI is_out(armIdx, sampIdx, dClean) : bOutlier
-' Whether sample sampIdx is an analysed SINC2 outlier (d_k <> dClean).
+' Whether sample sampIdx is an analysed SINC2 outlier (d_k <> dClean);
+' FALSE for a sampIdx outside WARM+1..ns-1.
 '
 ' @param armIdx - arm index, 0..NARMS-1
-' @param sampIdx - sample index (outside WARM+1..ns-1 -> FALSE)
+' @param sampIdx - sample index within the arm
 ' @param dClean - C*n^2, the clean SINC2 sample
 ' @returns bOutlier - TRUE when d_k <> dClean
 
@@ -778,10 +861,11 @@ PRI is_out(armIdx, sampIdx, dClean) : bOutlier
 
 
 PRI print_s2_row(armIdx, sampIdx, dClean) | xVal, dVal, dHat
-' Print one SINC2 row: measured x, d, e beside the model's J, x^ and e^.
+' Print one SINC2 row for sample sampIdx (> WARM): measured x, d, e beside
+' the model's J, x^ and e^.
 '
 ' @param armIdx - arm index, 0..NARMS-1
-' @param sampIdx - sample index (> WARM)
+' @param sampIdx - sample index within the arm
 ' @param dClean - C*n^2, the clean SINC2 sample
 
 ' Local Variables:
@@ -798,29 +882,31 @@ PRI print_s2_row(armIdx, sampIdx, dClean) | xVal, dVal, dHat
     debug("  k=", udec_(sampIdx), " L=", udec_(win_len(armIdx, sampIdx)), " x=", sdec_(xVal), " d=", sdec_(dVal), " e=", sdec_(dVal - dClean), " | no model")
 
 
-PRI print_pair_formula(armIdx, sampIdx) | nPrev, nCur, deltaLen, xtermPrev, errFirst, errNext
-' At the start of an outlier run, print the closed-form pair prediction
-' e_k, e_(k+1) from J_(k-1), valid when the window after the odd one is usual.
+PRI print_pair_formula(armIdx, runStart) | nPrev, nCur, deltaLen, xtermPrev, errFirst, errNext
+' At the start of an outlier run (k = runStart), print the closed-form pair
+' prediction from J_(k-1), valid when the window after the odd one is usual:
+'   e_k     =  dl*J_(k-1) + 2*C*n*dl + C*(dl^2-dl)/2
+'   e_(k+1) = -dl*J_(k-1) - dl*n*C  - C*(dl^2-dl)/2
 '
 ' @param armIdx - arm index, 0..NARMS-1
-' @param sampIdx - first sample of the run
+' @param runStart - first sample of the run
 
 ' Local Variables:
-' @local nPrev - active clocks in window k-1
+' @local nPrev - active clocks in window k-1 (n)
 ' @local nCur - active clocks in window k
 ' @local deltaLen - dl = nCur - nPrev
 ' @local xtermPrev - model J_(k-1)
 ' @local errFirst - predicted e_k
 ' @local errNext - predicted e_(k+1)
 
-  nPrev := win_len(armIdx, sampIdx - 1) - gapClocks
-  nCur := win_len(armIdx, sampIdx) - gapClocks
+  nPrev := win_len(armIdx, runStart - 1) - gapClocks
+  nCur := win_len(armIdx, runStart) - gapClocks
   deltaLen := nCur - nPrev
   if fitState[armIdx] == FIT_OK and abs deltaLen == ONE_CLOCK
-    xtermPrev := modelXterm[sampIdx - 1]
-    errFirst := deltaLen * xtermPrev + 2 * calCx * nPrev * deltaLen + calCx * (deltaLen * deltaLen - deltaLen) / 2
-    errNext := -deltaLen * xtermPrev - deltaLen * nPrev * calCx - calCx * (deltaLen * deltaLen - deltaLen) / 2
-    debug("  pair formula at k=", udec_(sampIdx), ": dl=", sdec_(deltaLen), " n=", udec_(nPrev), " J_(k-1)=", sdec_(xtermPrev), " -> e_k=", sdec_(errFirst), " e_(k+1)=", sdec_(errNext), " sum=", sdec_(errFirst + errNext), " (if window k+1 is usual)")
+    xtermPrev := modelXterm[runStart - 1]
+    errFirst := deltaLen * xtermPrev + 2 * calTermX * nPrev * deltaLen + calTermX * (deltaLen * deltaLen - deltaLen) / 2
+    errNext := -deltaLen * xtermPrev - deltaLen * nPrev * calTermX - calTermX * (deltaLen * deltaLen - deltaLen) / 2
+    debug("  pair formula at k=", udec_(runStart), ": dl=", sdec_(deltaLen), " n=", udec_(nPrev), " J_(k-1)=", sdec_(xtermPrev), " -> e_k=", sdec_(errFirst), " e_(k+1)=", sdec_(errNext), " sum=", sdec_(errFirst + errNext), " (if window k+1 is usual)")
 
 
 PRI close_run(armIdx, runStart, runLen, bClosed)
@@ -832,13 +918,13 @@ PRI close_run(armIdx, runStart, runLen, bClosed)
 ' @param runLen - samples in the run
 ' @param bClosed - TRUE when a clean sample followed the run
 
-  nRuns[armIdx]++
-  if not bClosed
-    nOpen[armIdx]++
-  elseif runStart == WARM + 1 and win_len(armIdx, WARM) <> normLen[armIdx]
-    nEdge[armIdx]++
-  elseif runLen == PAIR_LEN and win_len(armIdx, runStart) <> normLen[armIdx] and win_len(armIdx, runStart + 1) == normLen[armIdx]
-    nPairs[armIdx]++
+  outlierRunCount[armIdx]++
+  if bClosed == FALSE
+    openRunCount[armIdx]++
+  elseif runStart == WARM + 1 and win_len(armIdx, WARM) <> usualWindowLen[armIdx]
+    edgeRunCount[armIdx]++
+  elseif runLen == PAIR_LEN and win_len(armIdx, runStart) <> usualWindowLen[armIdx] and win_len(armIdx, runStart + 1) == usualWindowLen[armIdx]
+    pairRunCount[armIdx]++
   elseif arm_field(armIdx, AF_KIND) <> KIND_JITTER
     debug("  run at k=", udec_(runStart), " length ", udec_(runLen), " is NOT an adjacent pair")
 
@@ -856,10 +942,10 @@ PRI check_y(armIdx) | nsArm, sampIdx, nBad
   nsArm := arm_field(armIdx, AF_NS)
   nBad := 0
   repeat sampIdx from WARM to nsArm - 1
-    if smp(armIdx, sampIdx, SR_Y) <> (calCy / calCx) * smp(armIdx, sampIdx, SR_X)
+    if smp(armIdx, sampIdx, SR_Y) <> (calTermY / calTermX) * smp(armIdx, sampIdx, SR_X)
       nBad++
-  nYbad[armIdx] := nBad
-  debug("  Y (corroborating, not gating): y <> ", sdec_(calCy / calCx), "*x in ", udec_(nBad), " of ", udec_(nsArm - WARM), " samples")
+  yMismatchCount[armIdx] := nBad
+  debug("  Y (corroborating, not gating): y <> ", sdec_(calTermY / calTermX), "*x in ", udec_(nBad), " of ", udec_(nsArm - WARM), " samples")
 
 
 ' ------------------------------------------------------------- verdicts --
@@ -880,14 +966,15 @@ PRI complete_runs(armIdx) : runCount
 ' Runs that can be judged: neither truncated at the start nor open at the end.
 '
 ' @param armIdx - arm index, 0..NARMS-1
-' @returns runCount - nRuns - nEdge - nOpen
+' @returns runCount - outlierRunCount - edgeRunCount - openRunCount
 
-  runCount := nRuns[armIdx] - nEdge[armIdx] - nOpen[armIdx]
+  runCount := outlierRunCount[armIdx] - edgeRunCount[armIdx] - openRunCount[armIdx]
 
 
-PRI verdict_q1() | armIdx, bArmsOk, bEnough, bPairsOk, nUnl, nMiss, predNorm, predOdd, predPerX100, predZero
+PRI verdict_q1() | armIdx, bArmsOk, bEnough, bPairsOk, nUnl, nMiss, predNormClk, predOddClk, predPeriodX100, predZeroClk
 ' Q1: non-power-of-two -> adjacent-pair outliers that self-correct; power of
 ' two -> none.
+'
 
 ' Local Variables:
 ' @local armIdx - arm index
@@ -896,42 +983,42 @@ PRI verdict_q1() | armIdx, bArmsOk, bEnough, bPairsOk, nUnl, nMiss, predNorm, pr
 ' @local bPairsOk - every complete run is an adjacent pair
 ' @local nUnl - outliers with no window change, over the Q1 arms
 ' @local nMiss - window changes that left d clean, over the Q1 arms
-' @local predNorm - CHP predicted usual window
-' @local predOdd - CHP predicted odd window
-' @local predPerX100 - CHP predicted odd-window period, commands x100
-' @local predZero - CHP predicted XZERO window
+' @local predNormClk - CHP predicted usual window
+' @local predOddClk - CHP predicted odd window
+' @local predPeriodX100 - CHP predicted odd-window period, commands x100
+' @local predZeroClk - CHP predicted XZERO window
 
-  bArmsOk := armOk[ARM_P2_S2] and armOk[ARM_NPS_S2] and armOk[ARM_NPL_S2] and armOk[ARM_CHP_S2]
+  bArmsOk := armWindowsOk[ARM_P2_S2] and armWindowsOk[ARM_NPS_S2] and armWindowsOk[ARM_NPL_S2] and armWindowsOk[ARM_CHP_S2]
   bEnough := TRUE
   bPairsOk := TRUE
-  nUnl := nUnlinked[ARM_P2_S2]
-  nMiss := nMissed[ARM_P2_S2]
-  repeat armIdx from ARM_NPS_S2 to ARM_CHP_S2 step 2
-    debug("Q1 ", zstr_(arm_name(armIdx)), ": outliers ", udec_(nOut[armIdx]), " of ", udec_(nDsamp[armIdx]), " samples, odd windows ", udec_(nOddWin[armIdx]), ", runs ", udec_(nRuns[armIdx]), " (complete ", udec_(complete_runs(armIdx)), ", pairs ", udec_(nPairs[armIdx]), ")")
-    nUnl += nUnlinked[armIdx]
-    nMiss += nMissed[armIdx]
+  nUnl := unlinkedOutlierCount[ARM_P2_S2]
+  nMiss := missedChangeCount[ARM_P2_S2]
+  repeat armIdx from ARM_NPS_S2 to ARM_CHP_S2 step ARMS_PER_PAIR          ' the non-power-of-two SINC2 arms
+    debug("Q1 ", zstr_(arm_name(armIdx)), ": outliers ", udec_(outlierCount[armIdx]), " of ", udec_(diffSampleCount[armIdx]), " samples, odd windows ", udec_(oddWindowCount[armIdx]), ", runs ", udec_(outlierRunCount[armIdx]), " (complete ", udec_(complete_runs(armIdx)), ", pairs ", udec_(pairRunCount[armIdx]), ")")
+    nUnl += unlinkedOutlierCount[armIdx]
+    nMiss += missedChangeCount[armIdx]
     if complete_runs(armIdx) < MIN_RUNS
       bEnough := FALSE
-    if nPairs[armIdx] <> complete_runs(armIdx)
+    if pairRunCount[armIdx] <> complete_runs(armIdx)
       bPairsOk := FALSE
-  predNorm, predOdd, predPerX100, predZero := pred_windows(arm_field(ARM_CHP_S2, AF_FREQ), arm_field(ARM_CHP_S2, AF_CMD) & COUNT_MASK)
-  debug("Q1 cadence, CHP-S2 (1,000,000.19 Hz at 200 MHz, 100-cycle measurements): odd windows every x100 = ", udec_(odd_spacing_x100(ARM_CHP_S2)), " samples = ", udec_(muldiv64(odd_spacing_x100(ARM_CHP_S2), normLen[ARM_CHP_S2], CLK_MHZ * X100)), " us; predicted x100 = ", udec_(predPerX100), " = ", udec_(muldiv64(predPerX100, predNorm, CLK_MHZ * X100)), " us (windows ", udec_(predNorm), "/", udec_(predOdd), ", XZERO ", udec_(predZero), ")")
-  if not bArmsOk
+  predNormClk, predOddClk, predPeriodX100, predZeroClk := pred_windows(arm_field(ARM_CHP_S2, AF_FREQ), arm_field(ARM_CHP_S2, AF_CMD) & COUNT_MASK)
+  debug("Q1 cadence, CHP-S2 (1,000,000.19 Hz at 200 MHz, 100-cycle measurements): odd windows every x100 = ", udec_(odd_spacing_x100(ARM_CHP_S2)), " samples = ", udec_(muldiv64(odd_spacing_x100(ARM_CHP_S2), usualWindowLen[ARM_CHP_S2], CLK_MHZ * X100)), " us; predicted x100 = ", udec_(predPeriodX100), " = ", udec_(muldiv64(predPeriodX100, predNormClk, CLK_MHZ * X100)), " us (windows ", udec_(predNormClk), "/", udec_(predOddClk), ", XZERO ", udec_(predZeroClk), ")")
+  if bArmsOk == FALSE
     debug("VERDICT Q1: INCONCLUSIVE - a Q1 arm failed its window control (RIG FAIL above)")
-  elseif nOut[ARM_P2_S2] <> 0
-    debug("VERDICT Q1: REFUTED - the power-of-two SINC2 stream is not clean: ", udec_(nOut[ARM_P2_S2]), " of ", udec_(nDsamp[ARM_P2_S2]), " samples off C*n^2")
-  elseif nOut[ARM_NPS_S2] == 0 or nOut[ARM_NPL_S2] == 0
-    debug("VERDICT Q1: REFUTED - a varying count left SINC2 clean: NPS-S2 ", udec_(nOut[ARM_NPS_S2]), " outliers (", udec_(nOddWin[ARM_NPS_S2]), " odd windows), NPL-S2 ", udec_(nOut[ARM_NPL_S2]), " (", udec_(nOddWin[ARM_NPL_S2]), ")")
+  elseif outlierCount[ARM_P2_S2] <> 0
+    debug("VERDICT Q1: REFUTED - the power-of-two SINC2 stream is not clean: ", udec_(outlierCount[ARM_P2_S2]), " of ", udec_(diffSampleCount[ARM_P2_S2]), " samples off C*n^2")
+  elseif outlierCount[ARM_NPS_S2] == 0 or outlierCount[ARM_NPL_S2] == 0
+    debug("VERDICT Q1: REFUTED - a varying count left SINC2 clean: NPS-S2 ", udec_(outlierCount[ARM_NPS_S2]), " outliers (", udec_(oddWindowCount[ARM_NPS_S2]), " odd windows), NPL-S2 ", udec_(outlierCount[ARM_NPL_S2]), " (", udec_(oddWindowCount[ARM_NPL_S2]), ")")
   elseif nUnl <> 0
     debug("VERDICT Q1: INCONCLUSIVE - ", udec_(nUnl), " outlier(s) with no window change: another cause is present")
   elseif nMiss <> 0
     debug("VERDICT Q1: REFUTED - ", udec_(nMiss), " window-changed sample(s) read clean: a varying count does not always corrupt")
-  elseif not bEnough
+  elseif bEnough == FALSE
     debug("VERDICT Q1: INCONCLUSIVE - fewer than ", udec_(MIN_RUNS), " complete outlier runs in a non-power-of-two arm")
-  elseif not bPairsOk
+  elseif bPairsOk == FALSE
     debug("VERDICT Q1: REFUTED - outliers are not all adjacent pairs that self-correct (see the run lines above)")
   else
-    debug("VERDICT Q1: CONFIRMED - power of two: 0 of ", udec_(nDsamp[ARM_P2_S2]), " off; non-power-of-two: every odd window corrupts that sample and the next, then clean (pairs NPS ", udec_(nPairs[ARM_NPS_S2]), ", NPL ", udec_(nPairs[ARM_NPL_S2]), ", CHP ", udec_(nPairs[ARM_CHP_S2]), "); rates ", udec_(nOut[ARM_NPS_S2]), "/", udec_(nDsamp[ARM_NPS_S2]), ", ", udec_(nOut[ARM_NPL_S2]), "/", udec_(nDsamp[ARM_NPL_S2]), ", ", udec_(nOut[ARM_CHP_S2]), "/", udec_(nDsamp[ARM_CHP_S2]))
+    debug("VERDICT Q1: CONFIRMED - power of two: 0 of ", udec_(diffSampleCount[ARM_P2_S2]), " off; non-power-of-two: every odd window corrupts that sample and the next, then clean (pairs NPS ", udec_(pairRunCount[ARM_NPS_S2]), ", NPL ", udec_(pairRunCount[ARM_NPL_S2]), ", CHP ", udec_(pairRunCount[ARM_CHP_S2]), "); rates ", udec_(outlierCount[ARM_NPS_S2]), "/", udec_(diffSampleCount[ARM_NPS_S2]), ", ", udec_(outlierCount[ARM_NPL_S2]), "/", udec_(diffSampleCount[ARM_NPL_S2]), ", ", udec_(outlierCount[ARM_CHP_S2]), "/", udec_(diffSampleCount[ARM_CHP_S2]))
 
 
 PRI odd_spacing_x100(armIdx) : spacingX100
@@ -941,12 +1028,13 @@ PRI odd_spacing_x100(armIdx) : spacingX100
 ' @returns spacingX100 - mean spacing x100
 
   spacingX100 := 0
-  if nOddWin[armIdx] > 1
-    spacingX100 := (lastOddK[armIdx] - firstOddK[armIdx]) * X100 / (nOddWin[armIdx] - 1)
+  if oddWindowCount[armIdx] > 1                         ' spacing needs two odd windows: N-1 gaps
+    spacingX100 := (lastOddSample[armIdx] - firstOddSample[armIdx]) * X100 / (oddWindowCount[armIdx] - 1)
 
 
 PRI verdict_q2() | armIdx, bArmsOk, bVaried, nAcct, worstDev
 ' Q2: SINC1 under the same varying counts -- exactly one term off, alone.
+'
 
 ' Local Variables:
 ' @local armIdx - arm index
@@ -955,31 +1043,32 @@ PRI verdict_q2() | armIdx, bArmsOk, bVaried, nAcct, worstDev
 ' @local nAcct - SINC1 samples <> C*(L-g), over the Q2 arms
 ' @local worstDev - largest |x - x_usual|, over the Q2 arms
 
-  bArmsOk := armOk[ARM_NPS_S1] and armOk[ARM_NPL_S1] and armOk[ARM_CHP_S1]
+  bArmsOk := armWindowsOk[ARM_NPS_S1] and armWindowsOk[ARM_NPL_S1] and armWindowsOk[ARM_CHP_S1]
   bVaried := TRUE
   nAcct := 0
   worstDev := 0
-  repeat armIdx from ARM_NPS_S1 to ARM_CHP_S1 step 2
-    debug("Q2 ", zstr_(arm_name(armIdx)), ": odd windows ", udec_(nOddWin[armIdx]), ", samples off the usual value ", udec_(nDev1[armIdx]), ", max |dev| ", udec_(maxDev1[armIdx]), ", x <> C*(L-g) ", udec_(nAcctBad[armIdx]))
-    if nOddWin[armIdx] == 0
+  repeat armIdx from ARM_NPS_S1 to ARM_CHP_S1 step ARMS_PER_PAIR          ' the non-power-of-two SINC1 arms
+    debug("Q2 ", zstr_(arm_name(armIdx)), ": odd windows ", udec_(oddWindowCount[armIdx]), ", samples off the usual value ", udec_(sinc1DeviationCount[armIdx]), ", max |dev| ", udec_(sinc1MaxDeviation[armIdx]), ", x <> C*(L-g) ", udec_(accountingFailCount[armIdx]))
+    if oddWindowCount[armIdx] == 0
       bVaried := FALSE
-    nAcct += nAcctBad[armIdx]
-    worstDev := worstDev #> maxDev1[armIdx]
-  if not bArmsOk
+    nAcct += accountingFailCount[armIdx]
+    worstDev := worstDev #> sinc1MaxDeviation[armIdx]
+  if bArmsOk == FALSE
     debug("VERDICT Q2: INCONCLUSIVE - a Q2 arm failed its window control (RIG FAIL above)")
-  elseif not bVaried
+  elseif bVaried == FALSE
     debug("VERDICT Q2: INCONCLUSIVE - a SINC1 arm saw no odd window, so there was nothing to contrast")
   elseif nAcct <> 0
     debug("VERDICT Q2: REFUTED - ", udec_(nAcct), " SINC1 sample(s) differ from C*(window clocks)")
-  elseif worstDev > abs calCx
+  elseif worstDev > abs calTermX
     debug("VERDICT Q2: REFUTED - SINC1 deviated by ", udec_(worstDev), ", more than one term")
   else
-    debug("VERDICT Q2: CONFIRMED - SINC1 shows no such outlier: every sample = C*(clocks in its window); each odd window reads exactly one term (", udec_(abs calCx), ", 1/n) off, on that sample alone (odd windows NPS ", udec_(nOddWin[ARM_NPS_S1]), ", NPL ", udec_(nOddWin[ARM_NPL_S1]), ", CHP ", udec_(nOddWin[ARM_CHP_S1]), ")")
+    debug("VERDICT Q2: CONFIRMED - SINC1 shows no such outlier: every sample = C*(clocks in its window); each odd window reads exactly one term (", udec_(abs calTermX), ", 1/n) off, on that sample alone (odd windows NPS ", udec_(oddWindowCount[ARM_NPS_S1]), ", NPL ", udec_(oddWindowCount[ARM_NPL_S1]), ", CHP ", udec_(oddWindowCount[ARM_CHP_S1]), ")")
 
 
 PRI verdict_q3() | bArmsOk, bJitter, hugePct, outPct, devPct
 ' Q3: WAITX #1 WC before GETXACC with a power-of-two count -- huge noise in
 ' SINC2, at most one term in SINC1.
+'
 
 ' Local Variables:
 ' @local bArmsOk - both jitter arms passed their SPREAD control
@@ -988,22 +1077,22 @@ PRI verdict_q3() | bArmsOk, bJitter, hugePct, outPct, devPct
 ' @local outPct - JIT-S2 outliers, percent
 ' @local devPct - JIT-S1 samples off the usual value, percent
 
-  bArmsOk := armOk[ARM_JIT_S1] and armOk[ARM_JIT_S2]
-  bJitter := lenMax[ARM_JIT_S1] > lenMin[ARM_JIT_S1] and lenMax[ARM_JIT_S2] > lenMin[ARM_JIT_S2]
-  hugePct := nHuge[ARM_JIT_S2] * PCT / (nDsamp[ARM_JIT_S2] #> 1)
-  outPct := nOut[ARM_JIT_S2] * PCT / (nDsamp[ARM_JIT_S2] #> 1)
-  devPct := nDev1[ARM_JIT_S1] * PCT / (arm_field(ARM_JIT_S1, AF_NS) - WARM)
-  debug("Q3 JIT-S2: windows ", udec_(lenMin[ARM_JIT_S2]), "..", udec_(lenMax[ARM_JIT_S2]), "; outliers ", udec_(outPct), " % (predicted ~75), huge ", udec_(hugePct), " %, max |e| ", udec_(maxAbsErr[ARM_JIT_S2]), " | JIT-S1: off ", udec_(devPct), " % (predicted ~50), max |dev| ", udec_(maxDev1[ARM_JIT_S1]), ", x <> C*(L-g) ", udec_(nAcctBad[ARM_JIT_S1]), " | no-WC reference P2-S2 outliers ", udec_(nOut[ARM_P2_S2]))
-  if not bArmsOk
+  bArmsOk := armWindowsOk[ARM_JIT_S1] and armWindowsOk[ARM_JIT_S2]
+  bJitter := windowLenMax[ARM_JIT_S1] > windowLenMin[ARM_JIT_S1] and windowLenMax[ARM_JIT_S2] > windowLenMin[ARM_JIT_S2]
+  hugePct := hugeOutlierCount[ARM_JIT_S2] * PCT / (diffSampleCount[ARM_JIT_S2] #> MIN_DIVISOR)
+  outPct := outlierCount[ARM_JIT_S2] * PCT / (diffSampleCount[ARM_JIT_S2] #> MIN_DIVISOR)
+  devPct := sinc1DeviationCount[ARM_JIT_S1] * PCT / (arm_field(ARM_JIT_S1, AF_NS) - WARM)
+  debug("Q3 JIT-S2: windows ", udec_(windowLenMin[ARM_JIT_S2]), "..", udec_(windowLenMax[ARM_JIT_S2]), "; outliers ", udec_(outPct), " % (predicted ~75), huge ", udec_(hugePct), " %, max |e| ", udec_(maxAbsError[ARM_JIT_S2]), " | JIT-S1: off ", udec_(devPct), " % (predicted ~50), max |dev| ", udec_(sinc1MaxDeviation[ARM_JIT_S1]), ", x <> C*(L-g) ", udec_(accountingFailCount[ARM_JIT_S1]), " | no-WC reference P2-S2 outliers ", udec_(outlierCount[ARM_P2_S2]))
+  if bArmsOk == FALSE
     debug("VERDICT Q3: INCONCLUSIVE - a jitter arm failed its window control (RIG FAIL above)")
-  elseif not bJitter
+  elseif bJitter == FALSE
     debug("VERDICT Q3: INCONCLUSIVE - WAITX #1 WC did not move the read point (every window equal)")
-  elseif nAcctBad[ARM_JIT_S1] <> 0 or maxDev1[ARM_JIT_S1] > abs calCx
-    debug("VERDICT Q3: REFUTED - SINC1 under the same jitter is off by more than one term (max |dev| ", udec_(maxDev1[ARM_JIT_S1]), ")")
+  elseif accountingFailCount[ARM_JIT_S1] <> 0 or sinc1MaxDeviation[ARM_JIT_S1] > abs calTermX
+    debug("VERDICT Q3: REFUTED - SINC1 under the same jitter is off by more than one term (max |dev| ", udec_(sinc1MaxDeviation[ARM_JIT_S1]), ")")
   elseif hugePct < JIT_REFUTE_PCT
     debug("VERDICT Q3: REFUTED - no huge noise: only ", udec_(hugePct), " % of SINC2 samples are off by >= 1000 terms")
-  elseif hugePct >= JIT_CONFIRM_PCT and nOut[ARM_P2_S2] == 0
-    debug("VERDICT Q3: CONFIRMED - 1 clock of read jitter: SINC2 ", udec_(hugePct), " % of samples off by >= 1000 terms (max ", udec_(maxAbsErr[ARM_JIT_S2]), "), SINC1 at most one term (", udec_(devPct), " % off by ", udec_(maxDev1[ARM_JIT_S1]), "); same loop without WC clean")
+  elseif hugePct >= JIT_CONFIRM_PCT and outlierCount[ARM_P2_S2] == 0
+    debug("VERDICT Q3: CONFIRMED - 1 clock of read jitter: SINC2 ", udec_(hugePct), " % of samples off by >= 1000 terms (max ", udec_(maxAbsError[ARM_JIT_S2]), "), SINC1 at most one term (", udec_(devPct), " % off by ", udec_(sinc1MaxDeviation[ARM_JIT_S1]), "); same loop without WC clean")
   else
     debug("VERDICT Q3: INCONCLUSIVE - SINC2 huge in ", udec_(hugePct), " % (between 5 and 25), or the no-WC reference was not clean")
 
@@ -1012,6 +1101,7 @@ PRI verdict_q4() | armIdx, twinIdx, bArmsOk, bConst, bClean, bTwins, pairIdx, nN
 ' Q4: XZERO instead of XCONT -- one window length and one unchanging SINC2
 ' sample, against XCONT twins that vary. Constancy, not C*n^2, is the XZERO
 ' test: g was measured on an XCONT loop.
+'
 
 ' Local Variables:
 ' @local armIdx - XZERO arm index
@@ -1030,23 +1120,23 @@ PRI verdict_q4() | armIdx, twinIdx, bArmsOk, bConst, bClean, bTwins, pairIdx, nN
   repeat pairIdx from 0 to Q4_PAIRS - 1
     armIdx := lookupz(pairIdx : ARM_XZS_S2, ARM_XZC_S2, ARM_XZL_S2)
     twinIdx := lookupz(pairIdx : ARM_NPS_S2, ARM_CHP_S2, ARM_XCL_S2)
-    nNorm := normLen[armIdx] - gapClocks
-    debug("Q4 ", zstr_(arm_name(armIdx)), ": windows ", udec_(lenMin[armIdx]), "..", udec_(lenMax[armIdx]), " clocks, d changed in ", udec_(nDvar[armIdx]), " of ", udec_(nDsamp[armIdx]), " (d(k=4) = ", sdec_(smp(armIdx, WARM + 1, SR_X) - smp(armIdx, WARM, SR_X)), ", C*n^2 = ", sdec_(calCx * nNorm * nNorm), ") | XCONT twin ", zstr_(arm_name(twinIdx)), ": odd windows ", udec_(nOddWin[twinIdx]), ", outliers ", udec_(nOut[twinIdx]))
-    if not armOk[armIdx] or not armOk[twinIdx]
+    nNorm := usualWindowLen[armIdx] - gapClocks
+    debug("Q4 ", zstr_(arm_name(armIdx)), ": windows ", udec_(windowLenMin[armIdx]), "..", udec_(windowLenMax[armIdx]), " clocks, d changed in ", udec_(diffChangedCount[armIdx]), " of ", udec_(diffSampleCount[armIdx]), " (d(k=4) = ", sdec_(smp(armIdx, WARM + 1, SR_X) - smp(armIdx, WARM, SR_X)), ", C*n^2 = ", sdec_(calTermX * nNorm * nNorm), ") | XCONT twin ", zstr_(arm_name(twinIdx)), ": odd windows ", udec_(oddWindowCount[twinIdx]), ", outliers ", udec_(outlierCount[twinIdx]))
+    if armWindowsOk[armIdx] == FALSE or armWindowsOk[twinIdx] == FALSE
       bArmsOk := FALSE
-    if lenMax[armIdx] <> lenMin[armIdx]
+    if windowLenMax[armIdx] <> windowLenMin[armIdx]
       bConst := FALSE
-    if nDvar[armIdx] <> 0
+    if diffChangedCount[armIdx] <> 0
       bClean := FALSE
-    if nOddWin[twinIdx] == 0 or nOut[twinIdx] == 0
+    if oddWindowCount[twinIdx] == 0 or outlierCount[twinIdx] == 0
       bTwins := FALSE
-  if not bArmsOk
+  if bArmsOk == FALSE
     debug("VERDICT Q4: INCONCLUSIVE - a Q4 arm failed its window control (RIG FAIL above)")
-  elseif not bConst
+  elseif bConst == FALSE
     debug("VERDICT Q4: REFUTED - XZERO did not keep one window length (see the Q4 lines above)")
-  elseif not bClean
+  elseif bClean == FALSE
     debug("VERDICT Q4: INCONCLUSIVE - XZERO windows constant yet SINC2 samples changed: a different mechanism (first-stage range at that J?)")
-  elseif not bTwins
+  elseif bTwins == FALSE
     debug("VERDICT Q4: INCONCLUSIVE - an XCONT twin showed no odd window, so XZERO had nothing to avoid there")
   else
     debug("VERDICT Q4: CONFIRMED - XZERO kept one window length and an unchanging SINC2 sample at 10.24 us, 100 us and 25 ms measurements (streams 10.5 / 204.8 / 400 ms), where the XCONT twins varied and corrupted")
@@ -1060,9 +1150,9 @@ PRI q5_class(armIdx) : pLabel
 
   if fitState[armIdx] <> FIT_OK
     pLabel := @s_nofit
-  elseif nMisClean[armIdx] <> 0
+  elseif cleanMismatchCount[armIdx] <> 0
     pLabel := @s_cleanmis
-  elseif nMisOut[armIdx] <> 0
+  elseif changedMismatchCount[armIdx] <> 0
     pLabel := @s_outmis
   else
     pLabel := @s_modelok
@@ -1070,6 +1160,7 @@ PRI q5_class(armIdx) : pLabel
 
 PRI verdict_q5() | armIdx, bArmsOk, bFit, nClnMis, nOutMis, nOutTested, bP2AllOff
 ' Q5: does the carry model reproduce every sample, outliers included?
+'
 
 ' Local Variables:
 ' @local armIdx - arm index
@@ -1086,24 +1177,24 @@ PRI verdict_q5() | armIdx, bArmsOk, bFit, nClnMis, nOutMis, nOutTested, bP2AllOf
   nOutMis := 0
   nOutTested := 0
   repeat armIdx from 0 to NARMS - 1
-    if is_sinc2(armIdx)
-      debug("Q5 ", zstr_(arm_name(armIdx)), ": ", zstr_(q5_class(armIdx)), " - fit J ", sdec_(fitXterm[armIdx]), ", mismatches clean ", udec_(nMisClean[armIdx]), " / window-changed ", udec_(nMisOut[armIdx]), " (first k=", sdec_(firstMisK[armIdx]), "), outliers ", udec_(nOut[armIdx]))
+    if is_sinc2(armIdx) == TRUE
+      debug("Q5 ", zstr_(arm_name(armIdx)), ": ", zstr_(q5_class(armIdx)), " - fit J ", sdec_(fitXterm[armIdx]), ", mismatches clean ", udec_(cleanMismatchCount[armIdx]), " / window-changed ", udec_(changedMismatchCount[armIdx]), " (first k=", sdec_(firstMismatchSample[armIdx]), "), outliers ", udec_(outlierCount[armIdx]))
   repeat armIdx from ARM_P2_S2 to ARM_JIT_S2
     if armIdx == ARM_P2_S2 or armIdx == ARM_NPS_S2 or armIdx == ARM_NPL_S2 or armIdx == ARM_JIT_S2
-      if not armOk[armIdx]
+      if armWindowsOk[armIdx] == FALSE
         bArmsOk := FALSE
       if fitState[armIdx] <> FIT_OK
         bFit := FALSE
-      nClnMis += nMisClean[armIdx]
-      nOutMis += nMisOut[armIdx]
-      nOutTested += nOut[armIdx]
-  bP2AllOff := fitState[ARM_P2_S2] == FIT_OK and nMisClean[ARM_P2_S2] == nDsamp[ARM_P2_S2] - nChanged[ARM_P2_S2] and nMisClean[ARM_P2_S2] <> 0
-  if not bArmsOk
+      nClnMis += cleanMismatchCount[armIdx]
+      nOutMis += changedMismatchCount[armIdx]
+      nOutTested += outlierCount[armIdx]
+  bP2AllOff := fitState[ARM_P2_S2] == FIT_OK and cleanMismatchCount[ARM_P2_S2] == diffSampleCount[ARM_P2_S2] - changedWindowCount[ARM_P2_S2] and cleanMismatchCount[ARM_P2_S2] <> 0
+  if bArmsOk == FALSE
     debug("VERDICT Q5 MECHANISM: INCONCLUSIVE - a decisive arm failed its window control (RIG FAIL above)")
-  elseif not bFit
+  elseif bFit == FALSE
     debug("VERDICT Q5 MECHANISM: INCONCLUSIVE - the model fit was not exact in a decisive arm (see the fit lines)")
-  elseif bP2AllOff
-    debug("VERDICT Q5 MECHANISM: SEPARATE-MECHANISM - the clean prediction fails everywhere: P2-S2 reads d = ", sdec_(smp(ARM_P2_S2, WARM + 1, SR_X) - smp(ARM_P2_S2, WARM, SR_X)), ", the model C*n^2 = ", sdec_(calCx * P2_WINDOW * P2_WINDOW), " (d ~ 0 would mean GETXACC also clears the first stage)")
+  elseif bP2AllOff == TRUE
+    debug("VERDICT Q5 MECHANISM: SEPARATE-MECHANISM - the clean prediction fails everywhere: P2-S2 reads d = ", sdec_(smp(ARM_P2_S2, WARM + 1, SR_X) - smp(ARM_P2_S2, WARM, SR_X)), ", the model C*n^2 = ", sdec_(calTermX * P2_WINDOW * P2_WINDOW), " (d ~ 0 would mean GETXACC also clears the first stage)")
   elseif nClnMis <> 0
     debug("VERDICT Q5 MECHANISM: INCONCLUSIVE - the model broke at ", udec_(nClnMis), " clean-window sample(s) (premise failed; see first k and J above)")
   elseif nOutTested < MIN_OUT_Q5
@@ -1118,45 +1209,23 @@ PRI verdict_q5() | armIdx, bArmsOk, bFit, nClnMis, nOutMis, nOutTested, bP2AllOf
 PRI y_total() : nBadTotal | armIdx
 ' Total Y-corroboration mismatches over every arm.
 '
-' @returns nBadTotal - sum of nYbad over the arms
+' @returns nBadTotal - sum of yMismatchCount over the arms
 
 ' Local Variables:
 ' @local armIdx - arm index
 
   nBadTotal := 0
   repeat armIdx from 0 to NARMS - 1
-    nBadTotal += nYbad[armIdx]
-
-
-DAT ' ---- Labels ----
-nm_p2s1         byte    "P2-S1 (SINC1, 256 clk/cycle, XCONT)", 0
-nm_p2s2         byte    "P2-S2 (SINC2, 256 clk/cycle, XCONT)", 0
-nm_nps1         byte    "NPS-S1 (SINC1, 2^23+64, XCONT)", 0
-nm_nps2         byte    "NPS-S2 (SINC2, 2^23+64, XCONT)", 0
-nm_npl1         byte    "NPL-S1 (SINC1, 2^23-64, XCONT)", 0
-nm_npl2         byte    "NPL-S2 (SINC2, 2^23-64, XCONT)", 0
-nm_chp1         byte    "CHP-S1 (SINC1, 1 MHz, 100 cycles, XCONT)", 0
-nm_chp2         byte    "CHP-S2 (SINC2, 1 MHz, 100 cycles, XCONT)", 0
-nm_jit1         byte    "JIT-S1 (SINC1, 256 clk/cycle, WAITX #1 WC)", 0
-nm_jit2         byte    "JIT-S2 (SINC2, 256 clk/cycle, WAITX #1 WC)", 0
-nm_xzs2         byte    "XZS-S2 (SINC2, 2^23+64, XZERO)", 0
-nm_xzc2         byte    "XZC-S2 (SINC2, 1 MHz, 100 cycles, XZERO)", 0
-nm_xzl2         byte    "XZL-S2 (SINC2, 1 MHz, 25000 cycles, XZERO)", 0
-nm_xcl2         byte    "XCL-S2 (SINC2, 1 MHz, 25000 cycles, XCONT)", 0
-s_match         byte    "MATCH", 0
-s_mismatch      byte    "MISMATCH", 0
-s_nofit         byte    "NO-FIT", 0
-s_cleanmis      byte    "CLEAN-MISMATCH", 0
-s_outmis        byte    "OUTLIER-MISMATCH", 0
-s_modelok       byte    "MODEL-MATCH", 0
+    nBadTotal += yMismatchCount[armIdx]
 
 
 { MEASURING ENGINE -- runs in its own cog; the ONLY code that touches the
   streamer. No debug() here (DEBUG_COGS excludes this cog anyway).
-  PTRA = @mbox on entry. No SETQ precedes any XINIT/XCONT/XZERO, so every
+  PTRA = @mailbox on entry. No SETQ precedes any XINIT/XCONT/XZERO, so every
   command runs at the SETXFRQ value set while the streamer was idle.
 }
-DAT             org     0        ' ---- Measuring Engine ----
+DAT ' ---- Measuring Engine ----
+                org     0
 engine          mov     mbase_, ptra
                 setluts #0                      ' LUT sharing OFF (reset state)
                 wrpin   #0, #PIN                ' P3: smart pin off, reset config
@@ -1256,7 +1325,7 @@ run_arm         mov     hdrp_, ptrb
         if_z    jmp     #loop_xz
 
 loop_xc         xcont   dcmd_, imk_             ' waits for the running command's last clock
-                waitx   #JIT_MASK               ' fixed 3 clocks
+                waitx   #READ_WAITX             ' fixed 3 clocks
                 getxacc xsum_
                 mov     ysum_, 0-0
                 getct   ctv_
@@ -1267,7 +1336,7 @@ loop_xc         xcont   dcmd_, imk_             ' waits for the running command'
                 jmp     #arm_end
 
 loop_jit        xcont   dcmd_, imk_
-                waitx   #JIT_MASK               wc      ' 2 + (1 AND RND): Chip's jitter
+                waitx   #READ_WAITX     wc      ' 2 + (1 AND RND): Chip's jitter
                 getxacc xsum_
                 mov     ysum_, 0-0
                 getct   ctv_
@@ -1278,7 +1347,7 @@ loop_jit        xcont   dcmd_, imk_
                 jmp     #arm_end
 
 loop_xz         xzero   dcmd_, imk_             ' as XCONT, but zeroes phase per command
-                waitx   #JIT_MASK
+                waitx   #READ_WAITX
                 getxacc xsum_
                 mov     ysum_, 0-0
                 getct   ctv_

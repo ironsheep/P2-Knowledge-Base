@@ -29,6 +29,16 @@ The task named the second run as "21:49"; the SO9 log of the second run is stamp
 (L2:1). The 21:48:58 and 21:49:22 logs of that session are the other two rigs, not SO9
 (`grep -l SO9` over the logs folder returns only L1 and L2).
 
+**Workaround wording (2026-09-26, task #360; Stephen's decision, voice-guide §2).** The reader's
+change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
+(`{#sec-e6-fix}`) is now *A proven workaround* (`{#sec-e6-workaround}`), rule-first: *What any
+workaround must do* (the condition, as in the front matter's summary table), *One way, proven
+on a real P2* and the one-line block, then *Other ways that meet the condition*. The CAUTION
+box's third line is *Workaround* (the condition); the status row is *Workaround proven on
+silicon*. In ARCHIVE only the header purpose changed (*the `TT` = `%01` word is the
+workaround*): no line added or removed, and the object image is byte-identical to the pre-#360
+archive. Below, "Fix" in the *Where it appears* column means *A proven workaround*.
+
 ## Quotations (Parallax P2 Documentation)
 
 | Chapter text | Source |
@@ -92,33 +102,47 @@ The task named the second run as "21:49"; the SO9 log of the second run is stamp
 | controls all passed (no `RIG FAIL`) | Proof | no `RIG FAIL` line in L1 or L2; control W lines L1:27–29 decode as expected (RIG:354–356 expectations) |
 | outcomes written before the run | Proof | RIG:118–135 (header, pre-registered); RIG:333–343 printed at L1:14–24 before any sample |
 | 2026-09-25, run twice | Proof, Status | L1:1, L2:1; LED:1001–1002 |
-| C2 is the fix; OUT high runs ADC at TT=%01 | Fix, Proof, Status | LED:1021 ("Workaround proven: set TT bit 0 and accept the fast DAC driving the pin (C2)") |
+| C2 is the workaround; OUT high runs ADC at TT=%01 | Fix, Proof, Status | LED:1021 ("Workaround proven: set TT bit 0 and accept the fast DAC driving the pin (C2)") |
+| *What any workaround must do*: set `TT` bit 0 in the `WRPIN` word of a DAC-mode pin whose ADC `OUT` switches | LED:1021; C2 vs C4 (L1:43–47 vs L1:53–57); DOC:7653–7654 (`x1` = output enabled); front matter summary table |
+| *One way*: the tested DAC noise word with `TT` = `%01` | RIG:213; the rows above |
+| *Other ways*: the Spin2-symbol form and the literal are the same change | RIG:217 (`P_DAC_990R_3V \| P_TT_01 \| P_DAC_NOISE`), L1:28 `symbols=$0014_0042`; SPIN:1522/1525 (`P_TT_01` = `P_OE`) |
+| *Other ways*: `TT` = `%11` also sets bit 0, but gives the ADC switch to `OTHER`; not tested | DOC:7657 (`1x = OTHER enables ADC`); RIG tests `TT` = `%00` and `%01` only (RIG:212–213; LED:1022) |
 
-## The drop-in block (The fix)
+## The drop-in block (A proven workaround)
 
 | | |
 |---|---|
-| Chapter | the `spin2` fence opening *The fix* (one line) |
-| Source | RIG:213, one line, byte-identical, 71 columns, no tab characters in RIG (`grep -c -P "\t"` = 0) |
-| The run that proved it | the constant is loaded into `cfg_tt01_` (RIG:660) and written by `wrpin cfg_, #PIN_P` (RIG:640) for C1 and C2 (RIG:603). C2 = the fix: L1:43–47 and L2:51–55 (ADC running, 1,958–2,093), C1 = L1:38–42 / L2:46–50 (ADC off, 0) |
-| Why one line | No contiguous rig block that holds the `WRPIN`/`DIRH`/`OUTH` sequence is ≤ 76 columns: `do_cond` RIG:639 is 93 columns and RIG:643 is 90. RIG:213 is the only contiguous run of lines that is the fix itself and fits K |
+| Chapter | the `spin2` fence under *One way, proven on a real P2* in *A proven workaround* (one line, chapter 63) |
+| Source | RIG:213 (as-run), ARCHIVE:50 (printed, `examples-library/e6-dac-mode-adc-enable-test.spin2`; same one line; the archive's header comment was rewritten, so the line number moved), one line, byte-identical, 71 columns, no tab characters in RIG (`grep -c -P "\t"` = 0) |
+| The run that proved it | the constant is loaded into `cfg_tt01_` (RIG:660) and written by `wrpin cfg_, #PIN_P` (RIG:640) for C1 and C2 (RIG:603). C2 = the workaround: L1:43–47 and L2:51–55 (ADC running, 1,958–2,093), C1 = L1:38–42 / L2:46–50 (ADC off, 0) |
+| Why one line | No contiguous rig block that holds the `WRPIN`/`DIRH`/`OUTH` sequence is ≤ 76 columns: `do_cond` RIG:639 is 93 columns and RIG:643 is 90. RIG:213 is the only contiguous run of lines that is the workaround itself and fits K |
 | Symbol form | `P_DAC_990R_3V \| P_TT_01 \| P_DAC_NOISE` = RIG:217, stated inline (not a fence); equality to `$0014_0042` checked at run time, L1:28 `symbols=$0014_0042` |
 
-## Code excerpts (verbatim, contiguous)
+## Code excerpts (verbatim, contiguous; `sample` routine now mirrors ARCHIVE)
 
-| Chapter excerpt | Source lines | Max width |
-|---|---|---|
-| Drop-in `CFG_DAC_TT01 = $0014_0042 ...` | RIG:213 | 71 |
-| Round loop `mov round_, #ROUNDS` ... `djnz round_, #.round` | RIG:602–613 | 72 |
-| `sample` routine, comment line ... `ret` | RIG:648–657 | 75 |
-| `path_control`, two comment lines ... `ret` | RIG:628–636 | 74 |
-| `do_cond` described in prose only (RIG:639 = 93 and RIG:643 = 90 columns) | RIG:638–646 | n/a |
-| end-of-run pin release, described in prose | RIG:617–623 | n/a |
+**Printed code now mirrors the conformed archive copy (2026-09-26, «#360»); the measuring PASM
+is byte-identical to the as-run rig.** ARCHIVE = `examples-library/e6-dac-mode-adc-enable-test.spin2`
+(conformed 2026-09-26, task #360: the `sample` routine's `REP` now takes a label operand,
+`rep @.read_end, reads_`, in place of `rep #3, reads_`, with the loop's last instruction
+relabelled `.read_end`; same three-instruction repeat body, same PASM measuring image,
+byte-identical to RIG's).
+
+| Chapter excerpt | RIG lines (as-run, history) | ARCHIVE lines (printed) | Max width |
+|---|---|---|---|
+| Drop-in `CFG_DAC_TT01 = $0014_0042 ...` (content unchanged by #360; archive line differs, header rewritten) | RIG:213 | ARCHIVE:50 | 71 |
+| Round loop `mov round_, #ROUNDS` ... `djnz round_, #.round` (content unchanged by #360; archive line differs) | RIG:602–613 | ARCHIVE:439–450 | 72 |
+| `sample` routine, comment line ... `ret` (`rep @.read_end, reads_` / `.read_end wrlong ...` in place of `rep #3, reads_` / `wrlong ...`) | RIG:648–657 | ARCHIVE:485–494 | 75 |
+| `path_control`, two comment lines ... `ret` (content unchanged by #360; archive line differs) | RIG:628–636 | ARCHIVE:465–473 | 74 |
+| `do_cond` described in prose only (RIG:639 = 93 and RIG:643 = 90 columns) | RIG:638–646 | n/a | n/a |
+| end-of-run pin release, described in prose | RIG:617–623 | n/a | n/a |
 
 Byte-identity checked by printing both sides:
 `awk '/^```/ { inb = !inb; print "----"; next } inb { printf "%d|%s|\n", length($0), $0 }' <chapter>`
 and
-`awk '(NR==213) || (NR>=602 && NR<=613) || (NR>=628 && NR<=636) || (NR>=648 && NR<=657) {printf "%d|%d|%s|\n", NR, length($0), $0}' <RIG>`.
+`awk '(NR==213) || (NR>=602 && NR<=613) || (NR>=628 && NR<=636) || (NR>=648 && NR<=657) {printf "%d|%d|%s|\n", NR, length($0), $0}' <RIG>` (pre-#360). Post-#360, the chapter's
+fences equal the ARCHIVE spans above (verified by `engineering/tools/verify-example-corpus-identity.py`,
+GREEN); RIG is kept as the as-run record (the `sample` routine's `REP` operand differs; the
+measuring PASM itself is unchanged).
 
 No harness: the chapter carries no snippet that is not taken verbatim from RIG, so nothing was
 compiled for this chapter.
@@ -149,6 +173,6 @@ measured value (0) is given in the chapter's *What the P2 actually does* and pro
 - LED:1015–1017 give C2 as ranges per run; the chapter gives every sample (L1, L2) and the
   combined range 1,958–2,093.
 - LED:1022 "Of the `TT` settings, only `%00` and `%01` were tested; the `OTHER`-enable forms
-  (`TT` = `%1x`) were not": carried in *What the P2 actually does*, the fix's limits and Status.
+  (`TT` = `%1x`) were not": carried in *What the P2 actually does*, the workaround's limits and Status.
 - The tested `%SSSSS` value: RIG:212–213, 247 and L1:27–28 show `SSSSS=%1` only, i.e. `%00001`
   DAC noise. `%00010` and `%00011` never appear in RIG; the chapter qualifies to DAC noise.

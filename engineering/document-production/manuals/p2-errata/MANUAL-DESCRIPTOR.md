@@ -2,6 +2,7 @@
 manual_slug: p2-errata
 doc_class: reference                              # bench-proven errata reference; Assembly Reference voice
 code_line_budget_K: 76                            # inherits platform reference K (creation-guide §Code Line Budget)
+spin2_blocking_rules: 2.1, 2.1.4, 2.4, 2.5, 3.1, 3.2, 4.1, 4.2, 4.2.1, 4.5, 4.9, 5.0, 5.1, 5.2, 5.3, 5.4.1   # «#360» 2026-09-26: armed for THIS manual's examples-library (0 sites when armed); §3.4 (worded "preferred"), §5.7 and §6.4 (T1+T2 / Part 6) stay advisory
 last_published_tag: none                          # never released; v0.1.0 / v0.2.0 are community-review drafts
 guide_paths:
   creation_guide: ./creation-guide.md
@@ -10,9 +11,10 @@ guide_paths:
   classification: ./CLASSIFICATION-GUIDANCE.md    # governs what may enter (class 1 only)
 authoritative_sources: see ./creation-guide.md §6 # EF ledger EF-066..074 + fix-run entries (PRIMARY) + raw logs + rigs; P2 Documentation; KB YAML from disk
 high_risk_tables:
-  - "Front-matter summary table — erratum number ↔ title ↔ published-by ↔ fix; numbers are permanent"
-  - "Each chapter's Status table — published-by / found-by / confirmed / fix-proven must match the ledger"
-  - "Each chapter's CAUTION box and The fix — the printed fix block must be byte-identical to the marked block of the test program that ran it"
+  - "Front-matter summary table — erratum number ↔ title ↔ published-by ↔ workaround condition; numbers are permanent"
+  - "Each chapter's Status table — published-by / found-by / confirmed / workaround-proven must match the ledger"
+  - "Each chapter's CAUTION box and A proven workaround — the printed block must be byte-identical to the marked block of the archive test program that ran it"
+  - "Terminology: WORKAROUND, never fix (a fix is a silicon revision); A proven workaround, never THE (Stephen, 2026-09-26)"
   - "E1 pointer-delta table (control vs hazard per SETQ form) — transposition-prone"
 high_risk_quant:
   - "E1: control vs hazard PTRx deltas (+16 vs +12, +32 vs +4) — read from the log, never recomputed"
@@ -42,7 +44,7 @@ Everything not listed above is inherited from the central skill body and the gui
 - **Voice (Dimension #9):** the Assembly Reference voice, with the errata-specific rules in
   `voice-guide.md` §2.
 - **Code (Dimensions #3/#3b):** PASM2/Spin2 fences; walkthrough excerpts verbatim from
-  bench-run rigs; every printed fix byte-identical to a bench-run block (`pnut-ts` 1.55.8); K=76.
+  bench-run rigs; every printed workaround byte-identical to a bench-run block (`pnut-ts` 1.55.8); K=76.
 - **Chip revision:** Rev C (Stephen, 2026-09-26), stated once in the front matter's Sources.
 - **Open before public release:** the study's formal credit name;
   Parallax review of the whole manual; a small standalone reproducer per erratum, bench-run,

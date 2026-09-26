@@ -50,10 +50,16 @@ answers that in three lines; everything after it is the evidence for those lines
 paragraph follows the box, it does not restate it. Name whose statement the part contradicts
 (*the P2 Documentation states*), never an unowned "the design".
 
-**The fix is code proven on a part.** *The fix* opens with the code block a reader pastes,
-byte-identical to the block a test program ran on silicon, then one sentence saying what it
-guarantees and what kind of fix it is: a *one-time startup fix*, a *rule at each use*, or a
-*helper routine*. A fix that has not run on a part is not printed as the fix.
+**A workaround, not a fix; one, not the only one.** The part keeps its defect; the reader's
+code steps around it. A *fix* is what a new silicon revision does, so this manual never calls
+the reader's change a fix (Stephen, 2026-09-26: "We can't possibly be offering the only fix").
+Section *A proven workaround* is **rule-first**: it opens with the condition any workaround
+must meet (*What any workaround must do: …*), then *One way, proven on a real P2:* and the
+code block a reader pastes, byte-identical to a block a test program ran on silicon, then one
+sentence saying what it guarantees and its kind — a *one-time startup workaround*, a *rule at
+each use*, or a *helper routine*. Where other ways meet the same condition, say so (E3: any cog
+the program already keeps running in 4-7 does what the keeper does). A block that has not run
+on a part is not printed as the proven workaround.
 
 ## 2a. The voice boundary: where "you" is allowed
 
@@ -63,11 +69,11 @@ voice. The line is fixed by section:
 | Section | Voice |
 |---|---|
 | CAUTION box | "you" allowed |
-| Section headings (*What your program sees*, *The fix*) | "you" / "your" allowed |
+| Section headings (*What your program sees*, *A proven workaround*) | "you" / "your" allowed |
 | Opening paragraph | reference voice |
 | *What the P2 is documented to do* · *What the P2 actually does* | reference voice |
 | *What your program sees* | "you" allowed |
-| *The fix* | "you" allowed |
+| *A proven workaround* | "you" allowed |
 | *Why it happens* · *How it was proven on a real P2* · *The test program* · *Status* | reference voice, no "you" |
 
 "You" is the programmer at their bench, never a foil: no "you might think", no "as you can
@@ -84,8 +90,7 @@ result as a general law beyond the conditions it was measured under.
 | erratum / errata (only for class 1) | bug (in headings), glitch, quirk, gotcha |
 | silicon erratum | hardware bug |
 | the part, the chip, the P2 | the silicon (acceptable in *confirmed on silicon*) |
-| fix (the reader's code change, proven on a part; heading *The fix*) | patch, hack |
-| workaround (only for a change not proven on a part, named as such) | fix, for an unproven change |
+| workaround (the reader's code change; heading *A proven workaround*; *proven* only when it ran on a part) | fix (a fix is a silicon revision), patch, hack; *the* workaround (there may be others) |
 | test program (reader text) · rig (internal) | harness (reader text) |
 | confirmed on silicon | verified, validated (for a bench result) |
 | the clean-room design study (until its formal name is settled) | the HDL agent, the study agent |

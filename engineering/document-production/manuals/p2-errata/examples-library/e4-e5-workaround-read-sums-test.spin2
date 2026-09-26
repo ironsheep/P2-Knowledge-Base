@@ -1,10 +1,10 @@
 '' ===========================================================================
 ''
-''   File.......  e4-e5-fix-read-sums-test.spin2
-''   Purpose....  Errata E4 and E5 fix test: whether the burst_sums helper
-''                routine returns exactly N terms for bursts of 1 to 1001
-''                clocks, back to back, at both input levels; alongside,
-''                the uncorrected reads that show both errata
+''   File.......  e4-e5-workaround-read-sums-test.spin2
+''   Purpose....  Errata E4 and E5 workaround test: whether the burst_sums
+''                helper routine returns exactly N terms for bursts of 1
+''                to 1001 clocks, back to back, at both input levels;
+''                alongside, the uncorrected reads that show both errata
 ''   Manual.....  P2 Errata
 ''   Version....  v0.2.0 (2026-09-26)
 ''   Appears in.  Erratum E4: GETXACC Clears Only During a Goertzel Burst;
@@ -22,52 +22,54 @@
 '' ===========================================================================
 
 CON ' ---- Rig Parameters ----
-  _clkfreq        = 200_000_000
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
   DEBUG_COGS      = %0000_0001          ' debugger in cog 0 ONLY
 
   PIN             = 3                   ' Goertzel input pin 4g+3, g = 0
   G_COS           = 61                  ' LUT bits[23:16]: |C| of the cosine sum
   G_SIN           = 23                  ' LUT bits[31:24]: |C| of the sine sum
-  LUTADDR         = $0A5
-  LUTVAL          = (G_SIN << 24) | (G_COS << 16)     ' $173D_0000
+  LUTADDR         = $0A5                ' S[8:0]: LUT phase offset (S[11:9] = %000, 512 entries)
+  LUTVAL          = (G_SIN << 24) | (G_COS << 16)     ' sine in byte 3, cosine in byte 2: $173D_0000
   LUT_TOP         = $1FF                ' last LUT address; fill/readback run LUT_TOP..0
 
   MODE_G          = $F007_0000          ' Goertzel, SINC1, no DAC, pins P0..P3
   MODE_MASK       = $FFFF_0000          ' mode bits of a mode word (count is [15:0])
-  S_ON            = (1 << 19) | (1 << 15) | LUTADDR   ' $0008_80A5
-  S_ZERO          = (1 << 19) | LUTADDR               ' $0008_00A5: S[15:12] = 0
+  S_INVERT_P3     = 1 << 19             ' S[19]: invert pin 4g+3 (S[19:16] = invert pins)
+  S_SUM_P3        = 1 << 15             ' S[15]: sum pin 4g+3 (S[15:12] = summed pins)
+  S_ON            = S_INVERT_P3 | S_SUM_P3 | LUTADDR  ' $0008_80A5
+  S_ZERO          = S_INVERT_P3 | LUTADDR             ' $0008_00A5: S[15:12] = 0
   FRQ             = $8000_0000          ' count N = N active clocks
-  N_ZERO          = 4                   ' zero-burst count (rig and drop-in)
+  N_ZERO          = 4                   ' the rig's zero-burst count; control Z checks the drop-in's ZERO_COUNT against it
 
   N_CHARGE        = 1000                ' one-time charge, P3 low
   N_CAL_A         = 64                  ' CAL: C = D65 - D64
-  N_CAL_B         = 65
+  N_CAL_B         = 65                  '   (the longer CAL burst)
   N_NAIVE_A       = 64                  ' positive control, first burst
   N_NAIVE_B       = 65                  ' positive control, burst right after
-  N_DIRTY         = 7                   ' burst left unflushed before the fix calls
+  N_DIRTY         = 7                   ' burst left unflushed before the workaround calls
 
-  ' the fix calls' burst lengths, in call order
-  FIX_N0          = 1
-  FIX_N1          = 2
-  FIX_N2          = 3
-  FIX_N3          = 4
-  FIX_N4          = 7
-  FIX_N5          = 64
-  FIX_N6          = 65
-  FIX_N7          = 255
-  FIX_N8          = 256
-  FIX_N9          = 1001
-  FIX_CALLS       = 10
+  ' the workaround calls' burst lengths, in call order
+  WKR_N0          = 1
+  WKR_N1          = 2
+  WKR_N2          = 3
+  WKR_N3          = 4
+  WKR_N4          = 7
+  WKR_N5          = 64
+  WKR_N6          = 65
+  WKR_N7          = 255
+  WKR_N8          = 256
+  WKR_N9          = 1001
+  WKR_CALLS       = 10
 
   REPS            = 3                   ' records per P3 level
-  LEVELS          = 2
+  LEVELS          = 2                   ' P3 levels: LEVEL_LOW, then LEVEL_HIGH
   LEVEL_LOW       = 0                   ' P3 driven low  (TESTP reads 0)
   LEVEL_HIGH      = 1                   ' P3 driven high (TESTP reads 1)
   WAIT_PIN        = 10_000              ' settle after changing P3
   WAIT_REREAD     = 1000                ' idle time before the rig's own read Q
   RIG_TIMEOUT_SEC = 2                   ' host wait cap; the engine runs < 1 ms
   MBOX_DONE       = 1                   ' mailbox[MB_DONE] once P3 is released
-  LUT_LONGS       = 512
+  LUT_LONGS       = 512                 ' LUT size in longs (the LUT control reads them all)
 
   ' channel selectors: every X field is followed by its Y field
   CH_X            = 0
@@ -87,40 +89,49 @@ CON ' ---- Mailbox Layout ----
   MB_ZSEL         = 3
   MB_RECS         = 4
 
-  ' one fix-call block:
-  '  F_N      - the burst length N
-  '  F_BX/BY  - the drop-in's before reading (cos_base, sin_base)
-  '  F_SX/SY  - the drop-in's returned sums (cos_sum, sin_sum)
-  '  F_QX/QY  - the rig's own idle read, WAIT_REREAD clocks after the call
-  #0, F_N, F_BX, F_BY, F_SX, F_SY, F_QX, F_QY, F_LEN
+  ' one workaround-call block:
+  '  W_N      - the burst length N
+  '  W_BX/BY  - the drop-in's before reading (cos_base, sin_base)
+  '  W_SX/SY  - the drop-in's returned sums (cos_sum, sin_sum)
+  '  W_QX/QY  - the rig's own idle read, WAIT_REREAD clocks after the call
+  '  W_LEN    - longs per workaround-call block
+  #0, W_N, W_BX, W_BY, W_SX, W_SY, W_QX, W_QY, W_LEN
 
-  ' record fields, in the order the engine writes them:
+  ' record fields, in the order the engine writes them (every X field is
+  ' followed by its Y field):
   '  R_LEVEL            - P3 level of this record (LEVEL_LOW / LEVEL_HIGH)
   '  R_PINB             - TESTP P3 before the record
-  '  R_C64BX..R_C65RY   - CAL: before (B) and after (R) readings, N = 64, 65
-  '  R_PX..R_R3Y        - positive control readings P, R1, P2, R2, R3
+  '  R_C64BX, R_C64BY   - CAL, N = 64: before reading B
+  '  R_C64RX, R_C64RY   - CAL, N = 64: after reading R
+  '  R_C65BX, R_C65BY   - CAL, N = 65: before reading B
+  '  R_C65RX, R_C65RY   - CAL, N = 65: after reading R
+  '  R_PX, R_PY         - positive control: P, the first GETXACC "to clear"
+  '  R_R1X, R_R1Y       - positive control: R1, after the first burst
+  '  R_P2X, R_P2Y       - positive control: P2, the second GETXACC "to clear"
+  '  R_R2X, R_R2Y       - positive control: R2, after the second burst
+  '  R_R3X, R_R3Y       - positive control: R3, after a zero burst alone
   '  R_RDX, R_RDY       - reading after the dirty burst
-  '  R_FIX              - FIX_CALLS fix-call blocks of F_LEN longs
+  '  R_WKR              - WKR_CALLS workaround-call blocks of W_LEN longs
   '  R_PINA             - TESTP P3 after the record
-  #0, R_LEVEL, R_PINB, R_C64BX, R_C64BY, R_C64RX, R_C64RY, R_C65BX, R_C65BY, R_C65RX, R_C65RY, R_PX, R_PY, R_R1X, R_R1Y, R_P2X, R_P2Y, R_R2X, R_R2Y, R_R3X, R_R3Y, R_RDX, R_RDY, R_FIX
-  R_PINA          = R_FIX + FIX_CALLS * F_LEN
-  RECL            = R_PINA + 1
-  NREC            = LEVELS * REPS
-  TOTAL_CALLS     = NREC * FIX_CALLS
+  #0, R_LEVEL, R_PINB, R_C64BX, R_C64BY, R_C64RX, R_C64RY, R_C65BX, R_C65BY, R_C65RX, R_C65RY, R_PX, R_PY, R_R1X, R_R1Y, R_P2X, R_P2Y, R_R2X, R_R2Y, R_R3X, R_R3Y, R_RDX, R_RDY, R_WKR
+  R_PINA          = R_WKR + WKR_CALLS * W_LEN
+  RECL            = R_PINA + 1          ' longs per record
+  NREC            = LEVELS * REPS       ' records in the run
+  TOTAL_CALLS     = NREC * WKR_CALLS    ' workaround calls in the run
   FIRST_CALLS     = NREC                ' one dirty-start call per record
-  MB_LONGS        = MB_RECS + NREC * RECL
+  MB_LONGS        = MB_RECS + NREC * RECL  ' mailbox length in longs
 
 VAR ' ---- Mailbox & Analysis State ----
   long mailbox[MB_LONGS]                ' written by the measuring cog
-  long c_meas[LEVELS * CHANNELS]        ' accepted C: [level * CHANNELS + channel]
+  long measured_term[LEVELS * CHANNELS] ' accepted C: [level * CHANNELS + channel]
   long fail_count                       ' gating control failures
-  long n_exact, n_lead, n_idle          ' fix checks that held (of TOTAL_CALLS each)
-  long n_non_mult                       ' misses that are not whole multiples of C
-  long n_minus1, n_plus1, n_other       ' S misses: (N-1)*C, (N+1)*C, other multiple
+  long exact_count, lead_count, idle_count  ' workaround checks that held (of TOTAL_CALLS each)
+  long non_multiple_count               ' misses that are not whole multiples of C
+  long minus_one_count, plus_one_count, other_multiple_count  ' S misses: (N-1)*C, (N+1)*C, other multiple
 
 
 PUB main() | engineCog, startTick
-'' Run the E4+E5 fix rig: check the drop-in's words, start the measuring cog,
+'' Run the E4+E5 workaround rig: check the drop-in's words, start the measuring cog,
 '' wait for its done flag, then print every reading, the controls and the
 '' verdict.
 ''
@@ -131,8 +142,8 @@ PUB main() | engineCog, startTick
 
   longfill(@mailbox, 0, MB_LONGS)
   fail_count := 0
-  debug("=== E4+E5 FIX: does burst_sums return every Goertzel burst's exact sums? ===")
-  debug("rig: NO jumper; the measuring cog drives P3 (low, then high); clk 200 MHz; ", udec_(REPS), " records per level; ", udec_(FIX_CALLS), " fix calls per record")
+  debug("=== E4+E5 WORKAROUND: does burst_sums return every Goertzel burst's exact sums? ===")
+  debug("rig: NO jumper; the measuring cog drives P3 (low, then high); clk 200 MHz; ", udec_(REPS), " records per level; ", udec_(WKR_CALLS), " workaround calls per record")
   print_predictions()
   debug(" ")
   debug("--- CONTROL W: the drop-in's printed words ---")
@@ -173,7 +184,7 @@ PRI print_predictions()
 '
 
   debug("PRE-REGISTERED OUTCOMES (fixed before the run), in units of the measured C:")
-  debug("  FIX, per call: S = N*C | lead = B - prev = C on each record's first call, 0 on the rest | idle = Q - (B + S) = 0")
+  debug("  WORKAROUND, per call: S = N*C | lead = B - prev = C on each record's first call, 0 on the rest | idle = Q - (B + S) = 0")
   debug("  all ", udec_(TOTAL_CALLS), " calls hold all three, cosine and sine          -> VERDICT: CONFIRMED")
   debug("  any miss, every miss a whole multiple of C                 -> VERDICT: REFUTED (S = (N-1)*C: last term not delivered; S = (N+1)*C: an older term counted)")
   debug("  any miss that is not a whole multiple of C                 -> VERDICT: INCONCLUSIVE (the construction did not hold)")
@@ -207,15 +218,15 @@ PRI rec(recIdx, fieldOff) : fieldVal
   fieldVal := mailbox[MB_RECS + recIdx * RECL + fieldOff]
 
 
-PRI fixval(recIdx, callIdx, fieldOff) : fieldVal
-' One field of one fix call.
+PRI wkrval(recIdx, callIdx, callFieldOff) : fieldVal
+' One field of one workaround call.
 '
 ' @param recIdx - record index, 0..NREC-1 (level-major)
-' @param callIdx - fix call, 0..FIX_CALLS-1
-' @param fieldOff - fix-call field offset (an F_ constant)
+' @param callIdx - workaround call, 0..WKR_CALLS-1
+' @param callFieldOff - workaround-call field offset (a W_ constant)
 ' @returns fieldVal - the recorded value
 
-  fieldVal := rec(recIdx, R_FIX + callIdx * F_LEN + fieldOff)
+  fieldVal := rec(recIdx, R_WKR + callIdx * W_LEN + callFieldOff)
 
 
 PRI level_label(lvl) : pLabel
@@ -232,7 +243,7 @@ PRI level_label(lvl) : pLabel
 
 PRI report()
 ' Print every raw reading, gate on the controls, then score the positive
-' control and the fix and print the verdict. Single exit.
+' control and the workaround and print the verdict. Single exit.
 '
 
   debug(" ")
@@ -252,8 +263,8 @@ PRI report()
   else
     debug("controls: W, Z, LUT, PIN, NZ, CAL and the POSITIVE CONTROL all passed")
     debug(" ")
-    debug("--- FIX: burst_sums, every call (S = returned sum, lead = B - prev, idle = Q - (B + S)) ---")
-    score_fix()
+    debug("--- WORKAROUND: burst_sums, every call (S = returned sum, lead = B - prev, idle = Q - (B + S)) ---")
+    score_wkr()
     debug(" ")
     decide_verdict()
 
@@ -265,7 +276,7 @@ PRI print_raw() | recIdx, callIdx
 
 ' Local Variables:
 ' @local recIdx - record being printed
-' @local callIdx - fix call being printed
+' @local callIdx - workaround call being printed
 
   debug("header: LUT mismatches ", udec_(mailbox[MB_LUTFAIL]), "  zero_mode ", uhex_long_(mailbox[MB_ZMODE]), "  zero_sel ", uhex_long_(mailbox[MB_ZSEL]))
   repeat recIdx from 0 to NREC - 1
@@ -273,8 +284,8 @@ PRI print_raw() | recIdx, callIdx
     debug("   CAL X: N=64 B=", sdec_(rec(recIdx, R_C64BX)), " R=", sdec_(rec(recIdx, R_C64RX)), "  N=65 B=", sdec_(rec(recIdx, R_C65BX)), " R=", sdec_(rec(recIdx, R_C65RX)), "   Y: N=64 B=", sdec_(rec(recIdx, R_C64BY)), " R=", sdec_(rec(recIdx, R_C64RY)), "  N=65 B=", sdec_(rec(recIdx, R_C65BY)), " R=", sdec_(rec(recIdx, R_C65RY)))
     debug("   NAIVE X: P=", sdec_(rec(recIdx, R_PX)), " R1=", sdec_(rec(recIdx, R_R1X)), " P2=", sdec_(rec(recIdx, R_P2X)), " R2=", sdec_(rec(recIdx, R_R2X)), " R3=", sdec_(rec(recIdx, R_R3X)), " RD=", sdec_(rec(recIdx, R_RDX)))
     debug("   NAIVE Y: P=", sdec_(rec(recIdx, R_PY)), " R1=", sdec_(rec(recIdx, R_R1Y)), " P2=", sdec_(rec(recIdx, R_P2Y)), " R2=", sdec_(rec(recIdx, R_R2Y)), " R3=", sdec_(rec(recIdx, R_R3Y)), " RD=", sdec_(rec(recIdx, R_RDY)))
-    repeat callIdx from 0 to FIX_CALLS - 1
-      debug("   call ", udec_(callIdx), " N=", udec_(fixval(recIdx, callIdx, F_N)), "  X: B=", sdec_(fixval(recIdx, callIdx, F_BX)), " S=", sdec_(fixval(recIdx, callIdx, F_SX)), " Q=", sdec_(fixval(recIdx, callIdx, F_QX)), "  Y: B=", sdec_(fixval(recIdx, callIdx, F_BY)), " S=", sdec_(fixval(recIdx, callIdx, F_SY)), " Q=", sdec_(fixval(recIdx, callIdx, F_QY)))
+    repeat callIdx from 0 to WKR_CALLS - 1
+      debug("   call ", udec_(callIdx), " N=", udec_(wkrval(recIdx, callIdx, W_N)), "  X: B=", sdec_(wkrval(recIdx, callIdx, W_BX)), " S=", sdec_(wkrval(recIdx, callIdx, W_SX)), " Q=", sdec_(wkrval(recIdx, callIdx, W_QX)), "  Y: B=", sdec_(wkrval(recIdx, callIdx, W_BY)), " S=", sdec_(wkrval(recIdx, callIdx, W_SY)), " Q=", sdec_(wkrval(recIdx, callIdx, W_QY)))
 
 
 PRI check_controls() | recIdx, callIdx, lvl, nBad
@@ -283,7 +294,7 @@ PRI check_controls() | recIdx, callIdx, lvl, nBad
 
 ' Local Variables:
 ' @local recIdx - record under test
-' @local callIdx - fix call under test
+' @local callIdx - workaround call under test
 ' @local lvl - the record's P3 level
 ' @local nBad - failures found by the current check
 
@@ -304,23 +315,23 @@ PRI check_controls() | recIdx, callIdx, lvl, nBad
   repeat recIdx from 0 to NREC - 1
     if rec(recIdx, R_PX) == 0 or rec(recIdx, R_PY) == 0
       nBad++
-    repeat callIdx from 0 to FIX_CALLS - 1
-      if fixval(recIdx, callIdx, F_BX) == 0 or fixval(recIdx, callIdx, F_BY) == 0
+    repeat callIdx from 0 to WKR_CALLS - 1
+      if wkrval(recIdx, callIdx, W_BX) == 0 or wkrval(recIdx, callIdx, W_BY) == 0
         nBad++
-  if nBad
-    debug("RIG FAIL: control NZ, ", udec_(nBad), " P or fix-call B reading(s) = 0 (a clear would not show there)")
+  if nBad <> 0
+    debug("RIG FAIL: control NZ, ", udec_(nBad), " P or workaround-call B reading(s) = 0 (a clear would not show there)")
     fail_count++
 
 
-PRI check_cal() | lvl, rp, recIdx, calX, calY, firstX, firstY
+PRI check_cal() | lvl, repIdx, recIdx, calX, calY, firstX, firstY
 ' Control CAL: C = D65 - D64 per record, one term under any lag hypothesis.
 ' |C| must be G_COS / G_SIN, constant within a level, cosine and sine of one
-' sign, and flip between the levels. Accepted values go to c_meas.
+' sign, and flip between the levels. Accepted values go to measured_term.
 '
 
 ' Local Variables:
 ' @local lvl - P3 level
-' @local rp - rep within the level
+' @local repIdx - rep within the level
 ' @local recIdx - record index
 ' @local calX - measured cosine C of this record
 ' @local calY - measured sine C of this record
@@ -330,30 +341,30 @@ PRI check_cal() | lvl, rp, recIdx, calX, calY, firstX, firstY
   firstX := 0
   firstY := 0
   repeat lvl from LEVEL_LOW to LEVEL_HIGH
-    repeat rp from 0 to REPS - 1
-      recIdx := lvl * REPS + rp
+    repeat repIdx from 0 to REPS - 1
+      recIdx := lvl * REPS + repIdx
       calX := (rec(recIdx, R_C65RX) - rec(recIdx, R_C65BX)) - (rec(recIdx, R_C64RX) - rec(recIdx, R_C64BX))
       calY := (rec(recIdx, R_C65RY) - rec(recIdx, R_C65BY)) - (rec(recIdx, R_C64RY) - rec(recIdx, R_C64BY))
-      if rp == 0
+      if repIdx == 0
         firstX := calX
         firstY := calY
-      debug("CAL ", zstr_(level_label(lvl)), " rep ", udec_(rp), ": C cosine = ", sdec_(calX), "  C sine = ", sdec_(calY))
+      debug("CAL ", zstr_(level_label(lvl)), " rep ", udec_(repIdx), ": C cosine = ", sdec_(calX), "  C sine = ", sdec_(calY))
       if (abs calX) <> G_COS or (abs calY) <> G_SIN or calX <> firstX or calY <> firstY or calX * G_SIN <> calY * G_COS
-        debug("RIG FAIL: CAL control, ", zstr_(level_label(lvl)), " rep ", udec_(rp), " (expected |C| = ", udec_(G_COS), " / ", udec_(G_SIN), ", one sign, the same in every rep)")
+        debug("RIG FAIL: CAL control, ", zstr_(level_label(lvl)), " rep ", udec_(repIdx), " (expected |C| = ", udec_(G_COS), " / ", udec_(G_SIN), ", one sign, the same in every rep)")
         fail_count++
-    c_meas[lvl * CHANNELS + CH_X] := firstX
-    c_meas[lvl * CHANNELS + CH_Y] := firstY
-  if c_meas[LEVEL_LOW * CHANNELS + CH_X] <> -c_meas[LEVEL_HIGH * CHANNELS + CH_X]
-    debug("RIG FAIL: CAL control, C did not flip with P3: LOW ", sdec_(c_meas[LEVEL_LOW * CHANNELS + CH_X]), " HIGH ", sdec_(c_meas[LEVEL_HIGH * CHANNELS + CH_X]))
+    measured_term[lvl * CHANNELS + CH_X] := firstX
+    measured_term[lvl * CHANNELS + CH_Y] := firstY
+  if measured_term[LEVEL_LOW * CHANNELS + CH_X] <> -measured_term[LEVEL_HIGH * CHANNELS + CH_X]
+    debug("RIG FAIL: CAL control, C did not flip with P3: LOW ", sdec_(measured_term[LEVEL_LOW * CHANNELS + CH_X]), " HIGH ", sdec_(measured_term[LEVEL_HIGH * CHANNELS + CH_X]))
     fail_count++
   if fail_count == 0
-    if c_meas[LEVEL_LOW * CHANNELS + CH_X] == G_COS
+    if measured_term[LEVEL_LOW * CHANNELS + CH_X] == G_COS
       debug("  sign: as the E4 test measured (+C with P3 LOW); scoring uses the measured C")
     else
       debug("  sign: INVERTED from the E4 test (not gating; scoring uses the measured C)")
 
 
-PRI check_positive_control() | recIdx, lvl, chan, termC, nBad, d0, d1, d2, d3, d4
+PRI check_positive_control() | recIdx, lvl, chan, termC, nBad, clearDelta, naiveSumA, naiveSumB, zeroSum, dirtySum
 ' Control PC: in every record, on both channels, the naive readings must
 ' show E4 (P2 - R1 = 0) and E5 (R1 - P = (N1-1)*C, R2 - P2 = N2*C,
 ' R3 - R2 = C, RD - R3 = (N_DIRTY-1)*C). Any miss is a RIG FAIL.
@@ -365,48 +376,48 @@ PRI check_positive_control() | recIdx, lvl, chan, termC, nBad, d0, d1, d2, d3, d
 ' @local chan - channel, CH_X or CH_Y
 ' @local termC - measured C for this level and channel
 ' @local nBad - rows that missed
-' @local d0 - P2 - R1
-' @local d1 - R1 - P
-' @local d2 - R2 - P2
-' @local d3 - R3 - R2
-' @local d4 - RD - R3
+' @local clearDelta - P2 - R1: what the second GETXACC "to clear" moved
+' @local naiveSumA - R1 - P: the first burst (N_NAIVE_A) as naive use reads it
+' @local naiveSumB - R2 - P2: the second burst (N_NAIVE_B) as naive use reads it
+' @local zeroSum - R3 - R2: the zero burst alone
+' @local dirtySum - RD - R3: the dirty burst (N_DIRTY)
 
   nBad := 0
   repeat recIdx from 0 to NREC - 1
     lvl := recIdx / REPS
     repeat chan from CH_X to CH_Y
-      termC := c_meas[lvl * CHANNELS + chan]
-      d0 := rec(recIdx, R_P2X + chan) - rec(recIdx, R_R1X + chan)
-      d1 := rec(recIdx, R_R1X + chan) - rec(recIdx, R_PX + chan)
-      d2 := rec(recIdx, R_R2X + chan) - rec(recIdx, R_P2X + chan)
-      d3 := rec(recIdx, R_R3X + chan) - rec(recIdx, R_R2X + chan)
-      d4 := rec(recIdx, R_RDX + chan) - rec(recIdx, R_R3X + chan)
-      debug("#", udec_(recIdx), " ", zstr_(level_label(lvl)), " ", zstr_(chan == CH_X ? string("X") : string("Y")), " C=", sdec_(termC), ": P2-R1=", sdec_(d0), " (0)  R1-P=", sdec_(d1), " (", sdec_((N_NAIVE_A - 1) * termC), ")  R2-P2=", sdec_(d2), " (", sdec_(N_NAIVE_B * termC), ")  R3-R2=", sdec_(d3), " (", sdec_(termC), ")  RD-R3=", sdec_(d4), " (", sdec_((N_DIRTY - 1) * termC), ")  naive reading R1=", sdec_(rec(recIdx, R_R1X + chan)))
-      if d0 <> 0 or d1 <> (N_NAIVE_A - 1) * termC or d2 <> N_NAIVE_B * termC or d3 <> termC or d4 <> (N_DIRTY - 1) * termC
+      termC := measured_term[lvl * CHANNELS + chan]
+      clearDelta := rec(recIdx, R_P2X + chan) - rec(recIdx, R_R1X + chan)
+      naiveSumA := rec(recIdx, R_R1X + chan) - rec(recIdx, R_PX + chan)
+      naiveSumB := rec(recIdx, R_R2X + chan) - rec(recIdx, R_P2X + chan)
+      zeroSum := rec(recIdx, R_R3X + chan) - rec(recIdx, R_R2X + chan)
+      dirtySum := rec(recIdx, R_RDX + chan) - rec(recIdx, R_R3X + chan)
+      debug("#", udec_(recIdx), " ", zstr_(level_label(lvl)), " ", zstr_(chan == CH_X ? string("X") : string("Y")), " C=", sdec_(termC), ": P2-R1=", sdec_(clearDelta), " (0)  R1-P=", sdec_(naiveSumA), " (", sdec_((N_NAIVE_A - 1) * termC), ")  R2-P2=", sdec_(naiveSumB), " (", sdec_(N_NAIVE_B * termC), ")  R3-R2=", sdec_(zeroSum), " (", sdec_(termC), ")  RD-R3=", sdec_(dirtySum), " (", sdec_((N_DIRTY - 1) * termC), ")  naive reading R1=", sdec_(rec(recIdx, R_R1X + chan)))
+      if clearDelta <> 0 or naiveSumA <> (N_NAIVE_A - 1) * termC or naiveSumB <> N_NAIVE_B * termC or zeroSum <> termC or dirtySum <> (N_DIRTY - 1) * termC
         nBad++
-  if nBad
-    debug("RIG FAIL: POSITIVE CONTROL, ", udec_(nBad), " of ", udec_(NREC * CHANNELS), " rows did not reproduce E4/E5 as expected (bracketed values); the fix cannot be judged against an erratum this run did not show")
+  if nBad <> 0
+    debug("RIG FAIL: POSITIVE CONTROL, ", udec_(nBad), " of ", udec_(NREC * CHANNELS), " rows did not reproduce E4/E5 as expected (bracketed values); the workaround cannot be judged against an erratum this run did not show")
     fail_count++
   else
     debug("  E4 and E5 reproduced in all ", udec_(NREC * CHANNELS), " rows: the idle GETXACC cleared nothing, the burst read one term short, the held term arrived later")
 
 
-PRI score_fix() | recIdx, callIdx, lvl, burstN, termX, termY, prevX, prevY, expX, expY, errX, errY, leadX, leadY, idleX, idleY
-' Score every fix call: S against N*C, lead against its expected value,
-' idle against 0, on both channels; print one line per call and tally.
+PRI score_wkr() | recIdx, callIdx, lvl, burstN, termX, termY, prevX, prevY, expLeadX, expLeadY, errX, errY, leadX, leadY, idleX, idleY
+' Score every workaround call: S against N*C, lead against its expected
+' value, idle against 0, on both channels; print a line per call, tally.
 '
 
 ' Local Variables:
 ' @local recIdx - record under test
-' @local callIdx - fix call under test
+' @local callIdx - workaround call under test
 ' @local lvl - the record's P3 level
 ' @local burstN - the call's burst length N
 ' @local termX - measured cosine C for this level
 ' @local termY - measured sine C for this level
 ' @local prevX - cosine reading before this call (RD, or the previous Q)
 ' @local prevY - sine reading before this call
-' @local expX - expected cosine lead (C on the first call, else 0)
-' @local expY - expected sine lead
+' @local expLeadX - expected cosine lead (C on the first call, else 0)
+' @local expLeadY - expected sine lead
 ' @local errX - cosine S - N*C
 ' @local errY - sine S - N*C
 ' @local leadX - cosine B - prev
@@ -414,39 +425,41 @@ PRI score_fix() | recIdx, callIdx, lvl, burstN, termX, termY, prevX, prevY, expX
 ' @local idleX - cosine Q - (B + S)
 ' @local idleY - sine Q - (B + S)
 
-  n_exact := 0
-  n_lead := 0
-  n_idle := 0
-  n_non_mult := 0
-  n_minus1 := 0
-  n_plus1 := 0
-  n_other := 0
+  exact_count := 0
+  lead_count := 0
+  idle_count := 0
+  non_multiple_count := 0
+  minus_one_count := 0
+  plus_one_count := 0
+  other_multiple_count := 0
   repeat recIdx from 0 to NREC - 1
     lvl := recIdx / REPS
-    termX := c_meas[lvl * CHANNELS + CH_X]
-    termY := c_meas[lvl * CHANNELS + CH_Y]
+    termX := measured_term[lvl * CHANNELS + CH_X]
+    termY := measured_term[lvl * CHANNELS + CH_Y]
     prevX := rec(recIdx, R_RDX)
     prevY := rec(recIdx, R_RDY)
-    repeat callIdx from 0 to FIX_CALLS - 1
-      burstN := fixval(recIdx, callIdx, F_N)
+    repeat callIdx from 0 to WKR_CALLS - 1
+      burstN := wkrval(recIdx, callIdx, W_N)
       if callIdx == 0
-        expX := termX
-        expY := termY
+        expLeadX := termX
+        expLeadY := termY
       else
-        expX := 0
-        expY := 0
-      errX := fixval(recIdx, callIdx, F_SX) - burstN * termX
-      errY := fixval(recIdx, callIdx, F_SY) - burstN * termY
-      leadX := fixval(recIdx, callIdx, F_BX) - prevX
-      leadY := fixval(recIdx, callIdx, F_BY) - prevY
-      idleX := fixval(recIdx, callIdx, F_QX) - (fixval(recIdx, callIdx, F_BX) + fixval(recIdx, callIdx, F_SX))
-      idleY := fixval(recIdx, callIdx, F_QY) - (fixval(recIdx, callIdx, F_BY) + fixval(recIdx, callIdx, F_SY))
-      debug("#", udec_(recIdx), " call ", udec_(callIdx), " N=", udec_(burstN), "  X: S=", sdec_(fixval(recIdx, callIdx, F_SX)), " (", sdec_(burstN * termX), ") lead=", sdec_(leadX), " (", sdec_(expX), ") idle=", sdec_(idleX), "  Y: S=", sdec_(fixval(recIdx, callIdx, F_SY)), " (", sdec_(burstN * termY), ") lead=", sdec_(leadY), " (", sdec_(expY), ") idle=", sdec_(idleY))
+        expLeadX := 0
+        expLeadY := 0
+      errX := wkrval(recIdx, callIdx, W_SX) - burstN * termX
+      errY := wkrval(recIdx, callIdx, W_SY) - burstN * termY
+      leadX := wkrval(recIdx, callIdx, W_BX) - prevX
+      leadY := wkrval(recIdx, callIdx, W_BY) - prevY
+      idleX := wkrval(recIdx, callIdx, W_QX) - (wkrval(recIdx, callIdx, W_BX) + wkrval(recIdx, callIdx, W_SX))
+      idleY := wkrval(recIdx, callIdx, W_QY) - (wkrval(recIdx, callIdx, W_BY) + wkrval(recIdx, callIdx, W_SY))
+      debug("#", udec_(recIdx), " call ", udec_(callIdx), " N=", udec_(burstN), "  X: S=", sdec_(wkrval(recIdx, callIdx, W_SX)), " (", sdec_(burstN * termX), ") lead=", sdec_(leadX), " (", sdec_(expLeadX), ") idle=", sdec_(idleX), "  Y: S=", sdec_(wkrval(recIdx, callIdx, W_SY)), " (", sdec_(burstN * termY), ") lead=", sdec_(leadY), " (", sdec_(expLeadY), ") idle=", sdec_(idleY))
       tally_sum(errX, errY, termX, termY)
-      tally_zero(leadX - expX, leadY - expY, termX, termY, @n_lead)
-      tally_zero(idleX, idleY, termX, termY, @n_idle)
-      prevX := fixval(recIdx, callIdx, F_QX)
-      prevY := fixval(recIdx, callIdx, F_QY)
+      if tally_zero(leadX - expLeadX, leadY - expLeadY, termX, termY) == TRUE
+        lead_count++
+      if tally_zero(idleX, idleY, termX, termY) == TRUE
+        idle_count++
+      prevX := wkrval(recIdx, callIdx, W_QX)
+      prevY := wkrval(recIdx, callIdx, W_QY)
 
 
 PRI tally_sum(errX, errY, termX, termY)
@@ -458,52 +471,53 @@ PRI tally_sum(errX, errY, termX, termY)
 ' @param termY - measured sine C
 
   if errX == 0 and errY == 0
-    n_exact++
+    exact_count++
   elseif (errX // termX) <> 0 or (errY // termY) <> 0
-    n_non_mult++
+    non_multiple_count++
   elseif errX == -termX and errY == -termY
-    n_minus1++
+    minus_one_count++
   elseif errX == termX and errY == termY
-    n_plus1++
+    plus_one_count++
   else
-    n_other++
+    other_multiple_count++
 
 
-PRI tally_zero(devX, devY, termX, termY, pCount)
-' Count one deviation that must be zero on both channels: a hit bumps the
-' long at pCount; a miss that is not a whole multiple of C counts as such.
+PRI tally_zero(devX, devY, termX, termY) : bHit
+' Judge one deviation that must be zero on both channels: report a hit to the
+' caller, who counts it; a miss that is not a whole multiple of C counts as such.
 '
 ' @param devX - cosine deviation from the expected value
 ' @param devY - sine deviation from the expected value
 ' @param termX - measured cosine C
 ' @param termY - measured sine C
-' @param pCount - address of the hit counter to bump
+' @returns bHit - TRUE when both deviations are zero
 
+  bHit := FALSE
   if devX == 0 and devY == 0
-    long[pCount]++
+    bHit := TRUE
   elseif (devX // termX) <> 0 or (devY // termY) <> 0
-    n_non_mult++
+    non_multiple_count++
 
 
 PRI decide_verdict()
-' Apply the pre-registered rule to the fix tallies and print the one
+' Apply the pre-registered rule to the workaround tallies and print the one
 ' VERDICT line.
 '
 
-  debug("fix tallies (of ", udec_(TOTAL_CALLS), " calls, cosine AND sine): S = N*C ", udec_(n_exact), "  lead as expected ", udec_(n_lead), "  idle = 0 ", udec_(n_idle))
-  debug("  S misses: (N-1)*C ", udec_(n_minus1), "  (N+1)*C ", udec_(n_plus1), "  other multiple of C ", udec_(n_other), "  not a multiple of C (any check) ", udec_(n_non_mult))
-  if n_non_mult <> 0
-    debug("VERDICT: INCONCLUSIVE - ", udec_(n_non_mult), " miss(es) not a whole multiple of C: the construction did not hold (rows above)")
-  elseif n_exact == TOTAL_CALLS and n_lead == TOTAL_CALLS and n_idle == TOTAL_CALLS
+  debug("workaround tallies (of ", udec_(TOTAL_CALLS), " calls, cosine AND sine): S = N*C ", udec_(exact_count), "  lead as expected ", udec_(lead_count), "  idle = 0 ", udec_(idle_count))
+  debug("  S misses: (N-1)*C ", udec_(minus_one_count), "  (N+1)*C ", udec_(plus_one_count), "  other multiple of C ", udec_(other_multiple_count), "  not a multiple of C (any check) ", udec_(non_multiple_count))
+  if non_multiple_count <> 0
+    debug("VERDICT: INCONCLUSIVE - ", udec_(non_multiple_count), " miss(es) not a whole multiple of C: the construction did not hold (rows above)")
+  elseif exact_count == TOTAL_CALLS and lead_count == TOTAL_CALLS and idle_count == TOTAL_CALLS
     debug("VERDICT: CONFIRMED - burst_sums returned exactly N*C, cosine and sine, in all ", udec_(TOTAL_CALLS), " calls (N = 1..1001, P3 low and high, consecutive, ", udec_(FIRST_CALLS), " after an unflushed burst), and left nothing held and nothing moving")
   else
-    debug("VERDICT: REFUTED - burst_sums missed on whole multiples of C: S wrong in ", udec_(TOTAL_CALLS - n_exact), " call(s) ((N-1)*C ", udec_(n_minus1), ", (N+1)*C ", udec_(n_plus1), ", other ", udec_(n_other), "), lead wrong in ", udec_(TOTAL_CALLS - n_lead), ", idle moved in ", udec_(TOTAL_CALLS - n_idle))
+    debug("VERDICT: REFUTED - burst_sums missed on whole multiples of C: S wrong in ", udec_(TOTAL_CALLS - exact_count), " call(s) ((N-1)*C ", udec_(minus_one_count), ", (N+1)*C ", udec_(plus_one_count), ", other ", udec_(other_multiple_count), "), lead wrong in ", udec_(TOTAL_CALLS - lead_count), ", idle moved in ", udec_(TOTAL_CALLS - idle_count))
 
 
 { MEASURING ENGINE -- runs in its own cog; the ONLY code that touches the
   streamer, GETXACC or P3. No debug() here (DEBUG_COGS excludes this cog
   anyway). PTRA = @mailbox on entry; PTRB walks the records in the order the
-  R_ and F_ constants list.
+  R_ and W_ constants list.
 }
 DAT             org     0        ' ---- Measuring Engine ----
 engine          setluts #0                      ' LUT sharing OFF (reset state)
@@ -540,7 +554,7 @@ engine          setluts #0                      ' LUT sharing OFF (reset state)
                 wrlong  tmp_, ptrb++            ' R_PINB
                 call    #cal_arm                ' R_C64BX..R_C65RY
                 call    #naive_arm              ' R_PX..R_RDY
-                call    #fix_arm                ' R_FIX blocks
+                call    #wkr_arm                ' R_WKR blocks
                 testp   #PIN                    wc
                 wrc     tmp_
                 wrlong  tmp_, ptrb++            ' R_PINA
@@ -589,7 +603,7 @@ cal_one         xinit   dzero_, szero_          ' start flushed
                 wrlong  by_, ptrb++
                 ret
 
-' POSITIVE CONTROL: the documented use, no fix; then the dirty burst.
+' POSITIVE CONTROL: the documented use, no workaround; then the dirty burst.
 naive_arm       xinit   dzero_, szero_          ' start flushed
                 waitxfi
                 mov     dk_, dmode_
@@ -632,85 +646,90 @@ naive_arm       xinit   dzero_, szero_          ' start flushed
                 wrlong  ay_, ptrb++
                 ret
 
-' FIX: FIX_CALLS consecutive calls of the drop-in, set up as a reader would.
-fix_arm         mov     fidx_, #0
-.call           alts    fidx_, #fixn_
+' WORKAROUND: WKR_CALLS consecutive drop-in calls, set up as a reader would.
+wkr_arm         mov     widx_, #0
+.call           alts    widx_, #wkrn_
                 mov     nn_, 0-0                ' N for this call
                 setword burst_mode, nn_, #0     ' the reader's count
                 call    #burst_sums             ' THE DROP-IN
                 waitx   ##WAIT_REREAD
                 getxacc qx_                     ' Q: the rig's own idle read
                 mov     qy_, 0-0
-                wrlong  nn_, ptrb++             ' F_N
-                wrlong  cos_base, ptrb++        ' F_BX
-                wrlong  sin_base, ptrb++        ' F_BY
-                wrlong  cos_sum, ptrb++         ' F_SX
-                wrlong  sin_sum, ptrb++         ' F_SY
-                wrlong  qx_, ptrb++             ' F_QX
-                wrlong  qy_, ptrb++             ' F_QY
-                add     fidx_, #1
-                cmp     fidx_, #FIX_CALLS       wz
+                wrlong  nn_, ptrb++             ' W_N
+                wrlong  cos_base, ptrb++        ' W_BX
+                wrlong  sin_base, ptrb++        ' W_BY
+                wrlong  cos_sum, ptrb++         ' W_SX
+                wrlong  sin_sum, ptrb++         ' W_SY
+                wrlong  qx_, ptrb++             ' W_QX
+                wrlong  qy_, ptrb++             ' W_QY
+                add     widx_, #1
+                cmp     widx_, #WKR_CALLS       wz
         if_nz   jmp     #.call
                 ret
 
 ' ---- rig constants ----
-frq_            long    FRQ
-lutv_           long    LUTVAL
-dmode_          long    MODE_G
-dzero_          long    MODE_G | N_ZERO
-dcharge_        long    MODE_G | N_CHARGE
-son_            long    S_ON
-szero_          long    S_ZERO
-fixn_           long    FIX_N0, FIX_N1, FIX_N2, FIX_N3, FIX_N4
-                long    FIX_N5, FIX_N6, FIX_N7, FIX_N8, FIX_N9
+frq_            long    FRQ                     ' SETXFRQ value
+lutv_           long    LUTVAL                  ' every LUT long
+dmode_          long    MODE_G                  ' mode word, count set per burst
+dzero_          long    MODE_G | N_ZERO         ' the rig's zero burst
+dcharge_        long    MODE_G | N_CHARGE       ' the one-time charge burst
+son_            long    S_ON                    ' S: P3 summed
+szero_          long    S_ZERO                  ' S: no input summed
+wkrn_           long    WKR_N0, WKR_N1, WKR_N2, WKR_N3, WKR_N4  ' workaround-call burst
+                long    WKR_N5, WKR_N6, WKR_N7, WKR_N8, WKR_N9  '   lengths, in call order
 lutfail_        long    0                       ' counter: 0 by the COGINIT load
 
 ' ---- DROP-IN BEGIN ----
-' Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
-' sums. Put your XINIT D and S in burst_mode and burst_sel, then
-' CALL #burst_sums with the streamer idle. It leaves the burst's
-' cosine sum in cos_sum and its sine sum in sin_sum.
-burst_sums  mov     zero_mode, burst_mode   ' zero burst: your mode,
-            setword zero_mode, #4, #0       '   count 4,
-            mov     zero_sel, burst_sel     '   your S with every
-            setnib  zero_sel, #0, #3        '   input off: S[15:12]=0
-            xinit   zero_mode, zero_sel     ' adds any held term
+{ Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
+  sums. Put your XINIT D and S in burst_mode and burst_sel, then
+  CALL #burst_sums with the streamer idle. It leaves the burst's
+  cosine sum in cos_sum and its sine sum in sin_sum.
+}
+CON
+  ZERO_COUNT = 4    ' each zero burst: a count of 4
+  INPUT_NIB  = 3    ' S nibble 3 = S[15:12], the summed inputs
+DAT
+burst_sums  mov     zero_mode, burst_mode       ' zero burst: your mode,
+            setword zero_mode, #ZERO_COUNT, #0  '   count 4,
+            mov     zero_sel, burst_sel         '   your S with every
+            setnib  zero_sel, #0, #INPUT_NIB    '   input off: S[15:12]=0
+            xinit   zero_mode, zero_sel         ' adds any held term
             waitxfi
-            getxacc cos_base                ' idle read: no clear
+            getxacc cos_base                    ' idle read: no clear
             mov     sin_base, 0-0
-            xinit   burst_mode, burst_sel   ' your burst
+            xinit   burst_mode, burst_sel       ' your burst
             waitxfi
-            xinit   zero_mode, zero_sel     ' adds its last term
+            xinit   zero_mode, zero_sel         ' adds its last term
             waitxfi
-            getxacc cos_sum                 ' idle read again
+            getxacc cos_sum                     ' idle read again
             mov     sin_sum, 0-0
-            sub     cos_sum, cos_base       ' cosine sum, all N terms
-            sub     sin_sum, sin_base       ' sine sum, all N terms
+            sub     cos_sum, cos_base           ' cosine sum, all N terms
+            sub     sin_sum, sin_base           ' sine sum, all N terms
             ret
 
-burst_mode  long    $F007_0100              ' your D (count 256 here)
-burst_sel   long    $0008_80A5              ' your S
-zero_mode   long    0
-zero_sel    long    0
-cos_base    long    0
-sin_base    long    0
-cos_sum     long    0
-sin_sum     long    0
+burst_mode  long    $F007_0100                  ' your D (count 256 here)
+burst_sel   long    $0008_80A5                  ' your S
+zero_mode   long    0                           ' built: the zero burst's D
+zero_sel    long    0                           ' built: the zero burst's S
+cos_base    long    0                           ' before reading, cosine
+sin_base    long    0                           ' before reading, sine
+cos_sum     long    0                           ' result: cosine sum
+sin_sum     long    0                           ' result: sine sum
 ' ---- DROP-IN END ----
 
-idx_            res     1
-tmp_            res     1
-level_          res     1
-rep_            res     1
-fidx_           res     1
-nn_             res     1
-dk_             res     1
-ax_             res     1
-ay_             res     1
-bx_             res     1
-by_             res     1
-qx_             res     1
-qy_             res     1
+idx_            res     1               ' LUT address
+tmp_            res     1               ' scratch: LUT readback, TESTP level, mailbox address, cog id
+level_          res     1               ' current P3 level
+rep_            res     1               ' current rep within the level
+widx_           res     1               ' current workaround call
+nn_             res     1               ' burst length N of the current call
+dk_             res     1               ' burst word: mode with this burst's count
+ax_             res     1               ' first reading of a pair, cosine
+ay_             res     1               '   sine
+bx_             res     1               ' second reading of a pair, cosine
+by_             res     1               '   sine
+qx_             res     1               ' the rig's own idle read Q, cosine
+qy_             res     1               '   sine
 
 {{
  ---------------------------------------------------------------------------

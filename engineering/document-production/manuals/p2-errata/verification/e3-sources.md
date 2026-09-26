@@ -12,12 +12,12 @@ Abbreviations used below:
 | SD | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` |
 | RIG-A | `M/audit/verification-tests/test-o18-getct-upper-stale-runA.spin2` (byte-identical to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` copy, checked with `cmp` at v0.1.0) |
 | RIG-B | `M/audit/verification-tests/test-o18-getct-upper-stale-runB.spin2` (byte-identical to the campaign copy, checked with `cmp` at v0.1.0) |
-| RIG-FIX | `M/audit/verification-tests/e3-fix-keeper-cog-test.spin2` (the fix's test program; reader filename is the same). Run on silicon once, 2026-09-26 (LOG-FIX). |
+| RIG-FIX | `M/audit/verification-tests/e3-fix-keeper-cog-test.spin2` (the workaround's test program, under the name it ran with; since #360 the reader's copy is `examples-library/e3-workaround-keeper-cog-test.spin2`). Run on silicon once, 2026-09-26 (LOG-FIX). |
 | LOG-A2 | `M/audit/verification-tests/logs/debug_260924-231939.log` (Run A, second build; .bin 13037 bytes = the rig on disk) |
 | LOG-A1 | `M/audit/verification-tests/logs-orig/debug_260924-204946.log` (Run A, first build) |
 | LOG-B2 | `M/audit/verification-tests/logs/debug_260924-231846.log` (Run B, second build; .bin 12550 bytes = the rig on disk) |
 | LOG-B1 | `M/audit/verification-tests/logs-orig/debug_260924-204835.log` (Run B, first build) |
-| LOG-FIX | `M/audit/verification-tests/logs/debug_260926-015546.log` (the fix run, run once; LOG-FIX:14 downloads `e3-fix-keeper-cog-test.bin` of 13008 bytes, the size of the `.bin` beside RIG-FIX on disk per `ls -l`) |
+| LOG-FIX | `M/audit/verification-tests/logs/debug_260926-015546.log` (the workaround run, run once; LOG-FIX:14 downloads `e3-fix-keeper-cog-test.bin` of 13008 bytes, the size of the `.bin` beside RIG-FIX on disk per `ls -l`) |
 | APP-A | `M/opus-master/appendix-a-test-programs.md` |
 | KB-MD | `deliverables/ai/P2/language/spin2/constructs/method_definition.yaml` |
 | KB-COGINIT | `deliverables/ai/P2/language/spin2/methods/coginit.yaml` |
@@ -27,8 +27,23 @@ LOG-B2), the build that matches the rig files on disk. The first-build logs were
 the same D values and verdicts.
 
 Reader filenames: APP-A:13-15 names the three E3 programs `e3-getct-stale-upper-long-runA.spin2`,
-`e3-getct-stale-upper-long-runB.spin2` and `e3-fix-keeper-cog-test.spin2` (the last = RIG-FIX:3);
-the chapter uses those names (APP-A as read on 2026-09-26, while another slice was editing it).
+`e3-getct-stale-upper-long-runB.spin2` and `e3-workaround-keeper-cog-test.spin2` (the last renamed
+in #360 from RIG-FIX's own name `e3-fix-keeper-cog-test.spin2`, RIG-FIX:3); the chapter uses
+those names.
+
+**Workaround wording (2026-09-26, task #360; Stephen's decision, voice-guide §2).** The reader's
+change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
+(`{#sec-e3-fix}`) is now *A proven workaround* (`{#sec-e3-workaround}`), rule-first: *What any
+workaround must do* (the condition, as in the front matter's summary table), *One way, proven
+on a real P2* and the keeper block, then *Other ways that meet the condition* (the Run B
+evidence, formerly the section's closing Run B paragraph). The CAUTION box's third line is
+*Workaround* (the condition); the status row is *Workaround proven on silicon*. ARCHIVE-WKR's
+drop-in labels read `E3 Workaround:` (ARCHIVE-WKR:115, 118); `HI_FIX1/2` and `P_FIX` are renamed
+`HI_WKR1/2` and `P_WKR`, and comments and `debug()` text say *workaround*: no line added or
+removed, and the object image is byte-identical to the pre-#360 archive (pnut-ts 1.55.8, `-d`
+and without; the `-d` binary differs only in its DEBUG data). The reading labels `F1`/`F1L`/
+`F2`/`F2L` are `string()` literals in the object image and are kept. RIG-FIX and LOG-FIX are the
+as-run record and keep their own wording.
 
 ---
 
@@ -38,7 +53,7 @@ the chapter uses those names (APP-A as read on 2026-09-26, while another slice w
 |---|---|
 | Expected: "`GETCT WC` returns the upper 32 bits of the P2's one 64-bit free-running counter, whichever cog executes it" | SD:436 (one counter, "64-bit free-running counter"), SD:81 ("GETCT WC retrieves upper 32-bits"); no qualification by cog (absence claim, §1 last row) |
 | Actual: stale upper long in a cog of 4-7 started after the group had no running cog at a wrap; behind by one per wrap missed; first wrap 2^32^ clocks after reset | LEDGER:941-946; LOG-A2:65 (D=1 after one missed wrap), LOG-A2:185 (D=2 after two) |
-| Fix: keeper cog in cog 7 as the first line of `main()`, never stopped | RIG-FIX:200-211 (the drop-in, §5) |
+| Workaround: a cog of 4-7 must be running at every wrap of the lower long, from the first wrap on | LEDGER:941-944 (the group's upper long advances at a wrap only while a cog of the group runs); met by the keeper (RIG-FIX:200-211, §5; LOG-FIX, §9) and by Run B's cog 4 (§3.2) |
 | "starts its first cog there more than 2^32^ clocks after reset, 21.47 s at 200 MHz" | LEDGER:944-946; 21.47 s from RIG-A:109-110 (§3) |
 | "a program that stops every cog of 4-7 and starts one there again after a wrap has passed" | LOG-A2:140 (cog 4 stopped), :172 (wrap 4 with `running=%00000011`), :185 (D=2 after restart) |
 | "Plain `GETCT` ... is not affected" | lower-long bracket held in every pair: LOG-A2:234-244, LOG-B2:144-151 `lo-bracket-fails=0` |
@@ -76,7 +91,7 @@ carry the defect (creation-guide §6, F-462..466).
 | 2^32^ clocks per wrap; 21.47 s at 200 MHz | CAUTION box; opening; *What the P2 actually does*; *What your program sees* | RIG-A:109 `CLOCK / RUN TIME: _clkfreq = 200_000_000 -> 2^32 clocks = 21.47 s per` / RIG-A:110 `wrap.`; RIG-B:112-113 same; RIG-FIX:116-117 same. LEDGER:945 gives the rounded "21.5 s at 200 MHz"; the chapter uses the rig's 21.47 s. |
 | 200 MHz | throughout; Status | RIG-A:123 `_clkfreq    = 200_000_000`; RIG-FIX:131 same; LEDGER:892 "bare P2 board, 200 MHz" |
 | 2026-09-24, run twice | *How it was proven on a real P2*; Status | LEDGER:893 "RAM download with reset, 2026-09-24 (Stephen). **Run twice**, from two builds"; log headers LOG-A2:1, LOG-B2:1, LOG-A1, LOG-B1 (all 2026-09-24) |
-| debugger confined to cog 0 | *How it was proven on a real P2* (Run A/B and the fix program) | RIG-A:124 / RIG-B:127 `DEBUG_COGS  = %0000_0001`; RIG-FIX:132 same; LEDGER:890 |
+| debugger confined to cog 0 | *How it was proven on a real P2* (Run A/B and the workaround program) | RIG-A:124 / RIG-B:127 `DEBUG_COGS  = %0000_0001`; RIG-FIX:132 same; LEDGER:890 |
 | "as first written, and with its comments and layout conformed ... measuring code unchanged" | *How it was proven on a real P2* | LEDGER:893-894 "(as authored, then style-conformed with identical measuring engines): every measured value matched" |
 | "Every D value and every verdict matched between the two builds" | *How it was proven on a real P2* | LOG-A1:234-245 vs LOG-A2:234-245 (slot 0..10 D and st identical; both VERDICT CONFIRMED); LOG-B1:152-160 vs LOG-B2:144-152 (slots 0..7 identical; both VERDICT CONFIRMED) |
 | `$1000_0000`, `$F000_0000` (pair window) | *How it was proven on a real P2* | RIG-A:126-127 `LOWIN   = $1000_0000` / `HIWIN   = $F000_0000`; RIG-A:39-40; LEDGER:948; RIG-FIX:134-135 same |
@@ -84,13 +99,13 @@ carry the defect (creation-guide §6, F-462..466).
 | ten pairs per reading | *What your program sees*; *How it was proven on a real P2* | RIG-A:129 `NPAIRS  = 10`; RIG-FIX:137 same; every `=> D=` line in all four logs ends `valid pairs=10 tries=10` |
 | "compared unsigned" (lower-long check) | *How it was proven on a real P2* | RIG-A:42 `LO-BRACKET = refB.lo < sampler.lo < refA.lo (unsigned)`; RIG-A:315 uses `+<`; RIG-FIX:56, :403 same |
 | 100 ms | *How it was proven on a real P2* (controls) | RIG-A:79 `C5  every request answered within 100 ms (sampler alive).`; RIG-A:304 `take_pair(mb, seq, clkfreq / 10)`; RIG-FIX:140 `ACK_TIMEOUT_MS = 100` |
-| `$00DB_96FF` (Run B cog 4 start) | *The fix* (Run B paragraph) | LOG-B2:15 |
+| `$00DB_96FF` (Run B cog 4 start) | *A proven workaround* (*Other ways that meet the condition*) | LOG-B2:15 |
 | about 105 s (Run A), about 44 s (Run B) | *The test program* | RIG-A:110-111 `Run A ends at CT hi=4, lo=$E000_0000: about 4.9 x 21.47 s` / `= ~105 s after reset (plus download).`; RIG-B:113-114 `Run B ends at CT hi=2, lo=$1000_0000:` / `about 2.06 x 21.47 s = ~44 s after reset (plus download).` |
-| about 66 s (fix program) | *The test program* | RIG-FIX:117-118 `The run ends at CT hi=3, lo just past $1000_0000: about` / `3.06 x 21.47 s = ~66 s after reset (plus download).` (the program's stated design duration, not a measurement) |
+| about 67 s (workaround program) | *The test program* | MEASURED: LOG-FIX session start 01:55:46.807 to the last line 01:56:53.488 = 66.7 s (the chapter and Appendix A say "about 67 s"); the rig's design comment RIG-FIX:117-118 says `~66 s after reset (plus download)` |
 | `pnut-ts` 1.55.8, `-d` | *The test program* | RIG-A:119 `COMPILER: pnut-ts v1.55.8,  pnut-ts -d -l test-o18-getct-upper-stale-runA.spin2`; LEDGER:893; RIG-FIX:127 `COMPILER: pnut-ts v1.55.8,  pnut-ts -d e3-fix-keeper-cog-test.spin2` |
 | "at reset only cog 0 runs" | *What the P2 actually does*; *Why it happens* | LOG-A2:22 and LOG-B2:14 `running cogs=%00000001` at boot; LEDGER:944 |
-| cog 7, cogs 4, 5, 6 (fix program) | *The fix*; *How it was proven on a real P2*; CAUTION box | RIG-FIX:36-43 (cog map), :157-159 `SMP_COG_A = 4` / `_B = 5` / `_C = 6`, :201 `KEEPER_COG = 7` |
-| "seven cogs remain" | *The fix* (cost) | 8 cogs: SD:382 `8 cogs (processors)`; RIG-FIX:143 `COG_COUNT      = 8`; the keeper holds one |
+| cog 7, cogs 4, 5, 6 (workaround program) | *A proven workaround*; *How it was proven on a real P2* | RIG-FIX:36-43 (cog map), :157-159 `SMP_COG_A = 4` / `_B = 5` / `_C = 6`, :201 `KEEPER_COG = 7` |
+| "seven cogs remain" | *A proven workaround* (cost) | 8 cogs: SD:382 `8 cogs (processors)`; RIG-FIX:143 `COG_COUNT      = 8`; the keeper holds one |
 
 ### 3.1 Run A readings (table rows A; *What the P2 actually does*; *What your program sees*)
 
@@ -180,7 +195,7 @@ First-build confirmation, LOG-A1, verbatim:
 
 (LOG-A1:55 is the sample the ledger quotes at LEDGER:950, `$0000_0000_$1020_D8B3`.)
 
-### 3.2 Run B readings (table rows B; the Run B paragraph of *The fix*)
+### 3.2 Run B readings (table rows B; *Other ways that meet the condition* in *A proven workaround*)
 
 Raw lines, LOG-B2 (second build), verbatim:
 
@@ -261,23 +276,37 @@ First-build confirmation, LOG-B1, verbatim:
 - Valid-pair rule: RIG-A:311 (`rhb <> rha or not inwin(rlb) or not inwin(slo) or not inwin(rla)` -> discard).
 - D and bracket: RIG-A:314-315.
 - Reading = NPAIRS agreeing pairs: RIG-A:298-333.
-- The fix program uses the same definitions: RIG-FIX:45-57 ("the measuring engine of
+- The workaround program uses the same definitions: RIG-FIX:45-57 ("the measuring engine of
   test-o18-getct-upper-stale-runA/B, unchanged"), :399 (valid-pair rule), :402-403 (D and
   bracket), :389-422 (reading).
 
-## 4. Code excerpts (section *The test program*)
+## 4. Code excerpts (section *The test program*; printed lines now mirror ARCHIVE)
 
 All excerpts are contiguous, verbatim, and every fenced line in the chapter is 76 columns or
 fewer. Checked on 2026-09-26 with an `awk` line-by-line comparison of each chapter fence against
 its source range (CLAIMS of the «#359» E3 dispatch report), and an `awk` width pass over every
 fenced line.
 
-| # | Fence | Source lines | Content |
-|---|---|---|---|
-| 1 | `pasm2` | RIG-A:540-548 (identical at RIG-B:537-545) | sampler loop through `wrlong  s_lo, ptra[2]`. RIG-A:549 (`wrlong  s_req, ptra[3]`, the ack) is 80 columns and is described in prose instead. |
-| 2 | `spin2` | RIG-A:183-191 | Run A defect step: wait with cogs 4-7 idle, start cog 4, read cog 4 and cog 1 |
-| 3 | `spin2` | RIG-B:189-193 | Run B: both samplers from program start |
-| 4 | `spin2` | RIG-FIX:296-303 | the fix program's `arm` body: start a sampler in the named cog, check the running-cog set, read, stop, check again |
+**Printed code now mirrors the conformed archive copy (2026-09-26, «#360»); the measuring PASM
+is byte-identical to the as-run rig.** ARCHIVE-A = `examples-library/e3-getct-stale-upper-long-runA.spin2`,
+ARCHIVE-B = `examples-library/e3-getct-stale-upper-long-runB.spin2`, ARCHIVE-WKR =
+`examples-library/e3-workaround-keeper-cog-test.spin2` (renamed from `e3-fix-keeper-cog-test.spin2`
+later in #360, lines unchanged; all conformed 2026-09-26, task #360: named
+mailbox indices `MB_HI_IDX`/`MB_LO_IDX`, single-exit `if bHalted == FALSE` / `if status ==
+SUCCESS` restructuring, named `smpCog`/`baseMask`/`pLabel` parameters in place of `mb1`/`mb4`/`name`;
+PASM measuring image byte-identical to RIG-A/RIG-B/RIG-FIX's).
+
+| # | Fence | RIG lines (as-run, history) | ARCHIVE lines (printed) | Content |
+|---|---|---|---|---|
+| 1 | `pasm2` | RIG-A:540-548 (identical at RIG-B:537-545) | ARCHIVE-A:534-542 | sampler loop through `wrlong  s_lo, ptra[MB_LO_IDX]`. RIG-A:549 / ARCHIVE-A:543 (`wrlong  s_req, ptra[MB_ACK_IDX]`, the ack) is over 76 columns and is described in prose instead. |
+| 2 | `spin2` | RIG-A:183-191 | ARCHIVE-A:153-164 | Run A defect step: wait with cogs 4-7 idle, start cog 4, read cog 4 and cog 1; ARCHIVE-A wraps each step in `if bHalted == FALSE` (the #360 single-exit restructuring) |
+| 3 | `spin2` | RIG-B:189-193 | ARCHIVE-B:134-139 | Run B: both samplers from program start; ARCHIVE-B guards the step with `if status == SUCCESS` |
+| 4 | `spin2` | RIG-FIX:296-303 | ARCHIVE-WKR:236-244 | the workaround program's `arm` body: start a sampler in the named cog, check the running-cog set, read, stop, check again; ARCHIVE-WKR's parameter is `pLabel` (was `name`) and the read/stop/check-again steps are guarded by `if bHalted == FALSE` |
+
+Re-check (post-#360): the chapter's fences equal the ARCHIVE-A/B/WKR spans above (verified by
+`engineering/tools/verify-example-corpus-identity.py`, GREEN); RIG-A/B/FIX are kept as the
+as-run record and are no longer byte-identical to the printed fences (names and guards differ;
+the measuring PASM itself is unchanged).
 
 The v0.1.0 D-and-bracket excerpt (RIG-A:314-317) was dropped to keep four excerpts; its content
 is carried in prose under *How it was proven on a real P2* (§3.4).
@@ -289,10 +318,11 @@ Prose around the excerpts:
   `setq mb` / `coginit #4, pSampler`); RIG-A:537 `PTRA = mailbox`.
 - "writes the request number back as its acknowledgment and returns to `s_loop`":
   RIG-A:549-550.
-- "`cogstop(4)` at upper long 2 and a second `start_cog4` at upper long 4": RIG-A:199-210.
-- "The fix's test program carries the block of *The fix* unchanged, between the comments
-  `BEGIN DROP-IN` and `END DROP-IN`": RIG-FIX:199 `' ---- BEGIN DROP-IN ----`, :212
-  `' ---- END DROP-IN ----`.
+- "`cogstop(SMP_COG)` at upper long 2 and a second `start_cog4` at upper long 4": RIG-A:199-210
+  (`cogstop(4)` pre-#360); ARCHIVE-A:180-196 (`cogstop(SMP_COG)`, `SMP_COG` = 4).
+- "The workaround's test program carries the block of *A proven workaround* unchanged, between
+  the comments `BEGIN DROP-IN` and `END DROP-IN`": RIG-FIX:199 `' ---- BEGIN DROP-IN ----`, :212
+  `' ---- END DROP-IN ----`; in the reader's copy ARCHIVE-WKR:114 and :127.
 - "its `main()` goes on to call the rest of the test": RIG-FIX:213 `  run_rig()`.
 - "the same sampler instructions": RIG-FIX:597-603 and :607 are identical to RIG-A:540-546 and
   :550; RIG-FIX:604-606 carry the same instructions as RIG-A:547-549 with different trailing
@@ -302,13 +332,13 @@ Prose around the excerpts:
 - "`cogstop(KEEPER_COG)` stops the keeper, and the positive control is read in cog 6 after
   wrap 3": RIG-FIX:274, :279-280.
 
-## 5. The drop-in block (section *The fix*)
+## 5. The drop-in block (section *A proven workaround*)
 
 | Item | Source |
 |---|---|
-| Block | RIG-FIX:200-211, the 12 lines between the markers RIG-FIX:199 `' ---- BEGIN DROP-IN ----` and RIG-FIX:212 `' ---- END DROP-IN ----` |
-| Byte identity | chapter fence lines 75-86 compared line for line with RIG-FIX:200-211 by `awk` (IDENTICAL 12 lines) |
-| Widths | RIG-FIX:200-211 widths 34, 69, 0, 35, 19, 75, 0, 10, 63, 2, 0, 75 (all ≤ 76) by `awk` width listing |
+| Block | RIG-FIX:200-211, the 12 lines between the markers RIG-FIX:199 `' ---- BEGIN DROP-IN ----` and RIG-FIX:212 `' ---- END DROP-IN ----`; in the reader's copy ARCHIVE-WKR:115-126 (markers :114, :127) |
+| Byte identity | pre-#360-wording: chapter fence lines 75-86 compared line for line with RIG-FIX:200-211 by `awk` (IDENTICAL 12 lines). Post-#360 wording: chapter fence lines 79-90 equal ARCHIVE-WKR:115-126 (`verify-example-corpus-identity.py`, GREEN); they differ from RIG-FIX:200-211 only in the two block labels, `E3 Fix:` (RIG-FIX:200, 203) now `E3 Workaround:` (comments; the code lines are identical) |
+| Widths | RIG-FIX:200-211 widths 34, 69, 0, 35, 19, 75, 0, 10, 63, 2, 0, 75; the printed ARCHIVE-WKR:115-126 widths 41, 69, 0, 42, 19, 75, 0, 10, 63, 2, 0, 75 (all ≤ 76) |
 | ASCII | `grep -n -P "\t\|[^\x00-\x7F]"` on RIG-FIX returned no line: no tab, no non-ASCII |
 | Encoding of the keeper | RIG-FIX:111-112 `keeper   jmp #keeper     $FD9FFFFC ... A = -4 (one instruction back): jumps to itself` (read from the pnut-ts listing by the rig's author; not re-compiled here) |
 | Proving run | LOG-FIX, 2026-09-26, run once; verdict re-derived from the raw pair lines (§9), CONFIRMED |
@@ -317,7 +347,13 @@ What the chapter says about the block, and where it comes from:
 
 | Chapter text | Source |
 |---|---|
-| guarantee: "Started by the first line of `main()` and never stopped, the keeper keeps a cog of 4-7 running through every wrap ..., so a cog your program starts in 4-7 at any later time reads the same upper long as cog 0: this is a one-time startup fix." | RIG-FIX:27-30 ("Guarantee under test"), decided CONFIRMED by LOG-FIX (§9). |
+| *What any workaround must do*: "a cog of 4-7 must be running at every wrap of the lower long, from the first wrap on, so that the cogs 4-7 group's copy of the upper long advances with the counter" | LEDGER:941-944 (group rule); failure when unmet: LOG-A2:65 (D=1), :185 (D=2); met: Run B (§3.2), LOG-FIX (§9); front matter summary table |
+| guarantee: "Started by the first line of `main()` and never stopped, the keeper keeps a cog of 4-7 running through every wrap ..., so a cog your program starts in 4-7 at any later time reads the same upper long as cog 0: this is a one-time startup workaround." | RIG-FIX:27-30 ("Guarantee under test"), decided CONFIRMED by LOG-FIX (§9). |
+| *Other ways*: "A cog your program already starts in 4-7 before the first wrap and never stops meets it as well" | the condition itself; Run B: cog 4 started at program start (LOG-B2:15, lower long `$00DB_96FF`), kept running, D=0 before wrap 1 and after wraps 1 and 2 (§3.2) |
+| *Other ways*: Run B's kept-running cog was the reading cog; the workaround program's was a separate keeper; "Both arrangements met the condition, and both read current." | §3.2 (Run B); §9 (LOG-FIX: F1, F1L, F2, F2L all D=0) |
+| *Other ways*: "The cogs tested were executing code at every wrap: a polling loop in Run B, a jump to itself for the keeper." | RIG-B:537-547 (sampler polling loop, same code as RIG-A:540-550); RIG-FIX:205 (keeper) |
+| cost: "A program that already needs all eight cogs cannot add the keeper, but meets the condition if one of its own cogs of 4-7 is running from before the first wrap and is never stopped." | follows from the condition; evidence as the *Other ways* rows (Run B, §3.2); not separately tested |
+| limit, added: "the same holds for a cog of your own that you rely on in place of the keeper" (a cog held in a wait instruction at a wrap is untested) | RIG-FIX:24-26; no rig parked a cog of 4-7 in a wait instruction across a wrap (RIG-A, RIG-B and RIG-FIX samplers poll) |
 | "Spin2 runs the first `PUB` method of the top-level object at start" | KB-MD:61 `description: "First PUB method in top file is program entry"`; KB-MD:23 |
 | "a cog of 4-7 that nothing else in your program starts or stops" | RIG-FIX:201 comment `a cog of 4-7 the program never uses`; KB-COGINIT:21 `0-7: Start specific cog (will stop if running)` (a later `coginit` into that cog would replace the keeper) |
 | "The keeper executes a jump to itself and nothing else." | RIG-FIX:205; RIG-FIX:24-25 "The keeper is a busy loop (a JMP to itself)" |
@@ -328,10 +364,10 @@ What the chapter says about the block, and where it comes from:
 | limit: 200 MHz, RAM download with a reset | RIG-FIX:131; RIG-FIX:121-123 |
 
 The v0.1.0 workaround snippet and its compile harness (`M/verification/e3-harness-keep-group-running.spin2`)
-are retired from the chapter: the printed fix is now the RIG-FIX block. The harness file is
+are retired from the chapter: the printed workaround is now the RIG-FIX block. The harness file is
 left in place, untouched.
 
-## 6. The fix's test program (section *How it was proven on a real P2*, the fix)
+## 6. The workaround's test program (section *How it was proven on a real P2*, the workaround)
 
 | Chapter text | Source |
 |---|---|
@@ -341,15 +377,15 @@ left in place, untouched.
 | cogs 4, 5, 6 each started just before one reading and stopped just after | RIG-FIX:39-40, :75-77, :286-303 |
 | "Every reading of cogs 4-7 is paired with a reading of cog 1." | RIG-FIX:74, :250-281 |
 | Table row upper 0 early, cog 4, D 0 (control) | RIG-FIX:63, :249-250, :186 `P_CTRL = 0`, :93-94 (C6), :326 |
-| Table rows upper 1 early cog 5 / late cog 6: 0 with the fix, 1 without | RIG-FIX:65-66, :255-260, :184 `P_FIX = 0` |
-| Table rows upper 2 early cog 4 / late cog 5: 0 with the fix, 1 or 2 without | RIG-FIX:68-69, :265-270 |
+| Table rows upper 1 early cog 5 / late cog 6: 0 with the keeper, 1 without | RIG-FIX:65-66, :255-260, :184 `P_FIX = 0` (ARCHIVE-WKR:98 `P_WKR = 0`) |
+| Table rows upper 2 early cog 4 / late cog 5: 0 with the keeper, 1 or 2 without | RIG-FIX:68-69, :265-270 |
 | Table row upper 3 early cog 6, keeper stopped, D 1 (positive control) | RIG-FIX:70-73, :274-280, :185 `P_POS = 1`, :95-97 (C7), :328-330 |
 | "At start the running cogs must be cog 0 and the keeper only." | RIG-FIX:91 (C4), :163 `M_BOOT`, :238-240 |
 | "The keeper must be seen running on every poll up to the positive control, and stopped after it." | RIG-FIX:87-90 (C3), :164-165 `M_KEEP` / `M_NOKEEP`, :249-279 |
 | positive-control rationale ("cannot come from a test that is blind to it") | RIG-FIX:95-97 |
 | "Cog 6 reads both with the keeper running and ... stopped: the same cog and the same code, with only the keeper changed." | RIG-FIX:77-79 |
 | verdict rules: confirmed / refuted / inconclusive / no verdict | RIG-FIX:99-107; code RIG-FIX:336-345 |
-| "The verdict was fixed before the run." | RIG-FIX:99 "VERDICT (one line, fixed before the run)"; :183-186 predictions |
+| "The verdict rule was set before the run." | RIG-FIX:99 "VERDICT (one line, fixed before the run)"; :183-186 predictions |
 
 ## 7. Mechanism (section *Why it happens*)
 
@@ -364,7 +400,7 @@ quoted, no design names or line references. Each statement against the bench:
 | upper half refreshed only at a wrap while a group cog runs; not by a cog start | A1a D=1 just after start (LOG-A2:65); A4a D=2 just after restart (LOG-A2:185) |
 | takes the counter's value at the next wrap, closing in one step | A2 D=0 after one wrap from D=1 (LOG-A2:128); smp hi 0 -> 2 (LOG-A2:100, :118) |
 | copies start from zero at reset; only cog 0 runs at reset | LOG-A2:22 `running cogs=%00000001`; A1a smp hi `$0000_0000` after missing wrap 1 (LOG-A2:55) |
-| "A keeper cog in 4-7 that runs from before the first wrap gives that group a running cog at every wrap, so its upper long advances with the counter's" | consequence of the group rule (LEDGER:941-944); consistent with Run B (§3.2) and with the fix run, a separate keeper (LOG-FIX, §9). |
+| "A keeper cog in 4-7 that runs from before the first wrap gives that group a running cog at every wrap, so its upper long advances with the counter's" | consequence of the group rule (LEDGER:941-944); consistent with Run B (§3.2) and with the workaround run, a separate keeper (LOG-FIX, §9). |
 | "Running" = between start and stop, as COGCHK reports | the rig's running-cog mask is built from `cogchk()` (RIG-A:477-488; RIG-FIX:564-575) |
 | "By the study's reading, what a running cog is executing does not enter into it." | study-level statement, NOT bench-tested; the next sentence says so |
 | "The tests kept their cogs in a polling loop or, for the keeper, a jump to itself, and did not try ... `WAITX`" | samplers poll: RIG-A:540-550, RIG-FIX:597-607; keeper: RIG-FIX:205; RIG-FIX:24-26 |
@@ -376,10 +412,10 @@ quoted, no design names or line references. Each statement against the bench:
 | Published by Parallax: No | LEDGER:940 "(new; not in any vendor source)"; SD KNOWN BUGS 197-227 carries no counter item (§1) |
 | Found by | brief ERRATA-CHAPTER-BRIEF.md "Found by" rule for E3-E6; LEDGER:886-889 |
 | Confirmed on silicon: Yes — 2026-09-24, on a P2 board at 200 MHz, run twice | LEDGER:892-894 |
-| Fix proven on silicon: Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup fix | LOG-FIX:1 and :14 (date, one download), LOG-FIX:226 and the re-derivation in §9 (CONFIRMED); 200 MHz RIG-FIX:131; kind: creation-guide §5 |
-| Test program | APP-A:13-15 (all three names); RIG-FIX:3 (fix program name) |
+| Workaround proven on silicon: Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup workaround | LOG-FIX:1 and :14 (date, one download), LOG-FIX:226 and the re-derivation in §9 (CONFIRMED); 200 MHz RIG-FIX:131; kind: creation-guide §5 |
+| Test program | APP-A:13-15 (all three names; the workaround program's reader name `e3-workaround-keeper-cog-test.spin2`); RIG-FIX:3 (its as-run name) |
 
-## 9. The fix run (LOG-FIX): raw lines, re-derived verdict, chapter mapping
+## 9. The workaround run (LOG-FIX): raw lines, re-derived verdict, chapter mapping
 
 Run once, 2026-09-26, RAM download with reset (LOG-FIX:14-17), 200 MHz (RIG-FIX:131). One
 build: the `.bin` downloaded (LOG-FIX:14, 13008 bytes) matches the size of the `.bin` beside
@@ -468,18 +504,18 @@ Controls, each from the raw lines:
 - C7 (positive control P3 D = 1): recomputed 1; sampler upper `$0000_0002` beside cog 0's
   `$0000_0003` in every P3 pair (LOG-FIX:191-200), with wrap 3 passing while cogs 4-7 were
   idle (LOG-FIX:189 `running=%00000011`).
-- Fix arms F1, F1L, F2, F2L: all D = 0, status ok. By RIG-FIX:99-107 this is **CONFIRMED**.
+- Workaround arms F1, F1L, F2, F2L: all D = 0, status ok. By RIG-FIX:99-107 this is **CONFIRMED**.
 
 Chapter values taken from LOG-FIX:
 
 | Chapter text | Line(s) |
 |---|---|
-| *The fix*: "confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run once" | LOG-FIX:1, :14 (one download); RIG-FIX:131 (200 MHz) |
-| *The fix*: "cogs 5 and 6 started after one wrap and cogs 4 and 5 started after two each read the same upper long as cog 0 in all ten pairs" | F1 cog 5 LOG-FIX:65-75; F1L cog 6 :101-111; F2 cog 4 :128-138; F2L cog 5 :164-174 |
-| *The fix*: "with the keeper stopped, cog 6 read one behind" | LOG-FIX:191-201 |
-| *The fix* limits: "The test ran once" | LOG-FIX: a single download (LOG-FIX:14) and a single session end (LOG-FIX:227) |
-| fix table, Sampler D column: 0, 0, 0, 0, 0, **1** | LOG-FIX:35, :75, :111, :138, :174, :201 (recomputed above) |
-| fix table, Cog 1 D column: 0 in every row | LOG-FIX:46, :86, :122, :149, :185, :212 |
+| *A proven workaround*: "confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run once" | LOG-FIX:1, :14 (one download); RIG-FIX:131 (200 MHz) |
+| *A proven workaround*: "cogs 5 and 6 started after one wrap and cogs 4 and 5 started after two each read the same upper long as cog 0 in all ten pairs" | F1 cog 5 LOG-FIX:65-75; F1L cog 6 :101-111; F2 cog 4 :128-138; F2L cog 5 :164-174 |
+| *A proven workaround*: "with the keeper stopped, cog 6 read one behind" | LOG-FIX:191-201 |
+| *A proven workaround* limits: "The test ran once" | LOG-FIX: a single download (LOG-FIX:14) and a single session end (LOG-FIX:227) |
+| workaround table, Sampler D column: 0, 0, 0, 0, 0, **1** | LOG-FIX:35, :75, :111, :138, :174, :201 (recomputed above) |
+| workaround table, Cog 1 D column: 0 in every row | LOG-FIX:46, :86, :122, :149, :185, :212 |
 | "In every reading all ten pairs agreed on D, and the lower-long check held in every pair." | re-derivation above; LOG-FIX:214-225 `st=0 lo-bracket-fails=0` in every slot |
 | Result: "ran once, on 2026-09-26, on a P2 board at 200 MHz, downloaded to RAM with a reset" | LOG-FIX:14-17; RIG-FIX:131; reset shown by LOG-FIX:22 (upper long 0 at boot, C4) |
 | "At start the upper long read 0 and the running cogs were cog 0 and the keeper in cog 7" | LOG-FIX:22 |
@@ -488,5 +524,5 @@ Chapter values taken from LOG-FIX:
 | "the four readings taken after a wrap gave D = 0" | LOG-FIX:75, :111, :138, :174 |
 | "cog 6 read an upper long of `$0000_0002` beside cog 0's `$0000_0003`: D = 1, the erratum as in Run A" | LOG-FIX:191 (first P3 pair; all ten alike, :191-200), :201; Run A comparison LOG-A2:65 (D=1 after one missed wrap) |
 | "The verdict line read `CONFIRMED`." | LOG-FIX:226 (and re-derived above) |
-| Status "Fix proven on silicon: Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup fix: a keeper cog in cog 7 started by the first line of `main()`" | §8 row; RIG-FIX:201, :211 |
-| run length: the fix's test program "about 66 s after reset" (*The test program*) | RIG-FIX:117-118 (design figure); consistent with LOG-FIX:17 download end 01:55:47.715 to :227 end 01:56:53.488 |
+| Status "Workaround proven on silicon: Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup workaround: a keeper cog in cog 7 started by the first line of `main()`" | §8 row; RIG-FIX:201, :211 |
+| run length: the workaround's test program "about 67 s after reset" (*The test program*; measured 66.7 s, row above) | RIG-FIX:117-118 (design figure); consistent with LOG-FIX:17 download end 01:55:47.715 to :227 end 01:56:53.488 |

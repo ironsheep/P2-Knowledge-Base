@@ -7,7 +7,8 @@
 **Actual:** Between an `AUGS` and the instruction the `AUGS` was written for, the `ALTx`
 takes the augment too, and its `D` register moves by bits 17:9 of the augmented value.
 
-**Fix:** Give that `ALTx` a register `S` instead of an immediate `#S`; see *The fix*.
+**Workaround:** No `ALTx` with an immediate `#S` may sit between an `AUGS` and the
+instruction the `AUGS` was written for; see *A proven workaround*.
 :::
 
 The erratum affects PASM code that writes an `AUGS` explicitly and places an `ALTx` with
@@ -95,7 +96,12 @@ The size of the move is set by bits 17:9 of the augment, which the documented fi
 split makes the auto-increment; by that split, an augment whose bits 17:9 are zero moves
 nothing. The only value measured was 5.
 
-## The fix {#sec-e2-fix}
+## A proven workaround {#sec-e2-workaround}
+
+**What any workaround must do:** no `ALTx` with an immediate `#S` may stand between an
+`AUGS` and the instruction the `AUGS` was written for.
+
+**One way, proven on a real P2:** give that `ALTx` a register `S`.
 
 ```pasm2
                 augs    #AUGV
@@ -111,15 +117,18 @@ low 9 bits, and `sreg4` is a cog register that holds the `ALTD`'s `S`: the base,
 bits 8:0 and a zero auto-increment in bits 17:9. In your code, the base and any
 auto-increment that were in the immediate `#S` go into that register. On silicon, with
 `AUGV` = `$3C5C_0A55`, the `MOV` was redirected to the register four along from the one
-`idx` addressed, which received `$3C5C_0A55`, and `idx` did not move. The fix costs one
+`idx` addressed, which received `$3C5C_0A55`, and `idx` did not move. This way costs one
 cog register for each distinct `S` value.
 
 **The one-operand form is not a register form.** `ALTD idx` assembles to the same
 instruction word as `ALTD idx,#0`: immediate bit set, `S` = 0. That is the arrangement
 the test showed affected. The one-operand form of every `ALTx` instruction is encoded
-with the immediate bit set, so writing it does not apply the fix.
+with the immediate bit set, so writing it does not meet the condition.
 
-The fix was run with `ALTD` as the intervening instruction, one augment value and one
+Any other arrangement that keeps every immediate-`#S` `ALTx` out of the span from an
+`AUGS` to its target meets the same condition. None other was run on silicon.
+
+This way was run with `ALTD` as the intervening instruction, one augment value and one
 base. Parallax's statement directs a register `S` for any `ALTx` in this position; no
 other `ALTx` was run with one.
 
@@ -140,7 +149,7 @@ itself. Because it is an `ALTx`, it then leaves the augment pending, and the tar
 the next instruction with an immediate `S`, receives the same value.
 
 An `ALTx` with a register `S` has no immediate `S` to augment. It neither receives the
-value nor ends the pending state, which is why the fix holds.
+value nor ends the pending state, which is why the workaround holds.
 
 The effect is confined to the auto-increment because of how an `ALTx` reads its `S`.
 The augment supplies bits 31:9 and leaves bits 8:0 alone. Bits 8:0 are the base, so the
@@ -183,8 +192,8 @@ program issues no verdict unless all of them read exactly as expected. A1 shows 
 augment reaching an adjacent target. A2 and A4 show that an immediate-`S` `ALTx` with no
 `AUGS` pending leaves `idx` unchanged. A3 shows, on this part, that an `S` whose bits
 17:9 are 5 moves `idx` by 5 and leaves the redirected register at `win[8]`: the same
-field an augment of `$3C5C_0A55` would fill. A5 is the fix: its three instructions are
-the lines printed in *The fix*. A6 and A7 are the defect: the `ALTx` moved `idx` by 5,
+field an augment of `$3C5C_0A55` would fill. A5 is the workaround: its three instructions
+are the lines printed in *A proven workaround*. A6 and A7 are the defect: the `ALTx` moved `idx` by 5,
 and the target still wrote `$3C5C_0A55`.
 
 **The `AUGD` half.** Before each of these two arms the measuring cog wrote
@@ -217,15 +226,16 @@ The augment is chosen so that its two fields can be told apart:
 ```spin2
   AUGV       = $3C5C_0A55          ' AUGS payload: [17:9] = 5, [8:0] = $055
   LO         = AUGV & $1FF         ' $055 = the target's own 9-bit #S
-  AUTOINC    = (AUGV >> 9) & $1FF  ' 5 (bit 8 clear -> +5 after sign-extend)
 ```
 
-The fix arm and the `ALTD` test arm differ only in the form of the `ALTD`'s `S`.
+A third constant, `AUTOINC`, isolates the same bits 17:9 as `(AUGV >> ALT_INC_SHIFT) & $1FF`, `ALT_INC_SHIFT` being 9: 5, the value the erratum moves `idx` by.
+
+The workaround arm and the `ALTD` test arm differ only in the form of the `ALTD`'s `S`.
 Each arm fills the window, runs its sequence, and dumps the window and `idx` to hub RAM:
 
 ```pasm2
 ' ---- A5 ctrl: WORKAROUND -- register-S ALTD between AUGS and target ----
-                mov     armn, #5
+                mov     armn, #ARM_WORKAROUND
                 call    #fill
                 augs    #AUGV
                 altd    idx, sreg4
@@ -233,7 +243,7 @@ Each arm fills the window, runs its sequence, and dumps the window and `idx` to 
                 call    #dump
 
 ' ---- A6 TEST: immediate-#S ALTD between AUGS and target ----
-                mov     armn, #6
+                mov     armn, #ARM_TD
                 call    #fill
                 augs    #AUGV
                 altd    idx, #0
@@ -242,11 +252,10 @@ Each arm fills the window, runs its sequence, and dumps the window and `idx` to 
 ```
 
 The two register `S` values used by the controls hold the auto-increment and the base
-in their separate fields:
+in their separate fields: `sinc` is `AUTOINC` shifted into bits 17:9 by `ALT_INC_SHIFT` (base 0, auto-index +5); `sreg4` is the plain base `ALTD_REG_BASE` (4, no auto-increment):
 
 ```pasm2
-sinc            long    AUTOINC << 9     ' register S: base 0, auto-index +5
-sreg4           long    S4               ' register S: base 4, auto-index 0
+sreg4           long    ALTD_REG_BASE    ' register S: base 4, auto-index 0
 ```
 
 The `AUGD` test places an immediate-`S` `ALTS` between the `AUGD` and its `#D` target,
@@ -271,6 +280,6 @@ and records `idxs` before and after:
 | Published by Parallax | Yes, *P2 Documentation*, KNOWN BUGS |
 | Found by | Parallax |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | Yes — 2026-09-24, rule at each use: a register `S` on the `ALTx` (run with `ALTD`) |
+| Workaround proven on silicon | Yes — 2026-09-24, rule at each use: a register `S` on the `ALTx` (run with `ALTD`) |
 | Affects | an `ALTx` with an immediate `#S` between `AUGS` and its target; tested with `ALTD` and `ALTR` |
 | Test program | `e2-altx-takes-pending-augs-test.spin2` |

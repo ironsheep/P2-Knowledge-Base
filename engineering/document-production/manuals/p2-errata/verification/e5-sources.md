@@ -10,9 +10,20 @@ is documented behaviour (the P2 Documentation's *NOTE ABOUT GOERTZEL SINC2 MODE*
 2024.12.16, SDT:1704–1705), so under `CLASSIFICATION-GUIDANCE.md` it is not an erratum and not
 part of E5. Basis: the SINC2 rig's own header (S2R:152–155) says the one-clock lag's share
 "cannot be isolated in a continuous stream ... the fit absorbs" it. The chapter therefore
-carries SINC2 only as one scope paragraph in *The fix* (the routine is SINC1-only; the
-documented SINC2 constraint is separate; its two remedies held on a part) and one sentence in
-*The test program*. It claims no causal link between the lag and the SINC2 corruption.
+carries SINC2 only as one scope paragraph in *A proven workaround* (the routine is SINC1-only;
+the documented SINC2 constraint is separate; its two remedies held on a part) and one sentence
+in *The test program*. It claims no causal link between the lag and the SINC2 corruption.
+
+**Workaround wording (2026-09-26, task #360; Stephen's decision, voice-guide §2).** The reader's
+change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
+(`{#sec-e5-fix}`) is now *A proven workaround* (`{#sec-e5-workaround}`), rule-first: *What any
+workaround must do* (the condition, as in the front matter's summary table), *One way, proven
+on a real P2* and the block, then *Other ways that meet the condition*; the subsection *The
+fix's test* is now *The workaround's test* (`{#sec-e5-workaround-proof}`). The CAUTION box's
+third line is *Workaround* (the condition); the status row is *Workaround proven on silicon*.
+FIX's reader copy is renamed `e4-e5-workaround-read-sums-test.spin2` (ARCHIVE-WKR below; its
+renames are listed in `e4-sources.md`); no line added or removed, and the object image is
+byte-identical to the pre-#360 archive. FIX and FL are the as-run record and keep their wording.
 
 | Key | Path |
 |---|---|
@@ -20,8 +31,8 @@ documented SINC2 constraint is separate; its two remedies held on a part) and on
 | LOG2 | `M/audit/verification-tests/logs/debug_260924-231829.log` (lag test, second run, style-conformed build) |
 | LOG1 | `M/audit/verification-tests/logs-orig/debug_260924-204804.log` (lag test, first run, as-authored build) |
 | RIG | `M/audit/verification-tests/test-so84-goertzel-last-term-lag.spin2` (reader name `e5-goertzel-one-clock-lag-test.spin2`) |
-| FIX | `M/audit/verification-tests/e4-e5-fix-read-sums-test.spin2` (reader name `e4-e5-fix-read-sums-test.spin2`; ran once on silicon 2026-09-26, log FL) |
-| FL | `M/audit/verification-tests/logs/debug_260926-015810.log` (the fix run; full re-derivation and verbatim lines in `e4-sources.md` §"The fix run (FL)") |
+| FIX | `M/audit/verification-tests/e4-e5-fix-read-sums-test.spin2` (the as-run name; the reader's copy is `e4-e5-workaround-read-sums-test.spin2` since #360; ran once on silicon 2026-09-26, log FL) |
+| FL | `M/audit/verification-tests/logs/debug_260926-015810.log` (the workaround run; full re-derivation and verbatim lines in `e4-sources.md` §"The workaround run (FL)") |
 | S2R | `M/audit/verification-tests/test-goertzel-sinc2-iteration-count.spin2` (reader name `e5-goertzel-sinc2-iteration-count-test.spin2`; campaign copy `.../campaigns/2026-09-p2-errata-predictions/tests/`) |
 | S2L1 | `M/audit/verification-tests/logs/debug_260925-214001.log` (SINC2 test, run 1, 21:40, `.bin` 25081 bytes, S2L1:14) |
 | S2L2 | `M/audit/verification-tests/logs/debug_260925-214858.log` (SINC2 test, run 2, 21:48, same size, S2L2:14) |
@@ -36,22 +47,34 @@ S2L1 and S2L2 agree line for line except in the jitter arms and the verdict line
 (LEDGER:1002–1005); the S2L1 lines quoted in §4 have S2L2 counterparts at S2L2:87 (same text),
 S2L2:591 (Q1 verdict) and S2L2:598–601 (Q4 lines), each with the same numbers.
 
-## 0. The drop-in block (*The fix*)
+## 0. The drop-in block (*A proven workaround*)
+
+**Printed code now mirrors the conformed archive copy (2026-09-26, «#360»); the measuring PASM
+is byte-identical to the as-run rig.** ARCHIVE-WKR = `examples-library/e4-e5-workaround-read-sums-test.spin2`
+(renamed from `e4-e5-fix-read-sums-test.spin2` later in #360, lines unchanged; conformed 2026-09-26, task #360: the block's `'` line comments became a `{ }` block comment,
+and a new `CON` part names `ZERO_COUNT` (4) and `INPUT_NIB` (3) in place of the literals
+`#4`/`#3`; same instructions, same PASM measuring image, byte-identical to FIX's). See
+`e4-sources.md` §"The drop-in block" for the full width/ASCII/byte-identity detail, identical
+for this chapter since it prints the same block.
 
 | Item | Source |
 |---|---|
-| The 30-line `pasm2` block that opens *The fix* | FIX:808–837, byte-identical (between the markers FIX:807 and FIX:838). The same block, byte for byte, opens Erratum E4's *The fix*; see `e4-sources.md` §"The drop-in block" for widths, the ASCII check and the byte-identity command. For this chapter the same awk, run over this file, printed `compared 30 chapter lines with 30 rig lines` and no `DIFF` line |
-| Printed in full here as well as in E4 | a reader who lands on E5 first pastes without turning to E4; creation-guide §4.6 has every *The fix* open with the block |
-| **The run that proved it** | FL, 2026-09-26, run once, 200 MHz (FL:1, FL:13): 60 of 60 calls S = N × C, cosine and sine; re-derived from FL:24–113 in `e4-sources.md` §"The fix run (FL)"; E5-specific rows in §5a below |
+| The 35-line `pasm2` block under *One way, proven on a real P2* in *A proven workaround* (30 lines pre-#360) | ARCHIVE-WKR:683–717 (post-#360, between the markers ARCHIVE-WKR:682/718). Pre-#360: FIX:808–837, byte-identical (between the markers FIX:807 and FIX:838). The same block, byte for byte, is printed in Erratum E4's *A proven workaround*. Post-#360, the chapter's fence (chapter 56–90) equals ARCHIVE-WKR:683–717 (verified by `engineering/tools/verify-example-corpus-identity.py`, GREEN); pre-#360 the same awk, run over this file, printed `compared 30 chapter lines with 30 rig lines` and no `DIFF` line |
+| Printed in full here as well as in E4 | a reader who lands on E5 first pastes without turning to E4; creation-guide §4.6 puts the proven block in every *A proven workaround* |
+| **The run that proved it** | FL, 2026-09-26, run once, 200 MHz (FL:1, FL:13): 60 of 60 calls S = N × C, cosine and sine; re-derived from FL:24–113 in `e4-sources.md` §"The workaround run (FL)"; E5-specific rows in §5a below |
 
-| Chapter text in *The fix* | Source |
+| Chapter text in *A proven workaround* | Source |
 |---|---|
+| *What any workaround must do*: deliver the burst's held last term before reading, in SINC1 mode | LEDGER:979–983 (EF-070: the last term is held and arrives with the next Goertzel burst); front matter summary table |
+| *One way*: `burst_sums`, which ends every burst with a zero-term burst before reading and also steps around E4 | the block (above); FIX:24 ("combines both workarounds in one routine"), FIX:38–40 |
 | guarantee: all N terms, no term left held; helper routine, SINC1 | FIX:24–28, FIX:127–128 (pre-registered outcome), met in FL (§5a) |
 | "On silicon, this block returned exactly N terms ... in all 60 calls ...; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call" | FL:34–113 (S = N×C every line; call-0 lead = C in each record; later B = previous Q) — §5a |
-| same routine as Erratum E4; one call removes both | FIX:24 ("combines both workarounds in one routine") |
+| same routine as Erratum E4; one call steps around both | FIX:24 ("combines both workarounds in one routine") |
 | usage; printed values are the test program's | FIX:809–810, FIX:830–831 |
 | zero bursts: count 4, S[15:12] clear; first delivers the held term; second delivers the last term and leaves a zero held | FIX:812–815, FIX:35–41; mechanism LEDGER:979–983; LOG2:39 (`d2=-19` after a zero burst) |
 | readings idle, no clear (Erratum E4) | FIX:39–41 |
+| *Other ways*: by the mechanism under *Why it happens*, a Goertzel burst whose terms are all zero, run after the burst and before the reading, delivers the held term | the chapter's own *Why it happens* ("A zero-term burst works for the same reason"; study reading, §2); LEDGER:981–983 |
+| *Other ways*: the kind measured is the routine's own (count 4, S[15:12] clear); in the erratum test, started by `XINIT` and read after 500 clocks, not `WAITXFI`, the reading was exactly N terms above the reading before the measured burst in all 16 sequences; other zero bursts not tested | RIG:183 (`ZCOUNT = 4`), RIG:181–182 (`$0000_00C3`, S[15:12] clear), RIG:187 (`WAIT_IDLE = 500`); LOG2:39 etc. (`d1 + d2 = N*C`, §3 last row), LOG2:143 (16 sequences); no other zero-burst form in RIG or FIX |
 | cost: two zero bursts of 4 NCO rollovers; `WAITXFI`; 17 instructions, 8 longs | as in `e4-sources.md` (FIX:813, 817/821/823, 812–828, 830–837; SDOC:3500–3501; SDT:2097, 2182) |
 | limits: one burst at a time; `XINIT` issues at once | SDOC:2742 / SDT:1282; SDT:1284 |
 | conditions: cog RAM, `$8000_0000`, one pin, no DAC, N 1 to 1001, first call with a held term | FIX:47–54, 63, 88–92, 189–198, 647; "ran ... once", 200 MHz: FL:1, FL:13 |
@@ -79,7 +102,7 @@ The paragraph makes no claim that the lag causes the SINC2 corruption (S2R:152�
 
 The v0.1.0 chapter printed a 10-line zero-burst snippet compiled in HARN (HARN:45–54; pnut-ts
 1.55.8, `.bin` 6420 bytes, encodings recorded in the v0.1.0 sidecar). At v0.2.0 it is not
-printed: the printed fix is the FIX drop-in block (task «#359» decision 4). HARN is left in
+printed: the printed workaround is the FIX drop-in block (task «#359» decision 4). HARN is left in
 place, unchanged. The measurement behind the old snippet (step 3's zero burst, 16 of 16) stays
 in the chapter's proof as evidence.
 
@@ -180,7 +203,7 @@ in these lines):
 603: [2026-09-25T21:40:05.701] Cog0  VERDICT Q4: CONFIRMED - XZERO kept one window length and an unchanging SINC2 sample at 10.24 us, 100 us and 25 ms measurements (streams 10.5 / 204.8 / 400 ms), where the XCONT twins varied and corrupted
 ```
 
-## 5. The fix's test (*How it was proven*, subsection) — design facts (results: §5a)
+## 5. The workaround's test (*How it was proven*, subsection) — design facts (results: §5a)
 
 | Chapter text | Source |
 |---|---|
@@ -190,11 +213,11 @@ in these lines):
 | every call returns N × C, N = 1 to 1001 | FIX:98, FIX:189–198 |
 | (N-1) × C = zero burst did not deliver | FIX:131 |
 
-## 5a. The fix run (FL) — the E5 results paragraph
+## 5a. The workaround run (FL) — the E5 results paragraph
 
 Re-derived from FL's raw lines (FL:24–113), not from its verdict line; the full derivation
 (controls, CAL, all 12 positive-control rows, all 60 calls, both channels) is in
-`e4-sources.md` §"The fix run (FL)". Verdict re-derived: CONFIRMED.
+`e4-sources.md` §"The workaround run (FL)". Verdict re-derived: CONFIRMED.
 
 | Chapter number / statement | Source |
 |---|---|
@@ -224,10 +247,10 @@ Raw lines used here beyond those quoted in `e4-sources.md`, verbatim:
 
 | Chapter code / text | Source |
 |---|---|
-| The drop-in block (30 lines) | FIX:808–837 (§0) |
+| The drop-in block (35 lines post-#360, 30 pre-#360) | ARCHIVE-WKR:683–717 (post-#360); FIX:808–837 (pre-#360, §0) |
 | Excerpt: burst, R1, R1b, zero burst, R2 (12 lines) | RIG:694-705, verbatim |
 | Excerpt: carry arm (14 lines) | RIG:707-720, verbatim |
-| Excerpt: the fix program's second "clear" and 65-clock burst (12 lines) | FIX:746–757, verbatim (widths 23–71). FIX:736 and FIX:740 (86 and 82 columns) keep the first half of that arm out of the excerpt |
+| Excerpt: the workaround program's second "clear" and 65-clock burst (12 lines) | FIX:746–757, verbatim (widths 23–71); in the reader's copy ARCHIVE-WKR:621–632 (unchanged by the #360 renames). FIX:736 and FIX:740 (86 and 82 columns) keep the first half of that arm out of the excerpt |
 | v0.1.0 excerpt `dmode_` .. `imk_` (RIG:736-739) | dropped at v0.2.0 (excerpt budget 2–4); `dz_`, `imz_`, `imk_` are described in prose before the first excerpt (RIG:737–739) |
 | one sentence: the SINC2 test program checks the documented SINC2 constraint, not this erratum | arbiter ruling item 4; S2R:13–27 (what the rig tests) |
 | Widths / verbatim check | every fence line ≤ 76 and present in a rig; each fence located as one contiguous rig range by the v0.2.0 awk check (FIX:808–837, RIG:694–705, RIG:707–720, FIX:746–757) |

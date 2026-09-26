@@ -12,6 +12,17 @@ comes from the rig** (§6): it is RIG:484-485, the K_BLK4 control arm that ran o
 v0.1.0 compile harness HARN is kept unchanged as history; nothing in the v0.2.0 chapter is taken
 from it.
 
+**Workaround wording (2026-09-26, task #360; Stephen's decision, voice-guide §2).** The reader's
+change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
+(`{#sec-e1-fix}`) is now *A proven workaround* (`{#sec-e1-workaround}`), rule-first: *What any
+workaround must do* (the condition, as in the front matter's summary table), then *One way,
+proven on a real P2* and the block. The CAUTION box's third line is *Workaround* (the
+condition); the status row is *Workaround proven on silicon*. In ARCHIVE the drop-in labels
+read `E1 Workaround:` (ARCHIVE:577, 580) and three comments say *workaround*: text only, no
+line added or removed, so every ARCHIVE line number below still holds, and the object image is
+byte-identical to the pre-#360 archive (pnut-ts 1.55.8, `-d` and without). Chapter line numbers
+below are post-#360. RIG and the logs are the as-run record and keep their own wording.
+
 Path keys:
 
 | Key | Path |
@@ -56,7 +67,7 @@ still holds): a scratch copy of RIG compiled with `/usr/local/bin/pnut-ts -d` (v
 | Documented, `SCALE` is 4 | "SCALE = 1 for RDBYTE/WRBYTE, 2 for RDWORD/WRWORD, 4 for RDLONG/WRLONG/WMLONG" | DOC:6944 |
 | Documented, blockquote 2 | "Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas. The expected number of longs will transfer, but PTRx will only be modified according to normal PTRx expression behavior:" | DOC:198-200, section heading KNOWN BUGS at DOC:197. The chapter line carries an invisible U+200B (zero-width space) after five of the slashes (`ALTx/`, `AUGS/`, `SETQ/`, `RDLONG/`, `WRLONG/`; found with `grep -o -P "\w+/\x{200B}"`), carried unchanged from v0.1.0 as line-break points; the visible text is the source's. |
 | Documented, example | `SETQ #16-1` ('ready to load 16 longs), `ALTD start_reg`, `RDLONG 0,ptra++`; comment "ptra will only be incremented by 4 (1 long), not 16*4 as anticipated!!!" | DOC:201-210 (extraction splits columns: mnemonics 201/203/205, operands 202/204, comments 206-210; the third comment spans 210 + 206). The chapter paraphrases the example; it does not reproduce it as a quotation. |
-| The fix, "the block count overrides the index, as the P2 Documentation states" | "the index will be overridden with the number of longs" | DOC:7220-7221; measured LOG2:115 |
+| A proven workaround, "the block count overrides the index, as the P2 Documentation states" | "the index will be overridden with the number of longs" | DOC:7220-7221; measured LOG2:115 |
 
 ## 3. Numbers
 
@@ -65,7 +76,7 @@ still holds): a scratch copy of RIG compiled with `/usr/local/bin/pnut-ts -d` (v
 | Chapter number | Source |
 |---|---|
 | CAUTION *Actual*: every long still moves, `PTRA` moves only 4 bytes | LOG2:63 (delta=4, landed=4/4), LOG2:89 (delta=4, landed=8/8); LEDGER:917-919 |
-| CAUTION *Fix*: `SETQ`/`SETQ2` directly before the transfer | LEDGER:933-934; LOG2:50 (the fix's own run, see §6) |
+| CAUTION *Workaround*: nothing between the `SETQ`/`SETQ2` and the transfer | LEDGER:933-934; LOG2:50 (the workaround's own run, see §6); DOC:198-200 (the intervening instructions are what cancels the block step) |
 | Opening: code that reloads the pointer before its next use is not affected | follows from the defect being confined to the value left in `PTRx` (LOG2:63: before-address correct, data FULL); carried from v0.1.0 *The symptom* |
 | `setq #3` + `altd` + `rdlong 0-0, ptra++` advances 4, not 16 | LOG2:63 (hazard +4), LOG2:50 (control +16); RIG:492-494 |
 | +4 for `ptra++` | LOG2:63 |
@@ -79,10 +90,11 @@ still holds): a scratch copy of RIG compiled with `/usr/local/bin/pnut-ts -d` (v
 | Scope: only `ALTD` tested; `AUGS`/`AUGD`/other `ALTx` vendor-named | LEDGER:934-935; RIG:42-58 (arm table: every hazard arm is `altd`) |
 | Untested: `WMLONG`, `SETQ2`+`WRLONG`, `ptra--`, `++ptra`, `--ptra` | RIG:42-58 (arm table lists only rdlong/wrlong post-increment forms, and setq2 only with rdlong) |
 
-### The fix
+### A proven workaround
 
 | Chapter number | Source |
 |---|---|
+| *What any workaround must do*: nothing between the `SETQ`/`SETQ2` and the transfer | DOC:198-200 (intervening instructions cancel the block step); LEDGER:933-934; the adjacent control column, §4 |
 | Drop-in block | RIG:484-485 (see §6) |
 | "advanced `PTRA` by +16 in every round, with all four longs in place" | LOG2:50, 53, 56, 59 (K_BLK4 rounds 0-3: `delta=16 data=FULL landed=4/4 abad=0 bbad=0`) |
 | 8-long read +32 | LOG2:76 (K_BLK8; rounds 79, 82, 85 identical) |
@@ -91,7 +103,7 @@ still holds): a scratch copy of RIG compiled with `/usr/local/bin/pnut-ts -d` (v
 | `SETQ2` into lookup RAM +16 | LOG2:193 (K_Q2) |
 | `ptra++[3]` block +16 | LOG2:115 (K_IDX3) |
 | "six transfers above" | the six control arms K_BLK4, K_BLK8, K_PTRB, K_WR, K_Q2, K_IDX3 (RIG:46-57) |
-| Fix proven = SETQ adjacent (the control column) | LEDGER:933-934 |
+| Workaround proven = SETQ adjacent (the control column) | LEDGER:933-934 |
 | No form that keeps the redirect has been run on silicon | RIG:42-58 (the only arms that combine `SETQ`/`SETQ2` with an `ALTD` place the `ALTD` between them; no arm uses an explicit pointer step) |
 | Forms not run in the adjacent form either | RIG:42-58 (no `WMLONG`, no `SETQ2`+`WRLONG`, no `ptra--`/`++ptra`/`--ptra` arm) |
 
@@ -110,7 +122,7 @@ still holds): a scratch copy of RIG compiled with `/usr/local/bin/pnut-ts -d` (v
 | outcomes fixed before the run | RIG:23-26, RIG:86-93; LEDGER:891 |
 | controls gate the verdict, every round | RIG:81-84; LOG2:218 |
 | Results table | see section 4 (raw lines) |
-| "The *Without `ALTD`* column is the fix"; first row's control = the two lines in *The fix* | RIG:481-487 (K_BLK4 arm body; RIG:484-485 = the drop-in); LEDGER:933-934 |
+| "The *Without `ALTD`* column is the workaround"; first row's control = the two lines in *A proven workaround* | RIG:481-487 (K_BLK4 arm body; RIG:484-485 = the drop-in); LEDGER:933-934 |
 | wrlong row: longs from the ALTD-selected registers | LOG2:181 (hub A slots 2-5 = `$C0C0_0002..5` = `wsrc[2..5]`, RIG:99-101, RIG:678-680) |
 | single-long references +4, +4, +12 | LOG2:24, LOG2:37, LOG2:102 |
 | every round same value | LOG2 rounds 0-3 of every arm (lines 24-217); LOG2:220-226 "in all 4 rounds" |
@@ -157,7 +169,7 @@ Per-arm values were also read line by line in both logs.
 | Published by Parallax: KNOWN BUGS | DOC:197-211 |
 | Found by: Parallax | brief instruction; LEDGER:887-888 |
 | 2026-09-24, P2 board, 200 MHz, run twice | LEDGER:892-894; LOG1:1; LOG2:1 |
-| Fix proven on silicon: Yes, 2026-09-24, rule at each use, adjacent `SETQ`/`SETQ2` | LEDGER:933-934, LEDGER:893; LOG2:50/53/56/59 and LOG1:50/53/56/59 (K_BLK4 in both runs); kind per creation-guide §5 |
+| Workaround proven on silicon: Yes, 2026-09-24, rule at each use, adjacent `SETQ`/`SETQ2` | LEDGER:933-934, LEDGER:893; LOG2:50/53/56/59 and LOG1:50/53/56/59 (K_BLK4 in both runs); kind per creation-guide §5 |
 
 ## 4. Raw log lines used (verbatim, LOG2 unless marked)
 
@@ -208,31 +220,47 @@ Results-table row to raw line (control / hazard, round 0; rounds 1-3 identical, 
 | `setq #3` + `wrlong ptra++` | LOG2:167 (16) | LOG2:180 (4, 4/4) |
 | `setq2 #3` + `rdlong` LUT `ptra++` | LOG2:193 (16) | LOG2:206 (4, 4/4) |
 
-## 5. Code excerpts (verbatim from RIG)
+## 5. Code excerpts (verbatim from RIG; printed lines now mirror ARCHIVE)
 
-| Chapter lines (v0.2.0) | Fence | Source lines | Max width |
-|---|---|---|---|
-| 49-50 (*The fix*, drop-in block) | `pasm2` | RIG:484-485 | 39 |
-| 101-107 (control, K_BLK4 body) | `pasm2` | RIG:481-487 (RIG:480, the arm comment, omitted: it names a study-brief workaround label) | 39 |
-| 113-121 (hazard, H_BLK4 incl. arm comment) | `pasm2` | RIG:488-496 | 66 |
-| 129-131 (`PRI delta`) | `spin2` | RIG:353-355 | 43 |
+**Printed code now mirrors the conformed archive copy (2026-09-26, «#360»); the measuring PASM
+is byte-identical to the as-run rig.** ARCHIVE = `examples-library/e1-setq-block-pointer-step-test.spin2`
+(conformed 2026-09-26, task #360: renamed `dst`/`trp`+2 to `block_first`/`trap_first`, named
+`BLOCK_LONGS`/`WIDE_BLOCK_LONGS`; PASM measuring image byte-identical to RIG's).
 
-Byte-identity (v0.2.0): `grep -n -x -F -f <chapter> <RIG>` lists RIG:353-355, 481-487 and
-488-496 in full, so every one of the 21 code lines in the chapter occurs verbatim in RIG, and
-each excerpt is a contiguous RIG run. RIG has no tab characters (`grep -c -P "\t"` = 0, v0.1.0 check).
+| Chapter lines (v0.2.0, post-#360) | Fence | RIG lines (as-run, history) | ARCHIVE lines (printed) | Max width |
+|---|---|---|---|---|
+| 53-58 (*A proven workaround*, drop-in block; post-#360 lines) | `pasm2` | RIG:484-485 | ARCHIVE:577-582 | 72 |
+| 109-121 (control, K_BLK4 body) | `pasm2` | RIG:481-487 (RIG:480, the arm comment, omitted: it names a study-brief workaround label) | ARCHIVE:573-585 | 72 |
+| 127-135 (hazard, H_BLK4 incl. arm comment) | `pasm2` | RIG:488-496 | ARCHIVE:586-594 | 66 |
+| 143-144 (`delta` body, signature omitted: doc-commented in ARCHIVE, not contiguous with the body) | `spin2` | RIG:353-355 | ARCHIVE:375-376 | 60 |
 
-## 6. The drop-in block (*The fix*): from the rig that ran
+Byte-identity (v0.2.0, pre-#360 rename): `grep -n -x -F -f <chapter> <RIG>` listed RIG:353-355,
+481-487 and 488-496 in full. Post-#360, the chapter's fences equal the renamed ARCHIVE spans
+above (verified by `engineering/tools/verify-example-corpus-identity.py`, GREEN); RIG is kept
+as the as-run record and is no longer byte-identical to the printed fences (names differ; the
+measuring PASM itself is unchanged). RIG has no tab characters (`grep -c -P "\t"` = 0, v0.1.0 check).
 
-The block printed first in *The fix* is two lines, byte-identical to RIG:484-485, the body of
-arm 2, K_BLK4 (`setq #4 - 1` directly before `rdlong dst + 2, ptra++`):
+## 6. The drop-in block (*A proven workaround*): from the rig that ran (as-run) and the archive (printed)
+
+The block printed first in *A proven workaround* is six lines (`CON`/`DAT` plus the two-instruction body),
+byte-identical to ARCHIVE:577-582, between the `' ---- DROP-IN BEGIN/END ----` markers in
+`examples-library/e1-setq-block-pointer-step-test.spin2` (markers excluded). Before the #360
+conformance rename it was two lines, byte-identical to RIG:484-485, the body of arm 2, K_BLK4
+(`setq #4 - 1` directly before `rdlong dst + 2, ptra++`); the archive spelling is
+`setq #BLOCK_LONGS - 1` / `rdlong block_first, ptra++`, the same instructions with named
+operands:
 
 ```
-                setq    #4 - 1
-                rdlong  dst + 2, ptra++
+CON ' ---- E1 Workaround: Block Length ----
+  BLOCK_LONGS   = 4                     ' longs in your block
+
+DAT ' ---- E1 Workaround: Block Transfer ----
+                setq    #BLOCK_LONGS - 1        ' directly before RDLONG
+                rdlong  block_first, ptra++     ' block's first register
 ```
 
-- **Contiguity and width:** RIG:484 and RIG:485 are consecutive; widths 30 and 39 columns
-  (K = 76). Both lines match with `grep -x -F` (above).
+- **Contiguity and width:** ARCHIVE:577-582 are consecutive; widest line 72 columns (K = 76).
+  RIG:484 and RIG:485 (the as-run rig, unrenamed) are likewise consecutive at 30 and 39 columns.
 - **The run that proved it:** K_BLK4 is a control arm: the program refuses a verdict unless it
   reads its required delta and FULL data in every round (RIG:81-84, RIG:245-247).
   Run 2 (LOG2, the build on disk): LOG2:50, 53, 56, 59, `delta=16 data=FULL landed=4/4 abad=0 bbad=0`
@@ -245,7 +273,7 @@ arm 2, K_BLK4 (`setq #4 - 1` directly before `rdlong dst + 2, ptra++`):
 ## 6a. v0.1.0 compile harness (history; not printed in v0.2.0)
 
 HARN is kept unchanged. Its snippets 1 and 2 were compiled for v0.1.0; neither appears in the
-v0.2.0 chapter, whose only fix code is the rig block above. The v0.1.0 record follows.
+v0.2.0 chapter, whose only workaround code is the rig block above. The v0.1.0 record follows.
 
 | v0.1.0 chapter lines | HARN lines |
 |---|---|

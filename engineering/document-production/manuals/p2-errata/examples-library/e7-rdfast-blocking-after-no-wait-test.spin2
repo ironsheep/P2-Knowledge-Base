@@ -54,18 +54,29 @@ CON ' ---- Rig Parameters ----
   WR_FIRST        = $C3C3_0001          ' W1: the datum the early WFLONG writes
   WR_SECOND       = $C3C3_0002          ' W2: the follow-up WFLONG
   SENTINEL        = $5E5E_5E5E          ' "nothing written here"
-  LONG_MASK       = $FFFF_FFFF
-  WORD_MASK       = $FFFF
-  BYTE_MASK       = $FF
-  WORD_SHIFT      = 16
-  BYTE_SHIFT      = 8
+  LONG_MASK       = $FFFF_FFFF          ' datum width of an RFLONG
+  WORD_MASK       = $FFFF               ' datum width of an RFWORD
+  BYTE_MASK       = $FF                 ' datum width of an RFBYTE
+  WORD_SHIFT      = 16                  ' the second RFWORD reads bits [31:16] of new[s]
+  BYTE_SHIFT      = 8                   ' the second RFBYTE reads bits [15:8] of new[s]
+  LONG_SHIFT      = 2                   ' long index -> byte offset: << 2 (4 bytes per long)
   FLAG_Z_BIT      = 1                   ' record flags: bit 0 = C, bit 1 = Z
+  FIFO_NO_WAIT    = $8000_0000          ' RDFAST/WRFAST D: D[31]=1 no-wait, 0 blocks = no wrap
 
   EXC_DIGIT_MAX   = 9                   ' exc codes: 1..9 as digits
   EXC_LETTER_BASE = 10                  '  10..35 as A..Z
-  EXC_LETTER_MAX  = 35
+  EXC_LETTER_MAX  = 35                  '  above 35: "+"
+
+  JCLK_NONE       = 0                   ' jclk(): no such distance (index -1)
+  JCLK_BEYOND     = -1                  ' jclk(): beyond the sweep (index NDIST or more)
 
   STAT_READY      = $0000_0A11          ' measuring cog is up
+
+  ' status of the command channel (main, run_cmd):
+  '  SUCCESS    - the measuring cog started and answered
+  '  E_RIG_FAIL - a RIG FAIL line was printed; the run ends with no gates or verdicts
+  SUCCESS         = 0
+  E_RIG_FAIL      = -1
 
 CON ' ---- Identifiers ----
   ' Arm ids, in run order:
@@ -83,7 +94,7 @@ CON ' ---- Identifiers ----
   '  AR_ERENW   - sibling: re-armed no-wait RDFAST, late read
   '  AR_EREBLK  - sibling: blocking RDFAST while a no-wait RDFAST arms
   #0, AR_KCLOCK, AR_KRDLONG, AR_KPRIME, AR_KNWLATE, AR_ABLKL, AR_ABLKW, AR_ABLKB, AR_BNW, AR_KWBLK, AR_KWLATE, AR_DWNW, AR_ERENW, AR_EREBLK
-  NARMS = AR_EREBLK + 1
+  NARMS = AR_EREBLK + 1                 ' arms in all
 
   ' Arm kinds:
   '  KD_CLOCK - record holds only an elapsed count
@@ -94,7 +105,7 @@ CON ' ---- Identifiers ----
   ' Boundary summary slots for the swept measurement arms:
   '  SW_B  - B_NW    SW_D  - D_WNW    SW_E1 - E_RENW    SW_E2 - E_REBLK
   #0, SW_B, SW_D, SW_E1, SW_E2
-  NSWEPT = SW_E2 + 1
+  NSWEPT = SW_E2 + 1                    ' boundary summary slots in all
 
   ' Read classes (K_CLOCK uses C_OK / C_OTHER):
   '  C_OK    - the expected datum      C_FLAGS - datum right, C/Z wrong
@@ -102,7 +113,7 @@ CON ' ---- Identifiers ----
   '  C_MID   - a mid-region long       C_NEWSH - a new-region long, wrong index
   '  C_ZERO  - zero                    C_OTHER - anything else
   #0, C_OK, C_FLAGS, C_STALE, C_OLD, C_MID, C_NEWSH, C_ZERO, C_OTHER
-  NCLS = C_OTHER + 1
+  NCLS = C_OTHER + 1                    ' read classes in all (also covers the six write classes)
 
   ' Write classes:
   '  W_LANDED - W1 at dst, W2 at dst+4        W_DROP - W2 at dst, W1 nowhere
@@ -115,35 +126,71 @@ CON ' ---- Identifiers ----
   '  MB_SLICE, MB_PHASE, MB_NDIST - parameters of the command
   '  MB_NEW, MB_OLD, MB_MID, MB_WREG - aligned region bases
   '  MB_BUF   - record buffer      MB_ALIVE - STAT_READY once the cog runs
+  '  MB_LEN   - mailbox length, in longs
   #0, MB_CMD, MB_SLICE, MB_PHASE, MB_NDIST, MB_NEW, MB_OLD, MB_MID, MB_WREG, MB_BUF, MB_ALIVE, MB_LEN
 
-  ' Record longs.  Read/clock arms: elapsed, v1, v2, flags.  Write arms:
-  ' elapsed, then hub dst-4, dst, dst+4, dst+8, dst+12.
+  ' Record longs (RECW per trial):
+  '  REC_EL    - elapsed GETCT clocks (every arm)
+  '  REC_V1    - read arms: the first read's datum
+  '  REC_V2    - read arms: the second read's datum
+  '  REC_FLAGS - read arms: C in bit 0, Z in bit FLAG_Z_BIT, of the first read
+  '  REC_HUBM1 - write arms: hub long at dst-4 (guard)
+  '  REC_HUB0  - write arms: hub long at dst
+  '  REC_HUB1  - write arms: hub long at dst+4
+  '  REC_HUB2  - write arms: hub long at dst+8
+  '  REC_HUB3  - write arms: hub long at dst+12
   #0, REC_EL, REC_V1, REC_V2, REC_FLAGS
   #1, REC_HUBM1, REC_HUB0, REC_HUB1, REC_HUB2, REC_HUB3
 
 VAR ' ---- Rig State ----
-  long mbox[MB_LEN]
-  long newRegion[REGN + ALIGN_PAD], oldRegion[REGN + ALIGN_PAD], midRegion[REGN + ALIGN_PAD]
-  long writeRegion[WREG_LONGS + ALIGN_PAD]
-  long recBuf[NDIST * TRIALS * RECW]
-  long newBase, oldBase, midBase, writeBase
+  long mailbox[MB_LEN]                  ' cog 0 <-> measuring cog (MB_* longs)
+  ' pattern regions, each padded so a 32-byte-aligned REGN-long region fits
+  long newRegion[REGN + ALIGN_PAD]      ' new[k]: what the RDFAST under test must read
+  long oldRegion[REGN + ALIGN_PAD]      ' old[k]: what the prime loads into the FIFO
+  long midRegion[REGN + ALIGN_PAD]      ' mid[k]: the first RDFAST's data in the E arms
+  long writeRegion[WREG_LONGS + ALIGN_PAD]  ' WRFAST targets and their guards
+  long recordBuffer[NDIST * TRIALS * RECW]  ' one row's trial records, from the measuring cog
+  long newBase                          ' aligned base of newRegion
+  long oldBase                          ' aligned base of oldRegion
+  long midBase                          ' aligned base of midRegion
+  long writeBase                        ' aligned base of writeRegion
   ' per-arm tallies
-  long armTot[NARMS], armGood[NARMS], armElMin[NARMS], armElMax[NARMS]
-  long armExcess[NARMS], armFlagBad[NARMS], armV2Bad[NARMS]
-  long armBadSlice[NARMS], armBadPhase[NARMS], armBadDist[NARMS], armBadGot[NARMS], armBadExp[NARMS]
-  long armDamage[NARMS]
-  long clsCnt[NARMS * NCLS]
+  long armTotal[NARMS]                  ' trials run
+  long armGood[NARMS]                   ' trials in the arm's correct class
+  long armElapsedMin[NARMS]             ' fewest elapsed clocks seen
+  long armElapsedMax[NARMS]             ' most elapsed clocks seen
+  long armExcess[NARMS]                 ' trials with exc <> 0 in an arm that must show exc 0
+  long armFlagBad[NARMS]                ' trials whose C/Z disagree with their datum
+  long armV2Bad[NARMS]                  ' trials with a right first read and a wrong second
+  long armBadSlice[NARMS]               ' first wrong trial: slice
+  long armBadPhase[NARMS]               ' first wrong trial: phase
+  long armBadDistanceIndex[NARMS]       ' first wrong trial: distance index (-1 = none yet)
+  long armBadGot[NARMS]                 ' first wrong trial: recorded value
+  long armBadExpected[NARMS]            ' first wrong trial: expected value
+  long armDamage[NARMS]                 ' pattern-region longs the arm changed
+  long classCount[NARMS * NCLS]         ' trials per (arm, class)
   ' swept-arm boundary summaries, per (slot, slice, phase), as distance indexes
-  long swFirstOk[NSWEPT * NCELL], swLastBad[NSWEPT * NCELL], swJ0Bad[NSWEPT]
-  long blkExcess[NCELL]
-  long sliceFirstMin[NSLICE], sliceFirstMax[NSLICE], sliceDistinct[NSLICE]
+  long sweptFirstOk[NSWEPT * NCELL]     ' smallest j with every trial correct (NDIST = none)
+  long sweptLastBad[NSWEPT * NCELL]     ' largest j with a wrong trial (-1 = none)
+  long sweptAdjacentBad[NSWEPT]         ' wrong trials at j = 0 (2 clk), per slot
+  long blockingExcess[NCELL]            ' A_BLK_L blocking-RDFAST clocks per (slice, phase)
+  long sliceFirstMin[NSLICE]            ' per slice: smallest first-all-correct distance, clocks
+  long sliceFirstMax[NSLICE]            ' per slice: largest first-all-correct distance, clocks
+  long sliceDistinct[NSLICE]            ' per slice: distinct blocking-RDFAST durations
   ' state of the row being processed
-  long rowCnt[NCLS]
-  long rowGood, rowMixed, rowFirstCls, rowElMin, rowElMax, rowExcFirst, rowExcMixed, rowShowRec
-  byte clsRow[NDIST + 1], excRow[NDIST + 1]
+  long rowClassCount[NCLS]              ' trials per class in the row
+  long rowGood                          ' trials in the arm's correct class
+  long rowMixed                         ' TRUE once two trials disagree on class
+  long rowFirstClass                    ' class of the row's first trial
+  long rowElapsedMin                    ' fewest elapsed clocks in the row
+  long rowElapsedMax                    ' most elapsed clocks in the row
+  long rowExcessFirst                   ' exc of the row's first trial
+  long rowExcessMixed                   ' TRUE once two trials disagree on exc
+  long rowShowRecord                    ' hub address of the record the row prints
+  byte classRow[NDIST + 1]              ' printed class codes, one per j, zero-terminated
+  byte excessRow[NDIST + 1]             ' printed exc codes, one per j, zero-terminated
 
-PUB main() | armIdx, sliceIdx, phaseIdx, damageCnt, cog, startCt, bClockOk, bRdlongOk, bPrimeOk, bLateOk, bWblkOk, bWlateOk, bReadGate
+PUB main() | armIdx, sliceIdx, phaseIdx, damageCnt, cog, startCt, bClockOk, bRdlongOk, bPrimeOk, bLateOk, bWblkOk, bWlateOk, bReadGate, status
 '' Run every arm on the measuring cog, print the raw rows, then the gated verdicts.
 ''
 
@@ -161,16 +208,17 @@ PUB main() | armIdx, sliceIdx, phaseIdx, damageCnt, cog, startCt, bClockOk, bRdl
 ' @local bWblkOk - K_WBLK control passed
 ' @local bWlateOk - K_WLATE control passed
 ' @local bReadGate - the controls every read verdict needs passed
+' @local status - SUCCESS, or E_RIG_FAIL once the measuring cog failed to start or answer
 
   setup_regions()
   reset_tallies()
-  mbox[MB_CMD] := 0
-  mbox[MB_NEW] := newBase
-  mbox[MB_OLD] := oldBase
-  mbox[MB_MID] := midBase
-  mbox[MB_WREG] := writeBase
-  mbox[MB_BUF] := @recBuf
-  mbox[MB_ALIVE] := 0
+  mailbox[MB_CMD] := 0
+  mailbox[MB_NEW] := newBase
+  mailbox[MB_OLD] := oldBase
+  mailbox[MB_MID] := midBase
+  mailbox[MB_WREG] := writeBase
+  mailbox[MB_BUF] := @recordBuffer
+  mailbox[MB_ALIVE] := 0
 
   debug("=== RDFAST/WRFAST readiness boundary (pnut-ts v1.55.8, clk 200 MHz, ", udec_(TRIALS), " trials per cell, 8 slices x 8 phases) ===")
   debug("patterns: new[k]=$A5A5_0080+k  old[k]=$0D0D_0040+k  mid[k]=$3C3C_00C0+k  stale reference old[2]=$0D0D_0042  W1=$C3C3_0001  W2=$C3C3_0002  sentinel=$5E5E_5E5E")
@@ -179,54 +227,65 @@ PUB main() | armIdx, sliceIdx, phaseIdx, damageCnt, cog, startCt, bClockOk, bRdl
   debug("cls codes: . ok  F value ok/C-Z wrong  S stale old[2]  o other old  M mid  N new wrong index  Z zero  X other  * trials disagree | write: . landed  D W1 dropped  K W1 lost/ptr advanced  n none  Z zero  X other")
   debug("exc codes: elapsed minus the no-stall clock count; . 0  1-9  A-Z = 10-35  + >35  - negative  ~ trials disagree (blocking arms: exc = the blocking instruction's own clocks)")
 
-  cog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  status := SUCCESS
+  cog := coginit(COGEXEC_NEW, @pasm, @mailbox)
   if cog < 0
     debug("RIG FAIL: coginit expected a free cog (0..7), got ", sdec_(cog))
-    finish()
+    status := E_RIG_FAIL
+  else
+    startCt := getct()
+    repeat until mailbox[MB_ALIVE] == STAT_READY
+      if getct() - startCt > clkfreq
+        debug("RIG FAIL: measuring cog start-up expected $0000_0A11 within 1 s, got ", uhex_long_(mailbox[MB_ALIVE]))
+        status := E_RIG_FAIL
+        quit
 
-  startCt := getct()
-  repeat until mbox[MB_ALIVE] == STAT_READY
-    if getct() - startCt > clkfreq
-      debug("RIG FAIL: measuring cog start-up expected $0000_0A11 within 1 s, got ", uhex_long_(mbox[MB_ALIVE]))
-      finish()
-  debug("measuring cog ", udec_(cog), " running")
+  if status == SUCCESS
+    debug("measuring cog ", udec_(cog), " running")
 
-  repeat armIdx from 0 to NARMS - 1
-    print_arm_header(armIdx)
-    repeat sliceIdx from 0 to NSLICE - 1
-      repeat phaseIdx from 0 to NPHASE - 1
-        run_cmd(armIdx, sliceIdx, phaseIdx)
-        process_row(armIdx, sliceIdx, phaseIdx)
-        damageCnt := region_damage()
-        if damageCnt > 0
-          armDamage[armIdx] += damageCnt
-          debug("  REGION DAMAGE after ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ", udec_(damageCnt), " pattern longs changed (a stray hub write) - regions re-filled")
-          setup_regions()
+    repeat armIdx from 0 to NARMS - 1
+      print_arm_header(armIdx)
+      repeat sliceIdx from 0 to NSLICE - 1
+        repeat phaseIdx from 0 to NPHASE - 1
+          status := run_cmd(armIdx, sliceIdx, phaseIdx)
+          if status <> SUCCESS
+            quit
+          process_row(armIdx, sliceIdx, phaseIdx)
+          damageCnt := region_damage()
+          if damageCnt > 0
+            armDamage[armIdx] += damageCnt
+            debug("  REGION DAMAGE after ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ", udec_(damageCnt), " pattern longs changed (a stray hub write) - regions re-filled")
+            setup_regions()
+        if status <> SUCCESS
+          quit
+      if status <> SUCCESS
+        quit
 
-  ' ---- gates ---------------------------------------------------------------
-  debug("=== GATES ===")
-  repeat armIdx from 0 to NARMS - 1
-    if armDamage[armIdx] > 0
-      debug("RIG NOTE: ", zstr_(armname(armIdx)), " changed ", udec_(armDamage[armIdx]), " pattern-region longs in total (stray hub writes; see REGION DAMAGE lines)")
-  bClockOk := rig_check(AR_KCLOCK)
-  bRdlongOk := rig_check(AR_KRDLONG)
-  bPrimeOk := rig_check(AR_KPRIME)
-  bLateOk := rig_check(AR_KNWLATE)
-  bWblkOk := rig_check(AR_KWBLK)
-  bWlateOk := rig_check(AR_KWLATE)
-  if bClockOk and bRdlongOk and bPrimeOk and bLateOk and bWblkOk and bWlateOk
-    debug("RIG OK: K_CLOCK, K_RDLONG, K_PRIME, K_NWLATE, K_WBLK, K_WLATE all correct in every trial")
-  bReadGate := bClockOk and bRdlongOk and bPrimeOk
+  if status == SUCCESS
+    ' ---- gates ---------------------------------------------------------------
+    debug("=== GATES ===")
+    repeat armIdx from 0 to NARMS - 1
+      if armDamage[armIdx] > 0
+        debug("RIG NOTE: ", zstr_(armname(armIdx)), " changed ", udec_(armDamage[armIdx]), " pattern-region longs in total (stray hub writes; see REGION DAMAGE lines)")
+    bClockOk := isControlOk(AR_KCLOCK)
+    bRdlongOk := isControlOk(AR_KRDLONG)
+    bPrimeOk := isControlOk(AR_KPRIME)
+    bLateOk := isControlOk(AR_KNWLATE)
+    bWblkOk := isControlOk(AR_KWBLK)
+    bWlateOk := isControlOk(AR_KWLATE)
+    if bClockOk == TRUE and bRdlongOk == TRUE and bPrimeOk == TRUE and bLateOk == TRUE and bWblkOk == TRUE and bWlateOk == TRUE
+      debug("RIG OK: K_CLOCK, K_RDLONG, K_PRIME, K_NWLATE, K_WBLK, K_WLATE all correct in every trial")
+    bReadGate := bClockOk and bRdlongOk and bPrimeOk
 
-  ' ---- results -------------------------------------------------------------
-  debug("=== RESULTS ===")
-  phase_check()
-  verdict_rearm(AR_ERENW, bReadGate and bLateOk)
-  verdict_rearm(AR_EREBLK, bReadGate and bLateOk)
-  report_boundary(AR_DWNW, bClockOk and bWblkOk and bWlateOk, string("BOUNDARY NO-WAIT WRITE"), string("a write control (K_CLOCK, K_WBLK, K_WLATE) failed"))
-  verdict_wrong_value(bReadGate and bLateOk)
-  report_boundary(AR_BNW, bReadGate and bLateOk and block_bad() == 0, string("BOUNDARY NO-WAIT READ"), string("a read control (K_CLOCK, K_RDLONG, K_PRIME, K_NWLATE) failed, or its control arm A (blocking read) was not clean"))
-  verdict_blocking(bReadGate)
+    ' ---- results -------------------------------------------------------------
+    debug("=== RESULTS ===")
+    phase_check()
+    verdict_rearm(AR_ERENW, bReadGate and bLateOk)
+    verdict_rearm(AR_EREBLK, bReadGate and bLateOk)
+    report_boundary(AR_DWNW, bClockOk and bWblkOk and bWlateOk, string("BOUNDARY NO-WAIT WRITE"), string("a write control (K_CLOCK, K_WBLK, K_WLATE) failed"))
+    verdict_wrong_value(bReadGate and bLateOk)
+    report_boundary(AR_BNW, bReadGate and bLateOk and block_bad() == 0, string("BOUNDARY NO-WAIT READ"), string("a read control (K_CLOCK, K_RDLONG, K_PRIME, K_NWLATE) failed, or its control arm A (blocking read) was not clean"))
+    verdict_blocking(bReadGate)
 
   finish()
 
@@ -279,92 +338,117 @@ PRI reset_tallies()
 ' Clear every per-arm tally and boundary summary.
 '
 
-  longfill(@armTot, 0, NARMS)
+  longfill(@armTotal, 0, NARMS)
   longfill(@armGood, 0, NARMS)
-  longfill(@armElMin, POSX, NARMS)
-  longfill(@armElMax, NEGX, NARMS)
+  longfill(@armElapsedMin, POSX, NARMS)
+  longfill(@armElapsedMax, NEGX, NARMS)
   longfill(@armExcess, 0, NARMS)
   longfill(@armFlagBad, 0, NARMS)
   longfill(@armV2Bad, 0, NARMS)
-  longfill(@armBadDist, -1, NARMS)
+  longfill(@armBadDistanceIndex, -1, NARMS)
   longfill(@armDamage, 0, NARMS)
-  longfill(@clsCnt, 0, NARMS * NCLS)
-  longfill(@swFirstOk, NDIST, NSWEPT * NCELL)
-  longfill(@swLastBad, -1, NSWEPT * NCELL)
-  longfill(@swJ0Bad, 0, NSWEPT)
+  longfill(@classCount, 0, NARMS * NCLS)
+  longfill(@sweptFirstOk, NDIST, NSWEPT * NCELL)
+  longfill(@sweptLastBad, -1, NSWEPT * NCELL)
+  longfill(@sweptAdjacentBad, 0, NSWEPT)
 
-PRI run_cmd(armIdx, sliceIdx, phaseIdx) | startCt
+PRI run_cmd(armIdx, sliceIdx, phaseIdx) : status | startCt
 ' Hand one (arm, slice, phase) command to the measuring cog and wait for it.
 '
 ' @param armIdx - arm id (AR_*)
 ' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
 ' @param phaseIdx - egg-beater phase: WAITX clocks after the sync RDLONG (0..7)
+' @returns status - SUCCESS, or E_RIG_FAIL after printing the RIG FAIL line
 
 ' Local Variables:
 ' @local startCt - CT when the command was issued
 
-  mbox[MB_SLICE] := sliceIdx
-  mbox[MB_PHASE] := phaseIdx
-  mbox[MB_NDIST] := armnd(armIdx)
-  mbox[MB_CMD] := armIdx + 1
+  status := SUCCESS
+  mailbox[MB_SLICE] := sliceIdx
+  mailbox[MB_PHASE] := phaseIdx
+  mailbox[MB_NDIST] := armnd(armIdx)
+  mailbox[MB_CMD] := armIdx + 1
   startCt := getct()
-  repeat until mbox[MB_CMD] == 0
+  repeat until mailbox[MB_CMD] == 0
     if getct() - startCt > clkfreq
-      debug("RIG FAIL: measuring cog did not finish ", zstr_(armname(armIdx)), " slice ", udec_(sliceIdx), " phase ", udec_(phaseIdx), " within 1 s: expected command word 0, got ", uhex_long_(mbox[MB_CMD]))
-      finish()
+      debug("RIG FAIL: measuring cog did not finish ", zstr_(armname(armIdx)), " slice ", udec_(sliceIdx), " phase ", udec_(phaseIdx), " within 1 s: expected command word 0, got ", uhex_long_(mailbox[MB_CMD]))
+      status := E_RIG_FAIL
+      quit
 
 ' ---------------------------------------------------------------------------
-' arm tables
+' arm tables: each lookupz() below has one entry per arm, in AR_* order
+' (AR_KCLOCK .. AR_EREBLK, as listed in the Identifiers CON block)
 ' ---------------------------------------------------------------------------
 PRI armname(armIdx) : pArmName
+' The arm's printable name; one entry per arm, in AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns pArmName - the arm's printable name
 
   pArmName := lookupz(armIdx: string("K_CLOCK"), string("K_RDLONG"), string("K_PRIME"), string("K_NWLATE"), string("A_BLK_L"), string("A_BLK_W"), string("A_BLK_B"), string("B_NW"), string("K_WBLK"), string("K_WLATE"), string("D_WNW"), string("E_RENW"), string("E_REBLK"))
 
 PRI armnd(armIdx) : distCount
+' How many distance indexes the arm runs; one entry per arm, in AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns distCount - distance indexes the arm runs (NDIST swept, 1 fixed)
 
   distCount := lookupz(armIdx: NDIST, 1, 1, 1, 1, 1, 1, NDIST, 1, 1, NDIST, NDIST, NDIST)
 
 PRI armsw(armIdx) : swSlot
+' The arm's boundary summary slot; one entry per arm, in AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns swSlot - boundary summary slot (SW_*), -1 = none
 
   swSlot := lookupz(armIdx: -1, -1, -1, -1, -1, -1, -1, SW_B, -1, -1, SW_D, SW_E1, SW_E2)
 
 PRI armkind(armIdx) : kind
+' The kind of record the arm writes; one entry per arm, in AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns kind - record kind (KD_*)
 
   kind := lookupz(armIdx: KD_CLOCK, KD_READ, KD_READ, KD_READ, KD_READ, KD_READ, KD_READ, KD_READ, KD_WRITE, KD_WRITE, KD_WRITE, KD_READ, KD_READ)
 
 PRI armmask(armIdx) : widthMask
+' The datum width of the arm's first read; one entry per arm, in AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns widthMask - mask of the datum width the arm's first read returns
 
   widthMask := lookupz(armIdx: LONG_MASK, LONG_MASK, LONG_MASK, LONG_MASK, LONG_MASK, WORD_MASK, BYTE_MASK, LONG_MASK, LONG_MASK, LONG_MASK, LONG_MASK, LONG_MASK, LONG_MASK)
 
-PRI armflags(armIdx) : bHasFlags
+PRI hasRecordedFlags(armIdx) : bHasFlags
+' Whether the arm records the C/Z of its first read; one entry per arm, in
+' AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns bHasFlags - TRUE when the first read is an RFxxxx WCZ whose C/Z are recorded
 
   bHasFlags := lookupz(armIdx: FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE)
 
 PRI goodcls(armIdx) : correctCls
+' The class of a correct trial; one entry per arm, in AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns correctCls - the class a correct trial of this arm falls in
 
   correctCls := lookupz(armIdx: C_OK, C_OK, C_STALE, C_OK, C_OK, C_OK, C_OK, C_OK, W_LANDED, W_LANDED, W_LANDED, C_OK, C_OK)
 
-PRI armexc0(armIdx) : bZeroExcess
+PRI isZeroExcessArm(armIdx) : bZeroExcess
+' Whether the arm must show exc 0 in every trial; one entry per arm, in
+' AR_* order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns bZeroExcess - TRUE when the arm's elapsed must equal the no-stall count (exc 0)
 
   bZeroExcess := lookupz(armIdx: TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE)
 
-PRI armv2gate(armIdx) : bGateOnSecond
+PRI isV2Gated(armIdx) : bGateOnSecond
+' Whether a wrong second read fails the trial; one entry per arm, in AR_*
+' order.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns bGateOnSecond - TRUE for controls whose second read must also be right
 
@@ -381,18 +465,18 @@ PRI distclk(distIdx) : distClks
   else
     distClks := NW_WAITX_OFFSET + distIdx - 1
 
-PRI jclk(distIdx) : distClks
+PRI jclk(summaryDistIdx) : distClks
 ' Distance index to clocks for the boundary report.
 '
-' @param distIdx - distance index, -1 = none, NDIST or more = beyond the sweep
-' @returns distClks - clocks; 0 = none, -1 = beyond the sweep
+' @param summaryDistIdx - boundary-summary distance index: -1 = none, NDIST or more = beyond the sweep
+' @returns distClks - clocks; JCLK_NONE (0) = none, JCLK_BEYOND (-1) = beyond the sweep
 
-  if distIdx < 0
-    distClks := 0
-  elseif distIdx >= NDIST
-    distClks := -1
+  if summaryDistIdx < 0
+    distClks := JCLK_NONE
+  elseif summaryDistIdx >= NDIST
+    distClks := JCLK_BEYOND
   else
-    distClks := distclk(distIdx)
+    distClks := distclk(summaryDistIdx)
 
 PRI expclk(armIdx, distIdx) : baseClk
 ' The elapsed GETCT count a trial shows if nothing stalls (the exc = 0 value).
@@ -421,29 +505,37 @@ PRI expclk(armIdx, distIdx) : baseClk
       baseClk := 0
 
 PRI patnew(longIdx) : pattern
+' The new-region pattern long: NEW_BASE + index.
+'
 ' @param longIdx - long index inside the region
 ' @returns pattern - the new-region long at that index
 
   pattern := NEW_BASE + longIdx
 
 PRI patold(longIdx) : pattern
+' The old-region pattern long: OLD_BASE + index.
+'
 ' @param longIdx - long index inside the region
 ' @returns pattern - the old-region long at that index
 
   pattern := OLD_BASE + longIdx
 
 PRI patmid(longIdx) : pattern
+' The mid-region pattern long: MID_BASE + index.
+'
 ' @param longIdx - long index inside the region
 ' @returns pattern - the mid-region long at that index
 
   pattern := MID_BASE + longIdx
 
 PRI recaddr(distIdx, trialIdx) : pRec
+' Hub address of one trial's record in recordBuffer.
+'
 ' @param distIdx - distance index j
 ' @param trialIdx - trial number 0..TRIALS-1
 ' @returns pRec - hub address of that trial's record
 
-  pRec := @recBuf + ((distIdx * TRIALS + trialIdx) * RECW) * 4
+  pRec := @recordBuffer + ((distIdx * TRIALS + trialIdx) * RECW) * 4
 
 ' ---------------------------------------------------------------------------
 ' classification of one record
@@ -467,7 +559,7 @@ PRI classify(armIdx, sliceIdx, pRec, baseClk) : cls
       cls := classify_write(pRec)
     other:
       cls := classify_read(armIdx, sliceIdx, long[pRec][REC_V1])
-      if cls == goodcls(armIdx) and armflags(armIdx) and not flags_ok(armIdx, pRec)
+      if cls == goodcls(armIdx) and hasRecordedFlags(armIdx) == TRUE and isFlagsOk(armIdx, pRec) == FALSE
         cls := C_FLAGS
 
 PRI classify_read(armIdx, sliceIdx, datum) : cls | widthMask
@@ -526,7 +618,7 @@ PRI classify_write(pRec) : cls | hubPrev, hubAt0, hubAt1, bTailClean
   else
     cls := W_OTHER
 
-PRI flags_ok(armIdx, pRec) : bConsistent | datum, carryExp, zeroExp
+PRI isFlagsOk(armIdx, pRec) : bConsistent | datum, carryExp, zeroExp
 ' Check the recorded C/Z against the datum the same RFxxxx WCZ returned.
 '
 ' @param armIdx - arm id (AR_*)
@@ -543,7 +635,7 @@ PRI flags_ok(armIdx, pRec) : bConsistent | datum, carryExp, zeroExp
   zeroExp := (datum == 0) & 1
   bConsistent := long[pRec][REC_FLAGS] == (carryExp | (zeroExp << FLAG_Z_BIT))
 
-PRI v2_ok(armIdx, sliceIdx, pRec) : bMatch | expVal
+PRI isV2Ok(armIdx, sliceIdx, pRec) : bMatch | expVal
 ' Check the second FIFO access of a read record.
 '
 ' @param armIdx - arm id (AR_*)
@@ -566,6 +658,8 @@ PRI v2_ok(armIdx, sliceIdx, pRec) : bMatch | expVal
   bMatch := long[pRec][REC_V2] == expVal
 
 PRI expv1(armIdx, sliceIdx, distIdx) : expVal
+' The value a correct trial of the arm records, for the RIG FAIL report.
+'
 ' @param armIdx - arm id (AR_*)
 ' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
 ' @param distIdx - distance index j
@@ -583,6 +677,8 @@ PRI expv1(armIdx, sliceIdx, distIdx) : expVal
         expVal := patnew(sliceIdx) & armmask(armIdx)
 
 PRI got_value(armIdx, pRec) : gotVal
+' The value a trial actually recorded, for the RIG FAIL report.
+'
 ' @param armIdx - arm id (AR_*)
 ' @param pRec - hub address of the trial record
 ' @returns gotVal - the recorded counterpart of expv1()
@@ -596,6 +692,9 @@ PRI got_value(armIdx, pRec) : gotVal
       gotVal := long[pRec][REC_V1]
 
 PRI clschar(kind, cls) : codeChar
+' The one-character row code of a class: one entry per class, in W_* order
+' for write records and C_* order otherwise (legend in main's "cls codes" line).
+'
 ' @param kind - record kind (KD_*)
 ' @param cls - class of the trial
 ' @returns codeChar - the row code for that class
@@ -606,6 +705,9 @@ PRI clschar(kind, cls) : codeChar
     codeChar := lookupz(cls: ".", "F", "S", "o", "M", "N", "Z", "X")
 
 PRI clsname(kind, cls) : pClsName
+' The printable name of a class: one entry per class, in W_* order for
+' write records and C_* order otherwise.
+'
 ' @param kind - record kind (KD_*)
 ' @param cls - class of the trial
 ' @returns pClsName - printable class name
@@ -616,6 +718,8 @@ PRI clsname(kind, cls) : pClsName
     pClsName := lookupz(cls: string("OK"), string("FLAGS"), string("STALE"), string("OLD"), string("MID"), string("NEWSHIFT"), string("ZERO"), string("OTHER"))
 
 PRI excchar(excess) : codeChar
+' The one-character row code of an excess (legend in main's "exc codes" line).
+'
 ' @param excess - elapsed minus the no-stall count
 ' @returns codeChar - the row code for that excess
 
@@ -654,41 +758,41 @@ PRI process_row(armIdx, sliceIdx, phaseIdx) | distIdx, lastDist, trialIdx, pRec,
   cellIdx := sliceIdx * NPHASE + phaseIdx
   lastDist := armnd(armIdx) - 1
   repeat distIdx from 0 to lastDist
-    longfill(@rowCnt, 0, NCLS)
+    longfill(@rowClassCount, 0, NCLS)
     rowGood := 0
     rowMixed := FALSE
-    rowExcMixed := FALSE
-    rowShowRec := 0
+    rowExcessMixed := FALSE
+    rowShowRecord := 0
     baseClk := expclk(armIdx, distIdx)
     repeat trialIdx from 0 to TRIALS - 1
       pRec := recaddr(distIdx, trialIdx)
       cls := classify(armIdx, sliceIdx, pRec, baseClk)
-      if armkind(armIdx) == KD_READ and cls == goodcls(armIdx) and not v2_ok(armIdx, sliceIdx, pRec)
+      if armkind(armIdx) == KD_READ and cls == goodcls(armIdx) and isV2Ok(armIdx, sliceIdx, pRec) == FALSE
         armV2Bad[armIdx]++
-        if armv2gate(armIdx)
+        if isV2Gated(armIdx) == TRUE
           cls := C_OTHER                                      ' a control's second read must also be right
       tally_trial(armIdx, sliceIdx, phaseIdx, distIdx, trialIdx, pRec, cls, baseClk)
-    if rowShowRec == 0
-      rowShowRec := recaddr(distIdx, 0)
+    if rowShowRecord == 0
+      rowShowRecord := recaddr(distIdx, 0)
     if swSlot >= 0
       if rowGood == TRIALS
-        if swFirstOk[swSlot * NCELL + cellIdx] == NDIST
-          swFirstOk[swSlot * NCELL + cellIdx] := distIdx
+        if sweptFirstOk[swSlot * NCELL + cellIdx] == NDIST
+          sweptFirstOk[swSlot * NCELL + cellIdx] := distIdx
       else
-        swLastBad[swSlot * NCELL + cellIdx] := distIdx
+        sweptLastBad[swSlot * NCELL + cellIdx] := distIdx
     if armIdx == AR_ABLKL
-      blkExcess[cellIdx] := rowExcFirst
+      blockingExcess[cellIdx] := rowExcessFirst
     if lastDist > 0
-      clsRow[distIdx] := row_cls_char(armIdx)
-      excRow[distIdx] := row_exc_char()
-      if rowGood < TRIALS or (armexc0(armIdx) and (rowExcMixed or rowExcFirst <> 0))
+      classRow[distIdx] := row_cls_char(armIdx)
+      excessRow[distIdx] := row_exc_char()
+      if rowGood < TRIALS or (isZeroExcessArm(armIdx) == TRUE and (rowExcessMixed == TRUE or rowExcessFirst <> 0))
         print_detail(armIdx, sliceIdx, phaseIdx, distIdx, baseClk)
     else
       print_fixed(armIdx, sliceIdx, phaseIdx, baseClk)
   if lastDist > 0
-    clsRow[lastDist + 1] := 0
-    excRow[lastDist + 1] := 0
-    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " cls ", zstr_(@clsRow), " exc ", zstr_(@excRow))
+    classRow[lastDist + 1] := 0
+    excessRow[lastDist + 1] := 0
+    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " cls ", zstr_(@classRow), " exc ", zstr_(@excessRow))
 
 PRI tally_trial(armIdx, sliceIdx, phaseIdx, distIdx, trialIdx, pRec, cls, baseClk) | elapsed
 ' Add one classified trial to the row and arm tallies; keep the arm's first failure.
@@ -706,58 +810,62 @@ PRI tally_trial(armIdx, sliceIdx, phaseIdx, distIdx, trialIdx, pRec, cls, baseCl
 ' @local elapsed - GETCT-measured clocks of the trial
 
   elapsed := long[pRec][REC_EL]
-  rowCnt[cls]++
-  armTot[armIdx]++
-  clsCnt[armIdx * NCLS + cls]++
+  rowClassCount[cls]++
+  armTotal[armIdx]++
+  classCount[armIdx * NCLS + cls]++
   if trialIdx == 0
-    rowFirstCls := cls
-    rowExcFirst := elapsed - baseClk
-    rowElMin := elapsed
-    rowElMax := elapsed
+    rowFirstClass := cls
+    rowExcessFirst := elapsed - baseClk
+    rowElapsedMin := elapsed
+    rowElapsedMax := elapsed
   else
-    if cls <> rowFirstCls
+    if cls <> rowFirstClass
       rowMixed := TRUE
-    if elapsed - baseClk <> rowExcFirst
-      rowExcMixed := TRUE
-    rowElMin <#= elapsed
-    rowElMax #>= elapsed
-  armElMin[armIdx] <#= elapsed
-  armElMax[armIdx] #>= elapsed
-  if armexc0(armIdx) and elapsed <> baseClk
+    if elapsed - baseClk <> rowExcessFirst
+      rowExcessMixed := TRUE
+    rowElapsedMin <#= elapsed
+    rowElapsedMax #>= elapsed
+  armElapsedMin[armIdx] <#= elapsed
+  armElapsedMax[armIdx] #>= elapsed
+  if isZeroExcessArm(armIdx) == TRUE and elapsed <> baseClk
     armExcess[armIdx]++
-  if armflags(armIdx) and not flags_ok(armIdx, pRec)
+  if hasRecordedFlags(armIdx) == TRUE and isFlagsOk(armIdx, pRec) == FALSE
     armFlagBad[armIdx]++
   if cls == goodcls(armIdx)
     rowGood++
     armGood[armIdx]++
   else
-    if rowShowRec == 0
-      rowShowRec := pRec
+    if rowShowRecord == 0
+      rowShowRecord := pRec
     if distIdx == 0 and armsw(armIdx) >= 0
-      swJ0Bad[armsw(armIdx)]++
-    if armBadDist[armIdx] == -1
+      sweptAdjacentBad[armsw(armIdx)]++
+    if armBadDistanceIndex[armIdx] == -1
       armBadSlice[armIdx] := sliceIdx
       armBadPhase[armIdx] := phaseIdx
-      armBadDist[armIdx] := distIdx
+      armBadDistanceIndex[armIdx] := distIdx
       armBadGot[armIdx] := got_value(armIdx, pRec)
-      armBadExp[armIdx] := expv1(armIdx, sliceIdx, distIdx)
+      armBadExpected[armIdx] := expv1(armIdx, sliceIdx, distIdx)
 
 PRI row_cls_char(armIdx) : codeChar
+' The class code printed for the row cell just processed.
+'
 ' @param armIdx - arm id (AR_*)
 ' @returns codeChar - class code of the current row cell ("*" when trials disagree)
 
-  if rowMixed
+  if rowMixed == TRUE
     codeChar := "*"
   else
-    codeChar := clschar(armkind(armIdx), rowFirstCls)
+    codeChar := clschar(armkind(armIdx), rowFirstClass)
 
 PRI row_exc_char() : codeChar
+' The excess code printed for the row cell just processed.
+'
 ' @returns codeChar - excess code of the current row cell ("~" when trials disagree)
 
-  if rowExcMixed
+  if rowExcessMixed == TRUE
     codeChar := "~"
   else
-    codeChar := excchar(rowExcFirst)
+    codeChar := excchar(rowExcessFirst)
 
 PRI print_detail(armIdx, sliceIdx, phaseIdx, distIdx, baseClk)
 ' Print the raw counts of one swept cell that was not clean.
@@ -770,11 +878,11 @@ PRI print_detail(armIdx, sliceIdx, phaseIdx, distIdx, baseClk)
 
   case armkind(armIdx)
     KD_CLOCK:
-      debug("    K_CLOCK s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " expected ", sdec_(baseClk))
+      debug("    K_CLOCK s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " el ", sdec_(rowElapsedMin), "..", sdec_(rowElapsedMax), " expected ", sdec_(baseClk))
     KD_WRITE:
-      debug("    ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), " dist ", udec_(distclk(distIdx)), ": landed ", udec_(rowCnt[W_LANDED]), " drop ", udec_(rowCnt[W_DROP]), " skip ", udec_(rowCnt[W_SKIP]), " none ", udec_(rowCnt[W_NONE]), " zero ", udec_(rowCnt[W_ZERO]), " other ", udec_(rowCnt[W_OTHER]), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " base ", sdec_(baseClk), " hub[-1..3] ", uhex_long_array_(rowShowRec + REC_HUBM1 * 4, WGUARD))
+      debug("    ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), " dist ", udec_(distclk(distIdx)), ": landed ", udec_(rowClassCount[W_LANDED]), " drop ", udec_(rowClassCount[W_DROP]), " skip ", udec_(rowClassCount[W_SKIP]), " none ", udec_(rowClassCount[W_NONE]), " zero ", udec_(rowClassCount[W_ZERO]), " other ", udec_(rowClassCount[W_OTHER]), " el ", sdec_(rowElapsedMin), "..", sdec_(rowElapsedMax), " base ", sdec_(baseClk), " hub[-1..3] ", uhex_long_array_(rowShowRecord + REC_HUBM1 * 4, WGUARD))
     other:
-      debug("    ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), " dist ", udec_(distclk(distIdx)), ": ok ", udec_(rowCnt[C_OK]), " flg ", udec_(rowCnt[C_FLAGS]), " stale ", udec_(rowCnt[C_STALE]), " old ", udec_(rowCnt[C_OLD]), " mid ", udec_(rowCnt[C_MID]), " nsh ", udec_(rowCnt[C_NEWSH]), " zero ", udec_(rowCnt[C_ZERO]), " oth ", udec_(rowCnt[C_OTHER]), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " base ", sdec_(baseClk), " v1 ", uhex_long_(long[rowShowRec][REC_V1]), " v2 ", uhex_long_(long[rowShowRec][REC_V2]), " cz ", udec_(long[rowShowRec][REC_FLAGS]))
+      debug("    ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), " dist ", udec_(distclk(distIdx)), ": ok ", udec_(rowClassCount[C_OK]), " flg ", udec_(rowClassCount[C_FLAGS]), " stale ", udec_(rowClassCount[C_STALE]), " old ", udec_(rowClassCount[C_OLD]), " mid ", udec_(rowClassCount[C_MID]), " nsh ", udec_(rowClassCount[C_NEWSH]), " zero ", udec_(rowClassCount[C_ZERO]), " oth ", udec_(rowClassCount[C_OTHER]), " el ", sdec_(rowElapsedMin), "..", sdec_(rowElapsedMax), " base ", sdec_(baseClk), " v1 ", uhex_long_(long[rowShowRecord][REC_V1]), " v2 ", uhex_long_(long[rowShowRecord][REC_V2]), " cz ", udec_(long[rowShowRecord][REC_FLAGS]))
 
 PRI print_fixed(armIdx, sliceIdx, phaseIdx, baseClk) | pClsName
 ' Print the one-line raw result of a fixed (unswept) arm cell.
@@ -787,14 +895,14 @@ PRI print_fixed(armIdx, sliceIdx, phaseIdx, baseClk) | pClsName
 ' Local Variables:
 ' @local pClsName - class name of the row, or MIXED
 
-  if rowMixed
+  if rowMixed == TRUE
     pClsName := string("MIXED")
   else
-    pClsName := clsname(armkind(armIdx), rowFirstCls)
+    pClsName := clsname(armkind(armIdx), rowFirstClass)
   if armkind(armIdx) == KD_WRITE
-    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " ", zstr_(pClsName), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " exc ", sdec_(rowElMin - baseClk), "..", sdec_(rowElMax - baseClk), " hub[-1..3] ", uhex_long_array_(rowShowRec + REC_HUBM1 * 4, WGUARD))
+    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " ", zstr_(pClsName), " el ", sdec_(rowElapsedMin), "..", sdec_(rowElapsedMax), " exc ", sdec_(rowElapsedMin - baseClk), "..", sdec_(rowElapsedMax - baseClk), " hub[-1..3] ", uhex_long_array_(rowShowRecord + REC_HUBM1 * 4, WGUARD))
   else
-    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " ", zstr_(pClsName), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " exc ", sdec_(rowElMin - baseClk), "..", sdec_(rowElMax - baseClk), " v1 ", uhex_long_(long[rowShowRec][REC_V1]), " v2 ", uhex_long_(long[rowShowRec][REC_V2]), " cz ", udec_(long[rowShowRec][REC_FLAGS]))
+    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " ", zstr_(pClsName), " el ", sdec_(rowElapsedMin), "..", sdec_(rowElapsedMax), " exc ", sdec_(rowElapsedMin - baseClk), "..", sdec_(rowElapsedMax - baseClk), " v1 ", uhex_long_(long[rowShowRecord][REC_V1]), " v2 ", uhex_long_(long[rowShowRecord][REC_V2]), " cz ", udec_(long[rowShowRecord][REC_FLAGS]))
 
 PRI print_arm_header(armIdx)
 ' Print the arm's sequence, its prediction and what refutes it, before its rows.
@@ -832,20 +940,22 @@ PRI print_arm_header(armIdx)
 ' ---------------------------------------------------------------------------
 ' gates and verdicts
 ' ---------------------------------------------------------------------------
-PRI rig_check(armIdx) : bPass
+PRI isControlOk(ctrlArmIdx) : bPass
 ' Gate one control arm: every trial correct, else print RIG FAIL with the first failure.
 '
-' @param armIdx - control arm id (AR_K*)
+' @param ctrlArmIdx - control arm id (AR_K*)
 ' @returns bPass - TRUE when every trial of the control was correct
 
-  bPass := armTot[armIdx] > 0 and armGood[armIdx] == armTot[armIdx]
-  if not bPass
-    if armkind(armIdx) == KD_CLOCK
-      debug("RIG FAIL: ", zstr_(armname(armIdx)), " expected elapsed ", sdec_(armBadExp[armIdx]), " got ", sdec_(armBadGot[armIdx]), " at slice ", sdec_(armBadSlice[armIdx]), " phase ", sdec_(armBadPhase[armIdx]), " j ", sdec_(armBadDist[armIdx]), "; ", udec_(armTot[armIdx] - armGood[armIdx]), " of ", udec_(armTot[armIdx]), " trials bad")
+  bPass := armTotal[ctrlArmIdx] > 0 and armGood[ctrlArmIdx] == armTotal[ctrlArmIdx]
+  if bPass == FALSE
+    if armkind(ctrlArmIdx) == KD_CLOCK
+      debug("RIG FAIL: ", zstr_(armname(ctrlArmIdx)), " expected elapsed ", sdec_(armBadExpected[ctrlArmIdx]), " got ", sdec_(armBadGot[ctrlArmIdx]), " at slice ", sdec_(armBadSlice[ctrlArmIdx]), " phase ", sdec_(armBadPhase[ctrlArmIdx]), " j ", sdec_(armBadDistanceIndex[ctrlArmIdx]), "; ", udec_(armTotal[ctrlArmIdx] - armGood[ctrlArmIdx]), " of ", udec_(armTotal[ctrlArmIdx]), " trials bad")
     else
-      debug("RIG FAIL: ", zstr_(armname(armIdx)), " expected ", uhex_long_(armBadExp[armIdx]), " got ", uhex_long_(armBadGot[armIdx]), " at slice ", sdec_(armBadSlice[armIdx]), " phase ", sdec_(armBadPhase[armIdx]), "; ", udec_(armTot[armIdx] - armGood[armIdx]), " of ", udec_(armTot[armIdx]), " trials bad (second-read mismatches ", udec_(armV2Bad[armIdx]), ")")
+      debug("RIG FAIL: ", zstr_(armname(ctrlArmIdx)), " expected ", uhex_long_(armBadExpected[ctrlArmIdx]), " got ", uhex_long_(armBadGot[ctrlArmIdx]), " at slice ", sdec_(armBadSlice[ctrlArmIdx]), " phase ", sdec_(armBadPhase[ctrlArmIdx]), "; ", udec_(armTotal[ctrlArmIdx] - armGood[ctrlArmIdx]), " of ", udec_(armTotal[ctrlArmIdx]), " trials bad (second-read mismatches ", udec_(armV2Bad[ctrlArmIdx]), ")")
 
 PRI block_bad() : badTrials | armIdx
+' Count the wrong trials of the blocking-read classifier arms (A_BLK_*).
+'
 ' @returns badTrials - wrong trials over the three blocking (arm A) arms
 
 ' Local Variables:
@@ -853,7 +963,7 @@ PRI block_bad() : badTrials | armIdx
 
   badTrials := 0
   repeat armIdx from AR_ABLKL to AR_ABLKB
-    badTrials += armTot[armIdx] - armGood[armIdx]
+    badTrials += armTotal[armIdx] - armGood[armIdx]
 
 PRI phase_check() | sliceIdx, phaseIdx, priorIdx, bSeen
 ' Informational: count distinct blocking-RDFAST durations over the 8 phases per slice.
@@ -871,17 +981,17 @@ PRI phase_check() | sliceIdx, phaseIdx, priorIdx, bSeen
       bSeen := FALSE
       if phaseIdx > 0
         repeat priorIdx from 0 to phaseIdx - 1
-          if blkExcess[sliceIdx * NPHASE + priorIdx] == blkExcess[sliceIdx * NPHASE + phaseIdx]
+          if blockingExcess[sliceIdx * NPHASE + priorIdx] == blockingExcess[sliceIdx * NPHASE + phaseIdx]
             bSeen := TRUE
-      if not bSeen
+      if bSeen == FALSE
         sliceDistinct[sliceIdx]++
   debug("PHASE CHECK (informational): distinct A_BLK_L RDFAST durations over the 8 phases per slice (8 = the phase sweep spans a whole egg-beater rotation): s0 ", udec_(sliceDistinct[0]), " s1 ", udec_(sliceDistinct[1]), " s2 ", udec_(sliceDistinct[2]), " s3 ", udec_(sliceDistinct[3]), " s4 ", udec_(sliceDistinct[4]), " s5 ", udec_(sliceDistinct[5]), " s6 ", udec_(sliceDistinct[6]), " s7 ", udec_(sliceDistinct[7]))
 
-PRI verdict_rearm(armIdx, bGate) | badTrials, lastBadJ, cellIdx, clsBase
+PRI verdict_rearm(siblingArmIdx, bGate) | badTrials, lastBadJ, cellIdx, clsBase
 ' Print the separately-reported re-arm verdict (arm E).
 '
-' @param armIdx - AR_ERENW or AR_EREBLK
-' @param bGate - TRUE when the controls this arm needs all passed
+' @param siblingArmIdx - sibling (re-arm) arm id: AR_ERENW or AR_EREBLK
+' @param bGate - TRUE when every control this verdict depends on passed
 
 ' Local Variables:
 ' @local badTrials - wrong reads of the arm
@@ -889,24 +999,24 @@ PRI verdict_rearm(armIdx, bGate) | badTrials, lastBadJ, cellIdx, clsBase
 ' @local cellIdx - slice/phase cell
 ' @local clsBase - index of the arm's first class counter
 
-  badTrials := armTot[armIdx] - armGood[armIdx]
-  clsBase := armIdx * NCLS
+  badTrials := armTotal[siblingArmIdx] - armGood[siblingArmIdx]
+  clsBase := siblingArmIdx * NCLS
   lastBadJ := -1
   repeat cellIdx from 0 to NCELL - 1
-    lastBadJ #>= swLastBad[armsw(armIdx) * NCELL + cellIdx]
-  debug("  ", zstr_(armname(armIdx)), " by class: ok ", udec_(clsCnt[clsBase + C_OK]), " flg ", udec_(clsCnt[clsBase + C_FLAGS]), " stale ", udec_(clsCnt[clsBase + C_STALE]), " old ", udec_(clsCnt[clsBase + C_OLD]), " mid ", udec_(clsCnt[clsBase + C_MID]), " nsh ", udec_(clsCnt[clsBase + C_NEWSH]), " zero ", udec_(clsCnt[clsBase + C_ZERO]), " oth ", udec_(clsCnt[clsBase + C_OTHER]), "; elapsed ", sdec_(armElMin[armIdx]), "..", sdec_(armElMax[armIdx]), "; excess trials ", udec_(armExcess[armIdx]))
-  if not bGate
-    debug("NO VERDICT ", zstr_(armname(armIdx)), ": a gating read control (K_CLOCK, K_RDLONG, K_PRIME, K_NWLATE) failed - see RIG FAIL lines")
+    lastBadJ #>= sweptLastBad[armsw(siblingArmIdx) * NCELL + cellIdx]
+  debug("  ", zstr_(armname(siblingArmIdx)), " by class: ok ", udec_(classCount[clsBase + C_OK]), " flg ", udec_(classCount[clsBase + C_FLAGS]), " stale ", udec_(classCount[clsBase + C_STALE]), " old ", udec_(classCount[clsBase + C_OLD]), " mid ", udec_(classCount[clsBase + C_MID]), " nsh ", udec_(classCount[clsBase + C_NEWSH]), " zero ", udec_(classCount[clsBase + C_ZERO]), " oth ", udec_(classCount[clsBase + C_OTHER]), "; elapsed ", sdec_(armElapsedMin[siblingArmIdx]), "..", sdec_(armElapsedMax[siblingArmIdx]), "; excess trials ", udec_(armExcess[siblingArmIdx]))
+  if bGate == FALSE
+    debug("NO VERDICT ", zstr_(armname(siblingArmIdx)), ": a gating read control (K_CLOCK, K_RDLONG, K_PRIME, K_NWLATE) failed - see RIG FAIL lines")
   elseif badTrials == 0
-    debug("ARM-VERDICT ", zstr_(armname(armIdx)), ": HOLDS - the second RDFAST's first long new[s] was read in all ", udec_(armTot[armIdx]), " trials at every gap from 2 to ", udec_(distclk(NDIST - 1)), " clk")
+    debug("ARM-VERDICT ", zstr_(armname(siblingArmIdx)), ": HOLDS - the second RDFAST's first long new[s] was read in all ", udec_(armTotal[siblingArmIdx]), " trials at every gap from 2 to ", udec_(distclk(NDIST - 1)), " clk")
   else
-    debug("ARM-VERDICT ", zstr_(armname(armIdx)), ": DEVIATES - ", udec_(badTrials), " of ", udec_(armTot[armIdx]), " reads wrong (mid = first RDFAST's data ", udec_(clsCnt[clsBase + C_MID]), ", stale ", udec_(clsCnt[clsBase + C_STALE]), "); wrong up to gap ", sdec_(jclk(lastBadJ)), " clk; first at slice ", sdec_(armBadSlice[armIdx]), " phase ", sdec_(armBadPhase[armIdx]), " gap ", sdec_(jclk(armBadDist[armIdx])), " clk: got ", uhex_long_(armBadGot[armIdx]), " expected ", uhex_long_(armBadExp[armIdx]))
+    debug("ARM-VERDICT ", zstr_(armname(siblingArmIdx)), ": DEVIATES - ", udec_(badTrials), " of ", udec_(armTotal[siblingArmIdx]), " reads wrong (mid = first RDFAST's data ", udec_(classCount[clsBase + C_MID]), ", stale ", udec_(classCount[clsBase + C_STALE]), "); wrong up to gap ", sdec_(jclk(lastBadJ)), " clk; first at slice ", sdec_(armBadSlice[siblingArmIdx]), " phase ", sdec_(armBadPhase[siblingArmIdx]), " gap ", sdec_(jclk(armBadDistanceIndex[siblingArmIdx])), " clk: got ", uhex_long_(armBadGot[siblingArmIdx]), " expected ", uhex_long_(armBadExpected[siblingArmIdx]))
 
-PRI report_boundary(armIdx, bGate, pLabel, pNoGate) | sliceIdx, phaseIdx, cellIdx, firstOkJ, badJ, fMinJ, fMaxJ, lastBadJ, lastBadPhase, worstBadJ, unreached, nonMono, safeClk
+PRI report_boundary(boundaryArmIdx, bGate, pLabel, pNoGate) | sliceIdx, phaseIdx, cellIdx, firstOkJ, badJ, fMinJ, fMaxJ, lastBadJ, lastBadPhase, worstBadJ, unreached, nonMono, safeClk
 ' Print the per-slice boundary lines of a swept no-wait arm, then its verdict line.
 '
-' @param armIdx - AR_BNW or AR_DWNW
-' @param bGate - TRUE when the controls this arm needs all passed
+' @param boundaryArmIdx - swept boundary arm id: AR_BNW or AR_DWNW
+' @param bGate - TRUE when every control this verdict depends on passed
 ' @param pLabel - verdict label, e.g. "BOUNDARY NO-WAIT READ"
 ' @param pNoGate - why there is no verdict when bGate is FALSE
 
@@ -934,9 +1044,9 @@ PRI report_boundary(armIdx, bGate, pLabel, pNoGate) | sliceIdx, phaseIdx, cellId
     lastBadJ := -1
     lastBadPhase := -1
     repeat phaseIdx from 0 to NPHASE - 1
-      cellIdx := armsw(armIdx) * NCELL + sliceIdx * NPHASE + phaseIdx
-      firstOkJ := swFirstOk[cellIdx]
-      badJ := swLastBad[cellIdx]
+      cellIdx := armsw(boundaryArmIdx) * NCELL + sliceIdx * NPHASE + phaseIdx
+      firstOkJ := sweptFirstOk[cellIdx]
+      badJ := sweptLastBad[cellIdx]
       if firstOkJ == NDIST
         unreached++
       fMinJ <#= firstOkJ
@@ -950,46 +1060,46 @@ PRI report_boundary(armIdx, bGate, pLabel, pNoGate) | sliceIdx, phaseIdx, cellId
     sliceFirstMax[sliceIdx] := jclk(fMaxJ)
     worstBadJ #>= lastBadJ
     debug("  ", zstr_(pLabel), " slice ", udec_(sliceIdx), ": first all-correct dist over phases ", sdec_(jclk(fMinJ)), "..", sdec_(jclk(fMaxJ)), " clk; last dist with any wrong ", sdec_(jclk(lastBadJ)), " clk (phase ", sdec_(lastBadPhase), "); safe from ", sdec_(jclk(lastBadJ + 1)), " clk")
-  if armkind(armIdx) == KD_WRITE
-    debug("  D wrong writes by class: drop ", udec_(clsCnt[armIdx * NCLS + W_DROP]), " skip ", udec_(clsCnt[armIdx * NCLS + W_SKIP]), " none ", udec_(clsCnt[armIdx * NCLS + W_NONE]), " zero ", udec_(clsCnt[armIdx * NCLS + W_ZERO]), " other ", udec_(clsCnt[armIdx * NCLS + W_OTHER]), " of ", udec_(armTot[armIdx]), " trials; wrong at dist 2: ", udec_(swJ0Bad[SW_D]), " of ", udec_(NCELL * TRIALS))
+  if armkind(boundaryArmIdx) == KD_WRITE
+    debug("  D wrong writes by class: drop ", udec_(classCount[boundaryArmIdx * NCLS + W_DROP]), " skip ", udec_(classCount[boundaryArmIdx * NCLS + W_SKIP]), " none ", udec_(classCount[boundaryArmIdx * NCLS + W_NONE]), " zero ", udec_(classCount[boundaryArmIdx * NCLS + W_ZERO]), " other ", udec_(classCount[boundaryArmIdx * NCLS + W_OTHER]), " of ", udec_(armTotal[boundaryArmIdx]), " trials; wrong at dist 2: ", udec_(sweptAdjacentBad[SW_D]), " of ", udec_(NCELL * TRIALS))
   safeClk := jclk(worstBadJ + 1)
-  if not bGate
+  if bGate == FALSE
     debug("NO VERDICT ", zstr_(pLabel), ": ", zstr_(pNoGate), " - see RIG FAIL lines; the per-slice lines above are raw")
   elseif unreached > 0
     debug(zstr_(pLabel), ": INCONCLUSIVE - ", udec_(unreached), " of ", udec_(NCELL), " slice/phase cells never had all ", udec_(TRIALS), " trials correct at any distance up to ", udec_(distclk(NDIST - 1)), " clk")
   elseif worstBadJ < 0
-    debug(zstr_(pLabel), ": NONE - every no-wait access correct at every distance from 2 clk, all slices and phases (prediction refuted: no arming window observed); FIFO-access excess in ", udec_(armExcess[armIdx]), " of ", udec_(armTot[armIdx]), " trials")
+    debug(zstr_(pLabel), ": NONE - every no-wait access correct at every distance from 2 clk, all slices and phases (prediction refuted: no arming window observed); FIFO-access excess in ", udec_(armExcess[boundaryArmIdx]), " of ", udec_(armTotal[boundaryArmIdx]), " trials")
   else
-    debug("  ", zstr_(pLabel), " detail: worst-case safe from ", sdec_(safeClk), " clk = WAITX #", sdec_(safeClk - NW_WAITX_OFFSET), " after the no-wait instruction; non-monotonic cells ", udec_(nonMono), "; FIFO-access excess (stall) in ", udec_(armExcess[armIdx]), " of ", udec_(armTot[armIdx]), " trials")
+    debug("  ", zstr_(pLabel), " detail: worst-case safe from ", sdec_(safeClk), " clk = WAITX #", sdec_(safeClk - NW_WAITX_OFFSET), " after the no-wait instruction; non-monotonic cells ", udec_(nonMono), "; FIFO-access excess (stall) in ", udec_(armExcess[boundaryArmIdx]), " of ", udec_(armTotal[boundaryArmIdx]), " trials")
     debug(zstr_(pLabel), ": per-slice min..max clocks s0 ", sdec_(sliceFirstMin[0]), "..", sdec_(sliceFirstMax[0]), " s1 ", sdec_(sliceFirstMin[1]), "..", sdec_(sliceFirstMax[1]), " s2 ", sdec_(sliceFirstMin[2]), "..", sdec_(sliceFirstMax[2]), " s3 ", sdec_(sliceFirstMin[3]), "..", sdec_(sliceFirstMax[3]), " s4 ", sdec_(sliceFirstMin[4]), "..", sdec_(sliceFirstMax[4]), " s5 ", sdec_(sliceFirstMin[5]), "..", sdec_(sliceFirstMax[5]), " s6 ", sdec_(sliceFirstMin[6]), "..", sdec_(sliceFirstMax[6]), " s7 ", sdec_(sliceFirstMin[7]), "..", sdec_(sliceFirstMax[7]), "; safe from ", sdec_(safeClk), " clk")
 
 PRI verdict_wrong_value(bGate) | badTrials, clsBase
 ' Print what the wrong no-wait reads returned (arm C: stale vs garbage).
 '
-' @param bGate - TRUE when the read controls all passed
+' @param bGate - TRUE when every control this verdict depends on passed
 
 ' Local Variables:
 ' @local badTrials - wrong B_NW reads
 ' @local clsBase - index of B_NW's first class counter
 
   clsBase := AR_BNW * NCLS
-  badTrials := armTot[AR_BNW] - armGood[AR_BNW]
-  debug("  B wrong reads by class: flg ", udec_(clsCnt[clsBase + C_FLAGS]), " stale ", udec_(clsCnt[clsBase + C_STALE]), " old ", udec_(clsCnt[clsBase + C_OLD]), " mid ", udec_(clsCnt[clsBase + C_MID]), " nsh ", udec_(clsCnt[clsBase + C_NEWSH]), " zero ", udec_(clsCnt[clsBase + C_ZERO]), " oth ", udec_(clsCnt[clsBase + C_OTHER]), " of ", udec_(armTot[AR_BNW]), " trials; C/Z inconsistent with the returned D in ", udec_(armFlagBad[AR_BNW]), "; second read wrong after a right first read in ", udec_(armV2Bad[AR_BNW]))
-  if not bGate
+  badTrials := armTotal[AR_BNW] - armGood[AR_BNW]
+  debug("  B wrong reads by class: flg ", udec_(classCount[clsBase + C_FLAGS]), " stale ", udec_(classCount[clsBase + C_STALE]), " old ", udec_(classCount[clsBase + C_OLD]), " mid ", udec_(classCount[clsBase + C_MID]), " nsh ", udec_(classCount[clsBase + C_NEWSH]), " zero ", udec_(classCount[clsBase + C_ZERO]), " oth ", udec_(classCount[clsBase + C_OTHER]), " of ", udec_(armTotal[AR_BNW]), " trials; C/Z inconsistent with the returned D in ", udec_(armFlagBad[AR_BNW]), "; second read wrong after a right first read in ", udec_(armV2Bad[AR_BNW]))
+  if bGate == FALSE
     debug("NO VERDICT WRONG-VALUE (arm C): a read control (K_CLOCK, K_RDLONG, K_PRIME, K_NWLATE) failed - see RIG FAIL lines")
   elseif badTrials == 0
     debug("VERDICT WRONG-VALUE (arm C): NONE - no no-wait read was wrong, nothing to classify")
-  elseif clsCnt[clsBase + C_STALE] == badTrials
+  elseif classCount[clsBase + C_STALE] == badTrials
     debug("VERDICT WRONG-VALUE (arm C): STALE - all ", udec_(badTrials), " wrong no-wait reads returned the primed FIFO's next old long ", uhex_long_(patold(PRIME_READS)), "; C/Z inconsistent with it in ", udec_(armFlagBad[AR_BNW]), " trials")
-  elseif clsCnt[clsBase + C_ZERO] == badTrials
+  elseif classCount[clsBase + C_ZERO] == badTrials
     debug("VERDICT WRONG-VALUE (arm C): ZERO - all ", udec_(badTrials), " wrong no-wait reads returned zero")
   else
-    debug("VERDICT WRONG-VALUE (arm C): MIXED - of ", udec_(badTrials), " wrong reads: stale ", udec_(clsCnt[clsBase + C_STALE]), " other-old ", udec_(clsCnt[clsBase + C_OLD]), " zero ", udec_(clsCnt[clsBase + C_ZERO]), " other ", udec_(clsCnt[clsBase + C_OTHER]), " new-shifted ", udec_(clsCnt[clsBase + C_NEWSH]), " mid ", udec_(clsCnt[clsBase + C_MID]), " value-ok-flags-wrong ", udec_(clsCnt[clsBase + C_FLAGS]), "; first: ", uhex_long_(armBadGot[AR_BNW]))
+    debug("VERDICT WRONG-VALUE (arm C): MIXED - of ", udec_(badTrials), " wrong reads: stale ", udec_(classCount[clsBase + C_STALE]), " other-old ", udec_(classCount[clsBase + C_OLD]), " zero ", udec_(classCount[clsBase + C_ZERO]), " other ", udec_(classCount[clsBase + C_OTHER]), " new-shifted ", udec_(classCount[clsBase + C_NEWSH]), " mid ", udec_(classCount[clsBase + C_MID]), " value-ok-flags-wrong ", udec_(classCount[clsBase + C_FLAGS]), "; first: ", uhex_long_(armBadGot[AR_BNW]))
 
-PRI verdict_blocking(bGate) | armIdx, clsIdx, totTrials, badTrials, rdfMin, rdfMax, firstArm
+PRI verdict_blocking(bGate) | armIdx, clsIdx, totTrials, badTrials, rdfMin, rdfMax, firstArm, blkClsTotal[NCLS]
 ' Print the classification verdict (arm A: does the D[31]=0 promise hold?).
 '
-' @param bGate - TRUE when K_CLOCK, K_RDLONG and K_PRIME all passed
+' @param bGate - TRUE when every control this verdict depends on passed
 
 ' Local Variables:
 ' @local armIdx - arm id
@@ -999,38 +1109,38 @@ PRI verdict_blocking(bGate) | armIdx, clsIdx, totTrials, badTrials, rdfMin, rdfM
 ' @local rdfMin - fewest clocks a blocking RDFAST took
 ' @local rdfMax - most clocks a blocking RDFAST took
 ' @local firstArm - first A arm with a wrong trial, -1 = none
+' @local blkClsTotal - trials per class, summed over the three A arms
 
   totTrials := 0
   rdfMin := POSX
   rdfMax := NEGX
   firstArm := -1
-  longfill(@rowCnt, 0, NCLS)                                  ' reused: class totals over the A arms
+  longfill(@blkClsTotal, 0, NCLS)
   repeat armIdx from AR_ABLKL to AR_ABLKB
-    totTrials += armTot[armIdx]
-    rdfMin <#= armElMin[armIdx] - expclk(armIdx, 0)
-    rdfMax #>= armElMax[armIdx] - expclk(armIdx, 0)
-    if firstArm == -1 and armBadDist[armIdx] <> -1
+    totTrials += armTotal[armIdx]
+    rdfMin <#= armElapsedMin[armIdx] - expclk(armIdx, 0)
+    rdfMax #>= armElapsedMax[armIdx] - expclk(armIdx, 0)
+    if firstArm == -1 and armBadDistanceIndex[armIdx] <> -1
       firstArm := armIdx
     repeat clsIdx from 0 to NCLS - 1
-      rowCnt[clsIdx] += clsCnt[armIdx * NCLS + clsIdx]
+      blkClsTotal[clsIdx] += classCount[armIdx * NCLS + clsIdx]
   badTrials := block_bad()
-  debug("  teeth: the B_NW no-wait read at dist 2 was wrong in ", udec_(swJ0Bad[SW_B]), " of ", udec_(NCELL * TRIALS), " trials (0 = no arming window reached the next instruction)")
-  debug("  A (blocking) over", udec_(totTrials), " trials: RDFAST clocks ", sdec_(rdfMin), "..", sdec_(rdfMax), " (v35 instruction table 10..17); by class: ok ", udec_(rowCnt[C_OK]), " flg ", udec_(rowCnt[C_FLAGS]), " stale ", udec_(rowCnt[C_STALE]), " old ", udec_(rowCnt[C_OLD]), " mid ", udec_(rowCnt[C_MID]), " nsh ", udec_(rowCnt[C_NEWSH]), " zero ", udec_(rowCnt[C_ZERO]), " oth ", udec_(rowCnt[C_OTHER]), "; second read wrong after a right first read L ", udec_(armV2Bad[AR_ABLKL]), " W ", udec_(armV2Bad[AR_ABLKW]), " B ", udec_(armV2Bad[AR_ABLKB]))
-  if not bGate
+  debug("  teeth: the B_NW no-wait read at dist 2 was wrong in ", udec_(sweptAdjacentBad[SW_B]), " of ", udec_(NCELL * TRIALS), " trials (0 = no arming window reached the next instruction)")
+  debug("  A (blocking) over", udec_(totTrials), " trials: RDFAST clocks ", sdec_(rdfMin), "..", sdec_(rdfMax), " (v35 instruction table 10..17); by class: ok ", udec_(blkClsTotal[C_OK]), " flg ", udec_(blkClsTotal[C_FLAGS]), " stale ", udec_(blkClsTotal[C_STALE]), " old ", udec_(blkClsTotal[C_OLD]), " mid ", udec_(blkClsTotal[C_MID]), " nsh ", udec_(blkClsTotal[C_NEWSH]), " zero ", udec_(blkClsTotal[C_ZERO]), " oth ", udec_(blkClsTotal[C_OTHER]), "; second read wrong after a right first read L ", udec_(armV2Bad[AR_ABLKL]), " W ", udec_(armV2Bad[AR_ABLKW]), " B ", udec_(armV2Bad[AR_ABLKB]))
+  if bGate == FALSE
     debug("NO VERDICT BLOCKING READ: a gating control (K_CLOCK, K_RDLONG or K_PRIME) failed - see RIG FAIL lines")
   elseif rdfMin <= INSTR_CLK
     debug("VERDICT BLOCKING READ: INCONCLUSIVE - a D[31]=0 RDFAST completed in ", sdec_(rdfMin), " clocks (the no-wait time), so the arm did not exercise the blocking wait; RDFAST clocks ", sdec_(rdfMin), "..", sdec_(rdfMax))
   elseif badTrials == 0
     debug("VERDICT BLOCKING READ: CONFIRMED-PROMISE-HOLDS - all ", udec_(totTrials), " next-instruction reads (RFLONG/RFWORD/RFBYTE x 8 slices x 8 phases x ", udec_(TRIALS), ") returned the new first datum with consistent C/Z; RDFAST took ", sdec_(rdfMin), "..", sdec_(rdfMax), " clk")
   else
-    debug("VERDICT BLOCKING READ: ERRATUM-PROMISE-BROKEN - ", udec_(badTrials), " of ", udec_(totTrials), " next-instruction reads wrong (L ", udec_(armTot[AR_ABLKL] - armGood[AR_ABLKL]), " W ", udec_(armTot[AR_ABLKW] - armGood[AR_ABLKW]), " B ", udec_(armTot[AR_ABLKB] - armGood[AR_ABLKB]), "); first in ", zstr_(armname(firstArm)), " slice ", sdec_(armBadSlice[firstArm]), " phase ", sdec_(armBadPhase[firstArm]), ": got ", uhex_long_(armBadGot[firstArm]), " expected ", uhex_long_(armBadExp[firstArm]), "; RDFAST took ", sdec_(rdfMin), "..", sdec_(rdfMax), " clk")
+    debug("VERDICT BLOCKING READ: ERRATUM-PROMISE-BROKEN - ", udec_(badTrials), " of ", udec_(totTrials), " next-instruction reads wrong (L ", udec_(armTotal[AR_ABLKL] - armGood[AR_ABLKL]), " W ", udec_(armTotal[AR_ABLKW] - armGood[AR_ABLKW]), " B ", udec_(armTotal[AR_ABLKB] - armGood[AR_ABLKB]), "); first in ", zstr_(armname(firstArm)), " slice ", sdec_(armBadSlice[firstArm]), " phase ", sdec_(armBadPhase[firstArm]), ": got ", uhex_long_(armBadGot[firstArm]), " expected ", uhex_long_(armBadExpected[firstArm]), "; RDFAST took ", sdec_(rdfMin), "..", sdec_(rdfMax), " clk")
 
-' ===========================================================================
-' MEASURING COG (PASM, cog exec).  PTRA on entry = @mbox (from COGINIT).
-' No debug() in here: this cog has no debug interrupt (DEBUG_COGS).
-' Every timed sequence sits between two GETCTs with nothing else inside;
-' every trial begins with the prime and an egg-beater sync RDLONG.
-' ===========================================================================
+{ MEASURING COG (PASM, cog exec).  PTRA on entry = @mailbox (from COGINIT).
+  No debug() in here: this cog has no debug interrupt (DEBUG_COGS).
+  Every timed sequence sits between two GETCTs with nothing else inside;
+  every trial begins with the prime and an egg-beater sync RDLONG.
+}
 DAT             org     0        ' ---- Measuring Cog ----
 pasm            rdlong  c_newb, ptra[MB_NEW]
                 rdlong  c_oldb, ptra[MB_OLD]
@@ -1047,7 +1157,7 @@ wait_cmd        rdlong  c_arm, ptra                     wz      ' MB_CMD: 0 = id
                 rdlong  c_phase, ptra[MB_PHASE]
                 rdlong  c_ndist, ptra[MB_NDIST]
                 mov     c_off, c_slice
-                shl     c_off, #2                               ' slice s -> byte offset 4*s
+                shl     c_off, #LONG_SHIFT                      ' slice s -> byte offset 4*s
                 mov     c_new, c_newb
                 add     c_new, c_off                            ' FIFO start: new[s]
                 mov     c_new2, c_new
@@ -1316,7 +1426,7 @@ vec_tab         long    v_clock0, v_clockn                      ' K_CLOCK
                 long    v_reb0, v_rebn                          ' E_REBLK
 
 '--- cog data
-c_nowait        long    $8000_0000                              ' RDFAST/WRFAST D: D[31]=1 no-wait, 0 blocks = no wrap
+c_nowait        long    FIFO_NO_WAIT                            ' RDFAST/WRFAST D: D[31]=1 no-wait, 0 blocks = no wrap
 c_w1            long    WR_FIRST
 c_w2            long    WR_SECOND
 c_sent          long    SENTINEL[WGUARD]                        ' contiguous: SETQ block source

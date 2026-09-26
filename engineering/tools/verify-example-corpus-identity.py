@@ -106,6 +106,46 @@ def strip_generated_wrapper(raw: bytes) -> bytes:
     return body.rstrip(b"\n") + b"\n"
 
 
+# --- whole-program archive awareness (sync-manual-examples.py ARCHIVE MODE) ---
+#
+# Some manuals ship whole test programs and PRINT ONLY EXCERPTS of them (P2
+# Errata: 500-1,600-line rigs, 2-15-line excerpts). No block can equal such a
+# file, so the file<->block rule cannot apply; the promise is instead that every
+# excerpt the manual prints is the program's own code: each uncaptioned
+# ```spin2 / ```pasm2 fence must appear, as contiguous lines, in an archive file.
+# Opt-in by the sync tool's archive header sentence, so a document that merely
+# names a file it has not captioned (the app-note caption gap) is NOT excused.
+
+ARCHIVE_SENTINEL = b"It is the whole"
+
+
+def is_archive_file(raw: bytes) -> bool:
+    return (raw.startswith(_BANNER) and ADOPT_SENTINEL in raw
+            and ARCHIVE_SENTINEL in raw[:raw.find(_BANNER, len(_BANNER)) + 1])
+
+
+def uncaptioned_code_fences(md_path: Path):
+    """Yield (lines, source_md, line_no) for each ```spin2/```pasm2 fence with no caption."""
+    lines = md_path.read_text(encoding="utf-8").split("\n")
+    i, n = 0, len(lines)
+    while i < n:
+        s = lines[i].strip()
+        if (s.startswith(FENCE + "spin2") or s.startswith(FENCE + "pasm2")) and "caption=" not in s:
+            body, j = [], i + 1
+            while j < n and lines[j].strip() != FENCE:
+                body.append(lines[j])
+                j += 1
+            yield body, md_path.name, i + 1
+            i = j + 1
+        else:
+            i += 1
+
+
+def contains_contiguous(hay, needle) -> bool:
+    k = len(needle)
+    return k > 0 and any(hay[p:p + k] == needle for p in range(len(hay) - k + 1))
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Verify examples-library files are byte-identical to their opus-master code blocks."
@@ -153,11 +193,26 @@ def main():
             identical.append(caption)
         else:
             mismatched.append((caption, src, first_diff(file_bytes, block)))
+    archive = {}         # name -> body lines, for whole-program archive files
     for name in sorted(lib_files):
         if name not in blocks:
-            orphan_lib.append(name)
+            raw = lib_files[name].read_bytes()
+            if is_archive_file(raw):
+                archive[name] = strip_generated_wrapper(raw).decode("utf-8").split("\n")
+            else:
+                orphan_lib.append(name)
 
-    green = not (mismatched or orphan_block or orphan_lib or duplicates)
+    # Archive mode: every uncaptioned code fence must be an excerpt of an archive file.
+    excerpt_ok, excerpt_bad = 0, []
+    if archive:
+        for md in sorted(opus.rglob("*.md")):
+            for body, src, line in uncaptioned_code_fences(md):
+                if any(contains_contiguous(a, body) for a in archive.values()):
+                    excerpt_ok += 1
+                else:
+                    excerpt_bad.append((src, line, body[0] if body else ""))
+
+    green = not (mismatched or orphan_block or orphan_lib or duplicates or excerpt_bad)
 
     # ---- report ----
     out = []
@@ -168,7 +223,15 @@ def main():
     out.append(f"- identical: **{len(identical)}** · mismatched: **{len(mismatched)}** · "
                f"orphan blocks: **{len(orphan_block)}** · orphan library files: **{len(orphan_lib)}** · "
                f"duplicate captions: **{len(duplicates)}**")
+    if archive:
+        out.append(f"- whole-program archive files: **{len(archive)}** · printed excerpts found "
+                   f"verbatim in them: **{excerpt_ok}** · excerpts NOT found: **{len(excerpt_bad)}**")
     out.append("")
+    if excerpt_bad:
+        out.append("## EXCERPT DRIFT — a printed fence is not contiguous in any archive file")
+        for src, line, first in excerpt_bad:
+            out.append(f"- `{src}:{line}` — begins `{first.strip()[:60]}`")
+        out.append("")
     if mismatched:
         out.append("## MISMATCH — loose file differs from its opus-master block")
         for caption, src, diff in mismatched:
@@ -204,9 +267,14 @@ def main():
             print(f"ORPHAN-LIB {name}")
         for caption, a, b in duplicates:
             print(f"DUPLICATE {caption} ({a} & {b})")
+        for src, line, first in excerpt_bad:
+            print(f"EXCERPT-DRIFT {src}:{line} ({first.strip()[:60]})")
+        arch = (f", {len(archive)} archive files with {excerpt_ok} excerpts verbatim"
+                f"{', ' + str(len(excerpt_bad)) + ' drifted' if excerpt_bad else ''}"
+                if archive else "")
         print(f"{'GREEN' if green else 'RED'}: {len(identical)}/{len(blocks)} identical, "
               f"{len(mismatched)} mismatched, {len(orphan_block)+len(orphan_lib)} orphans, "
-              f"{len(duplicates)} duplicates ({manual.name})")
+              f"{len(duplicates)} duplicates{arch} ({manual.name})")
     else:
         print(report)
 
