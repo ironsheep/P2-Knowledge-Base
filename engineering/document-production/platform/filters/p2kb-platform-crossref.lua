@@ -5,6 +5,7 @@
     "Chapter 8"   -> the Chapter 8 header
     "Appendix C"  -> the Appendix C header
     "Section 8.2" -> the 8.2 header
+    "Erratum E3"  -> the "Erratum E3: ..." header (errata manuals)
     "§8.2"        -> the 8.2 header
 
   Two passes over the document:
@@ -53,6 +54,7 @@
 local chapters   = {}   -- ["8"]  = "chapter-8-frequency-generation-nco"
 local appendices = {}   -- ["C"]  = "appendix-c-..."
 local sections   = {}   -- ["8.2"]= the identifier pandoc assigned to that header
+local errata     = {}   -- ["3"]  = "ch-e3"  (an errata manual's "# Erratum E3: ..." heading)
 
 -- ---------- Pass 1: harvest header identifiers ----------
 local function harvest(h)
@@ -63,6 +65,8 @@ local function harvest(h)
   if c then chapters[c] = id end
   local a = txt:match("^Appendix%s+([A-Za-z])")
   if a then appendices[a:upper()] = id end
+  local e = txt:match("^Erratum%s+E(%d+)")
+  if e then errata[e] = id end
   local s = txt:match("^(%d+%.%d[%d%.]*)")
   if s then sections[s] = id end
   return nil
@@ -84,6 +88,11 @@ local function resolve(keyword, tok)
   elseif keyword == "Section" then
     local num, rest = tok:match("^(%d+%.%d[%d%.]*)(.*)$")
     if num and sections[num] then return sections[num], num, rest end
+  elseif keyword == "Erratum" then
+    -- "Erratum E3" -> the "# Erratum E3: ..." heading (P2 Errata numbers its
+    -- chapters by erratum; the pagination filter recognises the same heading)
+    local num, rest = tok:match("^E(%d+)(.*)$")
+    if num and errata[num] then return errata[num], "E" .. num, rest end
   end
   return nil
 end
@@ -114,7 +123,8 @@ local function rewrite(inlines)
       -- Both render identically: pandoc's LaTeX writer emits a newline for SoftBreak,
       -- which TeX reads as a space, so the emitted Space below is the same output.
       local sep = inlines[i+1]
-      if kw and (kw == "Chapter" or kw == "Ch" or kw == "Appendix" or kw == "Section")
+      if kw and (kw == "Chapter" or kw == "Ch" or kw == "Appendix" or kw == "Section"
+                 or kw == "Erratum")
          and sep and (sep.t == "Space" or sep.t == "SoftBreak")
          and inlines[i+2] and inlines[i+2].t == "Str" then
         local id, core, rest = resolve(kw, inlines[i+2].text)
