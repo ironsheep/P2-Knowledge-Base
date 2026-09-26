@@ -99,6 +99,11 @@ MARK_BEGIN = "'' ===============================================================
 # and a prefix match on the banner pulls un-adopted documents into checks they
 # should not face.
 ADOPT_SENTINEL = "This file is an EXAMPLE from the manual above."
+# The words that follow ADOPT_SENTINEL in an ARCHIVE header, and nowhere else.
+# verify-example-corpus-identity.py detects archive files by the same words
+# (its ARCHIVE_SENTINEL); change one and change the other, or that gate files
+# every archive program as an orphan and goes RED.
+ARCHIVE_SENTINEL = "It is the whole"
 AUTHORS = "Iron Sheep Productions, LLC"
 EMAIL = "stephen@ironsheep.biz"
 
@@ -192,6 +197,11 @@ def git(*args, default=""):
     return out.stdout.strip() or default
 
 
+def heading_text(ln: str, level: int) -> str:
+    """A '#'*level heading's title, with its {#anchor} stripped."""
+    return re.sub(r"\s*\{#[^}]*\}\s*$", "", ln[level + 1:]).strip()
+
+
 def blocks_with_context(md: Path):
     """Yield (caption, body_text, enclosing_heading) per captioned fence.
 
@@ -206,10 +216,10 @@ def blocks_with_context(md: Path):
     while i < n:
         ln = lines[i]
         if CHAPTER_RE.match(ln):
-            chapter = re.sub(r"\s*\{#[^}]*\}\s*$", "", ln[2:]).strip()
+            chapter = heading_text(ln, 1)
             heading = ""
         elif ln.startswith("## "):
-            heading = re.sub(r"\s*\{#[^}]*\}\s*$", "", ln[3:]).strip()
+            heading = heading_text(ln, 2)
         s = ln.strip()
         if s.startswith("```") and 'caption="' in s and ".spin2" in s:
             a = s.index('caption="') + len('caption="')
@@ -245,7 +255,7 @@ def chapters_naming(opus: Path):
         chapter = ""
         for ln in md.read_text(encoding="utf-8").split("\n"):
             if CHAPTER_RE.match(ln):
-                chapter = re.sub(r"\s*\{#[^}]*\}\s*$", "", ln[2:]).strip()
+                chapter = heading_text(ln, 1)
                 if chapter not in order:
                     order.append(chapter)
                 continue
@@ -377,7 +387,7 @@ def build_header(fname, purpose, doc_title, version, where, started, updated,
         # below would be false. It keeps ADOPT_SENTINEL verbatim: that sentence
         # is how split_file() and the adoption check find a generated header.
         L += ["''",
-              f"''   {ADOPT_SENTINEL} It is the whole",
+              f"''   {ADOPT_SENTINEL} {ARCHIVE_SENTINEL}",
               "''   program the chapters listed above name; where the manual",
               "''   quotes it, it quotes excerpts.",
               "''", MARK_BEGIN, ""]

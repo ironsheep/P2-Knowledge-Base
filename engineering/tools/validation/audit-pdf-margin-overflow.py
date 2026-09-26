@@ -176,14 +176,14 @@ def main():
     first, last = max(1, args.first), min(doc.page_count, args.last)
     for pno in range(first, last + 1):
         page = doc[pno - 1]
-        ys = [ln['bbox'][3] for bl in page.get_text('dict')['blocks']
-              for ln in bl.get('lines', [])]
-        if ys:
-            page_bottoms.append(max(ys))
+        ys = []
         for bl in page.get_text('dict')['blocks']:
             for ln in bl.get('lines', []):
+                ys.append(ln['bbox'][3])
                 t = ''.join(s['text'] for s in ln['spans']).strip()
                 low.append((pno, ln['bbox'][3], 'text', t))
+        if ys:
+            page_bottoms.append(max(ys))
         for dr in page.get_drawings():
             low.append((pno, dr['rect'].y1, 'drawing', ''))
     # The platform geometry fixes the bottom margin (foundation.sty: bottom=0.75in),
@@ -194,12 +194,11 @@ def main():
     paper = doc[0].rect.height
     body_bottom = paper - args.bottom_margin
     bottom_hits = []
-    if True:
-        for pno, y1, kind, t in low:
-            if pno == 1:
-                continue
-            if y1 > paper or y1 - body_bottom > args.tolerance:
-                bottom_hits.append((y1 - body_bottom, pno, kind, t, y1 > paper))
+    for pno, y1, kind, t in low:
+        if pno == 1:
+            continue
+        if y1 > paper or y1 - body_bottom > args.tolerance:
+            bottom_hits.append((y1 - body_bottom, pno, kind, t, y1 > paper))
     worst = {}
     for over, pno, kind, t, off in bottom_hits:       # one line per page, the worst
         if pno not in worst or over > worst[pno][0]:

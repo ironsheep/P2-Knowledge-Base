@@ -115,6 +115,7 @@ def strip_generated_wrapper(raw: bytes) -> bytes:
 # ```spin2 / ```pasm2 fence must appear, as contiguous lines, in an archive file.
 # Opt-in by the sync tool's archive header sentence, so a document that merely
 # names a file it has not captioned (the app-note caption gap) is NOT excused.
+# Must match sync-manual-examples.py's ARCHIVE_SENTINEL, which writes it.
 
 ARCHIVE_SENTINEL = b"It is the whole"
 

@@ -621,11 +621,17 @@ def comment_text_of_line(P, k):
     return "".join(ch for c, ch in enumerate(line) if P["mask"][s + c] == COMMENT)
 
 
+def block_lines(P, b, view="cvl"):
+    """Yield (line, text) for each line of block b in the given view, with the
+    block keyword (first 3 columns of the opening line) cut off."""
+    for k in range(b["start"], b["end"]):
+        yield k, P[view][k][3:] if k == b["start"] else P[view][k]
+
+
 def var_names(P, b):
     """[(line, name)] declared in a VAR block."""
     out = []
-    for k in range(b["start"], b["end"]):
-        code = P["cvl"][k][3:] if k == b["start"] else P["cvl"][k]
+    for k, code in block_lines(P, b):
         if not code.strip():
             continue
         for item in split_top(code):
@@ -642,8 +648,7 @@ def dat_labels(P, b):
     a data keyword. Meant for DATA-only blocks (a PASM mnemonic would be taken
     for a label, which is why the callers exempt blocks containing ORG)."""
     out = []
-    for k in range(b["start"], b["end"]):
-        code = P["cvl"][k][3:] if k == b["start"] else P["cvl"][k]
+    for k, code in block_lines(P, b):
         toks = code.split()
         if toks and toks[0].lower() not in DATA_KEYWORDS \
                 and IDENT_RE.fullmatch(toks[0]):
@@ -655,8 +660,7 @@ def block_has_org(P, b):
     """True when the DAT holds PASM: an ORG/ORGH as the first token of a line,
     or as the first token after the keyword on the DAT line (`DAT  org 0`),
     or after a label (`entry  org`)."""
-    for k in range(b["start"], b["end"]):
-        code = P["svl"][k][3:] if k == b["start"] else P["svl"][k]
+    for _, code in block_lines(P, b, "svl"):
         toks = [t.lower() for t in code.split()[:2]]
         if "org" in toks or "orgh" in toks:
             return True
@@ -669,8 +673,7 @@ def con_names(P):
     for b in P["blocks"]:
         if b["kind"] != "CON":
             continue
-        for k in range(b["start"], b["end"]):
-            code = P["cvl"][k][3:] if k == b["start"] else P["cvl"][k]
+        for k, code in block_lines(P, b):
             if not code.strip():
                 continue
             for item in split_top(code):
@@ -1137,8 +1140,7 @@ def rule_6_4(P):
                                            f"{m['name']}() is a literal"))
     for b in P["blocks"]:
         if b["kind"] == "VAR" or (b["kind"] == "DAT" and not block_has_org(P, b)):
-            for k in range(b["start"], b["end"]):
-                code = P["cvl"][k][3:] if k == b["start"] else P["cvl"][k]
+            for k, code in block_lines(P, b):
                 for lm in ARRAY_LIT_RE.finditer(code):
                     if (lit_value(lm.group(1)) or 0) >= 2:
                         out.append((k + 1, f"{b['kind']} array size "
