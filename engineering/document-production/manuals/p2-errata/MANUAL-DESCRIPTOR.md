@@ -21,7 +21,7 @@ high_risk_quant:
 fragile_areas:
   - "Classification: class 2 items (RDFAST/WRFAST readiness if blocking mode holds; any documentation gap) must never enter — peer manual only"
   - "No HDL quotation, signal/module names or line refs from the clean-room design material (decision 5)"
-  - "No internal ids in reader text (EF/VO/F/brief names); the chip revision stated once, in the front matter"
+  - "No internal ids in reader text (EF/VO/F/brief names); the chip revision (Rev C) stated once, in the front matter"
   - "Scope qualifiers the bench earned: E1 tested ALTD only as the intervening instruction; E3 conditions (four-cog group, wraps missed while no cog of the group ran)"
   - "KB lag: E3–E5 not yet in the KB YAML (F-462..466); the manual cites silicon, the KB must follow"
 ---
@@ -41,6 +41,7 @@ Everything not listed above is inherited from the central skill body and the gui
   `voice-guide.md` §2.
 - **Code (Dimensions #3/#3b):** PASM2/Spin2 fences; walkthrough excerpts verbatim from
   bench-run rigs; workaround snippets compiled with `pnut-ts` 1.55.8; K=76.
-- **Open before public release:** the study's formal credit name; the chip revision line;
+- **Chip revision:** Rev C (Stephen, 2026-09-26), stated once in the front matter's Sources.
+- **Open before public release:** the study's formal credit name;
   Parallax review of the whole manual; a small standalone reproducer per erratum, bench-run,
   in the examples archive.

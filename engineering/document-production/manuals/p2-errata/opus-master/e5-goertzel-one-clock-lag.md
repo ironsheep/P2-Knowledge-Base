@@ -71,7 +71,7 @@ When a burst ends, both registers stop updating. The last product formed stays i
 
 A zero-term burst works for the same reason. Its first clock moves the held product into the accumulator, and its own products are all zero, so it leaves zero behind.
 
-In SINC1 mode the product register is replaced on every clock. The study's reading does not settle the size of the shortfall in SINC2 mode (D[23] = `%1`), and SINC2 was not tested.
+In SINC1 mode the product register is replaced on every clock. In SINC2 mode (D[23] = `%1`), by the study's reading, the register keeps its value through a zero burst instead of being replaced by zero, so the zero-burst workaround does not apply there. SINC2 was not tested.
 
 ## How it was proven {#sec-e5-proven}
 

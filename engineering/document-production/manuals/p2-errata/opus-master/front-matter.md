@@ -101,7 +101,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 ## Sources
 
 - **Parallax Propeller 2 Documentation v35 (Rev B/C)** (Chip Gracey, Parallax Inc.): what the design says, including its KNOWN BUGS section.
-- **Tests on real P2 parts** (P2 Knowledge Base Project): every erratum in this manual was confirmed on silicon by a test program that is included in the examples archive.
+- **Tests on real P2 parts** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
 - **P2 Knowledge Base YAML** (Iron Sheep Productions / P2 Knowledge Base Project): instruction semantics and encodings.
 
 ## About This Draft
