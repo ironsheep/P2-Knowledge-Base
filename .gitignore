@@ -266,7 +266,10 @@ engineering/document-production/**/*.bin
 # authored in the manual's audit/verification-tests/ (ignored above, like every
 # manual's) and committed by replication to hardware-verification/campaigns/ once a
 # hardware run has produced a finding.
-engineering/document-production/manuals/p2-errata/code-validation/test-briefs/
+# The pattern is test-briefs* ON PURPOSE (2026-09-26): each new golden-source delivery
+# arrives with the previous set renamed aside (test-briefs-OLD/), and the exact-name
+# rule left that renamed folder untracked-and-exposed to any stray `git add`.
+engineering/document-production/manuals/p2-errata/code-validation/test-briefs*/
 
 # Color bar test directory (temporary testing)
 engineering/document-production/workspace/p2-assembly-language-manual/color-bar-test/
