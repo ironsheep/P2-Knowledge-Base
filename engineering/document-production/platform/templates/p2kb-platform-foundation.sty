@@ -117,7 +117,13 @@
 \counterwithin{table}{chapter}
 
 \RequirePackage[english]{babel}
-\RequirePackage[top=0.75in,bottom=0.75in,left=1in,right=1in]{geometry}
+% headheight=14pt: fancyhdr needs 13.6pt for the running head (it warned on every page of
+% every manual at 12pt -- PUNCH-LIST "fancyhdr headheight"). The head sits OUTSIDE the text
+% body (geometry's default, no includehead), so this reserves header space only; the body
+% and pagination do not move. Verified 2026-09-26 on P2 Errata before/after: 71 = 71 pages,
+% every page's text identical, every body line at the same position; the head and its rule
+% sit 1.6pt higher; the 208 warnings go to 0.
+\RequirePackage[top=0.75in,bottom=0.75in,left=1in,right=1in,headheight=14pt]{geometry}
 \RequirePackage{tcolorbox}
 \RequirePackage{makeidx}
 \RequirePackage{calc}

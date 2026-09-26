@@ -560,7 +560,7 @@ The augment is chosen so that its two fields can be told apart:
   LO         = AUGV & $1FF         ' $055 = the target's own 9-bit #S
 ```
 
-A third constant, `AUTOINC`, isolates the same bits 17:9 as `(AUGV >> ALT_INC_SHIFT) & $1FF`, `ALT_INC_SHIFT` being 9: 5, the value the erratum moves `idx` by.
+A third constant, `AUTOINC`, shifts `AUGV` right by `ALT_INC_SHIFT` (9) and masks it with `$1FF`, which leaves bits 17:9: the value 5, the step by which the erratum moves `idx`.
 
 The workaround arm and the `ALTD` test arm differ only in the form of the `ALTD`'s `S`.
 Each arm fills the window, runs its sequence, and dumps the window and `idx` to hub RAM:

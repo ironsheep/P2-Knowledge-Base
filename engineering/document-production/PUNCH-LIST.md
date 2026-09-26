@@ -340,7 +340,34 @@ owed for it alone.
 
 ---
 
-## `fancyhdr` headheight is 12pt where the package needs 13.6pt (cross-manual, platform) — OPEN
+## Every inline code span logs "\oval, \circle, or \line size unavailable" (cross-manual, platform) — OPEN (finding, cause unknown)
+
+**Found 2026-09-26** auditing the P2 Errata v0.2.0 compile log before a designer-review build:
+**3,159** warnings `LaTeX Warning: \oval, \circle, or \line size unavailable on input line N`,
+where every N is a `.tex` line carrying a `\passthrough{\lstinline!…!}` inline code span. The
+same warning is in every manual's log (Assembly Reference 2,961, I/O & Smart Pins 789, deSilva
+462, Getting Started 390 …), so it comes from the shared platform's inline-code styling, not a
+document. No gate reads it, the PDFs render, and the margin/overfull gates are clean where it
+fires. **Not yet understood** — whether a rounded background or rule around inline code falls
+back to a nearest size (cosmetic) or drops a drawn element (a visible defect). To decide: find
+the inline-code macro in `p2kb-platform-content.sty` / the code-coloring filter that draws with
+picture primitives, then compare one inline span rendered with and without it at high zoom.
+
+---
+
+## `fancyhdr` headheight is 12pt where the package needs 13.6pt (cross-manual, platform) — RESOLVED 2026-09-26
+
+> **Verified 2026-09-26** (daemon runs `p2-errata-headheight-before` / `-after`, same markdown):
+> 71 = 71 pages; every page's text identical; every body line at the identical position (all 71
+> pages); the running head and its rule sit 1.6pt higher (rule y 36.0 → 34.4); the log's
+> `\headheight is too small` warnings 208 → 0; overfull and margin gates unchanged. Every other
+> manual takes the fixed `foundation.sty` on its next build (Platform Freshness Ledger line).
+
+> **2026-09-26:** the carve-out's expiry ("the next deliberate `platform/` change") was reached by
+> two filter changes that day (pagination: `Erratum EN`; tables: EEEE header) and missed at the
+> time; caught in the P2 Errata compile-log audit (208 warnings). Fix: `headheight=14pt` on the
+> platform `geometry` line. Verification: P2 Errata rendered before and after on the daemon, every
+> page's text and position compared; result recorded here when it lands.
 
 **Found 2026-09-21** during the Streamer Guide v1.1.2 prepare, by reading the compile log rather than
 trusting its exit code. The v1.1.1 build's log carries the warning **267 times** — once per page that
