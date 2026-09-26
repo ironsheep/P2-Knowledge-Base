@@ -1,0 +1,688 @@
+'' =============================================================================
+''
+''   File....... test-so9-dac-mode-adc-enable.spin2
+''   Purpose.... Decide prediction SO9 on SILICON: does OUT switch the ADC in a DAC smart-pin mode with TT = %00
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 26 Sep 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED (brief BRIEF-SO9, Parts 2 and 5)
+    The published %TT table (P2 Documentation, p2-documentation.txt
+    :7652-7657) says, for the smart-pin modes:
+      "for all smart pin modes (%SSSSS > %00000):
+         x0 = output disabled, regardless of DIR
+         x1 = output enabled, regardless of DIR
+       for DAC smart pin modes (%SSSSS = %00001..%00011):
+         0x = OUT enables ADC in DAC_MODE, M[7:0] overridden"
+    Read as published, TT = %00 in a DAC smart mode is a pin whose output is
+    off and whose ADC is switched by OUT.
+    Prediction under test (an independent reading of the logic): with TT
+    bit 0 clear, raising OUT runs NOTHING -- the ADC never runs. With TT bit 0
+    set, OUT runs the ADC as published, and the fast DAC is on and drives the
+    pin while it does. Nobody has observed this on a part; this program is
+    written to be able to show it WRONG, and the published table says it is.
+
+  RIG
+    Any P2 board, NOTHING attached to P4 or P5 (the run sheet keeps P0..P7
+    free). Pin P = PIN_P = 4 (the pin under test) and P+1 = PIN_NBR = 5 (the
+    observer). Change PIN_P in the CON block to move the pair; PIN_P must be
+    0..30 so that P+1 is in INA. Pin P is DRIVEN by the fast DAC whenever TT
+    bit 0 is set (C1, C2) and as a plain output in the path control -- do not
+    choose a pin the board uses for anything else.
+
+  DEBUGGER (EF-057)
+    DEBUG_COGS = %0000_0001: the debug interrupt lives in cog 0 only. Every
+    pin operation and every INA read runs in a dedicated PASM cog started by
+    COGINIT from the DAT block below; cog 0 only checks constants, reads the
+    hub mailbox and reports.
+
+  CONFIGURATION WORDS, FIELD BY FIELD (published fields only)
+    WRPIN D layout (p2-documentation.txt:7572):
+      D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
+          [31:28] [27:24] [23:21] [20:8] [7:6] [5:1] [0]
+    ("The M[12:0] bits within the WRPIN instruction's D[20:8] operand go
+    directly to these bits", :7865-7866.)
+
+    Pin P, TT = %00:  $0014_0002 = %0000_0000_000_1010000000000_00_00001_0
+      %AAAA  = %0000  this pin's read state (:7578; unused by these modes)
+      %BBBB  = %0000
+      %FFF   = %000   A, B (:7604)
+      %M     = %1_0100_0000_0000 (D[20] and D[18] set)
+               M[12:10] = %101 -> "'DAC_MODE' is enabled when
+                          M[12:10] = %101" (:7638)
+               M[9:8]   = %00  -> Spin2 v55 P_DAC_990R_3V "DAC 990 ohm,
+                          3.3V peak, ADC 1x -> IN" (spin2-v55-text.txt:1476)
+               M[7:0]   = 0    -> "M[7:0] overridden" in the DAC smart modes
+                          (:7656; :7903 "overrides M[7:0] to feed the pin's
+                          8-bit DAC pseudo-random data")
+      %TT    = %00    -> x0 "output disabled, regardless of DIR" (:7653);
+                         0x "OUT enables ADC in DAC_MODE" (:7656)
+      %SSSSS = %00001 -> "DAC noise" with M[12:10] = %101 (:7685-7691,
+                         :7902); needs no WXPIN/WYPIN setup
+      bit 0  = 0      (layout :7572)
+    Pin P, TT = %01:  $0014_0042 = the word above with D[6] set
+      %TT    = %01    -> x1 "output enabled, regardless of DIR" (:7654);
+                         0x "OUT enables ADC in DAC_MODE" (:7656)
+    Pin P+1:          $7000_0000 = %0111_0000_000_0000000000000_00_00000_0
+      %AAAA  = %0111  0xxx "true" (:7576), x111 "relative -1 pin's read
+                      state" (:7585) -> A = pin P's read state
+      %FFF   = %000   "A, B"; "The resultant 'A' will drive the IN signal
+                      in non-smart-pin modes" (:7604, :7615)
+      %M     = 0      Spin2 v55 P_LOGIC_A (default) "Logic level A -> IN,
+                      output OUT" (spin2-v55-text.txt:1456)
+      %TT    = %00, %SSSSS = %00000: smart pin off, "DIR enables output"
+                      (:7640-7641); DIR stays LOW -> P+1 never drives.
+    Cross-check, from the Spin2 v55 symbol table (spin2-v55-text.txt:1432,
+    :1456, :1476, :1521-1522, :1529, :1531):
+      $0014_0002 = P_DAC_990R_3V | P_TT_00 | P_DAC_NOISE
+      $0014_0042 = P_DAC_990R_3V | P_TT_01 | P_DAC_NOISE   (P_TT_01 = P_OE)
+      $7000_0000 = P_MINUS1_A | P_LOGIC_A | P_TT_00 | P_NORMAL
+    Cog 0 decodes all three words into these fields at run time, prints
+    them, and gates on them and on the symbol compositions (control W).
+
+  OBSERVABLE
+    Pin P's own IN is not read. Pin P+1, configured with $7000_0000 and
+    DIR low, carries pin P's read state on its IN, which is bit P+1 of INA.
+    One SAMPLE = 4096 consecutive reads of INA in a REP loop (6 clocks per
+    read, 24,576 clocks), counting the reads in which bit P+1 = 1.
+
+  SEQUENCE (measuring cog; brief Part 5)
+    once   : P+1: DIRL, WRPIN $7000_0000, OUTL (DIR stays low all run)
+    K pre  : path control (below)
+    5 rounds, each C1, C2, C3, C4 in that order. For each condition:
+             DIRL P; WRPIN P with the word; DIRH P; OUTL or OUTH P (set
+             explicitly, whatever the previous condition left); WAITX
+             SETTLE_CLK (10,000 >= the brief's 1000 clocks); one sample.
+      C1 : $0014_0042 (TT = %01), OUT low   brief: fast DAC on, ADC off
+      C2 : $0014_0042 (TT = %01), OUT high  brief: fast DAC on, ADC on
+      C3 : $0014_0002 (TT = %00), OUT low   brief: nothing on
+      C4 : $0014_0002 (TT = %00), OUT high  brief: nothing on (the defect)
+                                            table: ADC on, output off
+    K post : path control again
+    end    : both pins DIRL, WRPIN #0, OUTL (smart pin off, output released)
+
+  CONTROLS (gating -- a failure prints RIG FAIL and NO VERDICT)
+    W : PIN_P in 0..30; each configuration word decodes to the fields
+        above and equals its Spin2 symbol composition.
+    K : path control, before AND after the rounds. Pin P as a plain pin
+        (WRPIN #0): DRVH -> P+1 must read 4096 of 4096; DRVL -> 0 of 4096.
+        Proves the observer sees pin P's read state and the sampler counts
+        every read. Fails if something is attached to P or P+1.
+    T : the measuring cog reports done within RIG_TIMEOUT_SEC.
+    The brief's own control -- C2 separates from C1 -- is NOT a rig gate: its
+    failure is the brief's INCONCLUSIVE outcome, reported as such.
+
+  PRE-REGISTERED OUTCOMES (fixed before the run; printed by the program)
+    X SEPARATES from Y when every sample of X lies outside the range from
+    the smallest to the largest sample of Y (brief Part 5).
+    Control : C2 separates from C1 -- the reading sees the ADC at TT = %01.
+    CONFIRMED    : C2 sep C1, C4 does NOT sep C3, C4 sep C2.
+                   OUT does nothing at TT = %00; what TT = %00 with OUT high
+                   produces is not the running ADC.
+    REFUTED      : C2 sep C1, C4 sep C3, C4 does NOT sep C2.
+                   OUT runs the ADC at TT = %00, as the published %TT table
+                   states; the brief's reading is wrong.
+    INCONCLUSIVE : C2 does NOT sep C1 (the reading does not show the ADC,
+                   whatever C3 and C4 show); or C2 sep C1 and C4 sep BOTH C3
+                   and C2 (a pattern neither side predicts); or C2 sep C1 and
+                   C4 sep NEITHER (the ranges do not discriminate).
+    C1 and C3 (OUT low) measure what pin P's read state carries with the ADC
+    off.
+    The brief marks that UNDETERMINED; no value is predicted, the samples
+    are printed in their own section.
+
+  DEPENDS ON CLAIMS THE BRIEF MARKS UNDETERMINED
+    - what the pin's read state carries in the DAC state with the ADC off:
+      measured (C1, C3), never assumed; the verdict compares samples only
+      with each other.
+    - whether the ADC's decision stream in this state holds both values: if
+      it sits at the ADC-off value, C2 does not separate from C1 and the run
+      is INCONCLUSIVE, not a refutation.
+    - whether the fast DAC's drive is visible through an external load: not
+      relied on (nothing is attached).
+
+  DEVIATION FROM THE BRIEF'S STEP LIST
+    Each condition issues DIRL before its WRPIN. The brief's step list is
+    WRPIN, DIRH, OUT. P2 Documentation :7855 says "A smart pin should be
+    configured while its DIR bit is low, holding it in reset", so every
+    condition starts from a smart-pin reset and no condition's state carries
+    into the next through the running smart pin. OUT is still set after
+    DIRH, as the brief orders it.
+
+  VERIFIED OPCODES AND DATA (pnut-ts -d -l v1.55.8 build 9/19/2026, read
+  from the .lst hub image; object offsets, cog addresses in brackets)
+    CON values in the symbol table: CFG_DAC_TT00 = SYM_DAC_TT00 = $0014_0002,
+      CFG_DAC_TT01 = SYM_DAC_TT01 = $0014_0042, CFG_NBR = SYM_NBR = $7000_0000.
+    DAT longs: $118 [$035] cfg_tt00_ = $0014_0002   $11C [$036] cfg_tt01_
+      = $0014_0042   $120 [$037] cfg_nbr_ = $7000_0000   $124 [$038] reads_
+      = $0000_1000 (4096)
+    wrpin cfg_nbr_, #5     $FC046E05  1100000 0LI: L=0 D=$037, I=1 S=#5
+    wrpin cfg_, #4         $FC047204  L=0 D=$039 (cfg_), I=1 S=#4
+    wrpin #0, #4 / #0, #5  $FC0C0004 / $FC0C0005  L=1 I=1
+    mov cfg_, cfg_tt01_    $F6007236  (C1/C2)   mov cfg_, cfg_tt00_ $F6007235 (C3/C4)
+    dirl #4 / dirh #4      $FD640840 / $FD640841
+    outl #4 / outh #4      if_z $AD640848 / if_nz $5D640849 (after cmp outlvl_,#0 wz
+                           $F20C7400)
+    drvh #4 / drvl #4      $FD640859 / $FD640858 (path control)
+    dirl #5 / outl #5      $FD640A40 / $FD640A48 (observer, DIR low all run)
+    waitx ##10000          AUGD $FF800013 + $FD66201F
+    rep #3, reads_         $FCD80638  1100110 1LI: L=1 D=#3, I=0 S=$038 (reads_)
+    mov insnap_, ina       $F6007BFE  S=$1FE (INA as the S operand)
+    testb insnap_, #5 wc   $F4147A05  C=1, I=1, S=#5 (bit P+1)
+    if_c add count_, #1    $C1047801
+    wrlong count_, ptrb    $FC647980  S=$180 (PTRB)
+    wrlong #1, ptra        $FC6C0300  done flag, after both pins are cleared
+
+  HOW TO RUN
+    Compile: pnut-ts -d test-so9-dac-mode-adc-enable.spin2
+    Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10). The
+    engine runs about 5 ms; the report prints about 70 lines. Done when you
+    see one "VERDICT: ..." line (or "NO VERDICT"), then "=== END ===" and
+    DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  PIN_P             = 4                 ' pin under test (DAC smart mode)
+  PIN_NBR           = PIN_P + 1         ' observer pin: A input = relative -1 pin = PIN_P
+  PIN_P_MIN         = 0
+  PIN_P_MAX         = 30                ' PIN_NBR must be a pin of INA (0..31)
+
+  ROUNDS            = 5                 ' C1..C4 in order, five times over
+  READS_PER_SAMPLE  = 4096              ' INA reads per sample
+  SETTLE_CLK        = 10_000            ' WAITX after every change (brief: >= 1000)
+  RIG_TIMEOUT_SEC   = 2                 ' host wait cap; the engine runs about 5 ms
+  MBOX_DONE         = 1                 ' mailbox[MB_DONE] once the pins are safe
+
+  ' plain-pin path control: expected counts of P+1 = 1 out of READS_PER_SAMPLE
+  K_HIGH_EXPECT     = READS_PER_SAMPLE  ' pin P driven high
+  K_LOW_EXPECT      = 0                 ' pin P driven low
+
+  ' OUT level the measuring cog sets on pin P for a condition
+  OUT_LOW           = 0
+  OUT_HIGH          = 1
+
+CON ' ---- Configuration Words ----
+  ' the brief's words (derivation in the header)
+  CFG_DAC_TT00      = $0014_0002        ' DAC_MODE, DAC noise, TT = %00
+  CFG_DAC_TT01      = $0014_0042        ' DAC_MODE, DAC noise, TT = %01
+  CFG_NBR           = $7000_0000        ' A = relative -1 pin's read state, smart off
+  ' the same words composed from the Spin2 v55 symbols (control W)
+  SYM_DAC_TT00      = P_DAC_990R_3V | P_TT_00 | P_DAC_NOISE
+  SYM_DAC_TT01      = P_DAC_990R_3V | P_TT_01 | P_DAC_NOISE
+  SYM_NBR           = P_MINUS1_A | P_LOGIC_A | P_TT_00 | P_NORMAL
+
+  ' WRPIN D field positions and widths (p2-documentation.txt:7572)
+  SHIFT_AAAA        = 28
+  MASK_AAAA         = %1111
+  SHIFT_BBBB        = 24
+  MASK_BBBB         = %1111
+  SHIFT_FFF         = 21
+  MASK_FFF          = %111
+  SHIFT_M           = 8
+  MASK_M            = %1_1111_1111_1111
+  SHIFT_M_TOP       = 10                ' M[12:10] within M
+  MASK_M_TOP        = %111
+  SHIFT_TT          = 6
+  MASK_TT           = %11
+  SHIFT_SSSSS       = 1
+  MASK_SSSSS        = %1_1111
+  MASK_BIT0         = 1
+
+  ' expected field values
+  AAAA_THIS_PIN     = %0000             ' true, this pin's read state
+  AAAA_MINUS1       = %0111             ' true, relative -1 pin's read state
+  BBBB_DEFAULT      = %0000
+  FFF_PASS_AB       = %000
+  M_DAC_990R        = %1_0100_0000_0000 ' M[12:10] = %101 DAC_MODE, M[9:0] = 0
+  M_LOGIC_A         = 0                 ' logic level A -> IN
+  TT_OUTPUT_OFF     = %00               ' smart modes: x0 = output disabled
+  TT_OUTPUT_ON      = %01               ' smart modes: x1 = output enabled
+  SSSSS_OFF         = %00000            ' smart pin off
+  SSSSS_DAC_NOISE   = %00001            ' DAC noise (with DAC_MODE)
+  BIT0_REQUIRED     = 0
+
+CON ' ---- Mailbox Layout ----
+  ' Conditions, in run order within a round:
+  '  COND_C1 - TT = %01, OUT low
+  '  COND_C2 - TT = %01, OUT high
+  '  COND_C3 - TT = %00, OUT low
+  '  COND_C4 - TT = %00, OUT high
+  #0, COND_C1, COND_C2, COND_C3, COND_C4
+  COND_COUNT        = 4
+
+  ' mailbox longs, in the order the measuring cog writes them:
+  '  MB_DONE      - MBOX_DONE once the engine has finished and released the pins
+  '  MB_K_PRE_HI  - path control before the rounds, pin P driven high
+  '  MB_K_PRE_LO  - path control before the rounds, pin P driven low
+  '  MB_SAMPLES   - ROUNDS * COND_COUNT samples, round-major, C1..C4 per round
+  '  MB_K_POST_HI - path control after the rounds, pin P driven high
+  '  MB_K_POST_LO - path control after the rounds, pin P driven low
+  MB_DONE           = 0
+  MB_K_PRE_HI       = 1
+  MB_K_PRE_LO       = 2
+  MB_SAMPLES        = 3
+  MB_K_POST_HI      = MB_SAMPLES + ROUNDS * COND_COUNT
+  MB_K_POST_LO      = MB_K_POST_HI + 1
+  MB_LONGS          = MB_K_POST_LO + 1
+
+VAR ' ---- Mailbox & Analysis State ----
+  long mailbox[MB_LONGS]                ' written by the measuring cog
+  long sample_min[COND_COUNT]           ' smallest sample per condition
+  long sample_max[COND_COUNT]           ' largest sample per condition
+  long fail_count                       ' gating control failures
+
+
+PUB main() | engineCog, startTick
+'' Run the SO9 rig: check the constants and configuration words, start the
+'' measuring cog, wait for its done flag, then print every sample and the verdict.
+''
+
+' Local Variables:
+' @local engineCog - cog id COGINIT returned (negative = no free cog)
+' @local startTick - CT when the wait for the done flag began
+
+  longfill(@mailbox, 0, MB_LONGS)
+  fail_count := 0
+  debug("=== SO9: in a DAC smart-pin mode, does OUT switch the ADC when TT = %00? ===")
+  debug("pin P = ", udec_(PIN_P), " (under test), P+1 = ", udec_(PIN_NBR), " (observer, DIR low); ", udec_(READS_PER_SAMPLE), " INA reads per sample; settle ", udec_(SETTLE_CLK), " clocks; ", udec_(ROUNDS), " rounds")
+  print_predictions()
+  debug(" ")
+  debug("--- CONTROL W: configuration words, decoded into the published WRPIN fields ---")
+  check_rig_constants()
+  if fail_count <> 0
+    debug("NO VERDICT: a construction control failed (see RIG FAIL lines above); the measuring cog was not started")
+  else
+    engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
+    if engineCog < 0
+      debug("RIG FAIL: no free cog for the measuring engine")
+      debug("NO VERDICT: nothing was measured")
+    else
+      startTick := getct()
+      repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
+      if mailbox[MB_DONE] <> MBOX_DONE
+        cogstop(engineCog)
+        pinclear(PIN_P addpins 1)
+        debug("RIG FAIL: measuring cog did not report done within ", udec_(RIG_TIMEOUT_SEC), " s (expected about 5 ms); pins P and P+1 cleared by cog 0")
+        debug("NO VERDICT: the measurement did not complete")
+      else
+        debug("measuring cog = ", udec_(engineCog), " (debugger restricted to cog 0)")
+        report()
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("=== END ===")
+  debug("DEBUG_END_SESSION")
+  repeat
+
+
+PRI print_predictions()
+' Print the outcomes fixed before the run, and the rule that decides them.
+'
+
+  debug("PRE-REGISTERED OUTCOMES (fixed before the run):")
+  debug("  X SEPARATES from Y when every sample of X lies outside [smallest Y sample, largest Y sample]")
+  debug("  C1 TT=%01 OUT low | C2 TT=%01 OUT high | C3 TT=%00 OUT low | C4 TT=%00 OUT high")
+  debug("  control     : C2 separates from C1 (the reading sees the ADC at TT = %01); if not -> INCONCLUSIVE whatever C3/C4 show")
+  debug("  prediction  : C4 does NOT separate from C3, and C4 separates from C2  -> VERDICT: CONFIRMED")
+  debug("  published   : %TT table, TT = %00 -> 'OUT enables ADC in DAC_MODE' (p2-documentation.txt:7652-7657)")
+  debug("                C4 separates from C3, and C4 does NOT separate from C2  -> VERDICT: REFUTED")
+  debug("  C4 separates from both C3 and C2 (unpredicted pattern)                -> VERDICT: INCONCLUSIVE")
+  debug("  C4 separates from neither C3 nor C2 (ranges do not discriminate)      -> VERDICT: INCONCLUSIVE")
+  debug("  C1 and C3 (OUT low, ADC off): undetermined -- measured and printed, no value predicted")
+  debug("  path control K (pin P a plain pin, before and after): P+1 reads ", udec_(K_HIGH_EXPECT), " driven high, ", udec_(K_LOW_EXPECT), " driven low, else RIG FAIL / NO VERDICT")
+
+
+PRI check_rig_constants()
+' Control W: the pin pair lies in INA, and every configuration word decodes
+' to the published fields and equals its Spin2 symbol composition.
+'
+
+  if PIN_P < PIN_P_MIN or PIN_P > PIN_P_MAX
+    debug("RIG FAIL: PIN_P = ", sdec_(PIN_P), " must be ", udec_(PIN_P_MIN), "..", udec_(PIN_P_MAX), " so that P+1 is a pin of INA")
+    fail_count++
+  check_word(string("pin P TT=%00"), CFG_DAC_TT00, SYM_DAC_TT00, AAAA_THIS_PIN, M_DAC_990R, TT_OUTPUT_OFF, SSSSS_DAC_NOISE)
+  check_word(string("pin P TT=%01"), CFG_DAC_TT01, SYM_DAC_TT01, AAAA_THIS_PIN, M_DAC_990R, TT_OUTPUT_ON, SSSSS_DAC_NOISE)
+  check_word(string("pin P+1     "), CFG_NBR, SYM_NBR, AAAA_MINUS1, M_LOGIC_A, TT_OUTPUT_OFF, SSSSS_OFF)
+
+
+PRI check_word(pLabel, cfgWord, symWord, expAaaa, expMode, expTt, expSssss) | fldAaaa, fldBbbb, fldFff, fldMode, fldTt, fldSssss, fldBit0
+' Decode one WRPIN word into its published fields, print them, and count a
+' construction failure if any field or the symbol composition disagrees.
+'
+' @param pLabel - label string for the printed line
+' @param cfgWord - the configuration word the measuring cog writes
+' @param symWord - the same word composed from the Spin2 v55 symbols
+' @param expAaaa - expected %AAAA
+' @param expMode - expected %M (13 bits)
+' @param expTt - expected %TT
+' @param expSssss - expected %SSSSS
+
+' Local Variables:
+' @local fldAaaa - decoded %AAAA
+' @local fldBbbb - decoded %BBBB
+' @local fldFff - decoded %FFF
+' @local fldMode - decoded %M (13 bits)
+' @local fldTt - decoded %TT
+' @local fldSssss - decoded %SSSSS
+' @local fldBit0 - decoded bit 0
+
+  fldAaaa := (cfgWord >> SHIFT_AAAA) & MASK_AAAA
+  fldBbbb := (cfgWord >> SHIFT_BBBB) & MASK_BBBB
+  fldFff := (cfgWord >> SHIFT_FFF) & MASK_FFF
+  fldMode := (cfgWord >> SHIFT_M) & MASK_M
+  fldTt := (cfgWord >> SHIFT_TT) & MASK_TT
+  fldSssss := (cfgWord >> SHIFT_SSSSS) & MASK_SSSSS
+  fldBit0 := cfgWord & MASK_BIT0
+  debug("  ", zstr_(pLabel), " ", uhex_long_(cfgWord), ": AAAA=", ubin_(fldAaaa), " BBBB=", ubin_(fldBbbb), " FFF=", ubin_(fldFff), " M=", ubin_(fldMode), " (M[12:10]=", ubin_((fldMode >> SHIFT_M_TOP) & MASK_M_TOP), ") TT=", ubin_(fldTt), " SSSSS=", ubin_(fldSssss), " bit0=", udec_(fldBit0), "  symbols=", uhex_long_(symWord))
+  if fldAaaa <> expAaaa or fldBbbb <> BBBB_DEFAULT or fldFff <> FFF_PASS_AB or fldMode <> expMode or fldTt <> expTt or fldSssss <> expSssss or fldBit0 <> BIT0_REQUIRED
+    debug("RIG FAIL: ", zstr_(pLabel), " fields differ from the expected AAAA=", ubin_(expAaaa), " M=", ubin_(expMode), " TT=", ubin_(expTt), " SSSSS=", ubin_(expSssss), " (BBBB, FFF, bit0 zero)")
+    fail_count++
+  if cfgWord <> symWord
+    debug("RIG FAIL: ", zstr_(pLabel), " word ", uhex_long_(cfgWord), " differs from its Spin2 symbol composition ", uhex_long_(symWord))
+    fail_count++
+
+
+PRI report() | bContinue
+' Print the path controls and every raw sample, then gate, then run the
+' separation tests and print the verdict. Single exit.
+'
+
+' Local Variables:
+' @local bContinue - TRUE while every gating control has passed
+
+  debug(" ")
+  debug("--- CONTROL K: neighbour path (pin P a plain pin, WRPIN #0) ---")
+  check_path_controls()
+  debug(" ")
+  debug("--- RAW SAMPLES (count of reads with INA bit P+1 = 1, of ", udec_(READS_PER_SAMPLE), ") ---")
+  print_samples()
+  compute_ranges()
+  debug(" ")
+  debug("--- RANGES ---")
+  print_ranges()
+  debug(" ")
+  debug("--- ADC-OFF READINGS (OUT low; the brief marks the value undetermined) ---")
+  print_adc_off()
+  debug(" ")
+  bContinue := (fail_count == 0)
+  if bContinue == FALSE
+    debug("NO VERDICT: a rig control failed (see RIG FAIL lines above); the samples are printed for diagnosis only")
+  else
+    decide_verdict()
+
+
+PRI check_path_controls()
+' Control K: pin P driven high then low as a plain pin, before and after the
+' rounds; P+1 must read every read high, then every read low.
+'
+
+  debug("  before rounds: P high -> ", udec_(mailbox[MB_K_PRE_HI]), "   P low -> ", udec_(mailbox[MB_K_PRE_LO]))
+  debug("  after rounds : P high -> ", udec_(mailbox[MB_K_POST_HI]), "   P low -> ", udec_(mailbox[MB_K_POST_LO]))
+  debug("  expected     : P high -> ", udec_(K_HIGH_EXPECT), "   P low -> ", udec_(K_LOW_EXPECT))
+  if mailbox[MB_K_PRE_HI] <> K_HIGH_EXPECT or mailbox[MB_K_PRE_LO] <> K_LOW_EXPECT
+    debug("RIG FAIL: path control before the rounds -- P+1 does not follow pin P driven as a plain pin")
+    fail_count++
+  if mailbox[MB_K_POST_HI] <> K_HIGH_EXPECT or mailbox[MB_K_POST_LO] <> K_LOW_EXPECT
+    debug("RIG FAIL: path control after the rounds -- P+1 does not follow pin P driven as a plain pin")
+    fail_count++
+
+
+PRI sample_at(roundIdx, condIdx) : readCount
+' One recorded sample.
+'
+' @param roundIdx - round, 0..ROUNDS-1
+' @param condIdx - condition, COND_C1..COND_C4
+' @returns readCount - reads (of READS_PER_SAMPLE) in which INA bit P+1 was 1
+
+  readCount := mailbox[MB_SAMPLES + roundIdx * COND_COUNT + condIdx]
+
+
+PRI cond_label(condIdx) : pLabel
+' Printable label for a condition.
+'
+' @param condIdx - condition, COND_C1..COND_C4
+' @returns pLabel - address of the label string
+
+  case condIdx
+    COND_C1: pLabel := string("C1 TT=%01 OUT low ")
+    COND_C2: pLabel := string("C2 TT=%01 OUT high")
+    COND_C3: pLabel := string("C3 TT=%00 OUT low ")
+    COND_C4: pLabel := string("C4 TT=%00 OUT high")
+    other:   pLabel := string("C? unknown        ")
+
+
+PRI yes_no(bFlag) : pText
+' Printable YES / NO for a boolean.
+'
+' @param bFlag - TRUE or FALSE
+' @returns pText - address of "YES" or "NO"
+
+  if bFlag == TRUE
+    pText := string("YES")
+  else
+    pText := string("NO")
+
+
+PRI print_samples() | condIdx, roundIdx
+' Print every raw sample, grouped by condition, in round order.
+'
+
+' Local Variables:
+' @local condIdx - condition being printed
+' @local roundIdx - round being printed
+
+  repeat condIdx from COND_C1 to COND_C4
+    repeat roundIdx from 0 to ROUNDS - 1
+      debug("  ", zstr_(cond_label(condIdx)), "  round ", udec_(roundIdx + 1), ": ", udec_(sample_at(roundIdx, condIdx)))
+
+
+PRI compute_ranges() | condIdx, roundIdx, readCount
+' Smallest and largest sample of every condition.
+'
+
+' Local Variables:
+' @local condIdx - condition being scanned
+' @local roundIdx - round being scanned
+' @local readCount - the sample under inspection
+
+  repeat condIdx from COND_C1 to COND_C4
+    sample_min[condIdx] := sample_at(0, condIdx)
+    sample_max[condIdx] := sample_min[condIdx]
+    repeat roundIdx from 1 to ROUNDS - 1
+      readCount := sample_at(roundIdx, condIdx)
+      if readCount < sample_min[condIdx]
+        sample_min[condIdx] := readCount
+      if readCount > sample_max[condIdx]
+        sample_max[condIdx] := readCount
+
+
+PRI print_ranges() | condIdx
+' Print each condition's range over its ROUNDS samples.
+'
+
+' Local Variables:
+' @local condIdx - condition being printed
+
+  repeat condIdx from COND_C1 to COND_C4
+    debug("  ", zstr_(cond_label(condIdx)), "  min ", udec_(sample_min[condIdx]), "  max ", udec_(sample_max[condIdx]), "  (", udec_(ROUNDS), " samples)")
+
+
+PRI print_adc_off() | roundIdx
+' The OUT-low samples: what the pin's read state carries in the DAC state
+' with the ADC off (C1 with TT bit 0 set, C3 with it clear). Informational.
+'
+
+' Local Variables:
+' @local roundIdx - round being printed
+
+  repeat roundIdx from 0 to ROUNDS - 1
+    debug("  round ", udec_(roundIdx + 1), ":  C1 (TT=%01, OUT low) = ", udec_(sample_at(roundIdx, COND_C1)), "   C3 (TT=%00, OUT low) = ", udec_(sample_at(roundIdx, COND_C3)))
+  debug("  C1 range ", udec_(sample_min[COND_C1]), "..", udec_(sample_max[COND_C1]), "   C3 range ", udec_(sample_min[COND_C3]), "..", udec_(sample_max[COND_C3]))
+  debug("  C1 separates from C3: ", zstr_(yes_no(separates(COND_C1, COND_C3))), "   C3 separates from C1: ", zstr_(yes_no(separates(COND_C3, COND_C1))), "   (informational, not part of the verdict)")
+
+
+PRI separates(xCond, yCond) : bSeparates | roundIdx, readCount
+' Brief Part 5: X separates from Y when every sample of X lies outside the
+' range from the smallest to the largest sample of Y.
+'
+' @param xCond - condition X
+' @param yCond - condition Y
+' @returns bSeparates - TRUE when no sample of X lies inside Y's range
+
+' Local Variables:
+' @local roundIdx - round of the X sample under test
+' @local readCount - the X sample under test
+
+  bSeparates := TRUE
+  repeat roundIdx from 0 to ROUNDS - 1
+    readCount := sample_at(roundIdx, xCond)
+    if readCount >= sample_min[yCond] and readCount <= sample_max[yCond]
+      bSeparates := FALSE
+      quit
+
+
+PRI decide_verdict() | bSep21, bSep43, bSep42
+' Run the brief's three separation tests and print the one VERDICT line.
+'
+
+' Local Variables:
+' @local bSep21 - C2 separates from C1 (the control)
+' @local bSep43 - C4 separates from C3
+' @local bSep42 - C4 separates from C2
+
+  bSep21 := separates(COND_C2, COND_C1)
+  bSep43 := separates(COND_C4, COND_C3)
+  bSep42 := separates(COND_C4, COND_C2)
+  debug("--- SEPARATION TESTS (X separates from Y: every X sample outside [min Y, max Y]) ---")
+  debug("  C2 separates from C1: ", zstr_(yes_no(bSep21)), "   control; YES = the reading sees the ADC at TT = %01")
+  debug("  C4 separates from C3: ", zstr_(yes_no(bSep43)), "   prediction NO;  published table YES")
+  debug("  C4 separates from C2: ", zstr_(yes_no(bSep42)), "   prediction YES; published table NO")
+  debug(" ")
+  if bSep21 == FALSE
+    debug("VERDICT: INCONCLUSIVE - C2 does not separate from C1: the neighbour reading does not show the ADC at TT = %01, so C3 and C4 decide nothing (samples above)")
+  elseif bSep43 == FALSE and bSep42 == TRUE
+    debug("VERDICT: CONFIRMED - at TT = %00 OUT high reads as OUT low (C4 not sep C3) and not as the running ADC (C4 sep C2); at TT = %01 OUT runs the ADC (C2 sep C1)")
+    debug("  OUT does not switch the ADC unless TT bit 0 enables the output")
+  elseif bSep43 == TRUE and bSep42 == FALSE
+    debug("VERDICT: REFUTED - at TT = %00 OUT high separates from OUT low (C4 sep C3) and falls with the running ADC (C4 not sep C2)")
+    debug("  OUT enables the ADC at TT = %00, as the published %TT table states")
+  elseif bSep43 == TRUE and bSep42 == TRUE
+    debug("VERDICT: INCONCLUSIVE - unpredicted pattern: C4 separates from both C3 and C2 (falls neither with OUT low nor with the running ADC); samples above")
+  else
+    debug("VERDICT: INCONCLUSIVE - C4 separates from neither C3 nor C2: the ranges do not discriminate; samples above")
+
+
+{ MEASURING ENGINE -- runs in its own cog; the ONLY code that touches pins.
+  No debug() here (DEBUG_COGS excludes this cog anyway). PTRA = @mailbox on
+  entry; PTRB walks the mailbox in the order the MB_ constants list.
+}
+DAT             org     0        ' ---- Measuring Engine ----
+engine          mov     ptrb, ptra
+                add     ptrb, #MB_K_PRE_HI * 4
+
+                ' observer P+1: A = relative -1 pin's read state, smart pin off,
+                ' DIR low for the whole run (never drives)
+                dirl    #PIN_NBR
+                wrpin   cfg_nbr_, #PIN_NBR
+                outl    #PIN_NBR
+
+                call    #path_control           ' K before the rounds
+
+                mov     round_, #ROUNDS
+.round          mov     cfg_, cfg_tt01_         ' C1: TT = %01, OUT low
+                mov     outlvl_, #OUT_LOW
+                call    #do_cond
+                mov     outlvl_, #OUT_HIGH      ' C2: TT = %01, OUT high
+                call    #do_cond
+                mov     cfg_, cfg_tt00_         ' C3: TT = %00, OUT low
+                mov     outlvl_, #OUT_LOW
+                call    #do_cond
+                mov     outlvl_, #OUT_HIGH      ' C4: TT = %00, OUT high
+                call    #do_cond
+                djnz    round_, #.round
+
+                call    #path_control           ' K after the rounds
+
+                ' leave both pins safe: smart pin off, DIR low, OUT low
+                dirl    #PIN_P
+                wrpin   #0, #PIN_P
+                outl    #PIN_P
+                dirl    #PIN_NBR
+                wrpin   #0, #PIN_NBR
+                outl    #PIN_NBR
+                wrlong  #MBOX_DONE, ptra        ' done -- always the last write
+                cogid   self_id_
+                cogstop self_id_
+
+' Control K: pin P as a plain pin (smart pin off, DIR enables the output),
+' one sample driven high, one driven low.
+path_control    dirl    #PIN_P
+                wrpin   #0, #PIN_P
+                drvh    #PIN_P                  ' DIR = 1, OUT = 1
+                call    #sample
+                drvl    #PIN_P                  ' DIR = 1, OUT = 0
+                call    #sample
+                ret
+
+' One condition: reset, configure, enable, set OUT, settle, sample.
+do_cond         dirl    #PIN_P                  ' configure with DIR low (smart pin in reset)
+                wrpin   cfg_, #PIN_P
+                dirh    #PIN_P                  ' let the smart pin run
+                cmp     outlvl_, #OUT_LOW       wz
+        if_z    outl    #PIN_P                  ' OUT set explicitly, whatever came before
+        if_nz   outh    #PIN_P
+                call    #sample
+                ret
+
+' One sample: settle, then READS_PER_SAMPLE reads of INA, counting bit P+1.
+sample          waitx   ##SETTLE_CLK
+                mov     count_, #0
+                rep     #3, reads_
+                mov     insnap_, ina
+                testb   insnap_, #PIN_NBR       wc
+        if_c    add     count_, #1
+                wrlong  count_, ptrb
+                add     ptrb, #4
+                ret
+
+cfg_tt00_       long    CFG_DAC_TT00
+cfg_tt01_       long    CFG_DAC_TT01
+cfg_nbr_        long    CFG_NBR
+reads_          long    READS_PER_SAMPLE
+
+cfg_            res     1               ' WRPIN word for the current condition
+outlvl_         res     1               ' OUT_LOW / OUT_HIGH for the current condition
+round_          res     1               ' rounds remaining
+count_          res     1               ' reads with INA bit P+1 = 1
+insnap_         res     1               ' one INA read
+self_id_        res     1               ' this cog's id, for COGSTOP
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

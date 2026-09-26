@@ -111,6 +111,49 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
 
+## Three KB statements the second errata bench session decides (2026-09-25, EF-071..074) — F-471, F-472, F-473
+
+### F-471 — the KB states the DAC-smart-mode `%TT` rule unqualified; on silicon `OUT` enables the ADC only while `TT` bit 0 enables the output — `CONFIRMED`
+
+**Where:** `architecture/smart_pins.yaml:408-410` (`condition: "%SSSSS = %00001..%00011"`,
+`enable_bit: "x0=disabled regardless of DIR…"`, `adc_control: "0x=OUT enables ADC, 1x=OTHER enables
+ADC"`) and `language/spin2/methods/wrpin.yaml:59-60` (the same two rules, as case 4). Both faithfully
+repeat the P2 Documentation's table (`p2-documentation.txt:7652-7657`).
+**What silicon does (EF-071, Rev C, run twice):** with `TT` = `%00` raising `OUT` runs **nothing** —
+the pin's read state stays 0, as with `OUT` low; with `TT` = `%01` `OUT` runs the ADC and the fast DAC
+drives the pin. So the two published rules do not combine as written.
+**Correction:** keep the published rules and add a `silicon_errata` entry to `smart_pins.yaml` (and a
+one-line pointer in `wrpin.yaml` case 4): in the DAC smart modes the ADC runs only while `TT` bit 0 is
+set, which also enables the fast DAC's drive; `TT` = `%00` with `OUT` high runs neither. Cite EF-071.
+Tested `TT` = `%00`/`%01` only; the `OTHER` forms (`%1x`) untested. → P2 Errata **E6**.
+
+### F-472 — `rdfast.yaml` gives the no-wait requirement no number and no consequence, and omits the blocking-after-no-wait erratum — `CONFIRMED`
+
+**Where:** `language/pasm2/rdfast.yaml` — "D[31]=1 for no-wait mode (doesn't stall for FIFO fill)"
+(:70), with no minimum distance and nothing on what an early read returns.
+**What silicon does (EF-073, EF-074, Rev C, run twice):** (1) a blocking `RDFAST` alone keeps its
+promise (3,072/3,072, 10–17 clocks); (2) after a no-wait `RDFAST`, a read is safe from **15 clocks**
+(8..15 by hub alignment; `WAITX #11`), and a read before that returns **zero** with no flag; (3) no
+unsafe distance for a no-wait `WRFAST` write; (4) **erratum:** a blocking `RDFAST` issued while a
+no-wait one is still arming can skip its wait (2 clocks) and the next read returns zero — one gap
+per alignment within 8..15 clocks; correct from 16 clocks on.
+**Correction:** add the measured 15-clock no-wait rule and the zero read (anti-pattern — also routed
+to P2 Anti-Patterns), and a `silicon_errata` entry for (4). Cite EF-073/EF-074; note SOURCE-ERRATA
+E-015 (Chip's unexplained "Yes") as plausibly (4). → P2 Errata **E7**.
+
+### F-473 — `getxacc.yaml`'s `sinc2_constraint` can now state its mechanism: it is the one-clock carry (EF-070) at SINC2 scale — `CONFIRMED`
+
+**Where:** `language/pasm2/getxacc.yaml` `sinc2_constraint` (F-469 held the rest of this entry "until
+VO-J-013 runs" — it has run).
+**What silicon does (EF-072, run twice):** Chip's SINC2 corruption reproduces exactly (odd-length
+windows corrupt that sample and the next, then correct; SINC1 off by one term at most; XZERO clean;
+one clock of read jitter → 75 % of samples off by ≥ 1,000 terms), and the one-clock carry model
+predicts every sample, clean and corrupted, value for value.
+**Correction:** apply F-469's citation fix, then state the mechanism (the term held on a window's last
+clock — the whole first-stage integral in SINC2 — is added on the next window's first clock), keep
+Chip's workarounds (power-of-two count, or XZERO), cite EF-072, and cross-reference F-464's lag entry.
+Not a separate erratum: P2 Errata **E5** covers it.
+
 ## Two KB statements contradicted by our own sources, found while building the SINC2 test (2026-09-25, VO-J-013) — F-469, F-470
 
 ### F-469 — `getxacc.yaml`'s `sinc2_constraint` says Chip's SINC2 note is "not yet in the released Silicon Doc"; the Silicon Doc carries it — `CONFIRMED`

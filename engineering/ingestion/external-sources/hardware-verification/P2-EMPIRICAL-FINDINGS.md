@@ -991,6 +991,112 @@ every delta a whole multiple of 19, zero-after-zero moves 0. *Grounds:* `pasm2/g
 
 ---
 
+## P2 errata — second bench session (silicon, 2026-09-25, VO-J-012..014)
+
+Three tests built after the first five: the `RDFAST`/`WRFAST` readiness boundary (VO-J-012), Chip
+Gracey's Goertzel SINC2 iteration-count report (VO-J-013), and the study's sixth prediction, the
+DAC-mode ADC enable (VO-J-014). Same house rig as EF-066..070: measurement in a launched PASM cog,
+`DEBUG_COGS = %0000_0001` (EF-057), verdicts gated on in-run controls, outcomes fixed in the program
+before the run, every verdict **re-derived here from the raw log lines**. *Rig:* **Rev C** P2 on
+Stephen's bench board (free pins P0–P7, P32–P47 only), 200 MHz, `pnut-ts` 1.55.8 `-d`, RAM download
+with reset, 2026-09-25. **Run twice, same builds** (21:40 and 21:49 local log stamps): RDFAST's 1,496
+report lines are identical; SO9 is identical except the running ADC's C2 toggle counts; SINC2 is
+identical in every arm except the two deliberately jittered arms (JIT-S1/S2) and the verdict lines
+quoting them. Campaign: `campaigns/2026-09-p2-errata-predictions/`.
+
+### EF-071 · In a DAC smart-pin mode, `OUT` does not switch the ADC while `TT` bit 0 is clear — `CONFIRMED` (new; contradicts the published `%TT` table)
+The P2 Documentation's `%TT` table (`p2-documentation.txt:7652-7657`) publishes, for every smart mode,
+"x0 = output disabled, regardless of DIR", and for the DAC smart modes (`%SSSSS` = `%00001..%00011`)
+"0x = OUT enables ADC in DAC_MODE". On silicon, with `TT` = `%00` raising `OUT` runs **nothing**: the
+pin's read state stays exactly as with `OUT` low. With `TT` = `%01` (output enabled), `OUT` runs the
+ADC, and the fast DAC drives the pin while it does. *How proven:* `test-so9-dac-mode-adc-enable` — P4
+in DAC-noise mode (`$0014_0002` TT=`%00` / `$0014_0042` TT=`%01`), P5 configured `$7000_0000` (A input
+= relative −1 pin, DIR low) so P4's read state is `INA` bit 5; one sample = 4,096 `INA` reads counting
+bit 5; four conditions × 5 rounds. *Result (run 1 / run 2):* **C1** TT=`%01` OUT low: 0 every sample ·
+**C2** TT=`%01` OUT high: 1,963–2,093 / 1,958–2,017 (the ADC's decisions toggling) · **C3** TT=`%00`
+OUT low: 0 · **C4** TT=`%00` OUT high: **0 every sample**. C2 separates from C1 (the reading sees the
+ADC); C4 does not separate from C3 and does separate from C2 — the pre-registered CONFIRMED pattern,
+both runs. Controls: the P4→P5 plain-pin path read 4,096 high / 0 low before and after the rounds; all
+three words decoded to the published fields and equal their Spin2 symbol compositions.
+**Workaround proven:** set `TT` bit 0 and accept the fast DAC driving the pin (C2). Of the `TT`
+settings, only `%00` and `%01` were tested; the `OTHER`-enable forms (`TT` = `%1x`) were not. *Also measured:* with the ADC off (C1, C3) the
+read state is 0 in every sample. **Classification: silicon erratum** (a published statement
+contradicted on silicon) → **P2 Errata E6**. *Grounds:* the KB's smart-pin `%TT` coverage needs a
+`silicon_errata` entry (to register). *Source:* `…/tests/test-so9-dac-mode-adc-enable.spin2`.
+
+### EF-072 · Chip Gracey's Goertzel SINC2 corruption is EF-070's one-clock carry, at double-integration scale — `CONFIRMED`
+Chip's 2024-12-16 report (`ingestion/external-inputs/forum-threads/ProblemGoertzelSINC2mode/INGEST.md`):
+in SINC2 mode a non-power-of-two iteration count makes `GETXACC` "off by one double integration",
+corrupting that sample and the next. Measured, and **explained value for value** by EF-070's carry:
+the term held on a window's last clock is added on the next window's first, and in SINC2 that held
+value is the first-stage integral J, so a window one clock longer or shorter than usual moves J
+between two adjacent samples. *How proven:* `test-goertzel-sinc2-iteration-count` — P3 driven as the
+Goertzel input (constant term C_X = ±1, C_Y = ±3 by P3 level), 14 arms of XCONT/XZERO streams with
+power-of-two, non-power-of-two (2^23±64), 1 MHz (100 cycles) and 25,000-cycle windows, SINC1 and
+SINC2 twins, and a `WAITX #1 WC` read-jitter pair. *Result:* **Q1** power-of-two SINC2: 0 of 1,020
+samples off; non-power-of-two: every odd-length window corrupts that sample and the next, then clean
+— NPS-S2 30 outliers in 15 pairs, NPL-S2 30 in 15, CHP-S2 12 in 6 (max |e| 1,968,115 / 1,966,097 /
+36,619,996); no outlier without a window change, no window change without an outlier. **Q2** SINC1:
+every sample = C × (clocks in its window); an odd window is off by exactly one term. **Q3** one clock
+of read jitter: SINC2 75 % of samples off by ≥ 1,000 terms (max 4,124,674 / 4,149,250), SINC1 off by
+at most one term — Chip's "huge noise" reproduced. **Q4** XZERO kept one window length and an
+unchanging SINC2 sample at 10.24 µs, 100 µs and 25 ms windows, where the XCONT twins varied and
+corrupted. **Q5 mechanism:** the carry model, J fitted once at k = 3 and then predicted from measured
+window lengths alone, equals **every** sample — all 829 / 834 outliers and every clean sample — in
+the four decisive arms. Worked pair (NPS-S2, k = 65/66): a 2,047-clock window gives e = −133,121 then
++131,073, sum −2,048, exactly the model. Controls: LUT readback 0 of 512 differ; CAL C sign flips
+with P3 and C_Y = 3·C_X; the power-of-two loop locked at 2,048 clocks per window, g = 0.
+**Classification:** not a new erratum — **EF-070 (E5) seen in SINC2**, where the stranded term is the
+whole first-stage integral. Chip's workarounds hold: a power-of-two iteration count, or XZERO.
+**Scope note (study reading, untested):** in SINC2 the E5 zero-burst workaround does not flush the
+first stage. *Grounds:* `pasm2/getxacc.yaml` `sinc2_constraint` (F-469 already open on its citation)
+— now also its mechanism, citing this entry. *Source:*
+`…/tests/test-goertzel-sinc2-iteration-count.spin2`.
+
+### EF-073 · `RDFAST` readiness: a blocking `RDFAST` keeps its promise; a no-wait `RDFAST` needs 8–15 clocks, and a read before that returns zero — `CONFIRMED` (blocking) / measured (no-wait)
+The P2 Documentation promises a **blocking** `RDFAST` (`D[31]` = 0) "will additionally wait until the
+FIFO has begun receiving hub data, so that it can start being used in the next instruction"; for
+**no-wait** (`D[31]` = 1) "your code must allow a sufficient number of clocks before any attempt is
+made to read or write FIFO data" — a requirement with no number and no stated consequence.
+*How proven:* `test-rdfast-wrfast-readiness-boundary` — every arm swept over all 8 hub slices × 8
+phases (a whole egg-beater rotation, confirmed: 8 distinct `RDFAST` durations per slice) × 16 trials,
+no-wait distances 2..44 clocks; six gating controls (clock arithmetic, `RDLONG` pattern, stale
+priming, late no-wait read, blocking and late `WRFAST`) all correct in every trial.
+*Result:* **Blocking read — the promise holds:** 3,072 of 3,072 next-instruction reads (`RFLONG`,
+`RFWORD`, `RFBYTE`) returned the new first datum with consistent C/Z; `RDFAST` took **10–17 clocks**,
+exactly the v35 instruction table. **No-wait read — the boundary:** the first all-correct distance is
+8..15 clocks depending on hub alignment, the same range in every slice; **safe from 15 clocks** (=
+`WAITX #11` after the no-wait `RDFAST`); no non-monotonic cell. **A read too early returns ZERO** —
+all 8,704 wrong reads of 43,008, never stale data (the rig had predicted stale and pre-listed zero as
+refuting that detail), with C/Z consistent with the zero and no stall. **No-wait write:** **no unsafe
+distance observed** — 0 of 43,008 writes dropped, skipped or wrong from 2 clocks on, every slice.
+**Re-arming (E_RENW):** a second no-wait `RDFAST` issued while the first is still arming wins — the
+new data read in 43,008 of 43,008. **Classification:** the no-wait hazard is an **anti-pattern**
+(documented requirement, undocumented number and consequence) → **P2 Anti-Patterns**, with the
+measured 15-clock rule. Chip's mitigation ("allow enough clock cycles", SOURCE-ERRATA E-015) now has
+its number. *Grounds:* `pasm2/rdfast.yaml` — the measured no-wait boundary and the zero read.
+*Source:* `…/tests/test-rdfast-wrfast-readiness-boundary.spin2`.
+
+### EF-074 · A blocking `RDFAST` issued while a no-wait `RDFAST` is still arming can skip its wait, and the next read returns zero — `CONFIRMED` (new; breaks the blocking promise)
+The same test's E_REBLK arm: `rdfast $8000_0000,mid` (no-wait) · `waitx` gap · `rdfast #0,new`
+(**blocking**) · `rflong` in the next instruction. The blocking promise quoted in EF-073 is unqualified.
+*Result (identical in both runs):* in each of the 64 slice × phase cells, **exactly one gap fails, in
+all 16 trials**, and at that gap the blocking `RDFAST` takes **2 clocks** — it does not wait — and the
+next `RFLONG` returns **`$0000_0000`** (never the first `RDFAST`'s data, never stale). 1,024 of 43,008
+reads. The failing gap moves with hub phase and falls on each of 8..15 clocks exactly eight times — the
+same 8..15-clock window as EF-073's no-wait arming boundary: the blocking `RDFAST` is fooled when it is
+issued at the moment the earlier no-wait fill begins arriving. One clock earlier it waits 12, 11…;
+one clock later it waits the full 17. Every other gap, 41,984 reads, correct. Gated on the same six
+controls as EF-073. **Classification: silicon erratum** (the published blocking promise is broken
+on silicon) → **P2 Errata E7**, pending the chapter's own reproducer. This is plausibly the bug Chip
+Gracey confirmed without explaining (SOURCE-ERRATA E-015: "Yes, but I can't explain it well").
+**Workaround measured in this arm:** issue the blocking `RDFAST` more than 15 clocks after the no-wait
+one — every gap from 16 to 44 clocks read correctly in every cell. *Not tested:* the `WRFAST` twin of
+this arrangement; any other fix (e.g. making the earlier `RDFAST` blocking). *Grounds:* `pasm2/rdfast.yaml` — a `silicon_errata`
+entry. *Source:* `…/tests/test-rdfast-wrfast-readiness-boundary.spin2`.
+
+---
+
 
 ## Open / pending empirical questions
 
