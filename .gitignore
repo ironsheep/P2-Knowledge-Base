@@ -271,6 +271,14 @@ engineering/document-production/**/*.bin
 # rule left that renamed folder untracked-and-exposed to any stray `git add`.
 engineering/document-production/manuals/p2-errata/code-validation/test-briefs*/
 
+# The HDL clean-room study's deliveries (Stephen 2026-09-26): Internal, derived from
+# the Rev C design, and at INDICATOR tier until a claim is certified -- never under
+# version control. Pattern is p2-hdl-study* for the same reason as test-briefs*
+# above: a new delivery arrives with the previous one renamed aside. The one
+# exception is OUR planning document inside it, which quotes no design material.
+/engineering/ingestion/external-inputs/p2-hdl-study*/*
+!/engineering/ingestion/external-inputs/p2-hdl-study/INTAKE-ANALYSIS.md
+
 # Color bar test directory (temporary testing)
 engineering/document-production/workspace/p2-assembly-language-manual/color-bar-test/
 engineering/document-production/workspace/p2-assembly-language-manual/request-align-test.json
