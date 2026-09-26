@@ -108,6 +108,21 @@ def modal_edge(values):
     return max(candidates) if candidates else None
 
 
+def bottom_edge(page_bottoms):
+    """The text block's bottom: the most common lowest-line position among the
+    lower-reaching half of the pages (full pages cluster there; pages that end a
+    chapter early do not). modal_edge() does not fit here: it takes the LARGEST
+    bucket holding a quarter of the peak, and with one value per page the peak is
+    small enough that a single overflowing page becomes the 'edge' it hides."""
+    if not page_bottoms:
+        return None
+    ordered = sorted(page_bottoms)
+    upper = ordered[len(ordered) // 2:]
+    hist = collections.Counter(round(v) for v in upper)
+    best = max(hist.values())
+    return min(v for v, c in hist.items() if c == best)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -115,6 +130,9 @@ def main():
     ap.add_argument('--tolerance', type=float, default=20.0,
                     help='points past the edge before reporting (default 20; '
                          'see the calibration note in this file)')
+    ap.add_argument('--bottom-margin', type=float, default=54.0,
+                    help='bottom margin in points (default 54 = the platform '
+                         'geometry\'s 0.75in)')
     ap.add_argument('--first', type=int, default=1)
     ap.add_argument('--last', type=int, default=10 ** 9)
     ap.add_argument('--quiet', action='store_true')
@@ -147,12 +165,64 @@ def main():
         if over > args.tolerance:
             hits.append((over, pno, txt.strip(), is_mono(sp)))
 
+    # BOTTOM EDGE (added 2026-09-26). The right-edge check above passed a PDF whose
+    # last table ran 37pt off the bottom of the PAPER (P2 Errata v0.2.0 Appendix A:
+    # a 12-row non-breaking table the filter did not route to a breaking one). The
+    # text block's bottom is measured the same way as its right edge -- the modal
+    # lowest text line per page -- and any text line or drawn element (table rules,
+    # code-box frames) that ends more than --tolerance below it, or below the paper
+    # itself, is reported.
+    page_bottoms, low = [], []
+    first, last = max(1, args.first), min(doc.page_count, args.last)
+    for pno in range(first, last + 1):
+        page = doc[pno - 1]
+        ys = [ln['bbox'][3] for bl in page.get_text('dict')['blocks']
+              for ln in bl.get('lines', [])]
+        if ys:
+            page_bottoms.append(max(ys))
+        for bl in page.get_text('dict')['blocks']:
+            for ln in bl.get('lines', []):
+                t = ''.join(s['text'] for s in ln['spans']).strip()
+                low.append((pno, ln['bbox'][3], 'text', t))
+        for dr in page.get_drawings():
+            low.append((pno, dr['rect'].y1, 'drawing', ''))
+    # The platform geometry fixes the bottom margin (foundation.sty: bottom=0.75in),
+    # so the edge is KNOWN, not estimated: a statistical estimate from one value per
+    # page is fragile (a manual of short pages put it 85pt too high). The cover
+    # (page 1) is its own layout and is not measured.
+    measured = bottom_edge(page_bottoms)
+    paper = doc[0].rect.height
+    body_bottom = paper - args.bottom_margin
+    bottom_hits = []
+    if True:
+        for pno, y1, kind, t in low:
+            if pno == 1:
+                continue
+            if y1 > paper or y1 - body_bottom > args.tolerance:
+                bottom_hits.append((y1 - body_bottom, pno, kind, t, y1 > paper))
+    worst = {}
+    for over, pno, kind, t, off in bottom_hits:       # one line per page, the worst
+        if pno not in worst or over > worst[pno][0]:
+            worst[pno] = (over, kind, t, off)
+
     print(f'text-block right edge: prose {prose_edge:.1f}pt, '
           f'code {mono_edge:.1f}pt   (tolerance {args.tolerance:g}pt)')
-    if not hits:
+    print(f'text-block bottom edge: {body_bottom:.1f}pt from the platform geometry '
+          f'(measured {measured if measured is not None else "n/a"}pt; '
+          f'paper {paper:.1f}pt; cover page not measured)')
+    if worst:
+        print(f'\n{len(worst)} page(s) with content below the text block — '
+              f'COMPLETE LIST, not a top-N\n')
+        for pno in sorted(worst):
+            over, kind, t, off = worst[pno]
+            where = 'OFF THE PAPER' if off else 'below the text block'
+            print(f'  p{pno:<4} +{over:6.1f}pt  [{kind}]  {where}  {t[:60]}')
+    if not hits and not worst:
         print(f'CLEAN  nothing crosses the margin '
               f'({doc.page_count} pages measured)')
         return 0
+    if not hits:
+        return 1
 
     hits.sort(key=lambda h: -h[0])
     print(f'\n{len(hits)} span(s) cross the right margin — '

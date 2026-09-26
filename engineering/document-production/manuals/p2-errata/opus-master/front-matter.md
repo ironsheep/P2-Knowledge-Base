@@ -17,13 +17,13 @@
 
 \begin{center}
 \vspace{0.35cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 Errata\par}
+{\fontsize{36}{42}\selectfont\bfseries \DocTitle\par}
 \vspace{0.3cm}
-{\Large\itshape Silicon Defects of the Propeller 2 Found So Far, Proven on P2 Hardware\par}
+{\Large\itshape \DocSubtitle\par}
 \vspace{0.35cm}
-{\large September 2026\par}
+{\large \DocDate\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.2.0\par}
+{\large\color{blue}Version \DocVersion\par}
 \vspace{0.25cm}
 {\large\bfseries\color{red!70!black} Community Review Draft \textperiodcentered\ Build 2026-09-26\par}
 

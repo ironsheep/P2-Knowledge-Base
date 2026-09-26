@@ -23,10 +23,23 @@
 \usepackage{p2kb-errata-local}
 
 % ==================== DOCUMENT METADATA ====================
-% These can be overridden by pandoc metadata
-\title{P2 Errata}
-\author{Iron Sheep Productions, LLC}
-\date{September 2026}
+% Single-source (F-300): every identity string lives once, in request.json
+% metadata, and reaches BOTH the PDF info dictionary and the cover page.
+% \renewcommand, not \newcommand -- p2kb-platform-foundation has already
+% \providecommand'd these. The platform fills the PDF info dictionary from \Doc*,
+% not from \@title/\@author, so without this binding Title, Subject and Author
+% ship EMPTY (P2 Errata v0.2.0's first build did).
+\renewcommand{\DocTitle}{$title$}
+\renewcommand{\DocSubtitle}{$subtitle$}
+\renewcommand{\DocVersion}{$version$}
+\renewcommand{\DocDate}{$date$}
+\renewcommand{\DocAuthor}{$author$}
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
+
+\title{\DocTitle}
+\author{\DocAuthor}
+\date{\DocDate}
 
 % ==================== ADDITIONAL SETUP ====================
 

@@ -340,6 +340,24 @@ owed for it alone.
 
 ---
 
+## The tables filter routes by ROW COUNT, so a tall table of ≤ 12 rows runs off the page (cross-manual, platform) — OPEN
+
+**Found 2026-09-26**, Stephen reading the P2 Errata v0.2.0 build: Appendix A's 12-row table ran
+**off the bottom of the paper** (drawn content to y = 829 on a 792pt page). `p2kb-platform-tables.lua`
+sends a general table to a breaking `longtblr` only above 12 rows (above 20 on the wide/auto-shrink
+path); below that it emits a NON-breaking `tblr`, whatever each row's height. Long wrapped cells
+make a short table taller than a page. **P2 Errata fixed at the source** (the list is now two
+bulleted lists, which is also the better form for a file list). **Platform fix owed:** route on
+estimated height (rows × wrapped lines per row), not row count — it changes which tables break in
+other manuals, so it needs its own before/after render of every manual with a table near the
+threshold. **Gate gap closed the same day:** `audit-pdf-margin-overflow.py` checked only the RIGHT
+margin; it now also measures the bottom edge from the platform geometry (0.75in) and flags content
+below it or off the paper. Measured on every released PDF before arming: one hit —
+**XBYTE p112**, a table's closing rule 28pt into the bottom margin (visible, not cut); XBYTE's next
+release gate will stop on it.
+
+---
+
 ## Every inline code span logs "\oval, \circle, or \line size unavailable" (cross-manual, platform) — OPEN (finding, cause unknown)
 
 **Found 2026-09-26** auditing the P2 Errata v0.2.0 compile log before a designer-review build:

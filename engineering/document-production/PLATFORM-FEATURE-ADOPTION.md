@@ -48,7 +48,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
 | Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
-| P2 Errata | manual | ⏳ ²⁵ | ⏳ ²⁵ | ⏳ ²⁵ | ⏳ ²⁵ |
+| P2 Errata | manual | 🔧 ²⁵ | 🔧 ²⁵ | ⏳ ²⁵ | **✅** ²⁵ |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
@@ -605,6 +605,19 @@ standing rule's trigger has not fired. Owed at the first release: `\DocVersion`/
 binding, rights metadata, `p2kb-platform-crossref` in `request.json` (the chapters already use
 `[Chapter 4](#ch-e4)`-style links), and generated example headers for the examples archive (not
 yet built; its reader copies of the rigs are part of the same release).
+
+**2026-09-26 (v0.2.0, Stephen: "let's please fix the PDF meta data now"):** **metadata single-source
++ rights WIRED** — the template binds `\DocTitle`/`\DocSubtitle`/`\DocVersion`/`\DocDate`/
+`\DocAuthor`/`\DocCopyright`/`\DocLicense` from `request.json` (which gained `copyright` and
+`license`), and the cover reads all four identity lines from `\Doc*`. Proven on the daemon render
+`p2-errata-meta-v2`: `audit-pdf-metadata.py --require-rights` CLEAN, all seven declared fields
+round-tripped (Title, Subject, Author, Keywords = copyright + CC BY-SA 4.0; date and version on
+page 1). Stays 🔧 until the returned MANUAL-store PDF shows the same (the rule above). **Generated
+example headers ✅** — the examples archive exists (`examples-library/`, 12 programs, whole-program
+archive mode), `sync-manual-examples.py --check` GREEN, the published zip byte-identical.
+**Cross-ref ⏳** — not wired: the chapters now cross-reference by *Erratum EN*, which
+`p2kb-platform-crossref` does not recognise; it needs that pattern taught to the filter (a platform
+change) before adoption means anything here.
 
 ---
 
