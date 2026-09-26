@@ -29,6 +29,28 @@ PAIRING
 Same convention as verify-example-corpus-identity.py: a file is paired to its
 block by the fence caption, ```{.spin2 caption="<name>.spin2"}.
 
+WHOLE-PROGRAM ARCHIVE MODE
+--------------------------
+Some manuals ship programs they never print whole. P2 Errata prints only
+excerpts of its test programs, yet every program that ran is in its
+examples-library, named in the chapters by filename. Such a file has no
+captioned block, so the pairing above cannot hold it, and before this mode it
+could only be reported as unpaired.
+
+A file that no captioned block claims, but whose exact filename appears in the
+text of a chapter-level section (`# Chapter N:`, `# Appendix X:` or
+`# Erratum EN:`), is an ARCHIVE file. For it the tool:
+  - checks that it is named by at least one such section (a file named
+    nowhere is still a failure: nothing tells the reader it exists);
+  - derives `Appears in.` from the headings of every section that names it,
+    chapters first, appendices last, in manual order;
+  - checks the header and licence footer are in sync, and Purpose is present
+    and ASCII, exactly as for a paired file;
+  - does NOT compare the body with any block, because there is none. The
+    body is the file's own; the header says it is the whole program and that
+    the manual quotes only excerpts of it.
+A captioned block always wins: a file that has one is paired, never archived.
+
 ADOPTION IS PER-DOCUMENT
 ------------------------
 A document is "adopted" once its files carry generated headers. Un-adopted
@@ -54,12 +76,21 @@ Exit: 0 clean / 1 out of sync or missing input / 2 usage error.
 """
 
 import argparse
+import datetime
 import re
 import subprocess
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
+
+# A chapter-level heading. `Erratum` joined `Chapter` and `Appendix` on
+# 2026-09-26: P2 Errata's chapters read "# Erratum E1: <title>", and without it
+# every archive file's `Appears in.` would have come out empty.
+CHAPTER_RE = re.compile(r"^# (Chapter|Appendix|Erratum) ")
+# An example filename as prose names it: not preceded by a filename character,
+# so `e3-fix-keeper-cog-test.spin2` is not also found inside a longer name.
+SPIN2_NAME_RE = re.compile(r"(?<![\w.\-])([\w.\-]+\.spin2)\b")
 
 MARK_BEGIN = "'' ==========================================================================="
 # Adoption is detected by this exact sentence, never by the banner rule: other
@@ -174,7 +205,7 @@ def blocks_with_context(md: Path):
     i, n = 0, len(lines)
     while i < n:
         ln = lines[i]
-        if re.match(r"^# (Chapter|Appendix) ", ln):
+        if CHAPTER_RE.match(ln):
             chapter = re.sub(r"\s*\{#[^}]*\}\s*$", "", ln[2:]).strip()
             heading = ""
         elif ln.startswith("## "):
@@ -196,6 +227,39 @@ def blocks_with_context(md: Path):
             i = j + 1
         else:
             i += 1
+
+
+def chapters_naming(opus: Path):
+    """{filename: [chapter heading, ...]} for every .spin2 named in a chapter.
+
+    The archive mode's `Appears in.` source. A name counts only inside a
+    chapter-level section (CHAPTER_RE); any other `# ` heading (front matter,
+    copyright) ends the current chapter, so a name there is not attributed to
+    the chapter before it. Headings keep manual order, appendices after the
+    chapters: the files sort appendix-first by name, and a reader looks for a
+    program in its chapter before the appendix that lists them all.
+    """
+    found = {}
+    order = []
+    for md in sorted(opus.rglob("*.md")):
+        chapter = ""
+        for ln in md.read_text(encoding="utf-8").split("\n"):
+            if CHAPTER_RE.match(ln):
+                chapter = re.sub(r"\s*\{#[^}]*\}\s*$", "", ln[2:]).strip()
+                if chapter not in order:
+                    order.append(chapter)
+                continue
+            if ln.startswith("# "):
+                chapter = ""
+                continue
+            if not chapter:
+                continue
+            for name in SPIN2_NAME_RE.findall(ln):
+                names = found.setdefault(name, [])
+                if chapter not in names:
+                    names.append(chapter)
+    rank = {c: (c.startswith("Appendix"), i) for i, c in enumerate(order)}
+    return {n: sorted(cs, key=rank.get) for n, cs in found.items()}
 
 
 def body_updated_month(basename):
@@ -289,7 +353,8 @@ def wrap(label, text, width=74):
     return "\n".join(out)
 
 
-def build_header(fname, purpose, doc_title, version, where, started, updated):
+def build_header(fname, purpose, doc_title, version, where, started, updated,
+                 archive=False):
     L = [MARK_BEGIN, "''"]
     L.append(wrap("File....... ", fname))
     L.append(wrap("Purpose.... ", purpose))
@@ -307,11 +372,21 @@ def build_header(fname, purpose, doc_title, version, where, started, updated):
     # no generated-by banner, no do-not-edit warning. Drift is caught by
     # `sync-manual-examples.py --check` in the release gate, which is a stronger
     # guarantee than a comment asking politely.
-    L += ["''",
-          f"''   {ADOPT_SENTINEL} Everything below",
-          "''   this header is byte-identical to the listing printed there --",
-          "''   what you read in the manual is what builds here.",
-          "''", MARK_BEGIN, ""]
+    if archive:
+        # An archive file is no printed listing, so the byte-identity promise
+        # below would be false. It keeps ADOPT_SENTINEL verbatim: that sentence
+        # is how split_file() and the adoption check find a generated header.
+        L += ["''",
+              f"''   {ADOPT_SENTINEL} It is the whole",
+              "''   program the chapters listed above name; where the manual",
+              "''   quotes it, it quotes excerpts.",
+              "''", MARK_BEGIN, ""]
+    else:
+        L += ["''",
+              f"''   {ADOPT_SENTINEL} Everything below",
+              "''   this header is byte-identical to the listing printed there --",
+              "''   what you read in the manual is what builds here.",
+              "''", MARK_BEGIN, ""]
     return "\n".join(L)
 
 
@@ -374,6 +449,7 @@ def main():
     for md in sorted(opus.rglob("*.md")):
         for cap, body, where in blocks_with_context(md):
             blocks[cap] = (body, where)
+    named = chapters_naming(opus)
 
     purposes = {}
     pf = lib / "PURPOSES.md"
@@ -395,13 +471,21 @@ def main():
               f"verify-example-corpus-identity.py. Pass --adopt to adopt.")
         return 0
 
-    problems, wrote = [], 0
+    problems, wrote, archived = [], 0, 0
     for f in files:
         raw = f.read_text(encoding="utf-8")
         header, body, footer = split_file(raw)
-        if f.name not in blocks:
-            problems.append(f"{f.name}: no captioned block in opus-master"); continue
-        blk_body, where = blocks[f.name]
+        archive = f.name not in blocks
+        if archive:
+            # Whole-program archive mode (see the module docstring): the file
+            # is its own body, and the chapters that name it are its location.
+            if f.name not in named:
+                problems.append(f"{f.name}: no captioned block in opus-master, "
+                                f"and no chapter names it"); continue
+            blk_body, where = body, "; ".join(named[f.name])
+            archived += 1
+        else:
+            blk_body, where = blocks[f.name]
 
         if body != blk_body:
             problems.append(f"{f.name}: BODY differs from its printed code block")
@@ -421,7 +505,12 @@ def main():
         # --follow cannot trace a rename that is not committed yet.
         hist = git("log", "--diff-filter=A", "--format=%ad", "--date=format:%b %Y",
                    "--", f"*/{f.name}", default="")
-        started = hist.split("\n")[-1] if hist else "Aug 2026"
+        # A file git has never seen was started now. The fallback used to be the
+        # literal "Aug 2026" -- right for the corpus it was written for, and a
+        # false date for every file created later (found 2026-09-26, when the
+        # P2 Errata archive's nine new files would all have claimed August).
+        started = (hist.split("\n")[-1] if hist
+                   else datetime.date.today().strftime("%b %Y"))
         # F-420 FIXED 2026-09-11. `Updated` is the last commit that changed the
         # file's BODY -- not the last commit that touched the file.
         #
@@ -440,7 +529,8 @@ def main():
         # to rewrite them to September purely because the header was added then.
         updated = body_updated_month(f.name) or started
         new = build_header(f.name, purpose, title, version, where,
-                           started or "unknown", updated or "unknown")
+                           started or "unknown", updated or "unknown",
+                           archive=archive)
         if not new.isascii():
             bad = sorted({c for c in new if not c.isascii()})
             problems.append(f"{f.name}: generated header holds non-ASCII {bad} "
@@ -458,7 +548,11 @@ def main():
     if problems:
         print(f"RED: {doc.name} — {len(problems)} problem(s)."); return 1
     verb = "verified" if a.check else f"synced ({wrote} rewritten)"
-    print(f"GREEN: {doc.name} — {len(files)} example(s) {verb}.")
+    # Say how many were held by the archive mode, so a file that lost its
+    # caption and slid into it is visible in the summary. Silent when zero,
+    # which keeps every block-paired document's output exactly as before.
+    kind = f" ({archived} whole-program archive)" if archived else ""
+    print(f"GREEN: {doc.name} — {len(files)} example(s){kind} {verb}.")
     return 0
 
 

@@ -201,8 +201,8 @@ were compared long for long. They were identical. The program was run twice on
 between the runs.
 
 **Assembly checked.** Before the run, every `AUGS`, `AUGD` and `ALTx` instruction word
-was read back from the assembler listing and its encoding confirmed; the program's
-header records each word. The `AUGS` assembled to `$FF1E2E05`.
+was read back from the assembler listing and its encoding confirmed. The `AUGS`
+assembled to `$FF1E2E05`.
 
 ## The test program {#sec-e2-program}
 

@@ -241,7 +241,7 @@ The fix's test program carries the block of *The fix* unchanged, between the com
 
 The readings run in the order of the table under *How it was proven on a real P2*. After the late reading at upper long 2, `cogstop(KEEPER_COG)` stops the keeper, and the positive control is read in cog 6 after wrap 3.
 
-Each file prints every pair raw, a summary line per reading, and a one-line verdict. All three are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and downloaded to RAM; the download must reset the part, since each program checks that the counter starts from zero. Run A ends about 105 s after reset, Run B about 44 s after reset, and the fix's test program about 66 s after reset.
+Each file prints every pair raw, a summary line per reading, and a one-line verdict. All three are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and downloaded to RAM; the download must reset the part, since each program checks that the counter starts from zero. Run A ends about 105 s after reset, Run B about 44 s after reset, and the fix's test program about 67 s after reset.
 
 ## Status {#sec-e3-status}
 
