@@ -88,7 +88,7 @@ PUB main()
 
 Started by the first line of `main()` and never stopped, the keeper keeps a cog of 4-7 running through every wrap of the lower long, so a cog your program starts in 4-7 at any later time reads the same upper long as cog 0: this is a one-time startup fix.
 
-<!-- PENDING-BENCH e3-fix: one sentence that the fix test program proved this block on silicon: the date, "on a P2 board at 200 MHz", the number of runs, and that cogs 4, 5 and 6, started after one and after two wraps with the keeper running, read the same upper long as cog 0 (D = 0) in every reading -->
+The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run once: with the keeper running, cogs 5 and 6 started after one wrap and cogs 4 and 5 started after two each read the same upper long as cog 0 in all ten pairs of their readings, and with the keeper stopped, cog 6 read one behind.
 
 **Where it goes.** Put the block at the top of your top-level object, ahead of every other `PUB` method: Spin2 runs the first `PUB` method of the top-level object at start, so this `main()` runs first. Your own `main()` body follows the `coginit` line. If your object already has a `main()`, move its body there and remove its old `PUB main()` line. In the test program, the line that follows is the call that runs the rest of the test.
 
@@ -100,12 +100,12 @@ Started by the first line of `main()` and never stopped, the keeper keeps a cog 
 
 **The limits of the proof:**
 
-- The fix's test program runs the keeper only as the loop above, a jump to itself. Whether a cog held in a wait instruction such as `WAITX` keeps its group current is not tested, so do not replace the loop with a wait.
-- It uses only cog 7 as the keeper. The cogs of 4-7 that read the counter after a wrap are cogs 4, 5 and 6, each started after one or two wraps and stopped again after its reading.
-- The keeper runs alone in cogs 4-7 through two wraps. The test program then stops it, as a positive control.
-- The test program runs at 200 MHz and is downloaded to RAM with a reset.
+- The keeper was tested only as the loop above, a jump to itself. Whether a cog held in a wait instruction such as `WAITX` keeps its group current was not tested, so do not replace the loop with a wait.
+- Only cog 7 was tested as the keeper. The cogs of 4-7 that read the counter after a wrap were cogs 4, 5 and 6, each started after one or two wraps and stopped again after its reading.
+- The keeper ran alone in cogs 4-7 through two wraps. The test program then stopped it, as a positive control.
+- The test ran once, at 200 MHz, with the program downloaded to RAM with a reset.
 
-Run B, under *How it was proven on a real P2*, is earlier evidence of the rule the fix relies on: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter. The block above keeps a separate cog running while the cogs that read the counter start and stop, which is the arrangement the fix's own test program checks.
+Run B, under *How it was proven on a real P2*, is earlier evidence of the rule the fix relies on: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter. The block above keeps a separate cog running while the cogs that read the counter start and stop, which is the arrangement the fix's own test program checked.
 
 ## Why it happens {#sec-e3-why}
 
@@ -123,7 +123,7 @@ Running here means the state a cog is in between its start and its stop, the sta
 
 ## How it was proven on a real P2 {#sec-e3-proof}
 
-Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program tests the fix; it is described after them.
+Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program, run once, confirmed the fix; it is described after them.
 
 **Arrangement.** Cog 0 is the reference. Cog 1, in the cogs 0-3 group, and cog 4, in the cogs 4-7 group, run the same sampler: on each new request from cog 0 it executes `GETCT WC` then `GETCT`, writes both longs to hub RAM, then writes an acknowledgment. One **pair** is taken as follows: cog 0 reads its own counter (`GETCT WC`, `GETCT`), writes a request, waits for the acknowledgment, reads the sampler's two longs, and reads its own counter again. The sampler's reads therefore fall between cog 0's two reads.
 
@@ -161,24 +161,24 @@ Wrap *n* below is the wrap after which cog 0's upper long reads *n*. An early re
 
 In every reading of both runs all ten pairs agreed on D, and the lower-long check held in every pair. Each program's verdict line read `CONFIRMED`, in both builds.
 
-**The fix.** The fix's test program decides the block printed under *The fix*. It carries that block byte for byte, with the same sampler, pair protocol, D and pair rules as Run A and Run B, at 200 MHz, with the debugger confined to cog 0. The keeper starts in cog 7 at the first line of `main()`. Cog 1 samples the cogs 0-3 group from start to end. The program's own cogs of 4-7 are cogs 4, 5 and 6: each is started as a sampler just before one reading and stopped again just after it, so every cog of 4-7 that reads the counter after a wrap was started after one or two wraps through which the keeper ran alone in that group. Every reading of cogs 4-7 is paired with a reading of cog 1.
+**The fix.** The fix's test program decided the block printed under *The fix*. It carries that block byte for byte, with the same sampler, pair protocol, D and pair rules as Run A and Run B, at 200 MHz, with the debugger confined to cog 0. The keeper starts in cog 7 at the first line of `main()`. Cog 1 samples the cogs 0-3 group from start to end. The program's own cogs of 4-7 are cogs 4, 5 and 6: each is started as a sampler just before one reading and stopped again just after it, so every cog of 4-7 that reads the counter after a wrap was started after one or two wraps through which the keeper ran alone in that group. Every reading of cogs 4-7 is paired with a reading of cog 1.
 
-| Cog 0 upper | Reading | Sampler | Cogs 4-7 before the reading | D written in advance |
-|---|---|---|---|---|
-| 0 | early | cog 4 | the keeper, since the first line of `main()` | 0 (control) |
-| 1 | early | cog 5 | the keeper alone through wrap 1 | 0 with the fix; 1 without |
-| 1 | late | cog 6 | the keeper alone through wrap 1 | 0 with the fix; 1 without |
-| 2 | early | cog 4 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without |
-| 2 | late | cog 5 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without |
-| 3 | early | cog 6 | the keeper stopped after the reading above; no cog running at wrap 3 | 1 (positive control) |
+| Cog 0 upper | Reading | Sampler | Cogs 4-7 before the reading | D written in advance | Sampler D | Cog 1 D |
+|---|---|---|---|---|---|---|
+| 0 | early | cog 4 | the keeper, since the first line of `main()` | 0 (control) | 0 | 0 |
+| 1 | early | cog 5 | the keeper alone through wrap 1 | 0 with the fix; 1 without | 0 | 0 |
+| 1 | late | cog 6 | the keeper alone through wrap 1 | 0 with the fix; 1 without | 0 | 0 |
+| 2 | early | cog 4 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without | 0 | 0 |
+| 2 | late | cog 5 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without | 0 | 0 |
+| 3 | early | cog 6 | the keeper stopped after the reading above; no cog running at wrap 3 | 1 (positive control) | **1** | 0 |
 
-<!-- PENDING-BENCH e3-fix: the measured D of each row of the table above (from each reading's "=> D=" line), as a "Measured D" column, plus the cog 1 D of each paired reading; or state them in one sentence if every value equals the value written in advance -->
+In every reading all ten pairs agreed on D, and the lower-long check held in every pair.
 
 The controls of Run A and Run B apply, with these differences. At start the running cogs must be cog 0 and the keeper only. The keeper must be seen running on every poll up to the positive control, and stopped after it. The reading at upper long 0 must give D = 0. The positive control must give D = 1: it shows that the program, on this part and in this run, sees the erratum when the keeper is absent, so a D of 0 with the keeper running cannot come from a test that is blind to it. Cog 6 reads both with the keeper running and, in the positive control, with it stopped: the same cog and the same code, with only the keeper changed.
 
 The verdict was fixed before the run. The fix is confirmed if the four readings taken after a wrap with the keeper running all give D = 0, with all ten pairs of each agreeing and the lower-long check holding in every pair. A reading whose ten pairs agree on a D other than 0, or a failed lower-long check, refutes it. A reading whose pairs disagree, or that gets too few valid pairs, leaves it inconclusive. A control failure gives no verdict.
 
-<!-- PENDING-BENCH e3-fix: the result paragraph: the date, the number of runs (and builds, if more than one), that every control passed (no RIG FAIL line), the positive-control D, and the verdict line as printed (CONFIRMED / REFUTED / INCONCLUSIVE) -->
+**Result.** The fix's test program ran once, on 2026-09-26, on a P2 board at 200 MHz, downloaded to RAM with a reset. At start the upper long read 0 and the running cogs were cog 0 and the keeper in cog 7. Every control passed, and no `RIG FAIL` line was printed. The running-cog set showed the keeper on every poll until it was stopped, with cog 0's counter at `$0000_0002_$E088_2186`, and did not show it on any poll after. With the keeper running, the four readings taken after a wrap gave D = 0. In the positive control, with the keeper stopped and wrap 3 missed, cog 6 read an upper long of `$0000_0002` beside cog 0's `$0000_0003`: D = 1, the erratum as in Run A. The verdict line read `CONFIRMED`.
 
 ## The test program {#sec-e3-program}
 
@@ -251,6 +251,6 @@ Each file prints every pair raw, a summary line per reading, and a one-line verd
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | <!-- PENDING-BENCH e3-fix --> |
+| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup fix: a keeper cog in cog 7 started by the first line of `main()` |
 | Affects | `GETCT WC` in a cog of a four-cog group that had no running cog at one or more wraps of the lower long (measured on cogs 4-7); plain `GETCT` is not affected |
 | Test program | `e3-getct-stale-upper-long-runA.spin2`, `e3-getct-stale-upper-long-runB.spin2`, `e3-fix-keeper-cog-test.spin2` |

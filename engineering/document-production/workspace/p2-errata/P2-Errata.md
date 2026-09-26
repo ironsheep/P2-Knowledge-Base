@@ -685,7 +685,7 @@ PUB main()
 
 Started by the first line of `main()` and never stopped, the keeper keeps a cog of 4-7 running through every wrap of the lower long, so a cog your program starts in 4-7 at any later time reads the same upper long as cog 0: this is a one-time startup fix.
 
-<!-- PENDING-BENCH e3-fix: one sentence that the fix test program proved this block on silicon: the date, "on a P2 board at 200 MHz", the number of runs, and that cogs 4, 5 and 6, started after one and after two wraps with the keeper running, read the same upper long as cog 0 (D = 0) in every reading -->
+The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run once: with the keeper running, cogs 5 and 6 started after one wrap and cogs 4 and 5 started after two each read the same upper long as cog 0 in all ten pairs of their readings, and with the keeper stopped, cog 6 read one behind.
 
 **Where it goes.** Put the block at the top of your top-level object, ahead of every other `PUB` method: Spin2 runs the first `PUB` method of the top-level object at start, so this `main()` runs first. Your own `main()` body follows the `coginit` line. If your object already has a `main()`, move its body there and remove its old `PUB main()` line. In the test program, the line that follows is the call that runs the rest of the test.
 
@@ -697,12 +697,12 @@ Started by the first line of `main()` and never stopped, the keeper keeps a cog 
 
 **The limits of the proof:**
 
-- The fix's test program runs the keeper only as the loop above, a jump to itself. Whether a cog held in a wait instruction such as `WAITX` keeps its group current is not tested, so do not replace the loop with a wait.
-- It uses only cog 7 as the keeper. The cogs of 4-7 that read the counter after a wrap are cogs 4, 5 and 6, each started after one or two wraps and stopped again after its reading.
-- The keeper runs alone in cogs 4-7 through two wraps. The test program then stops it, as a positive control.
-- The test program runs at 200 MHz and is downloaded to RAM with a reset.
+- The keeper was tested only as the loop above, a jump to itself. Whether a cog held in a wait instruction such as `WAITX` keeps its group current was not tested, so do not replace the loop with a wait.
+- Only cog 7 was tested as the keeper. The cogs of 4-7 that read the counter after a wrap were cogs 4, 5 and 6, each started after one or two wraps and stopped again after its reading.
+- The keeper ran alone in cogs 4-7 through two wraps. The test program then stopped it, as a positive control.
+- The test ran once, at 200 MHz, with the program downloaded to RAM with a reset.
 
-Run B, under *How it was proven on a real P2*, is earlier evidence of the rule the fix relies on: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter. The block above keeps a separate cog running while the cogs that read the counter start and stop, which is the arrangement the fix's own test program checks.
+Run B, under *How it was proven on a real P2*, is earlier evidence of the rule the fix relies on: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter. The block above keeps a separate cog running while the cogs that read the counter start and stop, which is the arrangement the fix's own test program checked.
 
 ## Why it happens {#sec-e3-why}
 
@@ -720,7 +720,7 @@ Running here means the state a cog is in between its start and its stop, the sta
 
 ## How it was proven on a real P2 {#sec-e3-proof}
 
-Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program tests the fix; it is described after them.
+Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program, run once, confirmed the fix; it is described after them.
 
 **Arrangement.** Cog 0 is the reference. Cog 1, in the cogs 0-3 group, and cog 4, in the cogs 4-7 group, run the same sampler: on each new request from cog 0 it executes `GETCT WC` then `GETCT`, writes both longs to hub RAM, then writes an acknowledgment. One **pair** is taken as follows: cog 0 reads its own counter (`GETCT WC`, `GETCT`), writes a request, waits for the acknowledgment, reads the sampler's two longs, and reads its own counter again. The sampler's reads therefore fall between cog 0's two reads.
 
@@ -758,24 +758,24 @@ Wrap *n* below is the wrap after which cog 0's upper long reads *n*. An early re
 
 In every reading of both runs all ten pairs agreed on D, and the lower-long check held in every pair. Each program's verdict line read `CONFIRMED`, in both builds.
 
-**The fix.** The fix's test program decides the block printed under *The fix*. It carries that block byte for byte, with the same sampler, pair protocol, D and pair rules as Run A and Run B, at 200 MHz, with the debugger confined to cog 0. The keeper starts in cog 7 at the first line of `main()`. Cog 1 samples the cogs 0-3 group from start to end. The program's own cogs of 4-7 are cogs 4, 5 and 6: each is started as a sampler just before one reading and stopped again just after it, so every cog of 4-7 that reads the counter after a wrap was started after one or two wraps through which the keeper ran alone in that group. Every reading of cogs 4-7 is paired with a reading of cog 1.
+**The fix.** The fix's test program decided the block printed under *The fix*. It carries that block byte for byte, with the same sampler, pair protocol, D and pair rules as Run A and Run B, at 200 MHz, with the debugger confined to cog 0. The keeper starts in cog 7 at the first line of `main()`. Cog 1 samples the cogs 0-3 group from start to end. The program's own cogs of 4-7 are cogs 4, 5 and 6: each is started as a sampler just before one reading and stopped again just after it, so every cog of 4-7 that reads the counter after a wrap was started after one or two wraps through which the keeper ran alone in that group. Every reading of cogs 4-7 is paired with a reading of cog 1.
 
-| Cog 0 upper | Reading | Sampler | Cogs 4-7 before the reading | D written in advance |
-|---|---|---|---|---|
-| 0 | early | cog 4 | the keeper, since the first line of `main()` | 0 (control) |
-| 1 | early | cog 5 | the keeper alone through wrap 1 | 0 with the fix; 1 without |
-| 1 | late | cog 6 | the keeper alone through wrap 1 | 0 with the fix; 1 without |
-| 2 | early | cog 4 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without |
-| 2 | late | cog 5 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without |
-| 3 | early | cog 6 | the keeper stopped after the reading above; no cog running at wrap 3 | 1 (positive control) |
+| Cog 0 upper | Reading | Sampler | Cogs 4-7 before the reading | D written in advance | Sampler D | Cog 1 D |
+|---|---|---|---|---|---|---|
+| 0 | early | cog 4 | the keeper, since the first line of `main()` | 0 (control) | 0 | 0 |
+| 1 | early | cog 5 | the keeper alone through wrap 1 | 0 with the fix; 1 without | 0 | 0 |
+| 1 | late | cog 6 | the keeper alone through wrap 1 | 0 with the fix; 1 without | 0 | 0 |
+| 2 | early | cog 4 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without | 0 | 0 |
+| 2 | late | cog 5 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without | 0 | 0 |
+| 3 | early | cog 6 | the keeper stopped after the reading above; no cog running at wrap 3 | 1 (positive control) | **1** | 0 |
 
-<!-- PENDING-BENCH e3-fix: the measured D of each row of the table above (from each reading's "=> D=" line), as a "Measured D" column, plus the cog 1 D of each paired reading; or state them in one sentence if every value equals the value written in advance -->
+In every reading all ten pairs agreed on D, and the lower-long check held in every pair.
 
 The controls of Run A and Run B apply, with these differences. At start the running cogs must be cog 0 and the keeper only. The keeper must be seen running on every poll up to the positive control, and stopped after it. The reading at upper long 0 must give D = 0. The positive control must give D = 1: it shows that the program, on this part and in this run, sees the erratum when the keeper is absent, so a D of 0 with the keeper running cannot come from a test that is blind to it. Cog 6 reads both with the keeper running and, in the positive control, with it stopped: the same cog and the same code, with only the keeper changed.
 
 The verdict was fixed before the run. The fix is confirmed if the four readings taken after a wrap with the keeper running all give D = 0, with all ten pairs of each agreeing and the lower-long check holding in every pair. A reading whose ten pairs agree on a D other than 0, or a failed lower-long check, refutes it. A reading whose pairs disagree, or that gets too few valid pairs, leaves it inconclusive. A control failure gives no verdict.
 
-<!-- PENDING-BENCH e3-fix: the result paragraph: the date, the number of runs (and builds, if more than one), that every control passed (no RIG FAIL line), the positive-control D, and the verdict line as printed (CONFIRMED / REFUTED / INCONCLUSIVE) -->
+**Result.** The fix's test program ran once, on 2026-09-26, on a P2 board at 200 MHz, downloaded to RAM with a reset. At start the upper long read 0 and the running cogs were cog 0 and the keeper in cog 7. Every control passed, and no `RIG FAIL` line was printed. The running-cog set showed the keeper on every poll until it was stopped, with cog 0's counter at `$0000_0002_$E088_2186`, and did not show it on any poll after. With the keeper running, the four readings taken after a wrap gave D = 0. In the positive control, with the keeper stopped and wrap 3 missed, cog 6 read an upper long of `$0000_0002` beside cog 0's `$0000_0003`: D = 1, the erratum as in Run A. The verdict line read `CONFIRMED`.
 
 ## The test program {#sec-e3-program}
 
@@ -848,7 +848,7 @@ Each file prints every pair raw, a summary line per reading, and a one-line verd
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | <!-- PENDING-BENCH e3-fix --> |
+| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup fix: a keeper cog in cog 7 started by the first line of `main()` |
 | Affects | `GETCT WC` in a cog of a four-cog group that had no running cog at one or more wraps of the lower long (measured on cogs 4-7); plain `GETCT` is not affected |
 | Test program | `e3-getct-stale-upper-long-runA.spin2`, `e3-getct-stale-upper-long-runB.spin2`, `e3-fix-keeper-cog-test.spin2` |
 
@@ -941,7 +941,9 @@ cos_sum     long    0
 sin_sum     long    0
 ```
 
-Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, whatever the accumulators held before the call: a *helper routine*. <!-- PENDING-BENCH e45-fix: this guarantee sentence stands only on "VERDICT: CONFIRMED" (60 of 60 calls S = N*C, cosine and sine; lead and idle as expected). Until then it is the claim under test, not a result. -->
+Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, whatever the accumulators held before the call: a *helper routine*.
+
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels, including 6 calls made while an earlier burst's term was still held; see *How it was proven on a real P2*.
 
 To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's: SINC1, no DAC output, input pins P0 to P3, a count of 256, with P3 inverted and summed and a lookup offset of `$0A5`.
 
@@ -953,7 +955,7 @@ The routine takes its two readings with the streamer idle, where `GETXACC` clear
 
 - **SINC1 only.** In SINC2 mode the zero burst has not been tested as a flush, and the routine is not recommended there; *The fix* of Erratum E5 notes the P2 Documentation's separate SINC2 constraint.
 - **One burst at a time, from an idle streamer.** The routine starts every command with `XINIT`, which issues it at once, so it does not fit a continuous stream of commands chained with `XCONT`. A `GETXACC` inside a running Goertzel command clears as documented.
-- **Conditions of the test.** <!-- PENDING-BENCH e45-fix: confirm the tested conditions from the run: NCO $8000_0000, one input pin (P3, inverted, summed), no DAC output, N = 1, 2, 3, 4, 7, 64, 65, 255, 256, 1001, P3 low and high, cog RAM execution, 200 MHz --> The fix's test program runs the routine from cog RAM, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies, hub execution, and accumulator values near the 32-bit limit were not tested.
+- **Conditions of the test.** The fix's test program ran the routine once, from cog RAM on a P2 board at 200 MHz, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies, hub execution, and accumulator values near the 32-bit limit were not tested.
 
 ## Why it happens {#sec-e4-why}
 
@@ -992,7 +994,7 @@ The program was run twice on 2026-09-24, from two builds with identical measurin
 
 ### The fix's test {#sec-e4-fix-proof}
 
-The fix is run in its own test program, on the same construction: the LUT, the NCO frequency, the mode word and the `S` operand above, with P3 driven by the measuring cog, low for the first half of the run and high for the second. The printed block is the routine the test program calls, byte for byte, and the program checks before it starts that `burst_mode` carries the printed mode bits and `burst_sel` the printed `S`. Every wait on a burst is `WAITXFI`, as in the routine.
+The fix ran in its own test program, on the same construction: the LUT, the NCO frequency, the mode word and the `S` operand above, with P3 driven by the measuring cog, low for the first half of the run and high for the second. The printed block is the routine the test program calls, byte for byte, and the program checks before it starts that `burst_mode` carries the printed mode bits and `burst_sel` the printed `S`. Every wait on a burst is `WAITXFI`, as in the routine.
 
 At each P3 level the program runs three records, each of four parts:
 
@@ -1003,7 +1005,13 @@ At each P3 level the program runs three records, each of four parts:
 
 The outcome was fixed before the run: every one of the 60 calls returns exactly N × C on the cosine and on the sine sum; the before reading of each record's first call has gained exactly C (the held term the first zero burst delivered), and that of every other call nothing; and the program's own reading after each call equals the before reading plus the returned sum. A miss of exactly -C would mean the zero burst did not deliver the last term; +C, that an older term was counted.
 
-<!-- PENDING-BENCH e45-fix: results. Fill from the fix run's raw lines: (1) CAL C measured, cosine and sine, P3 LOW and HIGH (expected +61/+23 and -61/-23 by the construction; state the measured values); (2) positive control reproduced in N of 12 rows (P2-R1 = 0; R1-P = 63*C; R2-P2 = 65*C; R3-R2 = C; RD-R3 = 6*C), with one example row's values; (3) fix tallies of 60: S = N*C, lead as expected, idle = 0; (4) one example call row, e.g. N=256 at P3 LOW (S cosine/sine) and N=1001; (5) the VERDICT line; (6) date, how many runs, and whether every value matched between runs. Claim nothing here until the log is read. -->
+**The results.** Every control passed. The printed words read `$F007_0100` and `$0008_80A5`; the routine built its zero-burst words as `$F007_0004` and `$0008_00A5`; the 512 LUT longs read back unchanged; and P3 read at its driven level before and after every record. The calibration gave C = 61 on the cosine sum and 23 on the sine sum in all three records at P3 low, and -61 and -23 in all three at P3 high.
+
+The documented use, without the fix, showed both errata in all 12 rows (6 records, cosine and sine): the second "clear" reading equalled the first, and the bursts read 63 × C, 65 × C, C and 6 × C. In the first record, on the cosine sum: P = 68,869, R1 = 72,712 (3,843, which is 63 × 61), the second "clear" 72,712, R2 = 76,677 (3,965, which is 65 × 61), the zero burst alone 76,738 (61), and the 7-clock burst 77,104 (366, which is 6 × 61).
+
+All 60 calls of `burst_sums` returned exactly N × C on both sums. At P3 low, for N = 1, 2, 3, 4, 7, 64, 65, 255, 256 and 1001, the cosine sums were 61, 122, 183, 244, 427, 3,904, 3,965, 15,555, 15,616 and 61,061, and the sine sums 23, 46, 69, 92, 161, 1,472, 1,495, 5,865, 5,888 and 23,023; at P3 high, the same values negated. The 256-clock call returned 15,616 (256 × 61), where the difference alone, in the erratum test above, read 15,555 (255 × 61). Each record's first call found its before reading moved by exactly C from the reading after the 7-clock burst (77,165 against 77,104 in the first record); every later call's before reading equalled the program's own reading after the previous call; and every one of the program's own readings, 1,000 clocks after a call, equalled the call's before reading plus its returned sum. No call returned (N-1) × C or (N+1) × C. The largest accumulator value read was 412,909.
+
+The test program was run once, on 2026-09-26, on a P2 board at 200 MHz. The values above are read from its raw lines, not from its verdict line.
 
 ## The test program {#sec-e4-program}
 
@@ -1078,7 +1086,7 @@ fix_arm         mov     fidx_, #0
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | <!-- PENDING-BENCH e45-fix --> |
+| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; helper routine |
 | Affects | `GETXACC` with the streamer idle or in a non-Goertzel mode: it returns the Goertzel accumulators without clearing them. Measured with SINC1 bursts started by `XINIT`, one input pin |
 | Test program | `e4-getxacc-clear-gating-test.spin2`; the fix: `e4-e5-fix-read-sums-test.spin2` |
 
@@ -1166,7 +1174,9 @@ cos_sum     long    0
 sin_sum     long    0
 ```
 
-Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, and leaves no term held for the next burst: a *helper routine*, for SINC1 mode. <!-- PENDING-BENCH e45-fix: this guarantee sentence stands only on "VERDICT: CONFIRMED" (60 of 60 calls S = N*C, cosine and sine; lead = C on the 6 first calls, 0 on the other 54). Until then it is the claim under test, not a result. -->
+Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, and leaves no term held for the next burst: a *helper routine*, for SINC1 mode.
+
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call; see *How it was proven on a real P2*.
 
 The routine is for SINC1 mode. In SINC2 mode its zero burst has not been tested as a flush, and the routine is not recommended there. SINC2 has its own, separate constraint, which is documented and is not this erratum: the P2 Documentation's note on Goertzel SINC2 mode, by Chip Gracey (2024.12.16), states that a varying number of iterations in a Goertzel cycle corrupts the current and next samples. Its two remedies held on a real P2 in the test program `e5-goertzel-sinc2-iteration-count-test.spin2` (2026-09-25, at 200 MHz, run twice). With every NCO cycle the same length (`SETXFRQ` of `$0080_0000`, 256 clocks per cycle, 2,048-clock commands chained with `XCONT`), 0 of 1,020 SINC2 samples were off. With each command issued by `XZERO`, at a `SETXFRQ` value of `$0080_0040` with 8 NCO cycles per command and of `$00A3_D70C` with 100 and with 25,000, every command kept one length and 0 of 1,020, 0 of 2,044 and 0 of 12 samples changed, where `XCONT` at the same settings gave 30, 12 and 4 corrupted samples.
 
@@ -1179,7 +1189,7 @@ The zero bursts are your mode word with a count of 4 and S[15:12] clear, so ever
 **Limits.**
 
 - **One burst at a time, from an idle streamer.** The routine starts every command with `XINIT`, which issues it at once, so it does not fit a continuous stream of commands chained with `XCONT`.
-- **Conditions of the test.** <!-- PENDING-BENCH e45-fix: confirm the tested conditions from the run: NCO $8000_0000, one input pin (P3, inverted, summed), no DAC output, N = 1, 2, 3, 4, 7, 64, 65, 255, 256, 1001, P3 low and high, first call with a held term, cog RAM execution, 200 MHz --> The fix's test program runs the routine from cog RAM, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks, the first call of each record made with an earlier burst's term still held. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies and hub execution were not tested.
+- **Conditions of the test.** The fix's test program ran the routine once, from cog RAM on a P2 board at 200 MHz, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks, the first call of each record made with an earlier burst's term still held. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies and hub execution were not tested.
 
 ## Why it happens {#sec-e5-why}
 
@@ -1250,9 +1260,11 @@ The test ran on 2026-09-24, twice, from two builds of the same program with iden
 
 ### The fix's test {#sec-e5-fix-proof}
 
-The fix is run in the test program described in Erratum E4, which calls the printed routine byte for byte. For this erratum its checks are these. The uncorrected part of each record must show the lag in the same run: a 64-clock burst read 63 × C, the 65-clock burst right after it read 65 × C, a zero burst alone read C, and a 7-clock burst read 6 × C, with its last term left held. The first call of `burst_sums` in each record starts with that term held, so its before reading must have gained exactly C, and every later call's nothing; every call must return N × C, for N = 1 to 1001. A result of (N-1) × C would mean the zero burst did not deliver the last term.
+The fix ran in the test program described in Erratum E4, which calls the printed routine byte for byte. For this erratum its checks are these. The uncorrected part of each record must show the lag in the same run: a 64-clock burst read 63 × C, the 65-clock burst right after it read 65 × C, a zero burst alone read C, and a 7-clock burst read 6 × C, with its last term left held. The first call of `burst_sums` in each record starts with that term held, so its before reading must have gained exactly C, and every later call's nothing; every call must return N × C, for N = 1 to 1001. A result of (N-1) × C would mean the zero burst did not deliver the last term.
 
-<!-- PENDING-BENCH e45-fix: results for E5. Fill from the fix run's raw lines: (1) positive-control E5 rows reproduced in N of 12 (R1-P = 63*C, R2-P2 = 65*C, R3-R2 = C, RD-R3 = 6*C) with one example row; (2) lead = C on the 6 first calls and 0 on the other 54 (tally); (3) S = N*C in N of 60, misses (N-1)*C / (N+1)*C counts; (4) one example call row, e.g. N=1 and N=1001 at P3 HIGH; (5) the VERDICT line; (6) date, runs, agreement. Claim nothing until the log is read. -->
+**The results.** Every control passed, and the per-clock term measured C = 61 on the cosine sum and 23 on the sine sum at P3 low, -61 and -23 at P3 high, in every record. The uncorrected part showed the lag in all 12 rows (6 records, cosine and sine): at P3 low, on the cosine sum, the 64-clock burst read 3,843 (63 × 61), the 65-clock burst right after it 3,965 (65 × 61), the zero burst alone 61, and the 7-clock burst 366 (6 × 61); on the sine sum 1,449, 1,495, 23 and 138; at P3 high the same values negated. The first call of each record found exactly C waiting: its before reading was 61 above the 7-clock burst's reading at P3 low (77,165 against 77,104 in the first record) and 61 below it at P3 high (396,744 against 396,805 in the fourth). Every later call's before reading equalled the program's own reading after the previous call, so no call left a term behind. Every one of the 60 calls returned N × C on both sums, from 61 for N = 1 to 61,061 for N = 1001 on the cosine sum at P3 low, and -23 to -23,023 on the sine sum at P3 high; none returned (N-1) × C.
+
+The test program was run once, on 2026-09-26, on a P2 board at 200 MHz. The values above are read from its raw lines, not from its verdict line.
 
 ## The test program {#sec-e5-program}
 
@@ -1325,7 +1337,7 @@ The test program `e5-goertzel-sinc2-iteration-count-test.spin2`, cited in *The f
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | <!-- PENDING-BENCH e45-fix --> |
+| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; helper routine (SINC1) |
 | Affects | `GETXACC` readings after a DDS/Goertzel burst in SINC1 mode, sine and cosine; tested with bursts of 64 and 65 clocks started by `XINIT` |
 | Test program | `e5-goertzel-one-clock-lag-test.spin2`; the fix: `e4-e5-fix-read-sums-test.spin2` |
 
@@ -1595,7 +1607,7 @@ The `WAITX #12` makes the spacing from the start of the no-wait `RDFAST` to the 
 
 In your code, `nowait` is a register holding `$8000_0000` (`D[31]` = 1, and a block count of 0, so no wrap); `hub_first` and `hub_next` hold the two hub addresses, and `first_long` receives the first long at `hub_next`.
 
-The rule is the spacing: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one. The no-wait `RDFAST` takes 2 clocks and `WAITX #12` takes 2 + 12 = 14. The basis is measured: in the erratum test, every spacing from 16 to 44 clocks read correctly in all 64 alignments and all 16 trials of each, and the blocking `RDFAST` then waited its usual 10 to 17 clocks. There the spacing was set by a `WAITX` whose register operand held 12 to 40; the block above, with `#12`, is the one the fix test runs. <!-- PENDING-BENCH e7-fix: the printed block's own run; date and number of runs; first_long correct in how many of 1,024 trials (8 slices x 8 offsets x 16) and the long after it correct; the blocking RDFAST's clocks inside the block; and that the unspaced sweep in the same run reproduced the erratum in 64 of 64 alignments -->
+The rule is the spacing: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one. The no-wait `RDFAST` takes 2 clocks and `WAITX #12` takes 2 + 12 = 14. The basis is measured: in the erratum test, every spacing from 16 to 44 clocks read correctly in all 64 alignments and all 16 trials of each, and the blocking `RDFAST` then waited its usual 10 to 17 clocks. There the spacing was set by a `WAITX` whose register operand held 12 to 40. The block above, with `#12`, ran in the fix test on 2026-09-26: in all 64 alignments, 16 trials each, `first_long` received the first long at `hub_next`, and the next `RFLONG` the long after it, in 1,024 of 1,024 trials, with the blocking `RDFAST` waiting 10 to 17 clocks. In the same run the unfixed arrangement failed as described above in all 64 alignments.
 
 The cost is the 14 clocks of the `WAITX`, each time a blocking `RDFAST` follows a no-wait one.
 
@@ -1658,7 +1670,11 @@ At each failing spacing, all 16 trials read `$0000_0000`, and the blocking `RDFA
 
 The test ran on 2026-09-25, twice. The two runs printed the same result for every alignment and spacing.
 
-**The fix.** <!-- PENDING-BENCH e7-fix: the fix test's run; date and number of runs; its controls passed (including WAITX #12 = 14 clocks); the unspaced sweep reproduced the erratum in 64 of 64 alignments; the printed block read the first long, and the long after it, in all 1,024 trials, and the blocking RDFAST's clocks inside it -->
+**The fix.** The fix test ran on 2026-09-26, once, on a P2 board at 200 MHz, with the same regions, the same loading of the FIFO before every trial and the same 64 alignments.
+
+- Its controls were the four above and one more: `WAITX #12` between two `GETCT`s measured 16 clocks, 2 for the `GETCT` pair and 14 for the `WAITX`, in every trial. Every control was correct in every trial.
+- As a positive control, the same run swept the unfixed arrangement over the same 42 spacings. It failed at exactly one spacing in each of the 64 alignments, at the same spacings as in the erratum test (table above), with all 16 trials reading `$0000_0000` and the blocking `RDFAST` taking 2 clocks: 1,024 of 43,008 reads wrong. At every spacing from 16 to 44 clocks, the first read and the long after it were correct in all 29,696 trials.
+- The block printed in *The fix*, with nothing else between its lines, read the first long at `hub_next` and then the long after it in 1,024 of 1,024 trials. Its blocking `RDFAST` waited 10 to 17 clocks, taking 8 different times over the 8 starting points in every slice.
 
 ## The test program {#sec-e7-program}
 
@@ -1706,7 +1722,7 @@ The fix test is `e7-fix-rdfast-spacing-test.spin2`. It uses the same constructio
 | Published by Parallax | No |
 | Found by | Found on the bench here, by a test built to measure something else |
 | Confirmed on silicon | Yes — 2026-09-25, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | <!-- PENDING-BENCH e7-fix --> |
+| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a rule at each use: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking one |
 | Affects | a blocking `RDFAST` issued 8 to 15 clocks after a no-wait `RDFAST`, at the one spacing its hub alignment selects: the next `RFLONG` returns `$0000_0000`. Tested in cog execution, with `RFLONG` as the read |
 | Test program | `e7-rdfast-blocking-after-no-wait-test.spin2`; the fix: `e7-fix-rdfast-spacing-test.spin2` |
 
@@ -1752,8 +1768,8 @@ To run one:
 
 Pin use: the E4 and E5 programs, including the SINC2 test and the E4/E5 fix test, drive P3 from the measuring cog, so P3 must be free. The E6 test drives P4 and reads it through P5, so both must be free and unconnected. The others use no pins.
 
-Running time: the E3 erratum programs wait for the counter's lower long to wrap, which takes 2^32^ clocks (21.47 s at 200 MHz); Run A ends about 105 s after reset and Run B about 44 s after reset. The E7 erratum test printed its output over about 23 s, the SINC2 test over about 5 s. The E1, E2, E4, E5 and E6 erratum programs each printed their whole output in about one second. <!-- PENDING-BENCH fixes: running time of e3-fix (est. ~66 s), e7-fix (est. ~10 s), e4-e5-fix (est. < 5 s), read from logs-fixes/ -->
+Running time: the E3 erratum programs wait for the counter's lower long to wrap, which takes 2^32^ clocks (21.47 s at 200 MHz); Run A ends about 105 s after reset and Run B about 44 s after reset. The E7 erratum test printed its output over about 23 s, the SINC2 test over about 5 s. The E1, E2, E4, E5 and E6 erratum programs each printed their whole output in about one second. Of the fix tests, the E3 test ends about 67 s after reset, since it waits through three wraps; the E7 test printed its output over about 8 s, and the E4/E5 test in about one second.
 
-The E1 to E5 erratum programs ran on 2026-09-24 on a P2 board at 200 MHz, each twice, from two builds with identical measuring code, and every measured value matched between the runs. The E5 SINC2, E6 and E7 erratum programs ran on 2026-09-25, each twice. <!-- PENDING-BENCH fixes: date, runs and agreement of the three fix tests -->
+The E1 to E5 erratum programs ran on 2026-09-24 on a P2 board at 200 MHz, each twice, from two builds with identical measuring code, and every measured value matched between the runs. The E5 SINC2, E6 and E7 erratum programs ran on 2026-09-25, each twice. The three fix tests ran on 2026-09-26, once each, on the same board at 200 MHz; each reproduced its erratum and passed every control in the same run.
 
 

@@ -81,7 +81,9 @@ cos_sum     long    0
 sin_sum     long    0
 ```
 
-Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, and leaves no term held for the next burst: a *helper routine*, for SINC1 mode. <!-- PENDING-BENCH e45-fix: this guarantee sentence stands only on "VERDICT: CONFIRMED" (60 of 60 calls S = N*C, cosine and sine; lead = C on the 6 first calls, 0 on the other 54). Until then it is the claim under test, not a result. -->
+Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, and leaves no term held for the next burst: a *helper routine*, for SINC1 mode.
+
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call; see *How it was proven on a real P2*.
 
 The routine is for SINC1 mode. In SINC2 mode its zero burst has not been tested as a flush, and the routine is not recommended there. SINC2 has its own, separate constraint, which is documented and is not this erratum: the P2 Documentation's note on Goertzel SINC2 mode, by Chip Gracey (2024.12.16), states that a varying number of iterations in a Goertzel cycle corrupts the current and next samples. Its two remedies held on a real P2 in the test program `e5-goertzel-sinc2-iteration-count-test.spin2` (2026-09-25, at 200 MHz, run twice). With every NCO cycle the same length (`SETXFRQ` of `$0080_0000`, 256 clocks per cycle, 2,048-clock commands chained with `XCONT`), 0 of 1,020 SINC2 samples were off. With each command issued by `XZERO`, at a `SETXFRQ` value of `$0080_0040` with 8 NCO cycles per command and of `$00A3_D70C` with 100 and with 25,000, every command kept one length and 0 of 1,020, 0 of 2,044 and 0 of 12 samples changed, where `XCONT` at the same settings gave 30, 12 and 4 corrupted samples.
 
@@ -94,7 +96,7 @@ The zero bursts are your mode word with a count of 4 and S[15:12] clear, so ever
 **Limits.**
 
 - **One burst at a time, from an idle streamer.** The routine starts every command with `XINIT`, which issues it at once, so it does not fit a continuous stream of commands chained with `XCONT`.
-- **Conditions of the test.** <!-- PENDING-BENCH e45-fix: confirm the tested conditions from the run: NCO $8000_0000, one input pin (P3, inverted, summed), no DAC output, N = 1, 2, 3, 4, 7, 64, 65, 255, 256, 1001, P3 low and high, first call with a held term, cog RAM execution, 200 MHz --> The fix's test program runs the routine from cog RAM, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks, the first call of each record made with an earlier burst's term still held. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies and hub execution were not tested.
+- **Conditions of the test.** The fix's test program ran the routine once, from cog RAM on a P2 board at 200 MHz, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks, the first call of each record made with an earlier burst's term still held. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies and hub execution were not tested.
 
 ## Why it happens {#sec-e5-why}
 
@@ -165,9 +167,11 @@ The test ran on 2026-09-24, twice, from two builds of the same program with iden
 
 ### The fix's test {#sec-e5-fix-proof}
 
-The fix is run in the test program described in Erratum E4, which calls the printed routine byte for byte. For this erratum its checks are these. The uncorrected part of each record must show the lag in the same run: a 64-clock burst read 63 × C, the 65-clock burst right after it read 65 × C, a zero burst alone read C, and a 7-clock burst read 6 × C, with its last term left held. The first call of `burst_sums` in each record starts with that term held, so its before reading must have gained exactly C, and every later call's nothing; every call must return N × C, for N = 1 to 1001. A result of (N-1) × C would mean the zero burst did not deliver the last term.
+The fix ran in the test program described in Erratum E4, which calls the printed routine byte for byte. For this erratum its checks are these. The uncorrected part of each record must show the lag in the same run: a 64-clock burst read 63 × C, the 65-clock burst right after it read 65 × C, a zero burst alone read C, and a 7-clock burst read 6 × C, with its last term left held. The first call of `burst_sums` in each record starts with that term held, so its before reading must have gained exactly C, and every later call's nothing; every call must return N × C, for N = 1 to 1001. A result of (N-1) × C would mean the zero burst did not deliver the last term.
 
-<!-- PENDING-BENCH e45-fix: results for E5. Fill from the fix run's raw lines: (1) positive-control E5 rows reproduced in N of 12 (R1-P = 63*C, R2-P2 = 65*C, R3-R2 = C, RD-R3 = 6*C) with one example row; (2) lead = C on the 6 first calls and 0 on the other 54 (tally); (3) S = N*C in N of 60, misses (N-1)*C / (N+1)*C counts; (4) one example call row, e.g. N=1 and N=1001 at P3 HIGH; (5) the VERDICT line; (6) date, runs, agreement. Claim nothing until the log is read. -->
+**The results.** Every control passed, and the per-clock term measured C = 61 on the cosine sum and 23 on the sine sum at P3 low, -61 and -23 at P3 high, in every record. The uncorrected part showed the lag in all 12 rows (6 records, cosine and sine): at P3 low, on the cosine sum, the 64-clock burst read 3,843 (63 × 61), the 65-clock burst right after it 3,965 (65 × 61), the zero burst alone 61, and the 7-clock burst 366 (6 × 61); on the sine sum 1,449, 1,495, 23 and 138; at P3 high the same values negated. The first call of each record found exactly C waiting: its before reading was 61 above the 7-clock burst's reading at P3 low (77,165 against 77,104 in the first record) and 61 below it at P3 high (396,744 against 396,805 in the fourth). Every later call's before reading equalled the program's own reading after the previous call, so no call left a term behind. Every one of the 60 calls returned N × C on both sums, from 61 for N = 1 to 61,061 for N = 1001 on the cosine sum at P3 low, and -23 to -23,023 on the sine sum at P3 high; none returned (N-1) × C.
+
+The test program was run once, on 2026-09-26, on a P2 board at 200 MHz. The values above are read from its raw lines, not from its verdict line.
 
 ## The test program {#sec-e5-program}
 
@@ -240,6 +244,6 @@ The test program `e5-goertzel-sinc2-iteration-count-test.spin2`, cited in *The f
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | <!-- PENDING-BENCH e45-fix --> |
+| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; helper routine (SINC1) |
 | Affects | `GETXACC` readings after a DDS/Goertzel burst in SINC1 mode, sine and cosine; tested with bursts of 64 and 65 clocks started by `XINIT` |
 | Test program | `e5-goertzel-one-clock-lag-test.spin2`; the fix: `e4-e5-fix-read-sums-test.spin2` |

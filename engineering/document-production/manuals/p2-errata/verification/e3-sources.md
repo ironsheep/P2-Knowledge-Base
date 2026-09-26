@@ -12,12 +12,12 @@ Abbreviations used below:
 | SD | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` |
 | RIG-A | `M/audit/verification-tests/test-o18-getct-upper-stale-runA.spin2` (byte-identical to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` copy, checked with `cmp` at v0.1.0) |
 | RIG-B | `M/audit/verification-tests/test-o18-getct-upper-stale-runB.spin2` (byte-identical to the campaign copy, checked with `cmp` at v0.1.0) |
-| RIG-FIX | `M/audit/verification-tests/e3-fix-keeper-cog-test.spin2` (the fix's test program; reader filename is the same). **Not yet run on silicon at the time of writing (2026-09-26).** |
+| RIG-FIX | `M/audit/verification-tests/e3-fix-keeper-cog-test.spin2` (the fix's test program; reader filename is the same). Run on silicon once, 2026-09-26 (LOG-FIX). |
 | LOG-A2 | `M/audit/verification-tests/logs/debug_260924-231939.log` (Run A, second build; .bin 13037 bytes = the rig on disk) |
 | LOG-A1 | `M/audit/verification-tests/logs-orig/debug_260924-204946.log` (Run A, first build) |
 | LOG-B2 | `M/audit/verification-tests/logs/debug_260924-231846.log` (Run B, second build; .bin 12550 bytes = the rig on disk) |
 | LOG-B1 | `M/audit/verification-tests/logs-orig/debug_260924-204835.log` (Run B, first build) |
-| LOG-FIX | the fix run's log(s), not yet on disk; APP-A:42's placeholder expects them under `M/audit/verification-tests/logs-fixes/` (see §9) |
+| LOG-FIX | `M/audit/verification-tests/logs/debug_260926-015546.log` (the fix run, run once; LOG-FIX:14 downloads `e3-fix-keeper-cog-test.bin` of 13008 bytes, the size of the `.bin` beside RIG-FIX on disk per `ls -l`) |
 | APP-A | `M/opus-master/appendix-a-test-programs.md` |
 | KB-MD | `deliverables/ai/P2/language/spin2/constructs/method_definition.yaml` |
 | KB-COGINIT | `deliverables/ai/P2/language/spin2/methods/coginit.yaml` |
@@ -311,13 +311,13 @@ Prose around the excerpts:
 | Widths | RIG-FIX:200-211 widths 34, 69, 0, 35, 19, 75, 0, 10, 63, 2, 0, 75 (all ≤ 76) by `awk` width listing |
 | ASCII | `grep -n -P "\t\|[^\x00-\x7F]"` on RIG-FIX returned no line: no tab, no non-ASCII |
 | Encoding of the keeper | RIG-FIX:111-112 `keeper   jmp #keeper     $FD9FFFFC ... A = -4 (one instruction back): jumps to itself` (read from the pnut-ts listing by the rig's author; not re-compiled here) |
-| Proving run | **PENDING**: Stephen is running RIG-FIX on 2026-09-26. No log exists yet (LOG-FIX). |
+| Proving run | LOG-FIX, 2026-09-26, run once; verdict re-derived from the raw pair lines (§9), CONFIRMED |
 
 What the chapter says about the block, and where it comes from:
 
 | Chapter text | Source |
 |---|---|
-| guarantee: "Started by the first line of `main()` and never stopped, the keeper keeps a cog of 4-7 running through every wrap ..., so a cog your program starts in 4-7 at any later time reads the same upper long as cog 0: this is a one-time startup fix." | RIG-FIX:27-30 ("Guarantee under test"). The claim is the one the fix run decides; the chapter states no proof of it (placeholder, §9). |
+| guarantee: "Started by the first line of `main()` and never stopped, the keeper keeps a cog of 4-7 running through every wrap ..., so a cog your program starts in 4-7 at any later time reads the same upper long as cog 0: this is a one-time startup fix." | RIG-FIX:27-30 ("Guarantee under test"), decided CONFIRMED by LOG-FIX (§9). |
 | "Spin2 runs the first `PUB` method of the top-level object at start" | KB-MD:61 `description: "First PUB method in top file is program entry"`; KB-MD:23 |
 | "a cog of 4-7 that nothing else in your program starts or stops" | RIG-FIX:201 comment `a cog of 4-7 the program never uses`; KB-COGINIT:21 `0-7: Start specific cog (will stop if running)` (a later `coginit` into that cog would replace the keeper) |
 | "The keeper executes a jump to itself and nothing else." | RIG-FIX:205; RIG-FIX:24-25 "The keeper is a busy loop (a JMP to itself)" |
@@ -364,7 +364,7 @@ quoted, no design names or line references. Each statement against the bench:
 | upper half refreshed only at a wrap while a group cog runs; not by a cog start | A1a D=1 just after start (LOG-A2:65); A4a D=2 just after restart (LOG-A2:185) |
 | takes the counter's value at the next wrap, closing in one step | A2 D=0 after one wrap from D=1 (LOG-A2:128); smp hi 0 -> 2 (LOG-A2:100, :118) |
 | copies start from zero at reset; only cog 0 runs at reset | LOG-A2:22 `running cogs=%00000001`; A1a smp hi `$0000_0000` after missing wrap 1 (LOG-A2:55) |
-| "A keeper cog in 4-7 that runs from before the first wrap gives that group a running cog at every wrap, so its upper long advances with the counter's" | consequence of the group rule (LEDGER:941-944); consistent with Run B (§3.2). Its test with a separate keeper is the fix run (PENDING, §9). |
+| "A keeper cog in 4-7 that runs from before the first wrap gives that group a running cog at every wrap, so its upper long advances with the counter's" | consequence of the group rule (LEDGER:941-944); consistent with Run B (§3.2) and with the fix run, a separate keeper (LOG-FIX, §9). |
 | "Running" = between start and stop, as COGCHK reports | the rig's running-cog mask is built from `cogchk()` (RIG-A:477-488; RIG-FIX:564-575) |
 | "By the study's reading, what a running cog is executing does not enter into it." | study-level statement, NOT bench-tested; the next sentence says so |
 | "The tests kept their cogs in a polling loop or, for the keeper, a jump to itself, and did not try ... `WAITX`" | samplers poll: RIG-A:540-550, RIG-FIX:597-607; keeper: RIG-FIX:205; RIG-FIX:24-26 |
@@ -376,22 +376,117 @@ quoted, no design names or line references. Each statement against the bench:
 | Published by Parallax: No | LEDGER:940 "(new; not in any vendor source)"; SD KNOWN BUGS 197-227 carries no counter item (§1) |
 | Found by | brief ERRATA-CHAPTER-BRIEF.md "Found by" rule for E3-E6; LEDGER:886-889 |
 | Confirmed on silicon: Yes — 2026-09-24, on a P2 board at 200 MHz, run twice | LEDGER:892-894 |
-| Fix proven on silicon | **PENDING** placeholder (§9) |
+| Fix proven on silicon: Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup fix | LOG-FIX:1 and :14 (date, one download), LOG-FIX:226 and the re-derivation in §9 (CONFIRMED); 200 MHz RIG-FIX:131; kind: creation-guide §5 |
 | Test program | APP-A:13-15 (all three names); RIG-FIX:3 (fix program name) |
 
-## 9. PENDING-BENCH placeholders (the fix run)
+## 9. The fix run (LOG-FIX): raw lines, re-derived verdict, chapter mapping
 
-The fix run (RIG-FIX on silicon) had not happened when this chapter was reshaped. Each
-placeholder below is an HTML comment in the chapter; each is filled from LOG-FIX lines only, and
-each fill gets a row here with the log line.
+Run once, 2026-09-26, RAM download with reset (LOG-FIX:14-17), 200 MHz (RIG-FIX:131). One
+build: the `.bin` downloaded (LOG-FIX:14, 13008 bytes) matches the size of the `.bin` beside
+RIG-FIX. The four PENDING-BENCH placeholders of the first reshape were filled from these lines
+and removed.
 
-| Chapter line | Section | What fills it | LOG-FIX lines to read |
+Raw lines, LOG-FIX, verbatim (the per-pair lines 25-34, 36-45, 65-74, 76-85, 101-110, 112-121,
+128-137, 139-148, 164-173, 175-184, 191-200, 202-211 are in the log; two are quoted here):
+
+```
+14:[2026-09-26T01:55:46.948] [SYSTEM] [DOWNLOAD TO RAM] File: e3-fix-keeper-cog-test.bin | Size: 13008 bytes | Modified: 2026-09-26T07:55:15.272Z
+22:[2026-09-26T01:55:47.740] Cog0  boot: cog0 CT=$0000_0000_$00BF_2806 running cogs=%10000001
+23:[2026-09-26T01:55:47.755] Cog0    alive CT=$0000_0000_$00DE_D98E wraps-seen=0 running=%10000011
+35:[2026-09-26T01:55:49.037] Cog0  K0  cog4 hi=0 => D=0 status=0 valid pairs=10 tries=10
+46:[2026-09-26T01:55:49.043] Cog0  C0  cog1 hi=0 => D=0 status=0 valid pairs=10 tries=10
+63:[2026-09-26T01:56:09.157] Cog0    alive CT=$0000_0001_$0000_136E wraps-seen=1 running=%10000011
+75:[2026-09-26T01:56:10.511] Cog0  F1  cog5 hi=1 => D=0 status=0 valid pairs=10 tries=10
+86:[2026-09-26T01:56:10.518] Cog0  C1  cog1 hi=1 => D=0 status=0 valid pairs=10 tries=10
+111:[2026-09-26T01:56:27.960] Cog0  F1L cog6 hi=1 late => D=0 status=0 valid pairs=10 tries=10
+122:[2026-09-26T01:56:27.967] Cog0  C1L cog1 hi=1 late => D=0 status=0 valid pairs=10 tries=10
+126:[2026-09-26T01:56:30.633] Cog0    alive CT=$0000_0002_$0000_01A6 wraps-seen=2 running=%10000011
+138:[2026-09-26T01:56:31.986] Cog0  F2  cog4 hi=2 => D=0 status=0 valid pairs=10 tries=10
+149:[2026-09-26T01:56:31.993] Cog0  C2  cog1 hi=2 => D=0 status=0 valid pairs=10 tries=10
+174:[2026-09-26T01:56:49.435] Cog0  F2L cog5 hi=2 late => D=0 status=0 valid pairs=10 tries=10
+185:[2026-09-26T01:56:49.452] Cog0  C2L cog1 hi=2 late => D=0 status=0 valid pairs=10 tries=10
+186:[2026-09-26T01:56:49.452] Cog0  --- keeper STOPPED at CT=$0000_0002_$E088_2186; waiting for CT hi=3 with cogs 4-7 idle (~3 s) ---
+187:[2026-09-26T01:56:49.468] Cog0    alive CT=$0000_0002_$E089_CEFE wraps-seen=2 running=%00000011
+189:[2026-09-26T01:56:52.107] Cog0    alive CT=$0000_0003_$0000_0ACE wraps-seen=3 running=%00000011
+191:[2026-09-26T01:56:53.445] Cog0  P3  cog6 hi=3 p1 ref=$0000_0003_$101F_D8F8 smp=$0000_0002_$101F_D913 ref2=$0000_0003_$101F_D965 D=1 lo-bracket=1
+201:[2026-09-26T01:56:53.461] Cog0  P3  cog6 hi=3 => D=1 status=0 valid pairs=10 tries=10
+212:[2026-09-26T01:56:53.468] Cog0  C3  cog1 hi=3 => D=0 status=0 valid pairs=10 tries=10
+214:[2026-09-26T01:56:53.469] Cog0  slot 0: D=0 st=0 lo-bracket-fails=0
+215:[2026-09-26T01:56:53.469] Cog0  slot 1: D=0 st=0 lo-bracket-fails=0
+216:[2026-09-26T01:56:53.469] Cog0  slot 2: D=0 st=0 lo-bracket-fails=0
+217:[2026-09-26T01:56:53.469] Cog0  slot 3: D=0 st=0 lo-bracket-fails=0
+218:[2026-09-26T01:56:53.469] Cog0  slot 4: D=0 st=0 lo-bracket-fails=0
+219:[2026-09-26T01:56:53.470] Cog0  slot 5: D=0 st=0 lo-bracket-fails=0
+220:[2026-09-26T01:56:53.470] Cog0  slot 6: D=0 st=0 lo-bracket-fails=0
+221:[2026-09-26T01:56:53.470] Cog0  slot 7: D=0 st=0 lo-bracket-fails=0
+222:[2026-09-26T01:56:53.470] Cog0  slot 8: D=0 st=0 lo-bracket-fails=0
+223:[2026-09-26T01:56:53.471] Cog0  slot 9: D=0 st=0 lo-bracket-fails=0
+224:[2026-09-26T01:56:53.471] Cog0  slot 10: D=1 st=0 lo-bracket-fails=0
+225:[2026-09-26T01:56:53.471] Cog0  slot 11: D=0 st=0 lo-bracket-fails=0
+226:[2026-09-26T01:56:53.472] Cog0  VERDICT: CONFIRMED - keeper running: cogs 4/5/6 started after 1 and 2 wraps read D=0 in every reading; keeper stopped: D=1 (positive control); cog 1 D=0 throughout
+```
+
+Slot map (RIG-FIX:176-177): 0=K0, 1=C0, 2=F1, 3=C1, 4=F1L, 5=C1L, 6=F2, 7=C2, 8=F2L, 9=C2L,
+10=P3, 11=C3.
+
+**Verdict re-derived from the raw pair lines, not from LOG-FIX:226.** An `awk` pass parsed
+every `p<n> ref=... smp=... ref2=...` line independently (hex decode of all six longs) and
+recomputed D = ref.hi - smp.hi, validity (ref.hi == ref2.hi; all three lower longs in
+[`$1000_0000`, `$F000_0000`]) and the bracket (ref.lo < smp.lo < ref2.lo, unsigned). Result, per
+reading: 10 pairs, 0 invalid, 0 bracket failures, 0 disagreements with the printed D, and a
+single D value:
+
+| Reading | Pair lines | Cog 0 upper | Recomputed D (all 10 pairs) |
 |---|---|---|---|
-| 91 | *The fix*, after the guarantee | one sentence: the fix test program proved the block on silicon (date, "on a P2 board at 200 MHz", number of runs; cogs 4, 5 and 6 read D = 0 after one and after two wraps) | the four fix-arm `=> D=` lines, the `VERDICT:` line, the log header date |
-| 175 | *How it was proven on a real P2*, below the fix table | the measured D of each row (a "Measured D" column), and the cog 1 D of each paired reading | the twelve `=> D=` lines (`K0`, `C0`, `F1`, `C1`, `F1L`, `C1L`, `F2`, `C2`, `F2L`, `C2L`, `P3`, `C3`) and the `slot N:` summary lines |
-| 181 | *How it was proven on a real P2*, end of the fix part | the result paragraph: date, runs/builds, every control passed (no `RIG FAIL` line), positive-control D, the verdict as printed | `boot:` line, absence of `RIG FAIL`/`HALTED`, the `P3` line, the `VERDICT:` line |
-| 254 | *Status*, "Fix proven on silicon" | "Yes — <date>; a one-time startup fix: a keeper cog in 4-7 started at the first line of `main()`" if the verdict is CONFIRMED; otherwise the section *The fix* must be rewritten (a fix not proven is not printed as the fix) | the `VERDICT:` line |
+| K0 cog 4 | 25-34 | 0 | 0 |
+| C0 cog 1 | 36-45 | 0 | 0 |
+| F1 cog 5 | 65-74 | 1 | 0 |
+| C1 cog 1 | 76-85 | 1 | 0 |
+| F1L cog 6 late | 101-110 | 1 | 0 |
+| C1L cog 1 late | 112-121 | 1 | 0 |
+| F2 cog 4 | 128-137 | 2 | 0 |
+| C2 cog 1 | 139-148 | 2 | 0 |
+| F2L cog 5 late | 164-173 | 2 | 0 |
+| C2L cog 1 late | 175-184 | 2 | 0 |
+| P3 cog 6 | 191-200 | 3 | 1 |
+| C3 cog 1 | 202-211 | 3 | 0 |
 
-If the run is REFUTED, INCONCLUSIVE or a RIG FAIL, the drop-in may not stay under *The fix*
-(creation-guide §4 item 6; voice-guide §2): the chapter's CAUTION-box Fix line, *The fix* and
-the Status row all change.
+Controls, each from the raw lines:
+
+- C1 (cog 1 D = 0, status ok, every control reading): C0, C1, C1L, C2, C2L, C3 above, all D=0
+  with 10 valid pairs and no bracket failure.
+- C2 (cog 0 upper long = wraps watched): a second `awk` pass over all 55 `alive` lines found
+  the CT upper long equal to `wraps-seen` on every one.
+- C3 (running-cog set): the same pass found `running=%10000011` (cogs 0, 1, 7) on every `alive`
+  line from LOG-FIX:23 through :163, and `running=%00000011` (cogs 0, 1) on every line from
+  LOG-FIX:187 on, after the keeper stop at LOG-FIX:186. The between-reading mask checks
+  print only on failure.
+- C4 (boot): LOG-FIX:22, CT upper long `$0000_0000`, `running cogs=%10000001` (cogs 0 and 7).
+- C5 (every request answered): `grep -c -E "RIG FAIL|HALTED|TIMEOUT|DISCARD"` on LOG-FIX = 0;
+  every reading `tries=10` for 10 valid pairs.
+- C6 (K0 D = 0): recomputed 0.
+- C7 (positive control P3 D = 1): recomputed 1; sampler upper `$0000_0002` beside cog 0's
+  `$0000_0003` in every P3 pair (LOG-FIX:191-200), with wrap 3 passing while cogs 4-7 were
+  idle (LOG-FIX:189 `running=%00000011`).
+- Fix arms F1, F1L, F2, F2L: all D = 0, status ok. By RIG-FIX:99-107 this is **CONFIRMED**.
+
+Chapter values taken from LOG-FIX:
+
+| Chapter text | Line(s) |
+|---|---|
+| *The fix*: "confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run once" | LOG-FIX:1, :14 (one download); RIG-FIX:131 (200 MHz) |
+| *The fix*: "cogs 5 and 6 started after one wrap and cogs 4 and 5 started after two each read the same upper long as cog 0 in all ten pairs" | F1 cog 5 LOG-FIX:65-75; F1L cog 6 :101-111; F2 cog 4 :128-138; F2L cog 5 :164-174 |
+| *The fix*: "with the keeper stopped, cog 6 read one behind" | LOG-FIX:191-201 |
+| *The fix* limits: "The test ran once" | LOG-FIX: a single download (LOG-FIX:14) and a single session end (LOG-FIX:227) |
+| fix table, Sampler D column: 0, 0, 0, 0, 0, **1** | LOG-FIX:35, :75, :111, :138, :174, :201 (recomputed above) |
+| fix table, Cog 1 D column: 0 in every row | LOG-FIX:46, :86, :122, :149, :185, :212 |
+| "In every reading all ten pairs agreed on D, and the lower-long check held in every pair." | re-derivation above; LOG-FIX:214-225 `st=0 lo-bracket-fails=0` in every slot |
+| Result: "ran once, on 2026-09-26, on a P2 board at 200 MHz, downloaded to RAM with a reset" | LOG-FIX:14-17; RIG-FIX:131; reset shown by LOG-FIX:22 (upper long 0 at boot, C4) |
+| "At start the upper long read 0 and the running cogs were cog 0 and the keeper in cog 7" | LOG-FIX:22 |
+| "Every control passed, and no `RIG FAIL` line was printed" | controls above; `grep -c` = 0 |
+| "showed the keeper on every poll until it was stopped, with cog 0's counter at `$0000_0002_$E088_2186`, and did not show it on any poll after" | LOG-FIX:23-163 `%10000011`; :186; :187-190 `%00000011` |
+| "the four readings taken after a wrap gave D = 0" | LOG-FIX:75, :111, :138, :174 |
+| "cog 6 read an upper long of `$0000_0002` beside cog 0's `$0000_0003`: D = 1, the erratum as in Run A" | LOG-FIX:191 (first P3 pair; all ten alike, :191-200), :201; Run A comparison LOG-A2:65 (D=1 after one missed wrap) |
+| "The verdict line read `CONFIRMED`." | LOG-FIX:226 (and re-derived above) |
+| Status "Fix proven on silicon: Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup fix: a keeper cog in cog 7 started by the first line of `main()`" | §8 row; RIG-FIX:201, :211 |
+| run length: the fix's test program "about 66 s after reset" (*The test program*) | RIG-FIX:117-118 (design figure); consistent with LOG-FIX:17 download end 01:55:47.715 to :227 end 01:56:53.488 |

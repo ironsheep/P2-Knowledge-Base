@@ -15,6 +15,24 @@ observed on a part. The outcome decides which of them the **P2 Errata** manual c
 | 4 | `test-so80-getxacc-clear-gating.spin2` | `GETXACC` clears only during a Goertzel burst; mid-burst it partitions the terms exactly | VO-J-010 | `CONFIRMED` | EF-069 |
 | 5 | `test-so84-goertzel-last-term-lag.spin2` | the Goertzel accumulators lag by one clock; a burst's last term lands in the next burst | VO-J-011 | `CONFIRMED` | EF-070 |
 
+**Second session (2026-09-25), three more tests, each run twice:**
+
+| # | Test (`tests/`) | Question | VO | Verdict | EF |
+|---|---|---|---|---|---|
+| 6 | `test-rdfast-wrfast-readiness-boundary.spin2` | `RDFAST`/`WRFAST` readiness, blocking and no-wait, every hub alignment | VO-J-012 | blocking `CONFIRMED`; no-wait measured; a blocking `RDFAST` after a still-arming no-wait one skips its wait | EF-073, EF-074 |
+| 7 | `test-goertzel-sinc2-iteration-count.spin2` | Chip Gracey's SINC2 iteration-count corruption | VO-J-013 | `CONFIRMED` (documented behaviour; not an erratum — EF-072 as corrected 2026-09-26) | EF-072 |
+| 8 | `test-so9-dac-mode-adc-enable.spin2` | in a DAC smart mode, does `OUT` switch the ADC with `TT` = `%00` | VO-J-014 | `CONFIRMED` (it does not) | EF-071 |
+
+**Fix tests (2026-09-26), each run once:** each runs, byte for byte, the drop-in fix that P2 Errata
+v0.2.0 prints, and reproduces its erratum in the same run as a positive control (`RIG FAIL`, not a
+verdict, if it cannot). Verdicts re-derived from the raw log lines.
+
+| # | Test (`tests/`) | Fix proven | Verdict | EF |
+|---|---|---|---|---|
+| 9 | `e3-fix-keeper-cog-test.spin2` | E3: a keeper cog started in cog 7 as the first line of `main()` | `CONFIRMED` | EF-075 |
+| 10 | `e4-e5-fix-read-sums-test.spin2` | E4 + E5: the `burst_sums` helper routine (SINC1) | `CONFIRMED` | EF-076 |
+| 11 | `e7-fix-rdfast-spacing-test.spin2` | E7: `WAITX #12` after the no-wait `RDFAST` (16 clocks to the blocking one) | `CONFIRMED` | EF-077 |
+
 ## How the tests were built — independence is the point
 
 Each test was written by an agent given **only its prediction**, with no access to the study's

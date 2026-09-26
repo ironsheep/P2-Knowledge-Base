@@ -111,6 +111,24 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
 
+## The errata fixes are now proven on silicon (2026-09-26, EF-075..077) — F-474
+
+### F-474 — the KB's `silicon_errata` entries for E3, E4/E5 and E7 should give the fix that ran on silicon, not an unproven workaround — `CONFIRMED`
+
+**Where:** the `silicon_errata` entries F-462..466 (GETCT, GETXACC) and F-472 (RDFAST) ask to add, in
+`language/pasm2/getct.yaml`, `getxacc.yaml`, `rdfast.yaml`.
+**What silicon does:** each fix P2 Errata v0.2.0 prints ran byte for byte, beside a positive control
+that reproduced the erratum in the same run. **EF-075** (E3): a keeper cog started in cog 7 as the first
+line of `main()` (`coginit(KEEPER_COG, @keeper, 0)`, keeper = `jmp #keeper`) — cogs 4–7 started after
+one and two wraps read D = 0. **EF-076** (E4, E5): the `burst_sums` routine (zero burst, idle read,
+burst, zero burst, idle read, subtract; SINC1) returned exactly N·C in 60 of 60 calls, N = 1..1001.
+**EF-077** (E7): `WAITX #12` after the no-wait `RDFAST` (≥ 16 clocks to the blocking one) read correctly
+in 1,024 of 1,024 trials across every hub alignment.
+**Correction:** when those entries land, each `workaround`/`fix` field states the proven form, cites its
+EF, and names its kind (one-time startup fix / helper routine / rule at each use). The E3 entry drops
+the untested "read the upper long in cogs 0–3 and pass it through hub RAM" alternative, or marks it
+untested; P2 Errata v0.2.0 dropped it for that reason.
+
 ## Three KB statements the second errata bench session decides (2026-09-25, EF-071..074) — F-471, F-472, F-473
 
 ### F-471 — the KB states the DAC-smart-mode `%TT` rule unqualified; on silicon `OUT` enables the ADC only while `TT` bit 0 enables the output — `CONFIRMED`

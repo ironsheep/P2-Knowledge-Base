@@ -1108,6 +1108,67 @@ entry. *Source:* `…/tests/test-rdfast-wrfast-readiness-boundary.spin2`.
 
 ---
 
+## P2 errata — fix tests (silicon, 2026-09-26)
+
+Three tests that each run, **byte for byte**, the drop-in fix P2 Errata v0.2.0 prints (between marker
+comments in the rig), and reproduce the erratum in the **same run** as a positive control — a rig that
+cannot see the defect prints `RIG FAIL`, never a verdict. Same house rig as EF-066..074; same bench
+board (free pins P0–P7, P32–P47 only), 200 MHz, `pnut-ts` 1.55.8 `-d`, RAM download with reset,
+2026-09-26 (Stephen), **run once each**; each downloaded `.bin` size equals the rig compiled here.
+Every verdict **re-derived from the raw log lines**. Structural yes/no behaviours on one part, as
+EF-066..070. Campaign: `campaigns/2026-09-p2-errata-predictions/` (tests 9–11).
+
+### EF-075 · E3's fix holds: a keeper cog started in cog 7 as the first line of `main()` keeps cogs 4–7 reading the current 64-bit counter across wraps — `CONFIRMED`
+*How proven:* `e3-fix-keeper-cog-test` — the drop-in (`KEEPER_COG = 7`, a `jmp #keeper` loop,
+`coginit(KEEPER_COG, @keeper, 0)` as the first line of `main()`) at boot, then samplers started and
+stopped in cogs 4, 5, 6 around it; each reading = 10 bracketed `GETCT WC`/`GETCT` pairs against cog 0;
+cog 1 is the group-0 control. *Result (log `debug_260926-015546`):* boot upper long `$0000_0000`,
+running cogs `%10000001` (cog 0 + keeper) (l.22). Keeper alone in 4–7: hi=0 cog 4 **D = 0** (l.35);
+after wrap 1 cog 5 **D = 0** (l.75), cog 6 late **D = 0** (l.111); after wrap 2 cog 4 **D = 0**
+(l.138), cog 5 late **D = 0** (l.174); every reading 10 of 10 valid pairs. **Positive control:** keeper
+stopped at `$0000_0002_$E088_2186` (l.186), wrap 3 missed → cog 6 **D = 1** (l.201) — the erratum,
+reproduced in the same run. Controls: cog 1 **D = 0** in all six readings; running-cog mask
+`%10000011` on every poll before the stop and `%00000011` after; cog 0's upper long equal to its own
+wrap count on all 55 alive lines; 0 bracket failures. **Kind:** one-time startup fix. *Limits:* a busy
+`jmp` loop only (a keeper parked in `WAITX`/`WAITATN` not tested); cog 7 only; 200 MHz. *Source:*
+`…/tests/e3-fix-keeper-cog-test.spin2`.
+
+### EF-076 · E4 and E5's fix holds: the `burst_sums` helper routine returns exactly N terms of a SINC1 Goertzel burst, whatever ran before it — `CONFIRMED`
+*How proven:* `e4-e5-fix-read-sums-test` — the printed routine (zero burst built from the caller's D/S
+with count 4 and `S[15:12]` = 0 to deliver any held term, idle `GETXACC`, the caller's burst,
+`WAITXFI`, zero burst, idle `GETXACC`, subtract), called 10 times back to back per record with
+N = 1, 2, 3, 4, 7, 64, 65, 255, 256, 1001, 3 records at P3 low and 3 at P3 high, each record's first
+call following a deliberately unflushed 7-clock burst; after every call an independent idle read
+1,000 clocks later. *Result (log `debug_260926-015810`):* calibration C = **±61** cosine / **±23**
+sine in all 6 records (e.g. l.31: 61,000 → 64,904 → 68,869 = 64C, 65C); **60 of 60 calls returned
+exactly N·C on both channels** (cosine 61 … 61,061 at P3 low, l.34–43; sine −23 … −23,023 at P3 high,
+l.76–85); each record's first call began exactly one C above the reading after the unflushed burst
+(l.32 RD = 77,104 → l.34 B = 77,165), every later call began at the previous call's closing reading,
+and every independent read equalled start + sum — nothing held, nothing moving. **Positive control
+(same run, all 12 rows):** a "clearing" `GETXACC` read idle changed nothing (P2 = R1), and a 64-clock
+burst, a 65-clock burst, a zero burst and a 7-clock burst read 63C, 65C (64 of its own terms plus the
+one carried in), C (the carried term alone) and 6C (l.32: 3,843 / 3,965 / 61 / 366) — E4 and E5,
+reproduced. Controls: the routine's zero-burst words `$F007_0004` /
+`$0008_00A5`, 0 LUT mismatches (l.29); P3 level held around every record. **Kind:** helper routine.
+*Limits:* SINC1 only (SINC2: EF-072, documented, not this fix); NCO `$8000_0000`, P3 input only, cog
+RAM, 200 MHz. *Source:* `…/tests/e4-e5-fix-read-sums-test.spin2`.
+
+### EF-077 · E7's fix holds: `WAITX #12` after the no-wait `RDFAST` (16 clocks to the blocking one) gives a correct first read in every hub alignment — `CONFIRMED`
+*How proven:* `e7-fix-rdfast-spacing-test` — the printed block (`rdfast nowait,hub_first` /
+`waitx #12` / `rdfast #0,hub_next` / `rflong first_long`) swept over all 8 slices × 8 phases × 16
+trials, first and second read checked; beside it the unspaced sweep of EF-074 (gaps 2..44) as the
+positive control. *Result (log `debug_260926-015823`):* **printed block: 1,024 of 1,024** trials read
+the new first long then the next (`$A5A5_0080`, `$A5A5_0081` in s0 p0), the blocking `RDFAST` waiting
+**10..17 clocks**, 8 distinct values per slice (l.484–547, 556). **Positive control reproduced:** in
+all 64 cells exactly one gap in 8..15 clocks failed in 16 of 16 trials, reading zero with a 2-clock
+blocking `RDFAST` — 1,024 of 43,008 reads, 8 cells at each gap 8..15, the same per-cell pattern as
+EF-074 (l.355–482, 552–554); gaps 16..44: first read correct in 29,696 of 29,696, no wrong second read
+(l.555). Controls: `WAITX #12` measured 16 clocks issue to issue (2 + 14) in every trial (l.94–157);
+clock, plain-read, primed-FIFO and late no-wait read correct in every trial (l.549). **Kind:** rule
+at each use — at least 16 clocks from the start of the no-wait `RDFAST` to the start of the blocking
+one. *Limits:* only `WAITX` tested between them (no hub-stalling instructions); the `WRFAST` twin not
+tested. *Source:* `…/tests/e7-fix-rdfast-spacing-test.spin2`.
+
 
 ## Open / pending empirical questions
 

@@ -86,7 +86,9 @@ cos_sum     long    0
 sin_sum     long    0
 ```
 
-Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, whatever the accumulators held before the call: a *helper routine*. <!-- PENDING-BENCH e45-fix: this guarantee sentence stands only on "VERDICT: CONFIRMED" (60 of 60 calls S = N*C, cosine and sine; lead and idle as expected). Until then it is the claim under test, not a result. -->
+Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, whatever the accumulators held before the call: a *helper routine*.
+
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels, including 6 calls made while an earlier burst's term was still held; see *How it was proven on a real P2*.
 
 To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's: SINC1, no DAC output, input pins P0 to P3, a count of 256, with P3 inverted and summed and a lookup offset of `$0A5`.
 
@@ -98,7 +100,7 @@ The routine takes its two readings with the streamer idle, where `GETXACC` clear
 
 - **SINC1 only.** In SINC2 mode the zero burst has not been tested as a flush, and the routine is not recommended there; *The fix* of Erratum E5 notes the P2 Documentation's separate SINC2 constraint.
 - **One burst at a time, from an idle streamer.** The routine starts every command with `XINIT`, which issues it at once, so it does not fit a continuous stream of commands chained with `XCONT`. A `GETXACC` inside a running Goertzel command clears as documented.
-- **Conditions of the test.** <!-- PENDING-BENCH e45-fix: confirm the tested conditions from the run: NCO $8000_0000, one input pin (P3, inverted, summed), no DAC output, N = 1, 2, 3, 4, 7, 64, 65, 255, 256, 1001, P3 low and high, cog RAM execution, 200 MHz --> The fix's test program runs the routine from cog RAM, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies, hub execution, and accumulator values near the 32-bit limit were not tested.
+- **Conditions of the test.** The fix's test program ran the routine once, from cog RAM on a P2 board at 200 MHz, with an NCO frequency of `$8000_0000`, one input pin, no DAC output, and bursts of 1 to 1001 clocks. With DAC channels enabled, the zero bursts are DDS/Goertzel commands like any other and, by the P2 Documentation, output on each of their clocks; that case, more than one input pin, other NCO frequencies, hub execution, and accumulator values near the 32-bit limit were not tested.
 
 ## Why it happens {#sec-e4-why}
 
@@ -137,7 +139,7 @@ The program was run twice on 2026-09-24, from two builds with identical measurin
 
 ### The fix's test {#sec-e4-fix-proof}
 
-The fix is run in its own test program, on the same construction: the LUT, the NCO frequency, the mode word and the `S` operand above, with P3 driven by the measuring cog, low for the first half of the run and high for the second. The printed block is the routine the test program calls, byte for byte, and the program checks before it starts that `burst_mode` carries the printed mode bits and `burst_sel` the printed `S`. Every wait on a burst is `WAITXFI`, as in the routine.
+The fix ran in its own test program, on the same construction: the LUT, the NCO frequency, the mode word and the `S` operand above, with P3 driven by the measuring cog, low for the first half of the run and high for the second. The printed block is the routine the test program calls, byte for byte, and the program checks before it starts that `burst_mode` carries the printed mode bits and `burst_sel` the printed `S`. Every wait on a burst is `WAITXFI`, as in the routine.
 
 At each P3 level the program runs three records, each of four parts:
 
@@ -148,7 +150,13 @@ At each P3 level the program runs three records, each of four parts:
 
 The outcome was fixed before the run: every one of the 60 calls returns exactly N × C on the cosine and on the sine sum; the before reading of each record's first call has gained exactly C (the held term the first zero burst delivered), and that of every other call nothing; and the program's own reading after each call equals the before reading plus the returned sum. A miss of exactly -C would mean the zero burst did not deliver the last term; +C, that an older term was counted.
 
-<!-- PENDING-BENCH e45-fix: results. Fill from the fix run's raw lines: (1) CAL C measured, cosine and sine, P3 LOW and HIGH (expected +61/+23 and -61/-23 by the construction; state the measured values); (2) positive control reproduced in N of 12 rows (P2-R1 = 0; R1-P = 63*C; R2-P2 = 65*C; R3-R2 = C; RD-R3 = 6*C), with one example row's values; (3) fix tallies of 60: S = N*C, lead as expected, idle = 0; (4) one example call row, e.g. N=256 at P3 LOW (S cosine/sine) and N=1001; (5) the VERDICT line; (6) date, how many runs, and whether every value matched between runs. Claim nothing here until the log is read. -->
+**The results.** Every control passed. The printed words read `$F007_0100` and `$0008_80A5`; the routine built its zero-burst words as `$F007_0004` and `$0008_00A5`; the 512 LUT longs read back unchanged; and P3 read at its driven level before and after every record. The calibration gave C = 61 on the cosine sum and 23 on the sine sum in all three records at P3 low, and -61 and -23 in all three at P3 high.
+
+The documented use, without the fix, showed both errata in all 12 rows (6 records, cosine and sine): the second "clear" reading equalled the first, and the bursts read 63 × C, 65 × C, C and 6 × C. In the first record, on the cosine sum: P = 68,869, R1 = 72,712 (3,843, which is 63 × 61), the second "clear" 72,712, R2 = 76,677 (3,965, which is 65 × 61), the zero burst alone 76,738 (61), and the 7-clock burst 77,104 (366, which is 6 × 61).
+
+All 60 calls of `burst_sums` returned exactly N × C on both sums. At P3 low, for N = 1, 2, 3, 4, 7, 64, 65, 255, 256 and 1001, the cosine sums were 61, 122, 183, 244, 427, 3,904, 3,965, 15,555, 15,616 and 61,061, and the sine sums 23, 46, 69, 92, 161, 1,472, 1,495, 5,865, 5,888 and 23,023; at P3 high, the same values negated. The 256-clock call returned 15,616 (256 × 61), where the difference alone, in the erratum test above, read 15,555 (255 × 61). Each record's first call found its before reading moved by exactly C from the reading after the 7-clock burst (77,165 against 77,104 in the first record); every later call's before reading equalled the program's own reading after the previous call; and every one of the program's own readings, 1,000 clocks after a call, equalled the call's before reading plus its returned sum. No call returned (N-1) × C or (N+1) × C. The largest accumulator value read was 412,909.
+
+The test program was run once, on 2026-09-26, on a P2 board at 200 MHz. The values above are read from its raw lines, not from its verdict line.
 
 ## The test program {#sec-e4-program}
 
@@ -223,6 +231,6 @@ fix_arm         mov     fidx_, #0
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Fix proven on silicon | <!-- PENDING-BENCH e45-fix --> |
+| Fix proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; helper routine |
 | Affects | `GETXACC` with the streamer idle or in a non-Goertzel mode: it returns the Goertzel accumulators without clearing them. Measured with SINC1 bursts started by `XINIT`, one input pin |
 | Test program | `e4-getxacc-clear-gating-test.spin2`; the fix: `e4-e5-fix-read-sums-test.spin2` |

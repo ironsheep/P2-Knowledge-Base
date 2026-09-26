@@ -1,0 +1,1225 @@
+'' =====================================================================
+''
+''   File....... e7-fix-rdfast-spacing-test.spin2
+''   Purpose.... Hardware-verification rig: the E7 fix - spacing between a no-wait
+''               RDFAST and a following blocking RDFAST
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 26 Sep 2026
+''
+'' =====================================================================
+
+{ WHAT IS DECIDED
+    P2 Documentation v35, FAST SEQUENTIAL FIFO INTERFACE (silicon-doc-text.txt
+    :3039-3043):
+      D[31]=0  "RDFAST/WRFAST will wait for any previous WRFAST to finish and
+               then reconfigure the hub FIFO interface ... In the case of
+               RDFAST, it will additionally wait until the FIFO has begun
+               receiving hub data, so that it can start being used in the
+               next instruction."
+      D[31]=1  "RDFAST/WRFAST will not wait for FIFO reconfiguration, taking
+               only two clocks."
+    E7 (ledger EF-074, test-rdfast-wrfast-readiness-boundary arm E_REBLK):
+    a blocking RDFAST issued while a no-wait RDFAST is still arming can skip
+    its wait.  In each of the 64 slice x phase cells exactly one gap failed,
+    in all 16 trials: the blocking RDFAST took 2 clocks and the next RFLONG
+    returned $0000_0000.  The failing gap fell on each of 8..15 clocks
+    exactly eight times; every gap from 16 to 44 clocks read correctly.
+    THIS RIG PROVES THE FIX: the printed drop-in block (a WAITX line between
+    the two RDFASTs) reads correctly in every cell and trial, while the
+    unspaced sweep in the SAME run still reproduces E7 (positive control).
+
+  THE FIX BLOCK (printed byte-identical in the E7 chapter)
+    It sits in the F_FIX variant of the measuring cog, between the two
+    marker comments (begin, end) that are the only lines in this file to
+    start with "' ---- E7 FIX".  The four registers it names carry reader
+    names, not c_ names:
+      nowait      holds $8000_0000: D[31]=1 (no-wait), no wrap
+      hub_first   hub address of the first (no-wait) RDFAST: mid[0]
+      hub_next    hub address of the blocking RDFAST: new[s]
+      first_long  receives the first long of hub_next
+    Guarantee the chapter prints: at least 16 clocks from the no-wait RDFAST
+    to the blocking RDFAST.
+
+  GAP -> CLOCKS -> WAITX (sources in brackets)
+    Gap = clocks from the issue of the no-wait RDFAST to the issue of the
+    blocking RDFAST, the no-wait RDFAST's own 2 clocks included.  This is
+    EF-074's measure: distclk() in test-rdfast-wrfast-readiness-boundary,
+    reused here unchanged.
+      j   between the two RDFASTs     gap
+      0   nothing                      2 clk
+      j   WAITX c_dly = j-1            2 + (2 + j-1) = j+3 clk
+    RDFAST with D[31]=1                  2       [P2 Documentation :3043]
+    WAITX #D                             2 + D   [pasm2/waitx.yaml]
+    THE FIX LINE: WAITX #12 directly after the no-wait RDFAST gives
+      2 (RDFAST) + 2 + 12 (WAITX #12) = 16 clk, the first clean gap (j 13).
+    WAITX #11 would give 15 clk, the gap that failed in 8 of the 64 cells in
+    EF-074.  Margin: one clock over the largest failing gap.  The failure is
+    deterministic per alignment (16 of 16 trials) and the 8 x 8 sweep spans
+    every alignment, so 16 is clean at all of them, not most of them.
+    Code with other instructions between the two RDFASTs: the rule is the
+    clock count, at least 16 from issue to issue, i.e. at least 14 clocks of
+    instructions after the no-wait RDFAST.  This rig proves the literal
+    block at 16 (the worst case: nothing else between) and the clock rule
+    at every gap from 16 to 44 (P_UNSPACED's spaced gaps).
+
+  RIG
+    Bare P2 board (P2 Edge / EVAL).  No pins, no jumpers, no instruments.
+    Everything that touches the FIFO runs in a DEDICATED PASM cog started
+    with COGINIT from the DAT block below (cog exec: hub exec would itself
+    own the FIFO).  DEBUG_COGS = %0000_0001 keeps the debugger's interrupt
+    out of the measuring cog (EF-057).  Cog 0 (Spin2) sends one command per
+    (arm, slice, phase); the measuring cog runs every gap j x TRIALS trials
+    and leaves raw records in hub; cog 0 classifies, prints every row, and
+    gives the verdicts.
+
+  ONE TRIAL (measuring cog, cog exec) - as EF-074's rig
+    1. PRIME: blocking RDFAST of the OLD region, WAITX #64, two RFLONGs
+       (old[0], old[1] consumed), WAITX #64 so the FIFO refills and idles.
+       The FIFO's next long is now old[2] = $0D0D_0042 (control K_PRIME).
+    2. SYNC: RDLONG of a slice-0 long (locks the cog to the egg-beater),
+       then WAITX #phase (phase 0..7) to set the rotation phase.
+    3. GETCT / the arm's sequence / GETCT, then C and Z where the arm reads
+       with WCZ, then a second RFLONG (the next long).
+
+  ALIGNMENT
+    Hub RAM is 8 slices; the slice of a long is address bits [4:2].  All
+    regions start on a 32-byte boundary (slice 0); slice s = start + 4*s.
+    Every arm runs 8 slices x 8 phases, a whole egg-beater rotation.
+
+  PATTERNS
+    new[k] = $A5A5_0080+k   old[k] = $0D0D_0040+k   mid[k] = $3C3C_00C0+k
+    (k = 0..47, 32-byte aligned).  hub_first = mid[0], hub_next = new[s].
+
+  CLOCK ACCOUNTING (cog exec)
+    GETCT pair around a sequence adds 2           [EF-035]
+    RFLONG                                2       [P2 Documentation :3055]
+    RDFAST with D[31]=0 (no WRFAST owed)  10..17  [EF-073]
+    "exc" = measured elapsed minus the no-stall count; for P_UNSPACED and
+    F_FIX it is the blocking RDFAST's own clocks.
+
+  ARMS, IN RUN ORDER (each: 8 slices x 8 phases x TRIALS=16; P_UNSPACED
+  also x 42 gaps).  PREDICTIONS AND REFUTING OUTCOMES FIXED HERE.
+    id name        sequence under GETCT                        role
+     0 K_CLOCK     (nothing) / waitx c_dly                     control
+                 must: elapsed 2 (j=0), j+3 (j>=1) every trial.
+     1 K_FIXCLK    waitx #12 (the fix's WAITX)                 control
+                 must: elapsed 16 = 2 + (2 + 12) every trial.
+     2 K_RDLONG    rdlong new[s] ; rdlong new[s+1]              control
+                 must: the pattern.
+     3 K_PRIME     rflong (no new RDFAST)                       control
+                 must: old[2] then old[3], C/Z consistent, exc 0.
+     4 K_NWLATE    rdfast nowait,new / waitx #200 / rflong      control
+                 must: new[s], new[s+1], exc 0.
+     5 P_UNSPACED  rdfast nowait,hub_first / [waitx c_dly]
+                   / rdfast #0,hub_next / rflong WCZ    POSITIVE CONTROL
+                 = EF-074's E_REBLK arm.  REPRODUCED when, in EVERY one of
+                 the 64 cells, exactly one gap has wrong reads, and at that
+                 gap all 16 trials read zero, the blocking RDFAST takes 2
+                 clocks in every trial, and the gap is within 8..15 clk.
+                 Its gaps 16..44 are the rule's margin points: every first
+                 AND second read there must be correct.
+     6 F_FIX       THE PRINTED BLOCK: rdfast nowait,hub_first / waitx #12
+                   / rdfast #0,hub_next / rflong first_long       THE FIX
+                 PREDICT: first_long = new[s] and the next RFLONG = new[s+1]
+                 in every trial of every cell (1,024 trials), and the
+                 blocking RDFAST waits (exc > 2).
+
+  CLASSES (first read)
+    . ok   F value ok, C/Z wrong   S stale old[2]   o other old long
+    M mid (hub_first's region)     N new region, wrong long   Z zero
+    X anything else                '*' = the 16 trials disagreed
+
+  GATES (in-run controls; a failure prints RIG FAIL and withholds the verdict)
+    K_CLOCK, K_FIXCLK, K_RDLONG, K_PRIME, K_NWLATE
+
+  VERDICT (printed last), decided in this order
+    NO VERDICT     a gate failed (RIG FAIL lines above it)
+    REFUTED        any F_FIX trial wrong (first or second read), or any
+                   P_UNSPACED read wrong at a gap of 16 clk or more
+    INCONCLUSIVE   the positive control did not reproduce E7 as above, or
+                   the F_FIX blocking RDFAST took only 2 clocks (no wait)
+    CONFIRMED      otherwise: the printed block read correctly in all 1,024
+                   trials while the unspaced sweep reproduced E7 in 64 of 64
+                   cells, and every read at gaps 16..44 was correct
+
+  VERIFIED OPCODES (pnut-ts -d -l, v1.55.8 build 9/19/2026, read from the
+  .lst hub image; RDFAST 1100011 1LI, WAITX 1101011 CZL ... 000011111).
+  Cog addresses: nowait=$092 (image $2F0 holds $8000_0000) hub_first=$093
+  hub_next=$094 first_long=$095 c_r0..c_r3=$096..$099 (contiguous); the
+  cog image ends at c_junk=$0AB.
+    rdfast nowait,hub_first  $FC712493  L=0 D=reg $092 -> D[31]=1, S=$093
+    waitx  #12               $FD64181F  L=1 D=#12
+    rdfast #0,hub_next       $FC780094  L=1 D=#0 -> D[31]=0 BLOCKING, S=$094
+    rflong first_long        $FD612A12  D=$095 S=%000010010
+    rflong c_r1 wcz          $FD792E12  C=1 Z=1 D=$097
+    waitx  c_dly             $FD61461F  L=0 D=reg $0A3
+  Adjacency read from the image: F_FIX block $27C rdfast / $280 waitx #12
+  / $284 rdfast #0 / $288 rflong, then getct c_t1 $28C; K_FIXCLK getct
+  $194 / waitx #FIX_WAITX $198 (= $FD64181F, the block's encoding) / getct
+  $19C; P_UNSPACED j=0 rdfast $220 -> rdfast #0 $224 -> rflong $228; j>=1
+  rdfast $24C, waitx c_dly $250, rdfast #0 $254, rflong $258.
+
+  HOW TO RUN
+    Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10).  Runs
+    once, about 10 s (almost all of it cog 0 printing); nothing is written
+    to flash.  Output: a header, per arm a prediction line and its raw rows
+    (about 550 lines), then GATES, then RESULTS ending with VERDICT E7 FIX,
+    then DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY (EF-057)
+
+  NSLICE          = 8                   ' hub long-slices (address bits [4:2])
+  NPHASE          = 8                   ' egg-beater phases: WAITX 0..7 after the sync
+  NCELL           = NSLICE * NPHASE     ' slice x phase cells per arm
+  NDIST           = 42                  ' gap indexes j = 0..41 (2, 4..44 clk), as EF-074
+  TRIALS          = 16                  ' identical trials per (arm, slice, phase, j)
+  REGN            = 48                  ' longs per pattern region
+  ALIGN_MASK      = 31                  ' regions start on a 32-byte (slice 0) boundary
+  ALIGN_PAD       = 8                   ' longs of slack so an aligned region fits
+
+  PRIME_READS     = 2                   ' RFLONGs consumed after the prime (the PASM has two)
+  PRIME_WAIT      = 64                  ' WAITX between the prime RDFAST and its RFLONGs
+  SETTLE_WAIT     = 64                  ' WAITX after the prime reads: FIFO refills and idles
+  LATE_WAIT       = 200                 ' the "generous" delay of K_NWLATE
+
+  GETCT_OVH       = 2                   ' GETCT-pair measurement overhead (EF-035)
+  INSTR_CLK       = 2                   ' RDFAST D[31]=1, RFLONG
+  WAITX_BASE      = 2                   ' WAITX D costs 2 + D (pasm2/waitx.yaml)
+  NW_WAITX_OFFSET = INSTR_CLK + WAITX_BASE  ' gap = WAITX D + this
+
+  FIX_WAITX       = 12                  ' the WAITX immediate in the printed block (#12)
+  FIX_GAP_CLK     = NW_WAITX_OFFSET + FIX_WAITX  ' gap the printed block gives: 16
+  SAFE_GAP_CLK    = 16                  ' EF-074: every gap from 16 clk read correctly
+  E7_GAP_MIN      = 8                   ' EF-074: the one failing gap per cell lies in 8..15 clk
+  E7_GAP_MAX      = 15
+  E7_GAP_SPAN     = E7_GAP_MAX - E7_GAP_MIN + 1
+  RDF_BLK_MIN     = 10                  ' EF-073: a blocking RDFAST takes 10..17 clk (reported)
+  RDF_BLK_MAX     = 17
+
+  NEW_BASE        = $A5A5_0080          ' new[k] = NEW_BASE + k
+  OLD_BASE        = $0D0D_0040          ' old[k] = OLD_BASE + k
+  MID_BASE        = $3C3C_00C0          ' mid[k] = MID_BASE + k
+  LONG_MSB        = 31                  ' C of an RFLONG WC = bit 31 of the long
+  FLAG_Z_BIT      = 1                   ' record flags: bit 0 = C, bit 1 = Z
+
+  EXC_DIGIT_MAX   = 9                   ' exc codes: 1..9 as digits
+  EXC_LETTER_BASE = 10                  '  10..35 as A..Z
+  EXC_LETTER_MAX  = 35
+
+  STAT_READY      = $0000_0A11          ' measuring cog is up
+
+CON ' ---- Identifiers ----
+  ' Arm ids, in run order:
+  '  AR_KCLOCK  - control: GETCT overhead and WAITX cost at every swept delay
+  '  AR_KFIXCLK - control: the fix's WAITX #12 costs 14 clocks
+  '  AR_KRDLONG - control: plain RDLONG reads the pattern at every slice
+  '  AR_KPRIME  - control: after the prime, RFLONG returns old[2] (the stale reference)
+  '  AR_KNWLATE - control: no-wait RDFAST + WAITX #200 reads new[s]
+  '  AR_PUNSP   - positive control: EF-074's E_REBLK sweep (E7 must reproduce)
+  '  AR_FFIX    - the fix: the printed block
+  #0, AR_KCLOCK, AR_KFIXCLK, AR_KRDLONG, AR_KPRIME, AR_KNWLATE, AR_PUNSP, AR_FFIX
+  NARMS = AR_FFIX + 1
+
+  ' Arm kinds:
+  '  KD_CLOCK - record holds only an elapsed count
+  '  KD_READ  - record holds v1, v2, flags
+  #0, KD_CLOCK, KD_READ
+
+  ' Read classes (clock arms use C_OK / C_OTHER):
+  '  C_OK    - the expected datum      C_FLAGS - datum right, C/Z wrong
+  '  C_STALE - old[PRIME_READS]        C_OLD   - another old-region long
+  '  C_MID   - a mid-region long       C_NEWSH - a new-region long, wrong index
+  '  C_ZERO  - zero                    C_OTHER - anything else
+  #0, C_OK, C_FLAGS, C_STALE, C_OLD, C_MID, C_NEWSH, C_ZERO, C_OTHER
+  NCLS = C_OTHER + 1
+
+  ' Mailbox longs (cog 0 <-> measuring cog):
+  '  MB_CMD   - 0 idle / arm id + 1 = run; the cog writes 0 when done
+  '  MB_SLICE, MB_PHASE, MB_NDIST - parameters of the command
+  '  MB_NEW, MB_OLD, MB_MID - aligned region bases
+  '  MB_BUF   - record buffer      MB_ALIVE - STAT_READY once the cog runs
+  #0, MB_CMD, MB_SLICE, MB_PHASE, MB_NDIST, MB_NEW, MB_OLD, MB_MID, MB_BUF, MB_ALIVE, MB_LEN
+
+  ' Record longs: elapsed, first read, second read, flags (C bit 0, Z bit 1)
+  #0, REC_EL, REC_V1, REC_V2, REC_FLAGS
+  RECW = REC_FLAGS + 1
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  long newRegion[REGN + ALIGN_PAD], oldRegion[REGN + ALIGN_PAD], midRegion[REGN + ALIGN_PAD]
+  long recBuf[NDIST * TRIALS * RECW]
+  long newBase, oldBase, midBase
+  ' per-arm tallies
+  long armTot[NARMS], armGood[NARMS], armElMin[NARMS], armElMax[NARMS]
+  long armExcess[NARMS], armFlagBad[NARMS], armV2Bad[NARMS]
+  long armBadSlice[NARMS], armBadPhase[NARMS], armBadDist[NARMS], armBadGot[NARMS], armBadExp[NARMS]
+  long armDamage[NARMS]
+  long clsCnt[NARMS * NCLS]
+  ' positive control, per slice/phase cell: gaps with a wrong read, the last such gap, E7-shaped
+  long pcBadGaps[NCELL], pcBadJ[NCELL], pcPure[NCELL]
+  long gapHist[E7_GAP_SPAN]
+  ' positive control, gaps >= SAFE_GAP_CLK (the rule's margin points)
+  long spacedTot, spacedBad, spacedV2Bad
+  long spBadSlice, spBadPhase, spBadGap, spBadGot
+  ' the fix: blocking-RDFAST clocks per cell, distinct durations per slice
+  long fixExc[NCELL], sliceDistinct[NSLICE]
+  ' state of the row being processed
+  long rowCnt[NCLS]
+  long rowGood, rowV2Bad, rowMixed, rowFirstCls, rowElMin, rowElMax, rowExcFirst, rowExcMixed, rowShowRec
+  byte clsRow[NDIST + 1], excRow[NDIST + 1]
+
+PUB main() | armIdx, sliceIdx, phaseIdx, damageCnt, cog, startCt, bClockOk, bFixClkOk, bRdlongOk, bPrimeOk, bLateOk, bGate, bReproduced
+'' Run every arm on the measuring cog, print the raw rows, then the gated verdict.
+''
+
+' Local Variables:
+' @local armIdx - arm id being run (AR_*)
+' @local sliceIdx - hub long-slice of the FIFO start address
+' @local phaseIdx - egg-beater phase (WAITX clocks after the sync)
+' @local damageCnt - pattern-region longs changed by the row just run
+' @local cog - cog number the measuring cog started in
+' @local startCt - CT at the start of the start-up timeout
+' @local bClockOk - K_CLOCK control passed
+' @local bFixClkOk - K_FIXCLK control passed
+' @local bRdlongOk - K_RDLONG control passed
+' @local bPrimeOk - K_PRIME control passed
+' @local bLateOk - K_NWLATE control passed
+' @local bGate - every gating control passed
+' @local bReproduced - the positive control reproduced E7 as EF-074 measured it
+
+  setup_regions()
+  reset_tallies()
+  mbox[MB_CMD] := 0
+  mbox[MB_NEW] := newBase
+  mbox[MB_OLD] := oldBase
+  mbox[MB_MID] := midBase
+  mbox[MB_BUF] := @recBuf
+  mbox[MB_ALIVE] := 0
+
+  debug("=== P2 Errata E7 fix: spacing a no-wait RDFAST from a blocking RDFAST (pnut-ts v1.55.8, clk 200 MHz, ", udec_(TRIALS), " trials per cell, 8 slices x 8 phases) ===")
+  debug("fix under test: waitx #", udec_(FIX_WAITX), " between the two RDFASTs = gap ", udec_(FIX_GAP_CLK), " clk (RDFAST 2 + WAITX 2+", udec_(FIX_WAITX), "); rule: at least ", udec_(SAFE_GAP_CLK), " clk from RDFAST to RDFAST (EF-074)")
+  debug("patterns: new[k]=$A5A5_0080+k  old[k]=$0D0D_0040+k  mid[k]=$3C3C_00C0+k  stale reference old[2]=$0D0D_0042; hub_first=mid[0], hub_next=new[s]")
+  debug("bases: new=", uhex_long_(newBase), " old=", uhex_long_(oldBase), " mid=", uhex_long_(midBase), " (slice s start = base + 4*s)")
+  debug("gap j: j=0 nothing between the RDFASTs, gap 2 clk; j>=1 WAITX c_dly=j-1, gap j+3 clk (3 clk unreachable). phase p = WAITX p after an egg-beater sync RDLONG")
+  debug("cls codes: . ok  F value ok/C-Z wrong  S stale old[2]  o other old  M mid  N new wrong index  Z zero  X other  * trials disagree")
+  debug("exc codes: elapsed minus the no-stall clock count; . 0  1-9  A-Z = 10-35  + >35  - negative  ~ trials disagree (P_UNSPACED, F_FIX: exc = the blocking RDFAST's own clocks)")
+
+  cog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if cog < 0
+    debug("RIG FAIL: coginit expected a free cog (0..7), got ", sdec_(cog))
+    finish()
+
+  startCt := getct()
+  repeat until mbox[MB_ALIVE] == STAT_READY
+    if getct() - startCt > clkfreq
+      debug("RIG FAIL: measuring cog start-up expected $0000_0A11 within 1 s, got ", uhex_long_(mbox[MB_ALIVE]))
+      finish()
+  debug("measuring cog ", udec_(cog), " running")
+
+  repeat armIdx from 0 to NARMS - 1
+    print_arm_header(armIdx)
+    repeat sliceIdx from 0 to NSLICE - 1
+      repeat phaseIdx from 0 to NPHASE - 1
+        run_cmd(armIdx, sliceIdx, phaseIdx)
+        process_row(armIdx, sliceIdx, phaseIdx)
+        damageCnt := region_damage()
+        if damageCnt > 0
+          armDamage[armIdx] += damageCnt
+          debug("  REGION DAMAGE after ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ", udec_(damageCnt), " pattern longs changed (a stray hub write) - regions re-filled")
+          setup_regions()
+
+  ' ---- gates ---------------------------------------------------------------
+  debug("=== GATES ===")
+  repeat armIdx from 0 to NARMS - 1
+    if armDamage[armIdx] > 0
+      debug("RIG NOTE: ", zstr_(armname(armIdx)), " changed ", udec_(armDamage[armIdx]), " pattern-region longs in total (stray hub writes; see REGION DAMAGE lines)")
+  bClockOk := rig_check(AR_KCLOCK)
+  bFixClkOk := rig_check(AR_KFIXCLK)
+  bRdlongOk := rig_check(AR_KRDLONG)
+  bPrimeOk := rig_check(AR_KPRIME)
+  bLateOk := rig_check(AR_KNWLATE)
+  bGate := bClockOk and bFixClkOk and bRdlongOk and bPrimeOk and bLateOk
+  if bGate
+    debug("RIG OK: K_CLOCK, K_FIXCLK, K_RDLONG, K_PRIME, K_NWLATE all correct in every trial")
+
+  ' ---- results -------------------------------------------------------------
+  debug("=== RESULTS ===")
+  phase_check()
+  bReproduced := positive_control()
+  report_spaced()
+  verdict_fix(bGate, bReproduced)
+
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' set-up and the command channel
+' ---------------------------------------------------------------------------
+PRI setup_regions() | idx
+' Align the three pattern regions to 32 bytes and fill them.
+'
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  newBase := (@newRegion + ALIGN_MASK) & !ALIGN_MASK
+  oldBase := (@oldRegion + ALIGN_MASK) & !ALIGN_MASK
+  midBase := (@midRegion + ALIGN_MASK) & !ALIGN_MASK
+  repeat idx from 0 to REGN - 1
+    long[newBase][idx] := patnew(idx)
+    long[oldBase][idx] := patold(idx)
+    long[midBase][idx] := patmid(idx)
+
+PRI region_damage() : damageCnt | idx
+' Count pattern-region longs that no longer hold their pattern.
+'
+' @returns damageCnt - changed longs over the new, old and mid regions
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  damageCnt := 0
+  repeat idx from 0 to REGN - 1
+    if long[newBase][idx] <> patnew(idx)
+      damageCnt++
+    if long[oldBase][idx] <> patold(idx)
+      damageCnt++
+    if long[midBase][idx] <> patmid(idx)
+      damageCnt++
+
+PRI reset_tallies()
+' Clear every per-arm tally and summary.
+'
+
+  longfill(@armTot, 0, NARMS)
+  longfill(@armGood, 0, NARMS)
+  longfill(@armElMin, POSX, NARMS)
+  longfill(@armElMax, NEGX, NARMS)
+  longfill(@armExcess, 0, NARMS)
+  longfill(@armFlagBad, 0, NARMS)
+  longfill(@armV2Bad, 0, NARMS)
+  longfill(@armBadDist, -1, NARMS)
+  longfill(@armDamage, 0, NARMS)
+  longfill(@clsCnt, 0, NARMS * NCLS)
+  longfill(@pcBadGaps, 0, NCELL)
+  longfill(@pcBadJ, -1, NCELL)
+  longfill(@pcPure, FALSE, NCELL)
+  longfill(@gapHist, 0, E7_GAP_SPAN)
+  longfill(@fixExc, 0, NCELL)
+  spacedTot := 0
+  spacedBad := 0
+  spacedV2Bad := 0
+  spBadSlice := -1
+  spBadPhase := -1
+  spBadGap := -1
+  spBadGot := 0
+
+PRI run_cmd(armIdx, sliceIdx, phaseIdx) | startCt
+' Hand one (arm, slice, phase) command to the measuring cog and wait for it.
+'
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param phaseIdx - egg-beater phase: WAITX clocks after the sync RDLONG (0..7)
+
+' Local Variables:
+' @local startCt - CT when the command was issued
+
+  mbox[MB_SLICE] := sliceIdx
+  mbox[MB_PHASE] := phaseIdx
+  mbox[MB_NDIST] := armnd(armIdx)
+  mbox[MB_CMD] := armIdx + 1
+  startCt := getct()
+  repeat until mbox[MB_CMD] == 0
+    if getct() - startCt > clkfreq
+      debug("RIG FAIL: measuring cog did not finish ", zstr_(armname(armIdx)), " slice ", udec_(sliceIdx), " phase ", udec_(phaseIdx), " within 1 s: expected command word 0, got ", uhex_long_(mbox[MB_CMD]))
+      finish()
+
+' ---------------------------------------------------------------------------
+' arm tables
+' ---------------------------------------------------------------------------
+PRI armname(armIdx) : pArmName
+' @param armIdx - arm id (AR_*)
+' @returns pArmName - the arm's printable name
+
+  pArmName := lookupz(armIdx: string("K_CLOCK"), string("K_FIXCLK"), string("K_RDLONG"), string("K_PRIME"), string("K_NWLATE"), string("P_UNSPACED"), string("F_FIX"))
+
+PRI armnd(armIdx) : distCount
+' @param armIdx - arm id (AR_*)
+' @returns distCount - gap indexes the arm runs (NDIST swept, 1 fixed)
+
+  distCount := lookupz(armIdx: NDIST, 1, 1, 1, 1, NDIST, 1)
+
+PRI armkind(armIdx) : kind
+' @param armIdx - arm id (AR_*)
+' @returns kind - record kind (KD_*)
+
+  kind := lookupz(armIdx: KD_CLOCK, KD_CLOCK, KD_READ, KD_READ, KD_READ, KD_READ, KD_READ)
+
+PRI armflags(armIdx) : bHasFlags
+' @param armIdx - arm id (AR_*)
+' @returns bHasFlags - TRUE when the first read is an RFLONG WCZ whose C/Z are recorded
+
+  bHasFlags := lookupz(armIdx: FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE)
+
+PRI goodcls(armIdx) : correctCls
+' @param armIdx - arm id (AR_*)
+' @returns correctCls - the class a correct trial of this arm falls in
+
+  correctCls := lookupz(armIdx: C_OK, C_OK, C_OK, C_STALE, C_OK, C_OK, C_OK)
+
+PRI armexc0(armIdx) : bZeroExcess
+' @param armIdx - arm id (AR_*)
+' @returns bZeroExcess - TRUE when the arm's elapsed must equal the no-stall count (exc 0)
+
+  bZeroExcess := lookupz(armIdx: TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE)
+
+PRI armv2gate(armIdx) : bGateOnSecond
+' @param armIdx - arm id (AR_*)
+' @returns bGateOnSecond - TRUE when the second read must also be right for the trial to count as correct
+
+  bGateOnSecond := lookupz(armIdx: FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
+
+PRI distclk(distIdx) : distClks
+' Gap in clocks, issue to issue, from the no-wait RDFAST to the blocking RDFAST for gap index j.
+'
+' @param distIdx - gap index j
+' @returns distClks - 2 for j=0 (adjacent), else INSTR_CLK + WAITX_BASE + (j-1) = j+3
+
+  if distIdx == 0
+    distClks := INSTR_CLK
+  else
+    distClks := NW_WAITX_OFFSET + distIdx - 1
+
+PRI expclk(armIdx, distIdx) : baseClk
+' The elapsed GETCT count a trial shows if nothing stalls (the exc = 0 value).
+'
+' @param armIdx - arm id (AR_*)
+' @param distIdx - gap index j
+' @returns baseClk - no-stall elapsed clocks
+
+  case armIdx
+    AR_KCLOCK:
+      if distIdx == 0
+        baseClk := GETCT_OVH
+      else
+        baseClk := GETCT_OVH + WAITX_BASE + distIdx - 1
+    AR_KFIXCLK:
+      baseClk := GETCT_OVH + WAITX_BASE + FIX_WAITX
+    AR_KRDLONG:
+      baseClk := GETCT_OVH                                   ' exc = the RDLONG's clocks
+    AR_KPRIME:
+      baseClk := GETCT_OVH + INSTR_CLK
+    AR_KNWLATE:
+      baseClk := GETCT_OVH + INSTR_CLK + WAITX_BASE + LATE_WAIT + INSTR_CLK
+    AR_PUNSP:
+      baseClk := GETCT_OVH + distclk(distIdx) + INSTR_CLK    ' exc = the blocking RDFAST's clocks
+    AR_FFIX:
+      baseClk := GETCT_OVH + FIX_GAP_CLK + INSTR_CLK         ' exc = the blocking RDFAST's clocks
+    other:
+      baseClk := 0
+
+PRI patnew(longIdx) : pattern
+' @param longIdx - long index inside the region
+' @returns pattern - the new-region long at that index
+
+  pattern := NEW_BASE + longIdx
+
+PRI patold(longIdx) : pattern
+' @param longIdx - long index inside the region
+' @returns pattern - the old-region long at that index
+
+  pattern := OLD_BASE + longIdx
+
+PRI patmid(longIdx) : pattern
+' @param longIdx - long index inside the region
+' @returns pattern - the mid-region long at that index
+
+  pattern := MID_BASE + longIdx
+
+PRI recaddr(distIdx, trialIdx) : pRec
+' @param distIdx - gap index j
+' @param trialIdx - trial number 0..TRIALS-1
+' @returns pRec - hub address of that trial's record
+
+  pRec := @recBuf + ((distIdx * TRIALS + trialIdx) * RECW) * 4
+
+' ---------------------------------------------------------------------------
+' classification of one record
+' ---------------------------------------------------------------------------
+PRI classify(armIdx, sliceIdx, pRec, baseClk) : cls
+' Classify one trial record in the arm's class space.
+'
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param pRec - hub address of the trial record
+' @param baseClk - the arm's no-stall elapsed count at this gap
+' @returns cls - C_* class of the trial
+
+  if armkind(armIdx) == KD_CLOCK
+    if long[pRec][REC_EL] == baseClk
+      cls := C_OK
+    else
+      cls := C_OTHER
+  else
+    cls := classify_read(sliceIdx, long[pRec][REC_V1])
+    if cls == goodcls(armIdx) and armflags(armIdx) and not flags_ok(pRec)
+      cls := C_FLAGS
+
+PRI classify_read(sliceIdx, datum) : cls
+' Name the region and position a first-read datum came from.
+'
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param datum - the value the first read returned
+' @returns cls - C_OK / C_STALE / C_OLD / C_MID / C_NEWSH / C_ZERO / C_OTHER
+
+  if datum == patnew(sliceIdx)
+    cls := C_OK
+  elseif datum == patold(PRIME_READS)
+    cls := C_STALE
+  elseif (datum - OLD_BASE) +< REGN
+    cls := C_OLD
+  elseif (datum - MID_BASE) +< REGN
+    cls := C_MID
+  elseif (datum - NEW_BASE) +< REGN
+    cls := C_NEWSH
+  elseif datum == 0
+    cls := C_ZERO
+  else
+    cls := C_OTHER
+
+PRI flags_ok(pRec) : bConsistent | datum, carryExp, zeroExp
+' Check the recorded C/Z against the datum the same RFLONG WCZ returned.
+'
+' @param pRec - hub address of the trial record
+' @returns bConsistent - TRUE when C = the datum's MSB and Z = (datum == 0)
+
+' Local Variables:
+' @local datum - the first-read value
+' @local carryExp - expected C (bit 31)
+' @local zeroExp - expected Z
+
+  datum := long[pRec][REC_V1]
+  carryExp := (datum >> LONG_MSB) & 1
+  zeroExp := (datum == 0) & 1
+  bConsistent := long[pRec][REC_FLAGS] == (carryExp | (zeroExp << FLAG_Z_BIT))
+
+PRI v2_ok(armIdx, sliceIdx, pRec) : bMatch | expVal
+' Check the second FIFO read of a read record.
+'
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param pRec - hub address of the trial record
+' @returns bMatch - TRUE when the second read is the long that follows the expected first
+
+' Local Variables:
+' @local expVal - the expected second-read value
+
+  if armIdx == AR_KPRIME
+    expVal := patold(PRIME_READS + 1)
+  else
+    expVal := patnew(sliceIdx + 1)
+  bMatch := long[pRec][REC_V2] == expVal
+
+PRI expv1(armIdx, sliceIdx, distIdx) : expVal
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param distIdx - gap index j
+' @returns expVal - what a correct trial records (elapsed / first datum)
+
+  if armkind(armIdx) == KD_CLOCK
+    expVal := expclk(armIdx, distIdx)
+  elseif armIdx == AR_KPRIME
+    expVal := patold(PRIME_READS)
+  else
+    expVal := patnew(sliceIdx)
+
+PRI got_value(armIdx, pRec) : gotVal
+' @param armIdx - arm id (AR_*)
+' @param pRec - hub address of the trial record
+' @returns gotVal - the recorded counterpart of expv1()
+
+  if armkind(armIdx) == KD_CLOCK
+    gotVal := long[pRec][REC_EL]
+  else
+    gotVal := long[pRec][REC_V1]
+
+PRI clschar(cls) : codeChar
+' @param cls - class of the trial
+' @returns codeChar - the row code for that class
+
+  codeChar := lookupz(cls: ".", "F", "S", "o", "M", "N", "Z", "X")
+
+PRI clsname(cls) : pClsName
+' @param cls - class of the trial
+' @returns pClsName - printable class name
+
+  pClsName := lookupz(cls: string("OK"), string("FLAGS"), string("STALE"), string("OLD"), string("MID"), string("NEWSHIFT"), string("ZERO"), string("OTHER"))
+
+PRI excchar(excess) : codeChar
+' @param excess - elapsed minus the no-stall count
+' @returns codeChar - the row code for that excess
+
+  if excess == 0
+    codeChar := "."
+  elseif excess < 0
+    codeChar := "-"
+  elseif excess <= EXC_DIGIT_MAX
+    codeChar := "0" + excess
+  elseif excess <= EXC_LETTER_MAX
+    codeChar := "A" + excess - EXC_LETTER_BASE
+  else
+    codeChar := "+"
+
+' ---------------------------------------------------------------------------
+' one (arm, slice, phase) row: tally, summarise, print raw
+' ---------------------------------------------------------------------------
+PRI process_row(armIdx, sliceIdx, phaseIdx) | distIdx, lastDist, trialIdx, pRec, cls, baseClk
+' Classify, tally and print one (arm, slice, phase) row of trial records.
+'
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param phaseIdx - egg-beater phase: WAITX clocks after the sync RDLONG (0..7)
+
+' Local Variables:
+' @local distIdx - gap index j
+' @local lastDist - last gap index the arm ran
+' @local trialIdx - trial number
+' @local pRec - hub address of the trial record
+' @local cls - class of the trial
+' @local baseClk - no-stall elapsed count at this gap
+
+  lastDist := armnd(armIdx) - 1
+  repeat distIdx from 0 to lastDist
+    longfill(@rowCnt, 0, NCLS)
+    rowGood := 0
+    rowV2Bad := 0
+    rowMixed := FALSE
+    rowExcMixed := FALSE
+    rowShowRec := 0
+    baseClk := expclk(armIdx, distIdx)
+    repeat trialIdx from 0 to TRIALS - 1
+      pRec := recaddr(distIdx, trialIdx)
+      cls := classify(armIdx, sliceIdx, pRec, baseClk)
+      if armkind(armIdx) == KD_READ and cls == goodcls(armIdx) and not v2_ok(armIdx, sliceIdx, pRec)
+        armV2Bad[armIdx]++
+        rowV2Bad++
+        if armv2gate(armIdx)
+          cls := C_OTHER                                      ' the second read must also be right
+      tally_trial(armIdx, sliceIdx, phaseIdx, distIdx, trialIdx, pRec, cls, baseClk)
+    if rowShowRec == 0
+      rowShowRec := recaddr(distIdx, 0)
+    if armIdx == AR_PUNSP
+      note_unspaced_row(sliceIdx, phaseIdx, distIdx)
+    elseif armIdx == AR_FFIX
+      fixExc[sliceIdx * NPHASE + phaseIdx] := rowExcFirst
+    if lastDist > 0
+      clsRow[distIdx] := row_cls_char()
+      excRow[distIdx] := row_exc_char()
+      if rowGood < TRIALS or rowV2Bad > 0 or (armexc0(armIdx) and (rowExcMixed or rowExcFirst <> 0))
+        print_detail(armIdx, sliceIdx, phaseIdx, distIdx, baseClk)
+    else
+      print_fixed(armIdx, sliceIdx, phaseIdx, baseClk)
+  if lastDist > 0
+    clsRow[lastDist + 1] := 0
+    excRow[lastDist + 1] := 0
+    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " cls ", zstr_(@clsRow), " exc ", zstr_(@excRow))
+
+PRI tally_trial(armIdx, sliceIdx, phaseIdx, distIdx, trialIdx, pRec, cls, baseClk) | elapsed
+' Add one classified trial to the row and arm tallies; keep the arm's first failure.
+'
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param phaseIdx - egg-beater phase: WAITX clocks after the sync RDLONG (0..7)
+' @param distIdx - gap index j
+' @param trialIdx - trial number 0..TRIALS-1
+' @param pRec - hub address of the trial record
+' @param cls - class of the trial
+' @param baseClk - the arm's no-stall elapsed count at this gap
+
+' Local Variables:
+' @local elapsed - GETCT-measured clocks of the trial
+
+  elapsed := long[pRec][REC_EL]
+  rowCnt[cls]++
+  armTot[armIdx]++
+  clsCnt[armIdx * NCLS + cls]++
+  if trialIdx == 0
+    rowFirstCls := cls
+    rowExcFirst := elapsed - baseClk
+    rowElMin := elapsed
+    rowElMax := elapsed
+  else
+    if cls <> rowFirstCls
+      rowMixed := TRUE
+    if elapsed - baseClk <> rowExcFirst
+      rowExcMixed := TRUE
+    rowElMin <#= elapsed
+    rowElMax #>= elapsed
+  armElMin[armIdx] <#= elapsed
+  armElMax[armIdx] #>= elapsed
+  if armexc0(armIdx) and elapsed <> baseClk
+    armExcess[armIdx]++
+  if armflags(armIdx) and not flags_ok(pRec)
+    armFlagBad[armIdx]++
+  if cls == goodcls(armIdx)
+    rowGood++
+    armGood[armIdx]++
+  else
+    if rowShowRec == 0
+      rowShowRec := pRec
+    if armBadDist[armIdx] == -1
+      armBadSlice[armIdx] := sliceIdx
+      armBadPhase[armIdx] := phaseIdx
+      armBadDist[armIdx] := distIdx
+      armBadGot[armIdx] := got_value(armIdx, pRec)
+      armBadExp[armIdx] := expv1(armIdx, sliceIdx, distIdx)
+
+PRI note_unspaced_row(sliceIdx, phaseIdx, distIdx) | cellIdx
+' Record one P_UNSPACED gap row: the E7 shape of the cell, and the spaced-gap tallies.
+'
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param phaseIdx - egg-beater phase: WAITX clocks after the sync RDLONG (0..7)
+' @param distIdx - gap index j
+
+' Local Variables:
+' @local cellIdx - slice * NPHASE + phase
+
+  cellIdx := sliceIdx * NPHASE + phaseIdx
+  if rowGood < TRIALS
+    pcBadGaps[cellIdx]++
+    pcBadJ[cellIdx] := distIdx
+    pcPure[cellIdx] := rowCnt[C_ZERO] == TRIALS and not rowExcMixed and rowExcFirst == INSTR_CLK
+  if distclk(distIdx) >= SAFE_GAP_CLK
+    spacedTot += TRIALS
+    spacedBad += TRIALS - rowGood
+    spacedV2Bad += rowV2Bad
+    if (rowGood < TRIALS or rowV2Bad > 0) and spBadGap == -1
+      spBadSlice := sliceIdx
+      spBadPhase := phaseIdx
+      spBadGap := distclk(distIdx)
+      spBadGot := long[rowShowRec][REC_V1]
+
+PRI row_cls_char() : codeChar
+' @returns codeChar - class code of the current row cell ("*" when trials disagree)
+
+  if rowMixed
+    codeChar := "*"
+  else
+    codeChar := clschar(rowFirstCls)
+
+PRI row_exc_char() : codeChar
+' @returns codeChar - excess code of the current row cell ("~" when trials disagree)
+
+  if rowExcMixed
+    codeChar := "~"
+  else
+    codeChar := excchar(rowExcFirst)
+
+PRI print_detail(armIdx, sliceIdx, phaseIdx, distIdx, baseClk)
+' Print the raw counts of one swept cell that was not clean.
+'
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param phaseIdx - egg-beater phase: WAITX clocks after the sync RDLONG (0..7)
+' @param distIdx - gap index j
+' @param baseClk - the arm's no-stall elapsed count at this gap
+
+  if armkind(armIdx) == KD_CLOCK
+    debug("    ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " expected ", sdec_(baseClk))
+  else
+    debug("    ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), " j", udec_(distIdx), " gap ", udec_(distclk(distIdx)), ": ok ", udec_(rowCnt[C_OK]), " flg ", udec_(rowCnt[C_FLAGS]), " stale ", udec_(rowCnt[C_STALE]), " old ", udec_(rowCnt[C_OLD]), " mid ", udec_(rowCnt[C_MID]), " nsh ", udec_(rowCnt[C_NEWSH]), " zero ", udec_(rowCnt[C_ZERO]), " oth ", udec_(rowCnt[C_OTHER]), " v2bad ", udec_(rowV2Bad), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " base ", sdec_(baseClk), " v1 ", uhex_long_(long[rowShowRec][REC_V1]), " v2 ", uhex_long_(long[rowShowRec][REC_V2]), " cz ", udec_(long[rowShowRec][REC_FLAGS]))
+
+PRI print_fixed(armIdx, sliceIdx, phaseIdx, baseClk) | pClsName
+' Print the one-line raw result of a fixed (unswept) arm cell.
+'
+' @param armIdx - arm id (AR_*)
+' @param sliceIdx - hub long-slice of the FIFO start address (0..7)
+' @param phaseIdx - egg-beater phase: WAITX clocks after the sync RDLONG (0..7)
+' @param baseClk - the arm's no-stall elapsed count
+
+' Local Variables:
+' @local pClsName - class name of the row, or MIXED
+
+  if rowMixed
+    pClsName := string("MIXED")
+  else
+    pClsName := clsname(rowFirstCls)
+  if armkind(armIdx) == KD_CLOCK
+    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " ", zstr_(pClsName), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " expected ", sdec_(baseClk))
+  else
+    debug("  ", zstr_(armname(armIdx)), " s", udec_(sliceIdx), " p", udec_(phaseIdx), ": ok ", udec_(rowGood), "/", udec_(TRIALS), " ", zstr_(pClsName), " v2bad ", udec_(rowV2Bad), " el ", sdec_(rowElMin), "..", sdec_(rowElMax), " exc ", sdec_(rowElMin - baseClk), "..", sdec_(rowElMax - baseClk), " v1 ", uhex_long_(long[rowShowRec][REC_V1]), " v2 ", uhex_long_(long[rowShowRec][REC_V2]), " cz ", udec_(long[rowShowRec][REC_FLAGS]))
+
+PRI print_arm_header(armIdx)
+' Print the arm's sequence, its prediction and what refutes it, before its rows.
+'
+' @param armIdx - arm id (AR_*)
+
+  case armIdx
+    AR_KCLOCK:
+      debug("ARM K_CLOCK (control): getct / [waitx c_dly] / getct. MUST: elapsed 2 at j=0, j+3 at j>=1, every trial (EF-035 + WAITX = 2+D)")
+    AR_KFIXCLK:
+      debug("ARM K_FIXCLK (control): getct / waitx #", udec_(FIX_WAITX), " / getct (the fix's WAITX). MUST: elapsed ", udec_(expclk(AR_KFIXCLK, 0)), " = GETCT 2 + WAITX 2+", udec_(FIX_WAITX), ", every trial")
+    AR_KRDLONG:
+      debug("ARM K_RDLONG (control): rdlong new[s] ; rdlong new[s+1]. MUST: the pattern. exc = the RDLONG's own clocks")
+    AR_KPRIME:
+      debug("ARM K_PRIME (control): after the prime, rflong WCZ with no new RDFAST. MUST: old[2]=$0D0D_0042 then old[3], C/Z consistent, exc 0")
+    AR_KNWLATE:
+      debug("ARM K_NWLATE (control): rdfast nowait,hub_next / waitx #200 / rflong WCZ. MUST: new[s] then new[s+1], exc 0")
+    AR_PUNSP:
+      debug("ARM P_UNSPACED (POSITIVE CONTROL = EF-074's E_REBLK arm): rdfast nowait,hub_first / [waitx c_dly] / rdfast #0,hub_next / rflong WCZ")
+      debug("  MUST reproduce E7: per cell exactly one gap in ", udec_(E7_GAP_MIN), "..", udec_(E7_GAP_MAX), " clk wrong, 16/16 zero, blocking RDFAST 2 clk; every read at gaps >= ", udec_(SAFE_GAP_CLK), " clk correct")
+    AR_FFIX:
+      debug("ARM F_FIX (THE FIX, the printed block): rdfast nowait,hub_first / waitx #", udec_(FIX_WAITX), " / rdfast #0,hub_next / rflong first_long. PREDICT new[s] then new[s+1] in every trial, blocking RDFAST waits (exc > 2). ANY wrong read = REFUTED")
+
+' ---------------------------------------------------------------------------
+' gates and verdicts
+' ---------------------------------------------------------------------------
+PRI rig_check(armIdx) : bPass
+' Gate one control arm: every trial correct, else print RIG FAIL with the first failure.
+'
+' @param armIdx - control arm id (AR_K*)
+' @returns bPass - TRUE when every trial of the control was correct
+
+  bPass := armTot[armIdx] > 0 and armGood[armIdx] == armTot[armIdx]
+  if not bPass
+    if armkind(armIdx) == KD_CLOCK
+      debug("RIG FAIL: ", zstr_(armname(armIdx)), " expected elapsed ", sdec_(armBadExp[armIdx]), " got ", sdec_(armBadGot[armIdx]), " at slice ", sdec_(armBadSlice[armIdx]), " phase ", sdec_(armBadPhase[armIdx]), " j ", sdec_(armBadDist[armIdx]), "; ", udec_(armTot[armIdx] - armGood[armIdx]), " of ", udec_(armTot[armIdx]), " trials bad")
+    else
+      debug("RIG FAIL: ", zstr_(armname(armIdx)), " expected ", uhex_long_(armBadExp[armIdx]), " got ", uhex_long_(armBadGot[armIdx]), " at slice ", sdec_(armBadSlice[armIdx]), " phase ", sdec_(armBadPhase[armIdx]), "; ", udec_(armTot[armIdx] - armGood[armIdx]), " of ", udec_(armTot[armIdx]), " trials bad (second-read mismatches ", udec_(armV2Bad[armIdx]), ")")
+
+PRI phase_check() | sliceIdx, phaseIdx, priorIdx, bSeen
+' Informational: count distinct F_FIX blocking-RDFAST durations over the 8 phases per slice.
+'
+
+' Local Variables:
+' @local sliceIdx - hub long-slice
+' @local phaseIdx - phase being checked
+' @local priorIdx - earlier phase compared against
+' @local bSeen - duration already counted
+
+  repeat sliceIdx from 0 to NSLICE - 1
+    sliceDistinct[sliceIdx] := 0
+    repeat phaseIdx from 0 to NPHASE - 1
+      bSeen := FALSE
+      if phaseIdx > 0
+        repeat priorIdx from 0 to phaseIdx - 1
+          if fixExc[sliceIdx * NPHASE + priorIdx] == fixExc[sliceIdx * NPHASE + phaseIdx]
+            bSeen := TRUE
+      if not bSeen
+        sliceDistinct[sliceIdx]++
+  debug("PHASE CHECK (informational): distinct F_FIX blocking-RDFAST durations over the 8 phases per slice (8 = the phase sweep spans a whole egg-beater rotation): s0 ", udec_(sliceDistinct[0]), " s1 ", udec_(sliceDistinct[1]), " s2 ", udec_(sliceDistinct[2]), " s3 ", udec_(sliceDistinct[3]), " s4 ", udec_(sliceDistinct[4]), " s5 ", udec_(sliceDistinct[5]), " s6 ", udec_(sliceDistinct[6]), " s7 ", udec_(sliceDistinct[7]))
+
+PRI positive_control() : bReproduced | cellIdx, gapClk, cellsMatch, noBad, multiBad, outside, impure, clsBase
+' Decide whether P_UNSPACED reproduced E7 in the shape EF-074 measured; print the evidence.
+'
+' @returns bReproduced - TRUE when all 64 cells show exactly one E7-shaped failing gap in 8..15 clk
+
+' Local Variables:
+' @local cellIdx - slice/phase cell
+' @local gapClk - the cell's failing gap in clocks
+' @local cellsMatch - cells in the EF-074 shape
+' @local noBad - cells with no failing gap
+' @local multiBad - cells with more than one failing gap
+' @local outside - cells whose one failing gap lies outside 8..15 clk
+' @local impure - cells whose failing gap was not 16/16 zero with a 2-clk RDFAST
+' @local clsBase - index of P_UNSPACED's first class counter
+
+  cellsMatch := 0
+  noBad := 0
+  multiBad := 0
+  outside := 0
+  impure := 0
+  repeat cellIdx from 0 to NCELL - 1
+    if pcBadGaps[cellIdx] == 0
+      noBad++
+    elseif pcBadGaps[cellIdx] > 1
+      multiBad++
+    else
+      gapClk := distclk(pcBadJ[cellIdx])
+      if gapClk < E7_GAP_MIN or gapClk > E7_GAP_MAX
+        outside++
+      elseif not pcPure[cellIdx]
+        impure++
+      else
+        cellsMatch++
+        gapHist[gapClk - E7_GAP_MIN]++
+  clsBase := AR_PUNSP * NCLS
+  debug("  P_UNSPACED by class: ok ", udec_(clsCnt[clsBase + C_OK]), " flg ", udec_(clsCnt[clsBase + C_FLAGS]), " stale ", udec_(clsCnt[clsBase + C_STALE]), " old ", udec_(clsCnt[clsBase + C_OLD]), " mid ", udec_(clsCnt[clsBase + C_MID]), " nsh ", udec_(clsCnt[clsBase + C_NEWSH]), " zero ", udec_(clsCnt[clsBase + C_ZERO]), " oth ", udec_(clsCnt[clsBase + C_OTHER]), " of ", udec_(armTot[AR_PUNSP]), "; C/Z inconsistent ", udec_(armFlagBad[AR_PUNSP]), "; elapsed ", sdec_(armElMin[AR_PUNSP]), "..", sdec_(armElMax[AR_PUNSP]))
+  debug("  P_UNSPACED E7-shaped cells by failing gap: ", udec_(E7_GAP_MIN), " clk ", udec_(gapHist[0]), ", ", udec_(E7_GAP_MIN + 1), " clk ", udec_(gapHist[1]), ", ", udec_(E7_GAP_MIN + 2), " clk ", udec_(gapHist[2]), ", ", udec_(E7_GAP_MIN + 3), " clk ", udec_(gapHist[3]), ", ", udec_(E7_GAP_MIN + 4), " clk ", udec_(gapHist[4]), ", ", udec_(E7_GAP_MIN + 5), " clk ", udec_(gapHist[5]), ", ", udec_(E7_GAP_MIN + 6), " clk ", udec_(gapHist[6]), ", ", udec_(E7_GAP_MAX), " clk ", udec_(gapHist[7]), " (EF-074: 8 each)")
+  bReproduced := cellsMatch == NCELL
+  if bReproduced
+    debug("POSITIVE CONTROL P_UNSPACED: REPRODUCED - in all ", udec_(NCELL), " cells exactly one gap in ", udec_(E7_GAP_MIN), "..", udec_(E7_GAP_MAX), " clk failed in all ", udec_(TRIALS), " trials, reading zero with the blocking RDFAST taking ", udec_(INSTR_CLK), " clk (E7 as EF-074)")
+  else
+    debug("POSITIVE CONTROL P_UNSPACED: NOT REPRODUCED - cells in the EF-074 shape ", udec_(cellsMatch), " of ", udec_(NCELL), "; no failing gap ", udec_(noBad), "; more than one failing gap ", udec_(multiBad), "; failing gap outside ", udec_(E7_GAP_MIN), "..", udec_(E7_GAP_MAX), " clk ", udec_(outside), "; failing gap not ", udec_(TRIALS), "/", udec_(TRIALS), " zero with a ", udec_(INSTR_CLK), "-clk RDFAST ", udec_(impure))
+
+PRI report_spaced()
+' Print P_UNSPACED's reads at gaps >= SAFE_GAP_CLK: the clock rule's margin points.
+'
+
+  debug("  SPACED GAPS (the rule's margin points) in P_UNSPACED, gaps ", udec_(SAFE_GAP_CLK), "..", udec_(distclk(NDIST - 1)), " clk: first read correct in ", udec_(spacedTot - spacedBad), " of ", udec_(spacedTot), " trials; second read wrong after a right first read in ", udec_(spacedV2Bad))
+  if spBadGap <> -1
+    debug("  first spaced-gap failure: slice ", sdec_(spBadSlice), " phase ", sdec_(spBadPhase), " gap ", sdec_(spBadGap), " clk, first read ", uhex_long_(spBadGot))
+
+PRI verdict_fix(bGate, bReproduced) | baseClk, fixBad, rdfMin, rdfMax, clsBase
+' Print the E7 fix verdict, in the order fixed in the header.
+'
+' @param bGate - TRUE when every gating control passed
+' @param bReproduced - TRUE when the positive control reproduced E7 as EF-074 measured it
+
+' Local Variables:
+' @local baseClk - F_FIX no-stall elapsed count
+' @local fixBad - F_FIX trials with a wrong first or second read
+' @local rdfMin - fewest clocks the F_FIX blocking RDFAST took
+' @local rdfMax - most clocks the F_FIX blocking RDFAST took
+' @local clsBase - index of F_FIX's first class counter
+
+  baseClk := expclk(AR_FFIX, 0)
+  fixBad := armTot[AR_FFIX] - armGood[AR_FFIX]
+  rdfMin := armElMin[AR_FFIX] - baseClk
+  rdfMax := armElMax[AR_FFIX] - baseClk
+  clsBase := AR_FFIX * NCLS
+  debug("  F_FIX by class: ok ", udec_(clsCnt[clsBase + C_OK]), " stale ", udec_(clsCnt[clsBase + C_STALE]), " old ", udec_(clsCnt[clsBase + C_OLD]), " mid ", udec_(clsCnt[clsBase + C_MID]), " nsh ", udec_(clsCnt[clsBase + C_NEWSH]), " zero ", udec_(clsCnt[clsBase + C_ZERO]), " oth ", udec_(clsCnt[clsBase + C_OTHER]), " of ", udec_(armTot[AR_FFIX]), " (oth includes a right first read with a wrong second: ", udec_(armV2Bad[AR_FFIX]), "); blocking RDFAST took ", sdec_(rdfMin), "..", sdec_(rdfMax), " clk (EF-073: ", udec_(RDF_BLK_MIN), "..", udec_(RDF_BLK_MAX), ")")
+  if not bGate
+    debug("NO VERDICT E7 FIX: a gating control (K_CLOCK, K_FIXCLK, K_RDLONG, K_PRIME, K_NWLATE) failed - see RIG FAIL lines; the lines above are raw")
+  elseif fixBad > 0 or spacedBad > 0 or spacedV2Bad > 0
+    if fixBad > 0
+      debug("  F_FIX first wrong trial: slice ", sdec_(armBadSlice[AR_FFIX]), " phase ", sdec_(armBadPhase[AR_FFIX]), ": first read ", uhex_long_(armBadGot[AR_FFIX]), " expected ", uhex_long_(armBadExp[AR_FFIX]), " (trials with a right first read and a wrong second: ", udec_(armV2Bad[AR_FFIX]), ")")
+    debug("VERDICT E7 FIX: REFUTED - F_FIX wrong in ", udec_(fixBad), " of ", udec_(armTot[AR_FFIX]), " trials; P_UNSPACED at gaps >= ", udec_(SAFE_GAP_CLK), " clk: wrong first reads ", udec_(spacedBad), ", wrong second reads ", udec_(spacedV2Bad), " of ", udec_(spacedTot))
+  elseif not bReproduced
+    debug("VERDICT E7 FIX: INCONCLUSIVE - the positive control did not reproduce E7 in the shape EF-074 measured (see POSITIVE CONTROL line), so the clean F_FIX result does not show the fix beating the erratum in this run")
+  elseif rdfMin <= INSTR_CLK
+    debug("VERDICT E7 FIX: INCONCLUSIVE - in F_FIX the blocking RDFAST completed in ", sdec_(rdfMin), " clk (no wait) although every read was right; RDFAST took ", sdec_(rdfMin), "..", sdec_(rdfMax), " clk")
+  else
+    debug("  the unspaced sweep in this run reproduced E7 in ", udec_(NCELL), " of ", udec_(NCELL), " cells; every read at gaps ", udec_(SAFE_GAP_CLK), "..", udec_(distclk(NDIST - 1)), " clk correct (", udec_(spacedTot), " trials)")
+    debug("VERDICT E7 FIX: CONFIRMED - the printed block (waitx #", udec_(FIX_WAITX), ", gap ", udec_(FIX_GAP_CLK), " clk) read new[s] then new[s+1] in all ", udec_(armTot[AR_FFIX]), " trials (8 slices x 8 phases x ", udec_(TRIALS), "), the blocking RDFAST waiting ", sdec_(rdfMin), "..", sdec_(rdfMax), " clk")
+
+' ===========================================================================
+' MEASURING COG (PASM, cog exec).  PTRA on entry = @mbox (from COGINIT).
+' No debug() in here: this cog has no debug interrupt (DEBUG_COGS).
+' Every timed sequence sits between two GETCTs with nothing else inside;
+' every trial begins with the prime and an egg-beater sync RDLONG.
+' ===========================================================================
+DAT             org     0        ' ---- Measuring Cog ----
+pasm            rdlong  c_newb, ptra[MB_NEW]
+                rdlong  c_oldb, ptra[MB_OLD]
+                rdlong  hub_first, ptra[MB_MID]                 ' first (no-wait) RDFAST: mid[0], slice 0
+                rdlong  c_bufb, ptra[MB_BUF]
+                mov     c_tmp, ##STAT_READY
+                wrlong  c_tmp, ptra[MB_ALIVE]
+
+wait_cmd        rdlong  c_arm, ptra                     wz      ' MB_CMD: 0 = idle
+        if_z    jmp     #wait_cmd
+                sub     c_arm, #1                               ' arm id
+                rdlong  c_slice, ptra[MB_SLICE]
+                rdlong  c_phase, ptra[MB_PHASE]
+                rdlong  c_ndist, ptra[MB_NDIST]
+                mov     hub_next, c_slice
+                shl     hub_next, #2                            ' slice s -> byte offset 4*s
+                add     hub_next, c_newb                        ' blocking RDFAST: new[s]
+                mov     c_new2, hub_next
+                add     c_new2, #4                              ' new[s+1] (K_RDLONG)
+                mov     c_bufp, c_bufb
+                mov     c_dist, #0
+
+dist_loop       mov     c_vidx, c_arm                           ' vector = vec_tab[2*arm + (j <> 0)]
+                shl     c_vidx, #1
+                mov     c_dly, c_dist
+                cmp     c_dist, #0                      wz
+        if_nz   add     c_vidx, #1
+        if_nz   sub     c_dly, #1                               ' j >= 1: WAITX c_dly = j - 1
+                alts    c_vidx, #vec_tab
+                mov     c_vec, 0-0
+                mov     c_trial, #TRIALS
+
+trial_loop      call    #prelude
+                jmp     c_vec                                   ' variant: sync, timed sequence, post
+
+trial_done      setq    #RECW - 1
+                wrlong  c_r0, c_bufp                            ' record: c_r0..c_r3
+                add     c_bufp, #RECW * 4
+                djnz    c_trial, #trial_loop
+                add     c_dist, #1
+                cmp     c_dist, c_ndist                 wz
+        if_nz   jmp     #dist_loop
+                wrlong  #0, ptra                                ' MB_CMD := 0 -> done
+                jmp     #wait_cmd
+
+'--- PRIME the FIFO with the OLD region (as EF-074's rig)
+prelude         rdfast  #0, c_oldb                              ' PRIME: blocking RDFAST of old[]
+                waitx   #PRIME_WAIT                             ' the prime must not lean on the promise under test
+                rflong  c_junk                                  ' consume old[0]
+                rflong  c_junk                                  ' consume old[1]: FIFO next = old[2]
+                waitx   #SETTLE_WAIT                            ' FIFO refills and idles
+                ret
+
+'--- K_CLOCK: nothing / waitx c_dly between the GETCTs
+v_clock0        rdlong  c_junk, c_oldb                          ' egg-beater sync (slice 0)
+                waitx   c_phase
+                getct   c_t0
+                getct   c_t1
+                jmp     #post_nodata
+v_clockn        rdlong  c_junk, c_oldb
+                waitx   c_phase
+                getct   c_t0
+                waitx   c_dly
+                getct   c_t1
+                jmp     #post_nodata
+
+'--- K_FIXCLK: the fix's WAITX alone between the GETCTs
+v_fixclk        rdlong  c_junk, c_oldb
+                waitx   c_phase
+                getct   c_t0
+                waitx   #FIX_WAITX                              ' same encoding as the block's waitx #12
+                getct   c_t1
+                jmp     #post_nodata
+
+'--- K_RDLONG: plain hub reads of new[s], new[s+1]
+v_rdlong        rdlong  c_junk, c_oldb
+                waitx   c_phase
+                getct   c_t0
+                rdlong  c_r1, hub_next
+                getct   c_t1
+                rdlong  c_r2, c_new2
+                mov     c_r3, #0
+                jmp     #post_read
+
+'--- K_PRIME: read the primed FIFO with no new RDFAST (stale reference)
+v_prime         rdlong  c_junk, c_oldb
+                waitx   c_phase
+                getct   c_t0
+                rflong  c_r1                            wcz
+                getct   c_t1
+                wrc     c_r3
+                bitz    c_r3, #FLAG_Z_BIT
+                rflong  c_r2
+                jmp     #post_read
+
+'--- K_NWLATE: no-wait RDFAST, generous delay, read
+v_late          rdlong  c_junk, c_oldb
+                waitx   c_phase
+                getct   c_t0
+                rdfast  nowait, hub_next                        ' D[31]=1
+                waitx   #LATE_WAIT
+                rflong  c_r1                            wcz
+                getct   c_t1
+                wrc     c_r3
+                bitz    c_r3, #FLAG_Z_BIT
+                rflong  c_r2
+                jmp     #post_read
+
+'--- P_UNSPACED (positive control, EF-074's E_REBLK): no-wait RDFAST, [gap], BLOCKING RDFAST, read next
+v_unsp0         rdlong  c_junk, c_oldb
+                waitx   c_phase
+                getct   c_t0
+                rdfast  nowait, hub_first                       ' D[31]=1, first address
+                rdfast  #0, hub_next                            ' D[31]=0, gap 2
+                rflong  c_r1                            wcz
+                getct   c_t1
+                wrc     c_r3
+                bitz    c_r3, #FLAG_Z_BIT
+                rflong  c_r2
+                jmp     #post_read
+v_unspn         rdlong  c_junk, c_oldb
+                waitx   c_phase
+                getct   c_t0
+                rdfast  nowait, hub_first                       ' D[31]=1, first address
+                waitx   c_dly
+                rdfast  #0, hub_next                            ' D[31]=0, gap 4 + c_dly
+                rflong  c_r1                            wcz
+                getct   c_t1
+                wrc     c_r3
+                bitz    c_r3, #FLAG_Z_BIT
+                rflong  c_r2
+                jmp     #post_read
+
+'--- F_FIX: the printed drop-in block, timed; nothing else sits between its lines
+v_fix           rdlong  c_junk, c_oldb                          ' egg-beater sync (slice 0)
+                waitx   c_phase
+                getct   c_t0
+' ---- E7 FIX BLOCK: begin (the E7 chapter prints the lines below byte-identical) ----
+        rdfast  nowait, hub_first   ' no-wait RDFAST (D[31] = 1)
+        waitx   #12                 ' E7: >= 16 clocks, RDFAST to RDFAST
+        rdfast  #0, hub_next        ' blocking RDFAST: now it waits
+        rflong  first_long          ' reads hub_next's first long
+' ---- E7 FIX BLOCK: end ----
+                getct   c_t1
+                mov     c_r1, first_long
+                mov     c_r3, #0                                ' the block reads without WCZ: no flags
+                rflong  c_r2                                    ' second long: new[s+1]
+                jmp     #post_read
+
+'--- record assembly
+post_nodata     mov     c_r1, #0
+                mov     c_r2, #0
+                mov     c_r3, #0
+post_read       mov     c_r0, c_t1
+                sub     c_r0, c_t0                              ' elapsed
+                jmp     #trial_done
+
+'--- variant vectors: two per arm, [j = 0, j >= 1], in AR_* order
+vec_tab         long    v_clock0, v_clockn                      ' K_CLOCK
+                long    v_fixclk, v_fixclk                      ' K_FIXCLK
+                long    v_rdlong, v_rdlong                      ' K_RDLONG
+                long    v_prime, v_prime                        ' K_PRIME
+                long    v_late, v_late                          ' K_NWLATE
+                long    v_unsp0, v_unspn                        ' P_UNSPACED
+                long    v_fix, v_fix                            ' F_FIX
+
+'--- cog data.  nowait, hub_first, hub_next and first_long are named in the printed block.
+nowait          long    $8000_0000                              ' RDFAST D: D[31]=1 no-wait, 0 blocks = no wrap
+hub_first       long    0                                       ' first (no-wait) RDFAST address: mid[0]
+hub_next        long    0                                       ' blocking RDFAST address: new[s]
+first_long      long    0                                       ' the block's read
+c_r0            long    0                                       ' record c_r0..c_r3 -- MUST stay contiguous
+c_r1            long    0
+c_r2            long    0
+c_r3            long    0
+c_newb          long    0
+c_oldb          long    0
+c_bufb          long    0
+c_bufp          long    0
+c_arm           long    0
+c_slice         long    0
+c_phase         long    0
+c_ndist         long    0
+c_dist          long    0
+c_dly           long    0
+c_trial         long    0
+c_vidx          long    0
+c_vec           long    0
+c_new2          long    0
+c_t0            long    0
+c_t1            long    0
+c_tmp           long    0
+c_junk          long    0
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

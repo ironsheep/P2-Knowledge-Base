@@ -20,7 +20,8 @@ documented SINC2 constraint is separate; its two remedies held on a part) and on
 | LOG2 | `M/audit/verification-tests/logs/debug_260924-231829.log` (lag test, second run, style-conformed build) |
 | LOG1 | `M/audit/verification-tests/logs-orig/debug_260924-204804.log` (lag test, first run, as-authored build) |
 | RIG | `M/audit/verification-tests/test-so84-goertzel-last-term-lag.spin2` (reader name `e5-goertzel-one-clock-lag-test.spin2`) |
-| FIX | `M/audit/verification-tests/e4-e5-fix-read-sums-test.spin2` (reader name `e4-e5-fix-read-sums-test.spin2`; **not yet run on silicon** at this writing) |
+| FIX | `M/audit/verification-tests/e4-e5-fix-read-sums-test.spin2` (reader name `e4-e5-fix-read-sums-test.spin2`; ran once on silicon 2026-09-26, log FL) |
+| FL | `M/audit/verification-tests/logs/debug_260926-015810.log` (the fix run; full re-derivation and verbatim lines in `e4-sources.md` §"The fix run (FL)") |
 | S2R | `M/audit/verification-tests/test-goertzel-sinc2-iteration-count.spin2` (reader name `e5-goertzel-sinc2-iteration-count-test.spin2`; campaign copy `.../campaigns/2026-09-p2-errata-predictions/tests/`) |
 | S2L1 | `M/audit/verification-tests/logs/debug_260925-214001.log` (SINC2 test, run 1, 21:40, `.bin` 25081 bytes, S2L1:14) |
 | S2L2 | `M/audit/verification-tests/logs/debug_260925-214858.log` (SINC2 test, run 2, 21:48, same size, S2L2:14) |
@@ -41,18 +42,19 @@ S2L2:591 (Q1 verdict) and S2L2:598–601 (Q4 lines), each with the same numbers.
 |---|---|
 | The 30-line `pasm2` block that opens *The fix* | FIX:808–837, byte-identical (between the markers FIX:807 and FIX:838). The same block, byte for byte, opens Erratum E4's *The fix*; see `e4-sources.md` §"The drop-in block" for widths, the ASCII check and the byte-identity command. For this chapter the same awk, run over this file, printed `compared 30 chapter lines with 30 rig lines` and no `DIFF` line |
 | Printed in full here as well as in E4 | a reader who lands on E5 first pastes without turning to E4; creation-guide §4.6 has every *The fix* open with the block |
-| **The run that proved it** | **PENDING** (FIX not yet run; RUN-SHEET.md row 10). Every result slot is a `PENDING-BENCH e45-fix` comment (list at the end) |
+| **The run that proved it** | FL, 2026-09-26, run once, 200 MHz (FL:1, FL:13): 60 of 60 calls S = N × C, cosine and sine; re-derived from FL:24–113 in `e4-sources.md` §"The fix run (FL)"; E5-specific rows in §5a below |
 
 | Chapter text in *The fix* | Source |
 |---|---|
-| guarantee: all N terms, no term left held; helper routine, SINC1 | claim under test, FIX:24–28, FIX:127–128; **stands only on CONFIRMED** (PENDING comment) |
+| guarantee: all N terms, no term left held; helper routine, SINC1 | FIX:24–28, FIX:127–128 (pre-registered outcome), met in FL (§5a) |
+| "On silicon, this block returned exactly N terms ... in all 60 calls ...; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call" | FL:34–113 (S = N×C every line; call-0 lead = C in each record; later B = previous Q) — §5a |
 | same routine as Erratum E4; one call removes both | FIX:24 ("combines both workarounds in one routine") |
 | usage; printed values are the test program's | FIX:809–810, FIX:830–831 |
 | zero bursts: count 4, S[15:12] clear; first delivers the held term; second delivers the last term and leaves a zero held | FIX:812–815, FIX:35–41; mechanism LEDGER:979–983; LOG2:39 (`d2=-19` after a zero burst) |
 | readings idle, no clear (Erratum E4) | FIX:39–41 |
 | cost: two zero bursts of 4 NCO rollovers; `WAITXFI`; 17 instructions, 8 longs | as in `e4-sources.md` (FIX:813, 817/821/823, 812–828, 830–837; SDOC:3500–3501; SDT:2097, 2182) |
 | limits: one burst at a time; `XINIT` issues at once | SDOC:2742 / SDT:1282; SDT:1284 |
-| conditions: cog RAM, `$8000_0000`, one pin, no DAC, N 1 to 1001, first call with a held term | FIX:47–54, 63, 88–92, 189–198, 647 (test design; "runs", PENDING comment) |
+| conditions: cog RAM, `$8000_0000`, one pin, no DAC, N 1 to 1001, first call with a held term | FIX:47–54, 63, 88–92, 189–198, 647; "ran ... once", 200 MHz: FL:1, FL:13 |
 | DAC output on each clock of a DDS/Goertzel command | SDOC:3985 / SDT:1555 |
 
 ### The SINC1-only scope paragraph (after the guarantee)
@@ -178,7 +180,7 @@ in these lines):
 603: [2026-09-25T21:40:05.701] Cog0  VERDICT Q4: CONFIRMED - XZERO kept one window length and an unchanging SINC2 sample at 10.24 us, 100 us and 25 ms measurements (streams 10.5 / 204.8 / 400 ms), where the XCONT twins varied and corrupted
 ```
 
-## 5. The fix's test (*How it was proven*, subsection) — design facts, no results
+## 5. The fix's test (*How it was proven*, subsection) — design facts (results: §5a)
 
 | Chapter text | Source |
 |---|---|
@@ -187,6 +189,36 @@ in these lines):
 | first call starts with the term held; before reading gains exactly C, later calls nothing | FIX:88–89, FIX:99–101 |
 | every call returns N × C, N = 1 to 1001 | FIX:98, FIX:189–198 |
 | (N-1) × C = zero burst did not deliver | FIX:131 |
+
+## 5a. The fix run (FL) — the E5 results paragraph
+
+Re-derived from FL's raw lines (FL:24–113), not from its verdict line; the full derivation
+(controls, CAL, all 12 positive-control rows, all 60 calls, both channels) is in
+`e4-sources.md` §"The fix run (FL)". Verdict re-derived: CONFIRMED.
+
+| Chapter number / statement | Source |
+|---|---|
+| every control passed | FL:24–25 (W), FL:29 (Z, LUT), FL:30/44/58/72/86/100 (PIN); cross-check FL:138 |
+| C = 61 / 23 at P3 low, -61 / -23 at P3 high, every record | FL:31, 45, 59 (X: 64,904 - 61,000 = 3,904 = D64; 68,869 - 64,904 = 3,965 = D65; C = 61; Y 1,472 / 1,495 → 23), FL:73, 87, 101 (negated); cross-check FL:116–121 |
+| lag in all 12 rows | FL:32–33, 46–47, 60–61, 74–75, 88–89, 102–103; cross-check FL:137 |
+| cosine at P3 low: 3,843 (63 × 61), 3,965 (65 × 61), 61, 366 (6 × 61) | FL:32: 72,712 - 68,869; 76,677 - 72,712; 76,738 - 76,677; 77,104 - 76,738 (same differences FL:46, FL:60) |
+| sine: 1,449, 1,495, 23, 138 | FL:33: 27,416 - 25,967; 28,911 - 27,416; 28,934 - 28,911; 29,072 - 28,934 |
+| P3 high: the same values negated | FL:74–75, 88–89, 102–103 (e.g. FL:74: 401,197 - 405,040 = -3,843; 396,805 - 397,171 = -366) |
+| first call found exactly C: 77,165 against 77,104 (P3 low, first record); 396,744 against 396,805 (P3 high, fourth record) | FL:34 `B=77_165`, FL:32 `RD=77_104`; FL:76 `B=396_744`, FL:74 `RD=396_805` |
+| every later before reading = previous own reading | FL:35–43, 49–57, 63–71, 77–85, 91–99, 105–113: each `B=` equals the previous line's `Q=`, X and Y |
+| 60 calls N × C; 61 (N=1) to 61,061 (N=1001) cosine at P3 low; -23 to -23,023 sine at P3 high | FL:34 (`S=61`), FL:43 (`S=61_061`); FL:76 (`S=-23`), FL:85 (`S=-23_023`); all 60 lines FL:34–113 |
+| none returned (N-1) × C | re-derivation; cross-check FL:203 (`(N-1)*C 0`) |
+| run once, 2026-09-26, 200 MHz | FL:1, FL:13 |
+| Status "Yes — 2026-09-26, on a P2 board at 200 MHz, run once; helper routine (SINC1)" | the above; kind per creation-guide §4.6; SINC1: FIX:5, FIX:64 |
+
+Raw lines used here beyond those quoted in `e4-sources.md`, verbatim:
+
+```
+46: [2026-09-26T01:58:10.846] Cog0     NAIVE X: P=186_172 R1=190_015 P2=190_015 R2=193_980 R3=194_041 RD=194_407
+75: [2026-09-26T01:58:10.860] Cog0     NAIVE Y: P=152_720 R1=151_271 P2=151_271 R2=149_776 R3=149_753 RD=149_615
+113: [2026-09-26T01:58:10.879] Cog0     call 9 N=1_001  X: B=122_061 S=-61_061 Q=61_000  Y: B=46_023 S=-23_023 Q=23_000
+137: [2026-09-26T01:58:10.892] Cog0    E4 and E5 reproduced in all 12 rows: the idle GETXACC cleared nothing, the burst read one term short, the held term arrived later
+```
 
 ## 6. Code and the test-program section
 
@@ -200,11 +232,4 @@ in these lines):
 | one sentence: the SINC2 test program checks the documented SINC2 constraint, not this erratum | arbiter ruling item 4; S2R:13–27 (what the rig tests) |
 | Widths / verbatim check | every fence line ≤ 76 and present in a rig; each fence located as one contiguous rig range by the v0.2.0 awk check (FIX:808–837, RIG:694–705, RIG:707–720, FIX:746–757) |
 
-## PENDING-BENCH placeholders (fix run `e45-fix`)
-
-| Chapter location | What fills it |
-|---|---|
-| *The fix*, after the guarantee sentence | Keep only on `VERDICT: CONFIRMED` (60 of 60 calls S = N*C, cosine and sine; lead = C on the 6 first calls, 0 on the other 54); otherwise rewrite per creation-guide §4.6 |
-| *The fix*, **Limits**, "Conditions of the test" | Confirm the stated conditions from the run; "runs" → "ran" |
-| *How it was proven*, *The fix's test*, results comment | E5 positive-control rows (63C, 65C, C, 6C) reproduced in N of 12, one example row; lead tally; S = N*C tally and the (N-1)*C / (N+1)*C counts; example call rows; the VERDICT line; date, runs, agreement |
-| *Status*, "Fix proven on silicon" | "Yes — <date>, helper routine" on CONFIRMED |
+No `PENDING-BENCH` placeholder remains in the chapter; each was filled from FL (§5a).

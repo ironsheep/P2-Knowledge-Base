@@ -3,8 +3,9 @@
 Verification sidecar for `opus-master/e7-rdfast-blocking-after-no-wait.md` (CH below). Every
 number, quotation and code excerpt in the chapter maps to a file and line below. Internal
 document: ids and paths are allowed here, never in the chapter. Written 2026-09-26 (task «#359»,
-v0.2.0 shape). The fix test has NOT run at the time of writing; every place its result goes
-carries a `PENDING-BENCH e7-fix` comment (list at the end).
+v0.2.0 shape). Updated the same day when the fix test ran (log **LF** below); its numbers were
+re-derived from LF's per-cell lines, not from its verdict lines (section *The fix run*). No
+`PENDING-BENCH` comment remains in the chapter.
 
 ## Abbreviations
 
@@ -15,7 +16,8 @@ carries a `PENDING-BENCH e7-fix` comment (list at the end).
 | **SE** | `engineering/ingestion/SOURCE-ERRATA.md` (E-015 at 492–515) |
 | **LED** | `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md` (EF-073 at 1056–1078, EF-074 at 1080–1096) |
 | **RIG** | `engineering/document-production/manuals/p2-errata/audit/verification-tests/test-rdfast-wrfast-readiness-boundary.spin2` (reader name `e7-rdfast-blocking-after-no-wait-test.spin2`); byte-identical to the tracked campaign copy `engineering/ingestion/external-sources/hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/test-rdfast-wrfast-readiness-boundary.spin2` (`cmp` printed nothing) |
-| **FIX** | `engineering/document-production/manuals/p2-errata/audit/verification-tests/e7-fix-rdfast-spacing-test.spin2` (reader name the same). **Untracked** (`audit/` is git-ignored; `git ls-files --error-unmatch` fails on it). NOT YET RUN |
+| **FIX** | `engineering/document-production/manuals/p2-errata/audit/verification-tests/e7-fix-rdfast-spacing-test.spin2` (reader name the same). **Untracked** (`audit/` is git-ignored; `git ls-files --error-unmatch` fails on it). Ran once, log LF |
+| **LF** | `.../audit/verification-tests/logs/debug_260926-015823.log` (the fix run, 2026-09-26 01:58:23 local, 561 lines of content + trailing blank; LF:14 `[DOWNLOAD TO RAM] File: e7-fix-rdfast-spacing-test.bin \| Size: 19215 bytes \| Modified: 2026-09-26T07:55:16.153Z`, which equals the on-disk `.bin` (19215 bytes, mtime 2026-09-26 07:55:16.153Z by `ls -l --time-style=full-iso`), built after the `.spin2` (mtime 05:07:40Z)) |
 | **L1** | `.../audit/verification-tests/logs/debug_260925-214019.log` (run 1, 2026-09-25 21:40:19; `.bin` 23511 bytes, Modified 2026-09-26T03:39:23.361Z, L1:14) |
 | **L2** | `.../audit/verification-tests/logs/debug_260925-214922.log` (run 2, 2026-09-25 21:49:22; `.bin` 23511 bytes, Modified 2026-09-26T03:48:33.316Z, L2:14) |
 | **WX** | `deliverables/ai/P2/language/pasm2/waitx.yaml` |
@@ -71,12 +73,12 @@ both runs". The two logs differ in length by one byte: the checksum line, "after
 | second no-wait RDFAST, `WAITX #200` before the read, 43,008 of 43,008 | CH:39 | RIG:1430–1442 (`v_ren`: `waitx #LATE_WAIT`, LATE_WAIT = 200 at RIG:226); L1/L2:1484 `E_RENW by class: ok 43_008`; L1/L2:1485 `HOLDS ... all 43_008 trials`; LED:1073–1074 |
 | no-wait read alone: zero, first correct spacing 8 to 15 | CH:25 | L1/L2:1498 `zero 8_704 ... of 43_008`; L1/L2:1499 `ZERO - all 8_704 wrong no-wait reads returned zero`; L1/L2:1509 `per-slice min..max clocks s0 8..15 ... s7 8..15`; LED:1067–1071 |
 | slice 0, starting point 0 example: spacing 7→13, 8→12, 9→11, 10→2 (zero), 11→17, 12→16 | CH:82, CH:118–121 | L1/L2:1353 `E_REBLK s0 p0 cls .......Z.... exc AGFEDCB2HGFE...`: j4 `D`=13, j5 `C`=12, j6 `B`=11, j7 `2`, j8 `H`=17, j9 `G`=16 (codes RIG:801–814); j → clk RIG:562–565 |
-| `D` = `$8000_0000` for the no-wait RDFAST | CH:31, CH:60, CH:139 | RIG:1502 `c_nowait long $8000_0000`; RIG:178–179 (opcode check); FIX:1181 |
+| `D` = `$8000_0000` for the no-wait RDFAST | CH:31, CH:60, CH:143 | RIG:1502 `c_nowait long $8000_0000`; RIG:178–179 (opcode check); FIX:1181 |
 | blocking `RDFAST #0` | CH:31, CH:94 | RIG:1461 `rdfast #0, c_new`; RIG:177 |
 | block count 0, no wrap | CH:60, CH:72 | RIG:1502 comment ("0 blocks = no wrap"); DOC:6674–6675 ("just use 0 for the block count, so that wrapping won't occur") |
 | 200 MHz | CH:74, CH:90, Status | RIG:207; L2:20 `clk 200 MHz` |
 | cog 1 in both runs; `DEBUG_COGS = %0000_0001` | CH:92 | L1/L2:26 `measuring cog 1 running`; RIG:208 |
-| no pins used | CH:90, CH:161 | RIG:34 ("No pins, no jumpers, no instruments") |
+| no pins used | CH:90, CH:165 | RIG:34 ("No pins, no jumpers, no instruments") |
 | regions 32-byte aligned; long k in slice k mod 8 | CH:93 | RIG:61–64, RIG:434–436; DOC:6634–6635 |
 | patterns `$3C3C_00C0`+k, `$A5A5_0080`+k, `$0D0D_0040`+k; stale `$0D0D_0042` | CH:93–94, CH:104 | RIG:70, RIG:234–236; L2:21 |
 | prime: blocking RDFAST, `WAITX #64`, two RFLONGs, `WAITX #64` | CH:94 | RIG:1272–1276; RIG:224–225 (PRIME_WAIT 64, SETTLE_WAIT 64) |
@@ -89,10 +91,10 @@ both runs". The two logs differ in length by one byte: the checksum line, "after
 | 2026-09-25, run twice, same result | CH:123, Status | L1:1, L2:1; LED:1083 ("identical in both runs") |
 | `WAITX #12` = 2 + 12 = 14 clocks; 16 = 2 + 14 | CH:58, CH:62, CH:64 | WX:8, WX:10, WX:76 (`2 + D`); RDFAST no-wait 2 clocks DOC:6708; K_CLOCK control measured WAITX = 2 + D at D = 12 (j13) in the erratum test (L1/L2:1481); FIX:55–56 |
 | erratum test's spacing set by `WAITX` register operand 12 to 40 for 16..44 | CH:62 | RIG:1460 `waitx c_dly`, `c_dly` = j − 1 (RIG:1248–1251); j = 13..41 → 12..40 |
-| 1,024 trials of the fix (8 × 8 × 16) | CH:62 and CH:125 (inside PENDING comments only) | FIX:125–126 ("in every trial of every cell (1,024 trials)") |
-| `INSTR_CLK` 2, `NW_WAITX_OFFSET` 4 | CH:159 | RIG:230, RIG:232 |
-| second `ARM-VERDICT` line reads `DEVIATES`, 1,024 of 43,008 | CH:161 | L1/L2:1485 (first, E_RENW), L1/L2:1487 (second, E_REBLK) |
-| fix test: marker comments, positive control, `WAITX #12` = 14 control, `VERDICT E7 FIX:` | CH:163 | FIX:33–43, FIX:105–108 (K_FIXCLK "elapsed 16 = 2 + (2 + 12)"), FIX:115–122, FIX:137–145 (INCONCLUSIVE if the positive control does not reproduce), FIX:1151/1156 markers, FIX:995–1006 verdict lines |
+| 1,024 trials of the fix (8 × 8 × 16) | CH:62, CH:129 | FIX:125–126 ("in every trial of every cell (1,024 trials)"); LF:484–547 (64 `F_FIX` lines × `ok 16/16`) |
+| `INSTR_CLK` 2, `NW_WAITX_OFFSET` 4 | CH:163 | RIG:230, RIG:232 |
+| second `ARM-VERDICT` line reads `DEVIATES`, 1,024 of 43,008 | CH:165 | L1/L2:1485 (first, E_RENW), L1/L2:1487 (second, E_REBLK) |
+| fix test: marker comments, positive control, `WAITX #12` = 14 control, `VERDICT E7 FIX:` | CH:167 | FIX:33–43, FIX:105–108 (K_FIXCLK "elapsed 16 = 2 + (2 + 12)"), FIX:115–122, FIX:137–145 (INCONCLUSIVE if the positive control does not reproduce), FIX:1151/1156 markers, FIX:995–1006 verdict lines |
 
 ## The drop-in block (The fix)
 
@@ -101,7 +103,7 @@ both runs". The two logs differ in length by one byte: the checksum line, "after
 | Chapter | CH:51–56, the `pasm2` fence opening *The fix* (four lines) |
 | Source | FIX:1152–1155, between the markers FIX:1151 (`' ---- E7 FIX BLOCK: begin ...`) and FIX:1156 (`' ---- E7 FIX BLOCK: end ----`). Byte-identical: widths 64, 72, 67, 65 on both sides; no tab characters in FIX (`grep -c -P "\t"` = 0) |
 | Registers | FIX:1181–1184: `nowait long $8000_0000`, `hub_first` (mid[0]), `hub_next` (new[s]), `first_long` |
-| The run that proved it | **NOT YET RUN.** The fix test (FIX) is being run by Stephen. Its result goes at the two PENDING-BENCH e7-fix comments in CH (CH:62 and CH:125) and the Status cell (CH:173). The guarantee sentence (CH:58) rests, until then, on the erratum test's measured basis: every spacing 16..44 correct in all 64 cells × 16 trials (L1/L2:1353–1479 `cls` strings; L1/L2:1487), where the spacing was set by `waitx c_dly` with a register, not `#12` (stated in CH:62) |
+| The run that proved it | LF (2026-09-26, run once): the block's lines FIX:1152–1155 ran as the `F_FIX` arm (FIX:1147–1161, `v_fix`), LF:483–547; 1,024 of 1,024 trials correct, first and second read. Details in *The fix run* below. Reported in CH:62, CH:125–129, CH:177. The erratum test's own basis (every spacing 16..44 correct in all 64 cells × 16 trials, L1/L2:1353–1479; spacing set there by `waitx c_dly`, a register) is kept in CH:62 alongside |
 | Kind | rule at each use (CH:58); FIX:42–43 ("Guarantee the chapter prints: at least 16 clocks from the no-wait RDFAST to the blocking RDFAST") |
 
 ## Code excerpts (verbatim, contiguous)
@@ -109,10 +111,10 @@ both runs". The two logs differ in length by one byte: the checksum line, "after
 | Chapter excerpt | Source lines | Max width |
 |---|---|---|
 | Drop-in block | FIX:1152–1155 | 72 |
-| `v_rebn rdlong c_junk, c_oldb` / `waitx c_phase` / `getct c_t0` (CH:134–136) | RIG:1456–1458 | 38 |
-| `rflong c_r1 wcz` ... `jmp #post_read` (CH:142–147) | RIG:1462–1467 | 59 |
-| `if distIdx == 0` ... `NW_WAITX_OFFSET + distIdx - 1` (CH:153–156) | RIG:562–565 | 45 |
-| inline, not a fence: `rdfast c_nowait, c_midb`, `waitx c_dly`, `rdfast #0, c_new` (CH:139) | RIG:1459–1461, instruction fields only; the lines are 88, 29 and 88 columns with their comments, so they cannot be fenced within K = 76 and are named inline, not excerpted | n/a |
+| `v_rebn rdlong c_junk, c_oldb` / `waitx c_phase` / `getct c_t0` (CH:138–140) | RIG:1456–1458 | 38 |
+| `rflong c_r1 wcz` ... `jmp #post_read` (CH:146–151) | RIG:1462–1467 | 59 |
+| `if distIdx == 0` ... `NW_WAITX_OFFSET + distIdx - 1` (CH:157–160) | RIG:562–565 | 45 |
+| inline, not a fence: `rdfast c_nowait, c_midb`, `waitx c_dly`, `rdfast #0, c_new` (CH:143) | RIG:1459–1461, instruction fields only; the lines are 88, 29 and 88 columns with their comments, so they cannot be fenced within K = 76 and are named inline, not excerpted | n/a |
 
 Byte-identity checked by printing both sides:
 `awk '/^```/ { inb = !inb; print NR "----"; next } inb { printf "%d|%d|%s|\n", NR, length($0), $0 }' <CH>`
@@ -148,7 +150,7 @@ only what the logs show, and says what is not known:
 - LED:1093–1094 workaround "more than 15 clocks": the chapter prints the fix block (16 clocks) and
   the 16..44 basis.
 - LED:1091 "pending the chapter's own reproducer": the erratum test is the reproducer for the
-  defect (two runs); the fix test (which also reproduces it as a positive control) is pending.
+  defect (two runs); the fix test also reproduced it, as its positive control, in its one run (LF).
 - The chip revision is not stated (brief); the front matter states it once.
 - Scope qualifiers carried from the task and LED:1094–1095: `WRFAST` twin not tested; first RDFAST
   blocking not tested as a fix; instructions between the two RDFASTs other than `WAITX` (in
@@ -157,10 +159,39 @@ only what the logs show, and says what is not known:
   count 0 (RIG:1502); spacings above 44 not tested (RIG:213); cog execution, one measuring cog,
   200 MHz (CH:71–74).
 
-## PENDING-BENCH placeholders (fill from the fix test's logs, `logs-fixes/`)
+## The fix run (LF), re-derived from the per-cell lines
 
-| CH line | Placeholder | What fills it |
+The verdict was re-derived from LF's per-cell lines before any summary line was read. The
+summary lines (LF:549–558) agree with the per-cell derivation; they are cited only as agreement.
+The three `PENDING-BENCH e7-fix` comments (CH:62, CH:125, CH:173 of the first draft) were
+replaced by the text now at CH:62, CH:125–129 and CH:177.
+
+**Where the fix test prints a per-cell detail line.** FIX:730: for a swept arm, a detail line is
+printed for a spacing when `rowGood < TRIALS or rowV2Bad > 0`, i.e. when any first read OR any
+second read at that spacing was wrong. So a cell with one detail line has every other spacing
+correct in all 16 trials, first and second read.
+
+| Chapter claim | Where | Raw LF lines (verbatim excerpt) |
 |---|---|---|
-| CH:62 | `<!-- PENDING-BENCH e7-fix: the printed block's own run; ... -->` | date and runs; `first_long` correct in N of 1,024 trials and the next long correct; the blocking RDFAST's clocks inside the block (F_FIX exc range); positive control reproduced in 64 of 64 cells |
-| CH:125 | `<!-- PENDING-BENCH e7-fix: the fix test's run; ... -->` | the **The fix.** paragraph of *How it was proven*: date, runs; controls passed incl. K_FIXCLK (`WAITX #12` = 14); `POSITIVE CONTROL P_UNSPACED: REPRODUCED`; `SPACED GAPS` line; `VERDICT E7 FIX:` line values |
-| CH:173 | `<!-- PENDING-BENCH e7-fix -->` (Status, "Fix proven on silicon") | "Yes — <date>; a rule at each use: at least 16 clocks from the no-wait `RDFAST` to the blocking one", or "No" if the run refutes it |
+| ran 2026-09-26, once; 200 MHz | CH:62, CH:125, CH:177 | LF:1 `=== Debug Logger Session Started at 2026-09-26T01:58:23.581 ===`; LF:20 `... (pnut-ts v1.55.8, clk 200 MHz, 16 trials per cell, 8 slices x 8 phases) ===`; one log for this program in `logs/` |
+| the `.bin` that ran is the rig on disk | (sidecar only) | LF:14 `File: e7-fix-rdfast-spacing-test.bin \| Size: 19215 bytes \| Modified: 2026-09-26T07:55:16.153Z` = on-disk `.bin` size and mtime |
+| same regions, loading, 64 alignments | CH:125 | LF:22 `patterns: new[k]=$A5A5_0080+k  old[k]=$0D0D_0040+k  mid[k]=$3C3C_00C0+k  stale reference old[2]=$0D0D_0042; hub_first=mid[0], hub_next=new[s]`; FIX:77–84 (trial = the erratum test's); LF:20 `8 slices x 8 phases` |
+| control: GETCT pair 2, WAITX 2+D at every swept delay | CH:127 ("the four above") | LF:29–92, 64 lines, every one `cls .......................................... exc ..........................................` (42 `.` each: elapsed = expected at every j, every trial) |
+| control: `WAITX #12` between two GETCTs = 16 clocks, every trial | CH:127 | LF:94–157, 64 lines, every one `ok 16/16 OK el 16..16 expected 16` (e.g. LF:94 `K_FIXCLK s0 p0: ok 16/16 OK el 16..16 expected 16`); header LF:93 `MUST: elapsed 16 = GETCT 2 + WAITX 2+12` |
+| control: RDLONG pattern | CH:127 | LF:159–222, 64 lines `ok 16/16 OK v2bad 0`, v1/v2 = new[s], new[s+1] (e.g. LF:159 `v1 $A5A5_0080 v2 $A5A5_0081`) |
+| control: primed FIFO returns `$0D0D_0042` then the next long | CH:127 | LF:224–287, 64 lines `ok 16/16 STALE v2bad 0 el 4..4 exc 0..0 v1 $0D0D_0042 v2 $0D0D_0043 cz 0` |
+| control: no-wait RDFAST + `WAITX #200` + RFLONG | CH:127 | LF:289–352, 64 lines `ok 16/16 OK v2bad 0 el 208..208 exc 0..0`, v1/v2 = new[s], new[s+1] |
+| every control correct in every trial | CH:127 | the four blocks above, 320 lines; LF:549 `RIG OK: K_CLOCK, K_FIXCLK, K_RDLONG, K_PRIME, K_NWLATE all correct in every trial` (agreement); no `RIG FAIL` / `NO VERDICT` line in LF |
+| positive control: exactly one failing spacing per alignment | CH:128 | LF:356–482, the 64 `P_UNSPACED ... cls` lines (even lines): each has exactly one `Z`, all other 41 characters `.`; exactly one detail line per cell (LF:355–481 odd lines), so no other spacing had a wrong first or second read (FIX:730) |
+| at the same spacings as in the erratum test (table above) | CH:128 | detail lines give p0 `j7 gap 10`, p1 `j6 gap 9`, p2 `j5 gap 8`, p3 `j12 gap 15`, p4 `j11 gap 14`, p5 `j10 gap 13`, p6 `j9 gap 12`, p7 `j8 gap 11`, for every slice (e.g. LF:355 `P_UNSPACED s0 p0 j7 gap 10`, LF:361 `s0 p3 j12 gap 15`, LF:481 `s7 p7 j8 gap 11`); identical to L1/L2:1352–1478. Each of 8..15 in 8 cells (LF:553 `8 clk 8, 9 clk 8, ... 15 clk 8`, agreement) |
+| all 16 trials `$0000_0000`, blocking RDFAST 2 clocks | CH:128 | every P_UNSPACED detail line `ok 0 flg 0 stale 0 old 0 mid 0 nsh 0 zero 16 oth 0 v2bad 0 el X..X base X-2 v1 $0000_0000` (e.g. LF:355 `el 16..16 base 14`); every `exc` string has a single `2` at the `Z` position, all else `A`..`H` |
+| 1,024 of 43,008 reads wrong | CH:128 | 64 cells × 16 (above); LF:552 `P_UNSPACED by class: ok 41_984 flg 0 stale 0 old 0 mid 0 nsh 0 zero 1_024 oth 0 of 43_008` (agreement) |
+| spacings 16..44: first read and the long after it correct in all 29,696 trials | CH:128 | every `cls` string is `.` at j13..j41 (29 spacings) and no detail line exists there (FIX:730 covers the second read): 64 × 29 × 16 = 29,696; LF:555 `first read correct in 29_696 of 29_696 trials; second read wrong after a right first read in 0` (agreement) |
+| the printed block: first long, then the long after it, 1,024 of 1,024 | CH:62, CH:129 | LF:484–547, 64 `F_FIX` lines, every one `ok 16/16 OK v2bad 0`, `v1` = new[s] and `v2` = new[s+1] (e.g. LF:484 `F_FIX s0 p0: ok 16/16 OK v2bad 0 el 32..32 exc 12..12 v1 $A5A5_0080 v2 $A5A5_0081 cz 0`; LF:547 `F_FIX s7 p7: ... v1 $A5A5_0087 v2 $A5A5_0088`); LF:556 `ok 1_024 ... of 1_024 (oth includes a right first read with a wrong second: 0)` (agreement) |
+| "with nothing else between its lines" | CH:129 | FIX:1147 (`'--- F_FIX: the printed drop-in block, timed; nothing else sits between its lines`), FIX:1150–1157 |
+| blocking RDFAST in the block waited 10 to 17 clocks | CH:62, CH:129 | the 64 `F_FIX` lines' `exc` values span `exc 10..10` (e.g. LF:486) to `exc 17..17` (e.g. LF:487), each cell a single value; exc = the blocking RDFAST's own clocks (LF:26, FIX:99–100); LF:556 `blocking RDFAST took 10..17 clk` (agreement) |
+| 8 different times over the 8 starting points in every slice | CH:129 | e.g. slice 0, LF:484–491: exc 12, 11, 10, 17, 16, 15, 14, 13; every slice shows all of 10..17 once (LF:484–547); LF:551 `PHASE CHECK ... s0 8 s1 8 ... s7 8` (agreement) |
+| verdict (not used as evidence) | — | LF:554 `POSITIVE CONTROL P_UNSPACED: REPRODUCED ...`; LF:558 `VERDICT E7 FIX: CONFIRMED - the printed block (waitx #12, gap 16 clk) read new[s] then new[s+1] in all 1_024 trials ...` |
+
+Not in LF and so not claimed: a second run of the fix test; any `F_FIX` C/Z (the block reads
+without `WCZ`; FIX:1159 records `cz 0`); the board's identity (the chapter says "a P2 board").
