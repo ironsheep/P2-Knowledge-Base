@@ -141,18 +141,24 @@ per alignment within 8..15 clocks; correct from 16 clocks on.
 to P2 Anti-Patterns), and a `silicon_errata` entry for (4). Cite EF-073/EF-074; note SOURCE-ERRATA
 E-015 (Chip's unexplained "Yes") as plausibly (4). → P2 Errata **E7**.
 
-### F-473 — `getxacc.yaml`'s `sinc2_constraint` can now state its mechanism: it is the one-clock carry (EF-070) at SINC2 scale — `CONFIRMED`
+### F-473 — `getxacc.yaml`'s `sinc2_constraint` can now state its mechanism: SINC2's running first stage read across windows of unequal length (NOT the one-clock carry — corrected 2026-09-26) — `CONFIRMED`
 
 **Where:** `language/pasm2/getxacc.yaml` `sinc2_constraint` (F-469 held the rest of this entry "until
 VO-J-013 runs" — it has run).
 **What silicon does (EF-072, run twice):** Chip's SINC2 corruption reproduces exactly (odd-length
 windows corrupt that sample and the next, then correct; SINC1 off by one term at most; XZERO clean;
-one clock of read jitter → 75 % of samples off by ≥ 1,000 terms), and the one-clock carry model
-predicts every sample, clean and corrupted, value for value.
-**Correction:** apply F-469's citation fix, then state the mechanism (the term held on a window's last
-clock — the whole first-stage integral in SINC2 — is added on the next window's first clock), keep
-Chip's workarounds (power-of-two count, or XZERO), cite EF-072, and cross-reference F-464's lag entry.
-Not a separate erratum: P2 Errata **E5** covers it.
+one clock of read jitter → 75 % of samples off by ≥ 1,000 terms), and the accumulator model predicts
+every sample, clean and corrupted, value for value.
+**Correction:** apply F-469's citation fix, then state the mechanism: in SINC2 the first stage is a
+running integral that `GETXACC` does not clear, so a window one clock longer or shorter than its
+neighbours moves one first-stage value between two adjacent samples (the current and the next), then
+self-corrects. Keep Chip's workarounds (power-of-two count, or XZERO) and cite EF-072. **Do not**
+attribute it to the one-clock lag (F-464/EF-070): the rig's model shows the lag's share is not
+separable (it shifts every first-stage value by one term, which the fit absorbs), and the same pairs
+follow without it.
+**Classification (corrected 2026-09-26):** documented behaviour — the P2 Documentation's *NOTE ABOUT
+GOERTZEL SINC2 MODE (2024.12.16)* states it — so not an erratum and **not part of P2 Errata E5**
+(the earlier text here said E5 covered it). E5 mentions it only as a scope note on its SINC1 fix.
 
 ## Two KB statements contradicted by our own sources, found while building the SINC2 test (2026-09-25, VO-J-013) — F-469, F-470
 

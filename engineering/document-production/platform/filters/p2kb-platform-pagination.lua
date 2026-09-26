@@ -37,6 +37,7 @@ end
 -- Helper: Check if title represents a chapter-level heading
 local function is_chapter_heading(title)
   return title:match("^Chapter") or
+         title:match("^Erratum%s+E%d") or
          title:match("^Appendix") or
          title:match("^Instructions:") or
          title:match("^Assembler Directives") or
@@ -81,11 +82,17 @@ function Header(header)
       -- figure numbering is correct (Figure 7.1, 11.2, D.1, ...). Pandoc emits
       -- \chapter* (unnumbered), which does not step the counter, so figures would
       -- otherwise all read 0.x. Also reset the figure counter at each chapter.
+      -- An errata manual numbers its chapters by erratum ("Erratum E3: ..."), so
+      -- its figures read E3.1, E3.2, ... in step with the heading.
       local cnum = title:match("^Chapter%s+(%d+)")
+      local enum = title:match("^Erratum%s+E(%d+)")
       local anum = title:match("^Appendix%s+([A-Z])")
       if cnum then
         table.insert(blocks, pandoc.RawBlock('latex',
           '\\setcounter{chapter}{' .. cnum .. '}\\setcounter{figure}{0}'))
+      elseif enum then
+        table.insert(blocks, pandoc.RawBlock('latex',
+          '\\renewcommand{\\thechapter}{E\\arabic{chapter}}\\setcounter{chapter}{' .. enum .. '}\\setcounter{figure}{0}'))
       elseif anum then
         local idx = string.byte(anum) - string.byte('A') + 1
         table.insert(blocks, pandoc.RawBlock('latex',

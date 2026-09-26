@@ -28,8 +28,12 @@ restated here or anywhere else in this folder. Three consequences govern authori
   intent and a run on real silicon meet. Published intent (the Silicon Doc) counts as design
   material.
 - **Proven on silicon before it enters.** An item whose bench run has not decided it is not a
-  chapter. (At v0.1.0: `RDFAST`/`WRFAST` readiness and the Goertzel SINC2 iteration count are
-  waiting on their runs and are not in the book.)
+  chapter. (At v0.2.0 the second bench session decided three more items: the DAC-mode ADC
+  enable is E6; a blocking `RDFAST` that follows a still-arming no-wait `RDFAST` is E7; the
+  Goertzel SINC2 iteration-count corruption is documented behaviour (the P2 Documentation's note
+  on Goertzel SINC2 mode), so it is not an erratum; E5 names it only as a scope limit of its
+  SINC1 fix. The no-wait `RDFAST` readiness boundary is class 2 and goes to
+  P2 Anti-Patterns; E7 says it is a different case.)
 
 ## 3. Structure
 
@@ -39,8 +43,11 @@ restated here or anywhere else in this folder. Three consequences govern authori
   document conventions.
 - **Chapter N is erratum EN.** Erratum numbers are **permanent**: a new erratum is appended as
   the next chapter, never inserted, and a number is never reused. Heading form:
-  `# Chapter N: <plain reader title>` (colon, no em-dash; the pagination filter treats an
-  em-dash after the number as a subtitle splitter).
+  `# Erratum EN: <plain reader title> {#ch-eN}` (colon, no em-dash). The platform pagination
+  filter recognises `Erratum EN` as a chapter heading: it starts the page, and sets the chapter
+  counter to N and its label to `EN`, so figures number `EN.1`. The heading text is what the
+  TOC and running heads print, so both read *Erratum EN*. A cross-reference is written
+  *Erratum EN*, never *Chapter N*.
 - **Appendix A: The Test Programs**: every rig in the examples archive, what it proves, and
   how to run it.
 
@@ -53,27 +60,54 @@ Current numbering (decided 2026-09-25):
 | E3 | `e3-getct-stale-upper-long.md` | `GETCT WC` returns a stale upper long in a cog group that missed a wrap |
 | E4 | `e4-getxacc-clear-gating.md` | `GETXACC` clears the Goertzel accumulators only during a Goertzel burst |
 | E5 | `e5-goertzel-one-clock-lag.md` | the Goertzel accumulators trail their term by one active clock |
+| E6 | `e6-dac-mode-adc-enable.md` | in a DAC smart-pin mode, `OUT` does not switch the ADC while `TT` bit 0 is clear |
+| E7 | `e7-rdfast-blocking-after-no-wait.md` | a blocking `RDFAST` issued while a no-wait `RDFAST` is still arming can skip its wait |
 
 ## 4. The chapter, section by section
 
-Every erratum chapter has the same sections, in this order, with these headings:
+Every erratum chapter has the same parts, in this order, with these headings. The reader
+decides from the first screen whether the erratum touches their program and what to change;
+everything below *The fix* is the evidence. Voice by section: `voice-guide.md` §2a.
 
-1. **Opening paragraph** (no heading): the defect in two or three sentences a reader can act on.
-2. `## What the design says`: the written statement the part contradicts, and where it is
-   written. For a vendor-published erratum, the published statement. **Quote Parallax
-   documentation exactly.** Never quote design source code (see §6).
-3. `## What the part does`: the defect, stated precisely: which instructions, in what
+1. **CAUTION box** (no heading), the first thing under the chapter heading, in the platform's
+   existing amber box, unchanged:
+
+   ```
+   ::: caution
+   **Expected:** what the P2 Documentation says happens, in one sentence.
+
+   **Actual:** what the part does instead, in one sentence.
+
+   **Fix:** the change that removes it, in one sentence, naming *The fix*.
+   :::
+   ```
+
+2. **Opening paragraph** (no heading): who is affected and when, in two or three sentences. It
+   follows the box and does not restate it.
+3. `## What the P2 is documented to do`: the written statement the part contradicts, and
+   **whose** it is and where (*the P2 Documentation, section …*). For a vendor-published
+   erratum, the published statement. **Quote Parallax documentation exactly.** Never quote
+   design source code (see §6).
+4. `## What the P2 actually does`: the defect, stated precisely: which instructions, in what
    arrangement, with what result.
-4. `## The symptom`: the defect as it shows up in a program, including what does
+5. `## What your program sees`: the defect as it shows up in a program, including what does
    **not** go wrong (e.g. "the data lands correctly; only the pointer is wrong").
-5. `## The workaround`: the fix, with a short code example, and whether the workaround was
-   itself proven on silicon. If no workaround is known, say so plainly.
-6. `## Why it happens`: the theory of operation, **in our own words** (§6).
-7. `## How it was proven`: the test on real silicon: what it arranges, its controls, what it
-   measured, and the numbers. Stated so a reader could rebuild the test.
-8. `## The test program`: a walkthrough of the rig with short excerpts, and the filename in
-   the examples archive.
-9. `## Status`: the status table (§5).
+6. `## The fix`: **opens with the drop-in code block**, byte-identical to the block a test
+   program ran on silicon, then one sentence of guarantee naming its kind: *one-time startup
+   fix*, *rule at each use*, or *helper routine*. Then its cost and its limits. Only a fix
+   proven on a part is printed as the fix; if none is proven, say so plainly and give the
+   unproven change as a *workaround*, named as unproven.
+7. `## Why it happens`: the theory of operation, **in our own words** (§6).
+8. `## How it was proven on a real P2`: the test on real silicon: what it arranges, its
+   controls, what it measured, and the numbers. Stated so a reader could rebuild the test. The
+   run that proved the fix is reported here too.
+9. `## The test program`: a walkthrough of the rig with short excerpts, and the filename in
+   the examples archive (and the fix's test program, if separate).
+10. `## Status`: the status table (§5).
+
+Section anchors: `{#sec-eN-documented}`, `{#sec-eN-actual}`, `{#sec-eN-sees}`,
+`{#sec-eN-fix}`, `{#sec-eN-why}`, `{#sec-eN-proof}`, `{#sec-eN-program}`,
+`{#sec-eN-status}`.
 
 ## 5. The status table
 
@@ -83,11 +117,11 @@ Every chapter ends with the same two-column table:
 |---|---|
 | Erratum | E*n* |
 | Published by Parallax | Yes, with where (e.g. *P2 Documentation, KNOWN BUGS*) · or No |
-| Found by | Parallax · or a prediction from the clean-room design study, confirmed here |
+| Found by | Parallax · a prediction from the clean-room design study, confirmed here · or found on the bench here |
 | Confirmed on silicon | Yes, with the date and the conditions (board, clock) |
-| Workaround proven on silicon | Yes · No · None known |
+| Fix proven on silicon | Yes, with the date and its kind (one-time startup fix / rule at each use / helper routine) · No · None known |
 | Affects | the instructions and conditions, briefly |
-| Test program | the filename in the examples archive |
+| Test program | the filename(s) in the examples archive: the erratum's, and the fix's if separate |
 
 **No internal identifiers in reader text:** no `EF-NNN`, `VO-*`, `O17`, `SO80`, `F-NNN`,
 brief names or ledger names. The chip revision is stated once, in the front matter, once it
@@ -97,7 +131,7 @@ is confirmed.
 
 | Source | Path | Use |
 |---|---|---|
-| **The bench ledger** (strongest) | `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md` (EF-066..070) | every claim about what the part does, every number |
+| **The bench ledger** (strongest) | `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md` (EF-066..074, and the fix runs' entries) | every claim about what the part does, every number |
 | **Raw logs** | `manuals/p2-errata/audit/verification-tests/logs/` | the numbers, read from the lines themselves |
 | **The rigs** | `manuals/p2-errata/audit/verification-tests/*.spin2`, replicated to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` | walkthrough excerpts, verbatim |
 | **Parallax P2 Documentation** | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` (KNOWN BUGS at 197–227) | *What the design says*; quote exactly |
@@ -123,9 +157,10 @@ Hallucinations happen at the moment of writing. Before a sentence goes into a ch
 - Every **code excerpt** from a rig is a contiguous run of lines copied verbatim, and its
   file and line range are recorded in the sidecar.
 - Every **workaround snippet** not taken verbatim from a rig is compiled inside a harness with
-  `pnut-ts` **1.55.8** (`/home/vscode/.local/pnut/pnut-ts-linux-arm64-015508/pnut_ts/pnut-ts`,
-  add `-d` if it carries `debug()`), and the harness is kept beside the sidecar. (Since
-  2026-09-23 `/usr/local/bin/pnut-ts` is 1.55.8; confirm with `pnut-ts --version`.)
+  `pnut-ts` **1.55.8** (`/usr/local/bin/pnut-ts`; confirm with `pnut-ts --version`; add `-d`
+  if it carries `debug()`), and the harness is kept beside the sidecar. **The fix block is
+  not a harness snippet:** it is byte-identical to the marked block inside the fix's test
+  program, which ran on silicon; the sidecar records both line ranges.
 - Red-flag words (*also provides*, *automatically*, *eliminates*, *synchronizes*, *enables*)
   are either sourced or cut.
 

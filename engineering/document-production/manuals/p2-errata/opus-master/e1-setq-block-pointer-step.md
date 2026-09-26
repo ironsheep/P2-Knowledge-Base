@@ -1,8 +1,16 @@
-# Chapter 1: SETQ Block Transfers Lose Their Pointer Step {#ch-e1}
+# Erratum E1: SETQ Block Transfers Lose Their Pointer Step {#ch-e1}
 
-When an `ALTD` sits between a `SETQ` or `SETQ2` and the block `RDLONG` or `WRLONG` it prepares, and that transfer uses a `PTRx` update expression such as `ptra++`, the whole block still moves, to or from the registers the `ALTD` selects, but `PTRx` changes by the step the expression gives a single long instead of by the size of the block. After `setq #3`, `altd` and `rdlong 0-0, ptra++`, `PTRA` has advanced by 4 bytes, not 16. Parallax lists this defect, for `ALTx`, `AUGS` and `AUGD`, among the known bugs in the P2 Documentation; it was confirmed on silicon here with `ALTD` as the intervening instruction.
+::: caution
+**Expected:** A `SETQ` or `SETQ2` block `RDLONG` or `WRLONG` through `ptra++` moves `PTRA` past the whole block, 4 bytes per long (P2 Documentation, *FAST BLOCK MOVES*).
 
-## What the design says {#sec-e1-design}
+**Actual:** With an `ALTD` between the `SETQ` and the transfer, every long still moves, but `PTRA` moves only 4 bytes, the step `ptra++` gives a single long.
+
+**Fix:** Keep the `SETQ` or `SETQ2` directly before the transfer, with nothing between them; see *The fix*.
+:::
+
+The erratum affects PASM code that places an `ALTD` between a `SETQ` or `SETQ2` and the block transfer it prepares, to redirect the block's first register, and then uses `PTRx` after the transfer: a loop that walks a hub buffer one block at a time, or an address computed from the pointer. Code that reloads the pointer before its next use is not affected. Parallax publishes the defect in the P2 Documentation.
+
+## What the P2 is documented to do {#sec-e1-documented}
 
 A `SETQ` or `SETQ2` placed before `RDLONG`, `WRLONG` or `WMLONG` turns that instruction into a fast block move. The P2 Documentation, in its section *FAST BLOCK MOVES*, states what a `PTRx` expression does in a block move:
 
@@ -16,35 +24,37 @@ The P2 Documentation records the departure from the block rule in its KNOWN BUGS
 
 The example that follows loads 16 longs with `SETQ #16-1`, alters the start register with `ALTD start_reg`, and issues `RDLONG 0,ptra++`. Its comment gives the result: `ptra` is incremented by 4 (1 long), not by 16*4.
 
-## What the part does {#sec-e1-part}
+## What the P2 actually does {#sec-e1-actual}
 
 With an `ALTD` between `SETQ` or `SETQ2` and a block `RDLONG` or `WRLONG` that carries a post-increment `PTRx` expression, one instruction does two things:
 
 - **The transfer completes as written, and the redirect holds.** The number of longs set by `SETQ` or `SETQ2` moves, to or from the registers the `ALTD` selects. The block is read from, or written to, the hub address `PTRx` held before the instruction.
 - **`PTRx` takes the plain expression's step.** The pointer changes by the amount the same expression gives without a `SETQ`: +4 for `ptra++` and `ptrb++`, +12 for `ptra++[3]`. The step does not depend on the block length. An 8-long block moved `PTRA` by +4, the same as a 4-long block.
 
-This held for every form tested: `SETQ` with `RDLONG` into cog registers at 4 and at 8 longs, `SETQ2` with `RDLONG` into lookup RAM, and `SETQ` with `WRLONG` from cog registers, through `PTRA` and through `PTRB`, with `ptra++` and with `ptra++[3]`. The measured values are in *How it was proven*.
+This held for every form tested: `SETQ` with `RDLONG` into cog registers at 4 and at 8 longs, `SETQ2` with `RDLONG` into lookup RAM, and `SETQ` with `WRLONG` from cog registers, through `PTRA` and through `PTRB`, with `ptra++` and with `ptra++[3]`. The measured values are in *How it was proven on a real P2*.
 
 The confirmation is narrower than Parallax's statement. **Only `ALTD` was tested as the intervening instruction; Parallax names `ALTx`, `AUGS` and `AUGD`.** `WMLONG`, `SETQ2` with `WRLONG`, and the decrement and pre-modify forms (`ptra--`, `++ptra`, `--ptra`) were not tested. In the pre-modify forms the expression also sets the hub address the block starts from, so what the part does with that address under this erratum is not established here.
 
 An `ALTD` on its own does not disturb the pointer. A single `RDLONG` with `ptra++`, redirected by `ALTD` and with no `SETQ` before it, moved `PTRA` by +4, as it does without the `ALTD`.
 
-## The symptom {#sec-e1-symptom}
+## What your program sees {#sec-e1-sees}
 
-The data is right and the pointer is not. Every long of the block lands where the `ALTD` sends it, the longs on either side of the block are untouched, and the hub side of the transfer starts at the address `PTRx` held. Only the value left in `PTRx` differs: after a 4-long block through `ptra++`, `PTRA` points 4 bytes past the start of the block instead of 16.
+Your data is right and your pointer is not. Every long of the block lands where the `ALTD` sends it, the longs on either side of the block are untouched, and the hub side of the transfer starts at the address `PTRx` held. Only the value left in `PTRx` differs: after a 4-long block through `ptra++`, `PTRA` points 4 bytes past the start of the block instead of 16.
 
-The effect appears at the next access through that pointer. A loop that walks a hub buffer block by block with `SETQ`, `ALTD` and `RDLONG ..., ptra++` starts each block 4 bytes after the start of the previous one, not after its end: the reads return overlapping data. The same loop built on `WRLONG` writes each block over all but the first long of the block before it. Any address computed from `PTRx` after the transfer carries the same error. A transfer whose pointer is reloaded before the next use is not affected.
+You see the effect at the next access through that pointer. A loop that walks a hub buffer block by block with `SETQ`, `ALTD` and `RDLONG ..., ptra++` starts each block 4 bytes after the start of the previous one, not after its end, so its reads return overlapping data. The same loop built on `WRLONG` writes each block over all but the first long of the block before it. Any address your code computes from `PTRx` after the transfer carries the same error.
 
-## The workaround {#sec-e1-workaround}
-
-**Keep `SETQ` or `SETQ2` immediately before the transfer.** With nothing between them, the pointer takes the full block step. This is the form of every control in the test program, and it is proven on silicon: `PTRA` advanced by +16 for 4 longs and by +32 for 8 longs, `PTRB`, `SETQ2` into lookup RAM and `WRLONG` each advanced by +16 for 4 longs, and `ptra++[3]` advanced by +16 for 4 longs, as the block rule states.
+## The fix {#sec-e1-fix}
 
 ```pasm2
-        setq    #NLONGS - 1         ' block of NLONGS longs
-        rdlong  buf, ptra++         ' PTRA += NLONGS * 4
+                setq    #4 - 1
+                rdlong  dst + 2, ptra++
 ```
 
-The cost is the redirect. Without an `ALTD`, the first register of the block is the one named in the instruction's `D` field. No workaround that keeps the redirect has been tested on silicon yet.
+With the `SETQ` or `SETQ2` as the instruction directly before the transfer, the whole block moves and `PTRx` steps past all of it: a *rule at each use*. In your code, `#4 - 1` is your block length minus one and `dst + 2` is the first register of your block.
+
+These two lines are the test program's control for the 4-long read, and on silicon they advanced `PTRA` by +16 in every round, with all four longs in place. The same adjacent form gave the full block step for an 8-long read (+32), through `PTRB`, for a `WRLONG` from cog registers, for `SETQ2` into lookup RAM, and with `ptra++[3]` (+16 each, for 4 longs); in the last, the block count overrides the index, as the P2 Documentation states.
+
+The cost is the redirect. Without the `ALTD`, the block's first register is the one named in the instruction's `D` field, fixed when the code is assembled. No form that keeps the redirect has been run on silicon, so none is printed here. The adjacent form was run for the six transfers above; the forms named as untested in *What the P2 actually does* were not run in it either.
 
 ## Why it happens {#sec-e1-why}
 
@@ -56,7 +66,7 @@ The pointer update does not use the held form. It asks only whether the instruct
 
 By the same reasoning an `AUGS` or `AUGD` in that position also breaks the adjacency the pointer update looks for. The test program did not exercise them.
 
-## How it was proven {#sec-e1-proof}
+## How it was proven on a real P2 {#sec-e1-proof}
 
 The test runs on a bare P2 board at 200 MHz. The measurement runs in a PASM cog of its own, started with `COGINIT`, because the Spin2 interpreter in cog 0 uses `PTRA` as its stack pointer. The debugger's interrupt is confined to cog 0 (`DEBUG_COGS = %0000_0001`), so it never enters the measuring cog. Cog 0 reads the results from hub RAM and does all checking and printing.
 
@@ -75,7 +85,7 @@ The results, from the second run, in bytes:
 | `setq #3` + `wrlong ..., ptra++` | 4 | +16 | **+4** | 4/4 |
 | `setq2 #3` + `rdlong` (lookup RAM) `..., ptra++` | 4 | +16 | **+4** | 4/4 |
 
-In the `wrlong` row, the four longs that reached hub RAM are the ones in the registers the `ALTD` selected. The single-long references read +4 for `rdlong ..., ptra++`, +4 for the same instruction redirected by `ALTD`, and +12 for `rdlong ..., ptra++[3]`.
+The *Without `ALTD`* column is the fix: each control is the same transfer with the `SETQ` or `SETQ2` directly before it, and the first row's control is the two lines printed in *The fix*. In the `wrlong` row, the four longs that reached hub RAM are the ones in the registers the `ALTD` selected. The single-long references read +4 for `rdlong ..., ptra++`, +4 for the same instruction redirected by `ALTD`, and +12 for `rdlong ..., ptra++[3]`.
 
 Every round of every arm gave the same value. In every arm the trap region was untouched: it held the sentinel after each read arm, and the write arm's trap registers kept their initial values `$7E7E_0000` + *k*. For the first row, round 0 printed `before=$0000_23C8 after=$0000_23D8 delta=16` for the control and `before=$0000_23C8 after=$0000_23CC delta=4` for the hazard arm, with `$A5A0_0004` to `$A5A0_0007` in destination slots 2 to 5 in both.
 
@@ -85,7 +95,7 @@ The test was run twice on 2026-09-24, from two builds of the program: as first w
 
 The test program is `e1-setq-block-pointer-step-test.spin2` in the examples archive. Its measuring cog is one PASM routine that runs the 15 arms in sequence. Each arm has the same frame: `prep_cog` refills the destination region `dst` and the trap region `trp` with the sentinel; the pointer is loaded from `c_rsrc`, the hub address of source long 4; `c_before` and `c_after` capture the pointer around the transfer; and `dump_cog` writes the pointer pair and both regions to a record in hub RAM.
 
-The control for the primary pair, `SETQ` directly before `RDLONG`:
+The control for the primary pair, `SETQ` directly before `RDLONG`, carries the fix in this frame:
 
 ```pasm2
                 call    #prep_cog
@@ -131,6 +141,6 @@ For every arm and round the program prints the pointer before and after, the cha
 | Published by Parallax | Yes, *P2 Documentation*, KNOWN BUGS |
 | Found by | Parallax |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Workaround proven on silicon | Yes, for `SETQ`/`SETQ2` directly before the transfer |
+| Fix proven on silicon | Yes — 2026-09-24, rule at each use: `SETQ`/`SETQ2` directly before the transfer |
 | Affects | a `SETQ`/`SETQ2` block `RDLONG`/`WRLONG`/`WMLONG` with a `PTRx` update expression, when an `ALTx`, `AUGS` or `AUGD` sits between them (confirmed with `ALTD`) |
 | Test program | `e1-setq-block-pointer-step-test.spin2` |

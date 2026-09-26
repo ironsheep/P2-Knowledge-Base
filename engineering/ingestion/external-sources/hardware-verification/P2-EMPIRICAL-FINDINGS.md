@@ -1024,7 +1024,7 @@ read state is 0 in every sample. **Classification: silicon erratum** (a publishe
 contradicted on silicon) → **P2 Errata E6**. *Grounds:* the KB's smart-pin `%TT` coverage needs a
 `silicon_errata` entry (to register). *Source:* `…/tests/test-so9-dac-mode-adc-enable.spin2`.
 
-### EF-072 · Chip Gracey's Goertzel SINC2 corruption is EF-070's one-clock carry, at double-integration scale — `CONFIRMED`
+### EF-072 · Chip Gracey's Goertzel SINC2 corruption reproduces value for value from the accumulator structure (SINC2's running first stage across unequal windows); his two workarounds hold — `CONFIRMED` (heading and classification corrected 2026-09-26: see *Correction* below)
 Chip's 2024-12-16 report (`ingestion/external-inputs/forum-threads/ProblemGoertzelSINC2mode/INGEST.md`):
 in SINC2 mode a non-power-of-two iteration count makes `GETXACC` "off by one double integration",
 corrupting that sample and the next. Measured, and **explained value for value** by EF-070's carry:
@@ -1046,8 +1046,17 @@ window lengths alone, equals **every** sample — all 829 / 834 outliers and eve
 the four decisive arms. Worked pair (NPS-S2, k = 65/66): a 2,047-clock window gives e = −133,121 then
 +131,073, sum −2,048, exactly the model. Controls: LUT readback 0 of 512 differ; CAL C sign flips
 with P3 and C_Y = 3·C_X; the power-of-two loop locked at 2,048 clocks per window, g = 0.
-**Classification:** not a new erratum — **EF-070 (E5) seen in SINC2**, where the stranded term is the
-whole first-stage integral. Chip's workarounds hold: a power-of-two iteration count, or XZERO.
+**Classification:** not a new erratum. Chip's workarounds hold: a power-of-two iteration count, or XZERO.
+**Correction (2026-09-26):** this entry first classified the corruption as "EF-070 (E5) seen in SINC2".
+The rig's own model section (`test-goertzel-sinc2-iteration-count.spin2` header, "What the one-clock lag
+itself contributes cannot be isolated in a continuous stream: it shifts every J by one C, which the fit
+absorbs") does not support that: the same corrupted pairs follow from SINC2's first-stage running
+integral crossing reading windows of unequal length, with or without the lag. And the behaviour is
+**published** — the P2 Documentation's *NOTE ABOUT GOERTZEL SINC2 MODE (2024.12.16)*
+(`silicon-doc-text.txt:1703-1704`) states that a varying iteration count "will corrupt the current and
+next samples". Documented behaviour, confirmed on silicon: **not an erratum, and not part of E5**. P2
+Errata E5 carries it only as a scope note (its SINC1 fix does not cover SINC2). Where it belongs, if
+anywhere beyond the P2 Documentation: P2 Anti-Patterns.
 **Scope note (study reading, untested):** in SINC2 the E5 zero-burst workaround does not flush the
 first stage. *Grounds:* `pasm2/getxacc.yaml` `sinc2_constraint` (F-469 already open on its citation)
 — now also its mechanism, citing this entry. *Source:*
@@ -1085,8 +1094,10 @@ all 16 trials**, and at that gap the blocking `RDFAST` takes **2 clocks** — it
 next `RFLONG` returns **`$0000_0000`** (never the first `RDFAST`'s data, never stale). 1,024 of 43,008
 reads. The failing gap moves with hub phase and falls on each of 8..15 clocks exactly eight times — the
 same 8..15-clock window as EF-073's no-wait arming boundary: the blocking `RDFAST` is fooled when it is
-issued at the moment the earlier no-wait fill begins arriving. One clock earlier it waits 12, 11…;
-one clock later it waits the full 17. Every other gap, 41,984 reads, correct. Gated on the same six
+issued at the moment the earlier no-wait fill begins arriving. On either side of the failing gap it
+waits as usual (in slice 0, start 0: 12, 11… one clock earlier and the full 17 one clock later; the
+value one clock later varies with alignment — slice 1, start 0 waits 10, log line 1369; corrected
+2026-09-26, the earlier wording generalised slice 0). Every other gap, 41,984 reads, correct. Gated on the same six
 controls as EF-073. **Classification: silicon erratum** (the published blocking promise is broken
 on silicon) → **P2 Errata E7**, pending the chapter's own reproducer. This is plausibly the bug Chip
 Gracey confirmed without explaining (SOURCE-ERRATA E-015: "Yes, but I can't explain it well").

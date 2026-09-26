@@ -12,7 +12,8 @@ in the front matter, and used exactly as defined everywhere else.
 
 ## 1. What carries over unchanged
 
-- Reference register: third person, definitive, specific. No "you", no "we", no "let's".
+- Reference register: third person, definitive, specific. No "we", no "let's". "You" only
+  where §2a allows it.
 - No vague hedging; **calibrated qualifiers are required** where the evidence is partial.
 - No marketing, no reassurance that the hardware is correct, no reader-as-foil, no
   self-admiration, no staged reveal.
@@ -33,13 +34,44 @@ strength of the sentence.
 **"Found so far", never "all".** The list is open-ended. No "the complete list of P2 errata",
 no "every silicon bug".
 
-**Credit without blame.** Parallax published E1 and E2 and is credited for it. E3 to E5 were
+**Credit without blame.** Parallax published E1 and E2 and is credited for it. E3 to E6 were
 predicted by the clean-room design study and confirmed here; the study is credited by name.
+E7 was found on the bench here, by a test built to measure something else; it was not
+predicted.
 No sentence implies the vendor hid anything or that documentation was careless.
 
 **The mechanism in our own words.** *Why it happens* describes behaviour at the programmer's
 model: registers, clocks, instructions, what is held and when it is applied. No HDL, no
 signal or module names from the design material, no line references.
+
+**Lead with what the reader must do.** The reader opened this manual to find out whether an
+erratum touches their program and what to change. The CAUTION box at the top of every erratum
+answers that in three lines; everything after it is the evidence for those lines. An opening
+paragraph follows the box, it does not restate it. Name whose statement the part contradicts
+(*the P2 Documentation states*), never an unowned "the design".
+
+**The fix is code proven on a part.** *The fix* opens with the code block a reader pastes,
+byte-identical to the block a test program ran on silicon, then one sentence saying what it
+guarantees and what kind of fix it is: a *one-time startup fix*, a *rule at each use*, or a
+*helper routine*. A fix that has not run on a part is not printed as the fix.
+
+## 2a. The voice boundary: where "you" is allowed
+
+The reader-facing parts of an erratum speak to the reader; the evidence speaks in the reference
+voice. The line is fixed by section:
+
+| Section | Voice |
+|---|---|
+| CAUTION box | "you" allowed |
+| Section headings (*What your program sees*, *The fix*) | "you" / "your" allowed |
+| Opening paragraph | reference voice |
+| *What the P2 is documented to do* · *What the P2 actually does* | reference voice |
+| *What your program sees* | "you" allowed |
+| *The fix* | "you" allowed |
+| *Why it happens* · *How it was proven on a real P2* · *The test program* · *Status* | reference voice, no "you" |
+
+"You" is the programmer at their bench, never a foil: no "you might think", no "as you can
+see", no "you'll be surprised". "We" is never used; the test was run *here*, or *on the bench*.
 
 **Numbers are the evidence.** Give the measured values exactly as the log prints them,
 with their units and conditions. Do not round a measured value, and do not state a measured
@@ -52,14 +84,15 @@ result as a general law beyond the conditions it was measured under.
 | erratum / errata (only for class 1) | bug (in headings), glitch, quirk, gotcha |
 | silicon erratum | hardware bug |
 | the part, the chip, the P2 | the silicon (acceptable in *confirmed on silicon*) |
-| workaround | fix, patch, hack |
+| fix (the reader's code change, proven on a part; heading *The fix*) | patch, hack |
+| workaround (only for a change not proven on a part, named as such) | fix, for an unproven change |
 | test program (reader text) · rig (internal) | harness (reader text) |
 | confirmed on silicon | verified, validated (for a bench result) |
 | the clean-room design study (until its formal name is settled) | the HDL agent, the study agent |
 
 ## 4. Headings
 
-Chapter headings are plain reader titles that name the behaviour, not the internal id:
-`# Chapter 3: GETCT Returns a Stale Upper Long`. Section headings inside a chapter are the
+Chapter headings carry the erratum number and a plain reader title that names the behaviour,
+not the internal id: `# Erratum E3: GETCT Returns a Stale Upper Long`. Section headings inside a chapter are the
 fixed set in `creation-guide.md` §4, in that order, every time. A reader who has read one
 erratum knows where everything is in the next.

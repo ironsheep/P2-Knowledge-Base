@@ -2,16 +2,17 @@
 manual_slug: p2-errata
 doc_class: reference                              # bench-proven errata reference; Assembly Reference voice
 code_line_budget_K: 76                            # inherits platform reference K (creation-guide §Code Line Budget)
-last_published_tag: none                          # never released; v0.1.0 is a community-review draft
+last_published_tag: none                          # never released; v0.1.0 / v0.2.0 are community-review drafts
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
   style_guide: ./voice-guide.md                   # voice-guide adopts the Assembly Reference guide by reference
   classification: ./CLASSIFICATION-GUIDANCE.md    # governs what may enter (class 1 only)
-authoritative_sources: see ./creation-guide.md §6 # EF ledger EF-066..070 (PRIMARY) + raw logs + rigs; P2 Documentation KNOWN BUGS; KB YAML from disk
+authoritative_sources: see ./creation-guide.md §6 # EF ledger EF-066..074 + fix-run entries (PRIMARY) + raw logs + rigs; P2 Documentation; KB YAML from disk
 high_risk_tables:
-  - "Front-matter summary table — erratum number ↔ chapter ↔ title ↔ published-by ↔ workaround; numbers are permanent"
-  - "Each chapter's Status table — published-by / found-by / confirmed / workaround-proven must match the ledger"
+  - "Front-matter summary table — erratum number ↔ title ↔ published-by ↔ fix; numbers are permanent"
+  - "Each chapter's Status table — published-by / found-by / confirmed / fix-proven must match the ledger"
+  - "Each chapter's CAUTION box and The fix — the printed fix block must be byte-identical to the marked block of the test program that ran it"
   - "E1 pointer-delta table (control vs hazard per SETQ form) — transposition-prone"
 high_risk_quant:
   - "E1: control vs hazard PTRx deltas (+16 vs +12, +32 vs +4) — read from the log, never recomputed"
@@ -19,11 +20,12 @@ high_risk_quant:
   - "E4: 50 of 50 idle reads unchanged; 255 = 29 + 226 terms × 61"
   - "E5: d1 = (N−1)·C, d2 = C, carry arm N·C; N = 64, C = −19 → −1,197"
 fragile_areas:
-  - "Classification: class 2 items (RDFAST/WRFAST readiness if blocking mode holds; any documentation gap) must never enter — peer manual only"
+  - "Classification: class 2 items (the no-wait RDFAST readiness boundary; any documentation gap) must never enter — peer manual only. E7 is the BLOCKING RDFAST case and must say it is not the no-wait one"
+  - "SINC2: the iteration-count corruption is DOCUMENTED (P2 Documentation note on Goertzel SINC2 mode) — not an erratum, not part of E5 (EF-072 corrected 2026-09-26); E5 names it only as the scope limit of its SINC1 fix"
   - "No HDL quotation, signal/module names or line refs from the clean-room design material (decision 5)"
   - "No internal ids in reader text (EF/VO/F/brief names); the chip revision (Rev C) stated once, in the front matter"
   - "Scope qualifiers the bench earned: E1 tested ALTD only as the intervening instruction; E3 conditions (four-cog group, wraps missed while no cog of the group ran)"
-  - "KB lag: E3–E5 not yet in the KB YAML (F-462..466); the manual cites silicon, the KB must follow"
+  - "KB lag: E3–E7 not yet in the KB YAML (F-462..466, F-471..473); the manual cites silicon, the KB must follow"
 ---
 
 # P2 Errata — Descriptor
@@ -32,7 +34,7 @@ Thin per-manual overlay read by document-audit (and prepare-/release-/finalize-m
 Everything not listed above is inherited from the central skill body and the guides above.
 
 - **Grounding model:** `reference`, **bench-first**. Every claim about what the part does is
-  verified against the hardware-verification ledger (`P2-EMPIRICAL-FINDINGS.md` EF-066..070)
+  verified against the hardware-verification ledger (`P2-EMPIRICAL-FINDINGS.md` EF-066..074)
   and the raw log lines, then against the P2 Documentation for what the design says. Each
   chapter carries a verification sidecar in `verification/` (tracked; see its README).
 - **Structure (Dimension #10):** front matter (incl. the three classes defined once and the
@@ -40,7 +42,7 @@ Everything not listed above is inherited from the central skill body and the gui
 - **Voice (Dimension #9):** the Assembly Reference voice, with the errata-specific rules in
   `voice-guide.md` §2.
 - **Code (Dimensions #3/#3b):** PASM2/Spin2 fences; walkthrough excerpts verbatim from
-  bench-run rigs; workaround snippets compiled with `pnut-ts` 1.55.8; K=76.
+  bench-run rigs; every printed fix byte-identical to a bench-run block (`pnut-ts` 1.55.8); K=76.
 - **Chip revision:** Rev C (Stephen, 2026-09-26), stated once in the front matter's Sources.
 - **Open before public release:** the study's formal credit name;
   Parallax review of the whole manual; a small standalone reproducer per erratum, bench-run,

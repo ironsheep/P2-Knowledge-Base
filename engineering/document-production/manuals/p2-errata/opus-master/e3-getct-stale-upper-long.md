@@ -1,79 +1,52 @@
-# Chapter 3: GETCT Returns a Stale Upper Long {#ch-e3}
+# Erratum E3: GETCT Returns a Stale Upper Long {#ch-e3}
 
-`GETCT WC` reads the upper long of the 64-bit system counter from a copy kept
-by the reading cog's group of four cogs, and that copy advances at a wrap of the
-lower long only if a cog of the group is running at the wrap. A cog started in a
-group that had no running cog at one or more wraps reads an upper long that is
-behind by one for each wrap missed, while plain `GETCT` returns a current lower
-long. From reset only cog 0 runs, so the first cog a program starts among cogs
-4-7 reads a stale upper long if it starts after the first wrap, 2^32^ clocks
-after reset (21.47 s at 200 MHz).
+::: caution
+**Expected:** `GETCT WC` returns the upper 32 bits of the P2's one 64-bit free-running counter, whichever cog executes it.
 
-## What the design says {#sec-e3-design}
+**Actual:** in a cog of cogs 4-7 started after that group of four cogs has had no running cog at a wrap of the lower long (the first wrap comes 2^32^ clocks after reset), `GETCT WC` returns an upper long that is behind by one for each wrap missed.
 
-The P2 Documentation, in its list of what the hub provides the cogs, describes
-one counter:
+**Fix:** start a keeper cog in cog 7 as the first line of your `main()` and never stop it; see *The fix*.
+:::
+
+This erratum affects a program that takes a 64-bit time with `GETCT WC` in a cog of cogs 4-7 and starts its first cog there more than 2^32^ clocks after reset, 21.47 s at 200 MHz. It affects in the same way a program that stops every cog of 4-7 and starts one there again after a wrap has passed. Plain `GETCT`, which reads the lower long, is not affected.
+
+## What the P2 is documented to do {#sec-e3-documented}
+
+The P2 Documentation (Parallax) describes one counter. Its overview of the chip lists, among what the hub provides the cogs:
 
 > 64-bit free-running counter which increments every clock, cleared on reset
 
-Its list of the improvements made to the chip states how a cog reads the upper
-half of that counter:
+Its list of the improvements made to the chip states how a cog reads the upper half of that counter:
 
 > System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.
 
-and its description of the counter events names the lower half:
+and its section EVENTS names the lower half:
 
 > Event 1 = CT passed CT1 (CT is the lower 32-bits of the free-running 64-bit global counter)
 
-The documentation describes a single counter. It does not qualify the value
-`GETCT WC` returns by cog number, or by which other cogs are running.
+The documentation does not qualify the value `GETCT WC` returns by cog number, or by which other cogs are running. The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
-## What the part does {#sec-e3-part}
+## What the P2 actually does {#sec-e3-actual}
 
-The eight cogs form two groups of four: cogs 0-3 and cogs 4-7. `GETCT` does not
-read the counter itself; each group reads its own copy of the counter's two
-longs, and the two halves of that copy behave differently.
+The eight cogs form two groups of four: cogs 0-3 and cogs 4-7. `GETCT` does not read the counter itself; each group reads its own copy of the counter's two longs, and the two halves of that copy behave differently.
 
-- **The lower long is current.** In every pair the test took, including every
-  pair in which the upper long was stale, the lower long a sampling cog read
-  with plain `GETCT` lay between cog 0's own lower-long reads taken just before
-  and just after it.
-- **The upper long advances at a wrap of the lower long only while at least one
-  cog of the group is running.** A group with no running cog at a wrap keeps its
-  previous upper long.
+- **The lower long is current.** In every pair the test took, including every pair in which the upper long was stale, the lower long a sampling cog read with plain `GETCT` lay between cog 0's own lower-long reads taken just before and just after it.
+- **The upper long advances at a wrap of the lower long only while at least one cog of the group is running.** A group with no running cog at a wrap keeps its previous upper long.
 
-Measured on cog 4, in the cogs 4-7 group, against cog 0 and cog 1 in the cogs
-0-3 group:
+Measured on cog 4, in the cogs 4-7 group, against cog 0 and cog 1 in the cogs 0-3 group:
 
-- A cog started in a group that missed wraps reads an upper long behind cog 0's
-  by the number of wraps missed. Cog 4, first started after its group had
-  missed one wrap, read 1 behind; started again after its group had missed two
-  more, it read 2 behind.
-- Starting a cog does not bring its group's upper long up to date. The reading
-  taken just after the start was already behind, and a reading late in the same
-  2^32^-clock span was behind by the same amount.
-- The first wrap the group runs through restores the correct value in one step.
-  Cog 4, 1 behind, ran through the next wrap and then read the same upper long
-  as cog 0.
-- A group whose only running cog stops is exposed again. Cog 4 was stopped after
-  it had caught up; its group then missed two wraps with no cog running, and cog
-  4, started again, read 2 behind.
+- A cog started in a group that missed wraps reads an upper long behind cog 0's by the number of wraps missed. Cog 4, first started after its group had missed one wrap, read 1 behind; started again after its group had missed two more, it read 2 behind.
+- Starting a cog does not bring its group's upper long up to date. The reading taken just after the start was already behind, and a reading late in the same 2^32^-clock span was behind by the same amount.
+- The first wrap the group runs through restores the correct value in one step. Cog 4, 1 behind, ran through the next wrap and then read the same upper long as cog 0.
+- A group whose only running cog stops is exposed again. Cog 4 was stopped after it had caught up; its group then missed two wraps with no cog running, and cog 4, started again, read 2 behind.
 
-At reset only cog 0 runs, so the cogs 4-7 group has no running cog until the
-program starts one, and its upper long stays at zero through every wrap until
-then. The first wrap comes 2^32^ clocks after reset: 21.47 s at 200 MHz.
+At reset only cog 0 runs, so the cogs 4-7 group has no running cog until the program starts one, and its upper long stays at zero through every wrap until then. The first wrap comes 2^32^ clocks after reset: 21.47 s at 200 MHz.
 
-The defect was confirmed at 200 MHz, for one and for two missed wraps. The test
-sampled cog 1 and cog 4; the other cogs of each group were not sampled
-separately, and the cogs 0-3 group was not tested with every one of its cogs
-stopped.
+The defect was confirmed at 200 MHz, for one and for two missed wraps. The test sampled cog 1 and cog 4; the other cogs of each group were not sampled separately, and the cogs 0-3 group was not tested with every one of its cogs stopped.
 
-## The symptom {#sec-e3-symptom}
+## What your program sees {#sec-e3-sees}
 
-In a cog of a group that missed wraps, `GETCT WC` followed by `GETCT` yields a
-64-bit time that is short by 2^32^ clocks for each wrap missed. In one pair of
-the test, cog 0 read its own counter immediately before and immediately after
-cog 4 read:
+In a cog of a group that missed wraps, `GETCT WC` followed by `GETCT` gives your program a 64-bit time that is short by 2^32^ clocks for each wrap missed. In one pair of the test, cog 0 read its own counter immediately before and immediately after cog 4 read:
 
 | Read by | Upper long (`GETCT WC`) | Lower long (`GETCT`) |
 |---|---|---|
@@ -81,148 +54,97 @@ cog 4 read:
 | cog 4 | `$0000_0000` | `$1020_DB59` |
 | cog 0, after | `$0000_0001` | `$1020_DBA1` |
 
-The three lower longs are in order; the upper long is one behind, a gap of 2^32^
-clocks, which is 21.47 s at 200 MHz.
+The three lower longs are in order; the upper long is one behind, a gap of 2^32^ clocks, which is 21.47 s at 200 MHz.
 
-In a program this shows up in two ways:
+In your program this shows up in two ways:
 
-- A 64-bit time stamp taken in the stale cog and one taken in a cog of an
-  up-to-date group disagree by 2^32^ clocks for each wrap missed.
-- The stale cog's upper long advances by more than one at the next wrap it runs
-  through, as its group's copy catches up. Cog 4 read `$0000_0000_$E013_C141`
-  late in one span and `$0000_0002_$1001_4D69` early in the next: its upper long
-  went from 0 to 2 across one wrap. A 64-bit interval that cog times across that
-  wrap includes 2^32^ clocks that did not pass, one for the wrap its group had
-  missed.
+- A 64-bit time stamp you take in the stale cog and one you take in a cog of an up-to-date group disagree by 2^32^ clocks for each wrap missed.
+- The stale cog's upper long advances by more than one at the next wrap it runs through, as its group's copy catches up. Cog 4 read `$0000_0000_$E013_C141` late in one span and `$0000_0002_$1001_4D69` early in the next: its upper long went from 0 to 2 across one wrap. A 64-bit interval that cog times across that wrap includes 2^32^ clocks that did not pass, one for the wrap its group had missed.
 
 What does not go wrong:
 
-- Plain `GETCT` returned a current lower long in every pair of every reading, in
-  both groups.
-- A cog of a group that had a running cog at every wrap read the same upper long
-  as cog 0: cog 1 in every reading of both runs, and cog 4 throughout the run in
-  which it ran from the start of the program.
-- The stale value is steady. All ten pairs of each reading agreed, early and
-  late in the span.
-- Before the first wrap the correct upper long is zero, and a group's copy
-  starts from zero at reset, so a program that has run for fewer than 2^32^
-  clocks since reset is not exposed.
-- Only `GETCT` was exercised. The counter events, which the documentation
-  defines on the lower long, were not tested.
+- Plain `GETCT` returned a current lower long in every pair of every reading, in both groups.
+- A cog of a group that had a running cog at every wrap read the same upper long as cog 0: cog 1 in every reading of both runs, and cog 4 throughout the run in which it ran from the start of the program.
+- The stale value is steady. All ten pairs of each reading agreed, early and late in the span.
+- Before the first wrap the correct upper long is zero, and a group's copy starts from zero at reset, so a program that has run for fewer than 2^32^ clocks since reset is not exposed.
+- Only `GETCT` was exercised. The counter events, which the documentation defines on the lower long, were not tested.
 
-## The workaround {#sec-e3-workaround}
-
-Keep at least one cog of each group the program uses running from before the
-first wrap, 2^32^ clocks after reset (21.47 s at 200 MHz), and do not let every
-cog of that group stop afterward. Cogs 0-3 are covered for as long as cog 0,
-which runs from reset, keeps running. For cogs 4-7, start the cog there at the
-beginning of the program and do not stop it:
+## The fix {#sec-e3-fix}
 
 ```spin2
-PUB main()
-  ' start the cog that reads the counter in cogs 4-7 at once,
-  ' before 2^32 clocks have run, and never stop it
-  coginit(4, @worker, 0)
+CON ' ---- E3 Fix: Keeper Cog ----
+  KEEPER_COG = 7                ' a cog of 4-7 the program never uses
 
-DAT
+DAT ' ---- E3 Fix: Keeper Code ----
                 org
-worker          getct   hi      wc      ' upper long: current
-                getct   lo              ' lower long
-                ' ... the cog's work ...
-                jmp     #worker
-hi              res     1
-lo              res     1
+keeper          jmp     #keeper         ' loop forever; never stop this cog
+
+PUB main()
+'' Start the keeper before anything else, then run the program.
+''
+
+  coginit(KEEPER_COG, @keeper, 0)       ' first line: before the first wrap
 ```
 
-The workaround is proven on silicon. In the second test program (Run B, under
-*How it was proven*), cog 4 was started at the beginning of the program, while the lower long read `$00DB_96FF`, and kept
-running; its upper long matched cog 0's before the first wrap, early and late
-after it, and after the second wrap.
+Started by the first line of `main()` and never stopped, the keeper keeps a cog of 4-7 running through every wrap of the lower long, so a cog your program starts in 4-7 at any later time reads the same upper long as cog 0: this is a one-time startup fix.
 
-What the proof covers: the cog kept running was the cog that read the counter,
-held in a polling loop. Two variants follow from the same group rule but were
-not tested on silicon: a separate cog held running only to keep its group
-current while other cogs of the group are started and stopped, and reading the
-upper long in a cog of cogs 0-3 and passing it to cogs 4-7 through hub RAM.
+<!-- PENDING-BENCH e3-fix: one sentence that the fix test program proved this block on silicon: the date, "on a P2 board at 200 MHz", the number of runs, and that cogs 4, 5 and 6, started after one and after two wraps with the keeper running, read the same upper long as cog 0 (D = 0) in every reading -->
+
+**Where it goes.** Put the block at the top of your top-level object, ahead of every other `PUB` method: Spin2 runs the first `PUB` method of the top-level object at start, so this `main()` runs first. Your own `main()` body follows the `coginit` line. If your object already has a `main()`, move its body there and remove its old `PUB main()` line. In the test program, the line that follows is the call that runs the rest of the test.
+
+`KEEPER_COG` names the keeper's cog. It must be a cog of 4-7 that nothing else in your program starts or stops.
+
+**The cost.** The fix takes one cog for the life of the program: the keeper holds cog 7, seven cogs remain for your program, and a program that already needs all eight cogs cannot use it. The keeper executes a jump to itself and nothing else.
+
+**What it covers.** The block covers cogs 4-7 only. Cogs 0-3 are kept current by cog 0, which runs your `main()` from reset, for as long as it or another cog of 0-3 keeps running; the cogs 0-3 group was not tested with every one of its cogs stopped.
+
+**The limits of the proof:**
+
+- The fix's test program runs the keeper only as the loop above, a jump to itself. Whether a cog held in a wait instruction such as `WAITX` keeps its group current is not tested, so do not replace the loop with a wait.
+- It uses only cog 7 as the keeper. The cogs of 4-7 that read the counter after a wrap are cogs 4, 5 and 6, each started after one or two wraps and stopped again after its reading.
+- The keeper runs alone in cogs 4-7 through two wraps. The test program then stops it, as a positive control.
+- The test program runs at 200 MHz and is downloaded to RAM with a reset.
+
+Run B, under *How it was proven on a real P2*, is earlier evidence of the rule the fix relies on: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter. The block above keeps a separate cog running while the cogs that read the counter start and stop, which is the arrangement the fix's own test program checks.
 
 ## Why it happens {#sec-e3-why}
 
-The P2 has one 64-bit counter, but a cog does not read it directly. Each group
-of four cogs holds its own copy of the counter's two longs, and `GETCT` reads
-the group's copy: the lower long without `WC`, the upper long with it. The group
-refreshes the two halves of its copy on different schedules.
+The account below is the clean-room design study's reading of the mechanism, stated at the level of the programmer's model. The measurements in the next section match it.
 
-The lower half is refreshed on every clock on which any cog of the group is
-running. If the group has been idle, the first clock on which one of its cogs
-runs brings the lower half up to date, so a newly started cog reads a current
-lower long.
+The P2 has one 64-bit counter, but a cog does not read it directly. Each group of four cogs holds its own copy of the counter's two longs, and `GETCT` reads the group's copy: the lower long without `WC`, the upper long with it. The group refreshes the two halves of its copy on different schedules.
 
-The upper half is refreshed only once in 2^32^ clocks, at the wrap of the lower
-long, and only if a cog of the group is running at that moment. Nothing else
-refreshes it: not a cog start, and not the clocks that pass between wraps. A
-group with no running cog at a wrap keeps its previous upper long. At the next
-wrap it runs through, it takes the counter's upper long as it is then, which is
-why the error closes in a single step rather than shrinking by one.
+The lower half is refreshed on every clock on which any cog of the group is running. If the group has been idle, the first clock on which one of its cogs runs brings the lower half up to date, so a newly started cog reads a current lower long.
 
-The counter and both groups' copies start from zero at reset, and at reset only
-cog 0 runs. The cogs 0-3 group therefore refreshes at every wrap from the start,
-for as long as cog 0 runs; the cogs 4-7 group refreshes at none until a program
-starts a cog there.
+The upper half is refreshed only once in 2^32^ clocks, at the wrap of the lower long, and only if a cog of the group is running at that moment. Nothing else refreshes it: not a cog start, and not the clocks that pass between wraps. A group with no running cog at a wrap keeps its previous upper long. At the next wrap it runs through, it takes the counter's upper long as it is then, which is why the error closes in a single step rather than shrinking by one.
 
-Running here means the state a cog is in between its start and its stop, the
-state `COGCHK` reports. In the design, what a running cog is executing does not
-enter into it; the test kept its cogs in a polling loop and did not try a cog
-held in a wait instruction such as `WAITX`.
+The counter and both groups' copies start from zero at reset, and at reset only cog 0 runs. The cogs 0-3 group therefore refreshes at every wrap from the start, for as long as cog 0 runs; the cogs 4-7 group refreshes at none until a program starts a cog there. A keeper cog in 4-7 that runs from before the first wrap gives that group a running cog at every wrap, so its upper long advances with the counter's, and a cog started there later reads it current.
 
-## How it was proven {#sec-e3-proof}
+Running here means the state a cog is in between its start and its stop, the state `COGCHK` reports. By the study's reading, what a running cog is executing does not enter into it. The tests kept their cogs in a polling loop or, for the keeper, a jump to itself, and did not try a cog held in a wait instruction such as `WAITX`.
 
-Two programs, Run A and Run B, were each downloaded to RAM with a chip reset and
-run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its
-comments and layout conformed to house style and its measuring code unchanged.
-Every D value and every verdict matched between the two builds.
+## How it was proven on a real P2 {#sec-e3-proof}
 
-**Arrangement.** Cog 0 is the reference. Cog 1, in the cogs 0-3 group, and cog 4,
-in the cogs 4-7 group, run the same sampler: on each new request from cog 0 it
-executes `GETCT WC` then `GETCT`, writes both longs to hub RAM, then writes an
-acknowledgment. One **pair** is taken as follows: cog 0 reads its own counter
-(`GETCT WC`, `GETCT`), writes a request, waits for the acknowledgment, reads the
-sampler's two longs, and reads its own counter again. The sampler's reads
-therefore fall between cog 0's two reads.
+Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program tests the fix; it is described after them.
 
-- A pair counts only if cog 0's two upper longs agree and all three lower longs
-  lie between `$1000_0000` and `$F000_0000`, clear of any wrap.
+**Arrangement.** Cog 0 is the reference. Cog 1, in the cogs 0-3 group, and cog 4, in the cogs 4-7 group, run the same sampler: on each new request from cog 0 it executes `GETCT WC` then `GETCT`, writes both longs to hub RAM, then writes an acknowledgment. One **pair** is taken as follows: cog 0 reads its own counter (`GETCT WC`, `GETCT`), writes a request, waits for the acknowledgment, reads the sampler's two longs, and reads its own counter again. The sampler's reads therefore fall between cog 0's two reads.
+
+- A pair counts only if cog 0's two upper longs agree and all three lower longs lie between `$1000_0000` and `$F000_0000`, clear of any wrap.
 - **D** is cog 0's upper long minus the sampler's upper long.
-- Each pair also checks that the sampler's lower long lies strictly between cog
-  0's two lower longs.
+- Each pair also checks that the sampler's lower long lies strictly between cog 0's two lower longs, compared unsigned.
 - A reading is ten counted pairs, and all ten must give the same D.
 
 **Controls.** Any failure stops the run with no verdict.
 
-- Cog 1, running from the start of the program, must give D = 0 in every
-  reading.
-- Cog 0's own upper long must equal the number of wraps of its lower long that
-  cog 0 has watched since reset, checked on every poll.
-- The set of running cogs, polled throughout every wait, must be exactly the
-  cogs the program started; in Run A, no cog of 4-7 may run before cog 4 is
-  started.
-- At start the upper long must read 0 and only cog 0 may be running, which
-  shows the download reset the part.
+- Cog 1, running from the start of the program, must give D = 0 in every reading.
+- Cog 0's own upper long must equal the number of wraps of its lower long that cog 0 has watched since reset, checked on every poll.
+- The set of running cogs, polled throughout every wait, must be exactly the cogs the program started; in Run A, no cog of 4-7 may run before cog 4 is started.
+- At start the upper long must read 0 and only cog 0 may be running, which shows the download reset the part.
 - Every request must be answered within 100 ms.
 
-The expected D of every reading, for the defect present and for it absent, was
-fixed in each program before the run.
+The expected D of every reading, for the defect present and for it absent, was fixed in each program before the run.
 
-**Run A** holds cogs 4-7 idle until cog 0's upper long reads 1, starts cog 4,
-and reads it just after the start and again late in the same span. Cog 4 then
-runs through the next wrap and is read again. Cog 4 is then stopped, its group
-misses two wraps with no cog running, and cog 4 is started again and read just
-after the restart and late in the span. **Run B** starts cog 4 at the beginning
-of the program, beside cog 1, and reads it before the first wrap, early and late
-after it, and after the second wrap.
+**Run A** holds cogs 4-7 idle until cog 0's upper long reads 1, starts cog 4, and reads it just after the start and again late in the same span. Cog 4 then runs through the next wrap and is read again. Cog 4 is then stopped, its group misses two wraps with no cog running, and cog 4 is started again and read just after the restart and late in the span. **Run B** starts cog 4 at the beginning of the program, beside cog 1, and reads it before the first wrap, early and late after it, and after the second wrap.
 
-Wrap *n* below is the wrap after which cog 0's upper long reads *n*. An early
-reading is taken with the lower long past `$1000_0000`, a late one past
-`$E000_0000`.
+Wrap *n* below is the wrap after which cog 0's upper long reads *n*. An early reading is taken with the lower long past `$1000_0000`, a late one past `$E000_0000`.
 
 | Run | Cog 0 upper | Reading | Cogs 4-7 before the reading | Cog 4 D | Cog 1 D |
 |---|---|---|---|---|---|
@@ -237,20 +159,32 @@ reading is taken with the lower long past `$1000_0000`, a late one past
 | B | 1 | late | cog 4 ran through wrap 1 | 0 | 0 |
 | B | 2 | early | cog 4 ran through wrap 2 | 0 | 0 |
 
-In every reading of both runs all ten pairs agreed on D, and the lower-long
-check held in every pair. Each program's verdict line read `CONFIRMED`, in both
-builds.
+In every reading of both runs all ten pairs agreed on D, and the lower-long check held in every pair. Each program's verdict line read `CONFIRMED`, in both builds.
+
+**The fix.** The fix's test program decides the block printed under *The fix*. It carries that block byte for byte, with the same sampler, pair protocol, D and pair rules as Run A and Run B, at 200 MHz, with the debugger confined to cog 0. The keeper starts in cog 7 at the first line of `main()`. Cog 1 samples the cogs 0-3 group from start to end. The program's own cogs of 4-7 are cogs 4, 5 and 6: each is started as a sampler just before one reading and stopped again just after it, so every cog of 4-7 that reads the counter after a wrap was started after one or two wraps through which the keeper ran alone in that group. Every reading of cogs 4-7 is paired with a reading of cog 1.
+
+| Cog 0 upper | Reading | Sampler | Cogs 4-7 before the reading | D written in advance |
+|---|---|---|---|---|
+| 0 | early | cog 4 | the keeper, since the first line of `main()` | 0 (control) |
+| 1 | early | cog 5 | the keeper alone through wrap 1 | 0 with the fix; 1 without |
+| 1 | late | cog 6 | the keeper alone through wrap 1 | 0 with the fix; 1 without |
+| 2 | early | cog 4 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without |
+| 2 | late | cog 5 | the keeper alone through wraps 1 and 2 | 0 with the fix; 1 or 2 without |
+| 3 | early | cog 6 | the keeper stopped after the reading above; no cog running at wrap 3 | 1 (positive control) |
+
+<!-- PENDING-BENCH e3-fix: the measured D of each row of the table above (from each reading's "=> D=" line), as a "Measured D" column, plus the cog 1 D of each paired reading; or state them in one sentence if every value equals the value written in advance -->
+
+The controls of Run A and Run B apply, with these differences. At start the running cogs must be cog 0 and the keeper only. The keeper must be seen running on every poll up to the positive control, and stopped after it. The reading at upper long 0 must give D = 0. The positive control must give D = 1: it shows that the program, on this part and in this run, sees the erratum when the keeper is absent, so a D of 0 with the keeper running cannot come from a test that is blind to it. Cog 6 reads both with the keeper running and, in the positive control, with it stopped: the same cog and the same code, with only the keeper changed.
+
+The verdict was fixed before the run. The fix is confirmed if the four readings taken after a wrap with the keeper running all give D = 0, with all ten pairs of each agreeing and the lower-long check holding in every pair. A reading whose ten pairs agree on a D other than 0, or a failed lower-long check, refutes it. A reading whose pairs disagree, or that gets too few valid pairs, leaves it inconclusive. A control failure gives no verdict.
+
+<!-- PENDING-BENCH e3-fix: the result paragraph: the date, the number of runs (and builds, if more than one), that every control passed (no RIG FAIL line), the positive-control D, and the verdict line as printed (CONFIRMED / REFUTED / INCONCLUSIVE) -->
 
 ## The test program {#sec-e3-program}
 
-The two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and
-`e3-getct-stale-upper-long-runB.spin2` (Run B). They share the sampler, the
-pair protocol and the controls, and differ only in when cog 4 starts and which
-readings are taken.
+The erratum's two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and `e3-getct-stale-upper-long-runB.spin2` (Run B). They share the sampler, the pair protocol and the controls, and differ only in when cog 4 starts and which readings are taken. The fix's test program is `e3-fix-keeper-cog-test.spin2`.
 
-The sampler is started explicitly in cog 1 and in cog 4 (`COGINIT #1` and
-`COGINIT #4`), with its hub mailbox address in `PTRA`. On each new request
-number it reads the counter and writes both longs:
+The sampler is started explicitly in cog 1 and in cog 4 (`COGINIT #1` and `COGINIT #4`), with its hub mailbox address in `PTRA`. On each new request number it reads the counter and writes both longs:
 
 ```pasm2
 sampler         mov     s_last, #0
@@ -264,23 +198,9 @@ s_loop          rdlong  s_req, ptra
                 wrlong  s_lo, ptra[2]
 ```
 
-It then writes the request number back as its acknowledgment and returns to
-`s_loop`. Cog 0's side of a pair, in the method `take_pair`, is inline PASM2 that
-executes `GETCT WC` and `GETCT` before writing the request, and again after
-seeing the acknowledgment and reading the sampler's two longs. From those six
-longs each reading computes D and the lower-long check (`+<` is the unsigned
-less-than):
+It then writes the request number back as its acknowledgment and returns to `s_loop`. Cog 0's side of a pair, in the method `take_pair`, is inline PASM2 that executes `GETCT WC` and `GETCT` before writing the request, and again after seeing the acknowledgment and reading the sampler's two longs. From those six longs each reading computes D and the lower-long check, and every pair is printed.
 
-```spin2
-    dd := rhb - shi
-    br := (rlb +< slo) and (slo +< rla)
-    if not br
-      rbf[slotIdx]++
-```
-
-Run A's defect step: cogs 4-7 stay idle while cog 0 waits for its upper long to
-read 1, with the running-cog set polled throughout the wait; then cog 4 is
-started and read, with cog 1 read beside it:
+Run A's defect step: cogs 4-7 stay idle while cog 0 waits for its upper long to read 1, with the running-cog set polled throughout the wait; then cog 4 is started and read, with cog 1 read beside it:
 
 ```spin2
   ' ---- hazard: group 1 idle across wrap 0->1 --------------------------
@@ -294,11 +214,9 @@ started and read, with cog 1 read beside it:
   reading(R_C1A, string("C1a cog1 hi=1"), @mb1)
 ```
 
-Later in the same file, `cogstop(4)` at upper long 2 and a second `start_cog4`
-at upper long 4 take the two-missed-wrap readings.
+Later in the same file, `cogstop(4)` at upper long 2 and a second `start_cog4` at upper long 4 take the two-missed-wrap readings.
 
-Run B changes the arrangement in one place: both samplers start at the beginning
-of the program.
+Run B changes the arrangement in one place: both samplers start at the beginning of the program.
 
 ```spin2
   ' ---- both samplers from program start: cog 1 (group 0), cog 4 (group 1)
@@ -308,11 +226,22 @@ of the program.
   expect_mask(M_C1C4)
 ```
 
-Each file prints every pair raw, a summary line per reading, and a one-line
-verdict. Both are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and
-downloaded to RAM; the download must reset the part, since the program checks
-that the counter starts from zero. Run A ends about 105 s after reset and Run B
-about 44 s after reset.
+The fix's test program carries the block of *The fix* unchanged, between the comments `BEGIN DROP-IN` and `END DROP-IN`; its `main()` goes on to call the rest of the test. It uses the same sampler instructions and the same pair protocol as Run A and Run B. Every reading of cogs 4-7 goes through the method `arm`, which starts the sampler in the named cog, checks the running-cog set, takes the reading, stops the cog, and checks the set again:
+
+```spin2
+  longfill(@mailboxGroup1, 0, MB_LONGS)
+  coginit(smpCog, @sampler, @mailboxGroup1)
+  waitms(COG_SETTLE_MS)
+  expect_mask(baseMask | (1 << smpCog))
+  reading(slotIdx, name, @mailboxGroup1)
+  cogstop(smpCog)
+  waitms(COG_SETTLE_MS)
+  expect_mask(baseMask)
+```
+
+The readings run in the order of the table under *How it was proven on a real P2*. After the late reading at upper long 2, `cogstop(KEEPER_COG)` stops the keeper, and the positive control is read in cog 6 after wrap 3.
+
+Each file prints every pair raw, a summary line per reading, and a one-line verdict. All three are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and downloaded to RAM; the download must reset the part, since each program checks that the counter starts from zero. Run A ends about 105 s after reset, Run B about 44 s after reset, and the fix's test program about 66 s after reset.
 
 ## Status {#sec-e3-status}
 
@@ -322,6 +251,6 @@ about 44 s after reset.
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
 | Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice |
-| Workaround proven on silicon | Yes |
+| Fix proven on silicon | <!-- PENDING-BENCH e3-fix --> |
 | Affects | `GETCT WC` in a cog of a four-cog group that had no running cog at one or more wraps of the lower long (measured on cogs 4-7); plain `GETCT` is not affected |
-| Test program | `e3-getct-stale-upper-long-runA.spin2`, `e3-getct-stale-upper-long-runB.spin2` |
+| Test program | `e3-getct-stale-upper-long-runA.spin2`, `e3-getct-stale-upper-long-runB.spin2`, `e3-fix-keeper-cog-test.spin2` |

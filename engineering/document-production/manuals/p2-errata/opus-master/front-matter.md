@@ -23,9 +23,9 @@
 \vspace{0.35cm}
 {\large September 2026\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 0.1.0\par}
+{\large\color{blue}Version 0.2.0\par}
 \vspace{0.25cm}
-{\large\bfseries\color{red!70!black} Community Review Draft \textperiodcentered\ Build 2026-09-25\par}
+{\large\bfseries\color{red!70!black} Community Review Draft \textperiodcentered\ Build 2026-09-26\par}
 
 \vspace{0.3cm}
 \begin{tcolorbox}[
@@ -45,10 +45,12 @@
 \item \textbf{E3} \enspace GETCT Returns a Stale Upper Long
 \item \textbf{E4} \enspace GETXACC Clears Only During a Goertzel Burst
 \item \textbf{E5} \enspace The Goertzel Accumulators Trail by One Clock
+\item \textbf{E6} \enspace In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC
+\item \textbf{E7} \enspace A Blocking RDFAST Can Skip Its Wait After a No-Wait RDFAST
 \end{itemize}
 \vspace{0.05cm}
-Each erratum: what the design says, what the part does, the symptom, the workaround,
-why it happens, and how it was proven on a real P2.
+Each erratum opens with what to expect, what happens instead, and the fix: a
+drop-in block of code proven on a real P2.
 }
 \end{tcolorbox}
 \vspace{0.05cm}
@@ -95,8 +97,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 **Parallax Inc.** for the Propeller 2, and for publishing its known silicon defects in the P2 Documentation. Errata E1 and E2 are Parallax's own findings.
 
 **Chip Gracey** for the design of the Propeller 2 and for the detailed silicon documentation that states what the part is meant to do. Every erratum here is measured against that statement.
-
-**The clean-room design study** for predicting errata E3, E4 and E5 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on real parts, independently, for this manual.
+**The clean-room design study** for predicting errata E3, E4, E5 and E6 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on real parts, independently, for this manual. Erratum E7 was not predicted: it was found on the bench, by a test built to measure something else.
 
 ## Sources
 
@@ -106,7 +107,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 ## About This Draft
 
-This is a **community review draft**. Its errata are confirmed on silicon; its wording, its structure and its explanations are open for review. Further behaviours are on the bench now, and any that the tests show to be silicon errata will be added as E6 onward.
+This is a **community review draft**. Its errata are confirmed on silicon, and so is every fix it prints; its wording, its structure and its explanations are open for review. Any further behaviour that a test on a real part shows to be a silicon erratum will be added as E8 onward.
 
 Erratum numbers are **permanent**. A number is never reused or reassigned, so E3 means the same defect in every edition.
 
@@ -124,30 +125,34 @@ Every finding describes something the P2 does when a program runs, and each belo
 
 The list is open-ended. These are the silicon errata **found so far**.
 
-## How Each Chapter Is Built
+## How Each Erratum Is Built
 
-Chapter *N* describes erratum E*N*. Every chapter has the same sections, in the same order:
+Each erratum has a chapter of its own, headed with its number: *Erratum E3* describes E3. It opens with a CAUTION box of three lines: what the P2 Documentation says to expect, what the part does instead, and the fix. The sections that follow are the same in every erratum, in the same order:
 
 | Section | What it gives |
 |---|---|
-| **What the design says** | the written statement the part contradicts, and where it is written |
-| **What the part does** | the defect, stated precisely |
-| **The symptom** | what the defect looks like in a program, and what it does not affect |
-| **The workaround** | how to write around it, with code, and whether the workaround was proven on silicon |
+| **What the P2 is documented to do** | the written statement the part contradicts, whose it is, and where it is written |
+| **What the P2 actually does** | the defect, stated precisely |
+| **What your program sees** | what the defect looks like in a program, and what it does not affect |
+| **The fix** | a drop-in block of code proven on a real P2, what it guarantees, and what it costs |
 | **Why it happens** | the mechanism, at the level of the programmer's model |
-| **How it was proven** | the test on real silicon, its controls, and the measured values |
+| **How it was proven on a real P2** | the test on real silicon, its controls, and the measured values |
 | **The test program** | a walkthrough of the test, and its filename in the examples archive |
 | **Status** | who published it, who found it, what is confirmed, and what it affects |
 
+Every fix is printed exactly as it ran on silicon. Each is one of three kinds: a **one-time startup fix**, added once when the program starts; a **rule at each use**, followed wherever the affected instruction is used; or a **helper routine**, called in place of the affected sequence.
+
 ## Summary
 
-| E | Erratum | Affects | Published by Parallax | Workaround |
+| E | Erratum | Affects | Published by Parallax | The fix |
 |---|---|---|:--:|---|
-| **E1** | SETQ Block Transfers Lose Their Pointer Step | `SETQ`/`SETQ2` block `RDLONG`/`WRLONG`/`WMLONG` with a `PTRx` expression, when an `ALTx`, `AUGS` or `AUGD` sits between them | Yes | Keep `SETQ` adjacent to the transfer |
-| **E2** | An Immediate ALTx Takes a Pending AUGS | an `ALTx` with an immediate `#S` between `AUGS` and its target | Yes | Give the `ALTx` a register `S` |
-| **E3** | GETCT Returns a Stale Upper Long | `GETCT WC` in a cog group that had no cog running when the counter's lower long wrapped | No | Keep a cog of the group running from before the first wrap |
-| **E4** | GETXACC Clears Only During a Goertzel Burst | `GETXACC` while the streamer is idle or in any mode other than Goertzel | No | Read with the streamer idle before and after the burst, and subtract |
-| **E5** | The Goertzel Accumulators Trail by One Clock | every Goertzel burst: its last term is added to the next burst | No | End each burst with a short zero-term burst before reading |
+| **E1** | SETQ Block Transfers Lose Their Pointer Step | `SETQ`/`SETQ2` block `RDLONG`/`WRLONG`/`WMLONG` with a `PTRx` expression, when an `ALTx`, `AUGS` or `AUGD` sits between them | Yes | Keep `SETQ` directly before the transfer (rule at each use) |
+| **E2** | An Immediate ALTx Takes a Pending AUGS | an `ALTx` with an immediate `#S` between `AUGS` and its target | Yes | Give the `ALTx` a register `S` (rule at each use) |
+| **E3** | GETCT Returns a Stale Upper Long | `GETCT WC` in a cog of 4-7 whose group had no cog running when the counter's lower long wrapped | No | Start a keeper cog in cog 7 first (one-time startup fix) |
+| **E4** | GETXACC Clears Only During a Goertzel Burst | `GETXACC` while the streamer is idle or in any mode other than Goertzel | No | The `burst_sums` routine, SINC1 (helper routine) |
+| **E5** | The Goertzel Accumulators Trail by One Clock | every Goertzel burst: its last term is added to the next burst | No | The `burst_sums` routine, SINC1 (helper routine) |
+| **E6** | In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC | a DAC smart-pin mode with `TT` = `%00` whose ADC is switched with `OUT` | No | Set `TT` bit 0 in the `WRPIN` word (rule at each use) |
+| **E7** | A Blocking RDFAST Can Skip Its Wait After a No-Wait RDFAST | a blocking `RDFAST` issued 8 to 15 clocks after a no-wait `RDFAST` | No | At least 16 clocks between them: `WAITX #12` (rule at each use) |
 
 ## Document Conventions
 

@@ -30,6 +30,8 @@ declare -a REQUIRED_FILES=(
     "e3-getct-stale-upper-long.md"
     "e4-getxacc-clear-gating.md"
     "e5-goertzel-one-clock-lag.md"
+    "e6-dac-mode-adc-enable.md"
+    "e7-rdfast-blocking-after-no-wait.md"
     "appendix-a-test-programs.md"
 )
 
