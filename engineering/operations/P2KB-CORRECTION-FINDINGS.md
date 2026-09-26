@@ -131,7 +131,13 @@ variables and `var` variables as instance variables."*
 > `variable-scoping`'s `dat_scope` carries the per-compiled-image nuance; `object-image-dedup`
 > links back. **Source trace:** Spin2 v55 (`sources/spin2-v55/spin2-v55-text.txt:181` "each
 > instance of this object will have its own VAR memory", `:238`); `object-image-dedup.yaml` (DAT
-> shared per compiled image, measured). Verified: `verify-yaml-format.py` clean on the 5 files,
+> shared per compiled image, measured). **Extended the same day** (Stephen: *cog code and registers
+> are loaded into the cog before being run — do not confuse them with normal named registers*):
+> `DAT.yaml` `instance_model` now says a PASM block and its register longs are an IMAGE that
+> `COGINIT` copies into each started cog's RAM, that a cog's register writes never reach the hub
+> DAT or another cog, and that cog registers are distinct from hub variables and from the named
+> special registers; links `pasm2/coginit.yaml` (whose description grounds the copy: "load code
+> from Hub RAM to be executed within Reg/LUT RAM"). Verified: `verify-yaml-format.py` clean on the 5 files,
 > `validate-crossref-keys.py` all resolve. The central guide's §3.6 wording is a nomination for
 > central (skill-evolution candidates), not a KB defect.
 

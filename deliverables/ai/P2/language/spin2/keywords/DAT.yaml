@@ -24,7 +24,12 @@ instance_model: |
   or one worker cog that serves all instances. Choose VAR for state that belongs to one
   instance: its configuration, and a mailbox or buffer shared only with the cog THAT
   instance started — in DAT, a second instance would silently overwrite the first's.
-  A PASM image in DAT is the code each started cog loads; its hub copy is shared.
+  PASM code and its register longs in DAT are an IMAGE, not variables: COGINIT copies it
+  from hub into the started cog's register RAM, and each cog then runs and writes its OWN
+  copy — a cog's writes to its registers never reach the DAT bytes in hub, and never reach
+  another cog. These cog registers (cog-RAM longs) are the cog program's working storage,
+  distinct from both the object's hub variables and the named special registers (PA, PB,
+  PTRA, DIRA...). Share data between cogs, or between a cog and Spin2, through hub memory.
 
 type_propagation: |
   In DAT blocks, the type specifier sets the LINE'S BASE TYPE for all
@@ -65,6 +70,7 @@ related:
   - language/spin2/keywords/VAR.yaml
   - language/spin2/concepts/object-image-dedup.yaml
   - language/fundamentals/variable-scoping-best-practices.yaml
+  - language/pasm2/coginit.yaml
   - language/spin2/keywords/BYTE.yaml
   - language/spin2/keywords/WORD.yaml
   - language/spin2/keywords/LONG.yaml
