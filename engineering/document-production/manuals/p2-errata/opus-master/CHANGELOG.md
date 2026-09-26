@@ -2,7 +2,7 @@
 
 ## v0.2.0 (2026-09-26) — Community Review Draft
 
-**Seven silicon errata, and each opens with what to do about it** — a three-line caution box at the top of every erratum, what any workaround must do, and one drop-in workaround that ran on a real P2.
+**Seven silicon errata, and each opens with what to do about it** — a three-line caution box at the top of every erratum, what any workaround must do, and one drop-in workaround that ran on P2 hardware.
 
 ### Added
 
@@ -16,13 +16,13 @@
 ### Changed
 
 - **Every erratum opens with a caution box**: what the P2 Documentation says to expect, what the part does instead, and what any workaround must do
-- **Section headings name whose statement is contradicted and what a program sees**: *What the P2 is documented to do*, *What the P2 actually does*, *What your program sees*, *A proven workaround*, *How it was proven on a real P2*
+- **Section headings name whose statement is contradicted and what a program sees**: *What the P2 is documented to do*, *What the P2 does*, *What your program sees*, *A proven workaround*, *How it was proven on P2 hardware*
 - **Chapters are headed by erratum number** (*Erratum E3*), in the contents and running heads as well
 - **The summary table** lists all seven errata and, for each, what any workaround must do and the proven way
 
 ## v0.1.0 (2026-09-25) — Community Review Draft
 
-**Five silicon errata, each proven on a real P2** — two that Parallax published, and three new ones predicted from the design and confirmed on the bench.
+**Five silicon errata, each proven on P2 hardware** — two that Parallax published, and three new ones predicted from the design and confirmed on the bench.
 
 ### Added
 

@@ -13,7 +13,7 @@ not restate it.
 **How it meets our pipeline.** The clean-room agent classifies from the design material alone — by
 design it sees neither Parallax's published documentation nor the bench. **The final classification
 is made here**, where all three meet: the study's reading, Parallax's published intent, and a run on
-real silicon (the `EF` ledger). Two consequences, both deliberate:
+P2 hardware (the `EF` ledger). Two consequences, both deliberate:
 
 - **Published intent counts as design material for us.** A statement in the Silicon Doc can supply
   the written intent that class 1 requires (see RDFAST: the Silicon Doc promises that a blocking
@@ -35,7 +35,7 @@ Every finding describes something the P2 does when a program runs. Each one goes
 - The delivered design material states an intent in a comment, a table, or a second place in the logic handling the same thing, and the logic breaks that intent.
 - The test is strict: there has to be a specific written statement inside the design that the implementation contradicts.
 - Errata also include the defects Parallax has published, and any found here that meet the same test.
-- Each erratum gets a test brief to prove the defect on a real part, plus a workaround if the design supports one. If none is known, it says so plainly.
+- Each erratum gets a test brief to prove the defect on P2 hardware, plus a workaround if the design supports one. If none is known, it says so plainly.
 - Example: the designer's own notes describe one accumulator as feeding a second, and say both are valid on the same clock. That can't be true, so every burst's last sample shows up in the next burst.
 
 2. Anti-pattern (undocumented or under-documented behaviour): legal code that does something other than what it appears to do.

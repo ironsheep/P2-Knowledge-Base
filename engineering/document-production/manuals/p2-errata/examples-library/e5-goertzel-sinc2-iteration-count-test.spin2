@@ -1072,7 +1072,7 @@ PRI verdict_q3() | bArmsOk, bJitter, hugePct, outPct, devPct
 
 ' Local Variables:
 ' @local bArmsOk - both jitter arms passed their SPREAD control
-' @local bJitter - the read point actually moved in both jitter arms
+' @local bJitter - the read point moved in both jitter arms
 ' @local hugePct - JIT-S2 samples off by >= 1000 terms, percent
 ' @local outPct - JIT-S2 outliers, percent
 ' @local devPct - JIT-S1 samples off the usual value, percent

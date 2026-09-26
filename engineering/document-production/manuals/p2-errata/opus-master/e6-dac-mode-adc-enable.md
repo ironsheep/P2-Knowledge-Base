@@ -38,7 +38,7 @@ For the two dithered DAC modes, `%00010` and `%00011`, each description carries 
 
 The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
-## What the P2 actually does {#sec-e6-actual}
+## What the P2 does {#sec-e6-actual}
 
 The part was tested in DAC noise mode (`%SSSSS` = `%00001`) with `M[12:10]` = `%101` and `M[9:8]` = `%00`, the setting the Spin2 symbol `P_DAC_990R_3V` names: a 990-ohm DAC of 3.3 V peak, with the ADC feeding the pin's input. The two configuration words differ only in bit 6, which is `TT` bit 0:
 
@@ -57,7 +57,7 @@ The test program read the pin's state through its neighbouring pin, and did not 
 
 **What any workaround must do:** set `TT` bit 0 in the `WRPIN` word of a pin in a DAC smart-pin mode whose ADC you switch with `OUT`.
 
-**One way, proven on a real P2:** the tested DAC noise word with `TT` = `%01`.
+**One way, proven on P2 hardware:** the tested DAC noise word with `TT` = `%01`.
 
 ```spin2
   CFG_DAC_TT01      = $0014_0042        ' DAC_MODE, DAC noise, TT = %01
@@ -93,7 +93,7 @@ The same reading gives the cost of the workaround. Setting `TT` bit 0 raises the
 
 The study left open what the pin's read state carries in the DAC pin state while the ADC is off. The test measured it rather than assuming it; the values are in the next section.
 
-## How it was proven on a real P2 {#sec-e6-proof}
+## How it was proven on P2 hardware {#sec-e6-proof}
 
 **The arrangement.** One P2 board at 200 MHz, with nothing attached to P4 or P5.
 

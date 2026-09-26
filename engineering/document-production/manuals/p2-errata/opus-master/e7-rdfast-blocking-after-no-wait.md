@@ -26,9 +26,9 @@ The no-wait paragraph's requirement describes a different case, and that case is
 
 The KNOWN BUGS section of the P2 Documentation does not list this behaviour. In the reviewers' comments attached to that section of the document, replying to a note that an `RDFAST` corruption bug should be listed there, Chip Gracey wrote: "Yes, but I can't explain it well." The comments do not describe the conditions or the symptom. The defect in this chapter is plausibly that bug; nothing in the comments establishes it.
 
-## What the P2 actually does {#sec-e7-actual}
+## What the P2 does {#sec-e7-actual}
 
-The arrangement tested, in cog execution: a no-wait `RDFAST` (D = `$8000_0000`), then either nothing or a `WAITX`, then a blocking `RDFAST #0` to a different hub address, then `RFLONG` as the very next instruction. The spacing is counted from the start of the no-wait `RDFAST` to the start of the blocking one, the no-wait `RDFAST`'s own 2 clocks included. It was swept over 2 and 4 to 44 clocks (3 cannot be reached, since every instruction takes at least 2 clocks) in each of 64 hub alignments: the 8 hub RAM slices the blocking `RDFAST`'s address can lie in, each at 8 starting points in the hub's rotation.
+The arrangement tested, in cog execution: a no-wait `RDFAST` (D = `$8000_0000`), then either nothing or a `WAITX`, then a blocking `RDFAST #0` to a different hub address, then `RFLONG` as the next instruction. The spacing is counted from the start of the no-wait `RDFAST` to the start of the blocking one, the no-wait `RDFAST`'s own 2 clocks included. It was swept over 2 and 4 to 44 clocks (3 cannot be reached, since every instruction takes at least 2 clocks) in each of 64 hub alignments: the 8 hub RAM slices the blocking `RDFAST`'s address can lie in, each at 8 starting points in the hub's rotation.
 
 - In every alignment, exactly one spacing failed, in all 16 trials. At that spacing the blocking `RDFAST` took 2 clocks, the time of a no-wait `RDFAST`, and the `RFLONG` returned `$0000_0000`: not the first long at the blocking `RDFAST`'s address, not data from the no-wait `RDFAST`'s address, and not the FIFO's earlier contents.
 - The failing spacing was between 8 and 15 clocks, set by the hub alignment. Each spacing from 8 to 15 clocks was the failing one in exactly 8 of the 64 alignments.
@@ -50,7 +50,7 @@ The long after the zero is not the second long either. The test printed the seco
 
 **What any workaround must do:** let at least 16 clocks pass from the start of the no-wait `RDFAST` to the start of the blocking one.
 
-**One way, proven on a real P2:** a `WAITX #RDFAST_SPACING_WAITX` (12) directly after the no-wait `RDFAST`.
+**One way, proven on P2 hardware:** a `WAITX #RDFAST_SPACING_WAITX` (12) directly after the no-wait `RDFAST`.
 
 ```pasm2
 CON
@@ -92,7 +92,7 @@ It also coincides with the arrival of the no-wait `RDFAST`'s data. In the same t
 
 What is not known: why the wait ends at once on that clock, where the zero comes from, and whether a blocking `WRFAST`, or the streamer, is affected in the same way.
 
-## How it was proven on a real P2 {#sec-e7-proof}
+## How it was proven on P2 hardware {#sec-e7-proof}
 
 **Where it came from.** The test was built to measure something else: when the hub FIFO can first be used after `RDFAST` and `WRFAST`, in both modes. The arrangement of this erratum was one of its secondary arrangements, expected to show the blocking promise holding. The defect was not predicted.
 

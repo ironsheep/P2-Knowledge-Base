@@ -19,7 +19,7 @@
 \vspace{0.35cm}
 {\fontsize{36}{42}\selectfont\bfseries P2 Errata\par}
 \vspace{0.3cm}
-{\Large\itshape Silicon Defects of the Propeller 2 Found So Far, Proven on Real Parts\par}
+{\Large\itshape Silicon Defects of the Propeller 2 Found So Far, Proven on P2 Hardware\par}
 \vspace{0.35cm}
 {\large September 2026\par}
 \vspace{0.2cm}
@@ -50,7 +50,7 @@
 \end{itemize}
 \vspace{0.05cm}
 Each erratum opens with what to expect, what happens instead, and what any
-workaround must do, then gives one workaround proven on a real P2.
+workaround must do, then gives one workaround proven on P2 hardware.
 }
 \end{tcolorbox}
 \vspace{0.05cm}
@@ -97,17 +97,17 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 **Parallax Inc.** for the Propeller 2, and for publishing its known silicon defects in the P2 Documentation. Errata E1 and E2 are Parallax's own findings.
 
 **Chip Gracey** for the design of the Propeller 2 and for the detailed silicon documentation that states what the part is meant to do. Every erratum here is measured against that statement.
-**The clean-room design study** for predicting errata E3, E4, E5 and E6 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on real parts, independently, for this manual. Erratum E7 was not predicted: it was found on the bench, by a test built to measure something else.
+**The clean-room design study** for predicting errata E3, E4, E5 and E6 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on P2 hardware, independently, for this manual. Erratum E7 was not predicted: it was found on the bench, by a test built to measure something else.
 
 ## Sources
 
 - **Parallax Propeller 2 Documentation v35 (Rev B/C)** (Chip Gracey, Parallax Inc.): what the design says, including its KNOWN BUGS section.
-- **Tests on real P2 parts** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
+- **Tests on P2 hardware** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
 - **P2 Knowledge Base YAML** (Iron Sheep Productions / P2 Knowledge Base Project): instruction semantics and encodings.
 
 ## About This Draft
 
-This is a **community review draft**. Its errata are confirmed on silicon, and so is every workaround it prints; its wording, its structure and its explanations are open for review. Any further behaviour that a test on a real part shows to be a silicon erratum will be added as E8 onward.
+This is a **community review draft**. Its errata are confirmed on silicon, and so is every workaround it prints; its wording, its structure and its explanations are open for review. Any further behaviour that a test on P2 hardware shows to be a silicon erratum will be added as E8 onward.
 
 Erratum numbers are **permanent**. A number is never reused or reassigned, so E3 means the same defect in every edition.
 
@@ -121,7 +121,7 @@ Every finding describes something the P2 does when a program runs, and each belo
 | **Anti-pattern** | Legal code that does something other than what it appears to do. |
 | **Open question** | The delivered material cannot settle it. |
 
-**This manual lists silicon errata only.** For an erratum there has to be a specific written statement of intent, in the design or in Parallax's published documentation, that the part contradicts on a real chip. Anti-patterns are documented, with their safe forms, in the companion manual *P2 Anti-Patterns*. An open question is published as neither.
+**This manual lists silicon errata only.** For an erratum there has to be a specific written statement of intent, in the design or in Parallax's published documentation, that P2 hardware contradicts. Anti-patterns are documented, with their safe forms, in the companion manual *P2 Anti-Patterns*. An open question is published as neither.
 
 The list is open-ended. These are the silicon errata **found so far**.
 
@@ -132,11 +132,11 @@ Each erratum has a chapter of its own, headed with its number: *Erratum E3* desc
 | Section | What it gives |
 |---|---|
 | **What the P2 is documented to do** | the written statement the part contradicts, whose it is, and where it is written |
-| **What the P2 actually does** | the defect, stated precisely |
+| **What the P2 does** | the defect: which instructions, in what arrangement, with what result |
 | **What your program sees** | what the defect looks like in a program, and what it does not affect |
-| **A proven workaround** | what any workaround must do, then one way that meets it: a drop-in block of code proven on a real P2, what it guarantees, and what it costs |
+| **A proven workaround** | what any workaround must do, then one way that meets it: a drop-in block of code proven on P2 hardware, what it guarantees, and what it costs |
 | **Why it happens** | the mechanism, at the level of the programmer's model |
-| **How it was proven on a real P2** | the test on real silicon, its controls, and the measured values |
+| **How it was proven on P2 hardware** | the test on P2 hardware, its controls, and the measured values |
 | **The test program** | a walkthrough of the test, and its filename in the examples archive |
 | **Status** | who published it, who found it, what is confirmed, and what it affects |
 
@@ -195,14 +195,14 @@ The P2 Documentation records the departure from the block rule in its KNOWN BUGS
 
 The example that follows loads 16 longs with `SETQ #16-1`, alters the start register with `ALTD start_reg`, and issues `RDLONG 0,ptra++`. Its comment gives the result: `ptra` is incremented by 4 (1 long), not by 16*4.
 
-## What the P2 actually does {#sec-e1-actual}
+## What the P2 does {#sec-e1-actual}
 
 With an `ALTD` between `SETQ` or `SETQ2` and a block `RDLONG` or `WRLONG` that carries a post-increment `PTRx` expression, one instruction does two things:
 
 - **The transfer completes as written, and the redirect holds.** The number of longs set by `SETQ` or `SETQ2` moves, to or from the registers the `ALTD` selects. The block is read from, or written to, the hub address `PTRx` held before the instruction.
 - **`PTRx` takes the plain expression's step.** The pointer changes by the amount the same expression gives without a `SETQ`: +4 for `ptra++` and `ptrb++`, +12 for `ptra++[3]`. The step does not depend on the block length. An 8-long block moved `PTRA` by +4, the same as a 4-long block.
 
-This held for every form tested: `SETQ` with `RDLONG` into cog registers at 4 and at 8 longs, `SETQ2` with `RDLONG` into lookup RAM, and `SETQ` with `WRLONG` from cog registers, through `PTRA` and through `PTRB`, with `ptra++` and with `ptra++[3]`. The measured values are in *How it was proven on a real P2*.
+This held for every form tested: `SETQ` with `RDLONG` into cog registers at 4 and at 8 longs, `SETQ2` with `RDLONG` into lookup RAM, and `SETQ` with `WRLONG` from cog registers, through `PTRA` and through `PTRB`, with `ptra++` and with `ptra++[3]`. The measured values are in *How it was proven on P2 hardware*.
 
 The confirmation is narrower than Parallax's statement. **Only `ALTD` was tested as the intervening instruction; Parallax names `ALTx`, `AUGS` and `AUGD`.** `WMLONG`, `SETQ2` with `WRLONG`, and the decrement and pre-modify forms (`ptra--`, `++ptra`, `--ptra`) were not tested. In the pre-modify forms the expression also sets the hub address the block starts from, so what the part does with that address under this erratum is not established here.
 
@@ -218,7 +218,7 @@ You see the effect at the next access through that pointer. A loop that walks a 
 
 **What any workaround must do:** nothing may sit between the `SETQ` or `SETQ2` and the block transfer it prepares, so that the transfer is the instruction directly after it.
 
-**One way, proven on a real P2:** write the `SETQ` or `SETQ2` directly before the transfer.
+**One way, proven on P2 hardware:** write the `SETQ` or `SETQ2` directly before the transfer.
 
 ```pasm2
 CON ' ---- E1 Workaround: Block Length ----
@@ -233,7 +233,7 @@ With the `SETQ` or `SETQ2` as the instruction directly before the transfer, the 
 
 These two lines are the test program's control for the 4-long read, and on silicon they advanced `PTRA` by +16 in every round, with all four longs in place. The same adjacent form gave the full block step for an 8-long read (+32), through `PTRB`, for a `WRLONG` from cog registers, for `SETQ2` into lookup RAM, and with `ptra++[3]` (+16 each, for 4 longs); in the last, the block count overrides the index, as the P2 Documentation states.
 
-The cost is the redirect. Without the `ALTD`, the block's first register is the one named in the instruction's `D` field, set when the code is assembled. No form that keeps the redirect has been run on silicon, so none is printed here. The adjacent form was run for the six transfers above; the forms named as untested in *What the P2 actually does* were not run in it either.
+The cost is the redirect. Without the `ALTD`, the block's first register is the one named in the instruction's `D` field, set when the code is assembled. No form that keeps the redirect has been run on silicon, so none is printed here. The adjacent form was run for the six transfers above; the forms named as untested in *What the P2 does* were not run in it either.
 
 ## Why it happens {#sec-e1-why}
 
@@ -245,7 +245,7 @@ The pointer update does not use the held form. It asks only whether the instruct
 
 By the same reasoning an `AUGS` or `AUGD` in that position also breaks the adjacency the pointer update looks for. The test program did not exercise them.
 
-## How it was proven on a real P2 {#sec-e1-proof}
+## How it was proven on P2 hardware {#sec-e1-proof}
 
 The test runs on a bare P2 board at 200 MHz. The measurement runs in a PASM cog of its own, started with `COGINIT`, because the Spin2 interpreter in cog 0 uses `PTRA` as its stack pointer. The debugger's interrupt is confined to cog 0 (`DEBUG_COGS = %0000_0001`), so it never enters the measuring cog. Cog 0 reads the results from hub RAM and does all checking and printing.
 
@@ -380,7 +380,7 @@ will affect #base, too. Use a register, instead." The published statement does n
 what the `ALTx` does with the value it takes, and it names `AUGS` only; it says nothing
 about `AUGD` in this arrangement.
 
-## What the P2 actually does {#sec-e2-actual}
+## What the P2 does {#sec-e2-actual}
 
 The arrangement is `AUGS #value`, then an `ALTx` with an immediate `#S`, then the target
 instruction with an immediate `#S`. On the part:
@@ -433,7 +433,7 @@ nothing. The only value measured was 5.
 **What any workaround must do:** no `ALTx` with an immediate `#S` may stand between an
 `AUGS` and the instruction the `AUGS` was written for.
 
-**One way, proven on a real P2:** give that `ALTx` a register `S`.
+**One way, proven on P2 hardware:** give that `ALTx` a register `S`.
 
 ```pasm2
                 augs    #AUGV
@@ -492,7 +492,7 @@ no immediate form for `D`: their encodings carry an immediate bit for `S` only, 
 their `D` is always a register. An `ALTx` therefore has no immediate `D` to receive a
 pending `AUGD`, and the `AUGD` passes to its target.
 
-## How it was proven on a real P2 {#sec-e2-proof}
+## How it was proven on P2 hardware {#sec-e2-proof}
 
 **Arrangement.** A P2 board with nothing connected to its pins, at 200 MHz. The
 measuring code is PASM, started in a fresh cog with `COGINIT` from the program's `DAT`
@@ -645,7 +645,7 @@ and its section EVENTS names the lower half:
 
 The documentation does not qualify the value `GETCT WC` returns by cog number, or by which other cogs are running. The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
-## What the P2 actually does {#sec-e3-actual}
+## What the P2 does {#sec-e3-actual}
 
 The eight cogs form two groups of four: cogs 0-3 and cogs 4-7. `GETCT` does not read the counter itself; each group reads its own copy of the counter's two longs, and the two halves of that copy behave differently.
 
@@ -692,7 +692,7 @@ What does not go wrong:
 
 **What any workaround must do:** a cog of 4-7 must be running at every wrap of the lower long, from the first wrap on, so that the cogs 4-7 group's copy of the upper long advances with the counter.
 
-**One way, proven on a real P2:** a keeper cog, started by the first line of `main()` and never stopped.
+**One way, proven on P2 hardware:** a keeper cog, started by the first line of `main()` and never stopped.
 
 ```spin2
 CON ' ---- E3 Workaround: Keeper Cog ----
@@ -717,7 +717,7 @@ The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run 
 
 `KEEPER_COG` names the keeper's cog. It must be a cog of 4-7 that nothing else in your program starts or stops.
 
-**Other ways that meet the condition.** The condition asks for a running cog in 4-7 at every wrap, not for a keeper. A cog your program already starts in 4-7 before the first wrap and never stops meets it as well, and then no keeper is needed. Run B, under *How it was proven on a real P2*, is the evidence for that arrangement: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter; in the workaround's test program a separate cog, the keeper, was kept running while the cogs that read the counter started and stopped. Both arrangements met the condition, and both read current. The cogs tested were executing code at every wrap: a polling loop in Run B, a jump to itself for the keeper.
+**Other ways that meet the condition.** The condition asks for a running cog in 4-7 at every wrap, not for a keeper. A cog your program already starts in 4-7 before the first wrap and never stops meets it as well, and then no keeper is needed. Run B, under *How it was proven on P2 hardware*, is the evidence for that arrangement: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter; in the workaround's test program a separate cog, the keeper, was kept running while the cogs that read the counter started and stopped. Both arrangements met the condition, and both read current. The cogs tested were executing code at every wrap: a polling loop in Run B, a jump to itself for the keeper.
 
 **The cost.** The keeper takes one cog for the life of the program: it holds cog 7, and seven cogs remain for your program. A program that already needs all eight cogs cannot add the keeper, but meets the condition if one of its own cogs of 4-7 is running from before the first wrap and is never stopped. The keeper executes a jump to itself and nothing else.
 
@@ -744,7 +744,7 @@ The counter and both groups' copies start from zero at reset, and at reset only 
 
 Running here means the state a cog is in between its start and its stop, the state `COGCHK` reports. By the study's reading, what a running cog is executing does not enter into it. The tests kept their cogs in a polling loop or, for the keeper, a jump to itself, and did not try a cog held in a wait instruction such as `WAITX`.
 
-## How it was proven on a real P2 {#sec-e3-proof}
+## How it was proven on P2 hardware {#sec-e3-proof}
 
 Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program, run once, confirmed the workaround; it is described after them.
 
@@ -867,7 +867,7 @@ The workaround's test program carries the block of *A proven workaround* unchang
     expect_mask(baseMask)
 ```
 
-The readings run in the order of the table under *How it was proven on a real P2*. After the late reading at upper long 2, `cogstop(KEEPER_COG)` stops the keeper, and the positive control is read in cog 6 after wrap 3.
+The readings run in the order of the table under *How it was proven on P2 hardware*. After the late reading at upper long 2, `cogstop(KEEPER_COG)` stops the keeper, and the positive control is read in cog 6 after wrap 3.
 
 Each file prints every pair raw, a summary line per reading, and a one-line verdict. All three are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and downloaded to RAM; the download must reset the part, since each program checks that the counter starts from zero. Run A ends about 105 s after reset, Run B about 44 s after reset, and the workaround's test program about 67 s after reset.
 
@@ -912,7 +912,7 @@ The SINC1/SINC2 table that follows that description carries the column heading:
 
 None of the three places makes the clear depend on the streamer's mode or on whether a streamer command is running.
 
-## What the P2 actually does {#sec-e4-actual}
+## What the P2 does {#sec-e4-actual}
 
 In this erratum a *Goertzel burst* is one DDS/Goertzel streamer command for the clocks it runs, and a *term* is the product the streamer adds to each accumulator on each of those clocks.
 
@@ -941,7 +941,7 @@ The difference of two idle readings is still one term short of your burst: the b
 
 **What any workaround must do:** take each burst's sums as the difference of two readings taken with the streamer idle, one before the burst and one after it. An idle `GETXACC` clears nothing, so the difference holds your burst whatever the accumulators held before it.
 
-**One way, proven on a real P2:** the `burst_sums` helper routine, which also steps around Erratum E5.
+**One way, proven on P2 hardware:** the `burst_sums` helper routine, which also steps around Erratum E5.
 
 ```pasm2
 { Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
@@ -983,13 +983,13 @@ sin_sum     long    0                           ' result: sine sum
 
 Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, whatever the accumulators held before the call: a *helper routine*.
 
-On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels, including 6 calls made while an earlier burst's term was still held; see *How it was proven on a real P2*.
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels, including 6 calls made while an earlier burst's term was still held; see *How it was proven on P2 hardware*.
 
 To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's: SINC1, no DAC output, input pins P0 to P3, a count of 256, with P3 inverted and summed and a lookup offset of `$0A5`.
 
 The routine takes its two readings with the streamer idle, where `GETXACC` clears nothing, so their difference is your burst whatever came before it. The zero bursts deal with Erratum E5: each is your mode word with a count of `ZERO_COUNT` (4) and `S` nibble `INPUT_NIB` ([15:12]) clear, so every term it forms is zero. The first delivers any term an earlier burst left held, so the before reading is complete; the second delivers your burst's last term before the after reading.
 
-**Other ways that meet the condition.** Any code that takes the two idle readings and subtracts meets this erratum's condition without the routine. The erratum test's run A did exactly that: it read 15,555 for a 256-clock burst in all eight repetitions, from five different starting values (see *How it was proven on a real P2*). That difference is 255 terms, not 256: it steps around this erratum but not Erratum E5, whose held last term only a later Goertzel burst delivers. The zero bursts in `burst_sums` are what add that term.
+**Other ways that meet the condition.** Any code that takes the two idle readings and subtracts meets this erratum's condition without the routine. The erratum test's run A did exactly that: it read 15,555 for a 256-clock burst in all eight repetitions, from five different starting values (see *How it was proven on P2 hardware*). That difference is 255 terms, not 256: it steps around this erratum but not Erratum E5, whose held last term only a later Goertzel burst delivers. The zero bursts in `burst_sums` are what add that term.
 
 **Cost.** Each call runs two zero bursts of 4 NCO rollovers each, at your `SETXFRQ` rate, besides your burst, and the cog waits in `WAITXFI` until each command has finished. The routine is 17 instructions, and 8 longs of cog RAM hold its operands and results.
 
@@ -1007,7 +1007,7 @@ The read does not depend on the update. `GETXACC` returns the accumulator's curr
 
 By the study's reading, every mode other than DDS/Goertzel behaves as the idle streamer does. One such mode was tested.
 
-## How it was proven on a real P2 {#sec-e4-proof}
+## How it was proven on P2 hardware {#sec-e4-proof}
 
 The test program runs on a P2 board at 200 MHz with nothing connected to pins P0 to P7. One cog, started from a `DAT` block, does all streamer work and issues every `GETXACC`; the debugger is confined to cog 0, which only waits for the results and prints them. The measuring cog drives P3 low as a plain output with its smart pin off, so the streamer's input bit for P3 holds a fixed level.
 
@@ -1161,7 +1161,7 @@ Its table of accumulation modes gives the SINC1 case (D[23] = `%0`) as `SIN_ACC 
 
 The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
-## What the P2 actually does {#sec-e5-actual}
+## What the P2 does {#sec-e5-actual}
 
 On each active clock of a Goertzel burst, each accumulator adds the term formed on the **previous** active clock, not the term formed on that clock. After a burst of N active clocks:
 
@@ -1187,7 +1187,7 @@ The difference of two idle readings is still needed as well, because `GETXACC` d
 
 **What any workaround must do:** deliver the burst's held last term to the accumulators before reading them, in SINC1 mode.
 
-**One way, proven on a real P2:** the `burst_sums` helper routine, which ends every burst with a zero-term burst before reading and also steps around Erratum E4.
+**One way, proven on P2 hardware:** the `burst_sums` helper routine, which ends every burst with a zero-term burst before reading and also steps around Erratum E4.
 
 ```pasm2
 { Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
@@ -1229,9 +1229,9 @@ sin_sum     long    0                           ' result: sine sum
 
 Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, and leaves no term held for the next burst: a *helper routine*, for SINC1 mode.
 
-On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call; see *How it was proven on a real P2*.
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call; see *How it was proven on P2 hardware*.
 
-The routine is for SINC1 mode. In SINC2 mode its zero burst has not been tested as a flush, and the routine is not recommended there. SINC2 has its own, separate constraint, which is documented and is not this erratum: the P2 Documentation's note on Goertzel SINC2 mode, by Chip Gracey (2024.12.16), states that a varying number of iterations in a Goertzel cycle corrupts the current and next samples. Its two remedies held on a real P2 in the test program `e5-goertzel-sinc2-iteration-count-test.spin2` (2026-09-25, at 200 MHz, run twice). With every NCO cycle the same length (`SETXFRQ` of `$0080_0000`, 256 clocks per cycle, 2,048-clock commands chained with `XCONT`), 0 of 1,020 SINC2 samples were off. With each command issued by `XZERO`, at a `SETXFRQ` value of `$0080_0040` with 8 NCO cycles per command and of `$00A3_D70C` with 100 and with 25,000, every command kept one length and 0 of 1,020, 0 of 2,044 and 0 of 12 samples changed, where `XCONT` at the same settings gave 30, 12 and 4 corrupted samples.
+The routine is for SINC1 mode. In SINC2 mode its zero burst has not been tested as a flush, and the routine is not recommended there. SINC2 has its own, separate constraint, which is documented and is not this erratum: the P2 Documentation's note on Goertzel SINC2 mode, by Chip Gracey (2024.12.16), states that a varying number of iterations in a Goertzel cycle corrupts the current and next samples. Its two remedies held on P2 hardware in the test program `e5-goertzel-sinc2-iteration-count-test.spin2` (2026-09-25, at 200 MHz, run twice). With every NCO cycle the same length (`SETXFRQ` of `$0080_0000`, 256 clocks per cycle, 2,048-clock commands chained with `XCONT`), 0 of 1,020 SINC2 samples were off. With each command issued by `XZERO`, at a `SETXFRQ` value of `$0080_0040` with 8 NCO cycles per command and of `$00A3_D70C` with 100 and with 25,000, every command kept one length and 0 of 1,020, 0 of 2,044 and 0 of 12 samples changed, where `XCONT` at the same settings gave 30, 12 and 4 corrupted samples.
 
 This is the same routine Erratum E4 prints, because one call steps around both errata. To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's.
 
@@ -1256,7 +1256,7 @@ When a burst ends, both registers stop updating. The last term formed stays in t
 
 A zero-term burst works for the same reason. Its first clock moves the held term into the accumulator, and its own terms are all zero, so it leaves zero behind.
 
-## How it was proven on a real P2 {#sec-e5-proof}
+## How it was proven on P2 hardware {#sec-e5-proof}
 
 **The arrangement.** One P2 board at 200 MHz, nothing attached to P3.
 
@@ -1437,7 +1437,7 @@ For the two dithered DAC modes, `%00010` and `%00011`, each description carries 
 
 The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
-## What the P2 actually does {#sec-e6-actual}
+## What the P2 does {#sec-e6-actual}
 
 The part was tested in DAC noise mode (`%SSSSS` = `%00001`) with `M[12:10]` = `%101` and `M[9:8]` = `%00`, the setting the Spin2 symbol `P_DAC_990R_3V` names: a 990-ohm DAC of 3.3 V peak, with the ADC feeding the pin's input. The two configuration words differ only in bit 6, which is `TT` bit 0:
 
@@ -1456,7 +1456,7 @@ The test program read the pin's state through its neighbouring pin, and did not 
 
 **What any workaround must do:** set `TT` bit 0 in the `WRPIN` word of a pin in a DAC smart-pin mode whose ADC you switch with `OUT`.
 
-**One way, proven on a real P2:** the tested DAC noise word with `TT` = `%01`.
+**One way, proven on P2 hardware:** the tested DAC noise word with `TT` = `%01`.
 
 ```spin2
   CFG_DAC_TT01      = $0014_0042        ' DAC_MODE, DAC noise, TT = %01
@@ -1492,7 +1492,7 @@ The same reading gives the cost of the workaround. Setting `TT` bit 0 raises the
 
 The study left open what the pin's read state carries in the DAC pin state while the ADC is off. The test measured it rather than assuming it; the values are in the next section.
 
-## How it was proven on a real P2 {#sec-e6-proof}
+## How it was proven on P2 hardware {#sec-e6-proof}
 
 **The arrangement.** One P2 board at 200 MHz, with nothing attached to P4 or P5.
 
@@ -1635,9 +1635,9 @@ The no-wait paragraph's requirement describes a different case, and that case is
 
 The KNOWN BUGS section of the P2 Documentation does not list this behaviour. In the reviewers' comments attached to that section of the document, replying to a note that an `RDFAST` corruption bug should be listed there, Chip Gracey wrote: "Yes, but I can't explain it well." The comments do not describe the conditions or the symptom. The defect in this chapter is plausibly that bug; nothing in the comments establishes it.
 
-## What the P2 actually does {#sec-e7-actual}
+## What the P2 does {#sec-e7-actual}
 
-The arrangement tested, in cog execution: a no-wait `RDFAST` (D = `$8000_0000`), then either nothing or a `WAITX`, then a blocking `RDFAST #0` to a different hub address, then `RFLONG` as the very next instruction. The spacing is counted from the start of the no-wait `RDFAST` to the start of the blocking one, the no-wait `RDFAST`'s own 2 clocks included. It was swept over 2 and 4 to 44 clocks (3 cannot be reached, since every instruction takes at least 2 clocks) in each of 64 hub alignments: the 8 hub RAM slices the blocking `RDFAST`'s address can lie in, each at 8 starting points in the hub's rotation.
+The arrangement tested, in cog execution: a no-wait `RDFAST` (D = `$8000_0000`), then either nothing or a `WAITX`, then a blocking `RDFAST #0` to a different hub address, then `RFLONG` as the next instruction. The spacing is counted from the start of the no-wait `RDFAST` to the start of the blocking one, the no-wait `RDFAST`'s own 2 clocks included. It was swept over 2 and 4 to 44 clocks (3 cannot be reached, since every instruction takes at least 2 clocks) in each of 64 hub alignments: the 8 hub RAM slices the blocking `RDFAST`'s address can lie in, each at 8 starting points in the hub's rotation.
 
 - In every alignment, exactly one spacing failed, in all 16 trials. At that spacing the blocking `RDFAST` took 2 clocks, the time of a no-wait `RDFAST`, and the `RFLONG` returned `$0000_0000`: not the first long at the blocking `RDFAST`'s address, not data from the no-wait `RDFAST`'s address, and not the FIFO's earlier contents.
 - The failing spacing was between 8 and 15 clocks, set by the hub alignment. Each spacing from 8 to 15 clocks was the failing one in exactly 8 of the 64 alignments.
@@ -1659,7 +1659,7 @@ The long after the zero is not the second long either. The test printed the seco
 
 **What any workaround must do:** let at least 16 clocks pass from the start of the no-wait `RDFAST` to the start of the blocking one.
 
-**One way, proven on a real P2:** a `WAITX #RDFAST_SPACING_WAITX` (12) directly after the no-wait `RDFAST`.
+**One way, proven on P2 hardware:** a `WAITX #RDFAST_SPACING_WAITX` (12) directly after the no-wait `RDFAST`.
 
 ```pasm2
 CON
@@ -1701,7 +1701,7 @@ It also coincides with the arrival of the no-wait `RDFAST`'s data. In the same t
 
 What is not known: why the wait ends at once on that clock, where the zero comes from, and whether a blocking `WRFAST`, or the streamer, is affected in the same way.
 
-## How it was proven on a real P2 {#sec-e7-proof}
+## How it was proven on P2 hardware {#sec-e7-proof}
 
 **Where it came from.** The test was built to measure something else: when the hub FIFO can first be used after `RDFAST` and `WRFAST`, in both modes. The arrangement of this erratum was one of its secondary arrangements, expected to show the blocking promise holding. The defect was not predicted.
 

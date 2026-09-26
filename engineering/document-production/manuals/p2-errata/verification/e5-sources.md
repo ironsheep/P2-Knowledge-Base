@@ -18,7 +18,7 @@ in *The test program*. It claims no causal link between the lag and the SINC2 co
 change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
 (`{#sec-e5-fix}`) is now *A proven workaround* (`{#sec-e5-workaround}`), rule-first: *What any
 workaround must do* (the condition, as in the front matter's summary table), *One way, proven
-on a real P2* and the block, then *Other ways that meet the condition*; the subsection *The
+on P2 hardware* and the block, then *Other ways that meet the condition*; the subsection *The
 fix's test* is now *The workaround's test* (`{#sec-e5-workaround-proof}`). The CAUTION box's
 third line is *Workaround* (the condition); the status row is *Workaround proven on silicon*.
 FIX's reader copy is renamed `e4-e5-workaround-read-sums-test.spin2` (ARCHIVE-WKR below; its
@@ -59,7 +59,7 @@ for this chapter since it prints the same block.
 
 | Item | Source |
 |---|---|
-| The 35-line `pasm2` block under *One way, proven on a real P2* in *A proven workaround* (30 lines pre-#360) | ARCHIVE-WKR:683–717 (post-#360, between the markers ARCHIVE-WKR:682/718). Pre-#360: FIX:808–837, byte-identical (between the markers FIX:807 and FIX:838). The same block, byte for byte, is printed in Erratum E4's *A proven workaround*. Post-#360, the chapter's fence (chapter 56–90) equals ARCHIVE-WKR:683–717 (verified by `engineering/tools/verify-example-corpus-identity.py`, GREEN); pre-#360 the same awk, run over this file, printed `compared 30 chapter lines with 30 rig lines` and no `DIFF` line |
+| The 35-line `pasm2` block under *One way, proven on P2 hardware* in *A proven workaround* (30 lines pre-#360) | ARCHIVE-WKR:683–717 (post-#360, between the markers ARCHIVE-WKR:682/718). Pre-#360: FIX:808–837, byte-identical (between the markers FIX:807 and FIX:838). The same block, byte for byte, is printed in Erratum E4's *A proven workaround*. Post-#360, the chapter's fence (chapter 56–90) equals ARCHIVE-WKR:683–717 (verified by `engineering/tools/verify-example-corpus-identity.py`, GREEN); pre-#360 the same awk, run over this file, printed `compared 30 chapter lines with 30 rig lines` and no `DIFF` line |
 | Printed in full here as well as in E4 | a reader who lands on E5 first pastes without turning to E4; creation-guide §4.6 puts the proven block in every *A proven workaround* |
 | **The run that proved it** | FL, 2026-09-26, run once, 200 MHz (FL:1, FL:13): 60 of 60 calls S = N × C, cosine and sine; re-derived from FL:24–113 in `e4-sources.md` §"The workaround run (FL)"; E5-specific rows in §5a below |
 

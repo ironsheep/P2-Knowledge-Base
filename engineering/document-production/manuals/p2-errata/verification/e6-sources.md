@@ -33,7 +33,7 @@ The task named the second run as "21:49"; the SO9 log of the second run is stamp
 change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
 (`{#sec-e6-fix}`) is now *A proven workaround* (`{#sec-e6-workaround}`), rule-first: *What any
 workaround must do* (the condition, as in the front matter's summary table), *One way, proven
-on a real P2* and the one-line block, then *Other ways that meet the condition*. The CAUTION
+on P2 hardware* and the one-line block, then *Other ways that meet the condition*. The CAUTION
 box's third line is *Workaround* (the condition); the status row is *Workaround proven on
 silicon*. In ARCHIVE only the header purpose changed (*the `TT` = `%01` word is the
 workaround*): no line added or removed, and the object image is byte-identical to the pre-#360
@@ -112,7 +112,7 @@ archive. Below, "Fix" in the *Where it appears* column means *A proven workaroun
 
 | | |
 |---|---|
-| Chapter | the `spin2` fence under *One way, proven on a real P2* in *A proven workaround* (one line, chapter 63) |
+| Chapter | the `spin2` fence under *One way, proven on P2 hardware* in *A proven workaround* (one line, chapter 63) |
 | Source | RIG:213 (as-run), ARCHIVE:50 (printed, `examples-library/e6-dac-mode-adc-enable-test.spin2`; same one line; the archive's header comment was rewritten, so the line number moved), one line, byte-identical, 71 columns, no tab characters in RIG (`grep -c -P "\t"` = 0) |
 | The run that proved it | the constant is loaded into `cfg_tt01_` (RIG:660) and written by `wrpin cfg_, #PIN_P` (RIG:640) for C1 and C2 (RIG:603). C2 = the workaround: L1:43–47 and L2:51–55 (ADC running, 1,958–2,093), C1 = L1:38–42 / L2:46–50 (ADC off, 0) |
 | Why one line | No contiguous rig block that holds the `WRPIN`/`DIRH`/`OUTH` sequence is ≤ 76 columns: `do_cond` RIG:639 is 93 columns and RIG:643 is 90. RIG:213 is the only contiguous run of lines that is the workaround itself and fits K |
@@ -160,7 +160,7 @@ the four pad facts from a source it does not cite by line; the chapter therefore
 only as the study's reading. No HDL fragment, signal name, module name, file name or line
 reference from BRF appears in the chapter. "The study left open what the pin's read state
 carries ... while the ADC is off" = BRF "What the source does not settle", first bullet; the
-measured value (0) is given in the chapter's *What the P2 actually does* and proof table.
+measured value (0) is given in the chapter's *What the P2 does* and proof table.
 
 ## Where the chapter departs from the ledger's wording
 
@@ -173,6 +173,6 @@ measured value (0) is given in the chapter's *What the P2 actually does* and pro
 - LED:1015–1017 give C2 as ranges per run; the chapter gives every sample (L1, L2) and the
   combined range 1,958–2,093.
 - LED:1022 "Of the `TT` settings, only `%00` and `%01` were tested; the `OTHER`-enable forms
-  (`TT` = `%1x`) were not": carried in *What the P2 actually does*, the workaround's limits and Status.
+  (`TT` = `%1x`) were not": carried in *What the P2 does*, the workaround's limits and Status.
 - The tested `%SSSSS` value: RIG:212–213, 247 and L1:27–28 show `SSSSS=%1` only, i.e. `%00001`
   DAC noise. `%00010` and `%00011` never appear in RIG; the chapter qualifies to DAC noise.

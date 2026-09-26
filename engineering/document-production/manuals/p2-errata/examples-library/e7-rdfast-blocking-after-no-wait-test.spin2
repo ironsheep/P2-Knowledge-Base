@@ -677,7 +677,7 @@ PRI expv1(armIdx, sliceIdx, distIdx) : expVal
         expVal := patnew(sliceIdx) & armmask(armIdx)
 
 PRI got_value(armIdx, pRec) : gotVal
-' The value a trial actually recorded, for the RIG FAIL report.
+' The value a trial recorded, for the RIG FAIL report.
 '
 ' @param armIdx - arm id (AR_*)
 ' @param pRec - hub address of the trial record

@@ -24,14 +24,14 @@ The P2 Documentation records the departure from the block rule in its KNOWN BUGS
 
 The example that follows loads 16 longs with `SETQ #16-1`, alters the start register with `ALTD start_reg`, and issues `RDLONG 0,ptra++`. Its comment gives the result: `ptra` is incremented by 4 (1 long), not by 16*4.
 
-## What the P2 actually does {#sec-e1-actual}
+## What the P2 does {#sec-e1-actual}
 
 With an `ALTD` between `SETQ` or `SETQ2` and a block `RDLONG` or `WRLONG` that carries a post-increment `PTRx` expression, one instruction does two things:
 
 - **The transfer completes as written, and the redirect holds.** The number of longs set by `SETQ` or `SETQ2` moves, to or from the registers the `ALTD` selects. The block is read from, or written to, the hub address `PTRx` held before the instruction.
 - **`PTRx` takes the plain expression's step.** The pointer changes by the amount the same expression gives without a `SETQ`: +4 for `ptra++` and `ptrb++`, +12 for `ptra++[3]`. The step does not depend on the block length. An 8-long block moved `PTRA` by +4, the same as a 4-long block.
 
-This held for every form tested: `SETQ` with `RDLONG` into cog registers at 4 and at 8 longs, `SETQ2` with `RDLONG` into lookup RAM, and `SETQ` with `WRLONG` from cog registers, through `PTRA` and through `PTRB`, with `ptra++` and with `ptra++[3]`. The measured values are in *How it was proven on a real P2*.
+This held for every form tested: `SETQ` with `RDLONG` into cog registers at 4 and at 8 longs, `SETQ2` with `RDLONG` into lookup RAM, and `SETQ` with `WRLONG` from cog registers, through `PTRA` and through `PTRB`, with `ptra++` and with `ptra++[3]`. The measured values are in *How it was proven on P2 hardware*.
 
 The confirmation is narrower than Parallax's statement. **Only `ALTD` was tested as the intervening instruction; Parallax names `ALTx`, `AUGS` and `AUGD`.** `WMLONG`, `SETQ2` with `WRLONG`, and the decrement and pre-modify forms (`ptra--`, `++ptra`, `--ptra`) were not tested. In the pre-modify forms the expression also sets the hub address the block starts from, so what the part does with that address under this erratum is not established here.
 
@@ -47,7 +47,7 @@ You see the effect at the next access through that pointer. A loop that walks a 
 
 **What any workaround must do:** nothing may sit between the `SETQ` or `SETQ2` and the block transfer it prepares, so that the transfer is the instruction directly after it.
 
-**One way, proven on a real P2:** write the `SETQ` or `SETQ2` directly before the transfer.
+**One way, proven on P2 hardware:** write the `SETQ` or `SETQ2` directly before the transfer.
 
 ```pasm2
 CON ' ---- E1 Workaround: Block Length ----
@@ -62,7 +62,7 @@ With the `SETQ` or `SETQ2` as the instruction directly before the transfer, the 
 
 These two lines are the test program's control for the 4-long read, and on silicon they advanced `PTRA` by +16 in every round, with all four longs in place. The same adjacent form gave the full block step for an 8-long read (+32), through `PTRB`, for a `WRLONG` from cog registers, for `SETQ2` into lookup RAM, and with `ptra++[3]` (+16 each, for 4 longs); in the last, the block count overrides the index, as the P2 Documentation states.
 
-The cost is the redirect. Without the `ALTD`, the block's first register is the one named in the instruction's `D` field, set when the code is assembled. No form that keeps the redirect has been run on silicon, so none is printed here. The adjacent form was run for the six transfers above; the forms named as untested in *What the P2 actually does* were not run in it either.
+The cost is the redirect. Without the `ALTD`, the block's first register is the one named in the instruction's `D` field, set when the code is assembled. No form that keeps the redirect has been run on silicon, so none is printed here. The adjacent form was run for the six transfers above; the forms named as untested in *What the P2 does* were not run in it either.
 
 ## Why it happens {#sec-e1-why}
 
@@ -74,7 +74,7 @@ The pointer update does not use the held form. It asks only whether the instruct
 
 By the same reasoning an `AUGS` or `AUGD` in that position also breaks the adjacency the pointer update looks for. The test program did not exercise them.
 
-## How it was proven on a real P2 {#sec-e1-proof}
+## How it was proven on P2 hardware {#sec-e1-proof}
 
 The test runs on a bare P2 board at 200 MHz. The measurement runs in a PASM cog of its own, started with `COGINIT`, because the Spin2 interpreter in cog 0 uses `PTRA` as its stack pointer. The debugger's interrupt is confined to cog 0 (`DEBUG_COGS = %0000_0001`), so it never enters the measuring cog. Cog 0 reads the results from hub RAM and does all checking and printing.
 

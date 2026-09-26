@@ -507,7 +507,7 @@ rep_loop        mov     ptra, recp_
                 getxacc g1_                     ' G1: idle
                 mov     g1y_, 0-0
                 xinit   dimm_, simm_            ' non-Goertzel mode, drives nothing
-                getxacc g2_                     ' G2: the very next instruction
+                getxacc g2_                     ' G2: the next instruction
                 mov     g2y_, 0-0
                 waitx   #G2L_WAIT
                 getxacc g2l_                    ' G2L: well inside the imm burst

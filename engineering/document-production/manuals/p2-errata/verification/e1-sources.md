@@ -5,9 +5,9 @@ the chapter, mapped to its source. Internal document: ids are allowed here, neve
 
 **v0.2.0 reshape (2026-09-26, task #359).** The chapter was restructured to the v0.2.0 shape
 (CAUTION box, opening, the eight fixed headings). Section names below are the v0.2.0 headings:
-*What the P2 is documented to do* (was *What the design says*), *What the P2 actually does* (was
+*What the P2 is documented to do* (was *What the design says*), *What the P2 does* (was
 *What the part does*), *What your program sees* (was *The symptom*), *The fix* (was *The
-workaround*), *How it was proven on a real P2* (was *How it was proven*). **The printed fix now
+workaround*), *How it was proven on P2 hardware* (was *How it was proven*). **The printed fix now
 comes from the rig** (§6): it is RIG:484-485, the K_BLK4 control arm that ran on silicon. The
 v0.1.0 compile harness HARN is kept unchanged as history; nothing in the v0.2.0 chapter is taken
 from it.
@@ -16,7 +16,7 @@ from it.
 change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
 (`{#sec-e1-fix}`) is now *A proven workaround* (`{#sec-e1-workaround}`), rule-first: *What any
 workaround must do* (the condition, as in the front matter's summary table), then *One way,
-proven on a real P2* and the block. The CAUTION box's third line is *Workaround* (the
+proven on P2 hardware* and the block. The CAUTION box's third line is *Workaround* (the
 condition); the status row is *Workaround proven on silicon*. In ARCHIVE the drop-in labels
 read `E1 Workaround:` (ARCHIVE:577, 580) and three comments say *workaround*: text only, no
 line added or removed, so every ARCHIVE line number below still holds, and the object image is
@@ -71,7 +71,7 @@ still holds): a scratch copy of RIG compiled with `/usr/local/bin/pnut-ts -d` (v
 
 ## 3. Numbers
 
-### CAUTION box, opening, What the P2 actually does, What your program sees
+### CAUTION box, opening, What the P2 does, What your program sees
 
 | Chapter number | Source |
 |---|---|
@@ -107,7 +107,7 @@ still holds): a scratch copy of RIG compiled with `/usr/local/bin/pnut-ts -d` (v
 | No form that keeps the redirect has been run on silicon | RIG:42-58 (the only arms that combine `SETQ`/`SETQ2` with an `ALTD` place the `ALTD` between them; no arm uses an explicit pointer step) |
 | Forms not run in the adjacent form either | RIG:42-58 (no `WMLONG`, no `SETQ2`+`WRLONG`, no `ptra--`/`++ptra`/`--ptra` arm) |
 
-### How it was proven on a real P2
+### How it was proven on P2 hardware
 
 | Chapter number | Source |
 |---|---|

@@ -48,7 +48,7 @@ will affect #base, too. Use a register, instead." The published statement does n
 what the `ALTx` does with the value it takes, and it names `AUGS` only; it says nothing
 about `AUGD` in this arrangement.
 
-## What the P2 actually does {#sec-e2-actual}
+## What the P2 does {#sec-e2-actual}
 
 The arrangement is `AUGS #value`, then an `ALTx` with an immediate `#S`, then the target
 instruction with an immediate `#S`. On the part:
@@ -101,7 +101,7 @@ nothing. The only value measured was 5.
 **What any workaround must do:** no `ALTx` with an immediate `#S` may stand between an
 `AUGS` and the instruction the `AUGS` was written for.
 
-**One way, proven on a real P2:** give that `ALTx` a register `S`.
+**One way, proven on P2 hardware:** give that `ALTx` a register `S`.
 
 ```pasm2
                 augs    #AUGV
@@ -160,7 +160,7 @@ no immediate form for `D`: their encodings carry an immediate bit for `S` only, 
 their `D` is always a register. An `ALTx` therefore has no immediate `D` to receive a
 pending `AUGD`, and the `AUGD` passes to its target.
 
-## How it was proven on a real P2 {#sec-e2-proof}
+## How it was proven on P2 hardware {#sec-e2-proof}
 
 **Arrangement.** A P2 board with nothing connected to its pins, at 200 MHz. The
 measuring code is PASM, started in a fresh cog with `COGINIT` from the program's `DAT`

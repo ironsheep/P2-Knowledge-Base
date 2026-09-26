@@ -26,7 +26,7 @@ and its section EVENTS names the lower half:
 
 The documentation does not qualify the value `GETCT WC` returns by cog number, or by which other cogs are running. The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
-## What the P2 actually does {#sec-e3-actual}
+## What the P2 does {#sec-e3-actual}
 
 The eight cogs form two groups of four: cogs 0-3 and cogs 4-7. `GETCT` does not read the counter itself; each group reads its own copy of the counter's two longs, and the two halves of that copy behave differently.
 
@@ -73,7 +73,7 @@ What does not go wrong:
 
 **What any workaround must do:** a cog of 4-7 must be running at every wrap of the lower long, from the first wrap on, so that the cogs 4-7 group's copy of the upper long advances with the counter.
 
-**One way, proven on a real P2:** a keeper cog, started by the first line of `main()` and never stopped.
+**One way, proven on P2 hardware:** a keeper cog, started by the first line of `main()` and never stopped.
 
 ```spin2
 CON ' ---- E3 Workaround: Keeper Cog ----
@@ -98,7 +98,7 @@ The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run 
 
 `KEEPER_COG` names the keeper's cog. It must be a cog of 4-7 that nothing else in your program starts or stops.
 
-**Other ways that meet the condition.** The condition asks for a running cog in 4-7 at every wrap, not for a keeper. A cog your program already starts in 4-7 before the first wrap and never stops meets it as well, and then no keeper is needed. Run B, under *How it was proven on a real P2*, is the evidence for that arrangement: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter; in the workaround's test program a separate cog, the keeper, was kept running while the cogs that read the counter started and stopped. Both arrangements met the condition, and both read current. The cogs tested were executing code at every wrap: a polling loop in Run B, a jump to itself for the keeper.
+**Other ways that meet the condition.** The condition asks for a running cog in 4-7 at every wrap, not for a keeper. A cog your program already starts in 4-7 before the first wrap and never stops meets it as well, and then no keeper is needed. Run B, under *How it was proven on P2 hardware*, is the evidence for that arrangement: cog 4, started at the beginning of that program while the lower long read `$00DB_96FF` and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two. In Run B the cog kept running was the cog that read the counter; in the workaround's test program a separate cog, the keeper, was kept running while the cogs that read the counter started and stopped. Both arrangements met the condition, and both read current. The cogs tested were executing code at every wrap: a polling loop in Run B, a jump to itself for the keeper.
 
 **The cost.** The keeper takes one cog for the life of the program: it holds cog 7, and seven cogs remain for your program. A program that already needs all eight cogs cannot add the keeper, but meets the condition if one of its own cogs of 4-7 is running from before the first wrap and is never stopped. The keeper executes a jump to itself and nothing else.
 
@@ -125,7 +125,7 @@ The counter and both groups' copies start from zero at reset, and at reset only 
 
 Running here means the state a cog is in between its start and its stop, the state `COGCHK` reports. By the study's reading, what a running cog is executing does not enter into it. The tests kept their cogs in a polling loop or, for the keeper, a jump to itself, and did not try a cog held in a wait instruction such as `WAITX`.
 
-## How it was proven on a real P2 {#sec-e3-proof}
+## How it was proven on P2 hardware {#sec-e3-proof}
 
 Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program, run once, confirmed the workaround; it is described after them.
 
@@ -248,7 +248,7 @@ The workaround's test program carries the block of *A proven workaround* unchang
     expect_mask(baseMask)
 ```
 
-The readings run in the order of the table under *How it was proven on a real P2*. After the late reading at upper long 2, `cogstop(KEEPER_COG)` stops the keeper, and the positive control is read in cog 6 after wrap 3.
+The readings run in the order of the table under *How it was proven on P2 hardware*. After the late reading at upper long 2, `cogstop(KEEPER_COG)` stops the keeper, and the positive control is read in cog 6 after wrap 3.
 
 Each file prints every pair raw, a summary line per reading, and a one-line verdict. All three are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and downloaded to RAM; the download must reset the part, since each program checks that the counter starts from zero. Run A ends about 105 s after reset, Run B about 44 s after reset, and the workaround's test program about 67 s after reset.
 

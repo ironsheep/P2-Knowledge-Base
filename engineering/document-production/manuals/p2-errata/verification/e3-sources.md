@@ -35,7 +35,7 @@ those names.
 change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
 (`{#sec-e3-fix}`) is now *A proven workaround* (`{#sec-e3-workaround}`), rule-first: *What any
 workaround must do* (the condition, as in the front matter's summary table), *One way, proven
-on a real P2* and the keeper block, then *Other ways that meet the condition* (the Run B
+on P2 hardware* and the keeper block, then *Other ways that meet the condition* (the Run B
 evidence, formerly the section's closing Run B paragraph). The CAUTION box's third line is
 *Workaround* (the condition); the status row is *Workaround proven on silicon*. ARCHIVE-WKR's
 drop-in labels read `E3 Workaround:` (ARCHIVE-WKR:115, 118); `HI_FIX1/2` and `P_FIX` are renamed
@@ -88,26 +88,26 @@ carry the defect (creation-guide §6, F-462..466).
 
 | Number / value in chapter | Where in chapter | Source |
 |---|---|---|
-| 2^32^ clocks per wrap; 21.47 s at 200 MHz | CAUTION box; opening; *What the P2 actually does*; *What your program sees* | RIG-A:109 `CLOCK / RUN TIME: _clkfreq = 200_000_000 -> 2^32 clocks = 21.47 s per` / RIG-A:110 `wrap.`; RIG-B:112-113 same; RIG-FIX:116-117 same. LEDGER:945 gives the rounded "21.5 s at 200 MHz"; the chapter uses the rig's 21.47 s. |
+| 2^32^ clocks per wrap; 21.47 s at 200 MHz | CAUTION box; opening; *What the P2 does*; *What your program sees* | RIG-A:109 `CLOCK / RUN TIME: _clkfreq = 200_000_000 -> 2^32 clocks = 21.47 s per` / RIG-A:110 `wrap.`; RIG-B:112-113 same; RIG-FIX:116-117 same. LEDGER:945 gives the rounded "21.5 s at 200 MHz"; the chapter uses the rig's 21.47 s. |
 | 200 MHz | throughout; Status | RIG-A:123 `_clkfreq    = 200_000_000`; RIG-FIX:131 same; LEDGER:892 "bare P2 board, 200 MHz" |
-| 2026-09-24, run twice | *How it was proven on a real P2*; Status | LEDGER:893 "RAM download with reset, 2026-09-24 (Stephen). **Run twice**, from two builds"; log headers LOG-A2:1, LOG-B2:1, LOG-A1, LOG-B1 (all 2026-09-24) |
-| debugger confined to cog 0 | *How it was proven on a real P2* (Run A/B and the workaround program) | RIG-A:124 / RIG-B:127 `DEBUG_COGS  = %0000_0001`; RIG-FIX:132 same; LEDGER:890 |
-| "as first written, and with its comments and layout conformed ... measuring code unchanged" | *How it was proven on a real P2* | LEDGER:893-894 "(as authored, then style-conformed with identical measuring engines): every measured value matched" |
-| "Every D value and every verdict matched between the two builds" | *How it was proven on a real P2* | LOG-A1:234-245 vs LOG-A2:234-245 (slot 0..10 D and st identical; both VERDICT CONFIRMED); LOG-B1:152-160 vs LOG-B2:144-152 (slots 0..7 identical; both VERDICT CONFIRMED) |
-| `$1000_0000`, `$F000_0000` (pair window) | *How it was proven on a real P2* | RIG-A:126-127 `LOWIN   = $1000_0000` / `HIWIN   = $F000_0000`; RIG-A:39-40; LEDGER:948; RIG-FIX:134-135 same |
-| `$E000_0000` (late reading) | *How it was proven on a real P2* | RIG-A:128 `LATE    = $E000_0000`; RIG-FIX:136 same |
-| ten pairs per reading | *What your program sees*; *How it was proven on a real P2* | RIG-A:129 `NPAIRS  = 10`; RIG-FIX:137 same; every `=> D=` line in all four logs ends `valid pairs=10 tries=10` |
-| "compared unsigned" (lower-long check) | *How it was proven on a real P2* | RIG-A:42 `LO-BRACKET = refB.lo < sampler.lo < refA.lo (unsigned)`; RIG-A:315 uses `+<`; RIG-FIX:56, :403 same |
-| 100 ms | *How it was proven on a real P2* (controls) | RIG-A:79 `C5  every request answered within 100 ms (sampler alive).`; RIG-A:304 `take_pair(mb, seq, clkfreq / 10)`; RIG-FIX:140 `ACK_TIMEOUT_MS = 100` |
+| 2026-09-24, run twice | *How it was proven on P2 hardware*; Status | LEDGER:893 "RAM download with reset, 2026-09-24 (Stephen). **Run twice**, from two builds"; log headers LOG-A2:1, LOG-B2:1, LOG-A1, LOG-B1 (all 2026-09-24) |
+| debugger confined to cog 0 | *How it was proven on P2 hardware* (Run A/B and the workaround program) | RIG-A:124 / RIG-B:127 `DEBUG_COGS  = %0000_0001`; RIG-FIX:132 same; LEDGER:890 |
+| "as first written, and with its comments and layout conformed ... measuring code unchanged" | *How it was proven on P2 hardware* | LEDGER:893-894 "(as authored, then style-conformed with identical measuring engines): every measured value matched" |
+| "Every D value and every verdict matched between the two builds" | *How it was proven on P2 hardware* | LOG-A1:234-245 vs LOG-A2:234-245 (slot 0..10 D and st identical; both VERDICT CONFIRMED); LOG-B1:152-160 vs LOG-B2:144-152 (slots 0..7 identical; both VERDICT CONFIRMED) |
+| `$1000_0000`, `$F000_0000` (pair window) | *How it was proven on P2 hardware* | RIG-A:126-127 `LOWIN   = $1000_0000` / `HIWIN   = $F000_0000`; RIG-A:39-40; LEDGER:948; RIG-FIX:134-135 same |
+| `$E000_0000` (late reading) | *How it was proven on P2 hardware* | RIG-A:128 `LATE    = $E000_0000`; RIG-FIX:136 same |
+| ten pairs per reading | *What your program sees*; *How it was proven on P2 hardware* | RIG-A:129 `NPAIRS  = 10`; RIG-FIX:137 same; every `=> D=` line in all four logs ends `valid pairs=10 tries=10` |
+| "compared unsigned" (lower-long check) | *How it was proven on P2 hardware* | RIG-A:42 `LO-BRACKET = refB.lo < sampler.lo < refA.lo (unsigned)`; RIG-A:315 uses `+<`; RIG-FIX:56, :403 same |
+| 100 ms | *How it was proven on P2 hardware* (controls) | RIG-A:79 `C5  every request answered within 100 ms (sampler alive).`; RIG-A:304 `take_pair(mb, seq, clkfreq / 10)`; RIG-FIX:140 `ACK_TIMEOUT_MS = 100` |
 | `$00DB_96FF` (Run B cog 4 start) | *A proven workaround* (*Other ways that meet the condition*) | LOG-B2:15 |
 | about 105 s (Run A), about 44 s (Run B) | *The test program* | RIG-A:110-111 `Run A ends at CT hi=4, lo=$E000_0000: about 4.9 x 21.47 s` / `= ~105 s after reset (plus download).`; RIG-B:113-114 `Run B ends at CT hi=2, lo=$1000_0000:` / `about 2.06 x 21.47 s = ~44 s after reset (plus download).` |
 | about 67 s (workaround program) | *The test program* | MEASURED: LOG-FIX session start 01:55:46.807 to the last line 01:56:53.488 = 66.7 s (the chapter and Appendix A say "about 67 s"); the rig's design comment RIG-FIX:117-118 says `~66 s after reset (plus download)` |
 | `pnut-ts` 1.55.8, `-d` | *The test program* | RIG-A:119 `COMPILER: pnut-ts v1.55.8,  pnut-ts -d -l test-o18-getct-upper-stale-runA.spin2`; LEDGER:893; RIG-FIX:127 `COMPILER: pnut-ts v1.55.8,  pnut-ts -d e3-fix-keeper-cog-test.spin2` |
-| "at reset only cog 0 runs" | *What the P2 actually does*; *Why it happens* | LOG-A2:22 and LOG-B2:14 `running cogs=%00000001` at boot; LEDGER:944 |
-| cog 7, cogs 4, 5, 6 (workaround program) | *A proven workaround*; *How it was proven on a real P2* | RIG-FIX:36-43 (cog map), :157-159 `SMP_COG_A = 4` / `_B = 5` / `_C = 6`, :201 `KEEPER_COG = 7` |
+| "at reset only cog 0 runs" | *What the P2 does*; *Why it happens* | LOG-A2:22 and LOG-B2:14 `running cogs=%00000001` at boot; LEDGER:944 |
+| cog 7, cogs 4, 5, 6 (workaround program) | *A proven workaround*; *How it was proven on P2 hardware* | RIG-FIX:36-43 (cog map), :157-159 `SMP_COG_A = 4` / `_B = 5` / `_C = 6`, :201 `KEEPER_COG = 7` |
 | "seven cogs remain" | *A proven workaround* (cost) | 8 cogs: SD:382 `8 cogs (processors)`; RIG-FIX:143 `COG_COUNT      = 8`; the keeper holds one |
 
-### 3.1 Run A readings (table rows A; *What the P2 actually does*; *What your program sees*)
+### 3.1 Run A readings (table rows A; *What the P2 does*; *What your program sees*)
 
 Raw lines, LOG-A2 (second build), verbatim:
 
@@ -256,7 +256,7 @@ First-build confirmation, LOG-B1, verbatim:
 160:[2026-09-24T20:49:20.870] Cog0  VERDICT: CONFIRMED - kept group 1: cog 4 D=0 at hi=1 and hi=2; cog 1 D=0 throughout
 ```
 
-### 3.3 Controls, Run A and Run B (section *How it was proven on a real P2*)
+### 3.3 Controls, Run A and Run B (section *How it was proven on P2 hardware*)
 
 | Chapter control | Source |
 |---|---|
@@ -268,7 +268,7 @@ First-build confirmation, LOG-B1, verbatim:
 | expected D fixed before the run | RIG-A:142-146 (P_A1_TRUE..P_CTRL); RIG-B `P_B_TRUE`/`P_B_FALSE`/`P_CTRL` (RIG-B:151-154) |
 | No RIG FAIL fired | no `RIG FAIL` / `HALTED` line in any of the four logs |
 
-### 3.4 Pair protocol and D (section *How it was proven on a real P2*)
+### 3.4 Pair protocol and D (section *How it was proven on P2 hardware*)
 
 - Pair definition: RIG-A:31-44; cog 0 side in inline PASM2, RIG-A:382-400
   (`getct rhb wc` / `getct rlb` before `wrlong reqNum, mb`; `rdlong shi, phi` /
@@ -309,7 +309,7 @@ as-run record and are no longer byte-identical to the printed fences (names and 
 the measuring PASM itself is unchanged).
 
 The v0.1.0 D-and-bracket excerpt (RIG-A:314-317) was dropped to keep four excerpts; its content
-is carried in prose under *How it was proven on a real P2* (§3.4).
+is carried in prose under *How it was proven on P2 hardware* (§3.4).
 
 Prose around the excerpts:
 
@@ -367,7 +367,7 @@ The v0.1.0 workaround snippet and its compile harness (`M/verification/e3-harnes
 are retired from the chapter: the printed workaround is now the RIG-FIX block. The harness file is
 left in place, untouched.
 
-## 6. The workaround's test program (section *How it was proven on a real P2*, the workaround)
+## 6. The workaround's test program (section *How it was proven on P2 hardware*, the workaround)
 
 | Chapter text | Source |
 |---|---|

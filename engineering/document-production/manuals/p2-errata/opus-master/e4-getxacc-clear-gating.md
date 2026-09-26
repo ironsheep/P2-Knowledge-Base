@@ -26,7 +26,7 @@ The SINC1/SINC2 table that follows that description carries the column heading:
 
 None of the three places makes the clear depend on the streamer's mode or on whether a streamer command is running.
 
-## What the P2 actually does {#sec-e4-actual}
+## What the P2 does {#sec-e4-actual}
 
 In this erratum a *Goertzel burst* is one DDS/Goertzel streamer command for the clocks it runs, and a *term* is the product the streamer adds to each accumulator on each of those clocks.
 
@@ -55,7 +55,7 @@ The difference of two idle readings is still one term short of your burst: the b
 
 **What any workaround must do:** take each burst's sums as the difference of two readings taken with the streamer idle, one before the burst and one after it. An idle `GETXACC` clears nothing, so the difference holds your burst whatever the accumulators held before it.
 
-**One way, proven on a real P2:** the `burst_sums` helper routine, which also steps around Erratum E5.
+**One way, proven on P2 hardware:** the `burst_sums` helper routine, which also steps around Erratum E5.
 
 ```pasm2
 { Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
@@ -97,13 +97,13 @@ sin_sum     long    0                           ' result: sine sum
 
 Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, whatever the accumulators held before the call: a *helper routine*.
 
-On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels, including 6 calls made while an earlier burst's term was still held; see *How it was proven on a real P2*.
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels, including 6 calls made while an earlier burst's term was still held; see *How it was proven on P2 hardware*.
 
 To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's: SINC1, no DAC output, input pins P0 to P3, a count of 256, with P3 inverted and summed and a lookup offset of `$0A5`.
 
 The routine takes its two readings with the streamer idle, where `GETXACC` clears nothing, so their difference is your burst whatever came before it. The zero bursts deal with Erratum E5: each is your mode word with a count of `ZERO_COUNT` (4) and `S` nibble `INPUT_NIB` ([15:12]) clear, so every term it forms is zero. The first delivers any term an earlier burst left held, so the before reading is complete; the second delivers your burst's last term before the after reading.
 
-**Other ways that meet the condition.** Any code that takes the two idle readings and subtracts meets this erratum's condition without the routine. The erratum test's run A did exactly that: it read 15,555 for a 256-clock burst in all eight repetitions, from five different starting values (see *How it was proven on a real P2*). That difference is 255 terms, not 256: it steps around this erratum but not Erratum E5, whose held last term only a later Goertzel burst delivers. The zero bursts in `burst_sums` are what add that term.
+**Other ways that meet the condition.** Any code that takes the two idle readings and subtracts meets this erratum's condition without the routine. The erratum test's run A did exactly that: it read 15,555 for a 256-clock burst in all eight repetitions, from five different starting values (see *How it was proven on P2 hardware*). That difference is 255 terms, not 256: it steps around this erratum but not Erratum E5, whose held last term only a later Goertzel burst delivers. The zero bursts in `burst_sums` are what add that term.
 
 **Cost.** Each call runs two zero bursts of 4 NCO rollovers each, at your `SETXFRQ` rate, besides your burst, and the cog waits in `WAITXFI` until each command has finished. The routine is 17 instructions, and 8 longs of cog RAM hold its operands and results.
 
@@ -121,7 +121,7 @@ The read does not depend on the update. `GETXACC` returns the accumulator's curr
 
 By the study's reading, every mode other than DDS/Goertzel behaves as the idle streamer does. One such mode was tested.
 
-## How it was proven on a real P2 {#sec-e4-proof}
+## How it was proven on P2 hardware {#sec-e4-proof}
 
 The test program runs on a P2 board at 200 MHz with nothing connected to pins P0 to P7. One cog, started from a `DAT` block, does all streamer work and issues every `GETXACC`; the debugger is confined to cog 0, which only waits for the results and prints them. The measuring cog drives P3 low as a plain output with its smart pin off, so the streamer's input bit for P3 holds a fixed level.
 

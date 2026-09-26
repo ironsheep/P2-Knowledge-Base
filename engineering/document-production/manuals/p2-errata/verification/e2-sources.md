@@ -6,8 +6,8 @@ the chapter maps to a source here.
 
 **v0.2.0 reshape (2026-09-26, task #359).** The chapter was restructured to the v0.2.0 shape:
 CAUTION box, opening, and the eight fixed headings (*What the P2 is documented to do*, *What
-the P2 actually does*, *What your program sees*, *The fix*, *Why it happens*, *How it was
-proven on a real P2*, *The test program*, *Status*). New in v0.2.0: the P2 Documentation's
+the P2 does*, *What your program sees*, *The fix*, *Why it happens*, *How it was
+proven on P2 hardware*, *The test program*, *Status*). New in v0.2.0: the P2 Documentation's
 *REGISTER INDIRECTION* statement is quoted (PDOC:1017-1018). **The printed fix now comes from
 the rig** (§3a): RIG:466-468, the A5 arm that ran on silicon. The v0.1.0 compile harness HARN is
 kept unchanged; the v0.2.0 chapter takes only its one-operand encoding check from it (§4).
@@ -16,7 +16,7 @@ kept unchanged; the v0.2.0 chapter takes only its one-operand encoding check fro
 change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
 (`{#sec-e2-fix}`) is now *A proven workaround* (`{#sec-e2-workaround}`), rule-first: *What any
 workaround must do* (chapter 101-102, the condition as in the front matter's summary table),
-then *One way, proven on a real P2* (104) and the block. The CAUTION box's third line is
+then *One way, proven on P2 hardware* (104) and the block. The CAUTION box's third line is
 *Workaround* (the condition, chapter 10-11); the status row is *Workaround proven on silicon*.
 New prose: chapter 128-129 (other arrangements meet the same condition; none other run). In
 ARCHIVE `ARM_FIX` is renamed `ARM_WORKAROUND` (ARCHIVE:48, 51, 53, 315, 324, 333, 409) and the

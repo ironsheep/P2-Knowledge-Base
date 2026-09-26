@@ -31,7 +31,7 @@ exactly those two differences.
 change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
 (`{#sec-e4-fix}`) is now *A proven workaround* (`{#sec-e4-workaround}`), rule-first: *What any
 workaround must do* (the condition, as in the front matter's summary table), *One way, proven
-on a real P2* and the block, then *Other ways that meet the condition*; the subsection *The
+on P2 hardware* and the block, then *Other ways that meet the condition*; the subsection *The
 fix's test* is now *The workaround's test* (`{#sec-e4-workaround-proof}`). The CAUTION box's
 third line is *Workaround* (the condition); the status row is *Workaround proven on silicon*.
 The archive copy of FIX is renamed `e4-e5-workaround-read-sums-test.spin2` (ARCHIVE-WKR below);
@@ -52,7 +52,7 @@ same instructions, same PASM measuring image, byte-identical to FIX's).
 
 | Item | Source |
 |---|---|
-| The 35-line `pasm2` block under *One way, proven on a real P2* in *A proven workaround* (30 lines pre-#360) | ARCHIVE-WKR:683–717 (post-#360), byte-identical: the lines strictly between the markers `' ---- DROP-IN BEGIN ----` (ARCHIVE-WKR:682) and `' ---- DROP-IN END ----` (ARCHIVE-WKR:718). Pre-#360: FIX:808–837, between FIX:807/FIX:838. The same block is printed in Erratum E5's *A proven workaround* |
+| The 35-line `pasm2` block under *One way, proven on P2 hardware* in *A proven workaround* (30 lines pre-#360) | ARCHIVE-WKR:683–717 (post-#360), byte-identical: the lines strictly between the markers `' ---- DROP-IN BEGIN ----` (ARCHIVE-WKR:682) and `' ---- DROP-IN END ----` (ARCHIVE-WKR:718). Pre-#360: FIX:808–837, between FIX:807/FIX:838. The same block is printed in Erratum E5's *A proven workaround* |
 | Widths | ARCHIVE-WKR:683–717: widest lines 73 columns (`burst_sums`/`sub` operand lines), all ≤ 76 (`awk` width pass); pre-#360, FIX:808–837 ran 15–69 columns; no tab and no non-ASCII byte in either file (`grep -n -P "[^\x20-\x7E]"` returns nothing) |
 | Byte-identity check | post-#360: the chapter's *A proven workaround* fence (chapter 61–95) equals ARCHIVE-WKR:683–717 (verified by `engineering/tools/verify-example-corpus-identity.py`, GREEN). Pre-#360 check (history): `awk 'NR==FNR { if (FNR>=808 && FNR<=837) r[++n]=$0; next } /^## The fix/ { f=1 } f && /^```pasm2/ { inb=1; next } inb && /^```/ { exit } inb { m++; if ($0 != r[m]) print "DIFF " m ": " $0 } END { print "compared " m " chapter lines with " n " rig lines" }' FIX <chapter>` → `compared 30 chapter lines with 30 rig lines`, no `DIFF` line |
 | Kind: helper routine | creation-guide §4.6; FIX:4–6 ("drop-in fix burst_sums: one routine that runs a DDS/Goertzel burst and returns its exact cosine and sine sums") |
@@ -115,7 +115,7 @@ END` block (widths 23–72) and compiled with `/usr/local/bin/pnut-ts -l <scratc
 | "a term is the product the streamer adds to each accumulator on each of those clocks" | DOC:4094–4095 ("multiplied by the bitstream sum ... then added into their respective 32-bit accumulators") |
 | "32-bit limit" | DOC:4095 ("32-bit accumulators") |
 
-## The continuous-stream paragraph (*What the P2 actually does*), new at v0.2.0
+## The continuous-stream paragraph (*What the P2 does*), new at v0.2.0
 
 | Chapter text | Source |
 |---|---|

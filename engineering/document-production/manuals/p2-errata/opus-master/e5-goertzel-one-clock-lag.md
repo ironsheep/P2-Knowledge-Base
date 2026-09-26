@@ -24,7 +24,7 @@ Its table of accumulation modes gives the SINC1 case (D[23] = `%0`) as `SIN_ACC 
 
 The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
-## What the P2 actually does {#sec-e5-actual}
+## What the P2 does {#sec-e5-actual}
 
 On each active clock of a Goertzel burst, each accumulator adds the term formed on the **previous** active clock, not the term formed on that clock. After a burst of N active clocks:
 
@@ -50,7 +50,7 @@ The difference of two idle readings is still needed as well, because `GETXACC` d
 
 **What any workaround must do:** deliver the burst's held last term to the accumulators before reading them, in SINC1 mode.
 
-**One way, proven on a real P2:** the `burst_sums` helper routine, which ends every burst with a zero-term burst before reading and also steps around Erratum E4.
+**One way, proven on P2 hardware:** the `burst_sums` helper routine, which ends every burst with a zero-term burst before reading and also steps around Erratum E4.
 
 ```pasm2
 { Runs one DDS/Goertzel burst (SINC1 only) and returns its exact
@@ -92,9 +92,9 @@ sin_sum     long    0                           ' result: sine sum
 
 Each call leaves in `cos_sum` and `sin_sum` the sums of your burst alone, all N of its terms, and leaves no term held for the next burst: a *helper routine*, for SINC1 mode.
 
-On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call; see *How it was proven on a real P2*.
+On silicon, this block returned exactly N terms on both sums in all 60 calls of its test program, for bursts of 1 to 1001 clocks at both input levels; in the 6 calls made while an earlier burst's term was still held, it added that term before its first reading, and it left no term for any later call; see *How it was proven on P2 hardware*.
 
-The routine is for SINC1 mode. In SINC2 mode its zero burst has not been tested as a flush, and the routine is not recommended there. SINC2 has its own, separate constraint, which is documented and is not this erratum: the P2 Documentation's note on Goertzel SINC2 mode, by Chip Gracey (2024.12.16), states that a varying number of iterations in a Goertzel cycle corrupts the current and next samples. Its two remedies held on a real P2 in the test program `e5-goertzel-sinc2-iteration-count-test.spin2` (2026-09-25, at 200 MHz, run twice). With every NCO cycle the same length (`SETXFRQ` of `$0080_0000`, 256 clocks per cycle, 2,048-clock commands chained with `XCONT`), 0 of 1,020 SINC2 samples were off. With each command issued by `XZERO`, at a `SETXFRQ` value of `$0080_0040` with 8 NCO cycles per command and of `$00A3_D70C` with 100 and with 25,000, every command kept one length and 0 of 1,020, 0 of 2,044 and 0 of 12 samples changed, where `XCONT` at the same settings gave 30, 12 and 4 corrupted samples.
+The routine is for SINC1 mode. In SINC2 mode its zero burst has not been tested as a flush, and the routine is not recommended there. SINC2 has its own, separate constraint, which is documented and is not this erratum: the P2 Documentation's note on Goertzel SINC2 mode, by Chip Gracey (2024.12.16), states that a varying number of iterations in a Goertzel cycle corrupts the current and next samples. Its two remedies held on P2 hardware in the test program `e5-goertzel-sinc2-iteration-count-test.spin2` (2026-09-25, at 200 MHz, run twice). With every NCO cycle the same length (`SETXFRQ` of `$0080_0000`, 256 clocks per cycle, 2,048-clock commands chained with `XCONT`), 0 of 1,020 SINC2 samples were off. With each command issued by `XZERO`, at a `SETXFRQ` value of `$0080_0040` with 8 NCO cycles per command and of `$00A3_D70C` with 100 and with 25,000, every command kept one length and 0 of 1,020, 0 of 2,044 and 0 of 12 samples changed, where `XCONT` at the same settings gave 30, 12 and 4 corrupted samples.
 
 This is the same routine Erratum E4 prints, because one call steps around both errata. To use it, put your `XINIT` D operand (the Goertzel mode word with your count) in `burst_mode` and your S operand in `burst_sel`, set `SETXFRQ` as your program already does, and `CALL #burst_sums` with the streamer idle. The values printed in `burst_mode` and `burst_sel` are the test program's.
 
@@ -119,7 +119,7 @@ When a burst ends, both registers stop updating. The last term formed stays in t
 
 A zero-term burst works for the same reason. Its first clock moves the held term into the accumulator, and its own terms are all zero, so it leaves zero behind.
 
-## How it was proven on a real P2 {#sec-e5-proof}
+## How it was proven on P2 hardware {#sec-e5-proof}
 
 **The arrangement.** One P2 board at 200 MHz, nothing attached to P3.
 

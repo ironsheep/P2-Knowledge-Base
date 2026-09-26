@@ -11,7 +11,7 @@ run*). No `PENDING-BENCH` comment remains in the chapter.
 change is a *workaround*, never a *fix* (a fix is a silicon revision). Section *The fix*
 (`{#sec-e7-fix}`) is now *A proven workaround* (`{#sec-e7-workaround}`), rule-first: *What any
 workaround must do* (CH:51, the condition, as in the front matter's summary table), *One way,
-proven on a real P2* (CH:53) and the block, then *Other ways that meet the condition* (CH:71).
+proven on P2 hardware* (CH:53) and the block, then *Other ways that meet the condition* (CH:71).
 The CAUTION box's third line is *Workaround* (the condition only; the `WAITX` detail moved to
 *One way*); the status row is *Workaround proven on silicon*. **Every `CH:` number below is the
 post-#360-wording chapter's** (they had lagged the chapter by three lines since the #360 block
@@ -130,7 +130,7 @@ is byte-identical to the as-run rig.** ARCHIVE-WKR = `examples-library/e7-workar
 
 | | |
 |---|---|
-| Chapter | CH:56–62, the `pasm2` fence under *One way, proven on a real P2* in *A proven workaround* (seven lines post-#360, four pre-#360) |
+| Chapter | CH:56–62, the `pasm2` fence under *One way, proven on P2 hardware* in *A proven workaround* (seven lines post-#360, four pre-#360) |
 | Source | ARCHIVE-WKR:1098–1104 (post-#360), between the markers ARCHIVE-WKR:1097 (`' ---- E7 WORKAROUND BLOCK: begin ...`) and ARCHIVE-WKR:1105 (`' ---- E7 WORKAROUND BLOCK: end ----`; both read `E7 FIX BLOCK` before the #360 wording change). Pre-#360: FIX:1152–1155, between the markers FIX:1151/1156. Byte-identical (post-#360: verified by `engineering/tools/verify-example-corpus-identity.py`, GREEN; pre-#360: widths 64, 72, 67, 65 on both sides); no tab characters in FIX or ARCHIVE-WKR (`grep -c -P "\t"` = 0) |
 | Registers | FIX:1181–1184; ARCHIVE-WKR:1130–1133 (same names, different line): `nowait long $8000_0000`, `hub_first` (mid[0]), `hub_next` (new[s]), `first_long` |
 | The run that proved it | LF (2026-09-26, run once): the block's lines FIX:1152–1155 ran as the `F_FIX` arm (FIX:1147–1161, `v_fix`), LF:483–547; 1,024 of 1,024 trials correct, first and second read. Details in *The workaround run* below. Reported in CH:69, CH:134–138, CH:186. LF ran the FIX build (pre-#360 literal `#12`), and the #360 renames left the measuring PASM byte-identical, so the verdict still applies to ARCHIVE-WKR. The erratum test's own basis (every spacing 16..44 correct in all 64 cells × 16 trials, L1/L2:1353–1479; spacing set there by `waitx c_dly`, a register) is kept in CH:69 alongside |

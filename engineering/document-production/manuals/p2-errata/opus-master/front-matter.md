@@ -19,7 +19,7 @@
 \vspace{0.35cm}
 {\fontsize{36}{42}\selectfont\bfseries P2 Errata\par}
 \vspace{0.3cm}
-{\Large\itshape Silicon Defects of the Propeller 2 Found So Far, Proven on Real Parts\par}
+{\Large\itshape Silicon Defects of the Propeller 2 Found So Far, Proven on P2 Hardware\par}
 \vspace{0.35cm}
 {\large September 2026\par}
 \vspace{0.2cm}
@@ -50,7 +50,7 @@
 \end{itemize}
 \vspace{0.05cm}
 Each erratum opens with what to expect, what happens instead, and what any
-workaround must do, then gives one workaround proven on a real P2.
+workaround must do, then gives one workaround proven on P2 hardware.
 }
 \end{tcolorbox}
 \vspace{0.05cm}
@@ -97,17 +97,17 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 **Parallax Inc.** for the Propeller 2, and for publishing its known silicon defects in the P2 Documentation. Errata E1 and E2 are Parallax's own findings.
 
 **Chip Gracey** for the design of the Propeller 2 and for the detailed silicon documentation that states what the part is meant to do. Every erratum here is measured against that statement.
-**The clean-room design study** for predicting errata E3, E4, E5 and E6 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on real parts, independently, for this manual. Erratum E7 was not predicted: it was found on the bench, by a test built to measure something else.
+**The clean-room design study** for predicting errata E3, E4, E5 and E6 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on P2 hardware, independently, for this manual. Erratum E7 was not predicted: it was found on the bench, by a test built to measure something else.
 
 ## Sources
 
 - **Parallax Propeller 2 Documentation v35 (Rev B/C)** (Chip Gracey, Parallax Inc.): what the design says, including its KNOWN BUGS section.
-- **Tests on real P2 parts** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
+- **Tests on P2 hardware** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
 - **P2 Knowledge Base YAML** (Iron Sheep Productions / P2 Knowledge Base Project): instruction semantics and encodings.
 
 ## About This Draft
 
-This is a **community review draft**. Its errata are confirmed on silicon, and so is every workaround it prints; its wording, its structure and its explanations are open for review. Any further behaviour that a test on a real part shows to be a silicon erratum will be added as E8 onward.
+This is a **community review draft**. Its errata are confirmed on silicon, and so is every workaround it prints; its wording, its structure and its explanations are open for review. Any further behaviour that a test on P2 hardware shows to be a silicon erratum will be added as E8 onward.
 
 Erratum numbers are **permanent**. A number is never reused or reassigned, so E3 means the same defect in every edition.
 
@@ -121,7 +121,7 @@ Every finding describes something the P2 does when a program runs, and each belo
 | **Anti-pattern** | Legal code that does something other than what it appears to do. |
 | **Open question** | The delivered material cannot settle it. |
 
-**This manual lists silicon errata only.** For an erratum there has to be a specific written statement of intent, in the design or in Parallax's published documentation, that the part contradicts on a real chip. Anti-patterns are documented, with their safe forms, in the companion manual *P2 Anti-Patterns*. An open question is published as neither.
+**This manual lists silicon errata only.** For an erratum there has to be a specific written statement of intent, in the design or in Parallax's published documentation, that P2 hardware contradicts. Anti-patterns are documented, with their safe forms, in the companion manual *P2 Anti-Patterns*. An open question is published as neither.
 
 The list is open-ended. These are the silicon errata **found so far**.
 
@@ -132,11 +132,11 @@ Each erratum has a chapter of its own, headed with its number: *Erratum E3* desc
 | Section | What it gives |
 |---|---|
 | **What the P2 is documented to do** | the written statement the part contradicts, whose it is, and where it is written |
-| **What the P2 actually does** | the defect, stated precisely |
+| **What the P2 does** | the defect: which instructions, in what arrangement, with what result |
 | **What your program sees** | what the defect looks like in a program, and what it does not affect |
-| **A proven workaround** | what any workaround must do, then one way that meets it: a drop-in block of code proven on a real P2, what it guarantees, and what it costs |
+| **A proven workaround** | what any workaround must do, then one way that meets it: a drop-in block of code proven on P2 hardware, what it guarantees, and what it costs |
 | **Why it happens** | the mechanism, at the level of the programmer's model |
-| **How it was proven on a real P2** | the test on real silicon, its controls, and the measured values |
+| **How it was proven on P2 hardware** | the test on P2 hardware, its controls, and the measured values |
 | **The test program** | a walkthrough of the test, and its filename in the examples archive |
 | **Status** | who published it, who found it, what is confirmed, and what it affects |
 

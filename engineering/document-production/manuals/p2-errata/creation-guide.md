@@ -10,7 +10,7 @@ Read this, `voice-guide.md` and `CLASSIFICATION-GUIDANCE.md` before writing a li
 | | |
 |---|---|
 | **Title** | P2 Errata (working title) |
-| **Subtitle** | Silicon Defects of the Propeller 2 Found So Far, Proven on Real Parts |
+| **Subtitle** | Silicon Defects of the Propeller 2 Found So Far, Proven on P2 Hardware |
 | **Slug** | `p2-errata` |
 | **Doc class** | reference |
 | **Reader** | a P2 programmer who needs to know where the chip does not do what its design says, what that looks like in a program, and how to write around it |
@@ -25,7 +25,7 @@ restated here or anywhere else in this folder. Three consequences govern authori
   erratum, however much it bites. There is **no** "behaviours mistaken for errata" section.
   The front matter defines the three classes, once, and points to the peer manual.
 - **Final classification is made here**, where the clean-room reading, Parallax's published
-  intent and a run on real silicon meet. Published intent (the Silicon Doc) counts as design
+  intent and a run on P2 hardware meet. Published intent (the Silicon Doc) counts as design
   material.
 - **Proven on silicon before it enters.** An item whose bench run has not decided it is not a
   chapter. (At v0.2.0 the second bench session decided three more items: the DAC-mode ADC
@@ -91,19 +91,19 @@ fix is a silicon revision), and the manual offers **a** proven workaround, never
    **whose** it is and where (*the P2 Documentation, section …*). For a vendor-published
    erratum, the published statement. **Quote Parallax documentation exactly.** Never quote
    design source code (see §6).
-4. `## What the P2 actually does`: the defect, stated precisely: which instructions, in what
+4. `## What the P2 does`: the defect, stated precisely: which instructions, in what
    arrangement, with what result.
 5. `## What your program sees`: the defect as it shows up in a program, including what does
    **not** go wrong (e.g. "the data lands correctly; only the pointer is wrong").
 6. `## A proven workaround`: **rule-first.** Open with the condition any workaround must
-   meet (**What any workaround must do:** …), then **One way, proven on a real P2:** and the
+   meet (**What any workaround must do:** …), then **One way, proven on P2 hardware:** and the
    drop-in code block, byte-identical to the block a test program ran on silicon, then one
    sentence of guarantee naming its kind: *one-time startup workaround*, *rule at each use*,
    or *helper routine*. Then, where they exist, other ways that meet the same condition; then
    its cost and its limits. Only a block proven on a part is printed as the proven
    workaround; if none is proven, say so plainly and name any change given as unproven.
 7. `## Why it happens`: the theory of operation, **in our own words** (§6).
-8. `## How it was proven on a real P2`: the test on real silicon: what it arranges, its
+8. `## How it was proven on P2 hardware`: the test on P2 hardware: what it arranges, its
    controls, what it measured, and the numbers. Stated so a reader could rebuild the test. The
    run that proved the workaround is reported here too.
 9. `## The test program`: a walkthrough of the rig with short excerpts, and the filename in
