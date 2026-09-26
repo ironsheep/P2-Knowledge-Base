@@ -1108,9 +1108,10 @@ entry. *Source:* `…/tests/test-rdfast-wrfast-readiness-boundary.spin2`.
 
 ---
 
-## P2 errata — fix tests (silicon, 2026-09-26)
+## P2 errata — workaround tests (silicon, 2026-09-26)
 
-Three tests that each run, **byte for byte**, the drop-in fix P2 Errata v0.2.0 prints (between marker
+Three tests that each run, **byte for byte**, the drop-in workaround P2 Errata v0.2.0 prints (a
+*workaround*, never a *fix*: the defect stays and code steps around it — Stephen, 2026-09-26) (between marker
 comments in the rig), and reproduce the erratum in the **same run** as a positive control — a rig that
 cannot see the defect prints `RIG FAIL`, never a verdict. Same house rig as EF-066..074; same bench
 board (free pins P0–P7, P32–P47 only), 200 MHz, `pnut-ts` 1.55.8 `-d`, RAM download with reset,
@@ -1118,7 +1119,7 @@ board (free pins P0–P7, P32–P47 only), 200 MHz, `pnut-ts` 1.55.8 `-d`, RAM d
 Every verdict **re-derived from the raw log lines**. Structural yes/no behaviours on one part, as
 EF-066..070. Campaign: `campaigns/2026-09-p2-errata-predictions/` (tests 9–11).
 
-### EF-075 · E3's fix holds: a keeper cog started in cog 7 as the first line of `main()` keeps cogs 4–7 reading the current 64-bit counter across wraps — `CONFIRMED`
+### EF-075 · E3's workaround holds: a keeper cog started in cog 7 as the first line of `main()` keeps cogs 4–7 reading the current 64-bit counter across wraps — `CONFIRMED`
 *How proven:* `e3-fix-keeper-cog-test` — the drop-in (`KEEPER_COG = 7`, a `jmp #keeper` loop,
 `coginit(KEEPER_COG, @keeper, 0)` as the first line of `main()`) at boot, then samplers started and
 stopped in cogs 4, 5, 6 around it; each reading = 10 bracketed `GETCT WC`/`GETCT` pairs against cog 0;
@@ -1133,7 +1134,7 @@ wrap count on all 55 alive lines; 0 bracket failures. **Kind:** one-time startup
 `jmp` loop only (a keeper parked in `WAITX`/`WAITATN` not tested); cog 7 only; 200 MHz. *Source:*
 `…/tests/e3-fix-keeper-cog-test.spin2`.
 
-### EF-076 · E4 and E5's fix holds: the `burst_sums` helper routine returns exactly N terms of a SINC1 Goertzel burst, whatever ran before it — `CONFIRMED`
+### EF-076 · E4 and E5's workaround holds: the `burst_sums` helper routine returns exactly N terms of a SINC1 Goertzel burst, whatever ran before it — `CONFIRMED`
 *How proven:* `e4-e5-fix-read-sums-test` — the printed routine (zero burst built from the caller's D/S
 with count 4 and `S[15:12]` = 0 to deliver any held term, idle `GETXACC`, the caller's burst,
 `WAITXFI`, zero burst, idle `GETXACC`, subtract), called 10 times back to back per record with
@@ -1153,7 +1154,7 @@ reproduced. Controls: the routine's zero-burst words `$F007_0004` /
 *Limits:* SINC1 only (SINC2: EF-072, documented, not this fix); NCO `$8000_0000`, P3 input only, cog
 RAM, 200 MHz. *Source:* `…/tests/e4-e5-fix-read-sums-test.spin2`.
 
-### EF-077 · E7's fix holds: `WAITX #12` after the no-wait `RDFAST` (16 clocks to the blocking one) gives a correct first read in every hub alignment — `CONFIRMED`
+### EF-077 · E7's workaround holds: `WAITX #12` after the no-wait `RDFAST` (16 clocks to the blocking one) gives a correct first read in every hub alignment — `CONFIRMED`
 *How proven:* `e7-fix-rdfast-spacing-test` — the printed block (`rdfast nowait,hub_first` /
 `waitx #12` / `rdfast #0,hub_next` / `rflong first_long`) swept over all 8 slices × 8 phases × 16
 trials, first and second read checked; beside it the unspaced sweep of EF-074 (gaps 2..44) as the
@@ -1169,10 +1170,33 @@ at each use — at least 16 clocks from the start of the no-wait `RDFAST` to the
 one. *Limits:* only `WAITX` tested between them (no hub-stalling instructions); the `WRFAST` twin not
 tested. *Source:* `…/tests/e7-fix-rdfast-spacing-test.spin2`.
 
+**The reader copies re-run (2026-09-26, Stephen, same bench, once each).** P2 Errata ships the 12
+programs as style-conformed reader copies (`manuals/p2-errata/examples-library/`, the three
+workaround tests renamed `e3-/e4-e5-/e7-workaround-…`): every measuring PASM image is
+byte-identical to the as-run build, cog-0 Spin2 was restyled. Each downloaded `.bin` equals a fresh
+compile of the archive source. Compared line by line with the original runs (logs in
+`p2-errata/audit/verification-tests/logs-archive/debug_260926-1444*…1525*`): **every analysed
+value, class and verdict matched in all 12.** Differences, all by design or by nature: labels and
+ids (`O17`→`Erratum E1`, `F_FIX`→`W_BLOCK`, `F1`→`W1`, `accx`→`xsum`, "FIX"→"WORKAROUND"),
+absolute hub addresses (E1 `before=/after=` +$18 as predicted; E7 and E7-workaround `bases:`),
+E3 counter timestamps, E6's C2 ADC toggle counts (2,041–2,113; run-to-run by nature), and the
+SINC2 test's JIT-S1/JIT-S2 arms (jittered by design). **One unexplained:** SINC2 arm XZS-S2's
+first sample `k=0` read x = 90,090,539 (y = 270,271,617) where both original runs read
+92,185,644 (276,556,932) — a start-up sample the program excludes (`WARM = 3`); every analysed
+sample of that arm matched. Recorded as an open question below.
+
 
 ## Open / pending empirical questions
 
-- *(none currently)*
+- **SINC2 XZS-S2 start-up sample moved with the restyled cog-0 code (2026-09-26).** In
+  `test-goertzel-sinc2-iteration-count` / its reader copy, the first `XZERO` arm's `k=0` sample
+  read x = 92,185,644 in both original runs (2026-09-25) and 90,090,539 in the reader-copy run;
+  the difference, 2,095,105, is 2^21 − 2,047, and y moved by exactly 3× that (C_Y = 3·C_X). The
+  measuring PASM is byte-identical; the cog-0 Spin2 that sequences the arms was restyled, so the
+  leading hypothesis is that what the first-stage integral holds when this arm's first
+  `GETXACC` lands depends on cog-0 timing between arms. Excluded from analysis (`WARM = 3`); no
+  verdict or analysed value changed. To decide: re-run the as-run build and the reader copy
+  back to back and compare `k=0` of every SINC2 arm.
 
 ### Resolved
 - **Labeled value in a named TERM (F-136 sub-item) — RESOLVED 2026-06-18.** Settled from the

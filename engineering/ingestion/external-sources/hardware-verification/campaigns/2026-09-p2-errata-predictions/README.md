@@ -33,6 +33,12 @@ verdict, if it cannot). Verdicts re-derived from the raw log lines.
 | 10 | `e4-e5-fix-read-sums-test.spin2` | E4 + E5: the `burst_sums` helper routine (SINC1) | `CONFIRMED` | EF-076 |
 | 11 | `e7-fix-rdfast-spacing-test.spin2` | E7: `WAITX #12` after the no-wait `RDFAST` (16 clocks to the blocking one) | `CONFIRMED` | EF-077 |
 
+**Reader copies (2026-09-26):** P2 Errata ships these 11 programs (12 files) as style-conformed
+reader copies in `manuals/p2-errata/examples-library/` (the workaround tests renamed
+`…-workaround-…`); measuring PASM byte-identical, cog-0 Spin2 restyled. All 12 were re-run: every
+analysed value, class and verdict matched the runs above (ledger, after EF-077). One start-up
+sample of the SINC2 test moved; it is an open question in the ledger.
+
 ## How the tests were built — independence is the point
 
 Each test was written by an agent given **only its prediction**, with no access to the study's
