@@ -1,12 +1,26 @@
 keyword: "VAR"
 type: keyword
 category: "Block Structure"
+aliases:
+  - instance variables
+  - VAR variables
+  - per-instance state
+  - object state
 
 description: |
   Variables section — declares instance variables allocated in hub memory
   per object instance. Supports BYTE, WORD, and LONG types, typed pointers
   (^BYTE, ^WORD, ^LONG, ^structName), structure instances, and arrays.
   Variables without an explicit type default to LONG.
+
+instance_model: |
+  Think of VAR variables as INSTANCE variables and DAT variables as CLASS variables.
+  The Spin2 documentation: "each instance of this object will have its own VAR memory".
+  Choose VAR for state that belongs to one instance — its configuration, its counters,
+  and a mailbox or buffer it shares only with the cog it started itself (that is still
+  instance state: "shared" with its own cog, not across instances). Put in DAT only what
+  every instance must share (see language/spin2/keywords/DAT.yaml instance_model). VAR space is zeroed per
+  instance; DAT can be pre-initialized.
 
 type_propagation: |
   In VAR blocks, the type specifier is STICKY — it applies to ALL subsequent
@@ -42,5 +56,8 @@ related:
   - language/spin2/keywords/LONG.yaml
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/concepts/type-propagation.yaml
+  - language/spin2/keywords/DAT.yaml
+  - language/spin2/concepts/object-image-dedup.yaml
+  - language/fundamentals/variable-scoping-best-practices.yaml
 
 oneliner: "Variables section — declares instance variables with sticky type propagation"

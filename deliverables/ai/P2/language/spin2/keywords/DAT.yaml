@@ -1,12 +1,30 @@
 keyword: "DAT"
 type: keyword
 category: "Block Structure"
+aliases:
+  - class variables
+  - DAT variables
+  - shared object data
+  - singleton state
+  - static data
 
 description: |
   Data section — contains initialized data declarations and inline PASM2 assembly.
   Data is stored in hub memory. Supports BYTE, WORD, LONG types, BYTEFIT/WORDFIT
   range-checked types, string literals, array repetition with [count], and
   inline type overrides for individual values.
+
+instance_model: |
+  Think of DAT variables as CLASS variables and VAR variables as INSTANCE variables.
+  A DAT region exists once per compiled object image and every instance of that object
+  reads and writes the same bytes; each instance gets its own VAR space. (Precisely:
+  instances share DAT while their images are byte-identical — a CON override that
+  changes the image bytes gives that instance its own DAT; see object-image-dedup.)
+  Choose DAT for state every instance must share: a singleton hardware owner, one lock
+  or one worker cog that serves all instances. Choose VAR for state that belongs to one
+  instance: its configuration, and a mailbox or buffer shared only with the cog THAT
+  instance started — in DAT, a second instance would silently overwrite the first's.
+  A PASM image in DAT is the code each started cog loads; its hub copy is shared.
 
 type_propagation: |
   In DAT blocks, the type specifier sets the LINE'S BASE TYPE for all
@@ -41,8 +59,12 @@ notes:
   - "Inline type overrides apply to single value only — line base type reasserts after"
   - "Supports BYTEFIT/WORDFIT for range-checked declarations"
   - "Can contain inline PASM2 assembly after ORG/ORGH directives"
+  - "DAT is class state (shared by instances of one image); VAR is instance state — see instance_model"
 
 related:
+  - language/spin2/keywords/VAR.yaml
+  - language/spin2/concepts/object-image-dedup.yaml
+  - language/fundamentals/variable-scoping-best-practices.yaml
   - language/spin2/keywords/BYTE.yaml
   - language/spin2/keywords/WORD.yaml
   - language/spin2/keywords/LONG.yaml

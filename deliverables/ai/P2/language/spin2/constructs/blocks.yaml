@@ -139,7 +139,11 @@ block_types:
     why_this_matters: |
       DAT is crucial for P2's multi-COG architecture:
       1. PASM2 code MUST be in DAT (COGs load from hub)
-      2. Shared buffers save memory (mailboxes, queues)
+      2. Buffers ALL instances share (e.g. the mailbox of one worker cog that
+         serves every instance). A mailbox for a cog EACH instance starts is
+         instance state and belongs in VAR — in DAT, instances overwrite each
+         other. DAT = class variables, VAR = instance variables (see
+         language/spin2/keywords/DAT.yaml instance_model).
       3. Lookup tables used by multiple instances
       4. Constants that need runtime address access
     
@@ -153,10 +157,10 @@ block_types:
         JMP   #entry
       x     LONG  0
         
-        ' Shared data structures
+        ' Shared data structures (one copy for ALL instances)
         ALIGNL
       mailbox
-        LONG  0[16]    ' 16-long mailbox
+        LONG  0[16]    ' 16-long mailbox of the ONE shared worker cog
         
         ' String constants
       message

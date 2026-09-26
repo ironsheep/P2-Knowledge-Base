@@ -42,7 +42,7 @@ detailed_scoping_rules:
     visibility: "All methods within the object"
     
   dat_scope:
-    description: "Shared variables - all instances share same memory"
+    description: "Shared (class) variables - all instances of one compiled object image share the same memory; a CON override that changes the image bytes gives an instance its own DAT (see language/spin2/concepts/object-image-dedup.yaml)"
     lifetime: "Exists for program lifetime"
     initialization: "Can be pre-initialized with data"
     visibility: "All methods in all instances of the object"

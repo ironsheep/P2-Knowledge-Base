@@ -111,6 +111,30 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
 
+## DAT is class state, VAR is instance state — the keyword entries never said so (2026-09-26) — F-475
+
+### F-475 — `DAT.yaml` / `VAR.yaml` did not state the class/instance model or how to choose, and `blocks.yaml` advised DAT for "shared buffers (mailboxes, queues)" unqualified — `DONE` 2026-09-26
+
+**Where:** `language/spin2/keywords/DAT.yaml`, `VAR.yaml`, `language/spin2/constructs/blocks.yaml:142`,
+`language/fundamentals/variable-scoping-best-practices.yaml` `dat_scope`.
+**What was wrong:** the model lived only in `object-image-dedup.yaml` and `variable-scoping`; the
+keyword entries an agent reaches first said nothing about instances (DAT) or gave no choice rule
+(VAR), and `blocks.yaml` listed mailboxes as a reason to use DAT. A mailbox for a cog EACH
+instance starts is instance state — in DAT, a second instance overwrites the first's. Surfaced by
+Stephen, 2026-09-26, correcting a P2 Errata style-audit finding that read the central authoring
+guide's §3.6 ("shared buffers MUST use DAT") literally: *"Think of `dat` variables as class
+variables and `var` variables as instance variables."*
+> **Applied 2026-09-26:** `instance_model` + aliases (class/instance variables, singleton state…)
+> added to `DAT.yaml` and `VAR.yaml`, each linking the other, `object-image-dedup.yaml` and
+> `variable-scoping`; `blocks.yaml`'s DAT reason #2 now says a mailbox belongs in DAT only when
+> ONE worker cog serves every instance, else VAR, and its example comment says so;
+> `variable-scoping`'s `dat_scope` carries the per-compiled-image nuance; `object-image-dedup`
+> links back. **Source trace:** Spin2 v55 (`sources/spin2-v55/spin2-v55-text.txt:181` "each
+> instance of this object will have its own VAR memory", `:238`); `object-image-dedup.yaml` (DAT
+> shared per compiled image, measured). Verified: `verify-yaml-format.py` clean on the 5 files,
+> `validate-crossref-keys.py` all resolve. The central guide's §3.6 wording is a nomination for
+> central (skill-evolution candidates), not a KB defect.
+
 ## The errata fixes are now proven on silicon (2026-09-26, EF-075..077) — F-474
 
 ### F-474 — the KB's `silicon_errata` entries for E3, E4/E5 and E7 should give the fix that ran on silicon, not an unproven workaround — `CONFIRMED`
