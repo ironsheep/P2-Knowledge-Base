@@ -23,5 +23,10 @@ The rigs' internal filenames (`test-o17-…`, `test-so80-…`) are not reader na
 name the examples-archive copies instead (`e1-setq-block-pointer-step-test.spin2`, and so on),
 which are the rigs with their internal header notes removed and their code unchanged.
 
+**Quoted log lines use renamed accumulator labels.** Before publication (2026-09-26) the study's
+own names for the Goertzel accumulations were replaced in the tracked rigs and here by `xsum`/`ysum`
+(and `xterm`/`yterm` for the held term). The raw logs, run before the rename, print the original
+names in those places; every number in a quoted line is unchanged.
+
 Any mention of `/home/vscode/.local/pnut/…` in a sidecar is the brief's original compiler path,
 which no longer exists; `/usr/local/bin/pnut-ts` is 1.55.8 since 2026-09-23.

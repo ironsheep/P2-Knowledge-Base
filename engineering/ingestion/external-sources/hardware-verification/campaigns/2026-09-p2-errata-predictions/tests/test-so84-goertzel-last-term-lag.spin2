@@ -10,11 +10,11 @@
 '' =============================================================================
 
 { WHAT IS TESTED (brief BRIEF-SO84, Parts 2 and 5)
-    Prediction: in DDS/Goertzel mode the per-clock term register (acca) and the
-    readable accumulator (accx) update on the same clock edge, so accx adds the
-    term acca held BEFORE the edge. A burst of N active clocks therefore adds
-    L + T[1] + ... + T[N-1] to accx (L = the term acca held when the burst
-    began) and leaves T[N] stranded in acca, which no instruction reads. The
+    Prediction: in DDS/Goertzel mode the per-clock term register (xterm) and the
+    readable accumulator (xsum) update on the same clock edge, so xsum adds the
+    term xterm held BEFORE the edge. A burst of N active clocks therefore adds
+    L + T[1] + ... + T[N-1] to xsum (L = the term xterm held when the burst
+    began) and leaves T[N] stranded in xterm, which no instruction reads. The
     last term is not lost: the NEXT Goertzel burst adds it on its first clock.
     Nobody has observed this on a part; this program is written to be able to
     show it WRONG.
@@ -40,7 +40,7 @@
 
   CONSTRUCTION (brief Part 2, "Constructing a burst...")
     Mode word D = $F007_0000 + count: [15:12]=%1111 and [2:0]=%111 (Goertzel),
-      [11:8]=0 (no DACs), [7]=0 (sinc1 -> acca REPLACED each clock), [6:3]=0
+      [11:8]=0 (no DACs), [7]=0 (sinc1 -> xterm REPLACED each clock), [6:3]=0
       (pin group 0 = P0..P3).
     IMM (S): K burst = $0000_80C3: imm[15]=1 (sum pin 4g+3 only), imm[14:12]=0,
       imm[19]=0, imm[11:9]=0, imm[8:0]=$0C3 (LUT address).
@@ -92,14 +92,14 @@
     MULT  : d1..d5 whole multiples of 19.
     C     : |C_meas| = 19, constant per level, sign flips with P3.
   PREMISE CHECKS (the brief names these as NOT-PROVEN outcomes)
-    IDLE  : R1b - R1 = 0 in every sequence. Nonzero -> REFUTED (accx moved
+    IDLE  : R1b - R1 = 0 in every sequence. Nonzero -> REFUTED (xsum moved
             while idle) -- unless it moved by >= 500*19, which means the burst
             never ended (construction failed) -> INCONCLUSIVE.
     RUN-ON: if the ZZ control fails ONLY because B reads 0 after a nonzero B0,
-            accx is being cleared by a read -> REFUTED (reads are not the
+            xsum is being cleared by a read -> REFUTED (reads are not the
             running totals the brief traces).
 
-  PREDICTIONS, accx, in units of the measured C (written before the run)
+  PREDICTIONS, xsum, in units of the measured C (written before the run)
     TRUE  (lag, brief)  : R1b-R1 = 0, d1 = (N-1)*C, d2 = C  (R2-B = N*C)
                           carry arm: d3 = (N-1)*C, d4 = N*C, d5 = C
     FALSE (no lag)      : d1 = N*C,     d2 = 0   (carry: N*C, N*C, 0)
@@ -118,8 +118,8 @@
                    d2=b*C); or the premise checks above fail.
     INCONCLUSIVE : results not repeatable across repetitions/levels; or Part 5
                    pair TRUE but the carry arm disagrees; or burst never ended.
-    accy (sin byte, |C| = 37) is reported as CORROBORATION only; the brief
-    traces accx, and the sin byte's position is from the KB, not the brief.
+    ysum (sin byte, |C| = 37) is reported as CORROBORATION only; the brief
+    traces xsum, and the sin byte's position is from the KB, not the brief.
 
   DEPENDS ON CLAIMS THE BRIEF MARKS INFERRED / UNDETERMINED
     - "same clock does not mean same value" (nonblocking semantics): INFERRED;
@@ -135,9 +135,9 @@
   VERIFIED OPCODES (pnut-ts v1.55.8, `pnut-ts -d -l`, read from the .lst hex
   dump; hub offsets are object-relative, cog addresses in brackets):
     getxacc b0x_ [$070]      $FD60E01E  [27:21]=1101011, [8:0]=000011110 (= brief's
-                                         op2 pattern; D=$070). All 8 GETXACCs
+                                         decode pattern; D=$070). All 8 GETXACCs
                                          share the form $FD60xx1E.
-    mov b0y_, 0-0            $F600E200  S=0: the follower that receives accy
+    mov b0y_, 0-0            $F600E200  S=0: the follower that receives ysum
     xinit dz_, imz_          $FCA0C061  [27:19]=110010100 (brief: 1100101_0?),
                                          L=I=0, D=$060 (dz_), S=$061 (imz_)
     xinit dk_, imk_          $FCA0D662  same pattern, D=$06B (dk_), S=$062 (imk_)
@@ -219,7 +219,7 @@ PUB main() | engineCog, tstart
 '' done-flag, then print the full report and verdict.
 
   longfill(@mbox, 0, HDR + NREC * RECL)
-  debug("=== SO84: does accx trail acca by one active clock? ===")
+  debug("=== SO84: does xsum trail xterm by one active clock? ===")
   predictions()
   engineCog := coginit(COGEXEC_NEW, @engine, @mbox)
   if engineCog < 0
@@ -264,7 +264,7 @@ PRI predictions() | lvl, burstN, predC
 ' Print the fixed-before-the-run prediction table for every (P3 level, N)
 ' combination, under each named hypothesis.
 
-  debug("PREDICTIONS for accx, fixed before the run (C = per-clock term):")
+  debug("PREDICTIONS for xsum, fixed before the run (C = per-clock term):")
   debug("  brief sign rule, imm[19]=0: C = -19 with P3 LOW, +19 with P3 HIGH")
   debug("  TRUE  (lag, brief): R1b-R1 = 0, d1 = (N-1)*C, d2 = C (R2-B = N*C)")
   debug("  FALSE (no lag)    : d1 = N*C, d2 = 0")
@@ -328,7 +328,7 @@ PRI report() | seqIdx, bContinue
   if bContinue
     debug("controls: LUT ok, pin ok, idle ok (R1b-R1 = 0), zero-after-zero ok, all deltas whole multiples of 19, C ok")
     debug(" ")
-    accy_summary()
+    ysum_summary()
     debug(" ")
     classify_and_verdict()
 
@@ -350,8 +350,8 @@ PRI print_record(seqIdx)
 ' @param seqIdx - sequence index, 0..NREC-1
 
   debug("#", udec_(seqIdx), " P3=", udec_(rv(seqIdx, O_LEVEL)), " rep=", udec_((seqIdx / 2) // REPS), " N=", udec_(rv(seqIdx, O_N)), " pin IN before/after=", udec_(rv(seqIdx, O_PINB)), "/", udec_(rv(seqIdx, O_PINA)))
-  debug("   accx B0=", sdec_long_(rv(seqIdx, O_B0X)), " B=", sdec_long_(rv(seqIdx, O_BX)), " R1=", sdec_long_(rv(seqIdx, O_R1X)), " R1b=", sdec_long_(rv(seqIdx, O_R1BX)), " R2=", sdec_long_(rv(seqIdx, O_R2X)), " R3=", sdec_long_(rv(seqIdx, O_R3X)), " R4=", sdec_long_(rv(seqIdx, O_R4X)), " R5=", sdec_long_(rv(seqIdx, O_R5X)))
-  debug("   accy B0=", sdec_long_(rv(seqIdx, O_B0Y)), " B=", sdec_long_(rv(seqIdx, O_BY)), " R1=", sdec_long_(rv(seqIdx, O_R1Y)), " R1b=", sdec_long_(rv(seqIdx, O_R1BY)), " R2=", sdec_long_(rv(seqIdx, O_R2Y)), " R3=", sdec_long_(rv(seqIdx, O_R3Y)), " R4=", sdec_long_(rv(seqIdx, O_R4Y)), " R5=", sdec_long_(rv(seqIdx, O_R5Y)))
+  debug("   xsum B0=", sdec_long_(rv(seqIdx, O_B0X)), " B=", sdec_long_(rv(seqIdx, O_BX)), " R1=", sdec_long_(rv(seqIdx, O_R1X)), " R1b=", sdec_long_(rv(seqIdx, O_R1BX)), " R2=", sdec_long_(rv(seqIdx, O_R2X)), " R3=", sdec_long_(rv(seqIdx, O_R3X)), " R4=", sdec_long_(rv(seqIdx, O_R4X)), " R5=", sdec_long_(rv(seqIdx, O_R5X)))
+  debug("   ysum B0=", sdec_long_(rv(seqIdx, O_B0Y)), " B=", sdec_long_(rv(seqIdx, O_BY)), " R1=", sdec_long_(rv(seqIdx, O_R1Y)), " R1b=", sdec_long_(rv(seqIdx, O_R1BY)), " R2=", sdec_long_(rv(seqIdx, O_R2Y)), " R3=", sdec_long_(rv(seqIdx, O_R3Y)), " R4=", sdec_long_(rv(seqIdx, O_R4Y)), " R5=", sdec_long_(rv(seqIdx, O_R5Y)))
   debug("   dx: B-B0=", sdec_(dd(seqIdx, O_BX, O_B0X)), " d1=", sdec_(dd(seqIdx, O_R1X, O_BX)), " R1b-R1=", sdec_(dd(seqIdx, O_R1BX, O_R1X)), " d2=", sdec_(dd(seqIdx, O_R2X, O_R1X)), " d3=", sdec_(dd(seqIdx, O_R3X, O_R2X)), " d4=", sdec_(dd(seqIdx, O_R4X, O_R3X)), " d5=", sdec_(dd(seqIdx, O_R5X, O_R4X)))
   debug("   dy: B-B0=", sdec_(dd(seqIdx, O_BY, O_B0Y)), " d1=", sdec_(dd(seqIdx, O_R1Y, O_BY)), " R1b-R1=", sdec_(dd(seqIdx, O_R1BY, O_R1Y)), " d2=", sdec_(dd(seqIdx, O_R2Y, O_R1Y)), " d3=", sdec_(dd(seqIdx, O_R3Y, O_R2Y)), " d4=", sdec_(dd(seqIdx, O_R4Y, O_R3Y)), " d5=", sdec_(dd(seqIdx, O_R5Y, O_R4Y)))
 
@@ -367,7 +367,7 @@ PRI check_pins() | seqIdx, lvl
 
 
 PRI idle_premise() : bIdleOk | seqIdx, deltaVal, nbad, worst
-' The brief's premise: accx does not move while the streamer is idle.
+' The brief's premise: xsum does not move while the streamer is idle.
 '
 ' @returns bIdleOk - TRUE when R1b = R1 in every sequence; FALSE prints the
 '   verdict (INCONCLUSIVE or REFUTED) before returning
@@ -384,14 +384,14 @@ PRI idle_premise() : bIdleOk | seqIdx, deltaVal, nbad, worst
   if not bIdleOk
     debug("PREMISE FAIL: R1b-R1 nonzero in ", udec_(nbad), " of 16 sequences, largest |R1b-R1| = ", udec_(worst))
     if worst >= (WAIT_R1B / 2) * G_COS
-      debug("VERDICT: INCONCLUSIVE - accx still moving ~1000 clocks after the burst: the count-down (burst end) of the construction did not hold")
+      debug("VERDICT: INCONCLUSIVE - xsum still moving ~1000 clocks after the burst: the count-down (burst end) of the construction did not hold")
     else
-      debug("VERDICT: REFUTED - accx moved while the streamer was idle (R1b-R1 <> 0); the premise every reading rests on fails")
+      debug("VERDICT: REFUTED - xsum moved while the streamer was idle (R1b-R1 <> 0); the premise every reading rests on fails")
 
 
 PRI runon_premise() : bRunonOk | seqIdx, nbad, nclr, nb0
 ' ZZ control: a zero burst after a zero burst adds nothing (every hypothesis).
-' If it fails ONLY because B reads 0 after a nonzero B0, accx is being cleared
+' If it fails ONLY because B reads 0 after a nonzero B0, xsum is being cleared
 ' by a read (not running totals) -- the brief's traced idle-read claim fails.
 '
 ' @returns bRunonOk - TRUE when the ZZ control holds in every sequence; FALSE
@@ -412,7 +412,7 @@ PRI runon_premise() : bRunonOk | seqIdx, nbad, nclr, nb0
     if nclr == nbad and nclr == nb0
       debug("PREMISE FAIL: in every sequence with B0 <> 0 (", udec_(nb0), ") a zero burst then read B = 0")
       debug("  Under clear-on-read semantics read d1 = R1 and d2 = R2 directly from the raw rows above.")
-      debug("VERDICT: REFUTED - accx does not run on across reads: a GETXACC clears it (at the read or at the next burst)")
+      debug("VERDICT: REFUTED - xsum does not run on across reads: a GETXACC clears it (at the read or at the next burst)")
     else
       debug("RIG FAIL: zero-burst control, B-B0 <> 0 in ", udec_(nbad), " of 16 sequences (expected 0: a zero burst after a zero burst adds nothing)")
       debug("NO VERDICT: the zero burst does not behave as constructed")
@@ -421,7 +421,7 @@ PRI runon_premise() : bRunonOk | seqIdx, nbad, nclr, nb0
 PRI check_multiples(ch) : nbad | seqIdx, magC, chOff, deltaIdx, deltaVal
 ' Verify d1..d5 are whole multiples of the channel's term magnitude, in
 ' every sequence. Only channel CH_X's failures fold into nfail (gating);
-' CH_Y (accy) is corroborating only.
+' CH_Y (ysum) is corroborating only.
 '
 ' @param ch - channel selector (CH_X or CH_Y)
 ' @returns nbad - count of non-multiple deltas found for this channel
@@ -451,7 +451,7 @@ PRI check_multiples(ch) : nbad | seqIdx, magC, chOff, deltaIdx, deltaVal
 
 PRI measure_c(ch) : bad | lvl, rp, seqIdx, chOff, magC, measC, measC0
 ' C_meas = (R2-B)[N=65] - (R2-B)[N=64], same level and repetition: one term
-' under every named hypothesis. Gate (accx only): |C| = 19, constant per level,
+' under every named hypothesis. Gate (xsum only): |C| = 19, constant per level,
 ' sign flips with P3.
 '
 ' @param ch - channel selector (CH_X or CH_Y)
@@ -481,7 +481,7 @@ PRI measure_c(ch) : bad | lvl, rp, seqIdx, chOff, magC, measC, measC0
     if ch == CH_X
       debug("RIG FAIL: C control, sign did not flip with P3: C(LOW) = ", sdec_(cmeas[0]), " C(HIGH) = ", sdec_(cmeas[1]))
   if ch == CH_X
-    debug("C measured, accx: P3 LOW reps ", sdec_(cm[0]), " ", sdec_(cm[1]), " ", sdec_(cm[2]), " ", sdec_(cm[3]), " | P3 HIGH reps ", sdec_(cm[4]), " ", sdec_(cm[5]), " ", sdec_(cm[6]), " ", sdec_(cm[7]), "  (predicted -19 / +19)")
+    debug("C measured, xsum: P3 LOW reps ", sdec_(cm[0]), " ", sdec_(cm[1]), " ", sdec_(cm[2]), " ", sdec_(cm[3]), " | P3 HIGH reps ", sdec_(cm[4]), " ", sdec_(cm[5]), " ", sdec_(cm[6]), " ", sdec_(cm[7]), "  (predicted -19 / +19)")
     if bad == 0
       if cmeas[0] == -G_COS
         debug("  sign rule: as the brief states (term = +g when imm[19] differs from the pin bit)")
@@ -529,7 +529,7 @@ PRI classify_and_verdict() | seqIdx, burstN, measC, same64, same65, idx64, idx65
 ' Classify every sequence's Part-5 pair and carry arm against the named
 ' hypotheses, then print the final VERDICT line.
 
-  debug("--- CLASSIFICATION (accx, units of measured C) ---")
+  debug("--- CLASSIFICATION (xsum, units of measured C) ---")
   allcarry := TRUE
   ntrue := 0
   nnolag := 0
@@ -588,14 +588,14 @@ PRI classify_and_verdict() | seqIdx, burstN, measC, same64, same65, idx64, idx65
     debug("VERDICT: INCONCLUSIVE - not repeatable across repetitions/levels: TRUE ", udec_(ntrue), " no-lag ", udec_(nnolag), " lost ", udec_(nlost), " other ", udec_(nother), " of 16")
 
 
-PRI accy_summary() | seqIdx, burstN, measC, nidle, nzz, nmul, bad, nTrue, nCarry
-' accy: corroborating only. The brief says accb/accy behave "identically";
+PRI ysum_summary() | seqIdx, burstN, measC, nidle, nzz, nmul, bad, nTrue, nCarry
+' ysum: corroborating only. The brief says yterm/ysum behave "identically";
 ' the sin byte's LUT position ([31:24]) comes from the KB, not the brief.
 '
-' Single exit: the TRUE/carry classification loop runs only when the accy
+' Single exit: the TRUE/carry classification loop runs only when the ysum
 ' construction checks passed; either way the method falls through to the end.
 
-  debug("--- ACCY (corroborating only, not gating; predicted |C| = 37) ---")
+  debug("--- YSUM (corroborating only, not gating; predicted |C| = 37) ---")
   nidle := 0
   nzz := 0
   repeat seqIdx from 0 to NREC - 1
@@ -605,9 +605,9 @@ PRI accy_summary() | seqIdx, burstN, measC, nidle, nzz, nmul, bad, nTrue, nCarry
       nzz++
   nmul := check_multiples(CH_Y)
   bad := measure_c(CH_Y)
-  debug("accy: idle moves ", udec_(nidle), ", zero-after-zero moves ", udec_(nzz), ", non-multiples of 37: ", udec_(nmul), ", C_meas P3 LOW ", sdec_(cm[8]), " ", sdec_(cm[9]), " ", sdec_(cm[10]), " ", sdec_(cm[11]), " HIGH ", sdec_(cm[12]), " ", sdec_(cm[13]), " ", sdec_(cm[14]), " ", sdec_(cm[15]))
+  debug("ysum: idle moves ", udec_(nidle), ", zero-after-zero moves ", udec_(nzz), ", non-multiples of 37: ", udec_(nmul), ", C_meas P3 LOW ", sdec_(cm[8]), " ", sdec_(cm[9]), " ", sdec_(cm[10]), " ", sdec_(cm[11]), " HIGH ", sdec_(cm[12]), " ", sdec_(cm[13]), " ", sdec_(cm[14]), " ", sdec_(cm[15]))
   if nidle or nzz or nmul or bad
-    debug("ACCY: construction checks failed on accy; no accy classification (accx verdict unaffected)")
+    debug("YSUM: construction checks failed on ysum; no ysum classification (xsum verdict unaffected)")
   else
     nTrue := 0
     nCarry := 0
@@ -618,7 +618,7 @@ PRI accy_summary() | seqIdx, burstN, measC, nidle, nzz, nmul, bad, nTrue, nCarry
         nTrue++
       if dd(seqIdx, O_R3Y, O_R2Y) / measC - burstN == -1 and dd(seqIdx, O_R4Y, O_R3Y) / measC - burstN == 0 and dd(seqIdx, O_R5Y, O_R4Y) / measC == 1
         nCarry++
-    debug("ACCY: TRUE (lag) pair in ", udec_(nTrue), " of 16, carry arm TRUE in ", udec_(nCarry), " of 16 (see dy rows for the rest)")
+    debug("YSUM: TRUE (lag) pair in ", udec_(nTrue), " of 16, carry arm TRUE in ", udec_(nCarry), " of 16 (see dy rows for the rest)")
 
 
 { MEASURING ENGINE -- runs in its own cog; the ONLY code that touches the
@@ -677,7 +677,7 @@ engine          mov     ptrb, ptra
                 cogstop t1_                     ' releases P3
 
 '' One sequence for burst length nn_. Every GETXACC is issued with the streamer
-'' idle (WAIT_IDLE clocks after the XINIT). "mov y, 0-0" receives accy.
+'' idle (WAIT_IDLE clocks after the XINIT). "mov y, 0-0" receives ysum.
 do_seq          mov     dk_, dmode_
                 or      dk_, nn_                ' D = $F007_0000 + N
                 testp   #PIN                    wc

@@ -66,7 +66,7 @@
 
   WHAT EACH CONTROL PROVES
     K_SINGLE  the harness: pointer load/capture, hub source, the dump path,
-              and that a plain ptra++ RDLONG steps +4 (the ptr_indx step)
+              and that a plain ptra++ RDLONG steps +4 (the plain index step step)
     K_ALTD1   ALTD redirects a RDLONG's D field on this part and does not
               itself disturb the ptra++ step (+4, one long at dst+2)
     K_BLK4    = the brief's workaround (a).  The part's normal block rule:
@@ -87,7 +87,7 @@
     PRIMARY  H_BLK4  delta TRUE = +4   FALSE = +16   (and data FULL at dst+2)
     H_BLK8   delta TRUE = +4   FALSE = +32
     H_IDX3   delta TRUE = +12  FALSE = +16  -- TRUE here is derived from
-             the brief's mechanism (ptr_indx = the plain scaled index) plus
+             the brief's mechanism (plain index step = the plain scaled index) plus
              the Silicon Doc's "normal PTRx expression behavior"; the brief
              itself states the value only for ptra++ (+4).  See NOTE A.
     H_PTRB / H_WR / H_Q2   TRUE = +4   FALSE = +16
@@ -114,7 +114,7 @@
     "ARM-VERDICT <name>: ..." and do not feed the primary verdict.
 
   NOTE A (inferred / undetermined items this test leans on -- see brief)
-    * Brief Part 2 marks as UNDETERMINED the value ptr_indx takes when the
+    * Brief Part 2 marks as UNDETERMINED the value plain index step takes when the
       intervening instruction is ALTD.  The primary discriminator does not
       need it: TRUE=+4 comes from the brief's own Part 5 statement, and
       ANY delta other than +4 is reported as REFUTED with the raw value.
@@ -124,7 +124,7 @@
       coincide with the block delta; the only coincidence is N=1 (4 = 4),
       so no hazard arm uses N=1.  H_BLK8 (4 vs 32) and H_IDX3 (12 vs 16)
       move the two values apart in two independent directions.
-    * H_WR, H_PTRB, H_Q2 rest on the brief's reading that ptr_bx covers
+    * H_WR, H_PTRB, H_Q2 rest on the brief's reading that block-delta path covers
       setq2 and WRLONG/WMLONG and both pointers (traced, cog.sv:1131 and
       :1124-1126); they are siblings and never gate the primary verdict.
 

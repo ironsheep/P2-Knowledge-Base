@@ -18,14 +18,14 @@
             DDS/Goertzel, GETXACC does NOT clear X/Y. The accumulators are
             frozen: repeat idle reads return bit-identical values.
     Half B  With a Goertzel burst running, GETXACC returns the running sum and
-            leaves accx = the one term acca holds on that clock (the "held
+            leaves xsum = the one term xterm holds on that clock (the "held
             term"), not zero. Readings taken during one burst therefore add up
             to exactly what one read at its end returns.
 
   WHAT WOULD SHOW IT WRONG (written before the run, encoded in judge()):
     Half A  any idle/non-Goertzel read G differs from the preamble's B.
-            G = 0 (dG = -B) specifically means the clear reached accx.
-    Half B  dd = dB - dA nonzero:  dd = R1  -> clear did not reach accx while
+            G = 0 (dG = -B) specifically means the clear reached xsum.
+    Half B  dd = dB - dA nonzero:  dd = R1  -> clear did not reach xsum while
             running;  dd = -C -> true zero, held term lost;  dd = +C -> held
             term counted twice;  other whole multiple of C -> refuted, other.
             dd not a whole multiple of C -> construction failed: INCONCLUSIVE.
@@ -50,7 +50,7 @@
     NCO frequency $8000_0000 (SETXFRQ once, thousands of clocks before any
       XINIT; no SETQ ever precedes an XINIT).
     Goertzel D = $F007_0000 | count: mode bits [15:12]=1111, [11:8]=0000 (no
-      DAC), [7]=0 (sinc1: acca REPLACED each clock), [6:3]=0000 (pins 0..3),
+      DAC), [7]=0 (sinc1: xterm REPLACED each clock), [6:3]=0000 (pins 0..3),
       [2:0]=111.
     S_ON   = $0008_80A5: imm[19]=1 (invert P3), imm[15]=1 (sum P3 only),
              imm[14:12]=0, imm[11:9]=000, imm[8:0]=$0A5 (LUT address).
@@ -89,8 +89,8 @@
   WHY P AS THE HALF-B BASELINE (improvement on the brief): the brief uses B.
   P is one more idle GETXACC immediately before the XINIT. If Half A holds,
   P = B exactly (and P-B is scored as more Half A evidence). If Half A is
-  wrong (idle clear works), B's own read zeroed accx and P reads that 0 --
-  so P is the true starting accx in BOTH worlds and Half B's arithmetic does
+  wrong (idle clear works), B's own read zeroed xsum and P reads that 0 --
+  so P is the true starting xsum in BOTH worlds and Half B's arithmetic does
   not silently inherit a Half A failure.
 
   EXPECTED VALUES IF THE PREDICTION IS TRUE
@@ -287,7 +287,7 @@ PRI controls() | ctrlVal, repIdx, dlo, dhi, khi, badCount
     debug("RIG FAIL: P3 level wrong ", udec_(ctrlVal), " times; last at site ", udec_(mb[CTRL + C_PINL]), " (expected the driven level)")
     fail_both()
 
-  ' every preamble B must be nonzero, or a clear that wrongly reached accx
+  ' every preamble B must be nonzero, or a clear that wrongly reached xsum
   ' would be invisible (brief Part 5 preamble)
   badCount := 0
   repeat ctrlVal from 0 to 1
@@ -357,9 +357,9 @@ PRI half_a() | repIdx, calSide
   elseif nMoved == 0
     debug("VERDICT HALF A: CONFIRMED -- all ", udec_(nObs), " idle/non-Goertzel GETXACC reads equal their B bit-for-bit")
   elseif nZeroed
-    debug("VERDICT HALF A: REFUTED -- ", udec_(nZeroed), " read(s) returned 0 (d = -B): the clear reached accx idle/outside Goertzel; ", udec_(nMoved), " moved in all")
+    debug("VERDICT HALF A: REFUTED -- ", udec_(nZeroed), " read(s) returned 0 (d = -B): the clear reached xsum idle/outside Goertzel; ", udec_(nMoved), " moved in all")
   else
-    debug("VERDICT HALF A: REFUTED -- ", udec_(nMoved), " read(s) differ from B (not zero): accx moved while idle/outside Goertzel")
+    debug("VERDICT HALF A: REFUTED -- ", udec_(nMoved), " read(s) differ from B (not zero): xsum moved while idle/outside Goertzel")
 
 
 PRI tallyA(readVal, baselineVal, bImm)
@@ -429,7 +429,7 @@ PRI half_b() | repIdx, termC, dA, kA, baselineP, k1, dB, dd, classCode
   elseif cls[0] == nScored
     debug("VERDICT HALF B: CONFIRMED -- dd = 0 in all ", udec_(nScored), " scored reps: the mid-burst read leaves exactly the held term")
   elseif cls[1] == nScored
-    debug("VERDICT HALF B: REFUTED -- dd = R1 in all scored reps: GETXACC did not clear accx even while the Goertzel streamer ran")
+    debug("VERDICT HALF B: REFUTED -- dd = R1 in all scored reps: GETXACC did not clear xsum even while the Goertzel streamer ran")
   elseif cls[2] == nScored
     debug("VERDICT HALF B: REFUTED -- dd = -C in all scored reps: the clear left a TRUE zero (held term lost)")
   elseif cls[3] == nScored
@@ -458,7 +458,7 @@ PRI info_y() | repIdx, dlo, dhi, dA, dB, moved
     dA := at(repIdx,O_RAY) - at(repIdx,O_PAY)
     dB := at(repIdx,O_R1Y) + at(repIdx,O_R2Y) - at(repIdx,O_PBY)
     debug("Y rep ", udec_(repIdx), ": dA=", sdec_(dA), " dB=", sdec_(dB), " dd=", sdec_(dB - dA))
-  debug("Y Half-A-style checks that moved: ", udec_(moved), " (0 expected if accy behaves as accx)")
+  debug("Y Half-A-style checks that moved: ", udec_(moved), " (0 expected if ysum behaves as xsum)")
 
 
 DAT  ' ---- CAL Label Strings ----

@@ -116,16 +116,16 @@
     13 XCL-S2  SINC2 XCONT                CHP    25_000  16       Q4 twin of 12
 
   THE CARRY MODEL (Q5) -- built only from what is proven or documented:
-    EF-070: accx adds, on each active clock, the value the first stage held
+    EF-070: xsum adds, on each active clock, the value the first stage held
             BEFORE that clock's edge (a one-clock trail).
     Silicon Doc: SINC1 first stage := term; SINC2 first stage += term (the
             same register accumulates: a running integral).
-    EF-069: GETXACC during an active Goertzel command returns accx and
+    EF-069: GETXACC during an active Goertzel command returns xsum and
             zeroes it, partitioning the terms exactly; it does not clear the
             first stage (Silicon Doc: SIN_ACC/COS_ACC are what it clears).
     Let window k hold n_k = L_k - g active clocks (g = clocks per window that
     add nothing; measured by P2-S1, expected 0) and J_k = the first-stage
-    value accx adds on window k's first clock. With a constant term C:
+    value xsum adds on window k's first clock. With a constant term C:
         x_k     = n_k*J_k + C*n_k*(n_k-1)/2
         J_(k+1) = J_k + C*n_k
         d_k     = x_k - x_(k-1)
@@ -224,7 +224,7 @@
       one SIN_MUL/COS_MUL for both), so the SINC1 zero burst zeroes it before
       each arm. Not assumed by the model: J is fitted; J/C is printed beside
       the clock count from XINIT so a carried-in value is visible.
-    - First stage and accx wrap as 32-bit registers (the model is mod 2^32).
+    - First stage and xsum wrap as 32-bit registers (the model is mod 2^32).
       J reaches ~2^21 (fast arms), ~2^25.3 (CHP), ~2^26.3 (25 ms arms).
     - XCONT/XZERO release on the prior command's last clock (Silicon Doc):
       checked by the LOCK control and measured per sample by GETCT.
@@ -249,8 +249,8 @@
     WAITX #1 WC          $FD74021F  C=1: 2 + (1 AND RND) clocks (loop_jit
                                     only; the one word the loops differ in,
                                     besides XCONT/XZERO)
-    GETXACC accx_        $FD619E1E  [27:21]=1101011 [8:0]=000011110, D=$0CF;
-                                    next word MOV accy_,0-0 = $F601A000 (S=0)
+    GETXACC xsum_        $FD619E1E  [27:21]=1101011 [8:0]=000011110, D=$0CF;
+                                    next word MOV ysum_,0-0 = $F601A000 (S=0)
     GETXACC calb_ / calr_  $FD61A41E / $FD61A81E, each followed by MOV x,0-0
     GETCT ctv_ / ct0_    $FD61A21A / $FD61981A
     SETXFRQ freq1to1_    $FD61041D  [8:0]=000011101, D=$082
@@ -393,7 +393,7 @@ CON ' ---- Arms, Loop Kinds and Mailbox Layout ----
 VAR ' ---- Mailbox & Analysis State ----
   long mbox[MBOX_LONGS]                   ' engine output (see the layout CONs)
   long modelX[NS_MAX]                     ' model x^ per sample, current SINC2 arm
-  long modelAcca[NS_MAX]                  ' model J per sample, current SINC2 arm
+  long modelXterm[NS_MAX]                  ' model J per sample, current SINC2 arm
   long armBase[NARMS]                     ' mbox index of each arm header
   long armOk[NARMS]                       ' window-spread control passed
   long normLen[NARMS], lenMin[NARMS], lenMax[NARMS]
@@ -402,7 +402,7 @@ VAR ' ---- Mailbox & Analysis State ----
   long nRuns[NARMS], nPairs[NARMS], nEdge[NARMS], nOpen[NARMS]
   long nUnlinked[NARMS], nMissed[NARMS], nChanged[NARMS]
   long nAcctBad[NARMS], nDev1[NARMS], maxDev1[NARMS]
-  long fitState[NARMS], fitAcca[NARMS]
+  long fitState[NARMS], fitXterm[NARMS]
   long nMisClean[NARMS], nMisOut[NARMS], firstMisK[NARMS]
   long nYbad[NARMS]
   long calCx, calCy                       ' measured per-clock terms, P3 HIGH
@@ -573,9 +573,9 @@ PRI print_predictions() | armIdx, normClk, oddClk, perX100, zeroClk, perUs, cons
 
   debug("PREDICTIONS (fixed before the run):")
   debug("  term per active clock: C_X = +1, C_Y = +3 with P3 HIGH (LUT $0301_0000, S = $0000_8000)")
-  debug("  carry model: SINC1 acca := C | SINC2 acca := acca + C | accx += acca before the edge (EF-070)")
-  debug("  GETXACC mid-stream returns accx and zeroes it, exact partition (EF-069); acca is not cleared")
-  debug("  window k: n_k active clocks, J_k = acca added on its first clock:")
+  debug("  carry model: SINC1 xterm := C | SINC2 xterm := xterm + C | xsum += xterm before the edge (EF-070)")
+  debug("  GETXACC mid-stream returns xsum and zeroes it, exact partition (EF-069); xterm is not cleared")
+  debug("  window k: n_k active clocks, J_k = xterm added on its first clock:")
   debug("    x_k = n_k*J_k + C*n_k*(n_k-1)/2    J_(k+1) = J_k + C*n_k    d_k = x_k - x_(k-1)")
   debug("    equal windows n: d = C*n^2 | one window n+dl between windows n:")
   debug("    e_k = dl*J_(k-1) + 2*C*n*dl + C*(dl^2-dl)/2   e_(k+1) = -dl*J_(k-1) - dl*n*C - C*(dl^2-dl)/2   e_(k+2) = 0")
@@ -886,7 +886,7 @@ PRI analyze_sinc1(armIdx) | nsArm, sampIdx, winClks, xVal, predVal, devVal, prin
   debug("  SINC1: ", udec_(nsArm - WARM), " samples; x <> C*(L-g) in ", udec_(nAcctBad[armIdx]), "; off the usual value in ", udec_(nDev1[armIdx]), "; max |dev| = ", udec_(maxDev1[armIdx]), " (one term = ", udec_(abs calCx), ", usual x = ", sdec_(calCx * (normLen[armIdx] - gapClocks)), ")")
 
 
-PRI fit_model(armIdx) | nsArm, clocksToFit, nWin, numer, accaRun, sampIdx, nWinK
+PRI fit_model(armIdx) | nsArm, clocksToFit, nWin, numer, xtermRun, sampIdx, nWinK
 ' Fit J once at k = WARM (exact division required), then fill the model x^ and
 ' J for every later sample from the measured windows alone.
 '
@@ -897,13 +897,13 @@ PRI fit_model(armIdx) | nsArm, clocksToFit, nWin, numer, accaRun, sampIdx, nWinK
 ' @local clocksToFit - clocks from the arm's XINIT to read WARM-1
 ' @local nWin - active clocks in window WARM
 ' @local numer - x_WARM - C*tri(nWin)
-' @local accaRun - running model J
+' @local xtermRun - running model J
 ' @local sampIdx - sample index
 ' @local nWinK - active clocks in window k
 
   nsArm := arm_field(armIdx, AF_NS)
   fitState[armIdx] := FIT_NONE
-  fitAcca[armIdx] := 0
+  fitXterm[armIdx] := 0
   nWin := win_len(armIdx, WARM) - gapClocks
   clocksToFit := smp(armIdx, WARM - 1, SR_CT) - mbox[armBase[armIdx] + AH_CT0]
   numer := 0
@@ -911,17 +911,17 @@ PRI fit_model(armIdx) | nsArm, clocksToFit, nWin, numer, accaRun, sampIdx, nWinK
     numer := smp(armIdx, WARM, SR_X) - calCx * tri(nWin)
     if (numer // nWin) == 0
       fitState[armIdx] := FIT_OK
-      fitAcca[armIdx] := numer / nWin
+      fitXterm[armIdx] := numer / nWin
     else
       fitState[armIdx] := FIT_FAIL
   if fitState[armIdx] == FIT_OK
-    accaRun := fitAcca[armIdx]
+    xtermRun := fitXterm[armIdx]
     repeat sampIdx from WARM to nsArm - 1
       nWinK := win_len(armIdx, sampIdx) - gapClocks
-      modelAcca[sampIdx] := accaRun
-      modelX[sampIdx] := nWinK * accaRun + calCx * tri(nWinK)
-      accaRun += calCx * nWinK
-    debug("  model fit at k=3: J = (x - C*n(n-1)/2)/n = ", sdec_(fitAcca[armIdx]), " = ", sdec_(fitAcca[armIdx] / calCx), " terms; clocks XINIT -> read 2 = ", udec_(clocksToFit), " (J/C - clocks = ", sdec_(fitAcca[armIdx] / calCx - clocksToFit), ": start offset)")
+      modelXterm[sampIdx] := xtermRun
+      modelX[sampIdx] := nWinK * xtermRun + calCx * tri(nWinK)
+      xtermRun += calCx * nWinK
+    debug("  model fit at k=3: J = (x - C*n(n-1)/2)/n = ", sdec_(fitXterm[armIdx]), " = ", sdec_(fitXterm[armIdx] / calCx), " terms; clocks XINIT -> read 2 = ", udec_(clocksToFit), " (J/C - clocks = ", sdec_(fitXterm[armIdx] / calCx - clocksToFit), ": start offset)")
   elseif fitState[armIdx] == FIT_FAIL
     debug("  model fit FAILED at k=3: x - C*n(n-1)/2 = ", sdec_(numer), " is not a multiple of n = ", udec_(nWin))
   else
@@ -1052,12 +1052,12 @@ PRI print_s2_row(armIdx, sampIdx, dClean) | xVal, dVal, dHat
   dVal := xVal - smp(armIdx, sampIdx - 1, SR_X)
   if fitState[armIdx] == FIT_OK
     dHat := modelX[sampIdx] - modelX[sampIdx - 1]
-    debug("  k=", udec_(sampIdx), " L=", udec_(win_len(armIdx, sampIdx)), " x=", sdec_(xVal), " d=", sdec_(dVal), " e=", sdec_(dVal - dClean), " | J=", sdec_(modelAcca[sampIdx]), " x^=", sdec_(modelX[sampIdx]), " e^=", sdec_(dHat - dClean), " -> ", zstr_(xVal == modelX[sampIdx] ? @s_match : @s_mismatch))
+    debug("  k=", udec_(sampIdx), " L=", udec_(win_len(armIdx, sampIdx)), " x=", sdec_(xVal), " d=", sdec_(dVal), " e=", sdec_(dVal - dClean), " | J=", sdec_(modelXterm[sampIdx]), " x^=", sdec_(modelX[sampIdx]), " e^=", sdec_(dHat - dClean), " -> ", zstr_(xVal == modelX[sampIdx] ? @s_match : @s_mismatch))
   else
     debug("  k=", udec_(sampIdx), " L=", udec_(win_len(armIdx, sampIdx)), " x=", sdec_(xVal), " d=", sdec_(dVal), " e=", sdec_(dVal - dClean), " | no model")
 
 
-PRI print_pair_formula(armIdx, sampIdx) | nPrev, nCur, deltaLen, accaPrev, errFirst, errNext
+PRI print_pair_formula(armIdx, sampIdx) | nPrev, nCur, deltaLen, xtermPrev, errFirst, errNext
 ' At the start of an outlier run, print the closed-form pair prediction
 ' e_k, e_(k+1) from J_(k-1), valid when the window after the odd one is usual.
 '
@@ -1068,7 +1068,7 @@ PRI print_pair_formula(armIdx, sampIdx) | nPrev, nCur, deltaLen, accaPrev, errFi
 ' @local nPrev - active clocks in window k-1
 ' @local nCur - active clocks in window k
 ' @local deltaLen - dl = nCur - nPrev
-' @local accaPrev - model J_(k-1)
+' @local xtermPrev - model J_(k-1)
 ' @local errFirst - predicted e_k
 ' @local errNext - predicted e_(k+1)
 
@@ -1076,10 +1076,10 @@ PRI print_pair_formula(armIdx, sampIdx) | nPrev, nCur, deltaLen, accaPrev, errFi
   nCur := win_len(armIdx, sampIdx) - gapClocks
   deltaLen := nCur - nPrev
   if fitState[armIdx] == FIT_OK and abs deltaLen == ONE_CLOCK
-    accaPrev := modelAcca[sampIdx - 1]
-    errFirst := deltaLen * accaPrev + 2 * calCx * nPrev * deltaLen + calCx * (deltaLen * deltaLen - deltaLen) / 2
-    errNext := -deltaLen * accaPrev - deltaLen * nPrev * calCx - calCx * (deltaLen * deltaLen - deltaLen) / 2
-    debug("  pair formula at k=", udec_(sampIdx), ": dl=", sdec_(deltaLen), " n=", udec_(nPrev), " J_(k-1)=", sdec_(accaPrev), " -> e_k=", sdec_(errFirst), " e_(k+1)=", sdec_(errNext), " sum=", sdec_(errFirst + errNext), " (if window k+1 is usual)")
+    xtermPrev := modelXterm[sampIdx - 1]
+    errFirst := deltaLen * xtermPrev + 2 * calCx * nPrev * deltaLen + calCx * (deltaLen * deltaLen - deltaLen) / 2
+    errNext := -deltaLen * xtermPrev - deltaLen * nPrev * calCx - calCx * (deltaLen * deltaLen - deltaLen) / 2
+    debug("  pair formula at k=", udec_(sampIdx), ": dl=", sdec_(deltaLen), " n=", udec_(nPrev), " J_(k-1)=", sdec_(xtermPrev), " -> e_k=", sdec_(errFirst), " e_(k+1)=", sdec_(errNext), " sum=", sdec_(errFirst + errNext), " (if window k+1 is usual)")
 
 
 PRI close_run(armIdx, runStart, runLen, bClosed)
@@ -1346,7 +1346,7 @@ PRI verdict_q5() | armIdx, bArmsOk, bFit, nClnMis, nOutMis, nOutTested, bP2AllOf
   nOutTested := 0
   repeat armIdx from 0 to NARMS - 1
     if is_sinc2(armIdx)
-      debug("Q5 ", zstr_(arm_name(armIdx)), ": ", zstr_(q5_class(armIdx)), " - fit J ", sdec_(fitAcca[armIdx]), ", mismatches clean ", udec_(nMisClean[armIdx]), " / window-changed ", udec_(nMisOut[armIdx]), " (first k=", sdec_(firstMisK[armIdx]), "), outliers ", udec_(nOut[armIdx]))
+      debug("Q5 ", zstr_(arm_name(armIdx)), ": ", zstr_(q5_class(armIdx)), " - fit J ", sdec_(fitXterm[armIdx]), ", mismatches clean ", udec_(nMisClean[armIdx]), " / window-changed ", udec_(nMisOut[armIdx]), " (first k=", sdec_(firstMisK[armIdx]), "), outliers ", udec_(nOut[armIdx]))
   repeat armIdx from ARM_P2_S2 to ARM_JIT_S2
     if armIdx == ARM_P2_S2 or armIdx == ARM_NPS_S2 or armIdx == ARM_NPL_S2 or armIdx == ARM_JIT_S2
       if not armOk[armIdx]
@@ -1516,33 +1516,33 @@ run_arm         mov     hdrp_, ptrb
 
 loop_xc         xcont   dcmd_, imk_             ' waits for the running command's last clock
                 waitx   #JIT_MASK               ' fixed 3 clocks
-                getxacc accx_
-                mov     accy_, 0-0
+                getxacc xsum_
+                mov     ysum_, 0-0
                 getct   ctv_
-                wrlong  accx_, ptrb++           ' SR_X
-                wrlong  accy_, ptrb++           ' SR_Y
+                wrlong  xsum_, ptrb++           ' SR_X
+                wrlong  ysum_, ptrb++           ' SR_Y
                 wrlong  ctv_, ptrb++            ' SR_CT
                 djnz    cnt_, #loop_xc
                 jmp     #arm_end
 
 loop_jit        xcont   dcmd_, imk_
                 waitx   #JIT_MASK               wc      ' 2 + (1 AND RND): Chip's jitter
-                getxacc accx_
-                mov     accy_, 0-0
+                getxacc xsum_
+                mov     ysum_, 0-0
                 getct   ctv_
-                wrlong  accx_, ptrb++
-                wrlong  accy_, ptrb++
+                wrlong  xsum_, ptrb++
+                wrlong  ysum_, ptrb++
                 wrlong  ctv_, ptrb++
                 djnz    cnt_, #loop_jit
                 jmp     #arm_end
 
 loop_xz         xzero   dcmd_, imk_             ' as XCONT, but zeroes phase per command
                 waitx   #JIT_MASK
-                getxacc accx_
-                mov     accy_, 0-0
+                getxacc xsum_
+                mov     ysum_, 0-0
                 getct   ctv_
-                wrlong  accx_, ptrb++
-                wrlong  accy_, ptrb++
+                wrlong  xsum_, ptrb++
+                wrlong  ysum_, ptrb++
                 wrlong  ctv_, ptrb++
                 djnz    cnt_, #loop_xz
 
@@ -1597,8 +1597,8 @@ hdrp_           res     1
 ct0_            res     1
 pinb_           res     1
 pina_           res     1
-accx_           res     1
-accy_           res     1
+xsum_           res     1
+ysum_           res     1
 ctv_            res     1
 calb_           res     1
 calby_          res     1

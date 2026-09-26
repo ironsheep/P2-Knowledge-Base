@@ -83,9 +83,11 @@ Half A: 50 reads; moved 0 (non-Goertzel-active 0); read exactly 0 0
 rep 0: waitx=30 kA=255 k1=29 k1-waitx=-1 dA=15_555 dB=15_555 dd=0 class=0
 ```
 
-**5 — SO84** (sequence #0, N = 64, C = −19):
+**5 — SO84** (sequence #0, N = 64, C = −19). *The tracked rigs now name the accumulations
+`xsum`/`ysum` and the held term `xterm`/`yterm` (2026-09-26, before publication); the raw logs, run
+before that rename, print the study's own names in their place.*
 ```
-accx B0=0 B=0 R1=-1_197 R1b=-1_197 R2=-1_216 R3=-2_413 R4=-3_629 R5=-3_648
+xsum B0=0 B=0 R1=-1_197 R1b=-1_197 R2=-1_216 R3=-2_413 R4=-3_629 R5=-3_648
 dx: B-B0=0 d1=-1_197 R1b-R1=0 d2=-19 d3=-1_197 d4=-1_216 d5=-19
 counts over 16 sequences: TRUE 16  no-lag 0  lost 0  other 0
 ```

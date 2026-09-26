@@ -98,10 +98,10 @@ below is from LOG2 and appears with the same content at the same line number in 
 44: [2026-09-24T23:18:30.659] Cog0     dx: B-B0=0 d1=-1_216 R1b-R1=0 d2=-19 d3=-1_216 d4=-1_235 d5=-19
 79: [2026-09-24T23:18:30.675] Cog0     dx: B-B0=0 d1=1_197 R1b-R1=0 d2=19 d3=1_197 d4=1_216 d5=19
 84: [2026-09-24T23:18:30.677] Cog0     dx: B-B0=0 d1=1_216 R1b-R1=0 d2=19 d3=1_216 d4=1_235 d5=19
-118: [2026-09-24T23:18:30.693] Cog0  C measured, accx: P3 LOW reps -19 -19 -19 -19 | P3 HIGH reps 19 19 19 19  (predicted -19 / +19)
+118: [2026-09-24T23:18:30.693] Cog0  C measured, xsum: P3 LOW reps -19 -19 -19 -19 | P3 HIGH reps 19 19 19 19  (predicted -19 / +19)
 120: [2026-09-24T23:18:30.694] Cog0  controls: LUT ok, pin ok, idle ok (R1b-R1 = 0), zero-after-zero ok, all deltas whole multiples of 19, C ok
-123: [2026-09-24T23:18:30.698] Cog0  accy: idle moves 0, zero-after-zero moves 0, non-multiples of 37: 0, C_meas P3 LOW -37 -37 -37 -37 HIGH 37 37 37 37
-124: [2026-09-24T23:18:30.698] Cog0  ACCY: TRUE (lag) pair in 16 of 16, carry arm TRUE in 16 of 16 (see dy rows for the rest)
+123: [2026-09-24T23:18:30.698] Cog0  ysum: idle moves 0, zero-after-zero moves 0, non-multiples of 37: 0, C_meas P3 LOW -37 -37 -37 -37 HIGH 37 37 37 37
+124: [2026-09-24T23:18:30.698] Cog0  YSUM: TRUE (lag) pair in 16 of 16, carry arm TRUE in 16 of 16 (see dy rows for the rest)
 143: [2026-09-24T23:18:30.710] Cog0  counts over 16 sequences: TRUE 16  no-lag 0  lost 0  other 0
 145: [2026-09-24T23:18:30.726] Cog0  VERDICT: CONFIRMED - all 16 sequences (N=64,65; P3 low,high; 4 reps) read d1=(N-1)C, d2=C, R1b-R1=0, and the carry arm read (N-1)C, N*C, C
 ```
