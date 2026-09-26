@@ -139,8 +139,16 @@ is confirmed.
 | **The bench ledger** (strongest) | `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md` (EF-066..074, and the fix runs' entries) | every claim about what the part does, every number |
 | **Raw logs** | `manuals/p2-errata/audit/verification-tests/logs/` | the numbers, read from the lines themselves |
 | **The rigs** | `manuals/p2-errata/audit/verification-tests/*.spin2`, replicated to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` | walkthrough excerpts, verbatim |
-| **Parallax P2 Documentation** | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` (KNOWN BUGS at 197–227) | *What the design says*; quote exactly |
-| **KB YAML** | `deliverables/ai/P2/language/pasm2/*.yaml`, read from disk | instruction semantics and encodings |
+| **Parallax P2 Documentation** | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` (v35; KNOWN BUGS at 197–227) and `silicon-doc-text.txt` (the current online edition) | *What the P2 is documented to do*; quote exactly |
+| **KB YAML** | `deliverables/ai/P2/language/pasm2/*.yaml`, read from disk | authoring aid for instruction semantics and encodings; **never cited in reader text** |
+
+**What reader text may cite (Stephen, 2026-09-26).** An erratum is the hardware contradicting a
+written statement of intent, so the statement must be Parallax's own: **only official Parallax P2
+documentation is cited** — the P2 Documentation (any official edition, named as such) and
+Parallax's other published P2 documents. **Never cited**: our own manuals, the P2 Knowledge Base,
+community-review drafts, forum threads, or the comment threads attached to a Parallax document
+(a comment is discussion, not documentation). Our bench runs are the *evidence*, stated as such,
+never the *statement of intent*.
 | **Study briefs** | `manuals/p2-errata/code-validation/test-briefs/` (**git-ignored, Internal**) | the mechanism, for *Why it happens* only, **paraphrased** |
 
 **The clean-room study's design material is never quoted.** No HDL fragments, no signal or

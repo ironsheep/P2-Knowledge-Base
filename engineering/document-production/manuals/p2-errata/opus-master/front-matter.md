@@ -101,10 +101,8 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 ## Sources
 
-- **Parallax Propeller 2 Documentation v35 (Rev B/C)** (Chip Gracey, Parallax Inc.): what the design says, including its KNOWN BUGS section.
+- **Parallax Propeller 2 Documentation** (Chip Gracey, Parallax Inc.), the v35 edition (Rev B/C) and the current online edition, which adds the 2024 note on Goertzel SINC2 mode: what the design says, including its KNOWN BUGS section. It is the only document this manual cites for what the P2 is meant to do.
 - **Tests on P2 hardware** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
-- **P2 Knowledge Base YAML** (Iron Sheep Productions / P2 Knowledge Base Project): instruction semantics and encodings.
-
 ## About This Draft
 
 This is a **community review draft**. Its errata are confirmed on silicon, and so is every workaround it prints; its wording, its structure and its explanations are open for review. Any further behaviour that a test on P2 hardware shows to be a silicon erratum will be added as E8 onward.

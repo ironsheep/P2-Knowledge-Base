@@ -24,7 +24,7 @@ The blocking paragraph names one thing the instruction waits for first, a previo
 
 The no-wait paragraph's requirement describes a different case, and that case is not this erratum. In the same test, a read issued too soon after a no-wait `RDFAST` alone returned `$0000_0000`, and the first spacing at which such a read was correct was 8 to 15 clocks, depending on hub alignment. The documentation states the requirement for that case, and the case belongs to the companion manual *P2 Anti-Patterns*. This erratum is the blocking `RDFAST` failing its own promise: the read follows a blocking `RDFAST`, which is documented to wait.
 
-The KNOWN BUGS section of the P2 Documentation does not list this behaviour. In the reviewers' comments attached to that section of the document, replying to a note that an `RDFAST` corruption bug should be listed there, Chip Gracey wrote: "Yes, but I can't explain it well." The comments do not describe the conditions or the symptom. The defect in this chapter is plausibly that bug; nothing in the comments establishes it.
+The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
 ## What the P2 does {#sec-e7-actual}
 

@@ -101,10 +101,8 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
 ## Sources
 
-- **Parallax Propeller 2 Documentation v35 (Rev B/C)** (Chip Gracey, Parallax Inc.): what the design says, including its KNOWN BUGS section.
+- **Parallax Propeller 2 Documentation** (Chip Gracey, Parallax Inc.), the v35 edition (Rev B/C) and the current online edition, which adds the 2024 note on Goertzel SINC2 mode: what the design says, including its KNOWN BUGS section. It is the only document this manual cites for what the P2 is meant to do.
 - **Tests on P2 hardware** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
-- **P2 Knowledge Base YAML** (Iron Sheep Productions / P2 Knowledge Base Project): instruction semantics and encodings.
-
 ## About This Draft
 
 This is a **community review draft**. Its errata are confirmed on silicon, and so is every workaround it prints; its wording, its structure and its explanations are open for review. Any further behaviour that a test on P2 hardware shows to be a silicon erratum will be added as E8 onward.
@@ -1633,7 +1631,7 @@ The blocking paragraph names one thing the instruction waits for first, a previo
 
 The no-wait paragraph's requirement describes a different case, and that case is not this erratum. In the same test, a read issued too soon after a no-wait `RDFAST` alone returned `$0000_0000`, and the first spacing at which such a read was correct was 8 to 15 clocks, depending on hub alignment. The documentation states the requirement for that case, and the case belongs to the companion manual *P2 Anti-Patterns*. This erratum is the blocking `RDFAST` failing its own promise: the read follows a blocking `RDFAST`, which is documented to wait.
 
-The KNOWN BUGS section of the P2 Documentation does not list this behaviour. In the reviewers' comments attached to that section of the document, replying to a note that an `RDFAST` corruption bug should be listed there, Chip Gracey wrote: "Yes, but I can't explain it well." The comments do not describe the conditions or the symptom. The defect in this chapter is plausibly that bug; nothing in the comments establishes it.
+The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
 ## What the P2 does {#sec-e7-actual}
 
