@@ -1,6 +1,6 @@
 # Appendix A: The Test Programs {#app-a}
 
-Every erratum in this manual was confirmed on silicon by a test program, and every workaround it prints ran on silicon inside a test program. Each program is in the examples archive. They are the programs that ran, prepared for readers: each carries a new file header, and internal labels in its comments and in its printed output are replaced with the erratum they refer to. Their code is unchanged: every instruction and every measuring routine assembles to the same bytes as the program that ran.
+Every erratum in this manual was confirmed on silicon by a test program, and every workaround it prints ran on silicon inside a test program. Each program is in the examples archive. They are the programs that ran, prepared for readers: each carries a new file header, and internal labels in its comments and in its printed output are replaced with the erratum they refer to. Every measuring routine assembles to the same bytes as the program that ran. The Spin2 code in cog 0 that starts each run, checks its controls and prints the results was brought to the Spin2 authoring guide, so some printed labels and hub addresses differ from the original run; the measuring code, and every value it measures, does not.
 
 ## What each program decides {#sec-a-list}
 
