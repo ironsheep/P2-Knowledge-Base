@@ -39,6 +39,18 @@ reader copies in `manuals/p2-errata/examples-library/` (the workaround tests ren
 analysed value, class and verdict matched the runs above (ledger, after EF-077). One start-up
 sample of the SINC2 test moved; it is an open question in the ledger.
 
+**E3 band follow-ups (authored 2026-09-27, NOT YET RUN):** three questions the E3 chapter's
+rewrite around the "red band" (a bounded stale window, not a lasting state) depends on. Written by
+the arbiter, not by an independent agent (see `VERIFICATION-OPPORTUNITIES.md`, VO-J-015..017).
+The sources live in `manuals/p2-errata/audit/verification-tests/` until they run; each moves to
+`tests/` here with its deciding lines once its verdict is re-derived from the log.
+
+| # | Test | Question | VO | Verdict | EF |
+|---|---|---|---|---|---|
+| 12 | `e3-waiting-keeper-test.spin2` | does a cog of 4-7 held in `WAITATN` / `WAITX` at the wrap keep its group current? | VO-J-015 | — | — |
+| 13 | `e3-group0-idle-band-test.spin2` | with every cog of 0-3 stopped across wraps, do cogs 0-3 show the same band, closed in one wrap? | VO-J-016 | — | — |
+| 14 | `e3-band-closes-in-one-wrap-test.spin2` | from a lag of 8 wraps, does the band close at the first wrap the group runs through; do Spin2 `GETMS()`/`GETSEC()` see it? | VO-J-017 | — | — |
+
 ## How the tests were built — independence is the point
 
 Each test was written by an agent given **only its prediction**, with no access to the study's
