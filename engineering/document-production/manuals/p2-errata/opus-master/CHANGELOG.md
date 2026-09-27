@@ -19,6 +19,10 @@
 - **Section headings name whose statement is contradicted and what a program sees**: *What the P2 is documented to do*, *What the P2 does*, *What your program sees*, *A proven workaround*, *How it was proven on P2 hardware*
 - **Chapters are headed by erratum number** (*Erratum E3*), in the contents and running heads as well
 - **The summary table** lists all seven errata and, for each, what any workaround must do and the proven way
+- **E3 is described as a stale window with a known end**: it opens when a group of four cogs that missed a counter wrap starts a cog, and closes at the group's next wrap, in one step, whatever the lag (confirmed on silicon from 1, 2 and 8 missed wraps). It holds for cogs 0-3 as well as 4-7, and Spin2's `GETMS()` and `GETSEC()` read short inside it, as `GETCT WC` does
+- **E3's workaround condition** is now "no 64-bit time inside the stale window", with two proven ways to meet it: keep a cog of the group running at every wrap (the keeper, or a cog of your own; a cog held in `WAITATN` or `WAITX` counts), or wait out one wrap
+- **Three more E3 test programs** in Appendix A and the examples archive: a waiting keeper, cogs 0-3 with every cog stopped, and eight missed wraps with `GETMS()`/`GETSEC()`
+- **Sources** add the Parallax Spin2 Language Documentation, for what `GETMS()` and `GETSEC()` return
 
 ## v0.1.0 (2026-09-25) — Community Review Draft
 

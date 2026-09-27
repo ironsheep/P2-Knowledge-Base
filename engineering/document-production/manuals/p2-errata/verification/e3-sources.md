@@ -526,3 +526,73 @@ Chapter values taken from LOG-FIX:
 | "The verdict line read `CONFIRMED`." | LOG-FIX:226 (and re-derived above) |
 | Status "Workaround proven on silicon: Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup workaround: a keeper cog in cog 7 started by the first line of `main()`" | §8 row; RIG-FIX:201, :211 |
 | run length: the workaround's test program "about 67 s after reset" (*The test program*; measured 66.7 s, row above) | RIG-FIX:117-118 (design figure); consistent with LOG-FIX:17 download end 01:55:47.715 to :227 end 01:56:53.488 |
+
+---
+
+## 10. The stale window (2026-09-27, task «#361»): three more runs, and the chapter reshaped around them
+
+Stephen, 2026-09-27: the chapter must speak to the erratum as a bounded window ("a transient
+where counts can be off"), and show that once a cog starts in the group it reads correctly again
+after one wrap of the lower long. Three tests decided what the chapter may claim; the chapter
+was then reshaped (CAUTION box, *What the P2 does*, *What your program sees*, *A proven
+workaround*, *Why it happens*, a new *The stale window* part of *How it was proven*, *The test
+program*, *Status*). Every fact kept from the earlier shape keeps its mapping above; this section
+maps what was added or changed.
+
+| Tag | File |
+|---|---|
+| SPIN2 | `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` (Parallax Spin2 Language Documentation v55); checked against `Parallax Spin2 Documentation v55.docx` in the same folder |
+| INTERP | `engineering/document-production/manuals/p2-xbyte-programming-guide/REF-NO-COMMIT/pnut-ts-parts/Spin2_interpreter.spin2` (Spin2 interpreter v55, 2026.05.07) — mechanism only, never quoted |
+| RIG-W / LOG-W | `M/audit/verification-tests/e3-waiting-keeper-test.spin2` / `logs/debug_260927-162313.log` (downloaded 13,291 bytes, LOG-W:14) |
+| RIG-G / LOG-G | `M/audit/verification-tests/e3-group0-idle-band-test.spin2` / `logs/debug_260927-162507.log` (13,497 bytes, LOG-G:14) |
+| RIG-8 / LOG-8 | `M/audit/verification-tests/e3-band-closes-in-one-wrap-test.spin2` / `logs/debug_260927-162927.log` (14,906 bytes, LOG-8:6) |
+| ARCHIVE-W / -G / -8 | `M/examples-library/e3-workaround-waiting-cog-test.spin2` / `e3-cogs-0-3-stale-window-test.spin2` / `e3-stale-window-closes-test.spin2` — the rigs with the development header replaced by the generated one; each compiled (`pnut-ts -d` 1.55.8) byte-identical to its rig's `.bin` (`cmp`, 2026-09-27). RIG-W and RIG-G had header-comment edits after the run; their as-run sources, rebuilt, are byte-identical too |
+| LEDGER | EF-078 (RIG-W), EF-079 (RIG-G), EF-080 (RIG-8) |
+
+Every verdict was re-derived from the raw pair lines (script over all `p<n> ref=… smp=… ref2=…`
+lines: D recomputed from the hex, bracket recomputed unsigned, window checked): all 40 counter
+readings (LOG-W 8, LOG-G 16, LOG-8 16) have 10 valid pairs with one D and the bracket holding;
+the three Spin2 readings (LOG-8 GBE, GBL, GXE) have 10 pairs each in one class, reclassified from
+the printed ms/s values. `grep -c "RIG FAIL\|DISCARD\|TIMEOUT"` = 0 on all three logs.
+
+| Chapter text | Source |
+|---|---|
+| CAUTION *Expected*: `GETMS()`/`GETSEC()` return the time since boot from that counter | SPIN2:552-553 |
+| CAUTION *Actual*: "all three return a time behind by 2^32^ clocks (21.47 s at 200 MHz) for each wrap missed, until that group runs through its next wrap" | `GETCT WC`: LOG-A2 (§3.1), LOG-G:84-142, LOG-8:170-239; `GETMS`/`GETSEC`: LOG-8:203, :261 (SHORT by 171,798-9 ms = 8 x 21,474.8 ms); closes: LOG-A2 (§3.1 A2), LOG-G:169-227, LOG-8:277-346, :310 |
+| Opening: "in a cog of cogs 4-7 … more than 2^32^ clocks after reset" / "either group" | as §0; either group: LOG-G (cogs 0-3) |
+| *Documented*: the two Spin2 quotations | SPIN2:552 (`GETSEC()`), :553 (`GETMS()`), description column only; the `.docx` text matches word for word ("Get seconds since booting, uses 64-bit system counter and CLKFREQ, rolls over every 136 years."; "… rolls over every 49.7 days.") |
+| *Documented*: "Neither document qualifies these values by cog number" | SD as §1; SPIN2:552-553 (no condition) |
+| *What the P2 does*: lower long current "in every pair the tests took" | §3.1-3.2, LOG-FIX; LOG-W/-G/-8 bracket held in all 400 counter pairs (re-derivation above) |
+| "A cog held in `WAITATN` or in `WAITX` at the wrap counts as running" | LOG-W:75 (E1 D=0, `WAITATN` keeper alone, mask `%10000011` on its polls), :115 (X2 D=0, `WAITX` keeper alone, `%01000011`); positive control :155 (P3 D=1, `%00000011`) |
+| "Cogs 4 and 7 … missed eight wraps, read 8 behind" | LOG-8:170, :181, :228, :239 (D=8); mask `%00000011` on all 131 polls before, then `%10110011` |
+| "cogs 4 and 7, 8 behind, did the same, and so did cogs 1 and 3, 2 behind" | LOG-8:277, :288, :335, :346 (D=0); LOG-G:169, :180, :216, :227 (D=0) |
+| "Both tests that read again one wrap later found the group still current" | LOG-G:254, :265 (hi=4, D=0); LOG-8:373, :384 (hi=10, D=0) |
+| cogs 0-3 paragraph: "cogs 1 and 3, started after their group had missed two wraps, read 2 behind" | LOG-G:84, :95, :131, :142 (D=2); no cog of 0-3 on any poll before: LOG-G `alive` lines `%00110000` (35) until the start, then `%00111010` (36); cog 0 stops LOG-G:22 |
+| "confirmed … for lags of one, two and eight missed wraps, in cogs 4-7 (cogs 4 and 7 sampled) and in cogs 0-3 (cogs 1 and 3 sampled)" | LOG-A2 (1, 2), LOG-G (2), LOG-8 (8); samplers RIG-8 `SMP_COG_A = 4`, `SMP_COG_B = 7`; RIG-G `SMP_COG_A = 1`, `SMP_COG_B = 3` |
+| `GETMS()`/`GETSEC()` table: cog 0 190,617 / 190, cog 5 18,819 / 18 | LOG-8:260 (GBL p10) |
+| table: after the window closed, cog 0 and cog 5 both 194,637 / 194 | LOG-8:300 (GXE p1) |
+| "After eight missed wraps, 171,798 ms at 200 MHz" | LOG-8:14 (`ms 171_798..171_799`), computed by `MULDIV64` from `clkfreq` in the rig |
+| *Closes*: cog 4 `$0000_0000_$E013_BB32` → `$0000_0009_$1001_546A` | LOG-8 B4L p10 (the last pair before wrap 9) and X4E p1; step line LOG-8:413 |
+| "all ten pairs of each reading agreed, early and late" | re-derivation above; LOG-A2 as §3.1 |
+| "Only `GETCT`, `GETMS()` and `GETSEC()` were exercised" | the three rigs and RIG-A/-B/-FIX read nothing else |
+| *Workaround* condition and "waiting it out" | LOG-8:277-384, LOG-G:169-265: every reading after the one closing wrap read D=0 / CURRENT |
+| "a keeper held in `WAITATN`, and one held in `WAITX`, each kept cogs 4-7 current through a wrap" | LOG-W:75, :115 |
+| "The P2 Documentation does not say which cog a free-cog start chooses" | SD: `grep -n -i "free cog\|lowest\|first available"` — :758-759 and :814-822 speak of "a free cog" with no order; SPIN2: no order stated (checked 2026-09-27) |
+| "check the cog number the start returns" | KB-COGINIT and `pasm2/coginit.yaml` (authoring aid, not cited): D receives the launched cog's ID |
+| Limits: "Spin2's `WAITMS()` and `WAITUS()` are not a wait instruction but a loop that reads the counter" | INTERP `pwct` (`getct w` / `cmpm w,x wc` / `if_c jmp #pwct`), reached from `waitus_`/`waitms_` |
+| Limits: "cogs 7 and 6 held the waits" | RIG-W `KEEP_COG_E = 7`, `KEEP_COG_X = 6` |
+| *Why it happens*: "`GETMS()` and `GETSEC()` are computed by the Spin2 interpreter from the calling cog's own `GETCT WC` and `GETCT`" | INTERP `getms_` (`getct z wc` / `getct y`, then `qdiv` by `clkfreq`); measured LOG-8:203, :261, :310 |
+| *Why*: "What a running cog is executing does not enter into it" | the study's reading, now measured for two waits: LOG-W:75, :115 |
+| *Proven*, stale-window part: "In all 40 of their counter readings … the three Spin2 readings" | re-derivation above |
+| waiting table rows | LOG-W:35 (hi 0, D 0), :46 (cog 1); :75, :86; :115, :126; :155 (**1**), :166 |
+| `WAITX` count "2 + D = 4,294,967,282 clocks, 14 short of 2^32^" | RIG-W `waitx ##$FFFF_FFF0` (word `$FD67E01F` + AUGD, decoded from the `.bin`); `WAITX` = 2 + D clocks (`pasm2/waitx.yaml`, authoring aid) |
+| "started just after the lower long passed `$1000_0000`" | RIG-W: keeper B started right after the E1 and C1 readings, taken at `wait_until(HI_E1, LOWIN, …)`; LOG-W:65 E1 pairs at `$101F_Dxxx` |
+| cogs 0-3 table rows | LOG-G:84/95/106, :131/142/153, :169/180/191, :216/227/238, :254/265/276 |
+| eight-wrap table rows | LOG-8:170/181/192/203, :228/239/250/261, :277/288/299/310, :335/346/357, :373/384/395 |
+| "Cog 4's own upper long … 0 in the last pair before wrap 9 and 9 in the first pair after it" | LOG-8:413 (`0 -> 9 step +9`), re-derived from the B4L/X4E pair lines |
+| "Every short Spin2 pair was behind by 171,798 or 171,799 ms and by 172 s" | re-derivation: GBE and GBL offMs {171,798; 171,799}, offS {172} |
+| *The test program*: the two keeper loops excerpt | ARCHIVE-W:514-523 (verbatim, ≤ 76 columns; checked by script) |
+| "`DEBUG_COGS` names cogs 0 and 4" | ARCHIVE-G:24 |
+| run lengths "about 66 s … 87 s … 216 s" | LOG-W:18 → :177 (65.8 s); LOG-G:17 → :294 (87.2 s); LOG-8:9 → :416 (216.1 s) |
+| Status: "2026-09-27, run once each" | one download per log (LOG-W:14, LOG-G:14, LOG-8:6) |
+| Status *Affects* "measured on cogs 4-7 and on cogs 0-3" | LOG-A2, LOG-8 (4-7); LOG-G (0-3) |

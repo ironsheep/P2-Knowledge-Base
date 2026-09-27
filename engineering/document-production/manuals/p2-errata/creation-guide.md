@@ -140,6 +140,7 @@ is confirmed.
 | **Raw logs** | `manuals/p2-errata/audit/verification-tests/logs/` | the numbers, read from the lines themselves |
 | **The rigs** | `manuals/p2-errata/audit/verification-tests/*.spin2`, replicated to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` | walkthrough excerpts, verbatim |
 | **Parallax P2 Documentation** | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` (v35; KNOWN BUGS at 197–227) and `silicon-doc-text.txt` (the current online edition) | *What the P2 is documented to do*; quote exactly |
+| **Parallax Spin2 Language Documentation** | `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` (v55) | *What the P2 is documented to do* where the statement is Spin2's (E3: `GETMS()`/`GETSEC()` at :552–553, the description column only — the `\|` and `GETMS ()` spacing are the table's); quote exactly, checked against the `.docx` |
 | **KB YAML** | `deliverables/ai/P2/language/pasm2/*.yaml`, read from disk | authoring aid for instruction semantics and encodings; **never cited in reader text** |
 
 **What reader text may cite (Stephen, 2026-09-26).** An erratum is the hardware contradicting a

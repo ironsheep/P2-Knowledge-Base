@@ -1199,8 +1199,9 @@ long; a reading = 10 bracketed pairs), same bench board, 200 MHz, `pnut-ts` 1.55
 with reset, 2026-09-27 (Stephen), **run once each**; each downloaded `.bin` (13,291 / 13,497 / 14,906
 bytes) equals the rig compiled here, and two header-comment edits made after the run leave the
 binary byte-identical (rebuilt and compared). Every verdict **re-derived from the raw pair lines**,
-not from the program's `VERDICT` line: all 36 readings 10 of 10 valid pairs, 0 discards, 0
-timeouts, 0 bracket failures, no `RIG FAIL`. Campaign: `campaigns/2026-09-p2-errata-predictions/`
+not from the program's `VERDICT` line: all 40 counter readings (8 + 16 + 16) 10 of 10 valid pairs,
+0 discards, 0 timeouts, 0 bracket failures; the 3 Spin2 readings 10 of 10 pairs in one class; no
+`RIG FAIL`. Campaign: `campaigns/2026-09-p2-errata-predictions/`
 (tests 12–14).
 
 ### EF-078 · A cog of 4–7 held in a wait at the wrap keeps its group current: `WAITATN` and `WAITX` both count as running — `CONFIRMED`

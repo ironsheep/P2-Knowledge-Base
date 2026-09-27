@@ -13,6 +13,9 @@ the erratum it belongs to. Keep it to one line, ASCII only.
 - `e3-getct-stale-upper-long-runA.spin2`: Erratum E3 test, Run A: the upper long GETCT WC returns in cogs 4-7 after that group has missed one wrap, and after it has missed two
 - `e3-getct-stale-upper-long-runB.spin2`: Erratum E3 test, Run B: the Run A readings with a cog of cogs 4-7 running from the start
 - `e3-workaround-keeper-cog-test.spin2`: Erratum E3 workaround test: with the keeper cog started first, whether cogs of 4-7 started after one and after two wraps read the current upper long; then, with the keeper stopped, that the erratum returns
+- `e3-workaround-waiting-cog-test.spin2`: Erratum E3 workaround test: whether a keeper held in WAITATN, and one held in WAITX, keeps cogs 4-7 current through a wrap; then, with no keeper, that the erratum returns
+- `e3-cogs-0-3-stale-window-test.spin2`: Erratum E3 test: with every cog of 0-3 stopped across two wraps, the upper long read in cogs 1 and 3 before and after the group's next wrap
+- `e3-stale-window-closes-test.spin2`: Erratum E3 test: after eight missed wraps, the upper long read in cogs 4 and 7, and GETMS() and GETSEC() in a Spin2 cog, before and after the group's next wrap
 - `e4-getxacc-clear-gating-test.spin2`: Erratum E4 test: whether GETXACC clears the accumulators with the streamer idle, in a non-Goertzel mode, and inside a Goertzel burst
 - `e5-goertzel-one-clock-lag-test.spin2`: Erratum E5 test: how many terms a reading after a Goertzel burst holds, and where the last term goes
 - `e5-goertzel-sinc2-iteration-count-test.spin2`: Erratum E5 scope test, not an erratum test: the documented SINC2 constraint that E5's workaround does not cover; which samples a varying iteration count corrupts, whether one clock of read jitter does the same, and whether XZERO or a constant count keeps every sample clean

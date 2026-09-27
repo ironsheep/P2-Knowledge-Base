@@ -28,6 +28,9 @@ python3 engineering/tools/sync-manual-examples.py --doc <this manual's dir>
 | `e3-getct-stale-upper-long-runA.spin2` | E3 | The upper long `GETCT WC` returns in cogs 4-7 after that group has missed one wrap, and after it has missed two. |
 | `e3-getct-stale-upper-long-runB.spin2` | E3 | The same readings with a cog of cogs 4-7 running from the start. |
 | `e3-workaround-keeper-cog-test.spin2` | E3 workaround | With the keeper cog started first, whether cogs of 4-7 started after one and after two wraps read the current upper long; then, with the keeper stopped, that the erratum returns. |
+| `e3-workaround-waiting-cog-test.spin2` | E3 workaround | Whether a keeper held in `WAITATN`, and one held in `WAITX`, keeps cogs 4-7 current through a wrap; then, with no keeper, that the erratum returns. |
+| `e3-cogs-0-3-stale-window-test.spin2` | E3 | With every cog of 0-3 stopped across two wraps, the upper long read in cogs 1 and 3 before and after the group's next wrap. |
+| `e3-stale-window-closes-test.spin2` | E3 | After eight missed wraps, the upper long read in cogs 4 and 7, and `GETMS()` and `GETSEC()` in a Spin2 cog, before and after the group's next wrap. |
 | `e4-getxacc-clear-gating-test.spin2` | E4 | Whether `GETXACC` clears the accumulators with the streamer idle, in a non-Goertzel mode, and inside a Goertzel burst. |
 | `e5-goertzel-one-clock-lag-test.spin2` | E5 | How many terms a reading after a Goertzel burst holds, and where the last term goes. |
 | `e5-goertzel-sinc2-iteration-count-test.spin2` | E5 (scope) | Not an erratum test: the documented SINC2 constraint that E5's workaround does not cover. |
@@ -43,7 +46,10 @@ Appendix A of the manual, *The Test Programs*, lists them the same way.
 Every program is one file: Spin2 in cog 0, and the measurement itself in PASM2
 in a cog of its own, started by `COGINIT`. `DEBUG_COGS = %0000_0001` confines
 the debug interrupt to cog 0, which only collects the results from hub RAM and
-prints them.
+prints them. Two E3 programs differ: the eight-wrap test also runs a Spin2 cog,
+since `GETMS()` and `GETSEC()` are Spin2 methods; and the cogs 0-3 test stops
+cog 0 to empty its group, so its reference and reporting cog is cog 4 and
+`DEBUG_COGS` names cogs 0 and 4.
 
 1. Compile with DEBUG enabled: `pnut-ts -d <file>.spin2` (or PNut with DEBUG).
    Without `-d` every `debug()` is dropped and the program prints nothing.
@@ -72,6 +78,9 @@ At 200 MHz, as run:
 | E3 Run A | ends about 105 s after reset (it waits for the counter's lower long to wrap, 2^32 clocks = 21.47 s, several times) |
 | E3 Run B | ends about 44 s after reset |
 | E3 workaround test | ends about 67 s after reset (three wraps) |
+| E3 waiting-cog workaround test | ends about 66 s after reset (three wraps) |
+| E3 cogs 0-3 test | ends about 87 s after reset (four wraps) |
+| E3 eight-wrap test | ends about 216 s after reset (ten wraps) |
 | E7 test | prints its output over about 23 s |
 | E7 workaround test | prints its output over about 8 s |
 | SINC2 test | prints its output over about 5 s |
