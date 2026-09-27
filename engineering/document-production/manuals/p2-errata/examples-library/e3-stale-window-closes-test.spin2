@@ -493,11 +493,11 @@ PRI spin_class(offMsB, offMsA, offSecB, offSecA) : pairClass
   else
     pairClass := SC_OTHER
 
-PRI spin_sampler(pMailbox) | lastReq, req
+PRI spin_sampler(pSpinMailbox) | lastReq, req
 ' Cog 5 (Spin2): on each NEW request number, call GETMS() then GETSEC(),
 ' write both, then write the request number back as the ack.
 '
-' @param pMailbox - mailbox base address ([0]=req [1]=ms [2]=sec [3]=ack)
+' @param pSpinMailbox - Spin2 sampler mailbox base address ([0]=req [1]=ms [2]=sec [3]=ack)
 
 ' Local Variables:
 ' @local lastReq - the last request number answered
@@ -505,12 +505,12 @@ PRI spin_sampler(pMailbox) | lastReq, req
 
   lastReq := 0
   repeat
-    req := long[pMailbox][SMB_REQ]
+    req := long[pSpinMailbox][SMB_REQ]
     if req <> lastReq
       lastReq := req
-      long[pMailbox][SMB_MS] := getms()
-      long[pMailbox][SMB_SEC] := getsec()
-      long[pMailbox][SMB_ACK] := req
+      long[pSpinMailbox][SMB_MS] := getms()
+      long[pSpinMailbox][SMB_SEC] := getsec()
+      long[pSpinMailbox][SMB_ACK] := req
 
 PRI isInWindow(loVal) : bInWindow
 ' True when loVal falls inside the sample window [LOWIN, HIWIN] -- well

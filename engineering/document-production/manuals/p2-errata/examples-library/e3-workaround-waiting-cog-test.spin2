@@ -233,31 +233,30 @@ PRI verdict() | slotIdx
 
   if bRigBad == TRUE
     debug("NO VERDICT: rig failed (see RIG FAIL lines)")
-    return
-
-  ' ---- WAITATN -------------------------------------------------------
-  if readStatus[R_E1] >= ST_MIXED
-    debug("VERDICT WAITATN: INCONCLUSIVE - E1 pairs disagreed or too few valid pairs")
-  elseif readStatus[R_E1] == ST_BRACKET
-    debug("VERDICT WAITATN: REFUTED - E1 plain GETCT fell outside cog 0's bracket: group-1 LOWER copy not current")
-  elseif readD[R_E1] == P_COUNTS
-    debug("VERDICT WAITATN: CONFIRMED - a keeper held in WAITATN at wrap 1 kept cogs 4-7 current (E1 D=0)")
-  elseif readD[R_E1] == P_NOTCOUNT
-    debug("VERDICT WAITATN: REFUTED - a keeper held in WAITATN at wrap 1 did NOT keep cogs 4-7 current (E1 D=1)")
   else
-    debug("VERDICT WAITATN: INCONCLUSIVE - E1 D=", sdec_(readD[R_E1]), " is neither 0 nor 1")
+    ' ---- WAITATN -----------------------------------------------------
+    if readStatus[R_E1] >= ST_MIXED
+      debug("VERDICT WAITATN: INCONCLUSIVE - E1 pairs disagreed or too few valid pairs")
+    elseif readStatus[R_E1] == ST_BRACKET
+      debug("VERDICT WAITATN: REFUTED - E1 plain GETCT fell outside cog 0's bracket: group-1 LOWER copy not current")
+    elseif readD[R_E1] == P_COUNTS
+      debug("VERDICT WAITATN: CONFIRMED - a keeper held in WAITATN at wrap 1 kept cogs 4-7 current (E1 D=0)")
+    elseif readD[R_E1] == P_NOTCOUNT
+      debug("VERDICT WAITATN: REFUTED - a keeper held in WAITATN at wrap 1 did NOT keep cogs 4-7 current (E1 D=1)")
+    else
+      debug("VERDICT WAITATN: INCONCLUSIVE - E1 D=", sdec_(readD[R_E1]), " is neither 0 nor 1")
 
-  ' ---- WAITX ---------------------------------------------------------
-  if readStatus[R_X2] >= ST_MIXED
-    debug("VERDICT WAITX: INCONCLUSIVE - X2 pairs disagreed or too few valid pairs")
-  elseif readStatus[R_X2] == ST_BRACKET
-    debug("VERDICT WAITX: REFUTED - X2 plain GETCT fell outside cog 0's bracket: group-1 LOWER copy not current")
-  elseif readD[R_X2] == P_COUNTS
-    debug("VERDICT WAITX: CONFIRMED - a keeper held in WAITX at wrap 2 kept cogs 4-7 current (X2 D=0)")
-  elseif readD[R_X2] == readD[R_E1] + 1
-    debug("VERDICT WAITX: REFUTED - a keeper held in WAITX at wrap 2 did NOT keep cogs 4-7 current (X2 D=", sdec_(readD[R_X2]), ")")
-  else
-    debug("VERDICT WAITX: INCONCLUSIVE - X2 D=", sdec_(readD[R_X2]), " is neither 0 nor E1+1")
+    ' ---- WAITX -------------------------------------------------------
+    if readStatus[R_X2] >= ST_MIXED
+      debug("VERDICT WAITX: INCONCLUSIVE - X2 pairs disagreed or too few valid pairs")
+    elseif readStatus[R_X2] == ST_BRACKET
+      debug("VERDICT WAITX: REFUTED - X2 plain GETCT fell outside cog 0's bracket: group-1 LOWER copy not current")
+    elseif readD[R_X2] == P_COUNTS
+      debug("VERDICT WAITX: CONFIRMED - a keeper held in WAITX at wrap 2 kept cogs 4-7 current (X2 D=0)")
+    elseif readD[R_X2] == readD[R_E1] + 1
+      debug("VERDICT WAITX: REFUTED - a keeper held in WAITX at wrap 2 did NOT keep cogs 4-7 current (X2 D=", sdec_(readD[R_X2]), ")")
+    else
+      debug("VERDICT WAITX: INCONCLUSIVE - X2 D=", sdec_(readD[R_X2]), " is neither 0 nor E1+1")
 
 PRI ctrl(slotIdx, pLabel)
 ' Check a control reading in slot slotIdx: st must be ST_OK and D must be
