@@ -240,7 +240,11 @@ Cog 4's own upper long, read as cog 0's minus D, was 0 in the last pair before w
 
 ## The test program {#sec-e3-program}
 
-The erratum's two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and `e3-getct-stale-upper-long-runB.spin2` (Run B). They share the sampler, the pair protocol and the controls, and differ only in when cog 4 starts and which readings are taken. The workaround's test program is `e3-workaround-keeper-cog-test.spin2`. The stale-window programs are `e3-workaround-waiting-cog-test.spin2`, `e3-cogs-0-3-stale-window-test.spin2` and `e3-stale-window-closes-test.spin2`.
+The erratum's two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and `e3-getct-stale-upper-long-runB.spin2` (Run B). They share the sampler, the pair protocol and the controls, and differ only in when cog 4 starts and which readings are taken. The workaround's test program is `e3-workaround-keeper-cog-test.spin2`. The stale-window programs are:
+
+- `e3-workaround-waiting-cog-test.spin2`, the waiting keepers;
+- `e3-cogs-0-3-stale-window-test.spin2`, cogs 0-3 with every cog stopped;
+- `e3-stale-window-closes-test.spin2`, eight missed wraps, with `GETMS()` and `GETSEC()`.
 
 The sampler is started explicitly in cog 1 and in cog 4 (`COGINIT #1` and `COGINIT #4`), with its hub mailbox address in `PTRA`. On each new request number it reads the counter and writes both longs:
 

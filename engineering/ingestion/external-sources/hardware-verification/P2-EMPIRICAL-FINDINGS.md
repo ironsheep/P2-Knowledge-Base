@@ -1223,6 +1223,10 @@ held in `WAITATN` or `WAITX`. *Limits:* two waits tested (not `WAITCT`, `WAITSEx
 wrap each; 200 MHz. Spin2's `WAITCT()`/`WAITMS()`/`WAITUS()` are not wait instructions: the
 interpreter polls `GETCT` in a loop (Spin2 interpreter v55, `pwct`), so a Spin2 cog in them is
 executing, as the polling samplers of EF-068 were.
+*Reader copy re-run (2026-09-27, Stephen):* the shipped `p2-errata/examples-library/e3-workaround-waiting-cog-test.spin2`,
+whose `verdict()` was restructured to a single exit (measuring image identical, same offset), ran once
+(`logs-archive/debug_260927-172602`, 13,291 bytes = the committed file compiled): every reading's D,
+pair count and bracket result identical to the run above; both verdicts `CONFIRMED`.
 *Source:* `…/tests/e3-waiting-keeper-test.spin2`.
 
 ### EF-079 · Cogs 0–3 show the same band as cogs 4–7 when every one of them is stopped across wraps, and it closes in one wrap — `CONFIRMED`

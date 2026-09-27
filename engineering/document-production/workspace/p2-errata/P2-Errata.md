@@ -860,7 +860,11 @@ Cog 4's own upper long, read as cog 0's minus D, was 0 in the last pair before w
 
 ## The test program {#sec-e3-program}
 
-The erratum's two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and `e3-getct-stale-upper-long-runB.spin2` (Run B). They share the sampler, the pair protocol and the controls, and differ only in when cog 4 starts and which readings are taken. The workaround's test program is `e3-workaround-keeper-cog-test.spin2`. The stale-window programs are `e3-workaround-waiting-cog-test.spin2`, `e3-cogs-0-3-stale-window-test.spin2` and `e3-stale-window-closes-test.spin2`.
+The erratum's two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and `e3-getct-stale-upper-long-runB.spin2` (Run B). They share the sampler, the pair protocol and the controls, and differ only in when cog 4 starts and which readings are taken. The workaround's test program is `e3-workaround-keeper-cog-test.spin2`. The stale-window programs are:
+
+- `e3-workaround-waiting-cog-test.spin2`, the waiting keepers;
+- `e3-cogs-0-3-stale-window-test.spin2`, cogs 0-3 with every cog stopped;
+- `e3-stale-window-closes-test.spin2`, eight missed wraps, with `GETMS()` and `GETSEC()`.
 
 The sampler is started explicitly in cog 1 and in cog 4 (`COGINIT #1` and `COGINIT #4`), with its hub mailbox address in `PTRA`. On each new request number it reads the counter and writes both longs:
 
@@ -1920,6 +1924,6 @@ Pin use: the E4 and E5 programs, including the SINC2 test and the E4/E5 workarou
 
 Running time: the E3 erratum programs wait for the counter's lower long to wrap, which takes 2^32^ clocks (21.47 s at 200 MHz); Run A ends about 105 s after reset, Run B about 44 s, the cogs 0-3 test about 87 s, and the eight-wrap test about 216 s. The E7 erratum test printed its output over about 23 s, the SINC2 test over about 5 s. The E1, E2, E4, E5 and E6 erratum programs each printed their whole output in about one second. Of the workaround tests, the E3 keeper test ends about 67 s after reset and the E3 waiting-cog test about 66 s, since each waits through three wraps; the E7 test printed its output over about 8 s, and the E4/E5 test in about one second.
 
-The E1 to E5 erratum programs ran on 2026-09-24 on a P2 board at 200 MHz, each twice, from two builds with identical measuring code, and every measured value matched between the runs. The E5 SINC2, E6 and E7 erratum programs ran on 2026-09-25, each twice. The three workaround tests ran on 2026-09-26, once each, on the same board at 200 MHz; each reproduced its erratum and passed every control in the same run. The three E3 stale-window programs ran on 2026-09-27, once each, on the same board at 200 MHz, and passed every control; the archive copies of the eight-wrap and cogs 0-3 tests differ from the programs that ran only in comments and names, and assemble to the same bytes; in the waiting-cog test, the Spin2 method that prints the verdicts was given a single exit, and its measuring code assembles to the same bytes.
+The E1 to E5 erratum programs ran on 2026-09-24 on a P2 board at 200 MHz, each twice, from two builds with identical measuring code, and every measured value matched between the runs. The E5 SINC2, E6 and E7 erratum programs ran on 2026-09-25, each twice. The three workaround tests ran on 2026-09-26, once each, on the same board at 200 MHz; each reproduced its erratum and passed every control in the same run. The three E3 stale-window programs ran on 2026-09-27, once each, on the same board at 200 MHz, and passed every control; the archive copies of the eight-wrap and cogs 0-3 tests differ from the programs that ran only in comments and names, and assemble to the same bytes; in the waiting-cog test, the Spin2 method that prints the verdicts was given a single exit, and its measuring code assembles to the same bytes; its archive copy was run again on the same board on 2026-09-27, and every reading and both verdicts matched.
 
 
