@@ -70,7 +70,14 @@ does not decide the question is not a verdict: the row stays open until a change
 **VO-J-015..017** (E3 follow-ups, 2026-09-27) depart from the independence rule: they were written
 by the arbiter, who had the study's reading and EF-068's results in view. Each still fixes its
 predictions and falsifying outcomes in the program before the run and gates its verdict on in-run
-controls, and each verdict is re-derived from the raw log lines, as for every row here.
+controls, and each verdict is re-derived from the raw log lines, as for every row here. To restore
+the independence before the run, each was then reviewed adversarially (2026-09-27) by a fresh
+agent given only the row's question and the source, told to find any way it could print a verdict
+the part did not earn: **no blocker in any of the three**. Adopted from the reviews, each checked
+against the source first: VO-J-016's header now states why its debugger may sit in the reference
+cog (as cog 0 does in every sibling; EF-057 concerns the samplers) and that a lock held by a stopped
+cog goes free (P2 Documentation, Locks); VO-J-015's header states when the `WAITX` keeper starts,
+replacing "mid-span".
 
 ## Section 2 — External-hardware catalog (recorded; NOT committed short-term)
 
