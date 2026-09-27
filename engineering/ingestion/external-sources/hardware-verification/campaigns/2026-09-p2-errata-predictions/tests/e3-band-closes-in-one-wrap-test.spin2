@@ -1,0 +1,850 @@
+'' =====================================================================
+''
+''   File....... e3-band-closes-in-one-wrap-test.spin2
+''   Purpose.... Prove on SILICON that the E3 stale-upper-long window
+''               (the "red band") closes at the FIRST wrap the cogs 4-7
+''               group runs through, from a lag of many wraps
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 27 Sep 2026
+''
+'' =====================================================================
+
+{ WHAT IS KNOWN (erratum E3, ledger EF-068, Run A):
+    Cogs 0-3 and cogs 4-7 each read their own copy of the 64-bit counter
+    CT.  A group's copy of the UPPER long (GETCT WC) advances only at a
+    wrap of the lower long while at least one cog of that group is
+    running; the lower long is always current.  A cog started in a group
+    that missed k wraps reads an upper long k BELOW cog 0's.
+    Run A measured the catch-up from a lag of ONE only: cog 4, 1 behind,
+    ran through wrap 2 and then read D = 0.  Its two-missed-wrap readings
+    (D = 2) end the run; no reading was taken after a later wrap.
+
+  THE QUESTION THIS TEST DECIDES:
+    A program that starts its first cog of 4-7 minutes after reset sees
+    a window -- the "red band" -- in which GETCT WC in 4-7 reads behind.
+    Does that window close at the first wrap the group runs through,
+    whatever the lag, in one step?  The design study predicts yes (the
+    group's copy takes the counter's upper long as it is then); Run A
+    shows it only from a lag of one.  This test measures it from a lag
+    of LAG (8) missed wraps, ~2.9 minutes at 200 MHz, in TWO cogs of the
+    group, and checks the copy stays current at the wrap after.
+
+  RIG: bare P2 board (20 MHz crystal assumed by _clkfreq), NO pin, NO
+    jumper, nothing attached.  No pin is driven; P56..P63 untouched
+    (P62/P63 are the DEBUG serial link, owned by the debugger).
+
+  THE SECOND QUESTION (Spin2 GETMS() / GETSEC()):
+    The Spin2 interpreter (v55, routine getms_) computes both from the
+    calling cog's own GETCT WC + GETCT, divided by clkfreq.  By that
+    source, in the band they return a time short by LAG x 2^32 clocks
+    (171.798 s at 200 MHz for LAG = 8) and are current once the band
+    closes.  A Spin2 cog in cog 5 answers requests with GETMS() then
+    GETSEC(); cog 0 calls both before and after each request.
+
+  COGS (every start names its cog -- never the free-cog form):
+    cog 0      this program; the only cog with the debugger (DEBUG_COGS)
+    cog 1      CTRL_COG, group-0 control sampler, from start to end
+    cog 4      SMP_COG_A, group-1 sampler, started in the band, never stopped
+    cog 5      SPIN_COG, group-1 Spin2 GETMS/GETSEC sampler, started in
+               the band, never stopped
+    cog 7      SMP_COG_B, group-1 sampler, started in the band, never stopped
+    Two group-1 samplers, at the two ends of the group, test that the
+    stale copy and its catch-up belong to the GROUP, not to one cog.
+
+  DEFINITIONS (the measuring engine of the E3 Run A / Run B programs,
+  unchanged):
+    pair  = cog 0 reads its own CT (GETCT WC then GETCT: refB), writes a
+            request number to the sampler's hub mailbox, the sampler
+            answers with its own GETCT WC then GETCT, then ack = request;
+            cog 0 reads the sampler's longs after seeing the ack, then
+            reads its own CT again (refA).  The sampler's read is thus
+            causally BETWEEN refB and refA.
+    valid = refB.hi == refA.hi and refB.lo, sampler.lo, refA.lo all in
+            [$1000_0000, $F000_0000] (well clear of any wrap).
+    D     = refB.hi - sampler.hi
+    LO-BRACKET = refB.lo < sampler.lo < refA.lo (unsigned).
+    A reading = 10 valid pairs, all printed raw.
+
+  ARMS, in run order (hi = cog 0's own CT upper long; L = LAG = 8):
+    boot   cog 0 CT hi must be 0; running = cog 0 only
+    start  cog 1 = group-0 control sampler (runs to the end)
+    R0     hi=0 early: cog 1 control
+    (cogs 4-7: NO cog running through wraps 0->1 ... (L-1)->L)
+    --- cogs 4 and 7 started at hi=L: the band opens ---
+    B4E/B7E  hi=L   early: cog 4, cog 7   band: TRUE L / FALSE 0
+    B4L/B7L  hi=L   late:  cog 4, cog 7   band: TRUE L (steady across
+                                          the span)
+    (cogs 4 and 7 run through wrap L->L+1: the closing wrap)
+    X4E/X7E  hi=L+1 early: cog 4, cog 7   closed: TRUE 0 / FALSE L-1
+                                          (one per wrap) or L (no
+                                          catch-up)
+    X4L/X7L  hi=L+1 late:  cog 4, cog 7   closed: TRUE 0
+    (cogs 4 and 7 run through wrap L+1->L+2)
+    Y4E/Y7E  hi=L+2 early: cog 4, cog 7   stays closed: TRUE 0
+    Every group-1 reading is paired with a cog-1 control reading.
+    Spin2 arms (cog 5), taken right after the cog-4/cog-7 readings:
+    GBE  hi=L   early  GETMS/GETSEC: TRUE short by L wraps / FALSE current
+    GBL  hi=L   late   GETMS/GETSEC: TRUE short by L wraps
+    GXE  hi=L+1 early  GETMS/GETSEC: TRUE current / FALSE still short
+
+  SPIN2 PAIR (cog 0 side all Spin2): cog 0 reads GETCT (in-window
+    check), GETMS(), GETSEC(), writes a request; cog 5 answers GETMS(),
+    GETSEC(), ack; cog 0 reads GETMS(), GETSEC(), GETCT again.
+    valid = both of cog 0's lower longs in [$1000_0000, $F000_0000].
+    With E = the time of L wraps (floor/ceil, computed from clkfreq at
+    run time with MULDIV64: 171798/171799 ms and 171/172 s at 200 MHz),
+    offB = cog 0 before - cog 5, offA = cog 0 after - cog 5:
+      SHORT   offB <= E.ceil and offA >= E.floor, in ms AND in s
+      CURRENT offB <= 0      and offA >= 0,       in ms AND in s
+      OTHER   neither
+    A Spin2 reading = 10 valid pairs, all printed, all the same class.
+
+  WHAT A PROGRAM SEES ACROSS THE CLOSING WRAP (reported, and part of
+  the verdict):  cog 4's own upper long, B4L -> X4E.  Predicted to step
+  by L+1 across one wrap (the L missed wraps plus the one that passed),
+  so a 64-bit interval cog 4 times across that wrap is L x 2^32 clocks
+  too long.  Computed from each reading's cog-0 upper long and D.
+
+  IN-RUN CONTROLS THAT GATE THE VERDICT (any failure -> "RIG FAIL", no
+  verdict):
+    C1  cog 1 (group 0) D == 0, status ok, in every control reading.
+        Proves the mailbox, the pair protocol and the D arithmetic.
+    C2  cog 0's upper long == the lower-long wraps cog 0 itself watched
+        since boot (every poll in the window).  Proves cog 0's reference.
+    C3  running-cog mask polled on every wait and checked after every
+        start: exactly the cogs this program started.  No cog of 4-7 may
+        run before hi = L.
+    C4  boot: CT hi == 0 (fresh reset) and running = cog 0 only.
+    C5  every request answered within 100 ms (sampler alive).
+
+  VERDICT (one line, fixed before the run):
+    CONFIRMED     all four band readings D = L, all six readings after
+                  the closing wrap D = 0, cog 4's step across the closing
+                  wrap = L+1, all status ok (LO-BRACKET true)
+    REFUTED       a group-1 reading consistent (10 agreeing pairs) with
+                  any other D (printed, with the arm that broke), or a
+                  group-1 LO-BRACKET failure
+    INCONCLUSIVE  a group-1 reading whose pairs disagree or that got too
+                  few valid pairs
+    RIG FAIL      any of C1..C5 failed: NO VERDICT (C2, C3, C4 halt at
+                  once; C1 and C5 are judged after the last reading)
+
+  VERDICT GETMS/GETSEC (a second line, fixed before the run; printed
+  only when there is no RIG FAIL):
+    CONFIRMED     GBE and GBL SHORT, GXE CURRENT
+    REFUTED       a Spin2 reading whose 10 pairs agree on another class
+                  (printed)
+    INCONCLUSIVE  a Spin2 reading with mixed classes, too few valid
+                  pairs, or no ack
+
+  CLOCK / RUN TIME: _clkfreq = 200_000_000 -> 2^32 clocks = 21.47 s per
+    wrap.  The run ends at CT hi = L+2 = 10, lo just past $1000_0000:
+    about 10.06 x 21.47 s = ~216 s (3 min 36 s) after reset (plus
+    download).  "alive" lines print every 2^28 clocks (~1.34 s).
+
+  HOW TO RUN: download to RAM with DEBUG enabled (pnut-term-ts, or PNut
+    with debug on: Ctrl-F10).  The download must RESET the P2 (the
+    counter must start from zero).  Do not reload while running.  Read
+    the final VERDICT line; all raw pairs are printed above it.  The run
+    ends with DEBUG_END_SESSION.
+
+  COMPILER: pnut-ts v1.55.8,  pnut-ts -d e3-band-closes-in-one-wrap-test.spin2
+}
+
+CON ' ---- Test Configuration ----
+  _clkfreq    = 200_000_000
+  DEBUG_COGS  = %0000_0001        ' debugger only in cog 0; no other cog takes a debug interrupt
+
+  LAG     = 8                     ' wraps the cogs 4-7 group misses before its first cog starts
+
+  LOWIN   = $1000_0000            ' sample window: lowest CT lower long a pair may use
+  HIWIN   = $F000_0000            ' sample window: highest CT lower long a pair may use
+  LATE    = $E000_0000            ' late-in-epoch reading point (inside window)
+  NPAIRS  = 10                    ' valid pairs per reading
+  MAXTRY  = 30                    ' request attempts per reading
+
+  ACK_TIMEOUTS_PER_SEC = 10       ' C5: a sampler must ack within clkfreq / 10 clocks (100 ms)
+  COG_SETTLE_MS  = 10             ' wait after a COGINIT before checking the mask
+  COG_COUNT      = 8              ' cogs 0..7 on a P2
+  LONG_BITS      = 32             ' bits in a long
+  NIB_BITS       = 4              ' "alive" throttle: hi and the top nibble of lo
+  ALIVE_SHIFT    = LONG_BITS - NIB_BITS   ' brings lo's top nibble down to bits 3..0
+  BOOL_BIT       = 1              ' low bit of TRUE (-1): prints a flag as 1 or 0
+
+  ' mailbox layout, in longs: [0]=request [1]=hi [2]=lo [3]=ack
+  MB_LONGS   = 4                  ' longs per mailbox
+  MB_HI_IDX  = 1                  ' long index of the hi long (the sampler's PTRA[MB_HI_IDX])
+  MB_LO_IDX  = 2                  ' long index of the lo long
+  MB_ACK_IDX = 3                  ' long index of the ack long
+  MB_HI_OFS  = MB_HI_IDX * 4      ' byte offsets of the hi, lo and ack longs
+  MB_LO_OFS  = MB_LO_IDX * 4
+  MB_ACK_OFS = MB_ACK_IDX * 4
+
+  ' the rig's cogs, each started by its explicit number
+  MAIN_COG  = 0                   ' runs main(), the pair transactions and every check
+  CTRL_COG  = 1                   ' group-0 control sampler
+  SMP_COG_A = 4                   ' group-1 sampler, low end of the group
+  SMP_COG_B = 7                   ' group-1 sampler, high end of the group
+  SPIN_COG  = 5                   ' group-1 Spin2 GETMS/GETSEC sampler
+
+  ' expected running-cog masks
+  M_BOOT  = 1 << MAIN_COG                                 ' cog 0 alone
+  M_C1    = M_BOOT | (1 << CTRL_COG)                      ' cog 0 + the control sampler
+  M_BAND  = M_C1 | (1 << SMP_COG_A) | (1 << SMP_COG_B) | (1 << SPIN_COG)  ' + all group-1 samplers
+
+  ' Spin2 sampler: mailbox [0]=request [1]=ms [2]=sec [3]=ack, and its stack
+  SMB_REQ = 0, SMB_MS = 1, SMB_SEC = 2, SMB_ACK = 3
+  SPIN_STACK_LONGS = 128
+
+  ' Spin2 reading classes (spinClass[] value per Spin2 slot)
+  '  SC_SHORT   - every pair: GETMS and GETSEC short by the time of LAG wraps
+  '  SC_CURRENT - every pair: GETMS and GETSEC current
+  '  SC_OTHER   - every pair agreed on neither
+  '  SC_MIXED   - pairs disagreed on the class
+  '  SC_SHORTN  - fewer than NPAIRS valid pairs before MAXTRY
+  '  SC_TIMEOUT - the Spin2 sampler never acked a request
+  SC_SHORT = 0, SC_CURRENT = 1, SC_OTHER = 2, SC_MIXED = 3, SC_SHORTN = 4, SC_TIMEOUT = 5
+
+  ' Spin2 reading slots
+  G_BE = 0, G_BL = 1, G_XE = 2, NGREAD = 3
+
+  MS_PER_SEC = 1000
+  HALF_WRAP  = $8000_0000         ' 2^31: LAG wraps = HALF_WRAP x (LAG x 2) clocks, for MULDIV64
+
+  ' reading status codes (readStatus[] value per slot)
+  '  ST_OK      - status ok, D consistent across all valid pairs
+  '  ST_BRACKET - LO-BRACKET failed on >= 1 valid pair (lower copy not current)
+  '  ST_MIXED   - valid pairs disagreed on D
+  '  ST_SHORT   - fewer than NPAIRS valid pairs before MAXTRY
+  '  ST_TIMEOUT - sampler never acked a request
+  ST_OK = 0, ST_BRACKET = 1, ST_MIXED = 2, ST_SHORT = 3, ST_TIMEOUT = 4
+
+  ' take_pair() ack status (a status code, not a boolean):
+  '  ACK_NONE - the sampler did not ack within the timeout
+  '  ACK_SEEN - the sampler acked
+  #0, ACK_NONE, ACK_SEEN
+
+  ' reading slots (index into readStatus[], readD[], readRefHi[] and
+  ' readBracketFails[]):
+  '  R_C0  - R0: cog 1 at hi=0, control (C1)
+  '  R_B4E, R_B7E, R_CBE - band, hi=LAG early: cog 4, cog 7, cog 1 control
+  '  R_B4L, R_B7L, R_CBL - band, hi=LAG late
+  '  R_X4E, R_X7E, R_CXE - after the closing wrap, hi=LAG+1 early
+  '  R_X4L, R_X7L, R_CXL - after the closing wrap, hi=LAG+1 late
+  '  R_Y4E, R_Y7E, R_CYE - one wrap later, hi=LAG+2 early
+  '  NREAD - number of reading slots
+  R_C0 = 0
+  R_B4E = 1, R_B7E = 2, R_CBE = 3, R_B4L = 4, R_B7L = 5, R_CBL = 6
+  R_X4E = 7, R_X7E = 8, R_CXE = 9, R_X4L = 10, R_X7L = 11, R_CXL = 12
+  R_Y4E = 13, R_Y7E = 14, R_CYE = 15
+  NREAD = 16
+
+  ' CT upper-long epochs the arms read in:
+  '  HI_BOOT  - before the first wrap (R0)
+  '  HI_BAND  - after LAG wraps with cogs 4-7 idle across all of them
+  '  HI_CLOSE - after the closing wrap, cogs 4 and 7 running through it
+  '  HI_AFTER - one wrap later, cogs 4 and 7 still running
+  HI_BOOT = 0, HI_BAND = LAG, HI_CLOSE = LAG + 1, HI_AFTER = LAG + 2
+
+  ' predictions, fixed before the run
+  P_BAND   = LAG                  ' in the band: behind by every missed wrap (FALSE: 0)
+  P_CLOSED = 0                    ' after the closing wrap: current (FALSE: LAG-1 or LAG)
+  P_STEP   = LAG + 1              ' cog 4's upper long across the closing wrap
+  P_CTRL   = 0                    ' cog 1 (group 0): always 0, else RIG FAIL
+
+VAR ' ---- Test State ----
+  long mailboxControl[MB_LONGS]   ' cog 1's mailbox
+  long mailboxCogA[MB_LONGS]      ' cog 4's mailbox
+  long mailboxCogB[MB_LONGS]      ' cog 7's mailbox
+  long requestSeq                 ' request counter, never 0 once used
+  long wrapsSeen                  ' lower-long wraps cog 0 watched since boot (C2)
+  long prevCtLo                   ' last CT lower long cog 0 saw (C2)
+  long bRigBad                    ' TRUE once any judged control has failed
+  long readStatus[NREAD]          ' per slot: ST_* status
+  long readD[NREAD]               ' per slot: agreed D
+  long readRefHi[NREAD]           ' per slot: cog 0's upper long during the reading
+  long readBracketFails[NREAD]    ' per slot: LO-BRACKET failure count
+  long bHalted                    ' TRUE once a RIG FAIL has halted the run: later steps are skipped
+  long mailboxSpin[MB_LONGS]      ' cog 5's mailbox (Spin2 sampler)
+  long spinStack[SPIN_STACK_LONGS]  ' cog 5's Spin2 stack
+  long spinClass[NGREAD]          ' per Spin2 slot: SC_* class
+  long lagMsFloor                 ' time of LAG wraps, in ms, floor and ceiling
+  long lagMsCeil
+  long lagSecFloor                ' time of LAG wraps, in s, floor and ceiling
+  long lagSecCeil
+
+PUB main() | ctHi, ctLo, cogMask
+'' Run the E3 band test: hold group 1 (cogs 4-7) idle through LAG wraps,
+'' start cogs 4 and 7, and compare their GETCT reads against cog 0's and
+'' cog 1's in the band, after the closing wrap, and one wrap later.
+''
+
+' Local Variables:
+' @local ctHi - cog 0's own CT upper long, from ct64()
+' @local ctLo - cog 0's own CT lower long, from ct64()
+' @local cogMask - running-cog bitmask, from runmask()
+
+  ' A RIG FAIL halts the run (bHalted): a guard follows every step that
+  ' can halt (wait_until, expect_mask), so every path ends at finish().
+  debug("=== Erratum E3 BAND TEST: group 1 idle through ", udec_(LAG), " wraps, then cogs 4 and 7 started ===")
+  debug("predictions: band D=", udec_(P_BAND), " (FALSE 0); after the closing wrap D=0 (FALSE ", udec_(LAG - 1), " or ", udec_(LAG), "); cog 4 step across it +", udec_(P_STEP), "; cog1 D=0 always")
+
+  ' the time of LAG wraps (LAG x 2^32 clocks) in ms and in s, from clkfreq
+  lagMsFloor := muldiv64(HALF_WRAP, LAG * 2 * MS_PER_SEC, clkfreq)
+  lagMsCeil := lagMsFloor + 1
+  lagSecFloor := muldiv64(HALF_WRAP, LAG * 2, clkfreq)
+  lagSecCeil := lagSecFloor + 1
+  debug("time of ", udec_(LAG), " wraps: ms ", udec_(lagMsFloor), "..", udec_(lagMsCeil), "  s ", udec_(lagSecFloor), "..", udec_(lagSecCeil))
+
+  ' ---- C4: boot state -------------------------------------------------
+  ctHi, ctLo := ct64()
+  cogMask := runmask()
+  prevCtLo := ctLo
+  wrapsSeen := 0
+  debug("boot: cog0 CT=", uhex_long_(ctHi), "_", uhex_long_(ctLo), " running cogs=", ubin_byte_(cogMask))
+  if ctHi <> HI_BOOT
+    debug("RIG FAIL: CT hi at boot expected 0, got ", uhex_long_(ctHi), " - no fresh reset; reload with reset")
+    halt()
+  elseif cogMask <> M_BOOT
+    debug("RIG FAIL: running cogs at boot expected ", ubin_byte_(M_BOOT), ", got ", ubin_byte_(cogMask))
+    halt()
+
+  ' ---- control sampler: cog 1 (group 0) from program start ------------
+  if bHalted == FALSE
+    start_sampler(CTRL_COG, @mailboxControl)
+    waitms(COG_SETTLE_MS)
+    expect_mask(M_C1)
+
+  if bHalted == FALSE
+    wait_until(HI_BOOT, LOWIN, M_C1)
+  if bHalted == FALSE
+    reading(R_C0, string("R0  cog1 hi=0"), @mailboxControl)
+
+  ' ---- group 1 idle across LAG wraps ----------------------------------
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=", udec_(HI_BAND), " with cogs 4-7 idle (~", udec_(LAG * 2147 / 100), " s) ---")
+    wait_until(HI_BAND, LOWIN, M_C1)
+
+  ' ---- the band opens: cogs 4 and 7 started ---------------------------
+  if bHalted == FALSE
+    start_sampler(SMP_COG_A, @mailboxCogA)
+    start_sampler(SMP_COG_B, @mailboxCogB)
+    cogspin(SPIN_COG, spin_sampler(@mailboxSpin), @spinStack)
+    waitms(COG_SETTLE_MS)
+    expect_mask(M_BAND)
+  if bHalted == FALSE
+    debug("--- cogs 4, 5 and 7 started (first group-1 cogs since reset): band open ---")
+    reading(R_B4E, string("B4E cog4 band early"), @mailboxCogA)
+    reading(R_B7E, string("B7E cog7 band early"), @mailboxCogB)
+    reading(R_CBE, string("CBE cog1 band early"), @mailboxControl)
+    spin_reading(G_BE, string("GBE cog5 GETMS/GETSEC band early"))
+
+  if bHalted == FALSE
+    wait_until(HI_BAND, LATE, M_BAND)
+  if bHalted == FALSE
+    reading(R_B4L, string("B4L cog4 band late"), @mailboxCogA)
+    reading(R_B7L, string("B7L cog7 band late"), @mailboxCogB)
+    reading(R_CBL, string("CBL cog1 band late"), @mailboxControl)
+    spin_reading(G_BL, string("GBL cog5 GETMS/GETSEC band late"))
+
+  ' ---- the closing wrap: cogs 4 and 7 run through it ------------------
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=", udec_(HI_CLOSE), " with cogs 4 and 7 running (the closing wrap) ---")
+    wait_until(HI_CLOSE, LOWIN, M_BAND)
+  if bHalted == FALSE
+    reading(R_X4E, string("X4E cog4 closed early"), @mailboxCogA)
+    reading(R_X7E, string("X7E cog7 closed early"), @mailboxCogB)
+    reading(R_CXE, string("CXE cog1 closed early"), @mailboxControl)
+    spin_reading(G_XE, string("GXE cog5 GETMS/GETSEC closed early"))
+
+  if bHalted == FALSE
+    wait_until(HI_CLOSE, LATE, M_BAND)
+  if bHalted == FALSE
+    reading(R_X4L, string("X4L cog4 closed late"), @mailboxCogA)
+    reading(R_X7L, string("X7L cog7 closed late"), @mailboxCogB)
+    reading(R_CXL, string("CXL cog1 closed late"), @mailboxControl)
+
+  ' ---- one wrap later: still current ----------------------------------
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=", udec_(HI_AFTER), " with cogs 4 and 7 running ---")
+    wait_until(HI_AFTER, LOWIN, M_BAND)
+  if bHalted == FALSE
+    reading(R_Y4E, string("Y4E cog4 after early"), @mailboxCogA)
+    reading(R_Y7E, string("Y7E cog7 after early"), @mailboxCogB)
+    reading(R_CYE, string("CYE cog1 after early"), @mailboxControl)
+
+  if bHalted == FALSE
+    verdict()
+  finish()
+
+' ---------------------------------------------------------------------
+PRI verdict() | slotIdx, stepHi, bBandOk, bClosedOk, bAnyInconclusive, bAnyBracket
+' Print every reading slot's status and cog 4's step across the closing
+' wrap, apply the control checks (C1/C5), then compare the group-1
+' readings with the predictions to produce the one-line VERDICT.
+'
+
+' Local Variables:
+' @local slotIdx - reading-slot index while printing the summary table
+' @local stepHi - cog 4's own upper long after the closing wrap minus before it
+' @local bBandOk - TRUE if all four band readings gave D = P_BAND
+' @local bClosedOk - TRUE if all six readings after the closing wrap gave D = P_CLOSED
+' @local bAnyInconclusive - TRUE if a group-1 reading had disagreeing or too few pairs
+' @local bAnyBracket - TRUE if a group-1 reading failed LO-BRACKET
+
+  debug("=== SUMMARY (D = cog0 hi - sampler hi; st 0=ok 1=lo-bracket-fail 2=mixed 3=short 4=timeout) ===")
+  repeat slotIdx from 0 to NREAD - 1
+    debug("slot ", udec_(slotIdx), ": cog0 hi=", udec_(readRefHi[slotIdx]), " D=", sdec_(readD[slotIdx]), " st=", udec_(readStatus[slotIdx]), " lo-bracket-fails=", udec_(readBracketFails[slotIdx]))
+
+  ' cog 4's own upper long = cog 0's upper long - D, before and after the closing wrap
+  stepHi := (readRefHi[R_X4E] - readD[R_X4E]) - (readRefHi[R_B4L] - readD[R_B4L])
+  debug("cog 4 upper long across the closing wrap: ", udec_(readRefHi[R_B4L] - readD[R_B4L]), " -> ", udec_(readRefHi[R_X4E] - readD[R_X4E]), " step +", sdec_(stepHi), " (predicted +", udec_(P_STEP), ")")
+
+  ' ---- C1: every cog-1 control reading must be ok with D = 0 ----------
+  ctrl(R_C0, string("R0"))
+  ctrl(R_CBE, string("CBE"))
+  ctrl(R_CBL, string("CBL"))
+  ctrl(R_CXE, string("CXE"))
+  ctrl(R_CXL, string("CXL"))
+  ctrl(R_CYE, string("CYE"))
+  ' ---- C5: the group-1 samplers must have answered --------------------
+  if group1_status_any(ST_TIMEOUT) == TRUE
+    debug("RIG FAIL: a group-1 sampler (cog 4 or cog 7) did not answer")
+    bRigBad := TRUE
+
+  bAnyInconclusive := group1_status_any(ST_MIXED) or group1_status_any(ST_SHORT)
+  bAnyBracket := group1_status_any(ST_BRACKET)
+  bBandOk := readD[R_B4E] == P_BAND and readD[R_B7E] == P_BAND and readD[R_B4L] == P_BAND and readD[R_B7L] == P_BAND
+  bClosedOk := readD[R_X4E] == P_CLOSED and readD[R_X7E] == P_CLOSED and readD[R_X4L] == P_CLOSED and readD[R_X7L] == P_CLOSED and readD[R_Y4E] == P_CLOSED and readD[R_Y7E] == P_CLOSED
+
+  if bRigBad == TRUE
+    debug("NO VERDICT: rig failed (see RIG FAIL lines)")
+  elseif bAnyInconclusive == TRUE
+    debug("VERDICT: INCONCLUSIVE - a group-1 reading had disagreeing pairs or too few valid pairs (st>=2 above)")
+  elseif bAnyBracket == TRUE
+    debug("VERDICT: REFUTED - a group-1 plain GETCT fell outside cog 0's bracket: group-1 LOWER copy not current (predicted current)")
+  elseif bBandOk == TRUE and bClosedOk == TRUE and stepHi == P_STEP
+    debug("VERDICT: CONFIRMED - cogs 4 and 7 D=", udec_(P_BAND), " in the band, D=0 after the ONE closing wrap and the wrap after; cog 4 stepped +", udec_(P_STEP), " across it")
+  elseif bBandOk == FALSE
+    debug("VERDICT: REFUTED (band) - band D: B4E=", sdec_(readD[R_B4E]), " B7E=", sdec_(readD[R_B7E]), " B4L=", sdec_(readD[R_B4L]), " B7L=", sdec_(readD[R_B7L]), " (pred ", udec_(P_BAND), ")")
+  elseif bClosedOk == FALSE
+    debug("VERDICT: REFUTED (closing) - after the closing wrap D: X4E=", sdec_(readD[R_X4E]), " X7E=", sdec_(readD[R_X7E]), " X4L=", sdec_(readD[R_X4L]), " X7L=", sdec_(readD[R_X7L]), " Y4E=", sdec_(readD[R_Y4E]), " Y7E=", sdec_(readD[R_Y7E]), " (pred 0)")
+  else
+    debug("VERDICT: REFUTED (step) - cog 4 stepped +", sdec_(stepHi), " across the closing wrap (pred +", udec_(P_STEP), ")")
+
+  ' ---- second verdict: Spin2 GETMS() / GETSEC() in cog 5 ----------------
+  if bRigBad == FALSE
+    debug("Spin2 classes (0=short 1=current 2=other 3=mixed 4=too-few 5=timeout): GBE=", udec_(spinClass[G_BE]), " GBL=", udec_(spinClass[G_BL]), " GXE=", udec_(spinClass[G_XE]))
+    if spinClass[G_BE] >= SC_MIXED or spinClass[G_BL] >= SC_MIXED or spinClass[G_XE] >= SC_MIXED
+      debug("VERDICT GETMS/GETSEC: INCONCLUSIVE - a Spin2 reading had mixed classes, too few valid pairs, or no ack")
+    elseif spinClass[G_BE] == SC_SHORT and spinClass[G_BL] == SC_SHORT and spinClass[G_XE] == SC_CURRENT
+      debug("VERDICT GETMS/GETSEC: CONFIRMED - cog 5 GETMS/GETSEC short by ", udec_(LAG), " wraps in the band, current after the closing wrap")
+    else
+      debug("VERDICT GETMS/GETSEC: REFUTED - GBE=", udec_(spinClass[G_BE]), " GBL=", udec_(spinClass[G_BL]), " (pred 0 short)  GXE=", udec_(spinClass[G_XE]), " (pred 1 current)")
+
+PRI group1_status_any(stCode) : bFound
+' True when any group-1 (cog 4 or cog 7) reading slot has status stCode.
+'
+' @param stCode - an ST_* status code
+' @returns bFound - TRUE if at least one group-1 slot has that status
+
+  bFound := FALSE
+  if readStatus[R_B4E] == stCode or readStatus[R_B7E] == stCode or readStatus[R_B4L] == stCode or readStatus[R_B7L] == stCode
+    bFound := TRUE
+  if readStatus[R_X4E] == stCode or readStatus[R_X7E] == stCode or readStatus[R_X4L] == stCode or readStatus[R_X7L] == stCode
+    bFound := TRUE
+  if readStatus[R_Y4E] == stCode or readStatus[R_Y7E] == stCode
+    bFound := TRUE
+
+PRI ctrl(slotIdx, pLabel)
+' Check the cog-1 (group 0) control reading in slot slotIdx: st must be
+' ST_OK and D must be P_CTRL (0), else RIG FAIL.
+'
+' @param slotIdx - reading-slot index (an R_* constant)
+' @param pLabel - address of the reading's zero-terminated label, printed by zstr_()
+
+  if readStatus[slotIdx] <> ST_OK or readD[slotIdx] <> P_CTRL
+    debug("RIG FAIL: control cog 1 reading ", zstr_(pLabel), " expected D=0 st=0, got D=", sdec_(readD[slotIdx]), " st=", udec_(readStatus[slotIdx]))
+    bRigBad := TRUE
+
+' ---------------------------------------------------------------------
+PRI reading(slotIdx, pLabel, pMailbox) | tries, validPairs, ackStatus, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter, diffHi, bBracket, bMixed, baseD, bTimedOut
+' One reading: NPAIRS valid request/answer pairs from one sampler.  Stores
+' the agreed D, cog 0's upper long, the status and the LO-BRACKET failure
+' count into slot slotIdx.  Every pair is printed raw as it is taken.
+'
+' @param slotIdx - reading-slot index (an R_* constant)
+' @param pLabel - address of the reading's zero-terminated label, printed by zstr_()
+' @param pMailbox - sampler mailbox base address ([0]=req [1]=hi [2]=lo [3]=ack)
+
+' Local Variables:
+' @local tries - request attempts made so far, up to MAXTRY
+' @local validPairs - valid (in-window) pairs taken so far, target NPAIRS
+' @local ackStatus - take_pair() ack status for the current attempt (ACK_SEEN or ACK_NONE)
+' @local refHiBefore - cog 0's own CT upper long, before the request (refB)
+' @local refLoBefore - cog 0's own CT lower long, before the request (refB)
+' @local smpHi - sampler's CT upper long for the current attempt
+' @local smpLo - sampler's CT lower long for the current attempt
+' @local refHiAfter - cog 0's own CT upper long, after the ack (refA)
+' @local refLoAfter - cog 0's own CT lower long, after the ack (refA)
+' @local diffHi - D for the current pair (refHiBefore - smpHi)
+' @local bBracket - LO-BRACKET result for the current pair (refLoBefore < smpLo < refLoAfter)
+' @local bMixed - TRUE once two valid pairs disagree on D
+' @local baseD - D agreed across all valid pairs so far (from the first pair)
+' @local bTimedOut - TRUE once take_pair() times out, to skip the post-loop scoring
+
+  tries := validPairs := baseD := 0
+  bMixed := FALSE
+  bTimedOut := FALSE
+  readBracketFails[slotIdx] := 0
+  readRefHi[slotIdx] := 0
+  repeat while validPairs < NPAIRS and tries < MAXTRY
+    tries++
+    requestSeq++
+    ackStatus, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter := take_pair(pMailbox, requestSeq, clkfreq / ACK_TIMEOUTS_PER_SEC)
+    if ackStatus == ACK_NONE
+      debug(zstr_(pLabel), " TIMEOUT: sampler did not ack request ", udec_(requestSeq))
+      readStatus[slotIdx] := ST_TIMEOUT
+      readD[slotIdx] := 0
+      bTimedOut := TRUE
+      quit
+    if refHiBefore <> refHiAfter or isInWindow(refLoBefore) == FALSE or isInWindow(smpLo) == FALSE or isInWindow(refLoAfter) == FALSE
+      debug(zstr_(pLabel), " try ", udec_(tries), " DISCARD (outside window) ref=", uhex_long_(refHiBefore), "_", uhex_long_(refLoBefore), " smp=", uhex_long_(smpHi), "_", uhex_long_(smpLo), " ref2=", uhex_long_(refHiAfter), "_", uhex_long_(refLoAfter))
+      next
+    diffHi := refHiBefore - smpHi
+    bBracket := (refLoBefore +< smpLo) and (smpLo +< refLoAfter)
+    if bBracket == FALSE
+      readBracketFails[slotIdx]++
+    if validPairs == 0
+      baseD := diffHi
+      readRefHi[slotIdx] := refHiBefore
+    elseif diffHi <> baseD or refHiBefore <> readRefHi[slotIdx]
+      bMixed := TRUE
+    validPairs++
+    debug(zstr_(pLabel), " p", udec_(validPairs), " ref=", uhex_long_(refHiBefore), "_", uhex_long_(refLoBefore), " smp=", uhex_long_(smpHi), "_", uhex_long_(smpLo), " ref2=", uhex_long_(refHiAfter), "_", uhex_long_(refLoAfter), " D=", sdec_(diffHi), " lo-bracket=", udec_(bBracket & BOOL_BIT))
+  if bTimedOut == FALSE
+    readD[slotIdx] := baseD
+    if validPairs < NPAIRS
+      readStatus[slotIdx] := ST_SHORT
+    elseif bMixed == TRUE
+      readStatus[slotIdx] := ST_MIXED
+    elseif readBracketFails[slotIdx] <> 0
+      readStatus[slotIdx] := ST_BRACKET
+    else
+      readStatus[slotIdx] := ST_OK
+    debug(zstr_(pLabel), " => D=", sdec_(baseD), " status=", udec_(readStatus[slotIdx]), " valid pairs=", udec_(validPairs), " tries=", udec_(tries))
+
+PRI spin_reading(gSlot, pLabel) | tries, validPairs, loBefore, loAfter, msBefore, secBefore, msAfter, secAfter, smpMs, smpSec, tmoStart, bAcked, pairClass, baseClass, bMixed, bTimedOut
+' One Spin2 reading: NPAIRS valid GETMS/GETSEC pairs from the cog-5 Spin2
+' sampler, each classed SHORT / CURRENT / OTHER.  Stores the class shared
+' by every pair (or SC_MIXED / SC_SHORTN / SC_TIMEOUT) into spinClass[].
+' Every pair is printed raw as it is taken.
+'
+' @param gSlot - Spin2 reading slot (a G_* constant)
+' @param pLabel - address of the reading's zero-terminated label, printed by zstr_()
+
+' Local Variables:
+' @local tries - request attempts made so far, up to MAXTRY
+' @local validPairs - valid (in-window) pairs taken so far, target NPAIRS
+' @local loBefore - cog 0's CT lower long before the pair (window check)
+' @local loAfter - cog 0's CT lower long after the pair (window check)
+' @local msBefore - cog 0's GETMS() before the request
+' @local secBefore - cog 0's GETSEC() before the request
+' @local msAfter - cog 0's GETMS() after the ack
+' @local secAfter - cog 0's GETSEC() after the ack
+' @local smpMs - cog 5's GETMS()
+' @local smpSec - cog 5's GETSEC()
+' @local tmoStart - GETCT at request time, for the ack timeout
+' @local bAcked - TRUE once cog 5 acked the current request
+' @local pairClass - SC_* class of the current pair
+' @local baseClass - class of the first valid pair
+' @local bMixed - TRUE once two valid pairs disagree on the class
+' @local bTimedOut - TRUE once cog 5 failed to ack
+
+  tries := validPairs := 0
+  baseClass := SC_OTHER
+  bMixed := bTimedOut := FALSE
+  repeat while validPairs < NPAIRS and tries < MAXTRY
+    tries++
+    requestSeq++
+    loBefore := getct()
+    msBefore := getms()
+    secBefore := getsec()
+    mailboxSpin[SMB_REQ] := requestSeq
+    tmoStart := getct()
+    bAcked := FALSE
+    repeat
+      if mailboxSpin[SMB_ACK] == requestSeq
+        bAcked := TRUE
+        quit
+    until getct() - tmoStart +> clkfreq / ACK_TIMEOUTS_PER_SEC
+    if bAcked == FALSE
+      debug(zstr_(pLabel), " TIMEOUT: Spin2 sampler did not ack request ", udec_(requestSeq))
+      bTimedOut := TRUE
+      quit
+    smpMs := mailboxSpin[SMB_MS]
+    smpSec := mailboxSpin[SMB_SEC]
+    msAfter := getms()
+    secAfter := getsec()
+    loAfter := getct()
+    if isInWindow(loBefore) == FALSE or isInWindow(loAfter) == FALSE or loAfter +< loBefore
+      debug(zstr_(pLabel), " try ", udec_(tries), " DISCARD (outside window) lo=", uhex_long_(loBefore), "..", uhex_long_(loAfter))
+      next
+    pairClass := spin_class(msBefore - smpMs, msAfter - smpMs, secBefore - smpSec, secAfter - smpSec)
+    if validPairs == 0
+      baseClass := pairClass
+    elseif pairClass <> baseClass
+      bMixed := TRUE
+    validPairs++
+    debug(zstr_(pLabel), " p", udec_(validPairs), " cog0 ms=", udec_(msBefore), "..", udec_(msAfter), " s=", udec_(secBefore), "..", udec_(secAfter), " cog5 ms=", udec_(smpMs), " s=", udec_(smpSec), " offMs=", sdec_(msBefore - smpMs), "..", sdec_(msAfter - smpMs), " offS=", sdec_(secBefore - smpSec), "..", sdec_(secAfter - smpSec), " class=", udec_(pairClass))
+  if bTimedOut == TRUE
+    spinClass[gSlot] := SC_TIMEOUT
+  elseif validPairs < NPAIRS
+    spinClass[gSlot] := SC_SHORTN
+  elseif bMixed == TRUE
+    spinClass[gSlot] := SC_MIXED
+  else
+    spinClass[gSlot] := baseClass
+  debug(zstr_(pLabel), " => class=", udec_(spinClass[gSlot]), " valid pairs=", udec_(validPairs), " tries=", udec_(tries))
+
+PRI spin_class(offMsB, offMsA, offSecB, offSecA) : pairClass
+' Class one Spin2 pair from cog 0's before/after offsets over cog 5's
+' reading: SHORT if the offset can be the time of LAG wraps in ms AND in
+' s, CURRENT if it can be 0 in both, else OTHER.
+'
+' @param offMsB - cog 0 GETMS() before minus cog 5 GETMS()
+' @param offMsA - cog 0 GETMS() after minus cog 5 GETMS()
+' @param offSecB - cog 0 GETSEC() before minus cog 5 GETSEC()
+' @param offSecA - cog 0 GETSEC() after minus cog 5 GETSEC()
+' @returns pairClass - SC_SHORT, SC_CURRENT or SC_OTHER
+
+  if offMsB <= lagMsCeil and offMsA >= lagMsFloor and offSecB <= lagSecCeil and offSecA >= lagSecFloor
+    pairClass := SC_SHORT
+  elseif offMsB <= 0 and offMsA >= 0 and offSecB <= 0 and offSecA >= 0
+    pairClass := SC_CURRENT
+  else
+    pairClass := SC_OTHER
+
+PRI spin_sampler(pMailbox) | lastReq, req
+' Cog 5 (Spin2): on each NEW request number, call GETMS() then GETSEC(),
+' write both, then write the request number back as the ack.
+'
+' @param pMailbox - mailbox base address ([0]=req [1]=ms [2]=sec [3]=ack)
+
+' Local Variables:
+' @local lastReq - the last request number answered
+' @local req - the request number just read
+
+  lastReq := 0
+  repeat
+    req := long[pMailbox][SMB_REQ]
+    if req <> lastReq
+      lastReq := req
+      long[pMailbox][SMB_MS] := getms()
+      long[pMailbox][SMB_SEC] := getsec()
+      long[pMailbox][SMB_ACK] := req
+
+PRI isInWindow(loVal) : bInWindow
+' True when loVal falls inside the sample window [LOWIN, HIWIN] -- well
+' clear of a 32-bit wrap.
+'
+' @param loVal - lower-long value to test
+' @returns bInWindow - TRUE if loVal is in [LOWIN, HIWIN], FALSE otherwise
+
+  bInWindow := (loVal +>= LOWIN) and (loVal +<= HIWIN)
+
+' ---------------------------------------------------------------------
+PRI take_pair(pMailbox, reqSeq, tmo) : ackStatus, refHiBefore, refLoBefore, smpHi, smpLo, refHiAfter, refLoAfter | tmoStart, tmoNow, pAck, ackSeq, pHi, pLo
+' One request/answer transaction with the sampler at pMailbox, entirely
+' in cog-0 PASM (cog-exec), waiting at most tmo clocks for the ack.
+' Causal order: refB -> req write -> (sampler GETCT WC, GETCT, writes,
+' ack) -> ack seen -> sampler longs read -> refA.
+'
+' @param pMailbox - sampler mailbox base address ([0]=req [1]=hi [2]=lo [3]=ack)
+' @param reqSeq - request sequence number to write, and to wait for as the ack
+' @param tmo - timeout, in clocks, to wait for the ack
+' @returns ackStatus - ACK_SEEN if the sampler acked within tmo, else ACK_NONE (rest of the returns 0)
+' @returns refHiBefore - cog 0's own CT upper long, read before the request (refB)
+' @returns refLoBefore - cog 0's own CT lower long, read before the request (refB)
+' @returns smpHi - sampler's CT upper long
+' @returns smpLo - sampler's CT lower long
+' @returns refHiAfter - cog 0's own CT upper long, read after the ack (refA)
+' @returns refLoAfter - cog 0's own CT lower long, read after the ack (refA)
+
+' Local Variables:
+' @local tmoStart - GETCT timestamp at request time, for the timeout wait
+' @local tmoNow - GETCT timestamp on each poll, for the timeout wait
+' @local pAck - hub address of the mailbox ack long
+' @local ackSeq - request sequence number read back from the mailbox ack long
+' @local pHi - hub address of the mailbox hi long
+' @local pLo - hub address of the mailbox lo long
+
+  ackStatus := ACK_NONE
+  refHiBefore := 0
+  refLoBefore := 0
+  smpHi := 0
+  smpLo := 0
+  refHiAfter := 0
+  refLoAfter := 0
+  pHi := pMailbox + MB_HI_OFS
+  pLo := pMailbox + MB_LO_OFS
+  pAck := pMailbox + MB_ACK_OFS
+  org
+                getct   refHiBefore     wc      ' cog 0 upper long (reference, before)
+                getct   refLoBefore             ' cog 0 lower long
+                wrlong  reqSeq, pMailbox        ' request
+                getct   tmoStart
+.wait           rdlong  ackSeq, pAck
+                cmp     ackSeq, reqSeq  wz
+        if_z    jmp     #.got
+                getct   tmoNow
+                sub     tmoNow, tmoStart
+                cmp     tmoNow, tmo     wc
+        if_c    jmp     #.wait
+                ret                             ' timeout: ackStatus stays ACK_NONE
+.got            rdlong  smpHi, pHi
+                rdlong  smpLo, pLo
+                getct   refHiAfter      wc      ' cog 0 upper long (reference, after)
+                getct   refLoAfter
+                mov     ackStatus, #ACK_SEEN
+  end
+
+PRI ct64() : ctHi, ctLo
+' cog 0's own 64-bit CT, read GETCT WC (upper long) then GETCT (lower
+' long), the order the sampler uses.
+'
+' @returns ctHi - cog 0's own CT upper long
+' @returns ctLo - cog 0's own CT lower long
+
+  org
+                getct   ctHi            wc
+                getct   ctLo
+  end
+
+PRI ct_track() : ctHi, ctLo
+' ct64() plus control C2: RIG FAIL if cog 0's upper long ever disagrees
+' with the number of lower-long wraps cog 0 itself watched since boot.
+'
+' @returns ctHi - cog 0's own CT upper long
+' @returns ctLo - cog 0's own CT lower long
+
+  ctHi, ctLo := ct64()
+  if ctLo +< prevCtLo
+    wrapsSeen++
+  prevCtLo := ctLo
+  if isInWindow(ctLo) == TRUE and ctHi <> wrapsSeen
+    debug("RIG FAIL: cog 0 CT hi=", uhex_long_(ctHi), " but cog 0 watched ", udec_(wrapsSeen), " lower-long wraps since boot - reference upper long not current")
+    halt()
+
+PRI wait_until(targetHi, minLo, expMask) | ctHi, ctLo, cogMask, ctTick, lastCtTick
+' Poll cog 0's own CT until hi == targetHi and lo >= minLo, RIG FAIL (and
+' halt) if the running-cog mask leaves expMask at any poll of the wait
+' (C3) or on a hi overshoot; prints an "alive" line on every 2^28-clock
+' tick while it waits. A halt (here or in ct_track()) quits the wait.
+'
+' @param targetHi - CT hi value to wait for
+' @param minLo - minimum CT lo value to wait for, once hi == targetHi
+' @param expMask - running-cog bitmask expected (bit N set = cog N running)
+
+' Local Variables:
+' @local ctHi - cog 0's own CT upper long, from ct_track()
+' @local ctLo - cog 0's own CT lower long, from ct_track()
+' @local cogMask - running-cog bitmask, from runmask()
+' @local ctTick - ctHi and the top nibble of ctLo packed together, to throttle "alive" lines
+' @local lastCtTick - ctTick at the last "alive" line, to detect a new tick
+
+  lastCtTick := -1
+  repeat
+    ctHi, ctLo := ct_track()
+    if bHalted == TRUE
+      quit
+    cogMask := runmask()
+    if cogMask <> expMask
+      debug("RIG FAIL: running cogs expected ", ubin_byte_(expMask), " got ", ubin_byte_(cogMask), " at CT ", uhex_long_(ctHi), "_", uhex_long_(ctLo))
+      halt()
+      quit
+    if ctHi > targetHi
+      debug("RIG FAIL: overshoot, CT hi=", udec_(ctHi), " waiting for ", udec_(targetHi))
+      halt()
+      quit
+    ctTick := (ctHi << NIB_BITS) | (ctLo >> ALIVE_SHIFT)
+    if ctTick <> lastCtTick
+      lastCtTick := ctTick
+      debug("  alive CT=", uhex_long_(ctHi), "_", uhex_long_(ctLo), " wraps-seen=", udec_(wrapsSeen), " running=", ubin_byte_(cogMask))
+  until ctHi == targetHi and ctLo +>= minLo
+
+PRI expect_mask(expMask) | cogMask
+' RIG FAIL (and halt) if the running-cog mask does not equal expMask at
+' this instant.
+'
+' @param expMask - running-cog bitmask expected (bit N set = cog N running)
+
+' Local Variables:
+' @local cogMask - running-cog bitmask, from runmask()
+
+  cogMask := runmask()
+  if cogMask <> expMask
+    debug("RIG FAIL: running cogs expected ", ubin_byte_(expMask), " got ", ubin_byte_(cogMask))
+    halt()
+
+PRI runmask() : cogMask | cogIdx
+' Build the running-cog bitmask from cogchk() across all cogs.
+'
+' @returns cogMask - bit N set if cog N is running
+
+' Local Variables:
+' @local cogIdx - cog number being tested
+
+  cogMask := 0
+  repeat cogIdx from 0 to COG_COUNT - 1
+    if cogchk(cogIdx) == TRUE
+      cogMask |= 1 << cogIdx
+
+PRI halt()
+' RIG FAIL exit: print the HALTED line and set bHalted, so every later step
+' of main() is skipped and the run ends at its one finish() (no verdict is
+' printed).
+'
+
+  debug("HALTED - no verdict")
+  bHalted := TRUE
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------
+PRI start_sampler(smpCog, pMailbox)
+' Start the sampler in cog smpCog by its explicit number (never the
+' free-cog form), with pMailbox in its PTRA.
+'
+' @param smpCog - the cog to start (0..7)
+' @param pMailbox - sampler mailbox base address ([0]=req [1]=hi [2]=lo [3]=ack)
+
+  coginit(smpCog, @sampler, pMailbox)
+
+DAT ' ---- Sampler Cog Code ----
+' Sampler (cog-exec).  PTRA = mailbox.  On each NEW request number it
+' reads GETCT WC then GETCT (upper long first), writes hi, lo, then ack.
+                org     0
+sampler         mov     s_last, #0
+s_loop          rdlong  s_req, ptra
+                cmp     s_req, s_last   wz
+        if_z    jmp     #s_loop
+                mov     s_last, s_req
+                getct   s_hi            wc      ' this group's UPPER copy
+                getct   s_lo                    ' this group's LOWER copy
+                wrlong  s_hi, ptra[MB_HI_IDX]
+                wrlong  s_lo, ptra[MB_LO_IDX]
+                wrlong  s_req, ptra[MB_ACK_IDX] ' ack last: hi/lo already in hub
+                jmp     #s_loop
+s_last          long    0
+s_req           res     1
+s_hi            res     1
+s_lo            res     1

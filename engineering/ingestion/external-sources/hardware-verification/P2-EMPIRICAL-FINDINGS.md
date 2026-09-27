@@ -1185,6 +1185,82 @@ first sample `k=0` read x = 90,090,539 (y = 270,271,617) where both original run
 92,185,644 (276,556,932) — a start-up sample the program excludes (`WARM = 3`); every analysed
 sample of that arm matched. Recorded as an open question below.
 
+---
+
+## P2 errata — E3 band follow-ups (silicon, 2026-09-27, VO-J-015..017)
+
+Three tests that decide what the E3 chapter may say about the stale window — the **band** — that
+EF-068 found: whether a *waiting* cog keeps its group current, whether cogs 0–3 behave as cogs 4–7
+do, and whether the band closes in one wrap from a long lag, in Spin2's `GETMS()`/`GETSEC()` as
+well as `GETCT WC`. Written by the arbiter (not an independent agent), then reviewed adversarially
+before the run by a fresh agent per test: no blocker (VO-J-015..017). Same house engine as
+EF-068/EF-075 (sampler words `$FD701A1A`/`$FD601C1A`; D = reference upper long − sampler upper
+long; a reading = 10 bracketed pairs), same bench board, 200 MHz, `pnut-ts` 1.55.8 `-d`, RAM download
+with reset, 2026-09-27 (Stephen), **run once each**; each downloaded `.bin` (13,291 / 13,497 / 14,906
+bytes) equals the rig compiled here, and two header-comment edits made after the run leave the
+binary byte-identical (rebuilt and compared). Every verdict **re-derived from the raw pair lines**,
+not from the program's `VERDICT` line: all 36 readings 10 of 10 valid pairs, 0 discards, 0
+timeouts, 0 bracket failures, no `RIG FAIL`. Campaign: `campaigns/2026-09-p2-errata-predictions/`
+(tests 12–14).
+
+### EF-078 · A cog of 4–7 held in a wait at the wrap keeps its group current: `WAITATN` and `WAITX` both count as running — `CONFIRMED`
+*How proven:* `e3-waiting-keeper-test` — a keeper in cog 7 held in `WAITATN` (`$FD603C24`; no cog sends
+ATN) started by the first line of `main()` and alone in 4–7 through wrap 1; it was then stopped and a
+keeper in cog 6 held in `WAITX ##$FFFF_FFF0` (`$FFFFFFFF`, `$FD67E01F`; 2 + D clocks, 14 short of
+2^32, started with the lower long just past `$101F_xxxx` so the wait spans the wrap) alone through
+wrap 2; then no keeper through wrap 3. Samplers started in cogs 4/5 for one reading each and
+stopped; cog 1 the group-0 control. *Result (log `debug_260927-162313`):* boot `$0000_0000_$00C1_3C9C`,
+running `%10000001` (l.22). hi=0 cog 4 **D = 0** (l.35). **After wrap 1 with only the `WAITATN`
+keeper: cog 5 D = 0** (l.75; e.g. l.65 `ref=$0000_0001_$101F_D95F smp=$0000_0001_$101F_D97F`).
+**After wrap 2 with only the `WAITX` keeper: cog 4 D = 0** (l.115). **Positive control:** no cog in
+4–7 through wrap 3 → cog 5 **D = 1** (l.155; l.145 `smp=$0000_0002_$101F_EBE7` beside `ref=$0000_0003`).
+Controls: cog 1 D = 0 in all four readings; running-cog mask on every poll `%10000011` (19) with the
+`WAITATN` keeper, `%01000011` (17) with the `WAITX` keeper, `%00000011` (17) with none. **Grounds:**
+the E3 chapter may say an application's own cog of 4–7 meets the workaround condition while it is
+held in `WAITATN` or `WAITX`. *Limits:* two waits tested (not `WAITCT`, `WAITSEx`, `WAITPAT`,
+`WAITINT`, `WAITFBW`/`WAITXFI`/`WAITXMT`/`WAITXRL`/`WAITXRO`); cogs 6 and 7 as the keeper; one
+wrap each; 200 MHz. Spin2's `WAITCT()`/`WAITMS()`/`WAITUS()` are not wait instructions: the
+interpreter polls `GETCT` in a loop (Spin2 interpreter v55, `pwct`), so a Spin2 cog in them is
+executing, as the polling samplers of EF-068 were.
+*Source:* `…/tests/e3-waiting-keeper-test.spin2`.
+
+### EF-079 · Cogs 0–3 show the same band as cogs 4–7 when every one of them is stopped across wraps, and it closes in one wrap — `CONFIRMED`
+*How proven:* `e3-group0-idle-band-test` — cog 0 checked the boot state, started the test (Spin2) in
+cog 4 with `COGSPIN`, and stopped itself; cog 4 was the reference from `$0000_0000_$00C1_3D4C` on
+(started before wrap 1, its upper long equal to its own wrap count on every poll), cog 5 the group-1
+control. Cogs 0–3 held empty through wraps 1 and 2, then cogs 1 and 3 started and never stopped.
+*Result (log `debug_260927-162507`):* boot `%00000001` (l.21), cog 0 stops (l.22), cog 4 up (l.24).
+Running-cog mask on every poll: **`%00110000` (35) — no cog of 0–3 — until the band opened**, then
+`%00111010` (36). **In the band (hi = 2): cogs 1 and 3 D = 2, early and late** (l.84, 95, 131, 142; l.130
+`ref=$0000_0002_$E013_B7FF smp=$0000_0000_$E013_B819`). **After the one closing wrap (hi = 3): D = 0,
+early and late** (l.169, 180, 216, 227; l.159 `smp=$0000_0003_$1001_4BF1`), **and at hi = 4: D = 0**
+(l.254, 265). Controls: cog 5 D = 0 in all six readings. **Grounds:** E3 is a property of both
+groups, not of 4–7; the chapter's "measured on cogs 4–7" becomes "both groups". A Spin2 program is
+exposed in 0–3 only if cog 0 stops (or its top method ends) while 0–3 is otherwise empty. *Limits:*
+the group-0 cogs sampled were 1 and 3; a lag of two wraps; 200 MHz. *Source:*
+`…/tests/e3-group0-idle-band-test.spin2`.
+
+### EF-080 · The band closes at the first wrap its group runs through, in one step, from a lag of 8 wraps; Spin2 `GETMS()`/`GETSEC()` read short by the same time inside it — `CONFIRMED`
+*How proven:* `e3-band-closes-in-one-wrap-test` — cogs 4–7 held empty through 8 wraps (171.8 s at
+200 MHz), then PASM samplers in cogs 4 **and** 7 and a Spin2 sampler in cog 5 (`GETMS()` then
+`GETSEC()` on each request) started and never stopped; cog 1 the group-0 control. The Spin2 pairs are
+classed from cog 0's own `GETMS`/`GETSEC` before and after, against the time of 8 wraps computed from
+`clkfreq` by `MULDIV64`: **171,798..171,799 ms, 171..172 s** (l.14). *Result (log
+`debug_260927-162927`):* running-cog mask `%00000011` on all 131 polls up to the band, then
+`%10110011` (36). **In the band (hi = 8): cogs 4 and 7 D = 8, early and late** (l.170, 181, 228, 239).
+**After the one closing wrap (hi = 9): D = 0, early and late** (l.277, 288, 335, 346), **and at
+hi = 10: D = 0** (l.373, 384). **Cog 4's own upper long went from 0 to 9 across that one wrap** (l.413;
+last band pair `smp=$0000_0000_$E013_BB32`, first after it `smp=$0000_0009_$1001_546A`): a 64-bit
+interval timed across it is 8 × 2^32 clocks too long. **Spin2:** all 20 band pairs SHORT (l.203,
+261; offsets 171,798–171,799 ms and 172 s — e.g. l.260 cog 0 `ms=190_617 s=190`, cog 5 `ms=18_819
+s=18`); all 10 pairs after the closing wrap CURRENT (l.310; l.300 both `ms=194_637 s=194`).
+Controls: cog 1 D = 0 in all six readings. **Grounds:** the band closes at the first wrap its group
+runs through, whatever the lag (1 in EF-068, 2 in EF-079, 8 here) — so *waiting out the band* (one
+wrap after the group's first cog starts) is a proven workaround; and `GETMS()`/`GETSEC()`, which the
+interpreter computes from the calling cog's `GETCT WC` + `GETCT` (Spin2 interpreter v55, `getms_`),
+are affected exactly as `GETCT WC` is. *Limits:* one lag (8) beyond EF-068/EF-079's 1 and 2; the
+Spin2 sampler in cog 5 only; 200 MHz. *Source:* `…/tests/e3-band-closes-in-one-wrap-test.spin2`.
+
 
 ## Open / pending empirical questions
 

@@ -295,6 +295,28 @@ after the first wrap (2³² clocks, ~21.5 s at 200 MHz), reads a wrong 64-bit ti
 in use running from before the first wrap, or take the upper long from a group-0 cog) citing EF-068,
 and qualify the "full 64-bit value" sentence. **Also check** `language/spin2/methods/getct.yaml` and
 any KB text that builds 64-bit time from `GETCT WC` in a cog of 4–7.
+> **Extended 2026-09-27 (EF-078..080) — still `CONFIRMED`, not yet applied; the entry now covers
+> five facts and three more YAMLs.** Verified on disk the same day: `pasm2/getct.yaml`,
+> `spin2/methods/getct.yaml`, `getms.yaml`, `getsec.yaml` carry nothing of it.
+> 1. **It is a bounded window (the band), not a lasting state:** it closes at the FIRST wrap the
+>    group runs through, in one step, whatever the lag — measured from 1 (EF-068), 2 (EF-079) and
+>    8 (EF-080). An interval timed across the closing wrap is too long by the missed wraps × 2³²
+>    clocks (cog 4 stepped 0 → 9 across one wrap, EF-080). So the workaround list gains *wait one
+>    wrap after the group's first cog starts before trusting a 64-bit time there*.
+> 2. **Both groups:** with every cog of 0–3 stopped (cog 0 included), cogs 0–3 show the same band
+>    and the same one-wrap close (EF-079). The "take the upper long from a group-0 cog" workaround
+>    holds only while a cog of 0–3 keeps running.
+> 3. **A waiting cog counts as running:** a keeper held in `WAITATN` or in `WAITX` at the wrap kept
+>    its group current (EF-078). Spin2 `WAITCT()`/`WAITMS()`/`WAITUS()` are a `GETCT` polling loop in
+>    the interpreter (v55 `pwct`), so a Spin2 cog in them is executing anyway.
+> 4. **Spin2 `GETMS()` and `GETSEC()` are affected exactly as `GETCT WC` is:** the interpreter computes
+>    both from the calling cog's `GETCT WC` + `GETCT` ÷ `clkfreq` (v55 `getms_`); in the band a cog 5
+>    read `GETMS` 18,819 beside cog 0's 190,617 (EF-080). `spin2/methods/getms.yaml` and `getsec.yaml`
+>    need the same `silicon_errata` note, and `getsec.yaml`'s "Good for long-duration timing" needs it
+>    beside it. (`MULDIV64` does not read the counter — not affected.)
+> 5. The condition to state: *in a cog of a four-cog group that has had no running cog at one or more
+>    wraps of the lower long, until that group runs through its next wrap.* The P2 Errata manual's E3
+>    chapter carries the same five facts (v0.2.0).
 
 ### F-464 — `getxacc.yaml` omits the one-clock lag that leaves each Goertzel burst's last term for the next burst — `CONFIRMED`
 

@@ -39,17 +39,17 @@ reader copies in `manuals/p2-errata/examples-library/` (the workaround tests ren
 analysed value, class and verdict matched the runs above (ledger, after EF-077). One start-up
 sample of the SINC2 test moved; it is an open question in the ledger.
 
-**E3 band follow-ups (authored 2026-09-27, NOT YET RUN):** three questions the E3 chapter's
-rewrite around the "red band" (a bounded stale window, not a lasting state) depends on. Written by
-the arbiter, not by an independent agent (see `VERIFICATION-OPPORTUNITIES.md`, VO-J-015..017).
-The sources live in `manuals/p2-errata/audit/verification-tests/` until they run; each moves to
-`tests/` here with its deciding lines once its verdict is re-derived from the log.
+**E3 band follow-ups (2026-09-27, each run once):** three questions the E3 chapter's rewrite
+around the "band" (a bounded stale window, not a lasting state) depends on. Written by the
+arbiter, not by an independent agent, then reviewed adversarially before the run by a fresh agent
+per test — no blocker (`VERIFICATION-OPPORTUNITIES.md`, VO-J-015..017). Verdicts re-derived from
+the raw pair lines.
 
-| # | Test | Question | VO | Verdict | EF |
+| # | Test (`tests/`) | Question | VO | Verdict | EF |
 |---|---|---|---|---|---|
-| 12 | `e3-waiting-keeper-test.spin2` | does a cog of 4-7 held in `WAITATN` / `WAITX` at the wrap keep its group current? | VO-J-015 | — | — |
-| 13 | `e3-group0-idle-band-test.spin2` | with every cog of 0-3 stopped across wraps, do cogs 0-3 show the same band, closed in one wrap? | VO-J-016 | — | — |
-| 14 | `e3-band-closes-in-one-wrap-test.spin2` | from a lag of 8 wraps, does the band close at the first wrap the group runs through; do Spin2 `GETMS()`/`GETSEC()` see it? | VO-J-017 | — | — |
+| 12 | `e3-waiting-keeper-test.spin2` | does a cog of 4-7 held in `WAITATN` / `WAITX` at the wrap keep its group current? | VO-J-015 | `CONFIRMED` (both count) | EF-078 |
+| 13 | `e3-group0-idle-band-test.spin2` | with every cog of 0-3 stopped across wraps, do cogs 0-3 show the same band, closed in one wrap? | VO-J-016 | `CONFIRMED` | EF-079 |
+| 14 | `e3-band-closes-in-one-wrap-test.spin2` | from a lag of 8 wraps, does the band close at the first wrap the group runs through; do Spin2 `GETMS()`/`GETSEC()` see it? | VO-J-017 | `CONFIRMED` (both) | EF-080 |
 
 ## How the tests were built — independence is the point
 
@@ -128,10 +128,37 @@ dx: B-B0=0 d1=-1_197 R1b-R1=0 d2=-19 d3=-1_197 d4=-1_216 d5=-19
 counts over 16 sequences: TRUE 16  no-lag 0  lost 0  other 0
 ```
 
+**12 — E3 waiting keeper** (`debug_260927-162313`): after wrap 1 with only the `WAITATN` keeper,
+after wrap 2 with only the `WAITX` keeper, then the positive control with no keeper:
+```
+E1 cog5 hi=1 (after WAITATN keeper) p1 ref=$0000_0001_$101F_D95F smp=$0000_0001_$101F_D97F ref2=$0000_0001_$101F_D9C8 D=0 lo-bracket=1
+X2 cog4 hi=2 (after WAITX keeper) p1 ref=$0000_0002_$101F_E7A7 smp=$0000_0002_$101F_E7C0 ref2=$0000_0002_$101F_E810 D=0 lo-bracket=1
+P3 cog5 hi=3 (positive control) p1 ref=$0000_0003_$101F_EBC7 smp=$0000_0002_$101F_EBE7 ref2=$0000_0003_$101F_EC30 D=1 lo-bracket=1
+```
+
+**13 — E3, cogs 0-3 stopped** (`debug_260927-162507`; reference = cog 4): cog 1 in the band, then
+after the one closing wrap:
+```
+B1L cog1 band late p10 ref=$0000_0002_$E013_B7FF smp=$0000_0000_$E013_B819 ref2=$0000_0002_$E013_B86A D=2 lo-bracket=1
+X1E cog1 closed early p1 ref=$0000_0003_$1001_4BD7 smp=$0000_0003_$1001_4BF1 ref2=$0000_0003_$1001_4C42 D=0 lo-bracket=1
+```
+
+**14 — E3 band closing, lag 8** (`debug_260927-162927`): cog 4 across the closing wrap, then Spin2
+`GETMS`/`GETSEC` in the band and after it:
+```
+B4L cog4 band late p10 ref=$0000_0008_$E013_BB0F smp=$0000_0000_$E013_BB32 ref2=$0000_0008_$E013_BB7A D=8 lo-bracket=1
+X4E cog4 closed early p1 ref=$0000_0009_$1001_5447 smp=$0000_0009_$1001_546A ref2=$0000_0009_$1001_54B2 D=0 lo-bracket=1
+GBL cog5 GETMS/GETSEC band late p10 cog0 ms=190_617..190_617 s=190..190 cog5 ms=18_819 s=18 offMs=171_798..171_798 offS=172..172 class=0
+GXE cog5 GETMS/GETSEC closed early p1 cog0 ms=194_637..194_637 s=194..194 cog5 ms=194_637 s=194 offMs=0..0 offS=0..0 class=1
+```
+
 ## What it changes
 
 - **KB:** F-462 … F-466 in `engineering/operations/P2KB-CORRECTION-FINDINGS.md` — `getxacc.yaml` is
   wrong about clearing (F-462) and lacks the lag (F-464); `getct.yaml` lacks the stale-upper-long
   erratum (F-463); `setq.yaml`'s "+4" is only the `[1]` case (F-465); `augs.yaml` gains where the
-  damage lands and loses its open `AUGD` scope note (F-466).
+  damage lands and loses its open `AUGD` scope note (F-466). The E3 band follow-ups (EF-078..080)
+  extend F-463 (2026-09-27): the band closes in one wrap, both groups, a waiting cog counts, and
+  Spin2 `GETMS()`/`GETSEC()` are affected — `getms.yaml`/`getsec.yaml` join `getct.yaml`.
 - **P2 Errata manual:** all five enter it, three of them as errata no vendor document carries.
+  E3's chapter is rewritten around the band on EF-078..080 (v0.2.0).
