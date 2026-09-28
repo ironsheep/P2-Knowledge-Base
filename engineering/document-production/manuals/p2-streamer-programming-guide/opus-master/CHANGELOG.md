@@ -1,38 +1,35 @@
 # P2 Streamer Programming Guide - Changelog
 
-## v1.1.2 (2026-09-21)
+## v1.1.2 (2026-09-28)
 
-**What the capture path actually reads, and three worked examples that now do what they say.**
+**What the capture path reads on a smart pin, how to capture that pin anyway, and a block diagram for each direction.**
 
 ### Added
 
-- **§8.0 What the Capture Path Actually Reads**: the streamer samples `{INB, INA}`, and on a pin running a smart pin, IN is that pin's event flag rather than the wire's level — so a capture aimed straight at a working SPI, serial or I²C bus records transaction pulses, not traffic, with no error and a buffer that fills at the expected rate
-- **Capturing a pin that is busy being a smart pin** (§8.0): the five-step neighbour composition — a monitor pin within ±3, smart-pin mode off, its `%AAAA` selector routed back at the bus pin, `DIR` left low, `WRFAST` and go
-- **`DIR` high is the output rule, not the capture rule** (§8.0): the monitor pin's `DIR` stays low, so it cannot drive the net it is watching
-- **Samples pack before they are written** (§8.1): 1-, 2- and 4-pin modes do a WFBYTE each time eight bits accrue, so a 1-pin capture writes one byte per eight rollovers — size the buffer from the packed rate
-- **Laying out more than one channel** (§8.0): monitors form one aligned block of the capture mode's width; interleaving them with bus pins spends half the width on flag lanes
-- **The input path has its own figure** (§2.1): Figure 2.2 shows pins or their ADC bitstreams sampled into the shifter, packed, and written through the hub FIFO by `WRFAST`, the same FIFO the output path reads through `RDFAST`
-- **The alignment rule in full** (§12.0): any pin for 1-pin modes, even for 2-pin, a multiple of 4 for 4-pin, a multiple of 8 for 8-pin and wider
-
-### Fixed
-
-- **The ADC configuration example enables the smart pin it depends on** (§9.2): the scope-fed ADC modes read a smart pin's result, so the pin needs `P_ADC_SCOPE` alongside its gain constant. As printed before, the SCOPE channel carried nothing
-- **The VGA program zeroes phase on the sync pulse** (§15.1), which is the line-boundary practice §4.7, §14.4 and Appendix D all prescribe and the HDMI program already followed
-- **Mode words compose with `|` throughout** (§5.2, §6.1, §6.2, §7.3, §8.1, §11.3, §12.3, §13.4): mixing `+` into a composition lets an unaligned base carry into the mode field and select a different mode at a different pin group
-- **`X_ALT_ON` is scoped where it is recommended** (§6.2, §12.4): the `%a` bit reorders bits within a sub-byte group, so it reaches only the 1-, 2- and 4-bit modes and does nothing to an 8-bit-per-transfer capture — reorder those after the fact with `REV` or `MOVBYTS`
-- **The SINC2 constant-iteration note is in the released documentation** (§10.5), in its note of 2024-12-16 on Goertzel SINC2 mode. A previous edition said it was not, and told readers not to look for it
-- **RGB16's cost is stated as arithmetic** (§7.1): two bytes per pixel puts a full 640×480 frame at 600 KB, which does not fit in hub RAM — which is why both worked programs paint 350 lines
-- **The DVI rate ceiling is the streamer's, not the standard's** (§3.4): the streamer needs a sysclk of ten times the pixel rate, which is what caps it
-- **`X_PINS_ON` and `X_WRITE_ON` are named as the same bit** (§13.2): D[23] is one enable whose meaning follows the mode
-- **§13.1's descriptions distinguish the rows they exist to distinguish**: pin count, DAC channel count and DAC bit width are separate columns of meaning, and three pairs of modes previously read identically
-- **`GETXACC` states its one-read-per-command contract where it is first used** (§10.6), and `S`'s inverted and summed pin fields are named where the LUT window is introduced (§10.3)
-- **The Edge oscillator is described in the module guides' own terms** (§3.5)
-- **§2.1's text quotes its figure's own label**, "DAC Channels X0–X3", where it had said "DAC0–DAC3"
+- **§8.0 What the Capture Path Actually Reads**: on a smart pin, IN is its event flag, so capturing a live bus records pulses, not traffic
+- **Capturing a pin that is busy being a smart pin** (§8.0): a neighbour pin within ±3, smart mode off and `DIR` low, watches it
+- **Samples pack before they are written** (§8.1): a 1-pin capture writes one byte per eight rollovers, so size the buffer from the packed rate
+- **Laying out more than one channel** (§8.0): monitors form one aligned block of the capture mode's width
+- **The alignment rule in full** (§12.0): any pin for 1-pin modes, even for 2-pin, then multiples of 4 and of 8
 
 ### Changed
 
-- **The block diagram is two figures, one per direction** (§2.1): Figure 2.1 is the output path, hub to pins; Figure 2.2 is the input path, pins to hub. Every arrow now runs the way the data moves, and the data-flow figure becomes Figure 2.3
-- **Green marks the physical pins, and nothing else** (Figures 2.1–2.3): the Goertzel input starts at a green pin block, *1–4 pins of one 4-pin block*, then the pin's ADC stage, *ADC pin mode, smart mode off*, as the P2 Documentation specifies; in Figure 2.3 the pins are green and the `WRFAST` hub FIFO is not
+- **A block diagram for each direction** (§2.1): output runs hub to pins, input runs pins to hub, both through the one hub FIFO
+- **Green marks the physical pins, and only them** (Figures 2.1–2.3): the Goertzel input starts at 1–4 pins of one 4-pin block, in ADC mode
+- **`X_ALT_ON` is scoped** (§6.2, §12.4): it reorders bits in 1-, 2- and 4-bit modes only; reorder wider captures with `REV` or `MOVBYTS`
+- **The SINC2 constant-iteration note is in the released documentation** (§10.5), dated 2024-12-16
+- **RGB16's cost** (§7.1): a 640×480 frame takes 600 KB, more than hub RAM holds, so both programs paint 350 lines
+- **The DVI rate ceiling is the streamer's** (§3.4): it needs a sysclk ten times the pixel rate
+- **`X_PINS_ON` and `X_WRITE_ON` are one bit** (§13.2): D[23], whose meaning follows the mode
+- **Mode descriptions separate pin count, DAC channel count and DAC bit width** (§13.1)
+- **`GETXACC` allows one read per command** (§10.6), and `S`'s inverted and summed pin fields are named at the LUT window (§10.3)
+- **The Edge oscillator is described in the module guides' own terms** (§3.5)
+
+### Fixed
+
+- **The ADC configuration example enables the smart pin it reads** (§9.2): the pin carries `P_ADC_SCOPE` alongside its gain constant
+- **The VGA program zeroes phase on the sync pulse** (§15.1), the line-boundary practice §4.7, §14.4 and Appendix D prescribe
+- **Mode words compose with `|` throughout** (§5.2–§13.4): with `+`, an unaligned base carries into the mode field
 
 ## v1.1.1 (2026-09-10)
 

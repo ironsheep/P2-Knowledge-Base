@@ -1,5 +1,36 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.1.2 (2026-09-28)
+
+**What the capture path reads on a smart pin, how to capture that pin anyway, and a block diagram for each direction.**
+
+### Added
+
+- **§8.0 What the Capture Path Actually Reads**: on a smart pin, IN is its event flag, so capturing a live bus records pulses, not traffic
+- **Capturing a pin that is busy being a smart pin** (§8.0): a neighbour pin within ±3, smart mode off and `DIR` low, watches it
+- **Samples pack before they are written** (§8.1): a 1-pin capture writes one byte per eight rollovers, so size the buffer from the packed rate
+- **Laying out more than one channel** (§8.0): monitors form one aligned block of the capture mode's width
+- **The alignment rule in full** (§12.0): any pin for 1-pin modes, even for 2-pin, then multiples of 4 and of 8
+
+### Changed
+
+- **A block diagram for each direction** (§2.1): output runs hub to pins, input runs pins to hub, both through the one hub FIFO
+- **Green marks the physical pins, and only them** (Figures 2.1–2.3): the Goertzel input starts at 1–4 pins of one 4-pin block, in ADC mode
+- **`X_ALT_ON` is scoped** (§6.2, §12.4): it reorders bits in 1-, 2- and 4-bit modes only; reorder wider captures with `REV` or `MOVBYTS`
+- **The SINC2 constant-iteration note is in the released documentation** (§10.5), dated 2024-12-16
+- **RGB16's cost** (§7.1): a 640×480 frame takes 600 KB, more than hub RAM holds, so both programs paint 350 lines
+- **The DVI rate ceiling is the streamer's** (§3.4): it needs a sysclk ten times the pixel rate
+- **`X_PINS_ON` and `X_WRITE_ON` are one bit** (§13.2): D[23], whose meaning follows the mode
+- **Mode descriptions separate pin count, DAC channel count and DAC bit width** (§13.1)
+- **`GETXACC` allows one read per command** (§10.6), and `S`'s inverted and summed pin fields are named at the LUT window (§10.3)
+- **The Edge oscillator is described in the module guides' own terms** (§3.5)
+
+### Fixed
+
+- **The ADC configuration example enables the smart pin it reads** (§9.2): the pin carries `P_ADC_SCOPE` alongside its gain constant
+- **The VGA program zeroes phase on the sync pulse** (§15.1), the line-boundary practice §4.7, §14.4 and Appendix D prescribe
+- **Mode words compose with `|` throughout** (§5.2–§13.4): with `+`, an unaligned base carries into the mode field
+
 ## v1.1.1 (2026-09-10)
 
 **The SETXFRQ word is a truncation with a conditional increment, and every printed value now carries it.**
