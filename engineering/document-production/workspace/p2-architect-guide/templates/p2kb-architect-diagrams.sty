@@ -198,9 +198,9 @@
   \node[phase]  (p1)  at (0,0)    {\textbf{1 \textperiodcentered{} Decide}\\what to build};
   \node[phase]  (p2)  at (3.3,0)  {\textbf{2 \textperiodcentered{} Learn}\\the hardware};
   \node[decomp] (dec) at (6.95,0)
-       {Decompose\\\scriptsize\mdseries which cog owns what};
-  \node[phase]  (p3)  at (10.6,0) {\textbf{3 \textperiodcentered{} Build}\\the capability};
-  \node[phase]  (p4)  at (13.9,0) {\textbf{4 \textperiodcentered{} Finish}\\\& ship};
+       {3 \textperiodcentered{} Decompose\\\scriptsize\mdseries which cog owns what};
+  \node[phase]  (p3)  at (10.6,0) {\textbf{4 \textperiodcentered{} Build}\\the capability};
+  \node[phase]  (p4)  at (13.9,0) {\textbf{5 \textperiodcentered{} Finish}\\\& ship};
   \draw[flow] (p1) -- (p2);
   \draw[flow, line width=1.5pt] (p2) -- (dec);
   \draw[flow, line width=1.5pt] (dec) -- (p3);
