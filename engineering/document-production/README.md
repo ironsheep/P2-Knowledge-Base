@@ -29,7 +29,7 @@ prose), with all per-publication detail in the roster.*
 | DeSilva Tutorial | manual | 3.0.8 | 168 | ✅ |
 | Debug Window | manual | 1.1.3 | 168 | ✅ |
 | Streamer Guide | manual | 1.1.2 | 91 | ✅ |
-| Architect's Guide | manual | 1.0.3 | 52 | ✅ |
+| Architect's Guide | manual | 1.1.0 | 60 | ✅ |
 | Interpreters & Emulators (XBYTE) | manual | 1.1.0 | 114 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.5 | 20 | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.4 | 15 | ✅ |

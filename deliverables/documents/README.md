@@ -84,11 +84,11 @@ The complete reference for the Propeller 2's pin I/O and Smart Pins, working up 
 *September 2026 - Community Review Edition* | [Changelog](DOCs/p2-io-and-smart-pins-user-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-io-and-smart-pins-user-guide-src.zip)
 
 ### [The P2 Architect's Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Architect-Guide.pdf)
-**Thinking in Cogs, Pins, and Forces** · *Version 1.0.3*
+**Thinking in Cogs, Pins, and Forces** · *Version 1.1.0*
 
-The design-and-realization companion to the reference manuals, picking up where *Getting Started with the Propeller 2* leaves off. It moves in three acts: getting a real project off the ground (choosing hardware and buses, spending the pin budget, getting the parts to talk), then **deriving** the software architecture from physical forces rather than guessing it (which cog owns what, how the pieces talk across the gaps, how mismatched rates are matched), and finally walking the whole process again with an AI agent at your side. It teaches a method, not a catalogue. Its two worked derivations are demonstrations on deliberately different hardware, never templates, and it's grounded throughout in the P2 Knowledge Base and in real, hardware-verified projects.
+The design-and-realization companion to the reference manuals, picking up where *Getting Started with the Propeller 2* leaves off. It follows a project in the order it runs: getting it off the ground (choosing hardware and buses, spending the pin budget, getting the parts to talk), then **deriving** the software architecture from physical forces rather than guessing it (which cog owns what, how the pieces talk across the gaps, how mismatched rates are matched), then building and shipping the pieces that cut names, and finally walking the whole process again with an AI agent at your side. It teaches a method, not a catalogue. Its two worked derivations are demonstrations on deliberately different hardware, never templates, and it's grounded throughout in the P2 Knowledge Base and in real, hardware-verified projects.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2-architect-guide-changelog.md)
+*September 2026 - Community Review Edition* | [Changelog](DOCs/p2-architect-guide-changelog.md)
 
 ### [P2 Interpreters & Emulators Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-XBYTE-Programming-Guide.pdf)
 **Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2** · *Version 1.1.0*

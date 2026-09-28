@@ -10,6 +10,28 @@ to commits). Newest entry first.
 
 ---
 
+## v1.1.0 (2026-09-28)
+
+**The guide follows a project's own order — decide, learn, decompose, build, ship — and says what it is for.**
+
+### Added
+
+- **Preface**: the design question the reference manuals leave open, what you can do by the book's end, and its four parts' proportions
+- **The P2 as its own logic analyzer** (Chapter 2): a neighbour pin watches a bus pin undisturbed, on connectors no probe can reach
+- **Chapter 12**: the decomposition walked with an agent, through the same nine steps and walking robot Chapter 7 derives
+- **The as-built audit** (Chapter 13): an agent compares the derived decomposition with the shipped source
+
+### Changed
+
+- **Four parts in project order**: Part I decides and learns, Part II decomposes, Part III builds and ships, Part IV repeats it with an agent
+- **The project spine opens Chapter 1**: decide, learn, decompose, build, ship, each step labelled with the Part that teaches it
+- **Part I navigation**: section headings throughout, and its provenance stated — twelve projects, each built, debugged against hardware, and released
+- **Part II in the contents**: the four forces are listed, and the five cross-cutting concerns carry the glossary's C1–C5 labels
+- **Part II closes on the work it leaves unfinished**, and hands each piece to Part IV
+- **Chapter titles** each name what their chapter is about, on the contents page and in the running heads
+
+---
+
 ## v1.0.3 (2026-08-08)
 
 A licensing change. No technical content changed.
@@ -99,7 +121,7 @@ presentation platform (`p2kb-platform-*`).
   (the chip, architecture YAML + Silicon Doc v35 + datasheet) · **Ch 2 "Reading P2 Code"**
   (the language *structure* for readers new to Spin2/PASM2, the six blocks, methods,
   indentation, the `...` continuation, objects, PASM2 anatomy, from the Spin2 v55 doc +
-  the Assembly manual) · **Ch 3 "Putting It to Work"** (hands-on, pnut_ts-verified
+  the Assembly manual) · **Ch 3 "Putting It to Work"** (hands-on, pnut-ts-verified
   examples) · **Ch 4 "Thinking in P2"** (functional decomposition, derived from the
   decomposition reasoning layer, anti-prescription gate applied throughout).
 - Back matter: Appendix A (space-vs-time + the FPGA-terminology table), Appendix B
@@ -111,6 +133,6 @@ presentation platform (`p2kb-platform-*`).
 - Verified on the PDF Forge, production PDF generated clean (48 pp); open cosmetic
   items logged to `PUNCH-LIST.md`.
 
-_(In development, not yet a public release. Code examples pnut_ts-verified; code lines
+_(In development, not yet a public release. Code examples pnut-ts-verified; code lines
 audited to K=76. The original 3-chapter plan grew to four when Ch2 "Reading P2 Code" was
 added for from-zero readers, see PLANNING D2.)_
