@@ -280,7 +280,10 @@ cog_loading:
   
   with_communication: |
     DAT
-      ' Mailbox in hub
+      ' Mailbox in hub -- ONE copy for every instance: right for one worker
+      ' cog that serves all instances. A cog EACH instance starts needs its
+      ' own mailbox in VAR, its address passed to the cog in PTRA (see
+      ' language/spin2/keywords/DAT.yaml instance_model).
       command   LONG  0
       param     LONG  0
       result    LONG  0

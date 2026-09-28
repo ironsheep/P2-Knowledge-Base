@@ -113,7 +113,7 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 
 ## A manual release published KB content without its index (2026-09-28) — F-476
 
-### F-476 — nothing stops a push while KB content sits past the last KB tag, and pushed content without its index is unverifiable — `CONFIRMED` (fix below; release half DONE in v1.21.1)
+### F-476 — nothing stops a push while KB content sits past the last KB tag, and pushed content without its index is unverifiable — `DONE` 2026-09-28 (release half v1.21.1; gate half b0e7bce5)
 
 **What happened:** F-475's content commits (09-26) were pushed to `main` on 09-28 by the Streamer
 and Architect manual releases — every commit on `main` goes with a manual release's push. No KB
@@ -127,9 +127,13 @@ before the content commit; here no index was regenerated at all.
 does not ask whether `deliverables/ai/P2/` has commits past the latest KB tag. Every manual release
 runs it as an advisory, so the check was in the right place and asked the wrong question.
 **Release half — DONE:** v1.21.1 published F-475 with a post-commit index; the five entries verify again.
-**Gate half — owed:** `audit-unpushed-releases.py` (and so every manual release's advisory) should
-report KB content commits after the latest `vX.Y.Z` KB tag as an unpublished-KB condition, and a
-manual release should not push while it holds.
+**Gate half — DONE (b0e7bce5):** `audit-unpushed-releases.py` now reports KB content commits after
+the latest `vX.Y.Z` tag on the branch (default report, so the session-start check sees it too) and
+answers that question alone with `--kb-content` (local history, no network). The manual-release
+runner runs `--kb-content` as the BLOCKING release-phase gate `kb-content-released`; the project's
+`release-manual` overlay says what to do when it is RED (run `release-yamls` first, never push around
+it). Proven both ways: GREEN on the v1.21.1 tree, RED with both F-475 commits named on a worktree at
+ebe15d12, the state that broke.
 
 ## DAT is class state, VAR is instance state — the keyword entries never said so (2026-09-26) — F-475
 
@@ -160,6 +164,17 @@ variables and `var` variables as instance variables."*
 > from Hub RAM to be executed within Reg/LUT RAM"). Verified: `verify-yaml-format.py` clean on the 5 files,
 > `validate-crossref-keys.py` all resolve. The central guide's §3.6 wording is a nomination for
 > central (skill-evolution candidates), not a KB defect.
+> **Released v1.21.1 (2026-09-28). The family was not finished there** — reading the served
+> `blocks.yaml` after that release showed `common_patterns.cog_communication` still calling a
+> single DAT mailbox "DAT mailbox for COG communication", unqualified, two screens below the
+> reason F-475 had narrowed. A KB-wide sweep (every mailbox declared in a DAT block without an
+> instance qualifier nearby) found one more: `constructs/inline_pasm.yaml` `with_communication`,
+> whose cog code even hard-codes `##@command`. Both now state the condition — one mailbox for the
+> ONE worker cog every instance shares; a cog each instance starts takes its own in VAR, address
+> passed in PTRA — in the description and a code comment, linking `DAT.yaml` `instance_model`.
+> The sweep's other hits are right as written: `cogid.yaml` / `longfill.yaml` declare a table of
+> eight mailboxes indexed by cog (chip-wide state every instance must share — F-475's own DAT
+> case), and the shared-bus broker is one resident cog serving all. Released v1.21.2.
 
 ## The errata fixes are now proven on silicon (2026-09-26, EF-075..077) — F-474
 

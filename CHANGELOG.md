@@ -20,6 +20,17 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.21.2] - 2026-09-28
+
+**Every DAT mailbox example says which cog it serves.**
+
+### Changed
+
+- **The block-types and inline-PASM mailbox patterns** name their case: one DAT mailbox for the one worker cog every instance shares
+- **A cog each instance starts takes its own mailbox in VAR**, its address passed to the cog in PTRA
+
+---
+
 ## [1.21.1] - 2026-09-28
 
 **DAT and VAR say which state each holds, and how to choose between them.**

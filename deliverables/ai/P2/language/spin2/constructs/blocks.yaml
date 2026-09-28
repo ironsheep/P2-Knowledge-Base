@@ -213,9 +213,11 @@ common_patterns:
         ' Start singleton
   
   - pattern: "cog_communication"
-    description: "DAT mailbox for COG communication"
+    description: "DAT mailbox for the ONE worker cog every instance shares; a cog EACH instance starts needs its own mailbox, in VAR (see language/spin2/keywords/DAT.yaml instance_model)"
     code: |
       DAT
+        ' ONE mailbox for every instance: right for one shared worker cog.
+        ' A cog each instance starts: declare these in VAR instead.
         command  LONG  0
         param1   LONG  0
         param2   LONG  0
