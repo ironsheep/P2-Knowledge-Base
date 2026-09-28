@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-09-22",
-    "last_updated": "2026-09-22T04:42:25.895879",
+    "release_date": "2026-09-28",
+    "last_updated": "2026-09-28T17:08:42.133160",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-09-22T04:42:25.895879",
+    "extraction_date": "2026-09-28T17:08:42.133160",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -18409,7 +18409,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-09-22T04:42:25.895879",
+    "extraction_date": "2026-09-28T17:08:42.133160",
     "categories": {
       "keywords": {
         "count": 37,
@@ -19143,7 +19143,15 @@
             "keyword": "DAT",
             "type": "keyword",
             "category": "Block Structure",
+            "aliases": [
+              "class variables",
+              "DAT variables",
+              "shared object data",
+              "singleton state",
+              "static data"
+            ],
             "description": "Data section \u2014 contains initialized data declarations and inline PASM2 assembly.\nData is stored in hub memory. Supports BYTE, WORD, LONG types, BYTEFIT/WORDFIT\nrange-checked types, string literals, array repetition with [count], and\ninline type overrides for individual values.\n",
+            "instance_model": "Think of DAT variables as CLASS variables and VAR variables as INSTANCE variables.\nA DAT region exists once per compiled object image and every instance of that object\nreads and writes the same bytes; each instance gets its own VAR space. (Precisely:\ninstances share DAT while their images are byte-identical \u2014 a CON override that\nchanges the image bytes gives that instance its own DAT; see object-image-dedup.)\nChoose DAT for state every instance must share: a singleton hardware owner, one lock\nor one worker cog that serves all instances. Choose VAR for state that belongs to one\ninstance: its configuration, and a mailbox or buffer shared only with the cog THAT\ninstance started \u2014 in DAT, a second instance would silently overwrite the first's.\nPASM code and its register longs in DAT are an IMAGE, not variables: COGINIT copies it\nfrom hub into the started cog's register RAM, and each cog then runs and writes its OWN\ncopy \u2014 a cog's writes to its registers never reach the DAT bytes in hub, and never reach\nanother cog. These cog registers (cog-RAM longs) are the cog program's working storage,\ndistinct from both the object's hub variables and the named special registers (PA, PB,\nPTRA, DIRA...). Share data between cogs, or between a cog and Spin2, through hub memory.\n",
             "type_propagation": "In DAT blocks, the type specifier sets the LINE'S BASE TYPE for all\ncomma-separated values. An inline type override (e.g., BYTE $56 within\na LONG line) applies ONLY to the single value it precedes \u2014 subsequent\nvalues revert to the line's base type. This override does NOT stick.\n",
             "syntax": "DAT\n  label type value1, value2, ...\n",
             "examples": [
@@ -19165,9 +19173,14 @@
               "Line base type persists across comma-separated values",
               "Inline type overrides apply to single value only \u2014 line base type reasserts after",
               "Supports BYTEFIT/WORDFIT for range-checked declarations",
-              "Can contain inline PASM2 assembly after ORG/ORGH directives"
+              "Can contain inline PASM2 assembly after ORG/ORGH directives",
+              "DAT is class state (shared by instances of one image); VAR is instance state \u2014 see instance_model"
             ],
             "related": [
+              "language/spin2/keywords/VAR.yaml",
+              "language/spin2/concepts/object-image-dedup.yaml",
+              "language/fundamentals/variable-scoping-best-practices.yaml",
+              "language/pasm2/coginit.yaml",
               "language/spin2/keywords/BYTE.yaml",
               "language/spin2/keywords/WORD.yaml",
               "language/spin2/keywords/LONG.yaml",
@@ -19183,7 +19196,14 @@
             "keyword": "VAR",
             "type": "keyword",
             "category": "Block Structure",
+            "aliases": [
+              "instance variables",
+              "VAR variables",
+              "per-instance state",
+              "object state"
+            ],
             "description": "Variables section \u2014 declares instance variables allocated in hub memory\nper object instance. Supports BYTE, WORD, and LONG types, typed pointers\n(^BYTE, ^WORD, ^LONG, ^structName), structure instances, and arrays.\nVariables without an explicit type default to LONG.\n",
+            "instance_model": "Think of VAR variables as INSTANCE variables and DAT variables as CLASS variables.\nThe Spin2 documentation: \"each instance of this object will have its own VAR memory\".\nChoose VAR for state that belongs to one instance \u2014 its configuration, its counters,\nand a mailbox or buffer it shares only with the cog it started itself (that is still\ninstance state: \"shared\" with its own cog, not across instances). Put in DAT only what\nevery instance must share (see language/spin2/keywords/DAT.yaml instance_model). VAR space is zeroed per\ninstance; DAT can be pre-initialized.\n",
             "type_propagation": "In VAR blocks, the type specifier is STICKY \u2014 it applies to ALL subsequent\nnames on the same line until a new type specifier is encountered.\nThis is different from PUB/PRI signatures where type resets each name.\n",
             "syntax": "VAR\n  type variable[count]\n",
             "examples": [
@@ -19207,7 +19227,10 @@
               "language/spin2/keywords/WORD.yaml",
               "language/spin2/keywords/LONG.yaml",
               "language/spin2/operators/typed-pointers.yaml",
-              "language/spin2/concepts/type-propagation.yaml"
+              "language/spin2/concepts/type-propagation.yaml",
+              "language/spin2/keywords/DAT.yaml",
+              "language/spin2/concepts/object-image-dedup.yaml",
+              "language/fundamentals/variable-scoping-best-practices.yaml"
             ],
             "oneliner": "Variables section \u2014 declares instance variables with sticky type propagation"
           },

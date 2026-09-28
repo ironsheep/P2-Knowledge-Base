@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-22T04:42:25.840438",
+    "generated": "2026-09-28T17:08:42.079403",
     "total_entries": 1131,
     "total_categories": 59,
-    "total_aliases": 3031,
+    "total_aliases": 3049,
     "multi_target_aliases": 189,
     "source": "deliverables/ai/P2/"
   },
@@ -1556,6 +1556,9 @@
     "CIRCULAR ARITHMETIC": [
       "p2kbSpin2OpOpAddmodulo"
     ],
+    "CLASS VARIABLES": [
+      "p2kbSpin2KwDAT"
+    ],
     "CLICK ADAPTER": [
       "p2kbHwAddonClickAdapterAddonClickAdapter"
     ],
@@ -1918,8 +1921,14 @@
     "DAT SINGLETON FORK": [
       "p2kbSpin2ObjectImageDedup"
     ],
+    "DAT VARIABLES": [
+      "p2kbSpin2KwDAT"
+    ],
     "DAT singleton fork": [
       "p2kbSpin2ObjectImageDedup"
+    ],
+    "DAT variables": [
+      "p2kbSpin2KwDAT"
     ],
     "DATA STRUCTURES": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities"
@@ -2898,6 +2907,9 @@
     "INSERT WORD DATA": [
       "p2kbSpin2AsmWord"
     ],
+    "INSTANCE VARIABLES": [
+      "p2kbSpin2KwVAR"
+    ],
     "INSTRUCTION SKIPPING - SKIP AND SKIPF": [
       "p2kbPasm2InstructionSkipping"
     ],
@@ -3603,6 +3615,9 @@
     "OBJECT INSTANTIATION": [
       "p2kbSpin2KwOBJ"
     ],
+    "OBJECT STATE": [
+      "p2kbSpin2KwVAR"
+    ],
     "OFFSETOF": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities",
       "p2kbSpin2Offsetof"
@@ -4076,6 +4091,9 @@
     ],
     "PER-GROUP ADC REFERENCE": [
       "p2kbArchPinPowerDomains"
+    ],
+    "PER-INSTANCE STATE": [
+      "p2kbSpin2KwVAR"
     ],
     "PERIOD MEASUREMENT": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
@@ -5470,6 +5488,9 @@
     "SHARED INSTANCE INJECTION": [
       "p2kbSpin2MethodPointers"
     ],
+    "SHARED OBJECT DATA": [
+      "p2kbSpin2KwDAT"
+    ],
     "SHARED-BUS BROKER WITH PER-COG MAILBOXES (ONE BUS, MANY COGS)": [
       "p2kbArchSharedBusBroker"
     ],
@@ -5563,6 +5584,9 @@
     ],
     "SINGLETON": [
       "p2kbSpin2ObjectImageDedup"
+    ],
+    "SINGLETON STATE": [
+      "p2kbSpin2KwDAT"
     ],
     "SIZEOF": [
       "p2kbAppNoteP2an007DataStructuresNewFacilities",
@@ -5769,6 +5793,9 @@
     ],
     "STANDARD EDGE MODULE": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
+    ],
+    "STATIC DATA": [
+      "p2kbSpin2KwDAT"
     ],
     "STEP": [
       "p2kbSpin2KwSTEP"
@@ -6482,6 +6509,12 @@
       "p2kbSpin2OpModuloAdd"
     ],
     "VAR": [
+      "p2kbSpin2KwVAR"
+    ],
+    "VAR VARIABLES": [
+      "p2kbSpin2KwVAR"
+    ],
+    "VAR variables": [
       "p2kbSpin2KwVAR"
     ],
     "VARBASE": [
@@ -7502,6 +7535,9 @@
     "circular arithmetic": [
       "p2kbSpin2OpOpAddmodulo"
     ],
+    "class variables": [
+      "p2kbSpin2KwDAT"
+    ],
     "click_module_integration": [
       "p2kbArchClickModuleIntegration"
     ],
@@ -8099,6 +8135,9 @@
     "input selector": [
       "p2kbPasm2Wrpin"
     ],
+    "instance variables": [
+      "p2kbSpin2KwVAR"
+    ],
     "instruction_skipping": [
       "p2kbPasm2InstructionSkipping"
     ],
@@ -8569,6 +8608,9 @@
     "object instantiation": [
       "p2kbSpin2KwOBJ"
     ],
+    "object state": [
+      "p2kbSpin2KwVAR"
+    ],
     "offsetof": [
       "p2kbSpin2Offsetof"
     ],
@@ -8658,6 +8700,9 @@
     ],
     "per-group ADC reference": [
       "p2kbArchPinPowerDomains"
+    ],
+    "per-instance state": [
+      "p2kbSpin2KwVAR"
     ],
     "period measurement": [
       "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement"
@@ -9311,6 +9356,9 @@
     "shared instance injection": [
       "p2kbSpin2MethodPointers"
     ],
+    "shared object data": [
+      "p2kbSpin2KwDAT"
+    ],
     "shared_bus_broker": [
       "p2kbArchSharedBusBroker"
     ],
@@ -9355,6 +9403,9 @@
     ],
     "singleton": [
       "p2kbSpin2ObjectImageDedup"
+    ],
+    "singleton state": [
+      "p2kbSpin2KwDAT"
     ],
     "sizeof": [
       "p2kbSpin2Sizeof"
@@ -9479,6 +9530,9 @@
     "state_machine": [
       "p2kbArchStateMachineAnalysis",
       "p2kbSpin2Spin2StateMachine"
+    ],
+    "static data": [
+      "p2kbSpin2KwDAT"
     ],
     "stepper motor driver add-on": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
@@ -11584,8 +11638,8 @@
     },
     "p2kbLanguageVariableScopingBestPractices": {
       "path": "deliverables/ai/P2/language/fundamentals/variable-scoping-best-practices.yaml",
-      "mtime": 1768613644,
-      "sha256": "e14a1d2c70cd62fe794180b301e53bc40cf5e3d6466817a385075c550736db1b"
+      "mtime": 1790448367,
+      "sha256": "51b7f7c04318983446228709b11e77bfd4911414d0d00fa611e67d6df769205c"
     },
     "p2kbPasm2Abs": {
       "path": "deliverables/ai/P2/language/pasm2/abs.yaml",
@@ -13774,8 +13828,8 @@
     },
     "p2kbSpin2ObjectImageDedup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/object-image-dedup.yaml",
-      "mtime": 1789778661,
-      "sha256": "e0e742c0cbf1340510e8590ba3ad2ef4b00b8071f0a5e7757051e40eec1d1113"
+      "mtime": 1790448367,
+      "sha256": "d5ed804768ec554b83f3b98ca1d1c608de3afe3040483fc95c66efe7c852eeee"
     },
     "p2kbSpin2ObjectArchetypes": {
       "path": "deliverables/ai/P2/language/spin2/concepts/object_archetypes.yaml",
@@ -13849,8 +13903,8 @@
     },
     "p2kbSpin2Blocks": {
       "path": "deliverables/ai/P2/language/spin2/constructs/blocks.yaml",
-      "mtime": 1768613644,
-      "sha256": "fe879060322839555b9ddb94c35b9a2e61bd40964fff58f2d88c36b5ebaec1a4"
+      "mtime": 1790448367,
+      "sha256": "eddbf2b9f2ae646277b471999178f29cfee00ae6e50d4f8d937609bf8d65eb36"
     },
     "p2kbSpin2Case": {
       "path": "deliverables/ai/P2/language/spin2/constructs/case.yaml",
@@ -14104,8 +14158,8 @@
     },
     "p2kbSpin2KwDAT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/DAT.yaml",
-      "mtime": 1773253579,
-      "sha256": "f818800716be7c54552e9d9edf8299ffdb4b53bb997000d19cba60cb4be6a449"
+      "mtime": 1790448982,
+      "sha256": "0163b0ebaa2ad58e253de8c4cbbb2ef9100955f0d7d7506e870152b1f2398be6"
     },
     "p2kbSpin2KwELSE": {
       "path": "deliverables/ai/P2/language/spin2/keywords/ELSE.yaml",
@@ -14234,8 +14288,8 @@
     },
     "p2kbSpin2KwVAR": {
       "path": "deliverables/ai/P2/language/spin2/keywords/VAR.yaml",
-      "mtime": 1773253579,
-      "sha256": "7d7ceb782da76f18438f79a41fd9d3f63dd7b77962fb4f4f1fc0cb9da7b65451"
+      "mtime": 1790448367,
+      "sha256": "d9a176f348cf50db54f7f600236344c81145415379c246226ef2698743c97234"
     },
     "p2kbSpin2KwWHILE": {
       "path": "deliverables/ai/P2/language/spin2/keywords/WHILE.yaml",
