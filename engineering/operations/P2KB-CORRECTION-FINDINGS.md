@@ -8830,7 +8830,7 @@ for the choice, not a resolution of it.
 > part: F-277's site sits in body text no Sprint 2 task touched. A findings-driven sweep sees the
 > diff; it does not see the document.
 
-### F-276 — deSilva Appendix A grounds the P2's value in "missed deadlines," an argument that fails against the reader it is aimed at. `PARTIAL — all three sites corrected in opus-master (Appendix A 2026-08-17, the two residual shapes 2026-08-25 «#301»); render + release owed`
+### F-276 — deSilva Appendix A grounds the P2's value in "missed deadlines," an argument that fails against the reader it is aimed at. `PARTIAL — all three sites corrected in opus-master (Appendix A 2026-08-17, the two residual shapes 2026-08-25 «#301»); render + release owed` → **`DONE` — shipped in deSilva v3.0.7 (2026-09-10) and v3.0.8 (2026-09-22); status flipped 2026-09-28**
 
 **Location:** `manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md` — §*"What You Are
 Buying With That"* (`:5993-6001`), with the same shape at `:225`, `:6001`, `:6049`.
