@@ -24,9 +24,21 @@ WHAT IT CHECKS
         vX.Y.Z              the knowledge base
         <slug>-vX.Y.Z       a document (p2an001-v1.0.5, p2-streamer-...-v1.1.0)
 
+    And KB CONTENT that no KB release has published: commits under
+    deliverables/ai/P2/ on the current branch after the latest vX.Y.Z tag it
+    contains. (F-476, 2026-09-28: F-475's YAML was committed, then pushed to main
+    by two MANUAL releases -- a push sends every commit on the branch. The
+    published index still carried the old sha256 for those five files, so the MCP
+    refused them to every uncached client: "temporarily unavailable -- verification
+    failed". The tag check above passed throughout; it asked whether TAGS reached
+    the remote, never whether CONTENT sat past the last tag.) This half needs no
+    network: it is a question about the local history, answered by `git log`.
+
 WHAT IT DOES NOT DO
     It does not push. Pushing is irreversible and stays Stephen's call every time;
-    this only makes the un-pushed state impossible to lose track of.
+    this only makes the un-pushed state impossible to lose track of. It does not
+    release the KB either: the remedy for unreleased KB content is `release-yamls`,
+    which regenerates the index against the committed content before the push.
 
 OFFLINE / NETWORK FAILURE
     `git ls-remote` needs the network. If it cannot run, this reports UNKNOWN and
@@ -36,10 +48,12 @@ OFFLINE / NETWORK FAILURE
 
 USAGE
     audit-unpushed-releases.py [--kb-only] [--remote origin]
+    audit-unpushed-releases.py --kb-content      # only the F-476 question; no network
 
 EXIT STATUS
-    0  every local release tag is on the remote, and the branch is not ahead
-    1  something is unpushed -- the detail lines name it
+    0  every local release tag is on the remote, the branch is not ahead, and no
+       KB content sits past the latest KB tag
+    1  something is unpushed or unreleased -- the detail lines name it
     2  could not reach the remote (UNKNOWN, never treat as clean)
 """
 
@@ -50,6 +64,7 @@ import sys
 
 KB_TAG = re.compile(r"^v\d+\.\d+\.\d+$")
 DOC_TAG = re.compile(r"^[a-z0-9][a-z0-9.-]*-v\d+\.\d+(\.\d+)?$")
+KB_CONTENT = "deliverables/ai/P2/"
 
 
 def git(*args, check=True):
@@ -61,12 +76,50 @@ def git(*args, check=True):
     return r.stdout.strip()
 
 
+def unreleased_kb_content():
+    """(latest KB tag on this branch, [commit lines under KB_CONTENT after it]).
+    The tag is the highest vX.Y.Z REACHABLE from HEAD, compared as numbers --
+    string order puts v1.9.0 above v1.21.1."""
+    tags = [t for t in git("tag", "--merged", "HEAD").split("\n") if KB_TAG.match(t)]
+    if not tags:
+        return None, []
+    latest = max(tags, key=lambda t: tuple(int(x) for x in t[1:].split(".")))
+    log = git("log", "--format=%h %cs %s", f"{latest}..HEAD", "--", KB_CONTENT)
+    return latest, [ln for ln in log.split("\n") if ln]
+
+
+def report_kb_content(latest, commits):
+    print(f"UNRELEASED KB CONTENT — {len(commits)} commit(s) under {KB_CONTENT} "
+          f"after {latest}")
+    for c in commits:
+        print(f"    {c}")
+    print("  The published index still describes these files as they were at "
+          f"{latest}. Pushed as they stand, p2kb-mcp refuses them")
+    print("  (\"verification failed\" — F-476). Release the KB first: "
+          "`release-yamls` regenerates the index against this content.")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--remote", default="origin")
     ap.add_argument("--kb-only", action="store_true",
                     help="only the knowledge base's own vX.Y.Z tags")
+    ap.add_argument("--kb-content", action="store_true",
+                    help="only ask whether KB content sits past the latest KB tag "
+                         "(F-476); local history, no network")
     a = ap.parse_args()
+
+    latest, kb_commits = unreleased_kb_content()
+    if a.kb_content:
+        if latest is None:
+            print("no vX.Y.Z tag on this branch — the KB has never been released here")
+            return 0
+        if not kb_commits:
+            print(f"GREEN: no KB content past {latest} — the published index "
+                  "describes every committed KB file")
+            return 0
+        report_kb_content(latest, kb_commits)
+        return 1
 
     local = [t for t in git("tag").split("\n") if t]
     wanted = [t for t in local
@@ -96,10 +149,16 @@ def main() -> int:
     except RuntimeError:
         ahead = "no upstream configured for the current branch"
 
-    if not missing and not ahead:
+    if not missing and not ahead and not kb_commits:
         print(f"GREEN: all {len(wanted)} release tag(s) are on {a.remote}, "
-              f"branch not ahead")
+              f"branch not ahead, no KB content past {latest}")
         return 0
+
+    if kb_commits:
+        report_kb_content(latest, kb_commits)
+        if not missing and not ahead:
+            return 1
+        print()
 
     print(f"UNPUBLISHED WORK — checked {len(wanted)} local release tag(s) "
           f"against {a.remote}")

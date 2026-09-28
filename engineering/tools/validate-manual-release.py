@@ -314,6 +314,17 @@ def build_gates(slug: str, phase: str, pdf: str | None):
                   [], "advisory",
                   "release tags that exist locally but not on the remote"))
 
+        # BLOCKING, unlike the advisory above, because here the manual release's
+        # own push is the harm (F-476, 2026-09-28). A push sends EVERY commit on the
+        # branch; KB content committed past the last KB tag goes out without an
+        # index that describes it, and p2kb-mcp refuses those entries ("verification
+        # failed") to every uncached client. Two manual releases did exactly that to
+        # F-475's five files. The remedy is `release-yamls` BEFORE this push, never
+        # waving the gate: release the KB, then re-run this runner.
+        G.append(("kb-content-released", f"{V}/audit-unpushed-releases.py",
+                  ["--kb-content"], True,
+                  "a push sends every commit; KB content must be released (indexed) first"))
+
     # --head manual on purpose: a YAML- or ingestion-head gate left unwired must
     # not block a manual release, or the meta-gate becomes the thing everyone
     # routes around -- which is how gates die in the first place.
