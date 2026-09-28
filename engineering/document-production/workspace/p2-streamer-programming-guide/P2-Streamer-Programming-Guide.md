@@ -297,10 +297,14 @@ Chapter 1 described the streamer as a paced pipe from memory to the pins. This c
 ## 2.1 Block Diagram {#sec-2-1}
 
 ```{=latex}
-\DiagStreamerArch
+\DiagStreamerOutput
 ```
 
-What the diagram does not show is *which physical pins* DAC0–DAC3 — and the 32 output pins — actually land on, and you will care about that the moment you wire something up. The mapping is not arbitrary: each DAC channel can only drive pins whose number ends in its own two bits — DAC0 drives pins ending in `%00` (pins 0, 4, 8, …), DAC1 those ending in `%01`, and so on. The complete channel-to-pin mapping is in Chapter 11, and choosing which 32-pin group a command targets is Chapter 12. (Setting a pin up to *act* as an analog/DAC output is a pin-configuration topic in its own right — see the *P2 I/O & Smart Pins User Guide*.) For now, just note that the diagram's "DAC0–DAC3" and "Pins" become specific pin numbers once you choose them.
+```{=latex}
+\DiagStreamerInput
+```
+
+What the diagrams do not show is *which physical pins* DAC0–DAC3 — and the 32 output pins — actually land on, and you will care about that the moment you wire something up. The mapping is not arbitrary: each DAC channel can only drive pins whose number ends in its own two bits — DAC0 drives pins ending in `%00` (pins 0, 4, 8, …), DAC1 those ending in `%01`, and so on. The complete channel-to-pin mapping is in Chapter 11, and choosing which 32-pin group a command targets is Chapter 12. (Setting a pin up to *act* as an analog/DAC output is a pin-configuration topic in its own right — see the *P2 I/O & Smart Pins User Guide*.) For now, just note that the output diagram's "DAC Channels X0–X3" and "Pins" become specific pin numbers once you choose them.
 
 ## 2.2 Data Flow Paths
 
@@ -1941,7 +1945,7 @@ This chapter returns to the DDS and Goertzel capabilities of Chapter 10 and puts
 
 ## 17.1 Goertzel Frequency Detection {#sec-17-1}
 
-Goertzel analysis reports how much of one chosen frequency is present in an incoming signal. It is the narrowest measurement the streamer offers, and it is sharp: a 1 MHz detector run against a 1 MHz tone on real silicon returned a magnitude of **1,059,000**, while the same detector against the same signal path returned **2,575** at twice the frequency, **286** at half, and **430** with no tone at all — selectivity of roughly **411:1**, **3,700:1**, and a **2,460:1** null.
+Goertzel analysis reports how much of one chosen frequency is present in an incoming signal. It is the narrowest measurement the streamer offers, and it is sharp: a 1 MHz detector run against a 1 MHz tone on silicon returned a magnitude of **1,059,000**, while the same detector against the same signal path returned **2,575** at twice the frequency, **286** at half, and **430** with no tone at all — selectivity of roughly **411:1**, **3,700:1**, and a **2,460:1** null.
 
 **Application:** Ultrasonic distance measurement, DTMF decoding, tone detection
 

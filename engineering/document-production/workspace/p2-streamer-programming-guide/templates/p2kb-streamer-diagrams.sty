@@ -6,7 +6,7 @@
 %
 % Invocation (from the body): a bare raw-LaTeX block
 %   ```{=latex}
-%   \DiagStreamerArch
+%   \DiagStreamerOutput
 %   ```
 % Each macro is a self-contained, per-chapter-numbered figure (internal \caption).
 
@@ -20,8 +20,13 @@
 
 % ==================== Chapter 2 -- streamer architecture ====================
 
-% Fig 2.1 -- the streamer data path (replaces the ASCII block diagram)
-\newcommand{\DiagStreamerArch}{%
+% Fig 2.1 and 2.2 -- the streamer data path, one figure per direction so every
+% arrow reads left to right with the data (Stephen, 2026-09-28: a two-way
+% figure could not show which way the capture path runs). Green = the physical
+% pin boundary, in both.
+
+% Fig 2.1 -- output: hub -> FIFO (set by RDFAST) -> shifter -> LUT -> pins
+\newcommand{\DiagStreamerOutput}{%
 \begin{figure}[H]\centering
 \diagramscale{%
 \begin{tikzpicture}[node distance=10mm and 14mm]
@@ -52,14 +57,49 @@
   \node[wlbl, left=10mm of cmd, align=center] (xi) {XINIT / XCONT\\XZERO / XSTOP};
   \draw[iospflow] (xi)--(cmd);
   \draw[iospflow] (cmd)--(shift);
-  % Goertzel analyzer branch
-  \node[iospbox, below=10mm of nco, text width=20mm] (go) {Goertzel\\Analyzer};
-  \node[wlbl, left=10mm of go] (adc) {ADC Pins};
+\end{tikzpicture}}
+\caption{Streamer output path: hub to pins, through the cog's hub FIFO set up by RDFAST}
+\end{figure}}
+
+% Fig 2.2 -- input: pins -> shifter (packs samples) -> FIFO (set by WRFAST) ->
+% hub (P2 Documentation mode groups "Pins => DACs/WRFAST" and
+% "ADCs/Pins => DACs/WRFAST"); and the Goertzel analyzer, whose sums the cog
+% reads with GETXACC
+\newcommand{\DiagStreamerInput}{%
+\begin{figure}[H]\centering
+\diagramscale{%
+\begin{tikzpicture}[node distance=10mm and 14mm]
+  % capture: left-to-right pipeline, pins to hub
+  \node[iospkey, text width=20mm] (cap) {Pins / ADC};
+  \node[iospbox, right=of cap, text width=22mm] (shift) {Data Shifter\\\& Formatter\\{\scriptsize (packs samples)}};
+  \node[iospbox, right=of shift, text width=18mm] (fifo) {FIFO\\Interface};
+  \node[wlbl, right=12mm of fifo, align=center] (hub) {Hub Memory\\{\scriptsize via WRFAST}};
+  \draw[iospflow] (cap)--(shift);
+  \draw[iospflow] (shift)--(fifo);
+  \draw[iospflow] (fifo)--(hub);
+  % NCO timing paces the sampling, from below
+  \node[iospbox, below=16mm of shift, text width=18mm] (nco) {NCO\\{\scriptsize 32-bit}};
+  \node[wlbl, left=10mm of nco] (sx) {SETXFRQ};
+  \draw[iospflow] (sx)--(nco);
+  \draw[iospflow] (nco)--(shift);
+  % command buffer above the shifter
+  \node[iospbox, above=10mm of shift, text width=22mm] (cmd) {Command\\Buffer};
+  \node[wlbl, left=10mm of cmd, align=center] (xi) {XINIT / XCONT\\XZERO / XSTOP};
+  \draw[iospflow] (xi)--(cmd);
+  \draw[iospflow] (cmd)--(shift);
+  % Goertzel analyzer: the physical pin boundary (green) first, then the pin's
+  % ADC stage (gray) inside it. P2 Documentation, DDS/Goertzel: a four-pin
+  % block, base = %pppp*4, one to four of its pins "configured for ADC mode
+  % ... with no smart pin mode selected".
+  \node[iospbox, below=14mm of nco, text width=20mm] (go) {Goertzel\\Analyzer};
+  \node[iospbox, left=10mm of go, text width=28mm] (adc) {ADC Pin Mode\\{\scriptsize (smart mode off)}};
+  \node[iospkey, left=10mm of adc, text width=22mm] (gpins) {Pins (1--4)\\{\scriptsize one 4-pin block}};
+  \draw[iospflow] (gpins)--(adc);
   \draw[iospflow] (adc)--(go);
   \node[wlbl, right=12mm of go] (gx) {GETXACC};
   \draw[iospflow] (go)--(gx);
 \end{tikzpicture}}
-\caption{Streamer data path}
+\caption{Streamer input paths: pins to hub, through the same hub FIFO set up by WRFAST; and the Goertzel analyzer}
 \end{figure}}
 
 % Fig 2.2 -- data-flow paths (sources -> routes -> destinations)
@@ -79,9 +119,9 @@
   \draw[iospflow] (imm)--(lut); \draw[iospflow] (imm.east)--(dir.west);
   \draw[iospflow] (rd.east)--(lut.west); \draw[iospflow] (rd)--(dir); \draw[iospflow] (rd.east)--(rgb.west);
   \draw[iospflow] (lut)--(out); \draw[iospflow] (dir)--(out); \draw[iospflow] (rgb.east)--(out.west);
-  % input (capture) path
-  \node[iospbox, below=16mm of rgb, text width=24mm] (cap) {Pins / ADC};
-  \node[iospkey, right=of cap, text width=24mm] (wr) {WRFAST $\to$ Hub};
+  % input (capture) path -- green marks the pins, on both paths
+  \node[iospkey, below=16mm of rgb, text width=24mm] (cap) {Pins / ADC};
+  \node[iospbox, right=of cap, text width=24mm] (wr) {WRFAST\\{\scriptsize Hub FIFO}};
   \draw[iospflow] (cap)--(wr);
 \end{tikzpicture}}
 \caption{Streamer data-flow paths}

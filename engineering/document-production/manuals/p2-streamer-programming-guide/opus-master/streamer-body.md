@@ -105,10 +105,14 @@ Chapter 1 described the streamer as a paced pipe from memory to the pins. This c
 ## 2.1 Block Diagram {#sec-2-1}
 
 ```{=latex}
-\DiagStreamerArch
+\DiagStreamerOutput
 ```
 
-What the diagram does not show is *which physical pins* DAC0–DAC3 — and the 32 output pins — actually land on, and you will care about that the moment you wire something up. The mapping is not arbitrary: each DAC channel can only drive pins whose number ends in its own two bits — DAC0 drives pins ending in `%00` (pins 0, 4, 8, …), DAC1 those ending in `%01`, and so on. The complete channel-to-pin mapping is in Chapter 11, and choosing which 32-pin group a command targets is Chapter 12. (Setting a pin up to *act* as an analog/DAC output is a pin-configuration topic in its own right — see the *P2 I/O & Smart Pins User Guide*.) For now, just note that the diagram's "DAC0–DAC3" and "Pins" become specific pin numbers once you choose them.
+```{=latex}
+\DiagStreamerInput
+```
+
+What the diagrams do not show is *which physical pins* DAC0–DAC3 — and the 32 output pins — actually land on, and you will care about that the moment you wire something up. The mapping is not arbitrary: each DAC channel can only drive pins whose number ends in its own two bits — DAC0 drives pins ending in `%00` (pins 0, 4, 8, …), DAC1 those ending in `%01`, and so on. The complete channel-to-pin mapping is in Chapter 11, and choosing which 32-pin group a command targets is Chapter 12. (Setting a pin up to *act* as an analog/DAC output is a pin-configuration topic in its own right — see the *P2 I/O & Smart Pins User Guide*.) For now, just note that the output diagram's "DAC Channels X0–X3" and "Pins" become specific pin numbers once you choose them.
 
 ## 2.2 Data Flow Paths
 

@@ -11,6 +11,7 @@
 - **`DIR` high is the output rule, not the capture rule** (§8.0): the monitor pin's `DIR` stays low, so it cannot drive the net it is watching
 - **Samples pack before they are written** (§8.1): 1-, 2- and 4-pin modes do a WFBYTE each time eight bits accrue, so a 1-pin capture writes one byte per eight rollovers — size the buffer from the packed rate
 - **Laying out more than one channel** (§8.0): monitors form one aligned block of the capture mode's width; interleaving them with bus pins spends half the width on flag lanes
+- **The input path has its own figure** (§2.1): Figure 2.2 shows pins or their ADC bitstreams sampled into the shifter, packed, and written through the hub FIFO by `WRFAST`, the same FIFO the output path reads through `RDFAST`
 - **The alignment rule in full** (§12.0): any pin for 1-pin modes, even for 2-pin, a multiple of 4 for 4-pin, a multiple of 8 for 8-pin and wider
 
 ### Fixed
@@ -26,6 +27,12 @@
 - **§13.1's descriptions distinguish the rows they exist to distinguish**: pin count, DAC channel count and DAC bit width are separate columns of meaning, and three pairs of modes previously read identically
 - **`GETXACC` states its one-read-per-command contract where it is first used** (§10.6), and `S`'s inverted and summed pin fields are named where the LUT window is introduced (§10.3)
 - **The Edge oscillator is described in the module guides' own terms** (§3.5)
+- **§2.1's text quotes its figure's own label**, "DAC Channels X0–X3", where it had said "DAC0–DAC3"
+
+### Changed
+
+- **The block diagram is two figures, one per direction** (§2.1): Figure 2.1 is the output path, hub to pins; Figure 2.2 is the input path, pins to hub. Every arrow now runs the way the data moves, and the data-flow figure becomes Figure 2.3
+- **Green marks the physical pins, and nothing else** (Figures 2.1–2.3): the Goertzel input starts at a green pin block, *1–4 pins of one 4-pin block*, then the pin's ADC stage, *ADC pin mode, smart mode off*, as the P2 Documentation specifies; in Figure 2.3 the pins are green and the `WRFAST` hub FIFO is not
 
 ## v1.1.1 (2026-09-10)
 
