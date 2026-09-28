@@ -178,34 +178,43 @@
 \end{center}
 }
 
-% ---- Part I: the four-phase project spine (Decide -> Learn -> Build -> Ship),
-%      handing off into Part II's decomposition. Also the spine Part III re-walks. ----
+% ---- Part I: the project spine in the order a project runs it -- Decide -> Learn ->
+%      Decompose (Part II) -> Build -> Ship. Part I teaches the four phases around the
+%      decomposition; Part II teaches the decomposition. Also the spine Part III re-walks.
+%      (Stephen, 2026-09-28: decomposition sits between learning and building.) ----
 \newcommand{\FourPhaseSpineDiagram}{%
 \begin{center}
 \diagramscale{%
 \begin{tikzpicture}[
     phase/.style={rectangle, draw=diagram-border, fill=diagram-box, rounded corners=2pt,
-                  align=center, text width=2.7cm, minimum height=1.4cm, font=\footnotesize,
+                  align=center, text width=2.5cm, minimum height=1.4cm, font=\footnotesize,
                   text=diagram-text, inner sep=4pt},
-    handoff/.style={rectangle, draw=diagram-border, fill=diagram-highlight, rounded corners=2pt,
-                    align=center, text width=3.2cm, minimum height=1.4cm, font=\footnotesize\bfseries,
-                    text=diagram-text, inner sep=4pt},
+    decomp/.style={rectangle, draw=diagram-border, fill=diagram-highlight, rounded corners=2pt,
+                   align=center, text width=3.0cm, minimum height=1.4cm, font=\footnotesize\bfseries,
+                   text=diagram-text, inner sep=4pt},
     flow/.style={-{Stealth[length=2.6mm]}, line width=1pt, draw=diagram-border},
     note/.style={font=\scriptsize\itshape, text=diagram-text, align=center}
 ]
-  \node[phase] (p1) at (0,0)    {\textbf{1 \textperiodcentered{} Decide}\\what to build};
-  \node[phase] (p2) at (3.4,0)  {\textbf{2 \textperiodcentered{} Learn}\\the hardware};
-  \node[phase] (p3) at (6.8,0)  {\textbf{3 \textperiodcentered{} Build}\\the capability};
-  \node[phase] (p4) at (10.2,0) {\textbf{4 \textperiodcentered{} Finish}\\\& ship};
-  \node[handoff] (dec) at (15.9,0)
-       {Part II\\\scriptsize Functional Decomposition\\\scriptsize (which cog owns what)};
+  \node[phase]  (p1)  at (0,0)    {\textbf{1 \textperiodcentered{} Decide}\\what to build};
+  \node[phase]  (p2)  at (3.3,0)  {\textbf{2 \textperiodcentered{} Learn}\\the hardware};
+  \node[decomp] (dec) at (6.95,0)
+       {Decompose\\\scriptsize\mdseries which cog owns what};
+  \node[phase]  (p3)  at (10.6,0) {\textbf{3 \textperiodcentered{} Build}\\the capability};
+  \node[phase]  (p4)  at (13.9,0) {\textbf{4 \textperiodcentered{} Finish}\\\& ship};
   \draw[flow] (p1) -- (p2);
-  \draw[flow] (p2) -- (p3);
+  \draw[flow, line width=1.5pt] (p2) -- (dec);
+  \draw[flow, line width=1.5pt] (dec) -- (p3);
   \draw[flow] (p3) -- (p4);
-  \draw[flow, line width=1.5pt] (p4) -- node[note, fill=white, inner sep=2pt]{hand off} (dec);
-  \node[note, text width=11cm] at (5.1,-1.5)
-       {The front of a project --- \emph{before any cog is assigned}.
-        Part III walks these same four phases again, with an agent.};
+  % which Part of the book teaches each step -- the book follows the project's order
+  \draw[diagram-border, line width=0.6pt] (p1.south west) ++(0,-0.25) -- ++(0,-0.15)
+       -| ([yshift=-0.25cm]p2.south east);
+  \node[note, font=\scriptsize\bfseries] at ($(p1.south)!0.5!(p2.south)+(0,-0.7)$) {Part I};
+  \draw[diagram-border, line width=0.6pt] (dec.south west) ++(0,-0.25) -- ++(0,-0.15)
+       -| ([yshift=-0.25cm]dec.south east);
+  \node[note, font=\scriptsize\bfseries] at ($(dec.south)+(0,-0.7)$) {Part II};
+  \draw[diagram-border, line width=0.6pt] (p3.south west) ++(0,-0.25) -- ++(0,-0.15)
+       -| ([yshift=-0.25cm]p4.south east);
+  \node[note, font=\scriptsize\bfseries] at ($(p3.south)!0.5!(p4.south)+(0,-0.7)$) {Part III};
 \end{tikzpicture}}
 \end{center}
 }

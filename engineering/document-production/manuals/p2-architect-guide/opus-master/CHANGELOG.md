@@ -10,16 +10,25 @@ to commits). Newest entry first.
 
 ---
 
-## v1.1.0 (2026-09-12)
+## v1.1.0 (2026-09-28)
 
-An orientation and structure release. No technical content changed.
+**The guide follows a project's own order — decide, learn, decompose, build, ship — and says what it is for.**
 
-- **Preface**: the guide opens by saying what it is for — the design question the reference manuals do not answer, what you should be able to do by the end of the book, and the honest proportions of its three parts. *How to Use This Guide* and *Conventions* sit beneath it.
-- **Part I navigation**: every chapter carries section headings, so the front-of-project work can be skimmed and returned to. The four-phase project spine opens Chapter 1. The part states its provenance plainly — twelve projects, each built, debugged against hardware, and released.
-- **Part II in the contents**: the four forces are listed in the table of contents. The five cross-cutting concerns carry the C1–C5 labels the glossary and the appendices refer to. The part closes by naming the work it leaves unfinished — the smart-pin triage that rests on recall, the reconciliation that has no formula, the as-built audit, and the tier whose mathematics can outrun its author — and hands each one to Part III.
-- **Chapter 13**: the decomposition is walked with an agent through the same nine-step procedure and the same walking robot Chapter 9 derives — what changes at each step, what stays the same, and where the judgment remains the reader's. The chapter closes on the as-built audit.
-- **Chapter titles**: Chapters 10 and 14 read *Sufficient Guidance, Not the Perfect Prompt* and *Beyond What You Could Build Alone*. All fourteen chapters now carry a single descriptive title, so the contents page and the running heads say what each chapter is about.
-- **Naming**: the guide's three divisions are called Parts throughout, on the cover as well as in the text.
+### Added
+
+- **Preface**: the design question the reference manuals leave open, what you can do by the book's end, and its four parts' proportions
+- **The P2 as its own logic analyzer** (Chapter 2): a neighbour pin watches a bus pin undisturbed, on connectors no probe can reach
+- **Chapter 12**: the decomposition walked with an agent, through the same nine steps and walking robot Chapter 7 derives
+- **The as-built audit** (Chapter 13): an agent compares the derived decomposition with the shipped source
+
+### Changed
+
+- **Four parts in project order**: Part I decides and learns, Part II decomposes, Part III builds and ships, Part IV repeats it with an agent
+- **The project spine opens Chapter 1**: decide, learn, decompose, build, ship, each step labelled with the Part that teaches it
+- **Part I navigation**: section headings throughout, and its provenance stated — twelve projects, each built, debugged against hardware, and released
+- **Part II in the contents**: the four forces are listed, and the five cross-cutting concerns carry the glossary's C1–C5 labels
+- **Part II closes on the work it leaves unfinished**, and hands each piece to Part IV
+- **Chapter titles** each name what their chapter is about, on the contents page and in the running heads
 
 ---
 

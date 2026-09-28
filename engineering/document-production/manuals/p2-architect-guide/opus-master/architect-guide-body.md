@@ -5,12 +5,15 @@ THE P2 ARCHITECT'S GUIDE — BODY (single-file, per DD3)
 Canonical body source. Assembled AFTER front-matter.md by assemble-manual.sh into
 P2-Architect-Guide.md for PDF Forge.
 
-STRUCTURE — design + realization book in THREE PARTS = three acts. Restructured
-2026-07-07 from one-chapter-per-act into Parts + Chapters (debug-manual style):
-  PART I   — Getting a Project Off the Ground  (Ch 1-4: Decide/Learn/Build/Ship)
-  PART II  — Thinking in P2: Functional Decomposition  (Ch 5-9; the capstone)
-  PART III — The Same Work, with an Agent  (Ch 10-14; synthesized from the 24
-             principles in act3-agent-seed-transcription.md)
+STRUCTURE — design + realization book in FOUR PARTS, in the order a project runs
+(restructured 2026-09-28, Stephen: decomposition sits between learning the hardware and
+building; earlier 2026-07-07 from one-chapter-per-act into Parts + Chapters):
+  PART I   — Getting a Project Off the Ground  (Ch 1-2: Decide/Learn)
+  PART II  — Thinking in P2: Functional Decomposition  (Ch 3-7; the capstone)
+  PART III — Building and Shipping  (Ch 8-9: Build/Ship)
+  PART IV  — The Same Work, with an Agent  (Ch 10-14, same order: 11 Decide/Learn,
+             12 Decomposition, 13 Build/Ship; synthesized from the 24 principles in
+             act3-agent-seed-transcription.md)
 Orientation (ex-Ch 1-3: Meet the P2 / Reading Code / Putting It to Work) lives in
 "Getting Started with the Propeller 2" (released v1.0.0) — a stated prerequisite.
 
@@ -32,13 +35,14 @@ people: a product you'll sell, a job you were contracted to do, a design you'll 
 practice it's usually a blend of those, and the stakes are the same either way — it has to
 actually work, for someone who isn't you.
 
-Before you can ask the question **Part II** answers — *which cog owns what?* — there's a
-whole body of work every such project makes you do first. None of it is decomposition yet. All of
-it shapes the decomposition that follows: by the time you're ready to carve the embedded application
-into cooperating cogs, this is the work that has handed you the parts, the pin map, the rates, and
-the deadlines you'll carve *around*. This part is a map of that front end — the things you *do*,
-and the things you have to *deal with*, to get a project from an idea to a wired-up, understood
-embedded application.
+At the center of every such project sits the question **Part II** answers — *which cog owns
+what?* This part is the work that comes before it: deciding what to build, and learning the
+hardware until the parts talk. None of it is decomposition yet, and all of it shapes the
+decomposition that follows: by the time you're ready to carve the embedded application into
+cooperating cogs, this is the work that has handed you the parts, the pin map, the rates, and the
+deadlines you'll carve *around*. This part is a map of that work — the things you *do*, and the
+things you have to *deal with*, to get a project from an idea to a wired-up, understood embedded
+application. The work after the cut, building each piece and shipping it, is **Part III**.
 
 A word on where this comes from. What follows is distilled from twelve real projects, every one of
 them built, debugged against hardware, and released — LED-matrix panel drivers, a walking robot, an
@@ -47,7 +51,7 @@ among them. They were taken on the way most engineering of this kind gets taken 
 by request rather than by a product plan. The work they demanded is the same work any shipping
 project demands, which is why the "you're shipping this" framing holds throughout. What varies is
 order and weight — no two of the twelve hit these steps the same way — so read for the *shape* of
-the front end rather than for a checklist.
+the work rather than for a checklist.
 
 # Chapter 1: Deciding What to Build
 
@@ -56,7 +60,7 @@ the front end rather than for a checklist.
 ```
 
 ::: {.figurecaption #fig:project-spine}
-The front of a project as four phases — decide what to build, learn the hardware, build the capability, finish and ship — handing off into Part II's decomposition. Not one cog is assigned until the hand-off; Part III walks these same four phases again, with an agent.
+A project in the order it runs, and the book in the same order — decide what to build and learn the hardware (Part I), decompose it into cogs (Part II), build the capability and finish and ship (Part III). Part IV walks all of it again, with an agent.
 :::
 
 Projects start in more ways than a plan admits. One begins as a standing interest — you've always
@@ -161,89 +165,20 @@ checks the other, as when an eight-channel serial driver was certified by lashin
 with sixteen wires and verifying every round trip. Underlying all of it is the routine work of
 tracking where each part plugs in and how it is wired.
 
-# Chapter 3: Building the Capability
-
-With the part talking, the work turns to making it *usable* — and here design taste starts to
-matter.
-
-## Designing the interface
-
-The interface comes first, and it's more than exposing what the chip does; it's deciding how
-someone will *think* about the thing. The strongest move is to unify. Study how different
-communities already reason about the problem, then design one interface a person from any of those
-backgrounds can pick up and use. The motor-control work reached servos, brushless motors, and
-wheeled drive through a single interface, so you come to it however you learned motors and still
-know how to drive it. And a lesson that repays attention: every time you layer a new capability
-*on top of* your own driver, it tends to *improve the driver itself*, because the new thing needs
-something you didn't anticipate — adding a morphing-digit display on top of a matrix driver made
-the driver's own interface richer.
-
-Above the raw interface you add convenience layers that hide the primitives, so the application can
-say "steer" instead of setting two motor speeds, or treat an animated digit as "just another font."
-Much of the building, too, is *translation and digestion*: the reference implementation you're
-learning from is almost always in another language — C, an Arduino sketch, NodeMCU — and you carry
-it across into Spin2 one idea at a time, often in your head. Sometimes you don't transcribe at all;
-you write a small program that *generates* what you need, the way a short Python script produced the
-digit-to-digit transition tables that were then baked into the object.
-
-## Chasing performance
-
-Then there's the thing that keeps a P2 developer up at night in the best way: *performance.* The
-reference drivers rarely run as fast as the P2 can, and matching what they do while going faster —
-and staying error-free at speed — is often the entire point. An eight-port serial (UART) driver pushed past two megabits
-per second on every port at once, error-free; the matrix driver is a standing chase after the
-best frame rate the panels will give.
-
-## Characterizing, then verifying
-
-You also *characterize* the hardware — measure how it truly behaves, not how the datasheet claims
-it should. How wheels behave against a motor's top speed under different batteries; how repeatably
-a servo returns to a commanded position. And here's the quiet payoff: those measurements don't stay
-in a lab notebook — they *become the features and the limits of the product.* Characterizing which
-batteries could drive the motor platform turned directly into its supported-battery spec. Then you
-verify: checksums, round-trip confirmation, and again the logic analyzer as the court of final
-appeal, proving the protocol is tight before you call it done.
-
-## When the limit is yours, not the chip's
-
-One honest note before we move on. Sometimes a project meets *your own* limits, not the chip's. A
-six-axis arm stalled at the edge of one engineer's comfort with the mathematics of inverse
-kinematics — the code was reachable, the math wasn't, so the demo could pick a thing up and move it
-but not much more. The opposite happens too: a project you bring deep prior expertise to almost
-builds itself, the way years of Linux and web experience made the hard parts of a gateway routine.
-Where your own ceiling sits is part of the real shape of a project — and it's exactly the place
-**Part III** will have the most to say.
-
-# Chapter 4: Finishing and Shipping
-
-A project isn't done when it runs. On every one of these the same closing ritual runs: *document it
-so the driver is genuinely usable, post it to the repository in a form people can pick up, and
-announce that it exists.* Skip any of the three and you've wasted the work.
-
-## Documenting so the work is usable
-
-Documentation here means more than prose. It's photographs of the actual devices you drove, short
-videos so people can watch the thing move, and — a signature of hardware work — the
-logic-analyzer traces themselves, published as proof of how the communication behaves. If you want
-the work to outlive the project, you make it *reusable and configurable*: pull the general part out
-of the specific one, let it be configured per device instead of hard-coded, record which channel
-each thing lives on. The servo work became a standalone, reusable driver extracted from the arm
-that first needed it.
-
-## The long tail
-
-And then the long tail the first release never shows you. Vendors ship new firmware and new code;
-keeping up means diffing their changes against what you built and deciding what to fold back in — a
-chore heavy enough to stall a project for a year. The time-of-flight driver still carries a known
-gap, a coordinate table and some angle math left undone, with a pile of newer vendor code waiting
-to be reconciled. A project can be shipped while honestly incomplete, as long as what isn't
-finished is documented clearly.
+The analyzer is not the only way to see the wires, though, and sometimes it cannot reach them at
+all. The P2 can watch its own pins. A spare pin within three places of the one you want to see can
+take that pin's signal as its own input, with its smart-pin mode off and its output left undriven,
+so it observes the net without disturbing it; the streamer can then sample it at a steady rate into
+hub RAM. The chip becomes its own logic analyzer, on the pins that are actually doing the talking.
+That is how the microSD file-system project verifies its card transactions, on a connector no probe
+can reach. Building one is more advanced than this book goes — the *P2 Streamer Programming Guide*
+shows how, in its chapter on capturing pins — but it is worth knowing the option exists before you
+decide a bus cannot be observed.
 
 ## Where this leaves you
 
-That's the front of a project. You decided what to build and what the P2 should and shouldn't do;
-you learned the parts, wired them, and proved they talk; you designed an interface, made it fast,
-characterized it, and shipped it with its documentation. Not one cog has been assigned yet — and
+That's the work before the cut. You decided what to build and what the P2 should and shouldn't do;
+you learned the parts, wired them, and proved they talk. Not one cog has been assigned yet — and
 that is the point. All of this is the raw material **Part II** works on.
 
 Part II takes exactly this — a wired-up, understood embedded application with a pin map, a set of
@@ -252,12 +187,8 @@ from it: which cog owns what, how the pieces talk across the gaps, what adapts b
 may have noticed a few of the hardest questions raised here went deliberately unanswered: two of the
 same sensor sharing one bus, a fast producer feeding slow displays, a clutch of tiny sensors that
 don't each deserve a cog of their own. Those aren't front-of-project questions; they're
-*decomposition* questions, and they belong to Part II.
-
-And a promise to close on. **Part III** comes back to this very list — every phase you just
-read — and asks it again with an AI agent at your side. Because every one of these things, from
-hunting down a datasheet in a language you don't read, to reconciling a vendor's new code, to
-reaching past your own math, changes when you have one.
+*decomposition* questions, and they belong to Part II. Once the cut is made, **Part III** builds
+the pieces it names and ships them.
 
 # Part II — Thinking in P2: Functional Decomposition
 
@@ -286,7 +217,7 @@ order to apply them in, and the way to judge the result. Late in this part we'll
 the whole method run on one example application, start to finish. Read that example to see the
 moves, never to copy the answer — your application will give a different, equally sound shape.
 
-# Chapter 5: Computing in Space, Not Just in Time
+# Chapter 3: Computing in Space, Not Just in Time
 
 Start with the idea that makes the rest of this part worth the effort. It's the one you
 first met in *Getting Started*, where each cog just keeps running its own job,
@@ -338,7 +269,7 @@ the P2 borrows from FPGA thinking and, just as importantly, what it *doesn't* �
 Appendix A. Here, the thesis is enough: **the P2 computes in space when you let it, and
 decomposition is how you let it.**
 
-# Chapter 6: Where Object Shape Comes From
+# Chapter 4: Where Object Shape Comes From
 
 Here's the central move of this whole part, stated plainly: on the P2, the shape of your
 object set is not a matter of taste picked from a menu. It is *derived* by reconciling a
@@ -399,7 +330,7 @@ derivation it skipped would have forbidden the cut. We'll see exactly how that h
 we meet Force 1. The cure is to derive the shape from the wiring instead of guessing it; the four
 forces are how you do that.
 
-# Chapter 7: The Forces That Do the Cutting
+# Chapter 5: The Forces That Do the Cutting
 
 Four forces do the work. Three of them are **primary** — they cut the object set
 horizontally, deciding who owns what and how the pieces relate. The fourth is **emergent**:
@@ -445,7 +376,7 @@ alone on its own bus wants a self-contained transport with nothing to coordinate
 up with the *same protocol implemented twice with two different state models* — and that's
 correct, because how many things share the wire, not which protocol it is, decided the shape.
 
-⚠️ **Watch out:** the flat device list is this force ignored. The moment two cogs touch one
+**Watch out:** the flat device list is this force ignored. The moment two cogs touch one
 bus, you get silent corruption that presents as flaky hardware — intermittent, timing-
 dependent, and miserable to debug from the symptom, because the symptom is three layers away
 from the cause. A design that picks its shape from *how many devices exist* rather than *who
@@ -623,7 +554,7 @@ coherent. That's a first-class decomposition tool for "shared resource, multiple
 it's the kind of answer you only find by holding two forces in tension instead of applying one
 in isolation.
 
-⚠️ **Watch out:** ignore the rate adapters and you get two classic embedded bugs. Skip the
+**Watch out:** ignore the rate adapters and you get two classic embedded bugs. Skip the
 sampler and a slow consumer back-pressures a fast producer (or a fast producer floods a slow
 consumer) — dropped frames, stalls, torn state. Skip the slew and your servos *snap* to
 position instead of moving, drawing current spikes and mechanical shock, because a step went
@@ -693,7 +624,7 @@ and let the *hardware and the hardest deadline win* — those are the two things
 negotiate with. That habit of reconciliation, more than any single rule, is what separates a
 design that fits the chip from one that fights it.
 
-# Chapter 8: Completing and Judging a Decomposition
+# Chapter 6: Completing and Judging a Decomposition
 
 ## The objects that guard the whole application
 
@@ -735,7 +666,7 @@ top of that isolation. You can't assume they'll fall out of the design. You plac
 purpose, and you place them *after* the structural tree is drawn, because where each one goes
 depends on the tree it's guarding.
 
-💡 **Tip:** when you think you're done, go down this list of five and ask "where does each of
+**Tip:** when you think you're done, go down this list of five and ask "where does each of
 these live in my design?" — and if one genuinely isn't needed (no external vocabulary, so no
 translator), say so out loud. An omission you *named* is a decision; an omission you didn't
 notice is a bug waiting in the field.
@@ -873,7 +804,7 @@ it's the nature of designing against hardware. (The retrospective form of this d
 comparing what you *derived* against what you actually *built*, once the code ships — is the
 as-built audit in the next chapter.)
 
-# Chapter 9: The Method in Action
+# Chapter 7: The Method in Action
 
 ## The first-contact procedure
 
@@ -1097,7 +1028,7 @@ made visible, run once each on deliberately different hardware. The method is wh
 
 And, the way Part I did, this part leaves some of its hardest work deliberately unfinished. Step 2
 asked whether a smart pin could absorb a protocol outright — a question you can answer only as well
-as you know the full catalogue of pin modes. The reconciliation in Chapter 7 was given no formula,
+as you know the full catalogue of pin modes. The reconciliation in Chapter 5 was given no formula,
 because there isn't one; you were told to hold the forces together and let them argue, which is
 straightforward advice and slow work the first several times you follow it. The as-built audit at
 the end of this chapter is a practice most projects skip, not because it lacks value but because by
@@ -1106,18 +1037,118 @@ third tier — foot position to joint angles — is inverse kinematics, the kind
 stopped a real project at the edge of its author's mathematics rather than the chip's limits.
 
 None of those is a flaw in the method. They are the places where the method costs more than a
-working engineer usually has, and each of them is where the next part has something specific to say.
+working engineer usually has, and each of them is where **Part IV**, the agent part, has something
+specific to say.
 
 Start from the wires, run the forces, judge the cut, and let the hardware, not habit, hand you the
-shape — that is what it means to think in P2. You've now done the front-of-project work of Part I and
-this decomposition by hand. One part remains, and it changes the cost and the reach of all of it: the
-same work, walked once more, with an agent at your side.
+shape — that is what it means to think in P2. You've now decided what to build, learned the
+hardware, and decomposed the embedded application by hand. What remains of the project is to build
+the pieces the cut named and ship them, and that is **Part III**.
 
-# Part III — The Same Work, with an Agent
+# Part III — Building and Shipping
 
-You now know the front of a project (Part I) and how to derive its architecture (Part II). This
-part walks the *same* work a third time, with an AI agent in the loop, asking one question of each
-step: *what changes when you have an agent at your side?*
+The decomposition handed you a set of objects, each with a cog, a job, and the seams it promises
+its neighbours. Now each one has to be made real: built into something usable, made fast,
+characterized against the hardware, and shipped with the documentation that lets someone else pick
+it up. This part is that work. It draws on the same twelve projects as Part I, and most of those
+were drivers — which is to say that most of them *are* the kind of object a decomposition produces,
+built one at a time.
+
+# Chapter 8: Building the Capability
+
+With the parts talking and the cut made, the work turns to making each piece *usable* — and here
+design taste starts to matter.
+
+## Designing the interface
+
+The interface comes first, and it's more than exposing what the chip does; it's deciding how
+someone will *think* about the thing. The strongest move is to unify. Study how different
+communities already reason about the problem, then design one interface a person from any of those
+backgrounds can pick up and use. The motor-control work reached servos, brushless motors, and
+wheeled drive through a single interface, so you come to it however you learned motors and still
+know how to drive it. And a lesson that repays attention: every time you layer a new capability
+*on top of* your own driver, it tends to *improve the driver itself*, because the new thing needs
+something you didn't anticipate — adding a morphing-digit display on top of a matrix driver made
+the driver's own interface richer.
+
+Above the raw interface you add convenience layers that hide the primitives, so the application can
+say "steer" instead of setting two motor speeds, or treat an animated digit as "just another font."
+Much of the building, too, is *translation and digestion*: the reference implementation you're
+learning from is almost always in another language — C, an Arduino sketch, NodeMCU — and you carry
+it across into Spin2 one idea at a time, often in your head. Sometimes you don't transcribe at all;
+you write a small program that *generates* what you need, the way a short Python script produced the
+digit-to-digit transition tables that were then baked into the object.
+
+## Chasing performance
+
+Then there's the thing that keeps a P2 developer up at night in the best way: *performance.* The
+reference drivers rarely run as fast as the P2 can, and matching what they do while going faster —
+and staying error-free at speed — is often the entire point. An eight-port serial (UART) driver pushed past two megabits
+per second on every port at once, error-free; the matrix driver is a standing chase after the
+best frame rate the panels will give.
+
+## Characterizing, then verifying
+
+You also *characterize* the hardware — measure how it truly behaves, not how the datasheet claims
+it should. How wheels behave against a motor's top speed under different batteries; how repeatably
+a servo returns to a commanded position. And here's the quiet payoff: those measurements don't stay
+in a lab notebook — they *become the features and the limits of the product.* Characterizing which
+batteries could drive the motor platform turned directly into its supported-battery spec. Then you
+verify: checksums, round-trip confirmation, and again the logic analyzer as the court of final
+appeal, proving the protocol is tight before you call it done.
+
+## When the limit is yours, not the chip's
+
+One honest note before we move on. Sometimes a project meets *your own* limits, not the chip's. A
+six-axis arm stalled at the edge of one engineer's comfort with the mathematics of inverse
+kinematics — the code was reachable, the math wasn't, so the demo could pick a thing up and move it
+but not much more. The opposite happens too: a project you bring deep prior expertise to almost
+builds itself, the way years of Linux and web experience made the hard parts of a gateway routine.
+Where your own ceiling sits is part of the real shape of a project — and it's exactly the place
+**Part IV** will have the most to say.
+
+# Chapter 9: Finishing and Shipping
+
+A project isn't done when it runs. On every one of these the same closing ritual runs: *document it
+so the driver is genuinely usable, post it to the repository in a form people can pick up, and
+announce that it exists.* Skip any of the three and you've wasted the work.
+
+## Documenting so the work is usable
+
+Documentation here means more than prose. It's photographs of the actual devices you drove, short
+videos so people can watch the thing move, and — a signature of hardware work — the
+logic-analyzer traces themselves, published as proof of how the communication behaves. If you want
+the work to outlive the project, you make it *reusable and configurable*: pull the general part out
+of the specific one, let it be configured per device instead of hard-coded, record which channel
+each thing lives on. The servo work became a standalone, reusable driver extracted from the arm
+that first needed it.
+
+## The long tail
+
+And then the long tail the first release never shows you. Vendors ship new firmware and new code;
+keeping up means diffing their changes against what you built and deciding what to fold back in — a
+chore heavy enough to stall a project for a year. The time-of-flight driver still carries a known
+gap, a coordinate table and some angle math left undone, with a pile of newer vendor code waiting
+to be reconciled. A project can be shipped while honestly incomplete, as long as what isn't
+finished is documented clearly.
+
+## Where this leaves you
+
+That's a project from end to end: you decided what to build, learned the hardware, derived which
+cog owns what, built each piece into something usable and fast, characterized it, and shipped it
+with its documentation.
+
+And a promise to close on. **Part IV** comes back to this very list — every phase you have now
+read, the decomposition included — and asks it again with an AI agent at your side. Because every
+one of these things, from hunting down a datasheet in a language you don't read, to reconciling a
+vendor's new code, to reaching past your own math, changes when you have one.
+
+# Part IV — The Same Work, with an Agent
+
+You now know a project end to end by hand: the work before the cut (Part I), the cut itself
+(Part II), and the building and shipping after it (Part III). This part walks the *same* work again,
+in the same order, with an AI agent in the loop, asking one question of each step: *what changes
+when you have an agent at your side?*
 
 Be clear about what does **not** change. The agent removes none of the judgment. You still decide
 what to build, you still own the pin map and hold the logic-analyzer probe, and you still judge the
@@ -1178,8 +1209,8 @@ you saw what you were choosing among. That is a better way to learn, not just a 
 
 # Chapter 11: Deciding and Learning, with an Agent
 
-This chapter walks the first half of Part I again — deciding what to build, and learning the
-hardware — with the agent in the loop.
+This chapter walks Part I again — deciding what to build, and learning the hardware — with the
+agent in the loop.
 
 The front of a project is slowest at research, which is exactly where the agent is strongest.
 Choosing a part is a recurring act: market research, a price point, an honest look at how hard the
@@ -1235,71 +1266,17 @@ the panels need an initialization chain — and it will derive the wiring, the b
 init sequence, and the replication correctly. Naming the frame is the human's real contribution;
 within it, the agent works.
 
-# Chapter 12: Building and Shipping, with an Agent
+# Chapter 12: Through the Decomposition, with an Agent
 
-Now the second half of Part I — building the capability, and finishing the job.
-
-The in-head translation that used to define the building phase — carrying a C or Arduino idea
-across into Spin2 one line at a time — the agent does with you at a different speed, and the tables
-and boilerplate you once hand-generated, it generates. But the deeper changes are three. When the
-hardware itself changes shape — moving a servo *behind* a PWM-generation chip, so the servo object
-now speaks to the chip that drives the servo — you describe the new indirection and the agent
-**reshapes the code**; what used to be a re-engineering slog becomes a change you recover from in
-an afternoon, back on the air where you left off. When performance is the goal, the division of
-labor is clean: *you* decide where speed matters and why; the agent helps decide *how* to reach it
-with the P2's own resources — LUT RAM, the CORDIC, the streamer — and external PSRAM. And when you build a piece
-in the middle — a FIFO, say — you build it as a **standalone object with an agent-written
-regression test**, proven before it's wired in, so that by the time it's inside the whole
-application it's a *tested component* and no longer a suspect when something breaks.
-
-There's a deeper shift underneath all of this. A **hosted** agent that holds the whole P2 toolchain
-— the `pnut-ts` compiler, the `pnut-term-ts` terminal-and-debug host, and the P2 Knowledge Base on
-tap — can close the *entire* loop by itself: write the code, compile it, download it to a P2,
-run it, read the `DEBUG` output and logs that come back, and go around again. It isn't drafting code
-for you to run and report back on; it is running its own experiment on silicon and reading its
-own result, round-trip after round-trip. That autonomy is what lets the isolation tests above
-actually get written *and passed* without you in the loop for every cycle — and it's the line
-between an agent that merely *suggests* and one that *converges*: you set the target and the check
-that says "done," and it iterates until it reaches it. The judgment of what "done" means stays
-yours; the grind of getting there does not.
-
-The single largest change, though, is the one Part I foreshadowed: the ceiling that used to be
-*yours* rather than the chip's. A six-axis arm once stalled at the edge of one engineer's comfort
-with the mathematics of inverse kinematics — the code was reachable, the math wasn't. With an
-agent that ceiling lifts. The same arm can carry a full inverse-kinematics solution and coordinated
-motion that brings the whole arm to its target in the least time rather than driving each joint in
-turn; it can even plan a move so the center of gravity shifts least and the arm stays stable — math
-that was simply out of reach before. That is the clearest single thing an agent changes: not the
-work you could already do faster, but the work you *couldn't do at all*. Taste still leads, all the
-same — what an interface should feel like, how a thing should behave, stays a human call the agent
-serves rather than makes.
-
-Finishing changes too, in two places. The documentation — the usable driver docs, the write-ups,
-the examples — the agent drafts, turning the closing ritual from a chore into a review; and if you
-tell it which documents do what, why, and when each must be updated, it will keep the whole
-catalog, and a changelog of what changed each pass, consistent for you. When a one-off deserves to
-become a reusable part, the agent recognizes the standalone pieces, suggests publishing them to
-OBEX, and — because it's grounded in the Knowledge Base — enriches the public documentation with
-the P2 techniques a reader should know but you didn't think to mention. And the long tail, the most
-demoralizing part of Part I, is where the agent earns its keep most surprisingly. A vendor ships new
-code and the year-long stall of reconciling it becomes surgical: take your original source, diff
-the new release, apply just the meaningful changes, pull the new binaries, and run — days instead
-of weeks, which is why a stalled time-of-flight project becomes worth reviving at all. The same
-move, pointed at *your own* history, finds a performance regression a user reports between an old
-release and a new one; pointed at the *Knowledge Base* as it improves, it re-audits old code
-against better examples and fixed bugs to unlock speed that wasn't reachable when you first shipped.
-
-# Chapter 13: Through the Decomposition, with an Agent
-
-Chapters 11 and 12 walked Part I again. This chapter walks Part II — the decomposition itself — and
+Chapter 11 walked Part I again. This chapter walks Part II — the decomposition itself — and
 it is the place an agent is most easily misunderstood, in both directions. It does not derive your
 architecture for you. Nor does it merely type faster while you do all of the thinking. The true
 account is narrower and more specific than either, and describing it in the abstract tends to
 produce exactly the two misreadings above.
 
 So we will not describe it. We will run a derivation you have already watched: the walking robot
-from Chapter 9 — the same hardware, the same nine steps, in the same order. Recall the input, which
-was all Chapter 9 started from: two I²C buses, one carrying a servo/PWM controller driving thirteen
+from Chapter 7 — the same hardware, the same nine steps, in the same order. Recall the input, which
+was all Chapter 7 started from: two I²C buses, one carrying a servo/PWM controller driving thirteen
 servos plus an IMU and a battery ADC behind a hard 50 Hz motion deadline, the other carrying a
 single clock-stretching voice module; and three discrete signals — an addressable LED chain, a
 buzzer, and an ultrasonic range sensor. Nothing about the object set is given. It was derived then
@@ -1320,12 +1297,12 @@ whether a smart pin can absorb a peripheral's protocol outright. Answering it we
 depended on holding the whole catalogue of pin modes in your head — which is a memory problem, not a
 design problem, and it is exactly the kind of question an agent grounded in the Knowledge Base
 answers directly: not "yes" or "no," but *here are the two or three ways the P2 offers to do this,
-and here is what each costs.* On the dog it produced the same triage Chapter 9 reached — the LED
+and here is what each costs.* On the dog it produced the same triage Chapter 7 reached — the LED
 chain, the buzzer, and the ultrasonic ping-and-echo each map onto a pin mode that carries the
 timing; the multi-byte I²C transactions do not. What you gained is not the answer; it is confidence
 that the answer was chosen from the whole menu rather than the part of it you happened to remember.
 
-⚠️ **Watch out:** an enumeration is not a verdict. Chapter 9's second application made the point
+**Watch out:** an enumeration is not a verdict. Chapter 7's second application made the point
 already — a smart pin *can* absorb the OLED's SPI, and a hand-written streaming loop still met the
 frame budget better, so bit-banging it was the right call. An agent that lists three techniques has
 told you what is available, not which one your deadline wants. That decision, and the record of why
@@ -1341,8 +1318,8 @@ frame unnamed and it will produce something plausible and generic instead, which
 mode a human has under the same conditions.
 
 The deadline itself is not something it can look up. Fifty hertz is a property of the mechanism —
-of how fast those legs can actually move under load, on the batteries you actually characterized in
-Part I. You are the agent's senses at the bench, and the numbers you measure there are requirements
+of how fast those legs can actually move under load, on the batteries you actually measured. You
+are the agent's senses at the bench, and the numbers you measure there are requirements
 in exactly the sense Chapter 10 meant.
 
 **Steps 4–5 — cadences, and the same-bus conflict.** Listing the cadences splits cleanly in two.
@@ -1401,7 +1378,7 @@ order are judgment calls of the same size with or without help.
 
 **Step 9 — reconcile.** The tally against the lattice — three cogs of eight, about eight smart pins
 of sixty-four, no locks — is bookkeeping, and bookkeeping is a document like any other: tell the
-agent what the budget is for and when it must be updated, as Chapter 12 described for the rest of
+agent what the budget is for and when it must be updated, as Chapter 13 describes for the rest of
 the documentation, and keeping it current stops being your job. The judgment it supports does not
 move. Whether this is a min-cut, whether a coupling count is low enough to accept, whether the one
 dynamic change-coupling crossing a cog boundary has actually been converted to static — those are
@@ -1423,6 +1400,64 @@ exactly where Part II said the skill lives: holding several forces in tension an
 hardware and the hardest deadline decide. That division is the one Part II described, and none of
 the nine steps above changes it.
 
+On the real build, the dog was reverse-engineered off its original Arduino, decomposed onto the P2,
+and coded with agent help in a week or two rather than a month or two — with all nine steps run,
+and none of them removed.
+
+# Chapter 13: Building and Shipping, with an Agent
+
+Now Part III — building each piece the cut named, and finishing the job.
+
+The in-head translation that used to define the building phase — carrying a C or Arduino idea
+across into Spin2 one line at a time — the agent does with you at a different speed, and the tables
+and boilerplate you once hand-generated, it generates. But the deeper changes are three. When the
+hardware itself changes shape — moving a servo *behind* a PWM-generation chip, so the servo object
+now speaks to the chip that drives the servo — you describe the new indirection and the agent
+**reshapes the code**; what used to be a re-engineering slog becomes a change you recover from in
+an afternoon, back on the air where you left off. When performance is the goal, the division of
+labor is clean: *you* decide where speed matters and why; the agent helps decide *how* to reach it
+with the P2's own resources — LUT RAM, the CORDIC, the streamer — and external PSRAM. And when you build a piece
+in the middle — a FIFO, say — you build it as a **standalone object with an agent-written
+regression test**, proven before it's wired in, so that by the time it's inside the whole
+application it's a *tested component* and no longer a suspect when something breaks.
+
+There's a deeper shift underneath all of this. A **hosted** agent that holds the whole P2 toolchain
+— the `pnut-ts` compiler, the `pnut-term-ts` terminal-and-debug host, and the P2 Knowledge Base on
+tap — can close the *entire* loop by itself: write the code, compile it, download it to a P2,
+run it, read the `DEBUG` output and logs that come back, and go around again. It isn't drafting code
+for you to run and report back on; it is running its own experiment on silicon and reading its
+own result, round-trip after round-trip. That autonomy is what lets the isolation tests above
+actually get written *and passed* without you in the loop for every cycle — and it's the line
+between an agent that merely *suggests* and one that *converges*: you set the target and the check
+that says "done," and it iterates until it reaches it. The judgment of what "done" means stays
+yours; the grind of getting there does not.
+
+The single largest change, though, is the one Part III foreshadowed: the ceiling that used to be
+*yours* rather than the chip's. A six-axis arm once stalled at the edge of one engineer's comfort
+with the mathematics of inverse kinematics — the code was reachable, the math wasn't. With an
+agent that ceiling lifts. The same arm can carry a full inverse-kinematics solution and coordinated
+motion that brings the whole arm to its target in the least time rather than driving each joint in
+turn; it can even plan a move so the center of gravity shifts least and the arm stays stable — math
+that was simply out of reach before. That is the clearest single thing an agent changes: not the
+work you could already do faster, but the work you *couldn't do at all*. Taste still leads, all the
+same — what an interface should feel like, how a thing should behave, stays a human call the agent
+serves rather than makes.
+
+Finishing changes too, in two places. The documentation — the usable driver docs, the write-ups,
+the examples — the agent drafts, turning the closing ritual from a chore into a review; and if you
+tell it which documents do what, why, and when each must be updated, it will keep the whole
+catalog, and a changelog of what changed each pass, consistent for you. When a one-off deserves to
+become a reusable part, the agent recognizes the standalone pieces, suggests publishing them to
+OBEX, and — because it's grounded in the Knowledge Base — enriches the public documentation with
+the P2 techniques a reader should know but you didn't think to mention. And the long tail, the most
+demoralizing part of Part III, is where the agent earns its keep most surprisingly. A vendor ships new
+code and the year-long stall of reconciling it becomes surgical: take your original source, diff
+the new release, apply just the meaningful changes, pull the new binaries, and run — days instead
+of weeks, which is why a stalled time-of-flight project becomes worth reviving at all. The same
+move, pointed at *your own* history, finds a performance regression a user reports between an old
+release and a new one; pointed at the *Knowledge Base* as it improves, it re-audits old code
+against better examples and fixed bugs to unlock speed that wasn't reachable when you first shipped.
+
 ## After it ships: the as-built audit becomes practical
 
 Part II left one practice openly unfinished — the as-built audit, comparing the decomposition you
@@ -1431,16 +1466,12 @@ time left to run it.
 
 That comparison is a diff between a design document and a codebase, and reading a whole tree to
 find where it diverges from a description is work an agent is genuinely good at — the same move
-Chapter 12 used to localize a performance regression between two of your own releases. Point it at
+this chapter used to localize a performance regression between two of your own releases. Point it at
 the derivation and the shipped source and ask which cuts survived, which quietly changed, and which
 mechanisms were built but only half-adopted — the wake path wired into a buffer manager and used by
 one consumer out of three. Tagging each divergence by the kind of reasoning behind the original cut
 is still yours, because only you know whether a boundary came from a hardware fact or from a pattern
 you liked. But the audit stops being a practice you agree is valuable and never perform.
-
-On the real build, the dog was reverse-engineered off its original Arduino, decomposed onto the P2,
-and coded with agent help in a week or two rather than a month or two — with all nine steps run,
-and none of them removed.
 
 # Chapter 14: Beyond What You Could Build Alone
 
@@ -1475,13 +1506,13 @@ from one project to the next.
 # In Closing
 
 Look back at the distance covered. You began with a real project and the ordinary, unglamorous
-front of the work — deciding what to build, learning parts nobody documented well, wiring them,
-proving they talk, making them fast, and shipping them so someone else could pick them up. Then you
-took that wired-up, understood application and *derived* its shape instead of guessing it — reading
-the forces the hardware and the deadlines press on you, and letting them, not habit, hand you which
-cog owns what. And then you walked all of it a third time with an agent beside you, and watched
-every phase get cheaper or reach farther — with a few designs that weren't reachable at all before
-coming into reach.
+front of the work — deciding what to build, learning parts nobody documented well, wiring them, and
+proving they talk. Then you took that wired-up, understood application and *derived* its shape
+instead of guessing it — reading the forces the hardware and the deadlines press on you, and
+letting them, not habit, hand you which cog owns what. Then you built the pieces that cut named,
+made them fast, and shipped them so someone else could pick them up. And then you walked all of it
+again with an agent beside you, and watched every phase get cheaper or reach farther — with a few
+designs that weren't reachable at all before coming into reach.
 
 What you carry out of these pages is not a set of answers; it's a *method*. Point it at hardware
 you've never seen — a new sensor, an unfamiliar bus, a tighter deadline — and it will hand you a
@@ -1597,7 +1628,7 @@ and the generative stance the whole approach takes.
   Program and Systems Design.* Prentice-Hall, 1979.** Where *coupling* and *cohesion* come from —
   the measures behind a good seam: low coupling across cogs, high cohesion within one.
 - **Page-Jones, M. — *Fundamentals of Object-Oriented Design in UML.* Addison-Wesley, 1999.** Its
-  treatment of *connascence* (this guide's **change-coupling**) is the sharpest tool in Chapter 8's "judging the cut" section — and the
+  treatment of *connascence* (this guide's **change-coupling**) is the sharpest tool in Chapter 6's "judging the cut" section — and the
   source of the static-versus-dynamic distinction that, on the P2, separates a safe seam from a
   race.
 

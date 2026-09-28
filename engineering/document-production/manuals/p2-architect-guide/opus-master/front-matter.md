@@ -41,11 +41,12 @@
 \vspace{0.1cm}
 {\footnotesize
 \begin{minipage}[t]{0.46\textwidth}
-\textbf{The Three Parts}
+\textbf{The Four Parts}
 \begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
 \item Part I — Getting a Project Off the Ground
 \item Part II — Thinking in P2 (Functional Decomposition)
-\item Part III — The Same Work, with an Agent
+\item Part III — Building and Shipping
+\item Part IV — The Same Work, with an Agent
 \end{itemize}
 \end{minipage}%
 \hfill%
@@ -123,15 +124,17 @@ That question — how a whole embedded application gets carved across eight inde
 
 By the end of it you should be able to sit down with hardware you have never seen — a new sensor, an unfamiliar bus, a deadline tighter than the last one — and derive a sound architecture for it: which cog owns which resource, what each seam between cogs promises, what adapts where two cadences meet, how deep each branch layers, and whether the whole thing fits on the chip. Not recall an architecture that resembles it. Derive one.
 
-The book walks a single journey three times.
+The book walks one project twice, in the order a project runs: once by hand, and once more with an agent.
 
-**Part I** is the front of a real project — deciding what to build, learning parts nobody documented well, wiring them, proving they talk, making them fast, and shipping them so someone else can pick them up. Not one cog is assigned anywhere in it. It is the work that hands the decomposition its raw material: the parts, the pin map, the rates, and the deadlines.
+**Part I** is the work before the cut — deciding what to build, learning parts nobody documented well, wiring them, and proving they talk. Not one cog is assigned anywhere in it. It is the work that hands the decomposition its raw material: the parts, the pin map, the rates, and the deadlines.
 
 **Part II** takes that wired-up, understood application and derives its software architecture from it. Four forces do the cutting; a handful of objects guard the whole application rather than sitting in it; a resource budget says when a cut is wrong; four tools judge one candidate cut against another; and a nine-step procedure puts them in order, watched running end to end on two deliberately different applications.
 
-**Part III** walks both of those again with an AI agent in the loop, asking one question at each step: what changes when you have one? The answer is never that the agent decides. It is that most steps get cheaper, and a few things that were out of reach come within it.
+**Part III** is the work after the cut — building each piece the decomposition named into something usable, making it fast, characterizing it, and shipping it so someone else can pick it up.
 
-Three parts, three acts of one story — but not three equal ones. **Part II is the book's center of gravity**, and considerably its longest; Part I is its approach and Part III its amplifier. That proportion is deliberate, and it is worth knowing before you start.
+**Part IV** walks all of that again with an AI agent in the loop, asking one question at each step: what changes when you have one? The answer is never that the agent decides. It is that most steps get cheaper, and a few things that were out of reach come within it.
+
+Four parts, one story — but not four equal ones. **Part II is the book's center of gravity**, and considerably its longest; Parts I and III are the work on either side of it, and Part IV its amplifier. That proportion is deliberate, and it is worth knowing before you start.
 
 A few things this book deliberately is not. It is not an orientation manual: **Getting Started with the Propeller 2** is its prerequisite, and this book opens where that one ends — it assumes you can already launch a cog, drive a pin, share data through hub, and choose between Spin2 and PASM2 for a given job. It is not a Spin2 or PASM2 reference and it does not duplicate the subsystem manuals; where you need depth, it names the manual that carries it. It contains no code at all, by design — the mechanics belong to those manuals, and the design reasoning is what this one is for. And it is not prescriptive: it will not tell you what to build, or hand you an architecture to copy. Every worked example in it is one application's answer, shown to make the method visible.
 
@@ -139,9 +142,9 @@ A few things this book deliberately is not. It is not an orientation manual: **G
 
 This is a short, narrative guide, not a reference manual — it is meant to be *read*. It assumes you have already met the Propeller 2; if you haven't, its companion **Getting Started with the Propeller 2** is the place to begin. Different readers can enter at different doors:
 
-- **Building a real system?** Read straight through. **Part I** gets the project off the ground — choosing the hardware and buses, spending the pin budget, getting the parts to talk. **Part II** derives the software architecture — which cog owns what, how the pieces talk. **Part III** walks the whole process again with an AI agent at your side.
-- **Already have a hardware design and need the software architecture?** Go straight to **Part II** (Chapter 5) — the functional-decomposition method — and use Part I as reference.
-- **Curious how an AI agent changes the work?** **Part III** (Chapters 10–14) revisits every step of the process with an agent in the loop — where it helps, and where judgment stays yours.
+- **Building a real system?** Read straight through — the book follows a project's own order. **Part I** gets the project off the ground — choosing the hardware and buses, spending the pin budget, getting the parts to talk. **Part II** derives the software architecture — which cog owns what, how the pieces talk. **Part III** builds and ships the pieces. **Part IV** walks the whole process again with an AI agent at your side.
+- **Already have a hardware design and need the software architecture?** Go straight to **Part II** (Chapter 3) — the functional-decomposition method — and use Part I as reference.
+- **Curious how an AI agent changes the work?** **Part IV** (Chapters 10–14) revisits every step of the process with an agent in the loop — where it helps, and where judgment stays yours.
 - **Coming from the Propeller 1?** Follow the bronze **"P1 note"** sidebars wherever a design decision differs from the P1.
 
 ## Conventions
@@ -152,7 +155,7 @@ A few conventions run through the whole guide:
 - **Code shows named constants, not raw numbers.** Examples use the compiler's symbolic constants (a pin's name, `_clkfreq`) the way you'd actually write them — and every code example compiles.
 - **Code blocks are colored by language** — Spin2 in **blue**, PASM2 (assembly) in **green** — the same IDE-aligned scheme as the rest of the P2 manual family, so code is recognizable at a glance.
 - **"P1 note" sidebars** (bronze boxes) are short asides for readers migrating from the Propeller 1, each labeled *same as P1*, *changed in P2*, or *new in P2*. A newcomer can skip every one of them without losing the thread.
-- **Inline markers are used sparingly** — 💡 **Tip** for a non-obvious orientation insight, ⚠️ **Watch out** for a genuine pitfall. This is a narrative guide, not a reference peppered with boxes.
+- **Inline markers are used sparingly** — **Tip** for a non-obvious orientation insight, **Watch out** for a genuine pitfall. This is a narrative guide, not a reference peppered with boxes.
 
 ```{=latex}
 \clearpage
