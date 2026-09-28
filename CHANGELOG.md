@@ -20,6 +20,19 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.21.1] - 2026-09-28
+
+**DAT and VAR say which state each holds, and how to choose between them.**
+
+### Changed
+
+- **`DAT` is class state and `VAR` is instance state**, each entry stating the model and the choice between them
+- **A DAT PASM block is an image each started cog copies**; a cog's register writes stay in that cog
+- **A mailbox belongs in DAT only when one worker cog serves every instance**; otherwise it is instance state, in VAR
+- **Searchable by the terms programmers use**: class, instance, singleton, static and per-instance state
+
+---
+
 ## [1.21.0] - 2026-09-22
 
 **Board revisions, stack budgets and transport classifications — the facts a build needs that no instruction page carries.**

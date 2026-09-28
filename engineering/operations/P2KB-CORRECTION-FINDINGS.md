@@ -111,6 +111,26 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
 
+## A manual release published KB content without its index (2026-09-28) — F-476
+
+### F-476 — nothing stops a push while KB content sits past the last KB tag, and pushed content without its index is unverifiable — `CONFIRMED` (fix below; release half DONE in v1.21.1)
+
+**What happened:** F-475's content commits (09-26) were pushed to `main` on 09-28 by the Streamer
+and Architect manual releases — every commit on `main` goes with a manual release's push. No KB
+release had run, so the published index still carried the v1.21.0 `sha256` for the five changed
+files. The MCP verifies a fetched body against that hash and refuses a mismatch: an uncached
+client asking for `p2kbSpin2KwDAT` got *"Content for 'p2kbSpin2KwDAT' is temporarily unavailable —
+verification failed"* (reproduced 2026-09-28 by flushing the local cache). Cached clients kept
+serving v1.21.0's text. Same symptom as F-441, different cause: F-441 regenerated the index
+before the content commit; here no index was regenerated at all.
+**Why no gate saw it:** `audit-unpushed-releases.py` checks that release TAGS reach the remote; it
+does not ask whether `deliverables/ai/P2/` has commits past the latest KB tag. Every manual release
+runs it as an advisory, so the check was in the right place and asked the wrong question.
+**Release half — DONE:** v1.21.1 published F-475 with a post-commit index; the five entries verify again.
+**Gate half — owed:** `audit-unpushed-releases.py` (and so every manual release's advisory) should
+report KB content commits after the latest `vX.Y.Z` KB tag as an unpublished-KB condition, and a
+manual release should not push while it holds.
+
 ## DAT is class state, VAR is instance state — the keyword entries never said so (2026-09-26) — F-475
 
 ### F-475 — `DAT.yaml` / `VAR.yaml` did not state the class/instance model or how to choose, and `blocks.yaml` advised DAT for "shared buffers (mailboxes, queues)" unqualified — `DONE` 2026-09-26
@@ -588,7 +608,7 @@ Every one was verified by the arbiter against a primary source, not taken from a
 > **correct** the whole time. An agent's answer depended on which file it read. That is the
 > two-homes-drift mechanism «#349» exists to measure — recorded here as an instance.
 
-### F-449 — `sumnc.yaml` and `sumnz.yaml` carry behavior prose in their flag fields — `CONFIRMED`
+### F-449 — `sumnc.yaml` and `sumnz.yaml` carry behavior prose in their flag fields — `DONE` 2026-09-22 (651e1ad0, shipped in v1.21.0; status flipped 2026-09-28)
 
 > `pasm2/sumnc.yaml:29` and `pasm2/sumnz.yaml:30` hold *"0 then D = D - S, else D = D + S"* where a
 > C (resp. Z) effect belongs. Correct values, from the manual's Part II entry
@@ -596,13 +616,13 @@ Every one was verified by the arbiter against a primary source, not taken from a
 > Z = `Result == 0`. **The manual is right; the YAML is wrong.** The manual's Appendix A had
 > inherited the corruption and was corrected in this pass.
 
-### F-450 — `incmod.yaml` C effect is a corrupted string — `CONFIRMED`
+### F-450 — `incmod.yaml` C effect is a corrupted string — `DONE` 2026-09-22 (651e1ad0, shipped in v1.21.0; status flipped 2026-09-28)
 
 > `pasm2/incmod.yaml:39` reads *"1, else D = D + 1 and C = 0"*. The manual's Part II entry
 > (`instructions-i.md:81`) has it right: `D was S (wrapped)`. Manual right, YAML wrong; Appendix A
 > had inherited it and was corrected in this pass.
 
-### F-451 — four more shipped flag/oneliner strings are garbage or wrong-shaped — `CONFIRMED`
+### F-451 — four more shipped flag/oneliner strings are garbage or wrong-shaped — `DONE` 2026-09-22 (651e1ad0, shipped in v1.21.0; status flipped 2026-09-28)
 
 > - `pasm2/rcr.yaml:28` — C effect `Last bit out1` (stray footnote digit). Every sibling uses
 >   `last bit shifted out if S[4:0] > 0, else D[31]`.
@@ -614,7 +634,7 @@ Every one was verified by the arbiter against a primary source, not taken from a
 >   not the instruction. The manual's Appendix C is right: `Get CT[31:0] or CT[63:32] if WC into D`.
 > - `pasm2/pollxrl.yaml:30` — Z effect `XRLEvent`, missing the space; the manual has `XRL Event`.
 
-### F-452 — `loc.yaml` categorizes LOC as Math and Logic — `CONFIRMED`
+### F-452 — `loc.yaml` categorizes LOC as Math and Logic — `DONE` 2026-09-22 (651e1ad0, shipped in v1.21.0; status flipped 2026-09-28)
 
 > `pasm2/loc.yaml:31` says `category: Math and Logic`, which places LOC under Arithmetic in the
 > manual's categorical index and `instruction-categories.md`. LOC loads an address (the manual's own
