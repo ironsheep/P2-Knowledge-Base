@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-09-28T17:08:42.079403",
+    "generated": "2026-09-28T17:41:16.468258",
     "total_entries": 1131,
     "total_categories": 59,
     "total_aliases": 3049,
@@ -13903,8 +13903,8 @@
     },
     "p2kbSpin2Blocks": {
       "path": "deliverables/ai/P2/language/spin2/constructs/blocks.yaml",
-      "mtime": 1790448367,
-      "sha256": "eddbf2b9f2ae646277b471999178f29cfee00ae6e50d4f8d937609bf8d65eb36"
+      "mtime": 1790617246,
+      "sha256": "bf1e1e2672898159c22b64d549cde36d07127746051a2137a7394f03ca6adcf8"
     },
     "p2kbSpin2Case": {
       "path": "deliverables/ai/P2/language/spin2/constructs/case.yaml",
@@ -13923,8 +13923,8 @@
     },
     "p2kbSpin2InlinePasm": {
       "path": "deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml",
-      "mtime": 1790051899,
-      "sha256": "2aaffc97fdcac23c274c6cf9eecf5c7eb5451e1eccabcc36ef878fc860bc6de3"
+      "mtime": 1790617246,
+      "sha256": "903c604b3dd2eb385c8c175e7b3e5e5f88c967a89498e2ccde11823afb3c0e4f"
     },
     "p2kbSpin2MethodDefinition": {
       "path": "deliverables/ai/P2/language/spin2/constructs/method_definition.yaml",
