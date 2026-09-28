@@ -46,7 +46,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ |
 | Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
-| Architect's Guide | manual | ⏳ | ⏳ | ⏳ | — |
+| **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
 | **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
@@ -596,6 +596,16 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+²⁶ **Architect's Guide — all three proven on the released v1.1.0 PDF, 2026-09-28** (16:51 build, 60pp).
+**Metadata single-source:** the cover reads `\DocTitle`, `\DocDate`, `\DocVersion` from the template's
+`request.json` bindings (`p2kb-architect-reference.latex:40–50`); `audit-pdf-metadata.py --require-rights
+--request` verified Title, Subject and Author and page 1's date and version against `request.json`.
+**Rights:** the same run verified Keywords carries both the copyright and the licence — CLEAN.
+**Cross-ref filter:** `p2kb-platform-crossref` is in `request.json`; on the artifact every textual chapter
+reference in the body is a working link to the right page — all 10 (Chapter 5→p19, 6→p26, 7→p31 ×4,
+10→p41, 11→p43 ×2, 13→p49), plus the Appendix A/B references (→p53/p56). The row had read ⏳ since the
+table was built; this release adopted all three rather than carry them.
 
 ²⁵ **P2 Errata — stood up 2026-09-25 («#357»), all four owed at its first release.** The workspace
 was cloned from XBYTE, which has adopted none of the three metadata/rights/cross-ref features, so it
