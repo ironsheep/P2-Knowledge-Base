@@ -1624,7 +1624,7 @@ and the generative stance the whole approach takes.
   of the ACM*, vol. 15, no. 12, 1972, pp. 1053–1058.** The origin of *information hiding*:
   decompose around the decisions likely to change, not around processing steps. This is the
   principle under Force 4 (layer by axis of change).
-- **Constantine, L.L. & Yourdon, E. — *Structured Design: Fundamentals of a Discipline of Computer
+- **Constantine, L.L. and Yourdon, E. — *Structured Design: Fundamentals of a Discipline of Computer
   Program and Systems Design.* Prentice-Hall, 1979.** Where *coupling* and *cohesion* come from —
   the measures behind a good seam: low coupling across cogs, high cohesion within one.
 - **Page-Jones, M. — *Fundamentals of Object-Oriented Design in UML.* Addison-Wesley, 1999.** Its
@@ -1645,13 +1645,13 @@ and the generative stance the whole approach takes.
   IFIP Congress 74*, Stockholm, 1974, pp. 471–475.** Kahn process networks: processes that
   communicate only by blocking reads on FIFO channels are *determinate regardless of timing* — the
   rule that makes inter-cog dataflow survive hub jitter.
-- **Kung, H.T. & Leiserson, C.E. — "Systolic Arrays (for VLSI)." In Mead, C. & Conway, L.,
+- **Kung, H.T. and Leiserson, C.E. — "Systolic Arrays (for VLSI)." In Mead, C. and Conway, L.,
   *Introduction to VLSI Systems*, Addison-Wesley, 1980 (§8.3).** Rhythmic data passing through a
   regular array of processing elements — the mental model for using cogs as pipeline stages.
-- **Lee, E.A. & Messerschmitt, D.G. — "Synchronous Data Flow." *Proceedings of the IEEE*, vol. 75,
+- **Lee, E.A. and Messerschmitt, D.G. — "Synchronous Data Flow." *Proceedings of the IEEE*, vol. 75,
   no. 9, 1987, pp. 1235–1245.** Static data rates yield computable buffer sizes — the math behind
   Force 3's rate adapters and the sizing of a buffer.
-- **Carloni, L.P., McMillan, K.L. & Sangiovanni-Vincentelli, A.L. — "Theory of Latency-Insensitive
+- **Carloni, L.P., McMillan, K.L. and Sangiovanni-Vincentelli, A.L. — "Theory of Latency-Insensitive
   Design." *IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems*, vol. 20,
   no. 9, 2001, pp. 1059–1076.** Correctness by data *order*, not arrival *time* — the formal bridge
   to the spatial domain and the discipline that makes hub jitter harmless.
@@ -1664,7 +1664,7 @@ and the generative stance the whole approach takes.
 - **Evans, E. — *Domain-Driven Design: Tackling Complexity in the Heart of Software.* Addison-Wesley,
   2003.** *Bounded contexts* as subsystem boundaries with their own internal language — the
   reasoning behind the external-interface translator (cross-cutting force C2).
-- **Liu, C.L. & Layland, J.W. — "Scheduling Algorithms for Multiprogramming in a Hard-Real-Time
+- **Liu, C.L. and Layland, J.W. — "Scheduling Algorithms for Multiprogramming in a Hard-Real-Time
   Environment." *Journal of the ACM*, vol. 20, no. 1, 1973, pp. 46–61.** Rate-monotonic scheduling —
   assigning urgency by cadence and reasoning about deadlines, the theory under the event plane's
   latency tiers.
