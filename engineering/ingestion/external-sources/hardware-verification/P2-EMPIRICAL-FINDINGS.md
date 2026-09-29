@@ -1266,6 +1266,68 @@ interpreter computes from the calling cog's `GETCT WC` + `GETCT` (Spin2 interpre
 are affected exactly as `GETCT WC` is. *Limits:* one lag (8) beyond EF-068/EF-079's 1 and 2; the
 Spin2 sampler in cog 5 only; 200 MHz. *Source:* `…/tests/e3-band-closes-in-one-wrap-test.spin2`.
 
+### EF-081 · No PASM2 instruction that takes a CT target sees E3's stale upper long — `WAITCTn`, `POLLCTn`, `JCTn`, `JNCTn`, the CT interrupts, the `SETQ` timeout and `WAITX` time exactly as in a current group, in the window and across its closing wrap; a cog held in `WAITCT1` counts as running — `CONFIRMED`
+*How proven:* `e3-scope-pasm2-ct-events-test` (VO-J-018) — a PASM2 probe runs one of seven commands
+per request, each on three targets after its own arm-time `GETCT`: `ADDCT1-3` + `WAITCT1-3`;
+`POLLCT1-3`; `JCT1-3`; `JNCT1-3`; `INT1-3` on CT-passed-CT1-3; three `SETQ` + `WAITATN WC` timeouts;
+three `WAITX`. Control probes in cogs 1-3; stale probes in cogs 4-7, started after their group missed
+a wrap (three windows: wraps 1, 3, 5 missed). Every command ran **IN** a window (targets 84–168 ms)
+and **ACROSS** the wrap that closes it (armed at lower long ≈ $F801_xxxx, targets $0800_0000–$0900_0000
+past the wrap, so the group's upper copy jumped while each target was pending), in both groups.
+*Result (log `debug_260929-140800`, 2026-09-29, first run, clean):* running-cog mask exactly as
+started on every poll (`%00001111` ×69, `%11111111` ×15, `%01111111` ×15, `%10001111` ×1). All 29
+arms status 0 and bracket held (l.277–306); **all 87 targets fired 3–49 clocks after their target,
+the same spread in the control arms as in the stale ones** (tolerance 1,000). Stale arms: Darm = 1 in
+all 15 (l.307 — `GETCT WC` stale, the E3 control), Dend = 1 IN and 0 ACROSS (e.g. l.147 cog 4
+`WAITCT` armed `$0000_0000_$F801_9270` beside cog 0's `$0000_0001_$F801_F1A3`, ended
+`$0000_0002_$0901_9282`: Dend 0). `SETQ` timeouts: C = 1 in all 12. Every command `NOT AFFECTED`
+(l.308–314). **K arm:** cog 7 alone in 4-7, held in `WAITCT1` through wrap 6, read Dend = 0 (l.272,
+315). **Grounds:** the CT events, the `SETQ` timeout and `WAITX` use the lower long only, as the P2
+Documentation defines the events (`silicon-doc-text.txt`:2040, :2084, :2137) — now measured, including
+across the jump; and a cog held in `WAITCT1` keeps its group current, as `WAITATN` and `WAITX` do
+(EF-078). *Limits:* `WAITATN` stands for the `SETQ`-timeout family (EF-020: one mechanism across the
+wait family); lag 1 in each window; the K arm tests `WAITCT1` only; 200 MHz; run once.
+*Source:* `…/tests/e3-scope-pasm2-ct-events-test.spin2`.
+
+### EF-082 · No Spin2 counter method but `GETMS()`/`GETSEC()` sees E3's stale upper long — `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` and `GETCT()` are current in the window and across its closing wrap — `CONFIRMED`
+*How proven:* `e3-scope-spin2-counter-methods-test` (VO-J-019) — a Spin2 probe runs `WAITCT(salo +
+dn)`, `REPEAT UNTIL POLLCT(salo + dn)`, `WAITMS` or `WAITUS` on three targets after its own arm-time
+`GETCT()`; control probes in cogs 1-3, stale probes in cogs 4-7 started after their group missed
+wrap 1; each method IN the window and ACROSS its closing wrap, in both groups. `GETCT()` is judged by
+a bracket against cog 0's reads at arm and end; `GETMS()`/`GETSEC()` at arm and end are classed
+against cog 0's (one wrap = 21,474..21,475 ms, 21..22 s at 200 MHz, l.22). *Result (log
+`debug_260929-140656`, 2026-09-29, first run, clean):* all 16 arms status 0 and bracket held
+(l.159–175); all 48 targets ended 34–2,202 clocks after their target (tolerance 50,000). Stale arms
+Darm = 1; Dend = 1 IN, 0 ACROSS. **`GETMS()`/`GETSEC()` short by one wrap at arm and end IN the
+window, current at the end ACROSS it** (e.g. l.90: cog 0 22,827 ms / 22 s, probe 1,352 ms / 1 s —
+short by 21,475 ms); current in every control arm. Verdicts l.176–181: `WAITCT()`, `POLLCT()`,
+`WAITMS()`, `WAITUS()`, `GETCT()` `NOT AFFECTED`; `GETMS()`/`GETSEC()` `CONFIRMED AFFECTED`.
+**Grounds:** measured, as the v55 interpreter reads: only `getms_` takes `GETCT WC`; `GETCT()`,
+`pwct` (`WAITCT`/`POLLCT`) and `waitus_` (`WAITUS`/`WAITMS`) take the lower long only. *Limits:* lag
+1; 200 MHz; run once. *Source:* `…/tests/e3-scope-spin2-counter-methods-test.spin2`.
+
+### EF-083 · `DEBUG_TIMESTAMP` stamps a DEBUG line with the sending cog's own copy of the counter: a line sent from E3's stale window carries a stamp one wrap early, and prints out of time order beside cog 0's — `CONFIRMED`
+*How proven:* `e3-scope-debug-timestamp-test` (VO-J-020) with `DEBUG_TIMESTAMP` declared and
+`DEBUG_COGS` = cogs 0, 1, 4, 7 — per pair, cog 0 sends a stamped REF line carrying its own
+`GETCT WC`/`GETCT`, a probe sends a stamped PRB line carrying its own, cog 0 sends a second REF.
+Probes: cog 1 (Spin2, group 0, control), cog 4 (Spin2 `debug()`) and cog 7 (PASM2 `DEBUG`), both
+started after group 1 missed wrap 1. Stamps judged by `e3-scope-debug-timestamp-verdict.py`, rules
+fixed before the run. *Result (log `debug_260929-141026`, 2026-09-29, first run, clean):* all 471
+DEBUG lines carry a `$HHHH_HHHH_LLLL_LLLL` stamp after `CogN`. **In the window, all 40 PRB
+stamps from cogs 4 and 7 are one wrap behind cog 0's REF stamps and match their own stale payload**
+— e.g. l.129–131: cog 0 `$0000_0001_10CC_275E`, cog 7 `$0000_0000_10CD_6197` (its payload
+`$0000_0000_10CD_617E`, 25 clocks before), cog 0 `$0000_0001_10CE_9896`; so every one of the 40
+prints earlier than the line sent before it. **After the closing wrap, all 20 are current** (l.353–355:
+cog 4 `$0000_0002_1002_D5A2` between cog 0's `$0000_0002_1001_959E` and `$0000_0002_1004_0D0E`).
+Controls: cog 1's 40 pairs current, in order, each stamp at its own payload; every REF stamp at its
+own payload; program window line `AS NEEDED` (l.487). Verdict (script): `AFFECTED` for Spin2
+`debug()` and PASM2 `DEBUG`. **Grounds:** the v55 debugger reads the stamp by `GETCT WC` / `GETCT`
+in the sending cog's debug interrupt (`debug_isr`), so it inherits that cog's group copy — measured
+here. The debugger's breakpoint view shows a CT read by the same code (`debug_entry`); not tested
+separately. *Limits:* lag 1; 200 MHz; run once; PNut-Term-TS v1.1.0 passed the stamp through
+unchanged. *Source:* `…/tests/e3-scope-debug-timestamp-test.spin2` +
+`…/tests/e3-scope-debug-timestamp-verdict.py`.
+
 
 ## Open / pending empirical questions
 

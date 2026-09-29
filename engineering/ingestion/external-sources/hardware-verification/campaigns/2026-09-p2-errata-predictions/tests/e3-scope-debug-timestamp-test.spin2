@@ -1,0 +1,519 @@
+'' =====================================================================
+''
+''   File....... e3-scope-debug-timestamp-test.spin2
+''   Purpose.... Prove on SILICON whether erratum E3's stale upper long
+''               reaches the DEBUG_TIMESTAMP stamp on a DEBUG line sent
+''               from a cog in the stale window (Spin2 debug() and PASM2
+''               DEBUG), and that the stamp is current once the window
+''               closes
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 29 Sep 2026
+''
+'' =====================================================================
+
+{ WHAT IS KNOWN (erratum E3; ledger EF-068, EF-078..080):
+    Cogs 0-3 and cogs 4-7 each read their own copy of the 64-bit counter
+    CT.  A group's copy of the UPPER long (GETCT WC) advances only at a
+    wrap of the lower long while a cog of that group is running.  A cog
+    started in a group that missed k wraps reads an upper long k BELOW
+    cog 0's -- the stale window -- until the group runs through its next
+    wrap.
+
+  THE QUESTION THIS TEST DECIDES:
+    Spin2 v55: "DEBUG_TIMESTAMP ... By declaring this symbol, each DEBUG
+    message will be time-stamped with the 64-bit CT value."  In the v55
+    debugger the stamp is read by the debug interrupt (debug_isr: GETCT
+    WC, then GETCT), which runs in the cog that sent the message -- so by
+    source, a line sent from a cog in the stale window carries a stamp
+    2^32 clocks (21.47 s) early per missed wrap, and prints out of time
+    order beside lines from an up-to-date group.  Nothing has measured it.
+
+  RIG: bare P2 board (20 MHz crystal assumed by _clkfreq), NO pin, NO
+    jumper, nothing attached.  No pin is driven; P56..P63 untouched
+    (P62/P63 are the DEBUG serial link, owned by the debugger).
+
+  COGS (every start names its cog -- never the free-cog form):
+    cog 0   this program: the reference; its own lines carry the stamp
+            of an up-to-date group
+    cog 1   Spin2 probe, group 0 (control), from start to end
+    cog 4   Spin2 probe, group 1, started after group 1 missed wrap 1
+    cog 7   PASM2 probe, group 1, started with cog 4
+    DEBUG_COGS = cogs 0, 1, 4 and 7: the stamp needs the debugger in the
+    probe cogs.  Nothing here measures timing, so the debug interrupt in
+    those cogs costs nothing (compare EF-057, a timing measurement).
+
+  ONE PAIR (id = request number):
+    cog 0   reads its own GETCT WC / GETCT (payload) and sends
+              "REF id=<id> b pay_hi=<hi> pay_lo=<lo>"
+            then writes the request to the probe's mailbox and waits for
+            the ack
+    probe   reads its own GETCT WC / GETCT, writes them to the mailbox,
+            sends "PRB id=<id> pay_hi=<hi> pay_lo=<lo>", then acks
+    cog 0   reads its own GETCT WC / GETCT and sends
+              "REF id=<id> a pay_hi=<hi> pay_lo=<lo>"
+            then prints "PAIR id=<id> <label> ..." with the in-program D
+    With DEBUG_TIMESTAMP every line is sent as
+      "CogN  $HHHH_HHHH_LLLL_LLLL  <text>"
+    where $HHHH_HHHH_LLLL_LLLL is the stamp.  The three lines of a pair
+    are sent in that order, one after the other, and in time the probe's
+    line lies between cog 0's two.
+
+  IN-PROGRAM (this file decides whether each pair sat where the test
+  needs it; it cannot read the stamps):
+    valid = cog 0's two upper longs agree and all three lower longs lie
+            in [$1000_0000, $F000_0000]
+    D     = cog 0's payload hi (b) - probe's payload hi
+    A reading = 10 valid pairs, all the same D.
+
+  THE STAMP VERDICT is decided from the LOG by
+    e3-scope-debug-timestamp-verdict.py <log>
+  whose rules are fixed before the run (see its header).  Per pair:
+    SELF     each line's stamp minus its own payload in [0, TOL_T):
+             the stamp is the sending cog's own counter copy, read when
+             the message is sent
+    Dts      = REF(b) stamp hi - PRB stamp hi
+    ORDER    REF(b) stamp lo < PRB stamp lo < REF(a) stamp lo (unsigned)
+
+  READINGS, in run order (hi = cog 0's own CT upper long):
+    boot    CT hi 0, running = cog 0 only; cog 1 started
+    C0      hi=0 early   cog 1                        D 0   Dts 0
+    (cogs 4-7: NO cog running at wrap 1)
+    --- hi=1: cogs 4 and 7 started: the window opens (lag 1) ---
+    B4E B7E C1E  hi=1 early   cog 4, cog 7, cog 1     D 1 1 0
+    B4L B7L C1L  hi=1 late    cog 4, cog 7, cog 1     D 1 1 0
+    (cogs 4 and 7 run through wrap 2: the window closes)
+    X4E X7E C2E  hi=2 early   cog 4, cog 7, cog 1     D 0 0 0
+
+  PREDICTIONS (fixed before the run; the script applies them):
+    B4E B7E B4L B7L: Dts = 1 in every pair, SELF holds -- the stamp is
+      stale with the cog (FALSE: Dts = 0 -- the stamp is current although
+      the cog's GETCT WC is not)
+    X4E X7E: Dts = 0 (the stamp is current once the window closes)
+    every stale-window PRB line prints a stamp EARLIER than the REF line
+      sent before it: ORDER fails by the stamp's upper long alone
+
+  IN-RUN CONTROLS THAT GATE THE VERDICT (any failure -> "RIG FAIL"):
+    C1  every cog-1 reading: D = 0 in every pair (this file) and Dts = 0,
+        SELF and ORDER in every pair (the script).  Every REF line: SELF.
+    C2  cog 0's upper long == the lower-long wraps cog 0 itself watched
+        since boot (every poll in every wait).
+    C3  running-cog mask polled on every wait and checked after every
+        start: exactly the cogs this program started.  No cog of 4-7 runs
+        at wrap 1.
+    C4  boot: CT hi == 0 (fresh reset) and running = cog 0 only.
+    C5  every request answered within 100 ms.
+    The window itself is this file's VERDICT line: the stale readings
+    must give D = 1 and the closed ones D = 0, or the stamps cannot be
+    judged.
+
+  CLOCK / RUN TIME: _clkfreq = 200_000_000 -> 2^32 clocks = 21.47 s per
+    wrap.  The run ends at CT hi = 2, lo just past $1000_0000: about
+    2.06 x 21.47 s = ~44 s after reset (plus download).
+
+  HOW TO RUN: download to RAM with DEBUG enabled (pnut-term-ts, or PNut
+    with debug on: Ctrl-F10).  The download must RESET the P2 (the
+    counter must start from zero).  Do not reload while running.  Save
+    the log; run  python3 e3-scope-debug-timestamp-verdict.py <log>.
+    The run ends with DEBUG_END_SESSION.  If the log lines carry no
+    "$HHHH_HHHH_LLLL_LLLL" stamp after "CogN", the terminal did not pass
+    the stamp through: that is a rig finding, not a verdict.
+
+  COMPILER: pnut-ts v1.55.8,  pnut-ts -d e3-scope-debug-timestamp-test.spin2
+}
+
+CON ' ---- Test Configuration ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %1001_0011    ' cogs 0, 1, 4 and 7: the stamp needs the debugger in each probe
+  DEBUG_TIMESTAMP = 1             ' every DEBUG line carries the 64-bit CT stamp
+
+  LOWIN   = $1000_0000            ' sample window: lowest CT lower long a pair may use
+  HIWIN   = $F000_0000            ' sample window: highest CT lower long a pair may use
+  LATE    = $E000_0000            ' late-in-epoch reading point (inside window)
+  NPAIRS  = 10                    ' valid pairs per reading
+  MAXTRY  = 30                    ' request attempts per reading
+
+  ACK_TIMEOUTS_PER_SEC = 10       ' C5: a probe must ack within clkfreq / 10 clocks (100 ms)
+  COG_SETTLE_MS  = 50             ' wait after a start before checking the mask (debugger INIT lines)
+  COG_COUNT      = 8              ' cogs 0..7 on a P2
+  LONG_BITS      = 32             ' bits in a long
+  NIB_BITS       = 4              ' "alive" throttle: hi and the top nibble of lo
+  ALIVE_SHIFT    = LONG_BITS - NIB_BITS   ' brings lo's top nibble down to bits 3..0
+  STACK_LONGS    = 128            ' the Spin2 probes' stacks
+
+  ' mailbox layout, in longs: [0]=request [1]=hi [2]=lo [3]=ack
+  MB_LONGS   = 4
+  MB_HI_IDX  = 1
+  MB_LO_IDX  = 2
+  MB_ACK_IDX = 3
+
+  ' the rig's cogs, each started by its explicit number
+  CTRL_COG  = 1                   ' group-0 Spin2 probe
+  SPIN_COG  = 4                   ' group-1 Spin2 probe
+  PASM_COG  = 7                   ' group-1 PASM2 probe
+
+  ' expected running-cog masks
+  M_BOOT = %0000_0001             ' cog 0 alone
+  M_C1   = %0000_0011             ' + cog 1
+  M_ALL  = %1001_0011             ' + cogs 4 and 7
+
+  ' reading status codes
+  ST_OK = 0, ST_MIXED = 2, ST_SHORT = 3, ST_TIMEOUT = 4
+
+  ' reading slots
+  R_C0 = 0
+  R_B4E = 1, R_B7E = 2, R_C1E = 3, R_B4L = 4, R_B7L = 5, R_C1L = 6
+  R_X4E = 7, R_X7E = 8, R_C2E = 9
+  NREAD = 10
+
+  ' predictions for the in-program D, fixed before the run
+  P_BAND   = 1                    ' cogs 4 and 7 in the window
+  P_CLOSED = 0                    ' cogs 4 and 7 after the closing wrap
+  P_CTRL   = 0                    ' cog 1, always
+
+VAR ' ---- Test State ----
+  long mailboxCtrl[MB_LONGS]      ' cog 1's mailbox
+  long mailboxSpin[MB_LONGS]      ' cog 4's mailbox
+  long mailboxPasm[MB_LONGS]      ' cog 7's mailbox
+  long stackCtrl[STACK_LONGS]     ' cog 1's Spin2 stack
+  long stackSpin[STACK_LONGS]     ' cog 4's Spin2 stack
+  long requestSeq                 ' request counter, never 0 once used
+  long wrapsSeen                  ' lower-long wraps cog 0 watched since boot (C2)
+  long prevCtLo                   ' last CT lower long cog 0 saw (C2)
+  long bHalted                    ' TRUE once a RIG FAIL has halted the run
+  long readStatus[NREAD]          ' per slot: ST_* status
+  long readD[NREAD]               ' per slot: agreed D
+
+PUB main() | ctHi, ctLo, cogMask
+'' Run the E3 DEBUG_TIMESTAMP test: pairs of timestamped DEBUG lines from
+'' cog 0 and a probe, in group 0, in the stale window of group 1, and after
+'' it closes.
+''
+
+' Local Variables:
+' @local ctHi - cog 0's own CT upper long, from ct64()
+' @local ctLo - cog 0's own CT lower long, from ct64()
+' @local cogMask - running-cog bitmask, from runmask()
+
+  debug("=== Erratum E3 SCOPE TEST (DEBUG_TIMESTAMP): stamps from cogs 4 (Spin2) and 7 (PASM2) in the stale window and after it ===")
+  debug("predictions: in-program D band=", udec_(P_BAND), " closed=", udec_(P_CLOSED), " cog1=0; stamp verdict by e3-scope-debug-timestamp-verdict.py: Dts=1 in the band, 0 after")
+
+  ' ---- C4: boot state -------------------------------------------------
+  ctHi, ctLo := ct64()
+  cogMask := runmask()
+  prevCtLo := ctLo
+  wrapsSeen := 0
+  debug("boot: cog0 CT=", uhex_long_(ctHi), "_", uhex_long_(ctLo), " running cogs=", ubin_byte_(cogMask))
+  if ctHi <> 0
+    debug("RIG FAIL: CT hi at boot expected 0, got ", uhex_long_(ctHi), " - no fresh reset; reload with reset")
+    halt()
+  elseif cogMask <> M_BOOT
+    debug("RIG FAIL: running cogs at boot expected ", ubin_byte_(M_BOOT), ", got ", ubin_byte_(cogMask))
+    halt()
+
+  if bHalted == FALSE
+    cogspin(CTRL_COG, spin_probe(@mailboxCtrl), @stackCtrl)
+    waitms(COG_SETTLE_MS)
+    expect_mask(M_C1)
+
+  if bHalted == FALSE
+    wait_until(0, LOWIN, M_C1)
+  if bHalted == FALSE
+    reading(R_C0, string("C0"), @mailboxCtrl)
+
+  ' ---- the window: cogs 4 and 7 started after group 1 missed wrap 1 ----
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=1 with cogs 4-7 idle (~21 s) ---")
+    wait_until(1, LOWIN, M_C1)
+  if bHalted == FALSE
+    longfill(@mailboxSpin, 0, MB_LONGS)
+    longfill(@mailboxPasm, 0, MB_LONGS)
+    cogspin(SPIN_COG, spin_probe(@mailboxSpin), @stackSpin)
+    coginit(PASM_COG, @pasm_probe, @mailboxPasm)
+    waitms(COG_SETTLE_MS)
+    expect_mask(M_ALL)
+  if bHalted == FALSE
+    debug("--- cogs 4 and 7 started (first group-1 cogs since reset): window open ---")
+    reading(R_B4E, string("B4E"), @mailboxSpin)
+    reading(R_B7E, string("B7E"), @mailboxPasm)
+    reading(R_C1E, string("C1E"), @mailboxCtrl)
+
+  if bHalted == FALSE
+    wait_until(1, LATE, M_ALL)
+  if bHalted == FALSE
+    reading(R_B4L, string("B4L"), @mailboxSpin)
+    reading(R_B7L, string("B7L"), @mailboxPasm)
+    reading(R_C1L, string("C1L"), @mailboxCtrl)
+
+  ' ---- the closing wrap: cogs 4 and 7 run through it -------------------
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=2 with cogs 4 and 7 running (the closing wrap) ---")
+    wait_until(2, LOWIN, M_ALL)
+  if bHalted == FALSE
+    reading(R_X4E, string("X4E"), @mailboxSpin)
+    reading(R_X7E, string("X7E"), @mailboxPasm)
+    reading(R_C2E, string("C2E"), @mailboxCtrl)
+
+  if bHalted == FALSE
+    verdict()
+  finish()
+
+' ---------------------------------------------------------------------
+PRI verdict() | slotIdx, bRigBad
+' Print every reading's D and status, apply C1/C5 to the cog-1 readings,
+' and print whether the window sat where the stamp verdict needs it.
+'
+
+' Local Variables:
+' @local slotIdx - reading-slot index
+' @local bRigBad - TRUE once a control failed
+
+  bRigBad := FALSE
+  debug("=== SUMMARY (D = cog0 hi - probe payload hi; st 0=ok 2=mixed 3=short 4=timeout) ===")
+  repeat slotIdx from 0 to NREAD - 1
+    debug("slot ", udec_(slotIdx), ": D=", sdec_(readD[slotIdx]), " st=", udec_(readStatus[slotIdx]))
+    if readStatus[slotIdx] == ST_TIMEOUT
+      debug("RIG FAIL: a probe did not answer in slot ", udec_(slotIdx))
+      bRigBad := TRUE
+  if readStatus[R_C0] <> ST_OK or readD[R_C0] <> P_CTRL or readStatus[R_C1E] <> ST_OK or readD[R_C1E] <> P_CTRL or readStatus[R_C1L] <> ST_OK or readD[R_C1L] <> P_CTRL or readStatus[R_C2E] <> ST_OK or readD[R_C2E] <> P_CTRL
+    debug("RIG FAIL: a cog-1 control reading was not D=0 st=0")
+    bRigBad := TRUE
+
+  if bRigBad == TRUE
+    debug("NO VERDICT: rig failed (see RIG FAIL lines)")
+  elseif readStatus[R_B4E] <> ST_OK or readStatus[R_B7E] <> ST_OK or readStatus[R_B4L] <> ST_OK or readStatus[R_B7L] <> ST_OK or readStatus[R_X4E] <> ST_OK or readStatus[R_X7E] <> ST_OK
+    debug("VERDICT WINDOW: INCONCLUSIVE - a group-1 reading had disagreeing or too few valid pairs")
+  elseif readD[R_B4E] == P_BAND and readD[R_B7E] == P_BAND and readD[R_B4L] == P_BAND and readD[R_B7L] == P_BAND and readD[R_X4E] == P_CLOSED and readD[R_X7E] == P_CLOSED
+    debug("VERDICT WINDOW: AS NEEDED - cogs 4 and 7 D=1 in the window, D=0 after it closed; now run e3-scope-debug-timestamp-verdict.py on this log")
+  else
+    debug("VERDICT WINDOW: NOT AS NEEDED - B4E=", sdec_(readD[R_B4E]), " B7E=", sdec_(readD[R_B7E]), " B4L=", sdec_(readD[R_B4L]), " B7L=", sdec_(readD[R_B7L]), " X4E=", sdec_(readD[R_X4E]), " X7E=", sdec_(readD[R_X7E]), " (pred 1 1 1 1 0 0): the stamps cannot be judged")
+
+' ---------------------------------------------------------------------
+PRI reading(slotIdx, pLabel, pMailbox) | tries, validPairs, bAcked, refHiB, refLoB, smpHi, smpLo, refHiA, refLoA, diffHi, bMixed, baseD, tmoStart
+' One reading: NPAIRS valid pairs with one probe.  Each pair sends cog 0's
+' REF b line, the probe's PRB line, cog 0's REF a line, then a PAIR line.
+' Stores the agreed D and the status in slot slotIdx.
+'
+' @param slotIdx - reading-slot index (an R_* constant)
+' @param pLabel - address of the reading's zero-terminated label
+' @param pMailbox - the probe's mailbox ([0]=req [1]=hi [2]=lo [3]=ack)
+
+' Local Variables:
+' @local tries - request attempts made so far, up to MAXTRY
+' @local validPairs - valid pairs taken so far, target NPAIRS
+' @local bAcked - TRUE once the probe acked the current request
+' @local refHiB - cog 0's CT upper long before the request (REF b payload)
+' @local refLoB - cog 0's CT lower long before the request
+' @local smpHi - the probe's CT upper long (PRB payload)
+' @local smpLo - the probe's CT lower long
+' @local refHiA - cog 0's CT upper long after the ack (REF a payload)
+' @local refLoA - cog 0's CT lower long after the ack
+' @local diffHi - D for the current pair
+' @local bMixed - TRUE once two valid pairs disagree on D
+' @local baseD - D of the first valid pair
+' @local tmoStart - GETCT at request time, for the ack timeout
+
+  tries := validPairs := baseD := 0
+  bMixed := FALSE
+  readStatus[slotIdx] := ST_OK
+  repeat while validPairs < NPAIRS and tries < MAXTRY
+    tries++
+    requestSeq++
+    refHiB, refLoB := ct64()
+    debug("REF id=", udec_(requestSeq), " b pay_hi=", uhex_long_(refHiB), " pay_lo=", uhex_long_(refLoB))
+    long[pMailbox][0] := requestSeq
+    tmoStart := getct()
+    bAcked := FALSE
+    repeat
+      if long[pMailbox][MB_ACK_IDX] == requestSeq
+        bAcked := TRUE
+        quit
+    until getct() - tmoStart +> clkfreq / ACK_TIMEOUTS_PER_SEC
+    if bAcked == FALSE
+      debug("PAIR id=", udec_(requestSeq), " ", zstr_(pLabel), " TIMEOUT: probe did not ack")
+      readStatus[slotIdx] := ST_TIMEOUT
+      quit
+    smpHi := long[pMailbox][MB_HI_IDX]
+    smpLo := long[pMailbox][MB_LO_IDX]
+    refHiA, refLoA := ct64()
+    debug("REF id=", udec_(requestSeq), " a pay_hi=", uhex_long_(refHiA), " pay_lo=", uhex_long_(refLoA))
+    if refHiB <> refHiA or in_window(refLoB) == FALSE or in_window(smpLo) == FALSE or in_window(refLoA) == FALSE
+      debug("PAIR id=", udec_(requestSeq), " ", zstr_(pLabel), " valid=0")
+      next
+    diffHi := refHiB - smpHi
+    if validPairs == 0
+      baseD := diffHi
+    elseif diffHi <> baseD
+      bMixed := TRUE
+    validPairs++
+    debug("PAIR id=", udec_(requestSeq), " ", zstr_(pLabel), " valid=1 p", udec_(validPairs), " D=", sdec_(diffHi))
+  if readStatus[slotIdx] <> ST_TIMEOUT
+    readD[slotIdx] := baseD
+    if validPairs < NPAIRS
+      readStatus[slotIdx] := ST_SHORT
+    elseif bMixed == TRUE
+      readStatus[slotIdx] := ST_MIXED
+  debug("READING ", zstr_(pLabel), " => D=", sdec_(readD[slotIdx]), " status=", udec_(readStatus[slotIdx]), " valid pairs=", udec_(validPairs), " tries=", udec_(tries))
+
+PRI in_window(loVal) : bIn
+' True when loVal falls inside [LOWIN, HIWIN] -- well clear of a wrap.
+'
+' @param loVal - lower-long value to test
+' @returns bIn - TRUE if in the window
+
+  bIn := (loVal +>= LOWIN) and (loVal +<= HIWIN)
+
+PRI spin_probe(pMailbox) | lastReq, req, pHi, pLo
+' A Spin2 probe (cogs 1 and 4).  Adopts the request it finds at start as
+' already answered; on each NEW request reads its own CT, writes it, sends
+' its PRB line (stamped by the debugger in this cog), then acks.
+'
+' @param pMailbox - its mailbox ([0]=req [1]=hi [2]=lo [3]=ack)
+
+' Local Variables:
+' @local lastReq - the last request answered
+' @local req - the request just read
+' @local pHi - this cog's CT upper long
+' @local pLo - this cog's CT lower long
+
+  lastReq := long[pMailbox][0]
+  repeat
+    req := long[pMailbox][0]
+    if req <> lastReq
+      lastReq := req
+      pHi, pLo := ct64()
+      long[pMailbox][MB_HI_IDX] := pHi
+      long[pMailbox][MB_LO_IDX] := pLo
+      debug("PRB id=", udec_(req), " pay_hi=", uhex_long_(pHi), " pay_lo=", uhex_long_(pLo))
+      long[pMailbox][MB_ACK_IDX] := req
+
+PRI ct64() : ctHi, ctLo
+' This cog's own 64-bit CT, read GETCT WC (upper long) then GETCT (lower
+' long).
+'
+' @returns ctHi - this cog's CT upper long
+' @returns ctLo - this cog's CT lower long
+
+  org
+                getct   ctHi            wc
+                getct   ctLo
+  end
+
+PRI ct_track() : ctHi, ctLo
+' ct64() plus control C2: RIG FAIL if cog 0's upper long ever disagrees
+' with the number of lower-long wraps cog 0 itself watched since boot.
+'
+' @returns ctHi - cog 0's own CT upper long
+' @returns ctLo - cog 0's own CT lower long
+
+  ctHi, ctLo := ct64()
+  if ctLo +< prevCtLo
+    wrapsSeen++
+  prevCtLo := ctLo
+  if in_window(ctLo) == TRUE and ctHi <> wrapsSeen
+    debug("RIG FAIL: cog 0 CT hi=", uhex_long_(ctHi), " but cog 0 watched ", udec_(wrapsSeen), " lower-long wraps since boot - reference upper long not current")
+    halt()
+
+PRI wait_until(targetHi, minLo, expMask) | ctHi, ctLo, cogMask, ctTick, lastCtTick
+' Poll cog 0's own CT until hi == targetHi and lo >= minLo, RIG FAIL (and
+' halt) if the running-cog mask leaves expMask at any poll of the wait
+' (C3) or on a hi overshoot; prints an "alive" line on every 2^28-clock
+' tick while it waits.  A halt (here or in ct_track()) quits the wait.
+'
+' @param targetHi - CT hi value to wait for
+' @param minLo - minimum CT lo value to wait for, once hi == targetHi
+' @param expMask - running-cog bitmask expected (bit N set = cog N running)
+
+' Local Variables:
+' @local ctHi - cog 0's own CT upper long, from ct_track()
+' @local ctLo - cog 0's own CT lower long, from ct_track()
+' @local cogMask - running-cog bitmask, from runmask()
+' @local ctTick - ctHi and the top nibble of ctLo packed together, to throttle "alive" lines
+' @local lastCtTick - ctTick at the last "alive" line, to detect a new tick
+
+  lastCtTick := -1
+  repeat
+    ctHi, ctLo := ct_track()
+    if bHalted == TRUE
+      quit
+    cogMask := runmask()
+    if cogMask <> expMask
+      debug("RIG FAIL: running cogs expected ", ubin_byte_(expMask), " got ", ubin_byte_(cogMask), " at CT ", uhex_long_(ctHi), "_", uhex_long_(ctLo))
+      halt()
+      quit
+    if ctHi > targetHi
+      debug("RIG FAIL: overshoot, CT hi=", udec_(ctHi), " waiting for ", udec_(targetHi))
+      halt()
+      quit
+    ctTick := (ctHi << NIB_BITS) | (ctLo >> ALIVE_SHIFT)
+    if ctTick <> lastCtTick
+      lastCtTick := ctTick
+      debug("  alive CT=", uhex_long_(ctHi), "_", uhex_long_(ctLo), " wraps-seen=", udec_(wrapsSeen), " running=", ubin_byte_(cogMask))
+  until ctHi == targetHi and ctLo +>= minLo
+
+PRI expect_mask(expMask) | cogMask
+' RIG FAIL (and halt) if the running-cog mask does not equal expMask at
+' this instant.
+'
+' @param expMask - running-cog bitmask expected (bit N set = cog N running)
+
+' Local Variables:
+' @local cogMask - running-cog bitmask, from runmask()
+
+  cogMask := runmask()
+  if cogMask <> expMask
+    debug("RIG FAIL: running cogs expected ", ubin_byte_(expMask), " got ", ubin_byte_(cogMask))
+    halt()
+
+PRI runmask() : cogMask | cogIdx
+' Build the running-cog bitmask from cogchk() across all cogs.
+'
+' @returns cogMask - bit N set if cog N is running
+
+' Local Variables:
+' @local cogIdx - cog number being tested
+
+  cogMask := 0
+  repeat cogIdx from 0 to COG_COUNT - 1
+    if cogchk(cogIdx) == TRUE
+      cogMask |= 1 << cogIdx
+
+PRI halt()
+' RIG FAIL exit: print the HALTED line and set bHalted, so every later step
+' of main() is skipped and the run ends at its one finish().
+'
+
+  debug("HALTED - no verdict")
+  bHalted := TRUE
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+DAT ' ---- PASM2 Probe Code ----
+' PASM2 probe (cog 7, cog-exec).  PTRA = mailbox.  Adopts the request it
+' finds at start as already answered; on each NEW request reads GETCT WC
+' then GETCT, writes both, sends its PRB line with DEBUG (stamped by the
+' debugger in this cog), then acks.
+                org     0
+pasm_probe      rdlong  q_last, ptra
+q_loop          rdlong  q_req, ptra
+                cmp     q_req, q_last   wz
+        if_z    jmp     #q_loop
+                mov     q_last, q_req
+                getct   q_hi            wc      ' this group's UPPER copy
+                getct   q_lo                    ' this group's LOWER copy
+                wrlong  q_hi, ptra[MB_HI_IDX]
+                wrlong  q_lo, ptra[MB_LO_IDX]
+                debug("PRB id=", udec_(q_req), " pay_hi=", uhex_long_(q_hi), " pay_lo=", uhex_long_(q_lo))
+                wrlong  q_req, ptra[MB_ACK_IDX] ' ack last
+                jmp     #q_loop
+q_last          res     1
+q_req           res     1
+q_hi            res     1
+q_lo            res     1

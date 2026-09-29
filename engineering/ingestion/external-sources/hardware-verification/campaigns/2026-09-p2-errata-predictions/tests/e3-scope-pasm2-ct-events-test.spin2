@@ -1,0 +1,1076 @@
+'' =====================================================================
+''
+''   File....... e3-scope-pasm2-ct-events-test.spin2
+''   Purpose.... Prove on SILICON, for every PASM2 instruction that takes
+''               a CT (system counter) target, whether erratum E3's stale
+''               upper long reaches it: in the stale window, and with its
+''               target past the wrap that closes the window
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Sep 2026
+''   Updated.... 29 Sep 2026
+''
+'' =====================================================================
+
+{ WHAT IS KNOWN (erratum E3; ledger EF-068, EF-078..080):
+    Cogs 0-3 and cogs 4-7 each read their own copy of the 64-bit counter
+    CT.  A group's copy of the UPPER long (GETCT WC) advances only at a
+    wrap of the lower long while a cog of that group is running; the
+    lower long (plain GETCT) is always current.  A cog started in a group
+    that missed k wraps reads an upper long k BELOW cog 0's -- the stale
+    window -- until the group runs through its next wrap, where the copy
+    catches up in ONE step.
+
+  THE QUESTION THIS TEST DECIDES:
+    The P2 Documentation defines every CT event on the LOWER long ("Event
+    1 = CT passed CT1 (CT is the lower 32-bits ...)"; the CT1 flag "Set
+    whenever CT passes the result of the ADDCT1 (MSB of CT minus CT1 is
+    0)"), and a SETQ before a WAITxxx supplies "a future CT target value"
+    for its timeout.  By that reading none of them can see the stale
+    upper long.  Nothing has measured it.  This test runs each of them in
+    a cog of the stale group and compares its timing with the same code
+    in the current group (cogs 1-3), twice:
+      IN      inside the stale window, target 84..168 ms ahead
+      ACROSS  armed just before the wrap that closes the window, target
+              ~0.67 s past it: the group's upper copy jumps while the
+              event is pending
+    It also decides whether a cog held in WAITCT1 counts as "running":
+    the only cog of its group, held in WAITCT1 at a wrap (the E3 limits
+    line names WAITATN and WAITX as tested, WAITCT not).
+
+  RIG: bare P2 board (20 MHz crystal assumed by _clkfreq), NO pin, NO
+    jumper, nothing attached.  No pin is driven; P56..P63 untouched
+    (P62/P63 are the DEBUG serial link, owned by the debugger).
+
+  THE SEVEN COMMANDS (a probe cog runs one per request; each arms THREE
+  targets d1 < d2 < d3 clocks after its own GETCT at arm time, alo):
+    WAITCT  ADDCT1/2/3 alo+d1/d2/d3, then WAITCT1, WAITCT2, WAITCT3
+    POLLCT  ADDCT1/2/3, then a loop of POLLCT1/2/3 WC until all three set
+    JCT     ADDCT1/2/3, then a loop of JCT1/2/3 until all three taken
+    JNCT    ADDCT1/2/3, then a loop of JNCT1/2/3 until all three fall
+            through
+    INT     ADDCT1/2/3, SETINT1 #1 / SETINT2 #2 / SETINT3 #3 (CT-passed-
+            CT1/2/3), three ISRs, main code spins until all three ran
+    SETQ    three SETQ alo+dn / WAITATN WC timeouts (no cog ever sends
+            ATN): the SETQ-timeout mechanism EF-020 found shared by the
+            wait family; C must read 1 (timeout) each time
+    WAITX   WAITX d1, then WAITX d2-d1, then WAITX d3-d2 (relative; no CT
+            target is documented -- probed in case one is used inside)
+    Each records its lower long at each firing (f1, f2, f3).  The probe's
+    elapsed time for target n is el_n = f_n - alo (32-bit, unsigned).
+
+  DEFINITIONS:
+    armed  the probe writes ahi (GETCT WC) and alo (GETCT) and then its
+           ARMED flag, after every target is set.  Cog 0 reads its own CT
+           (t0hi, t0lo) when it sees ARMED.
+    done   the probe reads ehi (GETCT WC) and elo (GETCT) after the last
+           firing, writes all results, then its DONE flag.  Cog 0 reads
+           its own CT (t1hi, t1lo) when it sees DONE.
+    Darm   = t0hi - ahi;  Dend = t1hi - ehi.  The probe's own measure of
+             the stale window: its GETCT WC against cog 0's.
+    BRACKET  t0lo - alo and t1lo - elo each in [0, TOL_B): the probe's
+             plain GETCT is current at arm and at end, so its el_n are
+             times on the true counter.
+    timing class of each el_n (dn = d1, d2, d3):
+      OK      dn <= el_n < dn + TOL_F      (TOL_F = 1000 clocks, 5 us)
+      EARLY   el_n < dn                    (fired before its target)
+      LATE    el_n >= dn + TOL_F           (fired late)
+      NEVER   no DONE within d3 + 100 ms   (the probe is then restarted)
+      BADC    SETQ only: C read 0 (the wait ended without a timeout)
+    SENSITIVITY: an instruction reached by E3 would be wrong by 2^32
+      clocks per missed wrap (21.47 s), or would act at the wrap where the
+      copy jumps (~0.67 s before an ACROSS target) -- EARLY, LATE or
+      NEVER, each at least 10^5 x TOL_F away from OK.  A "not affected"
+      verdict is earned only by arms whose own Darm shows the window was
+      open when they armed (and, ACROSS, whose Dend shows it closed
+      while they were pending).
+
+  COGS (every start names its cog -- never the free-cog form):
+    cog 0      this program; the only cog with the debugger (DEBUG_COGS)
+    cogs 1-3   control probes, current group, from start to end
+    cogs 4-7   stale-group probes, started and stopped by phase below
+
+  ARMS, in run order (hi = cog 0's own CT upper long; ARM_X = $F800_0000):
+    boot      CT hi 0, running = cog 0 only; cogs 1-3 started
+    CIN  hi=0 early   control IN: all 7 commands in cogs 1-3   D 0/0
+    CX1  hi=0 ARM_X   control ACROSS wrap 1: WAITCT POLLCT JCT  D 0/0
+    (cogs 4-7: NO cog running at wrap 1)
+    --- hi=1: cogs 4-7 started: window W1 opens (lag 1) ---
+    SIN  hi=1 early   stale IN: all 7 commands in cogs 4-7     D 1/1
+    SX1  hi=1 ARM_X   stale ACROSS wrap 2 (closes W1):
+                      4 WAITCT 5 POLLCT 6 JCT 7 INT             D 1/0
+         and control ACROSS wrap 2: 1 JNCT 2 INT 3 SETQ         D 0/0
+    (cogs 4-7 stopped at hi=2)
+    CX3  hi=2 ARM_X   control ACROSS wrap 3: WAITX              D 0/0
+    (cogs 4-7: NO cog running at wrap 3)
+    --- hi=3: cogs 4-6 started: window W2 opens (lag 1) ---
+    SX2  hi=3 ARM_X   stale ACROSS wrap 4 (closes W2):
+                      4 JNCT 5 SETQ 6 WAITX                     D 1/0
+    (cogs 4-6 stopped at hi=4; NO cog of 4-7 running at wrap 5)
+    --- hi=5, late: cog 7 started ALONE: window W3 opens (lag 1) ---
+    K    hi=5 ARM_X   cog 7 WAITCT ACROSS wrap 6, the ONLY cog of 4-7,
+                      held in WAITCT1 at the wrap                D 1/?
+    Every command runs IN and ACROSS in both groups.
+
+  PREDICTIONS (fixed before the run):
+    every stale arm: timing OK in all three targets, BRACKET holds,
+      Darm = 1; Dend = 1 IN, 0 ACROSS (FALSE: EARLY / LATE / NEVER /
+      BADC in a stale arm whose window was open -> AFFECTED)
+    K: Dend = 0 -- a cog held in WAITCT1 keeps its group current
+      (FALSE: Dend = 2 -- the group missed wrap 6 as well)
+    GETCT WC stale (Darm = 1) in every stale arm: the E3 control, the
+      affected instruction measured again in the same run
+
+  IN-RUN CONTROLS THAT GATE THE VERDICT (any failure -> "RIG FAIL", no
+  verdict):
+    C1  every control arm (cogs 1-3): timing OK, BRACKET, Darm = Dend = 0.
+        Proves the probe code, the timing arithmetic and the D arithmetic
+        on a group the defect cannot reach.
+    C2  cog 0's upper long == the lower-long wraps cog 0 itself watched
+        since boot (every poll in every wait).  Proves cog 0's reference.
+    C3  running-cog mask polled on every wait and checked after every
+        start and stop: exactly the cogs this program started.  No cog
+        of 4-7 runs at wraps 1, 3 and 5.
+    C4  boot: CT hi == 0 (fresh reset) and running = cog 0 only.
+
+  VERDICTS (one line per command, one for the WAITCT keeper, fixed
+  before the run):
+    NOT AFFECTED  every stale arm of the command: window as predicted and
+                  timing OK
+    AFFECTED      a stale arm with its window as predicted, BRACKET held,
+                  and a timing class other than OK (printed).  A NEVER arm
+                  that armed is judged on its Darm alone (it has no end)
+    INCONCLUSIVE  a stale arm whose Darm / Dend were not as predicted (the
+                  arm did not sit where the test needs it), or whose
+                  BRACKET failed (its times cannot be trusted)
+    KEEPER        COUNTS (K Dend = 0) / DOES NOT COUNT (K Dend = 2) /
+                  INCONCLUSIVE (anything else, or K Darm <> 1)
+
+  CLOCK / RUN TIME: _clkfreq = 200_000_000 -> 2^32 clocks = 21.47 s per
+    wrap.  The run ends at CT hi = 6, lo ~$0900_0000: about 6.04 x
+    21.47 s = ~130 s after reset (plus download).  "alive" lines print
+    every 2^28 clocks (~1.34 s).
+
+  HOW TO RUN: download to RAM with DEBUG enabled (pnut-term-ts, or PNut
+    with debug on: Ctrl-F10).  The download must RESET the P2 (the
+    counter must start from zero).  Do not reload while running.  Read
+    the VERDICT lines; every arm is printed above them.  The run ends
+    with DEBUG_END_SESSION.
+
+  COMPILER: pnut-ts v1.55.8,  pnut-ts -d e3-scope-pasm2-ct-events-test.spin2
+}
+
+CON ' ---- Test Configuration ----
+  _clkfreq    = 200_000_000
+  DEBUG_COGS  = %0000_0001        ' debugger only in cog 0; no other cog takes a debug interrupt
+
+  LOWIN   = $1000_0000            ' early point in an epoch: IN arms start here
+  ARM_X   = $F800_0000            ' ACROSS arms start here: $0800_0000 clocks (0.67 s) before the wrap
+  K_LEAD  = $0400_0000            ' cog 7 starts this many clocks before ARM_X (K arm)
+
+  ' targets, in clocks after the probe's alo (every one < 2^31, the MSB rule's reach)
+  DIN1 = $0100_0000               ' IN: 84 ms
+  DIN2 = $0180_0000               ' IN: 126 ms
+  DIN3 = $0200_0000               ' IN: 168 ms
+  DX1  = $1000_0000               ' ACROSS: 1.34 s -- $0800_0000 past the wrap
+  DX2  = $1080_0000               ' ACROSS: 1.38 s
+  DX3  = $1100_0000               ' ACROSS: 1.43 s
+
+  TOL_F = 1_000                   ' timing: a firing within TOL_F clocks after its target is OK
+  TOL_B = 200_000                 ' BRACKET: cog 0 sees ARMED / DONE within 1 ms of the probe's read
+  TMO_TAIL_PER_SEC = 10           ' NEVER: no DONE within d3 + clkfreq / 10 (100 ms)
+
+  COG_SETTLE_MS  = 10             ' wait after a COGINIT / COGSTOP before checking the mask
+  COG_COUNT      = 8              ' cogs 0..7 on a P2
+  LONG_BITS      = 32             ' bits in a long
+  NIB_BITS       = 4              ' "alive" throttle: hi and the top nibble of lo
+  ALIVE_SHIFT    = LONG_BITS - NIB_BITS   ' brings lo's top nibble down to bits 3..0
+  NTGT           = 3              ' targets per command
+
+  ' probe mailbox layout, in longs
+  MB_REQ   = 0                    ' request number (cog 0 writes it last)
+  MB_CMD   = 1                    ' command (a C_* constant)
+  MB_D1    = 2                    ' target offsets d1, d2, d3
+  MB_D2    = 3
+  MB_D3    = 4
+  MB_ARMED = 5                    ' request number, written once every target is set
+  MB_DONE  = 6                    ' request number, written after the results
+  MB_AHI   = 7                    ' results block (RES_LONGS longs, written by one SETQ + WRLONG):
+  MB_ALO   = 8                    '   ahi, alo       GETCT WC / GETCT at arm time
+  MB_F1    = 9                    '   f1, f2, f3     GETCT at each firing
+  MB_C1    = 12                   '   c1, c2, c3     C after each SETQ timeout wait
+  MB_EHI   = 15                   '   ehi, elo       GETCT WC / GETCT after the last firing
+  MB_ELO   = 16
+  MB_LONGS = 17
+  MB_RES_OFS = MB_AHI * 4         ' byte offset of the results block
+  RES_LONGS  = 10                 ' longs in the results block
+  ANN_LONGS  = 2                  ' longs written at arm time (ahi, alo)
+
+  ' probe commands
+  C_WAITCT = 0, C_POLLCT = 1, C_JCT = 2, C_JNCT = 3, C_INT = 4, C_SETQ = 5, C_WAITX = 6
+  NCMD = 7
+
+  ' CT event numbers for SETINTx (P2 Documentation, interrupt event sources)
+  EV_CT1 = 1, EV_CT2 = 2, EV_CT3 = 3
+  EV_OFF = 0
+  GOT_ALL = %1110                 ' probe: bits 1..3 set once CT1..CT3 have been seen
+  INT_ALL = 3                     ' probe: ISRs that must run in the INT command
+
+  ' arm phases
+  '  PH_CIN - control, IN          PH_CX - control, ACROSS
+  '  PH_SIN - stale, IN            PH_SX - stale, ACROSS (closing wrap)
+  '  PH_K   - stale, ACROSS, the only cog of its group (WAITCT keeper)
+  PH_CIN = 0, PH_CX = 1, PH_SIN = 2, PH_SX = 3, PH_K = 4
+
+  ' arm timing status, worst of its three targets (higher = worse); BRACKET is kept apart
+  ' (runBracket[]): a bracket failure makes the arm's times untrustworthy, not wrong
+  ST_OK = 0, ST_BADC = 1, ST_LATE = 2, ST_EARLY = 3, ST_NEVER = 5
+
+  NRUN = 32                       ' arm slots (29 used)
+
+  ' the rig's cogs, each started by its explicit number
+  NO_COG   = 0                    ' an empty arm place in batch() (cog 0 is never a probe)
+  KEEP_COG = 7                    ' the K arm's lone cog of 4-7
+
+  ' expected running-cog masks
+  M_BOOT = %0000_0001             ' cog 0 alone
+  M_G0   = %0000_1111             ' cog 0 + control probes 1-3
+  M_W1   = %1111_1111             ' + stale probes 4-7
+  M_W2   = %0111_1111             ' + stale probes 4-6
+  M_W3   = %1000_1111             ' + cog 7 alone in 4-7
+  M_CTRL = %0000_1110             ' the control probes
+  M_S47  = %1111_0000             ' stale probes 4-7
+  M_S46  = %0111_0000             ' stale probes 4-6
+
+  ' predictions, fixed before the run
+  P_LAG     = 1                   ' every stale window opens with its group one wrap behind
+  P_KEEP    = 0                   ' K Dend if a cog held in WAITCT1 counts as running
+  P_NOKEEP  = 2                   ' K Dend if it does not
+
+VAR ' ---- Test State ----
+  long mbox[COG_COUNT * MB_LONGS] ' one probe mailbox per cog
+  long requestSeq                 ' request counter, never 0 once used
+  long cogSeq[COG_COUNT]          ' request number last issued to each cog
+  long issuedD[COG_COUNT * NTGT]  ' d1..d3 last issued to each cog
+  long t0Hi[COG_COUNT]            ' cog 0's CT when it saw each probe's ARMED
+  long t0Lo[COG_COUNT]
+  long t1Hi[COG_COUNT]            ' cog 0's CT when it saw each probe's DONE
+  long t1Lo[COG_COUNT]
+  long neverMask                  ' probes of the last watch() that never wrote DONE
+  long armedMask                  ' probes of the last watch() whose ARMED was seen
+  long wrapsSeen                  ' lower-long wraps cog 0 watched since boot (C2)
+  long prevCtLo                   ' last CT lower long cog 0 saw (C2)
+  long bHalted                    ' TRUE once a RIG FAIL has halted the run
+  long runCount                   ' arm slots used
+  long runCmd[NRUN]               ' per arm: command
+  long runPhase[NRUN]             ' per arm: phase
+  long runStatus[NRUN]            ' per arm: ST_* status (timing)
+  long runBracket[NRUN]           ' per arm: TRUE if BRACKET held
+  long runDarm[NRUN]              ' per arm: Darm
+  long runDend[NRUN]              ' per arm: Dend
+
+PUB main() | ctHi, ctLo, cogMask
+'' Run the E3 scope test for PASM2 CT targets: every command in the
+'' current group (control) and in a stale group, inside the window and
+'' across the wrap that closes it; then the WAITCT keeper arm.
+''
+
+' Local Variables:
+' @local ctHi - cog 0's own CT upper long, from ct64()
+' @local ctLo - cog 0's own CT lower long, from ct64()
+' @local cogMask - running-cog bitmask, from runmask()
+
+  ' A RIG FAIL halts the run (bHalted): a guard follows every step that
+  ' can halt (wait_until, expect_mask), so every path ends at finish().
+  debug("=== Erratum E3 SCOPE TEST (PASM2): CT events, SETQ timeout, WAITX -- stale window and closing wrap ===")
+  debug("predictions: every stale arm timing OK (tol ", udec_(TOL_F), " clk), Darm=", udec_(P_LAG), ", Dend=", udec_(P_LAG), " IN / 0 ACROSS; K Dend=", udec_(P_KEEP), " (FALSE ", udec_(P_NOKEEP), "); controls D=0")
+
+  ' ---- C4: boot state -------------------------------------------------
+  ctHi, ctLo := ct64()
+  cogMask := runmask()
+  prevCtLo := ctLo
+  wrapsSeen := 0
+  debug("boot: cog0 CT=", uhex_long_(ctHi), "_", uhex_long_(ctLo), " running cogs=", ubin_byte_(cogMask))
+  if ctHi <> 0
+    debug("RIG FAIL: CT hi at boot expected 0, got ", uhex_long_(ctHi), " - no fresh reset; reload with reset")
+    halt()
+  elseif cogMask <> M_BOOT
+    debug("RIG FAIL: running cogs at boot expected ", ubin_byte_(M_BOOT), ", got ", ubin_byte_(cogMask))
+    halt()
+
+  ' ---- control probes: cogs 1-3 (current group) from program start ----
+  if bHalted == FALSE
+    start_probes(M_CTRL)
+    expect_mask(M_G0)
+
+  ' ---- CIN: control, IN, hi=0 -----------------------------------------
+  if bHalted == FALSE
+    wait_until(0, LOWIN, M_G0)
+  if bHalted == FALSE
+    debug("--- CIN: control probes, IN (hi=0) ---")
+    batch(PH_CIN, 1, C_WAITCT, 2, C_POLLCT, 3, C_JCT, NO_COG, 0, M_G0)
+    batch(PH_CIN, 1, C_JNCT, 2, C_INT, 3, C_SETQ, NO_COG, 0, M_G0)
+    batch(PH_CIN, 1, C_WAITX, NO_COG, 0, NO_COG, 0, NO_COG, 0, M_G0)
+
+  ' ---- CX1: control, ACROSS wrap 1 ------------------------------------
+  if bHalted == FALSE
+    wait_until(0, ARM_X, M_G0)
+  if bHalted == FALSE
+    debug("--- CX1: control probes, ACROSS wrap 1 ---")
+    batch(PH_CX, 1, C_WAITCT, 2, C_POLLCT, 3, C_JCT, NO_COG, 0, M_G0)
+
+  ' ---- W1: cogs 4-7 started after missing wrap 1 ----------------------
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=1 with cogs 4-7 idle ---")
+    wait_until(1, LOWIN, M_G0)
+  if bHalted == FALSE
+    start_probes(M_S47)
+    expect_mask(M_W1)
+  if bHalted == FALSE
+    debug("--- SIN: stale probes 4-7 (window W1), IN (hi=1) ---")
+    batch(PH_SIN, 4, C_WAITCT, 5, C_POLLCT, 6, C_JCT, 7, C_JNCT, M_W1)
+    batch(PH_SIN, 4, C_INT, 5, C_SETQ, 6, C_WAITX, NO_COG, 0, M_W1)
+
+  ' ---- SX1 + control: ACROSS wrap 2, the wrap that closes W1 -----------
+  if bHalted == FALSE
+    wait_until(1, ARM_X, M_W1)
+  if bHalted == FALSE
+    debug("--- SX1: stale probes 4-7 ACROSS wrap 2 (closes W1), with control probes 1-3 ---")
+    across_wrap2()
+
+  if bHalted == FALSE
+    stop_probes(M_S47)
+    expect_mask(M_G0)
+
+  ' ---- CX3: control, ACROSS wrap 3 (cogs 4-7 idle through it) ---------
+  if bHalted == FALSE
+    wait_until(2, ARM_X, M_G0)
+  if bHalted == FALSE
+    debug("--- CX3: control probe ACROSS wrap 3 (cogs 4-7 idle) ---")
+    batch(PH_CX, 1, C_WAITX, NO_COG, 0, NO_COG, 0, NO_COG, 0, M_G0)
+
+  ' ---- W2: cogs 4-6 started after missing wrap 3 ----------------------
+  if bHalted == FALSE
+    wait_until(3, LOWIN, M_G0)
+  if bHalted == FALSE
+    start_probes(M_S46)
+    expect_mask(M_W2)
+  if bHalted == FALSE
+    wait_until(3, ARM_X, M_W2)
+  if bHalted == FALSE
+    debug("--- SX2: stale probes 4-6 ACROSS wrap 4 (closes W2) ---")
+    batch(PH_SX, 4, C_JNCT, 5, C_SETQ, 6, C_WAITX, NO_COG, 0, M_W2)
+
+  if bHalted == FALSE
+    stop_probes(M_S46)
+    expect_mask(M_G0)
+
+  ' ---- K: cog 7 alone in 4-7, held in WAITCT1 across wrap 6 ------------
+  if bHalted == FALSE
+    debug("--- waiting for CT hi=5 with cogs 4-7 idle through wrap 5 ---")
+    wait_until(5, ARM_X - K_LEAD, M_G0)
+  if bHalted == FALSE
+    start_probes(1 << KEEP_COG)
+    expect_mask(M_W3)
+  if bHalted == FALSE
+    wait_until(5, ARM_X, M_W3)
+  if bHalted == FALSE
+    debug("--- K: cog 7 ALONE in 4-7, WAITCT ACROSS wrap 6 ---")
+    batch(PH_K, KEEP_COG, C_WAITCT, NO_COG, 0, NO_COG, 0, NO_COG, 0, M_W3)
+
+  if bHalted == FALSE
+    verdict()
+  finish()
+
+' ---------------------------------------------------------------------
+PRI across_wrap2()
+' The wrap-2 set: four stale ACROSS arms (cogs 4-7) and three control
+' ACROSS arms (cogs 1-3), all pending together through wrap 2.
+'
+
+  issue(4, C_WAITCT, PH_SX)
+  issue(5, C_POLLCT, PH_SX)
+  issue(6, C_JCT, PH_SX)
+  issue(7, C_INT, PH_SX)
+  issue(1, C_JNCT, PH_CX)
+  issue(2, C_INT, PH_CX)
+  issue(3, C_SETQ, PH_CX)
+  watch(M_S47 | M_CTRL, DX3)
+  evaluate(4, C_WAITCT, PH_SX)
+  evaluate(5, C_POLLCT, PH_SX)
+  evaluate(6, C_JCT, PH_SX)
+  evaluate(7, C_INT, PH_SX)
+  evaluate(1, C_JNCT, PH_CX)
+  evaluate(2, C_INT, PH_CX)
+  evaluate(3, C_SETQ, PH_CX)
+  expect_mask(M_W1)
+
+PRI batch(phase, cogA, cmdA, cogB, cmdB, cogC, cmdC, cogD, cmdD, expMask) | cogMask, dLast
+' Up to four arms of one phase, pending together: issue each, watch them
+' all, evaluate each.  NO_COG in a cog place leaves that place empty.
+'
+' @param phase - PH_* phase of every arm in the batch
+' @param cogA - probe cog of the first arm (then cogB, cogC, cogD; NO_COG = none)
+' @param cmdA - C_* command of the first arm (then cmdB, cmdC, cmdD)
+' @param expMask - running-cog bitmask expected after the batch
+
+' Local Variables:
+' @local cogMask - the probes of this batch
+' @local dLast - the batch's last target offset, for the NEVER timeout
+
+  cogMask := 0
+  if cogA > 0
+    issue(cogA, cmdA, phase)
+    cogMask |= 1 << cogA
+  if cogB > 0
+    issue(cogB, cmdB, phase)
+    cogMask |= 1 << cogB
+  if cogC > 0
+    issue(cogC, cmdC, phase)
+    cogMask |= 1 << cogC
+  if cogD > 0
+    issue(cogD, cmdD, phase)
+    cogMask |= 1 << cogD
+  dLast := (phase == PH_CIN or phase == PH_SIN) ? DIN3 : DX3
+  watch(cogMask, dLast)
+  if cogA > 0
+    evaluate(cogA, cmdA, phase)
+  if cogB > 0
+    evaluate(cogB, cmdB, phase)
+  if cogC > 0
+    evaluate(cogC, cmdC, phase)
+  if cogD > 0
+    evaluate(cogD, cmdD, phase)
+  expect_mask(expMask)
+
+' ---------------------------------------------------------------------
+PRI issue(cogN, cmd, phase) | pMb, d1, d2, d3
+' Write one request to probe cogN: command, target offsets (IN or ACROSS
+' by phase), then the new request number last.
+'
+' @param cogN - probe cog (1..7)
+' @param cmd - C_* command
+' @param phase - PH_* phase: IN phases use DIN1..3, ACROSS phases DX1..3
+
+' Local Variables:
+' @local pMb - the probe's mailbox address
+' @local d1 - first target offset, in clocks after alo
+' @local d2 - second target offset
+' @local d3 - third target offset
+
+  if phase == PH_CIN or phase == PH_SIN
+    d1, d2, d3 := DIN1, DIN2, DIN3
+  else
+    d1, d2, d3 := DX1, DX2, DX3
+  pMb := @mbox[cogN * MB_LONGS]
+  long[pMb][MB_CMD] := cmd
+  long[pMb][MB_D1] := d1
+  long[pMb][MB_D2] := d2
+  long[pMb][MB_D3] := d3
+  issuedD[cogN * NTGT + 0] := d1
+  issuedD[cogN * NTGT + 1] := d2
+  issuedD[cogN * NTGT + 2] := d3
+  requestSeq++
+  cogSeq[cogN] := requestSeq
+  long[pMb][MB_REQ] := requestSeq
+
+PRI watch(cogMask, dLast) | pending, armSeen, tStart, tmo, cogN, pMb
+' Wait for every probe in cogMask to write ARMED and then DONE for its
+' current request, reading cog 0's own CT the moment each flag is seen.
+' Probes with no DONE within dLast + 100 ms are left in neverMask.
+'
+' @param cogMask - the probes to watch (bit N = cog N)
+' @param dLast - the batch's last target offset, in clocks
+
+' Local Variables:
+' @local pending - probes with no DONE seen yet
+' @local armSeen - probes whose ARMED has been seen
+' @local tStart - cog 0's lower long when the watch began
+' @local tmo - the NEVER timeout, in clocks
+' @local cogN - probe being checked
+' @local pMb - its mailbox address
+
+  pending := cogMask
+  armSeen := 0
+  tmo := dLast + clkfreq / TMO_TAIL_PER_SEC
+  tStart := getct()
+  repeat while pending <> 0
+    repeat cogN from 1 to COG_COUNT - 1
+      if pending & (1 << cogN)
+        pMb := @mbox[cogN * MB_LONGS]
+        if (armSeen & (1 << cogN)) == 0
+          if long[pMb][MB_ARMED] == cogSeq[cogN]
+            t0Hi[cogN], t0Lo[cogN] := ct64()
+            armSeen |= 1 << cogN
+        if armSeen & (1 << cogN)
+          if long[pMb][MB_DONE] == cogSeq[cogN]
+            t1Hi[cogN], t1Lo[cogN] := ct64()
+            pending &= !(1 << cogN)
+    if getct() - tStart +> tmo
+      quit
+  neverMask := pending
+  armedMask := armSeen
+
+PRI evaluate(cogN, cmd, phase) | pMb, ahi, alo, ehi, elo, dArm, dEnd, st, bBracket, tgt, dn, el, stN, cFlag
+' Judge one arm from its probe's results and cog 0's readings: Darm, Dend,
+' BRACKET, and the timing class of each target.  Prints the arm and stores
+' it in the next arm slot.  A NEVER probe is restarted.
+'
+' @param cogN - probe cog (1..7)
+' @param cmd - C_* command it ran
+' @param phase - PH_* phase of the arm
+
+' Local Variables:
+' @local pMb - the probe's mailbox address
+' @local ahi - probe GETCT WC at arm time
+' @local alo - probe GETCT at arm time
+' @local ehi - probe GETCT WC after the last firing
+' @local elo - probe GETCT after the last firing
+' @local dArm - cog 0's upper long at ARMED minus ahi
+' @local dEnd - cog 0's upper long at DONE minus ehi
+' @local st - worst timing status so far (ST_*)
+' @local bBracket - TRUE if both brackets held
+' @local tgt - target index 0..2
+' @local dn - that target's offset
+' @local el - that target's elapsed time, f_n - alo
+' @local stN - that target's class
+' @local cFlag - that target's recorded C (SETQ)
+
+  pMb := @mbox[cogN * MB_LONGS]
+  runCmd[runCount] := cmd
+  runPhase[runCount] := phase
+  if neverMask & (1 << cogN)
+    ' A NEVER arm has no end readings.  If it armed, its window is judged
+    ' from Darm alone: Dend is set to its predicted value so verdict() does
+    ' not read the missing end as a misplaced window, and the arm's NEVER
+    ' status decides it (AFFECTED).  An arm that never armed keeps Darm 0:
+    ' its window is unknown (INCONCLUSIVE).  The K verdict reads NEVER as
+    ' INCONCLUSIVE before it reads Dend.
+    runStatus[runCount] := ST_NEVER
+    runDarm[runCount] := 0
+    runBracket[runCount] := FALSE
+    if armedMask & (1 << cogN)
+      runDarm[runCount] := t0Hi[cogN] - long[pMb][MB_AHI]
+      runBracket[runCount] := (t0Lo[cogN] - long[pMb][MB_ALO]) +< TOL_B
+    runDend[runCount] := (phase == PH_SIN) ? P_LAG : 0
+    debug(zstr_(phase_name(phase)), " cog", udec_(cogN), " ", zstr_(cmd_name(cmd)), " NEVER: no DONE within d3 + 100 ms; ARMED ", udec_((armedMask >> cogN) & 1), " Darm=", sdec_(runDarm[runCount]), " (no end readings) - probe restarted")
+    runCount++
+    cogstop(cogN)
+    coginit(cogN, @probe, pMb)
+    waitms(COG_SETTLE_MS)
+    return
+
+  ahi := long[pMb][MB_AHI]
+  alo := long[pMb][MB_ALO]
+  ehi := long[pMb][MB_EHI]
+  elo := long[pMb][MB_ELO]
+  dArm := t0Hi[cogN] - ahi
+  dEnd := t1Hi[cogN] - ehi
+  st := ST_OK
+  bBracket := (t0Lo[cogN] - alo) +< TOL_B and (t1Lo[cogN] - elo) +< TOL_B
+  debug(zstr_(phase_name(phase)), " cog", udec_(cogN), " ", zstr_(cmd_name(cmd)), " arm=", uhex_long_(ahi), "_", uhex_long_(alo), " cog0@armed=", uhex_long_(t0Hi[cogN]), "_", uhex_long_(t0Lo[cogN]), " end=", uhex_long_(ehi), "_", uhex_long_(elo), " cog0@done=", uhex_long_(t1Hi[cogN]), "_", uhex_long_(t1Lo[cogN]), " Darm=", sdec_(dArm), " Dend=", sdec_(dEnd), " bracket=", udec_(bBracket & 1))
+  repeat tgt from 0 to NTGT - 1
+    dn := issuedD[cogN * NTGT + tgt]
+    el := long[pMb][MB_F1 + tgt] - alo
+    cFlag := long[pMb][MB_C1 + tgt]
+    if el +< dn
+      stN := ST_EARLY
+    elseif el +>= dn + TOL_F
+      stN := ST_LATE
+    elseif cmd == C_SETQ and cFlag <> 1
+      stN := ST_BADC
+    else
+      stN := ST_OK
+    if stN > st
+      st := stN
+    debug("    target ", udec_(tgt + 1), ": d=", uhex_long_(dn), " el=", uhex_long_(el), " late by ", sdec_(el - dn), " clk C=", udec_(cFlag), " class=", udec_(stN))
+  debug("    => status=", udec_(st), " (0 ok 1 badC 2 late 3 early 5 never) bracket=", udec_(bBracket & 1))
+  runStatus[runCount] := st
+  runBracket[runCount] := bBracket
+  runDarm[runCount] := dArm
+  runDend[runCount] := dEnd
+  runCount++
+
+' ---------------------------------------------------------------------
+PRI verdict() | cmd, runIdx, bRigBad, bWinOk, bTimeOk, bBrOk, nStale, stale1, keepIdx, nStaleAll
+' Apply control C1 to every control arm, then judge each command from its
+' stale arms, then the WAITCT keeper (K) arm.  One VERDICT line each.
+'
+
+' Local Variables:
+' @local cmd - command being judged
+' @local runIdx - arm slot
+' @local bRigBad - TRUE once a control arm failed C1
+' @local bWinOk - TRUE while every stale arm of cmd sat where predicted
+' @local bTimeOk - TRUE while every stale arm of cmd timed OK
+' @local bBrOk - TRUE while every stale arm of cmd held BRACKET
+' @local nStale - stale arms of cmd
+' @local stale1 - stale arms with Darm = P_LAG, for the GETCT WC line
+' @local keepIdx - the K arm's slot (-1 if none)
+' @local nStaleAll - every stale arm, for the GETCT WC line
+
+  bRigBad := FALSE
+  keepIdx := -1
+  stale1 := nStaleAll := 0
+  debug("=== SUMMARY (phase 0 CIN 1 CX 2 SIN 3 SX 4 K; status 0 ok 1 badC 2 late 3 early 5 never; bracket 1 held) ===")
+  repeat runIdx from 0 to runCount - 1
+    debug("arm ", udec_(runIdx), ": ", zstr_(cmd_name(runCmd[runIdx])), " phase=", udec_(runPhase[runIdx]), " status=", udec_(runStatus[runIdx]), " Darm=", sdec_(runDarm[runIdx]), " Dend=", sdec_(runDend[runIdx]))
+    if runPhase[runIdx] == PH_CIN or runPhase[runIdx] == PH_CX
+      if runStatus[runIdx] <> ST_OK or runBracket[runIdx] == FALSE or runDarm[runIdx] <> 0 or runDend[runIdx] <> 0
+        debug("RIG FAIL: control arm ", udec_(runIdx), " (", zstr_(cmd_name(runCmd[runIdx])), ") expected status 0, bracket 1, Darm 0, Dend 0")
+        bRigBad := TRUE
+    else
+      nStaleAll++
+      if runDarm[runIdx] == P_LAG
+        stale1++
+      if runPhase[runIdx] == PH_K
+        keepIdx := runIdx
+
+  if bRigBad == TRUE
+    debug("NO VERDICT: rig failed (see RIG FAIL lines)")
+    return
+
+  debug("GETCT WC (affected, the E3 control): stale by ", udec_(P_LAG), " at arm time in ", udec_(stale1), " of ", udec_(nStaleAll), " stale arms")
+  repeat cmd from 0 to NCMD - 1
+    bWinOk := bTimeOk := bBrOk := TRUE
+    nStale := 0
+    repeat runIdx from 0 to runCount - 1
+      if runCmd[runIdx] == cmd and runPhase[runIdx] >= PH_SIN
+        nStale++
+        if runDarm[runIdx] <> P_LAG
+          bWinOk := FALSE
+        if runPhase[runIdx] == PH_SIN and runDend[runIdx] <> P_LAG
+          bWinOk := FALSE
+        if runPhase[runIdx] == PH_SX and runDend[runIdx] <> 0
+          bWinOk := FALSE
+        if runBracket[runIdx] == FALSE
+          bBrOk := FALSE
+        if runStatus[runIdx] <> ST_OK
+          bTimeOk := FALSE
+    if nStale == 0
+      debug("VERDICT ", zstr_(cmd_name(cmd)), ": INCONCLUSIVE - no stale arm ran")
+    elseif bWinOk == FALSE
+      debug("VERDICT ", zstr_(cmd_name(cmd)), ": INCONCLUSIVE - a stale arm's Darm/Dend was not as predicted (see SUMMARY)")
+    elseif bBrOk == FALSE
+      debug("VERDICT ", zstr_(cmd_name(cmd)), ": INCONCLUSIVE - a stale arm's lower long was not bracketed by cog 0 (bracket=0): its times cannot be trusted")
+    elseif bTimeOk == TRUE
+      debug("VERDICT ", zstr_(cmd_name(cmd)), ": NOT AFFECTED - ", udec_(nStale), " stale arms, IN the window and ACROSS its closing wrap, timed as in the current group")
+    else
+      debug("VERDICT ", zstr_(cmd_name(cmd)), ": AFFECTED - a stale arm with its window open timed wrong (see SUMMARY status)")
+
+  if keepIdx < 0
+    debug("VERDICT WAITCT KEEPER: INCONCLUSIVE - the K arm did not run")
+  elseif runDarm[keepIdx] <> P_LAG or runStatus[keepIdx] == ST_NEVER
+    debug("VERDICT WAITCT KEEPER: INCONCLUSIVE - K Darm=", sdec_(runDarm[keepIdx]), " status=", udec_(runStatus[keepIdx]), " (need Darm ", udec_(P_LAG), ")")
+  elseif runDend[keepIdx] == P_KEEP
+    debug("VERDICT WAITCT KEEPER: COUNTS - cog 7 alone in 4-7, held in WAITCT1 at wrap 6, read Dend=0: the group stayed current")
+  elseif runDend[keepIdx] == P_NOKEEP
+    debug("VERDICT WAITCT KEEPER: DOES NOT COUNT - cog 7 alone in 4-7, held in WAITCT1 at wrap 6, read Dend=2: the group missed the wrap")
+  else
+    debug("VERDICT WAITCT KEEPER: INCONCLUSIVE - K Dend=", sdec_(runDend[keepIdx]), " (predicted 0, falsifier 2)")
+
+PRI cmd_name(cmd) : pName
+' The command's printable name.
+'
+' @param cmd - C_* command
+' @returns pName - address of its zero-terminated name
+
+  case cmd
+    C_WAITCT: pName := string("WAITCT1-3")
+    C_POLLCT: pName := string("POLLCT1-3")
+    C_JCT:    pName := string("JCT1-3")
+    C_JNCT:   pName := string("JNCT1-3")
+    C_INT:    pName := string("INT1-3 on CT1-3")
+    C_SETQ:   pName := string("SETQ+WAITATN timeout")
+    C_WAITX:  pName := string("WAITX")
+    other:    pName := string("?")
+
+PRI phase_name(phase) : pName
+' The phase's printable name.
+'
+' @param phase - PH_* phase
+' @returns pName - address of its zero-terminated name
+
+  case phase
+    PH_CIN: pName := string("CIN")
+    PH_CX:  pName := string("CX ")
+    PH_SIN: pName := string("SIN")
+    PH_SX:  pName := string("SX ")
+    PH_K:   pName := string("K  ")
+    other:  pName := string("?")
+
+' ---------------------------------------------------------------------
+PRI start_probes(cogMask) | cogN
+' Start the probe in every cog of cogMask, each by its explicit number
+' (never the free-cog form), with its own mailbox in PTRA.
+'
+' @param cogMask - the cogs to start (bit N = cog N)
+
+' Local Variables:
+' @local cogN - cog being started
+
+  repeat cogN from 1 to COG_COUNT - 1
+    if cogMask & (1 << cogN)
+      coginit(cogN, @probe, @mbox[cogN * MB_LONGS])
+  waitms(COG_SETTLE_MS)
+
+PRI stop_probes(cogMask) | cogN
+' Stop the probe in every cog of cogMask.
+'
+' @param cogMask - the cogs to stop (bit N = cog N)
+
+' Local Variables:
+' @local cogN - cog being stopped
+
+  repeat cogN from 1 to COG_COUNT - 1
+    if cogMask & (1 << cogN)
+      cogstop(cogN)
+  waitms(COG_SETTLE_MS)
+
+PRI ct64() : ctHi, ctLo
+' cog 0's own 64-bit CT, read GETCT WC (upper long) then GETCT (lower
+' long), the order the probes use.
+'
+' @returns ctHi - cog 0's own CT upper long
+' @returns ctLo - cog 0's own CT lower long
+
+  org
+                getct   ctHi            wc
+                getct   ctLo
+  end
+
+PRI ct_track() : ctHi, ctLo
+' ct64() plus control C2: RIG FAIL if cog 0's upper long ever disagrees
+' with the number of lower-long wraps cog 0 itself watched since boot.
+'
+' @returns ctHi - cog 0's own CT upper long
+' @returns ctLo - cog 0's own CT lower long
+
+  ctHi, ctLo := ct64()
+  if ctLo +< prevCtLo
+    wrapsSeen++
+  prevCtLo := ctLo
+  if ctLo +>= LOWIN and ctHi <> wrapsSeen
+    debug("RIG FAIL: cog 0 CT hi=", uhex_long_(ctHi), " but cog 0 watched ", udec_(wrapsSeen), " lower-long wraps since boot - reference upper long not current")
+    halt()
+
+PRI wait_until(targetHi, minLo, expMask) | ctHi, ctLo, cogMask, ctTick, lastCtTick
+' Poll cog 0's own CT until hi == targetHi and lo >= minLo, RIG FAIL (and
+' halt) if the running-cog mask leaves expMask at any poll of the wait
+' (C3) or on a hi overshoot; prints an "alive" line on every 2^28-clock
+' tick while it waits.  A halt (here or in ct_track()) quits the wait.
+'
+' @param targetHi - CT hi value to wait for
+' @param minLo - minimum CT lo value to wait for, once hi == targetHi
+' @param expMask - running-cog bitmask expected (bit N set = cog N running)
+
+' Local Variables:
+' @local ctHi - cog 0's own CT upper long, from ct_track()
+' @local ctLo - cog 0's own CT lower long, from ct_track()
+' @local cogMask - running-cog bitmask, from runmask()
+' @local ctTick - ctHi and the top nibble of ctLo packed together, to throttle "alive" lines
+' @local lastCtTick - ctTick at the last "alive" line, to detect a new tick
+
+  lastCtTick := -1
+  repeat
+    ctHi, ctLo := ct_track()
+    if bHalted == TRUE
+      quit
+    cogMask := runmask()
+    if cogMask <> expMask
+      debug("RIG FAIL: running cogs expected ", ubin_byte_(expMask), " got ", ubin_byte_(cogMask), " at CT ", uhex_long_(ctHi), "_", uhex_long_(ctLo))
+      halt()
+      quit
+    if ctHi > targetHi
+      debug("RIG FAIL: overshoot, CT hi=", udec_(ctHi), " waiting for ", udec_(targetHi))
+      halt()
+      quit
+    ctTick := (ctHi << NIB_BITS) | (ctLo >> ALIVE_SHIFT)
+    if ctTick <> lastCtTick
+      lastCtTick := ctTick
+      debug("  alive CT=", uhex_long_(ctHi), "_", uhex_long_(ctLo), " wraps-seen=", udec_(wrapsSeen), " running=", ubin_byte_(cogMask))
+  until ctHi == targetHi and ctLo +>= minLo
+
+PRI expect_mask(expMask) | cogMask
+' RIG FAIL (and halt) if the running-cog mask does not equal expMask at
+' this instant.
+'
+' @param expMask - running-cog bitmask expected (bit N set = cog N running)
+
+' Local Variables:
+' @local cogMask - running-cog bitmask, from runmask()
+
+  cogMask := runmask()
+  if cogMask <> expMask
+    debug("RIG FAIL: running cogs expected ", ubin_byte_(expMask), " got ", ubin_byte_(cogMask))
+    halt()
+
+PRI runmask() : cogMask | cogIdx
+' Build the running-cog bitmask from cogchk() across all cogs.
+'
+' @returns cogMask - bit N set if cog N is running
+
+' Local Variables:
+' @local cogIdx - cog number being tested
+
+  cogMask := 0
+  repeat cogIdx from 0 to COG_COUNT - 1
+    if cogchk(cogIdx) == TRUE
+      cogMask |= 1 << cogIdx
+
+PRI halt()
+' RIG FAIL exit: print the HALTED line and set bHalted, so every later step
+' of main() is skipped and the run ends at its one finish() (no verdict is
+' printed).
+'
+
+  debug("HALTED - no verdict")
+  bHalted := TRUE
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+DAT ' ---- Probe Cog Code ----
+' Probe (cog-exec).  PTRA = its mailbox.  Adopts the request number it
+' finds at start as already answered, then on each NEW request number runs
+' the command it names and writes the results block and DONE.
+                org     0
+probe           rdlong  p_last, ptra            ' the request already in the mailbox is not new
+                mov     p_res, ptra
+                add     p_res, #MB_RES_OFS      ' hub address of the results block
+p_idle          rdlong  p_req, ptra
+                cmp     p_req, p_last   wz
+        if_z    jmp     #p_idle
+                mov     p_last, p_req
+                rdlong  p_cmd, ptra[MB_CMD]
+                rdlong  p_d1, ptra[MB_D1]
+                rdlong  p_d2, ptra[MB_D2]
+                rdlong  p_d3, ptra[MB_D3]
+                mov     p_f1, #0
+                mov     p_f2, #0
+                mov     p_f3, #0
+                mov     p_c1, #0
+                mov     p_c2, #0
+                mov     p_c3, #0
+                mov     p_got, #0
+                cmp     p_cmd, #C_WAITCT wz
+        if_z    jmp     #do_waitct
+                cmp     p_cmd, #C_POLLCT wz
+        if_z    jmp     #do_pollct
+                cmp     p_cmd, #C_JCT   wz
+        if_z    jmp     #do_jct
+                cmp     p_cmd, #C_JNCT  wz
+        if_z    jmp     #do_jnct
+                cmp     p_cmd, #C_INT   wz
+        if_z    jmp     #do_int
+                cmp     p_cmd, #C_SETQ  wz
+        if_z    jmp     #do_setq
+                cmp     p_cmd, #C_WAITX wz
+        if_z    jmp     #do_waitx
+                jmp     #p_report               ' unknown command: report zeros
+
+' ---- WAITCT: wait for CT1, then CT2, then CT3 --------------------------
+do_waitct       call    #p_arm_ct
+                call    #p_announce
+                waitct1
+                getct   p_f1
+                waitct2
+                getct   p_f2
+                waitct3
+                getct   p_f3
+                jmp     #p_report
+
+' ---- POLLCT: poll all three flags until each has been seen once --------
+do_pollct       call    #p_arm_ct
+                call    #p_announce
+.t1             testb   p_got, #1       wc      ' CT1 already seen?
+        if_c    jmp     #.t2
+                pollct1                 wc
+        if_c    getct   p_f1
+        if_c    bith    p_got, #1
+.t2             testb   p_got, #2       wc
+        if_c    jmp     #.t3
+                pollct2                 wc
+        if_c    getct   p_f2
+        if_c    bith    p_got, #2
+.t3             testb   p_got, #3       wc
+        if_c    jmp     #.chk
+                pollct3                 wc
+        if_c    getct   p_f3
+        if_c    bith    p_got, #3
+.chk            cmp     p_got, #GOT_ALL wz
+        if_nz   jmp     #.t1
+                jmp     #p_report
+
+' ---- JCT: jump on each flag until each has been taken once --------------
+do_jct          call    #p_arm_ct
+                call    #p_announce
+.t1             testb   p_got, #1       wc
+        if_c    jmp     #.t2
+                jct1    #.g1
+                jmp     #.t2
+.g1             getct   p_f1
+                bith    p_got, #1
+.t2             testb   p_got, #2       wc
+        if_c    jmp     #.t3
+                jct2    #.g2
+                jmp     #.t3
+.g2             getct   p_f2
+                bith    p_got, #2
+.t3             testb   p_got, #3       wc
+        if_c    jmp     #.chk
+                jct3    #.g3
+                jmp     #.chk
+.g3             getct   p_f3
+                bith    p_got, #3
+.chk            cmp     p_got, #GOT_ALL wz
+        if_nz   jmp     #.t1
+                jmp     #p_report
+
+' ---- JNCT: jump while each flag is clear; fall through once it is set ---
+do_jnct         call    #p_arm_ct
+                call    #p_announce
+.t1             testb   p_got, #1       wc
+        if_c    jmp     #.t2
+                jnct1   #.t2
+                getct   p_f1
+                bith    p_got, #1
+.t2             testb   p_got, #2       wc
+        if_c    jmp     #.t3
+                jnct2   #.t3
+                getct   p_f2
+                bith    p_got, #2
+.t3             testb   p_got, #3       wc
+        if_c    jmp     #.chk
+                jnct3   #.chk
+                getct   p_f3
+                bith    p_got, #3
+.chk            cmp     p_got, #GOT_ALL wz
+        if_nz   jmp     #.t1
+                jmp     #p_report
+
+' ---- INT: INT1/2/3 on CT-passed-CT1/2/3; main code spins ---------------
+do_int          mov     ijmp1, #p_isr1
+                mov     ijmp2, #p_isr2
+                mov     ijmp3, #p_isr3
+                mov     p_icnt, #0
+                call    #p_arm_ct
+                setint1 #EV_CT1
+                setint2 #EV_CT2
+                setint3 #EV_CT3
+                call    #p_announce
+.spin           cmp     p_icnt, #INT_ALL wz
+        if_nz   jmp     #.spin
+                jmp     #p_report
+
+p_isr1          getct   p_f1
+                setint1 #EV_OFF                 ' once only
+                add     p_icnt, #1
+                reti1
+p_isr2          getct   p_f2
+                setint2 #EV_OFF
+                add     p_icnt, #1
+                reti2
+p_isr3          getct   p_f3
+                setint3 #EV_OFF
+                add     p_icnt, #1
+                reti3
+
+' ---- SETQ: three SETQ-target timeouts on WAITATN (no ATN is ever sent) --
+do_setq         call    #p_arm_nt
+                mov     p_t1, p_alo
+                add     p_t1, p_d1
+                mov     p_t2, p_alo
+                add     p_t2, p_d2
+                mov     p_t3, p_alo
+                add     p_t3, p_d3
+                call    #p_announce
+                setq    p_t1
+                waitatn                 wc      ' C = 1: timed out
+                getct   p_f1
+                wrc     p_c1
+                setq    p_t2
+                waitatn                 wc
+                getct   p_f2
+                wrc     p_c2
+                setq    p_t3
+                waitatn                 wc
+                getct   p_f3
+                wrc     p_c3
+                jmp     #p_report
+
+' ---- WAITX: three relative waits ending at d1, d2, d3 after arm ---------
+do_waitx        call    #p_arm_nt
+                call    #p_announce
+                mov     p_t1, p_d1
+                waitx   p_t1
+                getct   p_f1
+                mov     p_t1, p_d2
+                sub     p_t1, p_d1
+                waitx   p_t1
+                getct   p_f2
+                mov     p_t1, p_d3
+                sub     p_t1, p_d2
+                waitx   p_t1
+                getct   p_f3
+                jmp     #p_report
+
+' ---- shared steps --------------------------------------------------------
+' arm with CT targets: read the counter, then CTn = alo + dn (clears each flag)
+p_arm_ct        getct   p_ahi           wc      ' this group's UPPER copy
+                getct   p_alo                   ' this group's LOWER copy
+                mov     p_t1, p_alo
+                addct1  p_t1, p_d1
+                mov     p_t1, p_alo
+                addct2  p_t1, p_d2
+                mov     p_t1, p_alo
+                addct3  p_t1, p_d3
+                ret
+' arm with no CT target: read the counter only
+p_arm_nt        getct   p_ahi           wc
+                getct   p_alo
+                ret
+' write ahi, alo, then ARMED
+p_announce      setq    #ANN_LONGS - 1
+                wrlong  p_ahi, p_res
+                wrlong  p_req, ptra[MB_ARMED]
+                ret
+' disarm, read the counter again, write the results block, then DONE
+p_report        setint1 #EV_OFF
+                setint2 #EV_OFF
+                setint3 #EV_OFF
+                getct   p_ehi           wc
+                getct   p_elo
+                setq    #RES_LONGS - 1
+                wrlong  p_ahi, p_res
+                wrlong  p_req, ptra[MB_DONE]
+                jmp     #p_idle
+
+p_last          res     1
+p_res           res     1
+p_req           res     1
+p_cmd           res     1
+p_d1            res     1
+p_d2            res     1
+p_d3            res     1
+p_got           res     1
+p_icnt          res     1
+p_t1            res     1
+p_t2            res     1
+p_t3            res     1
+' results block: these ten registers in this order (SETQ + WRLONG)
+p_ahi           res     1
+p_alo           res     1
+p_f1            res     1
+p_f2            res     1
+p_f3            res     1
+p_c1            res     1
+p_c2            res     1
+p_c3            res     1
+p_ehi           res     1
+p_elo           res     1
