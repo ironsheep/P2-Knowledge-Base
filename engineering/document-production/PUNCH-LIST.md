@@ -373,6 +373,21 @@ picture primitives, then compare one inline span rendered with and without it at
 
 ---
 
+## A line after an inline code span that ends a line can start with a visible space (cross-manual, platform) — OPEN (finding, cause unknown)
+
+**Found 2026-09-29** verifying the P2 Errata v0.2.0 render (E3 scope update), by eye at 70 dpi.
+Where an inline code span ends a line, the next line sometimes begins indented by about one
+space: p26 "…the `SETQ`" / " timeout of a wait…", p27 "…a `DEBUG_TIMESTAMP`" / " stamp is
+one…", p76 "…held in `WAITCT1`" / " keeps its group current". No gate reads it. **Not yet
+understood**: TeX normally discards the inter-word space at a line break, so something after
+`\passthrough{\lstinline!…!}` is keeping it (a non-discardable space, or a box the span leaves
+behind). Possibly related to the `\oval` finding above (same inline-code styling). To decide:
+take one site's `.tex`, compile the paragraph alone with and without the platform's inline-code
+styling, and look at the line start at high zoom; then check whether other manuals show it at
+the same kind of site. Not fixed by rewording — which line a span ends depends on the text above.
+
+---
+
 ## `fancyhdr` headheight is 12pt where the package needs 13.6pt (cross-manual, platform) — RESOLVED 2026-09-26
 
 > **Verified 2026-09-26** (daemon runs `p2-errata-headheight-before` / `-after`, same markdown):

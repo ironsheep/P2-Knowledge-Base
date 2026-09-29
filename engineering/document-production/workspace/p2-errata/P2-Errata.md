@@ -723,7 +723,7 @@ What does not go wrong:
 
 ## A proven workaround {#sec-e3-workaround}
 
-**What any workaround must do:** never use a 64-bit time taken inside a stale window; a `DEBUG_TIMESTAMP` stamp is one. Either keep the window from opening, with a cog of the group running at every wrap of the lower long from the first wrap on, or wait it out, taking no 64-bit time in a group until it has run through one wrap since its first cog started.
+**What any workaround must do:** never use a 64-bit time, a `DEBUG_TIMESTAMP` stamp included, taken inside a stale window. Either keep the window from opening, with a cog of the group running at every wrap of the lower long from the first wrap on, or wait it out, taking no 64-bit time in a group until it has run through one wrap since its first cog started.
 
 **One way, proven on P2 hardware:** a keeper cog, started by the first line of `main()` and never stopped.
 
@@ -770,7 +770,7 @@ The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run 
 
 The account below is the clean-room design study's reading of the mechanism, stated at the level of the programmer's model. The measurements in the next section match it.
 
-The P2 has one 64-bit counter, but a cog does not read it directly. Each group of four cogs holds its own copy of the counter's two longs, and `GETCT` reads the group's copy: the lower long without `WC`, the upper long with it. The group refreshes the two halves of its copy on different schedules. `GETMS()` and `GETSEC()` are computed by the Spin2 interpreter from the calling cog's own `GETCT WC` and `GETCT`, so they inherit whatever that copy holds. A `DEBUG_TIMESTAMP` stamp does too: the debugger reads it with `GETCT WC` and `GETCT` in the debug interrupt of the cog that sends the message. The debugger's display of the counter when it stops a cog at a breakpoint is read by the same code; it was not tested separately.
+The P2 has one 64-bit counter, but a cog does not read it directly. Each group of four cogs holds its own copy of the counter's two longs, and `GETCT` reads the group's copy: the lower long without `WC`, the upper long with it. The group refreshes the two halves of its copy on different schedules. The Spin2 interpreter computes `GETMS()` and `GETSEC()` from the calling cog's own `GETCT WC` and `GETCT`, so they inherit whatever that copy holds. A `DEBUG_TIMESTAMP` stamp does too: the debugger reads it with `GETCT WC` and `GETCT` in the debug interrupt of the cog that sends the message. The debugger's display of the counter when it stops a cog at a breakpoint is read by the same code; it was not tested separately.
 
 Everything that sets a target on the counter works on the lower half alone: the counter events and the `SETQ` timeout compare the lower long with their target, `WAITX` waits a count of clocks, and Spin2's `WAITCT()`, `POLLCT()`, `WAITMS()` and `WAITUS()` compare a plain `GETCT` with theirs. None of them reads the upper half, so none sees the stale window, even at the wrap where the upper half jumps.
 
