@@ -51,6 +51,19 @@ the raw pair lines.
 | 13 | `e3-group0-idle-band-test.spin2` | with every cog of 0-3 stopped across wraps, do cogs 0-3 show the same band, closed in one wrap? | VO-J-016 | `CONFIRMED` | EF-079 |
 | 14 | `e3-band-closes-in-one-wrap-test.spin2` | from a lag of 8 wraps, does the band close at the first wrap the group runs through; do Spin2 `GETMS()`/`GETSEC()` see it? | VO-J-017 | `CONFIRMED` (both) | EF-080 |
 
+**E3 scope (authored 2026-09-29, NOT YET RUN):** which other instructions and features the stale
+upper long reaches — every one taken as affected and every one taken as not, proved either way.
+Written by the arbiter, then reviewed adversarially before the run by a fresh agent per test
+(`VERIFICATION-OPPORTUNITIES.md`, VO-J-018..020). The sources live in
+`manuals/p2-errata/audit/verification-tests/` until they run; each moves to `tests/` here with its
+deciding lines once its verdict is re-derived from the log.
+
+| # | Test | Question | VO | Verdict | EF |
+|---|---|---|---|---|---|
+| 15 | `e3-scope-pasm2-ct-events-test.spin2` | do `WAITCTn`, `POLLCTn`, `JCTn`, `JNCTn`, the CT interrupts, the `SETQ` timeout or `WAITX` see the stale upper long, in the window or across its closing wrap; does a cog held in `WAITCT1` count as running? | VO-J-018 | — | — |
+| 16 | `e3-scope-spin2-counter-methods-test.spin2` | do Spin2 `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` or `GETCT()` see it (with `GETMS()`/`GETSEC()` as the affected control)? | VO-J-019 | — | — |
+| 17 | `e3-scope-debug-timestamp-test.spin2` (+ `e3-scope-debug-timestamp-verdict.py`) | does a `DEBUG_TIMESTAMP` stamp sent from the window carry it, from Spin2 `debug()` and PASM2 `DEBUG`? | VO-J-020 | — | — |
+
 ## How the tests were built — independence is the point
 
 Each test was written by an agent given **only its prediction**, with no access to the study's
