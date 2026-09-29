@@ -20,9 +20,10 @@
 - **Chapters are headed by erratum number** (*Erratum E3*), in the contents and running heads as well
 - **The summary table** lists all seven errata and, for each, what any workaround must do and the proven way
 - **E3 is described as a stale window with a known end**: it opens when a group of four cogs that missed a counter wrap starts a cog, and closes at the group's next wrap, in one step, whatever the lag (confirmed on silicon from 1, 2 and 8 missed wraps). It holds for cogs 0-3 as well as 4-7, and Spin2's `GETMS()` and `GETSEC()` read short inside it, as `GETCT WC` does
-- **E3's workaround condition** is now "no 64-bit time inside the stale window", with two proven ways to meet it: keep a cog of the group running at every wrap (the keeper, or a cog of your own; a cog held in `WAITATN` or `WAITX` counts), or wait out one wrap
+- **E3's workaround condition** is now "no 64-bit time inside the stale window", with two proven ways to meet it: keep a cog of the group running at every wrap (the keeper, or a cog of your own; a cog held in `WAITATN`, `WAITX` or `WAITCT1` counts), or wait out one wrap
 - **Three more E3 test programs** in Appendix A and the examples archive: a waiting keeper, cogs 0-3 with every cog stopped, and eight missed wraps with `GETMS()`/`GETSEC()`
-- **Sources** add the Parallax Spin2 Language Documentation, for what `GETMS()` and `GETSEC()` return
+- **E3 names everything the stale window reaches, and everything it does not**: `DEBUG_TIMESTAMP` stamps join `GETCT WC`, `GETMS()` and `GETSEC()`, since a message sent from the window carries a stamp one wrap early per missed wrap and prints out of time order; the counter events, the `SETQ` timeout, `WAITX`, and Spin2's `GETCT()`, `WAITCT()`, `POLLCT()`, `WAITMS()` and `WAITUS()` are unaffected, inside the window and across its closing wrap. A cog held in `WAITCT1` keeps its group current, as one held in `WAITATN` or `WAITX` does. Three more test programs in Appendix A and the examples archive, one with a script that reads the stamps from the saved log
+- **Sources** add the Parallax Spin2 Language Documentation, for what `GETMS()` and `GETSEC()` return and what `DEBUG_TIMESTAMP` stamps
 
 ## v0.1.0 (2026-09-25) — Community Review Draft
 

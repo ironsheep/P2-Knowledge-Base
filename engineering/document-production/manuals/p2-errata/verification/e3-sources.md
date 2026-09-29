@@ -574,7 +574,7 @@ the printed ms/s values. `grep -c "RIG FAIL\|DISCARD\|TIMEOUT"` = 0 on all three
 | "After eight missed wraps, 171,798 ms at 200 MHz" | LOG-8:14 (`ms 171_798..171_799`), computed by `MULDIV64` from `clkfreq` in the rig |
 | *Closes*: cog 4 `$0000_0000_$E013_BB32` → `$0000_0009_$1001_546A` | LOG-8 B4L p10 (the last pair before wrap 9) and X4E p1; step line LOG-8:413 |
 | "all ten pairs of each reading agreed, early and late" | re-derivation above; LOG-A2 as §3.1 |
-| "Only `GETCT`, `GETMS()` and `GETSEC()` were exercised" | the three rigs and RIG-A/-B/-FIX read nothing else |
+| "Only `GETCT`, `GETMS()` and `GETSEC()` were exercised" | the three rigs and RIG-A/-B/-FIX read nothing else — **removed 2026-09-29**: replaced by the measured list, §11 |
 | *Workaround* condition and "waiting it out" | LOG-8:277-384, LOG-G:169-265: every reading after the one closing wrap read D=0 / CURRENT |
 | "a keeper held in `WAITATN`, and one held in `WAITX`, each kept cogs 4-7 current through a wrap" | LOG-W:75, :115 |
 | "The P2 Documentation does not say which cog a free-cog start chooses" | SD: `grep -n -i "free cog\|lowest\|first available"` — :758-759 and :814-822 speak of "a free cog" with no order; SPIN2: no order stated (checked 2026-09-27) |
@@ -596,3 +596,52 @@ the printed ms/s values. `grep -c "RIG FAIL\|DISCARD\|TIMEOUT"` = 0 on all three
 | run lengths "about 66 s … 87 s … 216 s" | LOG-W:18 → :177 (65.8 s); LOG-G:17 → :294 (87.2 s); LOG-8:9 → :416 (216.1 s) |
 | Status: "2026-09-27, run once each" | one download per log (LOG-W:14, LOG-G:14, LOG-8:6) |
 | Status *Affects* "measured on cogs 4-7 and on cogs 0-3" | LOG-A2, LOG-8 (4-7); LOG-G (0-3) |
+
+## 11. What else it reaches (2026-09-29, task «#364»): three more runs
+
+Stephen, 2026-09-29: prove every counter consumer as affected or not. Three rigs, reviewed
+adversarially before the run (VERIFICATION-OPPORTUNITIES VO-J-018..020), each run once.
+
+| Tag | File |
+|---|---|
+| RIG-P / LOG-P | `M/audit/verification-tests/e3-scope-pasm2-ct-events-test.spin2` / `logs/debug_260929-140800.log` (download LOG-P:14, 15,479 bytes) |
+| RIG-S / LOG-S | `M/audit/verification-tests/e3-scope-spin2-counter-methods-test.spin2` / `logs/debug_260929-140656.log` (LOG-S:14, 15,120 bytes) |
+| RIG-T / LOG-T / SCRIPT | `M/audit/verification-tests/e3-scope-debug-timestamp-test.spin2` / `logs/debug_260929-141026.log` (LOG-T:14, 12,481 bytes) / `e3-scope-debug-timestamp-verdict.py` |
+| ARCHIVE-P / -S / -T / -PY | `M/examples-library/e3-pasm2-counter-targets-test.spin2` / `e3-spin2-counter-methods-test.spin2` / `e3-debug-timestamp-test.spin2` / `e3-debug-timestamp-verdict.py` — the rigs with the development header replaced by the generated one; below `CON` they differ in 1–3 printed "SCOPE TEST" / script-name strings and 1–2 comments, and then, for the armed `spin2-style` gate: 12 letter+digit locals renamed (`d1..d3` → `tgtFirst..tgtThird`, `f1..f3` → `endFirst..endThird`, §2.1.4), 16 `@param` descriptions unified (§2.5) — these two binary-neutral (`cmp` against the build before them, 2026-09-29) — and 5 early `return`s in cog 0's `evaluate()`/`verdict()` routed to one exit (§5.2). The PASM2 probe (`DAT`) and `spin_probe` are unchanged source apart from the local renames. Not re-run on silicon |
+| DBG | `engineering/document-production/manuals/p2-xbyte-programming-guide/REF-NO-COMMIT/pnut-ts-parts/Spin2_debugger.spin2` (v55 debugger) — mechanism only, never quoted |
+| LEDGER | EF-081 (RIG-P), EF-082 (RIG-S), EF-083 (RIG-T) |
+
+The as-run sources (RIG-P/-S/-T, also in the campaign `tests/`) rebuild the downloaded binaries
+byte for byte (`cmp`, 2026-09-29). Every verdict was re-derived from the raw lines: LOG-P, 29 arms
+all status 0 and bracket 1 (LOG-P:277-306), all 87 targets `class=0`, late-by 3–49 clocks in
+every phase (CIN, CX, SIN, SX; K 4); SETQ `C=1` in 12 of 12 targets, `C=0` in the other 75;
+running-cog mask exactly as started on every poll. LOG-S, 16 arms status 0 and bracket 1
+(LOG-S:159-175), 48 targets `class=0`, late-by 34–2,202. LOG-T, SCRIPT's per-pair table and a
+hand check of pair 21 and pair 71; stamp minus own payload: cog 0 400–424, cog 1 680, cog 4 696,
+cog 7 25 clocks. `RIG FAIL` / `HALTED` lines: 0 in all three logs.
+
+| Chapter text | Source |
+|---|---|
+| CAUTION *Expected*: "`DEBUG_TIMESTAMP` stamps each DEBUG message with that counter's value" | SPIN2:1018 |
+| CAUTION *Actual* "all four", *Workaround* "send no time-stamped DEBUG message" | LOG-T (EF-083) with §10 |
+| Opening: "Nothing that works on the lower long alone is affected: …" | LOG-P:308-314 (EF-081), LOG-S:176-180 (EF-082) |
+| *Documented*: the `DEBUG_TIMESTAMP` quotation | SPIN2:1018, verbatim ("By declaring this symbol, each DEBUG message will be time-stamped with the 64-bit CT value.") |
+| *What the P2 does*: "A cog held in … `WAITCT1` at the wrap counts as running" | LOG-P:272 (K arm: armed hi 5 with ahi 4, ended `$0000_0006_…` beside cog 0's hi 6, Dend 0), :315; mask `%10001111` on its polls |
+| *Sees*: stamp table `$0000_0001_10CC_275E` / `$0000_0000_10CD_6197` / `$0000_0001_10CE_9896` | LOG-T:129-131 (pair 21, B7E); cog 7 payload `$0000_0000_10CD_617E` (25 clocks before its stamp) |
+| "Spin2 `debug()` and PASM2 `DEBUG` messages are stamped the same way; after the window closed, both carried current stamps" | SCRIPT: B4E/B4L (cog 4, Spin2) and B7E/B7L (cog 7, PASM2) Dts 1 in 40 of 40; X4E/X7E Dts 0 in 20 of 20 (e.g. LOG-T:353-355) |
+| *Does not go wrong*: the measured list, "every PASM2 target fired 3 to 49 clocks after it, in both groups alike" | LOG-P per-target lines (late-by per phase 3..49); LOG-S:176-180 |
+| "The P2 Documentation defines each counter event on the lower long, and a `SETQ` before a wait supplies 'a future CT target value'" | SD:5131 ("Event 1 = CT passed CT1 (CT is the lower 32-bits …)"), SD:5207 |
+| *Workaround*: "a `DEBUG_TIMESTAMP` stamp is one" (a 64-bit time) | SPIN2:1018 ("the 64-bit CT value") |
+| *Workaround*: "one held in `WAITCT1` … kept cogs 4-7 current" | LOG-P:272, :315 |
+| Limits: "`WAITCT1` on a target after the wrap"; "cog 7 held `WAITCT1`" | RIG-P `KEEP_COG = 7`, K arm armed at `ARM_X` ($F800_0000), targets DX1..DX3 = $1000_0000..$1100_0000 after it (past the wrap at +$0800_0000) |
+| *Why*: "the debugger reads it with `GETCT WC` and `GETCT` in the debug interrupt of the cog that sends the message" | DBG `debug_isr` (`cth getct cth wc` / `ctl getct ctl`); measured LOG-T |
+| *Why*: "The debugger's display of the counter when it stops a cog at a breakpoint is read by the same code; it was not tested separately" | DBG `debug_entry` (`cth2 getct cth2 wc` / `ctl2 getct ctl2`); no rig reads it |
+| *Why*: "the counter events and the `SETQ` timeout compare the lower long …, `WAITX` waits a count of clocks, and Spin2's `WAITCT()`, `POLLCT()`, `WAITMS()` and `WAITUS()` compare a plain `GETCT` with theirs" | SD:5131-5133, :5207, :5299; `WAITX` = 2 + D clocks (`pasm2/waitx.yaml`, authoring aid); INTERP `pwct` (`getct w` / `cmpm w,x wc`), `waitus_` (`getct w` … `jmp #pwct`); measured LOG-P, LOG-S |
+| *Proven*, *What else it reaches* table: 14 control arms (hi 0, 1, 2), 7 IN (hi 1), 7 ACROSS (hi 1, 3), K (hi 5), 3–49 / 4 clocks | LOG-P SUMMARY (:277-306): phases 0/1 = 14 arms, 2 = 7, 3 = 7, 4 = 1; `arm=`/`cog0@armed=` hi per arm; per-phase late-by from the `target` lines |
+| "Every `SETQ` timeout set C" | LOG-P: `C=1` on the 12 SETQ target lines |
+| Spin2: "all 16 arms … 34 to 2,202 clocks … every `GETCT()` lay between cog 0's two lower longs"; `GETMS()`/`GETSEC()` current in 1-3, short then current in 4-7 | LOG-S:159-175 (status 0, bracket 1, G armed/done per arm); per-target late-by 34..2,202; e.g. LOG-S:90 (cog 0 22,827 ms / 22 s, probe 1,352 ms / 1 s) |
+| `DEBUG_TIMESTAMP` paragraph: "Every stamp lay just after the counter value its own message carried: 25 clocks after it in cog 7, 400 to 696 clocks in the Spin2 cogs"; "all 40 … one wrap behind"; "all 20 were current, as were all 40 from cog 1" | re-derivation above; SCRIPT table (C0/C1E/C1L/C2E Dts 0, 40 pairs) |
+| *The test program*: the `do_waitct`, `p_arm_ct` and `getct q_hi … wrlong q_lo` excerpts | ARCHIVE-P, ARCHIVE-T (verbatim, ≤ 76 columns; checked by script, 2026-09-29) |
+| run lengths "about 130 s", "about 44 s", "about 45 s" | LOG-P:14 → :316 (130.4 s); LOG-S:14 → :182 (44.5 s); LOG-T:14 → :488 (45.1 s) |
+| Status *Confirmed*: "`DEBUG_TIMESTAMP`, and what is not affected — 2026-09-29, run once each"; *Workaround*: "a keeper held in `WAITCT1` — 2026-09-29, run once" | one download per log (LOG-P/-S/-T:14) |
+| APP-A: "three or fewer printed lines each … were reworded, and the Spin2 code in cog 0 … was brought to the Spin2 authoring guide (local names, and one exit from each method); their measuring code is unchanged" | ARCHIVE-P/-S/-T `diff` against RIG-P/-S/-T below `CON` (2026-09-29), as the ARCHIVE row above |

@@ -31,6 +31,9 @@ python3 engineering/tools/sync-manual-examples.py --doc <this manual's dir>
 | `e3-workaround-waiting-cog-test.spin2` | E3 workaround | Whether a keeper held in `WAITATN`, and one held in `WAITX`, keeps cogs 4-7 current through a wrap; then, with no keeper, that the erratum returns. |
 | `e3-cogs-0-3-stale-window-test.spin2` | E3 | With every cog of 0-3 stopped across two wraps, the upper long read in cogs 1 and 3 before and after the group's next wrap. |
 | `e3-stale-window-closes-test.spin2` | E3 | After eight missed wraps, the upper long read in cogs 4 and 7, and `GETMS()` and `GETSEC()` in a Spin2 cog, before and after the group's next wrap. |
+| `e3-pasm2-counter-targets-test.spin2` | E3 | Whether `WAITCT1-3`, `POLLCT1-3`, `JCT1-3`, `JNCT1-3`, the CT interrupts, the `SETQ` timeout and `WAITX` time as in an up-to-date group, inside the stale window and across its closing wrap; whether a cog held in `WAITCT1` keeps its group current. |
+| `e3-spin2-counter-methods-test.spin2` | E3 | Whether `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` and `GETCT()` time as in an up-to-date group, inside the stale window and across its closing wrap; `GETMS()` and `GETSEC()` alongside. |
+| `e3-debug-timestamp-test.spin2` | E3 | Whether a `DEBUG_TIMESTAMP` stamp on a message sent from the stale window carries the sender's stale upper long, from Spin2 `debug()` and PASM2 `DEBUG`. Its stamps are judged from the saved log by `e3-debug-timestamp-verdict.py`. |
 | `e4-getxacc-clear-gating-test.spin2` | E4 | Whether `GETXACC` clears the accumulators with the streamer idle, in a non-Goertzel mode, and inside a Goertzel burst. |
 | `e5-goertzel-one-clock-lag-test.spin2` | E5 | How many terms a reading after a Goertzel burst holds, and where the last term goes. |
 | `e5-goertzel-sinc2-iteration-count-test.spin2` | E5 (scope) | Not an erratum test: the documented SINC2 constraint that E5's workaround does not cover. |
@@ -46,16 +49,27 @@ Appendix A of the manual, *The Test Programs*, lists them the same way.
 Every program is one file: Spin2 in cog 0, and the measurement itself in PASM2
 in a cog of its own, started by `COGINIT`. `DEBUG_COGS = %0000_0001` confines
 the debug interrupt to cog 0, which only collects the results from hub RAM and
-prints them. Two E3 programs differ: the eight-wrap test also runs a Spin2 cog,
-since `GETMS()` and `GETSEC()` are Spin2 methods; and the cogs 0-3 test stops
-cog 0 to empty its group, so its reference and reporting cog is cog 4 and
-`DEBUG_COGS` names cogs 0 and 4.
+prints them. Five E3 programs differ:
+
+- the eight-wrap test also runs a Spin2 cog, since `GETMS()` and `GETSEC()`
+  are Spin2 methods;
+- the cogs 0-3 test stops cog 0 to empty its group, so its reference and
+  reporting cog is cog 4 and `DEBUG_COGS` names cogs 0 and 4;
+- the PASM2 counter-targets test runs its probe in cogs 1-7, and the Spin2
+  counter-methods test runs its probe as Spin2 in cogs 1-7;
+- the `DEBUG_TIMESTAMP` test puts the debugger in cogs 0, 1, 4 and 7, since
+  the stamp is taken by the debugger in the cog that sends the message.
 
 1. Compile with DEBUG enabled: `pnut-ts -d <file>.spin2` (or PNut with DEBUG).
    Without `-d` every `debug()` is dropped and the program prints nothing.
 2. Download to RAM on a bare P2 board, with a reset. The E3 programs check that
    the counter starts from zero, so the download must reset the part.
 3. Watch the DEBUG terminal. The program ends with its verdict line.
+4. For the `DEBUG_TIMESTAMP` test only: save the DEBUG log, then run
+   `python3 e3-debug-timestamp-verdict.py <saved log>`. The program cannot
+   read its own stamps (the debugger adds them on the way to the terminal),
+   so its verdict line says only whether the stale window was where the test
+   needs it; the script prints the stamp verdicts.
 
 Each program checks its controls first; if any control fails it prints a
 `RIG FAIL` line and no verdict. Every measured value is printed, not only the
@@ -81,6 +95,9 @@ At 200 MHz, as run:
 | E3 waiting-cog workaround test | ends about 66 s after reset (three wraps) |
 | E3 cogs 0-3 test | ends about 87 s after reset (four wraps) |
 | E3 eight-wrap test | ends about 216 s after reset (ten wraps) |
+| E3 PASM2 counter-targets test | ends about 130 s after reset (six wraps) |
+| E3 Spin2 counter-methods test | ends about 44 s after reset (two wraps) |
+| E3 `DEBUG_TIMESTAMP` test | ends about 45 s after reset (two wraps) |
 | E7 test | prints its output over about 23 s |
 | E7 workaround test | prints its output over about 8 s |
 | SINC2 test | prints its output over about 5 s |

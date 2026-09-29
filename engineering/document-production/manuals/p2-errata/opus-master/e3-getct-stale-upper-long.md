@@ -1,14 +1,14 @@
 # Erratum E3: GETCT Returns a Stale Upper Long {#ch-e3}
 
 ::: caution
-**Expected:** `GETCT WC` returns the upper 32 bits of the P2's one 64-bit free-running counter, and Spin2's `GETMS()` and `GETSEC()` return the time since boot from that counter, whichever cog calls them.
+**Expected:** `GETCT WC` returns the upper 32 bits of the P2's one 64-bit free-running counter, Spin2's `GETMS()` and `GETSEC()` return the time since boot from that counter, and `DEBUG_TIMESTAMP` stamps each DEBUG message with that counter's value, whichever cog is running.
 
-**Actual:** in a cog of a group of four cogs (0-3 or 4-7) that has had no running cog at one or more wraps of the counter's lower long, all three return a time behind by 2^32^ clocks (21.47 s at 200 MHz) for each wrap missed, until that group runs through its next wrap.
+**Actual:** in a cog of a group of four cogs (0-3 or 4-7) that has had no running cog at one or more wraps of the counter's lower long, all four give a time behind by 2^32^ clocks (21.47 s at 200 MHz) for each wrap missed, until that group runs through its next wrap.
 
-**Workaround:** keep a cog of the group running at every wrap, or take no 64-bit time in that group until it has run through one wrap; see *A proven workaround*.
+**Workaround:** keep a cog of the group running at every wrap, or take no 64-bit time and send no time-stamped DEBUG message in that group until it has run through one wrap; see *A proven workaround*.
 :::
 
-This erratum affects a program that takes a 64-bit time, with `GETCT WC`, `GETMS()` or `GETSEC()`, in a cog of cogs 4-7 and starts its first cog there more than 2^32^ clocks after reset, 21.47 s at 200 MHz. It affects in the same way a program that stops every cog of either group and starts one there again after a wrap has passed. The error is a window, not a lasting state: it closes at the first wrap the group runs through, at most 2^32^ clocks after it opens. This chapter calls it the *stale window*. Plain `GETCT`, which reads the lower long, is not affected.
+This erratum affects a program that takes a 64-bit time, with `GETCT WC`, `GETMS()` or `GETSEC()`, or that sends DEBUG messages with `DEBUG_TIMESTAMP` declared, in a cog of cogs 4-7 and starts its first cog there more than 2^32^ clocks after reset, 21.47 s at 200 MHz. It affects in the same way a program that stops every cog of either group and starts one there again after a wrap has passed. The error is a window, not a lasting state: it closes at the first wrap the group runs through, at most 2^32^ clocks after it opens. This chapter calls it the *stale window*. Nothing that works on the lower long alone is affected: plain `GETCT`, the counter events, the `SETQ` timeout of a wait, `WAITX`, and Spin2's `GETCT()`, `WAITCT()`, `POLLCT()`, `WAITMS()` and `WAITUS()` (see *What does not go wrong*).
 
 ## What the P2 is documented to do {#sec-e3-documented}
 
@@ -32,6 +32,10 @@ and what `GETMS()` returns:
 
 > Get milliseconds since booting, uses 64-bit system counter and CLKFREQ, rolls over every 49.7 days.
 
+and, among the symbols that configure the debugger, what `DEBUG_TIMESTAMP` does:
+
+> By declaring this symbol, each DEBUG message will be time-stamped with the 64-bit CT value.
+
 Neither document qualifies these values by cog number, or by which other cogs are running. The KNOWN BUGS section of the P2 Documentation does not list this behaviour.
 
 ## What the P2 does {#sec-e3-actual}
@@ -39,7 +43,7 @@ Neither document qualifies these values by cog number, or by which other cogs ar
 The eight cogs form two groups of four: cogs 0-3 and cogs 4-7. `GETCT` does not read the counter itself; each group reads its own copy of the counter's two longs, and the two halves of that copy behave differently.
 
 - **The lower long is current.** In every pair the tests took, including every pair in which the upper long was stale, the lower long a sampling cog read with plain `GETCT` lay between the reference cog's own lower-long reads taken just before and just after it.
-- **The upper long advances at a wrap of the lower long only while at least one cog of the group is running.** A group with no running cog at a wrap keeps its previous upper long. A cog held in `WAITATN` or in `WAITX` at the wrap counts as running: each, alone in cogs 4-7, kept the group current.
+- **The upper long advances at a wrap of the lower long only while at least one cog of the group is running.** A group with no running cog at a wrap keeps its previous upper long. A cog held in `WAITATN`, in `WAITX` or in `WAITCT1` at the wrap counts as running: each, alone in cogs 4-7, kept the group current.
 
 From these two rules the stale window follows, and each of its parts was measured:
 
@@ -73,10 +77,20 @@ The three lower longs are in order; the upper long is one behind, a gap of 2^32^
 | cog 0, after the window closed | 194,637 | 194 |
 | cog 5, after the window closed | 194,637 | 194 |
 
+A `DEBUG_TIMESTAMP` stamp shows the same error. The debugger prints each message's stamp after the cog number, as `$` and the upper and lower longs. After one missed wrap, cog 0 and a PASM2 cog of the group sent three messages, one after the other; the terminal received them in this order:
+
+| Sent by | Stamp |
+|---|---|
+| cog 0 | `$0000_0001_10CC_275E` |
+| cog 7, in the stale window | `$0000_0000_10CD_6197` |
+| cog 0 | `$0000_0001_10CE_9896` |
+
+Cog 7's message came second, but its stamp is 21.47 s earlier than the first message's: in a log that mixes messages from both groups, the stale window's messages carry times out of order by 2^32^ clocks for each wrap missed. Spin2 `debug()` and PASM2 `DEBUG` messages are stamped the same way; after the window closed, both carried current stamps.
+
 In your program the stale window has four parts:
 
 - **It opens** when your program starts the first cog of a group that has had no running cog at one or more wraps. From reset that is any first cog of 4-7 started more than 2^32^ clocks after reset.
-- **Inside it,** a 64-bit time stamp, a `GETMS()` or a `GETSEC()` you take in that group is behind one taken in an up-to-date group by 2^32^ clocks for each wrap missed. The error is steady: all ten pairs of each reading agreed, early and late in the span.
+- **Inside it,** a 64-bit time stamp, a `GETMS()`, a `GETSEC()` or a `DEBUG_TIMESTAMP` stamp you take in that group is behind one taken in an up-to-date group by 2^32^ clocks for each wrap missed. The error is steady: all ten pairs of each reading agreed, early and late in the span.
 - **It closes** at the group's next wrap, at most 2^32^ clocks after it opens, and the upper long catches up in one step. A 64-bit interval you time across that wrap includes 2^32^ clocks that did not pass for each wrap the group missed: cog 4, 8 behind, read `$0000_0000_$E013_BB32` late in one span and `$0000_0009_$1001_546A` early in the next, an upper long that went from 0 to 9 across one wrap.
 - **After it,** the group reads current for as long as one of its cogs keeps running. It opens again only if every cog of the group stops and a wrap passes before one starts.
 
@@ -85,11 +99,11 @@ What does not go wrong:
 - Plain `GETCT` returned a current lower long in every pair of every reading, in both groups.
 - A cog of a group that had a running cog at every wrap read the same upper long as the reference cog, in every reading of every test.
 - Before the first wrap the correct upper long is zero, and a group's copy starts from zero at reset, so a program that has run for fewer than 2^32^ clocks since reset is not exposed.
-- Only `GETCT`, `GETMS()` and `GETSEC()` were exercised. The counter events, which the P2 Documentation defines on the lower long, were not tested.
+- Nothing that works on the lower long alone is affected, even at the wrap that closes the window, where the group's upper long jumps. In PASM2: `ADDCT1`-`ADDCT3` with `WAITCT1`-`WAITCT3`, `POLLCT1`-`POLLCT3`, `JCT1`-`JCT3` and `JNCT1`-`JNCT3`; interrupts on the CT1-CT3 events; the `SETQ` timeout of a wait, tested on `WAITATN`; and `WAITX`. In Spin2: `GETCT()`, `WAITCT()`, `POLLCT()`, `WAITMS()` and `WAITUS()`. Each ran in a cog inside a stale window, and again with its target set after the closing wrap so that the jump came while it waited, and each timed exactly as in an up-to-date group; every PASM2 target fired 3 to 49 clocks after it, in both groups alike. The P2 Documentation defines each counter event on the lower long, and a `SETQ` before a wait supplies "a future CT target value" for its timeout.
 
 ## A proven workaround {#sec-e3-workaround}
 
-**What any workaround must do:** never use a 64-bit time taken inside a stale window. Either keep the window from opening, with a cog of the group running at every wrap of the lower long from the first wrap on, or wait it out, taking no 64-bit time in a group until it has run through one wrap since its first cog started.
+**What any workaround must do:** never use a 64-bit time taken inside a stale window; a `DEBUG_TIMESTAMP` stamp is one. Either keep the window from opening, with a cog of the group running at every wrap of the lower long from the first wrap on, or wait it out, taking no 64-bit time in a group until it has run through one wrap since its first cog started.
 
 **One way, proven on P2 hardware:** a keeper cog, started by the first line of `main()` and never stopped.
 
@@ -118,7 +132,7 @@ The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run 
 
 **Other ways that meet the condition.** The condition asks for no 64-bit time inside a stale window, not for a keeper.
 
-- **A cog of your own.** A cog your program already starts in 4-7 before the first wrap and never stops keeps the window from opening, and then no keeper is needed. It does not have to be executing: a keeper held in `WAITATN`, and one held in `WAITX`, each kept cogs 4-7 current through a wrap on P2 hardware. So a driver cog that spends its time waiting for an event or a delay meets the condition, provided it starts before the first wrap and is never stopped. The P2 Documentation does not say which cog a free-cog start chooses, so start that cog in 4-7 by its number, or check the cog number the start returns. Run B, under *How it was proven on P2 hardware*, is the evidence for a cog of the program's own: cog 4, started at the beginning of the program and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two.
+- **A cog of your own.** A cog your program already starts in 4-7 before the first wrap and never stops keeps the window from opening, and then no keeper is needed. It does not have to be executing: a keeper held in `WAITATN`, one held in `WAITX`, and one held in `WAITCT1` each kept cogs 4-7 current through a wrap on P2 hardware. So a driver cog that spends its time waiting for an event or a delay meets the condition, provided it starts before the first wrap and is never stopped. The P2 Documentation does not say which cog a free-cog start chooses, so start that cog in 4-7 by its number, or check the cog number the start returns. Run B, under *How it was proven on P2 hardware*, is the evidence for a cog of the program's own: cog 4, started at the beginning of the program and kept running, read the same upper long as cog 0 before the first wrap and after each of the first two.
 - **Waiting it out.** A program that cannot keep a cog of 4-7 running can wait: once the group's first cog has run through one wrap, at most 2^32^ clocks (21.47 s at 200 MHz) after it starts, the group reads current. The test with eight missed wraps is the evidence: the readings taken after the one closing wrap, and after the wrap that followed, read current in both cogs sampled. A time taken before that wrap is behind, and an interval that spans it is too long.
 
 **The cost.** The keeper takes one cog for the life of the program: it holds cog 7, and seven cogs remain for your program. A program that already needs all eight cogs cannot add the keeper, but meets the condition if one of its own cogs of 4-7 is running from before the first wrap and is never stopped. The keeper executes a jump to itself and nothing else. Waiting it out costs no cog, only the wait.
@@ -127,8 +141,8 @@ The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run 
 
 **The limits of the proof:**
 
-- Two waits were tested as the only running cog of a group at a wrap: `WAITATN` that nothing ends, and `WAITX` with a count of `$FFFF_FFF0`. Other wait instructions were not tested. Spin2's `WAITMS()` and `WAITUS()` are not a wait instruction but a loop that reads the counter, so a Spin2 cog in them is executing, as the polling cogs of the tests were.
-- Only cog 7 was tested as the keeper executing a jump; cogs 7 and 6 held the waits. The cogs of 4-7 that read the counter after a wrap were cogs 4, 5 and 6, each started after one or two wraps and stopped again after its reading.
+- Three waits were tested as the only running cog of a group at a wrap: `WAITATN` that nothing ends, `WAITX` with a count of `$FFFF_FFF0`, and `WAITCT1` on a target after the wrap. Other wait instructions were not tested. Spin2's `WAITMS()` and `WAITUS()` are not a wait instruction but a loop that reads the counter, so a Spin2 cog in them is executing, as the polling cogs of the tests were.
+- Only cog 7 was tested as the keeper executing a jump; cogs 7 and 6 held `WAITATN` and `WAITX`, and cog 7 held `WAITCT1`. The cogs of 4-7 that read the counter after a wrap were cogs 4, 5 and 6, each started after one or two wraps and stopped again after its reading.
 - The keeper ran alone in cogs 4-7 through two wraps. The test program then stopped it, as a positive control.
 - The tests ran once each, at 200 MHz, with the program downloaded to RAM with a reset.
 
@@ -136,7 +150,9 @@ The block was confirmed on silicon on 2026-09-26, on a P2 board at 200 MHz, run 
 
 The account below is the clean-room design study's reading of the mechanism, stated at the level of the programmer's model. The measurements in the next section match it.
 
-The P2 has one 64-bit counter, but a cog does not read it directly. Each group of four cogs holds its own copy of the counter's two longs, and `GETCT` reads the group's copy: the lower long without `WC`, the upper long with it. The group refreshes the two halves of its copy on different schedules. `GETMS()` and `GETSEC()` are computed by the Spin2 interpreter from the calling cog's own `GETCT WC` and `GETCT`, so they inherit whatever that copy holds.
+The P2 has one 64-bit counter, but a cog does not read it directly. Each group of four cogs holds its own copy of the counter's two longs, and `GETCT` reads the group's copy: the lower long without `WC`, the upper long with it. The group refreshes the two halves of its copy on different schedules. `GETMS()` and `GETSEC()` are computed by the Spin2 interpreter from the calling cog's own `GETCT WC` and `GETCT`, so they inherit whatever that copy holds. A `DEBUG_TIMESTAMP` stamp does too: the debugger reads it with `GETCT WC` and `GETCT` in the debug interrupt of the cog that sends the message. The debugger's display of the counter when it stops a cog at a breakpoint is read by the same code; it was not tested separately.
+
+Everything that sets a target on the counter works on the lower half alone: the counter events and the `SETQ` timeout compare the lower long with their target, `WAITX` waits a count of clocks, and Spin2's `WAITCT()`, `POLLCT()`, `WAITMS()` and `WAITUS()` compare a plain `GETCT` with theirs. None of them reads the upper half, so none sees the stale window, even at the wrap where the upper half jumps.
 
 The lower half is refreshed on every clock on which any cog of the group is running. If the group has been idle, the first clock on which one of its cogs runs brings the lower half up to date, so a newly started cog reads a current lower long.
 
@@ -148,7 +164,7 @@ Running here means the state a cog is in between its start and its stop, the sta
 
 ## How it was proven on P2 hardware {#sec-e3-proof}
 
-Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program, run once, confirmed the workaround, and three more, run once each, measured the stale window; they are described after them.
+Two programs, Run A and Run B, confirmed the erratum. Each was downloaded to RAM with a chip reset and run on a bare P2 board at 200 MHz, with the debugger confined to cog 0. Each was run twice, from two builds: as first written, and with its comments and layout conformed to house style and its measuring code unchanged. Every D value and every verdict matched between the two builds. A third program, run once, confirmed the workaround; three more, run once each, measured the stale window; and three more, run once each, measured what else it reaches. They are described after them.
 
 **Arrangement.** Cog 0 is the reference. Cog 1, in the cogs 0-3 group, and cog 4, in the cogs 4-7 group, run the same sampler: on each new request from cog 0 it executes `GETCT WC` then `GETCT`, writes both longs to hub RAM, then writes an acknowledgment. One **pair** is taken as follows: cog 0 reads its own counter (`GETCT WC`, `GETCT`), writes a request, waits for the acknowledgment, reads the sampler's two longs, and reads its own counter again. The sampler's reads therefore fall between cog 0's two reads.
 
@@ -238,6 +254,23 @@ The verdict rule was set before the run. The workaround is confirmed if the four
 
 Cog 4's own upper long, read as cog 0's minus D, was 0 in the last pair before wrap 9 and 9 in the first pair after it. Every short Spin2 pair was behind by 171,798 or 171,799 ms and by 172 s.
 
+**What else it reaches.** Three more programs ran once each, on 2026-09-29, on the same board at 200 MHz, downloaded to RAM with a reset, with the same controls; each printed no `RIG FAIL` line. In each, the cogs of 0-3 other than cog 0 run the same code as the cogs of 4-7, as a control in an up-to-date group, and every cog of 4-7 starts after its group has missed one wrap.
+
+*Counter targets in PASM2.* A probe cog arms three targets, 84 to 168 ms after its own `GETCT`, and records the lower long at which each is met, in one of seven ways: `ADDCT1`-`ADDCT3` then `WAITCT1`-`WAITCT3`; the same targets polled with `POLLCT1`-`POLLCT3`, with `JCT1`-`JCT3`, or with `JNCT1`-`JNCT3`; interrupts `INT1`-`INT3` on the CT1-CT3 events; three `SETQ` timeouts on a `WAITATN` that nothing ends; and three `WAITX`. Each way ran inside a stale window, and again armed $0800_0000 clocks before the wrap that closes it, with targets 1.34 to 1.43 s ahead, so that the group's upper long jumped while all three were pending. Each ran in both groups.
+
+| Arms | Cog 0 upper at arming | Arming cog's upper, then after the last target | Targets met, clocks after each target |
+|---|---|---|---|
+| 14 in cogs 1-3 | 0, 1, 2 | as cog 0's | 3 to 49 |
+| 7 in cogs 4-7, inside the window | 1 | one behind, then one behind | 3 to 49 |
+| 7 in cogs 4-7, across the closing wrap | 1, 3 | one behind, then current | 3 to 49 |
+| 1 in cog 7, alone in 4-7, held in `WAITCT1` across wrap 6 | 5 | one behind, then current | 4 |
+
+Every `SETQ` timeout set C. The last row is a keeper: with cog 7 the only running cog of 4-7, held in `WAITCT1` at the wrap, the group read current after it.
+
+*Counter methods in Spin2.* A Spin2 probe cog does the same with `WAITCT()`, a `REPEAT UNTIL POLLCT()` loop, `WAITMS()` and `WAITUS()`, each on three targets, and judges its own `GETCT()` against cog 0's lower longs read just before and just after. In all 16 arms, in both groups, inside the window and across its closing wrap, every target was met 34 to 2,202 clocks after it and every `GETCT()` lay between cog 0's two lower longs. The probes' `GETMS()` and `GETSEC()`, read beside cog 0's, were current in cogs 1-3; in cogs 4-7 they read short by one wrap inside the window and current after it closed.
+
+*`DEBUG_TIMESTAMP`.* With the symbol declared and the debugger in cogs 0, 1, 4 and 7, cog 0 and a probe cog sent messages in turn, each carrying its sender's own `GETCT WC` and `GETCT`: cog 0, the probe, cog 0 again. The probes were cog 1, a Spin2 cog in cogs 0-3; cog 4, a Spin2 cog sending with `debug()`; and cog 7, a PASM2 cog sending with `DEBUG`. Every stamp lay just after the counter value its own message carried: 25 clocks after it in cog 7, 400 to 696 clocks in the Spin2 cogs. Inside the window, all 40 stamps from cogs 4 and 7 were one wrap behind cog 0's stamp on the message sent before them; after the closing wrap all 20 were current, as were all 40 from cog 1.
+
 ## The test program {#sec-e3-program}
 
 The erratum's two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and `e3-getct-stale-upper-long-runB.spin2` (Run B). They share the sampler, the pair protocol and the controls, and differ only in when cog 4 starts and which readings are taken. The workaround's test program is `e3-workaround-keeper-cog-test.spin2`. The stale-window programs are:
@@ -245,6 +278,12 @@ The erratum's two files are `e3-getct-stale-upper-long-runA.spin2` (Run A) and `
 - `e3-workaround-waiting-cog-test.spin2`, the waiting keepers;
 - `e3-cogs-0-3-stale-window-test.spin2`, cogs 0-3 with every cog stopped;
 - `e3-stale-window-closes-test.spin2`, eight missed wraps, with `GETMS()` and `GETSEC()`.
+
+The programs that measured what else it reaches are:
+
+- `e3-pasm2-counter-targets-test.spin2`, the PASM2 counter targets and the `WAITCT1` keeper;
+- `e3-spin2-counter-methods-test.spin2`, the Spin2 counter methods;
+- `e3-debug-timestamp-test.spin2`, `DEBUG_TIMESTAMP`, with `e3-debug-timestamp-verdict.py`, which reads the stamps from the saved log.
 
 The sampler is started explicitly in cog 1 and in cog 4 (`COGINIT #1` and `COGINIT #4`), with its hub mailbox address in `PTRA`. On each new request number it reads the counter and writes both longs:
 
@@ -325,7 +364,48 @@ keepWaitx       waitx   ##$FFFF_FFF0
 
 The cogs 0-3 test is the one program whose reference is not cog 0: its `main()` checks the start state, starts the method `controller` in cog 4 with `COGSPIN`, and stops cog 0, so `DEBUG_COGS` names cogs 0 and 4. The eight-wrap test adds a Spin2 method, `spin_sampler`, run in cog 5, which answers each request with `GETMS()` then `GETSEC()`.
 
-Each file prints every pair raw, a summary line per reading, and a one-line verdict (the eight-wrap test prints a second verdict line for `GETMS()`/`GETSEC()`). All are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and downloaded to RAM; the download must reset the part, since each program checks that the counter starts from zero. Run A ends about 105 s after reset, Run B about 44 s after reset, the workaround's test program about 67 s after reset, the waiting-cog test about 66 s, the cogs 0-3 test about 87 s, and the eight-wrap test about 216 s.
+The PASM2 counter-targets test replaces the sampler with a probe that, on each request, runs the command it names. Each command reads the counter, sets its three targets, writes the counter reading and an ARMED flag to hub RAM, and then waits; the `WAITCT` command is:
+
+```pasm2
+do_waitct       call    #p_arm_ct
+                call    #p_announce
+                waitct1
+                getct   p_f1
+                waitct2
+                getct   p_f2
+                waitct3
+                getct   p_f3
+                jmp     #p_report
+```
+
+and `p_arm_ct` sets the three targets from one reading of the counter:
+
+```pasm2
+p_arm_ct        getct   p_ahi           wc      ' this group's UPPER copy
+                getct   p_alo                   ' this group's LOWER copy
+                mov     p_t1, p_alo
+                addct1  p_t1, p_d1
+                mov     p_t1, p_alo
+                addct2  p_t1, p_d2
+                mov     p_t1, p_alo
+                addct3  p_t1, p_d3
+                ret
+```
+
+Cog 0 reads its own counter when it sees ARMED and again when it sees the probe's DONE flag, which gives each arm its own upper-long difference at arming and at the end. The Spin2 counter-methods test does the same in a Spin2 probe method, `spin_probe`, started in each probe cog with `COGSPIN`. The `DEBUG_TIMESTAMP` test declares the symbol, names cogs 0, 1, 4 and 7 in `DEBUG_COGS`, and has each probe send its counter reading in its own message. The PASM2 probe reads the counter and writes it to hub RAM:
+
+```pasm2
+                getct   q_hi            wc      ' this group's UPPER copy
+                getct   q_lo                    ' this group's LOWER copy
+                wrlong  q_hi, ptra[MB_HI_IDX]
+                wrlong  q_lo, ptra[MB_LO_IDX]
+```
+
+and then sends the same two longs with a PASM2 `DEBUG`, as `pay_hi` and `pay_lo` in a message that begins `PRB`.
+
+The program itself cannot read the stamps: the debugger adds them to the message on its way to the terminal. So the program decides only whether the window was where the test needs it, and `e3-debug-timestamp-verdict.py`, run on the saved log, compares each probe message's stamp with cog 0's and with the counter value the message carried.
+
+Each file prints every pair or arm raw, a summary line per reading or arm, and its verdict lines: one for the erratum programs and the workaround tests (the eight-wrap test prints a second for `GETMS()`/`GETSEC()`), one per instruction or method for the two counter-target tests, and one for the window in the `DEBUG_TIMESTAMP` test, whose stamp verdict the script prints. All are compiled with `pnut-ts` 1.55.8 with DEBUG enabled (`-d`) and downloaded to RAM; the download must reset the part, since each program checks that the counter starts from zero. Run A ends about 105 s after reset, Run B about 44 s after reset, the workaround's test program about 67 s after reset, the waiting-cog test about 66 s, the cogs 0-3 test about 87 s, the eight-wrap test about 216 s, the PASM2 counter-targets test about 130 s, the Spin2 counter-methods test about 44 s, and the `DEBUG_TIMESTAMP` test about 45 s.
 
 ## Status {#sec-e3-status}
 
@@ -334,7 +414,7 @@ Each file prints every pair raw, a summary line per reading, and a one-line verd
 | Erratum | E3 |
 | Published by Parallax | No |
 | Found by | Predicted by the clean-room design study; confirmed here |
-| Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice; the stale window's close from eight missed wraps, the cogs 0-3 group, and `GETMS()`/`GETSEC()` — 2026-09-27, run once each |
-| Workaround proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup workaround: a keeper cog in cog 7 started by the first line of `main()`. A keeper held in `WAITATN` or `WAITX`, and waiting out one wrap — 2026-09-27, run once |
-| Affects | `GETCT WC`, `GETMS()` and `GETSEC()` in a cog of a four-cog group that had no running cog at one or more wraps of the lower long, until that group runs through its next wrap (measured on cogs 4-7 and on cogs 0-3); plain `GETCT` is not affected |
-| Test program | `e3-getct-stale-upper-long-runA.spin2`, `e3-getct-stale-upper-long-runB.spin2`, `e3-workaround-keeper-cog-test.spin2`, `e3-workaround-waiting-cog-test.spin2`, `e3-cogs-0-3-stale-window-test.spin2`, `e3-stale-window-closes-test.spin2` |
+| Confirmed on silicon | Yes — 2026-09-24, on a P2 board at 200 MHz, run twice; the stale window's close from eight missed wraps, the cogs 0-3 group, and `GETMS()`/`GETSEC()` — 2026-09-27, run once each; `DEBUG_TIMESTAMP`, and what is not affected — 2026-09-29, run once each |
+| Workaround proven on silicon | Yes — 2026-09-26, on a P2 board at 200 MHz, run once; a one-time startup workaround: a keeper cog in cog 7 started by the first line of `main()`. A keeper held in `WAITATN` or `WAITX`, and waiting out one wrap — 2026-09-27, run once; a keeper held in `WAITCT1` — 2026-09-29, run once |
+| Affects | `GETCT WC`, `GETMS()`, `GETSEC()` and `DEBUG_TIMESTAMP` stamps in a cog of a four-cog group that had no running cog at one or more wraps of the lower long, until that group runs through its next wrap (measured on cogs 4-7 and on cogs 0-3); plain `GETCT`, the counter events, the `SETQ` timeout, `WAITX`, and Spin2's `GETCT()`, `WAITCT()`, `POLLCT()`, `WAITMS()` and `WAITUS()` are not affected |
+| Test program | `e3-getct-stale-upper-long-runA.spin2`, `e3-getct-stale-upper-long-runB.spin2`, `e3-workaround-keeper-cog-test.spin2`, `e3-workaround-waiting-cog-test.spin2`, `e3-cogs-0-3-stale-window-test.spin2`, `e3-stale-window-closes-test.spin2`, `e3-pasm2-counter-targets-test.spin2`, `e3-spin2-counter-methods-test.spin2`, `e3-debug-timestamp-test.spin2` with `e3-debug-timestamp-verdict.py` |

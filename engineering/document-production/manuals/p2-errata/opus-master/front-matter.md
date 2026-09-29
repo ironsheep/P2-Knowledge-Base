@@ -102,7 +102,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 ## Sources
 
 - **Parallax Propeller 2 Documentation** (Chip Gracey, Parallax Inc.), the v35 edition (Rev B/C) and the current online edition, which adds the 2024 note on Goertzel SINC2 mode: what the design says, including its KNOWN BUGS section.
-- **Parallax Spin2 Language Documentation** (Chip Gracey, Parallax Inc.), v55: what Spin2's `GETMS()` and `GETSEC()` return (Erratum E3).
+- **Parallax Spin2 Language Documentation** (Chip Gracey, Parallax Inc.), v55: what Spin2's `GETMS()` and `GETSEC()` return, and what `DEBUG_TIMESTAMP` stamps (Erratum E3).
 
 These two are the only documents this manual cites for what the P2 is meant to do.
 - **Tests on P2 hardware** (P2 Knowledge Base Project): every erratum in this manual was confirmed on **Rev C** silicon, the revision in production, by a test program that is included in the examples archive.
@@ -149,7 +149,7 @@ The part keeps its defect, so this manual offers workarounds, never fixes: code 
 |---|---|---|:--:|---|
 | **E1** | SETQ Block Transfers Lose Their Pointer Step | `SETQ`/`SETQ2` block `RDLONG`/`WRLONG`/`WMLONG` with a `PTRx` expression, when an `ALTx`, `AUGS` or `AUGD` sits between them | Yes | Nothing between `SETQ` and the transfer (keep them adjacent; rule at each use) |
 | **E2** | An Immediate ALTx Takes a Pending AUGS | an `ALTx` with an immediate `#S` between `AUGS` and its target | Yes | No immediate-`#S` `ALTx` between `AUGS` and its target (give the `ALTx` a register `S`; rule at each use) |
-| **E3** | GETCT Returns a Stale Upper Long | `GETCT WC`, `GETMS()` and `GETSEC()` in a cog whose group of four had no cog running at a wrap of the counter's lower long, until the group's next wrap | No | No 64-bit time inside that window: a cog of the group running at every wrap, or one wrap waited out (a keeper cog started first; one-time startup workaround) |
+| **E3** | GETCT Returns a Stale Upper Long | `GETCT WC`, `GETMS()`, `GETSEC()` and `DEBUG_TIMESTAMP` stamps in a cog whose group of four had no cog running at a wrap of the counter's lower long, until the group's next wrap | No | No 64-bit time inside that window: a cog of the group running at every wrap, or one wrap waited out (a keeper cog started first; one-time startup workaround) |
 | **E4** | GETXACC Clears Only During a Goertzel Burst | `GETXACC` while the streamer is idle or in any mode other than Goertzel | No | Take each burst's sums as a difference of idle reads (the `burst_sums` routine, SINC1; helper routine) |
 | **E5** | The Goertzel Accumulators Trail by One Clock | every Goertzel burst: its last term is added to the next burst | No | Deliver the held term before reading (the `burst_sums` routine, SINC1; helper routine) |
 | **E6** | In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC | a DAC smart-pin mode with `TT` = `%00` whose ADC is switched with `OUT` | No | `TT` bit 0 set in the `WRPIN` word (rule at each use) |
