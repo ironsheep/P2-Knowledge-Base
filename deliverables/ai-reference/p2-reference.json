@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-10-01",
-    "last_updated": "2026-10-01T21:13:04.244208",
+    "last_updated": "2026-10-01T21:57:30.887757",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-10-01T21:13:04.244208",
+    "extraction_date": "2026-10-01T21:57:30.887757",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -18452,7 +18452,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-10-01T21:13:04.244208",
+    "extraction_date": "2026-10-01T21:57:30.887757",
     "categories": {
       "keywords": {
         "count": 37,
@@ -19670,10 +19670,15 @@
           "FRAC": {
             "operator": "FRAC",
             "type": "operator",
-            "description": "Calculate fraction\n",
+            "description": "Unsigned fraction: x FRAC y = (x << 32) / y (Parallax Spin2 Documentation v55,\noperator table; assignment form var FRAC= y). The result is a 32-bit fraction of\n2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249\n(hardware-verified, EF-089). The interpreter runs it as the CORDIC QFRAC.\n",
             "category": "Math",
             "examples": [
               "frac := dividend FRAC divisor"
+            ],
+            "divide_by_zero": "x FRAC 0 does not trap: it returns NOT x (1 -> $FFFF_FFFE, $8000_0000 -> $7FFF_FFFF, $FFFF_FFFF -> 0), every time. Hardware-verified on Rev C (EF-089).",
+            "related": [
+              "language/pasm2/qfrac.yaml",
+              "language/spin2/operators/op_adddiv.yaml"
             ]
           },
           ":": {
@@ -20445,8 +20450,14 @@
           "/": {
             "operator": "/",
             "type": "operator",
-            "description": "Divide/float/modulo/unsigned\n",
-            "category": "Divide"
+            "description": "Signed divide, return quotient: x / y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var /= y). The interpreter divides the magnitudes with the\nCORDIC (QDIV) and negates the quotient when the operand signs differ, so it rounds\ntoward zero: -1000 / 3 = -333, 1000 / -3 = -333, -1000 / -3 = 333 (hardware-verified,\nEF-089).\n",
+            "category": "Divide",
+            "divide_by_zero": "x / 0 does not trap: it returns $FFFF_FFFF (-1) for x >= 0 and 1 for x < 0, every time; x /= 0 the same. Hardware-verified on Rev C (EF-089): the CORDIC quotient for a zero divisor is $FFFF_FFFF, negated when x is negative. Guard the divisor if a zero is possible.",
+            "related": [
+              "language/spin2/operators/op_divdiv.yaml",
+              "language/spin2/operators/op_adddiv.yaml",
+              "language/pasm2/qdiv.yaml"
+            ]
           },
           "<=.": {
             "operator": "<=.",
@@ -20635,8 +20646,14 @@
           "+/": {
             "operator": "+/",
             "type": "operator",
-            "description": "Divide/float/modulo/unsigned\n",
-            "category": "Divide"
+            "description": "Unsigned divide, return quotient: x +/ y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var +/= y). Both operands are treated as unsigned 32-bit\nvalues.\n",
+            "category": "Divide",
+            "divide_by_zero": "x +/ 0 does not trap: it returns $FFFF_FFFF for every x, every time; x +/= 0 the same. Hardware-verified on Rev C (EF-089).",
+            "related": [
+              "language/spin2/operators/op_addmodulo.yaml",
+              "language/spin2/operators/op_div.yaml",
+              "language/pasm2/qdiv.yaml"
+            ]
           },
           "? :": {
             "operator": "? :",
@@ -20650,8 +20667,14 @@
           "//": {
             "operator": "//",
             "type": "operator",
-            "description": "Divide/float/modulo/unsigned\n",
-            "category": "Divide"
+            "description": "Signed divide, return remainder: x // y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var //= y). The remainder takes the sign of x\n(-1000 // 3 = -1, 1000 // -3 = 1; hardware-verified, EF-089).\n",
+            "category": "Divide",
+            "divide_by_zero": "x // 0 does not trap: it returns x unchanged, every time; x //= 0 the same. Hardware-verified on Rev C (EF-089).",
+            "related": [
+              "language/spin2/operators/op_div.yaml",
+              "language/spin2/operators/op_addmodulo.yaml",
+              "language/pasm2/qdiv.yaml"
+            ]
           },
           ">.": {
             "operator": ">.",
@@ -27836,7 +27859,8 @@
               "Uses 64-bit intermediate result",
               "Unsigned operation: all parameters and the result are 32-bit unsigned (Parallax Spin2 Documentation v55, MULDIV64)",
               "Useful for scaling and ratio calculations",
-              "More precise than (a*b)/c for large values"
+              "More precise than (a*b)/c for large values",
+              "Divisor 0 does not trap: MULDIV64(a, b, 0) returns NOT (the upper 32 bits of a*b), every time -- so $FFFF_FFFF whenever a*b < 2^32 (e.g. MULDIV64(1000, 1000, 0)); MULDIV64($FFFF_FFFF, $FFFF_FFFF, 0) = 1. Guard the divisor if a zero is possible. Hardware-verified on Rev C (EF-089); the interpreter runs QMUL then QDIV."
             ],
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
