@@ -1387,6 +1387,47 @@ not an erratum. Spin2 v55's "a condition has no effect" (:62) is right about the
 literally, wrong about the code. *Limits:* the `SKIP` idiom tested outside an ISR only; one cog;
 200 MHz; run once. *Source:* `…/tests/test-so109-conditional-brk-breaks.spin2`.
 
+### EF-086 · E8's scope: a no-wait `RDFAST` releases `RDBYTE`, `RDWORD`, `WRBYTE` and `WRWORD` exactly as `RDLONG`/`WRLONG`; a released read writes the flags of the value it returns and still steps `PTRA++`; a no-wait `WRFAST` releases nothing; a `SETQ` block `RDLONG` in the window wrote one wrong long and the cog then stopped responding — `CONFIRMED` (predicted arms) / `OBSERVED` (`WRFAST`, `SETQ`)
+*How proven:* `test-o29b-rdfast-nowait-hub-op-scope` (VO-J-023), the EF-084 construction (primer,
+`RDFAST`/`WRFAST`, k `NOP`s, instruction under test; 64 cells × 16 repetitions; each run with a
+`NOP`-for-the-FIFO control and the waiting form), cog 0 reporting through a hub line buffer.
+*Result (log `debug_261001-014330`, 2026-10-01, first run, clean):* **positive control** — C1, PS,
+T1 at k = 0 (688 primer, 43 per repetition by δ 8 8 7 6 5 4 3 2) and k = 7 (sentinel 1024)
+reproduced EF-084 (l.90). Every `NOP` control and waiting form correct in all 1024 records or
+cells; no repetition disagreed in any run; **in every predicted test run the released cells were
+exactly T1's 43** (re-derived from the rows).
+- **Flags** (`RDLONG … WCZ`, flags preset C = 1 Z = 1, captured after the read): primer
+  `$A5A5_0001` → released records `($A5A5_0001, C=1, Z=0)`; primer `$0000_0000` → `($0000_0000,
+  C=0, Z=1)`; correct records `($5A5A_0002, C=0, Z=0)`; 688/336 each; no preset left, no late change
+  (l.201, 203). A released read writes C and Z from the long it returns.
+- **`PTRA++`:** `PTRA` stepped +4 in all 688 released and all 336 correct records (l.205): a
+  released read still advances its pointer.
+- **`RDBYTE` (offsets 0–3) and `RDWORD` (0, 2):** released in T1's 43 cells at k = 0, none at
+  k = 7; each released value is the previous read's long shifted by the instruction's own offset and
+  masked to its size (`$D4`/`$C3`/`$B2`/`$A1`; `$C3D4`/`$A1B2` from `$A1B2_C3D4`), with that value's
+  flags (l.490, 495; totals R 688 S 336 in every test run).
+- **`WRBYTE` (0–3) and `WRWORD` (0, 2):** with a read-back following, 43 cells kept the target's old
+  long unchanged — the write lost — and 21 released the read-back; with nothing following, all 64
+  landed (l.788, 793; old 1376 / new 336 / primer 336 in every W1 run).
+- **No-wait `WRFAST`** (FIFO flushed by a blocking `RDFAST` after every trial): **no early release**
+  of `RDLONG … WCZ` or `WRLONG` at k = 0 or k = 7 (reads: 2,048 test records correct with their
+  flags; writes: `(new,new)` in all 1,024 cells at k = 0 and at k = 7; l.906, 908).
+- **`SETQ #7` + `RDLONG` (block of 8)** into a guarded sacrificial register range: the `NOP` control
+  and the waiting form read the right block in 1024/1024 records with cog RAM unchanged outside
+  the range (l.922–937). After the no-wait `RDFAST` at k = 0, the first trial's record held **the
+  previous read's long in register 0 and registers 1–7 not written** (l.942, 951); **the measuring
+  cog then did not finish the run within 1 s** and cog 0 stopped it (l.940–941); 1,023 records were
+  never written (l.952).
+**Grounds:** the release is one mechanism across widths and directions (EF-084 → E8): every hub
+read and write width is affected the same way, at the same cells. The returned value is the
+previous read's long seen through this instruction's own size and offset, and the flags follow that
+value. `WRFAST`'s no-wait form does not release a following hub instruction. A released block read
+is the most damaging case seen: one wrong long, the rest unwritten, and the cog lost. *Limits:* the
+`SETQ` result is one trial — why the cog stopped (stalled or running elsewhere), whether it wrote
+hub RAM after, and k = 7 for the block read were not observed; `RETA` and an interrupt inside the
+window not tested; hub execution cannot use `RDFAST`; one cog; cog execution; 200 MHz; run once.
+*Source:* `…/tests/test-o29b-rdfast-nowait-hub-op-scope.spin2`.
+
 
 ## Open / pending empirical questions
 

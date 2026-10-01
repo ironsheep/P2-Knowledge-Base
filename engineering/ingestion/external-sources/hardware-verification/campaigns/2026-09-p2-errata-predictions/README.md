@@ -63,7 +63,7 @@ sources here rebuild the binaries that ran byte for byte.
 | 16 | `e3-scope-spin2-counter-methods-test.spin2` | do Spin2 `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` or `GETCT()` see it (with `GETMS()`/`GETSEC()` as the affected control)? | VO-J-019 | `CONFIRMED` (none affected; `GETMS`/`GETSEC` affected) | EF-082 |
 | 17 | `e3-scope-debug-timestamp-test.spin2` (+ `e3-scope-debug-timestamp-verdict.py`) | does a `DEBUG_TIMESTAMP` stamp sent from the window carry it, from Spin2 `debug()` and PASM2 `DEBUG`? | VO-J-020 | `CONFIRMED` (affected, both) | EF-083 |
 
-**Study briefs O29 and SO109 (2026-10-01, each run once):** two new predictions from the study
+**Study briefs O29 and SO109, and E8's scope (2026-10-01, each run once):** two new predictions from the study
 (golden source 0.1.5, both labelled user-reported). Each test was built by a fresh agent from its
 brief alone, encodings re-derived on `pnut-ts` 1.55.8, then reviewed adversarially before the
 run by another fresh agent — no blocker (`VERIFICATION-OPPORTUNITIES.md`, VO-J-021..022). SO109
@@ -74,7 +74,7 @@ erratum candidate.
 |---|---|---|---|---|---|
 | 18 | `test-o29-rdfast-nowait-releases-hub-op.spin2` | after a no-wait `RDFAST`, is a following `RDLONG` released early with the previous read's long, and a `WRLONG` released early and lost; what gap clears it; does the waiting form; does a blocking first `RDFAST` remove E7? | VO-J-021 | `CONFIRMED` (all four; E7B clean) | EF-084 |
 | 19 | `test-so109-conditional-brk-breaks.spin2` | with break-on-`BRK` armed, does a condition-false `BRK` still enter the debug ISR, showing the previous code; do the `SKIP` and `JMP` forms gate it? | VO-J-022 | `CONFIRMED` (documented behaviour) | EF-085 |
-| 20 | `test-o29b-rdfast-nowait-hub-op-scope.spin2` | E8's scope: what a released `RDLONG … WCZ` puts in C and Z, and whether a released `PTRA++` read still steps the pointer; are `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` released the same way; what a no-wait `WRFAST` and a `SETQ` block read do in the window? | VO-J-023 | not run | — |
+| 20 | `test-o29b-rdfast-nowait-hub-op-scope.spin2` | E8's scope: what a released `RDLONG … WCZ` puts in C and Z, and whether a released `PTRA++` read still steps the pointer; are `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` released the same way; what a no-wait `WRFAST` and a `SETQ` block read do in the window? | VO-J-023 | `CONFIRMED` (flags, byte/word); `WRFAST` unaffected; `SETQ` block lost the cog | EF-086 |
 
 ## How the tests were built — independence is the point
 
@@ -215,6 +215,21 @@ VERDICT SO109 BREAK: CONFIRMED - e1, e2 and e3 each entered the debug ISR with t
 VERDICT SO109 CODE: CONFIRMED - STALE: e1/e2/e3 show $A1/$D4/$D4, the last condition-true code
 VERDICT SO109 CANCELS: CONFIRMED - no record from s1 (SKIP), j1 (taken JMP), w1 (if_z JMP taken), w3 (if_z SKIP taken)
 VERDICT SO109 IDIOMS: CONFIRMED - w2 (if_z JMP around an unconditional BRK) delivered $F4; w4 (if_z SKIP #1 ahead of it) delivered $F6
+```
+
+**20 — E8 scope** (`debug_261001-014330`): the flags, pointer, byte/word and `WRFAST` results, and
+the `SETQ` block arm:
+```
+VERDICT O29B FLAGS C: CONFIRMED - every released record carried the predicted flags and every correct record its own; released in T1's same 43 cells in every repetition | before the run: released ($A5A5_0001, C=1 Z=0) / correct ($5A5A_0002, C=0 Z=0) | released cells 43 per repetition (T1: 43), same cells as T1 in 64 of 64; late flag changes 0
+VERDICT O29B FLAGS Z: CONFIRMED - every released record carried the predicted flags and every correct record its own; released in T1's same 43 cells in every repetition | before the run: released ($0000_0000, C=0 Z=1) / correct ($5A5A_0002, C=0 Z=0) | released cells 43 per repetition (T1: 43), same cells as T1 in 64 of 64; late flag changes 0
+OBSERVED O29B PTRA++: released cells (rep0) 43 of 64 (same cells as T1: 64 of 64); ptra after minus before, all reps: released cells: 0 x0, +4 x688, other x0 | correct cells: 0 x0, +4 x336, other x0 | other values: 0 x0, +4 x0, other x0 | first other delta 0 | waiting form (sentinel, +4) 1024 of 1024; disagreeing cells 0
+  RB1 T k0 all reps: R 688 S 336 W 0 Q 0 V 0 L 0 D 0 F 0 X 0 of 1024 | rep0 released value 43 by delta 8 8 7 6 5 4 3 2 | cells with disagreeing reps 0
+  WB1 T1 k0 all reps, values (rb1+rb2): old 1376 new 336 primer 336 seed 0 other-lane 0 stream 0 other 0 of 2048; (new,new) cells 0 of 1024 | cells with disagreeing reps 0
+OBSERVED O29B WRFAST-RDLONG: OBSERVED: no early release - no primer record after the no-wait WRFAST at k=0 or k=7, nor after the waiting WRFAST; records neither primer nor sentinel (seed, stream, other) 0 of 3072; flags not the value's 0, preset C=1 Z=1 survived 0, changed after the read 0; cells with disagreeing reps 0
+OBSERVED O29B WRFAST-WRLONG: OBSERVED: no early release - W1 (new,new) in all 64 cells at k=0 and k=7 and after the waiting WRFAST; W2 (seed,new) in all 64; cells with disagreeing reps 0
+  QB T k0 af0 rep0 a0-7: MUUUUUUU  agree 1.......
+  QB T k0 per long 0-7, all reps: primer 1 0 0 0 0 0 0 0 | seed 0 1 1 1 1 1 1 1 | other 0 0 0 0 0 0 0 0
+OBSERVED O29B SETQ-BLOCK: OBSERVED: measuring cog lost during the SETQ block arm (run QB T k0); cog-RAM registers changed outside the sacrificial range in the completed runs 0 (see INTEGRITY lines)
 ```
 
 ## What it changes
