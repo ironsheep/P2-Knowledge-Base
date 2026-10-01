@@ -20,6 +20,31 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.22.0] - 2026-10-01
+
+**The silicon errata proven on Rev C hardware, each beside the instruction it affects, with the workaround that ran.**
+
+### Added
+
+- **`RDFAST` carries the no-wait erratum**: a hub instruction started under 16 clocks after a no-wait `RDFAST` can complete early; the rule is the waiting form or 16 clocks, e.g. `WAITX #12`
+- **Every hub read and write states its share of it** — `RDBYTE`/`RDWORD`/`RDLONG` return the previous read's data and flags, `WRBYTE`/`WRWORD`/`WRLONG` can be lost — and now link their siblings and `RDFAST`
+- **`GETCT` carries the stale upper long** a four-cog group reads after missing a counter wrap, with the keeper-cog workaround; `GETMS()` and `GETSEC()` carry it too, and `GETCT()` states it is unaffected
+- **`GETXACC` carries both Goertzel errata** — its clear acts only during a Goertzel burst, and a burst's last term lands in the next — with the `burst_sums` routine that returns exact sums
+- **The DAC smart-pin modes state that `OUT` runs the ADC only while `TT` bit 0 is set**
+- **Symptom-phrase search terms** on `RDFAST`, `GETCT`, `GETXACC` and `BRK`
+
+### Changed
+
+- **`BRK`'s conditional-breakpoint example uses the documented form** — the opposite condition on a `SKIP #1` before an unconditional `BRK` — and states that a condition on `BRK` gates only its code
+- **A cancelled block `PTRx` delta is the plain expression's own step**: +4 for `ptra++`, +12 for `ptra++[3]`
+- **The intervening-`ALTx` `AUGS` erratum names where it lands** — the `ALTx`'s D-register auto-increment — and settles `AUGD`
+- **The SINC2 iteration-count constraint** cites Parallax's note, states its mechanism and both proven workarounds
+- **Hub RAM slices are long-granular**: slice = address bits [4:2]
+- **`MULDIV64` is unsigned**, operands and quotient
+- **`FBLOCK` is described as what it does**: it sets the next start address and block count, and never waits
+
+---
+
 ## [1.21.2] - 2026-09-28
 
 **Every DAT mailbox example says which cog it serves.**
