@@ -121,8 +121,10 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 `RDFAST`, the next `RDLONG` returned the previous hub read's long in 43 of 64 hub alignments (flags:
 EF-086, below); a `WRLONG` was released before it landed and lost
 when an immediate `RDLONG` followed (43 of 64), and landed when nothing followed. From 16 clocks
-(7 non-hub instructions) after the `RDFAST`, and with the waiting form, every read and write was
-correct. This is P2 Errata **E7** (the planned E8, merged 2026-10-01); F-472 carries the `rdfast.yaml` side.
+(7 non-hub instructions) after the `RDFAST` every read was correct, and with the waiting form every
+read and write (EF-084's write runs were at the next instruction only); **writes of every width at
+16 clocks (`WAITX #12` after the no-wait `RDFAST`) correct in 1,024/1,024 with an immediate
+read-back: EF-088**. This is P2 Errata **E7** (the planned E8, merged 2026-10-01); F-472 carries the `rdfast.yaml` side.
 **Correction:** add to each entry a caution naming the hazard, the rule (no hub-memory instruction
 within 16 clocks of a no-wait `RDFAST`, or use the waiting form) and the E7 reference, citing
 EF-084. **Extended by EF-086 (2026-10-01):** `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` are released in the
@@ -131,7 +133,7 @@ size and offset; a released read writes C and Z from the value it returns (`WC`/
 reveal the failure); `RDLONG … PTRA++` still steps the pointer; a `SETQ` block `RDLONG` either
 wrote one wrong long and overwrote cog registers outside its destination, or the cog did not
 finish (EF-087), and the same rule protects it — the `rdlong.yaml` caution names it; a no-wait
-`WRFAST` releases nothing. Cite EF-084, EF-086 and EF-087 in all six entries.
+`WRFAST` releases nothing. Cite EF-084, EF-086, EF-087 and EF-088 in all six entries.
 
 ## A condition-false `BRK` still breaks, and the KB teaches it as conditional (2026-10-01, found while building the SO109 test) — F-477
 
@@ -281,15 +283,16 @@ per alignment within 8..15 clocks; correct from 16 clocks on.
 **And (EF-084, 2026-10-01, Rev C):** (5) **erratum:** a `RDLONG` issued within 16 clocks of a no-wait
 `RDFAST` is released before its own read in most hub alignments (43 of 64 at the next instruction)
 and returns the **previous hub read's long**; a `WRLONG` there is released before it lands and is
-**lost** if another hub instruction follows; nothing reports either; from 16 clocks (7 non-hub
-instructions) on, and with the waiting form, both are correct. The window coincides with (4): one
+**lost** if a hub read follows at once; nothing reports either; from 16 clocks (7 non-hub
+instructions) on, and with the waiting form, both are correct (reads EF-084; writes at 16 clocks
+EF-088, 2026-10-01 — EF-084's own write runs were at the next instruction only). The window coincides with (4): one
 release, acting on whatever hub instruction is waiting. (6) Making the first `RDFAST` blocking also
 removes (4) (18,432/18,432). The Spin2 interpreter uses only the blocking form.
 **Correction:** add the measured no-wait rules — FIFO reads safe from 15 clocks (the zero read is an
 anti-pattern, also routed to P2 Anti-Patterns), and **no hub-memory instruction within 16 clocks
 of a no-wait `RDFAST`** (or use the waiting form) — and `silicon_errata` entries for (4) → P2 Errata
 **E7** (workarounds: 16 clocks `RDFAST` to `RDFAST`, or a blocking first `RDFAST`; F-474 carries the
-E7 fix wording) and (5) → also **E7** (merged 2026-10-01: one trigger, one window, one workaround — `p2-errata/CLASSIFICATION-GUIDANCE.md`). Cite EF-073/EF-074/EF-084; note SOURCE-ERRATA E-015 (Chip's
+E7 fix wording) and (5) → also **E7** (merged 2026-10-01: one trigger, one window, one workaround — `p2-errata/CLASSIFICATION-GUIDANCE.md`). Cite EF-073/EF-074/EF-084/EF-088; note SOURCE-ERRATA E-015 (Chip's
 unexplained "Yes") as plausibly (4). **Scope as proven (EF-084, EF-086):** every hub read and write
 width (`RDBYTE`/`RDWORD`/`RDLONG`, `WRBYTE`/`WRWORD`/`WRLONG`) and a blocking `RDFAST`; a `SETQ`
 block `RDLONG` in the window either wrote one wrong long, left seven unwritten and overwrote cog

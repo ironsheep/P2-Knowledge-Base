@@ -1,0 +1,1753 @@
+'' ===========================================================================
+''
+''   File.......  e7-workaround-hub-access-test.spin2
+''   Purpose....  Erratum E7 workaround test: whether a RDLONG, or a
+''                WRLONG and the RDLONG after it, started 16 clocks after
+''                a no-wait RDFAST complete with their own hub access in
+''                every hub alignment; the waiting form with no spacing;
+''                WRBYTE and WRWORD after the same spacing; alongside, the
+''                unspaced read and write that show the erratum
+''   Manual.....  P2 Errata
+''   Version....  v0.2.0 (2026-09-26)
+''   Appears in.  Erratum E7: After a No-Wait RDFAST, the Next Hub
+''                Instruction Can Complete Early; Appendix A: The Test
+''                Programs
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+''   This file is an EXAMPLE from the manual above. It is the whole
+''   program the chapters listed above name; where the manual
+''   quotes it, it quotes excerpts.
+''
+'' ===========================================================================
+
+{ WHAT IS MEASURED
+
+  Erratum E7: after a no-wait RDFAST (D[31] = 1), a hub instruction
+  started fewer than 16 clocks after the start of the RDFAST can complete
+  before its own hub access.  A RDLONG then returns the long of the
+  previous hub read, with the flags of that long; a WRLONG followed at
+  once by a RDLONG of the same address can lose its write.  The waiting
+  form (D[31] = 0) completes nothing early.
+
+  This program runs the three workaround blocks the E7 chapter prints,
+  each exactly as printed, in all 64 hub alignments, 16 times each:
+    W_READ   no-wait RDFAST / WAITX #HUB_SPACING_WAITX / RDLONG ... WCZ
+    W_WRITE  no-wait RDFAST / WAITX #HUB_SPACING_WAITX / WRLONG / RDLONG
+    W_WAIT   waiting RDFAST / WRLONG / RDLONG ... WCZ   (no spacing)
+  A no-wait RDFAST takes 2 clocks and WAITX #12 takes 2 + 12, so in
+  W_READ and W_WRITE the first hub instruction after the RDFAST starts
+  16 clocks after the RDFAST starts.  Alongside, not printed: WRBYTE at
+  byte offsets 0..3 and WRWORD at offsets 0 and 2 after the same
+  spacing.  In the same run: two positive controls that reproduce the
+  erratum with no spacing, and four controls that prove the rig.
+
+  The program compiles WITH debug (pnut-ts -d) and confines the debugger
+  to cog 0 (DEBUG_COGS = %0000_0001).  The measuring cog has no debug
+  interrupt, no debug() and no BRK, and sets up no interrupt.  Cog 0 only
+  polls the mailbox while the measuring cog runs, and each cog has its own
+  hub slot.
+
+RIG
+  Bare P2 board, 200 MHz.  No pins, no jumpers, no instruments.  Cog 0
+  (Spin2) fills the hub data, sends one command per run, waits for the
+  measuring cog (1 s timeout), classifies the records from hub RAM and
+  prints them.  The measuring cog (COGINIT, cog execution, PASM below)
+  runs every trial from cog RAM, so no instruction fetch from hub comes
+  between the instructions under test.  Every trial is its own
+  hand-written copy.
+  After the records of every run, the measuring cog writes back the value
+  its nowait register held (MB_ECHO); cog 0 prints RIG FAIL and ends the
+  run if it is not $8000_0000.
+
+HUB LAYOUT (constant addresses, all below the last 16 KB at $7_C000,
+  which holds the debugger and can be write-protected; the program image,
+  its VAR space and cog 0's stack sit far below $4_0000 - main() checks
+  the stack address at run time and prints RIG FAIL if it is not at least
+  16 KB below $4_0000)
+    $4_0000  stream source, 64 longs, long k = $1E1E_0000 + k (never
+             expected in a record: a record holding one shows F)
+    $4_1000  read table: 8 sentinel longs $5A5A_0002, slot bits 0..7
+    $4_2000  write targets: 8 longs, slot bits 0..7
+    $4_3000  primer long $A5A5_0001, slot bits 0
+    $4_4000  records: 1,024 trials x 3 longs, to $4_6FFF
+  Every region starts on a 32-byte boundary, so long k of a region has
+  slot bits k mod 8.  Cog 0 fills the record area with $EEEE_EEEE before
+  every run, so a record the measuring cog never wrote shows U.
+
+ONE TRIAL (measuring cog, cog execution)
+  image R (the reads):
+    value := seed $C3C3_0003 ; flags := $FF (no WCZ)
+    modcz _set, _set wcz            C=1 Z=1 (only trials whose RDLONG has
+                                    WCZ: a missing flag write shows)
+    rdlong tmp, primer              the last hub read is now $A5A5_0001,
+                                    and the cog's hub phase is set
+    the run's instructions          (RUNS, below)
+    wrc / bitz                      C and Z into flags (WCZ trials only)
+    settle (100 x djnz, >= 200 clocks) ; rdlong later, hub_addr
+    record value, later, flags
+  image W (the writes):
+    wrlong old, target ; settle ; check := later := seed ;
+    value := the write data ; flags := $FF
+    [modcz _set, _set wcz]          W_WAIT only
+    rdlong tmp, primer
+    the run's instructions
+    [wrc / bitz]                    W_WAIT only
+    settle ; rdlong later, target ; record check, later, flags
+  hub_stream = $4_0000 + 4*af.  Image R: hub_addr = $4_1000 + 4*a.
+  Image W: hub_long = $4_2000 + 4*a, the target long; hub_addr = hub_long
+  + the byte offset (0 for the long writes).  The read-back reads the
+  whole long at hub_long.
+  From the primer to the last instruction under test there is nothing
+  but the run's instructions; no ## operand there (it would add an AUGS).
+  Repetition r, cell (af, a): record r*64 + af*8 + a.  16 repetitions of
+  all 64 cells per run: 1,024 records.  delta = (a - af) mod 8.
+
+RUNS, IN ORDER.  PREDICTIONS ARE SET DOWN HERE AND PRINTED BEFORE THE
+  FIRST RUN
+   K_CLK    getct / waitx #HUB_SPACING_WAITX / getct            CONTROL
+            MUST: elapsed 16 (GETCT 2 + WAITX 2+12) in all 1,024.
+   C1       preset / primer / NOP in place of the RDFAST /
+            rdlong value, hub_addr wcz                          CONTROL
+            MUST: the sentinel with C=0 Z=0 in all 1,024.
+   PS       primer / rdfast nowait, hub_stream / waitx #200 /
+            rflong value                                        CONTROL
+            MUST: the stream's first long, $1E1E_0000 + af, in all
+            1,024: the RDFAST under test, with the register and the
+            addresses the runs use, starts a stream at its address.
+   C3       primer / NOP in place of the RDFAST /
+            wrlong value, hub_addr / rdlong check, hub_addr     CONTROL
+            MUST: (new,new) in all 1,024.
+   P_READ   preset / primer / rdfast nowait, hub_stream /
+            rdlong value, hub_addr wcz                 POSITIVE CONTROL
+            PREDICT per repetition: 43 cells the primer with C=1 Z=0,
+            by delta 0..7 = 8 8 7 6 5 4 3 2; the other 21 the sentinel
+            with C=0 Z=0.
+   W_READ   preset / primer / the printed read block       WORKAROUND
+            PREDICT: the sentinel with C=0 Z=0 in all 1,024.
+   P_WRITE  primer / rdfast nowait, hub_stream /
+            wrlong value, hub_addr / rdlong check, hub_addr
+                                                       POSITIVE CONTROL
+            PREDICT per repetition: 43 cells (old,old) - the write lost
+            - by delta 8 8 7 6 5 4 3 2, and 21 (primer,new) - the write
+            landed, the read-back completed early.
+   W_WRITE  primer / the printed write block               WORKAROUND
+            PREDICT: (new,new) in all 1,024.
+   W_WAIT   preset / primer / the printed waiting-form block
+                                                           WORKAROUND
+            PREDICT: (new,new) with C=1 Z=0, the new long's flags, in
+            all 1,024.
+   W_WRBYTE+0..+3, W_WRWORD+0, W_WRWORD+2
+            primer / rdfast nowait, hub_stream /
+            waitx #HUB_SPACING_WAITX / wrbyte (wrword) value, hub_addr /
+            rdlong check, hub_long.  Old long $4C3D_2E1F, write data
+            $C8D9_EAFB (WRBYTE writes $FB, WRWORD $EAFB).
+            PREDICT: the merged long, read back at once and read later,
+            in all 1,024 records of each run:
+              WRBYTE +0 $4C3D_2EFB  +1 $4C3D_FB1F  +2 $4CFB_2E1F
+                     +3 $FB3D_2E1F
+              WRWORD +0 $4C3D_EAFB  +2 $EAFB_2E1F
+  Values: primer $A5A5_0001, sentinel $5A5A_0002, seed $C3C3_0003, old
+  $0F0F_0004, new $F0F0_0005.  C of a RDLONG ... WC is bit 31 of the
+  long, Z is "the long is zero": the primer and the new long give C=1
+  Z=0, the sentinel and the old long C=0 Z=0, the preset C=1 Z=1.
+
+RECORD CODES (printed per cell for repetition 0)
+  image R cell: the code of value, then the flags code
+  image W cell: the code of check, of later, then the flags code
+  value codes: O old  N new (the long the write should leave)  P primer
+     S sentinel  D seed (never written)  F a stream long  U $EEEE_EEEE
+     (never written)  X other  . right (K_CLK 16 clocks; PS the stream's
+     first long)
+  flags code: C + 2*Z as a digit, - no WCZ in the trial, U never
+     written, ? other
+  agree code per cell: "." = all 16 repetitions identical, else the
+     number (hex) of repetitions identical to repetition 0.
+  Each run prints its rows, its totals, every cell not clean in some
+  repetition with that count (af a:count), and its first record not
+  clean (for P_READ and P_WRITE: its first record the prediction does
+  not name).
+
+GATES (each failure prints RIG FAIL; every verdict then prints NO VERDICT)
+  Ending the run at once: hub layout (checked before any data is written),
+       measuring cog start-up or done-flag timeout, a nowait echo that is
+       not $8000_0000.
+  After the runs: any record left $EEEE_EEEE in any run; any image R
+       later read (the table long, after settling) not the sentinel;
+       K_CLK, C1, PS or C3 not right in all 1,024 records (this also
+       catches an unnamed value and disagreeing repetitions in a
+       control).
+  POSITIVE CONTROLS (same run; a workaround verdict counts only if its
+  control reproduced the erratum):
+       P_READ reproduced: every record the primer with C=1 Z=0 or the
+       sentinel with C=0 Z=0, every cell's 16 repetitions identical, 43
+       primer cells by delta 8 8 7 6 5 4 3 2.
+       P_WRITE reproduced: every record (old,old) or (primer,new), every
+       cell's 16 repetitions identical, 43 (old,old) cells by delta
+       8 8 7 6 5 4 3 2 and 21 (primer,new).
+
+VERDICTS (printed last), each decided in the order listed
+  VERDICT E7 WORKAROUND READ:  (W_READ; gated on P_READ)
+    NO VERDICT    a gate failed
+    REFUTED       a W_READ record not the sentinel with C=0 Z=0 (the
+                  count, the cells and the first such record printed)
+    INCONCLUSIVE  W_READ clean, but P_READ did not reproduce the erratum
+    CONFIRMED     the sentinel with C=0 Z=0 in all 1,024 records
+  VERDICT E7 WORKAROUND WRITE:  (W_WRITE; gated on P_WRITE)
+    NO VERDICT / REFUTED (a record not (new,new)) / INCONCLUSIVE /
+    CONFIRMED ((new,new) in all 1,024)
+  VERDICT E7 WORKAROUND WAITING:  (W_WAIT; gated on P_WRITE)
+    NO VERDICT / REFUTED (a record not (new,new) with C=1 Z=0) /
+    INCONCLUSIVE / CONFIRMED
+  VERDICT E7 WORKAROUND BYTE/WORD WRITES:  (the six runs; gated on
+    P_WRITE)  NO VERDICT / REFUTED (a record not the merged long; the
+    count per run printed) / INCONCLUSIVE / CONFIRMED
+
+OPCODES (pnut-ts -d -l, v1.55.8 build 9/19/2026, read from the .lst hub
+  image; object offset = cog address * 4 + $F0).  RDFAST is 1100011 1LI,
+  WRLONG 1100011 0LI, WRBYTE 1100010 0LI, WRWORD 1100010 1LI, RDLONG
+  1011000 CZI, NOP $0000_0000.  Cog registers: nowait $0A7, hub_stream
+  $0A8, hub_addr $0A9, hub_long $0AA, value $0AB, check $0AC, c_prim
+  $0B0, c_flags $0B7, c_tmp $0C2; the cog image ends at c_tmp (pasm_end
+  $0C3).
+    modcz _set,_set wcz          $FD7DFE6F  flags preset C=1 Z=1
+    rdlong c_tmp,c_prim          $FB0184B0  the primer (every copy)
+    rdfast nowait,hub_stream     $FC714EA8  L=0 I=0: D = register nowait
+                                            ($8000_0000: no-wait)
+    waitx #HUB_SPACING_WAITX     $FD64181F  L=1, D = 12: no AUGS
+    rdlong value,hub_addr wcz    $FB1956A9  C1, P_READ, W_READ
+    wrlong value,hub_addr        $FC6156A9  C3, P_WRITE, W_WRITE, W_WAIT
+    rdlong check,hub_addr        $FB0158A9  C3, P_WRITE, W_WRITE
+    rdfast #0,hub_stream         $FC7800A8  L=1 D=#0: the waiting form
+    rdlong check,hub_addr wcz    $FB1958A9  W_WAIT
+    wrbyte value,hub_addr        $FC4156A9  W_WRBYTE
+    wrword value,hub_addr        $FC5156A9  W_WRWORD
+    rdlong check,hub_long        $FB0158AA  W_WRBYTE, W_WRWORD
+    waitx #200 / rflong value    $FD65901F / $FD615612  PS only
+    wrc c_flags / bitz c_flags,#1  $FD616E6C / $F4856E01
+    wrlong nowait,ptra[MB_ECHO]  $FC654F06  at cmd_done ($124), after
+                                            every record of the run
+  Adjacency read from the image (object offsets):
+    K_CLK    $1B0 getct, $1B4 waitx #12, $1B8 getct
+    C1       $1C8 modcz, $1CC primer, $1D0 nop, $1D4 rdlong wcz
+    PS       $1E4 primer, $1E8 rdfast, $1EC waitx #200, $1F0 rflong
+    P_READ   $1F8 modcz, $1FC primer, $200 rdfast, $204 rdlong wcz
+    W_READ   $214 modcz, $218 primer, $21C rdfast, $220 waitx #12,
+             $224 rdlong wcz                       (the printed block)
+    C3       $2D0 primer, $2D4 nop, $2D8 wrlong, $2DC rdlong
+    P_WRITE  $2E4 primer, $2E8 rdfast, $2EC wrlong, $2F0 rdlong
+    W_WRITE  $2F8 primer, $2FC rdfast, $300 waitx #12, $304 wrlong,
+             $308 rdlong                           (the printed block)
+    W_WAIT   $310 modcz, $314 primer, $318 rdfast #0, $31C wrlong,
+             $320 rdlong wcz                       (the printed block)
+    W_WRBYTE $330 primer, $334 rdfast, $338 waitx #12, $33C wrbyte,
+             $340 rdlong
+    W_WRWORD $348 primer, $34C rdfast, $350 waitx #12, $354 wrword,
+             $358 rdlong
+  In W_READ and W_WRITE the hub instruction after the RDFAST issues
+  2 (RDFAST) + 14 (WAITX #12) = 16 clocks after the RDFAST issues; K_CLK
+  measures the WAITX on the part.
+  DEBUG OUTPUT.  Every printed line is assembled in lineBuf from hub
+  strings and numbers and sent by the ONE debug(zstr_(@lineBuf)) record in
+  ln_out(); the only other record is debug("DEBUG_END_SESSION").  The
+  listing reports 2 DEBUG records, 24 bytes of DEBUG data.
+
+HOW TO RUN
+  Compile with pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or
+  PNut Ctrl-F10).  Runs once; nothing written to flash.  Output: header
+  with every prediction, one block per run (rows + totals), GATES, the
+  two POSITIVE CONTROL lines, RESULTS, the four VERDICT lines, then
+  DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+' ---- E7 WORKAROUND SPACING: begin (Erratum E7 prints this line) ----
+  HUB_SPACING_WAITX = 12                ' RDFAST 2 + WAITX 2+12 = 16 clocks
+' ---- E7 WORKAROUND SPACING: end ----
+
+  NSLOT           = 8                   ' slot bits: address bits [4:2]
+  NCELL           = NSLOT * NSLOT       ' (af, a) cells per repetition
+  REPS            = 16                  ' repetitions of every cell per run
+  NREC            = REPS * NCELL        ' records (trials) per run: 1,024
+  RECW            = 3                   ' longs per record: v1, v2, flags
+  SETTLE_N        = 100                 ' DJNZ count of a settle loop: >= 200 clocks
+  STREAM_WAIT     = 200                 ' PS: WAITX between the no-wait RDFAST and its RFLONG
+
+  GETCT_OVH       = 2                   ' GETCT-pair overhead
+  WAITX_BASE      = 2                   ' WAITX D costs 2 + D
+  RDFAST_CLK      = 2                   ' a no-wait RDFAST takes 2 clocks
+  CLK_PRED        = GETCT_OVH + WAITX_BASE + HUB_SPACING_WAITX   ' K_CLK elapsed: 16
+  SPACING_CLK     = RDFAST_CLK + WAITX_BASE + HUB_SPACING_WAITX  ' RDFAST start to next start: 16
+
+  PRIMV           = $A5A5_0001          ' primer: the last hub read before the RDFAST
+  SENTV           = $5A5A_0002          ' sentinel: the read table's longs
+  SEEDV           = $C3C3_0003          ' seed: a register before the trial ("never written")
+  OLDV            = $0F0F_0004          ' long writes: the target before the trial
+  NEWV            = $F0F0_0005          ' long writes: what the WRLONG writes
+  OLDBW           = $4C3D_2E1F          ' byte / word writes: the target before the trial
+  DATABW          = $C8D9_EAFB          ' byte / word writes: the data register (byte $FB, word $EAFB)
+  STRM_V          = $1E1E_0000          ' stream region long k = STRM_V + k
+  UNWRITTEN       = $EEEE_EEEE          ' record-area fill: nothing written here
+  FIFO_NO_WAIT    = $8000_0000          ' the nowait register: D[31]=1 no-wait, block count 0
+
+  LONG_MSB        = 31                  ' C of a RDLONG WC = bit 31 of the long
+  FLAG_Z_BIT      = 1                   ' flags record: bit 0 = C, bit 1 = Z
+  FLAG_CODES      = 4                   ' flags record values 0..3 (C + 2*Z)
+  FLAGS_NONE      = $FF                 ' flags record of a trial with no WCZ
+  BITS_PER_BYTE   = 8
+  SIZE_BYTE       = 1                   ' write sizes in bytes
+  SIZE_WORD       = 2
+  SIZE_LONG       = 4
+
+  PRED_REL        = 43                  ' positive controls: released cells per repetition
+  PRED_RDREL      = 21                  ' P_WRITE: (primer,new) cells per repetition
+  NCTRL           = 4                   ' gating controls: K_CLK, C1, PS, C3
+
+  ' -- constant hub layout (HUB LAYOUT in the header) --
+  HUB_STRM        = $4_0000             ' stream source, slot 0 aligned
+  STRM_LONGS      = 64
+  HUB_TBL         = $4_1000             ' read table: sentinels
+  HUB_WTBL        = $4_2000             ' write targets
+  HUB_PRIM        = $4_3000             ' primer long
+  HUB_RES         = $4_4000             ' records
+  HUB_DATA_LO     = HUB_STRM            ' lowest data byte
+  HUB_DATA_END    = HUB_RES + NREC * RECW * 4   ' first byte above the data ($4_7000)
+  HUB_TOP16K      = $7_C000             ' the last 16 KB of hub RAM starts here
+  STACK_MARGIN    = $4000               ' room demanded between cog 0's stack and the data
+
+  STAT_READY      = $0000_0A11          ' measuring cog is up
+  LINE_MAX        = 480                 ' longest printed line (chars); longer text is cut
+  R_CELL_W        = 3                   ' row chars per image R cell: value, flags, space
+  W_CELL_W        = 4                   ' row chars per image W cell: check, later, flags, space
+
+  SUCCESS         = 0
+  E_RIG_FAIL      = -1                  ' the measuring cog did not answer within 1 s
+  E_MODE_FAIL     = -2                  ' the nowait echo is not $8000_0000
+
+CON ' ---- Identifiers ----
+  ' commands to the measuring cog (MB_CMD)
+  #1, CMD_R, CMD_W
+
+  ' runs, in run order
+  #0, RUN_KCLK, RUN_C1, RUN_PS, RUN_C3, RUN_PREAD, RUN_WREAD, RUN_PWRITE, RUN_WWRITE, RUN_WWAIT
+  RUN_WB0         = RUN_WWAIT + 1       ' W_WRBYTE+0 .. +3
+  RUN_WB3         = RUN_WB0 + 3
+  RUN_WW0         = RUN_WB3 + 1         ' W_WRWORD+0
+  RUN_WW2         = RUN_WW0 + 1         ' W_WRWORD+2
+  NRUN            = RUN_WW2 + 1
+
+  ' trial copies in the measuring cog (rvec_tab, wvec_tab order)
+  #0, RCOPY_KCLK, RCOPY_C1, RCOPY_PS, RCOPY_PREAD, RCOPY_WREAD
+  #0, WCOPY_C3, WCOPY_PWRITE, WCOPY_WWRITE, WCOPY_WWAIT, WCOPY_WBYTE, WCOPY_WWORD
+
+  ' value classes (printed codes O N P D S F U X .)
+  #0, VC_OLD, VC_NEW, VC_PRIM, VC_SEED, VC_SENT, VC_STRM, VC_UNWR, VC_OTHER, VC_RIGHT
+
+  ' record kinds:
+  '  KD_CLEAN - what the run predicts when nothing completes early (a control's MUST)
+  '  KD_REL   - completed early: image R the primer; image W (old,old), the write lost
+  '  KD_RDREL - image W (primer,new): the write landed, the read-back completed early
+  '  KD_OTHER - anything the prediction does not name
+  #0, KD_CLEAN, KD_REL, KD_RDREL, KD_OTHER
+  NKIND           = KD_OTHER + 1
+
+  ' mailbox longs (cog 0 <-> measuring cog)
+  '  MB_CMD   - 0 idle / CMD_*; the measuring cog writes 0 when done
+  '  MB_COPY  - trial copy (RCOPY_* / WCOPY_*)
+  '  MB_OLD   - image W: the long the target holds before the trial
+  '  MB_WVAL  - image W: the write data register
+  '  MB_OFFS  - image W: byte offset of the write in the target long
+  '  MB_ALIVE - STAT_READY once the measuring cog runs
+  '  MB_ECHO  - the nowait register's value, written back after the records
+  #0, MB_CMD, MB_COPY, MB_OLD, MB_WVAL, MB_OFFS, MB_ALIVE, MB_ECHO, MB_LEN
+
+  ' record longs
+  #0, REC_V1, REC_V2, REC_FL
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  ' per run
+  long kindCnt[NRUN * NKIND]            ' records per kind over all repetitions
+  long rep0Kind[NRUN * NKIND]           ' repetition-0 cells per kind
+  long runDelta[NRUN * NSLOT]           ' repetition-0 KD_REL cells by delta
+  long runDisagree[NRUN]                ' cells whose 16 repetitions are not identical
+  long runBadCells[NRUN]                ' cells not clean in some repetition
+  long runUnwr[NRUN]                    ' records with a long still $EEEE_EEEE
+  long runTableBad[NRUN]                ' image R: later read not the sentinel
+  long runEcho[NRUN]                    ' the nowait register's value, echoed back
+  long runBadRec[NRUN], runBadV1[NRUN], runBadV2[NRUN], runBadFl[NRUN]   ' first record not clean
+  long runOthRec[NRUN], runOthV1[NRUN], runOthV2[NRUN], runOthFl[NRUN]   ' first record of KD_OTHER
+  long runDamage                        ' data longs changed during the runs
+  long clkMin, clkMax                   ' K_CLK elapsed range
+  ' the run being processed, per cell (repetition 0)
+  byte cellV1[NCELL], cellV2[NCELL], cellFl[NCELL], cellAgree[NCELL], cellNotClean[NCELL]
+  ' print buffers
+  byte rowStr[NSLOT * W_CELL_W + 1]
+  byte agreeStr[NSLOT + 1]
+  ' every printed line is built here and sent by ONE debug() record (ln_out)
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | runIdx, cog, startCt, status, pStack, damageCnt, bRigOk, bReadRepro, bWriteRepro
+'' Run every run on the measuring cog, print the raw rows, then the gates,
+'' the positive controls and the verdicts.
+''
+
+' Local Variables:
+' @local runIdx - run id (RUN_*)
+' @local cog - cog the measuring cog started in
+' @local startCt - CT at the start of the start-up timeout
+' @local status - SUCCESS, E_RIG_FAIL or E_MODE_FAIL
+' @local pStack - hub address of this method's locals: cog 0's stack
+' @local damageCnt - data longs changed by the run just made
+' @local bRigOk - every gate passed
+' @local bReadRepro - P_READ reproduced the erratum
+' @local bWriteRepro - P_WRITE reproduced the erratum
+
+  pStack := @status
+  linePos := 0
+  ' the layout check runs before the first write to the data area it protects
+  if pStack + STACK_MARGIN > HUB_DATA_LO or HUB_DATA_END > HUB_TOP16K
+    ln_s(string("RIG FAIL: hub layout - cog 0 stack at "))
+    ln_h(pStack)
+    ln_s(string(" must lie at least "))
+    ln_h(STACK_MARGIN)
+    ln_s(string(" below the data at "))
+    ln_h(HUB_DATA_LO)
+    ln_s(string(", and the data end "))
+    ln_h(HUB_DATA_END)
+    ln_s(string(" must lie below "))
+    ln_h(HUB_TOP16K)
+    ln_out()
+    finish()
+  reset_tallies()
+  fill_regions()
+  mbox[MB_CMD] := 0
+  mbox[MB_ALIVE] := 0
+
+  print_header(pStack)
+
+  cog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if cog < 0
+    ln_s(string("RIG FAIL: coginit expected a free cog (0..7), got "))
+    ln_d(cog)
+    ln_out()
+    finish()
+  startCt := getct()
+  repeat until mbox[MB_ALIVE] == STAT_READY
+    if getct() - startCt > clkfreq
+      ln_s(string("RIG FAIL: measuring cog start-up expected $0000_0A11 within 1 s, got "))
+      ln_h(mbox[MB_ALIVE])
+      ln_out()
+      finish()
+  ln_s(string("measuring cog "))
+  ln_d(cog)
+  say(string(" running"))
+
+  repeat runIdx from 0 to NRUN - 1
+    print_run_header(runIdx)
+    longfill(HUB_RES, UNWRITTEN, NREC * RECW)
+    status := send_cmd(runIdx)
+    if status == E_RIG_FAIL
+      ln_s(string("RIG FAIL: measuring cog did not finish run "))
+      ln_s(run_name(runIdx))
+      say(string(" within 1 s (done flag never cleared)"))
+    if status <> SUCCESS
+      finish()
+    runEcho[runIdx] := mbox[MB_ECHO]
+    process_run(runIdx)
+    print_run(runIdx)
+    damageCnt := region_damage()
+    if damageCnt > 0
+      runDamage += damageCnt
+      ln_s(string("  REGION DAMAGE after "))
+      ln_s(run_name(runIdx))
+      ln_s(string(": "))
+      ln_d(damageCnt)
+      say(string(" data longs changed (a stray hub write) - regions re-filled"))
+      fill_regions()
+
+  say(string("=== GATES ==="))
+  bRigOk := rig_gate()
+  bReadRepro := pos_read()
+  bWriteRepro := pos_write()
+
+  say(string("=== RESULTS ==="))
+  verdict_read(bRigOk, bReadRepro)
+  verdict_write(bRigOk, bWriteRepro)
+  verdict_waiting(bRigOk, bWriteRepro)
+  verdict_bytes(bRigOk, bWriteRepro)
+
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_d(numVal) | divisor, bStarted
+' Append a signed decimal (the form udec_/sdec_ printed) to the line.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local bStarted - a non-zero digit has been printed
+
+  if numVal == NEGX
+    ln_s(string("-2147483648"))
+  else
+    if numVal < 0
+      ln_c("-")
+      numVal := -numVal
+    divisor := 1_000_000_000
+    bStarted := FALSE
+    repeat 10
+      if numVal >= divisor or bStarted or divisor == 1
+        ln_c("0" + numVal / divisor)
+        numVal //= divisor
+        bStarted := TRUE
+      divisor /= 10
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as uhex_long_ printed it: $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from 7 to 0
+    nibble := (numVal >> (idx * 4)) & $F
+    if nibble < 10
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - 10)
+    if idx == 4
+      ln_c("_")
+
+PRI ln_row8(pLongs) | idx
+' Append 8 longs as decimals separated by single spaces.
+'
+' @param pLongs - hub address of the first long
+
+' Local Variables:
+' @local idx - long index 0..7
+
+  repeat idx from 0 to NSLOT - 1
+    if idx > 0
+      ln_c(" ")
+    ln_d(long[pLongs][idx])
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI ln_waitx()
+' Append "waitx #<HUB_SPACING_WAITX>".
+'
+
+  ln_s(string("waitx #"))
+  ln_d(HUB_SPACING_WAITX)
+
+PRI ln_run(runIdx)
+' Append "  <run name>", the lead of every per-run line.
+'
+' @param runIdx - run id (RUN_*)
+
+  ln_s(string("  "))
+  ln_s(run_name(runIdx))
+
+PRI ln_fl(recFl)
+' Append a flags record: its code, or its hex value when it is not a code.
+'
+' @param recFl - the flags long of a record
+
+  if flchar(recFl) == "?"
+    ln_h(recFl)
+  else
+    ln_c(flchar(recFl))
+
+PRI ln_rec(recIdx, recV1, recV2, recFl)
+' Append one record: "rep r af f a n: v1 $.. v2 $.. flags c".
+'
+' @param recIdx - record index: rep * 64 + af * 8 + a
+' @param recV1 - the record's first long
+' @param recV2 - the record's second long
+' @param recFl - the flags long of a record
+
+  ln_s(string("rep "))
+  ln_d(recIdx / NCELL)
+  ln_s(string(" af "))
+  ln_d((recIdx // NCELL) / NSLOT)
+  ln_s(string(" a "))
+  ln_d(recIdx // NSLOT)
+  ln_s(string(": v1 "))
+  ln_h(recV1)
+  ln_s(string(" v2 "))
+  ln_h(recV2)
+  ln_s(string(" flags "))
+  ln_fl(recFl)
+
+' ---------------------------------------------------------------------------
+' set-up and the command channel
+' ---------------------------------------------------------------------------
+PRI print_header(pStack) | runIdx
+' Print the rig identity, the hub layout and every prediction before the run.
+'
+' @param pStack - hub address of main()'s locals (cog 0's stack)
+
+' Local Variables:
+' @local runIdx - run id (RUN_*)
+
+  say(string("=== P2 Errata, Erratum E7 workarounds: hub reads and writes after a no-wait RDFAST (pnut-ts v1.55.8 -d, clk 200 MHz) ==="))
+  say(string("values: primer $A5A5_0001  sentinel $5A5A_0002  seed $C3C3_0003  old $0F0F_0004  new $F0F0_0005  stream long k $1E1E_0000+k  unwritten $EEEE_EEEE"))
+  ln_s(string("byte/word writes: old $4C3D_2E1F, data $C8D9_EAFB; the merged long each leaves:"))
+  repeat runIdx from RUN_WB0 to RUN_WW2
+    ln_c(" ")
+    ln_s(run_name(runIdx))
+    ln_c(" ")
+    ln_h(run_new(runIdx))
+  ln_out()
+  ln_s(string("hub: stream "))
+  ln_h(HUB_STRM)
+  ln_s(string(" read table "))
+  ln_h(HUB_TBL)
+  ln_s(string(" write targets "))
+  ln_h(HUB_WTBL)
+  ln_s(string(" primer "))
+  ln_h(HUB_PRIM)
+  ln_s(string(" records "))
+  ln_h(HUB_RES)
+  ln_s(string("; data end "))
+  ln_h(HUB_DATA_END)
+  ln_s(string("; measuring-cog image "))
+  ln_h(@pasm)
+  ln_s(string("; last VAR byte array "))
+  ln_h(@lineBuf)
+  ln_s(string("; cog 0 stack "))
+  ln_h(pStack)
+  ln_out()
+  ln_s(string("workaround spacing: "))
+  ln_waitx()
+  ln_s(string(" - the hub instruction after it starts "))
+  ln_d(SPACING_CLK)
+  ln_s(string(" clocks after the no-wait RDFAST starts (RDFAST "))
+  ln_d(RDFAST_CLK)
+  ln_s(string(" + WAITX "))
+  ln_d(WAITX_BASE)
+  ln_c("+")
+  ln_d(HUB_SPACING_WAITX)
+  say(string(")"))
+  say(string("record per trial: v1 = the trial's read (image W: the immediate read-back check; K_CLK: elapsed clocks; PS: the RFLONG), v2 = the long at the address read again after >= 200 clocks, flags = C + 2*Z from the trial's RDLONG ... WCZ (preset C=1 Z=1)"))
+  say(string("row codes: image R cell = v1 code + flags code; image W cell = v1 code + v2 code + flags code. O old  N new  P primer  S sentinel  D seed (never written)  F stream long  U unwritten  X other  . right (K_CLK, PS) | flags: digit C+2*Z  - no WCZ  ? other"))
+  say(string("agree: . all 16 identical, else hex count identical to rep 0. delta = (a - af) mod 8. Every run: 16 repetitions x 64 cells = 1024 records"))
+  ln_s(string("PREDICT controls (MUST, else RIG FAIL): K_CLK elapsed "))
+  ln_d(CLK_PRED)
+  say(string(" in all 1024 | C1 sentinel C=0 Z=0 in all 1024 | PS the stream's first long $1E1E_0000+af in all 1024 | C3 (new,new) in all 1024"))
+  ln_s(string("PREDICT positive controls (else the verdicts they gate are INCONCLUSIVE): P_READ per repetition 43 primer C=1 Z=0 by delta "))
+  ln_row8(@predRel)
+  ln_s(string(" + 21 sentinel C=0 Z=0 | P_WRITE per repetition 43 (old,old) by delta "))
+  ln_row8(@predRel)
+  say(string(" + 21 (primer,new)"))
+  say(string("PREDICT workarounds (any other record = REFUTED): W_READ sentinel C=0 Z=0 in all 1024 | W_WRITE (new,new) in all 1024 | W_WAIT (new,new) C=1 Z=0 in all 1024 | W_WRBYTE+0..+3, W_WRWORD+0, +2 (merged,merged) in all 1024 each"))
+  say(string("rig fails: a record left $EEEE_EEEE in any run; an image R v2 not the sentinel; a control not right in every record; the nowait register echoed back as anything but $8000_0000"))
+
+PRI fill_regions() | idx
+' Write every constant data region its pattern.
+'
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  repeat idx from 0 to STRM_LONGS - 1
+    long[HUB_STRM][idx] := STRM_V + idx
+  longfill(HUB_TBL, SENTV, NSLOT)
+  longfill(HUB_WTBL, OLDV, NSLOT)
+  long[HUB_PRIM] := PRIMV
+
+PRI region_damage() : damageCnt | idx
+' Count read-only data longs that no longer hold their pattern.
+'
+' @returns damageCnt - changed longs (stream, read table, primer)
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  damageCnt := 0
+  repeat idx from 0 to STRM_LONGS - 1
+    if long[HUB_STRM][idx] <> STRM_V + idx
+      damageCnt++
+  repeat idx from 0 to NSLOT - 1
+    if long[HUB_TBL][idx] <> SENTV
+      damageCnt++
+  if long[HUB_PRIM] <> PRIMV
+    damageCnt++
+
+PRI reset_tallies()
+' Clear every tally.
+'
+
+  longfill(@kindCnt, 0, NRUN * NKIND)
+  longfill(@rep0Kind, 0, NRUN * NKIND)
+  longfill(@runDelta, 0, NRUN * NSLOT)
+  longfill(@runDisagree, 0, NRUN)
+  longfill(@runBadCells, 0, NRUN)
+  longfill(@runUnwr, 0, NRUN)
+  longfill(@runTableBad, 0, NRUN)
+  longfill(@runEcho, 0, NRUN)
+  longfill(@runBadRec, -1, NRUN)
+  longfill(@runOthRec, -1, NRUN)
+  runDamage := 0
+  clkMin := POSX
+  clkMax := NEGX
+
+PRI send_cmd(runIdx) : status | startCt
+' Hand one run to the measuring cog and wait for it to clear MB_CMD.
+'
+' @param runIdx - run id (RUN_*)
+' @returns status - SUCCESS; E_RIG_FAIL on a 1 s timeout; E_MODE_FAIL (after
+'   printing its RIG FAIL line) when the nowait echo is not $8000_0000
+
+' Local Variables:
+' @local startCt - CT when the command was issued
+
+  status := SUCCESS
+  mbox[MB_COPY] := run_copy(runIdx)
+  mbox[MB_OLD] := run_old(runIdx)
+  mbox[MB_WVAL] := run_wval(runIdx)
+  mbox[MB_OFFS] := run_offs(runIdx)
+  mbox[MB_ECHO] := UNWRITTEN
+  if run_is_r(runIdx)
+    mbox[MB_CMD] := CMD_R
+  else
+    mbox[MB_CMD] := CMD_W
+  startCt := getct()
+  repeat until mbox[MB_CMD] == 0
+    if getct() - startCt > clkfreq
+      status := E_RIG_FAIL
+      quit
+  if status == SUCCESS and mbox[MB_ECHO] <> FIFO_NO_WAIT
+    ln_s(string("RIG FAIL: run "))
+    ln_s(run_name(runIdx))
+    ln_s(string(" ran with the nowait register at "))
+    ln_h(mbox[MB_ECHO])
+    ln_s(string(", expected "))
+    ln_h(FIFO_NO_WAIT)
+    say(string(" (echo)"))
+    status := E_MODE_FAIL
+
+' ---------------------------------------------------------------------------
+' run tables
+' ---------------------------------------------------------------------------
+PRI run_is_r(runIdx) : bImageR
+' @param runIdx - run id (RUN_*)
+' @returns bImageR - TRUE for an image R (read) run
+
+  bImageR := runIdx == RUN_KCLK or runIdx == RUN_C1 or runIdx == RUN_PS or runIdx == RUN_PREAD or runIdx == RUN_WREAD
+
+PRI run_copy(runIdx) : copyIdx
+' @param runIdx - run id (RUN_*)
+' @returns copyIdx - the measuring cog's trial copy for the run
+
+  copyIdx := lookupz(runIdx: RCOPY_KCLK, RCOPY_C1, RCOPY_PS, WCOPY_C3, RCOPY_PREAD, RCOPY_WREAD, WCOPY_PWRITE, WCOPY_WWRITE, WCOPY_WWAIT, WCOPY_WBYTE, WCOPY_WBYTE, WCOPY_WBYTE, WCOPY_WBYTE, WCOPY_WWORD, WCOPY_WWORD)
+
+PRI run_name(runIdx) : pName
+' @param runIdx - run id (RUN_*)
+' @returns pName - printable run name
+
+  pName := lookupz(runIdx: string("K_CLK"), string("C1"), string("PS"), string("C3"), string("P_READ"), string("W_READ"), string("P_WRITE"), string("W_WRITE"), string("W_WAIT"), string("W_WRBYTE+0"), string("W_WRBYTE+1"), string("W_WRBYTE+2"), string("W_WRBYTE+3"), string("W_WRWORD+0"), string("W_WRWORD+2"))
+
+PRI run_size(runIdx) : sizeBytes
+' @param runIdx - run id (RUN_*)
+' @returns sizeBytes - bytes the run's write writes (image R: SIZE_LONG, unused)
+
+  if runIdx >= RUN_WB0 and runIdx <= RUN_WB3
+    sizeBytes := SIZE_BYTE
+  elseif runIdx == RUN_WW0 or runIdx == RUN_WW2
+    sizeBytes := SIZE_WORD
+  else
+    sizeBytes := SIZE_LONG
+
+PRI run_offs(runIdx) : offsBytes
+' @param runIdx - run id (RUN_*)
+' @returns offsBytes - byte offset of the write inside the target long
+
+  if runIdx >= RUN_WB0 and runIdx <= RUN_WB3
+    offsBytes := runIdx - RUN_WB0
+  elseif runIdx == RUN_WW2
+    offsBytes := SIZE_WORD
+  else
+    offsBytes := 0
+
+PRI run_old(runIdx) : oldLong
+' @param runIdx - run id (RUN_*)
+' @returns oldLong - the long the target holds before the trial
+
+  if run_size(runIdx) == SIZE_LONG
+    oldLong := OLDV
+  else
+    oldLong := OLDBW
+
+PRI run_wval(runIdx) : dataVal
+' @param runIdx - run id (RUN_*)
+' @returns dataVal - the write data register
+
+  if run_size(runIdx) == SIZE_LONG
+    dataVal := NEWV
+  else
+    dataVal := DATABW
+
+PRI run_new(runIdx) : newLong | laneMask, shiftBits
+' The long the target holds once the write has landed: the new long, or the
+' old long with the written byte / word lanes replaced.
+'
+' @param runIdx - run id (RUN_*)
+' @returns newLong - the expected long after the write
+
+' Local Variables:
+' @local laneMask - $FF or $FFFF
+' @local shiftBits - the lane's bit position
+
+  if run_size(runIdx) == SIZE_LONG
+    newLong := NEWV
+  else
+    laneMask := (1 << (run_size(runIdx) * BITS_PER_BYTE)) - 1
+    shiftBits := run_offs(runIdx) * BITS_PER_BYTE
+    newLong := (OLDBW & !(laneMask << shiftBits)) | ((DATABW & laneMask) << shiftBits)
+
+PRI run_has_flags(runIdx) : bFlags
+' @param runIdx - run id (RUN_*)
+' @returns bFlags - TRUE when the trial's RDLONG has WCZ (flags preset, then recorded)
+
+  bFlags := runIdx == RUN_C1 or runIdx == RUN_PREAD or runIdx == RUN_WREAD or runIdx == RUN_WWAIT
+
+PRI run_uses_nowait(runIdx) : bNoWait
+' @param runIdx - run id (RUN_*)
+' @returns bNoWait - TRUE when the trial runs rdfast nowait, hub_stream
+
+  bNoWait := not (runIdx == RUN_KCLK or runIdx == RUN_C1 or runIdx == RUN_C3 or runIdx == RUN_WWAIT)
+
+PRI is_positive(runIdx) : bPositive
+' @param runIdx - run id (RUN_*)
+' @returns bPositive - TRUE for the positive controls P_READ and P_WRITE
+
+  bPositive := runIdx == RUN_PREAD or runIdx == RUN_PWRITE
+
+' ---------------------------------------------------------------------------
+' classification
+' ---------------------------------------------------------------------------
+PRI flags_of(datum) : flagsVal
+' The flags a RDLONG ... WCZ of this long writes, as recorded.
+'
+' @param datum - the long
+' @returns flagsVal - C (bit 31 of the long) + 2 * Z (the long is zero)
+
+  flagsVal := datum >> LONG_MSB
+  if datum == 0
+    flagsVal |= 1 << FLAG_Z_BIT
+
+PRI exp_fl(runIdx, datum) : flagsVal
+' @param runIdx - run id (RUN_*)
+' @param datum - the long
+' @returns flagsVal - the flags record a trial whose read returned this long leaves
+
+  if run_has_flags(runIdx)
+    flagsVal := flags_of(datum)
+  else
+    flagsVal := FLAGS_NONE
+
+PRI clean_v1(runIdx, afIdx) : cleanVal
+' @param runIdx - run id (RUN_*)
+' @param afIdx - stream slot bits af
+' @returns cleanVal - image R: the v1 predicted when nothing completes early
+
+  if runIdx == RUN_KCLK
+    cleanVal := CLK_PRED
+  elseif runIdx == RUN_PS
+    cleanVal := STRM_V + afIdx
+  else
+    cleanVal := SENTV
+
+PRI kind_of(runIdx, afIdx, recV1, recV2, recFl) : kind | newLong, oldLong
+' Name one record: clean, completed early (and how), or other.
+'
+' @param runIdx - run id (RUN_*)
+' @param afIdx - stream slot bits af
+' @param recV1 - the record's first long
+' @param recV2 - the record's second long
+' @param recFl - the flags long of a record
+' @returns kind - KD_*
+
+' Local Variables:
+' @local newLong - image W: the long after the write
+' @local oldLong - image W: the long before the write
+
+  kind := KD_OTHER
+  if run_is_r(runIdx)
+    if recV1 == clean_v1(runIdx, afIdx) and recFl == exp_fl(runIdx, recV1)
+      kind := KD_CLEAN
+    elseif run_has_flags(runIdx) and recV1 == PRIMV and recFl == exp_fl(runIdx, PRIMV)
+      kind := KD_REL
+  else
+    newLong := run_new(runIdx)
+    oldLong := run_old(runIdx)
+    if recV1 == newLong and recV2 == newLong and recFl == exp_fl(runIdx, newLong)
+      kind := KD_CLEAN
+    elseif recV1 == oldLong and recV2 == oldLong and recFl == exp_fl(runIdx, oldLong)
+      kind := KD_REL
+    elseif recV1 == PRIMV and recV2 == newLong and recFl == exp_fl(runIdx, PRIMV)
+      kind := KD_RDREL
+
+PRI class_v(runIdx, afIdx, datum) : cls
+' @param runIdx - run id (RUN_*)
+' @param afIdx - stream slot bits af
+' @param datum - the long
+' @returns cls - the value class (VC_*) of the long
+
+  if runIdx == RUN_KCLK
+    if datum == CLK_PRED
+      cls := VC_RIGHT
+    elseif datum == UNWRITTEN
+      cls := VC_UNWR
+    else
+      cls := VC_OTHER
+  elseif runIdx == RUN_PS and datum == STRM_V + afIdx
+    cls := VC_RIGHT
+  elseif not run_is_r(runIdx) and datum == run_old(runIdx)
+    cls := VC_OLD
+  elseif not run_is_r(runIdx) and datum == run_new(runIdx)
+    cls := VC_NEW
+  elseif datum == PRIMV
+    cls := VC_PRIM
+  elseif datum == SENTV
+    cls := VC_SENT
+  elseif datum == SEEDV
+    cls := VC_SEED
+  elseif datum == UNWRITTEN
+    cls := VC_UNWR
+  elseif (datum - STRM_V) +< STRM_LONGS
+    cls := VC_STRM
+  else
+    cls := VC_OTHER
+
+PRI vcchar(cls) : codeChar
+' @param cls - the value class (VC_*)
+' @returns codeChar - O N P D S F U X .
+
+  codeChar := lookupz(cls: "O", "N", "P", "D", "S", "F", "U", "X", ".")
+
+PRI flchar(recFl) : codeChar
+' @param recFl - the flags long of a record
+' @returns codeChar - digit C+2*Z, "-" no WCZ, "U" never written, "?" other
+
+  if recFl == FLAGS_NONE
+    codeChar := "-"
+  elseif recFl +< FLAG_CODES
+    codeChar := "0" + recFl
+  elseif recFl == UNWRITTEN
+    codeChar := "U"
+  else
+    codeChar := "?"
+
+PRI agreechar(agreeCnt) : codeChar
+' @param agreeCnt - repetitions identical to repetition 0 (1..16)
+' @returns codeChar - "." for all 16, else the hex digit
+
+  if agreeCnt == REPS
+    codeChar := "."
+  elseif agreeCnt < 10
+    codeChar := "0" + agreeCnt
+  else
+    codeChar := "A" + agreeCnt - 10
+
+PRI cell_delta(cellIdx) : deltaIdx
+' @param cellIdx - af * 8 + a
+' @returns deltaIdx - (a - af) mod 8
+
+  deltaIdx := ((cellIdx & (NSLOT - 1)) - (cellIdx / NSLOT)) & (NSLOT - 1)
+
+PRI rec_addr(recIdx) : pRec
+' @param recIdx - record index: rep * 64 + af * 8 + a
+' @returns pRec - hub address of the record
+
+  pRec := HUB_RES + recIdx * RECW * 4
+
+' ---------------------------------------------------------------------------
+' one run: classify and print
+' ---------------------------------------------------------------------------
+PRI process_run(runIdx) | cellIdx, afIdx, repIdx, recIdx, pRec, firstV1, firstV2, firstFl, recV1, recV2, recFl, kind, agreeCnt, notCleanCnt
+' Classify a run: repetition-0 codes and kinds, agreement, totals, delta split,
+' the first record not clean and the first of a kind not named.
+'
+' @param runIdx - run id (RUN_*)
+
+' Local Variables:
+' @local cellIdx - af * 8 + a
+' @local afIdx - stream slot bits af
+' @local repIdx - repetition
+' @local recIdx - record index
+' @local pRec - hub address of the record
+' @local firstV1 - repetition 0's v1
+' @local firstV2 - repetition 0's v2
+' @local firstFl - repetition 0's flags
+' @local recV1 - the record's first long
+' @local recV2 - the record's second long
+' @local recFl - the flags long of a record
+' @local kind - the record's kind (KD_*)
+' @local agreeCnt - repetitions identical to repetition 0
+' @local notCleanCnt - repetitions not clean
+
+  repeat cellIdx from 0 to NCELL - 1
+    afIdx := cellIdx / NSLOT
+    pRec := rec_addr(cellIdx)
+    firstV1 := long[pRec][REC_V1]
+    firstV2 := long[pRec][REC_V2]
+    firstFl := long[pRec][REC_FL]
+    cellV1[cellIdx] := class_v(runIdx, afIdx, firstV1)
+    cellV2[cellIdx] := class_v(runIdx, afIdx, firstV2)
+    cellFl[cellIdx] := flchar(firstFl)
+    kind := kind_of(runIdx, afIdx, firstV1, firstV2, firstFl)
+    rep0Kind[runIdx * NKIND + kind]++
+    if kind == KD_REL
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    notCleanCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      recIdx := repIdx * NCELL + cellIdx
+      pRec := rec_addr(recIdx)
+      recV1 := long[pRec][REC_V1]
+      recV2 := long[pRec][REC_V2]
+      recFl := long[pRec][REC_FL]
+      kind := kind_of(runIdx, afIdx, recV1, recV2, recFl)
+      kindCnt[runIdx * NKIND + kind]++
+      if kind <> KD_CLEAN
+        notCleanCnt++
+        if runBadRec[runIdx] == -1 or recIdx < runBadRec[runIdx]
+          runBadRec[runIdx] := recIdx
+          runBadV1[runIdx] := recV1
+          runBadV2[runIdx] := recV2
+          runBadFl[runIdx] := recFl
+      if kind == KD_OTHER and (runOthRec[runIdx] == -1 or recIdx < runOthRec[runIdx])
+        runOthRec[runIdx] := recIdx
+        runOthV1[runIdx] := recV1
+        runOthV2[runIdx] := recV2
+        runOthFl[runIdx] := recFl
+      if recV1 == UNWRITTEN or recV2 == UNWRITTEN or recFl == UNWRITTEN
+        runUnwr[runIdx]++
+      if run_is_r(runIdx) and recV2 <> SENTV
+        runTableBad[runIdx]++
+      if runIdx == RUN_KCLK
+        clkMin <#= recV1
+        clkMax #>= recV1
+      if recV1 == firstV1 and recV2 == firstV2 and recFl == firstFl
+        agreeCnt++
+    cellAgree[cellIdx] := agreeCnt
+    cellNotClean[cellIdx] := notCleanCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+    if notCleanCnt > 0
+      runBadCells[runIdx]++
+
+PRI print_run_header(runIdx)
+' Print the run's instructions and its prediction before its rows.
+'
+' @param runIdx - run id (RUN_*)
+
+  if runIdx == RUN_KCLK
+    ln_s(string("RUN K_CLK (CONTROL): getct / "))
+    ln_waitx()
+    ln_s(string(" / getct. MUST: elapsed "))
+    ln_d(CLK_PRED)
+    say(string(" (GETCT 2 + WAITX 2+D) in all 1024 trials, else RIG FAIL"))
+  elseif runIdx == RUN_C1
+    say(string("RUN C1 (CONTROL, image R): modcz C=1 Z=1 / rdlong primer / NOP in place of the RDFAST / rdlong value,hub_addr WCZ. MUST: the sentinel with C=0 Z=0 in all 1024 records, else RIG FAIL"))
+  elseif runIdx == RUN_PS
+    ln_s(string("RUN PS (CONTROL, image R): rdlong primer / rdfast nowait,hub_stream / waitx #200 / rflong value. MUST: the stream's first long $1E1E_0000+af in all 1024 records, "))
+    say(string("else RIG FAIL (the RDFAST under test would not be starting a stream)"))
+  elseif runIdx == RUN_C3
+    say(string("RUN C3 (CONTROL, image W): rdlong primer / NOP in place of the RDFAST / wrlong value,hub_addr / rdlong check,hub_addr ... later read. MUST: (new,new) in all 1024 records, else RIG FAIL"))
+  elseif runIdx == RUN_PREAD
+    ln_s(string("RUN P_READ (POSITIVE CONTROL, image R): modcz C=1 Z=1 / rdlong primer / rdfast nowait,hub_stream / rdlong value,hub_addr WCZ. PREDICT per repetition: 43 primer C=1 Z=0 by delta "))
+    ln_row8(@predRel)
+    say(string(" + 21 sentinel C=0 Z=0"))
+  elseif runIdx == RUN_WREAD
+    ln_s(string("RUN W_READ (WORKAROUND, the printed read block, image R): modcz C=1 Z=1 / rdlong primer / rdfast nowait,hub_stream / "))
+    ln_waitx()
+    say(string(" / rdlong value,hub_addr WCZ. PREDICT: the sentinel with C=0 Z=0 in all 1024 records; any other = REFUTED"))
+  elseif runIdx == RUN_PWRITE
+    ln_s(string("RUN P_WRITE (POSITIVE CONTROL, image W): rdlong primer / rdfast nowait,hub_stream / wrlong value,hub_addr / rdlong check,hub_addr ... later read. PREDICT per repetition: 43 (old,old) by delta "))
+    ln_row8(@predRel)
+    say(string(" + 21 (primer,new)"))
+  elseif runIdx == RUN_WWRITE
+    ln_s(string("RUN W_WRITE (WORKAROUND, the printed write block, image W): rdlong primer / rdfast nowait,hub_stream / "))
+    ln_waitx()
+    say(string(" / wrlong value,hub_addr / rdlong check,hub_addr ... later read. PREDICT: (new,new) in all 1024 records; any other = REFUTED"))
+  elseif runIdx == RUN_WWAIT
+    ln_s(string("RUN W_WAIT (WORKAROUND, the printed waiting-form block, image W): modcz C=1 Z=1 / rdlong primer / rdfast #0,hub_stream / wrlong value,hub_addr / rdlong check,hub_addr WCZ ... later read. "))
+    say(string("PREDICT: (new,new) with C=1 Z=0 in all 1024 records; any other = REFUTED"))
+  else
+    ln_s(string("RUN "))
+    ln_s(run_name(runIdx))
+    ln_s(string(" (image W): rdlong primer / rdfast nowait,hub_stream / "))
+    ln_waitx()
+    if run_size(runIdx) == SIZE_BYTE
+      ln_s(string(" / wrbyte"))
+    else
+      ln_s(string(" / wrword"))
+    ln_s(string(" value,hub_addr (hub_long+"))
+    ln_d(run_offs(runIdx))
+    ln_s(string(") / rdlong check,hub_long ... later read. PREDICT: (new,new), the merged long "))
+    ln_h(run_new(runIdx))
+    say(string(", in all 1024 records; any other = REFUTED"))
+
+PRI print_run(runIdx) | afIdx, arIdx, cellIdx, cellW, base, bImageR
+' Print a run's raw rows (repetition 0 per af, agreement) and its totals.
+'
+' @param runIdx - run id (RUN_*)
+
+' Local Variables:
+' @local afIdx - stream slot bits af
+' @local arIdx - address slot bits a
+' @local cellIdx - af * 8 + a
+' @local cellW - row chars per cell
+' @local base - index of the run's first count, or of the cell's first row char
+' @local bImageR - the run is an image R run
+
+  bImageR := run_is_r(runIdx)
+  if bImageR
+    cellW := R_CELL_W
+  else
+    cellW := W_CELL_W
+  repeat afIdx from 0 to NSLOT - 1
+    repeat arIdx from 0 to NSLOT - 1
+      cellIdx := afIdx * NSLOT + arIdx
+      agreeStr[arIdx] := agreechar(cellAgree[cellIdx])
+      base := arIdx * cellW
+      rowStr[base] := vcchar(cellV1[cellIdx])
+      if bImageR
+        rowStr[base + 1] := cellFl[cellIdx]
+      else
+        rowStr[base + 1] := vcchar(cellV2[cellIdx])
+        rowStr[base + 2] := cellFl[cellIdx]
+      rowStr[base + cellW - 1] := " "
+    agreeStr[NSLOT] := 0
+    rowStr[NSLOT * cellW - 1] := 0
+    ln_run(runIdx)
+    ln_s(string(" af"))
+    ln_d(afIdx)
+    ln_s(string(" rep0 a0-7: "))
+    ln_s(@rowStr)
+    ln_s(string("  agree "))
+    say(@agreeStr)
+
+  base := runIdx * NKIND
+  ln_run(runIdx)
+  ln_s(string(" all reps: clean "))
+  ln_d(kindCnt[base + KD_CLEAN])
+  if bImageR
+    ln_s(string(" | early (primer) "))
+    ln_d(kindCnt[base + KD_REL])
+  else
+    ln_s(string(" | (old,old) write lost "))
+    ln_d(kindCnt[base + KD_REL])
+    ln_s(string(" | (primer,new) read-back early "))
+    ln_d(kindCnt[base + KD_RDREL])
+  ln_s(string(" | other "))
+  ln_d(kindCnt[base + KD_OTHER])
+  ln_s(string(" | of "))
+  ln_d(NREC)
+  ln_s(string(" | rep0 early cells by delta "))
+  ln_row8(@runDelta[runIdx * NSLOT])
+  ln_s(string(" = "))
+  ln_d(rep0Kind[base + KD_REL])
+  if not bImageR
+    ln_s(string(", rep0 (primer,new) "))
+    ln_d(rep0Kind[base + KD_RDREL])
+  ln_s(string(" | cells with disagreeing reps "))
+  ln_d(runDisagree[runIdx])
+  if run_uses_nowait(runIdx)
+    ln_s(string(" | nowait (RDFAST D) run "))
+    ln_h(runEcho[runIdx])
+  if runIdx == RUN_KCLK
+    ln_s(string(" | elapsed "))
+    ln_d(clkMin)
+    ln_s(string(".."))
+    ln_d(clkMax)
+    ln_s(string(" clk (predicted "))
+    ln_d(CLK_PRED)
+    ln_c(")")
+  ln_out()
+
+  if is_positive(runIdx)
+    if runOthRec[runIdx] <> -1
+      ln_run(runIdx)
+      ln_s(string(" first record of a kind the prediction does not name: "))
+      ln_rec(runOthRec[runIdx], runOthV1[runIdx], runOthV2[runIdx], runOthFl[runIdx])
+      ln_out()
+  elseif runBadCells[runIdx] > 0
+    ln_run(runIdx)
+    ln_s(string(" cells not clean (af a:reps):"))
+    repeat cellIdx from 0 to NCELL - 1
+      if cellNotClean[cellIdx] > 0
+        ln_c(" ")
+        ln_d(cellIdx / NSLOT)
+        ln_d(cellIdx // NSLOT)
+        ln_c(":")
+        ln_d(cellNotClean[cellIdx])
+    ln_out()
+    ln_run(runIdx)
+    ln_s(string(" first record not clean: "))
+    ln_rec(runBadRec[runIdx], runBadV1[runIdx], runBadV2[runIdx], runBadFl[runIdx])
+    ln_out()
+  if runUnwr[runIdx] > 0
+    ln_run(runIdx)
+    ln_s(string(" records with a long never written (U, $EEEE_EEEE): "))
+    ln_d(runUnwr[runIdx])
+    ln_out()
+  if runTableBad[runIdx] > 0
+    ln_run(runIdx)
+    ln_s(string(" records whose v2 (the read table long after settling) is not the sentinel: "))
+    ln_d(runTableBad[runIdx])
+    ln_out()
+
+' ---------------------------------------------------------------------------
+' gates and positive controls
+' ---------------------------------------------------------------------------
+PRI rig_gate() : bPass | runIdx, ctrlIdx, unwrCnt, tableCnt
+' Check every gate after the runs; print a RIG FAIL line for each that fails.
+'
+' @returns bPass - TRUE when every gate passed
+
+' Local Variables:
+' @local runIdx - run id (RUN_*)
+' @local ctrlIdx - control index 0..NCTRL-1
+' @local unwrCnt - records with a long never written, over every run
+' @local tableCnt - image R records whose later read is not the sentinel
+
+  unwrCnt := 0
+  tableCnt := 0
+  repeat runIdx from 0 to NRUN - 1
+    unwrCnt += runUnwr[runIdx]
+    tableCnt += runTableBad[runIdx]
+  bPass := TRUE
+  if unwrCnt > 0
+    ln_s(string("RIG FAIL: "))
+    ln_d(unwrCnt)
+    say(string(" records hold a long still $EEEE_EEEE: the measuring cog never wrote them"))
+    bPass := FALSE
+  if tableCnt > 0
+    ln_s(string("RIG FAIL: "))
+    ln_d(tableCnt)
+    say(string(" image R records read the table long after settling as something other than the sentinel: the read table or the read path is wrong"))
+    bPass := FALSE
+  repeat ctrlIdx from 0 to NCTRL - 1
+    runIdx := lookupz(ctrlIdx: RUN_KCLK, RUN_C1, RUN_PS, RUN_C3)
+    if kindCnt[runIdx * NKIND + KD_CLEAN] <> NREC
+      ln_s(string("RIG FAIL: control "))
+      ln_s(run_name(runIdx))
+      ln_s(string(" right in "))
+      ln_d(kindCnt[runIdx * NKIND + KD_CLEAN])
+      ln_s(string(" of "))
+      ln_d(NREC)
+      ln_s(string(" records (its MUST is on its RUN line); first wrong: "))
+      ln_rec(runBadRec[runIdx], runBadV1[runIdx], runBadV2[runIdx], runBadFl[runIdx])
+      ln_out()
+      bPass := FALSE
+  if runDamage > 0
+    ln_s(string("RIG NOTE: "))
+    ln_d(runDamage)
+    say(string(" read-only data longs changed during the runs (see REGION DAMAGE lines)"))
+  if bPass
+    ln_s(string("RIG OK: K_CLK "))
+    ln_d(CLK_PRED)
+    say(string(" clocks, C1 the sentinel with C=0 Z=0, PS the stream's first long and C3 (new,new) in every record; no record left unwritten; every image R table long intact; nowait echoed $8000_0000 after every run"))
+
+PRI delta_match(runIdx) : bMatch | deltaIdx
+' @param runIdx - run id (RUN_*)
+' @returns bMatch - TRUE when the run's repetition-0 early cells by delta equal predRel
+
+' Local Variables:
+' @local deltaIdx - delta 0..7
+
+  bMatch := TRUE
+  repeat deltaIdx from 0 to NSLOT - 1
+    if runDelta[runIdx * NSLOT + deltaIdx] <> predRel[deltaIdx]
+      bMatch := FALSE
+
+PRI pos_read() : bRepro | base
+' Decide whether P_READ reproduced the erratum; print the evidence.
+'
+' @returns bRepro - TRUE when P_READ matched its prediction in every record
+
+' Local Variables:
+' @local base - index of P_READ's first count
+
+  base := RUN_PREAD * NKIND
+  bRepro := kindCnt[base + KD_OTHER] == 0 and runDisagree[RUN_PREAD] == 0 and rep0Kind[base + KD_REL] == PRED_REL and delta_match(RUN_PREAD)
+  if bRepro
+    ln_s(string("POSITIVE CONTROL P_READ: REPRODUCED - with no spacing, the RDLONG completed early in 43 of 64 cells in every repetition, each returning the primer $A5A5_0001 with C=1 Z=0, by delta "))
+    ln_row8(@runDelta[RUN_PREAD * NSLOT])
+    say(string("; the other 21 read the sentinel with C=0 Z=0"))
+  else
+    ln_s(string("POSITIVE CONTROL P_READ: NOT REPRODUCED - rep0 primer cells "))
+    ln_d(rep0Kind[base + KD_REL])
+    ln_s(string(" by delta "))
+    ln_row8(@runDelta[RUN_PREAD * NSLOT])
+    ln_s(string(" (predicted 43 by "))
+    ln_row8(@predRel)
+    ln_s(string("); records the prediction does not name "))
+    ln_d(kindCnt[base + KD_OTHER])
+    ln_s(string("; cells with disagreeing reps "))
+    ln_d(runDisagree[RUN_PREAD])
+    ln_out()
+
+PRI pos_write() : bRepro | base
+' Decide whether P_WRITE reproduced the erratum; print the evidence.
+'
+' @returns bRepro - TRUE when P_WRITE matched its prediction in every record
+
+' Local Variables:
+' @local base - index of P_WRITE's first count
+
+  base := RUN_PWRITE * NKIND
+  bRepro := kindCnt[base + KD_OTHER] == 0 and runDisagree[RUN_PWRITE] == 0 and rep0Kind[base + KD_REL] == PRED_REL and rep0Kind[base + KD_RDREL] == PRED_RDREL and delta_match(RUN_PWRITE)
+  if bRepro
+    ln_s(string("POSITIVE CONTROL P_WRITE: REPRODUCED - with no spacing, the write was lost, (old,old), in 43 of 64 cells in every repetition, by delta "))
+    ln_row8(@runDelta[RUN_PWRITE * NSLOT])
+    say(string("; in the other 21 the write landed and the read-back returned the primer, (primer,new)"))
+  else
+    ln_s(string("POSITIVE CONTROL P_WRITE: NOT REPRODUCED - rep0 (old,old) cells "))
+    ln_d(rep0Kind[base + KD_REL])
+    ln_s(string(" by delta "))
+    ln_row8(@runDelta[RUN_PWRITE * NSLOT])
+    ln_s(string(", (primer,new) cells "))
+    ln_d(rep0Kind[base + KD_RDREL])
+    ln_s(string(" (predicted 43 by "))
+    ln_row8(@predRel)
+    ln_s(string(" and 21); records the prediction does not name "))
+    ln_d(kindCnt[base + KD_OTHER])
+    ln_s(string("; cells with disagreeing reps "))
+    ln_d(runDisagree[RUN_PWRITE])
+    ln_out()
+
+' ---------------------------------------------------------------------------
+' verdicts
+' ---------------------------------------------------------------------------
+PRI ln_refuted(runIdx)
+' Append the evidence of a refuted workaround run: its counts, its cells and
+' its first record not clean.
+'
+' @param runIdx - run id (RUN_*)
+
+  ln_s(run_name(runIdx))
+  ln_s(string(" clean in "))
+  ln_d(kindCnt[runIdx * NKIND + KD_CLEAN])
+  ln_s(string(" of "))
+  ln_d(NREC)
+  ln_s(string(" records (completed early: "))
+  ln_d(kindCnt[runIdx * NKIND + KD_REL])
+  if not run_is_r(runIdx)
+    ln_s(string(" (old,old), "))
+    ln_d(kindCnt[runIdx * NKIND + KD_RDREL])
+    ln_s(string(" (primer,new)"))
+  ln_s(string("; other: "))
+  ln_d(kindCnt[runIdx * NKIND + KD_OTHER])
+  ln_s(string(") in "))
+  ln_d(runBadCells[runIdx])
+  ln_s(string(" cells (listed under RUN "))
+  ln_s(run_name(runIdx))
+  ln_s(string("); first: "))
+  ln_rec(runBadRec[runIdx], runBadV1[runIdx], runBadV2[runIdx], runBadFl[runIdx])
+
+PRI verdict_read(bRigOk, bRepro)
+' VERDICT E7 WORKAROUND READ, in the order given in the header.
+'
+' @param bRigOk - every gate passed
+' @param bRepro - the positive control reproduced the erratum
+
+  if not bRigOk
+    say(string("VERDICT E7 WORKAROUND READ: NO VERDICT - a gate failed (see RIG FAIL lines); the rows above are raw"))
+  elseif kindCnt[RUN_WREAD * NKIND + KD_CLEAN] <> NREC
+    ln_s(string("VERDICT E7 WORKAROUND READ: REFUTED - "))
+    ln_refuted(RUN_WREAD)
+    ln_out()
+  elseif not bRepro
+    say(string("VERDICT E7 WORKAROUND READ: INCONCLUSIVE - W_READ read the sentinel with C=0 Z=0 in all 1024 records, but P_READ did not reproduce the erratum in this run (see POSITIVE CONTROL P_READ), so the clean result is not shown beating it"))
+  else
+    ln_s(string("VERDICT E7 WORKAROUND READ: CONFIRMED - with "))
+    ln_waitx()
+    ln_s(string(" the RDLONG started "))
+    ln_d(SPACING_CLK)
+    ln_s(string(" clocks after the no-wait RDFAST and read the sentinel $5A5A_0002 with C=0 Z=0 in all "))
+    ln_d(NREC)
+    say(string(" records (64 alignments x 16); P_READ in the same run, with no spacing, completed early in 43 of 64 cells per repetition"))
+
+PRI verdict_write(bRigOk, bRepro)
+' VERDICT E7 WORKAROUND WRITE, in the order given in the header.
+'
+' @param bRigOk - every gate passed
+' @param bRepro - the positive control reproduced the erratum
+
+  if not bRigOk
+    say(string("VERDICT E7 WORKAROUND WRITE: NO VERDICT - a gate failed (see RIG FAIL lines); the rows above are raw"))
+  elseif kindCnt[RUN_WWRITE * NKIND + KD_CLEAN] <> NREC
+    ln_s(string("VERDICT E7 WORKAROUND WRITE: REFUTED - "))
+    ln_refuted(RUN_WWRITE)
+    ln_out()
+  elseif not bRepro
+    say(string("VERDICT E7 WORKAROUND WRITE: INCONCLUSIVE - W_WRITE gave (new,new) in all 1024 records, but P_WRITE did not reproduce the erratum in this run (see POSITIVE CONTROL P_WRITE), so the clean result is not shown beating it"))
+  else
+    ln_s(string("VERDICT E7 WORKAROUND WRITE: CONFIRMED - with "))
+    ln_waitx()
+    ln_s(string(" the WRLONG started "))
+    ln_d(SPACING_CLK)
+    ln_s(string(" clocks after the no-wait RDFAST; its write landed and the RDLONG after it read it back: (new,new) $F0F0_0005 in all "))
+    ln_d(NREC)
+    say(string(" records (64 alignments x 16); P_WRITE in the same run, with no spacing, lost the write in 43 of 64 cells per repetition"))
+
+PRI verdict_waiting(bRigOk, bRepro)
+' VERDICT E7 WORKAROUND WAITING, in the order given in the header.
+'
+' @param bRigOk - every gate passed
+' @param bRepro - the positive control reproduced the erratum
+
+  if not bRigOk
+    say(string("VERDICT E7 WORKAROUND WAITING: NO VERDICT - a gate failed (see RIG FAIL lines); the rows above are raw"))
+  elseif kindCnt[RUN_WWAIT * NKIND + KD_CLEAN] <> NREC
+    ln_s(string("VERDICT E7 WORKAROUND WAITING: REFUTED - "))
+    ln_refuted(RUN_WWAIT)
+    ln_out()
+  elseif not bRepro
+    say(string("VERDICT E7 WORKAROUND WAITING: INCONCLUSIVE - W_WAIT gave (new,new) with C=1 Z=0 in all 1024 records, but P_WRITE did not reproduce the erratum in this run (see POSITIVE CONTROL P_WRITE), so the clean result is not shown beating it"))
+  else
+    ln_s(string("VERDICT E7 WORKAROUND WAITING: CONFIRMED - with the waiting RDFAST (D = 0) and no spacing, the WRLONG's write landed and the RDLONG after it read it back with its flags: (new,new) $F0F0_0005 with C=1 Z=0 in all "))
+    ln_d(NREC)
+    say(string(" records (64 alignments x 16); P_WRITE in the same run, with the no-wait form, lost the write in 43 of 64 cells per repetition"))
+
+PRI verdict_bytes(bRigOk, bRepro) | runIdx, badCnt
+' VERDICT E7 WORKAROUND BYTE/WORD WRITES, in the order given in the header.
+'
+' @param bRigOk - every gate passed
+' @param bRepro - the positive control reproduced the erratum
+
+' Local Variables:
+' @local runIdx - run id (RUN_*)
+' @local badCnt - records not clean over the six byte / word runs
+
+  badCnt := 0
+  repeat runIdx from RUN_WB0 to RUN_WW2
+    badCnt += NREC - kindCnt[runIdx * NKIND + KD_CLEAN]
+  if not bRigOk
+    say(string("VERDICT E7 WORKAROUND BYTE/WORD WRITES: NO VERDICT - a gate failed (see RIG FAIL lines); the rows above are raw"))
+  elseif badCnt > 0
+    ln_s(string("VERDICT E7 WORKAROUND BYTE/WORD WRITES: REFUTED - records not the merged long (read back at once and read later), of 1024 per run:"))
+    repeat runIdx from RUN_WB0 to RUN_WW2
+      ln_c(" ")
+      ln_s(run_name(runIdx))
+      ln_c(" ")
+      ln_d(NREC - kindCnt[runIdx * NKIND + KD_CLEAN])
+    say(string(" (cells and first record under each run)"))
+  elseif not bRepro
+    say(string("VERDICT E7 WORKAROUND BYTE/WORD WRITES: INCONCLUSIVE - every byte and word run left the merged long in all 1024 records, but P_WRITE did not reproduce the erratum in this run (see POSITIVE CONTROL P_WRITE), so the clean result is not shown beating it"))
+  else
+    ln_s(string("VERDICT E7 WORKAROUND BYTE/WORD WRITES: CONFIRMED - with "))
+    ln_waitx()
+    ln_s(string(", WRBYTE at offsets 0..3 and WRWORD at offsets 0 and 2, each started "))
+    ln_d(SPACING_CLK)
+    ln_s(string(" clocks after the no-wait RDFAST, left the merged long, read back at once and read later, in all "))
+    ln_d(NREC)
+    say(string(" records of each of the six runs; P_WRITE in the same run, with no spacing, lost the write in 43 of 64 cells per repetition"))
+
+DAT ' ---- Predictions (printed in the header before the run) ----
+' Positive controls: early cells per repetition by delta 0..7 (43 in all)
+predRel         long    8, 8, 7, 6, 5, 4, 3, 2
+
+' ===========================================================================
+' MEASURING COG (PASM, cog exec).  PTRA on entry = @mbox (from COGINIT).
+' No debug(), no BRK, no interrupt in this cog (DEBUG_COGS excludes it).
+' From each primer RDLONG to the last instruction under test there is
+' nothing but the run's instructions; no ## operand.
+' ===========================================================================
+DAT             org     0        ' ---- Measuring Cog ----
+pasm            mov     c_tmp, ##STAT_READY
+                wrlong  c_tmp, ptra[MB_ALIVE]
+
+wait_cmd        rdlong  c_cmd, ptra                     wz      ' MB_CMD: 0 = idle
+        if_z    jmp     #wait_cmd
+                rdlong  c_copy, ptra[MB_COPY]
+                rdlong  c_oldv, ptra[MB_OLD]
+                rdlong  c_wval, ptra[MB_WVAL]
+                rdlong  c_offs, ptra[MB_OFFS]
+                cmp     c_cmd, #CMD_R                   wz
+        if_z    jmp     #run_r
+                cmp     c_cmd, #CMD_W                   wz
+        if_z    jmp     #run_w
+cmd_done        wrlong  nowait, ptra[MB_ECHO]                   ' epilogue, after every record: echo nowait
+                wrlong  #0, ptra                                ' MB_CMD := 0 -> done
+                jmp     #wait_cmd
+
+'--- image R: 16 repetitions x 8 af x 8 a; record (rep*8 + af)*8 + a
+run_r           alts    c_copy, #rvec_tab
+                mov     c_vec, 0-0
+                mov     c_rp, c_res
+                mov     c_reps, #REPS
+r_rep           mov     c_af, #0
+r_af            mov     c_ar, #0
+r_ar            mov     hub_stream, c_af
+                shl     hub_stream, #2
+                add     hub_stream, c_strm                      ' stream address: slot bits = af
+                mov     hub_addr, c_ar
+                shl     hub_addr, #2
+                add     hub_addr, c_tbl                         ' read address: slot bits = a
+                mov     value, c_seedv                          ' "never written" stays visible
+                mov     c_flags, #FLAGS_NONE                    ' no WCZ: stays $FF
+                jmp     c_vec                                   ' the trial copy
+r_settle        mov     c_t, #SETTLE_N
+r_dly           djnz    c_t, #r_dly                             ' >= 200 clocks: everything settles
+                rdlong  c_later, hub_addr                       ' the table long, read again
+                wrlong  value, c_rp                             ' record: v1, v2, flags
+                add     c_rp, #4
+                wrlong  c_later, c_rp
+                add     c_rp, #4
+                wrlong  c_flags, c_rp
+                add     c_rp, #4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #r_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #r_af
+                djnz    c_reps, #r_rep
+                jmp     #cmd_done
+
+'--- image R trial copies
+t_kclk          getct   c_t0                                    ' K_CLK: the spacing WAITX alone
+                waitx   #HUB_SPACING_WAITX                      ' K_CLK: the printed blocks' WAITX
+                getct   c_t1
+                mov     value, c_t1
+                sub     value, c_t0                             ' K_CLK: elapsed = GETCT 2 + WAITX 2+D
+                jmp     #r_settle
+
+t_c1            modcz   _set, _set                      wcz     ' C1: flags preset C=1 Z=1
+                rdlong  c_tmp, c_prim                           ' C1: primer
+                nop                                             ' C1: NOP in place of the RDFAST
+                rdlong  value, hub_addr                 wcz     ' C1: the RDLONG, nothing before it
+                wrc     c_flags                                 ' C1: C into flags bit 0
+                bitz    c_flags, #FLAG_Z_BIT                    ' C1: Z into flags bit 1
+                jmp     #r_settle
+
+t_ps            rdlong  c_tmp, c_prim                           ' PS: primer
+                rdfast  nowait, hub_stream                      ' PS: the RDFAST under test
+                waitx   #STREAM_WAIT                            ' PS: long past any start-up
+                rflong  value                                   ' PS: the stream's first long
+                jmp     #r_settle
+
+t_pread         modcz   _set, _set                      wcz     ' P_READ: flags preset C=1 Z=1
+                rdlong  c_tmp, c_prim                           ' P_READ: primer
+                rdfast  nowait, hub_stream                      ' P_READ: no-wait RDFAST
+                rdlong  value, hub_addr                 wcz     ' P_READ: the RDLONG at once
+                wrc     c_flags
+                bitz    c_flags, #FLAG_Z_BIT
+                jmp     #r_settle
+
+t_wread         modcz   _set, _set                      wcz     ' W_READ: flags preset C=1 Z=1
+                rdlong  c_tmp, c_prim                           ' W_READ: primer
+' ---- E7 WORKAROUND READ: begin (Erratum E7 prints these) ----
+        rdfast  nowait, hub_stream      ' no-wait RDFAST (D[31] = 1)
+        waitx   #HUB_SPACING_WAITX      ' E7: >= 16 clocks to next hub op
+        rdlong  value, hub_addr  wcz    ' hub_addr's long, and its flags
+' ---- E7 WORKAROUND READ: end ----
+                wrc     c_flags                                 ' W_READ: C into flags bit 0
+                bitz    c_flags, #FLAG_Z_BIT                    ' W_READ: Z into flags bit 1
+                jmp     #r_settle
+
+'--- image W: 16 repetitions x 8 af x 8 a; records check, later, flags per trial
+run_w           alts    c_copy, #wvec_tab
+                mov     c_vec, 0-0
+                mov     c_rp, c_res
+                mov     c_reps, #REPS
+w_rep           mov     c_af, #0
+w_af            mov     c_ar, #0
+w_ar            mov     hub_stream, c_af
+                shl     hub_stream, #2
+                add     hub_stream, c_strm                      ' stream address: slot bits = af
+                mov     hub_long, c_ar
+                shl     hub_long, #2
+                add     hub_long, c_wtbl                        ' target long: slot bits = a
+                mov     hub_addr, hub_long
+                add     hub_addr, c_offs                        ' the write's byte address
+                wrlong  c_oldv, hub_long                        ' the target holds the old long
+                mov     c_t, #SETTLE_N
+w_d1            djnz    c_t, #w_d1
+                mov     check, c_seedv
+                mov     c_later, c_seedv
+                mov     value, c_wval                           ' the write data
+                mov     c_flags, #FLAGS_NONE                    ' no WCZ: stays $FF
+                jmp     c_vec                                   ' the trial copy
+w_settle        mov     c_t, #SETTLE_N
+w_d2            djnz    c_t, #w_d2
+                rdlong  c_later, hub_long                       ' read-back after everything settled
+                wrlong  check, c_rp                             ' record: v1, v2, flags
+                add     c_rp, #4
+                wrlong  c_later, c_rp
+                add     c_rp, #4
+                wrlong  c_flags, c_rp
+                add     c_rp, #4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #w_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #w_af
+                djnz    c_reps, #w_rep
+                jmp     #cmd_done
+
+'--- image W trial copies
+t_c3            rdlong  c_tmp, c_prim                           ' C3: primer
+                nop                                             ' C3: NOP in place of the RDFAST
+                wrlong  value, hub_addr                         ' C3: the WRLONG
+                rdlong  check, hub_addr                         ' C3: immediate read-back
+                jmp     #w_settle
+
+t_pwrite        rdlong  c_tmp, c_prim                           ' P_WRITE: primer
+                rdfast  nowait, hub_stream                      ' P_WRITE: no-wait RDFAST
+                wrlong  value, hub_addr                         ' P_WRITE: the WRLONG at once
+                rdlong  check, hub_addr                         ' P_WRITE: immediate read-back
+                jmp     #w_settle
+
+t_wwrite        rdlong  c_tmp, c_prim                           ' W_WRITE: primer
+' ---- E7 WORKAROUND WRITE: begin (Erratum E7 prints these) ----
+        rdfast  nowait, hub_stream      ' no-wait RDFAST (D[31] = 1)
+        waitx   #HUB_SPACING_WAITX      ' E7: >= 16 clocks to next hub op
+        wrlong  value, hub_addr         ' lands at hub_addr
+        rdlong  check, hub_addr         ' the next hub instruction
+' ---- E7 WORKAROUND WRITE: end ----
+                jmp     #w_settle
+
+t_wwait         modcz   _set, _set                      wcz     ' W_WAIT: flags preset C=1 Z=1
+                rdlong  c_tmp, c_prim                           ' W_WAIT: primer
+' ---- E7 WORKAROUND WAITING FORM: begin (Erratum E7 prints these) ----
+        rdfast  #0, hub_stream          ' waiting RDFAST (D[31] = 0)
+        wrlong  value, hub_addr         ' lands at hub_addr
+        rdlong  check, hub_addr  wcz    ' reads value back, and its flags
+' ---- E7 WORKAROUND WAITING FORM: end ----
+                wrc     c_flags                                 ' W_WAIT: C into flags bit 0
+                bitz    c_flags, #FLAG_Z_BIT                    ' W_WAIT: Z into flags bit 1
+                jmp     #w_settle
+
+t_wbyte         rdlong  c_tmp, c_prim                           ' W_WRBYTE: primer
+                rdfast  nowait, hub_stream                      ' W_WRBYTE: no-wait RDFAST
+                waitx   #HUB_SPACING_WAITX                      ' W_WRBYTE: the workaround spacing
+                wrbyte  value, hub_addr                         ' W_WRBYTE: byte $FB at the offset
+                rdlong  check, hub_long                         ' W_WRBYTE: the whole long, at once
+                jmp     #w_settle
+
+t_wword         rdlong  c_tmp, c_prim                           ' W_WRWORD: primer
+                rdfast  nowait, hub_stream                      ' W_WRWORD: no-wait RDFAST
+                waitx   #HUB_SPACING_WAITX                      ' W_WRWORD: the workaround spacing
+                wrword  value, hub_addr                         ' W_WRWORD: word $EAFB at the offset
+                rdlong  check, hub_long                         ' W_WRWORD: the whole long, at once
+                jmp     #w_settle
+
+'--- trial-copy vectors
+rvec_tab        long    t_kclk, t_c1, t_ps, t_pread, t_wread            ' RCOPY_* order
+wvec_tab        long    t_c3, t_pwrite, t_wwrite, t_wwait, t_wbyte, t_wword ' WCOPY_* order
+
+'--- cog data.  nowait, hub_stream, hub_addr, value and check are named in the printed blocks.
+nowait          long    FIFO_NO_WAIT                            ' RDFAST D: D[31]=1 no-wait, block count 0 (no wrap)
+hub_stream      long    0                                       ' the RDFAST's address: stream slot bits af
+hub_addr        long    0                                       ' the read / write address under test
+hub_long        long    0                                       ' image W: the target long (read-back address)
+value           long    0                                       ' image R: the read; image W: the write data
+check           long    0                                       ' image W: the immediate read-back
+c_strm          long    HUB_STRM
+c_tbl           long    HUB_TBL
+c_wtbl          long    HUB_WTBL
+c_prim          long    HUB_PRIM
+c_res           long    HUB_RES
+c_seedv         long    SEEDV
+c_oldv          long    0                                       ' image W: the old long (MB_OLD)
+c_wval          long    0                                       ' image W: the write data (MB_WVAL)
+c_offs          long    0                                       ' image W: byte offset of the write (MB_OFFS)
+c_later         long    0                                       ' the address read again after settling
+c_flags         long    0                                       ' recorded flags: C bit 0, Z bit 1, $FF none
+c_cmd           long    0
+c_copy          long    0
+c_vec           long    0
+c_rp            long    0
+c_reps          long    0
+c_af            long    0
+c_ar            long    0
+c_t             long    0
+c_t0            long    0
+c_t1            long    0
+c_tmp           long    0
+pasm_end
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

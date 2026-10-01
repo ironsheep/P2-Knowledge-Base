@@ -1363,8 +1363,8 @@ blocking `RDFAST` (the study's mechanism: the no-wait `RDFAST`'s completion sign
 time when its FIFO first holds data). The Spin2 v55 interpreter uses only the blocking form.
 *Limits:* `RDLONG`/`WRLONG` only (byte/word, `SETQ` blocks and a no-wait `WRFAST`: VO-J-023);
 the write runs (T3, T4, C4) ran at k = 0 only — no `WRLONG` at 16 clocks or more was run, so the
-16-clock rule is proven for reads, not writes (corrected 2026-10-01 from a title that said it
-prevents both; found while writing the merged E7 chapter);
+16-clock rule was proven here for reads, not writes (corrected 2026-10-01 from a title that said it
+prevents both; found while writing the merged E7 chapter; **writes at 16 clocks: EF-088**);
 `RETA` and an interrupt inside the window not tested; hub execution excluded by the P2
 Documentation (`RDFAST` cannot be used there, :353-357); one cog; cog execution; 200 MHz; run
 once. *Source:* `…/tests/test-o29-rdfast-nowait-releases-hub-op.spin2`.
@@ -1456,6 +1456,50 @@ or a cog that does not finish. *Limits:* what wrote `$000`/`$001`, and whether a
 finish was stalled or running elsewhere, are not known; block distances between 4 and 16 clocks,
 other cells, and a block read's flags were not measured; one cog; cog execution; 200 MHz; run once.
 *Source:* `…/tests/test-o29c-setq-block-workaround.spin2`.
+
+### EF-088 · The E7 workaround blocks P2 Errata prints hold for a single read and a single write: `WAITX #12` after a no-wait `RDFAST` (the next hub instruction at 16 clocks) protects `RDLONG … WCZ`, `WRLONG` with an immediate read-back, and `WRBYTE`/`WRWORD` at every offset; the waiting form protects a write and its read-back — `CONFIRMED`
+*How proven:* `e7-workaround-hub-access-test` (VO-J-025, campaign test 22), the EF-084 construction
+(primer `RDLONG` of `$A5A5_0001`, then the `RDFAST`, then the instruction under test; 64 (af, a)
+cells × 16 repetitions = 1,024 records per run), cog 0 reporting through a hub line buffer (DEBUG
+data 24 bytes). The three blocks the chapter prints ran between marker comments, nothing between
+their instructions (W_READ `rdfast nowait,hub_stream` / `waitx #HUB_SPACING_WAITX` (12) /
+`rdlong value,hub_addr wcz`; W_WRITE the same with `wrlong value,hub_addr` / `rdlong
+check,hub_addr`; W_WAIT `rdfast #0,hub_stream` / `wrlong` / `rdlong … wcz`), flags preset C = 1 Z = 1
+before the primer. *Result (log `debug_261001-140939`, 2026-10-01, first run, clean; downloaded
+`.bin` 24,590 bytes = a fresh build of the source, `cmp` silent):* re-derived from the per-cell rows
+(every cell's 16 repetitions identical, agree `.` in all 15 runs). **Controls:** K_CLK `getct` /
+`waitx #12` / `getct` = 16 in all 1,024 (l.42); C1 sentinel C = 0 Z = 0, PS the stream's first long,
+C3 (new,new), all 1,024 (l.52, 62, 72); `nowait` echoed `$8000_0000` after every run (l.184).
+**Positive controls (same run):** P_READ — 43 cells per repetition the primer with C = 1 Z = 0, by
+δ 8 8 7 6 5 4 3 2, 21 the sentinel with C = 0 Z = 0 (688/336, l.82); P_WRITE — 43 (old,old) by δ
+8 8 7 6 5 4 3 2 and 21 (primer,new) (688/336, l.102): EF-084 reproduced. **Workarounds, 1,024 of
+1,024 each:** W_READ the sentinel `$5A5A_0002` with C = 0 Z = 0 (l.92); W_WRITE (new,new) `$F0F0_0005`,
+read back at once and read later (l.112); W_WAIT (new,new) with C = 1 Z = 0 (l.122); `WRBYTE` +0..+3
+and `WRWORD` +0, +2 the merged long (`$4C3D_2EFB`, `$4C3D_FB1F`, `$4CFB_2E1F`, `$FB3D_2E1F`,
+`$4C3D_EAFB`, `$EAFB_2E1F` from `$4C3D_2E1F`), read back at once and later (l.132–182). Verdicts
+l.188–191 all `CONFIRMED`. **Grounds:** E7's rule — the waiting form, or the next hub instruction at
+least 16 clocks after the no-wait `RDFAST` — now proven for writes of every width as well as reads;
+P2 Errata prints the three blocks as proven (KB: F-472/F-478 carry it). *Limits:* only `WAITX #12`
+as the spacing (16 clocks exactly; no other filler, no longer spacing); `WRLONG`/`WRBYTE`/`WRWORD`
+with a following `RDLONG` of the same long only; `WMLONG`, block writes, `RETA`, an interrupt in the
+window not tested; one cog; cog execution; 200 MHz; run once. *Source:*
+`…/tests/e7-workaround-hub-access-test.spin2`.
+
+**The E7 reader copies re-run (2026-10-01, Stephen, same bench, once each, same session as
+EF-088).** `examples-library/e7-next-hub-instruction-test` (EF-084's rig), `e7-every-hub-width-test`
+(EF-086's) and `e7-workaround-setq-block-test` (EF-087's): each measuring PASM image byte-identical
+to the as-run build (1,112 / 1,800 / 896 bytes, compared at the object base), cog-0 Spin2 restyled
+(the last two restructured to single-exit methods). Each downloaded `.bin` (30,090 / 44,438 / 32,254
+bytes) equals the archive build. Compared line by line with the original runs (logs
+`p2-errata/audit/verification-tests/logs-archive/debug_261001-141047`, `-141100`, `-141120` against
+`logs/debug_261001-000927`, `-014330`, `-114625`): **same line count (491 / 957 / 288), and every
+analysed value, class, count and verdict matched in all three**; the differing lines (21 / 31 / 53)
+carry only labels (`O29`/`O29B`/`O29C`/`E8`/`EF-084` → E7 wording) and hub string addresses. The
+block-read copy reproduced both released outcomes exactly (af0 cells: one wrong long, registers
+`$000`/`$001` → `$0000_0060`/`$0000_0061` and `$4000_0053`; af1/af2: did not finish within 1 s).
+**One post-run edit:** the release-test copy printed `VERDICT E7RDLONG:` (and `E7WINDOW`, `E7WRLONG`,
+`E7WAITING`) — a space lost in the relabelling; the 28 strings were corrected after the run (Spin2
+text only; the measuring image re-checked byte-identical, DEBUG data 24 bytes).
 
 
 ## Open / pending empirical questions

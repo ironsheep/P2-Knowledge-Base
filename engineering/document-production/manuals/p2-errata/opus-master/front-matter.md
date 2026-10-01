@@ -25,7 +25,7 @@
 \vspace{0.2cm}
 {\large\color{blue}Version \DocVersion\par}
 \vspace{0.25cm}
-{\large\bfseries\color{red!70!black} Community Review Draft \textperiodcentered\ Build 2026-09-26\par}
+{\large\bfseries\color{red!70!black} Community Review Draft \textperiodcentered\ Build 2026-10-01\par}
 
 \vspace{0.3cm}
 \begin{tcolorbox}[

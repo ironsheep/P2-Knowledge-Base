@@ -1783,21 +1783,21 @@ PRI verdict_rdlong(bRunsOk) | primerCnt, seedCnt
   primerCnt := t_cnt(0)
   seedCnt := runCnt[RUN_T1 * NVC + VC_SEED]
   if not bRunsOk
-    say(string("VERDICT E7RDLONG: NO VERDICT - an image R / W gate failed (see RIG FAIL lines); the rows above are raw"))
+    say(string("VERDICT E7 RDLONG: NO VERDICT - an image R / W gate failed (see RIG FAIL lines); the rows above are raw"))
   elseif not is_clean(RUN_C2)
-    ln_s(string("VERDICT E7RDLONG: INCONCLUSIVE - the waiting-form control C2 k=0 was sentinel in only "))
+    ln_s(string("VERDICT E7 RDLONG: INCONCLUSIVE - the waiting-form control C2 k=0 was sentinel in only "))
     ln_d(runGoodAll[RUN_C2])
     ln_s(string(" of 1024 records, so T1's "))
     ln_d(primerCnt)
     say(string(" primer cells are not shown to belong to the no-wait form"))
   elseif seedCnt > 0
-    ln_s(string("VERDICT E7RDLONG: REFUTED - the early value is not the previous read's: T1 has "))
+    ln_s(string("VERDICT E7 RDLONG: REFUTED - the early value is not the previous read's: T1 has "))
     ln_d(seedCnt)
     ln_s(string(" seed records (destination never written) over all reps, beside "))
     ln_d(primerCnt)
     say(string(" primer cells per rep"))
   elseif runOther[RUN_T1] > 0
-    ln_s(string("VERDICT E7RDLONG: REFUTED - the early value is not the previous read's: T1 holds "))
+    ln_s(string("VERDICT E7 RDLONG: REFUTED - the early value is not the previous read's: T1 holds "))
     ln_h(runOtherVal[RUN_T1])
     ln_s(string(" ("))
     ln_d(runOther[RUN_T1])
@@ -1805,7 +1805,7 @@ PRI verdict_rdlong(bRunsOk) | primerCnt, seedCnt
     ln_d(primerCnt)
     say(string(" primer cells per rep"))
   elseif runCnt[RUN_T1 * NVC + VC_STRM] > 0
-    ln_s(string("VERDICT E7RDLONG: REFUTED - the early value is not the previous read's: T1 holds stream long "))
+    ln_s(string("VERDICT E7 RDLONG: REFUTED - the early value is not the previous read's: T1 holds stream long "))
     ln_h(runStrmVal[RUN_T1])
     ln_s(string(" (data at the RDFAST's address; "))
     ln_d(runCnt[RUN_T1 * NVC + VC_STRM])
@@ -1813,12 +1813,12 @@ PRI verdict_rdlong(bRunsOk) | primerCnt, seedCnt
     ln_d(primerCnt)
     say(string(" primer cells per rep"))
   elseif primerCnt == 0
-    say(string("VERDICT E7RDLONG: REFUTED - no early release: T1 read the sentinel in all 64 cells of all 16 repetitions, with C1 and C2 k=0 clean"))
+    say(string("VERDICT E7 RDLONG: REFUTED - no early release: T1 read the sentinel in all 64 cells of all 16 repetitions, with C1 and C2 k=0 clean"))
   elseif primerCnt == predTot[0] and delta_match(RUN_T1, 0)
-    ln_s(string("VERDICT E7RDLONG: CONFIRMED - T1 completed 43 of 64 cells early in every repetition, each reading exactly the primer $A5A5_0001, "))
+    ln_s(string("VERDICT E7 RDLONG: CONFIRMED - T1 completed 43 of 64 cells early in every repetition, each reading exactly the primer $A5A5_0001, "))
     say(string("split by delta 8 8 7 6 5 4 3 2 as predicted; C1 and C2 k=0 sentinel in every record"))
   else
-    ln_s(string("VERDICT E7RDLONG: MECHANISM PRESENT, COUNT DIFFERS - T1 completed "))
+    ln_s(string("VERDICT E7 RDLONG: MECHANISM PRESENT, COUNT DIFFERS - T1 completed "))
     ln_d(primerCnt)
     ln_s(string(" of 64 cells early in every repetition (predicted 43), each reading exactly the primer $A5A5_0001; by delta "))
     ln_row8(@runDelta[RUN_T1 * NSLOT])
@@ -1865,36 +1865,36 @@ PRI verdict_window(bRunsOk) | kIdx, kZero, totalCnt, seedCnt, bAll, otherCnt, ot
     if t_cnt(kIdx) <> predTot[kIdx] or not delta_match(RUN_T1 + kIdx, kIdx)
       bAll := FALSE
   if not bRunsOk
-    say(string("VERDICT E7WINDOW: NO VERDICT - an image R / W gate failed (see RIG FAIL lines)"))
+    say(string("VERDICT E7 WINDOW: NO VERDICT - an image R / W gate failed (see RIG FAIL lines)"))
   elseif not c2_all_clean()
-    say(string("VERDICT E7WINDOW: INCONCLUSIVE - the waiting-form control C2 was not clean at every k (see the WINDOW TABLE C2 column)"))
+    say(string("VERDICT E7 WINDOW: INCONCLUSIVE - the waiting-form control C2 was not clean at every k (see the WINDOW TABLE C2 column)"))
   elseif seedCnt > 0
-    ln_s(string("VERDICT E7WINDOW: REFUTED - the early value is not the previous read's: "))
+    ln_s(string("VERDICT E7 WINDOW: REFUTED - the early value is not the previous read's: "))
     ln_d(seedCnt)
     say(string(" seed records over T1/T2"))
   elseif otherCnt > 0
-    ln_s(string("VERDICT E7WINDOW: REFUTED - the early value is not the previous read's: T1/T2 over k=0..8 hold "))
+    ln_s(string("VERDICT E7 WINDOW: REFUTED - the early value is not the previous read's: T1/T2 over k=0..8 hold "))
     ln_h(otherVal)
     ln_s(string(" ("))
     ln_d(otherCnt)
     say(string(" records; per-run 'first other value' lines above)"))
   elseif strmCnt > 0
-    ln_s(string("VERDICT E7WINDOW: REFUTED - the early value is not the previous read's: T1/T2 over k=0..8 hold stream long "))
+    ln_s(string("VERDICT E7 WINDOW: REFUTED - the early value is not the previous read's: T1/T2 over k=0..8 hold stream long "))
     ln_h(strmVal)
     ln_s(string(" (data at the RDFAST's address; "))
     ln_d(strmCnt)
     say(string(" records; per-run 'stream longs' lines above)"))
   elseif totalCnt == 0
-    say(string("VERDICT E7WINDOW: REFUTED - no early release at any k from 0 to 8"))
+    say(string("VERDICT E7 WINDOW: REFUTED - no early release at any k from 0 to 8"))
   elseif bAll
-    ln_s(string("VERDICT E7WINDOW: CONFIRMED - every k from 0 to 8 and every delta as predicted; zero from k=7 (test RDLONG issued 16 clocks after the RDFAST): "))
+    ln_s(string("VERDICT E7 WINDOW: CONFIRMED - every k from 0 to 8 and every delta as predicted; zero from k=7 (test RDLONG issued 16 clocks after the RDFAST): "))
     say(string("7 non-hub instructions are a sufficient gap"))
   elseif kZero > KMAX
-    ln_s(string("VERDICT E7WINDOW: MECHANISM PRESENT, COUNT DIFFERS - per-k totals in the WINDOW TABLE differ from the prediction, and k=8 still completes early in "))
+    ln_s(string("VERDICT E7 WINDOW: MECHANISM PRESENT, COUNT DIFFERS - per-k totals in the WINDOW TABLE differ from the prediction, and k=8 still completes early in "))
     ln_d(t_cnt(KMAX))
     say(string(" cells: no sufficient gap within this sweep (predicted zero from k=7)"))
   else
-    ln_s(string("VERDICT E7WINDOW: MECHANISM PRESENT, COUNT DIFFERS - per-k totals in the WINDOW TABLE differ from the prediction; measured: zero from k="))
+    ln_s(string("VERDICT E7 WINDOW: MECHANISM PRESENT, COUNT DIFFERS - per-k totals in the WINDOW TABLE differ from the prediction; measured: zero from k="))
     ln_d(kZero)
     ln_s(string(" (test RDLONG issued "))
     ln_d(2 + 2 * kZero)
@@ -1925,21 +1925,21 @@ PRI verdict_wrlong(bRunsOk) | base4, cntOO, cntPN, cntNN, cntON, cntDN4, old4, c
   repeat c1Idx from 0 to NVC - 1
     old4 += runRep0[base4 + c1Idx * NVC + VC_OLD]
   if not bRunsOk
-    say(string("VERDICT E7WRLONG: NO VERDICT - an image R / W gate failed (see RIG FAIL lines)"))
+    say(string("VERDICT E7 WRLONG: NO VERDICT - an image R / W gate failed (see RIG FAIL lines)"))
   elseif not is_clean(RUN_C4)
-    ln_s(string("VERDICT E7WRLONG: INCONCLUSIVE - the waiting-form control C4 was (new,new) in only "))
+    ln_s(string("VERDICT E7 WRLONG: INCONCLUSIVE - the waiting-form control C4 was (new,new) in only "))
     ln_d(runGoodAll[RUN_C4])
     say(string(" of 1024 cells"))
   elseif cntON > 0 or old4 > 0
-    ln_s(string("VERDICT E7WRLONG: REFUTED - writes are not lost as predicted: T3 cells (old,new) = write late but landed: "))
+    ln_s(string("VERDICT E7 WRLONG: REFUTED - writes are not lost as predicted: T3 cells (old,new) = write late but landed: "))
     ln_d(cntON)
     ln_s(string("; T4 cells with rb2 old = early WRLONG's write never lands:"))
     ln_d(old4)
     ln_out()
   elseif cntNN == NCELL and cntDN4 == NCELL
-    say(string("VERDICT E7WRLONG: REFUTED - erratum absent for WRLONG: T3 (new,new) in all 64 cells, T4 (seed,new) in all 64"))
+    say(string("VERDICT E7 WRLONG: REFUTED - erratum absent for WRLONG: T3 (new,new) in all 64 cells, T4 (seed,new) in all 64"))
   elseif cntOO + cntPN + cntNN <> NCELL or cntDN4 <> NCELL or cntOO == 0
-    ln_s(string("VERDICT E7WRLONG: REFUTED - a pattern the prediction does not name (or no (old,old) cell, so no lost write shown): T3 OO "))
+    ln_s(string("VERDICT E7 WRLONG: REFUTED - a pattern the prediction does not name (or no (old,old) cell, so no lost write shown): T3 OO "))
     ln_d(cntOO)
     ln_s(string(" PN "))
     ln_d(cntPN)
@@ -1951,10 +1951,10 @@ PRI verdict_wrlong(bRunsOk) | base4, cntOO, cntPN, cntNN, cntON, cntDN4, old4, c
     ln_d(cntDN4)
     say(string(" of 64 (rows above)"))
   elseif cntOO == T3_PRED_OO and cntPN == T3_PRED_PN and delta_match(RUN_T3, 0)
-    ln_s(string("VERDICT E7WRLONG: CONFIRMED - T3: 43 cells (old,old) (the write lost), split by delta 8 8 7 6 5 4 3 2, and 21 (primer,new) in every repetition; "))
+    ln_s(string("VERDICT E7 WRLONG: CONFIRMED - T3: 43 cells (old,old) (the write lost), split by delta 8 8 7 6 5 4 3 2, and 21 (primer,new) in every repetition; "))
     say(string("T4 (seed,new) in all 64 (the early WRLONG's write lands when nothing follows)"))
   else
-    ln_s(string("VERDICT E7WRLONG: MECHANISM PRESENT, COUNT DIFFERS - T3 (old,old) "))
+    ln_s(string("VERDICT E7 WRLONG: MECHANISM PRESENT, COUNT DIFFERS - T3 (old,old) "))
     ln_d(cntOO)
     ln_s(string(" (predicted 43), (primer,new) "))
     ln_d(cntPN)
@@ -1977,9 +1977,9 @@ PRI verdict_waiting(bRunsOk) | kIdx, badC2
   repeat kIdx from 0 to KMAX
     badC2 += NREC_R - runGoodAll[RUN_C2 + kIdx]
   if not bRunsOk
-    say(string("VERDICT E7WAITING FORM: NO VERDICT - an image R / W gate failed (see RIG FAIL lines)"))
+    say(string("VERDICT E7 WAITING FORM: NO VERDICT - an image R / W gate failed (see RIG FAIL lines)"))
   elseif badC2 > 0 or not is_clean(RUN_C4)
-    ln_s(string("VERDICT E7WAITING FORM: REFUTED - the waiting form fails: C2 records not sentinel over k=0..8: "))
+    ln_s(string("VERDICT E7 WAITING FORM: REFUTED - the waiting form fails: C2 records not sentinel over k=0..8: "))
     ln_d(badC2)
     ln_s(string(" of "))
     ln_d(NREC_R * (KMAX + 1))
@@ -1987,9 +1987,9 @@ PRI verdict_waiting(bRunsOk) | kIdx, badC2
     ln_d(NREC_R - runGoodAll[RUN_C4])
     say(string(" of 1024"))
   elseif t_cnt(0) == 0 and runRep0[RUN_T3 * NPAIR + PAIR_NN] == NCELL
-    say(string("VERDICT E7WAITING FORM: INCONCLUSIVE - C2 and C4 were clean, but T1 and T3 did not show the erratum, so the waiting form is not shown beating it"))
+    say(string("VERDICT E7 WAITING FORM: INCONCLUSIVE - C2 and C4 were clean, but T1 and T3 did not show the erratum, so the waiting form is not shown beating it"))
   else
-    ln_s(string("VERDICT E7WAITING FORM: CONFIRMED - C2 sentinel in all 1024 records at every k=0..8 and C4 (new,new) in all 1024 cells, "))
+    ln_s(string("VERDICT E7 WAITING FORM: CONFIRMED - C2 sentinel in all 1024 records at every k=0..8 and C4 (new,new) in all 1024 cells, "))
     say(string("in the same run in which the no-wait form completed early"))
 
 PRI verdict_e7b(bReproduced) | clsBase

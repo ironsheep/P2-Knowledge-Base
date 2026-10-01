@@ -1,10 +1,10 @@
 '' ===========================================================================
 ''
 ''   File.......  e7-workaround-rdfast-spacing-test.spin2
-''   Purpose....  Erratum E7 workaround test: whether the printed WAITX
-''                line between the two RDFASTs gives a correct first read
-''                in every hub alignment; alongside, the unspaced sweep
-''                that shows the erratum
+''   Purpose....  Erratum E7 workaround test: whether a WAITX #12 between
+''                the two RDFASTs gives a correct first read in every hub
+''                alignment; alongside, the unspaced sweep that shows the
+''                erratum
 ''   Manual.....  P2 Errata
 ''   Version....  v0.2.0 (2026-09-26)
 ''   Appears in.  Erratum E7: After a No-Wait RDFAST, the Next Hub
@@ -1095,7 +1095,7 @@ v_unspn         rdlong  c_junk, c_oldb
 v_wblock           rdlong  c_junk, c_oldb                          ' egg-beater sync (slice 0)
                 waitx   c_phase
                 getct   c_t0
-' ---- E7 WORKAROUND BLOCK: begin (the E7 chapter prints the lines below byte-identical) ----
+' ---- E7 WORKAROUND BLOCK: begin (the spaced arrangement the E7 chapter describes) ----
 CON
   RDFAST_SPACING_WAITX = 12            ' RDFAST 2 + WAITX 2+12 = 16 clocks
 DAT

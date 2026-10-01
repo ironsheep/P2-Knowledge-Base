@@ -25,7 +25,7 @@
 \vspace{0.2cm}
 {\large\color{blue}Version \DocVersion\par}
 \vspace{0.25cm}
-{\large\bfseries\color{red!70!black} Community Review Draft \textperiodcentered\ Build 2026-09-26\par}
+{\large\bfseries\color{red!70!black} Community Review Draft \textperiodcentered\ Build 2026-10-01\par}
 
 \vspace{0.3cm}
 \begin{tcolorbox}[
@@ -1862,46 +1862,65 @@ If your program issues a hub instruction fewer than 16 clocks after the start of
 
 None of these is flagged: the program sees the wrong data, the lost write, or a cog that has stopped, and no error.
 
-Whether it happens depends on the spacing and on the hub alignment at the moment your code runs. At a spacing of 2 clocks, a `RDLONG` was released in 43 of 64 alignments; at 8 clocks, in all 64; at 14 clocks, in 16. The same code can therefore read correctly on one pass and return the wrong value on another. From 16 clocks on, no hub read or block read tested was released in any alignment, and a waiting `RDFAST` read correctly at every spacing from 16 to 44 clocks. Writes were tested at a spacing of 2 clocks only.
-
-Whether a cog that stopped responding after a released block read wrote to hub RAM afterwards was not observed.
+Whether it happens depends on the spacing and on the hub alignment at the moment your code runs. At a spacing of 2 clocks, a `RDLONG` was released in 43 of 64 alignments; at 8 clocks, in all 64; at 14 clocks, in 16. The same code can therefore read correctly on one pass and return the wrong value on another. From 16 clocks on, no hub read, write or block read tested was released in any alignment, and a waiting `RDFAST` read correctly at every spacing from 16 to 44 clocks.
 
 ## A proven workaround {#sec-e7-workaround}
 
 **What any workaround must do:** after a no-wait `RDFAST`, start no hub instruction until at least 16 clocks have passed from the start of the `RDFAST`; or use the waiting form of `RDFAST`.
 
-**One way, proven on P2 hardware:** a `WAITX #RDFAST_SPACING_WAITX` (12) directly after the no-wait `RDFAST`.
+**One way, proven on P2 hardware:** a `WAITX #HUB_SPACING_WAITX` (12) directly after the no-wait `RDFAST`, with the constant in a `CON` block:
 
 ```pasm2
-CON
-  RDFAST_SPACING_WAITX = 12            ' RDFAST 2 + WAITX 2+12 = 16 clocks
-DAT
-        rdfast  nowait, hub_first      ' no-wait RDFAST (D[31] = 1)
-        waitx   #RDFAST_SPACING_WAITX  ' E7: >= 16 clocks, RDFAST to RDFAST
-        rdfast  #0, hub_next           ' blocking RDFAST: now it waits
-        rflong  first_long             ' reads hub_next's first long
+  HUB_SPACING_WAITX = 12                ' RDFAST 2 + WAITX 2+12 = 16 clocks
 ```
 
-The `WAITX #RDFAST_SPACING_WAITX` (12) makes the spacing from the start of the no-wait `RDFAST` to the start of the next hub instruction, here a waiting `RDFAST`, 16 clocks, so that the waiting `RDFAST` waits and the `RFLONG` after it reads the first long at `hub_next`; it is a rule at each use, applied wherever your code issues a hub instruction after a no-wait `RDFAST`.
+Before a hub read:
 
-In your code, `nowait` is a register holding `$8000_0000` (`D[31]` = 1, and a block count of 0, so no wrap); `hub_first` and `hub_next` hold the two hub addresses, and `first_long` receives the first long at `hub_next`. The comment's *blocking* is the test programs' name for the waiting form.
+```pasm2
+        rdfast  nowait, hub_stream      ' no-wait RDFAST (D[31] = 1)
+        waitx   #HUB_SPACING_WAITX      ' E7: >= 16 clocks to next hub op
+        rdlong  value, hub_addr  wcz    ' hub_addr's long, and its flags
+```
 
-The rule is the spacing: at least 16 clocks from the start of the no-wait `RDFAST` to the start of the next hub instruction. The no-wait `RDFAST` takes 2 clocks and `WAITX #RDFAST_SPACING_WAITX` takes 2 + 12 = 14. The block above ran in the workaround test on 2026-09-26: in all 64 alignments, 16 trials each, `first_long` received the first long at `hub_next`, and the next `RFLONG` the long after it, in 1,024 of 1,024 trials, with the waiting `RDFAST` waiting 10 to 17 clocks. In the same run the unspaced arrangement failed as described above in all 64 alignments.
+Before a hub write and the hub instruction after it:
+
+```pasm2
+        rdfast  nowait, hub_stream      ' no-wait RDFAST (D[31] = 1)
+        waitx   #HUB_SPACING_WAITX      ' E7: >= 16 clocks to next hub op
+        wrlong  value, hub_addr         ' lands at hub_addr
+        rdlong  check, hub_addr         ' the next hub instruction
+```
+
+The `WAITX #HUB_SPACING_WAITX` (12) makes the spacing from the start of the no-wait `RDFAST` to the start of the next hub instruction 16 clocks, so that the read returns the long at `hub_addr` with its own flags, and the write lands and the read after it returns what was written; it is a rule at each use, applied wherever your code issues a hub instruction after a no-wait `RDFAST`.
+
+In your code, `nowait` is a register holding `$8000_0000` (`D[31]` = 1, and a block count of 0, so no wrap); `hub_stream` holds the FIFO's start address, `hub_addr` the address read or written, `value` the long read or the long to write, and `check` receives the long read back.
+
+Both blocks ran in the read/write workaround test on 2026-10-01, in all 64 hub alignments, 16 trials each: the read returned the long at `hub_addr` with its own flags in 1,024 of 1,024 trials, and the write landed and was read back at once in 1,024 of 1,024. `WRBYTE` at each byte offset and `WRWORD` at each word offset, after the same `WAITX`, landed in 1,024 of 1,024 each. In the same run, with no spacing, the read was released in 43 of 64 alignments and the write lost in 43 of 64.
+
+**Another way, proven on P2 hardware: the waiting form.** A `RDFAST` with `D[31]` = 0 needs no spacing:
+
+```pasm2
+        rdfast  #0, hub_stream          ' waiting RDFAST (D[31] = 0)
+        wrlong  value, hub_addr         ' lands at hub_addr
+        rdlong  check, hub_addr  wcz    ' reads value back, and its flags
+```
+
+This block ran in the same test: the write landed and the read after it returned it, with its flags, in 1,024 of 1,024 trials. In every test that ran it, for every instruction under *What the P2 does*, the waiting form released nothing.
 
 **Other ways that meet the condition, proven on P2 hardware.**
 
-- **The waiting form.** A `RDFAST` with `D[31]` = 0 in place of the no-wait one released nothing: `RDLONG` correct at every spacing from 2 to 18 clocks; `RDBYTE`, `RDWORD` and the flags correct; `WRLONG`, `WRBYTE` and `WRWORD` landed; the `SETQ` block `RDLONG` correct with cog RAM intact; and a waiting `RDFAST` after it read correctly, in every alignment and trial tested. It is the one way proven for hub writes.
+- **The same spacing before a waiting `RDFAST`.** In the spacing workaround test, `WAITX #12` between a no-wait `RDFAST` and a waiting one made the waiting one wait, and the `RFLONG` after it read the first long at its address, in 1,024 of 1,024 trials.
 - **Seven two-clock instructions before a read.** Seven `NOP`s between the no-wait `RDFAST` and a `RDLONG`, `RDBYTE` or `RDWORD` (16 clocks) released nothing in any alignment, and neither did eight before a `RDLONG`. Before a `SETQ` block `RDLONG`, six `NOP`s and the `SETQ` (16 clocks), seven (18) and eight (20) read the right block with cog RAM intact; the `SETQ` counts as one of the seven.
 
-Other instructions that fill at least 16 clocks meet the same condition, since the measurements tie the release to the spacing: they have not been run. Only `NOP` and `WAITX` were placed in the window. A hub write started 16 clocks or more after a no-wait `RDFAST` has not been run either: for writes, the spacing is the condition the reads set, not a proven way.
+Other instructions that fill at least 16 clocks meet the same condition, since the measurements tie the release to the spacing: they have not been run. Only `NOP` and `WAITX` were placed in the window.
 
 The cost: the waiting form waits for the FIFO, 10 to 17 clocks for a `RDFAST` alone in the tests above, where a no-wait `RDFAST` takes 2; the spacing costs up to 14 clocks after each no-wait `RDFAST` that a hub instruction follows, less where the instructions in between do other work.
 
 The limits of the proof:
 
 - Tested after a no-wait `RDFAST`: `RDBYTE`, `RDWORD`, `RDLONG`, `WRBYTE`, `WRWORD`, `WRLONG`, a `SETQ` block `RDLONG` of 8 longs into cog registers, and a waiting `RDFAST` followed by `RFLONG`. Not tested: `WMLONG`, `SETQ2` block reads, `SETQ` block writes, `RETA` and the other instructions that read the hub stack, the other hub instructions, an interrupt taken inside the window, and the streamer.
-- `RDLONG` was tested at spacings of 2 to 18 clocks; `RDBYTE` and `RDWORD` at 2 and 16; the flags and `PTRA++` at 2; `WRLONG`, `WRBYTE` and `WRWORD` at 2 only; the no-wait `WRFAST` at 2 and 16; the block read at 4, 16, 18 and 20 clocks, in four alignments at 4 clocks; the waiting `RDFAST` at 2 and 4 to 44 clocks.
-- What changed cog registers `$000` and `$001`, and whether a cog that did not finish had stalled or was running elsewhere, are not known.
+- `RDLONG` was tested at spacings of 2 to 18 clocks; `RDBYTE` and `RDWORD` at 2 and 16; the flags at 2 and 16; `PTRA++` at 2; `WRLONG`, `WRBYTE` and `WRWORD` at 2 and 16, each followed at once by a `RDLONG` of the same long; the no-wait `WRFAST` at 2 and 16; the block read at 4, 16, 18 and 20 clocks, in four alignments at 4 clocks; the waiting `RDFAST` at 2 and 4 to 44 clocks.
+- What changed cog registers `$000` and `$001`, whether a cog that did not finish had stalled or was running elsewhere, and whether it wrote to hub RAM afterwards, are not known.
 - Only cog execution was tested, with one cog using its FIFO, at 200 MHz.
 
 ## Why it happens {#sec-e7-why}
@@ -1920,9 +1939,9 @@ What is not known: why a waiting `RDFAST` that returns early leaves the next `RF
 
 ## How it was proven on P2 hardware {#sec-e7-proof}
 
-**Where it came from.** The erratum was first found on the bench, by a test built to measure something else: when the hub FIFO can first be used after `RDFAST` and `WRFAST`, in both modes. A waiting `RDFAST` after a no-wait one was among its secondary arrangements, expected to show the waiting promise holding. The clean-room design study then predicted that a no-wait `RDFAST` releases any hub instruction waiting at that moment, not only a `RDFAST`; three further tests confirmed it, and measured the workaround on block reads.
+**Where it came from.** The erratum was first found on the bench, by a test built to measure something else: when the hub FIFO can first be used after `RDFAST` and `WRFAST`, in both modes. A waiting `RDFAST` after a no-wait one was among its secondary arrangements, expected to show the waiting promise holding. The clean-room design study then predicted that a no-wait `RDFAST` releases any hub instruction waiting at that moment, not only a `RDFAST`; three further tests confirmed it, and measured the workaround on block reads. A fourth ran the read, write and waiting-form blocks printed in *A proven workaround*.
 
-All five tests ran on one P2 board at 200 MHz, used no pins, and kept the debugger in cog 0 (`DEBUG_COGS = %0000_0001`), which sent the commands, classified the results from hub RAM and printed them. Every measurement ran in a measuring cog started by `COGINIT`, in cog execution. Each program's expected outcomes, and the outcomes that would refute them, were written into it before the run, and each prints every measured value, so its verdict can be re-derived from its output.
+All six tests ran on one P2 board at 200 MHz, used no pins, and kept the debugger in cog 0 (`DEBUG_COGS = %0000_0001`), which sent the commands, classified the results from hub RAM and printed them. Every measurement ran in a measuring cog started by `COGINIT`, in cog execution. Each program's expected outcomes, and the outcomes that would refute them, were written into it before the run, and each prints every measured value, so its verdict can be re-derived from its output.
 
 **The release test.** Each trial read a primer long, `$A5A5_0001`, with `RDLONG` (which also ties the cog to the hub rotation), issued the `RDFAST` (no-wait, or waiting) of a stream long in slice *f*, then k `NOP`s (k = 0 to 8), then the instruction under test on a long in slice *r*: 64 alignments (*f*, *r*), 16 repetitions each, 1,024 records per run, read back after the cog had settled. For reads, the instruction under test was a `RDLONG` of `$5A5A_0002` into a register preset to `$C3C3_0003`. For writes, it was a `WRLONG` of `$F0F0_0005` over `$0F0F_0004`, read back at once by `RDLONG` (or after a `NOP`), and again after settling. After every command the measuring cog reported the `RDFAST` mode it had run, and the program stopped if it was not the mode sent.
 
@@ -1934,6 +1953,8 @@ All five tests ran on one P2 board at 200 MHz, used no pins, and kept the debugg
 **The scope test.** The release test's construction, run for `RDBYTE` (offsets 0 to 3), `RDWORD` (offsets 0 and 2), `WRBYTE`, `WRWORD`, `RDLONG ... WCZ` (flags preset to C set and Z set, with a primer of `$A5A5_0001` and of `$0000_0000`), `RDLONG` through `PTRA++`, a no-wait `WRFAST` in place of the `RDFAST`, and a `SETQ #7` block `RDLONG` into a guarded range of cog registers. Each run had its own `NOP` control and waiting form. As its positive control, it reproduced the release test's `RDLONG` result first: 688 released records at k = 0, none at k = 7. In every run the released records fell in the same 43 alignments, and no repetition disagreed. The results are under *What the P2 does*. The block read at 4 clocks ran once, in its first trial: the measuring cog did not finish within 1 s, and the program stopped it.
 
 **The block-read workaround test.** Every run and every trial in a freshly started cog, whose cog RAM was checked against the loaded image before and after. It first reproduced the release test's `RDLONG` result as its positive control, then ran single block reads at 4 clocks in four alignments, 4 trials each, with a `NOP` control in each: the right block, cog RAM intact, the cog finished. Then the workaround: the waiting form, and 6, 7 and 8 `NOP`s with the `SETQ` (16, 18 and 20 clocks), 1,024 records each.
+
+**The read/write workaround test.** The release test's construction, with the three blocks printed in *A proven workaround* each between two marker comments, nothing else between their lines, in all 64 alignments, 16 repetitions each. Before each read trial the flags were preset to C set and Z set, so that a read that did not write them would show. Its controls: `WAITX #HUB_SPACING_WAITX` (12) between two `GETCT`s measured 16 clocks in all 1,024 trials; with a `NOP` in place of the `RDFAST`, the read returned `$5A5A_0002` with C clear and Z clear, and the write landed, in all 1,024; and a no-wait `RDFAST`, `WAITX #200` and `RFLONG` read the stream's first long in all 1,024. Its positive controls, the same read and write with no spacing, reproduced the release test: 43 released reads per repetition, each returning `$A5A5_0001` with C set and Z clear, and 43 lost writes with 21 released read-backs, split over the alignments as before. Then the workarounds, 1,024 records each: the read block returned `$5A5A_0002` with C clear and Z clear; the write block left `$F0F0_0005` at its address, read back at once and read again later; the waiting-form block did the same, with C set and Z clear; and `WRBYTE` at offsets 0 to 3 and `WRWORD` at 0 and 2, after `WAITX #HUB_SPACING_WAITX`, each left the merged long, read back at once and later. Every alignment's 16 repetitions were the same.
 
 **The first-found test.** Three data regions, each starting on a 32-byte boundary, so that long k of a region lies in hub slice k mod 8: the no-wait `RDFAST`'s region, long k = `$3C3C_00C0` + k; the waiting `RDFAST`'s region, `$A5A5_0080` + k; and a third region, `$0D0D_0040` + k, that the FIFO was loaded from before every trial, so that a stale read would show as `$0D0D_0042`. Each trial then read a slice-0 long with `RDLONG`, waited the starting point, 0 to 7 clocks, and between two `GETCT`s ran the no-wait `RDFAST` of the first region's long 0, the spacing, the waiting `RDFAST #0` of long s of the second region, and `RFLONG` with `WCZ`. A second `RFLONG` followed. The sweep: 8 slices s times 8 starting points gives 64 alignments; 42 spacings (2, and 4 to 44 clocks); 16 trials of each, 43,008 trials in all. The 8 starting points span a whole hub rotation: a waiting `RDFAST` alone took 8 different times over them, in every slice. The waiting `RDFAST`'s own clocks are the `GETCT` difference less the `GETCT` overhead, the spacing and the `RFLONG`.
 
@@ -1953,13 +1974,13 @@ At each failing spacing, all 16 trials read `$0000_0000`, and the waiting `RDFAS
 | Waiting `RDFAST` (clocks) | 13 | 12 | 11 | 2 | 17 | 16 |
 | `RFLONG` returned | correct | correct | correct | `$0000_0000` | correct | correct |
 
-**The spacing workaround test.** The first-found test's regions, loading and alignments, with the block printed in *A proven workaround*, with nothing else between its lines, in all 64 alignments. Its controls were the four above and one more: `WAITX #RDFAST_SPACING_WAITX` (12) between two `GETCT`s measured 16 clocks, 2 for the `GETCT` pair and 14 for the `WAITX`, in every trial. As a positive control, the same run swept the unspaced arrangement over the same 42 spacings; it failed at exactly one spacing in each of the 64 alignments, at the same spacings as in the first-found test, 1,024 of 43,008 reads wrong, and at every spacing from 16 to 44 clocks the first read and the long after it were correct in all 29,696 trials. The block read the first long at `hub_next` and then the long after it in 1,024 of 1,024 trials, its waiting `RDFAST` taking 8 different times over the 8 starting points in every slice.
+**The spacing workaround test.** The first-found test's regions, loading and alignments, with a `WAITX #12` between the no-wait `RDFAST` and the waiting one, nothing else between the lines, in all 64 alignments. Its controls were the four above and one more: that `WAITX` between two `GETCT`s measured 16 clocks, 2 for the `GETCT` pair and 14 for the `WAITX`, in every trial. As a positive control, the same run swept the unspaced arrangement over the same 42 spacings; it failed at exactly one spacing in each of the 64 alignments, at the same spacings as in the first-found test, 1,024 of 43,008 reads wrong, and at every spacing from 16 to 44 clocks the first read and the long after it were correct in all 29,696 trials. With the `WAITX`, the `RFLONG` read the first long at the waiting `RDFAST`'s address and then the long after it in 1,024 of 1,024 trials, the waiting `RDFAST` taking 10 to 17 clocks, 8 different times over the 8 starting points in every slice.
 
-**When they ran.** The first-found test ran on 2026-09-25, twice; the two runs printed the same result for every alignment and spacing. The spacing workaround test ran on 2026-09-26, once. The release test, the scope test and the block-read workaround test ran on 2026-10-01, once each; every control in each was correct.
+**When they ran.** The first-found test ran on 2026-09-25, twice; the two runs printed the same result for every alignment and spacing. The spacing workaround test ran on 2026-09-26, once. The release test, the scope test, the block-read workaround test and the read/write workaround test ran on 2026-10-01, once each; every control in each was correct.
 
 ## The test program {#sec-e7-program}
 
-Five programs in the examples archive measured this erratum.
+Six programs in the examples archive measured this erratum.
 
 The erratum as first found is `e7-rdfast-blocking-after-no-wait-test.spin2`. Its Spin2 code in cog 0 starts the measuring cog, sends it one command per arrangement, slice and starting point, classifies every trial, prints every row, checks the controls, and prints the verdicts. The measuring cog is PASM2 in the program's `DAT` block and is the only code that touches the FIFO. Besides the waiting-`RDFAST` arrangement, the program measures waiting and no-wait `RDFAST` and `WRFAST` on their own, and a second no-wait `RDFAST` in place of the waiting one.
 
@@ -1993,9 +2014,9 @@ The next three lines, whose comments run past this page's width, are `rdfast c_n
 
 `INSTR_CLK` is 2 and `NW_WAITX_OFFSET` is 4, and the measuring cog loads `c_dly` with j - 1, so j = 1 to 41 gives 4 to 44 clocks. A run that decides the question prints no `RIG FAIL` lines; the waiting-`RDFAST` arrangement shows as the second `ARM-VERDICT` line, which reads `DEVIATES` with 1,024 of 43,008 reads wrong.
 
-The spacing workaround test is `e7-workaround-rdfast-spacing-test.spin2`. It uses the same construction and the same trial, and runs the block printed in *A proven workaround*, between two marker comments, in all 64 alignments. Alongside, it runs the unspaced arrangement at every spacing from 2 to 44 clocks: a clean result for the block counts only if that sweep shows the erratum in every alignment, and otherwise the program reports the workaround as inconclusive. It ends with a `VERDICT E7 WORKAROUND:` line.
+The spacing workaround test is `e7-workaround-rdfast-spacing-test.spin2`. It uses the same construction and the same trial, and runs the spaced arrangement, between two marker comments, in all 64 alignments. Alongside, it runs the unspaced arrangement at every spacing from 2 to 44 clocks: a clean result for the block counts only if that sweep shows the erratum in every alignment, and otherwise the program reports the workaround as inconclusive. It ends with a `VERDICT E7 WORKAROUND:` line.
 
-The release test is `e7-next-hub-instruction-test.spin2`, the scope test `e7-every-hub-width-test.spin2`, and the block-read workaround test `e7-workaround-setq-block-test.spin2`. They share one construction: the measuring cog holds one hand-written copy of the trial for each k, so that nothing but the `RDFAST` and the k `NOP`s sits between the primer read and the instruction under test, and no `##` operand there adds an `AUGS`. Cog 0 fills the record area with `$EEEE_EEEE` before every command, so a record the measuring cog never wrote shows as unwritten. Each program prints its predictions before the first run and ends with one verdict line per prediction.
+The release test is `e7-next-hub-instruction-test.spin2`, the scope test `e7-every-hub-width-test.spin2`, the block-read workaround test `e7-workaround-setq-block-test.spin2`, and the read/write workaround test `e7-workaround-hub-access-test.spin2`, which holds the three blocks printed in *A proven workaround* between marker comments. They share one construction: the measuring cog holds one hand-written copy of the trial for each k, so that nothing but the `RDFAST` and the k `NOP`s sits between the primer read and the instruction under test, and no `##` operand there adds an `AUGS`. Cog 0 fills the record area with `$EEEE_EEEE` before every command, so a record the measuring cog never wrote shows as unwritten. Each program prints its predictions before the first run and ends with one verdict line per prediction.
 
 The release test's read trial with seven `NOP`s, the spacing of 16 clocks:
 
@@ -2024,15 +2045,15 @@ To run any of them, compile with `pnut-ts -d` and load it to RAM with DEBUG enab
 | Erratum | E7 |
 | Published by Parallax | No |
 | Found by | Found on the bench here, by a test built to measure something else; its reach to every hub read and write was predicted by the clean-room design study and confirmed here |
-| Confirmed on silicon | Yes — 2026-09-25 (run twice) and 2026-10-01 (three tests, run once each), on a P2 board at 200 MHz |
+| Confirmed on silicon | Yes — 2026-09-25 (run twice) and 2026-10-01 (four tests, run once each), on a P2 board at 200 MHz |
 | Workaround proven on silicon | Yes — 2026-09-26 and 2026-10-01, on a P2 board at 200 MHz; a rule at each use: the waiting form of `RDFAST`, or at least 16 clocks from the start of the no-wait `RDFAST` to the start of the next hub instruction |
 | Affects | a hub instruction started fewer than 16 clocks after a no-wait `RDFAST`: hub reads return the previous hub read's data and its flags, hub writes are lost when a hub read follows at once, a `SETQ` block `RDLONG` writes a wrong long and overwrites cog registers or the cog does not finish, and a waiting `RDFAST` does not wait, so the next `RFLONG` returns `$0000_0000`. Tested in cog execution |
-| Test program | `e7-rdfast-blocking-after-no-wait-test.spin2`, `e7-next-hub-instruction-test.spin2`, `e7-every-hub-width-test.spin2`; the workaround: `e7-workaround-rdfast-spacing-test.spin2`, `e7-workaround-setq-block-test.spin2` |
+| Test program | `e7-rdfast-blocking-after-no-wait-test.spin2`, `e7-next-hub-instruction-test.spin2`, `e7-every-hub-width-test.spin2`; the workaround: `e7-workaround-hub-access-test.spin2`, `e7-workaround-rdfast-spacing-test.spin2`, `e7-workaround-setq-block-test.spin2` |
 
 
 # Appendix A: The Test Programs {#app-a}
 
-Every erratum in this manual was confirmed on silicon by a test program, and every workaround it prints ran on silicon inside a test program. Each program is in the examples archive. They are the programs that ran, prepared for readers: each carries a new file header, and internal labels in its comments and in its printed output are replaced with the erratum they refer to. Every measuring routine assembles to the same bytes as the program that ran. The Spin2 code in cog 0 that starts each run, checks its controls and prints the results was brought to the Spin2 authoring guide, so some printed labels and hub addresses differ from the original run. The archive copies of the three E7 tests that ran on 2026-10-01 have not yet been run on P2 hardware themselves. The other archive copies were run on P2 hardware on 2026-09-26, and every value the programs analyse, every class and every verdict matched the original runs. Beyond labels, hub addresses and counter timestamps, two things differed, as they differ between any two runs: the E6 test's count of the running ADC's toggles, and the SINC2 test's two deliberately jittered arms. One start-up sample, which the SINC2 test excludes from its analysis (the first sample of its first `XZERO` arm), read differently from both original runs; the cause is not yet known.
+Every erratum in this manual was confirmed on silicon by a test program, and every workaround it prints ran on silicon inside a test program. Each program is in the examples archive. They are the programs that ran, prepared for readers: each carries a new file header, and internal labels in its comments and in its printed output are replaced with the erratum they refer to. Every measuring routine assembles to the same bytes as the program that ran. The Spin2 code in cog 0 that starts each run, checks its controls and prints the results was brought to the Spin2 authoring guide, so some printed labels and hub addresses differ from the original run. The archive copies were run on P2 hardware themselves, on 2026-09-26 and, for the E7 release, scope and block-read tests, on 2026-10-01, and every value the programs analyse, every class and every verdict matched the original runs. Beyond labels, hub addresses and counter timestamps, two things differed, as they differ between any two runs: the E6 test's count of the running ADC's toggles, and the SINC2 test's two deliberately jittered arms. One start-up sample, which the SINC2 test excludes from its analysis (the first sample of its first `XZERO` arm), read differently from both original runs; the cause is not yet known.
 
 ## What each program decides {#sec-a-list}
 
@@ -2064,7 +2085,8 @@ Each also reproduces its erratum in the same run.
 - **E3** `e3-workaround-keeper-cog-test.spin2` — with the keeper started first, whether cogs of 4-7 started after one and after two wraps read the current upper long.
 - **E3** `e3-workaround-waiting-cog-test.spin2` — whether a keeper held in `WAITATN`, and one held in `WAITX`, keeps cogs 4-7 current through a wrap.
 - **E4, E5** `e4-e5-workaround-read-sums-test.spin2` — whether `burst_sums` returns exactly *N* terms for bursts of 1 to 1001 clocks, back to back, at both input levels.
-- **E7** `e7-workaround-rdfast-spacing-test.spin2` — whether the printed `WAITX` spacing gives a correct first read in every hub alignment.
+- **E7** `e7-workaround-rdfast-spacing-test.spin2` — whether a `WAITX #12` between a no-wait and a waiting `RDFAST` gives a correct first read in every hub alignment.
+- **E7** `e7-workaround-hub-access-test.spin2` — whether the printed read and write blocks, `WAITX #12` after a no-wait `RDFAST`, and the waiting form give the right read, flags and write in every hub alignment; and `WRBYTE` and `WRWORD` after the same spacing.
 - **E7** `e7-workaround-setq-block-test.spin2` — whether the waiting form, and 16, 18 and 20 clocks between a no-wait `RDFAST` and a `SETQ` block `RDLONG`, read the right block with cog RAM intact, each run in a freshly started cog.
 
 ## How they are built and run {#sec-a-run}
@@ -2086,8 +2108,8 @@ To run one:
 
 Pin use: the E4 and E5 programs, including the SINC2 test and the E4/E5 workaround test, drive P3 from the measuring cog, so P3 must be free. The E6 test drives P4 and reads it through P5, so both must be free and unconnected. The others use no pins.
 
-Running time: the E3 erratum programs wait for the counter's lower long to wrap, which takes 2^32^ clocks (21.47 s at 200 MHz); Run A ends about 105 s after reset, Run B about 44 s, the cogs 0-3 test about 87 s, the eight-wrap test about 216 s, the PASM2 counter-targets test about 130 s, the Spin2 counter-methods test about 44 s, and the `DEBUG_TIMESTAMP` test about 45 s. The E7 erratum test printed its output over about 23 s, the SINC2 test over about 5 s, the E7 next-hub-instruction test over about 2 s, and the E7 every-hub-width test over about 5 s. The E1, E2, E4, E5 and E6 erratum programs each printed their whole output in about one second. Of the workaround tests, the E3 keeper test ends about 67 s after reset and the E3 waiting-cog test about 66 s, since each waits through three wraps; the E7 spacing test printed its output over about 8 s, the E7 block-read test over about 9 s, and the E4/E5 test in about one second.
+Running time: the E3 erratum programs wait for the counter's lower long to wrap, which takes 2^32^ clocks (21.47 s at 200 MHz); Run A ends about 105 s after reset, Run B about 44 s, the cogs 0-3 test about 87 s, the eight-wrap test about 216 s, the PASM2 counter-targets test about 130 s, the Spin2 counter-methods test about 44 s, and the `DEBUG_TIMESTAMP` test about 45 s. The E7 erratum test printed its output over about 23 s, the SINC2 test over about 5 s, the E7 next-hub-instruction test over about 2 s, and the E7 every-hub-width test over about 5 s. The E1, E2, E4, E5 and E6 erratum programs each printed their whole output in about one second. Of the workaround tests, the E3 keeper test ends about 67 s after reset and the E3 waiting-cog test about 66 s, since each waits through three wraps; the E7 spacing test printed its output over about 8 s, the E7 block-read test over about 9 s, the E7 read/write test in about one second, and the E4/E5 test in about one second.
 
-The E1 to E5 erratum programs ran on 2026-09-24 on a P2 board at 200 MHz, each twice, from two builds with identical measuring code, and every measured value matched between the runs. The E5 SINC2, E6 and E7 erratum programs ran on 2026-09-25, each twice. The E7 next-hub-instruction, every-hub-width and block-read workaround tests ran on 2026-10-01, once each, on the same board at 200 MHz, and passed every control; each reproduced the release of a `RDLONG` before its own measurements. The three earlier workaround tests ran on 2026-09-26, once each, on the same board at 200 MHz; each reproduced its erratum and passed every control in the same run. The three E3 stale-window programs ran on 2026-09-27, once each, on the same board at 200 MHz, and passed every control; the archive copies of the eight-wrap and cogs 0-3 tests differ from the programs that ran only in comments and names, and assemble to the same bytes; in the waiting-cog test, the Spin2 method that prints the verdicts was given a single exit, and its measuring code assembles to the same bytes; its archive copy was run again on the same board on 2026-09-27, and every reading and both verdicts matched. The three E3 programs that measured what else the stale window reaches ran on 2026-09-29, once each, on the same board at 200 MHz, and passed every control; in their archive copies, three or fewer printed lines each that named the programs by their internal names were reworded, and the Spin2 code in cog 0 that records and prints the results was brought to the Spin2 authoring guide (local names, and one exit from each method); their measuring code is unchanged.
+The E1 to E5 erratum programs ran on 2026-09-24 on a P2 board at 200 MHz, each twice, from two builds with identical measuring code, and every measured value matched between the runs. The E5 SINC2, E6 and E7 erratum programs ran on 2026-09-25, each twice. The E7 next-hub-instruction, every-hub-width and block-read workaround tests ran on 2026-10-01, once each, on the same board at 200 MHz, and passed every control; each reproduced the release of a `RDLONG` before its own measurements. Their archive copies ran later the same day, once each, and matched the original runs in every analysed value, class and verdict; after that run, a missing space in four of the next-hub-instruction test's printed verdict labels was restored. The E7 read/write workaround test ran on 2026-10-01, once, in the same session; it is the program that ran, with only its generated header added. The three earlier workaround tests ran on 2026-09-26, once each, on the same board at 200 MHz; each reproduced its erratum and passed every control in the same run. The three E3 stale-window programs ran on 2026-09-27, once each, on the same board at 200 MHz, and passed every control; the archive copies of the eight-wrap and cogs 0-3 tests differ from the programs that ran only in comments and names, and assemble to the same bytes; in the waiting-cog test, the Spin2 method that prints the verdicts was given a single exit, and its measuring code assembles to the same bytes; its archive copy was run again on the same board on 2026-09-27, and every reading and both verdicts matched. The three E3 programs that measured what else the stale window reaches ran on 2026-09-29, once each, on the same board at 200 MHz, and passed every control; in their archive copies, three or fewer printed lines each that named the programs by their internal names were reworded, and the Spin2 code in cog 0 that records and prints the results was brought to the Spin2 authoring guide (local names, and one exit from each method); their measuring code is unchanged.
 
 
