@@ -14,11 +14,24 @@ description: |
   (Rev B/C silicon) that increments every clock, cleared on reset.
   Without WC: D receives the lower 32 bits of the 64-bit counter.
   With WC:    D receives the upper 32 bits of the 64-bit counter.
-  GETCT WC followed by GETCT reads the full 64-bit value. The WC bit is a mode selector,
-  not a flag-write -- C and Z flags are always unchanged.
+  GETCT WC followed by GETCT reads the full 64-bit value -- except in a cog whose group of
+  four has missed a wrap of the lower long (see silicon_errata). The WC bit is a mode
+  selector, not a flag-write -- C and Z flags are always unchanged.
 flags_affected:
   C: Unchanged (WC selects upper/lower 32 bits of the counter; it does not write the C flag)
   Z: No effect
+silicon_errata:
+  stale_upper_long_after_missed_wrap:
+    condition: "In a cog of a four-cog group (cogs 0-3 or 4-7) that has had no running cog at one or more wraps of the counter's lower long (every 2^32 clocks, 21.47 s at 200 MHz), until that group runs through its next wrap. From reset only cog 0 runs, so the first cog a program starts in 4-7 after the first wrap meets it."
+    effect: "GETCT WC returns an upper long behind by one per missed wrap; the 64-bit time is short by that many x 2^32 clocks. The window closes at the group's next wrap, in one step, whatever the lag (measured from 1, 2 and 8 missed wraps); an interval timed across that wrap is too long by the same amount. Spin2 GETMS() and GETSEC() and DEBUG_TIMESTAMP stamps sent from the window are affected the same way."
+    workaround: "One-time startup workaround: keep a cog of each group in use running at every wrap -- e.g. coginit(KEEPER_COG, @keeper, 0) as the first line of main(), KEEPER_COG a cog of 4-7 nothing else starts or stops, its code 'keeper jmp #keeper'; a cog held in WAITATN, WAITX or WAITCT1 counts as running. Or take no 64-bit time in that group until it has run through one wrap."
+    not_affected: "GETCT without WC; WAITCTn, POLLCTn, JCTn/JNCTn, the CT interrupts, the SETQ timeout and WAITX time correctly inside the window and across its closing wrap; Spin2 GETCT(), WAITCT(), POLLCT(), WAITMS(), WAITUS() likewise."
+    evidence: "Hardware-verified on Rev C silicon, 200 MHz: EF-068 (both runs), EF-075 (keeper cog), EF-078 (waiting keeper), EF-079 (cogs 0-3 the same), EF-080 (closes in one wrap; GETMS/GETSEC), EF-081, EF-082 (unaffected counter uses), EF-083 (DEBUG_TIMESTAMP). Not listed in the Silicon Doc's KNOWN BUGS. P2 Errata E3."
+related:
+  - language/spin2/methods/getct.yaml
+  - language/spin2/methods/getms.yaml
+  - language/spin2/methods/getsec.yaml
+  - language/pasm2/waitx.yaml
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -34,3 +47,8 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:16.908732'
 category: Miscellaneous
 oneliner: Get CT[31:0], or CT[63:32] if WC, into D
+aliases:
+- GETCT WC stale upper long
+- 64-bit counter wrong in cogs 4-7
+- GETCT erratum E3
+- system counter behind by 21 seconds

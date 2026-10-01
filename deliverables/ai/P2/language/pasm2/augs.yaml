@@ -63,14 +63,19 @@ silicon_errata:
       intended target instruction (which also has an immediate #S operand), will use the
       AUGS value WITHOUT cancelling it. The intended target still uses and cancels the AUGS
       value as expected -- but the intervening ALTx has also (incorrectly) been augmented.
+      Where the damage lands (hardware-verified, EF-066): an ALTx takes its base register
+      from S[8:0] and its D-register auto-increment from S[17:9]. The augment leaves S[8:0]
+      alone, so the substituted register is the intended one; the auto-increment is taken
+      from the AUGS value instead, silently moving the ALTx's D register
+      (AUGS #$3C5C0A55, S[17:9] = 5: ALTD idx,#0 and ALTR idx,#3 each stepped idx by 5).
     example: |
       AUGS  #$FFFFF123        ' This AUGS is intended for the ADD instruction
       ALTD  index,#base       ' Look out! AUGS augments this #base too. Use a register instead.
       ADD   0-0,#$123         ' #$123 is augmented by the AUGS and cancels the AUGS
     workaround: "Use a register (not an immediate #S) for the S operand of any ALTx placed between AUGS and its target."
     status: "Active in Rev C silicon (current production)."
-    scope_note: "The Silicon Doc documents THIS errata (an intervening ALTx with immediate #S consuming the AUGS value) for AUGS only; AUGD is not mentioned in the source (P2 Silicon Doc v35, KNOWN BUGS). This is distinct from the block-size PTRx-delta bug above (KNOWN BUGS), which DOES explicitly name ALTx/AUGS/AUGD together. Whether THIS specific intervening-#S errata also applies to AUGD (an AUGD value spuriously consumed by an intervening ALTx with immediate #D) is not stated in any golden source and is deliberately not asserted here."
-    source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim"
+    scope_note: "The Silicon Doc documents THIS errata (an intervening ALTx with immediate #S consuming the AUGS value) for AUGS only; AUGD is not mentioned in the source (P2 Silicon Doc v35, KNOWN BUGS). This is distinct from the block-size PTRx-delta bug above (KNOWN BUGS), which DOES explicitly name ALTx/AUGS/AUGD together. AUGD on silicon (hardware-verified, EF-066): a pending AUGD survived an intervening immediate-S ALTS and reached its #D target intact (AUGD / ALTS idxs,#0 / WRLONG #$13C wrote $1357_9B3C, idxs unchanged); an ALTx has no immediate-D form, so it cannot consume a pending AUGD. One ALTx variant was tested for this half."
+    source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim; the ALTD/ALTR effect and the register-S workaround hardware-verified on Rev C (EF-066)."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

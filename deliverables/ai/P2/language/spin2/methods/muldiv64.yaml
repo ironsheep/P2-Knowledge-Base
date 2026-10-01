@@ -1,22 +1,26 @@
 method: MULDIV64
 type: method
 description: |
-  Multiply then divide with 64-bit intermediate result
+  Multiply then divide with a 64-bit intermediate product. Parallax Spin2
+  Documentation v55: "Divide the 64-bit product of 'mult1' and 'mult2' by
+  'divisor', return quotient (unsigned operation)." All operands and the quotient
+  are UNSIGNED 32-bit values -- an operand with bit 31 set is a large positive
+  number, not a negative one; handle signs yourself for signed math.
 category: Math/CORDIC Operations
 syntax: "result := MULDIV64(Multiplier, Multiplicand, Divisor)"
 parameters:
   - name: "Multiplier"
     type: "long"
-    description: "First value to multiply (32-bit signed)"
+    description: "First value to multiply (32-bit unsigned)"
   - name: "Multiplicand"
     type: "long"
-    description: "Second value to multiply (32-bit signed)"
+    description: "Second value to multiply (32-bit unsigned)"
   - name: "Divisor"
     type: "long"
-    description: "Value to divide by (32-bit signed, non-zero)"
+    description: "Value to divide the 64-bit product by (32-bit unsigned)"
 returns:
   type: "long"
-  description: "Result of (Multiplier × Multiplicand) ÷ Divisor"
+  description: "Unsigned quotient of (Multiplier × Multiplicand) ÷ Divisor"
 examples:
   - code: |
       ' Scale value without overflow
@@ -37,8 +41,7 @@ examples:
 notes:
   - "Prevents overflow in intermediate calculation"
   - "Uses 64-bit intermediate result"
-  - "All parameters are 32-bit signed"
-  - "Division by zero returns 0"
+  - "Unsigned operation: all parameters and the result are 32-bit unsigned (Parallax Spin2 Documentation v55, MULDIV64)"
   - "Useful for scaling and ratio calculations"
   - "More precise than (a*b)/c for large values"
 timing:
@@ -49,8 +52,8 @@ timing:
     single-PASM-instruction backing to cite).
 
 related:
-  - QLOG
-  - QEXP
+  - language/spin2/methods/qlog.yaml
+  - language/spin2/methods/qexp.yaml
 see_also:
   - "Extended precision math"
   - "Scaling operations"

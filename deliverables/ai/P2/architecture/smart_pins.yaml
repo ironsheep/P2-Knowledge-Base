@@ -408,6 +408,8 @@ configuration_format:
           condition: "%SSSSS = %00001..%00011"
           enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
           adc_control: "0x=OUT enables ADC, 1x=OTHER enables ADC (M[7:0] overridden)"
+          silicon_errata:
+            out_needs_tt_bit0_to_run_adc: "The two published rules do not combine as written: with TT = %00, raising OUT runs NOTHING -- the ADC stays off and the pin reads exactly as with OUT low. With TT = %01 (output enabled), OUT runs the ADC, and the fast DAC drives the pin while it does. Workaround (rule at each use): set TT bit 0 in the WRPIN word and accept the DAC driving the pin. Only TT = %00/%01 tested; the OTHER forms (TT = %1x) not. Hardware-verified on Rev C (EF-071, run twice); contradicts the Silicon Doc %TT table. P2 Errata E6."
       which_modes_need_p_oe:
         required: "All output modes: NCO (%00110-%00111), PWM (%01000-%01010), Pulse/Transition (%00100-%00101), Serial TX (%11100, %11110), DAC (%00001-%00011), USB (%11011)"
         not_needed: "Input-only modes: Timing (%10000-%10010), Counters (%01011-%01111), Period/Freq (%10011-%10111), ADC (%11000-%11010), Serial RX (%11101, %11111)"

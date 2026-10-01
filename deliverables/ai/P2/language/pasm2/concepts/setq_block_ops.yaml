@@ -20,14 +20,14 @@ silicon_errata:
       An ALTx, AUGS, or AUGD instruction placed BETWEEN SETQ/SETQ2 and the block
       RDLONG/WRLONG/WMLONG cancels the special-case block-size PTRx delta. The expected
       number of longs still transfers, but PTRx is then modified only by the normal PTRx
-      expression amount (+4 for one long), NOT by N*4.
+      expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT by N*4.
     example: |
       SETQ   #16-1            ' ready to load 16 longs
       ALTD   start_reg        ' alter start register -- this intervening ALTD CANCELS the block-size PTRx delta
       RDLONG 0, ptra++        ' ptra is incremented by 4 (1 long), NOT 16*4 as anticipated
     workaround: "Keep SETQ/SETQ2 immediately adjacent to the block transfer -- place no ALTx/AUGS/AUGD between them."
     status: "Active in Rev C silicon (current production)."
-    source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C, 2020_06_01) -- verbatim"
+    source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C, 2020_06_01). Hardware-verified on Rev C (EF-067): the whole block moves to the ALTD destination; ptra++ steps +4 and ptra++[3] +12, across PTRA/PTRB, RDLONG/WRLONG, SETQ2 and an 8-long block (only ALTD tested as the intervening instruction)."
 
 setq_instructions:
   SETQ:

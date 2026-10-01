@@ -10,24 +10,9 @@ timing:
   cycles: 2
   type: fixed
 description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size
-  in 64-byte units
-
-  (0 = max), S[19:0] = block start address.
-
-
-  Key features:
-
-  - Automatic sequential reading from HUB
-
-  - Background FIFO refill
-
-  - Perfect for streaming data processing
-
-  - Essential for checksum/CRC calculations
-
-  - Used with RFBYTE/RFWORD/RFLONG instructions
-
-  '
+  in 64-byte units (0 = max), S[19:0] = block start address. The FIFO then reads hub
+  sequentially and refills in the background; the cog takes the data with
+  RFBYTE/RFWORD/RFLONG, or the streamer consumes it.'
 flags_affected:
   C: No effect
   Z: No effect
@@ -65,12 +50,23 @@ related_instructions:
 - RFWORD: Read word via FIFO
 - RFLONG: Read long via FIFO
 - WRFAST: Begin fast hub write via FIFO
-- FBLOCK: Wait for FIFO block wrap
+- FBLOCK: Set the next start address and 64-byte block count, taken when the current blocks are fully read (2 clocks, never waits)
 notes:
-- D[31]=1 for no-wait mode (doesn't stall for FIFO fill)
+- "D[31]=0 (waiting form): waits for any previous WRFAST to finish, then until the FIFO has begun receiving hub data, so the next instruction can read it (P2 Silicon Doc, FAST SEQUENTIAL FIFO INTERFACE); measured 10-17 clocks (hardware-verified, EF-073)."
+- "D[31]=1 (no-wait form): takes 2 clocks; the Silicon Doc requires 'a sufficient number of clocks' before reading FIFO data. Measured: the first correct RFxxxx read comes 8-15 clocks after the RDFAST starts, by hub alignment; an earlier read returns $0000_0000 with no error. Allow at least 15 clocks (e.g. WAITX #11 directly after it) (hardware-verified, EF-073)."
+- "After a no-wait RDFAST, start no hub instruction (RDxxxx, WRxxxx, SETQ block, another RDFAST) for 16 clocks -- see silicon_errata.no_wait_rdfast_releases_next_hub_op. A no-wait WRFAST has no such effect (EF-086)."
 - Block size is in 64-byte units; 0 means maximum (16384 blocks = 262,144 longs)
 - FIFO automatically wraps at block boundary
 - Critical for high-throughput data processing
+
+silicon_errata:
+  no_wait_rdfast_releases_next_hub_op:
+    condition: "A hub instruction started fewer than 16 clocks after the start of a no-wait RDFAST (D[31]=1), while it still waits for its hub slot. Cog execution (hub execution cannot use RDFAST)."
+    effect: "It can complete before its own hub access (43 of 64 hub alignments at the next instruction; none from 16 clocks): RDBYTE/RDWORD/RDLONG return the PREVIOUS hub read's data (byte/word at their own offset) with that value's C/Z, and PTRA++ still steps; WRBYTE/WRWORD/WRLONG is lost if a hub read follows at once; a SETQ block RDLONG writes one wrong long, leaves the rest unwritten and can overwrite cog registers outside its destination, or the cog does not finish; a blocking RDFAST issued 8-15 clocks after it takes 2 clocks without waiting and the next RFLONG returns $0000_0000. Nothing flags any of these."
+    workaround: "Rule at each use: use the waiting form (D[31]=0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts -- e.g. WAITX #12 directly after it (2 + 14 = 16 clocks), or 7 two-clock non-hub instructions (a SETQ counts as one). The waiting form and the 16-clock spacing are proven on silicon for every read and write width, SETQ block reads and a following RDFAST (spacing tested with WAITX and NOPs only)."
+    not_affected: "A no-wait WRFAST releases nothing. A blocking first RDFAST removes the RDFAST-after-RDFAST case."
+    untested: "RETA and other hub-stack instructions, WMLONG, SETQ2 block reads, SETQ block writes, an interrupt inside the window, the streamer."
+    evidence: "Hardware-verified on Rev C silicon, 200 MHz: EF-074, EF-077, EF-084, EF-086, EF-087, EF-088. Not listed in the Silicon Doc's KNOWN BUGS. P2 Errata E7."
 
 streamer_pairing:
   rule: |
@@ -98,6 +94,12 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.018932'
 category: Hub FIFO
 oneliner: Begin new fast hub read via FIFO
+aliases:
+- no-wait RDFAST
+- RDFAST erratum E7
+- RDLONG returns stale value after RDFAST
+- WRLONG lost after RDFAST
+- RFLONG returns zero after RDFAST
 
 related:
   - language/pasm2/wrfast.yaml

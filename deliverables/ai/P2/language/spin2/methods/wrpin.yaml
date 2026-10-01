@@ -58,6 +58,10 @@ tt_field:
                                         0x/1x = SMART/OUT or SMART/OTHER drives
       4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;
                                         0x = OUT enables ADC, 1x = OTHER enables ADC
+                                        -- ON SILICON, OUT runs the ADC only while TT bit 0
+                                        is set (TT = %00: OUT high runs nothing); see
+                                        architecture/smart_pins.yaml dac_smart_pin_modes
+                                        silicon_errata (hardware-verified, EF-071)
     Full table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).
     Source: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.
   when_smart_pin_on: "x0=output disabled, x1=output enabled (regardless of DIR)"

@@ -113,7 +113,14 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 
 ## A no-wait `RDFAST` releases the next `RDLONG`/`WRLONG`, and their entries do not say so (2026-10-01, EF-084) — F-478
 
-### F-478 — the hub read/write entries give no caution for a no-wait `RDFAST` before them: within 16 clocks a read returns the previous hub read's data with that data's flags, and a write can be lost — `CONFIRMED`
+### F-478 — the hub read/write entries give no caution for a no-wait `RDFAST` before them: within 16 clocks a read returns the previous hub read's data with that data's flags, and a write can be lost — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** all six entries now carry `silicon_errata.after_no_wait_rdfast`
+> (rdlong/wrlong beside their SETQ note): the specific symptom per instruction (stale value with
+> that value's C/Z and `PTRA++` stepping for reads; lost write when a read follows at once for
+> writes; the SETQ block outcome on `rdlong`), the rule (waiting form, or ≥ 16 clocks, e.g.
+> `WAITX #12`) and EF-084/086/087/088, pointing to `rdfast.yaml` for the full account. **Widened:**
+> none of the six had a `related:` block; each now links its width siblings and `rdfast.yaml`
+> (findability).
 
 **Where:** `language/pasm2/rdlong.yaml`, `rdword.yaml`, `rdbyte.yaml`, `wrlong.yaml`, `wrword.yaml`,
 `wrbyte.yaml` — none mentions the FIFO.
@@ -137,7 +144,14 @@ finish (EF-087), and the same rule protects it — the `rdlong.yaml` caution nam
 
 ## A condition-false `BRK` still breaks, and the KB teaches it as conditional (2026-10-01, found while building the SO109 test) — F-477
 
-### F-477 — `brk.yaml` teaches a conditional `BRK` as "break only when condition met"; Parallax documents that a `BRK` breaks whatever its condition — `CONFIRMED`
+### F-477 — `brk.yaml` teaches a conditional `BRK` as "break only when condition met"; Parallax documents that a `BRK` breaks whatever its condition — `DONE` 2026-10-01 (YAML); the Assembly manual's BRK entry rides «#352»
+> **Applied 2026-10-01 («#372»):** `brk.yaml` — the example now puts the opposite condition on
+> `SKIP #1` before an unconditional `BRK` (compiled clean, pnut-ts 1.55.8; v55 :62-63), a new
+> `condition_behavior` states :2491 and EF-085, and the unsourced "Zero code means unconditional
+> break" note is **removed** (no source found; v55 :1056 gives only DEBUG → BRK #0). **Widened:**
+> the old example's comparison was also backwards (`CMP value, limit WC` sets C when value is
+> BELOW limit, so `if_c brk` broke on the wrong side); the new one states the sense. Added a
+> `related:` block (getbrk, skip, conditional-debug, debug_interrupt) and symptom aliases.
 
 **Where:** `language/pasm2/brk.yaml` — example "Conditional Breakpoint" ("Break only when condition
 met": `cmp value, limit wc` then `if_c brk #LIMIT_EXCEEDED`), and its note "Zero code means
@@ -238,7 +252,12 @@ variables and `var` variables as instance variables."*
 
 ## The errata fixes are now proven on silicon (2026-09-26, EF-075..077) — F-474
 
-### F-474 — the KB's `silicon_errata` entries for E3, E4/E5 and E7 should give the fix that ran on silicon, not an unproven workaround — `CONFIRMED`
+### F-474 — the KB's `silicon_errata` entries for E3, E4/E5 and E7 should give the fix that ran on silicon, not an unproven workaround — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** each `silicon_errata` workaround now states the proven form, its
+> kind and its EF: `getct.yaml` the keeper cog (one-time startup; EF-075, waiting keeper EF-078,
+> or wait out one wrap), with the untested "pass the upper long through hub RAM" alternative not
+> carried; `getxacc.yaml` the burst_sums helper routine step by step (EF-076); `rdfast.yaml` the
+> rule at each use (waiting form or 16 clocks; EF-077, EF-084..088).
 
 **Where:** the `silicon_errata` entries F-462..466 (GETCT, GETXACC) and F-472 (RDFAST) ask to add, in
 `language/pasm2/getct.yaml`, `getxacc.yaml`, `rdfast.yaml`.
@@ -256,7 +275,10 @@ untested; P2 Errata v0.2.0 dropped it for that reason.
 
 ## Three KB statements the second errata bench session decides (2026-09-25, EF-071..074) — F-471, F-472, F-473
 
-### F-471 — the KB states the DAC-smart-mode `%TT` rule unqualified; on silicon `OUT` enables the ADC only while `TT` bit 0 enables the output — `CONFIRMED`
+### F-471 — the KB states the DAC-smart-mode `%TT` rule unqualified; on silicon `OUT` enables the ADC only while `TT` bit 0 enables the output — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** published rules kept; `smart_pins.yaml`
+> `dac_smart_pin_modes.silicon_errata.out_needs_tt_bit0_to_run_adc` added (EF-071, TT %00/%01 only),
+> and `wrpin.yaml` case 4 carries a one-line pointer to it.
 
 **Where:** `architecture/smart_pins.yaml:408-410` (`condition: "%SSSSS = %00001..%00011"`,
 `enable_bit: "x0=disabled regardless of DIR…"`, `adc_control: "0x=OUT enables ADC, 1x=OTHER enables
@@ -270,7 +292,15 @@ one-line pointer in `wrpin.yaml` case 4): in the DAC smart modes the ADC runs on
 set, which also enables the fast DAC's drive; `TT` = `%00` with `OUT` high runs neither. Cite EF-071.
 Tested `TT` = `%00`/`%01` only; the `OTHER` forms (`%1x`) untested. → P2 Errata **E6**.
 
-### F-472 — `rdfast.yaml` gives the no-wait requirement no number and no consequence, and omits the no-wait `RDFAST` erratum (P2 Errata E7, which absorbed the planned E8 on 2026-10-01) — `CONFIRMED`
+### F-472 — `rdfast.yaml` gives the no-wait requirement no number and no consequence, and omits the no-wait `RDFAST` erratum (P2 Errata E7, which absorbed the planned E8 on 2026-10-01) — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** `rdfast.yaml` notes now give the waiting form's 10-17 clocks
+> and the no-wait FIFO-read number (first correct read 8-15 clocks; allow ≥ 15, e.g. `WAITX #11`;
+> an earlier read returns zero) from EF-073, and a new
+> `silicon_errata.no_wait_rdfast_releases_next_hub_op` carries condition, every symptom, the rule,
+> what is not affected (no-wait WRFAST; blocking first RDFAST), what is untested, and
+> EF-074/077/084/086/087/088. Symptom aliases added. The description was tightened to keep the
+> entry within its line budget. SOURCE-ERRATA E-015 is not cited in the YAML (a comment thread is
+> not a citable source).
 
 **Where:** `language/pasm2/rdfast.yaml` — "D[31]=1 for no-wait mode (doesn't stall for FIFO fill)"
 (:70), with no minimum distance and nothing on what an early read returns.
@@ -302,7 +332,13 @@ no-wait `WRFAST` does **not** release a following hub instruction (state it, so 
 over-apply the rule); `RETA` and interrupts in the window are not measured; hub execution cannot
 use `RDFAST` (P2 Documentation). The same caution goes to the read/write entries (F-478).
 
-### F-473 — `getxacc.yaml`'s `sinc2_constraint` can now state its mechanism: SINC2's running first stage read across windows of unequal length (NOT the one-clock carry — corrected 2026-09-26) — `CONFIRMED`
+### F-473 — `getxacc.yaml`'s `sinc2_constraint` can now state its mechanism: SINC2's running first stage read across windows of unequal length (NOT the one-clock carry — corrected 2026-09-26) — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»), with F-469:** `sinc2_constraint` rewritten — the Silicon Doc note
+> quoted as the source, the measured mechanism (SINC2's running first stage across unequal
+> windows, not the one-clock lag), both proven workarounds (power-of-two count; XZERO), SINC1 off
+> by at most one term, classed as documented behaviour, citing EF-072. **Widened:** the old
+> "periodic noise ~every 30-60 ms" and "keep the window under ~20 ms" had no Parallax source (the
+> latter is contradicted by EF-072's clean 25 ms XZERO windows) — removed.
 
 **Where:** `language/pasm2/getxacc.yaml` `sinc2_constraint` (F-469 held the rest of this entry "until
 VO-J-013 runs" — it has run).
@@ -323,7 +359,9 @@ GOERTZEL SINC2 MODE (2024.12.16)* states it — so not an erratum and **not part
 
 ## Two KB statements contradicted by our own sources, found while building the SINC2 test (2026-09-25, VO-J-013) — F-469, F-470
 
-### F-469 — `getxacc.yaml`'s `sinc2_constraint` says Chip's SINC2 note is "not yet in the released Silicon Doc"; the Silicon Doc carries it — `CONFIRMED`
+### F-469 — `getxacc.yaml`'s `sinc2_constraint` says Chip's SINC2 note is "not yet in the released Silicon Doc"; the Silicon Doc carries it — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** "not yet in the released Silicon Doc" removed; the note is cited
+> as NOTE ABOUT GOERTZEL SINC2 MODE (2024.12.16). The rest of the entry landed via F-473.
 
 **Where:** `language/pasm2/getxacc.yaml` `sinc2_constraint` — "Reported by Chip Gracey (P2 designer),
 2024-12-16; not yet in the released Silicon Doc."
@@ -334,7 +372,12 @@ number of iterations in a Goertzel cycle varies …". The note is in the documen
 Silicon Doc". **Hold the rest of the entry** until VO-J-013 runs: whether this constraint is a silicon
 erratum or a documented behaviour is being decided on the bench and by the clean-room classification.
 
-### F-470 — `muldiv64.yaml` calls every parameter "32-bit signed"; Spin2 v55 says MULDIV64 is an unsigned operation — `CONFIRMED`
+### F-470 — `muldiv64.yaml` calls every parameter "32-bit signed"; Spin2 v55 says MULDIV64 is an unsigned operation — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** description, the three parameters, the return and the notes
+> now say unsigned, quoting v55 :566. **Widened:** "Division by zero returns 0" had no source (v55
+> says nothing of a zero divisor) — removed. `related:` bare names QLOG/QEXP redirected to full
+> paths. **Sweep:** no manual or app note teaches a signed MULDIV64; P2AN001 already calls its
+> ratio unsigned.
 
 **Where:** `language/spin2/methods/muldiv64.yaml` — lines 10, 13, 16 ("32-bit signed") and 40 ("All
 parameters are 32-bit signed").
@@ -346,7 +389,11 @@ results for any operand with bit 31 set.
 
 ## Two hub-FIFO facts the KB states wrongly, found while building the RDFAST readiness test (2026-09-25, VO-J-012) — F-467, F-468
 
-### F-467 — `architecture/hub.yaml` says a hub slice is `address & 7`; the Silicon Doc says each slice holds every 8th long (address bits [4:2]) — `CONFIRMED`
+### F-467 — `architecture/hub.yaml` says a hub slice is `address & 7`; the Silicon Doc says each slice holds every 8th long (address bits [4:2]) — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** `hub.yaml` `slicing` now quotes the Silicon Doc and states slice
+> = (address >> 2) & 7 on the 8-cog part; `slice_assignment` rewritten in long addresses. **Sweep:**
+> no other YAML or manual carries the `address & 7` claim; the Assembly Reference (ch. 1) already
+> says "every eighth long".
 
 **Where:** `architecture/hub.yaml` `slicing.concept` — "Each slice corresponds to addresses where
 (address & 7) equals slice number" — and the `slice_assignment` block beneath it ("Addresses ending
@@ -359,7 +406,10 @@ the four bytes of one long in four different slices.
 `slice_assignment` in terms of long addresses, cite the Silicon Doc. **Sweep** for the same claim in
 the other hub/egg-beater YAMLs and the manuals (Architect's Guide, Assembly Reference hub chapter).
 
-### F-468 — `pasm2/rdfast.yaml` lists FBLOCK as "Wait for FIFO block wrap"; FBLOCK sets the next start address and block count — `CONFIRMED`
+### F-468 — `pasm2/rdfast.yaml` lists FBLOCK as "Wait for FIFO block wrap"; FBLOCK sets the next start address and block count — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** `rdfast.yaml` FBLOCK line now reads "Set the next start address
+> and 64-byte block count, taken when the current blocks are fully read (2 clocks, never waits)"
+> (:3022, :3045). `wrfast.yaml` and `fblock.yaml` checked: neither carries the wrong wording.
 
 **Where:** `language/pasm2/rdfast.yaml:68` — "FBLOCK: Wait for FIFO block wrap".
 **Against:** `silicon-doc-text.txt` :3022 — "The FBLOCK instruction provides a way to set a new start
@@ -377,7 +427,12 @@ evidence requires of a shipped YAML. **Evidence tier:** EF — the top of the au
 the Silicon Doc; each is a structural yes/no result, so N=1 is dispositive. **The counter above read
 `F-460` while F-460 and F-461 were already allocated (2026-09-22)** — corrected to `F-467` in this pass.
 
-### F-462 — `getxacc.yaml` says `GETXACC` clears the accumulators and that values hold until a new streamer command; silicon does neither outside a Goertzel burst — `CONFIRMED`
+### F-462 — `getxacc.yaml` says `GETXACC` clears the accumulators and that values hold until a new streamer command; silicon does neither outside a Goertzel burst — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** `getxacc.yaml` description, `reading_protocol` and `notes` now
+> say the clear acts only during a Goertzel burst and an idle read returns and keeps the running
+> total, keeping the Silicon Doc's statement as the documented one; new
+> `silicon_errata.clear_only_during_goertzel_burst` (EF-069). The read-before-and-after,
+> take-the-difference rule kept, now with its reason.
 
 **Where:** `language/pasm2/getxacc.yaml` — `description` ("Capture the streamer's Goertzel
 accumulators into holding registers and clear them … SUBSEQUENT GETXACC INSTRUCTIONS RETURN THE SAME
@@ -394,7 +449,14 @@ an idle read returns and preserves the running total, and that a new streamer co
 it. **Keep** the read-before-and-after, take-the-difference rule — it is exactly what this behaviour
 requires, and now has its reason. Add a `silicon_errata` entry citing EF-069.
 
-### F-463 — `getct.yaml` omits the stale upper long a four-cog group reads after missing a counter wrap — `CONFIRMED`
+### F-463 — `getct.yaml` omits the stale upper long a four-cog group reads after missing a counter wrap — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»), including the 2026-09-27 extension:** `pasm2/getct.yaml` — the
+> "full 64-bit value" sentence qualified, and `silicon_errata.stale_upper_long_after_missed_wrap`
+> added (condition for both groups, the band closing in one wrap, what is affected and what is not,
+> the keeper/wait-one-wrap workarounds; EF-068, 075, 078..083). `spin2/methods/getms.yaml` and
+> `getsec.yaml` carry the same note (EF-080, 082), `getsec.yaml`'s "Good for long-duration timing"
+> qualified, and their bare `related:` names redirected to full paths; `spin2/methods/getct.yaml`
+> notes that GETCT() itself is unaffected (EF-082). Symptom aliases added to `pasm2/getct.yaml`.
 
 **Where:** `language/pasm2/getct.yaml` — no `silicon_errata`; the description presents `GETCT WC`
 then `GETCT` as reading "the full 64-bit value" with no condition.
@@ -431,7 +493,10 @@ any KB text that builds 64-bit time from `GETCT WC` in a cog of 4–7.
 >    wraps of the lower long, until that group runs through its next wrap.* The P2 Errata manual's E3
 >    chapter carries the same five facts (v0.2.0).
 
-### F-464 — `getxacc.yaml` omits the one-clock lag that leaves each Goertzel burst's last term for the next burst — `CONFIRMED`
+### F-464 — `getxacc.yaml` omits the one-clock lag that leaves each Goertzel burst's last term for the next burst — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** `getxacc.yaml` `silicon_errata.last_term_lands_in_next_burst`
+> (EF-070), with the burst_sums workaround shared with F-462; the SINC2 constraint kept separate
+> (different condition, documented).
 
 **Where:** `language/pasm2/getxacc.yaml` — no statement of it anywhere.
 **What silicon does (EF-070):** a read after a burst of N clocks holds N − 1 terms; the last term
@@ -442,7 +507,11 @@ enables clear) delivers it — 16 of 16 sequences, N = 64 and 65, both signs.
 reconcile with the existing `sinc2_constraint` note (Chip Gracey's off-by-one) — related path,
 different condition, so neither replaces the other.
 
-### F-465 — `setq.yaml` says the cancelled block delta leaves `PTRx` at "+4 for one long"; silicon applies the plain expression's own step — `CONFIRMED`
+### F-465 — `setq.yaml` says the cancelled block delta leaves `PTRx` at "+4 for one long"; silicon applies the plain expression's own step — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** all five places (`setq.yaml`, `rdlong.yaml`, `wrlong.yaml`,
+> `wmlong.yaml`, `concepts/setq_block_ops.yaml`) now say the plain expression's own step (+4 for
+> `ptra++`, +12 for `ptra++[3]`), citing EF-067 (ALTD tested; `wmlong.yaml` notes WMLONG itself
+> untested). `setq.yaml` also gains the no-wait-RDFAST block-read note (F-478 family).
 
 **Where:** `language/pasm2/setq.yaml` `silicon_errata.block_transfer_ptrx_delta` — "(PTRx advances by
 +4 for one long, NOT by N*4)". **Widened 2026-09-25 (P2 Errata E1 drafting, «#357»):** the same
@@ -459,7 +528,10 @@ PTRx expression does without `SETQ`, not one long. `augs.yaml` is right. Confirm
 expression's step (e.g. +4 for `ptra++`, +12 for `ptra++[3]`)", citing EF-067. Only `ALTD` was tested
 as the intervening instruction.
 
-### F-466 — `augs.yaml`'s intervening-`ALTx` erratum can now say where the damage lands and settle its `AUGD` scope note — `CONFIRMED`
+### F-466 — `augs.yaml`'s intervening-`ALTx` erratum can now say where the damage lands and settle its `AUGD` scope note — `DONE` 2026-10-01
+> **Applied 2026-10-01 («#372»):** `augs.yaml` description adds where the damage lands (the ALTx
+> D register's auto-increment from S[17:9]; AUGS #$3C5C0A55 → +5), and the scope note's "not
+> asserted" is replaced by EF-066's AUGD result, scoped to the one ALTx variant tested.
 
 **Where:** `language/pasm2/augs.yaml` `silicon_errata.intervening_altx_immediate_s_consumes_augs` —
 its `description`/`example`, and its `scope_note` ("Whether THIS specific intervening-#S errata also

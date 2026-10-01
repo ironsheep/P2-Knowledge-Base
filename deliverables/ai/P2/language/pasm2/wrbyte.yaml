@@ -14,6 +14,8 @@ description: 'Write byte in D[7:0] to hub address {#}S/PTRx.'
 flags_affected:
   C: No effect
   Z: No effect
+silicon_errata:
+  after_no_wait_rdfast: "Started fewer than 16 clocks after a no-wait RDFAST (D[31]=1), WRBYTE can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Rule: use the waiting RDFAST (D[31]=0), or start this WRBYTE at least 16 clocks after the no-wait RDFAST (e.g. WAITX #12 directly after it). Hardware-verified (EF-086, EF-088). Full account: language/pasm2/rdfast.yaml silicon_errata."
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -38,3 +40,9 @@ immediate_address_note: >-
   WRWORD WMLONG) and is felt most with RDLUT/WRLUT, where small LUT addresses are
   written as bare literals. Authority: PNut-TS v1.55 (Spin2 v55); Silicon Doc
   hub-operand bit-table.
+
+related:
+  - language/pasm2/wrlong.yaml
+  - language/pasm2/wrword.yaml
+  - language/pasm2/rdbyte.yaml
+  - language/pasm2/rdfast.yaml

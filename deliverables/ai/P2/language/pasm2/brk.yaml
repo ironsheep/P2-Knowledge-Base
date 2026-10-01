@@ -17,11 +17,9 @@ documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:
 - name: Conditional Breakpoint
-  description: Break only when condition met
-  code: "' Check condition and break if true\n        cmp     value, limit    wc \
-    \      ' Check if over limit\nif_c    brk     #LIMIT_EXCEEDED          ' Break\
-    \ with error code\n        \n        ' Continue normal execution\n"
-  source: error_checking
+  description: "Break only when a condition holds. A condition on BRK itself does NOT do this (see condition_behavior): put the opposite condition on a SKIP #1 before an unconditional BRK, as the Spin2 compiler does for a conditional DEBUG."
+  code: "' Break only when value >= limit\n        cmp     value, limit    wc       ' C = 1 if value is below limit\nif_c    skip    #1                       ' opposite condition: skip the BRK\n        brk     #LIMIT_EXCEEDED          ' breaks only when C = 0\n"
+  source: "Parallax Spin2 Documentation v55 (conditional DEBUG: 'an opposite-condition SKIP instruction is placed before it'); behaviour hardware-verified (EF-085)"
 - name: Debug Communication
   description: Pass data to debug monitor
   code: "' Send value to debugger for logging\n        mov     debug_val, result \
@@ -35,6 +33,7 @@ examples:
     \   #DEBUG_WARNING           ' Warning-level break\n        \n' Debugger filters\
     \ based on level\n"
   source: debug_infrastructure
+condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code (Silicon Doc, BRK in the debugging section). So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. pnut-ts compiles a conditional DEBUG() to the SKIP form, but leaves a hand-written conditional BRK as written, without a warning. Hardware-verified on Rev C (EF-085). Documented behaviour, not a silicon erratum."
 related_instructions:
 - GETBRK: Get breakpoint status/code
 - COGBRK: Trigger breakpoint in another COG
@@ -42,7 +41,7 @@ related_instructions:
 notes:
 - Requires debug interrupts enabled to function
 - Breakpoint code passed to debug ISR
-- Zero code means unconditional break
+- "A condition on BRK does not make the break conditional -- see condition_behavior"
 - Essential for interactive debugging
 compiler_operand_format:
   name: operand_l
@@ -64,3 +63,13 @@ parameters:
   of a Debug ISR).
 manual_extraction_date: '2025-01-19'
 oneliner: Trigger breakpoint in current cog
+aliases:
+- conditional BRK
+- if_c BRK breaks anyway
+- BRK condition ignored
+
+related:
+  - language/pasm2/getbrk.yaml
+  - language/pasm2/skip.yaml
+  - language/pasm2/conditional-debug.yaml
+  - architecture/debug_interrupt.yaml

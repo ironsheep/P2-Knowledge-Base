@@ -118,7 +118,7 @@ notes:
   - "The upper 32 bits are accessible via the PASM2 GETCT D WC instruction"
   - "Wraps around every 2^32 clocks (lower 32 bits)"
   - "Subtraction handles wrap correctly"
-  - "All cogs see same counter value"
+  - "All cogs see the same lower 32 bits, which is what GETCT() returns -- unaffected by the stale upper long a cog group can read after missing a wrap (hardware-verified, EF-082); GETMS()/GETSEC(), which use the upper long, are affected: language/pasm2/getct.yaml silicon_errata"
   - "Not affected by cog start/stop"
   - "Resolution equals clock period"
 

@@ -68,19 +68,22 @@ egg_beater_architecture:
     
   slicing:
     concept: |
-      Hub RAM is divided into 8 slices for parallel access.
-      Each slice corresponds to addresses where (address & 7) equals slice number.
+      Hub RAM is divided into 8 slices for parallel access (one 32-bit-wide RAM per cog).
+      A slice holds LONGS, not bytes: "Each RAM slice holds every single/2nd/4th/8th/16th
+      (depending on number of cogs) set of 4 bytes in the composite hub RAM" (Silicon Doc,
+      THE COG -to- HUB RAM INTERFACE). On the 8-cog P2X8C4M64P, slice = (address >> 2) & 7,
+      i.e. hub address bits [4:2]; the four bytes of one long share one slice.
       All 8 slices can be accessed simultaneously by different COGs.
-      
+
     slice_assignment:
-      slice_0: "Addresses ending in 000 binary"
-      slice_1: "Addresses ending in 001 binary"
-      slice_2: "Addresses ending in 010 binary"
-      slice_3: "Addresses ending in 011 binary"
-      slice_4: "Addresses ending in 100 binary"
-      slice_5: "Addresses ending in 101 binary"
-      slice_6: "Addresses ending in 110 binary"
-      slice_7: "Addresses ending in 111 binary"
+      slice_0: "Longs at byte addresses with bits [4:2] = 000 ($00, $20, $40, ...)"
+      slice_1: "Longs at byte addresses with bits [4:2] = 001 ($04, $24, $44, ...)"
+      slice_2: "Longs at byte addresses with bits [4:2] = 010 ($08, $28, ...)"
+      slice_3: "Longs at byte addresses with bits [4:2] = 011 ($0C, $2C, ...)"
+      slice_4: "Longs at byte addresses with bits [4:2] = 100 ($10, $30, ...)"
+      slice_5: "Longs at byte addresses with bits [4:2] = 101 ($14, $34, ...)"
+      slice_6: "Longs at byte addresses with bits [4:2] = 110 ($18, $38, ...)"
+      slice_7: "Longs at byte addresses with bits [4:2] = 111 ($1C, $3C, ...)"
       
   synchronization:
     automatic: "Hardware handles all synchronization"
