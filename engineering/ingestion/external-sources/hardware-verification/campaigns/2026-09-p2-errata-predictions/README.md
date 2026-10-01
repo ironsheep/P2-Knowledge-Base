@@ -63,6 +63,18 @@ sources here rebuild the binaries that ran byte for byte.
 | 16 | `e3-scope-spin2-counter-methods-test.spin2` | do Spin2 `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` or `GETCT()` see it (with `GETMS()`/`GETSEC()` as the affected control)? | VO-J-019 | `CONFIRMED` (none affected; `GETMS`/`GETSEC` affected) | EF-082 |
 | 17 | `e3-scope-debug-timestamp-test.spin2` (+ `e3-scope-debug-timestamp-verdict.py`) | does a `DEBUG_TIMESTAMP` stamp sent from the window carry it, from Spin2 `debug()` and PASM2 `DEBUG`? | VO-J-020 | `CONFIRMED` (affected, both) | EF-083 |
 
+**Study briefs O29 and SO109 (2026-10-01, not yet run):** two new predictions from the study
+(golden source 0.1.5, both labelled user-reported). Each test was built by a fresh agent from its
+brief alone, encodings re-derived on `pnut-ts` 1.55.8, then reviewed adversarially before the
+run by another fresh agent — no blocker (`VERIFICATION-OPPORTUNITIES.md`, VO-J-021..022). SO109
+is documented behaviour (P2 Documentation, BRK in the debugging section), measured here, not an
+erratum candidate.
+
+| # | Test (`tests/`) | Question | VO | Verdict | EF |
+|---|---|---|---|---|---|
+| 18 | `test-o29-rdfast-nowait-releases-hub-op.spin2` | after a no-wait `RDFAST`, is a following `RDLONG` released early with the previous read's long, and a `WRLONG` released early and lost; what gap clears it; does the waiting form; does a blocking first `RDFAST` remove E7? | VO-J-021 | not run | — |
+| 19 | `test-so109-conditional-brk-breaks.spin2` | with break-on-`BRK` armed, does a condition-false `BRK` still enter the debug ISR, showing the previous code; do the `SKIP` and `JMP` forms gate it? | VO-J-022 | not run | — |
+
 ## How the tests were built — independence is the point
 
 Each test was written by an agent given **only its prediction**, with no access to the study's

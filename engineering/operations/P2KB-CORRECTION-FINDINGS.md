@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-471`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-478`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -110,6 +110,40 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
    source it cites). A register entry is a claim like any other.
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
+
+## A condition-false `BRK` still breaks, and the KB teaches it as conditional (2026-10-01, found while building the SO109 test) — F-477
+
+### F-477 — `brk.yaml` teaches a conditional `BRK` as "break only when condition met"; Parallax documents that a `BRK` breaks whatever its condition — `CONFIRMED`
+
+**Where:** `language/pasm2/brk.yaml` — example "Conditional Breakpoint" ("Break only when condition
+met": `cmp value, limit wc` then `if_c brk #LIMIT_EXCEEDED`), and its note "Zero code means
+unconditional break". The Assembly Language Manual's BRK entry
+(`p2-assembly-language-manual/opus-master/part-ii/instructions-b.md`, `## BRK {#brk}`) states no
+condition caveat at all.
+**Against:** `silicon-doc-text.txt`:2491 (P2 Documentation, BRK in the debugging section) —
+"Regardless of the execution condition, the BRK instruction will trigger a debug interrupt, if
+enabled. The execution condition only gates the writing of the 8-bit code". The KB already says
+so in `architecture/debug_interrupt.yaml`:148-150, so `brk.yaml` contradicts the KB's own
+architecture entry. Spin2 v55 :61-64 adds the compiler's side: "a condition has no effect, though
+an _RET_ will execute normally. In order to make the BRK instruction conditional, an
+opposite-condition SKIP instruction is placed before it" — which
+`language/pasm2/conditional-debug.yaml` already describes correctly.
+**Compiler (legality only), 2026-10-01:** `pnut-ts` 1.55.8 compiles `if_c debug("hi")` to
+`if_nc skip #1` + `brk #1` (`$3D640231`, `$FD640236`) and leaves a hand-written `if_z brk #$42`
+conditional as written (`$AD648436`), without a warning — so `debug()` users are protected and a
+hand-written conditional `BRK`, the shape this example teaches, is not.
+**The note:** "Zero code means unconditional break" has no source. Spin2 v55 :1056 says a plain
+`DEBUG` resolves to `BRK #0` (and `DEBUG()` to `BRK #1..255`); nothing states a zero code changes
+whether the break is taken. `NEEDS-VERIFICATION` for that line alone: find a source or remove it.
+**Correction:** replace the example with the documented form (the condition on an opposite-condition
+`SKIP #1`, or on a `JMP` around an unconditional `BRK`), and state in `brk.yaml` (and, through «#352»,
+the Assembly manual's BRK entry) what the P2 Documentation says: the debug interrupt is triggered
+whatever the condition, and the condition gates only the writing of the 8-bit code — so a
+condition-false `BRK` shows the debug ISR the previous code. Cite :2491, with v55 :62-63 for the
+compiler's `SKIP`. **Not an erratum:** the part does what its own documentation says, so under
+`p2-errata/CLASSIFICATION-GUIDANCE.md` this is documented behaviour and stays out of P2 Errata.
+VO-J-022 (the clean-room study's SO109 prediction, which matches :2491) measures it on silicon;
+its result is recorded here when it runs, and does not gate this correction.
 
 ## A manual release published KB content without its index (2026-09-28) — F-476
 
