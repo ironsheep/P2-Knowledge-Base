@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-480`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-481`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,18 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## What a CORDIC divide by zero returns is stated nowhere (2026-10-01, found researching F-470) — F-480
+
+### F-480 — `qdiv.yaml` says "Division by zero produces undefined results" with no source, and MULDIV64 (which divides via QDIV) inherits the gap — `NEEDS-VERIFICATION`
+
+**Where:** `language/pasm2/qdiv.yaml`:122. **Searched:** Silicon Doc DIVIDE section (:3328-3346),
+PASM2 manual QDIV/QFRAC rows (:11655, :11667), Spin2 v51/v55, the interpreter source, the bench
+ledger — no statement of the zero-divisor quotient or remainder. "Undefined" may be right, or the
+silicon may return a fixed value (it is deterministic hardware).
+**To settle:** a short jumper-free bench test — QDIV and QFRAC by 0 with several numerators,
+and Spin2 `MULDIV64(m1, m2, 0)` and `/` by 0 — then state the measured result, or keep
+"undefined" with that measurement behind it. Until then: no claim about the value in either YAML.
 
 ## Impact survey — v1.22.0 (`release-yamls` §8, run 2026-10-01)
 
@@ -186,8 +198,13 @@ finish (EF-087), and the same rule protects it — the `rdlong.yaml` caution nam
 ### F-477 — `brk.yaml` teaches a conditional `BRK` as "break only when condition met"; Parallax documents that a `BRK` breaks whatever its condition — `DONE` 2026-10-01 (YAML); the Assembly manual's BRK entry rides «#352»
 > **Applied 2026-10-01 («#372»):** `brk.yaml` — the example now puts the opposite condition on
 > `SKIP #1` before an unconditional `BRK` (compiled clean, pnut-ts 1.55.8; v55 :62-63), a new
-> `condition_behavior` states :2491 and EF-085, and the unsourced "Zero code means unconditional
-> break" note is **removed** (no source found; v55 :1056 gives only DEBUG → BRK #0). **Widened:**
+> `condition_behavior` states :2491 and EF-085, and the "Zero code means unconditional break"
+> note is **replaced** by what the sources say about code 0: a plain DEBUG compiles to `BRK #0` and
+> launches or updates the debugger, DEBUG() uses codes 1..255 as record indexes (v55 :1056, :1067).
+> Searched: Silicon Doc :2491-2493, PASM2 manual :3746 and r4c2 ("unconditionally trigger BRK
+> interrupt" — regardless of condition, nothing about the code), v55, `debug_interrupt.yaml`,
+> `getbrk.yaml`; no source ties conditionality to the code, so the old wording was wrong, not
+> merely unsourced. **Widened:**
 > the old example's comparison was also backwards (`CMP value, limit WC` sets C when value is
 > BELOW limit, so `if_c brk` broke on the wrong side); the new one states the sense. Added a
 > `related:` block (getbrk, skip, conditional-debug, debug_interrupt) and symptom aliases.
@@ -375,9 +392,13 @@ use `RDFAST` (P2 Documentation). The same caution goes to the read/write entries
 > **Applied 2026-10-01 («#372»), with F-469:** `sinc2_constraint` rewritten — the Silicon Doc note
 > quoted as the source, the measured mechanism (SINC2's running first stage across unequal
 > windows, not the one-clock lag), both proven workarounds (power-of-two count; XZERO), SINC1 off
-> by at most one term, classed as documented behaviour, citing EF-072. **Widened:** the old
-> "periodic noise ~every 30-60 ms" and "keep the window under ~20 ms" had no Parallax source (the
-> latter is contradicted by EF-072's clean 25 ms XZERO windows) — removed.
+> by at most one term, classed as documented behaviour, citing EF-072. The old "~30-60 ms" and
+> "under ~20 ms" figures are **kept, reframed** as Chip Gracey's rules of thumb from his 2024-12-16
+> forum report (`ingestion/external-inputs/forum-threads/ProblemGoertzelSINC2mode/INGEST.md` :43,
+> :49 — designer guidance, approximate, not the documented spec), with EF-072's clean 25 ms XZERO
+> windows beside the 20 ms one. (A first pass removed them as "no Parallax source" and called the
+> 20 ms figure contradicted; both were wrong — Chip says only that under 20 ms "may be fine".
+> Caught before the push, Stephen 2026-10-01.)
 
 **Where:** `language/pasm2/getxacc.yaml` `sinc2_constraint` (F-469 held the rest of this entry "until
 VO-J-013 runs" — it has run).
@@ -416,7 +437,11 @@ erratum or a documented behaviour is being decided on the bench and by the clean
 > now say unsigned, quoting v55 :566. **Widened:** "Division by zero returns 0" had no source (v55
 > says nothing of a zero divisor) — removed. `related:` bare names QLOG/QEXP redirected to full
 > paths. **Sweep:** no manual or app note teaches a signed MULDIV64; P2AN001 already calls its
-> ratio unsigned.
+> ratio unsigned. **Divide-by-zero search (re-done properly after Stephen's challenge):** Spin2
+> v51/v55 text, the v51 interpreter analysis, the interpreter source (`Spin2_interpreter.spin2`
+> `muldiv64_`: QMUL, then the shared CORDIC divide path — so its zero-divisor result is QDIV's),
+> the Silicon Doc DIVIDE section, the PASM2 manual QDIV/QFRAC rows, the bench ledger — none states
+> the result. Removal stands; QDIV's own zero-divisor behaviour is F-480.
 
 **Where:** `language/spin2/methods/muldiv64.yaml` — lines 10, 13, 16 ("32-bit signed") and 40 ("All
 parameters are 32-bit signed").

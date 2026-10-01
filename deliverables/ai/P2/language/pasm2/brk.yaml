@@ -42,6 +42,7 @@ notes:
 - Requires debug interrupts enabled to function
 - Breakpoint code passed to debug ISR
 - "A condition on BRK does not make the break conditional -- see condition_behavior"
+- "Under the Spin2 debugger, BRK #0 is what a plain DEBUG compiles to: it launches the debugger or forces an update of one already open; DEBUG() commands compile to BRK #1..255, each code indexing its record in the DEBUG() database (Parallax Spin2 Documentation v55)"
 - Essential for interactive debugging
 compiler_operand_format:
   name: operand_l
