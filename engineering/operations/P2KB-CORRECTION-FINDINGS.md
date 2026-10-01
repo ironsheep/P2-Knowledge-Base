@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-479`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-480`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,45 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Impact survey — v1.22.0 (`release-yamls` §8, run 2026-10-01)
+
+The v1.22.0 delta (21 YAMLs: the P2 Errata silicon findings — `rdfast` + hub read/write family,
+`setq`/`wmlong`/`setq_block_ops`, `augs`, `getct` + Spin2 `getct`/`getms`/`getsec`, `getxacc`,
+`brk`, `muldiv64`, `wrpin`, `architecture/hub` and `smart_pins`) was intersected against every live
+manual's declared sources, then each intersecting master was grepped for the statements the delta
+contradicts (capture-and-clear GETXACC, conditional BRK, signed MULDIV64, `address & 7` slicing,
+no-wait RDFAST use, GETSEC "long-duration").
+
+- **Streamer Guide — DEFECT FOUND → F-479** (GETXACC capture-and-clear, §10.6 and §17.1).
+- **Assembly Reference and deSilva — carried by «#352»** (its body names every entry: GETCT, GETXACC,
+  RDFAST and the hub read/write family, SETQ, AUGS, BRK, Appendix J).
+- **Architect Guide, Getting Started, I/O & Smart Pins, Single-Step Debugger, XBYTE — intersect, no
+  contradicted statement found** by the targeted grep; re-audit against HEAD at each one's next pass
+  (IOSP: the DAC-mode `TT` rule and §16.3's MULDIV64 ratio; Single-Step: its BRK material). XBYTE checked: every `RDFAST` it
+  shows is `rdfast #0, …` — the waiting form — so E7 does not reach it.
+- **No impact:** Debug Window, PNut-TS Terminal Guide. P2 Errata grounds on the silicon itself.
+
+## The Streamer Guide teaches GETXACC as capture-and-clear (2026-10-01, v1.22.0 impact survey) — F-479
+
+### F-479 — the Streamer Guide says GETXACC "captures and clears" both accumulators; on silicon the clear acts only during a Goertzel burst, and a burst's last term lands in the next — `CONFIRMED`
+
+**Where:** `p2-streamer-programming-guide/opus-master/streamer-body.md` §10.6 *Reading Results* (:813)
+and §17.1 *Reading the result: one GETXACC per command* (:1795-1799); its CHANGELOG v-entry (:96)
+repeats it.
+**Against:** EF-069 (Rev C): idle or in a non-Goertzel mode GETXACC clears nothing and returns the
+running total; EF-070: a burst's last term is added to the NEXT Goertzel burst. Both are P2 Errata
+E4/E5; KB v1.22.0 `getxacc.yaml` now states them. The guide's statements match the Silicon Doc's text
+(:1604), which the silicon contradicts.
+**What stays right:** read before and after and take the difference — the rule the guide gives — is
+exactly what E4 requires; its "a second read returns the same numbers" holds when idle (for a
+different reason).
+**Correction:** rewrite both passages to the silicon behaviour (clear only during a Goertzel burst;
+an idle read returns and keeps the running total), keep the difference rule with its reason, and
+add the held last term (deliver it with a zero-term burst, or accept one term of carry) — pointing
+to P2 Errata E4/E5 as the reader's reference. The CHANGELOG line is history and stays; the next
+release's entry states the change. Re-audit the guide's Goertzel examples for an absolute read
+after a discrete burst.
 
 ## Impact survey — v1.21.0 (`release-yamls` §8, run 2026-09-22)
 
