@@ -1328,6 +1328,65 @@ separately. *Limits:* lag 1; 200 MHz; run once; PNut-Term-TS v1.1.0 passed the s
 unchanged. *Source:* `…/tests/e3-scope-debug-timestamp-test.spin2` +
 `…/tests/e3-scope-debug-timestamp-verdict.py`.
 
+### EF-084 · After a no-wait `RDFAST`, a `RDLONG` issued within 16 clocks is released before its own read and returns the previous hub read's long, and a `WRLONG` is released before it lands and is lost if another hub instruction follows; the waiting form, or 16 clocks (7 non-hub instructions), prevents both — `CONFIRMED`
+*How proven:* `test-o29-rdfast-nowait-releases-hub-op` (VO-J-021; the clean-room study's O29
+prediction). Measuring cog 1 in cog execution, cog 0 reporting (`DEBUG_COGS = %0000_0001`). Each
+trial: a primer `RDLONG` of `$A5A5_0001` (also fixing the hub phase), then `RDFAST` (D =
+`$8000_0000` no-wait, or `0` waiting) of a stream long in slice `af`, k `NOP`s, then the instruction
+under test on a long in slice `ar`; 64 (`af`, `ar`) cells × 16 repetitions per run; records read
+after the cog settles. Image R: `RDLONG` of a sentinel `$5A5A_0002` into a destination seeded
+`$C3C3_0003`. Image W: `WRLONG $F0F0_0005` over `$0F0F_0004`, read back at once (T3) or after a
+`NOP` (T4), and again after settling. Each command echoed the mode it ran with.
+*Result (log `debug_261001-000927`, 2026-10-01, first run, clean):* controls — C1 (`NOP` for the
+`RDFAST`) sentinel 1024/1024 (l.49); PS (no-wait, `WAITX #200`, `RFLONG`) the stream's first long
+1024/1024 (l.59); C3 `(new,new)` 1024/1024 (l.249); no unwritten record, no other value, every
+cell's 16 repetitions identical (l.480). **T1, k = 0: 43 of 64 cells read the primer `$A5A5_0001`
+in every repetition (688 of 1024), by δ = (`ar` − `af`) mod 8: 8 8 7 6 5 4 3 2** (rows l.151–158,
+re-derived from the rows: 43, split as stated; l.159). **The k sweep, per repetition: 43, 54, 61, 64,
+48, 32, 16, 0, 0 for k = 0..8** (rows l.161–238; totals over 16 repetitions 864, 976, 1024, 768,
+512, 256, 0, 0, l.169–239), every δ split as the study predicted (l.493–501). The escaping cells at
+k = 0 were the ones the study's phase inference named (no escape at `af` 2–3; `ar` 3 alone at
+`af` 4; `ar` 0 and 3–7 at `af` 1, l.151–158). **T3: 43 cells `(old,old)` — the write lost — by δ
+8 8 7 6 5 4 3 2, and 21 `(primer,new)` — the immediate read-back released instead** (l.263–272);
+**T4: `(seed,new)` in all 64 — the write lands when no hub instruction follows** (l.274–283).
+**Waiting form: C2 sentinel 1024/1024 at every k = 0..8 (l.69–149), C4 `(new,new)` 1024/1024
+(l.260)**, in the same run. Verdicts l.502–505: RDLONG, WINDOW, WRLONG, WAITING FORM all
+`CONFIRMED`. **E7 arms:** E7N (no-wait then blocking `RDFAST`, spacings 2 and 4–20 clocks)
+reproduced E7 in 64 of 64 cells, failing spacing by phase 10, 9, 8, 15, 14, 13, 12, 11 clocks in
+every slice, as EF-074 (l.481–490); **E7B (the first `RDFAST` blocking) read `new[s]` then
+`new[s+1]` in all 18,432 trials**, the two `RDFAST`s taking 20–34 clocks (l.506–507).
+**Grounds:** the P2 Documentation restricts only FIFO reads after a no-wait `RDFAST`
+(`silicon-doc-text.txt`:3043) and says nothing of `RDLONG`/`WRLONG`, which are documented to read
+and write their own address: a silicon erratum (P2 Errata E8). E7's failing spacings (8–15 clocks)
+and safe spacing (16) coincide with this window, so E7 is the same release acting on a waiting
+blocking `RDFAST` (the study's mechanism: the no-wait `RDFAST`'s completion signal raised a second
+time when its FIFO first holds data). The Spin2 v55 interpreter uses only the blocking form.
+*Limits:* `RDLONG`/`WRLONG` only (byte/word, `SETQ` blocks and a no-wait `WRFAST`: VO-J-023);
+`RETA` and an interrupt inside the window not tested; hub execution excluded by the P2
+Documentation (`RDFAST` cannot be used there, :353-357); one cog; cog execution; 200 MHz; run
+once. *Source:* `…/tests/test-o29-rdfast-nowait-releases-hub-op.spin2`.
+
+### EF-085 · With break-on-`BRK` armed, a `BRK` whose condition is false still enters the debug interrupt, and `GETBRK` shows the last condition-true `BRK`'s code, not its own; a `SKIP` before or a taken `JMP` before cancels both — `CONFIRMED`
+*How proven:* `test-so109-conditional-brk-breaks` (VO-J-022; the clean-room study's SO109
+prediction), no DEBUG. Cog 0 enabled break-on-`BRK` for cog 1 alone (`HUBSET $2000_0002`), wrote a
+16-long debug ISR to cog 1's load area `$FFF40` and read it back 16/16, started cog 1. The ISR
+recorded each entry's `GETBRK` word and its return-address word (C bit 31, Z bit 30), re-armed
+(`BRK #$10`) and returned. Report on P62, plain serial, 2,000,000 baud.
+*Result (log `debug_261001-001006`, 2026-10-01, first run, clean):* 10 records, none unattributed
+(l.72–82). Entry record: bit 23 set, return `$000` (l.72). Controls `p1` `$A1`, `p2` `$A9`
+(l.73, 81). **Condition-false sites entered the ISR, each showing the previous condition-true
+code, its saved flags confirming the condition was false: `e1` (`if_z`, Z = 0) code `$A1`;
+`e2` (`if_nz`, Z = 1) `$D4`; `e3` (`if_c`, C = 0) `$D4`** (l.74, 77, 78); condition-true `t1`
+`$C3`, `t2` `$D4` (l.75–76). No record from `s1` (`SKIP #1` before), `j1` (taken `JMP` before),
+`w1` (`if_z JMP` taken), `w3` (`if_z SKIP #1` taken); `w2` delivered `$F4` and `w4` `$F6` with
+the condition true for the break (l.79–80). Verdicts l.96–101: BREAK, CODE (stale), CANCELS,
+IDIOMS all `CONFIRMED`. **Grounds:** as the P2 Documentation states — "Regardless of the execution
+condition, the BRK instruction will trigger a debug interrupt, if enabled. The execution condition
+only gates the writing of the 8-bit code" (`silicon-doc-text.txt`:2491) — so documented behaviour,
+not an erratum. Spin2 v55's "a condition has no effect" (:62) is right about the break and, read
+literally, wrong about the code. *Limits:* the `SKIP` idiom tested outside an ISR only; one cog;
+200 MHz; run once. *Source:* `…/tests/test-so109-conditional-brk-breaks.spin2`.
+
 
 ## Open / pending empirical questions
 

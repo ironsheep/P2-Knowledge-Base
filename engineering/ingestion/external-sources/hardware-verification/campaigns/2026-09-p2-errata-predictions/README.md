@@ -63,7 +63,7 @@ sources here rebuild the binaries that ran byte for byte.
 | 16 | `e3-scope-spin2-counter-methods-test.spin2` | do Spin2 `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` or `GETCT()` see it (with `GETMS()`/`GETSEC()` as the affected control)? | VO-J-019 | `CONFIRMED` (none affected; `GETMS`/`GETSEC` affected) | EF-082 |
 | 17 | `e3-scope-debug-timestamp-test.spin2` (+ `e3-scope-debug-timestamp-verdict.py`) | does a `DEBUG_TIMESTAMP` stamp sent from the window carry it, from Spin2 `debug()` and PASM2 `DEBUG`? | VO-J-020 | `CONFIRMED` (affected, both) | EF-083 |
 
-**Study briefs O29 and SO109 (2026-10-01, not yet run):** two new predictions from the study
+**Study briefs O29 and SO109 (2026-10-01, each run once):** two new predictions from the study
 (golden source 0.1.5, both labelled user-reported). Each test was built by a fresh agent from its
 brief alone, encodings re-derived on `pnut-ts` 1.55.8, then reviewed adversarially before the
 run by another fresh agent — no blocker (`VERIFICATION-OPPORTUNITIES.md`, VO-J-021..022). SO109
@@ -72,8 +72,8 @@ erratum candidate.
 
 | # | Test (`tests/`) | Question | VO | Verdict | EF |
 |---|---|---|---|---|---|
-| 18 | `test-o29-rdfast-nowait-releases-hub-op.spin2` | after a no-wait `RDFAST`, is a following `RDLONG` released early with the previous read's long, and a `WRLONG` released early and lost; what gap clears it; does the waiting form; does a blocking first `RDFAST` remove E7? | VO-J-021 | not run | — |
-| 19 | `test-so109-conditional-brk-breaks.spin2` | with break-on-`BRK` armed, does a condition-false `BRK` still enter the debug ISR, showing the previous code; do the `SKIP` and `JMP` forms gate it? | VO-J-022 | not run | — |
+| 18 | `test-o29-rdfast-nowait-releases-hub-op.spin2` | after a no-wait `RDFAST`, is a following `RDLONG` released early with the previous read's long, and a `WRLONG` released early and lost; what gap clears it; does the waiting form; does a blocking first `RDFAST` remove E7? | VO-J-021 | `CONFIRMED` (all four; E7B clean) | EF-084 |
+| 19 | `test-so109-conditional-brk-breaks.spin2` | with break-on-`BRK` armed, does a condition-false `BRK` still enter the debug ISR, showing the previous code; do the `SKIP` and `JMP` forms gate it? | VO-J-022 | `CONFIRMED` (documented behaviour) | EF-085 |
 
 ## How the tests were built — independence is the point
 
@@ -174,6 +174,46 @@ B4L cog4 band late p10 ref=$0000_0008_$E013_BB0F smp=$0000_0000_$E013_BB32 ref2=
 X4E cog4 closed early p1 ref=$0000_0009_$1001_5447 smp=$0000_0009_$1001_546A ref2=$0000_0009_$1001_54B2 D=0 lo-bracket=1
 GBL cog5 GETMS/GETSEC band late p10 cog0 ms=190_617..190_617 s=190..190 cog5 ms=18_819 s=18 offMs=171_798..171_798 offS=172..172 class=0
 GXE cog5 GETMS/GETSEC closed early p1 cog0 ms=194_637..194_637 s=194..194 cog5 ms=194_637 s=194 offMs=0..0 offS=0..0 class=1
+```
+
+**18 — O29** (`debug_261001-000927`): T1 at k = 0 (P = the primer, the previous read's long; S =
+the sentinel, a correct read), the window table, the write arm, and the verdicts:
+```
+T1 k0 af0 rep0 a0-7: PPPSSSSS  agree ........
+T1 k0 af1 rep0 a0-7: SPPSSSSS  agree ........
+T1 k0 af2 rep0 a0-7: PPPPPPPP  agree ........
+T1 k0 af3 rep0 a0-7: PPPPPPPP  agree ........
+T1 k0 af4 rep0 a0-7: PPPSPPPP  agree ........
+T1 k0 af5 rep0 a0-7: PPPSSPPP  agree ........
+T1 k0 af6 rep0 a0-7: PPPSSSPP  agree ........
+T1 k0 af7 rep0 a0-7: PPPSSSSP  agree ........
+T1 k0 all reps: primer 688 sentinel 336 seed 0 other 0 of 1024 | rep0 primer 43 by delta 8 8 7 6 5 4 3 2 | cells with disagreeing reps 0
+RIG OK: O29 - C1 sentinel, PS stream long and C3 (new,new) in every record, no other value in any control run, no record left unwritten, every cell's 16 repetitions identical
+  k=0: 8 8 7 6 5 4 3 2 = 43 | 43 | C2 1024
+  k=3: 8 8 8 8 8 8 8 8 = 64 | 64 | C2 1024
+  k=6: 2 2 2 2 2 2 2 2 = 16 | 16 | C2 1024
+  k=7: 0 0 0 0 0 0 0 0 = 0 | 0 | C2 1024
+T3 rep0 cells: OO 43 PN 21 NN 0 ON 0 DN 0 any other pair 0 | OO by delta 8 8 7 6 5 4 3 2
+T4 rep0 cells: OO 0 PN 0 NN 0 ON 0 DN 64 any other pair 0 | OO by delta 0 0 0 0 0 0 0 0
+POSITIVE CONTROL E7N: REPRODUCED - all 64 cells show exactly one failing spacing in 8..15 clk, 16/16 $0000_0000, blocking RDFAST 2 clk
+VERDICT O29 RDLONG: CONFIRMED - T1 released 43 of 64 cells early in every repetition, each reading exactly the primer $A5A5_0001, split by delta 8 8 7 6 5 4 3 2 as predicted; C1 and C2 k=0 sentinel in every record
+VERDICT O29 WINDOW: CONFIRMED - every k from 0 to 8 and every delta as predicted; zero from k=7 (test RDLONG issued 16 clocks after the RDFAST): 7 non-hub instructions are a sufficient gap
+VERDICT O29 WRLONG: CONFIRMED - T3: 43 cells (old,old) (the write lost), split by delta 8 8 7 6 5 4 3 2, and 21 (primer,new) in every repetition; T4 (seed,new) in all 64 (the released write lands when nothing follows)
+VERDICT O29 WAITING FORM: CONFIRMED - C2 sentinel in all 1024 records at every k=0..8 and C4 (new,new) in all 1024 cells, in the same run in which the no-wait form released early
+VERDICT E7 BLOCKING FIRST: CONFIRMED - with the first RDFAST blocking, new[s] then new[s+1] in all 18432 trials (64 alignments x 18 spacings x 16), the two RDFASTs taking 20..34 clk; E7N in the same run reproduced E7 in 64 of 64 cells
+```
+
+**19 — SO109** (`debug_261001-001006`, plain serial, no DEBUG): the condition-false sites and the
+verdicts:
+```
+  rec 02  GETBRK $A1000000  $1FF $00000007  code $A1 b23 0  ret $007  C0 Z0  site e1     flags agree
+  rec 05  GETBRK $D4000000  $1FF $40000013  code $D4 b23 0  ret $013  C0 Z1  site e2     flags agree
+  rec 06  GETBRK $D4000000  $1FF $40000017  code $D4 b23 0  ret $017  C0 Z1  site e3     flags agree
+  record count 10; unattributed 0
+VERDICT SO109 BREAK: CONFIRMED - e1, e2 and e3 each entered the debug ISR with their condition false (saved flags agree)
+VERDICT SO109 CODE: CONFIRMED - STALE: e1/e2/e3 show $A1/$D4/$D4, the last condition-true code
+VERDICT SO109 CANCELS: CONFIRMED - no record from s1 (SKIP), j1 (taken JMP), w1 (if_z JMP taken), w3 (if_z SKIP taken)
+VERDICT SO109 IDIOMS: CONFIRMED - w2 (if_z JMP around an unconditional BRK) delivered $F4; w4 (if_z SKIP #1 ahead of it) delivered $F6
 ```
 
 ## What it changes

@@ -1,0 +1,1281 @@
+'' =============================================================================
+''
+''   File....... test-so109-conditional-brk-breaks.spin2
+''   Purpose.... Decide prediction SO109 on SILICON: does a BRK whose condition
+''               is false still enter the debug ISR, and which code does
+''               GETBRK show for it
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... 01 Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED (brief BRIEF-SO109, Parts 2 and 5)
+    With "interrupt on BRK" armed in a cog's debug ISR, a BRK in that cog's
+    program does two things: it raises the debug interrupt, and it records
+    its 8-bit operand as the break code that GETBRK D WCZ returns in
+    D[31:24] inside the ISR.
+    Prediction under test (an independent reading of the logic, never
+    observed on a part by its authors): the interrupt half ignores the
+    BRK's flag condition, the code half honours it. So a condition-FALSE
+    BRK still enters the ISR (discriminator A), and GETBRK then shows the
+    code of the last condition-TRUE BRK this cog ran - a STALE code - not
+    the false BRK's own operand (discriminator B). A BRK cancelled by SKIP,
+    or sitting behind a taken branch, is cancelled on both halves.
+
+  WHAT PARALLAX SAYS (documentary sources; read before writing the outcomes)
+    Spin2 v55 change notes (spin2-v55-text.txt:61-64):
+      "PASM DEBUG instructions can be now preceded by a condition, not just
+       a _RET_."
+      "Because the BRK instruction used for DEBUG is handled early in the
+       pipeline, a condition has no effect, though an _RET_ will execute
+       normally."
+      "In order to make the BRK instruction conditional, an
+       opposite-condition SKIP instruction is placed before it, causing the
+       BRK to execute on the desired condition."
+    P2 Documentation v35, DEBUG INTERRUPT > BRK (silicon-doc-text.txt:2491):
+      "Regardless of the execution condition, the BRK instruction will
+       trigger a debug interrupt, if enabled. The execution condition only
+       gates the writing of the 8-bit code"
+    Discriminator A: the study, v55 :62 and P2 Documentation :2491 ALL say
+      a condition-false BRK enters the ISR. "Not entered" refutes all three.
+    Discriminator B: the study and P2 Documentation :2491 say STALE (the
+      condition gates the code write). v55 :62 read literally ("a condition
+      has no effect") says OWN (the false BRK latches its own code). The
+      program prints which reading the bench matched.
+    Sites w3 and w4 (if_z SKIP #1 ahead of an unconditional BRK) are the
+      very workaround v55 :63-64 documents, and the shape pnut-ts 1.55.8
+      emits for "if_c debug(...)".
+
+  RIG
+    Any P2 board, NOTHING attached. No bench pin is touched. Pin P62 (the
+    host serial TX line) carries the report as plain async serial, 8-N-1,
+    2,000,000 baud, from a P_ASYNC_TX smart pin run by cog 0. P63 is not
+    touched. Compile WITHOUT -d: there is NO DEBUG in this program, because
+    the construction itself owns everything PNut's debugger would own -
+    the HUBSET debug-enable/write-protect word, the per-cog debug hub
+    areas, and the debug interrupt. A -d build would collide with it.
+    Cog 0 (Spin2) is the starter and the reporter. Cog 1 is the target and
+    runs nothing else. No other cog is started.
+
+  CONSTRUCTION (cog 0, in this order)
+    1. Mailbox at MBOX = $7_0000 (hub RAM, below the top 16 KB at $7C000):
+         MBOX+0  next-record pointer, set to MBOX+8
+         MBOX+4  done flag, cleared (the target writes 1 as its last act)
+         MBOX+8  records: record k at MBOX+8+8k = GETBRK word, then the
+                 $1FF (IRET0) word; capacity REC_CAP = 32 records. At most
+                 14 can occur (the COGINIT entry + 13 BRK sites, all
+                 straight-line), so the ISR (which has no bound check)
+                 cannot run past MBOX_END = $7_0108.
+       Non-overlap is checked at run time (control W): the program image
+       ends below MBOX, and cog 0's stack (address of a local of main())
+       lies at least STACK_MARGIN = $1_0000 bytes below MBOX. This build:
+       see VERIFIED OPCODES below for the image size.
+    2. HUBSET ##$2000_0002 (inline PASM). P2 Documentation :2747-2761:
+       D = %0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD; L = 0 (no lock),
+       W = 0 (top 16 KB writable at both its ranges), D[15:0] = %10 (debug
+       interrupt enabled for cog 1 only). It also clears every other cog's
+       enable and write protection. If the boot left the lock set, this
+       write is ignored: the read-back (3) or the positive controls catch it.
+    3. Copy the 16-long ISR image to cog 1's ISR-image ("load") area and
+       read it back. P2 Documentation :2429 and table 25 (:2446-2477): the
+       image loads from $FF840 + (!cog << 7); cog 1 -> $FF840 + ($E << 7)
+       = $FFF40..$FFF7F; registers $000..$00F save to $FFF00..$FFF3F.
+       Read-back must match all 16 longs (gate G0). The same 16 longs read
+       at $7FF40 (the normal-range alias of the top 16 KB with W = 0,
+       P2 Documentation :2754-2755, :2870) are printed, informational only.
+    4. COGINIT cog 1, cog exec, from the target image (PTRB = its hub
+       address). The debug-enabled cog takes its first debug interrupt on
+       that COGINIT (P2 Documentation :2397); the ISR arms "interrupt on
+       BRK" (BRK #$10 inside the ISR: bit %E only, :2508, :2517) on every
+       entry, and exits through the ROM at $1FD (:2435-2439).
+    5. Wait up to 1 s for the done flag; then COGSTOP cog 1, HUBSET
+       ##$2000_0000 (debug enables all off), and report whatever records
+       exist (a timeout still prints them).
+
+  THE ISR IMAGE (exactly 16 longs, org 0; one 8-byte record per entry)
+    getbrk isr_t wcz   [31:24] = break code, [23] = 1 on the COGINIT entry
+    mov isr_r, $1FF    IRET0: return address [19:0], saved C [31], Z [30]
+    rdlong/wrlong x4   append (isr_t, isr_r) at long[MBOX], advance it by 8
+    brk #$10           re-arm interrupt-on-BRK only (no single step)
+    jmp #\$1FD         ROM exit: restore $000..$00F, RETI0
+
+  THE TARGET IMAGE (cog 1, org 0) - BRK SITES, cog addresses from THIS
+  listing (pnut-ts 1.55.8). Each test BRK is followed by two NOPs; a
+  record is attributed to a site when its return address is the BRK's
+  address + 1 or + 2.
+    site  BRK   code  shape                        flags at the BRK
+    p1    $002  $A1   brk (positive control)       (not judged)
+    e1    $006  $B2   if_z  brk   -- FALSE         C=0 Z=0 (mov y,#1 wcz)
+    t1    $00A  $C3   if_nz brk   -- true          C=0 Z=0
+    t2    $00E  $D4   if_z  brk   -- true          C=0 Z=1 (mov y,#0 wcz)
+    e2    $012  $E5   if_nz brk   -- FALSE         C=0 Z=1
+    e3    $016  $96   if_c  brk   -- FALSE (C)     C=0 Z=1
+    s1    $01A  $F1   skip #1 / brk                C=0 Z=1 (carried)
+    j1    $01E  $F2   jmp over / brk               C=0 Z=1 (carried)
+    w1    $023  $F3   if_z jmp over / brk, Z=1     C=0 Z=1  (unwanted)
+    w2    $028  $F4   if_z jmp over / brk, Z=0     C=0 Z=0  (wanted)
+    w3    $02D  $F5   if_z skip #1 / brk, Z=1      C=0 Z=1  (unwanted)
+    w4    $032  $F6   if_z skip #1 / brk, Z=0      C=0 Z=0  (wanted)
+    p2    $035  $A9   brk (closing positive ctl)   C=0 Z=0
+    The table is also CON constants (BRK_xx); control W re-derives every
+    address from the image's labels and fails the run if any differs.
+
+  PRE-REGISTERED OUTCOMES (fixed before the run; the program prints them)
+    STUDY PREDICTION - exactly 10 records, in this order:
+      #  site   code         return     saved flags
+      0  entry  any, b23=1   $000       -
+      1  p1     $A1          $003/$004  -
+      2  e1     $A1 (stale)  $007/$008  C0 Z0
+      3  t1     $C3          $00B/$00C  C0 Z0
+      4  t2     $D4          $00F/$010  C0 Z1
+      5  e2     $D4 (stale)  $013/$014  C0 Z1
+      6  e3     $D4 (stale)  $017/$018  C0 Z1
+      7  w2     $F4          $029/$02A  C0 Z0
+      8  w4     $F6          $033/$034  C0 Z0
+      9  p2     $A9          $036/$037  C0 Z0
+      No record from s1, j1, w1 or w3.
+    CONDITION HONOURED: 7 records (entry, p1, t1, t2, w2, w4, p2); nothing
+      from e1, e2, e3, while t1 and t2 entered.
+                                      -> VERDICT SO109 BREAK: REFUTED
+      (nothing from e1-e3 AND no t1 or t2 record -> INCONCLUSIVE: conditional
+      BRKs not breaking at all is not the same finding)
+    LATCH IGNORES THE CONDITION TOO: e1/e2/e3 records carry $B2/$E5/$96.
+                                      -> VERDICT SO109 CODE: REFUTED (OWN)
+    CANCEL FAILED: any record from s1, j1, w1 or w3.
+                                      -> VERDICT SO109 CANCELS: REFUTED
+    IDIOM SUPPRESSED A WANTED BREAK: no w2 or no w4 record (or a wrong code).
+                                      -> VERDICT SO109 IDIOMS: REFUTED
+    SAVED FLAG CONTRADICTS ITS SITE: a record's $1FF C/Z differ from the
+      flags its site set (table above; p1 not judged). That record says
+      nothing about a false condition -> that verdict INCONCLUSIVE.
+    ATTRIBUTION UNCERTAIN: any record after record 0 whose return address
+      is outside every site window -> all four verdicts INCONCLUSIVE (the
+      count and codes are still printed).
+    Anything else: INCONCLUSIVE, unpredicted pattern, named on the line.
+
+  GATES (setup check + positive controls; any failure prints RIG FAIL and
+  "NO VERDICT SO109", never a verdict - the run is inconclusive, not a
+  refutation)
+    W  : construction - ISR image is 16 longs; every BRK site address
+         derived from the labels equals the listing table; the ISR's
+         mailbox long equals MBOX; MBOX region below $7C000; image and
+         stack below MBOX.
+    G0 : load-area read-back matched (16 of 16).
+    G1 : at least one record; the record pointer is aligned and in range.
+    G2 : record 0 has GETBRK bit 23 set (its code and return address are
+         printed, not judged - the code is whatever cog 1 last latched since
+         reset; the address is expected to be $000, an inference no verdict
+         rests on).
+    G3 : a p1 record: code $A1, bit 23 clear.
+    G4 : a p2 record: code $A9, bit 23 clear.
+    G5 : done flag set within 1 s.
+
+  VERDICT LINES (names fixed)
+    VERDICT SO109 BREAK:   did e1, e2, e3 enter the ISR (discriminator A)
+    VERDICT SO109 CODE:    STALE (study, P2 Documentation :2491) / OWN
+                           (v55 :62 read literally) / OTHER (discr. B);
+                           needs the BREAK result and the t1/t2 controls
+    VERDICT SO109 CANCELS: no record from s1, j1, w1, w3
+    VERDICT SO109 IDIOMS:  w2 (JMP idiom) and w4 (SKIP idiom) deliver
+                           their own codes $F4 / $F6
+
+  DEPENDS ON CLAIMS THE BRIEF MARKS INFERRED OR UNDETERMINED
+    - where the entry after a BRK lands: attribution accepts +1 or +2; an
+      address outside both makes the verdicts INCONCLUSIVE, not wrong.
+    - that the COGINIT entry falls on the first instruction: record 0 is
+      identified by b23 alone (first entry since COGINIT); its return
+      address is printed and compared with $000 for information only, since
+      no verdict depends on it (adopted from the pre-run review).
+    - what the boot leaves in the lock / write protect / enables: G0 and
+      the positive controls catch a lock left set.
+    - record 0's code: printed, never judged.
+    - the $7FF40 alias of the load area: the brief marks it inferred;
+      P2 Documentation :2754-2755 states it. Printed, not gated.
+
+  VERIFIED OPCODES (pnut-ts -l v1.55.8 build 9/19/2026, NO -d; read from the
+  .lst hub image; object offsets, cog addresses in brackets)
+    Image: OBJ 9,768 bytes + VAR 248 bytes; .bin 16,048 bytes (with the
+      interpreter), so the program ends far below MBOX = $7_0000.
+    CON: HUBSET_BRK_COG1 = $2000_0002, LOAD_AREA = $000F_FF40,
+      SAVE_AREA = $000F_FF00, LOAD_ALIAS = $0007_FF40, MBOX_END = $0007_0108,
+      TX_X = $0064_0007 (100 clocks per bit, 8 bits).
+    ISR image $0B0..$0EF = 16 longs [$000..$00F] (isr_end = $0F0 [$010]):
+      $0B0 [$000] getbrk isr_t wcz     $FD781435  D=$00A, C=Z=1
+      $0B4 [$001] mov isr_r, $1FF      $F60017FF  D=$00B, S=$1FF
+      $0B8 [$002] rdlong isr_p, isr_b  $FB00180D
+      $0BC [$003] wrlong isr_t, isr_p  $FC60140C
+      $0C0 [$004] add isr_p, #4        $F1041804   ($0C8 [$006] the same)
+      $0C4 [$005] wrlong isr_r, isr_p  $FC60160C
+      $0CC [$007] wrlong isr_p, isr_b  $FC60180D
+      $0D0 [$008] brk #$10             $FD642036  D=$010 (%E only)
+      $0D4 [$009] jmp #\$1FD           $FD8001FD  bit 20 (R) = 0: absolute
+      $0D8..$0E0 [$00A..$00C] isr_t, isr_r, isr_p = 0
+      $0E4 [$00D] isr_b = $0007_0000 (MBOX); $0E8, $0EC pad = 0
+    Target image from $0F0 [$000]; tgt_y at $1E0 [$03C]:
+      mov tgt_y,#1 wcz  $F61C7801     mov tgt_y,#0 wcz  $F61C7800
+      $0F8 [$002] p1  brk #$A1         $FD654236  cond 1111
+      $108 [$006] e1  if_z brk #$B2    $AD656436  cond 1010
+      $118 [$00A] t1  if_nz brk #$C3   $5D658636  cond 0101
+      $128 [$00E] t2  if_z brk #$D4    $AD65A836  cond 1010
+      $138 [$012] e2  if_nz brk #$E5   $5D65CA36  cond 0101
+      $148 [$016] e3  if_c brk #$96    $CD652C36  cond 1100
+      $154 [$019] s1  skip #1          $FD640231
+      $158 [$01A]     brk #$F1         $FD65E236
+      $164 [$01D] j1  jmp #j1_land     $FD900004  relative, +1
+      $168 [$01E]     brk #$F2         $FD65E436
+      $178 [$022] w1  if_z jmp #w1_land $AD900004
+      $17C [$023]     brk #$F3         $FD65E636
+      $18C [$027] w2  if_z jmp #w2_land $AD900004
+      $190 [$028]     brk #$F4         $FD65E836
+      $1A0 [$02C] w3  if_z skip #1     $AD640231
+      $1A4 [$02D]     brk #$F5         $FD65EA36
+      $1B4 [$031] w4  if_z skip #1     $AD640231
+      $1B8 [$032]     brk #$F6         $FD65EC36
+      $1C4 [$035] p2  brk #$A9         $FD655236
+      $1D0 [$038] mov tgt_y, #1        $F6047801
+      $1D4 [$039] augs                 $FF000380  ($0007_0004 >> 9)
+      $1D8 [$03A] wrlong tgt_y, #$004  $FC647804  = ##MBOX_DONE
+      $1DC [$03B] jmp #$               $FD9FFFFC
+    Inline PASM (bytecode stream, unaligned):
+      brk_enable_cog1  $4FF: $FF900000 (AUGD) + $FD640400 = hubset ##$2000_0002
+      brk_disable_all  $513: $FF900000 (AUGD) + $FD640000 = hubset ##$2000_0000
+
+  HOW TO RUN
+    Compile: pnut-ts test-so109-conditional-brk-breaks.spin2     (NO -d)
+    Load to RAM WITH RESET and listen at 2,000,000 baud, e.g.
+      pnut-term-ts -r test-so109-conditional-brk-breaks.bin -b 2000000
+      (headless: add --headless --end-marker)
+    Cog 0 waits STARTUP_MS = 1 s before the first byte, then prints about
+    90 lines in well under a second. Done when you see the four
+    "VERDICT SO109 ..." lines (or "NO VERDICT SO109"), then "=== END ==="
+    and DEBUG_END_SESSION (sent as plain text).
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+
+  TX_PIN            = 62                ' host serial TX (the report link); no bench pin used
+  BAUD              = 2_000_000
+  TX_BIT_CLOCKS     = _clkfreq / BAUD   ' 100 clocks per bit
+  TX_MODE           = P_ASYNC_TX | P_OE
+  TX_X              = (TX_BIT_CLOCKS << 16) | 7     ' X[31:16] clocks/bit, X[4:0] = 8 bits - 1
+  TX_BUSY_BIT       = $8000_0000        ' RQPIN() Zval[31] = C = 'busy' (v55 :544; P2 Doc :4707)
+  STARTUP_MS        = 1000              ' let the host settle on the line before the first byte
+
+  TARGET_COG        = 1
+  DONE_TIMEOUT_MS   = 1000
+  DONE_VALUE        = 1                 ' the target writes this to MBOX_DONE last
+
+CON ' ---- Debug Interrupt Plumbing (P2 Documentation :2427-2477, :2747-2761) ----
+  HUBSET_BRK_COG1   = $2000_0000 | (1 << TARGET_COG)        ' $2000_0002: L=0, W=0, cog 1 only
+  HUBSET_BRK_NONE   = $2000_0000                            ' L=0, W=0, no cog enabled
+  SAVE_AREA         = $F_F800 + ((!TARGET_COG & $F) << 7)   ' $FFF00, registers $000..$00F saved
+  LOAD_AREA         = $F_F840 + ((!TARGET_COG & $F) << 7)   ' $FFF40, ISR image loaded from here
+  LOAD_ALIAS        = LOAD_AREA - $8_0000                   ' $7FF40, normal-range alias (W=0)
+  ISR_LONGS         = 16
+  HUB_TOP16K        = $7_C000           ' last 16 KB of hub RAM (aliased at $FC000..$FFFFF)
+
+CON ' ---- Mailbox ----
+  MBOX              = $7_0000
+  MBOX_NEXT         = MBOX              ' next-record pointer
+  MBOX_DONE         = MBOX + 4          ' done flag
+  MBOX_REC          = MBOX + 8          ' record k at MBOX_REC + 8k: GETBRK word, $1FF word
+  REC_CAP           = 32                ' at most 14 records can occur
+  MBOX_END          = MBOX_REC + REC_CAP * 8
+  STACK_MARGIN      = $1_0000           ' cog 0's stack must sit this far below MBOX
+
+  GETBRK_B23        = $0080_0000        ' GETBRK WCZ bit 23: COGINIT entry
+  RET_MASK          = $000F_FFFF        ' IRET0 [19:0] return address
+
+CON ' ---- BRK Sites (cog addresses from the pnut-ts 1.55.8 listing) ----
+  #0, S_P1, S_E1, S_T1, S_T2, S_E2, S_E3, S_S1, S_J1, S_W1, S_W2, S_W3, S_W4, S_P2, SITE_COUNT
+  S_ENTRY           = -1                ' the COGINIT entry (record 0)
+  S_NONE            = -2                ' return address outside every site window
+
+  BRK_P1            = $002
+  BRK_E1            = $006
+  BRK_T1            = $00A
+  BRK_T2            = $00E
+  BRK_E2            = $012
+  BRK_E3            = $016
+  BRK_S1            = $01A
+  BRK_J1            = $01E
+  BRK_W1            = $023
+  BRK_W2            = $028
+  BRK_W3            = $02D
+  BRK_W4            = $032
+  BRK_P2            = $035
+
+  ' site kinds
+  #0, K_POS, K_FALSE, K_TRUE, K_CANCEL, K_IDIOM
+
+  ' saved flags in the $1FF word, as (C << 1) | Z  (C = bit 31, Z = bit 30)
+  FLAGS_ANY         = -1
+  FLAGS_C0Z0        = %00
+  FLAGS_C0Z1        = %01
+
+  ' expected-record tables
+  #0, TBL_STUDY, TBL_ABSENT, TBL_OWN
+  CODE_ANY          = -1
+
+VAR ' ---- Analysis State ----
+  long recCount                         ' records read from the mailbox
+  long recSite[REC_CAP]                 ' attributed site of each record
+  long siteHits[SITE_COUNT]             ' records attributed to each site
+  long siteRec[SITE_COUNT]              ' first record index at each site
+  long failCount                        ' gating failures
+  long unattributed                     ' records (after record 0) outside every site window
+
+
+PUB main() | stackProbe, startTick, bDone
+'' Run the SO109 rig: check the construction, arm cog 1's debug interrupt,
+'' load the ISR image, start the target, wait for done, then report.
+''
+
+' Local Variables:
+' @local stackProbe - its address marks cog 0's stack (control W)
+' @local startTick - CT when the wait for the done flag began
+' @local bDone - TRUE when the target set the done flag in time
+
+  pinstart(TX_PIN, TX_MODE, TX_X, 0)
+  waitms(STARTUP_MS)
+  failCount := 0
+  say(string("=== SO109: does a condition-false BRK enter the debug ISR, and which code does GETBRK show? ==="))
+  say(string("no DEBUG build: plain serial on P62, 2000000 baud 8-N-1; target = cog 1; no bench pin used"))
+  print_predictions()
+  put_nl()
+  say(string("--- CONTROL W: construction ---"))
+  check_construction(@stackProbe)
+  if failCount <> 0
+    say(string("NO VERDICT SO109 - a construction control failed (RIG FAIL above); cog 1 was not started"))
+    finish()
+
+  long[MBOX_NEXT] := MBOX_REC
+  long[MBOX_DONE] := 0
+  longfill(MBOX_REC, 0, REC_CAP * 2)
+  brk_enable_cog1()
+  put_nl()
+  say(string("--- GATE G0: ISR image -> cog 1 load area $FFF40, read back ---"))
+  if load_isr() <> 0
+    brk_disable_all()
+    say(string("RIG FAIL: G0 load area not written (lock left set, or write protection still on)"))
+    say(string("NO VERDICT SO109 - setup failed; the run is INCONCLUSIVE, not a refutation; cog 1 was not started"))
+    finish()
+
+  coginit(TARGET_COG, @tgt, 0)
+  startTick := getct()
+  repeat until long[MBOX_DONE] == DONE_VALUE or getct() - startTick > clkfreq / 1000 * DONE_TIMEOUT_MS
+  bDone := long[MBOX_DONE] == DONE_VALUE
+  cogstop(TARGET_COG)
+  brk_disable_all()
+  report(bDone)
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends a run when DEBUG_END_SESSION
+' appears in its output (--end-marker / --exit-on-end-session); here it is plain text.
+'
+
+  say(string("=== END ==="))
+  say(string("DEBUG_END_SESSION"))
+  repeat
+
+
+PRI brk_enable_cog1()
+' HUBSET %0010 form: lock clear, write protection clear, debug interrupt for cog 1 only.
+'
+
+  org
+                hubset  ##HUBSET_BRK_COG1
+  end
+
+
+PRI brk_disable_all()
+' HUBSET %0010 form: lock clear, write protection clear, no cog debug-enabled.
+'
+
+  org
+                hubset  ##HUBSET_BRK_NONE
+  end
+
+
+PRI print_predictions() | tblIdx, siteIdx
+' Print the outcomes fixed before the run, generated from the same tables
+' the verdicts use.
+'
+
+' Local Variables:
+' @local tblIdx - row of the study table
+' @local siteIdx - site of that row
+
+  say(string("PRE-REGISTERED OUTCOMES (fixed before the run):"))
+  say(string("  study prediction: exactly 10 records, in this order; no record from s1, j1, w1, w3"))
+  say(string("   #  site   BRK   code          return      saved flags"))
+  repeat tblIdx from 0 to table_len(TBL_STUDY) - 1
+    siteIdx := exp_site(TBL_STUDY, tblIdx)
+    put_str(string("   "))
+    put_dec(tblIdx)
+    put_str(string("  "))
+    put_str(site_name(siteIdx))
+    if siteIdx == S_ENTRY
+      say(string("  -     any, b23=1    $000        -"))
+    else
+      put_str(string("  $"))
+      put_hex(site_brk(siteIdx), 3)
+      put_str(string("  $"))
+      put_hex(exp_code(TBL_STUDY, tblIdx), 2)
+      if site_kind(siteIdx) == K_FALSE
+        put_str(string(" (stale)"))
+      else
+        put_str(string("        "))
+      put_str(string("  $"))
+      put_hex(site_brk(siteIdx) + 1, 3)
+      put_str(string("/$"))
+      put_hex(site_brk(siteIdx) + 2, 3)
+      put_str(string("   "))
+      put_flags_expect(site_flags(siteIdx))
+      put_nl()
+  say(string("  BREAK  : e1/e2/e3 enter the ISR -> CONFIRMED (study; v55 :62 and P2 Documentation :2491 agree)"))
+  say(string("           none of e1/e2/e3 enters, t1 and t2 do (7 records) -> REFUTED, condition honoured"))
+  say(string("  CODE   : e1/e2/e3 show $A1/$D4/$D4 = STALE  -> CONFIRMED (study; P2 Documentation :2491)"))
+  say(string("           e1/e2/e3 show $B2/$E5/$96 = OWN    -> REFUTED (latch ignores the condition; v55 :62 literal)"))
+  say(string("  CANCELS: no record from s1, j1, w1, w3       -> CONFIRMED; any record there -> REFUTED"))
+  say(string("  IDIOMS : w2 shows $F4 and w4 shows $F6       -> CONFIRMED; missing or wrong code -> REFUTED"))
+  say(string("  saved C/Z contradicting a site, or a record outside every site window -> INCONCLUSIVE"))
+  say(string("  gates (else RIG FAIL / NO VERDICT): read-back 16/16; >=1 record; record 0 b23=1 (ret printed only);"))
+  say(string("         p1 record $A1 b23=0; p2 record $A9 b23=0; done flag within 1 s"))
+
+
+PRI put_flags_expect(flagRule)
+' Print an expected-flags cell.
+'
+' @param flagRule - FLAGS_ANY or (C << 1) | Z
+
+  if flagRule == FLAGS_ANY
+    put_str(string("-"))
+  else
+    put_str(string("C"))
+    put_dec((flagRule >> 1) & 1)
+    put_str(string(" Z"))
+    put_dec(flagRule & 1)
+
+
+PRI check_construction(pStack) | siteIdx, derived, imageEnd
+' Control W: image shape, site table, mailbox placement.
+'
+' @param pStack - address of a local of main() (cog 0's stack)
+
+' Local Variables:
+' @local siteIdx - site being checked
+' @local derived - site BRK address derived from the image labels
+' @local imageEnd - hub address just past the target image
+
+  put_str(string("  ISR image: $"))
+  put_hex(@isr, 5)
+  put_str(string("..$"))
+  put_hex(@isr_end - 1, 5)
+  put_str(string(" = "))
+  put_dec((@isr_end - @isr) / 4)
+  say(string(" longs (must be 16)"))
+  if @isr_end - @isr <> ISR_LONGS * 4
+    say(string("RIG FAIL: W ISR image is not 16 longs"))
+    failCount++
+  put_str(string("  ISR mailbox long = $"))
+  put_hex(isr_b, 5)
+  put_str(string(" (must be MBOX $"))
+  put_hex(MBOX, 5)
+  say(string(")"))
+  if isr_b <> MBOX
+    say(string("RIG FAIL: W ISR mailbox long differs from MBOX"))
+    failCount++
+  repeat siteIdx from 0 to SITE_COUNT - 1
+    derived := site_label_addr(siteIdx)
+    if derived <> site_brk(siteIdx)
+      put_str(string("RIG FAIL: W site "))
+      put_str(site_name(siteIdx))
+      put_str(string(" BRK at $"))
+      put_hex(derived, 3)
+      put_str(string(" in the image, table says $"))
+      put_hex(site_brk(siteIdx), 3)
+      put_nl()
+      failCount++
+  say(string("  site BRK addresses: derived from the image labels, compared with the listing table"))
+  imageEnd := @tgt_end
+  put_str(string("  target image: $"))
+  put_hex(@tgt, 5)
+  put_str(string("..$"))
+  put_hex(imageEnd - 1, 5)
+  put_str(string("   cog 0 stack near $"))
+  put_hex(pStack, 5)
+  put_str(string("   mailbox $"))
+  put_hex(MBOX, 5)
+  put_str(string("..$"))
+  put_hex(MBOX_END - 1, 5)
+  put_str(string("   top 16 KB from $"))
+  put_hex(HUB_TOP16K, 5)
+  put_nl()
+  if MBOX_END > HUB_TOP16K
+    say(string("RIG FAIL: W mailbox reaches into the top 16 KB"))
+    failCount++
+  if imageEnd >= MBOX or pStack + STACK_MARGIN > MBOX
+    say(string("RIG FAIL: W program image or cog 0 stack is not clear below the mailbox"))
+    failCount++
+  put_str(string("  load area $"))
+  put_hex(LOAD_AREA, 5)
+  put_str(string(" (alias $"))
+  put_hex(LOAD_ALIAS, 5)
+  put_str(string("), save area $"))
+  put_hex(SAVE_AREA, 5)
+  put_str(string("; HUBSET $"))
+  put_hex(HUBSET_BRK_COG1, 8)
+  put_nl()
+  if failCount == 0
+    say(string("  control W: all passed"))
+
+
+PRI load_isr() : mismatches | longIdx, imageLong, backLong, aliasLong, aliasDiffs
+' Gate G0: copy the ISR image to cog 1's load area, read it back, compare.
+'
+' @returns mismatches - load-area longs that differ from the image
+
+' Local Variables:
+' @local longIdx - long being compared
+' @local imageLong - the image long
+' @local backLong - the long read back at the load area
+' @local aliasLong - the long read at the normal-range alias
+' @local aliasDiffs - alias longs that differ (informational)
+
+  longmove(LOAD_AREA, @isr, ISR_LONGS)
+  mismatches := 0
+  aliasDiffs := 0
+  repeat longIdx from 0 to ISR_LONGS - 1
+    imageLong := long[@isr][longIdx]
+    backLong := long[LOAD_AREA][longIdx]
+    aliasLong := long[LOAD_ALIAS][longIdx]
+    put_str(string("  +"))
+    put_dec(longIdx)
+    put_str(string("  image $"))
+    put_hex(imageLong, 8)
+    put_str(string("  read back $"))
+    put_hex(backLong, 8)
+    put_str(string("  alias $"))
+    put_hex(aliasLong, 8)
+    if backLong <> imageLong
+      mismatches++
+      put_str(string("  MISMATCH"))
+    if aliasLong <> imageLong
+      aliasDiffs++
+    put_nl()
+  put_str(string("  G0 read-back matched "))
+  put_dec(ISR_LONGS - mismatches)
+  put_str(string(" of 16; alias $7FF40 matched "))
+  put_dec(ISR_LONGS - aliasDiffs)
+  say(string(" of 16 (alias informational)"))
+
+
+PRI report(bDone) | rawNext, recIdx, siteIdx
+' Read the mailbox, print every record, run the gates, then the verdicts.
+'
+' @param bDone - TRUE when the done flag was set in time
+
+' Local Variables:
+' @local rawNext - the next-record pointer as the ISR left it
+' @local recIdx - record being processed
+' @local siteIdx - site being cleared
+
+  put_nl()
+  say(string("--- RECORDS (raw GETBRK word, raw $1FF word, decoded, attributed site) ---"))
+  rawNext := long[MBOX_NEXT]
+  put_str(string("  next-record pointer $"))
+  put_hex(rawNext, 5)
+  put_str(string("  done flag "))
+  put_dec(long[MBOX_DONE])
+  put_nl()
+  recCount := 0
+  if rawNext < MBOX_REC or rawNext > MBOX_END or ((rawNext - MBOX_REC) & 7) <> 0
+    say(string("RIG FAIL: G1 next-record pointer out of range or misaligned; records not read"))
+    failCount++
+  else
+    recCount := (rawNext - MBOX_REC) / 8
+  repeat siteIdx from 0 to SITE_COUNT - 1
+    siteHits[siteIdx] := 0
+    siteRec[siteIdx] := -1
+  unattributed := 0
+  if recCount > 0
+    repeat recIdx from 0 to recCount - 1
+      recSite[recIdx] := attribute(recIdx)
+      siteIdx := recSite[recIdx]
+      if siteIdx >= 0
+        if siteHits[siteIdx] == 0
+          siteRec[siteIdx] := recIdx
+        siteHits[siteIdx]++
+      elseif siteIdx == S_NONE
+        unattributed++
+      print_record(recIdx)
+  put_str(string("  record count "))
+  put_dec(recCount)
+  put_str(string("; unattributed "))
+  put_dec(unattributed)
+  put_nl()
+  put_nl()
+  say(string("--- GATES G1..G5: setup check and positive controls ---"))
+  check_gates(bDone)
+  put_nl()
+  if failCount <> 0
+    say(string("NO VERDICT SO109 - setup failed (RIG FAIL above); the run is INCONCLUSIVE, not a refutation"))
+  else
+    say(string("--- OUTCOME CHECKS (whole-run patterns; informational) ---"))
+    print_table_check(TBL_STUDY, string("  10-record study prediction (stale codes)  : "))
+    print_table_check(TBL_ABSENT, string("  7-record erratum-absent pattern           : "))
+    print_table_check(TBL_OWN, string("  10-record latch-ignores-condition (OWN)   : "))
+    put_nl()
+    verdict_break()
+    verdict_code()
+    verdict_cancels()
+    verdict_idioms()
+
+
+PRI attribute(recIdx) : siteIdx | retAddr, scanIdx
+' Attribute one record to a site by its return address.
+'
+' @param recIdx - record index
+' @returns siteIdx - S_P1..S_P2, S_ENTRY (record 0 at $000), or S_NONE
+
+' Local Variables:
+' @local retAddr - the record's return address
+' @local scanIdx - site being tried
+
+  retAddr := rec_ret(recIdx)
+  siteIdx := S_NONE
+  if recIdx == 0 and rec_b23(0) == 1
+    siteIdx := S_ENTRY
+  else
+    repeat scanIdx from 0 to SITE_COUNT - 1
+      if retAddr == site_brk(scanIdx) + 1 or retAddr == site_brk(scanIdx) + 2
+        siteIdx := scanIdx
+        quit
+
+
+PRI print_record(recIdx) | siteIdx
+' Print one record raw and decoded.
+'
+' @param recIdx - record index
+
+' Local Variables:
+' @local siteIdx - the record's attributed site
+
+  siteIdx := recSite[recIdx]
+  put_str(string("  rec "))
+  put_dec2(recIdx)
+  put_str(string("  GETBRK $"))
+  put_hex(rec_brk(recIdx), 8)
+  put_str(string("  $1FF $"))
+  put_hex(rec_iret(recIdx), 8)
+  put_str(string("  code $"))
+  put_hex(rec_code(recIdx), 2)
+  put_str(string(" b23 "))
+  put_dec(rec_b23(recIdx))
+  put_str(string("  ret $"))
+  put_hex(rec_ret(recIdx), 3)
+  put_str(string("  C"))
+  put_dec((rec_flags(recIdx) >> 1) & 1)
+  put_str(string(" Z"))
+  put_dec(rec_flags(recIdx) & 1)
+  put_str(string("  site "))
+  put_str(site_name(siteIdx))
+  if siteIdx >= 0
+    if site_flags(siteIdx) == FLAGS_ANY
+      put_str(string("  flags not judged"))
+    elseif rec_flags(recIdx) == site_flags(siteIdx)
+      put_str(string("  flags agree"))
+    else
+      put_str(string("  FLAGS CONTRADICT SITE"))
+  put_nl()
+
+
+PRI check_gates(bDone) | recP
+' Gates G1..G5. Each failure prints RIG FAIL and counts.
+'
+' @param bDone - TRUE when the done flag was set in time
+
+' Local Variables:
+' @local recP - record index of a positive control
+
+  if recCount >= 1
+    say(string("  G1 at least one record: PASS"))
+  else
+    say(string("RIG FAIL: G1 no record at all (debug interrupt never entered)"))
+    failCount++
+  if recCount >= 1
+    if rec_b23(0) == 1
+      put_str(string("  G2 record 0 b23=1: PASS (its code $"))
+      put_hex(rec_code(0), 2)
+      put_str(string(" recorded, not judged; return address $"))
+      put_hex(rec_ret(0), 3)
+      if rec_ret(0) == 0
+        say(string(", the first instruction as inferred)"))
+      else
+        say(string(", NOT the first instruction - informational, no verdict depends on it)"))
+    else
+      say(string("RIG FAIL: G2 record 0 is not the COGINIT entry (needs b23=1)"))
+      failCount++
+  recP := siteRec[S_P1]
+  if recP >= 0 and rec_code(recP) == $A1 and rec_b23(recP) == 0
+    say(string("  G3 p1 record, code $A1, b23=0: PASS"))
+  else
+    say(string("RIG FAIL: G3 no p1 record with code $A1 and b23=0 (the ISR did not re-arm or return)"))
+    failCount++
+  recP := siteRec[S_P2]
+  if recP >= 0 and rec_code(recP) == $A9 and rec_b23(recP) == 0
+    say(string("  G4 p2 record, code $A9, b23=0: PASS"))
+  else
+    say(string("RIG FAIL: G4 no p2 record with code $A9 and b23=0 (re-arm or return failed partway)"))
+    failCount++
+  if bDone
+    say(string("  G5 done flag within 1 s: PASS"))
+  else
+    say(string("RIG FAIL: G5 done flag not set within 1 s (records above are whatever existed)"))
+    failCount++
+
+
+PRI print_table_check(tbl, pLabel)
+' Print whether the whole record list matches one expected table.
+'
+' @param tbl - TBL_STUDY, TBL_ABSENT or TBL_OWN
+' @param pLabel - line label
+
+  put_str(pLabel)
+  if table_matches(tbl)
+    say(string("MATCHED"))
+  else
+    say(string("not matched"))
+
+
+PRI table_matches(tbl) : bMatch | recIdx, expCode
+' TRUE when the records are exactly the table's sites, in order, with its codes.
+'
+' @param tbl - TBL_STUDY, TBL_ABSENT or TBL_OWN
+' @returns bMatch - TRUE on an exact match
+
+' Local Variables:
+' @local recIdx - record being compared
+' @local expCode - the table's code for that row
+
+  bMatch := recCount == table_len(tbl)
+  if bMatch
+    repeat recIdx from 0 to recCount - 1
+      if recSite[recIdx] <> exp_site(tbl, recIdx)
+        bMatch := FALSE
+      expCode := exp_code(tbl, recIdx)
+      if expCode <> CODE_ANY and rec_code(recIdx) <> expCode
+        bMatch := FALSE
+
+
+PRI site_clean(siteIdx) : bClean
+' TRUE when a site has exactly one record and its saved flags agree.
+'
+' @param siteIdx - site
+' @returns bClean - TRUE when usable
+
+  bClean := FALSE
+  if siteHits[siteIdx] == 1
+    if site_flags(siteIdx) == FLAGS_ANY or rec_flags(siteRec[siteIdx]) == site_flags(siteIdx)
+      bClean := TRUE
+
+
+PRI verdict_break() | entered, flagsBad, dupes
+' VERDICT SO109 BREAK: did the condition-false BRKs e1, e2, e3 enter the ISR.
+'
+
+' Local Variables:
+' @local entered - e-sites with at least one record
+' @local flagsBad - entered e-sites whose saved flags contradict the site
+' @local dupes - e-sites with more than one record
+
+  entered := 0
+  flagsBad := 0
+  dupes := 0
+  tally_site(S_E1, @entered, @flagsBad, @dupes)
+  tally_site(S_E2, @entered, @flagsBad, @dupes)
+  tally_site(S_E3, @entered, @flagsBad, @dupes)
+  put_str(string("VERDICT SO109 BREAK: "))
+  if unattributed > 0
+    say(string("INCONCLUSIVE - records fall outside every site window; the entry point differs from +1/+2"))
+  elseif dupes > 0
+    say(string("INCONCLUSIVE - unpredicted: an e-site produced more than one record"))
+  elseif flagsBad > 0
+    say(string("INCONCLUSIVE - a saved C/Z contradicts its e-site; that record says nothing about a false condition"))
+  elseif entered == 3
+    say(string("CONFIRMED - e1, e2 and e3 each entered the debug ISR with their condition false (saved flags agree)"))
+    say(string("  as the study predicts, and as v55 :62 and P2 Documentation :2491 both state"))
+  elseif entered == 0 and (siteHits[S_T1] == 0 or siteHits[S_T2] == 0)
+    say(string("INCONCLUSIVE - no conditional BRK entered, true ones (t1/t2) included; the rig cannot separate the condition from conditional BRKs not breaking at all"))
+  elseif entered == 0
+    say(string("REFUTED - no condition-false BRK entered the ISR while t1 and t2 did (this part honours the condition)"))
+    say(string("  contradicts the study AND v55 :62 AND P2 Documentation :2491"))
+  else
+    put_str(string("INCONCLUSIVE - unpredicted: entered at"))
+    put_entered(S_E1)
+    put_entered(S_E2)
+    put_entered(S_E3)
+    put_nl()
+
+
+PRI tally_site(siteIdx, pEntered, pFlagsBad, pDupes)
+' Count one e-site into the BREAK tallies.
+'
+' @param siteIdx - e-site
+' @param pEntered - address of the entered tally
+' @param pFlagsBad - address of the flags-contradict tally
+' @param pDupes - address of the duplicate tally
+
+  if siteHits[siteIdx] > 0
+    long[pEntered]++
+    if siteHits[siteIdx] > 1
+      long[pDupes]++
+    elseif rec_flags(siteRec[siteIdx]) <> site_flags(siteIdx)
+      long[pFlagsBad]++
+
+
+PRI put_entered(siteIdx)
+' Print " <site>=yes" or " <site>=no".
+'
+' @param siteIdx - site
+
+  put_str(string(" "))
+  put_str(site_name(siteIdx))
+  if siteHits[siteIdx] > 0
+    put_str(string("=yes"))
+  else
+    put_str(string("=no"))
+
+
+PRI verdict_code() | codeE1, codeE2, codeE3
+' VERDICT SO109 CODE: STALE (study) / OWN (v55 :62 literal) / OTHER.
+'
+
+' Local Variables:
+' @local codeE1 - code in the e1 record
+' @local codeE2 - code in the e2 record
+' @local codeE3 - code in the e3 record
+
+  put_str(string("VERDICT SO109 CODE: "))
+  if unattributed > 0
+    say(string("INCONCLUSIVE - records fall outside every site window"))
+  elseif not (site_clean(S_E1) and site_clean(S_E2) and site_clean(S_E3))
+    say(string("INCONCLUSIVE - needs one clean record from each of e1, e2, e3 (see VERDICT SO109 BREAK)"))
+  elseif not (site_clean(S_T1) and site_clean(S_T2)) or rec_code(siteRec[S_T1]) <> $C3 or rec_code(siteRec[S_T2]) <> $D4
+    say(string("INCONCLUSIVE - true-condition control failed: t1 must show $C3 and t2 $D4, each once, flags agreeing"))
+  else
+    codeE1 := rec_code(siteRec[S_E1])
+    codeE2 := rec_code(siteRec[S_E2])
+    codeE3 := rec_code(siteRec[S_E3])
+    if codeE1 == $A1 and codeE2 == $D4 and codeE3 == $D4
+      say(string("CONFIRMED - STALE: e1/e2/e3 show $A1/$D4/$D4, the last condition-true code"))
+      say(string("  bench matched the study and P2 Documentation :2491; NOT v55 :62 read literally (OWN)"))
+    elseif codeE1 == $B2 and codeE2 == $E5 and codeE3 == $96
+      say(string("REFUTED - OWN: e1/e2/e3 show their own codes $B2/$E5/$96; the code latch ignores the condition too"))
+      say(string("  bench matched v55 :62 read literally; NOT the study or P2 Documentation :2491"))
+    else
+      put_str(string("INCONCLUSIVE - OTHER: e1/e2/e3 show $"))
+      put_hex(codeE1, 2)
+      put_str(string("/$"))
+      put_hex(codeE2, 2)
+      put_str(string("/$"))
+      put_hex(codeE3, 2)
+      say(string(", neither STALE ($A1/$D4/$D4) nor OWN ($B2/$E5/$96)"))
+
+
+PRI verdict_cancels() | failed
+' VERDICT SO109 CANCELS: no record from s1, j1, w1, w3.
+'
+
+' Local Variables:
+' @local failed - cancel sites that produced a record
+
+  failed := 0
+  if siteHits[S_S1] > 0
+    failed++
+  if siteHits[S_J1] > 0
+    failed++
+  if siteHits[S_W1] > 0
+    failed++
+  if siteHits[S_W3] > 0
+    failed++
+  put_str(string("VERDICT SO109 CANCELS: "))
+  if unattributed > 0
+    say(string("INCONCLUSIVE - records fall outside every site window"))
+  elseif failed == 0
+    say(string("CONFIRMED - no record from s1 (SKIP), j1 (taken JMP), w1 (if_z JMP taken), w3 (if_z SKIP taken)"))
+  else
+    put_str(string("REFUTED - cancel failed: record at"))
+    put_hit(S_S1)
+    put_hit(S_J1)
+    put_hit(S_W1)
+    put_hit(S_W3)
+    put_nl()
+
+
+PRI put_hit(siteIdx)
+' Print " <site>" when the site produced a record.
+'
+' @param siteIdx - site
+
+  if siteHits[siteIdx] > 0
+    put_str(string(" "))
+    put_str(site_name(siteIdx))
+
+
+PRI verdict_idioms()
+' VERDICT SO109 IDIOMS: w2 (JMP idiom) and w4 (SKIP idiom) deliver $F4 / $F6.
+'
+
+  put_str(string("VERDICT SO109 IDIOMS: "))
+  if unattributed > 0
+    say(string("INCONCLUSIVE - records fall outside every site window"))
+  elseif siteHits[S_W2] == 0 or siteHits[S_W4] == 0
+    put_str(string("REFUTED - an idiom suppressed a wanted break: missing"))
+    if siteHits[S_W2] == 0
+      put_str(string(" w2"))
+    if siteHits[S_W4] == 0
+      put_str(string(" w4"))
+    put_nl()
+  elseif siteHits[S_W2] > 1 or siteHits[S_W4] > 1
+    say(string("INCONCLUSIVE - unpredicted: w2 or w4 produced more than one record"))
+  elseif not (site_clean(S_W2) and site_clean(S_W4))
+    say(string("INCONCLUSIVE - a saved C/Z contradicts w2 or w4"))
+  elseif rec_code(siteRec[S_W2]) <> $F4 or rec_code(siteRec[S_W4]) <> $F6
+    put_str(string("REFUTED - an idiom delivered the wrong code: w2 $"))
+    put_hex(rec_code(siteRec[S_W2]), 2)
+    put_str(string(" (want $F4), w4 $"))
+    put_hex(rec_code(siteRec[S_W4]), 2)
+    say(string(" (want $F6)"))
+  else
+    say(string("CONFIRMED - w2 (if_z JMP around an unconditional BRK) delivered $F4; w4 (if_z SKIP #1 ahead of it) delivered $F6"))
+    say(string("  w3/w4 are the SKIP form v55 :63-64 documents; suppression at w1/w3 is decided by VERDICT SO109 CANCELS"))
+
+
+' ---- record accessors ----
+
+PRI rec_brk(recIdx) : rawBrk
+' @param recIdx - record index
+' @returns rawBrk - the raw GETBRK WCZ word
+
+  rawBrk := long[MBOX_REC + recIdx * 8]
+
+
+PRI rec_iret(recIdx) : rawIret
+' @param recIdx - record index
+' @returns rawIret - the raw $1FF (IRET0) word
+
+  rawIret := long[MBOX_REC + recIdx * 8 + 4]
+
+
+PRI rec_code(recIdx) : brkCode
+' @param recIdx - record index
+' @returns brkCode - GETBRK [31:24]
+
+  brkCode := rec_brk(recIdx) >> 24
+
+
+PRI rec_b23(recIdx) : entryBit
+' @param recIdx - record index
+' @returns entryBit - GETBRK bit 23 (1 = COGINIT entry)
+
+  entryBit := (rec_brk(recIdx) >> 23) & 1
+
+
+PRI rec_ret(recIdx) : retAddr
+' @param recIdx - record index
+' @returns retAddr - return address, $1FF word [19:0]
+
+  retAddr := rec_iret(recIdx) & RET_MASK
+
+
+PRI rec_flags(recIdx) : savedFlags
+' @param recIdx - record index
+' @returns savedFlags - saved (C << 1) | Z from $1FF word bits 31, 30
+
+  savedFlags := (rec_iret(recIdx) >> 30) & %11
+
+
+' ---- site tables ----
+
+PRI site_brk(siteIdx) : addr
+' @param siteIdx - site
+' @returns addr - the site's BRK cog address (listing)
+
+  addr := lookupz(siteIdx: BRK_P1, BRK_E1, BRK_T1, BRK_T2, BRK_E2, BRK_E3, BRK_S1, BRK_J1, BRK_W1, BRK_W2, BRK_W3, BRK_W4, BRK_P2)
+
+
+PRI site_label_addr(siteIdx) : addr
+' @param siteIdx - site
+' @returns addr - the site's BRK cog address derived from the image labels
+
+  addr := (lookupz(siteIdx: @p1, @e1, @t1, @t2, @e2, @e3, @s1_brk, @j1_brk, @w1_brk, @w2_brk, @w3_brk, @w4_brk, @p2) - @tgt) >> 2
+
+
+PRI site_kind(siteIdx) : kind
+' @param siteIdx - site
+' @returns kind - K_POS, K_FALSE, K_TRUE, K_CANCEL or K_IDIOM
+
+  kind := lookupz(siteIdx: K_POS, K_FALSE, K_TRUE, K_TRUE, K_FALSE, K_FALSE, K_CANCEL, K_CANCEL, K_CANCEL, K_IDIOM, K_CANCEL, K_IDIOM, K_POS)
+
+
+PRI site_flags(siteIdx) : flagRule
+' @param siteIdx - site
+' @returns flagRule - the (C << 1) | Z the site's BRK sees, or FLAGS_ANY (p1: not judged)
+
+  flagRule := lookupz(siteIdx: FLAGS_ANY, FLAGS_C0Z0, FLAGS_C0Z0, FLAGS_C0Z1, FLAGS_C0Z1, FLAGS_C0Z1, FLAGS_C0Z1, FLAGS_C0Z1, FLAGS_C0Z1, FLAGS_C0Z0, FLAGS_C0Z1, FLAGS_C0Z0, FLAGS_C0Z0)
+
+
+PRI site_name(siteIdx) : pName
+' @param siteIdx - site, S_ENTRY or S_NONE
+' @returns pName - printable name (5 characters)
+
+  case siteIdx
+    S_ENTRY: pName := string("entry")
+    S_P1:    pName := string("p1   ")
+    S_E1:    pName := string("e1   ")
+    S_T1:    pName := string("t1   ")
+    S_T2:    pName := string("t2   ")
+    S_E2:    pName := string("e2   ")
+    S_E3:    pName := string("e3   ")
+    S_S1:    pName := string("s1   ")
+    S_J1:    pName := string("j1   ")
+    S_W1:    pName := string("w1   ")
+    S_W2:    pName := string("w2   ")
+    S_W3:    pName := string("w3   ")
+    S_W4:    pName := string("w4   ")
+    S_P2:    pName := string("p2   ")
+    other:   pName := string("NONE ")
+
+
+' ---- expected-record tables ----
+
+PRI table_len(tbl) : rows
+' @param tbl - TBL_STUDY, TBL_ABSENT or TBL_OWN
+' @returns rows - records the table expects
+
+  rows := lookupz(tbl: 10, 7, 10)
+
+
+PRI exp_site(tbl, rowIdx) : siteIdx
+' @param tbl - expected table
+' @param rowIdx - row
+' @returns siteIdx - the site that row expects
+
+  case tbl
+    TBL_STUDY, TBL_OWN:
+      siteIdx := lookupz(rowIdx: S_ENTRY, S_P1, S_E1, S_T1, S_T2, S_E2, S_E3, S_W2, S_W4, S_P2)
+    other:
+      siteIdx := lookupz(rowIdx: S_ENTRY, S_P1, S_T1, S_T2, S_W2, S_W4, S_P2)
+
+
+PRI exp_code(tbl, rowIdx) : brkCode
+' @param tbl - expected table
+' @param rowIdx - row
+' @returns brkCode - the GETBRK code that row expects, or CODE_ANY
+
+  case tbl
+    TBL_STUDY:
+      brkCode := lookupz(rowIdx: CODE_ANY, $A1, $A1, $C3, $D4, $D4, $D4, $F4, $F6, $A9)
+    TBL_OWN:
+      brkCode := lookupz(rowIdx: CODE_ANY, $A1, $B2, $C3, $D4, $E5, $96, $F4, $F6, $A9)
+    other:
+      brkCode := lookupz(rowIdx: CODE_ANY, $A1, $C3, $D4, $F4, $F6, $A9)
+
+
+' ---- plain serial output on P62 (no DEBUG) ----
+
+PRI put_ch(ch)
+' Send one byte and wait until the transmitter is idle.
+'
+' @param ch - byte to send
+
+  wypin(TX_PIN, ch)
+  repeat while rqpin(TX_PIN) & TX_BUSY_BIT
+
+
+PRI put_str(pStr)
+' Send a zero-terminated string.
+'
+' @param pStr - address of the string
+
+  repeat while byte[pStr]
+    put_ch(byte[pStr++])
+
+
+PRI put_nl()
+' End a line (CR LF).
+'
+
+  put_ch(13)
+  put_ch(10)
+
+
+PRI say(pStr)
+' Send a string and end the line.
+'
+' @param pStr - address of the string
+
+  put_str(pStr)
+  put_nl()
+
+
+PRI put_hex(value, digits) | nibIdx, nib
+' Send value as hex, most significant digit first.
+'
+' @param value - value to send
+' @param digits - number of hex digits (1..8)
+
+' Local Variables:
+' @local nibIdx - nibble being sent
+' @local nib - its value
+
+  repeat nibIdx from digits - 1 to 0
+    nib := (value >> (nibIdx * 4)) & $F
+    if nib < 10
+      put_ch("0" + nib)
+    else
+      put_ch("A" + nib - 10)
+
+
+PRI put_dec(value) | divisor, bStarted
+' Send a non-negative value in decimal.
+'
+' @param value - value to send (0..2_147_483_647)
+
+' Local Variables:
+' @local divisor - current decimal place
+' @local bStarted - TRUE once a non-zero digit has been sent
+
+  divisor := 1_000_000_000
+  bStarted := FALSE
+  repeat 10
+    if value >= divisor or bStarted or divisor == 1
+      put_ch("0" + value / divisor)
+      value //= divisor
+      bStarted := TRUE
+    divisor /= 10
+
+
+PRI put_dec2(value)
+' Send 0..99 as two decimal digits.
+'
+' @param value - value to send
+
+  put_ch("0" + value / 10)
+  put_ch("0" + value // 10)
+
+
+{ DEBUG ISR IMAGE -- 16 longs, assembled at $000, copied by cog 0 to cog 1's
+  load area $FFF40. The debug ROM loads it into cog 1's $000..$00F on every
+  debug interrupt (after saving the program's $000..$00F) and jumps to $000.
+}
+DAT             org     0               ' ---- debug ISR image (cog 1, $000..$00F) ----
+isr             getbrk  isr_t   wcz     ' [31:24] break code, [23] = COGINIT entry
+                mov     isr_r, $1FF     ' IRET0: return address [19:0], C [31], Z [30]
+                rdlong  isr_p, isr_b    ' address of the next free record
+                wrlong  isr_t, isr_p
+                add     isr_p, #4
+                wrlong  isr_r, isr_p
+                add     isr_p, #4
+                wrlong  isr_p, isr_b    ' one 8-byte record per entry
+                brk     #$10            ' inside the ISR: arm interrupt-on-BRK (%E) only
+                jmp     #\$1FD          ' debug ROM: restore $000..$00F, then RETI0
+isr_t           long    0
+isr_r           long    0
+isr_p           long    0
+isr_b           long    MBOX            ' mailbox base
+                long    0[2]            ' pad to 16 longs
+isr_end
+
+{ TARGET IMAGE -- cog 1, cog exec, assembled at $000. The COGINIT entry lands
+  on the first NOP. Every test BRK is followed by two NOPs. Each site's BRK
+  line carries its label (sites s1, j1, w1..w4 also label the SKIP/JMP).
+}
+DAT             org     0               ' ---- target image (cog 1) ----
+tgt             nop                     ' COGINIT entry lands here (return $000)
+                nop
+p1              brk     #$A1            ' positive control: unconditional
+                nop
+                nop
+                mov     tgt_y, #1   wcz ' C=0 Z=0
+e1      if_z    brk     #$B2            ' condition FALSE
+                nop
+                nop
+                mov     tgt_y, #1   wcz ' C=0 Z=0
+t1      if_nz   brk     #$C3            ' condition true
+                nop
+                nop
+                mov     tgt_y, #0   wcz ' C=0 Z=1
+t2      if_z    brk     #$D4            ' condition true
+                nop
+                nop
+                mov     tgt_y, #0   wcz ' C=0 Z=1
+e2      if_nz   brk     #$E5            ' condition FALSE
+                nop
+                nop
+                mov     tgt_y, #0   wcz ' C=0 Z=1
+e3      if_c    brk     #$96            ' condition FALSE (C flag)
+                nop
+                nop
+s1              skip    #1              ' skip control
+s1_brk          brk     #$F1
+                nop
+                nop
+j1              jmp     #j1_land        ' branch control
+j1_brk          brk     #$F2
+j1_land         nop
+                nop
+                mov     tgt_y, #0   wcz ' Z=1: the JMP idiom must NOT break
+w1      if_z    jmp     #w1_land
+w1_brk          brk     #$F3
+w1_land         nop
+                nop
+                mov     tgt_y, #1   wcz ' Z=0: the JMP idiom must break
+w2      if_z    jmp     #w2_land
+w2_brk          brk     #$F4
+w2_land         nop
+                nop
+                mov     tgt_y, #0   wcz ' Z=1: the SKIP idiom must NOT break
+w3      if_z    skip    #1
+w3_brk          brk     #$F5
+                nop
+                nop
+                mov     tgt_y, #1   wcz ' Z=0: the SKIP idiom must break
+w4      if_z    skip    #1
+w4_brk          brk     #$F6
+                nop
+                nop
+p2              brk     #$A9            ' closing positive control
+                nop
+                nop
+                mov     tgt_y, #1
+                wrlong  tgt_y, ##MBOX_DONE ' done flag (DONE_VALUE = 1)
+                jmp     #$
+tgt_y           long    0
+tgt_end
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-478`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-479`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -111,6 +111,22 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 3. **`p2an006` cited `cogspin.yaml` for figures `cogspin.yaml` had no source for** (F-392). Two
    files agreeing is not provenance; it is a loop.
 
+## A no-wait `RDFAST` releases the next `RDLONG`/`WRLONG`, and their entries do not say so (2026-10-01, EF-084) — F-478
+
+### F-478 — `rdlong.yaml` and `wrlong.yaml` give no caution for a no-wait `RDFAST` before them: within 16 clocks a `RDLONG` returns the previous hub read's long and a `WRLONG` can be lost — `CONFIRMED`
+
+**Where:** `language/pasm2/rdlong.yaml`, `language/pasm2/wrlong.yaml` — neither mentions the FIFO.
+**What silicon does (EF-084, Rev C, 200 MHz, run once, every repetition identical):** after a no-wait
+`RDFAST`, the next `RDLONG` returned the previous hub read's long in 43 of 64 hub alignments (flags
+were not measured); a `WRLONG` was released before it landed and lost
+when an immediate `RDLONG` followed (43 of 64), and landed when nothing followed. From 16 clocks
+(7 non-hub instructions) after the `RDFAST`, and with the waiting form, every read and write was
+correct. This is P2 Errata **E8**; F-472 carries the `rdfast.yaml` side.
+**Correction:** add to each entry a caution naming the hazard, the rule (no hub-memory instruction
+within 16 clocks of a no-wait `RDFAST`, or use the waiting form) and the E8 reference, citing
+EF-084. Same caution for `rdbyte`/`rdword`/`wrbyte`/`wrword` and for a `SETQ` block only if
+VO-J-023 shows it — extend this entry in place when it runs.
+
 ## A condition-false `BRK` still breaks, and the KB teaches it as conditional (2026-10-01, found while building the SO109 test) — F-477
 
 ### F-477 — `brk.yaml` teaches a conditional `BRK` as "break only when condition met"; Parallax documents that a `BRK` breaks whatever its condition — `CONFIRMED`
@@ -142,8 +158,10 @@ whatever the condition, and the condition gates only the writing of the 8-bit co
 condition-false `BRK` shows the debug ISR the previous code. Cite :2491, with v55 :62-63 for the
 compiler's `SKIP`. **Not an erratum:** the part does what its own documentation says, so under
 `p2-errata/CLASSIFICATION-GUIDANCE.md` this is documented behaviour and stays out of P2 Errata.
-VO-J-022 (the clean-room study's SO109 prediction, which matches :2491) measures it on silicon;
-its result is recorded here when it runs, and does not gate this correction.
+**Measured (EF-085, 2026-10-01, Rev C):** three condition-false `BRK`s each entered the debug ISR
+and showed the previous condition-true code; a `SKIP` before and a taken `JMP` before cancelled
+both effects, and both idioms delivered a wanted break with its own code. The correction now
+stands on silicon as well as on :2491; cite EF-085 beside it.
 
 ## A manual release published KB content without its index (2026-09-28) — F-476
 
@@ -244,7 +262,7 @@ one-line pointer in `wrpin.yaml` case 4): in the DAC smart modes the ADC runs on
 set, which also enables the fast DAC's drive; `TT` = `%00` with `OUT` high runs neither. Cite EF-071.
 Tested `TT` = `%00`/`%01` only; the `OTHER` forms (`%1x`) untested. → P2 Errata **E6**.
 
-### F-472 — `rdfast.yaml` gives the no-wait requirement no number and no consequence, and omits the blocking-after-no-wait erratum — `CONFIRMED`
+### F-472 — `rdfast.yaml` gives the no-wait requirement no number and no consequence, and omits both no-wait errata (E7, E8) — `CONFIRMED`
 
 **Where:** `language/pasm2/rdfast.yaml` — "D[31]=1 for no-wait mode (doesn't stall for FIFO fill)"
 (:70), with no minimum distance and nothing on what an early read returns.
@@ -254,9 +272,22 @@ promise (3,072/3,072, 10–17 clocks); (2) after a no-wait `RDFAST`, a read is s
 unsafe distance for a no-wait `WRFAST` write; (4) **erratum:** a blocking `RDFAST` issued while a
 no-wait one is still arming can skip its wait (2 clocks) and the next read returns zero — one gap
 per alignment within 8..15 clocks; correct from 16 clocks on.
-**Correction:** add the measured 15-clock no-wait rule and the zero read (anti-pattern — also routed
-to P2 Anti-Patterns), and a `silicon_errata` entry for (4). Cite EF-073/EF-074; note SOURCE-ERRATA
-E-015 (Chip's unexplained "Yes") as plausibly (4). → P2 Errata **E7**.
+**And (EF-084, 2026-10-01, Rev C):** (5) **erratum:** a `RDLONG` issued within 16 clocks of a no-wait
+`RDFAST` is released before its own read in most hub alignments (43 of 64 at the next instruction)
+and returns the **previous hub read's long**; a `WRLONG` there is released before it lands and is
+**lost** if another hub instruction follows; nothing reports either; from 16 clocks (7 non-hub
+instructions) on, and with the waiting form, both are correct. The window coincides with (4): one
+release, acting on whatever hub instruction is waiting. (6) Making the first `RDFAST` blocking also
+removes (4) (18,432/18,432). The Spin2 interpreter uses only the blocking form.
+**Correction:** add the measured no-wait rules — FIFO reads safe from 15 clocks (the zero read is an
+anti-pattern, also routed to P2 Anti-Patterns), and **no hub-memory instruction within 16 clocks
+of a no-wait `RDFAST`** (or use the waiting form) — and `silicon_errata` entries for (4) → P2 Errata
+**E7** (workarounds: 16 clocks `RDFAST` to `RDFAST`, or a blocking first `RDFAST`; F-474 carries the
+E7 fix wording) and (5) → **E8**. Cite EF-073/EF-074/EF-084; note SOURCE-ERRATA E-015 (Chip's
+unexplained "Yes") as plausibly (4). Scope as proven: `RDLONG`/`WRLONG`/blocking `RDFAST`; byte/word
+access, `SETQ` blocks and a no-wait `WRFAST` are decided by VO-J-023 — extend this entry in place
+when it runs; `RETA` and interrupts in the window are not measured; hub execution cannot use
+`RDFAST` (P2 Documentation). The same caution goes to `rdlong.yaml`/`wrlong.yaml` (F-478).
 
 ### F-473 — `getxacc.yaml`'s `sinc2_constraint` can now state its mechanism: SINC2's running first stage read across windows of unequal length (NOT the one-clock carry — corrected 2026-09-26) — `CONFIRMED`
 
