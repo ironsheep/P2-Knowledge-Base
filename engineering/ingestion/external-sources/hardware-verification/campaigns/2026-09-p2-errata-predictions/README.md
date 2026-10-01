@@ -75,6 +75,7 @@ erratum candidate.
 | 18 | `test-o29-rdfast-nowait-releases-hub-op.spin2` | after a no-wait `RDFAST`, is a following `RDLONG` released early with the previous read's long, and a `WRLONG` released early and lost; what gap clears it; does the waiting form; does a blocking first `RDFAST` remove E7? | VO-J-021 | `CONFIRMED` (all four; E7B clean) | EF-084 |
 | 19 | `test-so109-conditional-brk-breaks.spin2` | with break-on-`BRK` armed, does a condition-false `BRK` still enter the debug ISR, showing the previous code; do the `SKIP` and `JMP` forms gate it? | VO-J-022 | `CONFIRMED` (documented behaviour) | EF-085 |
 | 20 | `test-o29b-rdfast-nowait-hub-op-scope.spin2` | E8's scope: what a released `RDLONG … WCZ` puts in C and Z, and whether a released `PTRA++` read still steps the pointer; are `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` released the same way; what a no-wait `WRFAST` and a `SETQ` block read do in the window? | VO-J-023 | `CONFIRMED` (flags, byte/word); `WRFAST` unaffected; `SETQ` block lost the cog | EF-086 |
+| 21 | `test-o29c-setq-block-workaround.spin2` | does E8's workaround protect a `SETQ` block `RDLONG` — the waiting form, and 16 (the rule's boundary), 18 and 20 clocks after a no-wait `RDFAST`; does a released block read lose the cog every time? | VO-J-024 | not run | — |
 
 ## How the tests were built — independence is the point
 
