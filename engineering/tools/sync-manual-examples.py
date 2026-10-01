@@ -71,6 +71,11 @@ PURPOSE IS THE ONE HUMAN FIELD
     Everything else is derived. On adoption, provide it either as an existing
     "Purpose...." line in a file's header, or via examples-library/PURPOSES.md
     as "<filename>: <one-line purpose>". The tool refuses to invent one.
+    When PURPOSES.md has an entry for a file, that entry WINS over the header's
+    Purpose line, so editing PURPOSES.md takes effect on the next sync and
+    --check reports a header that disagrees with it. (Until 2026-10-01 the
+    header won, so a PURPOSES.md edit was silently ignored and a corrupted
+    header Purpose in the XBYTE guide went unreported.)
 
 Exit: 0 clean / 1 out of sync or missing input / 2 usage error.
 """
@@ -500,7 +505,7 @@ def main():
         if body != blk_body:
             problems.append(f"{f.name}: BODY differs from its printed code block")
 
-        purpose = existing_purpose(header) or purposes.get(f.name)
+        purpose = purposes.get(f.name) or existing_purpose(header)
         if purpose and not purpose.isascii():
             bad = sorted({c for c in purpose if not c.isascii()})
             problems.append(f"{f.name}: Purpose contains non-ASCII {bad} — the "

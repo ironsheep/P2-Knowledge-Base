@@ -20,6 +20,40 @@ about it are housekeeping and **never** gate a publication or hold a correction 
 
 ---
 
+## Each example's Purpose is hand-copied into the examples README and Appendix A — OPEN
+
+Raised 2026-10-01 by the «#368» altitude review. A Purpose sentence lives in `PURPOSES.md` (now the
+source, see below), the file header (generated from it), **and** by hand in the examples-library
+`README.md` table and the manual's test-program appendix, worded differently and unchecked (P2
+Errata: the new E7 rows already differ in wording). Generate the README table, or at least check
+it, from `PURPOSES.md` in `sync-manual-examples.py`; decide whether an appendix list may
+paraphrase. Cross-manual.
+
+## `sync-manual-examples.py`: a file's own Purpose line silently overrides its `PURPOSES.md` entry — RESOLVED 2026-10-01
+
+**Resolution (same day, «#368»).** `PURPOSES.md` now wins when it has an entry
+(`purposes.get(f.name) or existing_purpose(header)`; docstring says so), so a `PURPOSES.md` edit
+takes effect on the next sync and `--check` reports a header that disagrees. Measured first across
+every manual and app note with a `PURPOSES.md`: one drift only — the **XBYTE guide's**
+`xbyte-growing-vm.spin2` header read "x shared ALU body, … x branch, and x cog" (a bad `a`→`x`
+replacement) where `PURPOSES.md` had the right text. Re-synced: fixed in the repo. **The published
+XBYTE ZIP still carries the bad header until XBYTE's next release** (its `zip-currency` gate will
+say so). Every other corpus `--check` is unchanged (deSilva's three RED headers predate this and
+clear at its next prepare, «#352»). The README/Appendix A tables that repeat each Purpose by hand
+are still hand-synced — generating them from `PURPOSES.md` is a separate improvement, not done.
+
+The original finding:
+
+Found 2026-10-01 («#368», P2 Errata). `existing_purpose(header) or purposes.get(f.name)`
+(`engineering/tools/sync-manual-examples.py`:503) takes the Purpose already in a file's header
+first, so once a header exists, editing that file's `PURPOSES.md` line changes nothing — and the
+`--check` gate still passes, since header and file agree. Yet the examples-library READMEs and
+`PURPOSES.md` itself say Purpose is "kept in `PURPOSES.md`". Seen when the E7 spacing test's
+`PURPOSES.md` line was corrected and its header kept the old text; worked around by deleting the
+header's Purpose lines so the tool fell back to `PURPOSES.md`. Decide which is the source of truth
+(make `PURPOSES.md` win when it has an entry, or say in the READMEs that the header wins), then
+add a check that the two agree. Cross-manual: every manual with a `PURPOSES.md` is exposed.
+
 ## Review ALL manual content against the YAML-fidelity release — ⏳ HALF DELIVERED 2026-09-10: content COMPLETE, releases owed
 
 **Status:** Open — raised by Stephen 2026-08-25, **owed AFTER that release ships**, not before.
