@@ -22,6 +22,53 @@ P2 hardware (the `EF` ledger). Two consequences, both deliberate:
 - **Nothing is integrated unproven.** The guidance below says class 2 gets no test brief — that is
   the study's rule for its own output. On our side, every class-2 item that enters a manual or the KB
   is proven on silicon first, exactly as the errata were.
+- **Documented behaviour is not an erratum, however surprising.** Before classifying a new
+  prediction, read what Parallax's documentation already says about the instruction. If it states
+  the behaviour, the part does what its design says: class 2 at most, never class 1. *Example
+  (2026-10-01):* the study's SO109 (a condition-false `BRK` still breaks, showing the previous code)
+  is stated in the P2 Documentation's BRK text — documented behaviour, kept out of P2 Errata, and
+  measured anyway (EF-085).
+
+## What one erratum is — grouping (Stephen, 2026-10-01: "yes merge and record our reasoning")
+
+**The unit of an erratum is one triggering condition with one workaround** — the one thing a
+reader must do differently. Every symptom that condition produces is listed inside that erratum.
+
+**Two observed failures belong to one erratum when measurement shows they share all three:**
+1. **the trigger** — the same instruction or state starts them;
+2. **the window or conditions** — the same distance, alignment or state bounds them;
+3. **the workaround** — one rule prevents both.
+
+**A shared mechanism is supporting evidence only, never the reason to group.** Our manuals cannot
+cite the clean-room reading of the design, so a grouping that rests on mechanism alone is a
+grouping the reader cannot check. Failures whose triggers or workarounds differ stay separate
+errata and cross-reference each other, even when a common cause is suspected.
+
+**Findability by symptom is kept inside the erratum,** not by splitting it: the caution box names
+every symptom, and the manual gives a lookup from each symptom to its erratum (a symptom table in
+the front matter, or index entries once the manual has an index).
+
+**Numbers are permanent once published.** Before an erratum's first public release its scope
+may be reshaped (merged or split); after it, never — later findings that meet the three tests are
+added inside the existing erratum, and a new number is used only for a new condition.
+
+**Worked example — E7 and O29 (decided 2026-10-01).** E7 was found on the bench: a blocking
+`RDFAST` issued 8 to 15 clocks after a no-wait `RDFAST` skips its wait (EF-073/074). The study's O29
+then predicted that a no-wait `RDFAST` releases whatever hub instruction is waiting in that window;
+the bench confirmed it for every read and write width, the flags, `PTRA++` and block reads
+(EF-084, EF-086, EF-087). The three tests:
+- **Trigger:** a no-wait `RDFAST`, in both.
+- **Window:** E7 fails at 8–15 clocks and is safe from 16; O29's releases end at 16.
+- **Workaround:** E7's own workarounds — 16 clocks to the next `RDFAST`, or a blocking first `RDFAST`
+  (EF-077, EF-084) — are the 16-clock rule and the waiting form that prevent every O29 symptom.
+
+So O29 was merged into E7, before E7's first release, as one erratum ("after a no-wait `RDFAST`,
+the next hub instruction can complete early") with one rule: start the next hub instruction at
+least 16 clocks (7 non-hub instructions) after the no-wait `RDFAST`, or use the waiting form. It had
+been planned as a separate E8 for symptom-first lookup; that was reversed once the runs showed one
+condition reaching every hub instruction with one fix, and lookup by symptom is served by the
+caution box and the symptom lookup. The ledger entries EF-084 … EF-087 and VO-J-021 … VO-J-024, written before
+the merge, call it "E8"; read that as this erratum.
 
 ---
 

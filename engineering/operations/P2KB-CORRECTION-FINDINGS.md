@@ -122,9 +122,9 @@ because the register lags reality and a stale `CONFIRMED` is indistinguishable f
 EF-086, below); a `WRLONG` was released before it landed and lost
 when an immediate `RDLONG` followed (43 of 64), and landed when nothing followed. From 16 clocks
 (7 non-hub instructions) after the `RDFAST`, and with the waiting form, every read and write was
-correct. This is P2 Errata **E8**; F-472 carries the `rdfast.yaml` side.
+correct. This is P2 Errata **E7** (the planned E8, merged 2026-10-01); F-472 carries the `rdfast.yaml` side.
 **Correction:** add to each entry a caution naming the hazard, the rule (no hub-memory instruction
-within 16 clocks of a no-wait `RDFAST`, or use the waiting form) and the E8 reference, citing
+within 16 clocks of a no-wait `RDFAST`, or use the waiting form) and the E7 reference, citing
 EF-084. **Extended by EF-086 (2026-10-01):** `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` are released in the
 same cells; a released `RDBYTE`/`RDWORD` returns the previous read's long seen through its own
 size and offset; a released read writes C and Z from the value it returns (`WC`/`WZ` do not
@@ -268,7 +268,7 @@ one-line pointer in `wrpin.yaml` case 4): in the DAC smart modes the ADC runs on
 set, which also enables the fast DAC's drive; `TT` = `%00` with `OUT` high runs neither. Cite EF-071.
 Tested `TT` = `%00`/`%01` only; the `OTHER` forms (`%1x`) untested. → P2 Errata **E6**.
 
-### F-472 — `rdfast.yaml` gives the no-wait requirement no number and no consequence, and omits both no-wait errata (E7, E8) — `CONFIRMED`
+### F-472 — `rdfast.yaml` gives the no-wait requirement no number and no consequence, and omits the no-wait `RDFAST` erratum (P2 Errata E7, which absorbed the planned E8 on 2026-10-01) — `CONFIRMED`
 
 **Where:** `language/pasm2/rdfast.yaml` — "D[31]=1 for no-wait mode (doesn't stall for FIFO fill)"
 (:70), with no minimum distance and nothing on what an early read returns.
@@ -289,7 +289,7 @@ removes (4) (18,432/18,432). The Spin2 interpreter uses only the blocking form.
 anti-pattern, also routed to P2 Anti-Patterns), and **no hub-memory instruction within 16 clocks
 of a no-wait `RDFAST`** (or use the waiting form) — and `silicon_errata` entries for (4) → P2 Errata
 **E7** (workarounds: 16 clocks `RDFAST` to `RDFAST`, or a blocking first `RDFAST`; F-474 carries the
-E7 fix wording) and (5) → **E8**. Cite EF-073/EF-074/EF-084; note SOURCE-ERRATA E-015 (Chip's
+E7 fix wording) and (5) → also **E7** (merged 2026-10-01: one trigger, one window, one workaround — `p2-errata/CLASSIFICATION-GUIDANCE.md`). Cite EF-073/EF-074/EF-084; note SOURCE-ERRATA E-015 (Chip's
 unexplained "Yes") as plausibly (4). **Scope as proven (EF-084, EF-086):** every hub read and write
 width (`RDBYTE`/`RDWORD`/`RDLONG`, `WRBYTE`/`WRWORD`/`WRLONG`) and a blocking `RDFAST`; a `SETQ`
 block `RDLONG` in the window either wrote one wrong long, left seven unwritten and overwrote cog

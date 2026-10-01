@@ -1357,7 +1357,7 @@ every slice, as EF-074 (l.481–490); **E7B (the first `RDFAST` blocking) read `
 `new[s+1]` in all 18,432 trials**, the two `RDFAST`s taking 20–34 clocks (l.506–507).
 **Grounds:** the P2 Documentation restricts only FIFO reads after a no-wait `RDFAST`
 (`silicon-doc-text.txt`:3043) and says nothing of `RDLONG`/`WRLONG`, which are documented to read
-and write their own address: a silicon erratum (P2 Errata E8). E7's failing spacings (8–15 clocks)
+and write their own address: a silicon erratum (P2 Errata E7 — planned as E8, merged into E7 on 2026-10-01: one trigger, one window, one workaround; `p2-errata/CLASSIFICATION-GUIDANCE.md`). E7's failing spacings (8–15 clocks)
 and safe spacing (16) coincide with this window, so E7 is the same release acting on a waiting
 blocking `RDFAST` (the study's mechanism: the no-wait `RDFAST`'s completion signal raised a second
 time when its FIFO first holds data). The Spin2 v55 interpreter uses only the blocking form.
@@ -1387,7 +1387,7 @@ not an erratum. Spin2 v55's "a condition has no effect" (:62) is right about the
 literally, wrong about the code. *Limits:* the `SKIP` idiom tested outside an ISR only; one cog;
 200 MHz; run once. *Source:* `…/tests/test-so109-conditional-brk-breaks.spin2`.
 
-### EF-086 · E8's scope: a no-wait `RDFAST` releases `RDBYTE`, `RDWORD`, `WRBYTE` and `WRWORD` exactly as `RDLONG`/`WRLONG`; a released read writes the flags of the value it returns and still steps `PTRA++`; a no-wait `WRFAST` releases nothing; a `SETQ` block `RDLONG` in the window wrote one wrong long and the cog then stopped responding — `CONFIRMED` (predicted arms) / `OBSERVED` (`WRFAST`, `SETQ`)
+### EF-086 · The no-wait `RDFAST` erratum's scope (P2 Errata E7): a no-wait `RDFAST` releases `RDBYTE`, `RDWORD`, `WRBYTE` and `WRWORD` exactly as `RDLONG`/`WRLONG`; a released read writes the flags of the value it returns and still steps `PTRA++`; a no-wait `WRFAST` releases nothing; a `SETQ` block `RDLONG` in the window wrote one wrong long and the cog then stopped responding — `CONFIRMED` (predicted arms) / `OBSERVED` (`WRFAST`, `SETQ`)
 *How proven:* `test-o29b-rdfast-nowait-hub-op-scope` (VO-J-023), the EF-084 construction (primer,
 `RDFAST`/`WRFAST`, k `NOP`s, instruction under test; 64 cells × 16 repetitions; each run with a
 `NOP`-for-the-FIFO control and the waiting form), cog 0 reporting through a hub line buffer.
@@ -1418,7 +1418,7 @@ exactly T1's 43** (re-derived from the rows).
   previous read's long in register 0 and registers 1–7 not written** (l.942, 951); **the measuring
   cog then did not finish the run within 1 s** and cog 0 stopped it (l.940–941); 1,023 records were
   never written (l.952).
-**Grounds:** the release is one mechanism across widths and directions (EF-084 → E8): every hub
+**Grounds:** the release is one mechanism across widths and directions (EF-084 → E7): every hub
 read and write width is affected the same way, at the same cells. The returned value is the
 previous read's long seen through this instruction's own size and offset, and the flags follow that
 value. `WRFAST`'s no-wait form does not release a following hub instruction. A released block read
@@ -1428,7 +1428,7 @@ hub RAM after, and k = 7 for the block read were not observed; `RETA` and an int
 window not tested; hub execution cannot use `RDFAST`; one cog; cog execution; 200 MHz; run once.
 *Source:* `…/tests/test-o29b-rdfast-nowait-hub-op-scope.spin2`.
 
-### EF-087 · E8's workaround protects a `SETQ` block `RDLONG` — the waiting form and 16, 18 and 20 clocks after a no-wait `RDFAST` read the right block with cog RAM intact; released at 4 clocks, a block read either writes one wrong long and overwrites cog registers `$000`–`$001`, or the cog does not finish — `CONFIRMED` (workaround) / `OBSERVED` (release)
+### EF-087 · The no-wait `RDFAST` erratum's workaround (P2 Errata E7) protects a `SETQ` block `RDLONG` — the waiting form and 16, 18 and 20 clocks after a no-wait `RDFAST` read the right block with cog RAM intact; released at 4 clocks, a block read either writes one wrong long and overwrites cog registers `$000`–`$001`, or the cog does not finish — `CONFIRMED` (workaround) / `OBSERVED` (release)
 *How proven:* `test-o29c-setq-block-workaround` (VO-J-024), the EF-086 construction with **every run
 and every trial in a fresh measuring cog** (COGINIT, a cog-RAM baseline equal to the loaded image,
 the run, COGSTOP). *Result (log `debug_261001-114625`, 2026-10-01, first run, clean):*
@@ -1446,8 +1446,8 @@ the run, COGSTOP). *Result (log `debug_261001-114625`, 2026-10-01, first run, cl
   clocks to the block `RDLONG`: the rule's boundary), 7 (18) and 8 (20): **the right block in
   1024/1024, 0 cog registers changed outside the destination, the cog finished** (l.213–271);
   verdicts `CONFIRMED` (l.273–283).
-**Grounds:** E8's rule — the waiting form, or 16 clocks (7 non-hub instructions, `SETQ` counting as
-one) — holds for block reads as for single ones. A released block read is the most damaging E8
+**Grounds:** E7's rule — the waiting form, or 16 clocks (7 non-hub instructions, `SETQ` counting as
+one) — holds for block reads as for single ones. A released block read is the most damaging E7
 case: one wrong long and seven unwritten, with cog registers outside the destination overwritten,
 or a cog that does not finish. *Limits:* what wrote `$000`/`$001`, and whether a cog that did not
 finish was stalled or running elsewhere, are not known; block distances between 4 and 16 clocks,

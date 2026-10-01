@@ -41,8 +41,12 @@ restated here or anywhere else in this folder. Three consequences govern authori
   acknowledgments, sources, *What counts as an erratum* (the three classes defined once),
   *How each chapter is built*, the **summary table** of every erratum found so far, and
   document conventions.
-- **Chapter N is erratum EN.** Erratum numbers are **permanent**: a new erratum is appended as
-  the next chapter, never inserted, and a number is never reused. Heading form:
+- **Chapter N is erratum EN.** Erratum numbers are **permanent once published**: a new erratum is
+  appended as the next chapter, never inserted, and a number is never reused. What one erratum
+  covers — one trigger with one workaround, every symptom inside it — and when two findings
+  merge is decided by `CLASSIFICATION-GUIDANCE.md`, *What one erratum is*; an erratum's scope may
+  be reshaped only before its first public release (E7 absorbed the planned E8 that way,
+  2026-10-01). Heading form:
   `# Erratum EN: <plain reader title> {#ch-eN}` (colon, no em-dash). The platform pagination
   filter recognises `Erratum EN` as a chapter heading: it starts the page, and sets the chapter
   counter to N and its label to `EN`, so figures number `EN.1`. The heading text is what the

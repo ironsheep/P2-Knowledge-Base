@@ -63,7 +63,7 @@ sources here rebuild the binaries that ran byte for byte.
 | 16 | `e3-scope-spin2-counter-methods-test.spin2` | do Spin2 `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` or `GETCT()` see it (with `GETMS()`/`GETSEC()` as the affected control)? | VO-J-019 | `CONFIRMED` (none affected; `GETMS`/`GETSEC` affected) | EF-082 |
 | 17 | `e3-scope-debug-timestamp-test.spin2` (+ `e3-scope-debug-timestamp-verdict.py`) | does a `DEBUG_TIMESTAMP` stamp sent from the window carry it, from Spin2 `debug()` and PASM2 `DEBUG`? | VO-J-020 | `CONFIRMED` (affected, both) | EF-083 |
 
-**Study briefs O29 and SO109, and E8's scope (2026-10-01, each run once):** two new predictions from the study
+**Study briefs O29 and SO109, and the no-wait `RDFAST` erratum's scope (2026-10-01, each run once):** two new predictions from the study
 (golden source 0.1.5, both labelled user-reported). Each test was built by a fresh agent from its
 brief alone, encodings re-derived on `pnut-ts` 1.55.8, then reviewed adversarially before the
 run by another fresh agent — no blocker (`VERIFICATION-OPPORTUNITIES.md`, VO-J-021..022). SO109
@@ -74,8 +74,8 @@ erratum candidate.
 |---|---|---|---|---|---|
 | 18 | `test-o29-rdfast-nowait-releases-hub-op.spin2` | after a no-wait `RDFAST`, is a following `RDLONG` released early with the previous read's long, and a `WRLONG` released early and lost; what gap clears it; does the waiting form; does a blocking first `RDFAST` remove E7? | VO-J-021 | `CONFIRMED` (all four; E7B clean) | EF-084 |
 | 19 | `test-so109-conditional-brk-breaks.spin2` | with break-on-`BRK` armed, does a condition-false `BRK` still enter the debug ISR, showing the previous code; do the `SKIP` and `JMP` forms gate it? | VO-J-022 | `CONFIRMED` (documented behaviour) | EF-085 |
-| 20 | `test-o29b-rdfast-nowait-hub-op-scope.spin2` | E8's scope: what a released `RDLONG … WCZ` puts in C and Z, and whether a released `PTRA++` read still steps the pointer; are `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` released the same way; what a no-wait `WRFAST` and a `SETQ` block read do in the window? | VO-J-023 | `CONFIRMED` (flags, byte/word); `WRFAST` unaffected; `SETQ` block lost the cog | EF-086 |
-| 21 | `test-o29c-setq-block-workaround.spin2` | does E8's workaround protect a `SETQ` block `RDLONG` — the waiting form, and 16 (the rule's boundary), 18 and 20 clocks after a no-wait `RDFAST`; does a released block read lose the cog every time? | VO-J-024 | `CONFIRMED` (workaround, waiting form and 16/18/20 clocks); released block read: wrong long + cog registers overwritten, or cog lost | EF-087 |
+| 20 | `test-o29b-rdfast-nowait-hub-op-scope.spin2` | the no-wait `RDFAST` erratum's scope (E7): what a released `RDLONG … WCZ` puts in C and Z, and whether a released `PTRA++` read still steps the pointer; are `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` released the same way; what a no-wait `WRFAST` and a `SETQ` block read do in the window? | VO-J-023 | `CONFIRMED` (flags, byte/word); `WRFAST` unaffected; `SETQ` block lost the cog | EF-086 |
+| 21 | `test-o29c-setq-block-workaround.spin2` | does E7's workaround protect a `SETQ` block `RDLONG` — the waiting form, and 16 (the rule's boundary), 18 and 20 clocks after a no-wait `RDFAST`; does a released block read lose the cog every time? | VO-J-024 | `CONFIRMED` (workaround, waiting form and 16/18/20 clocks); released block read: wrong long + cog registers overwritten, or cog lost | EF-087 |
 
 ## How the tests were built — independence is the point
 
@@ -218,7 +218,7 @@ VERDICT SO109 CANCELS: CONFIRMED - no record from s1 (SKIP), j1 (taken JMP), w1 
 VERDICT SO109 IDIOMS: CONFIRMED - w2 (if_z JMP around an unconditional BRK) delivered $F4; w4 (if_z SKIP #1 ahead of it) delivered $F6
 ```
 
-**20 — E8 scope** (`debug_261001-014330`): the flags, pointer, byte/word and `WRFAST` results, and
+**20 — E7 (no-wait `RDFAST`) scope** (`debug_261001-014330`): the flags, pointer, byte/word and `WRFAST` results, and
 the `SETQ` block arm:
 ```
 VERDICT O29B FLAGS C: CONFIRMED - every released record carried the predicted flags and every correct record its own; released in T1's same 43 cells in every repetition | before the run: released ($A5A5_0001, C=1 Z=0) / correct ($5A5A_0002, C=0 Z=0) | released cells 43 per repetition (T1: 43), same cells as T1 in 64 of 64; late flag changes 0
@@ -233,7 +233,7 @@ OBSERVED O29B WRFAST-WRLONG: OBSERVED: no early release - W1 (new,new) in all 64
 OBSERVED O29B SETQ-BLOCK: OBSERVED: measuring cog lost during the SETQ block arm (run QB T k0); cog-RAM registers changed outside the sacrificial range in the completed runs 0 (see INTEGRITY lines)
 ```
 
-**21 — E8 workaround for block reads** (`debug_261001-114625`): one released trial of each outcome,
+**21 — E7 workaround for block reads** (`debug_261001-114625`): one released trial of each outcome,
 then the workaround verdicts:
 ```
   INTEGRITY QS T k0 af0 ar0 #1: cog register $000 changed: baseline $FC78_00B0 now $0000_0060
