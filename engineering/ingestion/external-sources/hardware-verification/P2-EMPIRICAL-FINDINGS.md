@@ -1428,6 +1428,32 @@ hub RAM after, and k = 7 for the block read were not observed; `RETA` and an int
 window not tested; hub execution cannot use `RDFAST`; one cog; cog execution; 200 MHz; run once.
 *Source:* `…/tests/test-o29b-rdfast-nowait-hub-op-scope.spin2`.
 
+### EF-087 · E8's workaround protects a `SETQ` block `RDLONG` — the waiting form and 16, 18 and 20 clocks after a no-wait `RDFAST` read the right block with cog RAM intact; released at 4 clocks, a block read either writes one wrong long and overwrites cog registers `$000`–`$001`, or the cog does not finish — `CONFIRMED` (workaround) / `OBSERVED` (release)
+*How proven:* `test-o29c-setq-block-workaround` (VO-J-024), the EF-086 construction with **every run
+and every trial in a fresh measuring cog** (COGINIT, a cog-RAM baseline equal to the loaded image,
+the run, COGSTOP). *Result (log `debug_261001-114625`, 2026-10-01, first run, clean):*
+**positive control** reproduced EF-084 (l.84).
+- **Release, single trials at k = 0** (`SETQ #7` + `RDLONG` starting 4 clocks after the no-wait
+  `RDFAST`), 4 trials per cell, each cell the same in all 4: **af0/ar0 and af0/ar4** — block long 0
+  the primer `$A5A5_0001`, longs 1–7 not written (seed `$C3C3_0003`), the cog finished and answered
+  a ping, and **cog registers `$000` and `$001` changed** from `$FC78_00B0`/`$F605_8C64` to
+  `$0000_0060` (af0/ar0) or `$0000_0061` (af0/ar4) and `$4000_0053` — neither block data nor the
+  primer (l.107–160); **af2/ar0 and af1/ar3** — nothing written, the cog did not finish within 1 s
+  (stopped) (l.161–193). The four cells are all released in EF-084's single-read map at k = 1
+  (also 4 clocks), including the two that escape at k = 0. `NOP` controls: the right block, cog RAM
+  intact, in all four (l.85–106).
+- **Workaround, 1024 records each:** the waiting form, and a no-wait `RDFAST` with 6 `NOP`s (16
+  clocks to the block `RDLONG`: the rule's boundary), 7 (18) and 8 (20): **the right block in
+  1024/1024, 0 cog registers changed outside the destination, the cog finished** (l.213–271);
+  verdicts `CONFIRMED` (l.273–283).
+**Grounds:** E8's rule — the waiting form, or 16 clocks (7 non-hub instructions, `SETQ` counting as
+one) — holds for block reads as for single ones. A released block read is the most damaging E8
+case: one wrong long and seven unwritten, with cog registers outside the destination overwritten,
+or a cog that does not finish. *Limits:* what wrote `$000`/`$001`, and whether a cog that did not
+finish was stalled or running elsewhere, are not known; block distances between 4 and 16 clocks,
+other cells, and a block read's flags were not measured; one cog; cog execution; 200 MHz; run once.
+*Source:* `…/tests/test-o29c-setq-block-workaround.spin2`.
+
 
 ## Open / pending empirical questions
 

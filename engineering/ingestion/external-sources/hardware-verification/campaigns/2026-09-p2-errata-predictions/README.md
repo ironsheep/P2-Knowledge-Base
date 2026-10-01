@@ -75,7 +75,7 @@ erratum candidate.
 | 18 | `test-o29-rdfast-nowait-releases-hub-op.spin2` | after a no-wait `RDFAST`, is a following `RDLONG` released early with the previous read's long, and a `WRLONG` released early and lost; what gap clears it; does the waiting form; does a blocking first `RDFAST` remove E7? | VO-J-021 | `CONFIRMED` (all four; E7B clean) | EF-084 |
 | 19 | `test-so109-conditional-brk-breaks.spin2` | with break-on-`BRK` armed, does a condition-false `BRK` still enter the debug ISR, showing the previous code; do the `SKIP` and `JMP` forms gate it? | VO-J-022 | `CONFIRMED` (documented behaviour) | EF-085 |
 | 20 | `test-o29b-rdfast-nowait-hub-op-scope.spin2` | E8's scope: what a released `RDLONG … WCZ` puts in C and Z, and whether a released `PTRA++` read still steps the pointer; are `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` released the same way; what a no-wait `WRFAST` and a `SETQ` block read do in the window? | VO-J-023 | `CONFIRMED` (flags, byte/word); `WRFAST` unaffected; `SETQ` block lost the cog | EF-086 |
-| 21 | `test-o29c-setq-block-workaround.spin2` | does E8's workaround protect a `SETQ` block `RDLONG` — the waiting form, and 16 (the rule's boundary), 18 and 20 clocks after a no-wait `RDFAST`; does a released block read lose the cog every time? | VO-J-024 | not run | — |
+| 21 | `test-o29c-setq-block-workaround.spin2` | does E8's workaround protect a `SETQ` block `RDLONG` — the waiting form, and 16 (the rule's boundary), 18 and 20 clocks after a no-wait `RDFAST`; does a released block read lose the cog every time? | VO-J-024 | `CONFIRMED` (workaround, waiting form and 16/18/20 clocks); released block read: wrong long + cog registers overwritten, or cog lost | EF-087 |
 
 ## How the tests were built — independence is the point
 
@@ -231,6 +231,19 @@ OBSERVED O29B WRFAST-WRLONG: OBSERVED: no early release - W1 (new,new) in all 64
   QB T k0 af0 rep0 a0-7: MUUUUUUU  agree 1.......
   QB T k0 per long 0-7, all reps: primer 1 0 0 0 0 0 0 0 | seed 0 1 1 1 1 1 1 1 | other 0 0 0 0 0 0 0 0
 OBSERVED O29B SETQ-BLOCK: OBSERVED: measuring cog lost during the SETQ block arm (run QB T k0); cog-RAM registers changed outside the sacrificial range in the completed runs 0 (see INTEGRITY lines)
+```
+
+**21 — E8 workaround for block reads** (`debug_261001-114625`): one released trial of each outcome,
+then the workaround verdicts:
+```
+  INTEGRITY QS T k0 af0 ar0 #1: cog register $000 changed: baseline $FC78_00B0 now $0000_0060
+  INTEGRITY QS T k0 af0 ar0 #1: cog register $001 changed: baseline $F605_8C64 now $4000_0053
+  QS T k0 af0 ar0 #1 block long 0-7 after the trial: $A5A5_0001 $C3C3_0003 $C3C3_0003 $C3C3_0003 $C3C3_0003 $C3C3_0003 $C3C3_0003 $C3C3_0003 -> long 0 the primer, longs 1-7 still the seed
+  QS T k0 af2 ar0 #1 completed: NO - did not finish within 1 s (stopped); ping: not sent (trial not completed)
+VERDICT O29C BLOCK WAITING: CONFIRMED - the right block in 1024 of 1024 records, 0 cog registers changed outside the sacrificial range and no block or primer long outside it, the cog completed the run; arm 1 showed a release in 8 trials
+VERDICT O29C BLOCK k6: CONFIRMED - the right block in 1024 of 1024 records, 0 cog registers changed outside the sacrificial range and no block or primer long outside it, the cog completed the run; arm 1 showed a release in 8 trials
+VERDICT O29C BLOCK k7: CONFIRMED - the right block in 1024 of 1024 records, 0 cog registers changed outside the sacrificial range and no block or primer long outside it, the cog completed the run; arm 1 showed a release in 8 trials
+VERDICT O29C BLOCK k8: CONFIRMED - the right block in 1024 of 1024 records, 0 cog registers changed outside the sacrificial range and no block or primer long outside it, the cog completed the run; arm 1 showed a release in 8 trials
 ```
 
 ## What it changes

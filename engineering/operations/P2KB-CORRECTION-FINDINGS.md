@@ -128,9 +128,10 @@ within 16 clocks of a no-wait `RDFAST`, or use the waiting form) and the E8 refe
 EF-084. **Extended by EF-086 (2026-10-01):** `RDBYTE`/`RDWORD`/`WRBYTE`/`WRWORD` are released in the
 same cells; a released `RDBYTE`/`RDWORD` returns the previous read's long seen through its own
 size and offset; a released read writes C and Z from the value it returns (`WC`/`WZ` do not
-reveal the failure); `RDLONG … PTRA++` still steps the pointer; a `SETQ` block `RDLONG` wrote one
-wrong long and the cog was lost (observed once) — the `rdlong.yaml` caution names it; a no-wait
-`WRFAST` releases nothing. Cite EF-084 and EF-086 in all six entries.
+reveal the failure); `RDLONG … PTRA++` still steps the pointer; a `SETQ` block `RDLONG` either
+wrote one wrong long and overwrote cog registers outside its destination, or the cog did not
+finish (EF-087), and the same rule protects it — the `rdlong.yaml` caution names it; a no-wait
+`WRFAST` releases nothing. Cite EF-084, EF-086 and EF-087 in all six entries.
 
 ## A condition-false `BRK` still breaks, and the KB teaches it as conditional (2026-10-01, found while building the SO109 test) — F-477
 
@@ -291,7 +292,9 @@ of a no-wait `RDFAST`** (or use the waiting form) — and `silicon_errata` entri
 E7 fix wording) and (5) → **E8**. Cite EF-073/EF-074/EF-084; note SOURCE-ERRATA E-015 (Chip's
 unexplained "Yes") as plausibly (4). **Scope as proven (EF-084, EF-086):** every hub read and write
 width (`RDBYTE`/`RDWORD`/`RDLONG`, `WRBYTE`/`WRWORD`/`WRLONG`) and a blocking `RDFAST`; a `SETQ`
-block `RDLONG` in the window wrote one wrong long and the cog was then lost (observed once); a
+block `RDLONG` in the window either wrote one wrong long, left seven unwritten and overwrote cog
+registers `$000`–`$001`, or the cog did not finish (EF-086, EF-087), and the rule protects it
+(the waiting form and 16/18/20 clocks clean, EF-087); a
 no-wait `WRFAST` does **not** release a following hub instruction (state it, so readers do not
 over-apply the rule); `RETA` and interrupts in the window are not measured; hub execution cannot
 use `RDFAST` (P2 Documentation). The same caution goes to the read/write entries (F-478).

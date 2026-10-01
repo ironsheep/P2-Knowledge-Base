@@ -1,0 +1,2635 @@
+'' =====================================================================
+''
+''   File....... test-o29c-setq-block-workaround.spin2
+''   Purpose.... Hardware-verification rig, O29 follow-up: does E8's
+''               workaround (k NOPs between a no-wait RDFAST and the next
+''               hub instruction) protect a SETQ block RDLONG?  And what
+''               does a single released block read at k = 0 do to the
+''               block, to cog RAM and to the cog?
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... 1 Oct 2026
+''
+'' =====================================================================
+
+{ WHAT IS ALREADY MEASURED (Rev C silicon, 200 MHz)
+
+  EF-084: after a no-wait RDFAST (D = $8000_0000), a RDLONG issued at once
+  (k = 0 NOPs between them) that waits for its own hub slot is released
+  when the stream's first long reaches the FIFO, and writes its
+  destination with the long of the PREVIOUS slow hub read (the primer).
+  With the primer at slot bits 0 this happened in 43 of the 64 (af, ar)
+  cells, by delta = (ar - af) mod 8 as 8 8 7 6 5 4 3 2, identical in all
+  16 repetitions; 7 NOPs (k = 7) between the two gave zero.  The cell map
+  at k = 0 (row af, position ar; P released, S correct):
+    af0 PPPSSSSS  af1 SPPSSSSS  af2 PPPPPPPP  af3 PPPPPPPP
+    af4 PPPSPPPP  af5 PPPSSPPP  af6 PPPSSSPP  af7 PPPSSSSP
+  EF-086 (the SETQ block arm of the O29B rig): "setq #7" + "rdlong" of 8
+  longs into a sacrificial cog-register range.  NOP control and waiting
+  form: the right block in 1024 of 1024 records, 0 cog registers changed
+  outside the sacrificial range.  No-wait RDFAST at k = 0: the first trial
+  (af 0, ar 0, repetition 0) recorded the primer $A5A5_0001 in block long
+  0 and longs 1-7 still at the seed (not written by the read); the
+  measuring cog then did not finish the run within 1 s and was stopped
+  (COGSTOP); 1,023 records were never written.  k = 7 never ran.
+
+WHAT THIS RIG DECIDES, ONE ARM EACH, IN THIS ORDER
+  Each arm prints its rows, its gate and its verdicts as soon as it
+  completes, before the next arm starts.  The characterisation arm (arm 1)
+  runs BEFORE the workaround arm (arm 2): it is the workaround arm's
+  positive control for block release.  Every trial and run of both arms
+  has its own fresh measuring cog, so nothing one of them does to a cog
+  carries into the next.
+
+  ARM 0  POSITIVE CONTROL.  C1, PS, T1 at k = 0 and T1 at k = 7, exactly
+         the O29 construction, on one measuring cog.  MUST reproduce
+         EF-084 (the map above: 43 per repetition, delta split 8 8 7 6 5 4
+         3 2, k = 7 zero), else RIG FAIL and no later verdict counts.
+  ARM 1  CHARACTERISATION AT k = 0 (RECORDS; the positive control for block
+         release).  Single trials, each in its own fresh cog, per cell one
+         NOP control trial (QS N) and 4 no-wait RDFAST trials at k = 0
+         (QS T).  Cells, with their class in the EF-084 map above:
+           af0 ar0   released (P)        af2 ar0   released (P)
+           af0 ar4   escaping (S)        af1 ar3   escaping (S)
+         Per trial: the 8 block longs as recorded right after the trial;
+         whether the cog completed the trial (done within 1 s); whether it
+         then answered a PING within 100 ms; and, if it answered, which
+         cog registers outside the sacrificial range changed since the
+         fresh cog's baseline, which registers outside the sacrificial
+         range hold a block or primer long, and the sacrificial range as
+         it stood at the ping.
+         MUST (controls): the right block, completed, answered, 0
+         registers changed, no block or primer long outside the
+         sacrificial range; else the arm's gate fails.
+         RELEASE SHOWN: at least one released-cell test trial whose block
+         has the primer in long 0, or a long left unwritten (still the
+         seed, or the record fill), or whose cog did not finish within 1 s
+         (stopped).
+         OBSERVED O29C SETQ k0: the escaping-cell trials with the right
+         block; the released-cell trials by block pattern (right block /
+         long 0 the primer and longs 1-7 still the seed / other); the
+         trials completed; the trials where the cog answered afterwards;
+         RELEASE SHOWN yes / no; then one line per cell, and one line of
+         register changes.  Records only: never CONFIRMED or REFUTED.
+         FIFO HISTORY.  A fresh cog's FIFO history differs from the O29B
+         run (EF-086), in which the block release was followed by the cog
+         not finishing.  So this arm may not reproduce that outcome; it
+         records whatever happens.
+  ARM 2  BLOCK READ, WORKAROUND RUNS.  Every run in a FRESH measuring cog
+         (below).  "setq #7" + "rdlong blk0, pr" reads 8 longs into the
+         8 sacrificial registers; SETQ sits directly before its RDLONG,
+         so the k NOPs sit between the RDFAST and the SETQ.
+           QB N k0  NOP in place of the RDFAST (control)
+           QB C k0  waiting RDFAST (D = 0), then setq + rdlong
+           QB T k6  no-wait RDFAST, 6 NOPs, setq + rdlong
+           QB T k7  no-wait RDFAST, 7 NOPs, setq + rdlong
+           QB T k8  no-wait RDFAST, 8 NOPs, setq + rdlong
+         E8's rule: 16 clocks, or 7 non-hub instructions, from the no-wait
+         RDFAST to the next hub instruction.  SETQ is a non-hub
+         instruction, so k6 (6 NOPs + SETQ) is exactly the rule as written;
+         k7 and k8 show margin.
+         CLOCKS from the start of the RDFAST to the start of the block
+         RDLONG (cog execution: RDFAST with D[31] = 1 takes 2 clocks, P2
+         Documentation, FIFO section; NOP and SETQ take 2 clocks each):
+           QB T k6   2 + 6 x 2 + 2 = 16 clocks (E8's rule exactly)
+           QB T k7   2 + 7 x 2 + 2 = 18 clocks
+           QB T k8   2 + 8 x 2 + 2 = 20 clocks
+           QB C k0   the waiting RDFAST's own wait (it waits until the
+                     FIFO has begun receiving hub data) + 2 (SETQ)
+           for comparison, T1 (no SETQ): 2 + 2k, so T1 k7 = 16 clocks
+         Verified from the listing: in each block copy the RDFAST, the k
+         NOPs, the SETQ and the RDLONG sit at consecutive cog addresses
+         (VERIFIED OPCODES below), and every one of them is a fixed
+         2-clock instruction except the waiting RDFAST.
+         MUST (QB N k0): the right block $5A5A_0100+ar+j in all 1024
+         records, 0 cog registers changed outside the sacrificial range,
+         no block or primer long outside it, and the cog completes the
+         run; else the arm's gate fails.
+         PREDICT (QB C k0, QB T k6, QB T k7, QB T k8), written before the
+         run:
+           (a) the right block $5A5A_0100+ar+j in all 1024 records;
+           (b) 0 cog registers changed outside the sacrificial range and
+               the loop variables, and no block or primer long found in
+               any register outside the sacrificial range;
+           (c) the cog completes the run (done within 1 s, mode echo
+               right, the integrity copy arrives).
+         POSITIVE CONTROL FOR RELEASE (arm 1, which runs first): a clean
+         workaround run proves something only if the same rig, in the
+         same run, shows a block read being released.  So CONFIRMED needs
+         arm 1's RELEASE SHOWN and arm 1's gate passed.
+         VERDICT O29C BLOCK WAITING: / BLOCK k6: / BLOCK k7: / BLOCK k8:
+           CONFIRMED if (a), (b) and (c) all hold, arm 1 showed a release
+           and arm 1's gate passed.
+           INCONCLUSIVE in place of CONFIRMED if arm 1 showed no release:
+           "the rig did not show a block read being released
+           (characterisation arm), so a clean workaround run proves
+           nothing"; or if arm 1's gate failed.
+           REFUTED naming each part that failed: "wrong long" (records
+           written with a long that is not the right block), "register
+           change" (b fails), "did not finish within 1 s (stopped)" (c
+           fails; a stalled cog and a slow one look the same).  A REFUTED
+           stands whatever arm 1 showed: a failing run needs no positive
+           control.
+           INCONCLUSIVE if no part failed but one could not be read (the
+           cog completed but no integrity copy arrived).
+
+FRESH MEASURING COG PER RUN (arms 1 and 2)
+  Before each trial (arm 1) or run (arm 2) cog 0 starts a measuring cog
+  (COGINIT, cog execution, start-up handshake within 1 s) and has it copy
+  its cog RAM $000-$1EF to hub (the baseline, checked against the loaded
+  image outside the loop variables).  Then it sends the run, waits up to
+  1 s, and stops the cog (COGSTOP) whether or not it finished.  A run
+  whose cog does not finish loses only that run: its records so far are
+  printed (U = never written) and the next run starts a fresh cog.  A cog
+  that does not start, or does not answer its baseline command, is
+  stopped and that run is reported NOT RUN; the next run tries again.
+  Arm 0's cog is stopped at the end of arm 0.
+  FIFO PRE-CONDITIONING.  Every measuring cog, before its start-up
+  handshake, issues a blocking "rdfast #0, stream" and a settle loop.  So
+  the first trial of every run starts, like every later trial, with the
+  FIFO in read mode streaming from the stream region, full and idle; a
+  fresh cog's first RDFAST is not its first FIFO use.
+  PING (arm 1).  After a completed trial cog 0 sends CMD_PING: the cog
+  copies its cog RAM $000-$1EF to hub, writes $0000_0B22 to the mailbox
+  and clears its command.  "Answered" = command cleared within 100 ms and
+  $0000_0B22 written.  A trial that did not complete is not pinged.
+
+INTEGRITY
+  The sacrificial range sits between two 8-long guard bands of constants
+  at the top of the cog image, so an overrun in either direction changes
+  a checked register.  A copy is compared with the same cog's baseline:
+  every changed register outside the sacrificial range and the loop
+  variables is listed (first 16) and counted.  Separately, every register
+  outside the sacrificial range (loop variables included) that changed and
+  now holds a block-source long ($5A5A_0100..$5A5A_010E) or the primer is
+  listed and counted, except the primer in c_tmp, the primer read's own
+  destination.
+  LIMITS.  The check sees the final cog-RAM state only (a register
+  changed and changed back is not seen).  A loop variable changes by
+  design, so its corruption is detected only when the stray value is a
+  block or primer long.  Registers $1F0-$1FF are not copied.
+
+STATED DEVIATION FROM THE STUDY'S HARNESS NOTE (as O29)
+  This rig compiles WITH debug (pnut-ts -d) and confines the debugger to
+  cog 0 (DEBUG_COGS = %0000_0001).  The measuring cog has no debug
+  interrupt, no debug() and no BRK, and sets up no interrupt; EF-084 and
+  EF-086 ran exactly this way.
+
+RIG
+  Bare P2 board, 200 MHz.  No pins, no jumpers, no instruments.  Cog 0
+  (Spin2) fills the hub data, starts measuring cogs, sends one command per
+  run, classifies the records from hub RAM and prints them.  The measuring
+  cog runs every trial from cog RAM.  After every command the measuring
+  cog writes back the FIFO D value it held (MB_ECHO); a mismatch is RIG
+  FAIL in arm 0 (the run ends) and a gate failure in arms 1 and 2.
+  NOT TESTED: hub execution (P2 Documentation: RDFAST cannot be used in
+  hub execution).
+  NOT MEASURED: the flags of a block read; the block release map beyond
+  the four characterised cells; block reads at distances between k = 0
+  and k = 6.
+
+HUB LAYOUT (all below $7_C000; the program image, VAR and cog 0's stack sit
+  far below $4_0000, checked at run time before any data is written)
+    $4_0000  stream region, 64 longs, long n = $1E1E_0000 + n
+    $4_1000  table T: 8 sentinel longs $5A5A_0002, slot bits 0..7
+    $4_1200  block source: 15 longs, long i = $5A5A_0100 + i
+    $4_3000  primer $A5A5_0001, slot bits 0
+    $4_4000  records, up to 8,192 longs, to $4_BFFF
+    $4_C000  cog-RAM copy, latest (496 longs); $4_D000 the baseline copy
+  Every region starts on a 32-byte boundary, so long n has slot bits n mod
+  8.  Cog 0 fills the record area with $EEEE_EEEE before every command, so
+  a record the measuring cog never wrote is class U.
+
+ONE TRIAL (measuring cog, cog execution; the timed stretch is the primer,
+  the RDFAST (or the NOP standing in for it), exactly k NOPs, and the test
+  instruction (SETQ + RDLONG for a block), adjacent, nothing else, no ##)
+  image R:  dst := seed $C3C3_0003
+            rdlong tmp, primer ; rdfast mode, stream+4*af ; k x nop ;
+            rdlong dst, table+4*ar ; settle (>= 200 clk) ; record dst
+  block:    blk0..blk7 := seed ; rdlong tmp, primer ; rdfast mode, stream+
+            4*af ; k x nop ; setq #7 ; rdlong blk0, block+4*ar ; settle ;
+            record blk0..blk7 (setq #7 + wrlong)
+  runs: 16 repetitions x 64 cells; record (r*8 + af)*8 + ar.  Arm 1: one
+  block trial at the given af, ar; one record.
+
+RECORD CLASSES
+  image R  P primer  S sentinel  D seed  F a stream long ($1E1E_0000 + n)
+           U $EEEE_EEEE (never written)  X other
+  block    . right block  P primer in some longs (rest right)  D seed in
+           some longs  M primer and seed  U unwritten  X other
+  agree: "." all 16 repetitions identical, else the hex count identical
+  to repetition 0.
+
+GATES
+  RIG FAIL (harness, ends the run): hub layout, run tables, arm 0's cog
+    not starting, a timeout or a mode echo mismatch in arm 0.
+  ARM 0: "RIG OK (arm 0 ...)" only if C1 sentinel 1024/1024, PS stream long
+    1024/1024, T1 k=0 43 primer by delta 8 8 7 6 5 4 3 2 in every
+    repetition (688 primer + 336 sentinel), T1 k=7 sentinel 1024/1024, no
+    U, no X in a control, no disagreeing cell.  Else "RIG FAIL (arm 0
+    ...)", and every later verdict prints NO VERDICT.
+  ARM 1: "GATE FAIL (arm 1)" for: a NOP control trial not run, not
+    completed, not answered, not the right block, or cog RAM not intact;
+    a baseline not equal to the loaded image; a mode echo mismatch.  Else
+    "GATES PASS (arm 1)".
+  ARM 2: "GATE FAIL (arm 2)" for: QB N k0 not run, not completed, not the
+    right block in all 1024, or cog RAM not intact; a baseline not equal
+    to the loaded image; a mode echo mismatch.  Else "GATES PASS (arm 2)".
+
+VERDICTS (each arm's after its gate; all repeated in the closing summary)
+  RIG OK / RIG FAIL                     arm 0
+  OBSERVED O29C SETQ k0:                arm 1, records; prefixed NO
+    VERDICT when arm 0 or arm 1's gate failed, the raw counts still printed
+  VERDICT O29C BLOCK WAITING: / BLOCK k6: / BLOCK k7: / BLOCK k8:
+                                        arm 2: NO VERDICT (arm 0 or arm
+    2's gate failed; the run did not take place) / CONFIRMED / REFUTED
+    (wrong long; register change; did not finish within 1 s (stopped) -
+    each named) / INCONCLUSIVE (no release shown in arm 1, or arm 1's
+    gate failed; or part (b) unreadable)
+
+VERIFIED OPCODES (pnut-ts -d -l, v1.55.8 build 9/19/2026, read from the
+  .lst hub image; object offset = cog address * 4 + $1AC).  RDFAST is
+  1100011 1LI, RDLONG 1011000 CZI, WRLONG 1100011 0LI, SETQ 1101011 00L
+  with S = %000101000, TJNZ 1011100 11I, NOP $0000_0000.
+  Cog registers: constants c_strm $0B0, c_res $0B1, c_dump $0B2, c_seedv
+  $0B3, c_ready $0B4, c_pong $0B5; loop variables c_cmd $0B6 .. c_tmp $0C7
+  (c_mode $0B8, c_pa $0BB, c_one $0C0, c_pf $0C3, c_pr $0C4, c_dst $0C5,
+  c_t $0C6, c_tmp $0C7); guard bands $0C8-$0CF and $0D8-$0DF; sacrificial
+  range c_blk0 $0D0-$0D7; the image ends at $0DF (pasm_end $0E0).
+    rdfast #0,c_strm        $FC7800B0  start-up pre-conditioning (cog $000):
+                                       L=1, D=#0, so D[31]=0: BLOCKING
+    rdlong c_tmp,c_pa       $FB018EBB  the primer (every copy)
+    rdfast c_mode,c_pf      $FC7170C3  L=0 I=0: D[31] is c_mode's value -
+                                       $8000_0000 no-wait, 0 waiting (one
+                                       encoding serves both forms)
+    rdlong c_dst,c_pr       $FB018AC4  the RDLONG under test (arm 0)
+    setq #7                 $FD640E28  directly before every block RDLONG
+    rdlong c_blk0,c_pr      $FB01A0C4  the block RDLONG (D = $0D0)
+    waitx #200 / rflong c_dst   $FD65901F / $FD618A12   PS only
+    tjnz c_one,#cmd_done    $FB9D81C4  CMD_B1 exit, after the record
+    setq #$1EF / wrlong pasm,c_dump   $FD67DE28 / $FC6000B2   cog-RAM copy
+    wrlong c_ready,ptra[MB_ALIVE]     $FC656907   start-up handshake
+    wrlong c_pong,ptra[MB_ALIVE]      $FC656B07   the ping's answer
+    wrlong c_mode,ptra[MB_ECHO]       $FC657108   mode echo
+  No AUGS (##) and no BRK anywhere in the measuring cog: no long of the
+  image ($1AC-$52B) has $FF as its top byte or the BRK form.  The O29B
+  FIFO flush (a blocking rdfast #0 after every trial) is not kept: no
+  WRFAST is issued here.
+  Adjacency read from the image (object offsets): primer / RDFAST (or
+  NOP) / NOPs / [SETQ] / test:
+    tc_r_nop_l   $330, $334 nop, $338 rdlong                       (C1)
+    tc_r_rf0_l   $340, $344 rdfast, $348 rdlong                    (T1 k=0)
+    tc_r_rf7_l   $350, $354 rdfast, $358-$370 7 nop, $374 rdlong   (T1 k=7)
+    tc_r_ps      $37C, $380 rdfast, $384 waitx, $388 rflong        (PS)
+    tc_b_nop     $390, $394 nop, $398 setq, $39C rdlong block      (QB N, QS N)
+    tc_b_rf0     $3A4, $3A8 rdfast, $3AC setq, $3B0 rdlong block   (QB C, QS T)
+    tc_b_rf6     $3B8, $3BC rdfast, $3C0-$3D4 6 nop, $3D8 setq, $3DC rdlong block
+    tc_b_rf7     $3E4, $3E8 rdfast, $3EC-$404 7 nop, $408 setq, $40C rdlong block
+    tc_b_rf8     $414, $418 rdfast, $41C-$438 8 nop, $43C setq, $440 rdlong block
+  So from the start of the RDFAST to the start of the block RDLONG: k6 =
+  rdfast + 6 nop + setq = 8 two-clock instructions = 16 clocks (E8's rule:
+  7 non-hub instructions); k7 = 9 = 18 clocks; k8 = 10 = 20 clocks; and
+  T1 k7 = rdfast + 7 nop = 8 = 16 clocks.  vec_tab ($448) holds $061 $065
+  $069 $074 $079 $07E $083 $08E $09A, the cog addresses of the nine copies
+  in CP_* order.
+  DEBUG OUTPUT.  Every printed line is assembled in lineBuf from hub
+  strings and numbers and sent by the ONE debug(zstr_(@lineBuf)) record in
+  ln_out(); the only other record is debug("DEBUG_END_SESSION").  The
+  listing reports 2 DEBUG records, 24 bytes of DEBUG data.
+
+HOW TO RUN
+  Compile with pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or PNut
+  Ctrl-F10).  Runs once; nothing written to flash.  Output: header with
+  every prediction, then per arm: its runs or trials (rows + totals), its
+  gate line, its verdict lines; then the VERDICT SUMMARY and
+  DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY (EF-057)
+
+  NSLOT           = 8                   ' slot bits: address bits [4:2]
+  NCELL           = NSLOT * NSLOT       ' (af, ar) cells per repetition
+  REPS            = 16                  ' repetitions of every cell per run
+  NTRIAL          = REPS * NCELL        ' trials per run (1,024)
+  BLKN            = 8                   ' longs per SETQ block read (setq #BLKN-1)
+  NREC_B          = NTRIAL * BLKN       ' block records per run (8,192 longs)
+  SETTLE_N        = 100                 ' DJNZ count of a settle loop: >= 200 clocks
+  STREAM_WAIT     = 200                 ' PS: WAITX between the no-wait RDFAST and its RFLONG
+
+  PRIMV           = $A5A5_0001          ' primer: the previous slow hub read
+  SENTV           = $5A5A_0002          ' sentinel, table T
+  SEEDV           = $C3C3_0003          ' seed: destination before the trial ("never written")
+  BLK_V           = $5A5A_0100          ' block source long i = BLK_V + i
+  GUARD_V         = $6D6D_0000          ' cog guard-band long i = GUARD_V + i
+  STRM_V          = $1E1E_0000          ' stream region long n = STRM_V + n
+  UNWRITTEN       = $EEEE_EEEE          ' record-area fill: nothing written here
+  FIFO_NO_WAIT    = $8000_0000          ' RDFAST D: D[31]=1 no-wait, block count 0
+  FIFO_WAIT       = $0000_0000          ' RDFAST D: D[31]=0 waiting form, block count 0
+
+  T1_PRED         = 43                  ' EF-084: primer cells per repetition at k=0
+  T1_PRED_SENT    = NCELL - T1_PRED     ' 21
+
+  ' -- fixed hub layout (HUB LAYOUT in the header) --
+  HUB_STRM        = $4_0000
+  STRM_LONGS      = 64
+  HUB_TBL         = $4_1000
+  HUB_BLK         = $4_1200
+  BLK_LONGS       = NSLOT + BLKN - 1    ' 15: blocks start at slot bits 0..7
+  HUB_PRIM        = $4_3000
+  HUB_RES         = $4_4000
+  HUB_DUMP        = $4_C000             ' cog-RAM copy written by the measuring cog
+  HUB_DUMP0       = $4_D000             ' the baseline copy (cog 0 moves it here)
+  COG_DUMP_N      = $1F0                ' cog registers $000-$1EF (496)
+  HUB_DATA_LO     = HUB_STRM
+  HUB_DATA_END    = HUB_DUMP0 + COG_DUMP_N * 4
+  HUB_TOP16K      = $7_C000
+  STACK_MARGIN    = $4000
+
+  STAT_READY      = $0000_0A11          ' start-up handshake
+  STAT_PONG       = $0000_0B22          ' the answer to a ping
+  RUN_TIMEOUT_MS  = 1000                ' a run, a trial, a baseline
+  PING_TIMEOUT_MS = 100                 ' arm 2 ping
+  LINE_MAX        = 480                 ' longest printed line (chars); longer text is cut
+  INT_SHOW        = 16                  ' changed cog registers listed per run or trial
+
+  SUCCESS         = 0
+  E_RIG_FAIL      = -1                  ' the measuring cog did not answer in time
+  E_MODE_FAIL     = -2                  ' the mode echoed back differs from the mode sent
+  E_NO_START      = -3                  ' a measuring cog did not start
+
+CON ' ---- Identifiers ----
+  #1, CMD_R, CMD_B, CMD_B1, CMD_SNAP, CMD_PING
+
+  #0, ARM_P, ARM_S, ARM_Q               ' run order: 0, 1 characterisation, 2 workaround
+  NARM            = ARM_Q + 1
+
+  #0, SH_R, SH_PS, SH_B                 ' shapes: image R; PS; block
+  #0, KD_NOP, KD_PS, KD_WAIT, KD_TEST
+
+  ' trial copies (the measuring cog's vec_tab order)
+  #0, CP_R_NOP_L, CP_R_RF0_L, CP_R_RF7_L, CP_R_PS
+  #4, CP_B_NOP, CP_B_RF0, CP_B_RF6, CP_B_RF7, CP_B_RF8
+
+  ' run-table fields (runTab, 6 bytes per run)
+  #0, RF_ARM, RF_SHAPE, RF_KIND, RF_COPY, RF_NOWAIT, RF_K
+  RT_W            = 6
+
+  ' run indexes, in run order
+  RUN_C1          = 0
+  RUN_PS          = 1
+  RUN_T1          = 2                   ' T1 k=0: the reference cell map
+  RUN_T1F         = 3                   ' T1 k=7
+  RUN_Q           = 4                   ' arm 2: N k0, C k0, T k6, T k7, T k8
+  NBRUN           = 5
+  NRUN            = RUN_Q + NBRUN
+  #0, QS_N, QS_C, QS_T6, QS_T7, QS_T8   ' arm 2 slots
+
+  ' arm 1 trial table (chTab, 4 bytes per trial): kind, af, ar, class in
+  ' the EF-084 map (1 released P, 0 escaping S)
+  #0, CF_KIND, CF_AF, CF_AR, CF_REL
+  CT_W            = 4
+  NCELL_S         = 4                   ' characterised cells
+  NCH             = NCELL_S * 5         ' per cell 1 NOP control + 4 test trials
+
+  ' state of an arm 2 run or an arm 1 trial
+  #0, ST_NOTRUN, ST_NOSTART, ST_NOBASE, ST_LOST, ST_ECHO, ST_DONE
+
+  ' value classes (image R); the block classes share the U/X slots
+  #0, VC_PRIM, VC_SENT, VC_SEED, VC_STRM, VC_UNWR, VC_OTHER
+  NVC             = VC_OTHER + 1
+  #0, BC_OK, BC_PRIM, BC_SEED, BC_MIX
+  BC_UNWR         = VC_UNWR
+  BC_OTHER        = VC_OTHER
+
+  ' arm 1 block patterns
+  #0, PAT_OK, PAT_P1, PAT_OTH
+
+  ' mailbox longs (cog 0 <-> measuring cog)
+  #0, MB_CMD, MB_COPY, MB_MODE, MB_AF, MB_AR, MB_PRIM, MB_TBL, MB_ALIVE, MB_ECHO, MB_LEN
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  long measCog
+  byte cellCode[NRUN * NCELL]           ' repetition 0: class
+  byte cellAgree[NRUN * NCELL]          ' repetitions identical to repetition 0
+  long runCnt[NRUN * NVC]               ' classes over all repetitions
+  long runRep0[NRUN * NVC]              ' repetition-0 cells per class
+  long runDelta[NRUN * NSLOT]           ' rep 0 by delta: released cells (R: primer, B: primer in the record)
+  long runDelta2[NRUN * NSLOT]          ' rep 0 by delta: cells not clean
+  long runDisagree[NRUN]
+  long runGoodAll[NRUN]                 ' over all repetitions: clean records
+  long runOther[NRUN]
+  long runOtherVal[NRUN]
+  long blkPrim[NBRUN * BLKN]            ' arm 2: primer, per long index, all reps
+  long blkSeed[NBRUN * BLKN]
+  long blkOth[NBRUN * BLKN]
+  long blkOthVal[NBRUN]
+  long blkOthIdx[NBRUN]
+  long qState[NBRUN]                    ' arm 2: ST_*
+  long qBaseOk[NBRUN]
+  long intChanged[NBRUN]                ' arm 2: changed cog registers, -1 = no copy arrived
+  long intFirst[NBRUN]                  ' arm 2: the first changed register
+  long intStray[NBRUN]                  ' arm 2: block/primer longs outside the sacrificial range
+  long chRec[NCH * BLKN]                ' arm 1: the block as recorded after the trial
+  long chSac[NCH * BLKN]                ' arm 1: the sacrificial range at the ping
+  long chState[NCH]
+  long chAns[NCH]
+  long chBaseOk[NCH]
+  long chChanged[NCH]
+  long chStray[NCH]
+  long armDamage[NARM]
+  long armDone[NARM]                    ' the arm finished and its gate was decided
+  long armPass[NARM]                    ' its gate passed
+  long lastBaseOk
+  long lastFirst
+  long lastStray
+  ' print buffers
+  byte rowStr[NSLOT + 1]
+  byte agreeStr[NSLOT + 1]
+  ' every printed line is built here and sent by ONE debug() record (ln_out)
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | status, pStack
+'' Run the three arms in order; each prints its runs, its gate and its
+'' verdicts when it completes; then the verdict summary.
+''
+
+' Local Variables:
+' @local status - SUCCESS, or the failure that ended the run
+' @local pStack - hub address of this method's locals: cog 0's stack
+
+  pStack := @status
+  linePos := 0
+  ' the layout check runs before the first write to the fixed data area it protects
+  if pStack + STACK_MARGIN > HUB_DATA_LO or HUB_DATA_END > HUB_TOP16K
+    ln_s(string("RIG FAIL: hub layout - cog 0 stack at "))
+    ln_h(pStack)
+    ln_s(string(" must lie at least "))
+    ln_h(STACK_MARGIN)
+    ln_s(string(" below the data at "))
+    ln_h(HUB_DATA_LO)
+    ln_s(string(", and the data end "))
+    ln_h(HUB_DATA_END)
+    ln_s(string(" must lie below "))
+    ln_h(HUB_TOP16K)
+    ln_out()
+    finish()
+  if @runTabEnd - @runTab <> NRUN * RT_W or @chTabEnd - @chTab <> NCH * CT_W
+    ln_s(string("RIG FAIL: run tables hold "))
+    ln_d(@runTabEnd - @runTab)
+    ln_s(string(" / "))
+    ln_d(@chTabEnd - @chTab)
+    ln_s(string(" bytes, expected "))
+    ln_d(NRUN * RT_W)
+    ln_s(string(" / "))
+    ln_d(NCH * CT_W)
+    ln_out()
+    finish()
+  reset_tallies()
+  fill_regions()
+
+  print_header(pStack)
+
+  status := run_arm0()
+  if status == SUCCESS
+    run_arm_s()                         ' arm 1 first: the positive control for block release
+    run_arm_q()
+
+  print_summary()
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_d(value) | divisor, bStarted
+' Append a signed decimal to the line.
+'
+' @param value - the number
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local bStarted - a non-zero digit has been printed
+
+  if value == NEGX
+    ln_s(string("-2147483648"))
+  else
+    if value < 0
+      ln_c("-")
+      value := -value
+    divisor := 1_000_000_000
+    bStarted := FALSE
+    repeat 10
+      if value >= divisor or bStarted or divisor == 1
+        ln_c("0" + value / divisor)
+        value //= divisor
+        bStarted := TRUE
+      divisor /= 10
+
+PRI ln_hx(value, digits) | idx, nibble
+' Append "$" and the low digits hex digits of value.
+'
+' @param value - the number
+' @param digits - hex digits to print (1..8)
+
+' Local Variables:
+' @local idx - nibble index, digits-1 .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from digits - 1 to 0
+    nibble := (value >> (idx * 4)) & $F
+    if nibble < 10
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - 10)
+
+PRI ln_h(value) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param value - the long
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from 7 to 0
+    nibble := (value >> (idx * 4)) & $F
+    if nibble < 10
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - 10)
+    if idx == 4
+      ln_c("_")
+
+PRI ln_row8(pLongs) | idx
+' Append 8 longs as decimals separated by single spaces.
+'
+' @param pLongs - hub address of the first long
+
+' Local Variables:
+' @local idx - long index 0..7
+
+  repeat idx from 0 to NSLOT - 1
+    if idx > 0
+      ln_c(" ")
+    ln_d(long[pLongs][idx])
+
+PRI ln_hex8(pLongs) | idx
+' Append 8 longs in hex, each preceded by a space.
+'
+' @param pLongs - hub address of the first long
+
+' Local Variables:
+' @local idx - long index 0..7
+
+  repeat idx from 0 to BLKN - 1
+    ln_c(" ")
+    ln_h(long[pLongs][idx])
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+' ---------------------------------------------------------------------------
+' set-up, the run tables and the command channel
+' ---------------------------------------------------------------------------
+PRI print_header(pStack)
+' Print the rig identity, the layout and every prediction before the run.
+'
+' @param pStack - hub address of main()'s locals (cog 0's stack)
+
+  say(string("=== P2 Errata O29C: E8's workaround for a SETQ block RDLONG after a no-wait RDFAST, and one released block read at k=0 (pnut-ts v1.55.8 -d, clk 200 MHz) ==="))
+  say(string("values: primer $A5A5_0001; sentinel $5A5A_0002; seed $C3C3_0003; block long i $5A5A_0100+i; stream long n $1E1E_0000+n; cog guard long i $6D6D_0000+i; unwritten $EEEE_EEEE"))
+  ln_s(string("hub: stream "))
+  ln_h(HUB_STRM)
+  ln_s(string(" table "))
+  ln_h(HUB_TBL)
+  ln_s(string(" block "))
+  ln_h(HUB_BLK)
+  ln_s(string(" primer "))
+  ln_h(HUB_PRIM)
+  ln_s(string(" records "))
+  ln_h(HUB_RES)
+  ln_s(string(" cog copies "))
+  ln_h(HUB_DUMP)
+  ln_c("/")
+  ln_h(HUB_DUMP0)
+  ln_s(string("; data end "))
+  ln_h(HUB_DATA_END)
+  ln_s(string("; measuring-cog image "))
+  ln_h(@pasm)
+  ln_s(string("; last VAR byte array "))
+  ln_h(@lineBuf)
+  ln_s(string("; cog 0 stack "))
+  ln_h(pStack)
+  ln_out()
+  ln_s(string("measuring cog: image $000-"))
+  ln_hx(cog_addr(@pasm_end) - 1, 3)
+  ln_s(string("; loop variables "))
+  ln_hx(cog_addr(@c_cmd), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_tmp), 3)
+  ln_s(string("; guard bands "))
+  ln_hx(cog_addr(@c_guard_lo), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_guard_lo) + BLKN - 1, 3)
+  ln_s(string(" and "))
+  ln_hx(cog_addr(@c_guard_hi), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_guard_hi) + BLKN - 1, 3)
+  ln_s(string("; sacrificial range "))
+  ln_hx(cog_addr(@c_blk0), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_blk0) + BLKN - 1, 3)
+  ln_out()
+  say(string("codes: image R  P primer  S sentinel  D seed  F stream long  U unwritten  X other | block  . right block  P primer in some longs  D seed in some longs  M both  U unwritten  X other"))
+  say(string("agree: . all 16 identical, else hex count identical to rep 0. delta = (ar - af) mod 8. Every run: 16 repetitions x 64 cells"))
+  say(string("ORDER: arm 0, then arm 1 (characterisation at k=0: the positive control for block release), then arm 2 (the E8 workaround runs)"))
+  say(string("FRESH COG: every trial of arm 1 and every run of arm 2 runs in a fresh measuring cog - COGINIT, start-up handshake, cog-RAM baseline, the run, then COGSTOP; a cog that does not finish within 1 s is stopped and loses only its run"))
+  say(string("ARM 0 MUST (EF-084): C1 sentinel 1024; PS stream long 1024; T1 k=0 43 primer per repetition by delta 8 8 7 6 5 4 3 2 (688 of 1024); T1 k=7 sentinel 1024. Else RIG FAIL: no later verdict counts"))
+  say(string("ARM 1 RECORDS (no prediction): single block trials at k=0, each in a fresh cog, then a ping (100 ms); per cell 1 NOP control (MUST right block, completed, answered, cog RAM intact) and 4 no-wait RDFAST trials;"))
+  say(string("  cells (EF-084 map): af0/ar0 and af2/ar0 released (P), af0/ar4 and af1/ar3 escaping (S); recorded: block per long, completed, answered, changed registers, block/primer longs outside the sacrificial range"))
+  say(string("  RELEASE SHOWN = a released-cell trial with the primer in long 0, a long left unwritten (seed or fill), or a cog that did not finish within 1 s (stopped)"))
+  say(string("ARM 2 clocks, start of the RDFAST to start of the block RDLONG: QB T k6 16 (rdfast 2 + 6 nop 12 + setq 2: E8's rule exactly, 7 non-hub instructions); QB T k7 18; QB T k8 20; QB C k0 the waiting RDFAST's own wait + 2"))
+  say(string("ARM 2 MUST: QB N k0 the right block $5A5A_0100+ar+j in all 1024 records, 0 cog registers changed outside the sacrificial range, no block or primer long outside it, the cog completes the run; else the arm's gate fails"))
+  say(string("ARM 2 PREDICT for QB C k0, QB T k6, QB T k7, QB T k8: (a) the right block in all 1024 records; (b) 0 cog registers changed outside the sacrificial range, no block or primer long outside it; (c) the cog completes the run"))
+  say(string("  CONFIRMED if (a), (b), (c) all hold AND arm 1 showed a release with its gate passed, else INCONCLUSIVE (a clean run proves nothing without it); REFUTED naming each part that failed: wrong long / register change / did not finish within 1 s (stopped)"))
+  say(string("rig fails: arm 0 not reproduced; a NOP control not clean; a baseline cog-RAM copy not equal to the loaded image; a mode echo mismatch"))
+
+PRI fill_regions() | idx
+' Write every fixed data region its pattern.
+'
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  repeat idx from 0 to STRM_LONGS - 1
+    long[HUB_STRM][idx] := STRM_V + idx
+  longfill(HUB_TBL, SENTV, NSLOT)
+  repeat idx from 0 to BLK_LONGS - 1
+    long[HUB_BLK][idx] := BLK_V + idx
+  long[HUB_PRIM] := PRIMV
+
+PRI region_damage() : damageCnt | idx
+' Count read-only data longs that no longer hold their pattern.
+'
+' @returns damageCnt - changed longs (stream, table, block source, primer)
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  damageCnt := 0
+  repeat idx from 0 to STRM_LONGS - 1
+    if long[HUB_STRM][idx] <> STRM_V + idx
+      damageCnt++
+  repeat idx from 0 to NSLOT - 1
+    if long[HUB_TBL][idx] <> SENTV
+      damageCnt++
+  repeat idx from 0 to BLK_LONGS - 1
+    if long[HUB_BLK][idx] <> BLK_V + idx
+      damageCnt++
+  if long[HUB_PRIM] <> PRIMV
+    damageCnt++
+
+PRI check_damage(armIdx) | damageCnt
+' After a run or trial: count damaged read-only data, report it, re-fill.
+'
+' @param armIdx - the arm the run belongs to
+
+' Local Variables:
+' @local damageCnt - data longs changed
+
+  damageCnt := region_damage()
+  if damageCnt > 0
+    armDamage[armIdx] += damageCnt
+    ln_s(string("  REGION DAMAGE: "))
+    ln_d(damageCnt)
+    say(string(" read-only data longs changed (a stray hub write) - regions re-filled"))
+    fill_regions()
+
+PRI reset_tallies()
+' Clear every tally.
+'
+
+  bytefill(@cellCode, 0, NRUN * NCELL)
+  bytefill(@cellAgree, 0, NRUN * NCELL)
+  longfill(@runCnt, 0, NRUN * NVC)
+  longfill(@runRep0, 0, NRUN * NVC)
+  longfill(@runDelta, 0, NRUN * NSLOT)
+  longfill(@runDelta2, 0, NRUN * NSLOT)
+  longfill(@runDisagree, 0, NRUN)
+  longfill(@runGoodAll, 0, NRUN)
+  longfill(@runOther, 0, NRUN)
+  longfill(@runOtherVal, 0, NRUN)
+  longfill(@blkPrim, 0, NBRUN * BLKN)
+  longfill(@blkSeed, 0, NBRUN * BLKN)
+  longfill(@blkOth, 0, NBRUN * BLKN)
+  longfill(@blkOthVal, 0, NBRUN)
+  longfill(@blkOthIdx, -1, NBRUN)
+  longfill(@qState, ST_NOTRUN, NBRUN)
+  longfill(@qBaseOk, FALSE, NBRUN)
+  longfill(@intChanged, -1, NBRUN)
+  longfill(@intFirst, -1, NBRUN)
+  longfill(@intStray, -1, NBRUN)
+  longfill(@chRec, UNWRITTEN, NCH * BLKN)
+  longfill(@chSac, UNWRITTEN, NCH * BLKN)
+  longfill(@chState, ST_NOTRUN, NCH)
+  longfill(@chAns, FALSE, NCH)
+  longfill(@chBaseOk, FALSE, NCH)
+  longfill(@chChanged, -1, NCH)
+  longfill(@chStray, -1, NCH)
+  longfill(@armDamage, 0, NARM)
+  longfill(@armDone, FALSE, NARM)
+  longfill(@armPass, FALSE, NARM)
+  lastBaseOk := FALSE
+  lastFirst := -1
+  lastStray := -1
+
+PRI run_fld(runIdx, fieldIdx) : value
+' @param runIdx - run index
+' @param fieldIdx - RF_* field
+' @returns value - the run table byte
+
+  value := byte[@runTab][runIdx * RT_W + fieldIdx]
+
+PRI ch_fld(trialIdx, fieldIdx) : value
+' @param trialIdx - arm 1 trial index
+' @param fieldIdx - CF_* field
+' @returns value - the trial table byte
+
+  value := byte[@chTab][trialIdx * CT_W + fieldIdx]
+
+PRI cog_addr(hubAddr) : cogAddr
+' @param hubAddr - hub address of a long in the measuring cog's image
+' @returns cogAddr - its cog register address
+
+  cogAddr := (hubAddr - @pasm) >> 2
+
+PRI start_meas_cog() : status | startCt
+' Start a measuring cog (COGINIT, cog execution) and wait for its start-up
+' handshake.  On a failed handshake the cog is stopped.  Prints a line on
+' failure only.
+'
+' @returns status - SUCCESS or E_NO_START
+
+' Local Variables:
+' @local startCt - CT at the start of the start-up timeout
+
+  status := SUCCESS
+  mbox[MB_CMD] := 0                     ' a fresh cog must not see a stale command
+  mbox[MB_ALIVE] := 0
+  measCog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if measCog < 0
+    ln_s(string("  COG START FAILED: coginit expected a free cog (0..7), got "))
+    ln_d(measCog)
+    ln_out()
+    status := E_NO_START
+    return
+  startCt := getct()
+  repeat until mbox[MB_ALIVE] == STAT_READY
+    if getct() - startCt > clkfreq
+      ln_s(string("  COG START FAILED: cog "))
+      ln_d(measCog)
+      ln_s(string(" start-up handshake expected $0000_0A11 within 1 s, got "))
+      ln_h(mbox[MB_ALIVE])
+      say(string("; the cog was stopped (COGSTOP)"))
+      cogstop(measCog)
+      status := E_NO_START
+      return
+
+PRI fresh_cog() : status | addr, imgLen, varLo, varHi, matchCnt, checkCnt
+' Start a fresh measuring cog and take its cog-RAM baseline (CMD_SNAP),
+' checked against the loaded image outside the loop variables.  Sets
+' lastBaseOk.  On a baseline timeout the cog is left running: the caller
+' stops it.
+'
+' @returns status - SUCCESS / E_NO_START / E_RIG_FAIL / E_MODE_FAIL
+
+' Local Variables:
+' @local addr - cog register address
+' @local imgLen - registers in the loaded image
+' @local varLo - first loop-variable register
+' @local varHi - last loop-variable register
+' @local matchCnt - image registers equal in the copy
+' @local checkCnt - image registers compared
+
+  lastBaseOk := FALSE
+  status := start_meas_cog()
+  if status <> SUCCESS
+    return
+  longfill(HUB_DUMP, UNWRITTEN, COG_DUMP_N)
+  status := send_cmd(CMD_SNAP, 0, FIFO_WAIT, 0, 0, HUB_BLK, RUN_TIMEOUT_MS)
+  if status == E_RIG_FAIL
+    ln_s(string("  BASELINE FAILED: fresh cog "))
+    ln_d(measCog)
+    say(string(" did not answer its baseline command within 1 s"))
+  if status <> SUCCESS
+    return
+  longmove(HUB_DUMP0, HUB_DUMP, COG_DUMP_N)
+  imgLen := cog_addr(@pasm_end)
+  varLo := cog_addr(@c_cmd)
+  varHi := cog_addr(@c_tmp)
+  matchCnt := 0
+  checkCnt := 0
+  repeat addr from 0 to imgLen - 1
+    if addr < varLo or addr > varHi
+      checkCnt++
+      if long[HUB_DUMP0][addr] == long[@pasm][addr]
+        matchCnt++
+  lastBaseOk := matchCnt == checkCnt
+  ln_s(string("  fresh measuring cog "))
+  ln_d(measCog)
+  ln_s(string(" (COGINIT); its baseline cog-RAM copy equals the loaded image in "))
+  ln_d(matchCnt)
+  ln_s(string(" of "))
+  ln_d(checkCnt)
+  say(string(" image registers outside the loop variables (MUST be all)"))
+
+PRI send_run(runIdx, timeoutMs) : status | cmdId, pTbl, modeVal
+' Build the command for one run from the run table and send it.
+'
+' @param runIdx - run index
+' @param timeoutMs - milliseconds to wait for the measuring cog
+' @returns status - SUCCESS / E_RIG_FAIL / E_MODE_FAIL
+
+' Local Variables:
+' @local cmdId - CMD_*
+' @local pTbl - table / block base
+' @local modeVal - FIFO D value
+
+  if run_fld(runIdx, RF_SHAPE) == SH_B
+    cmdId := CMD_B
+    pTbl := HUB_BLK
+  else
+    cmdId := CMD_R
+    pTbl := HUB_TBL
+  if run_fld(runIdx, RF_NOWAIT)
+    modeVal := FIFO_NO_WAIT
+  else
+    modeVal := FIFO_WAIT
+  status := send_cmd(cmdId, run_fld(runIdx, RF_COPY), modeVal, 0, 0, pTbl, timeoutMs)
+
+PRI send_cmd(cmdId, copyIdx, modeVal, afVal, arVal, pTbl, timeoutMs) : status | startCt
+' Hand one command to the measuring cog and wait for it to clear MB_CMD.
+'
+' @param cmdId - CMD_*
+' @param copyIdx - trial copy (CP_*)
+' @param modeVal - the RDFAST D value under test
+' @param afVal - CMD_B1: the stream slot bits
+' @param arVal - CMD_B1: the block's slot bits
+' @param pTbl - table / block base
+' @param timeoutMs - milliseconds to wait
+' @returns status - SUCCESS; E_RIG_FAIL on a timeout; E_MODE_FAIL (after
+'   printing its line) when the mode echoed back is not the mode sent
+
+' Local Variables:
+' @local startCt - CT when the command was issued
+
+  status := SUCCESS
+  mbox[MB_COPY] := copyIdx
+  mbox[MB_MODE] := modeVal
+  mbox[MB_AF] := afVal
+  mbox[MB_AR] := arVal
+  mbox[MB_PRIM] := HUB_PRIM
+  mbox[MB_TBL] := pTbl
+  mbox[MB_ECHO] := UNWRITTEN
+  mbox[MB_CMD] := cmdId
+  startCt := getct()
+  repeat until mbox[MB_CMD] == 0
+    if getct() - startCt > clkfreq / 1000 * timeoutMs
+      status := E_RIG_FAIL
+      quit
+  if status == SUCCESS and mbox[MB_ECHO] <> modeVal
+    ln_s(string("  MODE ECHO FAIL: command "))
+    ln_d(cmdId)
+    ln_s(string(" copy "))
+    ln_d(copyIdx)
+    ln_s(string(" ran with FIFO D "))
+    ln_h(mbox[MB_ECHO])
+    ln_s(string(", expected "))
+    ln_h(modeVal)
+    say(string(" (harness)"))
+    status := E_MODE_FAIL
+
+' ---------------------------------------------------------------------------
+' the arms
+' ---------------------------------------------------------------------------
+PRI run_arm0() : status | runIdx
+' Arm 0 on one measuring cog: C1, PS, T1 k=0, T1 k=7; then its gate.
+'
+' @returns status - SUCCESS, or the harness failure that ends the run
+
+' Local Variables:
+' @local runIdx - run index
+
+  say(string("===== ARM 0: POSITIVE CONTROL (C1, PS, T1 k=0, T1 k=7 - the O29 construction; MUST reproduce EF-084, else RIG FAIL and no later verdict counts) ====="))
+  status := start_meas_cog()
+  if status <> SUCCESS
+    say(string("RIG FAIL: arm 0's measuring cog did not start (line above); the run ends here"))
+    return
+  ln_s(string("measuring cog "))
+  ln_d(measCog)
+  say(string(" running (arm 0)"))
+  repeat runIdx from RUN_C1 to RUN_T1F
+    print_run_header(runIdx)
+    longfill(HUB_RES, UNWRITTEN, NTRIAL)
+    status := send_run(runIdx, RUN_TIMEOUT_MS)
+    if status == E_RIG_FAIL
+      cogstop(measCog)
+      ln_s(string("RIG FAIL: measuring cog did not finish run "))
+      ln_runname(runIdx)
+      say(string(" within 1 s (done flag never cleared); it was stopped (COGSTOP) and the run ends here"))
+      return
+    process_run(runIdx)
+    print_run(runIdx)
+    check_damage(ARM_P)
+    if status <> SUCCESS
+      cogstop(measCog)
+      say(string("RIG FAIL: mode echo in arm 0 (line above); the measuring cog was stopped (COGSTOP) and the run ends here"))
+      return
+  cogstop(measCog)
+  say(string("  arm 0's measuring cog stopped (COGSTOP); every later run and trial starts a fresh one"))
+  armPass[ARM_P] := arm0_gate()
+  armDone[ARM_P] := TRUE
+  print_rig_line()
+
+PRI run_arm_q() | runIdx, bIdx, status
+' Arm 2: every run in a fresh measuring cog; then its gate and verdicts.
+'
+
+' Local Variables:
+' @local runIdx - run index
+' @local bIdx - arm 2 slot (QS_*)
+' @local status - command result
+
+  say(string("===== ARM 2: SETQ BLOCK RDLONG, E8 WORKAROUND (QB N k0, QB C k0, QB T k6, QB T k7, QB T k8; each run in a fresh measuring cog; cog-RAM integrity checked after every run) ====="))
+  repeat runIdx from RUN_Q to NRUN - 1
+    bIdx := runIdx - RUN_Q
+    print_run_header(runIdx)
+    status := fresh_cog()
+    if status == E_NO_START
+      qState[bIdx] := ST_NOSTART
+      ln_s(string("  NOT RUN: "))
+      ln_runname(runIdx)
+      say(string(" - a fresh measuring cog did not start (line above); the next run starts another"))
+      next
+    qBaseOk[bIdx] := lastBaseOk
+    if status <> SUCCESS
+      cogstop(measCog)
+      if status == E_MODE_FAIL
+        qState[bIdx] := ST_ECHO
+      else
+        qState[bIdx] := ST_NOBASE
+      ln_s(string("  NOT RUN: "))
+      ln_runname(runIdx)
+      say(string(" - the fresh cog's baseline command failed (line above); the cog was stopped (COGSTOP)"))
+      next
+    longfill(HUB_RES, UNWRITTEN, NREC_B)
+    longfill(HUB_DUMP, UNWRITTEN, COG_DUMP_N)
+    status := send_run(runIdx, RUN_TIMEOUT_MS)
+    cogstop(measCog)
+    if status == E_RIG_FAIL
+      qState[bIdx] := ST_LOST
+      ln_s(string("  OBSERVED: run "))
+      ln_runname(runIdx)
+      say(string(" did not finish within 1 s (stopped by COGSTOP); the records it wrote follow (U = never written); the next run starts a fresh cog"))
+    elseif status == E_MODE_FAIL
+      qState[bIdx] := ST_ECHO
+    else
+      qState[bIdx] := ST_DONE
+    process_run(runIdx)
+    print_run(runIdx)
+    intChanged[bIdx] := integrity_check(FALSE, runIdx)
+    intFirst[bIdx] := lastFirst
+    intStray[bIdx] := lastStray
+    check_damage(ARM_Q)
+  armPass[ARM_Q] := q_gate()
+  armDone[ARM_Q] := TRUE
+  verdict_q(QS_C)
+  verdict_q(QS_T6)
+  verdict_q(QS_T7)
+  verdict_q(QS_T8)
+
+PRI run_arm_s() | trialIdx
+' Arm 1: single trials, each in a fresh measuring cog; then its gate and
+' its OBSERVED lines.  Runs before arm 2: its positive control for release.
+'
+
+' Local Variables:
+' @local trialIdx - arm 1 trial index
+
+  say(string("===== ARM 1: CHARACTERISATION AT k=0 (RECORDS; the positive control for block release, run before arm 2; single block trials, each in a fresh measuring cog, then a ping within 100 ms) ====="))
+  repeat trialIdx from 0 to NCH - 1
+    run_trial(trialIdx)
+  armPass[ARM_S] := s_gate()
+  armDone[ARM_S] := TRUE
+  observed_s()
+
+PRI run_trial(trialIdx) | kind, afIdx, arIdx, copyIdx, modeVal, status
+' One arm 1 trial: fresh cog, baseline, the trial, the ping, COGSTOP; print it.
+'
+' @param trialIdx - arm 1 trial index
+
+' Local Variables:
+' @local kind - KD_NOP (control) or KD_TEST
+' @local afIdx - stream slot bits
+' @local arIdx - block slot bits
+' @local copyIdx - trial copy
+' @local modeVal - FIFO D value
+' @local status - command result
+
+  kind := ch_fld(trialIdx, CF_KIND)
+  afIdx := ch_fld(trialIdx, CF_AF)
+  arIdx := ch_fld(trialIdx, CF_AR)
+  if kind == KD_NOP
+    copyIdx := CP_B_NOP
+    modeVal := FIFO_WAIT
+  else
+    copyIdx := CP_B_RF0
+    modeVal := FIFO_NO_WAIT
+  ln_s(string("TRIAL "))
+  ln_trialname(trialIdx)
+  if kind == KD_NOP
+    ln_s(string(" (NOP CONTROL): rdlong primer $A5A5_0001 / NOP in place of the RDFAST"))
+  else
+    ln_s(string(" (TEST): rdlong primer $A5A5_0001 / rdfast D=$8000_0000"))
+  ln_s(string(" / 0 NOP / setq #7 / rdlong block of 8 longs; EF-084 map: "))
+  if ch_fld(trialIdx, CF_REL)
+    ln_s(string("released (P)"))
+  else
+    ln_s(string("escaping (S)"))
+  ln_s(string("; T1 k=0 in this run "))
+  if cellCode[RUN_T1 * NCELL + afIdx * NSLOT + arIdx] == VC_PRIM
+    ln_s(string("released this cell"))
+  else
+    ln_s(string("did not release this cell"))
+  say(string("; then a ping (100 ms)"))
+  status := fresh_cog()
+  if status == E_NO_START
+    chState[trialIdx] := ST_NOSTART
+    ln_s(string("  NOT RUN: "))
+    ln_trialname(trialIdx)
+    say(string(" - a fresh measuring cog did not start (line above)"))
+    return
+  chBaseOk[trialIdx] := lastBaseOk
+  if status <> SUCCESS
+    cogstop(measCog)
+    if status == E_MODE_FAIL
+      chState[trialIdx] := ST_ECHO
+    else
+      chState[trialIdx] := ST_NOBASE
+    ln_s(string("  NOT RUN: "))
+    ln_trialname(trialIdx)
+    say(string(" - the fresh cog's baseline command failed (line above); the cog was stopped (COGSTOP)"))
+    return
+  longfill(HUB_RES, UNWRITTEN, BLKN)
+  longfill(HUB_DUMP, UNWRITTEN, COG_DUMP_N)
+  status := send_cmd(CMD_B1, copyIdx, modeVal, afIdx, arIdx, HUB_BLK, RUN_TIMEOUT_MS)
+  longmove(@chRec[trialIdx * BLKN], HUB_RES, BLKN)
+  if status == E_RIG_FAIL
+    chState[trialIdx] := ST_LOST
+  elseif status == E_MODE_FAIL
+    chState[trialIdx] := ST_ECHO
+  else
+    chState[trialIdx] := ST_DONE
+  if chState[trialIdx] <> ST_LOST
+    mbox[MB_ALIVE] := 0
+    status := send_cmd(CMD_PING, copyIdx, modeVal, afIdx, arIdx, HUB_BLK, PING_TIMEOUT_MS)
+    chAns[trialIdx] := status <> E_RIG_FAIL and mbox[MB_ALIVE] == STAT_PONG
+    if status == E_MODE_FAIL
+      chState[trialIdx] := ST_ECHO
+  cogstop(measCog)
+  if chAns[trialIdx]
+    longmove(@chSac[trialIdx * BLKN], HUB_DUMP + cog_addr(@c_blk0) * 4, BLKN)
+    chChanged[trialIdx] := integrity_check(TRUE, trialIdx)
+    chStray[trialIdx] := lastStray
+  print_trial(trialIdx)
+  check_damage(ARM_S)
+
+PRI integrity_check(bTrial, idx) : changed | addr, sacLo, varLo, varHi, tmpAddr, checkCnt, datum
+' Compare the cog-RAM copy with the same cog's baseline: list and count every
+' changed register outside the sacrificial range and the loop variables;
+' list and count every changed register outside the sacrificial range that
+' now holds a block-source long or the primer (the primer in c_tmp, its own
+' destination, excepted).  Sets lastFirst and lastStray.
+'
+' @param bTrial - FALSE: arm 2 run; TRUE: arm 1 trial
+' @param idx - the run or trial index
+' @returns changed - changed registers, or -1 when no copy arrived
+
+' Local Variables:
+' @local addr - cog register address
+' @local sacLo - first sacrificial register
+' @local varLo - first loop-variable register
+' @local varHi - last loop-variable register
+' @local tmpAddr - c_tmp (the primer read's destination)
+' @local checkCnt - registers compared for "changed"
+' @local datum - the register's value in the copy
+
+  lastFirst := -1
+  if long[HUB_DUMP][0] == UNWRITTEN and long[HUB_DUMP][COG_DUMP_N - 1] == UNWRITTEN
+    changed := -1
+    lastStray := -1
+    ln_s(string("  INTEGRITY "))
+    ln_label(bTrial, idx)
+    say(string(": no cog-RAM copy arrived (the copy area still holds $EEEE_EEEE)"))
+    return
+  sacLo := cog_addr(@c_blk0)
+  varLo := cog_addr(@c_cmd)
+  varHi := cog_addr(@c_tmp)
+  tmpAddr := cog_addr(@c_tmp)
+  changed := 0
+  lastStray := 0
+  checkCnt := 0
+  repeat addr from 0 to COG_DUMP_N - 1
+    if addr < sacLo or addr > sacLo + BLKN - 1
+      datum := long[HUB_DUMP][addr]
+      if addr < varLo or addr > varHi
+        checkCnt++
+        if datum <> long[HUB_DUMP0][addr]
+          changed++
+          if changed == 1
+            lastFirst := addr
+          if changed <= INT_SHOW
+            ln_s(string("  INTEGRITY "))
+            ln_label(bTrial, idx)
+            ln_s(string(": cog register "))
+            ln_hx(addr, 3)
+            ln_s(string(" changed: baseline "))
+            ln_h(long[HUB_DUMP0][addr])
+            ln_s(string(" now "))
+            ln_h(datum)
+            ln_out()
+      if datum <> long[HUB_DUMP0][addr] and ((datum - BLK_V) +< BLK_LONGS or (datum == PRIMV and addr <> tmpAddr))
+        lastStray++
+        if lastStray <= INT_SHOW
+          ln_s(string("  INTEGRITY "))
+          ln_label(bTrial, idx)
+          ln_s(string(": block/primer long "))
+          ln_h(datum)
+          ln_s(string(" in cog register "))
+          ln_hx(addr, 3)
+          ln_s(string(" (baseline "))
+          ln_h(long[HUB_DUMP0][addr])
+          say(string(")"))
+  ln_s(string("  INTEGRITY "))
+  ln_label(bTrial, idx)
+  ln_s(string(": "))
+  ln_d(changed)
+  ln_s(string(" of "))
+  ln_d(checkCnt)
+  ln_s(string(" cog registers outside the sacrificial range "))
+  ln_hx(sacLo, 3)
+  ln_c("-")
+  ln_hx(sacLo + BLKN - 1, 3)
+  ln_s(string(" and the loop variables "))
+  ln_hx(varLo, 3)
+  ln_c("-")
+  ln_hx(varHi, 3)
+  ln_s(string(" changed since the baseline; block/primer longs outside the sacrificial range: "))
+  ln_d(lastStray)
+  ln_out()
+
+PRI ln_label(bTrial, idx)
+' @param bTrial - FALSE: arm 2 run; TRUE: arm 1 trial
+' @param idx - the run or trial index
+
+  if bTrial
+    ln_trialname(idx)
+  else
+    ln_runname(idx)
+
+' ---------------------------------------------------------------------------
+' classification
+' ---------------------------------------------------------------------------
+PRI class_v(datum) : cls
+' Image R classification.
+'
+' @param datum - a record long
+' @returns cls - VC_*
+
+  if datum == PRIMV
+    cls := VC_PRIM
+  elseif datum == SENTV
+    cls := VC_SENT
+  elseif datum == SEEDV
+    cls := VC_SEED
+  elseif datum == UNWRITTEN
+    cls := VC_UNWR
+  elseif (datum - STRM_V) +< STRM_LONGS
+    cls := VC_STRM
+  else
+    cls := VC_OTHER
+
+PRI vcchar(cls) : codeChar
+' @param cls - VC_*
+' @returns codeChar - P S D F U X
+
+  codeChar := lookupz(cls: "P", "S", "D", "F", "U", "X")
+
+PRI bcchar(cls) : codeChar
+' @param cls - BC_* (U X in the shared slots)
+' @returns codeChar - . P D M U X
+
+  codeChar := lookupz(cls: ".", "P", "D", "M", "U", "X")
+
+PRI agreechar(agreeCnt) : codeChar
+' @param agreeCnt - repetitions identical to repetition 0 (1..16)
+' @returns codeChar - "." for all 16, else the hex digit
+
+  if agreeCnt == REPS
+    codeChar := "."
+  elseif agreeCnt < 10
+    codeChar := "0" + agreeCnt
+  else
+    codeChar := "A" + agreeCnt - 10
+
+PRI cell_delta(cellIdx) : deltaIdx
+' @param cellIdx - af * 8 + ar
+' @returns deltaIdx - (ar - af) mod 8
+
+  deltaIdx := ((cellIdx & (NSLOT - 1)) - (cellIdx >> 3)) & (NSLOT - 1)
+
+' ---------------------------------------------------------------------------
+' processing one run
+' ---------------------------------------------------------------------------
+PRI process_run(runIdx)
+' @param runIdx - run index
+
+  if run_fld(runIdx, RF_SHAPE) == SH_PS
+    process_ps(runIdx)
+  elseif run_fld(runIdx, RF_SHAPE) == SH_R
+    process_r(runIdx)
+  else
+    process_b(runIdx)
+
+PRI process_r(runIdx) | cellIdx, repIdx, firstVal, datum, cls, agreeCnt
+' Classify an image R run: repetition-0 codes, agreement, totals, delta split.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local firstVal - repetition 0's record
+' @local datum - a record
+' @local cls - its class
+' @local agreeCnt - repetitions identical to repetition 0
+
+  repeat cellIdx from 0 to NCELL - 1
+    firstVal := long[HUB_RES][cellIdx]
+    cls := class_v(firstVal)
+    cellCode[runIdx * NCELL + cellIdx] := cls
+    runRep0[runIdx * NVC + cls]++
+    if cls == VC_PRIM
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    if cls <> VC_SENT
+      runDelta2[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      datum := long[HUB_RES][repIdx * NCELL + cellIdx]
+      cls := class_v(datum)
+      runCnt[runIdx * NVC + cls]++
+      if cls == VC_OTHER
+        if runOther[runIdx] == 0
+          runOtherVal[runIdx] := datum
+        runOther[runIdx]++
+      if cls == VC_SENT
+        runGoodAll[runIdx]++
+      if datum == firstVal
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI process_ps(runIdx) | cellIdx, repIdx, firstVal, datum, agreeCnt, expVal
+' Classify the PS run: every record must be the stream's first long, STRM_V + af.
+' Cell code 1 = right, 0 = wrong.
+'
+' @param runIdx - RUN_PS
+
+' Local Variables:
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local firstVal - repetition 0's record
+' @local datum - a record
+' @local agreeCnt - repetitions identical to repetition 0
+' @local expVal - the stream's first long for this af
+
+  repeat cellIdx from 0 to NCELL - 1
+    expVal := STRM_V + (cellIdx >> 3)
+    firstVal := long[HUB_RES][cellIdx]
+    if firstVal == expVal
+      cellCode[runIdx * NCELL + cellIdx] := 1
+    else
+      cellCode[runIdx * NCELL + cellIdx] := 0
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      datum := long[HUB_RES][repIdx * NCELL + cellIdx]
+      if datum == expVal
+        runGoodAll[runIdx]++
+      elseif runOtherVal[runIdx] == 0
+        runOtherVal[runIdx] := datum
+      if datum == UNWRITTEN
+        runCnt[runIdx * NVC + VC_UNWR]++
+      if datum == firstVal
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI class_blk(pRec, arIdx, bIdx, bTally) : cls | j, datum, nPrim, nSeed, nOth, nUnwr
+' Classify one 8-long block record against the block expected for ar.
+'
+' @param pRec - hub address of the record
+' @param arIdx - the block's first slot bits (its first long is block long ar)
+' @param bIdx - arm 2 slot
+' @param bTally - TRUE: count per long index
+' @returns cls - BC_*
+
+' Local Variables:
+' @local j - long index in the record
+' @local datum - the long
+' @local nPrim - longs holding the primer
+' @local nSeed - longs holding the seed
+' @local nOth - longs holding anything else
+' @local nUnwr - longs holding the record-area fill
+
+  nPrim := 0
+  nSeed := 0
+  nOth := 0
+  nUnwr := 0
+  repeat j from 0 to BLKN - 1
+    datum := long[pRec][j]
+    if datum == BLK_V + arIdx + j
+      next
+    if datum == PRIMV
+      nPrim++
+      if bTally
+        blkPrim[bIdx * BLKN + j]++
+    elseif datum == SEEDV
+      nSeed++
+      if bTally
+        blkSeed[bIdx * BLKN + j]++
+    elseif datum == UNWRITTEN
+      nUnwr++
+    else
+      nOth++
+      if bTally
+        blkOth[bIdx * BLKN + j]++
+        if blkOthIdx[bIdx] == -1
+          blkOthIdx[bIdx] := j
+          blkOthVal[bIdx] := datum
+  if nUnwr > 0
+    cls := BC_UNWR
+  elseif nOth > 0
+    cls := BC_OTHER
+  elseif nPrim > 0 and nSeed > 0
+    cls := BC_MIX
+  elseif nPrim > 0
+    cls := BC_PRIM
+  elseif nSeed > 0
+    cls := BC_SEED
+  else
+    cls := BC_OK
+
+PRI same_block(pRecA, pRecB) : bSame | j
+' @param pRecA - a record
+' @param pRecB - another record
+' @returns bSame - TRUE when all 8 longs are equal
+
+' Local Variables:
+' @local j - long index
+
+  bSame := TRUE
+  repeat j from 0 to BLKN - 1
+    if long[pRecA][j] <> long[pRecB][j]
+      bSame := FALSE
+
+PRI process_b(runIdx) | bIdx, cellIdx, repIdx, pRec0, pRec, cls, agreeCnt
+' Classify an arm 2 run: per-record classes, per-long counts, agreement.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local bIdx - arm 2 slot
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local pRec0 - repetition 0's record
+' @local pRec - a record
+' @local cls - BC_*
+' @local agreeCnt - repetitions identical to repetition 0
+
+  bIdx := runIdx - RUN_Q
+  repeat cellIdx from 0 to NCELL - 1
+    pRec0 := HUB_RES + cellIdx * BLKN * 4
+    cls := class_blk(pRec0, cellIdx & (NSLOT - 1), bIdx, FALSE)
+    cellCode[runIdx * NCELL + cellIdx] := cls
+    runRep0[runIdx * NVC + cls]++
+    if cls == BC_PRIM or cls == BC_MIX
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    if cls <> BC_OK
+      runDelta2[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      pRec := HUB_RES + (repIdx * NCELL + cellIdx) * BLKN * 4
+      cls := class_blk(pRec, cellIdx & (NSLOT - 1), bIdx, TRUE)
+      runCnt[runIdx * NVC + cls]++
+      if cls == BC_OTHER
+        runOther[runIdx]++
+      if cls == BC_OK
+        runGoodAll[runIdx]++
+      if same_block(pRec, pRec0)
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI ch_pattern(trialIdx) : pat | j, arIdx
+' Arm 1: the block pattern recorded right after a trial.
+'
+' @param trialIdx - arm 1 trial index
+' @returns pat - PAT_OK right block / PAT_P1 long 0 the primer, longs 1-7
+'   still the seed / PAT_OTH other
+
+' Local Variables:
+' @local j - long index
+' @local arIdx - the block's slot bits
+
+  arIdx := ch_fld(trialIdx, CF_AR)
+  pat := PAT_OK
+  repeat j from 0 to BLKN - 1
+    if chRec[trialIdx * BLKN + j] <> BLK_V + arIdx + j
+      pat := PAT_OTH
+  if pat == PAT_OTH and chRec[trialIdx * BLKN] == PRIMV
+    pat := PAT_P1
+    repeat j from 1 to BLKN - 1
+      if chRec[trialIdx * BLKN + j] <> SEEDV
+        pat := PAT_OTH
+
+' ---------------------------------------------------------------------------
+' printing
+' ---------------------------------------------------------------------------
+PRI ln_runname(runIdx)
+' Append the run's printable name, e.g. "T1 k0", "QB T k7".
+'
+' @param runIdx - run index
+
+  if run_fld(runIdx, RF_ARM) == ARM_P
+    ln_s(lookupz(runIdx: string("C1"), string("PS"), string("T1"), string("T1")))
+  else
+    ln_s(string("QB "))
+    ln_c(lookupz(run_fld(runIdx, RF_KIND): "N", "?", "C", "T"))
+  ln_s(string(" k"))
+  ln_d(run_fld(runIdx, RF_K))
+
+PRI ln_trialname(trialIdx) | n, u
+' Append an arm 1 trial's printable name, e.g. "QS T k0 af0 ar4 #2".
+'
+' @param trialIdx - arm 1 trial index
+
+' Local Variables:
+' @local n - the trial's number among the trials with its kind, af and ar
+' @local u - an earlier trial index
+
+  ln_s(string("QS "))
+  if ch_fld(trialIdx, CF_KIND) == KD_NOP
+    ln_c("N")
+  else
+    ln_c("T")
+  ln_s(string(" k0 af"))
+  ln_d(ch_fld(trialIdx, CF_AF))
+  ln_s(string(" ar"))
+  ln_d(ch_fld(trialIdx, CF_AR))
+  n := 1
+  if trialIdx > 0
+    repeat u from 0 to trialIdx - 1
+      if ch_fld(u, CF_KIND) == ch_fld(trialIdx, CF_KIND) and ch_fld(u, CF_AF) == ch_fld(trialIdx, CF_AF) and ch_fld(u, CF_AR) == ch_fld(trialIdx, CF_AR)
+        n++
+  ln_s(string(" #"))
+  ln_d(n)
+
+PRI print_run_header(runIdx) | shape, kind, kVal
+' Print the run's sequence, and its MUST / PREDICT line, before its rows.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local shape - SH_*
+' @local kind - KD_*
+' @local kVal - NOPs between the RDFAST and the test instruction
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  kind := run_fld(runIdx, RF_KIND)
+  kVal := run_fld(runIdx, RF_K)
+  ln_s(string("RUN "))
+  ln_runname(runIdx)
+  ln_s(string(" ("))
+  ln_s(lookupz(kind: string("NOP CONTROL"), string("POSITIVE CONTROL"), string("WAITING FORM"), string("TEST")))
+  ln_s(string("): rdlong primer $A5A5_0001 / "))
+  if shape == SH_PS
+    ln_s(string("rdfast D=$8000_0000 / waitx #200 / rflong"))
+  else
+    if kind == KD_NOP
+      ln_s(string("NOP in place of the RDFAST"))
+    else
+      ln_s(string("rdfast D="))
+      if run_fld(runIdx, RF_NOWAIT)
+        ln_h(FIFO_NO_WAIT)
+      else
+        ln_h(FIFO_WAIT)
+    ln_s(string(" / "))
+    ln_d(kVal)
+    ln_s(string(" NOP / "))
+    if shape == SH_B
+      ln_s(string("setq #7 / rdlong block of 8 longs into the sacrificial registers"))
+    else
+      ln_s(string("rdlong test"))
+    if kind <> KD_NOP
+      ln_s(string("; start of the RDFAST to start of the "))
+      if shape == SH_B
+        ln_s(string("block RDLONG: "))
+      else
+        ln_s(string("RDLONG: "))
+      if not run_fld(runIdx, RF_NOWAIT)
+        ln_s(string("the waiting RDFAST's own wait + 2 clocks"))
+      else
+        if shape == SH_B
+          ln_d(2 + kVal * 2 + 2)
+        else
+          ln_d(2 + kVal * 2)
+        ln_s(string(" clocks"))
+  ln_out()
+  ln_s(string("    "))
+  ln_expect(runIdx)
+  ln_out()
+
+PRI ln_expect(runIdx) | shape, kind
+' Append the run's MUST / PREDICT statement.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local shape - SH_*
+' @local kind - KD_*
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  kind := run_fld(runIdx, RF_KIND)
+  if kind == KD_PS
+    ln_s(string("MUST: the stream's first long $1E1E_0000+af in all 1024 records, else RIG FAIL (the RDFAST under test would not be starting a stream)"))
+  elseif kind == KD_NOP
+    if shape == SH_B
+      ln_s(string("MUST: the block $5A5A_0100+ar+j in all 1024 records, 0 cog registers changed outside the sacrificial range, no block or primer long outside it, the cog completes the run; else the arm's gate fails"))
+    else
+      ln_s(string("MUST: sentinel $5A5A_0002 in all 1024 records, else RIG FAIL"))
+  elseif run_fld(runIdx, RF_ARM) == ARM_P
+    if run_fld(runIdx, RF_K) == 0
+      ln_s(string("MUST (EF-084): 43 primer per repetition, by delta 8 8 7 6 5 4 3 2; every other record sentinel"))
+    else
+      ln_s(string("MUST (EF-084): sentinel in all 1024 records"))
+  else
+    ln_s(string("PREDICT: (a) the right block $5A5A_0100+ar+j in all 1024 records, (b) 0 cog registers changed outside the sacrificial range and no block or primer long outside it, (c) the cog completes the run;"))
+    ln_s(string(" CONFIRMED if all hold and arm 1 showed a release (else INCONCLUSIVE); REFUTED naming each part that failed: wrong long / register change / did not finish within 1 s (stopped)"))
+
+PRI print_run(runIdx) | afIdx, arIdx, cellIdx, shape
+' Print a run's raw rows (repetition 0 per af, agreement) and its totals.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local afIdx - stream slot bits
+' @local arIdx - test-address slot bits
+' @local cellIdx - index into the per-cell arrays
+' @local shape - SH_*
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  repeat afIdx from 0 to NSLOT - 1
+    repeat arIdx from 0 to NSLOT - 1
+      cellIdx := runIdx * NCELL + afIdx * NSLOT + arIdx
+      agreeStr[arIdx] := agreechar(cellAgree[cellIdx])
+      if shape == SH_PS
+        rowStr[arIdx] := lookupz(cellCode[cellIdx]: "X", ".")
+      elseif shape == SH_R
+        rowStr[arIdx] := vcchar(cellCode[cellIdx])
+      else
+        rowStr[arIdx] := bcchar(cellCode[cellIdx])
+    agreeStr[NSLOT] := 0
+    rowStr[NSLOT] := 0
+    ln_s(string("  "))
+    ln_runname(runIdx)
+    ln_s(string(" af"))
+    ln_d(afIdx)
+    ln_s(string(" rep0 a0-7: "))
+    ln_s(@rowStr)
+    ln_s(string("  agree "))
+    say(@agreeStr)
+  print_totals(runIdx)
+
+PRI ln_lead(runIdx)
+' Append "  <run name>", the lead of every per-run total line.
+'
+' @param runIdx - run index
+
+  ln_s(string("  "))
+  ln_runname(runIdx)
+
+PRI print_totals(runIdx) | base, shape, bIdx
+' Print a run's totals: classes over all repetitions, repetition-0 delta splits.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local base - index of the run's first class count
+' @local shape - SH_*
+' @local bIdx - arm 2 slot
+
+  base := runIdx * NVC
+  shape := run_fld(runIdx, RF_SHAPE)
+  if shape == SH_PS
+    ln_lead(runIdx)
+    ln_s(string(" all reps: stream's first long right in "))
+    ln_d(runGoodAll[runIdx])
+    ln_s(string(" of 1024 records (. right, X wrong); first wrong value "))
+    ln_h(runOtherVal[runIdx])
+    ln_s(string(" | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+  elseif shape == SH_R
+    ln_lead(runIdx)
+    ln_s(string(" all reps: primer "))
+    ln_d(runCnt[base + VC_PRIM])
+    ln_s(string(" sentinel "))
+    ln_d(runCnt[base + VC_SENT])
+    ln_s(string(" seed "))
+    ln_d(runCnt[base + VC_SEED])
+    ln_s(string(" stream "))
+    ln_d(runCnt[base + VC_STRM])
+    ln_s(string(" other "))
+    ln_d(runCnt[base + VC_OTHER])
+    ln_s(string(" of 1024 | rep0 primer "))
+    ln_d(runRep0[base + VC_PRIM])
+    ln_s(string(" by delta "))
+    ln_row8(@runDelta[runIdx * NSLOT])
+    ln_s(string(" | rep0 not sentinel by delta "))
+    ln_row8(@runDelta2[runIdx * NSLOT])
+    ln_s(string(" | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+    if runOther[runIdx] > 0
+      ln_lead(runIdx)
+      ln_s(string(" first other value "))
+      ln_h(runOtherVal[runIdx])
+      ln_s(string(" ("))
+      ln_d(runOther[runIdx])
+      say(string(" other values in the run)"))
+  else
+    bIdx := runIdx - RUN_Q
+    ln_lead(runIdx)
+    ln_s(string(" all reps (records of 8 longs): right block "))
+    ln_d(runCnt[base + BC_OK])
+    ln_s(string(" primer-in-record "))
+    ln_d(runCnt[base + BC_PRIM])
+    ln_s(string(" seed-in-record "))
+    ln_d(runCnt[base + BC_SEED])
+    ln_s(string(" both "))
+    ln_d(runCnt[base + BC_MIX])
+    ln_s(string(" other "))
+    ln_d(runCnt[base + BC_OTHER])
+    ln_s(string(" unwritten "))
+    ln_d(runCnt[base + BC_UNWR])
+    ln_s(string(" of 1024 | rep0 records with the primer by delta "))
+    ln_row8(@runDelta[runIdx * NSLOT])
+    ln_s(string(" | rep0 not the right block by delta "))
+    ln_row8(@runDelta2[runIdx * NSLOT])
+    ln_s(string(" | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+    ln_lead(runIdx)
+    ln_s(string(" per long 0-7, all reps: primer "))
+    ln_row8(@blkPrim[bIdx * BLKN])
+    ln_s(string(" | seed "))
+    ln_row8(@blkSeed[bIdx * BLKN])
+    ln_s(string(" | other "))
+    ln_row8(@blkOth[bIdx * BLKN])
+    if blkOthIdx[bIdx] <> -1
+      ln_s(string(" | first other value "))
+      ln_h(blkOthVal[bIdx])
+      ln_s(string(" in long "))
+      ln_d(blkOthIdx[bIdx])
+    ln_out()
+  if runCnt[base + VC_UNWR] > 0
+    ln_lead(runIdx)
+    ln_s(string(" never written (U, $EEEE_EEEE): "))
+    ln_d(runCnt[base + VC_UNWR])
+    say(string(" records"))
+
+PRI print_trial(trialIdx) | st, pat
+' Print one arm 1 trial: its block, completion, ping and cog-RAM result.
+'
+' @param trialIdx - arm 1 trial index
+
+' Local Variables:
+' @local st - ST_*
+' @local pat - PAT_*
+
+  st := chState[trialIdx]
+  pat := ch_pattern(trialIdx)
+  ln_s(string("  "))
+  ln_trialname(trialIdx)
+  ln_s(string(" block long 0-7 after the trial:"))
+  ln_hex8(@chRec[trialIdx * BLKN])
+  ln_s(string(" -> "))
+  ln_s(lookupz(pat: string("right block"), string("long 0 the primer, longs 1-7 still the seed"), string("other")))
+  ln_out()
+  ln_s(string("  "))
+  ln_trialname(trialIdx)
+  ln_s(string(" completed: "))
+  if st == ST_DONE
+    ln_s(string("yes"))
+  elseif st == ST_ECHO
+    ln_s(string("yes, mode echo wrong (harness)"))
+  else
+    ln_s(string("NO - did not finish within 1 s (stopped)"))
+  ln_s(string("; ping: "))
+  if st == ST_LOST
+    ln_s(string("not sent (trial not completed)"))
+  elseif chAns[trialIdx]
+    ln_s(string("answered within 100 ms; registers changed outside the sacrificial range and loop variables "))
+    ln_d(chChanged[trialIdx])
+    ln_s(string("; block/primer longs outside the sacrificial range "))
+    ln_d(chStray[trialIdx])
+    ln_s(string("; sacrificial range at the ping:"))
+    ln_hex8(@chSac[trialIdx * BLKN])
+  else
+    ln_s(string("NO ANSWER within 100 ms (cog stopped)"))
+  ln_out()
+
+' ---------------------------------------------------------------------------
+' gates
+' ---------------------------------------------------------------------------
+PRI is_clean(runIdx) : bClean
+' @param runIdx - a run
+' @returns bClean - every trial clean (R sentinel, PS right, B right block)
+
+  bClean := runGoodAll[runIdx] == NTRIAL
+
+PRI arm0_gate() : bPass | runIdx, kind, unwrCnt, otherCnt, disCnt
+' Check arm 0's gates; print a line for each that fails.
+'
+' @returns bPass - TRUE when every gate of arm 0 passed
+
+' Local Variables:
+' @local runIdx - run index
+' @local kind - KD_*
+' @local unwrCnt - never-written records over the arm
+' @local otherCnt - X values in the control runs
+' @local disCnt - disagreeing cells over the arm
+
+  bPass := TRUE
+  unwrCnt := 0
+  otherCnt := 0
+  disCnt := 0
+  repeat runIdx from RUN_C1 to RUN_T1F
+    kind := run_fld(runIdx, RF_KIND)
+    unwrCnt += runCnt[runIdx * NVC + VC_UNWR]
+    disCnt += runDisagree[runIdx]
+    if kind == KD_NOP or kind == KD_PS
+      otherCnt += runOther[runIdx]
+      if not is_clean(runIdx)
+        ln_s(string("RIG FAIL (arm 0, positive control): "))
+        ln_runname(runIdx)
+        ln_s(string(" (control) clean in "))
+        ln_d(runGoodAll[runIdx])
+        say(string(" of 1024 trials: the table, the addresses or the read path is wrong"))
+        bPass := FALSE
+  if unwrCnt > 0
+    ln_s(string("RIG FAIL (arm 0, positive control): "))
+    ln_d(unwrCnt)
+    say(string(" records still hold the fill $EEEE_EEEE: the measuring cog never wrote them"))
+    bPass := FALSE
+  if otherCnt > 0
+    ln_s(string("RIG FAIL (arm 0, positive control): "))
+    ln_d(otherCnt)
+    say(string(" values classified X (other) in a control run"))
+    bPass := FALSE
+  if disCnt > 0
+    ln_s(string("RIG FAIL (arm 0, positive control): "))
+    ln_d(disCnt)
+    say(string(" cells whose 16 repetitions disagree: the slot phase was not fixed"))
+    bPass := FALSE
+  if runRep0[RUN_T1 * NVC + VC_PRIM] <> T1_PRED or not delta_match(RUN_T1) or runCnt[RUN_T1 * NVC + VC_PRIM] <> T1_PRED * REPS or runCnt[RUN_T1 * NVC + VC_SENT] <> T1_PRED_SENT * REPS
+    ln_s(string("RIG FAIL (arm 0, positive control): T1 k=0 did not reproduce EF-084: rep0 primer "))
+    ln_d(runRep0[RUN_T1 * NVC + VC_PRIM])
+    ln_s(string(" (MUST 43) by delta "))
+    ln_row8(@runDelta[RUN_T1 * NSLOT])
+    ln_s(string(" (MUST 8 8 7 6 5 4 3 2); all reps primer "))
+    ln_d(runCnt[RUN_T1 * NVC + VC_PRIM])
+    ln_s(string(" (MUST 688) sentinel "))
+    ln_d(runCnt[RUN_T1 * NVC + VC_SENT])
+    say(string(" (MUST 336)"))
+    bPass := FALSE
+  if not is_clean(RUN_T1F)
+    ln_s(string("RIG FAIL (arm 0, positive control): T1 k=7 sentinel in "))
+    ln_d(runGoodAll[RUN_T1F])
+    say(string(" of 1024 records (MUST 1024, EF-084 zero from k=7)"))
+    bPass := FALSE
+  if armDamage[ARM_P] > 0
+    ln_s(string("RIG NOTE (arm 0): "))
+    ln_d(armDamage[ARM_P])
+    say(string(" read-only data longs changed during the arm (see REGION DAMAGE lines)"))
+
+PRI delta_match(runIdx) : bMatch | deltaIdx
+' @param runIdx - run index
+' @returns bMatch - TRUE when the run's repetition-0 delta split is 8 8 7 6 5 4 3 2
+
+' Local Variables:
+' @local deltaIdx - delta 0..7
+
+  bMatch := TRUE
+  repeat deltaIdx from 0 to NSLOT - 1
+    if runDelta[runIdx * NSLOT + deltaIdx] <> predK0[deltaIdx]
+      bMatch := FALSE
+
+PRI q_gate() : bPass | bIdx, rN
+' Check arm 2's gates; print a line for each that fails, and the result.
+'
+' @returns bPass - TRUE when every gate of arm 2 passed
+
+' Local Variables:
+' @local bIdx - arm 2 slot
+' @local rN - the NOP control run
+
+  bPass := TRUE
+  rN := RUN_Q + QS_N
+  if qState[QS_N] <> ST_DONE or not is_clean(rN) or intChanged[QS_N] <> 0 or intStray[QS_N] <> 0
+    ln_s(string("GATE FAIL (arm 2): QB N k0 (control): state "))
+    ln_state(qState[QS_N])
+    ln_s(string(", right block in "))
+    ln_d(runGoodAll[rN])
+    ln_s(string(" of 1024 records, registers changed outside the sacrificial range "))
+    ln_d(intChanged[QS_N])
+    ln_s(string(" (-1 = no copy), block/primer longs outside it "))
+    ln_d(intStray[QS_N])
+    say(string(" (MUST done, 1024, 0, 0)"))
+    bPass := FALSE
+  repeat bIdx from 0 to NBRUN - 1
+    if qState[bIdx] == ST_ECHO
+      ln_s(string("GATE FAIL (arm 2): mode echo mismatch in "))
+      ln_runname(RUN_Q + bIdx)
+      say(string(" (harness)"))
+      bPass := FALSE
+    if (qState[bIdx] == ST_DONE or qState[bIdx] == ST_LOST) and not qBaseOk[bIdx]
+      ln_s(string("GATE FAIL (arm 2): the baseline cog-RAM copy of "))
+      ln_runname(RUN_Q + bIdx)
+      say(string(" did not equal the loaded image: its integrity check cannot be read"))
+      bPass := FALSE
+  if armDamage[ARM_Q] > 0
+    ln_s(string("RIG NOTE (arm 2): "))
+    ln_d(armDamage[ARM_Q])
+    say(string(" read-only data longs changed during the arm (see REGION DAMAGE lines)"))
+  if bPass
+    say(string("GATES PASS (arm 2): QB N k0 clean with cog RAM intact, every baseline equal to the loaded image, every mode echo right"))
+
+PRI s_gate() : bPass | trialIdx
+' Check arm 1's gates; print a line for each that fails, and the result.
+'
+' @returns bPass - TRUE when every gate of arm 1 passed
+
+' Local Variables:
+' @local trialIdx - arm 1 trial index
+
+  bPass := TRUE
+  repeat trialIdx from 0 to NCH - 1
+    if ch_fld(trialIdx, CF_KIND) == KD_NOP and not ctl_ok(trialIdx)
+      ln_s(string("GATE FAIL (arm 1): "))
+      ln_trialname(trialIdx)
+      ln_s(string(" (control): state "))
+      ln_state(chState[trialIdx])
+      ln_s(string(", answered "))
+      ln_d(chAns[trialIdx] & 1)
+      ln_s(string(", pattern "))
+      ln_d(ch_pattern(trialIdx))
+      ln_s(string(" (0 = right block), registers changed "))
+      ln_d(chChanged[trialIdx])
+      ln_s(string(", block/primer longs outside the sacrificial range "))
+      ln_d(chStray[trialIdx])
+      say(string(" (MUST done, answered 1, 0, 0, 0)"))
+      bPass := FALSE
+    if chState[trialIdx] == ST_ECHO
+      ln_s(string("GATE FAIL (arm 1): mode echo mismatch in "))
+      ln_trialname(trialIdx)
+      say(string(" (harness)"))
+      bPass := FALSE
+    if (chState[trialIdx] == ST_DONE or chState[trialIdx] == ST_LOST) and not chBaseOk[trialIdx]
+      ln_s(string("GATE FAIL (arm 1): the baseline cog-RAM copy of "))
+      ln_trialname(trialIdx)
+      say(string(" did not equal the loaded image: its integrity check cannot be read"))
+      bPass := FALSE
+  if armDamage[ARM_S] > 0
+    ln_s(string("RIG NOTE (arm 1): "))
+    ln_d(armDamage[ARM_S])
+    say(string(" read-only data longs changed during the arm (see REGION DAMAGE lines)"))
+  if bPass
+    say(string("GATES PASS (arm 1): every NOP control trial right block, completed, answered, cog RAM intact; every baseline equal to the loaded image; every mode echo right"))
+
+PRI rel_shown(trialIdx) : bShown | j, datum
+' Arm 1: did this trial show a block read being released?  A released-cell
+' test trial (EF-084 map P) shows it when its block has the primer in long
+' 0, or a long left unwritten (the seed, or the record fill), or when its
+' cog did not finish within 1 s (stopped).
+'
+' @param trialIdx - arm 1 trial index
+' @returns bShown - TRUE when the trial showed a release
+
+' Local Variables:
+' @local j - long index
+' @local datum - a block long
+
+  bShown := FALSE
+  if ch_fld(trialIdx, CF_KIND) <> KD_TEST or not ch_fld(trialIdx, CF_REL)
+    return
+  if chState[trialIdx] == ST_LOST
+    bShown := TRUE
+  if chState[trialIdx] == ST_LOST or chState[trialIdx] == ST_DONE or chState[trialIdx] == ST_ECHO
+    if chRec[trialIdx * BLKN] == PRIMV
+      bShown := TRUE
+    repeat j from 0 to BLKN - 1
+      datum := chRec[trialIdx * BLKN + j]
+      if datum == SEEDV or datum == UNWRITTEN
+        bShown := TRUE
+
+PRI rel_count() : relCnt | trialIdx
+' @returns relCnt - arm 1 trials that showed a block read being released
+
+' Local Variables:
+' @local trialIdx - arm 1 trial index
+
+  relCnt := 0
+  repeat trialIdx from 0 to NCH - 1
+    if rel_shown(trialIdx)
+      relCnt++
+
+PRI ctl_ok(trialIdx) : bOk
+' @param trialIdx - an arm 1 trial
+' @returns bOk - TRUE when it completed, answered, recorded the right block,
+'   and left cog RAM intact
+
+  bOk := chState[trialIdx] == ST_DONE and chAns[trialIdx] and ch_pattern(trialIdx) == PAT_OK and chChanged[trialIdx] == 0 and chStray[trialIdx] == 0
+
+PRI ln_state(st)
+' Append the name of an ST_* state.
+'
+' @param st - ST_*
+
+  ln_s(lookupz(st: string("not run"), string("cog did not start"), string("no baseline"), string("did not finish within 1 s (stopped)"), string("mode echo wrong"), string("done")))
+
+' ---------------------------------------------------------------------------
+' verdicts
+' ---------------------------------------------------------------------------
+PRI print_summary()
+' Repeat every arm's verdict line, so the closing block holds them all.
+'
+
+  say(string("=== VERDICT SUMMARY (each arm's verdict as printed at its end; arms not completed say so) ==="))
+  print_rig_line()
+  observed_s()
+  verdict_q(QS_C)
+  verdict_q(QS_T6)
+  verdict_q(QS_T7)
+  verdict_q(QS_T8)
+
+PRI ln_notdone(armIdx) : bNotDone
+' If the arm did not complete, append the reason to the line, send it, and
+' return TRUE.  The caller has already appended the verdict's name.
+'
+' @param armIdx - arm
+' @returns bNotDone - TRUE when the arm did not complete (line sent)
+
+  bNotDone := not armDone[armIdx]
+  if bNotDone
+    ln_s(string("NOT COMPLETED - the run ended before arm "))
+    ln_d(armIdx)
+    say(string(" ran (see the RIG FAIL line above)"))
+
+PRI print_rig_line()
+' Arm 0's verdict: RIG OK or RIG FAIL.
+'
+
+  if not armDone[ARM_P]
+    say(string("RIG FAIL (arm 0, positive control): arm 0 did not complete (see the RIG FAIL line above)"))
+  elseif armPass[ARM_P]
+    ln_s(string("RIG OK (arm 0, positive control): EF-084 reproduced - C1 sentinel and PS stream long in all 1024 records, T1 k=0 43 primer per repetition by delta 8 8 7 6 5 4 3 2 "))
+    say(string("(688 primer, 336 sentinel), T1 k=7 sentinel in all 1024, no U, no X in a control, every cell's 16 repetitions identical"))
+  else
+    say(string("RIG FAIL (arm 0, positive control): EF-084 not reproduced (see the lines above) - no later verdict counts"))
+
+PRI verdict_q(slot) | r, st, wrongCnt, unwrCnt, bLong, bReg, bCog, bUnknown
+' VERDICT O29C BLOCK WAITING (QB C k0) / BLOCK k6 (QB T k6) / BLOCK k7 (QB T k7)
+' / BLOCK k8 (QB T k8).
+'
+' @param slot - QS_C, QS_T6, QS_T7 or QS_T8
+
+' Local Variables:
+' @local r - the run
+' @local st - its state
+' @local wrongCnt - records written with a long that is not the right block
+' @local unwrCnt - records never written
+' @local bLong - part (a) holds
+' @local bReg - part (b) holds
+' @local bCog - part (c) holds
+' @local bUnknown - part (b) could not be read
+
+  r := RUN_Q + slot
+  st := qState[slot]
+  ln_s(lookupz(slot - QS_C: string("VERDICT O29C BLOCK WAITING: "), string("VERDICT O29C BLOCK k6: "), string("VERDICT O29C BLOCK k7: "), string("VERDICT O29C BLOCK k8: ")))
+  if ln_notdone(ARM_Q)
+    return
+  if not armPass[ARM_P]
+    say(string("NO VERDICT - arm 0 (positive control) failed: no later verdict counts; the rows above are raw"))
+    return
+  if not armPass[ARM_Q]
+    say(string("NO VERDICT - a gate of arm 2 failed (see GATE FAIL lines); the rows above are raw"))
+    return
+  if st == ST_NOSTART or st == ST_NOBASE or st == ST_NOTRUN
+    ln_s(string("NO VERDICT - the run did not take place ("))
+    ln_state(st)
+    say(string(")"))
+    return
+  unwrCnt := runCnt[r * NVC + BC_UNWR]
+  bCog := st == ST_DONE and intChanged[slot] <> -1
+  if st == ST_DONE
+    wrongCnt := NTRIAL - runGoodAll[r]
+  else
+    wrongCnt := NTRIAL - runGoodAll[r] - unwrCnt
+  bLong := wrongCnt == 0
+  bUnknown := intChanged[slot] == -1
+  bReg := not bUnknown and intChanged[slot] == 0 and intStray[slot] == 0
+  if bLong and bReg and bCog
+    if not armDone[ARM_S] or not armPass[ARM_S]
+      ln_s(string("INCONCLUSIVE - (a), (b), (c) held, but a gate of arm 1 failed, so its release evidence cannot be read and a clean workaround run proves nothing without it"))
+    elseif rel_count() == 0
+      ln_s(string("INCONCLUSIVE - the rig did not show a block read being released (characterisation arm), so a clean workaround run proves nothing; (a), (b), (c) held"))
+    else
+      ln_s(string("CONFIRMED - the right block in 1024 of 1024 records, 0 cog registers changed outside the sacrificial range and no block or primer long outside it, the cog completed the run; arm 1 showed a release in "))
+      ln_d(rel_count())
+      ln_s(string(" trials"))
+  elseif not bLong or (not bUnknown and not bReg) or st == ST_LOST
+    ln_s(string("REFUTED -"))
+    if not bLong
+      ln_s(string(" wrong long: "))
+      ln_d(wrongCnt)
+      ln_s(string(" of 1024 records written with a long that is not the right block (primer-in-record "))
+      ln_d(runCnt[r * NVC + BC_PRIM])
+      ln_s(string(", seed-in-record "))
+      ln_d(runCnt[r * NVC + BC_SEED])
+      ln_s(string(", both "))
+      ln_d(runCnt[r * NVC + BC_MIX])
+      ln_s(string(", other "))
+      ln_d(runCnt[r * NVC + BC_OTHER])
+      if st == ST_DONE
+        ln_s(string(", unwritten "))
+        ln_d(unwrCnt)
+      ln_s(string(");"))
+    if not bUnknown and not bReg
+      ln_s(string(" register change: "))
+      ln_d(intChanged[slot])
+      ln_s(string(" cog registers changed outside the sacrificial range"))
+      if intChanged[slot] > 0
+        ln_s(string(" (first "))
+        ln_hx(intFirst[slot], 3)
+        ln_c(")")
+      ln_s(string(", "))
+      ln_d(intStray[slot])
+      ln_s(string(" block/primer longs outside it;"))
+    if st == ST_LOST
+      ln_s(string(" did not finish within 1 s (stopped): records never written "))
+      ln_d(unwrCnt)
+      ln_s(string("; cog RAM not checked (no copy)"))
+  else
+    ln_s(string("INCONCLUSIVE - every record right, but the cog completed without its cog-RAM copy arriving: part (b) could not be read"))
+  ln_out()
+  say(string("  written before the run: CONFIRMED = the right block $5A5A_0100+ar+j in all 1024 records, 0 cog registers changed outside the sacrificial range, the cog completes the run, and arm 1 showed a release (else INCONCLUSIVE);"))
+  say(string("  REFUTED = wrong long / register change / did not finish within 1 s (stopped), each named"))
+
+PRI observed_s() | trialIdx, kind, pat, nCtlOk, nEscRun, nEscOk, nRelRun, nRelOk, nRelP1, nRelOth, nTried, nDone, nAns, nAnsRel, nAnsEsc, nChg, nStray, relCnt
+' OBSERVED O29C SETQ k0 (records): the main line, one line per cell, one
+' line of ping and cog-RAM results.  Every line stays under LINE_MAX.
+'
+
+' Local Variables:
+' @local trialIdx - arm 1 trial index
+' @local kind - KD_*
+' @local pat - PAT_*
+' @local nCtlOk - control trials passing
+' @local nEscRun - escaping-cell test trials run
+' @local nEscOk - of them, the right block
+' @local nRelRun - released-cell test trials run
+' @local nRelOk - of them, the right block
+' @local nRelP1 - of them, long 0 the primer and longs 1-7 the seed
+' @local nRelOth - of them, other
+' @local nTried - test trials run
+' @local nDone - test trials completed
+' @local nAns - test trials whose cog answered the ping
+' @local nAnsRel - released-cell trials answered
+' @local nAnsEsc - escaping-cell trials answered
+' @local nChg - answered test trials with registers changed
+' @local nStray - block/primer longs outside the sacrificial range, over the answered test trials
+' @local relCnt - trials that showed a block read being released
+
+  ln_s(string("OBSERVED O29C SETQ k0: "))
+  if ln_notdone(ARM_S)
+    return
+  nCtlOk := 0
+  nEscRun := 0
+  nEscOk := 0
+  nRelRun := 0
+  nRelOk := 0
+  nRelP1 := 0
+  nRelOth := 0
+  nTried := 0
+  nDone := 0
+  nAns := 0
+  nAnsRel := 0
+  nAnsEsc := 0
+  nChg := 0
+  nStray := 0
+  repeat trialIdx from 0 to NCH - 1
+    kind := ch_fld(trialIdx, CF_KIND)
+    if kind == KD_NOP
+      if ctl_ok(trialIdx)
+        nCtlOk++
+    elseif chState[trialIdx] == ST_LOST or chState[trialIdx] == ST_DONE or chState[trialIdx] == ST_ECHO
+      nTried++
+      pat := ch_pattern(trialIdx)
+      if chState[trialIdx] <> ST_LOST
+        nDone++
+      if chAns[trialIdx]
+        nAns++
+        if chChanged[trialIdx] > 0
+          nChg++
+        nStray += chStray[trialIdx]
+      if ch_fld(trialIdx, CF_REL)
+        nRelRun++
+        if chAns[trialIdx]
+          nAnsRel++
+        if pat == PAT_OK
+          nRelOk++
+        elseif pat == PAT_P1
+          nRelP1++
+        else
+          nRelOth++
+      else
+        nEscRun++
+        if chAns[trialIdx]
+          nAnsEsc++
+        if pat == PAT_OK
+          nEscOk++
+  if not armPass[ARM_P]
+    ln_s(string("NO VERDICT - arm 0 (positive control) failed; raw counts: "))
+  elseif not armPass[ARM_S]
+    ln_s(string("NO VERDICT - a gate of arm 1 failed (see GATE FAIL lines); raw counts: "))
+  ln_s(string("escaping cells (af0/ar4, af1/ar3): right block in "))
+  ln_d(nEscOk)
+  ln_s(string(" of "))
+  ln_d(nEscRun)
+  ln_s(string(" trials run; released cells (af0/ar0, af2/ar0): right block "))
+  ln_d(nRelOk)
+  ln_s(string(", long 0 the primer with longs 1-7 still the seed "))
+  ln_d(nRelP1)
+  ln_s(string(", other "))
+  ln_d(nRelOth)
+  ln_s(string(" of "))
+  ln_d(nRelRun)
+  ln_s(string(" run; completed "))
+  ln_d(nDone)
+  ln_s(string(" of "))
+  ln_d(nTried)
+  relCnt := rel_count()
+  if relCnt > 0
+    ln_s(string("; RELEASE SHOWN: yes, in "))
+    ln_d(relCnt)
+    ln_s(string(" released-cell trials"))
+  else
+    ln_s(string("; RELEASE SHOWN: no"))
+  ln_out()
+  repeat trialIdx from 0 to NCH - 1
+    if ch_fld(trialIdx, CF_KIND) == KD_NOP
+      ln_cell_line(trialIdx)
+  ln_s(string("  OBSERVED O29C SETQ k0 cog: the cog answered the ping afterwards in "))
+  ln_d(nAns)
+  ln_s(string(" of "))
+  ln_d(nTried)
+  ln_s(string(" (released cells "))
+  ln_d(nAnsRel)
+  ln_s(string(", escaping cells "))
+  ln_d(nAnsEsc)
+  ln_s(string("); answered trials with registers changed outside the sacrificial range and loop variables "))
+  ln_d(nChg)
+  ln_s(string(", block/primer longs outside the sacrificial range "))
+  ln_d(nStray)
+  ln_s(string(" | NOP controls clean "))
+  ln_d(nCtlOk)
+  ln_s(string(" of "))
+  ln_d(NCELL_S)
+  ln_out()
+
+PRI ln_cell_line(ctlIdx) | trialIdx, afIdx, arIdx, nCellRun, nOk, nP1, nOth, nDone, nAns
+' Print one characterised cell's OBSERVED line: its test trials by block
+' pattern, completed, answered.
+'
+' @param ctlIdx - the cell's NOP control trial (gives af, ar, class)
+
+' Local Variables:
+' @local trialIdx - arm 1 trial index
+' @local afIdx - the cell's stream slot bits
+' @local arIdx - the cell's block slot bits
+' @local nCellRun - its test trials run
+' @local nOk - of them, the right block
+' @local nP1 - of them, long 0 the primer and longs 1-7 the seed
+' @local nOth - of them, other
+' @local nDone - of them, completed
+' @local nAns - of them, answered the ping
+
+  afIdx := ch_fld(ctlIdx, CF_AF)
+  arIdx := ch_fld(ctlIdx, CF_AR)
+  nCellRun := 0
+  nOk := 0
+  nP1 := 0
+  nOth := 0
+  nDone := 0
+  nAns := 0
+  repeat trialIdx from 0 to NCH - 1
+    if ch_fld(trialIdx, CF_KIND) == KD_TEST and ch_fld(trialIdx, CF_AF) == afIdx and ch_fld(trialIdx, CF_AR) == arIdx
+      if chState[trialIdx] == ST_LOST or chState[trialIdx] == ST_DONE or chState[trialIdx] == ST_ECHO
+        nCellRun++
+        if chState[trialIdx] <> ST_LOST
+          nDone++
+        if chAns[trialIdx]
+          nAns++
+        if ch_pattern(trialIdx) == PAT_OK
+          nOk++
+        elseif ch_pattern(trialIdx) == PAT_P1
+          nP1++
+        else
+          nOth++
+  ln_s(string("  OBSERVED O29C SETQ k0 cell af"))
+  ln_d(afIdx)
+  ln_s(string("/ar"))
+  ln_d(arIdx)
+  if ch_fld(ctlIdx, CF_REL)
+    ln_s(string(" (released, P)"))
+  else
+    ln_s(string(" (escaping, S)"))
+  ln_s(string(": right block "))
+  ln_d(nOk)
+  ln_s(string(", long 0 the primer with longs 1-7 still the seed "))
+  ln_d(nP1)
+  ln_s(string(", other "))
+  ln_d(nOth)
+  ln_s(string(" of "))
+  ln_d(nCellRun)
+  ln_s(string(" run; completed "))
+  ln_d(nDone)
+  ln_s(string(", answered the ping "))
+  ln_d(nAns)
+  ln_s(string(" | NOP control clean "))
+  ln_d(ctl_ok(ctlIdx) & 1)
+  ln_out()
+
+DAT ' ---- Fixed predictions and the run tables ----
+' EF-084: primer cells per repetition at k=0, by delta 0..7
+predK0          long    8, 8, 7, 6, 5, 4, 3, 2
+
+' Run table, in run order: arm, shape, kind, copy, no-wait, k.
+runTab          byte    ARM_P,  SH_R,  KD_NOP,  CP_R_NOP_L,  0, 0      '  0 C1
+                byte    ARM_P,  SH_PS, KD_PS,   CP_R_PS,     1, 0      '  1 PS
+                byte    ARM_P,  SH_R,  KD_TEST, CP_R_RF0_L,  1, 0      '  2 T1 k=0
+                byte    ARM_P,  SH_R,  KD_TEST, CP_R_RF7_L,  1, 7      '  3 T1 k=7
+                byte    ARM_Q,  SH_B,  KD_NOP,  CP_B_NOP,    0, 0      '  4 QB N k0
+                byte    ARM_Q,  SH_B,  KD_WAIT, CP_B_RF0,    0, 0      '  5 QB C k0 (waiting form)
+                byte    ARM_Q,  SH_B,  KD_TEST, CP_B_RF6,    1, 6      '  6 QB T k6 (E8's rule exactly: 16 clocks)
+                byte    ARM_Q,  SH_B,  KD_TEST, CP_B_RF7,    1, 7      '  7 QB T k7
+                byte    ARM_Q,  SH_B,  KD_TEST, CP_B_RF8,    1, 8      '  8 QB T k8
+runTabEnd       byte    0
+
+' Arm 1 trial table, in trial order: kind, af, ar, class in the EF-084 map
+' (1 released P, 0 escaping S).  The NOP controls first, one per cell.
+chTab           byte    KD_NOP,  0, 0, 1                                '  0 QS N af0 ar0 (control)
+                byte    KD_NOP,  0, 4, 0                                '  1 QS N af0 ar4 (control)
+                byte    KD_NOP,  2, 0, 1                                '  2 QS N af2 ar0 (control)
+                byte    KD_NOP,  1, 3, 0                                '  3 QS N af1 ar3 (control)
+                byte    KD_TEST, 0, 0, 1                                '  4 QS T af0 ar0 #1 (released: af0 PPPSSSSS)
+                byte    KD_TEST, 0, 0, 1
+                byte    KD_TEST, 0, 0, 1
+                byte    KD_TEST, 0, 0, 1
+                byte    KD_TEST, 0, 4, 0                                '  8 QS T af0 ar4 #1 (escaping: af0 PPPSSSSS)
+                byte    KD_TEST, 0, 4, 0
+                byte    KD_TEST, 0, 4, 0
+                byte    KD_TEST, 0, 4, 0
+                byte    KD_TEST, 2, 0, 1                                ' 12 QS T af2 ar0 #1 (released: af2 PPPPPPPP)
+                byte    KD_TEST, 2, 0, 1
+                byte    KD_TEST, 2, 0, 1
+                byte    KD_TEST, 2, 0, 1
+                byte    KD_TEST, 1, 3, 0                                ' 16 QS T af1 ar3 #1 (escaping: af1 SPPSSSSS)
+                byte    KD_TEST, 1, 3, 0
+                byte    KD_TEST, 1, 3, 0
+                byte    KD_TEST, 1, 3, 0
+chTabEnd        byte    0
+                alignl
+
+' ===========================================================================
+' MEASURING COG (PASM, cog exec).  PTRA on entry = @mbox (from COGINIT).
+' No debug(), no BRK, no interrupt in this cog (DEBUG_COGS excludes it), and
+' no ## operand anywhere.  From each primer RDLONG to its test instruction
+' there is nothing but the RDFAST (or the NOP standing in for it), the k
+' NOPs and (block) the SETQ.  Loop variables are grouped (c_cmd..c_tmp);
+' the sacrificial block registers and their guard bands end the image.
+' ===========================================================================
+DAT             org     0        ' ---- Measuring Cog ----
+pasm            rdfast  #0, c_strm                              ' FIFO pre-conditioning: blocking, streams from the stream region
+                mov     c_t, #SETTLE_N
+st_d0           djnz    c_t, #st_d0                             ' the FIFO full and idle, as after any trial
+                wrlong  c_ready, ptra[MB_ALIVE]                 ' start-up handshake
+
+wait_cmd        rdlong  c_cmd, ptra                     wz      ' MB_CMD: 0 = idle
+        if_z    jmp     #wait_cmd
+                rdlong  c_copy, ptra[MB_COPY]
+                rdlong  c_mode, ptra[MB_MODE]
+                rdlong  c_af1, ptra[MB_AF]
+                rdlong  c_ar1, ptra[MB_AR]
+                rdlong  c_pa, ptra[MB_PRIM]
+                rdlong  c_tb, ptra[MB_TBL]
+                alts    c_copy, #vec_tab
+                mov     c_vec, 0-0
+                mov     c_rp, c_res
+                mov     c_reps, #REPS
+                mov     c_one, #0
+                cmp     c_cmd, #CMD_R                   wz
+        if_z    jmp     #r_rep
+                cmp     c_cmd, #CMD_B                   wz
+        if_z    jmp     #b_rep
+                cmp     c_cmd, #CMD_B1                  wz
+        if_z    jmp     #b1_ent
+                cmp     c_cmd, #CMD_SNAP                wz
+        if_z    jmp     #do_snap
+                cmp     c_cmd, #CMD_PING                wz
+        if_z    jmp     #do_ping
+cmd_done        wrlong  c_mode, ptra[MB_ECHO]                   ' epilogue, after every record: echo the mode run
+                wrlong  #0, ptra                                ' MB_CMD := 0 -> done
+                jmp     #wait_cmd
+
+do_snap         setq    #COG_DUMP_N - 1                         ' baseline: cog RAM $000-$1EF to hub
+                wrlong  pasm, c_dump
+                jmp     #cmd_done
+
+do_ping         setq    #COG_DUMP_N - 1                         ' ping: cog RAM $000-$1EF to hub, then the answer
+                wrlong  pasm, c_dump
+                wrlong  c_pong, ptra[MB_ALIVE]
+                jmp     #cmd_done
+
+'--- settle: >= 200 clocks.  Changes no flag.
+settle          mov     c_t, #SETTLE_N
+s_d1            djnz    c_t, #s_d1
+                ret
+
+'--- image R: 16 repetitions x 8 af x 8 ar; record (rep*8 + af)*8 + ar
+r_rep           mov     c_af, #0
+r_af            mov     c_ar, #0
+r_ar            mov     c_pf, c_af
+                shl     c_pf, #2
+                add     c_pf, c_strm                            ' stream address: slot bits = af
+                mov     c_pr, c_ar
+                shl     c_pr, #2
+                add     c_pr, c_tb                              ' test address: slot bits = ar
+                mov     c_dst, c_seedv                          ' "never written" stays visible
+                jmp     c_vec                                   ' the trial copy
+r_settle        call    #settle
+                wrlong  c_dst, c_rp                             ' one record per trial
+                add     c_rp, #4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #r_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #r_af
+                djnz    c_reps, #r_rep
+                jmp     #cmd_done
+
+'--- block: 16 repetitions x 8 af x 8 ar; record blk0..blk7 per trial
+'--- (CMD_B1: one trial at af = MB_AF, ar = MB_AR, one record, no integrity copy)
+b1_ent          mov     c_af, c_af1
+                mov     c_ar, c_ar1
+                mov     c_one, #1
+                jmp     #b_ar
+b_rep           mov     c_af, #0
+b_af            mov     c_ar, #0
+b_ar            mov     c_pf, c_af
+                shl     c_pf, #2
+                add     c_pf, c_strm
+                mov     c_pr, c_ar
+                shl     c_pr, #2
+                add     c_pr, c_tb                              ' block start: slot bits = ar
+                mov     c_blk0 + 0, c_seedv                     ' the sacrificial range := seed
+                mov     c_blk0 + 1, c_seedv
+                mov     c_blk0 + 2, c_seedv
+                mov     c_blk0 + 3, c_seedv
+                mov     c_blk0 + 4, c_seedv
+                mov     c_blk0 + 5, c_seedv
+                mov     c_blk0 + 6, c_seedv
+                mov     c_blk0 + 7, c_seedv
+                jmp     c_vec
+b_settle        call    #settle
+                setq    #BLKN - 1
+                wrlong  c_blk0, c_rp                            ' record: the 8 sacrificial longs
+                add     c_rp, #BLKN * 4
+                tjnz    c_one, #cmd_done                        ' CMD_B1: done after its one record
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #b_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #b_af
+                djnz    c_reps, #b_rep
+                setq    #COG_DUMP_N - 1                         ' integrity: cog RAM $000-$1EF to hub
+                wrlong  pasm, c_dump
+                jmp     #cmd_done
+
+'--- image R trial copies: primer, RDFAST (or NOP), k NOPs, the read under test
+tc_r_nop_l      rdlong  c_tmp, c_pa                             ' primer
+                nop                                             ' NOP in place of the RDFAST
+                rdlong  c_dst, c_pr                             ' the RDLONG under test
+                jmp     #r_settle
+tc_r_rf0_l      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                rdlong  c_dst, c_pr
+                jmp     #r_settle
+tc_r_rf7_l      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                rdlong  c_dst, c_pr
+                jmp     #r_settle
+tc_r_ps         rdlong  c_tmp, c_pa                             ' PS: primer
+                rdfast  c_mode, c_pf                            ' PS: the stream under test (no-wait)
+                waitx   #STREAM_WAIT                            ' PS: long past any start-up
+                rflong  c_dst                                   ' PS: the stream's first long
+                jmp     #r_settle
+
+'--- block copies: primer, RDFAST (or NOP), k NOPs, SETQ + the block RDLONG
+tc_b_nop        rdlong  c_tmp, c_pa
+                nop
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr                            ' the block RDLONG under test
+                jmp     #b_settle
+tc_b_rf0        rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr
+                jmp     #b_settle
+tc_b_rf6        rdlong  c_tmp, c_pa                             ' E8's rule exactly: 6 NOPs + SETQ = 7 non-hub instructions
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr
+                jmp     #b_settle
+tc_b_rf7        rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr
+                jmp     #b_settle
+tc_b_rf8        rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr
+                jmp     #b_settle
+
+'--- trial-copy vectors (CP_* order)
+vec_tab         long    tc_r_nop_l, tc_r_rf0_l, tc_r_rf7_l, tc_r_ps             ' 0..3
+                long    tc_b_nop, tc_b_rf0, tc_b_rf6, tc_b_rf7, tc_b_rf8        ' 4..8
+
+'--- cog constants
+c_strm          long    HUB_STRM
+c_res           long    HUB_RES
+c_dump          long    HUB_DUMP
+c_seedv         long    SEEDV
+c_ready         long    STAT_READY
+c_pong          long    STAT_PONG
+
+'--- loop variables (c_cmd .. c_tmp): excluded from the "changed" check
+c_cmd           long    0
+c_copy          long    0
+c_mode          long    0                                       ' FIFO D under test
+c_af1           long    0                                       ' CMD_B1: af
+c_ar1           long    0                                       ' CMD_B1: ar
+c_pa            long    0
+c_tb            long    0
+c_vec           long    0
+c_rp            long    0
+c_reps          long    0
+c_one           long    0                                       ' 1: CMD_B1 single trial
+c_af            long    0
+c_ar            long    0
+c_pf            long    0
+c_pr            long    0
+c_dst           long    0
+c_t             long    0
+c_tmp           long    0                                       ' the primer read's destination
+
+'--- guard band, the sacrificial range (written only by the block reads and
+'--- their presets), guard band; checked except the sacrificial range
+c_guard_lo      long    GUARD_V + 0, GUARD_V + 1, GUARD_V + 2, GUARD_V + 3, GUARD_V + 4, GUARD_V + 5, GUARD_V + 6, GUARD_V + 7
+c_blk0          long    0, 0, 0, 0, 0, 0, 0, 0
+c_guard_hi      long    GUARD_V + 8, GUARD_V + 9, GUARD_V + 10, GUARD_V + 11, GUARD_V + 12, GUARD_V + 13, GUARD_V + 14, GUARD_V + 15
+pasm_end
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}
