@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-09-28",
-    "last_updated": "2026-09-28T17:41:16.519044",
+    "release_date": "2026-10-01",
+    "last_updated": "2026-10-01T21:06:28.079607",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-09-28T17:41:16.519044",
+    "extraction_date": "2026-10-01T21:06:28.079607",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -11998,7 +11998,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Read the system counter into D. The underlying counter is a free-running 64-bit counter\n(Rev B/C silicon) that increments every clock, cleared on reset.\nWithout WC: D receives the lower 32 bits of the 64-bit counter.\nWith WC:    D receives the upper 32 bits of the 64-bit counter.\nGETCT WC followed by GETCT reads the full 64-bit value. The WC bit is a mode selector,\nnot a flag-write -- C and Z flags are always unchanged.\n",
+            "description": "Read the system counter into D. The underlying counter is a free-running 64-bit counter\n(Rev B/C silicon) that increments every clock, cleared on reset.\nWithout WC: D receives the lower 32 bits of the 64-bit counter.\nWith WC:    D receives the upper 32 bits of the 64-bit counter.\nGETCT WC followed by GETCT reads the full 64-bit value -- except in a cog whose group of\nfour has missed a wrap of the lower long (see silicon_errata). The WC bit is a mode\nselector, not a flag-write -- C and Z flags are always unchanged.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -12012,7 +12012,12 @@
             "syntax_variants": [
               "GETCT D"
             ],
-            "related": [],
+            "related": [
+              "language/spin2/methods/getct.yaml",
+              "language/spin2/methods/getms.yaml",
+              "language/spin2/methods/getsec.yaml",
+              "language/pasm2/waitx.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -12765,7 +12770,12 @@
             "syntax_variants": [
               "BRK {#}Dest"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/getbrk.yaml",
+              "language/pasm2/skip.yaml",
+              "language/pasm2/conditional-debug.yaml",
+              "architecture/debug_interrupt.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -14975,7 +14985,12 @@
             "syntax_variants": [
               "RDBYTE D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rdlong.yaml",
+              "language/pasm2/rdword.yaml",
+              "language/pasm2/wrbyte.yaml",
+              "language/pasm2/rdfast.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15023,7 +15038,12 @@
             "syntax_variants": [
               "RDWORD D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rdlong.yaml",
+              "language/pasm2/rdbyte.yaml",
+              "language/pasm2/wrword.yaml",
+              "language/pasm2/rdfast.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15122,7 +15142,13 @@
             "syntax_variants": [
               "RDLONG D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/wrlong.yaml",
+              "language/pasm2/rdword.yaml",
+              "language/pasm2/rdbyte.yaml",
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/concepts/setq_block_ops.yaml"
+            ],
             "compiler_info": {
               "syntax": "RDLONG D,S/#/PTRA/PTRB",
               "encoding": {
@@ -15196,7 +15222,14 @@
             "syntax_variants": [
               "WRLONG {#}D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rdlong.yaml",
+              "language/pasm2/wrword.yaml",
+              "language/pasm2/wrbyte.yaml",
+              "language/pasm2/wmlong.yaml",
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/concepts/setq_block_ops.yaml"
+            ],
             "compiler_info": {
               "syntax": "WRLONG D/#,S/#/PTRA/PTRB",
               "encoding": {
@@ -15248,7 +15281,12 @@
             "syntax_variants": [
               "WRWORD {#}D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/wrlong.yaml",
+              "language/pasm2/wrbyte.yaml",
+              "language/pasm2/rdword.yaml",
+              "language/pasm2/rdfast.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15346,7 +15384,12 @@
             "syntax_variants": [
               "WRBYTE {#}D,{#}S/P"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/wrlong.yaml",
+              "language/pasm2/wrword.yaml",
+              "language/pasm2/rdbyte.yaml",
+              "language/pasm2/rdfast.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15802,7 +15845,7 @@
                 "clocks": "2 or WRFAST finish + 10...17"
               }
             ],
-            "description": "Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units\n(0 = max), S[19:0] = block start address.\n\nKey features:\n- Automatic sequential reading from HUB\n- Background FIFO refill\n- Perfect for streaming data processing\n- Essential for checksum/CRC calculations\n- Used with RFBYTE/RFWORD/RFLONG instructions\n",
+            "description": "Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start address. The FIFO then reads hub sequentially and refills in the background; the cog takes the data with RFBYTE/RFWORD/RFLONG, or the streamer consumes it.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16920,7 +16963,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Capture the streamer's Goertzel accumulators into holding registers and clear them; write the captured cosine (X) accumulation into D and place the captured sine (Y) accumulation into the next instruction's S value. SUBSEQUENT GETXACC INSTRUCTIONS RETURN THE SAME CAPTURED VALUES UNTIL A NEW STREAMER COMMAND EXECUTES \u2014 GETXACC reads a holding register, not a live accumulator. Used with DDS/Goertzel modes for tone detection (DTMF) or signal analysis. The X,Y values represent the real/imaginary components of the Goertzel filter output. Follow with QVECTOR to compute magnitude and phase from the X,Y pair.",
+            "description": "Read the streamer's Goertzel accumulators -- the cosine (X) accumulation into D, the sine (Y) accumulation into the next instruction's S value. The Silicon Doc says GETXACC captures both into holding registers and clears them, and that repeat reads return the same values until a new streamer command executes. ON REV C SILICON THE CLEAR ACTS ONLY WHILE A DDS/GOERTZEL COMMAND IS RUNNING; with the streamer idle (or in another mode) GETXACC returns the running total and clears nothing, and each Goertzel burst's last term lands in the NEXT burst (see silicon_errata). Used with DDS/Goertzel modes for tone detection (DTMF) or signal analysis; X,Y are the real/imaginary components of the Goertzel output. Follow with QVECTOR to compute magnitude and phase.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16947,7 +16990,7 @@
                 "valueType": 24
               }
             },
-            "documentation_source": "Silicon Doc silicon-doc-text.txt:1604 (capture-into-holding-registers, clear, and the repeat-read rule)",
+            "documentation_source": "Silicon Doc silicon-doc-text.txt:1604 (the documented capture/clear/repeat-read statement); silicon behaviour: hardware-verified EF-069, EF-070, EF-076",
             "documentation_level": "enhanced"
           },
           "SETXFRQ": {
@@ -18409,7 +18452,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-09-28T17:41:16.519044",
+    "extraction_date": "2026-10-01T21:06:28.079607",
     "categories": {
       "keywords": {
         "count": 37,
@@ -21293,7 +21336,7 @@
               "The upper 32 bits are accessible via the PASM2 GETCT D WC instruction",
               "Wraps around every 2^32 clocks (lower 32 bits)",
               "Subtraction handles wrap correctly",
-              "All cogs see same counter value",
+              "All cogs see the same lower 32 bits, which is what GETCT() returns -- unaffected by the stale upper long a cog group can read after missing a wrap (hardware-verified, EF-082); GETMS()/GETSEC(), which use the upper long, are affected: language/pasm2/getct.yaml silicon_errata",
               "Not affected by cog start/stop",
               "Resolution equals clock period"
             ],
@@ -25132,13 +25175,17 @@
               "Good for human-scale timing (UI, timeouts)",
               "Handles clock frequency changes automatically"
             ],
+            "silicon_errata": {
+              "stale_upper_long_after_missed_wrap": "GETMS() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks (21,474-21,475 ms at 200 MHz) per missed wrap -- after 8 missed wraps a cog 5 read 18,819 ms beside cog 0's 190,617. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Hardware-verified on Rev C (EF-080, EF-082). Full account: language/pasm2/getct.yaml silicon_errata."
+            },
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "GETSEC",
-              "GETCT",
-              "WAITMS"
+              "language/spin2/methods/getsec.yaml",
+              "language/spin2/methods/getct.yaml",
+              "language/spin2/methods/waitms.yaml",
+              "language/pasm2/getct.yaml"
             ],
             "see_also": [
               "Time measurement",
@@ -25178,17 +25225,21 @@
               "Based on system counter divided by clkfreq",
               "32-bit value wraps after ~136 years",
               "1-second resolution",
-              "Good for long-duration timing",
+              "Good for long-duration timing -- in a cog whose four-cog group was kept running (see silicon_errata)",
               "More convenient than GETMS for human-readable times",
               "Handles clock frequency changes automatically"
             ],
+            "silicon_errata": {
+              "stale_upper_long_after_missed_wrap": "GETSEC() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks = 21.47 s at 200 MHz per missed wrap. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Hardware-verified on Rev C (EF-080, EF-082). Full account: language/pasm2/getct.yaml silicon_errata."
+            },
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "GETMS",
-              "GETCT",
-              "WAITMS"
+              "language/spin2/methods/getms.yaml",
+              "language/spin2/methods/getct.yaml",
+              "language/spin2/methods/waitms.yaml",
+              "language/pasm2/getct.yaml"
             ],
             "see_also": [
               "Time measurement",
@@ -26778,7 +26829,7 @@
               "bits": "7:6",
               "purpose": "Pin DIR/OUT control",
               "constants_reference": "architecture/smart_pins.yaml (configuration_format.fields.tt.constants) -- P_TT_00, P_TT_01, P_TT_10 and P_TT_11 with their values, binaries and the P_OE / P_CHANNEL / P_BITDAC aliases. The per-constant definitions are in language/spin2/symbols/spin2-builtin-symbols-complete.yaml. Defined once, in those two places, and pointed at from here.",
-              "context_dependent": "%TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by\nwhether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.\nThe per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.\nThe four contexts:\n  1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives\n  2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;\n                                    %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;\n                                    %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC\n  3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;\n                                    0x/1x = SMART/OUT or SMART/OTHER drives\n  4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;\n                                    0x = OUT enables ADC, 1x = OTHER enables ADC\nFull table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).\nSource: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.\n",
+              "context_dependent": "%TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by\nwhether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.\nThe per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.\nThe four contexts:\n  1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives\n  2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;\n                                    %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;\n                                    %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC\n  3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;\n                                    0x/1x = SMART/OUT or SMART/OTHER drives\n  4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;\n                                    0x = OUT enables ADC, 1x = OTHER enables ADC\n                                    -- ON SILICON, OUT runs the ADC only while TT bit 0\n                                    is set (TT = %00: OUT high runs nothing); see\n                                    architecture/smart_pins.yaml dac_smart_pin_modes\n                                    silicon_errata (hardware-verified, EF-071)\nFull table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).\nSource: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.\n",
               "when_smart_pin_on": "x0=output disabled, x1=output enabled (regardless of DIR)",
               "source_selection": "0x=SMART/OUT drives, 1x=SMART/OTHER drives",
               "p_oe_required_for": "SMART-PIN output modes only (NCO, PWM, Pulse, Transition, Serial TX, the smart-pin DAC modes %00001-%00011, USB). NOT the non-smart-pin (cog) DAC: with the smart pin off in DAC_MODE, the same bit is named P_CHANNEL and it SWITCHES THE DAC'S SOURCE from the pin's own level field to a cog DAC channel. Adding P_OE/P_CHANNEL to a level-driven DAC kills its output.",
@@ -27738,29 +27789,29 @@
           "MULDIV64": {
             "method": "MULDIV64",
             "type": "method",
-            "description": "Multiply then divide with 64-bit intermediate result\n",
+            "description": "Multiply then divide with a 64-bit intermediate product. Parallax Spin2\nDocumentation v55: \"Divide the 64-bit product of 'mult1' and 'mult2' by\n'divisor', return quotient (unsigned operation).\" All operands and the quotient\nare UNSIGNED 32-bit values -- an operand with bit 31 set is a large positive\nnumber, not a negative one; handle signs yourself for signed math.\n",
             "category": "Math/CORDIC Operations",
             "syntax": "result := MULDIV64(Multiplier, Multiplicand, Divisor)",
             "parameters": [
               {
                 "name": "Multiplier",
                 "type": "long",
-                "description": "First value to multiply (32-bit signed)"
+                "description": "First value to multiply (32-bit unsigned)"
               },
               {
                 "name": "Multiplicand",
                 "type": "long",
-                "description": "Second value to multiply (32-bit signed)"
+                "description": "Second value to multiply (32-bit unsigned)"
               },
               {
                 "name": "Divisor",
                 "type": "long",
-                "description": "Value to divide by (32-bit signed, non-zero)"
+                "description": "Value to divide the 64-bit product by (32-bit unsigned)"
               }
             ],
             "returns": {
               "type": "long",
-              "description": "Result of (Multiplier \u00d7 Multiplicand) \u00f7 Divisor"
+              "description": "Unsigned quotient of (Multiplier \u00d7 Multiplicand) \u00f7 Divisor"
             },
             "examples": [
               {
@@ -27783,8 +27834,7 @@
             "notes": [
               "Prevents overflow in intermediate calculation",
               "Uses 64-bit intermediate result",
-              "All parameters are 32-bit signed",
-              "Division by zero returns 0",
+              "Unsigned operation: all parameters and the result are 32-bit unsigned (Parallax Spin2 Documentation v55, MULDIV64)",
               "Useful for scaling and ratio calculations",
               "More precise than (a*b)/c for large values"
             ],
@@ -27792,8 +27842,8 @@
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
             },
             "related": [
-              "QLOG",
-              "QEXP"
+              "language/spin2/methods/qlog.yaml",
+              "language/spin2/methods/qexp.yaml"
             ],
             "see_also": [
               "Extended precision math",
