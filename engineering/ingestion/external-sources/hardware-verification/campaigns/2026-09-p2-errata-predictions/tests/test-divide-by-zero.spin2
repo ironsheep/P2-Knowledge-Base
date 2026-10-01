@@ -1,0 +1,1622 @@
+'' ===========================================================================
+''
+''   File.......  test-divide-by-zero.spin2
+''   Purpose....  Measure what the P2 returns when it divides by zero: the
+''                CORDIC QDIV and QFRAC (with and without SETQ), and the
+''                Spin2 operators /, //, +/, +// and MULDIV64
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+'' ===========================================================================
+
+{ WHAT IS MEASURED
+
+  No source states what a divide by zero returns.  The P2 silicon
+  documentation (CORDIC Solver, DIVIDE) gives QDIV {Q:D}/S and QFRAC {D:Q}/S
+  with the quotient in GETQX and the remainder in GETQY, and says nothing of
+  S = 0.  The Spin2 language documentation lists /, //, +/, +//, FRAC,
+  their assignment forms /=, //=, +/=, +//=, and MULDIV64 (unsigned), and
+  says nothing of a zero divisor either.
+
+  This program MEASURES the results; it predicts no value.  What it proves:
+    - the CORDIC path and the read-out are sound: controls with non-zero
+      divisors MUST give their exact results, or RIG FAIL;
+    - each zero-divisor result is a result of THAT operation, not a stale
+      one: before every repetition a MARKER divide with a different, known
+      result runs (checked exact), so a GETQX that returned the previous
+      result would show the marker's value and differ between repetitions;
+    - determinism: every case runs 8 times; DETERMINISTIC = all 8 identical,
+      VARIES = not (every repetition is printed raw);
+    - whether a zero-divisor operation leaves the CORDIC in a bad state: the
+      NEXT divide after it (1000 / 3) is checked, and its count printed;
+    - the clocks from GETCT before the operation to GETCT after its GETQX,
+      for zero-divisor cases beside the controls that run the same code.
+
+THE SPIN2 OPERATORS, FROM THE SPIN2 INTERPRETER SOURCE
+  The compiler emits one bytecode per operator; the interpreter runs it as
+  a skip pattern over shared code (mul_mod / muu_mod).  None tests the
+  divisor for zero; each passes it to QDIV or QFRAC as a register:
+    a / b    bc_div   ($97): w := |b| (C = sign of b); x := a; Z = sign of
+             a; x := |a|; QDIV x,w; x := GETQX; negate x if C <> Z
+    a // b   bc_rem   ($99): as /, but x := GETQY; negate x if a < 0
+    a +/ b   bc_divu  ($98): QDIV a,b; GETQX
+    a +// b  bc_remu  ($9A): QDIV a,b; GETQY
+    a FRAC b bc_frac  ($9D): QFRAC a,b; GETQX     ({a:0} / b)
+    a /= b, a //= b, a +/= b, a +//= b: bc_div_write, bc_rem_write,
+             bc_divu_write, bc_remu_write ($4C, $4E, $4D, $4F): the same
+             code as the operator, then the result written back to a
+    MULDIV64(m1,m2,d)  bc_muldiv64 ($92), muldiv64_: QMUL m1,m2 -> {hi,lo};
+             then SKIP into the GETSEC code: SETQ hi; QDIV lo,d; GETQX
+  So a Spin2 divide by zero is QDIV |a|,0 (or {hi:lo}/0, or QFRAC a,0)
+  plus, for the signed operators, the sign step above.  The controls below
+  include negative operands so the sign step is proven on the part.
+
+RIG
+  Bare P2 board, 200 MHz.  No pins, no jumpers, no instruments.
+  Cog 0 (Spin2, the only cog with the debugger) starts the measuring cog,
+  waits for it (1 s timeout), checks and prints its records; then starts a
+  Spin2 cog for the Spin2 cases, waits (1 s timeout), checks and prints.
+  The measuring cog (COGINIT, cog execution, PASM below) has no debug
+  interrupt, no debug() and no BRK, and sets up no interrupt; the Spin2
+  cog calls no debug().
+
+ONE PASM RUN (case c, repetition r; measuring cog)
+    MARKER   qdiv c_mkd,c_mks: c_mkd = 7 * m + k, c_mks = 7, m = $0010_0000
+             + c * 16 + r, k = (r & 3) + 1; GETQX / GETQY (MUST be m, k)
+    CASE     getct t0 / [setq Q] / qdiv-or-qfrac D,S / getqx QX / getct t1 /
+             getqy QY  (one hand-written copy per form, below)
+    NEXT     qdiv c_fud,c_fus (1000 / 3); GETQX / GETQY (333 and 1 if the
+             CORDIC is sound after the case)
+    record   marker QX, marker QY, QX, QY, t1 - t0, next QX, next QY, tag
+             (tag = $7A90_0000 + c * 16 + r, written in the same block, so a
+             record never written shows a wrong tag)
+
+PASM CASES (P00..P60; the table pcaseTbl below)
+  CONTROLS (P00..P10), each MUST give exactly, in all 8 repetitions.  Every
+  form that has a zero-divisor case below has a control here:
+    P00 qdiv D,S          1000 / 3                 QX 333          QY 1
+    P01 qdiv D,S          $FFFF_FFFF / 2           QX $7FFF_FFFF   QY 1
+    P02 qdiv D,S          0 / 5                    QX 0            QY 0
+    P03 qdiv D,S          7 / $FFFF_FFFF           QX 0            QY 7
+    P04 qdiv D,#7         $1234_5678 / 7           QX $0299_C335   QY 5
+    P05 setq Q/qdiv D,S   {$1234_5678:$9ABC_DEF0} / $8765_4321
+                                                   QX $226B_9022   QY $38BC_648E
+    P06 qfrac D,S         {1:0} / 3                QX $5555_5555   QY 1
+    P07 setq Q/qfrac D,S  {1:$8000_0000} / 7       QX $36DB_6DB6   QY 6
+    P08 qfrac D,#7        {1:0} / 7                QX $2492_4924   QY 4
+    P09 setq Q/qdiv D,#7  {3:$1234_5678} / 7       QX $7050_9EA3   QY 3
+    P10 setq Q/qfrac D,#7 {2:$1234_5678} / 7       QX $4BBE_557E   QY 6
+  The #7 forms run the same copies as the #0 forms except for the S field:
+  a control on #7 proves the immediate path of each form.
+  ZERO DIVISOR (P11..P60), each measured (QX, QY, clocks):
+    P11..P24  qdiv D,#0 and qdiv D,S (S = 0), D = 0, 1, 7, $7FFF_FFFF,
+              $8000_0000, $FFFF_FFFF, $1234_5678 (each D: #0 form, then S)
+    P25..P36  setq Q / qdiv D,S (S = 0), Q = 1, $FFFF_FFFF, $1234_5678,
+              D = 0, 7, $FFFF_FFFF; and setq Q / qdiv D,#0 with D = 7
+    P37..P48  qfrac D,#0 and qfrac D,S (S = 0), D = 0, 1, 7, $8000_0000,
+              $FFFF_FFFF, $1234_5678
+    P49..P60  setq Q / qfrac D,S (S = 0), Q = 1, $FFFF_FFFF, $1234_5678,
+              D = 0, 1, $1234_5678; and setq Q / qfrac D,#0 with D = 1
+
+SPIN2 CASES (S00..S70; the table scaseTbl below), run in a Spin2 cog by one
+  method for every case, with every operand a parameter, so the compiler
+  cannot fold the divisor.  Before every repetition a MARKER divide
+  (7 * m + k) +/ 7 (MUST be m); after it a NEXT divide 1000 +/ 3.
+  CONTROLS (S00..S20), each MUST give exactly, in all 8 repetitions:
+    1000 / 3 = 333   -1000 / 3 = -333   1000 / -3 = -333   -1000 / -3 = 333
+    1000 // 3 = 1    -1000 // 3 = -1    1000 // -3 = 1     -1000 // -3 = -1
+    $FFFF_FFFF +/ 2 = $7FFF_FFFF        1000 +/ 3 = 333
+    $FFFF_FFFF +// 2 = 1                1000 +// 7 = 6
+    MULDIV64(1000, 1000, 3) = 333333
+    MULDIV64($FFFF_FFFF, $FFFF_FFFF, $FFFF_FFFF) = $FFFF_FFFF
+    MULDIV64($1234_5678, $10, 3) = $6117_2280
+    1 FRAC 3 = $5555_5555               2 FRAC 7 = $4924_9249
+    a := -1000, a /= 3: -333            a := -1000, a //= 3: -1
+    a := $FFFF_FFFF, a +/= 2: $7FFF_FFFF
+    a := 1000, a +//= 7: 6
+  ZERO DIVISOR (S21..S70), each measured:
+    a / 0 and a // 0, a = 0, 1, 7, -1, -7, $7FFF_FFFF, NEGX, $1234_5678,
+      -$1234_5678
+    a +/ 0 and a +// 0, a = 0, 1, 7, $7FFF_FFFF, $8000_0000, $FFFF_FFFF,
+      $1234_5678
+    MULDIV64(m1, m2, 0), (m1, m2) = (0, 0), (0, 12345), (1, 1), (7, 3),
+      (1000, 1000), ($1234_5678, $10), ($FFFF_FFFF, $FFFF_FFFF),
+      ($1234_5678, $9ABC_DEF0)
+    a FRAC 0, a = 0, 1, 7, $8000_0000, $FFFF_FFFF, $1234_5678
+    a /= 0 and a //= 0 with a = -7; a +/= 0 and a +//= 0 with
+      a = $FFFF_FFFF (each also measured above in its operator form)
+
+CHECKS (each failure prints RIG FAIL)
+  Before the runs: the case tables hold the counts the program declares,
+    and every row names a known form or operator.
+  Measuring cog and Spin2 cog: started, and done within 1 s.  If not, the
+    cases before the one the cog stopped in are reported, then a STALLED
+    line names that case and repetition and the next line prints its
+    repetitions that did complete; a cog that never reported a run is
+    named as such.  The END line says STALLED.
+  Every PASM record: its tag right; its marker right.
+  Every control: its value right in all 8 repetitions, and its NEXT divide
+    right in all 8.
+  Every Spin2 marker right.
+  A zero-divisor case is never a RIG FAIL: its values, its agreement, how
+    often it equals the marker before it, and its NEXT count are measured
+    and printed.
+
+OUTPUT, PER CASE (two lines)
+  P..: the form and operands; repetition 0's QX and QY in hex and unsigned
+       decimal; DETERMINISTIC (8 of 8 identical) or VARIES (n of 8 identical
+       to repetition 0); "equal to the marker before it" n of 8; "next
+       divide right" n of 8; clocks min..max; controls add CONTROL OK or
+       CONTROL MISS with the expected values.
+  raw: every repetition's QX, QY and clocks.
+  S..: the operator and operands (hex and decimal); repetition 0's result;
+       DETERMINISTIC or VARIES; "equal to the marker before it" n of 8 (the
+       marker's quotient m for /, +/, FRAC, MULDIV64 and their assignment
+       forms, its remainder k for //, +// and theirs; either sign for the
+       signed operators); "next divide right"; controls CONTROL OK or
+       CONTROL MISS.  raw: every repetition's result.
+  A VARIES case whose "equal to the marker" count is not 0 is returning
+  stale results; one whose count is 0 really varies.  (MULDIV64 runs its
+  own QMUL between the marker and its QDIV, so for MULDIV64 the count
+  tests the marker only, not that QMUL's product.)
+  Then SUMMARY lines, a CONTROLS line, and the END line.
+
+OPCODES (pnut-ts -d -l, v1.55.8 build 9/19/2026, read from the .lst hub
+  image; object offset = cog address * 4 + $BF0).  QDIV is 1101000 1LI,
+  QFRAC 1101001 0LI; I = 1: S is the 9-bit immediate.  Cog registers: c_mks
+  $08D, c_fud $08E, c_fus $08F, dval $092, sval $093, qval $094, c_rp $096,
+  c_vec $09B, c_mkd $09D, c_t0 $09F, c_t1 $0A0, record block r_mkx..r_tag
+  $0A1..$0A8 (r_qx $0A3, r_qy $0A4).
+  Every form is, in order: getct c_t0 ($FD613E1A) / [setq qval
+  ($FD612828)] / the operation / getqx r_qx ($FD614618) / getct c_t1
+  ($FD61401A) / getqy r_qy ($FD614819) / jmp #case_done.  Each form's
+  label address, then its operation (the second long, or the third after
+  a SETQ):
+    f_div_imm0    $CB8  qdiv dval,#0     $FD152400  I=1, S=#0
+    f_div_reg     $CD0  qdiv dval,sval   $FD112493  I=0, S=$093
+    f_divq_imm0   $CE8  qdiv dval,#0     $FD152400  after the SETQ
+    f_divq_reg    $D04  qdiv dval,sval   $FD112493  after the SETQ
+    f_frac_imm0   $D20  qfrac dval,#0    $FD252400  I=1, S=#0
+    f_frac_reg    $D38  qfrac dval,sval  $FD212493  I=0, S=$093
+    f_fracq_imm0  $D50  qfrac dval,#0    $FD252400  after the SETQ
+    f_fracq_reg   $D6C  qfrac dval,sval  $FD212493  after the SETQ
+    f_div_immk    $D88  qdiv dval,#7     $FD152407  I=1, S=#7 (P04)
+    f_frac_immk   $DA0  qfrac dval,#7    $FD252407  I=1, S=#7 (P08)
+    f_divq_immk   $DB8  qdiv dval,#7     $FD152407  after the SETQ (P09)
+    f_fracq_immk  $DD4  qfrac dval,#7    $FD252407  after the SETQ (P10)
+    qdiv c_mkd,c_mks   $FD113A8D  the MARKER ($C60), then getqx r_mkx /
+                                  getqy r_mky / jmp c_vec ($FD61362C)
+    qdiv c_fud,c_fus   $FD111C8F  the NEXT divide ($C78)
+    setq #7 / wrlong r_mkx,c_rp  $FD640E28 / $FC614296  the 8-long record
+    kvec_tab ($DF0)    $032 $038 $03E $045 $04C $052 $058 $05F $066 $06C
+                       $072 $079: the cog addresses of the twelve forms,
+                       in K_* order
+  The one Spin2 method that runs every Spin2 case (object offset $268A):
+    E1 E2 97 F4 (a / b), E1 E2 99 F4 (//), E1 E2 98 F4 (+/), E1 E2 9A F4
+    (+//), E1 E2 E3 19 92 F4 (MULDIV64), E1 E2 9D F4 (FRAC), and for the
+    assignment forms E1 F4 (result := a) then E2 D4 4C (/=), E2 D4 4E
+    (//=), E2 D4 4D (+/=), E2 D4 4F (+//=): every divisor is a local read
+    at run time (E2, or E3 for MULDIV64), so none is folded at compile
+    time.
+  If you edit this file, recompile with -l and re-read every row above.
+
+DEBUG OUTPUT.  Every printed line is assembled in lineBuf from hub strings
+  and numbers and sent by the ONE debug(zstr_(@lineBuf)) record in ln_out();
+  the only other record is debug("DEBUG_END_SESSION").  The listing reports
+  2 DEBUG records, 24 bytes of DEBUG data.
+
+HOW TO RUN
+  Compile with pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or PNut
+  Ctrl-F10).  Runs once, in well under a second; nothing written to flash.
+  Output: the header, two lines per case (61 PASM, 71 Spin2), the SUMMARY
+  and CONTROLS lines, the END line, then DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+  REPS            = 8                   ' repetitions of every case
+  NPCASE          = 61                  ' PASM cases (pcaseTbl rows)
+  NPCTRL          = 11                  ' PASM controls: the first rows
+  NSCASE          = 71                  ' Spin2 cases (scaseTbl rows)
+  NSCTRL          = 21                  ' Spin2 controls: the first rows
+  CASE_W          = 6                   ' longs per pcaseTbl row
+  SCASE_W         = 5                   ' longs per scaseTbl row
+  RECW            = 8                   ' longs per PASM record
+
+  MK_BASE         = $0010_0000          ' marker quotient m = MK_BASE + case * 16 + rep
+  MK_CASE_SHIFT   = 4                   ' case * 16 (REPS <= 16)
+  MK_S            = 7                   ' marker divisor
+  MK_REM_MASK     = 3                   ' marker remainder k = (rep & 3) + 1
+  FU_D            = 1000                ' NEXT divide: 1000 / 3
+  FU_S            = 3
+  FU_QX           = 333
+  FU_QY           = 1
+  CTL_IMM_S       = 7                   ' P04, P08..P10: the #7 controls
+  TAG_BASE        = $7A90_0000          ' record tag = TAG_BASE + case * 16 + rep
+  DONE_V          = $0D0E_0D0E          ' a cog is done
+  UNWRITTEN       = $EEEE_EEEE          ' record fill before a run
+  CUR_REP_MASK    = $F                  ' progress long: case * 16 + rep
+
+  SPIN_STACK      = 128                 ' longs of stack for the Spin2 cog
+  LINE_MAX        = 480                 ' longest printed line (chars)
+  DEC_TOP         = 1_000_000_000       ' top decimal place of a long
+  DEC_DIGITS      = 10
+  DEC_BASE        = 10
+  HEX_DIGITS      = 8
+  HEX_BITS        = 4
+  HEX_GROUP       = 4                   ' "_" after the top four hex digits
+  HEX_LETTERS     = 10                  ' nibbles 10..15 print as A..F
+  NGRP            = 4                   ' clock groups (G_*)
+
+CON ' ---- Identifiers ----
+  ' PASM forms (kvec_tab order in the measuring cog)
+  #0, K_DIV_IMM0, K_DIV_REG, K_DIVQ_IMM0, K_DIVQ_REG, K_FRAC_IMM0, K_FRAC_REG, K_FRACQ_IMM0, K_FRACQ_REG
+  #K_FRACQ_REG + 1, K_DIV_IMMK, K_FRAC_IMMK, K_DIVQ_IMMK, K_FRACQ_IMMK  ' the #7 forms
+  NKIND           = K_FRACQ_IMMK + 1
+
+  ' pcaseTbl row longs: form, D, S, Q, expected QX, expected QY (controls)
+  #0, CW_KIND, CW_D, CW_S, CW_Q, CW_EXPX, CW_EXPY
+
+  ' PASM record longs
+  #0, RW_MKX, RW_MKY, RW_QX, RW_QY, RW_CLK, RW_FUX, RW_FUY, RW_TAG
+
+  ' Spin2 operators: the operator forms, then the assignment forms
+  '  (OP_DIVA /=, OP_REMA //=, OP_DIVUA +/=, OP_REMUA +//=)
+  #0, OP_DIV, OP_REM, OP_DIVU, OP_REMU, OP_MD64, OP_FRAC, OP_DIVA, OP_REMA, OP_DIVUA, OP_REMUA
+  NOP_KIND        = OP_REMUA + 1
+
+  ' scaseTbl row longs: operator, a, b, c (MULDIV64 divisor), expected (controls)
+  #0, SW_OP, SW_A, SW_B, SW_C, SW_EXP
+
+  ' clock groups: controls / zero-divisor cases, without / with SETQ
+  #0, G_CTRL_PLAIN, G_CTRL_SETQ, G_ZERO_PLAIN, G_ZERO_SETQ
+
+  ' mailbox longs (cog 0 <-> measuring cog)
+  '  MB_TBL   - hub address of pcaseTbl
+  '  MB_REC   - hub address of the records
+  '  MB_NCASE - number of cases to run
+  '  MB_CUR   - progress: case * 16 + rep of the run about to start
+  '  MB_DONE  - DONE_V once every case has run
+  #0, MB_TBL, MB_REC, MB_NCASE, MB_CUR, MB_DONE, MB_LEN
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  long precs[NPCASE * REPS * RECW]      ' PASM records
+  long spinRes[NSCASE * REPS]           ' Spin2: the case's result
+  long spinMk[NSCASE * REPS]            ' Spin2: the marker's result
+  long spinFu[NSCASE * REPS]            ' Spin2: the NEXT divide's result
+  long spinCur                          ' Spin2 progress: case * 16 + rep
+  long spinDone                         ' DONE_V once every Spin2 case has run
+  long spinStack[SPIN_STACK]
+  long failCnt                          ' RIG FAIL lines printed
+  long pRanCnt, sRanCnt                 ' cases fully run (PASM, Spin2)
+  long bPasmStall, bSpinStall           ' a cog did not finish within 1 s
+  long pDetCnt, pVarCnt                 ' PASM zero cases DETERMINISTIC / VARIES
+  long pEqMkCnt, pNextCnt, pRunCnt      ' PASM zero runs: equal to marker, next right, all
+  long sDetCnt, sVarCnt                 ' Spin2 zero cases DETERMINISTIC / VARIES
+  long sEqMkCnt, sNextCnt, sRunCnt      ' Spin2 zero runs: equal to marker, next right, all
+  long grpLo[NGRP], grpHi[NGRP]         ' clock range per G_* group
+  ' every printed line is built here and sent by ONE debug() record (ln_out)
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | pasmCog, spinCog, caseIdx
+'' Run the PASM cases on the measuring cog and the Spin2 cases on a Spin2
+'' cog, print every case, the controls, the summary and the END line.
+''
+
+' Local Variables:
+' @local pasmCog - cog the measuring cog started in
+' @local spinCog - cog the Spin2 cases ran in
+' @local caseIdx - case index
+
+  linePos := 0
+  failCnt := 0
+  reset_tallies()
+  print_header()
+  if not tables_ok()
+    say(string("=== END: RIG FAIL (case tables) ==="))
+    finish()
+
+  ' ---- PASM cases ----
+  longfill(@precs, UNWRITTEN, NPCASE * REPS * RECW)
+  mbox[MB_TBL] := @pcaseTbl
+  mbox[MB_REC] := @precs
+  mbox[MB_NCASE] := NPCASE
+  mbox[MB_CUR] := UNWRITTEN
+  mbox[MB_DONE] := 0
+  pasmCog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if pasmCog < 0
+    ln_s(string("RIG FAIL: coginit expected a free cog (0..7), got "))
+    ln_d(pasmCog)
+    ln_out()
+    say(string("=== END: RIG FAIL (no measuring cog) ==="))
+    finish()
+  pRanCnt := NPCASE
+  if not wait_done(@mbox[MB_DONE])
+    bPasmStall := TRUE
+    cogstop(pasmCog)
+    pRanCnt := ran_count(mbox[MB_CUR], NPCASE)
+  ln_s(string("=== PASM: measuring cog "))
+  ln_d(pasmCog)
+  say(string(" ==="))
+  if pRanCnt > 0
+    repeat caseIdx from 0 to pRanCnt - 1
+      report_pcase(caseIdx)
+  if bPasmStall
+    print_pstall(mbox[MB_CUR])
+
+  ' ---- Spin2 cases ----
+  longfill(@spinRes, UNWRITTEN, NSCASE * REPS)
+  longfill(@spinMk, UNWRITTEN, NSCASE * REPS)
+  longfill(@spinFu, UNWRITTEN, NSCASE * REPS)
+  spinCur := UNWRITTEN
+  spinDone := 0
+  spinCog := cogspin(NEWCOG, spin_worker(), @spinStack)
+  if spinCog < 0
+    ln_s(string("RIG FAIL: cogspin expected a free cog (0..7), got "))
+    ln_d(spinCog)
+    ln_out()
+    say(string("=== END: RIG FAIL (no Spin2 cog) ==="))
+    finish()
+  sRanCnt := NSCASE
+  if not wait_done(@spinDone)
+    bSpinStall := TRUE
+    cogstop(spinCog)
+    sRanCnt := ran_count(spinCur, NSCASE)
+  ln_s(string("=== SPIN2: Spin2 cog "))
+  ln_d(spinCog)
+  say(string(" ==="))
+  if sRanCnt > 0
+    repeat caseIdx from 0 to sRanCnt - 1
+      report_scase(caseIdx)
+  if bSpinStall
+    print_sstall(spinCur)
+
+  print_summary()
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal (the form udec_ printed) to the line; the
+' number is read as unsigned.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_d(numVal)
+' Append a signed decimal (the form sdec_ printed) to the line; the number
+' is read as signed.
+'
+' @param numVal - the number
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_u(numVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as uhex_long_ printed it: $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_hu(numVal)
+' Append "$XXXX_XXXX (unsigned decimal)".
+'
+' @param numVal - the number
+
+  ln_h(numVal)
+  ln_s(string(" ("))
+  ln_u(numVal)
+  ln_c(")")
+
+PRI ln_hs(numVal)
+' Append "$XXXX_XXXX (signed decimal)".
+'
+' @param numVal - the number
+
+  ln_h(numVal)
+  ln_s(string(" ("))
+  ln_d(numVal)
+  ln_c(")")
+
+PRI ln_cnt(countVal)
+' Append "n of 8".
+'
+' @param countVal - the count
+
+  ln_d(countVal)
+  ln_s(string(" of "))
+  ln_d(REPS)
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI rig_fail(pStr)
+' Count one RIG FAIL and start its line: "RIG FAIL: " and the string.  The
+' caller appends the details and sends the line.
+'
+' @param pStr - hub address of the string
+
+  failCnt++
+  ln_s(string("RIG FAIL: "))
+  ln_s(pStr)
+
+' ---------------------------------------------------------------------------
+' set-up
+' ---------------------------------------------------------------------------
+PRI print_header()
+' Print the rig identity, the record layout, every control's MUST value and
+' how each case is described, before any run.
+'
+
+  say(string("=== Divide by zero: CORDIC QDIV / QFRAC and the Spin2 divide operators (pnut-ts v1.55.8 -d, clk 200 MHz) ==="))
+  say(string("Measured, not predicted: every zero-divisor value is printed. Controls with non-zero divisors MUST be exact, else RIG FAIL."))
+  say(string("PASM run (case c, rep r): MARKER qdiv (7*m+k)/7, m = $0010_0000 + c*16 + r, k = (r & 3) + 1, MUST give m, k | CASE getct / [setq Q] / qdiv-or-qfrac D,S / getqx QX / getct / getqy QY | NEXT qdiv 1000/3"))
+  say(string("PASM controls MUST (all 8 reps, and NEXT 333 r 1): P00 1000/3 = 333 r 1 | P01 $FFFF_FFFF/2 = $7FFF_FFFF r 1 | P02 0/5 = 0 r 0 | P03 7/$FFFF_FFFF = 0 r 7 | P04 $1234_5678/#7 = $0299_C335 r 5"))
+  say(string("  P05 setq $1234_5678 qdiv $9ABC_DEF0/$8765_4321 = $226B_9022 r $38BC_648E | P06 qfrac 1/3 = $5555_5555 r 1 | P07 setq $8000_0000 qfrac 1/7 = $36DB_6DB6 r 6"))
+  say(string("  P08 qfrac 1/#7 = $2492_4924 r 4 | P09 setq 3 qdiv $1234_5678/#7 = $7050_9EA3 r 3 | P10 setq $1234_5678 qfrac 2/#7 = $4BBE_557E r 6"))
+  say(string("Spin2 run: MARKER (7*m+k) +/ 7 MUST give m | CASE the operator on a and b (MULDIV64: a, b, c), every operand a run-time parameter | NEXT 1000 +/ 3"))
+  say(string("Spin2 controls MUST (all 8 reps): 1000/3 = 333, -1000/3 = -333, 1000/-3 = -333, -1000/-3 = 333, 1000//3 = 1, -1000//3 = -1, 1000//-3 = 1, -1000//-3 = -1,"))
+  say(string("  $FFFF_FFFF +/ 2 = $7FFF_FFFF, 1000 +/ 3 = 333, $FFFF_FFFF +// 2 = 1, 1000 +// 7 = 6, MULDIV64(1000,1000,3) = 333333, MULDIV64($FFFF_FFFF,$FFFF_FFFF,$FFFF_FFFF) = $FFFF_FFFF, MULDIV64($1234_5678,$10,3) = $6117_2280,"))
+  say(string("  1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249, a := -1000 a /= 3 = -333, a := -1000 a //= 3 = -1, a := $FFFF_FFFF a +/= 2 = $7FFF_FFFF, a := 1000 a +//= 7 = 6"))
+  say(string("Per case: rep 0's values; DETERMINISTIC = all 8 reps identical, VARIES = not; equal to the marker before it n of 8 (not 0 = stale results); next divide right n of 8; PASM clocks = GETCT before the op to GETCT after its GETQX (min..max)"))
+
+PRI tables_ok() : bOk | caseIdx
+' Check that the case tables hold the declared counts and only known forms
+' and operators; print RIG FAIL for each that does not.
+'
+' @returns bOk - TRUE when both tables are as declared
+
+' Local Variables:
+' @local caseIdx - case index
+
+  bOk := TRUE
+  if @pzeroTbl - @pcaseTbl <> NPCTRL * CASE_W * 4 or @pcaseEnd - @pcaseTbl <> NPCASE * CASE_W * 4
+    rig_fail(string("pcaseTbl expected "))
+    ln_d(NPCTRL)
+    ln_s(string(" control rows of "))
+    ln_d(NPCASE)
+    ln_s(string(", holds "))
+    ln_d((@pzeroTbl - @pcaseTbl) / (CASE_W * 4))
+    ln_s(string(" of "))
+    ln_d((@pcaseEnd - @pcaseTbl) / (CASE_W * 4))
+    ln_out()
+    bOk := FALSE
+  if @szeroTbl - @scaseTbl <> NSCTRL * SCASE_W * 4 or @scaseEnd - @scaseTbl <> NSCASE * SCASE_W * 4
+    rig_fail(string("scaseTbl expected "))
+    ln_d(NSCTRL)
+    ln_s(string(" control rows of "))
+    ln_d(NSCASE)
+    ln_s(string(", holds "))
+    ln_d((@szeroTbl - @scaseTbl) / (SCASE_W * 4))
+    ln_s(string(" of "))
+    ln_d((@scaseEnd - @scaseTbl) / (SCASE_W * 4))
+    ln_out()
+    bOk := FALSE
+  if bOk
+    repeat caseIdx from 0 to NPCASE - 1
+      if long[pcase_row(caseIdx)][CW_KIND] +>= NKIND
+        rig_fail(string("pcaseTbl row "))
+        ln_d(caseIdx)
+        ln_s(string(" names form "))
+        ln_d(long[pcase_row(caseIdx)][CW_KIND])
+        ln_out()
+        bOk := FALSE
+    repeat caseIdx from 0 to NSCASE - 1
+      if long[scase_row(caseIdx)][SW_OP] +>= NOP_KIND
+        rig_fail(string("scaseTbl row "))
+        ln_d(caseIdx)
+        ln_s(string(" names operator "))
+        ln_d(long[scase_row(caseIdx)][SW_OP])
+        ln_out()
+        bOk := FALSE
+
+PRI reset_tallies()
+' Clear every tally.
+'
+
+  pRanCnt := 0
+  sRanCnt := 0
+  bPasmStall := FALSE
+  bSpinStall := FALSE
+  pDetCnt := 0
+  pVarCnt := 0
+  pEqMkCnt := 0
+  pNextCnt := 0
+  pRunCnt := 0
+  sDetCnt := 0
+  sVarCnt := 0
+  sEqMkCnt := 0
+  sNextCnt := 0
+  sRunCnt := 0
+  longfill(@grpLo, POSX, NGRP)
+  longfill(@grpHi, NEGX, NGRP)
+
+PRI wait_done(pFlag) : bDone | startCt
+' Wait up to 1 s for a cog to write DONE_V to its done long.
+'
+' @param pFlag - hub address of the done long
+' @returns bDone - TRUE when DONE_V arrived in time
+
+' Local Variables:
+' @local startCt - CT when the wait began
+
+  bDone := TRUE
+  startCt := getct()
+  repeat until long[pFlag] == DONE_V
+    if getct() - startCt > clkfreq
+      bDone := FALSE
+      quit
+
+PRI ran_count(progressVal, caseCnt) : ranCnt
+' The cases fully run before a cog stalled, from its progress long.
+'
+' @param progressVal - the progress long: case * 16 + rep, or UNWRITTEN
+'   if the cog never started a run
+' @param caseCnt - the cases in the cog's table
+' @returns ranCnt - cases before the one the cog stopped in (0..caseCnt)
+
+  if progressVal == UNWRITTEN
+    ranCnt := 0
+  else
+    ranCnt := (progressVal >> MK_CASE_SHIFT) <# caseCnt
+
+PRI ln_stall(pWho, prefixChar, progressVal)
+' Send the STALLED line of a cog: never reported, or the case and the
+' repetition it stopped in.
+'
+' @param pWho - hub address of the cog's name, as printed
+' @param prefixChar - "P" or "S"
+' @param progressVal - the progress long: case * 16 + rep, or UNWRITTEN
+'   if the cog never started a run
+
+  ln_s(string("STALLED: the "))
+  ln_s(pWho)
+  if progressVal == UNWRITTEN
+    say(string(" never reported - it started no run within 1 s"))
+  else
+    ln_s(string(" did not finish within 1 s; it stopped in case "))
+    ln_case(prefixChar, progressVal >> MK_CASE_SHIFT)
+    ln_s(string("repetition "))
+    ln_d(progressVal & CUR_REP_MASK)
+    ln_s(string(" (progress long "))
+    ln_h(progressVal)
+    say(string("); the cases before it are reported above"))
+
+PRI print_pstall(progressVal) | caseIdx, repIdx
+' Print the measuring cog's STALLED line, then every repetition of the case
+' it stopped in that completed (its records are written).
+'
+' @param progressVal - the progress long: case * 16 + rep, or UNWRITTEN
+'   if the cog never started a run
+
+' Local Variables:
+' @local caseIdx - case index
+' @local repIdx - repetition
+
+  ln_stall(string("measuring cog"), "P", progressVal)
+  caseIdx := progressVal >> MK_CASE_SHIFT
+  if progressVal <> UNWRITTEN and caseIdx < NPCASE
+    ln_s(string("  "))
+    ln_case("P", caseIdx)
+    ln_s(string("repetitions completed before the stall (QX QY clocks, marker QX QY, next QX QY):"))
+    if (progressVal & CUR_REP_MASK) == 0
+      ln_s(string(" none"))
+    else
+      repeat repIdx from 0 to (progressVal & CUR_REP_MASK) - 1
+        ln_s(string(" | "))
+        ln_h(rec_at(caseIdx, repIdx, RW_QX))
+        ln_c(" ")
+        ln_h(rec_at(caseIdx, repIdx, RW_QY))
+        ln_c(" ")
+        ln_d(rec_at(caseIdx, repIdx, RW_CLK))
+        ln_s(string(", "))
+        ln_h(rec_at(caseIdx, repIdx, RW_MKX))
+        ln_c(" ")
+        ln_h(rec_at(caseIdx, repIdx, RW_MKY))
+        ln_s(string(", "))
+        ln_h(rec_at(caseIdx, repIdx, RW_FUX))
+        ln_c(" ")
+        ln_h(rec_at(caseIdx, repIdx, RW_FUY))
+    ln_out()
+
+PRI print_sstall(progressVal) | caseIdx, repIdx, slotIdx
+' Print the Spin2 cog's STALLED line, then every repetition of the case it
+' stopped in that completed (its results are written).
+'
+' @param progressVal - the progress long: case * 16 + rep, or UNWRITTEN
+'   if the cog never started a run
+
+' Local Variables:
+' @local caseIdx - case index
+' @local repIdx - repetition
+' @local slotIdx - index of the repetition's results
+
+  ln_stall(string("Spin2 cog"), "S", progressVal)
+  caseIdx := progressVal >> MK_CASE_SHIFT
+  if progressVal <> UNWRITTEN and caseIdx < NSCASE
+    ln_s(string("  "))
+    ln_case("S", caseIdx)
+    ln_s(string("repetitions completed before the stall (result, marker, next):"))
+    if (progressVal & CUR_REP_MASK) == 0
+      ln_s(string(" none"))
+    else
+      repeat repIdx from 0 to (progressVal & CUR_REP_MASK) - 1
+        slotIdx := caseIdx * REPS + repIdx
+        ln_s(string(" | "))
+        ln_h(spinRes[slotIdx])
+        ln_c(" ")
+        ln_h(spinMk[slotIdx])
+        ln_c(" ")
+        ln_h(spinFu[slotIdx])
+    ln_out()
+
+' ---------------------------------------------------------------------------
+' tables and records
+' ---------------------------------------------------------------------------
+PRI pcase_row(caseIdx) : pRow
+' The row of a PASM case.
+'
+' @param caseIdx - case index
+' @returns pRow - hub address of the case's pcaseTbl row
+
+  pRow := @pcaseTbl + caseIdx * CASE_W * 4
+
+PRI scase_row(caseIdx) : pRow
+' The row of a Spin2 case.
+'
+' @param caseIdx - case index
+' @returns pRow - hub address of the case's scaseTbl row
+
+  pRow := @scaseTbl + caseIdx * SCASE_W * 4
+
+PRI rec_at(caseIdx, repIdx, fieldIdx) : fieldVal
+' One long of a PASM case's record.
+'
+' @param caseIdx - case index
+' @param repIdx - repetition
+' @param fieldIdx - record long (RW_*)
+' @returns fieldVal - that long of the case's record for the repetition
+
+  fieldVal := precs[(caseIdx * REPS + repIdx) * RECW + fieldIdx]
+
+PRI run_id(caseIdx, repIdx) : runId
+' @param caseIdx - case index
+' @param repIdx - repetition
+' @returns runId - case * 16 + rep (progress long, marker, tag)
+
+  runId := (caseIdx << MK_CASE_SHIFT) + repIdx
+
+PRI mk_quot(caseIdx, repIdx) : quotVal
+' @param caseIdx - case index
+' @param repIdx - repetition
+' @returns quotVal - the marker's quotient m
+
+  quotVal := MK_BASE + run_id(caseIdx, repIdx)
+
+PRI mk_rem(repIdx) : remVal
+' @param repIdx - repetition
+' @returns remVal - the marker's remainder k = (rep & 3) + 1
+
+  remVal := (repIdx & MK_REM_MASK) + 1
+
+PRI kind_text(kind) : pText
+' @param kind - PASM form (K_*)
+' @returns pText - the form as printed
+
+  pText := lookupz(kind: string("qdiv D,#0"), string("qdiv D,S"), string("setq Q / qdiv D,#0"), string("setq Q / qdiv D,S"), string("qfrac D,#0"), string("qfrac D,S"), string("setq Q / qfrac D,#0"), string("setq Q / qfrac D,S"), string("qdiv D,#7"), string("qfrac D,#7"), string("setq Q / qdiv D,#7"), string("setq Q / qfrac D,#7"))
+
+PRI kind_setq(kind) : bSetq
+' @param kind - PASM form (K_*)
+' @returns bSetq - TRUE when a SETQ Q precedes the operation
+
+  bSetq := kind == K_DIVQ_IMM0 or kind == K_DIVQ_REG or kind == K_FRACQ_IMM0 or kind == K_FRACQ_REG or kind == K_DIVQ_IMMK or kind == K_FRACQ_IMMK
+
+PRI kind_sreg(kind) : bSReg
+' @param kind - PASM form (K_*)
+' @returns bSReg - TRUE when S is a register (not an immediate)
+
+  bSReg := kind == K_DIV_REG or kind == K_DIVQ_REG or kind == K_FRAC_REG or kind == K_FRACQ_REG
+
+PRI op_text(opKind) : pText
+' @param opKind - Spin2 operator (OP_*)
+' @returns pText - the operator as printed
+
+  pText := lookupz(opKind: string("a / b"), string("a // b"), string("a +/ b"), string("a +// b"), string("MULDIV64(a, b, c)"), string("a FRAC b"), string("a /= b"), string("a //= b"), string("a +/= b"), string("a +//= b"))
+
+PRI op_signed(opKind) : bSigned
+' @param opKind - Spin2 operator (OP_*)
+' @returns bSigned - TRUE for the signed operators / and // and their
+'   assignment forms
+
+  bSigned := opKind == OP_DIV or opKind == OP_REM or opKind == OP_DIVA or opKind == OP_REMA
+
+PRI op_gives_rem(opKind) : bRem
+' @param opKind - Spin2 operator (OP_*)
+' @returns bRem - TRUE for the remainder operators // and +// and their
+'   assignment forms (their result comes from GETQY)
+
+  bRem := opKind == OP_REM or opKind == OP_REMU or opKind == OP_REMA or opKind == OP_REMUA
+
+PRI stale_of(opKind, caseIdx, repIdx, resultVal) : bStale | markerVal
+' Whether a Spin2 result equals what the marker before it left in the
+' CORDIC: its quotient m (GETQX operators) or its remainder k (GETQY
+' operators); either sign for the signed operators.
+'
+' @param opKind - Spin2 operator (OP_*)
+' @param caseIdx - case index
+' @param repIdx - repetition
+' @param resultVal - the repetition's result
+' @returns bStale - TRUE when the result equals the marker's
+
+' Local Variables:
+' @local markerVal - the marker's quotient or remainder
+
+  if op_gives_rem(opKind)
+    markerVal := mk_rem(repIdx)
+  else
+    markerVal := mk_quot(caseIdx, repIdx)
+  bStale := resultVal == markerVal or (op_signed(opKind) and resultVal == -markerVal)
+
+PRI ln_num(numVal, bSigned)
+' Append a number in hex and in signed or unsigned decimal.
+'
+' @param numVal - the number
+' @param bSigned - TRUE: signed decimal; FALSE: unsigned
+
+  if bSigned
+    ln_hs(numVal)
+  else
+    ln_hu(numVal)
+
+PRI ln_case(prefixChar, caseIdx)
+' Append the case label: P07, S12.
+'
+' @param prefixChar - "P" or "S"
+' @param caseIdx - case index
+
+  ln_c(prefixChar)
+  if caseIdx < DEC_BASE
+    ln_c("0")
+  ln_d(caseIdx)
+  ln_c(" ")
+
+' ---------------------------------------------------------------------------
+' PASM: check and print one case
+' ---------------------------------------------------------------------------
+PRI report_pcase(caseIdx) | pRow, kind, bCtrl, repIdx, firstX, firstY, valX, valY, sameCnt, tagCnt, mkCnt, eqMkCnt, nextCnt, ctrlCnt, clkVal, clkLo, clkHi, grpIdx
+' Check one PASM case's 8 records, update the tallies and print its two
+' lines and any RIG FAIL lines.
+'
+' @param caseIdx - case index
+
+' Local Variables:
+' @local pRow - hub address of the case's pcaseTbl row
+' @local kind - the case's form (K_*)
+' @local bCtrl - the case is a control
+' @local repIdx - repetition
+' @local firstX - repetition 0's QX
+' @local firstY - repetition 0's QY
+' @local valX - the repetition's QX
+' @local valY - the repetition's QY
+' @local sameCnt - repetitions identical to repetition 0
+' @local tagCnt - records whose tag is right
+' @local mkCnt - repetitions whose marker is right
+' @local eqMkCnt - repetitions whose QX, QY equal the marker's
+' @local nextCnt - repetitions whose NEXT divide is right
+' @local ctrlCnt - repetitions equal to the control's expected values
+' @local clkVal - the repetition's clocks
+' @local clkLo - fewest clocks
+' @local clkHi - most clocks
+' @local grpIdx - clock group (G_*)
+
+  pRow := pcase_row(caseIdx)
+  kind := long[pRow][CW_KIND]
+  bCtrl := caseIdx < NPCTRL
+  firstX := rec_at(caseIdx, 0, RW_QX)
+  firstY := rec_at(caseIdx, 0, RW_QY)
+  sameCnt := 0
+  tagCnt := 0
+  mkCnt := 0
+  eqMkCnt := 0
+  nextCnt := 0
+  ctrlCnt := 0
+  clkLo := POSX
+  clkHi := NEGX
+  repeat repIdx from 0 to REPS - 1
+    valX := rec_at(caseIdx, repIdx, RW_QX)
+    valY := rec_at(caseIdx, repIdx, RW_QY)
+    if valX == firstX and valY == firstY
+      sameCnt++
+    if rec_at(caseIdx, repIdx, RW_TAG) == TAG_BASE + run_id(caseIdx, repIdx)
+      tagCnt++
+    if rec_at(caseIdx, repIdx, RW_MKX) == mk_quot(caseIdx, repIdx) and rec_at(caseIdx, repIdx, RW_MKY) == mk_rem(repIdx)
+      mkCnt++
+    if valX == rec_at(caseIdx, repIdx, RW_MKX) and valY == rec_at(caseIdx, repIdx, RW_MKY)
+      eqMkCnt++
+    if rec_at(caseIdx, repIdx, RW_FUX) == FU_QX and rec_at(caseIdx, repIdx, RW_FUY) == FU_QY
+      nextCnt++
+    if valX == long[pRow][CW_EXPX] and valY == long[pRow][CW_EXPY]
+      ctrlCnt++
+    clkVal := rec_at(caseIdx, repIdx, RW_CLK)
+    clkLo <#= clkVal
+    clkHi #>= clkVal
+
+  ' clock group and tallies
+  if bCtrl
+    grpIdx := G_CTRL_PLAIN
+  else
+    grpIdx := G_ZERO_PLAIN
+    pRunCnt += REPS
+    pEqMkCnt += eqMkCnt
+    pNextCnt += nextCnt
+    if sameCnt == REPS
+      pDetCnt++
+    else
+      pVarCnt++
+  if kind_setq(kind)
+    grpIdx++
+  grpLo[grpIdx] <#= clkLo
+  grpHi[grpIdx] #>= clkHi
+
+  ' line 1: the case and its measured values
+  ln_case("P", caseIdx)
+  ln_s(kind_text(kind))
+  ln_s(string("  D "))
+  ln_hu(long[pRow][CW_D])
+  if kind_sreg(kind)
+    ln_s(string(" S "))
+    ln_hu(long[pRow][CW_S])
+  if kind_setq(kind)
+    ln_s(string(" Q "))
+    ln_hu(long[pRow][CW_Q])
+  ln_s(string(": QX "))
+  ln_hu(firstX)
+  ln_s(string(" QY "))
+  ln_hu(firstY)
+  if sameCnt == REPS
+    ln_s(string(" | DETERMINISTIC (8 of 8 identical)"))
+  else
+    ln_s(string(" | VARIES ("))
+    ln_cnt(sameCnt)
+    ln_s(string(" identical to rep 0)"))
+  ln_s(string(" | equal to the marker before it "))
+  ln_cnt(eqMkCnt)
+  ln_s(string(" | next divide right "))
+  ln_cnt(nextCnt)
+  ln_s(string(" | clocks "))
+  ln_d(clkLo)
+  ln_s(string(".."))
+  ln_d(clkHi)
+  if bCtrl
+    if ctrlCnt == REPS and nextCnt == REPS
+      ln_s(string(" | CONTROL OK"))
+    else
+      ln_s(string(" | CONTROL MISS - expected QX "))
+      ln_h(long[pRow][CW_EXPX])
+      ln_s(string(" QY "))
+      ln_h(long[pRow][CW_EXPY])
+      ln_s(string(" and next divide 333 r 1, in 8 of 8"))
+  ln_out()
+
+  ' line 2: every repetition raw
+  ln_s(string("  raw QX QY clocks per rep:"))
+  repeat repIdx from 0 to REPS - 1
+    ln_s(string(" | "))
+    ln_h(rec_at(caseIdx, repIdx, RW_QX))
+    ln_c(" ")
+    ln_h(rec_at(caseIdx, repIdx, RW_QY))
+    ln_c(" ")
+    ln_d(rec_at(caseIdx, repIdx, RW_CLK))
+  ln_out()
+
+  ' gates
+  if bCtrl and (ctrlCnt <> REPS or nextCnt <> REPS)
+    rig_fail(string("control P"))
+    ln_d(caseIdx)
+    ln_s(string(" right in "))
+    ln_cnt(ctrlCnt)
+    ln_s(string(", its next divide right in "))
+    ln_cnt(nextCnt)
+    ln_s(string(" (both MUST be 8 of 8)"))
+    ln_out()
+  if tagCnt <> REPS
+    rig_fail(string("P"))
+    ln_d(caseIdx)
+    ln_s(string(" records with the right tag "))
+    ln_cnt(tagCnt)
+    ln_s(string("; rep 0 tag "))
+    ln_h(rec_at(caseIdx, 0, RW_TAG))
+    ln_s(string(", expected "))
+    ln_h(TAG_BASE + run_id(caseIdx, 0))
+    ln_out()
+  if mkCnt <> REPS
+    rig_fail(string("P"))
+    ln_d(caseIdx)
+    ln_s(string(" markers right "))
+    ln_cnt(mkCnt)
+    ln_s(string("; rep 0 marker QX "))
+    ln_h(rec_at(caseIdx, 0, RW_MKX))
+    ln_s(string(" QY "))
+    ln_h(rec_at(caseIdx, 0, RW_MKY))
+    ln_s(string(", expected "))
+    ln_h(mk_quot(caseIdx, 0))
+    ln_s(string(" "))
+    ln_h(mk_rem(0))
+    ln_out()
+
+' ---------------------------------------------------------------------------
+' Spin2: the worker cog, and check and print one case
+' ---------------------------------------------------------------------------
+PRI spin_worker() | caseIdx, repIdx, pRow, slotIdx
+' Spin2 cog: run every Spin2 case 8 times, each repetition with a marker
+' divide before it and the NEXT divide after it; write DONE_V at the end.
+'
+
+' Local Variables:
+' @local caseIdx - Spin2 case index
+' @local repIdx - repetition
+' @local pRow - hub address of the case's scaseTbl row
+' @local slotIdx - index of the repetition's results
+
+  repeat caseIdx from 0 to NSCASE - 1
+    pRow := scase_row(caseIdx)
+    repeat repIdx from 0 to REPS - 1
+      spinCur := run_id(caseIdx, repIdx)
+      slotIdx := caseIdx * REPS + repIdx
+      spinMk[slotIdx] := spin_op(OP_DIVU, mk_quot(caseIdx, repIdx) * MK_S + mk_rem(repIdx), MK_S, 0)
+      spinRes[slotIdx] := spin_op(long[pRow][SW_OP], long[pRow][SW_A], long[pRow][SW_B], long[pRow][SW_C])
+      spinFu[slotIdx] := spin_op(OP_DIVU, FU_D, FU_S, 0)
+  spinDone := DONE_V
+
+PRI spin_op(opKind, argA, argB, argC) : opResult
+' One Spin2 divide.  Every operand arrives as a parameter, so the compiler
+' emits the operator's bytecode and the divisor is read at run time.  The
+' assignment forms load the dividend into the result, then divide it in
+' place.
+'
+' @param opKind - Spin2 operator (OP_*)
+' @param argA - the dividend; MULDIV64: the multiplier
+' @param argB - the divisor; MULDIV64: the multiplicand
+' @param argC - MULDIV64: the divisor (other operators: unused, 0)
+' @returns opResult - the operator's result
+
+  opResult := 0
+  case opKind
+    OP_DIV:
+      opResult := argA / argB
+    OP_REM:
+      opResult := argA // argB
+    OP_DIVU:
+      opResult := argA +/ argB
+    OP_REMU:
+      opResult := argA +// argB
+    OP_MD64:
+      opResult := muldiv64(argA, argB, argC)
+    OP_FRAC:
+      opResult := argA frac argB
+    OP_DIVA:
+      opResult := argA
+      opResult /= argB
+    OP_REMA:
+      opResult := argA
+      opResult //= argB
+    OP_DIVUA:
+      opResult := argA
+      opResult +/= argB
+    OP_REMUA:
+      opResult := argA
+      opResult +//= argB
+
+PRI report_scase(caseIdx) | pRow, opKind, bCtrl, bSigned, repIdx, slotIdx, firstVal, sameCnt, mkCnt, eqMkCnt, nextCnt, ctrlCnt
+' Check one Spin2 case's 8 repetitions, update the tallies and print its two
+' lines and any RIG FAIL lines.
+'
+' @param caseIdx - case index
+
+' Local Variables:
+' @local pRow - hub address of the case's scaseTbl row
+' @local opKind - the operator (OP_*)
+' @local bCtrl - the case is a control
+' @local bSigned - the operator is signed
+' @local repIdx - repetition
+' @local slotIdx - index of the repetition's results
+' @local firstVal - repetition 0's result
+' @local sameCnt - repetitions identical to repetition 0
+' @local mkCnt - repetitions whose marker is right
+' @local eqMkCnt - repetitions whose result equals the marker's
+' @local nextCnt - repetitions whose NEXT divide is right
+' @local ctrlCnt - repetitions equal to the control's expected value
+
+  pRow := scase_row(caseIdx)
+  opKind := long[pRow][SW_OP]
+  bCtrl := caseIdx < NSCTRL
+  bSigned := op_signed(opKind)
+  firstVal := spinRes[caseIdx * REPS]
+  sameCnt := 0
+  mkCnt := 0
+  eqMkCnt := 0
+  nextCnt := 0
+  ctrlCnt := 0
+  repeat repIdx from 0 to REPS - 1
+    slotIdx := caseIdx * REPS + repIdx
+    if spinRes[slotIdx] == firstVal
+      sameCnt++
+    if spinMk[slotIdx] == mk_quot(caseIdx, repIdx)
+      mkCnt++
+    if stale_of(opKind, caseIdx, repIdx, spinRes[slotIdx])
+      eqMkCnt++
+    if spinFu[slotIdx] == FU_QX
+      nextCnt++
+    if spinRes[slotIdx] == long[pRow][SW_EXP]
+      ctrlCnt++
+  if not bCtrl
+    sRunCnt += REPS
+    sEqMkCnt += eqMkCnt
+    sNextCnt += nextCnt
+    if sameCnt == REPS
+      sDetCnt++
+    else
+      sVarCnt++
+
+  ' line 1: the case and its measured value
+  ln_case("S", caseIdx)
+  ln_s(op_text(opKind))
+  ln_s(string("  a "))
+  ln_num(long[pRow][SW_A], bSigned)
+  ln_s(string(" b "))
+  ln_num(long[pRow][SW_B], bSigned)
+  if opKind == OP_MD64
+    ln_s(string(" c "))
+    ln_hu(long[pRow][SW_C])
+  ln_s(string(": result "))
+  ln_num(firstVal, bSigned)
+  if sameCnt == REPS
+    ln_s(string(" | DETERMINISTIC (8 of 8 identical)"))
+  else
+    ln_s(string(" | VARIES ("))
+    ln_cnt(sameCnt)
+    ln_s(string(" identical to rep 0)"))
+  ln_s(string(" | equal to the marker before it "))
+  ln_cnt(eqMkCnt)
+  ln_s(string(" | next divide right "))
+  ln_cnt(nextCnt)
+  if bCtrl
+    if ctrlCnt == REPS and nextCnt == REPS
+      ln_s(string(" | CONTROL OK"))
+    else
+      ln_s(string(" | CONTROL MISS - expected "))
+      ln_num(long[pRow][SW_EXP], bSigned)
+      ln_s(string(" and next divide 333, in 8 of 8"))
+  ln_out()
+
+  ' line 2: every repetition raw
+  ln_s(string("  raw result per rep:"))
+  repeat repIdx from 0 to REPS - 1
+    ln_c(" ")
+    ln_h(spinRes[caseIdx * REPS + repIdx])
+  ln_out()
+
+  ' gates
+  if bCtrl and (ctrlCnt <> REPS or nextCnt <> REPS)
+    rig_fail(string("control S"))
+    ln_d(caseIdx)
+    ln_s(string(" right in "))
+    ln_cnt(ctrlCnt)
+    ln_s(string(", its next divide right in "))
+    ln_cnt(nextCnt)
+    ln_s(string(" (both MUST be 8 of 8)"))
+    ln_out()
+  if mkCnt <> REPS
+    rig_fail(string("S"))
+    ln_d(caseIdx)
+    ln_s(string(" markers right "))
+    ln_cnt(mkCnt)
+    ln_s(string("; rep 0 marker "))
+    ln_h(spinMk[caseIdx * REPS])
+    ln_s(string(", expected "))
+    ln_h(mk_quot(caseIdx, 0))
+    ln_out()
+
+' ---------------------------------------------------------------------------
+' summary
+' ---------------------------------------------------------------------------
+PRI ln_grp(grpIdx)
+' Append a clock group's range "lo..hi" (or "none").
+'
+' @param grpIdx - clock group (G_*)
+
+  if grpLo[grpIdx] > grpHi[grpIdx]
+    ln_s(string("none"))
+  else
+    ln_d(grpLo[grpIdx])
+    ln_s(string(".."))
+    ln_d(grpHi[grpIdx])
+
+PRI print_summary()
+' Print the SUMMARY, CONTROLS and END lines.
+'
+
+  say(string("=== SUMMARY ==="))
+  ln_s(string("SUMMARY PASM: zero-divisor cases DETERMINISTIC "))
+  ln_d(pDetCnt)
+  ln_s(string(", VARIES "))
+  ln_d(pVarCnt)
+  ln_s(string(" (of "))
+  ln_d(pRanCnt - NPCTRL #> 0)
+  ln_s(string(" run); equal to the marker before them in "))
+  ln_d(pEqMkCnt)
+  ln_s(string(" of "))
+  ln_d(pRunCnt)
+  ln_s(string(" runs; next divide right after "))
+  ln_d(pNextCnt)
+  ln_s(string(" of "))
+  ln_d(pRunCnt)
+  ln_out()
+  ln_s(string("SUMMARY PASM clocks, GETCT before the op to GETCT after its GETQX: no SETQ - controls "))
+  ln_grp(G_CTRL_PLAIN)
+  ln_s(string(", zero divisor "))
+  ln_grp(G_ZERO_PLAIN)
+  ln_s(string("; with SETQ - controls "))
+  ln_grp(G_CTRL_SETQ)
+  ln_s(string(", zero divisor "))
+  ln_grp(G_ZERO_SETQ)
+  ln_out()
+  ln_s(string("SUMMARY SPIN2: zero-divisor cases DETERMINISTIC "))
+  ln_d(sDetCnt)
+  ln_s(string(", VARIES "))
+  ln_d(sVarCnt)
+  ln_s(string(" (of "))
+  ln_d(sRanCnt - NSCTRL #> 0)
+  ln_s(string(" run); equal to the marker before them in "))
+  ln_d(sEqMkCnt)
+  ln_s(string(" of "))
+  ln_d(sRunCnt)
+  ln_s(string(" runs; next divide right after "))
+  ln_d(sNextCnt)
+  ln_s(string(" of "))
+  ln_d(sRunCnt)
+  ln_out()
+  if failCnt == 0 and pRanCnt > NPCTRL and sRanCnt > NSCTRL
+    say(string("CONTROLS: OK - every control exact in 8 of 8 with its next divide, every marker right, every record tag right"))
+  else
+    ln_s(string("CONTROLS: RIG FAIL - "))
+    ln_d(failCnt)
+    say(string(" RIG FAIL line(s) above, or a cog stalled before its controls ran; the values above are raw, not results"))
+  if bPasmStall or bSpinStall
+    say(string("=== END: STALLED (see the STALLED line) ==="))
+  elseif failCnt == 0
+    say(string("=== END: CONTROLS OK ==="))
+  else
+    say(string("=== END: RIG FAIL ==="))
+
+DAT ' ---- PASM Cases: form, D, S, Q, expected QX, expected QY ----
+' controls P00..P10 (non-zero divisors; the expected values MUST appear)
+pcaseTbl        long    K_DIV_REG,    1000,       3,          0,          333,        1
+                long    K_DIV_REG,    $FFFF_FFFF, 2,          0,          $7FFF_FFFF, 1
+                long    K_DIV_REG,    0,          5,          0,          0,          0
+                long    K_DIV_REG,    7,          $FFFF_FFFF, 0,          0,          7
+                long    K_DIV_IMMK,   $1234_5678, CTL_IMM_S,  0,          $0299_C335, 5
+                long    K_DIVQ_REG,   $9ABC_DEF0, $8765_4321, $1234_5678, $226B_9022, $38BC_648E
+                long    K_FRAC_REG,   1,          3,          0,          $5555_5555, 1
+                long    K_FRACQ_REG,  1,          7,          $8000_0000, $36DB_6DB6, 6
+                long    K_FRAC_IMMK,  1,          CTL_IMM_S,  0,          $2492_4924, 4
+                long    K_DIVQ_IMMK,  $1234_5678, CTL_IMM_S,  3,          $7050_9EA3, 3
+                long    K_FRACQ_IMMK, 2,          CTL_IMM_S,  $1234_5678, $4BBE_557E, 6
+' zero divisor P11..P60 (S = #0, or S = a register holding 0)
+pzeroTbl        long    K_DIV_IMM0,   0,          0,          0,          0,          0
+                long    K_DIV_REG,    0,          0,          0,          0,          0
+                long    K_DIV_IMM0,   1,          0,          0,          0,          0
+                long    K_DIV_REG,    1,          0,          0,          0,          0
+                long    K_DIV_IMM0,   7,          0,          0,          0,          0
+                long    K_DIV_REG,    7,          0,          0,          0,          0
+                long    K_DIV_IMM0,   $7FFF_FFFF, 0,          0,          0,          0
+                long    K_DIV_REG,    $7FFF_FFFF, 0,          0,          0,          0
+                long    K_DIV_IMM0,   $8000_0000, 0,          0,          0,          0
+                long    K_DIV_REG,    $8000_0000, 0,          0,          0,          0
+                long    K_DIV_IMM0,   $FFFF_FFFF, 0,          0,          0,          0
+                long    K_DIV_REG,    $FFFF_FFFF, 0,          0,          0,          0
+                long    K_DIV_IMM0,   $1234_5678, 0,          0,          0,          0
+                long    K_DIV_REG,    $1234_5678, 0,          0,          0,          0
+                long    K_DIVQ_REG,   0,          0,          1,          0,          0
+                long    K_DIVQ_REG,   7,          0,          1,          0,          0
+                long    K_DIVQ_REG,   $FFFF_FFFF, 0,          1,          0,          0
+                long    K_DIVQ_IMM0,  7,          0,          1,          0,          0
+                long    K_DIVQ_REG,   0,          0,          $FFFF_FFFF, 0,          0
+                long    K_DIVQ_REG,   7,          0,          $FFFF_FFFF, 0,          0
+                long    K_DIVQ_REG,   $FFFF_FFFF, 0,          $FFFF_FFFF, 0,          0
+                long    K_DIVQ_IMM0,  7,          0,          $FFFF_FFFF, 0,          0
+                long    K_DIVQ_REG,   0,          0,          $1234_5678, 0,          0
+                long    K_DIVQ_REG,   7,          0,          $1234_5678, 0,          0
+                long    K_DIVQ_REG,   $FFFF_FFFF, 0,          $1234_5678, 0,          0
+                long    K_DIVQ_IMM0,  7,          0,          $1234_5678, 0,          0
+                long    K_FRAC_IMM0,  0,          0,          0,          0,          0
+                long    K_FRAC_REG,   0,          0,          0,          0,          0
+                long    K_FRAC_IMM0,  1,          0,          0,          0,          0
+                long    K_FRAC_REG,   1,          0,          0,          0,          0
+                long    K_FRAC_IMM0,  7,          0,          0,          0,          0
+                long    K_FRAC_REG,   7,          0,          0,          0,          0
+                long    K_FRAC_IMM0,  $8000_0000, 0,          0,          0,          0
+                long    K_FRAC_REG,   $8000_0000, 0,          0,          0,          0
+                long    K_FRAC_IMM0,  $FFFF_FFFF, 0,          0,          0,          0
+                long    K_FRAC_REG,   $FFFF_FFFF, 0,          0,          0,          0
+                long    K_FRAC_IMM0,  $1234_5678, 0,          0,          0,          0
+                long    K_FRAC_REG,   $1234_5678, 0,          0,          0,          0
+                long    K_FRACQ_REG,  0,          0,          1,          0,          0
+                long    K_FRACQ_REG,  1,          0,          1,          0,          0
+                long    K_FRACQ_REG,  $1234_5678, 0,          1,          0,          0
+                long    K_FRACQ_IMM0, 1,          0,          1,          0,          0
+                long    K_FRACQ_REG,  0,          0,          $FFFF_FFFF, 0,          0
+                long    K_FRACQ_REG,  1,          0,          $FFFF_FFFF, 0,          0
+                long    K_FRACQ_REG,  $1234_5678, 0,          $FFFF_FFFF, 0,          0
+                long    K_FRACQ_IMM0, 1,          0,          $FFFF_FFFF, 0,          0
+                long    K_FRACQ_REG,  0,          0,          $1234_5678, 0,          0
+                long    K_FRACQ_REG,  1,          0,          $1234_5678, 0,          0
+                long    K_FRACQ_REG,  $1234_5678, 0,          $1234_5678, 0,          0
+                long    K_FRACQ_IMM0, 1,          0,          $1234_5678, 0,          0
+pcaseEnd
+
+DAT ' ---- Spin2 Cases: operator, a, b, c, expected ----
+' controls S00..S20 (non-zero divisors; the expected value MUST appear)
+scaseTbl        long    OP_DIV,  1000,        3,          0,          333
+                long    OP_DIV,  -1000,       3,          0,          -333
+                long    OP_DIV,  1000,        -3,         0,          -333
+                long    OP_DIV,  -1000,       -3,         0,          333
+                long    OP_REM,  1000,        3,          0,          1
+                long    OP_REM,  -1000,       3,          0,          -1
+                long    OP_REM,  1000,        -3,         0,          1
+                long    OP_REM,  -1000,       -3,         0,          -1
+                long    OP_DIVU, $FFFF_FFFF,  2,          0,          $7FFF_FFFF
+                long    OP_DIVU, 1000,        3,          0,          333
+                long    OP_REMU, $FFFF_FFFF,  2,          0,          1
+                long    OP_REMU, 1000,        7,          0,          6
+                long    OP_MD64, 1000,        1000,       3,          333333
+                long    OP_MD64, $FFFF_FFFF,  $FFFF_FFFF, $FFFF_FFFF, $FFFF_FFFF
+                long    OP_MD64, $1234_5678,  $10,        3,          $6117_2280
+                long    OP_FRAC, 1,           3,          0,          $5555_5555
+                long    OP_FRAC, 2,           7,          0,          $4924_9249
+                long    OP_DIVA, -1000,       3,          0,          -333
+                long    OP_REMA, -1000,       3,          0,          -1
+                long    OP_DIVUA, $FFFF_FFFF, 2,          0,          $7FFF_FFFF
+                long    OP_REMUA, 1000,       7,          0,          6
+' zero divisor S21..S70 (b = 0; MULDIV64: c = 0)
+szeroTbl        long    OP_DIV,  0,           0,          0,          0
+                long    OP_DIV,  1,           0,          0,          0
+                long    OP_DIV,  7,           0,          0,          0
+                long    OP_DIV,  -1,          0,          0,          0
+                long    OP_DIV,  -7,          0,          0,          0
+                long    OP_DIV,  $7FFF_FFFF,  0,          0,          0
+                long    OP_DIV,  NEGX,        0,          0,          0
+                long    OP_DIV,  $1234_5678,  0,          0,          0
+                long    OP_DIV,  -$1234_5678, 0,          0,          0
+                long    OP_REM,  0,           0,          0,          0
+                long    OP_REM,  1,           0,          0,          0
+                long    OP_REM,  7,           0,          0,          0
+                long    OP_REM,  -1,          0,          0,          0
+                long    OP_REM,  -7,          0,          0,          0
+                long    OP_REM,  $7FFF_FFFF,  0,          0,          0
+                long    OP_REM,  NEGX,        0,          0,          0
+                long    OP_REM,  $1234_5678,  0,          0,          0
+                long    OP_REM,  -$1234_5678, 0,          0,          0
+                long    OP_DIVU, 0,           0,          0,          0
+                long    OP_DIVU, 1,           0,          0,          0
+                long    OP_DIVU, 7,           0,          0,          0
+                long    OP_DIVU, $7FFF_FFFF,  0,          0,          0
+                long    OP_DIVU, $8000_0000,  0,          0,          0
+                long    OP_DIVU, $FFFF_FFFF,  0,          0,          0
+                long    OP_DIVU, $1234_5678,  0,          0,          0
+                long    OP_REMU, 0,           0,          0,          0
+                long    OP_REMU, 1,           0,          0,          0
+                long    OP_REMU, 7,           0,          0,          0
+                long    OP_REMU, $7FFF_FFFF,  0,          0,          0
+                long    OP_REMU, $8000_0000,  0,          0,          0
+                long    OP_REMU, $FFFF_FFFF,  0,          0,          0
+                long    OP_REMU, $1234_5678,  0,          0,          0
+                long    OP_MD64, 0,           0,          0,          0
+                long    OP_MD64, 0,           12345,      0,          0
+                long    OP_MD64, 1,           1,          0,          0
+                long    OP_MD64, 7,           3,          0,          0
+                long    OP_MD64, 1000,        1000,       0,          0
+                long    OP_MD64, $1234_5678,  $10,        0,          0
+                long    OP_MD64, $FFFF_FFFF,  $FFFF_FFFF, 0,          0
+                long    OP_MD64, $1234_5678,  $9ABC_DEF0, 0,          0
+                long    OP_FRAC, 0,           0,          0,          0
+                long    OP_FRAC, 1,           0,          0,          0
+                long    OP_FRAC, 7,           0,          0,          0
+                long    OP_FRAC, $8000_0000,  0,          0,          0
+                long    OP_FRAC, $FFFF_FFFF,  0,          0,          0
+                long    OP_FRAC, $1234_5678,  0,          0,          0
+                long    OP_DIVA, -7,          0,          0,          0
+                long    OP_REMA, -7,          0,          0,          0
+                long    OP_DIVUA, $FFFF_FFFF, 0,          0,          0
+                long    OP_REMUA, $FFFF_FFFF, 0,          0,          0
+scaseEnd
+
+' ===========================================================================
+' MEASURING COG (PASM, cog exec).  PTRA on entry = @mbox (from COGINIT).
+' No debug(), no BRK, no interrupt in this cog (DEBUG_COGS excludes it).
+' Every CORDIC result is read with GETQX / GETQY before the next CORDIC
+' operation is issued, so at most one result is ever in flight.
+' ===========================================================================
+DAT             org     0        ' ---- Measuring Cog ----
+pasm            rdlong  c_tbl, ptra[MB_TBL]             ' hub address of pcaseTbl
+                rdlong  c_rp, ptra[MB_REC]              ' hub address of the records
+                rdlong  c_ncase, ptra[MB_NCASE]
+                mov     c_case, #0
+
+case_lp         rdlong  c_kind, c_tbl                   ' the case row: form, D, S, Q
+                add     c_tbl, #4
+                rdlong  dval, c_tbl
+                add     c_tbl, #4
+                rdlong  sval, c_tbl
+                add     c_tbl, #4
+                rdlong  qval, c_tbl
+                add     c_tbl, #(CASE_W - CW_Q) * 4     ' to the next row
+                alts    c_kind, #kvec_tab
+                mov     c_vec, 0-0                      ' the form's code
+                mov     c_rep, #0
+
+rep_lp          mov     r_tag, c_case                   ' case * 16 + rep
+                shl     r_tag, #MK_CASE_SHIFT
+                add     r_tag, c_rep
+                wrlong  r_tag, ptra[MB_CUR]             ' progress: the run about to start
+                mov     c_mkq, r_tag
+                add     c_mkq, c_mkbase                 ' marker quotient m
+                mov     c_mkd, c_mkq
+                shl     c_mkd, #3
+                sub     c_mkd, c_mkq                    ' 7 * m
+                mov     c_mkr, c_rep
+                and     c_mkr, #MK_REM_MASK
+                add     c_mkr, #1                       ' marker remainder k = (rep & 3) + 1
+                add     c_mkd, c_mkr                    ' marker numerator 7 * m + k
+                qdiv    c_mkd, c_mks                    ' MARKER: a non-zero divide
+                getqx   r_mkx
+                getqy   r_mky
+                jmp     c_vec                           ' THE CASE (one copy per form)
+
+case_done       mov     r_clk, c_t1
+                sub     r_clk, c_t0                     ' GETCT to GETCT
+                qdiv    c_fud, c_fus                    ' NEXT: 1000 / 3
+                getqx   r_fux
+                getqy   r_fuy
+                add     r_tag, c_tagbase
+                setq    #RECW - 1
+                wrlong  r_mkx, c_rp                     ' the record, 8 longs, tag last
+                add     c_rp, #RECW * 4
+                add     c_rep, #1
+                cmp     c_rep, #REPS                    wz
+        if_nz   jmp     #rep_lp
+                add     c_case, #1
+                cmp     c_case, c_ncase                 wz
+        if_nz   jmp     #case_lp
+                wrlong  c_donev, ptra[MB_DONE]
+                cogid   c_t0
+                cogstop c_t0
+
+'--- the forms, one hand-written copy each (kvec_tab order = K_* order)
+f_div_imm0      getct   c_t0
+                qdiv    dval, #0                        ' D / #0
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_div_reg       getct   c_t0
+                qdiv    dval, sval                      ' D / S
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_divq_imm0     getct   c_t0
+                setq    qval
+                qdiv    dval, #0                        ' {Q:D} / #0
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_divq_reg      getct   c_t0
+                setq    qval
+                qdiv    dval, sval                      ' {Q:D} / S
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_frac_imm0     getct   c_t0
+                qfrac   dval, #0                        ' {D:0} / #0
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_frac_reg      getct   c_t0
+                qfrac   dval, sval                      ' {D:0} / S
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_fracq_imm0    getct   c_t0
+                setq    qval
+                qfrac   dval, #0                        ' {D:Q} / #0
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_fracq_reg     getct   c_t0
+                setq    qval
+                qfrac   dval, sval                      ' {D:Q} / S
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_div_immk      getct   c_t0
+                qdiv    dval, #CTL_IMM_S                ' D / #7 (control P04)
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_frac_immk     getct   c_t0
+                qfrac   dval, #CTL_IMM_S                ' {D:0} / #7 (control P08)
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_divq_immk     getct   c_t0
+                setq    qval
+                qdiv    dval, #CTL_IMM_S                ' {Q:D} / #7 (control P09)
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+f_fracq_immk    getct   c_t0
+                setq    qval
+                qfrac   dval, #CTL_IMM_S                ' {D:Q} / #7 (control P10)
+                getqx   r_qx
+                getct   c_t1
+                getqy   r_qy
+                jmp     #case_done
+
+'--- form vectors
+kvec_tab        long    f_div_imm0, f_div_reg, f_divq_imm0, f_divq_reg, f_frac_imm0, f_frac_reg, f_fracq_imm0, f_fracq_reg
+                long    f_div_immk, f_frac_immk, f_divq_immk, f_fracq_immk
+
+'--- cog data
+c_mkbase        long    MK_BASE
+c_mks           long    MK_S                            ' marker divisor (register S)
+c_fud           long    FU_D                            ' NEXT divide: 1000 / 3
+c_fus           long    FU_S
+c_tagbase       long    TAG_BASE
+c_donev         long    DONE_V
+dval            long    0                               ' the case's D
+sval            long    0                               ' the case's S (register forms)
+qval            long    0                               ' the case's Q (SETQ forms)
+c_tbl           long    0
+c_rp            long    0
+c_ncase         long    0
+c_case          long    0
+c_rep           long    0
+c_kind          long    0
+c_vec           long    0
+c_mkq           long    0
+c_mkd           long    0
+c_mkr           long    0
+c_t0            long    0
+c_t1            long    0
+'--- the record, written as one 8-long block in this order (RW_* order)
+r_mkx           long    0                               ' marker QX
+r_mky           long    0                               ' marker QY
+r_qx            long    0                               ' the case's QX
+r_qy            long    0                               ' the case's QY
+r_clk           long    0                               ' GETCT to GETCT
+r_fux           long    0                               ' NEXT QX
+r_fuy           long    0                               ' NEXT QY
+r_tag           long    0                               ' TAG_BASE + case * 16 + rep
+pasm_end
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

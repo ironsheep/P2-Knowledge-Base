@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-481`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-483`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -49,6 +49,27 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## The QDIV and QFRAC examples did not assemble, or overflowed (2026-10-01, found building the divide-by-zero test) — F-481, F-482
+
+### F-481 — `qfrac.yaml`'s first three examples overflow the 32-bit quotient or do not assemble, and its description promises an integer.fraction result — `DONE` 2026-10-01
+**Where:** `language/pasm2/qfrac.yaml` examples 1-3 and `long_description`. QFRAC divides {D:Q} by S
+(Silicon Doc DIVIDE :3333-3340); the quotient is 32 bits, so it fits only while D < S. `{5:0.75}/2`
+and `{1000:0}/3` overflow; the 16.16 example's arithmetic does not give 100.5/3.25 (its 0.5 sits in
+the low long, worth 2^-32 units, not 2^-16); `#$C0000000` and `#$34000` exceed the 9-bit immediate
+without `##`. **Applied:** replaced by `QFRAC #1,#3` → $5555_5555 r 1 and `SETQ ##$8000_0000` /
+`QFRAC #1,#4` → $6000_0000 r 0 (compiled clean, pnut-ts 1.55.8; values from the documented operation);
+the description now says QFRAC yields a fraction of 2^32 and points to QDIV for quotients ≥ 1. The
+percentage example (QMUL then QFRAC of the product) was correct and stays. The bench test's QFRAC
+controls (VO-J-026) measure these same cases.
+
+### F-482 — `qdiv.yaml`'s first two examples use immediates that need `##`, and its 64-bit example's quotient overflows — `DONE` 2026-10-01
+**Where:** `language/pasm2/qdiv.yaml` examples 1-2: `QDIV #1000000,#3` and `SETQ #$12345678` /
+`QDIV #$9ABCDEF0,#1000` — immediates above 511 do not assemble without `##`, and
+$123456789ABCDEF0 / 1000 does not fit a 32-bit quotient. **Applied:** `MOV x,##1_000_000` /
+`QDIV x,#3` → 333333 r 1, and `SETQ #2` / `QDIV #0,#3` → $AAAA_AAAA r 2, with the rule that the
+SETQ value must stay below the divisor (compiled clean). The remainder-check and scaling examples
+were correct and stay.
 
 ## What a CORDIC divide by zero returns is stated nowhere (2026-10-01, found researching F-470) — F-480
 
@@ -393,12 +414,13 @@ use `RDFAST` (P2 Documentation). The same caution goes to the read/write entries
 > quoted as the source, the measured mechanism (SINC2's running first stage across unequal
 > windows, not the one-clock lag), both proven workarounds (power-of-two count; XZERO), SINC1 off
 > by at most one term, classed as documented behaviour, citing EF-072. The old "~30-60 ms" and
-> "under ~20 ms" figures are **kept, reframed** as Chip Gracey's rules of thumb from his 2024-12-16
-> forum report (`ingestion/external-inputs/forum-threads/ProblemGoertzelSINC2mode/INGEST.md` :43,
-> :49 — designer guidance, approximate, not the documented spec), with EF-072's clean 25 ms XZERO
-> windows beside the 20 ms one. (A first pass removed them as "no Parallax source" and called the
-> 20 ms figure contradicted; both were wrong — Chip says only that under 20 ms "may be fine".
-> Caught before the push, Stephen 2026-10-01.)
+> "under ~20 ms" figures (Chip Gracey's forum report, `ingestion/external-inputs/forum-threads/
+> ProblemGoertzelSINC2mode/INGEST.md` :43, :49) are **superseded by the bench**: the entry states
+> EF-072's measurement — a corrupted pair at every window-length change and never otherwise; XZERO
+> clean at 10.24 µs, 100 µs and 25 ms — and does not mention the forum figures (Stephen,
+> 2026-10-01: "the results should supersede"). History: a first pass removed them as "no Parallax
+> source" (wrong — they were Chip's), a second restored them framed as designer guidance, a third
+> replaced them with the measurement, all before the push.
 
 **Where:** `language/pasm2/getxacc.yaml` `sinc2_constraint` (F-469 held the rest of this entry "until
 VO-J-013 runs" — it has run).

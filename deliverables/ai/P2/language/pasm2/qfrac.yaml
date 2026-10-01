@@ -28,9 +28,9 @@ long_description: 'The QFRAC instruction performs fractional division using the 
 
 
   After 55 clocks, the quotient can be retrieved using GETQX and the remainder using
-  GETQY. This instruction is essential for fixed-point mathematics, fractional scaling
-  operations, and algorithms where the dividend''s integer portion needs to be preserved
-  in the primary operand.
+  GETQY. The quotient is 32 bits, so it fits only while D < S: QFRAC returns a FRACTION
+  of 2^32 (a ratio below 1), e.g. QFRAC #1,#3 gives $5555_5555. For a quotient of 1 or
+  more, use QDIV.
 
 
   The key difference from QDIV is the bit arrangement: QFRAC uses {D, SETQ} while
@@ -39,54 +39,28 @@ long_description: 'The QFRAC instruction performs fractional division using the 
 
   '
 examples:
-- code: ''' Fractional division: 5.75 ÷ 2 where 5.75 = {5, 0.75*2^32}
+- code: ''' A ratio as a 32-bit fraction: 1 / 3
 
-    SETQ    #$C0000000     '' 0.75 in 32-bit fraction format
+    QFRAC   #1, #3         '' {1, 0} / 3 = 2^32 / 3
 
-    QFRAC   #5, #2         '' {5, 0.75} / 2 = 2.875
+    GETQX   fraction       '' $5555_5555 = 0.3333... of 2^32 (GETQX waits)
 
-    '' Wait 55 clocks...
-
-    GETQX   quotient       '' Get integer quotient
-
-    GETQY   remainder      '' Get fractional remainder
+    GETQY   remainder      '' 1
 
     '
-  description: Fractional number division
-- code: ''' Fixed-point division: divide 16.16 fixed-point numbers
+  description: "Fractional result. {D, Q} / S fits in 32 bits only while D < S, so QFRAC yields a fraction of 2^32 -- use it for a ratio below 1."
+- code: ''' With SETQ: {1, $8000_0000} / 4 = 1.5 / 4 = 0.375
 
-    '' Example: 100.5 ÷ 3.25 in 16.16 format
+    SETQ    ##$8000_0000   '' lower 32 bits of the numerator: 0.5
 
-    MOV     dividend_int, #100
+    QFRAC   #1, #4         '' {D, SETQ} / S
 
-    MOV     dividend_frac, #$8000  '' 0.5 in 16-bit fraction
+    GETQX   fraction       '' $6000_0000 = 0.375 of 2^32
 
-    MOV     divisor, #$34000       '' 3.25 in 16.16 format
-
-    SETQ    dividend_frac
-
-    QFRAC   dividend_int, divisor
-
-    '' ... wait 55 clocks ...
-
-    GETQX   result_quotient
-
-    GETQY   result_remainder
+    GETQY   remainder      '' 0
 
     '
-  description: Fixed-point arithmetic division
-- code: ''' Simple fractional scaling without SETQ (D.0 format)
-
-    QFRAC   #1000, #3      '' {1000, 0} / 3 = 333 remainder 1
-
-    '' ... other work for 55 clocks ...
-
-    GETQX   scaled_result
-
-    GETQY   leftover
-
-    '
-  description: Integer division with QFRAC format
+  description: Fractional numerator via SETQ
 - code: ''' Percentage calculation: what percentage is A of B?
 
     '' Formula: (A * 100) / B where A is in D, 100*2^32 scaling
