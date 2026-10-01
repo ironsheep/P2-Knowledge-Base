@@ -125,7 +125,8 @@ correct. This is P2 Errata **E8**; F-472 carries the `rdfast.yaml` side.
 **Correction:** add to each entry a caution naming the hazard, the rule (no hub-memory instruction
 within 16 clocks of a no-wait `RDFAST`, or use the waiting form) and the E8 reference, citing
 EF-084. Same caution for `rdbyte`/`rdword`/`wrbyte`/`wrword` and for a `SETQ` block only if
-VO-J-023 shows it — extend this entry in place when it runs.
+VO-J-023 shows it, and what a released `RDLONG ... WC/WZ` writes to C and Z (VO-J-023 measures
+it) — extend this entry in place when it runs; until then the entries say nothing about flags.
 
 ## A condition-false `BRK` still breaks, and the KB teaches it as conditional (2026-10-01, found while building the SO109 test) — F-477
 
