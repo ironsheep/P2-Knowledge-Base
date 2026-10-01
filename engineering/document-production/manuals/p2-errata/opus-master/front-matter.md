@@ -46,7 +46,7 @@
 \item \textbf{E4} \enspace GETXACC Clears Only During a Goertzel Burst
 \item \textbf{E5} \enspace The Goertzel Accumulators Trail by One Clock
 \item \textbf{E6} \enspace In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC
-\item \textbf{E7} \enspace A Blocking RDFAST Can Skip Its Wait After a No-Wait RDFAST
+\item \textbf{E7} \enspace After a No-Wait RDFAST, the Next Hub Instruction Can Complete Early
 \end{itemize}
 \vspace{0.05cm}
 Each erratum opens with what to expect, what happens instead, and what any
@@ -97,7 +97,7 @@ Parallax, Propeller, Spin, and the Parallax logo are trademarks of Parallax Inc.
 **Parallax Inc.** for the Propeller 2, and for publishing its known silicon defects in the P2 Documentation. Errata E1 and E2 are Parallax's own findings.
 
 **Chip Gracey** for the design of the Propeller 2 and for the detailed silicon documentation that states what the part is meant to do. Every erratum here is measured against that statement.
-**The clean-room design study** for predicting errata E3, E4, E5 and E6 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on P2 hardware, independently, for this manual. Erratum E7 was not predicted: it was found on the bench, by a test built to measure something else.
+**The clean-room design study** for predicting errata E3, E4, E5 and E6 from the design material alone, and for the classification of findings this manual follows. The study read the design without Parallax's documentation or a bench; the predictions were then tested on P2 hardware, independently, for this manual. Erratum E7 was first found on the bench, by a test built to measure something else; the study then predicted that the same condition reaches every hub read and write, and the bench confirmed it.
 
 ## Sources
 
@@ -153,7 +153,24 @@ The part keeps its defect, so this manual offers workarounds, never fixes: code 
 | **E4** | GETXACC Clears Only During a Goertzel Burst | `GETXACC` while the streamer is idle or in any mode other than Goertzel | No | Take each burst's sums as a difference of idle reads (the `burst_sums` routine, SINC1; helper routine) |
 | **E5** | The Goertzel Accumulators Trail by One Clock | every Goertzel burst: its last term is added to the next burst | No | Deliver the held term before reading (the `burst_sums` routine, SINC1; helper routine) |
 | **E6** | In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC | a DAC smart-pin mode with `TT` = `%00` whose ADC is switched with `OUT` | No | `TT` bit 0 set in the `WRPIN` word (rule at each use) |
-| **E7** | A Blocking RDFAST Can Skip Its Wait After a No-Wait RDFAST | a blocking `RDFAST` issued 8 to 15 clocks after a no-wait `RDFAST` | No | At least 16 clocks between the two `RDFAST`s (`WAITX #12` directly after the no-wait one; rule at each use) |
+| **E7** | After a No-Wait RDFAST, the Next Hub Instruction Can Complete Early | a hub read, hub write, `SETQ` block `RDLONG` or waiting `RDFAST` started fewer than 16 clocks after a no-wait `RDFAST` | No | The waiting form of `RDFAST`, or at least 16 clocks from the no-wait `RDFAST` to the next hub instruction (`WAITX #12` directly after the no-wait one; rule at each use) |
+
+## Find an Erratum by Symptom
+
+Each row is a symptom a program can show, and the erratum that produces it. An erratum with several symptoms has a row for each; its CAUTION box names them all.
+
+| Symptom | Erratum |
+|---|---|
+| After a `SETQ` or `SETQ2` block transfer through `PTRx++`, with an `ALTx`, `AUGS` or `AUGD` between the `SETQ` and the transfer, the pointer moved by one long's step, not the block's | **E1** |
+| An `ALTx` with an immediate `#S`, between an `AUGS` and its target, changes its `D` register by bits 17:9 of the augmented value | **E2** |
+| `GETCT WC`, `GETMS()`, `GETSEC()` or a `DEBUG_TIMESTAMP` stamp reads behind by 2^32^ clocks (21.47 s at 200 MHz) or a multiple of it | **E3** |
+| `GETXACC` read while the streamer is idle does not clear the Goertzel sums, and each burst adds to what the last one left | **E4** |
+| A Goertzel burst's sum lacks its last term, and holds the last term of the burst before it | **E5** |
+| In a DAC smart-pin mode with `TT` = `%00`, raising `OUT` does not run the pin's ADC | **E6** |
+| A `RDBYTE`, `RDWORD` or `RDLONG` after a no-wait `RDFAST` returns the previous hub read's data, with that value's flags | **E7** |
+| A `WRBYTE`, `WRWORD` or `WRLONG` after a no-wait `RDFAST` is lost | **E7** |
+| A `SETQ` block `RDLONG` after a no-wait `RDFAST` writes one wrong long and changes cog registers outside its destination, or the cog stops responding | **E7** |
+| An `RFLONG` returns `$0000_0000` after a waiting `RDFAST` that followed a no-wait `RDFAST` | **E7** |
 
 ## Document Conventions
 

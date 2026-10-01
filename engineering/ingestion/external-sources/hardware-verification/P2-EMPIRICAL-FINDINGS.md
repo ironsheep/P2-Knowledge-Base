@@ -1328,7 +1328,7 @@ separately. *Limits:* lag 1; 200 MHz; run once; PNut-Term-TS v1.1.0 passed the s
 unchanged. *Source:* `…/tests/e3-scope-debug-timestamp-test.spin2` +
 `…/tests/e3-scope-debug-timestamp-verdict.py`.
 
-### EF-084 · After a no-wait `RDFAST`, a `RDLONG` issued within 16 clocks is released before its own read and returns the previous hub read's long, and a `WRLONG` is released before it lands and is lost if another hub instruction follows; the waiting form, or 16 clocks (7 non-hub instructions), prevents both — `CONFIRMED`
+### EF-084 · After a no-wait `RDFAST`, a `RDLONG` issued within 16 clocks is released before its own read and returns the previous hub read's long, and a `WRLONG` is released before it lands and is lost if another hub instruction follows; the waiting form prevents both, and 16 clocks (7 non-hub instructions) prevents the read (a write at 16 clocks was not run) — `CONFIRMED`
 *How proven:* `test-o29-rdfast-nowait-releases-hub-op` (VO-J-021; the clean-room study's O29
 prediction). Measuring cog 1 in cog execution, cog 0 reporting (`DEBUG_COGS = %0000_0001`). Each
 trial: a primer `RDLONG` of `$A5A5_0001` (also fixing the hub phase), then `RDFAST` (D =
@@ -1362,6 +1362,9 @@ and safe spacing (16) coincide with this window, so E7 is the same release actin
 blocking `RDFAST` (the study's mechanism: the no-wait `RDFAST`'s completion signal raised a second
 time when its FIFO first holds data). The Spin2 v55 interpreter uses only the blocking form.
 *Limits:* `RDLONG`/`WRLONG` only (byte/word, `SETQ` blocks and a no-wait `WRFAST`: VO-J-023);
+the write runs (T3, T4, C4) ran at k = 0 only — no `WRLONG` at 16 clocks or more was run, so the
+16-clock rule is proven for reads, not writes (corrected 2026-10-01 from a title that said it
+prevents both; found while writing the merged E7 chapter);
 `RETA` and an interrupt inside the window not tested; hub execution excluded by the P2
 Documentation (`RDFAST` cannot be used there, :353-357); one cog; cog execution; 200 MHz; run
 once. *Source:* `…/tests/test-o29-rdfast-nowait-releases-hub-op.spin2`.

@@ -9,7 +9,7 @@ guide_paths:
   voice_guide: ./voice-guide.md
   style_guide: ./voice-guide.md                   # voice-guide adopts the Assembly Reference guide by reference
   classification: ./CLASSIFICATION-GUIDANCE.md    # governs what may enter (class 1 only)
-authoritative_sources: see ./creation-guide.md §6 # EF ledger EF-066..074 + fix-run entries (PRIMARY) + raw logs + rigs; P2 Documentation; KB YAML from disk
+authoritative_sources: see ./creation-guide.md §6 # EF ledger EF-066..087 incl. workaround runs (PRIMARY) + raw logs + rigs; P2 Documentation; KB YAML from disk
 high_risk_tables:
   - "Front-matter summary table — erratum number ↔ title ↔ published-by ↔ workaround condition; numbers are permanent"
   - "Each chapter's Status table — published-by / found-by / confirmed / workaround-proven must match the ledger"
@@ -22,7 +22,7 @@ high_risk_quant:
   - "E4: 50 of 50 idle reads unchanged; 255 = 29 + 226 terms × 61"
   - "E5: d1 = (N−1)·C, d2 = C, carry arm N·C; N = 64, C = −19 → −1,197"
 fragile_areas:
-  - "Classification: class 2 items (the no-wait RDFAST readiness boundary; any documentation gap) must never enter — peer manual only. E7 is the BLOCKING RDFAST case and must say it is not the no-wait one"
+  - "Classification: class 2 items (the no-wait RDFAST readiness boundary — a FIFO read too soon after a no-wait RDFAST alone; any documentation gap) must never enter — peer manual only. E7 is the hub instruction AFTER a no-wait RDFAST completing early (hub reads, writes, SETQ block reads, a waiting RDFAST; merged 2026-10-01) and must say the FIFO-read case is not it"
   - "SINC2: the iteration-count corruption is DOCUMENTED (P2 Documentation note on Goertzel SINC2 mode) — not an erratum, not part of E5 (EF-072 corrected 2026-09-26); E5 names it only as the scope limit of its SINC1 fix"
   - "No HDL quotation, signal/module names or line refs from the clean-room design material (decision 5)"
   - "No internal ids in reader text (EF/VO/F/brief names); the chip revision (Rev C) stated once, in the front matter"
@@ -36,7 +36,7 @@ Thin per-manual overlay read by document-audit (and prepare-/release-/finalize-m
 Everything not listed above is inherited from the central skill body and the guides above.
 
 - **Grounding model:** `reference`, **bench-first**. Every claim about what the part does is
-  verified against the hardware-verification ledger (`P2-EMPIRICAL-FINDINGS.md` EF-066..074)
+  verified against the hardware-verification ledger (`P2-EMPIRICAL-FINDINGS.md` EF-066..087)
   and the raw log lines, then against the P2 Documentation for what the design says. Each
   chapter carries a verification sidecar in `verification/` (tracked; see its README).
 - **Structure (Dimension #10):** front matter (incl. the three classes defined once and the

@@ -41,6 +41,9 @@ python3 engineering/tools/sync-manual-examples.py --doc <this manual's dir>
 | `e6-dac-mode-adc-enable-test.spin2` | E6 | Whether raising `OUT` runs the ADC in a DAC smart-pin mode with `TT` = `%00` and with `TT` = `%01`; the `TT` = `%01` word is the workaround. |
 | `e7-rdfast-blocking-after-no-wait-test.spin2` | E7 | How many clocks a `RDFAST` needs before its first read, in every hub alignment, and what a blocking `RDFAST` does when issued while a no-wait one is still arming. |
 | `e7-workaround-rdfast-spacing-test.spin2` | E7 workaround | Whether the printed `WAITX` line between the two `RDFAST`s gives a correct first read in every hub alignment; alongside, the unspaced sweep that shows the erratum. |
+| `e7-next-hub-instruction-test.spin2` | E7 | Whether a `RDLONG` or `WRLONG` issued 0 to 8 instructions after a no-wait `RDFAST` completes before its own hub access, in every hub alignment; the waiting form alongside; and whether a waiting first `RDFAST` removes the waiting-`RDFAST` failure. |
+| `e7-every-hub-width-test.spin2` | E7 | Whether a no-wait `RDFAST` releases `RDBYTE`, `RDWORD`, `WRBYTE` and `WRWORD` as it does `RDLONG` and `WRLONG`; the flags a released read writes, and whether it still steps `PTRA++`; whether a no-wait `WRFAST` releases anything; a `SETQ` block `RDLONG` in the window. |
+| `e7-workaround-setq-block-test.spin2` | E7 workaround | Whether the waiting form, and 16, 18 and 20 clocks between a no-wait `RDFAST` and a `SETQ` block `RDLONG`, read the right block with cog RAM intact, each run in a freshly started cog; alongside, single released block reads that show the erratum. |
 
 Appendix A of the manual, *The Test Programs*, lists them the same way.
 
@@ -100,6 +103,9 @@ At 200 MHz, as run:
 | E3 `DEBUG_TIMESTAMP` test | ends about 45 s after reset (two wraps) |
 | E7 test | prints its output over about 23 s |
 | E7 workaround test | prints its output over about 8 s |
+| E7 next-hub-instruction test | prints its output over about 2 s |
+| E7 every-hub-width test | prints its output over about 5 s |
+| E7 block-read workaround test | prints its output over about 9 s |
 | SINC2 test | prints its output over about 5 s |
 | E1, E2, E4, E5, E6 tests and the E4/E5 workaround test | print their whole output in about one second |
 

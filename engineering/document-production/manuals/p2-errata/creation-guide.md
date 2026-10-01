@@ -32,8 +32,11 @@ restated here or anywhere else in this folder. Three consequences govern authori
   enable is E6; a blocking `RDFAST` that follows a still-arming no-wait `RDFAST` is E7; the
   Goertzel SINC2 iteration-count corruption is documented behaviour (the P2 Documentation's note
   on Goertzel SINC2 mode), so it is not an erratum; E5 names it only as a scope limit of its
-  SINC1 fix. The no-wait `RDFAST` readiness boundary is class 2 and goes to
-  P2 Anti-Patterns; E7 says it is a different case.)
+  SINC1 fix. The no-wait `RDFAST` readiness boundary — a FIFO read too soon after a no-wait
+  `RDFAST` alone — is class 2 and goes to P2 Anti-Patterns; E7 says it is a different case.
+  On 2026-10-01 E7 was widened, before its first public release, to the whole condition: after
+  a no-wait `RDFAST`, the next hub instruction (read, write, block read, or a waiting `RDFAST`)
+  can complete early — `CLASSIFICATION-GUIDANCE.md`, *What one erratum is*.)
 
 ## 3. Structure
 
@@ -65,7 +68,7 @@ Current numbering (decided 2026-09-25):
 | E4 | `e4-getxacc-clear-gating.md` | `GETXACC` clears the Goertzel accumulators only during a Goertzel burst |
 | E5 | `e5-goertzel-one-clock-lag.md` | the Goertzel accumulators trail their term by one active clock |
 | E6 | `e6-dac-mode-adc-enable.md` | in a DAC smart-pin mode, `OUT` does not switch the ADC while `TT` bit 0 is clear |
-| E7 | `e7-rdfast-blocking-after-no-wait.md` | a blocking `RDFAST` issued while a no-wait `RDFAST` is still arming can skip its wait |
+| E7 | `e7-rdfast-blocking-after-no-wait.md` | after a no-wait `RDFAST`, the next hub instruction can complete early: hub reads return the previous read's data, hub writes are lost, block reads go wrong, a waiting `RDFAST` skips its wait (file name kept from the first-found case) |
 
 ## 4. The chapter, section by section
 
@@ -140,7 +143,7 @@ is confirmed.
 
 | Source | Path | Use |
 |---|---|---|
-| **The bench ledger** (strongest) | `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md` (EF-066..074, and the fix runs' entries) | every claim about what the part does, every number |
+| **The bench ledger** (strongest) | `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md` (EF-066..087, the P2 errata entries, including the workaround runs) | every claim about what the part does, every number |
 | **Raw logs** | `manuals/p2-errata/audit/verification-tests/logs/` | the numbers, read from the lines themselves |
 | **The rigs** | `manuals/p2-errata/audit/verification-tests/*.spin2`, replicated to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` | walkthrough excerpts, verbatim |
 | **Parallax P2 Documentation** | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` (v35; KNOWN BUGS at 197–227) and `silicon-doc-text.txt` (the current online edition) | *What the P2 is documented to do*; quote exactly |

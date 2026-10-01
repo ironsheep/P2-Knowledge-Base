@@ -36,8 +36,9 @@ no "every silicon bug".
 
 **Credit without blame.** Parallax published E1 and E2 and is credited for it. E3 to E6 were
 predicted by the clean-room design study and confirmed here; the study is credited by name.
-E7 was found on the bench here, by a test built to measure something else; it was not
-predicted.
+E7 was first found on the bench here, by a test built to measure something else; the study
+then predicted that the same condition reaches every hub read and write, and the bench
+confirmed it, so E7 credits both.
 No sentence implies the vendor hid anything or that documentation was careless.
 
 **The mechanism in our own words.** *Why it happens* describes behaviour at the programmer's

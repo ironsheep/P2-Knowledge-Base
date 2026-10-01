@@ -1,0 +1,3968 @@
+'' ===========================================================================
+''
+''   File.......  e7-every-hub-width-test.spin2
+''   Purpose....  Erratum E7 test: whether a no-wait RDFAST releases
+''                RDBYTE, RDWORD, WRBYTE and WRWORD as it does RDLONG and
+''                WRLONG; the flags a released read writes, and whether it
+''                still steps PTRA++; whether a no-wait WRFAST releases
+''                anything; and a SETQ block RDLONG in the window
+''   Manual.....  P2 Errata
+''   Version....  v0.2.0 (2026-09-26)
+''   Appears in.  Erratum E7: After a No-Wait RDFAST, the Next Hub
+''                Instruction Can Complete Early; Appendix A: The Test
+''                Programs
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+''   This file is an EXAMPLE from the manual above. It is the whole
+''   program the chapters listed above name; where the manual
+''   quotes it, it quotes excerpts.
+''
+'' ===========================================================================
+
+{ WHAT IS KNOWN (Erratum E7, Rev C silicon, 200 MHz)
+
+  After a no-wait RDFAST (D = $8000_0000), a RDLONG issued at once (k = 0
+  NOPs between them) that waits for its own hub slot completes early, and
+  writes its destination with the long of the PREVIOUS slow hub read (the
+  primer), not the long at its own address.  With the primer at slot bits 0
+  this happened in 43 of the 64 (af, ar) cells, by delta = (ar - af) mod 8
+  as 8 8 7 6 5 4 3 2, identical in all 16 repetitions; 7 NOPs (k = 7)
+  between the two gave zero.  A WRLONG in the same place was lost when a
+  read-back followed (43 cells (old,old), 21 (primer,new)) and landed when
+  a NOP followed ((seed,new) in all 64).  The waiting form (D = 0) was
+  clean everywhere.
+
+  NAMES USED BELOW AND IN THE PRINTED OUTPUT
+    af, ar   the hub slot bits (address bits [4:2]) of the stream address
+             and of the test address; aw is the target's slot bits (writes)
+    k        the number of NOPs between the RDFAST/WRFAST and the test
+             instruction
+    C1       NOP control: a NOP stands in for the RDFAST
+    PS       stream check: the no-wait RDFAST really starts a stream
+    T1       the test: no-wait RDFAST, k NOPs, then the test instruction
+    primer   the slow hub read issued just before the RDFAST
+
+WHAT THIS TEST PROGRAM DECIDES, ONE ARM EACH, IN THIS ORDER
+  Each arm runs its own controls in the same run and prints its rows, its
+  gate and its verdict as soon as it completes, before the next arm starts:
+  a crash in a later arm cannot lose an earlier arm's output.  The
+  riskiest arm (SETQ block read) runs last.
+
+  ARM 0  POSITIVE CONTROL.  C1, PS, T1 at k = 0 and T1 at k = 7: the basic
+         no-wait RDFAST then RDLONG trial of Erratum E7.  MUST reproduce
+         the result above, else RIG FAIL and no later verdict counts.
+  ARM 1  FLAGS.  T1 at k = 0 with the test instruction "rdlong dst,pr wcz".
+         The C and Z flags are captured right after the test instruction
+         (WRC + BITZ into a flags register, outside the timed stretch) and
+         again after the settle loop (BITC + BITZ, same register), and the
+         flags long is written beside the value.  Before every trial the
+         flags are preset to C=1 Z=1, which no single read can produce, so
+         "flags never written" stays visible.
+           FC: primer $A5A5_0001 (bit 31 set, non-zero), sentinel
+               $5A5A_0002.  PREDICT released ($A5A5_0001, C=1, Z=0), correct
+               ($5A5A_0002, C=0, Z=0).  C decides it.
+           FZ: primer $0000_0000, sentinel $5A5A_0002 (non-zero, bit 31
+               clear).  PREDICT released ($0000_0000, C=0, Z=1), correct
+               ($5A5A_0002, C=0, Z=0).  Z decides it.  The seed $C3C3_0003
+               stays non-zero, so "never written" stays visible.  A zero
+               record is read as "released" whatever produced it, so the FZ
+               verdict also demands T1's exact cell map.
+         Each variant: NOP control, waiting form (D = 0) k = 0, test k = 0.
+         The flags verdicts name flags the released read did not write (the
+         preset survived) and flags that changed after the read (the late
+         capture differs); neither ever prints a bare CONFIRMED.
+         PTRA++ (records): T1 at k = 0 with the test instruction "rdlong
+         dst, ptra++", PTRA set to the test address by a plain "mov ptra,
+         pr" before the primer (outside the timed stretch; PTRA's mailbox
+         pointer is kept in a register and put back after the command).
+         Per record: the value and PTRA after the settle minus PTRA before
+         (a correct read gives +4).  NOP control (MUST sentinel, +4),
+         waiting form and test; the line "OBSERVED E7 PTRA++:" gives the
+         delta distribution split by released / correct cells.  Its test
+         run is not gated (it records).
+  ARM 2  RDBYTE / RDWORD in place of the test RDLONG (image R shape).
+         Primer long $A1B2_C3D4 (four distinct bytes), sentinel table long
+         $5A6B_7C8D.  RDBYTE at byte offsets 0, 1, 2, 3 and RDWORD at word
+         offsets 0 and 2: offset 0 alone could not tell "shifted by this
+         instruction's offset" from "not shifted at all"; offsets 1..3 and
+         word offset 2 do, and the four byte offsets cover every byte lane.
+         PREDICTION A: a released RDBYTE/RDWORD writes the previous read's
+         long ($A1B2_C3D4) shifted right by 8 x its own byte offset and
+         masked to its own size, zero-extended:
+              RDBYTE offset 0 / 1 / 2 / 3:  $0000_00D4 $0000_00C3
+                                            $0000_00B2 $0000_00A1
+              RDWORD offset 0 / 2:          $0000_C3D4 $0000_A1B2
+         NO RELEASE (the sentinel's part at that offset):
+              RDBYTE offset 0 / 1 / 2 / 3:  $0000_008D $0000_007C
+                                            $0000_006B $0000_005A
+              RDWORD offset 0 / 2:          $0000_7C8D $0000_5A6B
+         FLAGS.  The NOP control, the waiting form and the k = 0 test read
+         with WCZ and capture the flags exactly as arm 1 (preset C=1 Z=1,
+         WRC + BITZ right after the read, BITC + BITZ after the settle).  A
+         byte/word read sets C to the MSB of the byte/word and Z if it is
+         zero, so each value carries its own flags.  Triples written before
+         the run (value, C, Z), released / not released:
+              RDBYTE 0: ($D4,1,0) / ($8D,1,0) - same flags: the value decides
+              RDBYTE 1: ($C3,1,0) / ($7C,0,0)
+              RDBYTE 2: ($B2,1,0) / ($6B,0,0)
+              RDBYTE 3: ($A1,1,0) / ($5A,0,0)
+              RDWORD 0: ($C3D4,1,0) / ($7C8D,0,0)
+              RDWORD 2: ($A1B2,1,0) / ($5A6B,0,0)
+         Records are classified by (value, C, Z); the verdicts state the
+         flags result.  The k = 7 test records the value only.
+         Each variant: NOP control, waiting form k = 0, test k = 0 (PREDICT
+         prediction A with its flags in T1's same 43 cells), test k = 7
+         (PREDICT none).
+  ARM 3  WRBYTE / WRWORD in place of the WRLONG (image W shape).  The
+         target long holds old $4C3D_2E1F before every trial; the write
+         data register holds $C8D9_EAFB (WRBYTE writes $FB, WRWORD $EAFB).
+         Both read-backs are RDLONGs of the aligned long, so a partial write
+         is visible.  Same lanes as arm 2.
+         PREDICT, as for a released WRLONG: W1 (read-back follows): 43 cells (old,old) - the
+         write lost, the target's old long $4C3D_2E1F unchanged - in T1's
+         cells, and 21 cells (primer $A5A5_0001, new); W2 (NOP follows):
+         (seed,new) in all 64.  NO RELEASE: (new,new), new per lane:
+              WRBYTE offset 0 / 1 / 2 / 3:  $4C3D_2EFB $4C3D_FB1F
+                                            $4CFB_2E1F $FB3D_2E1F
+              WRWORD offset 0 / 2:          $4C3D_EAFB $EAFB_2E1F
+         Each variant: NOP control, waiting form W1, test W1, test W2.
+  ARM 4  No-wait WRFAST in place of the no-wait RDFAST, then RDLONG (image
+         R) and WRLONG (image W, old $0F0F_0004, new $F0F0_0005), at k = 0
+         and k = 7, with
+         the waiting WRFAST as control.  Runs: image R NOP control, waiting
+         WRFAST k=0, no-wait k=0, no-wait k=7; image W NOP control, waiting
+         WRFAST W1 k=0, no-wait W1 k=0, W1 k=7, W2 k=0 (W2 tells a lost
+         write from a late one).  The image R runs read with WCZ and capture
+         the flags as arm 1.  No prediction is made here:
+         the arm RECORDS (counts per class and per delta) and its lines say
+         OBSERVED, never CONFIRMED or REFUTED.
+         A HANG IS A RESULT.  If an arm-4 command does not finish within
+         1 s (e.g. the blocking flush never completes after a no-wait
+         WRFAST), cog 0 stops the measuring cog (COGSTOP), prints "OBSERVED
+         E7 WRFAST: blocking rdfast #0 after a no-wait WRFAST did not
+         complete (run <name>)" and the records it has, skips arm 4's
+         remaining runs, starts a fresh measuring cog (start-up handshake),
+         and goes on to arm 5, which takes its own cog-RAM baseline first.
+         FIFO FLUSH.  P2 Documentation, FIFO section: with D[31] = 0 a
+         RDFAST or WRFAST "will wait for any previous WRFAST to finish";
+         with D[31] = 1 it takes two clocks and does not wait.  So after
+         every arm-4 trial, once the settle loop has run, the measuring cog
+         issues a blocking "rdfast #0, stream" (waits for any WRFAST to
+         finish, then restarts a read stream) and runs a second settle loop.
+         Every arm-4 trial therefore starts, like every arm-0 trial, with
+         the FIFO in read mode, full and idle, and no write stream pending.
+         No WFxxxx is ever issued, so a WRFAST has nothing to write; a stray
+         write into the stream region would show as REGION DAMAGE.
+  ARM 5  SETQ block RDLONG after a no-wait RDFAST: "setq #7" + "rdlong
+         blk0, pr" reads 8 longs into 8 sacrificial cog registers, at k = 0
+         and k = 7, waiting form as control.  No prediction is made for
+         the block read, so the arm RECORDS.  SETQ must come
+         directly before its RDLONG, so here the k NOPs sit between the
+         RDFAST and the SETQ, and the RDLONG's command is 2 clocks later
+         than in T1 at the same k.
+         INTEGRITY.  Before the arm, the measuring cog copies its whole cog
+         RAM ($000-$1EF) to hub (SETQ #495 + WRLONG): the baseline, checked
+         against the loaded image.  At the end of every arm-5 command it
+         copies it again; cog 0 compares, and reports every register that
+         changed outside the sacrificial range and outside the loop-variable
+         registers (which change by design).  The sacrificial range sits
+         between two 8-long guard bands of constants, at the top of the cog
+         image, so an overrun in either direction changes a checked register.
+         The sacrificial range is preset to the seed before every trial and
+         recorded after it, classified per record as: the right block / the
+         primer in which longs / seed / other.
+         If the measuring cog stops answering, cog 0 stops it (COGSTOP),
+         prints "OBSERVED: measuring cog lost during the SETQ block arm" with
+         the records it has, then the verdict summary and DEBUG_END_SESSION.
+  NOT TESTED: RETA and an interrupt inside the window; hub execution (P2
+  Documentation: RDFAST cannot be used in hub execution).
+
+DEBUG
+  The program compiles WITH debug (pnut-ts -d) and confines the debugger to
+  cog 0 (DEBUG_COGS = %0000_0001).  The measuring cog has no debug
+  interrupt, no debug() and no BRK, and sets up no interrupt.
+
+SETUP
+  Bare P2 board, 200 MHz.  No pins, no jumpers, no instruments.  Cog 0
+  (Spin2) fills the hub data, sends one command per run, waits for the
+  measuring cog (1 s timeout), classifies the records from hub RAM and
+  prints them.  The measuring cog (COGINIT, cog execution, PASM below) runs
+  every trial from cog RAM.  Cog 0's Spin2 interpreter uses only the
+  blocking RDFAST.  After the records of every command the measuring cog
+  writes back the FIFO D value it held (MB_ECHO); a mismatch is RIG FAIL
+  and ends the run (after the run's records are printed).
+
+HUB LAYOUT (all below $7_C000; the program image, VAR and cog 0's stack sit
+  far below $4_0000, checked at run time before any data is written)
+    $4_0000  stream region, 64 longs, long n = $1E1E_0000 + n
+    $4_1000  table T: 8 sentinel longs $5A5A_0002, slot bits 0..7
+    $4_1100  table B: 8 sentinel longs $5A6B_7C8D (arm 2)
+    $4_1200  block source: 15 longs, long i = $5A5A_0100 + i (arm 5)
+    $4_2000  image W targets: 8 longs, slot bits 0..7
+    $4_3000  primer $A5A5_0001; $4_3020 primer $A1B2_C3D4 (arm 2);
+             $4_3040 primer $0000_0000 (arm 1 FZ) - all slot bits 0
+    $4_4000  records, up to 8,192 longs (arm 5), to $4_BFFF
+    $4_C000  cog-RAM copy, latest (496 longs); $4_D000 the baseline copy
+  Every region starts on a 32-byte boundary, so long n has slot bits n mod
+  8.  Cog 0 fills the record area with $EEEE_EEEE before every command, so
+  a record the measuring cog never wrote is class U.
+
+ONE TRIAL (measuring cog, cog execution; the timed stretch is the primer,
+  the RDFAST/WRFAST (or the NOP standing in for it), exactly k NOPs, and the
+  test instruction (SETQ + RDLONG in arm 5), adjacent, nothing else, no ##)
+  image R:  dst := seed $C3C3_0003 [value + flags: flags := C=1 Z=1]
+            [PTRA++: mov ptra, table+4*ar]
+            rdlong tmp, primer ; rdfast|wrfast mode, stream+4*af ;
+            k x nop ; rdlong|rdbyte|rdword dst, table+4*ar+offset [wcz]
+            (PTRA++: rdlong dst, ptra++)
+            [value + flags: wrc fl ; bitz fl,#1]  settle (>= 200 clk)
+            [arm 4: blocking rdfast #0 + settle]  [value + flags: bitc
+            fl,#2 ; bitz fl,#3]  record dst [, fl | , ptra - (table+4*ar)]
+  value + flags runs: arm 1 FC/FZ, arm 2 NOP/waiting/k=0, arm 4 image R.
+  image W:  wrlong old, target+4*aw ; settle ; rb1 := rb2 := seed
+            rdlong tmp, primer ; rdfast|wrfast mode, stream+4*af ; k x nop ;
+            wrlong|wrbyte|wrword new, target+4*aw+offset ;
+            rdlong rb1, target+4*aw (W1) | nop (W2) ; settle [arm 4: flush]
+            rdlong rb2, target+4*aw ; record rb1, rb2
+  block:    blk0..blk7 := seed ; rdlong tmp, primer ; rdfast mode, stream+
+            4*af ; k x nop ; setq #7 ; rdlong blk0, block+4*ar ; settle ;
+            record blk0..blk7 (setq #7 + wrlong)
+  16 repetitions x 64 cells per run; record (r*8 + af)*8 + ar.
+
+RECORD CLASSES
+  image R  P previous read (the primer; for RDBYTE/RDWORD prediction A's
+           part)  S sentinel (its part)  L the primer at ANOTHER offset
+           (prediction A's shift wrong)  D seed (never written)
+  value + flags   R released (the released value with ITS flags)  S correct
+           (the sentinel or its part with ITS flags)  W released value,
+           WRONG flags  Q sentinel with the RELEASED flags (where both
+           values give the same flags, S wins)  V sentinel with other flags
+           L the primer at another offset  D seed
+  PTRA++   rows show the value class (image R codes); the PTRA delta (0,
+           +4, other) is counted per value group in the run's totals
+  image W  per read-back: O old  N new (the lane-merged long)  P primer
+           D seed  L old with ANOTHER lane written
+  block    . right block  P primer in some longs (rest right)  D seed in
+           some longs  M primer and seed  (X other, U unwritten)
+  all      F a stream long ($1E1E_0000 + n)  U $EEEE_EEEE (never written)
+           X other.  agree: "." all 16 repetitions identical, else the hex
+           count identical to repetition 0.
+  THE "OTHER" SPLIT.  U in any run fails the arm's gate.  X in a
+  NOP control, or in a waiting-form control of arms 1-3 (the waiting
+  RDFAST is measured clean), fails it.  X in a test run, or in the
+  waiting-form controls of arms 4-5 (never measured), is a result: it is
+  named in the verdict.
+
+GATES (printed at the end of each arm)
+  RIG FAIL (the test program itself, ends the run): hub layout, run table, timeout in arms
+    0-3, mode echo, a restart of the measuring cog failing.  (Arm 4 timeout:
+    OBSERVED, restart, on to arm 5.  Arm 5 timeout: OBSERVED, lost cog.)
+  ARM 0: "RIG OK (arm 0 ...)" only if C1 sentinel 1024/1024, PS stream long
+    1024/1024, T1 k=0 43 primer by delta 8 8 7 6 5 4 3 2 in every
+    repetition (688 primer + 336 sentinel), T1 k=7 sentinel 1024/1024, no
+    U, no X, no disagreeing cell.  Else "RIG FAIL (arm 0 ...)", and every
+    later verdict prints NO VERDICT.
+  ARMS 1-5: "GATE FAIL (arm N)" for: U in any run; a NOP control not clean;
+    X as split above; disagreeing repetitions in a control run, or in a
+    test run of arms 1-3 (arms 4-5 and the PTRA++ test run record them);
+    arm 5's baseline copy not matching the loaded image.  Else "GATES PASS
+    (arm N)".  A NO VERDICT caused by disagreeing repetitions in a test run
+    adds: "disagreeing repetitions in a test run may be a result: see the
+    rows".
+
+VERDICTS (each arm's after its gate; all repeated in the closing summary)
+  RIG OK / RIG FAIL                     arm 0
+  VERDICT E7 FLAGS C: / FLAGS Z:        NO VERDICT / INCONCLUSIVE (waiting
+    form not clean; T not primer-or-sentinel; no release in T) / REFUTED
+    (flags not written by the released read; a read's flags not its
+    value's) / CONFIRMED (every released record has the predicted flags,
+    every correct record its own, 43 per repetition in T1's cells) /
+    CONFIRMED AT THE READ, BUT FLAGS CHANGED AFTER THE READ / MECHANISM
+    PRESENT, COUNT DIFFERS (flags right, cells not T1's)
+  OBSERVED E7 PTRA++:                    NO VERDICT or the delta
+    distribution split by released / correct cells (records)
+  VERDICT E7 RDBYTE: / RDWORD:           NO VERDICT / INCONCLUSIVE (waiting
+    form not clean) / REFUTED (seed records; the primer at another offset;
+    other or stream values; no release at all; flags not written by the
+    released read; flags not the value's) / CONFIRMED (every offset:
+    prediction A with its flags in T1's 43 cells per repetition, the rest
+    the sentinel part with its flags; k=7 none) / CONFIRMED AT THE READ,
+    BUT FLAGS CHANGED AFTER THE READ / MECHANISM PRESENT, COUNT DIFFERS.
+    Every line also states the k=0 flags result.
+  VERDICT E7 WRBYTE: / WRWORD:           NO VERDICT / INCONCLUSIVE (waiting
+    form not clean) / REFUTED (writes land after all (W1: old,new);
+    released write never lands (W2: rb2 old); defect absent: W1 (new,new)
+    everywhere; a pattern not named, incl. another lane written, or no
+    lost write) / CONFIRMED (every offset: 43 (old,old) in T1's cells + 21
+    (primer,new); W2 (seed,new) 64) / MECHANISM PRESENT, COUNT DIFFERS
+  OBSERVED E7 WRFAST-RDLONG: / WRFAST-WRLONG: / SETQ-BLOCK:
+    NO VERDICT (arm 0 or the arm's gate failed) or "OBSERVED: released
+    early in N of 64 cells ..." / "OBSERVED: no early release ...", with
+    the class counts, the delta split, (WRFAST-RDLONG) the flags result and
+    (SETQ) the integrity result; after an arm 4 hang both WRFAST lines say
+    "OBSERVED: blocking rdfast #0 after a no-wait WRFAST did not complete".
+  Every byte/word verdict line states both values (with flags for the
+  reads) written before the run.
+
+THE MEASURING COG'S IMAGE
+  The primer, the RDFAST or WRFAST (or the NOP standing in for it), the k
+  NOPs and the test instruction are adjacent instructions in cog RAM, with
+  no ## operand between them; the test instruction is followed by the
+  capture of the flags or by the read-back, and then by the jump to the
+  settle loop.  The only AUGS in the measuring cog is the start-up
+  "mov c_tmp, ##STAT_READY", outside every trial; there is no BRK.
+  DEBUG OUTPUT.  Every printed line is assembled in lineBuf from hub
+  strings and numbers and sent by the ONE debug(zstr_(@lineBuf)) record in
+  ln_out(); the only other record is debug("DEBUG_END_SESSION").  The
+  program therefore carries 2 DEBUG records and a small amount of DEBUG
+  data, so it loads and prints.
+
+HOW TO RUN
+  Compile with pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or PNut
+  Ctrl-F10).  Runs once; nothing written to flash.  Output: header with
+  every prediction, then per arm: its runs (rows + totals), its gate line,
+  its verdict lines; then the VERDICT SUMMARY and DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+  NSLOT           = 8                   ' slot bits: address bits [4:2]
+  NCELL           = NSLOT * NSLOT       ' (af, ar) cells per repetition
+  REPS            = 16                  ' repetitions of every cell per run
+  NTRIAL          = REPS * NCELL        ' trials per run (1,024)
+  NREC_W          = NTRIAL * 2          ' image W / flags records per run (2,048 longs)
+  BLKN            = 8                   ' longs per SETQ block read (setq #BLKN-1)
+  NREC_B          = NTRIAL * BLKN       ' block records per run (8,192 longs)
+  K_FAR           = 7                   ' the far NOP count: no release from k=7
+  SETTLE_N        = 100                 ' DJNZ count of a settle loop: >= 200 clocks
+  STREAM_WAIT     = 200                 ' PS: WAITX between the no-wait RDFAST and its RFLONG
+
+  PRIMV           = $A5A5_0001          ' primer (arms 0, 1 FC, 3, 4, 5)
+  SENTV           = $5A5A_0002          ' sentinel, table T
+  SEEDV           = $C3C3_0003          ' seed: destination before the trial ("never written")
+  OLDV            = $0F0F_0004          ' arm 4 image W: the target before the trial
+  NEWV            = $F0F0_0005          ' arm 4 image W: what the WRLONG writes
+  PRIMB           = $A1B2_C3D4          ' arm 2 primer: four distinct bytes
+  SENTB           = $5A6B_7C8D          ' arm 2 sentinel, table B
+  PRIMZ           = $0000_0000          ' arm 1 FZ primer
+  OLDB            = $4C3D_2E1F          ' arm 3 target before the trial (four distinct bytes)
+  NEWD            = $C8D9_EAFB          ' arm 3 write data: WRBYTE writes $FB, WRWORD $EAFB
+  BLK_V           = $5A5A_0100          ' block source long i = BLK_V + i
+  GUARD_V         = $6D6D_0000          ' cog guard-band long i = GUARD_V + i
+  STRM_V          = $1E1E_0000          ' stream region long n = STRM_V + n
+  UNWRITTEN       = $EEEE_EEEE          ' record-area fill: nothing written here
+  FIFO_NO_WAIT    = $8000_0000          ' RDFAST/WRFAST D: D[31]=1 no-wait, block count 0
+  FIFO_WAIT       = $0000_0000          ' RDFAST/WRFAST D: D[31]=0 waiting form, block count 0
+
+  T1_PRED         = 43                  ' Erratum E7: primer cells per repetition at k=0
+  T1_PRED_SENT    = NCELL - T1_PRED     ' 21
+  T3_PRED_OO      = 43                  ' Erratum E7: (old,old) cells per repetition
+  T3_PRED_PN      = 21                  ' Erratum E7: (primer,new) cells per repetition
+
+  ' arm 1 flags long: bit 0 C and bit 1 Z right after the test instruction,
+  ' bit 2 C and bit 3 Z after the settle loop
+  FLB_C_IMM       = 0
+  FLB_Z_IMM       = 1
+  FLB_C_LATE      = 2
+  FLB_Z_LATE      = 3
+  FL_PRESET       = %11                 ' C=1 Z=1: preset; no single read gives both
+
+  ' -- fixed hub layout (HUB LAYOUT in the header) --
+  HUB_STRM        = $4_0000
+  STRM_LONGS      = 64
+  HUB_TBL         = $4_1000
+  HUB_TBLB        = $4_1100
+  HUB_BLK         = $4_1200
+  BLK_LONGS       = NSLOT + BLKN - 1    ' 15: blocks start at slot bits 0..7
+  HUB_WTBL        = $4_2000
+  HUB_PRIM        = $4_3000
+  HUB_PRIMB       = $4_3020
+  HUB_PRIMZ       = $4_3040
+  HUB_RES         = $4_4000
+  HUB_DUMP        = $4_C000             ' cog-RAM copy written by the measuring cog
+  HUB_DUMP0       = $4_D000             ' the baseline copy (cog 0 moves it here)
+  COG_DUMP_N      = $1F0                ' cog registers $000-$1EF (496)
+  HUB_DATA_LO     = HUB_STRM
+  HUB_DATA_END    = HUB_DUMP0 + COG_DUMP_N * 4
+  HUB_TOP16K      = $7_C000
+  STACK_MARGIN    = $4000
+
+  STAT_READY      = $0000_0A11
+  LINE_MAX        = 480                 ' longest printed line (chars); longer text is cut
+  INT_SHOW        = 16                  ' changed cog registers listed per run
+
+  SUCCESS         = 0
+  E_RIG_FAIL      = -1                  ' the measuring cog did not answer within 1 s
+  E_MODE_FAIL     = -2                  ' the mode echoed back differs from the mode sent
+
+CON ' ---- Identifiers ----
+  #1, CMD_R, CMD_F, CMD_W, CMD_B, CMD_SNAP, CMD_P
+
+  #0, ARM_P, ARM_FL, ARM_RD, ARM_WR, ARM_WF, ARM_Q
+  NARM            = ARM_Q + 1
+
+  ' shapes: image R; PS; value + flags (SH_F); image W; block; value + PTRA delta (SH_P)
+  #0, SH_R, SH_PS, SH_F, SH_W, SH_B, SH_P
+  #0, KD_NOP, KD_PS, KD_WAIT, KD_TEST
+
+  ' trial copies (the measuring cog's vec_tab order)
+  #0, CP_R_NOP_L, CP_R_RF0_L, CP_R_RF7_L, CP_R_PS
+  #4, CP_R_RF7_B, CP_R_RF7_W
+  #6, CP_F_NOP, CP_F_RF0, CP_F_WF0, CP_F_WF7
+  #10, CP_FB_NOP, CP_FB_RF0, CP_FW_NOP, CP_FW_RF0
+  #14, CP_W_NOP_B, CP_W_RF1_B, CP_W_RF2_B
+  #17, CP_W_NOP_W, CP_W_RF1_W, CP_W_RF2_W
+  #20, CP_W_NOP_L, CP_W_WF1_L0, CP_W_WF1_L7, CP_W_WF2_L0
+  #24, CP_B_NOP, CP_B_RF0, CP_B_RF7
+  #27, CP_P_NOP, CP_P_RF0
+
+  ' run-table fields (runTab, 8 bytes per run)
+  #0, RF_ARM, RF_SHAPE, RF_KIND, RF_COPY, RF_NOWAIT, RF_K, RF_SIZE, RF_LANE
+  RT_W            = 8
+
+  ' run indexes, in run order
+  RUN_C1          = 0
+  RUN_PS          = 1
+  RUN_T1          = 2                   ' T1 k=0: the reference cell map for every arm
+  RUN_T1F         = 3                   ' T1 k=7
+  RUN_FL          = 4                   ' arm 1: FC N, C, T, then FZ N, C, T, then FP (PTRA++) N, C, T
+  RUN_FP          = RUN_FL + 6
+  RUN_RD          = RUN_FL + 9          ' arm 2: variant v (0..5) slot j at RUN_RD + 4*v + j
+  NVAR            = 6                   ' byte offsets 0..3, word offsets 0, 2
+  RUN_WR          = RUN_RD + NVAR * 4   ' arm 3: same layout
+  RUN_WF          = RUN_WR + NVAR * 4   ' arm 4 image R: N, C, T k0, T k7
+  RUN_WFW         = RUN_WF + 4          ' arm 4 image W: N, C, T1 k0, T1 k7, T2 k0
+  RUN_Q           = RUN_WFW + 5         ' arm 5: N, C, T k0, T k7
+  NRUN            = RUN_Q + 4
+  NBRUN           = 4
+  NPRUN           = 3                   ' arm 1 PTRA++ runs: N, C, T
+  #0, SL_N, SL_C, SL_T0, SL_T7          ' arm 2 slots (N, C, T0: value + flags; T7: image R)
+  #0, SW_N, SW_C, SW_T1, SW_T2          ' arm 3 slots
+
+  ' value classes (image R and W; the flags and block classes share the L/F/U/X slots)
+  #0, VC_OLD, VC_NEW, VC_PRIM, VC_SEED, VC_SENT, VC_LANE, VC_SPARE, VC_STRM, VC_UNWR, VC_OTHER
+  NVC             = VC_OTHER + 1
+  NPAIR           = NVC * NVC
+  PAIR_OO         = VC_OLD * NVC + VC_OLD
+  PAIR_ON         = VC_OLD * NVC + VC_NEW
+  PAIR_NN         = VC_NEW * NVC + VC_NEW
+  PAIR_PN         = VC_PRIM * NVC + VC_NEW
+  PAIR_DN         = VC_SEED * NVC + VC_NEW
+  ' value + flags classes (value, C, Z): arm 1 FC/FZ, arm 2 N/C/T0, arm 4 image R
+  #0, FL_REL, FL_OK, FL_REL_WF, FL_OK_RF, FL_OK_WF
+  FL_LANE         = VC_LANE             ' the primer's part at another offset
+  FL_SEED         = VC_SPARE
+  FL_STRM         = VC_STRM
+  FL_UNWR         = VC_UNWR
+  FL_OTHER        = VC_OTHER
+  ' block record classes
+  #0, BC_OK, BC_PRIM, BC_SEED, BC_MIX
+  BC_UNWR         = VC_UNWR
+  BC_OTHER        = VC_OTHER
+
+  ' mailbox longs (cog 0 <-> measuring cog)
+  #0, MB_CMD, MB_COPY, MB_MODE, MB_OFF, MB_PRIM, MB_TBL, MB_OLD, MB_NEW, MB_FLUSH, MB_ALIVE, MB_ECHO, MB_LEN
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  long measCog
+  byte cellCode[NRUN * NCELL]           ' repetition 0: class (R, F, B) or pair code (W)
+  byte cellAgree[NRUN * NCELL]          ' repetitions identical to repetition 0
+  long runCnt[NRUN * NVC]               ' classes over all repetitions (W: rb1 and rb2)
+  long runRep0[NRUN * NPAIR]            ' repetition-0 cells per code
+  long runDelta[NRUN * NSLOT]           ' rep 0 by delta: released cells (R/F: primer value, W: (old,old), B: primer in the record)
+  long runDelta2[NRUN * NSLOT]          ' rep 0 by delta: cells not clean
+  long runDisagree[NRUN]
+  long runGoodAll[NRUN]                 ' over all repetitions: clean records / cells
+  long runOther[NRUN]
+  long runOtherVal[NRUN]
+  long runStrmVal[NRUN]
+  long runLaneVal[NRUN]
+  long runLate[NRUN]                    ' value + flags runs: flags changed between the two captures
+  long runNoFlag[NRUN]                  ' value + flags runs: preset flags C=1 Z=1 survived
+  long runFlagVal[NRUN]                 ' value + flags runs: first wrong flags (low 4 bits), -1 none
+  long ptrDel[NPRUN * 9]                ' PTRA++ runs: [run][value group: released, correct, other][delta: 0, +4, other]
+  long ptrOddDel[NPRUN]                 ' PTRA++ runs: the first delta that is neither 0 nor +4
+  long armTestDis[NARM]                 ' disagreeing cells in gated test runs (arms 0-3)
+  long wfHang                           ' arm 4: a command timed out (the measuring cog was restarted)
+  long wfHangRun
+  long blkPrim[NBRUN * BLKN]            ' arm 5: primer, per long index, all reps
+  long blkSeed[NBRUN * BLKN]
+  long blkOth[NBRUN * BLKN]
+  long blkOthVal[NBRUN]
+  long blkOthIdx[NBRUN]
+  long intChanged[NBRUN]                ' arm 5: changed cog registers, -1 = no copy arrived
+  long intFirst[NBRUN]                  ' arm 5: the first changed register
+  long armDamage[NARM]
+  long armDone[NARM]                    ' the arm finished and its gate was decided
+  long armPass[NARM]                    ' its gate passed
+  long baseOk
+  long bLost
+  long lostRun
+  ' classification references for the run being processed (set_ref)
+  long refArm, refShape, refSize, refLane, refMask, refPrimL, refPrim, refSent
+  long refOld, refData, refNew, refRelFl, refOkFl
+  ' print buffers
+  byte rowStr[NSLOT * 3 + 1]
+  byte agreeStr[NSLOT + 1]
+  ' every printed line is built here and sent by ONE debug() record (ln_out)
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | armIdx, status, pStack
+'' Run the six arms in order on the measuring cog; each prints its runs, its
+'' gate and its verdicts when it completes; then the verdict summary.
+''
+
+' Local Variables:
+' @local armIdx - arm (ARM_*)
+' @local status - SUCCESS, or the failure that ended the run
+' @local pStack - hub address of this method's locals: cog 0's stack
+
+  pStack := @status
+  linePos := 0
+  ' the layout check runs before the first write to the fixed data area it protects
+  if pStack + STACK_MARGIN > HUB_DATA_LO or HUB_DATA_END > HUB_TOP16K
+    ln_s(string("RIG FAIL: hub layout - cog 0 stack at "))
+    ln_h(pStack)
+    ln_s(string(" must lie at least "))
+    ln_h(STACK_MARGIN)
+    ln_s(string(" below the data at "))
+    ln_h(HUB_DATA_LO)
+    ln_s(string(", and the data end "))
+    ln_h(HUB_DATA_END)
+    ln_s(string(" must lie below "))
+    ln_h(HUB_TOP16K)
+    ln_out()
+    finish()
+  if @runTabEnd - @runTab <> NRUN * RT_W
+    ln_s(string("RIG FAIL: run table holds "))
+    ln_d(@runTabEnd - @runTab)
+    ln_s(string(" bytes, expected "))
+    ln_d(NRUN * RT_W)
+    ln_out()
+    finish()
+  reset_tallies()
+  fill_regions()
+
+  print_header(pStack)
+
+  if start_meas_cog() <> SUCCESS
+    finish()
+
+  repeat armIdx from 0 to NARM - 1
+    status := run_arm(armIdx)
+    if status <> SUCCESS
+      quit
+
+  print_summary()
+  finish()
+
+PRI start_meas_cog() : status | startCt
+' Start a measuring cog (COGINIT, cog execution) and wait for its start-up
+' handshake.  Used at start-up and after an arm 4 timeout.  Prints RIG FAIL
+' on failure.
+'
+' @returns status - SUCCESS or E_RIG_FAIL
+
+' Local Variables:
+' @local startCt - CT at the start of the start-up timeout
+
+  status := SUCCESS
+  mbox[MB_CMD] := 0                     ' a fresh cog must not see a stale command
+  mbox[MB_ALIVE] := 0
+  measCog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if measCog < 0
+    ln_s(string("RIG FAIL: coginit expected a free cog (0..7), got "))
+    ln_d(measCog)
+    ln_out()
+    status := E_RIG_FAIL
+  else
+    startCt := getct()
+    repeat until mbox[MB_ALIVE] == STAT_READY
+      if getct() - startCt > clkfreq
+        ln_s(string("RIG FAIL: measuring cog start-up expected $0000_0A11 within 1 s, got "))
+        ln_h(mbox[MB_ALIVE])
+        ln_out()
+        status := E_RIG_FAIL
+        quit
+    if status == SUCCESS
+      ln_s(string("measuring cog "))
+      ln_d(measCog)
+      say(string(" running"))
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when END_SESSION or
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_d(value) | divisor, bStarted
+' Append a signed decimal to the line.
+'
+' @param value - the number
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local bStarted - a non-zero digit has been printed
+
+  if value == NEGX
+    ln_s(string("-2147483648"))
+  else
+    if value < 0
+      ln_c("-")
+      value := -value
+    divisor := 1_000_000_000
+    bStarted := FALSE
+    repeat 10
+      if value >= divisor or bStarted or divisor == 1
+        ln_c("0" + value / divisor)
+        value //= divisor
+        bStarted := TRUE
+      divisor /= 10
+
+PRI ln_hx(value, digits) | idx, nibble
+' Append "$" and the low digits hex digits of value.
+'
+' @param value - the number
+' @param digits - hex digits to print (1..8)
+
+' Local Variables:
+' @local idx - nibble index, digits-1 .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from digits - 1 to 0
+    nibble := (value >> (idx * 4)) & $F
+    if nibble < 10
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - 10)
+
+PRI ln_h(value) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param value - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from 7 to 0
+    nibble := (value >> (idx * 4)) & $F
+    if nibble < 10
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - 10)
+    if idx == 4
+      ln_c("_")
+
+PRI ln_row8(pLongs) | idx
+' Append 8 longs as decimals separated by single spaces.
+'
+' @param pLongs - hub address of the first long
+
+' Local Variables:
+' @local idx - long index 0..7
+
+  repeat idx from 0 to NSLOT - 1
+    if idx > 0
+      ln_c(" ")
+    ln_d(long[pLongs][idx])
+
+PRI ln_flags(flagBits)
+' Append "C=c Z=z" for a 2-bit flags value (bit 0 C, bit 1 Z).
+'
+' @param flagBits - the flags
+
+  ln_s(string("C="))
+  ln_d(flagBits & 1)
+  ln_s(string(" Z="))
+  ln_d((flagBits >> 1) & 1)
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+' ---------------------------------------------------------------------------
+' set-up, the run table and the command channel
+' ---------------------------------------------------------------------------
+PRI print_header(pStack) | varIdx
+' Print the program identity, the layout and every prediction before the run.
+'
+' @param pStack - hub address of main()'s locals (cog 0's stack)
+
+' Local Variables:
+' @local varIdx - arm 2/3 variant
+
+  say(string("=== P2 Errata E7: scope of the no-wait RDFAST early release - flags, RDBYTE/RDWORD, WRBYTE/WRWORD, no-wait WRFAST, SETQ block read (clk 200 MHz) ==="))
+  say(string("values: primer $A5A5_0001 / $A1B2_C3D4 (arm 2) / $0000_0000 (arm 1 FZ); sentinel $5A5A_0002 / $5A6B_7C8D (arm 2); seed $C3C3_0003; old $0F0F_0004 new $F0F0_0005 (arm 4)"))
+  say(string("values: arm 3 old $4C3D_2E1F data $C8D9_EAFB; block long i $5A5A_0100+i; stream long n $1E1E_0000+n; unwritten $EEEE_EEEE"))
+  ln_s(string("hub: stream "))
+  ln_h(HUB_STRM)
+  ln_s(string(" tables "))
+  ln_h(HUB_TBL)
+  ln_c("/")
+  ln_h(HUB_TBLB)
+  ln_s(string(" block "))
+  ln_h(HUB_BLK)
+  ln_s(string(" targets "))
+  ln_h(HUB_WTBL)
+  ln_s(string(" primers "))
+  ln_h(HUB_PRIM)
+  ln_c("/")
+  ln_h(HUB_PRIMB)
+  ln_c("/")
+  ln_h(HUB_PRIMZ)
+  ln_s(string(" records "))
+  ln_h(HUB_RES)
+  ln_s(string(" cog copies "))
+  ln_h(HUB_DUMP)
+  ln_c("/")
+  ln_h(HUB_DUMP0)
+  ln_s(string("; data end "))
+  ln_h(HUB_DATA_END)
+  ln_s(string("; measuring-cog image "))
+  ln_h(@pasm)
+  ln_s(string("; last VAR byte array "))
+  ln_h(@lineBuf)
+  ln_s(string("; cog 0 stack "))
+  ln_h(pStack)
+  ln_out()
+  ln_s(string("measuring cog: image $000-"))
+  ln_hx(cog_addr(@pasm_end) - 1, 3)
+  ln_s(string("; loop variables "))
+  ln_hx(cog_addr(@c_cmd), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_tmp), 3)
+  ln_s(string("; guard bands "))
+  ln_hx(cog_addr(@c_guard_lo), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_guard_lo) + BLKN - 1, 3)
+  ln_s(string(" and "))
+  ln_hx(cog_addr(@c_guard_hi), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_guard_hi) + BLKN - 1, 3)
+  ln_s(string("; sacrificial range "))
+  ln_hx(cog_addr(@c_blk0), 3)
+  ln_c("-")
+  ln_hx(cog_addr(@c_blk0) + BLKN - 1, 3)
+  ln_out()
+  say(string("codes: image R  P previous read (primer / prediction A part)  S sentinel (part)  L primer at another offset  D seed  F stream long  U unwritten  X other"))
+  say(string("codes: value+flags  R released (primer/part, its flags)  S correct (sentinel/part, its flags)  W released value wrong flags  Q sentinel released flags  V sentinel other flags  L D F U X"))
+  say(string("codes: PTRA++ rows show the value class (P S D F U X); the PTRA delta (after minus before; a correct read gives +4) is in each run's totals"))
+  say(string("codes: image W cell rb1 rb2 each  O old  N new  P primer  D seed  L another lane written  F U X | block  . right block  P primer in some longs  D seed in some  M both  X U"))
+  say(string("agree: . all 16 identical, else hex count identical to rep 0. delta = (ar - af) mod 8 (image W: aw - af). Every run: 16 repetitions x 64 cells"))
+  say(string("ARM 0 MUST (Erratum E7): C1 sentinel 1024; PS stream long 1024; T1 k=0 43 primer per repetition by delta 8 8 7 6 5 4 3 2 (688 of 1024); T1 k=7 sentinel 1024. Else RIG FAIL: no later verdict counts"))
+  say(string("ARM 1 PREDICT: FC released ($A5A5_0001, C=1, Z=0) / correct ($5A5A_0002, C=0, Z=0); FZ released ($0000_0000, C=0, Z=1) / correct ($5A5A_0002, C=0, Z=0); released in T1's 43 cells"))
+  say(string("ARM 1 PTRA++ RECORDS (no prediction): rdlong dst,ptra++ at k=0, ptra preset to the test address; ptra after minus before, split by released / correct cells (a correct read: +4)"))
+  say(string("ARM 2 PREDICTION A: a released RDBYTE/RDWORD writes the previous read's long $A1B2_C3D4 >> (8 x its own offset), masked to its size, with that value's flags (C = its MSB, Z = zero);"))
+  say(string("  in T1's 43 cells at k=0, none at k=7 (k=7 records the value only). Triples written before the run (value, C, Z):"))
+  repeat varIdx from 0 to NVAR - 1
+    ln_s(string("  "))
+    ln_s(lookupz(varIdx: string("RDBYTE offset 0"), string("RDBYTE offset 1"), string("RDBYTE offset 2"), string("RDBYTE offset 3"), string("RDWORD offset 0"), string("RDWORD offset 2")))
+    ln_s(string(": released (prediction A) ("))
+    ln_h(part(PRIMB, var_size(varIdx), var_lane(varIdx)))
+    ln_s(string(", "))
+    ln_flags(flags_of(part(PRIMB, var_size(varIdx), var_lane(varIdx)), var_size(varIdx)))
+    ln_s(string(") | not released (sentinel part) ("))
+    ln_h(part(SENTB, var_size(varIdx), var_lane(varIdx)))
+    ln_s(string(", "))
+    ln_flags(flags_of(part(SENTB, var_size(varIdx), var_lane(varIdx)), var_size(varIdx)))
+    ln_c(")")
+    if flags_of(part(PRIMB, var_size(varIdx), var_lane(varIdx)), var_size(varIdx)) == flags_of(part(SENTB, var_size(varIdx), var_lane(varIdx)), var_size(varIdx))
+      ln_s(string(" - same flags: only the value decides here"))
+    ln_out()
+  say(string("ARM 3 PREDICT (as for a released WRLONG): W1 43 (old,old) in T1's cells (write lost, target stays $4C3D_2E1F) + 21 (primer $A5A5_0001, new); W2 (seed,new) in all 64. Not released: (new,new):"))
+  repeat varIdx from 0 to NVAR - 1
+    ln_s(string("  "))
+    ln_s(lookupz(varIdx: string("WRBYTE offset 0"), string("WRBYTE offset 1"), string("WRBYTE offset 2"), string("WRBYTE offset 3"), string("WRWORD offset 0"), string("WRWORD offset 2")))
+    ln_s(string(": new "))
+    ln_h(merge(OLDB, NEWD, var_size(varIdx), var_lane(varIdx)))
+    ln_out()
+  say(string("ARM 4 RECORDS (no prediction): no-wait WRFAST then RDLONG wcz (value + flags) / WRLONG, k=0 and k=7, waiting WRFAST control; FIFO flushed after every trial by a blocking rdfast #0 + settle"))
+  say(string("ARM 4 on a timeout: the measuring cog is stopped, the arm's remaining runs are skipped, a fresh measuring cog is started and the run goes on to arm 5"))
+  say(string("ARM 5 RECORDS (no prediction): no-wait RDFAST / k NOP / setq #7 / rdlong into the sacrificial range, k=0 and k=7, waiting form control; cog-RAM integrity checked after every run"))
+  say(string("refuting outcomes: see each arm's header and the VERDICT lines; rig fails: U in any run, a NOP control not clean, X in a control (arms 4-5 waiting forms record it), disagreeing repetitions (arms 4-5 and PTRA++ test runs record them), mode echo"))
+
+PRI fill_regions() | idx
+' Write every fixed data region its pattern.
+'
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  repeat idx from 0 to STRM_LONGS - 1
+    long[HUB_STRM][idx] := STRM_V + idx
+  longfill(HUB_TBL, SENTV, NSLOT)
+  longfill(HUB_TBLB, SENTB, NSLOT)
+  repeat idx from 0 to BLK_LONGS - 1
+    long[HUB_BLK][idx] := BLK_V + idx
+  longfill(HUB_WTBL, OLDV, NSLOT)
+  long[HUB_PRIM] := PRIMV
+  long[HUB_PRIMB] := PRIMB
+  long[HUB_PRIMZ] := PRIMZ
+
+PRI region_damage() : damageCnt | idx
+' Count read-only data longs that no longer hold their pattern.
+'
+' @returns damageCnt - changed longs (stream, tables, block source, primers)
+
+' Local Variables:
+' @local idx - long index inside a region
+
+  damageCnt := 0
+  repeat idx from 0 to STRM_LONGS - 1
+    if long[HUB_STRM][idx] <> STRM_V + idx
+      damageCnt++
+  repeat idx from 0 to NSLOT - 1
+    if long[HUB_TBL][idx] <> SENTV
+      damageCnt++
+    if long[HUB_TBLB][idx] <> SENTB
+      damageCnt++
+  repeat idx from 0 to BLK_LONGS - 1
+    if long[HUB_BLK][idx] <> BLK_V + idx
+      damageCnt++
+  if long[HUB_PRIM] <> PRIMV
+    damageCnt++
+  if long[HUB_PRIMB] <> PRIMB
+    damageCnt++
+  if long[HUB_PRIMZ] <> PRIMZ
+    damageCnt++
+
+PRI reset_tallies()
+' Clear every tally.
+'
+
+  bytefill(@cellCode, 0, NRUN * NCELL)
+  bytefill(@cellAgree, 0, NRUN * NCELL)
+  longfill(@runCnt, 0, NRUN * NVC)
+  longfill(@runRep0, 0, NRUN * NPAIR)
+  longfill(@runDelta, 0, NRUN * NSLOT)
+  longfill(@runDelta2, 0, NRUN * NSLOT)
+  longfill(@runDisagree, 0, NRUN)
+  longfill(@runGoodAll, 0, NRUN)
+  longfill(@runOther, 0, NRUN)
+  longfill(@runOtherVal, 0, NRUN)
+  longfill(@runStrmVal, 0, NRUN)
+  longfill(@runLaneVal, 0, NRUN)
+  longfill(@runLate, 0, NRUN)
+  longfill(@runNoFlag, 0, NRUN)
+  longfill(@runFlagVal, -1, NRUN)
+  longfill(@ptrDel, 0, NPRUN * 9)
+  longfill(@ptrOddDel, 0, NPRUN)
+  longfill(@armTestDis, 0, NARM)
+  wfHang := FALSE
+  wfHangRun := -1
+  longfill(@blkPrim, 0, NBRUN * BLKN)
+  longfill(@blkSeed, 0, NBRUN * BLKN)
+  longfill(@blkOth, 0, NBRUN * BLKN)
+  longfill(@blkOthVal, 0, NBRUN)
+  longfill(@blkOthIdx, -1, NBRUN)
+  longfill(@intChanged, -1, NBRUN)
+  longfill(@intFirst, -1, NBRUN)
+  longfill(@armDamage, 0, NARM)
+  longfill(@armDone, FALSE, NARM)
+  longfill(@armPass, FALSE, NARM)
+  baseOk := FALSE
+  bLost := FALSE
+  lostRun := -1
+
+PRI run_fld(runIdx, fieldIdx) : value
+' @param runIdx - run index
+' @param fieldIdx - RF_* field
+' @returns value - the run table byte
+
+  value := byte[@runTab][runIdx * RT_W + fieldIdx]
+
+PRI cog_addr(hubAddr) : cogAddr
+' @param hubAddr - hub address of a long in the measuring cog's image
+' @returns cogAddr - its cog register address
+
+  cogAddr := (hubAddr - @pasm) >> 2
+
+PRI var_size(varIdx) : sizeBytes
+' @param varIdx - arm 2/3 variant 0..5
+' @returns sizeBytes - 1 (byte offsets 0..3) or 2 (word offsets 0, 2)
+
+  if varIdx < 4
+    sizeBytes := 1
+  else
+    sizeBytes := 2
+
+PRI var_lane(varIdx) : laneIdx
+' @param varIdx - arm 2/3 variant 0..5
+' @returns laneIdx - the byte offset
+
+  laneIdx := lookupz(varIdx: 0, 1, 2, 3, 0, 2)
+
+PRI flags_of(value, sizeBytes) : flagBits
+' The flags a read of value gives with WCZ: C = the MSB of its size, Z = (value == 0).
+'
+' @param value - the number
+' @param sizeBytes - 1, 2 or 4
+' @returns flagBits - bit 0 C, bit 1 Z
+
+  flagBits := (value >> (sizeBytes * 8 - 1)) & 1
+  if value == 0
+    flagBits |= %10
+
+PRI size_mask(sizeBytes) : maskVal
+' @param sizeBytes - 1, 2 or 4
+' @returns maskVal - $FF, $FFFF or $FFFF_FFFF
+
+  if sizeBytes == 1
+    maskVal := $FF
+  elseif sizeBytes == 2
+    maskVal := $FFFF
+  else
+    maskVal := $FFFF_FFFF
+
+PRI part(longVal, sizeBytes, laneIdx) : partVal
+' The value a byte/word read at byte offset laneIdx of longVal returns
+' (shifted and masked; zero-extended).
+'
+' @param longVal - the long
+' @param sizeBytes - 1, 2 or 4
+' @param laneIdx - byte offset
+' @returns partVal - the part
+
+  partVal := (longVal >> (laneIdx * 8)) & size_mask(sizeBytes)
+
+PRI merge(oldVal, dataVal, sizeBytes, laneIdx) : newVal | maskVal
+' The long a byte/word/long write of dataVal at offset laneIdx leaves in oldVal.
+'
+' @param oldVal - the target long before the write
+' @param dataVal - the write data register
+' @param sizeBytes - 1, 2 or 4
+' @param laneIdx - byte offset
+' @returns newVal - the target long after the write
+
+' Local Variables:
+' @local maskVal - the size mask
+
+  maskVal := size_mask(sizeBytes)
+  newVal := (oldVal & !(maskVal << (laneIdx * 8))) | ((dataVal & maskVal) << (laneIdx * 8))
+
+PRI arm_first(armIdx) : runIdx
+' @param armIdx - arm
+' @returns runIdx - its first run
+
+  runIdx := lookupz(armIdx: RUN_C1, RUN_FL, RUN_RD, RUN_WR, RUN_WF, RUN_Q)
+
+PRI arm_last(armIdx) : runIdx
+' @param armIdx - arm
+' @returns runIdx - its last run
+
+  runIdx := lookupz(armIdx: RUN_FL - 1, RUN_RD - 1, RUN_WR - 1, RUN_WF - 1, RUN_Q - 1, NRUN - 1)
+
+PRI is_w2(copyIdx) : bW2
+' @param copyIdx - trial copy
+' @returns bW2 - TRUE for a W2 copy (NOP in place of the immediate read-back)
+
+  bW2 := lookdown(copyIdx: CP_W_RF2_B, CP_W_RF2_W, CP_W_WF2_L0) <> 0
+
+PRI is_nop_copy(copyIdx) : bNop
+' @param copyIdx - trial copy
+' @returns bNop - TRUE when a NOP stands in place of the RDFAST/WRFAST
+
+  bNop := lookdown(copyIdx: CP_R_NOP_L, CP_F_NOP, CP_FB_NOP, CP_FW_NOP, CP_W_NOP_B, CP_W_NOP_W, CP_W_NOP_L, CP_B_NOP, CP_P_NOP) <> 0
+
+PRI is_wf_copy(copyIdx) : bWf
+' @param copyIdx - trial copy
+' @returns bWf - TRUE for a WRFAST copy
+
+  bWf := lookdown(copyIdx: CP_F_WF0, CP_F_WF7, CP_W_WF1_L0, CP_W_WF1_L7, CP_W_WF2_L0) <> 0
+
+PRI rec_longs(runIdx) : nLongs
+' @param runIdx - run index
+' @returns nLongs - record longs the run writes
+
+  if run_fld(runIdx, RF_SHAPE) == SH_B
+    nLongs := NREC_B
+  elseif run_fld(runIdx, RF_SHAPE) == SH_W or run_fld(runIdx, RF_SHAPE) == SH_F or run_fld(runIdx, RF_SHAPE) == SH_P
+    nLongs := NREC_W
+  else
+    nLongs := NTRIAL
+
+PRI send_run(runIdx) : status | shape, armIdx, cmdId, pPrim, pTbl, oldVal, newVal, offVal, modeVal
+' Build the command for one run from the run table and send it.
+'
+' @param runIdx - run index
+' @returns status - SUCCESS / E_RIG_FAIL / E_MODE_FAIL
+
+' Local Variables:
+' @local shape - SH_*
+' @local armIdx - arm
+' @local cmdId - CMD_*
+' @local pPrim - primer address
+' @local pTbl - table / target / block base
+' @local oldVal - image W old long
+' @local newVal - image W write data
+' @local offVal - byte offset
+' @local modeVal - FIFO D value
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  armIdx := run_fld(runIdx, RF_ARM)
+  if shape == SH_B
+    cmdId := CMD_B
+    pTbl := HUB_BLK
+  elseif shape == SH_W
+    cmdId := CMD_W
+    pTbl := HUB_WTBL
+  else
+    if shape == SH_F
+      cmdId := CMD_F
+    elseif shape == SH_P
+      cmdId := CMD_P
+    else
+      cmdId := CMD_R
+    if armIdx == ARM_RD
+      pTbl := HUB_TBLB
+    else
+      pTbl := HUB_TBL
+  if armIdx == ARM_RD
+    pPrim := HUB_PRIMB
+  elseif armIdx == ARM_FL and run_fld(runIdx, RF_LANE) == 1
+    pPrim := HUB_PRIMZ
+  else
+    pPrim := HUB_PRIM
+  if armIdx == ARM_WR
+    oldVal := OLDB
+    newVal := NEWD
+  else
+    oldVal := OLDV
+    newVal := NEWV
+  if armIdx == ARM_RD or armIdx == ARM_WR
+    offVal := run_fld(runIdx, RF_LANE)
+  else
+    offVal := 0
+  if run_fld(runIdx, RF_NOWAIT)
+    modeVal := FIFO_NO_WAIT
+  else
+    modeVal := FIFO_WAIT
+  status := send_cmd(cmdId, run_fld(runIdx, RF_COPY), modeVal, offVal, pPrim, pTbl, oldVal, newVal, armIdx == ARM_WF)
+
+PRI send_cmd(cmdId, copyIdx, modeVal, offVal, pPrim, pTbl, oldVal, newVal, bFlush) : status | startCt
+' Hand one command to the measuring cog and wait for it to clear MB_CMD.
+'
+' @param cmdId - CMD_*
+' @param copyIdx - trial copy
+' @param modeVal - the RDFAST/WRFAST D value under test
+' @param offVal - byte offset added to the test address
+' @param pPrim - primer address
+' @param pTbl - table / target / block base
+' @param oldVal - the target long before the write
+' @param newVal - image W write data
+' @param bFlush - TRUE: blocking rdfast #0 + settle after every trial (arm 4)
+' @returns status - SUCCESS; E_RIG_FAIL on a 1 s timeout; E_MODE_FAIL (after
+'   printing its RIG FAIL line) when the mode echoed back is not the mode sent
+
+' Local Variables:
+' @local startCt - CT when the command was issued
+
+  status := SUCCESS
+  mbox[MB_COPY] := copyIdx
+  mbox[MB_MODE] := modeVal
+  mbox[MB_OFF] := offVal
+  mbox[MB_PRIM] := pPrim
+  mbox[MB_TBL] := pTbl
+  mbox[MB_OLD] := oldVal
+  mbox[MB_NEW] := newVal
+  mbox[MB_FLUSH] := bFlush & 1
+  mbox[MB_ECHO] := UNWRITTEN
+  mbox[MB_CMD] := cmdId
+  startCt := getct()
+  repeat until mbox[MB_CMD] == 0
+    if getct() - startCt > clkfreq
+      status := E_RIG_FAIL
+      quit
+  if status == SUCCESS and mbox[MB_ECHO] <> modeVal
+    ln_s(string("RIG FAIL: command "))
+    ln_d(cmdId)
+    ln_s(string(" copy "))
+    ln_d(copyIdx)
+    ln_s(string(" ran with FIFO D "))
+    ln_h(mbox[MB_ECHO])
+    ln_s(string(", expected "))
+    ln_h(modeVal)
+    say(string(" (mode echo)"))
+    status := E_MODE_FAIL
+
+' ---------------------------------------------------------------------------
+' the arm loop
+' ---------------------------------------------------------------------------
+PRI run_arm(armIdx) : status | runIdx, damageCnt, bAbort
+' Run one arm: its header, every run (rows + totals), its gate, its verdicts.
+'
+' @param armIdx - arm
+' @returns status - SUCCESS, or the failure that ends the whole run
+
+' Local Variables:
+' @local runIdx - run index
+' @local damageCnt - data longs changed by the run just done
+' @local bAbort - the arm ended early: no gate, no closing verdicts
+
+  print_arm_header(armIdx)
+  status := SUCCESS
+  bAbort := FALSE
+  if armIdx == ARM_Q
+    status := take_baseline()
+    bAbort := status <> SUCCESS
+  if not bAbort
+    repeat runIdx from arm_first(armIdx) to arm_last(armIdx)
+      print_run_header(runIdx)
+      longfill(HUB_RES, UNWRITTEN, rec_longs(runIdx))
+      if run_fld(runIdx, RF_SHAPE) == SH_B
+        longfill(HUB_DUMP, UNWRITTEN, COG_DUMP_N)
+      status := send_run(runIdx)
+      if status == E_RIG_FAIL
+        cogstop(measCog)
+        if armIdx == ARM_Q
+          bLost := TRUE
+          lostRun := runIdx
+          say(string("OBSERVED: measuring cog lost during the SETQ block arm"))
+          ln_s(string("  the measuring cog did not finish run "))
+          ln_runname(runIdx)
+          say(string(" within 1 s and was stopped (COGSTOP); the records it wrote before that follow (U = never written)"))
+          process_run(runIdx)
+          print_run(runIdx)
+          observed_q(TRUE)
+        elseif armIdx == ARM_WF
+          ' arm 4: a hang is a result; restart the measuring cog and go on to arm 5
+          wfHang := TRUE
+          wfHangRun := runIdx
+          ln_s(string("OBSERVED E7 WRFAST: blocking rdfast #0 after a no-wait WRFAST did not complete (run "))
+          ln_runname(runIdx)
+          say(string(")"))
+          ln_s(string("  the measuring cog did not finish run "))
+          ln_runname(runIdx)
+          say(string(" within 1 s and was stopped (COGSTOP); its records so far follow (U = never written); arm 4's remaining runs are skipped"))
+          process_run(runIdx)
+          print_run(runIdx)
+          status := start_meas_cog()
+          if status == SUCCESS
+            say(string("  a fresh measuring cog runs arm 5 (arm 5 takes its own cog-RAM baseline first)"))
+            print_arm_verdicts(armIdx, FALSE)
+        else
+          ln_s(string("RIG FAIL: measuring cog did not finish run "))
+          ln_runname(runIdx)
+          say(string(" within 1 s (done flag never cleared); it was stopped (COGSTOP) and the run ends here"))
+        bAbort := TRUE
+        quit
+      process_run(runIdx)
+      print_run(runIdx)
+      if run_fld(runIdx, RF_SHAPE) == SH_B
+        integrity(runIdx)
+      damageCnt := region_damage()
+      if damageCnt > 0
+        armDamage[armIdx] += damageCnt
+        ln_s(string("  REGION DAMAGE after "))
+        ln_runname(runIdx)
+        ln_s(string(": "))
+        ln_d(damageCnt)
+        say(string(" read-only data longs changed (a stray hub write) - regions re-filled"))
+        fill_regions()
+      if status <> SUCCESS
+        bAbort := TRUE
+        quit
+  if not bAbort
+    armPass[armIdx] := arm_gate(armIdx)
+    armDone[armIdx] := TRUE
+    print_arm_verdicts(armIdx, TRUE)
+
+PRI print_arm_header(armIdx)
+' @param armIdx - arm
+
+  if armIdx == ARM_P
+    say(string("===== ARM 0: POSITIVE CONTROL (C1, PS, T1 k=0, T1 k=7 - the basic Erratum E7 trial; MUST reproduce it, else RIG FAIL and no later verdict counts) ====="))
+  elseif armIdx == ARM_FL
+    say(string("===== ARM 1: FLAGS ON A RELEASED RDLONG (T1 k=0 with rdlong dst,pr wcz; flags captured right after it and again after the settle); PTRA++ SIDE EFFECT (records) ====="))
+  elseif armIdx == ARM_RD
+    say(string("===== ARM 2: RDBYTE / RDWORD IN PLACE OF THE TEST RDLONG (prediction A per offset with its flags, printed in the header; k=0 runs read wcz) ====="))
+  elseif armIdx == ARM_WR
+    say(string("===== ARM 3: WRBYTE / WRWORD IN PLACE OF THE WRLONG (read-back as a long; predicted as for a released WRLONG) ====="))
+  elseif armIdx == ARM_WF
+    say(string("===== ARM 4: NO-WAIT WRFAST IN PLACE OF THE NO-WAIT RDFAST (RECORDS; RDLONG reads wcz; FIFO flushed after every trial: blocking rdfast #0 + settle) ====="))
+  else
+    say(string("===== ARM 5: SETQ BLOCK RDLONG AFTER A NO-WAIT RDFAST (RECORDS; runs last; cog-RAM integrity checked after every run) ====="))
+
+PRI take_baseline() : status | addr, imgLen, varLo, varHi, matchCnt, checkCnt
+' Arm 5: the measuring cog copies its cog RAM to hub; cog 0 keeps that as the
+' baseline and checks it against the loaded image (loop variables excluded).
+'
+' @returns status - SUCCESS / E_RIG_FAIL / E_MODE_FAIL
+
+' Local Variables:
+' @local addr - cog register address
+' @local imgLen - registers in the loaded image
+' @local varLo - first loop-variable register
+' @local varHi - last loop-variable register
+' @local matchCnt - image registers equal in the copy
+' @local checkCnt - image registers compared
+
+  longfill(HUB_DUMP, UNWRITTEN, COG_DUMP_N)
+  status := send_cmd(CMD_SNAP, 0, FIFO_WAIT, 0, HUB_PRIM, HUB_BLK, OLDV, NEWV, FALSE)
+  if status == E_RIG_FAIL
+    cogstop(measCog)
+    say(string("RIG FAIL: measuring cog did not answer the arm 5 baseline command within 1 s; it was stopped (COGSTOP) and the run ends here"))
+  if status == SUCCESS
+    longmove(HUB_DUMP0, HUB_DUMP, COG_DUMP_N)
+    imgLen := cog_addr(@pasm_end)
+    varLo := cog_addr(@c_cmd)
+    varHi := cog_addr(@c_tmp)
+    matchCnt := 0
+    checkCnt := 0
+    repeat addr from 0 to imgLen - 1
+      if addr < varLo or addr > varHi
+        checkCnt++
+        if long[HUB_DUMP0][addr] == long[@pasm][addr]
+          matchCnt++
+    baseOk := matchCnt == checkCnt
+    ln_s(string("INTEGRITY BASELINE: the measuring cog copied cog RAM $000-$1EF to hub "))
+    ln_h(HUB_DUMP)
+    ln_s(string(" (kept at "))
+    ln_h(HUB_DUMP0)
+    ln_s(string("); it equals the loaded image in "))
+    ln_d(matchCnt)
+    ln_s(string(" of "))
+    ln_d(checkCnt)
+    say(string(" image registers outside the loop variables (MUST be all)"))
+
+PRI integrity(runIdx) | bIdx, addr, changed, sacLo, varLo, varHi, checkCnt
+' Arm 5: compare the copy written at the end of the run with the baseline;
+' print every changed register outside the sacrificial range and the loop
+' variables (the first INT_SHOW of them) and the count.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local bIdx - arm 5 run slot
+' @local addr - cog register address
+' @local changed - changed registers
+' @local sacLo - first sacrificial register
+' @local varLo - first loop-variable register
+' @local varHi - last loop-variable register
+' @local checkCnt - registers compared
+
+  bIdx := runIdx - RUN_Q
+  if long[HUB_DUMP][0] == UNWRITTEN and long[HUB_DUMP][COG_DUMP_N - 1] == UNWRITTEN
+    intChanged[bIdx] := -1
+    ln_s(string("  INTEGRITY "))
+    ln_runname(runIdx)
+    say(string(": no cog-RAM copy arrived (the copy area still holds $EEEE_EEEE)"))
+  else
+    sacLo := cog_addr(@c_blk0)
+    varLo := cog_addr(@c_cmd)
+    varHi := cog_addr(@c_tmp)
+    changed := 0
+    checkCnt := 0
+    repeat addr from 0 to COG_DUMP_N - 1
+      if (addr < sacLo or addr > sacLo + BLKN - 1) and (addr < varLo or addr > varHi)
+        checkCnt++
+        if long[HUB_DUMP][addr] <> long[HUB_DUMP0][addr]
+          changed++
+          if changed == 1
+            intFirst[bIdx] := addr
+          if changed <= INT_SHOW
+            ln_s(string("  INTEGRITY "))
+            ln_runname(runIdx)
+            ln_s(string(": cog register "))
+            ln_hx(addr, 3)
+            ln_s(string(" changed: baseline "))
+            ln_h(long[HUB_DUMP0][addr])
+            ln_s(string(" now "))
+            ln_h(long[HUB_DUMP][addr])
+            ln_out()
+    intChanged[bIdx] := changed
+    ln_s(string("  INTEGRITY "))
+    ln_runname(runIdx)
+    ln_s(string(": "))
+    ln_d(changed)
+    ln_s(string(" of "))
+    ln_d(checkCnt)
+    ln_s(string(" cog registers outside the sacrificial range "))
+    ln_hx(sacLo, 3)
+    ln_c("-")
+    ln_hx(sacLo + BLKN - 1, 3)
+    ln_s(string(" and the loop variables "))
+    ln_hx(varLo, 3)
+    ln_c("-")
+    ln_hx(varHi, 3)
+    say(string(" changed since the baseline"))
+
+' ---------------------------------------------------------------------------
+' classification
+' ---------------------------------------------------------------------------
+PRI set_ref(runIdx)
+' Set the classification references for one run.
+'
+' @param runIdx - run index
+
+  refArm := run_fld(runIdx, RF_ARM)
+  refShape := run_fld(runIdx, RF_SHAPE)
+  refSize := run_fld(runIdx, RF_SIZE)
+  refMask := size_mask(refSize)
+  if refArm == ARM_RD or refArm == ARM_WR
+    refLane := run_fld(runIdx, RF_LANE)
+  else
+    refLane := 0
+  if refArm == ARM_RD
+    refPrimL := PRIMB
+    refSent := part(SENTB, refSize, refLane)
+  else
+    refPrimL := PRIMV
+    refSent := SENTV
+  if refArm == ARM_FL and run_fld(runIdx, RF_LANE) == 1
+    refPrimL := PRIMZ
+  refPrim := part(refPrimL, refSize, refLane)
+  if refArm == ARM_WR
+    refOld := OLDB
+    refData := NEWD
+  else
+    refOld := OLDV
+    refData := NEWV
+  refNew := merge(refOld, refData, refSize, refLane)
+  ' the flags a read of each value gives: C = the MSB of the read's size, Z = (value == 0)
+  refRelFl := flags_of(refPrim, refSize)
+  refOkFl := flags_of(refSent, refSize)
+
+PRI class_rest(datum) : cls
+' The classes shared by every shape after its own values.
+'
+' @param datum - a record long
+' @returns cls - VC_UNWR / VC_STRM / VC_OTHER
+
+  if datum == UNWRITTEN
+    cls := VC_UNWR
+  elseif (datum - STRM_V) +< STRM_LONGS
+    cls := VC_STRM
+  else
+    cls := VC_OTHER
+
+PRI is_lane_r(datum) : bLane | laneIdx
+' @param datum - a record long
+' @returns bLane - TRUE when it is the primer's part at ANOTHER offset
+
+' Local Variables:
+' @local laneIdx - byte offset 0..3
+
+  bLane := FALSE
+  repeat laneIdx from 0 to 3
+    if laneIdx <> refLane and datum == part(refPrimL, refSize, laneIdx)
+      bLane := TRUE
+
+PRI is_lane_w(datum) : bLane | laneIdx
+' @param datum - a record long
+' @returns bLane - TRUE when it is the old long with ANOTHER lane written
+
+' Local Variables:
+' @local laneIdx - byte offset
+
+  bLane := FALSE
+  repeat laneIdx from 0 to 4 - refSize
+    if laneIdx <> refLane and datum == merge(refOld, refData, refSize, laneIdx)
+      bLane := TRUE
+
+PRI class_v(datum) : cls
+' Image R and image W classification against the current references.
+'
+' @param datum - a record long
+' @returns cls - VC_*
+
+  if refShape == SH_W
+    if datum == refOld
+      cls := VC_OLD
+    elseif datum == refNew
+      cls := VC_NEW
+    elseif datum == PRIMV
+      cls := VC_PRIM
+    elseif datum == SEEDV
+      cls := VC_SEED
+    elseif refSize < 4 and is_lane_w(datum)
+      cls := VC_LANE
+    else
+      cls := class_rest(datum)
+  else
+    if datum == refPrim
+      cls := VC_PRIM
+    elseif datum == refSent
+      cls := VC_SENT
+    elseif datum == SEEDV
+      cls := VC_SEED
+    elseif refSize < 4 and is_lane_r(datum)
+      cls := VC_LANE
+    else
+      cls := class_rest(datum)
+
+PRI class_f(datum, flagLong) : cls | flagImm
+' Value + flags runs: classify by the (value, C, Z) triple, flags as
+' captured right after the test instruction.  The released value's flags
+' (refRelFl) and the correct value's flags (refOkFl) are those a read of
+' that value gives; where both are equal the correct class wins.
+'
+' @param datum - a record long
+' @param flagLong - the flags long
+' @returns cls - FL_*
+
+' Local Variables:
+' @local flagImm - bit 0 C, bit 1 Z, right after the test instruction
+
+  flagImm := flagLong & %11
+  if datum == UNWRITTEN
+    cls := FL_UNWR
+  elseif datum == refPrim
+    if flagImm == refRelFl
+      cls := FL_REL
+    else
+      cls := FL_REL_WF
+  elseif datum == refSent
+    if flagImm == refOkFl
+      cls := FL_OK
+    elseif flagImm == refRelFl
+      cls := FL_OK_RF
+    else
+      cls := FL_OK_WF
+  elseif datum == SEEDV
+    cls := FL_SEED
+  elseif refSize < 4 and is_lane_r(datum)
+    cls := FL_LANE
+  else
+    cls := class_rest(datum)
+
+PRI vcchar(cls) : codeChar
+' @param cls - VC_*
+' @returns codeChar - O N P D S L ? F U X
+
+  codeChar := lookupz(cls: "O", "N", "P", "D", "S", "L", "?", "F", "U", "X")
+
+PRI flchar(flClass) : codeChar
+' @param flClass - FL_* (L D F U X in the shared slots)
+' @returns codeChar - R S W Q V L D F U X
+
+  codeChar := lookupz(flClass: "R", "S", "W", "Q", "V", "L", "D", "F", "U", "X")
+
+PRI bcchar(blkClass) : codeChar
+' @param blkClass - BC_* (U X in the shared slots)
+' @returns codeChar - . P D M ? ? ? ? U X
+
+  codeChar := lookupz(blkClass: ".", "P", "D", "M", "?", "?", "?", "?", "U", "X")
+
+PRI agreechar(agreeCnt) : codeChar
+' @param agreeCnt - repetitions identical to repetition 0 (1..16)
+' @returns codeChar - "." for all 16, else the hex digit
+
+  if agreeCnt == REPS
+    codeChar := "."
+  elseif agreeCnt < 10
+    codeChar := "0" + agreeCnt
+  else
+    codeChar := "A" + agreeCnt - 10
+
+PRI cell_delta(cellIdx) : deltaIdx
+' @param cellIdx - af * 8 + ar
+' @returns deltaIdx - (ar - af) mod 8
+
+  deltaIdx := ((cellIdx & (NSLOT - 1)) - (cellIdx >> 3)) & (NSLOT - 1)
+
+PRI note_value(runIdx, cls, datum)
+' Count one classified value; keep the run's first X, F and L values.
+'
+' @param runIdx - run index
+' @param cls - VC_*
+' @param datum - a record long
+
+  if cls == VC_STRM and runCnt[runIdx * NVC + VC_STRM] == 0
+    runStrmVal[runIdx] := datum
+  if cls == VC_LANE and runCnt[runIdx * NVC + VC_LANE] == 0 and refShape <> SH_B
+    runLaneVal[runIdx] := datum
+  runCnt[runIdx * NVC + cls]++
+  if cls == VC_OTHER
+    if runOther[runIdx] == 0
+      runOtherVal[runIdx] := datum
+    runOther[runIdx]++
+
+' ---------------------------------------------------------------------------
+' processing one run
+' ---------------------------------------------------------------------------
+PRI process_run(runIdx)
+' @param runIdx - run index
+
+  set_ref(runIdx)
+  if refShape == SH_PS
+    process_ps(runIdx)
+  elseif refShape == SH_R
+    process_r(runIdx)
+  elseif refShape == SH_F
+    process_f(runIdx)
+  elseif refShape == SH_W
+    process_w(runIdx)
+  elseif refShape == SH_P
+    process_p(runIdx)
+  else
+    process_b(runIdx)
+
+PRI process_p(runIdx) | pIdx, cellIdx, repIdx, firstVal, firstDel, datum, delta, cls, grp, bucket, agreeCnt, recIdx
+' Classify an arm 1 PTRA++ run: value class per record, and the PTRA delta
+' (after minus before) by value group (released / correct / other).
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local pIdx - PTRA++ run slot 0..2
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local firstVal - repetition 0's value
+' @local firstDel - repetition 0's delta
+' @local datum - a value
+' @local delta - its PTRA delta
+' @local cls - VC_*
+' @local grp - 0 released (primer), 1 correct (sentinel), 2 other
+' @local bucket - 0 delta 0, 1 delta +4, 2 other delta
+' @local agreeCnt - repetitions identical to repetition 0 (value and delta)
+' @local recIdx - trial index (record pair 2*recIdx, 2*recIdx+1)
+
+  pIdx := runIdx - RUN_FP
+  repeat cellIdx from 0 to NCELL - 1
+    firstVal := long[HUB_RES][2 * cellIdx]
+    firstDel := long[HUB_RES][2 * cellIdx + 1]
+    cls := class_v(firstVal)
+    cellCode[runIdx * NCELL + cellIdx] := cls
+    runRep0[runIdx * NPAIR + cls]++
+    if cls == VC_PRIM
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    if cls <> VC_SENT or firstDel <> 4
+      runDelta2[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      recIdx := repIdx * NCELL + cellIdx
+      datum := long[HUB_RES][2 * recIdx]
+      delta := long[HUB_RES][2 * recIdx + 1]
+      cls := class_v(datum)
+      note_value(runIdx, cls, datum)
+      if cls == VC_PRIM
+        grp := 0
+      elseif cls == VC_SENT
+        grp := 1
+      else
+        grp := 2
+      if delta == 0
+        bucket := 0
+      elseif delta == 4
+        bucket := 1
+      else
+        bucket := 2
+        if ptrOddDel[pIdx] == 0
+          ptrOddDel[pIdx] := delta
+      ptrDel[pIdx * 9 + grp * 3 + bucket]++
+      if cls == VC_SENT and delta == 4
+        runGoodAll[runIdx]++
+      if datum == firstVal and delta == firstDel
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI process_r(runIdx) | cellIdx, repIdx, firstVal, datum, cls, agreeCnt
+' Classify an image R run: repetition-0 codes, agreement, totals, delta split.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local firstVal - repetition 0's record
+' @local datum - a record
+' @local cls - its class
+' @local agreeCnt - repetitions identical to repetition 0
+
+  repeat cellIdx from 0 to NCELL - 1
+    firstVal := long[HUB_RES][cellIdx]
+    cls := class_v(firstVal)
+    cellCode[runIdx * NCELL + cellIdx] := cls
+    runRep0[runIdx * NPAIR + cls]++
+    if cls == VC_PRIM
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    if cls <> VC_SENT
+      runDelta2[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      datum := long[HUB_RES][repIdx * NCELL + cellIdx]
+      cls := class_v(datum)
+      note_value(runIdx, cls, datum)
+      if cls == VC_SENT
+        runGoodAll[runIdx]++
+      if datum == firstVal
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI process_ps(runIdx) | cellIdx, repIdx, firstVal, datum, agreeCnt, expVal
+' Classify the PS run: every record must be the stream's first long, STRM_V + af.
+' Cell code 1 = right, 0 = wrong.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local firstVal - repetition 0's record
+' @local datum - a record
+' @local agreeCnt - repetitions identical to repetition 0
+' @local expVal - the stream's first long for this af
+
+  repeat cellIdx from 0 to NCELL - 1
+    expVal := STRM_V + (cellIdx >> 3)
+    firstVal := long[HUB_RES][cellIdx]
+    if firstVal == expVal
+      cellCode[runIdx * NCELL + cellIdx] := 1
+    else
+      cellCode[runIdx * NCELL + cellIdx] := 0
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      datum := long[HUB_RES][repIdx * NCELL + cellIdx]
+      if datum == expVal
+        runGoodAll[runIdx]++
+      elseif runOtherVal[runIdx] == 0
+        runOtherVal[runIdx] := datum
+      if datum == UNWRITTEN
+        runCnt[runIdx * NVC + VC_UNWR]++
+      if datum == firstVal
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI process_f(runIdx) | cellIdx, repIdx, firstVal, firstFl, datum, flagLong, cls, agreeCnt, recIdx
+' Classify an arm 1 run by (value, C, Z); count late flag changes.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local firstVal - repetition 0's value
+' @local firstFl - repetition 0's flags long
+' @local datum - a value
+' @local flagLong - its flags long
+' @local cls - FL_*
+' @local agreeCnt - repetitions identical to repetition 0 (value and flags)
+' @local recIdx - trial index (record pair 2*recIdx, 2*recIdx+1)
+
+  repeat cellIdx from 0 to NCELL - 1
+    firstVal := long[HUB_RES][2 * cellIdx]
+    firstFl := long[HUB_RES][2 * cellIdx + 1]
+    cls := class_f(firstVal, firstFl)
+    cellCode[runIdx * NCELL + cellIdx] := cls
+    runRep0[runIdx * NPAIR + cls]++
+    if cls == FL_REL or cls == FL_REL_WF
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    if cls <> FL_OK
+      runDelta2[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      recIdx := repIdx * NCELL + cellIdx
+      datum := long[HUB_RES][2 * recIdx]
+      flagLong := long[HUB_RES][2 * recIdx + 1]
+      cls := class_f(datum, flagLong)
+      note_value(runIdx, cls, datum)
+      if cls == FL_OK
+        runGoodAll[runIdx]++
+      if datum <> UNWRITTEN
+        if (flagLong & %11) <> ((flagLong >> FLB_C_LATE) & %11)
+          runLate[runIdx]++
+        if (flagLong & %11) == FL_PRESET
+          runNoFlag[runIdx]++
+      if (cls == FL_REL_WF or cls == FL_OK_RF or cls == FL_OK_WF) and runFlagVal[runIdx] == -1
+        runFlagVal[runIdx] := flagLong & %1111
+      if datum == firstVal and flagLong == firstFl
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI process_w(runIdx) | cellIdx, repIdx, firstRb1, firstRb2, rb1, rb2, pairCode, agreeCnt, recIdx
+' Classify an image W run: repetition-0 pair codes, agreement, totals, delta split.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local cellIdx - af * 8 + aw
+' @local repIdx - repetition
+' @local firstRb1 - repetition 0's rb1
+' @local firstRb2 - repetition 0's rb2
+' @local rb1 - immediate read-back
+' @local rb2 - settled read-back
+' @local pairCode - class(rb1) * NVC + class(rb2)
+' @local agreeCnt - repetitions identical to repetition 0
+' @local recIdx - trial index (record pair 2*recIdx, 2*recIdx+1)
+
+  repeat cellIdx from 0 to NCELL - 1
+    firstRb1 := long[HUB_RES][2 * cellIdx]
+    firstRb2 := long[HUB_RES][2 * cellIdx + 1]
+    pairCode := class_v(firstRb1) * NVC + class_v(firstRb2)
+    cellCode[runIdx * NCELL + cellIdx] := pairCode
+    runRep0[runIdx * NPAIR + pairCode]++
+    if pairCode == PAIR_OO
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    if pairCode <> PAIR_NN
+      runDelta2[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      recIdx := repIdx * NCELL + cellIdx
+      rb1 := long[HUB_RES][2 * recIdx]
+      rb2 := long[HUB_RES][2 * recIdx + 1]
+      note_value(runIdx, class_v(rb1), rb1)
+      note_value(runIdx, class_v(rb2), rb2)
+      if rb1 == refNew and rb2 == refNew
+        runGoodAll[runIdx]++
+      if rb1 == firstRb1 and rb2 == firstRb2
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+PRI class_blk(pRec, arIdx, bIdx, bTally) : cls | longIdx, datum, nPrim, nSeed, nOth, nUnwr
+' Arm 5: classify one 8-long record against the block expected for ar.
+'
+' @param pRec - hub address of the record
+' @param arIdx - the block's first slot bits (its first long is block long ar)
+' @param bIdx - arm 5 run slot
+' @param bTally - TRUE: count per long index
+' @returns cls - BC_*
+
+' Local Variables:
+' @local longIdx - long index in the record
+' @local datum - the long
+' @local nPrim - longs holding the primer
+' @local nSeed - longs holding the seed
+' @local nOth - longs holding anything else
+' @local nUnwr - longs holding the record-area fill
+
+  nPrim := 0
+  nSeed := 0
+  nOth := 0
+  nUnwr := 0
+  repeat longIdx from 0 to BLKN - 1
+    datum := long[pRec][longIdx]
+    if datum == BLK_V + arIdx + longIdx
+      next
+    if datum == PRIMV
+      nPrim++
+      if bTally
+        blkPrim[bIdx * BLKN + longIdx]++
+    elseif datum == SEEDV
+      nSeed++
+      if bTally
+        blkSeed[bIdx * BLKN + longIdx]++
+    elseif datum == UNWRITTEN
+      nUnwr++
+    else
+      nOth++
+      if bTally
+        blkOth[bIdx * BLKN + longIdx]++
+        if blkOthIdx[bIdx] == -1
+          blkOthIdx[bIdx] := longIdx
+          blkOthVal[bIdx] := datum
+  if nUnwr > 0
+    cls := BC_UNWR
+  elseif nOth > 0
+    cls := BC_OTHER
+  elseif nPrim > 0 and nSeed > 0
+    cls := BC_MIX
+  elseif nPrim > 0
+    cls := BC_PRIM
+  elseif nSeed > 0
+    cls := BC_SEED
+  else
+    cls := BC_OK
+
+PRI same_block(pRecA, pRecB) : bSame | longIdx
+' @param pRecA - a record
+' @param pRecB - another record
+' @returns bSame - TRUE when all 8 longs are equal
+
+' Local Variables:
+' @local longIdx - long index
+
+  bSame := TRUE
+  repeat longIdx from 0 to BLKN - 1
+    if long[pRecA][longIdx] <> long[pRecB][longIdx]
+      bSame := FALSE
+
+PRI process_b(runIdx) | bIdx, cellIdx, repIdx, pRec0, pRec, cls, agreeCnt
+' Classify an arm 5 run: per-record classes, per-long counts, agreement.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local bIdx - arm 5 run slot
+' @local cellIdx - af * 8 + ar
+' @local repIdx - repetition
+' @local pRec0 - repetition 0's record
+' @local pRec - a record
+' @local cls - BC_*
+' @local agreeCnt - repetitions identical to repetition 0
+
+  bIdx := runIdx - RUN_Q
+  repeat cellIdx from 0 to NCELL - 1
+    pRec0 := HUB_RES + cellIdx * BLKN * 4
+    cls := class_blk(pRec0, cellIdx & (NSLOT - 1), bIdx, FALSE)
+    cellCode[runIdx * NCELL + cellIdx] := cls
+    runRep0[runIdx * NPAIR + cls]++
+    if cls == BC_PRIM or cls == BC_MIX
+      runDelta[runIdx * NSLOT + cell_delta(cellIdx)]++
+    if cls <> BC_OK
+      runDelta2[runIdx * NSLOT + cell_delta(cellIdx)]++
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      pRec := HUB_RES + (repIdx * NCELL + cellIdx) * BLKN * 4
+      cls := class_blk(pRec, cellIdx & (NSLOT - 1), bIdx, TRUE)
+      runCnt[runIdx * NVC + cls]++
+      if cls == BC_OTHER
+        runOther[runIdx]++
+      if cls == BC_OK
+        runGoodAll[runIdx]++
+      if same_block(pRec, pRec0)
+        agreeCnt++
+    cellAgree[runIdx * NCELL + cellIdx] := agreeCnt
+    if agreeCnt <> REPS
+      runDisagree[runIdx]++
+
+' ---------------------------------------------------------------------------
+' printing one run
+' ---------------------------------------------------------------------------
+PRI ln_runname(runIdx) | armIdx, kind, shape
+' Append the run's printable name, e.g. "T1 k0", "RB2 T k7", "FW T2 k0".
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local armIdx - arm
+' @local kind - KD_*
+' @local shape - SH_*
+
+  armIdx := run_fld(runIdx, RF_ARM)
+  kind := run_fld(runIdx, RF_KIND)
+  shape := run_fld(runIdx, RF_SHAPE)
+  if armIdx == ARM_P
+    ln_s(lookupz(runIdx: string("C1"), string("PS"), string("T1"), string("T1")))
+  else
+    if armIdx == ARM_FL
+      ln_s(lookupz(run_fld(runIdx, RF_LANE): string("FC"), string("FZ"), string("FP")))
+    elseif armIdx == ARM_RD
+      ln_s(lookupz(run_fld(runIdx, RF_SIZE) >> 1: string("RB"), string("RW")))
+      ln_d(run_fld(runIdx, RF_LANE))
+    elseif armIdx == ARM_WR
+      ln_s(lookupz(run_fld(runIdx, RF_SIZE) >> 1: string("WB"), string("WW")))
+      ln_d(run_fld(runIdx, RF_LANE))
+    elseif armIdx == ARM_WF
+      if shape == SH_W
+        ln_s(string("FW"))
+      else
+        ln_s(string("FR"))
+    else
+      ln_s(string("QB"))
+    ln_c(" ")
+    if kind == KD_NOP
+      ln_c("N")
+    elseif kind == KD_WAIT
+      ln_c("C")
+    elseif shape == SH_W
+      if is_w2(run_fld(runIdx, RF_COPY))
+        ln_s(string("T2"))
+      else
+        ln_s(string("T1"))
+    else
+      ln_c("T")
+  ln_s(string(" k"))
+  ln_d(run_fld(runIdx, RF_K))
+
+PRI ln_opname(runIdx) | shape, sizeBytes
+' Append the test instruction's mnemonic.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local shape - SH_*
+' @local sizeBytes - access size
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  sizeBytes := run_fld(runIdx, RF_SIZE)
+  if shape == SH_W
+    ln_s(lookupz(sizeBytes >> 1: string("wrbyte"), string("wrword"), string("wrlong")))
+  else
+    ln_s(lookupz(sizeBytes >> 1: string("rdbyte"), string("rdword"), string("rdlong")))
+
+PRI print_run_header(runIdx) | shape, kind, copyIdx, armIdx
+' Print the run's sequence, and its MUST / PREDICT / RECORDS line, before its rows.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local shape - SH_*
+' @local kind - KD_*
+' @local copyIdx - CP_*
+' @local armIdx - arm
+
+  set_ref(runIdx)
+  shape := run_fld(runIdx, RF_SHAPE)
+  kind := run_fld(runIdx, RF_KIND)
+  copyIdx := run_fld(runIdx, RF_COPY)
+  armIdx := run_fld(runIdx, RF_ARM)
+  ln_s(string("RUN "))
+  ln_runname(runIdx)
+  ln_s(string(" ("))
+  ln_s(lookupz(kind: string("NOP CONTROL"), string("POSITIVE CONTROL"), string("WAITING FORM"), string("TEST")))
+  ln_s(string("): rdlong primer "))
+  ln_h(refPrimL)
+  ln_s(string(" / "))
+  if shape == SH_PS
+    ln_s(string("rdfast D=$8000_0000 / waitx #200 / rflong"))
+  else
+    if is_nop_copy(copyIdx)
+      ln_s(string("NOP in place of the RDFAST"))
+    else
+      if is_wf_copy(copyIdx)
+        ln_s(string("wrfast D="))
+      else
+        ln_s(string("rdfast D="))
+      if run_fld(runIdx, RF_NOWAIT)
+        ln_h(FIFO_NO_WAIT)
+      else
+        ln_h(FIFO_WAIT)
+    ln_s(string(" / "))
+    ln_d(run_fld(runIdx, RF_K))
+    ln_s(string(" NOP / "))
+    if shape == SH_B
+      ln_s(string("setq #7 / rdlong block of 8 longs into the sacrificial registers"))
+    elseif shape == SH_W
+      ln_opname(runIdx)
+      ln_s(string(" new at offset "))
+      ln_d(refLane)
+      if is_w2(copyIdx)
+        ln_s(string(" / NOP ... rdlong rb2"))
+      else
+        ln_s(string(" / rdlong rb1 ... rdlong rb2"))
+    elseif shape == SH_P
+      ln_s(string("rdlong test,ptra++ (ptra := the test address before the primer) ... record ptra after minus before"))
+    else
+      ln_opname(runIdx)
+      ln_s(string(" test"))
+      if shape == SH_F
+        ln_s(string(" wcz / wrc fl / bitz fl ... bitc/bitz fl (late)"))
+      if refSize < 4
+        ln_s(string(" at offset "))
+        ln_d(refLane)
+  if armIdx == ARM_WF
+    ln_s(string("; every trial ends: settle / rdfast #0 (blocking) / settle"))
+  ln_out()
+  ln_s(string("    "))
+  ln_expect(runIdx)
+  ln_out()
+
+PRI ln_expect(runIdx) | shape, kind, armIdx
+' Append the run's MUST / PREDICT / RECORDS statement (references already set).
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local shape - SH_*
+' @local kind - KD_*
+' @local armIdx - arm
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  kind := run_fld(runIdx, RF_KIND)
+  armIdx := run_fld(runIdx, RF_ARM)
+  if kind == KD_PS
+    ln_s(string("MUST: the stream's first long $1E1E_0000+af in all 1024 records, else RIG FAIL (the RDFAST under test would not be starting a stream)"))
+  elseif kind == KD_NOP
+    if shape == SH_W
+      ln_s(string("MUST: (new,new), new "))
+      ln_h(refNew)
+      ln_s(string(", in all 1024 cells, else the arm's gate fails"))
+    elseif shape == SH_B
+      ln_s(string("MUST: the block $5A5A_0100+ar+j in all 1024 records, else the arm's gate fails"))
+    elseif shape == SH_F
+      ln_s(string("MUST: (sentinel "))
+      ln_h(refSent)
+      ln_s(string(", "))
+      ln_flags(refOkFl)
+      ln_s(string(") in all 1024 records, else the arm's gate fails"))
+    elseif shape == SH_P
+      ln_s(string("MUST: sentinel $5A5A_0002 with ptra +4 in all 1024 records, else the arm's gate fails"))
+    else
+      ln_s(string("MUST: sentinel "))
+      ln_h(refSent)
+      ln_s(string(" in all 1024 records, else "))
+      if armIdx == ARM_P
+        ln_s(string("RIG FAIL"))
+      else
+        ln_s(string("the arm's gate fails"))
+  elseif kind == KD_WAIT
+    if armIdx == ARM_WF or armIdx == ARM_Q
+      ln_s(string("RECORDS: no prediction (this waiting form was never measured)"))
+    elseif shape == SH_W
+      ln_s(string("PREDICT: (new,new), new "))
+      ln_h(refNew)
+      ln_s(string(", in every cell; any other = the waiting form fails"))
+    elseif shape == SH_F
+      ln_s(string("PREDICT: (sentinel "))
+      ln_h(refSent)
+      ln_s(string(", "))
+      ln_flags(refOkFl)
+      ln_s(string(") in every record"))
+    elseif shape == SH_P
+      ln_s(string("RECORDS: value and ptra delta (a correct read: sentinel, +4); an X value here fails the arm's gate"))
+    else
+      ln_s(string("PREDICT: sentinel part "))
+      ln_h(refSent)
+      ln_s(string(" in all 1024 records"))
+  else
+    if armIdx == ARM_P
+      if run_fld(runIdx, RF_K) == 0
+        ln_s(string("MUST (Erratum E7): 43 primer per repetition, by delta 8 8 7 6 5 4 3 2; every other record sentinel"))
+      else
+        ln_s(string("MUST (Erratum E7): sentinel in all 1024 records"))
+    elseif shape == SH_P
+      ln_s(string("RECORDS: no prediction - value class and ptra delta per cell, split by released / correct cells (a correct read: sentinel, +4)"))
+    elseif armIdx == ARM_FL or (armIdx == ARM_RD and shape == SH_F)
+      ln_s(string("PREDICT per repetition: released ("))
+      ln_h(refPrim)
+      ln_s(string(", "))
+      ln_flags(refRelFl)
+      ln_s(string(") in T1's 43 cells; correct ("))
+      ln_h(refSent)
+      ln_s(string(", "))
+      ln_flags(refOkFl)
+      ln_s(string(") in the rest"))
+    elseif armIdx == ARM_RD
+      if run_fld(runIdx, RF_K) == 0
+        ln_s(string("PREDICT per repetition: prediction A "))
+        ln_h(refPrim)
+        ln_s(string(" in T1's 43 cells, sentinel part "))
+        ln_h(refSent)
+        ln_s(string(" in the rest"))
+      else
+        ln_s(string("PREDICT: sentinel part "))
+        ln_h(refSent)
+        ln_s(string(" in all 1024 records (k=7: no release)"))
+    elseif armIdx == ARM_WR
+      if is_w2(run_fld(runIdx, RF_COPY))
+        ln_s(string("PREDICT: (seed,new) in all 64 cells, new "))
+        ln_h(refNew)
+        ln_s(string("; rb2 old = the released write never lands"))
+      else
+        ln_s(string("PREDICT per repetition: 43 (old,old) in T1's cells (old "))
+        ln_h(refOld)
+        ln_s(string(" unchanged: write lost) + 21 (primer $A5A5_0001, new "))
+        ln_h(refNew)
+        ln_s(string("); (old,new) = write late, not lost"))
+    else
+      ln_s(string("RECORDS: no prediction"))
+
+PRI print_run(runIdx) | afIdx, arIdx, cellIdx, pairCode, shape
+' Print a run's raw rows (repetition 0 per af, agreement) and its totals.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local afIdx - stream slot bits
+' @local arIdx - test-address slot bits
+' @local cellIdx - index into the per-cell arrays
+' @local pairCode - image W cell code
+' @local shape - SH_*
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  repeat afIdx from 0 to NSLOT - 1
+    repeat arIdx from 0 to NSLOT - 1
+      cellIdx := runIdx * NCELL + afIdx * NSLOT + arIdx
+      agreeStr[arIdx] := agreechar(cellAgree[cellIdx])
+      if shape == SH_PS
+        rowStr[arIdx] := lookupz(cellCode[cellIdx]: "X", ".")
+      elseif shape == SH_R or shape == SH_P
+        rowStr[arIdx] := vcchar(cellCode[cellIdx])
+      elseif shape == SH_F
+        rowStr[arIdx] := flchar(cellCode[cellIdx])
+      elseif shape == SH_B
+        rowStr[arIdx] := bcchar(cellCode[cellIdx])
+      else
+        pairCode := cellCode[cellIdx]
+        rowStr[arIdx * 3] := vcchar(pairCode / NVC)
+        rowStr[arIdx * 3 + 1] := vcchar(pairCode // NVC)
+        rowStr[arIdx * 3 + 2] := " "
+    agreeStr[NSLOT] := 0
+    if shape == SH_W
+      rowStr[NSLOT * 3 - 1] := 0
+    else
+      rowStr[NSLOT] := 0
+    ln_s(string("  "))
+    ln_runname(runIdx)
+    ln_s(string(" af"))
+    ln_d(afIdx)
+    ln_s(string(" rep0 a0-7: "))
+    ln_s(@rowStr)
+    ln_s(string("  agree "))
+    say(@agreeStr)
+  print_totals(runIdx)
+
+PRI ln_lead(runIdx)
+' Append "  <run name>", the lead of every per-run total line.
+'
+' @param runIdx - run index
+
+  ln_s(string("  "))
+  ln_runname(runIdx)
+
+PRI print_totals(runIdx) | base, shape, bIdx
+' Print a run's totals: classes over all repetitions, repetition-0 delta splits.
+'
+' @param runIdx - run index
+
+' Local Variables:
+' @local base - index of the run's first class count
+' @local shape - SH_*
+' @local bIdx - arm 5 run slot
+
+  base := runIdx * NVC
+  shape := run_fld(runIdx, RF_SHAPE)
+  if shape == SH_PS
+    ln_lead(runIdx)
+    ln_s(string(" all reps: stream's first long right in "))
+    ln_d(runGoodAll[runIdx])
+    ln_s(string(" of 1024 records (. right, X wrong); first wrong value "))
+    ln_h(runOtherVal[runIdx])
+    ln_s(string(" | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+  elseif shape == SH_R
+    ln_lead(runIdx)
+    ln_s(string(" all reps: primer "))
+    ln_d(runCnt[base + VC_PRIM])
+    ln_s(string(" sentinel "))
+    ln_d(runCnt[base + VC_SENT])
+    ln_s(string(" other-offset "))
+    ln_d(runCnt[base + VC_LANE])
+    ln_s(string(" seed "))
+    ln_d(runCnt[base + VC_SEED])
+    ln_s(string(" stream "))
+    ln_d(runCnt[base + VC_STRM])
+    ln_s(string(" other "))
+    ln_d(runCnt[base + VC_OTHER])
+    ln_s(string(" of 1024 | rep0 primer "))
+    ln_d(runRep0[runIdx * NPAIR + VC_PRIM])
+    ln_s(string(" by delta "))
+    ln_row8(@runDelta[runIdx * NSLOT])
+    ln_s(string(" | rep0 not sentinel by delta "))
+    ln_row8(@runDelta2[runIdx * NSLOT])
+    ln_s(string(" | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+  elseif shape == SH_P
+    ln_lead(runIdx)
+    ln_s(string(" all reps: primer "))
+    ln_d(runCnt[base + VC_PRIM])
+    ln_s(string(" sentinel "))
+    ln_d(runCnt[base + VC_SENT])
+    ln_s(string(" seed "))
+    ln_d(runCnt[base + VC_SEED])
+    ln_s(string(" stream "))
+    ln_d(runCnt[base + VC_STRM])
+    ln_s(string(" other "))
+    ln_d(runCnt[base + VC_OTHER])
+    ln_s(string(" of 1024 | rep0 primer "))
+    ln_d(runRep0[runIdx * NPAIR + VC_PRIM])
+    ln_s(string(" by delta "))
+    ln_row8(@runDelta[runIdx * NSLOT])
+    ln_s(string(" | cells with disagreeing reps (value or ptra) "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+    ln_lead(runIdx)
+    ln_ptr_dist(runIdx - RUN_FP)
+    ln_out()
+  elseif shape == SH_F
+    ln_lead(runIdx)
+    ln_s(string(" all reps: R "))
+    ln_d(runCnt[base + FL_REL])
+    ln_s(string(" S "))
+    ln_d(runCnt[base + FL_OK])
+    ln_s(string(" W "))
+    ln_d(runCnt[base + FL_REL_WF])
+    ln_s(string(" Q "))
+    ln_d(runCnt[base + FL_OK_RF])
+    ln_s(string(" V "))
+    ln_d(runCnt[base + FL_OK_WF])
+    ln_s(string(" L "))
+    ln_d(runCnt[base + FL_LANE])
+    ln_s(string(" D "))
+    ln_d(runCnt[base + FL_SEED])
+    ln_s(string(" F "))
+    ln_d(runCnt[base + FL_STRM])
+    ln_s(string(" X "))
+    ln_d(runCnt[base + FL_OTHER])
+    ln_s(string(" of 1024 | rep0 released value "))
+    ln_d(runRep0[runIdx * NPAIR + FL_REL] + runRep0[runIdx * NPAIR + FL_REL_WF])
+    ln_s(string(" by delta "))
+    ln_row8(@runDelta[runIdx * NSLOT])
+    ln_s(string(" | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+    ln_lead(runIdx)
+    ln_s(string(" flags: preset C=1 Z=1 survived in "))
+    ln_d(runNoFlag[runIdx])
+    ln_s(string(" records; after-settle flags differ from the immediate flags in "))
+    ln_d(runLate[runIdx])
+    ln_s(string(" records; first unpredicted flags long (bit0 C bit1 Z immediate, bit2 C bit3 Z late) "))
+    if runFlagVal[runIdx] == -1
+      ln_s(string("none"))
+    else
+      ln_hx(runFlagVal[runIdx], 1)
+    ln_out()
+  elseif shape == SH_W
+    ln_lead(runIdx)
+    ln_s(string(" all reps, values (rb1+rb2): old "))
+    ln_d(runCnt[base + VC_OLD])
+    ln_s(string(" new "))
+    ln_d(runCnt[base + VC_NEW])
+    ln_s(string(" primer "))
+    ln_d(runCnt[base + VC_PRIM])
+    ln_s(string(" seed "))
+    ln_d(runCnt[base + VC_SEED])
+    ln_s(string(" other-lane "))
+    ln_d(runCnt[base + VC_LANE])
+    ln_s(string(" stream "))
+    ln_d(runCnt[base + VC_STRM])
+    ln_s(string(" other "))
+    ln_d(runCnt[base + VC_OTHER])
+    ln_s(string(" of 2048; (new,new) cells "))
+    ln_d(runGoodAll[runIdx])
+    ln_s(string(" of 1024 | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+    ln_lead(runIdx)
+    ln_s(string(" rep0 cells: OO "))
+    ln_d(runRep0[runIdx * NPAIR + PAIR_OO])
+    ln_s(string(" PN "))
+    ln_d(runRep0[runIdx * NPAIR + PAIR_PN])
+    ln_s(string(" NN "))
+    ln_d(runRep0[runIdx * NPAIR + PAIR_NN])
+    ln_s(string(" ON "))
+    ln_d(runRep0[runIdx * NPAIR + PAIR_ON])
+    ln_s(string(" DN "))
+    ln_d(runRep0[runIdx * NPAIR + PAIR_DN])
+    ln_s(string(" any other pair "))
+    ln_d(NCELL - runRep0[runIdx * NPAIR + PAIR_OO] - runRep0[runIdx * NPAIR + PAIR_PN] - runRep0[runIdx * NPAIR + PAIR_NN] - runRep0[runIdx * NPAIR + PAIR_ON] - runRep0[runIdx * NPAIR + PAIR_DN])
+    ln_s(string(" | OO by delta "))
+    ln_row8(@runDelta[runIdx * NSLOT])
+    ln_s(string(" | not NN by delta "))
+    ln_row8(@runDelta2[runIdx * NSLOT])
+    ln_out()
+  else
+    bIdx := runIdx - RUN_Q
+    ln_lead(runIdx)
+    ln_s(string(" all reps (records of 8 longs): right block "))
+    ln_d(runCnt[base + BC_OK])
+    ln_s(string(" primer-in-record "))
+    ln_d(runCnt[base + BC_PRIM])
+    ln_s(string(" seed-in-record "))
+    ln_d(runCnt[base + BC_SEED])
+    ln_s(string(" both "))
+    ln_d(runCnt[base + BC_MIX])
+    ln_s(string(" other "))
+    ln_d(runCnt[base + BC_OTHER])
+    ln_s(string(" unwritten "))
+    ln_d(runCnt[base + BC_UNWR])
+    ln_s(string(" of 1024 | rep0 records with the primer by delta "))
+    ln_row8(@runDelta[runIdx * NSLOT])
+    ln_s(string(" | rep0 not the right block by delta "))
+    ln_row8(@runDelta2[runIdx * NSLOT])
+    ln_s(string(" | cells with disagreeing reps "))
+    ln_d(runDisagree[runIdx])
+    ln_out()
+    ln_lead(runIdx)
+    ln_s(string(" per long 0-7, all reps: primer "))
+    ln_row8(@blkPrim[bIdx * BLKN])
+    ln_s(string(" | seed "))
+    ln_row8(@blkSeed[bIdx * BLKN])
+    ln_s(string(" | other "))
+    ln_row8(@blkOth[bIdx * BLKN])
+    if blkOthIdx[bIdx] <> -1
+      ln_s(string(" | first other value "))
+      ln_h(blkOthVal[bIdx])
+      ln_s(string(" in long "))
+      ln_d(blkOthIdx[bIdx])
+    ln_out()
+  if shape <> SH_PS and shape <> SH_B
+    if runOther[runIdx] > 0
+      ln_lead(runIdx)
+      ln_s(string(" first other value "))
+      ln_h(runOtherVal[runIdx])
+      ln_s(string(" ("))
+      ln_d(runOther[runIdx])
+      say(string(" other values in the run)"))
+    if runCnt[base + VC_STRM] > 0
+      ln_lead(runIdx)
+      ln_s(string(" stream longs (F, data at a FIFO address): "))
+      ln_d(runCnt[base + VC_STRM])
+      ln_s(string(" values, first "))
+      ln_h(runStrmVal[runIdx])
+      ln_out()
+    if (shape == SH_R or shape == SH_W or shape == SH_F) and runCnt[base + VC_LANE] > 0
+      ln_lead(runIdx)
+      ln_s(string(" other-offset/other-lane values (L): "))
+      ln_d(runCnt[base + VC_LANE])
+      ln_s(string(", first "))
+      ln_h(runLaneVal[runIdx])
+      ln_out()
+  if runCnt[base + VC_UNWR] > 0
+    ln_lead(runIdx)
+    ln_s(string(" never written (U, $EEEE_EEEE): "))
+    ln_d(runCnt[base + VC_UNWR])
+    say(string(" records"))
+
+PRI ln_ptr_dist(pIdx) | grp
+' Append a PTRA++ run's delta distribution, all repetitions, per value group.
+'
+' @param pIdx - PTRA++ run slot 0..2 (N, C, T)
+
+' Local Variables:
+' @local grp - value group: 0 released (primer), 1 correct (sentinel), 2 other
+
+  ln_s(string(" ptra after minus before, all reps:"))
+  repeat grp from 0 to 2
+    ln_s(lookupz(grp: string(" released cells"), string(" | correct cells"), string(" | other values")))
+    ln_s(string(": 0 x"))
+    ln_d(ptrDel[pIdx * 9 + grp * 3])
+    ln_s(string(", +4 x"))
+    ln_d(ptrDel[pIdx * 9 + grp * 3 + 1])
+    ln_s(string(", other x"))
+    ln_d(ptrDel[pIdx * 9 + grp * 3 + 2])
+  ln_s(string(" | first other delta "))
+  ln_d(ptrOddDel[pIdx])
+
+' ---------------------------------------------------------------------------
+' gates
+' ---------------------------------------------------------------------------
+PRI ln_gatefail(armIdx)
+' Append the lead of a gate-failure line.
+'
+' @param armIdx - arm
+
+  if armIdx == ARM_P
+    ln_s(string("RIG FAIL (arm 0, positive control): "))
+  else
+    ln_s(string("GATE FAIL (arm "))
+    ln_d(armIdx)
+    ln_s(string("): "))
+
+PRI is_clean(runIdx) : bClean
+' @param runIdx - run index
+' @returns bClean - every trial clean (R/F sentinel, PS right, W (new,new), B right block)
+
+  bClean := runGoodAll[runIdx] == NTRIAL
+
+PRI arm_gate(armIdx) : bPass | runIdx, kind, unwrCnt, otherCnt, disCnt
+' Check the arm's gates; print a line for each that fails, and the result.
+'
+' @param armIdx - arm
+' @returns bPass - TRUE when every gate of the arm passed
+
+' Local Variables:
+' @local runIdx - run index
+' @local kind - KD_*
+' @local unwrCnt - never-written records over the arm
+' @local otherCnt - X values in the gated control runs
+' @local disCnt - disagreeing cells in the gated runs
+
+  bPass := TRUE
+  unwrCnt := 0
+  otherCnt := 0
+  disCnt := 0
+  repeat runIdx from arm_first(armIdx) to arm_last(armIdx)
+    kind := run_fld(runIdx, RF_KIND)
+    unwrCnt += runCnt[runIdx * NVC + VC_UNWR]
+    if kind == KD_NOP or kind == KD_PS
+      if not is_clean(runIdx)
+        ln_gatefail(armIdx)
+        ln_runname(runIdx)
+        ln_s(string(" (control) clean in "))
+        ln_d(runGoodAll[runIdx])
+        say(string(" of 1024 trials: the table, the addresses, the read or write path is wrong"))
+        bPass := FALSE
+      otherCnt += runOther[runIdx]
+      disCnt += runDisagree[runIdx]
+    elseif kind == KD_WAIT
+      if armIdx <= ARM_WR
+        otherCnt += runOther[runIdx]
+      disCnt += runDisagree[runIdx]
+    elseif armIdx <= ARM_WR and run_fld(runIdx, RF_SHAPE) <> SH_P
+      ' a test run of arms 0-3 (the PTRA++ test run records, so it is not gated)
+      disCnt += runDisagree[runIdx]
+      armTestDis[armIdx] += runDisagree[runIdx]
+  if unwrCnt > 0
+    ln_gatefail(armIdx)
+    ln_d(unwrCnt)
+    say(string(" records still hold the fill $EEEE_EEEE: the measuring cog never wrote them"))
+    bPass := FALSE
+  if otherCnt > 0
+    ln_gatefail(armIdx)
+    ln_d(otherCnt)
+    say(string(" values classified X (other) in a gated control run - see each run's 'first other value' line"))
+    bPass := FALSE
+  if disCnt > 0
+    ln_gatefail(armIdx)
+    ln_d(disCnt)
+    say(string(" cells whose 16 repetitions disagree in a gated run: the result was not repeatable"))
+    bPass := FALSE
+  if armIdx == ARM_P
+    if runRep0[RUN_T1 * NPAIR + VC_PRIM] <> T1_PRED or not delta_match(RUN_T1) or runCnt[RUN_T1 * NVC + VC_PRIM] <> T1_PRED * REPS or runCnt[RUN_T1 * NVC + VC_SENT] <> T1_PRED_SENT * REPS
+      ln_gatefail(armIdx)
+      ln_s(string("T1 k=0 did not reproduce Erratum E7: rep0 primer "))
+      ln_d(runRep0[RUN_T1 * NPAIR + VC_PRIM])
+      ln_s(string(" (MUST 43) by delta "))
+      ln_row8(@runDelta[RUN_T1 * NSLOT])
+      ln_s(string(" (MUST 8 8 7 6 5 4 3 2); all reps primer "))
+      ln_d(runCnt[RUN_T1 * NVC + VC_PRIM])
+      ln_s(string(" (MUST 688) sentinel "))
+      ln_d(runCnt[RUN_T1 * NVC + VC_SENT])
+      say(string(" (MUST 336)"))
+      bPass := FALSE
+    if not is_clean(RUN_T1F)
+      ln_gatefail(armIdx)
+      ln_s(string("T1 k=7 sentinel in "))
+      ln_d(runGoodAll[RUN_T1F])
+      say(string(" of 1024 records (MUST 1024, no release from k=7)"))
+      bPass := FALSE
+  if armIdx == ARM_Q and not baseOk
+    ln_gatefail(armIdx)
+    say(string("the baseline cog-RAM copy did not equal the loaded image: the integrity check cannot be read"))
+    bPass := FALSE
+  if armDamage[armIdx] > 0
+    ln_s(string("RIG NOTE (arm "))
+    ln_d(armIdx)
+    ln_s(string("): "))
+    ln_d(armDamage[armIdx])
+    say(string(" read-only data longs changed during the arm (see REGION DAMAGE lines)"))
+  if armIdx <> ARM_P and bPass
+    ln_s(string("GATES PASS (arm "))
+    ln_d(armIdx)
+    say(string("): every NOP control clean, no record left unwritten, no other value and no disagreeing repetitions in a gated run"))
+
+PRI delta_match(runIdx) : bMatch | deltaIdx
+' @param runIdx - run index
+' @returns bMatch - TRUE when the run's repetition-0 delta split is 8 8 7 6 5 4 3 2
+
+' Local Variables:
+' @local deltaIdx - delta 0..7
+
+  bMatch := TRUE
+  repeat deltaIdx from 0 to NSLOT - 1
+    if runDelta[runIdx * NSLOT + deltaIdx] <> predK0[deltaIdx]
+      bMatch := FALSE
+
+PRI is_rel_code(runIdx, code) : bRel | shape
+' @param runIdx - run index
+' @param code - a repetition-0 cell code
+' @returns bRel - TRUE when the cell counts as released (R: primer, F: primer
+'   value, W: (old,old), B: primer in the record)
+
+' Local Variables:
+' @local shape - SH_*
+
+  shape := run_fld(runIdx, RF_SHAPE)
+  if shape == SH_W
+    bRel := code == PAIR_OO
+  elseif shape == SH_F
+    bRel := code == FL_REL or code == FL_REL_WF
+  elseif shape == SH_B
+    bRel := code == BC_PRIM or code == BC_MIX
+  else
+    bRel := code == VC_PRIM
+
+PRI map_match(runIdx) : matchCnt | cellIdx
+' @param runIdx - run index
+' @returns matchCnt - cells whose released / not-released status equals T1 k=0's
+
+' Local Variables:
+' @local cellIdx - af * 8 + ar
+
+  matchCnt := 0
+  repeat cellIdx from 0 to NCELL - 1
+    if is_rel_code(runIdx, cellCode[runIdx * NCELL + cellIdx]) == (cellCode[RUN_T1 * NCELL + cellIdx] == VC_PRIM)
+      matchCnt++
+
+PRI rel_cells(runIdx) : relCnt | cellIdx
+' @param runIdx - run index
+' @returns relCnt - repetition-0 cells counted as released
+
+' Local Variables:
+' @local cellIdx - af * 8 + ar
+
+  relCnt := 0
+  repeat cellIdx from 0 to NCELL - 1
+    if is_rel_code(runIdx, cellCode[runIdx * NCELL + cellIdx])
+      relCnt++
+
+' ---------------------------------------------------------------------------
+' verdicts
+' ---------------------------------------------------------------------------
+PRI print_arm_verdicts(armIdx, bDetail)
+' @param armIdx - arm
+' @param bDetail - TRUE: add the detail lines
+
+  if armIdx == ARM_P
+    print_rig_line()
+  elseif armIdx == ARM_FL
+    verdict_flags(FALSE, bDetail)
+    verdict_flags(TRUE, bDetail)
+    observed_ptr()
+  elseif armIdx == ARM_RD
+    verdict_rd(FALSE, bDetail)
+    verdict_rd(TRUE, bDetail)
+  elseif armIdx == ARM_WR
+    verdict_wr(FALSE, bDetail)
+    verdict_wr(TRUE, bDetail)
+  elseif armIdx == ARM_WF
+    observed_wf_r(bDetail)
+    observed_wf_w(bDetail)
+  else
+    observed_q(bDetail)
+
+PRI print_summary() | armIdx
+' Repeat every arm's verdict line, so the closing block holds them all.
+'
+
+' Local Variables:
+' @local armIdx - arm
+
+  say(string("=== VERDICT SUMMARY (each arm's verdict as printed at its end; arms not completed say so) ==="))
+  repeat armIdx from 0 to NARM - 1
+    print_arm_verdicts(armIdx, FALSE)
+
+PRI ln_notdone(armIdx) : bNotDone
+' If the arm did not complete, append the reason to the line, send it, and
+' return TRUE.  The caller has already appended the verdict's name.
+'
+' @param armIdx - arm
+' @returns bNotDone - TRUE when the arm did not complete (line sent)
+
+  bNotDone := not armDone[armIdx]
+  if bNotDone
+    ln_s(string("NOT COMPLETED - the run ended before arm "))
+    ln_d(armIdx)
+    say(string(" finished (see the RIG FAIL line above)"))
+
+PRI ln_nogate(armIdx) : bNoGate
+' If arm 0 or this arm's gate failed, append NO VERDICT, send, return TRUE.
+'
+' @param armIdx - arm
+' @returns bNoGate - TRUE when no verdict may be given (line sent)
+
+  bNoGate := not armPass[ARM_P] or not armPass[armIdx]
+  if bNoGate
+    if not armPass[ARM_P]
+      say(string("NO VERDICT - arm 0 (positive control) failed: no later verdict counts; the rows above are raw"))
+    else
+      ln_s(string("NO VERDICT - a gate of arm "))
+      ln_d(armIdx)
+      ln_s(string(" failed (see GATE FAIL lines); the rows above are raw"))
+      if armTestDis[armIdx] > 0
+        ln_s(string("; disagreeing repetitions in a test run may be a result: see the rows ("))
+        ln_d(armTestDis[armIdx])
+        ln_s(string(" cells)"))
+      ln_out()
+
+PRI print_rig_line()
+' Arm 0's verdict: RIG OK or RIG FAIL.
+'
+
+  if not armDone[ARM_P]
+    say(string("RIG FAIL (arm 0, positive control): arm 0 did not complete (see the RIG FAIL line above)"))
+  elseif armPass[ARM_P]
+    ln_s(string("RIG OK (arm 0, positive control): Erratum E7 reproduced - C1 sentinel and PS stream long in all 1024 records, T1 k=0 43 primer per repetition by delta 8 8 7 6 5 4 3 2 "))
+    say(string("(688 primer, 336 sentinel), T1 k=7 sentinel in all 1024, no U, no X, every cell's 16 repetitions identical"))
+  else
+    say(string("RIG FAIL (arm 0, positive control): Erratum E7 not reproduced (see the lines above) - no later verdict counts"))
+
+PRI verdict_flags(bZ, bDetail)
+' VERDICT E7 FLAGS C (FC) / FLAGS Z (FZ).
+'
+' @param bZ - FALSE: FC (C decides); TRUE: FZ (Z decides)
+' @param bDetail - TRUE: add the detail lines
+
+  if bZ
+    ln_s(string("VERDICT E7 FLAGS Z: "))
+  else
+    ln_s(string("VERDICT E7 FLAGS C: "))
+  if not ln_notdone(ARM_FL)
+    if not ln_nogate(ARM_FL)
+      verdict_flags_body(bZ, bDetail)
+
+PRI verdict_flags_body(bZ, bDetail) | varIdx, rWait, rT, relCnt, mapCnt, relWf, okRf, okWf, oddCnt
+' The FLAGS C / FLAGS Z verdict once the arm's gates have passed.
+'
+' @param bZ - FALSE: FC (C decides); TRUE: FZ (Z decides)
+' @param bDetail - TRUE: add the detail lines
+
+' Local Variables:
+' @local varIdx - variant 0 (FC) or 1 (FZ)
+' @local rWait - waiting-form run
+' @local rT - test run
+' @local relCnt - repetition-0 cells holding the released value
+' @local mapCnt - cells whose status equals T1's
+' @local relWf - records: primer value, wrong flags
+' @local okRf - records: sentinel with the released flags
+' @local okWf - records: sentinel with other flags
+' @local oddCnt - records neither primer nor sentinel value (seed, stream, other)
+
+  varIdx := bZ & 1
+  rWait := RUN_FL + varIdx * 3 + 1
+  rT := rWait + 1
+  set_ref(rT)
+  relCnt := rel_cells(rT)
+  mapCnt := map_match(rT)
+  relWf := runCnt[rT * NVC + FL_REL_WF]
+  okRf := runCnt[rT * NVC + FL_OK_RF]
+  okWf := runCnt[rT * NVC + FL_OK_WF]
+  oddCnt := runCnt[rT * NVC + FL_SEED] + runCnt[rT * NVC + FL_STRM] + runCnt[rT * NVC + FL_OTHER]
+  if not is_clean(rWait)
+    ln_s(string("INCONCLUSIVE - the waiting-form control was (sentinel, C=0, Z=0) in only "))
+    ln_d(runGoodAll[rWait])
+    ln_s(string(" of 1024 records"))
+  elseif relWf + okRf + okWf > 0
+    if runNoFlag[rT] > 0
+      ln_s(string("REFUTED - flags not written by the released read: the preset C=1 Z=1 survived in "))
+      ln_d(runNoFlag[rT])
+      ln_s(string(" records"))
+    else
+      ln_s(string("REFUTED - a read's flags are not its value's"))
+    ln_s(string("; released value with other flags "))
+    ln_d(relWf)
+    ln_s(string(", sentinel with released flags "))
+    ln_d(okRf)
+    ln_s(string(", sentinel with other flags "))
+    ln_d(okWf)
+    ln_s(string(" (first flags long "))
+    ln_hx(runFlagVal[rT], 1)
+    ln_c(")")
+  elseif oddCnt > 0
+    ln_s(string("INCONCLUSIVE - "))
+    ln_d(oddCnt)
+    ln_s(string(" records are neither the released value nor the sentinel (seed, stream, other): the value side departs from Erratum E7"))
+  elseif relCnt == 0
+    ln_s(string("INCONCLUSIVE - no cell released in this run, so a released RDLONG's flags were not seen"))
+  elseif relCnt == T1_PRED and mapCnt == NCELL and runCnt[rT * NVC + FL_REL] == T1_PRED * REPS
+    if runLate[rT] > 0
+      ln_s(string("CONFIRMED AT THE READ, BUT FLAGS CHANGED AFTER THE READ in "))
+      ln_d(runLate[rT])
+      ln_s(string(" records - right after the read every record had its value's flags; released in T1's same 43 cells"))
+    else
+      ln_s(string("CONFIRMED - every released record carried the predicted flags and every correct record its own; released in T1's same 43 cells in every repetition"))
+  else
+    ln_s(string("MECHANISM PRESENT, COUNT DIFFERS - every record's flags as predicted, but the released cells are not T1's 43"))
+    if runLate[rT] > 0
+      ln_s(string("; flags changed after the read in "))
+      ln_d(runLate[rT])
+      ln_s(string(" records"))
+  ln_s(string(" | before the run: released ("))
+  ln_h(refPrim)
+  ln_s(string(", "))
+  ln_flags(refRelFl)
+  ln_s(string(") / correct ("))
+  ln_h(refSent)
+  ln_s(string(", "))
+  ln_flags(refOkFl)
+  ln_s(string(") | released cells "))
+  ln_d(relCnt)
+  ln_s(string(" per repetition (T1: 43), same cells as T1 in "))
+  ln_d(mapCnt)
+  ln_s(string(" of 64; late flag changes "))
+  ln_d(runLate[rT])
+  ln_out()
+  if bDetail
+    ln_s(string("  detail: by delta "))
+    ln_row8(@runDelta[rT * NSLOT])
+    ln_s(string(" (T1: 8 8 7 6 5 4 3 2); records R "))
+    ln_d(runCnt[rT * NVC + FL_REL])
+    ln_s(string(" S "))
+    ln_d(runCnt[rT * NVC + FL_OK])
+    ln_s(string(" W "))
+    ln_d(relWf)
+    ln_s(string(" Q "))
+    ln_d(okRf)
+    ln_s(string(" V "))
+    ln_d(okWf)
+    ln_s(string(" other "))
+    ln_d(oddCnt)
+    ln_s(string(" of 1024; preset flags survived in "))
+    ln_d(runNoFlag[rT])
+    say(string(" records"))
+
+PRI observed_ptr() | rT
+' OBSERVED E7 PTRA++ (records): the PTRA delta of rdlong dst,ptra++ at
+' k=0, split by released / correct cells.  Gated on arm 0 and arm 1 (whose
+' gate includes the PTRA++ NOP control and waiting form, not its test run).
+'
+
+' Local Variables:
+' @local rT - the PTRA++ test run
+
+  rT := RUN_FP + 2
+  ln_s(string("OBSERVED E7 PTRA++: "))
+  if not ln_notdone(ARM_FL)
+    if not ln_nogate(ARM_FL)
+      ln_s(string("released cells (rep0) "))
+      ln_d(runRep0[rT * NPAIR + VC_PRIM])
+      ln_s(string(" of 64 (same cells as T1: "))
+      ln_d(map_match(rT))
+      ln_s(string(" of 64);"))
+      ln_ptr_dist(rT - RUN_FP)
+      ln_s(string(" | waiting form (sentinel, +4) "))
+      ln_d(runGoodAll[rT - 1])
+      ln_s(string(" of 1024; disagreeing cells "))
+      ln_d(runDisagree[rT])
+      ln_out()
+
+PRI ln_rd_values(bWord) | varIdx
+' Append the byte/word values written before the run (released / not released).
+'
+' @param bWord - FALSE: the byte instruction; TRUE: the word instruction
+
+' Local Variables:
+' @local varIdx - variant
+
+  ln_s(string(" | before the run (value,C,Z), released (prediction A): "))
+  repeat varIdx from 0 to NVAR - 1
+    if (varIdx >= 4) == bWord
+      ln_rd_triple(varIdx, PRIMB)
+  ln_s(string("; not released (sentinel part): "))
+  repeat varIdx from 0 to NVAR - 1
+    if (varIdx >= 4) == bWord
+      ln_rd_triple(varIdx, SENTB)
+
+PRI ln_rd_triple(varIdx, longVal) | partVal
+' Append "off<n> $<part> C<c>Z<z> " for one arm 2 variant.
+'
+' @param varIdx - arm 2/3 variant 0..5
+' @param longVal - the long
+
+' Local Variables:
+' @local partVal - the part read at the variant's offset
+
+  partVal := part(longVal, var_size(varIdx), var_lane(varIdx))
+  ln_s(string("off"))
+  ln_d(var_lane(varIdx))
+  ln_c(" ")
+  ln_hx(partVal, var_size(varIdx) * 2)
+  ln_s(string(" C"))
+  ln_d(flags_of(partVal, var_size(varIdx)) & 1)
+  ln_c("Z")
+  ln_d((flags_of(partVal, var_size(varIdx)) >> 1) & 1)
+  ln_c(" ")
+
+PRI verdict_rd(bWord, bDetail)
+' VERDICT E7 RDBYTE / RDWORD, in the order fixed in the header.
+'
+' @param bWord - FALSE: the byte instruction; TRUE: the word instruction
+' @param bDetail - TRUE: add the detail lines
+
+  if bWord
+    ln_s(string("VERDICT E7 RDWORD: "))
+  else
+    ln_s(string("VERDICT E7 RDBYTE: "))
+  if not ln_notdone(ARM_RD)
+    if not ln_nogate(ARM_RD)
+      verdict_rd_body(bWord, bDetail)
+
+PRI verdict_rd_body(bWord, bDetail) | varIdx, vFirst, vLast, rNop, rWait, rNear, rFar, badC, seedCnt, laneCnt, laneVal, laneRun, othCnt, othVal, othRun, relNear, relFar, bAll, flWrong, flPreset, flLate
+' The RDBYTE / RDWORD verdict once the arm's gates have passed.
+'
+' @param bWord - FALSE: the byte instruction; TRUE: the word instruction
+' @param bDetail - TRUE: add the detail lines
+
+' Local Variables:
+' @local varIdx - variant
+' @local vFirst - first variant of the instruction
+' @local vLast - last variant
+' @local rNop - NOP control run
+' @local rWait - waiting-form run
+' @local rNear - test k=0 run
+' @local rFar - test k=7 run
+' @local badC - waiting-form runs not clean
+' @local seedCnt - seed records in the test runs
+' @local laneCnt - other-offset records in the test runs
+' @local laneVal - the first such value
+' @local laneRun - its run
+' @local othCnt - other or stream records in the test runs
+' @local othVal - the first such value
+' @local othRun - its run
+' @local relNear - repetition-0 released cells at k=0, summed over the offsets
+' @local relFar - the same at k=7
+' @local bAll - every offset exactly as predicted
+' @local flWrong - k=0 records whose flags are not their value's
+' @local flPreset - k=0 records whose preset flags C=1 Z=1 survived
+' @local flLate - k=0 records whose flags changed after the read
+
+  if bWord
+    vFirst := 4
+    vLast := 5
+  else
+    vFirst := 0
+    vLast := 3
+  badC := 0
+  seedCnt := 0
+  laneCnt := 0
+  othCnt := 0
+  laneRun := -1
+  othRun := -1
+  relNear := 0
+  relFar := 0
+  bAll := TRUE
+  flWrong := 0
+  flPreset := 0
+  flLate := 0
+  repeat varIdx from vFirst to vLast
+    rNop := RUN_RD + varIdx * 4
+    rWait := rNop + SL_C
+    rNear := rNop + SL_T0               ' value + flags run (FL_* classes)
+    rFar := rNop + SL_T7                ' image R run (VC_* classes)
+    if not is_clean(rWait)
+      badC++
+    seedCnt += runCnt[rNear * NVC + FL_SEED] + runCnt[rFar * NVC + VC_SEED]
+    flWrong += runCnt[rNear * NVC + FL_REL_WF] + runCnt[rNear * NVC + FL_OK_RF] + runCnt[rNear * NVC + FL_OK_WF]
+    flPreset += runNoFlag[rNear]
+    flLate += runLate[rNear]
+    if laneRun == -1 and runCnt[rNear * NVC + VC_LANE] > 0
+      laneRun := rNear
+      laneVal := runLaneVal[rNear]
+    if laneRun == -1 and runCnt[rFar * NVC + VC_LANE] > 0
+      laneRun := rFar
+      laneVal := runLaneVal[rFar]
+    laneCnt += runCnt[rNear * NVC + VC_LANE] + runCnt[rFar * NVC + VC_LANE]
+    if othRun == -1 and runCnt[rNear * NVC + VC_OTHER] > 0
+      othRun := rNear
+      othVal := runOtherVal[rNear]
+    if othRun == -1 and runCnt[rNear * NVC + VC_STRM] > 0
+      othRun := rNear
+      othVal := runStrmVal[rNear]
+    if othRun == -1 and runCnt[rFar * NVC + VC_OTHER] > 0
+      othRun := rFar
+      othVal := runOtherVal[rFar]
+    if othRun == -1 and runCnt[rFar * NVC + VC_STRM] > 0
+      othRun := rFar
+      othVal := runStrmVal[rFar]
+    othCnt += runCnt[rNear * NVC + VC_OTHER] + runCnt[rNear * NVC + VC_STRM] + runCnt[rFar * NVC + VC_OTHER] + runCnt[rFar * NVC + VC_STRM]
+    relNear += rel_cells(rNear)
+    relFar += runRep0[rFar * NPAIR + VC_PRIM]
+    if rel_cells(rNear) <> T1_PRED or map_match(rNear) <> NCELL or not delta_match(rNear) or runCnt[rNear * NVC + FL_REL] + runCnt[rNear * NVC + FL_REL_WF] <> T1_PRED * REPS or not is_clean(rFar)
+      bAll := FALSE
+  if badC > 0
+    ln_s(string("INCONCLUSIVE - "))
+    ln_d(badC)
+    ln_s(string(" waiting-form control(s) at k=0 not (sentinel part, its flags) in every record"))
+  elseif seedCnt > 0
+    ln_s(string("REFUTED - a released read did not write its destination: "))
+    ln_d(seedCnt)
+    ln_s(string(" seed records in the test runs"))
+  elseif laneCnt > 0
+    ln_s(string("REFUTED - prediction A's shift is wrong: "))
+    ln_d(laneCnt)
+    ln_s(string(" records hold the primer's part at another offset (first "))
+    ln_h(laneVal)
+    ln_s(string(" in "))
+    ln_runname(laneRun)
+    ln_c(")")
+  elseif othCnt > 0
+    ln_s(string("REFUTED - a released value is not the previous read's: "))
+    ln_d(othCnt)
+    ln_s(string(" other or stream records (first "))
+    ln_h(othVal)
+    ln_s(string(" in "))
+    ln_runname(othRun)
+    ln_c(")")
+  elseif relNear == 0 and relFar == 0
+    ln_s(string("REFUTED - no early release: every test record the sentinel part at k=0 and k=7"))
+  elseif flWrong > 0
+    if flPreset > 0
+      ln_s(string("REFUTED - flags not written by the released read (preset C=1 Z=1 survived in "))
+      ln_d(flPreset)
+      ln_s(string(" records); values as prediction A"))
+    else
+      ln_s(string("REFUTED - values as prediction A, but flags are not the value's in "))
+      ln_d(flWrong)
+      ln_s(string(" k=0 records"))
+  elseif bAll and flLate > 0
+    ln_s(string("CONFIRMED AT THE READ, BUT FLAGS CHANGED AFTER THE READ in "))
+    ln_d(flLate)
+    ln_s(string(" records - prediction A with its flags in T1's 43 cells at every offset; k=7 none"))
+  elseif bAll
+    ln_s(string("CONFIRMED - at every offset prediction A with its flags in T1's same 43 cells in every repetition, the rest the sentinel part with its flags; k=7 none"))
+  else
+    ln_s(string("MECHANISM PRESENT, COUNT DIFFERS - values and flags as predicted, but released cells k=0 "))
+    ln_d(relNear)
+    ln_s(string(" / k=7 "))
+    ln_d(relFar)
+    ln_s(string(" over the offsets (predicted 43 per offset / 0)"))
+  ln_s(string(" | flags at k=0: not the value's "))
+  ln_d(flWrong)
+  ln_s(string(", preset survived "))
+  ln_d(flPreset)
+  ln_s(string(", changed after the read "))
+  ln_d(flLate)
+  ln_rd_values(bWord)
+  ln_out()
+  if bDetail
+    repeat varIdx from vFirst to vLast
+      rNop := RUN_RD + varIdx * 4
+      ln_s(string("  detail offset "))
+      ln_d(var_lane(varIdx))
+      ln_s(string(": k=0 released "))
+      ln_d(rel_cells(rNop + SL_T0))
+      ln_s(string(" of 64 (same cells as T1: "))
+      ln_d(map_match(rNop + SL_T0))
+      ln_s(string(" of 64) by delta "))
+      ln_row8(@runDelta[(rNop + SL_T0) * NSLOT])
+      ln_s(string("; k=0 records R/S/W/Q/V "))
+      ln_d(runCnt[(rNop + SL_T0) * NVC + FL_REL])
+      ln_c("/")
+      ln_d(runCnt[(rNop + SL_T0) * NVC + FL_OK])
+      ln_c("/")
+      ln_d(runCnt[(rNop + SL_T0) * NVC + FL_REL_WF])
+      ln_c("/")
+      ln_d(runCnt[(rNop + SL_T0) * NVC + FL_OK_RF])
+      ln_c("/")
+      ln_d(runCnt[(rNop + SL_T0) * NVC + FL_OK_WF])
+      ln_s(string(" | k=7 released "))
+      ln_d(runRep0[(rNop + SL_T7) * NPAIR + VC_PRIM])
+      ln_s(string(" | waiting k=0 (sentinel part, flags) "))
+      ln_d(runGoodAll[rNop + SL_C])
+      ln_s(string(" of 1024 | NOP control "))
+      ln_d(runGoodAll[rNop + SL_N])
+      say(string(" of 1024"))
+
+PRI ln_wr_values(bWord) | varIdx
+' Append the write values written before the run.
+'
+' @param bWord - FALSE: the byte instruction; TRUE: the word instruction
+
+' Local Variables:
+' @local varIdx - variant
+
+  ln_s(string(" | before the run: released = write lost, target stays $4C3D_2E1F (old,old), or read-back released (primer $A5A5_0001, new); not released = (new,new), new "))
+  repeat varIdx from 0 to NVAR - 1
+    if (varIdx >= 4) == bWord
+      ln_s(string("off"))
+      ln_d(var_lane(varIdx))
+      ln_c(" ")
+      ln_h(merge(OLDB, NEWD, var_size(varIdx), var_lane(varIdx)))
+      ln_c(" ")
+
+PRI verdict_wr(bWord, bDetail)
+' VERDICT E7 WRBYTE / WRWORD, in the order fixed in the header.
+'
+' @param bWord - FALSE: the byte instruction; TRUE: the word instruction
+' @param bDetail - TRUE: add the detail lines
+
+  if bWord
+    ln_s(string("VERDICT E7 WRWORD: "))
+  else
+    ln_s(string("VERDICT E7 WRBYTE: "))
+  if not ln_notdone(ARM_WR)
+    if not ln_nogate(ARM_WR)
+      verdict_wr_body(bWord, bDetail)
+
+PRI verdict_wr_body(bWord, bDetail) | varIdx, vFirst, vLast, rNop, rWait, rW1, rW2, badC, cntON, old2, allNN, unnamed, oo, pn, nn, sumOO, bAll, c1Idx
+' The WRBYTE / WRWORD verdict once the arm's gates have passed.
+'
+' @param bWord - FALSE: the byte instruction; TRUE: the word instruction
+' @param bDetail - TRUE: add the detail lines
+
+' Local Variables:
+' @local varIdx - variant
+' @local vFirst - first variant of the instruction
+' @local vLast - last variant
+' @local rNop - NOP control run
+' @local rWait - waiting-form run
+' @local rW1 - test W1 run
+' @local rW2 - test W2 run
+' @local badC - waiting-form runs not clean
+' @local cntON - W1 cells (old,new) over the offsets
+' @local old2 - W2 cells with rb2 old over the offsets
+' @local allNN - offsets whose W1 is (new,new) in all 64 and W2 (seed,new) in all 64
+' @local unnamed - offsets with a W1 cell outside OO/PN/NN or a W2 cell not (seed,new)
+' @local oo - W1 (old,old) cells at this offset
+' @local pn - W1 (primer,new) cells at this offset
+' @local nn - W1 (new,new) cells at this offset
+' @local sumOO - W1 (old,old) cells over the offsets
+' @local bAll - every offset exactly as predicted
+' @local c1Idx - rb1 class
+
+  if bWord
+    vFirst := 4
+    vLast := 5
+  else
+    vFirst := 0
+    vLast := 3
+  badC := 0
+  cntON := 0
+  old2 := 0
+  allNN := 0
+  unnamed := 0
+  sumOO := 0
+  bAll := TRUE
+  repeat varIdx from vFirst to vLast
+    rNop := RUN_WR + varIdx * 4
+    rWait := rNop + SW_C
+    rW1 := rNop + SW_T1
+    rW2 := rNop + SW_T2
+    if not is_clean(rWait)
+      badC++
+    oo := runRep0[rW1 * NPAIR + PAIR_OO]
+    pn := runRep0[rW1 * NPAIR + PAIR_PN]
+    nn := runRep0[rW1 * NPAIR + PAIR_NN]
+    sumOO += oo
+    cntON += runRep0[rW1 * NPAIR + PAIR_ON]
+    repeat c1Idx from 0 to NVC - 1
+      old2 += runRep0[rW2 * NPAIR + c1Idx * NVC + VC_OLD]
+    if nn == NCELL and runRep0[rW2 * NPAIR + PAIR_DN] == NCELL
+      allNN++
+    if oo + pn + nn <> NCELL or runRep0[rW2 * NPAIR + PAIR_DN] <> NCELL
+      unnamed++
+    if oo <> T3_PRED_OO or pn <> T3_PRED_PN or not delta_match(rW1) or map_match(rW1) <> NCELL or runRep0[rW2 * NPAIR + PAIR_DN] <> NCELL
+      bAll := FALSE
+  if badC > 0
+    ln_s(string("INCONCLUSIVE - "))
+    ln_d(badC)
+    ln_s(string(" waiting-form control(s) not (new,new) in every cell"))
+  elseif cntON > 0
+    ln_s(string("REFUTED - writes land after all (W1: old,new): "))
+    ln_d(cntON)
+    ln_s(string(" cells; W2 cells with rb2 old "))
+    ln_d(old2)
+  elseif old2 > 0
+    ln_s(string("REFUTED - released write never lands (W2: rb2 old): "))
+    ln_d(old2)
+    ln_s(string(" cells"))
+  elseif allNN == vLast - vFirst + 1
+    ln_s(string("REFUTED - defect absent: W1 (new,new) in all 64 cells and W2 (seed,new) in all 64, at every offset"))
+  elseif unnamed > 0 or sumOO == 0
+    ln_s(string("REFUTED - a pattern the prediction does not name (another lane written, other values, or no lost write) at "))
+    ln_d(unnamed)
+    ln_s(string(" offset(s); W1 (old,old) cells over the offsets "))
+    ln_d(sumOO)
+  elseif bAll
+    ln_s(string("CONFIRMED - at every offset W1 43 (old,old) in T1's cells (the write lost, the target's old long unchanged) + 21 (primer,new), W2 (seed,new) in all 64"))
+  else
+    ln_s(string("MECHANISM PRESENT, COUNT DIFFERS - lost writes present, but not 43 (old,old) + 21 (primer,new) in T1's cells at every offset; W1 (old,old) over the offsets "))
+    ln_d(sumOO)
+  ln_wr_values(bWord)
+  ln_out()
+  if bDetail
+    repeat varIdx from vFirst to vLast
+      rNop := RUN_WR + varIdx * 4
+      rW1 := rNop + SW_T1
+      ln_s(string("  detail offset "))
+      ln_d(var_lane(varIdx))
+      ln_s(string(": W1 OO "))
+      ln_d(runRep0[rW1 * NPAIR + PAIR_OO])
+      ln_s(string(" PN "))
+      ln_d(runRep0[rW1 * NPAIR + PAIR_PN])
+      ln_s(string(" NN "))
+      ln_d(runRep0[rW1 * NPAIR + PAIR_NN])
+      ln_s(string(" (same cells as T1: "))
+      ln_d(map_match(rW1))
+      ln_s(string(" of 64) OO by delta "))
+      ln_row8(@runDelta[rW1 * NSLOT])
+      ln_s(string(" | W2 (seed,new) "))
+      ln_d(runRep0[(rNop + SW_T2) * NPAIR + PAIR_DN])
+      ln_s(string(" | waiting (new,new) "))
+      ln_d(runGoodAll[rNop + SW_C])
+      ln_s(string(" of 1024 | NOP control (new,new) "))
+      ln_d(runGoodAll[rNop + SW_N])
+      say(string(" of 1024"))
+
+PRI observed_wf_r(bDetail)
+' OBSERVED E7 WRFAST-RDLONG (records).
+'
+' @param bDetail - TRUE: add the detail lines
+
+  ln_s(string("OBSERVED E7 WRFAST-RDLONG: "))
+  if not ln_wfhang()
+    if not ln_notdone(ARM_WF)
+      if not ln_nogate(ARM_WF)
+        observed_wf_r_body(bDetail)
+
+PRI observed_wf_r_body(bDetail) | rWait, rNear, rFar, primNear, primFar, primWait, oddCnt, flWrong, flPreset, flLate, rIdx
+' The WRFAST-RDLONG record once the arm's gates have passed.
+'
+' @param bDetail - TRUE: add the detail lines
+
+' Local Variables:
+' @local rWait - waiting WRFAST run
+' @local rNear - no-wait WRFAST k=0 run
+' @local rFar - no-wait WRFAST k=7 run
+' @local primNear - repetition-0 primer cells at k=0
+' @local primFar - the same at k=7
+' @local primWait - the same in the waiting form
+' @local oddCnt - records neither primer nor sentinel in the three runs
+' @local flWrong - records whose flags are not their value's, three runs
+' @local flPreset - records whose preset flags survived, three runs
+' @local flLate - records whose flags changed after the read, three runs
+' @local rIdx - run index
+
+  rWait := RUN_WF + 1
+  rNear := RUN_WF + 2
+  rFar := RUN_WF + 3
+  ' value + flags runs: released value = FL_REL or FL_REL_WF
+  primNear := rel_cells(rNear)
+  primFar := rel_cells(rFar)
+  primWait := rel_cells(rWait)
+  oddCnt := NTRIAL * 3 - wf_valued(rNear) - wf_valued(rFar) - wf_valued(rWait)
+  flWrong := 0
+  flPreset := 0
+  flLate := 0
+  repeat rIdx from rWait to rFar
+    flWrong += runCnt[rIdx * NVC + FL_REL_WF] + runCnt[rIdx * NVC + FL_OK_RF] + runCnt[rIdx * NVC + FL_OK_WF]
+    flPreset += runNoFlag[rIdx]
+    flLate += runLate[rIdx]
+  if primNear + primFar + primWait == 0
+    ln_s(string("OBSERVED: no early release - no primer record after the no-wait WRFAST at k=0 or k=7, nor after the waiting WRFAST"))
+  else
+    ln_s(string("OBSERVED: released early in "))
+    ln_d(primNear)
+    ln_s(string(" of 64 cells at k=0 (rep0 primer cells; same cells as T1 in "))
+    ln_d(map_match(rNear))
+    ln_s(string(" of 64), "))
+    ln_d(primFar)
+    ln_s(string(" at k=7, "))
+    ln_d(primWait)
+    ln_s(string(" after the waiting WRFAST"))
+  ln_s(string("; records neither primer nor sentinel (seed, stream, other) "))
+  ln_d(oddCnt)
+  ln_s(string(" of 3072; flags not the value's "))
+  ln_d(flWrong)
+  ln_s(string(", preset C=1 Z=1 survived "))
+  ln_d(flPreset)
+  ln_s(string(", changed after the read "))
+  ln_d(flLate)
+  ln_s(string("; cells with disagreeing reps "))
+  ln_d(runDisagree[rNear] + runDisagree[rFar] + runDisagree[rWait])
+  ln_out()
+  if bDetail
+    ln_s(string("  detail: k=0 primer by delta "))
+    ln_row8(@runDelta[rNear * NSLOT])
+    ln_s(string(", not (sentinel, C=0 Z=0) by delta "))
+    ln_row8(@runDelta2[rNear * NSLOT])
+    ln_s(string(" | k=7 primer by delta "))
+    ln_row8(@runDelta[rFar * NSLOT])
+    ln_s(string(" | waiting (sentinel, C=0 Z=0) "))
+    ln_d(runGoodAll[rWait])
+    ln_s(string(" of 1024 | seed k=0/k=7/waiting "))
+    ln_d(runCnt[rNear * NVC + FL_SEED])
+    ln_c("/")
+    ln_d(runCnt[rFar * NVC + FL_SEED])
+    ln_c("/")
+    ln_d(runCnt[rWait * NVC + FL_SEED])
+    say(string(" (per-run class counts in each run's totals lines)"))
+
+PRI wf_valued(runIdx) : cnt
+' @param runIdx - run index
+' @returns cnt - records whose value is the primer or the sentinel (any flags)
+
+  cnt := runCnt[runIdx * NVC + FL_REL] + runCnt[runIdx * NVC + FL_REL_WF] + runCnt[runIdx * NVC + FL_OK] + runCnt[runIdx * NVC + FL_OK_RF] + runCnt[runIdx * NVC + FL_OK_WF]
+
+PRI ln_wfhang() : bHang
+' If an arm 4 command timed out, append the hang report, send it, return TRUE.
+' The caller has already appended the verdict's name.
+'
+' @returns bHang - TRUE when arm 4 stopped on a timeout (line sent)
+
+  bHang := wfHang
+  if bHang
+    ln_s(string("OBSERVED: blocking rdfast #0 after a no-wait WRFAST did not complete (run "))
+    ln_runname(wfHangRun)
+    say(string("); arm 4 stopped there and its remaining runs were skipped; the runs before it are raw rows above"))
+
+PRI observed_wf_w(bDetail)
+' OBSERVED E7 WRFAST-WRLONG (records).
+'
+' @param bDetail - TRUE: add the detail lines
+
+  ln_s(string("OBSERVED E7 WRFAST-WRLONG: "))
+  if not ln_wfhang()
+    if not ln_notdone(ARM_WF)
+      if not ln_nogate(ARM_WF)
+        observed_wf_w_body(bDetail)
+
+PRI observed_wf_w_body(bDetail) | rWait, rNear, rFar, rSecond, notNewNear, notNewFar, notNewWait, oldSecond, seedNewSecond, oddPairs
+' The WRFAST-WRLONG record once the arm's gates have passed.
+'
+' @param bDetail - TRUE: add the detail lines
+
+' Local Variables:
+' @local rWait - waiting WRFAST W1 run
+' @local rNear - no-wait WRFAST W1 k=0 run
+' @local rFar - no-wait WRFAST W1 k=7 run
+' @local rSecond - no-wait WRFAST W2 k=0 run
+' @local notNewNear - W1 k=0 rep0 cells not (new,new)
+' @local notNewFar - W1 k=7 rep0 cells not (new,new)
+' @local notNewWait - waiting rep0 cells not (new,new)
+' @local oldSecond - W2 rep0 cells with rb2 old
+' @local seedNewSecond - W2 rep0 cells (seed,new)
+' @local oddPairs - W1 k=0 rep0 cells outside OO/PN/NN/ON
+
+  rWait := RUN_WFW + 1
+  rNear := RUN_WFW + 2
+  rFar := RUN_WFW + 3
+  rSecond := RUN_WFW + 4
+  notNewNear := NCELL - runRep0[rNear * NPAIR + PAIR_NN]
+  notNewFar := NCELL - runRep0[rFar * NPAIR + PAIR_NN]
+  notNewWait := NCELL - runRep0[rWait * NPAIR + PAIR_NN]
+  seedNewSecond := runRep0[rSecond * NPAIR + PAIR_DN]
+  oldSecond := 0
+  repeat oddPairs from 0 to NVC - 1
+    oldSecond += runRep0[rSecond * NPAIR + oddPairs * NVC + VC_OLD]
+  oddPairs := notNewNear - runRep0[rNear * NPAIR + PAIR_OO] - runRep0[rNear * NPAIR + PAIR_PN] - runRep0[rNear * NPAIR + PAIR_ON]
+  if notNewNear + notNewFar + notNewWait == 0 and seedNewSecond == NCELL
+    ln_s(string("OBSERVED: no early release - W1 (new,new) in all 64 cells at k=0 and k=7 and after the waiting WRFAST; W2 (seed,new) in all 64"))
+  else
+    ln_s(string("OBSERVED: released early in "))
+    ln_d(notNewNear)
+    ln_s(string(" of 64 cells at k=0 W1 (not (new,new): OO "))
+    ln_d(runRep0[rNear * NPAIR + PAIR_OO])
+    ln_s(string(" PN "))
+    ln_d(runRep0[rNear * NPAIR + PAIR_PN])
+    ln_s(string(" ON "))
+    ln_d(runRep0[rNear * NPAIR + PAIR_ON])
+    ln_s(string(" other "))
+    ln_d(oddPairs)
+    ln_s(string("), "))
+    ln_d(notNewFar)
+    ln_s(string(" at k=7, "))
+    ln_d(notNewWait)
+    ln_s(string(" after the waiting WRFAST; W2 k=0 (seed,new) "))
+    ln_d(seedNewSecond)
+    ln_s(string(", rb2 old "))
+    ln_d(oldSecond)
+  ln_s(string("; cells with disagreeing reps "))
+  ln_d(runDisagree[rNear] + runDisagree[rFar] + runDisagree[rWait] + runDisagree[rSecond])
+  ln_out()
+  if bDetail
+    ln_s(string("  detail: W1 k=0 OO by delta "))
+    ln_row8(@runDelta[rNear * NSLOT])
+    ln_s(string(", not NN by delta "))
+    ln_row8(@runDelta2[rNear * NSLOT])
+    ln_s(string(" (same OO cells as T1's primer cells: "))
+    ln_d(map_match(rNear))
+    ln_s(string(" of 64) | W1 k=7 not NN by delta "))
+    ln_row8(@runDelta2[rFar * NSLOT])
+    say(string(" (per-run counts in each run's totals lines)"))
+
+PRI observed_q(bDetail) | bIdx, intTot, intMissing
+' OBSERVED E7 SETQ-BLOCK (records), with the cog-RAM integrity result.
+'
+' @param bDetail - TRUE: add the detail lines
+
+' Local Variables:
+' @local bIdx - arm 5 run slot
+' @local intTot - changed cog registers over the arm's runs
+' @local intMissing - arm 5 runs whose cog-RAM copy never arrived
+
+  ln_s(string("OBSERVED E7 SETQ-BLOCK: "))
+  intTot := 0
+  intMissing := 0
+  repeat bIdx from 0 to NBRUN - 1
+    if intChanged[bIdx] == -1
+      intMissing++
+    else
+      intTot += intChanged[bIdx]
+  if bLost
+    ln_s(string("OBSERVED: measuring cog lost during the SETQ block arm (run "))
+    ln_runname(lostRun)
+    ln_s(string("); cog-RAM registers changed outside the sacrificial range in the completed runs "))
+    ln_d(intTot)
+    say(string(" (see INTEGRITY lines)"))
+  elseif not ln_notdone(ARM_Q)
+    if not armPass[ARM_P] or not armPass[ARM_Q]
+      ln_s(string("NO VERDICT - "))
+      if not armPass[ARM_P]
+        ln_s(string("arm 0 (positive control) failed"))
+      else
+        ln_s(string("a gate of arm 5 failed (see GATE FAIL lines)"))
+      ln_s(string("; the rows above are raw; cog-RAM registers changed outside the sacrificial range "))
+      ln_d(intTot)
+      say(string(" (see INTEGRITY lines)"))
+    else
+      observed_q_body(bDetail, intTot, intMissing)
+
+PRI observed_q_body(bDetail, intTot, intMissing) | rWait, rNear, rFar, primNear, primFar, primWait, oddCnt
+' The SETQ-BLOCK record once the arm's gates have passed.
+'
+' @param bDetail - TRUE: add the detail lines
+' @param intTot - changed cog registers over the arm's runs
+' @param intMissing - arm 5 runs whose cog-RAM copy never arrived
+
+' Local Variables:
+' @local rWait - waiting-form run
+' @local rNear - no-wait k=0 run
+' @local rFar - no-wait k=7 run
+' @local primNear - repetition-0 records with the primer at k=0
+' @local primFar - the same at k=7
+' @local primWait - the same in the waiting form
+' @local oddCnt - records with seed or other longs and no primer, in the three runs
+
+  rWait := RUN_Q + 1
+  rNear := RUN_Q + 2
+  rFar := RUN_Q + 3
+  primNear := runRep0[rNear * NPAIR + BC_PRIM] + runRep0[rNear * NPAIR + BC_MIX]
+  primFar := runRep0[rFar * NPAIR + BC_PRIM] + runRep0[rFar * NPAIR + BC_MIX]
+  primWait := runRep0[rWait * NPAIR + BC_PRIM] + runRep0[rWait * NPAIR + BC_MIX]
+  oddCnt := runCnt[rNear * NVC + BC_SEED] + runCnt[rNear * NVC + BC_OTHER] + runCnt[rFar * NVC + BC_SEED] + runCnt[rFar * NVC + BC_OTHER] + runCnt[rWait * NVC + BC_SEED] + runCnt[rWait * NVC + BC_OTHER]
+  if primNear + primFar + primWait == 0
+    ln_s(string("OBSERVED: no early release - no record holds the primer at k=0, k=7 or in the waiting form"))
+  else
+    ln_s(string("OBSERVED: released early in "))
+    ln_d(primNear)
+    ln_s(string(" of 64 cells at k=0 (records with the primer in some long; same cells as T1 in "))
+    ln_d(map_match(rNear))
+    ln_s(string(" of 64), "))
+    ln_d(primFar)
+    ln_s(string(" at k=7, "))
+    ln_d(primWait)
+    ln_s(string(" in the waiting form"))
+  ln_s(string("; records with seed or other longs and no primer "))
+  ln_d(oddCnt)
+  ln_s(string(" of 3072; cog-RAM registers changed outside the sacrificial range "))
+  ln_d(intTot)
+  if intMissing > 0
+    ln_s(string(" (copies missing: "))
+    ln_d(intMissing)
+    ln_c(")")
+  ln_out()
+  if bDetail
+    ln_s(string("  detail: k=0 primer by long 0-7 (all reps) "))
+    ln_row8(@blkPrim[(rNear - RUN_Q) * BLKN])
+    ln_s(string(" | k=0 records right / primer / seed / both / other "))
+    ln_d(runCnt[rNear * NVC + BC_OK])
+    ln_c("/")
+    ln_d(runCnt[rNear * NVC + BC_PRIM])
+    ln_c("/")
+    ln_d(runCnt[rNear * NVC + BC_SEED])
+    ln_c("/")
+    ln_d(runCnt[rNear * NVC + BC_MIX])
+    ln_c("/")
+    ln_d(runCnt[rNear * NVC + BC_OTHER])
+    ln_s(string(" | k=0 primer records by delta "))
+    ln_row8(@runDelta[rNear * NSLOT])
+    ln_s(string(" | waiting right block "))
+    ln_d(runGoodAll[rWait])
+    ln_s(string(" of 1024 | disagreeing cells k=0/k=7/waiting "))
+    ln_d(runDisagree[rNear])
+    ln_c("/")
+    ln_d(runDisagree[rFar])
+    ln_c("/")
+    ln_d(runDisagree[rWait])
+    ln_out()
+
+DAT ' ---- Fixed predictions and the run table ----
+' Erratum E7: primer cells per repetition at k=0, by delta 0..7
+predK0          long    8, 8, 7, 6, 5, 4, 3, 2
+
+' Run table, in run order: arm, shape, kind, copy, no-wait, k, size, lane.
+' For arm 1 (SH_F, SH_P) the lane byte is the variant: 0 = FC, 1 = FZ, 2 = FP.
+runTab          byte    ARM_P,  SH_R,  KD_NOP,  CP_R_NOP_L,  0, 0, 4, 0      '  0 C1
+                byte    ARM_P,  SH_PS, KD_PS,   CP_R_PS,     1, 0, 4, 0      '  1 PS
+                byte    ARM_P,  SH_R,  KD_TEST, CP_R_RF0_L,  1, 0, 4, 0      '  2 T1 k=0
+                byte    ARM_P,  SH_R,  KD_TEST, CP_R_RF7_L,  1, 7, 4, 0      '  3 T1 k=7
+                byte    ARM_FL, SH_F,  KD_NOP,  CP_F_NOP,    0, 0, 4, 0      '  4 FC N
+                byte    ARM_FL, SH_F,  KD_WAIT, CP_F_RF0,    0, 0, 4, 0      '  5 FC C
+                byte    ARM_FL, SH_F,  KD_TEST, CP_F_RF0,    1, 0, 4, 0      '  6 FC T
+                byte    ARM_FL, SH_F,  KD_NOP,  CP_F_NOP,    0, 0, 4, 1      '  7 FZ N
+                byte    ARM_FL, SH_F,  KD_WAIT, CP_F_RF0,    0, 0, 4, 1      '  8 FZ C
+                byte    ARM_FL, SH_F,  KD_TEST, CP_F_RF0,    1, 0, 4, 1      '  9 FZ T
+                byte    ARM_FL, SH_P,  KD_NOP,  CP_P_NOP,    0, 0, 4, 2      ' 10 FP N (PTRA++)
+                byte    ARM_FL, SH_P,  KD_WAIT, CP_P_RF0,    0, 0, 4, 2      ' 11 FP C
+                byte    ARM_FL, SH_P,  KD_TEST, CP_P_RF0,    1, 0, 4, 2      ' 12 FP T
+                byte    ARM_RD, SH_F,  KD_NOP,  CP_FB_NOP,   0, 0, 1, 0      ' 13 RB0 N (value + flags)
+                byte    ARM_RD, SH_F,  KD_WAIT, CP_FB_RF0,   0, 0, 1, 0      ' 14 RB0 C (value + flags)
+                byte    ARM_RD, SH_F,  KD_TEST, CP_FB_RF0,   1, 0, 1, 0      ' 15 RB0 T k0 (value + flags)
+                byte    ARM_RD, SH_R,  KD_TEST, CP_R_RF7_B,  1, 7, 1, 0      ' 16 RB0 T k7 (value)
+                byte    ARM_RD, SH_F,  KD_NOP,  CP_FB_NOP,   0, 0, 1, 1      ' 17 RB1
+                byte    ARM_RD, SH_F,  KD_WAIT, CP_FB_RF0,   0, 0, 1, 1
+                byte    ARM_RD, SH_F,  KD_TEST, CP_FB_RF0,   1, 0, 1, 1
+                byte    ARM_RD, SH_R,  KD_TEST, CP_R_RF7_B,  1, 7, 1, 1
+                byte    ARM_RD, SH_F,  KD_NOP,  CP_FB_NOP,   0, 0, 1, 2      ' 21 RB2
+                byte    ARM_RD, SH_F,  KD_WAIT, CP_FB_RF0,   0, 0, 1, 2
+                byte    ARM_RD, SH_F,  KD_TEST, CP_FB_RF0,   1, 0, 1, 2
+                byte    ARM_RD, SH_R,  KD_TEST, CP_R_RF7_B,  1, 7, 1, 2
+                byte    ARM_RD, SH_F,  KD_NOP,  CP_FB_NOP,   0, 0, 1, 3      ' 25 RB3
+                byte    ARM_RD, SH_F,  KD_WAIT, CP_FB_RF0,   0, 0, 1, 3
+                byte    ARM_RD, SH_F,  KD_TEST, CP_FB_RF0,   1, 0, 1, 3
+                byte    ARM_RD, SH_R,  KD_TEST, CP_R_RF7_B,  1, 7, 1, 3
+                byte    ARM_RD, SH_F,  KD_NOP,  CP_FW_NOP,   0, 0, 2, 0      ' 29 RW0
+                byte    ARM_RD, SH_F,  KD_WAIT, CP_FW_RF0,   0, 0, 2, 0
+                byte    ARM_RD, SH_F,  KD_TEST, CP_FW_RF0,   1, 0, 2, 0
+                byte    ARM_RD, SH_R,  KD_TEST, CP_R_RF7_W,  1, 7, 2, 0
+                byte    ARM_RD, SH_F,  KD_NOP,  CP_FW_NOP,   0, 0, 2, 2      ' 33 RW2
+                byte    ARM_RD, SH_F,  KD_WAIT, CP_FW_RF0,   0, 0, 2, 2
+                byte    ARM_RD, SH_F,  KD_TEST, CP_FW_RF0,   1, 0, 2, 2
+                byte    ARM_RD, SH_R,  KD_TEST, CP_R_RF7_W,  1, 7, 2, 2
+                byte    ARM_WR, SH_W,  KD_NOP,  CP_W_NOP_B,  0, 0, 1, 0      ' 37 WB0 N
+                byte    ARM_WR, SH_W,  KD_WAIT, CP_W_RF1_B,  0, 0, 1, 0      ' 38 WB0 C (W1)
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF1_B,  1, 0, 1, 0      ' 39 WB0 T1
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF2_B,  1, 0, 1, 0      ' 40 WB0 T2
+                byte    ARM_WR, SH_W,  KD_NOP,  CP_W_NOP_B,  0, 0, 1, 1      ' 41 WB1
+                byte    ARM_WR, SH_W,  KD_WAIT, CP_W_RF1_B,  0, 0, 1, 1
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF1_B,  1, 0, 1, 1
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF2_B,  1, 0, 1, 1
+                byte    ARM_WR, SH_W,  KD_NOP,  CP_W_NOP_B,  0, 0, 1, 2      ' 45 WB2
+                byte    ARM_WR, SH_W,  KD_WAIT, CP_W_RF1_B,  0, 0, 1, 2
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF1_B,  1, 0, 1, 2
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF2_B,  1, 0, 1, 2
+                byte    ARM_WR, SH_W,  KD_NOP,  CP_W_NOP_B,  0, 0, 1, 3      ' 49 WB3
+                byte    ARM_WR, SH_W,  KD_WAIT, CP_W_RF1_B,  0, 0, 1, 3
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF1_B,  1, 0, 1, 3
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF2_B,  1, 0, 1, 3
+                byte    ARM_WR, SH_W,  KD_NOP,  CP_W_NOP_W,  0, 0, 2, 0      ' 53 WW0
+                byte    ARM_WR, SH_W,  KD_WAIT, CP_W_RF1_W,  0, 0, 2, 0
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF1_W,  1, 0, 2, 0
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF2_W,  1, 0, 2, 0
+                byte    ARM_WR, SH_W,  KD_NOP,  CP_W_NOP_W,  0, 0, 2, 2      ' 57 WW2
+                byte    ARM_WR, SH_W,  KD_WAIT, CP_W_RF1_W,  0, 0, 2, 2
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF1_W,  1, 0, 2, 2
+                byte    ARM_WR, SH_W,  KD_TEST, CP_W_RF2_W,  1, 0, 2, 2
+                byte    ARM_WF, SH_F,  KD_NOP,  CP_F_NOP,    0, 0, 4, 0      ' 61 FR N (value + flags)
+                byte    ARM_WF, SH_F,  KD_WAIT, CP_F_WF0,    0, 0, 4, 0      ' 62 FR C
+                byte    ARM_WF, SH_F,  KD_TEST, CP_F_WF0,    1, 0, 4, 0      ' 63 FR T k0
+                byte    ARM_WF, SH_F,  KD_TEST, CP_F_WF7,    1, 7, 4, 0      ' 64 FR T k7
+                byte    ARM_WF, SH_W,  KD_NOP,  CP_W_NOP_L,  0, 0, 4, 0      ' 65 FW N
+                byte    ARM_WF, SH_W,  KD_WAIT, CP_W_WF1_L0, 0, 0, 4, 0      ' 66 FW C (W1 k0)
+                byte    ARM_WF, SH_W,  KD_TEST, CP_W_WF1_L0, 1, 0, 4, 0      ' 67 FW T1 k0
+                byte    ARM_WF, SH_W,  KD_TEST, CP_W_WF1_L7, 1, 7, 4, 0      ' 68 FW T1 k7
+                byte    ARM_WF, SH_W,  KD_TEST, CP_W_WF2_L0, 1, 0, 4, 0      ' 69 FW T2 k0
+                byte    ARM_Q,  SH_B,  KD_NOP,  CP_B_NOP,    0, 0, 4, 0      ' 70 QB N
+                byte    ARM_Q,  SH_B,  KD_WAIT, CP_B_RF0,    0, 0, 4, 0      ' 71 QB C
+                byte    ARM_Q,  SH_B,  KD_TEST, CP_B_RF0,    1, 0, 4, 0      ' 72 QB T k0
+                byte    ARM_Q,  SH_B,  KD_TEST, CP_B_RF7,    1, 7, 4, 0      ' 73 QB T k7
+runTabEnd       byte    0
+                alignl
+
+' ===========================================================================
+' MEASURING COG (PASM, cog exec).  PTRA on entry = @mbox (from COGINIT).
+' No debug(), no BRK, no interrupt in this cog (DEBUG_COGS excludes it).
+' From each primer RDLONG to its test instruction there is nothing but the
+' RDFAST/WRFAST (or the NOP standing in for it), the k NOPs and (block) the
+' SETQ; no ## operand.  Loop variables are grouped (c_cmd..c_tmp); the
+' sacrificial block registers and their guard bands end the image.
+' ===========================================================================
+DAT             org     0        ' ---- Measuring Cog ----
+pasm            mov     c_tmp, ##STAT_READY
+                wrlong  c_tmp, ptra[MB_ALIVE]
+
+wait_cmd        rdlong  c_cmd, ptra                     wz      ' MB_CMD: 0 = idle
+        if_z    jmp     #wait_cmd
+                rdlong  c_copy, ptra[MB_COPY]
+                rdlong  c_mode, ptra[MB_MODE]
+                rdlong  c_off, ptra[MB_OFF]
+                rdlong  c_pa, ptra[MB_PRIM]
+                rdlong  c_tb, ptra[MB_TBL]
+                rdlong  c_oldv, ptra[MB_OLD]
+                rdlong  c_newv, ptra[MB_NEW]
+                rdlong  c_flush, ptra[MB_FLUSH]
+                alts    c_copy, #vec_tab
+                mov     c_vec, 0-0
+                mov     c_rp, c_res
+                mov     c_reps, #REPS
+                cmp     c_cmd, #CMD_R                   wz
+        if_z    jmp     #r_rep
+                cmp     c_cmd, #CMD_F                   wz
+        if_z    jmp     #f_rep
+                cmp     c_cmd, #CMD_W                   wz
+        if_z    jmp     #w_rep
+                cmp     c_cmd, #CMD_B                   wz
+        if_z    jmp     #b_rep
+                cmp     c_cmd, #CMD_SNAP                wz
+        if_z    jmp     #do_snap
+                cmp     c_cmd, #CMD_P                   wz
+        if_z    jmp     #p_ent
+cmd_done        wrlong  c_mode, ptra[MB_ECHO]                   ' epilogue, after every record: echo the mode run
+                wrlong  #0, ptra                                ' MB_CMD := 0 -> done
+                jmp     #wait_cmd
+
+do_snap        setq    #COG_DUMP_N - 1                         ' arm 5 baseline: cog RAM $000-$1EF to hub
+                wrlong  pasm, c_dump
+                jmp     #cmd_done
+
+'--- settle: >= 200 clocks; arm 4 adds the FIFO flush (blocking RDFAST waits for
+'--- any previous WRFAST to finish) and a second settle.  Changes no flag.
+settle          mov     c_t, #SETTLE_N
+s_d1            djnz    c_t, #s_d1
+                tjz     c_flush, #s_ret
+                rdfast  #0, c_strm                              ' flush: blocking
+                mov     c_t, #SETTLE_N
+s_d2            djnz    c_t, #s_d2
+s_ret           ret
+
+'--- image R: 16 repetitions x 8 af x 8 ar; record (rep*8 + af)*8 + ar
+r_rep           mov     c_af, #0
+r_af            mov     c_ar, #0
+r_ar            mov     c_pf, c_af
+                shl     c_pf, #2
+                add     c_pf, c_strm                            ' stream address: slot bits = af
+                mov     c_pr, c_ar
+                shl     c_pr, #2
+                add     c_pr, c_tb
+                add     c_pr, c_off                             ' test address: slot bits = ar, + byte offset
+                mov     c_dst, c_seedv                          ' "never written" stays visible
+                jmp     c_vec                                   ' the trial copy
+r_settle        call    #settle
+                wrlong  c_dst, c_rp                             ' one record per trial
+                add     c_rp, #4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #r_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #r_af
+                djnz    c_reps, #r_rep
+                jmp     #cmd_done
+
+'--- value + flags (arm 1 FC/FZ, arm 2 k=0 runs, arm 4 image R): as image R; record value, flags
+f_rep           mov     c_af, #0
+f_af            mov     c_ar, #0
+f_ar            mov     c_pf, c_af
+                shl     c_pf, #2
+                add     c_pf, c_strm
+                mov     c_pr, c_ar
+                shl     c_pr, #2
+                add     c_pr, c_tb
+                add     c_pr, c_off                             ' + byte offset (arm 2)
+                mov     c_dst, c_seedv
+                modcz   _set, _set                      wcz     ' C=1 Z=1: no read gives both
+                jmp     c_vec
+f_settle        call    #settle
+                bitc    c_fl, #FLB_C_LATE                       ' late capture: C
+                bitz    c_fl, #FLB_Z_LATE                       ' late capture: Z
+                wrlong  c_dst, c_rp
+                add     c_rp, #4
+                wrlong  c_fl, c_rp
+                add     c_rp, #4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #f_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #f_af
+                djnz    c_reps, #f_rep
+                jmp     #cmd_done
+
+'--- arm 1 PTRA++: as image R with the test read through ptra++; record value,
+'--- ptra after minus before.  PTRA holds the mailbox pointer: kept in c_mb.
+p_ent           mov     c_mb, ptra                              ' keep the mailbox pointer
+p_rep           mov     c_af, #0
+p_af            mov     c_ar, #0
+p_ar            mov     c_pf, c_af
+                shl     c_pf, #2
+                add     c_pf, c_strm
+                mov     c_pr, c_ar
+                shl     c_pr, #2
+                add     c_pr, c_tb
+                mov     c_dst, c_seedv
+                mov     ptra, c_pr                              ' the test pointer, set before the primer
+                jmp     c_vec
+p_settle        call    #settle
+                mov     c_fl, ptra
+                sub     c_fl, c_pr                              ' ptra after minus before
+                wrlong  c_dst, c_rp
+                add     c_rp, #4
+                wrlong  c_fl, c_rp
+                add     c_rp, #4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #p_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #p_af
+                djnz    c_reps, #p_rep
+                mov     ptra, c_mb                              ' the mailbox pointer back
+                jmp     #cmd_done
+
+'--- image W: 16 repetitions x 8 af x 8 aw; records rb1, rb2 per trial
+w_rep           mov     c_af, #0
+w_af            mov     c_ar, #0                                ' c_ar = aw: the target's slot bits
+w_ar            mov     c_pf, c_af
+                shl     c_pf, #2
+                add     c_pf, c_strm
+                mov     c_pl, c_ar
+                shl     c_pl, #2
+                add     c_pl, c_tb                              ' the target long (aligned): slot bits = aw
+                mov     c_pw, c_pl
+                add     c_pw, c_off                             ' the lane written
+                wrlong  c_oldv, c_pl                            ' the target holds the old long
+                mov     c_t, #SETTLE_N
+w_d1            djnz    c_t, #w_d1
+                mov     c_rb1, c_seedv
+                mov     c_rb2, c_seedv
+                jmp     c_vec
+w_settle        call    #settle
+                rdlong  c_rb2, c_pl                             ' read-back after everything settled
+                wrlong  c_rb1, c_rp
+                add     c_rp, #4
+                wrlong  c_rb2, c_rp
+                add     c_rp, #4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #w_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #w_af
+                djnz    c_reps, #w_rep
+                jmp     #cmd_done
+
+'--- arm 5 block: 16 repetitions x 8 af x 8 ar; record blk0..blk7 per trial
+b_rep           mov     c_af, #0
+b_af            mov     c_ar, #0
+b_ar            mov     c_pf, c_af
+                shl     c_pf, #2
+                add     c_pf, c_strm
+                mov     c_pr, c_ar
+                shl     c_pr, #2
+                add     c_pr, c_tb                              ' block start: slot bits = ar
+                mov     c_blk0 + 0, c_seedv                     ' the sacrificial range := seed
+                mov     c_blk0 + 1, c_seedv
+                mov     c_blk0 + 2, c_seedv
+                mov     c_blk0 + 3, c_seedv
+                mov     c_blk0 + 4, c_seedv
+                mov     c_blk0 + 5, c_seedv
+                mov     c_blk0 + 6, c_seedv
+                mov     c_blk0 + 7, c_seedv
+                jmp     c_vec
+b_settle        call    #settle
+                setq    #BLKN - 1
+                wrlong  c_blk0, c_rp                            ' record: the 8 sacrificial longs
+                add     c_rp, #BLKN * 4
+                add     c_ar, #1
+                cmp     c_ar, #NSLOT                    wz
+        if_nz   jmp     #b_ar
+                add     c_af, #1
+                cmp     c_af, #NSLOT                    wz
+        if_nz   jmp     #b_af
+                djnz    c_reps, #b_rep
+                setq    #COG_DUMP_N - 1                         ' integrity: cog RAM $000-$1EF to hub
+                wrlong  pasm, c_dump
+                jmp     #cmd_done
+
+'--- image R trial copies: primer, RDFAST/WRFAST (or NOP), k NOPs, the read under test
+tc_r_nop_l      rdlong  c_tmp, c_pa                             ' primer
+                nop                                             ' NOP in place of the RDFAST
+                rdlong  c_dst, c_pr                             ' the RDLONG under test
+                jmp     #r_settle
+tc_r_rf0_l      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                rdlong  c_dst, c_pr
+                jmp     #r_settle
+tc_r_rf7_l      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                rdlong  c_dst, c_pr
+                jmp     #r_settle
+tc_r_ps         rdlong  c_tmp, c_pa                             ' PS: primer
+                rdfast  c_mode, c_pf                            ' PS: the stream under test (no-wait)
+                waitx   #STREAM_WAIT                            ' PS: long past any start-up
+                rflong  c_dst                                   ' PS: the stream's first long
+                jmp     #r_settle
+tc_r_rf7_b      rdlong  c_tmp, c_pa                             ' arm 2 k=7 (value only)
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                rdbyte  c_dst, c_pr
+                jmp     #r_settle
+tc_r_rf7_w      rdlong  c_tmp, c_pa                             ' arm 2 k=7 (value only)
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                rdword  c_dst, c_pr
+                jmp     #r_settle
+
+'--- value + flags copies: the test read with WCZ; flags captured at once (outside the timed stretch)
+tc_f_nop        rdlong  c_tmp, c_pa                             ' arm 1 FC/FZ N, arm 4 FR N
+                nop
+                rdlong  c_dst, c_pr                     wcz
+                wrc     c_fl                                    ' bit 0 := C (rest cleared)
+                bitz    c_fl, #FLB_Z_IMM                        ' bit 1 := Z
+                jmp     #f_settle
+tc_f_rf0        rdlong  c_tmp, c_pa                             ' arm 1 FC/FZ C, T
+                rdfast  c_mode, c_pf
+                rdlong  c_dst, c_pr                     wcz
+                wrc     c_fl
+                bitz    c_fl, #FLB_Z_IMM
+                jmp     #f_settle
+tc_f_wf0        rdlong  c_tmp, c_pa                             ' arm 4 FR C, T k=0
+                wrfast  c_mode, c_pf                            ' WRFAST in place of the RDFAST
+                rdlong  c_dst, c_pr                     wcz
+                wrc     c_fl
+                bitz    c_fl, #FLB_Z_IMM
+                jmp     #f_settle
+tc_f_wf7        rdlong  c_tmp, c_pa                             ' arm 4 FR T k=7
+                wrfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                rdlong  c_dst, c_pr                     wcz
+                wrc     c_fl
+                bitz    c_fl, #FLB_Z_IMM
+                jmp     #f_settle
+tc_fb_nop       rdlong  c_tmp, c_pa                             ' arm 2 RDBYTE N
+                nop
+                rdbyte  c_dst, c_pr                     wcz     ' the RDBYTE under test
+                wrc     c_fl
+                bitz    c_fl, #FLB_Z_IMM
+                jmp     #f_settle
+tc_fb_rf0       rdlong  c_tmp, c_pa                             ' arm 2 RDBYTE C, T k=0
+                rdfast  c_mode, c_pf
+                rdbyte  c_dst, c_pr                     wcz
+                wrc     c_fl
+                bitz    c_fl, #FLB_Z_IMM
+                jmp     #f_settle
+tc_fw_nop       rdlong  c_tmp, c_pa                             ' arm 2 RDWORD N
+                nop
+                rdword  c_dst, c_pr                     wcz     ' the RDWORD under test
+                wrc     c_fl
+                bitz    c_fl, #FLB_Z_IMM
+                jmp     #f_settle
+tc_fw_rf0       rdlong  c_tmp, c_pa                             ' arm 2 RDWORD C, T k=0
+                rdfast  c_mode, c_pf
+                rdword  c_dst, c_pr                     wcz
+                wrc     c_fl
+                bitz    c_fl, #FLB_Z_IMM
+                jmp     #f_settle
+
+'--- arm 1 PTRA++ copies: the test RDLONG through ptra++ (ptra set before the primer)
+tc_p_nop        rdlong  c_tmp, c_pa
+                nop
+                rdlong  c_dst, ptra++                           ' the RDLONG under test
+                jmp     #p_settle
+tc_p_rf0        rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                rdlong  c_dst, ptra++
+                jmp     #p_settle
+
+'--- image W trial copies: primer, RDFAST/WRFAST (or NOP), k NOPs, the write, read-back (W1) or NOP (W2)
+tc_w_nop_b      rdlong  c_tmp, c_pa
+                nop
+                wrbyte  c_newv, c_pw                            ' the WRBYTE under test
+                rdlong  c_rb1, c_pl                             ' immediate read-back
+                jmp     #w_settle
+tc_w_rf1_b      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                wrbyte  c_newv, c_pw
+                rdlong  c_rb1, c_pl
+                jmp     #w_settle
+tc_w_rf2_b      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                wrbyte  c_newv, c_pw
+                nop                                             ' W2: no immediate read-back
+                jmp     #w_settle
+tc_w_nop_w      rdlong  c_tmp, c_pa
+                nop
+                wrword  c_newv, c_pw                            ' the WRWORD under test
+                rdlong  c_rb1, c_pl
+                jmp     #w_settle
+tc_w_rf1_w      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                wrword  c_newv, c_pw
+                rdlong  c_rb1, c_pl
+                jmp     #w_settle
+tc_w_rf2_w      rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                wrword  c_newv, c_pw
+                nop
+                jmp     #w_settle
+tc_w_nop_l      rdlong  c_tmp, c_pa
+                nop
+                wrlong  c_newv, c_pw                            ' the WRLONG under test (arm 4)
+                rdlong  c_rb1, c_pl
+                jmp     #w_settle
+tc_w_wf1_l0     rdlong  c_tmp, c_pa
+                wrfast  c_mode, c_pf
+                wrlong  c_newv, c_pw
+                rdlong  c_rb1, c_pl
+                jmp     #w_settle
+tc_w_wf1_l7     rdlong  c_tmp, c_pa
+                wrfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                wrlong  c_newv, c_pw
+                rdlong  c_rb1, c_pl
+                jmp     #w_settle
+tc_w_wf2_l0     rdlong  c_tmp, c_pa
+                wrfast  c_mode, c_pf
+                wrlong  c_newv, c_pw
+                nop
+                jmp     #w_settle
+
+'--- arm 5 block copies: primer, RDFAST (or NOP), k NOPs, SETQ + the block RDLONG
+tc_b_nop        rdlong  c_tmp, c_pa
+                nop
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr                            ' the block RDLONG under test
+                jmp     #b_settle
+tc_b_rf0        rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr
+                jmp     #b_settle
+tc_b_rf7        rdlong  c_tmp, c_pa
+                rdfast  c_mode, c_pf
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                setq    #BLKN - 1
+                rdlong  c_blk0, c_pr
+                jmp     #b_settle
+
+'--- trial-copy vectors (CP_* order)
+vec_tab         long    tc_r_nop_l, tc_r_rf0_l, tc_r_rf7_l, tc_r_ps             ' 0..3
+                long    tc_r_rf7_b, tc_r_rf7_w                                  ' 4..5
+                long    tc_f_nop, tc_f_rf0, tc_f_wf0, tc_f_wf7                  ' 6..9
+                long    tc_fb_nop, tc_fb_rf0, tc_fw_nop, tc_fw_rf0              ' 10..13
+                long    tc_w_nop_b, tc_w_rf1_b, tc_w_rf2_b                      ' 14..16
+                long    tc_w_nop_w, tc_w_rf1_w, tc_w_rf2_w                      ' 17..19
+                long    tc_w_nop_l, tc_w_wf1_l0, tc_w_wf1_l7, tc_w_wf2_l0       ' 20..23
+                long    tc_b_nop, tc_b_rf0, tc_b_rf7                            ' 24..26
+                long    tc_p_nop, tc_p_rf0                                      ' 27..28
+
+'--- cog constants
+c_strm          long    HUB_STRM
+c_res           long    HUB_RES
+c_dump          long    HUB_DUMP
+c_seedv         long    SEEDV
+
+'--- loop variables (c_cmd .. c_tmp): excluded from the integrity check
+c_cmd           long    0
+c_copy          long    0
+c_mode          long    0                                       ' FIFO D under test
+c_off           long    0
+c_pa            long    0
+c_tb            long    0
+c_oldv          long    0
+c_newv          long    0
+c_flush         long    0
+c_vec           long    0
+c_rp            long    0
+c_reps          long    0
+c_af            long    0
+c_ar            long    0
+c_pf            long    0
+c_pr            long    0
+c_pl            long    0
+c_pw            long    0
+c_dst           long    0
+c_fl            long    0
+c_rb1           long    0
+c_rb2           long    0
+c_t             long    0
+c_mb            long    0                                       ' PTRA++ runs: the mailbox pointer
+c_tmp           long    0
+
+'--- arm 5: guard band, the sacrificial range (written only by the block reads
+'--- and their presets), guard band; checked except the sacrificial range
+c_guard_lo      long    GUARD_V + 0, GUARD_V + 1, GUARD_V + 2, GUARD_V + 3, GUARD_V + 4, GUARD_V + 5, GUARD_V + 6, GUARD_V + 7
+c_blk0          long    0, 0, 0, 0, 0, 0, 0, 0
+c_guard_hi      long    GUARD_V + 8, GUARD_V + 9, GUARD_V + 10, GUARD_V + 11, GUARD_V + 12, GUARD_V + 13, GUARD_V + 14, GUARD_V + 15
+pasm_end
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}
