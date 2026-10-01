@@ -44,6 +44,7 @@ notes:
   - "Unsigned operation: all parameters and the result are 32-bit unsigned (Parallax Spin2 Documentation v55, MULDIV64)"
   - "Useful for scaling and ratio calculations"
   - "More precise than (a*b)/c for large values"
+  - "Divisor 0 does not trap: MULDIV64(a, b, 0) returns NOT (the upper 32 bits of a*b), every time -- so $FFFF_FFFF whenever a*b < 2^32 (e.g. MULDIV64(1000, 1000, 0)); MULDIV64($FFFF_FFFF, $FFFF_FFFF, 0) = 1. Guard the divisor if a zero is possible. Hardware-verified on Rev C (EF-089); the interpreter runs QMUL then QDIV."
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

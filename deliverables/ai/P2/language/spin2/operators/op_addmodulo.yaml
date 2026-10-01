@@ -151,6 +151,7 @@ related_operators_source: >-
 notes:
   - Works with any modulus value, not only powers of two
   - Result range is 0 to (modulus - 1)
+  - "Modulus 0: x +// 0 does not trap -- it returns x unchanged, every time (x +//= 0 the same). Hardware-verified on Rev C (EF-089)."
   - The worked patterns above come from production driver code (P2-OctoSerial);
     they are usage examples, not a Parallax statement about the operator
 

@@ -1,5 +1,12 @@
 operator: "+/"
 type: operator
 description: |
-  Divide/float/modulo/unsigned
+  Unsigned divide, return quotient: x +/ y (Parallax Spin2 Documentation v55, operator
+  table; assignment form var +/= y). Both operands are treated as unsigned 32-bit
+  values.
 category: Divide
+divide_by_zero: "x +/ 0 does not trap: it returns $FFFF_FFFF for every x, every time; x +/= 0 the same. Hardware-verified on Rev C (EF-089)."
+related:
+  - language/spin2/operators/op_addmodulo.yaml
+  - language/spin2/operators/op_div.yaml
+  - language/pasm2/qdiv.yaml

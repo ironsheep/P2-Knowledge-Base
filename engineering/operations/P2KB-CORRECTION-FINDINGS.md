@@ -60,8 +60,9 @@ the low long, worth 2^-32 units, not 2^-16); `#$C0000000` and `#$34000` exceed t
 without `##`. **Applied:** replaced by `QFRAC #1,#3` → $5555_5555 r 1 and `SETQ ##$8000_0000` /
 `QFRAC #1,#4` → $6000_0000 r 0 (compiled clean, pnut-ts 1.55.8; values from the documented operation);
 the description now says QFRAC yields a fraction of 2^32 and points to QDIV for quotients ≥ 1. The
-percentage example (QMUL then QFRAC of the product) was correct and stays. The bench test's QFRAC
-controls (VO-J-026) measure these same cases.
+percentage example (QMUL then QFRAC of the product) was correct and stays. Confirmed on silicon
+(EF-089 controls): QFRAC 1/3 = `$5555_5555` r 1 exactly; the SETQ example's operation was exercised
+by `SETQ $8000_0000`/QFRAC 1/7 = `$36DB_6DB6` r 6 and 2/7-with-SETQ controls.
 
 ### F-482 — `qdiv.yaml`'s first two examples use immediates that need `##`, and its 64-bit example's quotient overflows — `DONE` 2026-10-01
 **Where:** `language/pasm2/qdiv.yaml` examples 1-2: `QDIV #1000000,#3` and `SETQ #$12345678` /
@@ -69,11 +70,20 @@ controls (VO-J-026) measure these same cases.
 $123456789ABCDEF0 / 1000 does not fit a 32-bit quotient. **Applied:** `MOV x,##1_000_000` /
 `QDIV x,#3` → 333333 r 1, and `SETQ #2` / `QDIV #0,#3` → $AAAA_AAAA r 2, with the rule that the
 SETQ value must stay below the divisor (compiled clean). The remainder-check and scaling examples
-were correct and stay.
+were correct and stay. Confirmed on silicon (EF-089 controls): 1000/3 = 333 r 1 and 64-bit SETQ
+divides exact.
 
 ## What a CORDIC divide by zero returns is stated nowhere (2026-10-01, found researching F-470) — F-480
 
-### F-480 — `qdiv.yaml` says "Division by zero produces undefined results" with no source, and MULDIV64 (which divides via QDIV) inherits the gap — `NEEDS-VERIFICATION`
+### F-480 — `qdiv.yaml` says "Division by zero produces undefined results" with no source, and MULDIV64 (which divides via QDIV) inherits the gap — `DONE` 2026-10-01 (settled on the bench, EF-089)
+> **Applied 2026-10-01 («#372»), Stephen: "why don't we settle the divide issues with a bench test
+> before we wrap this?"** VO-J-026 measured it: quotient = NOT (upper long of the numerator),
+> remainder = lower long, deterministic, normal timing, no stall, next op unaffected (100 of 100
+> cases). `qdiv.yaml` and `qfrac.yaml` now carry a `divide_by_zero` statement in place of
+> "undefined"; `muldiv64.yaml` states MULDIV64(a,b,0) = NOT (upper long of a×b) — so the removed
+> "returns 0" was wrong, not merely unsourced (it returns `$FFFF_FFFF` whenever a×b < 2^32); the
+> Spin2 `/`, `//`, `+/`, `+//`, `FRAC` operator entries carry their measured results, and their
+> one-line "Divide/float/modulo/unsigned" stubs were replaced by the v55 operator-table wording.
 
 **Where:** `language/pasm2/qdiv.yaml`:122. **Searched:** Silicon Doc DIVIDE section (:3328-3346),
 PASM2 manual QDIV/QFRAC rows (:11655, :11667), Spin2 v51/v55, the interpreter source, the bench

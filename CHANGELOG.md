@@ -32,6 +32,7 @@ published; per-document release history lives in the changelogs it links.
 - **`GETXACC` carries both Goertzel errata** — its clear acts only during a Goertzel burst, and a burst's last term lands in the next — with the `burst_sums` routine that returns exact sums
 - **The DAC smart-pin modes state that `OUT` runs the ADC only while `TT` bit 0 is set**
 - **Symptom-phrase search terms** on `RDFAST`, `GETCT`, `GETXACC` and `BRK`
+- **What a divide by zero returns, measured on Rev C hardware**: `QDIV` and `QFRAC` give NOT the numerator's upper long, remainder its lower long, every time and with no stall; Spin2 `/`, `//`, `+/`, `+//`, `FRAC` and `MULDIV64` state their results
 
 ### Changed
 
@@ -42,6 +43,8 @@ published; per-document release history lives in the changelogs it links.
 - **Hub RAM slices are long-granular**: slice = address bits [4:2]
 - **`MULDIV64` is unsigned**, operands and quotient
 - **`FBLOCK` is described as what it does**: it sets the next start address and block count, and never waits
+- **`QDIV` and `QFRAC` examples assemble and fit**: `QFRAC` returns a fraction of 2^32, so its numerator's upper long stays below the divisor
+- **The Spin2 `/`, `//` and `+/` entries carry their own descriptions** — signed or unsigned, quotient or remainder
 
 ---
 

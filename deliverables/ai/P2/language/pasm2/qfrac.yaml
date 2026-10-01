@@ -102,6 +102,7 @@ timing_notes: Result available 55 clocks after instruction issue. Each cog can i
 usage_notes: QFRAC uses {D, SETQ} bit arrangement, opposite of QDIV's {SETQ, D}. Use
   SETQ before QFRAC to specify fractional part. Without SETQ, lower 32 bits default
   to 0.
+divide_by_zero: "S = 0 does not trap or stall: GETQX returns NOT D (the upper 32 bits of the numerator) and GETQY the SETQ value (or 0), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected: QFRAC #1,#0 -> $FFFF_FFFE, D = $8000_0000 -> $7FFF_FFFF, D = $FFFF_FFFF -> 0. Hardware-verified on Rev C (EF-089); no Parallax document states it."
 applications: Fixed-point arithmetic, fractional scaling, percentage calculations,
   algorithms requiring integer.fraction dividend format.
 key_difference: 'QFRAC: {D, SETQ} / S vs QDIV: {SETQ, D} / S - QFRAC puts integer

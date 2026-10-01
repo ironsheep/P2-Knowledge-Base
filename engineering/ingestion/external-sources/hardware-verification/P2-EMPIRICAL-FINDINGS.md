@@ -1501,6 +1501,37 @@ block-read copy reproduced both released outcomes exactly (af0 cells: one wrong 
 `E7WAITING`) — a space lost in the relabelling; the 28 strings were corrected after the run (Spin2
 text only; the measuring image re-checked byte-identical, DEBUG data 24 bytes).
 
+### EF-089 · A CORDIC divide by zero returns quotient = NOT (upper long of the numerator) and remainder = its lower long, every time, in normal time, and harms nothing after it; Spin2's divide operators and MULDIV64 inherit it — `CONFIRMED` (characterisation)
+*How proven:* `test-divide-by-zero` (VO-J-026, campaign test 23), no pins, no prediction. PASM2 in a
+measuring cog (cog execution): `QDIV` and `QFRAC` by `#0` and by a zero register, without and with
+`SETQ`, `GETQX` and `GETQY`, 8 repetitions per case, each between a marker divide (a stale-value
+detector) and a follow-up `1000/3`, timed `GETCT` to `GETCT`. Spin2 in a `COGSPIN` cog, every divisor
+a run-time local (no folding — listing-checked): `/`, `//`, `+/`, `+//`, `FRAC`, `MULDIV64`, `/=`,
+`//=`, `+/=`, `+//=`. *Result (log `debug_261001-155208`, 2026-10-01, first run, clean; `.bin`
+21,198 bytes = the build):* **all 32 controls exact** in 8 of 8 (incl. every immediate form,
+1000/3, 64-bit SETQ cases, QFRAC 1/3 = `$5555_5555` r 1, `SETQ $8000_0000`/QFRAC 1/7 =
+`$36DB_6DB6` r 6, Spin2 sign rules: `-1000/3` = −333, `-1000//3` = −1, `1000//-3` = 1); **all 100
+zero-divisor cases DETERMINISTIC**, the follow-up divide right after 800 of 800; PASM clocks 66 for
+every op, zero divisor or not; no stall. Re-derived from the per-case rows:
+- **PASM2, numerator {hi:lo} (QDIV: hi = `SETQ` value or 0, lo = D; QFRAC: hi = D, lo = `SETQ` value
+  or 0) → GETQX = NOT hi, GETQY = lo**, in all 50 cases. So `QDIV D,#0` (no SETQ) → `$FFFF_FFFF`
+  r D; with `SETQ #1` → `$FFFF_FFFE`; `SETQ $1234_5678` → `$EDCB_A987`; `SETQ $FFFF_FFFF` → 0.
+  `QFRAC D,#0` → NOT D r 0 (D = 1 → `$FFFF_FFFE`, `$8000_0000` → `$7FFF_FFFF`, `$FFFF_FFFF` → 0).
+  `#0` and a zero register identical.
+- **Spin2** (each = the interpreter's sign handling around that rule): `a / 0` → `$FFFF_FFFF` (−1)
+  for a ≥ 0 and 1 for a < 0; `a // 0` → a; `a +/ 0` → `$FFFF_FFFF`; `a +// 0` → a; `a FRAC 0` →
+  NOT a; `MULDIV64(a,b,0)` → NOT (upper long of a×b): `$FFFF_FFFF` whenever a×b < 2^32,
+  `$1234_5678`×16 → `$FFFF_FFFE`, `$FFFF_FFFF`² → 1, `$1234_5678`×`$9ABC_DEF0` → `$F4FF_15B1`
+  (= NOT `$0B00_EA4E`); `/=`, `//=`, `+/=`, `+//=` as their operators. The "equal to the marker"
+  hits (6 of 400) are values 1 / −1 coinciding with the marker remainder, not stale reads (each
+  case's 8 values are identical and follow the rule).
+**Grounds:** no Parallax document states a zero-divisor result (F-480 search); this measurement
+replaces `qdiv.yaml`'s uncited "undefined" and the removed MULDIV64 "returns 0" (which was wrong
+whenever a×b < 2^32: it returns `$FFFF_FFFF`). *Limits:* one board, 200 MHz, Rev C; the numerators
+tested (0, 1, 7, `$7FFF_FFFF`, `$8000_0000`, `$FFFF_FFFF`, `$1234_5678`; hi 0/1/`$1234_5678`/
+`$FFFF_FFFF`) — the rule fits all, it is not proven for every 64-bit value; hub execution not
+tested; run once. *Source:* `…/tests/test-divide-by-zero.spin2`.
+
 
 ## Open / pending empirical questions
 
