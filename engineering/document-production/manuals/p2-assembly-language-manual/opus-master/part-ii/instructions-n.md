@@ -93,10 +93,10 @@ These instructions conditionally negate the value in Src (two-operand form) or D
 
 | Instruction | Negates when |
 |-------------|--------------|
-| NEGC | C = 1 |
-| NEGNC | C = 0 |
-| NEGZ | Z = 1 |
-| NEGNZ | Z = 0 |
+| NEGC | C == 1 |
+| NEGNC | C == 0 |
+| NEGZ | Z == 1 |
+| NEGNZ | Z == 0 |
 
 If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
 
@@ -135,7 +135,7 @@ Cancel Interrupt
 
 **Explanation:**
 
-NIXINT1, NIXINT2, and NIXINT3 cancel an interrupt of their respective level that has already been triggered and is waiting to branch. Each NIXINT instruction cancels only its corresponding level. They do not unconfigure the interrupt source.
+NIXINT1, NIXINT2, and NIXINT3 cancel an interrupt of their respective level that has already been triggered and is waiting to branch. Each NIXINT instruction cancels only its corresponding level.
 
 These instructions are useful only in main code after STALLI executes, or in an interrupt service routine that needs to stop a lower-level interrupt from executing after the current routine exits.
 

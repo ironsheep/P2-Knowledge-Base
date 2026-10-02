@@ -200,8 +200,8 @@ Any instruction can be made conditional by prefixing with an IF_x condition. Whe
 
 ```pasm2
                 cmp     a, b            wcz     ' Compare, set flags
-        if_z    mov     result, #1              ' Only if Z=1 (equal)
-        if_nz   mov     result, #0              ' Only if Z=0 (not equal)
+        if_z    mov     result, #1              ' Only if Z == 1 (equal)
+        if_nz   mov     result, #0              ' Only if Z == 0 (not equal)
 ```
 
 This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly six clock cycles (three instructions × 2 clocks each) regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes—but the cancelled MOV still occupies its 2-clock slot.
@@ -503,10 +503,10 @@ MODCZ accepts two operands specifying operations for C and Z respectively. The W
 The MUX family of instructions uses flag values to conditionally modify individual bits:
 
 ```pasm2
-        muxc    value, #mask    ' C=1: set bits; C=0: clear bits
-        muxnc   value, #mask    ' C=0: set bits; C=1: clear bits
-        muxz    value, #mask    ' Z=1: set bits; Z=0: clear bits
-        muxnz   value, #mask    ' Z=0: set bits; Z=1: clear bits
+        muxc    value, #mask    ' C == 1: set bits; C == 0: clear bits
+        muxnc   value, #mask    ' C == 0: set bits; C == 1: clear bits
+        muxz    value, #mask    ' Z == 1: set bits; Z == 0: clear bits
+        muxnz   value, #mask    ' Z == 0: set bits; Z == 1: clear bits
 ```
 
 These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C == 1, or clears them if C == 0. This enables building up bit patterns based on multiple flag tests:

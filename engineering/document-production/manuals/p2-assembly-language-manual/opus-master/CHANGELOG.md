@@ -27,14 +27,17 @@
   - `COGATN`'s 16-bit mask, `GETRND`'s shared generator, `LOCKREL`, `NIXINT`, `MUXQ`
   - `MIXPIX`'s formula, `QMUL` unsigned, `EXECF` as a jump, `IRETn` holding C and Z
 - **Directives**: the `ORGH` range for PASM-only programs, `DITTO`'s no-labels rule, the `FIT` limit labels and the inline-PASM toggle example are corrected
-- **Appendix H recounts to 845 reserved words** and adds `FIELD`, `SIZEOF`, `GRAY` and the cooperative-tasking symbols; `PI`, `HUBEXEC` and `DITTO` are described correctly, and `DEBUG_*` are shown as symbols you declare
-- **The Appendix E DEBUG examples are complete Spin2 programs**, and the Chapter 2 and 3 examples assemble
+- **Appendix H recounts to 864 reserved words** and adds `FIELD`, `SIZEOF`, `GRAY` and the cooperative-tasking symbols; `PI`, `HUBEXEC` and `DITTO` are described correctly, and the `DEBUG_*` configuration names note that a program uses them by declaring them in a `CON` block
+- **The Appendix E `DEBUG_COGS`, `DEBUG_TIMESTAMP`, `DEBUG_MAIN` and `DEBUG_COGINIT` examples are complete Spin2 programs**, and the Chapter 2 and 3 examples assemble
+- **Appendix A gives the original base bit as the C and Z result of the `DIRx`, `DRVx`, `FLTx` and `OUTx` families**, in every row of those families
+- **`RDLONG`, `RDWORD`, `WRLONG`, `WRWORD`, `WMLONG`, `PUSHA`, `PUSHB`, `POPA`, `POPB`, `CALLA`, `CALLB`, `RETA` and `RETB` state the extra clock when the access crosses a hub long**, in Appendix A and in each entry
+- **`COGSTOP` selects its cog by `D[3:0]`**; `COGID` with `WC` and `COGBRK` read the cog number from `Dest[2:0]`
 - **Condition tests are written with `==`** throughout, distinct from `=` for a value received
 
 ### Removed
 
 - **`IF_RET`** as a spelling of `_RET_` in Appendix B — it assembles as a label
-- **The `SETRAND` and `WAITQMT` instructions**, which the silicon does not have
+- **References to the `SETRAND` and `WAITQMT` instructions**, which the silicon does not have
 
 ## v3.1.10 (2026-09-22)
 

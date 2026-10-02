@@ -80,8 +80,7 @@ QEXP converts a logarithm in the format QLOG produces back to an integer.
 
 ```pasm2
         QEXP    log_value      ' Begin exponential conversion
-        ' Wait 55 clocks...
-        GETQX   integer_result ' Get 32-bit integer
+        GETQX   integer_result ' Get 32-bit integer (waits for it)
 ```
 
 
@@ -167,8 +166,7 @@ The instruction takes the unsigned integer value in the Dest operand. After 55 c
 
 ```pasm2
         QLOG    ##1000         ' Begin log conversion
-        ' Wait 55 clocks...
-        GETQX   log_result     ' Get 5:27 logarithm
+        GETQX   log_result     ' Get 5:27 logarithm (waits for it)
 ```
 
 
@@ -205,8 +203,7 @@ After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32
 
 ```pasm2
         QMUL    ##1000000, ##2000000
-        ' Wait 55 clocks...
-        GETQX   lower_32       ' Get lower 32 bits
+        GETQX   lower_32       ' Get lower 32 bits (waits for it)
         GETQY   upper_32       ' Get upper 32 bits
 ```
 
@@ -250,8 +247,7 @@ This instruction can also be used for polar to cartesian conversion by setting X
 ```pasm2
         SETQ    #200           ' Set Y coordinate
         QROTATE #100, ##$20000000 ' X=100, angle=45 degrees
-        ' Wait 55 clocks...
-        GETQX   new_x          ' Get rotated X
+        GETQX   new_x          ' Get rotated X (waits for it)
         GETQY   new_y          ' Get rotated Y
 ```
 
@@ -291,8 +287,7 @@ The result is the largest integer whose square does not exceed the input value.
 
 ```pasm2
         QSQRT   ##1000000, #0  ' sqrt(1000000) = 1000
-        ' Wait 55 clocks...
-        GETQX   sqrt_result    ' Get 1000
+        GETQX   sqrt_result    ' Get 1000 (waits for it)
 ```
 
 For 32-bit square roots, use Src=0.
@@ -335,8 +330,7 @@ QROTATE with Y = 0 converts polar to cartesian coordinates.
 
 ```pasm2
         QVECTOR #100, #200     ' Begin conversion
-        ' Wait 55 clocks...
-        GETQX   length         ' Get polar length
+        GETQX   length         ' Get polar length (waits for it)
         GETQY   angle          ' Get polar angle
 ```
 

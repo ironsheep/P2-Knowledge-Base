@@ -95,7 +95,7 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
 Output By Flag State
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
 :::
 
 \hypertarget{outnc}{}\hypertarget{outz}{}\hypertarget{outnz}{}
@@ -130,10 +130,10 @@ These instructions set pin output level(s) based on flag state:
 
 | Instruction | Drives high when |
 |-------------|------------------|
-| OUTC | C = 1 |
-| OUTNC | C = 0 |
-| OUTZ | Z = 1 |
-| OUTNZ | Z = 0 |
+| OUTC | C == 1 |
+| OUTNC | C == 0 |
+| OUTZ | Z == 1 |
+| OUTNZ | Z == 0 |
 
 OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
 
@@ -147,7 +147,7 @@ If WCZ is specified, both the C flag and the Z flag are set to the original outp
 ## OUTH {#outh}
 Output High
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level to high (1).
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to high (1).
 :::
 
 **OUTH**  *{#}Dest*  **{WCZ}**
@@ -188,7 +188,7 @@ OUTH is commonly used to turn on LEDs, assert control signals, or drive pins hig
 ## OUTL {#outl}
 Output Low
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level to low (0).
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to low (0).
 :::
 
 **OUTL**  *{#}Dest*  **{WCZ}**
@@ -229,7 +229,7 @@ OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins
 ## OUTNOT {#outnot}
 Output Not (Toggle)
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Toggles pin output level to opposite state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Toggles pin output level to opposite state.
 :::
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
@@ -270,7 +270,7 @@ OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling
 ## OUTRND {#outrnd}
 Output Random
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level to random state from PRNG.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to random state from PRNG.
 :::
 
 **OUTRND**  *{#}Dest*  **{WCZ}**

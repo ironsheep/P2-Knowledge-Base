@@ -16,7 +16,7 @@ Execute Continue
 **Result:** Buffers a new streamer command to execute when the current command completes its final NCO rollover, continuing from current phase.
 
 - Dest is the streamer mode configuration.
-- Src is the immediate data or LUT index for the streamer operation, or is ignored, depending on the mode. It is never a hub address.
+- Src is mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored; it is never a hub address.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -30,9 +30,9 @@ Execute Continue
 
 XCONT buffers a new streamer command that executes when the current command completes its final NCO rollover. Unlike XINIT and XZERO, XCONT preserves the phase accumulator, allowing continuation of streamer operations without a phase discontinuity. XINIT resets the phase; XCONT continues it.
 
-Use this instruction to chain multiple streamer operations together while maintaining phase coherence. The buffered command waits for the current command's NCO (numerically controlled oscillator) to complete its final rollover before activation. If the streamer count has already run down to 0, XCONT does not wait.
+Use this instruction to chain multiple streamer operations together while maintaining phase coherence. The buffered command waits for the current command's NCO (numerically controlled oscillator) to complete its final rollover before activation. If the streamer count has already run down to 0, XCONT does not wait. If the prior command used `$FFFF` as its count (running perpetually without decrementing), XCONT waits only for the next NCO rollover, at which point the new command begins.
 
-The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides immediate data or a LUT index, or is ignored, depending on the mode configuration; hub data reaches the streamer through the FIFO set up by RDFAST or WRFAST, never through Src.
+The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored, depending on the mode configuration; hub data reaches the streamer through the FIFO set up by RDFAST or WRFAST, never through Src.
 
 
 
@@ -48,7 +48,7 @@ Execute Initialize
 **Result:** Issues a streamer command immediately with the phase accumulator reset to zero.
 
 - Dest is the streamer mode configuration.
-- Src is the immediate data or LUT index for the streamer operation, or is ignored, depending on the mode. It is never a hub address.
+- Src is mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored; it is never a hub address.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -70,7 +70,7 @@ The streamer operates as a hardware DMA engine, transferring data without cog in
 
 Dest[15:0] is the transfer count, in NCO rollovers. A count of zero stops the streamer immediately; a count of `$FFFF` runs the command perpetually without decrementing, so the largest terminating count is `$FFFE`.
 
-The Src parameter provides the immediate data (or LUT index) for immediate and LUT modes, and is ignored by some modes. It is never a hub address: hub data moves through the FIFO set up by RDFAST or WRFAST.
+The Src parameter provides mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), and is ignored by some modes. It is never a hub address: hub data moves through the FIFO set up by RDFAST or WRFAST.
 
 XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:
 
@@ -175,7 +175,7 @@ The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bi
         ' Process random_val...
 ```
 
-The random value appears in the S field of the instruction immediately following XORO32. This means the next instruction must be one that reads from S, and the value specified for S in that instruction's encoding is ignored—it gets replaced by the random value. XORO32 also sets Q to the PRNG result, and Q keeps that value until another instruction that writes Q executes (SETQ, SETQ2, RDLUT, GETXACC).
+The random value appears in the S field of the instruction immediately following XORO32. This means the next instruction must be one that reads from S, and the value specified for S in that instruction's encoding is ignored—it gets replaced by the random value. XORO32 also sets Q to the PRNG result, and Q keeps that value until an instruction that overwrites Q executes (SETQ, SETQ2, RDLUT, GETXACC, CRCNIB, or a COGINIT/QDIV/QFRAC/QROTATE without a preceding SETQ).
 
 The seed value in Dest must be non-zero. A seed of zero will produce only zero values. For best results, initialize the seed with a value from GETRND or another entropy source.
 
@@ -230,7 +230,7 @@ Execute Zero
 **Result:** Buffers a new streamer command to execute when the current command completes, resetting phase to zero.
 
 - Dest is the streamer mode configuration.
-- Src is the immediate data or LUT index for the streamer operation, or is ignored, depending on the mode. It is never a hub address.
+- Src is mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored; it is never a hub address.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -244,10 +244,10 @@ Execute Zero
 
 XZERO buffers a new streamer command that executes when the current command completes its final NCO rollover, with the phase accumulator reset to zero. This combines the buffering behavior of XCONT with the phase-zeroing behavior of XINIT.
 
-The buffered command waits for the current streamer operation's NCO (numerically controlled oscillator) to complete its final rollover before activation. When activation occurs, the phase accumulator resets to zero, providing a clean starting point for the new operation.
+The buffered command waits for the current streamer operation's NCO (numerically controlled oscillator) to complete its final rollover before activation. When activation occurs, the phase accumulator resets to zero, providing a clean starting point for the new operation. If the prior command used `$FFFF` as its count (running perpetually without decrementing), XZERO waits only for the next NCO rollover, at which point the new command begins.
 
 Use this instruction to chain multiple streamer operations where each operation should start from a known phase state. This applies when switching between different streamer modes or when phase coherence between operations is not required.
 
-The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides immediate data or a LUT index, or is ignored, depending on the mode configuration; hub data reaches the streamer through the FIFO set up by RDFAST or WRFAST, never through Src.
+The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored, depending on the mode configuration; hub data reaches the streamer through the FIFO set up by RDFAST or WRFAST, never through Src.
 
 

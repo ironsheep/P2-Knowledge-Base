@@ -87,26 +87,26 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | DEBUG | `---` | — | — | — | — |
 | DECMOD | `0111001` | CZI | 2 | Modulus triggered | Result == 0 |
 | DECOD | `1001110` | — | 2 | — | — |
-| DIRC | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRH | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRL | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRNC | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRNOT | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRNZ | `1101011` | CZ | 2 | DIR bit | DIR bit |
+| DIRC | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRH | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRL | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRNC | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRNOT | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRNZ | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
 | DIRRND | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
-| DIRZ | `1101011` | CZ | 2 | DIR bit | DIR bit |
+| DIRZ | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
 | DJF | `1011011` | — | 2 or 4 | — | — |
 | DJNF | `1011011` | — | 2 or 4 | — | — |
 | DJNZ | `1011011` | — | 2 or 4 | — | — |
 | DJZ | `1011011` | — | 2 or 4 | — | — |
-| DRVC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVH | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVL | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVNC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVNOT | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVNZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| DRVC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVH | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVL | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVNC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVNOT | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVNZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | DRVRND | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
-| DRVZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| DRVZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | ENCOD | `0111100` | CZI | 2 | S != 0 | Result == 0 |
 | EXECF | `1101011` | — | 4 | — | — |
 | FBLOCK | `1100100` | — | 2 | — | — |
@@ -114,14 +114,14 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | FGES | `0011010` | CZI | 2 | limit enforced | Result == 0 |
 | FLE | `0011001` | CZI | 2 | limit enforced | Result == 0 |
 | FLES | `0011011` | CZI | 2 | limit enforced | Result == 0 |
-| FLTC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTH | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTL | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTNC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTNOT | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTNZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| FLTC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTH | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTL | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTNC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTNOT | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTNZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | FLTRND | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
-| FLTZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| FLTZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | GETBRK | `1101011` | CZ | 2 | — | — |
 | GETBYTE | `1000111` | — | 2 | — | — |
 | GETCT | `1101011` | C | 2 | --- | — |
@@ -206,14 +206,14 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | NOT | `0110001` | CZI | 2 | !S[31] | Result == 0 |
 | ONES | `0111101` | CZI | 2 | Result is odd | Result == 0 |
 | OR | `0101010` | CZI | 2 | Parity of Result | Result == 0 |
-| OUTC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTH | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTL | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTNC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTNOT | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTNZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| OUTC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTH | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTL | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTNC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTNOT | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTNZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | OUTRND | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
-| OUTZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| OUTZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | POLLATN | `1101011` | — | 2 | ATN Event | ATN Event |
 | POLLCT1 | `1101011` | — | 2 | CT1 Event | CT1 Event |
 | POLLCT2 | `1101011` | — | 2 | CT2 Event | CT2 Event |
@@ -398,7 +398,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
   - Hub synchronization (variable wait for hub access)
   - Operation parameters (CORDIC solver iterations, streamer operations)
   - Memory location (cog vs. LUT vs. hub execution)
-- The `*` symbol indicates hub memory access with variable timing
+- The `*` symbol indicates hub memory access with variable timing; add 1 clock to each `*` instruction (CALLA, CALLB, POPA, POPB, PUSHA, PUSHB, RDLONG, RDWORD, RETA, RETB, WMLONG, WRLONG, WRWORD) when the access crosses a hub long
 - See Part II (Instruction Reference) for complete encoding details and all variants
 - ASMCLK is a pseudo-instruction (macro) and DEBUG is a debug directive; neither has a single fixed hardware encoding (ASMCLK expands to HUBSET/WAITX, DEBUG emits a debug call under -d)
 

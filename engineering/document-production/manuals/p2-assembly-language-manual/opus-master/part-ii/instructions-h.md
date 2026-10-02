@@ -59,14 +59,14 @@ The rest of this entry describes the clock generator mode, which controls clock 
   - Note: the XI oscillator is enabled by the crystal-config field CC != %00, not by a dedicated bit.
 
 **Hard Reset and PRNG Seed (other D[31:28] values):**
-- D[31:28] = %0001 - hard reset, which reboots the chip: `HUBSET ##$1000_0000`
+- D[31:28] == %0001 - hard reset, which reboots the chip: `HUBSET ##$1000_0000`
 - D[31] == 1 - seed the Xoroshiro128** PRNG: `{1'b1, D[30:0]}` is written into 32 bits of its 128-bit state
 
 **Switching Clock Sources:**
 
 The clock selector controlled by the SS bits has a deglitching circuit: it waits for a positive edge on the old clock source before disengaging, then for a positive edge on the new clock source before switching over to it. Select RCFAST (%00) or RCSLOW (%01) while waiting for the crystal and/or PLL to settle, then switch over. Allow 5 ms for a crystal to stabilize before switching to XI, and 10 ms for crystal and PLL to stabilize before switching to the PLL. The PLL's VCO should be kept within 100 MHz to 200 MHz.
 
-**Warning:** Incorrectly switching away from the PLL setting (SS = %11 and CC != %00) with PPPP = %1111 can cause a clock glitch that hangs the chip until a reset occurs. To switch away safely, first switch to an internal RC oscillator (SS = %00 or %01) while keeping PPPP = %1111 and the same CC.
+**Warning:** Incorrectly switching away from the PLL setting (SS == %11 and CC != %00) with PPPP = %1111 can cause a clock glitch that hangs the chip until a reset occurs. To switch away safely, first switch to an internal RC oscillator (SS = %00 or %01) while keeping PPPP = %1111 and the same CC.
 
 Example: Enable a 20 MHz crystal with 15pF capacitors:
 

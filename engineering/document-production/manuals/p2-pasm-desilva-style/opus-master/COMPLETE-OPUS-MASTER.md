@@ -1292,7 +1292,7 @@ this_is_a_really_long_label_name
 
 ## Data in DAT Blocks: Your Program's Pantry
 
-Speaking of data definitions starting new scopes... we should probably talk about how to actually declare data! You've seen snippets like `counter long 0` scattered through our examples, but there's a whole world of data declaration waiting for you.
+Speaking of labelled data definitions... we should probably talk about how to actually declare data! You've seen snippets like `counter long 0` scattered through our examples, but there's a whole world of data declaration waiting for you.
 
 ### The Three Sizes
 
@@ -1733,8 +1733,8 @@ Compare multiply methods:
         mul     x, y
         getct   end_time
         sub     end_time, start_time
-        ' The raw difference is 4: the MUL's 2 clocks plus the 2 clocks
-        ' the first GETCT itself takes (two GETCTs back to back differ by 2)
+        ' The raw difference is 4: the MUL's 2 clocks plus 2 clocks of
+        ' measurement overhead (two GETCTs back to back differ by 2)
         sub     end_time, #2
         ' Result: 2 clocks!
         
@@ -1897,7 +1897,7 @@ Before you pull your hair out debugging hub access:
 
 1. **Forgetting the `##`** — hub addresses are 20-bit. On **RDxxx**/**WRxxx** a bare `#address` only encodes 8 bits (0–255)—the 9th S-field bit selects PTR-expression mode, not address 256+—so you'll hit the wrong memory. Always use `##` for any hub address above 255.
 
-2. **Unaligned long access** — **RDLONG** and **WRLONG** can read or write a long starting at *any* byte address (no low-bit masking, unlike P1). Keeping your longs on 4-byte boundaries is still good practice. Only the FIFO/wrapping mode actually requires long alignment.
+2. **Unaligned long access** — **RDLONG** and **WRLONG** can read or write a long starting at *any* byte address (no low-bit masking, unlike P1). A long that crosses a hub long boundary costs one extra clock (the instruction table in Parallax's *Propeller 2 Assembly Language (PASM2) Manual*: "+1 if crosses hub long"), so keeping your longs on 4-byte boundaries is still good practice. Only the FIFO/wrapping mode actually requires long alignment.
 
 3. **SETQ block size** — **SETQ** `#N-1` transfers `N` longs (not `N-1`). The `-1` is because the encoded field is "count minus one." Off-by-one bugs love this one.
 
@@ -2016,7 +2016,7 @@ fixed_mul
 - **MULS** D, S — signed 16×16→32
 - **QMUL** D, S — full 32×32→64 (read via **GETQX**/**GETQY** after 55 clocks)
 - **QDIV** D, S — unsigned divide: a 32-bit D (or, after **SETQ**, a 64-bit value) by a 32-bit S (read via **GETQX** quotient / **GETQY** remainder after 55 clocks)
-- **QFRAC** D, S — fractional divide (returns 32-bit fraction in **GETQX**)
+- **QFRAC** D, S — fractional divide (returns 32-bit fraction in **GETQX**; D must be less than S, and the result is a fraction of 2^32 — for a quotient of 1 or more, use **QDIV**)
 - 64-bit add: **ADD** + **ADDX** chained with **WC**
 
 For everyday integer work, **MUL**/**MULS** are 2 clocks and you're done. For precision (full 64-bit results, fixed-point math, 64-bit-by-32-bit unsigned division), **QMUL**/**QDIV** route through the CORDIC and pay 55 clocks — but they don't block the cog, so you can interleave other work.
@@ -2028,7 +2028,7 @@ Stretch your math muscles:
 
 1. **Compute the average:** Read 8 longs from hub, sum them with **ADD**, then divide by 8 using a **SHR** (or **QDIV** if you want exact). Compare both approaches.
 
-2. **Fractional reciprocal:** Use **QFRAC** to compute `2^32 / x` for various x values. You've just built a hardware reciprocal table.
+2. **Fractional reciprocal:** Use **QFRAC** to compute `2^32 / x` for various x values (x >= 2, so that D = 1 stays less than S). You've just built a hardware reciprocal table.
 
 3. **Pipeline overlap:** Start a **QMUL**, do 30+ clocks of other work (compute something else, update a counter), then **GETQX**/**GETQY**. Measure total cycles vs. doing the multiply blocking-style.
 
@@ -2489,7 +2489,7 @@ spiral
         mov     radius, #1
 
 draw_spiral
-        qrotate radius, angle         ' D=X (radius), S=angle
+        qrotate radius, angle         ' D=X (radius), S=angle, Y=0
         getqx   x                     ' Results come back in the same
         getqy   y                     '   units as the radius: pixels
         
@@ -2521,11 +2521,11 @@ tone_generator
         mov     frequency, ##$0100_0000  ' ~1.4 deg/sample (1/256 rot)
         
 sample_loop
+        ' Hub reads go before the CORDIC hand-off, never in the middle
+        rdlong  volume, ##volume_addr
+        
         qrotate ##$7FFF_FFFF, phase     ' D=radius, S=angle
         add     phase, frequency        ' Increment phase
-        
-        ' Do other audio processing while waiting
-        rdlong  volume, ##volume_addr
         
         getqy   sample                  ' Get sine value
         sar     sample, #16             ' Scale to 16-bit
@@ -2544,11 +2544,11 @@ sample_loop
 
 Before you pull your hair out debugging, know these:
 
-1. **Mind the pipeline depth** - The P2 has one shared CORDIC solver in the hub (not one per cog). You may have several operations in flight at once (about six or seven per cog)—results queue and are read in issue order via **GETQX**/**GETQY**. They're lost if you outrun the 54-stage pipeline before reading, or if an enabled interrupt steals enough clocks during the overlap. And keep hub access (**RDLONG**/**WRLONG**) out of both the fill and the drain: read your inputs into cog registers first, write the results back after the last **GETQY**. A pipelined sequence with hub accesses inside it returns wrong numbers silently—no flag, no stall, nothing to warn you.
+1. **Mind the pipeline depth** - The P2 has one shared CORDIC solver in the hub (not one per cog). You may have several operations in flight at once (about six or seven per cog)—results queue and are read in issue order via **GETQX**/**GETQY**. They're lost if you outrun the 54-stage pipeline before reading, or if an enabled interrupt steals enough clocks during the overlap. And keep hub access (**RDLONG**/**WRLONG**) out of both the fill and the drain: read your inputs into cog registers first, write the results back after the last **GETQY**. On P2 silicon, a **RDLONG** inside the fill loop or a **WRLONG** inside the drain loop returned wrong results silently—no flag, no stall, nothing to warn you. Other hub operations weren't tested, so don't read more into it than that: keep hub access out of both loops.
 
 2. **55 clocks after hand-off** - Results are ready exactly 55 clocks after the solver *receives* your command—but your cog first waits 0 to 7 clocks (on an 8-cog P2) for its hub slot, so time it from hand-off, not from the instruction issue.
 
-3. **Don't forget SETQ** - For two-operand operations (**QROTATE** with X,Y), you must load Y into Q first.
+3. **Don't forget SETQ** - For two-operand operations (**QROTATE** with X,Y), you must load Y into Q first. Without a **SETQ**, Y is 0 — which is exactly what the spiral above wants, since turning a length and an angle into X,Y is a polar-to-cartesian conversion with Y = 0.
 
 4. **Results are scaled** - When rotating a vector of length $7FFF_FFFF, the X/Y results come back scaled so that $7FFF_FFFF represents 1.0 (full-scale signed).
 
@@ -2970,7 +2970,7 @@ Well, while you CAN bit-bang serial at 115200 baud, or generate PWM, or measure 
 
 ## Coming Up Next
 
-Chapter 9 takes us into "Streaming Data" - the P2's incredible FIFO system that can move megabytes of data without breaking a sweat. We'll see how to stream video, audio, and massive data blocks at maximum speed.
+Chapter 9 takes us into "Streaming Data" - the P2's incredible FIFO system that can move the whole 512 KB of hub RAM without breaking a sweat. We'll see how to stream video, audio, and massive data blocks at maximum speed.
 
 
 **Have Fun!** Remember, every embedded system ultimately comes down to pins going high and low. You've just mastered the fundamentals that everything else builds upon!
@@ -3855,14 +3855,14 @@ Let me share why we avoid interrupts:
 | Approach | Problem | Result |
 |----------|---------|--------|
 | **With Interrupts** | Display updates interrupted by serial | Visible glitches, tearing, inconsistent timing |
-| **With Cogs** | Display Cog runs uninterrupted | Perfect, smooth, glitch-free display |
+| **With Cogs** | Display cog runs uninterrupted | Perfect, smooth, glitch-free display |
 
 ### Story 2: The Missed Pulse
 
 | Approach | Problem | Result |
 |----------|---------|--------|
 | **With Interrupts** | Motor step interrupted by sensor read | Missed step, motor stalls, position lost |
-| **With Cogs** | Motor Cog never misses a beat | Perfect positioning, no lost steps |
+| **With Cogs** | Motor cog never misses a beat | Perfect positioning, no lost steps |
 
 ### Story 3: The Debugging Nightmare
 
@@ -3954,7 +3954,7 @@ A: Dedicate a cog to critical events. It will respond faster than any interrupt.
 A: You have eight! And a focused cog is simpler than interrupt-riddled code.
 
 **Q: "What about power consumption?"**
-A: **WAITINT** is the instruction the P2 Documentation describes as stalling a cog to save power. WAITSE and WAITCT also put the cog to sleep until their event, so it isn't spinning, but the power-saving claim belongs to WAITINT.
+A: **WAITINT** is the instruction the P2 Documentation describes as stalling a cog to save power.
 
 ## What We've Learned
 
@@ -4081,9 +4081,9 @@ if_b    jmp     #less
 Hub timing is critical for performance:
 
 ```pasm2
-' Hub RAM allows any byte address (no masking, unlike P1), but
-' aligning your longs on 4-byte boundaries is still good practice
-        rdlong  v1, ##$1001     ' Unaligned: allowed
+' Hub RAM allows any byte address (no masking, unlike P1); a long
+' that crosses a hub long boundary costs +1 clock, so align on 4 bytes
+        rdlong  v1, ##$1001     ' Unaligned: allowed, +1 clock
         rdlong  v1, ##$1000     ' Aligned: the habit to keep
         
 ' Sequential ptra++ is convenient, but each read is still 9-16 clocks;
@@ -4299,8 +4299,9 @@ Always measure your optimizations:
         
         getct   end_time
         sub     end_time, start_time
-        ' end_time now holds the clocks between the two GETCTs
-        ' (that includes the 2 clocks of the second GETCT itself)
+        ' end_time now holds the clocks between the two GETCTs; the
+        ' difference includes 2 clocks of measurement overhead
+        ' (two GETCTs back to back differ by 2)
 ```
 
 **Pitfall — CT wraps:** **GETCT** reads a 32-bit free-running counter that wraps every ~21.5 seconds at 200 MHz (2³² ÷ 200 MHz). For short measurements like the one above, the **SUB** trick masks the wrap correctly thanks to two's-complement arithmetic. But for a *scheduler* or *timer* running over minutes, hours, or days, you need one of two strategies:
@@ -4659,7 +4660,7 @@ Remember that tedious bit-bang serial from Chapter 8? Watch this:
 
 That's it. The pin is now a fully autonomous UART transmitter. It handles start bits, stop bits, timing - everything. You just feed it bytes with **WYPIN** and it sends them. The pin has become a state machine.
 
-And here's the mind-bending part: *every single one of the 64 pins can do this*. Or PWM. Or ADC. Or quadrature decoding. Or 28 other modes.
+And here's the mind-bending part: *every single one of the 64 pins can do this*. Or PWM. Or ADC. Or quadrature decoding. Or any of the other smart pin modes.
 
 ## What Are Smart Pins, Really?
 
@@ -4679,7 +4680,7 @@ Every smart pin follows the same configuration pattern. This is **the most impor
 ```pasm2
 ' === THE SMART PIN RECIPE ===
 
-' Step 1: RESET the pin (CRITICAL!)
+' Step 1: RESET the pin (configure only while DIR is low)
         dirl    pin             ' Always start by resetting
 
 ' Step 2: CONFIGURE the mode
@@ -4698,7 +4699,7 @@ Every smart pin follows the same configuration pattern. This is **the most impor
 Why is `wypin` shown last, *after* `dirh`? For the serial and trigger modes,
 **WYPIN** is how you *feed data* to a running pin -- each byte you transmit is a
 fresh `wypin` issued after the pin is enabled, so that's where it naturally
-lives. (The silicon documentation's configuration procedure actually writes
+lives. (The P2 Documentation's configuration procedure actually writes
 **WRPIN**/**WXPIN**/**WYPIN** while DIR is low and *then* raises DIR; for pure value modes
 that order is fine too. Once the pin is live, feeding it with **WYPIN** is just the
 normal operating pattern.)
@@ -4706,7 +4707,7 @@ normal operating pattern.)
 ::: sidetrack
 **Why DIRL First?**
 
-The **DIRL** at the start isn't optional politeness - it's *required*. Smart pins must be reset before configuration to ensure they're in a known state. Skip this and you'll get unpredictable behavior as old settings conflict with new ones.
+The **DIRL** at the start isn't optional politeness. The P2 Documentation says a smart pin should be configured while its DIR bit is low, which holds it in reset. A **WRPIN** with DIR high changes how the pin's state bits are used on the fly, and the result is unpredictable behavior.
 
 Think of it like power-cycling a misbehaving device. Always start fresh.
 :::
@@ -4788,6 +4789,7 @@ Here are the modes you'll use most often:
 
 ' Send the first byte at once -- the buffer is empty right after enable
         wypin   txbyte, #TX_PIN
+        nop                     ' IN takes 2 clocks to drop after WYPIN
 
 ' Before each *subsequent* byte, wait until the pin is ready for more
 .send   testp   #TX_PIN wc      ' IN rises once a word moves to the shifter
@@ -4869,7 +4871,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 **❌ WRONG: Forgetting to reset before configure**
 
 ```antipattern
-' WRONG - Pin may be in unknown state!
+' WRONG - WRPIN with DIR high: unpredictable behavior!
         wrpin   ##P_PWM_SAWTOOTH | P_OE, #PIN
         wxpin   ##1000, #PIN
         dirh    #PIN
@@ -4933,7 +4935,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 - **RDPIN** = Read data FROM smart pin (clears IN)
 - **TESTP** = Check if IN flag set
 
-**Golden Rule:** **DIRL** before **WRPIN** · **WXPIN** before **DIRH** · **WYPIN** (data) after **DIRH** · `P_OE` on *every* output mode
+**Golden Rule:** **DIRL** before **WRPIN** · **WXPIN** before **DIRH** · **WYPIN** (data) after **DIRH** · `P_OE` on every smart-pin output mode (not a plain cog DAC pin, below)
 
 **The silent failure:** every smart-pin output mode (NCO, PWM, pulse, transition, serial TX, USB, and the smart-pin DAC modes) needs `P_OE`. Without it the smart pin runs perfectly and drives nothing, and it still assembles clean. If a mode is supposed to make a pin *do* something and the pin is dead, suspect `P_OE` first. Receive and measuring modes (RX, ADC, quadrature, the counters) don't take it.
 
@@ -5903,7 +5905,7 @@ This teaching manual focuses on concepts, patterns, and building your understand
 : Complete PASM2 instruction details including syntax, timing, and flag effects for all 300+ instructions. Quick lookup reference for day-to-day development.
 
 **Parallax Propeller 2 Documentation** *(v35, Rev B/C silicon, 2021-05-18)*
-: Official silicon documentation from Parallax covering hardware specifications, electrical characteristics, and detailed register maps.
+: Parallax's official P2 Documentation, covering hardware specifications, electrical characteristics, and detailed register maps.
 
 **The P2 Architect's Guide**
 : Where this manual taught you to write PASM2, that one teaches you how to decide what goes in which cog — how to derive a design from the physical facts of your project rather than guess at one. The natural next book if you have finished here and are staring at a blank page wondering how to carve up your own system.
@@ -5964,7 +5966,7 @@ No interrupt priority juggling. No RTOS configuration. Each task owns its proces
 
 Traditional MCUs bind peripherals to fixed pins — UART1 on PA9/PA10, SPI1 on PB3/PB4/PB5 — and if you need those pins for something else, you're stuck rerouting your PCB.
 
-On P2, every pin contains a programmable state machine. Any pin can become a UART, SPI, PWM, ADC, quadrature decoder, or 27 other modes. The peripheral comes to your pin, not the other way around.
+On P2, every pin contains a programmable state machine. Any pin can become a UART, SPI, PWM, ADC, quadrature decoder, or any of the other smart pin modes. The peripheral comes to your pin, not the other way around.
 
 ### Deterministic Timing
 

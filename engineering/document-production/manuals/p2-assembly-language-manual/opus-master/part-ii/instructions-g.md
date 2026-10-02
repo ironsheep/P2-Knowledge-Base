@@ -308,7 +308,7 @@ The random value is produced by the P2's Xoroshiro128** pseudo-random number gen
 ## GETSCP {#getscp}
 Get Oscilloscope Samples
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Retrieves four 8-bit oscilloscope samples.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Retrieves four 8-bit oscilloscope samples.
 :::
 
 **GETSCP**  *Dest*
@@ -380,7 +380,7 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 ## GETXACC {#getxacc}
 Get Goertzel Accumulators
 
-[streamer](#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
+[Streamer](#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
 :::
 
 **GETXACC**  *Dest*

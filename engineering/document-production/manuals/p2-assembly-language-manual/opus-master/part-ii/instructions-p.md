@@ -449,7 +449,7 @@ If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of t
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution.
+Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -485,7 +485,7 @@ If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of t
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution.
+Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
@@ -551,7 +551,7 @@ This instruction does not affect any flags. The post-increment model means PTRA 
 
 PUSHA paired with POPA implements an ascending stack in hub RAM (the pointer advances to higher addresses on each push).
 
-Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution.
+Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -584,7 +584,7 @@ PUSHB writes the long value in Dest (or a 9-bit immediate value) to hub address 
 
 This instruction does not affect any flags. The post-increment model means PTRB always points to the next available stack location after the push operation.
 
-Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution.
+Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 

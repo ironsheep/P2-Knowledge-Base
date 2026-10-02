@@ -54,7 +54,7 @@ IJZ and IJNZ increment Dest and conditionally jump based on whether the result i
 
 IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping; when jumping, 4 clocks in cog/LUT execution or 13–20 clocks during hub execution (pipeline flush).
 
 
 

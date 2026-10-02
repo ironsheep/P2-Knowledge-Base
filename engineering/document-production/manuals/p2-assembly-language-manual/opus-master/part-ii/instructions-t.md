@@ -284,7 +284,7 @@ TJF and TJNF test Dest for "full" state ($FFFF_FFFF = -1 = all bits set) and con
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJF/TJNF.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush) (2 or 13–20 in hub execution).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush; 2 or 13–20 in hub execution).
 
 
 
@@ -327,7 +327,7 @@ TJS and TJNS test the sign bit (bit 31) of Dest and conditionally jump:
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS/TJNS.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush) (2 or 13–20 in hub execution).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush; 2 or 13–20 in hub execution).
 
 
 
@@ -374,7 +374,7 @@ Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
         TJZ     count, #done   ' Exit when count == 0
 ```
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush) (2 or 13–20 in hub execution).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush; 2 or 13–20 in hub execution).
 
 
 

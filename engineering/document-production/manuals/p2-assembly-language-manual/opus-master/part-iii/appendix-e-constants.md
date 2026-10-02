@@ -232,10 +232,10 @@ COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COG
 #### Usage
 ```pasm2
 ' Start specific cog with code load
-        COGINIT #COGEXEC+1, #$100   ' Load and start Cog 1 from Hub RAM $100
+        COGINIT #COGEXEC+1, #$100   ' Load and start cog 1 from hub RAM $100
 
-' Start Cog 5 with code at label
-        COGINIT #COGEXEC+5, @code   ' Load and start Cog 5 from @code
+' Start cog 5 with code at label
+        COGINIT #COGEXEC+5, @code   ' Load and start cog 5 from @code
 ```
 
 #### Syntax
@@ -279,9 +279,9 @@ HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COG
 #### Usage
 ```pasm2
 ' Start specific cog with hub execution
-        COGINIT #HUBEXEC+1, ##$400   ' Cog 1 from Hub RAM $400
+        COGINIT #HUBEXEC+1, ##$400   ' Cog 1 from hub RAM $400
 
-' Start Cog 5 with hub execution at label
+' Start cog 5 with hub execution at label
         COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
 ```
 

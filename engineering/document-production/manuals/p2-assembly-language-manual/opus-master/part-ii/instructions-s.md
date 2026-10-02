@@ -357,7 +357,7 @@ SETD can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETDACS {#setdacs}
 Set DACs
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets all four DAC channels simultaneously from a single register.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets all four DAC channels simultaneously from a single register.
 :::
 
 **SETDACS**  *{#}Dest*
@@ -485,7 +485,7 @@ SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibbl
 ## SETPAT {#setpat}
 Set Pin Pattern
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures pin pattern matching for PAT event detection.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures pin pattern matching for PAT event detection.
 :::
 
 **SETPAT**  *{#}Dest, {#}Src*
@@ -628,6 +628,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
 
 **Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ2 and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
+
 ::: instrheader
 ## SETR {#setr}
 Set Result Field
@@ -696,7 +697,7 @@ SETS can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETSCP {#setscp}
 Set Oscilloscope
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures the four-channel hardware oscilloscope for debugging.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the four-channel hardware oscilloscope for debugging.
 :::
 
 **SETSCP**  *{#}Dest*
@@ -797,7 +798,7 @@ SETWORD stores Src[15:0] into the word identified by N within Dest, or the word 
 ## SETXFRQ {#setxfrq}
 Set Streamer Frequency
 
-[streamer](#streamer) - Sets the NCO frequency that controls streamer data output rate.
+[Streamer](#streamer) - Sets the NCO frequency that controls streamer data output rate.
 :::
 
 **SETXFRQ**  *{#}Dest*
@@ -1015,6 +1016,8 @@ Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cance
         NOP                    ' Skipped (bit 2)
 ```
 
+Skipping works only in main code, not inside interrupt service routines. An interrupt service routine that runs during a skipping sequence executes normally, and the skipping sequence resumes when it completes. A CALL, CALLPA or CALLPB that is not skipped executes its subroutine normally, and the skipping sequence resumes after the subroutine's RET or _RET_, so a subroutine can be skipped or run in full without disturbing the top-level sequence.
+
 
 
 ::: instrheader
@@ -1054,6 +1057,11 @@ SKIPF can ONLY leap over instructions when executing from **cog or LUT memory**.
 - SKIP is fully compatible with REP—cancellation maintains instruction counts
 - SKIPF works with REP ONLY if all skip patterns result in identical instruction counts
 - Recommendation: Use SKIP within REP blocks for predictable behavior
+
+**Branching Rules:** The ISR and CALL behavior described under SKIP applies to SKIPF and EXECF as well.
+
+- When a CALL, CALLPA or CALLPB is used within a SKIPF sequence and the instruction after it might be skipped, its immediate branch address must be absolute. CALLPA and CALLPB cannot be given an absolute immediate address; CALL can, with `#\address`. All three can use a register as the branch address, since a register holds an absolute address.
+- Other branches within a SKIPF sequence work with every immediate-relative branch, which is the default for immediate branches in cog/LUT memory. After an absolute-address branch (`#\label`, a register, or RET), do not skip the first instruction at the branch target. Immediate-relative branches have no such restriction, because the variable PC stepping lands on the first instruction of interest at or beyond the branch address.
 
 
 

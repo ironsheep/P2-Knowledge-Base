@@ -515,7 +515,7 @@ For this signed multiply-then-shift pattern, SCAS does signed scaled multiply in
 
 MULS differs from MUL only in that it treats the 16-bit operands as signed values rather than unsigned. The choice between them depends on whether the values being multiplied represent signed or unsigned quantities.
 
-For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which multiplies two unsigned 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. QMUL is unsigned.
+For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which multiplies two unsigned 32-bit values and produces a 64-bit result accessible through the upper and lower result registers.
 
 
 

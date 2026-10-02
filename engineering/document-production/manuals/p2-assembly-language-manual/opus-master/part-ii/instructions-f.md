@@ -194,7 +194,7 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
 Float with Output Preset by Flag
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
 
 \hypertarget{fltnc}{}\hypertarget{fltz}{}\hypertarget{fltnz}{}
@@ -246,7 +246,7 @@ If WCZ is specified, the C and Z flags are set to the original output state of t
 ## FLTH {#flth}
 Float High
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset high.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset high.
 :::
 
 **FLTH**  *{#}Dest*  **{WCZ}**
@@ -287,7 +287,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## FLTL {#fltl}
 Float Low
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset low.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset low.
 :::
 
 **FLTL**  *{#}Dest*  **{WCZ}**
@@ -328,7 +328,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## FLTNOT {#fltnot}
 Float Not
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output toggled.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output toggled.
 :::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
@@ -371,7 +371,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## FLTRND {#fltrnd}
 Float Random
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with random output levels.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with random output levels.
 :::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**

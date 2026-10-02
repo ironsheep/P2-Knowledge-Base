@@ -274,7 +274,7 @@ To add unsigned multi-long values, use ADD followed by one or more ADDX instruct
 ## AKPIN {#akpin}
 Acknowledge smart pin
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Acknowledges smart pin(s) to allow future events.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Acknowledges smart pin(s) to allow future events.
 :::
 
 **AKPIN**  *{#}Src*
@@ -303,7 +303,7 @@ When Src is a register, the register's value bits [10:0] are used as-is to form 
 
 The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 
-After AKPIN executes, the smart pin takes two clocks to lower its IN signal, so wait before polling the IN flag again (insert NOP instructions before testing it).
+After AKPIN executes, the smart pin takes two clocks to lower its IN signal, so wait before polling the IN flag again (insert one NOP, which takes 2 clocks, or more, before testing it).
 
 
 

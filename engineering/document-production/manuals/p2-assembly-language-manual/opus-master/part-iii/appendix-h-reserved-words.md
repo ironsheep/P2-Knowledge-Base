@@ -1,12 +1,12 @@
 # Appendix H: Reserved Words Reference
 
-This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
+This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers are reserved and should not be used as user-defined labels, symbols, or variable names. Using a reserved word as a label usually results in an assembly error; a few of the newer symbols (GRAY, for example) are currently accepted as labels, but they remain reserved, so do not use them.
 
-The `DEBUG_*` configuration names (`DEBUG_BAUD`, `DEBUG_COGS`, `DEBUG_PIN_TX` and the others the P2 Documentation lists as "Symbols you can define to modify DEBUG behavior") are not reserved words. They are `CON` symbols that your program declares to configure DEBUG, and they are not counted below.
+The nineteen `DEBUG_*` configuration names are reserved and counted below. A program uses them by declaring them in a `CON` block to configure DEBUG.
 
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether the source is pure PASM2 or mixed Spin2/PASM2 code.
 
-**Total Reserved Words: 845** (498 PASM2 + 347 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
+**Total Reserved Words: 864** (498 PASM2 + 366 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
 ## Quick Reference Index
 
@@ -45,7 +45,13 @@ CRCBIT      CRCNIB      CYAN
 
 ### D
 ```
-DAT         DEBUG       DECMOD      DECOD       DEPTH       DIRA
+DAT         DEBUG       DEBUG_BAUD  DEBUG_COGINIT
+DEBUG_COGS  DEBUG_DELAY DEBUG_DISABLE           DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP       DEBUG_HEIGHT            DEBUG_LEFT
+DEBUG_LOG_SIZE          DEBUG_MAIN  DEBUG_MASK  DEBUG_PIN
+DEBUG_PIN_RX            DEBUG_PIN_TX            DEBUG_TIMESTAMP
+DEBUG_TOP   DEBUG_WIDTH DEBUG_WINDOWS_OFF
+DECMOD      DECOD       DEPTH       DIRA
 DIRB        DIRC
 DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
 DIRRND      DIRZ        DITTO       DJF         DJNF        DJNZ
@@ -603,7 +609,7 @@ byte_data       long  $0
 
 ## Summary
 
-The Propeller 2 compiler reserves **845 identifiers** across PASM2 and Spin2, counted from the lists in this appendix (each word counted once):
+The Propeller 2 compiler reserves **864 identifiers** across PASM2 and Spin2, counted from the lists in this appendix (each word counted once):
 
 **PASM2-Specific Reserved Words (498):**
 
@@ -618,12 +624,12 @@ The Propeller 2 compiler reserves **845 identifiers** across PASM2 and Spin2, co
 | Effects | 9 | Flag modification suffixes |
 | **PASM2 Subtotal** | **498** | |
 
-**Spin2-Specific Reserved Words (347):**
+**Spin2-Specific Reserved Words (366):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
 | Language Keywords | 22 | Core Spin2 constructs |
-| DEBUG Parameters | 102 | Debug output formatting |
+| DEBUG Parameters | 121 | Debug output formatting and configuration |
 | Graphics/Color | 35 | Color names and display |
 | String/Data Methods | 22 | Memory/string manipulation |
 | Math/Conversion | 11 | Math functions |
@@ -635,7 +641,7 @@ The Propeller 2 compiler reserves **845 identifiers** across PASM2 and Spin2, co
 | Graphics Drawing | 31 | Graphics primitives |
 | Text/Display | 13 | Text rendering |
 | Lookup/Misc | 22 | Table lookup and other |
-| **Spin2 Subtotal** | **347** | |
+| **Spin2 Subtotal** | **366** | |
 
 **Hardware Constants (194+):**
 
@@ -645,7 +651,7 @@ The Propeller 2 compiler reserves **845 identifiers** across PASM2 and Spin2, co
 | Streamer (X_*) | ~78 | Streamer modes |
 | **Constants Subtotal** | **~194** | |
 
-**Grand Total: 1,039+ reserved identifiers** (845 + 194)
+**Grand Total: 1,058+ reserved identifiers** (864 + 194)
 
 **Cross-References:**
 
@@ -661,7 +667,7 @@ The Propeller 2 compiler reserves **845 identifiers** across PASM2 and Spin2, co
 
 Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. None of these identifiers can be used as labels, symbols, or variable names in assembly code, even in pure PASM2.
 
-**Total Spin2-Only Reserved Words: 347**
+**Total Spin2-Only Reserved Words: 366**
 
 The following sections list Spin2 reserved words organized by category.
 
@@ -684,9 +690,9 @@ TO          UNTIL       WHILE       WITH
 
 
 
-### DEBUG Command Parameters (102 words)
+### DEBUG Command Parameters (121 words)
 
-Debug output formatting commands and their variants. The `DEBUG_*` configuration names are `CON` symbols that your program declares, not reserved words (see the note at the top of this appendix).
+Debug output formatting commands and their variants, then the nineteen `DEBUG_*` configuration names. A program uses a `DEBUG_*` name by declaring it in a `CON` block.
 
 **Signed decimal (SDEC) variants:**
 ```
@@ -740,6 +746,17 @@ UBIN_WORD_            UBIN_WORD_ARRAY  UBIN_WORD_ARRAY_
 ```
 FDEC        FDEC_       FDEC_ARRAY       FDEC_ARRAY_      FDEC_REG_ARRAY
 FDEC_REG_ARRAY_
+```
+
+**DEBUG configuration names (declared in a `CON` block):**
+```
+DEBUG_BAUD           DEBUG_COGINIT        DEBUG_COGS
+DEBUG_DELAY          DEBUG_DISABLE        DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP    DEBUG_HEIGHT         DEBUG_LEFT
+DEBUG_LOG_SIZE       DEBUG_MAIN           DEBUG_MASK
+DEBUG_PIN            DEBUG_PIN_RX         DEBUG_PIN_TX
+DEBUG_TIMESTAMP      DEBUG_TOP            DEBUG_WIDTH
+DEBUG_WINDOWS_OFF
 ```
 
 

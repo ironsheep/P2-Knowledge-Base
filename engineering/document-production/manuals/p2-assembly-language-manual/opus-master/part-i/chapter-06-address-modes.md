@@ -585,7 +585,7 @@ Any of the PTRx forms described in Section 6.4:
 
 **Moderate:** Augmented immediate (+2 cycles per AUG instruction)
 
-**Variable:** Hub reads (9-16 clocks in cog/LUT mode, 9-26 clocks in HUB mode); hub writes are faster (3-10 clocks in cog/LUT mode, 3-20 clocks in HUB mode)
+**Variable:** Hub reads (9-16 clocks in cog/LUT mode, 9-26 clocks in HUB mode); hub writes are faster (3-10 clocks in cog/LUT mode, 3-20 clocks in HUB mode); RDLONG, RDWORD, WRLONG and WRWORD take 1 more clock when the access crosses a hub long
 
 > **Timing Note:** Hub reads require ~9 base clocks plus 0-7 clocks waiting for the hub window (with 8 cogs); hub writes require only ~3 base clocks plus the same 0-7 window wait. In HUB execution mode, the FIFO is busy fetching instructions, adding contention that extends the read maximum to 26 clocks.
 

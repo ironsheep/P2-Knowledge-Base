@@ -277,7 +277,7 @@ Read Long From hub
 
 **Explanation:**
 
-RDLONG reads a long from hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
+RDLONG reads a long from hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window. The access takes 1 more clock when it crosses a hub long.
 
 If preceded by a SETQ instruction, burst reads of multiple longs can be performed. Using SETQ2 instead of SETQ bursts the block into LUT RAM rather than cog RAM.
 
@@ -334,7 +334,7 @@ The LUT provides fast local memory access for frequently accessed data structure
 ## RDPIN {#rdpin}
 Read smart pin
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Reads smart pin result and acknowledges, clearing the ready flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads smart pin result and acknowledges, clearing the ready flag.
 :::
 
 **RDPIN**  *Dest, {#}Src*  **{WC}**
@@ -403,7 +403,7 @@ Read Word From hub
 
 **Explanation:**
 
-RDWORD reads a word from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
+RDWORD reads a word from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window. The access takes 1 more clock when it crosses a hub long.
 
 If the WC or WCZ effect is specified, C is set to the MSB of the word.
 
@@ -718,6 +718,8 @@ If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
 RETA is paired with CALLA for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
 
+The access takes 1 more clock when it crosses a hub long.
+
 
 
 ::: instrheader
@@ -760,6 +762,8 @@ If the WC or WCZ effect is specified, the C flag is restored from L[31].
 If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
 RETB is paired with CALLB for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
+
+The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -1256,7 +1260,7 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 ## RQPIN {#rqpin}
 Read Smart Pin Without Acknowledge
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Reads smart pin result without clearing the ready flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads smart pin result without clearing the ready flag.
 :::
 
 **RQPIN**  *Dest, {#}Src*  **{WC}**

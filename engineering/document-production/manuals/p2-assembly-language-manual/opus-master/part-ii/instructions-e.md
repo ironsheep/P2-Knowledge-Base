@@ -87,5 +87,7 @@ EXECF combines the functionality of a jump (like JMP, no return address is saved
 
 The instruction takes 4 clock cycles to execute, regardless of whether it executes from cog/LUT or hub memory.
 
+The skipping that EXECF initiates follows the rules of SKIPF: it works only in main code (not inside interrupt service routines, which run normally mid-sequence), an unskipped CALL, CALLPA or CALLPB runs its subroutine normally with the sequence resuming after the return, and the SKIPF branching rules apply (see SKIPF).
+
 
 

@@ -88,7 +88,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLA is used for subroutine calls when hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution.
+CALLA is used for subroutine calls when hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -132,7 +132,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution.
+CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -553,11 +553,11 @@ Cog Attention
 
 **COGATN**  *{#}Dest*
 
-**Operation:** strobe ATN on every cog n (0..15) where `D[n] = 1`
+**Operation:** strobe ATN on every cog n (0..15) where `D[n] == 1`
 
 **Result:** The attention signal of one or more cogs is strobed.
 
-- Dest is the register or 9-bit literal whose value is a 16-bit pattern in which bits 0..15 represent cogs 0..15; each set bit signals its cog. The P2X8C4M64P has 8 cogs, so bits 0..7 are the ones that reach a cog.
+- Dest is a register, or a literal (## for bits above 8), holding a 16-bit pattern in which bits 0..15 represent cogs 0..15; each set bit signals its cog. The P2X8C4M64P has 8 cogs, so bits 0..7 are the ones that reach a cog.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -635,7 +635,7 @@ Cog Identification
 
 **COGID**  *{#}Dest*  **{WC}**
 
-**Operation:** if no WC: `D = cog ID in D[3:0]`, upper bits cleared; if WC: `C = 1 if cog D is on`
+**Operation:** if no WC: `D = cog ID in D[3:0]`, upper bits cleared; if WC: `C = 1 if cog D[2:0] is on`
 
 **Result:** Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.
 
@@ -653,11 +653,11 @@ Cog Identification
 
 **Explanation:**
 
-COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest (if WC is given).
+COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest[2:0] (if WC is given).
 
 When used without the WC effect, COGID stores the current cog's ID in Dest[3:0], with the upper bits cleared (cog IDs are 0-7 on the P2X8C4M64P). This is useful when code needs to know which cog it is running on, for example when accessing cog-specific resources or implementing cog-aware algorithms.
 
-When used with the WC effect, COGID checks the status of the cog specified by Dest. If the WC effect is specified, the C flag is set (1) if the specified cog is running, or is cleared (0) if stopped (or never started). In this mode, Dest is not written.
+When used with the WC effect, COGID checks the status of the cog specified by Dest[2:0]. If the WC effect is specified, the C flag is set (1) if the specified cog is running, or is cleared (0) if stopped (or never started). In this mode, Dest is not written.
 
 For example, to get the current cog's ID:
 
@@ -766,7 +766,7 @@ Cog Stop
 
 **Result:** Cog indicated by Dest is terminated (stopped).
 
-- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
+- Dest is the register or 9-bit literal indicating (in lowest 4 bits) which cog to stop.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -778,9 +778,9 @@ Cog Stop
 
 **Explanation:**
 
-COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases to execute code and power consumption is greatly reduced.
+COGSTOP terminates the cog identified by Dest[3:0]. In this dormant state, the cog ceases to execute code and power consumption is greatly reduced.
 
-The cog specified by the lower 3 bits of Dest (0-7) is immediately halted. All registers and state in that cog are lost. The cog can be restarted later using COGINIT, which will reload it with new code and reset its state.
+The cog specified by the lower 4 bits of Dest is immediately halted. All registers and state in that cog are lost. The cog can be restarted later using COGINIT, which will reload it with new code and reset its state.
 
 For example, to stop cog 4:
 
