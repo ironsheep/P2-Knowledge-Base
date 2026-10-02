@@ -26,7 +26,7 @@ Shift Arithmetic Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
 
@@ -62,13 +62,13 @@ Shift Arithmetic Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
 
 **Explanation:**
 
-SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original Dest[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.
+SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original Dest[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is for signed integers; use SHR for unsigned values.
 
 ```pasm2
         SAR     value, #3      ' Divide signed value by 8
@@ -424,7 +424,7 @@ Set LUT Sharing
 
 **SETLUTS**  *{#}Dest*
 
-**Result:** If Dest[0] = 1, LUT sharing is enabled where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
+**Result:** If Dest[0] == 1, LUT sharing is enabled where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
 
 - Dest is a register or literal value (0-511) with enable bit in Dest[0].
 
@@ -438,7 +438,7 @@ Set LUT Sharing
 
 **Explanation:**
 
-Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] = 1), LUT writes within the adjacent odd/even companion cog are automatically copied to this cog's LUT, allowing cogs to share lookup table data.
+Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] == 1), LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT, allowing cogs to share lookup table data. When Dest[0] == 0, writes from the other cog are not allowed (default: disabled).
 
 
 
@@ -490,7 +490,7 @@ Set Pin Pattern
 
 **SETPAT**  *{#}Dest, {#}Src*
 
-**Result:** Pin pattern for PAT event is configured. C selects INA/INB, Z selects =/!=, Dest provides mask value, Src provides match value.
+**Result:** Pin pattern for PAT event is configured. The current C and Z flag values are read as inputs: C selects INA (0) or INB (1), Z selects the event on mismatch (0) or match (1). Dest provides the mask value, Src provides the match value.
 
 - Dest is a register or immediate containing mask value.
 - Src is a register or immediate containing match value.
@@ -505,7 +505,7 @@ Set Pin Pattern
 
 **Explanation:**
 
-Sets pin pattern for PAT event detection. The C flag selects INA or INB for monitoring, the Z flag selects equality (=) or inequality (!=) matching, Dest provides the mask value to select which pins to monitor, and Src provides the match value to compare against.
+Sets pin pattern for PAT event detection. C and Z are inputs, read when SETPAT executes; SETPAT takes no WC, WZ or WCZ effect and does not change the flags. Set C and Z before the SETPAT. C == 0 monitors INA and C == 1 monitors INB. With Z == 0, the PAT event occurs whenever (pins & Dest) != Src; with Z == 1, whenever (pins & Dest) == Src. Dest provides the mask value to select which pins to monitor, and Src provides the match value to compare against.
 
 
 
@@ -567,7 +567,7 @@ Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer
 ## SETQ {#setq}
 Set Q Register
 
-[hub memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
+[Hub Memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
 :::
 
 **SETQ**  *{#}Dest*
@@ -593,14 +593,14 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
         RDLONG  buffer, ptra   ' Read 16 longs from hub
 ```
 
-**Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward.
+**Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction.
 
 
 ::: instrheader
 ## SETQ2 {#setq2}
 Set Q For LUT Transfers
 
-[hub memory Access](#hub-memory-access) - Loads the Q register for LUT-to-hub block transfers.
+[Hub Memory Access](#hub-memory-access) - Loads the Q register for LUT-to-hub block transfers.
 :::
 
 **SETQ2**  *{#}Dest*
@@ -619,15 +619,14 @@ Set Q For LUT Transfers
 
 **Explanation:**
 
-Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. Use SETQ2 + RDLONG/WRLONG to block-transfer between hub and LUT RAM. The block moves one long per clock unless the hub FIFO is accessing the same hub RAM slice on the same cycle, in which case the FIFO has priority and the block move waits for that slice to come around again.
+Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from hub to LUT, while SETQ2 + WRLONG performs block write from LUT to hub. Use SETQ2 + RDLONG/WRLONG to block-transfer between hub and LUT RAM. The block moves one long per clock unless the hub FIFO is accessing the same hub RAM slice on the same cycle, in which case the FIFO has priority and the block move waits for that slice to come around again.
 
 ```pasm2
         SETQ2   #256-1         ' Set up for 256-long LUT transfer
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
 ```
 
-**Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The data transfers correctly, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
-
+**Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ2 and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
 ::: instrheader
 ## SETR {#setr}
@@ -751,7 +750,7 @@ Set Selectable Event (1, 2, 3, Or 4)
 
 SETSE1, SETSE2, SETSE3, and SETSE4 configure their respective selectable event's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event. Configuring SETSEn also clears the corresponding SEn event flag.
 
-The P2 provides four independent selectable events, each of which can be configured to detect various conditions including pin states, hub operations, CORDIC completion, and other system events. Once configured, these events can be polled with POLLSEn, waited upon with WAITSEn, or used for conditional jumps with JSEn and JNSEn.
+The P2 provides four independent selectable events, each of which can be configured to detect a pin, LUT, or hub lock event: a pin rising, falling, changing, low, or high; this cog or its odd/even companion cog reading or writing a LUT address (one of four, set by the low two bits of Dest); or a hub lock rising, falling, or changing. Once configured, these events can be polled with POLLSEn, waited upon with WAITSEn, or used for conditional jumps with JSEn and JNSEn.
 
 
 
@@ -897,7 +896,7 @@ Shift Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
 
@@ -933,7 +932,7 @@ Shift Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
@@ -1043,11 +1042,11 @@ Skip Instructions Fast
 
 **Explanation:**
 
-Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are never fetched or executed.
+Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are normally stepped over without being executed. Two cases are still cancelled in the pipeline, each becoming a 2-clock NOP: the first instruction after the SKIPF when its skip-pattern bit is 1, and the 8th instruction in a row being skipped (only 7 can be stepped over at once).
 
 **CRITICAL: Cog/LUT Memory Only**
 
-SKIPF can ONLY leap over instructions when executing from **cog or LUT memory**. When SKIPF is executed from hub memory, it automatically **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of cog/LUT memory.
+SKIPF can ONLY leap over instructions when executing from **cog or LUT memory**. When SKIPF is executed from hub memory, it **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of cog/LUT memory.
 
 **Best Practice:** Use SKIP for code in hub memory (ORGH sections), SKIPF for code in cog/LUT memory (ORG sections).
 
@@ -1341,10 +1340,10 @@ These instructions conditionally add or subtract Src from Dest based on the spec
 
 | Instruction | Subtracts when | Adds when |
 |-------------|----------------|-----------|
-| SUMC | C = 1 | C = 0 |
-| SUMNC | C = 0 | C = 1 |
-| SUMZ | Z = 1 | Z = 0 |
-| SUMNZ | Z = 0 | Z = 1 |
+| SUMC | C == 1 | C == 0 |
+| SUMNC | C == 0 | C == 1 |
+| SUMZ | Z == 1 | Z == 0 |
+| SUMNZ | Z == 0 | Z == 1 |
 
 The C flag (with WC) is updated to reflect the true sign of the result.
 

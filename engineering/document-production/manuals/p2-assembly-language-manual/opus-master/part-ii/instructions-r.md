@@ -26,13 +26,13 @@ Rotate Carry Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
 **Explanation:**
 
-RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations.
+RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C. With a shift of 1, the carry flag acts as a 33rd bit, giving a 33-bit rotate through C; with a larger shift, every new LSB receives the same C value.
 
 If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[31] if Src is 0.
 
@@ -64,13 +64,13 @@ Rotate Carry Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
 **Explanation:**
 
-RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations.
+RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to C. With a shift of 1, the carry flag acts as a 33rd bit, giving a 33-bit rotate through C; with a larger shift, every new MSB receives the same C value.
 
 If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[0] if Src is 0.
 
@@ -112,7 +112,7 @@ If the WC or WCZ effect is specified, the C flag is updated to the original Dest
 
 If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[30] state.
 
-This instruction provides a compact way to shift two flag states into a register while simultaneously extracting two bits from the register into the flags, enabling efficient state serialization and deserialization.
+This instruction shifts two flag states into a register while simultaneously extracting two bits from the register into the flags.
 
 
 
@@ -148,7 +148,7 @@ If the WC or WCZ effect is specified, the C flag is updated to the original Dest
 
 If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[0] state.
 
-This instruction provides a compact way to shift two flag states into a register while simultaneously extracting two bits from the register into the flags, enabling efficient state serialization and deserialization.
+This instruction shifts two flag states into a register while simultaneously extracting two bits from the register into the flags.
 
 
 
@@ -156,7 +156,7 @@ This instruction provides a compact way to shift two flag states into a register
 ## RDBYTE {#rdbyte}
 Read Byte From hub
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended byte from hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from hub memory into a register.
 :::
 
 **RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -190,8 +190,6 @@ Read Byte From hub
 
 RDBYTE reads a byte from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
 
-If preceded by a SETQ instruction, burst reads of multiple bytes can be performed.
-
 If the WC or WCZ effect is specified, C is set to the MSB of the byte.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
@@ -204,7 +202,7 @@ Hub memory operations follow a round-robin access pattern where each cog gets a 
 ## RDFAST {#rdfast}
 Read Fast Via FIFO
 
-[hub memory Access](#hub-memory-access) - Begins fast hub read operation via FIFO for high-throughput streaming.
+[Hub Memory Access](#hub-memory-access) - Begins fast hub read operation via FIFO for high-throughput streaming.
 :::
 
 **RDFAST**  *{#}Dest, {#}Src*
@@ -237,7 +235,7 @@ Read Fast Via FIFO
 
 RDFAST begins a new fast hub read operation via the FIFO. The instruction configures automatic sequential reading from hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from cog/LUT memory, not hub memory.
 
-Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size. Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
+Dest[31] selects the wait behavior. With Dest[31] == 0, RDFAST waits for any previous WRFAST to finish, then waits until the FIFO has begun receiving hub data (10...17 clocks), so the next instruction can read it. With Dest[31] == 1 (no-wait mode), RDFAST takes 2 clocks and leaves the wait to the program: the first correct RFBYTE, RFWORD or RFLONG comes 8...15 clocks after the RDFAST starts, depending on hub alignment, and an earlier read returns `$0000_0000` with no error. Allow at least 15 clocks, for example `WAITX #11` directly after the RDFAST. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size. Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
 
 After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read data from the FIFO. The FIFO is automatically refilled in the background, making this ideal for checksums, CRC calculations, data processing, and block copy operations.
 
@@ -247,7 +245,7 @@ After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read
 ## RDLONG {#rdlong}
 Read Long From hub
 
-[hub memory Access](#hub-memory-access) - Reads a 32-bit long from hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from hub memory into a register.
 :::
 
 **RDLONG**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -289,7 +287,7 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot.
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size. This leads to corrupted subsequent operations when code expects PTRx to point past the block.
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. This leads to corrupted subsequent operations when code expects PTRx to point past the block. Keep the SETQ and the transfer adjacent.
 
 
 
@@ -365,7 +363,7 @@ If the WC effect is specified, the C flag is set to the modal result, which prov
 
 Smart pins are autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous cog intervention. RDPIN retrieves the measured or received data after the pin signals completion.
 
-Because RDPIN acknowledges the pin, it resets the pin's IN flag, and the smart pin needs about 2 clock cycles to clear that flag before a TESTP poll of IN reads a valid result. Insert two NOP instructions (or other unrelated work) between RDPIN and the TESTP that polls the IN flag. RQPIN does not acknowledge the pin and so does not reset the IN flag, so no such delay is needed after RQPIN.
+Because RDPIN acknowledges the pin, it resets the pin's IN flag, and the smart pin needs about 2 clock cycles to clear that flag before a TESTP poll of IN reads a valid result. Insert one NOP instruction (2 clocks, or other unrelated work) between RDPIN and the TESTP that polls the IN flag. RQPIN does not acknowledge the pin and so does not reset the IN flag, so no such delay is needed after RQPIN.
 
 
 
@@ -373,7 +371,7 @@ Because RDPIN acknowledges the pin, it resets the pin's IN flag, and the smart p
 ## RDWORD {#rdword}
 Read Word From hub
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended word from hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from hub memory into a register.
 :::
 
 **RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -407,8 +405,6 @@ Read Word From hub
 
 RDWORD reads a word from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
 
-If preceded by a SETQ instruction, burst reads of multiple words can be performed.
-
 If the WC or WCZ effect is specified, C is set to the MSB of the word.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
@@ -426,12 +422,12 @@ Repeat Block
 
 **REP**  *@.label, {#}Src*
 
-**Operation:** repeat the next `D[8:0]` instructions `S` times (S = 0 → forever; D[8:0] = 0 → none)
+**Operation:** repeat the next `D[8:0]` instructions `S` times (S == 0 → forever; D[8:0] == 0 → none)
 
 **Result:** The next Dest[8:0] instructions are executed Src times.
 
-- Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
-- Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
+- Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] == 0, nothing repeats.
+- Src is the number of repetitions. If Src == 0, instructions repeat infinitely.
 - Alternatively, `@.label` calculates the instruction count automatically from a local label.
 
 
@@ -444,7 +440,7 @@ Repeat Block
 
 **Explanation:**
 
-REP creates a hardware-implemented loop that executes the next Dest[8:0] instructions Src times. If Src = 0, the instructions repeat infinitely (useful for main loops). If Dest[8:0] = 0, nothing repeats.
+REP creates a hardware-implemented loop that executes the next Dest[8:0] instructions Src times. If Src == 0, the instructions repeat infinitely (useful for main loops). If Dest[8:0] == 0, nothing repeats.
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
@@ -485,7 +481,7 @@ process_data    rep     @.end, count            ' Repeat until .end label
 .end                                            ' Empty label marks end
 
 ' Alternative using the # prefix with local label:
-fill_buffer     rep     #(.done - $), #256      ' Expression = count
+fill_buffer     rep     @.done, #256            ' Count to .done
                 wrbyte  value, ptr
                 add     ptr, #1
 .done
@@ -495,19 +491,18 @@ fill_buffer     rep     #(.done - $), #256      ' Expression = count
 
 **Extended Count Capability:**
 
-Both the instruction count (D) and repetition count (S) can exceed the 9-bit immediate limit of 0-511 using two methods:
+The instruction count (D) is always D[8:0], 0-511, in every form. Only the repetition count (S) can exceed the 9-bit immediate limit of 0-511, using two methods:
 
-| Form | Limit | Mechanism |
-|------|-------|-----------|
+| Form for S | Limit | Mechanism |
+|------------|-------|-----------|
 | `#count` | 0-511 | 9-bit immediate field |
-| `##count` | 0 to 2^32^-1 | AUGD/AUGS prefix emitted automatically |
+| `##count` | 0 to 2^32^-1 | AUGS prefix emitted automatically |
 | `register` | 0 to 2^32^-1 | Register value used at runtime |
 
 ```pasm2
 ' Extended repetition examples
                 rep     @.end, ##1000         ' 1000 reps (AUGS prefix)
                 rep     @.end, big_count      ' Register-based count
-                rep     ##1000, ##2000        ' Both extended (rare)
 ```
 
 **Memory Mode Constraints (for @label form):**
@@ -622,10 +617,10 @@ Resume From Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (cog), 13...20 (hub) |
 
 
 **Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
@@ -634,7 +629,7 @@ Resume From Interrupt
 
 RESI0, RESI1, RESI2, and RESI3 resume execution from their respective interrupt levels. Each instruction is functionally equivalent to a CALLD instruction that restores the program counter, C flag, and Z flag from the corresponding interrupt return address registers.
 
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
+RESIx returns to the interrupted code like RETIx, and also stores the ISR's own resume address in IJMPx (RESI1 is `CALLD IJMP1, IRET1 WCZ`). The next interrupt of that level therefore resumes the handler at the instruction after the RESIx, instead of at the handler's start address.
 
 
 
@@ -678,7 +673,7 @@ If the WZ or WCZ effect is specified, the Z flag is restored from K[30].
 
 The operation takes 4 cycles in cog/LUT execution, or 13–20 cycles in hub execution (the hub-branch refill cost when the return target resides in hub memory).
 
-The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, CALLPB, CALLA, and CALLB instructions.
+The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, and CALLPB, which push onto the hardware stack. CALLA and CALLB use hub-memory software stacks and return with RETA and RETB.
 
 
 
@@ -787,10 +782,10 @@ Return From Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (cog), 13...20 (hub) |
 
 
 **Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
@@ -830,7 +825,7 @@ Reverse Bits
 
 REV performs a complete bitwise reverse of the value in Dest, storing the result back into Dest. Bit 31 becomes bit 0, bit 30 becomes bit 1, and so on through bit 0 becoming bit 31. The operation takes 2 cycles and does not affect any flags.
 
-This instruction is useful for processing binary data in different MSB/LSB order than it is transmitted with, such as serial protocols that send least-significant bit first but need processing in most-significant bit first order. It is also used in bit-reversal algorithms for FFT operations.
+This instruction is useful for processing binary data in different MSB/LSB order than it is transmitted with, such as serial protocols that send least-significant bit first but need processing in most-significant bit first order.
 
 
 
@@ -838,7 +833,7 @@ This instruction is useful for processing binary data in different MSB/LSB order
 ## RFBYTE {#rfbyte}
 Read Byte Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended byte from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from the RDFAST FIFO.
 :::
 
 **RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
@@ -874,7 +869,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFLONG {#rflong}
 Read Long Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a 32-bit long from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from the RDFAST FIFO.
 :::
 
 **RFLONG**  *Dest*  **{WC|WZ|WCZ}**
@@ -910,7 +905,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFVAR {#rfvar}
 Read Variable Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVAR**  *Dest*  **{WC|WZ|WCZ}**
@@ -938,7 +933,7 @@ If the WC or WCZ effect is specified, C is always cleared to 0.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The length of each value read is determined by the streamer configuration set up before the RDFAST operation.
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
 
 
 
@@ -946,7 +941,7 @@ The length of each value read is determined by the streamer configuration set up
 ## RFVARS {#rfvars}
 Read Signed Variable Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVARS**  *Dest*  **{WC|WZ|WCZ}**
@@ -974,13 +969,15 @@ If the WC or WCZ effect is specified, C is set to the MSB of the value.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
+
 
 
 ::: instrheader
 ## RFWORD {#rfword}
 Read Word Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended word from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from the RDFAST FIFO.
 :::
 
 **RFWORD**  *Dest*  **{WC|WZ|WCZ}**
@@ -1096,7 +1093,7 @@ Rotate Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
@@ -1239,7 +1236,7 @@ Rotate Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 

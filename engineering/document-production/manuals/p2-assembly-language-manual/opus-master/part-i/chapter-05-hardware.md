@@ -287,7 +287,7 @@ Direction and output control manage the physical pin state. The P2 provides four
 - **FLT** family - Float pin to high-impedance (tri-state)
 - **DRV** family - Drive pin (opposite of float)
 
-Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:= C flag), `NC` (:= !C flag), `Z` (:= Z flag), `NZ` (:= !Z flag), `NOT` (toggle the bit), `RND` (:= a random bit). This provides fine-grained control: `DIRL` forces the pin to input (DIR=0), while `DIRZ` sets the pin's direction to the current Z flag value (Z=1 → output, Z=0 → input).
+Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:= C flag), `NC` (:= !C flag), `Z` (:= Z flag), `NZ` (:= !Z flag), `NOT` (toggle the bit), `RND` (:= a random bit). This provides fine-grained control: `DIRL` forces the pin to input (DIR=0), while `DIRZ` sets the pin's direction to the current Z flag value (Z == 1 → output, Z == 0 → input).
 
 The BIT family (BITL, BITH, BITC, BITNC, BITZ, BITNZ, BITNOT, BITRND) applies the same eight suffix variants to a bit of a destination register rather than a pin—the register-bit counterpart of these pin-control families.
 

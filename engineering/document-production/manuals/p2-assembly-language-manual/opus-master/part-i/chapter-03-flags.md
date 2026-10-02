@@ -224,10 +224,10 @@ This sequence takes exactly six clock cycles (three instructions × 2 clocks eac
 
 ```pasm2
                 test    flags, #BIT_READY  wz
-        if_z    jmp     #skip
+        if_z    jmp     #skip_it
                 mov     result, source
                 add     count, #1
-skip
+skip_it
 ```
 
 The branch version takes 6 clocks when not ready (test, then a taken jump—whose pipeline flush costs 4 clocks) or 8 clocks when ready (test, cancelled jump, mov, add). The timing varies with the data. The conditional version maintains constant 6-clock timing.
@@ -509,7 +509,7 @@ The MUX family of instructions uses flag values to conditionally modify individu
         muxnz   value, #mask    ' Z=0: set bits; Z=1: clear bits
 ```
 
-These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C=1, or clears them if C=0. This enables building up bit patterns based on multiple flag tests:
+These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C == 1, or clears them if C == 0. This enables building up bit patterns based on multiple flag tests:
 
 ```pasm2
         test    input, #BIT0    wc      ' Test bit 0 of input

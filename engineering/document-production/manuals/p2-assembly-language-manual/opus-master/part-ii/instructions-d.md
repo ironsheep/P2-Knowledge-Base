@@ -2,14 +2,14 @@
 
 This section contains all PASM2 instructions beginning with the letter D.
 
-**Conditional Jump Timing Convention:** Conditional jumps in this section (DJZ, DJNZ, DJF, DJNF) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps in this section (DJZ, DJNZ, DJF, DJNF) show their `Clks` field as `cog/LUT execution / hub execution`, each side giving the not-taken count and then the taken count. The *taken* value depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 cycles when the jump is not taken or 4 when taken; in hub execution, 2 cycles when not taken or 13–20 when taken.
 
 
 
@@ -172,6 +172,10 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRH instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRH's use.
+
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
+
 If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
 
@@ -208,6 +212,10 @@ DIRL alters the direction register's bit(s) designated by Dest to be low (0), se
 Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
+
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRL instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRL's use.
+
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 
 If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
@@ -503,9 +511,13 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVC or DRVNC instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVC or DRVNC's use.
+
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
 If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
+
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVC or DRVNC.
 
 
 
@@ -542,9 +554,13 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVH instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVH's use.
+
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
 If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
+
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVH.
 
 
 
@@ -580,6 +596,8 @@ DRVL sets the I/O pin(s) designated by Dest to the output direction and to a low
 Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
+
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVL instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVL's use.
 
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
@@ -671,9 +689,13 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVZ or DRVNZ instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVZ or DRVNZ's use.
+
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the base OUT bit.
+
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVZ or DRVNZ.
 
 
 

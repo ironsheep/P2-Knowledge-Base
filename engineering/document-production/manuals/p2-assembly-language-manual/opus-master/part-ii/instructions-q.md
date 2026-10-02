@@ -39,12 +39,11 @@ The 64-bit numerator is formed by concatenating the SETQ value (or 0 if SETQ not
 
 ```pasm2
         QDIV    ##1000000, #3  ' {0, 1000000} / 3
-        ' Wait 55 clocks...
-        GETQX   quotient       ' Get 333333
-        GETQY   remainder      ' Get 1
+        GETQX   quotient       ' 333333 (GETQX waits for the result)
+        GETQY   remainder      ' 1
 ```
 
-Division by zero produces undefined results. Each cog can issue one CORDIC instruction per hub window (every 8 clocks).
+Division by zero does not trap or stall, and takes the same time as any other divide. GETQX returns the bitwise NOT of the numerator's upper long (the SETQ value, or 0 without SETQ, giving $FFFF_FFFF) and GETQY returns the numerator's lower long, Dest. For example, `SETQ #1` then `QDIV D, #0` gives GETQX = $FFFF_FFFE. Each cog can issue one CORDIC instruction per hub window (every 8 clocks).
 
 
 
@@ -77,7 +76,7 @@ QEXP performs logarithm to integer conversion using the P2's 54-stage pipelined 
 
 The instruction takes the logarithm value in the Dest operand, which must be in P2's 5:27 format where bits [31:27] contain the 5-bit whole exponent and bits [26:0] contain the 27-bit fractional exponent. After 55 clocks, the integer result can be retrieved using GETQX.
 
-QEXP is the complement of QLOG and is commonly used together with QLOG to perform power calculations.
+QEXP converts a logarithm in the format QLOG produces back to an integer.
 
 ```pasm2
         QEXP    log_value      ' Begin exponential conversion
@@ -116,15 +115,24 @@ Queue Fractional Divide
 
 QFRAC performs fractional division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, but differs from QDIV in the operand arrangement: Dest forms the upper 32 bits while SETQ (or 0) forms the lower 32 bits.
 
-The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC particularly suitable for fractional arithmetic where the integer part is in Dest and the fractional part is in SETQ.
+The 64-bit numerator is formed as {Dest, SETQ}. The quotient is 32 bits, so it fits only while Dest < Src: QFRAC returns a fraction of 2^32 (a ratio below 1). For a quotient of 1 or more, use QDIV.
 
 ```pasm2
-        SETQ    ##$C0000000    ' 0.75 in 32-bit fraction format
-        QFRAC   #5, #2         ' {5, 0.75} / 2 = 2.875
-        ' Wait 55 clocks...
-        GETQX   quotient       ' Get integer quotient
-        GETQY   remainder      ' Get fractional remainder
+        QFRAC   #1, #3         ' {1, 0} / 3 = 2^32 / 3
+        GETQX   fraction       ' $5555_5555, 0.3333... of 2^32
+        GETQY   remainder      ' 1
 ```
+
+A SETQ value supplies the lower 32 bits of the numerator:
+
+```pasm2
+        SETQ    ##$8000_0000   ' lower 32 bits of the numerator: 0.5
+        QFRAC   #1, #4         ' {1, $8000_0000} / 4 = 1.5 / 4
+        GETQX   fraction       ' $6000_0000, 0.375 of 2^32
+        GETQY   remainder      ' 0
+```
+
+Division by zero does not trap or stall, and takes the same time as any other divide. GETQX returns the bitwise NOT of Dest and GETQY returns the SETQ value (or 0 without SETQ). For example, `QFRAC #1, #0` gives GETQX = $FFFF_FFFE.
 
 
 
@@ -323,7 +331,7 @@ The instruction takes the X coordinate in Dest and Y coordinate in Src, both as 
 
 The angle result uses P2's standard angle units where $00000000 = 0°, $40000000 = 90°, $80000000 = 180°, and $C0000000 = 270°.
 
-QVECTOR is the inverse operation of QROTATE.
+QROTATE with Y = 0 converts polar to cartesian coordinates.
 
 ```pasm2
         QVECTOR #100, #200     ' Begin conversion

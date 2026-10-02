@@ -25,9 +25,9 @@ DAT
         ' $ = 1 (cog address 1)
 
         ORGH    $400
-        ' $ = $400 (Hub address $400)
+        ' $ = $400 (hub address $400)
         BYTE    0
-        ' $ = $401 (Hub address $401)
+        ' $ = $401 (hub address $401)
 ```
 
 ### Cog/LUT Memory Regions
@@ -51,7 +51,7 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
 #### Syntax
 ```pasm2
         ORG                     ' Reset to cog address 0, limit $1F8
-        ORG     address         ' Set cog address, auto-calculate limit
+        ORG     address         ' Set cog address, default limit
         ORG     address, limit  ' Set cog address and limit
 ```
 
@@ -70,7 +70,7 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
 2. **With address only** (`ORG address`):
    - Sets cog address to specified value
    - Auto-calculates limit:
-     - If address < $200: limit = $200 (cog RAM boundary)
+     - If address < $200: limit = $1F8 (standard cog RAM limit, before the fixed special registers)
      - If address >= $200: limit = $400 (LUT RAM boundary)
 
 3. **With address and limit** (`ORG address, limit`):
@@ -110,7 +110,7 @@ lut_code
 - ORG sets the address counter without generating any bytes
 - DAT blocks start in hub mode by default; use ORG to switch to cog mode
 
-**Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
+**Pitfall:** Forgetting that ORG, with or without an address below $200, defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
 
 #### Related Directives
 - [ORGH](#orgh) — Set hub RAM origin
@@ -205,7 +205,7 @@ Set the assembly origin to a hub RAM address. All subsequent code and data assem
 #### Parameters
 | Parameter | Range | Description |
 |-----------|-------|-------------|
-| address | $400 to $100000 | Starting hub address (in bytes) |
+| address | $400 to $100000 (Spin2+PASM); 0 to $100000 (PASM-only) | Starting hub address (in bytes) |
 | limit | address to $100000 | Maximum address for FIT checking (optional) |
 
 #### Behavior by Context
@@ -240,15 +240,15 @@ Use ORGH when switching from cog-exec code to hub-exec code, or when defining da
         ORGH    $400            ' Start at hub address $400
         ' Hub-exec code here
 
-        ORGH                    ' Default: start at hub $400
+        ORGH                    ' $400 (Spin2+PASM) or current hub address
 
         ORGH    $1000           ' Start at hub address $1000
 hubData LONG    $DEADBEEF       ' Hub address $1000
         LONG    $CAFEBABE       ' Hub address $1004
 
-        ORGH    $400, $800      ' Hub from $400 to $800 limit
+        ORGH    $2000, $2800    ' Hub from $2000 to $2800 limit
         BYTE    0[1024]         ' 1KB of data
-        FIT     $800            ' Verify fits within limit
+        FIT     $2800           ' Verify fits within limit
 ```
 
 #### Mode Switching
@@ -266,6 +266,9 @@ dispatch_table
         ORG     $100            ' cog mode: register code
 routine1
         MOV     PA, #1
+        RET
+routine2
+        MOV     PA, #2
         RET
 
         ORGH                    ' Back to hub mode
@@ -344,7 +347,7 @@ pattern byte    $AA[16], $55[16] ' Alternating pattern: 16 $AA, then 16 $55
 - Each value occupies exactly 1 byte
 - Strings are stored as individual bytes without alignment
 - No automatic alignment—use ALIGNW or ALIGNL if needed
-- Values outside 0-255 range will be truncated to 8 bits
+- Values outside 0-255 range (including negative values) are accepted and truncated to 8 bits
 - The `[count]` syntax repeats the preceding value, useful for buffer initialization
 
 #### Related Directives
@@ -393,7 +396,7 @@ rates   long    160_000_000[8]  ' Eight entries, same value
 #### Notes
 - Each value occupies 4 bytes
 - No automatic alignment—data packs sequentially; use ALIGNL if alignment needed
-- Supports full 32-bit range (0 to $FFFFFFFF)
+- Supports full 32-bit range (0 to $FFFFFFFF); negative values are accepted as two's complement
 - Standard size for P2 registers and instructions
 - The `[count]` syntax repeats the preceding value
 
@@ -443,7 +446,7 @@ sine    word    $8000[256]          ' Init sine table with midpoints
 - Each value occupies 2 bytes
 - No automatic alignment—data packs sequentially; use ALIGNW if alignment needed
 - Range: 0 to 65535 (unsigned)
-- Values outside this range will be truncated to 16 bits
+- Values outside this range (including negative values) are accepted and truncated to 16 bits
 - The `[count]` syntax repeats the preceding value
 
 #### Related Directives
@@ -483,7 +486,6 @@ The filename must not contain path separator characters. The following character
 | `:` | Colon |
 | `*` | Asterisk |
 | `?` | Question mark |
-| `"` | Double quote |
 | `<` | Less than |
 | `>` | Greater than |
 | `|` | Pipe |
@@ -733,7 +735,7 @@ WORDFIT values must range from -$8000 to $FFFF
 
 ## Alignment Directives
 
-Alignment directives insert padding bytes to align the next data or instruction to specified boundaries. Proper alignment improves memory access efficiency and is required for certain P2 operations.
+Alignment directives insert padding bytes to align the next data or instruction to specified boundaries. Use them when code requires data to begin on a word or long boundary.
 
 ::: dirheader
 ### ALIGNL {#alignl}
@@ -809,8 +811,6 @@ In this case, the ALIGNL directive causes three zero ($00) bytes to emit after T
 
 #### Notes
 - Inserts 0-3 bytes of padding as needed to reach next 4-byte boundary
-- P2 requires long alignment for certain operations
-- Critical for hub memory access efficiency
 - No effect if already on a long boundary
 
 #### Related Directives
@@ -894,7 +894,7 @@ In this case, the ALIGNW directive causes one zero ($00) byte to emit after Tabl
 
 #### Notes
 - Inserts 0-1 bytes of padding as needed to reach next 2-byte boundary
-- Important for 16-bit data access efficiency
+- Use when 16-bit data must begin on a word boundary
 - No effect if already on a word boundary
 
 #### Related Directives
@@ -932,7 +932,7 @@ DAT
 | `$$` | Special symbol evaluating to current iteration index (0 to count-1) |
 
 #### Usage
-Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is useful for generating repetitive code or data. DITTO requires Spin2 v50 or later; place the {Spin2_v50} version directive at the start of the source file.
+Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. DITTO works in DAT blocks and in inline PASM.
 
 #### Example
 ```pasm2
@@ -941,6 +941,8 @@ Use DITTO to generate repetitive code or data patterns without manual duplicatio
 CON
   NumChannels = 8
   BasePin = 16
+  PinMode = 0                   ' WRPIN mode value
+  PinX = 0                      ' WXPIN X value
 
 DAT
         ORG     0
@@ -968,6 +970,8 @@ DAT
 When count is 0, the entire block is skipped with no output generated:
 
 ```pasm2
+{Spin2_v50}
+
 CON
   MotorCount = 0                ' No motors in this build
 
@@ -988,8 +992,9 @@ DAT
 | Missing END | `Expected DITTO END` |
 
 #### Notes
-- Requires Spin2 v50 or later — add {Spin2_v50} at the top of the file
-- Requires the {Spin2_v50} version directive at the start of the source file (first line, before any CON/DAT) — examples omitting it will not compile
+- No symbols (labels) are allowed within the block, because symbols cannot be redefined; to branch within the block, use `$`-relative addressing, e.g. `TJZ x, #$+5`
+- Labels may appear on the DITTO and DITTO END lines themselves
+- Requires Spin2 v50 or later, via the {Spin2_v50} version directive at the start of the source file (first line, before any CON/DAT) — examples omitting it will not compile
 - Works in cog, LUT, and ORGH (hub) modes
 - `$$` can be used in any expression: `$$ * 2`, `1 << $$`, `BasePin + $$`
 - Replication occurs at compile time—no runtime overhead
@@ -1024,15 +1029,15 @@ Verify at compile time that the current address has not exceeded a specified lim
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| limit | Maximum address (in longs for Cog mode, bytes for Hub mode) |
+| limit | Maximum address (in longs for cog mode, bytes for hub mode) |
 
 #### Behavior by Mode
 
-**In Cog Mode (after ORG):**
+**In cog mode (after ORG):**
 - `limit` is a long address (0 to $400)
 - Error: `Cog address exceeds FIT limit`
 
-**In Hub Mode (after ORGH):**
+**In hub mode (after ORGH):**
 - `limit` is a byte address
 - Error: `Hub address exceeds FIT limit`
 
@@ -1040,9 +1045,9 @@ Verify at compile time that the current address has not exceeded a specified lim
 
 | Limit | Meaning |
 |-------|---------|
-| `$1F0` | User Cog RAM (before special registers) |
-| `$1F8` | Cog RAM (with some special registers) |
-| `$200` | Full Cog RAM |
+| `$1F0` | Below the dual-purpose registers ($1F0-$1F7) |
+| `$1F8` | Below the fixed special registers (the ORG default limit) |
+| `$200` | Full cog RAM |
 | `$400` | Cog + LUT RAM |
 | `496` | Decimal equivalent of $1F0 |
 
@@ -1113,14 +1118,14 @@ DAT
 | Restriction | Error |
 |-------------|-------|
 | Cannot have a preceding label | `This directive cannot be preceded by a symbol` |
-| Address exceeds Cog limit | `Cog address exceeds FIT limit` |
-| Address exceeds Hub limit | `Hub address exceeds FIT limit` |
+| Address exceeds cog limit | `Cog address exceeds FIT limit` |
+| Address exceeds hub limit | `Hub address exceeds FIT limit` |
 
 #### Notes
 - FIT generates an assembly error if the limit is exceeded
 - Used for cog code size verification
 - Registers $1F0-$1F7 are dual-purpose; the eight fixed special-purpose registers occupy $1F8-$1FF
-- Use FIT $1F0 to ensure code does not overwrite special registers
+- Use FIT $1F8 to ensure code does not overwrite the fixed special registers; use FIT $1F0 to also keep the dual-purpose registers ($1F0-$1F7) free
 - FIT works in both cog mode and hub mode
 
 **Tip:** Always add FIT after cog code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
@@ -1155,10 +1160,9 @@ Reserve space in cog or LUT RAM without initializing. Allocates memory space but
 
 #### Key Characteristics
 
-1. **Cog Mode Only** - RES only works after ORG, not in ORGH mode
+1. **Cog mode only** - RES only works after ORG, not in ORGH mode
 2. **No Object Code** - RES advances the cog address counter but produces no bytes in the object file
-3. **Uninitialized** - Reserved space contains whatever was previously in cog RAM
-4. **Long-Aligned** - RES advances to the next long boundary before reserving
+3. **Uninitialized** - No value is emitted for the reserved space
 
 #### Usage
 Use RES to allocate variables and buffers in cog RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in cog/LUT RAM—hub RAM variables must use LONG with initial values or be allocated at runtime.
@@ -1281,12 +1285,10 @@ Use END to mark the conclusion of an inline assembly block that began with ORG o
 #### Example: Pin Toggle
 
 ```spin2
-PUB FastToggle(pin) | mask
-
-  mask := 1 << pin              ' Spin2 code
+PUB FastToggle(pin)
 
   ORG                           ' Begin inline PASM (cog execution)
-                DRVNOT  mask    ' Toggle the pin
+                DRVNOT  pin     ' Toggle the pin
   END                           ' End inline PASM, implicit RET
 
   ' Execution returns here
@@ -1295,6 +1297,9 @@ PUB FastToggle(pin) | mask
 #### Example: I2C Start Sequence
 
 ```spin2
+VAR
+  long sclpin, sdapin, delay    ' Pins and timing, set elsewhere
+
 PUB start() | scl, sda, tix
 
   longmove(@scl, @sclpin, 3)    ' Copy pins & timing to locals

@@ -231,6 +231,8 @@ That is the opposite of what the ADC sampling modes above require, and the two a
 | X_DDS_GOERTZEL_SINC1 | %1111_0000_0000_0111 << 16 | DDS/Goertzel with SINC1 filter |
 | X_DDS_GOERTZEL_SINC2 | %1111_0000_1000_0111 << 16 | DDS/Goertzel with SINC2 filter |
 
+SINC2 needs a constant iteration count per Goertzel cycle: a window one clock longer or shorter than its neighbours corrupts that sample and the next. Start each measurement with `XZERO`, which holds one window length.
+
 
 
 ## Control Flags

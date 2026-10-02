@@ -33,7 +33,7 @@ POLLATN copies the state of the attention event flag into C and/or Z and then cl
 
 The attention event flag is set whenever another cog issues an attention request for this cog using COGATN. The flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
 
-This instruction enables inter-cog communication by allowing a cog to check whether another cog has requested its attention without blocking execution.
+POLLATN does not block execution.
 
 
 
@@ -72,7 +72,7 @@ POLLCT1, POLLCT2, and POLLCT3 copy the state of their respective counter event f
 
 Each counter event flag is set whenever the System Counter (CT) passes the value in that counter's event trigger register; that is, the MSB of (CT - CTn) is 0. The counter event flag is cleared upon execution of ADDCTn, POLLCTn, WAITCTn, JCTn, or JNCTn.
 
-These instructions enable time-based event polling without blocking execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3) allowing a cog to simultaneously track multiple timing requirements.
+These instructions do not block execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3).
 
 
 
@@ -105,7 +105,7 @@ POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/
 
 The FIFO-interface-block-wrap event flag is set whenever the hub RAM FIFO interface exhausts its block count and reloads its block count and start address. The flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
 
-This instruction enables circular buffer management for high-speed hub RAM transfers.
+POLLFBW does not block execution.
 
 
 
@@ -138,7 +138,7 @@ POLLINT copies the state of the interrupt-occurred event flag into C and/or Z an
 
 The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs. Debug interrupts are ignored. The flag is cleared upon cog start, or execution of POLLINT, WAITINT, JINT, or JNINT instructions.
 
-This instruction enables non-blocking interrupt handling.
+POLLINT does not block execution.
 
 
 
@@ -171,7 +171,7 @@ POLLPAT copies the state of the pin-pattern-detected event flag into C and/or Z 
 
 The pin-pattern-detected event flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT instruction. The flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
-This instruction enables non-blocking pattern detection on input pins.
+POLLPAT does not block execution.
 
 
 
@@ -202,9 +202,9 @@ Poll CORDIC Empty event
 
 POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
-The CORDIC-read-but-empty event flag is set whenever GETQX or GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, WAITQMT, JQMT, or JNQMT instructions.
+The CORDIC-read-but-empty event flag is set whenever GETQX or GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, JQMT, or JNQMT instructions. There is no WAITQMT instruction, because the event could not happen while waiting.
 
-This instruction enables error detection for CORDIC operations.
+POLLQMT does not block execution.
 
 
 
@@ -278,7 +278,7 @@ POLLXFI copies the state of the streamer-finished event flag into C and/or Z and
 
 The streamer-finished event flag is set whenever the streamer runs out of commands to process. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.
 
-This instruction enables non-blocking management of the streamer subsystem.
+POLLXFI does not block execution.
 
 
 
@@ -311,7 +311,7 @@ POLLXMT copies the state of the streamer-empty event flag into C and/or Z and th
 
 The streamer-empty event flag is set whenever the streamer is ready for a new command. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
 
-This instruction enables pipelined streamer operations.
+POLLXMT does not block execution.
 
 
 
@@ -344,7 +344,7 @@ POLLXRL copies the state of the streamer-LUT-RAM-rollover event flag into C and/
 
 The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer. The flag is cleared upon cog start or upon execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
 
-This instruction enables circular buffer management when using LUT RAM as a streamer data source.
+POLLXRL does not block execution.
 
 
 
@@ -377,7 +377,7 @@ POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z
 
 The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
 
-This instruction enables precise timing control for streamer operations that use the NCO for rate control.
+POLLXRO does not block execution.
 
 
 
@@ -385,14 +385,14 @@ This instruction enables precise timing control for streamer operations that use
 ## POP {#pop}
 Pop From Internal Stack
 
-[Miscellaneous](#miscellaneous) - Pops a value from the internal K register stack.
+[Miscellaneous](#miscellaneous) - Pops the top entry of the internal hardware stack.
 :::
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
 
 **Operation:** `D = K (stack)`; `C = K[31]`
 
-**Result:** Dest receives the value from the K register.
+**Result:** Dest receives the top entry (K) of the internal stack.
 
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
@@ -407,13 +407,13 @@ Pop From Internal Stack
 
 **Explanation:**
 
-POP pops the internal stack register K into the destination register Dest. The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address.
+POP pops the top entry of the internal stack, K, into the destination register Dest. The P2 has an 8-level hardware stack that CALL instructions use to store return addresses: CALL pushes and RET pops.
 
 If the WC or WCZ effect is specified, the C flag is set to bit 31 of the popped value.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-POP retrieves this value, typically as part of a return sequence, though it can also be used to retrieve any value previously stored with PUSH.
+POP can retrieve any value previously stored with PUSH. Because RET and POP both take the top entry, every PUSH must be balanced by a POP before the RET that expects the return address.
 
 
 
@@ -421,7 +421,7 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 ## POPA {#popa}
 Pop From hub stack A
 
-[hub memory Access](#hub-memory-access) - Pops a long from hub memory using PTRA as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pops a long from hub memory using PTRA as stack pointer.
 :::
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
@@ -449,7 +449,7 @@ If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of t
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-This instruction enables hub RAM-based stacks for deep subroutine nesting and large temporary storage.
+Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution.
 
 
 
@@ -457,7 +457,7 @@ This instruction enables hub RAM-based stacks for deep subroutine nesting and la
 ## POPB {#popb}
 Pop From hub stack B
 
-[hub memory Access](#hub-memory-access) - Pops a long from hub memory using PTRB as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pops a long from hub memory using PTRB as stack pointer.
 :::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
@@ -485,6 +485,8 @@ If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of t
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
+Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution.
+
 Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
 
@@ -493,12 +495,12 @@ Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage
 ## PUSH {#push}
 Push To Internal Stack
 
-[Miscellaneous](#miscellaneous) - Pushes a value onto the internal K register stack.
+[Miscellaneous](#miscellaneous) - Pushes a value onto the internal hardware stack.
 :::
 
 **PUSH**  *{#}Dest*
 
-**Result:** The value from Dest (or immediate value) is stored in the K register.
+**Result:** The value from Dest (or immediate value) becomes the new top entry (K) of the internal stack.
 
 - Dest is a register or 9-bit immediate value (0-511) to push.
 
@@ -512,9 +514,9 @@ Push To Internal Stack
 
 **Explanation:**
 
-PUSH pushes the value in Dest (or an immediate value 0-511) onto the internal stack register K. This instruction does not affect any flags.
+PUSH pushes the value in Dest (or an immediate value 0-511) onto the internal stack. This instruction does not affect any flags.
 
-The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address. PUSH can be used to save other values in K, though this overwrites any return address that may be stored there.
+The P2 has an 8-level hardware stack that CALL instructions use to store return addresses: CALL pushes and RET pops. PUSH adds a new top entry; it does not overwrite the return address below it. The next RET or POP takes the pushed value first, so each PUSH must be balanced by a POP before the RET that expects the return address.
 
 
 
@@ -522,7 +524,7 @@ The P2 provides a single-level internal stack register K that is automatically u
 ## PUSHA {#pusha}
 Push To hub stack A
 
-[hub memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRA as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRA as stack pointer.
 :::
 
 **PUSHA**  *{#}Dest*
@@ -549,13 +551,15 @@ This instruction does not affect any flags. The post-increment model means PTRA 
 
 PUSHA paired with POPA implements an ascending stack in hub RAM (the pointer advances to higher addresses on each push).
 
+Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution.
+
 
 
 ::: instrheader
 ## PUSHB {#pushb}
 Push To hub stack B
 
-[hub memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRB as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRB as stack pointer.
 :::
 
 **PUSHB**  *{#}Dest*
@@ -579,6 +583,8 @@ Push To hub stack B
 PUSHB writes the long value in Dest (or a 9-bit immediate value) to hub address PTRB++. PTRB is automatically incremented by 4 after the write occurs (post-increment).
 
 This instruction does not affect any flags. The post-increment model means PTRB always points to the next available stack location after the push operation.
+
+Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution.
 
 Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 

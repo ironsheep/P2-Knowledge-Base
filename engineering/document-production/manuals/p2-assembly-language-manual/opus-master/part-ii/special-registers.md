@@ -32,7 +32,7 @@ Address $1F0. Interrupt 3 call address. Stores the address where execution jumps
 
 **Access**: Read/Write
 
-**Usage**: When the INT3 event is triggered, the cog saves the current PC in IRET3 and jumps to the address stored in IJMP3. This register can be used as general RAM when interrupt 3 is not enabled.
+**Usage**: When the INT3 event is triggered, the cog saves the C/Z flags and return address in IRET3 and jumps to the address stored in IJMP3. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
 ```pasm2
@@ -50,7 +50,7 @@ Address $1F1. Interrupt 3 return address. Stores the return address when interru
 
 **Access**: Read/Write
 
-**Usage**: When INT3 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI3 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 3 is not enabled.
+**Usage**: When INT3 is triggered, the hardware automatically saves the C/Z flags and the return address (the interrupted PC) to this register. The RETI3 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
 ```pasm2
@@ -69,7 +69,7 @@ Address $1F2. Interrupt 2 call address. Stores the address where execution jumps
 
 **Access**: Read/Write
 
-**Usage**: When the INT2 event is triggered, the cog saves the current PC in IRET2 and jumps to the address stored in IJMP2. This register can be used as general RAM when interrupt 2 is not enabled.
+**Usage**: When the INT2 event is triggered, the cog saves the C/Z flags and return address in IRET2 and jumps to the address stored in IJMP2. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
 ```pasm2
@@ -87,7 +87,7 @@ Address $1F3. Interrupt 2 return address. Stores the return address when interru
 
 **Access**: Read/Write
 
-**Usage**: When INT2 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI2 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 2 is not enabled.
+**Usage**: When INT2 is triggered, the hardware automatically saves the C/Z flags and the return address (the interrupted PC) to this register. The RETI2 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
 ```pasm2
@@ -106,7 +106,7 @@ Address $1F4. Interrupt 1 call address. Stores the address where execution jumps
 
 **Access**: Read/Write
 
-**Usage**: When the INT1 event is triggered, the cog saves the current PC in IRET1 and jumps to the address stored in IJMP1. This register can be used as general RAM when interrupt 1 is not enabled.
+**Usage**: When the INT1 event is triggered, the cog saves the C/Z flags and return address in IRET1 and jumps to the address stored in IJMP1. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
 ```pasm2
@@ -124,7 +124,7 @@ Address $1F5. Interrupt 1 return address. Stores the return address when interru
 
 **Access**: Read/Write
 
-**Usage**: When INT1 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI1 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 1 is not enabled.
+**Usage**: When INT1 is triggered, the hardware automatically saves the C/Z flags and the return address (the interrupted PC) to this register. The RETI1 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
 ```pasm2
@@ -246,7 +246,7 @@ The increment/decrement amount (SCALE) depends on the instruction:
 - `PTRA++[index]` — Post-update indexed: use PTRA, then PTRA += index × SCALE
 - `++PTRA[index]` — Pre-update indexed: PTRA += index × SCALE, then use PTRA
 
-Index ranges: -32 to +31 for non-updating indexed; -16 to +16 for updating forms.
+Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for the updating (`++` and `--`) forms.
 
 **Example**:
 ```pasm2
@@ -364,7 +364,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 |------|------|-------------|
 | 31:0 | OUT | Output state for each pin: 1 = high, 0 = low |
 
-**Usage**: OUTA sets the output state for pins 0-31. Only affects pins configured as outputs via DIRA. Reading OUTA returns the current output register state, not the actual pin states (use INA to read pin states). When multiple cogs drive the same pin, the outputs are OR'd together—if any cog outputs high, the pin goes high.
+**Usage**: OUTA sets the output state for pins 0-31. Only affects pins configured as outputs via DIRA. To read the actual pin states, use INA. When multiple cogs drive the same pin, the outputs are OR'd together—if any cog outputs high, the pin goes high.
 
 **Example**:
 ```pasm2
@@ -487,7 +487,7 @@ The program counter is a 20-bit register holding the address of the currently ex
 
         ' PC modified by control flow
         jmp     #target                 ' Sets PC to target address
-        call    #subroutine             ' Saves PC+4, jumps to subroutine
+        call    #subroutine             ' Saves return addr (next instr)
 ```
 
 **Related**: CALLD, CALL, JMP
@@ -501,7 +501,7 @@ These are two separate mechanisms that are easily conflated, because SETQ suppli
 **The Q register** is a 32-bit value written by SETQ or SETQ2 to modify the instruction that immediately follows. It is write-only from the cog's point of view — there is no instruction that reads it back. Its value persists until the companion instruction consumes it. It supplies:
 
 1. **Block transfer counts**: SETQ or SETQ2 before RDLONG/WRLONG/WMLONG converts the transfer into a multi-long block move.
-2. **The CORDIC's second operand**: SETQ before a CORDIC command supplies the 64-bit operand's upper long.
+2. **An optional extra CORDIC operand**: the meaning of Q depends on the command. SETQ before QDIV supplies the upper long of the 64-bit dividend; before QFRAC it supplies the lower long of the dividend; before QROTATE it supplies the Y term. Without a SETQ, Q is zero for these commands.
 3. **The PTRA value** passed to a cog started by the COGINIT that follows.
 
 **CORDIC results** are held in the CORDIC solver's own result pipeline, not in Q. A CORDIC command's two 32-bit results become available 55 clocks after the command is issued, and are retrieved with GETQX (the X result) and GETQY (the Y result). Both instructions stall until the results arrive, so no explicit wait is needed. QDIV places its quotient in the X result and its remainder in the Y result.
@@ -510,19 +510,19 @@ Reading a result when none is available and none is in progress completes in two
 
 **Example**:
 ```pasm2
-        setq    y                       ' Y coordinate via Q
+        setq    y                       ' Y term of QROTATE via Q
         qrotate x, angle                ' Rotate (X, Y) by angle
-        getqx   result_x                ' Get X result from Q
-        getqy   result_y                ' Get Y result from Q
+        getqx   result_x                ' Get the X result from the CORDIC
+        getqy   result_y                ' Get the Y result from the CORDIC
 
         ' Block transfer setup
         setq    #15                     ' Setup for 16-long transfer
         rdlong  buffer, ptra++          ' Read 16 longs using Q count
 
         ' Division
-        qdiv    dividend, divisor       ' Quotient goes to Q
-        getqx   quotient                ' Read quotient from Q
-        getqy   remainder               ' Read remainder from Q
+        qdiv    dividend, divisor       ' Quotient becomes the X result
+        getqx   quotient                ' Read quotient (X result)
+        getqy   remainder               ' Read remainder (Y result)
 ```
 
 **Related**: GETQX, GETQY, SETQ, SETQ2, QROTATE, QVECTOR, QDIV
@@ -712,7 +712,7 @@ Timeout detection:
 
 **Smart Pin Interaction**: When a pin has a smart pin mode selected, DIR no longer controls the pin's output enable — it becomes an active-low **reset** for the smart pin circuitry. A smart pin is configured with WRPIN/WXPIN/WYPIN while its DIR bit is low, then started by raising DIR, and can be reset at any time by lowering and re-raising DIR. The output enable is then governed by a WRPIN configuration field, the smart pin may drive the output state directly, and IN becomes a completion or event flag rather than the pin's input level.
 
-**Immediate Effect**: Changes to DIR and OUT registers take effect immediately—the hardware updates pin states on the same clock cycle as the register write.
+**Immediate Effect**: Changes to DIR and OUT registers take effect immediately.
 
 **Input Reading**: For a pin with no smart pin mode selected, INA and INB return the actual pin state regardless of direction settings, which allows an output to be read back for verification. When a smart pin mode is selected, that pin's IN bit instead serves as a completion or event flag raised by the smart pin.
 

@@ -112,7 +112,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 Cancel Interrupt
 
-[Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
+[Events and Timing](#events-and-timing) - Cancels a triggered interrupt of the specified level that is waiting to branch.
 :::
 
 \hypertarget{nixint2}{}\hypertarget{nixint3}{}
@@ -121,7 +121,7 @@ Cancel Interrupt
 **NIXINT2**
 **NIXINT3**
 
-**Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
+**Result:** The triggered interrupt (INT1, INT2, or INT3) waiting to branch is cancelled.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -135,9 +135,9 @@ Cancel Interrupt
 
 **Explanation:**
 
-NIXINT1, NIXINT2, and NIXINT3 cancel any pending interrupt events for their respective interrupt levels. These instructions prevent the interrupt from occurring even if its event condition has been met.
+NIXINT1, NIXINT2, and NIXINT3 cancel an interrupt of their respective level that has already been triggered and is waiting to branch. Each NIXINT instruction cancels only its corresponding level. They do not unconfigure the interrupt source.
 
-The P2 provides three independent interrupt levels, and each NIXINT instruction cancels only its corresponding level. Use these instructions when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger cog execution flow changes.
+These instructions are useful only in main code after STALLI executes, or in an interrupt service routine that needs to stop a lower-level interrupt from executing after the current routine exits.
 
 
 
@@ -164,7 +164,7 @@ No Operation
 
 NOP consumes two clock cycles without performing any operation. No registers are modified, no flags are affected, and no memory is accessed.
 
-NOP is primarily used for timing adjustments, creating precise delays, or as a placeholder during development. It can also be used to align code for performance optimization or to fill instruction slots in pipelined operations.
+NOP is used for timing adjustments, creating precise delays, or as a placeholder.
 
 
 

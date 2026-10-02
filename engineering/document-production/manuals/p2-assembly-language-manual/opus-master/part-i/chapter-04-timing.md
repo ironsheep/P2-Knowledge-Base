@@ -217,7 +217,7 @@ RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
 | D[31] | Behavior |
 |-------|----------|
 | 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
-| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
+| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data: allow at least 15 clocks before the first FIFO read; an earlier read returns zero. |
 
 The no-wait mode is useful when the FIFO must be reconfigured quickly and enough cycles can be guaranteed to pass before the first FIFO access.
 

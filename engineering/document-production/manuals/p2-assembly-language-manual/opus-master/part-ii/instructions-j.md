@@ -2,14 +2,14 @@
 
 This section contains all PASM2 instructions beginning with the letter J.
 
-**Conditional Jump Timing Convention:** Conditional jumps (including event-jumps and counter-jumps) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps (including event-jumps and counter-jumps) show their `Clks` field as `cog/LUT execution / hub execution`, each side giving the not-taken count and then the taken count. The *taken* value depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken (either context), 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 cycles when the jump is not taken or 4 when taken; in hub execution, 2 cycles when not taken or 13–20 when taken.
 
 
 
@@ -47,6 +47,8 @@ JATN checks the ATN (attention) event flag and conditionally jumps if the flag i
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 These instructions are useful for implementing inter-cog communication mechanisms where one cog needs to signal and get the attention of another cog for coordination or data exchange purposes.
 
@@ -96,6 +98,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the CTn event flag is cleared (unless the event sensor sets it again at the same time).
+
 The P2 provides three independent hardware counters for timing operations, allowing a cog to manage multiple simultaneous time-based events without software overhead. JCTn instructions are commonly used for timing loops that wait until a counter fires, while JNCTn instructions enable polling loops that continue until a counter event occurs.
 
 
@@ -135,6 +139,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
+
 These instructions are useful for implementing circular buffer operations and managing block-based data transfers through the FIFO interface.
 
 
@@ -168,11 +174,13 @@ PC is written only when the condition is met.
 
 **Explanation:**
 
-JINT checks the INT (interrupt) event flag and jumps if set. JNINT performs the opposite test, jumping if clear. The INT event flag indicates that a hardware interrupt condition is pending, as configured by one of the SETINT instructions.
+JINT checks the INT (interrupt) event flag and jumps if set. JNINT performs the opposite test, jumping if clear. The INT event flag is set whenever interrupt 1, 2, or 3 occurs (debug interrupts are ignored), and is cleared on cog start.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 These instructions provide a polling-based mechanism for handling hardware interrupts, allowing code to check for interrupt conditions at convenient points in the program flow.
 
@@ -322,6 +330,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the SEn event flag is cleared (unless the event sensor sets it again at the same time).
+
 The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for event-driven code. JSEn instructions are commonly used for event-triggered actions, while JNSEn instructions enable polling loops that continue until an event occurs.
 
 
@@ -359,6 +369,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
+
 JPAT is useful for implementing hardware-triggered control flow where code execution branches based on specific pin state patterns. JNPAT is useful for polling loops that wait until a specific pattern appears on the I/O pins.
 
 
@@ -390,13 +402,15 @@ Jump If CORDIC Empty Event Set / Clear
 
 **Explanation:**
 
-JQMT and JNQMT check the CORDIC-read-but-empty event flag and conditionally jump to the address specified by S. JQMT jumps if the flag is set; JNQMT jumps if it is clear. This event flag is set when code attempts to read CORDIC results before the calculation has completed, indicating a timing error.
+JQMT and JNQMT check the CORDIC-read-but-empty event flag and conditionally jump to the address specified by S. JQMT jumps if the flag is set; JNQMT jumps if it is clear. This event flag is set when GETQX or GETQY executes while no CORDIC result is available and none is in progress; it is cleared on cog start.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
-JQMT is useful for error handling in CORDIC operations, allowing code to detect and respond to premature reads of calculation results. JNQMT is useful for ensuring CORDIC results are read at the correct time, helping to detect and handle timing errors in mathematical operations.
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
+
+JQMT is useful for detecting a GETQX or GETQY that was executed when no CORDIC result was available or in progress. JNQMT jumps when no such read has occurred since the flag was last cleared.
 
 
 
@@ -428,11 +442,13 @@ Jump If Streamer Finished Event Set / Clear
 
 **Explanation:**
 
-JXFI and JNXFI check the XFI (streamer finished) event flag and conditionally jump to the address specified by S. JXFI jumps if the flag is set; JNXFI jumps if it is clear. The XFI event flag is set when the streamer completes its current operation.
+JXFI and JNXFI check the XFI (streamer finished) event flag and conditionally jump to the address specified by S. JXFI jumps if the flag is set; JNXFI jumps if it is clear. The XFI event flag is set whenever the streamer runs out of commands, and is cleared by XINIT, XZERO, and XCONT.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXFI is useful for chaining streamer operations or triggering code execution immediately when a streaming operation completes. JNXFI is useful for polling loops that wait until the streamer completes its operation.
 
@@ -465,11 +481,13 @@ Jump If Streamer Empty Event Set / Clear
 
 **Explanation:**
 
-JXMT and JNXMT check the XMT (streamer empty) event flag and conditionally jump to the address specified by S. JXMT jumps if the flag is set; JNXMT jumps if it is clear. The XMT event flag is set when the streamer's internal buffer becomes empty and needs to be refilled.
+JXMT and JNXMT check the XMT (streamer empty) event flag and conditionally jump to the address specified by S. JXMT jumps if the flag is set; JNXMT jumps if it is clear. The XMT event flag is set whenever the streamer is ready for a new command, and is cleared by XINIT, XZERO, and XCONT.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXMT is useful for implementing continuous streaming operations where the code needs to reload data into the streamer when the buffer empties. JNXMT is useful for maintaining continuous streamer operation by reloading data only when the streamer buffer still contains data.
 
@@ -502,11 +520,13 @@ Jump If Streamer LUT Rollover Event Set / Clear
 
 **Explanation:**
 
-JXRL and JNXRL check the XRL (streamer LUT RAM rollover) event flag and conditionally jump to the address specified by S. JXRL jumps if the flag is set; JNXRL jumps if it is clear. The XRL event flag is set when the streamer's LUT RAM address pointer rolls over from the end back to the beginning of the configured range.
+JXRL and JNXRL check the XRL (streamer LUT RAM rollover) event flag and conditionally jump to the address specified by S. JXRL jumps if the flag is set; JNXRL jumps if it is clear. The XRL event flag is set whenever the streamer reads location $1FF of the lookup RAM, and is cleared on cog start.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXRL is useful for implementing circular buffer operations with the streamer using LUT RAM, detecting when a complete cycle through the buffer has occurred. JNXRL is useful for detecting when a buffer boundary has not yet been crossed.
 
@@ -544,6 +564,8 @@ JXRO and JNXRO check the XRO (streamer NCO rollover) event flag and conditionall
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXRO is useful for timing-critical streamer applications where code needs to synchronize with the NCO rollovers. JNXRO is useful for detecting the absence of NCO rollovers in the streaming operation.
 

@@ -18,7 +18,7 @@ Wait For Attention
 **Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -32,7 +32,7 @@ Wait For Attention
 
 WAITATN waits for an attention event to occur, stalling the pipeline until the event flag is set. The attention event flag is set whenever another cog issues an attention request for this cog using COGATN. The flag is cleared upon cog start or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
 
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. The WC, WZ, or WCZ effect is recommended only when timeout is specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
+To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. With a timeout armed, WC, WZ, or WCZ reports the outcome: the flags are set (1) if the timeout occurred before the event, or cleared (0) if the event occurred before the timeout. Without a preceding SETQ, the effects clear the flags, as described above.
 
 During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
@@ -60,7 +60,7 @@ Wait For Counter Event
 **Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -96,7 +96,7 @@ Wait For FIFO Block Wrap
 **Result:** Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -128,7 +128,7 @@ Wait For Interrupt
 **Result:** Waits for an interrupt-occurred event, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -160,7 +160,7 @@ Wait For Pattern
 **Result:** Waits for a pin-pattern-detected event, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -176,7 +176,10 @@ WAITPAT waits for a pin-pattern-detected event to occur, stalling the pipeline u
 
 The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
+SETPAT reads C and Z as inputs: C selects INA (0) or INB (1), and Z selects `==` (1) or `!=` (0) for the comparison. Set them before SETPAT.
+
 ```pasm2
+        MODCZ   _clr, _set WCZ ' C = 0 (INA), Z = 1 (match when ==)
         SETPAT  mask, pattern  ' Set up pattern detector
         WAITPAT                ' Wait for pattern match
 ```
@@ -234,10 +237,10 @@ Wait Cycles
 
 **Operation:** wait `2 + D` clocks; if WC/WZ/WCZ wait `2 + (D & RND)` clocks; `C/Z = 0`
 
-**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay and clears C and Z to 0 after completion.
+**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay and clears the flag(s) the effect names to 0 after completion (WC clears C, WZ clears Z, WCZ clears both).
 
 - Dest is the delay value; total wait is 2 + Dest cycles (0-511 for immediate).
-- WC, WZ, or WCZ enable randomized delay mode; C and Z are set to 0 after completion.
+- WC, WZ, or WCZ enable randomized delay mode; the flag(s) the effect names are set to 0 after completion.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -249,7 +252,7 @@ Wait Cycles
 
 **Explanation:**
 
-WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified, the delay becomes randomized: 2 + (Dest AND RND) clocks, where RND is a random value. This randomized mode is useful for avoiding timing-based interference between cogs. WAITX is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
+WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified, the delay becomes randomized: 2 + (Dest AND RND) clocks, where RND is a random value. WAITX is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
 
 WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
 
@@ -273,7 +276,7 @@ Wait For Streamer Finished
 **Result:** Waits for a streamer-finished event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -305,7 +308,7 @@ Wait For Streamer Empty
 **Result:** Waits for a streamer-empty event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -337,7 +340,7 @@ Wait For Streamer LUT Rollover
 **Result:** Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -369,7 +372,7 @@ Wait For Streamer NCO Rollover
 **Result:** Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -391,7 +394,7 @@ The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, 
 ## WFBYTE {#wfbyte}
 Write FIFO Byte
 
-[hub memory Access](#hub-memory-access) - Writes a byte to the hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a byte to the hub FIFO interface.
 :::
 
 **WFBYTE**  *{#}Dest*
@@ -412,7 +415,7 @@ Write FIFO Byte
 
 WFBYTE writes a byte from Dest[7:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
-Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles.
 
 
 
@@ -420,7 +423,7 @@ Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles whe
 ## WFLONG {#wflong}
 Write FIFO Long
 
-[hub memory Access](#hub-memory-access) - Writes a long to the hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a long to the hub FIFO interface.
 :::
 
 **WFLONG**  *{#}Dest*
@@ -441,7 +444,7 @@ Write FIFO Long
 
 WFLONG writes a long (32-bit value) from Dest[31:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
-All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+All 32 bits of Dest are written. WFLONG executes in 2 clock cycles.
 
 
 
@@ -449,7 +452,7 @@ All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO
 ## WFWORD {#wfword}
 Write FIFO Word
 
-[hub memory Access](#hub-memory-access) - Writes a word to the hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a word to the hub FIFO interface.
 :::
 
 **WFWORD**  *{#}Dest*
@@ -470,7 +473,7 @@ Write FIFO Word
 
 WFWORD writes a word (16-bit value) from Dest[15:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
-Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles.
 
 
 
@@ -478,7 +481,7 @@ Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles wh
 ## WMLONG {#wmlong}
 Write Masked Long
 
-[hub memory Access](#hub-memory-access) - Writes only non-zero bytes to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes only non-zero bytes to hub RAM.
 :::
 
 **WMLONG**  *Dest, {#}Src/P*
@@ -513,13 +516,14 @@ This masked write capability is useful for sprite graphics, text overlay, and ot
 
 Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WMLONG. Per the P2 Documentation, such an intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
 
 
 ::: instrheader
 ## WRBYTE {#wrbyte}
 Write Byte
 
-[hub memory Access](#hub-memory-access) - Writes a byte to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a byte to hub RAM.
 :::
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
@@ -576,10 +580,10 @@ Write Flag To Register
 
 | Instruction | Dest value |
 |-------------|------------|
-| WRC | 1 if C=1, else 0 |
-| WRNC | 1 if C=0, else 0 |
-| WRZ | 1 if Z=1, else 0 |
-| WRNZ | 1 if Z=0, else 0 |
+| WRC | 1 if C == 1, else 0 |
+| WRNC | 1 if C == 0, else 0 |
+| WRZ | 1 if Z == 1, else 0 |
+| WRNZ | 1 if Z == 0, else 0 |
 
 - Dest is the destination register. Upper 31 bits are cleared to zero.
 
@@ -604,7 +608,7 @@ WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the 
 ## WRFAST {#wrfast}
 Write FIFO Setup
 
-[hub memory Access](#hub-memory-access) - Configures the hub FIFO for fast writes.
+[Hub Memory Access](#hub-memory-access) - Configures the hub FIFO for fast writes.
 :::
 
 **WRFAST**  *{#}Dest, {#}Src*
@@ -626,7 +630,7 @@ Write FIFO Setup
 
 WRFAST configures the hub FIFO interface for fast streaming writes to hub RAM. After WRFAST executes, use WFBYTE, WFWORD, or WFLONG to write data through the FIFO.
 
-Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. Dest[31] controls wait behavior: if set, FIFO writes proceed without stalling.
+Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. Dest[31] controls wait behavior: if clear, WRFAST waits for any previous WRFAST to finish and then reconfigures the FIFO interface; if set, WRFAST does not wait for the reconfiguration and takes only 2 clocks, so the code must allow enough clocks before the first FIFO write.
 
 Src[19:0] specifies the starting hub RAM address. The FIFO automatically increments the address as data is written.
 
@@ -641,7 +645,7 @@ Src[19:0] specifies the starting hub RAM address. The FIFO automatically increme
 ## WRLONG {#wrlong}
 Write Long
 
-[hub memory Access](#hub-memory-access) - Writes a long to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a long to hub RAM.
 :::
 
 **WRLONG**  *{#}Dest, {#}Src/P*
@@ -681,7 +685,7 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
         WRLONG  buffer, ptra   ' Write 16 longs to hub
 ```
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size.
+**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
 
 
 
@@ -727,7 +731,7 @@ WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup ta
 ## WRPIN {#wrpin}
 Write Pin Mode
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures the operating mode of a smart pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the operating mode of a smart pin.
 :::
 
 **WRPIN**  *{#}Dest, {#}Src*
@@ -751,10 +755,10 @@ WRPIN configures the operating mode of one or more smart pins. Each of the P2's 
 
 See Appendix F for the A/B input-selector (%AAAA/%BBBB) encodings.
 
-**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
+A smart pin should be configured while its DIR bit is low, holding it in reset. A WRPIN issued while DIR is high changes the use of the pin's state bits without regulation and gives unpredictable behavior in the newly selected mode.
 
 The standard configuration sequence is:
-1. DIRL pin — Reset smart pin (required)
+1. DIRL pin — Reset smart pin
 2. WRPIN mode, pin — Configure smart pin mode
 3. WXPIN x, pin — Set X parameter (setup)
 4. DIRH pin — Enable smart pin
@@ -777,7 +781,7 @@ WRPIN #0, pin clears all smart pin configuration.
 ## WRWORD {#wrword}
 Write Word
 
-[hub memory Access](#hub-memory-access) - Writes a word to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a word to hub RAM.
 :::
 
 **WRWORD**  *{#}Dest, {#}Src/P*
@@ -814,7 +818,7 @@ The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hu
 ## WXPIN {#wxpin}
 Write Pin X Parameter
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets the X parameter of a smart pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the X parameter of a smart pin.
 :::
 
 **WXPIN**  *{#}Dest, {#}Src*
@@ -836,10 +840,10 @@ Write Pin X Parameter
 
 WXPIN sets the X parameter of one or more smart pins. The X register meaning depends on the smart pin mode:
 
-- For PWM modes: Sets frame period or duty cycle parameter
+- For PWM modes: X[15:0] sets the base period in clocks and X[31:16] sets the PWM frame period in base periods
 - For serial modes: Controls bit timing and configuration
-- For pulse measurement: Sets measurement parameters
-- For transition modes: Controls timebase
+- For the counting and quadrature measurement modes: X[31:0] sets the measurement period in clocks (0 = continuous)
+- For pulse/cycle and transition output modes: X[15:0] sets the base period in clocks
 
 Writing the X register also acknowledges the smart pin, clearing any completion flags.
 
@@ -849,7 +853,7 @@ Writing the X register also acknowledges the smart pin, clearing any completion 
 ## WYPIN {#wypin}
 Write Pin Y Parameter
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets the Y parameter of a smart pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the Y parameter of a smart pin.
 :::
 
 **WYPIN**  *{#}Dest, {#}Src*
@@ -873,8 +877,9 @@ WYPIN sets the Y parameter of one or more smart pins. The Y register serves mult
 
 - For PWM modes: Sets the output value, captured at the start of every PWM frame and compared against the frame counter — the duty. The base period and frame count come from WXPIN
 - For SPI/serial modes: Controls data to transmit
-- For counter modes: Sets count value
-- For ADC modes: Initiates conversions
+- For pulse/cycle and transition output modes: A non-zero value starts that many pulses or transitions
+- For the edge- and high-counting modes (%01110, %01111): Y[0] selects counting A only (0) or incrementing on A and decrementing on B (1)
+- For ADC modes other than SINC2 sampling: Y[13:0] replaces the sample period set by WXPIN
 
 Writing the Y register also acknowledges pin completion, clearing any completion flags. Writing Y both supplies new data and acknowledges the previous result.
 

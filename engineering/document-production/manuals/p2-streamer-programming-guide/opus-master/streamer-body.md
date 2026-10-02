@@ -799,13 +799,13 @@ repeat i from 0 to 511
 :::
 
 ::: caution
-**SINC2 requires a *constant* iteration count per Goertzel cycle — a silicon limitation reported by the P2's designer.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle; GETXACC then captures an accumulator that is off by one integration, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise in the output. (Chip Gracey, the P2's designer, reported this constraint on 2024-12-16; it is stated in the *Parallax Propeller 2 Documentation*, in its note of that date on Goertzel SINC2 mode.)
+**SINC2 requires a *constant* iteration count per Goertzel cycle — a constraint stated in the P2 Documentation.** SINC2's double integration is only correct when every Goertzel cycle integrates the same number of streamer iterations. If the NCO frequency word (`SETXFRQ`'s D) makes one NCO cycle span a non-power-of-two number of system clocks, the iteration count varies by ±1 clock from cycle to cycle. SINC2's first stage is a running integral that `GETXACC` does not clear, so a window one clock longer or shorter than its neighbours moves one first-stage value between two adjacent samples, corrupting the current sample **and the following one** before it self-corrects. The symptom is periodic noise in the output. (Chip Gracey, the P2's designer, reported this constraint on 2024-12-16; it is stated in the *Parallax Propeller 2 Documentation*, in its note of that date on Goertzel SINC2 mode.)
 
 Three ways to avoid it, most robust first:
 
 1. **Run at a system clock that makes the iteration count a power of two.** To listen at 1 MHz, run the sysclock at 256 MHz rather than 250 MHz, so every Goertzel cycle is exactly 256 clocks — constant by construction. (A *constant* count is the true requirement; a power of two is simply the practical way to guarantee it.)
 2. **Use SINC1 instead.** Single integration is not sensitive to a varying iteration count.
-3. **If you must use SINC2 with a non-power-of-two rate, start each measurement with XZERO (not XCONT) and keep the measurement period short — on the order of 20 ms or less** — so the per-cycle error cannot accumulate far. This bound is approximate and not part of the documented specification; verify it for your rate.
+3. **If you must use SINC2 with a non-power-of-two rate, start each measurement with XZERO (not XCONT).** Measured on P2 silicon, a corrupted pair occurs at every change of window length and never otherwise; started with XZERO, each measurement held one window length and gave clean samples at 10.24 µs, 100 µs and 25 ms windows.
 :::
 
 ## 10.6 Reading Results {#sec-10-6}
@@ -1796,7 +1796,7 @@ This section builds a **detector** — the streamer's DAC routing stays off, and
 
 The consequence matters more than the mechanism: **`GETXACC` reads a holding register, not a live accumulator.** A second `GETXACC` with no intervening streamer command returns *the same numbers*, and a read taken before a command belongs to the **previous** one. The *Parallax Propeller 2 Documentation*'s own demo comments its read "get prior Goertzel acc's".
 
-So: **one read per streamer command.** With a discrete `XINIT` / `WAITXFI` / `GETXACC` sequence, read before the command and after it and take the **difference** — an absolute read in that pattern is not a per-command measurement. It fails invisibly, because the number returned is large, stable and entirely plausible. The `XCONT` loop below reads once per command and subtracts a baseline established on the first pass.
+So: **one read per streamer command.** With a discrete `XINIT` / `WAITXFI` / `GETXACC` sequence, read before the command and after it and take the **difference** — an absolute read in that pattern is not a per-command measurement. It fails invisibly, because the number returned is large, stable and entirely plausible. The `XCONT` loop below reads once per command.
 
 ### Detection loop
 

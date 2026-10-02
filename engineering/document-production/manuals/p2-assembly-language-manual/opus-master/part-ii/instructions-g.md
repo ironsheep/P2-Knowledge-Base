@@ -34,7 +34,7 @@ With the WCZ effect, GETBRK returns the cog's internal status: C indicates STALL
 
 With the WC effect, GETBRK reports skip and execution state: C is the LSB of the current SKIP/SKIPF/EXECF/XBYTE pattern, and Dest holds the CALL depth since that pattern began, the SKIP versus SKIPF/EXECF/XBYTE mode, the LUT-sharing and XBYTE state, and the 16 event-trap flags (CORDIC, attention, streamer, FIFO, pin-pattern, SE1-SE4, CT1-CT3, and interrupt events).
 
-With the WZ effect, GETBRK returns the queued skip pattern: Z indicates whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued (Dest = 0 means none), and Dest holds the full 32-bit pattern, consumed LSB-first to skip subsequent instructions.
+With the WZ effect, GETBRK returns the queued skip pattern: Z indicates whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued (Dest == 0 means none), and Dest holds the full 32-bit pattern, consumed LSB-first to skip subsequent instructions.
 
 GETBRK is essential for implementing debug infrastructure. It works in conjunction with BRK, and with COGBRK to break another cog, to provide breakpoint support.
 
@@ -91,7 +91,7 @@ Get System Counter
 **Result:** The current value of the system counter CT is written to Dest.
 
 - Dest is a register where the system counter value is written.
-- WC is an optional effect to retrieve the upper 32 bits of the 64-bit counter (Rev B/C silicon).
+- WC is an optional selector that retrieves the upper 32 bits of the 64-bit counter (Rev B/C silicon). It selects which half is read; the C flag is not written.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -159,7 +159,7 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 ## GETPTR {#getptr}
 Get FIFO Hub Pointer
 
-[hub memory Access](#hub-memory-access) - Retrieves the current FIFO hub pointer position.
+[Hub Memory Access](#hub-memory-access) - Retrieves the current FIFO hub pointer position.
 :::
 
 **GETPTR**  *Dest*
@@ -220,7 +220,7 @@ If the WC or WCZ effect is specified, the C flag is set to X[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-GETQX takes 2 clocks if the result is already available. If the result is not yet ready, GETQX waits until the CORDIC computation completes (up to 58 clocks from when the operation was queued).
+GETQX takes 2 to 58 clocks in total: 2 clocks if the result is already available, and longer when it must wait for the CORDIC computation to complete.
 
 
 
@@ -258,7 +258,7 @@ If the WC or WCZ effect is specified, the C flag is set to Y[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-GETQY takes 2 clocks if the result is already available. If the result is not yet ready, GETQY waits until the CORDIC computation completes (up to 58 clocks from when the operation was queued).
+GETQY takes 2 to 58 clocks in total: 2 clocks if the result is already available, and longer when it must wait for the CORDIC computation to complete.
 
 
 
@@ -266,7 +266,7 @@ GETQY takes 2 clocks if the result is already available. If the result is not ye
 ## GETRND {#getrnd}
 Get Random Value
 
-[Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the cog's RNG.
+[Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the chip's PRNG.
 :::
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**\
@@ -290,7 +290,7 @@ Get Random Value
 
 **Explanation:**
 
-GETRND retrieves the current value from the pseudo-random number generator (RNG) that is unique to each cog. Each cog maintains its own independent RNG state that advances continuously.
+GETRND retrieves the current value from the chip's pseudo-random number generator (PRNG). There is one PRNG, which iterates on every clock and generates 64 fresh bits that are spread among all cogs and smart pins. Each cog receives its own unique set of 32 different bits from that pool, in a scrambled arrangement with some bits inverted, and GETRND samples them.
 
 The first syntax form (GETRND Dest) writes the full 32-bit random value to the Dest register. This provides a complete random word for applications requiring random data, random seeds, or probabilistic algorithms.
 
@@ -298,7 +298,7 @@ The second syntax form (GETRND without Dest) is used when only random flag bits 
 
 If the WC or WCZ effect is specified, the C flag is set to RND[31], which is the most significant bit of the current random value.
 
-If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND[30] is unique per cog, meaning each cog's RNG produces independent bit sequences at this position, useful for multi-cog systems requiring independent randomness.
+If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Because each cog receives its own unique bits of the PRNG output, the value, and so this bit, differs from cog to cog.
 
 The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128^ - 1).
 

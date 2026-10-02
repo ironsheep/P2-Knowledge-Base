@@ -8,7 +8,7 @@ This section contains all PASM2 instructions beginning with the letter F.
 ## FBLOCK {#fblock}
 Set Next FIFO Block
 
-[hub memory Access](#hub-memory-access) - Configures the next block for FIFO wraparound operations.
+[Hub Memory Access](#hub-memory-access) - Configures the next block for FIFO wraparound operations.
 :::
 
 **FBLOCK**  *{#}Dest, {#}Src*
@@ -30,9 +30,11 @@ Set Next FIFO Block
 
 FBLOCK configures the parameters for the next hub FIFO block that will be used when the current block wraps around. This instruction is used to set up circular buffering in hub memory for streaming read and write operations.
 
+FBLOCK takes 2 clocks and never waits: it only queues the next start address and block count. They take effect when the current blocks are fully read or written, in place of the prior start address and block count that the FIFO would otherwise have wrapped back to. FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event.
+
 Dest[13:0] specifies the block size in 64-byte units. A value of 0 represents the maximum block size. The block size determines how many bytes can be transferred before the FIFO wraps to the beginning of the block.
 
-Src[19:0] specifies the starting address of the block in hub memory. This address marks where the FIFO will wrap to when it reaches the end of the current block.
+Src[19:0] specifies the starting address of the block in hub memory. This is the address at which the FIFO continues once the current blocks have been fully read or written.
 
 FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-throughput data streaming between hub memory and cog/LUT memory. The block configuration takes effect when the current FIFO operation completes and wraps around.
 
@@ -204,10 +206,10 @@ Float with Output Preset by Flag
 
 **Operation:** `OUT[pin range] = src`, `DIR[pin range] = 0` (FLTC src=C, FLTNC src=!C, FLTZ src=Z, FLTNZ src=!Z); `C,Z = OUT bit`
 
-**Result:** The I/O pins are set to input direction with output preset according to flag state. Optionally sets Z to original output state.
+**Result:** The I/O pins are set to input direction with output preset according to flag state. Optionally sets C and Z to the original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
-- WCZ is an optional effect to set Z to the original output state.
+- WCZ is an optional effect to set C and Z to the original output state.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |

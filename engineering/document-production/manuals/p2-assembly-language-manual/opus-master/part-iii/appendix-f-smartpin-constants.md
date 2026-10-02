@@ -85,10 +85,12 @@ Constants are combined using OR operations to build the complete configuration:
 | P_AND_AB | %0000_0000_001_0000000000000_00_00000_0 | A AND B → A, pass B |
 | P_OR_AB | %0000_0000_010_0000000000000_00_00000_0 | A OR B → A, pass B |
 | P_XOR_AB | %0000_0000_011_0000000000000_00_00000_0 | A XOR B → A, pass B |
-| P_FILT0_AB | %0000_0000_100_0000000000000_00_00000_0 | Filter A and B (2-clock sample) |
-| P_FILT1_AB | %0000_0000_101_0000000000000_00_00000_0 | Filter A and B (3-clock sample) |
-| P_FILT2_AB | %0000_0000_110_0000000000000_00_00000_0 | Filter A and B (5-clock sample) |
-| P_FILT3_AB | %0000_0000_111_0000000000000_00_00000_0 | Filter A and B (8-clock sample) |
+| P_FILT0_AB | %0000_0000_100_0000000000000_00_00000_0 | Filter A and B with the global filt0 setting (reset default: 2 flip-flops, tap 0) |
+| P_FILT1_AB | %0000_0000_101_0000000000000_00_00000_0 | Filter A and B with the global filt1 setting (reset default: 3 flip-flops, tap 5) |
+| P_FILT2_AB | %0000_0000_110_0000000000000_00_00000_0 | Filter A and B with the global filt2 setting (reset default: 5 flip-flops, tap 19) |
+| P_FILT3_AB | %0000_0000_111_0000000000000_00_00000_0 | Filter A and B with the global filt3 setting (reset default: 8 flip-flops, tap 22) |
+
+The four filter settings are global to the chip, shared by every smart pin; each is set with `HUBSET` (length 0..3 for 2, 3, 5 or 8 flip-flops, and a tap 0..31 of the free-running counter).
 
 
 
@@ -205,7 +207,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_TT_01 | %0000_0000_000_0000000000000_01_00000_0 | TT = %01 |
 | P_TT_10 | %0000_0000_000_0000000000000_10_00000_0 | TT = %10 |
 | P_TT_11 | %0000_0000_000_0000000000000_11_00000_0 | TT = %11 |
-| P_OE | %0000_0000_000_0000000000000_01_00000_0 | Output enable in smart pin mode |
+| P_OE | %0000_0000_000_0000000000000_01_00000_0 | Enable output in smart pin mode, regardless of DIR |
 | P_CHANNEL | %0000_0000_000_0000000000000_01_00000_0 | Enable DAC channel (non-smart mode) |
 | P_BITDAC | %0000_0000_000_0000000000000_10_00000_0 | Enable BITDAC (non-smart mode) |
 
@@ -302,7 +304,7 @@ Constants are combined using OR operations to build the complete configuration:
 ' Configure pin 32 for ADC with 10x gain
         mov     mode, ##P_ADC | P_ADC_10X
         wrpin   mode, #32
-        wxpin   ##14, #32           ' 14-bit resolution
+        wxpin   #%00_1101, #32      ' SINC2 sampling, 8192-clock period
         dirh    #32                 ' DIR high releases the reset
 ```
 
@@ -328,12 +330,12 @@ Constants are combined using OR operations to build the complete configuration:
 
 ## Combining Constants
 
-SmartPin constants are designed to be combined using OR operations. The bit fields are carefully arranged so constants from different categories don't conflict:
+SmartPin constants combine using OR operations: pick one constant from each group. The groups do not all have separate bits. The Sync mode, IN polarity and output polarity bits share positions with the ADC, DAC and level fields, and the P2 Documentation lists each for particular low-level pin modes only: Sync mode for Logic, Schmitt, Comparator and Level modes; IN polarity for Logic, Schmitt and Comparator modes; output polarity and drive strength for Logic, Schmitt, Comparator and ADC modes.
 
 ```pasm2
-' Complex config: Async TX, inverted, fast drive
-        mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT
-        or      mode, ##P_HIGH_FAST | P_LOW_FAST
+' Complex config: Schmitt A, synchronous, inverted IN and output
+        mov     mode, ##P_SCHMITT_A | P_SYNC_IO | P_INVERT_IN
+        or      mode, ##P_INVERT_OUTPUT | P_HIGH_FAST | P_LOW_1K5
         wrpin   mode, pin
 ```
 

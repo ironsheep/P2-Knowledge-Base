@@ -232,9 +232,7 @@ Blend Pixels
 
 BLNPIX alpha-blends the individual RGB (red, green, blue) color values of Src into that of Dest and stores the result in the Dest register. The blend factor must first be established with SETPIV, whose entry documents the factor format.
 
-The alpha-blending operation combines the two color values based on the blend factor, allowing smooth color transitions and transparency effects. A blend factor of 0 leaves Dest unchanged, while a blend factor of 255 completely replaces Dest with Src. Values between 0 and 255 produce proportional blends.
-
-The instruction processes all three color channels (and alpha if present) in parallel, completing in 7 clock cycles. This enables efficient pixel manipulation for graphics applications, user interfaces, and visual effects.
+The blend factor V is the 8-bit value set by SETPIV from D[7:0]. For each of the four bytes of Dest and Src, the result is `((Dest_byte * !V + Src_byte * V + $FF) >> 8) max $FF`, where `!V` is the inverse of V. All four bytes are processed in parallel, and the instruction takes 7 clock cycles.
 
 
 
@@ -300,7 +298,7 @@ Breakpoint
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
 
 
-**Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk)
+**Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk), [SKIP](#skip)
 
 **Explanation:**
 
@@ -312,7 +310,17 @@ During a Debug ISR, the BRK instruction is used instead to establish the next de
 
 The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where A is the 20-bit breakpoint address or 4-bit event code, and bits B-M control various interrupt enable conditions.
 
-BRK is essential for interactive debugging, allowing precise control over program execution and inspection of program state at specific points or conditions.
+**Condition caveat:** Regardless of its execution condition, BRK triggers the debug interrupt, if enabled. The condition gates only the writing of the 8-bit code, so a BRK whose condition is false still enters the Debug ISR, and GETBRK there shows the code of the previous BRK whose condition was true. To make a break conditional, place an opposite-condition SKIP #1 before an unconditional BRK, or JMP around it; either form cancels both the break and its code.
+
+```pasm2
+        cmp     value, limit    wc     ' C = 1 if value is below limit
+if_c    skip    #1                     ' opposite condition: skip the BRK
+        brk     #1                     ' breaks only when C == 0
+```
+
+Spin2's DEBUG statements use BRK: a plain DEBUG compiles to BRK #0, and DEBUG() commands compile to BRK #1 through #255, each code selecting the statement's record in the DEBUG database. A conditional DEBUG compiles to the same opposite-condition SKIP form shown above.
+
+BRK is essential for interactive debugging, allowing program execution to be interrupted and program state inspected at chosen points.
 
 
 

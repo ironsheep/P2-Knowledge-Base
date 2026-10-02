@@ -96,9 +96,22 @@ Mix Pixels
 
 MIXPIX performs pixel blending operations on the four bytes of D using the four bytes of S, according to the mixing parameters previously configured by SETPIX and SETPIV instructions. Each byte is treated as a separate pixel component (typically used for red, green, blue, and alpha channels in RGBA color format).
 
-The SETPIX instruction configures the pixel mixer mode, which determines how the source and destination bytes are combined (such as multiply, add, or blend operations). The SETPIV instruction provides additional configuration values that affect the mixing calculation.
+SETPIX sets the mixer mode M[5:0] from bits 5:0 of its operand. M[5:3] selects the DMIX term and M[2:0] selects the SMIX term. SETPIV sets the blend factor V[7:0] from bits 7:0 of its operand.
 
-This instruction executes in 7 clock cycles to perform the pixel arithmetic on all four bytes in parallel. The exact blending formula depends on the mode set by SETPIX, but typically implements standard pixel compositing operations used in graphics rendering, such as alpha blending, color multiplication, or additive blending.
+For each byte pair, MIXPIX computes `D.BYTE[n] = ((D.BYTE[n] * DMIX + S.BYTE[n] * SMIX + $FF) >> 8) max $FF`. Each of DMIX and SMIX is chosen by its three mode bits as follows:
+
+| M bits | Term value |
+|:------:|:-----------|
+| %000 | $00 |
+| %001 | $FF |
+| %010 | V |
+| %011 | !V |
+| %100 | S byte |
+| %101 | !S byte |
+| %110 | D byte |
+| %111 | !D byte |
+
+This instruction executes in 7 clock cycles and processes all four bytes.
 
 MIXPIX blends two pixels per the configured mode in one operation.
 
@@ -136,7 +149,7 @@ The modifier is applied as: C = cccc[{C,Z}], where {C,Z} forms a 2-bit index int
 
 Common modifier values enable useful operations: $F (binary 1111) always sets C to 1, $0 (binary 0000) always clears C to 0, $C (binary 1100) copies C to itself (C unchanged, independent of Z), and $3 (binary 0011) sets C to the inverse of the current C (NC), independent of Z.
 
-MODC is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
+MODC computes a new C from the current C and Z flags in a single instruction.
 
 The WC effect must be specified for the modification to take effect. Without WC, the instruction computes the result but does not write it to the C flag, rendering the instruction ineffective for most purposes.
 
@@ -173,9 +186,7 @@ MODCZ provides simultaneous conditional modification of both the C and Z flags b
 
 The modifiers are applied as: C = cccc[{C,Z}] and Z = zzzz[{C,Z}], where {C,Z} forms a 2-bit index into each 4-bit modifier value. Both flags are updated simultaneously based on the same initial C and Z states, allowing complex boolean operations to be computed in parallel.
 
-This instruction implements conditional logic operations without branching. For example, modifier values can implement logical operations like AND, OR, XOR between the flags, or conditional moves where one flag's new value depends on the other flag's current state.
-
-Common uses include implementing state machines where both flags represent state bits, performing multi-condition tests after comparison operations, and creating compact conditional code sequences that would otherwise require multiple instructions or branches.
+Modifier values can compute logical operations such as AND, OR and XOR of the two flags, or make one flag's new value depend on the other flag's current state.
 
 The WC, WZ, or WCZ effect must be specified for the modifications to take effect. Without these effects, the instruction computes results but does not write them to the flags, rendering the instruction ineffective for most purposes.
 
@@ -186,28 +197,28 @@ MODCZ updates both flags from the same initial flag state, which separate MODC/M
 | Value | Binary | Mnemonic | Description |
 |:-----:|:------:|:---------|:------------|
 | 0 | 0000 | _CLR | Always clear (result = 0) |
-| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
-| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 1 | 0001 | _NC_AND_NZ | C == 0 AND Z == 0 |
+| 2 | 0010 | _NC_AND_Z | C == 0 AND Z == 1 |
 | 3 | 0011 | _NC | Copy inverse of C (not C) |
-| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 4 | 0100 | _C_AND_NZ | C == 1 AND Z == 0 |
 | 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
 | 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
-| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
-| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 7 | 0111 | _NC_OR_NZ | C == 0 OR Z == 0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C == 1 AND Z == 1 (AND) |
 | 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
 | 10 | 1010 | _Z | Copy Z |
-| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 11 | 1011 | _NC_OR_Z | C == 0 OR Z == 1 |
 | 12 | 1100 | _C | Copy C |
-| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
-| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 13 | 1101 | _C_OR_NZ | C == 1 OR Z == 0 |
+| 14 | 1110 | _C_OR_Z | C == 1 OR Z == 1 (OR) |
 | 15 | 1111 | _SET | Always set (result = 1) |
 
 ```pasm2
-        MODCZ   _CLR, _SET      ' Clear C, set Z
-        MODCZ   _SET, _CLR      ' Set C, clear Z
-        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
-        MODCZ   _Z, _C          ' Swap C and Z values
-        MODCZ   _NC, _NZ        ' Invert both flags
+        MODCZ   _CLR, _SET  WCZ        ' Clear C, set Z
+        MODCZ   _SET, _CLR  WCZ        ' Set C, clear Z
+        MODCZ   _C_AND_Z, _C_OR_Z  WCZ ' C = C AND Z, Z = C OR Z
+        MODCZ   _Z, _C      WCZ        ' Swap C and Z values
+        MODCZ   _NC, _NZ    WCZ        ' Invert both flags
 ```
 
 
@@ -242,9 +253,9 @@ MODZ provides conditional modification of the Z flag based on a 4-bit modifier v
 
 The modifier is applied as: Z = zzzz[{C,Z}], where {C,Z} forms a 2-bit index into the 4-bit modifier value. For example, if the current C flag is 0 and Z flag is 1, the index is binary 01 (1 decimal), and the Z flag is set to bit 1 of the modifier value.
 
-Common modifier values enable useful operations: $F (binary 1111) always sets Z to 1, $0 (binary 0000) always clears Z to 0, $A (binary 1010) copies Z to itself (preserving current state), and $C (binary 1100) sets Z if C=1.
+Common modifier values enable useful operations: $F (binary 1111) always sets Z to 1, $0 (binary 0000) always clears Z to 0, $A (binary 1010) copies Z to itself (preserving current state), and $C (binary 1100) sets Z if C == 1.
 
-MODZ is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
+MODZ computes a new Z from the current C and Z flags in a single instruction.
 
 The WZ effect must be specified for the modification to take effect. Without WZ, the instruction computes the result but does not write it to the Z flag, rendering the instruction ineffective for most purposes.
 
@@ -275,11 +286,11 @@ Move
 
 **Explanation:**
 
-MOV copies the value from Src into the Dest register, providing the fundamental data movement operation in PASM2. This is one of the most frequently used instructions, enabling register initialization, value copying, and data transfer between registers.
+MOV copies the value from Src into the Dest register.
 
-If the WC or WCZ effect is specified, the C flag is set to the most significant bit of the source value (Src[31]), which represents the sign bit when Src is interpreted as a signed 32-bit value. This allows MOV to simultaneously copy a value and test its sign.
+If the WC or WCZ effect is specified, the C flag is set to the most significant bit of the source value (Src[31]), which represents the sign bit when Src is interpreted as a signed 32-bit value.
 
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result written to Dest equals zero, or is cleared (0) if the result is non-zero. This enables immediate testing of whether the moved value is zero without requiring a separate comparison instruction.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result written to Dest equals zero, or is cleared (0) if the result is non-zero.
 
 MOV with immediate values is commonly used for register initialization:
 
@@ -296,7 +307,7 @@ MOV between registers is used for preserving values and working with temporary c
         mov     result, value           ' Copy final result
 ```
 
-When combined with flag effects, MOV enables efficient value testing:
+With flag effects, MOV copies a value and tests it in one instruction:
 
 ```pasm2
                 mov     data, source  wz        ' Copy and test if zero
@@ -390,19 +401,18 @@ MUL is commonly used for scaling operations in fixed-point arithmetic:
         mul     value, #25              ' Multiply by 25: value = 25000
 ```
 
-For fixed-point math with 16-bit fractional parts:
+To keep only the upper 16 bits of the 32-bit product:
 
 ```pasm2
-        ' Multiply two 16.16 fixed-point numbers
-        ' Result in upper 16 bits needs shifting
-        mov     temp, frac1
-        mul     temp, frac2             ' temp = product (low 16 of each)
-        shr     temp, #16               ' Adjust for fixed-point scale
+        ' Multiply the low 16 bits of two values
+        mov     temp, value1
+        mul     temp, value2            ' temp = product (low 16 of each)
+        shr     temp, #16               ' Keep the product's upper 16 bits
 ```
 
 For this multiply-then-shift-by-16 scaling pattern, SCA performs the same work in a single instruction: SCA computes `unsigned(D[15:0] * S[15:0]) >> 16` and substitutes the result directly as the next instruction's S operand.
 
-For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
+For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which multiplies two unsigned 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
 
 
@@ -438,14 +448,13 @@ The multiplication treats bytes as 8-bit fractional values in the range 0.0 to 1
 
 MULPIX multiplies each color component of D by the corresponding component of S. For example, multiplying an RGB color by a brightness value: if D contains $80_60_40_20 (RGBA values) and S contains $80_80_80_FF (50% brightness on RGB, full alpha), each color component is reduced to 50% of its original value.
 
-MULPIX executes in 7 clock cycles to perform all four parallel multiplications. This is significantly faster than performing four separate multiply and scale operations, making it practical for real-time graphics processing.
+MULPIX executes in 7 clock cycles and processes all four byte pairs.
 
 Common uses include:
 
 - Color modulation (tinting): Multiply each color channel by a tint value
 - Brightness adjustment: Multiply RGB by a brightness factor
 - Alpha premultiplication: Multiply RGB by alpha for compositing
-- Texture filtering: Combine texel colors with interpolation weights
 
 The instruction treats all bytes independently, so it can be used for any four-byte parallel multiply operation, not just color processing.
 
@@ -493,12 +502,12 @@ Signed scaling example:
         muls    velocity, time          ' velocity = speed * time (signed)
 ```
 
-For signed fixed-point math with 16-bit fractional parts:
+To keep only the upper 16 bits of the signed 32-bit product:
 
 ```pasm2
-        ' Multiply two signed 16.16 fixed-point numbers
-        mov     temp, signed_frac1
-        muls    temp, signed_frac2      ' Signed multiplication
+        ' Multiply the low 16 bits of two signed values
+        mov     temp, signed1
+        muls    temp, signed2           ' Signed multiplication
         sar     temp, #16               ' Arithmetic shift to preserve sign
 ```
 
@@ -506,7 +515,7 @@ For this signed multiply-then-shift pattern, SCAS does signed scaled multiply in
 
 MULS differs from MUL only in that it treats the 16-bit operands as signed values rather than unsigned. The choice between them depends on whether the values being multiplied represent signed or unsigned quantities.
 
-For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full signed 32-bit values and produces a signed 64-bit result accessible through the upper and lower result registers.
+For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which multiplies two unsigned 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. QMUL is unsigned.
 
 
 
@@ -562,8 +571,8 @@ Example: Conditionally set bits based on a comparison:
 
 ```pasm2
         cmp     value, limit  wc        ' Set C if value < limit
-        muxc    status, #$01            ' Set bit 0 if less than
-        muxnc   status, #$02            ' Set bit 1 if greater or equal
+        muxc    status, #$01            ' Bit 0 = C (1 if less than)
+        muxnc   status, #$02            ' Bit 1 = !C (1 if greater or equal)
 ```
 
 If the WC or WCZ effect is specified, the C flag is set to the parity of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero.
@@ -610,9 +619,7 @@ This instruction is useful for sparse updates where only certain nibbles need mo
         muxnibs config, changes         ' Apply non-zero changes only
 ```
 
-MUXNIBS is commonly used in graphics operations for palette updates, bit-field modifications where fields are naturally nibble-aligned, and efficient sparse data updates. It provides a single-instruction way to perform selective nibble replacement that would otherwise require multiple mask and merge operations.
-
-The instruction treats nibbles independently, enabling parallel conditional updates across all eight nibble positions in a single 2-clock operation.
+MUXNIBS treats the eight nibbles independently and updates all of them in one 2-clock operation.
 
 
 
@@ -646,9 +653,7 @@ MUXNITS selectively copies bit pairs (2-bit fields, called "nits") from Src to D
 
 For example, if Dest = $5555_5555 (binary 01_01_01_01... in bit pairs) and Src = $00A0_0002 (containing non-zero bit pairs at positions 11, 10, and 0), only those three bit pairs are updated in Dest while the others remain as 01.
 
-This instruction is particularly useful for pixel graphics operations where 2-bit values represent pixel data (such as in 4-color graphics modes), sparse bit-field updates, and state machine implementations where state variables are represented as 2-bit fields.
-
-MUXNITS provides parallel conditional updates across all sixteen bit pair positions in a single 2-clock operation:
+MUXNITS treats the sixteen bit pairs independently and updates all of them in one 2-clock operation:
 
 ```pasm2
         ' Update specific 2-bit fields in a packed structure
@@ -656,7 +661,7 @@ MUXNITS provides parallel conditional updates across all sixteen bit pair positi
         muxnits state, updates          ' Apply non-zero updates only
 ```
 
-The name "nits" comes from "nibble bits" or 2-bit fields, representing the next smaller grouping after nibbles (4-bit fields). This instruction complements MUXNIBS by operating at a finer granularity.
+MUXNIBS performs the same operation on 4-bit fields.
 
 
 
@@ -686,7 +691,7 @@ Multiplex Q
 
 **Explanation:**
 
-MUXQ performs selective bit copying from Src to Dest based on a mask previously loaded into the Q register using SETQ. The mask is loaded into the Q register with SETQ executed immediately before MUXQ. For each bit position where Q contains a 1, the corresponding bit from Src is copied into Dest. For bit positions where Q contains a 0, the corresponding bit in Dest remains unchanged. The operation is: D = (!Q & D) | (Q & S).
+MUXQ performs selective bit copying from Src to Dest based on a mask previously loaded into the Q register using SETQ. The Q value persists until an instruction that overwrites Q executes (XORO32, RDLUT, GETXACC, CRCNIB, or a COGINIT/QDIV/QFRAC/QROTATE without a preceding SETQ). SETQ also shields the next instruction from interruption, so a MUXQ placed directly after its SETQ cannot be interrupted between the two. For each bit position where Q contains a 1, the corresponding bit from Src is copied into Dest. For bit positions where Q contains a 0, the corresponding bit in Dest remains unchanged. The operation is: D = (!Q & D) | (Q & S).
 
 MUXQ must be preceded by SETQ to load the mask into Q:
 
@@ -695,7 +700,7 @@ MUXQ must be preceded by SETQ to load the mask into Q:
         muxq    dest, source            ' Copy masked bits from source
 ```
 
-This provides atomic masked bit updates that are more efficient than separate AND and OR operations:
+This replaces the separate AND, ANDN and OR operations of a masked bit update:
 
 ```pasm2
         ' Traditional approach (4 instructions):
@@ -706,18 +711,18 @@ This provides atomic masked bit updates that are more efficient than separate AN
 
         ' MUXQ approach (2 instructions):
         setq    mask                    ' Set mask
-        muxq    dest, source            ' Atomic masked copy
+        muxq    dest, source            ' Masked copy
 ```
 
-MUXQ is critical for parallel I/O operations, especially driving multiple pins simultaneously:
+MUXQ can update several output pins in one instruction:
 
 ```pasm2
-        ' Update multiple RGB LED pins atomically
+        ' Update multiple RGB LED pins
         setq    rgb_mask                ' Mask for RGB pins
         muxq    outa, rgb_data          ' Update all RGB pins together
 ```
 
-The Q register mask enables masked bit manipulation:
+With the mask in Q, MUXQ copies only the masked bits:
 
 ```pasm2
         ' Update specific configuration bits

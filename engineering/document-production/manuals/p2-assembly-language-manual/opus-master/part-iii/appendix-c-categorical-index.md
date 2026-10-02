@@ -167,9 +167,9 @@ Branch instructions control program flow by modifying the program counter. This 
 |-------------|-------------|
 | [TJF](#tjf) | Test D and jump to S if D is full ($FFFF_FFFF) |
 | [TJNF](#tjnf) | Test D and jump to S if D is not full |
-| [TJNS](#tjns) | Test D and jump to S if D is not signed (D[31] = 0) |
+| [TJNS](#tjns) | Test D and jump to S if D is not signed (D[31] == 0) |
 | [TJNZ](#tjnz) | Test D and jump to S if D is not zero |
-| [TJS](#tjs) | Test D and jump to S if D is signed (D[31] = 1) |
+| [TJS](#tjs) | Test D and jump to S if D is signed (D[31] == 1) |
 | [TJV](#tjv) | Test D and jump to S if D overflowed |
 | [TJZ](#tjz) | Test D and jump to S if D is zero |
 | [DJF](#djf) | Decrement D and jump to S if result is $FFFF_FFFF |

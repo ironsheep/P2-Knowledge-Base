@@ -53,7 +53,7 @@ Allocate New Lock
 
 **Operation:** `D = LOCK number (0..15)`; `C = 1 if no LOCK available`
 
-**Result:** D is written with an available lock number (0-15), or remains unchanged if no lock is available.
+**Result:** D is written with an available lock number (0-15). With WC, C is cleared (0) if a lock was allocated, or set (1) if all locks are already allocated.
 
 - D is a register where the allocated lock number is written.
 - WC is an optional effect to update the C flag.
@@ -74,7 +74,7 @@ If the WC effect is specified, the C flag is set (1) if no lock is available, or
 
 Once a lock is allocated with LOCKNEW, it remains assigned until explicitly returned to the pool with LOCKRET. The allocated lock can then be used with LOCKTRY to acquire exclusive access and LOCKREL to release it. This allocation-try-release-return pattern manages locks across multi-cog systems.
 
-LOCKNEW is essential for dynamic lock allocation in systems where the number of required locks is not known at compile time, or where locks are allocated and deallocated as resources are created and destroyed. The instruction completes in 4 to 11 clock cycles depending on lock availability and contention.
+LOCKNEW is essential for dynamic lock allocation in systems where the number of required locks is not known at compile time, or where locks are allocated and deallocated as resources are created and destroyed. A cog may allocate more than one lock, and an allocated lock's number may be shared with other cogs so that they can use LOCKTRY and LOCKREL. The instruction takes 4 to 11 clock cycles.
 
 
 
@@ -87,12 +87,12 @@ Release Lock
 
 **LOCKREL**  *{#}D*  **{WC}**
 
-**Operation:** release LOCK D[3:0]; if reg + WC: `D = owner cog id`, `C = LOCK status`
+**Operation:** release LOCK D[3:0] if this cog holds it; if reg + WC: `D = owner cog id`, `C = 1 if the lock is taken`
 
 **Result:** The lock specified by D[3:0] is released for other cogs to acquire.
 
 - D is a register or 4-bit literal (0-15) specifying the lock number to release.
-- When D is a register and WC is specified, D is written with the previous owner's cog ID and the C flag indicates lock status.
+- When D is a register and WC is specified, D is written with the cog ID of the lock's current owner (if it is held) or last owner (if it is released), and C is set (1) if the lock is taken.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -106,7 +106,7 @@ Release Lock
 
 LOCKREL releases a lock that was previously acquired with LOCKTRY, making it available for other cogs to acquire. The lock to release is specified by the lower 4 bits of D (D[3:0]), allowing lock numbers 0 through 15.
 
-When D is a register (not an immediate) and the WC effect is specified, LOCKREL performs an additional operation: it writes the cog ID of the previous lock owner into D and sets the C flag based on whether the lock was held. This diagnostic feature allows verification of lock ownership and debugging of synchronization issues.
+LOCKREL can also be used to query the current lock status. When the WC effect is specified, C indicates whether the lock is currently taken (1) or not (0). If D is a register (not an immediate), it is also written with the cog ID of the lock's current owner (if the lock is held) or last owner (if it is released). The query is not passive: if the cog executing LOCKREL is also the cog holding the lock, the normal LOCKREL behavior still takes place and the lock is released.
 
 Only the cog holding a lock can release it. LOCKREL executed by a cog that does not hold the lock does not release it and has no effect on lock state, so the instruction is safe to issue on an error path without first checking ownership — but a cog cannot use LOCKREL to recover a lock stranded by another cog. LOCKRET does that: any cog may return an allocated lock to the pool, even one it did not allocate.
 

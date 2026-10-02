@@ -164,11 +164,11 @@ Call with Destination register
 | EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | D and PC | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
+**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
 
 **Explanation:**
 
-CALLD records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by writing them to the PA, PB, PTRA, PTRB, or Dest register, potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute another CALLD instruction to return to the recorded address (the instruction following the original CALLD), optionally restore the C and Z flag state as it was prior, and optionally prep for another CALLD.
+CALLD records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by writing them to the PA, PB, PTRA, PTRB, or Dest register, potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute another CALLD instruction to return to the recorded address (the instruction following the original CALLD), optionally restore the C and Z flag state as it was prior, and optionally prep for another CALLD. CALLD does not use the hardware stack, because the return address goes into the register it writes; RET does not return from a CALLD.
 
 This instruction is typically used for the P2 DEBUG function.
 
@@ -557,7 +557,7 @@ Cog Attention
 
 **Result:** The attention signal of one or more cogs is strobed.
 
-- Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal.
+- Dest is the register or 9-bit literal whose value is a 16-bit pattern in which bits 0..15 represent cogs 0..15; each set bit signals its cog. The P2X8C4M64P has 8 cogs, so bits 0..7 are the ones that reach a cog.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -569,7 +569,7 @@ Cog Attention
 
 **Explanation:**
 
-COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0 represent cogs 7 through 0; high (1) bits indicate the cog(s) to signal. The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag.
+COGATN strobes the attention signal for one or more cogs. Dest is a 16-bit value in which bits 0..15 represent cogs 0..15; high (1) bits indicate the cog(s) to signal. Because the P2X8C4M64P has 8 cogs, only bits 7:0 (cogs 7 through 0) reach a cog. The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag.
 
 In the intended use case, the cog receiving an attention request knows which other cog is strobing it and how to respond. In cases where multiple cogs may request the attention of a single cog, some messaging structure may need to be implemented in hub RAM to differentiate requests.
 
@@ -635,17 +635,17 @@ Cog Identification
 
 **COGID**  *{#}Dest*  **{WC}**
 
-**Operation:** if no WC: `D = cog ID (0..15)`; if WC: `C = 1 if cog D[3:0] is on`
+**Operation:** if no WC: `D = cog ID in D[3:0]`, upper bits cleared; if WC: `C = 1 if cog D is on`
 
 **Result:** Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.
 
-- Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to get the status for.
+- Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal whose value indicates which cog to get the status for.
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | Cog D[3:0] running | --- | D † | 2...9, +2 if result |
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | Cog D running | --- | D † | 2...9, +2 if result |
 
 † Result written only if D is register and WC not specified.
 
@@ -653,11 +653,11 @@ Cog Identification
 
 **Explanation:**
 
-COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest[2:0] (if WC is given).
+COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest (if WC is given).
 
-When used without the WC effect, COGID stores the current cog's ID (0-7) in the Dest register. This is useful when code needs to know which cog it is running on, for example when accessing cog-specific resources or implementing cog-aware algorithms.
+When used without the WC effect, COGID stores the current cog's ID in Dest[3:0], with the upper bits cleared (cog IDs are 0-7 on the P2X8C4M64P). This is useful when code needs to know which cog it is running on, for example when accessing cog-specific resources or implementing cog-aware algorithms.
 
-When used with the WC effect, COGID checks the status of the cog specified by Dest[2:0]. If the WC effect is specified, the C flag is set (1) if the specified cog is running, or is cleared (0) if stopped. In this mode, Dest is not written.
+When used with the WC effect, COGID checks the status of the cog specified by Dest. If the WC effect is specified, the C flag is set (1) if the specified cog is running, or is cleared (0) if stopped (or never started). In this mode, Dest is not written.
 
 For example, to get the current cog's ID:
 
@@ -711,12 +711,12 @@ The following predefined constants encode these bit patterns:
 
 | Constant | Target | Execution | Description |
 |----------|--------|-----------|-------------|
-| COGEXEC + id | Specific Cog | Cog RAM | Load 496 longs from Hub to Cog RAM, execute from Cog |
-| HUBEXEC + id | Specific Cog | Hub RAM | Execute directly from Hub RAM (no load) |
-| COGEXEC_NEW | Any free Cog | Cog RAM | Auto-select available Cog, load and execute |
-| HUBEXEC_NEW | Any free Cog | Hub RAM | Auto-select available Cog, execute from Hub |
-| COGEXEC_NEW_PAIR | Adjacent pair | Cog RAM | Auto-select adjacent Cog pair for LUT sharing |
-| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent Cog pair, Hub execution |
+| COGEXEC + id | Specific cog | Cog RAM | Load 496 longs from hub to cog RAM, execute from cog |
+| HUBEXEC + id | Specific cog | Hub RAM | Execute directly from hub RAM (no load) |
+| COGEXEC_NEW | Any free cog | Cog RAM | Auto-select available cog, load and execute |
+| HUBEXEC_NEW | Any free cog | Hub RAM | Auto-select available cog, execute from hub |
+| COGEXEC_NEW_PAIR | Adjacent pair | Cog RAM | Auto-select adjacent cog pair for LUT sharing |
+| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent cog pair, hub execution |
 
 For specific cog targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
 

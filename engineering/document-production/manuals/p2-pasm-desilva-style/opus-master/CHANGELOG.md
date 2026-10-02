@@ -1,5 +1,28 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.9 (2026-10-02)
+
+**Every example does what its comments say on real silicon, and every number matches the 200 MHz clock the book assumes.**
+
+### Added
+
+- **Mailboxes say what they can and cannot carry** (Chapters 2 and 16): one writer, one reader, one message, and why the reader's clear can race the next write
+- **The CORDIC pipeline rule**: keep hub reads and writes out of the fill and the drain, or results come back wrong with no warning
+- **A `SETSE` edge can be missed**: a byte that arrived before `SETSE` ran has already raised IN — check it with `TESTP` first
+
+### Changed
+
+- **The fast screen clear fills with an immediate value** (Chapter 4) — a register in that spot copies cog registers instead — and fits the hub
+- **A conditional instruction whose condition is false costs two clocks**, whatever it would have cost to run
+- **The CORDIC batch, servo, spiral, streamer and audio-filter examples run as described**: register-only CORDIC fill and drain, every servo pulse timed from the frame start, a spiral that stays on screen, `RDFAST` feeding the streamer, `SAR` for signed samples
+- **A 2 KB block move goes through the LUT** with `SETQ2`
+- **Timing constants are given at 200 MHz** throughout Chapters 14 and 15
+- **`QDIV` is unsigned**; `MUL` gives the full 32-bit product of two 16-bit values; `RFLONG`, `QROTATE` and `QDIV` timings match the silicon
+- **The Edge modules carry 16 MB of flash** (and 32 MB of PSRAM on the P2-EC32MB); the mini breakout brings out 40 pins
+- **Power saving is `WAITINT`'s**, and the hub is 512 KB
+- **Hub addresses in PASM use `##label`** where a 9-bit immediate cannot reach
+- **The index points at the chapters that teach each topic**
+
 ## v3.0.8 (2026-09-22)
 
 **A lock nobody claimed spins forever, a counter target fires once the counter has passed it, and the Eval board lights its LED the other way round.**

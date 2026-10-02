@@ -2,9 +2,11 @@
 
 This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
 
+The `DEBUG_*` configuration names (`DEBUG_BAUD`, `DEBUG_COGS`, `DEBUG_PIN_TX` and the others the P2 Documentation lists as "Symbols you can define to modify DEBUG behavior") are not reserved words. They are `CON` symbols that your program declares to configure DEBUG, and they are not counted below.
+
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether the source is pure PASM2 or mixed Spin2/PASM2 code.
 
-**Total Reserved Words: 859+** (456 PASM2 + 403 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
+**Total Reserved Words: 845** (498 PASM2 + 347 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
 ## Quick Reference Index
 
@@ -43,13 +45,8 @@ CRCBIT      CRCNIB      CYAN
 
 ### D
 ```
-DAT                DEBUG              DEBUG_BAUD         DEBUG_COGS
-DEBUG_COGINIT      DEBUG_DELAY        DEBUG_DISABLE      DEBUG_DISPLAY_LEFT
-DEBUG_DISPLAY_TOP  DEBUG_HEIGHT       DEBUG_LEFT         DEBUG_LOG_SIZE
-DEBUG_MAIN         DEBUG_MASK         DEBUG_PIN          DEBUG_PIN_RX
-DEBUG_PIN_TX       DEBUG_TIMESTAMP    DEBUG_TOP          DEBUG_WIDTH
-DEBUG_WINDOWS_OFF
-DECMOD      DECOD       DEPTH       DIRA        DIRB        DIRC
+DAT         DEBUG       DECMOD      DECOD       DEPTH       DIRA
+DIRB        DIRC
 DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
 DIRRND      DIRZ        DITTO       DJF         DJNF        DJNZ
 DJZ         DLY         DOT         DOTSIZE     DRVC        DRVH
@@ -68,17 +65,17 @@ EVENT_XMT   EVENT_XRL   EVENT_XRO   EXECF
 ```
 FABS        FALSE       FBLOCK      FDEC        FDEC_       FDEC_ARRAY
 FDEC_ARRAY_ FDEC_REG_ARRAY          FDEC_REG_ARRAY_         FFT
-FGE         FGES        FILE        FIT         FLE         FLES
-FLOAT       FLTC        FLTH        FLTL        FLTNC       FLTNOT
-FLTNZ       FLTRND      FLTZ        FRAC        FROM        FSQRT
-FVAR        FVARS
+FGE         FGES        FIELD       FILE        FIT         FLE
+FLES        FLOAT       FLTC        FLTH        FLTL        FLTNC
+FLTNOT      FLTNZ       FLTRND      FLTZ        FRAC        FROM
+FSQRT       FVAR        FVARS
 ```
 
 ### G
 ```
 GETBRK      GETBYTE     GETCRC      GETCT       GETMS       GETNIB
 GETPTR      GETQX       GETQY       GETREGS     GETRND      GETSCP
-GETSEC      GETWORD     GETXACC     GREEN       GREY
+GETSEC      GETWORD     GETXACC     GRAY        GREEN       GREY
 ```
 
 ### H
@@ -137,8 +134,8 @@ MUXNITS     MUXNZ       MUXQ        MUXZ
 ### N
 ```
 NAN         NEG         NEGC        NEGNC       NEGNZ       NEGX
-NEGZ        NEWCOG      NEXT        NIXINT1     NIXINT2     NIXINT3
-NOP         NOT
+NEGZ        NEWCOG      NEWTASK     NEXT        NIXINT1     NIXINT2
+NIXINT3     NOP         NOT
 ```
 
 ### O
@@ -204,7 +201,8 @@ SHEX_BYTE   SHEX_BYTE_  SHEX_BYTE_ARRAY         SHEX_BYTE_ARRAY_
 SHEX_LONG   SHEX_LONG_  SHEX_LONG_ARRAY         SHEX_LONG_ARRAY_
 SHEX_REG_ARRAY          SHEX_REG_ARRAY_         SHEX_WORD   SHEX_WORD_
 SHEX_WORD_ARRAY         SHEX_WORD_ARRAY_        SHL         SHR
-SIGNED      SIGNX       SIZE        SKIP        SKIPF       SPACING
+SIGNED      SIGNX       SIZE        SIZEOF      SKIP        SKIPF
+SPACING
 SPECTRO     SPLITB      SPLITW      SPRITE      SPRITEDEF   SQRT
 STALLI      STEP        STRCOMP     STRCOPY     STRING      STRSIZE
 STRUCT      SUB         SUBR        SUBS        SUBSX       SUBX
@@ -213,11 +211,12 @@ SUMC        SUMNC       SUMNZ       SUMZ
 
 ### T
 ```
-TERM        TEST        TESTB       TESTBN      TESTN       TESTP
-TESTPN      TEXT        TEXTANGLE   TEXTSIZE    TEXTSTYLE   TITLE
-TJF         TJNF        TJNS        TJNZ        TJS         TJV
-TJZ         TO          TRACE       TRGINT1     TRGINT2     TRGINT3
-TRIGGER     TRUE        TRUNC
+TASKCHK     TASKCONT    TASKHALT    TASKHLT     TASKID      TASKNEXT
+TASKSPIN    TASKSTOP    TERM        TEST        TESTB       TESTBN
+TESTN       TESTP       TESTPN      TEXT        TEXTANGLE   TEXTSIZE
+TEXTSTYLE   THISTASK    TITLE       TJF         TJNF        TJNS
+TJNZ        TJS         TJV         TJZ         TO          TRACE
+TRGINT1     TRGINT2     TRGINT3     TRIGGER     TRUE        TRUNC
 ```
 
 ### U
@@ -271,14 +270,15 @@ _Z_NE_C     _Z_OR_C     _Z_OR_NC
 
 ## Categories
 
-Reserved words fall into six main categories:
+PASM2 reserved words fall into seven main categories:
 
 1. **Instruction Mnemonics** (358 words) - All instruction names
 2. **Assembly Directives** (21 words) - Block identifiers and assembly-time directives
 3. **Predefined Constants** (11 words) - Built-in constant values
 4. **Special Register Names** (16 words) - Special-purpose registers
-5. **Condition Keywords** (41 words) - Conditional execution prefixes
-6. **Effect Keywords** (9 words) - flag modification suffixes
+5. **Event Constants** (17 words) - Event and interrupt-source numbers
+6. **Condition Keywords** (66 words) - Conditional execution prefixes
+7. **Effect Keywords** (9 words) - flag modification suffixes
 
 
 
@@ -374,7 +374,7 @@ These keywords define the major sections of a Spin2/PASM2 source file:
 - **BYTE** - Reserve/initialize byte-sized data
 - **BYTEFIT** - Verify code fits in specified byte count
 - **DEBUG** - Insert debug statements (Spin2 feature)
-- **DITTO** - Repeat previous instruction encoding
+- **DITTO** - Repeat the lines up to `DITTO END` a given number of times; `$$` is the iteration index (Spin2 v50+)
 - **FIT** - Verify code fits in cog memory
 - **LONG** - Reserve/initialize long-sized data (32 bits)
 - **ORG** - Set assembly origin (cog address)
@@ -394,7 +394,7 @@ Built-in constants that can be used in assembly expressions:
 
 - **FALSE** - Boolean false value (`$00000000`, decimal 0)
 - **NEGX** - Most negative signed 32-bit value (`$80000000`, decimal -2147483648)
-- **PI** - Fixed-point pi value for CORDIC operations
+- **PI** - Single-precision floating-point pi (`$40490FDB`); not a CORDIC angle
 - **POSX** - Most positive signed 32-bit value (`$7FFFFFFF`, decimal 2147483647)
 - **TRUE** - Boolean true value (`$FFFFFFFF`, decimal -1)
 
@@ -402,14 +402,12 @@ Built-in constants that can be used in assembly expressions:
 
 Used with the COGINIT instruction to specify execution mode:
 
-- **COGEXEC** - Execute from cog RAM (base mode, `%0_0_0000`)
-- **COGEXEC_NEW** - Auto-select available cog, execute from cog RAM
-- **COGEXEC_NEW_PAIR** - Auto-select cog pair, execute from cog RAM
-- **HUBEXEC** - Execute from hub RAM (base mode, `%0_1_0000`)
-- **HUBEXEC_NEW** - Auto-select available cog, execute from hub RAM
-- **HUBEXEC_NEW_PAIR** - Auto-select cog pair, execute from hub RAM
-
-**Note:** The `_NEW` and `_NEW_PAIR` variants are bit patterns that modify the base `COGEXEC` and `HUBEXEC` constants for use with COGINIT's automatic cog selection feature.
+- **COGEXEC** - Execute from cog RAM (base mode, `%00_0000`; add the cog number to start a specific cog)
+- **COGEXEC_NEW** - Start an available cog, execute from cog RAM (`%01_0000`)
+- **COGEXEC_NEW_PAIR** - Start an available even/odd cog pair, execute from cog RAM (`%01_0001`)
+- **HUBEXEC** - Execute from hub RAM (base mode, `%10_0000`; add the cog number to start a specific cog)
+- **HUBEXEC_NEW** - Start an available cog, execute from hub RAM (`%11_0000`)
+- **HUBEXEC_NEW_PAIR** - Start an available even/odd cog pair, execute from hub RAM (`%11_0001`)
 
 
 
@@ -445,7 +443,19 @@ Always provide special functions when accessed:
 
 
 
-## Condition Keywords (41 words)
+## Event Constants (17 words)
+
+Event and interrupt-source numbers (0-15), PASM only. The values are those the P2 Documentation gives; EVENT_INT and INT_OFF share value 0:
+
+```
+EVENT_INT   INT_OFF     EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_SE1
+EVENT_SE2   EVENT_SE3   EVENT_SE4   EVENT_PAT   EVENT_FBW   EVENT_XMT
+EVENT_XFI   EVENT_XRO   EVENT_XRL   EVENT_ATN   EVENT_QMT
+```
+
+
+
+## Condition Keywords (66 words)
 
 Conditional execution prefixes (IF_xxx) that can be applied to any instruction. These test the C (Carry) and Z (Zero) flags:
 
@@ -455,18 +465,18 @@ These are the canonical condition names:
 
 - **IF_ALWAYS** - Always execute (EEEE=1111; this is the encoding used when no condition is specified)
 - **_RET_** - Execute instruction, then return if no branch (EEEE=0000; note: P1's IF_NEVER does NOT exist in P2)
-- **IF_C** - Execute if C=1
-- **IF_NC** - Execute if C=0
-- **IF_Z** - Execute if Z=1
-- **IF_NZ** - Execute if Z=0
-- **IF_C_AND_Z** - Execute if C=1 AND Z=1
-- **IF_C_AND_NZ** - Execute if C=1 AND Z=0
-- **IF_NC_AND_Z** - Execute if C=0 AND Z=1
-- **IF_NC_AND_NZ** - Execute if C=0 AND Z=0
-- **IF_C_OR_Z** - Execute if C=1 OR Z=1
-- **IF_C_OR_NZ** - Execute if C=1 OR Z=0
-- **IF_NC_OR_Z** - Execute if C=0 OR Z=1
-- **IF_NC_OR_NZ** - Execute if C=0 OR Z=0
+- **IF_C** - Execute if C == 1
+- **IF_NC** - Execute if C == 0
+- **IF_Z** - Execute if Z == 1
+- **IF_NZ** - Execute if Z == 0
+- **IF_C_AND_Z** - Execute if C == 1 AND Z == 1
+- **IF_C_AND_NZ** - Execute if C == 1 AND Z == 0
+- **IF_NC_AND_Z** - Execute if C == 0 AND Z == 1
+- **IF_NC_AND_NZ** - Execute if C == 0 AND Z == 0
+- **IF_C_OR_Z** - Execute if C == 1 OR Z == 1
+- **IF_C_OR_NZ** - Execute if C == 1 OR Z == 0
+- **IF_NC_OR_Z** - Execute if C == 0 OR Z == 1
+- **IF_NC_OR_NZ** - Execute if C == 0 OR Z == 0
 - **IF_C_EQ_Z** - Execute if C equals Z
 - **IF_C_NE_Z** - Execute if C not equal to Z
 
@@ -498,11 +508,7 @@ Convenient aliases for post-comparison conditional execution. Two equivalent ter
 - **IF_NZ_AND_NC** - Not zero and no carry (same as IF_NC_AND_NZ)
 - **IF_Z_AND_C** - Zero and carry (same as IF_C_AND_Z)
 
-### Special Return Condition (1)
-
-- **_RET_** - Always execute instruction, then return if no branch (no flag restore)
-
-### Symmetric Alternatives (9)
+### Symmetric Alternatives (7)
 
 Additional aliases that express the same conditions in reverse order:
 
@@ -511,6 +517,20 @@ Additional aliases that express the same conditions in reverse order:
 - **IF_Z_OR_NC** - Same as IF_NC_OR_Z
 - **IF_NZ_OR_C** - Same as IF_C_OR_NZ
 - **IF_NZ_OR_NC** - Same as IF_NC_OR_NZ
+- **IF_Z_EQ_C** - Same as IF_C_EQ_Z
+- **IF_Z_NE_C** - Same as IF_C_NE_Z
+
+### Bit-Pattern Conditions (28)
+
+`IF_00` to `IF_X1` name the C and Z pattern tested (`X` = either; `IF_00` is C == 0, Z == 0). `IF_0000` to `IF_1111` give the four-bit condition field value (`IF_0001` is IF_NC_AND_NZ):
+
+```
+IF_00       IF_01       IF_10       IF_11       IF_0X       IF_1X
+IF_X0       IF_X1       IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11
+IF_0000     IF_0001     IF_0010     IF_0011     IF_0100     IF_0101
+IF_0110     IF_0111     IF_1000     IF_1001     IF_1010     IF_1011
+IF_1100     IF_1101     IF_1110     IF_1111
+```
 
 **Note:** Many conditions have multiple valid names (aliases). For example, `IF_C`, `IF_B`, and `IF_LT` all represent the same condition code but provide semantic clarity depending on context.
 
@@ -583,9 +603,9 @@ byte_data       long  $0
 
 ## Summary
 
-The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
+The Propeller 2 compiler reserves **845 identifiers** across PASM2 and Spin2, counted from the lists in this appendix (each word counted once):
 
-**PASM2-Specific Reserved Words (456):**
+**PASM2-Specific Reserved Words (498):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
@@ -593,29 +613,29 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Directives | 21 | Block identifiers and assembly-time directives |
 | Constants | 11 | Predefined constant values |
 | Special Registers | 16 | Hardware-mapped registers |
-| Conditions | 41 | Conditional execution prefixes |
+| Event Constants | 17 | Event and interrupt-source numbers |
+| Conditions | 66 | Conditional execution prefixes |
 | Effects | 9 | Flag modification suffixes |
-| **PASM2 Subtotal** | **456** | |
+| **PASM2 Subtotal** | **498** | |
 
-**Spin2-Specific Reserved Words (403):**
+**Spin2-Specific Reserved Words (347):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
-| Language Keywords | 20 | Core Spin2 constructs |
-| DEBUG Parameters | 121 | Debug output formatting |
-| Graphics/Color | 34 | Color names and display |
+| Language Keywords | 22 | Core Spin2 constructs |
+| DEBUG Parameters | 102 | Debug output formatting |
+| Graphics/Color | 35 | Color names and display |
 | String/Data Methods | 22 | Memory/string manipulation |
 | Math/Conversion | 11 | Math functions |
-| Event Constants | 16 | Event source identifiers |
+| Task Methods and Constants | 10 | Multitasking |
 | Pin Methods | 14 | High-level pin control |
 | Condition Shortcuts | 32 | Underscore-prefixed conditions |
-| IF_ Variants | 32 | Extended condition patterns |
 | Shared Registers | 8 | PR0-PR7 communication |
-| System/I/O | 26 | System control methods |
+| System/I/O | 25 | System control methods |
 | Graphics Drawing | 31 | Graphics primitives |
 | Text/Display | 13 | Text rendering |
-| Lookup/Misc | 23 | Table lookup and other |
-| **Spin2 Subtotal** | **403** | |
+| Lookup/Misc | 22 | Table lookup and other |
+| **Spin2 Subtotal** | **347** | |
 
 **Hardware Constants (194+):**
 
@@ -625,7 +645,7 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Streamer (X_*) | ~78 | Streamer modes |
 | **Constants Subtotal** | **~194** | |
 
-**Grand Total: 1,053+ reserved identifiers**
+**Grand Total: 1,039+ reserved identifiers** (845 + 194)
 
 **Cross-References:**
 
@@ -634,46 +654,39 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 - **Appendix F** — smart pin mode constants (P_* symbols, approximately 116 constants)
 - **Appendix G** — streamer mode constants (X_* symbols, approximately 78 constants)
 
-**Note on P_* and X_* Constants:** The smart pin configuration constants (P_*) and streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's smart pins and streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 456-word count above, they are effectively reserved and cannot be used as user-defined symbols.
+**Note on P_* and X_* Constants:** The smart pin configuration constants (P_*) and streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's smart pins and streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 498-word PASM2 count above, they are effectively reserved and cannot be used as user-defined symbols.
 
 
 ## Spin2 Reserved Words
 
 Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. None of these identifiers can be used as labels, symbols, or variable names in assembly code, even in pure PASM2.
 
-**Total Spin2-Only Reserved Words: 403**
+**Total Spin2-Only Reserved Words: 347**
 
 The following sections list Spin2 reserved words organized by category.
 
 
 
-### Language Keywords (20 words)
+### Language Keywords (22 words)
 
 Core Spin2 language constructs (block names CON, DAT, VAR, PUB, PRI, OBJ are listed under PASM2 Assembly Directives):
 
 ```
 ABORT       CASE        CASE_FAST   ELSE        ELSEIF      ELSEIFNOT
-END         FROM        IF          IFNOT       NEXT        OTHER
-QUIT        REPEAT      RETURN      STRUCT      TO          UNTIL
-WHILE       WITH
+END         FIELD       FROM        IF          IFNOT       NEXT
+OTHER       QUIT        REPEAT      RETURN      SIZEOF      STRUCT
+TO          UNTIL       WHILE       WITH
 ```
+
+`FIELD[ptr]` is the variable alias for a field pointer; `SIZEOF(Structure)` returns a structure's size in bytes.
 
 **Note:** STRUCT requires Spin2 v45 or later; WITH is the REPEAT positive-count loop-counter binding (`REPEAT <count> WITH <var>`).
 
 
 
-### DEBUG Command Parameters (121 words)
+### DEBUG Command Parameters (102 words)
 
-Debug output formatting commands and their variants:
-
-**Configuration Symbols:**
-```
-DEBUG_BAUD          DEBUG_COGS          DEBUG_COGINIT       DEBUG_DELAY
-DEBUG_DISABLE       DEBUG_DISPLAY_LEFT  DEBUG_DISPLAY_TOP   DEBUG_HEIGHT
-DEBUG_LEFT          DEBUG_LOG_SIZE      DEBUG_MAIN          DEBUG_MASK
-DEBUG_PIN           DEBUG_PIN_RX        DEBUG_PIN_TX        DEBUG_TIMESTAMP
-DEBUG_TOP           DEBUG_WIDTH         DEBUG_WINDOWS_OFF
-```
+Debug output formatting commands and their variants. The `DEBUG_*` configuration names are `CON` symbols that your program declares, not reserved words (see the note at the top of this appendix).
 
 **Signed decimal (SDEC) variants:**
 ```
@@ -731,14 +744,14 @@ FDEC_REG_ARRAY_
 
 
 
-### Graphics and Color Constants (34 words)
+### Graphics and Color Constants (35 words)
 
-Color names and graphics-related constants:
+Color names and graphics-related constants (`GRAY` and `GREY` are both recognized):
 
 ```
 BACKCOLOR   BLACK       BLUE        COLOR       CYAN        DEPTH
-GREEN       GREY        MAGENTA     OPACITY     ORANGE      RED
-WHITE       YELLOW
+GRAY        GREEN       GREY        MAGENTA     OPACITY     ORANGE
+RED         WHITE       YELLOW
 ```
 
 **HSV color conversion:**
@@ -788,15 +801,16 @@ QCOS        QSIN        ROUND       SQRT        TRUNC
 
 
 
-### Event Constants (16 words)
+### Task Methods and Constants (10 words)
 
-Event source identifiers for WAITSE and POLLSE:
+Multitasking methods, with the built-in symbols for their arguments (Spin2 v47):
 
 ```
-EVENT_ATN   EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_FBW   EVENT_INT
-EVENT_PAT   EVENT_QMT   EVENT_SE1   EVENT_SE2   EVENT_SE3   EVENT_SE4
-EVENT_XFI   EVENT_XMT   EVENT_XRL   EVENT_XRO
+NEWTASK     TASKCHK     TASKCONT    TASKHALT    TASKHLT     TASKID
+TASKNEXT    TASKSPIN    TASKSTOP    THISTASK
 ```
+
+`NEWTASK` and `THISTASK` are the values -1 for use in `TASKSPIN` and in `TASKSTOP` and `TASKHALT`; `TASKHLT` is the register that holds the HALT bits (in reverse order).
 
 
 
@@ -836,47 +850,32 @@ These mnemonics are used with the MODCZ instruction to modify C and Z flags. Eac
 | Value | Binary | Mnemonic | Description |
 |-------|--------|----------|-------------|
 | 0 | 0000 | _CLR | Always clear (result = 0) |
-| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
-| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 1 | 0001 | _NC_AND_NZ | C == 0 AND Z == 0 |
+| 2 | 0010 | _NC_AND_Z | C == 0 AND Z == 1 |
 | 3 | 0011 | _NC | Copy inverse of C (not C) |
-| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 4 | 0100 | _C_AND_NZ | C == 1 AND Z == 0 |
 | 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
 | 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
-| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
-| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 7 | 0111 | _NC_OR_NZ | C == 0 OR Z == 0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C == 1 AND Z == 1 (AND) |
 | 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
 | 10 | 1010 | _Z | Copy Z |
-| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 11 | 1011 | _NC_OR_Z | C == 0 OR Z == 1 |
 | 12 | 1100 | _C | Copy C |
-| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
-| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 13 | 1101 | _C_OR_NZ | C == 1 OR Z == 0 |
+| 14 | 1110 | _C_OR_Z | C == 1 OR Z == 1 (OR) |
 | 15 | 1111 | _SET | Always set (result = 1) |
 
 **Common MODCZ Usage:**
 ```pasm2
-        MODCZ   _CLR, _SET      ' Clear C, set Z
-        MODCZ   _SET, _CLR      ' Set C, clear Z
-        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
-        MODCZ   _Z, _C          ' Swap C and Z values
-        MODCZ   _NC, _NZ        ' Invert both flags
+        MODCZ   _CLR, _SET  WCZ ' Clear C, set Z
+        MODCZ   _SET, _CLR  WCZ ' Set C, clear Z
+        MODCZ   _C, _Z      WCZ ' C and Z unchanged (copy to themselves)
+        MODCZ   _Z, _C      WCZ ' Swap C and Z values
+        MODCZ   _NC, _NZ    WCZ ' Invert both flags
 ```
 
 **Cross-Reference:** See Part II MODCZ instruction for complete behavior description.
-
-
-
-### Additional IF_ Condition Variants (32 words)
-
-Extended condition code patterns for bit-testing:
-
-```
-IF          IF_00       IF_0000     IF_0001     IF_0010     IF_0011
-IF_01       IF_0100     IF_0101     IF_0110     IF_0111     IF_0X
-IF_10       IF_1000     IF_1001     IF_1010     IF_1011     IF_11
-IF_1100     IF_1101     IF_1110     IF_1111     IF_1X       IF_NOT_00
-IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_X0       IF_X1       IF_Z_EQ_C
-IF_Z_NE_C   IFNOT
-```
 
 
 
@@ -891,16 +890,16 @@ PR6         PR7
 
 
 
-### System and I/O Methods (26 words)
+### System and I/O Methods (25 words)
 
-System control and I/O operations (FILE is listed under PASM2 Assembly Directives):
+System control and I/O operations (FILE is listed under PASM2 Assembly Directives; INT_OFF under Event Constants):
 
 ```
 CLKFREQ     CLKMODE     CLKSET      CLOSE       COGCHK      COGSPIN
-GETCRC      GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
-NEWCOG      POLLCT      RECV        REG         REGEXEC     REGLOAD
-SEND        SETREGS     UPDATE      VARBASE     WAITCT      WAITMS
-WAITUS      WINDOW
+GETCRC      GETMS       GETREGS     GETSEC      LOCKCHK     NEWCOG
+POLLCT      RECV        REG         REGEXEC     REGLOAD     SEND
+SETREGS     UPDATE      VARBASE     WAITCT      WAITMS      WAITUS
+WINDOW
 ```
 
 
@@ -932,15 +931,15 @@ ZSTR_
 
 
 
-### Lookup and Miscellaneous (23 words)
+### Lookup and Miscellaneous (22 words)
 
-Table lookup and other Spin2 features:
+Table lookup and other Spin2 features (SQRT is listed under Math and Conversion Methods):
 
 ```
 ADDBITS     ADDPINS     ALT         ARCHIVE     CHANNEL     DLY
 FVAR        FVARS       LOOKDOWN    LOOKDOWNZ   LOOKUP      LOOKUPZ
 LSTR        LSTR_       MAG         MIDI        PRECISE     PRECOMPILE
-SET         SIGNED      SIZE        SQRT        STEP
+SET         SIGNED      SIZE        STEP
 ```
 
 

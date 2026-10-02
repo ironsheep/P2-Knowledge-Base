@@ -2,14 +2,14 @@
 
 This section contains all PASM2 instructions beginning with the letter I.
 
-**Conditional Jump Timing Convention:** Conditional jumps in this section (IJZ, IJNZ) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps in this section (IJZ, IJNZ) show their `Clks` field as `cog/LUT execution / hub execution`, each side giving the not-taken count and then the taken count. The *taken* value depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 cycles when the jump is not taken or 4 when taken; in hub execution, 2 cycles when not taken or 13–20 when taken.
 
 
 

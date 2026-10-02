@@ -45,20 +45,20 @@ The 4-bit EEEE field encodes sixteen conditions:
 | EEEE | Primary Mnemonic | Condition | Description |
 |:-----|:-----------------|:----------|:------------|
 | 0000 | _RET_ | Always | Execute, then return if no branch |
-| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | No carry and not zero |
-| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
-| 0011 | IF_NC | C=0 | No carry (C flag clear) |
-| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
-| 0101 | IF_NZ | Z=0 | Not zero (Z flag clear) |
-| 0110 | IF_C_NE_Z | C!=Z | C and Z flags differ |
-| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | Not both flags set |
-| 1000 | IF_C_AND_Z | C=1 AND Z=1 | Both flags set |
-| 1001 | IF_C_EQ_Z | C=Z | C and Z flags same |
-| 1010 | IF_Z | Z=1 | Zero (Z flag set) |
-| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | No carry or zero |
-| 1100 | IF_C | C=1 | Carry (C flag set) |
-| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
-| 1110 | IF_C_OR_Z | C=1 OR Z=1 | Either flag set |
+| 0001 | IF_NC_AND_NZ | C == 0 AND Z == 0 | No carry and not zero |
+| 0010 | IF_NC_AND_Z | C == 0 AND Z == 1 | No carry and zero |
+| 0011 | IF_NC | C == 0 | No carry (C flag clear) |
+| 0100 | IF_C_AND_NZ | C == 1 AND Z == 0 | Carry and not zero |
+| 0101 | IF_NZ | Z == 0 | Not zero (Z flag clear) |
+| 0110 | IF_C_NE_Z | C != Z | C and Z flags differ |
+| 0111 | IF_NC_OR_NZ | C == 0 OR Z == 0 | Not both flags set |
+| 1000 | IF_C_AND_Z | C == 1 AND Z == 1 | Both flags set |
+| 1001 | IF_C_EQ_Z | C == Z | C and Z flags same |
+| 1010 | IF_Z | Z == 1 | Zero (Z flag set) |
+| 1011 | IF_NC_OR_Z | C == 0 OR Z == 1 | No carry or zero |
+| 1100 | IF_C | C == 1 | Carry (C flag set) |
+| 1101 | IF_C_OR_NZ | C == 1 OR Z == 0 | Carry or not zero |
+| 1110 | IF_C_OR_Z | C == 1 OR Z == 1 | Either flag set |
 | 1111 | IF_ALWAYS | Always | Unconditional (when no condition specified) |
 
 > **Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
@@ -103,12 +103,12 @@ When comparing values with CMP, CMPS, SUB, or similar instructions, the resultin
 
 | Comparison Result | Flag State | Magnitude Style | Arithmetic Style |
 |:------------------|:-----------|:----------------|:-----------------|
-| Greater than | C=0, Z=0 | IF_A (Above) | IF_GT (Greater Than) |
-| Greater or equal | C=0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
-| Less than | C=1 | IF_B (Below) | IF_LT (Less Than) |
-| Less or equal | C=1 OR Z=1 | IF_BE (Below or Equal) | IF_LE (Less or Equal) |
-| Equal | Z=1 | IF_E | IF_E |
-| Not equal | Z=0 | IF_NE | IF_NE |
+| Greater than | C == 0, Z == 0 | IF_A (Above) | IF_GT (Greater Than) |
+| Greater or equal | C == 0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
+| Less than | C == 1 | IF_B (Below) | IF_LT (Less Than) |
+| Less or equal | C == 1 OR Z == 1 | IF_BE (Below or Equal) | IF_LE (Less or Equal) |
+| Equal | Z == 1 | IF_E | IF_E |
+| Not equal | Z == 0 | IF_NE | IF_NE |
 
 Both styles encode to identical condition codes—the choice is purely stylistic. Either terminology reads equally well in the source.
 
@@ -538,7 +538,7 @@ Consider the ADD instruction entry:
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result = 0 | D | 2 |
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result == 0 | D | 2 |
 
 
 From this entry:
@@ -706,7 +706,9 @@ CON
 **Conditional assembly values:**
 ```spin2
 CON
-  DELAY_MS = (CLKFREQ / 1000) #> 1              ' At least 1 tick
+  _clkfreq = 200_000_000
+  MAX_WAIT = 2500
+  DELAY_MS = (clkfreq_ / 1000) #> 1             ' Clocks per ms, at least 1
   TIMEOUT  = (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 ```
 

@@ -595,14 +595,17 @@ For a DEBUG statement to produce output, both conditions must be met: the statem
 
 ```spin2
 CON
-  DEBUG_COGS = %00000011      ' Only Cogs 0 and 1 produce output
+  DEBUG_COGS = %00000011      ' Only cogs 0 and 1 produce output
 
-DAT
-        org
-entry   debug("From Cog 0")           ' Output appears
-        cogspin(NEWCOG, worker, @stack)
+VAR
+  long  stack[64]
 
-worker  debug("From worker")          ' Output only if on Cog 0 or 1
+PUB main()
+  debug("From cog 0")                   ' Output appears
+  cogspin(NEWCOG, worker(), @stack)     ' The worker starts on cog 1
+
+PRI worker()
+  debug("From worker")                  ' Output appears: cog 1 is enabled
 ```
 
 #### Notes
@@ -679,7 +682,7 @@ Enables timestamps in debug messages.
 
 #### Description
 
-DEBUG_TIMESTAMP enables timing information in all debug output. When defined, each debug message includes a timestamp relative to program start. This aids timing analysis and performance profiling by showing when events occur.
+DEBUG_TIMESTAMP enables timing information in all debug output. When defined, each debug message is time-stamped with the 64-bit system counter (CT) value. This aids timing analysis and performance profiling by showing when events occur.
 
 #### Usage
 
@@ -687,11 +690,10 @@ DEBUG_TIMESTAMP enables timing information in all debug output. When defined, ea
 CON
   DEBUG_TIMESTAMP = TRUE
 
-DAT
-        org
-entry   debug("Started")              ' Output includes timestamp
-        waitms(100)
-        debug("After delay")          ' Timestamp shows ~100ms elapsed
+PUB main()
+  debug("Started")                      ' Output includes timestamp
+  waitms(100)
+  debug("After delay")                  ' Timestamp is ~100 ms later
 ```
 
 #### Notes
@@ -857,6 +859,9 @@ CON
 PUB main()
   ' Debugger breaks here before any code executes
   initialize()
+
+PRI initialize()
+  waitms(1)
 ```
 
 #### Notes
@@ -898,8 +903,14 @@ DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT 
 CON
   DEBUG_COGINIT               ' Break on every cog initialization
 
+VAR
+  long  stack[64]
+
 PUB main()
   cogspin(NEWCOG, worker(), @stack)   ' Debugger breaks here
+
+PRI worker()
+  repeat
 ```
 
 #### Notes

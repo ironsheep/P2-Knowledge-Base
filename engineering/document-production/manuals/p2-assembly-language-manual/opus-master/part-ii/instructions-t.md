@@ -2,14 +2,16 @@
 
 This section contains all PASM2 instructions beginning with the letter T.
 
-**Conditional Jump Timing Convention:** Conditional jumps in this section (TJZ, TJNZ, TJF, TJNF, TJV, TJS, TJNS) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps in this section (TJZ, TJNZ, TJF, TJNF, TJV, TJS, TJNS) show their `Clks` field as `cog/LUT / hub`: the group before the slash is the timing in cog and LUT execution, the group after it is the timing in hub execution. Each group gives the not-taken value first, then the taken value, which depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 clocks when the jump is not taken and 4 when taken; in hub execution, 2 clocks when not taken and 13–20 when taken.
+
+In the Result column, `PC*` means PC is written only when the jump condition is met.
 
 
 
@@ -187,7 +189,7 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 ## TESTP / TESTPN {#testp}
 Test Pin / Test Pin Negated
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
 \hypertarget{testpn}{}
@@ -233,7 +235,7 @@ IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
 TESTP reads the state (0 or 1) of the I/O pin designated by Dest, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. TESTPN does the same but inverts the pin state first. The pin number is specified by Dest[5:0] (0-63). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the pin state is applied to the selected flag.
 
-Both instructions read the actual pin state from the IN register, not the output register. This makes them useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states. TESTPN is particularly useful for active-low signals where a low pin state (0) indicates an active condition.
+Both instructions read the pin's input state as registered two clocks before the instruction starts, which is fresher than the INx registers (registered three clocks before). This makes them useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states. TESTPN is particularly useful for active-low signals where a low pin state (0) indicates an active condition.
 
 ```pasm2
         TESTP   #10 WC         ' Read pin 10 state into C
@@ -277,12 +279,12 @@ TJF and TJNF test Dest for "full" state ($FFFF_FFFF = -1 = all bits set) and con
 
 | Instruction | Jumps when |
 |-------------|------------|
-| TJF | Dest = $FFFF_FFFF (full) |
+| TJF | Dest == $FFFF_FFFF (full) |
 | TJNF | Dest != $FFFF_FFFF (not full) |
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJF/TJNF.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush) (2 or 13–20 in hub execution).
 
 
 
@@ -320,12 +322,12 @@ TJS and TJNS test the sign bit (bit 31) of Dest and conditionally jump:
 
 | Instruction | Jumps when |
 |-------------|------------|
-| TJS | Dest[31] = 1 (negative/signed) |
-| TJNS | Dest[31] = 0 (positive/unsigned) |
+| TJS | Dest[31] == 1 (negative/signed) |
+| TJNS | Dest[31] == 0 (positive/unsigned) |
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS/TJNS.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush) (2 or 13–20 in hub execution).
 
 
 
@@ -341,7 +343,7 @@ Test And Jump If Zero / Not Zero
 **TJZ**  *Dest, {#}Src*\
 **TJNZ**  *Dest, {#}Src*
 
-**Operation:** jump to S if D == 0 (TJZ) / D <> 0 (TJNZ)
+**Operation:** jump to S if D == 0 (TJZ) / D != 0 (TJNZ)
 
 **Result:** Dest is tested (not modified), and conditionally jumps based on zero/non-zero result.
 
@@ -354,11 +356,6 @@ Test And Jump If Zero / Not Zero
 | EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 | EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 
-```{=latex}
-*PC is written only when the jump condition is met.
-```
-
-
 **Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
 
 **Explanation:**
@@ -367,17 +364,17 @@ TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on wh
 
 | Instruction | Jumps when |
 |-------------|------------|
-| TJZ | Dest = 0 |
+| TJZ | Dest == 0 |
 | TJNZ | Dest != 0 |
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
 ```pasm2
-        TJNZ    count, #loop   ' Loop while count <> 0
-        TJZ     count, #done   ' Exit when count = 0
+        TJNZ    count, #loop   ' Loop while count != 0
+        TJZ     count, #done   ' Exit when count == 0
 ```
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush) (2 or 13–20 in hub execution).
 
 
 
@@ -409,7 +406,7 @@ Test And Jump If Overflow
 
 TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the true sign) by the previous ADDS, ADDSX, SUBS, SUBSX, CMPS, CMPSX, or SUMx instruction. The address (Src) can be absolute or relative.
 
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
+The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (2 or 13–20 in hub execution).
 
 ```pasm2
         ADDS    result, delta WC  ' Signed add, update C

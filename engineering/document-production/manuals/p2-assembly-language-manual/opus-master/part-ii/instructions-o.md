@@ -137,6 +137,8 @@ These instructions set pin output level(s) based on flag state:
 
 OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
 
+When Dest is a register, its bits [10:0] form the pin range specification. A SETQ immediately before the instruction overrides D[10:6] with SETQ's Dest[4:0], allowing dynamic control of the pin range.
+
 If WCZ is specified, both the C flag and the Z flag are set to the original output state of the base pin before modification.
 
 
@@ -173,6 +175,8 @@ OUTH sets the output level of the pin(s) specified by Dest to high (1), driving 
 Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
+
+A prior SETQ overrides D[10:6] with SETQ's Dest[4:0].
 
 If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
@@ -213,6 +217,8 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
+A prior SETQ overrides D[10:6] with SETQ's Dest[4:0].
+
 If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins low for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
@@ -252,6 +258,8 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
+A prior SETQ overrides D[10:6] with SETQ's Dest[4:0].
+
 If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling any output that needs to alternate states. It is particularly efficient for creating square waves or implementing state machines that alternate between two states.
@@ -285,7 +293,7 @@ Output Random
 
 **Explanation:**
 
-OUTRND sets the output level of the pin(s) specified by Dest to random low and high states, using bits from the hardware Xoroshiro128** pseudo-random number generator (PRNG). Each affected pin is independently set to either low (0) or high (1) based on successive bits from the PRNG. All other output level bits remain unchanged.
+OUTRND sets the output level of the pin(s) specified by Dest to random low and high states, using bits from the hardware Xoroshiro128** pseudo-random number generator (PRNG). Each affected pin is set to either low (0) or high (1) based on bits from the PRNG. All other output level bits remain unchanged.
 
 Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only this lower 6-bit value matters. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
 
@@ -295,7 +303,7 @@ When Dest is a register, the register's bits [10:0] are used directly to form th
 
 If the WCZ effect is specified, both the C and Z flags are set to the original state of the output level bit for the base pin, before the instruction executes.
 
-OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The quality of randomness depends on proper initialization of the PRNG using the SETRAND instruction.
+OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The PRNG is seeded by the boot ROM at reset; HUBSET with D[31] set can seed it again.
 
 
 

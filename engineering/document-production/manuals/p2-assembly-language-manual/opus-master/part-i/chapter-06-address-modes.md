@@ -452,16 +452,16 @@ In the SETQ2 block form the D operand names the first LUT long directly, countin
 ' BUGGY CODE - PTRx update is wrong!
         setq    #15                     ' Ready to transfer 16 longs
         altd    dest_reg                ' ALTD cancels block PTRx delta!
-        rdlong  0, ptra++               ' PTRA += 4 (1 long), NOT 64!
+        rdlong  0, ptra++               ' PTRA += 4 (plain step), NOT 64!
 
 ' CORRECT CODE - No intervening instruction
         setq    #15
         rdlong  dest_reg, ptra++        ' PTRA correctly increments by 64
 ```
 
-**Impact:** The data transfer completes correctly (16 longs are read), but PTRA only increments by the normal single-operation amount (4 bytes) instead of the block amount (64 bytes).
+**Impact:** The data transfer completes correctly (16 longs are read), but PTRA takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block amount (64 bytes here).
 
-**Workaround:** Never place ALTx, AUGS, or AUGD between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG when using PTRx expressions.
+**Workaround:** Never place ALTx, AUGS, or AUGD between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG when using PTRx expressions; keep the SETQ and the transfer adjacent.
 
 
 ## 6.6 ALTx Modified Addressing
@@ -502,21 +502,24 @@ ALTI can modify both destination and source fields, plus the instruction opcode:
 ### 6.6.4 ALTx with AUGS Interaction
 
 ::: {.warningbox}
-**SILICON BUG:** When an ALTx instruction with an immediate operand follows AUGS, the AUGS value affects both the ALTx and its intended target.
+**SILICON BUG:** When an ALTx instruction with an immediate operand follows AUGS, the ALTx takes the AUGS value too, and the AUGS is not cancelled for its intended target.
 :::
 
 ```pasm2
-' BUGGY CODE - AUGS affects both instructions
-        augs    #$12340000
-        altd    index, #$100            ' #$100 becomes #$12340100! (bug)
-        mov     0-0, #$078              ' #$078 becomes #$12340078
+' BUGGY CODE - the ALTD takes the pending AUGS as well
+        augs    #$3C5C0A00              ' Augment meant for the MOV
+        altd    index, #$100            ' Base stays $100, but S[17:9] = 5
+                                        ' moves index by 5 (silent)
+        mov     0-0, #$078              ' Receives $3C5C0A78
 
 ' CORRECT CODE - Use register for ALTx operand
         mov     base, #$100             ' Put base in register
-        augs    #$12340000
+        augs    #$3C5C0A00
         altd    index, base             ' Register not affected by AUGS
-        mov     0-0, #$078              ' Only this augments to #$12340078
+        mov     0-0, #$078              ' Only this augments to $3C5C0A78
 ```
+
+**Impact:** The ALTx base, S[8:0], is unchanged, and the instruction after the ALTx is still redirected as written. What changes is the auto-increment: it is taken from S[17:9] of the AUGS value, so the ALTx's D register silently moves by those bits (5 in the example). Any later instruction that uses that register sees the moved value.
 
 **Workaround:** When using ALTx near AUGS, use a register for the ALTx S operand instead of an immediate.
 

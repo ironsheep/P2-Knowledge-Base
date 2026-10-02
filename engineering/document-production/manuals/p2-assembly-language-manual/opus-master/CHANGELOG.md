@@ -1,5 +1,41 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.11 (2026-10-02)
+
+**The special registers, directives, appendices and every instruction's explanation are checked line by line against Parallax's documentation.**
+
+### Added
+
+- **`BRK` explains that its condition gates only the code**, with the opposite-condition `SKIP #1` form that makes a break truly conditional
+- **`QDIV` and `QFRAC` state what a divide by zero returns**, and `QFRAC` that its quotient is a fraction of 2^32^
+- **`HUBSET` documents all five of its modes**, and the clock-switching procedure that avoids a PLL glitch
+- **Every `J` event branch states that the event flag is cleared whether or not it jumps**
+
+### Changed
+
+- **`HUBSET` with D[31] set seeds the random-number generator**; a hard reset is `HUBSET ##$1000_0000`. The PLL example keeps the VCO within its 100-200 MHz range
+- **The hardware stack is eight levels deep**: `PUSH` adds a new top entry, and `PUSH`/`POP` must balance before `RET`
+- **`REP`'s instruction count is 0-511 in every form**; only the repeat count extends with `##` or a register. The `@label` form counts the body exactly
+- **`ORG` with an address below `$200` defaults its limit to `$1F8`**
+- **`JQMT`, `JXMT`, `JXRL`, `JXFI` and `JINT` give each event's exact trigger**; `SETSE` configures pin, LUT and lock events; `SETPAT` reads C and Z as inputs
+- **A block transfer whose `SETQ` is separated from it takes the pointer expression's own step** (+4 for `ptra++`, +12 for `ptra++[3]`); keeping the two adjacent is the workaround
+- **An immediate `ALTx` that takes a pending `AUGS` moves its own D register** by the augment's bits 17:9, while its base is kept
+- **Many explanations are corrected**:
+  - `RESIx`, `RET` pairing, `RFVAR` length, `RDPIN`'s one-`NOP` settle
+  - `SAR` for signed values, `SKIPF` cancel cases, `WRFAST` waiting, `XCONT` from idle
+  - the streamer's S operand, `WXPIN`/`WYPIN` roles, `WAITX` flags
+  - `COGATN`'s 16-bit mask, `GETRND`'s shared generator, `LOCKREL`, `NIXINT`, `MUXQ`
+  - `MIXPIX`'s formula, `QMUL` unsigned, `EXECF` as a jump, `IRETn` holding C and Z
+- **Directives**: the `ORGH` range for PASM-only programs, `DITTO`'s no-labels rule, the `FIT` limit labels and the inline-PASM toggle example are corrected
+- **Appendix H recounts to 845 reserved words** and adds `FIELD`, `SIZEOF`, `GRAY` and the cooperative-tasking symbols; `PI`, `HUBEXEC` and `DITTO` are described correctly, and `DEBUG_*` are shown as symbols you declare
+- **The Appendix E DEBUG examples are complete Spin2 programs**, and the Chapter 2 and 3 examples assemble
+- **Condition tests are written with `==`** throughout, distinct from `=` for a value received
+
+### Removed
+
+- **`IF_RET`** as a spelling of `_RET_` in Appendix B — it assembles as a label
+- **The `SETRAND` and `WAITQMT` instructions**, which the silicon does not have
+
 ## v3.1.10 (2026-09-22)
 
 **A counter event fires once the counter has passed its target, the interrupt levels run in the silicon's order, and the Q register is told apart from the CORDIC results.**

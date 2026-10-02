@@ -73,7 +73,7 @@ Execute with Skip Pattern
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
 
 
-**Related:** [CALL](#call), [SKIPF](#skipf), [SKIP](#skip)
+**Related:** [JMP](#jmp), [SKIPF](#skipf), [SKIP](#skip)
 
 **Explanation:**
 
@@ -83,7 +83,7 @@ The PC is set to the address formed by zero-extending Dest[9:0] to create a cog/
 
 The SKIPF pattern in Dest[31:10] provides a 22-bit pattern that controls which subsequent instructions will be skipped after the jump. Like SKIPF, this allows the PC to leap over instructions rather than cancelling them, providing fast conditional execution without the overhead of traditional branch instructions.
 
-EXECF combines the functionality of CALL (jumping to a new address) and SKIPF (setting a skip pattern), enabling efficient implementation of computed branches with conditional execution. This is particularly useful for jump tables and state machines where both the target address and subsequent execution pattern need to be determined dynamically.
+EXECF combines the functionality of a jump (like JMP, no return address is saved) and SKIPF (setting a skip pattern), enabling efficient implementation of computed branches with conditional execution. This is particularly useful for jump tables and state machines where both the target address and subsequent execution pattern need to be determined dynamically.
 
 The instruction takes 4 clock cycles to execute, regardless of whether it executes from cog/LUT or hub memory.
 

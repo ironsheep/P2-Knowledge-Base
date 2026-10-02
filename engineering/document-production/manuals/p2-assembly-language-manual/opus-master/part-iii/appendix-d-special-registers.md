@@ -16,7 +16,7 @@
 | 507 | $1FB | DIRB | R/W | Pin direction 32-63 |
 | 508 | $1FC | OUTA | R/W | Pin output 0-31 |
 | 509 | $1FD | OUTB | R/W | Pin output 32-63 |
-| 510 | $1FE | INA | R/O | Pin input 0-31 |
-| 511 | $1FF | INB | R/O | Pin input 32-63 |
+| 510 | $1FE | INA | R/O | Pin input 0-31 (overlaid as IJMP0, R/W, during a debug ISR) |
+| 511 | $1FF | INB | R/O | Pin input 32-63 (overlaid as IRET0, R/W, during a debug ISR) |
 
 *For complete documentation including memory map diagram, usage examples, and non-memory-mapped registers, see Part II: Special Registers.*

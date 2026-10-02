@@ -2,28 +2,28 @@
 
 This appendix is the **canonical reference** for all P2 condition codes. The EEEE field (bits 31-28) of every instruction specifies one of sixteen conditions that control whether the instruction executes based on the current C and Z flag states.
 
-Every instruction can be made conditional by prefixing it with one of these condition mnemonics. When the condition is false, the instruction does not execute but still consumes its normal execution time (2 clock cycles for most instructions).
+Every instruction can be made conditional by prefixing it with one of these condition mnemonics. When the condition is false, the instruction does not execute but still moves through the pipeline, taking two clock cycles.
 
 
 ## B.1 Complete Condition Code Table
 
 | EEEE | Primary Mnemonic | Condition | All Aliases |
 |:-----|:-----------------|:----------|:------------|
-| 0000 | _RET_ | Always + return | IF_RET |
-| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 |
-| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | IF_Z_AND_NC, IF_01 |
-| 0011 | IF_NC | C=0 | IF_GE, IF_AE, IF_0X |
-| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | IF_NZ_AND_C, IF_10 |
-| 0101 | IF_NZ | Z=0 | IF_NE, IF_X0 |
-| 0110 | IF_C_NE_Z | C!=Z | IF_Z_NE_C, IF_DIFF |
-| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | IF_NZ_OR_NC, IF_NOT_11 |
-| 1000 | IF_C_AND_Z | C=1 AND Z=1 | IF_Z_AND_C, IF_11 |
-| 1001 | IF_C_EQ_Z | C=Z | IF_Z_EQ_C, IF_SAME |
-| 1010 | IF_Z | Z=1 | IF_E, IF_X1 |
-| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | IF_Z_OR_NC, IF_NOT_10 |
-| 1100 | IF_C | C=1 | IF_LT, IF_B, IF_1X |
-| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | IF_NZ_OR_C, IF_NOT_01 |
-| 1110 | IF_C_OR_Z | C=1 OR Z=1 | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 |
+| 0000 | _RET_ | Always + return | — |
+| 0001 | IF_NC_AND_NZ | C == 0 AND Z == 0 | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 |
+| 0010 | IF_NC_AND_Z | C == 0 AND Z == 1 | IF_Z_AND_NC, IF_01 |
+| 0011 | IF_NC | C == 0 | IF_GE, IF_AE, IF_0X |
+| 0100 | IF_C_AND_NZ | C == 1 AND Z == 0 | IF_NZ_AND_C, IF_10 |
+| 0101 | IF_NZ | Z == 0 | IF_NE, IF_X0 |
+| 0110 | IF_C_NE_Z | C != Z | IF_Z_NE_C, IF_DIFF |
+| 0111 | IF_NC_OR_NZ | C == 0 OR Z == 0 | IF_NZ_OR_NC, IF_NOT_11 |
+| 1000 | IF_C_AND_Z | C == 1 AND Z == 1 | IF_Z_AND_C, IF_11 |
+| 1001 | IF_C_EQ_Z | C == Z | IF_Z_EQ_C, IF_SAME |
+| 1010 | IF_Z | Z == 1 | IF_E, IF_X1 |
+| 1011 | IF_NC_OR_Z | C == 0 OR Z == 1 | IF_Z_OR_NC, IF_NOT_10 |
+| 1100 | IF_C | C == 1 | IF_LT, IF_B, IF_1X |
+| 1101 | IF_C_OR_NZ | C == 1 OR Z == 0 | IF_NZ_OR_C, IF_NOT_01 |
+| 1110 | IF_C_OR_Z | C == 1 OR Z == 1 | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 |
 | 1111 | IF_ALWAYS | Always | — |
 
 
@@ -37,12 +37,12 @@ After a comparison instruction (CMP or CMPS), condition aliases express relation
 
 | Relationship | Magnitude Style | Arithmetic Style | Primary | Flag State |
 |:-------------|:----------------|:-----------------|:--------|:-----------|
-| Greater than | IF_A (Above) | IF_GT (Greater Than) | IF_NC_AND_NZ | C=0, Z=0 |
-| Greater or equal | IF_AE (Above or Equal) | IF_GE (Greater or Equal) | IF_NC | C=0 |
-| Less than | IF_B (Below) | IF_LT (Less Than) | IF_C | C=1 |
-| Less or equal | IF_BE (Below or Equal) | IF_LE (Less or Equal) | IF_C_OR_Z | C=1 OR Z=1 |
-| Equal | IF_E | IF_E | IF_Z | Z=1 |
-| Not equal | IF_NE | IF_NE | IF_NZ | Z=0 |
+| Greater than | IF_A (Above) | IF_GT (Greater Than) | IF_NC_AND_NZ | C == 0, Z == 0 |
+| Greater or equal | IF_AE (Above or Equal) | IF_GE (Greater or Equal) | IF_NC | C == 0 |
+| Less than | IF_B (Below) | IF_LT (Less Than) | IF_C | C == 1 |
+| Less or equal | IF_BE (Below or Equal) | IF_LE (Less or Equal) | IF_C_OR_Z | C == 1 OR Z == 1 |
+| Equal | IF_E | IF_E | IF_Z | Z == 1 |
+| Not equal | IF_NE | IF_NE | IF_NZ | Z == 0 |
 
 **Magnitude terminology** (A = Above, B = Below) reads naturally with unsigned values like addresses, counts, and sizes.
 
@@ -76,8 +76,8 @@ Express logical relationships between flag states:
 | IF_SAME | C equals Z | IF_C_EQ_Z |
 | IF_DIFF | C differs from Z | IF_C_NE_Z |
 | IF_NOT_00 | Not both clear | IF_C_OR_Z |
-| IF_NOT_01 | Not (C=0, Z=1) | IF_C_OR_NZ |
-| IF_NOT_10 | Not (C=1, Z=0) | IF_NC_OR_Z |
+| IF_NOT_01 | Not (C == 0, Z == 1) | IF_C_OR_NZ |
+| IF_NOT_10 | Not (C == 1, Z == 0) | IF_NC_OR_Z |
 | IF_NOT_11 | Not both set | IF_NC_OR_NZ |
 
 ### B.2.4 Commutative Forms
@@ -162,10 +162,10 @@ Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern
 
 The `_RET_` prefix adds overhead to the base instruction timing:
 
-| Execution Mode | Additional Cycles |
-|:---------------|:------------------|
-| Cog/LUT | +2 cycles |
-| Hub | +11 to +18 cycles |
+| Return Target | Timing |
+|:--------------|:-------|
+| Cog/LUT address | +2 cycles (a 2-clock instruction with `_RET_` takes 4) |
+| Hub address | The return is a branch to a hub address, which takes at least 13 clock cycles in all (one more if the target is not long-aligned) |
 
 ### B.3.7 Single-Instruction Subroutines
 
