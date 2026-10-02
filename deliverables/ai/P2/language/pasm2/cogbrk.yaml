@@ -2,7 +2,7 @@ instruction: COGBRK
 syntax: COGBRK {#}Dest
 brief_description: Cog break
 category: Interrupt
-description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous breakpoint interrupt enabled. Dest indicates the ID of the desired cog (0-7 on the P2X8C4M64P; the source gives no field width for this operand).'
+description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous breakpoint interrupt enabled. Dest indicates the ID of the desired cog (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax''s PASM2 Manual, COGBRK Explanation).'
 result: If in the Debug ISR, trigger an asynchronous breakpoint in cog identified
   by Dest.
 flags_affected:

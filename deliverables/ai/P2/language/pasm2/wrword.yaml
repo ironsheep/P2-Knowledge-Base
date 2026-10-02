@@ -10,7 +10,7 @@ timing:
   cycles: "3...10 (cog) / 3...20 (hub-exec)"
   type: variable
   range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
-  notes: "Hub-window dependent; minimum 3 clocks when window is hit"
+  notes: "Hub-window dependent; minimum 3 clocks when window is hit. +1 clock if the word crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: Write word in D[15:0] to hub address {#}S/PTRx.                                                               3...10
   1 / 3...20
 flags_affected:

@@ -134,7 +134,8 @@ mechanism, not run on this instruction"; the effect wording now states both case
 
 ### F-499 — cog-number fields: COGATN "bits 7:0", COGID/COGBRK/COGSTOP "lower 3 bits" — `PENDING-VALIDATION`
 COGATN D is a 16-bit value, bit n = cog n (silicon doc :2020); COGSTOP takes D[3:0] (:421); COGID
-returns D[3:0] (:429); COGID-WC and COGBRK operands carry no stated width. `cog.yaml` "2 bits per COG"
+returns D[3:0] (:429); the COGID-WC and COGBRK operand widths come from Parallax's PASM2 Manual,
+Dest[2:0] (pasm2-manual-text.txt :1881, :1867). `cog.yaml` "2 bits per COG"
 for COGATN fixed too.
 
 ### F-500 — `cog.yaml` "at least five clock cycles", unsourced stack wrap; `hubexec.yaml` 9-24 / 3-12 — `PENDING-VALIDATION`

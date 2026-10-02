@@ -10,7 +10,7 @@ timing:
   cycles: "3...10 (cog) / 3...20 (hub-exec)"
   type: variable
   range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
-  notes: "Writes long to hub at PTRB++; hub-window dependent"
+  notes: "Writes long to hub at PTRB++; hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: 'Write long in D[31:0] to hub address PTRB++.'
 flags_affected:
   C: No effect

@@ -15,7 +15,7 @@ encoding:
 timing:
   cycles: '5-12 (cog/LUT) / 14-32 (hub-exec)'
   type: variable
-  notes: 5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *)
+  notes: "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *). +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: Write current C and Z flags and address of the next instruction into
   the 4-byte Hub RAM location at PTRA, increment PTRA by 4, set PC to new relative
   or absolute address, and optionally update C and/or Z to new state. R = 1 then PC

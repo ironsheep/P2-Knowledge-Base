@@ -17,7 +17,7 @@ timing:
   cycles: "9...16 (cog) / 9...26 (hub-exec)"
   type: variable
   range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
-  notes: "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit"
+  notes: "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: '{WC/WZ/WCZ}                                                                                                                            9...16
   1 / 9...26'
 compiler_category: Memory and I/O

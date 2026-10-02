@@ -10,7 +10,7 @@ timing:
   cycles: "9...16 (cog) / 9...26 (hub-exec)"
   type: variable
   range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
-  notes: "Reads long from hub at --PTRB; hub-window dependent"
+  notes: "Reads long from hub at --PTRB; hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: Read long from hub address --PTRB into D.
 flags_affected:
   C: Set to MSB of long (bit 31 of popped value)
