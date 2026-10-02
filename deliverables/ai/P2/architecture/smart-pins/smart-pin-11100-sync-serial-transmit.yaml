@@ -144,7 +144,7 @@ timing:
   start_stop_mode: "Can modify data before clock starts"
   hold_time: "Data stable 2+ clocks after edge when X[5]=1"
 
-initialization: "MUST reset (DIR=0) before configuration"
+initialization: "Configure while DIR is low (held in reset); WRPIN while DIR is high gives unpredictable behavior"
 
 common_uses:
   - "SPI master"

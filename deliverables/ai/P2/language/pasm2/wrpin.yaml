@@ -12,15 +12,16 @@ timing:
   in_flag_reset_latency: |
     After WRPIN executes, the Smart Pin requires 2 system-clock cycles to reset
     the IN flag to logic-0 before a program can poll the flag again.
-    Insert NOP instructions before testing the IN flag:
+    Insert a NOP (2 clocks, "or more") before testing the IN flag:
       WRPIN   mode, #pin
-      NOP                   ' Clock 1 for IN flag reset
-      NOP                   ' Clock 2 for IN flag reset
+      NOP                   ' elapses the 2 clocks for IN to drop
       TESTP   #pin WC       ' NOW safe to poll IN flag
 description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart\
-  \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**CRITICAL REQUIREMENT**:\
-  \ Smart pins MUST be reset (DIR=0) before configuring with WRPIN.\nThis ensures\
-  \ the smart pin is in a known state and prevents configuration conflicts.\n"
+  \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**Configure while DIR is low**:\
+  \ a smart pin should be configured with WRPIN while its DIR bit is low (held in\
+  \ reset); a WRPIN while DIR is high changes the use of the pin's state bits and\
+  \ gives unpredictable behavior (silicon-doc-text.txt:3854-3856). Exception, hardware-verified\
+  \ (EF-012): WRPIN #0 resets a running smart pin without a DIR cycle.\n"
 flags_affected:
   C: No effect
   Z: No effect
@@ -57,9 +58,9 @@ input_selectors:
     x111: "relative -1 pin's read state"
 critical_requirement:
   reset_before_configure: true
-  description: Smart pin MUST be reset (DIR=0) before any WRPIN configuration
+  description: A smart pin should be configured by WRPIN while DIR is low (silicon-doc-text.txt:3854); WRPIN #0 on a running pin resets it with no DIR cycle (EF-012)
   sequence:
-  - 'DIRL pin       '' REQUIRED: Reset smart pin (DIR=0)'
+  - 'DIRL pin       '' Reset smart pin (DIR=0) before configuring'
   - WRPIN mode, pin ' Configure smart pin mode
   - WXPIN x, pin    ' Set X parameter
   - DIRH pin       ' Enable smart pin (DIR=1)
@@ -68,16 +69,15 @@ critical_requirement:
     (WYPIN): WYPIN comes AFTER DIRH. Mandatory for the trigger modes %00100/%00101 (a
     WYPIN issued before enable is lost); consistent and safe for all other modes.
     Hardware-verified (EF-011).'
-  consequence_of_skipping: Unpredictable behavior, configuration conflicts, or smart
-    pin malfunction
+  consequence_of_skipping: Selecting a new mode while DIR is high gives unpredictable, useless behavior (silicon-doc-text.txt:3856)
 usage_notes:
-- ALWAYS reset the smart pin with DIRL before WRPIN
-- 'WRPIN #0, pin clears all smart pin configuration'
+- Configure with WRPIN while DIR is low (DIRL first) when selecting or changing a mode
+- 'WRPIN #0, pin clears all smart pin configuration, and resets a running smart pin even with DIR high (EF-012)'
 - Smart pin begins operation when DIR is set high after configuration
 - Use AKPIN to acknowledge smart pin IN flag without reading
 examples:
 - description: Configure PWM output
-  code: 'DIRL  #16                '' REQUIRED: Reset smart pin
+  code: 'DIRL  #16                '' Reset smart pin (configure while DIR low)
 
     WRPIN ##P_PWM_TRIANGLE | P_OE, #16 '' PWM triangle, output enabled
 

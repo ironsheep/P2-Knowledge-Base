@@ -1,22 +1,22 @@
 instruction: DIRL
 syntax: DIRL    {#}D           {WCZ}
 category: Pin
-description: DIRL alters the direction register's bit(s) designated by Dest to be low (0), setting the I/O pin(s) to input mode. The rest of the direction bits are left as-is. If WCZ is specified, the Z flag is updated to the original state of the target direction bit.
+description: DIRL alters the direction register's bit(s) designated by Dest to be low (0), setting the I/O pin(s) to input mode. The rest of the direction bits are left as-is. If WCZ is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's DIR bit.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to original DIR bit state (if WCZ specified)
-  Z: Set to original DIR bit state (if WCZ specified)
+  C: Set to the original (pre-instruction) state of the base pin's DIR bit (if WCZ specified)
+  Z: Set to the original (pre-instruction) state of the base pin's DIR bit (if WCZ specified)
 timing:
   cycles: 2
   type: fixed
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000000
   write: DIRx
-  c: DIR bit
-  z: DIR bit
+  c: Orig DIRx base bit
+  z: Orig DIRx base bit
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive

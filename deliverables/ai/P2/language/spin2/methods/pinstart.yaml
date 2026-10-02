@@ -123,23 +123,24 @@ pin_field_operators:
 critical_requirement:
   reset_before_configure: true
   description: |
-    **CRITICAL**: PINSTART automatically resets the smart pin (DIR=0) before configuration.
-    This is REQUIRED to ensure proper smart pin operation. Never skip this reset step.
+    PINSTART automatically takes the smart pin's DIR low, configures it, then raises
+    DIR. A smart pin should be configured while its DIR bit is low, holding it in
+    reset; a WRPIN while DIR is high gives unpredictable behavior.
   internal_sequence:
-    - "DIR[pin] := 0     ' AUTOMATIC: Reset smart pin (REQUIRED)"
+    - "DIR[pin] := 0     ' AUTOMATIC: hold smart pin in reset while configuring"
     - "WRPIN(pin, Mode)  ' Configure smart pin mode"
     - "WXPIN(pin, Xval)  ' Set X parameter"
     - "WYPIN(pin, Yval)  ' Set Y parameter"
     - "DIR[pin] := 1     ' Enable smart pin"
 notes:
-  - "**CRITICAL**: Automatically performs required DIR=0 reset before configuration"
+  - "Automatically performs the DIR=0 reset while configuring, then raises DIR"
   - "Complete smart pin initialization sequence with proper reset"
   - "Mode constants defined in Spin2 (P_ADC, P_PWM_TRIANGLE, etc.)"
   - "X and Y parameters are mode-specific"
   - "Pin starts operating immediately after DIR=1"
   - "Use PINCLEAR to stop and reset smart pin before reconfiguration"
   - "ADDPINS allows configuring multiple pins with same mode"
-  - "NEVER configure a smart pin without first resetting it (DIR=0)"
+  - "Configure a smart pin while its DIR bit is low (hold it in reset); WRPIN while DIR is high gives unpredictable behavior"
 operations:
   - "DIR[pin] := 0 (reset)"
   - "WRPIN(pin, Mode) (set mode)"

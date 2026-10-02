@@ -9,11 +9,18 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Set pin pattern for PAT event. C selects INA/INB, Z selects =/!=, D provides
-  mask value, S provides match value.
+description: >-
+  Set pin pattern for PAT event. D provides the mask value, S provides the match value.
+  C and Z are INPUTS to SETPAT (current flag values at execution; SETPAT has no
+  WC/WZ/WCZ effect): C selects INA (0) or INB (1); Z selects != (0) or == (1).
+  The PAT event flag (POLLPAT/WAITPAT/JPAT/JNPAT) is cleared on SETPAT and is then set
+  whenever the selected condition holds - the four cases:
+  C=0,Z=0: (INA & D) != S; C=0,Z=1: (INA & D) == S;
+  C=1,Z=0: (INB & D) != S; C=1,Z=1: (INB & D) == S
+  (silicon-doc-text.txt:2157-2161).
 flags_affected:
-  C: No effect
-  Z: No effect
+  C: No effect (read as input)
+  Z: No effect (read as input)
 documentation_source: original
 documentation_level: enhanced
 compiler_operand_format:

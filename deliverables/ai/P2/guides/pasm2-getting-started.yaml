@@ -678,7 +678,7 @@ flag_behavior:
 timing_considerations:
   instruction_timing:
     most_instructions: "2 clock cycles (typical ALU ops, fixed)"
-    cog_branches: "4 clocks for JMP/CALL/RET; first instruction after branch takes 5+ clocks (Silicon Doc v35: pipeline flush)"
+    cog_branches: "4 clocks for JMP/CALL/RET; first instruction after branch takes 4+ clocks (Silicon Doc v35: pipeline flush)"
     hub_access_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE"
     hub_access_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE"
     hubexec_sequential: "2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO)"

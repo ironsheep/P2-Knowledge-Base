@@ -3,19 +3,19 @@ syntax: DIRH    {#}D           {WCZ}
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000001
   write: DIRx
-  c: DIR bit
-  z: DIR bit
+  c: Orig DIRx base bit
+  z: Orig DIRx base bit
   clocks: '2'
 timing:
   cycles: 2
   type: fixed
 description: >-
   DIRH sets the direction register's bit(s) designated by Dest to high (1), making
-  the pin(s) outputs. All other direction bits are left unchanged. Z is set to the
-  state of the direction bit.
+  the pin(s) outputs. All other direction bits are left unchanged. With WCZ, C and Z
+  are set to the original (pre-instruction) state of the base pin's DIR bit.
 flags_affected:
-  C: Set to DIR bit state
-  Z: Set to DIR bit state
+  C: Set to the original (pre-instruction) state of the base pin's DIR bit
+  Z: Set to the original (pre-instruction) state of the base pin's DIR bit
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

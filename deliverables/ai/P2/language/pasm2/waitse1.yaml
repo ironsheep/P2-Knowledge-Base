@@ -1,6 +1,6 @@
 instruction: WAITSE1
 syntax: WAITSE1 {WC|WZ|WCZ}
-no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Hardware-verified on P2 silicon (empirical finding EF-020)."
+no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Hardware-verified on P2 silicon on WAITSEx (EF-020); same mechanism as the rest of the wait family."
 encoding:
 - bits: EEEE 1101011 CZ0 000010100 000100100
   write: —
@@ -10,7 +10,7 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: Wait for SE1 event flag, then clear it. WAITSE1 waits for selectable event 1 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE1 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE1. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE1 event flag is set whenever the configured selectable event 1 occurs. The flag is cleared by SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 execution.
+description: Wait for SE1 event flag, then clear it. WAITSE1 waits for selectable event 1 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE1 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE1. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE1 event flag is set whenever the configured selectable event 1 occurs. The flag is cleared by SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 execution.
 flags_affected:
   C: Set if timeout occurred before event
   Z: Set if timeout occurred before event

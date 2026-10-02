@@ -172,22 +172,20 @@ special_operations:
 
 block_fill:
   cog_fill:
-    instruction: "SETQ + WRLONG immediate"
-    operation: "Fill cog registers with value"
-    syntax: |
-      SETQ #count-1
-      WRLONG #value, #first_reg
-    example: |
-      SETQ #15
-      WRLONG #0, #buffer  ' Clear 16 cog registers
+    instruction: "none"
+    operation: "No SETQ block form fills cog registers with a value"
+    note: "WRLONG/WMLONG write HUB memory, so SETQ + WRLONG cannot fill cog registers; SETQ + RDLONG copies hub longs INTO the cog (silicon-doc-text.txt:3257-3262)."
 
   hub_fill:
-    instruction: "SETQ + WRLONG with immediate"
-    operation: "Fill hub memory with value"
+    instruction: "SETQ + WRLONG/WMLONG with an immediate D"
+    operation: "Fill hub memory with an immediate value"
     syntax: |
       SETQ #count-1
-      WRLONG value_reg, hub_address
-    note: "Use FBLOCK for faster hub fills"
+      WRLONG #value, hub_address
+    example: |
+      SETQ #15
+      WRLONG #0, ##buffer_hub  ' Clear 16 hub longs
+    note: "Only an immediate D fills; a register D writes that many cog-register longs to hub instead (silicon-doc-text.txt:3269)."
 
 performance:
   transfer_rate: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (the FIFO gets priority and the block move waits for the slice to come around again)"

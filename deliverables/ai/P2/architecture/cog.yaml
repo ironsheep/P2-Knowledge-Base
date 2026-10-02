@@ -14,7 +14,7 @@ architecture:
   pipeline_type: "In-order scalar"
   execution_time: "2 clocks for typical ALU ops when pipeline full (Silicon Doc v35: '2-clock execution for all math and logic instructions')"
   branch_instruction_time: "4 clocks (per JMP/CALL/RET per-instruction YAMLs)"
-  post_branch_first_instruction: "At least 5 clocks (Silicon Doc v35 verbatim: 'Branch instructions cause the pipeline to be flushed, so the first instruction following the branch will take at least five clock cycles'). This is a separate fact from the branch instruction time."
+  post_branch_first_instruction: "At least 4 clocks (Silicon Doc v35 verbatim: 'Branch instructions cause the pipeline to be flushed, so the first instruction following the branch will take at least four clock cycles'). This is a separate fact from the branch instruction time."
   conditionally_canceled_instruction: "Still 2 clocks (Silicon Doc v35: 'Any instruction that is conditionally canceled will still move through the pipeline without stalling or executing, but taking two clock cycles')"
 
 memory:
@@ -100,8 +100,6 @@ stack:
     width: "22 bits (20-bit address + C + Z)"
     push_instructions: ["CALL", "CALLA", "CALLB", "CALLPA", "CALLPB", "CALLD"]
     pop_instructions: ["RET", "RETA", "RETB"]
-    overflow: "Wraps around (circular buffer)"
-    
   software_stack:
     ptra_stack: "PUSHA/POPA use PTRA as stack pointer"
     ptrb_stack: "PUSHB/POPB use PTRB as stack pointer"
@@ -219,7 +217,7 @@ cog_communication:
   cogatn:
     instruction: "COGATN {#}D"
     operation: "Signal attention to COG(s)"
-    d_parameter: "16-bit mask (2 bits per COG)"
+    d_parameter: "16-bit mask (bit n = cog n, bits 0..15; silicon-doc-text.txt:2020)"
     
   synchronization:
     locks: "Atomic test-and-set"
@@ -234,7 +232,7 @@ performance:
   
   instruction_timing:
     alu_ops: "2 clocks (typical math/logic; Silicon Doc verbatim)"
-    cog_branches: "4 clocks for the branch instruction (JMP/CALL/RET per-instruction YAMLs); first instruction after the branch takes 5+ clocks (Silicon Doc verbatim pipeline flush)"
+    cog_branches: "4 clocks for the branch instruction (JMP/CALL/RET per-instruction YAMLs); first instruction after the branch takes 4+ clocks (Silicon Doc verbatim pipeline flush)"
     hub_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE — hub-window dependent"
     hub_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE — hub-window dependent"
     hubexec_sequential: "2 clocks per instruction (FIFO streaming — same as cogexec)"

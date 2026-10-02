@@ -294,16 +294,16 @@ smart_pin_to_basic_io_transition:
   clearing_smart_pin:
     instruction: "WRPIN #0, pin"
     effect: "Disables all smart pin configuration"
-    prerequisite: "DIRL pin (DIR=0) before clearing"
+    prerequisite: "DIRL pin (DIR=0) first is the documented habit; WRPIN #0 also resets a running smart pin with DIR high (hardware-verified, EF-012)"
     example: |
-      DIRL  #16           ' DIR=0 required
+      DIRL  #16           ' DIR=0 while configuring
       WRPIN #0, #16       ' Clear smart pin config
       DRVH  #16           ' Now use as normal I/O
       
   safe_reconfiguration:
-    rule: "ALWAYS set DIR=0 before WRPIN configuration"
+    rule: "Configure a smart pin while its DIR bit is low, holding it in reset (silicon doc); WRPIN #0 is the hardware-verified exception (EF-012)"
     sequence: |
-      DIRL  pin           ' 1. DIR=0 (REQUIRED)
+      DIRL  pin           ' 1. DIR=0 (hold in reset)
       WRPIN mode, pin     ' 2. Configure mode
       WXPIN x, pin        ' 3. Set X parameter (if needed)
       WYPIN y, pin        ' 4. Set Y parameter (if needed)

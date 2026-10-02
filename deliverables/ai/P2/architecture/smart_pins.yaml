@@ -36,8 +36,10 @@ description: |
   timing, counting, serial protocols, ADC/DAC operations, and more. Offloads
   I/O processing from COGs for deterministic, high-performance operation.
   
-  **CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuration.
-  This ensures proper initialization and prevents configuration conflicts.
+  **Configure while DIR is low**: a smart pin should be configured (WRPIN/WXPIN/WYPIN)
+  while its DIR bit is low, holding it in reset. A WRPIN while DIR is high gives
+  unpredictable behavior. Exception, hardware-verified (EF-012): WRPIN #0 resets a
+  running smart pin without a DIR cycle.
 
 architecture:
   pin_count: 64
@@ -101,10 +103,13 @@ operating_modes:
 
 critical_requirements:
   reset_before_configure:
-    mandatory: true
+    mandatory: false
     description: |
-      **CRITICAL**: Smart pins MUST be reset (DIR=0) before any configuration.
-      This ensures the smart pin is in a known state and prevents conflicts.
+      **Configure while DIR is low**: a smart pin should be configured while its DIR
+      bit is low, holding it in reset (silicon-doc-text.txt:3852). A WRPIN while DIR
+      is high changes the use of the pin's state bits and gives unpredictable
+      behavior. Exception, hardware-verified (EF-012): WRPIN #0 resets a running
+      smart pin without a DIR cycle.
     correct_sequence:
       note: |
         Order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate (WYPIN).
@@ -115,7 +120,7 @@ critical_requirements:
         PINSTART()/pinstart() writes Y before raising DIR, so it is NOT safe for
         the trigger modes -- use the explicit sequence below for those.
       pasm2:
-        - "DIRL  pin         ' Reset smart pin (DIR=0) -- REQUIRED before WRPIN"
+        - "DIRL  pin         ' Hold smart pin in reset (DIR=0) while configuring"
         - "WRPIN mode, pin   ' Configure smart pin mode"
         - "WXPIN x, pin      ' Set X parameter (setup)"
         - "DIRH  pin         ' Enable smart pin (DIR=1)"
@@ -127,10 +132,7 @@ critical_requirements:
         - "DIRH(pin)            ' Enable smart pin (DIR=1)"
         - "WYPIN(pin, y)        ' Operate: write Y AFTER enable"
     consequences_of_skipping:
-      - "Unpredictable smart pin behavior"
-      - "Configuration conflicts between old and new settings"
-      - "Smart pin malfunction or incorrect operation"
-      - "Possible corruption of internal state machines"
+      - "Selecting a new mode while DIR is high gives unpredictable, quite certainly useless behavior in the newly-selected mode (silicon-doc-text.txt:3856)"
     why_this_is_the_rule:
       source: >-
         Propeller 2 Documentation v35 (Rev B/C) --
@@ -159,13 +161,13 @@ critical_requirements:
 
 pin_control_instructions:
   configuration:
-    wrpin: "Configure smart pin mode and routing (MUST reset pin first with DIRL)"
+    wrpin: "Configure smart pin mode and routing (configure while DIR is low -- DIRL first)"
     wxpin: "Write X parameter (mode-specific)"
     wypin: "Write Y parameter (mode-specific)"
     
   operation:
     dirh: "Enable smart pin (DIR high) - do this AFTER configuration"
-    dirl: "Disable/reset smart pin (DIR low) - do this BEFORE configuration"
+    dirl: "Disable/reset smart pin (DIR low) - configure while DIR is low"
     
   data_transfer:
     rdpin: "Read smart pin result (clears IN)"
@@ -573,7 +575,7 @@ pin_output_hierarchy:
 live_update_behavior:
   source: "Silicon Doc v35"
   principle: |
-    WRPIN needs DIR=0 (reset). WXPIN/WYPIN work freely while smart pin is running (DIR=1).
+    WRPIN should be issued while DIR=0 (reset); WRPIN #0 is the hardware-verified exception (EF-012). WXPIN/WYPIN work freely while smart pin is running (DIR=1).
     "Once configured, DIR can be raised high and the smart pin will begin operating.
     After that, you may feed it new data via WXPIN/WYPIN."
   what_needs_reset:

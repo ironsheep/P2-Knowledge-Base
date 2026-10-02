@@ -1,223 +1,119 @@
 concept: skipf_branching
 title: Special SKIPF Branching Rules
 category: control_flow
-description: Advanced SKIPF patterns that combine instruction skipping with automatic branching
+description: How SKIP, SKIPF and EXECF combine skipping with a branch (EXECF) or a RET prefix (_RET_ SKIP/SKIPF), and their rules
 
 overview: |
-  SKIPF has special branching capabilities beyond simple instruction skipping. When specific patterns
-  are used, SKIPF can automatically branch after the skip pattern completes. This enables sophisticated
-  control flow without explicit branch instructions, reducing code size and eliminating branch penalties.
+  SKIP and SKIPF carry only a skip pattern in D; they carry no branch target. EXECF is the
+  instruction that branches and skips at once: it jumps to D[9:0] in cog/LUT and starts a
+  SKIPF using the 22-bit pattern D[31:10]. To branch before skipping with SKIP or SKIPF,
+  precede it with _RET_ (see automatic_branch_before_skipping).
 
-skipf_branch_encoding:
+pattern_use:
+  - "Pattern is used LSB-first: bit=1 skips (cancels) the next instruction, bit=0 executes it"
+  - "The pattern is captured, then shifted right one bit for each instruction encountered"
+  - "Skipping selects among up to the next 32 instructions (SKIP/SKIPF); EXECF's pattern is 22 bits"
+  - "SKIPF and EXECF skip only in cog/LUT memory; SKIP skips in hub and cog/LUT memory"
+
+execf_encoding:
   format:
-    bits_31_22: "Skip pattern (10 bits used)"
-    bits_21_10: "Unused (must be 0)"
-    bits_9_0: "Branch target address"
-    encoding: "SKIPF ##(pattern << 22) | target"
-    
-  pattern_rules:
-    - "Only first 10 bits of pattern used"
-    - "Remaining bits must be zero"
-    - "Branch occurs after pattern exhausted"
-    - "Target is cog/LUT address (0-1023)"
+    bits_31_10: "SKIPF pattern (22 bits)"
+    bits_9_0: "Jump address in cog/LUT (0-1023)"
+  syntax: "EXECF ##(pattern << 10) | target"
+  example: |
+    EXECF ##(%1100110011 << 10) | next_phase
+  note: "Performs a JMP and a SKIPF at the same time (10-bit branch address from D[9:0], 22-bit skip pattern from D[31:10])"
 
-special_branching_modes:
-  call_mode:
-    trigger: "Pattern bit 31 = 1"
-    operation: "Acts like CALL instead of JMP"
-    return_storage: "Hardware stack"
-    syntax: |
-      SKIPF ##($80000000 | (pattern << 22) | target)
-    example: |
-      ' Skip pattern with call
-      SKIPF ##($80000000 | (%101 << 22) | subroutine)
-      ADD x, #1       ' Skipped
-      MOV y, #2       ' Executed
-      SUB z, #1       ' Skipped
-      ' Automatically calls subroutine
-    use_case: "Conditional operations before subroutine"
-
-  execf_mode:
-    instruction: "EXECF"
-    operation: "Dedicated instruction for skip+branch"
-    syntax: "EXECF ##(pattern << 10) | target"
-    advantages:
-      - "Clearer intent than SKIPF"
-      - "Compiler optimization friendly"
-      - "Same functionality, better readability"
-    example: |
-      EXECF ##(%1100110011 << 10) | next_phase
-      ' 10 instructions with pattern
-      ' Then jump to next_phase
-
-  zero_pattern:
-    pattern: "All zeros"
-    behavior: "Immediate branch, no skipping"
-    equivalent: "JMP target"
-    example: |
-      SKIPF ##target  ' Same as JMP #target
-    note: "Useful for computed branches"
+automatic_branch_before_skipping:
+  description: "Both SKIP and SKIPF can be preceded by _RET_ for an automatic branch before skipping commences"
+  example: |
+    PUSH #addr              ' point to the addr routine
+    _RET_ SKIPF pat         ' jump to addr and begin skipping fast using pat
 
 branch_timing:
   pattern_execution:
-    - "Each instruction uses one pattern bit"
-    - "Skipped instructions in cog/LUT memory: 0 clocks (Silicon Doc v35: 'leaping over them in cog/LUT memory (no clock penalty)')"
-    - "Skipped instructions when in hub-exec: 2 clocks each (Silicon Doc v35: 'If SKIPF is used in hub exec, it will revert to SKIP behavior, canceling instructions in the pipeline, instead of stepping over them')"
-    - "Skipped instructions when already in the pipeline (cancel case): 2 clocks each (Silicon Doc v35: 'effectively turning them into 2-clock NOP instructions')"
+    - "Each instruction encountered uses one pattern bit"
+    - "SKIPF leaps over skipped instructions in cog/LUT memory with no clock penalty"
+    - "SKIPF used in hub exec reverts to SKIP behavior: skipped instructions are canceled in the pipeline instead of stepped over"
+    - "Canceled instructions become 2-clock NOPs"
+    - "SKIPF/EXECF must cancel (2-clock NOP) instead of stepping over when the first instruction after the SKIPF/EXECF is skipped (pattern LSB = 1), or when the 8th instruction in a row is skipped (only 7 can be stepped over at once)"
     - "Executed instructions: normal per-instruction timing"
-    
-  pipeline_effects:
-    - "No flush for instructions leaped over in cog/LUT"
-    - "Pipeline-cancel cases turn skipped ops into 2-clock NOPs"
-    - "Overall faster than conditional branches when leaping over multiple instructions in cog/LUT"
 
   total_clocks:
     cog_lut_leap_case:
-      formula: "executed_instructions × 2 + 0 × skipped"
+      formula: "sum of executed instructions' clocks + 0 per leaped-over instruction"
       example: |
-        ' Pattern %10101010 (4 executed, 4 skipped) in cog/LUT
-        ' Total: 4 × 2 + 0 × 4 = 8 clocks (not counting any branch at the end)
+        ' Pattern %10101010 (4 executed, 4 skipped) in cog/LUT, 2-clock instructions
+        ' Total: 4 x 2 + 0 x 4 = 8 clocks (no cancel case in this pattern)
     cancel_case_or_hub_exec:
-      formula: "executed_instructions × 2 + skipped × 2"
+      formula: "sum of executed instructions' clocks + 2 per canceled instruction"
       example: |
-        ' Pattern %10101010 (4 executed, 4 skipped) in hub-exec or cancel case
-        ' Total: 4 × 2 + 4 × 2 = 16 clocks
+        ' Pattern %10101010 (4 executed, 4 skipped) in hub-exec, 2-clock instructions
+        ' Total: 4 x 2 + 4 x 2 = 16 clocks
 
 advanced_patterns:
-  conditional_return:
+  bytecode_dispatch:
     code: |
-      CMP value, limit WC
-      IF_C SKIPF ##(%1111111111 << 22) | 0
-        ' 10 instructions all skipped if C
-        ' Then implicit RET (branch to 0)
-    description: "Early return pattern"
+      REP   #1, #8            ' pre-stuff 8-level hardware stack with 'loop' address
+      PUSH  #loop             ' all RETs without CALLs will branch to 'loop'
 
-  multi_branch_table:
-    code: |
-      ALTS index, #branch_table
-      SKIPF 0-0               ' Load pattern+target from table
-      ' Execute pattern then branch
-      
-      branch_table
-        LONG (%1010101010 << 22) | handler_a
-        LONG (%1100110011 << 22) | handler_b
-        LONG (%1111000000 << 22) | handler_c
-    description: "Indexed pattern selection"
+      loop  RFBYTE i          ' get a bytecode
+            RDLUT  e, i       ' lookup long in LUT
+            EXECF  e          ' jump to e[9:0] and SKIPF e[31:10], RETs branch to 'loop'
+    description: "Each LUT long holds a routine address in its 10 LSBs and a 22-bit SKIPF pattern in its 22 MSBs; one table entry selects both the routine and which of its instructions run"
 
-  loop_with_exit:
+  shared_sequence_selection:
     code: |
-      .loop
-        SKIPF ##(%1111111100 << 22) | .continue
-        ' 8 conditional instructions
-        CMP counter, #0 WZ
-        IF_Z JMP #done        ' Early exit
-        .continue
-    description: "Loop with conditional termination"
-
-  state_machine:
-    code: |
-      ALTS state, #state_patterns
-      EXECF 0-0
-      ' Each state has unique pattern+target
-      
-      state_patterns
-        LONG (%0011001100 << 10) | state_0_next
-        LONG (%0101010101 << 10) | state_1_next
-        LONG (%1111000011 << 10) | state_2_next
-    description: "State-driven execution patterns"
+      SKIPF pat               ' pat = %001_110_110 executes 4 of 9 instructions
+      addr  RFBYTE m          ' offset - one of RFBYTE/RFWORD/RFLONG
+            RFWORD m
+            RFLONG m
+            ADD    m, pbase   ' base - one of three
+            ADD    m, vbase
+            ADD    m, dbase
+            SHL    i, #1      ' index - zero to two of these three
+            SHL    i, #2
+            ADD    m, i
+    description: "One static instruction sequence realizes many variants; the pattern picks the instructions to execute"
 
 interaction_rules:
   with_interrupts:
-    - "Pattern preserved across interrupt"
-    - "Branch delayed until pattern complete"
-    - "ISR can use own SKIPF"
-    
+    - "Skipping only works outside of interrupt service routines (in main code)"
+    - "An interrupt service routine executes normally during a skipping sequence; the skipping sequence resumes upon its completion"
+
+  with_call:
+    - "A CALL/CALLPA/CALLPB that is not skipped executes all its nested subroutines normally; skipping is suspended until after the RET/_RET_"
+    - "In SKIPF sequences, CALL/CALLPA/CALLPB immediate (#) branch addresses must be absolute when the instruction after the call might be skipped (CALL can use '#\\address'; CALLPA/CALLPB cannot, but can use registers)"
+    - "For non-CALL branches, SKIPF works through all immediate-relative branches (the cog/LUT default)"
+    - "With an absolute-address branch (#\\label, register, or RET), the first instruction after the branch must not be skipped"
+
   with_rep:
-    - "SKIPF works inside REP"
-    - "Pattern applies each iteration"
-    - "Branch only after REP completes"
-    
-  with_augs:
-    - "AUGS/AUGD must be in pattern"
-    - "Cannot skip prefix alone"
-    - "Both consume pattern bits"
+    - "SKIP is fully compatible with REP, since SKIP only cancels instructions and REP keeps accurate instruction counts"
+    - "SKIPF works with REP only if every SKIPF pattern results in the same instruction count, which REP must then be initiated with (not just the length of code)"
 
-  nested_skipf:
-    - "Not allowed"
-    - "Second SKIPF skipped if in pattern"
-    - "Would not load new pattern"
+code_layout:
+  - "SKIPF and EXECF skip only in cog/LUT memory; place their code and EXECF targets there"
+  - "The bytecode translation table for EXECF consists of longs (10 LSBs = cog/LUT jump address, 22 MSBs = SKIPF pattern)"
 
-optimization_strategies:
-  pattern_design:
-    - "Group skipped instructions"
-    - "Minimize pattern changes"
-    - "Align to common cases"
-    
-  branch_placement:
-    - "Use for loop continuation"
-    - "Replace multi-way branches"
-    - "Implement dispatch tables"
-    
-  code_layout:
-    - "Place targets in cog/LUT"
-    - "Keep patterns in lookup tables"
-    - "Organize for pattern reuse"
+inspecting_skip_state:
+  - "GETBRK D WZ returns the 32-bit SKIP/SKIPF/EXECF/XBYTE pattern in D (Z = 1 if no pattern is queued)"
+  - "GETBRK D WC returns C = LSB of the pattern; D[31:28] = CALL depth since the skip started (skipping suspended if not %0000); D[27] = 1 for SKIP mode, 0 for SKIPF/EXECF/XBYTE mode"
 
-debugging_skipf_branches:
-  challenges:
-    - "Hidden branch in pattern"
-    - "Complex execution flow"
-    - "Pattern state invisible"
-    
-  techniques:
-    - "Use EXECF for clarity"
-    - "Document pattern meanings"
-    - "Test patterns in isolation"
-    - "Add trace markers"
-
-performance_comparison:
-  vs_conditional_jumps:
-    skipf_cog_lut_leap: "N executed × 2 clocks + 0 for skipped (per Silicon Doc verbatim)"
-    skipf_hub_or_cancel: "N executed × 2 clocks + skipped × 2 clocks (NOP cancel)"
-    conditional_jumps_cog: "N instructions × 2 clocks + 4 clocks per cog branch instruction (+5+ clocks for first instruction after each branch per Silicon Doc pipeline-flush rule)"
-    conditional_jumps_hub: "N instructions × 2 clocks + 13-20 clocks per hub-exec branch (FIFO refill)"
-    advantage: "Fewer branch penalties when leaping over multiple instructions in cog/LUT"
-    
-  vs_skip_plus_jump:
-    combined: "Single instruction setup"
-    separate: "Two instruction setup"
-    advantage: "Code density"
-    
-  vs_computed_goto:
-    skipf: "Pattern execution + branch"
-    computed: "Address calc + branch"
-    advantage: "Conditional work before branch"
-
-best_practices:
-  - "Use EXECF for clarity over SKIPF"
-  - "Document pattern bit meanings"
-  - "Keep patterns in named constants"
-  - "Test branch targets thoroughly"
-  - "Limit pattern complexity"
-  - "Place targets strategically"
+pipeline_and_branch_facts:
+  - "Branch instructions flush the pipeline, so the first instruction following a branch takes at least four clock cycles"
+  - "Branching to a hub address takes a minimum of 13 clock cycles (one more if the target is not long-aligned)"
 
 common_errors:
-  wrong_bit_position:
-    - "Pattern not at bits 31:22"
-    - "Target not at bits 9:0"
-    - "Middle bits not cleared"
-    
-  pattern_overflow:
-    - "Pattern exceeds 10 bits"
-    - "Corrupts branch address"
-    - "Unexpected targets"
-    
-  augmentation_issues:
-    - "AUGS affects SKIPF itself"
-    - "Not pattern contents"
-    - "Use ## for large patterns"
+  wrong_pattern_layout:
+    - "EXECF pattern is D[31:10] (22 bits), not 10 bits"
+    - "EXECF jump address is D[9:0]; SKIP and SKIPF have no address field"
+    - "Build EXECF values as (pattern << 10) | target"
+
+  skipf_in_hub_exec:
+    - "SKIPF in hub exec reverts to SKIP behavior (cancels instead of stepping over)"
 
 references:
-  - silicon_doc: Special SKIPF Branching Rules section
-  - instruction_set: SKIPF/EXECF encoding
-  - optimization_guide: Advanced control flow
+  - silicon_doc: INSTRUCTION SKIPPING and Special SKIPF Branching Rules sections
+  - silicon_doc: GETBRK
+  - language/pasm2/skipf.yaml
+  - language/pasm2/execf.yaml

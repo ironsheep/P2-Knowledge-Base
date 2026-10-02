@@ -2,7 +2,7 @@ instruction: COGSTOP
 syntax: COGSTOP {#}Dest
 brief_description: Cog stop
 category: Hub Control
-description: 'COGSTOP terminates the cog identified by Dest[2:0]. In this dormant
+description: 'COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of the D/# operand supply the target cog ID; silicon-doc-text.txt:421). In this dormant
   state, the cog ceases to execute code and
 
   power consumption is greatly reduced.
@@ -13,8 +13,8 @@ flags_affected:
   C: No effect
   Z: No effect
 parameters:
-- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to
-  stop.
+- Dest is the register or 9-bit literal whose 4 LSBs (Dest[3:0]) indicate which cog to
+  stop (0-7 on the P2X8C4M64P).
 syntax_variants:
 - COGSTOP {#}Dest
 timing:

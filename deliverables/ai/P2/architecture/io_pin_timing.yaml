@@ -61,9 +61,9 @@ instruction_to_pin_timing:
       - "Any instruction writing to OUTx or DIRx"
     example: |
       DRVH    #8              ' Instruction completes (2 clocks)
-      NOP                     ' Clock 1 after instruction
-      NOP                     ' Clock 2 after instruction
-      NOP                     ' Clock 3 - pin NOW starts to transition
+      NOP                     ' A NOP is 2 clocks, so these 3 clocks
+      NOP                     '   are covered by about 1.5 NOPs; the pin
+                              '   starts to transition 3 clocks after DRVH
     total_latency: "5 clocks from instruction start to pin transition start -- this is the sum of a 2-clock DRVH and the source's THREE additional clocks, not a figure the source states. The source states only the THREE."
 
   input_latency_inx_register:
@@ -109,8 +109,7 @@ instruction_to_pin_timing:
       - "AKPIN"
     required_pattern: |
       WRPIN   mode, #pin      ' Write to Smart Pin
-      NOP                     ' Clock 1 for IN flag reset
-      NOP                     ' Clock 2 for IN flag reset
+      NOP                     ' NOP is 2 clocks: elapses the 2 clocks (or more)
       TESTP   #pin WC         ' NOW safe to poll IN flag
     note: "RQPIN does NOT reset the IN flag (read quiet)"
 

@@ -14,9 +14,9 @@ description: 'Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block trans
 
   SETQ2 enables block transfers to/from LUT RAM instead of COG RAM:
 
-  - SETQ2 + RDLONG: Block read from HUB to LUT
+  - SETQ2 + RDLONG: Block read from hub to LUT
 
-  - SETQ2 + WRLONG: Block write from LUT to HUB
+  - SETQ2 + WRLONG: Block write from LUT to hub
 
   '
 flags_affected:

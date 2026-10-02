@@ -18,6 +18,9 @@ description: >-
 
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
   the same 32-pin group; it will not cross the port boundary.
+
+  If the WCZ effect is specified, the C and Z flags are set to the original
+  (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.
 result: >-
   The I/O pins described by Dest are set to the input direction and to an output
   level of low/high according to !Z; the rest are left as-is.
@@ -26,16 +29,16 @@ parameters:
   the I/O pin(s) to set to input direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to OUT bit state
-  Z: Set to OUT bit state
+  C: Set to the original (pre-instruction) state of the base pin's OUT bit
+  Z: Set to the original (pre-instruction) state of the base pin's OUT bit
 timing:
   cycles: 2
   type: fixed
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001010101
   write: DIRx* + OUTx
-  c: OUT bit
-  z: OUT bit
+  c: Orig OUTx base bit
+  z: Orig OUTx base bit
   clocks: '2'
 encoding_notes:
 - New DIRx state is not data-forwarded; the next pipelined instruction sees the old state.

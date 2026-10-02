@@ -4,9 +4,12 @@ category: control_flow
 description: Hardware-based instruction skipping for efficient conditional execution without branches
 
 overview: |
-  P2's SKIP and SKIPF instructions provide zero-overhead conditional execution by selectively skipping
-  instructions based on bit patterns. This eliminates branch penalties and enables complex conditional
-  sequences without jumps. Instructions are fetched but not executed when skipped, maintaining pipeline flow.
+  P2's SKIP, SKIPF and EXECF instructions selectively skip up to the next 32 instructions based on a
+  bit pattern, with no branch needed. SKIP cancels each skipped instruction as it comes through the
+  pipeline (it becomes a 2-clock NOP). SKIPF, in cog/LUT memory, leaps over skipped instructions
+  instead, with no clock penalty, except where an instruction is already in the pipeline and must be
+  cancelled (see skip_behavior). Skipping only works in main code, not within interrupt service routines.
+  Source: silicon-doc-text.txt:780, :876-881.
 
 skip_instructions:
   SKIP:
@@ -20,13 +23,13 @@ skip_instructions:
         ADD x, #1       ' Skipped
         SUB y, #1       ' Executed  
         MOV z, #0       ' Skipped
-    timing: "No cycle penalty for skipped instructions"
+    timing: "Each skipped instruction is cancelled in the pipeline and becomes a 2-clock NOP (silicon-doc-text.txt:780)"
 
   SKIPF:
-    description: "Skip instructions based on register pattern"
-    syntax: "SKIPF pattern_reg"
-    pattern_source: "32-bit pattern from register"
-    operation: "Allows dynamic skip patterns"
+    description: "Like SKIP, but faster: cog/LUT only, PC steps over skipped instructions"
+    syntax: "SKIPF {#}pattern"
+    pattern_source: "32-bit pattern from a register or an immediate (# / ##)"
+    operation: "In cog/LUT memory the PC steps 1..8 to leap over skipped instructions (no clock penalty); in hub exec it reverts to SKIP behavior. An instruction is cancelled (2-clock NOP) instead of stepped over when it is the first instruction after SKIPF/EXECF with pattern LSB = 1, or the 8th in a row being skipped (only 7 can be stepped over at once) (silicon-doc-text.txt:848-881)."
     examples:
       - |
         MOV pattern, #%11001100
@@ -35,18 +38,18 @@ skip_instructions:
     use_case: "Runtime-determined conditionals"
 
   EXECF:
-    description: "Skip with automatic branch after pattern"
-    syntax: "EXECF pattern_and_target"
-    encoding: "Pattern[31:10], Target[9:0]"
-    operation: "Execute pattern then jump"
+    description: "Jump to a cog/LUT address, then skip instructions there by a pattern"
+    syntax: "EXECF {#}D"
+    encoding: "D[31:10] = SKIPF pattern, D[9:0] = jump target (cog/LUT address)"
+    operation: "Jumps to D[9:0] in cog/LUT first, then initiates SKIPF using D[31:10]; the pattern applies to the instructions starting at the jump target (silicon-doc-text.txt:786)"
     examples:
       - |
         EXECF ##(%101 << 10) | target
-        ADD x, #1       ' Skipped
-        SUB y, #1       ' Executed
-        MOV z, #0       ' Skipped
-        ' Automatically jumps to target
-    use_case: "Conditional execution with exit"
+        ' ...execution continues at target, where the pattern applies:
+        target  ADD x, #1       ' Skipped
+                SUB y, #1       ' Executed
+                MOV z, #0       ' Skipped
+    use_case: "Enter a block of instructions with a skip pattern chosen at the jump"
 
 pattern_encoding:
   bit_mapping:
@@ -67,14 +70,14 @@ pattern_encoding:
     - "Each instruction consumes one pattern bit"
     - "Pattern shifts after each instruction"
     - "Exhausted pattern = normal execution resumes"
-    - "Nested SKIP not allowed"
+    - "A CALL/CALLPA/CALLPB that is not skipped runs its whole subroutine normally; the skip sequence resumes after the returning RET/_RET_ (silicon-doc-text.txt:791)"
 
 skip_behavior:
   instruction_handling:
     skipped:
-      - "Instruction fetched but not executed"
+      - "SKIP: instruction is cancelled in the pipeline (a 2-clock NOP); not executed"
+      - "SKIPF/EXECF in cog/LUT: PC steps over it, no clocks consumed, except the cancel cases above"
       - "No side effects (flags, writes, etc.)"
-      - "No cycle consumption"
       - "PC advances normally"
     
     executed:
@@ -84,23 +87,17 @@ skip_behavior:
 
   special_cases:
     REP_interaction:
-      - "SKIP works within REP blocks"
-      - "Pattern applies to each iteration"
-      - "Careful pattern planning needed"
-    
-    AUGS_AUGD:
-      - "Augmentation prefixes cannot be skipped alone"
-      - "Skip pattern must include augmented instruction"
-      - "Both consume pattern bits"
+      - "SKIP is fully compatible with REP: it only cancels instructions, so REP keeps accurate instruction counts (silicon-doc-text.txt:883)"
+      - "SKIPF works with REP only if every SKIPF pattern results in the same instruction count, which REP must be initiated with (:885)"
+      - "The pattern advances one bit per instruction encountered, not per REP iteration"
 
-    branches:
-      - "Branches can be skipped"
-      - "Skipped branches don't redirect flow"
-      - "Pattern continues after skipped branch"
+    branches_in_skipf_sequences:
+      - "If the instruction after a CALL/CALLPA/CALLPB might be skipped, its immediate branch address must be absolute (CALL #\\address; registers are absolute; not possible for CALLPA/CALLPB) (:889)"
+      - "Immediate-relative branches work through SKIPF; after an absolute-address branch (#\\label, register, RET) the first instruction after the branch must not be skipped (:891)"
 
     interrupts:
-      - "Skip pattern preserved across interrupts"
-      - "Pattern resumes after interrupt return"
+      - "Skipping only works outside of interrupt service routines (in main code)"
+      - "An interrupt service routine executes normally during a skipping sequence; the skipping sequence resumes upon its completion (silicon-doc-text.txt:780, :791)"
 
 common_patterns:
   conditional_block:
@@ -110,16 +107,8 @@ common_patterns:
         ADD accumulator, value
         SHL value, #1
         OR flags, #PROCESSED
-        CALL #@process
-    description: "Multi-instruction conditional"
-
-  alternating_operations:
-    code: |
-      SKIP ##$AAAAAAAA       ' Pattern: 10101010...
-      REP #2, #16
-        ADD even_sum, value  ' Executed on even iterations
-        ADD odd_sum, value   ' Executed on odd iterations
-    description: "Alternate execution pattern"
+        CALL #process
+    description: "Multi-instruction conditional (SKIP runs only if C is set)"
 
   sparse_execution:
     code: |
@@ -131,75 +120,45 @@ common_patterns:
   conditional_sequence:
     code: |
       TEST flags, #MODE_MASK WZ
-      IF_Z SKIP #%111000
-        MOV x, #1       ' Skipped if Z
-        MOV y, #2       ' Skipped if Z
-        MOV z, #3       ' Skipped if Z
-        MOV x, #10      ' Executed if Z
-        MOV y, #20      ' Executed if Z
-        MOV z, #30      ' Executed if Z
-    description: "Mode-based initialization"
+      IF_Z SKIP #%111000      ' LSB first: run 3, then skip 3
+        MOV x, #1       ' Always runs
+        MOV y, #2       ' Always runs
+        MOV z, #3       ' Always runs
+        MOV x, #10      ' Skipped if Z
+        MOV y, #20      ' Skipped if Z
+        MOV z, #30      ' Skipped if Z
+    description: "Mode-based initialization: Z leaves 1,2,3; NZ (no SKIP) leaves 10,20,30"
 
   early_termination:
     code: |
-      SKIPF ##(%11111111_11111111_11111111_11111100 << 10) | exit_label
-      ' Process up to 30 items
-      ' Last 2 always execute then jump
-    description: "Process with guaranteed exit"
+      EXECF ##(%11_1111_1111_1111_1111_1100 << 10) | body
+      ' ...at body, the first 2 instructions execute (pattern bits 0-1
+      ' are 0) and the next 20 are skipped (bits 2-21 are 1)
+    description: "Jump and skip in one instruction (EXECF pattern is 22 bits)"
 
-skipf_branching:
-  concept: "SKIPF patterns can encode branch targets"
-  encoding: "Lower 10 bits = branch address"
-  behavior: "After pattern exhausted, branch taken"
+execf_branching:
+  concept: "Only EXECF carries a jump target; SKIP and SKIPF have none"
+  encoding: "D[31:10] = skip pattern, D[9:0] = jump target"
+  behavior: "The jump happens first; the pattern then applies from the target. SKIPF does not branch."
   examples:
     - |
-      ' Skip pattern with branch
+      ' Jump to next_section and skip its 2nd and 4th instructions
       EXECF ##(%1010 << 10) | next_section
-      ' 4 instructions with pattern 1010
-      ' Then automatic branch to next_section
 
-optimization_benefits:
-  vs_branches:
-    - "No pipeline flush"
-    - "No branch prediction needed"
-    - "Deterministic timing"
-    - "Better for short conditionals"
-
-  vs_conditional_execution:
-    - "Multiple instructions per condition"
-    - "Complex patterns possible"
-    - "No repeated condition testing"
-
-  code_density:
-    - "Eliminates branch instructions"
-    - "Reduces jump targets"
-    - "Inline conditional logic"
+benefits:
+  - "One static instruction sequence serves many variants: the silicon doc's 9-instruction 'addr' sequence realizes 36 address calculations, one pattern each (silicon-doc-text.txt:802-836)"
+  - "SKIPF/EXECF in cog/LUT step over skipped instructions with no clock penalty, except the two cancel cases (:776, :876-881)"
 
 limitations:
-  - "Maximum 32 instructions per pattern"
-  - "Cannot nest SKIP instructions"
-  - "Pattern must be predetermined"
-  - "Augmentation prefixes complicate patterns"
-  - "Debug stepping through SKIP is complex"
-
-best_practices:
-  - "Use for short conditional sequences"
-  - "Document skip patterns clearly"
-  - "Test pattern alignment carefully"
-  - "Consider REP for uniform patterns"
-  - "Use SKIPF for runtime patterns"
-  - "Avoid complex patterns in critical paths"
+  - "SKIP/SKIPF patterns cover the next 32 instructions; EXECF's pattern is 22 bits (:776, :864)"
+  - "SKIPF and EXECF skip only in cog/LUT memory; SKIPF in hub exec reverts to SKIP behavior (:793, :856)"
+  - "Skipping works only outside interrupt service routines (:780)"
+  - "SKIPF with REP only when every pattern gives the same instruction count (:885)"
 
 debugging:
-  challenges:
-    - "Skipped instructions appear to execute in debugger"
-    - "Pattern state not directly visible"
-    - "Hard to trace execution flow"
-
-  techniques:
-    - "Use NOP to visualize patterns"
-    - "Add markers before/after skip blocks"
-    - "Test patterns in isolation first"
+  inspecting_skip_state:
+    - "GETBRK D WZ returns the 32-bit SKIP/SKIPF/EXECF/XBYTE pattern in D; Z = 1 if no pattern is queued (silicon-doc-text.txt:2587-2593)"
+    - "GETBRK D WC returns C = pattern LSB, D[31:28] = CALL depth since the skip started (skipping suspended if not %0000), D[27] = 1 for SKIP mode or 0 for SKIPF/EXECF/XBYTE mode (silicon-doc-text.txt:2557-2564)"
 
 references:
   - silicon_doc: Instruction Skipping section

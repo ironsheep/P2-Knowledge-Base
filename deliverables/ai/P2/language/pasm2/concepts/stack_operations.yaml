@@ -17,21 +17,21 @@ hardware_stacks:
     operations:
       PUSHA:
         syntax: "PUSHA value"
-        operation: "hub[--PTRA] = value"
+        operation: "WRLONG value, PTRA++ (hub[PTRA] = value, then PTRA += 4; silicon-doc-text.txt:5490)"
         timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pusha.yaml encoding)"
-        description: "Pre-decrement push"
-      
+        description: "Write then post-increment push (ascending stack)"
+
       POPA:
         syntax: "POPA dest"
-        operation: "dest = hub[PTRA++]"
+        operation: "RDLONG dest, --PTRA (PTRA -= 4, then dest = hub[PTRA]; silicon-doc-text.txt:5475)"
         timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popa.yaml encoding)"
-        description: "Post-increment pop"
-      
+        description: "Pre-decrement then read pop (ascending stack)"
+
       manual:
         push: |
-          WRLONG value, --PTRA
+          WRLONG value, PTRA++
         pop: |
-          RDLONG dest, PTRA++
+          RDLONG dest, --PTRA
     
   ptrb_stack:
     pointer: "PTRB (Pointer B)"
@@ -40,12 +40,12 @@ hardware_stacks:
     operations:
       PUSHB:
         syntax: "PUSHB value"
-        operation: "hub[--PTRB] = value"
+        operation: "WRLONG value, PTRB++ (hub[PTRB] = value, then PTRB += 4; silicon-doc-text.txt:5491)"
         timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pushb.yaml encoding)"
       
       POPB:
         syntax: "POPB dest"
-        operation: "dest = hub[PTRB++]"
+        operation: "RDLONG dest, --PTRB (PTRB -= 4, then dest = hub[PTRB]; silicon-doc-text.txt:5476)"
         timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popb.yaml encoding)"
 
   call_stack:
@@ -86,21 +86,22 @@ stack_configurations:
     example: |
       ' Initialize ascending stack
       MOV PTRA, ##stack_base
-      ' Push
+      ' Push (PUSHA does this)
       WRLONG value, PTRA++
-      ' Pop
+      ' Pop (POPA does this)
       RDLONG dest, --PTRA
 
   descending_stack:
     growth: "Toward lower addresses"
     push: "Decrement then write"
     pop: "Read then increment"
+    note: "Not what PUSHA/POPA do; written out by hand with the pointer expressions."
     example: |
       ' Initialize descending stack
       MOV PTRA, ##stack_top
-      ' Push (PUSHA does this)
+      ' Push
       WRLONG value, --PTRA
-      ' Pop (POPA does this)
+      ' Pop
       RDLONG dest, PTRA++
 
   circular_stack:
@@ -152,22 +153,22 @@ common_patterns:
       PUSHA param2
       PUSHA param1
       CALL #function
-      ADD PTRA, #12       ' Clean up 3 parameters
-      
-      ' Callee
+      SUB PTRA, #12       ' Clean up 3 parameters (PUSHA ascends)
+
+      ' Callee (CALL does not touch PTRA; last push is at PTRA[-1])
       function
-        RDLONG param1, PTRA[1]  ' Access parameters
-        RDLONG param2, PTRA[2]
-        RDLONG param3, PTRA[3]
+        RDLONG param1, PTRA[-1]  ' Access parameters
+        RDLONG param2, PTRA[-2]
+        RDLONG param3, PTRA[-3]
     description: "Stack-based parameters"
 
   local_variables:
     code: |
       function
-        SUB PTRA, #16       ' Allocate 4 locals
-        ' Use PTRA[0..3] for locals
+        ADD PTRA, #16       ' Allocate 4 locals (ascending stack)
+        ' Use PTRA[-4..-1] for locals
         ' Function body
-        ADD PTRA, #16       ' Deallocate locals
+        SUB PTRA, #16       ' Deallocate locals
         RET
     description: "Stack frame for locals"
 
@@ -185,32 +186,33 @@ common_patterns:
 stack_operations_advanced:
   block_push:
     code: |
-      SUB PTRA, #64       ' Reserve 16 longs
       SETQ #15
-      WRLONG first_reg, PTRA
+      WRLONG first_reg, PTRA++   ' Writes 16 longs, PTRA += 64
     description: "Push multiple registers"
 
   block_pop:
     code: |
+      SUB PTRA, #64       ' Back up over the 16 longs
       SETQ #15
       RDLONG first_reg, PTRA
-      ADD PTRA, #64       ' Restore pointer
     description: "Pop multiple registers"
 
   stack_check:
     code: |
-      CMP PTRA, ##stack_limit WC
-      IF_C JMP #stack_overflow
+      CMP PTRA, ##stack_limit WC   ' ascending stack: limit is the top
+      IF_NC JMP #stack_overflow    ' PTRA >= limit
     description: "Overflow detection"
 
   stack_trace:
     code: |
-      MOV temp, PTRA
+      ' Ascending stack on PTRA: walk base up to PTRA with PTRB
+      ' (only PTRA/PTRB take ++; a plain register cannot)
+      MOV PTRB, ##stack_base
       .trace
-        RDLONG value, temp++
+        RDLONG value, PTRB++
         ' Process stack entry
-        CMP temp, ##stack_base WZ
-        IF_NZ JMP #.trace
+        CMP PTRB, PTRA WC
+        IF_B JMP #.trace
     description: "Walk stack contents"
 
 interrupt_considerations:

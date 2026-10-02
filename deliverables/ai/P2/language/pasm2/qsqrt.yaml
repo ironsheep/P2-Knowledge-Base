@@ -39,7 +39,7 @@ long_description: 'The QSQRT instruction performs square root calculation using 
 examples:
 - code: ''' Calculate square root of 1000000 (simple 32-bit value)
 
-    QSQRT   #1000000, #0   '' sqrt{0, 1000000} = sqrt1000000 ~= 1000
+    QSQRT   ##1000000, #0  '' D = low long, S = high long: sqrt{0, 1000000} = 1000
 
     '' Wait 55 clocks...
 
@@ -49,9 +49,9 @@ examples:
   description: Basic square root of 32-bit number
 - code: ''' Calculate square root of large 64-bit number
 
-    '' Example: sqrt{0x12345678, 0x9ABCDEF0}
+    '' Example: sqrt{$12345678, $9ABCDEF0} (high, low)
 
-    QSQRT   #$12345678, #$9ABCDEF0
+    QSQRT   ##$9ABCDEF0, ##$12345678   '' D = low long, S = high long
 
     '' ... other work for 55 clocks ...
 
@@ -77,11 +77,15 @@ examples:
 
     GETQY   y_squared_high
 
-    ADD     sum_low, x_squared_low, y_squared_low    '' x² + y² (low)
+    MOV     sum_low, x_squared_low
 
-    ADDX    sum_high, x_squared_high, y_squared_high '' x² + y² (high)
+    ADD     sum_low, y_squared_low WC    '' x² + y² (low)
 
-    QSQRT   sum_high, sum_low   '' sqrt(x² + y²)
+    MOV     sum_high, x_squared_high
+
+    ADDX    sum_high, y_squared_high     '' x² + y² (high)
+
+    QSQRT   sum_low, sum_high   '' sqrt(x² + y²): D = low, S = high
 
     '' ... wait 55 clocks ...
 
@@ -93,7 +97,7 @@ examples:
 
     '' Example: RMS of sum of squares stored in {high, low}
 
-    QSQRT   squares_high, squares_low
+    QSQRT   squares_low, squares_high   '' D = low, S = high
 
     '' ... other processing for 55 clocks ...
 
@@ -103,7 +107,7 @@ examples:
   description: RMS calculation using CORDIC square root
 - code: ''' Variable square root calculation
 
-    QSQRT   input_high, input_low
+    QSQRT   input_low, input_high   '' D = low, S = high
 
     '' ... wait 55 clocks ...
 

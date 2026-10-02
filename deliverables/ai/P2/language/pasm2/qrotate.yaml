@@ -46,7 +46,7 @@ examples:
 
     SETQ    #200           '' Set Y coordinate
 
-    QROTATE #100, #$20000000  '' X=100, angle=45°
+    QROTATE #100, ##$20000000  '' X=100, angle=45°
 
     '' Wait 55 clocks...
 
@@ -60,7 +60,7 @@ examples:
 
     SETQ    #0             '' Y coordinate = 0
 
-    QROTATE #500, #$15555555  '' X=length, angle=30°
+    QROTATE #500, ##$15555555  '' X=length, angle=30°
 
     '' ... other work for 55 clocks ...
 

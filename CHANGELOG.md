@@ -20,6 +20,33 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.22.1] - 2026-10-02
+
+**PASM2 instruction details checked line by line against Parallax's documentation, and the examples assemble.**
+
+### Changed
+
+- **Instruction skipping is described as the silicon does it**: only `EXECF` carries a jump target; `SKIP` cancels each skipped instruction as a 2-clock NOP, `SKIPF` steps over them in cog/LUT; skipping runs outside interrupt service routines and resumes after one; the `REP` and branch rules
+- **`PUSHA`/`POPA` stacks ascend** (`WRLONG D,PTRA++` / `RDLONG D,--PTRA`), and every stack example follows
+- **A block fill uses an immediate D**; a register D copies that many cog registers to hub
+- **`REP`'s instruction count is D[8:0] in every form**; only the repeat count extends with `##` or a register
+- **`HUBSET` examples encode `%CC_SS`**, and the 200 MHz PLL example keeps the VCO in range
+- **Streamer**: `XCONT`/`XZERO` start at once on an idle streamer; S is data or a LUT index, never a hub address; `XSTOP` stops immediately
+- **`WYPIN` gives each mode's role for Y**; smart pins are configured while DIR is low, and `WRPIN #0` resets a running pin
+- **The pin instructions' WCZ flags receive the base pin's original state**
+- **`WAITX` clears only the flag its effect names**; the `WAIT` entries give the effect's meaning with and without a `SETQ` timeout, and say which was run on silicon
+- **`SETPAT` reads C and Z as inputs**; `COGATN` takes a 16-bit cog mask; `RESIx` stores the handler's resume address
+- **`SAR` is for signed values**; one `NOP` covers a smart pin's IN-flag reset; `DRVC`/`DRVH`/`DRVZ` note that DIR is not data-forwarded
+- **CORDIC examples assemble**: `##` literals, `QSQRT` with the low long first
+- **Hub-exec `RDLONG`/`WRLONG` take 9…26 / 3…20 clocks**; a taken branch costs at least 4
+
+### Removed
+
+- **`IF_RET` as a spelling of `_RET_`** — it assembles as a label; a caution says so
+- **`WAITQMT`**, which the silicon does not have, and two unsourced claims: an automatic RCFAST fallback and a wrapping hardware stack
+
+---
+
 ## [1.22.0] - 2026-10-01
 
 **The silicon errata proven on Rev C hardware, each beside the instruction it affects, with the workaround that ran.**

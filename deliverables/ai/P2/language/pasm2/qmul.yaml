@@ -48,7 +48,7 @@ compiler_category: Miscellaneous
 examples:
 - code: ''' Multiply 1000000 × 2000000 = 2000000000000
 
-    QMUL    #1000000, #2000000
+    QMUL    ##1000000, ##2000000
 
     '' Wait 55 clocks...
 
@@ -84,7 +84,7 @@ examples:
 
     GETQY   prod_high
 
-    ADD     acc_low, prod_low
+    ADD     acc_low, prod_low WC
 
     ADDX    acc_high, prod_high  '' Add with carry
 

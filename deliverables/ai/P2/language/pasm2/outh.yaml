@@ -3,8 +3,8 @@ syntax: OUTH    {#}D           {WCZ}
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001001001
   write: OUTx
-  c: OUT bit
-  z: OUT bit
+  c: Orig OUTx base bit
+  z: Orig OUTx base bit
   clocks: '2'
 timing:
   cycles: 2
@@ -14,10 +14,10 @@ description: >-
   All other bits are left as-is.
 result: >-
   The I/O pin output level bit(s), described by Dest, are set high (1); the rest
-  are left as-is. Z = original OUT bit state.
+  are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.
 flags_affected:
-  C: Set to original OUT bit state
-  Z: Set to original OUT bit state
+  C: Set to the original (pre-instruction) state of the base pin's OUT bit
+  Z: Set to the original (pre-instruction) state of the base pin's OUT bit
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

@@ -1,6 +1,6 @@
 instruction: WAITFBW
 syntax: WAITFBW {WC|WZ|WCZ}
-no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Hardware-verified on P2 silicon (empirical finding EF-020)."
+no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Verified on P2 silicon on WAITSEx (EF-020); same mechanism here, not run on this instruction."
 brief_description: Wait FIFO block wrap
 category: Event
 description: >-
@@ -10,9 +10,10 @@ description: >-
   can time-out if the FIFO-interface-block-wrap event doesn't occur soon enough;
   setting C and/or Z flags and then resuming execution at the next instruction. To
   set the optional timeout, insert a SETQ (with a future System Counter target value)
-  right before WAITFBW. The WC, WZ, or WCZ effect is recommended only if the optional
-  timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout
+  right before WAITFBW. The WC, WZ, or WCZ effect reports the outcome when a SETQ
+  timeout is specified: the C flag and/or Z flag is set (1) if a timeout
   occurred before the event, or is cleared (0) if the event occurred before the timeout.
+  Without a SETQ no timeout is armed and the effect clears the named flags.
   During a wait, the pipeline is stalled; no instructions execute and no interrupts
   are processed in the cog until the wait condition ends. The FIFO-interface-block-wrap
   event flag is set whenever the Hub RAM FIFO interface exhausts its block count and

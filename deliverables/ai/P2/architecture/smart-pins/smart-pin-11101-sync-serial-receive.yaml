@@ -179,7 +179,7 @@ timing:
   
 data_format: "Always left-justified, needs right-shift except 32-bit"
 
-initialization: "MUST reset (DIR=0) before configuration"
+initialization: "Configure while DIR is low (held in reset); WRPIN while DIR is high gives unpredictable behavior"
 
 common_uses:
   - "SPI slave"

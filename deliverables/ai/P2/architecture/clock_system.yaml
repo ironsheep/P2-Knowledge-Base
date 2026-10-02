@@ -210,7 +210,7 @@ clock_sources:
 
 clock_switching:
   glitch_free: true
-  automatic_fallback: "Falls back to RCFAST if PLL/crystal fails"
+  switch_away_from_pll_warning: "No automatic fallback is documented. Switching away from the PLL (SS=%11, CC<>%00) with PPPP=%1111 can glitch the clock and hang the chip until reset; first switch to an RC oscillator (SS=%00 or %01) keeping PPPP=%1111 and CC (silicon-doc-text.txt:2726)."
   switching_time: "~5 microseconds typical"
   
   sequence:
@@ -318,7 +318,7 @@ related_systems:
 debugging:
   clock_output: "Can output clock on pins for measurement"
   pll_lock_detection: "Check PLL stability before switching"
-  fallback_mode: "System always falls back to RCFAST if clock fails"
+  switch_away_warning: "Switch away from the PLL only via an RC source with PPPP=%1111 and CC held (silicon-doc-text.txt:2726); no automatic fallback to RCFAST is documented"
 
 # Only the wrong/correct pairs the sources state. Two entries carried by the pre-purge
 # form of this block -- a hardcoded-WAITX pattern and a use-CLKFREQ-before-init pattern --

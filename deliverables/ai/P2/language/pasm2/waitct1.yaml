@@ -1,6 +1,6 @@
 instruction: WAITCT1
 syntax: WAITCT1 {WC|WZ|WCZ}
-no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Hardware-verified on P2 silicon (empirical finding EF-020)."
+no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: WC/WZ/WCZ then clear both C and Z (both carry the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z. Verified on P2 silicon on WAITSEx (EF-020); same mechanism here, the no-SETQ flag clear not run on WAITCT1 itself (WAITCT1 CT timing was verified separately, EF-081)."
 encoding:
 - bits: EEEE 1101011 CZ0 000010001 000100100
   write: —
@@ -10,7 +10,7 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: Wait for CT1 event flag, then clear it. WAITCT1 waits for the counter 1 event to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITCT1 can time-out if the counter event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT1. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The CT1 event flag is set whenever the System Counter passes the value in the CT1 event trigger register (MSB of CT - CT1 is 0). The flag is cleared by ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1 execution.
+description: Wait for CT1 event flag, then clear it. WAITCT1 waits for the counter 1 event to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITCT1 can time-out if the counter event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT1. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The CT1 event flag is set whenever the System Counter passes the value in the CT1 event trigger register (MSB of CT - CT1 is 0). The flag is cleared by ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1 execution.
 flags_affected:
   C: Set if timeout occurred before event
   Z: Set if timeout occurred before event

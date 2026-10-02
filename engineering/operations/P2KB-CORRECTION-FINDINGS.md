@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-483`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-506`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -51,6 +51,117 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## KB defects surfaced by the PASM2 references audit (2026-10-02, «#352») — F-483 … F-505
+
+The «#352» audit of the Assembly Reference and deSilva read both manuals in full against KB HEAD
+(v1.22.0); where the manual was right and the YAML wrong, the defect is logged here. All 23 were
+**applied in the same pass** (fix-group agents, every hunk reviewed by the arbiter; each re-verified
+against the source cited). **Status `PENDING-VALIDATION` = applied, awaiting publication** — each
+flips to `DONE` when the KB release carrying it is served by `p2kb-mcp`. Sources: silicon doc =
+`silicon-doc-text.txt`; PASM2 Manual = Parallax *Propeller 2 Assembly Language Manual* (2022/11/01)
+text; v55 = Spin2 v55 text.
+
+### F-483 — `setq_block_ops.yaml` block_fill: hub fill with a register D, and a "cog fill" via WRLONG — `PENDING-VALIDATION`
+Only an IMMEDIATE D fills; a register D copies that many cog registers to hub (silicon doc :3269).
+WRLONG writes hub, so no SETQ form fills cog registers. Fixed both; removed the unsourced FBLOCK tip.
+
+### F-484 — `sar.yaml` "safe for both signed and unsigned integers" — `PENDING-VALIDATION`
+SAR copies bit 31 into the vacated bits: right for signed values only; SHR for unsigned.
+
+### F-485 — the SKIP/SKIPF/EXECF concept YAMLs gave SKIPF a branch target, "no cycle consumption", and unsourced rules — `PENDING-VALIDATION`
+`concepts/instruction_skipping.yaml` and `concepts/skipf_branching.yaml`, audited claim by claim
+against silicon doc :772-891, :2557-2593. Only EXECF carries a target (D[9:0], pattern D[31:10]);
+SKIP cancels (2-clock NOP); SKIPF/EXECF step over in cog/LUT except the two cancel cases; skipping
+works only outside ISRs and resumes after one; SKIP/REP and SKIPF/REP rules; the CALL/absolute-branch
+rules; GETBRK pattern visibility. Removed: "nested SKIP not allowed", AUGS/AUGD rules, "pattern
+preserved across interrupts", call-mode bit 31, optimization/best-practice/debugging lists (all
+unsourced). `conditional_sequence` comments were inverted; `alternating_operations` (pattern assumed
+per REP iteration) removed.
+
+### F-486 — `rep.yaml`: the instruction count D extends via ## / register — `PENDING-VALIDATION`
+D is D[8:0] (0-511) in every form; only S extends (silicon doc :757). The manual carried the same
+error (fixed there).
+
+### F-487 — `groups/interrupt_resume.yaml` was a placeholder sentence — `PENDING-VALIDATION`
+Now: RESIx = `CALLD IJMPx,IRETx WCZ` — returns like RETIx and stores the ISR's resume address, so the
+next interrupt resumes the handler at the next instruction (silicon doc :2311-2317, :5478-5481).
+
+### F-488 — IN-flag reset delay shown as two (or three) NOPs — `PENDING-VALIDATION`
+`architecture/io_pin_timing.yaml`, `wrpin.yaml`: one NOP (2 clocks) covers it (silicon doc :3847-3850).
+
+### F-489 — CORDIC examples: `#` literals above 511, QSQRT operand order, QMUL carry chain — `PENDING-VALIDATION`
+`qrotate.yaml`, `qsqrt.yaml`, `qmul.yaml`: `##` added; QSQRT examples pass low long first ({S:D},
+silicon doc :3353); the ADD feeding ADDX gained WC. Compiled.
+
+### F-490 — `hubset.yaml` examples had CC/SS reversed and a mislabelled PLL; `clock_system.yaml` claimed an RCFAST fallback — `PENDING-VALIDATION`
+Low nibble is %CC_SS (silicon doc :2621); `pll_200mhz` rebuilt per :2736-2739 (VCO 200 MHz, PPPP=%1111);
+PPPP described as VCO/2…/30 and /1 (:2644-2678). "Falls back to RCFAST if the clock fails" has no
+source; replaced by the :2726 glitch-hang warning. (The manual's HUBSET entry was wrong too: D[31]
+"reset the chip" — fixed there.)
+
+### F-491 — DRVC/DRVH/DRVZ/DRVNZ YAMLs lacked the DIRx-not-data-forwarded note — `PENDING-VALIDATION`
+PASM2 Manual narrative :4003-4004, :4054, :4193; DRVL/DRVNOT/DRVRND/DRVNC already carried it.
+
+### F-492 — `pollqmt.yaml` lists WAITQMT — `PENDING-VALIDATION`
+There is no WAITQMT (silicon doc :2102; the :2211 list carries the slip).
+
+### F-493 — `muxq.yaml` examples wrote `mov q, …` — `PENDING-VALIDATION`
+Q is not addressable; SETQ loads it. Mask constants now match their pin comments.
+
+### F-494 — `concepts/stack_operations.yaml` had PUSHA/POPA (and B) backwards — `PENDING-VALIDATION`
+PUSHA = `WRLONG D,PTRA++`, POPA = `RDLONG D,--PTRA` (silicon doc :5475, :5490): an ascending stack.
+Every example re-derived (parameter offsets, locals, block push/pop, overflow test); `stack_trace`
+used `temp++` on a register (invalid) — now walks with PTRB++.
+
+### F-495 — streamer: XCONT "must have an active command", XINIT S "or hub address", XSTOP "after current command" — `PENDING-VALIDATION`
+`xcont.yaml`, `xinit.yaml`, `xzero.yaml`: with the count run down to 0 XCONT/XZERO do not wait
+(:1407); S is data / sub-mode / ignored, never a hub address (hub data goes via the FIFO); XSTOP is
+`XINIT #0,#0` and stops at once (:1405).
+
+### F-496 — `wypin.yaml`: Y as "base period", "count value", "initiates conversions" — `PENDING-VALIDATION`
+PWM: Y[15:0] is the output value (:4088-4089); counter: Y[0] selects count mode (:4133); ADC: Y[13:0]
+overrides the period except SINC2 sampling (:4387).
+
+### F-497 — "smart pins MUST be reset (DIR=0) before configuring" — `PENDING-VALIDATION`
+`wrpin.yaml`, `architecture/smart_pins.yaml`, `concepts/basic-io.yaml`, `spin2/methods/pinstart.yaml`,
+`smart-pin-11100…`, `smart-pin-11101…`: the silicon doc says *should be configured while DIR is low*
+(:3854-3856); EF-012 shows WRPIN #0 resets a running smart pin with no DIR cycle.
+
+### F-498 — WAITxxx entries: blanket "Hardware-verified on P2 silicon" and "WC/WZ/WCZ recommended only with a timeout" — `PENDING-VALIDATION`
+16 WAIT YAMLs: EF-020 verified the no-SETQ flag clear on WAITSEx only — the others now say "same
+mechanism, not run on this instruction"; the effect wording now states both cases (silicon doc
+:2082-2086).
+
+### F-499 — cog-number fields: COGATN "bits 7:0", COGID/COGBRK/COGSTOP "lower 3 bits" — `PENDING-VALIDATION`
+COGATN D is a 16-bit value, bit n = cog n (silicon doc :2020); COGSTOP takes D[3:0] (:421); COGID
+returns D[3:0] (:429); COGID-WC and COGBRK operands carry no stated width. `cog.yaml` "2 bits per COG"
+for COGATN fixed too.
+
+### F-500 — `cog.yaml` "at least five clock cycles", unsourced stack wrap; `hubexec.yaml` 9-24 / 3-12 — `PENDING-VALIDATION`
+Silicon doc :286 says four (also swept in `skipf_branching.yaml`, `pasm2-getting-started.yaml`); the
+"stack wraps (circular buffer)" claim has no source — removed; hub-exec RDLONG/WRLONG are 9...26 /
+3...20 (rdlong/wrlong/hub YAMLs); its bare-name references made full paths.
+
+### F-501 — `setq2.yaml` "HUB" in capitals — `PENDING-VALIDATION`
+
+### F-502 — `waitx.yaml` contradicted itself on which flags WC/WZ/WCZ clear — `PENDING-VALIDATION`
+A flag column applies only when its effect is given (PASM2 Manual p.30): WC clears C, WZ clears Z,
+WCZ both.
+
+### F-503 — `setpat.yaml` did not say C and Z are inputs — `PENDING-VALIDATION`
+SETPAT reads C (INA/INB) and Z (==/!=) as inputs and takes no effect suffix (silicon doc :2157-2161).
+
+### F-504 — `IF_RET` listed as an alias of `_RET_` — `PENDING-VALIDATION`
+`concepts/conditional_execution.yaml`, `PASM2-ENCODING-REFERENCE.md`: pnut-ts 1.55.8 assembles
+`if_ret mov x,#1` as a DAT label `IF_RET` and an UNCONDITIONAL mov (probe 2026-10-02); no Parallax
+document lists it (the only on-disk mention is an old compiler-source enum name). Alias removed, a
+caution added (IF_RET / IF_RETURN / IF_NEVER are not keywords). Shipped in the Assembly Reference
+v3.1.10's Appendix B — removed there too.
+
+### F-505 — pin-family YAMLs gave C/Z "the state of the base bit" without saying ORIGINAL — `PENDING-VALIDATION`
+31 DIR*/DRV*/FLT*/OUT* YAMLs: every PASM2 Manual table row reads "Orig DIRx/OUTx base bit"
+(pasm2-manual-text :2087-3266); now "the original (pre-instruction) state of the base pin's bit".
+
 ## Impact survey — v1.22.0 (`release-yamls` §8, run 2026-10-01)
 
 The v1.22.0 delta (21 YAMLs: the P2 Errata silicon findings — `rdfast` + hub read/write family,
@@ -71,7 +182,13 @@ no-wait RDFAST use, GETSEC "long-duration").
 
 ## The Streamer Guide teaches GETXACC as capture-and-clear (2026-10-01, v1.22.0 impact survey) — F-479
 
-### F-479 — the Streamer Guide says GETXACC "captures and clears" both accumulators; on silicon the clear acts only during a Goertzel burst, and a burst's last term lands in the next — `CONFIRMED`
+### F-479 — the Streamer Guide says GETXACC "captures and clears" both accumulators; on silicon the clear acts only during a Goertzel burst, and a burst's last term lands in the next — `CONFIRMED` (held: E4/E5 not yet ratified)
+> **2026-10-02 — held, not applied.** The guide's text is the P2 Documentation's documented
+> behaviour; the correction is errata E4/E5 content, and only E1 and E2 are ratified for
+> publication (Stephen, 2026-10-02). A first application in «#352» was reverted before any push.
+> Apply when E4/E5 are ratified. Done meanwhile (not errata): §17.1's claim that the XCONT loop
+> "subtracts a baseline" (no such code) removed. Re-audit of the guide's Goertzel examples: the
+> only other GETXACC site is the §10.6 read pattern (no absolute discrete read).
 
 **Where:** `p2-streamer-programming-guide/opus-master/streamer-body.md` §10.6 *Reading Results* (:813)
 and §17.1 *Reading the result: one GETXACC per command* (:1795-1799); its CHANGELOG v-entry (:96)

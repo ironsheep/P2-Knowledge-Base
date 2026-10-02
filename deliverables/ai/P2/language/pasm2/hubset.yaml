@@ -37,7 +37,7 @@ clock_configuration:
       range: "0-1023 (actual multiplier 1-1024)"
     d7_4:
       name: "Post Divider (PPPP)"
-      description: "PLL output post-divider - 1 (4 bits)"
+      description: "PLL output divider (4 bits): %0000 = VCO/2, %0001 = VCO/4, ... %1110 = VCO/30 (VCO / ((PPPP+1)*2)), and %1111 = VCO/1 (silicon-doc-text.txt:2644-2678)"
     d3_2:
       name: "Crystal Config (CC)"
       values:
@@ -78,26 +78,25 @@ safe_clock_switching:
 
 examples:
   enable_crystal:
-    description: "Enable 20 MHz crystal oscillator"
+    description: "Enable 20 MHz crystal oscillator (the low nibble is %CC_SS)"
     code: |
-      HUBSET  ##%00_01              ' Crystal with 15pF caps, stay on RCFAST
-      WAITX   ##20_000_000/100      ' Wait 10ms for crystal startup
-      HUBSET  ##%10_01              ' Switch to crystal (XI source)
+      HUBSET  ##%10_00              ' CC=%10 (15pF caps), SS=%00 stay on RCFAST
+      WAITX   ##20_000_000/200      ' Wait 5ms for crystal to stabilize
+      HUBSET  ##%10_10              ' SS=%10 switch to crystal (XI source)
 
   pll_200mhz:
-    description: "Configure PLL for 200 MHz from 20 MHz crystal"
+    description: "Configure PLL for 200 MHz from 20 MHz crystal (fields %E_DDDDDD_MMMMMMMMMM_PPPP_CC_SS)"
     code: |
-      ' Step 1: Enable crystal
-      HUBSET  ##%00_01              ' Crystal 15pF, RCFAST source
-      WAITX   ##20_000_000/100      ' Wait 10ms
-      HUBSET  ##%10_01              ' Switch to crystal
+      ' Step 1: RCFAST with PPPP=%1111 (safe base before using the PLL)
+      HUBSET  #$F0
 
-      ' Step 2: Configure PLL (20 MHz * 10 = 200 MHz)
-      HUBSET  ##%1_000000_0000001001_0000_01_01  ' PLL on, mult=10, source=crystal
-      WAITX   ##20_000_000/100      ' Wait 10ms for PLL lock
+      ' Step 2: PLL on, crystal on, stay on RCFAST (SS=%00)
+      '   DDDDDD=0 (/1), MMMMMMMMMM=9 (x10) -> VCO 200 MHz, PPPP=%1111 -> VCO/1
+      HUBSET  ##%1_000000_0000001001_1111_10_00
+      WAITX   ##20_000_000/100      ' Wait 10ms for crystal+PLL
 
-      ' Step 3: Switch to PLL
-      HUBSET  ##%1_000000_0000001001_0000_01_11  ' Same config, source=PLL
+      ' Step 3: Switch to PLL (SS=%11)
+      HUBSET  ##%1_000000_0000001001_1111_10_11  ' Same config, source=PLL
 
   chip_reset:
     description: "Reset (reboot) the entire chip -- D[31:28]=%0001 selects hard-reset mode"

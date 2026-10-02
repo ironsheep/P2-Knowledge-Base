@@ -21,15 +21,24 @@ description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknow
 
   The Y register serves multiple purposes:
 
-  - For PWM modes: Sets the base period
+  - For pulse/cycle (%00100) and transition (%00101) output: Y[31:0] is the pulse/transition count
 
-  - For SPI/serial: Controls data to transmit
+  - For PWM modes: Y[15:0] is the output value captured at each frame start (the base
+  period and frame count are set by WXPIN, not WYPIN)
 
-  - For counter modes: Sets count value
+  - For DAC modes: Y[15:0] is the DAC output value captured at each sample period
 
-  - For ADC modes: Initiates conversions
+  - For sync/async serial and USB: Y loads the output word/byte to transmit
 
-  - Writing Y also acknowledges pin completion
+  - For counter modes (%01110/%01111): Y[0] selects count-only (0) or increment/decrement
+  (1), not a count value; the measurement period is X
+
+  - For ADC modes other than SINC2 sampling: WYPIN may replace the period set by WXPIN
+  with Y[13:0] - it does not initiate conversions
+
+  - Writing Y also acknowledges the pin
+
+  - Source: silicon-doc-text.txt:3938, :3974, :3993, :4042, :4089, :4133, :4387, :4656
 
   '
 flags_affected:
@@ -46,8 +55,7 @@ related_instructions:
 notes:
 - Writing Y register automatically acknowledges pin
 - Y register meaning depends on smart pin mode
-- For continuous operation modes, Y triggers/resets
-- Essential for PWM, SPI, ADC, and counter operations
+- Y is used by the output, PWM, DAC, serial, USB, counter and ADC-period modes listed in the description
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#

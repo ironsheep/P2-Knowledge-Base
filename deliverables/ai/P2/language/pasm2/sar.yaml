@@ -14,8 +14,9 @@ description: 'The bits of Dest are shifted right by Src bits, extending Dest[31]
   manipulation and for swift division--
 
 
-  it is similar to SHR for swift division by a power-of-two, but is safe for both
-  signed and unsigned integers.
+  it is similar to SHR for swift division by a power-of-two, but is for signed
+  integers; use SHR for unsigned values (SAR on an unsigned value with bit 31 set
+  shifts in 1s).
 
 
   If the WC or WCZ effect is specified, the C flag is updated to the value of the

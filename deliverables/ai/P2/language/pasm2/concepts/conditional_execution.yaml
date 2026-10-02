@@ -51,11 +51,11 @@ condition_codes:
   
   - value: "%0000"
     primary: "_RET_"
-    aliases: ["IF_RET"]
+    aliases: []
     condition: "Always; then return IF THE INSTRUCTION DID NOT BRANCH"
     c_required: "X"
     z_required: "X"
-    note: "Special: the instruction ALWAYS executes, and a return is then performed ONLY IF that instruction did not branch. No C/Z context restore. On a BRANCHING instruction (CALL, JMP, ...) the branch stands and NO return occurs -- see ret_prefix_rule."
+    note: "Caution: IF_RET, IF_RETURN and IF_NEVER are NOT condition keywords -- pnut-ts assembles them as DAT labels and the instruction runs unconditionally. Special: the instruction ALWAYS executes, and a return is then performed ONLY IF that instruction did not branch. No C/Z context restore. On a BRANCHING instruction (CALL, JMP, ...) the branch stands and NO return occurs -- see ret_prefix_rule."
     
   - value: "%0001"
     primary: "IF_NC_AND_NZ"

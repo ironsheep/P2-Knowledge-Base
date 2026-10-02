@@ -12,15 +12,15 @@ timing:
 description: Execute next D[8:0] instructions S times. If S = 0, repeat instructions
   infinitely. If D[8:0] = 0, nothing repeats.
 constraints:
-  - Maximum 511 instructions with #immediate (9-bit D field); use ## or register for up to 2^32-1
-  - Maximum 511 iterations with #immediate; use ## or register for up to 2^32-1
+  - Instruction count is D[8:0] only (maximum 511 instructions, whether D is #immediate or a register); it does not extend beyond 9 bits (silicon-doc-text.txt:757)
+  - Maximum 511 iterations with #immediate; use ## or register for S up to 2^32-1
   - REP cannot be nested (single hardware counter)
   - Interrupts stalled during execution
   - Cannot use WC, WZ, or WCZ effects
   - Branches within block cancel REP immediately
 extended_counts:
-  - "##count emits AUGS/AUGD prefix for 32-bit values"
-  - "Register-based counts support full 32-bit range at runtime"
+  - "##reps (the S operand) emits an AUGS prefix for a 32-bit iteration count; S[31:0] may also come from a register"
+  - "The D instruction count stays 9 bits (D[8:0]); only the S repeat count extends to 32 bits"
 flags_affected:
   C: No effect
   Z: No effect

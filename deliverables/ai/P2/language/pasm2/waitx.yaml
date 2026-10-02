@@ -12,7 +12,9 @@ timing:
 description: >-
   Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified,
   wait 2+(D AND RND) clock cycles, where RND is a random value, producing a
-  randomized delay; C and Z are cleared to 0 after completion. The 2-cycle
+  randomized delay; the flag(s) the effect names are cleared to 0 after
+  completion (WC: C, WZ: Z, WCZ: both -- a flag column applies only when its
+  effect is given, Parallax PASM2 Manual p.30). The 2-cycle
   overhead is inherent to the instruction. Stalls the cog pipeline during the wait;
   no instructions execute and no interrupts are processed until the wait completes.
   Critical for bit-banging protocols, PWM generation, and timing-sensitive operations

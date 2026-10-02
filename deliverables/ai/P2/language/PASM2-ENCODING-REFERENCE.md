@@ -39,7 +39,7 @@ The 4-bit `EEEE` prefix selects conditional execution (sourced from
 
 | EEEE | Mnemonic | Condition | Aliases |
 |------|----------|-----------|---------|
-| `0000` | _RET_ | Always; then return IF THE INSTRUCTION DID NOT BRANCH | IF_RET |
+| `0000` | _RET_ | Always; then return IF THE INSTRUCTION DID NOT BRANCH | (none; `IF_RET` is not a keyword) |
 | `0001` | IF_NC_AND_NZ | C=0 AND Z=0 | IF_NZ_AND_NC, IF_A, IF_GT, IF_00 |
 | `0010` | IF_NC_AND_Z | C=0 AND Z=1 | IF_Z_AND_NC, IF_01 |
 | `0011` | IF_NC | C=0 | IF_AE, IF_GE, IF_0X |

@@ -22,8 +22,8 @@ description: >-
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
   the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
-  of DIRA / DIRB's base bit, identified by Dest.
+  If the WCZ effect is specified, the C and Z flags are set to the original
+  (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.
 result: >-
   The I/O pin direction bit(s), described by Dest, are set to output/input according
   to C or !C; the rest are left as-is.
@@ -32,16 +32,16 @@ parameters:
   the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to DIR bit state
-  Z: Set to DIR bit state
+  C: Set to the original (pre-instruction) state of the base pin's DIR bit
+  Z: Set to the original (pre-instruction) state of the base pin's DIR bit
 timing:
   cycles: 2
   type: fixed
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000011
   write: DIRx
-  c: DIR bit
-  z: DIR bit
+  c: Orig DIRx base bit
+  z: Orig DIRx base bit
   clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
