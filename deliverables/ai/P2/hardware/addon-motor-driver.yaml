@@ -84,7 +84,7 @@ signal_map:
     undocumented. This IS in the source PDF, not an extraction artifact - the
     raw text layer carries it too. The header pinout table is
     right: the board has four channels U/V/W/X and eight PWM pins, so 9/8 are
-    the U channel. Recorded in SOURCE-ERRATA.md.
+    the U channel.
 
 pwm_control:
   source: >-

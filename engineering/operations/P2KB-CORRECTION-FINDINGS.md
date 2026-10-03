@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-525`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-526`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -81,7 +81,7 @@ the same sentence and was corrected in v1.23.0 (F-507). **Fix:** state the hands
 posts only when ack == seq, the reader copies every argument before acknowledging — at the
 Architect's Guide's next release.
 
-## The bench ledger audited against the KB (2026-10-03, «#374», fixed «#375») — F-506 … F-523
+## The bench ledger audited against the KB (2026-10-03, «#374», fixed «#375») — F-506 … F-523, F-525
 
 Every hardware run we hold — **EF-001…EF-089 (84 entries) and XF-001…004 (4)**, 88 in all — was
 checked against the YAML on disk, not against its ledger "Grounds" line (only 28 of the 84 name a
@@ -113,7 +113,8 @@ YAML («#375»):** the option is replaced by a sentence saying why it is not saf
 non-blocking route. **Owed:** the same correction in the P2AN007 document — its next release (manual
 head; app notes ship through their own release).
 
-### F-523 — repo paths and `file:line` citations in shipped YAML prose — `CONFIRMED` (carve-out; expires at the next KB release after v1.23.0)
+### F-523 — repo paths and `file:line` citations in shipped YAML prose — `PENDING-VALIDATION` (applied 2026-10-03, «#376»; ships in the next KB release)
+> **Applied 2026-10-03 («#376»).** Re-measured with the real filter and a wider pattern (bare `:NNNN` cites too): **251 payload lines in 74 files**. Every citation MOVED into a stripped field in the same top-level block (`source:`/`sources:` keys; `# Source(s):` column-0 comment blocks; provenance keys renamed `path:`/`source_line:`/`*_source:` → stripped names). Widened in the same pass, same class: `extraction_metadata.source_documents` lists (10 files) → `sources:`; the `v55:NNNN` shorthand (F-400) and `v55_line:` keys; names of internal registers in prose (`SOURCE-ERRATA.md`, `P2KB-CORRECTION-FINDINGS.md`, `APP-NOTE-DESIGN-DECISIONS.md`); `source_document:` keys outside the code-example schema. **Not changed, deliberately:** the two code-example files keep `source_metadata.source_document` (the schema requires it; the value is a document name); line cites into public Parallax files (`flash_loader.spin2 line 275`) are citations a reader can follow; the schema's own example values. **Verification:** a negative-controlled structural checker against HEAD (stripped keys aside, identical structure; removed text only citation tokens; no number vanished from any file), a duplicate-key parse of every changed file, every flagged change and every comment change read by hand. It caught one slip of mine (an Edit trimmed a trailing space → `source_reference:1711`, invalid YAML), fixed before commit. Gates: payload 0 hits; crossref 3,870/3,870; claim-sourcing Tier 1 none (Tier 2 29 → 27), negative control PASS; source-lock and constant-fidelity exit 0. **Gate:** `validate_internal_ids` fails on repo paths, document `file:line`, bare `:NNNN`, `vNN:NNNN` and internal-register file names; planted-failure test catches each form and passes a decoy line. New finding while sweeping: F-525.
 Found 2026-10-03 while reviewing F-519's diff. Measured with the shipped filter: **190 payload lines in
 69 files** carry repo paths (`engineering/ingestion/sources/...`, 115) or document `file:line`
 citations (`silicon-doc-text.txt:3854`, 58; others) in content prose, outside the stripped fields. A
@@ -124,6 +125,16 @@ prose without moving them into a `source:` field beside each claim would disarm 
 per-claim move into stripped fields, block by block, then the F-519 gate widened to repo paths and
 `file:line`. **Expires:** the KB release after the one carrying F-506…F-522 — it ships in that release
 or this carve-out is re-read and its reason re-justified.
+
+### F-525 — `flash-loader-case-study.yaml` tells the reader to read a narrative the KB does not ship — `NEEDS-VERIFICATION`
+Found 2026-10-03 while sweeping F-523. `code-examples/flash-loader-case-study.yaml` `how_to_use_this_entry`:
+"Read Flash-Loader-Theory-of-Operations.md (companion narrative) for the full walkthrough". The file lives in
+this repo at `engineering/ingestion/sources/flash-loader/` and is not in the KB tree, so a consuming agent
+cannot fetch it by that name. Not a citation (it is a reading instruction), so F-523's move does not
+apply, and rewording it changes what the entry tells the reader. **To decide:** whether the narrative
+is published anywhere a reader can reach (e.g. the PNut-TS repository, where its subject
+`src/ext/flash_loader.spin2` lives). If it is, name that location; if not, either carry its substance
+into the KB (a code-example companion) or drop the instruction and keep "read flash_loader.spin2 itself".
 
 ## Impact survey — v1.22.0 (`release-yamls` §8, run 2026-10-01)
 
@@ -1948,7 +1959,9 @@ Reading 721 citations one at a time finds what it finds; it does not prove a cla
 
 ## `pnut-ts` shorthand `v55:NNNN` is used as a citation across the shipped set and resolves to no file (2026-08-30, release fix pass step 3) — F-400
 
-### F-400 — a locator form that a reader can follow and a tool cannot — `CONFIRMED`
+### F-400 — a locator form that a reader can follow and a tool cannot — `PENDING-VALIDATION` (applied 2026-10-03 under F-523, «#376»; ships in the next KB release)
+
+> **Applied 2026-10-03.** Resolved by option (a), because F-523 removed the shorthand from shipped text anyway: every `vNN:NNNN` left the payload (13 lines, `guides/pasm2-getting-started.yaml` and `guides/spin2-getting-started.yaml`), each moved into its block's `source:` naming the file (`spin2-v55-text.txt:1718`) wherever a bare number would otherwise follow a different file. That included one live instance of exactly this finding's failure: `how_to_declare: Spin2 v55 :1709-1710, :1725` sat after the datasheet path, so `:1725` bound to the datasheet. `v55_line:` keys → `source_reference:`. Count of `v(35|51|55):NNNN` across all KB YAML afterwards: **0**. The gate now fails on the form in the payload.
 
 **Not fixed. Registered, bounded, and a definition call.**
 

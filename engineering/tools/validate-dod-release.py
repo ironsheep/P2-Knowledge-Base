@@ -577,7 +577,10 @@ REPO_LOCATOR_PATTERN = re.compile(
     r'\b(?:engineering|deliverables)/[\w./-]+'
     r'|\b[\w.-]+\.(?:txt|md|ya?ml|spin2|lst|pas|pdf|docx|html|json|py|sh)\s*:\s*\d+'
     r'|\b[\w-]+-text\s*:\s*\d+'
-    r'|(?<![\w$#%:/]):\d{2,5}(?:[-,]\d+)?\b')
+    r'|(?<![\w$#%:/]):\d{2,5}(?:[-,]\d+)?\b'
+    r'|\bv\d{2}\s*:\s*\d{2,5}\b'               # `v55:1718` -- the F-400 shorthand
+    r'|\b(?:SOURCE-ERRATA|P2KB-CORRECTION-FINDINGS|P2-EMPIRICAL-FINDINGS|'
+    r'EXTERNAL-HARDWARE-FINDINGS|KNOWLEDGE-GAPS|APP-NOTE-DESIGN-DECISIONS)\.md\b')
 
 
 def validate_internal_ids(verbose: bool = False) -> ValidationResult:

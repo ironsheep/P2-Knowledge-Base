@@ -313,7 +313,7 @@ related_topics:
     reference: "language/spin2/concepts/timing_operations.yaml"
 
 extraction_metadata:
-  source_documents:
+  sources:
     - document: "Parallax Propeller 2 Documentation v35"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       source_reference: ":1987, :1997, :2005, :3847 (pin timing); :101 (VIO latch-up onset)"

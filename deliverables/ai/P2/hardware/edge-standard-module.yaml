@@ -198,8 +198,7 @@ pin_mapping:
       high or low by DRIVING weakly in that direction with DIR high; the %M..M
       drive ladder and the DIR/OUT rule that governs it are stated once in
       architecture/pin-drive-configuration.yaml (idioms.weak_high /
-      idioms.weak_low, and drive_ladder.no_other_rungs). Filed as
-      SOURCE-ERRATA.md E-010.
+      idioms.weak_low, and drive_ladder.no_other_rungs).
     disable: "the DIP switch marked LED removes power from both LEDs"
     source: >-
       P2-EC Edge Module Rev D Product Guide v3.0, 7. LED Buffer and 8. LEDs P56 and P57 --

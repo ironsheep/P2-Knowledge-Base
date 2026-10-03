@@ -2,7 +2,8 @@
 # Four-artifact model: this is the first-party, trust-stampable digest an agent consumes
 # WITHOUT opening the PDF. It is a DIGEST + LINKS, never a prose clone — the "why" lives in
 # the human document; this file carries the novel composition + pointers to the KB primitives
-# the note assembles. Schema pilot for the P2ANxxx series (see APP-NOTE-DESIGN-DECISIONS.md).
+# the note assembles. Schema pilot for the P2ANxxx series.
+# Source: the P2ANxxx schema is set by APP-NOTE-DESIGN-DECISIONS.md.
 
 title: "Single-Pin Instrumentation ADC"
 subtitle: "Absolute microvolt measurement on one P2 pin, no external ADC"

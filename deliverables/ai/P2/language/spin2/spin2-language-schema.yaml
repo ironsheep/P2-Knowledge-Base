@@ -15,7 +15,7 @@ aliases:
 spin2_language_schema:
   schema_version: "1.0.0"
   schema_date: "2025-09-06"
-  source_documents:
+  sources:
     - "complete-spin2-operators.md"
     - "complete-spin2-methods.md" 
     - "complete-builtin-symbols.md"

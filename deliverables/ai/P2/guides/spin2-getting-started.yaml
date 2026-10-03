@@ -54,10 +54,10 @@ core_block_types:
     purpose: "Define compile-time constants"
     syntax: "CON { optional label }"
     clock_setup_constants:
-      source: "Parallax Spin2 Documentation v55, section 'Clock Setup' -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1708-1726. Frequency ceiling from the P2 Datasheet 2022/11/01, AC Characteristics -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200, footnote 2 at :2209."
-      is_a_clock_symbol_required: "No. With no clock-setup symbol declared and DEBUG mode off, the compiler selects internal RCFAST, which runs at 20 MHz+ (v55:1718). Declaring a clock symbol is how you choose something OTHER than RCFAST; it is not a precondition for compiling or running."
+      source: "Parallax Spin2 Documentation v55, section 'Clock Setup' -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1708-1726. Frequency ceiling from the P2 Datasheet 2022/11/01, AC Characteristics -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200, footnote 2 at :2209. is_a_clock_symbol_required and correction_2026_08_27: spin2-v55-text.txt:1718. _clkfreq.description: spin2-v55-text.txt:1711."
+      is_a_clock_symbol_required: "No. With no clock-setup symbol declared and DEBUG mode off, the compiler selects internal RCFAST, which runs at 20 MHz+. Declaring a clock symbol is how you choose something OTHER than RCFAST; it is not a precondition for compiling or running."
       _clkfreq:
-        description: "Target system clock frequency in Hz. Optional. Declared on its own it selects XI/XO-crystal-plus-PLL mode and assumes a 20 MHz crystal, and the compiler computes the optimal PLL setting to achieve it; compilation fails if _clkfreq +/- _errfreq is unachievable. (v55:1711)"
+        description: "Target system clock frequency in Hz. Optional. Declared on its own it selects XI/XO-crystal-plus-PLL mode and assumes a 20 MHz crystal, and the compiler computes the optimal PLL setting to achieve it; compilation fails if _clkfreq +/- _errfreq is unachievable."
         common_values:
           - "200_000_000 (200 MHz)"
           - "300_000_000 (300 MHz)"
@@ -73,7 +73,7 @@ core_block_types:
           key: p2kbSpin2SpecialConfigurationSymbols
           path: language/spin2/constants/special-configuration-symbols.yaml
           description: "_clkfreq, _xtlfreq, _xinfreq, _errfreq, _rcfast, _rcslow, _AUTOCLK -- one entry per symbol"
-      correction_2026_08_27: "This entry previously sat under a key named required_constant and read 'System clock frequency in Hz - REQUIRED for timing', and the example below repeated ' Required: system clock frequency'. v55:1718 states the opposite -- no clock symbol is required. Corrected source-first here; the same claim was corrected in guides/pasm2-getting-started.yaml in the same pass."
+      correction_2026_08_27: "This entry previously sat under a key named required_constant and read 'System clock frequency in Hz - REQUIRED for timing', and the example below repeated ' Required: system clock frequency'. Spin2 v55 states the opposite -- no clock symbol is required. Corrected source-first here; the same claim was corrected in guides/pasm2-getting-started.yaml in the same pass."
     common_uses:
       - Pin assignments
       - Configuration values

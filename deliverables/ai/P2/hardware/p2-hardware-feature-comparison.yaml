@@ -29,7 +29,7 @@ edge_modules:
     engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:73-90;
     P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
     engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:113-127,
-    :417.
+    :417. corrections_applied_2026_08_25: engineering/operations/P2KB-CORRECTION-FINDINGS.md.
   p2_ec_standard:
     part_number: "P2-EC"
     flash_memory: "16 MB (128 Mb) SPI flash"
@@ -65,7 +65,7 @@ edge_modules:
   corrections_applied_2026_08_25: >-
     Both modules shipped dimensions "27x40mm" (the guides say 37 x 51.7 mm) and
     io_pins_total 64 for the P2-EC32MB (only 46 reach the edge connector).
-    Corrected from the guides above; see P2KB-CORRECTION-FINDINGS.md.
+    Corrected from the guides above.
 
 development_boards:
   source: >-
@@ -78,6 +78,7 @@ development_boards:
     engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:16-65;
     64020 P2 Edge Module Breadboard Product Guide v1.2 (2021-01-07) --
     engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:20-69.
+    corrections_applied_2026_08_25: engineering/operations/P2KB-CORRECTION-FINDINGS.md.
   p2_eval_board:
     part_number: "64000"
     part_number_note: "the limited-edition engineering-sample board is #64000-ES; the Rev C guide documents #64000"
@@ -164,7 +165,6 @@ development_boards:
     P2-EVAL-BREADBOARD-CARRIER, their wrong dimensions, the mini breakout's
     "3.3V input only" and "All 64 pins on edge castellations", and the
     "crystal_frequency: 20MHz" attributed to carriers that carry no crystal.
-    See P2KB-CORRECTION-FINDINGS.md.
 
 addon_boards:
   source: >-

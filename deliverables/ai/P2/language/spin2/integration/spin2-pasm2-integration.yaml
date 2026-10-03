@@ -17,7 +17,7 @@ aliases:
 spin2_pasm2_integration:
   schema_version: "1.0.0"
   extraction_date: "2025-09-06"
-  source_document: "spin2-pasm-integration-deep-dive.md"
+  source: "spin2-pasm-integration-deep-dive.md"
   total_patterns: 15
   integration_types: 5
   
@@ -471,7 +471,7 @@ integration_rules:
 # Validation metadata
 extraction_metadata:
   extraction_date: "2025-09-06"
-  source_documents:
+  sources:
     - document: "spin2-pasm-integration-deep-dive.md"
       section: "Complete integration patterns and memory layout"
   validation_status: "draft"

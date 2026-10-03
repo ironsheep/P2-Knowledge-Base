@@ -130,7 +130,7 @@ aliases:
 spin2_builtin_symbols:
   schema_version: "1.0.0"
   extraction_date: "2025-09-06"
-  source_document: "complete-builtin-symbols.md"
+  source: "complete-builtin-symbols.md"
   # Count of the records actually present in this file's `symbols:` list below,
   # derived by walking that list -- not the size of the upstream symbol universe.
   # This field read 1224 until 2026-08-26; 1224 is the sum of
@@ -2039,7 +2039,7 @@ symbol_relationships:
 # Validation metadata
 extraction_metadata:
   extraction_date: "2025-09-06"
-  source_documents:
+  sources:
     - document: "complete-builtin-symbols.md"
       section: "Complete built-in symbols with categories"
   validation_status: "draft"

@@ -509,7 +509,7 @@ related_topics:
     relationship: "ATN signals can trigger interrupts"
 
 extraction_metadata:
-  source_documents:
+  sources:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:

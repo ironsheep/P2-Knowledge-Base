@@ -404,7 +404,7 @@ related_topics:
     relationship: "Can use with locks for complex synchronization"
 
 extraction_metadata:
-  source_documents:
+  sources:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:

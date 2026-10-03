@@ -100,7 +100,7 @@ pin_mode_tip:
     P2 has NO pull-up resistors - P_HIGH_150K selects a 150 kOhm DRIVE STRENGTH
     ("Drive high 150k-ohm" in the Spin2 v55 symbol table). (2) Input mode is DIR
     LOW, and every drive selection is inactive while the pin is an input; the pin
-    simply floats. Filed as SOURCE-ERRATA.md E-004.
+    simply floats.
   scl_pull_up_caveat: >-
     The same Code Tip prescribes a "3.3 k-ohm pull-up" for I2C SCL. The P2 drive
     ladder has no 3.3 kOhm rung: its drive-high selections are FAST (30 mA),
