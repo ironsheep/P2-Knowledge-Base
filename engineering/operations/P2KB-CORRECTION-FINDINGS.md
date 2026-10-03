@@ -52,6 +52,15 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+## Impact survey — v1.23.1 (`release-yamls` §8, run 2026-10-03)
+
+v1.23.1 changed no fact: every edit moved a citation or a provenance key out of the shipped text
+(F-523, F-400). No live document teaches a fact this release changed, so **no document is flagged.**
+Published state verified from outside (raw.githubusercontent.com): `guides/pasm2-getting-started.yaml`
+served = HEAD blob, sha256 = the published index entry, `v55:` shorthand absent. The running p2kb-mcp
+refused it ("verification failed") — its boot-time index snapshot predates the release; F-523 and F-400
+flip to `DONE` on the first served probe after an MCP restart.
+
 ## Impact survey — v1.23.0 (`release-yamls` §8, run 2026-10-03)
 
 v1.23.0 changed facts (not only wording) in areas these live documents teach. Each flag is a
