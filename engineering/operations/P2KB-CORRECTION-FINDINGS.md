@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-524`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-525`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -50,6 +50,34 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Impact survey — v1.23.0 (`release-yamls` §8, run 2026-10-03)
+
+v1.23.0 changed facts (not only wording) in areas these live documents teach. Each flag is a
+**re-audit-against-HEAD** signal for that document's next pass; the grep that located each
+concrete site is the evidence, and the audit decides the fix.
+
+| Document | What changed in the KB | Located in the manual |
+|---|---|---|
+| Architect's Guide | latest-wins mailbox handshake is load-bearing (F-507) | `architect-guide-body.md:919` states the disproven claim — **F-524** |
+| P2AN007 | the re-check-the-sequence option is unsafe (F-521) | `P2AN007.md:214` (and the Tip below it) — owed under F-521 |
+| Streamer Guide | GETXACC clears only during a Goertzel burst (F-506); streamer-DAC pin needs `P_CHANNEL` (F-513) | GETXACC: already open as F-479 |
+| DEBUG Window Manual | SCOPE_XY DOTSIZE / SCOPE LINESIZE half-pixels (F-508); PLOT/MIDI COLOR, BITMAP SET, RATE un-freeze (F-516, F-518); DEBUG_TIMESTAMP stale-window caveat (F-514) | 6 files mention DOTSIZE/LINESIZE units — check each |
+| I/O & Smart Pins | PINSTART Yval lost in trigger/serial modes (F-509); NCO Y = 0 (F-510); %10010 restart (F-511); DAC TT bit 0 (F-512); WRPIN pin-first (F-522) | no PINSTART-with-trigger-Yval site found (grep); the rest to the audit |
+| P2AN003 | DAC smart-pin modes: OUT runs the ADC only with TT bit 0 (F-512) | to the audit |
+| Assembly Reference | DEBUG_TIMESTAMP stale-window caveat (F-514); GETCT pair overhead (F-515, already stated as 2 in ch. 4) | 4 DEBUG_TIMESTAMP sites — check against the caveat |
+
+No other live document's subject intersects the v1.23.0 fact changes; the F-519 id strip changes
+no fact.
+
+### F-524 — the Architect's Guide says a latest-wins mailbox makes a torn read impossible without a lock — `CONFIRMED`
+`manuals/p2-architect-guide/opus-master/architect-guide-body.md:919`: "sequence counter bumped
+last, so a torn read is impossible without a lock." The bench disproved it (EF-038): bump-last
+guards only the first publish; with a reader that does any work between reading the command and its
+arguments, a writer that does not wait for the ack tore 20,000 of 20,000 commands. The KB carried
+the same sentence and was corrected in v1.23.0 (F-507). **Fix:** state the handshake — the writer
+posts only when ack == seq, the reader copies every argument before acknowledging — at the
+Architect's Guide's next release.
 
 ## The bench ledger audited against the KB (2026-10-03, «#374», fixed «#375») — F-506 … F-523
 
