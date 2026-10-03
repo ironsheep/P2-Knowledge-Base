@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-10-01",
-    "last_updated": "2026-10-01T21:57:30.887757",
+    "release_date": "2026-10-03",
+    "last_updated": "2026-10-03T22:10:51.765369",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-10-01T21:57:30.887757",
+    "extraction_date": "2026-10-03T22:10:51.765369",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -2178,7 +2178,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.\n\nSAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to that of the original\n\nDest[31]; preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division--\n\nit is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.\n\nIf the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out (effectively C =\n\nresult bit \"-1\") if Src is 1-31, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero.",
+            "description": "The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.\n\nSAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to that of the original\n\nDest[31]; preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division--\n\nit is similar to SHR for swift division by a power-of-two, but is for signed integers; use SHR for unsigned values (SAR on an unsigned value with bit 31 set shifts in 1s).\n\nIf the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out (effectively C =\n\nresult bit \"-1\") if Src is 1-31, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero.",
             "result": "The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.",
             "timing": {
               "cycles": 2,
@@ -6700,7 +6700,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the CORDIC-read-but-empty event flag prior to clearing it. The CORDIC-read-but-empty event flag is set whenever GETQX / GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, WAITQMT, JQMT, or JNQMT instructions.",
+            "description": "POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the CORDIC-read-but-empty event flag prior to clearing it. The CORDIC-read-but-empty event flag is set whenever GETQX / GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, JQMT, or JNQMT instructions (there is no WAITQMT: the event could not happen while waiting, silicon-doc-text.txt:2102).",
             "result": "CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then it is cleared.",
             "timing": {
               "cycles": 2,
@@ -6991,7 +6991,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITATN waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITATN can time-out if the attention event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITATN. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The attention event flag is set whenever another cog issues an attention request for this cog. The attention event flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN instructions.",
+            "description": "WAITATN waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITATN can time-out if the attention event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITATN. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The attention event flag is set whenever another cog issues an attention request for this cog. The attention event flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN instructions.",
             "result": "Wait for attention event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -7044,7 +7044,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0 represent cogs 7 through 0; high (1) bits indicate the cog(s) to signal. The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag. In the intended use case, the cog receiving an attention request knows which other cog is strobing it and how to respond. In cases where multiple cogs may request the attention of a single cog, some messaging structure may need to be implemented in Hub RAM to differentiate requests.",
+            "description": "COGATN strobes the attention signal for one or more cogs. Dest supplies a 16-bit value in which bits 0..15 represent cogs 0..15 (the 8-cog part has cogs 0..7); high (1) bits indicate the cog(s) to signal. The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag. In the intended use case, the cog receiving an attention request knows which other cog is strobing it and how to respond. In cases where multiple cogs may request the attention of a single cog, some messaging structure may need to be implemented in Hub RAM to differentiate requests.",
             "result": "The attention signal of one or more cogs is strobed.",
             "timing": {
               "cycles": 2,
@@ -7055,7 +7055,7 @@
               "Z": "No effect"
             },
             "parameters": [
-              "Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal."
+              "Dest is the register or 9-bit literal whose value (16-bit pattern, bit n = cog n) indicates which cogs to signal."
             ],
             "syntax_variants": [
               "COGATN {#}D"
@@ -7097,7 +7097,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Wait for SE1 event flag, then clear it. WAITSE1 waits for selectable event 1 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE1 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE1. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE1 event flag is set whenever the configured selectable event 1 occurs. The flag is cleared by SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 execution.",
+            "description": "Wait for SE1 event flag, then clear it. WAITSE1 waits for selectable event 1 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE1 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE1. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE1 event flag is set whenever the configured selectable event 1 occurs. The flag is cleared by SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 execution.",
             "result": "Waits for SE1 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.",
             "timing": {
               "cycles": 2,
@@ -7297,7 +7297,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITXMT waits for a streamer-empty event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXMT can time-out if the streamer-empty event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXMT. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-empty event flag is set whenever the streamer is ready for a new command. The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.",
+            "description": "WAITXMT waits for a streamer-empty event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXMT can time-out if the streamer-empty event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXMT. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-empty event flag is set whenever the streamer is ready for a new command. The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.",
             "result": "Wait for streamer-empty event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -7399,7 +7399,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITCT3 waits for a counter 3 event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITCT3 can time-out if the counter event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction.\nTo set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT3.\nThe WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout.\nDuring a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends.\nThe counter 3 event flag is set whenever the System Counter (CT) passes the value in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The counter event flags are cleared upon execution of the corresponding ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3 instructions.",
+            "description": "WAITCT3 waits for a counter 3 event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITCT3 can time-out if the counter event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction.\nTo set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT3.\nThe WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags.\nDuring a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends.\nThe counter 3 event flag is set whenever the System Counter (CT) passes the value in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The counter event flags are cleared upon execution of the corresponding ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3 instructions.",
             "result": "Wait for counter 3 event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -7605,7 +7605,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITXFI waits for a streamer-finished event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXFI can time-out if the streamer-finished event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXFI. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-finished event flag is set whenever the streamer runs out of commands to process. The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.",
+            "description": "WAITXFI waits for a streamer-finished event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXFI can time-out if the streamer-finished event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXFI. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-finished event flag is set whenever the streamer runs out of commands to process. The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.",
             "result": "Wait for streamer-finished event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -7709,7 +7709,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITFBW can time-out if the FIFO-interface-block-wrap event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITFBW. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address. The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.",
+            "description": "WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITFBW can time-out if the FIFO-interface-block-wrap event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITFBW. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address. The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.",
             "result": "Wait for FIFO-interface-block-wrap event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -7817,7 +7817,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITXRL waits for a streamer-LUT-RAM-rollover event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXRL can time-out if the streamer-LUT-RAM-rollover event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXRL. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer. The streamer-LUT-RAM-rollover event flag is cleared upon cog start or upon execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.",
+            "description": "WAITXRL waits for a streamer-LUT-RAM-rollover event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXRL can time-out if the streamer-LUT-RAM-rollover event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXRL. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer. The streamer-LUT-RAM-rollover event flag is cleared upon cog start or upon execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.",
             "result": "Wait for streamer-LUT-RAM-rollover event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -8218,7 +8218,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Wait for CT2 event flag, then clear it. WAITCT2 waits for the counter 2 event to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITCT2 can time-out if the counter event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT2. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The CT2 event flag is set whenever the System Counter passes the value in the CT2 event trigger register (MSB of CT - CT2 is 0). The flag is cleared by ADDCT2, POLLCT2, WAITCT2, JCT2, or JNCT2 execution.",
+            "description": "Wait for CT2 event flag, then clear it. WAITCT2 waits for the counter 2 event to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITCT2 can time-out if the counter event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT2. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The CT2 event flag is set whenever the System Counter passes the value in the CT2 event trigger register (MSB of CT - CT2 is 0). The flag is cleared by ADDCT2, POLLCT2, WAITCT2, JCT2, or JNCT2 execution.",
             "result": "Waits for CT2 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.",
             "timing": {
               "cycles": 2,
@@ -8371,15 +8371,15 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set pin pattern for PAT event. C selects INA/INB, Z selects =/!=, D provides mask value, S provides match value.",
+            "description": "Set pin pattern for PAT event. D provides the mask value, S provides the match value. C and Z are INPUTS to SETPAT (current flag values at execution; SETPAT has no WC/WZ/WCZ effect): C selects INA (0) or INB (1); Z selects != (0) or == (1). The PAT event flag (POLLPAT/WAITPAT/JPAT/JNPAT) is cleared on SETPAT and is then set whenever the selected condition holds - the four cases: C=0,Z=0: (INA & D) != S; C=0,Z=1: (INA & D) == S; C=1,Z=0: (INB & D) != S; C=1,Z=1: (INB & D) == S (silicon-doc-text.txt:2157-2161).",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "No effect",
-              "Z": "No effect"
+              "C": "No effect (read as input)",
+              "Z": "No effect (read as input)"
             },
             "parameters": [],
             "syntax_variants": [],
@@ -8469,7 +8469,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Wait for CT1 event flag, then clear it. WAITCT1 waits for the counter 1 event to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITCT1 can time-out if the counter event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT1. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The CT1 event flag is set whenever the System Counter passes the value in the CT1 event trigger register (MSB of CT - CT1 is 0). The flag is cleared by ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1 execution.",
+            "description": "Wait for CT1 event flag, then clear it. WAITCT1 waits for the counter 1 event to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITCT1 can time-out if the counter event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT1. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The CT1 event flag is set whenever the System Counter passes the value in the CT1 event trigger register (MSB of CT - CT1 is 0). The flag is cleared by ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1 execution.",
             "result": "Waits for CT1 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.",
             "timing": {
               "cycles": 2,
@@ -8672,7 +8672,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Wait for SE4 event flag, then clear it. WAITSE4 waits for selectable event 4 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE4 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE4. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE4 event flag is set whenever the configured selectable event 4 occurs. The flag is cleared by SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 execution.",
+            "description": "Wait for SE4 event flag, then clear it. WAITSE4 waits for selectable event 4 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE4 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE4. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE4 event flag is set whenever the configured selectable event 4 occurs. The flag is cleared by SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 execution.",
             "result": "Waits for SE4 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.",
             "timing": {
               "cycles": 2,
@@ -8921,7 +8921,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITXRO waits for a streamer-NCO-rollover event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXRO can time-out if the streamer-NCO-rollover event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXRO. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over. The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.",
+            "description": "WAITXRO waits for a streamer-NCO-rollover event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITXRO can time-out if the streamer-NCO-rollover event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITXRO. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over. The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.",
             "result": "Wait for streamer-NCO-rollover event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -9275,7 +9275,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Wait for SE2 event flag, then clear it. WAITSE2 waits for selectable event 2 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE2 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE2. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE2 event flag is set whenever the configured selectable event 2 occurs. The flag is cleared by SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 execution.",
+            "description": "Wait for SE2 event flag, then clear it. WAITSE2 waits for selectable event 2 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE2 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE2. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE2 event flag is set whenever the configured selectable event 2 occurs. The flag is cleared by SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 execution.",
             "result": "Waits for SE2 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.",
             "timing": {
               "cycles": 2,
@@ -9522,7 +9522,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITPAT waits for a pin-pattern-detected event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITPAT can time-out if the pin-pattern-detected event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITPAT. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The pin-pattern-detected event flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT instruction. The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.",
+            "description": "WAITPAT waits for a pin-pattern-detected event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITPAT can time-out if the pin-pattern-detected event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITPAT. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The pin-pattern-detected event flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT instruction. The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.",
             "result": "Wait for pin-pattern-detected event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -9934,7 +9934,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "WAITINT waits for an interrupt-occurred event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITINT can time-out if the interrupt-occurred event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITINT. The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs -- debug interrupts are ignored. The interrupt-occurred event flag is cleared upon cog start, or execution of POLLINT, WAITINT, JINT, or JNINT instructions.",
+            "description": "WAITINT waits for an interrupt-occurred event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution at the next instruction. Optionally, WAITINT can time-out if the interrupt-occurred event doesn't occur soon enough; setting C and/or Z flags and then resuming execution at the next instruction. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITINT. The WC, WZ, or WCZ effect reports the outcome when a SETQ timeout is specified: the C flag and/or Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the timeout. Without a SETQ no timeout is armed and the effect clears the named flags. During a wait, the pipeline is stalled; no instructions execute and no interrupts are processed in the cog until the wait condition ends. The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs -- debug interrupts are ignored. The interrupt-occurred event flag is cleared upon cog start, or execution of POLLINT, WAITINT, JINT, or JNINT instructions.",
             "result": "Wait for interrupt-occurred event, then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.",
             "timing": {
               "cycles": 2,
@@ -10134,7 +10134,7 @@
                 "clocks": "2+"
               }
             ],
-            "description": "Wait for SE3 event flag, then clear it. WAITSE3 waits for selectable event 3 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE3 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE3. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE3 event flag is set whenever the configured selectable event 3 occurs. The flag is cleared by SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 execution.",
+            "description": "Wait for SE3 event flag, then clear it. WAITSE3 waits for selectable event 3 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE3 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE3. With a SETQ timeout, the WC/WZ/WCZ effect reports the outcome (flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first). Without a SETQ no timeout is armed and the effect clears the named flags. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE3 event flag is set whenever the configured selectable event 3 occurs. The flag is cleared by SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 execution.",
             "result": "Waits for SE3 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.",
             "timing": {
               "cycles": 2,
@@ -10188,20 +10188,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001100",
                 "write": "OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
             "description": "OUTZ alters the output level register's bit(s) designated by Dest to equal the state of the Z flag. All other bits are left as-is.",
-            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to Z; the rest are left as-is. Z = original OUT bit state.",
+            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to Z; the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUT bit state",
-              "Z": "Set to original OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set low or high.",
@@ -10237,21 +10237,21 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010110",
                 "write": "DIRx + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2",
                 "notes": "New DIRx state is not data-forwarded; next pipelined instruction sees old state"
               }
             ],
-            "description": "FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nFLTRND achieves the same effect as two instructions-- DIRL followed by OUTRND.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nFLTRND achieves the same effect as two instructions-- DIRL followed by OUTRND.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and each output level is set randomly low or high; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and with output level(s) set randomly to low or high.",
@@ -10295,20 +10295,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001010",
                 "write": "OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
             "description": "OUTC alters the output level register's bit(s) designated by Dest to equal the state of the C flag. All other bits are left as-is.",
-            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to C; the rest are left as-is. Z = original OUT bit state.",
+            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to C; the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUT bit state",
-              "Z": "Set to original OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set low or high.",
@@ -10344,20 +10344,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001011",
                 "write": "OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
             "description": "OUTNC alters the output level register's bit(s) designated by Dest to equal the inverse state of the C flag (!C). All other bits are left as-is.",
-            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to !C; the rest are left as-is. Z = original OUT bit state.",
+            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to !C; the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUT bit state",
-              "Z": "Set to original OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set low or high.",
@@ -10391,20 +10391,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000010",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRC sets the direction register's bit(s) designated by Dest to equal the state of the C flag. High (1) bits set the pin(s) to output, low (0) to input. All other direction bits are left unchanged. Z is set to the state of the direction bit.",
+            "description": "DIRC sets the direction register's bit(s) designated by Dest to equal the state of the C flag. High (1) bits set the pin(s) to output, low (0) to input. All other direction bits are left unchanged. With WCZ, C and Z are set to the original (pre-instruction) state of the base pin's DIR bit.",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to DIR bit state",
-              "Z": "Set to DIR bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.",
@@ -10512,20 +10512,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000100",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRZ or DIRNZ alters the direction register's bit(s) designated by Dest to equal the state, or inverse state, of the Z flag. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRZ instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRZ's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.",
+            "description": "DIRZ or DIRNZ alters the direction register's bit(s) designated by Dest to equal the state, or inverse state, of the Z flag. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRZ instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRZ's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.",
             "result": "The I/O pin direction bit(s), described by Dest, are set to output/input according to Z or !Z; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to DIR bit state",
-              "Z": "Set to DIR bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.",
@@ -10561,20 +10561,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001101",
                 "write": "OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
             "description": "OUTNZ alters the output level register's bit(s) designated by Dest to equal the inverse state of the Z flag (!Z). All other bits are left as-is.",
-            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to !Z; the rest are left as-is. Z = original OUT bit state.",
+            "result": "The I/O pin output level bit(s), described by Dest, are set to low/high according to !Z; the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUT bit state",
-              "Z": "Set to original OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set low or high.",
@@ -10608,20 +10608,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011111",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DRVNOT sets the I/O pin(s) designated by Dest to the output direction and toggles their output level(s) to the opposite state. All other pins are left unchanged. This instruction achieves the same effect as two instructions-- OUTNOT followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "DRVNOT sets the I/O pin(s) designated by Dest to the output direction and toggles their output level(s) to the opposite state. All other pins are left unchanged. This instruction achieves the same effect as two instructions-- OUTNOT followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to their opposite output level(s); the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the output direction and toggle to opposite output levels.",
@@ -10657,20 +10657,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000001",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRH sets the direction register's bit(s) designated by Dest to high (1), making the pin(s) outputs. All other direction bits are left unchanged. Z is set to the state of the direction bit.",
+            "description": "DIRH sets the direction register's bit(s) designated by Dest to high (1), making the pin(s) outputs. All other direction bits are left unchanged. With WCZ, C and Z are set to the original (pre-instruction) state of the base pin's DIR bit.",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to DIR bit state",
-              "Z": "Set to DIR bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.",
@@ -10706,12 +10706,12 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011000",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DRVL sets the I/O pin(s) designated by Dest to the output direction and to a low output level. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "DRVL sets the I/O pin(s) designated by Dest to the output direction and to a low output level. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to an output level of low; the rest are left as-is.",
             "timing": {
               "cycles": 2,
@@ -10720,8 +10720,8 @@
               "pin_output_latency_source": "P2 Documentation v35 Rev B/C (Parallax Inc.) -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987: \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\" Corroborated by the P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:967."
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of high or low.",
@@ -10755,20 +10755,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000101",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRZ or DIRNZ alters the direction register's bit(s) designated by Dest to equal the state, or inverse state, of the Z flag. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNZ instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNZ's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.",
+            "description": "DIRZ or DIRNZ alters the direction register's bit(s) designated by Dest to equal the state, or inverse state, of the Z flag. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNZ instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNZ's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.",
             "result": "The I/O pin direction bit(s), described by Dest, are set to output/input according to Z or !Z; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to DIR bit state",
-              "Z": "Set to DIR bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.",
@@ -10809,20 +10809,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001001",
                 "write": "OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
             "description": "OUTH alters the output level register's bit(s) designated by Dest to be high (1). All other bits are left as-is.",
-            "result": "The I/O pin output level bit(s), described by Dest, are set high (1); the rest are left as-is. Z = original OUT bit state.",
+            "result": "The I/O pin output level bit(s), described by Dest, are set high (1); the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUT bit state",
-              "Z": "Set to original OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set high or low.",
@@ -10858,20 +10858,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010011",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "FLTNC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the C flag (!C). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "FLTNC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the C flag (!C). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to an output level of low/high according to !C; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.",
@@ -10905,20 +10905,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000111",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRNOT alters the direction register's bit(s) designated by Dest to their inverse state. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of DIRA / DIRB's base bit, identified by Dest.",
+            "description": "DIRNOT alters the direction register's bit(s) designated by Dest to their inverse state. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.",
             "result": "The I/O pin direction bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to DIR bit state",
-              "Z": "Set to DIR bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle to the opposite direction.",
@@ -10962,20 +10962,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010101",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "FLTNZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the Z flag (!Z). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "FLTNZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the Z flag (!Z). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to an output level of low/high according to !Z; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.",
@@ -11009,20 +11009,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001111",
                 "write": "OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "OUTNOT alters the output level register's bit(s) designated by Dest to their inverse state (toggles them). All other bits are left unchanged. Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31). If the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
-            "result": "The I/O pin output level bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is. Z = OUT bit state.",
+            "description": "OUTNOT alters the output level register's bit(s) designated by Dest to their inverse state (toggles them). All other bits are left unchanged. Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31). If the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
+            "result": "The I/O pin output level bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to toggle to the opposite output level.",
@@ -11058,20 +11058,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010000",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "FLTL sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be low.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "FLTL sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be low.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to an output level of low; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of high or low.",
@@ -11105,20 +11105,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000011",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRC or DIRNC alters the direction register's bit(s) designated by Dest to equal the state, or inverse state, of the C flag. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNC instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNC's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.",
+            "description": "DIRC or DIRNC alters the direction register's bit(s) designated by Dest to equal the state, or inverse state, of the C flag. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNC instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRNC's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.",
             "result": "The I/O pin direction bit(s), described by Dest, are set to output/input according to C or !C; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to DIR bit state",
-              "Z": "Set to DIR bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.",
@@ -11159,20 +11159,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010100",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "FLTZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the Z flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "FLTZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the Z flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to an output level of low/high according to Z; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.",
@@ -11208,20 +11208,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011101",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DRVNZ sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the inverse of the Z flag (!Z). All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "DRVNZ sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the inverse of the Z flag (!Z). All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to an output level of low/high according to !Z; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high."
@@ -11254,20 +11254,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011011",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DRVNC sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the inverse of the C flag (!C). All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "DRVNC sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the inverse of the C flag (!C). All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to an output level of low/high according to !C; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.",
@@ -11301,20 +11301,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010010",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "FLTC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the C flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "FLTC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the C flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to an output level of low/high according to C; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.",
@@ -11350,20 +11350,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010111",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "FLTNOT sets the I/O pin(s) designated by Dest to the input direction (floating) and toggles their output level(s) to the opposite state. All other pins are left unchanged. FLTNOT achieves the same effect as two instructions-- DIRL followed by OUTNOT.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "FLTNOT sets the I/O pin(s) designated by Dest to the input direction (floating) and toggles their output level(s) to the opposite state. All other pins are left unchanged. FLTNOT achieves the same effect as two instructions-- DIRL followed by OUTNOT.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for FLTNOT's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to their opposite output level(s); the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and toggle to opposite output levels.",
@@ -11399,20 +11399,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011100",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DRVZ sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the Z flag. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "DRVZ sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the Z flag. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to an output level of low/high according to Z; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high."
@@ -11447,20 +11447,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011010",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DRVC sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the C flag. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "DRVC sets the I/O pin(s) designated by Dest to the output direction and to a low/high output level according to the C flag. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to an output level of low/high according to C; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of low or high.",
@@ -11496,12 +11496,12 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011001",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DRVH sets the I/O pin(s) designated by Dest to the output direction and to a high output level. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "DRVH sets the I/O pin(s) designated by Dest to the output direction and to a high output level. All other pins are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and to an output level of high; the rest are left as-is.",
             "timing": {
               "cycles": 2,
@@ -11510,8 +11510,8 @@
               "pin_output_latency_source": "P2 Documentation v35 Rev B/C (Parallax Inc.) -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987: \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\" Corroborated by the P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:967."
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output direction and output levels of high or low.",
@@ -11547,20 +11547,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000000",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRL alters the direction register's bit(s) designated by Dest to be low (0), setting the I/O pin(s) to input mode. The rest of the direction bits are left as-is. If WCZ is specified, the Z flag is updated to the original state of the target direction bit.",
+            "description": "DIRL alters the direction register's bit(s) designated by Dest to be low (0), setting the I/O pin(s) to input mode. The rest of the direction bits are left as-is. If WCZ is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's DIR bit.",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original DIR bit state (if WCZ specified)",
-              "Z": "Set to original DIR bit state (if WCZ specified)"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit (if WCZ specified)",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit (if WCZ specified)"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output or input.",
@@ -11601,21 +11601,21 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001011110",
                 "write": "DIRx + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2",
                 "notes": "New DIRx state is not data-forwarded; next pipelined instruction sees old state"
               }
             ],
-            "description": "DRVRND sets the I/O pin(s) designated by Dest to the output direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nDRVRND achieves the same effect as two instructions-- OUTRND followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of OUTA / OUTB's base bit, identified by Dest.",
+            "description": "DRVRND sets the I/O pin(s) designated by Dest to the output direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\nDRVRND achieves the same effect as two instructions-- OUTRND followed by DIRH.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the output direction and each output level is set randomly low or high; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the output direction and with output level(s) set randomly to low or high.",
@@ -11659,20 +11659,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001010001",
                 "write": "DIRx* + OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "FLTH sets the I/O pin(s) designated by Dest to the input direction (floating) and to a high output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be high.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.",
+            "description": "FLTH sets the I/O pin(s) designated by Dest to the input direction (floating) and to a high output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be high.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.",
             "result": "The I/O pins described by Dest are set to the input direction and to an output level of high; the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to OUT bit state",
-              "Z": "Set to OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of high or low.",
@@ -11765,20 +11765,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001000110",
                 "write": "DIRx",
-                "c": "DIR bit",
-                "z": "DIR bit",
+                "c": "Orig DIRx base bit",
+                "z": "Orig DIRx base bit",
                 "clocks": "2"
               }
             ],
-            "description": "DIRRND alters the direction register's bit(s) designated by Dest to be random low and high (input and output), based on bit(s) from the Xoroshiro128** PRNG. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are updated to the state of DIRA / DIRB's base bit, identified by Dest.",
+            "description": "DIRRND alters the direction register's bit(s) designated by Dest to be random low and high (input and output), based on bit(s) from the Xoroshiro128** PRNG. All other bits are left unchanged.\nDest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1-31).\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD instruction prior.\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRRND's use.\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.\nIf the WCZ effect is specified, the C and Z flags are set to the original (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.",
             "result": "The I/O pin direction bit(s), described by Dest, are each set randomly low or high (input or output); the rest are left as-is.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to DIR bit state",
-              "Z": "Set to DIR bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's DIR bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's DIR bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set randomly to input or output.",
@@ -11822,20 +11822,20 @@
               {
                 "bits": "EEEE 1101011 CZL DDDDDDDDD 001001000",
                 "write": "OUTx",
-                "c": "OUT bit",
-                "z": "OUT bit",
+                "c": "Orig OUTx base bit",
+                "z": "Orig OUTx base bit",
                 "clocks": "2"
               }
             ],
             "description": "OUTL alters the output level register's bit(s) designated by Dest to be low (0). All other bits are left as-is.",
-            "result": "The I/O pin output level bit(s), described by Dest, are set low (0); the rest are left as-is. Z = original OUT bit state.",
+            "result": "The I/O pin output level bit(s), described by Dest, are set low (0); the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
             },
             "flags_affected": {
-              "C": "Set to original OUT bit state",
-              "Z": "Set to original OUT bit state"
+              "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
+              "Z": "Set to the original (pre-instruction) state of the base pin's OUT bit"
             },
             "parameters": [
               "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set high or low.",
@@ -12049,7 +12049,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.\n\nSETQ2 enables block transfers to/from LUT RAM instead of COG RAM:\n- SETQ2 + RDLONG: Block read from HUB to LUT\n- SETQ2 + WRLONG: Block write from LUT to HUB\n",
+            "description": "Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.\n\nSETQ2 enables block transfers to/from LUT RAM instead of COG RAM:\n- SETQ2 + RDLONG: Block read from hub to LUT\n- SETQ2 + WRLONG: Block write from LUT to hub\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -12101,7 +12101,7 @@
                 "clocks": "2 + D"
               }
             ],
-            "description": "Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified, wait 2+(D AND RND) clock cycles, where RND is a random value, producing a randomized delay; C and Z are cleared to 0 after completion. The 2-cycle overhead is inherent to the instruction. Stalls the cog pipeline during the wait; no instructions execute and no interrupts are processed until the wait completes. Critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.",
+            "description": "Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified, wait 2+(D AND RND) clock cycles, where RND is a random value, producing a randomized delay; the flag(s) the effect names are cleared to 0 after completion (WC: C, WZ: Z, WCZ: both -- a flag column applies only when its effect is given, Parallax PASM2 Manual p.30). The 2-cycle overhead is inherent to the instruction. Stalls the cog pipeline during the wait; no instructions execute and no interrupts are processed until the wait completes. Critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.",
             "result": "",
             "timing": {
               "cycles": "2 + D",
@@ -12434,7 +12434,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous breakpoint interrupt enabled. Dest[2:0] indicates the ID of the desired cog (0-7).",
+            "description": "COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous breakpoint interrupt enabled. Dest indicates the ID of the desired cog (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax's PASM2 Manual, COGBRK Explanation).",
             "result": "If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest.",
             "timing": {
               "cycles": 2,
@@ -12445,7 +12445,7 @@
               "Z": "No effect"
             },
             "parameters": [
-              "Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger."
+              "Dest is the register or 9-bit literal whose value indicates which cog to trigger (0-7 on the P2X8C4M64P)."
             ],
             "syntax_variants": [
               "COGBRK {#}Dest"
@@ -13613,7 +13613,7 @@
             "timing": {
               "cycles": "5-12 (cog/LUT) / 14-32 (hub-exec)",
               "type": "variable",
-              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *)"
+              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *). +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to D[31] if WC/WCZ specified",
@@ -13927,7 +13927,7 @@
               "cycles": "11...18 (cog) / 20...40 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Returns by reading return address from hub at --PTRB; hub-window dependent + (in hub-exec) FIFO refill on the branch"
+              "notes": "Returns by reading return address from hub at --PTRB; hub-window dependent + (in hub-exec) FIFO refill on the branch. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to L[31] (bit 31 of hub long value)",
@@ -14123,7 +14123,7 @@
               "cycles": "11...18 (cog) / 20...40 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Returns by reading return address from hub at --PTRA; hub-window dependent + (in hub-exec) FIFO refill on the branch"
+              "notes": "Returns by reading return address from hub at --PTRA; hub-window dependent + (in hub-exec) FIFO refill on the branch. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to L[31] (bit 31 of hub long value)",
@@ -14614,7 +14614,7 @@
             "timing": {
               "cycles": "5-12 (cog/LUT) / 14-32 (hub-exec)",
               "type": "variable",
-              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *)"
+              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *). +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to D[31] if WC/WCZ specified",
@@ -15028,7 +15028,7 @@
               "cycles": "9...16 (cog) / 9...26 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Hub-window dependent; minimum 9 clocks when window is hit"
+              "notes": "Hub-window dependent; minimum 9 clocks when window is hit. +1 clock if the word crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to MSB of word",
@@ -15081,7 +15081,7 @@
               "cycles": "3...10 (cog) / 3...20 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Writes long to hub at PTRA++; hub-window dependent"
+              "notes": "Writes long to hub at PTRA++; hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "No effect",
@@ -15132,7 +15132,7 @@
               "cycles": "9...16 (cog) / 9...26 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit"
+              "notes": "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to MSB of long",
@@ -15212,7 +15212,7 @@
               "cycles": "3...10 (cog) / 3...20 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Hub-window dependent; minimum 3 clocks when window is hit"
+              "notes": "Hub-window dependent; minimum 3 clocks when window is hit. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "No effect",
@@ -15271,7 +15271,7 @@
               "cycles": "3...10 (cog) / 3...20 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Hub-window dependent; minimum 3 clocks when window is hit"
+              "notes": "Hub-window dependent; minimum 3 clocks when window is hit. +1 clock if the word crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "No effect",
@@ -15324,7 +15324,7 @@
               "cycles": "9...16 (cog) / 9...26 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Reads long from hub at --PTRB; hub-window dependent"
+              "notes": "Reads long from hub at --PTRB; hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to MSB of long (bit 31 of popped value)",
@@ -15426,7 +15426,8 @@
             "timing": {
               "cycles": "3...10 (cog) / 3...20 (hub-exec)",
               "type": "variable",
-              "range_source": "encoding.clocks per P2 Instructions v35 CSV (3...10 * / 3...20 *)"
+              "range_source": "encoding.clocks per P2 Instructions v35 CSV (3...10 * / 3...20 *)",
+              "notes": "Hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "No effect",
@@ -15465,7 +15466,7 @@
               "cycles": "9...16 (cog) / 9...26 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Reads long from hub at --PTRA; hub-window dependent"
+              "notes": "Reads long from hub at --PTRA; hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "Set to MSB of long (bit 31 of popped value)",
@@ -15516,7 +15517,7 @@
               "cycles": "3...10 (cog) / 3...20 (hub-exec)",
               "type": "variable",
               "range_source": "encoding.clocks per PASM2 Manual 2022/11/01",
-              "notes": "Writes long to hub at PTRB++; hub-window dependent"
+              "notes": "Writes long to hub at PTRB++; hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
             },
             "flags_affected": {
               "C": "No effect",
@@ -16428,7 +16429,7 @@
                 "clocks": "2\u20139"
               }
             ],
-            "description": "COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases to execute code and\npower consumption is greatly reduced.\n",
+            "description": "COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of the D/# operand supply the target cog ID; silicon-doc-text.txt:421). In this dormant state, the cog ceases to execute code and\npower consumption is greatly reduced.\n",
             "result": "Cog indicated by Dest is terminated (stopped).",
             "timing": {
               "cycles": 2,
@@ -16439,7 +16440,7 @@
               "Z": "No effect"
             },
             "parameters": [
-              "Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop."
+              "Dest is the register or 9-bit literal whose 4 LSBs (Dest[3:0]) indicate which cog to stop (0-7 on the P2X8C4M64P)."
             ],
             "syntax_variants": [
               "COGSTOP {#}Dest"
@@ -16479,7 +16480,7 @@
                 "clocks": "2\u20139, +2 if result"
               }
             ],
-            "description": "COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest[2:0] (if WC is given). If the WC effect is specified, the C flag is set (1) if the Dest[2:0] cog is running, or is cleared (0) if stopped.",
+            "description": "COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of cog D/# (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax's PASM2 Manual, COGID Explanation) (if WC is given). Without WC the current cog's ID is returned in D[3:0] with upper bits cleared (silicon-doc-text.txt:429). If the WC effect is specified, the C flag is set (1) if cog D/# is busy (running), or is cleared (0) if free (stopped or never started).",
             "result": "Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.",
             "timing": {
               "cycles": 2,
@@ -16490,7 +16491,7 @@
               "Z": "No effect"
             },
             "parameters": [
-              "Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to get the status for.",
+              "Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal whose value indicates which cog to get the status for (0-7 on the P2X8C4M64P).",
               "WC is an optional effect to update the C flag with the Dest cog's running status."
             ],
             "syntax_variants": [
@@ -17239,7 +17240,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set \"Y\" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins.\nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\nThe Y register serves multiple purposes:\n- For PWM modes: Sets the base period\n- For SPI/serial: Controls data to transmit\n- For counter modes: Sets count value\n- For ADC modes: Initiates conversions\n- Writing Y also acknowledges pin completion\n",
+            "description": "Set \"Y\" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins.\nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\nThe Y register serves multiple purposes:\n- For pulse/cycle (%00100) and transition (%00101) output: Y[31:0] is the pulse/transition count\n- For PWM modes: Y[15:0] is the output value captured at each frame start (the base period and frame count are set by WXPIN, not WYPIN)\n- For DAC modes: Y[15:0] is the DAC output value captured at each sample period\n- For sync/async serial and USB: Y loads the output word/byte to transmit\n- For counter modes (%01110/%01111): Y[0] selects count-only (0) or increment/decrement (1), not a count value; the measurement period is X\n- For ADC modes other than SINC2 sampling: WYPIN may replace the period set by WXPIN with Y[13:0] - it does not initiate conversions\n- Writing Y also acknowledges the pin\n- Source: silicon-doc-text.txt:3938, :3974, :3993, :4042, :4089, :4133, :4387, :4656\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -17379,12 +17380,12 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.\nThis ensures the smart pin is in a known state and prevents configuration conflicts.\n",
+            "description": "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**Configure while DIR is low**: a smart pin should be configured with WRPIN while its DIR bit is low (held in reset); a WRPIN while DIR is high changes the use of the pin's state bits and gives unpredictable behavior (silicon-doc-text.txt:3854-3856). Exception: WRPIN #0 resets a running smart pin without a DIR cycle.\n",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "fixed",
-              "in_flag_reset_latency": "After WRPIN executes, the Smart Pin requires 2 system-clock cycles to reset\nthe IN flag to logic-0 before a program can poll the flag again.\nInsert NOP instructions before testing the IN flag:\n  WRPIN   mode, #pin\n  NOP                   ' Clock 1 for IN flag reset\n  NOP                   ' Clock 2 for IN flag reset\n  TESTP   #pin WC       ' NOW safe to poll IN flag\n"
+              "in_flag_reset_latency": "After WRPIN executes, the Smart Pin requires 2 system-clock cycles to reset\nthe IN flag to logic-0 before a program can poll the flag again.\nInsert a NOP (2 clocks, \"or more\") before testing the IN flag:\n  WRPIN   mode, #pin\n  NOP                   ' elapses the 2 clocks for IN to drop\n  TESTP   #pin WC       ' NOW safe to poll IN flag\n"
             },
             "flags_affected": {
               "C": "No effect",
@@ -18452,7 +18453,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-10-01T21:57:30.887757",
+    "extraction_date": "2026-10-03T22:10:51.765369",
     "categories": {
       "keywords": {
         "count": 37,
@@ -19670,12 +19671,12 @@
           "FRAC": {
             "operator": "FRAC",
             "type": "operator",
-            "description": "Unsigned fraction: x FRAC y = (x << 32) / y (Parallax Spin2 Documentation v55,\noperator table; assignment form var FRAC= y). The result is a 32-bit fraction of\n2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249\n(hardware-verified, EF-089). The interpreter runs it as the CORDIC QFRAC.\n",
+            "description": "Unsigned fraction: x FRAC y = (x << 32) / y (Parallax Spin2 Documentation v55,\noperator table; assignment form var FRAC= y). The result is a 32-bit fraction of\n2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249.\nThe interpreter runs it as the CORDIC QFRAC.\n",
             "category": "Math",
             "examples": [
               "frac := dividend FRAC divisor"
             ],
-            "divide_by_zero": "x FRAC 0 does not trap: it returns NOT x (1 -> $FFFF_FFFE, $8000_0000 -> $7FFF_FFFF, $FFFF_FFFF -> 0), every time. Hardware-verified on Rev C (EF-089).",
+            "divide_by_zero": "x FRAC 0 does not trap: it returns NOT x (1 -> $FFFF_FFFE, $8000_0000 -> $7FFF_FFFF, $FFFF_FFFF -> 0), every time.",
             "related": [
               "language/pasm2/qfrac.yaml",
               "language/spin2/operators/op_adddiv.yaml"
@@ -20450,9 +20451,9 @@
           "/": {
             "operator": "/",
             "type": "operator",
-            "description": "Signed divide, return quotient: x / y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var /= y). The interpreter divides the magnitudes with the\nCORDIC (QDIV) and negates the quotient when the operand signs differ, so it rounds\ntoward zero: -1000 / 3 = -333, 1000 / -3 = -333, -1000 / -3 = 333 (hardware-verified,\nEF-089).\n",
+            "description": "Signed divide, return quotient: x / y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var /= y). The interpreter divides the magnitudes with the\nCORDIC (QDIV) and negates the quotient when the operand signs differ, so it rounds\ntoward zero: -1000 / 3 = -333, 1000 / -3 = -333, -1000 / -3 = 333.\n",
             "category": "Divide",
-            "divide_by_zero": "x / 0 does not trap: it returns $FFFF_FFFF (-1) for x >= 0 and 1 for x < 0, every time; x /= 0 the same. Hardware-verified on Rev C (EF-089): the CORDIC quotient for a zero divisor is $FFFF_FFFF, negated when x is negative. Guard the divisor if a zero is possible.",
+            "divide_by_zero": "x / 0 does not trap: it returns $FFFF_FFFF (-1) for x >= 0 and 1 for x < 0, every time; x /= 0 the same. The CORDIC quotient for a zero divisor is $FFFF_FFFF, negated when x is negative. Guard the divisor if a zero is possible.",
             "related": [
               "language/spin2/operators/op_divdiv.yaml",
               "language/spin2/operators/op_adddiv.yaml",
@@ -20648,7 +20649,7 @@
             "type": "operator",
             "description": "Unsigned divide, return quotient: x +/ y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var +/= y). Both operands are treated as unsigned 32-bit\nvalues.\n",
             "category": "Divide",
-            "divide_by_zero": "x +/ 0 does not trap: it returns $FFFF_FFFF for every x, every time; x +/= 0 the same. Hardware-verified on Rev C (EF-089).",
+            "divide_by_zero": "x +/ 0 does not trap: it returns $FFFF_FFFF for every x, every time; x +/= 0 the same.",
             "related": [
               "language/spin2/operators/op_addmodulo.yaml",
               "language/spin2/operators/op_div.yaml",
@@ -20667,9 +20668,9 @@
           "//": {
             "operator": "//",
             "type": "operator",
-            "description": "Signed divide, return remainder: x // y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var //= y). The remainder takes the sign of x\n(-1000 // 3 = -1, 1000 // -3 = 1; hardware-verified, EF-089).\n",
+            "description": "Signed divide, return remainder: x // y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var //= y). The remainder takes the sign of x\n(-1000 // 3 = -1, 1000 // -3 = 1).\n",
             "category": "Divide",
-            "divide_by_zero": "x // 0 does not trap: it returns x unchanged, every time; x //= 0 the same. Hardware-verified on Rev C (EF-089).",
+            "divide_by_zero": "x // 0 does not trap: it returns x unchanged, every time; x //= 0 the same.",
             "related": [
               "language/spin2/operators/op_div.yaml",
               "language/spin2/operators/op_addmodulo.yaml",
@@ -21359,7 +21360,7 @@
               "The upper 32 bits are accessible via the PASM2 GETCT D WC instruction",
               "Wraps around every 2^32 clocks (lower 32 bits)",
               "Subtraction handles wrap correctly",
-              "All cogs see the same lower 32 bits, which is what GETCT() returns -- unaffected by the stale upper long a cog group can read after missing a wrap (hardware-verified, EF-082); GETMS()/GETSEC(), which use the upper long, are affected: language/pasm2/getct.yaml silicon_errata",
+              "All cogs see the same lower 32 bits, which is what GETCT() returns -- unaffected by the stale upper long a cog group can read after missing a wrap; GETMS()/GETSEC(), which use the upper long, are affected: language/pasm2/getct.yaml silicon_errata",
               "Not affected by cog start/stop",
               "Resolution equals clock period"
             ],
@@ -22537,7 +22538,7 @@
           "PINSTART": {
             "method": "PINSTART",
             "type": "method",
-            "description": "Configure and start smart pin with mode and parameters.\nSupports pin groups via ADDPINS operator for parallel operations.\n",
+            "description": "Configure and start smart pin with mode and parameters.\nSupports pin groups via ADDPINS operator for parallel operations.\n\nTRIGGER AND SERIAL MODES: PINSTART's Yval is LOST. PINSTART writes Y before it raises\nDIR, and a WYPIN issued while DIR is low (the pin held in reset) never starts a\npulse/cycle (%00100), transition (%00101) or serial transmit (%11110, %11100) output.\nPass Yval = 0 and issue the triggering WYPIN AFTER PINSTART (reset -> WRPIN/WXPIN ->\nDIR high -> WYPIN). Value modes keep the Y that PINSTART writes (an NCO started by\nPINSTART runs at its Yval).\n",
             "category": "Smart Pin Operations",
             "documentation_source": "enhanced",
             "documentation_level": "comprehensive",
@@ -22620,9 +22621,9 @@
             },
             "critical_requirement": {
               "reset_before_configure": true,
-              "description": "**CRITICAL**: PINSTART automatically resets the smart pin (DIR=0) before configuration.\nThis is REQUIRED to ensure proper smart pin operation. Never skip this reset step.\n",
+              "description": "PINSTART automatically takes the smart pin's DIR low, configures it, then raises\nDIR. A smart pin should be configured while its DIR bit is low, holding it in\nreset; a WRPIN while DIR is high gives unpredictable behavior.\n",
               "internal_sequence": [
-                "DIR[pin] := 0     ' AUTOMATIC: Reset smart pin (REQUIRED)",
+                "DIR[pin] := 0     ' AUTOMATIC: hold smart pin in reset while configuring",
                 "WRPIN(pin, Mode)  ' Configure smart pin mode",
                 "WXPIN(pin, Xval)  ' Set X parameter",
                 "WYPIN(pin, Yval)  ' Set Y parameter",
@@ -22630,14 +22631,14 @@
               ]
             },
             "notes": [
-              "**CRITICAL**: Automatically performs required DIR=0 reset before configuration",
-              "Complete smart pin initialization sequence with proper reset",
+              "Automatically performs the DIR=0 reset while configuring, then raises DIR",
+              "Complete initialization for value modes; in trigger/serial modes the Yval is lost (written before DIR rises) -- pass 0 and WYPIN after PINSTART",
               "Mode constants defined in Spin2 (P_ADC, P_PWM_TRIANGLE, etc.)",
               "X and Y parameters are mode-specific",
               "Pin starts operating immediately after DIR=1",
               "Use PINCLEAR to stop and reset smart pin before reconfiguration",
               "ADDPINS allows configuring multiple pins with same mode",
-              "NEVER configure a smart pin without first resetting it (DIR=0)"
+              "Configure a smart pin while its DIR bit is low (hold it in reset); WRPIN while DIR is high gives unpredictable behavior"
             ],
             "operations": [
               "DIR[pin] := 0 (reset)",
@@ -22658,7 +22659,7 @@
               "PINREAD",
               "language/spin2/methods/wrpin.yaml"
             ],
-            "output_enable_note": "PINSTART writes the whole 32-bit mode word (DIRL, WRPIN, WXPIN, DIRH, WYPIN),\nso every call must carry P_OE if the mode drives the pin \u2014 a later PINSTART on\na pin replaces any P_OE set by an earlier group call. Output modes (NCO, PWM,\npulse, transition, serial TX, DAC, USB) produce no pin activity without it and\nstill compile clean. Receive/measuring modes (ADC, RX, counters) omit it.\nAuthority: language/spin2/methods/wrpin.yaml tt_field.p_oe_required_for\n",
+            "output_enable_note": "PINSTART writes the whole 32-bit mode word (DIRL, WRPIN, WXPIN, WYPIN, DIRH),\nso every call must carry P_OE if the mode drives the pin \u2014 a later PINSTART on\na pin replaces any P_OE set by an earlier group call. Output modes (NCO, PWM,\npulse, transition, serial TX, DAC, USB) produce no pin activity without it and\nstill compile clean. Receive/measuring modes (ADC, RX, counters) omit it.\nAuthority: language/spin2/methods/wrpin.yaml tt_field.p_oe_required_for\n",
             "production_patterns": {
               "hub75_panel": {
                 "description": "HUB75 RGB LED panel uses pin groups",
@@ -24010,7 +24011,7 @@
             "category": "Task Operations",
             "requires_version": "Spin2_v47",
             "version_directive": "{Spin2_v47}",
-            "description": "Get the ID of the currently executing task. Returns an integer from 0-31\nrepresenting this task's slot in the cog's task table. In each cog the\ntop-level (initial) code runs as that cog's task 0; TASKSPIN(NEWTASK) then\nallocates upward (1, 2, ...). Task IDs are cog-local (each cog has its own\n0-31 task space). Hardware-verified (EF-023).\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
+            "description": "Get the ID of the currently executing task. Returns an integer from 0-31\nrepresenting this task's slot in the cog's task table. In each cog the\ntop-level (initial) code runs as that cog's task 0; TASKSPIN(NEWTASK) then\nallocates upward (1, 2, ...). Task IDs are cog-local (each cog has its own\n0-31 task space).\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
             "syntax": "id := TASKID()",
             "parameters": [],
             "returns": {
@@ -24034,7 +24035,7 @@
             "notes": [
               "REQUIRES {Spin2_v47} or later at start of source file",
               "Returns ID of currently executing task (0-31)",
-              "In each cog the top-level code runs as that cog's task 0; TASKSPIN(NEWTASK) fills upward from 1 (hardware-verified, EF-023)",
+              "In each cog the top-level code runs as that cog's task 0; TASKSPIN(NEWTASK) fills upward from 1",
               "Task IDs are cog-local \u2014 every cog has its own 0-31 task space",
               "Useful for task-specific storage/behavior",
               "Each task has unique ID 0-31",
@@ -25199,7 +25200,7 @@
               "Handles clock frequency changes automatically"
             ],
             "silicon_errata": {
-              "stale_upper_long_after_missed_wrap": "GETMS() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks (21,474-21,475 ms at 200 MHz) per missed wrap -- after 8 missed wraps a cog 5 read 18,819 ms beside cog 0's 190,617. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Hardware-verified on Rev C (EF-080, EF-082). Full account: language/pasm2/getct.yaml silicon_errata."
+              "stale_upper_long_after_missed_wrap": "GETMS() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks (21,474-21,475 ms at 200 MHz) per missed wrap -- after 8 missed wraps a cog 5 read 18,819 ms beside cog 0's 190,617. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Full account: language/pasm2/getct.yaml silicon_errata."
             },
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
@@ -25253,7 +25254,7 @@
               "Handles clock frequency changes automatically"
             ],
             "silicon_errata": {
-              "stale_upper_long_after_missed_wrap": "GETSEC() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks = 21.47 s at 200 MHz per missed wrap. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Hardware-verified on Rev C (EF-080, EF-082). Full account: language/pasm2/getct.yaml silicon_errata."
+              "stale_upper_long_after_missed_wrap": "GETSEC() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks = 21.47 s at 200 MHz per missed wrap. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Full account: language/pasm2/getct.yaml silicon_errata."
             },
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
@@ -26852,7 +26853,7 @@
               "bits": "7:6",
               "purpose": "Pin DIR/OUT control",
               "constants_reference": "architecture/smart_pins.yaml (configuration_format.fields.tt.constants) -- P_TT_00, P_TT_01, P_TT_10 and P_TT_11 with their values, binaries and the P_OE / P_CHANNEL / P_BITDAC aliases. The per-constant definitions are in language/spin2/symbols/spin2-builtin-symbols-complete.yaml. Defined once, in those two places, and pointed at from here.",
-              "context_dependent": "%TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by\nwhether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.\nThe per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.\nThe four contexts:\n  1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives\n  2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;\n                                    %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;\n                                    %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC\n  3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;\n                                    0x/1x = SMART/OUT or SMART/OTHER drives\n  4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;\n                                    0x = OUT enables ADC, 1x = OTHER enables ADC\n                                    -- ON SILICON, OUT runs the ADC only while TT bit 0\n                                    is set (TT = %00: OUT high runs nothing); see\n                                    architecture/smart_pins.yaml dac_smart_pin_modes\n                                    silicon_errata (hardware-verified, EF-071)\nFull table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).\nSource: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.\n",
+              "context_dependent": "%TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by\nwhether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.\nThe per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.\nThe four contexts:\n  1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives\n  2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;\n                                    %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;\n                                    %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC\n  3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;\n                                    0x/1x = SMART/OUT or SMART/OTHER drives\n  4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;\n                                    0x = OUT enables ADC, 1x = OTHER enables ADC\n                                    -- ON SILICON, OUT runs the ADC only while TT bit 0\n                                    is set (TT = %00: OUT high runs nothing); see\n                                    architecture/smart_pins.yaml dac_smart_pin_modes\n                                    silicon_errata\nFull table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).\nSource: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.\n",
               "when_smart_pin_on": "x0=output disabled, x1=output enabled (regardless of DIR)",
               "source_selection": "0x=SMART/OUT drives, 1x=SMART/OTHER drives",
               "p_oe_required_for": "SMART-PIN output modes only (NCO, PWM, Pulse, Transition, Serial TX, the smart-pin DAC modes %00001-%00011, USB). NOT the non-smart-pin (cog) DAC: with the smart pin off in DAC_MODE, the same bit is named P_CHANNEL and it SWITCHES THE DAC'S SOURCE from the pin's own level field to a cog DAC channel. Adding P_OE/P_CHANNEL to a level-driven DAC kills its output.",
@@ -27860,7 +27861,7 @@
               "Unsigned operation: all parameters and the result are 32-bit unsigned (Parallax Spin2 Documentation v55, MULDIV64)",
               "Useful for scaling and ratio calculations",
               "More precise than (a*b)/c for large values",
-              "Divisor 0 does not trap: MULDIV64(a, b, 0) returns NOT (the upper 32 bits of a*b), every time -- so $FFFF_FFFF whenever a*b < 2^32 (e.g. MULDIV64(1000, 1000, 0)); MULDIV64($FFFF_FFFF, $FFFF_FFFF, 0) = 1. Guard the divisor if a zero is possible. Hardware-verified on Rev C (EF-089); the interpreter runs QMUL then QDIV."
+              "Divisor 0 does not trap: MULDIV64(a, b, 0) returns NOT (the upper 32 bits of a*b), every time -- so $FFFF_FFFF whenever a*b < 2^32 (e.g. MULDIV64(1000, 1000, 0)); MULDIV64($FFFF_FFFF, $FFFF_FFFF, 0) = 1. Guard the divisor if a zero is possible. The interpreter runs QMUL then QDIV."
             ],
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. The interpreter is\nengineered to run at minimum cost. We do not publish a clock count for\nthis method because we do not have a verifiable measurement (no clean\nsingle-PASM-instruction backing to cite).\n"
@@ -28247,7 +28248,7 @@
               "Bits are stored in REVERSE order (bit 0 = task 31, bit 31 = task 0)",
               "A set bit (1) indicates the task is halted",
               "A clear bit (0) indicates the task is running or stopped",
-              "Task 0 is the cog's top-level task; task IDs are cog-local (hardware-verified, EF-023)",
+              "Task 0 is the cog's top-level task; task IDs are cog-local",
               "Use TASKCHK() for simpler status checking of individual tasks",
               "Direct TASKHLT access useful for bulk task monitoring",
               "Writing to TASKHLT can force-halt or force-resume tasks"
