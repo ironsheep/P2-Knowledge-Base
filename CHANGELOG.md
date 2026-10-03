@@ -20,6 +20,16 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.23.1] - 2026-10-03
+
+**Every entry states its facts in plain text, with no pointers into files you cannot open.**
+
+### Changed
+
+- **Entries carry no repository file paths or line-number citations** in the text you receive; every fact reads as before, and its provenance stays with the knowledge base's sources
+
+---
+
 ## [1.23.0] - 2026-10-03
 
 **Every result proven on our P2 bench is in the KB, and PASM2 instruction details are checked line by line against Parallax's documentation.**
