@@ -145,7 +145,13 @@ def main():
         return 2
     try:
         req = json.loads(Path(args.request).read_text(encoding="utf-8"))
-        meta = req["documents"][0]["metadata"]
+        docs = req["documents"]
+        # The entry whose output IS this PDF. A request may build more than one
+        # document (P2 Errata v0.3.0: the guide and the errata sheet), and each
+        # PDF is checked against its own identity, never the first entry's. A
+        # PDF named for no entry falls back to the first, as before.
+        meta = next((d["metadata"] for d in docs
+                     if Path(d.get("output", "")).name == pdf.name), docs[0]["metadata"])
     except Exception as e:
         print(f"ERROR: cannot read metadata from {args.request}: {e}")
         return 2

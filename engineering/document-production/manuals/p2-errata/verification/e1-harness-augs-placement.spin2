@@ -1,0 +1,12 @@
+' E1 v0.3.0 sidecar harness: where the assembler places the AUGS for a ##
+' operand on a block transfer. Compile with pnut-ts 1.55.8 (-l for the listing)
+' and read the hub bytes: the AUGS lands between the SETQ and the RDLONG.
+DAT
+        org
+        setq    #3
+        rdlong  buf, ptra++[##100]
+        setq    #3
+        rdlong  buf, ##$1_2345
+        setq    #3
+        rdlong  buf, ptra++
+buf     long    0[4]

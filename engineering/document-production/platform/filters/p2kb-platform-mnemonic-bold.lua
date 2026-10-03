@@ -289,6 +289,14 @@ local function is_english_context(word, prev_word, next_word, suffix)
        prev == "which" or prev == "that" then
       return true
     end
+    -- A counted noun: "each call", "one call", "per call", "a single call". These
+    -- printed as "single CALL" / "one CALL" in the I/O and Smart Pins guide and as
+    -- "each CALL" in P2 Errata v0.3.0's draft. "each CALL instruction" stays the
+    -- instruction: the `next == "instruction"` test above runs first.
+    if prev == "each" or prev == "one" or prev == "per" or prev == "every" or
+       prev == "single" or prev == "first" or prev == "last" or prev == "next" then
+      return true
+    end
     if next == "the" or next == "a" or next == "an" or next == "this" or
        next == "that" or next == "it" or next == "to" or next == "into" or
        next == "on" or next == "onto" or next == "for" or next == "out" or
@@ -380,7 +388,16 @@ local function is_english_context(word, prev_word, next_word, suffix)
 
   -- "rev" - could be abbreviation, but usually instruction
   if w == "rev" then
-    if next == "." then  -- abbreviation like "Rev."
+    -- An abbreviation like "Rev. 2". The period arrives in `suffix`: next_word is
+    -- letters only, so the earlier `next == "."` test could never match.
+    if suf:match("^%.") then
+      return true
+    end
+    -- A silicon revision: "Rev C", "Rev B/C" -- "Rev" then a single capital letter.
+    -- Checked on next_word's ORIGINAL case (next is lowercased above). Without it,
+    -- plain prose "on Rev B/C silicon" printed as "On REV B/C silicon" in a released
+    -- Assembly Reference (p209), and "Rev C" in P2 Errata v0.3.0's draft did the same.
+    if next_word and next_word:match("^%u$") then
       return true
     end
     return false

@@ -1,5 +1,27 @@
 # P2 Errata - Changelog
 
+## v0.3.0 (2026-10-03) — Community Review Draft
+
+**A programmer's guide, with each erratum in proportion.** The same seven errata, reshaped around what a programmer needs to know: whether an erratum can reach your program, what it looks like, and what to write instead. The guide is a fraction of its former length, and a few-page errata sheet comes with it.
+
+### Added
+
+- **Errata Quick Reference**: which errata can affect your program, in the order you are likely to meet them (E3 first, the one ordinary multi-cog code meets), and the symptom lookup
+- **The P2 Errata sheet**: the quick reference and each erratum's summary on a few pages, built from the same text as the guide and carrying the same version
+- **E1: a `##` operand on a block transfer** puts an `AUGS` between the `SETQ` and the transfer without your writing one; keep `##` operands off a block transfer that updates `PTRx`
+
+### Changed
+
+- **Every erratum opens with three lines**: who meets it, what you see, and what to do
+- **Each erratum is two short sections**, *What happens* and *A proven workaround*, and says plainly how likely it is to reach a program
+- **The evidence moved to Appendix A**: one row per erratum naming its test programs, what they measured and the result. The test programs themselves are unchanged, and each still prints every value it measures
+- **The Preface** replaces the long front matter: how an entry is laid out, what counts as an erratum, sources and acknowledgments
+
+### Removed
+
+- **The test walkthroughs, proof sections and status tables** from each erratum; Appendix A and the examples archive carry the evidence
+- **The account of each erratum's internal mechanism**
+
 ## v0.2.0 (2026-09-26) — Community Review Draft
 
 **Seven silicon errata, and each opens with what to do about it** — a three-line caution box at the top of every erratum, what any workaround must do, and one drop-in workaround that ran on P2 hardware.

@@ -7,10 +7,8 @@
 ''                form alongside; and whether making the first of two
 ''                RDFASTs the waiting form removes E7's original failure
 ''   Manual.....  P2 Errata
-''   Version....  v0.2.0 (2026-09-26)
-''   Appears in.  Erratum E7: After a No-Wait RDFAST, the Next Hub
-''                Instruction Can Complete Early; Appendix A: The Test
-''                Programs
+''   Version....  v0.3.0 (2026-10-03)
+''   Appears in.  Appendix A: How Each Erratum Was Confirmed
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Oct 2026

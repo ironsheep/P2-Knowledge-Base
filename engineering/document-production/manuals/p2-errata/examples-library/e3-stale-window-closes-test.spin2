@@ -5,9 +5,8 @@
 ''                long read in cogs 4 and 7, and GETMS() and GETSEC() in a
 ''                Spin2 cog, before and after the group's next wrap
 ''   Manual.....  P2 Errata
-''   Version....  v0.2.0 (2026-09-26)
-''   Appears in.  Erratum E3: GETCT Returns a Stale Upper Long; Appendix
-''                A: The Test Programs
+''   Version....  v0.3.0 (2026-10-03)
+''   Appears in.  Appendix A: How Each Erratum Was Confirmed
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Sep 2026

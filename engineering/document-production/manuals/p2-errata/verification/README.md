@@ -30,3 +30,14 @@ names in those places; every number in a quoted line is unchanged.
 
 Any mention of `/home/vscode/.local/pnut/…` in a sidecar is the brief's original compiler path,
 which no longer exists; `/usr/local/bin/pnut-ts` is 1.55.8 since 2026-09-23.
+
+## Since v0.3.0 (the reshape)
+
+v0.3.0 reshaped the manual into a programmer's guide (`../RESHAPE-SPEC.md`). Each chapter now
+prints a **subset** of what its sidecar maps: the same Parallax quotations (byte-identical to
+v0.2.0, checked with `diff` when the chapters were rewritten), a few of the measured values,
+and the same workaround blocks. The proof walkthroughs, rig excerpts and *Why it happens*
+sections the sidecars also map are no longer printed. The sidecars are kept whole: they remain
+the source map for every value still printed, and the record of how each erratum was proven.
+A claim added in v0.3.0 has its own section in its chapter's sidecar (E1 §8: the `AUGS` a `##`
+operand places after a `SETQ`).

@@ -6,14 +6,12 @@
 ''                alignment; alongside, the unspaced sweep that shows the
 ''                erratum
 ''   Manual.....  P2 Errata
-''   Version....  v0.2.0 (2026-09-26)
-''   Appears in.  Erratum E7: After a No-Wait RDFAST, the Next Hub
-''                Instruction Can Complete Early; Appendix A: The Test
-''                Programs
+''   Version....  v0.3.0 (2026-10-03)
+''   Appears in.  Appendix A: How Each Erratum Was Confirmed
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Sep 2026
-''   Updated....  Sep 2026
+''   Updated....  Oct 2026
 ''
 ''   This file is an EXAMPLE from the manual above. It is the whole
 ''   program the chapters listed above name; where the manual

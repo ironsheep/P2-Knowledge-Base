@@ -26,6 +26,13 @@ in the front matter, and used exactly as defined everywhere else.
 Not "a dangerous bug", "silently corrupts", "a nasty surprise". Instead: what happens, when,
 and to what. Severity is shown by the symptom, not asserted by adjectives.
 
+**Keep each erratum in proportion** (Chip Gracey's review of v0.2.0: *"It needs to all be
+spelled out, but contextualized and made brief enough to read."*). Say plainly how likely a
+program is to meet the erratum, from the conditions that reach it, so that a rare one does not
+read as something to hunt for. State the consequences in a line or two; never catalogue
+what can go wrong. A long passage on a rare erratum tells the reader it matters more than it
+does.
+
 **Keep proof separate from prediction.** Say *confirmed on silicon* only for what a bench run
 decided. What the bench did not test stays qualified: *"only `ALTD` was tested as the
 intervening instruction; Parallax names `AUGS` and `AUGD` as well."* The evidence sets the
@@ -41,15 +48,18 @@ then predicted that the same condition reaches every hub read and write, and the
 confirmed it, so E7 credits both.
 No sentence implies the vendor hid anything or that documentation was careless.
 
-**The mechanism in our own words.** *Why it happens* describes behaviour at the programmer's
-model: registers, clocks, instructions, what is held and when it is applied. No HDL, no
-signal or module names from the design material, no line references.
+**The programmer's model, measured; never a design account.** Where a rule needs a model to
+make sense, *What happens* states it as behaviour measured on P2 hardware: registers, clocks,
+instructions, what is held and when it is applied (E3: each group of four cogs reads its own
+copy of the counter). No HDL, no signal or module names from the design material, no line
+references, and since v0.3.0 no account of the mechanism drawn from the clean-room study. The
+design reason for an erratum enters only from Parallax's own documentation.
 
-**Lead with what the reader must do.** The reader opened this manual to find out whether an
-erratum touches their program and what to change. The CAUTION box at the top of every erratum
-answers that in three lines; everything after it is the evidence for those lines. An opening
-paragraph follows the box, it does not restate it. Name whose statement the part contradicts
-(*the P2 Documentation states*), never an unowned "the design".
+**Lead with what the reader must do.** The reader opened this guide to find out whether an
+erratum touches their program and what to change. The summary box at the top of every erratum
+answers that in three lines (*Who meets it · What you see · What to do*); the two sections
+after it explain and show the code. Name whose statement the part contradicts (*the P2
+Documentation states*), never an unowned "the design".
 
 **A workaround, not a fix; one, not the only one.** The part keeps its defect; the reader's
 code steps around it. A *fix* is what a new silicon revision does, so this manual never calls
@@ -64,18 +74,15 @@ on a part is not printed as the proven workaround.
 
 ## 2a. The voice boundary: where "you" is allowed
 
-The reader-facing parts of an erratum speak to the reader; the evidence speaks in the reference
-voice. The line is fixed by section:
+The reader-facing parts of an erratum speak to the reader; the description and the evidence
+speak in the reference voice. The line is fixed by part:
 
-| Section | Voice |
+| Part | Voice |
 |---|---|
-| CAUTION box | "you" allowed |
-| Section headings (*What your program sees*, *A proven workaround*) | "you" / "your" allowed |
-| Opening paragraph | reference voice |
-| *What the P2 is documented to do* · *What the P2 does* | reference voice |
-| *What your program sees* | "you" allowed |
+| Summary box (guide and sheet) · the triage table's *Your program meets it if it…* column | "you" / "your" allowed |
+| *What happens* | reference voice; "you" / "your program" only in a sentence saying what the program sees |
 | *A proven workaround* | "you" allowed |
-| *Why it happens* · *How it was proven on P2 hardware* · *The test program* · *Status* | reference voice, no "you" |
+| Closing line · Preface · Appendix A | reference voice, no "you" |
 
 "You" is the programmer at their bench, never a foil: no "you might think", no "as you can
 see", no "you'll be surprised". "We" is never used; the test was run *here*, or *on the bench*.

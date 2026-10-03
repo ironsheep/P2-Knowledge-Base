@@ -4,9 +4,8 @@
 ''   Purpose....  Erratum E3 test, Run B: the Run A readings with a cog of
 ''                cogs 4-7 running from the start
 ''   Manual.....  P2 Errata
-''   Version....  v0.2.0 (2026-09-26)
-''   Appears in.  Erratum E3: GETCT Returns a Stale Upper Long; Appendix
-''                A: The Test Programs
+''   Version....  v0.3.0 (2026-10-03)
+''   Appears in.  Appendix A: How Each Erratum Was Confirmed
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Sep 2026

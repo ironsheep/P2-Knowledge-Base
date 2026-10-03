@@ -90,16 +90,30 @@ def source_mds(doc: Path):
     )
 
 
-def workspace_md(ws: Path):
+def workspace_docs(ws: Path):
+    """Every document the Forge request builds: (input .md path or None, output stem).
+
+    EVERY document, not documents[0]. P2 Errata v0.3.0 builds a second PDF (the
+    errata sheet) from the same request; reading only the first entry would have
+    shipped the second through no workspace-level gate at all (RESHAPE-SPEC §7).
+    The input path is None while that markdown is not assembled yet.
+    """
     req = ws / "request.json"
     if not req.is_file():
-        return None
+        return []
     try:
-        name = json.loads(req.read_text())["documents"][0]["input"]
-    except (KeyError, IndexError, json.JSONDecodeError):
-        return None
-    p = ws / name
-    return str(p) if p.is_file() else None
+        entries = json.loads(req.read_text())["documents"]
+    except (KeyError, json.JSONDecodeError):
+        return []
+    docs = []
+    for e in entries:
+        inp, out = e.get("input"), e.get("output")
+        if not inp:
+            continue
+        p = ws / inp
+        stem = Path(out).stem if out else Path(inp).stem
+        docs.append((str(p) if p.is_file() else None, stem))
+    return docs
 
 
 def spin2_blocking_rules(doc: Path):
@@ -144,11 +158,17 @@ def app_note_corpus_gap(doc: Path) -> bool:
     return "caption=" not in body.read_text(encoding="utf-8", errors="replace")
 
 
-def build_gates(slug: str, phase: str, pdf: str | None):
+def build_gates(slug: str, phase: str, pdfs: list[str] | None):
     doc, ws = doc_dirs(slug)
     srcs = source_mds(doc)
-    wsmd = workspace_md(ws)
+    wsdocs = workspace_docs(ws)
+    multi = len(wsdocs) > 1
     corpus = has_corpus(doc)
+    pdfs = pdfs or []
+
+    def per_doc(name: str, stem: str) -> str:
+        # One gate line per document; the bare name when the request builds one.
+        return f"{name}[{stem}]" if multi else name
     V = f"{VALIDATION}"
     G = []
 
@@ -179,12 +199,14 @@ def build_gates(slug: str, phase: str, pdf: str | None):
                   "the version the cover renders must have a changelog entry, "
                   "and metadata.version must be a bare number (the cover "
                   "supplies the word 'Version' itself)"))
-        if wsmd:
-            G.append(("font-glyphs", f"{V}/audit-font-glyphs.py",
+        for wsmd, stem in wsdocs:
+            G.append((per_doc("font-glyphs", stem), f"{V}/audit-font-glyphs.py",
                       [wsmd, "--source-dir", str(doc / "opus-master"),
                        "--templates", str(ws / "templates"),
-                       str(DOCPROD / "platform/templates")], True,
-                      "a glyph the font lacks prints NOTHING, with a clean log"))
+                       str(DOCPROD / "platform/templates")] if wsmd else None, True,
+                      "a glyph the font lacks prints NOTHING, with a clean log"
+                      if wsmd else
+                      "workspace markdown not assembled yet -- run the assemble step"))
 
         # F-319: a LaTeX internal (\@empty) used where @ is catcode 12 does not
         # mean what it reads as -- it tokenises as \@ plus letters, so the guard
@@ -202,8 +224,12 @@ def build_gates(slug: str, phase: str, pdf: str | None):
                       "guard using it never fires (F-319 shipped a malformed rights "
                       "string this way, past a clean compile AND a landed fix)"))
         else:
-            G.append(("font-glyphs", None, None, True,
-                      "workspace markdown not assembled yet -- run the assemble step"))
+            # This else once reported "font-glyphs: not assembled" when the
+            # TEMPLATES were missing, and nothing at all when the markdown was --
+            # it had drifted off the `if wsmd` it was written for. Unassembled
+            # markdown is reported per document above.
+            G.append(("latex-at-catcode", None, None, True,
+                      "no templates found for this manual or the platform"))
         if corpus:
             G += [
                 ("spin2-ascii", f"{V}/audit-spin2-ascii.py",
@@ -250,46 +276,55 @@ def build_gates(slug: str, phase: str, pdf: str | None):
         # showing what LaTeX actually RECEIVED. Wired when present; a missing
         # hand-back is a SKIP, never a pass.
         ob = DOCPROD / "outbound" / slug
-        tex = next(iter(sorted(ob.glob("*.tex"))), None) if ob.is_dir() else None
-        log = next(iter(sorted(ob.glob("*.compile.log"))), None) if ob.is_dir() else None
-        G.append(("tex-artifacts", f"{V}/audit-tex-artifacts.py",
-                  [str(tex)] if tex else None, True,
-                  "markup that leaked into LaTeX: F-284 ate an AND, F-285 printed "
-                  "&nbsp; 16 times, both with a CLEAN compile log"
-                  if tex else "no .tex hand-back in outbound"))
-        # --tex/--pdf resolve each site to a printed page; --verdicts carries the
-        # judgements forward. Without all three the gate could not be SATISFIED
-        # through this runner: it reported page=? for every site and had no file
-        # to read a verdict from, so any document with a >=20pt overfull was a
-        # permanent RED here -- the same could-not-reach-a-fixpoint shape as F-420.
-        # The verdicts file is per document and lives in its audit/ folder.
-        ovf = [str(log)] if log else None
-        if ovf:
-            if tex:
-                ovf += ["--tex", str(tex)]
-            if pdf:
-                ovf += ["--pdf", pdf]
-            # Doc ROOT, not audit/ -- `manuals/*/audit/` is gitignored (those
-            # folders are workspace history). A verdict recorded there would be
-            # local-only, so the next machine or session would re-adjudicate the
-            # same sites, which is the exact "moving bar" this gate exists to stop.
-            ovf += ["--verdicts", str(doc / "render-overfull-verdicts.txt")]
-        G.append(("render-overfulls", f"{V}/audit-render-overfulls.py",
-                  ovf, True,
-                  "overfull boxes exist only in the render, in no markdown"
-                  if log else "no compile log in outbound"))
-        if pdf:
-            G += [
-                ("pdf-metadata", f"{V}/audit-pdf-metadata.py",
-                 [pdf, "--request", str(ws / "request.json")], True,
-                 "the PDF must carry the identity it declares"),
-                ("pdf-margin-overflow", f"{V}/audit-pdf-margin-overflow.py",
-                 [pdf], True,
-                 "text crossing the right margin, measured not eyeballed"),
-            ]
-        else:
-            G += [("pdf-metadata", None, None, True, "no --pdf given"),
-                  ("pdf-margin-overflow", None, None, True, "no --pdf given")]
+
+        def handback(stem, suffix):
+            # Each document's hand-back is named for its output stem. A one-document
+            # request also accepts the first file of that kind in outbound, as the
+            # lookup always did; with several documents that would be another's.
+            named = ob / f"{stem}{suffix}"
+            if named.is_file():
+                return named
+            if multi or not ob.is_dir():
+                return None
+            return next(iter(sorted(ob.glob(f"*{suffix}"))), None)
+
+        for stem in ([s for _, s in wsdocs] or [None]):
+            tex, log = handback(stem, ".tex"), handback(stem, ".compile.log")
+            pdf = next((p for p in pdfs if Path(p).stem == stem),
+                       None if multi else (pdfs[0] if pdfs else None))
+            G.append((per_doc("tex-artifacts", stem), f"{V}/audit-tex-artifacts.py",
+                      [str(tex)] if tex else None, True,
+                      "markup that leaked into LaTeX: F-284 ate an AND, F-285 printed "
+                      "&nbsp; 16 times, both with a CLEAN compile log"
+                      if tex else "no .tex hand-back in outbound"))
+            # --tex/--pdf resolve each site to a printed page; --verdicts carries the
+            # judgements forward. Without all three the gate could not be SATISFIED
+            # through this runner: it reported page=? for every site and had no file
+            # to read a verdict from, so any document with a >=20pt overfull was a
+            # permanent RED here -- the same could-not-reach-a-fixpoint shape as F-420.
+            ovf = [str(log)] if log else None
+            if ovf:
+                if tex:
+                    ovf += ["--tex", str(tex)]
+                if pdf:
+                    ovf += ["--pdf", pdf]
+                # Doc ROOT, not audit/ -- `manuals/*/audit/` is gitignored (those
+                # folders are workspace history). A verdict recorded there would be
+                # local-only, so the next machine or session would re-adjudicate the
+                # same sites, which is the exact "moving bar" this gate exists to stop.
+                ovf += ["--verdicts", str(doc / "render-overfull-verdicts.txt")]
+            G.append((per_doc("render-overfulls", stem), f"{V}/audit-render-overfulls.py",
+                      ovf, True,
+                      "overfull boxes exist only in the render, in no markdown"
+                      if log else "no compile log in outbound"))
+            for gate, script, argv, why in (
+                    ("pdf-metadata", "audit-pdf-metadata.py",
+                     [pdf, "--request", str(ws / "request.json")],
+                     "the PDF must carry the identity it declares"),
+                    ("pdf-margin-overflow", "audit-pdf-margin-overflow.py", [pdf],
+                     "text crossing the right margin, measured not eyeballed")):
+                G.append((per_doc(gate, stem), f"{V}/{script}" if pdf else None,
+                          argv if pdf else None, True, why if pdf else "no --pdf given"))
 
     # The meta-gate runs in BOTH phases and is the reason this manifest stays
     # honest: it turns red when a gate script exists that nothing invokes.
@@ -348,7 +383,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--slug")
     ap.add_argument("--phase", choices=("prepare", "release"))
-    ap.add_argument("--pdf", help="the generated PDF (release phase)")
+    ap.add_argument("--pdf", action="append",
+                    help="a generated PDF (release phase); repeat it once per document "
+                         "when the request builds more than one")
     ap.add_argument("--list", action="store_true",
                     help="list the gates for the phase and exit, running none")
     ap.add_argument("--quiet", action="store_true")

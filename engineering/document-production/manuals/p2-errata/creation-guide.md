@@ -40,10 +40,19 @@ restated here or anywhere else in this folder. Three consequences govern authori
 
 ## 3. Structure
 
-- **Front matter:** cover (shared `book-artwork.png`), contents, copyright and licence,
-  acknowledgments, sources, *What counts as an erratum* (the three classes defined once),
-  *How each chapter is built*, the **summary table** of every erratum found so far, and
-  document conventions.
+**Since v0.3.0 the book is a programmer's guide** (`RESHAPE-SPEC.md`, decided with Stephen
+2026-10-03 after Chip Gracey's review of v0.2.0): shaped around the reader's three questions
+(*what must I watch for? · is this symptom a known erratum? · does this code hit one?*), with
+each erratum in proportion to how likely a program is to meet it. Proof is evidence, kept in
+Appendix A and the examples archive, never the body of an entry.
+
+- **Front matter:** cover (shared `book-artwork.png`), contents, copyright and licence, then
+  `# Preface`: who the guide is for, how an erratum is laid out, what counts as an erratum
+  (erratum vs. anti-pattern in two sentences, pointing to *P2 Anti-Patterns*), the review-draft
+  note and permanent numbering, sources, acknowledgments, document conventions.
+- **`# Errata Quick Reference`**: the triage (`shared-triage.md`: every erratum, who meets it,
+  how often that comes up, ordered by likelihood) and the symptom lookup (`shared-symptoms.md`).
+  "Quick Reference" is a chapter pattern the pagination filter already recognises.
 - **Chapter N is erratum EN.** Erratum numbers are **permanent once published**: a new erratum is
   appended as the next chapter, never inserted, and a number is never reused. What one erratum
   covers — one trigger with one workaround, every symptom inside it — and when two findings
@@ -55,8 +64,17 @@ restated here or anywhere else in this folder. Three consequences govern authori
   counter to N and its label to `EN`, so figures number `EN.1`. The heading text is what the
   TOC and running heads print, so both read *Erratum EN*. A cross-reference is written
   *Erratum EN*, never *Chapter N*.
-- **Appendix A: The Test Programs**: every rig in the examples archive, what it proves, and
-  how to run it.
+- **Appendix A: How Each Erratum Was Confirmed** (`{#app-a}`): one table row per erratum
+  (test programs · what was measured · result · date), then how to build and run the programs.
+  No ledger or other internal ids (§5).
+- **The errata sheet** (`sheet.md` → `P2-Errata-Sheet.pdf`): a 2-3 page build of the same
+  opus-master, carrying the same version: its own title block, the triage, the symptom lookup,
+  and each erratum's summary box under `## Erratum EN: <title> {#sh-eN}`. It has no roster row
+  and no CHANGELOG of its own.
+- **Shared text is written once.** Each erratum's summary box (`shared-eN.md`), the triage and
+  the symptom table live in `shared-*.md` and reach both documents through include lines
+  (`<!-- include: <file> -->`, expanded by `assemble-manual.sh`). Never type shared text twice.
+  Because the box is printed in the sheet, it refers to no guide section.
 
 Current numbering (decided 2026-09-25):
 
@@ -70,70 +88,56 @@ Current numbering (decided 2026-09-25):
 | E6 | `e6-dac-mode-adc-enable.md` | in a DAC smart-pin mode, `OUT` does not switch the ADC while `TT` bit 0 is clear |
 | E7 | `e7-rdfast-blocking-after-no-wait.md` | after a no-wait `RDFAST`, the next hub instruction can complete early: hub reads return the previous read's data, hub writes are lost, block reads go wrong, a waiting `RDFAST` skips its wait (file name kept from the first-found case) |
 
-## 4. The chapter, section by section
+## 4. The erratum entry
 
-Every erratum chapter has the same parts, in this order, with these headings. The reader
-decides from the first screen whether the erratum touches their program and what to change;
-everything below *A proven workaround* is the evidence. Voice by section: `voice-guide.md` §2a.
+Every erratum entry has the same parts, in this order. The box answers the reader's question
+in three lines; the two sections explain and show the code. An entry runs to about a page
+(E3, the one ordinary code meets, up to two). Voice by part: `voice-guide.md` §2a.
 Terminology (Stephen, 2026-09-26): the reader's change is a **workaround**, never a *fix* (a
 fix is a silicon revision), and the manual offers **a** proven workaround, never *the* only one.
 
-1. **CAUTION box** (no heading), the first thing under the chapter heading, in the platform's
-   existing amber box, unchanged:
+1. **The summary box** (no heading), the first thing under the chapter heading: the include
+   line for `shared-eN.md`, a `::: caution` box of three lines, in programmer terms, with no
+   documentation quotes and no reference to a guide section (the sheet prints it too):
 
    ```
    ::: caution
-   **Expected:** what the P2 Documentation says happens, in one sentence.
+   **Who meets it:** the code or condition that reaches it, in one or two sentences.
 
-   **Actual:** what the part does instead, in one sentence.
+   **What you see:** the symptom, in one or two sentences.
 
-   **Workaround:** the condition any workaround must meet, in one sentence, pointing to
-   *A proven workaround*.
+   **What to do:** the rule, in one sentence.
    :::
    ```
 
-2. **Opening paragraph** (no heading): who is affected and when, in two or three sentences. It
-   follows the box and does not restate it.
-3. `## What the P2 is documented to do`: the written statement the part contradicts, and
-   **whose** it is and where (*the P2 Documentation, section …*). For a vendor-published
-   erratum, the published statement. **Quote Parallax documentation exactly.** Never quote
-   design source code (see §6).
-4. `## What the P2 does`: the defect, stated precisely: which instructions, in what
-   arrangement, with what result.
-5. `## What your program sees`: the defect as it shows up in a program, including what does
-   **not** go wrong (e.g. "the data lands correctly; only the pointer is wrong").
-6. `## A proven workaround`: **rule-first.** Open with the condition any workaround must
-   meet (**What any workaround must do:** …), then **One way, proven on P2 hardware:** and the
-   drop-in code block, byte-identical to the block a test program ran on silicon, then one
-   sentence of guarantee naming its kind: *one-time startup workaround*, *rule at each use*,
-   or *helper routine*. Then, where they exist, other ways that meet the same condition; then
-   its cost and its limits. Only a block proven on a part is printed as the proven
-   workaround; if none is proven, say so plainly and name any change given as unproven.
-7. `## Why it happens`: the theory of operation, **in our own words** (§6).
-8. `## How it was proven on P2 hardware`: the test on P2 hardware: what it arranges, its
-   controls, what it measured, and the numbers. Stated so a reader could rebuild the test. The
-   run that proved the workaround is reported here too.
-9. `## The test program`: a walkthrough of the rig with short excerpts, and the filename in
-   the examples archive (and the workaround's test program, if separate).
-10. `## Status`: the status table (§5).
+2. **The "why" insertion point** (empty since v0.3.0). Chip Gracey's design reason for the
+   erratum, one short paragraph, goes directly after the box once his amendment to the P2
+   Documentation publishes it. Nothing in an entry refers forward to it, and the entry reads
+   complete without it. The study's account of the mechanism is never used here (§6).
+3. `## What happens {#sec-eN-actual}`: what Parallax's documentation states (whose it is and
+   where, with a short exact quote; for a vendor-published erratum, the published KNOWN BUGS
+   text), what the part does instead, the **programmer's model** where a rule needs one (a
+   measured model of behaviour, never a design account), what is **not** affected, and **how
+   likely** a program is to meet it, in plain words. State consequences in a line or two,
+   never as a catalogue. The scope the bench earned (what was not tested) goes in one sentence.
+4. `## A proven workaround {#sec-eN-workaround}`: **rule-first.** Open with **What any
+   workaround must do:** …, then **One way, proven on P2 hardware:** and the drop-in code
+   block, byte-identical to the block a test program ran on silicon, then its kind in italics
+   (*one-time startup workaround*, *rule at each use*, *helper routine*). Then, briefly: how to
+   use it, other ways that meet the condition, the cost, and the limits of the proof. Only a
+   block proven on a part is printed as the proven workaround.
+5. **The closing line:** **Found by** … (Parallax · the clean-room design study, as a
+   prediction · a bench test here), whether Parallax publishes it, and the date it was
+   confirmed on P2 hardware.
 
-Section anchors: `{#sec-eN-documented}`, `{#sec-eN-actual}`, `{#sec-eN-sees}`,
-`{#sec-eN-workaround}`, `{#sec-eN-why}`, `{#sec-eN-proof}`, `{#sec-eN-program}`,
-`{#sec-eN-status}`.
+**Code fences are verbatim excerpts of archive programs** (`corpus-identity` gate). An
+arrangement to avoid is printed from the test program's own hazard arm only where that reads
+clearly; otherwise it is written as an inline instruction sequence in prose.
 
-## 5. The status table
+## 5. The closing line and the evidence
 
-Every chapter ends with the same two-column table:
-
-| Field | Content |
-|---|---|
-| Erratum | E*n* |
-| Published by Parallax | Yes, with where (e.g. *P2 Documentation, KNOWN BUGS*) · or No |
-| Found by | Parallax · a prediction from the clean-room design study, confirmed here · or found on the bench here |
-| Confirmed on silicon | Yes, with the date and the conditions (board, clock) |
-| Workaround proven on silicon | Yes, with the date and its kind (one-time startup workaround / rule at each use / helper routine) · No · None known |
-| Affects | the instructions and conditions, briefly |
-| Test program | the filename(s) in the examples archive: the erratum's, and the workaround's if separate |
+The v0.2.0 status table is replaced by the closing line (§4) and Appendix A's evidence row
+(test programs · what was measured · result · date).
 
 **No internal identifiers in reader text:** no `EF-NNN`, `VO-*`, `O17`, `SO80`, `F-NNN`,
 brief names or ledger names. The chip revision is stated once, in the front matter, once it
@@ -145,9 +149,9 @@ is confirmed.
 |---|---|---|
 | **The bench ledger** (strongest) | `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md` (EF-066..087, the P2 errata entries, including the workaround runs) | every claim about what the part does, every number |
 | **Raw logs** | `manuals/p2-errata/audit/verification-tests/logs/` | the numbers, read from the lines themselves |
-| **The rigs** | `manuals/p2-errata/audit/verification-tests/*.spin2`, replicated to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` | walkthrough excerpts, verbatim |
-| **Parallax P2 Documentation** | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` (v35; KNOWN BUGS at 197–227) and `silicon-doc-text.txt` (the current online edition) | *What the P2 is documented to do*; quote exactly |
-| **Parallax Spin2 Language Documentation** | `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` (v55) | *What the P2 is documented to do* where the statement is Spin2's (E3: `GETMS()`/`GETSEC()` at :552–553, the description column only — the `\|` and `GETMS ()` spacing are the table's); quote exactly, checked against the `.docx` |
+| **The rigs** | `manuals/p2-errata/audit/verification-tests/*.spin2`, replicated to `hardware-verification/campaigns/2026-09-p2-errata-predictions/tests/` | the printed workaround blocks, verbatim |
+| **Parallax P2 Documentation** | `engineering/ingestion/sources/silicon-doc/p2-documentation.txt` (v35; KNOWN BUGS at 197–227) and `silicon-doc-text.txt` (the current online edition) | what the part is meant to do, in *What happens*; quote exactly |
+| **Parallax Spin2 Language Documentation** | `engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` (v55) | what the part is meant to do where the statement is Spin2's (E3: `GETMS()`/`GETSEC()` at :552–553, the description column only — the `\|` and `GETMS ()` spacing are the table's); quote exactly, checked against the `.docx` |
 | **KB YAML** | `deliverables/ai/P2/language/pasm2/*.yaml`, read from disk | authoring aid for instruction semantics and encodings; **never cited in reader text** |
 
 **What reader text may cite (Stephen, 2026-09-26).** An erratum is the hardware contradicting a
@@ -157,12 +161,14 @@ Parallax's other published P2 documents. **Never cited**: our own manuals, the P
 community-review drafts, forum threads, or the comment threads attached to a Parallax document
 (a comment is discussion, not documentation). Our bench runs are the *evidence*, stated as such,
 never the *statement of intent*.
-| **Study briefs** | `manuals/p2-errata/code-validation/test-briefs/` (**git-ignored, Internal**) | the mechanism, for *Why it happens* only, **paraphrased** |
+| **Study briefs** | `manuals/p2-errata/code-validation/test-briefs/` (**git-ignored, Internal**) | authoring background only, to design tests and understand results; **never in reader text** since v0.3.0 |
 
-**The clean-room study's design material is never quoted.** No HDL fragments, no signal or
-module names taken from it, no line references. *Why it happens* explains the mechanism in our
-own words, at the level of the programmer's model. The study is credited by name in the
-front matter. (Its formal name is **open**: Stephen settles it with Chip Gracey.)
+**The clean-room study's design material is never quoted, and since v0.3.0 its account of the
+mechanism is not printed at all.** No HDL fragments, no signal or module names taken from it, no
+line references, and no *Why it happens*. An entry states the programmer's model only where a
+rule needs it, and only as measured behaviour (`RESHAPE-SPEC.md` D5). The design reason for an
+erratum enters only from Parallax's own documentation (§4, the insertion point). The study is
+credited by name in the front matter. (Its formal name is **open**: Stephen settles it with Chip Gracey.)
 
 **Where the KB disagrees with the bench, the bench wins**, and the disagreement goes to
 `engineering/operations/P2KB-CORRECTION-FINDINGS.md`. At v0.1.0 the KB has not yet absorbed
@@ -207,9 +213,11 @@ defect: shorten the comment or split the line legally. Never let a code box wrap
 ## 9. Production
 
 1. Edit `opus-master/*.md` (canonical).
-2. `prepare-manual`: assemble (`workspace/p2-errata/assemble-manual.sh`), gates
-   (`validate-manual-release.py --slug p2-errata --phase prepare`), escape, stage changed files
-   to `outbound/p2-errata/`.
-3. Stephen deploys to the Forge's manual store and builds.
+2. `prepare-manual`: assemble (`workspace/p2-errata/assemble-manual.sh` writes both
+   `P2-Errata.md` and `P2-Errata-Sheet.md`), gates (`validate-manual-release.py --slug
+   p2-errata --phase prepare`, which gates every document in `request.json`), escape both,
+   stage changed files to `outbound/p2-errata/`.
+3. Stephen deploys to the Forge's manual store and builds. One request builds both PDFs,
+   `P2-Errata.pdf` and `P2-Errata-Sheet.pdf`, at the same version.
 4. Before any public release: Parallax review of the whole manual (Stephen), and the study's
    formal credit name settled.

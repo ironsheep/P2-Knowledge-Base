@@ -5,9 +5,8 @@
 ''                with the streamer idle, in a non-Goertzel mode, and
 ''                inside a Goertzel burst
 ''   Manual.....  P2 Errata
-''   Version....  v0.2.0 (2026-09-26)
-''   Appears in.  Erratum E4: GETXACC Clears Only During a Goertzel Burst;
-''                Appendix A: The Test Programs
+''   Version....  v0.3.0 (2026-10-03)
+''   Appears in.  Appendix A: How Each Erratum Was Confirmed
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
 ''   Started....  Sep 2026

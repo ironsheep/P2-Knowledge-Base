@@ -407,6 +407,21 @@ picture primitives, then compare one inline span rendered with and without it at
 
 ---
 
+## English words inside a `{ … }` block comment print as mnemonics (cross-manual, platform) — OPEN (finding, cause not traced)
+
+**Found 2026-10-03** on the P2 Errata v0.3.0 daemon render («#361»). The `burst_sums` routine's
+header is a Spin2/PASM2 block comment, `{ Runs one DDS/Goertzel burst (SINC1 only) and returns
+its exact sums. … CALL #burst_sums with the streamer idle. … }`, and the render prints "and" as
+**AND** (and the routine's own `CALL` stays `CALL`, correctly). The v0.2.0 build did the same
+(pp. 43 and 53), so it predates the reshape. `'` line comments in the same block printed their
+English unchanged ("the summed inputs"). Probable cause: the code-block path of
+`p2kb-platform-mnemonic-bold.lua` ("in code blocks: uppercase all mnemonics") recognises `'`
+comments but not `{ … }` / `{{ … }}` block comments. **Not traced** — confirm in the filter, then
+check the fleet: the Assembly Reference's comment hits seen so far ("(AND pattern)", "C = C AND
+pin 4 state") look intentional, so the measure is block comments specifically.
+
+---
+
 ## A line after an inline code span that ends a line can start with a visible space (cross-manual, platform) — OPEN (finding, cause unknown)
 
 **Found 2026-09-29** verifying the P2 Errata v0.2.0 render (E3 scope update), by eye at 70 dpi.
