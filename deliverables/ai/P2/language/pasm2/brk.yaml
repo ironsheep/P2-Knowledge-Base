@@ -33,7 +33,7 @@ examples:
     \   #DEBUG_WARNING           ' Warning-level break\n        \n' Debugger filters\
     \ based on level\n"
   source: debug_infrastructure
-condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code (Silicon Doc, BRK in the debugging section). So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. pnut-ts compiles a conditional DEBUG() to the SKIP form, but leaves a hand-written conditional BRK as written, without a warning. Hardware-verified on Rev C (EF-085). Documented behaviour, not a silicon erratum."
+condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code (Silicon Doc, BRK in the debugging section). So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. pnut-ts compiles a conditional DEBUG() to the SKIP form, but leaves a hand-written conditional BRK as written, without a warning. Documented behaviour, not a silicon erratum."
 related_instructions:
 - GETBRK: Get breakpoint status/code
 - COGBRK: Trigger breakpoint in another COG

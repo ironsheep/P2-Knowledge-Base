@@ -17,7 +17,7 @@ flags_affected:
   C: No effect
   Z: No effect
 silicon_errata:
-  setq_block_ptrx_delta: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this WMLONG -- the intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT N*4. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: P2 Silicon Doc v35 (KNOWN BUGS, Rev C); step measured for RDLONG/WRLONG, hardware-verified (EF-067) -- WMLONG itself not tested."
+  setq_block_ptrx_delta: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this WMLONG -- the intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT N*4. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: P2 Silicon Doc v35 (KNOWN BUGS, Rev C); step measured for RDLONG/WRLONG -- WMLONG itself not tested."
 documentation_source: original
 documentation_level: enhanced
 related_instructions:

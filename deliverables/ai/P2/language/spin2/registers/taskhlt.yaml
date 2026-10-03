@@ -75,7 +75,7 @@ notes:
   - "Bits are stored in REVERSE order (bit 0 = task 31, bit 31 = task 0)"
   - "A set bit (1) indicates the task is halted"
   - "A clear bit (0) indicates the task is running or stopped"
-  - "Task 0 is the cog's top-level task; task IDs are cog-local (hardware-verified, EF-023)"
+  - "Task 0 is the cog's top-level task; task IDs are cog-local"
   - "Use TASKCHK() for simpler status checking of individual tasks"
   - "Direct TASKHLT access useful for bulk task monitoring"
   - "Writing to TASKHLT can force-halt or force-resume tasks"

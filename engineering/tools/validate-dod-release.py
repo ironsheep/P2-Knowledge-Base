@@ -466,12 +466,28 @@ def _apply_shipped_filter(paths):
     return out
 
 
+_SHIPPED_PAYLOAD = None
+
+
+def _shipped_payload():
+    """(live index entries, {path: shipped payload}) -- computed once per run.
+
+    Two validators read the payload; the shipped filter is one bash pass over
+    every file, so it runs once and both share the result.
+    """
+    global _SHIPPED_PAYLOAD
+    if _SHIPPED_PAYLOAD is None:
+        with open(INDEX_PATH) as f:
+            idx = json.load(f)
+        live = [(key, Path(entry['path'])) for key, entry in idx['files'].items()
+                if Path(entry['path']).exists()]
+        _SHIPPED_PAYLOAD = (live, _apply_shipped_filter([p for _, p in live]))
+    return _SHIPPED_PAYLOAD
+
+
 def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     """Comprehensive audit of metadata filtering."""
     result = ValidationResult("Metadata Filter")
-
-    with open(INDEX_PATH) as f:
-        idx = json.load(f)
 
     total_files = 0
     files_with_changes = 0
@@ -479,9 +495,7 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     unexpected_changes = []
     structural_failures = []
 
-    live = [(key, Path(entry['path'])) for key, entry in idx['files'].items()
-            if Path(entry['path']).exists()]
-    shipped = _apply_shipped_filter([p for _, p in live])
+    live, shipped = _shipped_payload()
 
     for key, path in live:
         total_files += 1
@@ -550,6 +564,95 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     else:
         result.ok("Filtered payload re-parses cleanly with no filter-induced null keys")
 
+    return result
+
+
+INTERNAL_ID_PATTERN = re.compile(r'\b(?:EF|XF|F)-\d{3}\b|\bVO-[A-Z]-\d{3}\b')
+
+
+def validate_internal_ids(verbose: bool = False) -> ValidationResult:
+    """No internal identifier reaches a consumer (F-519, 2026-10-03).
+
+    Ledger ids (EF-/XF-NNN), finding ids (F-NNN) and verification-opportunity ids
+    (VO-X-NNN) are provenance: this repo's gates and auditors resolve them, a
+    consuming agent cannot. They may live in the fields the delivery filter strips
+    (source, sources, ...) and in its provenance comments -- that is where
+    provenance belongs. The bench audit of 2026-10-03 found 179 lines in 99 files
+    carrying them in content that ships, because nothing checked the payload.
+    So this reads the PAYLOAD: the shipped filter's own output, never the source
+    tree, and every hit is printed (a capped list reads like a clean one).
+    """
+    result = ValidationResult("Internal IDs in Shipped Content")
+    live, shipped = _shipped_payload()
+
+    hits = []
+    for _, path in live:
+        for n, line in enumerate(shipped[str(path)].split('\n'), 1):
+            for m in INTERNAL_ID_PATTERN.finditer(line):
+                hits.append(f"{path} (payload line {n}): {m.group(0)} -- {line.strip()[:90]}")
+
+    result.info(f"Files checked (shipped payload): {len(live)}")
+    if hits:
+        result.fail(f"{len(hits)} internal id(s) in shipped content -- move them to a "
+                    f"stripped field (source:) or remove the tag; state the fact only")
+        for h in hits:
+            result.info(f"  {h}")
+    else:
+        result.ok("No EF/XF/F/VO identifier reaches a consumer")
+    return result
+
+
+LEDGERS = [
+    Path("engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"),
+    Path("engineering/ingestion/external-sources/hardware-verification/EXTERNAL-HARDWARE-FINDINGS.md"),
+]
+LEDGER_ENTRY = re.compile(r'^### ((?:EF|XF)-\d{3})\b')
+NOT_A_KB_FACT = re.compile(r'not a KB fact\s*[—-]\s*\S')
+
+
+def validate_ledger_kb_home(verbose: bool = False) -> ValidationResult:
+    """Every bench entry says where its fact lives in the KB (2026-10-03, «#375»).
+
+    The bench audit of 2026-10-03 found that the ledger could not answer "did this
+    reach the KB?" for two-thirds of its entries: only 28 of 84 named a YAML in
+    their Grounds line, and the answer had to be rebuilt by reading the whole KB.
+    So the line directly under each `### EF-NNN` / `### XF-NNN` heading is
+    `*KB:*` followed by the YAML path(s) (in backticks, relative to
+    deliverables/ai/P2/) or `not a KB fact — <reason>`. This fails on an entry
+    without one and on a named path that does not exist. A new bench result is not
+    finished until this line names where it was written.
+    """
+    result = ValidationResult("Bench Ledger -> KB Home")
+    problems, entries = [], 0
+    for ledger in LEDGERS:
+        lines = ledger.read_text(encoding="utf-8").split("\n")
+        for i, line in enumerate(lines):
+            m = LEDGER_ENTRY.match(line)
+            if not m:
+                continue
+            entries += 1
+            where = f"{ledger.name}:{i + 1} {m.group(1)}"
+            nxt = next((l for l in lines[i + 1:] if l.strip()), "")
+            if not nxt.startswith("*KB:*"):
+                problems.append(f"{where}: no `*KB:*` line under the heading")
+                continue
+            body = nxt[len("*KB:*"):].strip()
+            if body.startswith("not a KB fact"):
+                if not NOT_A_KB_FACT.match(body):
+                    problems.append(f"{where}: 'not a KB fact' needs '— <reason>'")
+                continue
+            paths = re.findall(r'`([^`]+\.yaml)`', body)
+            if not paths:
+                problems.append(f"{where}: `*KB:*` names no YAML path")
+            problems += [f"{where}: {p} does not exist" for p in paths
+                         if not (YAML_BASE / p).is_file()]
+    result.info(f"Ledger entries checked: {entries}")
+    if problems:
+        result.fail(f"{len(problems)} ledger entr(y/ies) without a valid KB home")
+        for p in problems:
+            result.info(f"  {p}")
+    else:
+        result.ok("Every bench entry names where its fact lives (or why it is not a KB fact)")
     return result
 
 
@@ -891,6 +994,8 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_key_naming,
         validate_timestamps,
         validate_metadata_filter,
+        validate_internal_ids,
+        validate_ledger_kb_home,
         validate_cross_references,
         validate_constant_fidelity,
         validate_claim_sourcing,

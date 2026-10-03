@@ -28,12 +28,14 @@ disproved the claim) · `NOT-OBSERVED` (could not reproduce; not asserted) ·
 ## DEBUG display windows (Spin2 backtick protocol)
 
 ### EF-001 · Backtick display TEXT must be single-quoted — `CONFIRMED`
+*KB:* `language/spin2/statements/debug.yaml`; `language/spin2/debug-displays/term.yaml`
 Double-quoted text in a backtick named-window feed is **silently dropped** (no compile
 error); single-quoted text renders. *Proof:* `test1-term-string-quoting` — single-quoted
 body displayed in full; both double-quoted bodies were blank. *Date:* 2026-06-17 (real P2,
 Stephen). *Grounds:* F-136; `term.yaml`, `statements/debug.yaml`, `ch03-term.md`.
 
 ### EF-002 · A value-only FORMATTER fed to a named TERM renders as a glyph; use `` `(value) `` for text — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/term.yaml`
 `` `udec_(value) `` into a NAMED TERM renders a single raw-byte glyph (char = the value),
 not decimal text — and a bare formatter between text (`SDEC(x)`) showed nothing. The
 trailing-underscore value-only formatters (`udec_`/`sdec_`/`uhex_`) emit a *numeric data
@@ -46,6 +48,7 @@ v55 `spin2-v55-text.txt` L1090 + the canonical named-TERM example L1299 `` debug
 (`term.yaml`, `ch03-term.md`).
 
 ### EF-003 · A SCOPE channel-def on the CREATE line prevents window creation — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/scope.yaml`
 SCOPE channel/trigger config MUST be a separate message AFTER create. With six windows
 created, only the one whose channel-def (`'SC inline' -1000 1000`) sat on the create line
 failed to appear. LOGIC + SCOPE_XY create-line labels DO work (those are config-phase).
@@ -54,6 +57,7 @@ failed to appear. LOGIC + SCOPE_XY create-line labels DO work (those are config-
 lifecycle**: create → one-time config → looping updates.)
 
 ### EF-004 · An FFT window with NO channel declared renders nothing — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/fft.yaml`
 The FFT window needs at least one channel declared (as a separate post-create message)
 before fed samples render. *Proof:* `test2c-fft-baseline` (the manual's verbatim minimal
 snippet, no channel) = **blank on BOTH PNut-Term-TS and real PNut**; `test2d-fft-with-channel`
@@ -74,6 +78,7 @@ earlier; a clean `test2` run confirms it is fixed in PNut-Term-TS. *Note:* the F
      macOS + Windows). Full analysis: the manual's audit/v55-vs-REF-reconciliation-2026-07-10.md. -->
 
 ### EF-025 · TERM default color pair is `clLime` ($00FF00), NOT the `GREEN` keyword — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/term.yaml`
 The TERM default foreground is `clLime` = `$00FF00`, distinct from what the `GREEN` keyword
 renders. *How proven:* `conflict-testA-term-color` — render the default TERM vs a
 `GREEN`-keyword TERM; sample glyph-core RGB. *Result:* default glyph cores = **$00FF00**;
@@ -82,6 +87,7 @@ read-back Claire. *Grounds:* C-R6 — v55 text "Green" INVERTS; `term.yaml` "Lim
 stand (add reader-note: no LIME keyword, reproduce with `GREEN`). *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testA-term-color.spin2`.
 
 ### EF-026 · FFT negative `LINESIZE` draws vertical FILLED BARS (width grows with |n|), not isolated lines — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/fft.yaml`
 A negative FFT `LINESIZE` renders filled vertical bars whose width scales with `|n|`. *How
 proven:* `conflict-testB-fft-linesize` — render at `+4`, `−4`, `−16`; measure bar geometry.
 *Result:* `pos(+4)` = thin connected polyline; `neg(−4)` = filled bar ~6px; `neg16(−16)` =
@@ -90,6 +96,7 @@ v55 text "isolated vertical lines" INVERTS; `fft.yaml` "filled bars of width |n|
 stand. *Source:* `.../conflict-testB-fft-linesize.spin2`.
 
 ### EF-027 · LOGIC keyword ranges: `LINESIZE` default 3 (→32), `SAMPLES` max 2047, `SPACING` min 1 default 8 — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/logic.yaml`
 *How proven:* `conflict-testC-logic-ranges` — render LOGIC at `LINESIZE` 1/3/7/20/32,
 `SAMPLES` 1024/2047/2048, `SPACING` 1/2/8; use window-width as a pixel ruler + measure trace
 thickness. *Result:* default `LINESIZE` = **3px** (= `ls3`), monotone 1→3→5→11→**17px** at 32,
@@ -112,6 +119,7 @@ no clamp; `SAMPLES` `s2047`=2097px vs `s2048`=2097px **identical** → **2048 cl
 > from the REF. v55's "half-pixels" was right all along.
 
 ### EF-028 · PLOT TEXTSTYLE weight bits are honored but the DEBUG font does NOT visibly distinguish the four weights ($00 renders == $01) — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/plot.yaml`
 The style byte's weight field (bits 0–1) selects nominal font weights — Pascal
 `weight[0..3] = (100,400,700,900)` = thin/normal/bold/heavy (PLOT theory-of-ops) — but the
 DEBUG display font does not render them distinctly: `$00` renders identically to `$01`, and
@@ -124,6 +132,7 @@ weight mapping (per Pascal) is correct as a *selector* but does not render disti
 the manual to state the nominal mapping + this render caveat. *Source:* `.../conflict-testD-textstyle.spin2`.
 
 ### EF-029 · MIDI accepts a 24-bit `$RRGGBB` color (rgb24), not named-only — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/midi.yaml`
 *How proven:* `conflict-testE-midi-color` — render MIDI keys colored via rgb24 (`$0000FF`,
 `$00FF00`) vs the `GREEN` keyword; sample key colors. *Result:* `rgbBLUE($0000FF)`=blue,
 `rgbGREEN($00FF00)`=green **== `keyword`(GREEN)**; a blue key cannot be a default/green-fluke →
@@ -131,6 +140,7 @@ rgb24 definitively parsed. *Date/rig:* 2026-07-10, real P2 (Stephen). *Grounds:*
 "force named-only" finding INVERTS; the manual's `$RRGGBB` example stands. *Source:* `.../conflict-testE-midi-color.spin2`.
 
 ### EF-030 · SCOPE default `SIZE` width is 256 (not 255) — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/scope.yaml`
 *How proven:* `conflict-testF-scope-size` — render SCOPE at `SIZE` 255/256/512 + default;
 measure window width. *Result:* `s255`=269px vs `s256`=270px (**exactly 1px apart**),
 `s512`=526px (+256); `s_default`=**270 = the s256 rail**. *Date/rig:* 2026-07-10, real P2
@@ -138,6 +148,7 @@ measure window width. *Result:* `s255`=269px vs `s256`=270px (**exactly 1px apar
 *Source:* `.../conflict-testF-scope-size.spin2`.
 
 ### EF-031 · PLOT TEXTSTYLE justification is a per-axis HYBRID — horiz %10=right/%11=left, vert %10=top/%11=bottom — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/plot.yaml`
 The value→direction mapping differs by axis. *How proven:* `conflict-testI-textstyle-justify`
 — render a `$00` center-align control plus `$20`/`$30` (horiz) and `$80`/`$C0` (vert) against a
 guide line; centroid analysis of ink vs the guide. *Result:* `$00` control straddles the guide
@@ -166,6 +177,7 @@ centroid PIL (Claire). *Grounds:* F-205b — horiz **v55 text correct** (REF §4
 > The test resolved anyway because its rows are separable by position. Fixed 2026-07-14.)*
 
 ### EF-032 · PLOT POLAR: θ=0 points EAST (+x); increasing θ is counter-clockwise; no flip — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/plot.yaml`
 *How proven:* `conflict-testJ-polar-theta0` — render a POLAR wheel with four colored spokes at
 0°/90°/180°/270°; sample color at ρ≈150 around the origin (200,200). *Result:* **East=RED(0°)**
 (#BF0707), **North/up=GREEN(90°)** (#07BF07), West=BLUE(180°), South=YELLOW(270°) → θ=0 East,
@@ -178,6 +190,7 @@ was undocumented in manual + `plot.yaml`). *Source:* `.../conflict-testJ-polar-t
 ## PASM2 core & hub (silicon — 2026-07 conflict-test suite)
 
 ### EF-033 · AUGS/AUGD augment SURVIVES intervening instructions — "must immediately precede" is FALSE — `CONFIRMED-FALSE` (of the "immediately precede" claim)
+*KB:* `language/pasm2/augs.yaml`
 The 23-bit augment prefix is consumed by the next instruction with a `#` immediate regardless
 of intervening non-augmenting instructions. *How proven:* `conflict-testG-aug-intervening` —
 compare a register's value after an augmented immediate reached via four intervening paths (M1
@@ -188,6 +201,7 @@ mismatch was rig-caught; relative rails unambiguous on re-run.)* *Grounds:* C-56
 "augment must immediately precede" WRONG. Full write-up: catalog #644. *Source:* `.../conflict-testG-aug-intervening.spin2`.
 
 ### EF-034 · Hub egg-beater: scalar hub access ~15–16 clk each vs streaming ~2 clk/long (~7–8×) — `CONFIRMED`
+*KB:* `architecture/hub.yaml`; `language/pasm2/concepts/setq_block_ops.yaml`
 *How proven:* `conflict-testH-eggbeater-timing` — cycle-count scalar `RDLONG` (×1, ×8) vs a
 `SETQ`-block burst and a 16-long FIFO stream, using a base-2-clk NOP loop to resolve single
 clocks. *Result:* `scalar1`=**15 clk**, `scalar8`=**16 clk/read**; `setq8`=**2 clk/long**,
@@ -196,6 +210,7 @@ RDLONG blocks ~9–16 clk) stands; egg-beater rotor confirmed. Full write-up: ca
 *Source:* `.../conflict-testH-eggbeater-timing.spin2`.
 
 ### EF-035 · Two GETCTs bracketing a sequence add a fixed 2-clock measurement overhead (not 4) — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`
 The cost of measuring elapsed cycles with a GETCT pair is **2 clocks** (one GETCT's worth), not
 4. *How proven:* `getct-overhead-char` — cog-resident (2-clk-exact) PASM: a back-to-back GETCT
 pair (`d_ctrl`) plus 10-NOP (20-clk) and 20-NOP (40-clk) bracketed sequences (`d_10`/`d_20`).
@@ -214,6 +229,7 @@ the manual states the result, not a "samples-at-start" rationale. *Source:*
 ## Smart pins
 
 ### EF-010 · %00101 (transition) Y=0 leaves the pin IDLE — `CONFIRMED-FALSE` (of the YAML claim)
+*KB:* `architecture/smart-pins/smart-pin-00101-transition-output.yaml`
 Writing Y=0 in transition mode does NOT generate continuous transitions (the YAML claimed
 it did) — the pin holds idle. Continuous square-wave generation is the NCO modes
 (%00110/%00111). *Proof:* `test3-smartpin-00101-y0-continuous` over wired loopback P0→P2 /
@@ -222,6 +238,7 @@ P1→P3 — control pin at Y=2000 toggled then stopped; the Y=0 pin never toggle
 `continuous_mode` block deleted).
 
 ### EF-011 · Universal smart-pin init order: enable BEFORE WYPIN — `CONFIRMED` (ratified)
+*KB:* `architecture/smart-pins/smart-pin-00101-transition-output.yaml`; `language/pasm2/wrpin.yaml`; `language/spin2/methods/pinstart.yaml`
 The teachable order is **Reset (PINCLEAR/DIRL) → Setup (WRPIN/WXPIN) → Enable (PINHIGH/DIRH)
 → Operate (WYPIN)**. It is **REQUIRED** for trigger/serial modes (Y is held 0 during reset,
 so WYPIN-before-enable never triggers) and **SAFE** for value modes (order-independent).
@@ -233,23 +250,28 @@ so WYPIN-before-enable never triggers) and **SAFE** for value modes (order-indep
 set-wide reorder across the smart-pin YAMLs.
 
 ### EF-012 · WRPIN #0 resets a RUNNING smart pin with NO DIR cycle — `CONFIRMED` (Titus right)
+*KB:* `language/pasm2/wrpin.yaml`
 *Proof:* `batch1` RA-06 — `running=200, after=0`. *Date:* 2026-06-17. *Grounds:* IOSP ch4;
 Titus cross-audit RA-06.
 
 ### EF-013 · NCO with Y=0 produces NO output (static) — `CONFIRMED`
+*KB:* `architecture/smart-pins/smart-pin-00110-nco-frequency.yaml`
 *Proof:* `batch1` RA-12 — `Y=0 events=0`, control (Y>0) `events=200`. Corroborates EF-010
 in a second mode. *Date:* 2026-06-17. *Grounds:* Titus cross-audit RA-12.
 
 ### EF-014 · DAC-noise (%00001) X=0 → sample period = 65 534 clocks (≈65536) — `CONFIRMED`
+*KB:* `architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml`
 *Proof:* `batch1` RA-17 — measured `period = 65_534`. *Date:* 2026-06-17. *Grounds:* IOSP
 ch18 §18.3; Titus cross-audit RA-17. (The "reduces switching power" half remains for Chip.)
 
 ### EF-015 · RDPIN acknowledge AUTO-RESTARTS an event-timing (%10010) measurement — `CONFIRMED`
+*KB:* `architecture/smart-pins/smart-pin-10010-time-x-a-events.yaml`
 *Proof:* `test50-eventtiming-rdpin-restart` — two successive measurements both arrived
 (`ok1=1 Z1=99_949_010`, `ok2=1 Z2=99_999_239`). *Date:* 2026-06-17. *Grounds:* Titus
 cross-audit RA-24; IOSP ch13.
 
 ### EF-016 · async-TX first-byte glitch + $FF-preclear — `NOT-OBSERVED` (real wire)
+*KB:* not a KB fact — NOT-OBSERVED asserts nothing; the KB does not assert the gotcha
 The widely-repeated "first async-TX byte is corrupted unless you send a $FF settling frame"
 gotcha did NOT reproduce. Over a **real wired loopback (TX P0 → RX P2)**, the cold first
 byte arrived clean with no settle and no preclear, for both `$A5` and `$01`. (Raw 32-bit
@@ -261,6 +283,7 @@ internal-loopback `test51` (which had also accidentally applied the fix via the 
 init order).
 
 ### EF-017 · Concurrent single-signal counter cells (%10101/%10110/%10111) need BOTH A and B routed — `CONFIRMED`
+*KB:* `architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml`; `architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml`
 The period-aligned X-clocks counter modes measure A-rise → B-rise (Y=%00). When several cells
 watch one signal pin via relative-input routing, routing the **A-input only** (`P_MINUS*_A`)
 **hangs**: each neighbour's B-input stays on its own idle pin, which never rises, so the window
@@ -276,6 +299,7 @@ with the Silicon Doc ("B can be tied to the A pin for single-pin measurement"), 
 `smart-pin-10110/10111` YAML + IOSP ch15 §15 prose patched to route both inputs.
 
 ### EF-018 · Signed ADDS/SUBS/CMPS C-flag = TRUE SIGN (overflow-corrected), not bit-31 — `CONFIRMED`
+*KB:* `language/pasm2/adds.yaml`; `language/pasm2/subs.yaml`; `language/pasm2/cmps.yaml`
 On signed overflow the stored 32-bit result's bit 31 disagrees with the full-precision sign; silicon
 sets C to the TRUE overflow-corrected sign — NOT bit 31, and NOT a signed-overflow flag. *Proof:*
 `test71-signed-cflag-truesign` — six deliberately-overflowing cases, measured C = `0,1,0,1,1,0`, each
@@ -284,6 +308,7 @@ bit31=1); ADDS $80000000+$FFFFFFFF → C=1 (result $7FFFFFFF, bit31=0); SUBS/CMP
 2026-07-04. *Grounds:* upgrades F-165 (adds/subs/cmps "true sign" wording) from documentary to empirical.
 
 ### EF-019 · Reordered smart-pin init preserves NCO phase-lock and sync-serial gapless streaming — `CONFIRMED`
+*KB:* `architecture/smart-pins/smart-pin-00110-nco-frequency.yaml`; `architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml`
 The universal-order reorder (enable BEFORE WYPIN) does not disturb (a) a phase-locked NCO pair or
 (b) sync-serial continuous double-buffering. *Proof (a):* `test72-nco-phaselock` — two NCOs set up with
 the reordered init, 90° loaded via WXPIN, measured with mode %10011 through input routing (test70/F-192
@@ -296,6 +321,7 @@ special cases were flagged for a hardware look). *Note:* the phase read 0.79 T v
 fixed ~4% measurement/edge-definition offset, NOT drift (the zero spread is the phase-lock evidence).
 
 ### EF-020 · SETQ+WAITSEx = single-instruction event-OR-timeout; no-SETQ WCZ is a free flag-clear — `CONFIRMED`
+*KB:* `language/pasm2/waitse1.yaml`
 A `SETQ` (future CT target) immediately before an event-wait makes that ONE stalling instruction release on whichever
 comes first, reporting which via `WC`: event first → C=0, timeout first → C=1. With **no** preceding SETQ, no timer is
 armed, so the event is always "first" and `WAITSEx WCZ` clears **both** C and Z (a legitimate free-flag-clear idiom).
@@ -316,6 +342,7 @@ identically to both arms, and refuses to report PASS unless the broken arm actua
 v1.55.0 `-d`, real P2 silicon, RAM download, `_clkfreq = 200_000_000`, 2026-07-13.*
 
 ### EF-036 · Ring buffer: publishing the index BEFORE the record's fields tears every time — `CONFIRMED`
+*KB:* `application-notes/p2an007-data-structures-new-facilities.yaml`
 In a single-producer/single-consumer hub ring of multi-field records, advancing the publish index
 **after** writing a slot's fields is what prevents a torn read; advancing it **first** exposes the slot
 while it is still being written. *How proven:* `vt1-ring-buffer-integrity.spin2` — two arms, identical
@@ -327,6 +354,7 @@ Reproduced identically on two runs. *Verdict:* CONFIRMED 2026-07-13. *Grounds:* 
 stylistic preference but the entire safety property.
 
 ### EF-037 · A record packed into ONE long is NOT atomic unless it is published in ONE store — `CONFIRMED`
+*KB:* `application-notes/p2an007-data-structures-new-facilities.yaml`
 **The counter-intuitive one.** Spin2 v54 member bitfields let a whole record (opcode + argument +
 sequence) occupy a single LONG. Fitting in one long does **not** make the record atomic: each bitfield
 write is a **read-modify-write of the backing long**, so filling the *shared* record field-by-field is
@@ -342,6 +370,7 @@ this is the fact the recipe is built around, and it inverts the natural assumpti
 one-long record is inherently safe to publish.
 
 ### EF-038 · Latest-wins mailbox: the seq/ack handshake is LOAD-BEARING — removing it tears 100% for any worker that dispatches between reads — `CONFIRMED` (F-213)
+*KB:* `application-notes/p2an007-data-structures-new-facilities.yaml`; `language/spin2/patterns/implementation/spin2_latest_wins_mailbox.yaml`; `architecture/decomposition/data-flow-contracts.yaml`
 A latest-wins mailbox whose worker reads `opcode`, `arg0`, `arg1` as three separate reads of shared
 memory is protected **only** by the seq/ack handshake, which is what stops the writer overwriting the
 command mid-read. *How proven:* `vt2-mailbox-publish-order.spin2` exp-2 — a **slow worker** (25µs
@@ -358,6 +387,7 @@ alternatives (pack the payload into one long per EF-037, or re-check the sequenc
 discard a straddling copy).
 
 ### EF-039 · One hardware lock serializes a concurrent enqueue read-modify-write; without it two writers collide — `CONFIRMED`
+*KB:* `application-notes/p2an007-data-structures-new-facilities.yaml`
 When two cogs enqueue to one queue, "advance the head index" is a read-modify-write they can interleave:
 both read the same head, both write the same slot, and one record is lost while the head advances only
 once. Bracketing the enqueue with a single P2 hardware lock (`LOCKTRY`/`LOCKREL`) makes it exclusive.
@@ -372,6 +402,7 @@ decided at `cogspin` time rather than sampled. The 10µs window makes the overla
 `engineering/operations/lessons-learned/two-cog-race-rigs-must-be-structural.md`.
 
 ### EF-040 · STRUCT members pack with no padding — OFFSETOF/SIZEOF confirmed against the published layout numbers — `CONFIRMED`
+*KB:* `language/spin2/methods/offsetof.yaml`
 Spin2 packs STRUCT members with no padding or alignment, and `OFFSETOF` (v53) / `SIZEOF` return exactly
 that layout. *How proven:* `vt5-offsets-and-sizes.spin2` asserts every layout number P2AN007 prints to a
 reader, then writes the header through raw addressing (`WORD[@buf + OFFSETOF(hdr_t.length)] := …`) and
@@ -384,6 +415,7 @@ Verify text the note prints is correct as published.
 
 
 ### EF-041 · `LINESIZE` and `DOTSIZE` units are decided by the shift constant: `shl 6` = HALF-pixels, `shl 7` = WHOLE pixels — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/scope.yaml`; `language/spin2/debug-displays/scope_xy.yaml`
 The rendered size of a `LINESIZE`/`DOTSIZE` value is **not** one rule across the windows — it follows the
 call site's shift, exactly as the v55 text says. *How proven:* `conflict-testK-dotsize-render` (isolated dots,
 `LINESIZE 0`, constant feed) + `conflict-testL-scope-linesize` (flat trace, `DOTSIZE 0`); measured on the
@@ -407,6 +439,7 @@ Pascal's shift geometry + both renders). *Grounds:* supersedes EF-027's unit con
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testK-dotsize-render.spin2`, `campaigns/2026-07-debug-conflict-tests/conflict-testL-scope-linesize.spin2`.
 
 ### EF-042 · BITMAP `SPARSE` draws ROUND DOTS on a SOLID BACKGROUND FILL, and the `DOTSIZE >= 4` gate is REAL — `CONFIRMED (PNut + pnut-term-ts)`
+*KB:* `language/spin2/debug-displays/bitmap.yaml`
 *How proven:* `conflict-testM-bitmap-sparse` — a 6×4 canvas of pure-green `$00FF00` pixels at `DOTSIZE 12`, with
 `SPARSE $FF0000`, captured via `SAVE WINDOW` (a plain BITMAP `SAVE` writes the bitmap **1× un-DOTSIZEd** and would
 have shown nothing). Rail: the same window with **no** `SPARSE` contains **no red at all**. *Result:* the sparse
@@ -462,6 +495,7 @@ counted.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testM-bitmap-sparse.spin2`, `campaigns/2026-07-debug-conflict-tests/conflict-testP-sparse-gate.spin2`.
 
 ### EF-043 · No-POS window placement is TOOL-DEPENDENT — pnut-term-ts AUTO-ARRANGES (no overlap); PNut has no such feature — `CONFIRMED (pnut-term-ts)`
+*KB:* `language/spin2/debug-displays/scope_xy.yaml` (and the POS entry of every debug-displays window)
 *How proven:* `conflict-testN-pos-origin-overlap` — three PLOT windows created with **no `POS`**, in decreasing size.
 The instrument turned out to be the **log, not the screenshot**: pnut-term-ts emits a `WINDOW_PLACED` line per
 auto-placed window. *Result:* `Pa` (400×300) → `POS 1076,60`; `Pb` (300×220) → `POS 622,60`; `Pc` (200×150) →
@@ -480,6 +514,7 @@ behaviour recorded as P2 fact**, a KB defect. (2) The manual must **not** assert
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testN-pos-origin-overlap.spin2`.
 
 ### EF-044 · SCOPE_XY `SIZE` is a RADIUS: the canvas is 2×SIZE, and the default is radius 128 (a 256×256 canvas) — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/scope_xy.yaml`
 *How proven:* read straight off the pnut-term-ts placement log in `conflict-testO`. *Result:* `SCOPE_XY Good SIZE 150`
 → window **340×340** (canvas 300×300 = 2×150, + 40px margins); `SCOPE_XY Bad` with **no** `SIZE` → window **296×296**
 (canvas **256×256**, i.e. an implied radius of **128**). **PNut-CONFIRMED (2026-07-14):** the `SIZE`-is-a-radius half is independently visible in the PNut captures —
@@ -492,6 +527,7 @@ but note the provenance.)*
 2026-07-14 REF rebuild had already fixed. This is the independent confirmation. *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testO-scopexy-parser-hang.spin2` (log).
 
 ### EF-050 · BITMAP `SET` out-of-range is NOT clamped — the manual was RIGHT and the REF is WRONG — `CONFIRMED (PNut)`
+*KB:* `language/spin2/debug-displays/bitmap.yaml`
 **This one PREVENTED a regression: we were about to reverse correct shipped text.** *How proven:* `conflict-testQ` Q6 —
 an 8×8 BITMAP cleared to black, then `` `SET 999 999 `` followed by a single **white** pixel. *Result:* the saved canvas
 is **100 % BLACK — no white pixel anywhere.** A clamped `SET` would have put it at **(7,7)**. It is not there.
@@ -506,6 +542,7 @@ pixels, then `SET 999 999`, then a white pixel) would separate them.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
 
 ### EF-051 · A keyword placed after `SAVE` is CONSUMED AND DISCARDED — `` `Win SAVE CLEAR `` writes no file AND loses the CLEAR — `CONFIRMED (PNut)`
+*KB:* `language/spin2/debug-displays/bitmap.yaml`
 *How proven:* `conflict-testQ` Q2 — two identical green BITMAPs. One is sent `` `SAVE CLEAR ``; the other (the **rail**)
 is sent a plain `` `CLEAR ``. *Result:* the `SAVE CLEAR` window is **100 % GREEN** (the `CLEAR` never ran) and **no file
 was written**; the rail window is **100 % BLACK** (a plain `CLEAR` works perfectly). The rail discriminates, so the
@@ -515,6 +552,7 @@ and the command you thought you sent.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
 
 ### EF-052 · A runtime `` `RATE -1 `` FREEZES BITMAP auto-refresh — and v55's own Feeding table advertises it as legal — `CONFIRMED (PNut)`
+*KB:* `language/spin2/debug-displays/bitmap.yaml`
 *How proven:* `conflict-testQ` Q4/Q5 — two identical green BITMAPs are each fed a full canvas of **red**. One is first
 sent `` `RATE -1 `` (the test); the other `` `RATE 6 `` (the **rail**). *Result:* the `RATE -1` window stays **100 %
 GREEN — auto-refresh froze**; the rail window goes **94 % RED — still refreshing**. The rail proves the feed was alive,
@@ -527,6 +565,7 @@ meaningful **only in the create message**. At runtime it silently kills the disp
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
 
 ### EF-046 · PNut v55 `SAVE WINDOW` captures the WRONG RECTANGLE — truncated, offset, sometimes the neighbouring window — `CONFIRMED (PNut)` — TOOL BUG
+*KB:* not a KB fact — a PNut v55 tool defect; the KB records intent, not per-version tool bugs (bitmap.yaml steers to plain SAVE)
 `SAVE WINDOW 'name'` is meant to write a `.bmp` of the **entire window**. On PNut v55 the capture rectangle is both
 **too small** and **mis-positioned**, and it fails **silently** — the file is a valid `.bmp` of plausible size, so
 nothing signals that the capture is bad. *How proven:* `conflict-testQ-doc-claims-battery` + `conflict-testP-sparse-gate`
@@ -563,6 +602,7 @@ save only even when overlap"* — and he was right, for a better reason than eit
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`, `…/conflict-testP-sparse-gate.spin2`.
 
 ### EF-047 · `SAVE` writes the FRONT buffer — under `UPDATE` mode you capture the STALE previous frame — `CONFIRMED (PNut)`
+*KB:* `language/spin2/debug-displays/bitmap.yaml`
 *How proven:* `conflict-testQ` Q3 — a BITMAP created with `UPDATE` (buffered). Fill **RED** → `` `UPDATE `` (red is now
 the front buffer) → fill **GREEN** but do **not** update → `` `SAVE ``. *Result:* the saved file is **100% RED**. The
 live green buffer was not captured. *Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55. *Grounds:* confirms the REF's
@@ -571,6 +611,7 @@ will silently save the previous frame. This is live in ch04, ch05 and ch15 — a
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
 
 ### EF-048 · PLOT `OPACITY 256` WRAPS to 0 — fully TRANSPARENT, the exact inverse of "fully opaque" — `CONFIRMED (PNut)`
+*KB:* `language/spin2/debug-displays/plot.yaml`
 *How proven:* `conflict-testQ` Q7 — two dots on a black PLOT: left at `OPACITY 255` (the rail), right at `OPACITY 256`.
 *Result:* the capture shows **one dot**. The `OPACITY 255` dot is visible; the `OPACITY 256` dot is **absent**. The value
 is assigned into a byte with range-checking off, so 256 → **0**. *Date/rig:* 2026-07-14, real P2 (Stephen), PNut v55.
@@ -579,6 +620,7 @@ they draw afterwards disappears**. The failure looks like "my drawing commands s
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
 
 ### EF-049 · `CLOSE` is UPDATE-FIRST, CLOSE-SECOND — and a bare `SAVE` (no filename) writes nothing — `CONFIRMED (PNut)`
+*KB:* `language/spin2/debug-displays/scope_xy.yaml`; `language/spin2/debug-displays/bitmap.yaml`
 *How proven:* `conflict-testQ` Q8 + Q1. **Q8:** `` `q8 SAVE 'q8_saved' CLOSE `` — a single message carrying both.
 *Result:* **`q8_saved.bmp` was written AND the window closed** (Stephen, visually). So the rest of the message executes
 before the close — the `` `Win SAVE 'shot' CLOSE `` idiom is real and usable. **Q1:** a bare `` `SAVE `` with no
@@ -589,6 +631,7 @@ and nothing complains.
 *Source:* `campaigns/2026-07-debug-conflict-tests/conflict-testQ-doc-claims-battery.spin2`.
 
 ### EF-045 · A bare number in a SCOPE_XY create message HANGS PNut — and pnut-term-ts does NOT share the defect — `CONFIRMED (PNut) / REFUTED (pnut-term-ts)` — a TOOL DIVERGENCE
+*KB:* not a KB fact — a PNut v55 tool defect; the KB records intent, not per-version tool bugs
 The suspected infinite loop (`SCOPE_XY_Configure`'s `while not NextEnd do` matching neither `NextKey` nor `NextStr`,
 so `ptr` never advances) **does not occur in pnut-term-ts**. *How proven:* `conflict-testO-scopexy-parser-hang` — a TERM
 **heartbeat** is the instrument, distinguishing "the tool hung" from "the window just didn't open". *Result:* the
@@ -642,6 +685,7 @@ mechanism, blast radius, one-line fix) — for Stephen to route to Parallax/Chip
      campaign is deliberately NOT carried here; this ledger holds only what our board showed us. -->
 
 ### EF-053 · Hub access inside a CORDIC fill or drain loop silently loses results; register-only loops stay clean to FILL=7 — `CONFIRMED`
+*KB:* `architecture/cordic.yaml`; `application-notes/p2an002-cordic-for-real-work.yaml`
 Deep CORDIC pipelining works. What breaks it is **hub I/O inside the fill or drain loop** — and it
 fails *silently*: the reader gets wrong numbers, not missing ones. *How proven:*
 `test-f263-cordic-pipeline-depth` — four arms issuing `QMUL` and retrieving with `GETQX`, differing
@@ -661,6 +705,7 @@ hub access", and do not prescribe a clock-level discipline we did not measure. *
 and Assembly `chapter-05-hardware.md:~100-126`. *Source:* `campaigns/2026-08-manual-corrections/tests/test-f263-cordic-pipeline-depth.spin2`.
 
 ### EF-054 · A cog DAC drives with `TT=%01` alone; `P_OE`, `P_CHANNEL` and `P_TT_01` are ONE bit, so composing them with `+` breaks the mode — `CONFIRMED`
+*KB:* `architecture/smart_pins.yaml`; `language/spin2/methods/wrpin.yaml`
 The Streamer Guide's cog-DAC recipe is **correct** — `TT=%01` drives, and `OUT` is irrelevant to it.
 The real defect the sweep exposed is arithmetic: `P_OE`, `P_CHANNEL` and `P_TT_01` are three names for
 the **same** bit-field value, so `P_CHANNEL + P_OE` carries `%01 + %01` into `%10` = `P_BITDAC`, a
@@ -676,6 +721,7 @@ without). Class sweep: 281 doc config lines use `|`, exactly **2** use `+`, both
 *Source:* `campaigns/2026-08-manual-corrections/tests/test-f260-goertzel.spin2`.
 
 ### EF-055 · In `DAC_MODE` with the smart pin off, `TT=%01` switches the DAC's SOURCE — adding `P_OE`/`P_CHANNEL` to a level-driven DAC kills its output — `CONFIRMED`
+*KB:* `language/spin2/methods/wrpin.yaml`; `architecture/smart_pins.yaml`
 `%TT` is **context-dependent**, keyed on whether the smart pin is on and whether `DAC_MODE`
 (`M[12:10]=%101`) is active. With the smart pin off in `DAC_MODE`, `TT=%01` does not "enable output" —
 it selects a **cog DAC channel** as the source instead of the pin's own level field. *How proven:* a
@@ -689,6 +735,7 @@ the highest-severity class we carry: guidance that, applied in a legitimate cont
 code** — F-245's "add `P_OE`" remedy must never be applied to a cog-DAC configuration.
 
 ### EF-056 · DDS/Goertzel works and is sharply frequency-selective; with a discrete `XINIT`/`WAITXFI`/`GETXACC` sequence the reads are RUNNING TOTALS — `CONFIRMED`
+*KB:* `language/pasm2/getxacc.yaml`; `architecture/streamer/dds-goertzel.yaml`
 The mode detects, and it always did. *How proven:* an independent tone — smart-pin NCO
 (`P_NCO_FREQ | P_OE`) on P0 producing a real 1 MHz square wave from cog 0, sharing no NCO with the
 detector — read through the jumper on P1 by DDS/Goertzel in a launched cog. **Every row measures its
@@ -708,6 +755,7 @@ accounts for the difference is **unknown**. *Grounds:* F-260, F-265 (the ADC pin
 `P_ADC_x`, smart-pin mode `%00000`, no DIR). *Source:* `.../tests/test-f260-goertzel-input.spin2`.
 
 ### EF-057 · `DEBUG_COGS` defaults to ALL EIGHT cogs, and the debug interrupt corrupts streamer measurements — `CONFIRMED`
+*KB:* `architecture/streamer/overview.yaml`; `language/spin2/debug-commands/debug-strategy-guide.yaml`
 Debugging with `-d` — the normal way to debug — places the P2's **highest-priority interrupt inside
 the cog running your streamer**, by default. *How proven:* not a question we set out to ask; our probe
 crashed into the single-step debugger's memory dump. The `CogN INIT …` lines in every log were the
@@ -723,6 +771,7 @@ hardware sequencer measured under the debugger may be perturbed by it — restri
 reporting cog when measuring.
 
 ### EF-058 · `_RET_ CALL` never returns — it is a plain `CALL`, and execution falls out of the routine — `CONFIRMED (corroborates documented behaviour — see F-273)`
+*KB:* `language/pasm2/concepts/conditional_execution.yaml`; `language/pasm2/call.yaml`; `language/pasm2/ret.yaml`
 > **REFRAMED 2026-08-16 (F-273). This is NOT a hardware discovery.** Parallax documents the rule in
 > two independent primary sources: `_RET_` executes the instruction and returns **only if that
 > instruction did not branch** (*P2 Assembly Language Manual* 2022-11-01 condition table p.68; *P2
@@ -763,6 +812,7 @@ executes spuriously, which a reader would hunt in their VM logic for days. *Sour
 `.../tests/test-f256-retcall-xbyte.spin2`.
 
 ### EF-059 · `adc_pin<<17` in `X_1ADC8_0P_1DAC8_WFBYTE` changes the streamer MODE — the byte-count signature proves it — `CONFIRMED`
+*KB:* `architecture/streamer/modes-reference.yaml`; `architecture/streamer/pin-selection.yaml`
 That mode's template is `%1111_DDDD_W000_0010`: `D[22:20]` are fixed zeros, **there is no pin field**,
 and the ADC channel is selected by `S[1:0]`. So `adc_pin<<17` lands inside `D[19:16]` and the `add`
 carries, silently selecting a *different* streamer mode. *How proven:* nothing analog required — the
@@ -780,6 +830,7 @@ the channel at all. *The defect is invisible in testing:* the capture "works", t
 the data is simply the wrong shape.
 
 ### EF-060 · Inside a Spin2 object, `##hubsymbol` in a `DAT` block resolves against `$400`, not the object's load address — `CONFIRMED`
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
 A PASM fragment that is correct in a standalone file reads **interpreter memory** when pasted into a
 Spin2 object. *How proven:* surfaced while getting the EF-058 rig working — compare the address Spin2
 reports for a `DAT` symbol against the one PASM sees via `##`. *Result:* `@disp` = **`$1AF9`** from
@@ -793,6 +844,7 @@ in from Spin2 with `@`, or use PTRA.
 ---
 
 ### EF-062 · Streamer digital pin output through `X_PINS_ON` **requires `DIRH`** — the streamer feeds the pin's output STATE, not its output ENABLE — `CONFIRMED`
+*KB:* `architecture/streamer/pin-selection.yaml`; `architecture/streamer/pin-capture.yaml`
 `X_PINS_ON` (`D[23]=1`) enables the streamer's contribution to the pin's **OUT** side; the pin still
 does not drive until **DIR** is high. *How proven:* one streamer command, run twice, differing only
 in whether the pin was enabled first — and the DIR-high leg started from `OUT`=0, so a pass proves
@@ -818,6 +870,7 @@ was free to reverse F-308 and did not. *Source:*
 `campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2`.
 
 ### EF-063 · A **streamer-fed** DAC needs `%TT = %01` (`P_CHANNEL`); at `%TT = %00` the pin ignores the streamer and holds its own level field — `CONFIRMED`
+*KB:* `architecture/streamer/dac-routing.yaml`; `architecture/streamer/dds-goertzel.yaml`
 Closes the one arm EF-054 and EF-055 did not cover: both are graded `[M-pre — streamer-free]`, having
 swept `%TT` with the streamer uninvolved. *How proven:* a DAC on P0 jumpered to a smart-pin ADC on
 P1, driven full-scale then zero-scale, reading the HI−LO spread; the same routing
@@ -839,6 +892,7 @@ the empirical seal, not a change of answer. *Source:*
 `campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2`.
 
 ### EF-064 · Streamer pin placement is **mode-dependent**, and the `DIRx/DRVx` pin-span form works as documented — `CONFIRMED`
+*KB:* `architecture/streamer/pin-selection.yaml`
 Two facts one probe settled. (a) A **1-pin** mode reaches **any** pin: `X_IMM_32X1_1DAC1` at pin 20
 drove P20 and nothing else, so its pin field spans `D[22:17]`. An **8-pin** mode takes a **window**:
 `X_IMM_4X8_1DAC8` at base 16 drove exactly P16–P23, its group coming from `D[22:20]` in 8-pin steps,
@@ -859,6 +913,7 @@ idiom: they never disagreed, the field is mode-dependent. *Source:*
 `campaigns/2026-08-manual-corrections/tests/test-f308-cog-and-pingroup.spin2`.
 
 ### EF-065 · Composing an **unaligned** pin base with `+` in a multi-pin streamer mode silently selects a **different mode at a different pin group** — `CONFIRMED`
+*KB:* `architecture/streamer/pin-selection.yaml`; `architecture/streamer/modes-reference.yaml`
 `X_IMM_4X8_1DAC8 + X_PINS_ON + 20<<17` assembles to `$60B6_FFFF`, not the intended
 `$60AE_FFFF`: `20<<17` sets bit 19, `D[19:16]` already holds the mode template `%1110`, and the `+`
 **carries** — leaving `D[19:16] = %0110` (`X_IMM_4X8_4DAC2`, a different mode) and `D[22:20] = %011`
@@ -896,6 +951,7 @@ Each is N=1 real silicon; all five are structural yes/no behaviours, so one part
 Campaign: `campaigns/2026-09-p2-errata-predictions/`.
 
 ### EF-066 · An `ALTx` with an immediate `#S` between `AUGS` and its target is itself augmented, and the target still gets the augment — `CONFIRMED`
+*KB:* `language/pasm2/augs.yaml`
 The pending `AUGS` value fills bits 31:9 of the intervening `ALTx`'s own `S` and is **not** cancelled,
 so the intended target receives it as well. **Where the damage lands:** an `ALTx` takes its base from
 `S[8:0]` and its auto-increment from `S[17:9]`. The augment leaves `S[8:0]` alone, so the substituted
@@ -914,6 +970,7 @@ variant was tested for this half. All 3 passes bit-identical. *Grounds:* `pasm2/
 the `AUGD` half of its `scope_note`. *Source:* `…/tests/test-o1-altx-imm-s-steals-augs.spin2`.
 
 ### EF-067 · `SETQ`/`SETQ2` then `ALTD` then a block `RDLONG`/`WRLONG` with a `PTRx` update: the whole block moves, but `PTRx` takes the ordinary expression's step — `CONFIRMED`
+*KB:* `language/pasm2/setq.yaml`; `language/pasm2/concepts/setq_block_ops.yaml`
 The block transfer is unaffected — every long lands at the `ALTD`-redirected destination — but the
 pointer update ignores the block size and applies the **plain `PTRx` expression's own step**. That is
 +4 for `ptra++`, but **+12 for `ptra++[3]`**: the step is not "one long", it is whatever the
@@ -938,6 +995,7 @@ case), `concepts/setq_block_ops.yaml`, `pasm2/augs.yaml`; the Assembly Reference
 *Source:* `…/tests/test-o17-setq-altd-block-ptr-delta.spin2`.
 
 ### EF-068 · `GETCT WC` in a group of four cogs that had no running cog when the low `CT` long wrapped returns a **stale upper long** — `CONFIRMED` (new; not in any vendor source)
+*KB:* `language/pasm2/getct.yaml`
 Cogs 0–3 and 4–7 each read their own copy of the 64-bit counter. A group's copy of the **upper** long
 advances only at a wrap of the lower long **while at least one cog of that group is running**; the
 lower long is always current. A cog started in a group that missed wraps reads an upper long **behind
@@ -956,6 +1014,7 @@ of each group in use running from before the first wrap. *Grounds:* `pasm2/getct
 `silicon_errata` entry. *Source:* `…/tests/test-o18-getct-upper-stale-runA.spin2`, `…-runB.spin2`.
 
 ### EF-069 · `GETXACC` does not clear the Goertzel accumulators unless the streamer is running in Goertzel mode; mid-burst, it neither drops nor double-counts a term — `CONFIRMED` (new; contradicts `getxacc.yaml`)
+*KB:* `language/pasm2/getxacc.yaml`; `architecture/streamer/dds-goertzel.yaml`
 **Idle, or in any other streamer mode, `GETXACC` clears nothing:** it returns the live accumulator and
 leaves it as it was, so repeated reads — including across a new non-Goertzel streamer command — return
 the same value, and the accumulator keeps growing from burst to burst. **During a Goertzel burst** the
@@ -976,6 +1035,7 @@ value either. Its read-before-and-after, take-the-difference rule is exactly wha
 requires. *Source:* `…/tests/test-so80-getxacc-clear-gating.spin2`.
 
 ### EF-070 · The Goertzel accumulators trail their term by one active clock: a burst's last term lands in the **next** Goertzel burst — `CONFIRMED` (new)
+*KB:* `language/pasm2/getxacc.yaml`; `architecture/streamer/dds-goertzel.yaml`
 A reading taken after a burst of N clocks holds **N − 1** terms; the last one waits in an internal
 register no instruction reads, and is added on the first active clock of the next Goertzel burst.
 Waiting does not deliver it. **Workaround proven:** follow each burst with a short zero-term burst
@@ -1005,6 +1065,7 @@ identical in every arm except the two deliberately jittered arms (JIT-S1/S2) and
 quoting them. Campaign: `campaigns/2026-09-p2-errata-predictions/`.
 
 ### EF-071 · In a DAC smart-pin mode, `OUT` does not switch the ADC while `TT` bit 0 is clear — `CONFIRMED` (new; contradicts the published `%TT` table)
+*KB:* `architecture/smart_pins.yaml`; `language/spin2/methods/wrpin.yaml`; `architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml`; `architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml`; `architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml`
 The P2 Documentation's `%TT` table (`p2-documentation.txt:7652-7657`) publishes, for every smart mode,
 "x0 = output disabled, regardless of DIR", and for the DAC smart modes (`%SSSSS` = `%00001..%00011`)
 "0x = OUT enables ADC in DAC_MODE". On silicon, with `TT` = `%00` raising `OUT` runs **nothing**: the
@@ -1025,6 +1086,7 @@ contradicted on silicon) → **P2 Errata E6**. *Grounds:* the KB's smart-pin `%T
 `silicon_errata` entry (to register). *Source:* `…/tests/test-so9-dac-mode-adc-enable.spin2`.
 
 ### EF-072 · Chip Gracey's Goertzel SINC2 corruption reproduces value for value from the accumulator structure (SINC2's running first stage across unequal windows); his two workarounds hold — `CONFIRMED` (heading and classification corrected 2026-09-26: see *Correction* below)
+*KB:* `language/pasm2/getxacc.yaml`
 Chip's 2024-12-16 report (`ingestion/external-inputs/forum-threads/ProblemGoertzelSINC2mode/INGEST.md`):
 in SINC2 mode a non-power-of-two iteration count makes `GETXACC` "off by one double integration",
 corrupting that sample and the next. Measured, and **explained value for value** by EF-070's carry:
@@ -1063,6 +1125,7 @@ first stage. *Grounds:* `pasm2/getxacc.yaml` `sinc2_constraint` (F-469 already o
 `…/tests/test-goertzel-sinc2-iteration-count.spin2`.
 
 ### EF-073 · `RDFAST` readiness: a blocking `RDFAST` keeps its promise; a no-wait `RDFAST` needs 8–15 clocks, and a read before that returns zero — `CONFIRMED` (blocking) / measured (no-wait)
+*KB:* `language/pasm2/rdfast.yaml`
 The P2 Documentation promises a **blocking** `RDFAST` (`D[31]` = 0) "will additionally wait until the
 FIFO has begun receiving hub data, so that it can start being used in the next instruction"; for
 **no-wait** (`D[31]` = 1) "your code must allow a sufficient number of clocks before any attempt is
@@ -1087,6 +1150,7 @@ its number. *Grounds:* `pasm2/rdfast.yaml` — the measured no-wait boundary and
 *Source:* `…/tests/test-rdfast-wrfast-readiness-boundary.spin2`.
 
 ### EF-074 · A blocking `RDFAST` issued while a no-wait `RDFAST` is still arming can skip its wait, and the next read returns zero — `CONFIRMED` (new; breaks the blocking promise)
+*KB:* `language/pasm2/rdfast.yaml`
 The same test's E_REBLK arm: `rdfast $8000_0000,mid` (no-wait) · `waitx` gap · `rdfast #0,new`
 (**blocking**) · `rflong` in the next instruction. The blocking promise quoted in EF-073 is unqualified.
 *Result (identical in both runs):* in each of the 64 slice × phase cells, **exactly one gap fails, in
@@ -1120,6 +1184,7 @@ Every verdict **re-derived from the raw log lines**. Structural yes/no behaviour
 EF-066..070. Campaign: `campaigns/2026-09-p2-errata-predictions/` (tests 9–11).
 
 ### EF-075 · E3's workaround holds: a keeper cog started in cog 7 as the first line of `main()` keeps cogs 4–7 reading the current 64-bit counter across wraps — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`
 *How proven:* `e3-fix-keeper-cog-test` — the drop-in (`KEEPER_COG = 7`, a `jmp #keeper` loop,
 `coginit(KEEPER_COG, @keeper, 0)` as the first line of `main()`) at boot, then samplers started and
 stopped in cogs 4, 5, 6 around it; each reading = 10 bracketed `GETCT WC`/`GETCT` pairs against cog 0;
@@ -1135,6 +1200,7 @@ wrap count on all 55 alive lines; 0 bracket failures. **Kind:** one-time startup
 `…/tests/e3-fix-keeper-cog-test.spin2`.
 
 ### EF-076 · E4 and E5's workaround holds: the `burst_sums` helper routine returns exactly N terms of a SINC1 Goertzel burst, whatever ran before it — `CONFIRMED`
+*KB:* `language/pasm2/getxacc.yaml`
 *How proven:* `e4-e5-fix-read-sums-test` — the printed routine (zero burst built from the caller's D/S
 with count 4 and `S[15:12]` = 0 to deliver any held term, idle `GETXACC`, the caller's burst,
 `WAITXFI`, zero burst, idle `GETXACC`, subtract), called 10 times back to back per record with
@@ -1155,6 +1221,7 @@ reproduced. Controls: the routine's zero-burst words `$F007_0004` /
 RAM, 200 MHz. *Source:* `…/tests/e4-e5-fix-read-sums-test.spin2`.
 
 ### EF-077 · E7's workaround holds: `WAITX #12` after the no-wait `RDFAST` (16 clocks to the blocking one) gives a correct first read in every hub alignment — `CONFIRMED`
+*KB:* `language/pasm2/rdfast.yaml`
 *How proven:* `e7-fix-rdfast-spacing-test` — the printed block (`rdfast nowait,hub_first` /
 `waitx #12` / `rdfast #0,hub_next` / `rflong first_long`) swept over all 8 slices × 8 phases × 16
 trials, first and second read checked; beside it the unspaced sweep of EF-074 (gaps 2..44) as the
@@ -1205,6 +1272,7 @@ not from the program's `VERDICT` line: all 40 counter readings (8 + 16 + 16) 10 
 (tests 12–14).
 
 ### EF-078 · A cog of 4–7 held in a wait at the wrap keeps its group current: `WAITATN` and `WAITX` both count as running — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`
 *How proven:* `e3-waiting-keeper-test` — a keeper in cog 7 held in `WAITATN` (`$FD603C24`; no cog sends
 ATN) started by the first line of `main()` and alone in 4–7 through wrap 1; it was then stopped and a
 keeper in cog 6 held in `WAITX ##$FFFF_FFF0` (`$FFFFFFFF`, `$FD67E01F`; 2 + D clocks, 14 short of
@@ -1230,6 +1298,7 @@ pair count and bracket result identical to the run above; both verdicts `CONFIRM
 *Source:* `…/tests/e3-waiting-keeper-test.spin2`.
 
 ### EF-079 · Cogs 0–3 show the same band as cogs 4–7 when every one of them is stopped across wraps, and it closes in one wrap — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`
 *How proven:* `e3-group0-idle-band-test` — cog 0 checked the boot state, started the test (Spin2) in
 cog 4 with `COGSPIN`, and stopped itself; cog 4 was the reference from `$0000_0000_$00C1_3D4C` on
 (started before wrap 1, its upper long equal to its own wrap count on every poll), cog 5 the group-1
@@ -1246,6 +1315,7 @@ the group-0 cogs sampled were 1 and 3; a lag of two wraps; 200 MHz. *Source:*
 `…/tests/e3-group0-idle-band-test.spin2`.
 
 ### EF-080 · The band closes at the first wrap its group runs through, in one step, from a lag of 8 wraps; Spin2 `GETMS()`/`GETSEC()` read short by the same time inside it — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`; `language/spin2/methods/getms.yaml`; `language/spin2/methods/getsec.yaml`
 *How proven:* `e3-band-closes-in-one-wrap-test` — cogs 4–7 held empty through 8 wraps (171.8 s at
 200 MHz), then PASM samplers in cogs 4 **and** 7 and a Spin2 sampler in cog 5 (`GETMS()` then
 `GETSEC()` on each request) started and never stopped; cog 1 the group-0 control. The Spin2 pairs are
@@ -1267,6 +1337,7 @@ are affected exactly as `GETCT WC` is. *Limits:* one lag (8) beyond EF-068/EF-07
 Spin2 sampler in cog 5 only; 200 MHz. *Source:* `…/tests/e3-band-closes-in-one-wrap-test.spin2`.
 
 ### EF-081 · No PASM2 instruction that takes a CT target sees E3's stale upper long — `WAITCTn`, `POLLCTn`, `JCTn`, `JNCTn`, the CT interrupts, the `SETQ` timeout and `WAITX` time exactly as in a current group, in the window and across its closing wrap; a cog held in `WAITCT1` counts as running — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`
 *How proven:* `e3-scope-pasm2-ct-events-test` (VO-J-018) — a PASM2 probe runs one of seven commands
 per request, each on three targets after its own arm-time `GETCT`: `ADDCT1-3` + `WAITCT1-3`;
 `POLLCT1-3`; `JCT1-3`; `JNCT1-3`; `INT1-3` on CT-passed-CT1-3; three `SETQ` + `WAITATN WC` timeouts;
@@ -1290,6 +1361,7 @@ wait family); lag 1 in each window; the K arm tests `WAITCT1` only; 200 MHz; run
 *Source:* `…/tests/e3-scope-pasm2-ct-events-test.spin2`.
 
 ### EF-082 · No Spin2 counter method but `GETMS()`/`GETSEC()` sees E3's stale upper long — `WAITCT()`, `POLLCT()`, `WAITMS()`, `WAITUS()` and `GETCT()` are current in the window and across its closing wrap — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`; `language/spin2/methods/getct.yaml`
 *How proven:* `e3-scope-spin2-counter-methods-test` (VO-J-019) — a Spin2 probe runs `WAITCT(salo +
 dn)`, `REPEAT UNTIL POLLCT(salo + dn)`, `WAITMS` or `WAITUS` on three targets after its own arm-time
 `GETCT()`; control probes in cogs 1-3, stale probes in cogs 4-7 started after their group missed
@@ -1307,6 +1379,7 @@ short by 21,475 ms); current in every control arm. Verdicts l.176–181: `WAITCT
 1; 200 MHz; run once. *Source:* `…/tests/e3-scope-spin2-counter-methods-test.spin2`.
 
 ### EF-083 · `DEBUG_TIMESTAMP` stamps a DEBUG line with the sending cog's own copy of the counter: a line sent from E3's stale window carries a stamp one wrap early, and prints out of time order beside cog 0's — `CONFIRMED`
+*KB:* `language/pasm2/getct.yaml`; `language/spin2/constants/special-configuration-symbols.yaml`
 *How proven:* `e3-scope-debug-timestamp-test` (VO-J-020) with `DEBUG_TIMESTAMP` declared and
 `DEBUG_COGS` = cogs 0, 1, 4, 7 — per pair, cog 0 sends a stamped REF line carrying its own
 `GETCT WC`/`GETCT`, a probe sends a stamped PRB line carrying its own, cog 0 sends a second REF.
@@ -1329,6 +1402,7 @@ unchanged. *Source:* `…/tests/e3-scope-debug-timestamp-test.spin2` +
 `…/tests/e3-scope-debug-timestamp-verdict.py`.
 
 ### EF-084 · After a no-wait `RDFAST`, a `RDLONG` issued within 16 clocks is released before its own read and returns the previous hub read's long, and a `WRLONG` is released before it lands and is lost if another hub instruction follows; the waiting form prevents both, and 16 clocks (7 non-hub instructions) prevents the read (a write at 16 clocks was not run) — `CONFIRMED`
+*KB:* `language/pasm2/rdfast.yaml`; `language/pasm2/rdlong.yaml`; `language/pasm2/wrlong.yaml`
 *How proven:* `test-o29-rdfast-nowait-releases-hub-op` (VO-J-021; the clean-room study's O29
 prediction). Measuring cog 1 in cog execution, cog 0 reporting (`DEBUG_COGS = %0000_0001`). Each
 trial: a primer `RDLONG` of `$A5A5_0001` (also fixing the hub phase), then `RDFAST` (D =
@@ -1370,6 +1444,7 @@ Documentation (`RDFAST` cannot be used there, :353-357); one cog; cog execution;
 once. *Source:* `…/tests/test-o29-rdfast-nowait-releases-hub-op.spin2`.
 
 ### EF-085 · With break-on-`BRK` armed, a `BRK` whose condition is false still enters the debug interrupt, and `GETBRK` shows the last condition-true `BRK`'s code, not its own; a `SKIP` before or a taken `JMP` before cancels both — `CONFIRMED`
+*KB:* `language/pasm2/brk.yaml`
 *How proven:* `test-so109-conditional-brk-breaks` (VO-J-022; the clean-room study's SO109
 prediction), no DEBUG. Cog 0 enabled break-on-`BRK` for cog 1 alone (`HUBSET $2000_0002`), wrote a
 16-long debug ISR to cog 1's load area `$FFF40` and read it back 16/16, started cog 1. The ISR
@@ -1391,6 +1466,7 @@ literally, wrong about the code. *Limits:* the `SKIP` idiom tested outside an IS
 200 MHz; run once. *Source:* `…/tests/test-so109-conditional-brk-breaks.spin2`.
 
 ### EF-086 · The no-wait `RDFAST` erratum's scope (P2 Errata E7): a no-wait `RDFAST` releases `RDBYTE`, `RDWORD`, `WRBYTE` and `WRWORD` exactly as `RDLONG`/`WRLONG`; a released read writes the flags of the value it returns and still steps `PTRA++`; a no-wait `WRFAST` releases nothing; a `SETQ` block `RDLONG` in the window wrote one wrong long and the cog then stopped responding — `CONFIRMED` (predicted arms) / `OBSERVED` (`WRFAST`, `SETQ`)
+*KB:* `language/pasm2/rdfast.yaml`; `language/pasm2/rdbyte.yaml`; `language/pasm2/rdword.yaml`; `language/pasm2/wrbyte.yaml`; `language/pasm2/wrword.yaml`
 *How proven:* `test-o29b-rdfast-nowait-hub-op-scope` (VO-J-023), the EF-084 construction (primer,
 `RDFAST`/`WRFAST`, k `NOP`s, instruction under test; 64 cells × 16 repetitions; each run with a
 `NOP`-for-the-FIFO control and the waiting form), cog 0 reporting through a hub line buffer.
@@ -1432,6 +1508,7 @@ window not tested; hub execution cannot use `RDFAST`; one cog; cog execution; 20
 *Source:* `…/tests/test-o29b-rdfast-nowait-hub-op-scope.spin2`.
 
 ### EF-087 · The no-wait `RDFAST` erratum's workaround (P2 Errata E7) protects a `SETQ` block `RDLONG` — the waiting form and 16, 18 and 20 clocks after a no-wait `RDFAST` read the right block with cog RAM intact; released at 4 clocks, a block read either writes one wrong long and overwrites cog registers `$000`–`$001`, or the cog does not finish — `CONFIRMED` (workaround) / `OBSERVED` (release)
+*KB:* `language/pasm2/setq.yaml`; `language/pasm2/rdfast.yaml`
 *How proven:* `test-o29c-setq-block-workaround` (VO-J-024), the EF-086 construction with **every run
 and every trial in a fresh measuring cog** (COGINIT, a cog-RAM baseline equal to the loaded image,
 the run, COGSTOP). *Result (log `debug_261001-114625`, 2026-10-01, first run, clean):*
@@ -1458,6 +1535,7 @@ other cells, and a block read's flags were not measured; one cog; cog execution;
 *Source:* `…/tests/test-o29c-setq-block-workaround.spin2`.
 
 ### EF-088 · The E7 workaround blocks P2 Errata prints hold for a single read and a single write: `WAITX #12` after a no-wait `RDFAST` (the next hub instruction at 16 clocks) protects `RDLONG … WCZ`, `WRLONG` with an immediate read-back, and `WRBYTE`/`WRWORD` at every offset; the waiting form protects a write and its read-back — `CONFIRMED`
+*KB:* `language/pasm2/rdfast.yaml`; `language/pasm2/wrlong.yaml`
 *How proven:* `e7-workaround-hub-access-test` (VO-J-025, campaign test 22), the EF-084 construction
 (primer `RDLONG` of `$A5A5_0001`, then the `RDFAST`, then the instruction under test; 64 (af, a)
 cells × 16 repetitions = 1,024 records per run), cog 0 reporting through a hub line buffer (DEBUG
@@ -1502,6 +1580,7 @@ block-read copy reproduced both released outcomes exactly (af0 cells: one wrong 
 text only; the measuring image re-checked byte-identical, DEBUG data 24 bytes).
 
 ### EF-089 · A CORDIC divide by zero returns quotient = NOT (upper long of the numerator) and remainder = its lower long, every time, in normal time, and harms nothing after it; Spin2's divide operators and MULDIV64 inherit it — `CONFIRMED` (characterisation)
+*KB:* `language/pasm2/qdiv.yaml`; `language/spin2/operators/op_div.yaml`; `language/spin2/methods/muldiv64.yaml`
 *How proven:* `test-divide-by-zero` (VO-J-026, campaign test 23), no pins, no prediction. PASM2 in a
 measuring cog (cog execution): `QDIV` and `QFRAC` by `#0` and by a zero register, without and with
 `SETQ`, `GETQX` and `GETQY`, 8 repetitions per case, each between a marker divide (a stale-value
@@ -1563,6 +1642,7 @@ is whole. Their test artifacts predate this tree and are not yet migrated to a c
 folder — backfill a campaign + `.spin2` when located.
 
 ### EF-061 · PLOT default coordinates are bottom-left / Y-UP — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/plot.yaml`
 > **Renumbered 2026-08-16 (F-267).** This entry was absorbed into the ledger at KB v1.14.3 under
 > the id **EF-020**, which was already held by the `SETQ`+`WAITSEx` finding assigned 2026-07-04
 > (`:291`). That entry keeps EF-020 — it is the older assignment and the one cited from two
@@ -1574,6 +1654,7 @@ trust the `PLOT_GetXY` formula + the capture, not the ToO prose. (Also verified:
 capture verification. *Grounds:* the PLOT manual chapter; `plot.yaml`.
 
 ### EF-021 · DEBUG session-end mechanisms — three distinct forms — `CONFIRMED`
+*KB:* `language/spin2/constants/debug-end-session.yaml`; `language/spin2/statements/debug.yaml` (the host --end-marker form is a tool flag, not a KB fact)
 - per-window `` `CLOSE `` — frees ONE named window;
 - on-chip `DEBUG(DEBUG_END_SESSION)` — constant **27**, `{Spin2_v52}` — ends the WHOLE
   session (all windows + DEBUG.LOG);
@@ -1582,6 +1663,7 @@ capture verification. *Grounds:* the PLOT manual chapter; `plot.yaml`.
 `constants/debug-end-session.yaml`; the per-window `CLOSE` directives.
 
 ### EF-022 · DEBUG display-window 3-phase lifecycle — `CONFIRMED`
+*KB:* `language/spin2/debug-displays/scope.yaml`; `language/spin2/debug-displays/fft.yaml`
 A display window runs in three phases: **create** → **one-time configuration**
 (channels/triggers as their own message — e.g. SCOPE/FFT config is NOT on the create line,
 see EF-003) → **looping data updates**. LOGIC and SCOPE_XY accept their channel/label on the
@@ -1590,6 +1672,7 @@ prior-session window work. *Grounds:* the create/config/update split across the
 debug-display YAMLs + `statements/debug.yaml`.
 
 ### EF-023 · Top-level Spin2 code runs as its cog's task 0; task IDs are cog-local — `CONFIRMED`
+*KB:* `language/spin2/methods/taskid.yaml`
 In each cog, the **top-level (initial) code runs as that cog's `TASKID` 0**; `TASKSPIN(NEWTASK)`
 then allocates upward (1, 2, …). Task IDs are **cog-local** — every cog has its own 0–31 task
 space. *How proven:* `f198-tasks-per-cog-probe.spin2` (pnut_ts v1.55.0, `-d`, real P2 silicon,
@@ -1603,6 +1686,7 @@ task is typically ID 0" with the cog-local fact. Test replicated under
 `campaigns/2026-07-cooperative-tasking/tests/`.
 
 ### EF-024 · ADC gain modes measure a window CENTERED on mid-supply (~VIO/2), not ground-referenced — `CONFIRMED` (F-202)
+*KB:* `architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml`
 **Structural fact (definitive):** the pin-ADC gain modes (`P_ADC_1X/3X/10X/30X/100X`) measure an input
 window **centered on mid-supply (~VIO/2)**, NOT a ground-referenced `0..V` range. Every gain's transfer
 curve crosses its 50% point at **~1.64 V**. This refutes the fabricated `0..V/gain` framing (F-202) and

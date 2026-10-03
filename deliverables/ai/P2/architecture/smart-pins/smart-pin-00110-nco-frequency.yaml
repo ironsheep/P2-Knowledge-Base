@@ -29,6 +29,7 @@ y_register:
   function: "Frequency control value"
   Y[31:0]: "Added to Z accumulator each base period"
   formula: "Y = 2^32 × (Fout × X[15:0]) / Fclk"
+  zero: "Y = 0 produces NO output: the accumulator never carries and the pin stays static."
 
 z_register:
   function: "32-bit phase accumulator"
@@ -191,4 +192,8 @@ common_uses:
   - "Frequency sweeps"
   - "Phase-locked signals"
 
-related: ["00111 (NCO Duty)", "00101 (Transition)", "01000-01001 (PWM)"]
+related:
+  - architecture/smart-pins/smart-pin-00111-nco-duty.yaml
+  - architecture/smart-pins/smart-pin-00101-transition-output.yaml
+  - architecture/smart-pins/smart-pin-01000-pwm-triangle.yaml
+  - architecture/smart-pins/smart-pin-01001-pwm-sawtooth.yaml

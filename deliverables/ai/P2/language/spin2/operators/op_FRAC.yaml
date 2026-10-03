@@ -3,12 +3,12 @@ type: operator
 description: |
   Unsigned fraction: x FRAC y = (x << 32) / y (Parallax Spin2 Documentation v55,
   operator table; assignment form var FRAC= y). The result is a 32-bit fraction of
-  2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249
-  (hardware-verified, EF-089). The interpreter runs it as the CORDIC QFRAC.
+  2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249.
+  The interpreter runs it as the CORDIC QFRAC.
 category: Math
 examples:
   - "frac := dividend FRAC divisor"
-divide_by_zero: "x FRAC 0 does not trap: it returns NOT x (1 -> $FFFF_FFFE, $8000_0000 -> $7FFF_FFFF, $FFFF_FFFF -> 0), every time. Hardware-verified on Rev C (EF-089)."
+divide_by_zero: "x FRAC 0 does not trap: it returns NOT x (1 -> $FFFF_FFFE, $8000_0000 -> $7FFF_FFFF, $FFFF_FFFF -> 0), every time."
 related:
   - language/pasm2/qfrac.yaml
   - language/spin2/operators/op_adddiv.yaml

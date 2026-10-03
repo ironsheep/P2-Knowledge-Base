@@ -61,7 +61,7 @@ tt_field:
                                         -- ON SILICON, OUT runs the ADC only while TT bit 0
                                         is set (TT = %00: OUT high runs nothing); see
                                         architecture/smart_pins.yaml dac_smart_pin_modes
-                                        silicon_errata (hardware-verified, EF-071)
+                                        silicon_errata
     Full table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).
     Source: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.
   when_smart_pin_on: "x0=output disabled, x1=output enabled (regardless of DIR)"
@@ -102,7 +102,7 @@ examples:
 
 common_smart_modes:
   # Removed 2026-08-25. This block defined thirteen P_* constants a second time, in
-  # wording that had drifted from the source (F-321/F-323 class). Every smart-pin mode
+  # wording that had drifted from the source. Every smart-pin mode
   # constant is now defined exactly once, with the Spin2 v55 wording, its 32-bit value
   # and its bit pattern.
   reference: "language/spin2/symbols/spin2-builtin-symbols-complete.yaml -- all 32

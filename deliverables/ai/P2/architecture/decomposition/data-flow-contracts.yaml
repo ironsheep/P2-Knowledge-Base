@@ -132,9 +132,10 @@ example:
 
     Orchestrator -> motion-cog seam (CONTROL plane): a latest-wins command mailbox with
     a seq/ack handshake. The writer fills the argument slots FIRST and bumps a sequence
-    counter LAST (the publish); the reader acts when seq != ack and writes ack := seq
-    when it consumes. The bump-last ordering is what makes a torn read impossible without
-    a lock.
+    counter LAST (the publish); the reader acts when seq != ack, copies the command and
+    its arguments, then writes ack := seq; the writer posts again only when ack == seq.
+    Bump-last stops a read before the first publish; the handshake is what stops a second
+    post overwriting the slot mid-read, so it is load-bearing and needs no lock.
 
     Motion-cog -> anyone (DATA/telemetry): lock-free published telemetry. Attitude,
     battery, mode, and per-leg angles sit in hub longs that any cog reads without a lock,

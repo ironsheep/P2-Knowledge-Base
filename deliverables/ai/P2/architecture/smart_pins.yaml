@@ -38,7 +38,7 @@ description: |
   
   **Configure while DIR is low**: a smart pin should be configured (WRPIN/WXPIN/WYPIN)
   while its DIR bit is low, holding it in reset. A WRPIN while DIR is high gives
-  unpredictable behavior. Exception, hardware-verified (EF-012): WRPIN #0 resets a
+  unpredictable behavior. Exception: WRPIN #0 resets a
   running smart pin without a DIR cycle.
 
 architecture:
@@ -108,7 +108,7 @@ critical_requirements:
       **Configure while DIR is low**: a smart pin should be configured while its DIR
       bit is low, holding it in reset (silicon-doc-text.txt:3852). A WRPIN while DIR
       is high changes the use of the pin's state bits and gives unpredictable
-      behavior. Exception, hardware-verified (EF-012): WRPIN #0 resets a running
+      behavior. Exception: WRPIN #0 resets a running
       smart pin without a DIR cycle.
     correct_sequence:
       note: |
@@ -411,7 +411,7 @@ configuration_format:
           enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
           adc_control: "0x=OUT enables ADC, 1x=OTHER enables ADC (M[7:0] overridden)"
           silicon_errata:
-            out_needs_tt_bit0_to_run_adc: "The two published rules do not combine as written: with TT = %00, raising OUT runs NOTHING -- the ADC stays off and the pin reads exactly as with OUT low. With TT = %01 (output enabled), OUT runs the ADC, and the fast DAC drives the pin while it does. Workaround (rule at each use): set TT bit 0 in the WRPIN word and accept the DAC driving the pin. Only TT = %00/%01 tested; the OTHER forms (TT = %1x) not. Hardware-verified on Rev C (EF-071, run twice); contradicts the Silicon Doc %TT table. P2 Errata E6."
+            out_needs_tt_bit0_to_run_adc: "The two published rules do not combine as written: with TT = %00, raising OUT runs NOTHING -- the ADC stays off and the pin reads exactly as with OUT low. With TT = %01 (output enabled), OUT runs the ADC, and the fast DAC drives the pin while it does. Workaround (rule at each use): set TT bit 0 in the WRPIN word and accept the DAC driving the pin. Only TT = %00/%01 tested; the OTHER forms (TT = %1x) not. Contradicts the Silicon Doc %TT table. P2 Errata E6."
       which_modes_need_p_oe:
         required: "All output modes: NCO (%00110-%00111), PWM (%01000-%01010), Pulse/Transition (%00100-%00101), Serial TX (%11100, %11110), DAC (%00001-%00011), USB (%11011)"
         not_needed: "Input-only modes: Timing (%10000-%10010), Counters (%01011-%01111), Period/Freq (%10011-%10111), ADC (%11000-%11010), Serial RX (%11101, %11111)"
@@ -575,7 +575,7 @@ pin_output_hierarchy:
 live_update_behavior:
   source: "Silicon Doc v35"
   principle: |
-    WRPIN should be issued while DIR=0 (reset); WRPIN #0 is the hardware-verified exception (EF-012). WXPIN/WYPIN work freely while smart pin is running (DIR=1).
+    WRPIN should be issued while DIR=0 (reset); WRPIN #0 is the exception. WXPIN/WYPIN work freely while smart pin is running (DIR=1).
     "Once configured, DIR can be raised high and the smart pin will begin operating.
     After that, you may feed it new data via WXPIN/WYPIN."
   what_needs_reset:

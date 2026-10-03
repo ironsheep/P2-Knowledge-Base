@@ -1,7 +1,7 @@
 # `+//` -- REDIRECT
 #
 # The definition home for `+//` is language/spin2/operators/op_addmodulo.yaml
-# (F-402, 2026-09-05). This file previously carried a second, conflicting
+# (2026-09-05). This file previously carried a second, conflicting
 # definition: it called `+//` an "Unsigned Modulo Add" that "performs addition
 # with unsigned modulo". It performs no addition -- the leading `+` selects the
 # UNSIGNED form of `//`. Its worked ring-buffer material was correct and has been

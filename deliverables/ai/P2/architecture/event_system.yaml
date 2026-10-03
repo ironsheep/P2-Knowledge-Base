@@ -544,7 +544,7 @@ extraction_metadata:
       sections:
         - "PASM2 instruction table, SETPAT -- line 1909"
   re_derivation_note: >-
-    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    Re-derived 2026-08-26. The header this file shipped with cited
     `part1-cog.txt` (a file that has never existed) and datasheet pages 74-75 (the
     datasheet is 50 pages; it has no events section). Corrected in this pass: an invented
     event taxonomy naming events the P2 does not have ("Edge-detect", "IN-rise",

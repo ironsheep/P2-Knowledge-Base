@@ -394,6 +394,16 @@ coordination:
       bit_edge_lockstep above. Different SCK rates may need different
       pad values — verify with a logic analyzer if you change either
       WXPIN or SETXFRQ.
+    write_side: |
+      The WRITE direction (streamer driving a P_SYNC_TX MOSI against a
+      P_TRANSITION SCK) has its own pad, and its failure is silent. SCK starts on
+      the next base-period boundary after WYPIN while the streamer start moves
+      continuously, so only hp distinct phases exist (hp = SCK half-period in
+      sysclks) and EXACTLY ONE of them loses: at that pad, whole sectors are
+      written corrupt with no error or status bit. A pad safe at one hp can be
+      the losing one at another (a pad safe at hp = 7 lost at hp = 5, which a
+      201-250 MHz sysclk reaches at an ordinary 25 MHz SPI clock). Verify the
+      write pad at every SCK rate you use; it is not portable across rates.
     source: "Parallax P2 flash_loader.spin2 line 259"
 
   multi_pin_sync:

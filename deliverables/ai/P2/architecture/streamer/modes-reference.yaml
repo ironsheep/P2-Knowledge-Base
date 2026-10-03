@@ -36,19 +36,19 @@ encoding:
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1456 -- "Some of
       these modes have the %a bit in D[16] to reorder the data sequence within the
       individual bytes to top-first when %a = 1". The locator previously named lines
-      3653-3654, a superseded p2-documentation.txt number; corrected 2026-08-30,
-      F-399). It is NOT a pin
-      bit. Writing a 4th p where an `a` belongs is the specific error F-304 records.
+      3653-3654, a superseded p2-documentation.txt number; corrected 2026-08-30).
+      It is NOT a pin
+      bit. Writing a 4th p where an `a` belongs is a specific error.
     "b": "a LUT base-address bit, in the LUT-indexed modes only."
   field_notation_caveat: >-
     Compose a mode word with `|`, not `+`, and check the base pin's alignment before
     you compose at all. With `+`, a base pin that is not a multiple of the group
-    width carries out of the pin field and changes the mode (EF-065). With `|` it
+    width carries out of the pin field and changes the mode. With `|` it
     does not carry -- it can instead set bits the template already sets and VANISH,
-    producing a word byte-identical to the aligned base (also EF-065). Neither form
+    producing a word byte-identical to the aligned base. Neither form
     errors and the compiler sees neither.
   field_notation_caveat_second_proof: >-
-    This is not a one-off. EF-059 is the same failure in a different mode family and
+    This is not a one-off. The same failure occurs in a different mode family and
     was proven by a signature no analog rig was needed for: in
     X_1ADC8_0P_1DAC8_WFBYTE the template is %1111_DDDD_W000_0010 -- D[22:20] are
     fixed zeros and there is no pin field at all, the ADC channel being selected by
@@ -58,7 +58,7 @@ encoding:
     2,048, 2 gave 4,096, and the corrected form gave 1,024. Reproduced four times.
     The defect is invisible in testing -- the capture "works", the buffer fills, and
     the data is simply the wrong shape.
-  field_notation_caveat_source: >-
+  source: >-
     engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md
     -- EF-065 (grounds F-309) and EF-059 (grounds F-260), both real P2, 2026-08-20 and
     2026-08-14. Per-width alignment rules are in

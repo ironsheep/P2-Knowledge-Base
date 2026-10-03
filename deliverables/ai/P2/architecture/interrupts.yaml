@@ -525,7 +525,7 @@ extraction_metadata:
       sections:
         - "language/pasm2/reti0.yaml, language/pasm2/reti1.yaml, language/pasm2/reti2.yaml, language/pasm2/reti3.yaml -- alias encodings"
   re_derivation_note: >-
-    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    Re-derived 2026-08-26. The header this file shipped with cited
     `part1-cog.txt` (a file that has never existed) and datasheet pages 71-72 (the
     datasheet is 50 pages; it has no interrupt section at all). Corrected in this pass:
     the IJMPx/IRETx address map, which was inverted -- $1F0 is IJMP3 and $1F4 is IJMP1,

@@ -25,8 +25,7 @@ detailed_description:
       exception -- the sniffer change flips output drive rather than changing mode, so the
       multiplexing hazard may not apply -- or the sentence was removed because it was
       wrong. No document separates the two; they are the same document. Bench-testable
-      and jumper-only. Tracked as KNOWLEDGE-GAPS G-027 and P2KB-CORRECTION-FINDINGS
-      F-372. The claim is kept rather than deleted because it may well be right, but do
+      and jumper-only. The claim is kept rather than deleted because it may well be right, but do
       not rely on it without testing.
     wxpin_data: "WXPIN is used on the lower pin to establish the specific USB mode and set the baud rate. D[15] must be 1 for 'host' or 0 for 'device'. D[14] must be 1 for 'full-speed' or 0 for 'low-speed'. D[13:0] sets the baud rate, which is a 16-bit fraction of the system clock, whose two MSBs must be 0, necessitating that the baud rate be less than 1/4th of the system clock frequency."
     worked_example: "For example, if the main clock is 80MHz and you want a 12MHz baud rate (full-speed), use 12,000,000 / 80,000,000 * $10000 = 9830, or $2666. To use this baud rate and select 'host' mode and 'full-speed', you could do 'WXPIN ##$E666,lowerpin'."

@@ -197,10 +197,7 @@ internal_pull_resistors:
     high-impedance input with the selection INACTIVE. The authority for that is
     the Datasheet Pin Mode Legend -- "DIR = direction bit; 0: input (float),
     1: output (drive)", engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1144
-    -- and NOT a bench measurement. EF-063 and EF-064 use a weak drive with DIR
-    HIGH as rig apparatus for other measurements, and neither reports a result
-    taken with DIR dropped, so they corroborate the drive mechanism incidentally
-    and settle nothing about this rule. It is the reason the older form of this
+    -- and NOT a bench measurement. It is the reason the older form of this
     block -- weak drive followed by a float -- does not work.
   ladder_definition_home: architecture/pin-drive-configuration.yaml
   pull_a_line_high:
@@ -414,11 +411,11 @@ anti_patterns:
     description: "Smart pin mode without P_OE produces no output"
     wrong: |
       ' No output - missing P_OE!
-      WRPIN(P_PWM_TRIANGLE, PWM_PIN)
+      WRPIN(PWM_PIN, P_PWM_TRIANGLE)
       PINSTART(PWM_PIN, P_PWM_TRIANGLE, period, duty)  ' Still no output!
     correct: |
       ' Include P_OE for output
-      WRPIN(P_PWM_TRIANGLE | P_OE, PWM_PIN)
+      WRPIN(PWM_PIN, P_PWM_TRIANGLE | P_OE)
       PINSTART(PWM_PIN, P_PWM_TRIANGLE | P_OE, period, duty)
 
   - anti_pattern: "read_without_input_mode"
@@ -457,16 +454,15 @@ anti_patterns:
 
   - anti_pattern: "parameter_order_confusion"
     severity: "wrong_configuration"
-    description: "WRPIN and PINSTART have different parameter orders"
+    description: "The Spin2 methods take the pin FIRST; the PASM2 instruction takes the value first"
     wrong: |
-      ' WRONG: Parameter order confused
-      WRPIN(TX_PIN, P_ASYNC_TX)    ' Pin and mode swapped!
-    correct: |
-      ' WRPIN: (mode, pin)
+      ' WRONG in Spin2: mode and pin swapped (PASM2 operand order)
       WRPIN(P_ASYNC_TX | P_OE, TX_PIN)
-
-      ' PINSTART: (pin, mode, x, y) - different order!
-      PINSTART(TX_PIN, P_ASYNC_TX | P_OE, x_val, y_val)
+    correct: |
+      ' Spin2: WRPIN(PinField, Data), PINSTART(PinField, Mode, Xval, Yval)
+      WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
+      PINSTART(TX_PIN, P_ASYNC_TX | P_OE, x_val, 0)   ' serial: WYPIN data AFTER
+      ' PASM2: wrpin mode, pin  (D = value, S = pin)
 
   - anti_pattern: "rqpin_without_ack"
     severity: "data_stale"

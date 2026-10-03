@@ -31,6 +31,7 @@ registers:
 
 flags:
   in_flag: "Raised when X events complete or timeout occurs"
+  acknowledge_restarts: "Reading the result with RDPIN acknowledges it and the next measurement starts automatically: no new WYPIN is needed, and successive measurements arrive back to back (the loop in the example relies on this)."
   a_input: "Signal to monitor for events"
 
 code_examples:

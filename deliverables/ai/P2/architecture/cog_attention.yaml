@@ -416,7 +416,7 @@ extraction_metadata:
         - "Cog Attention, p.15-16 -- lines 681-695"
         - "PASM2 instruction table -- lines 1854, 1893, 1914"
   re_derivation_note: >-
-    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    Re-derived 2026-08-26. The header this file shipped with cited
     `part1-cog.txt` (a file that has never existed) and datasheet page 73 (the datasheet
     is 50 pages). Corrected in this pass: all three attention-instruction encodings; the
     attention event number (was 15, is 14) and the two SETINTx examples that used it; a

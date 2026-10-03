@@ -3,9 +3,9 @@ type: operator
 description: |
   Signed divide, return remainder: x // y (Parallax Spin2 Documentation v55, operator
   table; assignment form var //= y). The remainder takes the sign of x
-  (-1000 // 3 = -1, 1000 // -3 = 1; hardware-verified, EF-089).
+  (-1000 // 3 = -1, 1000 // -3 = 1).
 category: Divide
-divide_by_zero: "x // 0 does not trap: it returns x unchanged, every time; x //= 0 the same. Hardware-verified on Rev C (EF-089)."
+divide_by_zero: "x // 0 does not trap: it returns x unchanged, every time; x //= 0 the same."
 related:
   - language/spin2/operators/op_div.yaml
   - language/spin2/operators/op_addmodulo.yaml

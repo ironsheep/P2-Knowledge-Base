@@ -129,7 +129,7 @@ provenance:
     - "Spin2 Language Documentation, v47 and later (Chip Gracey, Parallax Inc.) — the TASK method family (TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), the NEWTASK/THISTASK constants, and the TASKHLT register (reversed halt bits @ $200)"
     - "Spin2 v55 keyword table (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149) — the authoritative TASK keyword list (TASKWAIT is absent)"
   tool_ground_truth:
-    - "pnut_ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword (F-196)"
+    - "pnut_ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword"
   cross_check_sources:
     - "P2 Knowledge Base cooperative-tasking pattern (language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
   companion_publication:

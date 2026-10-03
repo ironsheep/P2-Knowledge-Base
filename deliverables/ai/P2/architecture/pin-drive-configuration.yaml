@@ -248,7 +248,7 @@ idioms:
       pinhigh(pin)                  ' DIR = 1, OUT = 1 -- without this the pin floats
       waitms(1)                     ' settle: a weak drive into pin and wire capacitance
       level := pinread(pin)         ' reads 1 unless something stronger holds the line low
-    evidence: "Hardware-verified. EF-063 certifies a jumper digitally by holding the net
+    source: "Hardware-verified. EF-063 certifies a jumper digitally by holding the net
       through a 15 kOhm drive at one pin while the other drives it hard, so an open
       circuit reads the opposite value instead of an undefined float
       (P2-EMPIRICAL-FINDINGS.md:827). The code above is the rig routine that did it --
@@ -269,7 +269,7 @@ idioms:
       pinlow(pin)                   ' DIR = 1, OUT = 0 -- without this the pin floats
       waitms(1)                     ' settle: a weak drive into pin and wire capacitance
       level := pinread(pin)         ' reads 0 unless something stronger holds the line high
-    evidence: "Hardware-verified. EF-064 held P8..P31 at a 15 kOhm low with DIR high as a
+    source: "Hardware-verified. EF-064 held P8..P31 at a 15 kOhm low with DIR high as a
       canvas, so an undriven pin reads 0 for a stated reason instead of floating, while
       any driven pin overpowers the pull and reads 1 (P2-EMPIRICAL-FINDINGS.md:840). The
       code above is the same rig routine, called with P_LOW_15K at

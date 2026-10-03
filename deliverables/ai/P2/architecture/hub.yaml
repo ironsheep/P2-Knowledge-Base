@@ -28,7 +28,7 @@ memory_organization:
       - "TAQOZ Forth interpreter"
       
   write_protection:
-    # CORRECTED 2026-08-30 (F-391). This previously read
+    # CORRECTED 2026-08-30. This previously read
     # `protection_bit: "Set via HUBSET D[2]"`. W is D[16], not D[2] -- D[2] sits
     # inside the per-cog debug-enable field, and a HUBSET assembled from the old
     # sentence would carry the %0000 clock-configuration opcode, not %0010.
@@ -247,7 +247,7 @@ special_features:
     event_signaling: "Fast COG-to-COG events"
 
 debugging:
-  # CORRECTED 2026-08-30 (F-391). `state_preservation` previously read "All COG
+  # CORRECTED 2026-08-30. `state_preservation` previously read "All COG
   # states saved on debug entry". The silicon saves SIXTEEN registers, not all
   # of them -- and `architecture/debug_interrupt.yaml` already said so, so this
   # page was contradicting a sibling page.

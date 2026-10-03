@@ -20,8 +20,8 @@ description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge sm
   \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**Configure while DIR is low**:\
   \ a smart pin should be configured with WRPIN while its DIR bit is low (held in\
   \ reset); a WRPIN while DIR is high changes the use of the pin's state bits and\
-  \ gives unpredictable behavior (silicon-doc-text.txt:3854-3856). Exception, hardware-verified\
-  \ (EF-012): WRPIN #0 resets a running smart pin without a DIR cycle.\n"
+  \ gives unpredictable behavior (silicon-doc-text.txt:3854-3856). Exception:\
+  \ WRPIN #0 resets a running smart pin without a DIR cycle.\n"
 flags_affected:
   C: No effect
   Z: No effect
@@ -32,7 +32,7 @@ d_operand_format:
     # One home per fact. All six fields, with their bit ranges and purposes, live in
     # architecture/smart_pins.yaml; the 13-bit %M..M field's internals live in
     # architecture/pin-drive-configuration.yaml. Restating them here is what let three
-    # of the six drift wrong (F-331).
+    # of the six drift wrong.
     reference: "architecture/smart_pins.yaml (configuration_format.fields) -- all six
       fields, with bit ranges and purposes. Silicon Doc v35 part4-smart-pins.txt:10, 13,
       26, 39, 55, 63, 107; P2 Datasheet 2022/11/01 p.23, p2-datasheet-text.txt:1052-1059."
@@ -58,7 +58,7 @@ input_selectors:
     x111: "relative -1 pin's read state"
 critical_requirement:
   reset_before_configure: true
-  description: A smart pin should be configured by WRPIN while DIR is low (silicon-doc-text.txt:3854); WRPIN #0 on a running pin resets it with no DIR cycle (EF-012)
+  description: A smart pin should be configured by WRPIN while DIR is low (silicon-doc-text.txt:3854); WRPIN #0 on a running pin resets it with no DIR cycle
   sequence:
   - 'DIRL pin       '' Reset smart pin (DIR=0) before configuring'
   - WRPIN mode, pin ' Configure smart pin mode
@@ -67,12 +67,11 @@ critical_requirement:
   - WYPIN y, pin    ' Set Y parameter (AFTER enable)
   note: 'Universal init order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate
     (WYPIN): WYPIN comes AFTER DIRH. Mandatory for the trigger modes %00100/%00101 (a
-    WYPIN issued before enable is lost); consistent and safe for all other modes.
-    Hardware-verified (EF-011).'
+    WYPIN issued before enable is lost); consistent and safe for all other modes.'
   consequence_of_skipping: Selecting a new mode while DIR is high gives unpredictable, useless behavior (silicon-doc-text.txt:3856)
 usage_notes:
 - Configure with WRPIN while DIR is low (DIRL first) when selecting or changing a mode
-- 'WRPIN #0, pin clears all smart pin configuration, and resets a running smart pin even with DIR high (EF-012)'
+- 'WRPIN #0, pin clears all smart pin configuration, and resets a running smart pin even with DIR high'
 - Smart pin begins operation when DIR is set high after configuration
 - Use AKPIN to acknowledge smart pin IN flag without reading
 examples:

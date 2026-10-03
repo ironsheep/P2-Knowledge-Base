@@ -164,6 +164,12 @@ pin_mapping:
     DAC3: "Pins %xxxx11 (3, 7, 11, 15, 19, 23, 27, 31...)"
   note: "This is a silicon constraint - each DAC can only drive pins matching its channel number in the two LSBs"
 
+# Pin setup for a streamer-fed DAC output
+pin_setup:
+  rule: "The pin must be a COG DAC CHANNEL the streamer can override: a DAC mode with TT = %01 (P_CHANNEL, e.g. P_DAC_124R_3V | P_CHANNEL), COGID in M[3:0], and DIRH on the pin. The channel is chosen by the pin's two low bits (pin_mapping)."
+  tt_00: "At TT = %00 the pin IGNORES the streamer and holds its own M[7:0] level field: a configured, enabled pin with a constant output and no diagnostic."
+  see: "architecture/streamer/dds-goertzel.yaml dac_output_pin_setup (worked DDS-output setup); architecture/smart_pins.yaml (TT field)"
+
 # Common configurations
 common_configs:
   mono_audio:

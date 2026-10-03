@@ -418,7 +418,7 @@ extraction_metadata:
         - "Cog register note, INA/INB as debug call/return -- line 542"
         - "PASM2 instruction table, BRK/COGBRK/GETBRK -- lines 1938-1944"
   re_derivation_note: >-
-    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    Re-derived 2026-08-26. The header this file shipped with cited
     `part1-cog.txt`, a file that has never existed. Corrected in this pass: a
     `shadow_registers` block claiming debug shadows of PA/PB/PTRA/PTRB, replaced by the
     real mechanism (INA/INB remapped to IJMP0/IRET0, plus the $1F8..$1FF ROM and the

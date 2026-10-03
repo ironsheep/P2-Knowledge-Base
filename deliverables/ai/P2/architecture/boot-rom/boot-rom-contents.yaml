@@ -68,7 +68,7 @@ residents:
     entry_keystroke: '"> " (greater-than + space) then ESC'
     canonical_entry: architecture/boot-rom/taqoz-forth.yaml
 
-  # REMOVED 2026-09-08 (F-403): `character_font_data` and `math_tables` were
+  # REMOVED 2026-09-08: `character_font_data` and `math_tables` were
   # listed here as ROM residents carrying
   # `verification_status: "Existence confirmed"`. Existence was NOT confirmed.
   # Their only source was engineering/ingestion/sources/rom-booter/

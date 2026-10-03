@@ -128,13 +128,13 @@ gotchas:
   - flag: pitfall
     text: "A record that FITS in one long still needs a ONE-STORE publish (R5). Each bitfield write is a read-modify-write of the backing long, so filling the shared record field-by-field is several stores a reader can land between. Stage it in a private local, publish with one whole-struct store, snapshot with one whole-struct load. Fitting in one long makes an atomic publish POSSIBLE; storing it once is what makes it HAPPEN."
   - flag: pitfall
-    text: "R3's seq/ack handshake is LOAD-BEARING — do NOT drop it (KB finding F-213). The worker reads opcode/arg0/arg1 as THREE separate reads of shared memory; the ack is what stops the writer overwriting the command mid-read. For a non-blocking writer: pack the payload into one long (R5), or have the reader re-check the sequence (read seq, copy, re-read seq, retry if it moved) and discard a straddling copy."
+    text: "R3's seq/ack handshake is LOAD-BEARING — do NOT drop it. The worker reads opcode/arg0/arg1 as THREE separate reads of shared memory; the ack is what stops the writer overwriting the command mid-read. For a writer that must never wait: pack the payload into one long (R5). Re-reading the sequence after copying does NOT make a non-blocking writer safe: the writer bumps seq only after writing the fields, so a copy taken while it is mid-write sees the same seq before and after."
   - flag: pitfall
     text: "Member bitfields may OVERLAP silently. The compiler rejects a bit range that overruns its member type, but performs NO disjointness check — two fields sharing bits compile clean and corrupt each other. Add the bit budget up by hand, once."
   - flag: pitfall
     text: "Brackets write the POINTER, the bare name writes the RECORD: `[ph] := @packet` aims a ^struct pointer; plain `ph := ...` means the record it points at and will not compile as an address assignment."
   - flag: pitfall
-    text: "Use the REAL P2 locks LOCKNEW/LOCKTRY/LOCKREL. The P1 methods lockset()/lockclr() do NOT exist on P2 and will not compile (KB finding F-199)."
+    text: "Use the REAL P2 locks LOCKNEW/LOCKTRY/LOCKREL. The P1 methods lockset()/lockclr() do NOT exist on P2 and will not compile."
   - flag: pitfall
     text: "Release the lock on EVERY exit path from a critical section — an early RETURN/ABORT inside a locked section must LOCKREL first, or the lock leaks and other cogs hang. Free the lock with LOCKRET when done."
   - flag: pitfall
@@ -148,25 +148,25 @@ gotchas:
 
 hardware_status: |
   Every embedded block and every examples-library program compiles clean under pnut_ts -d (_clkfreq = 200_000_000). Beyond legality, every CROSS-COG claim in this note is CONFIRMED ON REAL P2
-  SILICON with two cogs actually contending (2026-07-13; empirical ledger EF-036..EF-040; rigs +
+  SILICON with two cogs actually contending (2026-07-13; rigs +
   golden analysis under external-sources/hardware-verification/campaigns/2026-07-cross-cog-data-structures/).
   Each discipline was measured against a deliberately-broken control, and the control was REQUIRED to
   fail before the result was accepted (a rig reporting zero in both arms is INCONCLUSIVE, never a pass).
-  Measured: R2 publish-index-last 0 torn / index-first 200_000 of 200_000 torn (EF-036). R5 staged
+  Measured: R2 publish-index-last 0 torn / index-first 200_000 of 200_000 torn. R5 staged
   one-store publish 0 torn / same fields written in-place into the shared packed long 116_452 of 200_000
-  torn (EF-037) -- fitting in ONE long does NOT make a record atomic; each bitfield write is a
+  torn -- fitting in ONE long does NOT make a record atomic; each bitfield write is a
   read-modify-write of the backing long. R3 seq/ack handshake present 0 bad / handshake removed 20_000 of
-  20_000 bad for a worker that dispatches between reads (EF-038, grounds F-213); a TIGHT-POLLING worker
+  20_000 bad for a worker that dispatches between reads; a TIGHT-POLLING worker
   reports zero, which is why the missing ack looks fine under the obvious test. R4 locked 0 anomalies /
-  unlocked 3_331 (EF-039). R6/R1 OFFSETOF+SIZEOF 11/11 layout checks match the numbers the note prints
-  (EF-040). No invented DEBUG captures. Implementation-only: the contract-choice reasoning is deferred to
+  unlocked 3_331. R6/R1 OFFSETOF+SIZEOF 11/11 layout checks match the numbers the note prints.
+  No invented DEBUG captures. Implementation-only: the contract-choice reasoning is deferred to
   the P2 Architect's Guide.
 
 provenance:
   primary_sources:
     - "Spin2 Language Documentation, v45 and later (Chip Gracey, Parallax Inc.) — the STRUCT facility (declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET"
   tool_ground_truth:
-    - "pnut_ts — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods (F-199)"
+    - "pnut_ts — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods"
   cross_check_sources:
     - "P2 Knowledge Base architecture/locks.yaml (16 locks, atomic test-and-set, deadlock ordering, release-on-all-paths) and architecture/decomposition/data-flow-contracts.yaml + the latest-wins-mailbox / buffer-management patterns (the mechanisms this note implements; the CHOICE among them is an Architect's Guide topic)"
   companion_publication:

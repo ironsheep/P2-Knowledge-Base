@@ -24,11 +24,11 @@ flags_affected:
 silicon_errata:
   clear_only_during_goertzel_burst:
     effect: "With the streamer idle, or running any non-Goertzel mode, GETXACC returns the live accumulator and clears nothing: repeated reads -- including right after XINIT of a non-Goertzel command -- return the same value, and the accumulators keep growing from one burst to the next. During a Goertzel burst the clear does act, and partitions the burst exactly (a read inside it plus the next read = one unread burst)."
-    evidence: "Hardware-verified on Rev C (EF-069): 50 of 50 idle/non-Goertzel reads equal the prior value; 8 of 8 mid-burst partitions exact. Contradicts the Silicon Doc's capture-and-clear statement. P2 Errata E4."
+    source: "Hardware-verified on Rev C (EF-069): 50 of 50 idle/non-Goertzel reads equal the prior value; 8 of 8 mid-burst partitions exact. Contradicts the Silicon Doc's capture-and-clear statement. P2 Errata E4."
   last_term_lands_in_next_burst:
     effect: "A reading after a Goertzel burst of N clocks holds N-1 terms; the last term waits in an internal register no instruction reads and is added on the first active clock of the NEXT Goertzel burst. Waiting does not deliver it."
-    evidence: "Hardware-verified on Rev C (EF-070): 16 of 16 sequences, N = 64 and 65, both signs. P2 Errata E5. (SINC2's iteration-count corruption is a separate, documented behaviour -- see goertzel_usage.sinc2_constraint.)"
-  workaround: "Helper routine (SINC1), proven on silicon (EF-076): take each burst's sums as the difference of two idle reads, and deliver the held term before each: (1) a zero-term burst -- XINIT with the caller's D at count 4 and the caller's S with S[15:12] = 0 (every summed input off) -- then WAITXFI; (2) GETXACC idle = baseline; (3) the caller's burst, WAITXFI; (4) another zero-term burst, WAITXFI; (5) GETXACC idle; (6) subtract. Returned exactly N terms in 60 of 60 calls, N = 1..1001, back to back. Not for SINC2 (its first stage is a running integral the zero burst does not flush)."
+    evidence: "Hardware-verified on Rev C: 16 of 16 sequences, N = 64 and 65, both signs. P2 Errata E5. (SINC2's iteration-count corruption is a separate, documented behaviour -- see goertzel_usage.sinc2_constraint.)"
+  workaround: "Helper routine (SINC1): take each burst's sums as the difference of two idle reads, and deliver the held term before each: (1) a zero-term burst -- XINIT with the caller's D at count 4 and the caller's S with S[15:12] = 0 (every summed input off) -- then WAITXFI; (2) GETXACC idle = baseline; (3) the caller's burst, WAITXFI; (4) another zero-term burst, WAITXFI; (5) GETXACC idle; (6) subtract. Returned exactly N terms in 60 of 60 calls, N = 1..1001, back to back. Not for SINC2 (its first stage is a running integral the zero burst does not flush)."
 documentation_source: "Silicon Doc silicon-doc-text.txt:1604 (the documented capture/clear/repeat-read statement); silicon behaviour: hardware-verified EF-069, EF-070, EF-076"
 documentation_level: enhanced
 compiler_operand_format:
@@ -70,7 +70,7 @@ goertzel_usage:
   target_frequency: "Set via SETXFRQ to match tone being detected"
   sample_count: "Run for power-of-2 samples (64, 128, 256 typical)"
   output: "X,Y are complex Goertzel output (real/imaginary)"
-  sinc2_constraint: "SINC2 (double integration) needs a CONSTANT iteration count per Goertzel cycle. A non-power-of-two SETXFRQ D makes the cycle span a varying number of clocks, and 'being off by a single clock cycle will corrupt the current and next samples' (Silicon Doc, NOTE ABOUT GOERTZEL SINC2 MODE, 2024.12.16). Mechanism, measured value for value: SINC2's first stage is a running integral GETXACC does not clear, so a window one clock longer or shorter than its neighbours moves one first-stage value between two adjacent samples, then self-corrects; one clock of read jitter corrupts most samples. Workarounds, both proven: a clock that makes the iteration count a power of two (the Silicon Doc's example runs 256 MHz, not 250, for a 1 MHz target), or start each measurement with XZERO instead of XCONT (clean at 10.24 us, 100 us and 25 ms windows). SINC1 is off by at most one term. Documented behaviour, not a silicon erratum. Measured: a corrupted pair occurs at every change of window length and never otherwise; XZERO held one window length and clean samples at 10.24 us, 100 us and 25 ms windows. Hardware-verified on Rev C (EF-072)."
+  sinc2_constraint: "SINC2 (double integration) needs a CONSTANT iteration count per Goertzel cycle. A non-power-of-two SETXFRQ D makes the cycle span a varying number of clocks, and 'being off by a single clock cycle will corrupt the current and next samples' (Silicon Doc, NOTE ABOUT GOERTZEL SINC2 MODE, 2024.12.16). Mechanism, measured value for value: SINC2's first stage is a running integral GETXACC does not clear, so a window one clock longer or shorter than its neighbours moves one first-stage value between two adjacent samples, then self-corrects; one clock of read jitter corrupts most samples. Workarounds, both proven: a clock that makes the iteration count a power of two (the Silicon Doc's example runs 256 MHz, not 250, for a 1 MHz target), or start each measurement with XZERO instead of XCONT (clean at 10.24 us, 100 us and 25 ms windows). SINC1 is off by at most one term. Documented behaviour, not a silicon erratum. Measured: a corrupted pair occurs at every change of window length and never otherwise; XZERO held one window length and clean samples at 10.24 us, 100 us and 25 ms windows."
 related_instructions:
   - QVECTOR: Compute magnitude/phase from X,Y pair
   - GETQX: Get magnitude result after QVECTOR
@@ -89,8 +89,8 @@ reading_protocol: |
   comments its read "get prior Goertzel acc's".
 
 notes:
-  - "GETXACC clears the accumulators only while a Goertzel burst runs; an idle read returns and keeps the running total (EF-069)"
-  - "A burst's last term lands in the next Goertzel burst unless a zero-term burst delivers it first (EF-070)"
+  - "GETXACC clears the accumulators only while a Goertzel burst runs; an idle read returns and keeps the running total"
+  - "A burst's last term lands in the next Goertzel burst unless a zero-term burst delivers it first"
   - Y value is injected into NEXT instruction's S operand
   - Must have appropriate instruction following GETXACC
   - Typical pattern: GETXACC + QVECTOR for magnitude extraction

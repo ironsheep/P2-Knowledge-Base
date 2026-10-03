@@ -58,9 +58,9 @@ description: |
   selector routes 'A' from the bus pin. That neighbour's IN then carries the bus
   pin's level, and the capture records the waveform.
 
-# LOCATORS REPAIRED 2026-08-30 (F-399). Every locator in this block except the
+# LOCATORS REPAIRED 2026-08-30. Every locator in this block except the
 # capture-path one was a p2-documentation.txt line number attributed to
-# silicon-doc-text.txt -- the F-365 carry-over shape. Each landed IN RANGE on
+# silicon-doc-text.txt. Each landed IN RANGE on
 # unrelated content (line 3604 was CORDIC example code), or past the end of the
 # file, so no range check could see it. The claims themselves were correct; only
 # the locators were wrong. Every replacement below was opened and read.
@@ -130,7 +130,7 @@ neighbour_capture_composition:
         condition under which the resultant 'A' drives IN at all."
     - step: 3
       do: "Leave the monitor pin's DIR low. It is an input; it must not drive the net
-        it is watching. (EF-062's DIRH requirement is about the streamer's pin OUTPUT
+        it is watching. (The DIRH requirement is about the streamer's pin OUTPUT
         path and does not apply to capture -- see dir_rule_does_not_apply_here below.)"
     - step: 4
       do: "Execute a WRFAST from cog RAM to aim the hub FIFO at your buffer, then start
@@ -225,17 +225,17 @@ alignment_constraint:
     8-pin-increment group select in D[22:20] is the only pin field there is."
   failure_with_plus: "the stray low bits CARRY out of the pin field into D[19:16],
     which is the mode field. You get a different mode at a different pin group.
-    Hardware-verified: EF-065 ran an 8-pin immediate mode at base 20 composed with `+`
-    and the silicon drove P24..P31, against an aligned control in the same run that
+    An 8-pin immediate mode at base 20 composed with `+`
+    made the silicon drive P24..P31, against an aligned control in the same run that
     drove P16..P23."
   failure_with_or: "the stray low bits set bits the mode template already sets, so they
-    VANISH and the command word comes out byte-identical to the aligned base. Also
-    EF-065. This is the worse failure, because two different-looking source lines
+    VANISH and the command word comes out byte-identical to the aligned base.
+    This is the worse failure, because two different-looking source lines
     produce the same machine word."
   neither_errors: "Both compile clean. The compiler cannot see either, and there is no
-    runtime check. EF-065's own rig would have compared two identical command words and
+    runtime check. The test rig would have compared two identical command words and
     called it a result -- the compiler LISTING caught that, not the bench."
-  second_family_second_proof: "EF-059 is the same failure in the ADC capture family,
+  second_family_second_proof: "The same failure occurs in the ADC capture family,
     proven by the bytes-per-rollover signature. See
     architecture/streamer/modes-reference.yaml field_notation_caveat_second_proof."
   practical_form: "Compose with `|`, check the alignment before composing, and read the
@@ -244,7 +244,7 @@ alignment_constraint:
     sub_pin_selection."
 
 dir_rule_does_not_apply_here:
-  the_confusion: "EF-062 established that a streamer pin OUTPUT does not drive until
+  the_confusion: "A streamer pin OUTPUT does not drive until
     DIR is raised -- the streamer feeds the pin's output STATE, not its output ENABLE."
   why_it_does_not_apply: "That is the output path (%e, D[23] in an output mode). Capture
     is the input path (%w, D[23] in a capture mode). A monitor pin is an input: its DIR
@@ -266,7 +266,7 @@ measurement_hygiene:
     confounded outright -- Goertzel accumulators reading 1,000,000-7,000,000 of
     corruption that collapsed to their true values in the hundreds once the mask was
     restricted."
-  detail_home: "architecture/streamer/overview.yaml debug_interaction -- the full EF-057
+  detail_home: "architecture/streamer/overview.yaml debug_interaction -- the full
     write-up, the CON snippet and the general rule."
   source: "EF-057 (grounds F-266) in
     engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"
@@ -284,34 +284,24 @@ displaying_a_capture:
   detail_home: "language/spin2/debug-displays/logic.yaml"
 
 verification_status:
-  what_is_bench_proven: "The ENCODING HAZARDS around this path are proven on real P2
-    silicon -- EF-065 and EF-059 for base-pin composition, EF-062 for the streamer's
-    output-side DIR requirement, EF-057 for the debug interrupt. Those transfer to
-    capture because they are properties of the command word and the cog, not of the
-    data direction."
-  what_is_not_proven_here: "The digital pin-capture path itself. Every streamer finding
-    this project holds is an OUTPUT or an ADC result; no test in our ledger has
-    exercised Pins-to-WRFAST digital capture into hub RAM, and none has measured the
-    IN-repurposing contrast on silicon. The mechanism above is documentary -- Propeller
-    2 Documentation v35 plus Parallax's own worked Spin2 v55 example -- and is
-    presented as documentary."
-  what_would_settle_it: "VO-J-005 in
-    engineering/ingestion/external-sources/hardware-verification/VERIFICATION-OPPORTUNITIES.md
-    -- a jumper-free bench rig that captures a smart-pin lane and a neighbour-routed
-    lane in the SAME buffer, so the contrast is one result rather than two runs
-    compared."
+  measured_on_silicon: "The IN contrast this page rests on: a plain pin whose A input
+    is routed from a neighbour reads that neighbour's level, and a pin running a
+    smart-pin mode presents the smart pin's handshake on IN, not the pin's level (both
+    observed with smart-pin counters). The command-word hazards (base-pin composition,
+    the output-side DIR requirement) and the debug-interrupt hazard are measured too."
+  not_yet_run: "Streamer digital capture into hub RAM (Pins-to-WRFAST) itself. That
+    path follows the Propeller 2 Documentation and Parallax's worked Spin2 v55
+    example."
 
 what_is_not_established_here:
   why_named: "So the omissions are deliberate rather than silent."
   sustained_sample_rate_ceiling: "NOT STATED. The NCO can be set to roll over every
     system clock, and the accrual rule says how many rollovers make a hub write -- but
     no Parallax source states a sustained capture rate the hub FIFO can hold, and this
-    project has never measured one. Any figure here would be invented. VO-J-005 is
-    written to measure it."
+    project has never measured one. Any figure here would be invented."
   filter_latency_and_inter_channel_skew: "NOT STATED. Whether a %FFF filt selection on
     one monitor pin delays that lane relative to an unfiltered lane, and by how much,
-    is not stated by any source we hold and has not been measured. VO-J-005 carries a
-    lane for it."
+    is not stated by any source we hold and has not been measured."
   protocol_decoding: "Out of scope entirely. Neither the streamer nor the DEBUG LOGIC
     window decodes SPI, I2C, UART or CAN; a capture yields levels over time."
 

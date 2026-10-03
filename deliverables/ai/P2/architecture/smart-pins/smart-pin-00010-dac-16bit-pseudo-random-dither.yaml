@@ -42,7 +42,7 @@ y_register:
 z_register:
   function: "ADC accumulation (if OUT=1)"
   usage: "16-bit ADC reading from last sample period"
-  enable: "Set OUT=1 to enable ADC feedback"
+  enable: "Set OUT=1 to enable ADC feedback -- with TT bit 0 set in the WRPIN word (P_OE / P_TT_01). With TT = %00 raising OUT runs nothing; with TT bit 0 set the DAC drives the pin while the ADC runs (architecture/smart_pins.yaml silicon_errata)."
 
 in_flag: |
   Raised at end of each sample period

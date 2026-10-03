@@ -170,7 +170,10 @@ notes:
   - "SINC2 post-processing: shift right by [LOG2(samples)]-1"
   - "SINC3 requires difference calculations and multiple accumulators"
   - "The gain modes (1x/3.16x/10x/31.6x/100x) set the pin-input voltage window and sensitivity. GIO/VIO do NOT - they substitute an internal calibration reference for the pin, and are how a reading is calibrated rather than how its range is chosen"
-  - "The gain-mode window is CENTERED ON MID-SUPPLY (~VIO/2), not referenced up from 0V. Measured on real P2 silicon: centered at ~1.64V for every gain (EF-024). A ground-referenced small-signal source needs a mid-rail bias network before it can be read through a gain mode"
+
+gain_mode_window:
+  fact: "The gain-mode window is CENTERED ON MID-SUPPLY (~VIO/2), not referenced up from 0V: centered at ~1.64V for every gain. A ground-referenced small-signal source needs a mid-rail bias network before it can be read through a gain mode."
+  source: "Hardware-verified on P2 silicon (Rev C): hardware-verification ledger EF-024 (F-202)."
 
 power_domain:
   fact: |

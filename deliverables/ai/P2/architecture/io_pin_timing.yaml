@@ -37,7 +37,7 @@ description: |
     - Slew rate. There is none to document. "slew" returns zero hits across every ingested
       Parallax source -- the Silicon Doc, both Spin2 editions, the smart-pins catalog, the
       re-ingested P2 Datasheet and the re-ingested P2 Hardware Manual. A prior form of this
-      description asserted configurable slew rates; it was fabrication (F-327, F-333) and is
+      description asserted configurable slew rates; it was fabrication and is
       not restored.
     - Propagation, rise and fall figures per drive setting. No Parallax source states them.
   source: "P2 Datasheet 2022/11/01 feature list and Absolute Maximum Electrical Ratings -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:117, :2126-2149"
@@ -229,7 +229,7 @@ dc_characteristics:
     Vol and Voh are characterised at 1 mA, 10 mA and 30 mA and stop there, which agrees
     with absolute_maximum_ratings' max_current_per_IO_pin of +/-30 mA above. Any figure
     above 30 mA per pin is not supported by this datasheet -- a shipped claim of 150 mA
-    was removed as fabricated (F-348 class), and this table is the reason it could never
+    was removed as fabricated, and this table is the reason it could never
     have been right.
 
   ac_characteristics_are_clock_specs_only: |
@@ -238,7 +238,7 @@ dc_characteristics:
     ranges and XI/XO pin capacitance ONLY. It carries no pin propagation, rise or fall
     figures, which is why this file's description says no source states them. Its PLL
     row -- 3.33 MHz min / 180 MHz typ / 320 MHz max, with the note that 180 MHz is
-    nominal at up to 105 degC -- is the same ceiling F-378 corrected the clock files to.
+    nominal at up to 105 degC -- is the same ceiling the clock files state.
 
 input_voltage_and_protection:
   description: |
@@ -298,7 +298,7 @@ timing_violations_debug:
 
 related_topics:
   - topic: "smart_pins"
-    relationship: "Smart pins are configured and read through WRPIN/WXPIN/WYPIN/RDPIN; their IN-flag reset timing is the smart_pin_in_flag_reset block above. A prior form of this line claimed smart pins add ~1-2 ns to base timing -- no Parallax source states any nanosecond figure for this, so it is not carried (cite-or-omit; same class as F-327/F-333)."
+    relationship: "Smart pins are configured and read through WRPIN/WXPIN/WYPIN/RDPIN; their IN-flag reset timing is the smart_pin_in_flag_reset block above. A prior form of this line claimed smart pins add ~1-2 ns to base timing -- no Parallax source states any nanosecond figure for this, so it is not carried (cite-or-omit)."
   
   - topic: "clock_system"
     relationship: "Pin timing scales with system clock"

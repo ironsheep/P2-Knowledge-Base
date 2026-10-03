@@ -26,10 +26,10 @@ configuration_directives:
   note: "Accepted in BITMAP_Configure (window creation)."
   TITLE: "TITLE 'string' -- window caption. Default caption is '<name> - BITMAP', not a bare type name."
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See language/spin2/statements/debug.yaml string_quoting."
-  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program)."
   SIZE: "SIZE w h -- pixels, each 1..2048 (default 256x256)"
   DOTSIZE: "DOTSIZE x {y} -- pixel magnification, each 1..256 (default 1x1; y copies x). Client size = w*x by h*y."
-  SPARSE: "SPARSE color -- sparse mode: each magnified pixel is drawn as a ROUND DOT on a SOLID BACKGROUND FILL of <color> (named/RGB24); -1 = off. It is NOT a grid border or an outline -- <color> fills the block BEHIND the dot. GATE: sparse rendering requires DOTSIZE >= 4; at DOTSIZE 3 or less it does not engage (hardware-verified, EF-042). Sparse renders far more slowly than the 1:1 path -- keep the logical canvas small."
+  SPARSE: "SPARSE color -- sparse mode: each magnified pixel is drawn as a ROUND DOT on a SOLID BACKGROUND FILL of <color> (named/RGB24); -1 = off. It is NOT a grid border or an outline -- <color> fills the block BEHIND the dot. GATE: sparse rendering requires DOTSIZE >= 4; at DOTSIZE 3 or less it does not engage. Sparse renders far more slowly than the 1:1 path -- keep the logical canvas small."
   color_mode: "Color mode keyword -- one of 19, in this order: LUT1 LUT2 LUT4 LUT8 LUMA8 LUMA8W LUMA8X HSV8 HSV8W HSV8X RGBI8 RGBI8W RGBI8X RGB8 HSV16 HSV16W HSV16X RGB16 RGB24 (default RGB24). Max depth is RGB24 -- no 32-bit/alpha."
   LUTCOLORS: "LUTCOLORS c0..cN -- up to 256 RGB24 palette entries (LUT modes only). The LUT is ZERO-INITIALIZED: until LUTCOLORS loads it, every entry is $000000, so a LUT mode with no LUTCOLORS renders a uniformly BLACK picture (not random garbage). Load the palette before feeding LUT-mode pixel data."
   TRACE: "TRACE n -- 0..15 bitfield: bits 0-2 = scan pattern (0..7), bit 3 = scroll (default 0)"
@@ -44,8 +44,8 @@ display_directives:
   color_mode: "A color-mode keyword may be sent mid-stream to change translation."
   LUTCOLORS: "Runtime palette replacement (LUT modes)."
   TRACE: "TRACE n -- mid-stream scan/scroll change; resets pixel position."
-  RATE: "RATE n -- runtime pixels-per-refresh change. WARNING: the create-line substitution of -1/0 does NOT happen at runtime. A runtime RATE -1 (or 0) stores the value as-is, and the refresh counter -- which fires on an EQUALITY test against an ever-increasing count -- can then never match it, so auto-refresh FREEZES: pixels keep arriving and the display silently stops updating. It is not an error and is not reported. A runtime RATE with any positive count resumes refreshing. Hardware-verified: EF-052. (v55's own Feeding table advertises RATE -1 as a legal runtime directive -- it is the trap.)"
-  SET: "SET x y -- random-access pixel position; x 0..w-1, y 0..h-1; CANCELS scroll."
+  RATE: "RATE n -- runtime pixels-per-refresh change. WARNING: the create-line substitution of -1/0 does NOT happen at runtime. A runtime RATE -1 (or 0) stores the value as-is, and the refresh counter -- which fires on an EQUALITY test against an ever-increasing count -- can then never match it, so auto-refresh FREEZES: pixels keep arriving and the display silently stops updating. It is not an error and is not reported. A later TRACE or CLEAR (both re-derive the rate) or an explicit UPDATE un-freezes it. (v55's own Feeding table advertises RATE -1 as a legal runtime directive -- it is the trap.)"
+  SET: "SET x y -- random-access pixel position; x 0..w-1, y 0..h-1; CANCELS scroll. An out-of-range SET is NOT clamped to the edge: the pixel fed after it does not appear."
   SCROLL: "SCROLL x y -- shift the bitmap; x -w..w (+x = right), y -h..h (+y = down); vacated area filled with background."
   CLEAR: "CLEAR -- fill with background, reset trace position, refresh (unless in UPDATE mode)"
   UPDATE: "UPDATE -- force a canvas refresh (needed in manual-refresh mode)"
@@ -83,7 +83,7 @@ not_supported:
 notes:
   - "Pixel stream order follows the TRACE scan pattern; SET gives random access, SCROLL shifts the image."
   - "LUT color modes use the LUTCOLORS palette; max depth is RGB24."
-  - "RATE -1 / RATE 0 are CREATE-LINE shorthands (whole frame / per scan-line). At RUNTIME they are NOT substituted and FREEZE auto-refresh instead (EF-052)."
+  - "RATE -1 / RATE 0 are CREATE-LINE shorthands (whole frame / per scan-line). At RUNTIME they are NOT substituted and FREEZE auto-refresh instead."
 
 related:
   - language/spin2/statements/debug.yaml

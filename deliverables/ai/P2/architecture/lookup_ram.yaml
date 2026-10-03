@@ -11,7 +11,7 @@
 #     (SETLUTS), :2065 (WRLUT); the cog/LUT block-transfer note lives on RDLONG's
 #     row at :1830-1832 ("Prior SETQ/SETQ2 invokes cog/LUT block transfer").
 #     The header previously cited :1831 alone as if it were a LUT instruction row;
-#     it is RDLONG. Corrected 2026-08-30, F-399.
+#     it is RDLONG. Corrected 2026-08-30.
 #   Spin2 Language Documentation v55, inline PASM2 cog register and LUT areas --
 #     engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:805-806, :833-834
 
@@ -337,7 +337,7 @@ extraction_metadata:
       sections:
         - "Inline PASM2 cog register and LUT areas -- lines 805-806, 833-834"
   re_derivation_note: >-
-    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    Re-derived 2026-08-26. The header this file shipped with cited
     `part1-cog.txt` (a file that has never existed) and datasheet pages 67-68 (the
     datasheet is 50 pages). Corrected in this pass: the WRLUT encoding and its reversed
     operands (D is the data, S is the address); the SETLUTS encoding; the LUT-sharing
@@ -346,7 +346,7 @@ extraction_metadata:
     WRLUT 2); and three invented LUT "regions" presented as a memory map. The fabricated
     mnemonic RDLUTS was removed -- it is in no Parallax source, in no other file of this
     knowledge base, and pnut-ts does not accept it as an instruction.
-    Re-derived again 2026-09-13 under F-422, F-427 and F-428: the literal LUT address range
+    Re-derived again 2026-09-13: the literal LUT address range
     corrected to #0..#255; the block-transfer examples corrected to the Silicon Doc's
     SETQ2 + RDLONG/WRLONG first_lut form, which addresses the LUT from 0; the unsourced
     waveform_generation, fast_buffer and fast_stack patterns removed, with the shared_read

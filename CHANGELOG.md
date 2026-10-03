@@ -20,11 +20,32 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
-## [1.22.1] - 2026-10-02
+## [1.23.0] - 2026-10-03
 
-**PASM2 instruction details checked line by line against Parallax's documentation, and the examples assemble.**
+**Every result proven on our P2 bench is in the KB, and PASM2 instruction details are checked line by line against Parallax's documentation.**
+
+### Added
+
+- **Timing with two `GETCT`s adds 2 clocks**: elapsed = end − start − 2
+- **An NCO frequency pin with Y = 0 produces no output**; the pin stays static
+- **`%10010` event timing restarts on the acknowledge**: reading the result with `RDPIN` starts the next measurement, with no new `WYPIN`
+- **A streamer-fed DAC pin needs `TT` = `%01` (`P_CHANNEL`)**; at `TT` = `%00` the pin ignores the streamer and holds its own level
+- **`DEBUG_TIMESTAMP` stamps come from the sending cog's own counter copy**, so a message from a cog in the `GETCT` stale window is stamped one wrap early
+- **The write-side SPI alignment pad**: only half-period-many phases exist, exactly one silently corrupts whole sectors, and a safe pad at one SCK rate can be the losing one at another
+- **PLOT `COLOR` takes a raw `$RRGGBB`** (read through the current color mode, RGB24 by default) and draws cyan by default; MIDI `COLOR` takes named or RGB24 colors; an out-of-range BITMAP `SET` is not clamped
+- **Hub reads and writes that cross a hub long boundary take one more clock**, noted on the 13 instructions it applies to
 
 ### Changed
+
+- **The streamer's DDS/Goertzel page reads `GETXACC` as the silicon behaves**: the clear acts only during a Goertzel burst, so read before and after a burst and subtract
+- **The latest-wins command mailbox carries its load-bearing handshake**: the writer posts only when ack equals seq, the reader copies every argument before acknowledging, and a writer that never waits packs the command into one long
+- **`PINSTART` states that its Yval is lost in the trigger and serial-transmit modes** (pass 0 and `WYPIN` after) and gives its own order, `WYPIN` before DIR goes high; the sync-serial example follows
+- **Spin2 `WRPIN` takes the pin first**, as `PINSTART` does; the PASM2 instruction takes the value first
+- **SCOPE_XY `DOTSIZE` and SCOPE `LINESIZE` are in half-pixels** (rendered size n/2); SCOPE `DOTSIZE` is in whole pixels
+- **The DAC smart-pin mode pages state that `OUT` runs the ADC only while `TT` bit 0 is set**
+- **A frozen BITMAP refresh resumes on `TRACE`, `CLEAR` or `UPDATE`**
+- **Entries state their facts without internal reference codes**
+- **`COGID` and `COGBRK` read the cog number from Dest[2:0]**; the `WAIT` entries name the flag each effect clears
 
 - **Instruction skipping is described as the silicon does it**: only `EXECF` carries a jump target; `SKIP` cancels each skipped instruction as a 2-clock NOP, `SKIPF` steps over them in cog/LUT; skipping runs outside interrupt service routines and resumes after one; the `REP` and branch rules
 - **`PUSHA`/`POPA` stacks ascend** (`WRLONG D,PTRA++` / `RDLONG D,--PTRA`), and every stack example follows
@@ -44,6 +65,7 @@ published; per-document release history lives in the changelogs it links.
 
 - **`IF_RET` as a spelling of `_RET_`** — it assembles as a label; a caution says so
 - **`WAITQMT`**, which the silicon does not have, and two unsourced claims: an automatic RCFAST fallback and a wrapping hardware stack
+- **A non-blocking mailbox variant that re-reads the sequence after copying**, which a writer that bumps the sequence last defeats
 
 ---
 

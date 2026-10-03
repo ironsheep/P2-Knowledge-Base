@@ -398,7 +398,7 @@ extraction_metadata:
         - "Locks, p.19-20 -- lines 877-905"
         - "PASM2 instruction table, lock rows, p.42 -- lines 1791-1797"
   re_derivation_note: >-
-    Re-derived 2026-08-26 under F-359. The header this file shipped with cited
+    Re-derived 2026-08-26. The header this file shipped with cited
     `part1-cog.txt` (a file that has never existed) and datasheet pages 34-35 and 82
     (the datasheet is 50 pages). All four lock-instruction encodings were wrong and have
     been replaced from the encoding table above; the "LOCKTRY (WC mode) = check without

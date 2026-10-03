@@ -159,7 +159,7 @@ development_boards:
   corrections_applied_2026_08_25: >-
     Removed and corrected against the sources above: the eval board's fabricated
     "USB-C programming", "Two 2x6 headers", "127x89mm", "16MB (with P2-EC)" and
-    part number "64000-ES" (F-350); and the three carriers' fabricated part
+    part number "64000-ES"; and the three carriers' fabricated part
     numbers P2-EVAL-STD-BREAKOUT / P2-EVAL-MINI-BREAKOUT /
     P2-EVAL-BREADBOARD-CARRIER, their wrong dimensions, the mini breakout's
     "3.3V input only" and "All 64 pins on edge castellations", and the
@@ -267,7 +267,7 @@ addon_boards:
     correction_note: >-
       This entry previously described 64006G as a "Combined Digital I/O" board
       with 4 LEDs and 4 switches. No such board exists in the #64006 series;
-      64006G is the Goertzel board. Same fabrication family as F-121.
+      64006G is the Goertzel board.
       The name also stood in two feature_matrix guidance lists
       (educational_progression.intermediate_path and
       application_domains.user_interfaces) and was removed from both on
@@ -441,7 +441,7 @@ compatibility_matrix:
     correction_note: >-
       This entry previously read "Up to 2 add-on boards" with a pin allocation of
       "A-side (P32-P39) + B-side (P24-P31)". The #64000 has eight headers covering
-      all 64 pins. F-350.
+      all 64 pins.
     
   recommended_combinations:
     education_starter:

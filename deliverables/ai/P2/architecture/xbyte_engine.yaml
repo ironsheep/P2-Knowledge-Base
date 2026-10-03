@@ -121,7 +121,7 @@ configuration_patterns:
 
   index_form_bit:
     name: "Mode-operand bit 1 -- index-form selector"
-    status: "DEFINED. Documentary (full Silicon Doc v35 mode table) and confirmed by Chip Gracey. Resolves F-223."
+    status: "DEFINED. Documentary (full Silicon Doc v35 mode table) and confirmed by Chip Gracey."
     detail: |
       Bit 1 selects WHICH HALF of the bytecode indexes the dispatch table:
         bit 1 = 0  -> index from the bytecode's LOW  bits (the 'primary' form)

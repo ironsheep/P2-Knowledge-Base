@@ -16,7 +16,7 @@ total_symbols: 78
 # fields, and every symbol below is defined one level down under a `symbol:` key
 # inside a mode list -- so without this block not one X_* streamer constant is
 # reachable by name through the published index, and neither is this file. That
-# was measured on 2026-09-05 (F-401): X_RFBYTE_1P_1DAC1, X_IMM_32X1_LUT and
+# was measured on 2026-09-05: X_RFBYTE_1P_1DAC1, X_IMM_32X1_LUT and
 # X_ALT_ON all resolved to nothing, while X_PINS_ON and X_WRITE_ON resolved only
 # because architecture/streamer/pin-selection.yaml happens to list those two in
 # its own hand-written aliases.

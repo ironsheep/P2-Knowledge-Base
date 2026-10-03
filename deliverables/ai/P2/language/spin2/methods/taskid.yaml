@@ -10,7 +10,7 @@ description: |
   representing this task's slot in the cog's task table. In each cog the
   top-level (initial) code runs as that cog's task 0; TASKSPIN(NEWTASK) then
   allocates upward (1, 2, ...). Task IDs are cog-local (each cog has its own
-  0-31 task space). Hardware-verified (EF-023).
+  0-31 task space).
   REQUIRES: {Spin2_v47} or later version directive at start of source file.
 syntax: "id := TASKID()"
 parameters: []
@@ -48,7 +48,7 @@ examples:
 notes:
   - "REQUIRES {Spin2_v47} or later at start of source file"
   - "Returns ID of currently executing task (0-31)"
-  - "In each cog the top-level code runs as that cog's task 0; TASKSPIN(NEWTASK) fills upward from 1 (hardware-verified, EF-023)"
+  - "In each cog the top-level code runs as that cog's task 0; TASKSPIN(NEWTASK) fills upward from 1"
   - "Task IDs are cog-local — every cog has its own 0-31 task space"
   - "Useful for task-specific storage/behavior"
   - "Each task has unique ID 0-31"

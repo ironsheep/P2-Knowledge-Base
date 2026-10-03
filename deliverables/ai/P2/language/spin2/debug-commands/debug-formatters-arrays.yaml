@@ -2,13 +2,13 @@
 # ALL array formatters support underscore (_) variants
 
 
-# Findability index (F-401, 2026-09-05). This file named itself in no
+# Findability index (2026-09-05). This file named itself in no
 # top-level field, so neither it nor anything it documents was reachable by
 # name through the published index -- only by guessing its camelCase key.
 # An alias is a lookup key, never a definition; every name below is defined
 # in this file.
 #
-# EXTENDED 2026-09-09 (F-404). The 2026-09-05 block enumerated the seven bare
+# EXTENDED 2026-09-09. The 2026-09-05 block enumerated the seven bare
 # `_ARRAY` forms plus UHEX_BYTE_ARRAY, and left the sized and register forms to
 # the composition rule in `formatters` x `array_types` below. A composition rule
 # is not a string, so no field held the literal token and the harvester could not

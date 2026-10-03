@@ -92,7 +92,7 @@ key_parameters:
     - "QVECTOR (X,Y) -> (length, angle) (signed)"
     - "QLOG integer -> 5.27 fixed-point log2"
     - "QEXP 5.27 fixed-point -> integer"
-  # F-416/F-419, 2026-09-10: the "~28 bits" figure is stated by no Parallax source and is
+  # 2026-09-10: the "~28 bits" figure is stated by no Parallax source and is
   # not asserted. See architecture/cordic.yaml accuracy.trigonometric.
   precision: "integer ops (mul/div/sqrt) exact; trig (rotate/vector/log/exp) iterative -- low bits approximate, no sourced bit count"
 
@@ -102,9 +102,9 @@ prerequisites:
   - "P2 32-bit signed integer / fixed-point model (no floating-point hardware)"
 
 gotchas:
-  # LOCATORS REPAIRED 2026-08-30 (F-399). Three of the four silicon-doc locators
+  # LOCATORS REPAIRED 2026-08-30. Three of the four silicon-doc locators
   # (lines 434, 5145 and 5401) landed in range on unrelated content -- COGID and
-  # COG RAM, and the RDLUT and MERGEW encoding tables -- the F-377 shape, invisible
+  # COG RAM, and the RDLUT and MERGEW encoding tables -- invisible
   # to a range check. Line 175 was already correct. Every replacement was opened
   # and read.
   source: "Propeller 2 Documentation v35 -- CORDIC solver summary at engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:175 and :3304 ('a 54-stage pipelined CORDIC solver'), the 55-clock result latency at :3315, and the GETQX/GETQY no-result event at :2054 and :2291 ('Event 15 = GETQX/GETQY executed without any CORDIC results available') with the pipelining/interrupt warning at :3413; hardware-verified pipeline behaviour EF-053 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:637-655"
@@ -114,7 +114,7 @@ gotchas:
     - flag: pitfall
       text: "Read each result before the next overwrites it. Reading with nothing pending raises the documented event: 'GETQX/GETQY executed without any CORDIC results available or in progress' (event 15). Never let an interrupt stall a pipelined sequence -- wrap it in REP."
     - flag: pitfall
-      text: "Keep hub access OUT of both CORDIC loops -- correctness, not optimization. Hardware-verified 2026-08-14 on real P2 at 200 MHz (EF-053, seven consistent runs): a RDLONG inside the fill loop first gave wrong results at FILL=2; a WRLONG inside the drain at FILL=3; register-only fill AND drain, with hub I/O batched outside, stayed clean through FILL=7. The failure is SILENT -- plausible-looking numbers, no fault and no flag. Scope, from the finding itself: this measures WHERE results are lost, not why; state it as the tested shape -- keep hub access out of both loops -- not as a law about any hub access. Index a cog-RAM buffer with ALTS/ALTD in between."
+      text: "Keep hub access OUT of both CORDIC loops -- correctness, not optimization. Hardware-verified 2026-08-14 on real P2 at 200 MHz (seven consistent runs): a RDLONG inside the fill loop first gave wrong results at FILL=2; a WRLONG inside the drain at FILL=3; register-only fill AND drain, with hub I/O batched outside, stayed clean through FILL=7. The failure is SILENT -- plausible-looking numbers, no fault and no flag. Scope, from the finding itself: this measures WHERE results are lost, not why; state it as the tested shape -- keep hub access out of both loops -- not as a law about any hub access. Index a cog-RAM buffer with ALTS/ALTD in between."
     - flag: tip
       text: "The angle occupies the whole 32-bit range, so there is no wrap to manage -- add and subtract angles freely; the overflow IS the wrap you want."
     - flag: hardware

@@ -14,7 +14,7 @@ description: |
   P2 Monitor debug interface, and the TAQOZ Forth interpreter. (Those three are
   what the Hardware Manual's content line names; a prior form of this sentence
   added utility routines, character font data and math tables, which no source
-  states — F-403.) On power-up or reset, the Bootloader
+  states.) On power-up or reset, the Bootloader
   reads three boot pattern pins (P59-P61) and selects one of three boot
   paths: serial (P63/P62), SPI flash (P58-P61), or microSD card. Each path
   has documented fallback behavior. The Monitor and TAQOZ are interactive

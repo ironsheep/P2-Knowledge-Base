@@ -1,6 +1,6 @@
 # Spin2 `+//` -- unsigned remainder
 #
-# DEFINITION HOME for this operator (F-402, 2026-09-05). Two files defined `+//`
+# DEFINITION HOME for this operator (2026-09-05). Two files defined `+//`
 # and they disagreed: language/spin2/operators/modulo_add.yaml called it an
 # "Unsigned Modulo Add" that "performs addition with unsigned modulo". It performs
 # no addition -- a leading `+` on a division-family operator selects the UNSIGNED
@@ -151,7 +151,7 @@ related_operators_source: >-
 notes:
   - Works with any modulus value, not only powers of two
   - Result range is 0 to (modulus - 1)
-  - "Modulus 0: x +// 0 does not trap -- it returns x unchanged, every time (x +//= 0 the same). Hardware-verified on Rev C (EF-089)."
+  - "Modulus 0: x +// 0 does not trap -- it returns x unchanged, every time (x +//= 0 the same)."
   - The worked patterns above come from production driver code (P2-OctoSerial);
     they are usage examples, not a Parallax statement about the operator
 

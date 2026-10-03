@@ -1,10 +1,19 @@
 pattern_id: "latest_wins_mailbox"
 description: |
-  Non-blocking, single-slot command mailbox with a seq/ack handshake. The writer fills
-  the argument slots FIRST and bumps a sequence counter LAST (the publish); the reader
-  acts when seq != ack and writes ack := seq when it consumes. Neither side ever blocks,
-  and a torn read is impossible without a lock because the seq bump is the single atomic
-  long that gates visibility of the args.
+  Single-slot command mailbox with a seq/ack handshake, no lock. The writer fills the
+  argument slots FIRST and bumps a sequence counter LAST (the publish); the reader acts
+  when seq != ack, copies the command and ALL its arguments, and only then writes
+  ack := seq. The writer does not touch the slot again until ack == seq. The reader
+  never blocks; the writer waits only for the reader's copy, not for the command to run.
+
+  THE HANDSHAKE IS LOAD-BEARING. Bump-last only guarantees the reader never sees a
+  command before its first publish. It does not stop a SECOND post overwriting the slot
+  while the reader is part-way through reading it -- the reader's reads of the id and the
+  args are separate reads of shared memory. Measured: with the writer not waiting for the
+  ack and a reader that does any work between reading the id and the args, every command
+  was torn; with the wait, none was. A tight polling reader wins the race and HIDES the
+  fault, so the obvious test passes. A writer that must never wait packs the whole command
+  into ONE long and publishes it with one store (p2an007 recipe R5).
 
   This is the contract a real-time control loop needs for its inbound command seam — the
   correct replacement for a blocking `repeat while mailbox_cmd` poll, which couples the
@@ -13,7 +22,7 @@ description: |
   freshness counter (event plane).
 
 when_use:
-  - "A producer cog must hand a command to a consumer cog without either one blocking"
+  - "A producer cog must hand a command to a consumer cog without the consumer blocking, the producer waiting only for the consumer's copy"
   - "Only the NEWEST command matters (latest-wins); intermediate commands may be dropped"
   - "A real-time loop must accept commands without stalling on the producer"
 
@@ -25,8 +34,9 @@ implementation: |
     long  bCmdSeq                          ' producer bumps this LAST (publish)
     long  bAckSeq                          ' consumer sets = bCmdSeq when consumed
 
-  ' --- producer cog: publish a command (never blocks) ---
+  ' --- producer cog: publish a command ---
   PUB postCommand(commandId, arg0, arg1, arg2, arg3)
+    repeat until bAckSeq == bCmdSeq        ' previous command copied by the reader
     bCmdArg[0] := arg0
     bCmdArg[1] := arg1
     bCmdArg[2] := arg2
@@ -41,20 +51,23 @@ implementation: |
         consumeCommand()
       ' ... other periodic work continues regardless ...
 
-  PRI consumeCommand() | requestedCmd
+  PRI consumeCommand() | requestedCmd, args[4]
     requestedCmd := bCmdId
-    bAckSeq := bCmdSeq                     ' acknowledge BEFORE acting (latest-wins)
+    longmove(@args, @bCmdArg, 4)           ' copy EVERY arg out of shared memory...
+    bAckSeq := bCmdSeq                     ' ...THEN acknowledge (slot is free again)
     case requestedCmd
-      ' ... act on requestedCmd / bCmdArg[] ...
+      ' ... act on requestedCmd / args[] (the local copies) ...
 
 anti_patterns:
   - "Bumping the seq BEFORE writing the args -- the reader can latch stale/torn arguments."
-  - "A blocking `repeat while mailbox_cmd` handshake -- serializes a system meant to run in parallel and throws away the P2's determinism."
-  - "Using a lock to guard the slot when there is exactly one writer -- the seq-bumped-last discipline already makes it correct lock-free (single-long writes are atomic)."
+  - "Posting the next command without waiting for ack == seq -- a reader that does any work between reading the id and the args reads a torn command; a tight polling reader hides it."
+  - "Acknowledging before every arg has been copied -- hands the slot back while it is still being read."
+  - "A blocking `repeat while mailbox_cmd` handshake on the COMMAND's completion -- couples the writer to the consumer's worst-case latency; here the writer waits only for the copy."
+  - "Using a lock to guard the slot when there is exactly one writer -- the seq/ack handshake already makes it correct lock-free (single-long writes are atomic)."
 
 resources:
   memory: "~24 bytes per mailbox (4 args + id + cmdSeq + ackSeq)"
-  locks: "none -- single-writer atomic-long publish"
+  locks: "none -- one writer, seq bumped last, seq/ack handshake"
   cogs: "two (one producer, one consumer)"
 
 combines_with:
@@ -67,6 +80,7 @@ related:
   - architecture/decomposition/evaluation-vocabulary.yaml
   - language/spin2/patterns/implementation/spin2_mailbox_communication.yaml
   - language/spin2/concepts/object_archetypes.yaml
+  - application-notes/p2an007-data-structures-new-facilities.yaml
 
 see_also:
   - "Force 2 / the three planes -- when to choose this contract: p2kbArchDataFlowContracts"

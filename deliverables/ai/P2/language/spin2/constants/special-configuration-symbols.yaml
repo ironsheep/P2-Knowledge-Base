@@ -318,6 +318,7 @@ debug_output_control:
     description: Adds 64-bit CT timestamp to each DEBUG message
     default: "undefined"
     usage: "CON DEBUG_TIMESTAMP = 1"
+    caveat: "The stamp is read from the SENDING cog's own copy of the counter, so a message sent from a cog in a stale window (a four-cog group that had no running cog at a counter wrap -- the GETCT WC silicon erratum) is stamped one wrap early per wrap missed (2^32 clocks, 21.47 s at 200 MHz) and prints out of time order among other cogs' messages. Applies to Spin2 debug() and PASM2 DEBUG alike. Workaround and full conditions: language/pasm2/getct.yaml silicon_errata."
     
   DEBUG_MASK:
     description: |
@@ -398,7 +399,7 @@ debug_debugger_control:
       every cog it starts - including a cog running timing-critical work.
       Restrict it to the reporting cog when measuring anything: see
       architecture/streamer/pin-capture.yaml `measurement_hygiene`, where leaving it at
-      the default corrupted streamer accumulators by 1,000,000-7,000,000 (EF-057).
+      the default corrupted streamer accumulators by 1,000,000-7,000,000.
       A child object compiled with DEBUG_MASK = 0 is NOT removed from the debug
       mechanism by that - DEBUG_MASK is a compile-time code mask, DEBUG_COGS is the
       runtime interrupt enable. They are different questions.

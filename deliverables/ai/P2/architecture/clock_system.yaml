@@ -127,7 +127,7 @@ pll_system:
     pll_when_pppp_is_15: "PLL = VCO"
     pll_otherwise: "PLL = VCO / ((%PPPP + 1) * 2)"
   overclocking: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15). -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545"
-  cross_source_conflict: "The P2 Hardware Manual's equivalent table states the recommended VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz (engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:574). Filed as F-330; the 100-200 MHz recommendation and the separate 350 MHz overclock ceiling are the form used here."
+  cross_source_conflict: "The P2 Hardware Manual's equivalent table states the recommended VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz (engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:574). The 100-200 MHz recommendation and the separate 350 MHz overclock ceiling are the form used here."
 
 hubset_configuration:
   source: "P2 Datasheet p.18 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:775-777; Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:521"
@@ -174,7 +174,7 @@ stabilization_timing:
   rcfast: "Can be switched to at any time."
   rcslow: "Can be switched to at any time."
   emitted_wait: "WAITX ##20_000_000/100 -- the wait the sources themselves emit for the 10ms case, computed at the RCFAST rate the code is still running at."
-  conflict_resolved: "An earlier form of this block stated pll_lock as ~10 microseconds. Three Parallax sources state 10ms, each via two independent extraction paths (raw text and reconstructed table); the microsecond figure has no source. See F-349."
+  conflict_resolved: "An earlier form of this block stated pll_lock as ~10 microseconds. Three Parallax sources state 10ms, each via two independent extraction paths (raw text and reconstructed table); the microsecond figure has no source."
 
 clock_sources:
   rcfast:

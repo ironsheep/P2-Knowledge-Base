@@ -24,8 +24,8 @@ flags_affected:
   C: No effect
   Z: No effect
 silicon_errata:
-  setq_block_ptrx_delta: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this WRLONG -- the intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT N*4; every long still transfers. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: P2 Silicon Doc v35 (KNOWN BUGS, Rev C); step measured, hardware-verified (EF-067, ALTD tested)."
-  after_no_wait_rdfast: "Started fewer than 16 clocks after a no-wait RDFAST (D[31]=1), WRLONG can complete before its write lands; if a hub read follows at once, the write is lost (the hub keeps its old long) or that read returns the previous hub read's long instead. Nothing flags it. Rule: use the waiting RDFAST (D[31]=0), or start this WRLONG at least 16 clocks after the no-wait RDFAST (e.g. WAITX #12 directly after it). Hardware-verified (EF-084, EF-086, EF-088). Full account: language/pasm2/rdfast.yaml silicon_errata."
+  setq_block_ptrx_delta: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this WRLONG -- the intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT N*4; every long still transfers. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: P2 Silicon Doc v35 (KNOWN BUGS, Rev C); step measured, ALTD tested."
+  after_no_wait_rdfast: "Started fewer than 16 clocks after a no-wait RDFAST (D[31]=1), WRLONG can complete before its write lands; if a hub read follows at once, the write is lost (the hub keeps its old long) or that read returns the previous hub read's long instead. Nothing flags it. Rule: use the waiting RDFAST (D[31]=0), or start this WRLONG at least 16 clocks after the no-wait RDFAST (e.g. WAITX #12 directly after it). Full account: language/pasm2/rdfast.yaml silicon_errata."
 compiler_category: Memory and I/O
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced

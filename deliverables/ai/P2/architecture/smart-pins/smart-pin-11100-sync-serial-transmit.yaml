@@ -63,10 +63,12 @@ spin2_complete: |
   PUB main() | mode
     ' 8-bit SPI master TX, positive edge
     mode := P_SYNC_TX | P_OE | P_PLUS1_B     ' Clock from pin+1
-    PINSTART(TX_PIN, mode, %1_00111, $A5)    ' Start-stop, 8-bit, data=$A5
-    
-    ' Setup companion clock
-    PINSTART(CLK_PIN, P_TRANSITION | P_OE, $1000, 16)  ' 16 transitions
+    PINSTART(TX_PIN, mode, %1_00111, 0)      ' Start-stop, 8-bit (Y=0: see below)
+    WYPIN(TX_PIN, $A5)                       ' data AFTER enable
+
+    ' Setup companion clock -- a PINSTART Yval is lost in a trigger mode
+    PINSTART(CLK_PIN, P_TRANSITION | P_OE, $1000, 0)
+    WYPIN(CLK_PIN, 16)                       ' 16 transitions, AFTER enable
     
   PUB stream_continuous() | mode
     ' Continuous streaming with negative edge

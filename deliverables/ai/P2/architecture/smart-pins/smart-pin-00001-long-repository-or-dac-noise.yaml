@@ -29,6 +29,7 @@ dac_noise_mode:
   x_register: "Optional sample period in clocks for IN timing (0 = max 65536-clock period, lowest switching power)"
   y_register: "Not used (8-bit DAC is fed pseudo-random data every clock automatically)"
   z_register: "16-bit ADC accumulation from last sample period (RDPIN/RQPIN)"
+  adc_enable: "With TT = %0x, OUT switches the pin's ADC -- but only while TT bit 0 is also set (P_OE / P_TT_01): with TT = %00 raising OUT runs nothing, and with TT bit 0 set the DAC drives the pin while the ADC runs (architecture/smart_pins.yaml silicon_errata)."
   requires: "M[12:10]=%101 in WRPIN mode value"
 
 # Complete Spin2 Example

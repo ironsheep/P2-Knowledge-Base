@@ -194,7 +194,7 @@ gotchas:
     symptom: "Community lore holds that the first byte after enabling may briefly glitch the line low before the start bit. NOT reproduced on P2 silicon: over a real wired loopback the cold first byte arrived clean, with no settling frame, for multiple values (a faint sub-bit line-settle showed in the raw word but did not corrupt the decoded byte)."
     workaround: "The reported harmless WYPIN $FF (all-ones) pre-clear is optional belt-and-suspenders — it is not required for correct first-byte transmission on real hardware."
     attribution: "Community-reported (credited to Ray Rodrick)."
-    status: "HW-CONFIRMED NOT-OBSERVED (2026-06-17, test51b-asynctx-firstbyte-glitch-wired, RA-19; ledger EF-016). Do not assert as a rule."
+    status: "HW-CONFIRMED NOT-OBSERVED (2026-06-17, test51b-asynctx-firstbyte-glitch-wired, RA-19). Do not assert as a rule."
 
 notes:
   - "OUT signal automatically overridden in this mode"

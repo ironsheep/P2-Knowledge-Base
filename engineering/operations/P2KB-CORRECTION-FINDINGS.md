@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-521`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-524`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -51,7 +51,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## The bench ledger audited against the KB (2026-10-03, «#374») — F-506 … F-520
+## The bench ledger audited against the KB (2026-10-03, «#374», fixed «#375») — F-506 … F-523
 
 Every hardware run we hold — **EF-001…EF-089 (84 entries) and XF-001…004 (4)**, 88 in all — was
 checked against the YAML on disk, not against its ledger "Grounds" line (only 28 of the 84 name a
@@ -66,7 +66,8 @@ per-version tool bugs; XF-004 an SD-protocol count). One agent verdict was overr
 rig, and agrees with the KB's "one long per clock after sync" — clean. Two KB-wide findings rode
 along (F-519, F-520). Fix through `yaml-knowledge-base-maintenance`; ship in one `release-yamls`.
 
-### F-506 — `dds-goertzel.yaml` teaches GETXACC as capture-and-clear into a holding register — `CONFIRMED`
+### F-506 — `dds-goertzel.yaml` teaches GETXACC as capture-and-clear into a holding register — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `reading_results.operation` rewritten to the Rev C model (clear only during a Goertzel burst; N-1 terms; last term in the next burst), `holding_register_protocol` → `reading_protocol` (read before and after, subtract, zero-term burst first), and the XCONT example comment corrected ("the sums since the last read"). Trace: EF-069, EF-056, EF-070; matches `pasm2/getxacc.yaml`.
 `architecture/streamer/dds-goertzel.yaml:167-183` (`reading_results.operation`,
 `holding_register_protocol`): "Both accumulators are CAPTURED into holding registers and cleared …
 Subsequent GETXACC instructions return THE SAME captured values until a new streamer command
@@ -78,7 +79,8 @@ bench result — the v1.22.0 fix never reached the streamer page. **Fix:** rewri
 getxacc.yaml model (read before and after, take the difference; the burst_sums helper for exact
 sums).
 
-### F-507 — the latest-wins mailbox pattern says a torn read is impossible — `CONFIRMED`
+### F-507 — the latest-wins mailbox pattern says a torn read is impossible — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** Both files now carry the P2AN007 R3 design the bench validated (0 bad in 20,000 with the ack): the writer posts only when ack == seq; the reader copies the id and every arg, then acks. The pattern's example was fixed (`postCommand` waits; `consumeCommand` copies with `longmove` before acking; compiled with pnut-ts 1.55.8 in a harness); anti-patterns added; "neither side ever blocks" removed. Trace: EF-038; `P2AN007/examples-library/latest-wins-mailbox.spin2`. The second non-blocking alternative p2an007 offered turned out unsafe — F-521.
 `language/spin2/patterns/implementation/spin2_latest_wins_mailbox.yaml:5-7` ("a torn read is
 impossible without a lock because the seq bump is the single atomic long that gates visibility of
 the args") and `architecture/decomposition/data-flow-contracts.yaml:135-137` ("The bump-last ordering
@@ -88,11 +90,13 @@ worker that does any work between reading the opcode and its arguments, removing
 the slot mid-read. The pattern's own example (`consumeCommand`, :44-48) writes `bAckSeq := bCmdSeq`
 **before** reading `bCmdArg[]` ("acknowledge BEFORE acting"), which hands the slot back while it is
 still being read. `application-notes/p2an007-data-structures-new-facilities.yaml:131` states the
-correct rule. **Fix:** both files carry p2an007's rule — the handshake is load-bearing; read the
-whole payload before acknowledging, or pack it into one long, or re-check the sequence after copying
-and discard a straddling copy; correct the example's order.
+correct rule. **Fix:** both files carry p2an007's R3 rule — the handshake is load-bearing; the writer
+posts only when ack == seq, the reader reads the whole payload before acknowledging; a writer that must
+never wait packs it into one long (R5); correct the example's order. (p2an007's third option, re-checking
+the sequence after copying, is unsafe with a bump-last writer — F-521.)
 
-### F-508 — SCOPE_XY `DOTSIZE` "in pixels" and SCOPE `LINESIZE` with no unit; both are half-pixels — `CONFIRMED`
+### F-508 — SCOPE_XY `DOTSIZE` "in pixels" and SCOPE `LINESIZE` with no unit; both are half-pixels — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `scope_xy.yaml` DOTSIZE and `scope.yaml` LINESIZE state half-pixels (rendered = n/2); `scope.yaml` DOTSIZE states whole pixels. LOGIC/FFT units left unstated (not benched). Trace: EF-041 (PNut + pnut-term-ts).
 `language/spin2/debug-displays/scope_xy.yaml:37`: "DOTSIZE n -- dot diameter in pixels, 2..20".
 `language/spin2/debug-displays/scope.yaml:35`: "LINESIZE n -- trace line thickness, 0..32" (no
 unit). Measured on PNut and pnut-term-ts (EF-041): SCOPE_XY `DOTSIZE` and SCOPE `LINESIZE` render at
@@ -101,7 +105,8 @@ Spin2 v55 says the same. **Fix:** state half-pixels (rendered size = n/2) on bot
 shares the whole-pixel path (inferred, not measured); LOGIC/FFT `LINESIZE` units were not benched —
 check them against the PNut source before stating a unit.
 
-### F-509 — `pinstart.yaml` presents WYPIN-before-DIRH as the complete, correct sequence — `CONFIRMED`
+### F-509 — `pinstart.yaml` presents WYPIN-before-DIRH as the complete, correct sequence — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `pinstart.yaml`: the description states that PINSTART's Yval is lost in the trigger and serial-transmit modes (pass 0, WYPIN after), value modes keep it; the misleading note reworded. **Widened in the same file:** `output_enable_note` gave PINSTART's order as "DIRL, WRPIN, WXPIN, DIRH, WYPIN" — corrected to WYPIN before DIRH (Spin2 v55 `spin2-v55-text.txt:537`). **Widened in the family:** `smart-pin-11100-sync-serial-transmit.yaml`'s example passed its data and transition count as PINSTART Yvals — both now Y = 0 then WYPIN after. Trace: EF-011 (and EF-019, the value-mode NCO pass).
 `language/spin2/methods/pinstart.yaml:129-150`: `internal_sequence` and `operations` list DIR=0,
 WRPIN, WXPIN, **WYPIN, then DIR=1**, and `notes` calls it "Complete smart pin initialization sequence
 with proper reset". The bench (EF-011) proved that order **never triggers** the trigger and serial
@@ -112,19 +117,22 @@ on the page a PINSTART user reads. **Fix:** pinstart.yaml says it suits value mo
 trigger and serial modes need reset → WRPIN/WXPIN → DIRH → WYPIN; check `smart-pin-00100…` and
 `smart-pin-11110…` carry the order too.
 
-### F-510 — the NCO mode pages never say what Y = 0 does — `CONFIRMED`
+### F-510 — the NCO mode pages never say what Y = 0 does — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `smart-pin-00110-nco-frequency.yaml` `y_register.zero`. Narrowed: `%00111`'s Y = 0 is already 0% duty by its own formula, and the bench measured one NCO mode, so that page is unchanged. The page's bare-name `related:` list converted to full paths (findability). Trace: EF-013.
 `architecture/smart-pins/smart-pin-00110-nco-frequency.yaml` and `smart-pin-00111-nco-duty.yaml`:
 the `y_register` blocks give the frequency formula only. Measured (EF-013): Y = 0 produces **no
 output** — the pin stays static (0 events against 200 with Y > 0), as EF-010 found for %00101.
 **Fix:** one line in each `y_register` block.
 
-### F-511 — %10010 does not say that RDPIN's acknowledge starts the next measurement — `CONFIRMED`
+### F-511 — %10010 does not say that RDPIN's acknowledge starts the next measurement — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `smart-pin-10010-time-x-a-events.yaml` `flags.acknowledge_restarts`. Trace: EF-015.
 `architecture/smart-pins/smart-pin-10010-time-x-a-events.yaml` has no restart statement, though its
 frequency example (:46-53) loops on RDPIN and relies on it. Measured (EF-015): two successive
 measurements both arrived with no re-WYPIN — the acknowledge restarts the measurement. **Fix:** state
 it in the mode page (and in `pasm2/rdpin.yaml` for this mode if the page lists per-mode effects).
 
-### F-512 — the DAC smart-pin mode pages say "OUT enables the ADC" without the TT bit 0 condition — `CONFIRMED`
+### F-512 — the DAC smart-pin mode pages say "OUT enables the ADC" without the TT bit 0 condition — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `%00010` and `%00011` `enable` lines and a new `%00001` `adc_enable` line state the TT bit 0 condition and point to `architecture/smart_pins.yaml` silicon_errata. Trace: EF-071.
 `architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml:45, :56, :94, :175`
 ("OUT=1 enables ADC"), and the same claim in `smart-pin-00011-dac-16bit-pwm-dither.yaml`; the
 %00001 page carries no ADC rule at all. P2 Errata E6 (EF-071): with `TT` = `%00`, raising OUT runs
@@ -133,26 +141,30 @@ nothing; `TT` bit 0 must be set, and the DAC then drives the pin. The rule is in
 Their examples use `P_OE` (TT bit 0 set), so nothing printed there fails. **Fix:** each of the three
 mode pages states the condition and points to the smart_pins.yaml entry.
 
-### F-513 — `dac-routing.yaml` does not say a streamer-fed DAC pin needs `TT` = `%01` (`P_CHANNEL`) — `CONFIRMED`
+### F-513 — `dac-routing.yaml` does not say a streamer-fed DAC pin needs `TT` = `%01` (`P_CHANNEL`) — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** New `pin_setup` block (rule, the TT = %00 failure, pointer to the dds-goertzel worked setup). Trace: EF-063.
 `architecture/streamer/dac-routing.yaml` has no TT or P_CHANNEL text. Measured (EF-063): at
 `TT` = `%00` the pin ignores the streamer and holds its own level field (spread 1 against 5,330 with
 P_CHANNEL). The rule appears only inside `dds-goertzel.yaml:301-307`'s example notes. **Fix:** state
 it in dac-routing.yaml (and the X_DACS_* notes in `modes-reference.yaml` if they describe pin setup).
 
-### F-514 — the `DEBUG_TIMESTAMP` entry carries no stale-window caveat — `CONFIRMED`
+### F-514 — the `DEBUG_TIMESTAMP` entry carries no stale-window caveat — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `special-configuration-symbols.yaml` `DEBUG_TIMESTAMP.caveat`, pointing to `pasm2/getct.yaml`. Trace: EF-083.
 `language/spin2/constants/special-configuration-symbols.yaml:282, :317-320` describe the stamp as
 "the 64-bit CT value" with no caveat. Measured (EF-083): the stamp is taken from the **sending cog's
 own** copy of the counter, so a message sent from a cog inside a stale window (P2 Errata E3) is
 stamped one wrap early and prints out of time order. The fact is only in `pasm2/getct.yaml:26`.
 **Fix:** a caveat on the DEBUG_TIMESTAMP entry pointing to the getct.yaml erratum.
 
-### F-515 — no YAML gives the 2-clock overhead of timing with a GETCT pair — `CONFIRMED`
+### F-515 — no YAML gives the 2-clock overhead of timing with a GETCT pair — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `pasm2/getct.yaml` `measuring_elapsed`. Not added to the Spin2 pages: the figure is a PASM2 measurement and Spin2's GETCT() runs through the interpreter. Trace: EF-035.
 Measured (EF-035): two GETCTs bracketing a sequence add **2 clocks** (back-to-back pair = 2; 10 NOPs
 = 22; 20 NOPs = 42), so elapsed = end − start − 2. Searched the whole KB (getct.yaml has only the
 instruction's own `cycles: 2`). **Fix:** `language/pasm2/getct.yaml`, with a pointer from the Spin2
 timing idiom page if it teaches GETCT timing.
 
-### F-516 — three DEBUG display facts the pages do not state — `CONFIRMED`
+### F-516 — three DEBUG display facts the pages do not state — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `midi.yaml` COLOR "named or RGB24"; `bitmap.yaml` SET "not clamped; the pixel fed after it does not appear"; `plot.yaml` COLOR: numeric values read through the current color mode (RGB24 by default, so `$RRGGBB` works) and default draw color cyan `$00FFFF`. The PLOT half was confirmed against the PNut source before editing (`p2-debug-window-manual/REF/theory-of-operations/PLOT_Theory_of_Operations.md`: `DefaultPlotColor = clCyan`, §21.1 TranslateColor). Trace: EF-029, EF-050, EF-061.
 - `debug-displays/midi.yaml:32`: COLOR is described with names only; MIDI accepts a 24-bit
   `$RRGGBB` (EF-029). Use scope.yaml's wording, "named or RGB24".
 - `debug-displays/bitmap.yaml:48`: `SET` gives the ranges but not what an out-of-range SET does. It
@@ -161,7 +173,8 @@ timing idiom page if it teaches GETCT timing.
 - `debug-displays/plot.yaml:49`: COLOR does not say a raw `$RRGGBB` is accepted, nor that the default
   draw colour is cyan (EF-061, from an earlier capture session — confirm both on PNut when fixing).
 
-### F-517 — the write-side SPI alignment pad's failure shape is missing — `CONFIRMED`
+### F-517 — the write-side SPI alignment pad's failure shape is missing — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** `streamer_smartpin_control.yaml` `alignment_pad.write_side` — the shape only; the −6 residue is not stated. Trace: XF-001 (SCOPED).
 `language/pasm2/concepts/streamer_smartpin_control.yaml:366-397` (`alignment_pad`) covers only the
 read side. Partner bench XF-001 (graded SCOPED): for a streamer `P_SYNC_TX` MOSI against a
 `P_TRANSITION` SCK only `hp` phases exist (hp = SCK half-period in sysclks) and **exactly one loses**,
@@ -170,7 +183,8 @@ default was safe at hp = 7 and lost at hp = 5). **Fix:** add the shape, write si
 phase per hp, silent corruption, not portable across SCK rates, verify per rate. **Do not** state
 their −6 residue: its authors call it "a fit to five points, not a law".
 
-### F-518 — two BITMAP statements rest on less than they claim — `NEEDS-VERIFICATION`
+### F-518 — two BITMAP statements rest on less than they claim — `PENDING-VALIDATION`
+> **Settled 2026-10-03 («#375») from the PNut source** (`p2-debug-window-manual/REF/theory-of-operations/BITMAP_Theory_of_Operations.md`). SPARSE: the source draws a solid fill plus a round dot and disables sparse below dot size 4 — the YAML stands, unchanged. RATE: the source names TRACE, CLEAR or UPDATE as what un-freezes refresh (RateCycle tests equality against a count that keeps rising); nothing supports "any positive count resumes refreshing", so that sentence was replaced with the sourced one. Searched: the ledger (EF-052), the BITMAP theory of operations.
 - `debug-displays/bitmap.yaml:32, :72, :79` state SPARSE (round dots on a solid fill; off below
   DOTSIZE 4) as hardware-verified. EF-042 records that every observation was on pnut-term-ts and the
   PNut leg is void, pending a PNut re-run. Settle with a PNut run (bench) or the PNut source.
@@ -178,7 +192,8 @@ their −6 residue: its authors call it "a fit to five points, not a law".
   EF-052 tested only that a later TRACE, CLEAR or UPDATE un-freezes it. Check the sentence against the
   PNut Pascal source before keeping it.
 
-### F-519 — ledger and finding IDs written into shipped YAML prose — `CONFIRMED`
+### F-519 — ledger and finding IDs written into shipped YAML prose — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** Measured with the shipped filter itself, not a grep of the tree: 179 payload lines in 99 files carried EF/XF/F/VO ids (IDs inside stripped fields and `# Source` comments are correct and stay). All 179 removed — the id and any tag whose only job was carrying it; every fact kept word for word; wholly-provenance `evidence:` fields renamed `source:` (kept in the repo, stripped on delivery). Every hunk reviewed by word diff. **Gate:** `validate-dod-release.py` `validate_internal_ids` reads the shipped payload (the filter extracted from `fetch-kb-file.sh`) and prints every hit — 0 now; a planted `EF-999` turns it FAIL. **Not in scope here:** repo paths and `file:line` citations in shipped prose — F-523.
 **73** YAML files under `deliverables/ai/P2/` carry `EF-NNN`/`XF-NNN` in their text and **45** carry
 `F-NNN` — e.g. `spin2/methods/getms.yaml:55` "Hardware-verified on Rev C (EF-080, EF-082)",
 `debug-displays/term.yaml:40` "hardware-verification ledger EF-001", `pasm2/getct.yaml:29`. The
@@ -188,13 +203,50 @@ the fact; provenance stays in the repo. **Fix:** strip the IDs (and "hardware-ve
 only carry them) from content prose, KB-wide; keep the fact sentence. Provenance moves to the
 register/ledger. A gate that fails on `\b(EF|XF|F)-\d{3}\b` in shipped prose keeps it out.
 
-### F-520 — `pin-capture.yaml`'s verification status says the IN-repurposing contrast was never measured — `CONFIRMED`
+### F-520 — `pin-capture.yaml`'s verification status says the IN-repurposing contrast was never measured — `PENDING-VALIDATION`
+> **Applied 2026-10-03 («#375»).** Rewritten, not removed: `measured_on_silicon` (the IN contrast, with counters; the command-word and debug-interrupt hazards) and `not_yet_run` (streamer capture into hub RAM itself, which still follows the documentation). No ids or repo paths. Trace: XF-002, XF-003.
 `architecture/streamer/pin-capture.yaml:286-302` (`verification_status`): "none has measured the
 IN-repurposing contrast on silicon … The mechanism above is documentary". Partner bench XF-002 and
 XF-003 now measured both halves (a neighbour-routed plain pin counts the clock; a live smart-pin lane
 reads the transfer-complete handshake). The block is also provenance commentary (EF/VO ids, repo
 paths) of the F-519 kind. **Fix:** remove the block; the mechanism text above it is now
 bench-supported.
+
+### F-521 — p2an007 offers "re-check the sequence after copying" as a safe non-blocking mailbox; with a bump-last writer it is not — `PENDING-VALIDATION` (YAML) · `CONFIRMED` (P2AN007 document)
+Found 2026-10-03 while fixing F-507. `application-notes/p2an007-data-structures-new-facilities.yaml:131`
+and the P2AN007 document (`app-notes/P2AN007/opus-master/P2AN007.md:214`, R3 pitfall; the Tip below it
+repeats it) give two "honest options" for a writer that never waits: pack the payload into one long
+(R5, measured, EF-037), or have the reader read seq, copy the record, re-read seq and retry if it moved.
+**The second does not work with this recipe's writer.** The writer bumps seq only AFTER writing the
+fields, so while it is mid-write the reader reads the old seq, copies half-new fields, and re-reads the
+same old seq — the torn copy passes the check. (A seqlock needs the writer to mark a write in progress
+before touching the fields, e.g. an odd seq first; the recipe does not do that, and no bench run has
+tested any variant.) Never run on silicon; refuted by this counterexample. **Applied 2026-10-03 to the
+YAML («#375»):** the option is replaced by a sentence saying why it is not safe; R5 remains the
+non-blocking route. **Owed:** the same correction in the P2AN007 document — its next release (manual
+head; app notes ship through their own release).
+
+### F-522 — `basic-io.yaml` teaches Spin2 `WRPIN(mode, pin)` as correct and the right order as wrong — `PENDING-VALIDATION`
+Found 2026-10-03 while fixing F-509. `language/spin2/concepts/basic-io.yaml` anti-pattern
+`parameter_order_confusion` labelled `WRPIN(TX_PIN, P_ASYNC_TX)` WRONG ("Pin and mode swapped!") and
+`WRPIN(P_ASYNC_TX | P_OE, TX_PIN)` correct, claiming WRPIN and PINSTART take different orders; the
+`missing_output_enable` example used `WRPIN(P_PWM_TRIANGLE, PWM_PIN)`. Spin2 v55 (`spin2-v55-text.txt:539`):
+`WRPIN (PinField, Data)` — pin first, like PINSTART. **Applied 2026-10-03 («#375»):** both examples
+now pin-first; the anti-pattern reworded to the real trap (Spin2 methods take the pin first, the PASM2
+instruction `wrpin mode, pin` takes the value first). Swept: every other Spin2 WRPIN/WXPIN/WYPIN call in
+the KB is pin-first.
+
+### F-523 — repo paths and `file:line` citations in shipped YAML prose — `CONFIRMED` (carve-out; expires at the next KB release after v1.23.0)
+Found 2026-10-03 while reviewing F-519's diff. Measured with the shipped filter: **190 payload lines in
+69 files** carry repo paths (`engineering/ingestion/sources/...`, 115) or document `file:line`
+citations (`silicon-doc-text.txt:3854`, 58; others) in content prose, outside the stripped fields. A
+consuming agent can open none of them; doctrine (provenance is for us) says the shipped entry states
+the fact only. **Why it is carved out, not swept with F-519:** these citations are what
+`audit-yaml-claim-sourcing.py` reads to decide whether a claim block is grounded; stripping them from
+prose without moving them into a `source:` field beside each claim would disarm that gate. The fix is a
+per-claim move into stripped fields, block by block, then the F-519 gate widened to repo paths and
+`file:line`. **Expires:** the KB release after the one carrying F-506…F-522 — it ships in that release
+or this carve-out is re-read and its reason re-justified.
 
 ## KB defects surfaced by the PASM2 references audit (2026-10-02, «#352») — F-483 … F-505
 

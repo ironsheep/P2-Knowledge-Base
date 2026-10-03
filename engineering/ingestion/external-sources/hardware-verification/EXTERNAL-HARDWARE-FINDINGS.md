@@ -53,6 +53,7 @@ submitting project states) · `UNGRADED` (recorded, admission bar not met — sa
 ## P2X8C4M64P / uSD-FAT32 project
 
 ### XF-001 · The write-side SPI alignment pad is a phase of period `hp`, with exactly one losing value — `SCOPED`
+*KB:* `language/pasm2/concepts/streamer_smartpin_control.yaml` (the shape only, never the −6 fit)
 
 Streamer driving a `P_SYNC_TX` MOSI against a `P_TRANSITION` SCK. SCK starts on the next
 base-period boundary after `WYPIN` while the streamer start moves continuously, so only `hp`
@@ -85,6 +86,7 @@ and says nothing about the write side at all.
 *Submitted:* staged 2026-08-29; delivery to this tree not recorded before 2026-09-19.
 
 ### XF-002 · Neighbour routing into a counter works from a plain driven pin — `CONFIRMED`
+*KB:* `architecture/streamer/pin-capture.yaml`
 
 A counter on P62 routed relative −1 from P61 counted **1,009 of 1,009** driven edges, with a
 matched control on P57 ← P56 counting **601 of 601** (2026-08-28). P61 was driven as a **plain
@@ -102,6 +104,7 @@ and it remains open. See `XF-003`.
 that a smart-pin pin captures as handshake rather than level, is still documentary.
 
 ### XF-003 · A live smart pin interferes with the streamer's direct pin read — `CONFIRMED`
+*KB:* `architecture/streamer/pin-capture.yaml`
 
 Their driver disables the MISO smart pin before every streamer read because the live smart pin
 *"interferes with streamer's direct pin reading"* (verified on hardware 2026-01-23). Roughly twenty
@@ -115,6 +118,7 @@ for `VO-J-005`, which measures the smart-pin and neighbour lanes **in the same b
 contrast is one result rather than two runs compared.
 
 ### XF-004 · A plain-pin observer counts 4,736 SCK rises per SD sector read — `CONFIRMED`
+*KB:* not a KB fact — SD-protocol arithmetic and a one-off instrumentation count, not a P2 behaviour
 
 100 Ω jumper from SCK (P61) to a plain pin (P57); an edge counter reading its own pin counted
 **4,736** rises on every one of six reads.

@@ -10,7 +10,7 @@
 > resumes your thread, and routes you into the right head. This README is what you
 > read to see the *whole board* and decide where to push next.
 >
-> _Last refreshed: 2026-10-02_
+> _Last refreshed: 2026-10-03_
 
 ## The heads — status & next action
 
@@ -19,7 +19,7 @@ Glance only — one line per head; each head's own dashboard (Dashboard column) 
 | Head | Dashboard | Status at a glance | Next actionable |
 |------|-----------|--------------------|-----------------|
 | **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | **36 logical sources** (🏆 26) · gap ledger 6 OPEN + 4 PARTIAL · expert queue 6 open | **next target is open** — the prior entry (Smart Pins cert audit) closed 2026-08-26 |
-| **YAML (P2KB)** | [dashboard](operations/YAML-HEAD-DASHBOARD.md) · [register](operations/P2KB-CORRECTION-FINDINGS.md) | **v1.22.1** 2026-10-02 — the PASM2 references audit feeds the KB: 23 defect families (F-483..F-505) corrected against Parallax's documentation | Flip F-483..F-505 to DONE once served; archive sweep |
+| **YAML (P2KB)** | [dashboard](operations/YAML-HEAD-DASHBOARD.md) · [register](operations/P2KB-CORRECTION-FINDINGS.md) | **v1.23.0** 2026-10-03 — every bench result reaches the KB (88/88 audited) plus the PASM2 references audit; internal ids stripped from shipped content | Flip F-483..F-522 to DONE once served; F-523 (repo paths in prose) before the next release; archive sweep |
 | **Manual** | [`document-production/README.md`](document-production/README.md) · [roster](document-production/PUBLICATION-ROSTER.md) | **18 published** · 9 manuals · 7 app-notes · 1 guide · 1 tool-guide — latest **Architect's Guide v1.1.0** and **Streamer Guide v1.1.2** (2026-09-28); before them Assembly v3.1.10, DeSilva v3.0.8, Single-Step v1.0.1 (09-22) | P2 Errata v0.2.0 awaits design critique |
 | **OBEX** | [`obex-integration/README.md`](obex-integration/README.md) | ✅ **v2.2** (2026-06-29) · **130 P2 objects** · shipped in KB v1.13.3 · MCP-served | Delta re-scan vs the **2026-06-29** baseline |
 | **Operations** | [`operations/README.md`](operations/README.md) | Cross-cutting process · owns register + lessons-learned | (infrastructure — supports the content heads) |

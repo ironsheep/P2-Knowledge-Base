@@ -118,7 +118,7 @@ timing_notes: Result available 55 clocks after instruction issue. Each cog can i
   one CORDIC instruction per hub window (every 8 clocks).
 usage_notes: Use SETQ before QDIV to specify upper 32 bits of numerator. Without SETQ,
   upper 32 bits default to 0.
-divide_by_zero: "S = 0 does not trap or stall: GETQX returns NOT (the upper 32 bits of the numerator) and GETQY the lower 32 bits (D), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected. So without SETQ: QDIV D,#0 -> $FFFF_FFFF remainder D; SETQ #1 -> $FFFF_FFFE; SETQ $FFFF_FFFF -> 0. Immediate #0 and a zero register behave the same. Hardware-verified on Rev C (EF-089); no Parallax document states it."
+divide_by_zero: "S = 0 does not trap or stall: GETQX returns NOT (the upper 32 bits of the numerator) and GETQY the lower 32 bits (D), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected. So without SETQ: QDIV D,#0 -> $FFFF_FFFF remainder D; SETQ #1 -> $FFFF_FFFE; SETQ $FFFF_FFFF -> 0. Immediate #0 and a zero register behave the same. No Parallax document states it."
 applications: High-precision arithmetic, fixed-point scaling, remainder calculations,
   algorithm implementations requiring exact division.
 documentation_source: p2_datasheet

@@ -9,9 +9,9 @@
 component: streamer_pins
 description: Pin group selection via %ppp field and sub-pin selection
 
-# LOCATORS REPAIRED 2026-08-30 (F-399). Five locators (lines 3653, 3603-3605,
+# LOCATORS REPAIRED 2026-08-30. Five locators (lines 3653, 3603-3605,
 # 3654-3655, 3661-3662 and 6693-6701) were superseded p2-documentation.txt line
-# numbers attributed to silicon-doc-text.txt -- the F-365 carry-over shape. Lines
+# numbers attributed to silicon-doc-text.txt. Lines
 # 1443 and 1535 were already correct. Every replacement below was opened and read;
 # the CLAIMS were right in each case, only the locators were wrong.
 source: "Propeller 2 Documentation v35, Streamer -- the %ppp pin-group rule and the
@@ -72,7 +72,7 @@ pin_groups:
 
 # Sub-pin selection (for <8 pin modes)
 #
-# CORRECTED 2026-08-26 (F-361). This block previously printed a DENSE slot table
+# CORRECTED 2026-08-26. This block previously printed a DENSE slot table
 # -- 2-pin "%001 = Pins 3..2", 4-pin "%111 = Pins 31..28" -- which no source
 # states and which the bench contradicts. See below.
 sub_pin_selection:
@@ -118,7 +118,7 @@ sub_pin_selection:
   what_a_misaligned_base_does: "It does not error and it does not round. The stray low
     bits land in D[19:16], which is the MODE field -- see pin_base_encoding below and
     architecture/streamer/modes-reference.yaml field_notation_caveat. Bench-proven, twice, in two different
-    mode families (EF-065, EF-059)."
+    mode families."
   source: "Propeller 2 Documentation v35: \"In every mode, the three %ppp bits in
     D[22:20] select the pin group, in 8-pin increments\"
     (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443) and \"For
@@ -148,11 +148,9 @@ enable_control:
       '1' to enable pin output.\""
     dir_is_still_required: "%e enables the streamer's OUT contribution; it does NOT
       enable the pin's output driver. DIR still gates that, so a streamer pin drives
-      nothing until DIR is raised. Hardware-verified: EF-062 measured one streamer
+      nothing until DIR is raised. Measured: one streamer
       command twice, differing only in DIR -- 4 of 8 with DIR low, 8 of 8 with DIRH,
-      against an 8-of-8 plain-drive control
-      (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md,
-      EF-062; grounds F-308). The DIR-high leg started from OUT = 0, so passing proves
+      against an 8-of-8 plain-drive control. The DIR-high leg started from OUT = 0, so passing proves
       the streamer overrode OUT rather than the OUT bit doing the work."
     source: "Propeller 2 Documentation v35,
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1439 for the
@@ -229,9 +227,9 @@ alt_bit_order:
 
 # Pin base calculation
 #
-# CORRECTED 2026-08-26 (F-361). The worked example here used to be
+# CORRECTED 2026-08-26. The worked example here used to be
 # `X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + count` -- an 8-pin mode at a base that
-# is not a multiple of 8, composed with `+`. That is the EF-065 trap verbatim, in a
+# is not a multiple of 8, composed with `+`. That is the unaligned-base trap verbatim, in a
 # second mode family, printed as the example a reader copies.
 pin_base_encoding:
   description: "Pin base is encoded in D[22:17]: D[22:20] is the 8-pin group,

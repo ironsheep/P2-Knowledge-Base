@@ -25,11 +25,11 @@ configuration_directives:
   note: "Accepted in MIDI_Configure (window creation)."
   TITLE: "TITLE 'string' -- window title (default 'MIDI')"
   string_quoting: "Display-command text (TITLE/SAVE/etc.) uses SINGLE quotes '...'; double quotes are silently ignored at runtime, no compile error. See language/spin2/statements/debug.yaml string_quoting."
-  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program). Hardware-verified: EF-043."
+  POS: "POS left top -- OPTIONAL window screen offset. Omit POS and the DEBUG display HOST places the window -- and WHERE it places it is TOOL-DEPENDENT, not a P2 behavior: some hosts auto-arrange windows so they do not overlap, others stack every window at the same origin (so all but one are hidden). Neither is guaranteed. Supply POS explicitly whenever the layout matters (i.e. any multi-window program)."
   SIZE: "SIZE n -- key-size scalar 1..50 (default 4); pixel key size is 8 + n*4. This is NOT a pixel dimension."
   RANGE: "RANGE firstKey lastKey -- displayed MIDI note range, each 0..127 (default 21..108); lastKey is clamped to be >= firstKey."
   CHANNEL: "CHANNEL n -- MIDI channel to display, 0..15 (default 0). This is an exact channel filter: 0 means channel-0-only, NOT an 'all channels' mode."
-  COLOR: "COLOR onWhite onBlack -- the lit colors for white vs black keys (defaults CYAN, MAGENTA). COLOR sets the HUE; VELOCITY sets the fill HEIGHT. There is no velocity color gradient -- the hue is fixed per key type."
+  COLOR: "COLOR onWhite onBlack -- the lit colors for white vs black keys, each named or RGB24 ($RRGGBB) (defaults CYAN, MAGENTA). COLOR sets the HUE; VELOCITY sets the fill HEIGHT. There is no velocity color gradient -- the hue is fixed per key type."
 
 display_directives:
   note: "Accepted in MIDI_Update."

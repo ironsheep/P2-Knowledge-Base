@@ -165,23 +165,27 @@ reading_results:
   instruction: "GETXACC D"
   
   operation: |
-    1. Both accumulators are CAPTURED into holding registers and cleared
-    2. The captured cosine accumulation → D register
-    3. The captured sine accumulation → next instruction's S operand
-    4. Subsequent GETXACC instructions return THE SAME captured values until a
-       new streamer command executes
+    1. The cosine accumulation → D register
+    2. The sine accumulation → next instruction's S operand
+    3. The accumulators are cleared ONLY while a DDS/Goertzel command is running.
+       With the streamer idle, or running any other mode, GETXACC returns the
+       running total and clears nothing; a new streamer command does not reset it.
+    4. Each Goertzel burst's last term is added on the first clock of the NEXT
+       Goertzel burst, so a reading after a burst of N clocks holds N-1 terms.
+    (The Silicon Doc describes capture-and-clear into holding registers on every
+    GETXACC; Rev C silicon clears only during a Goertzel burst -- silicon errata
+    in language/pasm2/getxacc.yaml.)
 
-  holding_register_protocol: |
-    GETXACC reads a HOLDING REGISTER, not a live accumulator — so one GETXACC per
-    streamer command is the contract. Reading twice without an intervening command
-    returns the same numbers, and a value read before the command belongs to the
-    PREVIOUS command (the Silicon Doc's own demo comments its read "get prior
-    Goertzel acc's"). If you use a discrete XINIT / WAITXFI / GETXACC sequence,
-    read before the command and after it and take the DIFFERENCE — an absolute
-    read in that pattern is not a per-command measurement and looks plausible while
-    being meaningless. The XCONT-loop form in the Silicon Doc demo reads once per
-    command and subtracts a first-pass baseline.
-  source: "Silicon Doc silicon-doc-text.txt:1604"
+  reading_protocol: |
+    READ BEFORE AND AFTER, TAKE THE DIFFERENCE. With a discrete XINIT / WAITXFI /
+    GETXACC sequence the read after the burst holds every earlier burst too: a
+    large, stable, plausible-looking number that is not a per-burst measurement.
+    Read idle before the burst and after it and subtract; deliver the held last
+    term first with a zero-term burst (the helper routine in
+    language/pasm2/getxacc.yaml, SINC1). Inside a running Goertzel burst a read does clear, so the XCONT-loop
+    form in the Silicon Doc demo reads once per command and subtracts a baseline
+    established on the first pass.
+  source: "Silicon Doc silicon-doc-text.txt:1604 (documented behaviour); Rev C behaviour: language/pasm2/getxacc.yaml silicon_errata"
 
   example: |
     getxacc cos_result       ' Cosine → D
@@ -276,7 +280,7 @@ usage_pattern:
     setword dds_cmd, cycles, #0
     xcont   dds_cmd, dds_s
 
-    ' 5. Read once per command; the read returns the PRIOR command's capture
+    ' 5. Read once per command, while the next runs: the sums since the last read
     getxacc cos_acc
     mov     sin_acc, 0-0
     qvector cos_acc, sin_acc
@@ -295,16 +299,16 @@ usage_pattern:
     result back with GETXACC/QVECTOR. It therefore configures NO DAC output pin.
     Until 2026-08-21 it did -- `wrpin ##P_DAC_124R_3V` plus `dirh` on a pin that
     nothing in the program ever drove, giving a configured, enabled, silent pin and
-    no diagnostic (F-306). If you want the DDS OUTPUT half instead, that is a
+    no diagnostic. If you want the DDS OUTPUT half instead, that is a
     different arrangement, not a line to add here: route the DACs in %dddd and set
     the pin up as a streamer-fed DAC -- see dac_output_pin_setup below.
   dac_output_pin_setup: >-
     For the DDS-output direction the pin must be a COG DAC CHANNEL the streamer can
     override: P_DAC_124R_3V | P_CHANNEL, with COGID in M[3:0] and DIRH on the pin,
     the channel chosen by the pin's own two low bits. Measured, not reasoned --
-    EF-054 swept %TT on a jumpered cog-DAC pin (%00 = 1,408, no drive; %01 = 6,737)
-    and EF-055 watched the spread collapse from 1,305/2,000 samples to 25 once
-    P_CHANNEL was added. See F-272 and language/pasm2/wrpin.yaml:54.
+    sweeping %TT on a jumpered cog-DAC pin gave (%00 = 1,408, no drive; %01 = 6,737)
+    and the spread collapsed from 1,305/2,000 samples to 25 once
+    P_CHANNEL was added. See language/pasm2/wrpin.yaml:54.
   source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program --
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1621-1640 (the
       program's description and setup) and :1686-1687 (the dds_d / dds_s mode and data

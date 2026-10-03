@@ -3,7 +3,7 @@
 # Comprehensive reference for all P2 system registers
 
 
-# Findability index (F-401, 2026-09-05). This file named itself in no
+# Findability index. This file named itself in no
 # top-level field, so neither it nor anything it documents was reachable by
 # name through the published index -- only by guessing its camelCase key.
 # An alias is a lookup key, never a definition; every name below is defined
@@ -27,7 +27,7 @@ metadata:
     self-sufficient; nothing here defers to a per-register file. Three per-register files
     exist alongside it (architecture/system-registers/ptra-register.yaml, architecture/system-registers/dira-dirb-registers.yaml) and are pointed to
     by `yaml_file:` where they do. Thirteen further `yaml_file:` pointers, naming eleven
-    files that were never written, were removed on 2026-08-26 under F-364 rather than
+    files that were never written, were removed on 2026-08-26 rather than
     satisfied by writing thin stubs: that would put one fact in two homes. If per-register
     files are ever wanted, everything needed to generate them is already in this file.
 
