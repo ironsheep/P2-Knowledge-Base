@@ -1,5 +1,12 @@
 # P2AN007 Changelog: Data Structures with the New Language Facilities
 
+## v1.0.2 (2026-10-03)
+
+**The R3 pitfall is corrected.** Re-checking the sequence after copying the record does not make a
+non-blocking writer safe with this writer, which bumps the sequence only after writing the fields;
+for a writer that must never wait, use R5. The cover and the PDF properties now carry the version,
+date and rights, and each example file carries a generated header.
+
 ## v1.0.1 (2026-08-08)
 
 A licensing change. No technical content changed.

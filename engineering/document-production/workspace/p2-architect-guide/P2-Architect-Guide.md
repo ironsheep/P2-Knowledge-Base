@@ -588,8 +588,9 @@ freshest value, or every value? Who depends on whom?
 That promise is called the **contract** for the seam, and choosing it *is* a decomposition
 decision, because the coupling you can tolerate determines where the boundary goes. A few
 contracts you'll reach for: a *blocking call*, where the caller waits on the callee's
-worst-case latency (tight coupling); a *latest-wins mailbox*, a single slot where the
-producer never waits and the consumer always reads the newest value (decoupled completely);
+worst-case latency (tight coupling); a *latest-wins mailbox*, a single slot holding only the
+newest command, where the consumer never waits and the producer waits only for the consumer to
+copy a command before posting the next (a command that fits in one long needs no wait at all);
 a *ring buffer*, which decouples the two rates while preserving every sample; *published
 telemetry*, where one writer puts values in hub and any number of readers take them with no
 lock at all; and — when one producer feeds *many* consumers with bulk frames rather than
@@ -1079,13 +1080,15 @@ cadence and yielding at bus-transaction boundaries. We also flag one discrete-to
 command has to become a smooth servo trajectory, so a slew engine is going to be needed.
 
 **Step 6 — draw the seams, per plane.** The orchestrator-to-motion seam is a *control-plane* link: a
-latest-wins command mailbox with a sequence/acknowledge handshake, arguments written first and the
-sequence counter bumped last, so a torn read is impossible without a lock. Motion-to-everyone is a
+latest-wins command mailbox with a sequence/acknowledge handshake: arguments written first and the
+sequence counter bumped last, and the orchestrator posts again only after motion has copied the
+command and acknowledged it. The bump-last order alone does not prevent a torn read; the
+acknowledgement is what keeps a second post from landing mid-copy. Motion-to-everyone is a
 *data/telemetry* link: lock-free published telemetry — attitude, battery, mode, leg angles — sitting in
 atomic single longs with one writer and any number of lockless readers. Inbound device events (a finished
 ping, a recognized word) are an *event-plane* link: a value plus a bumped freshness counter that the slow
-poll edge-detects. Nothing blocks anywhere — the 50 Hz loop never waits on the orchestrator, and the
-orchestrator never waits on a device.
+poll edge-detects. Nothing waits on a slow partner — the 50 Hz loop never waits on the orchestrator,
+and the orchestrator waits only for motion's copy of a command, never on a device.
 
 **Step 7 — layer the motion branch.** It splits by unit conversion into four tiers: the PWM-chip register
 driver (changes if the chip changes); then servo pulse-width and channel semantics (changes if the wiring

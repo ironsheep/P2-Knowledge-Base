@@ -24,12 +24,14 @@
 \vspace{0.25cm}
 {\Large\itshape Spin2 STRUCT for in-cog records — and the worked code for sharing them safely across cogs\par}
 \vspace{0.35cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.0.1\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vspace{0.25cm}
 % App-note cover box: repurposes the manuals' bottom-of-cover content table.
+% A manual lists Parts/Chapters here; an app note has neither, so this box
+% carries the app-note's actual job instead — the outcome + the techniques.
 \begin{tcolorbox}[
   colback=gray!5,
   colframe=gray!40,

@@ -54,7 +54,8 @@ each feature's *mechanism* stays in its own document, linked below.
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
 | **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ |
 | **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ |
-| P2AN003 · P2AN005 · P2AN006 · P2AN007 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
+| P2AN007 | app-note | 🔧 | 🔧 | 🔧 | 🔧 |
+| P2AN003 · P2AN005 · P2AN006 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
 

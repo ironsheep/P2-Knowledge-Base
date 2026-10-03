@@ -10,6 +10,7 @@
       ],
       "lua_filters": [
         "p2kb-platform-figures",
+        "p2kb-platform-crossref",
         "p2kb-platform-tables",
         "p2kb-platform-mnemonic-bold",
         "p2kb-platform-code-coloring",
@@ -19,8 +20,10 @@
         "title": "Data Structures with the New Language Facilities",
         "subtitle": "Application Note P2AN007 — STRUCT Records, Shared Safely Across Cogs",
         "author": "Iron Sheep Productions, LLC",
-        "version": "v1.0.1",
-        "date": "August 2026"
+        "version": "1.0.2",
+        "date": "October 2026",
+        "copyright": "Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.",
+        "license": "CC BY-SA 4.0"
       }
     }
   ]

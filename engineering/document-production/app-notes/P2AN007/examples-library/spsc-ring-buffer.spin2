@@ -1,3 +1,23 @@
+'' ===========================================================================
+''
+''   File.......  spsc-ring-buffer.spin2
+''   Purpose....  Stream records from exactly one producer cog to one
+''                consumer cog through a ring buffer, with no lock
+''   Manual.....  Data Structures with the New Language Facilities
+''   Version....  v1.0.2 (2026-10-03)
+''   Appears in.  Recipe R2 - Lock-Free Ring Buffer (One Producer, One
+''                Consumer)
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Jul 2026
+''   Updated....  Jul 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
 {Spin2_v45}
 CON
   _clkfreq = 200_000_000
@@ -36,3 +56,22 @@ PRI producer() | n
       ' THEN publish head (single atomic long) -> element visible
       qhead := (qhead + 1) & QMASK
       n++
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

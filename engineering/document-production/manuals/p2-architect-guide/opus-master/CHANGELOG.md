@@ -10,6 +10,16 @@ to commits). Newest entry first.
 
 ---
 
+## v1.1.1 (2026-10-03)
+
+**The latest-wins mailbox states its handshake, as measured on silicon.**
+
+### Fixed
+
+- **Latest-wins mailbox** (Chapter 5, Force 2; Chapter 7, the walking robot's Step 6): the producer posts again only after the consumer has copied the command and acknowledged it; a command that fits in one long needs no wait
+
+---
+
 ## v1.1.0 (2026-09-28)
 
 **The guide follows a project's own order — decide, learn, decompose, build, ship — and says what it is for.**
