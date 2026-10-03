@@ -17,15 +17,17 @@ hardware_stacks:
     operations:
       PUSHA:
         syntax: "PUSHA value"
-        operation: "WRLONG value, PTRA++ (hub[PTRA] = value, then PTRA += 4; silicon-doc-text.txt:5490)"
+        operation: "WRLONG value, PTRA++ (hub[PTRA] = value, then PTRA += 4)"
         timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pusha.yaml encoding)"
         description: "Write then post-increment push (ascending stack)"
+        source: "operation: Silicon Doc, silicon-doc-text.txt:5490"
 
       POPA:
         syntax: "POPA dest"
-        operation: "RDLONG dest, --PTRA (PTRA -= 4, then dest = hub[PTRA]; silicon-doc-text.txt:5475)"
+        operation: "RDLONG dest, --PTRA (PTRA -= 4, then dest = hub[PTRA])"
         timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popa.yaml encoding)"
         description: "Pre-decrement then read pop (ascending stack)"
+        source: "operation: Silicon Doc, silicon-doc-text.txt:5475"
 
       manual:
         push: |
@@ -40,13 +42,15 @@ hardware_stacks:
     operations:
       PUSHB:
         syntax: "PUSHB value"
-        operation: "WRLONG value, PTRB++ (hub[PTRB] = value, then PTRB += 4; silicon-doc-text.txt:5491)"
+        operation: "WRLONG value, PTRB++ (hub[PTRB] = value, then PTRB += 4)"
         timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pushb.yaml encoding)"
+        source: "operation: Silicon Doc, silicon-doc-text.txt:5491"
       
       POPB:
         syntax: "POPB dest"
-        operation: "RDLONG dest, --PTRB (PTRB -= 4, then dest = hub[PTRB]; silicon-doc-text.txt:5476)"
+        operation: "RDLONG dest, --PTRB (PTRB -= 4, then dest = hub[PTRB])"
         timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popb.yaml encoding)"
+        source: "operation: Silicon Doc, silicon-doc-text.txt:5476"
 
   call_stack:
     type: "Internal hardware stack"

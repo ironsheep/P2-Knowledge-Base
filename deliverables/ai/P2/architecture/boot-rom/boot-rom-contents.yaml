@@ -26,9 +26,9 @@ rom_facts:
 authoritative_content_list:
   statement: "ROM | 16 KB (Bootloader, P2 Monitor debug interface, and TAQOZ (Forth) command interface)"
   names: 3
-  source: "P2 Hardware Manual 2022-11-01 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:210"
-  corroboration: "Same three-item list recorded in engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md ('Boot ROM Contents (16 KB)')."
-  what_other_sources_say: "The P2 Datasheet (p2-datasheet-text.txt:99) and the Silicon Doc (silicon-doc-text.txt:189) state only '16KB boot ROM' and inventory nothing. No ingested source inventories the ROM more finely than the line above."
+  source: "P2 Hardware Manual 2022-11-01 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:210; what_other_sources_say: P2 Datasheet, p2-datasheet-text.txt:99, and Silicon Doc, silicon-doc-text.txt:189"
+  verified_against: "Same three-item list recorded in engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md ('Boot ROM Contents (16 KB)')."
+  what_other_sources_say: "The P2 Datasheet and the Silicon Doc state only '16KB boot ROM' and inventory nothing. No ingested source inventories the ROM more finely than the line above."
 
 # ROM residents (per Hardware Manual + ROM booter narrative)
 residents:
@@ -71,8 +71,7 @@ residents:
   # REMOVED 2026-09-08: `character_font_data` and `math_tables` were
   # listed here as ROM residents carrying
   # `verification_status: "Existence confirmed"`. Existence was NOT confirmed.
-  # Their only source was engineering/ingestion/sources/rom-booter/
-  # rom-booter-narrative.txt:51-56, which is OUR OWN GENERATED SUMMARY of the
+  # Their only source was rom-booter-narrative.txt, which is OUR OWN GENERATED SUMMARY of the
   # listing (commit 9fcf7d84, "Complete narrative text generation"), not a
   # Parallax document. The Hardware Manual states the ROM's contents in one line
   # and names three things, not five or six (see authoritative_content_list
@@ -84,6 +83,7 @@ residents:
   # ROM can hold unlabelled data blocks no symbol name would reveal. It records
   # that no source we hold supports them, so the KB does not state them. Open
   # question for Chip Gracey, not for a document.
+# Source: rom-booter narrative, engineering/ingestion/sources/rom-booter/rom-booter-narrative.txt:51-56
 
   utility_routines:
     role: "Shared subroutines called by the ROM components"

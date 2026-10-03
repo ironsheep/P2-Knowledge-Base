@@ -201,9 +201,9 @@ parallax_worked_example:
       buffer -- WRFAST issued at the buffer before XINIT
   known_source_defect_in_that_passage: "The sentence says \"it does an RFBYTE\". The
     mode is a WRFAST (capture) mode and the code in the same example issues WRFAST, so
-    the write is a WFBYTE. Recorded as E-011 in engineering/ingestion/SOURCE-ERRATA.md;
+    the write is a WFBYTE. Recorded as E-011;
     quote the mechanism, not that word."
-  locator: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144"
+  source_reference: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144; known_source_defect_in_that_passage: E-011 in engineering/ingestion/SOURCE-ERRATA.md"
 
 what_the_capture_path_writes:
   one_home: "architecture/streamer/pin-selection.yaml enable_control.input_modes carries

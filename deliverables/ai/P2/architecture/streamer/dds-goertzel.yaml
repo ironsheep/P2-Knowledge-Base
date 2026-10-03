@@ -38,9 +38,9 @@ adc_input_pins:
     The ADC pins feeding Goertzel are RAW delta-sigma bit streams: configure them for ADC
     mode (a P_ADC_* constant) with smart-pin mode field %00000, and DO NOT set DIR.
     A smart pin left enabled on these pins produces no Goertzel accumulation.
-  source: "Silicon Doc silicon-doc-text.txt:1563 (verbatim: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected')"
+  source: "Silicon Doc silicon-doc-text.txt:1563 (verbatim: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected'); source_tension: Silicon Doc STREAMER intro, part2-pixel-ops.txt:82; bitstream_summation: Silicon Doc silicon-doc-text.txt:1563"
   source_tension: |
-    The Silicon Doc's STREAMER intro (part2-pixel-ops.txt:82) says Goertzel works "from smart
+    The Silicon Doc's STREAMER intro says Goertzel works "from smart
     pins configured as ADC's". That wording is loose and MISLEADS: the DDS/Goertzel section
     above is the specific, authoritative statement, and the Silicon Doc's own worked example
     follows it — `wrpin adcmode,#adcpin` with mode field %00000 and no DIR on the ADC pin
@@ -62,7 +62,7 @@ adc_input_pins:
       bits -- "%001_ATTTTTTTT", "%010_AATTTTTTT" and so on. The %A bits BOUND the
       read to a sub-region of the LUT, so more than one waveform can be resident at
       once; the %T bits are ADDED to the topmost NCO bits, which shifts or modulates
-      the phase of playback. Silicon Doc silicon-doc-text.txt:1602, verbatim:
+      the phase of playback. Silicon Doc, verbatim:
       "On each clock, the lookup RAM is read at the 9-bit location bound by the %A
       bits, with the lower bits being the sum of the %T bits and the topmost NCO
       bits. This allows you to set bounded areas within the LUT and to shift or
@@ -76,8 +76,8 @@ adc_input_pins:
       %A/%T rule: 'the lower bits being the sum of the %T bits and the topmost NCO
       bits ... to shift or modulate the phase of playback'). The locator previously
       named lines 4062-4095, which is the PWM/SMPS smart-pin mode text; corrected
-      2026-08-30, F-399."
-  bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit (silicon-doc-text.txt:1563)."
+      2026-08-30, F-399. field_8_0: Silicon Doc silicon-doc-text.txt:1602."
+  bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit."
   gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the shipped Silicon Doc demo can use high gain because it couples capacitively through a touch pad."
 
 # Operation (every clock cycle)
@@ -122,7 +122,8 @@ lut_setup:
   lut_window:
     description: >-
       S[11:9] selects the loop size; the remaining S[8:0] bits split into %A region
-      bounds and %T phase offset. Silicon Doc silicon-doc-text.txt:1597.
+      bounds and %T phase offset. Silicon Doc.
+    source: "Silicon Doc silicon-doc-text.txt:1597 (lut_window description)"
     settings:
       - {s_11_0: "%000_TTTTTTTTT", loop_size: 512, nco_bits: "30..22", lut_range: "%000000000..%111111111"}
       - {s_11_0: "%001_ATTTTTTTT", loop_size: 256, nco_bits: "30..23", lut_range: "%A00000000..%A11111111"}
@@ -308,12 +309,12 @@ usage_pattern:
     the channel chosen by the pin's own two low bits. Measured, not reasoned --
     sweeping %TT on a jumpered cog-DAC pin gave (%00 = 1,408, no drive; %01 = 6,737)
     and the spread collapsed from 1,305/2,000 samples to 25 once
-    P_CHANNEL was added. See language/pasm2/wrpin.yaml:54.
+    P_CHANNEL was added. See language/pasm2/wrpin.yaml.
   source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program --
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1621-1640 (the
       program's description and setup) and :1686-1687 (the dds_d / dds_s mode and data
       longs). The second locator previously named lines 4289-4305, which is Table 34's
-      streamer clocks/bits rows; corrected 2026-08-30, F-399."
+      streamer clocks/bits rows; corrected 2026-08-30, F-399. dac_output_pin_setup: language/pasm2/wrpin.yaml:54."
 
 see_also:
   - architecture/streamer/modes-reference.yaml

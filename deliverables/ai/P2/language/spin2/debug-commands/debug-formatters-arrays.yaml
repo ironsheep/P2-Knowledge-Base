@@ -18,9 +18,12 @@
 # a scrolling LOGIC or SCOPE window, and it resolved to nothing.
 #
 # The 24 names below are transcribed from the v55 formatter tables and each was
-# read at its line: engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt
+# read at its line.
+# Source: engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt
 # :943 (FDEC_REG_ARRAY), :951-954 (UDEC), :960-963 (SDEC), :969-972 (UHEX),
-# :978-981 (SHEX), :987-990 (UBIN), :996-999 (SBIN). They are LOOKUP KEYS for
+# :978-981 (SHEX), :987-990 (UBIN), :996-999 (SBIN).
+
+# They are LOOKUP KEYS for
 # the composition rule already documented here; nothing new is claimed.
 aliases:
   - "array formatter"

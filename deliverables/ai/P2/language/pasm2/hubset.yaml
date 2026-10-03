@@ -37,7 +37,8 @@ clock_configuration:
       range: "0-1023 (actual multiplier 1-1024)"
     d7_4:
       name: "Post Divider (PPPP)"
-      description: "PLL output divider (4 bits): %0000 = VCO/2, %0001 = VCO/4, ... %1110 = VCO/30 (VCO / ((PPPP+1)*2)), and %1111 = VCO/1 (silicon-doc-text.txt:2644-2678)"
+      description: "PLL output divider (4 bits): %0000 = VCO/2, %0001 = VCO/4, ... %1110 = VCO/30 (VCO / ((PPPP+1)*2)), and %1111 = VCO/1"
+      source: "description: Silicon Doc, silicon-doc-text.txt:2644-2678"
     d3_2:
       name: "Crystal Config (CC)"
       values:
@@ -54,6 +55,7 @@ clock_configuration:
         0b11: "PLL output"
 
 safe_clock_switching:
+  source: "P2 Datasheet p.18 %SS clock-source table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:828-834 (allow 10ms for crystal+PLL to stabilize before switching to PLL); independently in Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:576-580"
   description: |
     When switching to PLL, follow this three-step sequence to avoid glitches:
     1. Configure PLL but stay on current source

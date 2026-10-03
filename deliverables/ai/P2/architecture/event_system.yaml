@@ -1,5 +1,5 @@
 # P2 Event System
-# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
 # never existed and datasheet pages beyond the end of a 50-page datasheet):
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section EVENTS --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2035-2261
@@ -34,6 +34,7 @@ architecture:
       Propeller 2 Documentation v35 (Rev B/C), EVENTS -- "Cogs monitor and track 16
       different background events, numbered 0..15",
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2037-2054.
+      note: Silicon Doc, silicon-doc-text.txt:2102.
     list:
       - {event: 0,  name: "interrupt occurred",        poll: "POLLINT"}
       - {event: 1,  name: "CT passed CT1",             poll: "POLLCT1"}
@@ -53,8 +54,7 @@ architecture:
       - {event: 15, name: "GETQX/GETQY executed with no CORDIC result available", poll: "POLLQMT"}
     note: >-
       Every event but 15 also has a matching WAITxxx and a Jxxx/JNxxx branch. There is no
-      WAITQMT, because that event cannot occur while waiting
-      (silicon-doc-text.txt:2102). Events 0-3 and 8-15 are fixed sensors; only events 4-7
+      WAITQMT, because that event cannot occur while waiting. Events 0-3 and 8-15 are fixed sensors; only events 4-7
       are programmable, via SETSE1..4.
   
   event_routing:
@@ -535,12 +535,12 @@ related_topics:
 extraction_metadata:
   source_documents:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
         - "EVENTS -- lines 2035-2260"
         - "PASM2 encoding table -- lines 5204, 5264-5267, 5273-5276, 5290-5293"
     - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "PASM2 instruction table, SETPAT -- line 1909"
   re_derivation_note: >-

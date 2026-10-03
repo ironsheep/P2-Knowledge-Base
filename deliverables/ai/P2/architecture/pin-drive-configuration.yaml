@@ -17,11 +17,12 @@ last_updated: "2026-08-25"
 # answer -- P_HIGH_15K with DIR=1, OUT=1 is a 15 kOhm resistive path to VIO, which
 # is a pull-up in every sense that matters to their circuit. They must land here,
 # whatever separator or casing they type. The Silicon Doc uses the same vocabulary
-# for the same rungs (silicon-doc-text.txt:4599, USB mode: "two 15k pull-downs for
+# for the same rungs (USB mode: "two 15k pull-downs for
 # 'host' or a 1.5k pull-up and a float for 'device'"), so this is the authority's
 # word too, not a concession to loose speech.
 # Measured 2026-09-09: only 2 of 17 pull-vocabulary forms resolved; `pullup`,
 # `pull up`, `pull-up resistor` and `bias resistor` all returned nothing.
+# Source: Silicon Doc, silicon-doc-text.txt:4599 (USB mode pull-up/pull-down wording)
 aliases:
   - "pin drive configuration"
   - "drive strength"
@@ -294,9 +295,11 @@ not_documented_here:
     open_source: "not stated by any Parallax source as a P_* composition"
     keeper_or_bus_hold: "no source"
     high_side_weak_with_low_side_floated: "the P_HIGH_15K with P_LOW_FLOAT variant has no
-      Parallax documentary statement and no empirical record; a gap is filed for it in
-      engineering/operations/P2KB-CORRECTION-FINDINGS.md rather than content shipped here"
+      Parallax documentary statement and no empirical record; a gap is filed for it
+      rather than content shipped here"
     per_pin_current_or_impedance: "nothing beyond the eight ladder rungs the legend states"
+    sources:
+      - "high_side_weak_with_low_side_floated: gap filed in the P2KB corrections register, engineering/operations/P2KB-CORRECTION-FINDINGS.md"
 
 related:
   - architecture/smart_pins.yaml

@@ -33,6 +33,7 @@ specifications:
     That capture is the forced-OCR re-ingestion (F-250); every quantity in it is
     triple-validated against the OCR text, the original text layer, and the
     rendered page.
+    physical.dimensions_note: engineering/ingestion/SOURCE-ERRATA.md.
   microcontroller:
     part: "P2X8C4M64PES"
     silicon_revision: "Rev C silicon, approved for production (engineering sample, not a production chip)"
@@ -77,7 +78,7 @@ specifications:
     dimensions_note: >-
       The source prints "(90 x 90 cm)" beside the inch figure; 3.55 in is 90 mm,
       not 90 cm. The metric parenthetical is a source typo -- quote the inch figure.
-      Recorded in engineering/ingestion/SOURCE-ERRATA.md.
+      Recorded in SOURCE-ERRATA.md.
     outline: "octagon (a square with chamfered corners)"
     mounting_holes: "four plated holes attached to the ground plane, spaced 40 mm apart; the spacing could accommodate a 50 mm fan or heatsink"
     ground_plane: "continuous 4 oz copper on the bottom layer"

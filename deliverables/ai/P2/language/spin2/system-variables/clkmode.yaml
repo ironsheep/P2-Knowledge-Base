@@ -86,7 +86,8 @@ clock_source_modes:
     bits: "0b11"
     frequency: "Calculated from PLL settings"
     description: "PLL output (requires PLL enable)"
-    use_case: "High-speed operation. The P2 Datasheet rates the PLL at 320 MHz maximum, 180 MHz typical (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200); the Parallax Propeller 2 Documentation notes it can be pushed to 350 MHz in 'VCO / 1' mode (engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545). A prior form of this line said 'up to 500 MHz', which is the pnut-ts compiler's acceptance limit rather than a silicon rating -- see language/spin2/constants/special-configuration-symbols.yaml."
+    use_case: "High-speed operation. The P2 Datasheet rates the PLL at 320 MHz maximum, 180 MHz typical; the Parallax Propeller 2 Documentation notes it can be pushed to 350 MHz in 'VCO / 1' mode. A prior form of this line said 'up to 500 MHz', which is the pnut-ts compiler's acceptance limit rather than a silicon rating -- see language/spin2/constants/special-configuration-symbols.yaml."
+    source: "use_case: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200 (PLL 320 MHz maximum, 180 MHz typical); Parallax Propeller 2 Documentation (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545 (350 MHz in 'VCO / 1' mode)"
 
 examples:
   - description: "Read current clock mode"
@@ -110,7 +111,10 @@ notes:
   - "Compiler calculates optimal PLL settings automatically"
   - "Use CLKSET for safe clock transitions (handles PLL lock timing)"
   - "Raw HUBSET to change mode requires proper sequencing"
-  - "PLL must lock before switching to PLL source (~10 ms). Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2635 -- \"XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source.\""
+  - "PLL must lock before switching to PLL source (~10 ms). Silicon Doc (Parallax Propeller 2 Documentation) v35 -- \"XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source.\""
+
+sources:
+  - "notes (PLL lock, 10 ms crystal+PLL stabilization): Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2635"
 
 related:
   - language/spin2/system-variables/clkfreq.yaml

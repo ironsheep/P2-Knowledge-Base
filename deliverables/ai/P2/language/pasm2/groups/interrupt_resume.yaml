@@ -11,7 +11,8 @@ shared_documentation:
     so that the next interrupt resumes the ISR at its next instruction. RESI3 = CALLD
     IJMP3,IRET3 WCZ; RESI2 = CALLD IJMP2,IRET2 WCZ; RESI1 = CALLD IJMP1,IRET1 WCZ;
     RESI0 = CALLD INA,INB WCZ. The CALLD with WCZ signals the cog that the interrupt
-    is complete (silicon-doc-text.txt:2311-2317, :5478-5481).
+    is complete.
+  source: "explanation: Silicon Doc, silicon-doc-text.txt:2311-2317, :5478-5481"
   timing_details: See individual instructions for specific timing.
   addressing: null
 related_instructions:

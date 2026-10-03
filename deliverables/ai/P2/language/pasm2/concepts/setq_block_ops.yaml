@@ -59,7 +59,7 @@ block_operations:
     syntax: |
       SETQ #count-1
       RDLONG first_cog_reg, hub_address
-    timing: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (silicon-doc-text.txt:3257)"
+    timing: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
     example: |
       SETQ #31           ' 32 longs
       RDLONG buffer, ##source_data
@@ -68,7 +68,7 @@ block_operations:
       ' Save registers $010..$1F7 to the save buffer
       setq    #$1F7-$010
       wrlong  $010, regh
-    debug_use_source: "Spin2 debugger v51 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:204-205"
+    source: "Spin2 debugger v51 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:204-205; timing: Silicon Doc, silicon-doc-text.txt:3257"
 
   cog_to_hub_transfer:
     instruction: "SETQ + WRLONG"
@@ -76,11 +76,12 @@ block_operations:
     syntax: |
       SETQ #count-1
       WRLONG first_cog_reg, hub_address
-    timing: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (silicon-doc-text.txt:3257)"
+    timing: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
     example: |
       SETQ #63           ' 64 longs
       WRLONG results, PTRA
       ' Writes cog[results..results+63] to hub[PTRA..PTRA+255]
+    source: "timing: Silicon Doc, silicon-doc-text.txt:3257"
 
   hub_to_lut_transfer:
     instruction: "SETQ2 + RDLONG"
@@ -174,7 +175,8 @@ block_fill:
   cog_fill:
     instruction: "none"
     operation: "No SETQ block form fills cog registers with a value"
-    note: "WRLONG/WMLONG write HUB memory, so SETQ + WRLONG cannot fill cog registers; SETQ + RDLONG copies hub longs INTO the cog (silicon-doc-text.txt:3257-3262)."
+    note: "WRLONG/WMLONG write HUB memory, so SETQ + WRLONG cannot fill cog registers; SETQ + RDLONG copies hub longs INTO the cog."
+    source: "note: Silicon Doc, silicon-doc-text.txt:3257-3262"
 
   hub_fill:
     instruction: "SETQ + WRLONG/WMLONG with an immediate D"
@@ -185,11 +187,12 @@ block_fill:
     example: |
       SETQ #15
       WRLONG #0, ##buffer_hub  ' Clear 16 hub longs
-    note: "Only an immediate D fills; a register D writes that many cog-register longs to hub instead (silicon-doc-text.txt:3269)."
+    note: "Only an immediate D fills; a register D writes that many cog-register longs to hub instead."
+    source: "note: Silicon Doc, silicon-doc-text.txt:3269"
 
 performance:
   transfer_rate: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (the FIFO gets priority and the block move waits for the slice to come around again)"
-  transfer_rate_source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3257"
+  source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3257"
   lut_advantage: "After load, RDLUT reads a LUT long in 3 clocks and WRLUT writes one in 2"
 
   limitations:

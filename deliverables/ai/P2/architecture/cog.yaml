@@ -217,7 +217,9 @@ cog_communication:
   cogatn:
     instruction: "COGATN {#}D"
     operation: "Signal attention to COG(s)"
-    d_parameter: "16-bit mask (bit n = cog n, bits 0..15; silicon-doc-text.txt:2020)"
+    d_parameter: "16-bit mask (bit n = cog n, bits 0..15)"
+    sources:
+      - "d_parameter: Silicon Doc, silicon-doc-text.txt:2020"
     
   synchronization:
     locks: "Atomic test-and-set"

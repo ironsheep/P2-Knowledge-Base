@@ -34,9 +34,9 @@ connectivity:
     # Corrected 2026-08-25: this board has NO on-board USB-to-serial converter.
     # 64020 P2 Edge Module Breadboard Product Guide v1.2 (Parallax, 2021-01-07):
     # "Programming: Serial up to 2 MBaud; requires Parallax Prop-Plug programming
-    # adapter" -- engineering/ingestion/sources/edge-module-breadboard/
-    # edge-module-breadboard-narrative.txt:67, and "3. Prop Plug Programming
-    # Header" at :101-108.
+    # adapter", and "3. Prop Plug Programming
+    # Header".
+# Source: 64020 P2 Edge Module Breadboard Product Guide v1.2, engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:67 and :101-108
     - type: "Prop Plug (#32201)"
       connector: "dedicated 4-way header, pins marked up-triangle / down-triangle / RES / VSS"
       note: "the only wired programming path; serial up to 2 MBaud"
@@ -61,7 +61,7 @@ power:
   # whole block and nothing replaced it, leaving the file with no power figure at
   # all. The guide is unambiguous: 5 VDC only, absolute maximum 5.5 VDC. The removed
   # wording is recorded in
-  # engineering/analysis/archived/2026-08-25-yaml-release-change-ledger.md (item 7)
+  # 2026-08-25-yaml-release-change-ledger.md (item 7)
   # and is deliberately not repeated here. That ledger was superseded by
   # 2026-08-27-yaml-release-change-ledger.md and moved to archived/ on the way; this
   # locator was left pointing at the pre-move path until 2026-09-05.
@@ -72,6 +72,8 @@ power:
     (barrel jack), :61-66 (Key Specifications), :93-100 ("2. Power Jack"),
     :126-135 ("4. Servo Ports"), :137-158 ("5. VIO 3.3V Power and GND Access"),
     :166-172 ("8. Power Switch"), :177-182 ("10. ACC ON/OFF Header").
+    The removed-wording ledger is
+    engineering/analysis/archived/2026-08-25-yaml-release-change-ledger.md (item 7).
   input_connector: "2.1 mm center-positive DC barrel jack"
   input_voltage: "5 VDC"
   absolute_maximum: "5.5 VDC"

@@ -35,8 +35,8 @@ where_the_data_comes_from:
     settings; SAMPLES/SPACING/TRIGGER all act on data you feed it."
   parallax_worked_example: "The Spin2 v55 LOGIC section builds both halves together --
     a smart pin transmitting async serial, the streamer capturing it through an
-    adjacent non-smart pin, and this display unpacking the result with LONGS_2BIT.
-    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144."
+    adjacent non-smart pin, and this display unpacking the result with LONGS_2BIT."
+  source: "parallax_worked_example: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144"
 
 syntax:
   create: "DEBUG(`LOGIC MyLog <config directives> <channel-def strings>)"

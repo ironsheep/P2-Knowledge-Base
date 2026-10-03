@@ -63,6 +63,8 @@ software_features:
     P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
     Productions LLC, "Software Support" and "Performance Specifications" --
     engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:144-192.
+    gap_pulse_widths: the ISP HUB75 driver documentation would be ingested into
+    engineering/ingestion/sources/.
   driver: "ISP HUB75 Driver (P2 OBEX / GitHub) - see resources"
   capabilities:
     - "Multiple panel support (daisy-chain and grid configurations)"
@@ -89,7 +91,7 @@ software_features:
     No ingested source states either. They were removed rather than reconciled.
     What would settle it: ingesting the ISP HUB75 driver's own documentation
     (github.com/ironsheep/P2-HUB75-LED-Matrix-Driver) into
-    engineering/ingestion/sources/.
+    the ingestion sources.
 
 notes:
   source: >-

@@ -64,7 +64,8 @@ clock_configuration:
       Desired system clock frequency in Hz. The compiler calculates PLL settings
       to achieve this frequency. If used alone, assumes 20 MHz crystal input.
     range: "3,333,333 Hz to 500,000,000 Hz -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
-    silicon_limit: "The P2 Datasheet rates the PLL at 3.33 MHz min, 180 MHz typical, 320 MHz MAXIMUM (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200), with the note that nominal PLL frequency is 180 MHz at up to 105 degC (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2209). The Parallax Propeller 2 Documentation adds that for fastest overclocking the PLL can be pushed to 350 MHz using the 'VCO / 1' mode, %PPPP = 15 (engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545). So the compiler will accept a _clkfreq 180 MHz above the datasheet maximum and 150 MHz above the documented overclock ceiling."
+    silicon_limit: "The P2 Datasheet rates the PLL at 3.33 MHz min, 180 MHz typical, 320 MHz MAXIMUM, with the note that nominal PLL frequency is 180 MHz at up to 105 degC. The Parallax Propeller 2 Documentation adds that for fastest overclocking the PLL can be pushed to 350 MHz using the 'VCO / 1' mode, %PPPP = 15. So the compiler will accept a _clkfreq 180 MHz above the datasheet maximum and 150 MHz above the documented overclock ceiling."
+    source: "silicon_limit: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200 (PLL 3.33 MHz min, 180 MHz typical, 320 MHz maximum) and engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2209 (nominal PLL frequency 180 MHz at up to 105 degC); Parallax Propeller 2 Documentation (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545 (350 MHz overclock, VCO / 1 mode, %PPPP = 15)"
     example: "CON _clkfreq = 200_000_000  ' 200 MHz using PLL"
     notes:
       - "Used by timing functions (WAITMS, WAITUS, WAITX)"
@@ -81,7 +82,8 @@ clock_configuration:
       the default 20 MHz. Can be used alone (direct crystal, no PLL) or with
       _clkfreq (crystal + PLL multiplication).
     range: "1 MHz to 60 MHz typical -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
-    silicon_limit: "The P2 Datasheet rates a crystal between XI and XO at 1 MHz min to 50 MHz MAXIMUM (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2199). The compiler accepts 10 MHz beyond that."
+    silicon_limit: "The P2 Datasheet rates a crystal between XI and XO at 1 MHz min to 50 MHz MAXIMUM. The compiler accepts 10 MHz beyond that."
+    source: "silicon_limit: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2199"
     example: "CON _xtlfreq = 25_000_000  ' 25 MHz crystal"
     notes:
       - "Crystals >= 16 MHz use 15pF internal loading capacitors"
@@ -94,7 +96,8 @@ clock_configuration:
       External clock input frequency in Hz. Use when driving XI pin from an
       external oscillator or clock source instead of a crystal.
     range: "250 kHz to 500 MHz -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
-    silicon_limit: "The P2 Datasheet rates direct drive into XI at DC to 200 MHz MAXIMUM (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2198). The compiler accepts 300 MHz beyond that."
+    silicon_limit: "The P2 Datasheet rates direct drive into XI at DC to 200 MHz MAXIMUM. The compiler accepts 300 MHz beyond that."
+    source: "silicon_limit: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2198"
     example: "CON _xinfreq = 10_000_000  ' 10 MHz external clock"
     notes:
       - "For external oscillator modules or shared clock sources"

@@ -20,14 +20,10 @@ description: |
   bounded by that 32-bit span; GETMS and GETSEC read the 64-bit counter instead.
   See the `pitfalls` block below.
 
-  Sources: Parallax Spin2 Documentation v55, Timing Methods --
-  engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547, and :552-553
-  for GETSEC and GETMS, each of which "uses 64-bit system counter and CLKFREQ".
-  P2 Datasheet 2022/11/01 --
-  engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:95 (counter
-  width and behaviour), :2084-2085 (GETCT row).
-  Propeller 2 Documentation v35 Rev B/C --
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55.
+sources:
+  - "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547, and :552-553 for GETSEC and GETMS, each of which \"uses 64-bit system counter and CLKFREQ\"."
+  - "P2 Datasheet 2022/11/01 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:95 (counter width and behaviour), :2084-2085 (GETCT row)."
+  - "Propeller 2 Documentation v35 Rev B/C -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55."
 
 syntax: "GETCT() : Count"
 

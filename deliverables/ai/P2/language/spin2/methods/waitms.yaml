@@ -90,12 +90,12 @@ related_methods:
   - "POLLCT"
 
 notes:
-  source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:551"
+  source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:551; choosing_between_waits: WAITUS at :550, WAITCT at :549 (same file)"
   v55_definition: "WAITMS(Milliseconds) -- Wait Milliseconds, uses CLKFREQ, duration must not exceed $8000_0000 clocks."
   clkfreq_dependent: "Because the wait is computed from CLKFREQ, the same Milliseconds argument is a different number of clocks at every clock frequency, and the ceiling moves with it."
   choosing_between_waits:
-    - "For sub-millisecond delays use WAITUS -- WAITUS(Microseconds), same $8000_0000-clock bound. -- :550"
-    - "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'. -- :549"
+    - "For sub-millisecond delays use WAITUS -- WAITUS(Microseconds), same $8000_0000-clock bound."
+    - "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'."
   blocking: "The cog is stopped in the wait for its duration."
 
 limitations:

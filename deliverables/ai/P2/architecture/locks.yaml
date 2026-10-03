@@ -1,5 +1,5 @@
 # P2 Hardware Locks System
-# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
 # never existed and datasheet pages beyond the end of a 50-page datasheet):
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section LOCKS --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3673-3700
@@ -388,12 +388,12 @@ related_topics:
 extraction_metadata:
   source_documents:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
         - "LOCKS, incl. Allocating Locks and Using Locks -- lines 3673-3700"
         - "PASM2 encoding table, LOCKNEW/LOCKRET/LOCKTRY/LOCKREL -- lines 5236-5239"
     - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "Locks, p.19-20 -- lines 877-905"
         - "PASM2 instruction table, lock rows, p.42 -- lines 1791-1797"

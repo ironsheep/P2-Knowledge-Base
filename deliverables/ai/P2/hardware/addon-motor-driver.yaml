@@ -48,6 +48,8 @@ signal_map:
     engineering/ingestion/sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md:138-152,
     :255-283; raw text layer at
     engineering/ingestion/sources/p2-universal-motor-driver/p2-universal-motor-driver-text.txt:214-244.
+    pin_label_errata: p2-universal-motor-driver-text.txt:637-646, and
+    engineering/ingestion/SOURCE-ERRATA.md.
   upper_header_note: "offsets 15..8 carry the PWM drive signals; VIO3V3 and GND are on the same header."
   lower_header_note: "offsets 7..0 carry the Hall and sense feedback signals; VIO3V3 and GND are on the same header."
   pins:
@@ -80,10 +82,9 @@ signal_map:
     "Pin Definitions for the P2 Dual Accessory Header Block 15-8" table labels
     them PWM_XH and PWM_XL, duplicating the X channel and leaving channel U
     undocumented. This IS in the source PDF, not an extraction artifact - the
-    raw text layer carries it too
-    (p2-universal-motor-driver-text.txt:637-646). The header pinout table is
+    raw text layer carries it too. The header pinout table is
     right: the board has four channels U/V/W/X and eight PWM pins, so 9/8 are
-    the U channel. Recorded in engineering/ingestion/SOURCE-ERRATA.md.
+    the U channel. Recorded in SOURCE-ERRATA.md.
 
 pwm_control:
   source: >-

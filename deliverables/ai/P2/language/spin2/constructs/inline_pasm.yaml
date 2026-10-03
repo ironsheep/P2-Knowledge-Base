@@ -325,7 +325,7 @@ debugging_considerations:
     solution: "Let the appended RET do the work, or return early with _RET_ / RET; never fall out of the block"
 
 hardware_stack_budget:
-  source: "Parallax Spin2 Documentation v55 -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:812 and :837, both verbatim: 'Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.'"
+  source: "Parallax Spin2 Documentation v55 -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:812 and :837, both verbatim: 'Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.'; not_stated_by_any_source_we_hold: Parallax Spin2 Documentation v55 inline-PASM section, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:788-840"
   levels_available: 5
   of_total: 8
   applies_to: "both the ORG/END inline form and the CALL() surface -- v55 states it in both places"
@@ -335,7 +335,7 @@ hardware_stack_budget:
     you may use, not the hardware depth.
   not_stated_by_any_source_we_hold: >-
     The C and Z flag state ON ENTRY to an inline block. v55's inline-PASM section
-    (:788-840) says nothing about it, so do not assume C or Z are cleared, set, or
+    says nothing about it, so do not assume C or Z are cleared, set, or
     carried in from the calling Spin2 code. Read the flags only after an instruction of
     yours has written them.
 

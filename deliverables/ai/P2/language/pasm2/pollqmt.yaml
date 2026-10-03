@@ -10,7 +10,9 @@ description: >-
   The CORDIC-read-but-empty event flag is set whenever GETQX / GETQY executes without
   any CORDIC results available or in progress. The flag is cleared upon cog start or
   execution of POLLQMT, JQMT, or JNQMT instructions (there is no WAITQMT: the event
-  could not happen while waiting, silicon-doc-text.txt:2102).
+  could not happen while waiting).
+sources:
+  - "description (no WAITQMT): Silicon Doc, silicon-doc-text.txt:2102"
 result: CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then
   it is cleared.
 flags_affected:

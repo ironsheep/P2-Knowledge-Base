@@ -104,9 +104,10 @@ operating_modes:
 critical_requirements:
   reset_before_configure:
     mandatory: false
+    source: "Silicon Doc, silicon-doc-text.txt:3852 (configure while DIR is low); consequences_of_skipping: Silicon Doc, silicon-doc-text.txt:3856"
     description: |
       **Configure while DIR is low**: a smart pin should be configured while its DIR
-      bit is low, holding it in reset (silicon-doc-text.txt:3852). A WRPIN while DIR
+      bit is low, holding it in reset. A WRPIN while DIR
       is high changes the use of the pin's state bits and gives unpredictable
       behavior. Exception: WRPIN #0 resets a running
       smart pin without a DIR cycle.
@@ -132,7 +133,7 @@ critical_requirements:
         - "DIRH(pin)            ' Enable smart pin (DIR=1)"
         - "WYPIN(pin, y)        ' Operate: write Y AFTER enable"
     consequences_of_skipping:
-      - "Selecting a new mode while DIR is high gives unpredictable, quite certainly useless behavior in the newly-selected mode (silicon-doc-text.txt:3856)"
+      - "Selecting a new mode while DIR is high gives unpredictable, quite certainly useless behavior in the newly-selected mode"
     why_this_is_the_rule:
       source: >-
         Propeller 2 Documentation v35 (Rev B/C) --
@@ -233,7 +234,10 @@ in_signal_semantics:
     engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-157 (same text
     in the whole-document extraction at
     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3845), and the
-    non-smart-pin case at part4-smart-pins.txt:50 (silicon-doc-text.txt:3767)."
+    non-smart-pin case at part4-smart-pins.txt:50 (silicon-doc-text.txt:3767). consequence_source: Spin2 v55 LOGIC display section,
+    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144; Propeller 2
+    Documentation v35, Pins => DACs/WRFAST,
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535."
 
   rule: |
     A pin's IN signal does not mean one thing. What it carries depends entirely on
@@ -278,10 +282,8 @@ in_signal_semantics:
     architecture/streamer/pin-capture.yaml.
   consequence_source: "The streamer half is stated by Parallax in the Spin2 v55 LOGIC
     display section: \"On every clock, the streamer will record the smart pin's IN
-    signal and its output state, as read from an adjacent pin\" --
-    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144. The pin-capture
-    read source is Propeller 2 Documentation v35, Pins => DACs/WRFAST,
-    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535."
+    signal and its output state, as read from an adjacent pin\". The pin-capture
+    read source is Propeller 2 Documentation v35, Pins => DACs/WRFAST."
 
   related:
     - architecture/streamer/pin-capture.yaml
@@ -465,7 +467,7 @@ in_flag:
   not_clearing:
     - "RQPIN (read quiet) -- it does NOT acknowledge, which is what lets any number
       of cogs read the pin concurrently without bus conflict"
-  clearing_source: "Propeller 2 Documentation v35 -- \"A cog acknowledges a smart pin
+  source_reference: "Propeller 2 Documentation v35 -- \"A cog acknowledges a smart pin
     whenever it does a WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on it. This causes the smart
     pin to lower its IN signal...\" and the RQPIN exception, at
     engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-153

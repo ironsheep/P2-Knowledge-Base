@@ -141,7 +141,7 @@ related_operators:
   - "//": Signed remainder (modulo) -- the signed counterpart of this operator
   - "+/": Unsigned divide quotient
   - "&": AND mask (alternative for power-of-2)
-related_operators_source: >-
+source_reference: >-
   engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:62 and :103.
   The pre-merge form of this block (in language/spin2/operators/modulo_add.yaml) called `//` the UNSIGNED
   remainder, inverting the single distinction this file exists to draw, and listed

@@ -84,6 +84,7 @@ pin_mode_tip:
     real P2, 2026-08-20) corroborate the mechanism only INCIDENTALLY: they are rig
     apparatus for a streamer-fed DAC %TT finding (:813) and a streamer
     pin-placement finding (:834). Neither is a drive-strength finding.
+    do_not_copy_the_guides_wording: engineering/ingestion/SOURCE-ERRATA.md E-004.
   board_fact: >-
     SCL, INT and CLKOUT share the single +0 IO pin, so only one of the three can
     be in use at a time. To use INT or CLKOUT, first configure them over I2C per
@@ -99,7 +100,7 @@ pin_mode_tip:
     P2 has NO pull-up resistors - P_HIGH_150K selects a 150 kOhm DRIVE STRENGTH
     ("Drive high 150k-ohm" in the Spin2 v55 symbol table). (2) Input mode is DIR
     LOW, and every drive selection is inactive while the pin is an input; the pin
-    simply floats. Filed as engineering/ingestion/SOURCE-ERRATA.md E-004.
+    simply floats. Filed as SOURCE-ERRATA.md E-004.
   scl_pull_up_caveat: >-
     The same Code Tip prescribes a "3.3 k-ohm pull-up" for I2C SCL. The P2 drive
     ladder has no 3.3 kOhm rung: its drive-high selections are FAST (30 mA),

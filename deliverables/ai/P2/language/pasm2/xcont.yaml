@@ -58,9 +58,11 @@ patterns:
 notes:
 - Phase continues from previous command (no reset)
 - Use for seamless streaming where timing continuity matters
-- Waits for the prior command's last clock cycle; if the streamer count has already run down to 0 there is no waiting. If the prior command used count $FFFF (perpetual), it waits only for the next NCO rollover (silicon-doc-text.txt:1407)
+- Waits for the prior command's last clock cycle; if the streamer count has already run down to 0 there is no waiting. If the prior command used count $FFFF (perpetual), it waits only for the next NCO rollover
 - XINIT starts the streamer from any state (XCONT does not need an active command to be legal)
 - Stalls until command buffer is empty if buffer is full
+sources:
+  - "notes (waits for the prior command's last clock cycle): Silicon Doc, silicon-doc-text.txt:1407"
 
 related_instructions:
 - XINIT: Start immediately with zero phase

@@ -9,7 +9,7 @@ overview: |
   pipeline (it becomes a 2-clock NOP). SKIPF, in cog/LUT memory, leaps over skipped instructions
   instead, with no clock penalty, except where an instruction is already in the pipeline and must be
   cancelled (see skip_behavior). Skipping only works in main code, not within interrupt service routines.
-  Source: silicon-doc-text.txt:780, :876-881.
+# Sources: overview: Silicon Doc, silicon-doc-text.txt:780, :876-881.
 
 skip_instructions:
   SKIP:
@@ -23,13 +23,17 @@ skip_instructions:
         ADD x, #1       ' Skipped
         SUB y, #1       ' Executed  
         MOV z, #0       ' Skipped
-    timing: "Each skipped instruction is cancelled in the pipeline and becomes a 2-clock NOP (silicon-doc-text.txt:780)"
+    timing: "Each skipped instruction is cancelled in the pipeline and becomes a 2-clock NOP"
+    sources:
+      - "timing: Silicon Doc, silicon-doc-text.txt:780"
 
   SKIPF:
     description: "Like SKIP, but faster: cog/LUT only, PC steps over skipped instructions"
     syntax: "SKIPF {#}pattern"
     pattern_source: "32-bit pattern from a register or an immediate (# / ##)"
-    operation: "In cog/LUT memory the PC steps 1..8 to leap over skipped instructions (no clock penalty); in hub exec it reverts to SKIP behavior. An instruction is cancelled (2-clock NOP) instead of stepped over when it is the first instruction after SKIPF/EXECF with pattern LSB = 1, or the 8th in a row being skipped (only 7 can be stepped over at once) (silicon-doc-text.txt:848-881)."
+    operation: "In cog/LUT memory the PC steps 1..8 to leap over skipped instructions (no clock penalty); in hub exec it reverts to SKIP behavior. An instruction is cancelled (2-clock NOP) instead of stepped over when it is the first instruction after SKIPF/EXECF with pattern LSB = 1, or the 8th in a row being skipped (only 7 can be stepped over at once)."
+    sources:
+      - "operation: Silicon Doc, silicon-doc-text.txt:848-881"
     examples:
       - |
         MOV pattern, #%11001100
@@ -41,7 +45,9 @@ skip_instructions:
     description: "Jump to a cog/LUT address, then skip instructions there by a pattern"
     syntax: "EXECF {#}D"
     encoding: "D[31:10] = SKIPF pattern, D[9:0] = jump target (cog/LUT address)"
-    operation: "Jumps to D[9:0] in cog/LUT first, then initiates SKIPF using D[31:10]; the pattern applies to the instructions starting at the jump target (silicon-doc-text.txt:786)"
+    operation: "Jumps to D[9:0] in cog/LUT first, then initiates SKIPF using D[31:10]; the pattern applies to the instructions starting at the jump target"
+    sources:
+      - "operation: Silicon Doc, silicon-doc-text.txt:786"
     examples:
       - |
         EXECF ##(%101 << 10) | target
@@ -70,7 +76,9 @@ pattern_encoding:
     - "Each instruction consumes one pattern bit"
     - "Pattern shifts after each instruction"
     - "Exhausted pattern = normal execution resumes"
-    - "A CALL/CALLPA/CALLPB that is not skipped runs its whole subroutine normally; the skip sequence resumes after the returning RET/_RET_ (silicon-doc-text.txt:791)"
+    - "A CALL/CALLPA/CALLPB that is not skipped runs its whole subroutine normally; the skip sequence resumes after the returning RET/_RET_"
+  sources:
+    - "pattern_consumption (CALL/CALLPA/CALLPB subroutine): Silicon Doc, silicon-doc-text.txt:791"
 
 skip_behavior:
   instruction_handling:
@@ -87,17 +95,23 @@ skip_behavior:
 
   special_cases:
     REP_interaction:
-      - "SKIP is fully compatible with REP: it only cancels instructions, so REP keeps accurate instruction counts (silicon-doc-text.txt:883)"
-      - "SKIPF works with REP only if every SKIPF pattern results in the same instruction count, which REP must be initiated with (:885)"
+      - "SKIP is fully compatible with REP: it only cancels instructions, so REP keeps accurate instruction counts"
+      - "SKIPF works with REP only if every SKIPF pattern results in the same instruction count, which REP must be initiated with"
       - "The pattern advances one bit per instruction encountered, not per REP iteration"
 
     branches_in_skipf_sequences:
-      - "If the instruction after a CALL/CALLPA/CALLPB might be skipped, its immediate branch address must be absolute (CALL #\\address; registers are absolute; not possible for CALLPA/CALLPB) (:889)"
-      - "Immediate-relative branches work through SKIPF; after an absolute-address branch (#\\label, register, RET) the first instruction after the branch must not be skipped (:891)"
+      - "If the instruction after a CALL/CALLPA/CALLPB might be skipped, its immediate branch address must be absolute (CALL #\\address; registers are absolute; not possible for CALLPA/CALLPB)"
+      - "Immediate-relative branches work through SKIPF; after an absolute-address branch (#\\label, register, RET) the first instruction after the branch must not be skipped"
 
     interrupts:
       - "Skipping only works outside of interrupt service routines (in main code)"
-      - "An interrupt service routine executes normally during a skipping sequence; the skipping sequence resumes upon its completion (silicon-doc-text.txt:780, :791)"
+      - "An interrupt service routine executes normally during a skipping sequence; the skipping sequence resumes upon its completion"
+    sources:
+      - "REP_interaction (SKIP compatible with REP): Silicon Doc, silicon-doc-text.txt:883"
+      - "REP_interaction (SKIPF with REP, same instruction count): Silicon Doc, silicon-doc-text.txt:885"
+      - "branches_in_skipf_sequences (CALL/CALLPA/CALLPB absolute branch address): Silicon Doc, silicon-doc-text.txt:889"
+      - "branches_in_skipf_sequences (after an absolute-address branch): Silicon Doc, silicon-doc-text.txt:891"
+      - "interrupts (ISR during a skipping sequence): Silicon Doc, silicon-doc-text.txt:780, :791"
 
 common_patterns:
   conditional_block:
@@ -146,19 +160,24 @@ execf_branching:
       EXECF ##(%1010 << 10) | next_section
 
 benefits:
-  - "One static instruction sequence serves many variants: the silicon doc's 9-instruction 'addr' sequence realizes 36 address calculations, one pattern each (silicon-doc-text.txt:802-836)"
-  - "SKIPF/EXECF in cog/LUT step over skipped instructions with no clock penalty, except the two cancel cases (:776, :876-881)"
+  - "One static instruction sequence serves many variants: the silicon doc's 9-instruction 'addr' sequence realizes 36 address calculations, one pattern each"
+  - "SKIPF/EXECF in cog/LUT step over skipped instructions with no clock penalty, except the two cancel cases"
+# Sources: benefits: Silicon Doc, silicon-doc-text.txt:802-836 ('addr' sequence); silicon-doc-text.txt:776, :876-881 (cancel cases)
 
 limitations:
-  - "SKIP/SKIPF patterns cover the next 32 instructions; EXECF's pattern is 22 bits (:776, :864)"
-  - "SKIPF and EXECF skip only in cog/LUT memory; SKIPF in hub exec reverts to SKIP behavior (:793, :856)"
-  - "Skipping works only outside interrupt service routines (:780)"
-  - "SKIPF with REP only when every pattern gives the same instruction count (:885)"
+  - "SKIP/SKIPF patterns cover the next 32 instructions; EXECF's pattern is 22 bits"
+  - "SKIPF and EXECF skip only in cog/LUT memory; SKIPF in hub exec reverts to SKIP behavior"
+  - "Skipping works only outside interrupt service routines"
+  - "SKIPF with REP only when every pattern gives the same instruction count"
+# Sources: limitations: Silicon Doc, silicon-doc-text.txt:776, :864 (pattern sizes); silicon-doc-text.txt:793, :856 (cog/LUT only, hub exec reverts to SKIP); silicon-doc-text.txt:780 (outside ISRs); silicon-doc-text.txt:885 (SKIPF with REP)
 
 debugging:
   inspecting_skip_state:
-    - "GETBRK D WZ returns the 32-bit SKIP/SKIPF/EXECF/XBYTE pattern in D; Z = 1 if no pattern is queued (silicon-doc-text.txt:2587-2593)"
-    - "GETBRK D WC returns C = pattern LSB, D[31:28] = CALL depth since the skip started (skipping suspended if not %0000), D[27] = 1 for SKIP mode or 0 for SKIPF/EXECF/XBYTE mode (silicon-doc-text.txt:2557-2564)"
+    - "GETBRK D WZ returns the 32-bit SKIP/SKIPF/EXECF/XBYTE pattern in D; Z = 1 if no pattern is queued"
+    - "GETBRK D WC returns C = pattern LSB, D[31:28] = CALL depth since the skip started (skipping suspended if not %0000), D[27] = 1 for SKIP mode or 0 for SKIPF/EXECF/XBYTE mode"
+  sources:
+    - "GETBRK D WZ pattern: Silicon Doc, silicon-doc-text.txt:2587-2593"
+    - "GETBRK D WC fields: Silicon Doc, silicon-doc-text.txt:2557-2564"
 
 references:
   - silicon_doc: Instruction Skipping section

@@ -1,5 +1,5 @@
 # P2 COG Attention System
-# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
 # never existed and a datasheet page beyond the end of a 50-page datasheet):
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section COG ATTENTION --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2013-2033
@@ -27,9 +27,10 @@ architecture:
   signal_matrix: "8×8 (any COG to any COGs)"
   operand_field: >-
     COGATN's D operand carries the cog-select bit pattern; bit N selects cog N. The P2
-    Datasheet describes the lower 8 bits and a composite set of 8 strobes
-    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:682-692), which is
+    Datasheet describes the lower 8 bits and a composite set of 8 strobes, which is
     the shape the eight physical cogs use.
+  sources:
+    - "operand_field: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:682-692"
   
   attention_flags:
     per_cog: 1
@@ -170,7 +171,8 @@ event_configuration:
       requested by another cog or other cogs",
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2053; and the
       INTERRUPTS event-source table, silicon-doc-text.txt:2290. Event 15 is
-      GETQX/GETQY-with-no-CORDIC-result, not attention.
+      GETQX/GETQY-with-no-CORDIC-result, not attention. setup_for_event: Silicon Doc,
+      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2246-2260.
     trigger: "An attention strobe from another cog sets this cog's ATN event flag"
     
     setup_for_interrupt: |
@@ -185,8 +187,7 @@ event_configuration:
     
     setup_for_event: >-
       Attention is NOT one of the events SETSE1..4 can select. SETSEn selects LUT
-      read/write events, hub-lock events, and pin rise/fall/change/high/low events only
-      (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2246-2260).
+      read/write events, hub-lock events, and pin rise/fall/change/high/low events only.
       Attention is tracked as event 14 in its own right and is reached with
       POLLATN / WAITATN / JATN / JNATN, or as interrupt source 14 via SETINTx.
 
@@ -405,13 +406,13 @@ related_topics:
 extraction_metadata:
   source_documents:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
         - "COG ATTENTION -- lines 2013-2033"
         - "EVENTS, event numbering and POLL/WAIT/J flag rules -- lines 2037-2260"
         - "PASM2 encoding table -- lines 5181, 5198, 5234, 5283, 5300, 5351"
     - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "Cog Attention, p.15-16 -- lines 681-695"
         - "PASM2 instruction table -- lines 1854, 1893, 1914"

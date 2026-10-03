@@ -21,8 +21,7 @@ encoding:
   config_field: "D[19:16]"
 
   # How to read the d_19_16 column. Every symbol below is one BIT of D[19:16],
-  # written MSB-first, exactly as the Silicon Doc prints it (silicon-doc-text.txt
-  # :3004-3015 immediate, :3128-3139 RDFAST, :3292-3303 WRFAST).
+  # written MSB-first, exactly as the Silicon Doc prints it.
   field_notation:
     "0 / 1": "a FIXED bit. The mode template sets it; you do not."
     "p": >-
@@ -33,7 +32,7 @@ encoding:
       pin: the stray low bits have nowhere to go and carry up into D[22:20].
     "a": >-
       the ALTERNATE-BIT-ORDER flag, D[16] (Silicon Doc
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1456 -- "Some of
+      "Some of
       these modes have the %a bit in D[16] to reorder the data sequence within the
       individual bytes to top-first when %a = 1". The locator previously named lines
       3653-3654, a superseded p2-documentation.txt number; corrected 2026-08-30).
@@ -65,6 +64,9 @@ encoding:
     architecture/streamer/pin-selection.yaml sub_pin_selection.bits_free_by_width; the
     DDS/Goertzel D[22:19] multiple-of-four form is in
     architecture/streamer/dds-goertzel.yaml adc_input_pins.pin_block_selection.
+    field_notation: Silicon Doc, silicon-doc-text.txt:3004-3015 immediate,
+    :3128-3139 RDFAST, :3292-3303 WRFAST. The "a" bit: Silicon Doc,
+    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1456.
   
 # Mode categories by D[31:28]
 categories:

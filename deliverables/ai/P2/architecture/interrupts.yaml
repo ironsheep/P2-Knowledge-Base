@@ -1,5 +1,5 @@
 # P2 Interrupt System
-# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
 # never existed and datasheet pages beyond the end of a 50-page datasheet):
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section INTERRUPTS --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2262-2392
@@ -426,7 +426,8 @@ best_practices:
       Hardware saves ONLY the return address and the C/Z flags, into IRETx. PA, PB, PTRA,
       PTRB, the CORDIC queue and every general register are shared with the interrupted
       code -- an ISR that touches them must save and restore them itself.
-    rationale: "There are no shadow register banks (silicon-doc-text.txt:2294, :2359)"
+    rationale: "There are no shadow register banks"
+    source: "rationale: Silicon Doc, silicon-doc-text.txt:2294, :2359"
   
   - practice: "avoid_hub_ops"
     description: "Minimize hub operations in ISRs"
@@ -510,18 +511,18 @@ related_topics:
 extraction_metadata:
   source_documents:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
         - "INTERRUPTS -- lines 2262-2392"
         - "PASM2 encoding table -- lines 5302-5315"
         - "RESIx / RETIx alias definitions -- lines 5478-5486"
     - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "Cog special-purpose register table, IJMPx/IRETx -- lines 558-563"
         - "PASM2 instruction table, SETINTx -- line 1954"
     - document: "This knowledge base's own per-instruction YAMLs"
-      path: "deliverables/ai/P2/language/pasm2/"
+      source: "deliverables/ai/P2/language/pasm2/"
       sections:
         - "language/pasm2/reti0.yaml, language/pasm2/reti1.yaml, language/pasm2/reti2.yaml, language/pasm2/reti3.yaml -- alias encodings"
   re_derivation_note: >-

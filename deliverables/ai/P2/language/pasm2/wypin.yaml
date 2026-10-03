@@ -38,9 +38,9 @@ description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknow
 
   - Writing Y also acknowledges the pin
 
-  - Source: silicon-doc-text.txt:3938, :3974, :3993, :4042, :4089, :4133, :4387, :4656
-
   '
+sources:
+  - "description (Y register by smart pin mode): Silicon Doc, silicon-doc-text.txt:3938, :3974, :3993, :4042, :4089, :4133, :4387, :4656"
 flags_affected:
   C: No effect
   Z: No effect

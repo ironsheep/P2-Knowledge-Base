@@ -304,9 +304,9 @@ loading_strategies:
 
 fifo_behavior:
   # CANONICAL MENTAL MODEL — read this first when reasoning about hubexec timing.
-  # All numbers verified against Silicon Doc v35 HUB EXECUTION section
-  # (P2 Silicon Doc v35) and
-  # per-instruction YAMLs in deliverables/ai/P2/language/pasm2/.
+# Sources: All numbers verified against Silicon Doc v35 HUB EXECUTION section
+#   (P2 Silicon Doc v35) and
+#   per-instruction YAMLs in deliverables/ai/P2/language/pasm2/.
   summary: |
     Hubexec instruction timing is governed by the per-cog instruction-prefetch
     FIFO. Per Silicon Doc verbatim, 'The FIFO contains (cogs+11) stages' —

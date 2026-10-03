@@ -1702,8 +1702,8 @@ spin2_builtin_symbols:
       hardware_relationship: "SmartPin operating mode selector"
 
     # Event and Interrupt Symbols
-    # Source: Spin2 Language Documentation v55, "Built-In Symbols for Events and Interrupt Sources
-    # (PASM only, see silicon doc)" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1638-1656.
+# Source: Spin2 Language Documentation v55, "Built-In Symbols for Events and Interrupt Sources
+# (PASM only, see silicon doc)" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1638-1656.
     # Value = the event number (also the SETINTx interrupt-source code); description = the table's text.
     - symbol_id: "event_int"
       symbol_name: "EVENT_INT"

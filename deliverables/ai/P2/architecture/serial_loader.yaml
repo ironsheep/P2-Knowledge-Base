@@ -9,7 +9,7 @@ description: |
   configuring the P2 chip via serial connection.
 
 boot_sequence:
-  source: "P2 Hardware Manual -- Boot Pattern table :269-282, Download Propeller Application :1592-1595, Prop_Hex checksum response :1666 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt"
+  source: "P2 Hardware Manual -- Boot Pattern table :269-282, Download Propeller Application :1592-1595, Prop_Hex checksum response :1666 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt; rom_listing_confirmation: ROM booter listing, engineering/ingestion/sources/rom-booter/ROM_Booter.lst:750-752"
   see_pattern_table: architecture/boot-rom/boot-pattern-selection.yaml
 
   serial_triggered_when:
@@ -31,7 +31,7 @@ boot_sequence:
 
   execution:
     target: "On a valid checksum \"the booter will perform a COGINIT #0,#0 instruction to relaunch cog 0 (currently running the loader program) with the new program starting at $00000.  When invalid, the booter will wait for another command.\""
-    rom_listing_confirmation: "engineering/ingestion/sources/rom-booter/ROM_Booter.lst:750-752 -- serial_done calls reset_pins, then 'if_z jmp #0' -- 'if SPI program, run it, else shut down'."
+    rom_listing_confirmation: "serial_done calls reset_pins, then 'if_z jmp #0' -- 'if SPI program, run it, else shut down'."
 
 auto_baud_detection:
   mechanism: "Measures bit timing from CR character"

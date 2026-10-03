@@ -143,11 +143,11 @@ configuration_constants:
   adc_input_modes:
     # GIO / VIO / FLOAT are NOT input ranges - they select an INTERNAL reference as the
     # ADC's input. Only the 1x..100x entries are pin-input gain ranges.
-    # Silicon Doc silicon-doc-text.txt:200 - "Delta-sigma ADC with 5 ranges, 2 sources,
-    # and VIO/GIO calibration." Mode-name glosses: spin2-v55-text.txt:1466-1473.
+    # Silicon Doc - "Delta-sigma ADC with 5 ranges, 2 sources,
+    # and VIO/GIO calibration." Mode-name glosses: Spin2 v55.
     - "P_ADC_GIO - GIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
     - "P_ADC_VIO - VIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
-    - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range (Silicon Doc silicon-doc-text.txt:115)"
+    - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range (Silicon Doc)"
     - "P_ADC_1X - 1x gain"
     - "P_ADC_3X - 3.16x gain (sqrt-10-spaced ladder)"
     - "P_ADC_10X - 10x gain"
@@ -160,6 +160,11 @@ configuration_constants:
     - "%10_xxxx - SINC3 filtering (software post-process required)"
     - "%11_xxxx - Bitstream capturing (raw 32-bit ADC snapshot every 32 clocks)"
     - "Lower 4 bits control sample period/resolution"
+
+  sources:
+    - "adc_input_modes (5 ranges, 2 sources, VIO/GIO calibration): Silicon Doc, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:200"
+    - "adc_input_modes (mode-name glosses): Spin2 v55, spin2-v55-text.txt:1466-1473"
+    - "P_ADC_FLOAT: Silicon Doc, silicon-doc-text.txt:115"
 
 notes:
   - "Requires M[12:10] = %100 in WRPIN configuration to enable ADC"

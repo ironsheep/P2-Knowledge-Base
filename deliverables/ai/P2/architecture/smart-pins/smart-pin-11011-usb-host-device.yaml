@@ -6,7 +6,7 @@ compatible_languages: ["Spin2", "PASM2"]
 brief_description: "USB differential pair control for host/device communication (even/odd pin pair = DM/DP)"
 
 detailed_description:
-  source: "Propeller 2 Documentation v35, %11011 = USB host/device -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4579; the mode line 'USB host/device (even/odd pin pair = DM/DP)' also at engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:140"
+  source: "Propeller 2 Documentation v35, %11011 = USB host/device -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4579; the mode line 'USB host/device (even/odd pin pair = DM/DP)' also at engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:140; wrpin_data_conflict: PDF-derived capture of v35 p2-documentation.txt:8886 (now superseded), DOCX capture of v35 silicon-doc-text.txt:4579, general rule silicon-doc-text.txt:3856; registers comment: Silicon Doc silicon-doc-text.txt:4579"
   pin_pairing: "This mode requires that two adjacent pins be configured together to form a USB pair, whose OUTs will be overridden to control their output states. These pins must be an even/odd pair, having only the LSB of their pin numbers different. For example: pins 0 and 1, pins 2 and 3, and pins 4 and 5 can form USB pairs."
   which_pin_is_which:
     upper_odd_pin: "The upper (odd) pin is the DP pin. This pin's IN is raised whenever the output buffer empties, signalling that a new output byte can be written via WYPIN to the lower (even) pin. No WXPIN/WYPIN instructions are used for this pin."
@@ -16,9 +16,9 @@ detailed_description:
     wrpin_data: "They can be configured via WRPIN with identical D data of %1_11011_0. Using D data of %0_11011_0 will disable output drive and effectively create a USB 'sniffer'. A new WRPIN can be done to effect such a change without resetting the smart pin."
     wrpin_data_conflict: >-
       ⚠ THAT LAST SENTENCE IS NOT SETTLED. It comes from the PDF-derived capture of v35
-      (p2-documentation.txt:8886, now superseded). The DOCX capture of the SAME v35
-      document omits it entirely (silicon-doc-text.txt:4579) while stating the opposite
-      general rule at :3856 -- a WRPIN issued while DIR is high remaps 126 bits of state
+      (now superseded). The DOCX capture of the SAME v35
+      document omits it entirely while stating the opposite
+      general rule -- a WRPIN issued while DIR is high remaps 126 bits of state
       under a running mode, "unpredictable and quite certainly useless behavior", which
       is why modes are configured only while DIR is low (see
       architecture/smart_pins.yaml critical_requirements). Either USB is a genuine
@@ -35,7 +35,7 @@ detailed_description:
 
 registers:
   # All WXPIN/WYPIN/RDPIN for USB are issued on the LOWER (even / DM) pin.
-  # Silicon Doc silicon-doc-text.txt:4579.
+  # Silicon Doc.
   x_register:
     function: "USB mode + baud rate, set via WXPIN on the lower (even) pin"
     D_15: "1 = host, 0 = device"

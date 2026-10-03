@@ -90,7 +90,8 @@ idioms:
     description: |
       Block-transfer a run of contiguous cog registers to hub with one WRLONG.
       SETQ2 transfers from LUT RAM instead. Registers $1F8..$1FF cannot be
-      transferred to hub this way (silicon-doc-text.txt:3276).
+      transferred to hub this way.
+    source: "description: Silicon Doc, silicon-doc-text.txt:3276"
     examples:
       - |
         setq    #16-1
@@ -116,7 +117,7 @@ idioms:
       The production flash loader uses this exact pattern for the
       application copy phase. See code-examples/flash-loader-case-study.yaml for
       the full sequence.
-    source_example: "Parallax P2 flash loader -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:148-152"
+    source: "Parallax P2 flash loader -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:148-152"
     related: code-examples/flash-loader-case-study.yaml
 
 related:

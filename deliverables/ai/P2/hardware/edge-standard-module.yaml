@@ -46,11 +46,13 @@ specifications:
     engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:73-90
     (Key Specifications), :50-71 (Features), :169-173 (5. Flash Memory),
     :470-509 (Recommend and Absolute Maximum Ratings).
+    chip_marking_note: P2-EC Edge Module Rev D Product Guide v3.0,
+    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:104-107.
   propeller_chip: "P2X8C4M64P (8 cogs, 512 KB shared hub RAM, 64 smart pins)"
   chip_marking_note: >-
     A limited number of P2 Rev C chips carry the extended part number
     P2X8C4M64PES instead of P2X8C4M64P. The guide states the two are identical
-    other than the part marking (engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:104-107).
+    other than the part marking.
   oscillator: "TCXO 20 MHz +/-0.5 PPM (high-precision temperature-compensated crystal oscillator)"
   crystal_load_capacitance: "9 pF, internal to the P2's on-chip crystal oscillator"
   clock:
@@ -128,6 +130,8 @@ pin_mapping:
     engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:343-425
     (Edge Connector Pin Assignments), :433-457 (Other Pins),
     :297-312 (12. microSD card socket), :129-146 (3. LDO regulators for I/O Pin Voltage).
+    boot_pin_direction_note: Parallax ROM_Booter listing,
+    engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:135-138.
   summary: >-
     "Smart I/O pins P0-P55 are fully free; P56-P63 are routed to peripheral
     circuits and/or have special functions related to Propeller 2 boot sequence
@@ -164,8 +168,7 @@ pin_mapping:
     P58 is the P2 INPUT (flash/card data OUT, i.e. MISO) and P59 the P2 OUTPUT
     (flash/card data IN, i.e. MOSI). P60 and P61 SWAP roles between the two boot
     sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60
-    and microSD CLK on P61. The P2 boot ROM listing states both directly --
-    engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:135-138.
+    and microSD CLK on P61. The P2 boot ROM listing states both directly.
   microsd_socket:
     added_in: "Rev C"
     power: "supplied by the VIO5663 LDO regulator"
@@ -196,11 +199,12 @@ pin_mapping:
       drive ladder and the DIR/OUT rule that governs it are stated once in
       architecture/pin-drive-configuration.yaml (idioms.weak_high /
       idioms.weak_low, and drive_ladder.no_other_rungs). Filed as
-      engineering/ingestion/SOURCE-ERRATA.md E-010.
+      SOURCE-ERRATA.md E-010.
     disable: "the DIP switch marked LED removes power from both LEDs"
     source: >-
       P2-EC Edge Module Rev D Product Guide v3.0, 7. LED Buffer and 8. LEDs P56 and P57 --
       engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:257-282.
+      do_not_copy_the_guides_wording: engineering/ingestion/SOURCE-ERRATA.md E-010.
   other_pins:
     RESn: >-
       Internally pulled up to 3.3 V with a 10K resistor. The Propeller chip resets

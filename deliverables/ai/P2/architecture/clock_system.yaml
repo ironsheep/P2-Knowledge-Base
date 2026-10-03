@@ -86,7 +86,7 @@ configuration_rules:
   errfreq_default: "The _errfreq declaration is optional, since _errfreq defaults to 1_000_000."
 
 pll_system:
-  source: "P2 Datasheet pp.18-19 HUBSET bit fields and PLL Example -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:783-790, :841-856; independently in Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:528-556"
+  source: "P2 Datasheet pp.18-19 HUBSET bit fields and PLL Example -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:783-790, :841-856; independently in Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:528-556; overclocking: Propeller 2 Documentation v35 (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545; cross_source_conflict: P2 Hardware Manual, engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:574"
   enable:
     field: "%E"
     values: "0/1 -- PLL off/on"
@@ -126,11 +126,11 @@ pll_system:
     vco: "VCO = Freq(XI) * (%MMMMMMMMMM + 1) / (%DDDDDD + 1)"
     pll_when_pppp_is_15: "PLL = VCO"
     pll_otherwise: "PLL = VCO / ((%PPPP + 1) * 2)"
-  overclocking: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15). -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545"
-  cross_source_conflict: "The P2 Hardware Manual's equivalent table states the recommended VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz (engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:574). The 100-200 MHz recommendation and the separate 350 MHz overclock ceiling are the form used here."
+  overclocking: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."
+  cross_source_conflict: "The P2 Hardware Manual's equivalent table states the recommended VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz. The 100-200 MHz recommendation and the separate 350 MHz overclock ceiling are the form used here."
 
 hubset_configuration:
-  source: "P2 Datasheet p.18 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:775-777; Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:521"
+  source: "P2 Datasheet p.18 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:775-777; Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:521; safe_switching_warning: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:837-839; deglitching: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:866-869"
   instruction: "HUBSET ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS   'set clock mode"
   fields:
     E: "PLL off/on"
@@ -139,8 +139,8 @@ hubset_configuration:
     PPPP: "VCO post-divider select"
     CC: "XI/XO crystal and loading-cap configuration"
     SS: "clock source select"
-  safe_switching_warning: "Incorrectly switching away from the PLL setting (%SS = %11) can cause a glitch which will hang the clock circuit. In order to safely switch, always start by switching to an internal oscillator using either HUBSET #$F0 (for RCFAST) or HUBSET #$F1 (for RCSLOW). -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:837-839"
-  deglitching: "The clock selector controlled by the %SS bits has a deglitching circuit which waits for a positive edge on the old clock source before disengaging, holding its output high, and then waiting for a positive edge on the new clock source before switching over to it. It is necessary to select mode %00 or %01 while waiting for the crystal and/or PLL to settle into operation, before switching over to either. -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:866-869"
+  safe_switching_warning: "Incorrectly switching away from the PLL setting (%SS = %11) can cause a glitch which will hang the clock circuit. In order to safely switch, always start by switching to an internal oscillator using either HUBSET #$F0 (for RCFAST) or HUBSET #$F1 (for RCSLOW)."
+  deglitching: "The clock selector controlled by the %SS bits has a deglitching circuit which waits for a positive edge on the old clock source before disengaging, holding its output high, and then waiting for a positive edge on the new clock source before switching over to it. It is necessary to select mode %00 or %01 while waiting for the crystal and/or PLL to settle into operation, before switching over to either."
   worked_sequence:
     description: "The datasheet's own worked example: a 20 MHz crystal driven to 148.5 MHz, %DDDDDD = 39, %MMMMMMMMMM = 296, %PPPP = %1111."
     source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:851-864"
@@ -210,8 +210,10 @@ clock_sources:
 
 clock_switching:
   glitch_free: true
-  switch_away_from_pll_warning: "No automatic fallback is documented. Switching away from the PLL (SS=%11, CC<>%00) with PPPP=%1111 can glitch the clock and hang the chip until reset; first switch to an RC oscillator (SS=%00 or %01) keeping PPPP=%1111 and CC (silicon-doc-text.txt:2726)."
+  switch_away_from_pll_warning: "No automatic fallback is documented. Switching away from the PLL (SS=%11, CC<>%00) with PPPP=%1111 can glitch the clock and hang the chip until reset; first switch to an RC oscillator (SS=%00 or %01) keeping PPPP=%1111 and CC."
   switching_time: "~5 microseconds typical"
+  sources:
+    - "switch_away_from_pll_warning: Silicon Doc, silicon-doc-text.txt:2726"
   
   sequence:
     - "Configure new clock source"
@@ -253,7 +255,7 @@ programming_examples:
       HUBSET  ##%0000_0001_0000_0000_0001_1000_0000_1011  ' Switch to PLL output
 
 clock_specifications:
-  source: "P2 Datasheet, DC and AC Characteristics -- Oscillator Frequency table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2195-2209"
+  source: "P2 Datasheet, DC and AC Characteristics -- Oscillator Frequency table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2195-2209; overclock_ceiling: Propeller 2 Documentation v35 (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545"
   measurement_condition: "Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated."
   oscillator_frequency:
     rcslow_internal: {min: "12 kHz", typ: "20 kHz", max: "30 kHz"}
@@ -267,7 +269,7 @@ clock_specifications:
     mode_1_direct_drive: "2 pF"
     mode_2_crystal_ge_16mhz: "15 pF"
     mode_3_crystal_lt_16mhz: "30 pF"
-  overclock_ceiling: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15). -- engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545"
+  overclock_ceiling: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."
 
 clock_distribution:
   system_clock: "Main clock for all COGs"
@@ -318,7 +320,9 @@ related_systems:
 debugging:
   clock_output: "Can output clock on pins for measurement"
   pll_lock_detection: "Check PLL stability before switching"
-  switch_away_warning: "Switch away from the PLL only via an RC source with PPPP=%1111 and CC held (silicon-doc-text.txt:2726); no automatic fallback to RCFAST is documented"
+  switch_away_warning: "Switch away from the PLL only via an RC source with PPPP=%1111 and CC held; no automatic fallback to RCFAST is documented"
+  sources:
+    - "switch_away_warning: Silicon Doc, silicon-doc-text.txt:2726"
 
 # Only the wrong/correct pairs the sources state. Two entries carried by the pre-purge
 # form of this block -- a hardcoded-WAITX pattern and a use-CLKFREQ-before-init pattern --

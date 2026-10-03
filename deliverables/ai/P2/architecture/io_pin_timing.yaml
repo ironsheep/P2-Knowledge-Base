@@ -30,8 +30,7 @@ description: |
   What it deliberately does NOT carry, and where those live instead:
     - Drive strength. The datasheet states it as a set of DRIVE MODES, not a current
       ladder: "Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k /
-      1 mA / 100 µA / 10 µA / float"
-      (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:117). The eight
+      1 mA / 100 µA / 10 µA / float". The eight
       rungs, their %HHH/%LLL encodings and their P_* constant names are defined once, in
       architecture/pin-drive-configuration.yaml.
     - Slew rate. There is none to document. "slew" returns zero hits across every ingested
@@ -151,7 +150,7 @@ dc_characteristics:
     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2151-2186.
     Per-row lines given below. Operating temperature range for the whole table:
     -40 degC to +105 degC unless otherwise noted (:2152). Typ column footnote:
-    'Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated' (:2186)."
+    'Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated' (:2186). ac_characteristics_are_clock_specs_only (AC Characteristics table, P2 Datasheet): p2-datasheet-text.txt:2188-2210."
 
   operating_temperature_range: "-40 degC to +105 degC unless otherwise noted"
 
@@ -160,13 +159,13 @@ dc_characteristics:
       min: "1.7 V"
       typ: "1.8 V"
       max: "1.9 V"
-      source_line: ":2159"
+      source: ":2159"
     io_supply_voltage_Vxxyy:
       min: "3.15 V"
       typ: "3.3 V"
       max: "3.45 V"
       note: "Vxxyy is the per-group I/O supply; see architecture/pin-power-domains.yaml"
-      source_line: ":2161"
+      source: ":2161"
 
   input_logic_threshold_Vih:
     parameter: "Input Logic Threshold"
@@ -174,7 +173,7 @@ dc_characteristics:
     typ: "Vxxyy * 0.5"
     max: "Vxxyy * 0.7"
     units: "V"
-    source_line: ":2163"
+    source: ":2163"
     what_this_means: |
       The datasheet states the threshold as a FRACTION OF THE I/O SUPPLY, not as fixed
       volts, and gives one threshold rather than a VIL/VIH pair. At the nominal 3.3 V
@@ -195,7 +194,7 @@ dc_characteristics:
     conditions: "IO pin Vin = GND or Vio"
     typ: "+/-0.1 uA"
     max: "+/-10 uA"
-    source_line: ":2165"
+    source: ":2165"
 
   output_low_voltage_Vol:
     parameter: "Output Low Voltage (relative to GND)"
@@ -204,7 +203,7 @@ dc_characteristics:
     sinking_1mA: "15 mV"
     sinking_10mA: "160 mV"
     sinking_30mA: "510 mV"
-    source_line: ":2172-2174"
+    source: ":2172-2174"
 
   output_high_voltage_Voh:
     parameter: "Output High Voltage (relative to Vxxyy)"
@@ -213,17 +212,17 @@ dc_characteristics:
     sourcing_1mA: "-6 mV"
     sourcing_10mA: "-170 mV"
     sourcing_30mA: "-580 mV"
-    source_line: ":2176-2178"
+    source: ":2176-2178"
 
   quiescent_current:
     Iq_Vdd:
       conditions: "RESn = TEST = P0..P64 = 0V, Vxxyy = 3.3V, VDD = 1.8V"
       typ: "40 uA"
-      source_line: ":2180-2181"
+      source: ":2180-2181"
     Iq_Vxxyy:
       conditions: "RESn = TEST = P0..P64 = 0V, Vxxyy = 3.3V, VDD = 1.8V"
       typ: "0.5 uA"
-      source_line: ":2183-2184"
+      source: ":2183-2184"
 
   the_30mA_ceiling_this_table_confirms: |
     Vol and Voh are characterised at 1 mA, 10 mA and 30 mA and stop there, which agrees
@@ -234,7 +233,7 @@ dc_characteristics:
 
   ac_characteristics_are_clock_specs_only: |
     Checked 2026-09-09 so the absence is a finding rather than an oversight: the AC
-    Characteristics table on the facing page (:2188-2210) states oscillator frequency
+    Characteristics table on the facing page states oscillator frequency
     ranges and XI/XO pin capacitance ONLY. It carries no pin propagation, rise or fall
     figures, which is why this file's description says no source states them. Its PLL
     row -- 3.33 MHz min / 180 MHz typ / 320 MHz max, with the note that 180 MHz is
@@ -316,10 +315,10 @@ related_topics:
 extraction_metadata:
   source_documents:
     - document: "Parallax Propeller 2 Documentation v35"
-      file: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
-      lines: ":1987, :1997, :2005, :3847 (pin timing); :101 (VIO latch-up onset)"
+      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      source_reference: ":1987, :1997, :2005, :3847 (pin timing); :101 (VIO latch-up onset)"
     - document: "Parallax P2 Datasheet 2022/11/01"
-      file: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
-      lines: ":117 (drive modes); :2126-2149 (Absolute Maximum Electrical Ratings)"
+      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      source_reference: ":117 (drive modes); :2126-2149 (Absolute Maximum Electrical Ratings)"
   confidence: "high -- every claim re-read at its cited line 2026-08-29"
   last_updated: "2024-12-30"

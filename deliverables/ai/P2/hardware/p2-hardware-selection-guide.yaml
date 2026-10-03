@@ -83,10 +83,11 @@ application_specific_guides:
     capabilities:
       # The #64006H guide lists sockets and signal formats, not a resolution
       # ceiling. "VGA video output up to 1024x768" was stated here with no
-      # source and has been replaced by the guide's own feature list
-      # (p2-eval-add-on-boards-text.txt:326-334). Resolution is a function of
+      # source and has been replaced by the guide's own feature list.
+      # Resolution is a function of
       # the streamer/NCO timing you drive, not of the breakout board -- see
       # architecture/streamer/nco-timing.yaml.
+# Source: P2 Eval Add-on Boards guide (#64006H feature list), engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:326-334
       - "VGA output on a 15-pin VGA socket"
       - "Component video to RCA 4-band (composite sync, RGBS), digital component video on RCA, and composite video on RCA"
       - "Stereo audio with multiple output formats"

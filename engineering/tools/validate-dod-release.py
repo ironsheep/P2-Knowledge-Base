@@ -569,9 +569,23 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
 
 INTERNAL_ID_PATTERN = re.compile(r'\b(?:EF|XF|F)-\d{3}\b|\bVO-[A-Z]-\d{3}\b')
 
+# Repo locators a consumer cannot open (F-523, 2026-10-03): a path into this repo,
+# a document file cited by line (`silicon-doc-text.txt:2726`, `pasm2-manual-text :2087`),
+# or a bare line cite (`(:834`, `doc :3269`). The bare form excludes a colon that
+# follows a word, digit, `$`, `%`, `#`, `:` or `/` -- times, hex, URLs, labels.
+REPO_LOCATOR_PATTERN = re.compile(
+    r'\b(?:engineering|deliverables)/[\w./-]+'
+    r'|\b[\w.-]+\.(?:txt|md|ya?ml|spin2|lst|pas|pdf|docx|html|json|py|sh)\s*:\s*\d+'
+    r'|\b[\w-]+-text\s*:\s*\d+'
+    r'|(?<![\w$#%:/]):\d{2,5}(?:[-,]\d+)?\b')
+
 
 def validate_internal_ids(verbose: bool = False) -> ValidationResult:
-    """No internal identifier reaches a consumer (F-519, 2026-10-03).
+    """No internal identifier or repo locator reaches a consumer (F-519, F-523, 2026-10-03).
+
+    F-523 widened it to repo locators: a repo path or a document `file:line` cite
+    is provenance the consumer cannot open. Both belong in a stripped field
+    (`source:` / `sources:`), where `audit-yaml-claim-sourcing.py` still reads them.
 
     Ledger ids (EF-/XF-NNN), finding ids (F-NNN) and verification-opportunity ids
     (VO-X-NNN) are provenance: this repo's gates and auditors resolve them, a
@@ -590,15 +604,17 @@ def validate_internal_ids(verbose: bool = False) -> ValidationResult:
         for n, line in enumerate(shipped[str(path)].split('\n'), 1):
             for m in INTERNAL_ID_PATTERN.finditer(line):
                 hits.append(f"{path} (payload line {n}): {m.group(0)} -- {line.strip()[:90]}")
+            for m in REPO_LOCATOR_PATTERN.finditer(line):
+                hits.append(f"{path} (payload line {n}): {m.group(0)} -- {line.strip()[:90]}")
 
     result.info(f"Files checked (shipped payload): {len(live)}")
     if hits:
-        result.fail(f"{len(hits)} internal id(s) in shipped content -- move them to a "
-                    f"stripped field (source:) or remove the tag; state the fact only")
+        result.fail(f"{len(hits)} internal id(s) or repo locator(s) in shipped content -- "
+                    f"move each to a stripped field (source:/sources:); state the fact only")
         for h in hits:
             result.info(f"  {h}")
     else:
-        result.ok("No EF/XF/F/VO identifier reaches a consumer")
+        result.ok("No EF/XF/F/VO identifier, repo path or file:line cite reaches a consumer")
     return result
 
 

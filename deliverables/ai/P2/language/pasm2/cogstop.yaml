@@ -2,12 +2,14 @@ instruction: COGSTOP
 syntax: COGSTOP {#}Dest
 brief_description: Cog stop
 category: Hub Control
-description: 'COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of the D/# operand supply the target cog ID; silicon-doc-text.txt:421). In this dormant
+description: 'COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of the D/# operand supply the target cog ID). In this dormant
   state, the cog ceases to execute code and
 
   power consumption is greatly reduced.
 
   '
+sources:
+  - "COGSTOP target cog ID in Dest[3:0]: Silicon Doc, silicon-doc-text.txt:421"
 result: Cog indicated by Dest is terminated (stopped).
 flags_affected:
   C: No effect

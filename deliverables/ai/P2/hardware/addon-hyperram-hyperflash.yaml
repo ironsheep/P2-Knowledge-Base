@@ -74,7 +74,8 @@ specifications:
     engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:22
     (target board). The capture was made with forced OCR because the PDF's embedded
     text layer is ciphered; part numbers and URLs carrying transcription risk are
-    flagged [VERIFY] in the datasheets block below.
+    flagged [VERIFY] in the datasheets block below. acc_hdr_jumper: 64004-ES Product
+    Guide v1.0, engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:57
   ram: "16 MB / 128 Mb (16 Mb x 8) Parallel PSRAM"
   flash: "32 MB / 256 Mb (32 Mb x 8) Parallel NOR Flash"
   supply_voltage: "+3.3 VDC, supplied by the P2-ES Eval Board I/O LDO regulator"
@@ -83,7 +84,6 @@ specifications:
     P2-ES Eval Board Rev B the ACC HDR jumper can remain in its default off position.
     Note this is the opposite of the Serial Host add-on, which requires that jumper
     fitted -- do not carry the Serial Host instruction over to this board.
-    (Source: engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:57)
   max_clock_rate: "100 MHz (200 MB/s) at 3.0 Vcc"
   ram_current: "60 mA peak burst; 600 uA standby (CS# = High)"
   flash_current: "100 mA peak burst; 25 uA standby (CS# = High)"

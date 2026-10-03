@@ -20,8 +20,7 @@ aliases:
 provenance:
   pin_offsets: >-
     The twelve CLICK_OFST_* values below are established by the 64008 Rev A
-    schematic (Parallax Inc., 2020-08-10, Open Source Hardware CC BY-SA 4.0) --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+    schematic (Parallax Inc., 2020-08-10, Open Source Hardware CC BY-SA 4.0).
     They were originally derived from the P2-Click-eInk driver by code analysis;
     the 2026-08-26 schematic ingestion confirmed all twelve exactly, with zero
     corrections. The driver-derived values and the primary source agree.
@@ -32,6 +31,8 @@ provenance:
   code_patterns: >-
     The Spin2 patterns below remain code_analysis, sourced from the P2-Click-eInk
     driver. They are idiom examples, not authority.
+  sources:
+    - "pin_offsets: 64008 Rev A schematic netlist, engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md"
 
 overview: |
   Click modules from MikroElektronika provide standardized hardware interfaces

@@ -17,7 +17,8 @@ description: >-
   whenever the selected condition holds - the four cases:
   C=0,Z=0: (INA & D) != S; C=0,Z=1: (INA & D) == S;
   C=1,Z=0: (INB & D) != S; C=1,Z=1: (INB & D) == S
-  (silicon-doc-text.txt:2157-2161).
+sources:
+  - "description (PAT event four cases): Silicon Doc, silicon-doc-text.txt:2157-2161"
 flags_affected:
   C: No effect (read as input)
   Z: No effect (read as input)

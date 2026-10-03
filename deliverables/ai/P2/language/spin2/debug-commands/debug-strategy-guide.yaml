@@ -101,7 +101,7 @@ what_a_debug_build_takes_from_your_program:
     cogs that are not running ISRs in the background; if the ISRs tolerate skew and
     nothing depends on the interrupt continuing to cycle, DEBUG is usable with understood
     timing degradation. CT-based interrupts are not prone to it.
-    (Source: engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071)
+  source: "interrupt_retrigger_can_stop_for_good: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071"
   clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived clock of at least 10 MHz."
   measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000."
 

@@ -25,11 +25,11 @@ last_updated: "2026-05-23"
 
 # Boot timing (from Hardware Manual)
 boot_timing:
-  source: "P2 Hardware Manual, Boot Up -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:262-263"
+  source: "P2 Hardware Manual, Boot Up -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:262-263; reset_to_bootloader: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:436; serial_loader_active: P2 Hardware Manual, engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1595"
   trigger: "Upon any power-up, reset (RESn) pin low-to-high, or software reset event."
   sequence: "The Propeller 2 delays for 3 ms, engages the fast clock, then loads up Cog 0 with the ROM-resident Bootloader within 2 ms."
-  reset_to_bootloader: "Within 5 ms, the Propeller 2 loads its Bootloader into cog 0. -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:436"
-  serial_loader_active: "Unless forbidden by the Boot Pattern or preempted by a program in an SPI memory chip, the serial loader becomes active within 15ms of reset being released. -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1595"
+  reset_to_bootloader: "Within 5 ms, the Propeller 2 loads its Bootloader into cog 0."
+  serial_loader_active: "Unless forbidden by the Boot Pattern or preempted by a program in an SPI memory chip, the serial loader becomes active within 15ms of reset being released."
 
 # Boot pin overview (full details: boot-pattern-selection.yaml)
 boot_pins:

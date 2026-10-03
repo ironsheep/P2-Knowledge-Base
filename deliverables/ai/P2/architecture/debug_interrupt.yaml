@@ -1,5 +1,5 @@
 # P2 Debug Interrupt System
-# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
 # never existed):
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section DEBUG INTERRUPT --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2393-2593
@@ -407,12 +407,12 @@ related_topics:
 extraction_metadata:
   source_documents:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
         - "DEBUG INTERRUPT -- lines 2393-2593"
         - "PASM2 encoding table -- lines 5337 (GETBRK), 5338 (COGBRK), 5339 (BRK)"
     - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "Feature list, hidden debug interrupt -- line 74"
         - "Cog register note, INA/INB as debug call/return -- line 542"

@@ -1,5 +1,5 @@
 # P2 Lookup RAM (LUT)
-# Provenance (re-derived 2026-08-26; the previous header cited a file that has
+# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
 # never existed and datasheet pages beyond the end of a 50-page datasheet):
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section LOOKUP RAM --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:471-504
@@ -264,7 +264,7 @@ performance_characteristics:
     read: "3 clock cycles"
     write: "2 clock cycles"
     block_transfer: "one long per clock via SETQ2 + RDLONG/WRLONG/WMLONG, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
-    block_transfer_source: >-
+    source: >-
       Propeller 2 Documentation v35 (Rev B/C) --
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3257.
   
@@ -321,19 +321,19 @@ related:
 extraction_metadata:
   source_documents:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      path: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
+      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
         - "LOOKUP RAM, incl. LOAD/STORE ACCESS and RAM SHARING BETWEEN PAIRED COGS -- lines 471-504"
         - "PASM2 encoding table -- lines 5140 (RDLUT), 5209 (WRLUT), 5340 (SETLUTS)"
         - "COGINIT pair start -- lines 413, 502; SETSE LUT events -- lines 504, 2246-2249"
         - "SETQ2 block transfer to and from lookup RAM -- lines 3257-3281"
     - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      path: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
+      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "Lookup RAM, p.14 -- lines 592-616"
         - "PASM2 instruction table -- lines 1831 (RDLONG), 2061-2065 (RDLUT/SETLUTS/WRLUT)"
     - document: "Spin2 Language Documentation v55"
-      path: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt"
+      source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt"
       sections:
         - "Inline PASM2 cog register and LUT areas -- lines 805-806, 833-834"
   re_derivation_note: >-
