@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-10-03",
-    "last_updated": "2026-10-03T22:10:51.765369",
+    "last_updated": "2026-10-03T23:37:50.478842",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-10-03T22:10:51.765369",
+    "extraction_date": "2026-10-03T23:37:50.478842",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -2442,7 +2442,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the result into the Dest register. The SUBSX instruction is used to perform signed multi-long (extended) subtraction, such as 64-bit subtraction. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of D - (S + C) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); it is NOT Result[31]. The manual's prose here says Result[31]; its own Table 169 (sources/pasm2-manual/pasm2-manual-text.txt:3983) says `sign of D-(S+C)`, and the manual's TJV description (:4196, restated :5168) requires C to hold the CORRECT sign, which Result[31] would not give in the overflow case TJV exists to detect. See engineering/ingestion/SOURCE-ERRATA.md E-016. Use WC or WCZ on preceding SUB and SUBX instructions for proper final C flag. If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest - (Src + C) is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions for proper final Z flag. To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.",
+            "description": "SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the result into the Dest register. The SUBSX instruction is used to perform signed multi-long (extended) subtraction, such as 64-bit subtraction. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of D - (S + C) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); it is NOT Result[31]. The manual's prose here says Result[31]; its own Table 169 says `sign of D-(S+C)`, and the manual's TJV description requires C to hold the CORRECT sign, which Result[31] would not give in the overflow case TJV exists to detect. Use WC or WCZ on preceding SUB and SUBX instructions for proper final C flag. If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest - (Src + C) is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions for proper final Z flag. To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.",
             "result": "Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the extended sign and zero status.",
             "timing": {
               "cycles": 2,
@@ -4264,7 +4264,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "ADDSX sums the signed values of Dest and Src plus C together and stores the result into the Dest register. The ADDSX instruction is used to perform signed multi-long (extended) addition, such as 64-bit addition. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of (D + S + C) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); it is NOT Result[31]. The manual's prose here says Result[31]; its own Table 9 (sources/pasm2-manual/pasm2-manual-text.txt:912) says `sign of (D+S+C)`, and the manual's TJV description (:4196, restated :5168) requires C to hold the CORRECT sign, which Result[31] would not give in the overflow case TJV exists to detect. See engineering/ingestion/SOURCE-ERRATA.md E-016. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag. If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest + Src + C is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper final Z flag. To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values.",
+            "description": "ADDSX sums the signed values of Dest and Src plus C together and stores the result into the Dest register. The ADDSX instruction is used to perform signed multi-long (extended) addition, such as 64-bit addition. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of (D + S + C) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); it is NOT Result[31]. The manual's prose here says Result[31]; its own Table 9 says `sign of (D+S+C)`, and the manual's TJV description requires C to hold the CORRECT sign, which Result[31] would not give in the overflow case TJV exists to detect. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag. If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest + Src + C is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper final Z flag. To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values.",
             "result": "Sum of signed Src plus C and signed Dest is stored in Dest.",
             "timing": {
               "cycles": 2,
@@ -6700,7 +6700,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the CORDIC-read-but-empty event flag prior to clearing it. The CORDIC-read-but-empty event flag is set whenever GETQX / GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, JQMT, or JNQMT instructions (there is no WAITQMT: the event could not happen while waiting, silicon-doc-text.txt:2102).",
+            "description": "POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the CORDIC-read-but-empty event flag prior to clearing it. The CORDIC-read-but-empty event flag is set whenever GETQX / GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, JQMT, or JNQMT instructions (there is no WAITQMT: the event could not happen while waiting).",
             "result": "CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then it is cleared.",
             "timing": {
               "cycles": 2,
@@ -8371,7 +8371,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set pin pattern for PAT event. D provides the mask value, S provides the match value. C and Z are INPUTS to SETPAT (current flag values at execution; SETPAT has no WC/WZ/WCZ effect): C selects INA (0) or INB (1); Z selects != (0) or == (1). The PAT event flag (POLLPAT/WAITPAT/JPAT/JNPAT) is cleared on SETPAT and is then set whenever the selected condition holds - the four cases: C=0,Z=0: (INA & D) != S; C=0,Z=1: (INA & D) == S; C=1,Z=0: (INB & D) != S; C=1,Z=1: (INB & D) == S (silicon-doc-text.txt:2157-2161).",
+            "description": "Set pin pattern for PAT event. D provides the mask value, S provides the match value. C and Z are INPUTS to SETPAT (current flag values at execution; SETPAT has no WC/WZ/WCZ effect): C selects INA (0) or INB (1); Z selects != (0) or == (1). The PAT event flag (POLLPAT/WAITPAT/JPAT/JNPAT) is cleared on SETPAT and is then set whenever the selected condition holds - the four cases: C=0,Z=0: (INA & D) != S; C=0,Z=1: (INA & D) == S; C=1,Z=0: (INB & D) != S; C=1,Z=1: (INB & D) == S",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -10717,7 +10717,7 @@
               "cycles": 2,
               "type": "fixed",
               "pin_output_latency": "After instruction completes, the pin starts to transition 3 system-clock cycles later.\nTotal from instruction start: 2 (execution) + 3 (propagation) = 5 clocks to pin change.\n",
-              "pin_output_latency_source": "P2 Documentation v35 Rev B/C (Parallax Inc.) -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987: \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\" Corroborated by the P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:967."
+              "source": "P2 Documentation v35 Rev B/C (Parallax Inc.) -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987: \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\" Corroborated by the P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:967."
             },
             "flags_affected": {
               "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
@@ -11507,7 +11507,7 @@
               "cycles": 2,
               "type": "fixed",
               "pin_output_latency": "After instruction completes, the pin starts to transition 3 system-clock cycles later.\nTotal from instruction start: 2 (execution) + 3 (propagation) = 5 clocks to pin change.\n",
-              "pin_output_latency_source": "P2 Documentation v35 Rev B/C (Parallax Inc.) -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987: \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\" Corroborated by the P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:967."
+              "source": "P2 Documentation v35 Rev B/C (Parallax Inc.) -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1987: \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\" Corroborated by the P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:967."
             },
             "flags_affected": {
               "C": "Set to the original (pre-instruction) state of the base pin's OUT bit",
@@ -16429,7 +16429,7 @@
                 "clocks": "2\u20139"
               }
             ],
-            "description": "COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of the D/# operand supply the target cog ID; silicon-doc-text.txt:421). In this dormant state, the cog ceases to execute code and\npower consumption is greatly reduced.\n",
+            "description": "COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of the D/# operand supply the target cog ID). In this dormant state, the cog ceases to execute code and\npower consumption is greatly reduced.\n",
             "result": "Cog indicated by Dest is terminated (stopped).",
             "timing": {
               "cycles": 2,
@@ -16480,7 +16480,7 @@
                 "clocks": "2\u20139, +2 if result"
               }
             ],
-            "description": "COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of cog D/# (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax's PASM2 Manual, COGID Explanation) (if WC is given). Without WC the current cog's ID is returned in D[3:0] with upper bits cleared (silicon-doc-text.txt:429). If the WC effect is specified, the C flag is set (1) if cog D/# is busy (running), or is cleared (0) if free (stopped or never started).",
+            "description": "COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of cog D/# (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax's PASM2 Manual, COGID Explanation) (if WC is given). Without WC the current cog's ID is returned in D[3:0] with upper bits cleared. If the WC effect is specified, the C flag is set (1) if cog D/# is busy (running), or is cleared (0) if free (stopped or never started).",
             "result": "Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.",
             "timing": {
               "cycles": 2,
@@ -17240,7 +17240,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set \"Y\" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins.\nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\nThe Y register serves multiple purposes:\n- For pulse/cycle (%00100) and transition (%00101) output: Y[31:0] is the pulse/transition count\n- For PWM modes: Y[15:0] is the output value captured at each frame start (the base period and frame count are set by WXPIN, not WYPIN)\n- For DAC modes: Y[15:0] is the DAC output value captured at each sample period\n- For sync/async serial and USB: Y loads the output word/byte to transmit\n- For counter modes (%01110/%01111): Y[0] selects count-only (0) or increment/decrement (1), not a count value; the measurement period is X\n- For ADC modes other than SINC2 sampling: WYPIN may replace the period set by WXPIN with Y[13:0] - it does not initiate conversions\n- Writing Y also acknowledges the pin\n- Source: silicon-doc-text.txt:3938, :3974, :3993, :4042, :4089, :4133, :4387, :4656\n",
+            "description": "Set \"Y\" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins.\nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\nThe Y register serves multiple purposes:\n- For pulse/cycle (%00100) and transition (%00101) output: Y[31:0] is the pulse/transition count\n- For PWM modes: Y[15:0] is the output value captured at each frame start (the base period and frame count are set by WXPIN, not WYPIN)\n- For DAC modes: Y[15:0] is the DAC output value captured at each sample period\n- For sync/async serial and USB: Y loads the output word/byte to transmit\n- For counter modes (%01110/%01111): Y[0] selects count-only (0) or increment/decrement (1), not a count value; the measurement period is X\n- For ADC modes other than SINC2 sampling: WYPIN may replace the period set by WXPIN with Y[13:0] - it does not initiate conversions\n- Writing Y also acknowledges the pin\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -17380,7 +17380,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**Configure while DIR is low**: a smart pin should be configured with WRPIN while its DIR bit is low (held in reset); a WRPIN while DIR is high changes the use of the pin's state bits and gives unpredictable behavior (silicon-doc-text.txt:3854-3856). Exception: WRPIN #0 resets a running smart pin without a DIR cycle.\n",
+            "description": "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**Configure while DIR is low**: a smart pin should be configured with WRPIN while its DIR bit is low (held in reset); a WRPIN while DIR is high changes the use of the pin's state bits and gives unpredictable behavior. Exception: WRPIN #0 resets a running smart pin without a DIR cycle.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -18453,7 +18453,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-10-03T22:10:51.765369",
+    "extraction_date": "2026-10-03T23:37:50.478842",
     "categories": {
       "keywords": {
         "count": 37,
@@ -21298,7 +21298,12 @@
             "method": "GETCT",
             "category": "timing",
             "type": "method",
-            "description": "Get the 32-bit system counter. Parallax Spin2 Documentation v55 states it as\n\"GETCT() : Count -- Get 32-bit system counter.\"\nThe counter itself is wider than the value this method returns. The P2 Datasheet\nlists \"64-bit free-running counter which increments every clock, cleared on\nreset\", and Propeller 2 Documentation v35 records the change as \"System counter\nextended to 64 bits. GETCT WC retrieves upper 32-bits.\" The Datasheet's GETCT\nrow states \"Get CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full\nCT. CT=0 on reset, CT++ on every clock.\"\nGETCT() in Spin2 returns the CT[31:0] half only. The upper half is reachable\nfrom PASM2 via the GETCT D WC form -- see language/pasm2/getct.yaml.\nBecause the returned value is the low half, any deadline built from GETCT() is\nbounded by that 32-bit span; GETMS and GETSEC read the 64-bit counter instead.\nSee the `pitfalls` block below.\n\nSources: Parallax Spin2 Documentation v55, Timing Methods --\nengineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547, and :552-553\nfor GETSEC and GETMS, each of which \"uses 64-bit system counter and CLKFREQ\".\nP2 Datasheet 2022/11/01 --\nengineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:95 (counter\nwidth and behaviour), :2084-2085 (GETCT row).\nPropeller 2 Documentation v35 Rev B/C --\nengineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55.\n",
+            "description": "Get the 32-bit system counter. Parallax Spin2 Documentation v55 states it as\n\"GETCT() : Count -- Get 32-bit system counter.\"\nThe counter itself is wider than the value this method returns. The P2 Datasheet\nlists \"64-bit free-running counter which increments every clock, cleared on\nreset\", and Propeller 2 Documentation v35 records the change as \"System counter\nextended to 64 bits. GETCT WC retrieves upper 32-bits.\" The Datasheet's GETCT\nrow states \"Get CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full\nCT. CT=0 on reset, CT++ on every clock.\"\nGETCT() in Spin2 returns the CT[31:0] half only. The upper half is reachable\nfrom PASM2 via the GETCT D WC form -- see language/pasm2/getct.yaml.\nBecause the returned value is the low half, any deadline built from GETCT() is\nbounded by that 32-bit span; GETMS and GETSEC read the 64-bit counter instead.\nSee the `pitfalls` block below.\n",
+            "sources": [
+              "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547, and :552-553 for GETSEC and GETMS, each of which \"uses 64-bit system counter and CLKFREQ\".",
+              "P2 Datasheet 2022/11/01 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:95 (counter width and behaviour), :2084-2085 (GETCT row).",
+              "Propeller 2 Documentation v35 Rev B/C -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55."
+            ],
             "syntax": "GETCT() : Count",
             "parameters": "none",
             "returns": {
@@ -22341,12 +22346,12 @@
               "POLLCT"
             ],
             "notes": {
-              "source": "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:551",
+              "source": "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:551; choosing_between_waits: WAITUS at :550, WAITCT at :549 (same file)",
               "v55_definition": "WAITMS(Milliseconds) -- Wait Milliseconds, uses CLKFREQ, duration must not exceed $8000_0000 clocks.",
               "clkfreq_dependent": "Because the wait is computed from CLKFREQ, the same Milliseconds argument is a different number of clocks at every clock frequency, and the ceiling moves with it.",
               "choosing_between_waits": [
-                "For sub-millisecond delays use WAITUS -- WAITUS(Microseconds), same $8000_0000-clock bound. -- :550",
-                "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'. -- :549"
+                "For sub-millisecond delays use WAITUS -- WAITUS(Microseconds), same $8000_0000-clock bound.",
+                "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'."
               ],
               "blocking": "The cog is stopped in the wait for its duration."
             },
@@ -23628,11 +23633,11 @@
               "POLLCT"
             ],
             "notes": {
-              "source": "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550",
+              "source": "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550; choosing_between_waits: WAITMS at :551, WAITCT at :549 (same file)",
               "v55_definition": "WAITUS(Microseconds) -- Wait Microseconds, uses CLKFREQ, duration must not exceed $8000_0000 clocks.",
               "choosing_between_waits": [
-                "For millisecond-scale delays use WAITMS(Milliseconds) -- same $8000_0000-clock bound. -- :551",
-                "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'. -- :549"
+                "For millisecond-scale delays use WAITMS(Milliseconds) -- same $8000_0000-clock bound.",
+                "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'."
               ],
               "blocking": "The cog is stopped in the wait for its duration."
             },
@@ -26853,7 +26858,8 @@
               "bits": "7:6",
               "purpose": "Pin DIR/OUT control",
               "constants_reference": "architecture/smart_pins.yaml (configuration_format.fields.tt.constants) -- P_TT_00, P_TT_01, P_TT_10 and P_TT_11 with their values, binaries and the P_OE / P_CHANNEL / P_BITDAC aliases. The per-constant definitions are in language/spin2/symbols/spin2-builtin-symbols-complete.yaml. Defined once, in those two places, and pointed at from here.",
-              "context_dependent": "%TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by\nwhether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.\nThe per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.\nThe four contexts:\n  1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives\n  2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;\n                                    %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;\n                                    %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC\n  3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;\n                                    0x/1x = SMART/OUT or SMART/OTHER drives\n  4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;\n                                    0x = OUT enables ADC, 1x = OTHER enables ADC\n                                    -- ON SILICON, OUT runs the ADC only while TT bit 0\n                                    is set (TT = %00: OUT high runs nothing); see\n                                    architecture/smart_pins.yaml dac_smart_pin_modes\n                                    silicon_errata\nFull table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).\nSource: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.\n",
+              "context_dependent": "%TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by\nwhether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.\nThe per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.\nThe four contexts:\n  1. smart pin OFF, non-DAC_MODE  - DIR enables output; %0x = OUT drives, %1x = OTHER drives\n  2. smart pin OFF, DAC_MODE      - %00 OUT enables ADC + M[7:0] sets the DAC level;\n                                    %01 OUT enables ADC + M[3:0] selects a COG DAC CHANNEL;\n                                    %10 OUT drives BIT_DAC; %11 OTHER drives BIT_DAC\n  3. smart pin ON, non-DAC modes  - x0/x1 = output disabled/enabled regardless of DIR;\n                                    0x/1x = SMART/OUT or SMART/OTHER drives\n  4. smart pin ON, DAC modes (%00001..%00011) - enable bit as above;\n                                    0x = OUT enables ADC, 1x = OTHER enables ADC\n                                    -- ON SILICON, OUT runs the ADC only while TT bit 0\n                                    is set (TT = %00: OUT high runs nothing); see\n                                    architecture/smart_pins.yaml dac_smart_pin_modes\n                                    silicon_errata\nFull table: architecture/smart_pins.yaml (configuration_format.fields.tt.behavior_by_context).\n",
+              "source": "context_dependent: Silicon Doc silicon-doc-text.txt:3790, part4-locks.txt:118-139.",
               "when_smart_pin_on": "x0=output disabled, x1=output enabled (regardless of DIR)",
               "source_selection": "0x=SMART/OUT drives, 1x=SMART/OTHER drives",
               "p_oe_required_for": "SMART-PIN output modes only (NCO, PWM, Pulse, Transition, Serial TX, the smart-pin DAC modes %00001-%00011, USB). NOT the non-smart-pin (cog) DAC: with the smart pin off in DAC_MODE, the same bit is named P_CHANNEL and it SWITCHES THE DAC'S SOURCE from the pin's own level field to a cog DAC channel. Adding P_OE/P_CHANNEL to a level-driven DAC kills its output.",
@@ -28886,9 +28892,9 @@
             "category": "Debug Control",
             "documentation_source": "Spin2 v51 (debug-section.txt) + PNut v55 directive matrix",
             "documentation_level": "comprehensive",
-            "source": "Parallax Spin2 Language Reference v51a (PC_KEY P2-side API + key-code table); host-side key handling per PNut/Spin2 v55 DebugDisplayUnit.pas",
+            "source": "Parallax Spin2 Language Reference v51a (PC_KEY P2-side API + key-code table); host-side key handling per PNut/Spin2 v55 DebugDisplayUnit.pas; description (PC_KEY statement): Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1004",
             "syntax": "PC_KEY(pointer_to_long)",
-            "description": "PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()\ndisplay. Spin2 v55 states it as: \"FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be\nthe last command in a DEBUG() statement. Returns any new host-PC keypress that\noccurred within the last 100ms into a long inside the chip. The DEBUG() Display\nmust have focus for keypresses to be noticed.\"\nThe 100 ms latch is what sets the poll rate: a loop that polls more slowly than\nthat will miss keypresses, and one that polls faster simply reads 0 between them.\nSource: engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1004\n",
+            "description": "PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()\ndisplay. Spin2 v55 states it as: \"FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be\nthe last command in a DEBUG() statement. Returns any new host-PC keypress that\noccurred within the last 100ms into a long inside the chip. The DEBUG() Display\nmust have focus for keypresses to be noticed.\"\nThe 100 ms latch is what sets the poll rate: a loop that polls more slowly than\nthat will miss keypresses, and one that polls faster simply reads 0 between them.\n",
             "usage_rules": {
               "source": "Parallax Spin2 Documentation v55 -- PC_KEY entry engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1004; backtick-escape mechanism :1084 and :1094",
               "rules": [
@@ -28899,7 +28905,7 @@
                 "If used in Spin2 code, the long must be in the hub (use @key as the pointer). If used in PASM code, the long must be a cog register (use #key as the pointer)."
               ],
               "backtick_rule": {
-                "why": "Inside a backtick display message the source states that everything is text\nunless a further backtick escapes it back into a command: \"This syntax is\ninvoked when the first character in the DEBUG() command is the backtick. This\ncauses everything in the DEBUG() command to be viewed as a string, except when\nsubsequent backticks act as 'escape' characters to allow normal or shorthand\nDEBUG() commands.\" (:1084) \u2014 and \"Regular DEBUG() commands can follow the\nbacktick, as well.\" (:1094)\n",
+                "why": "Inside a backtick display message the source states that everything is text\nunless a further backtick escapes it back into a command: \"This syntax is\ninvoked when the first character in the DEBUG() command is the backtick. This\ncauses everything in the DEBUG() command to be viewed as a string, except when\nsubsequent backticks act as 'escape' characters to allow normal or shorthand\nDEBUG() commands.\" \u2014 and \"Regular DEBUG() commands can follow the\nbacktick, as well.\"\n",
                 "consequence": "PC_KEY needs its OWN backtick inside a display message \u2014\nDEBUG(`MyTerm `PC_KEY(@key)). Written without it, the text is sent to the\nwindow as literal characters, no command runs, and the long is never written.\nIt compiles clean, so the failure is silent and only visible at runtime.\n"
               }
             },
@@ -29947,7 +29953,8 @@
                 "bits": "0b11",
                 "frequency": "Calculated from PLL settings",
                 "description": "PLL output (requires PLL enable)",
-                "use_case": "High-speed operation. The P2 Datasheet rates the PLL at 320 MHz maximum, 180 MHz typical (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200); the Parallax Propeller 2 Documentation notes it can be pushed to 350 MHz in 'VCO / 1' mode (engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545). A prior form of this line said 'up to 500 MHz', which is the pnut-ts compiler's acceptance limit rather than a silicon rating -- see language/spin2/constants/special-configuration-symbols.yaml."
+                "use_case": "High-speed operation. The P2 Datasheet rates the PLL at 320 MHz maximum, 180 MHz typical; the Parallax Propeller 2 Documentation notes it can be pushed to 350 MHz in 'VCO / 1' mode. A prior form of this line said 'up to 500 MHz', which is the pnut-ts compiler's acceptance limit rather than a silicon rating -- see language/spin2/constants/special-configuration-symbols.yaml.",
+                "source": "use_case: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200 (PLL 320 MHz maximum, 180 MHz typical); Parallax Propeller 2 Documentation (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545 (350 MHz in 'VCO / 1' mode)"
               }
             },
             "examples": [
@@ -29969,7 +29976,10 @@
               "Compiler calculates optimal PLL settings automatically",
               "Use CLKSET for safe clock transitions (handles PLL lock timing)",
               "Raw HUBSET to change mode requires proper sequencing",
-              "PLL must lock before switching to PLL source (~10 ms). Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2635 -- \"XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source.\""
+              "PLL must lock before switching to PLL source (~10 ms). Silicon Doc (Parallax Propeller 2 Documentation) v35 -- \"XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source.\""
+            ],
+            "sources": [
+              "notes (PLL lock, 10 ms crystal+PLL stabilization): Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2635"
             ],
             "related": [
               "language/spin2/system-variables/clkfreq.yaml",
