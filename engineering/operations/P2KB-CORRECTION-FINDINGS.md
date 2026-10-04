@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-546`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-547`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -54,6 +54,15 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Found during the 2026-10 manual releases (2026-10-04) — F-546
+
+### F-546 — `instruction_skipping.yaml`'s absolute-CALL rule cites only the Silicon Doc; EF-092 proves it on silicon — `CONFIRMED` (low; next KB release)
+`language/pasm2/concepts/instruction_skipping.yaml:112` (rule) and `:121` (its source line). EF-092
+(2026-10-04): under XBYTE, a relative `call #` before a line the pattern skips corrupted the VM (4 of 5
+results wrong); the absolute `call #\` ran it right. **Fix:** add EF-092 to the `:121` source line
+(hardware-verified, Rev C, cog execution under XBYTE); no content change. Held for the next KB release
+so no committed-unreleased YAML blocks the manual releases under way (`kb-content-released`).
 
 ## Full impact audit: every fact KB v1.23.0 and v1.23.1 changed, against every live document (2026-10-04, «#378») — F-526 … F-541, plus F-542 … F-545 (seen verifying v1.23.1 and writing the MCP filter handoff)
 
@@ -160,7 +169,12 @@ repoint the index (P_CHANNEL is at ch02:380 and appendix-b:242).
 > together with the line after it (JMP), so both stay relative; every other guide CALL is outside a skip body or
 > followed by a never-skipped `ret`. **Bench:** `audit/verification-tests/test-f537-absolute-call-skip.spin2`
 > runs the example's two jobs with the absolute form (A, gating: vars 0/15/8/15/1) and with the relative form
-> (B, characterization). Owed: Stephen's run; A PASS is what the release needs.
+> (B, characterization). **Run 2026-10-04 (Stephen), twice, identical → EF-092:** A PASS (0/15/8/15/1);
+> B RELATIVE-MISBEHAVES (0/126,768/0/0/0) — the rule is load-bearing on silicon. §4.5 now says so in one
+> clause. KB: `instruction_skipping.yaml:112` already states the rule from the Silicon Doc (:889) and needs
+> no change; EF-092 joins its sources at the next KB release (F-546; a YAML edit now would hold every
+> manual release behind `kb-content-released`). Its SKIP `conditional_block` example (:133) is not affected — the
+> rule is for SKIPF sequences.
 C18; Silicon Doc "Special SKIPF Branching Rules": a CALL's immediate address must be absolute
 (`#\address`) wherever the instruction after it might be skipped. `xbyte-body.md:282-283` (`call #pop_two`
 then `add x, y 'a | | |`), :1448-1453, :1563-1576, and the runnable `examples-library/xbyte-growing-vm.spin2:63`

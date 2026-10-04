@@ -6,7 +6,7 @@
 
 ### Added
 
-- **The absolute-`CALL` rule for skip bodies** (§4.5): where the next line may be skipped, write `call #\label`
+- **The absolute-`CALL` rule for skip bodies** (§4.5): where the next line may be skipped, write `call #\label`, as measured on P2 silicon
 - **A Rev C note on no-wait `RDFAST`** (§5.1): start no hub instruction for 16 clocks after it
 - **PDF properties** carry the title, subtitle, author, copyright and license
 

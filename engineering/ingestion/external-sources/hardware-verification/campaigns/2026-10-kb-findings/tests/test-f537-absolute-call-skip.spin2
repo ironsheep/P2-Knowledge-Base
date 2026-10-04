@@ -1,0 +1,348 @@
+'' =============================================================================
+''
+''   File....... test-f537-absolute-call-skip.spin2
+''   Purpose.... F-537 on SILICON: the growing VM's skip families with an absolute
+''               CALL (the corrected example) and, as a control, a relative CALL
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... 04 Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED (register F-537)
+    The P2 Documentation (silicon-doc-text.txt:889, "Special SKIPF Branching
+    Rules") says a CALL's immediate address must be absolute (#\address)
+    wherever the instruction after the CALL might be skipped. The XBYTE guide's
+    shared ALU body opened with a relative `call #pop_two`, and the line after
+    it (`add x, y`) is skipped by the SUB, AND and OR patterns. The example
+    (examples-library/xbyte-growing-vm.spin2) now writes `call #\pop_two`.
+    No silicon run of either form is recorded.
+
+  ENGINES (both in cog 0, one after the other; pure PASM, no Spin)
+    A  the example's VM as corrected: alu opens with `call #\pop_two`.
+       Its code is the example's, with labels suffixed _a and `done`
+       replaced by a jump to the reporter.
+    B  identical except alu opens with the RELATIVE `call #pop_two_b`.
+    Each runs the example's two jobs (prog1, prog2), which exercise every
+    skip family in the example: ADD and SUB (job one's loop), JZ and JMP
+    (the loop's branch), AND, OR and CMPLT (job two).
+
+  RIG
+    None. No pins are used.
+
+  PRE-REGISTERED OUTCOMES (printed by the program)
+    Expected after both jobs: vars[0] 0, vars[1] 15, vars[2] 8, vars[3] 15,
+    vars[4] 1 (the example's own comments).
+    A, all five as expected     -> A PASS  (the corrected example runs right)
+    A, any other value          -> A FAIL
+    B, all five as expected     -> B RELATIVE-TOLERATED (the rule still holds
+                                   per the documentation; silicon happened to
+                                   tolerate this layout)
+    B, any other value          -> B RELATIVE-MISBEHAVES (the rule is load-
+                                   bearing on silicon)
+    No "B:" lines within a few seconds of the A report -> B HUNG (also
+    RELATIVE-MISBEHAVES). A runs first so its verdict prints regardless.
+    VERDICT: A PASS is what F-537 needs. B is characterization.
+
+  HOW TO RUN
+    Compile: pnut-ts -d test-f537-absolute-call-skip.spin2
+    Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10). Both
+    engines run in microseconds; the report is about 16 lines, ending
+    "=== END ===".
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+
+  EXP_V0            = 0                 ' job one counts n down to 0
+  EXP_V1            = 15                ' job one: sum 1..5
+  EXP_V2            = 8                 ' job two: 12 AND 10
+  EXP_V3            = 15                ' job two: 12 OR 3
+  EXP_V4            = 1                 ' job two: 3 < 9
+
+DAT ' ---- cog 0: engine A, engine B, reporter ----
+                org
+
+entry           debug("=== F-537: absolute vs relative CALL in XBYTE skip bodies ===")
+                debug("PRE-REGISTERED: vars 0/15/8/15/1 expected; A all = PASS else FAIL; B all = RELATIVE-TOLERATED else MISBEHAVES; no B lines = HUNG")
+                jmp     #start_a
+
+' ===================== ENGINE A: the corrected example =====================
+start_a         setq2   #11-1               ' load 11 longs into LUT $000..
+                rdlong  $000, ##disp_table_a ' the dispatch table
+                mov     job_a, ##prog1      ' first job
+
+run_a           rdfast  #0, job_a           ' FIFO -> this job's bytecodes
+                push    #$1ff               ' return target per handler
+        _ret_   setq    #0                  ' arm: 256-entry table @ LUT
+
+halted_a        pop     tmp_a               ' reclaim it before re-arming
+                cmp     job_a, ##prog2 wz
+        if_z    jmp     #report_a           ' second job done - report
+                mov     job_a, ##prog2
+                jmp     #run_a              ' arm again for job two
+
+h_pushc_a       rfvar   x_a                 ' 1..4 bytes, zero-extended
+                call    #push_x_a
+                ret
+
+h_loadv_a       call    #var_addr_a
+                rdlong  x_a, n_a
+                call    #push_x_a
+                ret
+
+h_storev_a      call    #var_addr_a
+                call    #pop_x_a
+        _ret_   wrlong  x_a, n_a
+
+alu_a           call    #\pop_two_a 'a b c d
+                add     x_a, y_a    'a | | |
+                sub     x_a, y_a    '| b | |
+                and     x_a, y_a    '| | c |
+                or      x_a, y_a    '| | | d
+                call    #push_x_a   'a b c d
+                ret                 'a b c d
+
+h_cmplt_a       call    #pop_two_a
+                cmps    x_a, y_a    wc
+                mov     x_a, #0
+        if_c    mov     x_a, #1
+                call    #push_x_a
+                ret
+
+br_a            rfvars  off_a       'a b
+                call    #pop_x_a    '| b
+                cmp     x_a, #0 wz  '| b
+        if_nz   ret                 '| b
+                getptr  ptr_a       'a b
+                add     ptr_a, off_a 'a b
+        _ret_   rdfast  #0, ptr_a   'a b
+
+h_halt_a        jmp     #halted_a
+
+var_addr_a      rfbyte  n_a
+                shl     n_a, #2
+        _ret_   add     n_a, vbase_a
+
+pop_two_a       sub     sp_a, #4
+                rdlong  y_a, sp_a
+                sub     sp_a, #4
+        _ret_   rdlong  x_a, sp_a
+
+pop_x_a         sub     sp_a, #4
+        _ret_   rdlong  x_a, sp_a
+
+push_x_a        wrlong  x_a, sp_a
+        _ret_   add     sp_a, #4
+
+' ---- report A, clear the variables, then run B ----
+report_a        call    #read_vars
+                debug("A (call #\pop_two): vars ", udec(v0, v1, v2, v3, v4))
+                call    #check_vars
+                tjnz    fails, #a_failed
+                debug("A PASS: the corrected example's skip families run right on silicon")
+                jmp     #a_done
+a_failed        debug("A FAIL: ", udec(fails), " of 5 variables wrong")
+a_done          call    #clear_vars
+                jmp     #start_b
+
+' ===================== ENGINE B: relative CALL control =====================
+start_b         setq2   #11-1
+                rdlong  $000, ##disp_table_b
+                mov     job_b, ##prog1
+
+run_b           rdfast  #0, job_b
+                push    #$1ff
+        _ret_   setq    #0
+
+halted_b        pop     tmp_b
+                cmp     job_b, ##prog2 wz
+        if_z    jmp     #report_b
+                mov     job_b, ##prog2
+                jmp     #run_b
+
+h_pushc_b       rfvar   x_b
+                call    #push_x_b
+                ret
+
+h_loadv_b       call    #var_addr_b
+                rdlong  x_b, n_b
+                call    #push_x_b
+                ret
+
+h_storev_b      call    #var_addr_b
+                call    #pop_x_b
+        _ret_   wrlong  x_b, n_b
+
+alu_b           call    #pop_two_b  'a b c d   RELATIVE - the form under test
+                add     x_b, y_b    'a | | |
+                sub     x_b, y_b    '| b | |
+                and     x_b, y_b    '| | c |
+                or      x_b, y_b    '| | | d
+                call    #push_x_b   'a b c d
+                ret                 'a b c d
+
+h_cmplt_b       call    #pop_two_b
+                cmps    x_b, y_b    wc
+                mov     x_b, #0
+        if_c    mov     x_b, #1
+                call    #push_x_b
+                ret
+
+br_b            rfvars  off_b       'a b
+                call    #pop_x_b    '| b
+                cmp     x_b, #0 wz  '| b
+        if_nz   ret                 '| b
+                getptr  ptr_b       'a b
+                add     ptr_b, off_b 'a b
+        _ret_   rdfast  #0, ptr_b   'a b
+
+h_halt_b        jmp     #halted_b
+
+var_addr_b      rfbyte  n_b
+                shl     n_b, #2
+        _ret_   add     n_b, vbase_b
+
+pop_two_b       sub     sp_b, #4
+                rdlong  y_b, sp_b
+                sub     sp_b, #4
+        _ret_   rdlong  x_b, sp_b
+
+pop_x_b         sub     sp_b, #4
+        _ret_   rdlong  x_b, sp_b
+
+push_x_b        wrlong  x_b, sp_b
+        _ret_   add     sp_b, #4
+
+report_b        call    #read_vars
+                debug("B (call #pop_two):  vars ", udec(v0, v1, v2, v3, v4))
+                call    #check_vars
+                tjnz    fails, #b_bad
+                debug("B RELATIVE-TOLERATED: all five right in this layout")
+                jmp     #b_done
+b_bad           debug("B RELATIVE-MISBEHAVES: ", udec(fails), " of 5 variables wrong")
+b_done          debug("=== END ===")
+park            jmp     #park
+
+' ---- shared reporter helpers ----
+read_vars       mov     ptr_r, ##vars
+                rdlong  v0, ptr_r
+                add     ptr_r, #4
+                rdlong  v1, ptr_r
+                add     ptr_r, #4
+                rdlong  v2, ptr_r
+                add     ptr_r, #4
+                rdlong  v3, ptr_r
+                add     ptr_r, #4
+        _ret_   rdlong  v4, ptr_r
+
+check_vars      mov     fails, #0
+                cmp     v0, #EXP_V0 wz
+        if_nz   add     fails, #1
+                cmp     v1, #EXP_V1 wz
+        if_nz   add     fails, #1
+                cmp     v2, #EXP_V2 wz
+        if_nz   add     fails, #1
+                cmp     v3, #EXP_V3 wz
+        if_nz   add     fails, #1
+                cmp     v4, #EXP_V4 wz
+        if_nz   add     fails, #1
+                ret
+
+clear_vars      mov     ptr_r, ##vars
+                rep     #2, #8
+                wrlong  #0, ptr_r
+                add     ptr_r, #4
+                ret
+
+' ---- cog variables ----
+sp_a            long    stack
+vbase_a         long    vars
+sp_b            long    stack
+vbase_b         long    vars
+job_a           res     1
+tmp_a           res     1
+x_a             res     1
+y_a             res     1
+n_a             res     1
+off_a           res     1
+ptr_a           res     1
+job_b           res     1
+tmp_b           res     1
+x_b             res     1
+y_b             res     1
+n_b             res     1
+off_b           res     1
+ptr_b           res     1
+ptr_r           res     1
+fails           res     1
+v0              res     1
+v1              res     1
+v2              res     1
+v3              res     1
+v4              res     1
+
+' ---- hub data: tables, the example's programs, variables, stack ----
+                orgh
+disp_table_a    long    h_pushc_a
+                long    h_loadv_a
+                long    h_storev_a
+                long    alu_a + (%0011100 << 10)    ' ADD
+                long    alu_a + (%0011010 << 10)    ' SUB
+                long    alu_a + (%0010110 << 10)    ' AND
+                long    alu_a + (%0001110 << 10)    ' OR
+                long    h_cmplt_a
+                long    br_a  + (%0001110 << 10)    ' JMP
+                long    br_a                        ' JZ
+                long    h_halt_a
+
+disp_table_b    long    h_pushc_b
+                long    h_loadv_b
+                long    h_storev_b
+                long    alu_b + (%0011100 << 10)
+                long    alu_b + (%0011010 << 10)
+                long    alu_b + (%0010110 << 10)
+                long    alu_b + (%0001110 << 10)
+                long    h_cmplt_b
+                long    br_b  + (%0001110 << 10)
+                long    br_b
+                long    h_halt_b
+
+' job one: sum 1..5 with a counted loop -> vars[1] = 15  (the example's prog1)
+prog1           byte    $00, 5
+                byte    $02, 0
+                byte    $00, 0
+                byte    $02, 1
+p1_loop         byte    $01, 1
+                byte    $01, 0
+                byte    $03
+                byte    $02, 1
+                byte    $01, 0
+                byte    $00, 1
+                byte    $04
+                byte    $02, 0
+                byte    $01, 0
+                byte    $09, (p1_done-p1_a) & $7f
+p1_a            byte    $08, (p1_loop-p1_b) & $7f
+p1_b
+p1_done         byte    $0a
+
+' job two: -> vars[2]=8, vars[3]=15, vars[4]=1  (the example's prog2)
+prog2           byte    $00, 12
+                byte    $00, 10
+                byte    $05
+                byte    $02, 2
+                byte    $00, 12
+                byte    $00, 3
+                byte    $06
+                byte    $02, 3
+                byte    $00, 3
+                byte    $00, 9
+                byte    $07
+                byte    $02, 4
+                byte    $0a
+
+                alignl
+vars            long    0[8]
+stack           long    0[16]

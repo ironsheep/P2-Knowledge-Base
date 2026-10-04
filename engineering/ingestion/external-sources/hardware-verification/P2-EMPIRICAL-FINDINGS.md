@@ -1649,6 +1649,24 @@ teaches exactly this and is right; the KB had removed the rule as unsourced (F-4
 source. *Limits:* one board, Rev C, cog execution; AUGS only (AUGD not run, though it is the same
 kind of prefix instruction); run once. *Source:* `…/tests/test-f540-augs-skip-pattern-bit.spin2`.
 
+### EF-092 · In an XBYTE shared body, a relative `call #` whose next instruction the pattern skips corrupts the VM; the absolute `call #\` runs it right — `CONFIRMED`
+*KB:* `language/pasm2/concepts/instruction_skipping.yaml`; the P2 Interpreters & Emulators Guide §4.5
+*How proven:* `test-f537-absolute-call-skip` (campaign `2026-10-kb-findings`), no pins, pure PASM in
+cog 0. The XBYTE guide's growing VM (11 bytecodes: shared ALU body for ADD/SUB/AND/OR, variables,
+JZ/JMP, CMPLT) run twice on its own two jobs: engine A opens the ALU body with `call #\pop_two`
+(the corrected example), engine B is identical except `call #pop_two` (relative). The SUB, AND and OR
+patterns skip the `add` straight after that call. *Result (logs `debug_261004-170721` and
+`-170743`, 2026-10-04, two runs identical but for timestamps; `.bin` 4,427 bytes = the build):*
+**A** — vars 0 / 15 / 8 / 15 / 1, exactly the example's expected values (gate, pre-registered
+`A PASS`). **B** — vars 0 / 126,768 / 0 / 0 / 0, 4 of 5 wrong (`RELATIVE-MISBEHAVES`): job one's
+loop still terminated (vars[0] = 0) but its sum is garbage, and job two stored nothing.
+**Grounds:** decides F-537 on silicon. The P2 Documentation's *Special SKIPF Branching Rules*
+(`silicon-doc-text.txt:889`) require an absolute CALL address wherever the next instruction might be
+skipped; this shows the rule is load-bearing, not advisory, and that the guide's corrected example
+runs. *Limits:* one board, Rev C, cog execution under XBYTE (SKIPF patterns from EXECF); one body
+layout; the failure mode of the relative form (where the call lands) was not traced, only its
+effect. *Source:* `…/tests/test-f537-absolute-call-skip.spin2`.
+
 
 ## Open / pending empirical questions
 
