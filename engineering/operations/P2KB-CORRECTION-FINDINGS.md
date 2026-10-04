@@ -195,7 +195,7 @@ Seen 2026-10-04 reading the served entry while verifying v1.23.1. Against the Si
 **Fix:** re-derive those blocks from the per-instruction YAMLs and the Silicon Doc register table. A
 beginner guide is the most-copied page in the set.
 
-### F-544 — the delivery filter deleted a line of the Edge modules' boot-pin note: a wrapped prose line began `sources:` — `PENDING-VALIDATION` (fixed 2026-10-04; ships in the next KB release)
+### F-544 — the delivery filter deleted a line of the Edge modules' boot-pin note: a wrapped prose line began `sources:` — `PENDING-VALIDATION` (served in v1.23.3, verified 2026-10-04 via p2kb_get; closes when the MCP filter roll's acceptance probe shows the line intact)
 Found 2026-10-04 writing the MCP filter handoff, by comparing the shipped filter's output with a
 structural strip of the same nine keys across all 1,131 files (8 differed). In
 `hardware/edge-32mb-module.yaml` and `hardware/edge-standard-module.yaml`, the folded
