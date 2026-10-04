@@ -196,7 +196,7 @@ state the rule in §4.5; re-run the example's skipping variants on the bench.
   "wraps around" claim). The caution itself stands. **Fix:** "each skipped instruction costs 2 clocks";
   "overflows without faulting".
 
-### F-539 — Streamer Guide ch16: streamer SPI data against a P_TRANSITION clock, taught as "matched rates", with no word on the losing start phase — `RESOLVED` (applied 2026-10-04; ships in Streamer v1.1.3, staged)
+### F-539 — Streamer Guide ch16: streamer SPI data against a P_TRANSITION clock, taught as "matched rates", with no word on the losing start phase — `DONE` (released in Streamer v1.1.3, 2026-10-04, verified on the PDF: pages 72-73)
 > **Applied.** Ch16 intro: the rates match because both run from one clock, and the starting phase is set by
 > your code. §16.1 gains a caution after the bulk transfer: the `XINIT`-to-`WYPIN` spacing picks one of a few
 > phases (one per sysclk of the half-period), exactly one loses silently, and a safe spacing at one SCK rate can
@@ -363,7 +363,7 @@ no-wait RDFAST use, GETSEC "long-duration").
 
 ## The Streamer Guide teaches GETXACC as capture-and-clear (2026-10-01, v1.22.0 impact survey) — F-479
 
-### F-479 — the Streamer Guide says GETXACC "captures and clears" both accumulators; on silicon the clear acts only during a Goertzel burst, and a burst's last term lands in the next — `RESOLVED` (applied 2026-10-04; ships in Streamer v1.1.3, staged)
+### F-479 — the Streamer Guide says GETXACC "captures and clears" both accumulators; on silicon the clear acts only during a Goertzel burst, and a burst's last term lands in the next — `DONE` (released in Streamer v1.1.3, 2026-10-04, verified on the PDF: pages 43, 75)
 > **2026-10-04 — hold lifted, applied.** Stephen: "yes E1-E7 approved". §10.6 and §17.1 now state the silicon
 > behaviour as two Rev C silicon-note chips (E4: an idle read returns the running total and clears nothing;
 > E5: a burst's last term joins the next Goertzel burst), keep the before/after difference rule, and give the

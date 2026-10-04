@@ -1,5 +1,20 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.1.3 (2026-10-04)
+
+**How Goertzel results read on Rev C silicon, SINC2 measured, and where SPI data meets its clock.**
+
+### Added
+
+- **Rev C notes on `GETXACC`** (§10.6, §17.1): an idle read returns the running total; a burst's last term joins the next burst
+- **Exact SINC1 sums from discrete bursts** (§17.1): a zero-term burst delivers the held term before each idle read
+- **SPI data-to-clock phase** (§16.1): the `XINIT`-to-`WYPIN` spacing picks the phase; check it at every SCK rate
+
+### Changed
+
+- **SINC2 with a non-power-of-two rate** (§10.5): start each measurement with `XZERO`, measured clean on P2 silicon at 10.24 µs, 100 µs and 25 ms windows
+- **The `XCONT` detection loop is described as the code reads** (§17.1): one read per command
+
 ## v1.1.2 (2026-09-28)
 
 **What the capture path reads on a smart pin, how to capture that pin anyway, and a block diagram for each direction.**

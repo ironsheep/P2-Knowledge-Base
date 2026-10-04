@@ -45,7 +45,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | — |
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | — |
 | **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |
-| **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | 🔧 |
+| **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | **✅** ³⁰ |
 | **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — | — |
 | Interpreters & Emulators (XBYTE) | manual | 🔧 ³ | 🔧 | 🔧 | ✅ | 🔧 |
 | **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | — |
@@ -597,6 +597,10 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+³⁰ **Streamer Guide — silicon notes proven on the released v1.1.3 PDF, 2026-10-04** (23:42 build, 91pp = prior).
+Two `GETXACC` chips (E4 and E5) render inline on p43 (§10.6) and p75 (§17.1), rendered and read; two notes,
+so no index. `p2kb-platform-silicon-notes` sits before tables in `request.json`.
 
 ²⁹ **Debug Window — all four proven on the released v1.1.4 PDF, 2026-10-04** (22:47 build, 169pp, prior
 168). **Metadata single-source + rights:** the cover reads `\DocTitle`/`\DocSubtitle`/`\DocDate`/
