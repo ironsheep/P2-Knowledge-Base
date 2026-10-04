@@ -2,12 +2,17 @@
 
 ## v1.0.2 (2026-10-03)
 
-**The R3 pitfall is corrected.** Re-checking the sequence after copying the record does not make a
-non-blocking writer safe with this writer, which bumps the sequence only after writing the fields;
-for a writer that must never wait, use R5. The publish-last pitfall and R3's "use it when" now say
-that the writer does not rewrite a record until the reader has handed it back. The cover and the
-PDF properties now carry the version,
-date and rights, and each example file carries a generated header.
+**The latest-wins mailbox states its hand-back rule and its one safe non-blocking form.**
+
+### Fixed
+
+- **R3 Latest-Wins Mailbox**: a writer that must never wait packs the command into one long (R5); re-checking the sequence after copying does not make it safe
+- **Publish-last**: the writer rewrites a record only after the reader hands it back, through R2's tail or R3's acknowledgement
+
+### Added
+
+- **Example library**: each example file opens with a header naming its purpose and this note's version
+- **Cover and PDF properties** carry the version, date and license
 
 ## v1.0.1 (2026-08-08)
 

@@ -54,7 +54,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
 | **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ |
 | **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ |
-| P2AN007 | app-note | 🔧 | 🔧 | 🔧 | 🔧 |
+| **P2AN007** | app-note | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ |
 | P2AN003 · P2AN005 · P2AN006 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
 | Layout Torture Test | instrument | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — |
@@ -597,6 +597,18 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+²⁷ **P2AN007 — all four proven on the released v1.0.2 PDF, 2026-10-04** (18:32 build, 16pp = prior).
+**Metadata single-source + rights:** the cover reads `\DocDate` / `\DocVersion` (page 1: "October 2026",
+"Version 1.0.2"); `audit-pdf-metadata.py --require-rights --request` verified all seven declared fields —
+Title, Subject, Author, Keywords (copyright + licence), page-1 date and version — CLEAN; v1.0.1 carried
+none of the four PDF properties. (Run with `--prior 1.0.1` the gate flags the note's own revision-history
+line "v1.0.1 (August 2026) — license restored …", which is history, not a stale identity string; the
+release runner does not pass `--prior`.) **Cross-ref filter:** wired in `request.json` before
+`p2kb-platform-tables`; correctly silent — the source holds no `Chapter N` / `Appendix X` reference to
+link (0 matches), as for P2AN001/002/004. **Captions + generated headers:** six captions print under
+their listings (e.g. `latest-wins-mailbox.spin2`, page 7, rendered and read); corpus identity 6/6;
+published ZIP repacked from the headed corpus, currency 7/7 GREEN.
 
 ²⁶ **Architect's Guide — all three proven on the released v1.1.0 PDF, 2026-09-28** (16:51 build, 60pp).
 **Metadata single-source:** the cover reads `\DocTitle`, `\DocDate`, `\DocVersion` from the template's

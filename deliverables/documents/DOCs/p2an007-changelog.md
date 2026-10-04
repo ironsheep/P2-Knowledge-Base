@@ -1,5 +1,19 @@
 # P2AN007 Changelog: Data Structures with the New Language Facilities
 
+## v1.0.2 (2026-10-03)
+
+**The latest-wins mailbox states its hand-back rule and its one safe non-blocking form.**
+
+### Fixed
+
+- **R3 Latest-Wins Mailbox**: a writer that must never wait packs the command into one long (R5); re-checking the sequence after copying does not make it safe
+- **Publish-last**: the writer rewrites a record only after the reader hands it back, through R2's tail or R3's acknowledgement
+
+### Added
+
+- **Example library**: each example file opens with a header naming its purpose and this note's version
+- **Cover and PDF properties** carry the version, date and license
+
 ## v1.0.1 (2026-08-08)
 
 A licensing change. No technical content changed.
@@ -29,4 +43,4 @@ required to fail before the result was accepted.
 
 Implementation-only by design: the note teaches the worked code and defers the *contract decision*
 (which structure to use and why, copy vs. reference) to the P2 Architect's Guide. Every recipe
-compiles clean under `pnut_ts -d`. Ships with a downloadable example library of all six programs.
+compiles clean under `pnut-ts -d`. Ships with a downloadable example library of all six programs.

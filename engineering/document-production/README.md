@@ -37,7 +37,7 @@ prose), with all per-publication detail in the roster.*
 | P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.3 | 15 | ✅ |
 | P2AN005 — Cooperative Multitasking / TASK | app-note | 1.0.2 | 12 | ✅ |
 | P2AN006 — Sizing Cog & Task Stacks | app-note | 1.0.1 | 13 | ✅ |
-| P2AN007 — Data Structures (STRUCT, cross-cog) | app-note | 1.0.1 | 16 | ✅ |
+| P2AN007 — Data Structures (STRUCT, cross-cog) | app-note | 1.0.2 | 16 | ✅ |
 | AI Privacy Guide | guide | — | — | ✅ |
 | Single-Step Debugger | manual | 1.0.1 | 47 | ✅ |
 | PNut-Term-TS User Guide | tool-guide | 1.0.0 | 47 | ✅ |
