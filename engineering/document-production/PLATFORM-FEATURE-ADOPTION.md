@@ -38,26 +38,26 @@ each feature's *mechanism* stays in its own document, linked below.
 
 ## The table
 
-| Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers |
-|---|---|:--:|:--:|:--:|:--:|
-| **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ |
-| **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ |
-| **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — |
-| **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ |
-| Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ |
-| **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — |
-| **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — |
-| Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ |
-| **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ |
-| **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — |
-| **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — |
-| **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ |
-| **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ |
-| **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ |
-| **P2AN007** | app-note | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ |
-| P2AN003 · P2AN005 · P2AN006 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ |
-| Layout Torture Test | instrument | — | — | — | — |
-| AI Privacy Guide | guide | — | ⏳ | — | — |
+| Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers | Silicon notes ²⁸ |
+|---|---|:--:|:--:|:--:|:--:|:--:|
+| **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ | — |
+| **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | — |
+| **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | — |
+| **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | — |
+| Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ | 🔧 |
+| **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | — |
+| **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — | — |
+| Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ | — |
+| **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | — |
+| **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — | — |
+| **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — | — |
+| **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ | — |
+| **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | — |
+| **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | — |
+| **P2AN007** | app-note | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | — |
+| P2AN003 · P2AN005 · P2AN006 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ | — |
+| Layout Torture Test | instrument | — | — | — | — | — |
+| AI Privacy Guide | guide | — | ⏳ | — | — | — |
 
 ¹ Wired in `request.json` with the correct filter ordering and shipped in released
 PDFs, **but no visual audit is recorded** — the pilot row was left mid-flight. Close
@@ -598,6 +598,14 @@ cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
 
+²⁸ **Silicon notes — column added 2026-10-04** (Stephen, choosing it over a coloured box: errata
+"important and yet can't be distracting"). Seeded from detected state: a document owes the feature
+once its source carries a silicon erratum at a point of use, and today only Debug Window does (ch14,
+`DEBUG_TIMESTAMP`; 🔧 until its next PDF proves it). **Writing a document's first silicon note flips its
+cell from — to ⏳**, and the owed work is the tag in the source plus `p2kb-platform-silicon-notes` in
+`request.json` before the tables filter. The `::: silicon-note-index` appendix is part of the same
+adoption only where the document carries three or more notes.
+
 ²⁷ **P2AN007 — all four proven on the released v1.0.2 PDF, 2026-10-04** (18:32 build, 16pp = prior).
 **Metadata single-source + rights:** the cover reads `\DocDate` / `\DocVersion` (page 1: "October 2026",
 "Version 1.0.2"); `audit-pdf-metadata.py --require-rights --request` verified all seven declared fields —
@@ -704,6 +712,24 @@ PDF — every auto-link points where it should and nothing was wrongly linked.
 Each example's header is generated from what the repo already knows, including where
 in the manual the block sits. A document is adopted once its corpus files carry
 generated headers (`--adopt` on first run).
+
+### Silicon notes — `p2kb-platform-silicon-notes.lua`
+
+**Mechanism:** the filter's header comment; macros in `p2kb-platform-content.sty`
+(§ SILICON NOTE). **Fixture:** `platform/tests/silicon-notes-test.md`.
+
+A silicon erratum is stated once, in the manual's own voice, at the point of use, as a plain
+sentence led by a small graphite **Rev C** chip: no box, no erratum number, no pointer to an
+unpublished source. Authoring: `[Rev C]{.silicon-note topic="few words naming the rule"}`
+replaces "On Rev C silicon,". A manual with three or more notes adds an appendix (its own
+heading and intro sentence) holding an empty `::: silicon-note-index` div, which the filter
+fills with one pointer per note (topic → chapter; section → page). The appendix never
+restates a rule.
+
+**To adopt a document:** write the tag(s); add `p2kb-platform-silicon-notes` to
+`request.json` `lua_filters` **before `p2kb-platform-tables`**; render and read each tagged
+page, and the index if any. The escape pass protects the `]{.class …}` attribute block, so
+a `topic` must not contain inline code.
 
 ---
 

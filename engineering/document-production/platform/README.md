@@ -20,6 +20,7 @@ platform/filters/
   p2kb-platform-code-coloring.lua
   p2kb-platform-mnemonic-bold.lua
   p2kb-platform-pagination.lua
+  p2kb-platform-silicon-notes.lua  silicon-note chip ([Rev C]{.silicon-note topic="..."}) + optional pointer-only index (::: silicon-note-index); order BEFORE tables
 ```
 
 ## How a manual consumes the platform

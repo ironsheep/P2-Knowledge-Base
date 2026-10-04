@@ -356,6 +356,21 @@
   coltitle=white, fonttitle=\sffamily\bfseries\small, title={HARDWARE}
 }
 
+% ==================== SILICON NOTE (inline tag) ====================
+% A one-sentence rule about how the current silicon behaves, met rarely but not
+% to be missed (a silicon erratum in the manual's own voice, at the point of use).
+% Deliberately NOT a box: a box says "this matters to everyone here" and would
+% compete with the real trap callouts above. A small graphite chip -- the
+% hardware family's colour -- at the start of the sentence is recognisable at a
+% glance and costs the reader nothing when it does not apply to them.
+% Emitted by p2kb-platform-silicon-notes.lua from [Rev C]{.silicon-note topic="..."}.
+% \SiliconNoteAnchor gives the index its link target and page label.
+\newtcbox{\SiliconNoteTag}{on line,
+  colback=iosp-hardware-border, colupper=white, boxrule=0pt, arc=1.5pt,
+  boxsep=0pt, left=2.5pt, right=2.5pt, top=1pt, bottom=1pt,
+  fontupper=\sffamily\bfseries\scriptsize}
+\newcommand{\SiliconNoteAnchor}[1]{\phantomsection\hypertarget{#1}{}\label{#1}}
+
 % ==================== TOOL-DEVELOPER REVIEW (DRAFT SCAFFOLDING) ====================
 % A question put to a named outside tool author, inside a review draft that goes
 % only to those authors. NOT a reader-facing element: every one of these is meant

@@ -188,6 +188,11 @@ TEST-*.lua
 !engineering/document-production/manuals/p2-layout-torture-test/opus-master/P2-Layout-Torture-Test.md
 !engineering/document-production/workspace/p2-layout-torture-test/P2-Layout-Torture-Test.md
 
+# Exception: platform filter fixtures are permanent evidence that a platform change works
+# (platform/tests/README.md). core.ignorecase is on here, so *-TEST.md also matched the
+# lowercase *-test.md fixture names and left them untracked.
+!engineering/document-production/platform/tests/*.md
+
 # Archive directories
 archive/
 archive-*/

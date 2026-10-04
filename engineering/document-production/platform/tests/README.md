@@ -68,3 +68,28 @@ print(len(pg.get_links()))          # expect 6
 
 Cross-check `output.tex` for `\hyperlink{...}` on each case — the `.tex` shows plainly
 which cases linked and which stayed prose.
+
+---
+
+## `silicon-notes-test.md` — `p2kb-platform-silicon-notes.lua`
+
+**Proves:** every `[Rev C]{.silicon-note topic="..."}` span becomes the graphite chip with
+a link target wherever it sits, the `::: silicon-note-index` div lists each note once in
+document order, and nothing else is tagged or indexed.
+
+| Case | Expect |
+|---|---|
+| `CASE-POS-PARA` / `-MID` / `-QUOTE` / `-LIST` | **chip** — paragraph start, mid-paragraph, blockquote, bullet |
+| `CASE-EDGE-TABLE` | **chip** — a table cell keeps its tag (silicon-notes runs before tables) |
+| `CASE-EDGE-NOTOPIC` | **chip**, index shows the section title, log carries one WARNING |
+| `CASE-NEG-OTHERSPAN` | **plain** — a span of another class |
+| `CASE-NEG-BRACES` | **literal** `{.notattr}` — prose braces are still escaped |
+| `CASE-INDEX` | **six** entries, each linked |
+
+**Expected result:** 6 `\SiliconNoteAnchor` and 6 `\hyperlink{silicon-note-N}` in
+`output.tex`; exactly one WARNING (no topic) in the compile log; 12 links on the index page
+(6 topic links + 6 `\pageref`s). First proven 2026-10-04, run `silicon-notes-v2`.
+
+Request: template `p2kb-debugwin.latex` (with `p2kb-debugwin-local.sty` and the two
+platform `.sty`), filters `figures, silicon-notes, tables, mnemonic-bold, code-coloring,
+pagination`, pandoc args `--top-level-division=chapter --toc --toc-depth=2`.

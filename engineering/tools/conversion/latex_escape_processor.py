@@ -245,6 +245,15 @@ def process_latex_escaping(input_file, output_file):
             placeholder = f'XPROTECTIMGATTR{len(protected_attrs)}X'
             protected_attrs.append(match.group(0))
             line = line.replace(match.group(0), placeholder, 1)
+        # Bracketed-span class attributes — [Rev C]{.silicon-note topic="..."} — are
+        # markdown syntax too. Only a brace block that directly follows "]" and starts
+        # with ".class" is protected, so prose braces are unaffected. Attribute values
+        # must not contain inline code: that is protected (and restored) before this.
+        span_attr_pattern = r'(?<=\])\{\.[A-Za-z][\w-]*(?:\s+[A-Za-z][\w-]*="[^"\n]*")*\}'
+        for match in re.finditer(span_attr_pattern, line):
+            placeholder = f'XPROTECTIMGATTR{len(protected_attrs)}X'
+            protected_attrs.append(match.group(0))
+            line = line.replace(match.group(0), placeholder, 1)
 
         # PROTECT PANDOC SUPERSCRIPT SYNTAX ^text^
         # Pandoc converts ^text^ to \textsuperscript{text} in LaTeX
