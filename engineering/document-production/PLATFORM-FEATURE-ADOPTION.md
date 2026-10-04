@@ -691,7 +691,11 @@ value of `0.9.0`.
    date / version / publisher line with the macros. Keep any surrounding wording
    ("Version", a qualifier) in the cover.
 3. Normalize `request.json` `metadata.version` to the **bare number** — the cover
-   supplies the word "Version".
+   supplies the word "Version". **Escape LaTeX specials in every metadata value**
+   (`"P2 Interpreters \\& Emulators Guide"`): the Forge passes metadata as pandoc
+   `--variable`, inserted raw, so a bare `&` aborts xelatex at `\DocTitle` (XBYTE
+   v1.1.1's first build, 2026-10-04). The prepare gate `request-metadata-latex`
+   checks it.
 4. Round-trip and **read the rendered PDF**: cover unchanged, and
    `pymupdf.open(pdf).metadata` carries title / author / subject.
 

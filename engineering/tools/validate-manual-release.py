@@ -199,6 +199,14 @@ def build_gates(slug: str, phase: str, pdfs: list[str] | None):
                   "the version the cover renders must have a changelog entry, "
                   "and metadata.version must be a bare number (the cover "
                   "supplies the word 'Version' itself)"))
+        # 2026-10-04: the XBYTE guide's production build died on "! Misplaced
+        # alignment tab character &" at \DocTitle -- the Forge passes request.json
+        # metadata as pandoc --variable, which is inserted RAW. Read the directive
+        # here, before the render, the same way changelog-version-sync does.
+        G.append(("request-metadata-latex",
+                  f"{V}/audit-request-metadata-latex.py", ["--slug", slug], True,
+                  "request.json metadata reaches LaTeX unescaped (pandoc --variable); "
+                  "a bare & % $ # _ { } ~ ^ aborts xelatex at \\DocTitle"))
         for wsmd, stem in wsdocs:
             G.append((per_doc("font-glyphs", stem), f"{V}/audit-font-glyphs.py",
                       [wsmd, "--source-dir", str(doc / "opus-master"),
