@@ -17,13 +17,13 @@
 
 \begin{center}
 \vspace{0.4cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 Debug Window Manual\par}
+{\fontsize{36}{42}\selectfont\bfseries \DocTitle\par}
 \vspace{0.3cm}
-{\Large\itshape See What Your Program Is Doing\par}
+{\Large\itshape \DocSubtitle\par}
 \vspace{0.35cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.1.3\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[
@@ -777,7 +777,7 @@ The configuration keywords you can add to the creation line:
 | `TITLE` | `'text'` | `<name> - TERM` | The window's title-bar text |
 | `POS` | `left top` | host-placed | Screen position of the window, in pixels |
 | `SIZE` | `cols rows` | `40 20` | Grid size; each is **1–256** |
-| `TEXTSIZE` | `points` | editor text size | Font size (6–200); the window sizes itself to fit |
+| `TEXTSIZE` | `points` | `10` | Font size (6–200); the default tracks the editor's text-size preference, which is itself 10. The window sizes itself to fit |
 | `COLOR` | 8 values | see below | Four foreground/background color pairs |
 | `BACKCOLOR` | `rgb` | black | The canvas background — the fill used for clear and scroll (not the per-character background) |
 | `UPDATE` | — | off | Enables buffered mode (see "Controlling updates") |
@@ -1396,8 +1396,9 @@ horizontal patterns, `height` for vertical.
 > the refresh counter — which fires on an *equality* test against an ever-increasing
 > count — can never match it. The window stops updating. It is not an error and it
 > is not reported; pixels keep arriving and the picture simply stops moving.
-> A runtime `` `RATE `` with any positive count resumes refreshing normally.
-> (Hardware-verified.)
+> (Hardware-verified.) A runtime `` `RATE 0 `` freezes it the same way. A later
+> `` `TRACE `` or `` `CLEAR `` (each re-derives the rate) or an explicit `` `UPDATE ``
+> brings it back.
 
 `SAVE 'name'` writes the canvas to `name.bmp` on the host. The filename is
 **required** — a bare `` `SAVE `` writes nothing at all, and says nothing. See
@@ -1887,6 +1888,14 @@ The `style` byte packs weight, italic, underline, and alignment into one value:
 So `$02` is bold, `$06` is bold + italic, `$0A` is bold + underline, and
 `$20` right-aligns. The default style is `$01` (`%00000001`): **normal** weight,
 centered both ways.
+
+Read those alignment names as *where the ink lands relative to the anchor point* — not
+as which edge of the text the anchor sits on. The two readings describe the same pixels
+in opposite words, which is exactly how a table like this gets written down backwards.
+Concretely: horizontal `2` puts the text to the **right** of the anchor, so the anchor
+is the text's *left* edge; vertical `2` puts the text **above** the anchor, so the
+anchor is its *bottom* edge. If a label lands on the wrong side of its point, you have
+almost certainly read the row in the other vocabulary rather than found a bug.
 
 The weight field selects a *nominal* font weight, but the DEBUG display font does
 not render it as a weight progression: `$00` looks identical to the `$01` default,
@@ -5444,6 +5453,10 @@ debug(`Status 'now: `(sine)' 13)
 > `DEBUG_TIMESTAMP` symbol stamps every `DEBUG` *message* with the 64-bit CT
 > value. That is a property of the message stream, set once in a `CON` block — not a
 > command you send to a display window.
+> [Rev C]{.silicon-note topic="DEBUG_TIMESTAMP stamp order"} The stamp is read from the
+> sending cog's own copy of the counter. A cog whose group of four had no cog running
+> when the counter wrapped holds a copy that is a whole number of wraps (21.47 s each at
+> 200 MHz) behind, so its messages are stamped early and print out of time order.
 
 ## Debugging from PASM
 

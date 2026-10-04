@@ -1,0 +1,14 @@
+# Render-overfull verdicts — P2 Debug Window Manual
+#
+# Read by audit-render-overfulls.py --verdicts. One "page: verdict" line each.
+# An overfull is a POINTER TO A PAGE, not a defect: the magnitude is the badness
+# of the line-break, not the size of what shows. Every line here is a page that
+# was RENDERED AND LOOKED AT, not inferred from the number.
+#
+# v1.1.4, 2026-10-04. One site at 45.29pt (tex 6700-6704), a prose paragraph.
+
+108: CLEAN — Chapter 10 SPECTRO, "Color mapping", the closing paragraph ("LUMA8X is the
+    default if you name no mode. The luminance modes render a brightness ramp ..."). Rendered
+    at 110 dpi and inspected: every line ends inside the right margin; the break resolves
+    with a hyphen ("lumi-nance") and wide inter-word spacing, nothing spills.
+    pdf-margin-overflow is CLEAN for the same build.

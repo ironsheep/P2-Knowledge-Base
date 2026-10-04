@@ -1,5 +1,23 @@
 # P2 Debug Window Manual: Change Log
 
+## v1.1.4 (2026-10-04)
+
+**How a frozen BITMAP comes back, how PLOT text aligns, and when a DEBUG timestamp runs early.**
+
+### Added
+
+- **PLOT text alignment reads as where the ink lands** (Chapter 5): horizontal `2` sets
+  text right of its anchor
+- **A Rev C note on `DEBUG_TIMESTAMP`** (Chapter 14): a cog whose group of four idled
+  across a counter wrap stamps early
+- **PDF properties** carry the title, subtitle, author, copyright and license
+
+### Fixed
+
+- **A frozen BITMAP refreshes again after `TRACE`, `CLEAR` or `UPDATE`** (Chapter 4); a
+  runtime `RATE 0` freezes it just as `RATE -1` does
+- **TERM's `TEXTSIZE` default is `10`** (Chapter 3), the editor's own text-size default
+
 ## v1.1.3 (2026-08-18)
 
 **What an omitted FFT channel argument does.**

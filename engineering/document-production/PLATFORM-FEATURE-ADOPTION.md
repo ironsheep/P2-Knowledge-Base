@@ -44,7 +44,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | — |
 | **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | — |
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | — |
-| Debug Window | manual | ⏳ | ⏳ | ⏳ | **✅** ¹⁰ | 🔧 |
+| **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | — |
 | **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — | — |
 | Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ | — |
@@ -597,6 +597,15 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+²⁹ **Debug Window — all four proven on the released v1.1.4 PDF, 2026-10-04** (22:47 build, 169pp, prior
+168). **Metadata single-source + rights:** the cover reads `\DocTitle`/`\DocSubtitle`/`\DocDate`/
+`\DocVersion` (page 1: "October 2026", "Version 1.1.4"); the PDF carries Title, Subject (the cover's
+subtitle, which won over the never-printed long form in `request.json`), Author and Keywords (copyright +
+CC BY-SA 4.0); `pdf-metadata` gate PASS. **Cross-ref filter:** wired before tables; the source already
+writes its 113 references as explicit `[Chapter N](#ch-N)` links, which the filter leaves alone, so internal
+links went 600 → 601 (the one added PLOT paragraph's page); no mislink seen on the pages read. **Silicon
+notes:** the ch14 `DEBUG_TIMESTAMP` chip renders on p136 (rendered and read); one note, so no index.
 
 ²⁸ **Silicon notes — column added 2026-10-04** (Stephen, choosing it over a coloured box: errata
 "important and yet can't be distracting"). Seeded from detected state: a document owes the feature
