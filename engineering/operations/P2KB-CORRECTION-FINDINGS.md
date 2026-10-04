@@ -205,6 +205,16 @@ exactly one `AUGS #$91` before each `MOV x, #$145`): `p2-xbyte-programming-guide
 (5 ms crystal, 10 ms crystal + PLL). Seen by the audit, not an inventory fact. **To do:** settle against
 the Silicon Doc and the KB (`architecture/clock_system.yaml` stabilization_timing), fix the losing side.
 
+## Impact survey — v1.23.2 (`release-yamls` §8, run 2026-10-04)
+
+v1.23.2 changed two facts, both decided on the bench (EF-090, EF-091). Sync serial TX primes its first
+word in reset: the I/O & Smart Pins guide already teaches this (ch11:292-296), and F-533's fix text
+carries it; no other live document teaches `%11100` ordering (the «#378» audit's per-document reads).
+A `##` operand's AUGS takes a skip-pattern bit: the XBYTE guide already teaches it (xbyte-body.md:321-328);
+the Assembly Reference states no skip-pattern AUGS rule («#378» G1: NOT-TAUGHT). **No document is
+flagged.** Published state verified from raw.githubusercontent.com (both new sentences served); the
+running p2kb-mcp needs a restart before F-526/F-540 can flip to `DONE`.
+
 ## Impact survey — v1.23.1 (`release-yamls` §8, run 2026-10-03)
 
 v1.23.1 changed no fact: every edit moved a citation or a provenance key out of the shipped text
