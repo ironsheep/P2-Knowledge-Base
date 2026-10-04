@@ -3,8 +3,8 @@
 ''   File.......  xbyte-growing-vm.spin2
 ''   Purpose....  The minimal VM grown to eleven bytecodes - a shared ALU
 ''                body, variables, a branch, and a cog that arms twice
-''   Manual.....  P2 XBYTE Programming Guide
-''   Version....  v1.1.0 (2026-08-19)
+''   Manual.....  P2 Interpreters & Emulators Guide
+''   Version....  v1.1.1 (2026-10-04)
 ''   Appears in.  Chapter 15: Growing the VM -- 15.5 The complete program
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
@@ -60,7 +60,7 @@ h_storev        call    #var_addr
 ' ---- $03..$06: ONE body, four skip patterns from the table --------
 ' One column per bytecode; read DOWN a column for that bytecode's path.
 '   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
-alu             call    #pop_two    'a b c d
+alu             call    #\pop_two   'a b c d
                 add     x, y        'a | | |
                 sub     x, y        '| b | |
                 and     x, y        '| | c |

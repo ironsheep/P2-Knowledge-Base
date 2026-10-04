@@ -17,13 +17,13 @@
 
 \begin{center}
 \vspace{0.35cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 Interpreters \& Emulators Guide\par}
+{\fontsize{36}{42}\selectfont\bfseries \DocTitle\par}
 \vspace{0.3cm}
-{\Large\itshape Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2\par}
+{\Large\itshape \DocSubtitle\par}
 \vspace{0.35cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.1.0\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[

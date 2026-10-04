@@ -47,7 +47,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | 🔧 |
 | **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — | — |
-| Interpreters & Emulators (XBYTE) | manual | ⏳ ³ | ⏳ | ⏳ | ✅ | — |
+| Interpreters & Emulators (XBYTE) | manual | 🔧 ³ | 🔧 | 🔧 | ✅ | 🔧 |
 | **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | — |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — | — |

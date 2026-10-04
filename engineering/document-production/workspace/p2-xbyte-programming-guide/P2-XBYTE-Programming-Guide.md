@@ -17,13 +17,13 @@
 
 \begin{center}
 \vspace{0.35cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 Interpreters \& Emulators Guide\par}
+{\fontsize{36}{42}\selectfont\bfseries \DocTitle\par}
 \vspace{0.3cm}
-{\Large\itshape Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2\par}
+{\Large\itshape \DocSubtitle\par}
 \vspace{0.35cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.2cm}
-{\large\color{blue}Version 1.1.0\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vspace{0.1cm}
 \begin{tcolorbox}[
@@ -473,7 +473,7 @@ One entry deserves saying twice, in the chapter that just explained what the eng
 
 If your project is a **CPU emulator**, read Chapters 7 and 8 before you write a line. They will tell you which of the engine's two assets you can actually take — and for a good number of guests, the honest answer is *one of them*. That is not a caveat on the way to using XBYTE; for many guest CPUs it is the finding, and acting on it early saves rewriting an interpreter around an engine that was never going to fit.
 
-To see what the engine makes possible on real silicon — and, just as usefully, where working emulators have chosen *not* to use it — see **Appendix C: Further Implementations**.
+To see what the engine makes possible on silicon — and, just as usefully, where working emulators have chosen *not* to use it — see **Appendix C: Further Implementations**.
 
 # Chapter 4: The Skip Family {#ch-4}
 
@@ -483,7 +483,7 @@ All three take a pattern of bits and use it to *not execute* selected instructio
 
 ## 4.1 SKIP — cancel instructions in place {#sec-4-1}
 
-**SKIP** takes a 32-bit pattern in D and, as the next up-to-32 instructions come down the pipeline, **cancels** each one whose corresponding bit is set. Bit 0 governs the first instruction after SKIP, bit 1 the second, and so on. A cancelled instruction still passes through the pipeline — it simply has no effect, taking its time but doing nothing.
+**SKIP** takes a 32-bit pattern in D and, as the next up-to-32 instructions come down the pipeline, **cancels** each one whose corresponding bit is set. Bit 0 governs the first instruction after SKIP, bit 1 the second, and so on. A cancelled instruction still passes through the pipeline — it simply has no effect, becoming a 2-clock `NOP`.
 
 ```pasm2
                 skip    #%0000_0110         ' cancel the 2nd and 3rd
@@ -496,7 +496,7 @@ All three take a pattern of bits and use it to *not execute* selected instructio
 
 `x` ends up holding `%1001` — read it as a bitmap of which instructions survived.
 
-Because a cancelled instruction still spends its clocks, SKIP's cost is the cost of the instructions it skips over. Its value is that one straight-line block of code can be made to behave like many different sequences, chosen by the pattern — the basis of a *shared handler*.
+Because each cancelled instruction still costs 2 clocks, SKIP is never free: every instruction it skips over costs 2 clocks. Its value is that one straight-line block of code can be made to behave like many different sequences, chosen by the pattern — the basis of a *shared handler*.
 
 ::: hardware
 **SKIP works even in hub-executed code.** It is the general-purpose member of the family — it stays in the normal execution flow and cancels, rather than jumping. That makes it the one to reach for in hubexec, where SKIPF's PC-leap does not apply.
@@ -554,7 +554,7 @@ The reason the skip family matters to an interpreter is *code sharing*. Many byt
 ' entry supplies a SKIPF pattern leaving one ALU line and skipping the rest.
 '   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
 alu_body
-                call    #pop_two    'a b c d   operands -> x, y
+                call    #\pop_two   'a b c d   operands -> x, y
                 add     x, y        'a | | |
                 sub     x, y        '| b | |
                 and     x, y        '| | c |
@@ -579,7 +579,9 @@ The shared body above depends on one behaviour and must step around two traps. A
 
 **Skipping is suspended inside a `CALL`.**
 
-Look at `alu_body` again. It opens with `call #pop_two` and ends with `call #push_x` followed by `ret`. Those helpers contain instructions of their own — and the bytecode's skip pattern is **not** applied to them. The P2 suspends skipping for the duration of a call and resumes it on return.
+Look at `alu_body` again. It opens with `call #\pop_two` and ends with `call #push_x` followed by `ret`. Those helpers contain instructions of their own — and the bytecode's skip pattern is **not** applied to them. The P2 suspends skipping for the duration of a call and resumes it on return.
+
+That comes with one rule. Where the instruction after a `CALL` might be skipped, the call's immediate address must be **absolute**: write `call #\pop_two`, not the default relative `call #pop_two`. The *Parallax Propeller 2 Documentation v35* states it in its SKIPF branching rules. In `alu_body` the line after the first call is `add`, which three of the four patterns skip, so that call takes the `#\` form. The closing `call #push_x` is followed by `ret`, which no pattern skips, so the relative form is fine there. `CALLPA` and `CALLPB` have no absolute immediate form; give them a register address instead.
 
 This is not folklore; the hardware tracks it explicitly. The **`CALL` depth since the pattern began** is one of the fields `GETBRK` reports (§13.1), and **skipping is suspended whenever that depth is non-zero**.
 
@@ -662,7 +664,7 @@ Before any bytecode can be fetched, the cog's FIFO must be pointed at the byteco
 ```
 
 - **S** holds the hub start address (S[19:0]).
-- **D** holds the block size in 64-byte units (D[13:0]); **0 means "no limit"** — the FIFO streams continuously, which is what an interpreter usually wants. D[31] is a no-wait flag.
+- **D** holds the block size in 64-byte units (D[13:0]); **0 means "no limit"** — the FIFO streams continuously, which is what an interpreter usually wants. D[31] is a no-wait flag. [Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} After a no-wait `RDFAST`, start no hub instruction for 16 clocks (a `WAITX #12` straight after it does it), or use the waiting form; a hub instruction started sooner can complete before its own hub access.
 
 After RDFAST, the FIFO delivers bytes in order, refilling from hub memory on its own.
 
@@ -1096,7 +1098,7 @@ The Z80's three interrupt modes and the 68000's seven vectored levels are more *
 
 Ask this question early, because the answer changes your architecture.
 
-**If the guest drives real hardware whose timing is visible** — a video signal, an audio channel, a raster interrupt — then instruction-level timing is not enough. You must count the guest's cycles and *pace* the emulation to them. Real implementations do this by computing elapsed time against the guest's cycle budget and using `WAITX` to throttle the P2 **down** to the guest's speed, once per instruction.
+**If the guest drives hardware whose timing is visible** — a video signal, an audio channel, a raster interrupt — then instruction-level timing is not enough. You must count the guest's cycles and *pace* the emulation to them. Real implementations do this by computing elapsed time against the guest's cycle budget and using `WAITX` to throttle the P2 **down** to the guest's speed, once per instruction.
 
 And now the catch: **that per-instruction pacing has no cheap home under XBYTE** (§7.4). It is the one kind of cross-cutting work that cannot be confined to a family of handlers — by definition it runs on every instruction — so it is paid on every dispatch, which is most of what the software loop was charging for in the first place. This is why cycle accuracy and rung 3 pull against each other, and why the Z80 row in §8.2 carries the caveat it does.
 
@@ -1448,7 +1450,7 @@ h_halt          pop     tmp                 ' reclaim the arming $1FF
 ```
 
 ::: caution
-**The stack drift wraps with no fault to warn you.**
+**The stack drift overflows with no fault to warn you.**
 
 Nothing reports the leak. The stack is eight levels, any handler or between-jobs code that uses `CALL`/`RET` shares it, and the drift eventually starves it — at which point a `RET` returns somewhere it should not, in a handler that has nothing wrong with it. The bug surfaces far from the missing `POP`, in code that was never edited.
 
@@ -1720,7 +1722,7 @@ Section 4.4 introduced the shared-handler idiom and left it as a sketch. This is
 ```pasm2
 ' One column per bytecode; read DOWN a column for that bytecode's path.
 '   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
-alu             call    #pop_two    'a b c d
+alu             call    #\pop_two   'a b c d
                 add     x, y        'a | | |
                 sub     x, y        '| b | |
                 and     x, y        '| | c |
@@ -1744,7 +1746,7 @@ Write the patterns in binary rather than hex and each one becomes a picture of t
 
 Both `call`s inside the body are free of the pattern. Skipping is suspended for the duration of a call (§4.5), so `pop_two` and `push_x` can be any length and no pattern has to account for them. That is what keeps a shared body short enough for a 22-bit pattern to cover.
 
-**Order the body so bit 0 is never the bit you need.** Bit 0 of the pattern would cancel the body's *first* instruction — the one you branched to in order to run (§4.5). Put an instruction every member of the family needs at the top and the question never arises. Here it is `call #pop_two`; in the branch family below it is the operand read.
+**Order the body so bit 0 is never the bit you need.** Bit 0 of the pattern would cancel the body's *first* instruction — the one you branched to in order to run (§4.5). Put an instruction every member of the family needs at the top and the question never arises. Here it is `call #\pop_two`; in the branch family below it is the operand read.
 
 `CMPLT` is deliberately not in the family. It needs the same two operands but a different tail — a flag turned into a value — and forcing it into the body would cost more lines than the sharing saves. Section 4.6 names the limit directly: when a family stops being regular, split it rather than stretch it.
 
@@ -1835,7 +1837,7 @@ h_storev        call    #var_addr
 ' ---- $03..$06: ONE body, four skip patterns from the table --------
 ' One column per bytecode; read DOWN a column for that bytecode's path.
 '   a: ADD   b: SUB   c: AND   d: OR    "|" = its pattern skips the line
-alu             call    #pop_two    'a b c d
+alu             call    #\pop_two   'a b c d
                 add     x, y        'a | | |
                 sub     x, y        '| b | |
                 and     x, y        '| | c |
@@ -1959,7 +1961,7 @@ The arming `$1FF` is pushed once and never popped — the return that triggers e
 halted          pop     tmp                 ' reclaim it before re-arming
 ```
 
-Delete that `pop` and the first job still runs perfectly. So does the second. The cost is one stale entry per job on an eight-level stack, and the hardware wraps without faulting — so a VM that services jobs in a loop works for a while and then fails somewhere else entirely, in a handler whose `CALL` no longer returns where it should. A run-once VM like Chapter 14's never notices; the moment a cog arms twice, the rule applies.
+Delete that `pop` and the first job still runs perfectly. So does the second. The cost is one stale entry per job on an eight-level stack, and the stack overflows without faulting — so a VM that services jobs in a loop works for a while and then fails somewhere else entirely, in a handler whose `CALL` no longer returns where it should. A run-once VM like Chapter 14's never notices; the moment a cog arms twice, the rule applies.
 
 That is the whole difference between the two chapters, in one instruction. Chapter 16 takes the same machinery to a processor somebody else designed, where the instruction set is a given and the technique has to stretch to fit it.
 
@@ -2039,7 +2041,7 @@ The helper's own instructions are safe from the caller's skip pattern, because t
 
 Parallax's instruction table (*P2 Instructions v35 – Rev B/C Silicon*, row 410) defines `_RET_` as *"execute `<inst>` always and return **if no branch**."* `CALL` branches. The return is therefore suppressed, and the line is silently a plain `CALL`: the helper returns to the instruction *after* the call, and execution runs on out of the handler into whatever the assembler happened to place next.
 
-Nothing faults and no flag is set. On real P2 silicon this was measured running an **entire adjacent handler** — code whose bytecode was never in the stream — after which *that* handler's own `RET` returned to `$1FF` and dispatch carried on as if nothing had happened. The program finished, having silently done work it was never asked to do. Because what executes is simply whatever sits next in cog memory, the symptom turns up nowhere near the cause.
+Nothing faults and no flag is set. On P2 silicon this was measured running an **entire adjacent handler** — code whose bytecode was never in the stream — after which *that* handler's own `RET` returned to `$1FF` and dispatch carried on as if nothing had happened. The program finished, having silently done work it was never asked to do. Because what executes is simply whatever sits next in cog memory, the symptom turns up nowhere near the cause.
 
 **End the handler with an explicit `RET` after the call.**
 :::
@@ -2544,7 +2546,7 @@ The instructions XBYTE uses, grouped by role. Encodings are given in the P2's `E
 
 | Instruction | Syntax | Encoding | Effect |
 |-------------|--------|----------|--------|
-| **SKIP** | `SKIP {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110001` | Cancel each of the next up-to-32 instructions whose bit in D is set; cancelled instructions still consume their clocks. Works in cog, LUT, and hub. No flag effect. |
+| **SKIP** | `SKIP {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110001` | Cancel each of the next up-to-32 instructions whose bit in D is set; each cancelled instruction costs 2 clocks, as a `NOP`. Works in cog, LUT, and hub. No flag effect. |
 | **SKIPF** | `SKIPF {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110010` | Fast skip: the PC leaps over each of the next up-to-32 instructions whose bit in D is set; skipped instructions cost nothing. (Under XBYTE the pattern comes from EXECF and is 22 bits — §4.3.) Cog/LUT only. No flag effect. |
 | **EXECF** | `EXECF {#}D` | `EEEE 1101011 00L DDDDDDDDD 000110011` | Jump to D[9:0] in cog/LUT, then apply D[31:10] as a SKIPF pattern. PC = {10'b0, D[9:0]}. The dispatch vehicle. No flag effect. 4 clocks. |
 

@@ -151,7 +151,16 @@ appendix-f:694 give `%01x`; `part-5-appendices/index.md:149` points P_CHANNEL at
 mentions it. **To do:** settle the edge encoding against the Silicon Doc, then fix the losing side;
 repoint the index (P_CHANNEL is at ch02:380 and appendix-b:242).
 
-### F-537 — XBYTE guide: SKIPF shared bodies use a relative `call #` before an instruction the pattern may skip — `CONFIRMED` (high)
+### F-537 — XBYTE guide: SKIPF shared bodies use a relative `call #` before an instruction the pattern may skip — `RESOLVED` (high; applied 2026-10-04, ships in XBYTE v1.1.1, staged; bench run of the rig owed)
+> **Applied.** Rule confirmed at `silicon-doc-text.txt:889`. §4.5 states it (where the next line may be skipped,
+> the CALL's immediate must be absolute; CALLPA/CALLPB take a register). `call #\pop_two` in all three ALU-body
+> copies (§4.4, §15.2, §15.5) and the example (`xbyte-growing-vm.spin2`; .bin differs in that one long only).
+> **Evidence-scoping:** of the named sites, only the ALU body has the hazard — its SUB/AND/OR patterns skip the
+> `add` after the call. `h_cmplt` (:72) runs with pattern 0 (no skipping) and `br`'s `call #pop_x` is skipped
+> together with the line after it (JMP), so both stay relative; every other guide CALL is outside a skip body or
+> followed by a never-skipped `ret`. **Bench:** `audit/verification-tests/test-f537-absolute-call-skip.spin2`
+> runs the example's two jobs with the absolute form (A, gating: vars 0/15/8/15/1) and with the relative form
+> (B, characterization). Owed: Stephen's run; A PASS is what the release needs.
 C18; Silicon Doc "Special SKIPF Branching Rules": a CALL's immediate address must be absolute
 (`#\address`) wherever the instruction after it might be skipped. `xbyte-body.md:282-283` (`call #pop_two`
 then `add x, y 'a | | |`), :1448-1453, :1563-1576, and the runnable `examples-library/xbyte-growing-vm.spin2:63`
@@ -160,7 +169,12 @@ XBYTE code in the reference set writes `call #\label` there (NeoYume `neoyume_lo
 drivers). No silicon run of these variants is recorded. **Fix:** `call #\pop_two` (and every such CALL);
 state the rule in §4.5; re-run the example's skipping variants on the bench.
 
-### F-538 — XBYTE guide: a cancelled instruction "still spends its clocks"; the 8-level stack "wraps" — `CONFIRMED` (low)
+### F-538 — XBYTE guide: a cancelled instruction "still spends its clocks"; the 8-level stack "wraps" — `RESOLVED` (low; applied 2026-10-04, ships in XBYTE v1.1.1, staged)
+> **Applied.** Against `silicon-doc-text.txt:780` (cancelled instructions become 2-clock NOPs): §4.1 (two
+> sentences) and the §20.1 SKIP row now say each cancelled instruction costs 2 clocks. Stack: §12.4's caution
+> heading and §15.6 say "overflows without faulting"; no other wrap claim in the guide. Also in this release:
+> E7 as a Rev C note at §5.1 (`rdfast.yaml` silicon_errata), and the guide adopts metadata single-source,
+> rights metadata, crossref and silicon notes.
 - C12: `xbyte-body.md:224` "SKIP's cost is the cost of the instructions it skips over", :211-212, :2272 —
   the Silicon Doc: cancelled instructions become 2-clock NOPs.
 - C4: :1176 "The stack drift wraps with no fault", :1687 "the hardware wraps without faulting" — the

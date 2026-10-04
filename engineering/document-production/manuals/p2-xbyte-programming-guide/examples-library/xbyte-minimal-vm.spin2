@@ -3,8 +3,8 @@
 ''   File.......  xbyte-minimal-vm.spin2
 ''   Purpose....  The smallest complete XBYTE program - load the table,
 ''                prime the FIFO, arm the engine, four handlers, halt
-''   Manual.....  P2 XBYTE Programming Guide
-''   Version....  v1.1.0 (2026-08-19)
+''   Manual.....  P2 Interpreters & Emulators Guide
+''   Version....  v1.1.1 (2026-10-04)
 ''   Appears in.  Chapter 14: A Minimal Custom VM -- 14.2 The complete
 ''                program
 ''   Authors....  Iron Sheep Productions, LLC
