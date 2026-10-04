@@ -34,6 +34,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-03 (45 findings: F-440, F-445, F-446, F-447, F-448, F-483…F-505, F-506…F-520, F-522) → `correction-sweeps/2026-10-03-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-04 (4 findings: F-400, F-523, F-526, F-540) → `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-04 after the manual releases (2 findings: F-521, F-524) → `correction-sweeps/2026-10-04-manual-releases-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-10-04 after the Debug Window v1.1.4 release (1 finding: F-531) → `correction-sweeps/2026-10-04-debug-window-release-P2KB-CORRECTION-FINDINGS-archive.md`
 
 > **Swept 2026-08-19** per `punch-list-maintenance`, as **rename-then-trim** (the archive is a
 > git-tracked rename of the original; both files are subtractions from a preserved copy — see the
@@ -118,15 +119,6 @@ Errata E3). Assembly half under «#352».
 D18. DEBUG Window `ch14-multiwindow-pasm.md:132-135`; Assembly `part-iii/appendix-e-constants.md:685`.
 `special-configuration-symbols.yaml` caveat: the stamp is the sending cog's own counter copy; a cog in a
 stale window stamps one wrap early and prints out of order. **Fix:** one sentence each.
-
-### F-531 — DEBUG Window BITMAP: "a runtime RATE with any positive count resumes refreshing" — `DONE` (released in v1.1.4, 2026-10-04, verified on the PDF: page 39)
-> **Applied and released.** The sentence now says a later `TRACE` or `CLEAR` (each re-derives the rate) or an
-> explicit `UPDATE` brings it back, and that a runtime `RATE 0` freezes it as `RATE -1` does (`bitmap.yaml`
-> RATE entry, from the PNut source). "(Hardware-verified.)" moved to follow the freeze sentence, the only part
-> the bench measured.
-D21. `ch04-bitmap.md:311` (marked "Hardware-verified"). `bitmap.yaml:47` (from the PNut source): a later
-TRACE or CLEAR, or an explicit UPDATE, un-freezes it. **Fix:** replace the sentence; check what the
-"(Hardware-verified.)" tag covers (the freeze, not the recovery).
 
 ### F-532 — deSilva: "2/13-20 (hub-exec)" and "REP and SKIP for zero-overhead loops" — `CONFIRMED` (low)
 `COMPLETE-OPUS-MASTER.md:3992` (C3; the same file's :3339 is right) and `:4320` (C12: each skipped
