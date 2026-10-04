@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-542`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-544`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -52,7 +52,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Full impact audit: every fact KB v1.23.0 and v1.23.1 changed, against every live document (2026-10-04, «#378») — F-526 … F-541
+## Full impact audit: every fact KB v1.23.0 and v1.23.1 changed, against every live document (2026-10-04, «#378») — F-526 … F-541, plus F-542, F-543 (seen verifying v1.23.1)
 
 **Method.** The fact inventory was built from the diffs (`v1.22.0..v1.23.1`, `deliverables/ai/P2/`), not
 from this register: **69 net fact changes** (843d6fac: 43 — C6 net-reversed by a0ebdd21; a0ebdd21 +
@@ -80,7 +80,7 @@ audit, see their notes).
 | Getting Started · Single-Step · PNut-Term-TS · P2 Errata · P2AN001-P2AN006 | no | — |
 | *the KB itself* | **yes** | F-526, F-540 |
 
-### F-526 — the KB says a PINSTART/WYPIN Yval written during reset is lost for sync serial TX `%11100`; the Silicon Doc says that is how the shifter is primed — `PENDING-VALIDATION` (bench CONFIRMED EF-090; applied 2026-10-04, «#379»; ships in the next KB release)
+### F-526 — the KB says a PINSTART/WYPIN Yval written during reset is lost for sync serial TX `%11100`; the Silicon Doc says that is how the shifter is primed — `DONE` (bench CONFIRMED EF-090; served in v1.23.2, verified 2026-10-04 via p2kb_get)
 > **Bench: `CONFIRMED` (EF-090, first run).** Prime-in-reset sent `$A5, $3C` in 5 of 5; enable-first sent `$3C, $3C` in 5 of 5 (W1 lost, W2 twice); start-stop control exact. **Applied 2026-10-04 («#379»):** `pinstart.yaml` — `%11100` removed from the lost-Yval list and stated as the opposite case (a reset-time word primes the shifter; PINSTART's Yval is the first word sent); the note line likewise. `smart-pin-11100-sync-serial-transmit.yaml` — `stream_continuous` primes while DIR is low, then enables; `timing.continuous_mode` states the rule and the measured failure. **Widened in the same file (all sourced, all in its examples):** the Spin2 example routed the clock with `P_PLUS1_B` from pin 42 while declaring `CLK_PIN = 40` (pin−1) → `CLK_PIN = 42`; negative-edge clocking used `P_INVERT_A`, but the Silicon Doc inverts the **B** input ("the B input may be inverted by setting B.[3]") → `P_INVERT_B` (`$0800_0000`, compiler-checked), and the `clock_edge` note likewise; the PASM example had no clock routing at all (its own `critical_requirements` call that mandatory) and bit-pattern comments showing `BBBB=1111` for a word with B = 0 → `P_PLUS1_B` added, comments recomputed from compiled values (`$0100_0078`, `$0900_0078`), `clk_pin` 42; the inline example gained `P_PLUS1_B`. Gates: crossref 3,870/3,870, claim-sourcing Tier 1 none, constant fidelity clean, payload locator gate clean, no duplicate keys.
 `language/spin2/methods/pinstart.yaml:9` lists "serial transmit (%11110, %11100)" among modes whose Yval is
 lost. **The Silicon Doc (`silicon-doc-text.txt`, %11100 section after :4640):** continuous mode "a first
@@ -189,7 +189,7 @@ corrupts whole transfers; a pad safe at one SCK rate can lose at another. **Fix:
 the XINIT-to-WYPIN phase matters, and the alignment must be verified at each SCK rate
 (`streamer_smartpin_control.yaml` alignment_pad.write_side). Do not state the partner's residue formula.
 
-### F-540 — the KB is silent on whether a `##` (AUGS/AUGD) prefix consumes a skip-pattern bit; the XBYTE guide teaches that it does — `PENDING-VALIDATION` (bench CONFIRMED-COUNTS EF-091; applied 2026-10-04, «#379»; ships in the next KB release)
+### F-540 — the KB is silent on whether a `##` (AUGS/AUGD) prefix consumes a skip-pattern bit; the XBYTE guide teaches that it does — `DONE` (bench CONFIRMED-COUNTS EF-091; served in v1.23.2, verified 2026-10-04 via p2kb_get)
 > **Bench: `CONFIRMED-COUNTS` (EF-091, first run).** Under SKIP and SKIPF, pattern `%1000` landed on `add #4` (acc 9): the AUGS takes its own bit. Both characterization patterns matched the same reading exactly (`%0010` → MOV un-augmented, x `$145`; `%0100` → pending AUGS augmented the next immediate, acc `$1220D`). **The XBYTE guide is right; no guide change.** **Applied 2026-10-04 («#379»):** `pasm2/concepts/instruction_skipping.yaml` `pattern_consumption` states both facts (AUGS only — AUGD was not run, so it is not claimed), sourced in its `sources:`; the file also gained `aliases` (it had none: "skip pattern" reached nothing).
 F-485 removed "AUGS/AUGD both consume pattern bits" from the KB as unsourced. The XBYTE guide
 (`xbyte-body.md:321-328`, :362-366) teaches it, reasoning from the Silicon Doc's "shifted right by one bit
@@ -204,6 +204,31 @@ exactly one `AUGS #$91` before each `MOV x, #$145`): `p2-xbyte-programming-guide
 `part-i/chapter-04-timing.md:66` (crystal ~10 ms, PLL ~10 µs) against `part-ii/instructions-h.md:67`
 (5 ms crystal, 10 ms crystal + PLL). Seen by the audit, not an inventory fact. **To do:** settle against
 the Silicon Doc and the KB (`architecture/clock_system.yaml` stabilization_timing), fix the losing side.
+
+### F-542 — `guides/pasm2-getting-started.yaml` teaches a wrong register map and P1 instructions — `CONFIRMED`
+Seen 2026-10-04 reading the served entry while verifying v1.23.1. Against the Silicon Doc
+(`silicon-doc-text.txt:452` "$1F6 RAM / PA"; :664 `SETS`; the CALL entry) and the file's own
+`size_checking.why_1F8`:
+- `register_model.special_registers` numbers PA 496, PB 497, PTRA 498, PTRB 499, DIRA 500 … INB 505.
+  Actual: PA `$1F6`, PB `$1F7`, PTRA `$1F8`, PTRB `$1F9`, DIRA `$1FA`, DIRB `$1FB`, OUTA `$1FC`, OUTB
+  `$1FD`, INA `$1FE`, INB `$1FF`. PA/PB "Return address A/B" is wrong too (PA/PB are CALLD/CALLPA/LOC
+  registers).
+- `core_instructions.data_movement` lists `MOVS`/`MOVD` (P1); the P2 has `SETS`/`SETD`.
+- `branching.CALL` "saves return in PA", `RET` "jumps to PA", and `critical_gotchas` "RET uses PA
+  register (set by CALL)" — CALL pushes the return onto the hardware stack.
+- `TJNZ` / `TJZ` "… decrement D" — they test only; `DJNZ` decrements.
+- `assembler_directives.FIT` example "FIT $1F0 (496 longs)" contradicts the file's own corrected
+  `size_checking` ($1F8).
+**Fix:** re-derive those blocks from the per-instruction YAMLs and the Silicon Doc register table. A
+beginner guide is the most-copied page in the set.
+
+### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `CONFIRMED`
+`examples` (P2-FLASH-FS): `PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)` and the same for
+`P_SYNC_RX`. For `%11100`/`%11101` X.[5..0] is the mode and word size (`smart-pin-11100` x_register;
+Silicon Doc); bits 24+ of X do nothing, and the clock is routed by the mode word's B field (a
+relative-pin selector, e.g. `P_PLUS1_B`). `8` in X.[4..0] selects 9-bit words. The example cannot clock.
+**Fix:** route the clock in the mode word (pins 56-59: MOSI 57 takes CLK 56 as `P_MINUS1_B`; MISO 58 as
+`P_MINUS2_B`), X = `%1_00111` (or the intended word size), compile-check.
 
 ## Impact survey — v1.23.2 (`release-yamls` §8, run 2026-10-04)
 
@@ -285,7 +310,7 @@ YAML («#375»):** the option is replaced by a sentence saying why it is not saf
 non-blocking route. **Owed:** the same correction in the P2AN007 document — its next release (manual
 head; app notes ship through their own release).
 
-### F-523 — repo paths and `file:line` citations in shipped YAML prose — `PENDING-VALIDATION` (applied 2026-10-03, «#376»; ships in the next KB release)
+### F-523 — repo paths and `file:line` citations in shipped YAML prose — `DONE` (served in v1.23.1, verified 2026-10-04 via p2kb_get; the MCP itself still serves stripped fields — F-439)
 > **Applied 2026-10-03 («#376»).** Re-measured with the real filter and a wider pattern (bare `:NNNN` cites too): **251 payload lines in 74 files**. Every citation MOVED into a stripped field in the same top-level block (`source:`/`sources:` keys; `# Source(s):` column-0 comment blocks; provenance keys renamed `path:`/`source_line:`/`*_source:` → stripped names). Widened in the same pass, same class: `extraction_metadata.source_documents` lists (10 files) → `sources:`; the `v55:NNNN` shorthand (F-400) and `v55_line:` keys; names of internal registers in prose (`SOURCE-ERRATA.md`, `P2KB-CORRECTION-FINDINGS.md`, `APP-NOTE-DESIGN-DECISIONS.md`); `source_document:` keys outside the code-example schema. **Not changed, deliberately:** the two code-example files keep `source_metadata.source_document` (the schema requires it; the value is a document name); line cites into public Parallax files (`flash_loader.spin2 line 275`) are citations a reader can follow; the schema's own example values. **Verification:** a negative-controlled structural checker against HEAD (stripped keys aside, identical structure; removed text only citation tokens; no number vanished from any file), a duplicate-key parse of every changed file, every flagged change and every comment change read by hand. It caught one slip of mine (an Edit trimmed a trailing space → `source_reference:1711`, invalid YAML), fixed before commit. Gates: payload 0 hits; crossref 3,870/3,870; claim-sourcing Tier 1 none (Tier 2 29 → 27), negative control PASS; source-lock and constant-fidelity exit 0. **Gate:** `validate_internal_ids` fails on repo paths, document `file:line`, bare `:NNNN`, `vNN:NNNN` and internal-register file names; planted-failure test catches each form and passes a decoy line. New finding while sweeping: F-525.
 Found 2026-10-03 while reviewing F-519's diff. Measured with the shipped filter: **190 payload lines in
 69 files** carry repo paths (`engineering/ingestion/sources/...`, 115) or document `file:line`
@@ -2131,7 +2156,7 @@ Reading 721 citations one at a time finds what it finds; it does not prove a cla
 
 ## `pnut-ts` shorthand `v55:NNNN` is used as a citation across the shipped set and resolves to no file (2026-08-30, release fix pass step 3) — F-400
 
-### F-400 — a locator form that a reader can follow and a tool cannot — `PENDING-VALIDATION` (applied 2026-10-03 under F-523, «#376»; ships in the next KB release)
+### F-400 — a locator form that a reader can follow and a tool cannot — `DONE` (served in v1.23.1, verified 2026-10-04 via p2kb_get: no `v55:` shorthand in pasm2-getting-started)
 
 > **Applied 2026-10-03.** Resolved by option (a), because F-523 removed the shorthand from shipped text anyway: every `vNN:NNNN` left the payload (13 lines, `guides/pasm2-getting-started.yaml` and `guides/spin2-getting-started.yaml`), each moved into its block's `source:` naming the file (`spin2-v55-text.txt:1718`) wherever a bare number would otherwise follow a different file. That included one live instance of exactly this finding's failure: `how_to_declare: Spin2 v55 :1709-1710, :1725` sat after the datasheet path, so `:1725` bound to the datasheet. `v55_line:` keys → `source_reference:`. Count of `v(35|51|55):NNNN` across all KB YAML afterwards: **0**. The gate now fails on the form in the payload.
 
