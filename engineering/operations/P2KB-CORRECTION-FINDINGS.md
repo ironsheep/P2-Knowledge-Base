@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-526`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-542`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -51,6 +51,151 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
+
+## Full impact audit: every fact KB v1.23.0 and v1.23.1 changed, against every live document (2026-10-04, «#378») — F-526 … F-541
+
+**Method.** The fact inventory was built from the diffs (`v1.22.0..v1.23.1`, `deliverables/ai/P2/`), not
+from this register: **69 net fact changes** (843d6fac: 43 — C6 net-reversed by a0ebdd21; a0ebdd21 +
+522bc105: 26). v1.23.1 changed no fact (structurally verified in «#376»). Every fact × every live
+document — the 18 published plus P2 Errata — was read by five read-only agents, each with a 69-row
+denominator per document (all 18 sum to 69). **Every non-CONSISTENT verdict was re-read by the arbiter
+against the manual file and against the YAML AND the Silicon Doc on disk.** Rejected after reading:
+D16 Single-Step (a Spin2 `GETCT()` example; the 2-clock figure is PASM2-only by design), D10 I/O &
+Smart Pins (the guide is right — see F-526), C10 I/O & Smart Pins and P2AN001 (rule + taught `WRPIN #0`
+exception = the KB's; P2AN001 changes input select, not mode), C32 Assembly (a valid PLL bring-up), C13
+XBYTE (echoes the Silicon Doc's own "cog/LUT only!"), C21 XBYTE (see F-540). Excluded: AI Privacy Guide
+(no P2 facts), Donna-Manuscript (private), the layout torture test (instrument). Already in flight, not
+re-filed: Streamer GETXACC (F-479); Architect's Guide and P2AN007 mailbox (F-524/F-521 — widened by this
+audit, see their notes).
+
+| Document | Update needed | Findings |
+|---|---|---|
+| Assembly Reference | **yes** | F-527, F-528, F-529, F-530, F-541 |
+| DeSilva Tutorial | **yes** | F-529, F-532 |
+| I/O & Smart Pins | **yes** | F-533, F-534, F-535, F-536 |
+| DEBUG Window | **yes** | F-530, F-531 |
+| XBYTE Guide | **yes** | F-537, F-538 |
+| Streamer Guide | **yes** | F-539 (+ F-479 open) |
+| Architect's Guide · P2AN007 | in «#377» | F-524, F-521 (widened, re-staged) |
+| Getting Started · Single-Step · PNut-Term-TS · P2 Errata · P2AN001-P2AN006 | no | — |
+| *the KB itself* | **yes** | F-526, F-540 |
+
+### F-526 — the KB says a PINSTART/WYPIN Yval written during reset is lost for sync serial TX `%11100`; the Silicon Doc says that is how the shifter is primed — `CONFIRMED`
+`language/spin2/methods/pinstart.yaml:9` lists "serial transmit (%11110, %11100)" among modes whose Yval is
+lost. **The Silicon Doc (`silicon-doc-text.txt`, %11100 section after :4640):** continuous mode "a first
+word is written via WYPIN during reset (DIR=0) to prime the shifter"; "During reset, the buffer flows
+straight into the shifter"; "Upon release of reset, the output will reflect the LSB of the output word
+written by any WYPIN during reset." EF-011 (the bench basis) tested `%00100`, `%00101` and `%11110`
+only. `%11100` was added by inference when F-509 was widened («#375», mine). Same defect in
+`architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml` `stream_continuous` (:75-81): continuous
+mode, "Enable FIRST", then "Prime shifter (after enable)" — the opposite of the documented continuous-mode
+procedure (the first word likely goes out wrong). The start-stop example (X.[5]=1) is unaffected (WYPIN
+before the first clock is documented there). **Fix:** remove `%11100` from the lost-Yval list (keep
+`%11110`, `%00100`, `%00101`); restore the documented continuous-mode prime-in-reset sequence; say that
+sync TX primes in reset. Found because the I/O & Smart Pins guide (ch11:292-296) had it right. Bench
+candidate: a `%11100` continuous-mode A/B (prime in reset vs after enable).
+
+### F-527 — Assembly Reference: "13-20 clocks" for a taken hub-exec branch, at 87 lines, against its own correct rule — `CONFIRMED`
+The removed range (C3; Silicon Doc: "a minimum of 13 clock cycles (one more if the target is not
+long-aligned)") stands at 87 lines in 8 files (plus one CHANGELOG line, history): `part-ii/instructions-j.md` (49), `-c` (10), `-t` (8),
+`-d` (6), `-i` (3), `-r` (1), `part-iii/appendix-a-encoding-table.md` (8, e.g. "CALL | 4 / 13-20"),
+`part-i/chapter-04-timing.md` (2); e.g. instructions-j.md:49 "taken jumps require 13-20 clock cycles
+depending on hub timing". The manual's own appendix-b:168, ch04:623, :646 and ch01:202 state the correct
+rule. **Fix:** "13+ (one more if the target is not long-aligned)" everywhere; table cells "4 / 13+".
+
+### F-528 — Assembly Reference GETXACC: "both accumulators are cleared" unconditionally, no per-burst procedure — `CONFIRMED`
+`part-ii/instructions-g.md:388-410`. P2 Errata E4/E5 (Rev C): clears only during a DDS/Goertzel command;
+idle reads return the running total; a read after N clocks holds N-1 terms; read before and after and
+subtract (`pasm2/getxacc.yaml`). Owed under «#352» (its body names "Assembly's ... GETXACC ... entries"),
+never registered until now. **Fix:** at «#352».
+
+### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `CONFIRMED`
+Outside the two changesets (P2 Errata E3, KB since v1.22.0), found while reading them.
+- deSilva `COMPLETE-OPUS-MASTER.md:4305-4309` recommends "Capture the full 64-bit count" (`GETCT D WC`)
+  for schedulers over "minutes, hours, or days" with no caveat (`pasm2/getct.yaml` silicon_errata).
+- Assembly `part-ii/instructions-g.md:110-116`: no erratum note, AND the example reads `getct low_word`
+  then `getct high_word wc` — the KB ("GETCT WC followed by GETCT reads the full 64-bit value") and the
+  Silicon Doc (GETCT+WC is an interrupt-shielding instruction, :2349) give WC first; low-then-high can tear
+  at a wrap.
+**Fix:** WC first in Assembly; both state the E3 window and its keeper-cog workaround (or point to P2
+Errata E3). Assembly half under «#352».
+
+### F-530 — DEBUG_TIMESTAMP taught as "the 64-bit CT value" with no stale-window caveat — `CONFIRMED` (low)
+D18. DEBUG Window `ch14-multiwindow-pasm.md:132-135`; Assembly `part-iii/appendix-e-constants.md:685`.
+`special-configuration-symbols.yaml` caveat: the stamp is the sending cog's own counter copy; a cog in a
+stale window stamps one wrap early and prints out of order. **Fix:** one sentence each.
+
+### F-531 — DEBUG Window BITMAP: "a runtime RATE with any positive count resumes refreshing" — `CONFIRMED`
+D21. `ch04-bitmap.md:311` (marked "Hardware-verified"). `bitmap.yaml:47` (from the PNut source): a later
+TRACE or CLEAR, or an explicit UPDATE, un-freezes it. **Fix:** replace the sentence; check what the
+"(Hardware-verified.)" tag covers (the freeze, not the recovery).
+
+### F-532 — deSilva: "2/13-20 (hub-exec)" and "REP and SKIP for zero-overhead loops" — `CONFIRMED` (low)
+`COMPLETE-OPUS-MASTER.md:3992` (C3; the same file's :3339 is right) and `:4320` (C12: each skipped
+instruction is a 2-clock NOP). **Fix:** "2/13+ (hub-exec)"; "REP for zero-overhead loops, SKIP for
+shared code paths".
+
+### F-533 — I/O & Smart Pins: trigger-mode examples write Y before enable, and the generic sequence and PINSTART carry no caveat — `CONFIRMED`
+D19 (EF-011: pulse and transition PASS-REQUIRED). `part-5-appendices/appendix-f-mode-reference.md:205-208`
+(P_PULSE: `WYPIN(pin, 5)` then `PINH`) and `:238-241` (P_TRANSITION: `WYPIN(pin, 20)` then `PINH`) — the
+count is lost. Generic: `chapter-04:369-392` ("Step 4 WYPIN / Step 5 Enable", no trigger caveat),
+`chapter-05:291-308` (PINSTART "combines WRPIN, WXPIN, WYPIN, and enable"), `:407`, `:508`. Also
+`appendix-e-troubleshooting.md:590-597`: the async loopback test never raises DIR at all, so nothing
+transmits. ch07, ch11 and ch17:301-308 already do it right. **Fix:** appendix F examples WYPIN after
+PINH; one caveat in ch04/ch05 (trigger and async TX: Y after enable; value modes either way; sync TX
+primes in reset — F-526); loopback test enables both pins.
+
+### F-534 — I/O & Smart Pins: "OUT=1 enables the ADC" in the DAC modes, without the TT bit 0 condition — `CONFIRMED`
+D7 (P2 Errata E6). `part-2-output-modes/chapter-10-dac-output.md:356-365` ("Enable ADC feedback (OUT=1)",
+`PINWRITE(pin, 1)`), `part-4-special-modes/chapter-18-repository.md:252` ("When OUT is high, the pin's ADC
+is enabled"), and the "(if OUT=1)" table cells at ch10:215, :263, ch18:544, appendix-f:127, :161. The
+examples carry `P_OE`, so they work. **Fix:** "with TT bit 0 set (P_OE)" at each, pointing to the erratum.
+
+### F-535 — I/O & Smart Pins: "WAITSE1 WC ... C and Z carry the same timeout result" — `CONFIRMED` (low)
+C39/D4. `chapter-05-working-with-smart-pins.md:81`: with `WC` only C is written. **Fix:** "(`WCZ` writes
+both; with `WC` only `C` is written.)"
+
+### F-536 — I/O & Smart Pins: an internal edge-mode inconsistency and a dead index pointer — `NEEDS-VERIFICATION`
+Seen by the audit, not inventory facts. ch13:245-251 gives `%1x` as "any edge" while ch13:593-600 and
+appendix-f:694 give `%01x`; `part-5-appendices/index.md:149` points P_CHANNEL at Chapter 10, which never
+mentions it. **To do:** settle the edge encoding against the Silicon Doc, then fix the losing side;
+repoint the index (P_CHANNEL is at ch02:380 and appendix-b:242).
+
+### F-537 — XBYTE guide: SKIPF shared bodies use a relative `call #` before an instruction the pattern may skip — `CONFIRMED` (high)
+C18; Silicon Doc "Special SKIPF Branching Rules": a CALL's immediate address must be absolute
+(`#\address`) wherever the instruction after it might be skipped. `xbyte-body.md:282-283` (`call #pop_two`
+then `add x, y 'a | | |`), :1448-1453, :1563-1576, and the runnable `examples-library/xbyte-growing-vm.spin2:63`
+and `:72`. The guide never states the rule (its §4.5 covers only the call-suspends-skipping half). Real
+XBYTE code in the reference set writes `call #\label` there (NeoYume `neoyume_lower.spin2`, the PSRAM
+drivers). No silicon run of these variants is recorded. **Fix:** `call #\pop_two` (and every such CALL);
+state the rule in §4.5; re-run the example's skipping variants on the bench.
+
+### F-538 — XBYTE guide: a cancelled instruction "still spends its clocks"; the 8-level stack "wraps" — `CONFIRMED` (low)
+- C12: `xbyte-body.md:224` "SKIP's cost is the cost of the instructions it skips over", :211-212, :2272 —
+  the Silicon Doc: cancelled instructions become 2-clock NOPs.
+- C4: :1176 "The stack drift wraps with no fault", :1687 "the hardware wraps without faulting" — the
+  Silicon Doc says only "8-level hardware stack"; what overflow does is unsourced (the KB removed the same
+  "wraps around" claim). The caution itself stands. **Fix:** "each skipped instruction costs 2 clocks";
+  "overflows without faulting".
+
+### F-539 — Streamer Guide ch16: streamer SPI data against a P_TRANSITION clock, taught as "matched rates", with no word on the losing start phase — `CONFIRMED`
+D15 (partner bench XF-001, graded SCOPED). `streamer-body.md:1688-1747`: `wrpin P_TRANSITION`,
+`xinit mode, data`, `wypin transitions` — only half-period-many start phases exist and exactly one silently
+corrupts whole transfers; a pad safe at one SCK rate can lose at another. **Fix:** a caution in 16.1:
+the XINIT-to-WYPIN phase matters, and the alignment must be verified at each SCK rate
+(`streamer_smartpin_control.yaml` alignment_pad.write_side). Do not state the partner's residue formula.
+
+### F-540 — the KB is silent on whether a `##` (AUGS/AUGD) prefix consumes a skip-pattern bit; the XBYTE guide teaches that it does — `NEEDS-VERIFICATION`
+F-485 removed "AUGS/AUGD both consume pattern bits" from the KB as unsourced. The XBYTE guide
+(`xbyte-body.md:321-328`, :362-366) teaches it, reasoning from the Silicon Doc's "shifted right by one bit
+for each instruction encountered" (AUGS is an instruction). Neither is a cited statement. **To do:** a
+bench run (SKIPF pattern over a `##` instruction) settles it; then the KB states it (sourced) or the guide
+changes. Not a guide defect until then.
+
+### F-541 — Assembly Reference: crystal/PLL settle times disagree inside the manual — `NEEDS-VERIFICATION`
+`part-i/chapter-04-timing.md:66` (crystal ~10 ms, PLL ~10 µs) against `part-ii/instructions-h.md:67`
+(5 ms crystal, 10 ms crystal + PLL). Seen by the audit, not an inventory fact. **To do:** settle against
+the Silicon Doc and the KB (`architecture/clock_system.yaml` stabilization_timing), fix the losing side.
 
 ## Impact survey — v1.23.1 (`release-yamls` §8, run 2026-10-03)
 
