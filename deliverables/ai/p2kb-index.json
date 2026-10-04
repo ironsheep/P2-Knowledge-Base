@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-10-04T04:46:31.440759",
+    "generated": "2026-10-04T18:47:24.835817",
     "total_entries": 1131,
     "total_categories": 59,
     "total_aliases": 3091,
@@ -10389,8 +10389,8 @@
     },
     "p2kbArchIoPinTiming": {
       "path": "deliverables/ai/P2/architecture/io_pin_timing.yaml",
-      "mtime": 1791067956,
-      "sha256": "1df3d372e10f3d6450d4c805d67dcd2fbb02263b3c394d21772387019a07bf5f"
+      "mtime": 1791139622,
+      "sha256": "13eb088940591646a84265916886d526569e1ac017ad7a1217dd2c788d3d15f4"
     },
     "p2kbArchLocks": {
       "path": "deliverables/ai/P2/architecture/locks.yaml",
@@ -11684,8 +11684,8 @@
     },
     "p2kbHwEdge32mbModuleEdge32mbModule": {
       "path": "deliverables/ai/P2/hardware/edge-32mb-module.yaml",
-      "mtime": 1791067956,
-      "sha256": "acdf5193597104b0a464324601bf3b4b334df343f44f27c923801dedd548b9a9"
+      "mtime": 1791139622,
+      "sha256": "bbe259a1aba653f49499d8ec76784e856b4f8cbffe58180e92e02f2714fd92e6"
     },
     "p2kbHwEdgeBreadboardCarrierEdgeBreadboardCarrier": {
       "path": "deliverables/ai/P2/hardware/edge-breadboard-carrier.yaml",
@@ -11704,8 +11704,8 @@
     },
     "p2kbHwEdgeStandardModuleEdgeStandardModule": {
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
-      "mtime": 1791067956,
-      "sha256": "9fcf9c4d2f1811fedf0b34d320595ae2898781a9b01f26318d2706130fc2620e"
+      "mtime": 1791139622,
+      "sha256": "640d906045f1c78078763e8913033e37235b134bef0ea4d22780b7445b762b6e"
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
