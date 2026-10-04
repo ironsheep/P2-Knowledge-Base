@@ -1,5 +1,11 @@
 concept: instruction_skipping
 title: Instruction Skipping - SKIP and SKIPF
+aliases:
+  - "skip pattern"
+  - "SKIPF pattern"
+  - "skip pattern bits"
+  - "AUGS in a skip pattern"
+  - "## inside a SKIP sequence"
 category: control_flow
 description: Hardware-based instruction skipping for efficient conditional execution without branches
 
@@ -77,8 +83,11 @@ pattern_encoding:
     - "Pattern shifts after each instruction"
     - "Exhausted pattern = normal execution resumes"
     - "A CALL/CALLPA/CALLPB that is not skipped runs its whole subroutine normally; the skip sequence resumes after the returning RET/_RET_"
+    - "The AUGS that a ## S operand emits is an instruction of its own and consumes its own pattern bit (under SKIP and SKIPF), so every bit after a ## line moves up by one"
+    - "Skipping the instruction but not its AUGS leaves the AUGS pending: it augments the next instruction that has an immediate S"
   sources:
     - "pattern_consumption (CALL/CALLPA/CALLPB subroutine): Silicon Doc, silicon-doc-text.txt:791"
+    - "pattern_consumption (AUGS takes a bit; a pending AUGS augments the next immediate): bench-measured under SKIP and SKIPF, P2-EMPIRICAL-FINDINGS.md EF-091 (AUGD not run)"
 
 skip_behavior:
   instruction_handling:

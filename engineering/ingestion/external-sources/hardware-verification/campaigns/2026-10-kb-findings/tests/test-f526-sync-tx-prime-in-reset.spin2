@@ -1,0 +1,466 @@
+'' =============================================================================
+''
+''   File....... test-f526-sync-tx-prime-in-reset.spin2
+''   Purpose.... Decide F-526 on SILICON: in sync serial TX (%11100) continuous mode, is a word written during reset sent, or lost?
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... 04 Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED (register F-526)
+    P2 Documentation, %11100 synchronous serial transmit (silicon-doc-text.txt,
+    after :4640): "X.[5] = 0 sets continuous mode, where a first word is
+    written via WYPIN during reset (DIR=0) to prime the shifter. Then, after
+    reset (DIR=1), the second word is buffered via WYPIN and continuous
+    clocking is started." ... "During reset, the buffer flows straight into
+    the shifter." ... "Upon release of reset, the output will reflect the LSB
+    of the output word written by any WYPIN during reset."
+    The KB (pinstart.yaml, smart-pin-11100 stream_continuous) says the
+    opposite for %11100: a Y written while DIR is low is lost, so enable
+    first and WYPIN after. Its bench basis, EF-011, never tested %11100.
+
+  RIG (no wiring -- every connection is an internal input selector)
+    P4 = TX   P_SYNC_TX | P_OE, B input = relative +1 pin (P5, the clock)
+    P5 = CLK  P_TRANSITION | P_OE, base period CLK_BASE clocks per transition
+    P6 = RX   P_SYNC_RX, A input = relative -2 pin (P4), B = relative -1 (P5);
+              TT = %00: the receiver never drives its pin
+    NOTHING may be attached to P4, P5 or P6 (the run sheet keeps P0..P7
+    free). TX and CLK drive their pins during the run.
+
+  DEBUGGER (EF-057)
+    DEBUG_COGS = %0000_0001: debugger in cog 0 only. Every pin operation runs
+    in a dedicated PASM cog; it writes results to a hub mailbox; cog 0 reports.
+
+  ARMS (every arm, every round, starts from all three pins reset: DIRL,
+  WRPIN #0; then CLK and RX are configured and enabled, then TX per arm,
+  then WYPIN CLK with the transition count)
+    A  continuous (X = %0_00111), the DOCUMENTED order:
+         DIRL TX, WRPIN, WXPIN, WYPIN W1 (in reset), DIRH TX, WYPIN W2
+         clock 32 transitions (two 8-bit words)
+    B  continuous (X = %0_00111), the KB's order:
+         DIRL TX, WRPIN, WXPIN, DIRH TX, WYPIN W1, WYPIN W2
+         clock 32 transitions
+    C  start-stop (X = %1_00111), CONTROL -- both readings agree:
+         DIRL TX, WRPIN, WXPIN, DIRH TX, WYPIN W1 ("the current output word
+         can always be updated via WYPIN before the first clock")
+         clock 16 transitions
+    W1 = $A5, W2 = $3C. The receiver samples A just before each rising B
+    edge (X.[5] = 0); the transmitter changes its bit two clocks after it.
+    Each received word is read with RDPIN (MSB-justified) and SHR 24.
+
+  CONTROLS (gating -- a failure prints RIG FAIL and NO VERDICT)
+    G1: arm C receives exactly [W1] in every round (proves the clock routes
+        to TX and RX, TX drives, RX samples the right bits).
+    G2: every clock run completes (CLK IN raised) within the timeout.
+    G3: the engine reports done within RIG_TIMEOUT_SEC.
+
+  PRE-REGISTERED OUTCOMES (printed by the program)
+    A_OK = every round of A received exactly [W1, W2]; B_OK likewise for B.
+    CONFIRMED  : A_OK and not B_OK -- the word written in reset is sent;
+                 enabling first loses it (the Silicon Doc is right; the KB's
+                 %11100 rule and example are wrong).
+    REFUTED    : B_OK and not A_OK -- the KB's order is the working one.
+    BOTH-WORK  : A_OK and B_OK -- neither order loses a word in this mode
+                 (the KB's "lost" claim is still wrong for %11100).
+    INCONCLUSIVE: neither, or rounds disagree within an arm.
+    B's received words are printed as characterization (the documented
+    reading predicts a first word of $00 and W1 lost).
+
+  HOW TO RUN
+    Compile: pnut-ts -d test-f526-sync-tx-prime-in-reset.spin2
+    Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10). The
+    engine runs about 2 ms; the report is about 40 lines. Done at the
+    "VERDICT: ..." (or "NO VERDICT") line, then "=== END ===".
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  PIN_TX            = 4                 ' sync TX under test
+  PIN_CLK           = PIN_TX + 1        ' transition clock (TX's B = relative +1)
+  PIN_RX            = PIN_TX + 2        ' sync RX (A = relative -2, B = relative -1)
+
+  ROUNDS            = 5
+  CLK_BASE          = 100               ' clocks per transition (8-bit word = 1600 clocks)
+  TRANS_PER_WORD    = 16                ' 8 bits, one rising edge each
+  WORD_BITS_M1      = 7                 ' X.[4..0] = bits - 1
+  X_CONTINUOUS      = %0_00000 | WORD_BITS_M1   ' TX X.[5] = 0
+  X_START_STOP      = %1_00000 | WORD_BITS_M1   ' TX X.[5] = 1
+  X_RX_BEFORE_EDGE  = %0_00000 | WORD_BITS_M1   ' RX X.[5] = 0: sample just before the B edge
+  RX_JUSTIFY        = 32 - 8            ' RDPIN is MSB-justified
+
+  W1                = $A5
+  W2                = $3C
+  NO_WORD           = $FFFF_FFFF        ' recorded when a word did not arrive in time
+
+  WORD_TIMEOUT      = 200_000           ' clocks to wait for one received word (1 ms)
+  CLK_TIMEOUT       = 400_000           ' clocks to wait for the clock run to finish
+  RIG_TIMEOUT_SEC   = 2
+  MBOX_DONE         = 1
+
+CON ' ---- Configuration Words ----
+  CFG_TX            = P_SYNC_TX | P_OE | P_PLUS1_B
+  CFG_CLK           = P_TRANSITION | P_OE
+  CFG_RX            = P_SYNC_RX | P_MINUS2_A | P_MINUS1_B
+
+CON ' ---- Mailbox Layout ----
+  #0, ARM_A, ARM_B, ARM_C
+  ARM_COUNT         = 3
+  ' per arm per round: words received, word 1, word 2, extra-word flag, clock-done flag
+  #0, R_COUNT, R_WORD1, R_WORD2, R_EXTRA, R_CLKDONE
+  R_LONGS           = 5
+  MB_DONE           = 0
+  MB_RESULTS        = 1
+  MB_LONGS          = MB_RESULTS + ARM_COUNT * ROUNDS * R_LONGS
+
+VAR ' ---- Mailbox & Analysis State ----
+  long mailbox[MB_LONGS]
+  long fail_count
+
+
+PUB main() | engineCog, startTick
+'' Run the F-526 rig: start the engine cog, wait for its done flag, report.
+''
+
+' Local Variables:
+' @local engineCog - cog id COGINIT returned (negative = no free cog)
+' @local startTick - CT when the wait for the done flag began
+
+  longfill(@mailbox, 0, MB_LONGS)
+  fail_count := 0
+  debug("=== F-526: sync serial TX %11100, continuous mode -- is a word written during reset sent or lost? ===")
+  debug("TX P", udec_(PIN_TX), " (B = P", udec_(PIN_CLK), "), CLK P", udec_(PIN_CLK), " (", udec_(CLK_BASE), " clocks/transition), RX P", udec_(PIN_RX), " (A = P", udec_(PIN_TX), ", B = P", udec_(PIN_CLK), "); W1 = ", uhex_byte_(W1), ", W2 = ", uhex_byte_(W2), "; ", udec_(ROUNDS), " rounds")
+  debug("words: TX ", uhex_long_(CFG_TX), "  CLK ", uhex_long_(CFG_CLK), "  RX ", uhex_long_(CFG_RX))
+  print_predictions()
+  engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
+  if engineCog < 0
+    debug("RIG FAIL: no free cog for the engine")
+    debug("NO VERDICT: nothing was measured")
+  else
+    startTick := getct()
+    repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
+    if mailbox[MB_DONE] <> MBOX_DONE
+      cogstop(engineCog)
+      pinclear(PIN_TX addpins 2)
+      debug("RIG FAIL: engine did not report done within ", udec_(RIG_TIMEOUT_SEC), " s; pins cleared by cog 0")
+      debug("NO VERDICT: the measurement did not complete")
+    else
+      debug("engine cog = ", udec_(engineCog), " (debugger restricted to cog 0)")
+      report()
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here.
+'
+
+  debug("=== END ===")
+  debug("DEBUG_END_SESSION")
+  repeat
+
+
+PRI print_predictions()
+' Print the outcomes fixed before the run.
+'
+
+  debug("PRE-REGISTERED OUTCOMES (fixed before the run):")
+  debug("  A: continuous, W1 written IN RESET, enable, W2   (Silicon Doc order)")
+  debug("  B: continuous, enable FIRST, then W1, W2          (KB order)")
+  debug("  C: start-stop, enable, W1  -- CONTROL: must receive exactly [W1] every round, else RIG FAIL")
+  debug("  A_OK and not B_OK -> CONFIRMED (word written in reset is sent; enable-first loses it)")
+  debug("  B_OK and not A_OK -> REFUTED   (KB order is the working one)")
+  debug("  A_OK and B_OK     -> BOTH-WORK (neither order loses a word)")
+  debug("  otherwise         -> INCONCLUSIVE")
+
+
+PRI rec(armIdx, roundIdx, slotIdx) : value
+' One recorded value.
+'
+' @param armIdx - ARM_A..ARM_C
+' @param roundIdx - 0..ROUNDS-1
+' @param slotIdx - R_COUNT..R_CLKDONE
+' @returns value - the recorded long
+
+  value := mailbox[MB_RESULTS + (armIdx * ROUNDS + roundIdx) * R_LONGS + slotIdx]
+
+
+PRI arm_label(armIdx) : pLabel
+' Printable label for an arm.
+'
+' @param armIdx - ARM_A..ARM_C
+' @returns pLabel - address of the label string
+
+  case armIdx
+    ARM_A: pLabel := string("A doc order ")
+    ARM_B: pLabel := string("B KB order  ")
+    ARM_C: pLabel := string("C ctl s/stop")
+    other: pLabel := string("?           ")
+
+
+PRI round_ok(armIdx, roundIdx, expCount) : bOk
+' TRUE when a round received exactly the expected words and nothing more.
+'
+' @param armIdx - ARM_A..ARM_C
+' @param roundIdx - round
+' @param expCount - 1 (W1) or 2 (W1, W2)
+' @returns bOk - exact match
+
+  bOk := rec(armIdx, roundIdx, R_COUNT) == expCount and rec(armIdx, roundIdx, R_WORD1) == W1 and rec(armIdx, roundIdx, R_EXTRA) == 0
+  if expCount == 2
+    bOk := bOk and rec(armIdx, roundIdx, R_WORD2) == W2
+
+
+PRI arm_all_ok(armIdx, expCount) : bOk | roundIdx
+' TRUE when every round of an arm received exactly the expected words.
+'
+' @param armIdx - ARM_A..ARM_C
+' @param expCount - 1 or 2
+' @returns bOk - every round matched
+
+' Local Variables:
+' @local roundIdx - round under test
+
+  bOk := TRUE
+  repeat roundIdx from 0 to ROUNDS - 1
+    if round_ok(armIdx, roundIdx, expCount) == FALSE
+      bOk := FALSE
+
+
+PRI arm_any_ok(armIdx, expCount) : bOk | roundIdx
+' TRUE when at least one round of an arm matched.
+'
+' @param armIdx - ARM_A..ARM_C
+' @param expCount - 1 or 2
+' @returns bOk - some round matched
+
+' Local Variables:
+' @local roundIdx - round under test
+
+  bOk := FALSE
+  repeat roundIdx from 0 to ROUNDS - 1
+    if round_ok(armIdx, roundIdx, expCount)
+      bOk := TRUE
+
+
+PRI report() | armIdx, roundIdx, bAOk, bBOk
+' Print every round, gate, decide. Single exit.
+'
+
+' Local Variables:
+' @local armIdx - arm being printed
+' @local roundIdx - round being printed
+' @local bAOk - every round of A received [W1, W2]
+' @local bBOk - every round of B received [W1, W2]
+
+  debug(" ")
+  debug("--- RAW RESULTS (words received; word 1; word 2; extra word after the run; clock run done) ---")
+  repeat armIdx from ARM_A to ARM_C
+    repeat roundIdx from 0 to ROUNDS - 1
+      debug("  ", zstr_(arm_label(armIdx)), " round ", udec_(roundIdx + 1), ": n=", udec_(rec(armIdx, roundIdx, R_COUNT)), "  w1=", uhex_long_(rec(armIdx, roundIdx, R_WORD1)), "  w2=", uhex_long_(rec(armIdx, roundIdx, R_WORD2)), "  extra=", udec_(rec(armIdx, roundIdx, R_EXTRA)), "  clk_done=", udec_(rec(armIdx, roundIdx, R_CLKDONE)))
+  debug(" ")
+  debug("--- GATE ---")
+  repeat armIdx from ARM_A to ARM_C
+    repeat roundIdx from 0 to ROUNDS - 1
+      if rec(armIdx, roundIdx, R_CLKDONE) <> 1
+        debug("RIG FAIL: ", zstr_(arm_label(armIdx)), " round ", udec_(roundIdx + 1), " -- the clock run did not complete")
+        fail_count++
+  if arm_all_ok(ARM_C, 1)
+    debug("  ok   control C received exactly [", uhex_byte_(W1), "] in all ", udec_(ROUNDS), " rounds")
+  else
+    debug("RIG FAIL: control C did not receive exactly [", uhex_byte_(W1), "] in every round -- clock routing, TX drive or RX sampling is wrong")
+    fail_count++
+  debug(" ")
+  if fail_count <> 0
+    debug("NO VERDICT: a gating control failed (see RIG FAIL lines above); results printed for diagnosis only")
+  else
+    bAOk := arm_all_ok(ARM_A, 2)
+    bBOk := arm_all_ok(ARM_B, 2)
+    debug("  A received [W1, W2] in every round: ", zstr_(yes_no(bAOk)), "   B: ", zstr_(yes_no(bBOk)))
+    if (bAOk == FALSE and arm_any_ok(ARM_A, 2)) or (bBOk == FALSE and arm_any_ok(ARM_B, 2))
+      debug("VERDICT: INCONCLUSIVE - rounds disagree within an arm (results above)")
+    elseif bAOk and not bBOk
+      debug("VERDICT: CONFIRMED - in %11100 continuous mode the word written during reset is sent; enabling first loses it")
+    elseif bBOk and not bAOk
+      debug("VERDICT: REFUTED - the enable-first order works and the word written during reset does not")
+    elseif bAOk and bBOk
+      debug("VERDICT: BOTH-WORK - neither order loses a word in %11100 continuous mode")
+    else
+      debug("VERDICT: INCONCLUSIVE - neither order delivered [W1, W2] (results above)")
+
+
+PRI yes_no(bFlag) : pText
+' Printable YES / NO.
+'
+' @param bFlag - TRUE or FALSE
+' @returns pText - address of "YES" or "NO"
+
+  if bFlag
+    pText := string("YES")
+  else
+    pText := string("NO")
+
+
+{ ENGINE -- runs in its own cog; the ONLY code that touches pins. No debug()
+  here. PTRA = @mailbox on entry; PTRB walks the results arm-major, round-
+  major, R_LONGS per round, in the order the mailbox layout lists.
+}
+DAT             org     0        ' ---- Engine ----
+engine          mov     ptrb, ptra
+                add     ptrb, #MB_RESULTS * 4
+
+                mov     arm_, #ARM_A
+.arm            mov     round_, #ROUNDS
+.round          call    #reset_pins
+                call    #setup_clk_rx
+                cmp     arm_, #ARM_A            wz
+        if_z    call    #tx_arm_a
+                cmp     arm_, #ARM_B            wz
+        if_z    call    #tx_arm_b
+                cmp     arm_, #ARM_C            wz
+        if_z    call    #tx_arm_c
+                call    #run_and_collect
+                djnz    round_, #.round
+                add     arm_, #1
+                cmp     arm_, #ARM_COUNT        wz
+        if_nz   jmp     #.arm
+
+                call    #reset_pins
+                wrlong  #MBOX_DONE, ptra        ' done -- always the last write
+                cogid   self_id_
+                cogstop self_id_
+
+' All three pins: smart pin off, DIR low, OUT low.
+reset_pins      dirl    #PIN_TX
+                dirl    #PIN_CLK
+                dirl    #PIN_RX
+                wrpin   #0, #PIN_TX
+                wrpin   #0, #PIN_CLK
+                wrpin   #0, #PIN_RX
+                outl    #PIN_TX
+                outl    #PIN_CLK
+                outl    #PIN_RX
+                waitx   #100
+                ret
+
+' Clock pin and receiver: configured in reset, then enabled. The clock holds
+' low with no transitions until its WYPIN; the receiver waits for B edges.
+setup_clk_rx    wrpin   cfg_clk_, #PIN_CLK
+                wxpin   #CLK_BASE, #PIN_CLK
+                dirh    #PIN_CLK
+                wrpin   cfg_rx_, #PIN_RX
+                wxpin   #X_RX_BEFORE_EDGE, #PIN_RX
+                dirh    #PIN_RX
+                ret
+
+' A: continuous, W1 written during reset (documented), enable, W2.
+tx_arm_a        wrpin   cfg_tx_, #PIN_TX
+                wxpin   #X_CONTINUOUS, #PIN_TX
+                wypin   #W1, #PIN_TX            ' DIR still low
+                dirh    #PIN_TX
+                wypin   #W2, #PIN_TX
+                mov     trans_, #TRANS_PER_WORD * 2
+                mov     expect_, #2
+                ret
+
+' B: continuous, enable first (KB), then W1, W2.
+tx_arm_b        wrpin   cfg_tx_, #PIN_TX
+                wxpin   #X_CONTINUOUS, #PIN_TX
+                dirh    #PIN_TX
+                wypin   #W1, #PIN_TX
+                wypin   #W2, #PIN_TX
+                mov     trans_, #TRANS_PER_WORD * 2
+                mov     expect_, #2
+                ret
+
+' C: start-stop control, enable, W1 before the first clock.
+tx_arm_c        wrpin   cfg_tx_, #PIN_TX
+                wxpin   #X_START_STOP, #PIN_TX
+                dirh    #PIN_TX
+                wypin   #W1, #PIN_TX
+                mov     trans_, #TRANS_PER_WORD
+                mov     expect_, #1
+                ret
+
+' Start the clock; read up to expect_ words; wait for the clock run to end;
+' note any extra word; record R_LONGS longs.
+run_and_collect mov     count_, #0
+                mov     word1_, ##NO_WORD
+                mov     word2_, ##NO_WORD
+                wypin   trans_, #PIN_CLK        ' clocking starts at the next base period
+
+                call    #wait_word
+        if_c    mov     word1_, word_
+        if_c    add     count_, #1
+                cmp     expect_, #2             wz
+        if_z    call    #wait_word
+        if_z_and_c  mov word2_, word_
+        if_z_and_c  add count_, #1
+
+                getct   t0_
+.clk            testp   #PIN_CLK                wc
+        if_c    jmp     #.clkdone
+                getct   t1_
+                sub     t1_, t0_
+                cmp     t1_, ##CLK_TIMEOUT      wc
+        if_c    jmp     #.clk
+                mov     clkdone_, #0
+                jmp     #.extra
+.clkdone        mov     clkdone_, #1
+
+.extra          waitx   ##CLK_BASE * 4          ' any late word would have landed
+                testp   #PIN_RX                 wc
+        if_c    mov     extra_, #1
+        if_nc   mov     extra_, #0
+
+                wrlong  count_, ptrb
+                add     ptrb, #4
+                wrlong  word1_, ptrb
+                add     ptrb, #4
+                wrlong  word2_, ptrb
+                add     ptrb, #4
+                wrlong  extra_, ptrb
+                add     ptrb, #4
+                wrlong  clkdone_, ptrb
+                add     ptrb, #4
+                ret
+
+' Wait for one received word: C = 1 and word_ = the byte, or C = 0 on timeout.
+wait_word       getct   t0_
+.poll           testp   #PIN_RX                 wc
+        if_c    jmp     #.got
+                getct   t1_
+                sub     t1_, t0_
+                cmp     t1_, ##WORD_TIMEOUT     wc
+        if_c    jmp     #.poll
+                ret                             ' timeout: C = 0 from the CMP above (plain RET keeps flags)
+.got            rdpin   word_, #PIN_RX          ' read + acknowledge (no WC: C stays 1 from TESTP)
+                shr     word_, #RX_JUSTIFY      ' no WC: C stays 1
+                ret
+
+cfg_tx_         long    CFG_TX
+cfg_clk_        long    CFG_CLK
+cfg_rx_         long    CFG_RX
+
+arm_            res     1
+round_          res     1
+trans_          res     1
+expect_         res     1
+count_          res     1
+word_           res     1
+word1_          res     1
+word2_          res     1
+extra_          res     1
+clkdone_        res     1
+t0_             res     1
+t1_             res     1
+self_id_        res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+  See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

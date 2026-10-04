@@ -51,15 +51,15 @@ pins:
   data_pin: "Outputs serial data (A-input)"
   clock_pin: "Receives clock signal (B-input)"
   clock_edge:
-    positive: "Default A/B inputs"
-    negative: "Use P_INVERT_A for A-input, P_INVERT_B for B-input"
+    positive: "Default B input (bits shift on the clock's rising edge)"
+    negative: "Invert the B (clock) input: add P_INVERT_B (B.[3] in WRPIN's D)"
 
 # Complete Spin2 Example
 spin2_complete: |
   CON
     TX_PIN = 41
-    CLK_PIN = 40
-    
+    CLK_PIN = 42                             ' TX_PIN + 1, matching P_PLUS1_B
+
   PUB main() | mode
     ' 8-bit SPI master TX, positive edge
     mode := P_SYNC_TX | P_OE | P_PLUS1_B     ' Clock from pin+1
@@ -72,12 +72,12 @@ spin2_complete: |
     
   PUB stream_continuous() | mode
     ' Continuous streaming with negative edge
-    mode := P_SYNC_TX | P_OE | P_INVERT_A    ' Negative edge clocking
+    mode := P_SYNC_TX | P_OE | P_PLUS1_B | P_INVERT_B  ' clock from pin+1, inverted
     PINCLEAR(TX_PIN)
     WRPIN(TX_PIN, mode)
     WXPIN(TX_PIN, %0_00111)                  ' Continuous, 8-bit
-    PINHIGH(TX_PIN)                          ' Enable FIRST (universal init order)
-    WYPIN(TX_PIN, first_data)                ' Prime shifter (after enable)
+    WYPIN(TX_PIN, first_data)                ' Prime the shifter WHILE DIR IS LOW
+    PINHIGH(TX_PIN)                          ' Enable
     WYPIN(TX_PIN, second_data)               ' Load buffer (double-buffered, gapless)
     
     REPEAT
@@ -91,9 +91,9 @@ pasm2_complete: |
   
   ' Pin assignments and mode constants
   tx_pin        LONG  41
-  clk_pin       LONG  40
-  sync_tx_pos   LONG  P_SYNC_TX | P_OE                 ' %0000_1111_000_0000000000000_01_11100_0
-  sync_tx_neg   LONG  P_SYNC_TX | P_OE | P_INVERT_A    ' %0000_0111_000_0000000000000_01_11100_0
+  clk_pin       LONG  42                               ' tx_pin + 1 (P_PLUS1_B)
+  sync_tx_pos   LONG  P_SYNC_TX | P_OE | P_PLUS1_B                ' %0000_0001_000_0000000000000_01_11100_0
+  sync_tx_neg   LONG  P_SYNC_TX | P_OE | P_PLUS1_B | P_INVERT_B   ' %0000_1001_000_0000000000000_01_11100_0
   clk_mode      LONG  P_TRANSITION | P_OE              ' %0000_0000_000_0000000000000_01_00101_0
   
   ' Initialize sync serial transmit
@@ -134,7 +134,7 @@ spin2_inline: |
   PUB fast_tx(pin, data)
     ORG
       DIRL  pin                     ' Reset smart pin
-      WRPIN ##P_SYNC_TX | P_OE, pin ' Configure mode
+      WRPIN ##P_SYNC_TX | P_OE | P_PLUS1_B, pin ' Configure mode, clock on pin+1
       WXPIN #%1_00111, pin          ' Start-stop, 8-bit
       DIRH  pin                     ' Enable
       WYPIN data, pin               ' Transmit
@@ -142,7 +142,8 @@ spin2_inline: |
 
 # Key Points
 timing:
-  continuous_mode: "Double-buffered for gapless transmission"
+  continuous_mode: "Double-buffered for gapless transmission. Write the FIRST word with WYPIN while DIR is low: it primes the shifter and is the first word sent. Then raise DIR and WYPIN the second word into the buffer. Written after DIR rises, the first of two words is lost and the second is sent twice."
+  source: "continuous_mode: P2 Documentation, silicon-doc-text.txt %11100 section ('a first word is written via WYPIN during reset (DIR=0) to prime the shifter'); bench-measured, P2-EMPIRICAL-FINDINGS.md EF-090"
   start_stop_mode: "Can modify data before clock starts"
   hold_time: "Data stable 2+ clocks after edge when X[5]=1"
 

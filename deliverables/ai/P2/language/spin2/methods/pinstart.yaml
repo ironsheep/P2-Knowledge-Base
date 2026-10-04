@@ -4,12 +4,16 @@ description: |
   Configure and start smart pin with mode and parameters.
   Supports pin groups via ADDPINS operator for parallel operations.
 
-  TRIGGER AND SERIAL MODES: PINSTART's Yval is LOST. PINSTART writes Y before it raises
-  DIR, and a WYPIN issued while DIR is low (the pin held in reset) never starts a
-  pulse/cycle (%00100), transition (%00101) or serial transmit (%11110, %11100) output.
-  Pass Yval = 0 and issue the triggering WYPIN AFTER PINSTART (reset -> WRPIN/WXPIN ->
-  DIR high -> WYPIN). Value modes keep the Y that PINSTART writes (an NCO started by
-  PINSTART runs at its Yval).
+  TRIGGER AND ASYNC SERIAL MODES: PINSTART's Yval is LOST. PINSTART writes Y before it
+  raises DIR, and a WYPIN issued while DIR is low (the pin held in reset) never starts a
+  pulse/cycle (%00100), transition (%00101) or asynchronous serial transmit (%11110)
+  output. Pass Yval = 0 and issue the triggering WYPIN AFTER PINSTART (reset -> WRPIN/WXPIN
+  -> DIR high -> WYPIN). Value modes keep the Y that PINSTART writes (an NCO started by
+  PINSTART runs at its Yval). SYNCHRONOUS serial transmit (%11100) is the opposite: a word
+  written while DIR is low primes its shifter and is sent once clocking starts, so
+  PINSTART's Yval is the first word transmitted.
+sources:
+  - "description (%11100 keeps the reset-time word): P2 Documentation, silicon-doc-text.txt %11100 section; bench-verified in continuous mode, P2-EMPIRICAL-FINDINGS.md EF-090"
 category: Smart Pin Operations
 documentation_source: enhanced
 documentation_level: comprehensive
@@ -141,7 +145,7 @@ critical_requirement:
     - "DIR[pin] := 1     ' Enable smart pin"
 notes:
   - "Automatically performs the DIR=0 reset while configuring, then raises DIR"
-  - "Complete initialization for value modes; in trigger/serial modes the Yval is lost (written before DIR rises) -- pass 0 and WYPIN after PINSTART"
+  - "Complete initialization for value modes; in trigger and async-serial-TX modes the Yval is lost (written before DIR rises) -- pass 0 and WYPIN after PINSTART; sync serial TX (%11100) sends it (it primes the shifter)"
   - "Mode constants defined in Spin2 (P_ADC, P_PWM_TRIANGLE, etc.)"
   - "X and Y parameters are mode-specific"
   - "Pin starts operating immediately after DIR=1"

@@ -1,0 +1,383 @@
+'' =============================================================================
+''
+''   File....... test-f540-augs-skip-pattern-bit.spin2
+''   Purpose.... Decide F-540 on SILICON: does the AUGS a ## operand emits consume a skip-pattern bit
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... 04 Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED (register F-540)
+    The P2 Documentation (silicon-doc-text.txt, INSTRUCTION SKIPPING, after :778)
+    says the skip pattern "is initially captured and subsequently shifted right
+    by one bit for each instruction encountered". A ## operand makes the
+    assembler emit an AUGS ahead of the instruction: one source line, two longs.
+    The P2 XBYTE guide (xbyte-body.md:321-328) teaches that the AUGS takes its
+    own pattern bit, so every bit from that line onward moves up by one. The KB
+    removed the same claim as unsourced (F-485). No document states it either
+    way; this run decides it.
+
+  RIG
+    None. No pins are used. Everything runs in one PASM cog in cog RAM
+    (SKIPF steps over instructions only in cog/LUT memory).
+
+  DEBUGGER (EF-057)
+    DEBUG_COGS = %0000_0001: the debug interrupt lives in cog 0 only. The
+    sequences run in a dedicated PASM cog started by COGINIT; it writes its
+    results to a hub mailbox, and cog 0 reports.
+
+  SEQUENCES (each a CALLed routine; the skip begins inside it)
+    AUG  (under test)              CTL  (control: no ## operand)
+      mov  acc,#0                    mov  acc,#0
+      mov  x,#0                      mov  x,#0
+      SKIP/SKIPF pat                 SKIP/SKIPF pat
+      add  acc,#1                    add  acc,#1
+      mov  x,##$12345   (AUGS+MOV)   mov  x,#5
+      add  acc,#4                    add  acc,#4
+      add  acc,#8                    add  acc,#8
+      ret                            ret
+    Each runs under SKIP and under SKIPF, with patterns 0, %0010, %0100 and
+    %1000 (bit 0 is never set, so the SKIPF first-instruction cancel case
+    does not arise). Bits above 3 are 0, so RET and everything after it run.
+
+  WHAT EACH PATTERN DOES (bit n = the n-th instruction after SKIP/SKIPF)
+    CTL, both modes (fixes the bit numbering; GATING):
+      0     -> acc 13, x 5        %0010 -> acc 13, x 0
+      %0100 -> acc 9,  x 5        %1000 -> acc 5,  x 5
+    AUG pattern 0 (GATING): acc 13, x $12345 (the ## value assembled whole).
+    AUG pattern %1000 DECIDES:
+      AUGS COUNTS (bit 1 = AUGS, bit 2 = MOV, bit 3 = add #4)  -> acc 9,  x $12345
+      AUGS DOES NOT COUNT (bit 1 = MOV, bit 2 = add #4, bit 3 = add #8)
+                                                               -> acc 5,  x $12345
+    AUG %0010 and %0100 are printed as characterization, with what each
+    hypothesis predicts; they do not decide. If the AUGS counts, %0100 skips
+    the MOV and leaves its AUGS pending, so it augments the next immediate:
+    add acc,#4 becomes add acc,#$12204 ($12345 & !$1FF | 4) -> acc $1220D.
+    If it counts, %0010 skips the AUGS and the MOV runs un-augmented -> x $145.
+
+  PRE-REGISTERED OUTCOMES (printed by the program)
+    Gate : all 8 CTL results and both AUG-pattern-0 results as listed, else
+           RIG FAIL / NO VERDICT.
+    Per mode (SKIP, SKIPF), AUG %1000: acc 9 = COUNTS, acc 5 = DOES NOT
+    COUNT, anything else (or x not $12345) = UNEXPECTED.
+    VERDICT: CONFIRMED-COUNTS     both modes COUNTS
+             CONFIRMED-NOT-COUNTED both modes DOES NOT COUNT
+             SPLIT                 the modes disagree (reported per mode)
+             INCONCLUSIVE          either mode UNEXPECTED
+
+  HOW TO RUN
+    Compile: pnut-ts -d test-f540-augs-skip-pattern-bit.spin2
+    Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10). The
+    engine runs in microseconds; the report is about 30 lines. Done at the
+    "VERDICT: ..." (or "NO VERDICT") line, then "=== END ===".
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  RIG_TIMEOUT_SEC   = 1                 ' host wait cap; the engine runs in microseconds
+  MBOX_DONE         = 1
+
+  AUG_VALUE         = $12345            ' the ## operand under test
+  CTL_VALUE         = 5                 ' the control's plain # operand
+  AUG_LOW9          = AUG_VALUE & $1FF  ' what MOV sees un-augmented ($145)
+  AUG_PENDING_ADD4  = (AUG_VALUE & !$1FF) | 4   ' add #4 augmented by a pending AUGS ($12204)
+
+  PAT_NONE          = %0000
+  PAT_BIT1          = %0010
+  PAT_BIT2          = %0100
+  PAT_BIT3          = %1000
+
+  ' decider outcomes, AUG pattern %1000
+  ACC_IF_COUNTS     = 1 + 8             ' add #4 skipped
+  ACC_IF_NOT        = 1 + 4             ' add #8 skipped
+
+CON ' ---- Mailbox Layout ----
+  ' runs, in the order the engine performs them:
+  #0, RUN_CTL_SKIP, RUN_CTL_SKIPF, RUN_AUG_SKIP, RUN_AUG_SKIPF
+  RUN_COUNT         = 4
+  PAT_COUNT         = 4                 ' PAT_NONE, PAT_BIT1, PAT_BIT2, PAT_BIT3
+  ' mailbox: MB_DONE, then for each run, for each pattern: acc, x
+  MB_DONE           = 0
+  MB_RESULTS        = 1
+  MB_LONGS          = MB_RESULTS + RUN_COUNT * PAT_COUNT * 2
+
+VAR ' ---- Mailbox & Analysis State ----
+  long mailbox[MB_LONGS]
+  long fail_count
+
+
+PUB main() | engineCog, startTick
+'' Run the F-540 rig: start the engine cog, wait for its done flag, report.
+''
+
+' Local Variables:
+' @local engineCog - cog id COGINIT returned (negative = no free cog)
+' @local startTick - CT when the wait for the done flag began
+
+  longfill(@mailbox, 0, MB_LONGS)
+  fail_count := 0
+  debug("=== F-540: does the AUGS a ## operand emits consume a skip-pattern bit? ===")
+  print_predictions()
+  engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
+  if engineCog < 0
+    debug("RIG FAIL: no free cog for the engine")
+    debug("NO VERDICT: nothing was measured")
+  else
+    startTick := getct()
+    repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
+    if mailbox[MB_DONE] <> MBOX_DONE
+      cogstop(engineCog)
+      debug("RIG FAIL: engine did not report done within ", udec_(RIG_TIMEOUT_SEC), " s")
+      debug("NO VERDICT: the measurement did not complete")
+    else
+      debug("engine cog = ", udec_(engineCog), " (debugger restricted to cog 0)")
+      report()
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here.
+'
+
+  debug("=== END ===")
+  debug("DEBUG_END_SESSION")
+  repeat
+
+
+PRI print_predictions()
+' Print the outcomes fixed before the run.
+'
+
+  debug("PRE-REGISTERED OUTCOMES (fixed before the run):")
+  debug("  gate   : CTL (no ##) under SKIP and SKIPF -> p0 13/5, %0010 13/0, %0100 9/5, %1000 5/5; AUG p0 -> 13/$12345")
+  debug("  decide : AUG %1000 -> acc 9 = AUGS COUNTS (bit 3 lands on add #4), acc 5 = DOES NOT COUNT (bit 3 lands on add #8)")
+  debug("  verdict: both modes COUNTS -> CONFIRMED-COUNTS | both NOT -> CONFIRMED-NOT-COUNTED | modes differ -> SPLIT | other -> INCONCLUSIVE")
+
+
+PRI result_acc(runIdx, patIdx) : value
+' acc recorded for one run and pattern.
+'
+' @param runIdx - RUN_CTL_SKIP..RUN_AUG_SKIPF
+' @param patIdx - 0..PAT_COUNT-1 (PAT_NONE, PAT_BIT1, PAT_BIT2, PAT_BIT3)
+' @returns value - acc after the sequence
+
+  value := mailbox[MB_RESULTS + (runIdx * PAT_COUNT + patIdx) * 2]
+
+
+PRI result_x(runIdx, patIdx) : value
+' x recorded for one run and pattern.
+'
+' @param runIdx - RUN_CTL_SKIP..RUN_AUG_SKIPF
+' @param patIdx - 0..PAT_COUNT-1
+' @returns value - x after the sequence
+
+  value := mailbox[MB_RESULTS + (runIdx * PAT_COUNT + patIdx) * 2 + 1]
+
+
+PRI run_label(runIdx) : pLabel
+' Printable label for a run.
+'
+' @param runIdx - RUN_CTL_SKIP..RUN_AUG_SKIPF
+' @returns pLabel - address of the label string
+
+  case runIdx
+    RUN_CTL_SKIP:  pLabel := string("CTL SKIP ")
+    RUN_CTL_SKIPF: pLabel := string("CTL SKIPF")
+    RUN_AUG_SKIP:  pLabel := string("AUG SKIP ")
+    RUN_AUG_SKIPF: pLabel := string("AUG SKIPF")
+    other:         pLabel := string("?        ")
+
+
+PRI pat_value(patIdx) : pattern
+' The skip pattern for a pattern index.
+'
+' @param patIdx - 0..PAT_COUNT-1
+' @returns pattern - PAT_NONE, PAT_BIT1, PAT_BIT2 or PAT_BIT3
+
+  case patIdx
+    0: pattern := PAT_NONE
+    1: pattern := PAT_BIT1
+    2: pattern := PAT_BIT2
+    other: pattern := PAT_BIT3
+
+
+PRI report() | runIdx, patIdx, verdictSkip, verdictSkipf
+' Print every result, run the gate, then decide. Single exit.
+'
+
+' Local Variables:
+' @local runIdx - run being printed
+' @local patIdx - pattern being printed
+' @local verdictSkip - per-mode outcome for SKIP (0 counts, 1 not, 2 unexpected)
+' @local verdictSkipf - per-mode outcome for SKIPF
+
+  debug(" ")
+  debug("--- RAW RESULTS (acc / x) ---")
+  repeat runIdx from RUN_CTL_SKIP to RUN_AUG_SKIPF
+    repeat patIdx from 0 to PAT_COUNT - 1
+      debug("  ", zstr_(run_label(runIdx)), "  pattern ", ubin_byte_(pat_value(patIdx)), ":  acc ", uhex_long_(result_acc(runIdx, patIdx)), "   x ", uhex_long_(result_x(runIdx, patIdx)))
+  debug(" ")
+  debug("--- GATE ---")
+  check_ctl(RUN_CTL_SKIP)
+  check_ctl(RUN_CTL_SKIPF)
+  check_one(RUN_AUG_SKIP, 0, 13, AUG_VALUE)
+  check_one(RUN_AUG_SKIPF, 0, 13, AUG_VALUE)
+  debug(" ")
+  debug("--- CHARACTERIZATION (does not decide) ---")
+  debug("  AUG %0010: if AUGS counts -> acc 13, x ", uhex_long_(AUG_LOW9), " (MOV un-augmented)")
+  debug("  AUG %0100: if AUGS counts -> acc ", uhex_long_(1 + AUG_PENDING_ADD4 + 8), ", x 0 (MOV skipped, AUGS pending on add #4); if not -> acc 9, x ", uhex_long_(AUG_VALUE))
+  debug(" ")
+  if fail_count <> 0
+    debug("NO VERDICT: a gating control failed (see RIG FAIL lines above); results printed for diagnosis only")
+  else
+    verdictSkip := mode_outcome(RUN_AUG_SKIP)
+    verdictSkipf := mode_outcome(RUN_AUG_SKIPF)
+    if verdictSkip == 2 or verdictSkipf == 2
+      debug("VERDICT: INCONCLUSIVE - AUG %1000 matched neither hypothesis in at least one mode (results above)")
+    elseif verdictSkip == 0 and verdictSkipf == 0
+      debug("VERDICT: CONFIRMED-COUNTS - under SKIP and SKIPF the AUGS of a ## operand takes its own pattern bit")
+    elseif verdictSkip == 1 and verdictSkipf == 1
+      debug("VERDICT: CONFIRMED-NOT-COUNTED - under SKIP and SKIPF a ## instruction (AUGS + instruction) takes ONE pattern bit")
+    else
+      debug("VERDICT: SPLIT - SKIP and SKIPF disagree (per-mode lines above)")
+
+
+PRI check_ctl(runIdx)
+' Gate: the control sequence (no ##) skips exactly the instruction its bit names.
+'
+' @param runIdx - RUN_CTL_SKIP or RUN_CTL_SKIPF
+
+  check_one(runIdx, 0, 13, CTL_VALUE)
+  check_one(runIdx, 1, 13, 0)
+  check_one(runIdx, 2, 9, CTL_VALUE)
+  check_one(runIdx, 3, 5, CTL_VALUE)
+
+
+PRI check_one(runIdx, patIdx, expAcc, expX)
+' Gate one result; count a failure if it differs.
+'
+' @param runIdx - run
+' @param patIdx - pattern index
+' @param expAcc - expected acc
+' @param expX - expected x
+
+  if result_acc(runIdx, patIdx) == expAcc and result_x(runIdx, patIdx) == expX
+    debug("  ok   ", zstr_(run_label(runIdx)), " pattern ", ubin_byte_(pat_value(patIdx)), " = ", udec_(expAcc), " / ", uhex_long_(expX))
+  else
+    debug("RIG FAIL: ", zstr_(run_label(runIdx)), " pattern ", ubin_byte_(pat_value(patIdx)), " expected ", udec_(expAcc), " / ", uhex_long_(expX))
+    fail_count++
+
+
+PRI mode_outcome(runIdx) : outcome | accValue, xValue
+' Decide one mode from AUG pattern %1000.
+'
+' @param runIdx - RUN_AUG_SKIP or RUN_AUG_SKIPF
+' @returns outcome - 0 AUGS counts, 1 does not count, 2 unexpected
+
+' Local Variables:
+' @local accValue - acc after AUG %1000
+' @local xValue - x after AUG %1000
+
+  accValue := result_acc(runIdx, 3)
+  xValue := result_x(runIdx, 3)
+  if xValue == AUG_VALUE and accValue == ACC_IF_COUNTS
+    outcome := 0
+    debug("  ", zstr_(run_label(runIdx)), " %1000: acc ", udec_(accValue), " -> AUGS COUNTS")
+  elseif xValue == AUG_VALUE and accValue == ACC_IF_NOT
+    outcome := 1
+    debug("  ", zstr_(run_label(runIdx)), " %1000: acc ", udec_(accValue), " -> DOES NOT COUNT")
+  else
+    outcome := 2
+    debug("  ", zstr_(run_label(runIdx)), " %1000: acc ", uhex_long_(accValue), ", x ", uhex_long_(xValue), " -> UNEXPECTED")
+
+
+{ ENGINE -- runs in its own cog, cog RAM. No debug() here. PTRA = @mailbox on
+  entry; PTRB walks the results in the order the mailbox layout lists.
+}
+DAT             org     0        ' ---- Engine ----
+engine          mov     ptrb, ptra
+                add     ptrb, #MB_RESULTS * 4
+
+                mov     rtn_, #seq_ctl_skip
+                call    #run_patterns
+                mov     rtn_, #seq_ctl_skipf
+                call    #run_patterns
+                mov     rtn_, #seq_aug_skip
+                call    #run_patterns
+                mov     rtn_, #seq_aug_skipf
+                call    #run_patterns
+
+                wrlong  #MBOX_DONE, ptra        ' done -- always the last write
+                cogid   self_id_
+                cogstop self_id_
+
+' Run the routine in rtn_ under each of the four patterns; store acc, x.
+run_patterns    mov     pat_, #PAT_NONE
+                call    #run_one
+                mov     pat_, #PAT_BIT1
+                call    #run_one
+                mov     pat_, #PAT_BIT2
+                call    #run_one
+                mov     pat_, #PAT_BIT3
+                call    #run_one
+                ret
+
+run_one         call    rtn_                    ' register CALL: absolute
+                wrlong  acc_, ptrb
+                add     ptrb, #4
+                wrlong  x_, ptrb
+                add     ptrb, #4
+                ret
+
+seq_ctl_skip    mov     acc_, #0
+                mov     x_, #0
+                skip    pat_
+                add     acc_, #1                ' bit 0
+                mov     x_, #CTL_VALUE          ' bit 1
+                add     acc_, #4                ' bit 2
+                add     acc_, #8                ' bit 3
+                ret
+
+seq_ctl_skipf   mov     acc_, #0
+                mov     x_, #0
+                skipf   pat_
+                add     acc_, #1
+                mov     x_, #CTL_VALUE
+                add     acc_, #4
+                add     acc_, #8
+                ret
+
+seq_aug_skip    mov     acc_, #0
+                mov     x_, #0
+                skip    pat_
+                add     acc_, #1
+                mov     x_, ##AUG_VALUE         ' AUGS + MOV: two longs
+                add     acc_, #4
+                add     acc_, #8
+                ret
+
+seq_aug_skipf   mov     acc_, #0
+                mov     x_, #0
+                skipf   pat_
+                add     acc_, #1
+                mov     x_, ##AUG_VALUE
+                add     acc_, #4
+                add     acc_, #8
+                ret
+
+rtn_            res     1               ' routine under test (cog address)
+pat_            res     1               ' skip pattern
+acc_            res     1
+x_              res     1
+self_id_        res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+  See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

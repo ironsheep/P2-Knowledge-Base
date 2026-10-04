@@ -1611,6 +1611,44 @@ tested (0, 1, 7, `$7FFF_FFFF`, `$8000_0000`, `$FFFF_FFFF`, `$1234_5678`; hi 0/1/
 `$FFFF_FFFF`) — the rule fits all, it is not proven for every 64-bit value; hub execution not
 tested; run once. *Source:* `…/tests/test-divide-by-zero.spin2`.
 
+### EF-090 · In sync serial TX `%11100` continuous mode, a word written with WYPIN during reset is sent; enabling first and then writing two words loses the first and sends the second twice — `CONFIRMED` (documentary claim decided)
+*KB:* `language/spin2/methods/pinstart.yaml`; `architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml`
+*How proven:* `test-f526-sync-tx-prime-in-reset` (campaign `2026-10-kb-findings`), no wiring: TX P4
+(`P_SYNC_TX | P_OE | P_PLUS1_B`, `$0100_0078`), clock P5 (`P_TRANSITION | P_OE`, 100 clocks per
+transition), receiver P6 (`P_SYNC_RX | P_MINUS2_A | P_MINUS1_B`, `$6700_003A`, sampling just before the
+B edge); 8-bit words W1 = `$A5`, W2 = `$3C`; every round from all three pins reset; 5 rounds per arm.
+*Result (log `debug_261003-223909`, 2026-10-03, first run; `.bin` 12,513 bytes = the build):* control C
+(start-stop, enable, WYPIN W1, 16 transitions) received exactly `[$A5]` in 5 of 5, every clock run
+completed. **Arm A** (continuous X = `%0_00111`: WRPIN, WXPIN, **WYPIN W1 with DIR low**, DIRH,
+WYPIN W2; 32 transitions) received **`$A5, $3C` in 5 of 5**. **Arm B** (the same, but DIRH first, then
+WYPIN W1, WYPIN W2) received **`$3C, $3C` in 5 of 5** — W1 lost, W2 sent twice. Pre-registered verdict
+printed: `CONFIRMED`.
+**Grounds:** decides F-526. The Silicon Doc's %11100 text ("a first word is written via WYPIN during
+reset (DIR=0) to prime the shifter … Upon release of reset, the output will reflect the LSB of the
+output word written by any WYPIN during reset") holds; the KB's v1.23.0 listing of `%11100` among the
+modes whose reset-time Y is lost (an inference beyond EF-011, which tested `%00100`, `%00101`,
+`%11110`) is wrong, and so is the enable-first continuous example. *Limits:* one board, 200 MHz, Rev
+C; 8-bit words at one clock rate; continuous mode with two words (start-stop with a reset-time write
+not tested). *Source:* `…/tests/test-f526-sync-tx-prime-in-reset.spin2`.
+
+### EF-091 · The AUGS that a `##` operand emits takes its own skip-pattern bit under SKIP and SKIPF; a skipped instruction leaves a preceding AUGS pending for the next immediate — `CONFIRMED`
+*KB:* `language/pasm2/concepts/instruction_skipping.yaml`
+*How proven:* `test-f540-augs-skip-pattern-bit` (campaign `2026-10-kb-findings`), no pins, one PASM
+cog in cog RAM. Sequence after SKIP/SKIPF: `add acc,#1` · `mov x,##$12345` (listing: `AUGS #$91`
+`$FF000091` + `MOV x,#$145`) · `add acc,#4` · `add acc,#8`; a control sequence with `mov x,#5` (no
+`##`); patterns 0, `%0010`, `%0100`, `%1000`. *Result (log `debug_261003-223951`, 2026-10-03, first
+run; `.bin` 11,940 bytes = the build):* all 8 control results and both AUG pattern-0 results exact
+(gate). AUG `%1000` → **acc 9** under SKIP and SKIPF (bit 3 lands on `add #4`, so bit 1 = AUGS,
+bit 2 = MOV) — the AUGS counts. Corroborated by the two characterization patterns, both exactly as
+the counts reading predicts: `%0010` (AUGS skipped) → x = `$145` (MOV un-augmented); `%0100` (MOV
+skipped) → acc = `$1220D`, i.e. the pending AUGS augmented the next immediate (`add acc,#4` became
+`add acc,#$12204`). Pre-registered verdict printed: `CONFIRMED-COUNTS`.
+**Grounds:** decides F-540. The P2 Documentation's "shifted right by one bit for each instruction
+encountered" applies to the AUGS as an instruction; the P2 XBYTE guide (`xbyte-body.md:321-328`)
+teaches exactly this and is right; the KB had removed the rule as unsourced (F-485) and now has a
+source. *Limits:* one board, Rev C, cog execution; AUGS only (AUGD not run, though it is the same
+kind of prefix instruction); run once. *Source:* `…/tests/test-f540-augs-skip-pattern-bit.spin2`.
+
 
 ## Open / pending empirical questions
 

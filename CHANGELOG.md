@@ -20,6 +20,21 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.23.2] - 2026-10-04
+
+**Synchronous serial transmit primes its first word in reset, and a `##` operand's skip-pattern cost is stated — both measured on silicon.**
+
+### Fixed
+
+- **Sync serial TX (`%11100`) sends the word written during reset**: write the first word with WYPIN while DIR is low, raise DIR, then write the second; `PINSTART`'s Yval is the first word sent in this mode
+- **Sync serial TX examples**: the clock pin matches its `P_PLUS1_B` routing, negative-edge clocking inverts the B (clock) input, and the PASM example routes its clock
+
+### Added
+
+- **A `##` operand inside a skip sequence takes two pattern bits**: its AUGS consumes one of its own, and an AUGS whose instruction is skipped augments the next immediate
+
+---
+
 ## [1.23.1] - 2026-10-03
 
 **Every entry states its facts in plain text, with no pointers into files you cannot open.**
