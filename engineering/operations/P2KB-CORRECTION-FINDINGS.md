@@ -92,8 +92,11 @@ mode, "Enable FIRST", then "Prime shifter (after enable)" — the opposite of th
 procedure (the first word likely goes out wrong). The start-stop example (X.[5]=1) is unaffected (WYPIN
 before the first clock is documented there). **Fix:** remove `%11100` from the lost-Yval list (keep
 `%11110`, `%00100`, `%00101`); restore the documented continuous-mode prime-in-reset sequence; say that
-sync TX primes in reset. Found because the I/O & Smart Pins guide (ch11:292-296) had it right. Bench
-candidate: a `%11100` continuous-mode A/B (prime in reset vs after enable).
+sync TX primes in reset. Found because the I/O & Smart Pins guide (ch11:292-296) had it right.
+**Bench before the fix (Stephen, 2026-10-04: "should be proven on bench so we know truth").** Rig
+built and compiled (pnut-ts 1.55.8): `p2-io-and-smart-pins-user-guide/audit/verification-tests/test-f526-sync-tx-prime-in-reset.spin2`
+— TX P4 / CLK P5 / RX P6, internal selectors only; arm A prime-in-reset, arm B enable-first, arm C
+start-stop control; pre-registered CONFIRMED / REFUTED / BOTH-WORK. Awaiting the run («#379»).
 
 ### F-527 — Assembly Reference: "13-20 clocks" for a taken hub-exec branch, at 87 lines, against its own correct rule — `CONFIRMED`
 The removed range (C3; Silicon Doc: "a minimum of 13 clock cycles (one more if the target is not
@@ -190,7 +193,10 @@ F-485 removed "AUGS/AUGD both consume pattern bits" from the KB as unsourced. Th
 (`xbyte-body.md:321-328`, :362-366) teaches it, reasoning from the Silicon Doc's "shifted right by one bit
 for each instruction encountered" (AUGS is an instruction). Neither is a cited statement. **To do:** a
 bench run (SKIPF pattern over a `##` instruction) settles it; then the KB states it (sourced) or the guide
-changes. Not a guide defect until then.
+changes. Not a guide defect until then. **Rig built and compiled** (pnut-ts 1.55.8; the listing shows
+exactly one `AUGS #$91` before each `MOV x, #$145`): `p2-xbyte-programming-guide/audit/verification-tests/test-f540-augs-skip-pattern-bit.spin2`
+— SKIP and SKIPF, control sequence without `##` gating the bit numbering; pattern `%1000` decides (acc
+9 = AUGS counts, acc 5 = it does not). Awaiting the run («#379»).
 
 ### F-541 — Assembly Reference: crystal/PLL settle times disagree inside the manual — `NEEDS-VERIFICATION`
 `part-i/chapter-04-timing.md:66` (crystal ~10 ms, PLL ~10 µs) against `part-ii/instructions-h.md:67`
