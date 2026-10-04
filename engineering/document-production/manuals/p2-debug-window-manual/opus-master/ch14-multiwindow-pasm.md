@@ -133,6 +133,10 @@ debug(`Status 'now: `(sine)' 13)
 > `DEBUG_TIMESTAMP` symbol stamps every `DEBUG` *message* with the 64-bit CT
 > value. That is a property of the message stream, set once in a `CON` block — not a
 > command you send to a display window.
+> [Rev C]{.silicon-note topic="DEBUG_TIMESTAMP stamp order"} The stamp is read from the
+> sending cog's own copy of the counter. A cog whose group of four had no cog running
+> when the counter wrapped holds a copy that is a whole number of wraps (21.47 s each at
+> 200 MHz) behind, so its messages are stamped early and print out of time order.
 
 ## Debugging from PASM
 

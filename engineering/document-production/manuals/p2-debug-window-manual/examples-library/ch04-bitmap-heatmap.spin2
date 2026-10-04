@@ -4,7 +4,7 @@
 ''   Purpose....  A BITMAP window as a heat map, where the pixel value IS
 ''                the measurement
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.3 (2026-08-18)
+''   Version....  v1.1.4 (2026-10-04)
 ''   Appears in.  Chapter 4: The BITMAP Window - Pixel Raster -- A
 ''                complete example
 ''   Authors....  Iron Sheep Productions, LLC

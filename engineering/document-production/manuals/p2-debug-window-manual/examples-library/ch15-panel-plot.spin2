@@ -4,7 +4,7 @@
 ''   Purpose....  A compact plot panel with the axes hidden, sized to sit
 ''                alongside other windows
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.3 (2026-08-18)
+''   Version....  v1.1.4 (2026-10-04)
 ''   Appears in.  Chapter 15: Building Control and Status Panels - From
 ''                Text Dashboards to Sprite-Blitted Instruments -- A
 ''                status panel is positioned output, refreshed in place

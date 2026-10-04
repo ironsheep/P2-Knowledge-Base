@@ -4,7 +4,7 @@
 ''   Purpose....  A real SPI transaction captured on three channels, read
 ''                as a bus rather than as pins
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.3 (2026-08-18)
+''   Version....  v1.1.4 (2026-10-04)
 ''   Appears in.  Chapter 6: The LOGIC Window - Digital Waveforms -- A
 ''                complete software-only example
 ''   Authors....  Iron Sheep Productions, LLC

@@ -308,8 +308,9 @@ horizontal patterns, `height` for vertical.
 > the refresh counter — which fires on an *equality* test against an ever-increasing
 > count — can never match it. The window stops updating. It is not an error and it
 > is not reported; pixels keep arriving and the picture simply stops moving.
-> A runtime `` `RATE `` with any positive count resumes refreshing normally.
-> (Hardware-verified.)
+> (Hardware-verified.) A runtime `` `RATE 0 `` freezes it the same way. A later
+> `` `TRACE `` or `` `CLEAR `` (each re-derives the rate) or an explicit `` `UPDATE ``
+> brings it back.
 
 `SAVE 'name'` writes the canvas to `name.bmp` on the host. The filename is
 **required** — a bare `` `SAVE `` writes nothing at all, and says nothing. See

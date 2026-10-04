@@ -17,13 +17,13 @@
 
 \begin{center}
 \vspace{0.4cm}
-{\fontsize{36}{42}\selectfont\bfseries P2 Debug Window Manual\par}
+{\fontsize{36}{42}\selectfont\bfseries \DocTitle\par}
 \vspace{0.3cm}
-{\Large\itshape See What Your Program Is Doing\par}
+{\Large\itshape \DocSubtitle\par}
 \vspace{0.35cm}
-{\large August 2026\par}
+{\large \DocDate\par}
 \vspace{0.15cm}
-{\large\color{blue}Version 1.1.3\par}
+{\large\color{blue}Version \DocVersion\par}
 
 \vspace{0.5cm}
 \begin{tcolorbox}[

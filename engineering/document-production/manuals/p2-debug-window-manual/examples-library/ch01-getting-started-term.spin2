@@ -4,7 +4,7 @@
 ''   Purpose....  The first window - one directive creates it, and the
 ''                next line already prints into it
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.3 (2026-08-18)
+''   Version....  v1.1.4 (2026-10-04)
 ''   Appears in.  Chapter 1: The DEBUG Display Windows -- Create by name,
 ''                feed by name
 ''   Authors....  Iron Sheep Productions, LLC
