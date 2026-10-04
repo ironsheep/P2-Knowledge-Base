@@ -1,8 +1,14 @@
 # P2 Streamer Programming Guide - Changelog
 
-## v1.1.3 (2026-10-02)
+## v1.1.3 (2026-10-04)
 
-**SINC2's iteration-count constraint, measured on P2 silicon.**
+**How Goertzel results read on Rev C silicon, SINC2 measured, and where SPI data meets its clock.**
+
+### Added
+
+- **Rev C notes on `GETXACC`** (§10.6, §17.1): an idle read returns the running total; a burst's last term joins the next burst
+- **Exact SINC1 sums from discrete bursts** (§17.1): a zero-term burst delivers the held term before each idle read
+- **SPI data-to-clock phase** (§16.1): the `XINIT`-to-`WYPIN` spacing picks the phase; check it at every SCK rate
 
 ### Changed
 

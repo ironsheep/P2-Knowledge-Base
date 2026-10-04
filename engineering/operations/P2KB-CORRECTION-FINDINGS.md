@@ -109,12 +109,21 @@ Outside the two changesets (P2 Errata E3, KB since v1.22.0), found while reading
 **Fix:** WC first in Assembly; both state the E3 window and its keeper-cog workaround (or point to P2
 Errata E3). Assembly half under «#352».
 
-### F-530 — DEBUG_TIMESTAMP taught as "the 64-bit CT value" with no stale-window caveat — `CONFIRMED` (low)
+### F-530 — DEBUG_TIMESTAMP taught as "the 64-bit CT value" with no stale-window caveat — `PARTIAL` (low; DEBUG Window half released in v1.1.4, 2026-10-04; Assembly half owed)
+> **DEBUG Window half applied and released (v1.1.4, 2026-10-04, `p2-debug-window-manual-v1.1.4`).** ch14 carries
+> the rule as a Rev C silicon-note chip (the new platform tag, 3aa14a43): the stamp is the sending cog's own
+> counter copy, so a cog whose group of four had no running cog at a wrap is a whole number of wraps behind.
+> Source: `special-configuration-symbols.yaml` DEBUG_TIMESTAMP caveat. Verified on the PDF, p136. **Owed:**
+> Assembly `appendix-e-constants.md:685`, at the Assembly Reference release («#385»).
 D18. DEBUG Window `ch14-multiwindow-pasm.md:132-135`; Assembly `part-iii/appendix-e-constants.md:685`.
 `special-configuration-symbols.yaml` caveat: the stamp is the sending cog's own counter copy; a cog in a
 stale window stamps one wrap early and prints out of order. **Fix:** one sentence each.
 
-### F-531 — DEBUG Window BITMAP: "a runtime RATE with any positive count resumes refreshing" — `CONFIRMED`
+### F-531 — DEBUG Window BITMAP: "a runtime RATE with any positive count resumes refreshing" — `DONE` (released in v1.1.4, 2026-10-04, verified on the PDF: page 39)
+> **Applied and released.** The sentence now says a later `TRACE` or `CLEAR` (each re-derives the rate) or an
+> explicit `UPDATE` brings it back, and that a runtime `RATE 0` freezes it as `RATE -1` does (`bitmap.yaml`
+> RATE entry, from the PNut source). "(Hardware-verified.)" moved to follow the freeze sentence, the only part
+> the bench measured.
 D21. `ch04-bitmap.md:311` (marked "Hardware-verified"). `bitmap.yaml:47` (from the PNut source): a later
 TRACE or CLEAR, or an explicit UPDATE, un-freezes it. **Fix:** replace the sentence; check what the
 "(Hardware-verified.)" tag covers (the freeze, not the recovery).
@@ -167,7 +176,13 @@ state the rule in §4.5; re-run the example's skipping variants on the bench.
   "wraps around" claim). The caution itself stands. **Fix:** "each skipped instruction costs 2 clocks";
   "overflows without faulting".
 
-### F-539 — Streamer Guide ch16: streamer SPI data against a P_TRANSITION clock, taught as "matched rates", with no word on the losing start phase — `CONFIRMED`
+### F-539 — Streamer Guide ch16: streamer SPI data against a P_TRANSITION clock, taught as "matched rates", with no word on the losing start phase — `RESOLVED` (applied 2026-10-04; ships in Streamer v1.1.3, staged)
+> **Applied.** Ch16 intro: the rates match because both run from one clock, and the starting phase is set by
+> your code. §16.1 gains a caution after the bulk transfer: the `XINIT`-to-`WYPIN` spacing picks one of a few
+> phases (one per sysclk of the half-period), exactly one loses silently, and a safe spacing at one SCK rate can
+> lose at another, so check it at every rate. Source: `streamer_smartpin_control.yaml` alignment_pad.write_side.
+> The partner's residue formula is not stated. The examples keep their back-to-back `XINIT`/`WYPIN`: no
+> spacing is proven for their configuration, so the caution, not a number, is the fix.
 D15 (partner bench XF-001, graded SCOPED). `streamer-body.md:1688-1747`: `wrpin P_TRANSITION`,
 `xinit mode, data`, `wypin transitions` — only half-period-many start phases exist and exactly one silently
 corrupts whole transfers; a pad safe at one SCK rate can lose at another. **Fix:** a caution in 16.1:
@@ -328,7 +343,15 @@ no-wait RDFAST use, GETSEC "long-duration").
 
 ## The Streamer Guide teaches GETXACC as capture-and-clear (2026-10-01, v1.22.0 impact survey) — F-479
 
-### F-479 — the Streamer Guide says GETXACC "captures and clears" both accumulators; on silicon the clear acts only during a Goertzel burst, and a burst's last term lands in the next — `CONFIRMED` (held: E4/E5 not yet ratified)
+### F-479 — the Streamer Guide says GETXACC "captures and clears" both accumulators; on silicon the clear acts only during a Goertzel burst, and a burst's last term lands in the next — `RESOLVED` (applied 2026-10-04; ships in Streamer v1.1.3, staged)
+> **2026-10-04 — hold lifted, applied.** Stephen: "yes E1-E7 approved". §10.6 and §17.1 now state the silicon
+> behaviour as two Rev C silicon-note chips (E4: an idle read returns the running total and clears nothing;
+> E5: a burst's last term joins the next Goertzel burst), keep the before/after difference rule, and give the
+> zero-term burst (count 4, `S[15:12]` = 0, then `WAITXFI`) for an exact SINC1 sum. Source: `getxacc.yaml`
+> silicon_errata + workaround (EF-069, EF-070, EF-076). No pointer to P2 Errata and no E-numbers in the text:
+> the citation waits for the amended Silicon Doc. The demo's "get prior Goertzel acc's" quote was dropped (it
+> described the holding-register model). Re-audit for an absolute read after a discrete burst: none — the only
+> other read is the §17.1 `XCONT` loop, which reads inside the running command.
 > **2026-10-02 — held, not applied.** The guide's text is the P2 Documentation's documented
 > behaviour; the correction is errata E4/E5 content, and only E1 and E2 are ratified for
 > publication (Stephen, 2026-10-02). A first application in «#352» was reverted before any push.

@@ -810,7 +810,7 @@ Three ways to avoid it, most robust first:
 
 ## 10.6 Reading Results {#sec-10-6}
 
-`GETXACC` captures and clears both accumulators into holding registers, and the sine half arrives in the **next instruction's `S` operand** — which is what the `0-0` placeholder below receives. One read per streamer command is the contract: a second read with no command in between returns the same numbers, and a read taken *before* a command belongs to the previous one. §17.1 works the consequence through.
+`GETXACC` returns the cosine accumulator in `D`, and the sine half arrives in the **next instruction's `S` operand** — which is what the `0-0` placeholder below receives. [Rev C]{.silicon-note topic="GETXACC clears only during a Goertzel burst"} The read clears the accumulators only while a Goertzel command is running; with the streamer idle it returns the running total and clears nothing, so a second idle read returns the same numbers. §17.1 works the consequence through.
 
 **Pattern** — supply the `cos_result`, `sin_result`, `magnitude` and `phase` registers.
 
@@ -1685,7 +1685,7 @@ It also stops short of a picture. Composite still needs a framebuffer, a streame
 
 # Chapter 16: High-Speed Serial (SPI) {#ch-16}
 
-Not every streamer job is video or audio. This chapter shows the streamer as a fast, precise bit pump for serial protocols such as SPI — emitting a stream of bits from memory while a smart pin generates the matching clock. The pairing is the point: the streamer handles the data, the smart pin handles the clock, and — both being driven from the same system clock — they run at matched rates for transfers far faster than a software bit-bang.
+Not every streamer job is video or audio. This chapter shows the streamer as a fast, precise bit pump for serial protocols such as SPI — emitting a stream of bits from memory while a smart pin generates the matching clock. The pairing is the point: the streamer handles the data, the smart pin handles the clock, and both run from the same system clock, so their rates match for transfers far faster than a software bit-bang. Their starting phase is a separate matter, set by your code; §16.1 shows where.
 
 ## 16.1 SPI Output with Streamer
 
@@ -1729,6 +1729,10 @@ spi_block       rdfast  #0, ptra                ' Point to data
                 wypin   ##256*8*2, #spi_clk     ' Clock transitions
           _ret_ waitxfi
 ```
+
+::: caution
+**The spacing between `XINIT` and `WYPIN` sets where each data bit lands against the clock.** The clock starts on its next base-period boundary after `WYPIN`, while the streamer starts as soon as `XINIT` engages. So that spacing picks one of a few phases (one per system clock of the clock's half-period), and exactly one of them loses: the transfer completes, nothing reports an error, and the receiver latches the wrong bits. A spacing that is safe at one clock rate can be the losing one at another, so check the alignment with a logic analyzer at every SCK rate you use.
+:::
 
 ## 16.2 Coordinating with WAITXFI
 
@@ -1790,13 +1794,13 @@ Gain is a property of the **coupling**, not of this mode. A high-gain constant s
 
 This section builds a **detector** — the streamer's DAC routing stays off, and the only pin configured is the input. The same mode also *generates*, driving a synthesized waveform out of the DACs while it measures; that side is §17.2, and the DAC routing field is what turns it on.
 
-### Reading the result: one GETXACC per command
+### Reading the result: take the difference
 
-`GETXACC` **captures** both accumulators into holding registers and **clears** them, returning the captured cosine in `D` and placing the captured sine into the **next instruction's `S` operand** — which is what the `0-0` placeholder below receives.
+`GETXACC` returns the cosine accumulator in `D` and places the sine into the **next instruction's `S` operand** — which is what the `0-0` placeholder below receives.
 
-The consequence matters more than the mechanism: **`GETXACC` reads a holding register, not a live accumulator.** A second `GETXACC` with no intervening streamer command returns *the same numbers*, and a read taken before a command belongs to the **previous** one. The *Parallax Propeller 2 Documentation*'s own demo comments its read "get prior Goertzel acc's".
+[Rev C]{.silicon-note topic="GETXACC clears only during a Goertzel burst"} A read clears the accumulators only while a Goertzel command is running. With the streamer idle it returns the running total and clears nothing: a second idle read returns *the same numbers*, and an absolute read after a discrete burst includes every burst before it. That fails invisibly, because the number returned is large, stable and entirely plausible.
 
-So: **one read per streamer command.** With a discrete `XINIT` / `WAITXFI` / `GETXACC` sequence, read before the command and after it and take the **difference** — an absolute read in that pattern is not a per-command measurement. It fails invisibly, because the number returned is large, stable and entirely plausible. The `XCONT` loop below reads once per command.
+So with a discrete `XINIT` / `WAITXFI` / `GETXACC` sequence, read before the command and after it and take the **difference**. [Rev C]{.silicon-note topic="Goertzel last term lands in the next burst"} Each burst's last term is held back and added on the first clock of the next Goertzel burst, so for an exact SINC1 sum, deliver it first: run the same command with its count set to 4 and `S[15:12]` = 0, then `WAITXFI`, before each idle read. The `XCONT` loop below reads inside the running command, where the read does clear, so it reads once per command.
 
 ### Detection loop
 
