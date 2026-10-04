@@ -166,8 +166,8 @@ pin_mapping:
     P63: "Prop-Plug TX (P2 RX)"
   boot_pin_direction_note: >-
     P58 is the P2 INPUT (flash/card data OUT, i.e. MISO) and P59 the P2 OUTPUT
-    (flash/card data IN, i.e. MOSI). P60 and P61 SWAP roles between the two boot
-    sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60
+    (flash/card data IN, i.e. MOSI). P60 and P61 SWAP roles between the two
+    boot sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60
     and microSD CLK on P61. The P2 boot ROM listing states both directly.
   microsd_socket:
     added_in: "Rev C"

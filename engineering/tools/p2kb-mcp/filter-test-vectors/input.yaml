@@ -1,0 +1,46 @@
+# Title comment: kept (not a provenance header)
+# Sources: provenance header at column 0 -- dropped
+#   continuation of the header -- dropped
+#   another continuation -- dropped
+
+# A normal comment after a blank line -- kept
+name: "vector file"
+last_updated: "2025-01-01"
+documentation_source: enhanced
+description: |
+  Block text stays.
+  source: this line is inside a block scalar but matches the field pattern -- dropped
+  and this deeper line rides the drop span -- dropped
+next_key: kept
+block:
+  fact: "kept"
+  source: >-
+    folded provenance line one
+    folded provenance line two
+
+  sibling: "kept: same indent ends the span"
+  sources:
+    - "list item one"
+    - "list item two"
+top_after_list: kept
+  # Source: indented comment -- KEPT (the comment rule is column 0 only)
+items:
+  - source: "list-item form -- KEPT (dash before the key)"
+  - fact: "kept"
+source_documents: "longer key name -- KEPT (exact names only)"
+sourcey: "KEPT"
+deep:
+  inner:
+    verified_against: "dropped"
+      deeper: "dropped"
+    after: "kept"
+# Extracted from: header -- dropped
+# Verified against: second header straight after -- dropped
+#	tab continuation -- dropped
+#no-space comment -- kept (not a continuation: needs whitespace after #)
+manual_extraction_date: "2025"
+enhancement_source: x
+documentation_level: y
+source_reference: ":123"
+end_key: "kept"
+source: "field at end of file -- dropped"

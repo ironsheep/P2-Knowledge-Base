@@ -39,7 +39,7 @@ description: |
       description asserted configurable slew rates; it was fabrication and is
       not restored.
     - Propagation, rise and fall figures per drive setting. No Parallax source states them.
-  source: "P2 Datasheet 2022/11/01 feature list and Absolute Maximum Electrical Ratings -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:117, :2126-2149"
+source: "P2 Datasheet 2022/11/01 feature list and Absolute Maximum Electrical Ratings -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:117, :2126-2149"
 
 instruction_to_pin_timing:
   description: |

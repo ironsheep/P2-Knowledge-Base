@@ -20,6 +20,16 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.23.3] - 2026-10-04
+
+**The P2 Edge modules' boot-pin note arrives whole.**
+
+### Fixed
+
+- **P2 Edge modules, boot pins P58-P61**: the note on which pin carries which signal now includes the P60/P61 role swap between the flash and microSD boot sources
+
+---
+
 ## [1.23.2] - 2026-10-04
 
 **Synchronous serial transmit primes its first word in reset, and a `##` operand's skip-pattern cost is stated — both measured on silicon.**

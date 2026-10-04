@@ -619,6 +619,11 @@ require (
 
 ### Filter Implementation
 
+The rule is §Content Filtering; the reference implementation, its test vectors
+(`filter-test-vectors/`) and the parity/acceptance tests are in `MCP-DELIVERY-FILTER-HANDOFF.md`
+(2026-10-04, F-439). The five-field line regex this section used to show is the server's old
+behaviour and is NOT the rule.
+
 ```go
 package filter
 
@@ -627,11 +632,53 @@ import (
     "strings"
 )
 
-var metadataPattern = regexp.MustCompile(
-    `(?m)^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):.*\n?`)
+// [ \t\n\v\f\r] is POSIX [[:space:]] (what the awk reference uses).
+var (
+    fieldRe       = regexp.MustCompile(`^[ \t\n\v\f\r]*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date|source|sources|source_reference|verified_against):`)
+    commentHeadRe = regexp.MustCompile(`^#[ \t\n\v\f\r]*(Source|Sources|Extracted from|Verified against)`)
+    commentContRe = regexp.MustCompile(`^#[ \t\n\v\f\r]+`)
+    blankRe       = regexp.MustCompile(`^[ \t\n\v\f\r]*$`)
+    leadWSRe      = regexp.MustCompile(`^[ \t\n\v\f\r]*`)
+)
 
+// FilterMetadata removes provenance exactly as fetch-kb-file.sh filter_metadata() does.
 func FilterMetadata(content string) string {
-    return metadataPattern.ReplaceAllString(content, "")
+    lines := strings.Split(content, "\n")
+    if strings.HasSuffix(content, "\n") {
+        lines = lines[:len(lines)-1]
+    }
+    var b strings.Builder
+    dropping, commentDrop := false, false
+    dropIndent := 0
+    for _, line := range lines {
+        if dropping {
+            if blankRe.MatchString(line) {
+                continue
+            }
+            if len(leadWSRe.FindString(line)) > dropIndent {
+                continue
+            }
+            dropping = false
+        }
+        if commentHeadRe.MatchString(line) {
+            commentDrop = true
+            continue
+        }
+        if commentDrop {
+            if commentContRe.MatchString(line) {
+                continue
+            }
+            commentDrop = false
+        }
+        if fieldRe.MatchString(line) {
+            dropIndent = len(leadWSRe.FindString(line))
+            dropping = true
+            continue
+        }
+        b.WriteString(line)
+        b.WriteString("\n")
+    }
+    return b.String()
 }
 ```
 

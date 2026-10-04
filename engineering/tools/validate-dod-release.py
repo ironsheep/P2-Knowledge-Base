@@ -392,6 +392,51 @@ def _find_filter_induced_nulls(original_obj, filtered_obj, path: str = "") -> Li
     return bad
 
 
+def _strip_provenance_keys(obj):
+    """The structural reading of the filter's intent: the same field names,
+    removed as YAML KEYS (what YAML itself says is a key), not as lines."""
+    if isinstance(obj, dict):
+        return {k: _strip_provenance_keys(v) for k, v in obj.items()
+                if str(k) not in EXPECTED_FILTER_FIELDS}
+    if isinstance(obj, list):
+        return [_strip_provenance_keys(x) for x in obj]
+    return obj
+
+
+def _find_filter_eaten_content(expected_obj, filtered_obj, path: str = "") -> List[str]:
+    """Content the line filter deleted although YAML reads it as content.
+
+    The line rule drops any line that STARTS WITH a provenance field name, so a
+    wrapped prose line inside a block scalar that happens to begin `sources: ...`
+    is deleted from the delivered text (2026-10-04: the P60/P61 boot-pin swap
+    in both Edge module notes was shipped with that line missing). Comparing the
+    filter to a prediction of the same line rule cannot see it; comparing it to
+    YAML's own reading can. Direction matters: the filter KEEPING a content key
+    that happens to share a field name (a flow mapping `{source: "cog
+    registers"}`, a list item `- source: "CON"`) is correct and is not reported.
+    """
+    eaten: List[str] = []
+    if isinstance(expected_obj, dict) and isinstance(filtered_obj, dict):
+        for k, ev in expected_obj.items():
+            new_path = f"{path}.{k}" if path else str(k)
+            if k not in filtered_obj:
+                eaten.append(f"{new_path} (key missing)")
+            else:
+                eaten.extend(_find_filter_eaten_content(ev, filtered_obj[k], new_path))
+    elif isinstance(expected_obj, list) and isinstance(filtered_obj, list):
+        if len(expected_obj) != len(filtered_obj):
+            eaten.append(f"{path} (list length {len(expected_obj)} -> {len(filtered_obj)})")
+        for i, (ev, fv) in enumerate(zip(expected_obj, filtered_obj)):
+            eaten.extend(_find_filter_eaten_content(ev, fv, f"{path}[{i}]"))
+    elif isinstance(expected_obj, str) and isinstance(filtered_obj, str):
+        kept = {ln.strip() for ln in filtered_obj.split('\n')}
+        lost = [ln.strip() for ln in expected_obj.split('\n')
+                if ln.strip() and ln.strip() not in kept]
+        if lost:
+            eaten.append(f"{path} (line lost: {lost[0][:70]!r})")
+    return eaten
+
+
 def _predicted_filtered(original: str) -> str:
     """An INDEPENDENT prediction of what the shipped filter should produce.
 
@@ -540,6 +585,9 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
             for bad_path in _find_filter_induced_nulls(original_obj, filtered_obj):
                 structural_failures.append(
                     (key, f"key '{bad_path}' became null — every child was a filtered field"))
+            for eaten in _find_filter_eaten_content(_strip_provenance_keys(original_obj), filtered_obj):
+                structural_failures.append(
+                    (key, f"filter deleted content YAML reads as content: {eaten}"))
 
     result.info(f"Files analyzed: {total_files}")
     result.info(f"Files with metadata: {files_with_changes}")
@@ -562,7 +610,7 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
         for key, msg in structural_failures[:10]:
             result.info(f"  {key}: {msg}")
     else:
-        result.ok("Filtered payload re-parses cleanly with no filter-induced null keys")
+        result.ok("Filtered payload re-parses cleanly with no filter-induced null keys and no deleted content")
 
     return result
 

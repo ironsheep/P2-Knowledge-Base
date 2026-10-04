@@ -1,0 +1,23 @@
+# Title comment: kept (not a provenance header)
+
+# A normal comment after a blank line -- kept
+name: "vector file"
+description: |
+  Block text stays.
+  and this deeper line rides the drop span -- dropped
+next_key: kept
+block:
+  fact: "kept"
+  sibling: "kept: same indent ends the span"
+top_after_list: kept
+  # Source: indented comment -- KEPT (the comment rule is column 0 only)
+items:
+  - source: "list-item form -- KEPT (dash before the key)"
+  - fact: "kept"
+source_documents: "longer key name -- KEPT (exact names only)"
+sourcey: "KEPT"
+deep:
+  inner:
+    after: "kept"
+#no-space comment -- kept (not a continuation: needs whitespace after #)
+end_key: "kept"

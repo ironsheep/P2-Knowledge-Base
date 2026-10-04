@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-544`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-546`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -53,7 +53,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Full impact audit: every fact KB v1.23.0 and v1.23.1 changed, against every live document (2026-10-04, «#378») — F-526 … F-541, plus F-542, F-543 (seen verifying v1.23.1)
+## Full impact audit: every fact KB v1.23.0 and v1.23.1 changed, against every live document (2026-10-04, «#378») — F-526 … F-541, plus F-542 … F-545 (seen verifying v1.23.1 and writing the MCP filter handoff)
 
 **Method.** The fact inventory was built from the diffs (`v1.22.0..v1.23.1`, `deliverables/ai/P2/`), not
 from this register: **69 net fact changes** (843d6fac: 43 — C6 net-reversed by a0ebdd21; a0ebdd21 +
@@ -194,6 +194,41 @@ Seen 2026-10-04 reading the served entry while verifying v1.23.1. Against the Si
   `size_checking` ($1F8).
 **Fix:** re-derive those blocks from the per-instruction YAMLs and the Silicon Doc register table. A
 beginner guide is the most-copied page in the set.
+
+### F-544 — the delivery filter deleted a line of the Edge modules' boot-pin note: a wrapped prose line began `sources:` — `PENDING-VALIDATION` (fixed 2026-10-04; ships in the next KB release)
+Found 2026-10-04 writing the MCP filter handoff, by comparing the shipped filter's output with a
+structural strip of the same nine keys across all 1,131 files (8 differed). In
+`hardware/edge-32mb-module.yaml` and `hardware/edge-standard-module.yaml`, the folded
+`pin_mapping.boot_pin_direction_note` wrapped so that a line began `sources: flash SPI CLK on P60 and
+flash SPI CS on P61, but microSD CS on P60`; the line rule took it for a provenance key and deleted it,
+so script consumers received the P60/P61 role swap without its first half. **Fixed:** re-wrapped ("the
+two / boot sources:"), parsed text identical to HEAD, the shipped note now whole. Same comparison:
+`architecture/io_pin_timing.yaml` had its `source:` line indented into the `description: |` block
+(YAML read it as description prose; the filter dropped it as provenance) → moved to a top-level
+`source:` key, the rest of the file unchanged. The other six differences are correct or cosmetic: a
+flow mapping `{source: "cog registers"}` and list items `- source: "CON …"` are content the line rule
+rightly keeps; three are a block scalar's final newline. **Gate:** `validate_metadata_filter` now also
+compares the payload with YAML's own reading and fails on any content line the filter deleted
+(negative control: the pre-fix edge file is caught; the flow-mapping collision stays silent). **Why it
+matters for the MCP roll:** the MCP does not yet apply this filter, so MCP consumers still had the
+line; rolling the MCP filter before this fix would have spread the loss.
+
+### F-545 — provenance ships under keys the delivery filter does not list (`last_verified`, `extraction_status`, `authority_tier`, `grounding`, …) — `NEEDS-VERIFICATION` (classify, then move into the existing keys)
+Measured 2026-10-04 on the shipped payload (keys surviving the filter): `extraction_status` 131 files,
+`last_verified` 131, `last_author_extraction` 113, `last_complete_extraction` 73,
+`last_author_re_extraction` 29, `authority_tier` 92 lines / 15 files, `grounding` 28 / 10,
+`extraction_metadata` 13, `provenance` 10, `extraction_date` 9, `primary_sources` 7, `authority` 7,
+`derived_from` 7 / 4, `cite` 18 / 2, `cross_check_sources` 4, `source_document` 3 (outside the
+code-example schema), `range_source` 12, `rescrape_source` 17, `import_source` 12,
+`original_archiver_name` 6, and others. These reach every consumer (scripts and MCP alike). **Rule
+(Stephen, 2026-10-04): the filter's key list does not grow** — "let's make sure we're using existing
+keys the way we should and not inventing new keys." So the fix is on the KB side, key by key:
+provenance moves into `source:` / `sources:` (or the existing metadata keys), content stays. **To do:**
+classify each key (provenance vs content — e.g. `resources`, `reference_links`, `source_code`,
+`event_sources` are content; `original_archiver_name` may be attribution a consumer should see), then a
+sweep with the «#376» verification method (structural checker, word diffs, gates). Also add a gate that
+fails on a NEW key name containing source/extract/verified/provenance/authority that is not in the
+list, so the drift cannot recur.
 
 ### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `CONFIRMED`
 `examples` (P2-FLASH-FS): `PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)` and the same for
