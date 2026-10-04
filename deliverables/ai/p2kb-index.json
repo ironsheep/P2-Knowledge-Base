@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.5.0",
-    "generated": "2026-10-03T23:37:50.423603",
+    "generated": "2026-10-04T04:46:31.440759",
     "total_entries": 1131,
     "total_categories": 59,
-    "total_aliases": 3081,
+    "total_aliases": 3091,
     "multi_target_aliases": 189,
     "source": "deliverables/ai/P2/"
   },
@@ -699,6 +699,12 @@
     "#": [
       "p2kbSpin2SymHash"
     ],
+    "## INSIDE A SKIP SEQUENCE": [
+      "p2kbPasm2InstructionSkipping"
+    ],
+    "## inside a SKIP sequence": [
+      "p2kbPasm2InstructionSkipping"
+    ],
     "#32201": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
     ],
@@ -1302,6 +1308,12 @@
     ],
     "AUGS": [
       "p2kbPasm2Augs"
+    ],
+    "AUGS IN A SKIP PATTERN": [
+      "p2kbPasm2InstructionSkipping"
+    ],
+    "AUGS in a skip pattern": [
+      "p2kbPasm2InstructionSkipping"
     ],
     "Absolute Address Operator": [
       "p2kbSpin2SymDoubleAt"
@@ -5673,8 +5685,20 @@
     "SKIP": [
       "p2kbPasm2Skip"
     ],
+    "SKIP PATTERN": [
+      "p2kbPasm2InstructionSkipping"
+    ],
+    "SKIP PATTERN BITS": [
+      "p2kbPasm2InstructionSkipping"
+    ],
     "SKIPF": [
       "p2kbPasm2Skipf"
+    ],
+    "SKIPF PATTERN": [
+      "p2kbPasm2InstructionSkipping"
+    ],
+    "SKIPF pattern": [
+      "p2kbPasm2InstructionSkipping"
     ],
     "SKIPF_BRANCHING": [
       "p2kbPasm2SkipfBranching"
@@ -9506,6 +9530,12 @@
     "skip": [
       "p2kbPasm2Skip"
     ],
+    "skip pattern": [
+      "p2kbPasm2InstructionSkipping"
+    ],
+    "skip pattern bits": [
+      "p2kbPasm2InstructionSkipping"
+    ],
     "skipf": [
       "p2kbPasm2Skipf"
     ],
@@ -10579,8 +10609,8 @@
     },
     "p2kbArchSmartPin11100SyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml",
-      "mtime": 1791065413,
-      "sha256": "88be69d3d0ce1caa054fcbc5a299144986954ad304618aa3f8b64daa6691abf5"
+      "mtime": 1791089168,
+      "sha256": "fa1a79144682b0123328bacae6b2e21ee69dacfc488f0a0fb5c7c58c5fee3dd1"
     },
     "p2kbArchSmartPin11101SyncSerialReceive": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml",
@@ -12084,8 +12114,8 @@
     },
     "p2kbPasm2InstructionSkipping": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/instruction_skipping.yaml",
-      "mtime": 1791067549,
-      "sha256": "e09a86b836707afd939968ad4f71a68a1c348f9830b1751433c79e11380a7970"
+      "mtime": 1791089168,
+      "sha256": "975843dd9d6b1bdf91062f1f6fbc723a330f16ff1bafa80c148a7520ec66dddf"
     },
     "p2kbPasm2Labels": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/labels.yaml",
@@ -14684,8 +14714,8 @@
     },
     "p2kbSpin2Pinstart": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinstart.yaml",
-      "mtime": 1791065413,
-      "sha256": "a688651997bd4a8a777b260fa491f76f8db2f7e1e060d4fa36281c80d05ae4d6"
+      "mtime": 1791089168,
+      "sha256": "b78538d0032ed1f64f391cbde9748e1f7efff8049145f9f16205e69bfad944cc"
     },
     "p2kbSpin2Pintoggle": {
       "path": "deliverables/ai/P2/language/spin2/methods/pintoggle.yaml",

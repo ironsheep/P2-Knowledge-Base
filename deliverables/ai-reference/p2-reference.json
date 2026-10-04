@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-10-03",
-    "last_updated": "2026-10-03T23:37:50.478842",
+    "release_date": "2026-10-04",
+    "last_updated": "2026-10-04T04:46:31.493331",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-10-03T23:37:50.478842",
+    "extraction_date": "2026-10-04T04:46:31.493331",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -18453,7 +18453,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-10-03T23:37:50.478842",
+    "extraction_date": "2026-10-04T04:46:31.493331",
     "categories": {
       "keywords": {
         "count": 37,
@@ -22543,7 +22543,10 @@
           "PINSTART": {
             "method": "PINSTART",
             "type": "method",
-            "description": "Configure and start smart pin with mode and parameters.\nSupports pin groups via ADDPINS operator for parallel operations.\n\nTRIGGER AND SERIAL MODES: PINSTART's Yval is LOST. PINSTART writes Y before it raises\nDIR, and a WYPIN issued while DIR is low (the pin held in reset) never starts a\npulse/cycle (%00100), transition (%00101) or serial transmit (%11110, %11100) output.\nPass Yval = 0 and issue the triggering WYPIN AFTER PINSTART (reset -> WRPIN/WXPIN ->\nDIR high -> WYPIN). Value modes keep the Y that PINSTART writes (an NCO started by\nPINSTART runs at its Yval).\n",
+            "description": "Configure and start smart pin with mode and parameters.\nSupports pin groups via ADDPINS operator for parallel operations.\n\nTRIGGER AND ASYNC SERIAL MODES: PINSTART's Yval is LOST. PINSTART writes Y before it\nraises DIR, and a WYPIN issued while DIR is low (the pin held in reset) never starts a\npulse/cycle (%00100), transition (%00101) or asynchronous serial transmit (%11110)\noutput. Pass Yval = 0 and issue the triggering WYPIN AFTER PINSTART (reset -> WRPIN/WXPIN\n-> DIR high -> WYPIN). Value modes keep the Y that PINSTART writes (an NCO started by\nPINSTART runs at its Yval). SYNCHRONOUS serial transmit (%11100) is the opposite: a word\nwritten while DIR is low primes its shifter and is sent once clocking starts, so\nPINSTART's Yval is the first word transmitted.\n",
+            "sources": [
+              "description (%11100 keeps the reset-time word): P2 Documentation, silicon-doc-text.txt %11100 section; bench-verified in continuous mode, P2-EMPIRICAL-FINDINGS.md EF-090"
+            ],
             "category": "Smart Pin Operations",
             "documentation_source": "enhanced",
             "documentation_level": "comprehensive",
@@ -22637,7 +22640,7 @@
             },
             "notes": [
               "Automatically performs the DIR=0 reset while configuring, then raises DIR",
-              "Complete initialization for value modes; in trigger/serial modes the Yval is lost (written before DIR rises) -- pass 0 and WYPIN after PINSTART",
+              "Complete initialization for value modes; in trigger and async-serial-TX modes the Yval is lost (written before DIR rises) -- pass 0 and WYPIN after PINSTART; sync serial TX (%11100) sends it (it primes the shifter)",
               "Mode constants defined in Spin2 (P_ADC, P_PWM_TRIANGLE, etc.)",
               "X and Y parameters are mode-specific",
               "Pin starts operating immediately after DIR=1",
