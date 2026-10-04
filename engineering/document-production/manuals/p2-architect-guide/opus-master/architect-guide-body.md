@@ -486,10 +486,12 @@ that conflation in your own design before it ships.
 
 There's one small discipline from the control plane worth carrying away by name, because it
 recurs everywhere on the P2: when you publish a multi-field update through hub, write the
-payload first and bump the signalling counter *last*. Because a single-long write is atomic,
-a reader that watches that counter can never catch a torn, half-written value — the
-publish-last ordering makes a lockless hand-off safe. It costs nothing and it removes a
-whole category of glitch.
+payload first and bump the signalling counter *last*, and do not write the next update until
+the reader has copied this one — an acknowledgement, or a ring buffer's tail, hands the slot
+back. Because a single-long write is atomic, a reader that watches that counter then never
+catches a torn, half-written value, and the hand-off needs no lock. Publish-last on its own
+guards only the first update: a second write landing while the reader is still copying tears
+it. It costs almost nothing and it removes a whole category of glitch.
 
 The failure modes Force 2 prevents are two: blocking calls between cogs that quietly
 *serialize* a system that was meant to run in parallel, and multi-long structures written by
@@ -1741,8 +1743,9 @@ exceeds the back-pressure across the cut.
 pipeline's rate, not by any one stage's instruction count.
 
 **Publish-last.** The discipline of writing a multi-field update's payload first and bumping its
-signalling counter last, so a reader can never catch a torn value — a lockless hand-off made safe by
-single-long atomicity.
+signalling counter last, and not writing the next update until the reader has handed the slot back
+(an acknowledgement, or a ring buffer's tail), so a reader never catches a torn value — a lockless
+hand-off made safe by single-long atomicity.
 
 **Rate adaptation (Force 3).** The force that inserts objects wherever two cadences meet:
 samplers/buffers at rate-domain crossings, and slew/easing engines where a discrete intent must

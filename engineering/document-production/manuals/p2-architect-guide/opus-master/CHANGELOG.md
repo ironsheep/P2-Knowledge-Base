@@ -17,6 +17,7 @@ to commits). Newest entry first.
 ### Fixed
 
 - **Latest-wins mailbox** (Chapter 5, Force 2; Chapter 7, the walking robot's Step 6): the producer posts again only after the consumer has copied the command and acknowledged it; a command that fits in one long needs no wait
+- **The publish-last discipline** (Chapter 5 and the glossary): the writer does not publish the next update until the reader has handed the slot back, by an acknowledgement or a ring buffer's tail
 
 ---
 
