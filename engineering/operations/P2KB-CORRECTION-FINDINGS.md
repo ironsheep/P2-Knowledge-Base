@@ -115,7 +115,7 @@ long-aligned)") stands at 87 lines in 8 files (plus one CHANGELOG line, history)
 depending on hub timing". The manual's own appendix-b:168, ch04:623, :646 and ch01:202 state the correct
 rule. **Fix:** "13+ (one more if the target is not long-aligned)" everywhere; table cells "4 / 13+".
 
-### F-528 — Assembly Reference GETXACC: "both accumulators are cleared" unconditionally, no per-burst procedure — `RESOLVED` (applied 2026-10-05; ships in Assembly v3.1.11, staged)
+### F-528 — Assembly Reference GETXACC: "both accumulators are cleared" unconditionally, no per-burst procedure — `DONE` (released in Assembly v3.1.11, 2026-10-05, verified on the PDF: page 220)
 > **Applied** (`instructions-g.md` GETXACC): two Rev C silicon-note chips after the clear sentence — the
 > clear acts only during a Goertzel burst (read before and after, subtract), and a burst's last term lands
 > in the next (zero-term burst, count 4, `S[15:12]` = 0, then `WAITXFI`; not for SINC2). Source:
@@ -125,7 +125,7 @@ idle reads return the running total; a read after N clocks holds N-1 terms; read
 subtract (`pasm2/getxacc.yaml`). Owed under «#352» (its body names "Assembly's ... GETXACC ... entries"),
 never registered until now. **Fix:** at «#352».
 
-### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `RESOLVED` (deSilva half ships in v3.0.9; Assembly half applied 2026-10-05, ships in v3.1.11; both staged)
+### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `RESOLVED` (Assembly half released in v3.1.11, 2026-10-05, verified on the PDF: page 214; deSilva half ships in v3.0.9, render in progress)
 > **Assembly applied** (`instructions-g.md` GETCT): the example reads `GETCT WC` first, then plain `GETCT`
 > ("GETCT WC + GETCT gets full CT" — P2 Datasheet :2084, PASM2 Manual; GETCT+WC interrupt-shielding,
 > Silicon Doc :2349), plus a Rev C chip with the keeper-cog workaround. Compiled clean (pnut-ts).
@@ -145,7 +145,7 @@ Outside the two changesets (P2 Errata E3, KB since v1.22.0), found while reading
 **Fix:** WC first in Assembly; both state the E3 window and its keeper-cog workaround (or point to P2
 Errata E3). Assembly half under «#352».
 
-### F-530 — DEBUG_TIMESTAMP taught as "the 64-bit CT value" with no stale-window caveat — `RESOLVED` (low; DEBUG Window half released in v1.1.4, 2026-10-04; Assembly half applied 2026-10-05, ships in v3.1.11, staged)
+### F-530 — DEBUG_TIMESTAMP taught as "the 64-bit CT value" with no stale-window caveat — `DONE` (low; DEBUG Window half released in v1.1.4, 2026-10-04; Assembly half released in v3.1.11, 2026-10-05, verified on the PDF: page 468)
 > **Assembly applied** (`appendix-e-constants.md` DEBUG_TIMESTAMP): a Rev C chip in the DEBUG Window's
 > wording, pointing to GETCT for the cure.
 > **DEBUG Window half applied and released (v1.1.4, 2026-10-04, `p2-debug-window-manual-v1.1.4`).** ch14 carries
@@ -164,7 +164,7 @@ stale window stamps one wrap early and prints out of order. **Fix:** one sentenc
 instruction is a 2-clock NOP). **Fix:** "2/13+ (hub-exec)"; "REP for zero-overhead loops, SKIP for
 shared code paths".
 
-### F-541 — Assembly Reference: crystal/PLL settle times disagree inside the manual — `RESOLVED` (applied 2026-10-05; ships in Assembly v3.1.11, staged)
+### F-541 — Assembly Reference: crystal/PLL settle times disagree inside the manual — `DONE` (released in Assembly v3.1.11, 2026-10-05, verified on the PDF: pages 76, 222)
 > **Settled:** `instructions-h.md:67` is right — 5 ms crystal, 10 ms crystal + PLL (P2 Datasheet :828-834,
 > Silicon Doc part3 :576-580, `clock_system.yaml` stabilization_timing, whose `conflict_resolved` notes the
 > sourceless "~10 µs"). `chapter-04-timing.md:66` now states the same.

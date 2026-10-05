@@ -1,5 +1,52 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.11 (2026-10-05)
+
+**Every explanation, register, directive and appendix is checked against Parallax's documentation, and Rev C silicon notes mark each silicon trap where you meet it.**
+
+### Added
+
+- **Rev C silicon notes** state how the current silicon behaves, at the instruction concerned; Appendix J's Silicon Notes section lists them all
+- **`GETCT WC`'s upper half lags** in a cog whose group of four ran no cog at a counter wrap; keep one cog per group running
+- **`DEBUG_TIMESTAMP` stamps early** from a cog in such a group, so its messages print out of time order
+- **`GETXACC` clears only during a Goertzel burst**, and a burst's last term lands in the next: read before and after, and subtract
+- **After a no-wait `RDFAST`, start no hub instruction for 16 clocks** — stated at `RDFAST`, `SETQ` and every hub read and write
+- **`BRK` explains that its condition gates only the code**, with the opposite-condition `SKIP #1` form that makes a break conditional
+- **`QDIV` and `QFRAC` state what a divide by zero returns**, and `QFRAC` that its quotient is a fraction of 2^32^
+- **`HUBSET` documents all five of its modes**, and the clock-switching procedure that avoids a PLL glitch
+- **Every `J` event branch states that the event flag is cleared whether or not it jumps**
+
+### Changed
+
+- **The 64-bit `GETCT` example reads the upper half first**, with `GETCT WC`, then the lower half, the pairing that gets the full counter
+- **Chapter 4 allows 5 ms for a crystal and 10 ms for crystal plus PLL**, as `HUBSET` does
+- **`HUBSET` with D[31] set seeds the random-number generator**; `HUBSET ##$1000_0000` is a hard reset; the PLL example keeps the VCO at 100–200 MHz
+- **The hardware stack is eight levels deep**: `PUSH` adds a new top entry, and `PUSH`/`POP` must balance before `RET`
+- **`REP` counts 0–511 instructions in every form**; only the repeat count extends with `##` or a register, and `@label` counts the body exactly
+- **`ORG` with an address below `$200` defaults its limit to `$1F8`**
+- **`JQMT`, `JXMT`, `JXRL`, `JXFI` and `JINT` give each event's exact trigger**; `SETSE` covers pin, LUT and lock events; `SETPAT` reads C and Z
+- **A block transfer whose `SETQ` is separated from it steps the pointer by its own expression** (+4 for `ptra++`); keep the two adjacent
+- **An immediate `ALTx` that takes a pending `AUGS` moves its own D register** by the augment's bits 17:9, while its base is kept
+- **These explanations now read as Parallax documents them**:
+  - `RESIx`, `RET` pairing, `RFVAR` length, `RDPIN`'s one-`NOP` settle
+  - `SAR` for signed values, `SKIPF` cancel cases, `WRFAST` waiting, `XCONT` from idle
+  - the streamer's S operand, `WXPIN`/`WYPIN` roles, `WAITX` flags
+  - `COGATN`'s 16-bit mask, `GETRND`'s shared generator, `LOCKREL`, `NIXINT`, `MUXQ`
+  - `MIXPIX`'s formula, `QMUL` unsigned, `EXECF` as a jump, `IRETn` holding C and Z
+- **Directives** state the `ORGH` range for PASM-only programs, `DITTO`'s no-labels rule, the `FIT` limit labels and a working inline-PASM toggle
+- **Appendix H counts 864 reserved words**, adding `FIELD`, `SIZEOF`, `GRAY` and the cooperative-tasking symbols
+- **Appendix H describes `PI`, `HUBEXEC` and `DITTO`**, and that a program uses a `DEBUG_*` configuration name by declaring it in `CON`
+- **The Appendix E `DEBUG_COGS`, `DEBUG_TIMESTAMP`, `DEBUG_MAIN` and `DEBUG_COGINIT` examples are complete Spin2 programs**, and the Chapter 2 and 3 examples assemble
+- **Appendix A gives the original base bit as the C and Z result** in every `DIRx`, `DRVx`, `FLTx` and `OUTx` row
+- **Hub accesses that cross a hub long take one more clock** — stated for `RDLONG`, `RDWORD`, `WRLONG`, `WRWORD`, `WMLONG`, `PUSHx`, `POPx`, `CALLA`/`CALLB` and `RETA`/`RETB`
+- **`COGSTOP` selects its cog by `D[3:0]`**; `COGID` with `WC` and `COGBRK` read the cog number from `Dest[2:0]`
+- **Condition tests are written with `==`** throughout, distinct from `=` for a value received
+
+### Removed
+
+- **`IF_RET`** as a spelling of `_RET_` in Appendix B — it assembles as a label
+- **References to the `SETRAND` and `WAITQMT` instructions**, which the silicon does not have
+
 ## v3.1.10 (2026-09-22)
 
 **A counter event fires once the counter has passed its target, the interrupt levels run in the silicon's order, and the Q register is told apart from the CORDIC results.**

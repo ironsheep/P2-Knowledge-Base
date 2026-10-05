@@ -42,7 +42,7 @@ each feature's *mechanism* stays in its own document, linked below.
 |---|---|:--:|:--:|:--:|:--:|:--:|
 | **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ | — |
 | **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ³³ |
-| **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | 🔧 |
+| **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | **✅** ³⁴ |
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | 🔧 |
 | **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | **✅** ³⁰ |
@@ -597,6 +597,15 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+³⁴ **Assembly Reference — silicon notes proven on the released v3.1.11 PDF, 2026-10-05** (20:05 build,
+522pp, prior 509). **The first silicon-note index in the set.** 22 chips across GETCT, GETXACC (×2),
+DEBUG_TIMESTAMP, RDFAST, SETQ/SETQ2, the six hub reads and writes, ALTD, AUGD and AUGS; Appendix J's
+`## Silicon Notes` (`::: silicon-note-index`) renders 22 lines in document order, each "topic — chapter;
+section — page N", with 44 link annotations on the page. `audit-pdf-silicon-notes.py` CLEAN: every entry's
+page carries its chip and section, 22 entries = 22 notes in the source. That gate was built at this release
+after the 05:19 build sent the WMLONG entry a page early (fixed in `content.sty`, 19:43 line).
+`p2kb-platform-silicon-notes` sits before tables in `request.json`.
 
 ³³ **I/O & Smart Pins — silicon notes proven on the released v1.0.11 PDF, 2026-10-05** (03:03 build, 397pp
 = prior). Two chips (DAC-mode ADC feedback: OUT runs the ADC only with TT bit 0 set) render inline on p161
