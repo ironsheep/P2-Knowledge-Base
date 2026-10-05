@@ -333,6 +333,17 @@ def build_gates(slug: str, phase: str, pdfs: list[str] | None):
                      "text crossing the right margin, measured not eyeballed")):
                 G.append((per_doc(gate, stem), f"{V}/{script}" if pdf else None,
                           argv if pdf else None, True, why if pdf else "no --pdf given"))
+            # A silicon-note index prints page NUMBERS, which no other gate compares
+            # with the page they name. Assembly v3.1.11's index sent the WMLONG note
+            # to p352 while it printed on p353, behind a clean log and a green runner
+            # (2026-10-05). The source says whether an index was asked for and how
+            # many notes it must list.
+            md = dict((s, m) for m, s in wsdocs).get(stem)
+            G.append((per_doc("pdf-silicon-notes", stem),
+                      f"{V}/audit-pdf-silicon-notes.py" if pdf else None,
+                      ([pdf] + (["--source", md] if md else [])) if pdf else None, True,
+                      "every silicon-note index entry names the page its note is on"
+                      if pdf else "no --pdf given"))
 
     # The meta-gate runs in BOTH phases and is the reason this manifest stays
     # honest: it turns red when a gate script exists that nothing invokes.
