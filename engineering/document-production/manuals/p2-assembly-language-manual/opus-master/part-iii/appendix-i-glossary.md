@@ -75,6 +75,10 @@ This glossary defines the terms used throughout the instruction encoding tables,
 | Clocks | Execution time in system clock cycles |
 
 
+```{=latex}
+\needspace{6\baselineskip}
+```
+
 ## Related Documentation
 
 - **Chapter 2** — Detailed explanation of instruction encoding format
