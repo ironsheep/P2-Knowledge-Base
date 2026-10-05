@@ -203,7 +203,7 @@ appendix-f:694 give `%01x`; `part-5-appendices/index.md:149` points P_CHANNEL at
 mentions it. **To do:** settle the edge encoding against the Silicon Doc, then fix the losing side;
 repoint the index (P_CHANNEL is at ch02:380 and appendix-b:242).
 
-### F-537 — XBYTE guide: SKIPF shared bodies use a relative `call #` before an instruction the pattern may skip — `RESOLVED` (high; applied 2026-10-04, ships in XBYTE v1.1.1, staged; bench run of the rig owed)
+### F-537 — XBYTE guide: SKIPF shared bodies use a relative `call #` before an instruction the pattern may skip — `DONE` (high; released in XBYTE v1.1.1, 2026-10-05, verified on the PDF: pages 26-27, 74; bench EF-092)
 > **Applied.** Rule confirmed at `silicon-doc-text.txt:889`. §4.5 states it (where the next line may be skipped,
 > the CALL's immediate must be absolute; CALLPA/CALLPB take a register). `call #\pop_two` in all three ALU-body
 > copies (§4.4, §15.2, §15.5) and the example (`xbyte-growing-vm.spin2`; .bin differs in that one long only).
@@ -226,7 +226,7 @@ XBYTE code in the reference set writes `call #\label` there (NeoYume `neoyume_lo
 drivers). No silicon run of these variants is recorded. **Fix:** `call #\pop_two` (and every such CALL);
 state the rule in §4.5; re-run the example's skipping variants on the bench.
 
-### F-538 — XBYTE guide: a cancelled instruction "still spends its clocks"; the 8-level stack "wraps" — `RESOLVED` (low; applied 2026-10-04, ships in XBYTE v1.1.1, staged)
+### F-538 — XBYTE guide: a cancelled instruction "still spends its clocks"; the 8-level stack "wraps" — `DONE` (low; released in XBYTE v1.1.1, 2026-10-05, verified on the PDF: pages 22, 24, 79, 98)
 > **Applied.** Against `silicon-doc-text.txt:780` (cancelled instructions become 2-clock NOPs): §4.1 (two
 > sentences) and the §20.1 SKIP row now say each cancelled instruction costs 2 clocks. Stack: §12.4's caution
 > heading and §15.6 say "overflows without faulting"; no other wrap claim in the guide. Also in this release:

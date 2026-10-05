@@ -47,7 +47,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | **✅** ³⁰ |
 | **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — | — |
-| Interpreters & Emulators (XBYTE) | manual | 🔧 ³ | 🔧 | 🔧 | ✅ | 🔧 |
+| **Interpreters & Emulators (XBYTE)** | manual | **✅** ³¹ | **✅** ³¹ | **✅** ³¹ | ✅ | **✅** ³¹ |
 | **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | — |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — | — |
@@ -65,8 +65,8 @@ the audit at its next release rather than assuming it passed.
 ² Its template declares **no `\title` and no `\author` at all**, and cover vs
 `request.json` disagree on **both** title and subtitle. Needs the conflict resolved
 (the cover wins) before it can convert.
-³ Its template still carries the pre-v1.1.0 name `P2 XBYTE Programming Guide`; the
-shipped cover reads *"P2 Interpreters & Emulators Guide"*.
+³ Resolved at v1.1.1: the cover and the PDF properties both read *"P2 Interpreters &
+Emulators Guide"* from `request.json` (see ³¹).
 ⁴ All seven share `p2kb-appnote-reference.latex`, which hardcodes
 `\title{P2 Application Note}`. Converting the shared template converts all seven at
 once — `request.json` `metadata.title` already equals each cover title.
@@ -597,6 +597,14 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+³¹ **XBYTE Guide — all four proven on the released v1.1.1 PDF, 2026-10-05** (02:41 build, 115pp, prior
+114). **Metadata single-source + rights:** page 1 reads "October 2026", "Version 1.1.1" from `\DocDate`/
+`\DocVersion`; the PDF carries Title "P2 Interpreters & Emulators Guide", Subject (the cover subtitle),
+Author and Keywords "Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA
+4.0" — all four were empty in v1.1.0 (pymupdf metadata of the tagged PDF). **Cross-ref filter:** 322 → 765
+internal links; `.tex` sweep clean (no unresolved refs). **Silicon notes:** one chip (no-wait `RDFAST`,
+§5.1) renders on p31; one note, so no index; the filter sits before tables in `request.json`.
 
 ³⁰ **Streamer Guide — silicon notes proven on the released v1.1.3 PDF, 2026-10-04** (23:42 build, 91pp = prior).
 Two `GETXACC` chips (E4 and E5) render inline on p43 (§10.6) and p75 (§17.1), rendered and read; two notes,

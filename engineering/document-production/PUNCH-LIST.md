@@ -835,8 +835,17 @@ partners in one `forge-test` sweep are F-300 (PDF Title/Author metadata) and, as
 polish, F-299 (6-column table overhang).
 
 **Verify when done:** `audit-pdf-margin-overflow.py` reports zero spans on the XBYTE
-PDF, and the §C.1 and §C.2 URLs both sit inside the text block with their breaks at
+PDF, and the §C.1 and §C.8 URLs both sit inside the text block with their breaks at
 sensible boundaries.
+
+**Measured on the released XBYTE v1.1.1 PDF, 2026-10-05.** §C.1 is fixed locally: the
+URL became an autolink (`<https://…>`, 4bb62e3e), which breaks at many points rather than
+only at `/`, so it does not depend on where the line falls; it now ends at 541.3pt (p107).
+The second overhang was misnamed above as §C.2 — it is **§C.8**, `https://github.com/
+totalspectrum/riscvemu` as inline code, ending at 557.6pt on p110 (17.6pt into the
+margin, under the 20pt tolerance, so the gate reports CLEAN on all 115 pages). The
+other Appendix C URLs end at or inside 540pt. Still OPEN for the platform fix: inline
+code in prose has no break points but `/`, in every manual.
 
 ---
 

@@ -91,11 +91,11 @@ The design-and-realization companion to the reference manuals, picking up where 
 *October 2026 - Community Review Edition* | [Changelog](DOCs/p2-architect-guide-changelog.md)
 
 ### [P2 Interpreters & Emulators Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-XBYTE-Programming-Guide.pdf)
-**Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2** · *Version 1.1.0*
+**Skip Patterns, Bytecode Dispatch, and the XBYTE Engine on the Propeller 2** · *Version 1.1.1*
 
 The complete guide to the Propeller 2's XBYTE hardware bytecode engine: the skip family (SKIP/SKIPF/EXECF), the FIFO bytecode stream, and LUT dispatch that together let one indexed jump select and run a handler with no software in the loop. It works up from what the engine is, through the three decisions that settle whether your project can actually take it — most P2 emulators land one rung short of the full engine, and the guide says plainly why — to building on it: a minimal custom virtual machine, that same machine grown until its dispatch table has to work for a living, and a compact, illustrative CPU emulator, with chapters on servicing guest interrupts, prefix bytes and alternate tables, and using the engine beyond interpreters to parse protocols and drive displays. Written in two registers, a warm teaching layer for the concepts and a precise reference layer for the tables, encodings, and configuration bits, and grounded throughout in the P2 documentation, the knowledge base, and worked community code. Includes a downloadable library of three compile-clean Spin2 example programs.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2-xbyte-programming-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-xbyte-programming-guide-src.zip)
+*October 2026 - Community Review Edition* | [Changelog](DOCs/p2-xbyte-programming-guide-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/p2-xbyte-programming-guide-src.zip)
 
 ### [P2 Single-Step Debugger Manual](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2-Single-Step-Debugger-Manual.pdf)
 **Observe and Control Your Running P2 Code** · *Version 1.0.1*

@@ -1,4 +1,22 @@
-# P2 XBYTE Programming Guide - Changelog
+# P2 Interpreters & Emulators Guide - Changelog
+
+## v1.1.1 (2026-10-04)
+
+**Absolute calls in shared bodies, what a skip costs, and a Rev C note on RDFAST.**
+
+### Added
+
+- **The absolute-`CALL` rule for skip bodies** (§4.5): where the next line may be skipped, write `call #\label`
+- **A Rev C note on no-wait `RDFAST`** (§5.1): start no hub instruction for 16 clocks after it
+- **PDF properties** carry the title, subtitle, author, copyright and license
+
+### Fixed
+
+- **The shared ALU body opens with `call #\pop_two`** (§4.4, §15.2, §15.5) and in the example library
+- **Each instruction SKIP cancels costs 2 clocks** (§4.1, §20.1)
+- **An unbalanced stack overflows without faulting** (§12.4, §15.6)
+- **"skip pattern" prints as written** throughout, not as the `SKIP` instruction
+- **The Parallax repository link in Appendix C** stays inside the page margin
 
 ## v1.1.0 (2026-08-19)
 

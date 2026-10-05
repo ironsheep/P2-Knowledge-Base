@@ -30,7 +30,7 @@ prose), with all per-publication detail in the roster.*
 | Debug Window | manual | 1.1.4 | 169 | ✅ |
 | Streamer Guide | manual | 1.1.3 | 91 | ✅ |
 | Architect's Guide | manual | 1.1.1 | 60 | ✅ |
-| Interpreters & Emulators (XBYTE) | manual | 1.1.0 | 114 | ✅ |
+| Interpreters & Emulators (XBYTE) | manual | 1.1.1 | 115 | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.5 | 20 | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.4 | 15 | ✅ |
 | P2AN003 — DAC & Signal Generation | app-note | 1.0.2 | 19 | ✅ |
