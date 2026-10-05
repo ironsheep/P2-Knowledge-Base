@@ -38,3 +38,12 @@
 # The same 6-column counter-mode table also sets on p226 (Ch 14) and p333
 # (Appendix D) without being flagged, which is the content-dependence F-423
 # describes: the overrun is constant, whether it SHOWS is not.
+
+# v1.0.11, 2026-10-05. The three F-423 sites above no longer report (F-423 landed);
+# one new site, a prose paragraph.
+
+314: CLEAN — Appendix B, the "Gain-mode windows are centered on ~VIO/2" blockquote at the
+     top of the page (tex 21078-21083, 22.49pt; reworded by c76527e5, "measured on P2
+     hardware"). Rendered at 100 dpi and inspected: the break resolves with a hyphen
+     ("hard-ware") and every line ends inside the right margin; pdf-margin-overflow is
+     CLEAN for the same build.
