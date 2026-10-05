@@ -15,6 +15,8 @@
 - **The shared ALU body opens with `call #\pop_two`** (§4.4, §15.2, §15.5) and in the example library
 - **Each instruction SKIP cancels costs 2 clocks** (§4.1, §20.1)
 - **An unbalanced stack overflows without faulting** (§12.4, §15.6)
+- **"skip pattern" prints as written** throughout, not as the `SKIP` instruction
+- **The Parallax repository link in Appendix C** stays inside the page margin
 
 ## v1.1.0 (2026-08-19)
 
