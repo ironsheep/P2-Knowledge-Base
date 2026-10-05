@@ -789,6 +789,17 @@ release.
 seven wave elements on 2026-08-17. Exactly two touched them and both were dealt with — F-281 (Debug
 Window, blocking, evidence-blocked) and F-224 (Assembly, fixed into v3.1.6 that same day).
 
+### ⏳ 2026-10-05 («#386») — the closed half is now gated; the canonical `Status:` line is still owed
+
+The register reconciliation verified all 179 live findings against the tree and the release tags
+and swept the 130 closed ones (`correction-sweeps/2026-10-05-register-reconciliation-…`); 50 open
+findings remain, each with a status re-derived from the tree. Two gate changes landed with it:
+the corrections register now closes on `RESOLVED` (a live one is closed-but-live, so CLEAN means
+open work only), and a wrapped bullet headline whose token sits after its dash is read. F-203 and
+F-256 from item 3 are closed and archived; F-272 was archived earlier. **Still owed:** item 1, the
+single canonical `**Status:**` line in a fixed vocabulary, and item 2, printing the open set for the
+drain gate — the register's statuses still live in headlines and four body notations.
+
 ---
 
 ## Inline-code URLs cannot break often enough and overhang the right margin — OPEN
