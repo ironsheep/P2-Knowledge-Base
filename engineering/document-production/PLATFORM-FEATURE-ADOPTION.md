@@ -41,7 +41,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers | Silicon notes ²⁸ |
 |---|---|:--:|:--:|:--:|:--:|:--:|
 | **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ | — |
-| **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | — |
+| **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | 🔧 |
 | **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | — |
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | — |
 | **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |

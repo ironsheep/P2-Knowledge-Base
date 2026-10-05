@@ -212,7 +212,7 @@ Uses pseudo-random dithering for smooth 16-bit output.
 |----------|---------|
 | X[15:0] | Sample period in clocks (1 = immediate update) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 
 **Spin2:**
 ```spin2
@@ -260,7 +260,7 @@ Uses PWM dithering for better dynamic range.
 |----------|---------|
 | X[15:0] | Sample period (must be multiple of 256) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 
 **Spin2:**
 ```spin2
@@ -349,12 +349,12 @@ mode := P_PWM_TRIANGLE | P_DAC_600R_2V | P_OE | ($F0 << 8)
 
 ### Monitoring DAC Loading
 
-Dithered DAC modes support ADC feedback to measure pin loading:
+Dithered DAC modes support ADC feedback to measure pin loading. [Rev C]{.silicon-note topic="DAC-mode ADC feedback needs TT bit 0"} OUT runs the ADC only while TT bit 0 is set in the WRPIN word (`P_OE` sets it); with TT = %00, raising OUT runs nothing.
 
 **Spin2:**
 ```spin2
 PUB read_dac_loading(pin) : loading | mode
-  ' Enable ADC feedback (OUT=1)
+  ' Enable ADC feedback: OUT=1 (pin set up with P_OE)
   PINWRITE(pin, 1)
 
   ' Wait for accumulation

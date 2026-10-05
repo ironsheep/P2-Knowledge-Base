@@ -4,7 +4,7 @@
 ''   Purpose....  Counting edges over a fixed window to get RPM, where the
 ''                window is what sets the resolution
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.10 (2026-09-10)
+''   Version....  v1.0.11 (2026-10-05)
 ''   Appears in.  Chapter 14: Counting Modes -- 14.10 Worked Examples
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

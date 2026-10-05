@@ -2917,6 +2917,8 @@ PINHIGH(pin)                             ' DIR=1, start Smart Pin
 
 **Note:** For output modes, DRVL vs DRVH doesn't affect the smart pin output (which is controlled by the mode). Use whichever is appropriate for the pre-enabled output state.
 
+**Trigger modes take Y after the enable.** In `P_PULSE`, `P_TRANSITION` and `P_ASYNC_TX` the WYPIN is what starts the output, and one issued while DIR is still low is lost: do Step 5 before Step 4. Value modes keep a Y written in reset, and `P_SYNC_TX` sends it as its first word.
+
 ### Worked Example - NCO Frequency
 
 **Spin2:**
@@ -3213,7 +3215,7 @@ Every pattern above keeps the cog **executing** — the poll-spin loops on `TEST
               ' Handle the timeout
 ```
 
-The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`C` and `Z` carry the same timeout result, so testing one flag is sufficient.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
+The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`WCZ` writes the timeout result to both `C` and `Z`; with `WC` only `C` is written.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
 
 **Where the cog must do other work while waiting**, poll the event against the counter in a loop instead of stalling, branching on whichever fires first:
 
@@ -3423,7 +3425,7 @@ The owner controls the timing; observers passively read.
 
 ### PINSTART - One-Call Configuration
 
-PINSTART combines WRPIN, WXPIN, WYPIN, and enable into one call:
+PINSTART combines WRPIN, WXPIN, WYPIN, and enable into one call. It writes Y before it raises DIR, so in `P_PULSE`, `P_TRANSITION` and `P_ASYNC_TX` its Yval is lost: pass 0 and issue the starting WYPIN after PINSTART (§4.8).
 
 ```spin-syntax
 PINSTART(Pin, Mode, Xval, Yval)
@@ -3640,7 +3642,7 @@ For high-frequency events:
 1. Always configure while DIR=0 (reset state)
 2. Include P_OE for output modes
 3. Verify calculations for X and Y values
-4. Enable last (DRVL/DRVH after WRPIN/WXPIN/WYPIN)
+4. Enable after WRPIN/WXPIN (DRVL/DRVH); WYPIN before or after, except in trigger modes, where it comes after (§4.8)
 
 ### Operation
 
@@ -5845,7 +5847,7 @@ Uses pseudo-random dithering for smooth 16-bit output.
 |----------|---------|
 | X[15:0] | Sample period in clocks (1 = immediate update) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 
 **Spin2:**
 ```spin2
@@ -5893,7 +5895,7 @@ Uses PWM dithering for better dynamic range.
 |----------|---------|
 | X[15:0] | Sample period (must be multiple of 256) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 
 **Spin2:**
 ```spin2
@@ -5982,12 +5984,12 @@ mode := P_PWM_TRIANGLE | P_DAC_600R_2V | P_OE | ($F0 << 8)
 
 ### Monitoring DAC Loading
 
-Dithered DAC modes support ADC feedback to measure pin loading:
+Dithered DAC modes support ADC feedback to measure pin loading. [Rev C]{.silicon-note topic="DAC-mode ADC feedback needs TT bit 0"} OUT runs the ADC only while TT bit 0 is set in the WRPIN word (`P_OE` sets it); with TT = %00, raising OUT runs nothing.
 
 **Spin2:**
 ```spin2
 PUB read_dac_loading(pin) : loading | mode
-  ' Enable ADC feedback (OUT=1)
+  ' Enable ADC feedback: OUT=1 (pin set up with P_OE)
   PINWRITE(pin, 1)
 
   ' Wait for accumulation
@@ -8065,7 +8067,7 @@ PUB comm_monitor() | timeout_clocks
 
 ### P_EVENTS_TICKS Y Register
 
-| Y Value | Mode | Event Type |
+| Y[2:0] | Mode | Event Type |
 |---------|------|------------|
 | %000 | Time events | High level |
 | %001 | Time events | Rising edge |
@@ -9432,7 +9434,7 @@ ADC operation requires specific pin mode bits. Set P[12:10] = %100 in the WRPIN 
 
 > **Gain modes measure *around* the ADC's mid-supply bias point (~VIO/2) — not up from ground.** A higher gain narrows the measurable window *symmetrically about mid-supply*; it does not rescale a 0 V-referenced range. A ground-referenced small signal (a 0-100 mV sensor sitting near 0 V) cannot be read directly by a gain mode — bias it to mid-supply first, or use the ratiometric reference method in §16.3.
 
-The per-gain input windows below were **measured on a real P2** (one sample; the on-chip DAC driven through a pin-to-pin loopback into the ADC). Every gain centers on ~VIO/2, and the windows narrow ~3.16x per gain step. Treat them as **representative** — the exact endpoints vary part-to-part and with VIO and temperature, so calibrate for absolute work.
+The per-gain input windows below were **measured on P2 hardware** (one sample; the on-chip DAC driven through a pin-to-pin loopback into the ADC). Every gain centers on ~VIO/2, and the windows narrow ~3.16x per gain step. Treat them as **representative** — the exact endpoints vary part-to-part and with VIO and temperature, so calibrate for absolute work.
 
 | Mode | Gain | Input window (measured, VIO ~3.3 V) |
 |------|------|-------------------------------------|
@@ -9981,7 +9983,7 @@ threshold     long      128                   ' Mid-scale threshold
 Some bounds come from the analog front end itself and **cannot be averaged away** — know them before promising absolute accuracy:
 
 - **High input impedance.** The 1× range presents a high input impedance, so a low-impedance source loads it lightly. A high-impedance source — or a large external series resistor — forms a divider with it that shifts the reading. Buffer high-Z sources, or account for the divider.
-- **Absolute-error floor.** A single pin's absolute error is small — a few millivolts (≤ ~9 mV measured on real P2 silicon; representative, not a guaranteed spec). The larger concern is **pin-to-pin spread**: the GIO, VIO, and pin paths use three *separate* matched on-chip resistors that do not match perfectly, so different pins can read a bit apart in absolute terms. This is a design limit, not noise — more averaging will not remove it. Where absolute accuracy matters, self-calibrate by driving the pin to each rail and measuring the result, or characterize the per-pin offset once.
+- **Absolute-error floor.** A single pin's absolute error is small — a few millivolts (≤ ~9 mV measured on P2 silicon; representative, not a guaranteed spec). The larger concern is **pin-to-pin spread**: the GIO, VIO, and pin paths use three *separate* matched on-chip resistors that do not match perfectly, so different pins can read a bit apart in absolute terms. This is a design limit, not noise — more averaging will not remove it. Where absolute accuracy matters, self-calibrate by driving the pin to each rail and measuring the result, or characterize the per-pin offset once.
 - **Supply and temperature sensitivity.** The internal references track the VIO supply, so a noisy switch-mode VIO degrades precision — feed VIO from a clean LDO for instrumentation work. GIO and VIO also drift with temperature (VIO is the more stable of the two), giving each chip a per-pin fingerprint; periodic re-referencing handles the slow drift.
 - **Power-of-2 sample period.** In SINC2 sampling mode the period must be a power of two (`2^X[3:0]`) and cannot be freely dithered (§16.3, Resolution and Sample Rate).
 
@@ -11047,7 +11049,7 @@ PRI get_next_sample() : sample
 
 ### ADC Readback
 
-When OUT is high, the pin's ADC is enabled and RDPIN returns the 16-bit ADC accumulation (useful for measuring DAC loading). See Chapter 10 §10.6 for the ADC-feedback pattern.
+[Rev C]{.silicon-note topic="DAC-dither ADC readback needs TT bit 0"} When OUT is high and TT bit 0 is set (`P_OE` sets it), the pin's ADC is enabled and RDPIN returns the 16-bit ADC accumulation (useful for measuring DAC loading). See Chapter 10 §10.6 for the ADC-feedback pattern.
 
 
 ## 18.5 Mode %00011: DAC PWM Dither
@@ -11339,7 +11341,7 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 |----------|----------|
 | X[15:0] | Sample period (PWM must be ×256) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC readback (if OUT=1) |
+| Z | ADC readback (if OUT=1, TT bit 0 set) |
 
 ### Key Points
 
@@ -12070,7 +12072,7 @@ Two independent fields in bits [27:24]: the polarity bit (bit 27) combines with 
 | P_ADC_30X | 31.6x | ~1.57-1.71V | Gain, centered on ~VIO/2 (measured) |
 | P_ADC_100X | 100x | ~1.61-1.66V | Gain, centered on ~VIO/2 (measured) |
 
-> Gain-mode windows are **centered on ~VIO/2 (mid-supply)** — measured on a real P2 (representative single sample; vary part-to-part and with VIO/temperature). GIO/VIO are calibration references, not signal inputs. See Chapter 16, §16.2.
+> Gain-mode windows are **centered on ~VIO/2 (mid-supply)** — measured on P2 hardware (representative single sample; vary part-to-part and with VIO/temperature). GIO/VIO are calibration references, not signal inputs. See Chapter 16, §16.2.
 
 
 ## DAC Output Modes (pick one)
@@ -12419,7 +12421,7 @@ voltage_mv = (128 × 3300) / 255 = 1656 mV
 
 ### ADC with Gain
 
-Gain modes measure a window **centered on the ADC's mid-supply bias point (~VIO/2)**, narrowing ~3.16x per gain step — NOT a ground-referenced 0-to-max range. The windows below were **measured on a real P2** (representative single sample; vary part-to-part and with VIO/temperature — calibrate for absolute work). See Chapter 16, §16.2.
+Gain modes measure a window **centered on the ADC's mid-supply bias point (~VIO/2)**, narrowing ~3.16x per gain step — NOT a ground-referenced 0-to-max range. The windows below were **measured on P2 hardware** (representative single sample; vary part-to-part and with VIO/temperature — calibrate for absolute work). See Chapter 16, §16.2.
 
 | Gain Mode | Gain Factor | Input window (measured, VIO ~3.3 V) |
 |-----------|-------------|-------------------------------------|
@@ -13561,13 +13563,13 @@ REPEAT 10
 
 **Mode echo test:**
 ```spin2
-' Loopback test for serial
-WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-WRPIN(RX_PIN, P_ASYNC_RX)
-' Wire TX_PIN to RX_PIN
-WYPIN(TX_PIN, $55)
+' Loopback test for serial - wire TX_PIN to RX_PIN
+bit_period := (_clkfreq / 115_200) << 16
+PINSTART(RX_PIN, P_ASYNC_RX, bit_period | 7, 0)        ' 8 data bits
+PINSTART(TX_PIN, P_ASYNC_TX | P_OE, bit_period | 7, 0) ' enabled first
+WYPIN(TX_PIN, $55)                       ' Y after the enable starts TX
 WAITMS(1)
-received := RDPIN(RX_PIN)
+received := RDPIN(RX_PIN) >> 24          ' LSB-justify the 8-bit byte
 DEBUG("Sent: $55, Received: ", UHEX_(received))
 ```
 
@@ -13734,7 +13736,7 @@ Provides nominal 16-bit DAC resolution (averaged over time) using pseudo-random 
 |----------|----------|
 | X[15:0] | Sample period (1 = immediate) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 | IN | Sample period complete |
 
 ### Key Constants
@@ -13768,7 +13770,7 @@ Provides 16-bit DAC resolution using PWM dithering. Better dynamic range than PR
 |----------|----------|
 | X[15:0] | Sample period (must be multiple of 256) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 | IN | Sample period complete |
 
 ### Key Constants
@@ -13814,8 +13816,8 @@ P_PULSE | P_OE
 ```spin2
 WRPIN(pin, P_PULSE | P_OE)
 WXPIN(pin, 16 | (8 << 16))               ' period 16, high above 8 (50%)
+PINH(pin)                                ' enable first: Y starts the output
 WYPIN(pin, 5)                            ' 5 pulses
-PINH(pin)
 ```
 
 ### Reference
@@ -13847,8 +13849,8 @@ P_TRANSITION | P_OE
 ```spin2
 WRPIN(pin, P_TRANSITION | P_OE)
 WXPIN(pin, 100)                          ' 100 clocks per transition
+PINH(pin)                                ' enable first: Y starts the output
 WYPIN(pin, 20)                           ' 20 transitions (10 cycles)
-PINH(pin)
 ```
 
 ### Reference
@@ -14973,7 +14975,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **P_ASYNC_RX** - Async serial receive (%11111), Ch. 17, App. F
 - **P_ASYNC_TX** - Async serial transmit (%11110), Ch. 11, App. F
 - **P_BITDAC** - Bit DAC enable, Ch. 10
-- **P_CHANNEL** - DAC channel enable, Ch. 10
+- **P_CHANNEL** - DAC channel enable, Ch. 2, App. B
 - **P_COMPARE_AB** - A>B comparator, Ch. 12
 - **P_COUNT_HIGHS** - Count high states (%01111), Ch. 14, App. F
 - **P_COUNT_RISES** - Count rising edges (%01110), Ch. 14, App. F

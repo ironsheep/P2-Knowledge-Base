@@ -4,7 +4,7 @@
 ''   Purpose....  A pin read and a pin driven, with no smart pin involved
 ''                - the baseline everything later is measured against
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.10 (2026-09-10)
+''   Version....  v1.0.11 (2026-10-05)
 ''   Appears in.  Chapter 1: Direct I/O - The Foundation -- 1.11 Common
 ''                Patterns
 ''   Authors....  Iron Sheep Productions, LLC

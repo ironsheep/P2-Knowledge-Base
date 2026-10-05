@@ -78,7 +78,7 @@ Every pattern above keeps the cog **executing** — the poll-spin loops on `TEST
               ' Handle the timeout
 ```
 
-The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`C` and `Z` carry the same timeout result, so testing one flag is sufficient.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
+The `SETQ` arms the timeout for the single instruction that follows it; `WAITSE1 WC` then sets `C` if the deadline arrived first, or clears it if the pin event did. (`WCZ` writes the timeout result to both `C` and `Z`; with `WC` only `C` is written.) This keeps the zero-cost stall of a plain `WAITSE1` while guaranteeing the cog can never hang. The same `SETQ`-then-wait timeout works for every event wait — `WAITSE1`–`WAITSE4`, `WAITCT1`–`WAITCT3`, `WAITPAT`, `WAITATN`, and the rest.
 
 **Where the cog must do other work while waiting**, poll the event against the counter in a loop instead of stalling, branching on whichever fires first:
 
@@ -288,7 +288,7 @@ The owner controls the timing; observers passively read.
 
 ### PINSTART - One-Call Configuration
 
-PINSTART combines WRPIN, WXPIN, WYPIN, and enable into one call:
+PINSTART combines WRPIN, WXPIN, WYPIN, and enable into one call. It writes Y before it raises DIR, so in `P_PULSE`, `P_TRANSITION` and `P_ASYNC_TX` its Yval is lost: pass 0 and issue the starting WYPIN after PINSTART (§4.8).
 
 ```spin-syntax
 PINSTART(Pin, Mode, Xval, Yval)
@@ -505,7 +505,7 @@ For high-frequency events:
 1. Always configure while DIR=0 (reset state)
 2. Include P_OE for output modes
 3. Verify calculations for X and Y values
-4. Enable last (DRVL/DRVH after WRPIN/WXPIN/WYPIN)
+4. Enable after WRPIN/WXPIN (DRVL/DRVH); WYPIN before or after, except in trigger modes, where it comes after (§4.8)
 
 ### Operation
 

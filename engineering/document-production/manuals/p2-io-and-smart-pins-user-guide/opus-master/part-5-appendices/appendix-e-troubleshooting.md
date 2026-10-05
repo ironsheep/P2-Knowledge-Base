@@ -587,13 +587,13 @@ REPEAT 10
 
 **Mode echo test:**
 ```spin2
-' Loopback test for serial
-WRPIN(TX_PIN, P_ASYNC_TX | P_OE)
-WRPIN(RX_PIN, P_ASYNC_RX)
-' Wire TX_PIN to RX_PIN
-WYPIN(TX_PIN, $55)
+' Loopback test for serial - wire TX_PIN to RX_PIN
+bit_period := (_clkfreq / 115_200) << 16
+PINSTART(RX_PIN, P_ASYNC_RX, bit_period | 7, 0)        ' 8 data bits
+PINSTART(TX_PIN, P_ASYNC_TX | P_OE, bit_period | 7, 0) ' enabled first
+WYPIN(TX_PIN, $55)                       ' Y after the enable starts TX
 WAITMS(1)
-received := RDPIN(RX_PIN)
+received := RDPIN(RX_PIN) >> 24          ' LSB-justify the 8-bit byte
 DEBUG("Sent: $55, Received: ", UHEX_(received))
 ```
 

@@ -392,6 +392,8 @@ PINHIGH(pin)                             ' DIR=1, start Smart Pin
 
 **Note:** For output modes, DRVL vs DRVH doesn't affect the smart pin output (which is controlled by the mode). Use whichever is appropriate for the pre-enabled output state.
 
+**Trigger modes take Y after the enable.** In `P_PULSE`, `P_TRANSITION` and `P_ASYNC_TX` the WYPIN is what starts the output, and one issued while DIR is still low is lost: do Step 5 before Step 4. Value modes keep a Y written in reset, and `P_SYNC_TX` sends it as its first word.
+
 ### Worked Example - NCO Frequency
 
 **Spin2:**

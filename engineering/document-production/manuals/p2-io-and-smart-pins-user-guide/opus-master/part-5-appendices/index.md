@@ -146,7 +146,7 @@ Alphabetical index of terms, constants, and concepts in this guide.
 - **P_ASYNC_RX** - Async serial receive (%11111), Ch. 17, App. F
 - **P_ASYNC_TX** - Async serial transmit (%11110), Ch. 11, App. F
 - **P_BITDAC** - Bit DAC enable, Ch. 10
-- **P_CHANNEL** - DAC channel enable, Ch. 10
+- **P_CHANNEL** - DAC channel enable, Ch. 2, App. B
 - **P_COMPARE_AB** - A>B comparator, Ch. 12
 - **P_COUNT_HIGHS** - Count high states (%01111), Ch. 14, App. F
 - **P_COUNT_RISES** - Count rising edges (%01110), Ch. 14, App. F

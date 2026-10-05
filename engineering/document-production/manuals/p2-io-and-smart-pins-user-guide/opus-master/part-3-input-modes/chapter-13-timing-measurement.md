@@ -590,7 +590,7 @@ PUB comm_monitor() | timeout_clocks
 
 ### P_EVENTS_TICKS Y Register
 
-| Y Value | Mode | Event Type |
+| Y[2:0] | Mode | Event Type |
 |---------|------|------------|
 | %000 | Time events | High level |
 | %001 | Time events | Rising edge |

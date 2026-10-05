@@ -4,7 +4,7 @@
 ''   Purpose....  Three NCO pins sharing one frequency and differing only
 ''                in phase - the offset lives in X, not in code
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.10 (2026-09-10)
+''   Version....  v1.0.11 (2026-10-05)
 ''   Appears in.  Chapter 8: Frequency Generation (NCO) -- 8.4 Phase
 ''                Synchronization
 ''   Authors....  Iron Sheep Productions, LLC

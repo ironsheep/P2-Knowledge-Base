@@ -4,7 +4,7 @@
 ''   Purpose....  Measuring a reference against the system clock to find
 ''                the error in parts per million
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.10 (2026-09-10)
+''   Version....  v1.0.11 (2026-10-05)
 ''   Appears in.  Chapter 15: Frequency Measurement - Periods, Duty &
 ''                Reciprocal Counting -- 15.6 Application Examples
 ''   Authors....  Iron Sheep Productions, LLC

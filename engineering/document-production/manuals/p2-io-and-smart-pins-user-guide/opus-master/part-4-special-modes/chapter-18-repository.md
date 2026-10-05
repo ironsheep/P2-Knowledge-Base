@@ -249,7 +249,7 @@ PRI get_next_sample() : sample
 
 ### ADC Readback
 
-When OUT is high, the pin's ADC is enabled and RDPIN returns the 16-bit ADC accumulation (useful for measuring DAC loading). See Chapter 10 §10.6 for the ADC-feedback pattern.
+[Rev C]{.silicon-note topic="DAC-dither ADC readback needs TT bit 0"} When OUT is high and TT bit 0 is set (`P_OE` sets it), the pin's ADC is enabled and RDPIN returns the 16-bit ADC accumulation (useful for measuring DAC loading). See Chapter 10 §10.6 for the ADC-feedback pattern.
 
 
 ## 18.5 Mode %00011: DAC PWM Dither
@@ -541,7 +541,7 @@ Add to WRPIN value: `P_DAC_xxxR_yV | P_OE`
 |----------|----------|
 | X[15:0] | Sample period (PWM must be ×256) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC readback (if OUT=1) |
+| Z | ADC readback (if OUT=1, TT bit 0 set) |
 
 ### Key Points
 

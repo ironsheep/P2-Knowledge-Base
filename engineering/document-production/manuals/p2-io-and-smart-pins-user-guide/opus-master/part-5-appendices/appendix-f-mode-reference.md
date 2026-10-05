@@ -124,7 +124,7 @@ Provides nominal 16-bit DAC resolution (averaged over time) using pseudo-random 
 |----------|----------|
 | X[15:0] | Sample period (1 = immediate) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 | IN | Sample period complete |
 
 ### Key Constants
@@ -158,7 +158,7 @@ Provides 16-bit DAC resolution using PWM dithering. Better dynamic range than PR
 |----------|----------|
 | X[15:0] | Sample period (must be multiple of 256) |
 | Y[15:0] | 16-bit DAC value |
-| Z | ADC accumulation (if OUT=1) |
+| Z | ADC accumulation (if OUT=1, TT bit 0 set) |
 | IN | Sample period complete |
 
 ### Key Constants
@@ -204,8 +204,8 @@ P_PULSE | P_OE
 ```spin2
 WRPIN(pin, P_PULSE | P_OE)
 WXPIN(pin, 16 | (8 << 16))               ' period 16, high above 8 (50%)
+PINH(pin)                                ' enable first: Y starts the output
 WYPIN(pin, 5)                            ' 5 pulses
-PINH(pin)
 ```
 
 ### Reference
@@ -237,8 +237,8 @@ P_TRANSITION | P_OE
 ```spin2
 WRPIN(pin, P_TRANSITION | P_OE)
 WXPIN(pin, 100)                          ' 100 clocks per transition
+PINH(pin)                                ' enable first: Y starts the output
 WYPIN(pin, 20)                           ' 20 transitions (10 cycles)
-PINH(pin)
 ```
 
 ### Reference

@@ -4,7 +4,7 @@
 ''   Purpose....  Pulse-width measurement turning an echo into a distance,
 ''                timed by the pin and not by a loop
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.10 (2026-09-10)
+''   Version....  v1.0.11 (2026-10-05)
 ''   Appears in.  Chapter 13: Timing Measurement -- 13.7 Worked Examples
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

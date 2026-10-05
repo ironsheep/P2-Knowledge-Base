@@ -4,7 +4,7 @@
 ''   Purpose....  The same blink, but choosing the drive strength the pin
 ''                uses to get there
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.10 (2026-09-10)
+''   Version....  v1.0.11 (2026-10-05)
 ''   Appears in.  Chapter 6: Digital Output -- 6.5 Worked Examples
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
