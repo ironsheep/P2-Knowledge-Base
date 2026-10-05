@@ -684,6 +684,8 @@ Enables timestamps in debug messages.
 
 DEBUG_TIMESTAMP enables timing information in all debug output. When defined, each debug message is time-stamped with the 64-bit system counter (CT) value. This aids timing analysis and performance profiling by showing when events occur.
 
+[Rev C]{.silicon-note topic="DEBUG_TIMESTAMP stamp order"} The stamp is read from the sending cog's own copy of the counter. A cog whose group of four (cogs 0–3 or 4–7) had no cog running when the counter's lower half wrapped holds a copy a whole number of wraps (21.47 s each at 200 MHz) behind, so its messages are stamped early and print out of time order. The cure is the one for `GETCT WC` (see [GETCT](#getct)).
+
 #### Usage
 
 ```spin2

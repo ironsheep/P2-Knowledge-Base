@@ -63,7 +63,7 @@ The configuration value contains fields for clock source selection, crystal conf
 Switching clock sources requires a careful sequence to ensure glitch-free transitions:
 
 1. **Enable the new source**: Configure crystal oscillator or PLL, but keep the current clock source active
-2. **Wait for stabilization**: Crystal oscillators need approximately 10 ms to stabilize; PLL lock requires approximately 10 µs
+2. **Wait for stabilization**: Allow 5 ms for a crystal to stabilize before switching to it, and 10 ms for the crystal and PLL together before switching to the PLL
 3. **Switch sources**: Change the SS field to select the new clock source
 4. **Optionally disable the old source**: Turn off unused oscillators to save power
 

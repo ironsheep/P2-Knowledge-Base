@@ -95,7 +95,17 @@ audit, see their notes).
 
 F-526 (sync TX primes in reset, EF-090) and F-540 (`##` takes a skip-pattern bit, EF-091) are DONE and archived — `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`.
 
-### F-527 — Assembly Reference: "13-20 clocks" for a taken hub-exec branch, at 87 lines, against its own correct rule — `CONFIRMED`
+### F-527 — Assembly Reference: "13-20 clocks" for a taken hub-exec branch, at 87 lines, against its own correct rule — `REJECTED` (2026-10-05, «#385»)
+> **Rejected on re-reading the sources.** The range is Parallax's own: the P2 Datasheet (2022/11/01)
+> gives "4 / 13...20" on every branch row (`sources/p2-datasheet/p2-datasheet-text.txt:1725-1744`),
+> the P2 Instructions v35 spreadsheet carries `13...20` on 63 rows, and the KB's per-instruction YAMLs
+> state it in 54 files (`pasm2/jmp.yaml` `range: 4 / 13...20`). C3 removed ONE unsourced composite line
+> (`instruction_skipping.yaml` `conditional_jumps_hub`) and replaced it with the Silicon Doc's minimum;
+> a minimum of 13 does not contradict a 13-to-20 range, and the manual already joins the two
+> (`chapter-04-timing.md:141`). The full family is 113 lines, not 87 (11 en-dash forms, 15 `13...20`
+> forms) — all left as they are. Applying "13+" would have deleted a sourced upper bound at 113 sites.
+> deSilva's F-532 "13+" (v3.0.9, staged) is true and stays.
+
 The removed range (C3; Silicon Doc: "a minimum of 13 clock cycles (one more if the target is not
 long-aligned)") stands at 87 lines in 8 files (plus one CHANGELOG line, history): `part-ii/instructions-j.md` (49), `-c` (10), `-t` (8),
 `-d` (6), `-i` (3), `-r` (1), `part-iii/appendix-a-encoding-table.md` (8, e.g. "CALL | 4 / 13-20"),
@@ -103,13 +113,20 @@ long-aligned)") stands at 87 lines in 8 files (plus one CHANGELOG line, history)
 depending on hub timing". The manual's own appendix-b:168, ch04:623, :646 and ch01:202 state the correct
 rule. **Fix:** "13+ (one more if the target is not long-aligned)" everywhere; table cells "4 / 13+".
 
-### F-528 — Assembly Reference GETXACC: "both accumulators are cleared" unconditionally, no per-burst procedure — `CONFIRMED`
+### F-528 — Assembly Reference GETXACC: "both accumulators are cleared" unconditionally, no per-burst procedure — `RESOLVED` (applied 2026-10-05; ships in Assembly v3.1.11, staged)
+> **Applied** (`instructions-g.md` GETXACC): two Rev C silicon-note chips after the clear sentence — the
+> clear acts only during a Goertzel burst (read before and after, subtract), and a burst's last term lands
+> in the next (zero-term burst, count 4, `S[15:12]` = 0, then `WAITXFI`; not for SINC2). Source:
+> `getxacc.yaml` silicon_errata.
 `part-ii/instructions-g.md:388-410`. P2 Errata E4/E5 (Rev C): clears only during a DDS/Goertzel command;
 idle reads return the running total; a read after N clocks holds N-1 terms; read before and after and
 subtract (`pasm2/getxacc.yaml`). Owed under «#352» (its body names "Assembly's ... GETXACC ... entries"),
 never registered until now. **Fix:** at «#352».
 
-### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `PARTIAL` (deSilva half applied 2026-10-05, ships in v3.0.9, staged; Assembly half owed)
+### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `RESOLVED` (deSilva half ships in v3.0.9; Assembly half applied 2026-10-05, ships in v3.1.11; both staged)
+> **Assembly applied** (`instructions-g.md` GETCT): the example reads `GETCT WC` first, then plain `GETCT`
+> ("GETCT WC + GETCT gets full CT" — P2 Datasheet :2084, PASM2 Manual; GETCT+WC interrupt-shielding,
+> Silicon Doc :2349), plus a Rev C chip with the keeper-cog workaround. Compiled clean (pnut-ts).
 > **deSilva applied** (Chapter 12, strategy 1): a Rev C silicon-note chip — in a cog whose group of four had no
 > running cog at a wrap, the upper half comes back behind by one per missed wrap until the group's next wrap;
 > keep one cog of each group you use running from start-up. Source: `getct.yaml` silicon_errata (EF-068,
@@ -126,7 +143,9 @@ Outside the two changesets (P2 Errata E3, KB since v1.22.0), found while reading
 **Fix:** WC first in Assembly; both state the E3 window and its keeper-cog workaround (or point to P2
 Errata E3). Assembly half under «#352».
 
-### F-530 — DEBUG_TIMESTAMP taught as "the 64-bit CT value" with no stale-window caveat — `PARTIAL` (low; DEBUG Window half released in v1.1.4, 2026-10-04; Assembly half owed)
+### F-530 — DEBUG_TIMESTAMP taught as "the 64-bit CT value" with no stale-window caveat — `RESOLVED` (low; DEBUG Window half released in v1.1.4, 2026-10-04; Assembly half applied 2026-10-05, ships in v3.1.11, staged)
+> **Assembly applied** (`appendix-e-constants.md` DEBUG_TIMESTAMP): a Rev C chip in the DEBUG Window's
+> wording, pointing to GETCT for the cure.
 > **DEBUG Window half applied and released (v1.1.4, 2026-10-04, `p2-debug-window-manual-v1.1.4`).** ch14 carries
 > the rule as a Rev C silicon-note chip (the new platform tag, 3aa14a43): the stamp is the sending cog's own
 > counter copy, so a cog whose group of four had no running cog at a wrap is a whole number of wraps behind.
@@ -220,7 +239,10 @@ state the rule in §4.5; re-run the example's skipping variants on the bench.
   "wraps around" claim). The caution itself stands. **Fix:** "each skipped instruction costs 2 clocks";
   "overflows without faulting".
 
-### F-541 — Assembly Reference: crystal/PLL settle times disagree inside the manual — `NEEDS-VERIFICATION`
+### F-541 — Assembly Reference: crystal/PLL settle times disagree inside the manual — `RESOLVED` (applied 2026-10-05; ships in Assembly v3.1.11, staged)
+> **Settled:** `instructions-h.md:67` is right — 5 ms crystal, 10 ms crystal + PLL (P2 Datasheet :828-834,
+> Silicon Doc part3 :576-580, `clock_system.yaml` stabilization_timing, whose `conflict_resolved` notes the
+> sourceless "~10 µs"). `chapter-04-timing.md:66` now states the same.
 `part-i/chapter-04-timing.md:66` (crystal ~10 ms, PLL ~10 µs) against `part-ii/instructions-h.md:67`
 (5 ms crystal, 10 ms crystal + PLL). Seen by the audit, not an inventory fact. **To do:** settle against
 the Silicon Doc and the KB (`architecture/clock_system.yaml` stabilization_timing), fix the losing side.

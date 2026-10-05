@@ -518,7 +518,7 @@ The access takes 1 more clock when it crosses a hub long.
 
 Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WMLONG. Per the P2 Documentation, such an intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WMLONG. Per the P2 Documentation, such an intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
 
 
 
@@ -560,6 +560,8 @@ The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hu
 ```pasm2
         WRBYTE  value, ptra++  ' Write byte, increment pointer
 ```
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, WRBYTE can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Nothing flags it. Use the waiting `RDFAST`, or start WRBYTE at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -688,7 +690,9 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
         WRLONG  buffer, ptra   ' Write 16 longs to hub
 ```
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, WRLONG can complete before its write lands; if a hub read follows at once, the write is lost (the hub keeps its old long) or that read returns the previous hub read's long instead. Nothing flags it. Use the waiting `RDFAST`, or start WRLONG at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -814,6 +818,8 @@ Write Word
 WRWORD writes the word (16-bit value) in Dest[15:0] to hub RAM at address Src/PTRx. Only the lower 16 bits of Dest are written.
 
 The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. The access takes 1 more clock when it crosses a hub long. When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, WRWORD can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Nothing flags it. Use the waiting `RDFAST`, or start WRWORD at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 

@@ -1,10 +1,16 @@
 # P2 Assembly Language Reference Manual - Changelog
 
-## v3.1.11 (2026-10-02)
+## v3.1.11 (2026-10-05)
 
-**The special registers, directives, appendices and every instruction's explanation are checked line by line against Parallax's documentation.**
+**Every explanation, register, directive and appendix is checked line by line against Parallax's documentation, and Rev C silicon notes mark silicon traps where you meet them.**
 
 ### Added
+
+- **Rev C silicon notes** state how the current silicon behaves at the instruction concerned; Appendix J's new Silicon Notes section lists them all
+- **`GETCT WC` notes the idle cog-group window**: the upper half lags one per missed wrap; keep a cog of each group running
+- **`GETXACC` clears only during a Goertzel burst**, and a burst's last term lands in the next: read before and after, and subtract
+- **`RDFAST`, `SETQ` and every hub read and write warn of the no-wait window**: start no hub instruction within 16 clocks
+- **`DEBUG_TIMESTAMP` notes that a cog in an idle group stamps its messages early**
 
 - **`BRK` explains that its condition gates only the code**, with the opposite-condition `SKIP #1` form that makes a break truly conditional
 - **`QDIV` and `QFRAC` state what a divide by zero returns**, and `QFRAC` that its quotient is a fraction of 2^32^
@@ -13,6 +19,8 @@
 
 ### Changed
 
+- **The 64-bit `GETCT` example reads the upper half first**, with `GETCT WC`, then the lower half
+- **Chapter 4 allows 5 ms for a crystal and 10 ms for crystal plus PLL**, as `HUBSET` does
 - **`HUBSET` with D[31] set seeds the random-number generator**; a hard reset is `HUBSET ##$1000_0000`. The PLL example keeps the VCO within its 100-200 MHz range
 - **The hardware stack is eight levels deep**: `PUSH` adds a new top entry, and `PUSH`/`POP` must balance before `RET`
 - **`REP`'s instruction count is 0-511 in every form**; only the repeat count extends with `##` or a register. The `@label` form counts the body exactly

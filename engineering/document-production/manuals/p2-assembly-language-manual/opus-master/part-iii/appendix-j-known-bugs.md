@@ -2,7 +2,7 @@
 # Appendix J: Known Silicon Bugs {#appendix-j}
 :::
 
-This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P silicon. Each entry gives the condition, the effect and a workaround that steps around it.
+This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P silicon. Each entry gives the condition, the effect and a workaround that steps around it. The two entries below are the bugs the Parallax documentation lists; [Silicon Notes](#silicon-notes) at the end of this appendix points to every Rev C rule this manual states, including these two.
 
 ## ALTx/AUGx Interference with SETQ Block Transfers {#bug-altx-setq}
 
@@ -86,3 +86,12 @@ An AUGD pending across an intervening immediate-S ALTx is not taken by it: the A
 ---
 
 *These bugs are documented in the official Parallax P2 documentation and affect all P2X8C4M64P Rev B/C silicon.*
+
+---
+
+## Silicon Notes {#silicon-notes}
+
+A small **Rev C** tag in the text marks a rule about how the current silicon behaves, stated where you use the instruction it concerns. Each line below names one rule and points to it; the rule itself is stated only at its tag.
+
+::: silicon-note-index
+:::

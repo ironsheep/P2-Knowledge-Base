@@ -107,12 +107,14 @@ GETCT retrieves the current value of the system counter CT into the Dest registe
 
 The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all cogs and provides the foundation for timing operations and synchronization.
 
-**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
+**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, read the upper half first, with `GETCT WC`, and the lower half with a plain `GETCT` directly after it; this pair gets the full counter. `GETCT WC` holds off interrupts until the next instruction, so nothing can run between the two reads.
 
 ```pasm2
-        getct   low_word        ' Get lower 32 bits (CT[31:0])
         getct   high_word wc    ' Get upper 32 bits (CT[63:32])
+        getct   low_word        ' Then the lower 32 bits (CT[31:0])
 ```
+
+[Rev C]{.silicon-note topic="64-bit GETCT in an idle cog group"} In a cog whose group of four (cogs 0–3 or 4–7) had no running cog at a wrap of the lower half, `GETCT WC` returns an upper half behind by one for each wrap it missed, until that group's next wrap. Keep one cog of each group you use running from start-up (a cog waiting in `WAITATN`, `WAITX` or `WAITCT1` counts as running), or take no 64-bit time in that group until it has run through one wrap. A plain `GETCT` and every `WAITCT`/`ADDCT` timing are unaffected.
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 
@@ -404,6 +406,10 @@ Get Goertzel Accumulators
 GETXACC retrieves the two Goertzel accumulators from the streamer, which are used for frequency detection and digital signal processing applications. The Goertzel algorithm accumulates signal correlation data that can be used to detect specific frequencies in an input signal.
 
 The X accumulator value is written directly to the Dest register. The Y accumulator value is written to the S field of the immediately following instruction, utilizing the P2's next-instruction operand modification capability. After both values are retrieved, the X and Y accumulators are automatically cleared to zero.
+
+[Rev C]{.silicon-note topic="GETXACC clears only during a Goertzel burst"} The read clears the accumulators only while a Goertzel command is running. With the streamer idle, or in any other mode, it returns the running total and clears nothing, so a second idle read returns the same numbers and the totals keep growing from one burst to the next. To get one burst's sums, read before the burst and after it, and subtract.
+
+[Rev C]{.silicon-note topic="Goertzel last term lands in the next burst"} A read after a Goertzel burst of N clocks holds N−1 terms: the last term is held back and added on the first clock of the next Goertzel burst, and waiting does not deliver it. For an exact SINC1 sum, deliver it before each idle read: run the same command with its count set to 4 and `S[15:12]` = 0, then `WAITXFI`. The zero-term burst does not flush a SINC2 sum.
 
 This dual-retrieval mechanism allows both accumulator values to be captured in a compact instruction sequence. The following instruction must have an S field that can receive the Y accumulator value. Typically, this is a MOV or similar instruction where the S operand receives the Y accumulator data.
 

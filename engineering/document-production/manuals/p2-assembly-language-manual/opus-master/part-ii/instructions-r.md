@@ -196,6 +196,8 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot. The actual latency depends on when the request arrives relative to the cog's assigned slot.
 
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, RDBYTE can complete before its own read: Dest gets the byte at its own offset within the previous hub read's long, and the flags come from that wrong value. Use the waiting `RDFAST`, or start RDBYTE at least 16 clocks after it (see [RDFAST](#rdfast)).
+
 
 
 ::: instrheader
@@ -236,6 +238,8 @@ Read Fast Via FIFO
 RDFAST begins a new fast hub read operation via the FIFO. The instruction configures automatic sequential reading from hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from cog/LUT memory, not hub memory.
 
 Dest[31] selects the wait behavior. With Dest[31] == 0, RDFAST waits for any previous WRFAST to finish, then waits until the FIFO has begun receiving hub data (10...17 clocks), so the next instruction can read it. With Dest[31] == 1 (no-wait mode), RDFAST takes 2 clocks and leaves the wait to the program: the first correct RFBYTE, RFWORD or RFLONG comes 8...15 clocks after the RDFAST starts, depending on hub alignment, and an earlier read returns `$0000_0000` with no error. Allow at least 15 clocks, for example `WAITX #11` directly after the RDFAST. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size. Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} After a no-wait RDFAST, start no hub instruction (`RDBYTE`/`RDWORD`/`RDLONG`, `WRBYTE`/`WRWORD`/`WRLONG`, a `SETQ` block read, another `RDFAST`) until 16 clocks after the RDFAST starts, or use the waiting form. A hub instruction started sooner can complete before its own hub access: a read returns the previous hub read's data with that value's flags, a write can be lost, a `SETQ` block read can write outside its destination or stop the cog, and a waiting `RDFAST` issued 8 to 15 clocks after it returns without waiting, its first `RFLONG` reading `$0000_0000`. `WAITX #12` directly after the RDFAST (16 clocks in all) covers both this and the FIFO reads above, as do seven two-clock non-hub instructions (a `SETQ` counts as one). A no-wait `WRFAST` has no such effect.
 
 After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read data from the FIFO. The FIFO is automatically refilled in the background, making this ideal for checksums, CRC calculations, data processing, and block copy operations.
 
@@ -287,7 +291,9 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot.
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. This leads to corrupted subsequent operations when code expects PTRx to point past the block. Keep the SETQ and the transfer adjacent.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. This leads to corrupted subsequent operations when code expects PTRx to point past the block. Keep the SETQ and the transfer adjacent.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, RDLONG can complete before its own read: Dest gets the previous hub read's long, the flags come from that wrong value, and `PTRA++` still steps. As a `SETQ` block read it writes one wrong long and leaves the rest unwritten, can overwrite cog registers outside its destination, or the cog does not finish; the `SETQ` counts toward the 16 clocks. Use the waiting `RDFAST`, or start RDLONG at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -408,6 +414,8 @@ RDWORD reads a word from hub memory at the address specified by Src (or pointer 
 If the WC or WCZ effect is specified, C is set to the MSB of the word.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, RDWORD can complete before its own read: Dest gets the word at its own offset within the previous hub read's long, and the flags come from that wrong value. Use the waiting `RDFAST`, or start RDWORD at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 

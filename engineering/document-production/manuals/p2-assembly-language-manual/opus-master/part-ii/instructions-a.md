@@ -422,9 +422,9 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTD is shielded from interrupt. ALTD alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
-**Pitfall (Silicon Bug):** ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
 
-**Pitfall (Silicon Bug):** When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. ALTD's base, S[8:0], is unchanged, but its auto-indexer takes S[17:9] from the augmented value, so ALTD's Dest register moves by that amount. Use a register for ALTD's S operand when AUGS is active.
+[Rev C]{.silicon-note topic="AUGS and an intervening immediate ALTx"} When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. ALTD's base, S[8:0], is unchanged, but its auto-indexer takes S[17:9] from the augmented value, so ALTD's Dest register moves by that amount. Use a register for ALTD's S operand when AUGS is active.
 
 ::: instrheader
 ## ALTGB {#altgb}
@@ -1017,7 +1017,7 @@ All instructions following AUGD are shielded from interrupt until after the inst
 
 Though AUGD may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Dest field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-**Pitfall (Silicon Bug):** AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
 
 A pending AUGD survives an intervening ALTx with an immediate #S operand: the target instruction still receives the full augmented value, and the ALTx's Dest register does not move. This was tested with ALTS.
 
@@ -1054,7 +1054,7 @@ All instructions following AUGS are shielded from interrupt until after the inst
 
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-**Pitfall (Silicon Bug):** Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. The ALTx's base, S[8:0], is unchanged, and the target still receives the augmented literal; the damage lands in the ALTx's auto-indexer, which takes S[17:9] from the AUGS value, so the ALTx's Dest register moves by the sign-extended value of those bits. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate.
+[Rev C]{.silicon-note topic="AUGS and an intervening immediate ALTx"} Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. The ALTx's base, S[8:0], is unchanged, and the target still receives the augmented literal; the damage lands in the ALTx's auto-indexer, which takes S[17:9] from the AUGS value, so the ALTx's Dest register moves by the sign-extended value of those bits. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate.
 
-**Pitfall (Silicon Bug):** AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
 

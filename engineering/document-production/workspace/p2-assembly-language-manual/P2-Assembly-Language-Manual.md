@@ -477,7 +477,7 @@ When a cog accesses a specific hub address, it must wait up to 7 clocks to reach
 
 The hardware FIFO smooths out data flow for non-sequential or variable-rate access. The FIFO can be configured for hub-RAM-read or hub-RAM-write operation, allowing sequential transfers in any combination of bytes, words, or longs at rates up to one long per clock. The FIFO maintains proper hub slice alignment without programmer intervention.
 
-Hub read instructions (RDBYTE/RDWORD/RDLONG) take 9-16 clocks in cog/LUT execution mode (9-26 in hub execution mode). Hub write instructions (WRBYTE/WRWORD/WRLONG) take 3-10 clocks in cog/LUT mode (3-20 in hub execution mode). All ranges are egg-beater hub-window dependent. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks (LOCKNEW takes 4-11).
+Hub read instructions (RDBYTE/RDWORD/RDLONG) take 9-16 clocks in cog/LUT execution mode (9-26 in hub execution mode). Hub write instructions (WRBYTE/WRWORD/WRLONG) take 3-10 clocks in cog/LUT mode (3-20 in hub execution mode). All ranges are egg-beater hub-window dependent; RDLONG, RDWORD, WRLONG and WRWORD take 1 more clock when the access crosses a hub long. Hub control instructions (HUBSET, COGINIT, LOCK*, CORDIC) have different timing of 2-9 clocks (LOCKNEW takes 4-11).
 
 Despite the variable initial wait, hub timing remains deterministic. The maximum wait is always seven clocks, and once aligned, sequential access proceeds at one long per clock. Programs requiring precise timing use cog execution mode for critical sections and hub memory for data storage and inter-cog communication.
 
@@ -615,20 +615,20 @@ The 4-bit EEEE field encodes sixteen conditions:
 | EEEE | Primary Mnemonic | Condition | Description |
 |:-----|:-----------------|:----------|:------------|
 | 0000 | _RET_ | Always | Execute, then return if no branch |
-| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | No carry and not zero |
-| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | No carry and zero |
-| 0011 | IF_NC | C=0 | No carry (C flag clear) |
-| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | Carry and not zero |
-| 0101 | IF_NZ | Z=0 | Not zero (Z flag clear) |
-| 0110 | IF_C_NE_Z | C!=Z | C and Z flags differ |
-| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | Not both flags set |
-| 1000 | IF_C_AND_Z | C=1 AND Z=1 | Both flags set |
-| 1001 | IF_C_EQ_Z | C=Z | C and Z flags same |
-| 1010 | IF_Z | Z=1 | Zero (Z flag set) |
-| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | No carry or zero |
-| 1100 | IF_C | C=1 | Carry (C flag set) |
-| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | Carry or not zero |
-| 1110 | IF_C_OR_Z | C=1 OR Z=1 | Either flag set |
+| 0001 | IF_NC_AND_NZ | C == 0 AND Z == 0 | No carry and not zero |
+| 0010 | IF_NC_AND_Z | C == 0 AND Z == 1 | No carry and zero |
+| 0011 | IF_NC | C == 0 | No carry (C flag clear) |
+| 0100 | IF_C_AND_NZ | C == 1 AND Z == 0 | Carry and not zero |
+| 0101 | IF_NZ | Z == 0 | Not zero (Z flag clear) |
+| 0110 | IF_C_NE_Z | C != Z | C and Z flags differ |
+| 0111 | IF_NC_OR_NZ | C == 0 OR Z == 0 | Not both flags set |
+| 1000 | IF_C_AND_Z | C == 1 AND Z == 1 | Both flags set |
+| 1001 | IF_C_EQ_Z | C == Z | C and Z flags same |
+| 1010 | IF_Z | Z == 1 | Zero (Z flag set) |
+| 1011 | IF_NC_OR_Z | C == 0 OR Z == 1 | No carry or zero |
+| 1100 | IF_C | C == 1 | Carry (C flag set) |
+| 1101 | IF_C_OR_NZ | C == 1 OR Z == 0 | Carry or not zero |
+| 1110 | IF_C_OR_Z | C == 1 OR Z == 1 | Either flag set |
 | 1111 | IF_ALWAYS | Always | Unconditional (when no condition specified) |
 
 > **Complete Reference:** Each condition has multiple aliases for different contexts (comparison aliases like IF_GT/IF_A, flag state aliases like IF_00/IF_11, and logical aliases like IF_SAME/IF_DIFF). For the complete alias table and detailed documentation, see **Appendix B: Condition Code Reference**.
@@ -663,7 +663,7 @@ toggle_pin0                             ' Subroutine: toggle pin 0
 
 This is faster than a separate instruction followed by RET, which costs two additional clocks.
 
-**Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in cog/LUT mode. In hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles (ret.yaml).
+**Timing:** The `_RET_` prefix triggers a RET (stack-pop) return: +2 cycles incremental return cost in cog/LUT mode. In hub-exec mode the embedded return costs more due to FIFO refill on the branch — the RET hub-exec range is 13...20 cycles.
 
 > **Complete Reference:** For advanced `_RET_` usage including branch behavior, XBYTE bytecode interpreter patterns, and SKIP/SKIPF combinations, see **Appendix B: Condition Code Reference**.
 
@@ -673,12 +673,12 @@ When comparing values with CMP, CMPS, SUB, or similar instructions, the resultin
 
 | Comparison Result | Flag State | Magnitude Style | Arithmetic Style |
 |:------------------|:-----------|:----------------|:-----------------|
-| Greater than | C=0, Z=0 | IF_A (Above) | IF_GT (Greater Than) |
-| Greater or equal | C=0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
-| Less than | C=1 | IF_B (Below) | IF_LT (Less Than) |
-| Less or equal | C=1 OR Z=1 | IF_BE (Below or Equal) | IF_LE (Less or Equal) |
-| Equal | Z=1 | IF_E | IF_E |
-| Not equal | Z=0 | IF_NE | IF_NE |
+| Greater than | C == 0, Z == 0 | IF_A (Above) | IF_GT (Greater Than) |
+| Greater or equal | C == 0 | IF_AE (Above or Equal) | IF_GE (Greater or Equal) |
+| Less than | C == 1 | IF_B (Below) | IF_LT (Less Than) |
+| Less or equal | C == 1 OR Z == 1 | IF_BE (Below or Equal) | IF_LE (Less or Equal) |
+| Equal | Z == 1 | IF_E | IF_E |
+| Not equal | Z == 0 | IF_NE | IF_NE |
 
 Both styles encode to identical condition codes—the choice is purely stylistic. Either terminology reads equally well in the source.
 
@@ -1108,7 +1108,7 @@ Consider the ADD instruction entry:
 
 | EEEE | Opcode | CZI | D | S | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:------:|:----:|
-| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result = 0 | D | 2 |
+| EEEE | 0001000 | CZI | DDDDDDDDD | SSSSSSSSS | carry of (D + S) | Result == 0 | D | 2 |
 
 
 From this entry:
@@ -1276,7 +1276,9 @@ CON
 **Conditional assembly values:**
 ```spin2
 CON
-  DELAY_MS = (CLKFREQ / 1000) #> 1              ' At least 1 tick
+  _clkfreq = 200_000_000
+  MAX_WAIT = 2500
+  DELAY_MS = (clkfreq_ / 1000) #> 1             ' Clocks per ms, at least 1
   TIMEOUT  = (MAX_WAIT < 1000) ? MAX_WAIT : 1000  ' Clamp to 1000
 ```
 
@@ -1650,8 +1652,8 @@ Any instruction can be made conditional by prefixing with an IF_x condition. Whe
 
 ```pasm2
                 cmp     a, b            wcz     ' Compare, set flags
-        if_z    mov     result, #1              ' Only if Z=1 (equal)
-        if_nz   mov     result, #0              ' Only if Z=0 (not equal)
+        if_z    mov     result, #1              ' Only if Z == 1 (equal)
+        if_nz   mov     result, #0              ' Only if Z == 0 (not equal)
 ```
 
 This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly six clock cycles (three instructions × 2 clocks each) regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes—but the cancelled MOV still occupies its 2-clock slot.
@@ -1674,10 +1676,10 @@ This sequence takes exactly six clock cycles (three instructions × 2 clocks eac
 
 ```pasm2
                 test    flags, #BIT_READY  wz
-        if_z    jmp     #skip
+        if_z    jmp     #skip_it
                 mov     result, source
                 add     count, #1
-skip
+skip_it
 ```
 
 The branch version takes 6 clocks when not ready (test, then a taken jump—whose pipeline flush costs 4 clocks) or 8 clocks when ready (test, cancelled jump, mov, add). The timing varies with the data. The conditional version maintains constant 6-clock timing.
@@ -1953,13 +1955,13 @@ MODCZ accepts two operands specifying operations for C and Z respectively. The W
 The MUX family of instructions uses flag values to conditionally modify individual bits:
 
 ```pasm2
-        muxc    value, #mask    ' C=1: set bits; C=0: clear bits
-        muxnc   value, #mask    ' C=0: set bits; C=1: clear bits
-        muxz    value, #mask    ' Z=1: set bits; Z=0: clear bits
-        muxnz   value, #mask    ' Z=0: set bits; Z=1: clear bits
+        muxc    value, #mask    ' C == 1: set bits; C == 0: clear bits
+        muxnc   value, #mask    ' C == 0: set bits; C == 1: clear bits
+        muxz    value, #mask    ' Z == 1: set bits; Z == 0: clear bits
+        muxnz   value, #mask    ' Z == 0: set bits; Z == 1: clear bits
 ```
 
-These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C=1, or clears them if C=0. This enables building up bit patterns based on multiple flag tests:
+These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C == 1, or clears them if C == 0. This enables building up bit patterns based on multiple flag tests:
 
 ```pasm2
         test    input, #BIT0    wc      ' Test bit 0 of input
@@ -2242,7 +2244,7 @@ The configuration value contains fields for clock source selection, crystal conf
 Switching clock sources requires a careful sequence to ensure glitch-free transitions:
 
 1. **Enable the new source**: Configure crystal oscillator or PLL, but keep the current clock source active
-2. **Wait for stabilization**: Crystal oscillators need approximately 10 ms to stabilize; PLL lock requires approximately 10 µs
+2. **Wait for stabilization**: Allow 5 ms for a crystal to stabilize before switching to it, and 10 ms for the crystal and PLL together before switching to the PLL
 3. **Switch sources**: Change the SS field to select the new clock source
 4. **Optionally disable the old source**: Turn off unused oscillators to save power
 
@@ -2295,7 +2297,7 @@ Register operations like ADD, SUB, AND, and OR complete in 2 cycles whether they
 
 Branch instructions take 2 cycles when the branch is not taken and 4 cycles when taken. This predictable variation allows precise timing of both paths through conditional code. Programmers can eliminate this variation entirely by using conditional execution instead of branches.
 
-Hub memory access instructions have variable timing because they must wait for the cog's hub access window. That slot-wait ranges from 0 to 7 cycles depending on when the instruction executes relative to the hub rotation pattern—but it is only one component of the cost. Hub data reads (RDLONG, RDWORD, RDBYTE) carry a 9-clock floor (9...16 clocks in cog mode) set by the hub-access pipeline itself; the slot-wait varies the total within that range rather than adding to a 2-cycle base. Hub writes (WRLONG, WRWORD, WRBYTE) floor lower, at 3...10 clocks in cog mode.
+Hub memory access instructions have variable timing because they must wait for the cog's hub access window. That slot-wait ranges from 0 to 7 cycles depending on when the instruction executes relative to the hub rotation pattern—but it is only one component of the cost. Hub data reads (RDLONG, RDWORD, RDBYTE) carry a 9-clock floor (9...16 clocks in cog mode) set by the hub-access pipeline itself; the slot-wait varies the total within that range rather than adding to a 2-cycle base. Hub writes (WRLONG, WRWORD, WRBYTE) floor lower, at 3...10 clocks in cog mode. RDLONG, RDWORD, WRLONG and WRWORD take 1 more clock when the access crosses a hub long.
 
 CORDIC operations use a two-phase execution model. The instruction that starts a CORDIC operation (like QMUL for multiplication) completes in 2 clocks when the cog's hub slot is current, and up to 9 clocks (2 base + up to 7 slot-wait, on an 8-Cog P2) when it must wait for its hub slot. The result is not available until 55 clocks after the operation starts. Programs can perform other work during this 55-clock computation period and retrieve the result later with GETQX or GETQY.
 
@@ -2396,7 +2398,7 @@ RDFAST and WRFAST each have two modes controlled by bit 31 of the D operand:
 | D[31] | Behavior |
 |-------|----------|
 | 0 | Wait for any previous WRFAST to finish, then reconfigure FIFO. For RDFAST, also wait until FIFO begins receiving data. Ready to use immediately after instruction completes. |
-| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data. |
+| 1 | No-wait mode—takes only 2 clocks. Code must allow sufficient time before accessing FIFO data: allow at least 15 clocks before the first FIFO read; an earlier read returns zero. |
 
 The no-wait mode is useful when the FIFO must be reconfigured quickly and enough cycles can be guaranteed to pass before the first FIFO access.
 
@@ -2732,7 +2734,7 @@ Measuring code execution time involves reading the counter before and after the 
         sub     end_time, start_time    ' Elapsed cycles
 ```
 
-The difference between the two readings gives the number of cycles elapsed, plus a fixed **2-cycle measurement overhead** — the cost of the GETCT pair itself, confirmed on real P2 silicon. Subtract 2 cycles for a precise figure.
+The difference between the two readings gives the number of cycles elapsed, plus a fixed **2-cycle measurement overhead** — the cost of the GETCT pair itself, confirmed on P2 silicon. Subtract 2 cycles for a precise figure.
 
 For short code sequences, the measurement overhead matters. Measuring a 10-cycle sequence with two GETCT instructions reports 12 cycles (2-cycle overhead + 10). For longer sequences, the 2-cycle overhead becomes negligible.
 
@@ -3002,7 +3004,7 @@ rotate_points
 Results overwrite the input buffer in place, which is safe because the output cursor `kk` trails the input cursor `ii` by six pairs for the whole run — every long is read before it is rewritten.
 
 ::: hardware
-**Keep hub access out of both CORDIC loops.** This is the difference between a pipeline that works and one that silently returns wrong numbers. Measured on real P2 silicon at 200 MHz: a `RDLONG` inside the fill loop began losing results at a fill depth of **2**; a register-only fill with a `WRLONG` in the drain began losing them at **3**; register-only fill *and* drain, with hub I/O batched outside, stayed correct through a depth of **7**.
+**Keep hub access out of both CORDIC loops.** This is the difference between a pipeline that works and one that silently returns wrong numbers. Measured on P2 silicon at 200 MHz: a `RDLONG` inside the fill loop began losing results at a fill depth of **2**; a register-only fill with a `WRLONG` in the drain began losing them at **3**; register-only fill *and* drain, with hub I/O batched outside, stayed correct through a depth of **7**.
 
 The failure is silent and it is not a missing result — it is a *wrong* one. The result is a full array of plausible-looking coordinates, some fraction of which are stale. Nothing faults, no flag is set, and `QMT` does not help: it records an erroneous early read after the fact rather than warning of it in advance.
 
@@ -3135,7 +3137,7 @@ Direction and output control manage the physical pin state. The P2 provides four
 - **FLT** family - Float pin to high-impedance (tri-state)
 - **DRV** family - Drive pin (opposite of float)
 
-Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:= C flag), `NC` (:= !C flag), `Z` (:= Z flag), `NZ` (:= !Z flag), `NOT` (toggle the bit), `RND` (:= a random bit). This provides fine-grained control: `DIRL` forces the pin to input (DIR=0), while `DIRZ` sets the pin's direction to the current Z flag value (Z=1 → output, Z=0 → input).
+Each family includes suffix variants: `L` (DIR/OUT bit := 0), `H` (:= 1), `C` (:= C flag), `NC` (:= !C flag), `Z` (:= Z flag), `NZ` (:= !Z flag), `NOT` (toggle the bit), `RND` (:= a random bit). This provides fine-grained control: `DIRL` forces the pin to input (DIR=0), while `DIRZ` sets the pin's direction to the current Z flag value (Z == 1 → output, Z == 0 → input).
 
 The BIT family (BITL, BITH, BITC, BITNC, BITZ, BITNZ, BITNOT, BITRND) applies the same eight suffix variants to a bit of a destination register rather than a pin—the register-bit counterpart of these pin-control families.
 
@@ -4166,16 +4168,16 @@ In the SETQ2 block form the D operand names the first LUT long directly, countin
 ' BUGGY CODE - PTRx update is wrong!
         setq    #15                     ' Ready to transfer 16 longs
         altd    dest_reg                ' ALTD cancels block PTRx delta!
-        rdlong  0, ptra++               ' PTRA += 4 (1 long), NOT 64!
+        rdlong  0, ptra++               ' PTRA += 4 (plain step), NOT 64!
 
 ' CORRECT CODE - No intervening instruction
         setq    #15
         rdlong  dest_reg, ptra++        ' PTRA correctly increments by 64
 ```
 
-**Impact:** The data transfer completes correctly (16 longs are read), but PTRA only increments by the normal single-operation amount (4 bytes) instead of the block amount (64 bytes).
+**Impact:** The data transfer completes correctly (16 longs are read), but PTRA takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block amount (64 bytes here).
 
-**Workaround:** Never place ALTx, AUGS, or AUGD between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG when using PTRx expressions.
+**Workaround:** Never place ALTx, AUGS, or AUGD between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG when using PTRx expressions; keep the SETQ and the transfer adjacent.
 
 
 ## 6.6 ALTx Modified Addressing
@@ -4216,21 +4218,24 @@ ALTI can modify both destination and source fields, plus the instruction opcode:
 ### 6.6.4 ALTx with AUGS Interaction
 
 ::: {.warningbox}
-**SILICON BUG:** When an ALTx instruction with an immediate operand follows AUGS, the AUGS value affects both the ALTx and its intended target.
+**SILICON BUG:** When an ALTx instruction with an immediate operand follows AUGS, the ALTx takes the AUGS value too, and the AUGS is not cancelled for its intended target.
 :::
 
 ```pasm2
-' BUGGY CODE - AUGS affects both instructions
-        augs    #$12340000
-        altd    index, #$100            ' #$100 becomes #$12340100! (bug)
-        mov     0-0, #$078              ' #$078 becomes #$12340078
+' BUGGY CODE - the ALTD takes the pending AUGS as well
+        augs    #$3C5C0A00              ' Augment meant for the MOV
+        altd    index, #$100            ' Base stays $100, but S[17:9] = 5
+                                        ' moves index by 5 (silent)
+        mov     0-0, #$078              ' Receives $3C5C0A78
 
 ' CORRECT CODE - Use register for ALTx operand
         mov     base, #$100             ' Put base in register
-        augs    #$12340000
+        augs    #$3C5C0A00
         altd    index, base             ' Register not affected by AUGS
-        mov     0-0, #$078              ' Only this augments to #$12340078
+        mov     0-0, #$078              ' Only this augments to $3C5C0A78
 ```
+
+**Impact:** The ALTx base, S[8:0], is unchanged, and the instruction after the ALTx is still redirected as written. What changes is the auto-increment: it is taken from S[17:9] of the AUGS value, so the ALTx's D register silently moves by those bits (5 in the example). Any later instruction that uses that register sees the moved value.
 
 **Workaround:** When using ALTx near AUGS, use a register for the ALTx S operand instead of an immediate.
 
@@ -4296,7 +4301,7 @@ Any of the PTRx forms described in Section 6.4:
 
 **Moderate:** Augmented immediate (+2 cycles per AUG instruction)
 
-**Variable:** Hub reads (9-16 clocks in cog/LUT mode, 9-26 clocks in HUB mode); hub writes are faster (3-10 clocks in cog/LUT mode, 3-20 clocks in HUB mode)
+**Variable:** Hub reads (9-16 clocks in cog/LUT mode, 9-26 clocks in HUB mode); hub writes are faster (3-10 clocks in cog/LUT mode, 3-20 clocks in HUB mode); RDLONG, RDWORD, WRLONG and WRWORD take 1 more clock when the access crosses a hub long
 
 > **Timing Note:** Hub reads require ~9 base clocks plus 0-7 clocks waiting for the hub window (with 8 cogs); hub writes require only ~3 base clocks plus the same 0-7 window wait. In HUB execution mode, the FIFO is busy fetching instructions, adding contention that extends the read maximum to 26 clocks.
 
@@ -4775,7 +4780,7 @@ To add unsigned multi-long values, use ADD followed by one or more ADDX instruct
 ## AKPIN {#akpin}
 Acknowledge smart pin
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Acknowledges smart pin(s) to allow future events.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Acknowledges smart pin(s) to allow future events.
 :::
 
 **AKPIN**  *{#}Src*
@@ -4803,6 +4808,8 @@ A 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range
 When Src is a register, the register's value bits [10:0] are used as-is to form the 11-bit smart pin range, unless a SETQ instruction immediately precedes the AKPIN instruction; in that case, SETQ's Dest[4:0] substitutes for value bits[10:6] for AKPIN's use.
 
 The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
+
+After AKPIN executes, the smart pin takes two clocks to lower its IN signal, so wait before polling the IN flag again (insert one NOP, which takes 2 clocks, or more, before testing it).
 
 
 
@@ -4921,10 +4928,9 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTD is shielded from interrupt. ALTD alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
-**Pitfall (Silicon Bug):** ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} ALTD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
 
-**Pitfall (Silicon Bug):** When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. Use a register for ALTD's S operand when AUGS is active.
-
+[Rev C]{.silicon-note topic="AUGS and an intervening immediate ALTx"} When ALTD uses an immediate #S operand and an AUGS is active (targeting a later instruction), ALTD's #S operand also receives the augmented value without canceling it. ALTD's base, S[8:0], is unchanged, but its auto-indexer takes S[17:9] from the augmented value, so ALTD's Dest register moves by that amount. Use a register for ALTD's S operand when AUGS is active.
 
 ::: instrheader
 ## ALTGB {#altgb}
@@ -5425,18 +5431,18 @@ Set Clock Mode
 - Can be used with conditional prefix (IF_C, IF_NC, etc.).
 
 ::: {.note}
-**Note:** ASMCLK is a pseudo-instruction (macro) that expands to 1–6 real PASM instructions depending on the clock mode. It is not a hardware instruction with a fixed encoding.
+**Note:** ASMCLK is a pseudo-instruction (macro) that expands to one or six real PASM instructions depending on the clock mode. It is not a hardware instruction with a fixed encoding.
 :::
 
 **Expansion:**
 
 | Clock Mode | Expands To | Instructions |
 |:-----------|:-----------|:------------:|
-| External crystal/oscillator with PLL | HUBSET, WAITX, HUBSET | 3–6 |
+| External crystal/oscillator with PLL | HUBSET, WAITX, HUBSET | 6 |
 | RCSLOW (internal slow RC) | HUBSET #1 | 1 |
 | RCFAST (internal fast RC) | HUBSET #0 | 1 |
 
-For external clock modes, the expansion sequence is:
+For external clock modes, the expansion is three instructions, each carrying a `##` literal that inserts an AUGS, which makes six in all:
 
 ```pasm2
                 hubset  ##clkmode_ & !%11       ' Start ext clock, RCFAST
@@ -5517,8 +5523,9 @@ All instructions following AUGD are shielded from interrupt until after the inst
 
 Though AUGD may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Dest field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-**Pitfall (Silicon Bug):** AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
 
+A pending AUGD survives an intervening ALTx with an immediate #S operand: the target instruction still receives the full augmented value, and the ALTx's Dest register does not move. This was tested with ALTS.
 
 ::: instrheader
 ## AUGS {#augs}
@@ -5553,10 +5560,9 @@ All instructions following AUGS are shielded from interrupt until after the inst
 
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
-**Pitfall (Silicon Bug):** Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate.
+[Rev C]{.silicon-note topic="AUGS and an intervening immediate ALTx"} Intervening ALTx instructions with an immediate #S operand between AUGS and its intended target instruction will also receive the augmented value—without canceling it. Both the ALTx and the target instruction use the AUGS value. The ALTx's base, S[8:0], is unchanged, and the target still receives the augmented literal; the damage lands in the ALTx's auto-indexer, which takes S[17:9] from the AUGS value, so the ALTx's Dest register moves by the sign-extended value of those bits. To avoid this, use a register for the ALTx instruction's S operand instead of an immediate.
 
-**Pitfall (Silicon Bug):** AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances by only a single-long delta.
-
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG cancels the block-size PTRx delta calculation. The block transfer completes correctly, but PTRx advances only by the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`), not by the block length. Keep the SETQ or SETQ2 and the transfer adjacent.
 
 
 # Instructions: B
@@ -5793,9 +5799,7 @@ Blend Pixels
 
 BLNPIX alpha-blends the individual RGB (red, green, blue) color values of Src into that of Dest and stores the result in the Dest register. The blend factor must first be established with SETPIV, whose entry documents the factor format.
 
-The alpha-blending operation combines the two color values based on the blend factor, allowing smooth color transitions and transparency effects. A blend factor of 0 leaves Dest unchanged, while a blend factor of 255 completely replaces Dest with Src. Values between 0 and 255 produce proportional blends.
-
-The instruction processes all three color channels (and alpha if present) in parallel, completing in 7 clock cycles. This enables efficient pixel manipulation for graphics applications, user interfaces, and visual effects.
+The blend factor V is the 8-bit value set by SETPIV from D[7:0]. For each of the four bytes of Dest and Src, the result is `((Dest_byte * !V + Src_byte * V + $FF) >> 8) max $FF`, where `!V` is the inverse of V. All four bytes are processed in parallel, and the instruction takes 7 clock cycles.
 
 
 
@@ -5861,7 +5865,7 @@ Breakpoint
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110110 | --- | --- | --- | 2 |
 
 
-**Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk)
+**Related:** [GETBRK](#getbrk), [COGBRK](#cogbrk), [SKIP](#skip)
 
 **Explanation:**
 
@@ -5873,7 +5877,17 @@ During a Debug ISR, the BRK instruction is used instead to establish the next de
 
 The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where A is the 20-bit breakpoint address or 4-bit event code, and bits B-M control various interrupt enable conditions.
 
-BRK is essential for interactive debugging, allowing precise control over program execution and inspection of program state at specific points or conditions.
+**Condition caveat:** Regardless of its execution condition, BRK triggers the debug interrupt, if enabled. The condition gates only the writing of the 8-bit code, so a BRK whose condition is false still enters the Debug ISR, and GETBRK there shows the code of the previous BRK whose condition was true. To make a break conditional, place an opposite-condition SKIP #1 before an unconditional BRK, or JMP around it; either form cancels both the break and its code.
+
+```pasm2
+        cmp     value, limit    wc     ' C = 1 if value is below limit
+if_c    skip    #1                     ' opposite condition: skip the BRK
+        brk     #1                     ' breaks only when C == 0
+```
+
+Spin2's DEBUG statements use BRK: a plain DEBUG compiles to BRK #0, and DEBUG() commands compile to BRK #1 through #255, each code selecting the statement's record in the DEBUG database. A conditional DEBUG compiles to the same opposite-condition SKIP form shown above.
+
+BRK is essential for interactive debugging, allowing program execution to be interrupted and program state inspected at chosen points.
 
 
 
@@ -5968,7 +5982,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLA is used for subroutine calls when hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution.
+CALLA is used for subroutine calls when hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -6012,7 +6026,7 @@ If the WC or WCZ effect is specified, the C flag is set to D[31] after the origi
 
 If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the original state is recorded.
 
-CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution.
+CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles for cog/LUT execution, or 14-32 cycles for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -6044,11 +6058,11 @@ Call with Destination register
 | EEEE | 1011001 | CZI | DDDDDDDDD | SSSSSSSSS | S[31] | S[30] | D and PC | 4 / 13-20 |
 
 
-**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [RET](#ret), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
+**Related:** [CALL](#call), [CALLPA](#callpa), [CALLPB](#callpb), [PA](#pa), [PB](#pb), [PTRA](#ptra), [PTRB](#ptrb)
 
 **Explanation:**
 
-CALLD records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by writing them to the PA, PB, PTRA, PTRB, or Dest register, potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute another CALLD instruction to return to the recorded address (the instruction following the original CALLD), optionally restore the C and Z flag state as it was prior, and optionally prep for another CALLD.
+CALLD records the current state of the C and Z flags and the address of the next instruction (PC + 1 if cog/LUT execution; PC + 4 if hub execution) by writing them to the PA, PB, PTRA, PTRB, or Dest register, potentially updates the C and Z flags with new given states, and jumps to the given address or offset. The routine at the new address should eventually execute another CALLD instruction to return to the recorded address (the instruction following the original CALLD), optionally restore the C and Z flag state as it was prior, and optionally prep for another CALLD. CALLD does not use the hardware stack, because the return address goes into the register it writes; RET does not return from a CALLD.
 
 This instruction is typically used for the P2 DEBUG function.
 
@@ -6433,11 +6447,11 @@ Cog Attention
 
 **COGATN**  *{#}Dest*
 
-**Operation:** strobe ATN on every cog n (0..15) where `D[n] = 1`
+**Operation:** strobe ATN on every cog n (0..15) where `D[n] == 1`
 
 **Result:** The attention signal of one or more cogs is strobed.
 
-- Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal.
+- Dest is a register, or a literal (## for bits above 8), holding a 16-bit pattern in which bits 0..15 represent cogs 0..15; each set bit signals its cog. The P2X8C4M64P has 8 cogs, so bits 0..7 are the ones that reach a cog.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -6449,7 +6463,7 @@ Cog Attention
 
 **Explanation:**
 
-COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0 represent cogs 7 through 0; high (1) bits indicate the cog(s) to signal. The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag.
+COGATN strobes the attention signal for one or more cogs. Dest is a 16-bit value in which bits 0..15 represent cogs 0..15; high (1) bits indicate the cog(s) to signal. Because the P2X8C4M64P has 8 cogs, only bits 7:0 (cogs 7 through 0) reach a cog. The receiving cog(s) then latch the signal, setting an internal flag, and can use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to respond and clear the flag.
 
 In the intended use case, the cog receiving an attention request knows which other cog is strobing it and how to respond. In cases where multiple cogs may request the attention of a single cog, some messaging structure may need to be implemented in hub RAM to differentiate requests.
 
@@ -6515,17 +6529,17 @@ Cog Identification
 
 **COGID**  *{#}Dest*  **{WC}**
 
-**Operation:** if no WC: `D = cog ID (0..15)`; if WC: `C = 1 if cog D[3:0] is on`
+**Operation:** if no WC: `D = cog ID in D[3:0]`, upper bits cleared; if WC: `C = 1 if cog D[2:0] is on`
 
 **Result:** Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.
 
-- Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to get the status for.
+- Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal whose value indicates which cog to get the status for.
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | Cog D[3:0] running | --- | D † | 2...9, +2 if result |
+| EEEE | 1101011 | C0L | DDDDDDDDD | 000000001 | Cog D running | --- | D † | 2...9, +2 if result |
 
 † Result written only if D is register and WC not specified.
 
@@ -6535,9 +6549,9 @@ Cog Identification
 
 COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest[2:0] (if WC is given).
 
-When used without the WC effect, COGID stores the current cog's ID (0-7) in the Dest register. This is useful when code needs to know which cog it is running on, for example when accessing cog-specific resources or implementing cog-aware algorithms.
+When used without the WC effect, COGID stores the current cog's ID in Dest[3:0], with the upper bits cleared (cog IDs are 0-7 on the P2X8C4M64P). This is useful when code needs to know which cog it is running on, for example when accessing cog-specific resources or implementing cog-aware algorithms.
 
-When used with the WC effect, COGID checks the status of the cog specified by Dest[2:0]. If the WC effect is specified, the C flag is set (1) if the specified cog is running, or is cleared (0) if stopped. In this mode, Dest is not written.
+When used with the WC effect, COGID checks the status of the cog specified by Dest[2:0]. If the WC effect is specified, the C flag is set (1) if the specified cog is running, or is cleared (0) if stopped (or never started). In this mode, Dest is not written.
 
 For example, to get the current cog's ID:
 
@@ -6591,12 +6605,12 @@ The following predefined constants encode these bit patterns:
 
 | Constant | Target | Execution | Description |
 |----------|--------|-----------|-------------|
-| COGEXEC + id | Specific Cog | Cog RAM | Load 496 longs from Hub to Cog RAM, execute from Cog |
-| HUBEXEC + id | Specific Cog | Hub RAM | Execute directly from Hub RAM (no load) |
-| COGEXEC_NEW | Any free Cog | Cog RAM | Auto-select available Cog, load and execute |
-| HUBEXEC_NEW | Any free Cog | Hub RAM | Auto-select available Cog, execute from Hub |
-| COGEXEC_NEW_PAIR | Adjacent pair | Cog RAM | Auto-select adjacent Cog pair for LUT sharing |
-| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent Cog pair, Hub execution |
+| COGEXEC + id | Specific cog | Cog RAM | Load 496 longs from hub to cog RAM, execute from cog |
+| HUBEXEC + id | Specific cog | Hub RAM | Execute directly from hub RAM (no load) |
+| COGEXEC_NEW | Any free cog | Cog RAM | Auto-select available cog, load and execute |
+| HUBEXEC_NEW | Any free cog | Hub RAM | Auto-select available cog, execute from hub |
+| COGEXEC_NEW_PAIR | Adjacent pair | Cog RAM | Auto-select adjacent cog pair for LUT sharing |
+| HUBEXEC_NEW_PAIR | Adjacent pair | Hub RAM | Auto-select adjacent cog pair, hub execution |
 
 For specific cog targeting, add the cog ID (0-7) to COGEXEC or HUBEXEC. The _NEW variants automatically select available resources.
 
@@ -6646,7 +6660,7 @@ Cog Stop
 
 **Result:** Cog indicated by Dest is terminated (stopped).
 
-- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
+- Dest is the register or 9-bit literal indicating (in lowest 4 bits) which cog to stop.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -6658,9 +6672,9 @@ Cog Stop
 
 **Explanation:**
 
-COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases to execute code and power consumption is greatly reduced.
+COGSTOP terminates the cog identified by Dest[3:0]. In this dormant state, the cog ceases to execute code and power consumption is greatly reduced.
 
-The cog specified by the lower 3 bits of Dest (0-7) is immediately halted. All registers and state in that cog are lost. The cog can be restarted later using COGINIT, which will reload it with new code and reset its state.
+The cog specified by the lower 4 bits of Dest is immediately halted. All registers and state in that cog are lost. The cog can be restarted later using COGINIT, which will reload it with new code and reset its state.
 
 For example, to stop cog 4:
 
@@ -6777,14 +6791,14 @@ CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providi
 
 This section contains all PASM2 instructions beginning with the letter D.
 
-**Conditional Jump Timing Convention:** Conditional jumps in this section (DJZ, DJNZ, DJF, DJNF) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps in this section (DJZ, DJNZ, DJF, DJNF) show their `Clks` field as `cog/LUT execution / hub execution`, each side giving the not-taken count and then the taken count. The *taken* value depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 cycles when the jump is not taken or 4 when taken; in hub execution, 2 cycles when not taken or 13–20 when taken.
 
 
 
@@ -6871,7 +6885,7 @@ DECOD is the complement of ENCOD. It is commonly used to generate bit masks for 
 ## DIRC / DIRNC {#dirc}
 Set Pin Direction by C flag
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on C flag state.
 :::
 
 \hypertarget{dirnc}{}
@@ -6918,7 +6932,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRH {#dirh}
 Set Pin Direction High
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction.
 :::
 
 **DIRH**  *{#}Dest*  **{WCZ}**
@@ -6947,6 +6961,10 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRH instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRH's use.
+
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
+
 If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
 
@@ -6955,7 +6973,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DIRL {#dirl}
 Set Pin Direction Low
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction.
 :::
 
 **DIRL**  *{#}Dest*  **{WCZ}**
@@ -6984,6 +7002,10 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRL instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DIRL's use.
+
+The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
+
 If the WCZ effect is specified, the C flag is set to the original state of the base direction bit, and Z is set to the same value.
 
 
@@ -6992,7 +7014,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DIRNOT {#dirnot}
 Direction Not
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Toggles pin direction to opposite state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Toggles pin direction to opposite state.
 :::
 
 **DIRNOT**  *{#}Dest*  **{WCZ}**
@@ -7033,7 +7055,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRZ / DIRNZ {#dirz}
 Set Pin Direction by Z flag
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction based on Z flag state.
 :::
 
 \hypertarget{dirnz}{}
@@ -7080,7 +7102,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## DIRRND {#dirrnd}
 Direction Random
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin direction to random state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin direction to random state.
 :::
 
 **DIRRND**  *{#}Dest*  **{WCZ}**
@@ -7243,7 +7265,7 @@ Takes 2 clocks when not jumping; when jumping, 4 clocks in cog/LUT execution or 
 ## DRVC / DRVNC {#drvc}
 Drive Pins by C flag
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on C flag state.
 :::
 
 \hypertarget{drvnc}{}
@@ -7278,9 +7300,13 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVC or DRVNC instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVC or DRVNC's use.
+
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
 If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
+
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVC or DRVNC.
 
 
 
@@ -7288,7 +7314,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DRVH {#drvh}
 Drive Pins High
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives high.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives high.
 :::
 
 **DRVH**  *{#}Dest*  **{WCZ}**
@@ -7317,9 +7343,13 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVH instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVH's use.
+
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
 If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
+
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVH.
 
 
 
@@ -7327,7 +7357,7 @@ If the WCZ effect is specified, the C flag is set to the original state of the b
 ## DRVL {#drvl}
 Drive Pins Low
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives low.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and drives low.
 :::
 
 **DRVL**  *{#}Dest*  **{WCZ}**
@@ -7356,11 +7386,13 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVL instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVL's use.
+
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
 If the WCZ effect is specified, the C flag is set to the original state of the base OUT bit, and Z is set to the same value.
 
-Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVL.
 
 
 
@@ -7368,7 +7400,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 ## DRVNOT {#drvnot}
 Drive Not
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction and toggles output level.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction and toggles output level.
 :::
 
 **DRVNOT**  *{#}Dest*  **{WCZ}**
@@ -7403,7 +7435,7 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest.
 
-Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVNOT.
 
 
 
@@ -7411,7 +7443,7 @@ Note that the new DIRx state is not data-forwarded; the next pipelined instructi
 ## DRVZ / DRVNZ {#drvz}
 Drive Pins by Z flag
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Drives pins high or low based on Z flag state.
 :::
 
 \hypertarget{drvnz}{}
@@ -7446,9 +7478,13 @@ Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indica
 
 A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value—this inserts an AUGD instruction prior.
 
+When Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the DRVZ or DRVNZ instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for DRVZ or DRVNZ's use.
+
 The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group; it will not cross the port boundary.
 
 If the WCZ effect is specified, the C and Z flags are set to the original state of the base OUT bit.
+
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVZ or DRVNZ.
 
 
 
@@ -7456,7 +7492,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## DRVRND {#drvrnd}
 Drive Random
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to output direction with random output levels.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to output direction with random output levels.
 :::
 
 **DRVRND**  *{#}Dest*  **{WCZ}**
@@ -7493,7 +7529,7 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA / OUTB's base bit, identified by Dest, before the random modification occurs.
 
-Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
+Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction that reads or modifies DIRx is at least two instructions after a DRVRND.
 
 
 
@@ -7573,7 +7609,7 @@ Execute with Skip Pattern
 | EEEE | 1101011 | 00L | DDDDDDDDD | 000110011 | --- | --- | --- | 4 |
 
 
-**Related:** [CALL](#call), [SKIPF](#skipf), [SKIP](#skip)
+**Related:** [JMP](#jmp), [SKIPF](#skipf), [SKIP](#skip)
 
 **Explanation:**
 
@@ -7583,9 +7619,11 @@ The PC is set to the address formed by zero-extending Dest[9:0] to create a cog/
 
 The SKIPF pattern in Dest[31:10] provides a 22-bit pattern that controls which subsequent instructions will be skipped after the jump. Like SKIPF, this allows the PC to leap over instructions rather than cancelling them, providing fast conditional execution without the overhead of traditional branch instructions.
 
-EXECF combines the functionality of CALL (jumping to a new address) and SKIPF (setting a skip pattern), enabling efficient implementation of computed branches with conditional execution. This is particularly useful for jump tables and state machines where both the target address and subsequent execution pattern need to be determined dynamically.
+EXECF combines the functionality of a jump (like JMP, no return address is saved) and SKIPF (setting a skip pattern), enabling efficient implementation of computed branches with conditional execution. This is particularly useful for jump tables and state machines where both the target address and subsequent execution pattern need to be determined dynamically.
 
 The instruction takes 4 clock cycles to execute, regardless of whether it executes from cog/LUT or hub memory.
+
+The skipping that EXECF initiates follows the rules of SKIPF: it works only in main code (not inside interrupt service routines, which run normally mid-sequence), an unskipped CALL, CALLPA or CALLPB runs its subroutine normally with the sequence resuming after the return, and the SKIPF branching rules apply (see SKIPF).
 
 
 
@@ -7600,7 +7638,7 @@ This section contains all PASM2 instructions beginning with the letter F.
 ## FBLOCK {#fblock}
 Set Next FIFO Block
 
-[hub memory Access](#hub-memory-access) - Configures the next block for FIFO wraparound operations.
+[Hub Memory Access](#hub-memory-access) - Configures the next block for FIFO wraparound operations.
 :::
 
 **FBLOCK**  *{#}Dest, {#}Src*
@@ -7622,9 +7660,11 @@ Set Next FIFO Block
 
 FBLOCK configures the parameters for the next hub FIFO block that will be used when the current block wraps around. This instruction is used to set up circular buffering in hub memory for streaming read and write operations.
 
+FBLOCK takes 2 clocks and never waits: it only queues the next start address and block count. They take effect when the current blocks are fully read or written, in place of the prior start address and block count that the FIFO would otherwise have wrapped back to. FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event.
+
 Dest[13:0] specifies the block size in 64-byte units. A value of 0 represents the maximum block size. The block size determines how many bytes can be transferred before the FIFO wraps to the beginning of the block.
 
-Src[19:0] specifies the starting address of the block in hub memory. This address marks where the FIFO will wrap to when it reaches the end of the current block.
+Src[19:0] specifies the starting address of the block in hub memory. This is the address at which the FIFO continues once the current blocks have been fully read or written.
 
 FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-throughput data streaming between hub memory and cog/LUT memory. The block configuration takes effect when the current FIFO operation completes and wraps around.
 
@@ -7784,7 +7824,7 @@ FLES is the signed counterpart to FLE and is used when working with signed value
 ## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
 Float with Output Preset by Flag
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset by flag state.
 :::
 
 \hypertarget{fltnc}{}\hypertarget{fltz}{}\hypertarget{fltnz}{}
@@ -7796,10 +7836,10 @@ Float with Output Preset by Flag
 
 **Operation:** `OUT[pin range] = src`, `DIR[pin range] = 0` (FLTC src=C, FLTNC src=!C, FLTZ src=Z, FLTNZ src=!Z); `C,Z = OUT bit`
 
-**Result:** The I/O pins are set to input direction with output preset according to flag state. Optionally sets Z to original output state.
+**Result:** The I/O pins are set to input direction with output preset according to flag state. Optionally sets C and Z to the original output state.
 
 - Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
-- WCZ is an optional effect to set Z to the original output state.
+- WCZ is an optional effect to set C and Z to the original output state.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -7836,7 +7876,7 @@ If WCZ is specified, the C and Z flags are set to the original output state of t
 ## FLTH {#flth}
 Float High
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset high.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset high.
 :::
 
 **FLTH**  *{#}Dest*  **{WCZ}**
@@ -7877,7 +7917,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## FLTL {#fltl}
 Float Low
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset low.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output preset low.
 :::
 
 **FLTL**  *{#}Dest*  **{WCZ}**
@@ -7918,7 +7958,7 @@ If the WCZ effect is specified, the C and Z flags are set to the original state 
 ## FLTNOT {#fltnot}
 Float Not
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with output toggled.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with output toggled.
 :::
 
 **FLTNOT**  *{#}Dest*  **{WCZ}**
@@ -7961,7 +8001,7 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 ## FLTRND {#fltrnd}
 Float Random
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pins to input direction with random output levels.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pins to input direction with random output levels.
 :::
 
 **FLTRND**  *{#}Dest*  **{WCZ}**
@@ -8038,7 +8078,7 @@ With the WCZ effect, GETBRK returns the cog's internal status: C indicates STALL
 
 With the WC effect, GETBRK reports skip and execution state: C is the LSB of the current SKIP/SKIPF/EXECF/XBYTE pattern, and Dest holds the CALL depth since that pattern began, the SKIP versus SKIPF/EXECF/XBYTE mode, the LUT-sharing and XBYTE state, and the 16 event-trap flags (CORDIC, attention, streamer, FIFO, pin-pattern, SE1-SE4, CT1-CT3, and interrupt events).
 
-With the WZ effect, GETBRK returns the queued skip pattern: Z indicates whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued (Dest = 0 means none), and Dest holds the full 32-bit pattern, consumed LSB-first to skip subsequent instructions.
+With the WZ effect, GETBRK returns the queued skip pattern: Z indicates whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued (Dest == 0 means none), and Dest holds the full 32-bit pattern, consumed LSB-first to skip subsequent instructions.
 
 GETBRK is essential for implementing debug infrastructure. It works in conjunction with BRK, and with COGBRK to break another cog, to provide breakpoint support.
 
@@ -8095,7 +8135,7 @@ Get System Counter
 **Result:** The current value of the system counter CT is written to Dest.
 
 - Dest is a register where the system counter value is written.
-- WC is an optional effect to retrieve the upper 32 bits of the 64-bit counter (Rev B/C silicon).
+- WC is an optional selector that retrieves the upper 32 bits of the 64-bit counter (Rev B/C silicon). It selects which half is read; the C flag is not written.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -8111,12 +8151,14 @@ GETCT retrieves the current value of the system counter CT into the Dest registe
 
 The CT counter provides a continuous, monotonic time reference. The lower 32 bits wrap around from $FFFF_FFFF to $0000_0000 approximately every 21.5 seconds at 200 MHz. This counter is shared across all cogs and provides the foundation for timing operations and synchronization.
 
-**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, use two consecutive GETCT instructions:
+**64-bit Counter (Rev B/C):** If the WC effect is specified, the upper 32 bits of the 64-bit counter (CT[63:32]) are written to Dest instead of the lower 32 bits. To capture a full 64-bit timestamp, read the upper half first, with `GETCT WC`, and the lower half with a plain `GETCT` directly after it; this pair gets the full counter. `GETCT WC` holds off interrupts until the next instruction, so nothing can run between the two reads.
 
 ```pasm2
-        getct   low_word        ' Get lower 32 bits (CT[31:0])
         getct   high_word wc    ' Get upper 32 bits (CT[63:32])
+        getct   low_word        ' Then the lower 32 bits (CT[31:0])
 ```
+
+[Rev C]{.silicon-note topic="64-bit GETCT in an idle cog group"} In a cog whose group of four (cogs 0–3 or 4–7) had no running cog at a wrap of the lower half, `GETCT WC` returns an upper half behind by one for each wrap it missed, until that group's next wrap. Keep one cog of each group you use running from start-up (a cog waiting in `WAITATN`, `WAITX` or `WAITCT1` counts as running), or take no 64-bit time in that group until it has run through one wrap. A plain `GETCT` and every `WAITCT`/`ADDCT` timing are unaffected.
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 
@@ -8163,7 +8205,7 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 ## GETPTR {#getptr}
 Get FIFO Hub Pointer
 
-[hub memory Access](#hub-memory-access) - Retrieves the current FIFO hub pointer position.
+[Hub Memory Access](#hub-memory-access) - Retrieves the current FIFO hub pointer position.
 :::
 
 **GETPTR**  *Dest*
@@ -8224,7 +8266,7 @@ If the WC or WCZ effect is specified, the C flag is set to X[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-GETQX takes 2 clocks if the result is already available. If the result is not yet ready, GETQX waits until the CORDIC computation completes (up to 58 clocks from when the operation was queued).
+GETQX takes 2 to 58 clocks in total: 2 clocks if the result is already available, and longer when it must wait for the CORDIC computation to complete.
 
 
 
@@ -8262,7 +8304,7 @@ If the WC or WCZ effect is specified, the C flag is set to Y[31], which is the s
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
 
-GETQY takes 2 clocks if the result is already available. If the result is not yet ready, GETQY waits until the CORDIC computation completes (up to 58 clocks from when the operation was queued).
+GETQY takes 2 to 58 clocks in total: 2 clocks if the result is already available, and longer when it must wait for the CORDIC computation to complete.
 
 
 
@@ -8270,7 +8312,7 @@ GETQY takes 2 clocks if the result is already available. If the result is not ye
 ## GETRND {#getrnd}
 Get Random Value
 
-[Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the cog's RNG.
+[Miscellaneous](#miscellaneous) - Retrieves a pseudo-random value from the chip's PRNG.
 :::
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**\
@@ -8294,7 +8336,7 @@ Get Random Value
 
 **Explanation:**
 
-GETRND retrieves the current value from the pseudo-random number generator (RNG) that is unique to each cog. Each cog maintains its own independent RNG state that advances continuously.
+GETRND retrieves the current value from the chip's pseudo-random number generator (PRNG). There is one PRNG, which iterates on every clock and generates 64 fresh bits that are spread among all cogs and smart pins. Each cog receives its own unique set of 32 different bits from that pool, in a scrambled arrangement with some bits inverted, and GETRND samples them.
 
 The first syntax form (GETRND Dest) writes the full 32-bit random value to the Dest register. This provides a complete random word for applications requiring random data, random seeds, or probabilistic algorithms.
 
@@ -8302,7 +8344,7 @@ The second syntax form (GETRND without Dest) is used when only random flag bits 
 
 If the WC or WCZ effect is specified, the C flag is set to RND[31], which is the most significant bit of the current random value.
 
-If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND[30] is unique per cog, meaning each cog's RNG produces independent bit sequences at this position, useful for multi-cog systems requiring independent randomness.
+If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Because each cog receives its own unique bits of the PRNG output, the value, and so this bit, differs from cog to cog.
 
 The random value is produced by the P2's Xoroshiro128** pseudo-random number generator, which has 128 bits of state, advances every clock cycle, and has an extremely long period (2^128^ - 1).
 
@@ -8312,7 +8354,7 @@ The random value is produced by the P2's Xoroshiro128** pseudo-random number gen
 ## GETSCP {#getscp}
 Get Oscilloscope Samples
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Retrieves four 8-bit oscilloscope samples.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Retrieves four 8-bit oscilloscope samples.
 :::
 
 **GETSCP**  *Dest*
@@ -8384,7 +8426,7 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 ## GETXACC {#getxacc}
 Get Goertzel Accumulators
 
-[streamer](#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
+[Streamer](#streamer) - Retrieves Goertzel X and Y accumulators from the streamer.
 :::
 
 **GETXACC**  *Dest*
@@ -8409,6 +8451,10 @@ GETXACC retrieves the two Goertzel accumulators from the streamer, which are use
 
 The X accumulator value is written directly to the Dest register. The Y accumulator value is written to the S field of the immediately following instruction, utilizing the P2's next-instruction operand modification capability. After both values are retrieved, the X and Y accumulators are automatically cleared to zero.
 
+[Rev C]{.silicon-note topic="GETXACC clears only during a Goertzel burst"} The read clears the accumulators only while a Goertzel command is running. With the streamer idle, or in any other mode, it returns the running total and clears nothing, so a second idle read returns the same numbers and the totals keep growing from one burst to the next. To get one burst's sums, read before the burst and after it, and subtract.
+
+[Rev C]{.silicon-note topic="Goertzel last term lands in the next burst"} A read after a Goertzel burst of N clocks holds N−1 terms: the last term is held back and added on the first clock of the next Goertzel burst, and waiting does not deliver it. For an exact SINC1 sum, deliver it before each idle read: run the same command with its count set to 4 and `S[15:12]` = 0, then `WAITXFI`. The zero-term burst does not flush a SINC2 sum.
+
 This dual-retrieval mechanism allows both accumulator values to be captured in a compact instruction sequence. The following instruction must have an S field that can receive the Y accumulator value. Typically, this is a MOV or similar instruction where the S operand receives the Y accumulator data.
 
 GETXACC is used in conjunction with the streamer's Goertzel mode, configured via XINIT and controlled via XCONT. The retrieved accumulator values represent the correlation between the input signal and the reference frequency configured in the Goertzel algorithm.
@@ -8431,7 +8477,7 @@ Set Hub Configuration
 
 **HUBSET**  *{#}D*
 
-**Result:** Hub configuration is updated according to the value in D, controlling clock source, crystal settings, and PLL configuration.
+**Result:** Hub configuration is updated according to the value in D, selected by D[31:28]: clock source, crystal settings, and PLL configuration, a hard reset, write-protect and debug enables, the filter, or the PRNG seed.
 
 - D is a register or 9-bit literal (or 32-bit augmented literal) containing the configuration value for the hub system.
 
@@ -8445,9 +8491,17 @@ Set Hub Configuration
 
 **Explanation:**
 
-HUBSET configures the P2's clock system and hub parameters. The 32-bit value in D specifies clock source selection, crystal oscillator settings, and PLL configuration to control the system clock frequency.
+HUBSET configures the P2's global hub circuits. The single D operand both selects the circuit to configure, by its upper bits D[31:28], and supplies the configuration data:
 
-The D value contains multiple fields that control different aspects of the clock system:
+| D[31:28] | D format | Effect |
+|:--------:|:---------|:-------|
+| %0000 | `%0000_xxxE_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS` | Set clock generator mode |
+| %0001 | `%0001_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx` | Hard reset, reboots the chip |
+| %0010 | `%0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD` | Set write-protect and debug enables |
+| %0100 | `%0100_xxxx_xxxx_xxxx_xxxx_xxxR_RLLT_TTTT` | Set filter R to length L and tap T |
+| %1xxx | `%1DDD_DDDD_DDDD_DDDD_DDDD_DDDD_DDDD_DDDD` | Seed the Xoroshiro128** PRNG with D |
+
+The rest of this entry describes the clock generator mode, which controls clock source selection, crystal oscillator settings, and PLL configuration.
 
 **Clock Source Selection (D[1:0]):**
 - `%00` - RCFAST internal oscillator (~20-25 MHz, boot default)
@@ -8468,10 +8522,15 @@ The D value contains multiple fields that control different aspects of the clock
 - D[24] - PLL power enable (E)
   - Note: the XI oscillator is enabled by the crystal-config field CC != %00, not by a dedicated bit.
 
-**System Reset:**
-- D[31] - Write 1 to reset the entire chip
+**Hard Reset and PRNG Seed (other D[31:28] values):**
+- D[31:28] == %0001 - hard reset, which reboots the chip: `HUBSET ##$1000_0000`
+- D[31] == 1 - seed the Xoroshiro128** PRNG: `{1'b1, D[30:0]}` is written into 32 bits of its 128-bit state
 
-The clock switching is glitch-free, and the system automatically falls back to RCFAST if the selected clock source fails. Proper timing must be observed when switching clock sources to allow for oscillator stabilization.
+**Switching Clock Sources:**
+
+The clock selector controlled by the SS bits has a deglitching circuit: it waits for a positive edge on the old clock source before disengaging, then for a positive edge on the new clock source before switching over to it. Select RCFAST (%00) or RCSLOW (%01) while waiting for the crystal and/or PLL to settle, then switch over. Allow 5 ms for a crystal to stabilize before switching to XI, and 10 ms for crystal and PLL to stabilize before switching to the PLL. The PLL's VCO should be kept within 100 MHz to 200 MHz.
+
+**Warning:** Incorrectly switching away from the PLL setting (SS == %11 and CC != %00) with PPPP = %1111 can cause a clock glitch that hangs the chip until a reset occurs. To switch away safely, first switch to an internal RC oscillator (SS = %00 or %01) while keeping PPPP = %1111 and the same CC.
 
 Example: Enable a 20 MHz crystal with 15pF capacitors:
 
@@ -8481,20 +8540,18 @@ Example: Enable a 20 MHz crystal with 15pF capacitors:
         hubset  ##%10_10              ' Switch to crystal clock
 ```
 
-Example: Configure PLL to generate 160 MHz from a 20 MHz crystal:
+Example: Configure the PLL to generate 80 MHz from a 20 MHz crystal:
 
 ```pasm2
-        hubset  ##%10_00          ' Enable 15pF crystal, stay RCFAST
-        waitx   ##20_000_000/100  ' Wait 10ms
-        hubset  ##%10_10          ' Switch to crystal
-        ' PLL on, /1 * 16 / 2, stay on XI while PLL locks:
-        hubset  ##%1_000000_0000001111_0000_10_10
-        waitx   ##20_000_000/10000  ' Wait 100µs for PLL lock
+        ' PLL on, XI /1, VCO x8, post divider /2, 15pF crystal;
+        ' stay in RCFAST while the crystal and PLL stabilize:
+        hubset  ##%1_000000_0000000111_0000_10_00
+        waitx   ##20_000_000/100  ' Wait ~10ms for crystal+PLL
         ' Switch to PLL output:
-        hubset  ##%1_000000_0000001111_0000_10_11
+        hubset  ##%1_000000_0000000111_0000_10_11
 ```
 
-In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divider divides by 2 to produce 160 MHz system clock.
+In this PLL example, the VCO runs at 20 MHz / 1 * 8 = 160 MHz, within the 100 MHz to 200 MHz range, then the post divider divides by 2 to produce an 80 MHz system clock.
 
 HUBSET takes 2-9 clock cycles to execute depending on hub window alignment. Switching to a new clock source may take additional time for oscillator stabilization and PLL lock. Always allow appropriate wait periods when changing clock sources.
 
@@ -8505,14 +8562,14 @@ HUBSET takes 2-9 clock cycles to execute depending on hub window alignment. Swit
 
 This section contains all PASM2 instructions beginning with the letter I.
 
-**Conditional Jump Timing Convention:** Conditional jumps in this section (IJZ, IJNZ) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps in this section (IJZ, IJNZ) show their `Clks` field as `cog/LUT execution / hub execution`, each side giving the not-taken count and then the taken count. The *taken* value depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 cycles when the jump is not taken or 4 when taken; in hub execution, 2 cycles when not taken or 13–20 when taken.
 
 
 
@@ -8557,7 +8614,7 @@ IJZ and IJNZ increment Dest and conditionally jump based on whether the result i
 
 IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping; when jumping, 4 clocks in cog/LUT execution or 13–20 clocks during hub execution (pipeline flush).
 
 
 
@@ -8632,14 +8689,14 @@ INCMOD also indexes round-robin scheduling across a fixed number of resources:
 
 This section contains all PASM2 instructions beginning with the letter J.
 
-**Conditional Jump Timing Convention:** Conditional jumps (including event-jumps and counter-jumps) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps (including event-jumps and counter-jumps) show their `Clks` field as `cog/LUT execution / hub execution`, each side giving the not-taken count and then the taken count. The *taken* value depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken (either context), 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 cycles when the jump is not taken or 4 when taken; in hub execution, 2 cycles when not taken or 13–20 when taken.
 
 
 
@@ -8677,6 +8734,8 @@ JATN checks the ATN (attention) event flag and conditionally jumps if the flag i
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 These instructions are useful for implementing inter-cog communication mechanisms where one cog needs to signal and get the attention of another cog for coordination or data exchange purposes.
 
@@ -8726,6 +8785,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the CTn event flag is cleared (unless the event sensor sets it again at the same time).
+
 The P2 provides three independent hardware counters for timing operations, allowing a cog to manage multiple simultaneous time-based events without software overhead. JCTn instructions are commonly used for timing loops that wait until a counter fires, while JNCTn instructions enable polling loops that continue until a counter event occurs.
 
 
@@ -8765,6 +8826,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
+
 These instructions are useful for implementing circular buffer operations and managing block-based data transfers through the FIFO interface.
 
 
@@ -8798,11 +8861,13 @@ PC is written only when the condition is met.
 
 **Explanation:**
 
-JINT checks the INT (interrupt) event flag and jumps if set. JNINT performs the opposite test, jumping if clear. The INT event flag indicates that a hardware interrupt condition is pending, as configured by one of the SETINT instructions.
+JINT checks the INT (interrupt) event flag and jumps if set. JNINT performs the opposite test, jumping if clear. The INT event flag is set whenever interrupt 1, 2, or 3 occurs (debug interrupts are ignored), and is cleared on cog start.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the condition is not met, execution continues with the next instruction.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 These instructions provide a polling-based mechanism for handling hardware interrupts, allowing code to check for interrupt conditions at convenient points in the program flow.
 
@@ -8952,6 +9017,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the SEn event flag is cleared (unless the event sensor sets it again at the same time).
+
 The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for event-driven code. JSEn instructions are commonly used for event-triggered actions, while JNSEn instructions enable polling loops that continue until an event occurs.
 
 
@@ -8989,6 +9056,8 @@ When the # prefix is used with S, the jump is relative to the current PC value. 
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
+
 JPAT is useful for implementing hardware-triggered control flow where code execution branches based on specific pin state patterns. JNPAT is useful for polling loops that wait until a specific pattern appears on the I/O pins.
 
 
@@ -9020,13 +9089,15 @@ Jump If CORDIC Empty Event Set / Clear
 
 **Explanation:**
 
-JQMT and JNQMT check the CORDIC-read-but-empty event flag and conditionally jump to the address specified by S. JQMT jumps if the flag is set; JNQMT jumps if it is clear. This event flag is set when code attempts to read CORDIC results before the calculation has completed, indicating a timing error.
+JQMT and JNQMT check the CORDIC-read-but-empty event flag and conditionally jump to the address specified by S. JQMT jumps if the flag is set; JNQMT jumps if it is clear. This event flag is set when GETQX or GETQY executes while no CORDIC result is available and none is in progress; it is cleared on cog start.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
 
-JQMT is useful for error handling in CORDIC operations, allowing code to detect and respond to premature reads of calculation results. JNQMT is useful for ensuring CORDIC results are read at the correct time, helping to detect and handle timing errors in mathematical operations.
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
+
+JQMT is useful for detecting a GETQX or GETQY that was executed when no CORDIC result was available or in progress. JNQMT jumps when no such read has occurred since the flag was last cleared.
 
 
 
@@ -9058,11 +9129,13 @@ Jump If Streamer Finished Event Set / Clear
 
 **Explanation:**
 
-JXFI and JNXFI check the XFI (streamer finished) event flag and conditionally jump to the address specified by S. JXFI jumps if the flag is set; JNXFI jumps if it is clear. The XFI event flag is set when the streamer completes its current operation.
+JXFI and JNXFI check the XFI (streamer finished) event flag and conditionally jump to the address specified by S. JXFI jumps if the flag is set; JNXFI jumps if it is clear. The XFI event flag is set whenever the streamer runs out of commands, and is cleared by XINIT, XZERO, and XCONT.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXFI is useful for chaining streamer operations or triggering code execution immediately when a streaming operation completes. JNXFI is useful for polling loops that wait until the streamer completes its operation.
 
@@ -9095,11 +9168,13 @@ Jump If Streamer Empty Event Set / Clear
 
 **Explanation:**
 
-JXMT and JNXMT check the XMT (streamer empty) event flag and conditionally jump to the address specified by S. JXMT jumps if the flag is set; JNXMT jumps if it is clear. The XMT event flag is set when the streamer's internal buffer becomes empty and needs to be refilled.
+JXMT and JNXMT check the XMT (streamer empty) event flag and conditionally jump to the address specified by S. JXMT jumps if the flag is set; JNXMT jumps if it is clear. The XMT event flag is set whenever the streamer is ready for a new command, and is cleared by XINIT, XZERO, and XCONT.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXMT is useful for implementing continuous streaming operations where the code needs to reload data into the streamer when the buffer empties. JNXMT is useful for maintaining continuous streamer operation by reloading data only when the streamer buffer still contains data.
 
@@ -9132,11 +9207,13 @@ Jump If Streamer LUT Rollover Event Set / Clear
 
 **Explanation:**
 
-JXRL and JNXRL check the XRL (streamer LUT RAM rollover) event flag and conditionally jump to the address specified by S. JXRL jumps if the flag is set; JNXRL jumps if it is clear. The XRL event flag is set when the streamer's LUT RAM address pointer rolls over from the end back to the beginning of the configured range.
+JXRL and JNXRL check the XRL (streamer LUT RAM rollover) event flag and conditionally jump to the address specified by S. JXRL jumps if the flag is set; JNXRL jumps if it is clear. The XRL event flag is set whenever the streamer reads location $1FF of the lookup RAM, and is cleared on cog start.
 
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXRL is useful for implementing circular buffer operations with the streamer using LUT RAM, detecting when a complete cycle through the buffer has occurred. JNXRL is useful for detecting when a buffer boundary has not yet been crossed.
 
@@ -9174,6 +9251,8 @@ JXRO and JNXRO check the XRO (streamer NCO rollover) event flag and conditionall
 When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the flag is in the opposite state, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in cog execution mode). In hub execution mode, taken jumps require 13-20 clock cycles depending on hub timing.
+
+Whether or not the jump is taken, the event flag is cleared (unless the event sensor sets it again at the same time).
 
 JXRO is useful for timing-critical streamer applications where code needs to synchronize with the NCO rollovers. JNXRO is useful for detecting the absence of NCO rollovers in the streaming operation.
 
@@ -9235,7 +9314,7 @@ Allocate New Lock
 
 **Operation:** `D = LOCK number (0..15)`; `C = 1 if no LOCK available`
 
-**Result:** D is written with an available lock number (0-15), or remains unchanged if no lock is available.
+**Result:** D is written with an available lock number (0-15). With WC, C is cleared (0) if a lock was allocated, or set (1) if all locks are already allocated.
 
 - D is a register where the allocated lock number is written.
 - WC is an optional effect to update the C flag.
@@ -9256,7 +9335,7 @@ If the WC effect is specified, the C flag is set (1) if no lock is available, or
 
 Once a lock is allocated with LOCKNEW, it remains assigned until explicitly returned to the pool with LOCKRET. The allocated lock can then be used with LOCKTRY to acquire exclusive access and LOCKREL to release it. This allocation-try-release-return pattern manages locks across multi-cog systems.
 
-LOCKNEW is essential for dynamic lock allocation in systems where the number of required locks is not known at compile time, or where locks are allocated and deallocated as resources are created and destroyed. The instruction completes in 4 to 11 clock cycles depending on lock availability and contention.
+LOCKNEW is essential for dynamic lock allocation in systems where the number of required locks is not known at compile time, or where locks are allocated and deallocated as resources are created and destroyed. A cog may allocate more than one lock, and an allocated lock's number may be shared with other cogs so that they can use LOCKTRY and LOCKREL. The instruction takes 4 to 11 clock cycles.
 
 
 
@@ -9269,12 +9348,12 @@ Release Lock
 
 **LOCKREL**  *{#}D*  **{WC}**
 
-**Operation:** release LOCK D[3:0]; if reg + WC: `D = owner cog id`, `C = LOCK status`
+**Operation:** release LOCK D[3:0] if this cog holds it; if reg + WC: `D = owner cog id`, `C = 1 if the lock is taken`
 
 **Result:** The lock specified by D[3:0] is released for other cogs to acquire.
 
 - D is a register or 4-bit literal (0-15) specifying the lock number to release.
-- When D is a register and WC is specified, D is written with the previous owner's cog ID and the C flag indicates lock status.
+- When D is a register and WC is specified, D is written with the cog ID of the lock's current owner (if it is held) or last owner (if it is released), and C is set (1) if the lock is taken.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -9288,7 +9367,7 @@ Release Lock
 
 LOCKREL releases a lock that was previously acquired with LOCKTRY, making it available for other cogs to acquire. The lock to release is specified by the lower 4 bits of D (D[3:0]), allowing lock numbers 0 through 15.
 
-When D is a register (not an immediate) and the WC effect is specified, LOCKREL performs an additional operation: it writes the cog ID of the previous lock owner into D and sets the C flag based on whether the lock was held. This diagnostic feature allows verification of lock ownership and debugging of synchronization issues.
+LOCKREL can also be used to query the current lock status. When the WC effect is specified, C indicates whether the lock is currently taken (1) or not (0). If D is a register (not an immediate), it is also written with the cog ID of the lock's current owner (if the lock is held) or last owner (if it is released). The query is not passive: if the cog executing LOCKREL is also the cog holding the lock, the normal LOCKREL behavior still takes place and the lock is released.
 
 Only the cog holding a lock can release it. LOCKREL executed by a cog that does not hold the lock does not release it and has no effect on lock state, so the instruction is safe to issue on an error path without first checking ownership — but a cog cannot use LOCKREL to recover a lock stranded by another cog. LOCKRET does that: any cog may return an allocated lock to the pool, even one it did not allocate.
 
@@ -9464,9 +9543,22 @@ Mix Pixels
 
 MIXPIX performs pixel blending operations on the four bytes of D using the four bytes of S, according to the mixing parameters previously configured by SETPIX and SETPIV instructions. Each byte is treated as a separate pixel component (typically used for red, green, blue, and alpha channels in RGBA color format).
 
-The SETPIX instruction configures the pixel mixer mode, which determines how the source and destination bytes are combined (such as multiply, add, or blend operations). The SETPIV instruction provides additional configuration values that affect the mixing calculation.
+SETPIX sets the mixer mode M[5:0] from bits 5:0 of its operand. M[5:3] selects the DMIX term and M[2:0] selects the SMIX term. SETPIV sets the blend factor V[7:0] from bits 7:0 of its operand.
 
-This instruction executes in 7 clock cycles to perform the pixel arithmetic on all four bytes in parallel. The exact blending formula depends on the mode set by SETPIX, but typically implements standard pixel compositing operations used in graphics rendering, such as alpha blending, color multiplication, or additive blending.
+For each byte pair, MIXPIX computes `D.BYTE[n] = ((D.BYTE[n] * DMIX + S.BYTE[n] * SMIX + $FF) >> 8) max $FF`. Each of DMIX and SMIX is chosen by its three mode bits as follows:
+
+| M bits | Term value |
+|:------:|:-----------|
+| %000 | $00 |
+| %001 | $FF |
+| %010 | V |
+| %011 | !V |
+| %100 | S byte |
+| %101 | !S byte |
+| %110 | D byte |
+| %111 | !D byte |
+
+This instruction executes in 7 clock cycles and processes all four bytes.
 
 MIXPIX blends two pixels per the configured mode in one operation.
 
@@ -9504,7 +9596,7 @@ The modifier is applied as: C = cccc[{C,Z}], where {C,Z} forms a 2-bit index int
 
 Common modifier values enable useful operations: $F (binary 1111) always sets C to 1, $0 (binary 0000) always clears C to 0, $C (binary 1100) copies C to itself (C unchanged, independent of Z), and $3 (binary 0011) sets C to the inverse of the current C (NC), independent of Z.
 
-MODC is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
+MODC computes a new C from the current C and Z flags in a single instruction.
 
 The WC effect must be specified for the modification to take effect. Without WC, the instruction computes the result but does not write it to the C flag, rendering the instruction ineffective for most purposes.
 
@@ -9541,9 +9633,7 @@ MODCZ provides simultaneous conditional modification of both the C and Z flags b
 
 The modifiers are applied as: C = cccc[{C,Z}] and Z = zzzz[{C,Z}], where {C,Z} forms a 2-bit index into each 4-bit modifier value. Both flags are updated simultaneously based on the same initial C and Z states, allowing complex boolean operations to be computed in parallel.
 
-This instruction implements conditional logic operations without branching. For example, modifier values can implement logical operations like AND, OR, XOR between the flags, or conditional moves where one flag's new value depends on the other flag's current state.
-
-Common uses include implementing state machines where both flags represent state bits, performing multi-condition tests after comparison operations, and creating compact conditional code sequences that would otherwise require multiple instructions or branches.
+Modifier values can compute logical operations such as AND, OR and XOR of the two flags, or make one flag's new value depend on the other flag's current state.
 
 The WC, WZ, or WCZ effect must be specified for the modifications to take effect. Without these effects, the instruction computes results but does not write them to the flags, rendering the instruction ineffective for most purposes.
 
@@ -9554,28 +9644,28 @@ MODCZ updates both flags from the same initial flag state, which separate MODC/M
 | Value | Binary | Mnemonic | Description |
 |:-----:|:------:|:---------|:------------|
 | 0 | 0000 | _CLR | Always clear (result = 0) |
-| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
-| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 1 | 0001 | _NC_AND_NZ | C == 0 AND Z == 0 |
+| 2 | 0010 | _NC_AND_Z | C == 0 AND Z == 1 |
 | 3 | 0011 | _NC | Copy inverse of C (not C) |
-| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 4 | 0100 | _C_AND_NZ | C == 1 AND Z == 0 |
 | 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
 | 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
-| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
-| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 7 | 0111 | _NC_OR_NZ | C == 0 OR Z == 0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C == 1 AND Z == 1 (AND) |
 | 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
 | 10 | 1010 | _Z | Copy Z |
-| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 11 | 1011 | _NC_OR_Z | C == 0 OR Z == 1 |
 | 12 | 1100 | _C | Copy C |
-| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
-| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 13 | 1101 | _C_OR_NZ | C == 1 OR Z == 0 |
+| 14 | 1110 | _C_OR_Z | C == 1 OR Z == 1 (OR) |
 | 15 | 1111 | _SET | Always set (result = 1) |
 
 ```pasm2
-        MODCZ   _CLR, _SET      ' Clear C, set Z
-        MODCZ   _SET, _CLR      ' Set C, clear Z
-        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
-        MODCZ   _Z, _C          ' Swap C and Z values
-        MODCZ   _NC, _NZ        ' Invert both flags
+        MODCZ   _CLR, _SET  WCZ        ' Clear C, set Z
+        MODCZ   _SET, _CLR  WCZ        ' Set C, clear Z
+        MODCZ   _C_AND_Z, _C_OR_Z  WCZ ' C = C AND Z, Z = C OR Z
+        MODCZ   _Z, _C      WCZ        ' Swap C and Z values
+        MODCZ   _NC, _NZ    WCZ        ' Invert both flags
 ```
 
 
@@ -9610,9 +9700,9 @@ MODZ provides conditional modification of the Z flag based on a 4-bit modifier v
 
 The modifier is applied as: Z = zzzz[{C,Z}], where {C,Z} forms a 2-bit index into the 4-bit modifier value. For example, if the current C flag is 0 and Z flag is 1, the index is binary 01 (1 decimal), and the Z flag is set to bit 1 of the modifier value.
 
-Common modifier values enable useful operations: $F (binary 1111) always sets Z to 1, $0 (binary 0000) always clears Z to 0, $A (binary 1010) copies Z to itself (preserving current state), and $C (binary 1100) sets Z if C=1.
+Common modifier values enable useful operations: $F (binary 1111) always sets Z to 1, $0 (binary 0000) always clears Z to 0, $A (binary 1010) copies Z to itself (preserving current state), and $C (binary 1100) sets Z if C == 1.
 
-MODZ is typically used after comparison or test instructions to create complex conditional logic without branching. It provides a mechanism to compute a boolean result based on multiple flag conditions in a single instruction.
+MODZ computes a new Z from the current C and Z flags in a single instruction.
 
 The WZ effect must be specified for the modification to take effect. Without WZ, the instruction computes the result but does not write it to the Z flag, rendering the instruction ineffective for most purposes.
 
@@ -9643,11 +9733,11 @@ Move
 
 **Explanation:**
 
-MOV copies the value from Src into the Dest register, providing the fundamental data movement operation in PASM2. This is one of the most frequently used instructions, enabling register initialization, value copying, and data transfer between registers.
+MOV copies the value from Src into the Dest register.
 
-If the WC or WCZ effect is specified, the C flag is set to the most significant bit of the source value (Src[31]), which represents the sign bit when Src is interpreted as a signed 32-bit value. This allows MOV to simultaneously copy a value and test its sign.
+If the WC or WCZ effect is specified, the C flag is set to the most significant bit of the source value (Src[31]), which represents the sign bit when Src is interpreted as a signed 32-bit value.
 
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result written to Dest equals zero, or is cleared (0) if the result is non-zero. This enables immediate testing of whether the moved value is zero without requiring a separate comparison instruction.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result written to Dest equals zero, or is cleared (0) if the result is non-zero.
 
 MOV with immediate values is commonly used for register initialization:
 
@@ -9664,7 +9754,7 @@ MOV between registers is used for preserving values and working with temporary c
         mov     result, value           ' Copy final result
 ```
 
-When combined with flag effects, MOV enables efficient value testing:
+With flag effects, MOV copies a value and tests it in one instruction:
 
 ```pasm2
                 mov     data, source  wz        ' Copy and test if zero
@@ -9758,19 +9848,18 @@ MUL is commonly used for scaling operations in fixed-point arithmetic:
         mul     value, #25              ' Multiply by 25: value = 25000
 ```
 
-For fixed-point math with 16-bit fractional parts:
+To keep only the upper 16 bits of the 32-bit product:
 
 ```pasm2
-        ' Multiply two 16.16 fixed-point numbers
-        ' Result in upper 16 bits needs shifting
-        mov     temp, frac1
-        mul     temp, frac2             ' temp = product (low 16 of each)
-        shr     temp, #16               ' Adjust for fixed-point scale
+        ' Multiply the low 16 bits of two values
+        mov     temp, value1
+        mul     temp, value2            ' temp = product (low 16 of each)
+        shr     temp, #16               ' Keep the product's upper 16 bits
 ```
 
 For this multiply-then-shift-by-16 scaling pattern, SCA performs the same work in a single instruction: SCA computes `unsigned(D[15:0] * S[15:0]) >> 16` and substitutes the result directly as the next instruction's S operand.
 
-For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
+For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which multiplies two unsigned 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
 
 
@@ -9806,14 +9895,13 @@ The multiplication treats bytes as 8-bit fractional values in the range 0.0 to 1
 
 MULPIX multiplies each color component of D by the corresponding component of S. For example, multiplying an RGB color by a brightness value: if D contains $80_60_40_20 (RGBA values) and S contains $80_80_80_FF (50% brightness on RGB, full alpha), each color component is reduced to 50% of its original value.
 
-MULPIX executes in 7 clock cycles to perform all four parallel multiplications. This is significantly faster than performing four separate multiply and scale operations, making it practical for real-time graphics processing.
+MULPIX executes in 7 clock cycles and processes all four byte pairs.
 
 Common uses include:
 
 - Color modulation (tinting): Multiply each color channel by a tint value
 - Brightness adjustment: Multiply RGB by a brightness factor
 - Alpha premultiplication: Multiply RGB by alpha for compositing
-- Texture filtering: Combine texel colors with interpolation weights
 
 The instruction treats all bytes independently, so it can be used for any four-byte parallel multiply operation, not just color processing.
 
@@ -9861,12 +9949,12 @@ Signed scaling example:
         muls    velocity, time          ' velocity = speed * time (signed)
 ```
 
-For signed fixed-point math with 16-bit fractional parts:
+To keep only the upper 16 bits of the signed 32-bit product:
 
 ```pasm2
-        ' Multiply two signed 16.16 fixed-point numbers
-        mov     temp, signed_frac1
-        muls    temp, signed_frac2      ' Signed multiplication
+        ' Multiply the low 16 bits of two signed values
+        mov     temp, signed1
+        muls    temp, signed2           ' Signed multiplication
         sar     temp, #16               ' Arithmetic shift to preserve sign
 ```
 
@@ -9874,7 +9962,7 @@ For this signed multiply-then-shift pattern, SCAS does signed scaled multiply in
 
 MULS differs from MUL only in that it treats the 16-bit operands as signed values rather than unsigned. The choice between them depends on whether the values being multiplied represent signed or unsigned quantities.
 
-For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full signed 32-bit values and produces a signed 64-bit result accessible through the upper and lower result registers.
+For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which multiplies two unsigned 32-bit values and produces a 64-bit result accessible through the upper and lower result registers.
 
 
 
@@ -9930,8 +10018,8 @@ Example: Conditionally set bits based on a comparison:
 
 ```pasm2
         cmp     value, limit  wc        ' Set C if value < limit
-        muxc    status, #$01            ' Set bit 0 if less than
-        muxnc   status, #$02            ' Set bit 1 if greater or equal
+        muxc    status, #$01            ' Bit 0 = C (1 if less than)
+        muxnc   status, #$02            ' Bit 1 = !C (1 if greater or equal)
 ```
 
 If the WC or WCZ effect is specified, the C flag is set to the parity of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero.
@@ -9978,9 +10066,7 @@ This instruction is useful for sparse updates where only certain nibbles need mo
         muxnibs config, changes         ' Apply non-zero changes only
 ```
 
-MUXNIBS is commonly used in graphics operations for palette updates, bit-field modifications where fields are naturally nibble-aligned, and efficient sparse data updates. It provides a single-instruction way to perform selective nibble replacement that would otherwise require multiple mask and merge operations.
-
-The instruction treats nibbles independently, enabling parallel conditional updates across all eight nibble positions in a single 2-clock operation.
+MUXNIBS treats the eight nibbles independently and updates all of them in one 2-clock operation.
 
 
 
@@ -10014,9 +10100,7 @@ MUXNITS selectively copies bit pairs (2-bit fields, called "nits") from Src to D
 
 For example, if Dest = $5555_5555 (binary 01_01_01_01... in bit pairs) and Src = $00A0_0002 (containing non-zero bit pairs at positions 11, 10, and 0), only those three bit pairs are updated in Dest while the others remain as 01.
 
-This instruction is particularly useful for pixel graphics operations where 2-bit values represent pixel data (such as in 4-color graphics modes), sparse bit-field updates, and state machine implementations where state variables are represented as 2-bit fields.
-
-MUXNITS provides parallel conditional updates across all sixteen bit pair positions in a single 2-clock operation:
+MUXNITS treats the sixteen bit pairs independently and updates all of them in one 2-clock operation:
 
 ```pasm2
         ' Update specific 2-bit fields in a packed structure
@@ -10024,7 +10108,7 @@ MUXNITS provides parallel conditional updates across all sixteen bit pair positi
         muxnits state, updates          ' Apply non-zero updates only
 ```
 
-The name "nits" comes from "nibble bits" or 2-bit fields, representing the next smaller grouping after nibbles (4-bit fields). This instruction complements MUXNIBS by operating at a finer granularity.
+MUXNIBS performs the same operation on 4-bit fields.
 
 
 
@@ -10054,7 +10138,7 @@ Multiplex Q
 
 **Explanation:**
 
-MUXQ performs selective bit copying from Src to Dest based on a mask previously loaded into the Q register using SETQ. The mask is loaded into the Q register with SETQ executed immediately before MUXQ. For each bit position where Q contains a 1, the corresponding bit from Src is copied into Dest. For bit positions where Q contains a 0, the corresponding bit in Dest remains unchanged. The operation is: D = (!Q & D) | (Q & S).
+MUXQ performs selective bit copying from Src to Dest based on a mask previously loaded into the Q register using SETQ. The Q value persists until an instruction that overwrites Q executes (XORO32, RDLUT, GETXACC, CRCNIB, or a COGINIT/QDIV/QFRAC/QROTATE without a preceding SETQ). SETQ also shields the next instruction from interruption, so a MUXQ placed directly after its SETQ cannot be interrupted between the two. For each bit position where Q contains a 1, the corresponding bit from Src is copied into Dest. For bit positions where Q contains a 0, the corresponding bit in Dest remains unchanged. The operation is: D = (!Q & D) | (Q & S).
 
 MUXQ must be preceded by SETQ to load the mask into Q:
 
@@ -10063,7 +10147,7 @@ MUXQ must be preceded by SETQ to load the mask into Q:
         muxq    dest, source            ' Copy masked bits from source
 ```
 
-This provides atomic masked bit updates that are more efficient than separate AND and OR operations:
+This replaces the separate AND, ANDN and OR operations of a masked bit update:
 
 ```pasm2
         ' Traditional approach (4 instructions):
@@ -10074,18 +10158,18 @@ This provides atomic masked bit updates that are more efficient than separate AN
 
         ' MUXQ approach (2 instructions):
         setq    mask                    ' Set mask
-        muxq    dest, source            ' Atomic masked copy
+        muxq    dest, source            ' Masked copy
 ```
 
-MUXQ is critical for parallel I/O operations, especially driving multiple pins simultaneously:
+MUXQ can update several output pins in one instruction:
 
 ```pasm2
-        ' Update multiple RGB LED pins atomically
+        ' Update multiple RGB LED pins
         setq    rgb_mask                ' Mask for RGB pins
         muxq    outa, rgb_data          ' Update all RGB pins together
 ```
 
-The Q register mask enables masked bit manipulation:
+With the mask in Q, MUXQ copies only the masked bits:
 
 ```pasm2
         ' Update specific configuration bits
@@ -10196,10 +10280,10 @@ These instructions conditionally negate the value in Src (two-operand form) or D
 
 | Instruction | Negates when |
 |-------------|--------------|
-| NEGC | C = 1 |
-| NEGNC | C = 0 |
-| NEGZ | Z = 1 |
-| NEGNZ | Z = 0 |
+| NEGC | C == 1 |
+| NEGNC | C == 0 |
+| NEGZ | Z == 1 |
+| NEGNZ | Z == 0 |
 
 If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
 
@@ -10215,7 +10299,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 Cancel Interrupt
 
-[Events and Timing](#events-and-timing) - Cancels any pending interrupt event for the specified level.
+[Events and Timing](#events-and-timing) - Cancels a triggered interrupt of the specified level that is waiting to branch.
 :::
 
 \hypertarget{nixint2}{}\hypertarget{nixint3}{}
@@ -10224,7 +10308,7 @@ Cancel Interrupt
 **NIXINT2**
 **NIXINT3**
 
-**Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
+**Result:** The triggered interrupt (INT1, INT2, or INT3) waiting to branch is cancelled.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -10238,9 +10322,9 @@ Cancel Interrupt
 
 **Explanation:**
 
-NIXINT1, NIXINT2, and NIXINT3 cancel any pending interrupt events for their respective interrupt levels. These instructions prevent the interrupt from occurring even if its event condition has been met.
+NIXINT1, NIXINT2, and NIXINT3 cancel an interrupt of their respective level that has already been triggered and is waiting to branch. Each NIXINT instruction cancels only its corresponding level.
 
-The P2 provides three independent interrupt levels, and each NIXINT instruction cancels only its corresponding level. Use these instructions when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger cog execution flow changes.
+These instructions are useful only in main code after STALLI executes, or in an interrupt service routine that needs to stop a lower-level interrupt from executing after the current routine exits.
 
 
 
@@ -10267,7 +10351,7 @@ No Operation
 
 NOP consumes two clock cycles without performing any operation. No registers are modified, no flags are affected, and no memory is accessed.
 
-NOP is primarily used for timing adjustments, creating precise delays, or as a placeholder during development. It can also be used to align code for performance optimization or to fill instruction slots in pipelined operations.
+NOP is used for timing adjustments, creating precise delays, or as a placeholder.
 
 
 
@@ -10413,7 +10497,7 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
 Output By Flag State
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level based on flag state.
 :::
 
 \hypertarget{outnc}{}\hypertarget{outz}{}\hypertarget{outnz}{}
@@ -10448,12 +10532,14 @@ These instructions set pin output level(s) based on flag state:
 
 | Instruction | Drives high when |
 |-------------|------------------|
-| OUTC | C = 1 |
-| OUTNC | C = 0 |
-| OUTZ | Z = 1 |
-| OUTNZ | Z = 0 |
+| OUTC | C == 1 |
+| OUTNC | C == 0 |
+| OUTZ | Z == 1 |
+| OUTNZ | Z == 0 |
 
 OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
+
+When Dest is a register, its bits [10:0] form the pin range specification. A SETQ immediately before the instruction overrides D[10:6] with SETQ's Dest[4:0], allowing dynamic control of the pin range.
 
 If WCZ is specified, both the C flag and the Z flag are set to the original output state of the base pin before modification.
 
@@ -10463,7 +10549,7 @@ If WCZ is specified, both the C flag and the Z flag are set to the original outp
 ## OUTH {#outh}
 Output High
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level to high (1).
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to high (1).
 :::
 
 **OUTH**  *{#}Dest*  **{WCZ}**
@@ -10492,6 +10578,8 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
+A prior SETQ overrides D[10:6] with SETQ's Dest[4:0].
+
 If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTH is commonly used to turn on LEDs, assert control signals, or drive pins high for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
@@ -10502,7 +10590,7 @@ OUTH is commonly used to turn on LEDs, assert control signals, or drive pins hig
 ## OUTL {#outl}
 Output Low
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level to low (0).
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to low (0).
 :::
 
 **OUTL**  *{#}Dest*  **{WCZ}**
@@ -10531,6 +10619,8 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
+A prior SETQ overrides D[10:6] with SETQ's Dest[4:0].
+
 If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins low for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
@@ -10541,7 +10631,7 @@ OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins
 ## OUTNOT {#outnot}
 Output Not (Toggle)
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Toggles pin output level to opposite state.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Toggles pin output level to opposite state.
 :::
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
@@ -10570,6 +10660,8 @@ Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, on
 
 A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
+A prior SETQ overrides D[10:6] with SETQ's Dest[4:0].
+
 If the WCZ effect is specified, the C flag is set to the original state of the output level bit for the base pin, and Z is set to the same value, before the instruction executes.
 
 OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling any output that needs to alternate states. It is particularly efficient for creating square waves or implementing state machines that alternate between two states.
@@ -10580,7 +10672,7 @@ OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling
 ## OUTRND {#outrnd}
 Output Random
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets pin output level to random state from PRNG.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets pin output level to random state from PRNG.
 :::
 
 **OUTRND**  *{#}Dest*  **{WCZ}**
@@ -10603,7 +10695,7 @@ Output Random
 
 **Explanation:**
 
-OUTRND sets the output level of the pin(s) specified by Dest to random low and high states, using bits from the hardware Xoroshiro128** pseudo-random number generator (PRNG). Each affected pin is independently set to either low (0) or high (1) based on successive bits from the PRNG. All other output level bits remain unchanged.
+OUTRND sets the output level of the pin(s) specified by Dest to random low and high states, using bits from the hardware Xoroshiro128** pseudo-random number generator (PRNG). Each affected pin is set to either low (0) or high (1) based on bits from the PRNG. All other output level bits remain unchanged.
 
 Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only this lower 6-bit value matters. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
 
@@ -10613,7 +10705,7 @@ When Dest is a register, the register's bits [10:0] are used directly to form th
 
 If the WCZ effect is specified, both the C and Z flags are set to the original state of the output level bit for the base pin, before the instruction executes.
 
-OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The quality of randomness depends on proper initialization of the PRNG using the SETRAND instruction.
+OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The PRNG is seeded by the boot ROM at reset; HUBSET with D[31] set can seed it again.
 
 
 
@@ -10654,7 +10746,7 @@ POLLATN copies the state of the attention event flag into C and/or Z and then cl
 
 The attention event flag is set whenever another cog issues an attention request for this cog using COGATN. The flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
 
-This instruction enables inter-cog communication by allowing a cog to check whether another cog has requested its attention without blocking execution.
+POLLATN does not block execution.
 
 
 
@@ -10693,7 +10785,7 @@ POLLCT1, POLLCT2, and POLLCT3 copy the state of their respective counter event f
 
 Each counter event flag is set whenever the System Counter (CT) passes the value in that counter's event trigger register; that is, the MSB of (CT - CTn) is 0. The counter event flag is cleared upon execution of ADDCTn, POLLCTn, WAITCTn, JCTn, or JNCTn.
 
-These instructions enable time-based event polling without blocking execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3) allowing a cog to simultaneously track multiple timing requirements.
+These instructions do not block execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3).
 
 
 
@@ -10726,7 +10818,7 @@ POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/
 
 The FIFO-interface-block-wrap event flag is set whenever the hub RAM FIFO interface exhausts its block count and reloads its block count and start address. The flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
 
-This instruction enables circular buffer management for high-speed hub RAM transfers.
+POLLFBW does not block execution.
 
 
 
@@ -10759,7 +10851,7 @@ POLLINT copies the state of the interrupt-occurred event flag into C and/or Z an
 
 The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs. Debug interrupts are ignored. The flag is cleared upon cog start, or execution of POLLINT, WAITINT, JINT, or JNINT instructions.
 
-This instruction enables non-blocking interrupt handling.
+POLLINT does not block execution.
 
 
 
@@ -10792,7 +10884,7 @@ POLLPAT copies the state of the pin-pattern-detected event flag into C and/or Z 
 
 The pin-pattern-detected event flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT instruction. The flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
-This instruction enables non-blocking pattern detection on input pins.
+POLLPAT does not block execution.
 
 
 
@@ -10823,9 +10915,9 @@ Poll CORDIC Empty event
 
 POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
-The CORDIC-read-but-empty event flag is set whenever GETQX or GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, WAITQMT, JQMT, or JNQMT instructions.
+The CORDIC-read-but-empty event flag is set whenever GETQX or GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, JQMT, or JNQMT instructions. There is no WAITQMT instruction, because the event could not happen while waiting.
 
-This instruction enables error detection for CORDIC operations.
+POLLQMT does not block execution.
 
 
 
@@ -10899,7 +10991,7 @@ POLLXFI copies the state of the streamer-finished event flag into C and/or Z and
 
 The streamer-finished event flag is set whenever the streamer runs out of commands to process. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.
 
-This instruction enables non-blocking management of the streamer subsystem.
+POLLXFI does not block execution.
 
 
 
@@ -10932,7 +11024,7 @@ POLLXMT copies the state of the streamer-empty event flag into C and/or Z and th
 
 The streamer-empty event flag is set whenever the streamer is ready for a new command. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
 
-This instruction enables pipelined streamer operations.
+POLLXMT does not block execution.
 
 
 
@@ -10965,7 +11057,7 @@ POLLXRL copies the state of the streamer-LUT-RAM-rollover event flag into C and/
 
 The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer. The flag is cleared upon cog start or upon execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
 
-This instruction enables circular buffer management when using LUT RAM as a streamer data source.
+POLLXRL does not block execution.
 
 
 
@@ -10998,7 +11090,7 @@ POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z
 
 The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
 
-This instruction enables precise timing control for streamer operations that use the NCO for rate control.
+POLLXRO does not block execution.
 
 
 
@@ -11006,14 +11098,14 @@ This instruction enables precise timing control for streamer operations that use
 ## POP {#pop}
 Pop From Internal Stack
 
-[Miscellaneous](#miscellaneous) - Pops a value from the internal K register stack.
+[Miscellaneous](#miscellaneous) - Pops the top entry of the internal hardware stack.
 :::
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
 
 **Operation:** `D = K (stack)`; `C = K[31]`
 
-**Result:** Dest receives the value from the K register.
+**Result:** Dest receives the top entry (K) of the internal stack.
 
 - Dest is the register to receive the popped value.
 - WC, WZ, or WCZ are optional effects to update flags.
@@ -11028,13 +11120,13 @@ Pop From Internal Stack
 
 **Explanation:**
 
-POP pops the internal stack register K into the destination register Dest. The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address.
+POP pops the top entry of the internal stack, K, into the destination register Dest. The P2 has an 8-level hardware stack that CALL instructions use to store return addresses: CALL pushes and RET pops.
 
 If the WC or WCZ effect is specified, the C flag is set to bit 31 of the popped value.
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-POP retrieves this value, typically as part of a return sequence, though it can also be used to retrieve any value previously stored with PUSH.
+POP can retrieve any value previously stored with PUSH. Because RET and POP both take the top entry, every PUSH must be balanced by a POP before the RET that expects the return address.
 
 
 
@@ -11042,7 +11134,7 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 ## POPA {#popa}
 Pop From hub stack A
 
-[hub memory Access](#hub-memory-access) - Pops a long from hub memory using PTRA as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pops a long from hub memory using PTRA as stack pointer.
 :::
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
@@ -11070,7 +11162,7 @@ If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of t
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-This instruction enables hub RAM-based stacks for deep subroutine nesting and large temporary storage.
+Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 
 
@@ -11078,7 +11170,7 @@ This instruction enables hub RAM-based stacks for deep subroutine nesting and la
 ## POPB {#popb}
 Pop From hub stack B
 
-[hub memory Access](#hub-memory-access) - Pops a long from hub memory using PTRB as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pops a long from hub memory using PTRB as stack pointer.
 :::
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
@@ -11106,6 +11198,8 @@ If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of t
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
+Timing is 9...16 clocks for cog execution and 9...26 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
+
 Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
 
@@ -11114,12 +11208,12 @@ Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage
 ## PUSH {#push}
 Push To Internal Stack
 
-[Miscellaneous](#miscellaneous) - Pushes a value onto the internal K register stack.
+[Miscellaneous](#miscellaneous) - Pushes a value onto the internal hardware stack.
 :::
 
 **PUSH**  *{#}Dest*
 
-**Result:** The value from Dest (or immediate value) is stored in the K register.
+**Result:** The value from Dest (or immediate value) becomes the new top entry (K) of the internal stack.
 
 - Dest is a register or 9-bit immediate value (0-511) to push.
 
@@ -11133,9 +11227,9 @@ Push To Internal Stack
 
 **Explanation:**
 
-PUSH pushes the value in Dest (or an immediate value 0-511) onto the internal stack register K. This instruction does not affect any flags.
+PUSH pushes the value in Dest (or an immediate value 0-511) onto the internal stack. This instruction does not affect any flags.
 
-The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address. PUSH can be used to save other values in K, though this overwrites any return address that may be stored there.
+The P2 has an 8-level hardware stack that CALL instructions use to store return addresses: CALL pushes and RET pops. PUSH adds a new top entry; it does not overwrite the return address below it. The next RET or POP takes the pushed value first, so each PUSH must be balanced by a POP before the RET that expects the return address.
 
 
 
@@ -11143,7 +11237,7 @@ The P2 provides a single-level internal stack register K that is automatically u
 ## PUSHA {#pusha}
 Push To hub stack A
 
-[hub memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRA as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRA as stack pointer.
 :::
 
 **PUSHA**  *{#}Dest*
@@ -11170,13 +11264,15 @@ This instruction does not affect any flags. The post-increment model means PTRA 
 
 PUSHA paired with POPA implements an ascending stack in hub RAM (the pointer advances to higher addresses on each push).
 
+Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
+
 
 
 ::: instrheader
 ## PUSHB {#pushb}
 Push To hub stack B
 
-[hub memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRB as stack pointer.
+[Hub Memory Access](#hub-memory-access) - Pushes a long to hub memory using PTRB as stack pointer.
 :::
 
 **PUSHB**  *{#}Dest*
@@ -11200,6 +11296,8 @@ Push To hub stack B
 PUSHB writes the long value in Dest (or a 9-bit immediate value) to hub address PTRB++. PTRB is automatically incremented by 4 after the write occurs (post-increment).
 
 This instruction does not affect any flags. The post-increment model means PTRB always points to the next available stack location after the push operation.
+
+Timing is 3...10 clocks for cog execution and 3...20 clocks for hub execution. The access takes 1 more clock when it crosses a hub long.
 
 Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
@@ -11246,12 +11344,11 @@ The 64-bit numerator is formed by concatenating the SETQ value (or 0 if SETQ not
 
 ```pasm2
         QDIV    ##1000000, #3  ' {0, 1000000} / 3
-        ' Wait 55 clocks...
-        GETQX   quotient       ' Get 333333
-        GETQY   remainder      ' Get 1
+        GETQX   quotient       ' 333333 (GETQX waits for the result)
+        GETQY   remainder      ' 1
 ```
 
-Division by zero produces undefined results. Each cog can issue one CORDIC instruction per hub window (every 8 clocks).
+Division by zero does not trap or stall, and takes the same time as any other divide. GETQX returns the bitwise NOT of the numerator's upper long (the SETQ value, or 0 without SETQ, giving $FFFF_FFFF) and GETQY returns the numerator's lower long, Dest. For example, `SETQ #1` then `QDIV D, #0` gives GETQX = $FFFF_FFFE. Each cog can issue one CORDIC instruction per hub window (every 8 clocks).
 
 
 
@@ -11284,12 +11381,11 @@ QEXP performs logarithm to integer conversion using the P2's 54-stage pipelined 
 
 The instruction takes the logarithm value in the Dest operand, which must be in P2's 5:27 format where bits [31:27] contain the 5-bit whole exponent and bits [26:0] contain the 27-bit fractional exponent. After 55 clocks, the integer result can be retrieved using GETQX.
 
-QEXP is the complement of QLOG and is commonly used together with QLOG to perform power calculations.
+QEXP converts a logarithm in the format QLOG produces back to an integer.
 
 ```pasm2
         QEXP    log_value      ' Begin exponential conversion
-        ' Wait 55 clocks...
-        GETQX   integer_result ' Get 32-bit integer
+        GETQX   integer_result ' Get 32-bit integer (waits for it)
 ```
 
 
@@ -11323,15 +11419,24 @@ Queue Fractional Divide
 
 QFRAC performs fractional division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, but differs from QDIV in the operand arrangement: Dest forms the upper 32 bits while SETQ (or 0) forms the lower 32 bits.
 
-The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC particularly suitable for fractional arithmetic where the integer part is in Dest and the fractional part is in SETQ.
+The 64-bit numerator is formed as {Dest, SETQ}. The quotient is 32 bits, so it fits only while Dest < Src: QFRAC returns a fraction of 2^32 (a ratio below 1). For a quotient of 1 or more, use QDIV.
 
 ```pasm2
-        SETQ    ##$C0000000    ' 0.75 in 32-bit fraction format
-        QFRAC   #5, #2         ' {5, 0.75} / 2 = 2.875
-        ' Wait 55 clocks...
-        GETQX   quotient       ' Get integer quotient
-        GETQY   remainder      ' Get fractional remainder
+        QFRAC   #1, #3         ' {1, 0} / 3 = 2^32 / 3
+        GETQX   fraction       ' $5555_5555, 0.3333... of 2^32
+        GETQY   remainder      ' 1
 ```
+
+A SETQ value supplies the lower 32 bits of the numerator:
+
+```pasm2
+        SETQ    ##$8000_0000   ' lower 32 bits of the numerator: 0.5
+        QFRAC   #1, #4         ' {1, $8000_0000} / 4 = 1.5 / 4
+        GETQX   fraction       ' $6000_0000, 0.375 of 2^32
+        GETQY   remainder      ' 0
+```
+
+Division by zero does not trap or stall, and takes the same time as any other divide. GETQX returns the bitwise NOT of Dest and GETQY returns the SETQ value (or 0 without SETQ). For example, `QFRAC #1, #0` gives GETQX = $FFFF_FFFE.
 
 
 
@@ -11366,8 +11471,7 @@ The instruction takes the unsigned integer value in the Dest operand. After 55 c
 
 ```pasm2
         QLOG    ##1000         ' Begin log conversion
-        ' Wait 55 clocks...
-        GETQX   log_result     ' Get 5:27 logarithm
+        GETQX   log_result     ' Get 5:27 logarithm (waits for it)
 ```
 
 
@@ -11404,8 +11508,7 @@ After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32
 
 ```pasm2
         QMUL    ##1000000, ##2000000
-        ' Wait 55 clocks...
-        GETQX   lower_32       ' Get lower 32 bits
+        GETQX   lower_32       ' Get lower 32 bits (waits for it)
         GETQY   upper_32       ' Get upper 32 bits
 ```
 
@@ -11449,8 +11552,7 @@ This instruction can also be used for polar to cartesian conversion by setting X
 ```pasm2
         SETQ    #200           ' Set Y coordinate
         QROTATE #100, ##$20000000 ' X=100, angle=45 degrees
-        ' Wait 55 clocks...
-        GETQX   new_x          ' Get rotated X
+        GETQX   new_x          ' Get rotated X (waits for it)
         GETQY   new_y          ' Get rotated Y
 ```
 
@@ -11490,8 +11592,7 @@ The result is the largest integer whose square does not exceed the input value.
 
 ```pasm2
         QSQRT   ##1000000, #0  ' sqrt(1000000) = 1000
-        ' Wait 55 clocks...
-        GETQX   sqrt_result    ' Get 1000
+        GETQX   sqrt_result    ' Get 1000 (waits for it)
 ```
 
 For 32-bit square roots, use Src=0.
@@ -11530,12 +11631,11 @@ The instruction takes the X coordinate in Dest and Y coordinate in Src, both as 
 
 The angle result uses P2's standard angle units where $00000000 = 0°, $40000000 = 90°, $80000000 = 180°, and $C0000000 = 270°.
 
-QVECTOR is the inverse operation of QROTATE.
+QROTATE with Y = 0 converts polar to cartesian coordinates.
 
 ```pasm2
         QVECTOR #100, #200     ' Begin conversion
-        ' Wait 55 clocks...
-        GETQX   length         ' Get polar length
+        GETQX   length         ' Get polar length (waits for it)
         GETQY   angle          ' Get polar angle
 ```
 
@@ -11569,13 +11669,13 @@ Rotate Carry Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000101 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
 **Explanation:**
 
-RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations.
+RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C. With a shift of 1, the carry flag acts as a 33rd bit, giving a 33-bit rotate through C; with a larger shift, every new LSB receives the same C value.
 
 If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[31] if Src is 0.
 
@@ -11607,13 +11707,13 @@ Rotate Carry Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000100 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
 **Explanation:**
 
-RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations.
+RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to C. With a shift of 1, the carry flag acts as a 33rd bit, giving a 33-bit rotate through C; with a larger shift, every new MSB receives the same C value.
 
 If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[0] if Src is 0.
 
@@ -11655,7 +11755,7 @@ If the WC or WCZ effect is specified, the C flag is updated to the original Dest
 
 If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[30] state.
 
-This instruction provides a compact way to shift two flag states into a register while simultaneously extracting two bits from the register into the flags, enabling efficient state serialization and deserialization.
+This instruction shifts two flag states into a register while simultaneously extracting two bits from the register into the flags.
 
 
 
@@ -11691,7 +11791,7 @@ If the WC or WCZ effect is specified, the C flag is updated to the original Dest
 
 If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[0] state.
 
-This instruction provides a compact way to shift two flag states into a register while simultaneously extracting two bits from the register into the flags, enabling efficient state serialization and deserialization.
+This instruction shifts two flag states into a register while simultaneously extracting two bits from the register into the flags.
 
 
 
@@ -11699,7 +11799,7 @@ This instruction provides a compact way to shift two flag states into a register
 ## RDBYTE {#rdbyte}
 Read Byte From hub
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended byte from hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from hub memory into a register.
 :::
 
 **RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -11733,13 +11833,13 @@ Read Byte From hub
 
 RDBYTE reads a byte from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
 
-If preceded by a SETQ instruction, burst reads of multiple bytes can be performed.
-
 If the WC or WCZ effect is specified, C is set to the MSB of the byte.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot. The actual latency depends on when the request arrives relative to the cog's assigned slot.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, RDBYTE can complete before its own read: Dest gets the byte at its own offset within the previous hub read's long, and the flags come from that wrong value. Use the waiting `RDFAST`, or start RDBYTE at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -11747,7 +11847,7 @@ Hub memory operations follow a round-robin access pattern where each cog gets a 
 ## RDFAST {#rdfast}
 Read Fast Via FIFO
 
-[hub memory Access](#hub-memory-access) - Begins fast hub read operation via FIFO for high-throughput streaming.
+[Hub Memory Access](#hub-memory-access) - Begins fast hub read operation via FIFO for high-throughput streaming.
 :::
 
 **RDFAST**  *{#}Dest, {#}Src*
@@ -11780,7 +11880,9 @@ Read Fast Via FIFO
 
 RDFAST begins a new fast hub read operation via the FIFO. The instruction configures automatic sequential reading from hub memory with background FIFO refill, enabling high-throughput streaming data processing. This instruction is only available when executing from cog/LUT memory, not hub memory.
 
-Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size. Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
+Dest[31] selects the wait behavior. With Dest[31] == 0, RDFAST waits for any previous WRFAST to finish, then waits until the FIFO has begun receiving hub data (10...17 clocks), so the next instruction can read it. With Dest[31] == 1 (no-wait mode), RDFAST takes 2 clocks and leaves the wait to the program: the first correct RFBYTE, RFWORD or RFLONG comes 8...15 clocks after the RDFAST starts, depending on hub alignment, and an earlier read returns `$0000_0000` with no error. Allow at least 15 clocks, for example `WAITX #11` directly after the RDFAST. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size. Src[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} After a no-wait RDFAST, start no hub instruction (`RDBYTE`/`RDWORD`/`RDLONG`, `WRBYTE`/`WRWORD`/`WRLONG`, a `SETQ` block read, another `RDFAST`) until 16 clocks after the RDFAST starts, or use the waiting form. A hub instruction started sooner can complete before its own hub access: a read returns the previous hub read's data with that value's flags, a write can be lost, a `SETQ` block read can write outside its destination or stop the cog, and a waiting `RDFAST` issued 8 to 15 clocks after it returns without waiting, its first `RFLONG` reading `$0000_0000`. `WAITX #12` directly after the RDFAST (16 clocks in all) covers both this and the FIFO reads above, as do seven two-clock non-hub instructions (a `SETQ` counts as one). A no-wait `WRFAST` has no such effect.
 
 After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read data from the FIFO. The FIFO is automatically refilled in the background, making this ideal for checksums, CRC calculations, data processing, and block copy operations.
 
@@ -11790,7 +11892,7 @@ After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read
 ## RDLONG {#rdlong}
 Read Long From hub
 
-[hub memory Access](#hub-memory-access) - Reads a 32-bit long from hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from hub memory into a register.
 :::
 
 **RDLONG**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -11822,7 +11924,7 @@ Read Long From hub
 
 **Explanation:**
 
-RDLONG reads a long from hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
+RDLONG reads a long from hub memory at the address specified by Src (or pointer register) and loads it into Dest. Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window. The access takes 1 more clock when it crosses a hub long.
 
 If preceded by a SETQ instruction, burst reads of multiple longs can be performed. Using SETQ2 instead of SETQ bursts the block into LUT RAM rather than cog RAM.
 
@@ -11832,7 +11934,9 @@ If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or
 
 Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot.
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size. This leads to corrupted subsequent operations when code expects PTRx to point past the block.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and RDLONG. Such intervening instructions cancel the block-size PTRx delta calculation—every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. This leads to corrupted subsequent operations when code expects PTRx to point past the block. Keep the SETQ and the transfer adjacent.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, RDLONG can complete before its own read: Dest gets the previous hub read's long, the flags come from that wrong value, and `PTRA++` still steps. As a `SETQ` block read it writes one wrong long and leaves the rest unwritten, can overwrite cog registers outside its destination, or the cog does not finish; the `SETQ` counts toward the 16 clocks. Use the waiting `RDFAST`, or start RDLONG at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -11879,7 +11983,7 @@ The LUT provides fast local memory access for frequently accessed data structure
 ## RDPIN {#rdpin}
 Read smart pin
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Reads smart pin result and acknowledges, clearing the ready flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads smart pin result and acknowledges, clearing the ready flag.
 :::
 
 **RDPIN**  *Dest, {#}Src*  **{WC}**
@@ -11908,7 +12012,7 @@ If the WC effect is specified, the C flag is set to the modal result, which prov
 
 Smart pins are autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous cog intervention. RDPIN retrieves the measured or received data after the pin signals completion.
 
-Because RDPIN acknowledges the pin, it resets the pin's IN flag, and the smart pin needs about 2 clock cycles to clear that flag before a TESTP poll of IN reads a valid result. Insert two NOP instructions (or other unrelated work) between RDPIN and the TESTP that polls the IN flag. RQPIN does not acknowledge the pin and so does not reset the IN flag, so no such delay is needed after RQPIN.
+Because RDPIN acknowledges the pin, it resets the pin's IN flag, and the smart pin needs about 2 clock cycles to clear that flag before a TESTP poll of IN reads a valid result. Insert one NOP instruction (2 clocks, or other unrelated work) between RDPIN and the TESTP that polls the IN flag. RQPIN does not acknowledge the pin and so does not reset the IN flag, so no such delay is needed after RQPIN.
 
 
 
@@ -11916,7 +12020,7 @@ Because RDPIN acknowledges the pin, it resets the pin's IN flag, and the smart p
 ## RDWORD {#rdword}
 Read Word From hub
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended word from hub memory into a register.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from hub memory into a register.
 :::
 
 **RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
@@ -11948,13 +12052,13 @@ Read Word From hub
 
 **Explanation:**
 
-RDWORD reads a word from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window.
-
-If preceded by a SETQ instruction, burst reads of multiple words can be performed.
+RDWORD reads a word from hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). Timing depends on execution context: 9-16 cycles for cog execution, 9-26 for hub execution, with additional latency when interrupts are enabled (9-24 for cog, 9-44 for hub). The cog must wait for its hub access window. The access takes 1 more clock when it crosses a hub long.
 
 If the WC or WCZ effect is specified, C is set to the MSB of the word.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, RDWORD can complete before its own read: Dest gets the word at its own offset within the previous hub read's long, and the flags come from that wrong value. Use the waiting `RDFAST`, or start RDWORD at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -11969,12 +12073,12 @@ Repeat Block
 
 **REP**  *@.label, {#}Src*
 
-**Operation:** repeat the next `D[8:0]` instructions `S` times (S = 0 → forever; D[8:0] = 0 → none)
+**Operation:** repeat the next `D[8:0]` instructions `S` times (S == 0 → forever; D[8:0] == 0 → none)
 
 **Result:** The next Dest[8:0] instructions are executed Src times.
 
-- Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
-- Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
+- Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] == 0, nothing repeats.
+- Src is the number of repetitions. If Src == 0, instructions repeat infinitely.
 - Alternatively, `@.label` calculates the instruction count automatically from a local label.
 
 
@@ -11987,7 +12091,7 @@ Repeat Block
 
 **Explanation:**
 
-REP creates a hardware-implemented loop that executes the next Dest[8:0] instructions Src times. If Src = 0, the instructions repeat infinitely (useful for main loops). If Dest[8:0] = 0, nothing repeats.
+REP creates a hardware-implemented loop that executes the next Dest[8:0] instructions Src times. If Src == 0, the instructions repeat infinitely (useful for main loops). If Dest[8:0] == 0, nothing repeats.
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
@@ -12028,7 +12132,7 @@ process_data    rep     @.end, count            ' Repeat until .end label
 .end                                            ' Empty label marks end
 
 ' Alternative using the # prefix with local label:
-fill_buffer     rep     #(.done - $), #256      ' Expression = count
+fill_buffer     rep     @.done, #256            ' Count to .done
                 wrbyte  value, ptr
                 add     ptr, #1
 .done
@@ -12038,19 +12142,18 @@ fill_buffer     rep     #(.done - $), #256      ' Expression = count
 
 **Extended Count Capability:**
 
-Both the instruction count (D) and repetition count (S) can exceed the 9-bit immediate limit of 0-511 using two methods:
+The instruction count (D) is always D[8:0], 0-511, in every form. Only the repetition count (S) can exceed the 9-bit immediate limit of 0-511, using two methods:
 
-| Form | Limit | Mechanism |
-|------|-------|-----------|
+| Form for S | Limit | Mechanism |
+|------------|-------|-----------|
 | `#count` | 0-511 | 9-bit immediate field |
-| `##count` | 0 to 2^32^-1 | AUGD/AUGS prefix emitted automatically |
+| `##count` | 0 to 2^32^-1 | AUGS prefix emitted automatically |
 | `register` | 0 to 2^32^-1 | Register value used at runtime |
 
 ```pasm2
 ' Extended repetition examples
                 rep     @.end, ##1000         ' 1000 reps (AUGS prefix)
                 rep     @.end, big_count      ' Register-based count
-                rep     ##1000, ##2000        ' Both extended (rare)
 ```
 
 **Memory Mode Constraints (for @label form):**
@@ -12165,10 +12268,10 @@ Resume From Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111110 | 111111111 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111110100 | 111110101 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111110010 | 111110011 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111110000 | 111110001 | --- | --- | --- | 4 (cog), 13...20 (hub) |
 
 
 **Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
@@ -12177,7 +12280,7 @@ Resume From Interrupt
 
 RESI0, RESI1, RESI2, and RESI3 resume execution from their respective interrupt levels. Each instruction is functionally equivalent to a CALLD instruction that restores the program counter, C flag, and Z flag from the corresponding interrupt return address registers.
 
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
+RESIx returns to the interrupted code like RETIx, and also stores the ISR's own resume address in IJMPx (RESI1 is `CALLD IJMP1, IRET1 WCZ`). The next interrupt of that level therefore resumes the handler at the instruction after the RESIx, instead of at the handler's start address.
 
 
 
@@ -12221,7 +12324,7 @@ If the WZ or WCZ effect is specified, the Z flag is restored from K[30].
 
 The operation takes 4 cycles in cog/LUT execution, or 13–20 cycles in hub execution (the hub-branch refill cost when the return target resides in hub memory).
 
-The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, CALLPB, CALLA, and CALLB instructions.
+The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, and CALLPB, which push onto the hardware stack. CALLA and CALLB use hub-memory software stacks and return with RETA and RETB.
 
 
 
@@ -12266,6 +12369,8 @@ If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
 RETA is paired with CALLA for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
 
+The access takes 1 more clock when it crosses a hub long.
+
 
 
 ::: instrheader
@@ -12309,6 +12414,8 @@ If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
 RETB is paired with CALLB for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
 
+The access takes 1 more clock when it crosses a hub long.
+
 
 
 ::: instrheader
@@ -12330,10 +12437,10 @@ Return From Interrupt
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
-| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
-| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (Cog), 13...20 (Hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111111111 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110101 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110011 | --- | --- | --- | 4 (cog), 13...20 (hub) |
+| EEEE | 1011001 | 110 | 111111111 | 111110001 | --- | --- | --- | 4 (cog), 13...20 (hub) |
 
 
 **Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
@@ -12373,7 +12480,7 @@ Reverse Bits
 
 REV performs a complete bitwise reverse of the value in Dest, storing the result back into Dest. Bit 31 becomes bit 0, bit 30 becomes bit 1, and so on through bit 0 becoming bit 31. The operation takes 2 cycles and does not affect any flags.
 
-This instruction is useful for processing binary data in different MSB/LSB order than it is transmitted with, such as serial protocols that send least-significant bit first but need processing in most-significant bit first order. It is also used in bit-reversal algorithms for FFT operations.
+This instruction is useful for processing binary data in different MSB/LSB order than it is transmitted with, such as serial protocols that send least-significant bit first but need processing in most-significant bit first order.
 
 
 
@@ -12381,7 +12488,7 @@ This instruction is useful for processing binary data in different MSB/LSB order
 ## RFBYTE {#rfbyte}
 Read Byte Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended byte from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended byte from the RDFAST FIFO.
 :::
 
 **RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
@@ -12417,7 +12524,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFLONG {#rflong}
 Read Long Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a 32-bit long from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a 32-bit long from the RDFAST FIFO.
 :::
 
 **RFLONG**  *Dest*  **{WC|WZ|WCZ}**
@@ -12453,7 +12560,7 @@ The operation takes 2 cycles when the FIFO has data available. The FIFO is autom
 ## RFVAR {#rfvar}
 Read Variable Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVAR**  *Dest*  **{WC|WZ|WCZ}**
@@ -12481,7 +12588,7 @@ If the WC or WCZ effect is specified, C is always cleared to 0.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The length of each value read is determined by the streamer configuration set up before the RDFAST operation.
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
 
 
 
@@ -12489,7 +12596,7 @@ The length of each value read is determined by the streamer configuration set up
 ## RFVARS {#rfvars}
 Read Signed Variable Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a sign-extended 1-4 byte value from the RDFAST FIFO.
 :::
 
 **RFVARS**  *Dest*  **{WC|WZ|WCZ}**
@@ -12517,13 +12624,15 @@ If the WC or WCZ effect is specified, C is set to the MSB of the value.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
+
 
 
 ::: instrheader
 ## RFWORD {#rfword}
 Read Word Via FIFO
 
-[hub memory Access](#hub-memory-access) - Reads a zero-extended word from the RDFAST FIFO.
+[Hub Memory Access](#hub-memory-access) - Reads a zero-extended word from the RDFAST FIFO.
 :::
 
 **RFWORD**  *Dest*  **{WC|WZ|WCZ}**
@@ -12639,7 +12748,7 @@ Rotate Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000001 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
@@ -12782,7 +12891,7 @@ Rotate Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000000 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 
@@ -12802,7 +12911,7 @@ Rotation is useful for bit manipulation, circular buffers, hash functions, and c
 ## RQPIN {#rqpin}
 Read Smart Pin Without Acknowledge
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Reads smart pin result without clearing the ready flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Reads smart pin result without clearing the ready flag.
 :::
 
 **RQPIN**  *Dest, {#}Src*  **{WC}**
@@ -12861,7 +12970,7 @@ Shift Arithmetic Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000111 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
 
@@ -12897,13 +13006,13 @@ Shift Arithmetic Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000110 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
 
 **Explanation:**
 
-SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original Dest[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.
+SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original Dest[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is for signed integers; use SHR for unsigned values.
 
 ```pasm2
         SAR     value, #3      ' Divide signed value by 8
@@ -13192,7 +13301,7 @@ SETD can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETDACS {#setdacs}
 Set DACs
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets all four DAC channels simultaneously from a single register.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets all four DAC channels simultaneously from a single register.
 :::
 
 **SETDACS**  *{#}Dest*
@@ -13259,7 +13368,7 @@ Set LUT Sharing
 
 **SETLUTS**  *{#}Dest*
 
-**Result:** If Dest[0] = 1, LUT sharing is enabled where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
+**Result:** If Dest[0] == 1, LUT sharing is enabled where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
 
 - Dest is a register or literal value (0-511) with enable bit in Dest[0].
 
@@ -13273,7 +13382,7 @@ Set LUT Sharing
 
 **Explanation:**
 
-Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] = 1), LUT writes within the adjacent odd/even companion cog are automatically copied to this cog's LUT, allowing cogs to share lookup table data.
+Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] == 1), LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT, allowing cogs to share lookup table data. When Dest[0] == 0, writes from the other cog are not allowed (default: disabled).
 
 
 
@@ -13320,12 +13429,12 @@ SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibbl
 ## SETPAT {#setpat}
 Set Pin Pattern
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures pin pattern matching for PAT event detection.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures pin pattern matching for PAT event detection.
 :::
 
 **SETPAT**  *{#}Dest, {#}Src*
 
-**Result:** Pin pattern for PAT event is configured. C selects INA/INB, Z selects =/!=, Dest provides mask value, Src provides match value.
+**Result:** Pin pattern for PAT event is configured. The current C and Z flag values are read as inputs: C selects INA (0) or INB (1), Z selects the event on mismatch (0) or match (1). Dest provides the mask value, Src provides the match value.
 
 - Dest is a register or immediate containing mask value.
 - Src is a register or immediate containing match value.
@@ -13340,7 +13449,7 @@ Set Pin Pattern
 
 **Explanation:**
 
-Sets pin pattern for PAT event detection. The C flag selects INA or INB for monitoring, the Z flag selects equality (=) or inequality (!=) matching, Dest provides the mask value to select which pins to monitor, and Src provides the match value to compare against.
+Sets pin pattern for PAT event detection. C and Z are inputs, read when SETPAT executes; SETPAT takes no WC, WZ or WCZ effect and does not change the flags. Set C and Z before the SETPAT. C == 0 monitors INA and C == 1 monitors INB. With Z == 0, the PAT event occurs whenever (pins & Dest) != Src; with Z == 1, whenever (pins & Dest) == Src. Dest provides the mask value to select which pins to monitor, and Src provides the match value to compare against.
 
 
 
@@ -13402,7 +13511,7 @@ Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer
 ## SETQ {#setq}
 Set Q Register
 
-[hub memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
+[Hub Memory Access](#hub-memory-access) - Loads the Q register for block transfers and multi-parameter instructions.
 :::
 
 **SETQ**  *{#}Dest*
@@ -13428,14 +13537,16 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
         RDLONG  buffer, ptra   ' Read 16 longs from hub
 ```
 
-**Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The correct number of longs transfers, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction, or manually adjust PTRx afterward.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} A SETQ block read started fewer than 16 clocks after a no-wait `RDFAST` (the SETQ counts toward the 16) can write one wrong long and leave the rest unwritten, overwrite cog registers outside its destination, or never finish. Use the waiting `RDFAST`, or space the block read 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 ::: instrheader
 ## SETQ2 {#setq2}
 Set Q For LUT Transfers
 
-[hub memory Access](#hub-memory-access) - Loads the Q register for LUT-to-hub block transfers.
+[Hub Memory Access](#hub-memory-access) - Loads the Q register for LUT-to-hub block transfers.
 :::
 
 **SETQ2**  *{#}Dest*
@@ -13454,14 +13565,14 @@ Set Q For LUT Transfers
 
 **Explanation:**
 
-Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. Use SETQ2 + RDLONG/WRLONG to block-transfer between hub and LUT RAM. The block moves one long per clock unless the hub FIFO is accessing the same hub RAM slice on the same cycle, in which case the FIFO has priority and the block move waits for that slice to come around again.
+Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of cog RAM: SETQ2 + RDLONG performs block read from hub to LUT, while SETQ2 + WRLONG performs block write from LUT to hub. Use SETQ2 + RDLONG/WRLONG to block-transfer between hub and LUT RAM. The block moves one long per clock unless the hub FIFO is accessing the same hub RAM slice on the same cycle, in which case the FIFO has priority and the block move waits for that slice to come around again.
 
 ```pasm2
         SETQ2   #256-1         ' Set up for 256-long LUT transfer
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
 ```
 
-**Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. The data transfers correctly, but PTRx advances by only a single-long delta instead of the full block size. Avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ2 and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
 
 ::: instrheader
@@ -13532,7 +13643,7 @@ SETS can also be used in self-modifying register RAM code. Unlike with ALTx inst
 ## SETSCP {#setscp}
 Set Oscilloscope
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures the four-channel hardware oscilloscope for debugging.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the four-channel hardware oscilloscope for debugging.
 :::
 
 **SETSCP**  *{#}Dest*
@@ -13586,7 +13697,7 @@ Set Selectable Event (1, 2, 3, Or 4)
 
 SETSE1, SETSE2, SETSE3, and SETSE4 configure their respective selectable event's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event. Configuring SETSEn also clears the corresponding SEn event flag.
 
-The P2 provides four independent selectable events, each of which can be configured to detect various conditions including pin states, hub operations, CORDIC completion, and other system events. Once configured, these events can be polled with POLLSEn, waited upon with WAITSEn, or used for conditional jumps with JSEn and JNSEn.
+The P2 provides four independent selectable events, each of which can be configured to detect a pin, LUT, or hub lock event: a pin rising, falling, changing, low, or high; this cog or its odd/even companion cog reading or writing a LUT address (one of four, set by the low two bits of Dest); or a hub lock rising, falling, or changing. Once configured, these events can be polled with POLLSEn, waited upon with WAITSEn, or used for conditional jumps with JSEn and JNSEn.
 
 
 
@@ -13633,7 +13744,7 @@ SETWORD stores Src[15:0] into the word identified by N within Dest, or the word 
 ## SETXFRQ {#setxfrq}
 Set Streamer Frequency
 
-[streamer](#streamer) - Sets the NCO frequency that controls streamer data output rate.
+[Streamer](#streamer) - Sets the NCO frequency that controls streamer data output rate.
 :::
 
 **SETXFRQ**  *{#}Dest*
@@ -13732,7 +13843,7 @@ Shift Left
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000011 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[31].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[31].
 
 **Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
 
@@ -13768,7 +13879,7 @@ Shift Right
 |:----:|:------:|:---:|:-:|:-:|:-:|:-:|:-------|:----:|
 | EEEE | 0000010 | CZI | DDDDDDDDD | SSSSSSSSS | Last bit out† | result == 0 | D | 2 |
 
-† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] = 0 (no shift), C receives D[0].
+† If S[4:0] > 0, C receives the last bit shifted out. If S[4:0] == 0 (no shift), C receives D[0].
 
 **Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
@@ -13851,6 +13962,8 @@ Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cance
         NOP                    ' Skipped (bit 2)
 ```
 
+Skipping works only in main code, not inside interrupt service routines. An interrupt service routine that runs during a skipping sequence executes normally, and the skipping sequence resumes when it completes. A CALL, CALLPA or CALLPB that is not skipped executes its subroutine normally, and the skipping sequence resumes after the subroutine's RET or _RET_, so a subroutine can be skipped or run in full without disturbing the top-level sequence.
+
 
 
 ::: instrheader
@@ -13878,11 +13991,11 @@ Skip Instructions Fast
 
 **Explanation:**
 
-Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are never fetched or executed.
+Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are normally stepped over without being executed. Two cases are still cancelled in the pipeline, each becoming a 2-clock NOP: the first instruction after the SKIPF when its skip-pattern bit is 1, and the 8th instruction in a row being skipped (only 7 can be stepped over at once).
 
 **CRITICAL: Cog/LUT Memory Only**
 
-SKIPF can ONLY leap over instructions when executing from **cog or LUT memory**. When SKIPF is executed from hub memory, it automatically **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of cog/LUT memory.
+SKIPF can ONLY leap over instructions when executing from **cog or LUT memory**. When SKIPF is executed from hub memory, it **reverts to SKIP behavior** (cancelling instructions in the pipeline instead of stepping over them). This is a hardware limitation—the hub memory FIFO can only provide sequential instructions; random PC stepping requires the random-access capability of cog/LUT memory.
 
 **Best Practice:** Use SKIP for code in hub memory (ORGH sections), SKIPF for code in cog/LUT memory (ORG sections).
 
@@ -13890,6 +14003,11 @@ SKIPF can ONLY leap over instructions when executing from **cog or LUT memory**.
 - SKIP is fully compatible with REP—cancellation maintains instruction counts
 - SKIPF works with REP ONLY if all skip patterns result in identical instruction counts
 - Recommendation: Use SKIP within REP blocks for predictable behavior
+
+**Branching Rules:** The ISR and CALL behavior described under SKIP applies to SKIPF and EXECF as well.
+
+- When a CALL, CALLPA or CALLPB is used within a SKIPF sequence and the instruction after it might be skipped, its immediate branch address must be absolute. CALLPA and CALLPB cannot be given an absolute immediate address; CALL can, with `#\address`. All three can use a register as the branch address, since a register holds an absolute address.
+- Other branches within a SKIPF sequence work with every immediate-relative branch, which is the default for immediate branches in cog/LUT memory. After an absolute-address branch (`#\label`, a register, or RET), do not skip the first instruction at the branch target. Immediate-relative branches have no such restriction, because the variable PC stepping lands on the first instruction of interest at or beyond the branch address.
 
 
 
@@ -14176,10 +14294,10 @@ These instructions conditionally add or subtract Src from Dest based on the spec
 
 | Instruction | Subtracts when | Adds when |
 |-------------|----------------|-----------|
-| SUMC | C = 1 | C = 0 |
-| SUMNC | C = 0 | C = 1 |
-| SUMZ | Z = 1 | Z = 0 |
-| SUMNZ | Z = 0 | Z = 1 |
+| SUMC | C == 1 | C == 0 |
+| SUMNC | C == 0 | C == 1 |
+| SUMZ | Z == 1 | Z == 0 |
+| SUMNZ | Z == 0 | Z == 1 |
 
 The C flag (with WC) is updated to reflect the true sign of the result.
 
@@ -14191,14 +14309,16 @@ SUMC and SUMZ subtract when their flag is set (1). SUMNC and SUMNZ subtract when
 
 This section contains all PASM2 instructions beginning with the letter T.
 
-**Conditional Jump Timing Convention:** Conditional jumps in this section (TJZ, TJNZ, TJF, TJNF, TJV, TJS, TJNS) show their `Clks` field as `not-taken / taken`. The *taken* value depends on execution context:
+**Conditional Jump Timing Convention:** Conditional jumps in this section (TJZ, TJNZ, TJF, TJNF, TJV, TJS, TJNS) show their `Clks` field as `cog/LUT / hub`: the group before the slash is the timing in cog and LUT execution, the group after it is the timing in hub execution. Each group gives the not-taken value first, then the taken value, which depends on execution context:
 
 | Context | Clocks when taken |
 |:--------|:----------------:|
 | Cog / LUT execution | 4 |
 | Hub execution | 13...20 |
 
-So `2 or 4 / 2 or 13-20` reads as: 2 cycles when the jump is not taken, 4 cycles when taken in cog/LUT, 13–20 cycles when taken in hub execution.
+So `2 or 4 / 2 or 13-20` reads as: in cog/LUT execution, 2 clocks when the jump is not taken and 4 when taken; in hub execution, 2 clocks when not taken and 13–20 when taken.
+
+In the Result column, `PC*` means PC is written only when the jump condition is met.
 
 
 
@@ -14376,7 +14496,7 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 ## TESTP / TESTPN {#testp}
 Test Pin / Test Pin Negated
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Tests I/O pin state and optionally combines with flag.
 :::
 
 \hypertarget{testpn}{}
@@ -14422,7 +14542,7 @@ IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
 TESTP reads the state (0 or 1) of the I/O pin designated by Dest, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. TESTPN does the same but inverts the pin state first. The pin number is specified by Dest[5:0] (0-63). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the pin state is applied to the selected flag.
 
-Both instructions read the actual pin state from the IN register, not the output register. This makes them useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states. TESTPN is particularly useful for active-low signals where a low pin state (0) indicates an active condition.
+Both instructions read the pin's input state as registered two clocks before the instruction starts, which is fresher than the INx registers (registered three clocks before). This makes them useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states. TESTPN is particularly useful for active-low signals where a low pin state (0) indicates an active condition.
 
 ```pasm2
         TESTP   #10 WC         ' Read pin 10 state into C
@@ -14466,12 +14586,12 @@ TJF and TJNF test Dest for "full" state ($FFFF_FFFF = -1 = all bits set) and con
 
 | Instruction | Jumps when |
 |-------------|------------|
-| TJF | Dest = $FFFF_FFFF (full) |
+| TJF | Dest == $FFFF_FFFF (full) |
 | TJNF | Dest != $FFFF_FFFF (not full) |
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJF/TJNF.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush; 2 or 13–20 in hub execution).
 
 
 
@@ -14509,12 +14629,12 @@ TJS and TJNS test the sign bit (bit 31) of Dest and conditionally jump:
 
 | Instruction | Jumps when |
 |-------------|------------|
-| TJS | Dest[31] = 1 (negative/signed) |
-| TJNS | Dest[31] = 0 (positive/unsigned) |
+| TJS | Dest[31] == 1 (negative/signed) |
+| TJNS | Dest[31] == 0 (positive/unsigned) |
 
 The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS/TJNS.
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush; 2 or 13–20 in hub execution).
 
 
 
@@ -14530,7 +14650,7 @@ Test And Jump If Zero / Not Zero
 **TJZ**  *Dest, {#}Src*\
 **TJNZ**  *Dest, {#}Src*
 
-**Operation:** jump to S if D == 0 (TJZ) / D <> 0 (TJNZ)
+**Operation:** jump to S if D == 0 (TJZ) / D != 0 (TJNZ)
 
 **Result:** Dest is tested (not modified), and conditionally jumps based on zero/non-zero result.
 
@@ -14543,11 +14663,6 @@ Test And Jump If Zero / Not Zero
 | EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 | EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | --- | --- | PC* | 2 or 4 / 2 or 13-20 |
 
-```{=latex}
-*PC is written only when the jump condition is met.
-```
-
-
 **Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
 
 **Explanation:**
@@ -14556,17 +14671,17 @@ TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on wh
 
 | Instruction | Jumps when |
 |-------------|------------|
-| TJZ | Dest = 0 |
+| TJZ | Dest == 0 |
 | TJNZ | Dest != 0 |
 
 Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
 ```pasm2
-        TJNZ    count, #loop   ' Loop while count <> 0
-        TJZ     count, #done   ' Exit when count = 0
+        TJNZ    count, #loop   ' Loop while count != 0
+        TJZ     count, #done   ' Exit when count == 0
 ```
 
-Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush; 2 or 13–20 in hub execution).
 
 
 
@@ -14598,7 +14713,7 @@ Test And Jump If Overflow
 
 TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the true sign) by the previous ADDS, ADDSX, SUBS, SUBSX, CMPS, CMPSX, or SUMx instruction. The address (Src) can be absolute or relative.
 
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
+The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (2 or 13–20 in hub execution).
 
 ```pasm2
         ADDS    result, delta WC  ' Signed add, update C
@@ -14663,7 +14778,7 @@ Wait For Attention
 **Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14677,7 +14792,7 @@ Wait For Attention
 
 WAITATN waits for an attention event to occur, stalling the pipeline until the event flag is set. The attention event flag is set whenever another cog issues an attention request for this cog using COGATN. The flag is cleared upon cog start or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
 
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. The WC, WZ, or WCZ effect is recommended only when timeout is specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
+To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. With a timeout armed, WC, WZ, or WCZ reports the outcome: the flags are set (1) if the timeout occurred before the event, or cleared (0) if the event occurred before the timeout. Without a preceding SETQ, the effects clear the flags, as described above.
 
 During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
@@ -14705,7 +14820,7 @@ Wait For Counter Event
 **Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag (unless it's being set again by the event sensor) and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14741,7 +14856,7 @@ Wait For FIFO Block Wrap
 **Result:** Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14773,7 +14888,7 @@ Wait For Interrupt
 **Result:** Waits for an interrupt-occurred event, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14805,7 +14920,7 @@ Wait For Pattern
 **Result:** Waits for a pin-pattern-detected event, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14821,7 +14936,10 @@ WAITPAT waits for a pin-pattern-detected event to occur, stalling the pipeline u
 
 The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
+SETPAT reads C and Z as inputs: C selects INA (0) or INB (1), and Z selects `==` (1) or `!=` (0) for the comparison. Set them before SETPAT.
+
 ```pasm2
+        MODCZ   _clr, _set WCZ ' C = 0 (INA), Z = 1 (match when ==)
         SETPAT  mask, pattern  ' Set up pattern detector
         WAITPAT                ' Wait for pattern match
 ```
@@ -14847,7 +14965,7 @@ Wait For Selectable Event (1, 2, 3, Or 4)
 **Result:** Waits for the specified selectable event flag (SE1-SE4) to be set, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear). The `SETQ` timeout (event first gives C = 0, timeout first gives C = 1) and the `WCZ` flag-clear are hardware-verified on P2 silicon.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14879,10 +14997,10 @@ Wait Cycles
 
 **Operation:** wait `2 + D` clocks; if WC/WZ/WCZ wait `2 + (D & RND)` clocks; `C/Z = 0`
 
-**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay and clears C and Z to 0 after completion.
+**Result:** Stalls the cog for 2 + Dest clock cycles. If WC/WZ/WCZ is specified, waits 2 + (Dest AND RND) clocks for a randomized delay and clears the flag(s) the effect names to 0 after completion (WC clears C, WZ clears Z, WCZ clears both).
 
 - Dest is the delay value; total wait is 2 + Dest cycles (0-511 for immediate).
-- WC, WZ, or WCZ enable randomized delay mode; C and Z are set to 0 after completion.
+- WC, WZ, or WCZ enable randomized delay mode; the flag(s) the effect names are set to 0 after completion.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14894,7 +15012,7 @@ Wait Cycles
 
 **Explanation:**
 
-WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified, the delay becomes randomized: 2 + (Dest AND RND) clocks, where RND is a random value. This randomized mode is useful for avoiding timing-based interference between cogs. WAITX is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
+WAITX stalls the cog for 2 + Dest clock cycles. When WC, WZ, or WCZ is specified, the delay becomes randomized: 2 + (Dest AND RND) clocks, where RND is a random value. WAITX is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
 
 WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
 
@@ -14918,7 +15036,7 @@ Wait For Streamer Finished
 **Result:** Waits for a streamer-finished event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14950,7 +15068,7 @@ Wait For Streamer Empty
 **Result:** Waits for a streamer-empty event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14982,7 +15100,7 @@ Wait For Streamer LUT Rollover
 **Result:** Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -15014,7 +15132,7 @@ Wait For Streamer NCO Rollover
 **Result:** Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution.
 
 - WC, WZ, or WCZ are optional effects to set flags on timeout.
-- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC`/`WZ`/`WCZ` clear both C and Z (a valid one-instruction flag-clear). Hardware-verified on P2 silicon.
+- The timeout is armed by a `SETQ` (a future System-Counter target) placed immediately before this instruction; the wait then releases on the event **or** the deadline, whichever comes first — C/Z = 1 if the timeout won, 0 if the event won. With **no** preceding `SETQ` no timeout is armed, so the event always wins and `WC` clears C, `WZ` clears Z and `WCZ` clears both (a valid one-instruction flag-clear).
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -15036,7 +15154,7 @@ The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, 
 ## WFBYTE {#wfbyte}
 Write FIFO Byte
 
-[hub memory Access](#hub-memory-access) - Writes a byte to the hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a byte to the hub FIFO interface.
 :::
 
 **WFBYTE**  *{#}Dest*
@@ -15057,7 +15175,7 @@ Write FIFO Byte
 
 WFBYTE writes a byte from Dest[7:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
-Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles.
 
 
 
@@ -15065,7 +15183,7 @@ Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles whe
 ## WFLONG {#wflong}
 Write FIFO Long
 
-[hub memory Access](#hub-memory-access) - Writes a long to the hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a long to the hub FIFO interface.
 :::
 
 **WFLONG**  *{#}Dest*
@@ -15086,7 +15204,7 @@ Write FIFO Long
 
 WFLONG writes a long (32-bit value) from Dest[31:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
-All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+All 32 bits of Dest are written. WFLONG executes in 2 clock cycles.
 
 
 
@@ -15094,7 +15212,7 @@ All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO
 ## WFWORD {#wfword}
 Write FIFO Word
 
-[hub memory Access](#hub-memory-access) - Writes a word to the hub FIFO interface.
+[Hub Memory Access](#hub-memory-access) - Writes a word to the hub FIFO interface.
 :::
 
 **WFWORD**  *{#}Dest*
@@ -15115,7 +15233,7 @@ Write FIFO Word
 
 WFWORD writes a word (16-bit value) from Dest[15:0] into the hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast hub memory writes.
 
-Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles.
 
 
 
@@ -15123,7 +15241,7 @@ Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles wh
 ## WMLONG {#wmlong}
 Write Masked Long
 
-[hub memory Access](#hub-memory-access) - Writes only non-zero bytes to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes only non-zero bytes to hub RAM.
 :::
 
 **WMLONG**  *Dest, {#}Src/P*
@@ -15156,7 +15274,11 @@ WMLONG writes only non-zero bytes from Dest to hub RAM at address Src. Each byte
 
 This masked write capability is useful for sprite graphics, text overlay, and other applications where selective pixel/byte updates are needed without affecting other data in the same long.
 
+The access takes 1 more clock when it crosses a hub long.
+
 Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
+
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WMLONG. Per the P2 Documentation, such an intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
 
 
 
@@ -15164,7 +15286,7 @@ Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 ## WRBYTE {#wrbyte}
 Write Byte
 
-[hub memory Access](#hub-memory-access) - Writes a byte to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a byte to hub RAM.
 :::
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
@@ -15199,6 +15321,8 @@ The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hu
         WRBYTE  value, ptra++  ' Write byte, increment pointer
 ```
 
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, WRBYTE can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Nothing flags it. Use the waiting `RDFAST`, or start WRBYTE at least 16 clocks after it (see [RDFAST](#rdfast)).
+
 
 
 ::: instrheader
@@ -15221,10 +15345,10 @@ Write Flag To Register
 
 | Instruction | Dest value |
 |-------------|------------|
-| WRC | 1 if C=1, else 0 |
-| WRNC | 1 if C=0, else 0 |
-| WRZ | 1 if Z=1, else 0 |
-| WRNZ | 1 if Z=0, else 0 |
+| WRC | 1 if C == 1, else 0 |
+| WRNC | 1 if C == 0, else 0 |
+| WRZ | 1 if Z == 1, else 0 |
+| WRNZ | 1 if Z == 0, else 0 |
 
 - Dest is the destination register. Upper 31 bits are cleared to zero.
 
@@ -15249,7 +15373,7 @@ WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the 
 ## WRFAST {#wrfast}
 Write FIFO Setup
 
-[hub memory Access](#hub-memory-access) - Configures the hub FIFO for fast writes.
+[Hub Memory Access](#hub-memory-access) - Configures the hub FIFO for fast writes.
 :::
 
 **WRFAST**  *{#}Dest, {#}Src*
@@ -15271,7 +15395,7 @@ Write FIFO Setup
 
 WRFAST configures the hub FIFO interface for fast streaming writes to hub RAM. After WRFAST executes, use WFBYTE, WFWORD, or WFLONG to write data through the FIFO.
 
-Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. Dest[31] controls wait behavior: if set, FIFO writes proceed without stalling.
+Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. Dest[31] controls wait behavior: if clear, WRFAST waits for any previous WRFAST to finish and then reconfigures the FIFO interface; if set, WRFAST does not wait for the reconfiguration and takes only 2 clocks, so the code must allow enough clocks before the first FIFO write.
 
 Src[19:0] specifies the starting hub RAM address. The FIFO automatically increments the address as data is written.
 
@@ -15286,7 +15410,7 @@ Src[19:0] specifies the starting hub RAM address. The FIFO automatically increme
 ## WRLONG {#wrlong}
 Write Long
 
-[hub memory Access](#hub-memory-access) - Writes a long to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a long to hub RAM.
 :::
 
 **WRLONG**  *{#}Dest, {#}Src/P*
@@ -15317,7 +15441,7 @@ Write Long
 
 WRLONG writes the 32-bit value in Dest to hub RAM at address Src/PTRx. All 32 bits of Dest are written.
 
-The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment (minimum 3 cycles when the window is hit). When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment (minimum 3 cycles when the window is hit). The access takes 1 more clock when it crosses a hub long. When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
 
 Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to hub RAM in a burst transfer. SETQ sets the count for a block transfer to or from cog RAM, while SETQ2 sets it for a block transfer to or from LUT RAM.
 
@@ -15326,7 +15450,9 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
         WRLONG  buffer, ptra   ' Write 16 longs to hub
 ```
 
-**Pitfall (Silicon Bug):** When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx advances by only a single-long delta (4 bytes) instead of the full block size.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} When using SETQ/SETQ2 for block transfers with PTRx expressions, do NOT place any ALTx, AUGS, or AUGD instruction between SETQ/SETQ2 and WRLONG. Such intervening instructions cancel the block-size PTRx delta calculation—the data transfers correctly, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the full block size. Keep the SETQ and the transfer adjacent.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, WRLONG can complete before its write lands; if a hub read follows at once, the write is lost (the hub keeps its old long) or that read returns the previous hub read's long instead. Nothing flags it. Use the waiting `RDFAST`, or start WRLONG at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -15372,7 +15498,7 @@ WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup ta
 ## WRPIN {#wrpin}
 Write Pin Mode
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Configures the operating mode of a smart pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Configures the operating mode of a smart pin.
 :::
 
 **WRPIN**  *{#}Dest, {#}Src*
@@ -15396,10 +15522,10 @@ WRPIN configures the operating mode of one or more smart pins. Each of the P2's 
 
 See Appendix F for the A/B input-selector (%AAAA/%BBBB) encodings.
 
-**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
+A smart pin should be configured while its DIR bit is low, holding it in reset. A WRPIN issued while DIR is high changes the use of the pin's state bits without regulation and gives unpredictable behavior in the newly selected mode.
 
 The standard configuration sequence is:
-1. DIRL pin — Reset smart pin (required)
+1. DIRL pin — Reset smart pin
 2. WRPIN mode, pin — Configure smart pin mode
 3. WXPIN x, pin — Set X parameter (setup)
 4. DIRH pin — Enable smart pin
@@ -15422,7 +15548,7 @@ WRPIN #0, pin clears all smart pin configuration.
 ## WRWORD {#wrword}
 Write Word
 
-[hub memory Access](#hub-memory-access) - Writes a word to hub RAM.
+[Hub Memory Access](#hub-memory-access) - Writes a word to hub RAM.
 :::
 
 **WRWORD**  *{#}Dest, {#}Src/P*
@@ -15451,7 +15577,9 @@ Write Word
 
 WRWORD writes the word (16-bit value) in Dest[15:0] to hub RAM at address Src/PTRx. Only the lower 16 bits of Dest are written.
 
-The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
+The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hub execution, depending on hub-window alignment. The access takes 1 more clock when it crosses a hub long. When Src specifies PTRA or PTRB, the pointer value is used as the hub address. Pointer auto-increment modes can be applied for sequential access.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} Started fewer than 16 clocks after a no-wait `RDFAST`, WRWORD can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Nothing flags it. Use the waiting `RDFAST`, or start WRWORD at least 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 
@@ -15459,7 +15587,7 @@ The instruction takes 3–10 cycles in cog/LUT execution, or 3–20 cycles in hu
 ## WXPIN {#wxpin}
 Write Pin X Parameter
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets the X parameter of a smart pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the X parameter of a smart pin.
 :::
 
 **WXPIN**  *{#}Dest, {#}Src*
@@ -15481,10 +15609,11 @@ Write Pin X Parameter
 
 WXPIN sets the X parameter of one or more smart pins. The X register meaning depends on the smart pin mode:
 
-- For PWM modes: Sets frame period or duty cycle parameter
+- For PWM modes: X[15:0] sets the base period in clocks and X[31:16] sets the PWM frame period in base periods
 - For serial modes: Controls bit timing and configuration
-- For pulse measurement: Sets measurement parameters
-- For transition modes: Controls timebase
+- For the counting and quadrature measurement modes: X[31:0] sets the measurement period in clocks (0 = continuous)
+- For the timing-measurement modes (%10010 to %10111): X[31:0] is a count or a time, by mode: how many A-input highs/rises/edges to accumulate, how many clocks pass before a timeout without an A-input high/rise/edge, how many A-to-B periods to measure, or the minimum number of clock cycles to track periods for
+- For pulse/cycle and transition output modes: X[15:0] sets the base period in clocks
 
 Writing the X register also acknowledges the smart pin, clearing any completion flags.
 
@@ -15494,7 +15623,7 @@ Writing the X register also acknowledges the smart pin, clearing any completion 
 ## WYPIN {#wypin}
 Write Pin Y Parameter
 
-[Pin I/O and smart pins](#pin-io-and-smart-pins) - Sets the Y parameter of a smart pin.
+[Pin I/O and Smart Pins](#pin-io-and-smart-pins) - Sets the Y parameter of a smart pin.
 :::
 
 **WYPIN**  *{#}Dest, {#}Src*
@@ -15517,9 +15646,12 @@ Write Pin Y Parameter
 WYPIN sets the Y parameter of one or more smart pins. The Y register serves multiple purposes depending on smart pin mode:
 
 - For PWM modes: Sets the output value, captured at the start of every PWM frame and compared against the frame counter — the duty. The base period and frame count come from WXPIN
-- For SPI/serial modes: Controls data to transmit
-- For counter modes: Sets count value
-- For ADC modes: Initiates conversions
+- For the DAC modes: Y[15:0] is the DAC output value, captured at each sample period and held for its duration
+- For the synchronous and asynchronous serial modes: Y is the output word to transmit; it goes into a single-stage buffer before advancing to the shifter
+- For the USB mode: Y is the byte (or command value) written to the transmit buffer of the lower (even) pin
+- For pulse/cycle and transition output modes: A non-zero value starts that many pulses or transitions
+- For the edge- and high-counting modes (%01110, %01111): Y[0] selects counting A only (0) or incrementing on A and decrementing on B (1)
+- For ADC modes other than SINC2 sampling: Y[13:0] replaces the sample period set by WXPIN
 
 Writing the Y register also acknowledges pin completion, clearing any completion flags. Writing Y both supplies new data and acknowledges the previous result.
 
@@ -15539,7 +15671,7 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 ## XCONT {#xcont}
 Execute Continue
 
-[streamer](#streamer) - Buffers a streamer command continuing from current phase.
+[Streamer](#streamer) - Buffers a streamer command continuing from current phase.
 :::
 
 **XCONT**  *{#}Dest, {#}Src*
@@ -15547,7 +15679,7 @@ Execute Continue
 **Result:** Buffers a new streamer command to execute when the current command completes its final NCO rollover, continuing from current phase.
 
 - Dest is the streamer mode configuration.
-- Src is the data value or hub address for the streamer operation.
+- Src is mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored; it is never a hub address.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -15559,11 +15691,11 @@ Execute Continue
 
 **Explanation:**
 
-XCONT buffers a new streamer command that executes automatically when the current command completes. Unlike XINIT and XZERO, XCONT preserves the phase accumulator, allowing continuation of streamer operations without a phase discontinuity.
+XCONT buffers a new streamer command that executes when the current command completes its final NCO rollover. Unlike XINIT and XZERO, XCONT preserves the phase accumulator, allowing continuation of streamer operations without a phase discontinuity. XINIT resets the phase; XCONT continues it.
 
-This instruction enables chaining multiple streamer operations together while maintaining phase coherence. The buffered command waits for the current command's NCO (numerically controlled oscillator) to complete its final rollover before activation.
+Use this instruction to chain multiple streamer operations together while maintaining phase coherence. The buffered command waits for the current command's NCO (numerically controlled oscillator) to complete its final rollover before activation. If the streamer count has already run down to 0, XCONT does not wait. If the prior command used `$FFFF` as its count (running perpetually without decrementing), XCONT waits only for the next NCO rollover, at which point the new command begins.
 
-The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides either immediate data or a hub memory address depending on the mode configuration.
+The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored, depending on the mode configuration; hub data reaches the streamer through the FIFO set up by RDFAST or WRFAST, never through Src.
 
 
 
@@ -15571,7 +15703,7 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 ## XINIT {#xinit}
 Execute Initialize
 
-[streamer](#streamer) - Issues a streamer command immediately with phase reset to zero.
+[Streamer](#streamer) - Issues a streamer command immediately with phase reset to zero.
 :::
 
 **XINIT**  *{#}Dest, {#}Src*
@@ -15579,7 +15711,7 @@ Execute Initialize
 **Result:** Issues a streamer command immediately with the phase accumulator reset to zero.
 
 - Dest is the streamer mode configuration.
-- Src is the data value or hub address for the streamer operation.
+- Src is mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored; it is never a hub address.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -15591,17 +15723,17 @@ Execute Initialize
 
 **Explanation:**
 
-XINIT starts a streamer operation immediately, resetting the phase accumulator to zero. This provides a clean starting point for high-speed data transfers between the cog and hub memory or I/O pins.
+XINIT starts a streamer operation immediately, resetting the phase accumulator to zero. This provides a clean starting point for high-speed data transfers between hub memory and I/O pins.
 
 The streamer operates as a hardware DMA engine, transferring data without cog intervention. The mode word in Dest configures critical parameters:
 
-- Transfer direction (input from pins to hub, output from hub to pins, or cog-only operations)
+- Transfer direction (input from pins to hub, output from hub to pins, or output of immediate or LUT data supplied by the cog)
 - Number of pins involved in the transfer
 - Data formatting (bit order, byte packing, word sizes)
 
 Dest[15:0] is the transfer count, in NCO rollovers. A count of zero stops the streamer immediately; a count of `$FFFF` runs the command perpetually without decrementing, so the largest terminating count is `$FFFE`.
 
-The Src parameter provides either the data source (for immediate transfers) or a hub memory address (for hub-based transfers).
+The Src parameter provides mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), and is ignored by some modes. It is never a hub address: hub data moves through the FIFO set up by RDFAST or WRFAST.
 
 XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:
 
@@ -15611,7 +15743,7 @@ XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:
         WAITXFI                    ' Wait for completion
 ```
 
-This parallel operation eliminates cog intervention, enabling sustained high-speed data rates limited only by the configured clock frequency.
+The streamer runs on its own after XINIT, so the cog is free to start the smart pin while the streamer command runs.
 
 
 
@@ -15706,7 +15838,7 @@ The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bi
         ' Process random_val...
 ```
 
-The random value appears in the S field of the instruction immediately following XORO32. This means the next instruction must be one that reads from S, and the value specified for S in that instruction's encoding is ignored—it gets replaced by the random value.
+The random value appears in the S field of the instruction immediately following XORO32. This means the next instruction must be one that reads from S, and the value specified for S in that instruction's encoding is ignored—it gets replaced by the random value. XORO32 also sets Q to the PRNG result, and Q keeps that value until an instruction that overwrites Q executes (SETQ, SETQ2, RDLUT, GETXACC, CRCNIB, or a COGINIT/QDIV/QFRAC/QROTATE without a preceding SETQ).
 
 The seed value in Dest must be non-zero. A seed of zero will produce only zero values. For best results, initialize the seed with a value from GETRND or another entropy source.
 
@@ -15716,7 +15848,7 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 ## XSTOP {#xstop}
 Execute Stop
 
-[streamer](#streamer) - Immediately halts the active streamer operation.
+[Streamer](#streamer) - Immediately halts the active streamer operation.
 :::
 
 **XSTOP**
@@ -15737,7 +15869,7 @@ Execute Stop
 
 XSTOP immediately halts any active streamer operation. This provides programmatic control to abort streamer transfers before completion.
 
-When XSTOP executes, the streamer hardware stops all data movement and pin activity. Any buffered streamer command (from XCONT or XZERO) is also discarded.
+When XSTOP executes, the streamer hardware stops all data movement and pin activity.
 
 XSTOP is useful when:
 
@@ -15745,7 +15877,7 @@ XSTOP is useful when:
 - Dynamic control flow needs to terminate streaming based on data content
 - Cleanup is required before reconfiguring the streamer
 
-After XSTOP, the streamer remains idle until a new XINIT command is issued. XSTOP is itself an alias for XINIT #0,#0, so it leaves the phase accumulator zeroed. To restart, issue XINIT (which begins a new command with phase reset to zero); XCONT cannot be used to restart from idle because it only buffers behind an active command.
+After XSTOP, the streamer remains idle until a new XINIT command is issued. XSTOP is itself an alias for XINIT #0,#0, so it leaves the phase accumulator zeroed. To restart, issue XINIT, which begins a new command with phase reset to zero. XZERO and XCONT also start a command when the streamer count has already run down to 0, because they do not wait in that case; XZERO resets the phase, and XCONT continues it.
 
 
 
@@ -15753,7 +15885,7 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. XSTO
 ## XZERO {#xzero}
 Execute Zero
 
-[streamer](#streamer) - Buffers a streamer command with phase reset to zero.
+[Streamer](#streamer) - Buffers a streamer command with phase reset to zero.
 :::
 
 **XZERO**  *{#}Dest, {#}Src*
@@ -15761,7 +15893,7 @@ Execute Zero
 **Result:** Buffers a new streamer command to execute when the current command completes, resetting phase to zero.
 
 - Dest is the streamer mode configuration.
-- Src is the data value or hub address for the streamer operation.
+- Src is mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored; it is never a hub address.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -15773,13 +15905,13 @@ Execute Zero
 
 **Explanation:**
 
-XZERO buffers a new streamer command that executes automatically when the current command completes, with the phase accumulator reset to zero. This combines the buffering behavior of XCONT with the phase-zeroing behavior of XINIT.
+XZERO buffers a new streamer command that executes when the current command completes its final NCO rollover, with the phase accumulator reset to zero. This combines the buffering behavior of XCONT with the phase-zeroing behavior of XINIT.
 
-The buffered command waits for the current streamer operation's NCO (numerically controlled oscillator) to complete its final rollover before activation. When activation occurs, the phase accumulator resets to zero, providing a clean starting point for the new operation.
+The buffered command waits for the current streamer operation's NCO (numerically controlled oscillator) to complete its final rollover before activation. When activation occurs, the phase accumulator resets to zero, providing a clean starting point for the new operation. If the prior command used `$FFFF` as its count (running perpetually without decrementing), XZERO waits only for the next NCO rollover, at which point the new command begins.
 
-This instruction enables chaining multiple streamer operations where each operation should start from a known phase state. This applies when switching between different streamer modes or when phase coherence between operations is not required.
+Use this instruction to chain multiple streamer operations where each operation should start from a known phase state. This applies when switching between different streamer modes or when phase coherence between operations is not required.
 
-The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides either immediate data or a hub memory address depending on the mode configuration.
+The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides mode-dependent data (immediate data, a LUT index or LUT base address, a color value, an ADC select or a configuration value), or is ignored, depending on the mode configuration; hub data reaches the streamer through the FIFO set up by RDFAST or WRFAST, never through Src.
 
 
 
@@ -15863,9 +15995,9 @@ DAT
         ' $ = 1 (cog address 1)
 
         ORGH    $400
-        ' $ = $400 (Hub address $400)
+        ' $ = $400 (hub address $400)
         BYTE    0
-        ' $ = $401 (Hub address $401)
+        ' $ = $401 (hub address $401)
 ```
 
 ### Cog/LUT Memory Regions
@@ -15889,7 +16021,7 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
 #### Syntax
 ```pasm2
         ORG                     ' Reset to cog address 0, limit $1F8
-        ORG     address         ' Set cog address, auto-calculate limit
+        ORG     address         ' Set cog address, default limit
         ORG     address, limit  ' Set cog address and limit
 ```
 
@@ -15908,7 +16040,7 @@ Set the assembly origin to a specific cog or LUT RAM address. All subsequent ins
 2. **With address only** (`ORG address`):
    - Sets cog address to specified value
    - Auto-calculates limit:
-     - If address < $200: limit = $200 (cog RAM boundary)
+     - If address < $200: limit = $1F8 (standard cog RAM limit, before the fixed special registers)
      - If address >= $200: limit = $400 (LUT RAM boundary)
 
 3. **With address and limit** (`ORG address, limit`):
@@ -15948,7 +16080,7 @@ lut_code
 - ORG sets the address counter without generating any bytes
 - DAT blocks start in hub mode by default; use ORG to switch to cog mode
 
-**Pitfall:** Forgetting that ORG without parameters defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
+**Pitfall:** Forgetting that ORG, with or without an address below $200, defaults to limit $1F8 (not $200) can cause unexpected FIT errors when code approaches the special register area.
 
 #### Related Directives
 - [ORGH](#orgh) — Set hub RAM origin
@@ -16043,7 +16175,7 @@ Set the assembly origin to a hub RAM address. All subsequent code and data assem
 #### Parameters
 | Parameter | Range | Description |
 |-----------|-------|-------------|
-| address | $400 to $100000 | Starting hub address (in bytes) |
+| address | $400 to $100000 (Spin2+PASM); 0 to $100000 (PASM-only) | Starting hub address (in bytes) |
 | limit | address to $100000 | Maximum address for FIT checking (optional) |
 
 #### Behavior by Context
@@ -16078,15 +16210,15 @@ Use ORGH when switching from cog-exec code to hub-exec code, or when defining da
         ORGH    $400            ' Start at hub address $400
         ' Hub-exec code here
 
-        ORGH                    ' Default: start at hub $400
+        ORGH                    ' $400 (Spin2+PASM) or current hub address
 
         ORGH    $1000           ' Start at hub address $1000
 hubData LONG    $DEADBEEF       ' Hub address $1000
         LONG    $CAFEBABE       ' Hub address $1004
 
-        ORGH    $400, $800      ' Hub from $400 to $800 limit
+        ORGH    $2000, $2800    ' Hub from $2000 to $2800 limit
         BYTE    0[1024]         ' 1KB of data
-        FIT     $800            ' Verify fits within limit
+        FIT     $2800           ' Verify fits within limit
 ```
 
 #### Mode Switching
@@ -16104,6 +16236,9 @@ dispatch_table
         ORG     $100            ' cog mode: register code
 routine1
         MOV     PA, #1
+        RET
+routine2
+        MOV     PA, #2
         RET
 
         ORGH                    ' Back to hub mode
@@ -16182,7 +16317,7 @@ pattern byte    $AA[16], $55[16] ' Alternating pattern: 16 $AA, then 16 $55
 - Each value occupies exactly 1 byte
 - Strings are stored as individual bytes without alignment
 - No automatic alignment—use ALIGNW or ALIGNL if needed
-- Values outside 0-255 range will be truncated to 8 bits
+- Values outside 0-255 range (including negative values) are accepted and truncated to 8 bits
 - The `[count]` syntax repeats the preceding value, useful for buffer initialization
 
 #### Related Directives
@@ -16231,7 +16366,7 @@ rates   long    160_000_000[8]  ' Eight entries, same value
 #### Notes
 - Each value occupies 4 bytes
 - No automatic alignment—data packs sequentially; use ALIGNL if alignment needed
-- Supports full 32-bit range (0 to $FFFFFFFF)
+- Supports full 32-bit range (0 to $FFFFFFFF); negative values are accepted as two's complement
 - Standard size for P2 registers and instructions
 - The `[count]` syntax repeats the preceding value
 
@@ -16281,7 +16416,7 @@ sine    word    $8000[256]          ' Init sine table with midpoints
 - Each value occupies 2 bytes
 - No automatic alignment—data packs sequentially; use ALIGNW if alignment needed
 - Range: 0 to 65535 (unsigned)
-- Values outside this range will be truncated to 16 bits
+- Values outside this range (including negative values) are accepted and truncated to 16 bits
 - The `[count]` syntax repeats the preceding value
 
 #### Related Directives
@@ -16321,7 +16456,6 @@ The filename must not contain path separator characters. The following character
 | `:` | Colon |
 | `*` | Asterisk |
 | `?` | Question mark |
-| `"` | Double quote |
 | `<` | Less than |
 | `>` | Greater than |
 | `|` | Pipe |
@@ -16571,7 +16705,7 @@ WORDFIT values must range from -$8000 to $FFFF
 
 ## Alignment Directives
 
-Alignment directives insert padding bytes to align the next data or instruction to specified boundaries. Proper alignment improves memory access efficiency and is required for certain P2 operations.
+Alignment directives insert padding bytes to align the next data or instruction to specified boundaries. Use them when code requires data to begin on a word or long boundary.
 
 ::: dirheader
 ### ALIGNL {#alignl}
@@ -16647,8 +16781,6 @@ In this case, the ALIGNL directive causes three zero ($00) bytes to emit after T
 
 #### Notes
 - Inserts 0-3 bytes of padding as needed to reach next 4-byte boundary
-- P2 requires long alignment for certain operations
-- Critical for hub memory access efficiency
 - No effect if already on a long boundary
 
 #### Related Directives
@@ -16732,7 +16864,7 @@ In this case, the ALIGNW directive causes one zero ($00) byte to emit after Tabl
 
 #### Notes
 - Inserts 0-1 bytes of padding as needed to reach next 2-byte boundary
-- Important for 16-bit data access efficiency
+- Use when 16-bit data must begin on a word boundary
 - No effect if already on a word boundary
 
 #### Related Directives
@@ -16770,7 +16902,7 @@ DAT
 | `$$` | Special symbol evaluating to current iteration index (0 to count-1) |
 
 #### Usage
-Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. This is useful for generating repetitive code or data. DITTO requires Spin2 v50 or later; place the {Spin2_v50} version directive at the start of the source file.
+Use DITTO to generate repetitive code or data patterns without manual duplication. The `$$` symbol allows each iteration to produce different values based on the iteration index. DITTO works in DAT blocks and in inline PASM.
 
 #### Example
 ```pasm2
@@ -16779,6 +16911,8 @@ Use DITTO to generate repetitive code or data patterns without manual duplicatio
 CON
   NumChannels = 8
   BasePin = 16
+  PinMode = 0                   ' WRPIN mode value
+  PinX = 0                      ' WXPIN X value
 
 DAT
         ORG     0
@@ -16806,6 +16940,8 @@ DAT
 When count is 0, the entire block is skipped with no output generated:
 
 ```pasm2
+{Spin2_v50}
+
 CON
   MotorCount = 0                ' No motors in this build
 
@@ -16826,8 +16962,9 @@ DAT
 | Missing END | `Expected DITTO END` |
 
 #### Notes
-- Requires Spin2 v50 or later — add {Spin2_v50} at the top of the file
-- Requires the {Spin2_v50} version directive at the start of the source file (first line, before any CON/DAT) — examples omitting it will not compile
+- No symbols (labels) are allowed within the block, because symbols cannot be redefined; to branch within the block, use `$`-relative addressing, e.g. `TJZ x, #$+5`
+- Labels may appear on the DITTO and DITTO END lines themselves
+- Requires Spin2 v50 or later, via the {Spin2_v50} version directive at the start of the source file (first line, before any CON/DAT) — examples omitting it will not compile
 - Works in cog, LUT, and ORGH (hub) modes
 - `$$` can be used in any expression: `$$ * 2`, `1 << $$`, `BasePin + $$`
 - Replication occurs at compile time—no runtime overhead
@@ -16862,15 +16999,15 @@ Verify at compile time that the current address has not exceeded a specified lim
 #### Parameters
 | Parameter | Description |
 |-----------|-------------|
-| limit | Maximum address (in longs for Cog mode, bytes for Hub mode) |
+| limit | Maximum address (in longs for cog mode, bytes for hub mode) |
 
 #### Behavior by Mode
 
-**In Cog Mode (after ORG):**
+**In cog mode (after ORG):**
 - `limit` is a long address (0 to $400)
 - Error: `Cog address exceeds FIT limit`
 
-**In Hub Mode (after ORGH):**
+**In hub mode (after ORGH):**
 - `limit` is a byte address
 - Error: `Hub address exceeds FIT limit`
 
@@ -16878,9 +17015,9 @@ Verify at compile time that the current address has not exceeded a specified lim
 
 | Limit | Meaning |
 |-------|---------|
-| `$1F0` | User Cog RAM (before special registers) |
-| `$1F8` | Cog RAM (with some special registers) |
-| `$200` | Full Cog RAM |
+| `$1F0` | Below the dual-purpose registers ($1F0-$1F7) |
+| `$1F8` | Below the fixed special registers (the ORG default limit) |
+| `$200` | Full cog RAM |
 | `$400` | Cog + LUT RAM |
 | `496` | Decimal equivalent of $1F0 |
 
@@ -16951,14 +17088,14 @@ DAT
 | Restriction | Error |
 |-------------|-------|
 | Cannot have a preceding label | `This directive cannot be preceded by a symbol` |
-| Address exceeds Cog limit | `Cog address exceeds FIT limit` |
-| Address exceeds Hub limit | `Hub address exceeds FIT limit` |
+| Address exceeds cog limit | `Cog address exceeds FIT limit` |
+| Address exceeds hub limit | `Hub address exceeds FIT limit` |
 
 #### Notes
 - FIT generates an assembly error if the limit is exceeded
 - Used for cog code size verification
 - Registers $1F0-$1F7 are dual-purpose; the eight fixed special-purpose registers occupy $1F8-$1FF
-- Use FIT $1F0 to ensure code does not overwrite special registers
+- Use FIT $1F8 to ensure code does not overwrite the fixed special registers; use FIT $1F0 to also keep the dual-purpose registers ($1F0-$1F7) free
 - FIT works in both cog mode and hub mode
 
 **Tip:** Always add FIT after cog code to catch overflow early. It costs nothing at runtime and prevents hard-to-debug overwrites of special registers or adjacent code.
@@ -16993,10 +17130,9 @@ Reserve space in cog or LUT RAM without initializing. Allocates memory space but
 
 #### Key Characteristics
 
-1. **Cog Mode Only** - RES only works after ORG, not in ORGH mode
+1. **Cog mode only** - RES only works after ORG, not in ORGH mode
 2. **No Object Code** - RES advances the cog address counter but produces no bytes in the object file
-3. **Uninitialized** - Reserved space contains whatever was previously in cog RAM
-4. **Long-Aligned** - RES advances to the next long boundary before reserving
+3. **Uninitialized** - No value is emitted for the reserved space
 
 #### Usage
 Use RES to allocate variables and buffers in cog RAM without initializing them. This advances the address counter by the specified number of longs without generating any bytes in the binary. RES is only valid in cog/LUT RAM—hub RAM variables must use LONG with initial values or be allocated at runtime.
@@ -17119,12 +17255,10 @@ Use END to mark the conclusion of an inline assembly block that began with ORG o
 #### Example: Pin Toggle
 
 ```spin2
-PUB FastToggle(pin) | mask
-
-  mask := 1 << pin              ' Spin2 code
+PUB FastToggle(pin)
 
   ORG                           ' Begin inline PASM (cog execution)
-                DRVNOT  mask    ' Toggle the pin
+                DRVNOT  pin     ' Toggle the pin
   END                           ' End inline PASM, implicit RET
 
   ' Execution returns here
@@ -17133,6 +17267,9 @@ PUB FastToggle(pin) | mask
 #### Example: I2C Start Sequence
 
 ```spin2
+VAR
+  long sclpin, sdapin, delay    ' Pins and timing, set elsewhere
+
 PUB start() | scl, sda, tix
 
   longmove(@scl, @sclpin, 3)    ' Copy pins & timing to locals
@@ -17267,7 +17404,7 @@ Address $1F0. Interrupt 3 call address. Stores the address where execution jumps
 
 **Access**: Read/Write
 
-**Usage**: When the INT3 event is triggered, the cog saves the current PC in IRET3 and jumps to the address stored in IJMP3. This register can be used as general RAM when interrupt 3 is not enabled.
+**Usage**: When the INT3 event is triggered, the cog saves the C/Z flags and return address in IRET3 and jumps to the address stored in IJMP3. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
 ```pasm2
@@ -17285,7 +17422,7 @@ Address $1F1. Interrupt 3 return address. Stores the return address when interru
 
 **Access**: Read/Write
 
-**Usage**: When INT3 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI3 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 3 is not enabled.
+**Usage**: When INT3 is triggered, the hardware automatically saves the C/Z flags and the return address (the interrupted PC) to this register. The RETI3 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 3 is not enabled.
 
 **Example**:
 ```pasm2
@@ -17304,7 +17441,7 @@ Address $1F2. Interrupt 2 call address. Stores the address where execution jumps
 
 **Access**: Read/Write
 
-**Usage**: When the INT2 event is triggered, the cog saves the current PC in IRET2 and jumps to the address stored in IJMP2. This register can be used as general RAM when interrupt 2 is not enabled.
+**Usage**: When the INT2 event is triggered, the cog saves the C/Z flags and return address in IRET2 and jumps to the address stored in IJMP2. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
 ```pasm2
@@ -17322,7 +17459,7 @@ Address $1F3. Interrupt 2 return address. Stores the return address when interru
 
 **Access**: Read/Write
 
-**Usage**: When INT2 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI2 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 2 is not enabled.
+**Usage**: When INT2 is triggered, the hardware automatically saves the C/Z flags and the return address (the interrupted PC) to this register. The RETI2 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 2 is not enabled.
 
 **Example**:
 ```pasm2
@@ -17341,7 +17478,7 @@ Address $1F4. Interrupt 1 call address. Stores the address where execution jumps
 
 **Access**: Read/Write
 
-**Usage**: When the INT1 event is triggered, the cog saves the current PC in IRET1 and jumps to the address stored in IJMP1. This register can be used as general RAM when interrupt 1 is not enabled.
+**Usage**: When the INT1 event is triggered, the cog saves the C/Z flags and return address in IRET1 and jumps to the address stored in IJMP1. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
 ```pasm2
@@ -17359,7 +17496,7 @@ Address $1F5. Interrupt 1 return address. Stores the return address when interru
 
 **Access**: Read/Write
 
-**Usage**: When INT1 is triggered, the hardware automatically saves the interrupted PC value to this register. The RETI1 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 1 is not enabled.
+**Usage**: When INT1 is triggered, the hardware automatically saves the C/Z flags and the return address (the interrupted PC) to this register. The RETI1 instruction uses this address to return from the interrupt handler. This register can be used as general RAM when interrupt 1 is not enabled.
 
 **Example**:
 ```pasm2
@@ -17481,7 +17618,7 @@ The increment/decrement amount (SCALE) depends on the instruction:
 - `PTRA++[index]` — Post-update indexed: use PTRA, then PTRA += index × SCALE
 - `++PTRA[index]` — Pre-update indexed: PTRA += index × SCALE, then use PTRA
 
-Index ranges: -32 to +31 for non-updating indexed; -16 to +16 for updating forms.
+Index ranges: -32 to +31 for non-updating indexed; 1 to 16 for the updating (`++` and `--`) forms.
 
 **Example**:
 ```pasm2
@@ -17599,7 +17736,7 @@ Address $1FC. Output register A for pins 0-31. Sets the output state for pins co
 |------|------|-------------|
 | 31:0 | OUT | Output state for each pin: 1 = high, 0 = low |
 
-**Usage**: OUTA sets the output state for pins 0-31. Only affects pins configured as outputs via DIRA. Reading OUTA returns the current output register state, not the actual pin states (use INA to read pin states). When multiple cogs drive the same pin, the outputs are OR'd together—if any cog outputs high, the pin goes high.
+**Usage**: OUTA sets the output state for pins 0-31. Only affects pins configured as outputs via DIRA. To read the actual pin states, use INA. When multiple cogs drive the same pin, the outputs are OR'd together—if any cog outputs high, the pin goes high.
 
 **Example**:
 ```pasm2
@@ -17722,7 +17859,7 @@ The program counter is a 20-bit register holding the address of the currently ex
 
         ' PC modified by control flow
         jmp     #target                 ' Sets PC to target address
-        call    #subroutine             ' Saves PC+4, jumps to subroutine
+        call    #subroutine             ' Saves return addr (next instr)
 ```
 
 **Related**: CALLD, CALL, JMP
@@ -17736,7 +17873,7 @@ These are two separate mechanisms that are easily conflated, because SETQ suppli
 **The Q register** is a 32-bit value written by SETQ or SETQ2 to modify the instruction that immediately follows. It is write-only from the cog's point of view — there is no instruction that reads it back. Its value persists until the companion instruction consumes it. It supplies:
 
 1. **Block transfer counts**: SETQ or SETQ2 before RDLONG/WRLONG/WMLONG converts the transfer into a multi-long block move.
-2. **The CORDIC's second operand**: SETQ before a CORDIC command supplies the 64-bit operand's upper long.
+2. **An optional extra CORDIC operand**: the meaning of Q depends on the command. SETQ before QDIV supplies the upper long of the 64-bit dividend; before QFRAC it supplies the lower long of the dividend; before QROTATE it supplies the Y term. Without a SETQ, Q is zero for these commands.
 3. **The PTRA value** passed to a cog started by the COGINIT that follows.
 
 **CORDIC results** are held in the CORDIC solver's own result pipeline, not in Q. A CORDIC command's two 32-bit results become available 55 clocks after the command is issued, and are retrieved with GETQX (the X result) and GETQY (the Y result). Both instructions stall until the results arrive, so no explicit wait is needed. QDIV places its quotient in the X result and its remainder in the Y result.
@@ -17745,19 +17882,19 @@ Reading a result when none is available and none is in progress completes in two
 
 **Example**:
 ```pasm2
-        setq    y                       ' Y coordinate via Q
+        setq    y                       ' Y term of QROTATE via Q
         qrotate x, angle                ' Rotate (X, Y) by angle
-        getqx   result_x                ' Get X result from Q
-        getqy   result_y                ' Get Y result from Q
+        getqx   result_x                ' Get the X result from the CORDIC
+        getqy   result_y                ' Get the Y result from the CORDIC
 
         ' Block transfer setup
         setq    #15                     ' Setup for 16-long transfer
         rdlong  buffer, ptra++          ' Read 16 longs using Q count
 
         ' Division
-        qdiv    dividend, divisor       ' Quotient goes to Q
-        getqx   quotient                ' Read quotient from Q
-        getqy   remainder               ' Read remainder from Q
+        qdiv    dividend, divisor       ' Quotient becomes the X result
+        getqx   quotient                ' Read quotient (X result)
+        getqy   remainder               ' Read remainder (Y result)
 ```
 
 **Related**: GETQX, GETQY, SETQ, SETQ2, QROTATE, QVECTOR, QDIV
@@ -17947,7 +18084,7 @@ Timeout detection:
 
 **Smart Pin Interaction**: When a pin has a smart pin mode selected, DIR no longer controls the pin's output enable — it becomes an active-low **reset** for the smart pin circuitry. A smart pin is configured with WRPIN/WXPIN/WYPIN while its DIR bit is low, then started by raising DIR, and can be reset at any time by lowering and re-raising DIR. The output enable is then governed by a WRPIN configuration field, the smart pin may drive the output state directly, and IN becomes a completion or event flag rather than the pin's input level.
 
-**Immediate Effect**: Changes to DIR and OUT registers take effect immediately—the hardware updates pin states on the same clock cycle as the register write.
+**Immediate Effect**: Changes to DIR and OUT registers take effect immediately.
 
 **Input Reading**: For a pin with no smart pin mode selected, INA and INB return the actual pin state regardless of direction settings, which allows an output to be read back for verification. When a smart pin mode is selected, that pin's IN bit instead serves as a completion or event flag raised by the smart pin.
 
@@ -18049,26 +18186,26 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | DEBUG | `---` | — | — | — | — |
 | DECMOD | `0111001` | CZI | 2 | Modulus triggered | Result == 0 |
 | DECOD | `1001110` | — | 2 | — | — |
-| DIRC | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRH | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRL | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRNC | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRNOT | `1101011` | CZ | 2 | DIR bit | DIR bit |
-| DIRNZ | `1101011` | CZ | 2 | DIR bit | DIR bit |
+| DIRC | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRH | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRL | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRNC | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRNOT | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
+| DIRNZ | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
 | DIRRND | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
-| DIRZ | `1101011` | CZ | 2 | DIR bit | DIR bit |
+| DIRZ | `1101011` | CZ | 2 | Original DIRx base bit | Original DIRx base bit |
 | DJF | `1011011` | — | 2 or 4 | — | — |
 | DJNF | `1011011` | — | 2 or 4 | — | — |
 | DJNZ | `1011011` | — | 2 or 4 | — | — |
 | DJZ | `1011011` | — | 2 or 4 | — | — |
-| DRVC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVH | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVL | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVNC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVNOT | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| DRVNZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| DRVC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVH | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVL | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVNC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVNOT | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| DRVNZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | DRVRND | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
-| DRVZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| DRVZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | ENCOD | `0111100` | CZI | 2 | S != 0 | Result == 0 |
 | EXECF | `1101011` | — | 4 | — | — |
 | FBLOCK | `1100100` | — | 2 | — | — |
@@ -18076,14 +18213,14 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | FGES | `0011010` | CZI | 2 | limit enforced | Result == 0 |
 | FLE | `0011001` | CZI | 2 | limit enforced | Result == 0 |
 | FLES | `0011011` | CZI | 2 | limit enforced | Result == 0 |
-| FLTC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTH | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTL | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTNC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTNOT | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| FLTNZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| FLTC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTH | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTL | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTNC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTNOT | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| FLTNZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | FLTRND | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
-| FLTZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| FLTZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | GETBRK | `1101011` | CZ | 2 | — | — |
 | GETBYTE | `1000111` | — | 2 | — | — |
 | GETCT | `1101011` | C | 2 | --- | — |
@@ -18168,14 +18305,14 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | NOT | `0110001` | CZI | 2 | !S[31] | Result == 0 |
 | ONES | `0111101` | CZI | 2 | Result is odd | Result == 0 |
 | OR | `0101010` | CZI | 2 | Parity of Result | Result == 0 |
-| OUTC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTH | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTL | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTNC | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTNOT | `1101011` | CZ | 2 | OUT bit | OUT bit |
-| OUTNZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| OUTC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTH | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTL | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTNC | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTNOT | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
+| OUTNZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | OUTRND | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
-| OUTZ | `1101011` | CZ | 2 | OUT bit | OUT bit |
+| OUTZ | `1101011` | CZ | 2 | Original OUTx base bit | Original OUTx base bit |
 | POLLATN | `1101011` | — | 2 | ATN Event | ATN Event |
 | POLLCT1 | `1101011` | — | 2 | CT1 Event | CT1 Event |
 | POLLCT2 | `1101011` | — | 2 | CT2 Event | CT2 Event |
@@ -18360,7 +18497,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
   - Hub synchronization (variable wait for hub access)
   - Operation parameters (CORDIC solver iterations, streamer operations)
   - Memory location (cog vs. LUT vs. hub execution)
-- The `*` symbol indicates hub memory access with variable timing
+- The `*` symbol indicates hub memory access with variable timing; add 1 clock to each `*` instruction (CALLA, CALLB, POPA, POPB, PUSHA, PUSHB, RDLONG, RDWORD, RETA, RETB, WMLONG, WRLONG, WRWORD) when the access crosses a hub long
 - See Part II (Instruction Reference) for complete encoding details and all variants
 - ASMCLK is a pseudo-instruction (macro) and DEBUG is a debug directive; neither has a single fixed hardware encoding (ASMCLK expands to HUBSET/WAITX, DEBUG emits a debug call under -d)
 
@@ -18369,28 +18506,28 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 
 This appendix is the **canonical reference** for all P2 condition codes. The EEEE field (bits 31-28) of every instruction specifies one of sixteen conditions that control whether the instruction executes based on the current C and Z flag states.
 
-Every instruction can be made conditional by prefixing it with one of these condition mnemonics. When the condition is false, the instruction does not execute but still consumes its normal execution time (2 clock cycles for most instructions).
+Every instruction can be made conditional by prefixing it with one of these condition mnemonics. When the condition is false, the instruction does not execute but still moves through the pipeline, taking two clock cycles.
 
 
 ## B.1 Complete Condition Code Table
 
 | EEEE | Primary Mnemonic | Condition | All Aliases |
 |:-----|:-----------------|:----------|:------------|
-| 0000 | _RET_ | Always + return | IF_RET |
-| 0001 | IF_NC_AND_NZ | C=0 AND Z=0 | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 |
-| 0010 | IF_NC_AND_Z | C=0 AND Z=1 | IF_Z_AND_NC, IF_01 |
-| 0011 | IF_NC | C=0 | IF_GE, IF_AE, IF_0X |
-| 0100 | IF_C_AND_NZ | C=1 AND Z=0 | IF_NZ_AND_C, IF_10 |
-| 0101 | IF_NZ | Z=0 | IF_NE, IF_X0 |
-| 0110 | IF_C_NE_Z | C!=Z | IF_Z_NE_C, IF_DIFF |
-| 0111 | IF_NC_OR_NZ | C=0 OR Z=0 | IF_NZ_OR_NC, IF_NOT_11 |
-| 1000 | IF_C_AND_Z | C=1 AND Z=1 | IF_Z_AND_C, IF_11 |
-| 1001 | IF_C_EQ_Z | C=Z | IF_Z_EQ_C, IF_SAME |
-| 1010 | IF_Z | Z=1 | IF_E, IF_X1 |
-| 1011 | IF_NC_OR_Z | C=0 OR Z=1 | IF_Z_OR_NC, IF_NOT_10 |
-| 1100 | IF_C | C=1 | IF_LT, IF_B, IF_1X |
-| 1101 | IF_C_OR_NZ | C=1 OR Z=0 | IF_NZ_OR_C, IF_NOT_01 |
-| 1110 | IF_C_OR_Z | C=1 OR Z=1 | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 |
+| 0000 | _RET_ | Always + return | — |
+| 0001 | IF_NC_AND_NZ | C == 0 AND Z == 0 | IF_NZ_AND_NC, IF_GT, IF_A, IF_00 |
+| 0010 | IF_NC_AND_Z | C == 0 AND Z == 1 | IF_Z_AND_NC, IF_01 |
+| 0011 | IF_NC | C == 0 | IF_GE, IF_AE, IF_0X |
+| 0100 | IF_C_AND_NZ | C == 1 AND Z == 0 | IF_NZ_AND_C, IF_10 |
+| 0101 | IF_NZ | Z == 0 | IF_NE, IF_X0 |
+| 0110 | IF_C_NE_Z | C != Z | IF_Z_NE_C, IF_DIFF |
+| 0111 | IF_NC_OR_NZ | C == 0 OR Z == 0 | IF_NZ_OR_NC, IF_NOT_11 |
+| 1000 | IF_C_AND_Z | C == 1 AND Z == 1 | IF_Z_AND_C, IF_11 |
+| 1001 | IF_C_EQ_Z | C == Z | IF_Z_EQ_C, IF_SAME |
+| 1010 | IF_Z | Z == 1 | IF_E, IF_X1 |
+| 1011 | IF_NC_OR_Z | C == 0 OR Z == 1 | IF_Z_OR_NC, IF_NOT_10 |
+| 1100 | IF_C | C == 1 | IF_LT, IF_B, IF_1X |
+| 1101 | IF_C_OR_NZ | C == 1 OR Z == 0 | IF_NZ_OR_C, IF_NOT_01 |
+| 1110 | IF_C_OR_Z | C == 1 OR Z == 1 | IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00 |
 | 1111 | IF_ALWAYS | Always | — |
 
 
@@ -18404,12 +18541,12 @@ After a comparison instruction (CMP or CMPS), condition aliases express relation
 
 | Relationship | Magnitude Style | Arithmetic Style | Primary | Flag State |
 |:-------------|:----------------|:-----------------|:--------|:-----------|
-| Greater than | IF_A (Above) | IF_GT (Greater Than) | IF_NC_AND_NZ | C=0, Z=0 |
-| Greater or equal | IF_AE (Above or Equal) | IF_GE (Greater or Equal) | IF_NC | C=0 |
-| Less than | IF_B (Below) | IF_LT (Less Than) | IF_C | C=1 |
-| Less or equal | IF_BE (Below or Equal) | IF_LE (Less or Equal) | IF_C_OR_Z | C=1 OR Z=1 |
-| Equal | IF_E | IF_E | IF_Z | Z=1 |
-| Not equal | IF_NE | IF_NE | IF_NZ | Z=0 |
+| Greater than | IF_A (Above) | IF_GT (Greater Than) | IF_NC_AND_NZ | C == 0, Z == 0 |
+| Greater or equal | IF_AE (Above or Equal) | IF_GE (Greater or Equal) | IF_NC | C == 0 |
+| Less than | IF_B (Below) | IF_LT (Less Than) | IF_C | C == 1 |
+| Less or equal | IF_BE (Below or Equal) | IF_LE (Less or Equal) | IF_C_OR_Z | C == 1 OR Z == 1 |
+| Equal | IF_E | IF_E | IF_Z | Z == 1 |
+| Not equal | IF_NE | IF_NE | IF_NZ | Z == 0 |
 
 **Magnitude terminology** (A = Above, B = Below) reads naturally with unsigned values like addresses, counts, and sizes.
 
@@ -18443,8 +18580,8 @@ Express logical relationships between flag states:
 | IF_SAME | C equals Z | IF_C_EQ_Z |
 | IF_DIFF | C differs from Z | IF_C_NE_Z |
 | IF_NOT_00 | Not both clear | IF_C_OR_Z |
-| IF_NOT_01 | Not (C=0, Z=1) | IF_C_OR_NZ |
-| IF_NOT_10 | Not (C=1, Z=0) | IF_NC_OR_Z |
+| IF_NOT_01 | Not (C == 0, Z == 1) | IF_C_OR_NZ |
+| IF_NOT_10 | Not (C == 1, Z == 0) | IF_NC_OR_Z |
 | IF_NOT_11 | Not both set | IF_NC_OR_NZ |
 
 ### B.2.4 Commutative Forms
@@ -18529,10 +18666,10 @@ Both SKIP and SKIPF can be combined with `_RET_` to branch before a skip pattern
 
 The `_RET_` prefix adds overhead to the base instruction timing:
 
-| Execution Mode | Additional Cycles |
-|:---------------|:------------------|
-| Cog/LUT | +2 cycles |
-| Hub | +11 to +18 cycles |
+| Return Target | Timing |
+|:--------------|:-------|
+| Cog/LUT address | +2 cycles (a 2-clock instruction with `_RET_` takes 4) |
+| Hub address | The return is a branch to a hub address, which takes at least 13 clock cycles in all (one more if the target is not long-aligned) |
 
 ### B.3.7 Single-Instruction Subroutines
 
@@ -18554,10 +18691,10 @@ This is significantly faster than a separate instruction followed by RET (which 
 When a conditional instruction's condition is false, the instruction does not execute but still consumes 2 clock cycles. This provides deterministic timing—critical for real-time operations:
 
 ```pasm2
-                cmp     a, b            wcz     ' 2 cycles - always
-        if_z    mov     result, #1              ' 2 cycles - if Z=1 or not
-        if_nz   mov     result, #0              ' 2 cycles - if Z=0 or not
-                                                ' Total: always 6 cycles
+                cmp     a, b            wcz    ' 2 cycles - always
+        if_z    mov     result, #1             ' 2 cycles - if Z == 1 or not
+        if_nz   mov     result, #0             ' 2 cycles - if Z == 0 or not
+                                               ' Total: always 6 cycles
 ```
 
 This timing predictability enables branchless programming where instruction timing remains constant regardless of data values.
@@ -18731,9 +18868,9 @@ Branch instructions control program flow by modifying the program counter. This 
 |-------------|-------------|
 | [TJF](#tjf) | Test D and jump to S if D is full ($FFFF_FFFF) |
 | [TJNF](#tjnf) | Test D and jump to S if D is not full |
-| [TJNS](#tjns) | Test D and jump to S if D is not signed (D[31] = 0) |
+| [TJNS](#tjns) | Test D and jump to S if D is not signed (D[31] == 0) |
 | [TJNZ](#tjnz) | Test D and jump to S if D is not zero |
-| [TJS](#tjs) | Test D and jump to S if D is signed (D[31] = 1) |
+| [TJS](#tjs) | Test D and jump to S if D is signed (D[31] == 1) |
 | [TJV](#tjv) | Test D and jump to S if D overflowed |
 | [TJZ](#tjz) | Test D and jump to S if D is zero |
 | [DJF](#djf) | Decrement D and jump to S if result is $FFFF_FFFF |
@@ -19239,8 +19376,8 @@ These extended effects enable testing multiple bits or pins and accumulating the
 | 507 | $1FB | DIRB | R/W | Pin direction 32-63 |
 | 508 | $1FC | OUTA | R/W | Pin output 0-31 |
 | 509 | $1FD | OUTB | R/W | Pin output 32-63 |
-| 510 | $1FE | INA | R/O | Pin input 0-31 |
-| 511 | $1FF | INB | R/O | Pin input 32-63 |
+| 510 | $1FE | INA | R/O | Pin input 0-31 (overlaid as IJMP0, R/W, during a debug ISR) |
+| 511 | $1FF | INB | R/O | Pin input 32-63 (overlaid as IRET0, R/W, during a debug ISR) |
 
 *For complete documentation including memory map diagram, usage examples, and non-memory-mapped registers, see Part II: Special Registers.*
 
@@ -19478,10 +19615,10 @@ COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COG
 #### Usage
 ```pasm2
 ' Start specific cog with code load
-        COGINIT #COGEXEC+1, #$100   ' Load and start Cog 1 from Hub RAM $100
+        COGINIT #COGEXEC+1, #$100   ' Load and start cog 1 from hub RAM $100
 
-' Start Cog 5 with code at label
-        COGINIT #COGEXEC+5, @code   ' Load and start Cog 5 from @code
+' Start cog 5 with code at label
+        COGINIT #COGEXEC+5, @code   ' Load and start cog 5 from @code
 ```
 
 #### Syntax
@@ -19525,9 +19662,9 @@ HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COG
 #### Usage
 ```pasm2
 ' Start specific cog with hub execution
-        COGINIT #HUBEXEC+1, ##$400   ' Cog 1 from Hub RAM $400
+        COGINIT #HUBEXEC+1, ##$400   ' Cog 1 from hub RAM $400
 
-' Start Cog 5 with hub execution at label
+' Start cog 5 with hub execution at label
         COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
 ```
 
@@ -19841,14 +19978,17 @@ For a DEBUG statement to produce output, both conditions must be met: the statem
 
 ```spin2
 CON
-  DEBUG_COGS = %00000011      ' Only Cogs 0 and 1 produce output
+  DEBUG_COGS = %00000011      ' Only cogs 0 and 1 produce output
 
-DAT
-        org
-entry   debug("From Cog 0")           ' Output appears
-        cogspin(NEWCOG, worker, @stack)
+VAR
+  long  stack[64]
 
-worker  debug("From worker")          ' Output only if on Cog 0 or 1
+PUB main()
+  debug("From cog 0")                   ' Output appears
+  cogspin(NEWCOG, worker(), @stack)     ' The worker starts on cog 1
+
+PRI worker()
+  debug("From worker")                  ' Output appears: cog 1 is enabled
 ```
 
 #### Notes
@@ -19925,7 +20065,9 @@ Enables timestamps in debug messages.
 
 #### Description
 
-DEBUG_TIMESTAMP enables timing information in all debug output. When defined, each debug message includes a timestamp relative to program start. This aids timing analysis and performance profiling by showing when events occur.
+DEBUG_TIMESTAMP enables timing information in all debug output. When defined, each debug message is time-stamped with the 64-bit system counter (CT) value. This aids timing analysis and performance profiling by showing when events occur.
+
+[Rev C]{.silicon-note topic="DEBUG_TIMESTAMP stamp order"} The stamp is read from the sending cog's own copy of the counter. A cog whose group of four (cogs 0–3 or 4–7) had no cog running when the counter's lower half wrapped holds a copy a whole number of wraps (21.47 s each at 200 MHz) behind, so its messages are stamped early and print out of time order. The cure is the one for `GETCT WC` (see [GETCT](#getct)).
 
 #### Usage
 
@@ -19933,11 +20075,10 @@ DEBUG_TIMESTAMP enables timing information in all debug output. When defined, ea
 CON
   DEBUG_TIMESTAMP = TRUE
 
-DAT
-        org
-entry   debug("Started")              ' Output includes timestamp
-        waitms(100)
-        debug("After delay")          ' Timestamp shows ~100ms elapsed
+PUB main()
+  debug("Started")                      ' Output includes timestamp
+  waitms(100)
+  debug("After delay")                  ' Timestamp is ~100 ms later
 ```
 
 #### Notes
@@ -20103,6 +20244,9 @@ CON
 PUB main()
   ' Debugger breaks here before any code executes
   initialize()
+
+PRI initialize()
+  waitms(1)
 ```
 
 #### Notes
@@ -20144,8 +20288,14 @@ DEBUG_COGINIT instructs the debugger to trigger a breakpoint whenever a COGINIT 
 CON
   DEBUG_COGINIT               ' Break on every cog initialization
 
+VAR
+  long  stack[64]
+
 PUB main()
   cogspin(NEWCOG, worker(), @stack)   ' Debugger breaks here
+
+PRI worker()
+  repeat
 ```
 
 #### Notes
@@ -20283,10 +20433,12 @@ Constants are combined using OR operations to build the complete configuration:
 | P_AND_AB | %0000_0000_001_0000000000000_00_00000_0 | A AND B → A, pass B |
 | P_OR_AB | %0000_0000_010_0000000000000_00_00000_0 | A OR B → A, pass B |
 | P_XOR_AB | %0000_0000_011_0000000000000_00_00000_0 | A XOR B → A, pass B |
-| P_FILT0_AB | %0000_0000_100_0000000000000_00_00000_0 | Filter A and B (2-clock sample) |
-| P_FILT1_AB | %0000_0000_101_0000000000000_00_00000_0 | Filter A and B (3-clock sample) |
-| P_FILT2_AB | %0000_0000_110_0000000000000_00_00000_0 | Filter A and B (5-clock sample) |
-| P_FILT3_AB | %0000_0000_111_0000000000000_00_00000_0 | Filter A and B (8-clock sample) |
+| P_FILT0_AB | %0000_0000_100_0000000000000_00_00000_0 | Filter A and B with the global filt0 setting (reset default: 2 flip-flops, tap 0) |
+| P_FILT1_AB | %0000_0000_101_0000000000000_00_00000_0 | Filter A and B with the global filt1 setting (reset default: 3 flip-flops, tap 5) |
+| P_FILT2_AB | %0000_0000_110_0000000000000_00_00000_0 | Filter A and B with the global filt2 setting (reset default: 5 flip-flops, tap 19) |
+| P_FILT3_AB | %0000_0000_111_0000000000000_00_00000_0 | Filter A and B with the global filt3 setting (reset default: 8 flip-flops, tap 22) |
+
+The four filter settings are global to the chip, shared by every smart pin; each is set with `HUBSET` (length 0..3 for 2, 3, 5 or 8 flip-flops, and a tap 0..31 of the free-running counter).
 
 
 
@@ -20403,7 +20555,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_TT_01 | %0000_0000_000_0000000000000_01_00000_0 | TT = %01 |
 | P_TT_10 | %0000_0000_000_0000000000000_10_00000_0 | TT = %10 |
 | P_TT_11 | %0000_0000_000_0000000000000_11_00000_0 | TT = %11 |
-| P_OE | %0000_0000_000_0000000000000_01_00000_0 | Output enable in smart pin mode |
+| P_OE | %0000_0000_000_0000000000000_01_00000_0 | Enable output in smart pin mode, regardless of DIR |
 | P_CHANNEL | %0000_0000_000_0000000000000_01_00000_0 | Enable DAC channel (non-smart mode) |
 | P_BITDAC | %0000_0000_000_0000000000000_10_00000_0 | Enable BITDAC (non-smart mode) |
 
@@ -20500,7 +20652,7 @@ Constants are combined using OR operations to build the complete configuration:
 ' Configure pin 32 for ADC with 10x gain
         mov     mode, ##P_ADC | P_ADC_10X
         wrpin   mode, #32
-        wxpin   ##14, #32           ' 14-bit resolution
+        wxpin   #%00_1101, #32      ' SINC2 sampling, 8192-clock period
         dirh    #32                 ' DIR high releases the reset
 ```
 
@@ -20526,12 +20678,12 @@ Constants are combined using OR operations to build the complete configuration:
 
 ## Combining Constants
 
-SmartPin constants are designed to be combined using OR operations. The bit fields are carefully arranged so constants from different categories don't conflict:
+SmartPin constants combine using OR operations: pick one constant from each group. The groups do not all have separate bits. The Sync mode, IN polarity and output polarity bits share positions with the ADC, DAC and level fields, and the P2 Documentation lists each for particular low-level pin modes only: Sync mode for Logic, Schmitt, Comparator and Level modes; IN polarity for Logic, Schmitt and Comparator modes; output polarity and drive strength for Logic, Schmitt, Comparator and ADC modes.
 
 ```pasm2
-' Complex config: Async TX, inverted, fast drive
-        mov     mode, ##P_ASYNC_TX | P_OE | P_INVERT_OUTPUT
-        or      mode, ##P_HIGH_FAST | P_LOW_FAST
+' Complex config: Schmitt A, synchronous, inverted IN and output
+        mov     mode, ##P_SCHMITT_A | P_SYNC_IO | P_INVERT_IN
+        or      mode, ##P_INVERT_OUTPUT | P_HIGH_FAST | P_LOW_1K5
         wrpin   mode, pin
 ```
 
@@ -20781,6 +20933,8 @@ That is the opposite of what the ADC sampling modes above require, and the two a
 | X_DDS_GOERTZEL_SINC1 | %1111_0000_0000_0111 << 16 | DDS/Goertzel with SINC1 filter |
 | X_DDS_GOERTZEL_SINC2 | %1111_0000_1000_0111 << 16 | DDS/Goertzel with SINC2 filter |
 
+SINC2 needs a constant iteration count per Goertzel cycle: a window one clock longer or shorter than its neighbours corrupts that sample and the next. Start each measurement with `XZERO`, which holds one window length.
+
 
 
 ## Control Flags
@@ -20948,11 +21102,13 @@ Streamer mode and control flags are combined using OR:
 
 # Appendix H: Reserved Words Reference
 
-This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers cannot be used as user-defined labels, symbols, or variable names. Attempting to use a reserved word as a label will result in an assembly error.
+This appendix lists all reserved words recognized by the Propeller 2 compiler. These identifiers are reserved and should not be used as user-defined labels, symbols, or variable names. Using a reserved word as a label usually results in an assembly error; a few of the newer symbols (GRAY, for example) are currently accepted as labels, but they remain reserved, so do not use them.
+
+The nineteen `DEBUG_*` configuration names are reserved and counted below. A program uses them by declaring them in a `CON` block to configure DEBUG.
 
 **Important:** Since Spin2 and PASM2 share a single compiler, **all reserved words from both languages apply** regardless of whether the source is pure PASM2 or mixed Spin2/PASM2 code.
 
-**Total Reserved Words: 859+** (456 PASM2 + 403 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
+**Total Reserved Words: 864** (498 PASM2 + 366 Spin2; P_*/X_* hardware constants add ~194 more — see Grand Total below)
 
 ## Quick Reference Index
 
@@ -20991,13 +21147,14 @@ CRCBIT      CRCNIB      CYAN
 
 ### D
 ```
-DAT                DEBUG              DEBUG_BAUD         DEBUG_COGS
-DEBUG_COGINIT      DEBUG_DELAY        DEBUG_DISABLE      DEBUG_DISPLAY_LEFT
-DEBUG_DISPLAY_TOP  DEBUG_HEIGHT       DEBUG_LEFT         DEBUG_LOG_SIZE
-DEBUG_MAIN         DEBUG_MASK         DEBUG_PIN          DEBUG_PIN_RX
-DEBUG_PIN_TX       DEBUG_TIMESTAMP    DEBUG_TOP          DEBUG_WIDTH
-DEBUG_WINDOWS_OFF
-DECMOD      DECOD       DEPTH       DIRA        DIRB        DIRC
+DAT         DEBUG       DEBUG_BAUD  DEBUG_COGINIT
+DEBUG_COGS  DEBUG_DELAY DEBUG_DISABLE           DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP       DEBUG_HEIGHT            DEBUG_LEFT
+DEBUG_LOG_SIZE          DEBUG_MAIN  DEBUG_MASK  DEBUG_PIN
+DEBUG_PIN_RX            DEBUG_PIN_TX            DEBUG_TIMESTAMP
+DEBUG_TOP   DEBUG_WIDTH DEBUG_WINDOWS_OFF
+DECMOD      DECOD       DEPTH       DIRA
+DIRB        DIRC
 DIRH        DIRL        DIRNC       DIRNOT      DIRNZ
 DIRRND      DIRZ        DITTO       DJF         DJNF        DJNZ
 DJZ         DLY         DOT         DOTSIZE     DRVC        DRVH
@@ -21016,17 +21173,17 @@ EVENT_XMT   EVENT_XRL   EVENT_XRO   EXECF
 ```
 FABS        FALSE       FBLOCK      FDEC        FDEC_       FDEC_ARRAY
 FDEC_ARRAY_ FDEC_REG_ARRAY          FDEC_REG_ARRAY_         FFT
-FGE         FGES        FILE        FIT         FLE         FLES
-FLOAT       FLTC        FLTH        FLTL        FLTNC       FLTNOT
-FLTNZ       FLTRND      FLTZ        FRAC        FROM        FSQRT
-FVAR        FVARS
+FGE         FGES        FIELD       FILE        FIT         FLE
+FLES        FLOAT       FLTC        FLTH        FLTL        FLTNC
+FLTNOT      FLTNZ       FLTRND      FLTZ        FRAC        FROM
+FSQRT       FVAR        FVARS
 ```
 
 ### G
 ```
 GETBRK      GETBYTE     GETCRC      GETCT       GETMS       GETNIB
 GETPTR      GETQX       GETQY       GETREGS     GETRND      GETSCP
-GETSEC      GETWORD     GETXACC     GREEN       GREY
+GETSEC      GETWORD     GETXACC     GRAY        GREEN       GREY
 ```
 
 ### H
@@ -21085,8 +21242,8 @@ MUXNITS     MUXNZ       MUXQ        MUXZ
 ### N
 ```
 NAN         NEG         NEGC        NEGNC       NEGNZ       NEGX
-NEGZ        NEWCOG      NEXT        NIXINT1     NIXINT2     NIXINT3
-NOP         NOT
+NEGZ        NEWCOG      NEWTASK     NEXT        NIXINT1     NIXINT2
+NIXINT3     NOP         NOT
 ```
 
 ### O
@@ -21152,7 +21309,8 @@ SHEX_BYTE   SHEX_BYTE_  SHEX_BYTE_ARRAY         SHEX_BYTE_ARRAY_
 SHEX_LONG   SHEX_LONG_  SHEX_LONG_ARRAY         SHEX_LONG_ARRAY_
 SHEX_REG_ARRAY          SHEX_REG_ARRAY_         SHEX_WORD   SHEX_WORD_
 SHEX_WORD_ARRAY         SHEX_WORD_ARRAY_        SHL         SHR
-SIGNED      SIGNX       SIZE        SKIP        SKIPF       SPACING
+SIGNED      SIGNX       SIZE        SIZEOF      SKIP        SKIPF
+SPACING
 SPECTRO     SPLITB      SPLITW      SPRITE      SPRITEDEF   SQRT
 STALLI      STEP        STRCOMP     STRCOPY     STRING      STRSIZE
 STRUCT      SUB         SUBR        SUBS        SUBSX       SUBX
@@ -21161,11 +21319,12 @@ SUMC        SUMNC       SUMNZ       SUMZ
 
 ### T
 ```
-TERM        TEST        TESTB       TESTBN      TESTN       TESTP
-TESTPN      TEXT        TEXTANGLE   TEXTSIZE    TEXTSTYLE   TITLE
-TJF         TJNF        TJNS        TJNZ        TJS         TJV
-TJZ         TO          TRACE       TRGINT1     TRGINT2     TRGINT3
-TRIGGER     TRUE        TRUNC
+TASKCHK     TASKCONT    TASKHALT    TASKHLT     TASKID      TASKNEXT
+TASKSPIN    TASKSTOP    TERM        TEST        TESTB       TESTBN
+TESTN       TESTP       TESTPN      TEXT        TEXTANGLE   TEXTSIZE
+TEXTSTYLE   THISTASK    TITLE       TJF         TJNF        TJNS
+TJNZ        TJS         TJV         TJZ         TO          TRACE
+TRGINT1     TRGINT2     TRGINT3     TRIGGER     TRUE        TRUNC
 ```
 
 ### U
@@ -21219,14 +21378,15 @@ _Z_NE_C     _Z_OR_C     _Z_OR_NC
 
 ## Categories
 
-Reserved words fall into six main categories:
+PASM2 reserved words fall into seven main categories:
 
 1. **Instruction Mnemonics** (358 words) - All instruction names
 2. **Assembly Directives** (21 words) - Block identifiers and assembly-time directives
 3. **Predefined Constants** (11 words) - Built-in constant values
 4. **Special Register Names** (16 words) - Special-purpose registers
-5. **Condition Keywords** (41 words) - Conditional execution prefixes
-6. **Effect Keywords** (9 words) - flag modification suffixes
+5. **Event Constants** (17 words) - Event and interrupt-source numbers
+6. **Condition Keywords** (66 words) - Conditional execution prefixes
+7. **Effect Keywords** (9 words) - flag modification suffixes
 
 
 
@@ -21322,7 +21482,7 @@ These keywords define the major sections of a Spin2/PASM2 source file:
 - **BYTE** - Reserve/initialize byte-sized data
 - **BYTEFIT** - Verify code fits in specified byte count
 - **DEBUG** - Insert debug statements (Spin2 feature)
-- **DITTO** - Repeat previous instruction encoding
+- **DITTO** - Repeat the lines up to `DITTO END` a given number of times; `$$` is the iteration index (Spin2 v50+)
 - **FIT** - Verify code fits in cog memory
 - **LONG** - Reserve/initialize long-sized data (32 bits)
 - **ORG** - Set assembly origin (cog address)
@@ -21342,7 +21502,7 @@ Built-in constants that can be used in assembly expressions:
 
 - **FALSE** - Boolean false value (`$00000000`, decimal 0)
 - **NEGX** - Most negative signed 32-bit value (`$80000000`, decimal -2147483648)
-- **PI** - Fixed-point pi value for CORDIC operations
+- **PI** - Single-precision floating-point pi (`$40490FDB`); not a CORDIC angle
 - **POSX** - Most positive signed 32-bit value (`$7FFFFFFF`, decimal 2147483647)
 - **TRUE** - Boolean true value (`$FFFFFFFF`, decimal -1)
 
@@ -21350,14 +21510,12 @@ Built-in constants that can be used in assembly expressions:
 
 Used with the COGINIT instruction to specify execution mode:
 
-- **COGEXEC** - Execute from cog RAM (base mode, `%0_0_0000`)
-- **COGEXEC_NEW** - Auto-select available cog, execute from cog RAM
-- **COGEXEC_NEW_PAIR** - Auto-select cog pair, execute from cog RAM
-- **HUBEXEC** - Execute from hub RAM (base mode, `%0_1_0000`)
-- **HUBEXEC_NEW** - Auto-select available cog, execute from hub RAM
-- **HUBEXEC_NEW_PAIR** - Auto-select cog pair, execute from hub RAM
-
-**Note:** The `_NEW` and `_NEW_PAIR` variants are bit patterns that modify the base `COGEXEC` and `HUBEXEC` constants for use with COGINIT's automatic cog selection feature.
+- **COGEXEC** - Execute from cog RAM (base mode, `%00_0000`; add the cog number to start a specific cog)
+- **COGEXEC_NEW** - Start an available cog, execute from cog RAM (`%01_0000`)
+- **COGEXEC_NEW_PAIR** - Start an available even/odd cog pair, execute from cog RAM (`%01_0001`)
+- **HUBEXEC** - Execute from hub RAM (base mode, `%10_0000`; add the cog number to start a specific cog)
+- **HUBEXEC_NEW** - Start an available cog, execute from hub RAM (`%11_0000`)
+- **HUBEXEC_NEW_PAIR** - Start an available even/odd cog pair, execute from hub RAM (`%11_0001`)
 
 
 
@@ -21393,7 +21551,19 @@ Always provide special functions when accessed:
 
 
 
-## Condition Keywords (41 words)
+## Event Constants (17 words)
+
+Event and interrupt-source numbers (0-15), PASM only. The values are those the P2 Documentation gives; EVENT_INT and INT_OFF share value 0:
+
+```
+EVENT_INT   INT_OFF     EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_SE1
+EVENT_SE2   EVENT_SE3   EVENT_SE4   EVENT_PAT   EVENT_FBW   EVENT_XMT
+EVENT_XFI   EVENT_XRO   EVENT_XRL   EVENT_ATN   EVENT_QMT
+```
+
+
+
+## Condition Keywords (66 words)
 
 Conditional execution prefixes (IF_xxx) that can be applied to any instruction. These test the C (Carry) and Z (Zero) flags:
 
@@ -21403,18 +21573,18 @@ These are the canonical condition names:
 
 - **IF_ALWAYS** - Always execute (EEEE=1111; this is the encoding used when no condition is specified)
 - **_RET_** - Execute instruction, then return if no branch (EEEE=0000; note: P1's IF_NEVER does NOT exist in P2)
-- **IF_C** - Execute if C=1
-- **IF_NC** - Execute if C=0
-- **IF_Z** - Execute if Z=1
-- **IF_NZ** - Execute if Z=0
-- **IF_C_AND_Z** - Execute if C=1 AND Z=1
-- **IF_C_AND_NZ** - Execute if C=1 AND Z=0
-- **IF_NC_AND_Z** - Execute if C=0 AND Z=1
-- **IF_NC_AND_NZ** - Execute if C=0 AND Z=0
-- **IF_C_OR_Z** - Execute if C=1 OR Z=1
-- **IF_C_OR_NZ** - Execute if C=1 OR Z=0
-- **IF_NC_OR_Z** - Execute if C=0 OR Z=1
-- **IF_NC_OR_NZ** - Execute if C=0 OR Z=0
+- **IF_C** - Execute if C == 1
+- **IF_NC** - Execute if C == 0
+- **IF_Z** - Execute if Z == 1
+- **IF_NZ** - Execute if Z == 0
+- **IF_C_AND_Z** - Execute if C == 1 AND Z == 1
+- **IF_C_AND_NZ** - Execute if C == 1 AND Z == 0
+- **IF_NC_AND_Z** - Execute if C == 0 AND Z == 1
+- **IF_NC_AND_NZ** - Execute if C == 0 AND Z == 0
+- **IF_C_OR_Z** - Execute if C == 1 OR Z == 1
+- **IF_C_OR_NZ** - Execute if C == 1 OR Z == 0
+- **IF_NC_OR_Z** - Execute if C == 0 OR Z == 1
+- **IF_NC_OR_NZ** - Execute if C == 0 OR Z == 0
 - **IF_C_EQ_Z** - Execute if C equals Z
 - **IF_C_NE_Z** - Execute if C not equal to Z
 
@@ -21446,11 +21616,7 @@ Convenient aliases for post-comparison conditional execution. Two equivalent ter
 - **IF_NZ_AND_NC** - Not zero and no carry (same as IF_NC_AND_NZ)
 - **IF_Z_AND_C** - Zero and carry (same as IF_C_AND_Z)
 
-### Special Return Condition (1)
-
-- **_RET_** - Always execute instruction, then return if no branch (no flag restore)
-
-### Symmetric Alternatives (9)
+### Symmetric Alternatives (7)
 
 Additional aliases that express the same conditions in reverse order:
 
@@ -21459,6 +21625,20 @@ Additional aliases that express the same conditions in reverse order:
 - **IF_Z_OR_NC** - Same as IF_NC_OR_Z
 - **IF_NZ_OR_C** - Same as IF_C_OR_NZ
 - **IF_NZ_OR_NC** - Same as IF_NC_OR_NZ
+- **IF_Z_EQ_C** - Same as IF_C_EQ_Z
+- **IF_Z_NE_C** - Same as IF_C_NE_Z
+
+### Bit-Pattern Conditions (28)
+
+`IF_00` to `IF_X1` name the C and Z pattern tested (`X` = either; `IF_00` is C == 0, Z == 0). `IF_0000` to `IF_1111` give the four-bit condition field value (`IF_0001` is IF_NC_AND_NZ):
+
+```
+IF_00       IF_01       IF_10       IF_11       IF_0X       IF_1X
+IF_X0       IF_X1       IF_NOT_00   IF_NOT_01   IF_NOT_10   IF_NOT_11
+IF_0000     IF_0001     IF_0010     IF_0011     IF_0100     IF_0101
+IF_0110     IF_0111     IF_1000     IF_1001     IF_1010     IF_1011
+IF_1100     IF_1101     IF_1110     IF_1111
+```
 
 **Note:** Many conditions have multiple valid names (aliases). For example, `IF_C`, `IF_B`, and `IF_LT` all represent the same condition code but provide semantic clarity depending on context.
 
@@ -21531,9 +21711,9 @@ byte_data       long  $0
 
 ## Summary
 
-The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
+The Propeller 2 compiler reserves **864 identifiers** across PASM2 and Spin2, counted from the lists in this appendix (each word counted once):
 
-**PASM2-Specific Reserved Words (456):**
+**PASM2-Specific Reserved Words (498):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
@@ -21541,29 +21721,29 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Directives | 21 | Block identifiers and assembly-time directives |
 | Constants | 11 | Predefined constant values |
 | Special Registers | 16 | Hardware-mapped registers |
-| Conditions | 41 | Conditional execution prefixes |
+| Event Constants | 17 | Event and interrupt-source numbers |
+| Conditions | 66 | Conditional execution prefixes |
 | Effects | 9 | Flag modification suffixes |
-| **PASM2 Subtotal** | **456** | |
+| **PASM2 Subtotal** | **498** | |
 
-**Spin2-Specific Reserved Words (403):**
+**Spin2-Specific Reserved Words (366):**
 
 | Category | Count | Purpose |
 |----------|-------|---------|
-| Language Keywords | 20 | Core Spin2 constructs |
-| DEBUG Parameters | 121 | Debug output formatting |
-| Graphics/Color | 34 | Color names and display |
+| Language Keywords | 22 | Core Spin2 constructs |
+| DEBUG Parameters | 121 | Debug output formatting and configuration |
+| Graphics/Color | 35 | Color names and display |
 | String/Data Methods | 22 | Memory/string manipulation |
 | Math/Conversion | 11 | Math functions |
-| Event Constants | 16 | Event source identifiers |
+| Task Methods and Constants | 10 | Multitasking |
 | Pin Methods | 14 | High-level pin control |
 | Condition Shortcuts | 32 | Underscore-prefixed conditions |
-| IF_ Variants | 32 | Extended condition patterns |
 | Shared Registers | 8 | PR0-PR7 communication |
-| System/I/O | 26 | System control methods |
+| System/I/O | 25 | System control methods |
 | Graphics Drawing | 31 | Graphics primitives |
 | Text/Display | 13 | Text rendering |
-| Lookup/Misc | 23 | Table lookup and other |
-| **Spin2 Subtotal** | **403** | |
+| Lookup/Misc | 22 | Table lookup and other |
+| **Spin2 Subtotal** | **366** | |
 
 **Hardware Constants (194+):**
 
@@ -21573,7 +21753,7 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 | Streamer (X_*) | ~78 | Streamer modes |
 | **Constants Subtotal** | **~194** | |
 
-**Grand Total: 1,053+ reserved identifiers**
+**Grand Total: 1,058+ reserved identifiers** (864 + 194)
 
 **Cross-References:**
 
@@ -21582,29 +21762,31 @@ The Propeller 2 compiler reserves **852+ identifiers** across PASM2 and Spin2:
 - **Appendix F** — smart pin mode constants (P_* symbols, approximately 116 constants)
 - **Appendix G** — streamer mode constants (X_* symbols, approximately 78 constants)
 
-**Note on P_* and X_* Constants:** The smart pin configuration constants (P_*) and streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's smart pins and streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 456-word count above, they are effectively reserved and cannot be used as user-defined symbols.
+**Note on P_* and X_* Constants:** The smart pin configuration constants (P_*) and streamer mode constants (X_*) are predefined symbols that function as reserved words when programming the P2's smart pins and streamer hardware. These are documented in their own appendices due to their specialized nature and extensive count. While not included in the 498-word PASM2 count above, they are effectively reserved and cannot be used as user-defined symbols.
 
 
 ## Spin2 Reserved Words
 
 Since the Propeller 2 uses a single compiler for both Spin2 and PASM2, **all Spin2 reserved words are also reserved in PASM2**. None of these identifiers can be used as labels, symbols, or variable names in assembly code, even in pure PASM2.
 
-**Total Spin2-Only Reserved Words: 403**
+**Total Spin2-Only Reserved Words: 366**
 
 The following sections list Spin2 reserved words organized by category.
 
 
 
-### Language Keywords (20 words)
+### Language Keywords (22 words)
 
 Core Spin2 language constructs (block names CON, DAT, VAR, PUB, PRI, OBJ are listed under PASM2 Assembly Directives):
 
 ```
 ABORT       CASE        CASE_FAST   ELSE        ELSEIF      ELSEIFNOT
-END         FROM        IF          IFNOT       NEXT        OTHER
-QUIT        REPEAT      RETURN      STRUCT      TO          UNTIL
-WHILE       WITH
+END         FIELD       FROM        IF          IFNOT       NEXT
+OTHER       QUIT        REPEAT      RETURN      SIZEOF      STRUCT
+TO          UNTIL       WHILE       WITH
 ```
+
+`FIELD[ptr]` is the variable alias for a field pointer; `SIZEOF(Structure)` returns a structure's size in bytes.
 
 **Note:** STRUCT requires Spin2 v45 or later; WITH is the REPEAT positive-count loop-counter binding (`REPEAT <count> WITH <var>`).
 
@@ -21612,16 +21794,7 @@ WHILE       WITH
 
 ### DEBUG Command Parameters (121 words)
 
-Debug output formatting commands and their variants:
-
-**Configuration Symbols:**
-```
-DEBUG_BAUD          DEBUG_COGS          DEBUG_COGINIT       DEBUG_DELAY
-DEBUG_DISABLE       DEBUG_DISPLAY_LEFT  DEBUG_DISPLAY_TOP   DEBUG_HEIGHT
-DEBUG_LEFT          DEBUG_LOG_SIZE      DEBUG_MAIN          DEBUG_MASK
-DEBUG_PIN           DEBUG_PIN_RX        DEBUG_PIN_TX        DEBUG_TIMESTAMP
-DEBUG_TOP           DEBUG_WIDTH         DEBUG_WINDOWS_OFF
-```
+Debug output formatting commands and their variants, then the nineteen `DEBUG_*` configuration names. A program uses a `DEBUG_*` name by declaring it in a `CON` block.
 
 **Signed decimal (SDEC) variants:**
 ```
@@ -21677,16 +21850,27 @@ FDEC        FDEC_       FDEC_ARRAY       FDEC_ARRAY_      FDEC_REG_ARRAY
 FDEC_REG_ARRAY_
 ```
 
+**DEBUG configuration names (declared in a `CON` block):**
+```
+DEBUG_BAUD           DEBUG_COGINIT        DEBUG_COGS
+DEBUG_DELAY          DEBUG_DISABLE        DEBUG_DISPLAY_LEFT
+DEBUG_DISPLAY_TOP    DEBUG_HEIGHT         DEBUG_LEFT
+DEBUG_LOG_SIZE       DEBUG_MAIN           DEBUG_MASK
+DEBUG_PIN            DEBUG_PIN_RX         DEBUG_PIN_TX
+DEBUG_TIMESTAMP      DEBUG_TOP            DEBUG_WIDTH
+DEBUG_WINDOWS_OFF
+```
 
 
-### Graphics and Color Constants (34 words)
 
-Color names and graphics-related constants:
+### Graphics and Color Constants (35 words)
+
+Color names and graphics-related constants (`GRAY` and `GREY` are both recognized):
 
 ```
 BACKCOLOR   BLACK       BLUE        COLOR       CYAN        DEPTH
-GREEN       GREY        MAGENTA     OPACITY     ORANGE      RED
-WHITE       YELLOW
+GRAY        GREEN       GREY        MAGENTA     OPACITY     ORANGE
+RED         WHITE       YELLOW
 ```
 
 **HSV color conversion:**
@@ -21736,15 +21920,16 @@ QCOS        QSIN        ROUND       SQRT        TRUNC
 
 
 
-### Event Constants (16 words)
+### Task Methods and Constants (10 words)
 
-Event source identifiers for WAITSE and POLLSE:
+Multitasking methods, with the built-in symbols for their arguments (Spin2 v47):
 
 ```
-EVENT_ATN   EVENT_CT1   EVENT_CT2   EVENT_CT3   EVENT_FBW   EVENT_INT
-EVENT_PAT   EVENT_QMT   EVENT_SE1   EVENT_SE2   EVENT_SE3   EVENT_SE4
-EVENT_XFI   EVENT_XMT   EVENT_XRL   EVENT_XRO
+NEWTASK     TASKCHK     TASKCONT    TASKHALT    TASKHLT     TASKID
+TASKNEXT    TASKSPIN    TASKSTOP    THISTASK
 ```
+
+`NEWTASK` and `THISTASK` are the values -1 for use in `TASKSPIN` and in `TASKSTOP` and `TASKHALT`; `TASKHLT` is the register that holds the HALT bits (in reverse order).
 
 
 
@@ -21784,47 +21969,32 @@ These mnemonics are used with the MODCZ instruction to modify C and Z flags. Eac
 | Value | Binary | Mnemonic | Description |
 |-------|--------|----------|-------------|
 | 0 | 0000 | _CLR | Always clear (result = 0) |
-| 1 | 0001 | _NC_AND_NZ | C=0 AND Z=0 |
-| 2 | 0010 | _NC_AND_Z | C=0 AND Z=1 |
+| 1 | 0001 | _NC_AND_NZ | C == 0 AND Z == 0 |
+| 2 | 0010 | _NC_AND_Z | C == 0 AND Z == 1 |
 | 3 | 0011 | _NC | Copy inverse of C (not C) |
-| 4 | 0100 | _C_AND_NZ | C=1 AND Z=0 |
+| 4 | 0100 | _C_AND_NZ | C == 1 AND Z == 0 |
 | 5 | 0101 | _NZ | Copy inverse of Z (not Z) |
 | 6 | 0110 | _C_NE_Z | C XOR Z (C not equal to Z) |
-| 7 | 0111 | _NC_OR_NZ | C=0 OR Z=0 (NAND) |
-| 8 | 1000 | _C_AND_Z | C=1 AND Z=1 (AND) |
+| 7 | 0111 | _NC_OR_NZ | C == 0 OR Z == 0 (NAND) |
+| 8 | 1000 | _C_AND_Z | C == 1 AND Z == 1 (AND) |
 | 9 | 1001 | _C_EQ_Z | NOT(C XOR Z) (C equals Z) |
 | 10 | 1010 | _Z | Copy Z |
-| 11 | 1011 | _NC_OR_Z | C=0 OR Z=1 |
+| 11 | 1011 | _NC_OR_Z | C == 0 OR Z == 1 |
 | 12 | 1100 | _C | Copy C |
-| 13 | 1101 | _C_OR_NZ | C=1 OR Z=0 |
-| 14 | 1110 | _C_OR_Z | C=1 OR Z=1 (OR) |
+| 13 | 1101 | _C_OR_NZ | C == 1 OR Z == 0 |
+| 14 | 1110 | _C_OR_Z | C == 1 OR Z == 1 (OR) |
 | 15 | 1111 | _SET | Always set (result = 1) |
 
 **Common MODCZ Usage:**
 ```pasm2
-        MODCZ   _CLR, _SET      ' Clear C, set Z
-        MODCZ   _SET, _CLR      ' Set C, clear Z
-        MODCZ   _C, _Z          ' C and Z unchanged (copy to themselves)
-        MODCZ   _Z, _C          ' Swap C and Z values
-        MODCZ   _NC, _NZ        ' Invert both flags
+        MODCZ   _CLR, _SET  WCZ ' Clear C, set Z
+        MODCZ   _SET, _CLR  WCZ ' Set C, clear Z
+        MODCZ   _C, _Z      WCZ ' C and Z unchanged (copy to themselves)
+        MODCZ   _Z, _C      WCZ ' Swap C and Z values
+        MODCZ   _NC, _NZ    WCZ ' Invert both flags
 ```
 
 **Cross-Reference:** See Part II MODCZ instruction for complete behavior description.
-
-
-
-### Additional IF_ Condition Variants (32 words)
-
-Extended condition code patterns for bit-testing:
-
-```
-IF          IF_00       IF_0000     IF_0001     IF_0010     IF_0011
-IF_01       IF_0100     IF_0101     IF_0110     IF_0111     IF_0X
-IF_10       IF_1000     IF_1001     IF_1010     IF_1011     IF_11
-IF_1100     IF_1101     IF_1110     IF_1111     IF_1X       IF_NOT_00
-IF_NOT_01   IF_NOT_10   IF_NOT_11   IF_X0       IF_X1       IF_Z_EQ_C
-IF_Z_NE_C   IFNOT
-```
 
 
 
@@ -21839,16 +22009,16 @@ PR6         PR7
 
 
 
-### System and I/O Methods (26 words)
+### System and I/O Methods (25 words)
 
-System control and I/O operations (FILE is listed under PASM2 Assembly Directives):
+System control and I/O operations (FILE is listed under PASM2 Assembly Directives; INT_OFF under Event Constants):
 
 ```
 CLKFREQ     CLKMODE     CLKSET      CLOSE       COGCHK      COGSPIN
-GETCRC      GETMS       GETREGS     GETSEC      INT_OFF     LOCKCHK
-NEWCOG      POLLCT      RECV        REG         REGEXEC     REGLOAD
-SEND        SETREGS     UPDATE      VARBASE     WAITCT      WAITMS
-WAITUS      WINDOW
+GETCRC      GETMS       GETREGS     GETSEC      LOCKCHK     NEWCOG
+POLLCT      RECV        REG         REGEXEC     REGLOAD     SEND
+SETREGS     UPDATE      VARBASE     WAITCT      WAITMS      WAITUS
+WINDOW
 ```
 
 
@@ -21880,15 +22050,15 @@ ZSTR_
 
 
 
-### Lookup and Miscellaneous (23 words)
+### Lookup and Miscellaneous (22 words)
 
-Table lookup and other Spin2 features:
+Table lookup and other Spin2 features (SQRT is listed under Math and Conversion Methods):
 
 ```
 ADDBITS     ADDPINS     ALT         ARCHIVE     CHANNEL     DLY
 FVAR        FVARS       LOOKDOWN    LOOKDOWNZ   LOOKUP      LOOKUPZ
 LSTR        LSTR_       MAG         MIDI        PRECISE     PRECOMPILE
-SET         SIGNED      SIZE        SQRT        STEP
+SET         SIGNED      SIZE        STEP
 ```
 
 
@@ -21947,13 +22117,13 @@ This glossary defines the terms used throughout the instruction encoding tables,
 ## Flag and State Terms
 
 **H / Hub Long**
-: A hub RAM long (4 bytes) used to store subroutine calling context states. This includes the C and Z flags plus the return address, allowing nested subroutine calls to preserve and restore processor state.
+: A hub RAM long (4 bytes) used to store subroutine calling context states. This includes the C and Z flags plus the return address, allowing nested subroutine calls to preserve and restore cog state.
 
 **I / Immediate flag**
 : When set (I=1), the S field contains a literal value rather than a register address. When clear (I=0), the S field is a register address and the instruction reads from that register. The `#` prefix in source code sets this bit.
 
 **K / Stack**
-: The 8-level hardware stack used for subroutine calls and temporary storage. On CALL, the stack stores C, Z, and PC (return address). Under the Spin2 interpreter, inline PASM may use only 5 of these levels. PUSH and POP provide general-purpose 32-bit value storage. Stack overflow/underflow wraps silently—there is no trap or error indication.
+: The 8-level hardware stack used for subroutine calls and temporary storage. On CALL, the stack stores C, Z, and PC (return address). Under the Spin2 interpreter, inline PASM may use only 5 of these levels. PUSH and POP provide general-purpose 32-bit value storage.
 
 **L / Literal flag**
 : When set (L=1), the D field contains a literal value rather than a register address. This is less common than immediate S operands and appears in specific instructions. The `#` prefix on the destination in source code sets this bit where valid.
@@ -22010,7 +22180,7 @@ This glossary defines the terms used throughout the instruction encoding tables,
 # Appendix J: Known Silicon Bugs {#appendix-j}
 :::
 
-This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P Rev B/C silicon.
+This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P silicon. Each entry gives the condition, the effect and a workaround that steps around it. The two entries below are the bugs the Parallax documentation lists; [Silicon Notes](#silicon-notes) at the end of this appendix points to every Rev C rule this manual states, including these two.
 
 ## ALTx/AUGx Interference with SETQ Block Transfers {#bug-altx-setq}
 
@@ -22018,7 +22188,7 @@ This appendix documents known hardware bugs in the P2 silicon that affect instru
 
 **Bug Description:**
 
-When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer, intervening ALTx, AUGS, or AUGD instructions cancel the special-case block-size PTRx delta calculation. The expected number of longs transfers correctly, but PTRx is modified according to normal PTRx expression behavior rather than the block-adjusted delta.
+When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer, an intervening ALTx, AUGS, or AUGD instruction cancels the special-case block-size PTRx delta. The expected number of longs transfers correctly, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. (Parallax names ALTx, AUGS and AUGD; ALTD was confirmed on silicon.)
 
 **Example of Bug:**
 
@@ -22030,29 +22200,31 @@ When SETQ or SETQ2 precedes RDLONG, WRLONG, or WMLONG to set up a block transfer
 
 **Expected Behavior:** After reading 16 longs with `ptra++`, ptra should advance by 64 bytes (16 × 4).
 
-**Actual Behavior:** ptra advances by only 4 bytes (1 long) because the ALTD instruction between SETQ and RDLONG cancels the block-size adjustment.
+**Actual Behavior:** ptra advances by only 4 bytes, the step `ptra++` takes on its own, because the ALTD instruction between SETQ and RDLONG cancels the block-size adjustment.
 
 **Workaround:**
 
-Manually adjust PTRx after the block transfer, or restructure code to avoid ALTx/AUGx instructions between SETQ/SETQ2 and the subsequent RDLONG/WRLONG/WMLONG.
+Nothing may sit between the SETQ or SETQ2 and the transfer it prepares: write them adjacent. The cost is the redirect, since the block's first register is then the one named in the transfer instruction's D field.
 
 ```pasm2
-        ' Workaround: Adjust pointer manually after transfer
+        ' Workaround: SETQ directly before the transfer
         SETQ    #16-1           ' Ready to load 16 longs
-        ALTD    start_reg       ' Alter start register
-        RDLONG  0, ptra++       ' ptra only advances by 4
-        ADD     ptra, #(16-1)*4 ' Manually add remaining 60 bytes
+        RDLONG  start_reg, ptra++ ' ptra advances by 64 bytes
 ```
 
 ---
 
 ## AUGS Leakage to Intervening ALTx Instructions {#bug-augs-altx}
 
-**Affected Instructions:** AUGS, ALTD, ALTS, ALTR, and all ALTx variants
+**Affected Instructions:** AUGS, and every ALTx (ALTD, ALTS, ALTR and the others) with an immediate #S operand, including the one-operand form
 
 **Bug Description:**
 
-When AUGS precedes an instruction with an immediate #S operand (its intended target), intervening ALTx instructions that also have an immediate #S operand will consume the AUGS value without canceling it. Both the intervening ALTx and the intended target instruction receive the augmented value.
+When AUGS precedes an instruction with an immediate #S operand (its intended target), an intervening ALTx that also has an immediate #S operand takes the AUGS value without canceling it. Both the intervening ALTx and the intended target instruction receive the augmented value.
+
+The ALTx takes its base register from S[8:0], which the augment leaves unchanged, so the following instruction is still redirected to the register the program names. The ALTx's D register takes its auto-increment from S[17:9], and those bits now come from the AUGS value, so the D register (here `index`) silently moves by the sign-extended S[17:9].
+
+The one-operand form (`ALTD index`) is encoded with the immediate bit set, so it is affected too.
 
 **Example of Bug:**
 
@@ -22062,13 +22234,13 @@ When AUGS precedes an instruction with an immediate #S operand (its intended tar
         ADD     0-0, #$123      ' #$123 is augmented, cancels AUGS
 ```
 
-**Expected Behavior:** AUGS should only affect the ADD instruction's #$123 operand.
+**Expected Behavior:** AUGS should only affect the ADD instruction's #$123 operand, and `index` should stay as it was.
 
-**Actual Behavior:** AUGS affects both `#base` in the ALTD instruction AND `#$123` in the ADD instruction. The `#base` value becomes `#$FFFFF000 + base` (augmented), which is almost certainly not the intended behavior.
+**Actual Behavior:** AUGS affects both `#base` in the ALTD instruction AND `#$123` in the ADD instruction. The ALTD's S becomes `$FFFFF000 + base`. Its bits 17:9 are %1_1111_1000 (bits 17:12 set, bits 11:9 clear), which sign-extends to -8, so `index` moves by -8. The ADD still receives `$FFFFF123`.
 
 **Workaround:**
 
-Use a register instead of an immediate for the ALTx instruction's S operand when an AUGS is active.
+Use a register instead of an immediate for the ALTx instruction's S operand when an AUGS is active. The register holds the base in bits 8:0 and a zero auto-increment in bits 17:9.
 
 ```pasm2
         ' Workaround: Use register instead of immediate in ALTx
@@ -22078,16 +22250,27 @@ Use a register instead of an immediate for the ALTx instruction's S operand when
         ADD     0-0, #$123      ' Only ADD gets the augmented value
 ```
 
+An AUGD pending across an intervening immediate-S ALTx is not taken by it: the AUGD reaches its #D target. This was tested with one ALTx variant, ALTS.
+
 ---
 
 ## Summary Table
 
 | Bug | Trigger Condition | Consequence | Workaround |
 |-----|-------------------|-------------|------------|
-| ALTx cancels block PTRx delta | ALTx/AUGx between SETQ and RD/WR/WMLONG | PTRx advances by single-long delta instead of block delta | Manually adjust PTRx after transfer |
-| AUGS leaks to ALTx | ALTx with #S between AUGS and target | ALTx receives unintended augmented value | Use register for ALTx S operand |
+| ALTx cancels block PTRx delta | ALTx/AUGS/AUGD between SETQ/SETQ2 and a block RD/WR/WMLONG with a PTRx expression | PTRx takes the plain expression's step (+4 for `ptra++`) instead of the block step | Nothing between SETQ/SETQ2 and the transfer (keep them adjacent) |
+| AUGS leaks to ALTx | ALTx with #S between AUGS and its target | ALTx receives the augmented value; its D register moves by the sign-extended S[17:9] | Use a register for ALTx S operand |
 
 ---
 
 *These bugs are documented in the official Parallax P2 documentation and affect all P2X8C4M64P Rev B/C silicon.*
+
+---
+
+## Silicon Notes {#silicon-notes}
+
+A small **Rev C** tag in the text marks a rule about how the current silicon behaves, stated where you use the instruction it concerns. Each line below names one rule and points to it; the rule itself is stated only at its tag.
+
+::: silicon-note-index
+:::
 

@@ -593,7 +593,9 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer c
         RDLONG  buffer, ptra   ' Read 16 longs from hub
 ```
 
-**Pitfall (Silicon Bug):** Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} Intervening ALTx, AUGS, or AUGD instructions between SETQ and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ and the block transfer instruction.
+
+[Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} A SETQ block read started fewer than 16 clocks after a no-wait `RDFAST` (the SETQ counts toward the 16) can write one wrong long and leave the rest unwritten, overwrite cog registers outside its destination, or never finish. Use the waiting `RDFAST`, or space the block read 16 clocks after it (see [RDFAST](#rdfast)).
 
 
 ::: instrheader
@@ -626,7 +628,7 @@ Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transf
         RDLONG  0, ptra        ' Read 256 longs from hub into LUT
 ```
 
-**Pitfall (Silicon Bug):** Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ2 and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
+[Rev C]{.silicon-note topic="SETQ block transfer: nothing between SETQ and the transfer"} Same as SETQ—intervening ALTx, AUGS, or AUGD instructions between SETQ2 and RDLONG/WRLONG/WMLONG cancel the block-size PTRx delta calculation. Every long still transfers, but PTRx takes the plain expression's own step (+4 for `ptra++`, +12 for `ptra++[3]`) instead of the block step. Keep the SETQ2 and the transfer adjacent: avoid placing any ALTx or AUGx instruction between SETQ2 and the block transfer instruction.
 
 
 ::: instrheader
