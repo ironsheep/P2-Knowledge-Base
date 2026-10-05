@@ -1,5 +1,21 @@
 # P2 I/O & Smart Pins User Guide: Change Log
 
+## v1.0.11 (2026-10-05)
+
+**Trigger modes take Y after the enable, and a Rev C note on DAC-mode ADC feedback.**
+
+### Added
+
+- **Trigger modes take Y after the enable** (§4.8, §5.4): pulse, transition and async transmit start on the WYPIN that follows DIR
+- **Rev C notes on DAC-mode ADC feedback** (§10.6, §18.4): OUT runs the ADC only with TT bit 0 set (`P_OE`)
+
+### Fixed
+
+- **The pulse and transition quick examples enable before WYPIN** (Appendix F)
+- **The serial loopback test** (Appendix E) sets the bit period, enables both pins and reads the byte LSB-justified
+- **`WAITSE1 WC` writes only `C`** (§5.1); `WCZ` writes both
+- **Index: `P_CHANNEL`** points to Chapter 2 and Appendix B
+
 ## v1.0.10 (2026-09-10)
 
 **An input threshold is a fraction of the supply, and a pull-up is a driven pin.**

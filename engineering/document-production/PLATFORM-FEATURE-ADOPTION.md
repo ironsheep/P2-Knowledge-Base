@@ -41,7 +41,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | Document | Type | Metadata single-source | Rights metadata | Cross-ref filter | Generated example headers | Silicon notes ²⁸ |
 |---|---|:--:|:--:|:--:|:--:|:--:|
 | **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ | — |
-| **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | 🔧 |
+| **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ³³ |
 | **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | 🔧 |
 | **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | 🔧 |
 | **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |
@@ -597,6 +597,11 @@ raw LaTeX through untouched — no Lua filter can see inside it. Anything needin
 cross-reference must live in markdown, not in a raw block.
 
 ⁸ **Rights metadata (F-316) — proven on the returned v1.1.0 PDF 2026-08-22.** The PDF's `Keywords` now reads *"Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.; licensed under CC BY-SA 4.0"*, where every published PDF in the set previously carried **no** machine-readable rights at all. Fed per document from its own `request.json` — never a platform constant, because 17 documents are ISP + Parallax and `pnut-term-ts-user-guide` is ISP alone. Gated from here on by `audit-pdf-metadata.py --require-rights`, which verifies each declared value ROUND-TRIPPED into the artifact rather than merely that something rights-shaped is present. XMP `dc:rights` is not yet emitted (needs `hyperxmp`; unconfirmed in the Forge's TeX Live) — `Keywords` is the carrier today.
+
+³³ **I/O & Smart Pins — silicon notes proven on the released v1.0.11 PDF, 2026-10-05** (03:03 build, 397pp
+= prior). Two chips (DAC-mode ADC feedback: OUT runs the ADC only with TT bit 0 set) render inline on p161
+(§10.6) and p284 (§18.4), rendered and read; two notes, so no index. `p2kb-platform-silicon-notes` sits
+before tables in `request.json`.
 
 ³¹ **XBYTE Guide — all four proven on the released v1.1.1 PDF, 2026-10-05** (02:41 build, 115pp, prior
 114). **Metadata single-source + rights:** page 1 reads "October 2026", "Version 1.1.1" from `\DocDate`/
