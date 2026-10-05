@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-547`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-548`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -60,7 +60,20 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases (2026-10-04) — F-546
+## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/05) — F-546, F-547
+
+### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `CONFIRMED` (next KB release)
+Found 2026-10-05 re-verifying F-443 («#386»). `language/spin2/operators/op_addlt.yaml` (`+<`), `op_addgt.yaml`
+(`+>`), `op_addlteq.yaml` (`+<=`), `op_addgteq.yaml` (`+>=`), `op_lteqgt.yaml` (`<=>`) and `op_addlteqgt.yaml`
+(`+<=>`) each carry the one-line description `Signed/unsigned compare`, which tells an agent nothing about which.
+Spin2 v55 (`spin2-v55-text.txt:473-488`): `+<`, `+<=`, `+>=`, `+>` are **unsigned** less/less-or-equal/
+greater-or-equal/greater (return 0 or -1); `<=>` is a **signed** three-way comparison returning -1, 0 or 1, CON
+only. **`+<=>` is in no Parallax source and the compiler rejects it** (pnut-ts 1.55.8: `a = 3 +<=> 5` → "Expected a
+constant, unary operator, or (", while `a = 3 <=> 5` compiles). Its only origin is our own derived
+`engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:25, :164`, which is also where the
+"Signed/unsigned compare" label comes from. **Fix:** state each operator's signedness and return values from
+v55; delete `op_addlteqgt.yaml` (no fabricated names in the KB — redirect any `related:` that points to it
+to `op_lteqgt.yaml`, Sacred Rule #7); mark the derived v51 table's `+<=>` row as not a real operator.
 
 ### F-546 — `instruction_skipping.yaml`'s absolute-CALL rule cites only the Silicon Doc; EF-092 proves it on silicon — `CONFIRMED` (low; next KB release)
 `language/pasm2/concepts/instruction_skipping.yaml:112` (rule) and `:121` (its source line). EF-092
@@ -396,7 +409,7 @@ removed fabricated electricals, and 27 of its 48 hunks were delete-then-repopula
 inside the same file); it took four real facts with it. All four were confirmed verbatim in sources
 already held, so restoring them was transcription, not research.
 
-### F-454 — `edge-standard-module.yaml` lost its revision history, leaving a VIN maximum that destroys Rev A/B boards — `RESOLVED — applied 2026-09-22`
+### F-454 — `edge-standard-module.yaml` lost its revision history, leaving a VIN maximum that destroys Rev A/B boards — `PARTIAL — applied 2026-09-22; the gate this entry names as owed (an absolute maximum stated without its board revision) is not built (re-verified 2026-10-05 «#386»)`
 
 > **SEVERITY: BREAKS USERS (hardware damage).** The purge deleted the board's revision history. What
 > remained read `input_voltage: "5-16 VDC"` and `ratings.vin: "5 V recommended, 16 V maximum"` with
@@ -492,7 +505,7 @@ Every one was verified by the arbiter against a primary source, not taken from a
 
 F-447 and F-448 (and F-449…F-452, swept 2026-10-01) are archived; F-453 stays open.
 
-### F-453 — `architecture/locks.yaml`'s `state_versus_allocation` block carries no `source:` — `CONFIRMED`
+### F-453 — `architecture/locks.yaml`'s `state_versus_allocation` block carries no `source:` — `DONE` (verified 2026-10-05 «#386»: the block cites the Silicon Doc in v1.23.3)
 
 > The block is **correct** — `silicon-doc-text.txt:3698` states it plainly (*"A lock will also be
 > implicitly released if the cog that's holding the lock is stopped (COGSTOP) or restarted
@@ -557,7 +570,7 @@ at the operator. Now `>=`, and the example was compiled.
 
 ## Two release-path defects, one root cause — F-440, F-441
 
-### F-441 — v1.19.1 published an index the integrity check could not verify — `RESOLVED — v1.19.2, 2026-09-19; published state re-verified against raw.githubusercontent.com`
+### F-441 — v1.19.1 published an index the integrity check could not verify — `PARTIAL — v1.19.2, 2026-09-19; published state re-verified against raw.githubusercontent.com; the owed index-sha256-vs-committed-blob gate is not built (re-verified 2026-10-05 «#386»)`
 
 v1.19.1's index carried the **pre-change** SHA-256 for the two files that release edited, so the
 MCP refused to serve them: *"Content for 'p2kbPasm2Xinit' is temporarily unavailable — verification
@@ -814,7 +827,7 @@ script passes `-D SYM=value` to the compiler, and nothing in `engineering/tools/
 a `.map`. The two open items on `DRAFTS/PNUT-TS-PUNCH-LIST.md` are both fixed by this release and
 were moved to *Shipped* with the evidence.
 
-### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `RESOLVED — applied 2026-09-19; validated by the v1.19.0/.1/.2 releases, 2026-09-19`
+### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `PARTIAL — map_caveat applied 2026-09-19 and shipped; the two unreproduced byte pairs this entry says were dropped are still in object-image-dedup.yaml (:75, :99) (re-verified 2026-10-05 «#386»)`
 
 `language/spin2/concepts/object-image-dedup.yaml` `map_caveat` tells readers the multi-instance
 `.map`'s instance-name/source-name columns are unreliable and to *"do NOT trust those labels."* The
@@ -1204,7 +1217,7 @@ LUT use from a Spin2 program otherwise learns it only by reading the inline-PASM
 
 ## The two ROM listings are different BUILD TARGETS, and F-123's grounding plan names the FPGA one (2026-09-10, ROM-asset mining) — F-421
 
-### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `CONFIRMED`
+### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `PARTIAL` (re-verified 2026-10-05 «#386»: the grounding plan is annotated; nine shipped KB files still cite ROM_Booter.lst unlabelled)
 
 Found 2026-09-10 while scoping the ROM-facility mining Stephen asked for. The corpus holds two ROM
 listings in `engineering/ingestion/sources/rom-booter/` and nothing says which is the chip.
@@ -2475,7 +2488,7 @@ cog. The page must not imply that cog 0 is a place to evacuate.
 
 ## DEBUG's cost to the running application is nowhere in the KB: 16KB of hub gone, the protection LOCKED until reset, `LOCK[15]` taken, two pins consumed (2026-08-30, debug/stack research) — F-393
 
-### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `RESOLVED — the load-bearing residue applied 2026-09-22 («#351»)`
+### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `PARTIAL — the load-bearing residue applied 2026-09-22 («#351»); the protected-region layout ($FEA00/$FF1A0) is still absent from the KB (re-verified 2026-10-05 «#386»)`
 
 > Most of this had already landed (`debug-strategy-guide.yaml:77-94` carries the hub `$7C000..$7FFFF`
 > reservation, `LOCK[15]`, P62/P63, the HUBSET `L`-bit lock, the ≥10 MHz crystal requirement and the
@@ -2582,7 +2595,7 @@ statement.
 
 ## The DEBUG budget: we ship all three limits and none of what they cost (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-4) — F-383
 
-### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `CONFIRMED`
+### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `PARTIAL` (re-verified 2026-10-05 «#386»: parts (a)(c)(e)(g) shipped; the stale "hit first" bullet, the byte column, the DEBUG_MASK per-object limit and the coalesce mapping remain)
 
 **Class: MIXED — parts (a)(c)(e)(f) are BEHAVIOUR to be proven by test; parts (d)(g) are TECHNIQUE and
 need their conditions stated. Part (b) is an editorial correction.**
@@ -2708,7 +2721,7 @@ the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
 
 ## Two pin-reading questions the KB discusses in detail and never answers (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-1/GAP-2) — F-384
 
-### F-384 — nothing states what the streamer INPUT samples, or what a live smart pin does to it; and AAAA's "read state" is undefined for a smart-pin neighbour — `CONFIRMED`
+### F-384 — nothing states what the streamer INPUT samples, or what a live smart pin does to it; and AAAA's "read state" is undefined for a smart-pin neighbour — `DONE` (verified 2026-10-05 «#386»: pin-capture.yaml and smart_pins.yaml in_signal_semantics, v1.23.3)
 
 **Class: BEHAVIOUR — empirically settled by the reporter, needs our own sourcing before it ships.**
 
@@ -2745,7 +2758,7 @@ measurement is the lead, not yet our citation.**
 
 ## `p2kbArchStreamerPinSelection` names one field three different ways, and the streamer symbols never got the composition rule the smart pins did (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-1) — F-385
 
-### F-385 — `D[19:16]` vs `D[19:17]` vs `D[22:17]` on one page, and mode constants that collide with the pin-base field — `CONFIRMED`
+### F-385 — `D[19:16]` vs `D[19:17]` vs `D[22:17]` on one page, and mode constants that collide with the pin-base field — `DONE` (verified 2026-10-05 «#386»: pin-selection.yaml composition rule and field split, v1.23.3)
 
 **Class: AMBIGUITY — no instrument can see it; a reader cannot construct a mode word without guessing.**
 
@@ -2893,7 +2906,7 @@ spellings are real and both appear in Parallax material.
 
 ## The index returns partial results by construction: 27 of 60 debug files reachable, and nine DEBUG-window pages carry no searchable trace of the word (2026-08-30, measured; corroborates P2KB-GAPS-RUNNING-LOG FINDABLE-1/2/3) — F-389
 
-### F-389 — key generation abbreviates and drops path components, so whole subtrees vanish from the term that names them — `CONFIRMED`
+### F-389 — key generation abbreviates and drops path components, so whole subtrees vanish from the term that names them — `PARTIAL` (re-verified 2026-10-05 «#386»: alias vocabulary added in places; the generator still abbreviates and has no component-survival check)
 
 **Class: FINDABILITY — a defect in the index generator, not in any entry's content.**
 
@@ -3250,7 +3263,7 @@ exposed 12 always-uncited blocks as Tier-1 blocking. All 12 are now cited or rem
 
 ## Two residues the gates cannot see: a citation re-anchor that translated line numbers, and an eighth fabricated-provenance file (2026-08-27, «#325» verification) — F-377
 
-### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `RESOLVED`
+### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `PARTIAL` (re-verified 2026-10-05 «#386»: part 2 fixed; clock_system.yaml still cites spin2-v55-text.txt:1718 and :1716-1725 for text that sits at :1711 and :1709)
 
 **DISCHARGED 2026-08-30 by F-399.** Part 1 (the translated-locator class) is closed the only way it can be: all **721** citation locators in the shipped set were opened at their cited lines and read. 22 were repaired — 18 pointing at content that does not support the claim, of which **10 were exactly this carry-over shape** in `pin-capture.yaml` and `pin-selection.yaml`; the two named in this entry (`dds-goertzel.yaml`) are among them. A corpus-wide carry-over detector now returns **zero** across all 222 `silicon-doc-text.txt` citations. Part 2 (`io_pin_timing.yaml`'s fabricated `part3-pins.txt`) was repaired earlier and its replacement locators were re-read in the F-399 sweep. **See F-399 for the method, the totals, and the two instrument defects that had to be fixed before any of it could be trusted.**
 
@@ -3377,7 +3390,7 @@ what the delivery path does to files that were never part of the shape question 
 ⚠ **Ledger correction 2026-09-11.** These numbers were first appended as §1.26 to `2026-08-27-yaml-release-change-ledger.md`. That ledger was **spent** — its declared range `v1.17.0..b0057ec1` shipped on 2026-09-10 as v1.18.0/v1.18.1 — so it could not gate an unshipped release. Stephen caught it. The append was reverted, that ledger archived byte-identical to its last committed revision, and the content re-derived against the correct `v1.18.1..HEAD` range in `2026-09-11-yaml-release-change-ledger.md`. **A release ledger expires the moment its range ships, and nothing in the process was checking that.**
 ## Two silent-failure bugs in the KB tooling (2026-08-26, «#324» verification) — F-376
 
-### F-376 — `fetch-kb-file.sh -v <KEY>` fetches nothing and exits 0; the index generator swallows parse errors — `CONFIRMED`
+### F-376 — `fetch-kb-file.sh -v <KEY>` fetches nothing and exits 0; the index generator swallows parse errors — `DONE` (verified 2026-10-05 «#386»: both tools fixed at HEAD)
 
 Two unrelated bugs, same shape: **the failure is silent and the exit code is 0.**
 
@@ -3871,7 +3884,7 @@ two. No other file carries the wording.
 address`; `$1F7` → `CALLD-imm return, CALLPB parameter, or LOC address`. Triple-sourced, so no
 further research is owed.
 
-### F-364 — the same index advertises 16 register files; 13 of the pointers do not exist — `RESOLVED`
+### F-364 — the same index advertises 16 register files; 13 of the pointers do not exist — `PARTIAL` (re-verified 2026-10-05 «#386»: pointers removed and shipped; the gate reading `yaml_file:` is not built)
 
 **What was measured.** Every `yaml_file:` pointer in
 `complete-system-registers-index.yaml`, resolved against its own directory:
@@ -3918,7 +3931,7 @@ non-existent file, which it reported as DANGLE before being restored.
 resolved by a gate. Today nothing in the shipped tool set reads them — the resolution above was
 done by an ad-hoc walker, not by an armed check. With 3/3 resolving, arming it is cheap now.
 
-Status: `RESOLVED` — 13 dangling pointers removed, content kept inline, 3/3 remaining pointers
+Status: `PARTIAL` (2026-10-05: the `yaml_file:` gate is still owed) — 13 dangling pointers removed, content kept inline, 3/3 remaining pointers
 resolve. The instrument gap (no gate reads `yaml_file:`) remains open.
 
 ## The hygiene gate reports CLEAN on the register that owns the `G-`/`Q-` allocators while reading none of its entries (2026-08-26, p2-click-adapter ingestion) — F-362
@@ -4170,7 +4183,7 @@ ENH-NNN` report line on every run so the question surfaces instead of staying si
 
 - **F-359 — Seven `architecture/` files carry a provenance header citing source files that have
   never existed and datasheet pages beyond the end of the datasheet; the header itself satisfies
-  the citation regex, so six of the seven still pass the gate today.** — `RESOLVED`
+  the citation regex, so six of the seven still pass the gate today.** — `PARTIAL` (re-verified 2026-10-05 «#386»: six files re-derived and shipped; 5 of the 8 non-derivable claims are still in the tree and their delete-or-keep call is undecided)
 
   **How it surfaced.** Stephen asked whether `io_pin_timing.yaml`'s content might have come from
   our own I/O & Smart Pins manual rather than a Parallax source — i.e. whether the provenance was
@@ -4325,7 +4338,7 @@ ENH-NNN` report line on every run so the question surfaces instead of staying si
   first: absent from the silicon doc, absent from every other file in `deliverables/ai/P2/`, and
   not accepted as instructions by pnut-ts v1.55.3.
 
-  Status: `RESOLVED` — all six re-derived and cited against live sources; eight non-derivable
+  Status: `PARTIAL` (2026-10-05: 5 of the 8 non-derivable claims still stand, call undecided) — all six re-derived and cited against live sources; eight non-derivable
   claims listed above are left in place for Stephen's delete-or-keep call.
 
 ---
@@ -4845,7 +4858,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > `engineering/analysis/2026-08-25-whole-kb-promotion-filter.md`. Every line number below was read off
 > disk on 2026-08-25.
 
-### F-348 — a *cited* block shipped a pin-current limit five times the datasheet's absolute maximum, plus TTL logic levels the P2 datasheet does not contain — `PARTIAL`
+### F-348 — a *cited* block shipped a pin-current limit five times the datasheet's absolute maximum, plus TTL logic levels the P2 datasheet does not contain — `DONE` (verified 2026-10-05 «#386»: block deleted from both twins, ±30 mA in io_pin_timing, v1.23.3)
 
 > **Where:** `deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml` and
 > `deliverables/ai/P2/language/spin2/concepts/basic-io.yaml`, both `hardware_specifications`
@@ -5254,7 +5267,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 
 - **F-328 — `deliverables/ai/P2/hardware/p2-eval-board.yaml` carries claims the #64000 Rev C
   guide contradicts, plus whole blocks describing hardware the board does not have; and the
-  guide itself contradicts itself on one pin pair.** — `PENDING-VALIDATION` · Two separable halves.
+  guide itself contradicts itself on one pin pair.** — `DONE` (verified 2026-10-05 «#386»: the owed YAML release landed; p2-eval-board.yaml v1.23.3) · Two separable halves.
 
   **(a) The source contradicts itself — a genuine documentary conflict, not an extraction
   defect.** The #64000 guide's §18 "microSD Card Socket" (p.12) lists *"P58 - DI/CD (data in
@@ -5378,7 +5391,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
   > fabricated prototyping area, VGA/HDMI/audio block, USB-B/USB-C connector and Prop Plug #32201
   > are gone and were not written back. See **F-353**.
 
-  Status: `PENDING-VALIDATION` — **(a) RESOLVED 2026-08-24** by cross-source normalization against
+  Status: `DONE` (2026-10-05: the owed YAML release landed) — **(a) RESOLVED 2026-08-24** by cross-source normalization against
   the ROM booter and the silicon-doc boot table: P58 = MISO / P59 = MOSI, the KB is already correct
   and stands unchanged, and the guide's §18 is source errata. **(b) applied 2026-08-25** as
   described above; only the YAML release is owed.
@@ -5585,7 +5598,7 @@ high-priority repopulation, source-first from the Edge module guides.
 
 - **F-334 — `audit-yaml-claim-sourcing.py` treats a board REVISION (`Rev B` / `Rev C`) and a
   POWER `source:` as citations, which silences the gate on 11 quantitative blocks that are as
-  uncited as the 48 just removed.** — `PENDING-VALIDATION` — the gate's `INLINE_CITE_RE` includes `rev\s*[BC]\b`, which
+  uncited as the 48 just removed.** — `DONE` (verified 2026-10-05 «#386»: detector repaired at HEAD, the 11 blocks resolved in v1.23.3) — the gate's `INLINE_CITE_RE` includes `rev\s*[BC]\b`, which
   is a reasonable citation token in `Silicon Doc Rev C` prose and a **false positive** in a
   hardware file, where `Rev B` is the board's own identity: `board_revision: "Rev B (Guide
   v2.0)"`, or plain description text *"Goertzel experimenter board (Rev B) with pads…"*.
@@ -5703,7 +5716,7 @@ needs a source that states it or a rewrite that does not compute.
   `language/spin2/methods/getct.yaml description` was «#299»'s and is recorded with F-347/F-352.
   Nothing on either record is still owed.
 
-  Status: `PENDING-VALIDATION` — the detector repair, all 59 removals and the whole repopulation
+  Status: `DONE` (2026-10-05: released and verified in v1.23.3) — the detector repair, all 59 removals and the whole repopulation
   are applied and gate-verified; only the YAML release is owed. See **F-335**, which this repair
   exposed.
 
@@ -6126,7 +6139,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 >
 > **«#296» must not ship the `P_HIGH_15K | P_LOW_FLOAT` string as sourced.**
 
-### F-337 — the P2 Datasheet and the P2 Hardware Manual agree with each other and contradict the Silicon Doc on `%TT` in DAC_MODE, and the shipped YAML follows the minority source — `CONFIRMED`
+### F-337 — the P2 Datasheet and the P2 Hardware Manual agree with each other and contradict the Silicon Doc on `%TT` in DAC_MODE, and the shipped YAML follows the minority source — `PARTIAL` (re-verified 2026-10-05 «#386»: EF-071 settles the smart-mode row; the smart-pin-off DAC_MODE %TT=00 row has no bench result)
 
 > **Two disagreements, both in the `(T) Pin DIR/OUT Control` table, both about whether it is the
 > DAC or the ADC that gets enabled.**
@@ -6152,7 +6165,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > settle it or be one short rig away from settling it. Empirical outranks both documentary
 > sources; that is the route, not picking the majority.
 
-### F-338 — `P_LEVEL_B` and `P_SCHMITT_B` do not exist: two fabricated constant names stood in four `related_symbols:` lists, and nothing in the toolchain could see them — `PARTIAL`
+### F-338 — `P_LEVEL_B` and `P_SCHMITT_B` do not exist: two fabricated constant names stood in four `related_symbols:` lists, and nothing in the toolchain could see them — `DONE` (verified 2026-10-05 «#386»: names gone in v1.23.3; F-340's nested check at HEAD)
 
 > **Evidence, three ways.** Neither name is in the Spin2 v55 symbol table (114 rows, 116 distinct
 > names, `spin2-v55-text.txt:1419-1562`). Neither is on `audit-constant-fidelity.py`'s 120-name
@@ -6917,7 +6930,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 **VALIDATED ON THE SERVED KB 2026-09-11** — `p2kb_get p2kbArchIoPinTiming` against the published index (v1.18.1, now on the remote), not the repo tree. The served file's top-level `description:` — the exact field F-333 named as the place no instrument could see — now carries an explicit *"What it deliberately does NOT carry"* section reading: *"Slew rate. There is none to document. 'slew' returns zero hits across every ingested Parallax source ... A prior form of this description asserted configurable slew rates; it was fabrication (F-327, F-333) and is not restored."* Drive strength is likewise redirected to `architecture/pin-drive-configuration.yaml` rather than restated.
 
 **Class sweep run at the same time** (`feedback_classwide_sweep_on_every_finding`): every `slew` occurrence remaining in `deliverables/ai/P2/` is either a NEGATION of the fabricated claim (`basic-io.yaml` x2: *"no programmable slew rate exists"*) or the unrelated Spin2 **slew/easing engine** decomposition pattern, which is a software shaping construct and not a pin electrical claim. No residual assertion survives.
-### F-329 — the SAME fabricated drive ladder stands twice more in `io_pin_timing.yaml`, in blocks F-327 does not name, alongside ~20 nanosecond quantities that NEITHER of the sprint's two extraction paths carries — `PARTIAL`
+### F-329 — the SAME fabricated drive ladder stands twice more in `io_pin_timing.yaml`, in blocks F-327 does not name, alongside ~20 nanosecond quantities that NEITHER of the sprint's two extraction paths carries — `DONE` (verified 2026-10-05 «#386»: io_pin_timing.yaml blocks cite Silicon Doc lines, v1.23.3)
 
 > **Found:** 2026-08-24, by the DOCX-primary re-ingestion of `p2-hardware-manual` (the source
 > plan §8 names as the datasheet's cross-check partner). This is **additive to F-327, not a
@@ -7095,7 +7108,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > which is how the PWM example survived to a reader.
 
 - **F-250 — the #64000 Eval Board Rev C guide was ingested with EVERY DIGIT MISSING; any
-  numeric fact traced to it is unsafe.** — `PARTIAL` · `engineering/ingestion/sources/p2-eval-board/`
+  numeric fact traced to it is unsafe.** — `DONE` (verified 2026-10-05 «#386»: re-ingested with the digit-density gate; KB half closed under F-328) · `engineering/ingestion/sources/p2-eval-board/`
   was extracted with a text-layer tool, but that PDF's font encoding does not map numerals —
   `pdftotext` silently drops them. Evidence: the shipped `p2-eval-board-narrative.txt` has
   digits on **91 of 1315 lines**; `pdf-ocr --force-ocr` + re-extract yields **368**. Lines
@@ -7154,11 +7167,11 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   > **F-328**, and repaired by the sprint's purge/repopulate tasks, not here. The ingestion
   > head is done with this one.
   >
-  Status: `PARTIAL` — ingestion half complete 2026-08-24; the KB-side re-derivation it
+  Status: `DONE` (2026-10-05: KB half closed under F-328) — ingestion half complete 2026-08-24; the KB-side re-derivation it
   exposed is carried by F-328.
 
 - **F-251 — the "why do the LEDs glow when I touch a pin" explanation must account for the
-  LED BUFFER, and the freshly-shipped DeSilva v3.0.5 aside does not.** — `PARTIAL` · The #64000 guide
+  LED BUFFER, and the freshly-shipped DeSilva v3.0.5 aside does not.** — `DONE` (verified 2026-10-05 «#386»: shipped in deSilva v3.0.9) · The #64000 guide
   (feature 12) and both Edge module YAMLs describe the onboard LEDs as **buffered** — the P2
   pin drives a buffer *input*, and the buffer drives the LED. DeSilva v3.0.5's new Chapter 1
   aside "Why Your LEDs Glow When You Touch Them" instead explains the effect as microamps
@@ -7229,10 +7242,10 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   > pin)"`) and `:124` (P58–P63 shared with USB data and P2 memory signals) — note both moved from
   > the `:27`/`:29`/`:31-34` this entry recorded.
 
-  Status: `PARTIAL — mechanism fixed 2026-08-17; the pull-up sentence this entry called "right" was wrong and is fixed 2026-08-25 («#301»); render + release owed`.
+  Status: `DONE — mechanism fixed 2026-08-17; the pull-up sentence this entry called "right" was wrong and is fixed 2026-08-25 («#301»); shipped in deSilva v3.0.9 (verified 2026-10-05)`.
 
 - **F-252 — the Getting Started guide hardcodes `LED = 56` with no board caveat (same class
-  as the DeSilva fix).** — `PARTIAL` · `p2-getting-started-guide/opus-master/getting-started-body.md:558`
+  as the DeSilva fix).** — `DONE` (verified 2026-10-05 «#386»: shipped in Getting Started v1.0.4) · `p2-getting-started-guide/opus-master/getting-started-body.md:558`
   declares `LED = 56  ' the pin our LED is on`, used by the blink examples at `:493` and
   `:408`. On a **P2 Edge 32MB PSRAM Module** P56 is the PSRAM **clock** — the example lights
   nothing and drives the memory bus; the LEDs there are **P38/P39**. This is exactly the
@@ -7295,7 +7308,7 @@ mechanism, so Table 25 is unlikely to be the only other instance.
   >
   > **Owed to «#302»/release:** confirm the added bullet sets on the page, then release.
 
-  Status: `PARTIAL — caveat added to opus-master 2026-08-25 («#301»); render + release owed`.
+  Status: `DONE — caveat added to opus-master 2026-08-25 («#301»); shipped in Getting Started v1.0.4 (verified 2026-10-05)`.
 
 ---
 
@@ -7579,7 +7592,7 @@ the no-`DIRH` half is gone, exactly as EF-062 sealed it. Still owed:
 
 ## `object-image-dedup.yaml`'s map_caveat goes stale when pnut-ts 1.55.4 ships (2026-08-22) — F-320
 
-### F-320 — `p2kbSpin2ObjectImageDedup`'s `map_caveat` warns readers off .map labels that 1.55.4 makes correct, while the limitation that SURVIVES the fix is documented nowhere. `CONFIRMED — HELD by decision (Stephen, 2026-08-22) until the new compiler and its fixture set are in hand`
+### F-320 — `p2kbSpin2ObjectImageDedup`'s `map_caveat` warns readers off .map labels that 1.55.4 makes correct, while the limitation that SURVIVES the fix is documented nowhere. `PARTIAL — the hold's conditions are met (pnut-ts 1.55.8; map_caveat rewritten and shipped); the SYMBOL INDEX per-source-file limitation is still documented nowhere and unmeasured on 1.55.8 (re-verified 2026-10-05 «#386»)`
 
 **Origin.** `engineering/ingestion/external-inputs/p2kb-update-requests/P2KB-map-caveat-retraction-1.55.4.md`
 — an upstream request from the pnut-ts side proposing an amendment. Treated as **input, not
@@ -7857,7 +7870,7 @@ carries the supply. This entry records only the site the F-412 validation pass h
 
 ## The rights guard fails open, so an unadopted document emits a malformed rights string (2026-08-22) — F-319
 
-### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `CLOSED 2026-09-11 — the negative control FAILED the 2026-09-10 fix and exposed the real cause (`@` at catcode 12); completed fix proven on the artifact in all four branches`
+### F-319 — `p2kb-platform-foundation.sty`'s pdfkeywords guard does not fire for a document whose `\Doc*` macros are at their defaults, so it emits `"; licensed under "` instead of nothing. `DONE — closed 2026-09-11 (token normalised 2026-10-05 «#386»); the negative control FAILED the 2026-09-10 fix and exposed the real cause (`@` at catcode 12); completed fix proven on the artifact in all four branches`
 
 **How it surfaced.** The Assembly Language Reference v3.1.7 render (2026-08-22) came back with
 `Keywords: "; licensed under "` — the both-values-present branch, with both values empty.
@@ -8343,7 +8356,7 @@ NOT to sweep on the app-note reading; prose "as of" sweep; PDF versioning explic
 > **Neither finding ships in the current wave.** IOSP left it when F-261 reversed into F-269, so
 > both wait for IOSP's next release rather than being force-fitted into this one.
 
-### F-274 — IOSP Ch.19 §19.4 teaches an FS-USB configuration at exactly the clock its own source flags, and states no sysclk dependency anywhere. `PARTIAL — corrected in opus-master 2026-08-25 («#301»); render + release owed`
+### F-274 — IOSP Ch.19 §19.4 teaches an FS-USB configuration at exactly the clock its own source flags, and states no sysclk dependency anywhere. `DONE — corrected in opus-master 2026-08-25 («#301»); shipped in IOSP v1.0.11 (verified 2026-10-05 «#386»)`
 
 **Location:** `manuals/p2-io-and-smart-pins-user-guide/opus-master/part-4-special-modes/chapter-19-usb.md:122-128`.
 **RELEASED (v1.0.8).**
@@ -8560,7 +8573,7 @@ finding wrongly proposed cutting it.
 > (`Donna-Manuscript` hits are a private non-P2 book and out of scope.) Verified rather than assumed,
 > which is the standard this finding set for itself.
 
-### F-278 — wrong-code examples ship in ordinary syntax-highlighted blocks, distinguished only by a comment, in three manuals. `PARTIAL`
+### F-278 — wrong-code examples ship in ordinary syntax-highlighted blocks, distinguished only by a comment, in three manuals. `DONE` (verified 2026-10-05 «#386»: all 8 sites are antipattern blocks at the latest tags)
 
 **Locations (8 sites — the 7 first enumerated, plus the 8th the narrow pattern missed).** Sites are
 named by section rather than by line, because master line numbers move with every content task and a
@@ -8645,7 +8658,7 @@ comments in one box.
 >
 > **The other 7 sites are re-confirmed shipped** and are not part of what is owed.
 
-**Status:** `PARTIAL — 8 of 8 sites converted IN SOURCE; 7 shipped (Streamer v1.0.9, Debug Window
+**Status:** `DONE — all 8 sites shipped as antipattern blocks at the latest tags (verified 2026-10-05 «#386»); history: 8 of 8 sites converted IN SOURCE; 7 shipped (Streamer v1.0.9, Debug Window
 v1.1.3, IOSP v1.0.9). The 8th (ch08-scope-xy.md's blockquote pair) is converted but its render is
 UNPROVEN — it is the only `> ```antipattern` in the set. Verify it on the page at the next Debug
 Window Forge round-trip; that render is the only thing between this finding and closure.`
@@ -8771,7 +8784,7 @@ site is the *command*; the project name in running text is properly **PNut-TS**.
 > gate** — a token substitution has no layout consequence — so «#302» need not look at it; it is a
 > release-wave item.
 
-### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `RESOLVED` — **the whole fleet corrected and the guard's own blind spot closed 2026-08-25 («#302»)**
+### F-282 — every `MANUAL-DESCRIPTOR.md` records a stale `last_published_tag`, so every diff-since-published audit reads the wrong baseline. `DONE` (regressed and re-closed 2026-10-05 «#386»: 12 of 17 descriptors were stale again; all advanced from git, and the step is now the blocking runner gate `descriptor-baseline`) — **the whole fleet corrected and the guard's own blind spot closed 2026-08-25 («#302»)**
 
 > **CLOSED 2026-08-25 («#302») — both halves, measured against `git tag` rather than against any
 > file's own claim.**
@@ -8988,7 +9001,7 @@ both apply. Nothing in any master needs editing.
 
 ## Nine documents carry a request.json subtitle their own cover contradicts (2026-08-22) — F-317
 
-### F-317 — the subtitle in `request.json` disagrees with the printed cover in 9 of 15 published documents, and adopting metadata single-sourcing is what makes that visible. `CONFIRMED` — **all 9 re-measured 2026-08-25 («#302»): unchanged, still drifting, none adopted**
+### F-317 — the subtitle in `request.json` disagrees with the printed cover in 9 of 15 published documents, and adopting metadata single-sourcing is what makes that visible. `PARTIAL` (re-verified 2026-10-05 «#386»: deSilva and Debug Window now agree; seven app-note subtitles still contradict their covers) — **all 9 re-measured 2026-08-25 («#302»): unchanged, still drifting, none adopted**
 
 **How it surfaced.** Stephen: *"fix README if needed, always."* Sweeping the public index's
 subtitle lines against the PDFs found 10 apparent mismatches — but checking them against
@@ -9051,7 +9064,7 @@ drift.
 > entry calls for (cover descriptive line vs catalog tagline) — **do not sweep one reading across
 > all seven.**
 
-**Status:** `CONFIRMED — resolve each document's subtitle to its printed cover BEFORE the render that adopts metadata single-sourcing; all 9 rows verified still drifting 2026-08-25.`
+**Status:** `PARTIAL — resolve each document's subtitle to its printed cover BEFORE the render that adopts metadata single-sourcing; 2 of 9 resolved (deSilva, Debug Window), the seven app notes still drifting (re-verified 2026-10-05 «#386»).`
 
 ## Open — enhancement proposals (new content, not corrections)
 
@@ -9143,7 +9156,7 @@ drift.
 > surfaced during the rerun (F-132/F-133/F-134, all `DONE`). Every changed example was
 > compile-verified with `pnut-ts -d`.
 
-### F-207 — packed-data feed for **scrolling** LOGIC/SCOPE windows requires a **full-window array feed** (`` `uhex_long_array_ ``); a single `` `(packed) `` long does NOT fill the window — `PARTIAL — manual DONE + HW-verified · KB DONE (v1.15.0) · one manual design decision open`
+### F-207 — packed-data feed for **scrolling** LOGIC/SCOPE windows requires a **full-window array feed** (`` `uhex_long_array_ ``); a single `` `(packed) `` long does NOT fill the window — `DONE — manual DONE + HW-verified · KB DONE (v1.15.0) · the design decision adopted in Debug Window v1.1.4 ch13 (verified 2026-10-05 «#386»)`
 
 > **Heading corrected in place 2026-08-15.** It read *"KB enrichment pending"* while this entry's own
 > body recorded **"KB APPLIED 2026-07-11 — PUBLISHED in KB v1.15.0. Both facets landed."** Verified
@@ -9189,7 +9202,7 @@ drift.
 
 **Verify first (at fix time, §4.5):** open v55 text line ~1144 (and the REF Pascal-derived matrix / `DebugDisplayUnit.pas SetPack`) and match wording exactly — do not paraphrase. Facet A's feed-shape claim is grounded in the 2026-07-11 hardware renders + v55 showing only the array form. **Facet B is a peer report (Stephen), not yet our own hardware run — confirm on silicon before enriching the KB** (empirical > documentary); the LONGS_2BIT 2-channel render, if we adopt that example, IS that confirmation.
 
-### F-208 — PLOT POLAR orientation (θ=0 baseline direction) is undocumented; the rotation-sense wording is murky/likely-wrong — `CONFIRMED` (Test J)
+### F-208 — PLOT POLAR orientation (θ=0 baseline direction) is undocumented; the rotation-sense wording is murky/likely-wrong — `DONE` (verified 2026-10-05 «#386»: plot.yaml v1.23.3 and Debug Window v1.1.4 ch05 both state θ=0 East) (Test J)
 
 **Surfaced:** 2026-07-11 — Test J had to be run to *learn* the POLAR orientation because it is documented nowhere. Per the **test-to-learn = doc/KB gap** rule (Stephen's call this date), the learned fact must be written back into both the KB and the manual, not consumed once.
 
@@ -9269,7 +9282,7 @@ drift.
 
 ## ADC gain-mode input ranges framed ground-referenced, not centered on VIO/2 (2026-07-07) — F-202
 
-### F-202 — IOSP §16.2 ADC input-mode table (and 5 propagated sites) frame the gain ranges as ground-referenced `0V–ceiling` — `PARTIALLY CONFIRMED: GIO/VIO-as-calibration + mid-supply bias grounded in Silicon Doc; exact centered endpoints UNVERIFIED (no trusted numeric source) → hardware campaign required`
+### F-202 — IOSP §16.2 ADC input-mode table (and 5 propagated sites) frame the gain ranges as ground-referenced `0V–ceiling` — `PARTIAL — the KB and the IOSP ch16/appendix-c windows ship as measured; two stale phrases still say the windows are "being characterized on hardware" (IOSP ch16 :532, appendix-d :192) (re-verified 2026-10-05 «#386»)`
 > **Source of report:** community reviewer (2026-07-07, relayed by Stephen): *"the ranges are totally
 > wrong… they are centred around 1.65V."* Community-tier input (Titus-tier): challenges our work, is not
 > itself a citable source.
@@ -9372,7 +9385,7 @@ drift.
 
 ## Quantitative hardware-table audit batch (2026-07-07) — F-203
 
-### F-203 — 4-manual fan-out audit of quantitative hardware tables vs trusted ingested sources — `PARTIAL — 14 CONFIRMED_WRONG (hand-verified) + 8 AT_RISK; the IOSP and deSilva cells are fixed, the Streamer and Debug cells need their own patches`
+### F-203 — 4-manual fan-out audit of quantitative hardware tables vs trusted ingested sources — `DONE — 14 CONFIRMED_WRONG (hand-verified) + 8 AT_RISK; every manual cell settled at the latest tags (Streamer v1.1.3, Debug Window v1.1.4, IOSP v1.0.11, deSilva v3.0.9; verified 2026-10-05 «#386»)`
 > **Method:** 9-unit fan-out (IOSP ×5 parts, Streamer, Debug ×2, deSilva) enumerating every quantitative/encoding
 > table cell, each classified GROUNDED/DERIVED/AT_RISK/WRONG against **ingested sources only** (Silicon Doc,
 > Spin2 v55, P2 datasheet), then adversarially verified. Full verdicts: workflow `wx8vrj00a` output. 1 false
@@ -10300,7 +10313,7 @@ along and the TO-RECONCILE item closes on evidence rather than another capture.
 
 ---
 
-### F-301 — the cross-ref filter's adopt-at-next-release rule was passed over about a dozen times, because nothing read the tracker. `CONFIRMED` — **detected 2026-08-19 by comparing the tracker against every `request.json`**
+### F-301 — the cross-ref filter's adopt-at-next-release rule was passed over about a dozen times, because nothing read the tracker. `PARTIAL` (re-verified 2026-10-05 «#386»: the structural fix landed; only P2AN003, P2AN005 and P2AN006 still lack the cross-ref filter) — **detected 2026-08-19 by comparing the tracker against every `request.json`**
 
 **The rule, written into `CROSSREF-FILTER-ADOPTION.md` when the filter shipped 2026-06-26:**
 *"The next time each manual is released (for any reason), its release MUST add

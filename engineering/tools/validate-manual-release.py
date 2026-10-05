@@ -379,6 +379,24 @@ def build_gates(slug: str, phase: str, pdfs: list[str] | None):
                   ["--kb-content"], True,
                   "a push sends every commit; KB content must be released (indexed) first"))
 
+        # BLOCKING: the descriptor must name the tag THIS release creates. F-282 fixed
+        # the baseline fleet-wide once (2026-08-25) and left the per-release step as
+        # overlay prose; by 2026-10-05 twelve of seventeen were stale again, four of
+        # them released that day, because nothing loaded the overlay at release time.
+        try:
+            version = json.loads((ws / "request.json").read_text())["documents"][0][
+                "metadata"]["version"]
+        except (OSError, KeyError, IndexError, json.JSONDecodeError):
+            version = None
+        G.append(("descriptor-baseline", f"{V}/audit-descriptor-baseline.py" if version else None,
+                  ["--slug", doc.name, "--version", version] if version else None, True,
+                  "MANUAL-DESCRIPTOR names the release being cut (diff-since-published baseline)"
+                  if version else "no metadata.version in request.json"))
+        # ADVISORY: every OTHER document's baseline, so a stale one is seen at the
+        # next release of anything rather than at the next audit of that document.
+        G.append(("descriptor-fleet", f"{V}/audit-descriptor-baseline.py", [], "advisory",
+                  "every MANUAL-DESCRIPTOR names its latest release tag"))
+
     # --head manual on purpose: a YAML- or ingestion-head gate left unwired must
     # not block a manual release, or the meta-gate becomes the thing everyone
     # routes around -- which is how gates die in the first place.

@@ -206,7 +206,18 @@ LEDGER_WORDS = ("OPEN", "ANSWERED", "STILL-UNKNOWN", "RELOCATED", "NARROWED",
 LEDGER_CLOSED = ("ANSWERED", "RESOLVED", "RELOCATED")
 LEDGER_VOCAB = _vocab(LEDGER_WORDS, closed=LEDGER_CLOSED, sweep=False, fold_case=True)
 
+# THE CORRECTIONS REGISTER (`Next finding ID`) CLOSES ON `RESOLVED` TOO. Its own legend
+# says so -- "`RESOLVED` entries are CLOSED and are awaiting the next archive sweep, not
+# awaiting work" -- but the gate read `RESOLVED` as open, so closed findings piled up
+# behind a CLEAN verdict: 119 of 179 live entries by 2026-10-05, and verifying them
+# against the tree found 129 closed and the register's "what is outstanding?" wrong by
+# two-thirds («#386»). Here a live `RESOLVED` is closed-but-live, exactly as `DONE` is.
+# The errata register (`Next erratum ID`) keeps the DEFAULT vocabulary on purpose: its
+# `RESOLVED` rows are its lifecycle working, not entries awaiting a sweep.
+CORRECTIONS_VOCAB = _vocab(STATUS_WORDS, closed=CLOSED_WORDS + ("RESOLVED",))
+
 VOCAB_BY_LABEL = {
+    "finding": CORRECTIONS_VOCAB,
     "gap": LEDGER_VOCAB,
     "expert-question": LEDGER_VOCAB,
     "P1-gap": LEDGER_VOCAB,
@@ -510,10 +521,16 @@ def scannable_head(block):
     if not lines_ or not lines_[0].lstrip().startswith("-"):
         return block["headline"]
     acc = []
-    for ln in lines_:
+    for k, ln in enumerate(lines_):
         acc.append(ln)
         joined = " ".join(acc)
         if joined.count("**") >= 2 and joined.count("**") % 2 == 0:
+            # The lead-in can end on its dash with the status token wrapped onto the
+            # NEXT line (`… legal YAML.** —` / `  `RESOLVED``). Stopping at the bold
+            # left that token outside the headline, so the entry's status was
+            # invisible here: F-360 read neither open nor closed («#386»).
+            if joined.rstrip().endswith("—") and k + 1 < len(lines_):
+                acc.append(lines_[k + 1])
             break
     return " ".join(acc)
 
@@ -553,6 +570,18 @@ def negative_control():
         ("corrections dialect, counter BEHIND — MUST FAIL",
          "> **Next finding ID: `F-001`**\n\n"
          "## A section — F-001\n\n### F-001 — a thing · `CONFIRMED`\n\nbody\n", True),
+        # «#386»: the corrections register closes on RESOLVED; one left live is
+        # closed-but-live. The errata register keeps RESOLVED rows on purpose.
+        ("corrections dialect, a RESOLVED entry left live — MUST FAIL",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n### F-001 — a thing · `RESOLVED`\n\nbody\n", True),
+        ("corrections bullet, RESOLVED wrapped onto the line after the dash — MUST FAIL",
+         "> **Next finding ID: `F-002`**\n\n"
+         "## A section — F-001\n\n"
+         "- **F-001 — a thing that wraps,\n  across two lines.** —\n  `RESOLVED`\n\n  body\n", True),
+        ("errata dialect, a RESOLVED row left live — MUST BE CLEAN",
+         "> **Next erratum ID: `E-002`**\n\n"
+         "## E-001 — a thing · `RESOLVED`\n\nbody\n", False),
         ("errata dialect, counter AHEAD — MUST BE CLEAN",
          "> **Next erratum ID: `E-003`**\n\n"
          "## E-001 — a thing · `RESOLVED`\n\nbody\n"
