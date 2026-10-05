@@ -1,6 +1,4 @@
-::: instrheader
 # Appendix J: Known Silicon Bugs {#appendix-j}
-:::
 
 This appendix documents known hardware bugs in the P2 silicon that affect instruction behavior. These bugs cannot be fixed in software updates—they are permanent characteristics of the P2X8C4M64P silicon. Each entry gives the condition, the effect and a workaround that steps around it. The two entries below are the bugs the Parallax documentation lists; [Silicon Notes](#silicon-notes) at the end of this appendix points to every Rev C rule this manual states, including these two.
 
