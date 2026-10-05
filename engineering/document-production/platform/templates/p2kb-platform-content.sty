@@ -364,12 +364,17 @@
 % hardware family's colour -- at the start of the sentence is recognisable at a
 % glance and costs the reader nothing when it does not apply to them.
 % Emitted by p2kb-platform-silicon-notes.lua from [Rev C]{.silicon-note topic="..."}.
-% \SiliconNoteAnchor gives the index its link target and page label.
+% \SiliconNoteAnchor gives the index its link target and page label. It starts
+% with \leavevmode: a note usually OPENS its paragraph, and an anchor set before
+% the paragraph begins sits on the vertical list, where a page break can fall
+% between it and the chip -- the label then names the previous page. Measured on
+% Assembly v3.1.11 (05:19 build): the WMLONG note printed on p353 and the index
+% said 352. Inside a paragraph \leavevmode does nothing, so nothing moves.
 \newtcbox{\SiliconNoteTag}{on line,
   colback=iosp-hardware-border, colupper=white, boxrule=0pt, arc=1.5pt,
   boxsep=0pt, left=2.5pt, right=2.5pt, top=1pt, bottom=1pt,
   fontupper=\sffamily\bfseries\scriptsize}
-\newcommand{\SiliconNoteAnchor}[1]{\phantomsection\hypertarget{#1}{}\label{#1}}
+\newcommand{\SiliconNoteAnchor}[1]{\leavevmode\phantomsection\hypertarget{#1}{}\label{#1}}
 
 % ==================== TOOL-DEVELOPER REVIEW (DRAFT SCAFFOLDING) ====================
 % A question put to a named outside tool author, inside a review draft that goes
