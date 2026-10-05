@@ -14,6 +14,7 @@
       "lua_filters": [
         "p2kb-platform-figures",
         "p2kb-platform-crossref",
+        "p2kb-platform-silicon-notes",
         "p2kb-platform-tables",
         "p2kb-platform-mnemonic-bold",
         "p2kb-platform-code-coloring",
@@ -23,8 +24,8 @@
         "title": "P2 Assembly Programming",
         "subtitle": "A Human-Centered Approach to Parallel Processing",
         "author": "Iron Sheep Productions, LLC",
-        "version": "3.0.8",
-        "date": "September 2026",
+        "version": "3.0.9",
+        "date": "October 2026",
         "copyright": "Copyright 2025-2026 Iron Sheep Productions, LLC and Parallax Inc.",
         "license": "CC BY-SA 4.0"
       }

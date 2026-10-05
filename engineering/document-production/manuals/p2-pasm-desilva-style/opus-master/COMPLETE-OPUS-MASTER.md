@@ -3989,7 +3989,7 @@ Let me show you a loop that looks fine — until you realize you're paying for t
         add     value, #1        ' 2 clocks
         wrlong  value, ptra      ' 3-10 (cog-exec) / 3-20 (hub-exec)
         add     ptra, #4         ' 2 clocks
-        djnz    count, #.loop    ' 2/4 (cog-exec) / 2/13-20 (hub-exec)
+        djnz    count, #.loop    ' 2/4 (cog-exec) / 2/13+ (hub-exec)
 
 ' After optimization using PTR expressions:
 .tight  rdlong  value, ptra      ' Read from current address
@@ -4306,7 +4306,7 @@ Always measure your optimizations:
 
 **Pitfall — CT wraps:** **GETCT** reads a 32-bit free-running counter that wraps every ~21.5 seconds at 200 MHz (2³² ÷ 200 MHz). For short measurements like the one above, the **SUB** trick masks the wrap correctly thanks to two's-complement arithmetic. But for a *scheduler* or *timer* running over minutes, hours, or days, you need one of two strategies:
 
-1. **Capture the full 64-bit count.** `GETCT D WC` latches the full 64-bit counter and returns its upper 32 bits; here `WC` is not a flag result, it is a selector that asks for the upper half instead of the lower. The very next `GETCT D` (no `WC`) returns the matching lower 32 bits of that same instant. Keep the two instructions back-to-back and uninterrupted—no re-read-and-retry loop is needed.
+1. **Capture the full 64-bit count.** `GETCT D WC` latches the full 64-bit counter and returns its upper 32 bits; here `WC` is not a flag result, it is a selector that asks for the upper half instead of the lower. The very next `GETCT D` (no `WC`) returns the matching lower 32 bits of that same instant. Keep the two instructions back-to-back and uninterrupted—no re-read-and-retry loop is needed. [Rev C]{.silicon-note topic="64-bit GETCT in an idle cog group"} In a cog whose group of four (cogs 0–3 or 4–7) had no running cog at a counter wrap, the upper half comes back behind by one for each wrap it missed, until that group's next wrap. Keep one cog of each group you use running from start-up, and you never meet it.
 2. **Work with deltas, not absolute time.** Compare `(now - start)` rather than `now > deadline`. The subtraction wraps correctly even when the counter does.
 
 The 21.5-second wrap is *fast* — long enough that you won't see it in a basic example, short enough that real applications hit it constantly.
@@ -4317,7 +4317,7 @@ You're now an optimization expert:
 
 - ✅ Understanding the P2 pipeline
 - ✅ Instruction timing knowledge
-- ✅ **REP** and **SKIP** for zero-overhead loops
+- ✅ **REP** for zero-overhead loops, **SKIP** for shared code paths
 - ✅ FIFO for maximum throughput
 - ✅ Parallel operation techniques
 - ✅ Real-world optimization strategies

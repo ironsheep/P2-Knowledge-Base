@@ -109,7 +109,13 @@ idle reads return the running total; a read after N clocks holds N-1 terms; read
 subtract (`pasm2/getxacc.yaml`). Owed under «#352» (its body names "Assembly's ... GETXACC ... entries"),
 never registered until now. **Fix:** at «#352».
 
-### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `CONFIRMED`
+### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `PARTIAL` (deSilva half applied 2026-10-05, ships in v3.0.9, staged; Assembly half owed)
+> **deSilva applied** (Chapter 12, strategy 1): a Rev C silicon-note chip — in a cog whose group of four had no
+> running cog at a wrap, the upper half comes back behind by one per missed wrap until the group's next wrap;
+> keep one cog of each group you use running from start-up. Source: `getct.yaml` silicon_errata (EF-068,
+> EF-075, EF-080). deSilva already reads WC first. Other errata swept against deSilva: E1 (no SETQ block
+> transfer with PTRx), E2 (its ALTD examples follow a completed `##` MOV, no pending AUGS), E7 (every RDFAST is
+> the waiting form) — none taught, none added. **Owed:** Assembly `instructions-g.md:110-116` («#385»).
 Outside the two changesets (P2 Errata E3, KB since v1.22.0), found while reading them.
 - deSilva `COMPLETE-OPUS-MASTER.md:4305-4309` recommends "Capture the full 64-bit count" (`GETCT D WC`)
   for schedulers over "minutes, hours, or days" with no caveat (`pasm2/getct.yaml` silicon_errata).
@@ -130,7 +136,9 @@ D18. DEBUG Window `ch14-multiwindow-pasm.md:132-135`; Assembly `part-iii/appendi
 `special-configuration-symbols.yaml` caveat: the stamp is the sending cog's own counter copy; a cog in a
 stale window stamps one wrap early and prints out of order. **Fix:** one sentence each.
 
-### F-532 — deSilva: "2/13-20 (hub-exec)" and "REP and SKIP for zero-overhead loops" — `CONFIRMED` (low)
+### F-532 — deSilva: "2/13-20 (hub-exec)" and "REP and SKIP for zero-overhead loops" — `RESOLVED` (low; applied 2026-10-05; ships in deSilva v3.0.9, staged)
+> **Applied** (Chapter 12): the loop comment reads "2/13+ (hub-exec)"; the summary bullet reads "REP for
+> zero-overhead loops, SKIP for shared code paths".
 `COMPLETE-OPUS-MASTER.md:3992` (C3; the same file's :3339 is right) and `:4320` (C12: each skipped
 instruction is a 2-clock NOP). **Fix:** "2/13+ (hub-exec)"; "REP for zero-overhead loops, SKIP for
 shared code paths".
