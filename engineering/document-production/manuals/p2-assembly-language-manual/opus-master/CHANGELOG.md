@@ -2,43 +2,43 @@
 
 ## v3.1.11 (2026-10-05)
 
-**Every explanation, register, directive and appendix is checked line by line against Parallax's documentation, and Rev C silicon notes mark silicon traps where you meet them.**
+**Every explanation, register, directive and appendix is checked against Parallax's documentation, and Rev C silicon notes mark each silicon trap where you meet it.**
 
 ### Added
 
-- **Rev C silicon notes** state how the current silicon behaves at the instruction concerned; Appendix J's new Silicon Notes section lists them all
-- **`GETCT WC` notes the idle cog-group window**: the upper half lags one per missed wrap; keep a cog of each group running
+- **Rev C silicon notes** state how the current silicon behaves, at the instruction concerned; Appendix J's Silicon Notes section lists them all
+- **`GETCT WC`'s upper half lags** in a cog whose group of four ran no cog at a counter wrap; keep one cog per group running
+- **`DEBUG_TIMESTAMP` stamps early** from a cog in such a group, so its messages print out of time order
 - **`GETXACC` clears only during a Goertzel burst**, and a burst's last term lands in the next: read before and after, and subtract
-- **`RDFAST`, `SETQ` and every hub read and write warn of the no-wait window**: start no hub instruction within 16 clocks
-- **`DEBUG_TIMESTAMP` notes that a cog in an idle group stamps its messages early**
-
-- **`BRK` explains that its condition gates only the code**, with the opposite-condition `SKIP #1` form that makes a break truly conditional
+- **After a no-wait `RDFAST`, start no hub instruction for 16 clocks** — stated at `RDFAST`, `SETQ` and every hub read and write
+- **`BRK` explains that its condition gates only the code**, with the opposite-condition `SKIP #1` form that makes a break conditional
 - **`QDIV` and `QFRAC` state what a divide by zero returns**, and `QFRAC` that its quotient is a fraction of 2^32^
 - **`HUBSET` documents all five of its modes**, and the clock-switching procedure that avoids a PLL glitch
 - **Every `J` event branch states that the event flag is cleared whether or not it jumps**
 
 ### Changed
 
-- **The 64-bit `GETCT` example reads the upper half first**, with `GETCT WC`, then the lower half
+- **The 64-bit `GETCT` example reads the upper half first**, with `GETCT WC`, then the lower half, the pairing that gets the full counter
 - **Chapter 4 allows 5 ms for a crystal and 10 ms for crystal plus PLL**, as `HUBSET` does
-- **`HUBSET` with D[31] set seeds the random-number generator**; a hard reset is `HUBSET ##$1000_0000`. The PLL example keeps the VCO within its 100-200 MHz range
+- **`HUBSET` with D[31] set seeds the random-number generator**; `HUBSET ##$1000_0000` is a hard reset; the PLL example keeps the VCO at 100–200 MHz
 - **The hardware stack is eight levels deep**: `PUSH` adds a new top entry, and `PUSH`/`POP` must balance before `RET`
-- **`REP`'s instruction count is 0-511 in every form**; only the repeat count extends with `##` or a register. The `@label` form counts the body exactly
+- **`REP` counts 0–511 instructions in every form**; only the repeat count extends with `##` or a register, and `@label` counts the body exactly
 - **`ORG` with an address below `$200` defaults its limit to `$1F8`**
-- **`JQMT`, `JXMT`, `JXRL`, `JXFI` and `JINT` give each event's exact trigger**; `SETSE` configures pin, LUT and lock events; `SETPAT` reads C and Z as inputs
-- **A block transfer whose `SETQ` is separated from it takes the pointer expression's own step** (+4 for `ptra++`, +12 for `ptra++[3]`); keeping the two adjacent is the workaround
+- **`JQMT`, `JXMT`, `JXRL`, `JXFI` and `JINT` give each event's exact trigger**; `SETSE` covers pin, LUT and lock events; `SETPAT` reads C and Z
+- **A block transfer whose `SETQ` is separated from it steps the pointer by its own expression** (+4 for `ptra++`); keep the two adjacent
 - **An immediate `ALTx` that takes a pending `AUGS` moves its own D register** by the augment's bits 17:9, while its base is kept
-- **Many explanations are corrected**:
+- **These explanations now read as Parallax documents them**:
   - `RESIx`, `RET` pairing, `RFVAR` length, `RDPIN`'s one-`NOP` settle
   - `SAR` for signed values, `SKIPF` cancel cases, `WRFAST` waiting, `XCONT` from idle
   - the streamer's S operand, `WXPIN`/`WYPIN` roles, `WAITX` flags
   - `COGATN`'s 16-bit mask, `GETRND`'s shared generator, `LOCKREL`, `NIXINT`, `MUXQ`
   - `MIXPIX`'s formula, `QMUL` unsigned, `EXECF` as a jump, `IRETn` holding C and Z
-- **Directives**: the `ORGH` range for PASM-only programs, `DITTO`'s no-labels rule, the `FIT` limit labels and the inline-PASM toggle example are corrected
-- **Appendix H recounts to 864 reserved words** and adds `FIELD`, `SIZEOF`, `GRAY` and the cooperative-tasking symbols; `PI`, `HUBEXEC` and `DITTO` are described correctly, and the `DEBUG_*` configuration names note that a program uses them by declaring them in a `CON` block
+- **Directives** state the `ORGH` range for PASM-only programs, `DITTO`'s no-labels rule, the `FIT` limit labels and a working inline-PASM toggle
+- **Appendix H counts 864 reserved words**, adding `FIELD`, `SIZEOF`, `GRAY` and the cooperative-tasking symbols
+- **Appendix H describes `PI`, `HUBEXEC` and `DITTO`**, and that a program uses a `DEBUG_*` configuration name by declaring it in `CON`
 - **The Appendix E `DEBUG_COGS`, `DEBUG_TIMESTAMP`, `DEBUG_MAIN` and `DEBUG_COGINIT` examples are complete Spin2 programs**, and the Chapter 2 and 3 examples assemble
-- **Appendix A gives the original base bit as the C and Z result of the `DIRx`, `DRVx`, `FLTx` and `OUTx` families**, in every row of those families
-- **`RDLONG`, `RDWORD`, `WRLONG`, `WRWORD`, `WMLONG`, `PUSHA`, `PUSHB`, `POPA`, `POPB`, `CALLA`, `CALLB`, `RETA` and `RETB` state the extra clock when the access crosses a hub long**, in Appendix A and in each entry
+- **Appendix A gives the original base bit as the C and Z result** in every `DIRx`, `DRVx`, `FLTx` and `OUTx` row
+- **Hub accesses that cross a hub long take one more clock** — stated for `RDLONG`, `RDWORD`, `WRLONG`, `WRWORD`, `WMLONG`, `PUSHx`, `POPx`, `CALLA`/`CALLB` and `RETA`/`RETB`
 - **`COGSTOP` selects its cog by `D[3:0]`**; `COGID` with `WC` and `COGBRK` read the cog number from `Dest[2:0]`
 - **Condition tests are written with `==`** throughout, distinct from `=` for a value received
 
