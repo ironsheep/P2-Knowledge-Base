@@ -43,7 +43,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Getting Started** | manual | **✅** ²¹ | **✅** ²¹ | **✅** ²¹ | **✅** ¹⁰ | — |
 | **I/O & Smart Pins** | manual | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ²³ | **✅** ³³ |
 | **Assembly Reference** | manual | **✅** ⁹ ¹⁶ ²⁴ | **✅** ⁹ | **✅** ⁹ | — | **✅** ³⁴ |
-| **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | 🔧 |
+| **DeSilva Tutorial** | manual | **✅** ²² | **✅** ²² | **✅** ²² | **✅** ¹⁰ | **✅** ³² |
 | **Debug Window** | manual | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ¹⁰ | **✅** ²⁹ |
 | **Streamer Guide** | manual | **✅** ⁷ | **✅** ⁸ | ✅ | — | **✅** ³⁰ |
 | **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — | — |
@@ -611,6 +611,11 @@ after the 05:19 build sent the WMLONG entry a page early (fixed in `content.sty`
 = prior). Two chips (DAC-mode ADC feedback: OUT runs the ADC only with TT bit 0 set) render inline on p161
 (§10.6) and p284 (§18.4), rendered and read; two notes, so no index. `p2kb-platform-silicon-notes` sits
 before tables in `request.json`.
+
+³² **DeSilva Tutorial — silicon notes proven on the released v3.0.9 PDF, 2026-10-05** (20:36 build, 171pp,
+prior 168). One chip (the 64-bit `GETCT` in an idle cog group, Chapter 12) renders inline on p117, rendered
+and read; one note, so no index (`pdf-silicon-notes` CLEAN). `p2kb-platform-silicon-notes` sits before
+tables in `request.json`.
 
 ³¹ **XBYTE Guide — all four proven on the released v1.1.1 PDF, 2026-10-05** (02:41 build, 115pp, prior
 114). **Metadata single-source + rights:** page 1 reads "October 2026", "Version 1.1.1" from `\DocDate`/

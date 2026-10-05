@@ -98,7 +98,7 @@ audit, see their notes).
 
 F-526 (sync TX primes in reset, EF-090) and F-540 (`##` takes a skip-pattern bit, EF-091) are DONE and archived — `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`.
 
-### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `RESOLVED` (Assembly half released in v3.1.11, 2026-10-05, verified on the PDF: page 214; deSilva half ships in v3.0.9, render in progress)
+### F-529 — GETCT 64-bit capture taught without the stale-upper-long erratum (deSilva, Assembly); Assembly also reads the halves in the wrong order — `DONE` (Assembly half released in v3.1.11, 2026-10-05, verified on the PDF: page 214; deSilva half released in v3.0.9, 2026-10-05, verified on the PDF: page 117)
 > **Assembly applied** (`instructions-g.md` GETCT): the example reads `GETCT WC` first, then plain `GETCT`
 > ("GETCT WC + GETCT gets full CT" — P2 Datasheet :2084, PASM2 Manual; GETCT+WC interrupt-shielding,
 > Silicon Doc :2349), plus a Rev C chip with the keeper-cog workaround. Compiled clean (pnut-ts).
@@ -118,7 +118,7 @@ Outside the two changesets (P2 Errata E3, KB since v1.22.0), found while reading
 **Fix:** WC first in Assembly; both state the E3 window and its keeper-cog workaround (or point to P2
 Errata E3). Assembly half under «#352».
 
-### F-532 — deSilva: "2/13-20 (hub-exec)" and "REP and SKIP for zero-overhead loops" — `RESOLVED` (low; applied 2026-10-05; ships in deSilva v3.0.9, staged)
+### F-532 — deSilva: "2/13-20 (hub-exec)" and "REP and SKIP for zero-overhead loops" — `DONE` (low; released in deSilva v3.0.9, 2026-10-05, verified on the PDF: pages 110-112, 117)
 > **Applied** (Chapter 12): the loop comment reads "2/13+ (hub-exec)"; the summary bullet reads "REP for
 > zero-overhead loops, SKIP for shared code paths".
 `COMPLETE-OPUS-MASTER.md:3992` (C3; the same file's :3339 is right) and `:4320` (C12: each skipped
@@ -8530,7 +8530,7 @@ for the choice, not a resolution of it.
 > part: F-277's site sits in body text no Sprint 2 task touched. A findings-driven sweep sees the
 > diff; it does not see the document.
 
-### F-276 — deSilva Appendix A grounds the P2's value in "missed deadlines," an argument that fails against the reader it is aimed at. `PARTIAL — all three sites corrected in opus-master (Appendix A 2026-08-17, the two residual shapes 2026-08-25 «#301»); render + release owed` → **`DONE` — shipped in deSilva v3.0.7 (2026-09-10) and v3.0.8 (2026-09-22); status flipped 2026-09-28**
+### F-276 — deSilva Appendix A grounds the P2's value in "missed deadlines," an argument that fails against the reader it is aimed at. — `DONE` (shipped in deSilva v3.0.7, 2026-09-10, and v3.0.8, 2026-09-22; all three sites corrected in opus-master — Appendix A 2026-08-17, the two residual shapes 2026-08-25 «#301»; status flipped 2026-09-28; token normalised 2026-10-05 so the register reads it as closed)
 
 **Location:** `manuals/p2-pasm-desilva-style/opus-master/COMPLETE-OPUS-MASTER.md` — §*"What You Are
 Buying With That"* (`:5993-6001`), with the same shape at `:225`, `:6001`, `:6049`.

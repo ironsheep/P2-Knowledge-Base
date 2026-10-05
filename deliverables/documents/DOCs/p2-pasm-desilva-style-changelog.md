@@ -1,5 +1,49 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.9 (2026-10-05)
+
+**Every example does what its comments say, and every number matches the 200 MHz clock the book assumes.**
+
+### Added
+
+- **A Rev C note on the 64-bit `GETCT`** (Chapter 12): keep one cog of each group you use running from start-up
+- **Mailboxes say what they can and cannot carry** (Chapters 2, 16): one writer, one reader, one message; the reader's clear can race the next write
+- **The CORDIC pipeline rule**: keep hub reads and writes out of the fill and the drain, or results come back wrong with no warning
+- **A `SETSE` edge can be missed**: a byte that arrived before `SETSE` ran has already raised IN — check it with `TESTP` first
+
+### Changed
+
+- **The fast screen clear fills with an immediate value** (Chapter 4) and fits the hub; a register there copies cog registers
+- **A conditional instruction whose condition is false costs two clocks**, whatever it would have cost to run
+- **The CORDIC batch and spiral examples run as described**: register-only fill and drain, and a spiral that stays on screen
+- **The servo, streamer and audio-filter examples run as described**: servo pulses timed from the frame start, `RDFAST` feeding the streamer, `SAR` for signed samples
+- **A 2 KB block move goes through the LUT** with `SETQ2`
+- **Timing constants are given at 200 MHz** throughout Chapters 14 and 15
+- **`QDIV` is unsigned**; `MUL` gives the full 32-bit product of two 16-bit values; `RFLONG`, `QROTATE` and `QDIV` timings match the silicon
+- **The Edge modules carry 16 MB of flash** (and 32 MB of PSRAM on the P2-EC32MB); the mini breakout brings out 40 pins
+- **Power saving comes from `WAITINT`**, and hub-exec code space is bounded by the 512 KB hub
+- **A labelled data definition is a global label**, so it starts a new local-label scope; unlabelled data does not
+- **The `GETCT` timing examples agree**: the difference of two back-to-back `GETCT`s includes 2 clocks of measurement overhead
+- **An unaligned long that crosses a hub long boundary costs one extra clock** (Chapter 4)
+- **`P_OE` goes on every smart-pin output mode** — but not on a plain cog DAC pin, where that bit picks the DAC channel instead
+- **The UART examples' baud word**: `WXPIN` takes the clock divisor in the upper half, bits-minus-one in the lower; the transmitter waits two clocks after `WYPIN`
+- **Smart pins are configured while DIR is low**, and a `WRPIN` with DIR high gives unpredictable behavior
+- **`QFRAC` states its range**: D less than S; use `QDIV` for a quotient of 1 or more
+- **A `QROTATE` with no `SETQ`** is a polar-to-cartesian conversion with Y = 0 (the spiral example)
+- **The lock example's `lock_id` comment says to claim the lock with `LOCKNEW` first**
+- **Hub addresses in PASM use `##label`** where a 9-bit immediate cannot reach
+- **What `_clkfreq` alone assumes**: a 20 MHz crystal with the PLL worked out; with no clock declaration, a non-DEBUG program runs on RCFAST
+- **Reading eight pins is one `INA` read and a mask**, not a pin-by-pin `TESTB` loop
+- **A literal `#` LUT address reaches only 0-255**; 256-511 go through a register
+- **The serial receiver's start-bit test is `if_nc`**: the line idles high and the start bit is low
+- **`main_app` waits on an empty mailbox** and clears the slot with `WRLONG #0` once the message is collected
+- **The interrupt example sets `IJMP1`** to its handler before the main code carries on
+- **The block-fill exercise hints at the right tool**: a block `WRLONG` with an immediate first operand fills, while a register first operand copies cog registers
+- **Small wording matches the instruction set**: nine everyday instructions, `RET` as a 4-clock branch, and `MERGEB` merging the bits of bytes
+- **Smart-pin mode counts read "any of the other smart pin modes"**, and the reset step reads "configure only while DIR is low"
+- **The index points at the chapters that teach each topic**
+- **A hub-exec branch costs 13+ clocks** in the Chapter 12 loop timing; the summary credits `REP` with zero-overhead loops, `SKIP` with shared code paths
+
 ## v3.0.8 (2026-09-22)
 
 **A lock nobody claimed spins forever, a counter target fires once the counter has passed it, and the Eval board lights its LED the other way round.**
