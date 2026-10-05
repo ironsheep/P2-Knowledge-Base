@@ -2409,7 +2409,7 @@ The pattern in that table: nearly every emulator keeps the dispatch asset (`EXEC
 
 Two pieces of first-party code are the best primary sources here.
 
-- **The XBYTE demo** — in Parallax's `propeller` repository on GitHub (`https://github.com/parallaxinc/propeller`), at `resources/FPGA Examples/xbyte.spin2`. About sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 9.
+- **The XBYTE demo** — in Parallax's `propeller` repository on GitHub (<https://github.com/parallaxinc/propeller>), at `resources/FPGA Examples/xbyte.spin2`. About sixty lines: it loads a table, primes the FIFO, arms the engine, and runs five bytecodes. It also carries Parallax's own clock-by-clock account of the dispatch cycle, which is the source for Chapter 9.
 - **The Spin2 interpreter** — the language's own bytecode engine, and the most complete XBYTE program available to study. It is where the compression mode, the F bit, and one-shot `SETQ2`-as-grammar (§18.4) are all put to full use.
 
 ## C.2 P2 Arc8de — eight 8080 arcade machines on one P2 {#sec-c-2}

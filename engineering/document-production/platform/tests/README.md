@@ -93,3 +93,22 @@ document order, and nothing else is tagged or indexed.
 Request: template `p2kb-debugwin.latex` (with `p2kb-debugwin-local.sty` and the two
 platform `.sty`), filters `figures, silicon-notes, tables, mnemonic-bold, code-coloring,
 pagination`, pandoc args `--top-level-division=chapter --toc --toc-depth=2`.
+
+---
+
+## `mnemonic-skip-test.md` — `p2kb-platform-mnemonic-bold.lua` (the word "skip")
+
+**Proves:** a lowercase "skip" reads as English in the noun phrase "skip pattern(s)" and as a verb
+after a subject or modal ("patterns skip", "may skip"), while the instruction cases still uppercase
+and an author's own uppercase "SKIP pattern" is left as written.
+
+| Case | Expect |
+|---|---|
+| `CASE-NOUN-1/2` · "skip pattern(s)" | **lowercase** — the fix |
+| `CASE-VERB-1/2` · "patterns skip", "may skip" | **lowercase** — the fix |
+| `CASE-CTL-1/2` · "can skip the", "to skip over" | **lowercase** — English before the change; must not regress |
+| `CASE-NEG-1/2/3` · "Use skip with", "The skip instruction", "skipf, skip works" | **SKIP** — still the instruction |
+| `CASE-UPPER-1` · "The SKIP pattern" | **SKIP** — as written |
+
+**Expected result:** read each `CASE-` line in `output.tex`. First proven 2026-10-05, run
+`mnemonic-skip-v1`: all ten as expected. Same request as the silicon-notes fixture.

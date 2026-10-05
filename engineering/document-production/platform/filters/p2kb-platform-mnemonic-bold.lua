@@ -421,6 +421,22 @@ local function is_english_context(word, prev_word, next_word, suffix)
     if prev == "to" or prev == "will" or prev == "can" then
       return true
     end
+    -- Only a LOWERCASE "skip" gets the two rules below: an author who writes
+    -- "SKIP pattern" means the instruction's, and it is left as written.
+    -- "skip pattern(s)" is the domain's noun phrase (the bits EXECF/XBYTE hand to
+    -- SKIPF are a "skip pattern" too); it printed as "SKIP pattern" 31 times in the
+    -- XBYTE guide v1.1.0, naming an instruction the sentence was not about.
+    if word == "skip" and (next == "pattern" or next == "patterns") then
+      return true
+    end
+    -- After a subject or a modal it is the verb: "three of the four patterns skip",
+    -- "which it may skip". (XBYTE v1.1.1 first build printed "patterns SKIP".)
+    if word == "skip" and (prev == "patterns" or prev == "pattern" or prev == "bits" or
+       prev == "it" or prev == "they" or prev == "which" or prev == "that" or
+       prev == "would" or prev == "may" or prev == "might" or prev == "must" or
+       prev == "not" or prev == "does" or prev == "cannot") then
+      return true
+    end
     if next == "the" or next == "a" or next == "over" or next == "to" then
       return true
     end
