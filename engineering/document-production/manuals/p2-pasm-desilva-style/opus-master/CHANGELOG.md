@@ -2,7 +2,7 @@
 
 ## v3.0.9 (2026-10-05)
 
-**Every example does what its comments say on P2 silicon, and every number matches the 200 MHz clock the book assumes.**
+**Every example does what its comments say, and every number matches the 200 MHz clock the book assumes.**
 
 ### Added
 
@@ -21,13 +21,13 @@
 - **Timing constants are given at 200 MHz** throughout Chapters 14 and 15
 - **`QDIV` is unsigned**; `MUL` gives the full 32-bit product of two 16-bit values; `RFLONG`, `QROTATE` and `QDIV` timings match the silicon
 - **The Edge modules carry 16 MB of flash** (and 32 MB of PSRAM on the P2-EC32MB); the mini breakout brings out 40 pins
-- **Power saving is `WAITINT`'s**, and the hub is 512 KB — which is why hub-exec is no longer billed as "unlimited" code space
+- **Power saving comes from `WAITINT`**, and hub-exec code space is bounded by the 512 KB hub
 - **A labelled data definition is a global label**, so it starts a new local-label scope; unlabelled data does not
 - **The `GETCT` timing examples agree**: the difference of two back-to-back `GETCT`s includes 2 clocks of measurement overhead
-- **An unaligned long that crosses a hub long boundary costs one extra clock** (Chapter 4), per the instruction table in Parallax's PASM2 Manual
+- **An unaligned long that crosses a hub long boundary costs one extra clock** (Chapter 4)
 - **`P_OE` goes on every smart-pin output mode** — but not on a plain cog DAC pin, where that bit picks the DAC channel instead
 - **The UART examples' baud word**: `WXPIN` takes the clock divisor in the upper half, bits-minus-one in the lower; the transmitter waits two clocks after `WYPIN`
-- **Smart pins are configured while DIR is low**, and a `WRPIN` with DIR high gives unpredictable behavior, as the P2 Documentation puts it
+- **Smart pins are configured while DIR is low**, and a `WRPIN` with DIR high gives unpredictable behavior
 - **`QFRAC` states its range**: D less than S; use `QDIV` for a quotient of 1 or more
 - **A `QROTATE` with no `SETQ`** is a polar-to-cartesian conversion with Y = 0 (the spiral example)
 - **The lock example's `lock_id` comment says to claim the lock with `LOCKNEW` first**
