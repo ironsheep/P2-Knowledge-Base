@@ -115,7 +115,7 @@ as the authoritative P2 source.
 
 | Tool | Parameters | What it does |
 |---|---|---|
-| `p2kb_get` | `query` (string, required) — natural language or an exact key | Returns one KB entry's content plus related items; ambiguous queries return suggestions. The result is JSON; the YAML is in its **`content`** field. |
+| `p2kb_get` | `query` (string, required) — natural language or an exact key | Returns one KB entry; ambiguous queries return suggestions. The result is JSON: the filtered YAML in **`content`**, plus `type`, `key`, `categories`, and `resolved_from` when an alias was used (MCP agent, 2026-10-07; the earlier `related` field is being removed). |
 | `p2kb_find` | `term`, `category` (strings, optional), `limit` (int, default 50) | No parameters: categories with counts. `term`: matching keys. `category`: keys in that category. |
 | `p2kb_refresh` | `flush` (bool, default false), `include_obex` (bool, default false) | Re-fetches the index and removes stale cache entries by index timestamps; `flush` wipes the whole content cache; `include_obex` also refreshes OBEX. |
 | `p2kb_version` | none | Diagnostic: `mcp_version`, `index_version`, index status (`total_entries`, `total_categories`, `total_aliases`, cache age), OBEX cache status. **Agreed additions** (not yet built): `filter_rule_id`, `filter_rule_source`, `filter_engine_version`, `filter_rule_refused` — agreement §7. |
@@ -164,15 +164,14 @@ The engine is certified against a KB-built bundle — the whole KB with expected
 golden vectors, rule variants — before either side releases: agreement §9. Live acceptance after
 release: agreement §10.
 
-## 10. Notes for the MCP agent — no reply needed
+## 10. Notes with the MCP agent — settled 2026-10-07
 
-**Build on these as written.** Reply only if one is wrong for the server; otherwise your
-certification report (agreement §9.3) is the next message we expect.
-
-1. Two contract points were tightened after your review: a **missing** rule block falls back to
-   last-good (not straight to built-in), the same as a refused one; and rule parsing is **strict**
-   (agreement §§3, 5).
-2. OBEX object YAMLs are KB files and get the same filter (agreement §5.1). If your OBEX tools fetch
-   them through a separate path, filter there too.
+1. A **missing** rule block falls back to last-good, the same as a refused one, and rule parsing is
+   **strict** (agreement §§3, 5). *Confirmed by the MCP agent.*
+2. OBEX object YAMLs are KB files and get the same filter (agreement §5.1). *MCP agent: not today —
+   after this sprint the OBEX objects go through the same fetch path, so the filter covers them.*
+   Until then the gap is nil in practice: the OBEX objects carry none of the §3 fields, and one
+   column-0 comment, in `_template.yaml`.
 3. The acceptance probes read only `content` from `p2kb_get` and the four named fields from
-   `p2kb_version`.
+   `p2kb_version`. *MCP agent: `p2kb_get`'s other fields are `type`, `key`, `categories`, and
+   `resolved_from` when an alias was used; `related` is being removed* (§5).

@@ -318,4 +318,30 @@ Doc-audit instrument output: §0.1 (2 findings, outside this sprint's surfaces).
 6. **Named unknowns** — what the certification run (§8) finds; a mismatch is diagnosed against both
    engines and absorbed as a dated revision if the agreement changes.
 
-Questions remaining: none (Q1, Q1a, Q2, Q3 resolved 2026-10-07).
+Questions remaining: none (Q1, Q1a, Q2, Q3 resolved 2026-10-07). The MCP agent answered the spec's
+§10 notes the same day (confirmed; OBEX objects join the filtered fetch path after this sprint;
+`p2kb_get` fields listed) — recorded in the spec, no reply owed.
+
+## Tasks — tag `delivery_filter_rule`
+
+**Dispatch:** `arbiter-serial` (project default; every task writes into the same few scripts and the
+validator). **Two-phase:** none — the engine's shape is fixed by the agreement, so no task's design
+is still open. **Environment:** all container-side except «#394»'s single Windows run (Stephen) and
+«#397» (MCP side); «#394» is ordered before the docs task so his run overlaps «#395».
+**Gate over the sprint's output:** «#396» runs every release gate before building the bundle, after
+every task that feeds it («#388»–«#395»).
+
+| Plan § | Deliverable | Task | seq |
+|---|---|---|---|
+| §1, §1a | agreement + spec | done before tasking | — |
+| §2 | index carries the rule | «#388» | 76 |
+| §3 (bash) | bash engine, rule read, cache stamp | «#389» | 77 |
+| §6 | golden vectors | «#390» | 78 |
+| §3a | no-`jq` fallbacks | «#391» | 79 |
+| §4 | refresh scripts use fetch-kb-file | «#392» | 80 |
+| §5 | gates read the rule from the index | «#393» | 81 |
+| §3 (ps1), §5b | PowerShell engine, Windows check, hash pin | «#394» | 82 |
+| §10 | documentation | «#395» | 83 |
+| §7 | certification bundle | «#396» | 84 |
+| §8 | MCP certification run | «#397» | 85 |
+| §9 | release and acceptance | «#398» | 86 |
