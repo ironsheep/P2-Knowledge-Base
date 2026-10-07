@@ -204,8 +204,8 @@ above is not compiled on the KB side (no Go toolchain here) — the bundle is th
 - **Hash before you filter** — unchanged: verify the raw body against the index's `sha256` (git-blob
   hash), then filter.
 - **Cache stamp = `rule_id` + the server's engine version.** On index refresh, if the stamp differs
-  from the one the cached bodies were filtered under, discard every cached body. This replaces the
-  manual flush the 2026-10-04 handoff required, and also covers an engine bug fix.
+  from the one the cached bodies were filtered under, discard every cached body. This covers both a
+  rule change and an engine bug fix, with no manual flush.
 - Per-entry `mtime` / `sha256` invalidation is unchanged.
 
 ## 7. `p2kb_version` additions (diagnostic)
