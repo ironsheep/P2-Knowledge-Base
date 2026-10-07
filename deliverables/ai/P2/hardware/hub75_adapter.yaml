@@ -31,7 +31,9 @@ specifications:
     Productions LLC (the board's manufacturer) --
     engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:15-33, :122-126;
     pin-offset map at
-    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-complete-pinout.md:8-27, :105-115.
+    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-complete-pinout.md:8-27, :105-115;
+    panel_clock_note from the board designer's HUB75Adapter.md "Specifications" note,
+    github.com/ironsheep/P2-HUB75-LED-Matrix-Driver.
   physical:
     pcb_dimensions: "1.9 x 2.8 inches (48 x 71 mm)"
     form_factor: "dual 2x6-pin female pass-through headers, 0.1 inch spacing"
@@ -39,7 +41,11 @@ specifications:
   electrical:
     operating_voltage: "+5 VDC, supplied by the P2 development board"
     board_consumption: "under 50 mA (level shifters and support circuitry)"
-    max_clock_rate: "70 MHz, limited by the level shifter ICs"
+    max_clock_rate: "70 MHz, limited by the level shifter ICs (2x 74HCT244)"
+    panel_clock_note: >-
+      The 70 MHz figure is the adapter's ceiling, not the panel's. Each panel's
+      LED driver chipset sets the clock rate it accepts, typically far below the
+      adapter's; the level shifters were chosen so the adapter is never the limit.
     level_shifting: "3.3 V to 5 V for all HUB75 signals; all signals are P2 outputs, so no bi-directional capability is required"
   address_line_support:
     - {lines: "A-B-C", scan: "8 row scan", panels: "16-row panels"}
@@ -50,48 +56,14 @@ specifications:
     - "P2 Edge Module Breadboard (#64020) with a P2 Edge Module (#P2-EC)"
     - "P2 Edge Mini Breakout Board (#64019) with a P2 Edge Module (#P2-EC)"
   pin_budget: "uses 14 of the 16 pins in a dual-header block; offsets 14 and 15 are spare"
-  gap_max_clock: >-
-    The KB previously shipped "40 MHz max (35 MHz reliable), 13 ns propagation
-    delay, 2x 74HCT244". Only the level-shifter part number survives elsewhere in
-    this file; the 40/35 MHz and 13 ns figures appear in NO ingested source, and
-    the manufacturer's own specification says 70 MHz. They were removed rather
-    than reconciled. What would settle it: a level-shifter datasheet or a measured
-    result in the hardware-verification ledger.
 
 software_features:
-  source: >-
-    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
-    Productions LLC, "Software Support" and "Performance Specifications" --
-    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:144-192.
-    gap_pulse_widths: the ISP HUB75 driver documentation would be ingested into
-    engineering/ingestion/sources/.
-  driver: "ISP HUB75 Driver (P2 OBEX / GitHub) - see resources"
-  capabilities:
-    - "Multiple panel support (daisy-chain and grid configurations)"
-    - "Automatic panel detection"
-    - "PWM brightness control (0-255 levels)"
-    - "Color correction and gamma adjustment"
-    - "Double-buffering for flicker-free updates"
-    - "Text rendering with multiple fonts"
-    - "Graphic primitives (lines, circles, rectangles)"
-    - "BMP image display support"
-  measured_refresh_rates:
-    note: "typical, 24-bit colour, with the P2 at 200 MHz"
-    rates:
-      - {panel: "32x32", refresh: "120 Hz"}
-      - {panel: "64x32", refresh: "100 Hz"}
-      - {panel: "64x64", refresh: "60 Hz"}
-      - {panel: "128x64", refresh: "30 Hz"}
-  bandwidth_model: >-
-    Bandwidth = Width x Height x Colors x RefreshRate x ScanRate. Worked example
-    for a 64x32 panel: 64 x 32 x 3 bytes x 100 Hz x (1/16 scan) = 38.4 KB/s.
-  gap_pulse_widths: >-
-    The KB previously shipped clock/latch/OE pulse-width minimums (15 ns / 200 ns
-    / 100 ns) and a per-panel refresh table keyed on 3-bit and 8-bit colour depth.
-    No ingested source states either. They were removed rather than reconciled.
-    What would settle it: ingesting the ISP HUB75 driver's own documentation
-    (github.com/ironsheep/P2-HUB75-LED-Matrix-Driver) into
-    the ingestion sources.
+  driver: >-
+    Drive this board with the ISP HUB75 Matrix Driver (OBEX 2850; see
+    resources). The driver is configured for the LED driver chipset of the panels
+    on each adapter; its API, configuration, supported chipsets, timing and
+    performance are the driver's, documented with it, and change with its
+    releases -- this entry does not restate them.
 
 notes:
   source: >-
@@ -105,13 +77,7 @@ notes:
     - "Panel scan patterns follow the address lines fitted: A-B-C is a 1/8 scan, A-B-C-D a 1/16 scan, A-B-C-D-E a 1/32 scan."
     - "Panels are daisy-chainable for larger displays."
     - "Use thick power cables (18 AWG or larger), distribute power injection across multiple panels, and add capacitors near panel power inputs."
-    - "Maximum clock rate is 70 MHz, set by the level shifter ICs."
-  gap_chain_limit: >-
-    The KB previously shipped "Maximum 3 chains supported (3 adapter boards)" and
-    "Driver does not use P2 streamer (bit-bang approach)". Neither is in any
-    ingested source, and the pinout capture argues the other way for the second
-    ("6-bit parallel data perfect for P2 streamer"). Both removed rather than
-    reconciled. What would settle it: the ISP HUB75 driver documentation, ingested.
+    - "Maximum clock rate is 70 MHz, set by the level shifter ICs; the panel's own chipset usually sets a lower limit (see specifications.electrical.panel_clock_note)."
 
 # --- Eval-header board model (uniform across all eval-header occupants) ---
 eval_header_occupant: true
@@ -167,51 +133,6 @@ supported_panels:
     - P4     # 4mm spacing
     - P5     # 5mm spacing
     - P6-P10 # 6-10mm spacing
-
-led_driver_chips:
-  # Chips requiring special initialization
-  with_init:
-    FM6126A:
-      init_required: true
-      registers: [11, 12]
-      features:
-        - Magic bit sequence initialization
-        - Control register programming
-        - Brightness control
-
-    FM6124:
-      init_required: false
-      latch_style: enclosed
-
-    MBI5124GP:
-      init_required: true
-      features:
-        - Special reset sequence
-
-  # Chips with timing variations
-  timing_variants:
-    ICN2037:
-      latch_style: enclosed
-      slow_clock: true
-
-    ICN2038S:
-      latch_style: enclosed
-      slow_clock: true
-
-    DP5125D:
-      latch_style: standard
-
-    GS6238S:
-      latch_style: standard
-
-  # Unknown/generic chips
-  generic:
-    UNK_LAT_END_ENCL:
-      latch_style: enclosed
-
-    UNK_LAT_END_ENCL_SLO_CLK:
-      latch_style: enclosed
-      slow_clock: true
 
 compatibility:
   p2_boards:

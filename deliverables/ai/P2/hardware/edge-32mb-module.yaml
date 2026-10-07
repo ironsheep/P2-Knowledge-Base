@@ -339,7 +339,7 @@ code_patterns:
         psram : "psram"
 
       PUB main() | err
-        err := psram.start()                  ' Initialize PSRAM driver (uses 1 cog)
+        err := psram.start()                  ' Initialize PSRAM driver
         IF err >= 0
           psram.write(@src_buf, $100000, 1024)  ' Write 1KB to address 0x100000
           psram.read(@dst_buf, $100000, 1024)   ' Read it back

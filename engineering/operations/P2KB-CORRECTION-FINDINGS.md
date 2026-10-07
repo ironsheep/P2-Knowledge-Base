@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-548`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-549`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,21 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/05) — F-546, F-547
+## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546, F-547, F-548
+
+### F-548 — `hardware/` entries restate their drivers (API, timing, cog use, chipset tables), which every driver release can falsify — `CONFIRMED` (class sweep owed)
+Found 2026-10-07 re-scoping F-354. Stephen's ruling: a hardware entry carries the board — pinout, pin
+budget, voltages, level shifting, the board's published ceiling — and names its driver; the driver's
+API, configuration, timing and resource use are the driver's (`.claude/doctrine-overlay.md`, *A
+hardware entry carries the board, not the driver that runs it*). `hub75_adapter.yaml` was brought to
+that shape under F-354. Known remaining instance: `edge-32mb-module.yaml` `code_patterns` (a
+`psram.spin2` API restatement) and `protocol_constraints.psram` "Recommended driver settings"
+(sysclk/N rates, burst formula), plus `resources` driver-feature lists and `advantages` driver
+claims. 18 of 29 `hardware/` YAMLs mention "driver"; that is a mention count, not a defect count —
+each needs reading. **Fix:** per file, keep board facts (the PSRAM chip's own 133 MHz and 8 µs CE#
+limits are chip facts and stay), replace driver restatement with a pointer to the driver's OBEX
+entry; before removing anything, run the search in *"Unsourced" is a finding about our search* so
+board facts are told apart from driver facts.
 
 ### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `CONFIRMED` (next KB release)
 Found 2026-10-05 re-verifying F-443 («#386»). `language/spin2/operators/op_addlt.yaml` (`+<`), `op_addgt.yaml`
@@ -1913,25 +1927,38 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > `language/spin2/methods/getct.yaml description` — is outside this tree and belongs to «#299», so
 > **58** were in scope here. Every line number below was read off disk 2026-08-25.
 
-### F-354 — seven content-level holes inside blocks that DID come back, and one held block whose content is only three-quarters in the ingestion tree — `CONFIRMED`
+### F-354 — eight content-level holes in the repopulated `hardware/` blocks: the five driver-shaped ones are closed by removal (2026-10-07); three Parallax-board facts still need a schematic or drawing — `PARTIAL`
 
 > **Why these are not "gaps" in the three-number sense.** Every ACTIONABLE block returned. What did
 > not return is *material inside* those blocks — figures the KB shipped that no ingested source
-> states. Each is recorded in the YAML itself, at the point of use, with what would settle it, so a
-> reader meets the hole where the fact would have been rather than in a register they may not open.
+> states. Each open one is recorded in the YAML itself, at the point of use, with what would settle
+> it, so a reader meets the hole where the fact would have been.
 >
-> | Hole | Where it is recorded | What would settle it |
-> |---|---|---|
-> | HUB75 max clock **40 MHz (35 MHz reliable)** and **13 ns propagation delay** | `hub75_adapter.yaml` `specifications.gap_max_clock` | A level-shifter datasheet, or a measured result in `P2-EMPIRICAL-FINDINGS.md`. ⚠️ The manufacturer's own capture says **70 MHz** (`p2-hub75-adapter-official-specs.md:22`) — the two differ by ~2x and the KB now carries only the sourced figure. |
-> | HUB75 **clock/latch/OE pulse-width minimums** (15 ns / 200 ns / 100 ns) and the 3-bit/8-bit refresh table | `hub75_adapter.yaml` `software_features.gap_pulse_widths` | Ingesting the ISP HUB75 driver's own documentation into `engineering/ingestion/sources/`. |
-> | HUB75 **"maximum 3 chains"** and **"driver does not use the P2 streamer"** | `hub75_adapter.yaml` `notes.gap_chain_limit` | Same ingestion. The pinout capture argues the opposite for the second (`p2-hub75-adapter-complete-pinout.md:90`, "6-bit parallel data perfect for P2 streamer"). |
-> | HUB75 **board current 35 mA @ 35 MHz** and the per-panel typical currents | `hub75_adapter.yaml` `power_requirements` is HELD, but its ingestion home states **under 50 mA** and **1-2 A** where the KB said 35 mA and 1.5 A (`p2-hub75-adapter-official-specs.md:126`, `:131-136`) | Same ingestion. The held block's numbers are NOT the ingestion tree's numbers — a re-check before anyone quotes the removed values from git. |
-> | **"One cog consumed by the PSRAM driver"** on the 32 MB module | `edge-32mb-module.yaml` `development_workflow.psram_driver_note` | The #P2-EC32MB guide neither ships nor describes a PSRAM driver. Ingesting the OBEX `psram.spin2` driver documentation would ground it (and the API already sitting in that file's `code_patterns`). |
-> | Whether the **#64013 RTC board carries its own SDA/SCL pull-ups** | `addon-rtc.yaml` `pin_mode_tip.scl_pull_up_caveat` | The #64013 board schematic (referenced by the guide, not ingested). |
-> | Numeric **PCB dimensions for the #64006 add-on boards** | `addon-goertzel-touch.yaml` `specifications.pcb_size_class` | The guide gives only a drawing and a three-size classification (`p2-eval-add-on-boards-text.txt:45-46`, `:381-396`); the drawing was never resolved to numbers. Re-cutting that page, or the board schematics. |
-> | `addon-serial-device.yaml` `specifications` — **the "3.3 V supply" item** | held block | `grep -n -i "3\.3 *v\|3v3"` over the whole #64006 guide and all eight per-board captures returns **one** hit, and it is the A/V board's audio tip. The mounting-hole figures (3.2 mm / 5 mm / 9.5 mm) ARE in the ingestion tree at `:39-42`; the supply voltage is not. Three-quarters held, one quarter a gap. What would settle it: the #64006 board schematics. |
+> **Re-scoped 2026-10-07 by Stephen's ruling** (he designed the HUB75 adapter): *"it is best that
+> we do not get too specific about the driver so we don't have to update every thing the driver
+> changes.. the api matters to code, the pinout matters to code."* A hardware entry carries the board
+> — pinout, pin budget, voltages, level shifting, the board's published ceiling — and names its
+> driver; the driver's timings, chain counts, cog use and chipset table are the driver's, and the
+> v4 HUB75 driver is coming. So a driver-shaped hole is closed by **removing the hole**, not by
+> sourcing the number (`.claude/doctrine-overlay.md`, *A hardware entry carries the board, not the
+> driver that runs it*). The entry previously said six of the eight needed documents this repo does
+> not hold; that was also wrong for the HUB75 rows — Stephen's driver repository is in
+> `engineering/ingestion/external-inputs/source-code/external-projects/p2-HUB75-LED-Matrix-Driver/`
+> (`THEOPS.md:149` states 1–3 adapters; nothing under `driver/` uses the streamer).
 >
-> Status: `CONFIRMED`.
+> | Hole | Disposition |
+> |---|---|
+> | HUB75 max clock **40/35 MHz**, **13 ns** | **CLOSED 2026-10-07.** Board fact, already sourced: the designer's spec says 70 MHz, limited by the 2x 74HCT244 (`p2-hub75-adapter-official-specs.md:22`). `gap_max_clock` deleted; `specifications.electrical.panel_clock_note` added from the designer's own note (HUB75Adapter.md "Specifications" note: the panel's chipset sets the clock, far below the adapter's ceiling). No datasheet needed. |
+> | HUB75 **pulse-width minimums**, 3/8-bit refresh table | **CLOSED 2026-10-07 — driver facts, out of scope.** `gap_pulse_widths` deleted with the rest of the driver restatement in `software_features` (feature list incl. a wrong "automatic panel detection" — the driver is configured per panel chipset — refresh rates, bandwidth model); replaced by a pointer to OBEX 2850. |
+> | HUB75 **"maximum 3 chains"**, **"no streamer"** | **CLOSED 2026-10-07 — driver facts, out of scope.** `notes.gap_chain_limit` deleted. The `led_driver_chips` table (the driver's per-chipset configuration) removed for the same reason. |
+> | HUB75 **board current 35 mA**, per-panel currents | **CLOSED (verified 2026-10-07).** The board's own draw ships sourced (`specifications.electrical.board_consumption`, "under 50 mA", `official-specs.md:126`); the held `power_requirements` block is gone from the tree; panel currents are the panel's. |
+> | **"One cog consumed by the PSRAM driver"** (32 MB module) | **CLOSED 2026-10-07 — driver fact, out of scope.** The `(uses 1 cog)` comment removed from `code_patterns.spin2.obex_driver_usage`. The rest of that file's driver restatement (`code_patterns`, `protocol_constraints` driver settings) is the class sweep **F-548**. |
+> | Whether the **#64013 RTC board carries its own SDA/SCL pull-ups** | **OPEN** — `addon-rtc.yaml` `pin_mode_tip.scl_pull_up_caveat`. A board fact that changes how it is connected. Needs the #64013 schematic (referenced by the guide, not ingested). |
+> | Numeric **PCB dimensions for the #64006 add-on boards** | **OPEN, low** — `addon-goertzel-touch.yaml` `specifications.pcb_size_class`. A board fact that matters to neither code nor connection; the guide gives a drawing and a three-size class (`p2-eval-add-on-boards-text.txt:45-46`, `:381-396`). Resolve the drawing to numbers, or let the size class stand. |
+> | `addon-serial-device.yaml` **"3.3 V supply"** | **OPEN** — held block. A board fact that changes how it is connected; the mounting holes are sourced (`:39-42`), the supply voltage is not. Needs the #64006 schematics. |
+>
+> Status: `PARTIAL` — five closed by removal (ship in the next KB release); three need Parallax
+> schematics or the drawing.
 
 ---
 
