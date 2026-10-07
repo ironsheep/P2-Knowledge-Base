@@ -2480,7 +2480,14 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 
 ## `object-image-dedup.yaml`'s map_caveat goes stale when pnut-ts 1.55.4 ships (2026-08-22) — F-320
 
-### F-320 — `p2kbSpin2ObjectImageDedup`'s `map_caveat` warns readers off .map labels that 1.55.4 makes correct, while the limitation that SURVIVES the fix is documented nowhere. `PARTIAL — the hold's conditions are met (pnut-ts 1.55.8; map_caveat rewritten and shipped); the SYMBOL INDEX per-source-file limitation is still documented nowhere and unmeasured on 1.55.8 (re-verified 2026-10-05 «#386»)`
+### F-320 — `p2kbSpin2ObjectImageDedup`'s `map_caveat` warns readers off .map labels that 1.55.4 makes correct, while the limitation that SURVIVES the fix is documented nowhere. `PENDING-VALIDATION` (closed by measurement 2026-10-07, «#387»; the one-clause addition ships with the next KB release)
+> **Measured 2026-10-07 on pnut-ts 1.55.8 — the limitation no longer survives.** The mirror-trap
+> fixture (F-436; `drv` forked into images #2 and #3) maps its DAT symbol `BUF` as **two** SYMBOL
+> INDEX rows — `BUF DAT #2 $00034` and `BUF DAT #3 $00068` — with an `Owner` column, and every
+> method likewise once per image. The per-source-file SYMBOL INDEX this entry recorded on 1.55.3
+> is gone, so there is nothing to document as a limitation (the KB carries the current edition
+> only). `map_caveat` now says SYMBOL INDEX lists a forked symbol once per image, beside the
+> ADDRESS INDEX clause it already had.
 
 **Origin.** `engineering/ingestion/external-inputs/p2kb-update-requests/P2KB-map-caveat-retraction-1.55.4.md`
 — an upstream request from the pnut-ts side proposing an amendment. Treated as **input, not

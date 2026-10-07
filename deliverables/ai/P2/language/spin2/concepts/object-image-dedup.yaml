@@ -137,8 +137,9 @@ verification:
     Its labels are reliable. Every instance appears, named by access path (A, A.LEAF, D[1],
     A.D[1].LEAF) with its source object and its own VAR base; each element of an OBJ array
     gets its own row; instances sharing an image are listed together against the shared
-    code/DAT range while keeping separate VAR blocks; and ADDRESS INDEX names the owning
-    image for every symbol.
+    code/DAT range while keeping separate VAR blocks; ADDRESS INDEX names the owning
+    image for every symbol; and SYMBOL INDEX lists a forked symbol once per image, each
+    with its owner and address.
     On a compiler old enough to print an `Objects:` line, trust that count and the DAT
     symbol addresses but not the instance/source labels beside them - identical copies,
     nested children, OBJ arrays and any OBJ declared after an array were mislabelled there.
