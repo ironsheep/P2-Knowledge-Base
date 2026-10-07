@@ -473,7 +473,15 @@ upstream request is a **lead, never an authority** (D3), so each claim below was
 sources this project holds before anything was applied. The two requests came out differently, and
 the difference is the point: one was confirmed by our own sources and applied; one was held.
 
-### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `PARTIAL — map_caveat applied 2026-09-19 and shipped; the two unreproduced byte pairs this entry says were dropped are still in object-image-dedup.yaml (:75, :99) (re-verified 2026-10-05 «#386»)`
+### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `PENDING-VALIDATION` (the last residue applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07.** The two byte pairs (`singleton_rule` "Objects 3 vs 2, 348 vs 216", and
+> `completeness_rule` "Objects 4, 372 … Objects 3, 240") were still in the file. Re-measured on
+> pnut-ts 1.55.8 with fresh fixtures, reading the `.map` SUMMARY: the mirror trap (one declaration
+> overridden, its sibling not) → **3 images, none shared, 136 Code/DAT bytes** vs both overridden →
+> **2 images, one shared, 92**; forwarding one of two DAT-sizing CONs → **4 images, none shared,
+> 176** vs adding the missing constant → **3 images, one shared, 124**. Both lines now state the
+> image counts (structure-determined) and the byte *relation*; the absolute bytes are
+> fixture-dependent and are not carried. Both relations already stood in `verification.measured`.
 
 `language/spin2/concepts/object-image-dedup.yaml` `map_caveat` tells readers the multi-instance
 `.map`'s instance-name/source-name columns are unreliable and to *"do NOT trust those labels."* The

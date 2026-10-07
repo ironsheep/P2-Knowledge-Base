@@ -72,7 +72,9 @@ forking_a_dat_region:
     program.
       OBJ  a : "drv" | MAX_B = 6
            b : "drv"                 ' <- forgot it here: two images, silently
-    Measured: Objects 3 vs 2, and 348 vs 216 bytes CODE/DATA, for that one omission.
+    Measured: 3 images with none shared, against 2 images with the driver's shared
+    when both declarations carry the override -- and more Code/DAT bytes, for that
+    one omission.
 
 cascade_through_tiers:
   description: |
@@ -96,8 +98,9 @@ cascade_through_tiers:
       CON  MID_A = 4                            ' MAX_B has no forwarding constant
       OBJ  lf : "leaf" | MAX_A = MID_A
       ' a caller needing MAX_B = 6 now cannot make the two declarations agree
-    Measured, forwarding one of two: Objects 4, 372 bytes, two driver images.
-    Adding the missing forwarding constant: Objects 3, 240 bytes, one image.
+    Measured, forwarding one of two: 4 images, two of them the driver's.
+    Adding the missing forwarding constant: 3 images, one driver image shared --
+    and fewer Code/DAT bytes.
   naming_gotcha: |
     Each tier needs a DISTINCT constant name. The self-named forward
     `leaf : "casc_leaf" | TAG = TAG` (same token both sides) fails to parse with
