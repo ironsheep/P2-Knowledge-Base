@@ -666,6 +666,7 @@ REPO_LOCATOR_PATTERN = re.compile(
     r'|\b[\w-]+-text\s*:\s*\d+'
     r'|(?<![\w$#%:/]):\d{2,5}(?:[-,]\d+)?\b'
     r'|\bv\d{2}\s*:\s*\d{2,5}\b'               # `v55:1718` -- the F-400 shorthand
+    r'|\(order \d+(?:,\s*\d+)*\)'              # `(order 154)` -- an instruction-sheet row number (F-557)
     r'|\b(?:SOURCE-ERRATA|P2KB-CORRECTION-FINDINGS|P2-EMPIRICAL-FINDINGS|'
     r'EXTERNAL-HARDWARE-FINDINGS|KNOWLEDGE-GAPS|APP-NOTE-DESIGN-DECISIONS)\.md\b')
 
