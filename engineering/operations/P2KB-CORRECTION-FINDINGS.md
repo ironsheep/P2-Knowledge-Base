@@ -89,7 +89,22 @@ limits are chip facts and stay), replace driver restatement with a pointer to th
 entry; before removing anything, run the search in *"Unsourced" is a finding about our search* so
 board facts are told apart from driver facts.
 
-### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `CONFIRMED` (next KB release)
+### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07.** `op_addlt`/`op_addlteq`/`op_addgteq`/`op_addgt` now state UNSIGNED and
+> name their signed and `.` siblings (v55 `:473`, `:476`, `:483`, `:486`); `op_lteqgt` states
+> SIGNED three-way, -1/0/1, no unsigned form, float return in CON (`:488`, `:505`). Each gained a
+> resolvable `source:`, `aliases:` (the index harvests aliases, not `keywords:`) and `related:`
+> to its siblings. `op_addlteqgt.yaml` **deleted**; nothing in the KB linked to it. **One
+> correction to this entry's own fix text:** v55's "CON only" column is not a restriction — it
+> carries footnotes `**`/`***` (`:504-505`): in CON, applied to floats, these return float values.
+> `<=>` compiles in PUB as well as CON, so "CON only" was not carried. **Proven on pnut-ts 1.55.8**
+> (CON-folded values read from the `.lst`): `3<=>5`=-1, `5<=>5`=0, `7<=>5`=1;
+> `$8000_0000 < 1`=-1 but `$8000_0000 +< 1`=0; `1 +> $8000_0000`=0; `$8000_0000 +>= $8000_0000`=-1;
+> `$FFFF_FFFF +<= 0`=0; `a := 3 +<=> 5` → `error: Expected an expression term (m172)`.
+> **Widened in the sweep:** `precedence.yaml` level 11 also listed `+<=>` and omitted the six
+> floating-point compares v55 puts at the same priority — now the 17 operators of `:472-488`, in
+> v55's order. The derived `sources/spin2-v51/complete-spin2-operators.md` (`:25`, `:164`) carries
+> a dated correction note instead of the `+<=>` row.
 Found 2026-10-05 re-verifying F-443 («#386»). `language/spin2/operators/op_addlt.yaml` (`+<`), `op_addgt.yaml`
 (`+>`), `op_addlteq.yaml` (`+<=`), `op_addgteq.yaml` (`+>=`), `op_lteqgt.yaml` (`<=>`) and `op_addlteqgt.yaml`
 (`+<=>`) each carry the one-line description `Signed/unsigned compare`, which tells an agent nothing about which.

@@ -45,9 +45,9 @@ precedence_table:
     type: "Bitfield/Pinfield"
     note: "Make bitfield (x | y<<5) / pinfield (x | y<<6)"
   - level: 11
-    operators: ["<", "+<", ">", "+>", "<=", "+<=", ">=", "+>=", "<=>", "+<=>", "==", "<>"]
+    operators: ["<", "+<", "<.", "<=", "+<=", "<=.", "==", "==.", "<>", "<>.", ">=", "+>=", ">=.", ">", "+>", ">.", "<=>"]
     type: "Compare/Equality"
-    note: "Signed/unsigned comparison and (in)equality — all one priority in v55"
+    note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority in v55 (spin2-v55-text.txt:472-488)"
   - level: 13
     operators: ["&&", "AND", "!&&"]
     type: "Logical AND"

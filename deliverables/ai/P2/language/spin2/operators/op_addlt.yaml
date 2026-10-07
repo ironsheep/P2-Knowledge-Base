@@ -1,5 +1,17 @@
 operator: "+<"
 type: operator
 description: |
-  Signed/unsigned compare
+  UNSIGNED less than. Returns -1 (true) or 0 (false).
+  The leading `+` selects the unsigned form: both operands are compared as unsigned
+  32-bit values. The signed form is `<`; the floating-point form is `<.`.
 category: Comparison
+source: >-
+  Parallax Spin2 Documentation v55, operator table --
+  engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:473 ("Unsigned less than
+  (returns 0 or -1)"); signed `<` at :472, floating-point `<.` at :474.
+aliases:
+  - "+<"
+  - "unsigned less than"
+related:
+  - language/spin2/operators/op_lt.yaml
+  - language/spin2/operators/op_ltdot.yaml
