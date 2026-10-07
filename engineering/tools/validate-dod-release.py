@@ -19,8 +19,11 @@ Exit codes:
     1 = Validation failures found
 """
 
+import hashlib
 import json
+import os
 import re
+import tempfile
 import sys
 import gzip
 import subprocess
@@ -36,33 +39,50 @@ INDEX_GZ_PATH = Path("deliverables/ai/p2kb-index.json.gz")
 YAML_BASE = Path("deliverables/ai/P2")
 HISTORY_FILE = Path("engineering/tools/.dod-validation-history.json")
 
-# Metadata filter pattern (must match fetch scripts exactly)
-# Update this if fetch scripts change!
-FILTER_PATTERN = re.compile(
-    r'^\s*(last_updated|enhancement_source|documentation_source|documentation_level|'
-    r'manual_extraction_date|source|sources|source_reference|verified_against):'
-)
+# The delivery filter's rule is read from the GENERATED INDEX -- the artifact every
+# receiver reads -- never from a copy held here. A copy per receiver is what let the
+# MCP server ship a stale filter (F-439). generate-p2kb-index.py's DELIVERY_FILTER
+# is the single source; contract MCP-DELIVERY-FILTER-HANDOFF.md §3 (format 1).
+_FIELD_NAME_RE = re.compile(r'^[A-Za-z0-9_]+$')
+_INDEX_RULE = None
 
-# Provenance written as a comment -- stripped by the same filter, for the same
-# reason, and classified here so an expected removal is not reported as a surprise.
-COMMENT_PROVENANCE_PATTERN = re.compile(r'^#\s*(Source|Sources|Extracted from|Verified against)')
 
-# Expected metadata fields that get filtered
-EXPECTED_FILTER_FIELDS = {
-    'last_updated',
-    'enhancement_source',
-    'documentation_source',
-    'documentation_level',
-    'manual_extraction_date',
-    # Added 2026-09-19: provenance is for this project's gates and auditors, never
-    # for the consuming agent. `source` is the one that was actually reaching
-    # consumers -- 177 files, 91 of them citing `engineering/` paths no consumer
-    # has. Public citations go too: an agent cannot open the Silicon Doc either.
-    'source',
-    'sources',
-    'source_reference',
-    'verified_against',
-}
+def index_filter_rule() -> Tuple[Optional[Dict], str]:
+    """(rule, problem) from the index's `delivery_filter`, validated as strictly as a
+    format-1 receiver must (agreement §3). rule is None when it is absent or invalid,
+    and problem says why -- the release fails on either (agreement §8.1)."""
+    global _INDEX_RULE
+    if _INDEX_RULE is None:
+        with open(INDEX_PATH) as f:
+            rule = json.load(f).get('delivery_filter')
+        problem = ''
+        if rule is None:
+            problem = 'the index carries no delivery_filter block'
+        elif not isinstance(rule, dict) or set(rule) != {'format', 'remove_fields', 'remove_column0_comments'}:
+            problem = 'delivery_filter must have exactly format / remove_fields / remove_column0_comments'
+        elif type(rule['format']) is not int or rule['format'] != 1:
+            problem = f"delivery_filter.format is {rule['format']!r}, not the integer 1"
+        elif type(rule['remove_column0_comments']) is not bool:
+            problem = 'delivery_filter.remove_column0_comments is not a boolean'
+        elif (not isinstance(rule['remove_fields'], list) or not rule['remove_fields']
+              or not all(isinstance(n, str) and _FIELD_NAME_RE.match(n) for n in rule['remove_fields'])
+              or len(set(rule['remove_fields'])) != len(rule['remove_fields'])):
+            problem = 'delivery_filter.remove_fields must be a non-empty list of unique literal names'
+        _INDEX_RULE = (None if problem else rule, problem)
+    return _INDEX_RULE
+
+
+def filter_rule_id(rule: Dict) -> str:
+    """rule_id per agreement §3.1 -- what every receiver computes for this rule."""
+    text = (f"p2kb-delivery-filter\nformat={rule['format']}\n"
+            f"remove_fields={','.join(rule['remove_fields'])}\n"
+            f"remove_column0_comments={'true' if rule['remove_column0_comments'] else 'false'}\n")
+    return hashlib.sha256(text.encode('utf-8')).hexdigest()
+
+
+def _rule_fields() -> Set[str]:
+    rule, _ = index_filter_rule()
+    return set(rule['remove_fields']) if rule else set()
 
 
 # =============================================================================
@@ -397,7 +417,7 @@ def _strip_provenance_keys(obj):
     removed as YAML KEYS (what YAML itself says is a key), not as lines."""
     if isinstance(obj, dict):
         return {k: _strip_provenance_keys(v) for k, v in obj.items()
-                if str(k) not in EXPECTED_FILTER_FIELDS}
+                if str(k) not in _rule_fields()}
     if isinstance(obj, list):
         return [_strip_provenance_keys(x) for x in obj]
     return obj
@@ -446,30 +466,36 @@ def _predicted_filtered(original: str) -> str:
     independent readings is evidence, and a disagreement is a finding about one of
     them. What it must never become again is the single source of the answer, which
     is what let the Python line-model and the shipped filter drift apart.
+
+    It is a transcription of the agreement's format-1 text (MCP-DELIVERY-FILTER-HANDOFF.md
+    §4), applied with the rule read from the index -- not of the awk.
     """
-    lines = original.split('\n')
+    rule, _ = index_filter_rule()
+    if rule is None:
+        return original
+    if original == '':
+        return ''
+    ws = ' \t\n\v\f\r'                       # POSIX [[:space:]], as the agreement says
+    fields = set(rule['remove_fields'])
+    col0 = rule['remove_column0_comments']
     kept = []
     dropping = False
     drop_indent = 0
-    comment_drop = False
-    for line in lines:
-        if comment_drop:
-            if re.match(r'^#\s+', line):
-                continue
-            comment_drop = False
+    for line in original.split('\n'):
         if dropping:
-            if line.strip() == '':
+            body = line.lstrip(ws)
+            if body == '' or body.startswith('#'):     # blank or comment: span continues
                 continue
-            indent = len(line) - len(line.lstrip())
-            if indent > drop_indent:
+            if len(line) - len(body) > drop_indent:    # deeper: still the field
                 continue
-            dropping = False
-        if COMMENT_PROVENANCE_PATTERN.match(line):
-            comment_drop = True
+            dropping = False                           # span ended; test this line
+        if col0 and line.startswith('#'):
             continue
-        if FILTER_PATTERN.match(line):
-            drop_indent = len(line) - len(line.lstrip())
-            dropping = True
+        indent = len(line) - len(line.lstrip(ws))
+        rest = line[indent:]
+        colon = rest.find(':')
+        if colon > 0 and rest[:colon] in fields:
+            drop_indent, dropping = indent, True
             continue
         kept.append(line)
     return '\n'.join(kept)
@@ -486,16 +512,23 @@ def _apply_shipped_filter(paths):
     Python line-model kept reporting 50 files broken that the real filter handles
     correctly. A gate must read the produced artifact, never a declaration of it
     -- and a gate that models the thing it checks will eventually check the model.
-    `FILTER_PATTERN` is retained only to classify WHICH field a removed line
-    belonged to, never to decide what gets removed.
+
+    The rule it applies is the INDEX's (passed as RULE_FIELDS / RULE_COL0, exactly
+    as fetch-kb-file.sh's load_filter_rule sets them), so the payload checked is
+    the payload a receiver of this index would deliver.
     """
     sh = Path("engineering/tools/p2kb/fetch-kb-file.sh").read_text()
     start = sh.index("filter_metadata() {")
     end = sh.index("\n}\n", start) + 3
     delim = "@@P2KB-FILTER-DELIM@@"
     driver = sh[start:end] + f'\nfor f in "$@"; do echo "{delim}$f"; filter_metadata < "$f"; done\n'
+    rule, _ = index_filter_rule()
+    env = dict(os.environ)
+    if rule is not None:
+        env['RULE_FIELDS'] = ','.join(rule['remove_fields'])
+        env['RULE_COL0'] = 'true' if rule['remove_column0_comments'] else 'false'
     proc = subprocess.run(["bash", "-c", driver, "bash"] + [str(x) for x in paths],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, env=env)
     if proc.returncode != 0:
         raise RuntimeError(f"shipped filter failed: {proc.stderr[:200]}")
     out, cur, buf = {}, None, []
@@ -540,6 +573,14 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     unexpected_changes = []
     structural_failures = []
 
+    rule, problem = index_filter_rule()
+    if rule is None:
+        result.fail(f"No usable delivery filter rule: {problem} -- every receiver reads "
+                    f"the rule from the index (MCP-DELIVERY-FILTER-HANDOFF.md §8.1)")
+        return result
+    result.info(f"Rule from the index: rule_id {filter_rule_id(rule)}")
+    fields = set(rule['remove_fields'])
+
     live, shipped = _shipped_payload()
 
     for key, path in live:
@@ -552,26 +593,24 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
         # filter itself rather than a Python model of it.
         filtered = shipped[str(path)]
 
+        # Did the shipped filter remove exactly what the published rule says? Compared
+        # against an independent prediction on EVERY file -- including those the
+        # shipped filter left unchanged, or a filter that silently removed nothing
+        # would never be compared at all.
+        if filtered.rstrip('\n') != _predicted_filtered(original).rstrip('\n'):
+            unexpected_changes.append(
+                (key, 'shipped filter and the expected rule disagree on this file'))
+
         if original != filtered:
             files_with_changes += 1
 
-            # Did the shipped filter remove exactly what this project intends it
-            # to remove? Compared against an independent prediction, not against a
-            # line-by-line heuristic -- a block scalar's continuation lines are a
-            # legitimate removal and a per-line classifier calls them a surprise.
-            if filtered.rstrip('\n') != _predicted_filtered(original).rstrip('\n'):
-                unexpected_changes.append(
-                    (key, 'shipped filter and the expected rule disagree on this file'))
-
             for line in original.split('\n'):
-                line_stripped = line.strip()
-                if COMMENT_PROVENANCE_PATTERN.match(line):
-                    field_removals['#provenance-comment'] += 1
+                if rule['remove_column0_comments'] and line.startswith('#'):
+                    field_removals['#column-0 comment'] += 1
                     continue
-                for field in EXPECTED_FILTER_FIELDS:
-                    if line_stripped.startswith(f'{field}:'):
-                        field_removals[field] += 1
-                        break
+                name = line.strip().split(':', 1)[0]
+                if ':' in line and name in fields:
+                    field_removals[name] += 1
 
             # Read the ARTIFACT, not the declaration: does the payload the
             # consumer actually receives still parse, and did filtering
@@ -980,18 +1019,22 @@ def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
         else:
             result.fail(f"Version mismatch: bash={bash_version.group(1)}, ps={ps_version.group(1)}")
 
-    # Check same metadata fields filtered (must include all 5 fields)
-    expected_fields = sorted(EXPECTED_FILTER_FIELDS)
-
-    bash_has_all = all(field in bash_content for field in expected_fields)
-    ps_has_all = all(field in ps_content for field in expected_fields)
-
-    if bash_has_all and ps_has_all:
-        result.ok(f"Metadata filter patterns match ({len(expected_fields)} fields)")
-    elif bash_has_all != ps_has_all:
-        result.fail("Metadata filter fields differ between scripts")
+    # The scripts' BUILT-IN rule (used without jq, or when the index has no usable
+    # block) must be the published rule exactly -- read from the script by running
+    # it, never by spotting field names in its text.
+    rule, problem = index_filter_rule()
+    if rule is None:
+        result.fail(f"Cannot compare built-in rules: {problem}")
     else:
-        result.warn("Could not verify filter pattern match")
+        sh = bash_content[bash_content.index("filter_metadata() {"):]
+        sh = sh[:sh.index("\n}\n") + 3]
+        proc = subprocess.run(["bash", "-c", sh + "\nfilter_metadata --builtin-fields"],
+                              capture_output=True, text=True)
+        builtin = proc.stdout.split(',') if proc.returncode == 0 else []
+        if builtin == rule['remove_fields'] and rule['remove_column0_comments'] is True:
+            result.ok(f"bash built-in rule equals the index rule ({len(builtin)} fields, column-0 comments)")
+        else:
+            result.fail(f"bash built-in rule {builtin} differs from the index rule {rule['remove_fields']}")
 
     # Check same base URL
     if 'ironsheep/P2-Knowledge-Base' in bash_content and \
@@ -1006,6 +1049,111 @@ def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
     else:
         result.warn("Cache max age may differ")
 
+    return result
+
+
+FETCH_SH = Path("engineering/tools/p2kb/fetch-kb-file.sh")
+
+
+def _fetch_sh_functions(*names: str) -> str:
+    """The named top-level functions of fetch-kb-file.sh, as shell text, so a gate
+    runs the script's own code rather than a model of it."""
+    sh = FETCH_SH.read_text()
+    out = []
+    for name in names:
+        start = sh.index(f"\n{name}() {{") + 1
+        end = sh.index("\n}\n", start) + 3
+        out.append(sh[start:end])
+    return "\n".join(out)
+
+
+def validate_filter_rule_readback(verbose: bool = False) -> ValidationResult:
+    """fetch-kb-file.sh reads the published rule back out of the generated index.
+
+    Agreement §8.3: the KB's own scripts must be able to read the rule it publishes.
+    Runs the script's load_filter_rule and filter_rule_id (with jq) against the
+    generated index and requires the same fields, flag and rule_id this validator
+    computes. Without jq the script uses its built-in rule; the parity gate checks
+    that one.
+    """
+    result = ValidationResult("Filter Rule Read-Back (fetch-kb-file.sh)")
+    rule, problem = index_filter_rule()
+    if rule is None:
+        result.fail(problem)
+        return result
+    if subprocess.run(["bash", "-c", "command -v jq"], capture_output=True).returncode != 0:
+        result.fail("jq is not installed here -- the read-back runs the script's jq path")
+        return result
+    driver = ("log() { :; }\nINDEX_FILE=\"$1\"\n"
+              + _fetch_sh_functions("load_filter_rule", "sha256_hex", "filter_rule_id", "filter_metadata")
+              + '\nload_filter_rule\nprintf "%s|%s|%s\\n" "$RULE_FIELDS" "$RULE_COL0" "$(filter_rule_id)"\n')
+    proc = subprocess.run(["bash", "-c", driver, "bash", str(INDEX_PATH)],
+                          capture_output=True, text=True)
+    want = (f"{','.join(rule['remove_fields'])}|"
+            f"{'true' if rule['remove_column0_comments'] else 'false'}|{filter_rule_id(rule)}")
+    got = proc.stdout.strip()
+    if got == want:
+        result.ok(f"Script reads the index rule back: rule_id {filter_rule_id(rule)}")
+    else:
+        result.fail(f"Script read {got!r}; the index says {want!r}")
+    return result
+
+
+def validate_nojq_lookup(verbose: bool = False) -> ValidationResult:
+    """Without jq, fetch-kb-file.sh resolves every key and alias as json.load does.
+
+    jq is optional on users' machines; the script's no-jq reader depends on the
+    layout the generator writes. A layout change that breaks it would otherwise
+    fail only on machines without jq, silently. Runs the script's own lookup_key /
+    lookup_alias with jq hidden from PATH (a directory of every PATH tool but jq),
+    over every key and every alias of the generated index.
+    """
+    result = ValidationResult("No-jq Key/Alias Lookup (fetch-kb-file.sh)")
+    with open(INDEX_PATH) as f:
+        idx = json.load(f)
+    keys, aliases = list(idx['files']), list(idx['aliases'])
+
+    def expected_alias(a):                     # exact, then UPPER, then lower
+        for v in (a, a.upper(), a.lower()):
+            if v in idx['aliases']:
+                return ','.join(idx['aliases'][v])
+        return ''
+
+    driver = ("log() { :; }\nerror() { :; }\nINDEX_FILE=\"$1\"\n"
+              + _fetch_sh_functions("nojq_index", "json_escape", "to_upper", "to_lower",
+                                    "lookup_key", "lookup_alias")
+              + '\nwhile IFS= read -r n; do\n'
+                '  if [[ $2 == key ]]; then printf "%s\\t%s\\n" "$n" "$(lookup_key "$n")"\n'
+                '  else printf "%s\\t%s\\n" "$n" "$(lookup_alias "$n" | paste -sd, -)"; fi\n'
+                'done\n')
+    with tempfile.TemporaryDirectory() as bindir:
+        for d in os.environ.get('PATH', '').split(':'):
+            if not os.path.isdir(d):
+                continue
+            for name in os.listdir(d):
+                target = os.path.join(bindir, name)
+                if name != 'jq' and not os.path.exists(target):
+                    os.symlink(os.path.join(d, name), target)
+        env = dict(os.environ, PATH=bindir, LC_ALL='C.UTF-8', LANG='C.UTF-8')
+        if subprocess.run(["bash", "-c", "command -v jq"], capture_output=True, env=env).returncode == 0:
+            result.fail("could not hide jq from PATH for this check")
+            return result
+        problems = []
+        for mode, names, want in (("key", keys, lambda k: idx['files'][k]['path']),
+                                  ("alias", aliases, expected_alias)):
+            proc = subprocess.run(["bash", "-c", driver, "bash", str(INDEX_PATH), mode],
+                                  input="\n".join(names) + "\n", capture_output=True,
+                                  text=True, env=env)
+            got = dict(line.split("\t", 1) for line in proc.stdout.rstrip("\n").split("\n") if "\t" in line)
+            problems += [f"{mode} {n!r}: got {got.get(n)!r}, want {want(n)!r}"
+                         for n in names if got.get(n) != want(n)]
+    result.info(f"Checked without jq: {len(keys)} keys, {len(aliases)} aliases")
+    if problems:
+        result.fail(f"{len(problems)} lookup(s) differ from json.load without jq")
+        for p in problems[:10]:
+            result.info(f"  {p}")
+    else:
+        result.ok("Every key and alias resolves without jq exactly as json.load reads it")
     return result
 
 
@@ -1070,6 +1218,8 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_duplicate_keys,
         validate_adc_encoding,
         validate_fetch_script_parity,
+        validate_filter_rule_readback,
+        validate_nojq_lookup,
     ]
 
     all_passed = True
