@@ -48,56 +48,36 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Start ADC on pin 16
-      PINSTART(16, P_ADC | P_ADC_1X, 0, 0)
-    description: "Configure pin as ADC input"
+      ' Start ADC on pin 16: SINC2 sampling, 1,024-clock sample period
+      PINSTART(16, P_ADC | P_ADC_1X, %00_1010, 0)
+    description: >-
+      Configure pin as ADC input. X.[5..4] selects the mode (%00 = SINC2 sampling) and
+      the sample period is 2^X.[3..0] clocks (%1010 = 1,024 clocks, 11-bit resolution).
+      X = 0 would select a 1-clock period, which the P2 Documentation marks impractical.
+    source: "P2 Documentation, silicon-doc-text.txt:4257-4268 and table 34 (%11000 ADC modes, X.[5..4] and X.[3..0] rows); P_ADC/P_ADC_1X per spin2-v55-text.txt:1469, :1554"
   - code: |
-      ' Start PWM on pin 8
-      PINSTART(8, P_PWM_TRIANGLE | P_OE, 1000, 500)
-    description: "Configure PWM with period=1000, duty=500"
+      ' Start PWM on pin 8: base period 1 clock, frame 1000 base periods, duty 500
+      PINSTART(8, P_PWM_TRIANGLE | P_OE, 1000 << 16 | 1, 500)
+    description: >-
+      Configure triangle PWM. X.[15..0] is the base period in clocks and X.[31..16] the
+      frame period in base periods; Y.[15..0] is the output value, from zero to the frame
+      period.
+    source: "P2 Documentation, silicon-doc-text.txt:4034-4044 (%01000 PWM triangle)"
   - code: |
       ' Start async serial TX on pin 62 at 115200 baud, 8 data bits
       ' X = (clocks/bit << 16) | (data_bits - 1)
       PINSTART(62, P_ASYNC_TX | P_OE, ((clkfreq/115200) << 16) | 7, 0)
     description: "Configure asynchronous serial transmit"
+    source: "P2 Documentation, silicon-doc-text.txt:4684-4694 (%11110: X.[31..16] clocks per bit period, X.[4..0] bits minus 1)"
   - code: |
-      ' Start quadrature encoder on pins 32-33
-      PINSTART(32 ADDPINS 1, P_QUADRATURE, 0, 0)
-    description: "Configure quadrature encoder input"
-  - code: |
-      ' HUB75 RGB pin groups for LED panel
-      CON
-        RGB_BASE = 16        ' Base pin for RGB data
-        RGB_COUNT = 6        ' 6 pins for RGB (2 per color)
-        CLK_PIN = 22
-        LAT_PIN = 23
-        OE_PIN = 24
-        
-      PUB setup_hub75()
-        ' Configure 6 RGB data pins as outputs
-        PINSTART(RGB_BASE ADDPINS (RGB_COUNT-1), P_HIGH_FAST | P_OE, 0, 0)
-        
-        ' Configure control pins
-        PINSTART(CLK_PIN, P_HIGH_FAST | P_OE, 0, 0)
-        PINSTART(LAT_PIN, P_HIGH_FAST | P_OE, 0, 0)
-        PINSTART(OE_PIN, P_HIGH_FAST | P_OE, 0, 0)
-    description: "Configure HUB75 LED panel pin groups"
-    source: hub75_driver
-  - code: |
-      ' Multi-pin ADC configuration for sensor array
-      CON
-        SENSOR_BASE = 8
-        SENSOR_COUNT = 8      ' 8 sensors
-        
-      PUB setup_sensors() | i
-        ' Configure 8 consecutive ADC pins
-        REPEAT i FROM 0 TO SENSOR_COUNT-1
-          PINSTART(SENSOR_BASE + i, P_ADC | P_ADC_1X, 0, 0)
-          
-        ' Or using ADDPINS for group config (same mode)
-        PINSTART(SENSOR_BASE ADDPINS (SENSOR_COUNT-1), P_HIGH_1K5, 0, 0)
-    description: "Configure sensor array pins"
-    source: sensor_array
+      ' Quadrature encoder: A on pin 32, B on pin 33 (B input = pin+1)
+      PINSTART(32, P_QUADRATURE | P_PLUS1_B, 0, 0)   ' X = 0: continuous count
+      ' RDPIN(32) returns the 32-bit step count
+    description: >-
+      Configure a quadrature encoder on ONE smart pin whose A input is its own pin and
+      whose B input is selected relative to it. Starting both pins with ADDPINS does not
+      pair them: each pin's B input defaults to its own pin.
+    source: "P2 Documentation, silicon-doc-text.txt:4093-4097 (%01011 quadrature, X = 0 continuous), :3746-3756 (B input selector, x000 = this pin by default); P_PLUS1_B per spin2-v55-text.txt:1438"
   - code: |
       ' Smart-pin SPI (mode 0) on the P2 boot flash pins
       CON

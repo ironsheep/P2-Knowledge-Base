@@ -102,7 +102,18 @@ timing from CR"; `validation_format` describes a `'Prop'` header at offset 0 wit
 **Fix (M-L):** per `.claude/skills/SOURCE-REPAIR-ORDER.md` — remove the uncited blocks and
 re-derive from HW Manual :1580-1725 (+ Silicon Doc :4860 ff.), every field quoted or cited.
 
-### F-549 — `pinstart.yaml`'s HUB75 and sensor-array examples carry invented `source:` labels, and the HUB75 one contradicts the board's pinout — `CONFIRMED`
+### F-549 — `pinstart.yaml`'s HUB75 and sensor-array examples carry invented `source:` labels, and the HUB75 one contradicts the board's pinout — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07, and widened to every example in the file.** The two named examples were
+> **removed** (uncited; HUB75 contradicts the adapter pinout; the sensor one reconfigures its ADC
+> pins as outputs under a "same mode" comment). The other four were uncited too, so each was
+> checked against the P2 Documentation: **three were wrong** — PWM triangle `X = 1000` sets a
+> 1000-clock base and a zero frame period, so `Y = 500` exceeds its range (`:4034-4044`; now
+> `1000 << 16 | 1`); quadrature `32 ADDPINS 1` starts two pins whose B input defaults to their own
+> pin (`:3746-3756`), so neither sees the other phase (now one pin, `P_QUADRATURE | P_PLUS1_B`,
+> `:4093-4097`); ADC `X = 0` selects a 1-clock SINC2 period, marked "impractical" in table 34
+> (`:4257-4268`; now `%00_1010`, 1,024 clocks, 11-bit). Async TX was correct and gained its
+> source (`:4684-4694`). Every example now carries a `source:` and compiles (pnut-ts 1.55.8).
+> **Grounded fixes 3 · removals 2 · gaps 0.**
 Found 2026-10-07 fixing F-543 in the same file. `examples[4]` (`source: hub75_driver`) and `examples[5]`
 (`source: sensor_array`) name no document; the third invented label in the file was F-543's. The HUB75
 example puts six RGB pins at 16-21 and CLK/LAT/OE at 22/23/24; the adapter's pinout
