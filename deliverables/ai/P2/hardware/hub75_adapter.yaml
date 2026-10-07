@@ -41,7 +41,7 @@ specifications:
   electrical:
     operating_voltage: "+5 VDC, supplied by the P2 development board"
     board_consumption: "under 50 mA (level shifters and support circuitry)"
-    max_clock_rate: "70 MHz, limited by the level shifter ICs (2x 74HCT244)"
+    max_clock_rate: "70 MHz, limited by the level shifter ICs"
     panel_clock_note: >-
       The 70 MHz figure is the adapter's ceiling, not the panel's. Each panel's
       LED driver chipset sets the clock rate it accepts, typically far below the
@@ -91,8 +91,8 @@ pin_group:
   base_pin_options: [0, 16, 32, 48]
   base_pin_note: "Needs 16 consecutive I/O pins (two adjacent 8-pin headers). P16-P31 is the most common."
 
-# All 14 used HUB75 signals are P2 outputs (driven to the panel via the
-# 2x 74HCT244 level shifters). Offsets 14-15 are unused.
+# All 14 used HUB75 signals are P2 outputs (driven to the panel through the
+# board's level shifters). Offsets 14-15 are unused.
 signal_map:
   - {offset: 0,  signal: "CLK (pixel clock)", direction: out, notes: "Shifts pixel data into the panel."}
   - {offset: 1,  signal: "OE# (output enable, active low)", direction: out, notes: "Blanks the display during latch/address."}
@@ -156,7 +156,6 @@ resources:
     name: "P2-HUB75 LED Matrix Driver"
     author: "Stephen M Moraco (Iron Sheep Productions)"
     url: "https://obex.parallax.com/obex/p2-hub75-led-matrix-driver/"
-    driver_file: "isp_hub75_matrix.spin2"
     complexity: "complex_driver"
     recommendation: "Use OBEX driver - do not attempt to implement manually"
 
