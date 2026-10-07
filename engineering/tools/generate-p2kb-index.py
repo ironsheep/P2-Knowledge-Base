@@ -9,6 +9,9 @@ Version 3.2.0 adds categories section for navigation support.
 Version 3.3.0 adds single-value aliases for instruction/method lookup.
 Version 3.4.0 changes aliases to arrays - preserves ALL matches (e.g., ABS → [PASM2, Spin2]).
 Version 3.5.0 adds per-entry sha256 (of the git blob) for cache-integrity verification.
+Version 3.6.0 adds `delivery_filter` -- the provenance-removal rule every receiver applies
+(engineering/tools/p2kb-mcp/MCP-DELIVERY-FILTER-HANDOFF.md §3). DELIVERY_FILTER below is
+the single source of that rule.
 
 Keys follow the naming convention: p2kb + Category + Name in CamelCase.
 
@@ -29,6 +32,52 @@ import yaml
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Set, List, Optional, Tuple
+
+
+# The delivery filter's rule -- the ONE place it is defined. Receivers (the p2kb-mcp
+# server, fetch-kb-file.sh/.ps1, the release gates) read it from the published index
+# rather than holding their own copy: a copy per receiver is what let F-439 happen.
+# Contract: MCP-DELIVERY-FILTER-HANDOFF.md §3 (format 1). The list does not grow to
+# chase provenance into new keys -- that is fixed in the KB (Stephen, 2026-10-04, F-545).
+DELIVERY_FILTER = {
+    'format': 1,
+    'remove_fields': sorted([
+        'documentation_level', 'documentation_source', 'enhancement_source',
+        'last_updated', 'manual_extraction_date', 'source', 'source_reference',
+        'sources', 'verified_against',
+    ]),
+    'remove_column0_comments': True,
+}
+
+FIELD_NAME_RE = re.compile(r'^[A-Za-z0-9_]+$')
+
+
+def validate_delivery_filter(rule: Dict[str, Any]) -> None:
+    """Refuse a rule a format-1 receiver would refuse (agreement §3)."""
+    if set(rule) != {'format', 'remove_fields', 'remove_column0_comments'}:
+        raise ValueError(f"delivery_filter keys must be exactly format/remove_fields/"
+                         f"remove_column0_comments, got {sorted(rule)}")
+    if type(rule['format']) is not int or rule['format'] != 1:
+        raise ValueError(f"delivery_filter.format must be the integer 1, got {rule['format']!r}")
+    if type(rule['remove_column0_comments']) is not bool:
+        raise ValueError("delivery_filter.remove_column0_comments must be a boolean")
+    fields = rule['remove_fields']
+    if not isinstance(fields, list) or not fields:
+        raise ValueError("delivery_filter.remove_fields must be a non-empty list")
+    for name in fields:
+        if not isinstance(name, str) or not FIELD_NAME_RE.match(name):
+            raise ValueError(f"delivery_filter field {name!r} is not a literal key name")
+    if len(set(fields)) != len(fields):
+        raise ValueError("delivery_filter.remove_fields lists a name twice")
+
+
+def delivery_filter_rule_id(rule: Dict[str, Any]) -> str:
+    """rule_id per agreement §3.1: SHA-256 of the canonical text, lowercase hex."""
+    text = (f"p2kb-delivery-filter\n"
+            f"format={rule['format']}\n"
+            f"remove_fields={','.join(rule['remove_fields'])}\n"
+            f"remove_column0_comments={'true' if rule['remove_column0_comments'] else 'false'}\n")
+    return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
 
 def to_camel_case(name: str) -> str:
@@ -604,10 +653,12 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
     # Count multi-target aliases
     multi_target_count = len([a for a in sorted_aliases.values() if len(a) > 1])
 
+    validate_delivery_filter(DELIVERY_FILTER)
+
     # Build index structure
     index = {
         'system': {
-            'version': '3.5.0',
+            'version': '3.6.0',
             'generated': datetime.now().isoformat(),
             'total_entries': len(files),
             'total_categories': len(categories),
@@ -615,6 +666,7 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
             'multi_target_aliases': multi_target_count,
             'source': 'deliverables/ai/P2/'
         },
+        'delivery_filter': DELIVERY_FILTER,
         'categories': categories,
         'aliases': sorted_aliases,
         'files': files
@@ -653,7 +705,7 @@ def main():
     """Main entry point."""
     base_path = Path.cwd()
 
-    print("Generating p2kb-index.json v3.5 (array aliases + sha256 cache-integrity)...")
+    print("Generating p2kb-index.json v3.6 (array aliases + sha256 cache-integrity + delivery_filter)...")
     print(f"  Source: {base_path / 'deliverables/ai/P2/'}")
 
     # Timestamps and blob hashes are both DERIVED from git; prove it can answer
@@ -676,6 +728,7 @@ def main():
     print(f"   Total categories: {index['system']['total_categories']}")
     print(f"   Total aliases: {index['system']['total_aliases']}")
     print(f"   Multi-target aliases: {index['system']['multi_target_aliases']}")
+    print(f"   delivery_filter rule_id: {delivery_filter_rule_id(index['delivery_filter'])}")
 
     # Show alias summary by type
     if index['aliases']:
