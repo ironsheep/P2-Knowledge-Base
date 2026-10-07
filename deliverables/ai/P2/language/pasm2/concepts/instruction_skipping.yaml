@@ -118,7 +118,7 @@ skip_behavior:
     sources:
       - "REP_interaction (SKIP compatible with REP): Silicon Doc, silicon-doc-text.txt:883"
       - "REP_interaction (SKIPF with REP, same instruction count): Silicon Doc, silicon-doc-text.txt:885"
-      - "branches_in_skipf_sequences (CALL/CALLPA/CALLPB absolute branch address): Silicon Doc, silicon-doc-text.txt:889"
+      - "branches_in_skipf_sequences (CALL/CALLPA/CALLPB absolute branch address): Silicon Doc, silicon-doc-text.txt:889; bench-verified under XBYTE (a relative call # before a skipped instruction corrupted the VM, the absolute call #\\ ran it right), P2-EMPIRICAL-FINDINGS.md EF-092"
       - "branches_in_skipf_sequences (after an absolute-address branch): Silicon Doc, silicon-doc-text.txt:891"
       - "interrupts (ISR during a skipping sequence): Silicon Doc, silicon-doc-text.txt:780, :791"
 

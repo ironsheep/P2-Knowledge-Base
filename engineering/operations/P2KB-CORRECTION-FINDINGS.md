@@ -90,7 +90,12 @@ constant, unary operator, or (", while `a = 3 <=> 5` compiles). Its only origin 
 v55; delete `op_addlteqgt.yaml` (no fabricated names in the KB — redirect any `related:` that points to it
 to `op_lteqgt.yaml`, Sacred Rule #7); mark the derived v51 table's `+<=>` row as not a real operator.
 
-### F-546 — `instruction_skipping.yaml`'s absolute-CALL rule cites only the Silicon Doc; EF-092 proves it on silicon — `CONFIRMED` (low; next KB release)
+### F-546 — `instruction_skipping.yaml`'s absolute-CALL rule cites only the Silicon Doc; EF-092 proves it on silicon — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07.** `skip_behavior.special_cases.sources` (now `:121`) cites EF-092 beside
+> `silicon-doc-text.txt:889`; no content change. Proven: `:889` states the rule; EF-092
+> (`P2-EMPIRICAL-FINDINGS.md:1652`, Rev C, two identical runs) — relative `call #` 4 of 5 wrong,
+> absolute `call #\` all 5 right. Parsed value checked (`#\` survives YAML unescaping).
+
 `language/pasm2/concepts/instruction_skipping.yaml:112` (rule) and `:121` (its source line). EF-092
 (2026-10-04): under XBYTE, a relative `call #` before a line the pattern skips corrupted the VM (4 of 5
 results wrong); the absolute `call #\` ran it right. **Fix:** add EF-092 to the `:121` source line
