@@ -1172,7 +1172,18 @@ this one differs and that it is safe. Then sweep every other mode page for the s
 
 ## `||` means logical OR in P2 and absolute value in P1, and the page that flags exactly this hazard twice does not flag it (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-6) — F-387
 
-### F-387 — `language/spin2/concepts/operators.yaml` annotates `~` and `~~` as P1 differences and leaves `||` unmarked — `PARTIAL — the `||` note applied 2026-09-22 («#351»); the P1-changed-operator class sweep is owed`
+### F-387 — `language/spin2/concepts/operators.yaml` annotates `~` and `~~` as P1 differences and leaves `||` unmarked — `PENDING-VALIDATION` (the class sweep applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Class sweep applied 2026-10-07.** Every row of P1 Manual Table 2-9 (`p1-…-layout-text.txt:4934-4975`)
+> was compared with the v55 operator table (`spin2-v55-text.txt:409-491`) and each P1 form compiled on
+> pnut-ts 1.55.8. New top-level `changed_from_p1` in `operators.yaml`, two tiers:
+> **compiles with a different meaning (silent)** — `a ~> 2` is `(a~) > 2` and *clears a*; `a <- 2` is
+> `a < -2`; `c := a <= b` is a compare where P1's `<=`/`>=` were the assignment forms of `<`/`>`;
+> binary `||` is logical OR — the first three **proven by byte-identical binaries** against the
+> explicit spelling. **Fails to compile (loud)** — `?x`/`x?`, `^^x`, prefix `~x`/`~~x`, `**`, `|<`,
+> `>|`, `->`, `><`, `=<`, `=>` — each with its v55 spelling. `REV` takes the top bit index, so P1
+> `>< n` is `REV (n-1)`: P1's own `Y >< 6` example folds to the same value under `REV 5`. Every P2
+> spelling compiles; `SIGNX 7/15` folds to the sign-extended values. **Two of the three silent
+> cases (`~>`, `<-`) were not in the filing** — they were found only by compiling the P1 forms.
 
 > **Applied 2026-09-22.** The `["||", "OR"]` entry now carries the same shape of note the `~`/`~~`
 > entries already had: *"P2 Spin2 semantics; not P1 absolute value. In P1 '||' was the Absolute
