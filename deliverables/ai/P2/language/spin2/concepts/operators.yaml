@@ -322,30 +322,41 @@ changed_from_p1:
     that fails to compile costs a minute; one that still compiles gives a wrong value
     with no error. Each row was compiled on pnut-ts 1.55.8; where a P1 form compiles,
     its Spin2 meaning was proven by a byte-identical binary.
-  source: "P1: Propeller Manual v1.2 Table 2-9 -- engineering/ingestion/sources/p1-propeller-manual-v1.2/p1-propeller-manual-v1.2-layout-text.txt:4943-4973 (line per row below). P2: Parallax Spin2 Documentation v55 operator table -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:409-491. Compile results: pnut-ts 1.55.8, 2026-10-07."
+  source: >-
+    P1: Propeller Manual v1.2 Table 2-9 --
+    engineering/ingestion/sources/p1-propeller-manual-v1.2/p1-propeller-manual-v1.2-layout-text.txt:4943-4973.
+    P2: Parallax Spin2 Documentation v55 operator table --
+    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:409-491.
+    Compile results: pnut-ts 1.55.8, 2026-10-07.
+    Lines per row (P1 / v55): ~> 4952 / 419 (post-clear ~), 445 (SAR);
+    <- 4958 / 447 (ROL); <= >= assignment forms 4970-4971 / 475, 482 (compares);
+    || 4949 / 491 (logical OR), 432 (ABS); ?x x? 4953 / 412 (??);
+    ^^ 4948 / 438 (SQRT), 490 (logical XOR); ~x ~~x 4950-4951 / 450 (SIGNX), 419-420 (postfix x~ x~~);
+    ** 4943; |< 4954 / 435 (DECOD); >| 4955 / 434 (ENCOD); -> 4959 / 446 (ROR);
+    >< 4960, 5681-5683 / 448 (REV); =< => 4972-4973 / 475, 482.
   compiles_with_a_different_meaning:
-    - p1: "a ~> 2 -- shift arithmetic right (P1 :4952)"
-      spin2_reads_it_as: "(a~) > 2 -- a comparison that also CLEARS a (post-clear ~, v55 :419)"
-      spin2_spelling: "a SAR 2 (:445)"
-    - p1: "a <- 2 -- rotate left (P1 :4958)"
+    - p1: "a ~> 2 -- shift arithmetic right"
+      spin2_reads_it_as: "(a~) > 2 -- a comparison that also CLEARS a (post-clear ~)"
+      spin2_spelling: "a SAR 2"
+    - p1: "a <- 2 -- rotate left"
       spin2_reads_it_as: "a < -2"
-      spin2_spelling: "a ROL 2 (:447)"
-    - p1: "a <= b / a >= b -- the ASSIGNMENT forms of < and >: a := a < b (P1 :4970-4971)"
-      spin2_reads_it_as: "a plain compare -- less than or equal / greater than or equal (:475, :482); a is not written. As a statement on its own it no longer compiles."
+      spin2_spelling: "a ROL 2"
+    - p1: "a <= b / a >= b -- the ASSIGNMENT forms of < and >: a := a < b"
+      spin2_reads_it_as: "a plain compare -- less than or equal / greater than or equal; a is not written. As a statement on its own it no longer compiles."
       spin2_spelling: "a := a < b"
-    - p1: "|| -- unary absolute value (P1 :4949)"
-      spin2_reads_it_as: "binary logical OR (:491); a || b compiles and returns 0 or -1"
-      spin2_spelling: "ABS a (:432)"
+    - p1: "|| -- unary absolute value"
+      spin2_reads_it_as: "binary logical OR; a || b compiles and returns 0 or -1"
+      spin2_spelling: "ABS a"
   fails_to_compile:
-    - {p1: "?x / x? -- random (P1 :4953)", spin2_spelling: "??x (:412); ? is now the ternary operator"}
-    - {p1: "^^x -- square root (P1 :4948)", spin2_spelling: "SQRT x (:438); ^^ is now logical XOR (:490)"}
-    - {p1: "~x / ~~x -- sign-extend from bit 7 / 15 (P1 :4950-4951)", spin2_spelling: "x SIGNX 7 / x SIGNX 15 (:450); postfix x~ and x~~ keep their P1 post-clear / post-set meaning (:419-420)"}
-    - {p1: "a ** b -- upper 32 bits of a signed multiply (P1 :4943)", spin2_spelling: "no ** operator in Spin2"}
-    - {p1: "|< x -- decode (P1 :4954)", spin2_spelling: "DECOD x (:435)"}
-    - {p1: ">| x -- encode (P1 :4955)", spin2_spelling: "ENCOD x (:434)"}
-    - {p1: "a -> 2 -- rotate right (P1 :4959)", spin2_spelling: "a ROR 2 (:446)"}
-    - {p1: "a >< n -- reverse the n low bits (P1 :4960, :5681-5683)", spin2_spelling: "a REV (n-1) -- REV takes the top bit index, bits 0..y (:448); P1's a >< 6 is a REV 5"}
-    - {p1: "a =< b / a => b -- equal-or-less / equal-or-greater (P1 :4972-4973)", spin2_spelling: "a <= b / a >= b (:475, :482)"}
+    - {p1: "?x / x? -- random", spin2_spelling: "??x; ? is now the ternary operator"}
+    - {p1: "^^x -- square root", spin2_spelling: "SQRT x; ^^ is now logical XOR"}
+    - {p1: "~x / ~~x -- sign-extend from bit 7 / 15", spin2_spelling: "x SIGNX 7 / x SIGNX 15; postfix x~ and x~~ keep their P1 post-clear / post-set meaning"}
+    - {p1: "a ** b -- upper 32 bits of a signed multiply", spin2_spelling: "no ** operator in Spin2"}
+    - {p1: "|< x -- decode", spin2_spelling: "DECOD x"}
+    - {p1: ">| x -- encode", spin2_spelling: "ENCOD x"}
+    - {p1: "a -> 2 -- rotate right", spin2_spelling: "a ROR 2"}
+    - {p1: "a >< n -- reverse the n low bits", spin2_spelling: "a REV (n-1) -- REV takes the top bit index, bits 0..y; P1's a >< 6 is a REV 5"}
+    - {p1: "a =< b / a => b -- equal-or-less / equal-or-greater", spin2_spelling: "a <= b / a >= b"}
 
 related:
   - language/spin2/operators/precedence.yaml

@@ -63,7 +63,15 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-552
 
-### F-552 — F-387's P1→Spin2 operator tables ship line citations in content; the release gate fails — `CONFIRMED`
+### F-552 — F-387's P1→Spin2 operator tables ship line citations in content; the release gate fails — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07.** `concepts/operators.yaml` `changed_from_p1`: all 32 row cites
+> (`(P1 :NNNN)`, `(:NNN)`, `v55 :419`) moved into the block's existing `source:` as a
+> row→line map (P1 Manual v1.2 layout-text 4943-4973, 5681-5683; v55 text 409-491); every
+> stated fact unchanged — checked structurally against HEAD (values equal once the citations
+> are removed; the post-clear note kept as "(post-clear ~)"). `operators/precedence.yaml`
+> level 11: the `spin2-v55-text.txt:472-488` cite moved to a new `source:` on that entry.
+> No fact needed re-proving — nothing but citation text changed. Gates: verify-yaml-format
+> clean, crossref 3893/3893, `validate-dod-release.py` ALL PASSED (Internal IDs now 0).
 Found 2026-10-07 measuring the delivered-output scan baseline for the delivery-filter-rule sprint
 (`engineering/planning/P2KB-DELIVERY-FILTER-RULE-SPRINT-PLAN.md`). `validate_internal_ids` in
 `validate-dod-release.py` reads the shipped payload and reports **33 repo-locator hits**: 32 in

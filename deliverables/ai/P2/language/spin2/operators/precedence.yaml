@@ -47,7 +47,8 @@ precedence_table:
   - level: 11
     operators: ["<", "+<", "<.", "<=", "+<=", "<=.", "==", "==.", "<>", "<>.", ">=", "+>=", ">=.", ">", "+>", ">.", "<=>"]
     type: "Compare/Equality"
-    note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority in v55 (spin2-v55-text.txt:472-488)"
+    note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority in v55"
+    source: "Parallax Spin2 Documentation v55 operator table -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:472-488"
   - level: 13
     operators: ["&&", "AND", "!&&"]
     type: "Logical AND"
