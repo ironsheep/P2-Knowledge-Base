@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-552`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-553`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,19 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-551
+## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-552
+
+### F-552 — F-387's P1→Spin2 operator tables ship line citations in content; the release gate fails — `CONFIRMED`
+Found 2026-10-07 measuring the delivered-output scan baseline for the delivery-filter-rule sprint
+(`engineering/planning/P2KB-DELIVERY-FILTER-RULE-SPRINT-PLAN.md`). `validate_internal_ids` in
+`validate-dod-release.py` reads the shipped payload and reports **33 repo-locator hits**: 32 in
+`language/spin2/concepts/operators.yaml` (payload lines 324–339+, e.g. `"a ~> 2 -- shift arithmetic
+right (P1 :4952)"`, `"a SAR 2 (:445)"`) and 1 in `language/spin2/operators/precedence.yaml`. All come
+from commit `ad10b085` (F-387, 2026-10-07): the `p1:` / `spin2_spelling:` / `spin2_reads_it_as:`
+values carry `(:NNN)` / `(P1 :NNNN)` line cites. A consumer cannot open them, and the gate blocks the
+next KB release. **Fix:** move each cite to the entry's `sources:` (where the claim-sourcing gate still
+reads it), keep the stated fact; re-run `validate-dod-release.py`. Not touched by the filter sprint —
+its certification bundle is frozen at HEAD and this stays a register item (Stephen, 2026-10-07).
 
 ### F-551 — `guides/pasm2-getting-started.yaml` is uncited outside the blocks F-542 re-derived — `CONFIRMED` (L)
 Found 2026-10-07 scoping F-542. Of 729 lines only `file_structure` and `timing_considerations`
