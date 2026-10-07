@@ -257,7 +257,11 @@ the index and YAMLs only (no `manifests/` — the server fetches none).
 hash equals its index `sha256`; edge — variant B's expected set differs from main exactly where B's
 rule differs; error — dirty tree → refuses.
 
-## 8. Certification run and iteration
+## 8. Certification run and iteration — DONE 2026-10-07
+
+**Outcome:** bundle built at KB commit `ab011682`; Stephen relayed (2026-10-07) that the MCP server
+passes all tests and is waiting for the KB release. No mismatch, so neither engine changed. The
+server version was not relayed — it is recorded at §9's live acceptance from `p2kb_version`.
 
 Stephen copies the bundle; the MCP agent runs agreement §9.2 and reports per §9.3. A mismatch is
 diagnosed against **both** engines before either is changed; if ours changes, §6/§7 rerun and a new
