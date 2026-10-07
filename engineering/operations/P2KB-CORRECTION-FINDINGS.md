@@ -1130,7 +1130,22 @@ the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
 
 ## An improvement to the general smart-pin page made a contradiction with the mode page SHARPER (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-5) — F-386
 
-### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `PARTIAL — the named page fixed and verified 2026-09-22 («#351»); the class sweep is owed`
+### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `PARTIAL` (the class sweep RUN 2026-10-07, «#387»; the general rule corrected; ten mode pages wait on VO-J-028)
+> **Sweep run 2026-10-07 over all 33 files in `architecture/smart-pins/`.** Two shapes searched:
+> `pinstart` with a non-zero Y in a mode that loses it, and `wypin` before `dirh`.
+> **Trigger and async-TX pages are clean** — the only `pinstart` calls in those modes
+> (`smart-pin-11110…:51, :120, :137, :149`) pass Y = 0. **The general rule itself was wrong, and is
+> fixed:** `smart_pins.yaml` `correct_sequence` said "the serial modes hold Y at 0 during reset" and
+> that Y-after-enable is "correct for EVERY mode". EF-011 measured only async TX among the serial
+> modes; EF-090 proved sync TX `%11100` continuous **primes** its first word during reset and loses
+> it if enabled first (P2 Documentation `:4650` says the same). The note now names the measured
+> modes on each side and carries the `%11100` exception; its `source:` cites EF-011, EF-090 and
+> `:4650`. **Ten pages write a configuration Y before `DIRH`** (`%01111`, `%10010`–`%10111`,
+> `%11001`, `%11011`; plus `%11100`, which is correct — that is the priming write). The P2
+> Documentation states Y's reset behaviour per mode — "set to zero" for pulse/transition
+> (`:3984`, `:3997`), "captured" for PWM (`:4050-4086`), and **nothing about Y** for
+> %01100–%10111 (`:4116-4254`, Z only). Neither order is proven safe or harmful for those ten, so
+> they are **not reordered** on inference: VO-J-028 (jumper-only) decides it.
 
 > **The named page is done, verified in the tree 2026-09-22.**
 > `architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml:64-65` now runs `dirh`

@@ -104,7 +104,7 @@ operating_modes:
 critical_requirements:
   reset_before_configure:
     mandatory: false
-    source: "Silicon Doc, silicon-doc-text.txt:3852 (configure while DIR is low); consequences_of_skipping: Silicon Doc, silicon-doc-text.txt:3856"
+    source: "Silicon Doc, silicon-doc-text.txt:3852 (configure while DIR is low); consequences_of_skipping: Silicon Doc, silicon-doc-text.txt:3856; correct_sequence order: bench-measured, P2-EMPIRICAL-FINDINGS.md EF-011 (pulse, transition, async TX required; NCO, DAC-noise safe) and EF-090 (sync TX %11100 continuous primes in reset), with the Silicon Doc %11100 text at silicon-doc-text.txt:4650"
     description: |
       **Configure while DIR is low**: a smart pin should be configured while its DIR
       bit is low, holding it in reset. A WRPIN while DIR
@@ -114,12 +114,16 @@ critical_requirements:
     correct_sequence:
       note: |
         Order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate (WYPIN).
-        Write Y with WYPIN AFTER raising DIR. The trigger modes (pulse %00100,
-        transition %00101) and the serial modes hold Y at 0 during reset, so a
-        WYPIN issued before DIRH never takes effect; writing Y after enable is the
-        one order correct for EVERY mode (and order-safe for the value modes).
+        Write Y with WYPIN AFTER raising DIR for the trigger modes (pulse %00100,
+        transition %00101) and asynchronous serial transmit (%11110): they hold Y at
+        0 during reset, so a WYPIN issued before DIRH never takes effect. The value
+        modes measured (NCO %00110, DAC-noise %00001) work in either order.
+        EXCEPTION -- synchronous serial transmit (%11100) in continuous mode needs its
+        FIRST word written with WYPIN DURING reset: that write primes the shifter,
+        and enabling first loses the word.
         PINSTART()/pinstart() writes Y before raising DIR, so it is NOT safe for
-        the trigger modes -- use the explicit sequence below for those.
+        the trigger modes or asynchronous serial transmit -- use the explicit
+        sequence below for those.
       pasm2:
         - "DIRL  pin         ' Hold smart pin in reset (DIR=0) while configuring"
         - "WRPIN mode, pin   ' Configure smart pin mode"
