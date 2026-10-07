@@ -140,7 +140,7 @@ manifests/
 
 **Files with Outdated References**:
 - `engineering/ai-integration/README.md` - References old `manifests/ai-instructions.yaml` system
-- `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md` - References ai-instructions.yaml
+- ~~`engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md` - References ai-instructions.yaml~~ — resolved 2026-10-07: the spec was rewritten to the current interface; it now records that the server fetches no `manifests/` file
 - `manifests/propeller-knowledge-root.yaml` - May need update or removal
 
 **What Changed**:

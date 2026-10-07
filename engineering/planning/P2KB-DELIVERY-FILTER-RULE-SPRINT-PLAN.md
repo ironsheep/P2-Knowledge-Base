@@ -106,7 +106,19 @@ all folded in (see Revisions); the agreement reads AGREED. **Why:** the MCP agen
 anything else); we fold the reply in and mark it AGREED. **Verify:** every §11 question answered;
 every change from the reply traced to a line of the reply; status line reads AGREED with the date.
 
-## 1a. Bring `P2KB-MCP-SPECIFICATION.md` to "where we are today" — delivered to the MCP agent
+## 1a. Bring `P2KB-MCP-SPECIFICATION.md` to "where we are today" — delivered to the MCP agent — DONE 2026-10-07
+
+**Outcome:** the read-through found the whole spec stale as an interface statement, not only the
+filter sections — its tool list (`p2kb_search`, `p2kb_browse`, `p2kb_batch_get`, …) is not what the
+server serves. The original stays in git at `804715b7` (plus a local, git-ignored archive copy)
+and the live spec
+rewritten (1,409 → ~190 lines) to the interface as it stands: tools read from the live server's
+schemas, `p2kb_version` read live (mcp 1.4.0, index 3.5.0), filter sections pointing to the
+agreement, agreed-not-built items marked, an "open with the MCP agent" list. Also found and fixed:
+OBEX object YAMLs **are** in the main index (131, `p2kbCommunity<id>`), contrary to
+`OBEX-IMPLEMENTATION-SPEC.md:9` (corrected) — so the agreement's §5.1 now filters every file under
+`deliverables/ai/P2/`, OBEX objects included; `TECHNICAL-DEBT.md:143` (spec references
+`ai-instructions.yaml`) resolved.
 
 **Requested by Stephen** (2026-10-07): update the spec so it can go to the MCP agent as the
 current-state document alongside the agreement. Done **before** either side builds, not at release.

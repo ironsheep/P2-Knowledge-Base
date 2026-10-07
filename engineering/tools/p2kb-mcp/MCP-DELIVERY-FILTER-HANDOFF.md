@@ -325,9 +325,12 @@ still correct.
 
 ### 5.1 Where the filter applies
 
-Every tool result that returns the body of a KB file returns the **filtered** body — `p2kb_get`,
-and equally any batch, related-content or other path that returns file content. No path returns a
-raw body. The OBEX tools are not KB YAML and are unaffected.
+**Every file the server fetches from under `deliverables/ai/P2/` is filtered immediately after its
+hash check, before it is parsed, cached or returned** — the bodies `p2kb_get` returns, and equally
+the OBEX object YAMLs (`deliverables/ai/P2/community/obex/objects/*.yaml`, which are KB files listed
+in the main index) that the `p2kb_obex_*` tools read. No path uses a raw body. (Measured 2026-10-07:
+the OBEX objects carry none of the §3 fields and one column-0 comment, in `_template.yaml`; filtering
+them changes almost nothing today, and keeps them covered when that changes.)
 
 ## 6. Cache
 
@@ -491,7 +494,8 @@ Everything the server must do, each pointing at its section:
       and refresh (§3).
 - [ ] Determine the rule in effect at startup and after every index load/refresh: index → last-good →
       built-in; persist last-good; never apply a refused block (§5).
-- [ ] Filter every KB file body any tool returns; no raw path (§5.1).
+- [ ] Filter every file fetched from `deliverables/ai/P2/`, OBEX object YAMLs included, before it
+      is parsed, cached or returned; no raw path (§5.1).
 - [ ] Hash the raw body against `sha256`, then filter, then cache (§6).
 - [ ] Cache stamp `rule_id/engine-version`: checked at startup and after every index load/refresh;
       discard on mismatch or absence; bump the engine version whenever `Apply`/`ParseRule` change
@@ -503,15 +507,13 @@ Everything the server must do, each pointing at its section:
 - [ ] Certification steps 1–7 against the bundle, reported per §9.3.
 - [ ] Release only after the KB release is live, when Stephen says (§10).
 
-**Where this agreement and `P2KB-MCP-SPECIFICATION.md` differ, this agreement wins.** The KB brings
-the spec in line as part of its sprint.
+**Where this agreement and `P2KB-MCP-SPECIFICATION.md` differ, this agreement wins.** The spec was
+rewritten 2026-10-07 to the current interface and points here for everything filter-related.
 
 **The bundle** is built by the KB after its side is certified; Stephen copies it to you. Its
 `README.md` carries the KB commit, every `rule_id`, the file count, and the command for step 5.
 
 ---
 
-*Contract documents brought in line with this agreement by the KB sprint (plan §10):
-`P2KB-MCP-SPECIFICATION.md` §Data Sources (the server fetches no manifests), §Index Structure,
-§Content Filtering, §Filter Implementation, §Cache Invalidation on Index Update, `p2kb_version`,
-§Configuration (`P2KB_BASE_URL` status).*
+*Companion: `P2KB-MCP-SPECIFICATION.md` — the interface as it stands (rewritten 2026-10-07; the
+original 2025 design is that file at commit `804715b7`).*
