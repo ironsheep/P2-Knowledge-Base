@@ -25,18 +25,6 @@ flags_affected:
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-- name: HUB75 RGB Panel Timing
-  description: Generate precise clock timing for RGB LED panel
-  code: "' HUB75 panel driver clock generation\nrgb_clock_cycle\n        setq    rgb_mask\
-    \         ' Set pin mask\n        muxq    outa, rgb_data   ' Output RGB data\n\
-    \        drvh    clk_pin          ' Clock high\n        waitx   #2           \
-    \    ' Hold time (4 cycles: 2+D)\n        drvl    clk_pin          ' Clock low\n\
-    \        waitx   #2               ' Hold time\n        ret\n        \n' Latch\
-    \ row data\nlatch_row\n        drvh    latch_pin        ' Latch high\n       \
-    \ waitx   #4               ' Latch pulse width\n        drvl    latch_pin    \
-    \    ' Latch low\n        waitx   #10              ' Inter-row delay\n       \
-    \ ret\n"
-  source: hub75_driver
 - name: Inline PASM2 Timing
   description: Precise timing in inline PASM2 code
   code: "PUB pulse_pin(pin, width) | x\n  ORG\n    drvh    pin              ' Drive\
@@ -81,7 +69,6 @@ notes:
 - Use smart pins for continuous PWM
 - For long delays, consider WAITCT
 - Critical for bit-banged protocols
-- Essential for HUB75 panel driving
 compiler_operand_format:
   name: operand_l
   pattern: D/#0..511

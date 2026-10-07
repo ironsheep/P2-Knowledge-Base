@@ -1,5 +1,5 @@
 # Spin2 Method: COGSPIN
-# Source: Spin2 v51 documentation, P2-FLASH-FS analysis
+# Source: Spin2 v51 documentation
 # Purpose: Start Spin2 method in a cog
 
 method: "COGSPIN"
@@ -146,52 +146,6 @@ examples:
         REPEAT i FROM 0 TO 3
           COGSPIN(NEWCOG, process_chunk(i), @cog_stacks[i])
     description: "Launch multiple parallel processors"
-    
-  - code: |
-      ' Multi-COG Flash FS stress test pattern
-      CON
-        NUM_TESTER_COGS = 7
-        STACK_SIZE_LONGS = 64
-        
-      DAT
-        ' Per-COG stacks in DAT for persistence
-        stacks  LONG  0[NUM_TESTER_COGS * STACK_SIZE_LONGS]
-        results BYTE  0[8]  ' One per COG
-        lock    LONG  -1    ' Shared resource lock
-        
-      PUB stress_test() | idx
-        ' Initialize lock for file system access
-        lock := LOCKNEW()
-        
-        ' Launch test COGs with indexed stacks
-        REPEAT idx FROM 0 TO NUM_TESTER_COGS-1
-          COGSPIN(NEWCOG, fs_tester(idx), @stacks[idx * STACK_SIZE_LONGS])
-        
-        ' Monitor results
-        REPEAT
-          show_results()
-          WAITMS(1000)
-          
-      PRI fs_tester(cog_index) | handle
-        ' Each COG performs random file operations
-        REPEAT
-          ' Random delay to create contention
-          WAITMS(GETRND() & $FF)
-          
-          ' Acquire lock for file system access
-          REPEAT WHILE NOT LOCKTRY(lock)
-          
-          ' Perform file operation
-          handle := open("test.dat", "r")
-          IF handle >= 0
-            ' Read/write operations
-            results[cog_index]++
-            close(handle)
-          
-          ' Release lock
-          LOCKREL(lock)
-    description: "Multi-COG flash filesystem stress test"
-    source: P2-FLASH-FS
 
 method_execution:
   interpreter: "Each cog gets its own Spin2 interpreter"
@@ -208,20 +162,9 @@ common_uses:
   - "Multi-threaded applications"
   - "Separate UI and processing"
   - "Real-time event handlers"
-  - "Multi-COG stress testing"
   - "Parallel file system access"
 
 production_patterns:
-  multi_cog_with_locks:
-    description: "Pattern for safe multi-COG resource access"
-    pattern: |
-      1. Allocate shared lock in DAT
-      2. Create per-COG stacks in DAT
-      3. Launch COGs with indexed stack addresses
-      4. Use LOCKTRY/LOCKREL for resource protection
-      5. Track per-COG results/status
-    source: P2-FLASH-FS
-    
   indexed_stack_allocation:
     description: "Efficient stack allocation for multiple COGs"
     code: |
@@ -249,7 +192,8 @@ synchronization:
   shared_variables: "Use locks for thread-safe access"
   communication: "Use hub RAM for data exchange"
   coordination: "Use COGATN/POLLATN for signaling"
-  file_system_access: "Must use locks for flash FS operations"
+  file_system_access: "The Flash Filesystem driver (OBEX 4261, v1.4.0 on) supports multiple cogs and takes its own lock inside each of its operations"
+  source: "file_system_access: OBEX 4261 flash_fs.spin2 -- engineering/ingestion/external-inputs/source-code/obex-projects/4261-P2_FLASH_Filesystem/flash_fs.spin2:19 (multi-cog support), :146 (fsLock), :221 and :248 (locktry/lockrel around an operation)"
 
 notes:
   - "Method runs until it returns or cog is stopped"
@@ -257,7 +201,6 @@ notes:
   - "Each cog has independent method call stack"
   - "Parameters are passed by value"
   - "Cannot share local variables between cogs"
-  - "Flash FS requires lock protection for multi-COG access"
 
 best_practices:
   - "Always check return value for -1"
@@ -273,7 +216,6 @@ warnings:
   - "Insufficient stack causes crashes"
   - "VAR variables need synchronization"
   - "No automatic resource cleanup"
-  - "File system not thread-safe without locks"
 
 see_also:
   - "language/spin2/methods/coginit.yaml"

@@ -46,22 +46,13 @@ last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Set discrete bits of a value to that of another
 examples:
-- name: HUB75 Parallel RGB Output
-  description: Drive 6 RGB data lines simultaneously
+- name: Parallel Pin Output (HUB75 driver)
+  description: Write several output pins at once through a mask, leaving the other pins untouched
   code: |
-    ' HUB75 RGB panel driver - output 6 parallel RGB bits
-    ' Q register holds mask for RGB pins
-    rgb_output
-            setq    rgb_mask         ' Set pin mask in Q
-            muxq    outa, rgb_data   ' Update RGB pins atomically
-            drvh    clk_pin          ' Clock high
-            waitx   #2               ' Hold time
-            drvl    clk_pin          ' Clock low
-            ret
-
-    rgb_mask long   %00111111_00000000_00000000  ' Pins 16-21 for RGB
-    rgb_data long   0                   ' Current RGB values
-  source: hub75_driver
+    ' write our 6 color bits
+            SETQ    maskRgb12        ' load Q bit w/ RGB[12] mask
+            MUXQ    OUTA, reg_value  ' write contents of LS-byte anded with mask to output pins
+  source: "OBEX 2850 ISP HUB75 Matrix Driver -- engineering/ingestion/external-inputs/source-code/obex-projects/2850-ISP_Hub75_Matrix_Driver/isp_hub75_rgb3bit.spin2:932-934"
 - name: Masked Bit Update
   description: Update specific bits without affecting others
   code: |
@@ -103,5 +94,4 @@ related:
 notes:
 - Q register must be set before MUXQ
 - Atomic operation for parallel bit updates
-- Essential for HUB75 RGB panel driving
 - More efficient than AND/OR sequences

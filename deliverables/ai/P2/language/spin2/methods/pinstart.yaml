@@ -168,22 +168,6 @@ output_enable_note: |
   pulse, transition, serial TX, DAC, USB) produce no pin activity without it and
   still compile clean. Receive/measuring modes (ADC, RX, counters) omit it.
   Authority: language/spin2/methods/wrpin.yaml tt_field.p_oe_required_for
-production_patterns:
-  hub75_panel:
-    description: "HUB75 RGB LED panel uses pin groups"
-    pattern: |
-      - 6 RGB data pins configured as group
-      - Control pins (CLK, LAT, OE) individual
-      - Use ADDPINS for efficient setup
-      - Parallel output via SETQ/MUXQ
-    source: hub75_driver
-  flash_filesystem:
-    description: "SPI pins for flash access"
-    pattern: |
-      - Configure pins as group first
-      - Then specialize each pin's mode
-      - Maintains pin locality
-    source: P2-FLASH-FS
 see_also:
   - "Smart pin modes"
   - "Smart pin configuration"
