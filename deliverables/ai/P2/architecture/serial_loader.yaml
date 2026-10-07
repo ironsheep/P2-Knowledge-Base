@@ -9,7 +9,7 @@ description: |
   configuring the P2 chip via serial connection.
 
 boot_sequence:
-  source: "P2 Hardware Manual -- Boot Pattern table :269-282, Download Propeller Application :1592-1595, Prop_Hex checksum response :1666 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt; rom_listing_confirmation: ROM booter listing, engineering/ingestion/sources/rom-booter/ROM_Booter.lst:750-752"
+  source: "P2 Hardware Manual -- Boot Pattern table :269-282, Download Propeller Application :1592-1595, Prop_Hex checksum response :1666 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt; rom_listing_confirmation: Prop2 silicon ROM booter listing, engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:758-760"
   see_pattern_table: architecture/boot-rom/boot-pattern-selection.yaml
 
   serial_triggered_when:

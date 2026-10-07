@@ -2,7 +2,7 @@
 # Sources:
 #   - Hardware Manual 2022-11-01 (boot pattern table, fallback behavior)
 #     (boot pattern table consolidated from the Hardware Manual)
-#   - Parallax P2 boot ROM listing (ROM_Booter.lst — FAT32 + SD card SPI mode references)
+#   - Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build — FAT32 + SD card SPI mode references)
 
 component: sd_card_boot
 category: boot_rom
@@ -77,7 +77,7 @@ knowledge_gaps:
 # Where to chase the missing content
 chase_targets:
   rom_booter_listing:
-    listing: "Parallax P2 boot ROM listing (ROM_Booter.lst)"
+    listing: "Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build)"
     description: "Contains the SD card boot code; could be inspected for filename matching, size limits, etc."
     status: "Deferred to a follow-up session"
 

@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-550`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-551`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,23 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-549
+## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-550
+
+### F-550 — `serial_loader.yaml` `protocol_commands` gives the FPGA build's `Prop_Chk` answer and an invented `Prop_Clk` syntax — `CONFIRMED`
+Found 2026-10-07 fixing F-421 in the same file. Against the P2 Hardware Manual (`p2-hardware-manual-text.txt:1629-1725`)
+and the Silicon Doc (`silicon-doc-text.txt:4860-4868`):
+- `prop_chk.response` "'Prop_Ver Au' (version A silicon)". Both documents: the Rev B/C silicon
+  responds `CR+LF+"Prop_Ver G"+CR+LF` (HW Manual :1631-1634); the silicon ROM builds `ver = "G"`
+  (`rom_booter_v33_01j.lst:131`). "A" is the FPGA build's letter (F-421).
+- `prop_chk.syntax` "Prop_Chk" — the documented form carries the four INA/INB mask/data fields:
+  `> Prop_Chk 0 0 0 0` (:1634).
+- `prop_clk` — syntax "Prop_Clk P1 P2 P3" with P1 = source, P2 = multiply, P3 = divide, and example
+  "Prop_Clk 2 8 1". No source states this. Documented: `Prop_Clk <INAmask> <INAdata> <INBmask>
+  <INBdata> <clockmode>` (hex HUBSET value, e.g. `> Prop_Clk 0 0 0 0 19D28F8`, :1652, :1660;
+  `boot-pattern-selection.yaml` already quotes the correct form).
+- `prop_txt.syntax` "Prop_Txt ~" — documented `> Prop_Txt 0 0 0 0 <base64> ~ | ?` (:1716, :1722);
+  its `efficiency` figures need checking against :1702-1725.
+**Fix:** re-derive `protocol_commands` from HW Manual :1625-1725, every field quoted or cited.
 
 ### F-549 — `pinstart.yaml`'s HUB75 and sensor-array examples carry invented `source:` labels, and the HUB75 one contradicts the board's pinout — `CONFIRMED`
 Found 2026-10-07 fixing F-543 in the same file. `examples[4]` (`source: hub75_driver`) and `examples[5]`
@@ -556,7 +572,18 @@ two silent traps and `cascade_through_tiers` were not touched; this release chan
 
 ## The two ROM listings are different BUILD TARGETS, and F-123's grounding plan names the FPGA one (2026-09-10, ROM-asset mining) — F-421
 
-### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `PARTIAL` (re-verified 2026-10-05 «#386»: the grounding plan is annotated; nine shipped KB files still cite ROM_Booter.lst unlabelled)
+### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `PENDING-VALIDATION` (the KB half applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07.** Every shipped citation of `ROM_Booter.lst` now names the silicon listing.
+> **Line-anchored ones were re-derived, not renamed:** each cited FPGA line was read and its
+> counterpart found in `rom_booter_v33_01j.lst` with identical code — `serial_loader.yaml`
+> `serial_done` :750-752 → **:758-760**; `boot-pattern-selection.yaml` `rc_max`/`timeout_per`
+> :146,426 → **:154,434**, the Prop_Clk RCFAST-then-full HUBSET switch :578-587 → **:586-595**, the
+> shutdown `hubset #1` :754-756 → **:762-764**. Unanchored mentions (`boot-rom-contents`,
+> `spi-flash-boot`, `taqoz-forth`, `p2-monitor`, `sd-card-boot`, `_index`) now name
+> `rom_booter_v33_01j.lst, the Prop2 silicon build`, after confirming that listing carries what
+> each points at (SD/FAT32, Monitor, TAQOZ, flash). `boot-rom-contents` `source_listing` labels
+> `ROM_Booter.lst` as the FPGA build. The two Edge-module notes titled "Parallax ROM_Booter
+> listing" already cite the silicon file (`:135-138`) and were left. **Surfaced: F-550.**
 
 Found 2026-09-10 while scoping the ROM-facility mining Stephen asked for. The corpus holds two ROM
 listings in `engineering/ingestion/sources/rom-booter/` and nothing says which is the chip.

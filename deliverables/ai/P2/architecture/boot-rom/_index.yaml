@@ -2,7 +2,7 @@
 # Download-on-demand manifest for P2 Boot ROM subsystem
 # Use this file to identify which file contains the information you need
 # Sources: Hardware Manual (BOOT-PROCESS-COMPLETE), Silicon Doc v35, P2 Datasheet,
-#          Parallax P2 boot ROM listing (ROM_Booter.lst),
+#          Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build),
 #          Parallax P2 flash_loader.spin2 (golden flash loader),
 #          P2 Edge Standard Module (Edge DIP-switch mapping),
 #          P2 Edge 32MB Module (Edge 32MB DIP-switch mapping),

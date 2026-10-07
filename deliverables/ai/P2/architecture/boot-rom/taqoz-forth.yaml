@@ -70,7 +70,7 @@ author:
 knowledge_gaps:
   word_dictionary:
     status: "Not documented in primary sources we have ingested"
-    chase: "Mine the Parallax P2 boot ROM listing (ROM_Booter.lst) for the actual ROM dictionary; verify against Peter Jakacki's TAQOZ.spin2 source"
+    chase: "Mine the Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build) for the actual ROM dictionary; verify against Peter Jakacki's TAQOZ.spin2 source"
 
   runtime_capabilities:
     status: "Specific operations beyond 'interactive Forth REPL' are not documented in primary sources"
@@ -90,7 +90,7 @@ knowledge_gaps:
 
   rom_vs_reloaded_word_diff:
     status: "Which specific words are in ROM TAQOZ vs. only in TAQOZ Reloaded is not documented"
-    chase: "Extract ROM dictionary from ROM_Booter.lst; compare with TAQOZ Reloaded glossary"
+    chase: "Extract ROM dictionary from rom_booter_v33_01j.lst, the Prop2 silicon build; compare with TAQOZ Reloaded glossary"
 
 # Where to find documentation
 external_documentation:
@@ -101,7 +101,7 @@ external_documentation:
   taqoz_spin2_source: "Linked from the forum threads (originally on SourceForge and/or GitHub); closest available representation of the ROM build; not yet ingested into P2KB"
   community_glossary: "TAQOZ Reloaded 2.8 'Glossary of Words' — comprehensive but contains Reloaded-only words; needs filtering for the ROM subset"
 
-  remaining_grounding: "ROM-dictionary / Monitor-parser / TAQOZ.spin2 grounding for the gaps above is tracked in the project's ingestion tree (not duplicated here); primary mining source is the Parallax P2 boot ROM listing (ROM_Booter.lst)."
+  remaining_grounding: "ROM-dictionary / Monitor-parser / TAQOZ.spin2 grounding for the gaps above is tracked in the project's ingestion tree (not duplicated here); primary mining source is the Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build)."
 
 # Cross-references
 related:
