@@ -164,13 +164,15 @@ The engine is certified against a KB-built bundle — the whole KB with expected
 golden vectors, rule variants — before either side releases: agreement §9. Live acceptance after
 release: agreement §10.
 
-## 10. Open with the MCP agent
+## 10. Notes for the MCP agent — no reply needed
 
-Items this spec states from the agreement or the original design and that the server side should
-confirm or correct:
+**Build on these as written.** Reply only if one is wrong for the server; otherwise your
+certification report (agreement §9.3) is the next message we expect.
 
-1. The two contract changes made after the agreement's review: a **missing** rule block falls back
-   to last-good (not straight to built-in), and rule parsing is **strict** (agreement §§3, 5).
-2. That the OBEX tools read the object YAMLs through the same fetch path, so §4's filter covers them.
-3. The `p2kb_get` result's other fields (beyond `content`), if the KB's acceptance probes should read
-   them.
+1. Two contract points were tightened after your review: a **missing** rule block falls back to
+   last-good (not straight to built-in), the same as a refused one; and rule parsing is **strict**
+   (agreement §§3, 5).
+2. OBEX object YAMLs are KB files and get the same filter (agreement §5.1). If your OBEX tools fetch
+   them through a separate path, filter there too.
+3. The acceptance probes read only `content` from `p2kb_get` and the four named fields from
+   `p2kb_version`.
