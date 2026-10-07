@@ -29,7 +29,7 @@ only a fixed engine that applies it. A rule change reaches every receiver on its
 
 | | The KB | The server |
 |---|---|---|
-| The rule (which fields, comment handling) | **Owns.** Publishes it in every release index (§3). Changes it only in a KB release. | Reads it on every index refresh. Never edits or extends it. |
+| The rule (which fields, comment handling) | **Owns.** Publishes it in every release index (§3). Changes it only in a KB release. | Reads it at startup and on every index load/refresh (§5). Never edits or extends it. |
 | The engine (how a rule is applied) | Owns the reference implementation and the test bundle (§9). | Implements format 1 exactly (§4). |
 | Escapes (provenance the rule does not catch) | **Owns.** Its release gate scans the filtered output of every file (§8). | — |
 | Cache correctness | — | Owns: stamp by rule + engine (§6). |
@@ -50,13 +50,19 @@ only a fixed engine that applies it. A rule change reaches every receiver on its
 ```
 
 - `format` — integer. This agreement defines **format 1** only.
-- `remove_fields` — **literal key names, matched exactly.** Each matches `^[A-Za-z0-9_]+$`. Not
-  patterns, not regex: Go RE2, awk ERE and .NET regex differ, and a list of literals behaves the same
-  everywhere. The KB emits them sorted; receivers use them as given.
+- `remove_fields` — **literal key names, matched exactly and case-sensitively.** Each matches
+  `^[A-Za-z0-9_]+$`; no name appears twice; the list is not empty. Not patterns, not regex: Go RE2,
+  awk ERE and .NET regex differ, and a list of literals behaves the same everywhere. The KB emits them
+  sorted; receivers use them as given.
 - `remove_column0_comments` — boolean.
+- **All three keys are required, with exactly these types, and a format-1 block has no other keys.**
+  A missing key, a wrong type, an extra key, a duplicate or invalid name, or an empty list makes the
+  block **refused** (§5) — never "read with defaults". (In Go, a missing boolean decodes silently as
+  `false`, which would filter less; §4.1's `ParseRule` guards against that.)
 - Every other index key is unchanged (`system`, `categories`, `aliases`, `files`, `sha256`
   semantics). An index without `delivery_filter` is valid (every KB release before this change) —
   see §5.
+
 ### 3.1 Rule identity — `rule_id`
 
 Every receiver computes the same identity for a rule, so caches and diagnostics can compare them:
@@ -70,7 +76,17 @@ rule_id = lowercase hex SHA-256 of the UTF-8 text:
 ```
 
 The KB's release gate computes it from the index it publishes and prints it; the certification
-bundle's README states it (§9).
+bundle's README states it for every rule in the bundle (§9).
+
+**The built-in rule** (§5) is exactly the block shown above, fields in the order shown. Its
+`rule_id` is:
+
+```
+b431af2a9f515c11fe5fd982642c636c6f8843bf89ed2c3003ee0e28c04877ee
+```
+
+(Reproduce: `printf 'p2kb-delivery-filter\nformat=1\nremove_fields=documentation_level,documentation_source,enhancement_source,last_updated,manual_extraction_date,source,source_reference,sources,verified_against\nremove_column0_comments=true\n' | sha256sum`.)
+Use it as a unit-test value for `RuleID`.
 
 ## 4. The engine — format 1, exact
 
@@ -91,6 +107,16 @@ A **line rule, indentation-aware.** Not a YAML-aware key delete, and not a plain
 
 Whitespace is POSIX `[[:space:]]` = `[ \t\n\v\f\r]`. Output is every kept line followed by `"\n"`,
 whether or not the input ended in one.
+
+**Exactness details** (each is what the KB's reference engine does; the bundle tests it):
+- The input is bytes, split on `\n` only. No CRLF normalization: a `\r` is just whitespace at the
+  start of a line and an ordinary byte elsewhere. No Unicode handling is needed — every character the
+  rule tests is ASCII.
+- Indent is the **count of leading whitespace bytes**; a tab counts as 1, the same as a space.
+- "Followed immediately by `:`" — `source :` (space before the colon) does not match; `sources_x:`
+  does not match `sources`; `- source:` and `{source:` do not match (the first non-whitespace
+  character is not part of a name).
+- A field line removes the **whole line**, including any value on it (`source: "x"`).
 
 **Why a line rule.** Some KB content uses these words as data keys, and the leading `-` or `{` keeps
 them out of step 3:
@@ -129,35 +155,103 @@ also removing indented maintainer comments that sit inside a span; no content ch
 package filter
 
 import (
+    "bytes"
+    "crypto/sha256"
+    "encoding/hex"
+    "encoding/json"
     "fmt"
     "regexp"
     "strings"
 )
 
 type Rule struct {
-    Format                int      `json:"format"`
-    RemoveFields          []string `json:"remove_fields"`
-    RemoveColumn0Comments bool     `json:"remove_column0_comments"`
+    Format                int
+    RemoveFields          []string
+    RemoveColumn0Comments bool
+}
+
+// BuiltinRule is the §3 block exactly. rule_id b431af2a…77ee (§3.1).
+var BuiltinRule = Rule{
+    Format: 1,
+    RemoveFields: []string{
+        "documentation_level", "documentation_source", "enhancement_source", "last_updated",
+        "manual_extraction_date", "source", "source_reference", "sources", "verified_against",
+    },
+    RemoveColumn0Comments: true,
 }
 
 const posixSpace = " \t\n\v\f\r"
 
 var fieldNameRe = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
 
+// RefusedRule is returned when the index carries a block this engine must not apply.
+// Format is the block's format when it could be read, else 0.
+type RefusedRule struct {
+    Format int
+    Reason string
+}
+
+func (e *RefusedRule) Error() string { return "delivery_filter refused: " + e.Reason }
+
+// ParseRule reads the index's "delivery_filter" value. Strict: every key required, exact types,
+// no extra keys, no duplicate or invalid names. Anything else is a *RefusedRule (§3, §5).
+func ParseRule(raw json.RawMessage) (Rule, error) {
+    var head struct {
+        Format *int `json:"format"`
+    }
+    if err := json.Unmarshal(raw, &head); err != nil || head.Format == nil {
+        return Rule{}, &RefusedRule{Reason: "format missing or not an integer"}
+    }
+    if *head.Format != 1 {
+        return Rule{}, &RefusedRule{Format: *head.Format, Reason: fmt.Sprintf("unsupported format %d", *head.Format)}
+    }
+    var p struct {
+        Format                *int      `json:"format"`
+        RemoveFields          *[]string `json:"remove_fields"`
+        RemoveColumn0Comments *bool     `json:"remove_column0_comments"`
+    }
+    dec := json.NewDecoder(bytes.NewReader(raw))
+    dec.DisallowUnknownFields()
+    if err := dec.Decode(&p); err != nil {
+        return Rule{}, &RefusedRule{Format: 1, Reason: err.Error()}
+    }
+    if p.RemoveFields == nil || p.RemoveColumn0Comments == nil {
+        return Rule{}, &RefusedRule{Format: 1, Reason: "remove_fields or remove_column0_comments missing"}
+    }
+    r := Rule{Format: 1, RemoveFields: *p.RemoveFields, RemoveColumn0Comments: *p.RemoveColumn0Comments}
+    if err := r.Validate(); err != nil {
+        return Rule{}, &RefusedRule{Format: 1, Reason: err.Error()}
+    }
+    return r, nil
+}
+
 // Validate reports whether this engine can apply r. Format 1 only.
 func (r Rule) Validate() error {
     if r.Format != 1 {
-        return fmt.Errorf("unsupported delivery_filter format %d", r.Format)
+        return fmt.Errorf("unsupported format %d", r.Format)
     }
     if len(r.RemoveFields) == 0 {
-        return fmt.Errorf("delivery_filter.remove_fields is empty")
+        return fmt.Errorf("remove_fields is empty")
     }
+    seen := map[string]bool{}
     for _, f := range r.RemoveFields {
         if !fieldNameRe.MatchString(f) {
-            return fmt.Errorf("delivery_filter field %q is not a literal key name", f)
+            return fmt.Errorf("field %q is not a literal key name", f)
         }
+        if seen[f] {
+            return fmt.Errorf("field %q listed twice", f)
+        }
+        seen[f] = true
     }
     return nil
+}
+
+// RuleID is §3.1: SHA-256 of the canonical text, lowercase hex.
+func (r Rule) RuleID() string {
+    text := fmt.Sprintf("p2kb-delivery-filter\nformat=%d\nremove_fields=%s\nremove_column0_comments=%t\n",
+        r.Format, strings.Join(r.RemoveFields, ","), r.RemoveColumn0Comments)
+    sum := sha256.Sum256([]byte(text))
+    return hex.EncodeToString(sum[:])
 }
 
 func leadWS(s string) int { return len(s) - len(strings.TrimLeft(s, posixSpace)) }
@@ -206,35 +300,60 @@ func Apply(r Rule, content string) string {
 
 The KB's reference engine is `filter_metadata()` in `engineering/tools/p2kb/fetch-kb-file.sh`; the
 certification bundle's expected outputs are produced by running it (§9), not by hand. The Go text
-above is not compiled on the KB side (no Go toolchain here) — the bundle is the proof.
+above is not compiled on the KB side (no Go toolchain here) — the bundle is the proof. It
+**replaces** the server's current five-field `FilterMetadata` regex entirely; nothing of the old
+filter remains.
 
-## 5. When the index rule cannot be used
+## 5. Determining the rule in effect
 
-- **Index has no `delivery_filter`** (any KB release before this change): apply the **built-in
-  rule** — exactly the format-1 block in §3.
-- **Index has a block this engine refuses** (`Validate()` fails — e.g. a future `format: 2`): do
-  **not** apply it and do **not** fall back to anything weaker. Keep applying the **last rule this
-  server applied successfully** (persist it with the cache); if there is none, the built-in rule.
-- Either way, say so in `p2kb_version` (§7). This is a maintainer diagnostic; the consuming agent
-  is not expected to act on it — a filter failure gives it extra provenance lines beside content that
-  is still correct.
+Run this **at startup** (against the cached index, if there is one) and **after every index load or
+refresh**:
+
+1. The index has a `delivery_filter` block and `ParseRule` accepts it → **that rule**, source
+   `index`. Persist it as the **last-good rule** (a small file next to the cached index).
+2. Otherwise — no block, or a block `ParseRule` refuses — → the **last-good rule** if one is
+   persisted, source `last-good`; if none, **`BuiltinRule`**, source `built-in`.
+
+Never apply a refused block, and never drop from a known rule to something weaker. A
+missing block and a refused block are treated alike so that neither can make the server filter
+less than it last did. (Before the first KB release that carries a block, every server runs on
+`BuiltinRule`.)
+
+Report the outcome in `p2kb_version` (§7). This is a maintainer diagnostic; the consuming agent is
+not expected to act on it — a filter failure gives it extra provenance lines beside content that is
+still correct.
+
+### 5.1 Where the filter applies
+
+Every tool result that returns the body of a KB file returns the **filtered** body — `p2kb_get`,
+and equally any batch, related-content or other path that returns file content. No path returns a
+raw body. The OBEX tools are not KB YAML and are unaffected.
 
 ## 6. Cache
 
-- **Hash before you filter** — unchanged: verify the raw body against the index's `sha256` (git-blob
-  hash), then filter.
-- **Cache stamp = `rule_id` + the server's engine version.** The stamp is checked **whenever the
-  rule in effect is determined — at startup and on every index refresh.** If it differs from the
-  stamp the cached bodies were filtered under, discard every cached body. **A cache with no stamp is
-  discarded** — that is what clears old `sources:` blocks for installs upgrading from a server version
-  that predates this agreement. This covers a rule change, an engine bug fix and an upgrade, with no
-  manual flush.
+- **Hash before you filter** — unchanged: SHA-256 of the raw HTTP response bytes (the committed git
+  blob bytes, exactly as served), compared with the index entry's `sha256`, **then** filter. A
+  mismatch is a stale/poisoned body → re-fetch.
+- **Cache only filtered bodies**, each filtered under the rule in effect.
+- **Cache stamp = `rule_id` + `"/"` + the server's engine version** (an engine version string you
+  bump whenever `Apply` or `ParseRule` changes). Store it with the cache. Every time §5 determines
+  the rule in effect — **at startup and after every index load or refresh** — compare the stamp:
+  different → discard every cached body and write the new stamp. **A cache with no stamp is
+  discarded** — that clears old `sources:` blocks for installs upgrading from a server version that
+  predates this agreement. This covers a rule change, an engine change and an upgrade, with no manual
+  flush.
 - Per-entry `mtime` / `sha256` invalidation is unchanged.
 
 ## 7. `p2kb_version` additions (diagnostic)
 
-Report: the `rule_id` in use; where it came from — `index` | `last-good` | `built-in`; and, when an
-index rule was refused, the `Validate()` error text and the refused rule's `format`.
+Add these fields (names as given, so the KB's acceptance probe can read them):
+
+| Field | Value |
+|---|---|
+| `filter_rule_id` | `rule_id` of the rule in effect |
+| `filter_rule_source` | `index` \| `last-good` \| `built-in` |
+| `filter_engine_version` | the engine version in the cache stamp |
+| `filter_rule_refused` | present only when the index's block was refused: `{ "format": <int or 0>, "reason": "<RefusedRule.Reason>" }` |
 
 ## 8. What the KB guarantees
 
@@ -280,25 +399,42 @@ inside a removed field's span followed by more of that field's lines — all rem
 
 ### 9.2 Running it
 
-Serve `serve/` with any static HTTP server and point the server at it with `P2KB_BASE_URL`, which
-the server implements for the index and content fetches as part of this work (it is listed in the
-spec but not implemented today). Then:
+**`P2KB_BASE_URL`** (implemented by the server in this work; listed in the spec but not implemented
+today) replaces the prefix `https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main`. The
+index is fetched from `<base>/deliverables/ai/p2kb-index.json.gz`; each file from
+`<base>/<files[key].path>`. No trailing slash on `<base>`. `serve/` is laid out to match.
 
-1. **Golden vectors:** `Apply(rule, vectors/input.yaml) == vectors/expected.yaml` and
-   `Apply(rule, "") == ""`, byte for byte.
+Serve `serve/` with any static HTTP server (e.g. `python3 -m http.server 8080 -d serve`), set
+`P2KB_BASE_URL=http://localhost:8080`, start from an **empty cache directory**, and run the steps
+**in order**. "Fresh cache" below means: stop the server, delete the whole cache directory —
+including the stamp and the last-good rule file — and start again.
+
+1. **Golden vectors** (unit test, no server): with `BuiltinRule`,
+   `Apply(vectors/input.yaml) == vectors/expected.yaml` and
+   `Apply(vectors/empty-input.yaml) == vectors/empty-expected.yaml` (both zero bytes), byte for byte.
+   `BuiltinRule.RuleID()` equals the value in §3.1.
 2. **Whole KB:** for every key in the index, the **`content` field** of the `p2kb_get` result ==
    `expected/<key>.yaml`, byte for byte (the tool returns JSON with the YAML in that field). This
-   applies to every output comparison below. `p2kb_version` reports source `index` and the README's
-   main `rule_id`.
-3. **Variant A:** replace the served `p2kb-index.json.gz` with A's; `p2kb_refresh`. `p2kb_version`
-   reports the refusal and source `last-good`; outputs still equal `expected/`.
-4. **Variant B:** replace it with B's; `p2kb_refresh`. `p2kb_version` reports B's `rule_id`; cached
-   bodies were discarded; outputs equal `variants/B-changed-fields/expected/`.
-5. **No rule block:** serve an index without `delivery_filter` (the main index with the key removed —
-   the README gives the command); fresh cache; source `built-in`; outputs equal `expected/`.
+   applies to every output comparison below. `p2kb_version`: `filter_rule_source` = `index`,
+   `filter_rule_id` = the README's main `rule_id`.
+3. **Variant A (refused block):** replace the served `p2kb-index.json.gz` with A's; `p2kb_refresh`.
+   `p2kb_version`: source `last-good`, same `rule_id` as step 2, `filter_rule_refused.format` = 2.
+   Outputs still equal `expected/`.
+4. **Variant B (changed rule):** replace it with B's; `p2kb_refresh`. `p2kb_version`: source
+   `index`, B's `rule_id` (README). Outputs equal `variants/B-changed-fields/expected/` — which can
+   only happen if the bodies cached under the main rule were discarded.
+5. **No rule block:** serve the main index with `delivery_filter` removed (the README gives the
+   command); **fresh cache**. `p2kb_version`: source `built-in`, `rule_id` = §3.1's built-in value.
+   Outputs equal `expected/` (the main rule and the built-in rule are identical).
+6. **Unstamped cache (upgrade path):** with the main index served, populate a cache, then stop the
+   server and delete **only** the cache stamp; start again. Every cached body is discarded and
+   re-fetched; outputs equal `expected/`.
+7. **Restart keeps a valid cache:** stop and start with the stamp intact; no body is re-fetched
+   (from your logs) and outputs equal `expected/`.
 
-The variants' file entries and `sha256` values are identical to the main index — only the rule
-differs.
+The variants' `files` entries and `sha256` values are identical to the main index — only the rule
+differs. Also unit-test `ParseRule` on: a missing `remove_column0_comments`, a string `format`, an
+extra key, a duplicate field name, an empty list, a name with a `-` — each must be refused.
 
 ### 9.3 Reporting back
 
@@ -310,11 +446,12 @@ fault fixes it; the KB rebuilds the bundle if its engine or rule changed.
 
 1. **KB releases first.** Its index carries the rule; servers built before this change ignore the
    new key, so the KB release is harmless to them.
-2. **Server releases** against that index.
+2. **Server releases** against that index — when Stephen says; not before the KB release is live.
 3. **Live acceptance** (the KB runs it after `p2kb_refresh`):
 
 ```
-p2kb_version                            -> source "index"; rule_id = the KB release's rule_id
+p2kb_version                            -> filter_rule_source "index";
+                                           filter_rule_id = the KB release's rule_id
 p2kb_get p2kbSpin2Pinstart              -> no "sources:" key; the description still contains
                                            "SYNCHRONOUS serial transmit (%11100) is the opposite"
 p2kb_get p2kbPasm2InstructionSkipping   -> no line starting "#"; "pattern_consumption"
@@ -343,6 +480,34 @@ and records it.
 The MCP agent also confirmed one known limit as acceptable: a block-scalar content line that begins
 with a removed field name (the F-544 case) is still removed by step 3, and §8.3's over-removal gate
 fails the KB release on it.
+
+## 12. Server implementation checklist
+
+Everything the server must do, each pointing at its section:
+
+- [ ] Delete the old five-field `FilterMetadata`; add `Rule`, `BuiltinRule`, `ParseRule`,
+      `Validate`, `RuleID`, `Apply` exactly as §4.1 (§3, §3.1, §4).
+- [ ] Read `delivery_filter` from the index (`json.RawMessage`; absent is normal) on every index load
+      and refresh (§3).
+- [ ] Determine the rule in effect at startup and after every index load/refresh: index → last-good →
+      built-in; persist last-good; never apply a refused block (§5).
+- [ ] Filter every KB file body any tool returns; no raw path (§5.1).
+- [ ] Hash the raw body against `sha256`, then filter, then cache (§6).
+- [ ] Cache stamp `rule_id/engine-version`: checked at startup and after every index load/refresh;
+      discard on mismatch or absence; bump the engine version whenever `Apply`/`ParseRule` change
+      (§6).
+- [ ] `p2kb_version`: `filter_rule_id`, `filter_rule_source`, `filter_engine_version`,
+      `filter_rule_refused` (§7).
+- [ ] Implement `P2KB_BASE_URL` for the index and file fetches (§9.2).
+- [ ] Unit tests: golden vectors, empty input, `RuleID` value, the six `ParseRule` refusals (§9.2).
+- [ ] Certification steps 1–7 against the bundle, reported per §9.3.
+- [ ] Release only after the KB release is live, when Stephen says (§10).
+
+**Where this agreement and `P2KB-MCP-SPECIFICATION.md` differ, this agreement wins.** The KB brings
+the spec in line as part of its sprint.
+
+**The bundle** is built by the KB after its side is certified; Stephen copies it to you. Its
+`README.md` carries the KB commit, every `rule_id`, the file count, and the command for step 5.
 
 ---
 
