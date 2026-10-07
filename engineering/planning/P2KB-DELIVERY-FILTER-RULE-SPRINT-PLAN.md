@@ -10,6 +10,10 @@
   research incomplete** (the engine text was not exercised against a comment-inside-span or an empty
   input before it was sent, and the spec's `P2KB_BASE_URL` / manifests claims were taken from the
   spec, not confirmed).
+- 2026-10-07 — the spec update moves from §10 (at release) to new §1a (now, delivered to the MCP
+  agent as the current-state document beside the agreement). **Cause: 1 — owner ruling not asked
+  for** (when the spec should be current, and who receives it, was not asked at planning).
+
 **Closes:** F-439 (the MCP serves provenance) · **Interface:**
 `engineering/tools/p2kb-mcp/MCP-DELIVERY-FILTER-HANDOFF.md` (the agreement with the MCP agent)
 
@@ -101,6 +105,33 @@ all folded in (see Revisions); the agreement reads AGREED. **Why:** the MCP agen
 `.backups/`). **Target:** Stephen hands it over; the MCP agent replies once (its §11 questions plus
 anything else); we fold the reply in and mark it AGREED. **Verify:** every §11 question answered;
 every change from the reply traced to a line of the reply; status line reads AGREED with the date.
+
+## 1a. Bring `P2KB-MCP-SPECIFICATION.md` to "where we are today" — delivered to the MCP agent
+
+**Requested by Stephen** (2026-10-07): update the spec so it can go to the MCP agent as the
+current-state document alongside the agreement. Done **before** either side builds, not at release.
+**Starting point:** `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md` (1,409 lines — backup
+first). Known-wrong or superseded today:
+- §Data Sources (`:43-54`) lists `manifests/` fetches — the server fetches none (MCP agent).
+- §Index Structure (`:56-97`) — no `delivery_filter`; schema 3.5.0.
+- §Content Filtering (`:98-152`) — hard-coded nine-field list, keyword comment rule, and an
+  "ungated third implementation / F-439" warning that this agreement retires.
+- §Filter Implementation (`:620-684`) — the old `FilterMetadata` reference.
+- §Cache Invalidation on Index Update (`:460-470`) — no rule stamp, no startup check.
+- `p2kb_version` (`:279-293`) — no filter fields.
+- §Configuration (`:1000-1011`) — presents `P2KB_BASE_URL` as existing; it is not implemented yet.
+- Any other statement a read-through finds false against the server as the MCP agent describes it
+  or against the agreement.
+**Target:** every section above states the agreed interface and the server's actual current state;
+the filter sections **point to the agreement** as canonical (rule, engine, resolution order, cache
+stamp, `p2kb_version` fields) instead of restating the engine, so there is one copy. Where something
+is agreed but not yet built (`P2KB_BASE_URL`, the filter fields), the spec says so plainly. A dated
+status line at the top says what the document reflects. Stephen hands it to the MCP agent with the
+agreement.
+**Verify:** normal — every section listed above changed and re-read against the agreement; edge —
+no remaining copy of the field list or engine code outside the agreement (grep the spec for
+`source_reference`, `FilterMetadata`, `Extracted from`); error — any claim the KB cannot confirm
+about the server is phrased as the MCP agent stated it, with the date, or flagged for them.
 
 ## 2. The index carries the rule
 
@@ -229,11 +260,7 @@ F-439 closed in the register with the server version.
 
 ## 10. Documentation
 
-- `P2KB-MCP-SPECIFICATION.md` — §Index Structure (`delivery_filter`, 3.6.0), §Content Filtering and
-  §Filter Implementation (point to the agreement; drop the hard-coded list and keyword comment rule),
-  §Cache Invalidation (rule stamp, startup check, unstamped discard), `p2kb_version` (diagnostic
-  fields), §Data Sources (the server fetches no `manifests/` — the table says it does),
-  §Configuration (`P2KB_BASE_URL` — listed, not implemented until this work).
+- `P2KB-MCP-SPECIFICATION.md` — done early, in §1a; re-checked here at release.
 - `MCP-DELIVERY-FILTER-HANDOFF.md` — AGREED 2026-10-07; outcome noted at release.
 - `engineering/tools/p2kb/METADATA-FILTER-DESIGN.md` — stale (v3.0, four fields, `grep -v`): rewrite
   to the current design, pointing at the agreement as canonical.
@@ -250,7 +277,7 @@ invalidation, gate inputs.
 
 | Artifact | Describes | Disposition |
 |---|---|---|
-| `P2KB-MCP-SPECIFICATION.md` §§ Index Structure, Content Filtering, Filter Implementation, Cache Invalidation, `p2kb_version`, Data Sources, Configuration | rule, engine, cache; two claims the MCP agent says are false today | §10 |
+| `P2KB-MCP-SPECIFICATION.md` §§ Index Structure, Content Filtering, Filter Implementation, Cache Invalidation, `p2kb_version`, Data Sources, Configuration | rule, engine, cache; two claims the MCP agent says are false today | §1a (early, delivered to the MCP agent) |
 | `MCP-DELIVERY-FILTER-HANDOFF.md` | the interface | AGREED 2026-10-07 (§1) |
 | `engineering/tools/p2kb/METADATA-FILTER-DESIGN.md` | filter design — **already stale** | §10 |
 | `engineering/procedures/yaml-workflow-quick-guide.md:121-131` | field list — **already stale** | §10 |
