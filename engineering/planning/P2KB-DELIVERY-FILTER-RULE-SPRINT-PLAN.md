@@ -21,18 +21,18 @@ both release on agreement.
 
 Asked one at a time; each carries a recommendation.
 
-1. ~~Require `jq` for the bash scripts?~~ **RESOLVED 2026-10-07 — no.** Stephen: *"we can not
-   leave any host side dependency."* Research had found the bash scripts already depend on `jq` in
-   practice: `fetch-kb-file.sh:139-142` falls back to `grep -o "\"$key\":{\"path\":..."` without
-   `jq`, but the generator writes the index pretty-printed (`generate-p2kb-index.py:671`,
-   `indent=2`), so the pattern never matches — measured: 0 hits for `"p2kbPasm2Add":{"path"` in both
-   `p2kb-index.json` and the `.gz`. **Key lookup without `jq` is broken today.** That is a defect,
-   fixed in this sprint (§2a, §3): the bash scripts use **no `jq` at all** — only what they already
-   need (`curl`, `gunzip`, `awk`, `grep`, `sed`) — reading an index whose line layout the generator
-   guarantees and a release gate proves.
-2. **Do any open punch-list / register items join this sprint?** Presented as a group in §0.1.
-   **Recommendation:** none — F-545 is the KB-side content work that §8's discipline relies on but
-   is independently scoped under its own ruling; F-552 is a content fix in «#387»'s lane.
+1. **RESOLVED 2026-10-07 — the `jq` arrangement does not change.** The bash scripts keep using `jq`
+   when present and falling back without it; no new host-side dependency. The rule needs no `jq`-less
+   reader at all: with `jq` the script reads the index's rule; without it, it uses its built-in rule
+   (the quiet fallback already agreed).
+1a. **RESOLVED 2026-10-07 — fix the broken no-`jq` fallback in this sprint (§3a).** Found while
+   researching: `fetch-kb-file.sh:139-142` falls back to `grep -o "\"$key\":{\"path\":..."`, but the
+   generator writes the index pretty-printed (`generate-p2kb-index.py:671`, `indent=2`), so the
+   pattern never matches — measured: 0 hits for `"p2kbPasm2Add":{"path"` in both `p2kb-index.json`
+   and the `.gz`. Without `jq`, key lookup finds nothing today. Stephen chose option (a): repair the
+   fallbacks in this sprint and gate them.
+2. **RESOLVED 2026-10-07 — no open punch-list / register item joins this sprint** (§0.1 list
+   presented; Stephen: "none"). F-552 stays in «#387» and must be fixed before §9's KB release.
 3. **How is the PowerShell engine verified?** No `pwsh` in this container; the current parity gate
    only checks that field names appear in the `.ps1` text. **Recommendation:** install PowerShell in
    the devcontainer image (`.devcontainer/Dockerfile`, the same place the PDF tools are baked in) so
@@ -77,7 +77,7 @@ Asked one at a time; each carries a recommendation.
 | Removing **all** column-0 comments is content-safe | 1,342 lines in 175 files; parsed YAML changed in **0** files |
 | The payload provenance scan already exists | `validate-dod-release.py:634` `validate_internal_ids` reads the shipped payload; today it **fails, 33 hits** (F-552) |
 | Our own receivers carry stale rule copies | `refresh-kb.sh:198-200` and `refresh-kb.ps1:220-226` still run the **original five-field** `grep -v` — the F-439 defect, on our side |
-| Bash index lookup without `jq` is broken | §0 Q1 — 0 hits for the fallback's pattern in both index files |
+| Bash index lookup without `jq` is broken | §0 Q1a — 0 hits for the fallback's pattern in both index files |
 | No PowerShell in the container | `which pwsh powershell` → none |
 | Server can be pointed at local files | `P2KB-MCP-SPECIFICATION.md` §Configuration: `P2KB_BASE_URL` — confirmed by the MCP agent in review (agreement §11.1) |
 | Live index count | 1,131 entries, 1,130 files present — `op_addlteqgt.yaml` deleted by F-547, index not yet regenerated (expected; the bundle regenerates it) |
@@ -103,44 +103,40 @@ documents it. The generator prints the `rule_id` (agreement §3.1).
 edge — the generator rejects a non-literal field name; error — malformed block cannot be emitted
 (the generator validates before writing).
 
-## 2a. The index line layout is a guarantee (no host-side dependency)
-
-**Why:** §0 Q1 — the bash scripts must read the index with no `jq`, and today's no-`jq` paths
-silently find nothing. **Starting point:** `json.dump(index, f, indent=2)` (`generate-p2kb-index.py:671`)
-— a layout nothing promises. **Target:** the generator writes the index in a fixed, documented line
-layout that is still plain valid JSON (the server and PowerShell parse it as JSON, unaffected): one
-line per record — the `system` object on one line, the `delivery_filter` object on one line, one
-line per category (`"name": [keys]`), per alias (`"ALIAS": [keys]`), and per file
-(`"key": {"path": …, "mtime": …, "sha256": …}`), each section opened and closed on its own line. The
-layout is written down in the spec's Index Structure section as part of the interface.
-**Verify:** normal — `json.load` of the new index equals `json.load` of the old one (same content,
-different whitespace); edge — keys containing characters JSON escapes (measure whether any exist and
-cover them in the bash reader); error — the §5 reader-parity gate fails on any record the bash
-reader misreads.
-
 ## 3. The KB reference engine — `fetch-kb-file.sh` and `.ps1`
 
 **Starting point:** `fetch-kb-file.sh:205-232` (`filter_metadata`, awk, hard-coded list and comment
 keywords); `fetch-kb-file.ps1:221-260` (`Filter-Metadata`, same); script cache under `.p2kb/cache`
 with no rule awareness (`fetch-kb-file.sh:370-395`).
-**Target:** both apply format 1 exactly (agreement §4) with the rule read from the cached index
-(bash: `awk` over the §2a layout, **no `jq`**; PowerShell: `ConvertFrom-Json`); a built-in format-1
-rule used **quietly** when the index has no block or one the script cannot apply; the script cache
-stamped with `rule_id` + script version and cleared when it changes. **Every `jq` use in
-`fetch-kb-file.sh` (22 lines: lookup, aliases, search, browse, categories, entry count) is replaced
-by an `awk` reader of the §2a layout** — one code path, not a `jq` path beside a fallback that can
-rot. Script versions bump together (parity gate checks they match).
-**Verify:** normal — output equals the Python transliteration on all files; every subcommand
-(`<key>`, `--search`, `--browse`, `--categories`, alias lookup) returns what `json.load` of the index
-says it should, on a machine path with `jq` absent from `PATH`; edge — index without a block →
-built-in rule, same output; a `format: 2` index → built-in rule; changed rule → cache cleared.
+**Target:** both apply format 1 exactly (agreement §4). The rule comes from the cached index — bash
+via `jq` when present, PowerShell via `ConvertFrom-Json`; a built-in format-1 rule is used
+**quietly** when bash has no `jq`, or the index has no block, or one the script cannot apply. The
+script cache is stamped with `rule_id` + script version and cleared when it changes. Script versions
+bump together (parity gate checks they match).
+**Verify:** normal — output equals the Python transliteration on all files; edge — no `jq` →
+built-in rule, same output on today's rule; index without a block → built-in rule; a `format: 2`
+index → built-in rule; changed rule → cache cleared.
+
+## 3a. Repair the no-`jq` fallbacks in the bash scripts
+
+**Why:** §0 Q1a. **Starting point:** the `grep`/`sed` fallbacks in `fetch-kb-file.sh` — key lookup
+`:142`, alias lookup `:163`, key search `:183`, `:361` — and `refresh-kb.sh:190-194`; they assume
+compact JSON. `--browse` / `--categories` (`:291`, `:308`) refuse without `jq`.
+**Target:** every fallback reads the index as `json.dump(..., indent=2)` actually writes it, so a
+user without `jq` gets the same answers as with it. Whether `--browse` / `--categories` gain a
+fallback or keep their explicit "jq required" message is decided at task time against what the
+pretty layout allows — the message is honest, a silent miss is not.
+**Verify:** normal — with `jq` off `PATH`, key lookup, alias lookup and search return what
+`json.load` of the index says for **every** key and alias (the §5 gate); edge — aliases mapping to
+several targets, keys that are prefixes of other keys; error — a key not in the index reports
+not-found, never a partial match.
 
 ## 4. `refresh-kb.sh` / `.ps1` stop carrying their own filter
 
 **Starting point:** `refresh-kb.sh:198-207` and `refresh-kb.ps1:220-236` prefetch common keys through
 a stale five-field filter. `refresh-kb.sh:129-133` already downloads `fetch-kb-file.sh`.
 **Target:** the refresh scripts prefetch **through** `fetch-kb-file.*` — one engine per language, no
-second copy (shared-component rule); `refresh-kb.sh`'s 5 `jq` uses go the same way as §3's.
+second copy (shared-component rule).
 **Verify:** prefetched cache bodies byte-equal to
 `fetch-kb-file.*` output for the same keys; no `filter`/field-name literal left in either refresh
 script (grep).
@@ -157,10 +153,11 @@ independent second implementation; `_apply_shipped_filter` (`:478`) runs the bas
 - `_apply_shipped_filter` runs the bash engine against that same index.
 - `validate_internal_ids` (the escape scan, agreement §8.3) is unchanged — it already reads the
   payload. F-552 makes it fail today; that is a register item, not this sprint's.
-- New check (reader parity, replaces the fixed-line gate agreed earlier): with `jq` off `PATH`,
-  the bash reader recovers the rule (same `rule_id` as the validator) and resolves **every** file
-  key, alias and category of the generated index exactly as `json.load` does. A layout change that
-  breaks the reader fails the release.
+- New check (rule read-back): bash with `jq` recovers the index rule and computes the same
+  `rule_id` as the validator.
+- New check (no-`jq` fallback parity, §3a): with `jq` off `PATH`, the bash fallbacks resolve
+  **every** key and alias of the generated index exactly as `json.load` does. A generator layout
+  change that breaks the fallbacks fails the release.
 - The PowerShell engine cannot run in this container (no `pwsh` — measured 2026-10-07); how it is
   verified is §0 Q3.
 - `validate_fetch_script_parity` checks the scripts' **built-in** fallback rules equal the index rule,
@@ -214,13 +211,12 @@ F-439 closed in the register with the server version.
 - `engineering/procedures/yaml-workflow-quick-guide.md:121-131` — stale "5 fields" section: replace
   with a pointer to the rule in the generator.
 - `.claude/skills/release-yamls/SKILL.md` — name the new rule read-back check among the gates it runs.
-- Spec §Index Structure — the §2a line layout, stated as part of the interface.
 - KB CHANGELOG entry at the release.
 
 ## Documentation Blast Radius
 
 Behaviors changed: what is removed at delivery (all column-0 comments now), where the rule lives
-(index), the index's line layout (now guaranteed), bash scripts working without `jq`, cache
+(index), bash key/alias lookup working without `jq` (repaired), cache
 invalidation, gate inputs.
 
 | Artifact | Describes | Disposition |
@@ -255,4 +251,4 @@ Doc-audit instrument output: §0.1 (2 findings, outside this sprint's surfaces).
    absorbs it as a dated revision. Whether the server's `P2KB_BASE_URL` covers manifests (§11.1) —
    if not, the bundle adds what it needs.
 
-Questions remaining: §0 Q2, Q3 (Q1 resolved 2026-10-07).
+Questions remaining: §0 Q3 (Q1, Q1a, Q2 resolved 2026-10-07).

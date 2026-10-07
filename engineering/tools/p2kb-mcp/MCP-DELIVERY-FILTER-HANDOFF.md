@@ -56,10 +56,6 @@ only a fixed engine that applies it. A rule change reaches every receiver on its
 - Every other index key is unchanged (`system`, `categories`, `aliases`, `files`, `sha256`
   semantics). An index without `delivery_filter` is valid (every KB release before this change) —
   see §5.
-- The index's **whitespace layout** changes to one record per line, so the KB's bash scripts can
-  read it without `jq` (no host-side dependency). It is still ordinary JSON; parse it as JSON and
-  nothing changes for the server.
-
 ### 3.1 Rule identity — `rule_id`
 
 Every receiver computes the same identity for a rule, so caches and diagnostics can compare them:
