@@ -209,34 +209,19 @@ $CommonKeys = @(
     "p2kbGuidePasm2GettingStarted"
 )
 
-function Get-PathForKey {
-    param([string]$key)
-    if ($idx.files.PSObject.Properties.Name -contains $key) {
-        return $idx.files.$key.path
-    }
-    return $null
-}
-
-function Filter-Metadata {
-    param([string]$Content)
-    $lines = $Content -split "`n"
-    $filtered = $lines | Where-Object {
-        $_ -notmatch '^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):'
-    }
-    return $filtered -join "`n"
-}
-
+# Prefetch THROUGH fetch-kb-file.ps1 -- the one place the delivery filter lives
+# (the rule comes from the index; see that script). This script keeps no filter
+# or index lookup of its own: a second copy is how a stale filter shipped here.
+# Each key's cached body is removed first so it is re-fetched fresh.
+$env:P2KB_INDEX = $IndexDir
 foreach ($key in $CommonKeys) {
-    $path = Get-PathForKey $key
-    if ($path) {
-        Write-Log "Fetching $key -> $path"
-        $cacheFile = "$CacheDir\$key.yaml"
-        $content = (Invoke-WebRequest -Uri "$BaseUrl/$path" -Headers $NoCacheHeaders -UseBasicParsing).Content
-        $filtered = Filter-Metadata $content
-        $filtered | Out-File -FilePath $cacheFile -Encoding UTF8 -NoNewline
+    Remove-Item -Path "$CacheDir\$key.yaml" -Force -ErrorAction SilentlyContinue
+    try {
+        & "$ScriptDir\fetch-kb-file.ps1" $key | Out-Null
+        if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "exit $LASTEXITCODE" }
         Write-Status $key
-    } else {
-        Write-Err "$key - not found in index"
+    } catch {
+        Write-Err "$key - fetch failed or not found in index"
     }
 }
 

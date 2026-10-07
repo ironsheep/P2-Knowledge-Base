@@ -184,31 +184,16 @@ COMMON_KEYS=(
     "p2kbGuidePasm2GettingStarted"
 )
 
-# Function to look up key in index
-lookup_key() {
-    local key="$1"
-    if command -v jq &>/dev/null; then
-        jq -r ".files[\"$key\"].path // empty" "$INDEX_FILE"
-    else
-        grep -o "\"$key\":{\"path\":\"[^\"]*\"" "$INDEX_FILE" | sed 's/.*"path":"\([^"]*\)".*/\1/'
-    fi
-}
-
-# Filter metadata from YAML content
-filter_metadata() {
-    grep -v -E "^[[:space:]]*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):"
-}
-
+# Prefetch THROUGH fetch-kb-file.sh -- the one place the delivery filter lives
+# (the rule comes from the index; see that script). This script keeps no filter
+# or index reader of its own: a second copy is how a stale filter shipped here.
+# Each key's cached body is removed first so it is re-fetched fresh.
 for key in "${COMMON_KEYS[@]}"; do
-    path=$(lookup_key "$key")
-    if [[ -n "$path" ]]; then
-        log "Fetching $key -> $path"
-        cache_file="$CACHE_DIR/${key}.yaml"
-        curl -sS -H "Cache-Control: no-cache" "$BASE_URL/$path" | filter_metadata > "$cache_file.tmp"
-        mv "$cache_file.tmp" "$cache_file"
+    rm -f "$CACHE_DIR/${key}.yaml"
+    if P2KB_INDEX="$INDEX_DIR" "$SCRIPT_DIR/fetch-kb-file.sh" "$key" > /dev/null 2>&1; then
         status "$key"
     else
-        error "$key (not found in index)"
+        error "$key (fetch failed or not found in index)"
     fi
 done
 
