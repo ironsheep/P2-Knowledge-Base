@@ -1,6 +1,15 @@
 # P2KB Delivery-Filter Rule — sprint plan
 
-**Head:** `yaml:p2kb` · **Written:** 2026-10-07 · **Status:** READY — all §0 questions resolved; awaiting the MCP agent's review (§1)
+**Head:** `yaml:p2kb` · **Written:** 2026-10-07 · **Status:** READY — agreement AGREED 2026-10-07 (§1 done); next: `plan-to-tasks`
+
+**Revisions**
+- 2026-10-07 — MCP review folded in: engine step 1 (a comment inside a span no longer ends it),
+  empty input → empty output, cache stamp checked at startup and unstamped caches discarded (all
+  three receivers, §3); no `manifests/` in the bundle; comparisons on the `p2kb_get` `content` field;
+  `P2KB_BASE_URL` is implemented by the server in this work, not already present. **Cause: 2 —
+  research incomplete** (the engine text was not exercised against a comment-inside-span or an empty
+  input before it was sent, and the spec's `P2KB_BASE_URL` / manifests claims were taken from the
+  spec, not confirmed).
 **Closes:** F-439 (the MCP serves provenance) · **Interface:**
 `engineering/tools/p2kb-mcp/MCP-DELIVERY-FILTER-HANDOFF.md` (the agreement with the MCP agent)
 
@@ -73,20 +82,21 @@ Asked one at a time; each carries a recommendation.
 
 | Premise | Measurement |
 |---|---|
-| The format-1 engine (agreement §4) equals today's shipped filter minus the remaining column-0 comments | Python transliteration vs `fetch-kb-file.sh filter_metadata` over all 1,130 live files: **0 mismatches** (throwaway session check; §5's `_predicted_filtered` makes it permanent) |
+| The format-1 engine (agreement §4) equals today's shipped filter minus the remaining column-0 comments | Draft engine: Python transliteration vs `fetch-kb-file.sh filter_metadata` over all 1,130 live files: **0 mismatches**. Agreed engine (comment-in-span fix): differs from the draft on **2 files**, `spin2-language-schema.yaml` (1 line) and `spin2-builtin-symbols-complete.yaml` (9 lines) — indented maintainer comments inside a span, no content (throwaway session checks; §5's `_predicted_filtered` makes it permanent) |
 | Removing **all** column-0 comments is content-safe | 1,342 lines in 175 files; parsed YAML changed in **0** files |
 | The payload provenance scan already exists | `validate-dod-release.py:634` `validate_internal_ids` reads the shipped payload; today it **fails, 33 hits** (F-552) |
 | Our own receivers carry stale rule copies | `refresh-kb.sh:198-200` and `refresh-kb.ps1:220-226` still run the **original five-field** `grep -v` — the F-439 defect, on our side |
 | Bash index lookup without `jq` is broken | §0 Q1a — 0 hits for the fallback's pattern in both index files |
 | No PowerShell in the container | `which pwsh powershell` → none |
-| Server can be pointed at local files | `P2KB-MCP-SPECIFICATION.md` §Configuration: `P2KB_BASE_URL` — confirmed by the MCP agent in review (agreement §11.1) |
+| Server can be pointed at local files | **Not today** — the spec lists `P2KB_BASE_URL` but the server does not implement it (MCP agent, 2026-10-07); the server implements it for index + content in this work. It fetches no `manifests/` |
 | Live index count | 1,131 entries, 1,130 files present — `op_addlteqgt.yaml` deleted by F-547, index not yet regenerated (expected; the bundle regenerates it) |
 
 ---
 
-## 1. The interface agreement — one review round
+## 1. The interface agreement — one review round — DONE 2026-10-07
 
-**Why:** the MCP agent builds against the agreement; it must be settled before either side codes.
+**Outcome:** the MCP agent agreed the design and asked for three engine changes plus answered §11;
+all folded in (see Revisions); the agreement reads AGREED. **Why:** the MCP agent builds against the agreement; it must be settled before either side codes.
 **Starting point:** `MCP-DELIVERY-FILTER-HANDOFF.md` rewritten in place 2026-10-07 (backup in
 `.backups/`). **Target:** Stephen hands it over; the MCP agent replies once (its §11 questions plus
 anything else); we fold the reply in and mark it AGREED. **Verify:** every §11 question answered;
@@ -111,7 +121,9 @@ with no rule awareness (`fetch-kb-file.sh:370-395`).
 **Target:** both apply format 1 exactly (agreement §4). The rule comes from the cached index — bash
 via `jq` when present, PowerShell via `ConvertFrom-Json`; a built-in format-1 rule is used
 **quietly** when bash has no `jq`, or the index has no block, or one the script cannot apply. The
-script cache is stamped with `rule_id` + script version and cleared when it changes. Script versions
+script cache is stamped with `rule_id` + script version, checked whenever the script determines the
+rule in effect (every run, not only on index refresh), and cleared when it differs **or is absent**
+(clears caches filtered by older script versions). Empty input → empty output. Script versions
 bump together (parity gate checks they match).
 **Verify:** normal — output equals the Python transliteration on all files; edge — no `jq` →
 built-in rule, same output on today's rule; index without a block → built-in rule; a `format: 2`
@@ -183,8 +195,10 @@ differed.
 **Starting point:** `engineering/tools/p2kb-mcp/filter-test-vectors/input.yaml` / `expected.yaml`
 (md5s in the old handoff), built for the keyword-comment rule.
 **Target:** `expected.yaml` regenerated by running the §3 engine (never hand-written), with cases
-added: a non-provenance column-0 comment (now removed), a column-0 comment inside a span, `#` with no
-space, an indented `#` outside a span (kept). **Verify:** the Python transliteration and both script
+added: a non-provenance column-0 comment (now removed); comment-only lines (column 0 and indented)
+inside a span **followed by more of that field's lines** (all removed — the MCP review case); `#`
+with no space; an indented `#` outside a span (kept). Plus a separate empty-input vector pair
+(zero bytes → zero bytes). **Verify:** the Python transliteration and both script
 engines produce `expected.yaml` byte for byte.
 
 ## 7. Certification bundle builder
@@ -194,7 +208,8 @@ environment, they test"). **Target:** `engineering/tools/p2kb-mcp/build-filter-c
 producing the layout in agreement §9.1 into a git-ignored directory
 (`engineering/tools/p2kb-mcp/cert-bundle/`, new `.gitignore` rule), from `git ls-files` content at
 HEAD (refuses a dirty `deliverables/ai/P2/` tree), with expected outputs produced by the §3 bash
-engine, both variants, the no-block command in the README, and `MANIFEST.sha256`.
+engine, both variants, the no-block command in the README, and `MANIFEST.sha256`. `serve/` holds
+the index and YAMLs only (no `manifests/` — the server fetches none).
 **Verify:** normal — manifest checks; `expected/` count = index entries; each `serve/` YAML's git-blob
 hash equals its index `sha256`; edge — variant B's expected set differs from main exactly where B's
 rule differs; error — dirty tree → refuses.
@@ -216,8 +231,10 @@ F-439 closed in the register with the server version.
 
 - `P2KB-MCP-SPECIFICATION.md` — §Index Structure (`delivery_filter`, 3.6.0), §Content Filtering and
   §Filter Implementation (point to the agreement; drop the hard-coded list and keyword comment rule),
-  §Cache Invalidation (rule stamp), `p2kb_version` (diagnostic fields).
-- `MCP-DELIVERY-FILTER-HANDOFF.md` — status → AGREED; outcome noted at release.
+  §Cache Invalidation (rule stamp, startup check, unstamped discard), `p2kb_version` (diagnostic
+  fields), §Data Sources (the server fetches no `manifests/` — the table says it does),
+  §Configuration (`P2KB_BASE_URL` — listed, not implemented until this work).
+- `MCP-DELIVERY-FILTER-HANDOFF.md` — AGREED 2026-10-07; outcome noted at release.
 - `engineering/tools/p2kb/METADATA-FILTER-DESIGN.md` — stale (v3.0, four fields, `grep -v`): rewrite
   to the current design, pointing at the agreement as canonical.
 - `engineering/procedures/yaml-workflow-quick-guide.md:121-131` — stale "5 fields" section: replace
@@ -233,8 +250,8 @@ invalidation, gate inputs.
 
 | Artifact | Describes | Disposition |
 |---|---|---|
-| `P2KB-MCP-SPECIFICATION.md` §§ Index Structure, Content Filtering, Filter Implementation, Cache Invalidation, `p2kb_version` | rule, engine, cache | §10 |
-| `MCP-DELIVERY-FILTER-HANDOFF.md` | the interface | rewritten 2026-10-07 (§1) |
+| `P2KB-MCP-SPECIFICATION.md` §§ Index Structure, Content Filtering, Filter Implementation, Cache Invalidation, `p2kb_version`, Data Sources, Configuration | rule, engine, cache; two claims the MCP agent says are false today | §10 |
+| `MCP-DELIVERY-FILTER-HANDOFF.md` | the interface | AGREED 2026-10-07 (§1) |
 | `engineering/tools/p2kb/METADATA-FILTER-DESIGN.md` | filter design — **already stale** | §10 |
 | `engineering/procedures/yaml-workflow-quick-guide.md:121-131` | field list — **already stale** | §10 |
 | `fetch-kb-file.sh/.ps1` header comments (`:195-204`) | rule rationale, "61 files carry one" | §3 |
@@ -253,14 +270,13 @@ Doc-audit instrument output: §0.1 (2 findings, outside this sprint's surfaces).
 
 1. **Standing rulings** — quoted above with dates.
 2. **Intent** — stated at top, from Stephen's 2026-10-07 direction.
-3. **Decisions and open items** — every agreed point maps to agreement §§3-10 and plan §§2-9; open
-   items listed in §0.1 awaiting his disposition (Q2).
-4. **Premises** — measured, table above; `P2KB_BASE_URL` coverage is the one premise only the MCP
-   agent can confirm (agreement §11.1).
+3. **Decisions and open items** — every agreed point maps to agreement §§3-10 and plan §§2-9; §0.1
+   items dispositioned by Stephen (none join).
+4. **Premises** — measured, table above; the MCP-side premises (`P2KB_BASE_URL`, manifests) were
+   answered by the MCP agent's review.
 5. **Research** — the defect class (a receiver holding a rule copy) searched across the repo: found
    in `refresh-kb.*` (§4) and the validator (§5), not only the server. No bench work.
-6. **Named unknowns** — the MCP agent's review reply (§1) may change the agreement; the plan
-   absorbs it as a dated revision. Whether the server's `P2KB_BASE_URL` covers manifests (§11.1) —
-   if not, the bundle adds what it needs.
+6. **Named unknowns** — what the certification run (§8) finds; a mismatch is diagnosed against both
+   engines and absorbed as a dated revision if the agreement changes.
 
 Questions remaining: none (Q1, Q1a, Q2, Q3 resolved 2026-10-07).

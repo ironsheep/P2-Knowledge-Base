@@ -2,8 +2,9 @@
 
 **Between:** the P2-Knowledge-Base YAML head (the KB) and the agent maintaining
 `P2-Knowledge-Base-MCP` (the `p2kb-mcp` server).
-**Status:** **DRAFT for one review round by the MCP agent** — 2026-10-07. Read it, reply once with
-your thoughts and answers to §11; we fold them in and both sides build against the agreed text.
+**Status:** **AGREED 2026-10-07.** The MCP agent reviewed the draft once (2026-10-07); its three
+engine changes (§4 step 1, empty input, startup cache check) and its §11 answers are folded in
+below. Both sides build against this text.
 **Supersedes:** the 2026-10-04 handoff of the same name (a fixed field list copied into each
 receiver). Closes register finding **F-439** when §10 completes.
 **Plan on the KB side:** `engineering/planning/P2KB-DELIVERY-FILTER-RULE-SPRINT-PLAN.md`.
@@ -75,11 +76,13 @@ bundle's README states it (§9).
 
 A **line rule, indentation-aware.** Not a YAML-aware key delete, and not a plain `grep -v`.
 
-For each input line, in this order:
+**Empty input produces empty output.** Otherwise, for each input line, in this order:
 
-1. **Inside a removed field's span:** a blank line (only whitespace) is removed; a line whose
-   leading-whitespace length is **greater** than the span's indent is removed. A line at the same or
-   shallower indent **ends the span** and continues to step 2.
+1. **Inside a removed field's span:** a blank line (only whitespace) is removed; a **comment-only
+   line** (first non-whitespace character `#`, at any indent) is removed and does **not** end the
+   span — YAML ignores comments, so the engine does too; a line whose leading-whitespace length is
+   **greater** than the span's indent is removed. Any other line (at the same or shallower indent)
+   **ends the span** and continues to step 2.
 2. **Column-0 comment:** if `remove_column0_comments` is true and the line's first character is `#`,
    remove it.
 3. **Removed field:** strip leading whitespace; if the rest starts with a name from `remove_fields`
@@ -106,6 +109,19 @@ non-indentation-aware filter breaks 50 files (measured 2026-09-19).
 Measured 2026-10-07 at KB HEAD: 1,342 column-0 comment lines in 175 files; removing every one changes
 the parsed YAML of **0** files. An indented `#` line is not touched by step 2 (it is removed only if
 it falls inside a span).
+
+**Why a comment does not end a span** (MCP review, 2026-10-07). Without it, a comment inside a
+removed field ends the span early and the rest of the field ships — an escape:
+
+```yaml
+sources:
+  - ledger B-112          # removed
+# note                    # would end the span, then be removed as a comment
+  - engineering/foo.txt   # would ship
+```
+
+Measured on the KB at the time of agreement: this changes the output of 2 files, in both cases by
+also removing indented maintainer comments that sit inside a span; no content changes.
 
 ### 4.1 Reference implementation (Go)
 
@@ -148,6 +164,9 @@ func leadWS(s string) int { return len(s) - len(strings.TrimLeft(s, posixSpace))
 
 // Apply removes provenance from one raw YAML file. Hash the raw body BEFORE calling this.
 func Apply(r Rule, content string) string {
+    if content == "" {
+        return ""
+    }
     fields := make(map[string]bool, len(r.RemoveFields))
     for _, f := range r.RemoveFields {
         fields[f] = true
@@ -160,8 +179,9 @@ func Apply(r Rule, content string) string {
     dropping, dropIndent := false, 0
     for _, line := range lines {
         if dropping {
-            if strings.TrimLeft(line, posixSpace) == "" {
-                continue
+            trimmed := strings.TrimLeft(line, posixSpace)
+            if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+                continue // blank or comment-only: removed, span continues
             }
             if leadWS(line) > dropIndent {
                 continue
@@ -203,9 +223,12 @@ above is not compiled on the KB side (no Go toolchain here) — the bundle is th
 
 - **Hash before you filter** — unchanged: verify the raw body against the index's `sha256` (git-blob
   hash), then filter.
-- **Cache stamp = `rule_id` + the server's engine version.** On index refresh, if the stamp differs
-  from the one the cached bodies were filtered under, discard every cached body. This covers both a
-  rule change and an engine bug fix, with no manual flush.
+- **Cache stamp = `rule_id` + the server's engine version.** The stamp is checked **whenever the
+  rule in effect is determined — at startup and on every index refresh.** If it differs from the
+  stamp the cached bodies were filtered under, discard every cached body. **A cache with no stamp is
+  discarded** — that is what clears old `sources:` blocks for installs upgrading from a server version
+  that predates this agreement. This covers a rule change, an engine bug fix and an upgrade, with no
+  manual flush.
 - Per-entry `mtime` / `sha256` invalidation is unchanged.
 
 ## 7. `p2kb_version` additions (diagnostic)
@@ -242,24 +265,31 @@ p2kb-filter-cert/
 ├── serve/                    # the P2KB_BASE_URL root; mirrors the raw.githubusercontent paths
 │   ├── deliverables/ai/p2kb-index.json
 │   ├── deliverables/ai/p2kb-index.json.gz
-│   ├── deliverables/ai/P2/**.yaml          # raw, unfiltered
-│   └── manifests/                          # propeller-knowledge-root.yaml, ai-instructions.yaml
+│   └── deliverables/ai/P2/**.yaml          # raw, unfiltered (the server fetches nothing else)
 ├── expected/<index key>.yaml # the KB reference engine's output, one per index entry
 ├── variants/
 │   ├── A-unknown-format/p2kb-index.json.gz        # delivery_filter.format = 2
 │   └── B-changed-fields/p2kb-index.json.gz        # a different remove_fields list
 │       └── expected/<index key>.yaml              # reference output under rule B
-└── vectors/input.yaml, vectors/expected.yaml      # golden edge cases, updated for format 1
+└── vectors/input.yaml, vectors/expected.yaml      # golden edge cases, format 1
+    vectors/empty-input.yaml, vectors/empty-expected.yaml   # zero bytes in, zero bytes out
 ```
+
+`vectors/input.yaml` covers, among the existing edges, a comment-only line (column 0 and indented)
+inside a removed field's span followed by more of that field's lines — all removed.
 
 ### 9.2 Running it
 
-Serve `serve/` with any static HTTP server and point the server at it with `P2KB_BASE_URL`
-(spec §Configuration). Then:
+Serve `serve/` with any static HTTP server and point the server at it with `P2KB_BASE_URL`, which
+the server implements for the index and content fetches as part of this work (it is listed in the
+spec but not implemented today). Then:
 
-1. **Golden vectors:** `Apply(rule, vectors/input.yaml) == vectors/expected.yaml`, byte for byte.
-2. **Whole KB:** for every key in the index, `p2kb_get` output == `expected/<key>.yaml`, byte for
-   byte. `p2kb_version` reports source `index` and the README's main `rule_id`.
+1. **Golden vectors:** `Apply(rule, vectors/input.yaml) == vectors/expected.yaml` and
+   `Apply(rule, "") == ""`, byte for byte.
+2. **Whole KB:** for every key in the index, the **`content` field** of the `p2kb_get` result ==
+   `expected/<key>.yaml`, byte for byte (the tool returns JSON with the YAML in that field). This
+   applies to every output comparison below. `p2kb_version` reports source `index` and the README's
+   main `rule_id`.
 3. **Variant A:** replace the served `p2kb-index.json.gz` with A's; `p2kb_refresh`. `p2kb_version`
    reports the refusal and source `last-good`; outputs still equal `expected/`.
 4. **Variant B:** replace it with B's; `p2kb_refresh`. `p2kb_version` reports B's `rule_id`; cached
@@ -301,20 +331,22 @@ p2kb_get p2kbHwEdgeStandardModuleEdgeStandardModule
 The last two prove nothing was over-removed. Report the live server version; the KB closes F-439
 and records it.
 
-## 11. Questions for the MCP agent's review
+## 11. Review questions — answered by the MCP agent, 2026-10-07
 
-Each carries the KB's proposed answer; confirm or correct.
+1. **`P2KB_BASE_URL`** — not implemented today although the spec lists it; the server implements it
+   for the index and content fetches in this work. The server never fetches `manifests/`, so the
+   bundle carries none (§9.1).
+2. **Persisting the last-good rule (§5)** — agreed: a small file next to the cached index.
+3. **The `rule_id` text (§3.1)** — kept as proposed.
+4. **Bundle needs** — the two new vectors (§9.1) and comparison on the `content` field (§9.2).
 
-1. **Does `P2KB_BASE_URL` redirect the index, the YAMLs and the `manifests/` fetches alike?**
-   Proposed: yes, as the spec's Configuration table states; if not, say what the bundle must provide
-   instead.
-2. **Persisting the last-good rule (§5)** — acceptable alongside the cache? Proposed: a small file
-   next to the cached index.
-3. **The `rule_id` text (§3.1)** — any reason to prefer a different canonical form? Proposed: keep
-   it; it is trivial in Go, bash and PowerShell, unlike canonical JSON.
-4. **Anything else the bundle needs** for your test harness?
+The MCP agent also confirmed one known limit as acceptable: a block-scalar content line that begins
+with a removed field name (the F-544 case) is still removed by step 3, and §8.3's over-removal gate
+fails the KB release on it.
 
 ---
 
-*Contract documents updated with this agreement once agreed: `P2KB-MCP-SPECIFICATION.md`
-§Content Filtering, §Filter Implementation, §Cache Invalidation on Index Update, `p2kb_version`.*
+*Contract documents brought in line with this agreement by the KB sprint (plan §10):
+`P2KB-MCP-SPECIFICATION.md` §Data Sources (the server fetches no manifests), §Index Structure,
+§Content Filtering, §Filter Implementation, §Cache Invalidation on Index Update, `p2kb_version`,
+§Configuration (`P2KB_BASE_URL` status).*
