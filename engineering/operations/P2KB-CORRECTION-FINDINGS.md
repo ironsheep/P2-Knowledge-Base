@@ -904,7 +904,17 @@ cog. The page must not imply that cog 0 is a place to evacuate.
 
 ## DEBUG's cost to the running application is nowhere in the KB: 16KB of hub gone, the protection LOCKED until reset, `LOCK[15]` taken, two pins consumed (2026-08-30, debug/stack research) — F-393
 
-### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `PARTIAL — the load-bearing residue applied 2026-09-22 («#351»); the protected-region layout ($FEA00/$FF1A0) is still absent from the KB (re-verified 2026-10-05 «#386»)`
+### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `PENDING-VALIDATION` (the last residue applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07.** `debug-strategy-guide.yaml` `what_a_debug_build_takes_from_your_program`
+> gained `protected_region_layout` beside `hub_memory`: `$FC000` DEBUG data, `$FEA00` the debugged
+> cog's `$010..$1F7` buffer, `$FF1A0` debugger + overlays + data to `$FFC00`, then the per-cog
+> 128-byte blocks `$FFC00` (cog 7) … `$FFF80` (cog 0). **Proven** from the Parallax debugger source
+> (`Spin2_debugger.spin2` v51 2025.04.02, `:7-10` CON, `:20-49` map) and, for the per-cog blocks it
+> marks "fixed in silicon", against the P2 Documentation table 25 (`silicon-doc-text.txt:2446-2477`
+> — identical addresses). The block's `source:` now also cites `hub_memory` (v55 `:900`), which was
+> uncited. Placed in the debug-build cost list rather than `debug_interrupt.yaml`, which already
+> carries the silicon half (`:79-87`); only v51's debugger source is held, so a later debugger's
+> layout is not verified.
 
 > Most of this had already landed (`debug-strategy-guide.yaml:77-94` carries the hub `$7C000..$7FFFF`
 > reservation, `LOCK[15]`, P62/P63, the HUBSET `L`-bit lock, the ≥10 MHz crystal requirement and the

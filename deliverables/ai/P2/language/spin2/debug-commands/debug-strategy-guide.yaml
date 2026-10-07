@@ -80,6 +80,13 @@ what_a_debug_build_takes_from_your_program:
     resource the debugger takes that your program may already be using; every one of
     them has cost somebody a debugging session that was chasing the wrong thing.
   hub_memory: "The top 16 KB, $7C000..$7FFFF, remapped to $FC000..$FFFFF and write-protected. A buffer placed there works in a non-debug build and its writes are SILENTLY DROPPED in a debug build. See architecture/hub.yaml."
+  protected_region_layout: >-
+    Inside that 16 KB: $FC000 DEBUG data; $FEA00 a buffer for the debugged cog's
+    registers $010..$1F7; $FF1A0 the debugger itself with its overlays and data, up to
+    $FFC00; then $FFC00..$FFFFF, one 128-byte block per cog (cog 7 at $FFC00 through cog
+    0 at $FFF80), each a 64-byte buffer for registers $000..$00F followed by that cog's
+    64-byte initial debug ISR. The per-cog blocks are fixed in silicon (see
+    architecture/debug_interrupt.yaml); the rest is the Spin2 debugger's own layout.
   a_lock: "LOCK[15] is held, so LOCKNEW has one fewer lock available — only when debugging. See architecture/locks.yaml."
   pins_62_63: "P62 (TX) and P63 (the clock-frequency repository). A clock change that does not rewrite P63 makes the debugger emit garbage."
   p62_is_reconfigured_by_every_debug_call: |
@@ -101,7 +108,7 @@ what_a_debug_build_takes_from_your_program:
     cogs that are not running ISRs in the background; if the ISRs tolerate skew and
     nothing depends on the interrupt continuing to cycle, DEBUG is usable with understood
     timing degradation. CT-based interrupts are not prone to it.
-  source: "interrupt_retrigger_can_stop_for_good: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071"
+  source: "interrupt_retrigger_can_stop_for_good: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071; hub_memory: same, :900; protected_region_layout: the Parallax Spin2 debugger source (Spin2_debugger.spin2 v51, 2025.04.02), engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:7-10, :20-49, and the per-cog blocks per P2 Documentation, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2399, :2446-2477"
   clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived clock of at least 10 MHz."
   measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000."
 
