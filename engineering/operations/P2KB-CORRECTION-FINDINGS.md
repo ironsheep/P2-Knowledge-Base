@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-560`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-563`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -63,7 +63,46 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-552
 
-### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `CONFIRMED` (re-scoped by Stephen 2026-10-07)
+### F-562 — `hub75_adapter.yaml` names the OBEX driver and URL differently from OBEX 2850's own metadata — `NEEDS-VERIFICATION`
+Found 2026-10-07 by the independent check of F-556. `hardware/hub75_adapter.yaml:156,158` gives
+"P2-HUB75 LED Matrix Driver" and `https://obex.parallax.com/obex/p2-hub75-led-matrix-driver/`;
+`engineering/ingestion/external-inputs/source-code/obex-projects/2850-ISP_Hub75_Matrix_Driver/2850_metadata.yaml:51,57`
+gives "ISP Hub75 Matrix Driver" and `.../isp-hub75-matrix-driver/`. Which is current is unverified
+(no network probe here). **Fix:** confirm against the OBEX listing the user can open; use that.
+
+### F-561 — P2AN003 (app note + YAML companion) says reversing the DAC init order "leaves the first output cycle undefined"; the P2 Documentation says Y is captured in reset — `CONFIRMED` (manual change)
+Found 2026-10-07 by the independent check of F-554. `app-notes/P2AN003/opus-master/P2AN003.md:541`
+and its companion `application-notes/p2an003-dac-analog-signal-generation.yaml:98` ("the universal
+smart-pin init order. Reversing it leaves the first output cycle undefined"). For the DAC modes
+the P2 Documentation says "During reset (DIR=0), IN is low and Y.[15..0] is captured"
+(`silicon-doc-text.txt:3946`, `:3963`) — a WYPIN before DIR is raised is captured, not lost; no
+source states the "undefined" outcome, and "universal" overclaims (EF-090 exception). **Fix:** the
+app note and its companion together (the agreement gate), as an app-note correction release —
+state the order as the general one and drop the unsourced consequence, or source it.
+
+### F-560 — 78 `source:` fields in 58 files name a label, not a document — `CONFIRMED` (L; planning item)
+Found 2026-10-07 by the F-553 class sweep: `grep -rn -E "^\s+source: *['\"]?[A-Za-z0-9_-]+['\"]?\s*$" deliverables/ai/P2/`
+returns 78 lines in 58 files whose `source:` is a bare label: `parallax-quick-bytes` ×42 (a corpus
+not yet ingested — `quickbytes-integration` is NOT processed), `P2-OctoSerial` ×10, `P2-Click-eInk`
+×2, and 24 one-off category names that are no document at all (`bit_bang_spi`,
+`resource_protection`, `memory_operations`, `debug_logging`, …). Each such block is an example or
+pattern whose stated origin cannot be checked. Not introduced by the unreleased commits — already
+published. **Fix:** per `SOURCE-REPAIR-ORDER.md`, file by file: re-source from the real artifact
+(ingest Quick Bytes first for the 42; OBEX/project source for OctoSerial/eInk) or remove the block;
+never relabel in place. F-553 removed the `hub75_driver` and `P2-FLASH-FS` instances: the flash
+driver contradicted its attributions; the HUB75 examples were invented code under a driver's name
+(the real driver does use SETQ + MUXQ, and `muxq.yaml` now quotes it with a real source).
+
+### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07.** `debug-strategy-guide.yaml` rewritten to the ruling: no compiler or
+> debugger figure stated as fact (title, aliases, `hard_limits` → `the_compilers_limits`, decision
+> guide and setups keyed to the listing, not counts); the debugger layout reduced to what is
+> silicon (top 16 KB, per-cog blocks). Kept and verified by re-measurement on pnut-ts 1.55.8
+> (independent check): merge cuts records (2→1), value-only forms dedup (2→1), DAT+`zstr_` removes
+> text and shares a record, IF adds bytes, masked child adds nothing, error texts m150/m151/m153.
+> Contradictions fixed ("every debug() consumes a slot", "non-overlapping", dedup advice). Also
+> found and fixed: `debug IF(c)(...)` does not compile (m281) — now `debug(IF(c), ...)`, v55 :920.
+> Class sweep: no other KB file states a DEBUG limit.
 > **Ruling, Stephen 2026-10-07:** "debug limits are not hardware and are not hard and fast... we
 > can teach techniques for how to mitigate bumping up against them but not the limits themselves...
 > soft values change with each compiler release." So the fix is **not** to state 10,752 in place
@@ -90,7 +129,16 @@ remedies" vs the DAT+`zstr_` fix that cuts both; `:128`/`:415-419` "don't rely o
 `$2A00` = 10,752). **Decision owed:** whether the KB states the layout limit (and VO-J-027 is
 reinstated as a bench confirmation), given the 2026-10-07 strike ruling.
 
-### F-558 — F-387's P1→Spin2 table: `||` in the wrong tier, `>|`→`ENCOD` off by one, two rows lose P1 behaviour — `CONFIRMED`
+### F-558 — F-387's P1→Spin2 table: `||` in the wrong tier, `>|`→`ENCOD` off by one, two rows lose P1 behaviour — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07.** `operators.yaml`: `||a` moved to `fails_to_compile` (m172); `>|` →
+> `(x <> 0) ? ENCOD x + 1 : 0`, compile-checked against all four P1 examples (0/8/32/21);
+> `?x/x?` states the reversible LFSR and that `x?` has no equivalent; `~x/~~x` → `SIGNX=` (writes
+> back); `>=` assignment spelling added. Row map extended (P1 5463/5498, 5522-5535, 5577-5588).
+> `generate-p2kb-index.py` comments: current count 74, dated record annotated. Independent check:
+> every row re-compiled, all CORRECT. **Left, with reasons:** the derived
+> `spin2-v51/complete-spin2-operators.md` blockquote formatting and `:471` cite (ingestion tree —
+> Stephen's call on editing it, raised 2026-10-07); `yaml-source-lock.json:861` stale key (a ratchet
+> baseline — re-recorded at its next tightening, not hand-edited).
 Found 2026-10-07 by the pre-release audit of F-387 (`concepts/operators.yaml` `changed_from_p1`).
 (1) `||` (P1 unary abs) is listed under `compiles_with_a_different_meaning`, but `r := ||a`
 fails to compile (m172) — it belongs in `fails_to_compile`. (2) P1 `>|` returns highest set bit
@@ -103,18 +151,29 @@ operators (`:4950`, `:5463`) — the Spin2 equivalent writes back (`SIGNX=`, v55
 and cites `:471` (ADDPINS) instead of `:472`; `generate-p2kb-index.py:113-117,128` comments and
 `validation/baselines/yaml-source-lock.json:861` still name `+<=>` / `op_addlteqgt.yaml`.
 
-### F-557 — `pasm2-getting-started.yaml` (F-542): four facts incomplete against a primary source; 36 "(order N)" row locators ship — `CONFIRMED`
+### F-557 — `pasm2-getting-started.yaml` (F-542): four facts incomplete against a primary source; 36 "(order N)" row locators ship — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07.** GETCT gains the group-copy caveat (EF-068, EF-079 in `source:`); ORGH
+> states the Spin2+PASM and PASM-only behaviours (v55 :326-327, compile-checked); `##` → AUGS or
+> AUGD (Silicon Doc :5571-5572, listing-checked); hub timing gains "+1 if crossing a hub long;
+> 8-cog figures" (CSV header); all 34 "(order N)" tokens moved into `source:` row maps. Gate gap
+> closed: `validate-dod-release.py` REPO_LOCATOR_PATTERN now matches "(order N)" — negative control:
+> 34 hits on the old guide, none on prose like "the order of operations". Independent check: all
+> CORRECT. **Left:** `critical_gotchas` stays `{source, items}` (its source needs a stripped field).
 Found 2026-10-07 by the pre-release audit of F-542. (1) GETCT "GETCT WC then GETCT gets the full
 64-bit CT" omits EF-068 (a group of four cogs with no running cog at a low-long wrap returns a
 stale upper long). (2) Bare ORGH "hub origin $00400" is the Spin2+PASM case only; v55 `:327`:
 PASM-only, bare ORGH sets hub-exec at the current hub address. (3) "`##` prefixes an AUGS" —
 Silicon Doc `:5571-5572`: AUGS/AUGD (the guide's own `WAITX ##` uses AUGD). (4) RDLONG/WRLONG
-timing drops the CSV's "+1 if crosses hub long" and 8-cog qualifiers. (5) 36 "(order N)"
+timing drops the CSV's "+1 if crosses hub long" and 8-cog qualifiers. (5) 34 "(order N)" (38 row numbers; "36" corrected 2026-10-07)
 spreadsheet row numbers sit in shipped descriptions — an internal locator the Internal-IDs
 payload scan does not pattern-match (a gate gap). Also: `critical_gotchas` changed from a list to
 `{source, items}`, so readers now get `{items: [...]}` unlike the sibling Spin2 guide.
 
-### F-556 — "2x 74HCT244" ships with no primary source (HUB75 adapter) — `CONFIRMED`
+### F-556 — "2x 74HCT244" ships with no primary source (HUB75 adapter) — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07.** Part number removed from `hub75_adapter.yaml` (×2) and
+> `hardware-compatibility-matrix.yaml`; "level shifter ICs" kept (`official-specs.md:22`). The
+> non-existent `driver_file: isp_hub75_matrix.spin2` removed. Independent check: CORRECT. The
+> OBEX name/URL mismatch it noticed is F-562.
 Found 2026-10-07 by the pre-release audit of F-354. The part number appears only in this
 project's own `p2-addon-board-circuit-knowledge.md:363,391`; `p2-hub75-adapter-official-specs.md:22`
 (cited) says only "limited by level shifter ICs". Ships in `hardware/hub75_adapter.yaml` (twice)
@@ -122,14 +181,29 @@ and `hardware/hardware-compatibility-matrix.yaml`. The schematic PDF is not inge
 `hub75_adapter.yaml:159` names `driver_file: isp_hub75_matrix.spin2`, which is in neither OBEX
 2850 nor the project copy.
 
-### F-555 — `boot-rom-contents.yaml` calls `ROM_Booter.lst` "an FPGA build of the same source"; it is an earlier revision — `CONFIRMED`
+### F-555 — `boot-rom-contents.yaml` calls `ROM_Booter.lst` "an FPGA build of the same source"; it is an earlier revision — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07.** Label now: the silicon build is revision v33_01j (2019); `ROM_Booter.lst`
+> is an earlier revision, v141 (2018), built for the Prop123-A9 / BeMicro-A9 FPGA boards — cited in
+> `source:` (both listings' history lines, `ROM_Booter.lst:118`, Silicon Doc `:2876`,
+> `:2950-2951`). My first edit dropped "FPGA" as unproven; the independent check showed it proven
+> and it was restored. F-421's note corrected the same way.
 Found 2026-10-07 by the pre-release audit of F-421. `rom_booter_v33_01j.lst:87-93` carries
 2019 revisions (v33_01a…j) that `ROM_Booter.lst` lacks (its history ends at v141, 2018-05-27,
-`:84-85`); TAQOZ builds differ. "FPGA" is unproven (`_clockfpga` is defined, never used). The
-F-421 register text ("neither is a newer revision") is wrong the same way. The re-citation to the
-silicon listing itself is right.
+`:84-85`); TAQOZ builds differ. It is ALSO an FPGA build — `:118` `ver = "A" 'Prop123-A9 /
+BeMicro-A9`, FPGA boards per `silicon-doc-text.txt:2876`, `:2950-2951` — so "FPGA" stays and only
+"of the same source" is wrong. The F-421 register text ("neither is a newer revision") is wrong
+the same way. The re-citation to the silicon listing itself is right.
 
-### F-554 — F-386 left the false "WYPIN after enable is safe for all modes" rule in three files; one wrong locator — `CONFIRMED`
+### F-554 — F-386 left the false "WYPIN after enable is safe for all modes" rule in three files; one wrong locator — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07.** The rule corrected in `smart_pins.yaml` (procedure + note: documented
+> reason for pulse/transition, measured effect for async TX, %11100 exception), `wrpin.yaml`
+> (note; ids moved to `source:`), `smart-pin-01110` (no "every mode", no "safe either way"); locator
+> `:3852` → `:3854`; "universal" → "general" in six mode pages (27 code comments). Found by the
+> independent check and fixed in the same pass: Spin2 `DIRH(pin)` does not compile → `PINHIGH`;
+> the `:3854` quote restored "depending on the mode"; `%11011` USB example did WYPIN before DIR
+> although `silicon-doc-text.txt:4593` documents the order → reordered, and dropped from VO-J-028
+> (now eight pages). Ledger: EF-019 scope note (cadence, not content; EF-090 governs %11100).
+> **Left:** P2AN003's "universal … first output cycle undefined" is an app-note change → F-561.
 Found 2026-10-07 by the pre-release audit of F-386. Still shipped: `architecture/smart_pins.yaml:589`
 ("safe for all"), `smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml:74` ("correct for
 EVERY mode"), `language/pasm2/wrpin.yaml:73` ("safe for all other modes") — EF-090 contradicts it
@@ -139,7 +213,14 @@ interpretation, not a documented or measured fact (Silicon Doc `:4714` says outp
 Ledger: EF-019's heading still reads CONFIRMED for prime-after-enable on %11100 with no pointer to
 EF-090. Register/VO-J-028 say "ten mode pages" for a list of nine.
 
-### F-553 — `pinstart.yaml` `production_patterns` keeps the invented labels F-543/F-549 removed from the examples — `CONFIRMED`
+### F-553 — `pinstart.yaml` `production_patterns` keeps the invented labels F-543/F-549 removed from the examples — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+> **Applied 2026-10-07, widened by the class sweep.** `pinstart.yaml` `production_patterns`
+> removed. Same labels elsewhere: `cogspin.yaml` — the flash-FS stress example and
+> `multi_cog_with_locks` removed, and the claims that callers must lock the flash filesystem
+> replaced by what the driver shows (`flash_fs.spin2:19` multi-cog, `:146`/`:221`/`:248` its own
+> lock); `waitx.yaml`, `muxq.yaml` — invented HUB75 examples and "Essential for HUB75" removed;
+> `muxq.yaml` gains a verbatim example from the real driver (`isp_hub75_rgb3bit.spin2:932-934`).
+> Independent check: CORRECT. The wider label-as-source class (78 lines) is F-560.
 Found 2026-10-07 by the pre-release fact audit of F-543/F-549. `production_patterns`
 (`language/spin2/methods/pinstart.yaml`, after the P_OE note) was untouched by both fixes and
 still carries `hub75_panel` → `source: hub75_driver` (names no document — the same invented
@@ -739,6 +820,14 @@ two silent traps and `cascade_through_tiers` were not touched; this release chan
 ## The two ROM listings are different BUILD TARGETS, and F-123's grounding plan names the FPGA one (2026-09-10, ROM-asset mining) — F-421
 
 ### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `PENDING-VALIDATION` (the KB half applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Correction 2026-10-07 (F-555):** "neither is a newer revision" is wrong — `ROM_Booter.lst` is
+> an **earlier revision** (history ends v141, 2018-05-27, `:84-85`; the silicon listing adds the
+> 2019 v33_01a..j revisions, `rom_booter_v33_01j.lst:87-93`). It IS an FPGA build, but the proof
+> is `ROM_Booter.lst:118` (`ver = "A" 'Prop123-A9 / BeMicro-A9`), boards the P2 Documentation lists
+> as FPGA boards (`silicon-doc-text.txt:2876`, `:2950-2951`) — not `_clockfpga`, which is defined
+> and never used. The re-citation to the silicon listing stands; the shipped label is fixed under
+> F-555.
+>
 > **Applied 2026-10-07.** Every shipped citation of `ROM_Booter.lst` now names the silicon listing.
 > **Line-anchored ones were re-derived, not renamed:** each cited FPGA line was read and its
 > counterpart found in `rom_booter_v33_01j.lst` with identical code — `serial_loader.yaml`
@@ -1250,11 +1339,14 @@ the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
 > modes; EF-090 proved sync TX `%11100` continuous **primes** its first word during reset and loses
 > it if enabled first (P2 Documentation `:4650` says the same). The note now names the measured
 > modes on each side and carries the `%11100` exception; its `source:` cites EF-011, EF-090 and
-> `:4650`. **Ten pages write a configuration Y before `DIRH`** (`%01111`, `%10010`–`%10111`,
-> `%11001`, `%11011`; plus `%11100`, which is correct — that is the priming write). The P2
+> `:4650`. **Eight pages write a configuration Y before `DIRH`** (`%01111`, `%10010`–`%10111`,
+> `%11001`; `%11100` does too, correctly — that is the priming write). *(Corrected 2026-10-07,
+> F-554: the original list named nine and was counted as "ten"; `%11011` USB has a documented
+> order — `silicon-doc-text.txt:4593`, WYPIN after DIR is set — so its page was fixed, not left to
+> VO-J-028.)* The P2
 > Documentation states Y's reset behaviour per mode — "set to zero" for pulse/transition
 > (`:3984`, `:3997`), "captured" for PWM (`:4050-4086`), and **nothing about Y** for
-> %01100–%10111 (`:4116-4254`, Z only). Neither order is proven safe or harmful for those ten, so
+> %01100–%10111 (`:4116-4254`, Z only). Neither order is proven safe or harmful for those eight, so
 > they are **not reordered** on inference: VO-J-028 (jumper-only) decides it.
 
 > **The named page is done, verified in the tree 2026-09-22.**

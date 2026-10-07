@@ -309,6 +309,10 @@ bit31=1); ADDS $80000000+$FFFFFFFF → C=1 (result $7FFFFFFF, bit31=0); SUBS/CMP
 
 ### EF-019 · Reordered smart-pin init preserves NCO phase-lock and sync-serial gapless streaming — `CONFIRMED`
 *KB:* `architecture/smart-pins/smart-pin-00110-nco-frequency.yaml`; `architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml`
+> **Scope note, 2026-10-07 (F-554):** proof (b) measured inter-word **cadence** only, never word
+> content. EF-090 later measured content: for %11100 continuous TX, priming **after** enable loses
+> the first word. So (b) shows gapless streaming, not that prime-after-enable is correct for
+> %11100 — the KB follows EF-090 (first word written during reset). Proof (a) stands.
 The universal-order reorder (enable BEFORE WYPIN) does not disturb (a) a phase-locked NCO pair or
 (b) sync-serial continuous double-buffering. *Proof (a):* `test72-nco-phaselock` — two NCOs set up with
 the reordered init, 90° loaded via WXPIN, measured with mode %10011 through input routing (test70/F-192
