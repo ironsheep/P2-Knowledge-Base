@@ -64,7 +64,7 @@ spin2_complete: |
     PINCLEAR(pin)
     WRPIN(pin, mode)
     WXPIN(pin, 1)               ' Base period = 1 (max resolution)
-    PINHIGH(pin)                ' Enable FIRST (universal init order)
+    PINHIGH(pin)                ' Enable FIRST (general init order)
     WYPIN(pin, y_value)         ' THEN set frequency
     
   PRI calc_nco_value(freq_hz, x_div) : y_value
@@ -80,7 +80,7 @@ spin2_complete: |
     PINCLEAR(NCO_PIN)
     WRPIN(NCO_PIN, mode)        ' NCO + DAC output
     WXPIN(NCO_PIN, 1)           ' Base = 1
-    PINHIGH(NCO_PIN)            ' Enable FIRST (universal init order)
+    PINHIGH(NCO_PIN)            ' Enable FIRST (general init order)
     WYPIN(NCO_PIN, y_value)     ' THEN set frequency
     
   PUB phase_locked_outputs() | mode, y_val
@@ -99,7 +99,7 @@ spin2_complete: |
     WXPIN(49, $4000_0001)       ' Phase = 90° (0x4000 = 1/4)
 
     PINHIGH(48)                 ' Enable both pins...
-    PINHIGH(49)                 ' ...together (universal order: enable before WYPIN)
+    PINHIGH(49)                 ' ...together (general order: enable before WYPIN)
     WYPIN(48, y_val)            ' THEN set frequency on both (phase set by WXPIN above)
     WYPIN(49, y_val)
 
@@ -125,7 +125,7 @@ pasm2_complete: |
           GETQX y_value               ' Get fraction
           
           WXPIN #1, pin               ' Base period = 1
-          DIRH  pin                   ' Enable FIRST (universal init order)
+          DIRH  pin                   ' Enable FIRST (general init order)
           WYPIN y_value, pin          ' THEN set frequency
           RET
   
@@ -135,7 +135,7 @@ pasm2_complete: |
           DIRL  pin
           WRPIN nco_mode, pin
           WXPIN #1, pin
-          DIRH  pin                   ' Enable ONCE before the loop (universal init order)
+          DIRH  pin                   ' Enable ONCE before the loop (general init order)
 
           MOV   y_value, start_freq
   .loop   WYPIN y_value, pin          ' update frequency each step (operate)

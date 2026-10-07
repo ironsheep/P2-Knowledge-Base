@@ -84,7 +84,7 @@ spin2_complete: |
     PINCLEAR(DAC_PIN)
     WRPIN(DAC_PIN, mode)
     WXPIN(DAC_PIN, SAMPLE_PERIOD)  ' Must be multiple of 256
-    PINHIGH(DAC_PIN)               ' Enable FIRST (universal init order)
+    PINHIGH(DAC_PIN)               ' Enable FIRST (general init order)
     WYPIN(DAC_PIN, $8000)          ' THEN write Y: mid-scale initial
     
   PUB output_sine(angle) | value16
@@ -127,7 +127,7 @@ pasm2_complete: |
           WRPIN dac_mode, pin       ' Configure mode
           MOV   x, sample_period
           WXPIN x, pin              ' Set period (multiple of 256)
-          DIRH  pin                 ' Enable FIRST (universal init order)
+          DIRH  pin                 ' Enable FIRST (general init order)
           WYPIN ##$8000, pin        ' THEN write Y: mid-scale initial
           RET
   

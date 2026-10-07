@@ -68,11 +68,13 @@ code_examples:
         jmp     #.loop
 
 configuration_order:
-  follows_the_universal_rule: |
+  follows_the_general_order: |
     The PASM2 example above writes Y with WYPIN AFTER raising DIR, which is
     architecture/smart_pins.yaml's reset_before_configure order:
-    DIRL -> WRPIN -> WXPIN -> DIRH -> WYPIN. That order is correct for EVERY mode,
-    so the examples here use it rather than relying on this mode tolerating another.
+    DIRL -> WRPIN -> WXPIN -> DIRH -> WYPIN. That is the general order (synchronous
+    serial transmit %11100 in continuous mode is a documented exception). Whether this
+    mode also tolerates WYPIN before DIRH is not documented for this mode and not
+    measured, so the examples here use the general order.
     (This page previously showed WYPIN before DIRH.)
   about_pinstart: |
     The Spin2 example uses pinstart(), which writes Y BEFORE raising DIR. The general
@@ -80,7 +82,7 @@ configuration_order:
     %01110 is a counting mode, not a trigger mode, so pinstart() is not excluded by
     that rule -- but NOT STATED, by this page or any source we hold: whether %01110 is
     positively immune to the early Y write. If that matters to your design, use the
-    explicit five-step sequence, which is safe either way.
+    explicit five-step sequence, which follows the general order.
 
 common_applications:
   - "Event counting with separate increment/decrement inputs"

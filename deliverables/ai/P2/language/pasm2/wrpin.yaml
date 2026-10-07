@@ -68,11 +68,13 @@ critical_requirement:
   - WXPIN x, pin    ' Set X parameter
   - DIRH pin       ' Enable smart pin (DIR=1)
   - WYPIN y, pin    ' Set Y parameter (AFTER enable)
-  note: 'Universal init order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate
-    (WYPIN): WYPIN comes AFTER DIRH. Mandatory for the trigger modes %00100/%00101 (a
-    WYPIN issued before enable is lost); consistent and safe for all other modes.'
+  note: 'General init order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate
+    (WYPIN): WYPIN comes AFTER DIRH. Required for the trigger modes %00100/%00101 and
+    asynchronous serial transmit %11110 (a WYPIN issued before enable does not take
+    effect). Exception: synchronous serial transmit %11100 in continuous mode needs its
+    first word written with WYPIN during reset -- enabling first loses that word.'
   consequence_of_skipping: Selecting a new mode while DIR is high gives unpredictable, useless behavior
-  source: "description: Silicon Doc, silicon-doc-text.txt:3854; consequence_of_skipping: Silicon Doc, silicon-doc-text.txt:3856"
+  source: "description: Silicon Doc, silicon-doc-text.txt:3854; consequence_of_skipping: Silicon Doc, silicon-doc-text.txt:3856; note: P2-EMPIRICAL-FINDINGS.md EF-011 (pulse, transition, async TX) and EF-090 (sync TX %11100 continuous), Silicon Doc silicon-doc-text.txt:4650 (prime during reset)"
 usage_notes:
 - Configure with WRPIN while DIR is low (DIRL first) when selecting or changing a mode
 - 'WRPIN #0, pin clears all smart pin configuration, and resets a running smart pin even with DIR high'

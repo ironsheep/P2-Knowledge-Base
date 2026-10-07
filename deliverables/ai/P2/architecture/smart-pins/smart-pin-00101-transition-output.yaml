@@ -62,7 +62,7 @@ spin2_complete: |
     PINCLEAR(pin)
     WRPIN(pin, mode)
     WXPIN(pin, period)              ' Transition period
-    PINHIGH(pin)                    ' Enable FIRST (universal init order)
+    PINHIGH(pin)                    ' Enable FIRST (general init order)
     WYPIN(pin, transitions)         ' THEN write Y -> triggers the transitions
 
   PUB sync_serial_clock() | mode
@@ -91,7 +91,7 @@ pasm2_complete: |
           DIRL  pin                   ' Reset
           WRPIN trans_mode, pin       ' Configure
           WXPIN period, pin           ' Set period
-          DIRH  pin                   ' Enable FIRST (universal init order)
+          DIRH  pin                   ' Enable FIRST (general init order)
           WYPIN count, pin            ' THEN write Y -> triggers the transitions
   .wait   TESTP pin WC                ' Test IN
     IF_NC JMP   #.wait              ' Wait for completion
@@ -113,7 +113,7 @@ pasm2_complete: |
           DIRL  pin
           WRPIN trans_mode, pin
           WXPIN #100, pin             ' Bit period
-          DIRH  pin                   ' Enable FIRST (universal init order)
+          DIRH  pin                   ' Enable FIRST (general init order)
           WYPIN #16, pin              ' THEN trigger: 16 edges for 8 bits
           RET
   
@@ -129,7 +129,7 @@ spin2_inline: |
       DIRL  pin
       WRPIN ##P_TRANSITION | P_OE, pin
       WXPIN #2, pin                 ' Fast toggle
-      DIRH  pin                     ' Enable FIRST (universal init order)
+      DIRH  pin                     ' Enable FIRST (general init order)
       WYPIN edges, pin              ' THEN write Y -> triggers the transitions
     END
 
@@ -140,7 +140,7 @@ transition_counting: |
   Odd count leaves pin in opposite state
 
 init_order: |
-  Universal smart-pin init order: reset (PINCLEAR/DIRL) -> setup (WRPIN/WXPIN)
+  General smart-pin init order: reset (PINCLEAR/DIRL) -> setup (WRPIN/WXPIN)
   -> ENABLE (PINHIGH/DIRH) -> OPERATE (WYPIN). For trigger modes like %00101 the
   Y-write MUST come AFTER enable -- Y is held 0 during reset, so writing Y while
   still disabled never triggers. NOTE: pinstart() writes Y before raising DIR, so

@@ -6,7 +6,7 @@ compatible_languages: ["Spin2", "PASM2"]
 brief_description: "USB differential pair control for host/device communication (even/odd pin pair = DM/DP)"
 
 detailed_description:
-  source: "Propeller 2 Documentation v35, %11011 = USB host/device -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4579; the mode line 'USB host/device (even/odd pin pair = DM/DP)' also at engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:140; wrpin_data_conflict: PDF-derived capture of v35 p2-documentation.txt:8886 (now superseded), DOCX capture of v35 silicon-doc-text.txt:4579, general rule silicon-doc-text.txt:3856; registers comment: Silicon Doc silicon-doc-text.txt:4579"
+  source: "Propeller 2 Documentation v35, %11011 = USB host/device -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4579; the mode line 'USB host/device (even/odd pin pair = DM/DP)' also at engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:140; wrpin_data_conflict: PDF-derived capture of v35 p2-documentation.txt:8886 (now superseded), DOCX capture of v35 silicon-doc-text.txt:4579, general rule silicon-doc-text.txt:3856; registers comment: Silicon Doc silicon-doc-text.txt:4579; start_sequence and the PASM example's order (WYPIN after DIR is set): silicon-doc-text.txt:4593"
   pin_pairing: "This mode requires that two adjacent pins be configured together to form a USB pair, whose OUTs will be overridden to control their output states. These pins must be an even/odd pair, having only the LSB of their pin numbers different. For example: pins 0 and 1, pins 2 and 3, and pins 4 and 5 can form USB pairs."
   which_pin_is_which:
     upper_odd_pin: "The upper (odd) pin is the DP pin. This pin's IN is raised whenever the output buffer empties, signalling that a new output byte can be written via WYPIN to the lower (even) pin. No WXPIN/WYPIN instructions are used for this pin."
@@ -116,9 +116,9 @@ code_examples:
         dirl    #usb_dp_pin                      ' Reset DP pin
         wrpin   usb_mode, #usb_dm_pin            ' Configure USB mode
         wxpin   usb_config, #usb_dm_pin          ' Set parameters
-        wypin   usb_ctrl, #usb_dm_pin            ' Control settings
         dirh    #usb_dm_pin                      ' Enable USB pair
         dirh    #usb_dp_pin
+        wypin   usb_ctrl, #usb_dm_pin            ' Control settings (after DIR is set, per the start sequence)
       
       usb_mode
         long    P_USB_PAIR | P_OE               ' USB pair, output enabled (active port)
