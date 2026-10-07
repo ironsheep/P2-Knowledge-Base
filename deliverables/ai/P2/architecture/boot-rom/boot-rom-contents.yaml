@@ -41,7 +41,8 @@ residents:
       selects a boot path (serial / SPI flash / SD card), and either loads
       and jumps to user code or hands off to one of the interactive
       interfaces (Monitor or TAQOZ) on the appropriate keystroke trigger.
-    source_listing: "Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build; ROM_Booter.lst is an FPGA build of the same source)"
+    source_listing: "Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build, revision v33_01j of 2019; ROM_Booter.lst is an earlier revision, v141 of 2018, built for the Prop123-A9 / BeMicro-A9 FPGA boards)"
+    source: "rom_booter_v33_01j.lst:87-93 (2019 revisions v33_01a..j; 'j use \"G\" for Prop2 silicon v2'), :125-131 (\"A\" commented out, ver = \"G\" active); ROM_Booter.lst:84-85 (history ends at v141, 2018-05-27), :118 (ver = \"A\" 'Prop123-A9 / BeMicro-A9) -- both under engineering/ingestion/sources/rom-booter/; FPGA boards: P2 Documentation, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2876, :2950-2951"
     canonical_entries:
       - architecture/boot-rom/_index.yaml
       - architecture/boot-rom/boot-pattern-selection.yaml
