@@ -318,7 +318,14 @@ F-506…F-524 are DONE and archived (`correction-sweeps/2026-10-03-…` and the 
 
 F-523 (repo locators in shipped text) is DONE and archived — `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`.
 
-### F-525 — `flash-loader-case-study.yaml` tells the reader to read a narrative the KB does not ship — `NEEDS-VERIFICATION`
+### F-525 — `flash-loader-case-study.yaml` tells the reader to read a narrative the KB does not ship — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Decided and applied 2026-10-07: drop the instruction.** `Flash-Loader-Theory-of-Operations.md`
+> is our own derived analysis of Chip Gracey's source — the ingestion dashboard classes it
+> "derived analysis docs … not raw extraction" (`engineering/ingestion/README.md:136`); its own
+> header frames it as "what we can learn about the P2 from studying it". It is published nowhere a
+> reader can reach and is not a source, so neither "name the location" nor "carry its substance
+> into the KB" applies. The `how_to_use_this_entry` line naming it is removed; "Read
+> flash_loader.spin2 itself for source-of-truth" stays.
 Found 2026-10-03 while sweeping F-523. `code-examples/flash-loader-case-study.yaml` `how_to_use_this_entry`:
 "Read Flash-Loader-Theory-of-Operations.md (companion narrative) for the full walkthrough". The file lives in
 this repo at `engineering/ingestion/sources/flash-loader/` and is not in the KB tree, so a consuming agent

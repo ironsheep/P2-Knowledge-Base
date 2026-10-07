@@ -98,7 +98,6 @@ technical_analysis:
 how_to_use_this_entry:
   - "Skim techniques_demonstrated for orientation"
   - "Follow canonical links for depth on each technique"
-  - "Read Flash-Loader-Theory-of-Operations.md (companion narrative) for the full walkthrough"
   - "Read flash_loader.spin2 itself for source-of-truth"
 
 # Cross-references — one block, no duplication with technique canonicals above
