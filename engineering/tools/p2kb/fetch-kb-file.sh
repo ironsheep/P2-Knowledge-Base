@@ -133,35 +133,119 @@ refresh_index() {
     fi
 }
 
+# -----------------------------------------------------------------------------
+# Reading the index WITHOUT jq. jq is optional; without it these read the index
+# exactly as generate-p2kb-index.py writes it -- json.dump(indent=2): each
+# section opens on `  "<section>": {`, each member starts on a line indented
+# four spaces (`    "<name>": {` for files, `    "<name>": [` for aliases and
+# categories), file entries carry `"path"` on the next line, and list members sit
+# one per line. Names are compared as the JSON text the file holds (see
+# json_escape). The release gate checks every key and alias resolves here exactly
+# as json.load reads them, so a generator layout change cannot break this quietly.
+#
+#   nojq_index path    files      <key>     -> the entry's path
+#   nojq_index members <section>  <name>    -> the list's members, one per line
+#   nojq_index names   <section>            -> every member name (JSON text)
+#   nojq_index counts  <section>            -> "<name> <member count>" per member
+# -----------------------------------------------------------------------------
+nojq_index() {
+    LC_ALL=C awk -v mode="$1" -v sec="$2" -v want="$3" '
+        $0 == "  \"" sec "\": {" { inside = 1; next }
+        inside && /^  }/ { exit }
+        !inside || !/^    "/ { next }
+        {
+            boundary = match($0, /": [[{]/)
+            if (!boundary) next
+            name = substr($0, 6, boundary - 6)
+            opener = substr($0, boundary + 3, 1)
+            if (mode == "names") { print name; next }
+            if (mode == "path") {
+                if (name != want) next
+                getline
+                sub(/^ *"path": "/, ""); sub(/",?$/, "")
+                print
+                exit
+            }
+            if (opener != "[") next
+            if (mode == "members" && name != want) next
+            count = 0
+            if ($0 !~ /\[\],?$/) {
+                while ((getline line) > 0 && line !~ /^    \]/) {
+                    count++
+                    if (mode == "members") {
+                        sub(/^ *"/, "", line); sub(/",?$/, "", line)
+                        print line
+                    }
+                }
+            }
+            if (mode == "counts") print name " " count
+            if (mode == "members") exit
+        }
+    ' "$INDEX_FILE"
+}
+
+# A name as JSON text, so it can be compared with the index without decoding it:
+# `"` and `\` are escaped and every non-ASCII character becomes \uXXXX (lowercase
+# hex, surrogate pairs above U+FFFF) -- json.dump's default (ensure_ascii). The
+# 30 non-ASCII aliases need this (em dashes). Needs a UTF-8 locale for non-ASCII
+# input; ASCII input passes straight through.
+json_escape() {
+    local s="$1"
+    # Printable ASCII with no quote or backslash is already its own JSON text.
+    if [[ -z "$(printf '%s' "$s" | LC_ALL=C tr -d ' -~')" && "$s" != *[\"\\]* ]]; then
+        printf '%s' "$s"
+        return 0
+    fi
+    local out="" c code i hi lo
+    for (( i = 0; i < ${#s}; i++ )); do
+        c="${s:i:1}"
+        case "$c" in
+            '"')  out+='\"' ;;
+            '\')  out+='\\' ;;
+            *)
+                code=$(printf '%d' "'$c")
+                if (( code < 128 )); then
+                    out+="$c"
+                elif (( code <= 0xFFFF )); then
+                    out+=$(printf '\\u%04x' "$code")
+                else
+                    hi=$(( 0xD800 + ((code - 0x10000) >> 10) ))
+                    lo=$(( 0xDC00 + ((code - 0x10000) & 0x3FF) ))
+                    out+=$(printf '\\u%04x\\u%04x' "$hi" "$lo")
+                fi
+                ;;
+        esac
+    done
+    printf '%s' "$out"
+}
+
+to_upper() { printf '%s' "$1" | LC_ALL=C tr '[:lower:]' '[:upper:]'; }
+to_lower() { printf '%s' "$1" | LC_ALL=C tr '[:upper:]' '[:lower:]'; }
+
 # Look up key in index - returns path or empty
 lookup_key() {
     local key="$1"
     if command -v jq &>/dev/null; then
         jq -r ".files[\"$key\"].path // empty" "$INDEX_FILE"
     else
-        grep -o "\"$key\":{\"path\":\"[^\"]*\"" "$INDEX_FILE" 2>/dev/null | sed 's/.*"path":"\([^"]*\)".*/\1/'
+        nojq_index path files "$(json_escape "$key")"
     fi
 }
 
 # Look up alias in index - returns array of canonical keys (v3.4+)
-# Aliases are now arrays: "MOV": ["p2kbPasm2Mov"] or "ABS": ["p2kbPasm2Abs", "p2kbSpin2Abs"]
+# Aliases are arrays: "MOV": ["p2kbPasm2Mov"] or "ABS": ["p2kbPasm2Abs", "p2kbSpin2Abs"]
+# Tries the exact name, then UPPER, then lower case.
 lookup_alias() {
-    local alias="$1"
-    if command -v jq &>/dev/null; then
-        # Try exact match first, then uppercase, then lowercase
-        local keys=""
-        keys=$(jq -r ".aliases[\"$alias\"][]? // empty" "$INDEX_FILE" 2>/dev/null)
-        if [[ -z "$keys" ]]; then
-            keys=$(jq -r ".aliases[\"${alias^^}\"][]? // empty" "$INDEX_FILE" 2>/dev/null)
+    local alias="$1" keys="" variant
+    for variant in "$alias" "$(to_upper "$alias")" "$(to_lower "$alias")"; do
+        if command -v jq &>/dev/null; then
+            keys=$(jq -r --arg a "$variant" '.aliases[$a][]? // empty' "$INDEX_FILE" 2>/dev/null)
+        else
+            keys=$(nojq_index members aliases "$(json_escape "$variant")")
         fi
-        if [[ -z "$keys" ]]; then
-            keys=$(jq -r ".aliases[\"${alias,,}\"][]? // empty" "$INDEX_FILE" 2>/dev/null)
-        fi
-        echo "$keys"
-    else
-        # Fallback without jq - less reliable for arrays
-        grep -o "\"${alias}\":\[\"[^]]*\]" "$INDEX_FILE" 2>/dev/null | sed 's/.*\[\(.*\)\].*/\1/' | tr -d '"' | tr ',' '\n'
-    fi
+        [[ -n "$keys" ]] && break
+    done
+    echo "$keys"
 }
 
 # Find similar keys for error suggestions
@@ -180,7 +264,7 @@ find_similar_keys() {
     if command -v jq &>/dev/null; then
         jq -r ".files | keys[] | select(test(\"$search_term\"; \"i\"))" "$INDEX_FILE" 2>/dev/null | head -5
     else
-        grep -o "\"p2kb[^\"]*\"" "$INDEX_FILE" | tr -d '"' | grep -i "$search_term" | head -5
+        nojq_index names files | grep -i -- "$search_term" | head -5
     fi
 }
 
@@ -346,23 +430,27 @@ cmd_browse() {
     ensure_dirs
     refresh_index
 
+    local keys
     if command -v jq &>/dev/null; then
-        local keys=$(jq -r ".categories[\"$category\"][]?" "$INDEX_FILE" 2>/dev/null)
-        if [[ -z "$keys" ]]; then
-            error "Category '$category' not found or empty"
-            echo "" >&2
-            echo "Available categories:" >&2
-            jq -r '.categories | keys[]' "$INDEX_FILE" | sed 's/^/  /' >&2
-            exit 1
-        fi
-        echo "$keys"
-        local count=$(echo "$keys" | wc -l | tr -d ' ')
-        echo "" >&2
-        echo "Total: $count keys in '$category'" >&2
+        keys=$(jq -r --arg c "$category" '.categories[$c][]?' "$INDEX_FILE" 2>/dev/null)
     else
-        error "jq required for --browse command"
+        keys=$(nojq_index members categories "$(json_escape "$category")")
+    fi
+    if [[ -z "$keys" ]]; then
+        error "Category '$category' not found or empty"
+        echo "" >&2
+        echo "Available categories:" >&2
+        if command -v jq &>/dev/null; then
+            jq -r '.categories | keys[]' "$INDEX_FILE" | sed 's/^/  /' >&2
+        else
+            nojq_index names categories | LC_ALL=C sort | sed 's/^/  /' >&2
+        fi
         exit 1
     fi
+    echo "$keys"
+    local count=$(echo "$keys" | wc -l | tr -d ' ')
+    echo "" >&2
+    echo "Total: $count keys in '$category'" >&2
     exit 0
 }
 
@@ -373,12 +461,11 @@ cmd_categories() {
     ensure_dirs
     refresh_index
 
+    echo "Available categories:"
     if command -v jq &>/dev/null; then
-        echo "Available categories:"
         jq -r '.categories | to_entries[] | "  \(.key): \(.value | length) keys"' "$INDEX_FILE"
     else
-        error "jq required for --categories command"
-        exit 1
+        nojq_index counts categories | awk '{ print "  " $1 ": " $2 " keys" }'
     fi
     exit 0
 }
@@ -397,40 +484,46 @@ cmd_search() {
     ensure_dirs
     refresh_index
 
+    # Search both keys and aliases (case-insensitive)
+    local keys aliases
     if command -v jq &>/dev/null; then
-        # Search both keys and aliases
-        local keys=$(jq -r ".files | keys[] | select(test(\"$term\"; \"i\"))" "$INDEX_FILE" 2>/dev/null)
-        local aliases=$(jq -r ".aliases | to_entries[] | select(.key | test(\"$term\"; \"i\")) | \"\(.key) -> \(.value | join(\", \"))\"" "$INDEX_FILE" 2>/dev/null)
-
-        local found_something=0
-
-        if [[ -n "$keys" ]]; then
-            echo "=== Matching Keys ==="
-            echo "$keys"
-            local key_count=$(echo "$keys" | wc -l | tr -d ' ')
-            echo "" >&2
-            echo "Found: $key_count keys matching '$term'" >&2
-            found_something=1
-        fi
-
-        if [[ -n "$aliases" ]]; then
-            if [[ $found_something -eq 1 ]]; then
-                echo ""
-            fi
-            echo "=== Matching Aliases ==="
-            echo "$aliases"
-            local alias_count=$(echo "$aliases" | wc -l | tr -d ' ')
-            echo "" >&2
-            echo "Found: $alias_count aliases matching '$term'" >&2
-            found_something=1
-        fi
-
-        if [[ $found_something -eq 0 ]]; then
-            echo "No keys or aliases found matching '$term'" >&2
-        fi
+        keys=$(jq -r ".files | keys[] | select(test(\"$term\"; \"i\"))" "$INDEX_FILE" 2>/dev/null)
+        aliases=$(jq -r ".aliases | to_entries[] | select(.key | test(\"$term\"; \"i\")) | \"\(.key) -> \(.value | join(\", \"))\"" "$INDEX_FILE" 2>/dev/null)
     else
-        # Fallback without jq - only searches keys
-        grep -o "\"p2kb[^\"]*\"" "$INDEX_FILE" | tr -d '"' | grep -i "$term"
+        # Without jq, alias names with non-ASCII characters match by their \uXXXX text.
+        # `|| true`: grep exits 1 on no match, which `set -e` would turn into a silent exit.
+        keys=$(nojq_index names files | grep -i -- "$term" || true)
+        local name
+        aliases=$(nojq_index names aliases | { grep -i -- "$term" || true; } | while IFS= read -r name; do
+            printf '%s -> %s\n' "$name" "$(nojq_index members aliases "$name" | paste -sd, - | sed 's/,/, /g')"
+        done)
+    fi
+
+    local found_something=0
+
+    if [[ -n "$keys" ]]; then
+        echo "=== Matching Keys ==="
+        echo "$keys"
+        local key_count=$(echo "$keys" | wc -l | tr -d ' ')
+        echo "" >&2
+        echo "Found: $key_count keys matching '$term'" >&2
+        found_something=1
+    fi
+
+    if [[ -n "$aliases" ]]; then
+        if [[ $found_something -eq 1 ]]; then
+            echo ""
+        fi
+        echo "=== Matching Aliases ==="
+        echo "$aliases"
+        local alias_count=$(echo "$aliases" | wc -l | tr -d ' ')
+        echo "" >&2
+        echo "Found: $alias_count aliases matching '$term'" >&2
+        found_something=1
+    fi
+
+    if [[ $found_something -eq 0 ]]; then
+        echo "No keys or aliases found matching '$term'" >&2
     fi
     exit 0
 }
