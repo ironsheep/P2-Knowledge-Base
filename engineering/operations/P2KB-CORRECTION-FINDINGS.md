@@ -63,7 +63,16 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-552
 
-### F-559 — the DEBUG guide calls 15,872 bytes the DEBUG-data budget; the debugger's own layout overruns at 10,752 — `CONFIRMED` (needs Stephen: it bears on the VO-J-027 strike)
+### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `CONFIRMED` (re-scoped by Stephen 2026-10-07)
+> **Ruling, Stephen 2026-10-07:** "debug limits are not hardware and are not hard and fast... we
+> can teach techniques for how to mitigate bumping up against them but not the limits themselves...
+> soft values change with each compiler release." So the fix is **not** to state 10,752 in place
+> of 15,872: `debug-strategy-guide.yaml` drops every DEBUG byte/record limit stated as a fact
+> (the 15,872 "budget" F-383 added included) and keeps the techniques — DAT + `zstr_()`, the
+> value-only forms, merging statements to cut records, `DEBUG_MASK`/`DEBUG_DISABLE` — plus how to
+> read the compiler's own listing for the current figures. VO-J-027 stays struck. The layout
+> analysis below is kept as the reason the KB must not imply a compiled build is safe up to the
+> compiler's cap; it is not KB content.
 Found 2026-10-07 by the pre-release audit of F-383 / the VO-J-027 strike. The debugger pnut-ts
 embeds (byte-identical to `external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2`
 apart from patched config bytes) copies DEBUG data to `dat_addr = $FC000` (`:7`); its register
