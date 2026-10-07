@@ -994,7 +994,7 @@ gets cost and limits on one page.
 > `udec_(x)`/`udec_(y)` 1 rec · no statements: `-d` adds 2,934 B to the binary, DEBUG data 0.
 > **Refuted:** (a)/(c) "fails SILENTLY, no compiler error" — the compile-time cap is loud (m151);
 > the reported *runtime* mute under the cap is **not carried** — Stephen 2026-10-07, striking
-> VO-J-027: *"(1) it's soft not specific, (2) it's likely compiler specific"*; a per-build,
+> VO-J-027: *"(1) it's soft not specific, (2) it's likely compiler version specific"*; a per-version,
 > per-program threshold is tool behaviour, not a P2 fact, so the guide states only the loud
 > compile-time limit and the listing method.
 > (e) "~2,945 bytes, 18% of the budget, gone before the first debug()" — that is the debugger
