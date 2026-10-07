@@ -982,7 +982,29 @@ gets cost and limits on one page.
 
 ## The DEBUG budget: we ship all three limits and none of what they cost (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-4) — F-383
 
-### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `PARTIAL` (re-verified 2026-10-05 «#386»: parts (a)(c)(e)(g) shipped; the stale "hit first" bullet, the byte column, the DEBUG_MASK per-object limit and the coalesce mapping remain)
+### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it; the runtime mute threshold is VO-J-027)
+> **Applied 2026-10-07 — by measurement on pnut-ts 1.55.8, and two of this entry's claims did not
+> survive it.** Instrument: `pnut-ts -d -l` — the listing states both budgets directly (`DEBUG
+> records: N of 255`, `DEBUG data: N of 15872 bytes`). Fixtures (scratch, regenerable):
+> 100 × 154-byte records = **15,800 of 15,872 compiles; +1 char each fails** `total exceeds 16384
+> bytes (m151)`; a 260-char literal fails `record exceeds 255 bytes (m150)`. Three labelled
+> statements 62 B/3 rec · `DEBUG_DISABLE = 1` 0/0 · `DEBUG_MASK = 0` with `debug[0]` 0/0 ·
+> `DEBUG_COGS = 1` 62/3 · `debug(if(v),…)` 65/3 · two `zstr_()` in one statement 4 B vs one 3 B
+> (1 rec each) · `zstr_(@a/@b/@c), udec(v)` ×3 → **1 record, 6 B** · `udec(x)`/`udec(y)` 2 rec ·
+> `udec_(x)`/`udec_(y)` 1 rec · no statements: `-d` adds 2,934 B to the binary, DEBUG data 0.
+> **Refuted:** (a)/(c) "fails SILENTLY, no compiler error" — the compile-time cap is loud (m151);
+> what is silent is a *runtime* mute **under** the cap, kept, threshold unmeasured → VO-J-027.
+> (e) "~2,945 bytes, 18% of the budget, gone before the first debug()" — that is the debugger
+> image in the binary (2,934 B with zero statements), not DEBUG data (reads 0); the
+> subtraction method (g) measures that larger quantity, so the listing replaces it.
+> (f) "DEBUG_MASK cannot be overridden at instantiation" — `OBJ c : "child" | DEBUG_MASK = 1`
+> takes a mask-0 child from 0 records to 1 (control: no override, 0); the KB now states the
+> override. **Mapping (d), now measured:** DAT + `zstr_()` cuts bytes, and records too when
+> statements become byte-identical (value-only forms store no label, v55 `:918`); coalescing
+> `zstr_()` calls cuts bytes only; buffer-formatted lines are one record for any number of call
+> sites. **Applied:** `hard_limits` (limit 15,872, both failure modes, what is counted, the
+> listing method), `the_two_budgets_…` rewritten from the fixtures, `reduces_debug_bytes`
+> column, `debug_mask.per_object`, the stale "hit first" note replaced. (7) is F-389.
 
 **Class: MIXED — parts (a)(c)(e)(f) are BEHAVIOUR to be proven by test; parts (d)(g) are TECHNIQUE and
 need their conditions stated. Part (b) is an editorial correction.**

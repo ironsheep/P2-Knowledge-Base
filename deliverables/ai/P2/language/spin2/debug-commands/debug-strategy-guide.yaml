@@ -39,39 +39,53 @@ hard_limits:
   single_record_size:
     limit: "255 bytes"
     description: "One debug statement cannot exceed 255 bytes of encoded data"
+    fails: "LOUDLY, at compile time: 'DEBUG data is too long: record exceeds 255 bytes (m150)'."
   total_debug_data:
-    limit: "16 KB"
-    description: "All debug records combined cannot exceed 16,384 bytes"
+    limit: "15,872 bytes of DEBUG data"
+    description: "All debug records combined. The compiler's listing states the budget directly: 'DEBUG data: N of 15872 bytes'."
     fails: |
-      SILENTLY. There is no compiler error and no warning. Over the cap, output dies
-      partway through a report with no end marker, or never starts at all — not even a
-      banner placed before every other statement. A mute board is indistinguishable
-      from a dead one, and every mechanical check (the define reached the compiler, the
-      arms built differently, clock, baud, clean tree) passes while it happens.
-      TREAT 16,384 AS AN UPPER BOUND, NOT A BUDGET: the usable ceiling is lower by an
-      amount that depends on the program, and it has not been bisected.
+      TWO WAYS, and only one is loud.
+      AT COMPILE TIME, LOUDLY: past 15,872 bytes the build fails with 'DEBUG data is
+      too long: total exceeds 16384 bytes (m151)' (the message names 16384; the usable
+      figure is the listing's 15,872).
+      AT RUNTIME, SILENTLY: a -d build that compiles inside the budget can download
+      and then print nothing at all — not even a banner placed before every other
+      statement. A mute board is indistinguishable from a dead one, and every
+      mechanical check passes while it happens. The DEBUG-data size at which this
+      starts has NOT been established, so keep DEBUG data well under the budget and
+      read the listing figure on every -d build.
     what_it_counts: |
-      The literal FORMAT STRINGS inside debug() calls, plus per-statement overhead.
-      DAT strings are NOT counted — this is the lever that matters, because it means
-      prose moved into DAT and emitted with zstr_() costs nothing against this cap.
+      The literal text inside debug() calls, the labels of the labelled output
+      commands, and per-statement overhead. DAT strings are NOT counted: prose moved
+      into DAT and emitted with zstr_() leaves only the command bytes behind (three
+      statements measured 62 bytes with literals, 6 with zstr_ of DAT strings).
     how_to_measure: |
-      Build once WITHOUT -d, once WITH -d, and subtract the two binary sizes. That
-      difference is the DEBUG data. It is deliberately crude: nothing to parse, and
-      nothing that can drift from what the compiler actually did. (Counting literals
-      with a regex and subtracting gives a confident wrong answer.)
-    fixed_overhead: "About 2,945 bytes are consumed before the first debug() — measured twice, on a bare vehicle and on one including a whole driver compiled with DEBUG_MASK = 0. A child object at DEBUG_MASK = 0 contributes ZERO bytes, not merely zero records, which is what decides whether a large library is safe to include."
-    scope: "The byte figures above are what -d adds to the binary, measured on one project's vehicle (external-hardware-findings: P2X8C4M64P / uSD-FAT32). Whether that is the same quantity the 16,384 limit counts is NOT established — which is exactly why the guidance is 'treat it as an upper bound'."
+      Compile with -d and a listing (pnut-ts -d -l). The listing reports
+      'DEBUG records: N of 255' and 'DEBUG data: N of 15872 bytes' -- the compiler's
+      own count of both budgets. The difference between -d and non-d binary sizes is
+      NOT this figure: it includes the debugger image (2,934 bytes with no debug
+      statements at all, while DEBUG data reads 0).
+    scope: "Compile-time figures measured on pnut-ts 1.55.8. The runtime silent failure is a field observation; its threshold is not measured."
 
 the_two_budgets_are_reduced_by_different_means:
   description: |
     Over on BYTES and over on RECORDS are different problems with non-overlapping
     remedies, and applying the wrong one changes nothing while looking like work.
   over_on_bytes:
-    fix: "Move prose into DAT and emit it with zstr_()."
-    does_not_help: "Merging statements — it may not shed a single byte."
+    fix: "Move prose into DAT and emit it with zstr_() -- the text leaves DEBUG data entirely."
+    also_helps: "Coalescing adjacent strings so one zstr_() replaces several saves the per-command byte (two zstr_() in one statement measured 4 bytes, one measured 3); it does not change the record count."
+    does_not_help: "DEBUG_COGS and debug(IF(...)) -- both are runtime; IF adds bytes."
   over_on_records:
-    fix: "Merge statements: format several values into one line and emit once."
-    does_not_help: "Moving prose to DAT — the record count is unchanged."
+    fix: |
+      Make statements byte-identical so the compiler deduplicates them. The value-only
+      commands (the forms ending in "_", such as zstr_() and udec_()) store no label, so
+      statements that differ only in the expression they print compile to ONE record:
+      debug(zstr_(@a), udec(v)), the same with @b, and with @c measured 1 record (the
+      zstr_ pointer is not stored; the label "v" is the same in all three). A line
+      formatted in a hub buffer and emitted with debug(zstr_(@buf)) is one record no
+      matter how many call sites emit it. The labelled forms store the
+      expression's name, so debug(udec(x)) and debug(udec(y)) stay two records.
+    does_not_help: "DEBUG_COGS and debug(IF(...)) -- the records are still compiled."
 
 
 what_a_debug_build_takes_from_your_program:
@@ -108,7 +122,7 @@ what_a_debug_build_takes_from_your_program:
     cogs that are not running ISRs in the background; if the ISRs tolerate skew and
     nothing depends on the interrupt continuing to cycle, DEBUG is usable with understood
     timing degradation. CT-based interrupts are not prone to it.
-  source: "interrupt_retrigger_can_stop_for_good: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071; hub_memory: same, :900; protected_region_layout: the Parallax Spin2 debugger source (Spin2_debugger.spin2 v51, 2025.04.02), engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:7-10, :20-49, and the per-cog blocks per P2 Documentation, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2399, :2446-2477"
+  source: "hard_limits, the_two_budgets_are_reduced_by_different_means, mechanisms_overview reduces_debug_bytes and mechanism_details.debug_mask.per_object: measured with pnut-ts 1.55.8 (-d -l listing figures and compile errors m150/m151), 2026-10-07; value-only '_' forms per Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:918. interrupt_retrigger_can_stop_for_good: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071; hub_memory: same, :900; protected_region_layout: the Parallax Spin2 debugger source (Spin2_debugger.spin2 v51, 2025.04.02), engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:7-10, :20-49, and the per-cog blocks per P2 Documentation, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2399, :2446-2477"
   clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived clock of at least 10 MHz."
   measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000."
 
@@ -138,6 +152,7 @@ mechanisms_overview:
     - mechanism: "-d compiler flag"
       level: compile-time
       reduces_record_count: "Yes (all or nothing)"
+      reduces_debug_bytes: "Yes (all or nothing)"
       granularity: Global
       eliminates_code: true
       requires_code_changes: "No (build flag)"
@@ -145,6 +160,7 @@ mechanisms_overview:
     - mechanism: DEBUG_DISABLE
       level: compile-time
       reduces_record_count: "Yes (all or nothing)"
+      reduces_debug_bytes: "Yes (all or nothing; measured 0 bytes)"
       granularity: "Global (per source file)"
       eliminates_code: true
       requires_code_changes: "CON constant"
@@ -152,6 +168,7 @@ mechanisms_overview:
     - mechanism: "DEBUG_MASK + debug[N]()"
       level: compile-time
       reduces_record_count: "Yes (selective per channel)"
+      reduces_debug_bytes: "Yes (masked channels measured 0 bytes)"
       granularity: "Per channel (32 channels)"
       eliminates_code: "Yes (disabled channels)"
       requires_code_changes: "CON constant + debug[N] syntax"
@@ -159,6 +176,7 @@ mechanisms_overview:
     - mechanism: DEBUG_COGS
       level: runtime
       reduces_record_count: false
+      reduces_debug_bytes: false
       granularity: "Per cog (8 cogs)"
       eliminates_code: false
       requires_code_changes: "CON constant"
@@ -166,6 +184,7 @@ mechanisms_overview:
     - mechanism: "debug IF() / IFNOT()"
       level: runtime
       reduces_record_count: false
+      reduces_debug_bytes: "No -- the condition adds bytes (three statements measured 62 bytes plain, 65 with IF)"
       granularity: Per statement
       eliminates_code: false
       requires_code_changes: "Wrap each statement"
@@ -224,6 +243,13 @@ mechanism_details:
       Regular debug() statements (without a channel number) are NOT controlled
       by DEBUG_MASK. They compile whenever -d is used and DEBUG_DISABLE is not set.
       Use debug[N]() for everything you want to be maskable.
+    per_object: |
+      DEBUG_MASK belongs to the file that defines it, and a parent can set a child's
+      mask at instantiation like any other overridable constant:
+        OBJ  drv : "driver" | DEBUG_MASK = %1     ' enable the driver's channel 0
+      Measured: a child defining DEBUG_MASK = 0 compiles 0 records on its own and 1
+      record with the override. A masked-off child adds 0 records AND 0 bytes, which
+      is what decides whether a large library is safe to include.
     example_subsystem:
       code: |
         {Spin2_v46}
@@ -400,7 +426,7 @@ common_mistakes:
     solution: "Don't rely on deduplication for variable-containing debug statements"
 
 notes:
-  - "The 255-record limit is the one you'll hit first in non-trivial projects"
+  - "Which limit you hit first depends on the shape of the output: many short statements reach 255 records first; a few long formatted lines reach the byte budget first. Read both figures from the -d listing."
   - "Only COMPILE-TIME mechanisms reduce record count"
   - "Runtime mechanisms (DEBUG_COGS, debug IF/IFNOT) still consume record slots"
   - "Regular debug() without channel number always compiles — use sparingly for critical messages"
