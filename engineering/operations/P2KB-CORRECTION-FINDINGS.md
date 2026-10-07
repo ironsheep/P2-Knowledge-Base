@@ -982,7 +982,7 @@ gets cost and limits on one page.
 
 ## The DEBUG budget: we ship all three limits and none of what they cost (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-4) — F-383
 
-### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it; the runtime mute threshold is VO-J-027)
+### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 > **Applied 2026-10-07 — by measurement on pnut-ts 1.55.8, and two of this entry's claims did not
 > survive it.** Instrument: `pnut-ts -d -l` — the listing states both budgets directly (`DEBUG
 > records: N of 255`, `DEBUG data: N of 15872 bytes`). Fixtures (scratch, regenerable):
@@ -993,7 +993,10 @@ gets cost and limits on one page.
 > (1 rec each) · `zstr_(@a/@b/@c), udec(v)` ×3 → **1 record, 6 B** · `udec(x)`/`udec(y)` 2 rec ·
 > `udec_(x)`/`udec_(y)` 1 rec · no statements: `-d` adds 2,934 B to the binary, DEBUG data 0.
 > **Refuted:** (a)/(c) "fails SILENTLY, no compiler error" — the compile-time cap is loud (m151);
-> what is silent is a *runtime* mute **under** the cap, kept, threshold unmeasured → VO-J-027.
+> the reported *runtime* mute under the cap is **not carried** — Stephen 2026-10-07, striking
+> VO-J-027: *"(1) it's soft not specific, (2) it's likely compiler specific"*; a per-build,
+> per-program threshold is tool behaviour, not a P2 fact, so the guide states only the loud
+> compile-time limit and the listing method.
 > (e) "~2,945 bytes, 18% of the budget, gone before the first debug()" — that is the debugger
 > image in the binary (2,934 B with zero statements), not DEBUG data (reads 0); the
 > subtraction method (g) measures that larger quantity, so the listing replaces it.

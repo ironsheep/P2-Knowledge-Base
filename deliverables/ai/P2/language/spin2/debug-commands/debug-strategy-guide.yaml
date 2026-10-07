@@ -16,10 +16,10 @@ aliases:
   - "debug output stops partway"
   - "debug output dies mid-report"
   - "16KB debug limit"
+  - "15872 debug data"
   - "debug byte budget"
   - "what a debug build costs"
   - "debug resource usage"
-  - "mute board"
 
 description: |
   Strategic guide for choosing the right debug mechanism in P2 projects.
@@ -44,16 +44,9 @@ hard_limits:
     limit: "15,872 bytes of DEBUG data"
     description: "All debug records combined. The compiler's listing states the budget directly: 'DEBUG data: N of 15872 bytes'."
     fails: |
-      TWO WAYS, and only one is loud.
-      AT COMPILE TIME, LOUDLY: past 15,872 bytes the build fails with 'DEBUG data is
+      LOUDLY, at compile time: past 15,872 bytes the build fails with 'DEBUG data is
       too long: total exceeds 16384 bytes (m151)' (the message names 16384; the usable
       figure is the listing's 15,872).
-      AT RUNTIME, SILENTLY: a -d build that compiles inside the budget can download
-      and then print nothing at all — not even a banner placed before every other
-      statement. A mute board is indistinguishable from a dead one, and every
-      mechanical check passes while it happens. The DEBUG-data size at which this
-      starts has NOT been established, so keep DEBUG data well under the budget and
-      read the listing figure on every -d build.
     what_it_counts: |
       The literal text inside debug() calls, the labels of the labelled output
       commands, and per-statement overhead. DAT strings are NOT counted: prose moved
@@ -65,7 +58,7 @@ hard_limits:
       own count of both budgets. The difference between -d and non-d binary sizes is
       NOT this figure: it includes the debugger image (2,934 bytes with no debug
       statements at all, while DEBUG data reads 0).
-    scope: "Compile-time figures measured on pnut-ts 1.55.8. The runtime silent failure is a field observation; its threshold is not measured."
+    scope: "Figures measured on pnut-ts 1.55.8."
 
 the_two_budgets_are_reduced_by_different_means:
   description: |
