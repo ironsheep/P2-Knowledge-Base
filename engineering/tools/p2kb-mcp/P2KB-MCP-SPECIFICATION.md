@@ -54,14 +54,17 @@ use them.
 
 ## 3. Index structure
 
+Schema 3.6.0 (the published index is 3.5.0 until the next KB release; 3.5.0 is the same
+without `delivery_filter`). Counts are illustrative.
+
 ```json
 {
   "system": {
-    "version": "3.5.0",
-    "generated": "2026-10-04T18:47:24.835817",
-    "total_entries": 1131,
+    "version": "3.6.0",
+    "generated": "2026-10-07T21:27:30.000000",
+    "total_entries": 1130,
     "total_categories": 59,
-    "total_aliases": 3091,
+    "total_aliases": 3102,
     "multi_target_aliases": 189,
     "source": "deliverables/ai/P2/"
   },

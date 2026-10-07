@@ -109,7 +109,7 @@ Before pushing to live:
 python3 engineering/tools/validate-dod-release.py --verbose
 ```
 
-Validates: index integrity, gzip correctness, file paths, orphans, naming conventions, timestamps, metadata filtering, cross-references, fetch script parity.
+Validates: index integrity, gzip correctness, file paths, orphans, naming conventions, timestamps, the delivery filter (rule read from the index, shipped engine vs prediction, no provenance in the payload), cross-references, content gates, fetch script parity, rule read-back, no-jq lookup, and the PowerShell scripts' Windows verification.
 
 **Incremental mode** (faster, changes only):
 ```bash
@@ -118,16 +118,14 @@ python3 engineering/tools/validate-dod-release.py --incremental
 
 ---
 
-## Metadata Fields Filtered by Fetch Scripts
+## Provenance Removed at Delivery
 
-These 5 fields are process/lineage info, filtered out for consumers:
-- `last_updated`
-- `enhancement_source`
-- `documentation_source`
-- `documentation_level`
-- `manual_extraction_date`
-
-If adding new metadata fields, update both fetch scripts and the validator.
+Receivers (the fetch scripts and the p2kb-mcp server) remove provenance fields and column-0
+comments before an agent sees a file. **The rule is defined once** — `DELIVERY_FILTER` in
+`engineering/tools/generate-p2kb-index.py` — and published in the index; receivers read it
+from there. Put provenance in the existing fields (`source:` / `sources:` and the metadata
+fields that rule lists) rather than inventing new keys: the list does not grow to chase new
+names (Stephen, 2026-10-04, F-545). Design: `engineering/tools/p2kb/METADATA-FILTER-DESIGN.md`.
 
 ---
 
