@@ -33,7 +33,7 @@ hub_variables:
 # language/spin2/constants/special-configuration-symbols.yaml; this block names the
 # set and the source that defines it, rather than carrying a second copy.
 configuration_constants:
-  source: "Parallax Spin2 Documentation v55, \"Clock Setup\" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1715-1725"
+  source: "Parallax Spin2 Documentation v55, \"Clock Setup\" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1708-1726, :1736"
   definition_home: language/spin2/constants/special-configuration-symbols.yaml
   symbols:
     - "_clkfreq -- desired system clock frequency"
@@ -52,7 +52,7 @@ configuration_constants:
 # v55 states these as a closed set: "These symbols must be defined in one of the
 # following combinations." Rule text and %CC_SS values are the source's own.
 configuration_rules:
-  source: "Parallax Spin2 Documentation v55, \"Clock Setup\" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1716-1725"
+  source: "Parallax Spin2 Documentation v55, \"Clock Setup\" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1709-1722"
   closed_set: "These symbols must be defined in one of the following combinations."
   combinations:
     - declaration: "_clkfreq (with optional _errfreq)"
@@ -331,13 +331,13 @@ anti_patterns:
   conflicting_definitions:
     wrong: "_rcfast together with _clkfreq"
     reason: "v55 states the clock-setup symbols as a closed set of combinations: \"These symbols must be defined in one of the following combinations.\" _rcfast and _rcslow each appear alone."
-    source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1716-1725"
+    source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1709-1719"
 
   missing_crystal_frequency:
     wrong: "_clkfreq alone on a board whose crystal is not 20 MHz"
     correct: "Declare _xtlfreq to match the actual crystal, alongside _clkfreq."
     reason: "_clkfreq alone \"Selects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal.\""
-    source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1718"
+    source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1711"
 
   no_stabilization_wait:
     wrong: "HUBSET to the PLL clock source in the same step that enables the crystal and PLL."

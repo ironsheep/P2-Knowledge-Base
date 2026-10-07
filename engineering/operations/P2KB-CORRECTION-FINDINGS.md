@@ -1228,7 +1228,16 @@ start unasked. What «#334» fixed is only the three files it touched.
 
 ## Two residues the gates cannot see: a citation re-anchor that translated line numbers, and an eighth fabricated-provenance file (2026-08-27, «#325» verification) — F-377
 
-### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `PARTIAL` (re-verified 2026-10-05 «#386»: part 2 fixed; clock_system.yaml still cites spin2-v55-text.txt:1718 and :1716-1725 for text that sits at :1711 and :1709)
+### F-377 — F-365's re-anchor left locators that are in range and point at nothing; `io_pin_timing.yaml` cites a silicon-doc part file that does not exist — `PENDING-VALIDATION` (the last residue applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07.** `architecture/clock_system.yaml` had **four** off locators into v55
+> "Clock Setup", not two: `configuration_constants` :1715-1725 → **:1708-1726, :1736** (section
+> head, the CON table and its footnotes, the compiler-defined `clkmode_`/`clkfreq_` at :1724-1726,
+> `_AUTOCLK` at :1736); `configuration_rules` :1716-1725 → **:1709-1722** (closed-set sentence,
+> the rows :1711-1719, footnotes :1721-1722); `anti_patterns.conflicting_definitions` :1716-1725 →
+> **:1709-1719**; `missing_crystal_frequency` :1718 → **:1711** (the `_clkfreq`-alone row,
+> "assumes 20 MHz crystal"; :1718 is the no-symbol default row). Each target line read off disk.
+> Swept the class: every other KB citation into v55 :1700-1749 (`guides/pasm2-getting-started.yaml`,
+> `guides/spin2-getting-started.yaml`) lands on the text it names — untouched.
 
 **DISCHARGED 2026-08-30 by F-399.** Part 1 (the translated-locator class) is closed the only way it can be: all **721** citation locators in the shipped set were opened at their cited lines and read. 22 were repaired — 18 pointing at content that does not support the claim, of which **10 were exactly this carry-over shape** in `pin-capture.yaml` and `pin-selection.yaml`; the two named in this entry (`dds-goertzel.yaml`) are among them. A corpus-wide carry-over detector now returns **zero** across all 222 `silicon-doc-text.txt` citations. Part 2 (`io_pin_timing.yaml`'s fabricated `part3-pins.txt`) was repaired earlier and its replacement locators were re-read in the F-399 sweep. **See F-399 for the method, the totals, and the two instrument defects that had to be fixed before any of it could be trusted.**
 
