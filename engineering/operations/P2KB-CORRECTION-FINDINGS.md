@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-551`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-552`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,18 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-550
+## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-551
+
+### F-551 — `guides/pasm2-getting-started.yaml` is uncited outside the blocks F-542 re-derived — `CONFIRMED` (L)
+Found 2026-10-07 scoping F-542. Of 729 lines only `file_structure` and `timing_considerations`
+carried a source; F-542 re-derived `register_model`, `core_instructions`, `assembler_directives`
+and `critical_gotchas`. Still uncited: `instruction_format`, `addressing_modes`, `common_patterns`,
+`inline_pasm2_in_spin2`, `labels_and_symbols`, `string_handling`, `debugging_support`,
+`flag_behavior`, `knowledge_progression`, `next_steps`. Also `file_structure.size_checking`
+ships a dated `correction_2026_08_25` history note in reader-facing text. This is the
+most-copied beginner page in the set. **Fix:** `SOURCE-REPAIR-ORDER.md` — remove and re-derive
+each block from the spreadsheet / P2 Documentation / v55, compile every example, report
+grounded · gaps · removals.
 
 ### F-550 — `serial_loader.yaml` `protocol_commands` gives the FPGA build's `Prop_Chk` answer and an invented `Prop_Clk` syntax — `CONFIRMED`
 Found 2026-10-07 fixing F-421 in the same file. Against the P2 Hardware Manual (`p2-hardware-manual-text.txt:1629-1725`)
@@ -187,7 +198,25 @@ audit, see their notes).
 
 F-526 (sync TX primes in reset, EF-090) and F-540 (`##` takes a skip-pattern bit, EF-091) are DONE and archived — `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`.
 
-### F-542 — `guides/pasm2-getting-started.yaml` teaches a wrong register map and P1 instructions — `CONFIRMED`
+### F-542 — `guides/pasm2-getting-started.yaml` teaches a wrong register map and P1 instructions — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+> **Applied 2026-10-07 per `SOURCE-REPAIR-ORDER.md`** — the four named blocks were uncited, so they
+> were removed and re-derived source-first, not patched. Sources: the Parallax *P2 Instructions v35
+> Rev B/C* spreadsheet (`sources/p2-instructions-csv/…Sheet1.csv`, each entry citing its `order`
+> row), the P2 Documentation register map (`silicon-doc-text.txt:437-472`), and v55 `:302-323`
+> for directives. Every example compiles (pnut-ts 1.55.8, one cog image, inside `FIT $1F8`).
+> **Grounded fixes:** register map PA `$1F6` … INB `$1FF` with the Silicon Doc's roles (PA/PB are
+> CALLD-imm/CALLPA/CALLPB/LOC registers; INA/INB also the debug-interrupt addresses); `MOVS`/`MOVD`
+> → `SETS`/`SETD`; CALL pushes to the hardware stack, RET pops it; `TJZ`/`TJNZ` test only, `DJNZ`
+> added; `FIT $1F8`. **Widened — wrong and not in the filing:** `CMP` "C=1 if D > S" (C is the
+> borrow: D < S); `MUL` "lower 32 bits" (16 x 16); `WAITX ##1000` "wait 1000 clocks" (2 + D);
+> LUT "same speed as cog registers" (RDLUT 3 clocks vs 2); "PTRA auto-increment is AFTER the
+> access" (pre- and post-forms exist, `silicon-doc-text.txt:3189-3193`); every instruction's
+> syntax now carries its `{#}`/flag-effect form. **Removals (uncited, no source found):**
+> `cog_registers` "fast access (2 clock cycles)"/usage/naming lines; gotchas "flags persist",
+> "labels must start in column 1", "comments use '", "pin numbers 0-63 … some contexts".
+> **Gaps:** none. Two prose pointers to `rdlong.yaml`/`wrlong.yaml` went with the old timing
+> strings; the guide gained a `related:` block to 13 per-instruction entries (findability).
+> **The rest of the guide is F-551.**
 Seen 2026-10-04 reading the served entry while verifying v1.23.1. Against the Silicon Doc
 (`silicon-doc-text.txt:452` "$1F6 RAM / PA"; :664 `SETS`; the CALL entry) and the file's own
 `size_checking.why_1F8`:

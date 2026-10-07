@@ -213,222 +213,153 @@ instruction_format:
       example: "SUB  x, y  WCZ     ' Set both flags"
 
 register_model:
+  source: "P2 Documentation -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:139 (512 KB hub RAM), :153-154 and :472 (register and lookup RAM), :437-467 (register map); hub and LUT access from the P2 Instructions v35 Rev B/C spreadsheet -- engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv, order 151-154, 220-223"
   cog_registers:
-    range: "0-511 (512 registers)"
-    size: "32 bits each"
-    usage:
-      - "General purpose computation"
-      - "Local variable storage"
-      - "Fast access (2 clock cycles)"
-    naming: "Use meaningful names in code"
-    
+    size: "512 longs of dual-port register RAM, $000-$1FF"
+    general_purpose: "$000-$1EF -- general-purpose registers for code and data"
+    dual_purpose: "$1F0-$1F7 -- general-purpose, or special-purpose when their associated functions are enabled ($1F0-$1F5 are the interrupt IJMP/IRET registers; $1F6/$1F7 are PA/PB)"
+
   special_registers:
-    PA:
-      range: "496 (alias for register 496)"
-      usage: "Return address A"
-      
-    PB:
-      range: "497 (alias for register 497)"
-      usage: "Return address B"
-      
-    PTRA:
-      range: "498"
-      usage: "Pointer A for hub memory access"
-      
-    PTRB:
-      range: "499"
-      usage: "Pointer B for hub memory access"
-      
-    DIRA:
-      range: "500"
-      usage: "Pin direction for pins 0-31"
-      
-    DIRB:
-      range: "501"
-      usage: "Pin direction for pins 32-63"
-      
-    OUTA:
-      range: "502"
-      usage: "Pin output for pins 0-31"
-      
-    OUTB:
-      range: "503"
-      usage: "Pin output for pins 32-63"
-      
-    INA:
-      range: "504"
-      usage: "Pin input for pins 0-31 (read-only)"
-      
-    INB:
-      range: "505"
-      usage: "Pin input for pins 32-63 (read-only)"
+    PA: {address: "$1F6", role: "CALLD-imm return, CALLPA parameter, or LOC address (dual-purpose RAM)"}
+    PB: {address: "$1F7", role: "CALLD-imm return, CALLPB parameter, or LOC address (dual-purpose RAM)"}
+    PTRA: {address: "$1F8", role: "pointer A to hub RAM"}
+    PTRB: {address: "$1F9", role: "pointer B to hub RAM"}
+    DIRA: {address: "$1FA", role: "output enables for P31..P0"}
+    DIRB: {address: "$1FB", role: "output enables for P63..P32"}
+    OUTA: {address: "$1FC", role: "output states for P31..P0"}
+    OUTB: {address: "$1FD", role: "output states for P63..P32"}
+    INA: {address: "$1FE", role: "input states for P31..P0; also the debug interrupt call address"}
+    INB: {address: "$1FF", role: "input states for P63..P32; also the debug interrupt return address"}
 
   lut_memory:
-    range: "512 longs (separate from cog registers)"
-    access: "RDLUT/WRLUT instructions"
-    usage: "Lookup tables, additional storage"
-    speed: "Same speed as cog registers"
+    size: "512 longs of dual-port lookup RAM per cog, for code, streamer lookup, and variables"
+    access: "RDLUT D,{#}S/P (3 clocks); WRLUT {#}D,{#}S/P (2 clocks)"
 
   hub_memory:
-    size: "512KB shared memory"
-    access: "RDLONG/RDWORD/RDBYTE, WRLONG/WRWORD/WRBYTE"
-    timing: "Reads: 9-16 clocks (cog) / 9-26 clocks (hub-exec); Writes: 3-10 clocks (cog) / 3-20 clocks (hub-exec). Hub-window dependent (egg-beater). Per per-instruction YAMLs."
-    usage: "Shared data, large buffers, communication"
+    size: "512 KB, shared by all cogs"
+    access: "RDBYTE/RDWORD/RDLONG and WRBYTE/WRWORD/WRLONG"
+    timing: "RDLONG 9...16 clocks (cog exec) / 9...26 (hub exec); WRLONG 3...10 / 3...20"
 
 core_instructions:
+  source: "P2 Instructions v35 Rev B/C spreadsheet -- engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv; each entry names its row by the sheet's `order` column. In the sheet, a `*` on a flag description means Z = (result == 0). Every example below compiles (pnut-ts)."
   data_movement:
     MOV:
-      syntax: "MOV  D, S"
-      description: "Copy source to destination"
+      syntax: "MOV  D,{#}S  {WC/WZ/WCZ}"
+      description: "Move S into D. D = S. C = S[31]. Z = (result == 0). (order 58)"
       example: "MOV  result, input"
-      
-    MOVS:
-      syntax: "MOVS  D, S"
-      description: "Copy S field of instruction"
-      usage: "Self-modifying code"
-      
-    MOVD:
-      syntax: "MOVD  D, S"
-      description: "Copy D field of instruction"
-      usage: "Self-modifying code"
+    SETS:
+      syntax: "SETS  D,{#}S"
+      description: "Set S field of D to S[8:0]. D = {D[31:9], S[8:0]}. Used to patch an instruction's S field. (order 126)"
+      example: "SETS  patch, #target"
+    SETD:
+      syntax: "SETD  D,{#}S"
+      description: "Set D field of D to S[8:0]. D = {D[31:18], S[8:0], D[8:0]}. Used to patch an instruction's D field. (order 125)"
+      example: "SETD  patch, #target"
 
   arithmetic:
     ADD:
-      syntax: "ADD  D, S  {WC/WZ/WCZ}"
-      description: "D := D + S"
+      syntax: "ADD  D,{#}S  {WC/WZ/WCZ}"
+      description: "Add S into D. D = D + S. C = carry of (D + S). Z = (result == 0). (order 10)"
       example: "ADD  total, value  WC"
-      
     SUB:
-      syntax: "SUB  D, S  {WC/WZ/WCZ}"
-      description: "D := D - S"
+      syntax: "SUB  D,{#}S  {WC/WZ/WCZ}"
+      description: "Subtract S from D. D = D - S. C = borrow of (D - S). Z = (result == 0). (order 14)"
       example: "SUB  count, #1  WZ"
-      
     MUL:
-      syntax: "MUL  D, S"
-      description: "Multiply (lower 32 bits)"
+      syntax: "MUL  D,{#}S  {WZ}"
+      description: "D = unsigned (D[15:0] * S[15:0]) -- a 16 x 16 multiply with a 32-bit result. Z = (S == 0) | (D == 0). (order 137)"
       example: "MUL  product, factor"
-      
     NEG:
-      syntax: "NEG  D, S  {WC/WZ/WCZ}"
-      description: "D := -S"
+      syntax: "NEG  D,{#}S  {WC/WZ/WCZ}"
+      description: "Negate S into D. D = -S. C = MSB of result. Z = (result == 0). (order 63)"
       example: "NEG  value, value"
 
   logical:
     AND:
-      syntax: "AND  D, S  {WC/WZ/WCZ}"
-      description: "D := D & S (bitwise AND)"
+      syntax: "AND  D,{#}S  {WC/WZ/WCZ}"
+      description: "AND S into D. D = D & S. C = parity of result. Z = (result == 0). (order 50)"
       example: "AND  flags, #$FF"
-      
     OR:
-      syntax: "OR  D, S  {WC/WZ/WCZ}"
-      description: "D := D | S (bitwise OR)"
+      syntax: "OR  D,{#}S  {WC/WZ/WCZ}"
+      description: "OR S into D. D = D | S. C = parity of result. Z = (result == 0). (order 52)"
       example: "OR  config, #%1000"
-      
     XOR:
-      syntax: "XOR  D, S  {WC/WZ/WCZ}"
-      description: "D := D ^ S (bitwise XOR)"
+      syntax: "XOR  D,{#}S  {WC/WZ/WCZ}"
+      description: "XOR S into D. D = D ^ S. C = parity of result. Z = (result == 0). (order 53)"
       example: "XOR  value, mask"
-      
     NOT:
-      syntax: "NOT  D, S  {WC/WZ/WCZ}"
-      description: "D := !S (bitwise NOT)"
+      syntax: "NOT  D,{#}S  {WC/WZ/WCZ}"
+      description: "Get !S into D. D = !S. C = !S[31]. Z = (result == 0). (order 59)"
       example: "NOT  inverted, original"
 
   comparison:
     CMP:
-      syntax: "CMP  D, S  WC/WZ/WCZ"
-      description: "Compare D with S, set flags"
-      flags:
-        - "Z=1 if D == S"
-        - "C=1 if D > S (unsigned)"
-      example: "CMP  count, #100  WZ"
-      
+      syntax: "CMP  D,{#}S  {WC/WZ/WCZ}"
+      description: "Compare D to S. C = borrow of (D - S), so C = 1 when D < S (unsigned). Z = (D == S). D is not written. (order 18)"
+      example: "CMP  count, #100  WCZ"
     TEST:
-      syntax: "TEST  D, S  WC/WZ/WCZ"
-      description: "Test bits (D & S), set flags"
+      syntax: "TEST  D,{#}S  {WC/WZ/WCZ}"
+      description: "Test D with S. C = parity of (D & S). Z = ((D & S) == 0). D is not written. (order 81)"
       example: "TEST  status, #$01  WZ"
 
   branching:
     JMP:
-      syntax: "JMP  #address"
-      description: "Unconditional jump"
-      example: "JMP  #loop"
-      
+      syntax: "JMP  #{\\}A"
+      description: "Jump to A. If R = 1 then PC += A, else PC = A. '\\' forces R = 0 (absolute). (order 402)"
+      example: "JMP  #done"
     CALL:
-      syntax: "CALL  #address"
-      description: "Call subroutine (saves return in PA)"
+      syntax: "CALL  #{\\}A"
+      description: "Call to A by pushing {C, Z, 10'b0, PC[19:0]} onto the hardware stack -- not into PA. (order 403)"
       example: "CALL  #process_data"
-      
     RET:
-      syntax: "RET"
-      description: "Return from CALL (jumps to PA)"
+      syntax: "RET  {WC/WZ/WCZ}"
+      description: "Return by popping the stack (K). C = K[31], Z = K[30], PC = K[19:0]. (order 319)"
       example: "RET"
-      
-    TJNZ:
-      syntax: "TJNZ  D, #address"
-      description: "Jump if D not zero, decrement D"
-      usage: "Loop counting"
-      example: "TJNZ  counter, #loop"
-      
+    DJNZ:
+      syntax: "DJNZ  D,{#}S"
+      description: "Decrement D and jump to S if the result is not zero -- the loop-counting branch. (order 169)"
+      example: "DJNZ  counter, #start"
     TJZ:
-      syntax: "TJZ  D, #address"
-      description: "Jump if D zero, decrement D"
+      syntax: "TJZ  D,{#}S"
+      description: "Test D and jump to S if D is zero. D is not changed. (order 174)"
       example: "TJZ  countdown, #done"
+    TJNZ:
+      syntax: "TJNZ  D,{#}S"
+      description: "Test D and jump to S if D is not zero. D is not changed. (order 175)"
+      example: "TJNZ  pending, #start"
 
   conditional_execution:
-    IF_Z:
-      syntax: "IF_Z  INSTRUCTION"
-      description: "Execute if Z flag is set"
-      example: "IF_Z  MOV  result, #0"
-      
-    IF_NZ:
-      syntax: "IF_NZ  INSTRUCTION"
-      description: "Execute if Z flag is clear"
-      example: "IF_NZ  JMP  #continue"
-      
-    IF_C:
-      syntax: "IF_C  INSTRUCTION"
-      description: "Execute if C flag is set"
-      example: "IF_C  ADD  overflow, #1"
-      
-    IF_NC:
-      syntax: "IF_NC  INSTRUCTION"
-      description: "Execute if C flag is clear"
-      example: "IF_NC  JMP  #no_carry"
+    IF_Z: {syntax: "IF_Z  <inst>  <ops>", description: "Execute <inst> if Z = 1. (order 441)"}
+    IF_NZ: {syntax: "IF_NZ  <inst>  <ops>", description: "Execute <inst> if Z = 0. (order 426)", example: "IF_NZ  JMP  #continue"}
+    IF_C: {syntax: "IF_C  <inst>  <ops>", description: "Execute <inst> if C = 1. (order 447)", example: "IF_C  JMP  #below"}
+    IF_NC: {syntax: "IF_NC  <inst>  <ops>", description: "Execute <inst> if C = 0. (order 419)"}
 
   hub_access:
     RDLONG:
-      syntax: "RDLONG  D, PTRA/PTRB/address"
-      description: "Read long (32-bit) from hub memory"
-      timing: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per language/pasm2/rdlong.yaml encoding"
+      syntax: "RDLONG  D,{#}S/P  {WC/WZ/WCZ}"
+      description: "Read long from hub address {#}S/PTRx into D. C = MSB of long. A prior SETQ/SETQ2 makes it a cog/LUT block transfer. 9...16 clocks (cog exec), 9...26 (hub exec). (order 154)"
       example: "RDLONG  value, PTRA++"
-      
     WRLONG:
-      syntax: "WRLONG  D, PTRA/PTRB/address"
-      description: "Write long to hub memory"
-      timing: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per language/pasm2/wrlong.yaml encoding"
+      syntax: "WRLONG  {#}D,{#}S/P"
+      description: "Write long in D[31:0] to hub address {#}S/PTRx. A prior SETQ/SETQ2 makes it a cog/LUT block transfer. 3...10 clocks (cog exec), 3...20 (hub exec). (order 223)"
       example: "WRLONG  result, PTRA"
-      
     RDBYTE:
-      syntax: "RDBYTE  D, address"
-      description: "Read byte from hub memory"
+      syntax: "RDBYTE  D,{#}S/P  {WC/WZ/WCZ}"
+      description: "Read zero-extended byte from hub address {#}S/PTRx into D. C = MSB of byte. (order 152)"
       example: "RDBYTE  char, PTRA++"
-      
     WRBYTE:
-      syntax: "WRBYTE  D, address"
-      description: "Write byte to hub memory"
-      example: "WRBYTE  char, PTRA++"
+      syntax: "WRBYTE  {#}D,{#}S/P"
+      description: "Write byte in D[7:0] to hub address {#}S/PTRx. (order 221)"
+      example: "WRBYTE  char, PTRB++"
 
   timing:
     WAITX:
-      syntax: "WAITX  ticks"
-      description: "Wait specified clock cycles"
-      example: "WAITX  ##1000      ' Wait 1000 clocks"
-      
+      syntax: "WAITX  {#}D  {WC/WZ/WCZ}"
+      description: "Wait 2 + D clocks. With WC/WZ/WCZ, wait 2 + (D & RND) clocks. C/Z = 0. (order 266)"
+      example: "WAITX  ##1000      ' waits 1002 clocks"
     GETCT:
-      syntax: "GETCT  D"
-      description: "Get current system counter"
-      usage: "Precise timing measurements"
+      syntax: "GETCT  D  {WC}"
+      description: "Get CT[31:0], or CT[63:32] with WC, into D. GETCT WC followed by GETCT gets the full 64-bit CT. CT = 0 on reset and increments on every clock. (order 260)"
       example: "GETCT  timestamp"
 
 addressing_modes:
@@ -562,35 +493,22 @@ labels_and_symbols:
   detailed_reference: "language/pasm2/concepts/labels.yaml"
 
 assembler_directives:
+  source: "Parallax Spin2 Documentation v55 -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:302-303 (DAT symbols and data), :313 (ORG), :316 (FIT, cog), :322-323 (ORGH, FIT, hub)"
   ORG:
-    syntax: "ORG  address"
-    description: "Set assembly origin (default $000 for cog)"
-    example: "ORG  $000"
-    
+    syntax: "ORG  {address{,limit}}"
+    description: "Set cog-exec mode. Bare ORG: cog address $000, cog limit $1F8 (both defaults); ORG $100: address $100, limit $1F8; ORG $100,$120: address $100, limit $120."
+    example: "ORG"
   ORGH:
-    syntax: "ORGH  address"
-    description: "Assemble for hub execution"
-    usage: "Code that runs from hub memory"
-    
+    syntax: "ORGH  {origin{,limit}}"
+    description: "Set hub-exec mode. Bare ORGH: hub origin $00400, origin limit $100000 (both defaults)."
   FIT:
-    syntax: "FIT  max_address"
-    description: "Verify code fits in specified space"
-    example: "FIT  $1F0       ' Ensure fits in cog (496 longs)"
-    
-  LONG:
-    syntax: "LONG  value"
-    description: "Define 32-bit data"
-    example: "lookup_table  LONG  10, 20, 30, 40"
-    
-  BYTE:
-    syntax: "BYTE  value"
-    description: "Define 8-bit data"
-    example: 'message  BYTE  "Hello", 0'
-    
-  WORD:
-    syntax: "WORD  value"
-    description: "Define 16-bit data"
-    example: "data  WORD  1000, 2000, 3000"
+    syntax: "FIT  limit"
+    description: "Test that the cog (after ORG) or hub (after ORGH) address has not exceeded limit. FIT $1F8 matches an unqualified ORG -- see file_structure.size_checking."
+    example: "FIT  $1F8"
+  BYTE_WORD_LONG:
+    syntax: "symbol  BYTE|WORD|LONG  value{, value...}"
+    description: "Emit byte, word or long data; a preceding symbol takes that size and points at the first value. Symbols without data take the size of the previous declaration."
+    example: 'HexChrs  BYTE  "0123456789ABCDEF"'
 
 string_handling:
   overview: |
@@ -643,16 +561,15 @@ debugging_support:
       description: "DEBUG beginner tutorial"
 
 critical_gotchas:
-  - "All instructions are 32-bit (one long per instruction)"
-  - "Immediate values limited to 9 bits (0-511) unless using ##"
-  - "Hub memory access is slower than cog/LUT: RDLONG/etc. take 9-16 clocks (cog) / 9-26 (hub-exec); writes 3-10 / 3-20. Per per-instruction YAMLs."
-  - "PTRA/PTRB auto-increment is AFTER the access (post-increment)"
-  - "Flags (C, Z) persist until explicitly changed"
-  - "Labels must start in column 1 or use local syntax (.label)"
-  - "Comments use single quote (') in PASM2"
-  - "Pin numbers are 0-63, not bit positions in some contexts"
-  - "DJNZ decrements THEN tests (jumps if result not zero)"
-  - "RET uses PA register (set by CALL)"
+  source: "P2 Instructions v35 Rev B/C spreadsheet (engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv), order 18, 154, 169, 174, 175, 223, 319, 403, 408; P2 Documentation -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:452-453 (PA/PB), :3189-3193 (PTRA forms)"
+  items:
+    - "Every instruction is one 32-bit long (the encoding column of every row)."
+    - "An immediate #S is 9 bits (0-511); ## prefixes an AUGS that supplies the upper 23 bits, making it 32 bits (order 408)."
+    - "Hub access costs more than cog/LUT access: RDLONG 9...16 clocks (cog exec) / 9...26 (hub exec); WRLONG 3...10 / 3...20 (order 154, 223)."
+    - "PTRA++ uses PTRA and then adds; ++PTRA adds first and uses the new value. Pick the form deliberately."
+    - "CALL pushes its return address onto the hardware stack and RET pops it (order 403, 319). PA and PB are not CALL's return registers -- they serve CALLD-imm, CALLPA/CALLPB and LOC."
+    - "CMP sets C on borrow: C = 1 means D < S, unsigned (order 18)."
+    - "DJNZ decrements, then jumps if the result is not zero; TJZ and TJNZ only test (order 169, 174, 175)."
 
 flag_behavior:
   C_flag:
@@ -717,6 +634,21 @@ next_steps:
     - "CORDIC solver - math coprocessor functions"
     - "Streamer - high-speed pin sequencing"
     - "Multi-COG programming - parallel processing"
+
+related:
+  - language/pasm2/special-registers.yaml
+  - language/pasm2/call.yaml
+  - language/pasm2/ret.yaml
+  - language/pasm2/cmp.yaml
+  - language/pasm2/mul.yaml
+  - language/pasm2/sets.yaml
+  - language/pasm2/setd.yaml
+  - language/pasm2/djnz.yaml
+  - language/pasm2/tjnz.yaml
+  - language/pasm2/rdlong.yaml
+  - language/pasm2/wrlong.yaml
+  - language/pasm2/waitx.yaml
+  - language/pasm2/getct.yaml
 
 see_also:
   - language/pasm2/special-registers.yaml
