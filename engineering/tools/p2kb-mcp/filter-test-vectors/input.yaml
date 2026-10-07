@@ -1,16 +1,19 @@
-# Title comment: kept (not a provenance header)
+# Golden input for the delivery filter, format 1 (MCP-DELIVERY-FILTER-HANDOFF.md §4).
+# Every column-0 comment is dropped, these header lines included.
+# Each line below states its expected fate; expected.yaml is produced by RUNNING
+# fetch-kb-file.sh filter_metadata with the built-in rule, never by hand.
+# The filter is a line rule, so this file need not parse as YAML (tab_block does not).
 # Sources: provenance header at column 0 -- dropped
-#   continuation of the header -- dropped
-#   another continuation -- dropped
+#   continuation of the header -- dropped (column 0)
 
-# A normal comment after a blank line -- kept
+# A normal comment after a blank line -- dropped (column 0); the blank line above is kept
 name: "vector file"
 last_updated: "2025-01-01"
 documentation_source: enhanced
 description: |
   Block text stays.
   source: this line is inside a block scalar but matches the field pattern -- dropped
-  and this deeper line rides the drop span -- dropped
+  and this line is at the SAME indent as that match, so it ends the span -- KEPT
 next_key: kept
 block:
   fact: "kept"
@@ -23,7 +26,7 @@ block:
     - "list item one"
     - "list item two"
 top_after_list: kept
-  # Source: indented comment -- KEPT (the comment rule is column 0 only)
+  # Source: indented comment outside any span -- KEPT (step 2 is column 0 only)
 items:
   - source: "list-item form -- KEPT (dash before the key)"
   - fact: "kept"
@@ -35,12 +38,29 @@ deep:
       deeper: "dropped"
     after: "kept"
 # Extracted from: header -- dropped
-# Verified against: second header straight after -- dropped
-#	tab continuation -- dropped
-#no-space comment -- kept (not a continuation: needs whitespace after #)
+#	tab after hash -- dropped
+#no-space comment -- dropped (column 0)
 manual_extraction_date: "2025"
 enhancement_source: x
 documentation_level: y
 source_reference: ":123"
+span_with_comments:
+  fact: "kept"
+  sources:
+    - "ledger B-112 -- dropped"
+# column-0 comment INSIDE the span -- dropped, and the span CONTINUES
+    - "engineering/foo.txt -- dropped (would escape if the comment ended the span)"
+  # same-indent comment inside the span -- dropped, span continues
+    # deeper comment inside the span -- dropped
+    - "last item -- dropped"
+  after_span: "kept: a non-comment line at the field's indent ends the span"
+tab_block:
+	source: "tab-indented field -- dropped"
+		deeper: "tab-deeper line -- dropped"
+	sibling: "kept"
+"source": "quoted key -- KEPT (the first character is a quote, not a name)"
+source : "space before colon -- KEPT (name must be followed immediately by ':')"
+sources_x: "KEPT (exact names only)"
+REG_ARRAY: {source: "cog registers", pointer: "register"}
 end_key: "kept"
 source: "field at end of file -- dropped"
