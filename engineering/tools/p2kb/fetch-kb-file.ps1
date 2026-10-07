@@ -1,4 +1,4 @@
-# P2 Knowledge Base Fetch Script v3.4
+# P2 Knowledge Base Fetch Script v3.5
 # Key-based access to YAML content with navigation and alias support
 # Usage: ./fetch-kb-file.ps1 <key|alias> | -Help | -Cached | -Browse <category> | -Search <term>
 
@@ -34,7 +34,7 @@ $IndexMaxAge = 86400  # 24 hours in seconds
 
 function Show-Help {
     @"
-P2 Knowledge Base Fetch Script v3.4
+P2 Knowledge Base Fetch Script v3.5
 
 USAGE:
     fetch-kb-file.ps1 <key|alias>        Fetch content by key or alias (e.g., MOV, WAITMS)

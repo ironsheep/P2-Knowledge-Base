@@ -1,5 +1,5 @@
 #!/bin/bash
-# P2 Knowledge Base Fetch Script v3.4
+# P2 Knowledge Base Fetch Script v3.5
 # Key-based access to YAML content with navigation and alias support
 # Usage: ./fetch-kb-file.sh <key|alias> | --help | --cached | --browse <category> | --search <term>
 
@@ -26,7 +26,7 @@ VERBOSE=0
 
 show_help() {
     cat <<'EOF'
-P2 Knowledge Base Fetch Script v3.4
+P2 Knowledge Base Fetch Script v3.5
 
 USAGE:
     fetch-kb-file.sh <key|alias>        Fetch content by key or alias (e.g., MOV, WAITMS)
@@ -184,52 +184,124 @@ find_similar_keys() {
     fi
 }
 
-# Filter metadata from YAML content.
+# =============================================================================
+# Delivery filter -- removes PROVENANCE from every YAML before it is cached or shown
+# =============================================================================
 #
-# INDENTATION-AWARE, not line-based. A `grep -v` on the field name removes the
-# field's OWN line and leaves the continuation lines of a block scalar behind,
-# which then parse as garbage: 141 of the KB's `source:` values are written
-# `source: >-`, and a line-based strip of those delivers YAML that does not load
-# ("mapping values are not allowed here"). So: drop the matched line, then drop
-# every following line indented deeper than it, plus blank lines inside that
-# span. That covers block scalars, nested maps and lists without needing a YAML
-# parser on the consumer's machine.
+# WHAT IS REMOVED AND WHY: provenance is how this project knows a claim is true
+# (source:/sources: fields, bench-ledger ids, repo paths). Its readers are the
+# KB's release gates and auditors; a consuming agent can act on none of it. It
+# stays in the repo and is removed on the way out.
 #
-# WHAT IS STRIPPED AND WHY: everything here is PROVENANCE -- how we know a claim
-# is true. Its readers are this project's release gates and whoever audits a
-# claim later; a consuming agent can act on none of it. It stays in the repo
-# (audit-yaml-claim-sourcing.py reads the repo tree, not this payload) and is
-# removed on the way out. Public document citations are stripped too: an agent
-# cannot open the Silicon Doc either, and "see the PASM2 Manual" belongs in
-# prose where it helps a human, not in a metadata field on every download.
+# THE RULE IS PUBLISHED, NOT HELD HERE. The index carries it as `delivery_filter`
+# (written by generate-p2kb-index.py, the single source); this script carries only
+# the fixed engine. Contract: engineering/tools/p2kb-mcp/MCP-DELIVERY-FILTER-HANDOFF.md
+# §3-§6 (format 1). The p2kb-mcp server applies the same rule with the same engine.
+# Without jq, or when the index has no usable block, the built-in rule inside
+# filter_metadata (identical to the agreement's §3 block) is used -- quietly.
+
+FILTER_ENGINE_VERSION="3.5"   # bump whenever filter_metadata or load_filter_rule changes
+RULE_FIELDS=""                # set by load_filter_rule; empty = built-in rule
+RULE_COL0=""
+
+# Read the rule from the index when jq can, and only if it is a valid format-1 block
+# (exactly three keys, format 1, boolean flag, non-empty list of unique literal names).
+load_filter_rule() {
+    RULE_FIELDS=""
+    RULE_COL0=""
+    command -v jq &>/dev/null || return 0
+    [[ -f "$INDEX_FILE" ]] || return 0
+    local rule
+    rule=$(jq -r '
+        .delivery_filter as $r
+        | if ($r|type) == "object"
+             and ($r|keys) == ["format","remove_column0_comments","remove_fields"]
+             and ($r.format|type) == "number" and $r.format == 1
+             and ($r.remove_column0_comments|type) == "boolean"
+             and ($r.remove_fields|type) == "array" and ($r.remove_fields|length) > 0
+             and all($r.remove_fields[]; type == "string" and test("^[A-Za-z0-9_]+$"))
+             and ($r.remove_fields|unique|length) == ($r.remove_fields|length)
+          then "\($r.remove_fields|join(","))\t\($r.remove_column0_comments)"
+          else empty end' "$INDEX_FILE" 2>/dev/null) || rule=""
+    if [[ -n "$rule" ]]; then
+        RULE_FIELDS="${rule%%$'\t'*}"
+        RULE_COL0="${rule##*$'\t'}"
+        log "Delivery filter: rule from index"
+    else
+        log "Delivery filter: built-in rule"
+    fi
+}
+
+sha256_hex() {
+    if command -v sha256sum &>/dev/null; then sha256sum | cut -d' ' -f1
+    elif command -v shasum &>/dev/null; then shasum -a 256 | cut -d' ' -f1
+    else openssl dgst -sha256 | sed 's/^.*= //'
+    fi
+}
+
+# rule_id per the agreement §3.1 -- the same value every receiver computes.
+filter_rule_id() {
+    local fields="${RULE_FIELDS:-$(filter_metadata --builtin-fields)}"
+    local col0="${RULE_COL0:-true}"
+    printf 'p2kb-delivery-filter\nformat=1\nremove_fields=%s\nremove_column0_comments=%s\n' \
+        "$fields" "$col0" | sha256_hex
+}
+
+# Cached bodies were filtered under one rule and one engine. If either changed --
+# or the cache carries no stamp at all (an older script filled it) -- they go.
+check_cache_stamp() {
+    local stamp_file="$CACHE_DIR/.filter-stamp"
+    local want
+    want="$(filter_rule_id)/$FILTER_ENGINE_VERSION"
+    if [[ ! -f "$stamp_file" ]] || [[ "$(cat "$stamp_file")" != "$want" ]]; then
+        log "Delivery filter changed (or cache unstamped) -- clearing cached bodies"
+        rm -f "$CACHE_DIR"/*.yaml
+        printf '%s\n' "$want" > "$stamp_file"
+    fi
+}
+
+# The format-1 engine (agreement §4). A LINE rule, indentation-aware:
+#   1. Inside a removed field's span: blank lines and comment-only lines are removed
+#      and do NOT end the span (YAML ignores comments); deeper lines are removed;
+#      any other line ends the span and is tested below.
+#   2. A column-0 `#` line is removed when remove_column0_comments is true.
+#   3. A line whose text after leading whitespace is a listed name immediately
+#      followed by `:` is removed and opens a span at its indent.
+# Not a YAML-aware delete: `- source:` and `{source: ...}` are content and stay.
+# Empty input gives empty output. Standalone (no rule loaded) it applies the
+# built-in rule, which is the agreement's §3 block exactly.
 filter_metadata() {
-    awk '
-        # A line at indent <= the span we are dropping ends the span.
+    local builtin="documentation_level,documentation_source,enhancement_source,last_updated,manual_extraction_date,source,source_reference,sources,verified_against"
+    if [[ "$1" == "--builtin-fields" ]]; then
+        printf '%s' "$builtin"
+        return 0
+    fi
+    LC_ALL=C awk -v fields="${RULE_FIELDS:-$builtin}" -v col0="${RULE_COL0:-true}" '
+        BEGIN {
+            n = split(fields, names, ",")
+            for (i = 1; i <= n; i++) remove[names[i]] = 1
+        }
         dropping {
-            if ($0 ~ /^[[:space:]]*$/) next          # blank line inside the span
+            body = $0
+            sub(/^[[:space:]]+/, "", body)
+            if (body == "" || substr(body, 1, 1) == "#") next   # blank or comment: span continues
             match($0, /^[[:space:]]*/)
-            if (RLENGTH > drop_indent) next          # deeper: still the field value
-            dropping = 0                             # same or shallower: span ended
+            if (RLENGTH > drop_indent) next                     # deeper: still the field value
+            dropping = 0                                        # span ended; test this line below
         }
-        # Provenance carried as a COMMENT. No field filter can reach these, and
-        # they are the same thing by another spelling -- 61 files carry one.
-        # Continuation lines of a multi-line "# Sources:" block are indented
-        # comments, so they are dropped with it.
-        /^#[[:space:]]*(Source|Sources|Extracted from|Verified against)/ {
-            comment_drop = 1
-            next
-        }
-        comment_drop {
-            if ($0 ~ /^#[[:space:]]+/) next          # indented continuation comment
-            comment_drop = 0
-        }
-        /^[[:space:]]*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date|source|sources|source_reference|verified_against):/ {
+        col0 == "true" && substr($0, 1, 1) == "#" { next }
+        {
             match($0, /^[[:space:]]*/)
-            drop_indent = RLENGTH
-            dropping = 1
-            next
+            indent = RLENGTH
+            rest = substr($0, indent + 1)
+            colon = index(rest, ":")
+            if (colon > 1 && (substr(rest, 1, colon - 1) in remove)) {
+                drop_indent = indent
+                dropping = 1
+                next
+            }
+            print
         }
-        { print }
     '
 }
 
@@ -411,6 +483,8 @@ cmd_fetch() {
 
     ensure_dirs
     refresh_index
+    load_filter_rule
+    check_cache_stamp
 
     # 1. Try direct key lookup first
     local path=$(lookup_key "$input")
