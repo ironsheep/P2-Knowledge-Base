@@ -115,7 +115,8 @@ def to_camel_case(name: str) -> str:
 # any form. A symbolic token cannot reach the index the other way either: the
 # per-file key is derived from the path, so op_addlteqgt.yaml becomes
 # p2kbSpin2OpOpAddlteqgt and the token `+<=>` survives nowhere. `p2kb_find("+//")`
-# matched nothing and fell back to dumping all 59 categories.
+# matched nothing and fell back to dumping all 59 categories. (Record of 2026-09-05:
+# `+<=>` was later found to be no Spin2 operator and its file deleted -- F-547.)
 #
 # Punctuation is safe on both sides and this was verified before the change, not
 # assumed: the table already held 161 punctuated keys and the resolver returned
@@ -125,7 +126,7 @@ def to_camel_case(name: str) -> str:
 # values between them, so it yields collisions rather than lookups.
 NAME_FIELDS = (
     # symbolic — the tokens an agent actually reads in Spin2 source
-    'operator',        # 75 files: + +/ +// <=> +<=> #> <# ... and word-forms (ADDBITS)
+    'operator',        # 74 files: + +/ +// <=> #> <# ... and word-forms (ADDBITS)
     'symbol',          # 13 files: $ $$ @ @@ ^@ % . .. ` _
     'directive',       # 37 files: #DEFINE #IFDEF #PRAGMA EXPORTDEF ...
     # word-named things that simply were not being read
