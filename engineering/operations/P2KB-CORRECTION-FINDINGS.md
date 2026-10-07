@@ -77,7 +77,19 @@ and the Silicon Doc (`silicon-doc-text.txt:4860-4868`):
   `boot-pattern-selection.yaml` already quotes the correct form).
 - `prop_txt.syntax` "Prop_Txt ~" — documented `> Prop_Txt 0 0 0 0 <base64> ~ | ?` (:1716, :1722);
   its `efficiency` figures need checking against :1702-1725.
-**Fix:** re-derive `protocol_commands` from HW Manual :1625-1725, every field quoted or cited.
+
+**Widened on reading the whole file (same day):** only `boot_sequence` (:11-34) carries a source.
+Everything from `auto_baud_detection` to `performance` is uncited, and much of it contradicts the
+manual: `response_codes`/`error_handling` give `?` as the error reply (the loader answers `!` for
+a bad checksum; `?` and `~` are terminators the *sender* sends, :1666-1667); `'> '` is called the
+loader's ready prompt (it is the sender's auto-baud sequence, :1645); auto-baud "measures bit
+timing from CR"; `validation_format` describes a `'Prop'` header at offset 0 with a length field
+(the documented scheme is a checksum-complement long placed anywhere long-aligned, :1688-1699);
+`programming_examples` repeats the `Prop_Ver Au` and invented `Prop_Clk 2 16 1` forms;
+`multi_chip_support` omits that P0/P1 cannot be matched (:1623); `security_considerations`
+"disable_option: Don't pull up P61" and the `performance` figures have no source.
+**Fix (M-L):** per `.claude/skills/SOURCE-REPAIR-ORDER.md` — remove the uncited blocks and
+re-derive from HW Manual :1580-1725 (+ Silicon Doc :4860 ff.), every field quoted or cited.
 
 ### F-549 — `pinstart.yaml`'s HUB75 and sensor-array examples carry invented `source:` labels, and the HUB75 one contradicts the board's pinout — `CONFIRMED`
 Found 2026-10-07 fixing F-543 in the same file. `examples[4]` (`source: hub75_driver`) and `examples[5]`
