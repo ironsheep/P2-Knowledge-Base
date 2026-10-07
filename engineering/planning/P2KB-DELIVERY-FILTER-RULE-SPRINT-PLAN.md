@@ -1,6 +1,6 @@
 # P2KB Delivery-Filter Rule — sprint plan
 
-**Head:** `yaml:p2kb` · **Written:** 2026-10-07 · **Status:** PLANNING — open questions in §0
+**Head:** `yaml:p2kb` · **Written:** 2026-10-07 · **Status:** READY — all §0 questions resolved; awaiting the MCP agent's review (§1)
 **Closes:** F-439 (the MCP serves provenance) · **Interface:**
 `engineering/tools/p2kb-mcp/MCP-DELIVERY-FILTER-HANDOFF.md` (the agreement with the MCP agent)
 
@@ -33,12 +33,12 @@ Asked one at a time; each carries a recommendation.
    fallbacks in this sprint and gate them.
 2. **RESOLVED 2026-10-07 — no open punch-list / register item joins this sprint** (§0.1 list
    presented; Stephen: "none"). F-552 stays in «#387» and must be fixed before §9's KB release.
-3. **How is the PowerShell engine verified?** No `pwsh` in this container; the current parity gate
-   only checks that field names appear in the `.ps1` text. **Recommendation:** install PowerShell in
-   the devcontainer image (`.devcontainer/Dockerfile`, the same place the PDF tools are baked in) so
-   the §5 gates run the `.ps1` engine and reader exactly as they run bash. *(Alternative: Stephen
-   runs a supplied `.ps1` check on a Windows/macOS host each release — a manual step a gate cannot
-   enforce.)*
+3. **RESOLVED 2026-10-07 — PowerShell is verified once, by Stephen, and again only if the `.ps1`
+   changes.** Stephen: the scripts run only on Windows (his Windows emulator on macOS) — *"let's do
+   as little of this as possible."* The design makes that enough: the engine is fixed and the rule
+   comes from the index, so a rule change needs no Windows run. Mechanism (§5b): one supplied check
+   script, run once this sprint; the release gate pins the hashes of the two `.ps1` files to the last
+   recorded Windows pass and fails if either changes without a new one.
 
 ### 0.1 Open items presented with the scope (unfiltered)
 
@@ -158,13 +158,25 @@ independent second implementation; `_apply_shipped_filter` (`:478`) runs the bas
 - New check (no-`jq` fallback parity, §3a): with `jq` off `PATH`, the bash fallbacks resolve
   **every** key and alias of the generated index exactly as `json.load` does. A generator layout
   change that breaks the fallbacks fails the release.
-- The PowerShell engine cannot run in this container (no `pwsh` — measured 2026-10-07); how it is
-  verified is §0 Q3.
+- The PowerShell engine cannot run in this container (no `pwsh` — measured 2026-10-07); see §5b.
 - `validate_fetch_script_parity` checks the scripts' **built-in** fallback rules equal the index rule,
   not that field names appear in their text.
 **Verify:** normal — all filter gates green on HEAD except the known F-552 scan; edge — a doctored
 index rule changes what every gate expects (proves nothing reads a copy); error — an index with no
 block fails the release (agreement §8.1).
+
+## 5b. PowerShell — one Windows run, then a hash pin
+
+**Why:** §0 Q3. **Target:** a single `.ps1` check (`engineering/tools/p2kb/verify-ps1-filter.ps1`)
+that Stephen runs once on Windows. It needs no network: it reads the golden vectors and a small
+local index fixture (rule present / absent / `format: 2`), runs `Filter-Metadata` and the rule
+reader, and prints one PASS/FAIL line plus the two `.ps1` file hashes. The result is recorded in
+`engineering/tools/p2kb/PS1-VERIFIED.md` (date, hashes, PASS). The release gate then fails if
+either `.ps1` file's hash differs from the recorded pass — so Stephen runs it again only when a
+`.ps1` actually changes, never for a rule change.
+**Verify:** normal — Stephen's run prints PASS and the hashes are recorded; edge — editing either
+`.ps1` makes the gate fail until re-run; error — a FAIL line names the vector or fixture that
+differed.
 
 ## 6. Golden vectors
 
@@ -251,4 +263,4 @@ Doc-audit instrument output: §0.1 (2 findings, outside this sprint's surfaces).
    absorbs it as a dated revision. Whether the server's `P2KB_BASE_URL` covers manifests (§11.1) —
    if not, the bundle adds what it needs.
 
-Questions remaining: §0 Q3 (Q1, Q1a, Q2 resolved 2026-10-07).
+Questions remaining: none (Q1, Q1a, Q2, Q3 resolved 2026-10-07).
