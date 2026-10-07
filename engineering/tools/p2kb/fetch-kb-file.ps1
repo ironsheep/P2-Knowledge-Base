@@ -155,7 +155,7 @@ function Refresh-Index {
             Move-Item -Path $tempJson -Destination $IndexFile -Force
             Remove-Item -Path $tempGz -Force -ErrorAction SilentlyContinue
 
-            $index = Get-Content $IndexFile | ConvertFrom-Json
+            $index = Get-Content $IndexFile -Raw -Encoding UTF8 | ConvertFrom-Json
             Write-Log "Index updated: $($index.system.total_entries) entries"
         } catch {
             Write-Error-Message "Failed to download index: $_"
@@ -168,7 +168,9 @@ function Get-Index {
     if (-not (Test-Path $IndexFile)) {
         Refresh-Index
     }
-    return Get-Content $IndexFile -Raw | ConvertFrom-Json
+    # -Encoding UTF8: Windows PowerShell 5.1 otherwise decodes as ANSI and garbles
+    # non-ASCII alias names (the index holds em dashes).
+    return Get-Content $IndexFile -Raw -Encoding UTF8 | ConvertFrom-Json
 }
 
 function Lookup-Key {
@@ -218,51 +220,120 @@ function Find-SimilarKeys {
     return $similar
 }
 
-# Filter metadata from YAML content.
+# =============================================================================
+# Delivery filter -- removes PROVENANCE from every YAML before it is cached or shown
+# =============================================================================
 #
-# INDENTATION-AWARE, not line-based. Dropping only the field's own line leaves a
-# block scalar's continuation lines behind, and they parse as garbage: 141 of the
-# KB's `source:` values are written `source: >-`. So: drop the matched line, then
-# drop every following line indented deeper than it, plus blank lines inside that
-# span. Must stay behaviourally identical to fetch-kb-file.sh -- validate-dod-release.py
-# blocks the release if the two scripts' field sets differ.
+# WHAT IS REMOVED AND WHY: provenance is how this project knows a claim is true
+# (source:/sources: fields, bench-ledger ids, repo paths). Its readers are the KB's
+# release gates and auditors; a consuming agent can act on none of it.
 #
-# WHAT IS STRIPPED AND WHY: everything here is PROVENANCE -- how we know a claim
-# is true. Its readers are this project's release gates and whoever audits a claim
-# later; a consuming agent can act on none of it. It stays in the repo and is
-# removed on the way out. Public document citations are stripped too: an agent
-# cannot open the Silicon Doc either.
+# THE RULE IS PUBLISHED, NOT HELD HERE. The index carries it as `delivery_filter`
+# (written by generate-p2kb-index.py, the single source); this script carries only
+# the fixed engine -- the same engine as fetch-kb-file.sh and the p2kb-mcp server.
+# Contract: engineering/tools/p2kb-mcp/MCP-DELIVERY-FILTER-HANDOFF.md §3-§6 (format 1).
+# When the index has no usable block, the built-in rule below (the agreement's §3
+# block exactly) is used -- quietly.
+
+$FilterEngineVersion = "3.5"   # bump whenever Filter-Metadata or Get-FilterRule changes
+
+function Get-BuiltinFilterRule {
+    # BEGIN BUILTIN-RULE (validate-dod-release.py compares this list with the index rule)
+    $fields = @("documentation_level", "documentation_source", "enhancement_source", "last_updated", "manual_extraction_date", "source", "source_reference", "sources", "verified_against")
+    # END BUILTIN-RULE
+    return @{ Fields = $fields; Column0 = $true; Source = "built-in" }
+}
+
+# The rule from the index, only if it is a valid format-1 block: exactly three keys,
+# format 1, a boolean flag, a non-empty array of unique literal names.
+function Get-FilterRule {
+    $builtin = Get-BuiltinFilterRule
+    if (-not (Test-Path $IndexFile)) { return $builtin }
+    try {
+        $index = Get-Content $IndexFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    } catch {
+        return $builtin
+    }
+    $r = $index.delivery_filter
+    if ($null -eq $r) { return $builtin }
+    $keys = @($r.PSObject.Properties.Name | Sort-Object)
+    if (($keys -join ",") -cne "format,remove_column0_comments,remove_fields") { return $builtin }
+    if (-not (($r.format -is [int]) -or ($r.format -is [long])) -or $r.format -ne 1) { return $builtin }
+    if (-not ($r.remove_column0_comments -is [bool])) { return $builtin }
+    if (-not ($r.remove_fields -is [array]) -or $r.remove_fields.Count -eq 0) { return $builtin }
+    $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+    foreach ($f in $r.remove_fields) {
+        if (-not ($f -is [string]) -or $f -cnotmatch '^[A-Za-z0-9_]+$') { return $builtin }
+        if (-not $seen.Add($f)) { return $builtin }
+    }
+    return @{ Fields = [string[]]$r.remove_fields; Column0 = [bool]$r.remove_column0_comments; Source = "index" }
+}
+
+# rule_id per the agreement §3.1 -- the same value every receiver computes.
+function Get-FilterRuleId {
+    param($Rule)
+    $flag = if ($Rule.Column0) { "true" } else { "false" }
+    $text = "p2kb-delivery-filter`nformat=1`nremove_fields=$($Rule.Fields -join ',')`nremove_column0_comments=$flag`n"
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $hash = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($text))
+    return -join ($hash | ForEach-Object { $_.ToString("x2") })
+}
+
+# Cached bodies were filtered under one rule and one engine. If either changed --
+# or the cache carries no stamp (an older script filled it) -- they go.
+function Sync-CacheStamp {
+    param($Rule)
+    $stampFile = Join-Path $CacheDir ".filter-stamp"
+    $want = "$(Get-FilterRuleId $Rule)/$FilterEngineVersion"
+    $have = if (Test-Path $stampFile) { (Get-Content $stampFile -Raw).Trim() } else { $null }
+    if ($have -cne $want) {
+        Write-Log "Delivery filter changed (or cache unstamped) -- clearing cached bodies"
+        Get-ChildItem -Path $CacheDir -Filter "*.yaml" -ErrorAction SilentlyContinue | Remove-Item -Force
+        [System.IO.File]::WriteAllText($stampFile, "$want`n")
+    }
+}
+
+# The format-1 engine (agreement §4). A LINE rule, indentation-aware:
+#   1. Inside a removed field's span: blank lines and comment-only lines are removed
+#      and do NOT end the span (YAML ignores comments); deeper lines are removed;
+#      any other line ends the span and is tested below.
+#   2. A column-0 `#` line is removed when the rule says so.
+#   3. A line whose text after leading whitespace is a listed name immediately
+#      followed by `:` is removed and opens a span at its indent.
+# Not a YAML-aware delete: `- source:` and `{source: ...}` are content and stay.
+# Empty input gives empty output; every kept line is followed by "`n".
 function Filter-Metadata {
-    param([string]$Content)
-    $lines = $Content -split "`n"
-    $out = New-Object System.Collections.Generic.List[string]
+    param([string]$Content, $Rule = $null)
+    if ($null -eq $Rule) { $Rule = Get-BuiltinFilterRule }
+    if ($Content.Length -eq 0) { return "" }
+    $remove = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+    foreach ($f in $Rule.Fields) { [void]$remove.Add($f) }
+    $ws = [char[]]@([char]32, [char]9, [char]10, [char]11, [char]12, [char]13)   # POSIX [[:space:]]
+    $lines = $Content.Split([char]10)
+    if ($Content.EndsWith("`n")) { $lines = $lines[0..($lines.Count - 2)] }
+    $sb = New-Object System.Text.StringBuilder
     $dropping = $false
     $dropIndent = 0
-    $commentDrop = $false
     foreach ($line in $lines) {
         if ($dropping) {
-            if ($line -match '^\s*$') { continue }
-            $indent = ($line -replace '^(\s*).*$', '$1').Length
-            if ($indent -gt $dropIndent) { continue }
-            $dropping = $false
+            $body = $line.TrimStart($ws)
+            if ($body.Length -eq 0 -or $body[0] -eq [char]'#') { continue }   # span continues
+            if (($line.Length - $body.Length) -gt $dropIndent) { continue }   # deeper: still the field
+            $dropping = $false                                                # span ended
         }
-        # Provenance carried as a COMMENT -- same thing by another spelling.
-        if ($line -match '^#\s*(Source|Sources|Extracted from|Verified against)') {
-            $commentDrop = $true
-            continue
-        }
-        if ($commentDrop) {
-            if ($line -match '^#\s+') { continue }   # indented continuation comment
-            $commentDrop = $false
-        }
-        if ($line -match '^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date|source|sources|source_reference|verified_against):') {
-            $dropIndent = ($line -replace '^(\s*).*$', '$1').Length
+        if ($Rule.Column0 -and $line.Length -gt 0 -and $line[0] -eq [char]'#') { continue }
+        $rest = $line.TrimStart($ws)
+        $indent = $line.Length - $rest.Length
+        $colon = $rest.IndexOf([char]':')
+        if ($colon -gt 0 -and $remove.Contains($rest.Substring(0, $colon))) {
+            $dropIndent = $indent
             $dropping = $true
             continue
         }
-        $out.Add($line)
+        [void]$sb.Append($line)
+        [void]$sb.Append("`n")
     }
-    return ($out -join "`n")
+    return $sb.ToString()
 }
 
 # =============================================================================
@@ -404,7 +475,7 @@ function Fetch-SingleKey {
         Write-Log "Fetching: $BaseUrl/$path"
         try {
             $content = Invoke-WebRequest -Uri "$BaseUrl/$path" -UseBasicParsing | Select-Object -ExpandProperty Content
-            $filtered = Filter-Metadata -Content $content
+            $filtered = Filter-Metadata -Content $content -Rule $script:FilterRule
             $filtered | Out-File -FilePath $cacheFile -Encoding UTF8 -NoNewline
             Write-Log "Cached to: $cacheFile"
         } catch {
@@ -425,6 +496,9 @@ function Invoke-Fetch {
 
     Ensure-Directories
     Refresh-Index
+    $script:FilterRule = Get-FilterRule
+    Write-Log "Delivery filter: rule from $($script:FilterRule.Source)"
+    Sync-CacheStamp $script:FilterRule
 
     # 1. Try direct key lookup first
     $path = Lookup-Key -KeyName $Input

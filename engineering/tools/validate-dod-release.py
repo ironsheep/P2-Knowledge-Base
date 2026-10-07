@@ -1035,6 +1035,14 @@ def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
             result.ok(f"bash built-in rule equals the index rule ({len(builtin)} fields, column-0 comments)")
         else:
             result.fail(f"bash built-in rule {builtin} differs from the index rule {rule['remove_fields']}")
+        # PowerShell cannot run here; its built-in list sits between fixed markers.
+        block = re.search(r'# BEGIN BUILTIN-RULE(.*?)# END BUILTIN-RULE', ps_content, re.S)
+        ps_builtin = re.findall(r'"([^"]+)"', block.group(1)) if block else []
+        ps_col0 = bool(re.search(r'Column0 = \$true', ps_content))
+        if ps_builtin == rule['remove_fields'] and ps_col0 and rule['remove_column0_comments'] is True:
+            result.ok(f"PowerShell built-in rule equals the index rule ({len(ps_builtin)} fields)")
+        else:
+            result.fail(f"PowerShell built-in rule {ps_builtin} differs from the index rule")
 
     # Check same base URL
     if 'ironsheep/P2-Knowledge-Base' in bash_content and \
@@ -1157,6 +1165,37 @@ def validate_nojq_lookup(verbose: bool = False) -> ValidationResult:
     return result
 
 
+PS1_RECORD = Path("engineering/tools/p2kb/PS1-VERIFIED.md")
+PS1_SCRIPTS = [Path("engineering/tools/p2kb/fetch-kb-file.ps1"),
+               Path("engineering/tools/p2kb/refresh-kb.ps1")]
+
+
+def validate_ps1_verified(verbose: bool = False) -> ValidationResult:
+    """The PowerShell scripts as they stand were verified on Windows.
+
+    They cannot run in this container (Stephen, 2026-10-07: one Windows run, as little
+    as possible). verify-ps1-filter.ps1 prints each script's SHA-256 over its
+    LF-normalized content; PS1-VERIFIED.md records them with the result. A .ps1 edited
+    since its recorded PASS fails here until the check is run again. A rule change does
+    not -- the rule comes from the index.
+    """
+    result = ValidationResult("PowerShell Filter Verified")
+    record = PS1_RECORD.read_text() if PS1_RECORD.exists() else ""
+    if not re.search(r'^result: PASS\s*$', record, re.M):
+        result.fail(f"{PS1_RECORD} records no PASS -- run verify-ps1-filter.ps1 on Windows and record it")
+    for script in PS1_SCRIPTS:
+        actual = hashlib.sha256(script.read_bytes().replace(b'\r\n', b'\n')).hexdigest()
+        m = re.search(rf'^{re.escape(script.name)}: ([0-9a-f]{{64}})\s*$', record, re.M)
+        if not m:
+            result.fail(f"{script.name}: no verified hash recorded (current {actual})")
+        elif m.group(1) != actual:
+            result.fail(f"{script.name} changed since its Windows verification "
+                        f"(recorded {m.group(1)[:12]}..., now {actual[:12]}...) -- re-run the check")
+        else:
+            result.ok(f"{script.name} is the version verified on Windows")
+    return result
+
+
 def run_all_validations(verbose: bool = False, incremental: bool = False) -> bool:
     """Run all validations and return overall pass/fail."""
     history = load_validation_history()
@@ -1220,6 +1259,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_fetch_script_parity,
         validate_filter_rule_readback,
         validate_nojq_lookup,
+        validate_ps1_verified,
     ]
 
     all_passed = True

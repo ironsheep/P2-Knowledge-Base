@@ -335,3 +335,9 @@ engineering/planning/yaml-audit-report.yaml
 
 # fetch-kb-file.sh writes its downloaded index + cache here; regenerable, never committed
 engineering/tools/p2kb/.p2kb/
+
+# Delivery-filter certification bundle for the p2kb-mcp agent -- built by
+# build-filter-cert-bundle.py, copied across by hand, never committed (Stephen, 2026-10-07)
+engineering/tools/p2kb-mcp/cert-bundle/
+# The PowerShell check folder copied to Windows -- built by build-ps1-check-folder.sh
+engineering/tools/p2kb/ps1-check/
