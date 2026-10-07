@@ -99,23 +99,31 @@ examples:
     description: "Configure sensor array pins"
     source: sensor_array
   - code: |
-      ' Flash FS SPI pin configuration
+      ' Smart-pin SPI (mode 0) on the P2 boot flash pins
       CON
-        SPI_CLK = 56
-        SPI_MOSI = 57
-        SPI_MISO = 58
-        SPI_CS = 59
-        
-      PUB setup_spi()
-        ' Configure SPI pins as group
-        PINSTART(SPI_CLK ADDPINS 3, P_HIGH_FAST | P_OE, 0, 0)
-        
-        ' Then set specific modes
-        PINSTART(SPI_CLK, P_TRANSITION | P_OE, 1, 0)
-        PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)
-        PINSTART(SPI_MISO, P_SYNC_RX, SPI_CLK<<24 | 8, 0)
-    description: "Configure SPI pins for flash filesystem"
-    source: P2-FLASH-FS
+        SF_SCK = 60                   ' clock out
+        SF_SDO = 59                   ' data out (to flash DI)
+        SF_SDI = 58                   ' data in (from flash DO)
+
+      PUB setup_spi(khz) | x
+        ' data out: sync TX, B input = SCK (pin+1); X = start-stop, 8 bits
+        PINSTART(SF_SDO, P_OE | P_SYNC_TX | P_PLUS1_B, %1_00111, 0)
+        PINF(SF_SDO)                  ' hold in reset until a transfer
+        ' data in: sync RX, B input = SCK (pin+2); X = sample before edge, 8 bits
+        PINSTART(SF_SDI, P_SYNC_RX | P_PLUS2_B, %0_00111, 0)
+        PINF(SF_SDI)
+        ' clock: pulse output; X.word[0] = ticks per period, X.word[1] = ticks low
+        x.word[0] := 2 #> (clkfreq / (khz * 1000)) <# $FFFF
+        x.word[1] := x.word[0] >> 1
+        PINSTART(SF_SCK, P_OE | P_PULSE, x, 0)
+    description: >-
+      Configure smart-pin SPI: the data pins clock from SCK through the mode word's
+      B-input selector (a relative pin offset), not through X; X carries only the
+      sync-serial mode bit and the word size minus 1.
+    source: >-
+      Pattern of jm_ez_spi.spin2 start() (OBEX 2841, Jon McPhalen); X and B-input
+      encodings per P2 Documentation, silicon-doc-text.txt %11100/%11101 and %00100
+      sections; P_PLUS1_B/P_PLUS2_B per spin2-v55-text.txt:1438-1439.
 pin_field_operators:
   ADDPINS:
     syntax: "base_pin ADDPINS count"
