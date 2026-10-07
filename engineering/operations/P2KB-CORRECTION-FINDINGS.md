@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-553`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-560`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -62,6 +62,84 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 ## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-552
+
+### F-559 — the DEBUG guide calls 15,872 bytes the DEBUG-data budget; the debugger's own layout overruns at 10,752 — `CONFIRMED` (needs Stephen: it bears on the VO-J-027 strike)
+Found 2026-10-07 by the pre-release audit of F-383 / the VO-J-027 strike. The debugger pnut-ts
+embeds (byte-identical to `external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2`
+apart from patched config bytes) copies DEBUG data to `dat_addr = $FC000` (`:7`); its register
+buffer starts at `sav_addr = $FEA00` (`:8`, 10,752 bytes later) and the debugger itself at
+`dbg_addr = $FF1A0` (`:9`, 12,704 later). pnut-ts 1.55.8 accepts 15,872 bytes of DEBUG data
+(listing "15_872 of 15872"; copy length word 16,002 = data + 2 + 2×records). So a build between
+~10.7 KB and the compile cap compiles clean and overruns the debugger's memory at load — a fixed
+layout, not a soft threshold; VO-J-027's field figures (5,783 / ~10,400 fine; 13,023 / ~14,900
+mute) straddle it. `debug-strategy-guide.yaml` presents 15,872 as the budget and d8a70660 removed
+the runtime-mute claim. Also left contradictory in that file by the F-383 rewrite: `:38` area
+still calls a cap "silent"; `:26` "every debug() consumes a record slot"; "non-overlapping
+remedies" vs the DAT+`zstr_` fix that cuts both; `:128`/`:415-419` "don't rely on dedup" vs
+`over_on_records`; the records-side "merge statements" fix dropped although merging cuts records
+(2→1, measured). Corroborating, not authority: SingleStep-Debugger ToO `:1191` (PNut checks
+`$2A00` = 10,752). **Decision owed:** whether the KB states the layout limit (and VO-J-027 is
+reinstated as a bench confirmation), given the 2026-10-07 strike ruling.
+
+### F-558 — F-387's P1→Spin2 table: `||` in the wrong tier, `>|`→`ENCOD` off by one, two rows lose P1 behaviour — `CONFIRMED`
+Found 2026-10-07 by the pre-release audit of F-387 (`concepts/operators.yaml` `changed_from_p1`).
+(1) `||` (P1 unary abs) is listed under `compiles_with_a_different_meaning`, but `r := ||a`
+fails to compile (m172) — it belongs in `fails_to_compile`. (2) P1 `>|` returns highest set bit
+**plus 1** (P1 Manual `:5576-5587`: `%1000_0000` → 8); `ENCOD $80` = 7 (compiled) — the
+spelling is `ENCOD x + 1` for x≠0, 0 for x=0. (3) `?x / x?` → `??x` loses that P1 random is
+reversible (P1 `:5522-5535`) and `x?` has no Spin2 equivalent. (4) `~x / ~~x` are P1 assignment
+operators (`:4950`, `:5463`) — the Spin2 equivalent writes back (`SIGNX=`, v55 `:450`). (5) The
+`>=` assignment form has no spelling given. Related leftovers: the derived
+`spin2-v51/complete-spin2-operators.md` correction blockquote (F-547) breaks the table under GFM
+and cites `:471` (ADDPINS) instead of `:472`; `generate-p2kb-index.py:113-117,128` comments and
+`validation/baselines/yaml-source-lock.json:861` still name `+<=>` / `op_addlteqgt.yaml`.
+
+### F-557 — `pasm2-getting-started.yaml` (F-542): four facts incomplete against a primary source; 36 "(order N)" row locators ship — `CONFIRMED`
+Found 2026-10-07 by the pre-release audit of F-542. (1) GETCT "GETCT WC then GETCT gets the full
+64-bit CT" omits EF-068 (a group of four cogs with no running cog at a low-long wrap returns a
+stale upper long). (2) Bare ORGH "hub origin $00400" is the Spin2+PASM case only; v55 `:327`:
+PASM-only, bare ORGH sets hub-exec at the current hub address. (3) "`##` prefixes an AUGS" —
+Silicon Doc `:5571-5572`: AUGS/AUGD (the guide's own `WAITX ##` uses AUGD). (4) RDLONG/WRLONG
+timing drops the CSV's "+1 if crosses hub long" and 8-cog qualifiers. (5) 36 "(order N)"
+spreadsheet row numbers sit in shipped descriptions — an internal locator the Internal-IDs
+payload scan does not pattern-match (a gate gap). Also: `critical_gotchas` changed from a list to
+`{source, items}`, so readers now get `{items: [...]}` unlike the sibling Spin2 guide.
+
+### F-556 — "2x 74HCT244" ships with no primary source (HUB75 adapter) — `CONFIRMED`
+Found 2026-10-07 by the pre-release audit of F-354. The part number appears only in this
+project's own `p2-addon-board-circuit-knowledge.md:363,391`; `p2-hub75-adapter-official-specs.md:22`
+(cited) says only "limited by level shifter ICs". Ships in `hardware/hub75_adapter.yaml` (twice)
+and `hardware/hardware-compatibility-matrix.yaml`. The schematic PDF is not ingested. Also
+`hub75_adapter.yaml:159` names `driver_file: isp_hub75_matrix.spin2`, which is in neither OBEX
+2850 nor the project copy.
+
+### F-555 — `boot-rom-contents.yaml` calls `ROM_Booter.lst` "an FPGA build of the same source"; it is an earlier revision — `CONFIRMED`
+Found 2026-10-07 by the pre-release audit of F-421. `rom_booter_v33_01j.lst:87-93` carries
+2019 revisions (v33_01a…j) that `ROM_Booter.lst` lacks (its history ends at v141, 2018-05-27,
+`:84-85`); TAQOZ builds differ. "FPGA" is unproven (`_clockfpga` is defined, never used). The
+F-421 register text ("neither is a newer revision") is wrong the same way. The re-citation to the
+silicon listing itself is right.
+
+### F-554 — F-386 left the false "WYPIN after enable is safe for all modes" rule in three files; one wrong locator — `CONFIRMED`
+Found 2026-10-07 by the pre-release audit of F-386. Still shipped: `architecture/smart_pins.yaml:589`
+("safe for all"), `smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml:74` ("correct for
+EVERY mode"), `language/pasm2/wrpin.yaml:73` ("safe for all other modes") — EF-090 contradicts it
+for %11100. `smart_pins.yaml:107` cites `silicon-doc-text.txt:3852` (blank) for "configure while
+DIR is low" — the sentence is `:3854`. The async-TX cause "they hold Y at 0 during reset" is EF-011's
+interpretation, not a documented or measured fact (Silicon Doc `:4714` says output held high).
+Ledger: EF-019's heading still reads CONFIRMED for prime-after-enable on %11100 with no pointer to
+EF-090. Register/VO-J-028 say "ten mode pages" for a list of nine.
+
+### F-553 — `pinstart.yaml` `production_patterns` keeps the invented labels F-543/F-549 removed from the examples — `CONFIRMED`
+Found 2026-10-07 by the pre-release fact audit of F-543/F-549. `production_patterns`
+(`language/spin2/methods/pinstart.yaml`, after the P_OE note) was untouched by both fixes and
+still carries `hub75_panel` → `source: hub75_driver` (names no document — the same invented
+label F-549 removed from the examples) and `flash_filesystem` → `source: P2-FLASH-FS` with
+"Configure pins as group first / Then specialize each pin's mode" — the attribution F-543
+showed false: `flash_fs.spin2` (OBEX 4261) never calls PINSTART (grep: 0 hits). F-549's
+applied-note says it was widened to every example in the file; this block was missed.
+**Fix:** per `SOURCE-REPAIR-ORDER.md` — remove both patterns (they cite nothing real); re-add
+only what a primary source states. Sacred Rule #7: the block holds no `related:` paths.
 
 ### F-552 — F-387's P1→Spin2 operator tables ship line citations in content; the release gate fails — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
 > **Applied 2026-10-07.** `concepts/operators.yaml` `changed_from_p1`: all 32 row cites
