@@ -1,0 +1,56 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/idioms/memory-access.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "b550f8c02241cd10"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[0].examples[1]
+    fp: "3d508ef1c65b7bf9"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[0].examples[2]
+    fp: "75572a1cc40372c1"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[1].examples[0]
+    fp: "838d70ee98358f91"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[1].examples[1]
+    fp: "9af5befef7e7a70c"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[1].examples[2]
+    fp: "3f1acaef437045fd"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[2].examples[0]
+    fp: "f1225104f330be73"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[2].examples[1]
+    fp: "dcd2ed495c7f7168"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[2].examples[2]
+    fp: "280ee7ce5b4ca7bb"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[3].examples[0]
+    fp: "72e9988400c9aaf0"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[3].examples[1]
+    fp: "9770ebbcaee73915"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[4].examples[0]
+    fp: "9cdc8cb233477286"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
+  - at: idioms[4].examples[1]
+    fp: "c87a368fa2e509fe"
+    compile: not-code
+    reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"

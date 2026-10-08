@@ -1,0 +1,730 @@
+[
+ {
+  "slug": "cog-label-unaligned-after-byte-data",
+  "finding": "S-PENDING-cog-label-unaligned-after-byte-data",
+  "statement": "blocks.yaml's DAT syntax example keeps `message BYTE \"Hello, P2!\", 0` (11 bytes) and then the label `sine_table` with WORD data inside the same `ORG 0` (cog-mode) region. In a cog-mode region every label is a cog register address and must be long-aligned; after 11 bytes it is not.",
+  "compiler_error": "Cog symbol must be long-aligned (at `sine_table`, block line 20)",
+  "correct_source": "no source statement; the same block already puts ALIGNL before `mailbox` (block line 11) for exactly this reason",
+  "verified_fix": "`ALIGNL` before `sine_table` compiles (the whole block, scratch t/h_align); so does `ORGH` + `ALIGNL` before the shared data (t/h2_orgh)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/blocks.yaml",
+    "addr": "block_types[3].syntax",
+    "key_line": 150,
+    "gate_first_error": "block line 20 (YAML line 170): Cog symbol must be long-aligned",
+    "source_line_of_error": "sine_table",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "inline-if-colon-form",
+  "finding": "S-PENDING-inline-if-colon-form",
+  "statement": "`IF button_pressed() : counter++` ('inline_if', syntax `IF condition : single_statement`, 'Single-line conditional execution'). Spin2 has no one-line IF; the body goes on the following indented lines. The same page-set repeats the idea for CASE (`CASE x : 1: a(), 2: b(), OTHER: c()`, case.yaml:77 `inline_case`) -- also rejected (t/b_inlinecase).",
+  "compiler_error": "Expected end of line (m281) (at the `:` after the condition)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:731-748 (IF/IFNOT and CASE forms: the condition/match line, then indented code)",
+  "verified_fix": "`IF button_pressed()` followed by an indented `counter++` compiles (scratch t/b_inlineif_fix). NOT GATED (no candidate): if_elseif_else.yaml:61 `syntax: \"IF condition : single_statement\"` and case.yaml:76-78 `syntax: \"CASE x : 1: a(), 2: b(), OTHER: c()\"`",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/if_elseif_else.yaml",
+    "addr": "syntax_forms[3].example",
+    "key_line": 63,
+    "gate_first_error": "block line 1 (YAML line 64): Expected end of line (m281)",
+    "source_line_of_error": "IF button_pressed() : counter++",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "button_pressed()->1/0",
+     "counter"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "signed-comparison-operator-typo",
+  "finding": "S-PENDING-signed-comparison-operator-typo",
+  "statement": "`IF x <<=> y == 1  ' x > y` under special_comparisons, operator `<<=>` described as 'Signed comparison result (-1, 0, 1)'. There is no `<<=>` operator; the signed comparison operator is `<=>`.",
+  "compiler_error": "Expected an expression term (m172) (at the stray `<`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:488 (`<=>`, x <=> y, 'Signed comparison (<,=,> returns -1,0,1)'; the row is marked 'CON only' for its float behaviour, but `x <=> y` compiles in a method)",
+  "verified_fix": "`IF x <=> y == 1` compiles in a method (scratch t/n_cmp). The page's operator field (`operator: \"<<=>\"`, :141) has the same typo",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/if_elseif_else.yaml",
+    "addr": "condition_expressions.special_comparisons[0].example",
+    "key_line": 143,
+    "gate_first_error": "block line 1: Expected an expression term (m172)",
+    "source_line_of_error": "IF x <<=> y == 1  ' x > y",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "x",
+     "y"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "short-circuit-example-untyped-pointer",
+  "finding": "S-PENDING-short-circuit-example-untyped-pointer",
+  "statement": "`IF ptr AND ptr.value > 0   ' Won't access ptr.value if ptr is 0` is the page's only example of 'short_circuit_evaluation'. `ptr.value` is member access through a STRUCT-typed pointer (v45 pointers); the snippet declares no type, and on an ordinary long `ptr`, `.value` is not accepted. The behaviour the line exists to show (AND/OR stop evaluating) is itself unsourced -- see O6.",
+  "compiler_error": "Expected \"[\" (at `.value` on a plain long)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:37 (pointer variables: `VAR ^structname j`; 'Pointers have the same usage syntax as the variables they point to')",
+  "verified_fix": "`{Spin2_v45}` + `CON STRUCT s(value)` + `VAR ^s ptr`, then `IF ptr AND ptr.value > 0` compiles (scratch t/f_ptr). Legality only: whether the right operand is skipped is not shown by compiling",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/if_elseif_else.yaml",
+    "addr": "special_features[0].example",
+    "key_line": 189,
+    "gate_first_error": "block line 1 (YAML line 190): Expected \"[\"",
+    "source_line_of_error": "IF ptr AND ptr.value > 0   ' Won't access ptr.value if ptr is 0",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "ptr"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "end-closing-dat-org",
+  "finding": "S-PENDING-end-closing-dat-org",
+  "statement": "inline_pasm.yaml's `cog_code` and `hub_exec` forms close a DAT `ORG 0` / `ORGH` section with `END`. END terminates an IN-LINE `ORG`/`ORGH` inside a PUB/PRI; a DAT block has no END.",
+  "compiler_error": "Expected a unique name, BYTE, WORD, LONG, or assembly instruction (at the `END` line)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:785-787 (in-line PASM: 'terminating the PASM code with an END'); :311, :320 (the DAT ORG / ORGH examples carry no END)",
+  "verified_fix": "the same two blocks without the `END` line compile (scratch t/j_dat_end, t/l_orgend_dat)",
+  "class_kind": "defect",
+  "site_count": 2,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/inline_pasm.yaml",
+    "addr": "syntax_forms[1].syntax",
+    "key_line": 88,
+    "gate_first_error": "block line 6 (YAML line 94): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "END",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/inline_pasm.yaml",
+    "addr": "syntax_forms[2].syntax",
+    "key_line": 99,
+    "gate_first_error": "block line 5 (YAML line 104): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "END",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "var-address-in-inline-pasm",
+  "finding": "S-PENDING-var-address-in-inline-pasm",
+  "statement": "inline_pasm.yaml's `hub_variables` pattern ('Access VAR/DAT from PASM') writes `MOV PTRA, @shared_data` inside an inline `ORG`, where `shared_data` is a VAR long. Inline PASM resolves `@name` only against DAT symbols; a VAR variable's address cannot be taken inside the ORG..END.",
+  "compiler_error": "Expected a DAT symbol (at `@shared_data`, block line 6)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:311 (`@IncPins` is the hub address of a DAT symbol); :813 (inline PASM symbols are its own)",
+  "verified_fix": "`p := @shared_data` in Spin2 before the `ORG` (p a local), then `MOV PTRA, p` inside, compiles (scratch t/k_varaddr)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/inline_pasm.yaml",
+    "addr": "data_sharing_patterns[1].code",
+    "key_line": 203,
+    "gate_first_error": "block line 6 (YAML line 209): Expected a DAT symbol",
+    "source_line_of_error": "MOV   PTRA, @shared_data",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "invented-crc-instructions",
+  "finding": "S-PENDING-invented-crc-instructions",
+  "statement": "inline_pasm.yaml's `inline_optimization` checksum uses `SETCRC crc, #$04C11DB7` and `CRC PA, crc`. P2 has no SETCRC or CRC instruction. The P2 CRC instructions are CRCBIT and CRCNIB; a custom-polynomial CRC from Spin2 is GETCRC(BytePtr, Poly, Count). (The 32-bit polynomial would also not fit a single `#`.)",
+  "compiler_error": "Expected instruction, directive, BYTE/WORD/LONG, or END (at `SETCRC`, block line 8)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5116 (`CRCBIT D,S/#`), :1186-1189 (CRCNIB); engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:597 (GETCRC)",
+  "verified_fix": "a variant using `crcbit crc, ##$04C11DB7` in place of the two invented lines compiles (scratch t/f_crc). Legality only: the variant is not claimed to compute the CRC the page intends",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/inline_pasm.yaml",
+    "addr": "data_sharing_patterns[2].code",
+    "key_line": 217,
+    "gate_first_error": "block line 8 (YAML line 225): Expected instruction, directive, BYTE/WORD/LONG, or END",
+    "source_line_of_error": "SETCRC crc, #$04C11DB7",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "address-of-parameter-declaration",
+  "finding": "S-PENDING-address-of-parameter-declaration",
+  "statement": "method_definition.yaml's `array_parameters` declares `PUB clear_array(@array, size)   ' Pass array address`. A parameter list takes plain names (or ^BYTE/^WORD/^LONG/^StructName pointer types); `@` is not part of a declaration.",
+  "compiler_error": "Expected a unique parameter name (m220) (at `@array`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (`PUB|PRI MethodName({{^BYTE|^WORD|^LONG|^StructName} Parameter{, ...}})`)",
+  "verified_fix": "`PUB clear_array(array, size)` (the caller passes `@buf`) compiles with the rest of the block unchanged (scratch t/l_arrparam)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/method_definition.yaml",
+    "addr": "parameter_handling.array_parameters",
+    "key_line": 108,
+    "gate_first_error": "block line 1 (YAML line 109): Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB clear_array(@array, size)    ' Pass array address",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "method-chaining-self-reference",
+  "finding": "S-PENDING-method-chaining-self-reference",
+  "statement": "method_definition.yaml's `method_chaining` pattern returns 'self': `PUB set_x(value) : self` / `self := @this ' Return object reference`, used as `obj.set_x(10).set_y(20).draw()`. Spin2 has no `this`/self-reference symbol and no chained call on a method's result; `self` is only a result name.",
+  "compiler_error": "Expected a string, variable, method, or object (at `@this`, block line 3); the chained call `o.set_x(10).set_y(20)` fails with Expected end of line (m281) (scratch t/d_chain)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:233-236 (an object's methods are called as `object_name.method_name(...)`, one call per term)",
+  "verified_fix": "separate statements `o.set_x(10)` then `o.set_y(20)` compile (scratch t/e_chainfix). The decision records the block WITHOUT an assumed `this` (a stub for the very thing the page documents) so the gate stays red",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/method_definition.yaml",
+    "addr": "common_patterns[2].code",
+    "key_line": 244,
+    "gate_first_error": "block line 3 (YAML line 247): Expected a string, variable, method, or object",
+    "source_line_of_error": "self := @this    ' Return object reference",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "x"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "local-shadows-object-variable",
+  "finding": "S-PENDING-local-shadows-object-variable",
+  "statement": "method_definition.yaml's `variable_shadowing` pitfall: `VAR LONG count` and `PUB method() | count   ' Local 'count' shadows VAR 'count'` / `count := 10 ' Sets local, not VAR`. Spin2 does not shadow: a local with the name of a VAR (or CON, parameter...) of the same object is a duplicate-name error.",
+  "compiler_error": "Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m241) (at the local `count`)",
+  "correct_source": "compiler behaviour (names are unique per object, case-insensitive: the same fact as S-050 / S-071); no source line permits shadowing",
+  "verified_fix": "renaming the local (`| cnt2`) compiles (scratch t/h_shadow_fix)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/method_definition.yaml",
+    "addr": "pitfalls[1].example",
+    "key_line": 263,
+    "gate_first_error": "block line 4 (YAML line 267): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m241)",
+    "source_line_of_error": "PUB method() | count    ' Local 'count' shadows VAR 'count'",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "repeat-count-with-condition",
+  "finding": "S-PENDING-repeat-count-with-condition",
+  "statement": "repeat.yaml lists `REPEAT count WHILE condition` ('pre_test_while') and `REPEAT count UNTIL condition` ('pre_test_until') -- 'up to count times, while/until' -- and uses them in `REPEAT 1000 WHILE sensor < threshold`, `REPEAT timeout UNTIL data_ready()`, `REPEAT 1000 UNTIL IN(pin)`. Spin2 has no such forms; REPEAT takes a count, a count WITH a variable, FROM/TO/STEP, or WHILE/UNTIL (before or after the body).",
+  "compiler_error": "Expected a variable (m251) (for `REPEAT 1000 WHILE ...`, `REPEAT 1000 UNTIL ...`); Expected FROM (for `REPEAT timeout UNTIL ...`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:752-773 (the complete list of REPEAT forms)",
+  "verified_fix": "`REPEAT 1000` with an `IF NOT (sensor < threshold)` / `QUIT` inside compiles (scratch t/i_rep). NOT GATED (no candidate): repeat.yaml:50 and :57 `syntax: \"REPEAT count WHILE condition\"` / `\"REPEAT count UNTIL condition\"`",
+  "class_kind": "defect",
+  "site_count": 3,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/repeat.yaml",
+    "addr": "variants[4].example",
+    "key_line": 52,
+    "gate_first_error": "block line 1 (YAML line 53): Expected a variable (m251)",
+    "source_line_of_error": "REPEAT 1000 WHILE sensor < threshold",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "sensor",
+     "threshold",
+     "process_data()->0/0"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/repeat.yaml",
+    "addr": "variants[5].example",
+    "key_line": 59,
+    "gate_first_error": "block line 1 (YAML line 60): Expected FROM",
+    "source_line_of_error": "REPEAT timeout UNTIL data_ready()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "timeout",
+     "data_ready()->1/0"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/repeat.yaml",
+    "addr": "common_patterns[2].code",
+    "key_line": 197,
+    "gate_first_error": "block line 1 (YAML line 198): Expected a variable (m251)",
+    "source_line_of_error": "REPEAT 1000 UNTIL IN(pin)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "pin"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "nonexistent-in-method",
+  "finding": "S-PENDING-nonexistent-in-method",
+  "statement": "`REPEAT 1000 UNTIL IN(pin)` (repeat.yaml polling_loop) calls `IN(pin)`. Spin2 has no IN() method; reading a pin is PINREAD(pin).",
+  "compiler_error": "(masked by the REPEAT-form error on the same line; `IN(` alone is an undefined name)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:536 (`PINR | PINREAD (PinField) : PinStates`)",
+  "verified_fix": "`if pinread(pin)` / `quit` inside `REPEAT 1000` compiles (scratch t/b_pinread_in)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/repeat.yaml",
+    "addr": "common_patterns[2].code",
+    "key_line": 197,
+    "gate_first_error": "block line 1 (YAML line 198): Expected a variable (m251)",
+    "source_line_of_error": "REPEAT 1000 UNTIL IN(pin)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "pin"
+    ],
+    "role": "co-class: the block's gate error is attributed to repeat-count-with-condition (same line)"
+   }
+  ]
+ },
+ {
+  "slug": "method-without-result-used-as-value",
+  "finding": "S-PENDING-method-without-result-used-as-value",
+  "statement": "repeat.yaml's `delay_loop` pattern: `REPEAT WAITMS(1) * 1000    ' Wait 1 second`. WAITMS returns no value, so it cannot be multiplied; and the loop would not wait 1 second by any reading (the intent is `WAITMS(1000)`).",
+  "compiler_error": "Expression terms must return a single result",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:551 (`WAITMS(Milliseconds)`; no result)",
+  "verified_fix": "`WAITMS(1000)`, or `REPEAT 1000` with `WAITMS(1)` in the body, compiles (scratch t/k_wait)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/repeat.yaml",
+    "addr": "common_patterns[0].code",
+    "key_line": 186,
+    "gate_first_error": "block line 1 (YAML line 187): Expression terms must return a single result",
+    "source_line_of_error": "REPEAT WAITMS(1) * 1000    ' Wait 1 second",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "p1-cognew-call",
+  "finding": "S-PENDING-p1-cognew-call",
+  "statement": "cog-operations.yaml's `new_cog` idiom (`cognew(@driver, @params)`, `cognew(@pasm_code, @mailbox)`) is the Propeller 1 call. P2 starts PASM in a cog with COGINIT(COGEXEC_NEW, @code, @param) (the same page's init_cog idiom); COGNEW does not exist.",
+  "compiler_error": "Expected an instruction or variable (at `cognew`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:517 (`COGINIT(CogNum, PASMaddr, PTRAvalue)`), :1662 (`COGEXEC_NEW`)",
+  "verified_fix": "`coginit(COGEXEC_NEW, @driver, @params)` compiles (scratch t/d_cogvariant). The decisions record the block WITHOUT an assumed `cognew()` stub",
+  "class_kind": "defect",
+  "site_count": 2,
+  "sites": [
+   {
+    "file": "language/spin2/idioms/cog-operations.yaml",
+    "addr": "idioms[3].examples[0]",
+    "key_line": 41,
+    "gate_first_error": "block line 1: Expected an instruction or variable",
+    "source_line_of_error": "cognew(@driver, @params)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "driver",
+     "params"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/idioms/cog-operations.yaml",
+    "addr": "idioms[3].examples[1]",
+    "key_line": 42,
+    "gate_first_error": "block line 1: Expected an instruction or variable",
+    "source_line_of_error": "cognew(@pasm_code, @mailbox)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "pasm_code",
+     "mailbox"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "invented-pin-array-syntax",
+  "finding": "S-PENDING-invented-pin-array-syntax",
+  "statement": "pin-operations.yaml's `pin_range_access` and `pin_toggle` idioms: `pina[0..7]`, `pinl[8..15]`, `pinh[16..31]`, `pina[16] ^^`, `pinl[LED_PIN] ^^`. Spin2 has no pin-array variables `pina`/`pinl`/`pinh` and no `^^` post-toggle. PINL and PINH are the short names of the methods PINLOW and PINHIGH and take a PinField in parentheses.",
+  "compiler_error": "Expected \"]\" (m311) / Expected an instruction or variable (`pina[...]`); Expected \"(\" (`pinl[...]`, `pinh[...]`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:531-536 (PINW/PINL/PINH/PINT/PINR short names of PINWRITE/PINLOW/PINHIGH/PINTOGGLE/PINREAD, all `NAME(PinField...)`), :405 (`PINREAD(17..12)`, pin range Top..Bottom)",
+  "verified_fix": "`pinread(7..0)`, `pinlow(15..8)`, `pinhigh(31..16)`, `pintoggle(16)`, `pintoggle(LED_PIN)` compile (scratch t/a_pinvariants). The decisions record the blocks with no assumed `pina`/`pinl`/`pinh`",
+  "class_kind": "defect",
+  "site_count": 5,
+  "sites": [
+   {
+    "file": "language/spin2/idioms/pin-operations.yaml",
+    "addr": "idioms[4].examples[0]",
+    "key_line": 51,
+    "gate_first_error": "block line 1: Expected an instruction or variable",
+    "source_line_of_error": "pina[0..7]",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/idioms/pin-operations.yaml",
+    "addr": "idioms[4].examples[1]",
+    "key_line": 52,
+    "gate_first_error": "block line 1: Expected \"(\"",
+    "source_line_of_error": "pinl[8..15]",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/idioms/pin-operations.yaml",
+    "addr": "idioms[4].examples[2]",
+    "key_line": 53,
+    "gate_first_error": "block line 1: Expected \"(\"",
+    "source_line_of_error": "pinh[16..31]",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/idioms/pin-operations.yaml",
+    "addr": "idioms[5].examples[0]",
+    "key_line": 60,
+    "gate_first_error": "block line 1: Expected an instruction or variable",
+    "source_line_of_error": "pina[16] ^^",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/idioms/pin-operations.yaml",
+    "addr": "idioms[5].examples[1]",
+    "key_line": 61,
+    "gate_first_error": "block line 1: Expected \"(\"",
+    "source_line_of_error": "pinl[LED_PIN] ^^",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "LED_PIN=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "undefined-upper-helper",
+  "finding": "S-PENDING-undefined-upper-helper",
+  "statement": "case.yaml's `command_processor` pattern switches on `UPPER(command)`. UPPER is not a Spin2 built-in (v55 has no such method) and the page defines no helper by that name; written in capitals like a built-in it reads as one. Every other callee in the block (read_register, write_register, show_status, show_help, send_string) is a lower-case user placeholder.",
+  "compiler_error": "Expected an expression term (m172) (at `UPPER(`, block line 1)",
+  "correct_source": "no source line: `grep -w -i upper engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt` finds only the word 'upper' in prose",
+  "verified_fix": "a user method `PRI upper(c) : r` makes `CASE upper(command)` compile (scratch t/i_upperfix). The decision records the block WITHOUT an assumed UPPER() stub, so the gate stays red until the page shows or names the helper. A reviewer may overrule this as a placeholder -- see DEVIATIONS",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/constructs/case.yaml",
+    "addr": "common_patterns[1].code",
+    "key_line": 140,
+    "gate_first_error": "block line 1 (YAML line 141): Expected an expression term (m172)",
+    "source_line_of_error": "CASE UPPER(command)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "command",
+     "value",
+     "param",
+     "read_register()->1/1",
+     "write_register()->0/2",
+     "show_status()->0/0",
+     "show_help()->0/0",
+     "send_string()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-008",
+  "statement": "reserved word used as identifier: `quit()` (case.yaml:37, `QUIT` keyword called as a method) and `PUB test()` (debug.yaml:179, `TEST` is the PASM instruction). Renaming (`run`) compiles (scratch t/g2_test).",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/case.yaml",
+    "addr": "syntax_forms[0].example",
+    "key_line": 33,
+    "gate_first_error": "block line 4 (YAML line 37): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "\"Q\": quit()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "command",
+     "add_item()->0/0",
+     "delete_item()->0/0",
+     "show_error()->0/0"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/statements/debug.yaml",
+    "addr": "examples[7].code",
+    "key_line": 177,
+    "gate_first_error": "block line 2 (YAML line 179): Expected a unique method name",
+    "source_line_of_error": "PUB test() | value",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-009",
+  "statement": "two-index array `grid[x][y]` in the nested-loop NEXT/QUIT level examples (next.yaml, quit.yaml, repeat.yaml); `grid[x*10+y]` compiles (scratch t/d_next1, t/o_next_grid). The `NEXT 1` / `QUIT 1` forms themselves compile.",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/next.yaml",
+    "addr": "example",
+    "key_line": 13,
+    "gate_first_error": "block line 9 (YAML line 22): Expected end of line (m281)",
+    "source_line_of_error": "IF grid[x][y] < 0",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "i",
+     "array",
+     "process()->0/1",
+     "x",
+     "y",
+     "grid"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/quit.yaml",
+    "addr": "example",
+    "key_line": 14,
+    "gate_first_error": "block line 10 (YAML line 24): Expected end of line (m281)",
+    "source_line_of_error": "IF grid[x][y] == value",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "i",
+     "array",
+     "target",
+     "process()->0/1",
+     "x",
+     "y",
+     "grid",
+     "value"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/repeat.yaml",
+    "addr": "control_keywords[2].example",
+    "key_line": 145,
+    "gate_first_error": "block line 3 (YAML line 148): Expected end of line (m281)",
+    "source_line_of_error": "IF grid[x][y] == target",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "x",
+     "y",
+     "grid",
+     "target"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "S-014",
+  "statement": "multi-character quoted literal used as a string argument: `send_string(\"Unknown command\")` (case.yaml:155), `log_error(\"Unknown state\")` (case.yaml:193); `@\"...\"` compiles (scratch t/j_sendstr_fix)",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/case.yaml",
+    "addr": "common_patterns[1].code",
+    "key_line": 140,
+    "gate_first_error": "block line 1 (YAML line 141): Expected an expression term (m172)",
+    "source_line_of_error": "CASE UPPER(command)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "command",
+     "value",
+     "param",
+     "read_register()->1/1",
+     "write_register()->0/2",
+     "show_status()->0/0",
+     "show_help()->0/0",
+     "send_string()->0/1"
+    ],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/constructs/case.yaml",
+    "addr": "pitfalls[1].correct",
+    "key_line": 187,
+    "gate_first_error": "block line 6 (YAML line 193): Expected \")\" (m301)",
+    "source_line_of_error": "log_error(\"Unknown state\")",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "state",
+     "idle()->0/0",
+     "running()->0/0",
+     "stopped()->0/0",
+     "log_error()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-018",
+  "statement": "object used with no OBJ line: `\\child_objects[i].method()` (abort.yaml:110), `LED.on()`/`LED.off()` (if_elseif_else.yaml:35,37), `LED.toggle()` (repeat.yaml:25)",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/abort.yaml",
+    "addr": "trap_operator.trapping_object_methods.example",
+    "key_line": 110,
+    "gate_first_error": "block line 1: Expected a method, object, or variable",
+    "source_line_of_error": "result := \\child_objects[i].method()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "result",
+     "i"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/if_elseif_else.yaml",
+    "addr": "syntax_forms[1].example",
+    "key_line": 33,
+    "gate_first_error": "block line 2 (YAML line 35): Expected an instruction or variable",
+    "source_line_of_error": "LED.on()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "sensor",
+     "threshold"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/repeat.yaml",
+    "addr": "variants[0].example",
+    "key_line": 23,
+    "gate_first_error": "block line 2 (YAML line 25): Expected an instruction or variable",
+    "source_line_of_error": "LED.toggle()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "S-020",
+  "statement": "PUB returns a value (`RETURN FALSE`, `RETURN result`) but declares no result: blocks.yaml singleton_enforcement (:209-212) and cog_communication (:226-231); declaring a result (`: r`) compiles (scratch t/i_ret, t/i2_ret)",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/blocks.yaml",
+    "addr": "common_patterns[0].code",
+    "key_line": 205,
+    "gate_first_error": "block line 6 (YAML line 211): Expected end of line (m280)",
+    "source_line_of_error": "RETURN FALSE    ' Already running",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/constructs/blocks.yaml",
+    "addr": "common_patterns[1].code",
+    "key_line": 217,
+    "gate_first_error": "block line 14 (YAML line 231): Expected end of line (m280)",
+    "source_line_of_error": "RETURN result",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-066",
+  "statement": "escaped double quote: the table lists `\\\"` (escape-strings.yaml:46-48) and example 4 (`@\\\"She said \\\"Hello World\\\"\"`, :84) relies on it; the v55 set (:50-59) has no `\\\"` -- the quote ends the string. `\\x22` compiles (scratch t/g_esc_fix)",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/escape-strings.yaml",
+    "addr": "examples[3].code",
+    "key_line": 81,
+    "gate_first_error": "block line 3 (YAML line 84): Empty string",
+    "source_line_of_error": "debug(@\\\"She said \\\"Hello World\\\"\")    ' Output: She said \"Hello World\"",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-068",
+  "statement": "`debug(@\"...\")` / `debug(@\\\"...\")` -- a bare term inside DEBUG() is output as a character, not as a string. escape-strings.yaml builds its whole examples list (and its 'Output:' comments) on the string-pointer form. The blocks compile, so they cannot be REGISTERED; the class is the claim (inferred row, bench question).",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/escape-strings.yaml",
+    "line": "58,61",
+    "claim": "`debug(@\"Hello World\")` 'Output: Hello World'; `debug(@\\\"Line 1\\nLine 2\")`"
+   },
+   {
+    "file": "language/spin2/constructs/escape-strings.yaml",
+    "line": "68-70",
+    "claim": "tab-separated `debug(@\\\"Name\\tAge\\tCity\")`..."
+   },
+   {
+    "file": "language/spin2/constructs/escape-strings.yaml",
+    "line": "75-78",
+    "claim": "status-report lines `debug(@\\\"=== STATUS REPORT ===\\n\")`..."
+   },
+   {
+    "file": "language/spin2/constructs/escape-strings.yaml",
+    "line": "84,90-91,97,103,105,107,114",
+    "claim": "quote / hex / backslash / carriage-return / bell examples, all `debug(@\\\"...\")` with 'Output:' comments"
+   }
+  ],
+  "site_count": 8
+ },
+ {
+  "slug": "S-054",
+  "statement": "REV off-by-one / out-of-range: `x REV y` reverses bits 0..y (y+1 bits). The idiom page gives `data REV 8` ('Mirror bits within specified range') and `value REV 32` -- REV 8 reverses nine bits, and 32 is past the top bit index (31). The blocks are decided not-code (bare operator expressions), so there is no registered failure.",
+  "sites": [
+   {
+    "file": "language/spin2/idioms/bit-manipulation.yaml",
+    "line": "61,62",
+    "claim": "`data REV 8`, `value REV 32`; pattern `{value} REV {bits}`, 'Reverse bit order', context 'Mirror bits within specified range'"
+   }
+  ],
+  "site_count": 1
+ }
+]

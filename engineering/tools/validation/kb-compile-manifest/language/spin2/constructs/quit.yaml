@@ -1,0 +1,15 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/quit.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: example
+    fp: "6bd9780224d7f618"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, array, target, process()->0/1, x, y, grid, value]
+    finding: "S-009"
+  - at: common_patterns
+    fp: "a3786cf33fb3f818"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [data, read_sensor()->1/0, STOP_VALUE=con, process()->1/1, found, i, MAX=con, items, search_value]

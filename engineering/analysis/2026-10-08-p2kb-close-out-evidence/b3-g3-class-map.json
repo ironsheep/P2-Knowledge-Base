@@ -1,0 +1,17 @@
+{
+ "cog-label-unaligned-after-byte-data": "S-074",
+ "inline-if-colon-form": "S-075",
+ "signed-comparison-operator-typo": "S-076",
+ "short-circuit-example-untyped-pointer": "S-077",
+ "end-closing-dat-org": "S-078",
+ "var-address-in-inline-pasm": "S-079",
+ "invented-crc-instructions": "S-080",
+ "address-of-parameter-declaration": "S-081",
+ "method-chaining-self-reference": "S-082",
+ "local-shadows-object-variable": "S-083",
+ "repeat-count-with-condition": "S-084",
+ "nonexistent-in-method": "S-085",
+ "method-without-result-used-as-value": "S-086",
+ "p1-cognew-call": "S-087",
+ "invented-pin-array-syntax": "S-088"
+}

@@ -1,0 +1,21 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/register-constants.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "08f15257baae3aaf"
+    compile: program
+  - at: examples[1].code
+    fp: "33e6e2d40f4615fb"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [LED_PINS=con, SENSOR_MASK=con]
+  - at: examples[2].code
+    fp: "7f781fce4b21057a"
+    compile: program
+  - at: examples[3].code
+    fp: "42e6e19da0609f8b"
+    compile: program
+  - at: examples[4].code
+    fp: "f9c5b20c020d227b"
+    compile: program

@@ -1,0 +1,63 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/blocks.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: block_types[0].why_this_matters
+    fp: "6ad2e350ce8028c2"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
+  - at: block_types[0].syntax
+    fp: "11eb27e48e48c3bf"
+    compile: fragment
+    wrap: spin2-top
+  - at: block_types[0].example
+    fp: "218bba901468a8e1"
+    compile: fragment
+    wrap: spin2-top
+  - at: block_types[1].why_this_matters
+    fp: "c861dc165547f0a8"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
+  - at: block_types[1].syntax
+    fp: "84818819c74b5f18"
+    compile: fragment
+    wrap: spin2-top
+  - at: block_types[1].instance_example
+    fp: "de34cf543927f685"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [uart.__kbstub(0)]
+  - at: block_types[2].why_this_matters
+    fp: "1f8c20e10fceadcb"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
+  - at: block_types[2].syntax
+    fp: "dbe7ebaf0ff0bff7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [ser.__kbstub(0), gpio.__kbstub(0), comm.__kbstub(0)]
+  - at: block_types[3].why_this_matters
+    fp: "b4821387ac2be482"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
+  - at: block_types[3].syntax
+    fp: "dca8fd6ac21110eb"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-074"
+  - at: memory_organization_example
+    fp: "a41e77a388f3e5df"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [serial.__kbstub(0)]
+  - at: common_patterns[0].code
+    fp: "9e386e9db19a79ac"
+    compile: program
+    finding: "S-020"
+  - at: common_patterns[1].code
+    fp: "64019cd649177b34"
+    compile: program
+    finding: "S-020"
+  - at: common_patterns[2].code
+    fp: "cb1800c3c2b6b1af"
+    compile: program

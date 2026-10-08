@@ -1,0 +1,52 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/case.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax_forms[0].example
+    fp: "7ad15f967a548371"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [command, add_item()->0/0, delete_item()->0/0, show_error()->0/0]
+    finding: "S-008"
+  - at: special_features[0].example
+    fp: "7407a2d0f6361989"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, handle_overflow()->1/0, handle_underflow()->1/0, target, handle_match()->1/0, handle_normal()->1/0]
+  - at: special_features[1].example
+    fp: "d09135092daf41ce"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [command_string, begin_process()->1/0, end_process()->1/0, pause_process()->1/0]
+  - at: common_patterns[0].code
+    fp: "6c5c08377b3f770f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [state, IDLE=con, trigger, ACTIVE=con, process_data()->1/0, done, COMPLETE=con, cleanup()->1/0, ERROR=con, handle_error()->1/0]
+  - at: common_patterns[1].code
+    fp: "923ba2c330208e1e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [command, value, param, read_register()->1/1, write_register()->0/2, show_status()->0/0, show_help()->0/0, send_string()->0/1, UPPER()->1/1]
+    finding: "S-014"
+  - at: common_patterns[2].code
+    fp: "1e3cb4dd6c3d963f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [temperature, status, EXTREME_COLD=con, FREEZING=con, COLD=con, COMFORTABLE=con, WARM=con, HOT=con, EXTREME_HOT=con]
+  - at: pitfalls[1].correct
+    fp: "3b5e98234f56446e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [state, idle()->0/0, running()->0/0, stopped()->0/0, log_error()->0/1]
+    finding: "S-014"
+  - at: pasm_equivalent.regular_case
+    fp: "7d3e53f48f69d143"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, action1, action2]
+  - at: pasm_equivalent.fast_case
+    fp: "a7a34f98396b7a67"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, max_case=con, case_other, case_0, case_1, case_2]

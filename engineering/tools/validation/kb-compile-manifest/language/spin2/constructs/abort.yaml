@@ -1,0 +1,123 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/abort.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: abort_syntax.without_value.example
+    fp: "03fc19ad8e542bb9"
+    compile: program
+  - at: abort_syntax.with_value.example
+    fp: "71728c01f6850b38"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CMD_READ=con, do_read()->1/0, CMD_WRITE=con, do_write()->1/0]
+  - at: trap_operator.instruction_context.example
+    fp: "e7bddd79941776bf"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [close_file()->1/0, release_resource()->1/0, stop_motor()->1/0]
+  - at: trap_operator.expression_context.example
+    fp: "ed2fb820596e9007"
+    compile: program
+  - at: trap_operator.trapping_object_methods.example
+    fp: "7d820e571de793a0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, i]
+    finding: "S-018"
+  - at: trap_operator.trapping_method_pointers.example
+    fp: "cde95a51c4dfd184"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [some_method()->0/0]
+  - at: propagation_behavior.example
+    fp: "cb0910f9e6ea3b79"
+    compile: program
+  - at: propagation_behavior.nested_traps.example
+    fp: "ec272352019c6601"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [other_work()->1/0]
+  - at: patterns.error_code_out_data_through_pointer.code
+    fp: "7fedbad889e2ea7e"
+    compile: program
+  - at: patterns.detect_any_abort_with_flag.code
+    fp: "45e00ad5ce40fdf9"
+    compile: program
+  - at: patterns.cleanup_then_rethrow.code
+    fp: "2e15bdbf5d39407e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [send_frame()->1/0]
+  - at: patterns.retry.code
+    fp: "9e97f0a7358d8ea8"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_device()->1/1]
+  - at: patterns.validation_chain.code
+    fp: "dd820afcb94bb050"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [validate_range()->1/1, validate_checksum()->1/1]
+  - at: patterns.supervise_a_cog.code
+    fp: "b6c4a053f3f054dd"
+    compile: program
+  - at: anti_patterns.uncaught_abort.wrong
+    fp: "1b301982c5aed7c4"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [error]
+  - at: anti_patterns.uncaught_abort.correct
+    fp: "d0d110f4e0345b95"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [process()->1/0, handle_error()->1/1]
+  - at: anti_patterns.reading_result_through_trap.wrong
+    fp: "af95331356808f37"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_level()->1/0]
+  - at: anti_patterns.reading_result_through_trap.correct
+    fp: "96d6fa6e55cb5d15"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_level()->1/1]
+  - at: anti_patterns.ignoring_error_values.wrong
+    fp: "1160f8a1f370fb1b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [operation()->1/0, continue_anyway()->1/0]
+  - at: anti_patterns.ignoring_error_values.correct
+    fp: "1cde24e9745121b9"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [operation()->1/0, handle_error()->1/1, continue_safely()->1/0]
+  - at: anti_patterns.abort_for_normal_flow.wrong
+    fp: "27f50164471960a0"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [size, items]
+  - at: anti_patterns.abort_for_normal_flow.correct
+    fp: "ffbba368cd99ea5b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [size, items]
+  - at: anti_patterns.resource_leak.wrong
+    fp: "5a87c99fd2c12bf6"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [acquire_resource()->1/0, risky_work()->1/0, release_resource()->1/1]
+  - at: anti_patterns.resource_leak.correct
+    fp: "ab5847ad026cf258"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [acquire_resource()->1/0, risky_work()->1/0, release_resource()->1/1]
+  - at: anti_patterns.mixing_error_codes_and_data.wrong
+    fp: "0b8d79399ac5f84e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_value()->1/0]
+  - at: anti_patterns.mixing_error_codes_and_data.correct
+    fp: "df5eb2007e2c73e4"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [handle_error()->1/1, sensor_offline()->1/0, ERR_SENSOR=con, sensor_read()->1/0]

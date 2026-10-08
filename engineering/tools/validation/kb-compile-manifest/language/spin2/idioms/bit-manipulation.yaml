@@ -1,0 +1,64 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/idioms/bit-manipulation.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "4dcbac2f6584fb5f"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[0].examples[1]
+    fp: "352e82c38903c1e5"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[0].examples[2]
+    fp: "28c7bdd1421d7565"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[1].examples[0]
+    fp: "be82b01cf5e53838"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[1].examples[1]
+    fp: "a14babfb79b54355"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[2].examples[0]
+    fp: "6d1dc283de2a9183"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[2].examples[1]
+    fp: "9a03d19d67ca8075"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[3].examples[0]
+    fp: "b6a26c41ed8635a5"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[3].examples[1]
+    fp: "9e714ce58c5f160c"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[4].examples[0]
+    fp: "a309c184371039a3"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[4].examples[1]
+    fp: "baece49dfd3f7421"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[5].examples[0]
+    fp: "9d86e9817ec6f6bc"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[5].examples[1]
+    fp: "a83a3f7638b7cdac"
+    compile: not-code
+    reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
+  - at: idioms[6].examples[0]
+    fp: "014fa28c621d6708"
+    compile: not-code
+    reason: "Spin2 `REV` operator expression shown standalone; legal only inside a statement. (The proposer's pasm2-dat PASS is a label followed by the PASM instruction of the same name -- not the Spin2 operator)"
+  - at: idioms[6].examples[1]
+    fp: "e5aced39e2627e90"
+    compile: not-code
+    reason: "Spin2 `REV` operator expression shown standalone; legal only inside a statement. (The proposer's pasm2-dat PASS is a label followed by the PASM instruction of the same name -- not the Spin2 operator)"

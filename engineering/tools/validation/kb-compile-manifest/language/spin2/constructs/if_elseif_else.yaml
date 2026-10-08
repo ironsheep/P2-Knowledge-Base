@@ -1,0 +1,123 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/if_elseif_else.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax_forms[0].example
+    fp: "478ba555e3c6946e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, handle_overflow()->1/0]
+  - at: syntax_forms[1].example
+    fp: "25c11d6eac7e968e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [sensor, threshold]
+    finding: "S-018"
+  - at: syntax_forms[2].example
+    fp: "38f8831c55134aaa"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [temperature, state, TOO_HOT=con, TOO_COLD=con, WARM=con, NORMAL=con]
+  - at: syntax_forms[3].example
+    fp: "63c2eafe137a07b4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [button_pressed()->1/0, counter]
+    finding: "S-075"
+  - at: syntax_forms[4].example
+    fp: "e83c41a53e4aa44e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [sensor_value, handle_no_signal()->1/0]
+  - at: syntax_forms[5].example
+    fp: "0799084aa3039011"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, handle_positive_a()->1/0, b, handle_zero_b()->1/0, handle_other()->1/0]
+  - at: block_syntax.example
+    fp: "3a86871c738e62f3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, ACTIVE=con, start_timer()->1/0, enable_outputs()->1/0, status, RUNNING=con, update_display()->1/0]
+  - at: condition_expressions.boolean_operators[0].example
+    fp: "7fb9d7415d1811c9"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x]
+  - at: condition_expressions.boolean_operators[1].example
+    fp: "d35d4b559029bfbb"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [status, ERROR=con, FAULT=con]
+  - at: condition_expressions.boolean_operators[2].example
+    fp: "4bf452a7d50be6ed"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ready]
+  - at: condition_expressions.boolean_operators[3].example
+    fp: "3690d2b8d359d901"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [switch1, switch2]
+  - at: condition_expressions.special_comparisons[0].example
+    fp: "b6b6a4d31d8e5dcf"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, y]
+    finding: "S-076"
+  - at: common_patterns[0].code
+    fp: "fe954b85e86a3537"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, MIN_LIMIT=con, MAX_LIMIT=con, process_valid_value()->1/1]
+  - at: common_patterns[1].code
+    fp: "bbf5adb9384e93fc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [state, IDLE=con, check_for_start()->1/0, RUNNING=con, process_data()->1/0, ERROR=con, handle_error()->1/0, reset_system()->1/0]
+  - at: common_patterns[2].code
+    fp: "753496193e44eccf"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ptr, use_pointer()->1/1, handle_null()->1/0]
+  - at: common_patterns[3].code
+    fp: "b6b60ceaca03f816"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, ENABLE_BIT=con, feature_enabled()->1/0]
+  - at: common_patterns[4].code
+    fp: "1ecef394a8ce6406"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, AUTO=con, sensor, threshold, alarm_active, trigger_alarm()->1/0]
+  - at: special_features[0].example
+    fp: "673861065bd302d0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ptr]
+    finding: "S-077"
+  - at: special_features[1].example
+    fp: "4fc7d3c2c7f6cb1e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, read_sensor()->1/0, limit, process_high_value()->1/1]
+  - at: special_features[2].example
+    fp: "13f8fbeb9ba72d26"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [is_ready()->1/0, has_data()->1/0, process()->1/0]
+  - at: pitfalls[0].correct
+    fp: "1adf704368630856"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x]
+  - at: pasm_equivalent.example.spin2
+    fp: "f830e7d8cdd0f92b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, y]
+  - at: pasm_equivalent.example.pasm2
+    fp: "28b15cc91b8fe528"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]

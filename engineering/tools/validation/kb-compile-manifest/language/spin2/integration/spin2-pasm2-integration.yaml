@@ -1,0 +1,43 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/integration/spin2-pasm2-integration.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: spin2_pasm2_integration.integration_patterns[0].syntax_examples[0].spin2_code
+    fp: "febd81a5f391a3a3"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[1].syntax_examples[0].spin2_code
+    fp: "b9b0e89a734ee724"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[2].syntax_examples[0].spin2_code
+    fp: "49d60536eeda0d1a"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[3].syntax_examples[0].spin2_code
+    fp: "6051d0d7b73ad63d"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[4].syntax_examples[0].spin2_code
+    fp: "02308382712255a6"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[5].syntax_examples[0].spin2_code
+    fp: "e2f3e0150b04ae71"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[6].syntax_examples[0].spin2_code
+    fp: "01468cd2f9165306"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[7].syntax_examples[0].spin2_code
+    fp: "57246cec8cf124d4"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[8].syntax_examples[0].spin2_code
+    fp: "fca0e74057378941"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[9].syntax_examples[0].spin2_code
+    fp: "53bec92340aaedd1"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[10].syntax_examples[0].spin2_code
+    fp: "f8773c21e6215634"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[11].syntax_examples[0].spin2_code
+    fp: "c80e5a98191a2d0f"
+    compile: program
+  - at: spin2_pasm2_integration.integration_patterns[12].syntax_examples[0].spin2_code
+    fp: "d6b323c545ea0c09"
+    compile: program

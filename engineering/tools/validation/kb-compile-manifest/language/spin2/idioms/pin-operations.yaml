@@ -1,0 +1,87 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/idioms/pin-operations.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "68e1812eee0dbd8a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [TEST_PIN_SNS_LOOP=con]
+  - at: idioms[0].examples[1]
+    fp: "6f34a0c06e8192c0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [apin]
+  - at: idioms[0].examples[2]
+    fp: "02693fbdae78daa3"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[1].examples[0]
+    fp: "5d752227fcabe15a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [MTX_LED_PIN_OE=con]
+  - at: idioms[1].examples[1]
+    fp: "66fb9f864bd11e14"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [MTX_COLOR_PINS=con]
+  - at: idioms[1].examples[2]
+    fp: "efc377f4b4ac022f"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[2].examples[0]
+    fp: "34194d951b958718"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [apin]
+  - at: idioms[2].examples[1]
+    fp: "d211f080d9122895"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin_rst]
+  - at: idioms[2].examples[2]
+    fp: "06746ddcb4d2e843"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[3].examples[0]
+    fp: "3d6ca36043135606"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rxp, bitmode]
+  - at: idioms[3].examples[1]
+    fp: "9bc82eee63b0862b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rxp, spmode, baudcfg]
+  - at: idioms[3].examples[2]
+    fp: "82f93339bad3e610"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [txp, spmode, baudcfg]
+  - at: idioms[4].examples[0]
+    fp: "f539d66979e0b83a"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-088"
+  - at: idioms[4].examples[1]
+    fp: "c9e0d4e8dbe54385"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-088"
+  - at: idioms[4].examples[2]
+    fp: "eb378132f557673f"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-088"
+  - at: idioms[5].examples[0]
+    fp: "97f6d6ab6dd6cb57"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-088"
+  - at: idioms[5].examples[1]
+    fp: "b51216770859bebc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [LED_PIN=con]
+    finding: "S-088"

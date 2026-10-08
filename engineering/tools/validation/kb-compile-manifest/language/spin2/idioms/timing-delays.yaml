@@ -1,0 +1,42 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/idioms/timing-delays.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "f1137a5b47746d68"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[0].examples[1]
+    fp: "1da4a49562a0a7c8"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[0].examples[2]
+    fp: "fa55d8adbe40c1bc"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[1].examples[0]
+    fp: "a9aa933391485cda"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[1].examples[1]
+    fp: "066e986c3bbfcaa2"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[1].examples[2]
+    fp: "74dab140f5726f75"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[2].examples[0]
+    fp: "23df5791bba4b4bd"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [t, MS_001=con]
+  - at: idioms[2].examples[1]
+    fp: "48cbe358f006c567"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[2].examples[2]
+    fp: "387699f7985c1636"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [delay]

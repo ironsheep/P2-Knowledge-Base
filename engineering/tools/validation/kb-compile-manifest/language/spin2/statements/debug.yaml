@@ -1,0 +1,93 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/statements/debug.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: display_types[0].usage
+    fp: "3fa9c90475133d1e"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[1].usage
+    fp: "26c28dbbfed0cd1d"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[2].usage
+    fp: "179950b521b9ee43"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[3].usage
+    fp: "e595aee1735604e9"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[4].usage
+    fp: "0930dc0e7ab02a16"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[5].usage
+    fp: "62fa94f998855876"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[6].usage
+    fp: "ee0758cac1d665e3"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[7].usage
+    fp: "abc236acb55c7e8b"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: display_types[8].usage
+    fp: "a45ffc5e1ba44e90"
+    compile: not-code
+    reason: "usage description: backtick DEBUG commands joined by English words ('then', 'to declare the channel'), prose, not one compilable statement"
+  - at: examples[0].code
+    fp: "7642cbd7528abe51"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "f4bbdb470da96b72"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, y]
+  - at: examples[2].code
+    fp: "0e3f18c5127822c9"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [sensor_value, filtered_value]
+  - at: examples[3].code
+    fp: "5328040a0dffacdf"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [sample]
+  - at: examples[4].code
+    fp: "ca8fad6b0c89659a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [buff]
+  - at: examples[5].code
+    fp: "b81ffa888596cd5c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [register_value]
+  - at: examples[6].code
+    fp: "3f41e18f2b853c0c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags]
+  - at: examples[7].code
+    fp: "98440bc1774db6c6"
+    compile: program
+    finding: "S-008"
+  - at: examples[8].code
+    fp: "98a43e556d7432ce"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [error_flag, error_message]
+  - at: examples[9].code
+    fp: "a19eacd19d5457a1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, array]
+  - at: examples[10].code
+    fp: "7c108e20a916c3f0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [sensor, read_sensor()->1/0]

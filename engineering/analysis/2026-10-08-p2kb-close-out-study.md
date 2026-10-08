@@ -264,6 +264,55 @@ is a `program` carrying S-070 and stays red until fixed.
 | S-072 | B | G2 | wrong, not code-driving | two convention pages require different block orders, each "required"; the compiler accepts any order | O24 | traced | — | to research | no |
 | S-073 | B | G2 | **drives wrong code** | `johnny-mac-documentation-style.yaml:233`: `wypin(txbyte, TX_PIN)` — arguments swapped; WYPIN(PinField, Data) | O25; `spin2-v55-text.txt:541` | traced | PASM operand order | to research (class sweep: WYPIN/WXPIN/WRPIN argument order) | no |
 
+**ENH-03 B3, group G3 (`language/spin2/constructs/`, `idioms/`, `statements/`, `integration/`,
+files directly in `language/spin2/`; 276 blocks), 2026-10-08.** Evidence: `b3-g3-defects.json`
+(new classes, plus new sites for S-008, S-009, S-014, S-018, S-020, S-066, and passing sites for
+S-054, S-068), `b3-g3-class-map.json`, `b3-g3-observations.json`. Arbiter checks: re-applied in a
+fresh scratch root (same result); not-code reasons and the one `never` read; source lines for O3,
+O5, O10, O11, O14, O19 re-read and holding. **One reviewer call overturned:** `case.yaml`
+`common_patterns[1].code` — `UPPER()` is an ordinary user helper there, not a built-in lookalike,
+so it is an accepted assume; the block still fails on S-014.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-074 | B | G3 | drives wrong code | `blocks.yaml`: DAT label `sine_table` after 11 bytes of BYTE data in ORG 0 — a cog label must be long-aligned | defects `cog-label-unaligned-after-byte-data` | traced | — | to research (`ALIGNL`) | no |
+| S-075 | B | G3 | drives wrong code | `IF cond : stmt` one-line form does not exist (the CASE colon form does) | defects `inline-if-colon-form` | traced | other-language habit | to research | no |
+| S-076 | B | G3 | drives wrong code | `<<=>` typo for `<=>` | defects `signed-comparison-operator-typo` | traced | typo | to research | yes |
+| S-077 | B | G3 | drives wrong code | `ptr.value` on an untyped pointer in the short-circuit example | defects `short-circuit-example-untyped-pointer` | traced | — | to research (with S-094) | no |
+| S-078 | B | G3 | drives wrong code | `END` used to close a DAT ORG/ORGH section (2 sites); END closes inline PASM only | defects `end-closing-dat-org` | traced | — | to research | no |
+| S-079 | B | G3 | drives wrong code | `@var` inside inline PASM | defects `var-address-in-inline-pasm` | traced | — | to research | no |
+| S-080 | B | G3 | **drives wrong code** | invented PASM instructions `SETCRC`, `CRC` | defects `invented-crc-instructions` | traced | invented names | to research | no |
+| S-081 | B | G3 | drives wrong code | `(@array, size)` in a parameter list | defects `address-of-parameter-declaration` | traced | other-language habit | to research | no |
+| S-082 | B | G3 | **drives wrong code** | `@this` and method chaining `obj.a().b()` taught as Spin2 | defects `method-chaining-self-reference` | traced | invented feature | to research | no |
+| S-083 | B | G3 | drives wrong code | a local with a VAR's name taught as shadowing; it is a duplicate-name error | defects `local-shadows-object-variable` | traced | — | to research | no |
+| S-084 | B | G3 | **drives wrong code** | `REPEAT n WHILE/UNTIL cond` (3 sites); no such form | defects `repeat-count-with-condition` | traced | invented form | to research | no |
+| S-085 | B | G3 | drives wrong code | `IN(pin)` is not a method (PINREAD) | defects `nonexistent-in-method` | traced | — | to research | no |
+| S-086 | B | G3 | drives wrong code | `REPEAT WAITMS(1) * 1000` — WAITMS returns no value | defects `method-without-result-used-as-value` | traced | — | to research | no |
+| S-087 | B | G3 | **drives wrong code** | P1 `cognew()` (2 sites) | defects `p1-cognew-call` | traced | P1 carry-over (class with S-070, S-035, S-051, S-052) | to research (one P1-carry-over class sweep) | no |
+| S-088 | B | G3 | **drives wrong code** | invented pin-array syntax `pina[0..7]`, `pinl[..]`, `pinh[..]`, `^^` toggle (5 sites) | defects `invented-pin-array-syntax` | traced | invented syntax | to research | no |
+| S-089 | B | G3 | wrong, not code-driving | `blocks.yaml:46`: `#0, IDLE, RUNNING, ERROR ' 0, 1, 2, 3` — three names, four values | O1 | traced | — | to research | yes |
+| S-090 | B | G3 | wrong, not code-driving | `blocks.yaml:52`: structures and conditional compilation "v44+"; STRUCT is v45 | O2; `spin2-v55-text.txt:37` | traced | stale gating (with S-046) | to research | no |
+| S-091 | B | G3 | **drives wrong code** | `inline_pasm.yaml:166-168`: parameters "in PR0/PR1", return "in PR0"; the method's first 16 longs are at $1E0..$1EF under their own names | O3; `spin2-v55-text.txt:802-803` | traced | invented mapping | to research | no |
+| S-092 | B | G3 | **drives wrong code** | `inline_pasm.yaml:184-189`, `method_definition.yaml:278-285`: `MUL` then `GETQX` shown as a multiply; MUL leaves the product in D | O4; p2kb `p2kbPasm2Mul` | traced | MUL/QMUL confusion | to research | no |
+| S-093 | B | G3 | wrong, not code-driving | `inline_pasm.yaml:179-182`: "inline PASM labels must start with `.`"; plain labels compile | O5; `spin2-v55-text.txt:813` | traced | — | to research | no |
+| S-094 | B | G3 | latent | `if_elseif_else.yaml:187-190`: AND/OR short-circuit — unsourced; the v51 interpreter's `bc_logand` works on evaluated values | O6 | inferred | — | to research (interpreter source; bench only if silent) | no |
+| S-095 | B | G3 | drives wrong code | `case.yaml:90-96`: "direct string comparison" with `"START":` | O7; `spin2-v55-text.txt:738-748` | traced | as S-014 | to research (with S-014) | no |
+| S-096 | B | G3 | wrong, not code-driving | `case.yaml:170-177`: a variable range bound "won't work"; the compiler accepts it | O8; `spin2-v55-text.txt:743-745` | traced | — | to research | no |
+| S-097 | B | G3 | wrong, not code-driving | `repeat.yaml:35-47`: `post_test_*` variants labelled "test at end" with pre-test examples | O9; `spin2-v55-text.txt:764-767` | traced | — | to research | no |
+| S-098 | B | G3 | drives wrong code | `repeat.yaml:158-159`: "loop variable is local to the REPEAT block"; it must be a declared variable | O10; `spin2-v55-text.txt:760-761` | traced | — | to research | no |
+| S-099 | B | G3 | latent | `repeat.yaml:161-162`: STEP direction override and `FROM 10 TO 0 STEP 1` "never executes" | O11; `spin2-v55-text.txt:762-763` | inferred | — | to research (interpreter source; bench only if silent) | no |
+| S-100 | B | G3 | **drives wrong code** | `spin2-pasm2-integration.yaml:112-126`: `CALL(#fastLoop)` on DAT code never loaded into cog registers | O12; `spin2-v55-text.txt:840-843` | traced | — | to research | no |
+| S-101 | B | G3 | **drives wrong code** | `spin2-pasm2-integration.yaml:379-413`: REGEXEC chunk length ends before `temp`/`shared_flag_addr`, so they are never loaded | O13; reviewer's pnut-ts listing | traced | — | to research | no |
+| S-102 | B | G3 | **drives wrong code** | `spin2-pasm2-integration.yaml:349-366`: `COGINIT(COGEXEC, …)` "start in cog mode" restarts cog 0 | O14; `spin2-v55-text.txt:1660` | traced | — | to research | no |
+| S-103 | B | G3 | **drives wrong code** | `register-constants.yaml:100-110`: `rdlong value, ##INA_ADDR` reads hub RAM, not the register | O15; `spin2-v55-text.txt:360` | traced | — | to research | no |
+| S-104 | B | G3 | latent | `method_definition.yaml:271`: "~50 clock cycles for call/return" — unsourced, against the KB's own stated position | O16 | traced | unsourced number | to research | no |
+| S-105 | B | G3 | wrong, not code-driving | `case.yaml:110-113` etc.: Spin2 control flow "compiled to PASM2", "jump tables in COG RAM" — Spin2 compiles to bytecode | O17 | traced | — | to research | no |
+| S-106 | B | G3 | wrong, not code-driving | `method_definition.yaml:79-81`: "arrays and objects pass references" | O18; `spin2-v55-text.txt:275-277` | traced | — | to research | no |
+| S-107 | B | G3 | **drives wrong code** | `memory-access.yaml:46-52`: `@@buffer` "get absolute hub address"; `@@x` converts a stored object-relative offset | O19; `spin2-v55-text.txt:300`, `:425` | traced | — | to research | no |
+| S-108 | B | G3 | wrong, not code-driving | `next.yaml:52`, `quit.yaml:53`: ABORT "exits entire method"; it unwinds to the trapping caller | O20; `abort.yaml:35-41`, `:120-131` | traced | — | to research | no |
+| S-109 | F | G3 | latent (gate coverage) | the finder's net misses some code under `wrong`/`correct`/`syntax` that opens with a Spin2 flow statement (IF/CASE/REPEAT); arbiter census 2026-10-08: ~65 code-shaped multi-line strings outside the net | O21; arbiter scan | traced | net 2 counts block keywords and instructions, not flow statements | **fixed in the B3 tooling pass (arbiter)**, then the newly netted blocks are classified | no |
+| S-110 | B | G3 | wrong, not code-driving | `debug.yaml:218`: "automatic type detection", "processed at compile time" | O22; the page's own `:83-91` | traced | — | to research | no |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

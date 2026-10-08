@@ -1,0 +1,70 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/idioms/loop-patterns.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "736c1f1019fa948f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, BUF_SIZE=con]
+  - at: idioms[0].examples[1]
+    fp: "dc211fbba009abdd"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i]
+  - at: idioms[0].examples[2]
+    fp: "e8b91dd4dc983c2e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ch]
+  - at: idioms[1].examples[0]
+    fp: "25e2b6b106523880"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[1].examples[1]
+    fp: "7dc98ab2c5cf5ee3"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[2].examples[0]
+    fp: "c2c51b69ef8df4e3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [c, x]
+  - at: idioms[2].examples[1]
+    fp: "4787b06c512279e6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rxtail, rxhead]
+  - at: idioms[2].examples[2]
+    fp: "bf8da9a32a9ab6c3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rxcheck()->1/0]
+  - at: idioms[3].examples[0]
+    fp: "6d6f7be4ce60875a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rxp]
+  - at: idioms[3].examples[1]
+    fp: "f69302e4ac3293fe"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [b, rxcheck()->1/0]
+  - at: idioms[3].examples[2]
+    fp: "f59f3467551c763f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [done]
+  - at: idioms[4].examples[0]
+    fp: "5b2f5cd76893d092"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[4].examples[1]
+    fp: "308d8952f6e0a1c9"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[4].examples[2]
+    fp: "baa7f6044cf1d32d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [samples]

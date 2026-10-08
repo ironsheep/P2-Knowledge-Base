@@ -1,0 +1,58 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/idioms/cog-operations.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "56128dbd5dbc47ac"
+    compile: not-code
+    reason: "bare method-call term shown standalone (`cogid()` returns a value; the compiler: 'This instruction can only be used as an expression term'); the same page shows it in statements two lines below"
+  - at: idioms[0].examples[1]
+    fp: "f3d32bb7b015f9af"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mycog]
+  - at: idioms[0].examples[2]
+    fp: "5f0ae8ab6b9b0be9"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[1].examples[0]
+    fp: "e5953fcd8ae264b0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [cog]
+  - at: idioms[1].examples[1]
+    fp: "c74bac645c955963"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mycog]
+  - at: idioms[1].examples[2]
+    fp: "12ed5e3577a62930"
+    compile: fragment
+    wrap: spin2-method
+  - at: idioms[2].examples[0]
+    fp: "e4a1caea266eada5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [uart_mgr, rxp]
+  - at: idioms[2].examples[1]
+    fp: "424630fb6d2e2a49"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [uart_mgr, rxp]
+  - at: idioms[2].examples[2]
+    fp: "5161de5e39848e91"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [entry, stack]
+  - at: idioms[3].examples[0]
+    fp: "754248f86f01421c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [driver, params]
+    finding: "S-087"
+  - at: idioms[3].examples[1]
+    fp: "bcf459c8f86c2f51"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pasm_code, mailbox]
+    finding: "S-087"

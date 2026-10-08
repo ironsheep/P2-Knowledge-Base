@@ -1,0 +1,31 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/escape-strings.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "52476fce8edc6ba0"
+    compile: program
+  - at: examples[1].code
+    fp: "0e91bc504c6e0ad0"
+    compile: program
+  - at: examples[2].code
+    fp: "61d7a63fe2d9ef02"
+    compile: program
+  - at: examples[3].code
+    fp: "c02b6bc6b79c791e"
+    compile: program
+    finding: "S-066"
+  - at: examples[4].code
+    fp: "87cad2d992e60e86"
+    compile: program
+  - at: examples[5].code
+    fp: "38f327d738293cd2"
+    compile: program
+  - at: examples[6].code
+    fp: "ea53fec5807c419a"
+    compile: program
+  - at: examples[7].code
+    fp: "34c16e7bd55f014d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [error_detected]

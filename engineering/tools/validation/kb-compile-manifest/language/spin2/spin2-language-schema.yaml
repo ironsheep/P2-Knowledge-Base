@@ -1,0 +1,28 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/spin2-language-schema.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: spin2_language_schema.language_constructs.operators.schema_definition.symbol.examples[0]
+    fp: "cfc0c0607a3380f7"
+    compile: not-code
+    reason: "an operator symbol shown as a schema example value (a token, not a statement)"
+  - at: spin2_language_schema.language_constructs.operators.schema_definition.symbol.examples[1]
+    fp: "d8156bae0c4243d3"
+    compile: not-code
+    reason: "an operator symbol shown as a schema example value (a token, not a statement)"
+  - at: spin2_language_schema.language_constructs.operators.schema_definition.symbol.examples[2]
+    fp: "a318c24216defe20"
+    compile: not-code
+    reason: "an operator symbol shown as a schema example value (a token, not a statement)"
+  - at: spin2_language_schema.language_constructs.operators.schema_definition.symbol.examples[3]
+    fp: "684888c0ebb17f37"
+    compile: not-code
+    reason: "an operator symbol shown as a schema example value (a token, not a statement)"
+  - at: spin2_language_schema.language_constructs.operators.schema_definition.symbol.examples[4]
+    fp: "73e7b6f86214bc78"
+    compile: not-code
+    reason: "an operator symbol shown as a schema example value (a token, not a statement)"
+  - at: spin2_language_schema.language_constructs.operators.schema_definition.symbol.examples[5]
+    fp: "2c4e68664fd39392"
+    compile: not-code
+    reason: "an operator symbol shown as a schema example value (a token, not a statement)"

@@ -1,0 +1,108 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constructs/method_definition.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax.basic_structure
+    fp: "cc42170cf8533fca"
+    compile: program
+  - at: syntax.with_parameters
+    fp: "955f5c0c0977427f"
+    compile: program
+  - at: syntax.with_return_values
+    fp: "ace02c93f08c6d97"
+    compile: program
+  - at: syntax.with_multiple_returns
+    fp: "aa12cddd1f33d4bb"
+    compile: program
+  - at: syntax.with_local_variables
+    fp: "97bcd4233e92a576"
+    compile: program
+  - at: syntax.complete_form
+    fp: "557b207d9a61331d"
+    compile: program
+  - at: special_behaviors[0].example
+    fp: "21a266e9181845a1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [setup()->1/0, loop()->1/0]
+  - at: special_behaviors[1].example
+    fp: "bdeab345a7203566"
+    compile: program
+  - at: method_visibility.pub_methods.example
+    fp: "d67477e927a132f7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [initialize()->1/2]
+  - at: method_visibility.pri_methods.example
+    fp: "7454e6a868818030"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [configure_pin()->1/1, set_baud_rate()->1/1]
+  - at: parameter_handling.array_parameters
+    fp: "791b71503387231e"
+    compile: program
+    finding: "S-081"
+  - at: parameter_handling.default_values
+    fp: "0bea79f9152f6733"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [OUTPUT=con, NO_PULL=con]
+  - at: return_values.single_return
+    fp: "4fc494a5f3a2566e"
+    compile: program
+  - at: return_values.multiple_returns
+    fp: "2c8c7206e41c57d6"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_x_sensor()->1/0, read_y_sensor()->1/0, read_z_sensor()->1/0]
+  - at: return_values.early_return
+    fp: "1490c1a99becc895"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [MAX_VALUE=con]
+  - at: return_values.implicit_return
+    fp: "1af23c8326a6ebe9"
+    compile: program
+  - at: local_variables.example
+    fp: "a5eb4af2d2fce2f1"
+    compile: program
+  - at: method_limits.parameters.type_overrides.example
+    fp: "40c9d43333b52faa"
+    compile: program
+  - at: method_limits.return_values.type_overrides.example
+    fp: "6b95c6f2551ac13b"
+    compile: program
+  - at: method_limits.local_variables.type_overrides.example
+    fp: "b018b91bfda66956"
+    compile: program
+  - at: common_patterns[0].code
+    fp: "34136fb987d1ef6b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [pasm_code, params]
+  - at: common_patterns[1].code
+    fp: "a0da5c3120b16b87"
+    compile: program
+  - at: common_patterns[2].code
+    fp: "fbd9d450a3400d86"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [x]
+    finding: "S-082"
+  - at: pitfalls[0].wrong
+    fp: "37bff1dff8debf2e"
+    compile: never
+    wrap: spin2-top
+    reason: "the pitfall's point: a PUB with no declared result cannot RETURN a value; the block's own comment says 'Error - no return variable declared' and the page pairs it with the corrected form two lines on"
+    fails_at: 2
+  - at: pitfalls[0].correct
+    fp: "d22869880ab62840"
+    compile: program
+  - at: pitfalls[1].example
+    fp: "d4752b8137cbcf9f"
+    compile: program
+    finding: "S-083"
+  - at: pasm_integration
+    fp: "4189e1b7314b217e"
+    compile: not-code
+    reason: "prose sentence (`PUB methods can contain inline PASM2:`) followed by a code excerpt; mixed prose + excerpt, not one compilable unit"
