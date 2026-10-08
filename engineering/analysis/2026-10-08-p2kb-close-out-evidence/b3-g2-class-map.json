@@ -1,0 +1,14 @@
+{
+ "reg-hash-in-register-index": "S-041",
+ "hub-address-immediate-without-augment": "S-042",
+ "child-dat-label-through-object": "S-043",
+ "swap-operator-on-plain-variables": "S-044",
+ "pasm-register-collides-with-parameter-name": "S-045",
+ "unsupported-spin2-v44-directive": "S-046",
+ "xoro-operator-without-variable": "S-047",
+ "callee-called-with-inconsistent-arity": "S-048",
+ "byte-word-typed-parameter-or-result": "S-049",
+ "result-name-collides-with-constant": "S-050",
+ "parenless-method-header-and-call": "S-051",
+ "p1-comparison-operators-equal-first": "S-052"
+}

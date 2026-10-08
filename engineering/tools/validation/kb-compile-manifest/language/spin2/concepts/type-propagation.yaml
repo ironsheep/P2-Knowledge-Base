@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/type-propagation.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: rules.var_block.example.code
+    fp: "52cf6bff988c1c0d"
+    compile: fragment
+    wrap: spin2-top
+  - at: rules.pub_pri_parameters.example.code
+    fp: "2c6a4981fd7a7b45"
+    compile: program
+    finding: "S-049"
+  - at: rules.pub_pri_return_values.example.code
+    fp: "c38a9a4bbf569308"
+    compile: program
+    finding: "S-049"
+  - at: rules.pub_pri_locals.example.code
+    fp: "3a98db8c37e424aa"
+    compile: not-code
+    reason: "contrast pair: two alternative headers of the same method (`PUB baz() | BYTE temp, count` then `PUB baz() | BYTE temp, BYTE count`) printed one after the other; compiled together they define baz twice. Each header alone is a valid local declaration"
+  - at: rules.dat_block.example.code
+    fp: "282b8464b36dc0b4"
+    compile: program

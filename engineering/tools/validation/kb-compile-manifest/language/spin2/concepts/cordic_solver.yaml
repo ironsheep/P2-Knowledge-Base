@@ -1,0 +1,64 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/cordic_solver.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: available_methods.trigonometric.qsin.example
+    fp: "eab8c6be51064617"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [y]
+  - at: available_methods.trigonometric.qcos.example
+    fp: "f524b8ee24165d88"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x]
+  - at: available_methods.coordinate_transforms.rotxy.example
+    fp: "0a50341a868e00cc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x2, y2]
+  - at: available_methods.coordinate_transforms.polxy.example
+    fp: "5359f554721fcb12"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, y]
+  - at: available_methods.coordinate_transforms.xypol.example
+    fp: "2def60ad1fac5b70"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rho, theta]
+  - at: available_methods.logarithmic.qlog.example
+    fp: "65b8c9e53c95fe23"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [log_val]
+  - at: available_methods.logarithmic.qexp.example
+    fp: "73c527e6e21b0e49"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, log_val]
+  - at: available_methods.extended_precision.muldiv64.example
+    fp: "8200dea98cc44e1e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [avg, total, count]
+  - at: common_patterns.sine_wave_generation.code
+    fp: "30300945a852fe3b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ang, amplitude, max_amplitude, output()->1/1]
+  - at: common_patterns.circular_motion.code
+    fp: "dd90eab86f1d1839"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, center_x, radius, ang, y, center_y, draw_point()->1/2, speed]
+  - at: common_patterns.distance_calculation.code
+    fp: "88234b543f99352d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [dx, x2, x1, dy, y2, y1, distance, unused]
+  - at: common_patterns.angle_calculation.code
+    fp: "e290722b29bd790f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [dx, target_x, current_x, dy, target_y, current_y, unused, heading]

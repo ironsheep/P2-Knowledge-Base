@@ -1,0 +1,118 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/string_constants.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: string_creation_methods[0].example
+    fp: "ec3b171fa06b87c5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ptr]
+  - at: string_creation_methods[1].example
+    fp: "9691c26b6d739d21"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ptr]
+  - at: string_creation_methods[2].example
+    fp: "f6d722753980a960"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 43
+    assumes: [tx()->1/1]
+  - at: string_creation_methods[3].syntax
+    fp: "612a651b31b0a3d0"
+    compile: program
+  - at: string_creation_methods[3].example
+    fp: "3b7482b0b5dce72a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [print_string()->1/1]
+  - at: memory_layout.zero_terminated.example
+    fp: "a3796f994a7c4a14"
+    compile: not-code
+    reason: "memory-layout table (Offset/Value/Hex rows) for a string; terminal-style listing, not code"
+  - at: memory_layout.length_prefixed.example
+    fp: "39cdc9926db8f719"
+    compile: not-code
+    reason: "memory-layout table (Offset/Value/Hex rows) for a string; terminal-style listing, not code"
+  - at: escape_sequences.alternative
+    fp: "580e33e8f669e0ac"
+    compile: not-code
+    reason: "prose sentence followed by a short DAT excerpt; mixed prose + excerpt, not one compilable unit"
+  - at: string_table_pattern.example
+    fp: "bc2b771867b2d1db"
+    compile: program
+  - at: string_table_pattern.compact_pattern.code
+    fp: "2e219135df21dec4"
+    compile: program
+  - at: common_patterns[0].code
+    fp: "be2ece78d908c5e2"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [print_string()->0/3, print_char()->0/1]
+    finding: "S-048"
+  - at: common_patterns[1].code
+    fp: "f77654b8a5c6d74c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [count, status]
+  - at: common_patterns[2].code
+    fp: "6435e0c48bd9b248"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [print_string()->1/1, print_dec()->1/1]
+  - at: common_patterns[3].code
+    fp: "9cb49e3ce6c7d6be"
+    compile: program
+  - at: common_patterns[4].code
+    fp: "98d49871dd01f6b2"
+    compile: program
+  - at: string_utility_functions[0].code
+    fp: "888d300ec1720c78"
+    compile: program
+  - at: string_utility_functions[1].code
+    fp: "a8170a1fecf4ca73"
+    compile: program
+  - at: string_utility_functions[2].code
+    fp: "3b25111345b5501d"
+    compile: program
+  - at: anti_patterns[0].wrong
+    fp: "5425238776f8fb3a"
+    compile: program
+  - at: anti_patterns[0].correct
+    fp: "c828aae55a1474fd"
+    compile: program
+  - at: anti_patterns[1].wrong
+    fp: "998122529a8d4402"
+    compile: program
+    finding: "S-019"
+  - at: anti_patterns[1].correct
+    fp: "647ca47451b4618d"
+    compile: program
+  - at: anti_patterns[2].wrong
+    fp: "79c1eb2df9c24aeb"
+    compile: program
+  - at: anti_patterns[2].correct
+    fp: "b5b02ea078b1b97b"
+    compile: fragment
+    wrap: spin2-top
+    with: ["anti_patterns[2].wrong"]
+  - at: anti_patterns[3].wrong
+    fp: "4dc5c1850c0d0de7"
+    compile: fragment
+    wrap: spin2-top
+    with: ["string_utility_functions[1].code"]
+  - at: anti_patterns[3].correct
+    fp: "5f02079d0441e86a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buffer]
+  - at: anti_patterns[4].wrong
+    fp: "a75f658f3b7aa363"
+    compile: program
+  - at: anti_patterns[4].correct
+    fp: "b8487dd3c4908efc"
+    compile: program
+  - at: memory_considerations.alignment_tip
+    fp: "a573d62901c05757"
+    compile: not-code
+    reason: "prose sentence followed by a short DAT excerpt; mixed prose + excerpt, not one compilable unit"

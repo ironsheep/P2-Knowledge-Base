@@ -1,0 +1,80 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/method-pointers.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: getting_method_addresses.local_method.example
+    fp: "eecc6858940cefe8"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [handler, ProcessData()->0/0]
+  - at: getting_method_addresses.child_object_method.example
+    fp: "5f1c8149b9e39a2b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [outputMethod, serial.tx(0), lcd.Char(0)]
+    with: ["examples[1].code"]
+  - at: getting_method_addresses.indexed_object_method.example
+    fp: "4d0436d0d144596e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [readMethod, index]
+    finding: "S-018"
+  - at: calling_through_pointers.multiple_returns.example
+    fp: "d1ea4bca6d6b5a9d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [GetPosition()->3/0]
+  - at: examples[0].code
+    fp: "f8344713e6768934"
+    compile: program
+  - at: examples[1].code
+    fp: "61cfe16206794a4c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [serial.tx(0), lcd.Char(0)]
+  - at: examples[2].code
+    fp: "b6b182dee3bde558"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [HandleIdle()->1/0, HandleRunning()->1/0, HandleError()->1/0]
+    finding: "S-017"
+  - at: examples[3].code
+    fp: "aad6bb1b0dd2aef7"
+    compile: program
+  - at: examples[4].code
+    fp: "538079af0909ab37"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [NBUS=con, pca.write(2)]
+    finding: "S-019"
+  - at: examples[5].code
+    fp: "2d0875a256c4d9e7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [values]
+    finding: "S-017"
+  - at: examples[6].code
+    fp: "dcfbc204bfb1a5a8"
+    compile: program
+    finding: "S-008+S-017"
+  - at: recv_send_as_pointers.recv.usage
+    fp: "5215c8f4a0906923"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [data, inputMethod]
+    finding: "S-017"
+  - at: recv_send_as_pointers.send.usage
+    fp: "d31071bd5db807a4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [outputMethod, data]
+  - at: recv_send_as_pointers.flexible_io_pattern
+    fp: "d14ed7ac8f9eed24"
+    compile: program
+    finding: "S-017+S-018+S-033"
+  - at: parameter_considerations.wrapper_pattern
+    fp: "d6b381f32b186569"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [handlers, ActualNoParam()->1/0, ActualOneParam()->1/1]
+    finding: "S-017"

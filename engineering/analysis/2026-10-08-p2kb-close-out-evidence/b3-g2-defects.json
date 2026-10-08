@@ -1,0 +1,694 @@
+[
+ {
+  "slug": "reg-hash-in-register-index",
+  "finding": "S-PENDING-reg-hash-in-register-index",
+  "statement": "`REG[#myregs + index]` -- `#` is not allowed inside REG[], and a run-time index cannot be added inside the brackets. The page repeats the form in its comparison table (`REG[#myreg]`, addressing.yaml:180) and notes (:169-170 `# returns cog register address`, `REG[]`).",
+  "compiler_error": "Expected a constant, unary operator, or \"(\" (at `#`; also for `REG[myregs + index]` with a run-time index)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:364-365 (`REG[register]`, `REG[register][index]` -- 'register' may be a symbol declared in an ORG section; the index is a separate [index])",
+  "verified_fix": "`REG[myregs][index] := value` / `value := REG[myregs][index]` compiles (the whole block, scratch t1.spin2). `REG[myregs + 1]` (constant offset) and `x := #myregs` also compile",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/addressing.yaml",
+    "addr": "common_patterns.register_access.code",
+    "key_line": 158,
+    "gate_first_error": "block line 6 (YAML line 164): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "REG[#myregs + index] := value  ' Write to cog register",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "hub-address-immediate-without-augment",
+  "finding": "S-PENDING-hub-address-immediate-without-augment",
+  "statement": "In a cog-mode (ORG 0) listing, `MOV PA, #@hubData` loads a hub address ($400+) with a plain 9-bit immediate. A hub address needs the `##` augmented immediate (the same page writes `##@hubData` two lines below).",
+  "compiler_error": "Constant must be from 0 to 511 (m130)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:188 ('(## for >9 bits)'), :311 (`@IncPins` is the hub address of the instruction)",
+  "verified_fix": "`MOV PA, ##@hubData` compiles (with `temp` declared as a cog register before ORGH; scratch t2.spin2). The block also uses `temp` in the ORGH section without declaring it",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/addressing.yaml",
+    "addr": "org_vs_orgh_addressing.example",
+    "key_line": 225,
+    "gate_first_error": "block line 4 (YAML line 229): Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "MOV     PA, #@hubData           ' Get hub address into PA",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "temp"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "child-dat-label-through-object",
+  "finding": "S-PENDING-child-dat-label-through-object",
+  "statement": "The pasm_only_object archetype: a child object that holds only a DAT/PASM driver ('No Spin2 methods, only DAT/PASM') and a parent that starts it with `COGINIT(COGEXEC_NEW, @pasm_calc.pasm_entry, @params)`. Two compiler facts contradict it: a file with only a DAT block cannot be used as an OBJ, and `@obj.dat_label` is not an expression -- a child's DAT label is reachable only through a method of the child.",
+  "compiler_error": "child = DAT only: `fast_calculator.spin2 is a PASM file and cannot be used as a Spin2 object`; child with a PUB added: `Expected an object constant, structure, or method` (at `.pasm_entry`). In the gate, whose stub object is an empty file: `inside fast_calculator.spin2: No PUB method or DAT block found`",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:234-236 (a parent reaches a child's methods and constants -- object_name.method_name(), object_name.constant_name -- not its DAT symbols); the page's own archetype text object_archetypes.yaml:321-329",
+  "verified_fix": "child gets `PUB entry_addr() : a` / `a := @pasm_entry`; parent `COGINIT(COGEXEC_NEW, pasm_calc.entry_addr(), @params)` compiles (scratch t/obj1)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/object_archetypes.yaml",
+    "addr": "archetypes[8].parent_usage",
+    "key_line": 353,
+    "gate_first_error": "inside fast_calculator.spin2: No PUB method or DAT block found",
+    "source_line_of_error": "",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "file:fast_calculator.spin2"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "swap-operator-on-plain-variables",
+  "finding": "S-PENDING-swap-operator-on-plain-variables",
+  "statement": "`a :=: b  ' a and b are swapped` (listed as the swap operator in the overview, operators.yaml:25, and as the swap_values pattern). `:=:` swaps the contents of two STRUCTURE variables; it is not defined for plain long variables.",
+  "compiler_error": "Variable needs an operator",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:37 (v45 note: `structureA :=: structureB 'swap structures' contents`), :866",
+  "verified_fix": "`a, b := b, a` compiles for longs; `p :=: q` compiles for two STRUCT variables ({Spin2_v45}; scratch t/s1.spin2)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/operators.yaml",
+    "addr": "common_patterns[10].code",
+    "key_line": 200,
+    "gate_first_error": "block line 1: Variable needs an operator",
+    "source_line_of_error": "a :=: b  ' a and b are swapped",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "a",
+     "b"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "pasm-register-collides-with-parameter-name",
+  "finding": "S-PENDING-pasm-register-collides-with-parameter-name",
+  "statement": "The dual_cog_object template starts a PASM driver whose first instruction is `RDLONG pin, PTRA[0]` -- `pin` is not defined in the DAT (the code is elided with '...'), and the only natural completion (`pin res 1`) collides with the PUB parameter `pin` of `start(pin, frequency)`: names are one namespace per object.",
+  "compiler_error": "Expected a unique parameter name (m221) when `pin` is declared as a DAT/cog register; Undefined symbol when it is not",
+  "correct_source": "compiler behaviour (scratch t/u1.spin2); v55:285 says inline PASM sees parameters by their names, which is the same namespace",
+  "verified_fix": "naming the register `pin_reg` (`RDLONG pin_reg, PTRA[0]`, `pin_reg res 1`) compiles (scratch t/v7.spin2)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/object_archetypes.yaml",
+    "addr": "archetypes[7].template",
+    "key_line": 286,
+    "gate_first_error": "block line 5 (YAML line 291): Expected a unique parameter name (m221)",
+    "source_line_of_error": "PUB start(pin, frequency) : ok",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "pin"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "unsupported-spin2-v44-directive",
+  "finding": "S-PENDING-unsupported-spin2-v44-directive",
+  "statement": "The well_structured_file template begins with the version directive `{Spin2_v44}`. PNut-TS no longer accepts it.",
+  "compiler_error": "{Spin2_v44} is no longer supported due to changes in data structures beginning in v45]",
+  "correct_source": "compiler behaviour; v55:37 (v45 revamped data structures); the page's own struct-bitfields.yaml uses {Spin2_v45}+",
+  "verified_fix": "`{Spin2_v45}` at the top of the same template compiles (scratch t/v8d)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/conventions/vscode-pnut-documentation-style.yaml",
+    "addr": "templates.well_structured_file.template",
+    "key_line": 237,
+    "gate_first_error": "block line 5 (YAML line 242): {Spin2_v44} is no longer supported due to changes in data structures beginning in v45]",
+    "source_line_of_error": "CON { Configuration Constants }",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "serial.start(2)"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "xoro-operator-without-variable",
+  "finding": "S-PENDING-xoro-operator-without-variable",
+  "statement": "`value := ??` and `value := ?? // 100` use `??` as a free-standing term. `??` is a variable-prefix operator: it needs a long variable, which it iterates and returns (`??var`).",
+  "compiler_error": "Expected a variable (m251)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:412 (`?? (pre)`, `??var`: Iterate long var per XORO32, return pseudo-random value); the same page's other examples use `??seed`/`??state`",
+  "verified_fix": "`value := ??seed` and `value := (??seed) +// 100` compile (scratch t/v4.spin2)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/operators.yaml",
+    "addr": "special_operators[0].example",
+    "key_line": 281,
+    "gate_first_error": "block line 1 (YAML line 282): Expected a variable (m251)",
+    "source_line_of_error": "value := ??              ' Get random 32-bit value",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "callee-called-with-inconsistent-arity",
+  "finding": "S-PENDING-callee-called-with-inconsistent-arity",
+  "statement": "menu_system calls the same user method `print_string` with three arguments (`print_string(@\"=== Main Menu ===\", 13, 10)`) and with one (`print_string(@@menu_table[i])`). One method cannot take both; the code block is not self-consistent.",
+  "compiler_error": "Expected \",\" (the second call, with print_string declared as 3 parameters; with 1 parameter the first call fails the same way)",
+  "correct_source": "no source statement; the block's own two calls disagree. Other blocks of the same page call print_string with one argument (string_constants.yaml:70, :167-169, :187)",
+  "verified_fix": "`print_string(@\"=== Main Menu ===\")` followed by `print_char(13)` / `print_char(10)` compiles with print_string(p) and print_char(c) declared (scratch t/v6.spin2)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/string_constants.yaml",
+    "addr": "common_patterns[0].code",
+    "key_line": 154,
+    "gate_first_error": "block line 15 (YAML line 169): Expected \",\"",
+    "source_line_of_error": "print_string(@@menu_table[i])",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "print_string()->0/3",
+     "print_char()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "byte-word-typed-parameter-or-result",
+  "finding": "S-PENDING-byte-word-typed-parameter-or-result",
+  "statement": "type-propagation.yaml shows `BYTE`/`WORD` typed method PARAMETERS (`PUB foo(BYTE a, b, WORD c)`) and RESULTS (`PUB bar() : BYTE status, value`) and builds the 'type is not sticky' rule on them. Parameters and results can only be long or pointer-typed (`^BYTE`, `^WORD`, `^LONG`, `^StructName`); a bare BYTE/WORD in a parameter or result list is a compile error. (Locals are fine: `| BYTE temp, count` compiles, and count is a long -- the one row of the page that is right.)",
+  "compiler_error": "Expected a unique parameter name (m220) at `BYTE a`; Expected a unique result name (m230) at `BYTE status`",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (`PUB|PRI MethodName({{^BYTE|^WORD|^LONG|^StructName} Parameter{, ...}}) {: {^BYTE|^WORD|^LONG|^StructName} Result{, ...}} {| ... {{^}BYTE|{^}WORD|{^}LONG|{^}StructName} LocalVar ...}`), :276-278 (^BYTE etc. make parameters/results POINTERS), :283 (overrides apply only to the variable being declared)",
+  "verified_fix": "`PUB foo(^BYTE a, b, ^WORD c)`, `PUB bar() : ^BYTE status, value`, `PUB baz() | BYTE temp, count` compile (scratch t/v1.spin2); the meaning is pointer-to-byte, not a byte-sized parameter",
+  "class_kind": "defect",
+  "site_count": 2,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/type-propagation.yaml",
+    "addr": "rules.pub_pri_parameters.example.code",
+    "key_line": 29,
+    "gate_first_error": "block line 1 (YAML line 30): Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB foo(BYTE a, b, WORD c)           ' a=BYTE, b=LONG(!), c=WORD",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/type-propagation.yaml",
+    "addr": "rules.pub_pri_return_values.example.code",
+    "key_line": 40,
+    "gate_first_error": "block line 1 (YAML line 41): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB bar() : BYTE status, value       ' status=BYTE, value=LONG(!)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "result-name-collides-with-constant",
+  "finding": "S-PENDING-result-name-collides-with-constant",
+  "statement": "`PUB check_sensor_read() : ready` in a block that also declares `CON ... READY = 2`. Spin2 names are case-insensitive: the result `ready` and the constant `READY` are the same name.",
+  "compiler_error": "Expected a unique result name (m230)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (result names must be unique); the compiler is the authority for case-insensitivity",
+  "verified_fix": "renaming the result `is_ready` compiles (scratch t/v2.spin2)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/concepts/timing_operations.yaml",
+    "addr": "anti_patterns[5].correct",
+    "key_line": 448,
+    "gate_first_error": "block line 15 (YAML line 463): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB check_sensor_read() : ready",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "request_reading()->0/0"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "parenless-method-header-and-call",
+  "finding": "S-PENDING-parenless-method-header-and-call",
+  "statement": "The JonnyMac method_pattern shows `pub main` / `pub setup` headers and the calls `setup`, `time.start` with no parentheses (P1 style). Spin2 requires `()` on a method header and on a call with no parameters; the page's other templates (`pub start(value)`, `pub random() : result`, `pub stop()`) do use them.",
+  "compiler_error": "Expected \"(\" (at the first header `pub main`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (`PUB|PRI MethodName(...)`), :233-236 (`object_name.method_name({any_parameters})`)",
+  "verified_fix": "`pub main()`, `setup()`, `pub setup()`, `time.start()` with `OBJ time/serial` declared and stub objects compiles (scratch t/v3d)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/conventions/johnny-mac-documentation-style.yaml",
+    "addr": "code_organization.method_pattern",
+    "key_line": 143,
+    "gate_first_error": "block line 1 (YAML line 144): Expected \"(\"",
+    "source_line_of_error": "pub main",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "RX_PIN=con",
+     "TX_PIN=con",
+     "BAUD_115200=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "p1-comparison-operators-equal-first",
+  "finding": "S-PENDING-p1-comparison-operators-equal-first",
+  "statement": "`IF (idx => 0) AND (idx =< 15)` in the P2 complete example uses the P1 operators `=>` and `=<`. Spin2 spells them `>=` and `<=` (the same KB lists P1 `=<`/`=>` as fails_to_compile, operators.yaml:358).",
+  "compiler_error": "Expected \")\" (m301)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:475, :482 (`<=`, `>=`); operators.yaml:358",
+  "verified_fix": "`IF (idx >= 0) AND (idx <= 15)` compiles -- the whole complete_example, with jm_time_80 / jm_fullduplexserial stubs (scratch t/v5d)",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/conventions/spin2-naming-jonnymac.yaml",
+    "addr": "complete_example.code",
+    "key_line": 284,
+    "gate_first_error": "block line 41 (YAML line 325): Expected \")\" (m301)",
+    "source_line_of_error": "IF (idx => 0) AND (idx =< 15)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "time.start(0)",
+     "serial.start(3)"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-008",
+  "statement": "reserved word used as identifier: `cmp` (PASM CMP instruction) as a local in the SortArray example; `field` (FIELD operator) as the assignment target in the extract_field pattern. Renaming (`order`, `fld`) compiles.",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "examples[6].code",
+    "key_line": 178,
+    "gate_first_error": "block line 1 (YAML line 179): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m241)",
+    "source_line_of_error": "PUB SortArray(pArray, count, compareFunc) | i, j, temp, cmp",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/operators.yaml",
+    "addr": "common_patterns[5].code",
+    "key_line": 180,
+    "gate_first_error": "block line 1: Expected \"[\"",
+    "source_line_of_error": "field := (value >> P) & BMASK (N-1)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value",
+     "P",
+     "N"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-012",
+  "statement": "statements at top level (`if fabs(...) <. EPSILON`) beside `CON EPSILON = ...`, outside any method",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/floating_point.yaml",
+    "addr": "anti_patterns.float_equality.correct",
+    "key_line": 161,
+    "gate_first_error": "block line 2 (YAML line 163): Expected a unique constant name, \"#\", or STRUCT (m211)",
+    "source_line_of_error": "if fabs(result -. 0.0) <. EPSILON",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-013",
+  "statement": "PASM instruction WAITX called as a Spin2 method (`waitx(TX_BIT_TICKS)` / `WAITX(...)`); Spin2 has WAITCT/WAITMS/WAITUS. (The same templates also write WYPIN with its arguments in PASM order -- see O25.)",
+  "sites": [
+   {
+    "file": "language/spin2/conventions/johnny-mac-documentation-style.yaml",
+    "addr": "method_templates.complex_method.template",
+    "key_line": 225,
+    "gate_first_error": "block line 11 (YAML line 236): Expected an instruction or variable",
+    "source_line_of_error": "waitx(TX_BIT_TICKS)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "rqs_full()->1/0",
+     "TX_PIN=con",
+     "TX_BIT_TICKS=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/conventions/spin2-docs-jonnymac.yaml",
+    "addr": "method_templates.complex_method.pattern",
+    "key_line": 103,
+    "gate_first_error": "block line 10 (YAML line 113): Expected an instruction or variable",
+    "source_line_of_error": "WAITX(TX_BIT_TICKS)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "rqs_full()->1/0",
+     "TX_PIN=con",
+     "TX_BIT_TICKS=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-017",
+  "statement": "method-pointer call without the `:N` result count where a result is used (`nextState := stateHandlers[currentState]()`, `LONG[pArray][i] := transformFunc(value)`, `cmp := compareFunc(...)`, `data := inputMethod()`, `char := inputMethod()`, `result := handlers[index](p1,p2,p3)`); `:1` fixes (w1.spin2)",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "examples[2].code",
+    "key_line": 113,
+    "gate_first_error": "block line 19 (YAML line 132): This method returns no results",
+    "source_line_of_error": "nextState := stateHandlers[currentState]()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "HandleIdle()->1/0",
+     "HandleRunning()->1/0",
+     "HandleError()->1/0"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "examples[5].code",
+    "key_line": 164,
+    "gate_first_error": "block line 4 (YAML line 168): This method returns no results",
+    "source_line_of_error": "LONG[pArray][i] := transformFunc(value)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "values"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "examples[6].code",
+    "key_line": 178,
+    "gate_first_error": "block line 1 (YAML line 179): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m241)",
+    "source_line_of_error": "PUB SortArray(pArray, count, compareFunc) | i, j, temp, cmp",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "recv_send_as_pointers.recv.usage",
+    "key_line": 198,
+    "gate_first_error": "block line 1: This method returns no results",
+    "source_line_of_error": "data := inputMethod()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "data",
+     "inputMethod"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "recv_send_as_pointers.flexible_io_pattern",
+    "key_line": 207,
+    "gate_first_error": "block line 10 (YAML line 217): Expected a string, variable, method, or object",
+    "source_line_of_error": "inputMethod := @serial.rx",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "parameter_considerations.wrapper_pattern",
+    "key_line": 228,
+    "gate_first_error": "block line 3 (YAML line 231): This method returns no results",
+    "source_line_of_error": "result := handlers[index](p1, p2, p3)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "handlers",
+     "ActualNoParam()->1/0",
+     "ActualOneParam()->1/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 6
+ },
+ {
+  "slug": "S-018",
+  "statement": "object used with no OBJ line: `@sensors[index].Read`, `@serial.rx`/`@serial.tx` (flexible_io_pattern), `time.start`/`serial.start` in the JonnyMac method_pattern",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "getting_method_addresses.indexed_object_method.example",
+    "key_line": 47,
+    "gate_first_error": "block line 1: Expected a string, variable, method, or object",
+    "source_line_of_error": "readMethod := @sensors[index].Read",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "readMethod",
+     "index"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "recv_send_as_pointers.flexible_io_pattern",
+    "key_line": 207,
+    "gate_first_error": "block line 10 (YAML line 217): Expected a string, variable, method, or object",
+    "source_line_of_error": "inputMethod := @serial.rx",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/conventions/johnny-mac-documentation-style.yaml",
+    "addr": "code_organization.method_pattern",
+    "key_line": 143,
+    "gate_first_error": "block line 1 (YAML line 144): Expected \"(\"",
+    "source_line_of_error": "pub main",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "RX_PIN=con",
+     "TX_PIN=con",
+     "BAUD_115200=con"
+    ],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "S-019",
+  "statement": "complete PUB with undeclared locals: `filtered` (moving_average), `i` (method-pointers dependency-injection Init), `ptr` (bad_idea), `flag, place, digit` (print_with_commas -- the v55 original declares `| flag, place, digit`). Verified fixes compile (scratch t/w4.spin2, t/x1)",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/floating_point.yaml",
+    "addr": "patterns.moving_average.code",
+    "key_line": 145,
+    "gate_first_error": "block line 3 (YAML line 148): Expected an instruction or variable",
+    "source_line_of_error": "filtered := ALPHA *. float(new_sample) +. (1.0 -. ALPHA) *. filtered",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "examples[4].code",
+    "key_line": 149,
+    "gate_first_error": "block line 5 (YAML line 154): Object count must be from 1 to 255",
+    "source_line_of_error": "pca[NBUS] : \"pca9685_var\"          ' one VAR instance per bus",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "NBUS=con",
+     "pca.write(2)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/string_constants.yaml",
+    "addr": "anti_patterns[1].wrong",
+    "key_line": 283,
+    "gate_first_error": "block line 2 (YAML line 285): Expected an instruction or variable",
+    "source_line_of_error": "ptr := @\"Hello\"",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/table_lookup.yaml",
+    "addr": "common_patterns[4].code",
+    "key_line": 186,
+    "gate_first_error": "block line 3 (YAML line 189): Expected an expression term (m172)",
+    "source_line_of_error": "if flag ||= (digit := value / place // 10) or place == 1",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 4
+ },
+ {
+  "slug": "S-020",
+  "statement": "PUB returns a value (`RETURN stop - start`) but declares no result: bad_elapsed, good_elapsed, bad_sensor_read",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/timing_operations.yaml",
+    "addr": "anti_patterns[1].wrong",
+    "key_line": 368,
+    "gate_first_error": "block line 6 (YAML line 374): Expected end of line (m280)",
+    "source_line_of_error": "RETURN stop - start",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "do_work()->0/0"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/timing_operations.yaml",
+    "addr": "anti_patterns[1].correct",
+    "key_line": 375,
+    "gate_first_error": "block line 5 (YAML line 380): Expected end of line (m280)",
+    "source_line_of_error": "RETURN stop - start          ' Always correct",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "do_work()->0/0"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/concepts/timing_operations.yaml",
+    "addr": "anti_patterns[5].wrong",
+    "key_line": 443,
+    "gate_first_error": "block line 4 (YAML line 447): Expected end of line (m280)",
+    "source_line_of_error": "RETURN get_reading()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "request_reading()->0/0",
+     "get_reading()->1/0"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "S-033",
+  "statement": "RECV/SEND copied out into LONG variables and called (`inputMethod := RECV`, `outputMethod := SEND`) instead of the documented assignment `SEND := @OutMethod`",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/method-pointers.yaml",
+    "addr": "recv_send_as_pointers.flexible_io_pattern",
+    "key_line": 207,
+    "gate_first_error": "block line 10 (YAML line 217): Expected a string, variable, method, or object",
+    "source_line_of_error": "inputMethod := @serial.rx",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-023",
+  "statement": "GETRND described as true hardware randomness (thermal noise, 'never repeats', 'cryptographically suitable'); it is the xoroshiro128** PRNG seeded at boot (silicon-doc:2850-2859). The random_generation page builds its comparison table, when_to_use lists and two anti-patterns on it. The blocks carrying the claim compile, so they cannot be REGISTERED; the sites are prose.",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/random_generation.yaml",
+    "line": "7-12",
+    "claim": "GETRND: 'Hardware random from true random number generator (thermal noise)'; 'true randomness (cryptography, unique IDs)'"
+   },
+   {
+    "file": "language/spin2/concepts/random_generation.yaml",
+    "line": "17,23,26,29,32",
+    "claim": "comparison table: 'Thermal noise (true entropy)', 'Never repeats (true random)', 'True random', 'Cryptographically suitable'"
+   },
+   {
+    "file": "language/spin2/concepts/random_generation.yaml",
+    "line": "36-39",
+    "claim": "when_to_use_getrnd: cryptographic key generation, UUIDs, session IDs, security-sensitive"
+   },
+   {
+    "file": "language/spin2/concepts/random_generation.yaml",
+    "line": "155,164,218,272,277",
+    "claim": "code blocks/comments: 'unique identifier using hardware random', 'true random seed', `key := GETRND()  ' True hardware random`, notes 'GETRND ... provides true randomness'"
+   },
+   {
+    "file": "language/spin2/concepts/random_generation.yaml",
+    "line": "292",
+    "claim": "oneliner: 'GETRND (true random)'"
+   }
+  ],
+  "site_count": 5
+ },
+ {
+  "slug": "S-025",
+  "statement": "float/int square-root confusion: `\"sqrt(-x)\": \"NaN\"` listed among float special results (SQRT is the unsigned-integer root; FSQRT is the float root)",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/floating_point.yaml",
+    "line": "99",
+    "claim": "special_results: \"sqrt(-x)\": \"NaN\""
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-031",
+  "statement": "STRCOPY's Max treated as the destination size; the source copies up to Max characters and occupies Max+1 bytes (spin2-v55-text.txt:590). Harmless with the short strings shown, wrong as a pattern.",
+  "sites": [
+   {
+    "file": "language/spin2/concepts/string_constants.yaml",
+    "line": "292",
+    "claim": "`STRCOPY(@buffer, @\"Hello\", 10)` into `BYTE buffer[10]` (Max = buffer size)"
+   },
+   {
+    "file": "language/spin2/concepts/string_constants.yaml",
+    "line": "323,325",
+    "claim": "`STRCOPY(@buffer, src, 20)` into `BYTE buffer[20]`; the ELSE branch uses 19 then writes `buffer[19] := 0` (redundant -- STRCOPY already wrote the zero)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-035",
+  "statement": "P1 `cnt` in a P2 convention page, inside a listing the page itself labels P1 (decided not-code, see O21)",
+  "sites": [
+   {
+    "file": "language/spin2/conventions/johnny-mac-documentation-style.yaml",
+    "line": "531",
+    "claim": "`seed := cnt  ' seed random number` in complete_example (labelled 'Complete P1 example', :482)"
+   }
+  ],
+  "site_count": 1
+ }
+]

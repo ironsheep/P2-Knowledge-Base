@@ -1,0 +1,62 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/conventions/spin2-docs-jonnymac.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: comment_types.method_documentation.usage
+    fp: "1284bdafa09817a9"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: comment_types.code_comments.usage
+    fp: "00db064feedfafc4"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: comment_types.assembly_comments.usage
+    fp: "3340f2c651f4376e"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: method_templates.simple_method.pattern
+    fp: "b305abe443675162"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed, DFLT_SEED=con]
+  - at: method_templates.method_with_return.pattern
+    fp: "7406d3bd74a96065"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed]
+  - at: method_templates.complex_method.pattern
+    fp: "ce5f1f1f42cf3c7e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [rqs_full()->1/0, TX_PIN=con, TX_BIT_TICKS=con]
+    finding: "S-013"
+  - at: method_templates.method_with_complex_params.pattern
+    fp: "5cc49cc8808a20e8"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [RX_PIN=con]
+  - at: special_method_types.null_placeholder.pattern
+    fp: "9d6e4a5f17d1d272"
+    compile: program
+  - at: special_method_types.initialization.pattern
+    fp: "73612b198adaae0f"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [stop()->0/0]
+  - at: special_method_types.cleanup.pattern
+    fp: "5987e5fb86b57605"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [rx_pin, tx_pin]
+  - at: pasm2_documentation.inline_example
+    fp: "1189e3013da3cf00"
+    compile: program
+  - at: constants_and_variables.constant_documentation.example
+    fp: "d41b6cc8c5d2ae99"
+    compile: fragment
+    wrap: spin2-top
+  - at: constants_and_variables.variable_documentation.example
+    fp: "40d28f36691b0cda"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [BUFFER_SIZE=con]

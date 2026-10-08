@@ -1,0 +1,30 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/struct-bitfields.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax_forms.named_member_bitfield.example
+    fp: "15a4d41b4f2e9ac4"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+  - at: syntax_forms.nameless_member.example
+    fp: "f4e6195fbaeb4476"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+  - at: examples[0].code
+    fp: "db3c3441be9be281"
+    compile: program
+  - at: examples[1].code
+    fp: "6552152c417fe0e4"
+    compile: program
+  - at: examples[2].code
+    fp: "1be32f808140cf3d"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[3].code
+    fp: "0ec1b0f345245057"
+    compile: program
+  - at: examples[4].code
+    fp: "faa4b81b4c470ca8"
+    compile: program

@@ -1,0 +1,108 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/object_archetypes.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: archetypes[0].template
+    fp: "cdfd2da53522703d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [serial.start(3)]
+  - at: archetypes[1].template
+    fp: "78b4ddbceb182f5d"
+    compile: program
+  - at: archetypes[2].template
+    fp: "81eadabdcafdf2e0"
+    compile: program
+  - at: archetypes[3].template
+    fp: "b623fa16b60591b1"
+    compile: program
+  - at: archetypes[4].child_template
+    fp: "f08b72326e539943"
+    compile: program
+  - at: archetypes[4].parent_usage
+    fp: "fb6bbf696fb70621"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [fast_timer.start(0)]
+  - at: archetypes[5].template
+    fp: "995fb92ff550d0b4"
+    compile: program
+  - at: archetypes[6].template
+    fp: "813f6a53327f9620"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [handle_idle()->1/1, handle_connecting()->1/1, handle_connected()->1/1, handle_error()->1/1]
+  - at: archetypes[7].template
+    fp: "42fa5f2b10b2e389"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [pin]
+    finding: "S-045"
+  - at: archetypes[8].object_template
+    fp: "80b001d02b3bb492"
+    compile: program
+  - at: archetypes[8].parent_usage
+    fp: "b9cc9046bfec474c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:fast_calculator.spin2]
+    finding: "S-043"
+  - at: data_sharing_patterns[0].code
+    fp: "ded5096bff091c6a"
+    compile: program
+  - at: data_sharing_patterns[1].code
+    fp: "8d53d874e237703e"
+    compile: program
+  - at: data_sharing_patterns[2].code
+    fp: "f55a9f3d5af85d0f"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker_cog]
+  - at: data_sharing_patterns[3].code
+    fp: "251c2236d0c8d06b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [data_lock, shared_data]
+  - at: anti_patterns[0].wrong
+    fp: "b9508425485f76d6"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [cog, worker()->0/0, stack]
+  - at: anti_patterns[0].correct
+    fp: "30512ef18ce3d9b1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [cog, lock]
+  - at: anti_patterns[1].wrong
+    fp: "26cabb4458c68cce"
+    compile: program
+  - at: anti_patterns[1].correct
+    fp: "9f68c2e76df24530"
+    compile: program
+  - at: anti_patterns[2].wrong
+    fp: "20324017c2fb6895"
+    compile: fragment
+    wrap: spin2-top
+  - at: anti_patterns[2].correct
+    fp: "2bc435a1c1f7164d"
+    compile: program
+  - at: anti_patterns[3].wrong
+    fp: "165c9e072d6aafa7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker()->0/0, stack]
+  - at: anti_patterns[3].correct
+    fp: "9668c22031569801"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [cog, worker()->0/0, stack]
+  - at: anti_patterns[4].wrong
+    fp: "6e5dab4cca097a4a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [state]
+  - at: anti_patterns[4].correct
+    fp: "2c0a8f25408c5369"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [STATE_IDLE=con, STATE_RUNNING=con, STATE_ERROR=con, state]

@@ -1,0 +1,137 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/basic-io.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: single_pin_operations.set_output_high.example
+    fp: "273b80e3a761dbd3"
+    compile: fragment
+    wrap: spin2-method
+  - at: single_pin_operations.set_output_low.example
+    fp: "215e9c00c9ef4728"
+    compile: fragment
+    wrap: spin2-method
+  - at: single_pin_operations.toggle_output.example
+    fp: "073c6001376190e6"
+    compile: fragment
+    wrap: spin2-method
+  - at: single_pin_operations.float_pin.example
+    fp: "0529345a6727b709"
+    compile: fragment
+    wrap: spin2-method
+  - at: single_pin_operations.read_pin.example
+    fp: "1ad2580f4801429d"
+    compile: fragment
+    wrap: spin2-method
+  - at: single_pin_operations.write_pin.example
+    fp: "0a3536ec39bc8b6b"
+    compile: fragment
+    wrap: spin2-method
+  - at: multi_pin_operations.pin_field_methods.example
+    fp: "d658c07ef1f581d2"
+    compile: fragment
+    wrap: spin2-method
+  - at: multi_pin_operations.register_access.example
+    fp: "047721be36a273ea"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: pin_field_encoding.addpins_operator.example
+    fp: "d4633d52f3575227"
+    compile: not-code
+    reason: "pin-field notation with a gloss ('8 ADDPINS 7 = pins 8 through 15'); notation, not a statement"
+  - at: pin_field_encoding.range_operator.example
+    fp: "55a72ca749158679"
+    compile: not-code
+    reason: "pin-field notation with a gloss ('8 ADDPINS 7 = pins 8 through 15'); notation, not a statement"
+  - at: internal_pull_resistors.pull_a_line_high.example
+    fp: "e2489529fa347ec4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [level]
+  - at: internal_pull_resistors.pull_a_line_low.example
+    fp: "58828e96f78b16b3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [level]
+  - at: smart_pin_to_basic_io_transition.clearing_smart_pin.example
+    fp: "e72e3dc4615bbc8a"
+    compile: fragment
+    wrap: spin2-method
+  - at: safe_initialization_patterns.method_calls_are_safe.example
+    fp: "e495ce12be01dedb"
+    compile: fragment
+    wrap: spin2-method
+  - at: safe_initialization_patterns.register_access_caution.wrong
+    fp: "c8e3019e2533f43b"
+    compile: fragment
+    wrap: spin2-method
+  - at: safe_initialization_patterns.register_access_caution.correct
+    fp: "59a748835c4465f4"
+    compile: fragment
+    wrap: spin2-method
+  - at: common_patterns.led_blink.code
+    fp: "99f5aae5336b6ec9"
+    compile: program
+  - at: common_patterns.button_read.code
+    fp: "4f672d0e1266a7a5"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buttonPressed()->0/0]
+  - at: common_patterns.parallel_bus_write.code
+    fp: "618c3cdc51c3ce36"
+    compile: program
+  - at: common_patterns.parallel_bus_read.code
+    fp: "65ad465d054ccbcd"
+    compile: program
+  - at: application_examples.seven_segment_display.code
+    fp: "23ded1072860f0f1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lookupSegments()->1/1]
+  - at: application_examples.matrix_keypad.code
+    fp: "9ba8f820e3255d92"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [decodeKey()->1/2]
+  - at: application_examples.ws2812_bit_bang.code
+    fp: "331c0da0ca2b44b2"
+    compile: program
+  - at: multi_cog_pin_coordination.coordination_strategies.single_cog_ownership.implementation
+    fp: "0c5be21237159bbb"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code"
+  - at: anti_patterns[1].wrong
+    fp: "018552b334946800"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [INPUT_PIN=con, value]
+  - at: anti_patterns[1].correct
+    fp: "3bf008b2800480e1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [INPUT_PIN=con, value]
+  - at: anti_patterns[2].wrong
+    fp: "af0e6e44a7118a0a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ADC_PIN=con, value]
+  - at: anti_patterns[2].correct
+    fp: "454456c56fc0fc8b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ADC_PIN=con, value]
+  - at: anti_patterns[3].correct
+    fp: "2f1b4610386bc7f3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [SERIAL_RX=con, timeout_reached()->1/0, value]
+  - at: anti_patterns[5].wrong
+    fp: "1226f623a413cd33"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, ADC_PIN=con]
+  - at: anti_patterns[5].correct
+    fp: "7685c23bd72f2961"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, ADC_PIN=con]

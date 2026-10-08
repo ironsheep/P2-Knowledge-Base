@@ -1,0 +1,139 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/operators.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: overview
+    fp: "aff8705b47942076"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code"
+  - at: operator_categories.limit.operators[0].example
+    fp: "a7d36248aec70b15"
+    compile: not-code
+    reason: "limit-operator expression shown standalone ('value #> 0 ' Clamp to at least 0'); legal only inside a statement"
+  - at: operator_categories.limit.operators[1].example
+    fp: "b7b6d0c7593c3c0c"
+    compile: not-code
+    reason: "limit-operator expression shown standalone ('value #> 0 ' Clamp to at least 0'); legal only inside a statement"
+  - at: operator_categories.unary_bit_operations[0].example
+    fp: "c35456f2dd42ee7e"
+    compile: not-code
+    reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
+  - at: operator_categories.unary_bit_operations[1].example
+    fp: "886cb77181aed1ae"
+    compile: not-code
+    reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
+  - at: operator_categories.unary_bit_operations[2].example
+    fp: "4c0a2be15e3af915"
+    compile: not-code
+    reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
+  - at: operator_categories.unary_bit_operations[3].example
+    fp: "db95b03099cd1b0f"
+    compile: not-code
+    reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
+  - at: operator_categories.unary_bit_operations[4].example
+    fp: "4a15fe4879cfa093"
+    compile: not-code
+    reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
+  - at: operator_categories.unary_bit_operations[5].example
+    fp: "495491002ef5e188"
+    compile: not-code
+    reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
+  - at: operator_categories.unary_bit_operations[6].example
+    fp: "6c8ebeebd1d9caa9"
+    compile: not-code
+    reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
+  - at: common_patterns[0].code
+    fp: "e1fb320004a5b1ca"
+    compile: program
+  - at: common_patterns[1].code
+    fp: "f2dea5a1af60506c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con]
+  - at: common_patterns[2].code
+    fp: "869215c4e7bf1b6b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con]
+  - at: common_patterns[3].code
+    fp: "5d512b727fac1e66"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con]
+  - at: common_patterns[4].code
+    fp: "f3131766928581df"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con, bit_is_set()->1/0]
+  - at: common_patterns[5].code
+    fp: "c01c6286f4b3bb4b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, P, N]
+    finding: "S-008"
+  - at: common_patterns[6].code
+    fp: "87ae163ef423889e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [clamped, value, min_val, max_val]
+  - at: common_patterns[7].code
+    fp: "6fc04a5b03225b67"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [wrapped, value, max_val]
+  - at: common_patterns[8].code
+    fp: "a3e6eb89454af7b5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, n]
+  - at: common_patterns[9].code
+    fp: "d6871c36d5af28bc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, n]
+  - at: common_patterns[10].code
+    fp: "b81e35c47d11ae50"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, b]
+    finding: "S-044"
+  - at: anti_patterns[5].correct
+    fp: "2bf80f138eac81af"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [average, a, b]
+  - at: special_operators[0].example
+    fp: "d69475ebf07acaf0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+    finding: "S-047"
+  - at: special_operators[1].example
+    fp: "6e344fedca30d76f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, flag]
+  - at: special_operators[2].example
+    fp: "42862f10c2349a31"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, flag]
+  - at: special_operators[3].example
+    fp: "32fb3852ed954976"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ptr, buffer]
+  - at: special_operators[4].example
+    fp: "24ba18a30676bd87"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [addr, strings, index]
+  - at: special_operators[5].example
+    fp: "2f69e5a412d9f325"
+    compile: not-code
+    reason: "range-operator notation ('0..9 expands to 0, 1, 2, ..., 9'); notation with a gloss, not a statement"
+  - at: special_operators[6].example
+    fp: "f987e574127ce706"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, condition, true_val, false_val]

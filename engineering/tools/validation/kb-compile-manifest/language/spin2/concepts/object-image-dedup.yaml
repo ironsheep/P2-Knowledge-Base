@@ -1,0 +1,16 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/object-image-dedup.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "28af5091ff163aef"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code"
+  - at: forking_a_dat_region.to_force_a_fork
+    fp: "95fc9259456654a4"
+    compile: not-code
+    reason: "prose sentence introducing a two-line CON/DAT excerpt whose first line carries a prose comment; mixed prose + excerpt, not one compilable unit"
+  - at: cascade_through_tiers.pattern
+    fp: "7fa8f9ff2891e697"
+    compile: not-code
+    reason: "two-file listing: the mid-tier file (CON/OBJ leaf/DAT) and the top file (OBJ a/b overriding MID_TAG) printed one after the other under comments; the two parts are separate source files and cannot be one compilation unit"

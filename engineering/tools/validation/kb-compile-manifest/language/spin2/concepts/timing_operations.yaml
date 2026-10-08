@@ -1,0 +1,100 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/timing_operations.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: time_conversions.conversion_functions
+    fp: "36490106d1c35ed8"
+    compile: program
+  - at: patterns[0].code
+    fp: "3d2d0ca2fcbf9c63"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_periodic_work()->1/0]
+  - at: patterns[1].code
+    fp: "c9f5bea4a8846a5f"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [response_ready()->1/0]
+  - at: patterns[2].code
+    fp: "58c9e5f8f5afbe49"
+    compile: program
+  - at: patterns[3].code
+    fp: "b7824b89889f019c"
+    compile: program
+  - at: patterns[4].code
+    fp: "06d1b5909bb02b21"
+    compile: program
+  - at: patterns[5].code
+    fp: "fa9a400d21e46165"
+    compile: program
+  - at: patterns[6].code
+    fp: "42dea5f0de2aaee7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [handle_timer_expired()->1/1]
+  - at: patterns[7].code
+    fp: "44dbc6e7941bb1c1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_work()->1/0]
+  - at: patterns[8].code
+    fp: "cf58f96f09d74b9a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [perform_operation()->1/0]
+  - at: anti_patterns[0].wrong
+    fp: "460ac9c3f1781899"
+    compile: program
+  - at: anti_patterns[0].correct
+    fp: "0d4a6be8e2c4ddd5"
+    compile: program
+  - at: anti_patterns[1].wrong
+    fp: "bf2b41e9ab664c45"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_work()->0/0]
+    finding: "S-020"
+  - at: anti_patterns[1].correct
+    fp: "d213fbdbc6022033"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_work()->0/0]
+    finding: "S-020"
+  - at: anti_patterns[2].wrong
+    fp: "b2f09bb75f44ea3d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [sd_busy_released()->1/0, SD_OK=con, ERR_TIMEOUT=con]
+  - at: anti_patterns[2].correct
+    fp: "d1a695b6b6c5d04e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [sd_busy_released()->1/0, SD_OK=con, ERR_TIMEOUT=con]
+  - at: anti_patterns[3].wrong
+    fp: "9801754230367266"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_work()->1/0]
+  - at: anti_patterns[3].correct
+    fp: "a55c24ab6930efc9"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_work()->1/0]
+  - at: anti_patterns[4].wrong
+    fp: "6b4127e907d2a552"
+    compile: program
+  - at: anti_patterns[4].correct
+    fp: "1eb688ee7f916d91"
+    compile: program
+  - at: anti_patterns[5].wrong
+    fp: "2049421616f8a594"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [request_reading()->0/0, get_reading()->1/0]
+    finding: "S-020"
+  - at: anti_patterns[5].correct
+    fp: "997d4b2e3b822aff"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [request_reading()->0/0]
+    finding: "S-050"

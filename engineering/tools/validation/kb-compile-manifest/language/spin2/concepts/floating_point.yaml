@@ -1,0 +1,65 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/floating_point.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: conversion_functions.FLOAT.example
+    fp: "870821bbd72a7417"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [float_val]
+  - at: conversion_functions.TRUNC.example
+    fp: "a4c2c9d402b43e54"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [int_val]
+  - at: conversion_functions.ROUND.example
+    fp: "4eeb362846527c0e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [int_val]
+  - at: patterns.temperature_conversion.code
+    fp: "930adfee84f97135"
+    compile: program
+  - at: patterns.sensor_scaling.code
+    fp: "d0f7cf4fdac2d3f5"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_adc()->1/0]
+  - at: patterns.moving_average.code
+    fp: "9171a670bdea3a04"
+    compile: program
+    finding: "S-019"
+  - at: patterns.distance_calculation.code
+    fp: "e1abd9628a283861"
+    compile: program
+  - at: anti_patterns.float_equality.correct
+    fp: "a1e8e383e5073f0c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [result]
+    finding: "S-012"
+  - at: anti_patterns.accumulating_errors.wrong
+    fp: "360205ebeed2277f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [sum, i, count, samples]
+  - at: anti_patterns.float_in_tight_loops.wrong
+    fp: "f1d262de4d5272d6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, sum]
+  - at: anti_patterns.float_in_tight_loops.correct
+    fp: "5fd8c92dc7760c74"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, int_sum, sum]
+  - at: anti_patterns.ignoring_nan.wrong
+    fp: "ebae270e022c6621"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value, use_result()->1/1]
+  - at: anti_patterns.ignoring_nan.correct
+    fp: "ed63548bff3da183"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value, handle_error()->1/0, use_result()->1/1]

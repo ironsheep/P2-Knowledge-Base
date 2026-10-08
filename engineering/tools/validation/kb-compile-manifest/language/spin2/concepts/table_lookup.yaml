@@ -1,0 +1,62 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/table_lookup.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: range_support.code_example
+    fp: "332b301cb52b3eae"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CAT_DIGIT=con, CAT_UPPER=con, CAT_LOWER=con, CAT_OTHER=con]
+  - at: common_patterns[0].code
+    fp: "1025344c53c1a40f"
+    compile: program
+  - at: common_patterns[1].code
+    fp: "da5348f9b2c65732"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [VALID1=con, VALID2=con, VALID3=con]
+  - at: common_patterns[2].code
+    fp: "d30210b393f6287b"
+    compile: program
+  - at: common_patterns[3].code
+    fp: "c653398ee4c80310"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [char, value]
+  - at: common_patterns[4].code
+    fp: "442f8ac9ee1550b8"
+    compile: program
+    finding: "S-019"
+  - at: anti_patterns[0].wrong
+    fp: "0665e3cd84732213"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [index, pin, PIN_A=con, PIN_B=con]
+  - at: anti_patterns[1].wrong
+    fp: "e59fab16dec4a642"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [index, value]
+  - at: anti_patterns[1].correct
+    fp: "b3b2c75a055d413f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, found]
+  - at: anti_patterns[2].wrong
+    fp: "1e4ca0bbee5e94b0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [day_name, day_num, print_string()->1/1]
+  - at: anti_patterns[2].correct
+    fp: "c18d4c139fcc395b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [day_name, day_num, print_string()->1/1]
+  - at: anti_patterns[3].wrong
+    fp: "b5296a8bd5edf242"
+    compile: not-code
+    reason: "pseudo-code with an elision ('LOOKUP(index : 0, 1, 2, ..., 99)'); the '...' is not a value list"
+  - at: anti_patterns[3].correct
+    fp: "39515a6f19d13b0c"
+    compile: not-code
+    reason: "excerpt with an elision ('values long 0, 1, 2, ...') -- the proposer's PASS is an accident: '...' is the Spin2 line-continuation token, and TABLE_SIZE is undefined"

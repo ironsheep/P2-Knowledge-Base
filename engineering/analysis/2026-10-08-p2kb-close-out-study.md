@@ -219,6 +219,51 @@ O11, O13 and the CALL/REGEXEC/WAITCT rows re-read and holding.
 | S-039 | B | G1 | wrong, not code-driving | `byte.yaml:41`: `send(BYTE(...))` presented as a user method; `send` is the built-in SEND pointer (names are case-insensitive) | O21; `spin2-v55-text.txt:662-667` | traced | — | to research | no |
 | S-040 | B | G1 | latent | unsourced behaviour claims: "cog 0 always starts first", "cannot stop cog -1", "values outside 0-7 return 0", "maximum 496 longs" (`cogid`, `cogstop`, `cogchk`, `regload`) | O22 | undetermined | unsourced | to research (sources, then bench if silent) | no |
 
+**ENH-03 B3, group G2 (`language/spin2/concepts/`, `conventions/`, 370 blocks), 2026-10-08.**
+Evidence: `b3-g2-defects.json` (new classes, plus new sites for S-008, S-012, S-013, S-017,
+S-018, S-019, S-020, S-033 and prose sites for S-023, S-025, S-031, S-035), `b3-g2-class-map.json`,
+`b3-g2-observations.json`. Arbiter checks: re-applied in a fresh scratch root (same result); all
+not-code reasons read; source lines for O2, O3, O7, O11, O12, O14 re-read and holding. **One
+reviewer call overturned:** `johnny-mac-documentation-style.yaml` `complete_example.code`, a
+complete P1 listing, was marked not-code; it is served as the Spin2 style page's example, so it
+is a `program` carrying S-070 and stays red until fixed.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-041 | B | G2 | drives wrong code | `addressing.yaml:164,167`: `REG[#myregs + index]` and notes "# returns cog register address"; the form is `REG[reg][index]` | defects `reg-hash-in-register-index`; O1; `spin2-v55-text.txt:364-365` | traced | PASM `#` habit in Spin2 | to research | no |
+| S-042 | B | G2 | drives wrong code | `MOV PA, #@hubData` needs `##` | defects `hub-address-immediate-without-augment` | traced | — | to research | no |
+| S-043 | B | G2 | **drives wrong code** | `object_archetypes.yaml:321-371` "pasm_only_object": a DAT-only child cannot be an OBJ, and `@obj.dat_label` is not legal; the archetype's claims fail to compile | defects `child-dat-label-through-object`; O22; `spin2-v55-text.txt:233-236` | traced | invented object mechanism | to research | no |
+| S-044 | B | G2 | **drives wrong code** | `operators.yaml:25`, `:198-200`: `a :=: b` swaps plain variables; `:=:` swaps structures (v45) — use `a, b := b, a` | defects `swap-operator-on-plain-variables`; O7; `spin2-v55-text.txt:37`, `:866` | traced | — | to research | no |
+| S-045 | B | G2 | drives wrong code | inline PASM register `pin` collides with a PUB parameter of the same name | defects `pasm-register-collides-with-parameter-name` | traced | — | to research | no |
+| S-046 | B | G2 | drives wrong code | `{Spin2_v44}` used; the compiler refuses it (structures changed in v45) | defects `unsupported-spin2-v44-directive` | traced | stale gating | to research (class sweep: every `Spin2_v44` in the KB) | no |
+| S-047 | B | G2 | drives wrong code | `value := ??` with no operand variable | defects `xoro-operator-without-variable` | traced | — | to research (with S-059) | no |
+| S-048 | B | G2 | wrong, not code-driving | `print_string` called with 3 arguments, then 1, in one example | defects `callee-called-with-inconsistent-arity` | traced | — | to research | no |
+| S-049 | B | G2 | **drives wrong code** | `type-propagation.yaml:24-43`: BYTE/WORD-typed parameters and results (`PUB foo(BYTE a, b)`, `: BYTE status`) taught as rules; the compiler rejects them (m220/m230) | defects `byte-word-typed-parameter-or-result`; O19; `spin2-v55-text.txt:276-278`, `:288` | traced | invented type rules | to research | no |
+| S-050 | B | G2 | drives wrong code | result name `ready` collides with CON `READY` (names are case-insensitive) | defects `result-name-collides-with-constant` | traced | — | to research (with S-071) | no |
+| S-051 | B | G2 | drives wrong code | `pub main` with no `()` | defects `parenless-method-header-and-call` | traced | P1 habit | to research | no |
+| S-052 | B | G2 | drives wrong code | P1 comparison operators `=>`, `=<` | defects `p1-comparison-operators-equal-first` | traced | P1 habit | to research | no |
+| S-053 | B | G2 | **drives wrong code** | `operators.yaml:49-50`: SCAS "(a * b) >> 32"; it is >> 30 | O2; `spin2-v55-text.txt:461-462` | traced | SCA/SCAS conflated | to research | no |
+| S-054 | B | G2 | drives wrong code | `operators.yaml:131-133`: REV "reverse bottom N bits", `REV 8` result wrong; `x REV y` reverses bits 0..y (y+1 bits) | O3; `spin2-v55-text.txt:448` | traced | off by one | to research | no |
+| S-055 | B | G2 | wrong, not code-driving | `operators.yaml:151`: `-100 +/ 7 = 613566751`; it is 613566742 | O4; `spin2-v55-text.txt:458` | traced | arithmetic | to research | yes |
+| S-056 | B | G2 | **drives wrong code** | `operators.yaml:194-196`: `DECOD ENCOD (n - 1)` "round up to next power of 2" gives the power not above n-1 | O5; `spin2-v55-text.txt:434-435` | traced | — | to research | no |
+| S-057 | B | G2 | wrong, not code-driving | `operators.yaml:206-208`, `:217`: precedence levels for `==` and `+` misquoted | O6; `spin2-v55-text.txt:464`, `:468-469`, `:478` | traced | — | to research (with the F-547 operator audit, «#402») | no |
+| S-058 | B | G2 | latent | `operators.yaml:259`, `:280`: "float ~100x slower", "?? uses XORO32 hardware" — unsourced | O8 | traced | unsourced | to research | no |
+| S-059 | B | G2 | **drives wrong code** | `random_generation.yaml:47-60`: the `??` algorithm, period and zero-state claims are invented | O9; `spin2-v55-text.txt:412`; silicon doc XORO32 | traced | invented algorithm | to research | no |
+| S-060 | B | G2 | drives wrong code | `random_generation.yaml:220-226`: `GETRND() // 10` "slight bias toward 0-5"; `//` is signed, so the result is -9..9 | O10; `spin2-v55-text.txt:458-459` | traced | — | to research | no |
+| S-061 | B | G2 | **drives wrong code** | `basic-io.yaml:109`: PINREAD of one pin returns "TRUE (-1)"; it returns 0/1, so `IF !PINREAD(...)` at `:295` is always true | O11; `Spin2_interpreter.spin2:2409-2415` (v51) | traced | — | to research | no |
+| S-062 | B | G2 | **drives wrong code** | `basic-io.yaml:157-161`: pin range written `bottom..top`; Spin2 is Top..Bottom | O12; `spin2-v55-text.txt:390` | traced | — | to research (class sweep: every `..` pin range in the KB) | no |
+| S-063 | B | G2 | drives wrong code | `basic-io.yaml:443-452`: "RDPIN blocks until data ready"; it does not wait | O13; `silicon-doc-text.txt:3720` | traced | — | to research | no |
+| S-064 | B | G2 | wrong, not code-driving | `basic-io.yaml:382`, `:398-401`: conflicting cog drives "not documented"; the silicon doc says DIR/OUT are OR'd across cogs | O14; `silicon-doc-text.txt:3725` | traced | missed source | to research | no |
+| S-065 | B | G2 | drives wrong code | `basic-io.yaml:369-376`: WS2812 timings 800/450/400/850 ns beside `WAITUS(1)`/`WAITUS(0)` | O15 | traced | unsourced, impossible with 1 µs granularity | to research | no |
+| S-066 | B | G2 | drives wrong code | `string_constants.yaml:89-108`: escape table lists `\0`, `\"` and applies escapes to all strings; the source gives escapes only for `@\"…\"` and a different set | O16; `spin2-v55-text.txt:46-55` | traced | same class as S-032 | to research (with S-032) | no |
+| S-067 | B | G2 | latent | `string_constants.yaml:21`: hub strings and DAT data called "read-only", with "undefined behaviour" on write — unsourced | O17; `spin2-v55-text.txt:303` | traced | — | to research | no |
+| S-068 | B | G2 | drives wrong code | `string_constants.yaml:23`: `debug(@"Hello")`, `debug(label_ptr, …)` — a bare term in DEBUG() is output as a character | O18; `spin2-v55-text.txt:919`, `:938` | inferred | — | to research (sources first; bench only if silent) | no |
+| S-069 | B | G2 | wrong, not code-driving | `timing_operations.yaml:180-181`: us-to-cycles overflow put at ~2.1B us; it is ~10.7M us at 200 MHz | O20 | traced | arithmetic | to research | yes |
+| S-070 | B | G2 | **drives wrong code** | `johnny-mac-documentation-style.yaml:481-569`: the Spin2 style page's complete example is a P1 program (`cnt`, `_clkmode = xtal1 + pll16x`, `=>`) | O21; manifest entry `complete_example.code` (program, red) | traced | P1 source carried into a P2 page | to research | no |
+| S-071 | B | G2 | drives wrong code | `johnny-mac-documentation-style.yaml:70-92`: constants `RX_PIN` and variables `rx_pin` side by side — one name, error m240 | O23 | traced | case-insensitivity missed | to research (with S-050) | no |
+| S-072 | B | G2 | wrong, not code-driving | two convention pages require different block orders, each "required"; the compiler accepts any order | O24 | traced | — | to research | no |
+| S-073 | B | G2 | **drives wrong code** | `johnny-mac-documentation-style.yaml:233`: `wypin(txbyte, TX_PIN)` — arguments swapped; WYPIN(PinField, Data) | O25; `spin2-v55-text.txt:541` | traced | PASM operand order | to research (class sweep: WYPIN/WXPIN/WRPIN argument order) | no |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

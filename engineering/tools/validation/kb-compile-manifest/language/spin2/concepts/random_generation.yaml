@@ -1,0 +1,93 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/random_generation.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: xoro32_algorithm.description
+    fp: "ddc275c552870b02"
+    compile: not-code
+    reason: "prose + pseudo-code for the ?? operator ('state ^= state >> 2 ...' -- not Spin2 syntax for the operator, and not valid as a statement sequence outside a method)"
+  - at: common_patterns[0].code
+    fp: "31df5f10ba4769f4"
+    compile: program
+  - at: common_patterns[1].code
+    fp: "830a85e18588cd00"
+    compile: program
+  - at: common_patterns[2].code
+    fp: "5f807372c78ae2ee"
+    compile: program
+  - at: common_patterns[3].code
+    fp: "82a4ce2f19ca08af"
+    compile: program
+  - at: common_patterns[4].code
+    fp: "c8df149b418aa8e6"
+    compile: program
+  - at: common_patterns[5].code
+    fp: "14798d19fa190985"
+    compile: program
+  - at: common_patterns[6].code
+    fp: "0f4ee8acbb312c0e"
+    compile: program
+  - at: common_patterns[7].code
+    fp: "0d0c896108d92116"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CATEGORY_COMMON=con, CATEGORY_UNCOMMON=con, CATEGORY_RARE=con]
+  - at: common_patterns[8].code
+    fp: "0dfa91ccd0a3b66b"
+    compile: program
+  - at: common_patterns[9].code
+    fp: "c11e06e9b434ee86"
+    compile: program
+  - at: common_patterns[10].code
+    fp: "5a715ca3666154ed"
+    compile: program
+  - at: seeding_strategies[0].code
+    fp: "9dfe5b741d7eae44"
+    compile: program
+  - at: seeding_strategies[1].code
+    fp: "0e4286f1155884fd"
+    compile: fragment
+    wrap: spin2-top
+    with: ["seeding_strategies[0].code"]
+  - at: seeding_strategies[2].code
+    fp: "572ef1d88a47fa60"
+    compile: fragment
+    wrap: spin2-top
+    with: ["seeding_strategies[0].code"]
+  - at: anti_patterns[0].wrong
+    fp: "6130165f1e9f9678"
+    compile: program
+  - at: anti_patterns[0].correct
+    fp: "c808593767dcd8e7"
+    compile: fragment
+    wrap: spin2-top
+    with: ["anti_patterns[0].wrong"]
+  - at: anti_patterns[1].wrong
+    fp: "969d86c4f9f40265"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed]
+  - at: anti_patterns[1].correct
+    fp: "8576203f1e31daa5"
+    compile: program
+  - at: anti_patterns[3].wrong
+    fp: "0e6d873deead9a38"
+    compile: program
+  - at: anti_patterns[3].correct
+    fp: "967e0212183ad770"
+    compile: program
+  - at: anti_patterns[4].wrong
+    fp: "9a5f75215ef3c2f8"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed]
+  - at: anti_patterns[4].correct
+    fp: "73b4da8222e4d9d2"
+    compile: fragment
+    wrap: spin2-top
+    with: ["anti_patterns[0].wrong"]
+  - at: anti_patterns[5].correct
+    fp: "0be3ae0b3361bcd5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]

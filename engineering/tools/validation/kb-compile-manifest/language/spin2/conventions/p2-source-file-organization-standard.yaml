@@ -1,0 +1,48 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/conventions/p2-source-file-organization-standard.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_section_guidelines.dat_section.usage[0]
+    fp: "e242ddaa200af755"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: code_section_guidelines.dat_section.usage[1]
+    fp: "3378b96d6ff0ecd5"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: code_section_guidelines.dat_section.usage[2]
+    fp: "db5988266a0502fa"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: code_section_guidelines.pri_section.usage
+    fp: "31cf2c08234296d9"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: license_footer_requirements.mit_license_decoration
+    fp: "dc77828709b5ca03"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_naming_conventions.standard_files.examples[0]
+    fp: "2c1864e0db0c1967"
+    compile: not-code
+    reason: "a file name shown as a naming example, not code"
+  - at: file_naming_conventions.standard_files.examples[1]
+    fp: "3ffd0d020be8b862"
+    compile: not-code
+    reason: "a file name shown as a naming example, not code"
+  - at: file_naming_conventions.library_files.examples[0]
+    fp: "ba3a8bae6c177b90"
+    compile: not-code
+    reason: "a file name shown as a naming example, not code"
+  - at: file_naming_conventions.library_files.examples[1]
+    fp: "22ae611741325e64"
+    compile: not-code
+    reason: "a file name shown as a naming example, not code"
+  - at: file_naming_conventions.project_files.examples[0]
+    fp: "9044845e1c8e49ec"
+    compile: not-code
+    reason: "a file name shown as a naming example, not code"
+  - at: file_naming_conventions.project_files.examples[1]
+    fp: "ab3a95887e01987f"
+    compile: not-code
+    reason: "a file name shown as a naming example, not code"

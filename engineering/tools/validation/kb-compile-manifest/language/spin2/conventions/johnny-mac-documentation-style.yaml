@@ -1,0 +1,131 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/conventions/johnny-mac-documentation-style.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_structure_requirements.indentation.usage
+    fp: "ef7414d5f919a453"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: naming_conventions.constants.examples[0]
+    fp: "20a06cb8355b3509"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.constants.examples[1]
+    fp: "fecd2b792767eca3"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.constants.examples[2]
+    fp: "febd8e4fabd85705"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.constants.examples[3]
+    fp: "e6f3b662def2a4db"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.pre_initialized_data.examples[0]
+    fp: "5e5f7eb8197029e7"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.pre_initialized_data.examples[1]
+    fp: "8a83e8f726655896"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.pre_initialized_data.examples[2]
+    fp: "877978dd065e2e5e"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.objects.examples[0]
+    fp: "7a24958769cdcd9a"
+    compile: not-code
+    reason: "one OBJ-block line shown as a naming example without its OBJ header (`name : \"file\"`); not a compilable unit on its own"
+  - at: naming_conventions.objects.examples[1]
+    fp: "5b87b58595cdbde0"
+    compile: not-code
+    reason: "one OBJ-block line shown as a naming example without its OBJ header (`name : \"file\"`); not a compilable unit on its own"
+  - at: naming_conventions.objects.examples[2]
+    fp: "414159ee3b73e4e5"
+    compile: not-code
+    reason: "one OBJ-block line shown as a naming example without its OBJ header (`name : \"file\"`); not a compilable unit on its own"
+  - at: naming_conventions.assembly_labels.examples[0]
+    fp: "99762451bca6df80"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.assembly_labels.examples[1]
+    fp: "9d2a9cec0e68d4e6"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: naming_conventions.assembly_labels.examples[2]
+    fp: "f3f71c922143d1f9"
+    compile: not-code
+    reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
+  - at: code_organization.method_pattern
+    fp: "28dbe5a10db77bcc"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [RX_PIN=con, TX_PIN=con, BAUD_115200=con]
+    finding: "S-018+S-051"
+  - at: code_organization.p1_specific.example
+    fp: "45691130a018656a"
+    compile: program
+  - at: comment_types.method_documentation.usage
+    fp: "1284bdafa09817a9"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: comment_types.code_comments.usage
+    fp: "00db064feedfafc4"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: comment_types.assembly_comments.usage
+    fp: "3340f2c651f4376e"
+    compile: not-code
+    reason: "usage description (English words), not code"
+  - at: method_templates.simple_method.template
+    fp: "17c604b31482ad70"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed, DFLT_SEED=con]
+  - at: method_templates.method_with_return.template
+    fp: "6b10610135aabbed"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed]
+  - at: method_templates.complex_method.template
+    fp: "6e884d4156650830"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [rqs_full()->1/0, TX_PIN=con, TX_BIT_TICKS=con]
+    finding: "S-013"
+  - at: method_templates.method_with_complex_params.template
+    fp: "d98759df74f08443"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [RX_PIN=con]
+  - at: special_method_types.null_placeholder.template
+    fp: "b03e770848fa90d5"
+    compile: program
+  - at: special_method_types.initialization.template
+    fp: "bac22731ecf0e3d6"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [stop()->0/0]
+  - at: special_method_types.cleanup.template
+    fp: "6a122e6c00744497"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [rx_pin, tx_pin]
+  - at: pasm2_documentation.inline_pasm2_example
+    fp: "a5d976831edece8a"
+    compile: program
+  - at: constants_and_variables.constant_documentation.example
+    fp: "9db88e4672eb090c"
+    compile: fragment
+    wrap: spin2-top
+  - at: constants_and_variables.variable_documentation.example
+    fp: "3b33ae3ab58aa902"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [BUFFER_SIZE=con]
+  - at: complete_example.code
+    fp: "9af4df94f1a4d41b"
+    compile: program
+    finding: "S-070"

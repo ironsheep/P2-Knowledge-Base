@@ -1,0 +1,82 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/concepts/addressing.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: critical_distinction_byte_vs_long.cog_lut.example
+    fp: "e4166f406ffcd340"
+    compile: not-code
+    reason: "memory-addressing note: 'COG address $10 means the 16th long' -- an English sentence, not code"
+  - at: critical_distinction_byte_vs_long.hub.example
+    fp: "cce758784f94caa6"
+    compile: not-code
+    reason: "memory-addressing note: 'COG address $10 means the 16th long' -- an English sentence, not code"
+  - at: address_operators.at.examples[0]
+    fp: "23bc85e09abda091"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: address_operators.at.examples[1]
+    fp: "e50858f700452559"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: address_operators.at.examples[2]
+    fp: "56067e0c3b9cdd33"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: address_operators.double_at.examples[0]
+    fp: "0cb36972c5c54cae"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: address_operators.caret_at.examples[0]
+    fp: "605516069c0e5784"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: address_operators.caret_at.examples[1]
+    fp: "74475fa8a9c35e29"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: address_operators.hash.examples[0]
+    fp: "42fd4e44b43f455b"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: address_operators.hash.examples[1]
+    fp: "ad042e48abec6665"
+    compile: not-code
+    reason: "operator/operand notation followed by an English gloss (e.g. '@myvar - address of VAR variable'); notation, not a statement"
+  - at: common_patterns.string_table.code
+    fp: "09a026f2db2554c4"
+    compile: program
+  - at: common_patterns.launch_cog.code
+    fp: "62dd6af62ea3e619"
+    compile: program
+  - at: common_patterns.shared_data.code
+    fp: "1b97aa3a9e3873dc"
+    compile: fragment
+    wrap: spin2-top
+    with: ["common_patterns.launch_cog.code"]
+  - at: common_patterns.register_access.code
+    fp: "dcfb459b85abbb6c"
+    compile: program
+    finding: "S-041"
+  - at: address_alignment.example
+    fp: "818a6355e7eeb560"
+    compile: program
+  - at: org_vs_orgh_addressing.ORG.example
+    fp: "6cb7e08162d76d34"
+    compile: not-code
+    reason: "English sentence with an inline instruction ('JMP #label uses cog-relative address'), not code"
+  - at: org_vs_orgh_addressing.ORGH.example
+    fp: "695de0e8128db0fe"
+    compile: not-code
+    reason: "English sentence with an inline instruction ('JMP #label uses cog-relative address'), not code"
+  - at: org_vs_orgh_addressing.example
+    fp: "6935423c659bfaa7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [temp]
+    finding: "S-042"
+  - at: address_arithmetic.size_calculation.example
+    fp: "dbec06b333e431d7"
+    compile: program
+  - at: address_arithmetic.type_aware_indexing.example
+    fp: "4c1086fb54092174"
+    compile: program
