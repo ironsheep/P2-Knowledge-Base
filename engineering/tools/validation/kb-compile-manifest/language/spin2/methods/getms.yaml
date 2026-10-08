@@ -20,6 +20,5 @@ blocks:
   - at: examples[3].code
     fp: "df69fdb2ffea4db5"
     compile: fragment
-    wrap: spin2-method
+    wrap: spin2-method-result
     assumes: [timeout_ms, sd_busy_released()->1/0, SD_OK=con, ERR_WRITE_TIMEOUT=con]
-    finding: "S-022"

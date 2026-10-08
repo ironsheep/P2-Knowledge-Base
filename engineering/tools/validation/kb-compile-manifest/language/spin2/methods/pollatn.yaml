@@ -15,6 +15,5 @@ blocks:
   - at: examples[2].code
     fp: "e5d5113b542e9e4f"
     compile: fragment
-    wrap: spin2-method
+    wrap: spin2-method-result
     assumes: [timeout]
-    finding: "S-022"
