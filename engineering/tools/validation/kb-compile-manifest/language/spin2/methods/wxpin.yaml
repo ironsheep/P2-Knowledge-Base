@@ -1,0 +1,40 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/wxpin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "43a02e1770542b07"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [baud, x_val]
+  - at: examples[1].code
+    fp: "2984645cba7fd9fb"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "02bbd24dae33c815"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [freq, x_val, pin]
+  - at: examples[3].code
+    fp: "c925997af84c67ee"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin]
+  - at: examples[4].code
+    fp: "93a8c69e537c267b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [spi_pin]
+  - at: calculation_examples.uart_baud
+    fp: "fff6e4b829e4d326"
+    compile: program
+    finding: "S-019"
+  - at: calculation_examples.pwm_frequency
+    fp: "bb3286e050a283b1"
+    compile: program
+    finding: "S-019"
+  - at: calculation_examples.measurement_time
+    fp: "542249a36892c546"
+    compile: program
+    finding: "S-019"

@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/lockchk.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "568f549b22c9e374"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [state, lock_id, owner]
+  - at: examples[1].code
+    fp: "40e0f12878c250a5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [state, lock_id]
+  - at: examples[2].code
+    fp: "af1cddeca418b645"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [state, lock_id]

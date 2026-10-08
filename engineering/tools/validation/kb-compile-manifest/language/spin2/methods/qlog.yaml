@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/qlog.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "ca2c9cf2198a6748"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ln_value]
+  - at: examples[1].code
+    fp: "02426e64d5b24168"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [log10_value, value]
+  - at: examples[2].code
+    fp: "276c99afccfd5c46"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [db, amplitude]

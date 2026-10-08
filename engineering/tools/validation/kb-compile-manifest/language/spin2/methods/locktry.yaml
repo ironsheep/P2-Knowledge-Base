@@ -1,0 +1,52 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/locktry.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "37fcdfece345db22"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [lock_id, access_shared_resource()->1/0, handle_busy()->1/0]
+  - at: examples[1].code
+    fp: "50f7f53e1f744c0d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [lock_id, modify_shared_data()->1/0]
+  - at: examples[2].code
+    fp: "5bddc61ab5df132f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [timeout, lock_id]
+  - at: examples[3].code
+    fp: "2cb67c5de37cada5"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [counter_lock, shared_counter]
+  - at: anti_patterns[0].wrong
+    fp: "4796fb3398010672"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lock_a, lock_b]
+  - at: anti_patterns[0].correct
+    fp: "bfcf10b6a3d6eedd"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lock_a, lock_b]
+  - at: anti_patterns[1].wrong
+    fp: "0036aa0a3fa24966"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lock_id, do_work()->1/0, error_condition]
+  - at: anti_patterns[1].correct
+    fp: "a5c794ebf1c73c21"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lock_id, do_work()->1/0, error_condition]
+  - at: anti_patterns[2].wrong
+    fp: "f91f3423ee04f7b5"
+    compile: fragment
+    wrap: spin2-top
+  - at: anti_patterns[2].correct
+    fp: "4b2a907b53105f16"
+    compile: fragment
+    wrap: spin2-top

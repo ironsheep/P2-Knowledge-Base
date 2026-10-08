@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/strsize.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "39f6f2792cb86021"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [len, message]
+  - at: examples[1].code
+    fp: "7dc3024e6dee6235"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [input, buffer_size, buffer]
+  - at: examples[2].code
+    fp: "27be902137a000d0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [total, part1, part2]

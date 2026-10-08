@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/pollatn.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "794830d680540c0c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [process_signal()->1/0]
+  - at: examples[1].code
+    fp: "577e6ed0d2774c26"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [do_main_work()->1/0, handle_interrupt()->1/0]
+  - at: examples[2].code
+    fp: "e5d5113b542e9e4f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [timeout]
+    finding: "S-022"

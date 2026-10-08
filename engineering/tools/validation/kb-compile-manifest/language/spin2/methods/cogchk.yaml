@@ -1,0 +1,45 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/cogchk.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "ce45c63077aa2824"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [driver]
+  - at: examples[1].code
+    fp: "91aab19e45a74a5d"
+    compile: program
+  - at: examples[2].code
+    fp: "3c2f84ffd36ffc50"
+    compile: program
+    finding: "S-019"
+  - at: examples[3].code
+    fp: "6362d560ec04939a"
+    compile: program
+  - at: examples[4].code
+    fp: "62992b331c6276c7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [critical_cog, handle_error()->1/0, restart_critical_cog()->1/0]
+  - at: return_value_usage.in_expressions
+    fp: "2b9f2880875f16d4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [running_count, n, status]
+    finding: "S-014"
+  - at: typical_patterns[0].code
+    fp: "e528af6af0df5d61"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [n]
+  - at: typical_patterns[1].code
+    fp: "35ef3cf5deac477b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [cog, code]
+  - at: typical_patterns[2].code
+    fp: "0bef3111751da9ae"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [driver_cog, restart_driver()->1/0]

@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/muldiv64.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "9db1c73b12a31f51"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [scaled, value]
+  - at: examples[1].code
+    fp: "5fdfd8134e19c3a2"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [percent, part, total]
+  - at: examples[2].code
+    fp: "9cbf7352a9c177c1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [freq, numerator, denominator]
+  - at: examples[3].code
+    fp: "216462ab9aea2cb8"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, a, b]

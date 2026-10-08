@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/cogstop.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "f9d774dfce659c38"
+    compile: program
+  - at: examples[1].code
+    fp: "5f31fb057c339b66"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [cog]
+  - at: examples[2].code
+    fp: "26fc9a5be8b5500f"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "15b3159ebfa04078"
+    compile: program
+    finding: "S-020"

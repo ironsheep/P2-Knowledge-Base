@@ -1,0 +1,54 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/lookdownz.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: index_mapping.example
+    fp: "b044c4489edb79c0"
+    compile: not-code
+    reason: "index-to-value mapping table (notation, not statements); includes non-code characters/words"
+  - at: examples[0].code
+    fp: "5588a2db07bfde23"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pos]
+  - at: examples[1].code
+    fp: "e0d1f6bcac825a65"
+    compile: program
+  - at: examples[2].code
+    fp: "aba28e0e4fafe4ac"
+    compile: program
+  - at: examples[3].code
+    fp: "db9ac0704abd2dba"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [selection, key, quit_program()->1/0, save_file()->1/0, load_file()->1/0, show_help()->1/0]
+  - at: common_patterns[0].code
+    fp: "230007bc02e690ed"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [index, value, found]
+  - at: common_patterns[1].code
+    fp: "ed056a2926ed6ac2"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, found]
+  - at: anti_patterns[0].wrong
+    fp: "c58d954177a94d70"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [index, value]
+  - at: anti_patterns[0].correct
+    fp: "f789cde37a68e831"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, found, index]
+  - at: anti_patterns[1].wrong
+    fp: "d9d727a7a4ff2934"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [selection, key, process_selection()->1/1]
+  - at: anti_patterns[1].correct
+    fp: "5ba42726baaf3846"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [key, selection, process_selection()->1/1]

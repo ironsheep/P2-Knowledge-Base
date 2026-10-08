@@ -1,0 +1,17 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/pinclear.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "7d53f962e8d16954"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "823a09bbdc56c84d"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "419a2693fa6c9a05"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [adc_pin]

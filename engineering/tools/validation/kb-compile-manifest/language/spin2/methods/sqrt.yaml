@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/sqrt.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "023c65c72f57aa7a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, y, z]
+  - at: examples[1].code
+    fp: "b63876902bc06d9a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [distance, x2, x1, y2, y1]
+  - at: examples[2].code
+    fp: "8e9469a087ae59ca"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rms, sum_of_squares, count]

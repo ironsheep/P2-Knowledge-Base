@@ -1,0 +1,67 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/getrnd.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "6930739f0edd2e24"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: examples[1].code
+    fp: "81be48f02622c394"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [dice, percent]
+  - at: examples[2].code
+    fp: "830a85e18588cd00"
+    compile: program
+  - at: examples[3].code
+    fp: "299eea84f43587c4"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[4].code
+    fp: "e2cb9519dc2e744d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [seed]
+  - at: examples[5].code
+    fp: "55c816e36910f325"
+    compile: program
+  - at: examples[6].code
+    fp: "82a4ce2f19ca08af"
+    compile: program
+  - at: common_patterns[0].code
+    fp: "fedd7d64434dee62"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result]
+  - at: common_patterns[1].code
+    fp: "be20515bd7d76a69"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, array_ptr, count]
+  - at: common_patterns[2].code
+    fp: "900d2a5f13041116"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [roll, result, COMMON=con, UNCOMMON=con, RARE=con]
+  - at: common_patterns[3].code
+    fp: "14effe2acb5266f8"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, count, j, temp, array_ptr]
+  - at: anti_patterns[1].correct
+    fp: "3201a5502ab9a3d7"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: anti_patterns[2].wrong
+    fp: "43a913a9fa687c93"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: anti_patterns[2].correct
+    fp: "70701c8af106291f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, prng_state]

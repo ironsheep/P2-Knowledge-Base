@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/pinhigh.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "4b58eba0a4e72708"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "97137a14c8775185"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "3069e7652e8ac7ef"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "3d22d140d0394c33"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "37b78630af8cd588"
+    compile: program

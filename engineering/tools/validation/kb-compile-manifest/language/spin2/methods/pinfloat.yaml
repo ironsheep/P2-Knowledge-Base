@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/pinfloat.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "302e2e580575793e"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "25e183aab4d9fff1"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "bac6ef2b0fb274e7"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "59ce444db461484d"
+    compile: fragment
+    wrap: spin2-method

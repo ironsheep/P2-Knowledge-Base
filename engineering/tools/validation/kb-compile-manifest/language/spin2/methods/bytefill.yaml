@@ -1,0 +1,25 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/bytefill.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "f165d0c83c4bef65"
+    compile: program
+  - at: examples[1].code
+    fp: "e2e6241b7be77255"
+    compile: program
+  - at: examples[2].code
+    fp: "0329b0681e3b8e02"
+    compile: program
+  - at: examples[3].code
+    fp: "0de586c271f2b3b9"
+    compile: program
+    finding: "S-008"
+  - at: examples[4].code
+    fp: "2995aefebdc2576f"
+    compile: program
+  - at: performance_comparison.manual_loop
+    fp: "ca3edfc0b5a87c1c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, count, dest, value]

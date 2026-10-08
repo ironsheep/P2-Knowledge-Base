@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/pintoggle.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "cf8170ea759deeb6"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "7f72a1dbe4f7d7cf"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "c2ac16c12a00777f"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "ea99dfb561874122"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "0d880da908e0af8a"
+    compile: program

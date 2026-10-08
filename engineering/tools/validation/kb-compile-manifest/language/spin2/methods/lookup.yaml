@@ -1,0 +1,52 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/lookup.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: index_mapping.example
+    fp: "21fbe380f1cb4150"
+    compile: not-code
+    reason: "index-to-value mapping table (notation, not statements); includes non-code characters/words"
+  - at: examples[0].code
+    fp: "8cb916d48377ca99"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: examples[1].code
+    fp: "b5033ee6c676e4fd"
+    compile: program
+  - at: examples[2].code
+    fp: "a4684a96074be444"
+    compile: program
+    finding: "S-016"
+  - at: examples[3].code
+    fp: "e4732b2f6928d9ed"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [char, index]
+  - at: common_patterns[0].code
+    fp: "6f2c208410325932"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [MOTOR_6_5_INCH=con, MOTOR_DOCO_4K=con]
+  - at: anti_patterns[0].wrong
+    fp: "d6b7b286163f47af"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [index, pin, PIN_A=con, PIN_B=con, PIN_C=con]
+  - at: anti_patterns[0].correct
+    fp: "df74c136f2bd267c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [index, pin, PIN_A=con, PIN_B=con, PIN_C=con]
+  - at: anti_patterns[1].wrong
+    fp: "4158aaa160533300"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [day_name, day_num, print_string()->0/1]
+    finding: "S-016"
+  - at: anti_patterns[1].correct
+    fp: "bd390ca24939950e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [day_name, day_num, print_string()->0/1]
+    finding: "S-016"

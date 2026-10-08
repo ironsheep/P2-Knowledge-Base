@@ -1,0 +1,953 @@
+[
+ {
+  "slug": "var-declaration-name-before-type",
+  "finding": "S-PENDING-var-declaration-name-before-type",
+  "statement": "A VAR example declares an array as `name BYTE[n]` / `name LONG[n]` / `name WORD[n]` (the DAT order, and the order the page's own `syntax:` lines give: `Name BYTE [Count]`). Spin2 VAR takes the type first: `BYTE name[n]`.",
+  "compiler_error": "Expected \",\" or end of line (block line 2, the declaration)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:267 (VAR {BYTE|WORD|LONG|StructName} VarName{[ArraySize]}); byte.yaml:15, long.yaml:15, word.yaml:15 carry the same wrong order in `contexts:` (see observation O1)",
+  "verified_fix": "`VAR\\n  BYTE buffer[256]` compiles (spin2-top)",
+  "class_kind": "defect",
+  "site_count": 3,
+  "sites": [
+   {
+    "file": "language/spin2/methods/byte.yaml",
+    "addr": "examples[1].code",
+    "key_line": 28,
+    "gate_first_error": "block line 2 (YAML line 30): Expected \",\" or end of line",
+    "source_line_of_error": "buffer  BYTE[256]  ' 256-byte array",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/long.yaml",
+    "addr": "examples[1].code",
+    "key_line": 28,
+    "gate_first_error": "block line 2 (YAML line 30): Expected \",\" or end of line",
+    "source_line_of_error": "results  LONG[512]  ' 512-long array",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/word.yaml",
+    "addr": "examples[1].code",
+    "key_line": 28,
+    "gate_first_error": "block line 2 (YAML line 30): Expected \",\" or end of line",
+    "source_line_of_error": "samples  WORD[1024]  ' 1024-word array",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "reserved-word-as-identifier",
+  "finding": "S-PENDING-reserved-word-as-identifier",
+  "statement": "An example uses a Spin2 reserved word as a user identifier: `lookup` (LOOKUP method) as a VAR array, `lstr` (DEBUG LSTR command symbol) as a local, `next` (REPEAT NEXT) as a variable.",
+  "compiler_error": "m240 Expected a unique variable name... (lookup); Expected an instruction or variable (lstr, at the assignment); Expected a constant, unary operator, or \"(\" (next)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:600-603 (LOOKUP built-in), :774 (NEXT/QUIT), :939 (LSTR DEBUG command). The compiler is the authority for which names are reserved",
+  "verified_fix": "renaming lookup->lookup_tbl, lstr->lstr_ptr, next->next_time compiles",
+  "class_kind": "defect",
+  "site_count": 3,
+  "sites": [
+   {
+    "file": "language/spin2/methods/bytefill.yaml",
+    "addr": "examples[3].code",
+    "key_line": 71,
+    "gate_first_error": "block line 3 (YAML line 74): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m240)",
+    "source_line_of_error": "BYTE lookup[256]",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/lstring.yaml",
+    "addr": "examples[0].code",
+    "key_line": 17,
+    "gate_first_error": "block line 2 (YAML line 19): Expected an instruction or variable",
+    "source_line_of_error": "lstr := LSTRING(\"Hello, World!\")",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/waitms.yaml",
+    "addr": "anti_patterns[0].correct",
+    "key_line": 126,
+    "gate_first_error": "block line 2 (YAML line 128): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "next := getct()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "do_work()->0/0"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "two-dimensional-array",
+  "finding": "S-PENDING-two-dimensional-array",
+  "statement": "An example declares a two-index array `[a][b]`; Spin2 arrays take a single ArraySize.",
+  "compiler_error": "Expected \",\" or end of line (block line 2/3, the declaration)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:267 (VarName{[ArraySize]}, one size)",
+  "verified_fix": "flat arrays `BYTE screen[25*80]`, `LONG cog_data[8*10]`, `LONG cog_stacks[4*64]` with computed offsets compile",
+  "class_kind": "defect",
+  "site_count": 3,
+  "sites": [
+   {
+    "file": "language/spin2/methods/bytemove.yaml",
+    "addr": "examples[3].code",
+    "key_line": 79,
+    "gate_first_error": "block line 3 (YAML line 82): Expected \",\" or end of line",
+    "source_line_of_error": "BYTE screen[25][80]",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/cogid.yaml",
+    "addr": "typical_patterns[0].code",
+    "key_line": 86,
+    "gate_first_error": "block line 2 (YAML line 88): Expected \",\" or end of line",
+    "source_line_of_error": "LONG cog_data[8][10]  ' 10 longs per cog",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/cogspin.yaml",
+    "addr": "examples[3].code",
+    "key_line": 141,
+    "gate_first_error": "block line 2 (YAML line 143): Expected \",\" or end of line",
+    "source_line_of_error": "LONG cog_stacks[4][64]",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "process_chunk()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "swap-methods-missing-count",
+  "finding": "S-PENDING-swap-methods-missing-count",
+  "statement": "BYTESWAP/WORDSWAP/LONGSWAP examples call the method with two arguments; the method takes (AddrA, AddrB, Count). The same wrong arity is in the pages' `syntax:` lines (registered as S-006); these are the nine example sites.",
+  "compiler_error": "Expected \",\" (after the second argument)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:579-581 (BYTESWAP(AddrA, AddrB, Count) swaps Count bytes of two ranges)",
+  "verified_fix": "`BYTESWAP(@array[i], @array[size-1-i], 1)` and `LONGSWAP(@reg_a, @reg_b, 1)` compile (spin2_version 45)",
+  "class_kind": "defect",
+  "site_count": 9,
+  "sites": [
+   {
+    "file": "language/spin2/methods/byteswap.yaml",
+    "addr": "examples[0].code",
+    "key_line": 18,
+    "gate_first_error": "block line 2 (YAML line 20): Expected \",\"",
+    "source_line_of_error": "BYTESWAP(@value1, @value2)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value1",
+     "value2"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/byteswap.yaml",
+    "addr": "examples[1].code",
+    "key_line": 22,
+    "gate_first_error": "block line 3 (YAML line 25): Expected \",\"",
+    "source_line_of_error": "BYTESWAP(@array[i], @array[size-1-i])",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "i",
+     "size",
+     "array"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/byteswap.yaml",
+    "addr": "examples[2].code",
+    "key_line": 27,
+    "gate_first_error": "block line 2 (YAML line 29): Expected \",\"",
+    "source_line_of_error": "BYTESWAP($1000, $2000)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/longswap.yaml",
+    "addr": "examples[0].code",
+    "key_line": 18,
+    "gate_first_error": "block line 2 (YAML line 20): Expected \",\"",
+    "source_line_of_error": "LONGSWAP(@value1, @value2)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value1",
+     "value2"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/longswap.yaml",
+    "addr": "examples[1].code",
+    "key_line": 22,
+    "gate_first_error": "block line 3 (YAML line 25): Expected \",\"",
+    "source_line_of_error": "LONGSWAP(@array[i], @array[size-1-i])",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "i",
+     "size",
+     "array"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/longswap.yaml",
+    "addr": "examples[2].code",
+    "key_line": 27,
+    "gate_first_error": "block line 2 (YAML line 29): Expected \",\"",
+    "source_line_of_error": "LONGSWAP(@reg_a, @reg_b)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "reg_a",
+     "reg_b"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/wordswap.yaml",
+    "addr": "examples[0].code",
+    "key_line": 18,
+    "gate_first_error": "block line 2 (YAML line 20): Expected \",\"",
+    "source_line_of_error": "WORDSWAP(@value1, @value2)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value1",
+     "value2"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/wordswap.yaml",
+    "addr": "examples[1].code",
+    "key_line": 22,
+    "gate_first_error": "block line 3 (YAML line 25): Expected \",\"",
+    "source_line_of_error": "WORDSWAP(@array[i], @array[size-1-i])",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "i",
+     "size",
+     "array"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/wordswap.yaml",
+    "addr": "examples[2].code",
+    "key_line": 27,
+    "gate_first_error": "block line 2 (YAML line 29): Expected \",\"",
+    "source_line_of_error": "WORDSWAP(@data[0], @data[1])",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "data"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "call-regexec-used-as-expression",
+  "finding": "S-PENDING-call-regexec-used-as-expression",
+  "statement": "CALL(...) and REGEXEC(...) are used as expression terms (`result := CALL(...)`, `value := CALL(...)`, `result := REGEXEC(...)`). Neither returns a value. The pages also state a return (`syntax: result := CALL(PASMAddress)`, `returns: long`, notes `Result returned in result1 register`; see observation O2).",
+  "compiler_error": "Expression terms must return a single result (exact for regexec.yaml:25 and regload.yaml:20; for the DAT-bearing examples this error is masked by statements-outside-method)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:556-558 (CALL(RegisterOrHubAddr), REGEXEC(HubAddr), REGLOAD(HubAddr) -- no result)",
+  "verified_fix": "`CALL(@pasm_code)` and `REGEXEC(@buffer)` as statements compile",
+  "class_kind": "defect",
+  "site_count": 6,
+  "sites": [
+   {
+    "file": "language/spin2/methods/call.yaml",
+    "addr": "examples[0].code",
+    "key_line": 15,
+    "gate_first_error": "block line 2 (YAML line 17): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := CALL(@pasm_code)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/call.yaml",
+    "addr": "examples[2].code",
+    "key_line": 30,
+    "gate_first_error": "block line 2 (YAML line 32): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "value := CALL(@fast_multiply)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "value"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/regexec.yaml",
+    "addr": "examples[0].code",
+    "key_line": 15,
+    "gate_first_error": "block line 2 (YAML line 17): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := REGEXEC(@hub_pasm_code)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/regexec.yaml",
+    "addr": "examples[1].code",
+    "key_line": 25,
+    "gate_first_error": "block line 3 (YAML line 28): Expression terms must return a single result",
+    "source_line_of_error": "result := REGEXEC(@buffer)  ' Execute it",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "build_pasm_code()->0/1",
+     "buffer",
+     "result"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/regexec.yaml",
+    "addr": "examples[2].code",
+    "key_line": 30,
+    "gate_first_error": "block line 2 (YAML line 32): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := REGEXEC(@big_routine)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/regload.yaml",
+    "addr": "examples[1].code",
+    "key_line": 20,
+    "gate_first_error": "block line 4 (YAML line 24): Expression terms must return a single result",
+    "source_line_of_error": "result := CALL($100)  ' Execute at cog address",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "modify_pasm()->0/1",
+     "buffer",
+     "result"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "statements-outside-method",
+  "finding": "S-PENDING-statements-outside-method",
+  "statement": "A block shows Spin2 statements (or a call) at top level, outside any PUB/PRI, next to a DAT or VAR declaration. Statements are only legal inside a method; the block as written is not a program and cannot be wrapped as a fragment.",
+  "compiler_error": "Expected \"=\" \"[\" \",\" or end of line (statement before DAT); m240 Expected a unique variable name... (statement after a VAR block)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (methods are introduced by PUB|PRI headers); the corrected example needs a PUB around the statements",
+  "verified_fix": "wrapping the statements in `PUB demo()` and keeping the VAR/DAT after/before compiles (VAR+GETREGS, DAT+CALL)",
+  "class_kind": "defect",
+  "site_count": 9,
+  "sites": [
+   {
+    "file": "language/spin2/methods/call.yaml",
+    "addr": "examples[0].code",
+    "key_line": 15,
+    "gate_first_error": "block line 2 (YAML line 17): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := CALL(@pasm_code)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/call.yaml",
+    "addr": "examples[2].code",
+    "key_line": 30,
+    "gate_first_error": "block line 2 (YAML line 32): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "value := CALL(@fast_multiply)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "value"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/regexec.yaml",
+    "addr": "examples[0].code",
+    "key_line": 15,
+    "gate_first_error": "block line 2 (YAML line 17): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := REGEXEC(@hub_pasm_code)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/regexec.yaml",
+    "addr": "examples[2].code",
+    "key_line": 30,
+    "gate_first_error": "block line 2 (YAML line 32): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := REGEXEC(@big_routine)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/getregs.yaml",
+    "addr": "examples[0].code",
+    "key_line": 21,
+    "gate_first_error": "block line 5 (YAML line 26): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m240)",
+    "source_line_of_error": "GETREGS(@saved_regs, $1F0, 16)  ' Save $1F0-$1FF",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/getregs.yaml",
+    "addr": "examples[1].code",
+    "key_line": 28,
+    "gate_first_error": "block line 5 (YAML line 33): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m240)",
+    "source_line_of_error": "GETREGS(@cog_dump, 0, 512)  ' Dump entire cog",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/getregs.yaml",
+    "addr": "examples[2].code",
+    "key_line": 35,
+    "gate_first_error": "block line 5 (YAML line 40): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m240)",
+    "source_line_of_error": "GETREGS(@pasm_vars, $100, 10)  ' Get PASM data",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/setregs.yaml",
+    "addr": "examples[1].code",
+    "key_line": 25,
+    "gate_first_error": "block line 5 (YAML line 30): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m240)",
+    "source_line_of_error": "SETREGS(@saved_regs, $1F0, 16)  ' Restore $1F0-$1FF",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/setregs.yaml",
+    "addr": "examples[2].code",
+    "key_line": 32,
+    "gate_first_error": "block line 5 (YAML line 37): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m240)",
+    "source_line_of_error": "repeat i from 0 to 9",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "undefined-pasm-symbol-result1",
+  "finding": "S-PENDING-undefined-pasm-symbol-result1",
+  "statement": "PASM examples move their result into `result1`, a symbol that is not defined. There is no such register; the v55 CALL example passes data through PR0.",
+  "compiler_error": "Undefined symbol (`mov result1, #42` -> block line of the mov)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:820-821 (CALL example uses pr0)",
+  "verified_fix": "`mov pr0, #42` compiles; `mul pa, pb` and `mov pa, ptra` in the same listing are legal",
+  "class_kind": "defect",
+  "site_count": 3,
+  "sites": [
+   {
+    "file": "language/spin2/methods/call.yaml",
+    "addr": "examples[0].code",
+    "key_line": 15,
+    "gate_first_error": "block line 2 (YAML line 17): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := CALL(@pasm_code)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/call.yaml",
+    "addr": "examples[2].code",
+    "key_line": 30,
+    "gate_first_error": "block line 2 (YAML line 32): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "value := CALL(@fast_multiply)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "value"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/regexec.yaml",
+    "addr": "examples[0].code",
+    "key_line": 15,
+    "gate_first_error": "block line 2 (YAML line 17): Expected \"=\" \"[\" \",\" or end of line",
+    "source_line_of_error": "result := REGEXEC(@hub_pasm_code)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   }
+  ]
+ },
+ {
+  "slug": "pasm-instruction-called-as-spin2-method",
+  "finding": "S-PENDING-pasm-instruction-called-as-spin2-method",
+  "statement": "A Spin2 fragment calls the PASM instruction DRVH as if it were a Spin2 method: `DRVH(pin)`. Spin2 drives pins with PINHIGH().",
+  "compiler_error": "Expected an instruction or variable (at DRVH)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:533 (PINHIGH(PinField)); pinhigh.yaml:12 itself says PINHIGH is equivalent to DRVH",
+  "verified_fix": "`PINHIGH(pin)` compiles",
+  "class_kind": "defect",
+  "site_count": 2,
+  "sites": [
+   {
+    "file": "language/spin2/methods/lookupz.yaml",
+    "addr": "anti_patterns[0].wrong",
+    "key_line": 72,
+    "gate_first_error": "block line 2 (YAML line 74): Expected an instruction or variable",
+    "source_line_of_error": "DRVH(pin)  ' If channel >= 4, pin is 0, drives wrong pin!",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "pin",
+     "channel"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/lookupz.yaml",
+    "addr": "anti_patterns[0].correct",
+    "key_line": 75,
+    "gate_first_error": "block line 3 (YAML line 78): Expected an instruction or variable",
+    "source_line_of_error": "DRVH(pin)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "pin",
+     "channel"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "string-literal-in-expression",
+  "finding": "S-PENDING-string-literal-in-expression",
+  "statement": "`status := COGCHK(n) ? \"Running\" : \"Stopped\"` uses multi-character quoted literals as values; a quoted literal in an expression is not a string value (the compiler stops at the first `\"Running\"`). A string value needs STRING(\"...\") or @\"...\".",
+  "compiler_error": "Expected \":\"",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:591-592 (@\"Text\" and STRING(\"Text\") return the string address), :493 (ternary)",
+  "verified_fix": "`COGCHK(n) ? STRING(\"Running\") : STRING(\"Stopped\")` compiles",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/methods/cogchk.yaml",
+    "addr": "return_value_usage.in_expressions",
+    "key_line": 92,
+    "gate_first_error": "block line 2 (YAML line 94): Expected \":\"",
+    "source_line_of_error": "status := COGCHK(n) ? \"Running\" : \"Stopped\"",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "running_count",
+     "n",
+     "status"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "send-byte-array-form-invalid",
+  "finding": "S-PENDING-send-byte-array-form-invalid",
+  "statement": "`SEND(BYTE[@buffer, 10])  ' Send 10 bytes from buffer` -- `BYTE[...]` takes one base (and an optional [index]); there is no `[addr, count]` form. SEND passes each parameter to the output method, so sending 10 bytes needs a loop (or 10 parameters).",
+  "compiler_error": "Expected \"]\" (m311)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:664-667 (SEND passes all parameters to the method SEND points to); :401 (BYTE[i++] form)",
+  "verified_fix": "`repeat i from 0 to 9 / SEND(BYTE[@buffer][i])` compiles",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/methods/send.yaml",
+    "addr": "examples[3].code",
+    "key_line": 27,
+    "gate_first_error": "block line 2 (YAML line 29): Expected \"]\" (m311)",
+    "source_line_of_error": "SEND(BYTE[@buffer, 10])  ' Send 10 bytes from buffer",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "buffer"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "multiline-expression-without-continuation",
+  "finding": "S-PENDING-multiline-expression-without-continuation",
+  "statement": "A LOOKUP/LOOKDOWN argument list is continued on the next line after a trailing comma. Spin2 does not continue a line at a comma; it needs the `...` continuation marker.",
+  "compiler_error": "Expected an expression term (m172) (at the end of the first line)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:337 (`...` at the end of a line continues parsing on the next line); :29 (v37 note)",
+  "verified_fix": "adding `, ...` at the end of the first line makes both the PUB and the fragment forms compile",
+  "class_kind": "defect",
+  "site_count": 4,
+  "sites": [
+   {
+    "file": "language/spin2/methods/lookdown.yaml",
+    "addr": "examples[1].code",
+    "key_line": 34,
+    "gate_first_error": "block line 3 (YAML line 37): Expected an expression term (m172)",
+    "source_line_of_error": "result := LOOKDOWN(char : \"A\", \"E\", \"I\", \"O\", \"U\",",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/lookup.yaml",
+    "addr": "examples[2].code",
+    "key_line": 48,
+    "gate_first_error": "block line 3 (YAML line 51): Expected an expression term (m172)",
+    "source_line_of_error": "name_ptr := LOOKUP(day_num : @\"Sunday\", @\"Monday\", @\"Tuesday\",",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/lookup.yaml",
+    "addr": "anti_patterns[1].wrong",
+    "key_line": 88,
+    "gate_first_error": "block line 1 (YAML line 89): Expected an expression term (m172)",
+    "source_line_of_error": "day_name := LOOKUP(day_num : @\"Sun\", @\"Mon\", @\"Tue\", @\"Wed\",",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "day_name",
+     "day_num",
+     "print_string()->0/1"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/lookup.yaml",
+    "addr": "anti_patterns[1].correct",
+    "key_line": 92,
+    "gate_first_error": "block line 1 (YAML line 93): Expected an expression term (m172)",
+    "source_line_of_error": "day_name := LOOKUP(day_num : @\"Sun\", @\"Mon\", @\"Tue\", @\"Wed\",",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "day_name",
+     "day_num",
+     "print_string()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "method-pointer-call-without-result-count",
+  "finding": "S-PENDING-method-pointer-call-without-result-count",
+  "statement": "A method pointer is called as `data := inputMethod()` (LONG variable `inputMethod`). A pointer call has no compile-time knowledge of its result count; the call must say how many values it returns: `inputMethod():1`.",
+  "compiler_error": "This method returns no results",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:649-654 (`Var := LongVar():1`)",
+  "verified_fix": "`data := inputMethod():1` compiles (with an OBJ declaration present for the other defect)",
+  "class_kind": "defect",
+  "site_count": 2,
+  "sites": [
+   {
+    "file": "language/spin2/methods/recv.yaml",
+    "addr": "as_method_pointer.usage",
+    "key_line": 40,
+    "gate_first_error": "block line 1: This method returns no results",
+    "source_line_of_error": "data := inputMethod()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "data",
+     "inputMethod"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/recv.yaml",
+    "addr": "as_method_pointer.example",
+    "key_line": 45,
+    "gate_first_error": "block line 8 (YAML line 53): Expected a string, variable, method, or object",
+    "source_line_of_error": "inputMethod := @serial.rx   ' Use serial port",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "undeclared-object-instance",
+  "finding": "S-PENDING-undeclared-object-instance",
+  "statement": "The example uses `@serial.rx` / `@serial.tx` but declares no `OBJ serial : \"...\"` line; the block is not self-sufficient and the gate's object stubs can only hang on an OBJ line in the block.",
+  "compiler_error": "Expected a string, variable, method, or object",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:644 (LongVar := @SomeObject.SomeMethod requires the child object to be declared)",
+  "verified_fix": "with `OBJ\\n  serial : \"serial\"` in the block and assumes [serial.rx(0)] the rest of recv.yaml:45 compiles (when `:1` is added)",
+  "class_kind": "defect",
+  "site_count": 2,
+  "sites": [
+   {
+    "file": "language/spin2/methods/recv.yaml",
+    "addr": "as_method_pointer.example",
+    "key_line": 45,
+    "gate_first_error": "block line 8 (YAML line 53): Expected a string, variable, method, or object",
+    "source_line_of_error": "inputMethod := @serial.rx   ' Use serial port",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/send.yaml",
+    "addr": "as_method_pointer.example",
+    "key_line": 40,
+    "gate_first_error": "block line 8 (YAML line 48): Expected a string, variable, method, or object",
+    "source_line_of_error": "outputMethod := @serial.tx  ' Use serial port",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "undeclared-local-in-complete-method",
+  "finding": "S-PENDING-undeclared-local-in-complete-method",
+  "statement": "A complete PUB (header and body shown) uses a variable it never declares: a REPEAT loop variable (`cog`, `n`), a scratch variable (`len`, `x`, `period`, `duty`), or `result` in a method with no `: result`. Spin2 has no implicit locals and no implicit `result`. Copying the example gives a compile error.",
+  "compiler_error": "Expected an instruction or variable / Expected an expression term (m172) at the first use",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (`| LocalVar` declares locals; `: Result` declares results), :284-286",
+  "verified_fix": "adding `| len`, `| n`, `| x`, `| period, duty`, `: result` as appropriate compiles",
+  "class_kind": "defect",
+  "site_count": 11,
+  "sites": [
+   {
+    "file": "language/spin2/methods/bytemove.yaml",
+    "addr": "examples[2].code",
+    "key_line": 71,
+    "gate_first_error": "block line 3 (YAML line 74): Expected an instruction or variable",
+    "source_line_of_error": "len := STRSIZE(source) <# (max_len - 1)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/cogatn.yaml",
+    "addr": "synchronization_patterns[2].code",
+    "key_line": 131,
+    "gate_first_error": "block line 2 (YAML line 133): Expected an expression term (m172)",
+    "source_line_of_error": "REPEAT cog FROM 0 TO 7",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/cogchk.yaml",
+    "addr": "examples[2].code",
+    "key_line": 53,
+    "gate_first_error": "block line 3 (YAML line 56): Expected an expression term (m172)",
+    "source_line_of_error": "REPEAT n FROM 0 TO 7",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/cogid.yaml",
+    "addr": "examples[4].code",
+    "key_line": 63,
+    "gate_first_error": "block line 2 (YAML line 65): Expected an expression term (m172)",
+    "source_line_of_error": "REPEAT n FROM 0 TO 7",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/coginit.yaml",
+    "addr": "examples[0].code",
+    "key_line": 80,
+    "gate_first_error": "block line 11 (YAML line 91): Expected an instruction or variable",
+    "source_line_of_error": "cog := COGINIT(COGEXEC_NEW, @blink_code, 0)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/cogspin.yaml",
+    "addr": "examples[3].code",
+    "key_line": 141,
+    "gate_first_error": "block line 2 (YAML line 143): Expected \",\" or end of line",
+    "source_line_of_error": "LONG cog_stacks[4][64]",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "process_chunk()->0/1"
+    ],
+    "role": "secondary (masked by the primary class at this site)"
+   },
+   {
+    "file": "language/spin2/methods/longmove.yaml",
+    "addr": "examples[2].code",
+    "key_line": 67,
+    "gate_first_error": "block line 6 (YAML line 73): Expected an instruction or variable",
+    "source_line_of_error": "result := array[0]",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/wxpin.yaml",
+    "addr": "calculation_examples.uart_baud",
+    "key_line": 105,
+    "gate_first_error": "block line 3 (YAML line 108): Expected an instruction or variable",
+    "source_line_of_error": "x := ((CLKFREQ / baud) << 16) | 7    ' bits[31:16]=clocks/bit, bits[4:0]=N-1",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/wxpin.yaml",
+    "addr": "calculation_examples.pwm_frequency",
+    "key_line": 111,
+    "gate_first_error": "block line 3 (YAML line 114): Expected an instruction or variable",
+    "source_line_of_error": "x := CLKFREQ / freq - 1",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/wxpin.yaml",
+    "addr": "calculation_examples.measurement_time",
+    "key_line": 117,
+    "gate_first_error": "block line 7 (YAML line 124): Expected an instruction or variable",
+    "source_line_of_error": "x := CLKFREQ / 1000 * ms",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/wypin.yaml",
+    "addr": "data_transmission.pwm_update",
+    "key_line": 101,
+    "gate_first_error": "block line 2 (YAML line 103): Expected an instruction or variable",
+    "source_line_of_error": "period := X_VALUE  ' Previously set with WXPIN",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "X_VALUE=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "return-value-without-declared-result",
+  "finding": "S-PENDING-return-value-without-declared-result",
+  "statement": "`PUB restart_cog(n, code_addr, param)` returns a value (`RETURN COGINIT(...)`) but declares no result.",
+  "compiler_error": "Expected end of line (m280) (at the RETURN expression)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (`: Result` in the PUB header); :612-613 (SumPoints declares `: x, y` before RETURN x1+x2, y1+y2)",
+  "verified_fix": "`PUB restart_cog(n, code_addr, param) : cog` compiles",
+  "class_kind": "defect",
+  "site_count": 1,
+  "sites": [
+   {
+    "file": "language/spin2/methods/cogstop.yaml",
+    "addr": "examples[3].code",
+    "key_line": 61,
+    "gate_first_error": "block line 3 (YAML line 64): Expected end of line (m280)",
+    "source_line_of_error": "RETURN COGINIT(n, code_addr, param)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "undefined-clkmode-constants",
+  "finding": "S-PENDING-undefined-clkmode-constants",
+  "statement": "CLKSET examples use `clkmode_pll` and `clkmode_rcfast`, and the page says \"Use predefined clkmode_ constants\". The only predefined names are `clkmode_` (the compiled clock mode) and `clkmode` (the variable); neither name used exists.",
+  "compiler_error": "Expected an expression term (m172)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1725 (clkmode_), :1730 (clkmode); there is no clkmode_pll/clkmode_rcfast",
+  "verified_fix": "`CLKSET(clkmode_, 200_000_000)` compiles; a user CON constant also compiles (but is then a user name, not predefined)",
+  "class_kind": "defect",
+  "site_count": 3,
+  "sites": [
+   {
+    "file": "language/spin2/methods/clkset.yaml",
+    "addr": "examples[0].code",
+    "key_line": 18,
+    "gate_first_error": "block line 2 (YAML line 20): Expected an expression term (m172)",
+    "source_line_of_error": "CLKSET(clkmode_pll, 200_000_000)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/clkset.yaml",
+    "addr": "examples[1].code",
+    "key_line": 22,
+    "gate_first_error": "block line 2 (YAML line 24): Expected an expression term (m172)",
+    "source_line_of_error": "CLKSET(clkmode_rcfast, 20_000_000)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/clkset.yaml",
+    "addr": "examples[2].code",
+    "key_line": 26,
+    "gate_first_error": "block line 3 (YAML line 29): Expected an expression term (m172)",
+    "source_line_of_error": "CLKSET(clkmode_pll, 80_000_000)  ' Reduce to 80MHz",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "battery_low"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "undecided-return-in-fragment",
+  "finding": "S-PENDING-undecided-return-in-fragment",
+  "statement": "QUESTION (not a KB defect as far as I can tell): two fragments show the BODY of a method that returns a value (`return SD_OK` / `return FALSE`). The gate's spin2-method wrap is `PUB __kbgate()` with no result, so any `return <value>` fails m280, and no wrap or assume can declare a result. The text compiles inside `PUB x() : r` (verified).",
+  "compiler_error": "Expected end of line (m280)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:288 (result declaration)",
+  "verified_fix": "the same body inside `PUB wait_sd() : r` compiles",
+  "class_kind": "undecided",
+  "question": "How should a fragment that returns a value be classified: (a) add a harness wrap with a declared result (e.g. spin2-method-result), (b) rewrite the two examples so the block shows the PUB header (then they are `program`/`fragment spin2-top`), or (c) leave them as registered failures? Recommendation: (a) -- the examples are legitimate method bodies and the KB is not wrong; it avoids a spurious defect. Two sites: getms.yaml:34 examples[3].code, pollatn.yaml:25 examples[2].code.",
+  "site_count": 2,
+  "sites": [
+   {
+    "file": "language/spin2/methods/getms.yaml",
+    "addr": "examples[3].code",
+    "key_line": 34,
+    "gate_first_error": "block line 10 (YAML line 44): Expected end of line (m280)",
+    "source_line_of_error": "return SD_OK                      ' write completed",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "timeout_ms",
+     "sd_busy_released()->1/0",
+     "SD_OK=con",
+     "ERR_WRITE_TIMEOUT=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/methods/pollatn.yaml",
+    "addr": "examples[2].code",
+    "key_line": 25,
+    "gate_first_error": "block line 9 (YAML line 34): Expected end of line (m280)",
+    "source_line_of_error": "return FALSE",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "timeout"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ }
+]

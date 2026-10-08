@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/offsetof.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "7ed2446fb9b7c618"
+    compile: program
+  - at: examples[1].code
+    fp: "6a963f2a33978733"
+    compile: program
+  - at: examples[2].code
+    fp: "61f2c8ba0de72a9d"
+    compile: program
+  - at: examples[3].code
+    fp: "b1575a34c2654e0d"
+    compile: program
+  - at: examples[4].code
+    fp: "2b1ab11038d952f7"
+    compile: program

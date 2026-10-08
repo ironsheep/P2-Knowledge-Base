@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/sizeof.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "3d0dd14e30ed0b3c"
+    compile: program
+  - at: examples[1].code
+    fp: "d8a468d6ef436bc9"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[2].code
+    fp: "2e0d0c40871a543f"
+    compile: program

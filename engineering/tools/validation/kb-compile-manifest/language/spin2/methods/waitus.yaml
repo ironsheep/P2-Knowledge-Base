@@ -1,0 +1,25 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/waitus.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "e3cefeaeeeb6532c"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "1481667207e6c7eb"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "74236393bbf79dd2"
+    compile: program
+  - at: examples[3].code
+    fp: "94acbaca72f19ab4"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [TX_PIN=con]
+  - at: examples[4].code
+    fp: "8d5331e51d4afdee"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [SCL=con, data, SDA=con]

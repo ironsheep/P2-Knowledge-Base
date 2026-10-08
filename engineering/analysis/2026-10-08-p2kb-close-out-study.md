@@ -173,6 +173,52 @@ arbiter verifies its cited lines before a row enters the register. **Nothing in
 
 *S-005/S-006 were found 2026-10-08 checking a proposer stub during ENH-03 B3 («#403»).*
 
+**ENH-03 B3, group G1 (`language/spin2/methods/`, 457 blocks), 2026-10-08.** The reviewer's
+site lists, compiler errors, source lines and compiled fixes are in
+`2026-10-08-p2kb-close-out-evidence/b3-g1-defects.json` (classes, mapped to rows by
+`b3-g1-class-map.json`) and `b3-g1-observations.json` (O-ids). Each sidecar entry's `finding:`
+names its row. Arbiter checks: decisions re-applied in a fresh scratch root (same gate result);
+the 301 accepted assume names scanned (all user placeholders); source lines for O3, O6, O8, O10,
+O11, O13 and the CALL/REGEXEC/WAITCT rows re-read and holding.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-006 *(widened)* | B | G1 | **drives wrong code** | also: 9 example blocks call BYTESWAP/WORDSWAP/LONGSWAP with two arguments (class `swap-methods-missing-count`); the notes claim an "atomic" single-value exchange (O20) | b3-g1 defects/O20; `spin2-v55-text.txt:579-581` | traced | as S-005 | to research | no |
+| S-007 | B | G1 | **drives wrong code** | `byte.yaml`/`word.yaml`/`long.yaml` give the VAR declaration as `Name BYTE [Count]` (syntax, contexts, 3 examples); Spin2 is `BYTE Name[Count]` | defects `var-declaration-name-before-type`; O1; `spin2-v55-text.txt:267` | traced | DAT order applied to VAR | to research | no |
+| S-008 | B | G1 | drives wrong code | reserved words used as identifiers (`lookup`, `lstr`, `next`), 3 sites | defects `reserved-word-as-identifier` | traced | compiler-unchecked authoring | to research | no |
+| S-009 | B | G1 | drives wrong code | two-index arrays `[a][b]`, 3 sites; Spin2 arrays take one size | defects `two-dimensional-array` | traced | other-language habit | to research | no |
+| S-010 | B | G1 | **drives wrong code** | CALL and REGEXEC documented as returning a value (`result := CALL(...)`, "result in result1"); neither returns one, and the compiler rejects them as terms. 6 example sites plus page prose (O2) | defects `call-regexec-used-as-expression`; O2; `spin2-v55-text.txt:556-558` | traced | invented return value | to research | no |
+| S-011 | B | G1 | drives wrong code | PASM examples move results into `result1`, which does not exist (3 sites); the v55 CALL example passes data through PR0 | defects `undefined-pasm-symbol-result1` | traced | as S-010 | to research (with S-010) | no |
+| S-012 | B | G1 | wrong, not code-driving | Spin2 statements at top level beside DAT/VAR, outside any method (9 sites) | defects `statements-outside-method` | traced | shorthand presented as code | to research (show the PUB, or mark the block as excerpt) | no |
+| S-013 | B | G1 | **drives wrong code** | `DRVH(pin)` called as a Spin2 method (2 sites); Spin2 uses PINHIGH() | defects `pasm-instruction-called-as-spin2-method` | traced | same class as S-001..S-003 (PASM written as Spin2) | to research (one class sweep with S-001..S-003) | no |
+| S-014 | B | G1 | drives wrong code | `COGCHK(n) ? "Running" : "Stopped"`: a multi-character quoted literal used as a string value | defects `string-literal-in-expression` | traced | other-language habit | to research | no |
+| S-015 | B | G1 | drives wrong code | `SEND(BYTE[@buffer, 10])`: no such `BYTE[addr, count]` form | defects `send-byte-array-form-invalid` | traced | invented syntax | to research | no |
+| S-016 | B | G1 | drives wrong code | LOOKUP/LOOKDOWN argument lists continued after a trailing comma with no `...` (4 sites) | defects `multiline-expression-without-continuation` | traced | other-language habit | to research | no |
+| S-017 | B | G1 | drives wrong code | method-pointer call `data := inputMethod()` without the `:1` result count (2 sites) | defects `method-pointer-call-without-result-count` | traced | — | to research (with S-033) | no |
+| S-018 | B | G1 | wrong, not code-driving | `@serial.rx` used with no `OBJ serial` line (2 sites) | defects `undeclared-object-instance` | traced | incomplete example | to research | no |
+| S-019 | B | G1 | drives wrong code | complete PUB methods using undeclared locals or an undeclared `result` (11 sites) | defects `undeclared-local-in-complete-method` | traced | compiler-unchecked authoring | to research | no |
+| S-020 | B | G1 | drives wrong code | `PUB restart_cog(...)` returns a value but declares no result | defects `return-value-without-declared-result` | traced | as S-019 | to research (with S-019) | no |
+| S-021 | B | G1 | **drives wrong code** | CLKSET examples use `clkmode_pll`/`clkmode_rcfast`, which do not exist; the page says "use predefined clkmode_ constants" (only `clkmode_` and `clkmode` exist) | defects `undefined-clkmode-constants`; O15; `spin2-v55-text.txt:1725`, `:1730` | traced | invented names | to research | no |
+| S-022 | F | G1 | hygiene (tooling) | **not a KB defect**: `getms.yaml:34`, `pollatn.yaml:25` are method bodies that `return` a value; the `spin2-method` wrap declares no result, so no honest context compiles them | defects `undecided-return-in-fragment` | traced | harness gap | **arbiter's call: fix the harness** (a wrap that declares a result) in the B3 tooling pass, then reclassify both as fragments | yes |
+| S-023 | B | G1 | **drives wrong code** | GETRND described as a true-random hardware RNG "suitable for cryptographic use"; it is the xoroshiro128** PRNG seeded at boot | O3; `spin2-v55-text.txt:567`; `silicon-doc-text.txt:2852-2854` | traced | embellished description | to research | no |
+| S-024 | B | G1 | latent | GETCRC: "hardware CRC engine", "initial CRC value is 0" — unsourced | O4; `spin2-v55-text.txt:597` | traced | unsourced embellishment | to research | no |
+| S-025 | B | G1 | drives wrong code | `nan.yaml:23`: `sqrt(-1.0)` "creates NaN"; SQRT is the unsigned-integer root operator | O5; `spin2-v55-text.txt:438-439` | traced | float/int operator confusion | to research | no |
+| S-026 | B | G1 | **drives wrong code** | QLOG/QEXP described as natural log and e^x, with ln-based examples; the silicon computes log base 2 and 2^x | O6; `silicon-doc-text.txt:3393`, `:3404` | traced | wrong base | to research | no |
+| S-027 | B | G1 | **drives wrong code** | `movbyts.yaml:56-58`, `:82-85`: `%%1032` documented as swapping adjacent byte pairs; it swaps the words | O7; MOVBYTS definition (silicon doc) | traced | arithmetic error | to research | no |
+| S-028 | B | G1 | **drives wrong code** | `hubset.yaml:37-38`: `HUBSET($8000_0000)` "bit 31 = reset chip"; MSB set seeds the PRNG, reset is `$1000_0000` | O8; `silicon-doc-text.txt:2852`, `:2862-2864` | traced | wrong bit | to research | no |
+| S-029 | B | G1 | **drives wrong code** | `wrpin.yaml:74-96`: five mode literals are 31 bits, so each mode field lands one bit low | O9; `silicon-doc-text.txt:3731`, `:4684`, `:4257` | traced | digit-count error | to research | no |
+| S-030 | B | G1 | **drives wrong code** | `wxpin.yaml:46`, `:86-89`: sync-serial word size given as X[5:0]; `%1_00111` called 16 bits (it is 8) | O10; `silicon-doc-text.txt:4654`, `:4675` | traced | — | to research | no |
+| S-031 | B | G1 | **drives wrong code** | STRCOPY's Max documented as including the terminator; the source says up to Max characters, Max+1 bytes | O11; `spin2-v55-text.txt:590` | traced | off by one | to research | no |
+| S-032 | B | G1 | latent | `string.yaml:39`: "escape sequences supported (\n, \t)" for STRING(); escapes belong to the `@\"…\"` form | O12; `spin2-v55-text.txt:50-59`, `:592` | traced | — | to research | no |
+| S-033 | B | G1 | **drives wrong code** | RECV/SEND documented as copied out into a LONG and called; they are assigned (`SEND := @OutMethod`) and inherited | O13; `spin2-v55-text.txt:662-667`, `:682-685` | traced | mechanism misread | to research (with S-017) | no |
+| S-034 | B | G1 | wrong, not code-driving | COGINIT called with NEWCOG (`cogchk.yaml:44,123`, `longmove.yaml:64`); NEWCOG is COGSPIN's symbol (same value) | O14; `spin2-v55-text.txt:1658-1669` | traced | — | to research | no |
+| S-035 | B | G1 | wrong, not code-driving | `getct.yaml:90-92`: "direct access to CNT register" — CNT is P1 | O16; `spin2-v55-text.txt:547` | traced | P1 carry-over | to research | no |
+| S-036 | B | G1 | drives wrong code | `waitct.yaml:38,45`: "until counter matches Tick", "exact match"; the wait ends once CT has passed Tick | O17; `spin2-v55-text.txt:549` | traced | — | to research | no |
+| S-037 | B | G1 | latent | `cogatn.yaml:138`: "cannot signal yourself" — unsourced; the silicon doc does not exclude the signalling cog | O18; `silicon-doc-text.txt:2015-2021` | inferred | — | to research (possible bench question if the sources stay silent) | no |
+| S-038 | B | G1 | latent | BYTEMOVE/WORDMOVE/LONGMOVE documented as overlap-safe with automatic direction; the source is silent | O19; `spin2-v55-text.txt:576-578` | inferred | unsourced | to research (interpreter source first; bench only if silent) | no |
+| S-039 | B | G1 | wrong, not code-driving | `byte.yaml:41`: `send(BYTE(...))` presented as a user method; `send` is the built-in SEND pointer (names are case-insensitive) | O21; `spin2-v55-text.txt:662-667` | traced | — | to research | no |
+| S-040 | B | G1 | latent | unsourced behaviour claims: "cog 0 always starts first", "cannot stop cog -1", "values outside 0-7 return 0", "maximum 496 longs" (`cogid`, `cogstop`, `cogchk`, `regload`) | O22 | undetermined | unsourced | to research (sources, then bench if silent) | no |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

@@ -1,0 +1,18 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/getsec.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "993d0efb4d68c393"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "6af752295398e6f3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [start_sec, elapsed_sec]
+  - at: examples[2].code
+    fp: "b86b392c461ddd12"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [next_run, do_periodic_task()->1/0]

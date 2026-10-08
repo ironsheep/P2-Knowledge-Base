@@ -1,0 +1,35 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/pinstart.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "c38e5d92ba3e85ac"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "f1c1f5a54823ad68"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "f53e8aeb1addf3dd"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "74208c9dd8a8ae78"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[4].code
+    fp: "d9edbd2d9fbbb64a"
+    compile: program
+  - at: pin_field_operators.ADDPINS.examples[0]
+    fp: "39c1040146cee921"
+    compile: not-code
+    reason: "pin-field operand expression shown standalone (operand notation); legal only as an argument, not a statement"
+  - at: pin_field_operators.ADDPINS.examples[1]
+    fp: "4aef8c71ad760688"
+    compile: not-code
+    reason: "pin-field operand expression shown standalone (operand notation); legal only as an argument, not a statement"
+  - at: pin_field_operators.ADDPINS.examples[2]
+    fp: "8ca0029148fb02b9"
+    compile: not-code
+    reason: "pin-field operand expression shown standalone (operand notation); legal only as an argument, not a statement"

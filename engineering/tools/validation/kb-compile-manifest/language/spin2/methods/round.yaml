@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/round.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "9ea888cadd26ddf5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [float_val, int_val]
+  - at: examples[1].code
+    fp: "4971bd0e9849eb8e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [float_val, int_val]
+  - at: examples[2].code
+    fp: "3d24b3f815d49882"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [float_val, int_val]
+  - at: examples[3].code
+    fp: "601ddf5a9ad5d7e0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [filtered, alpha, new_sample, result]

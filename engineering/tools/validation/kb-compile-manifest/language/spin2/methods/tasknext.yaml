@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/tasknext.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "904496bb5f208e3b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_work_chunk()->1/0]
+  - at: examples[1].code
+    fp: "50ca425d36b46d3a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [data_ready, process_data()->1/0]
+  - at: examples[2].code
+    fp: "c298b320aa60d154"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [calculate_step()->1/1]

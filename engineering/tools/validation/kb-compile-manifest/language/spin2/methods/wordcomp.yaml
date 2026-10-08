@@ -1,0 +1,22 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/wordcomp.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "ce47f588f2dd4728"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [array1, array2]
+  - at: examples[1].code
+    fp: "da34ed131fabc501"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [readings, expected]
+  - at: examples[2].code
+    fp: "84890d65490dd17b"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [data, i, signature]

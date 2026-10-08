@@ -1,0 +1,17 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/taskhalt.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "b621ac320b714d1f"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_critical_work()->1/0]
+  - at: examples[1].code
+    fp: "4546bd97c07ff642"
+    compile: program
+  - at: examples[2].code
+    fp: "40270f8a190d8c07"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buffer_full, producer_task]

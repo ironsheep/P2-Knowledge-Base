@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/rotxy.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "284d863721d9cb2a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x2, y2]
+  - at: examples[1].code
+    fp: "933bd3af9ecec481"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [angle, x2, y2, radius, plot()->1/2, center_x, center_y]
+  - at: examples[2].code
+    fp: "6f2e58bf36afa2e8"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, num_vertices, vx, vy, rotation]

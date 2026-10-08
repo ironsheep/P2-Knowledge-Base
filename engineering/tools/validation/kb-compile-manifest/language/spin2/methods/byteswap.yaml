@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/byteswap.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "bfcd63920c6846b6"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [value1, value2]
+    finding: "S-006"
+  - at: examples[1].code
+    fp: "4c19e4d312b3b7d7"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [i, size, array]
+    finding: "S-006"
+  - at: examples[2].code
+    fp: "c830049035bc6ca6"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    finding: "S-006"

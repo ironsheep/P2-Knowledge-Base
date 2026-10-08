@@ -1,0 +1,25 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/getms.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "a2d4a146851524a1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [start_ms, elapsed]
+  - at: examples[1].code
+    fp: "348d8e33127bcb06"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [timeout_ms, check_condition()->1/0]
+  - at: examples[2].code
+    fp: "77abd3967c84bbc0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ms, seconds, minutes, hours]
+  - at: examples[3].code
+    fp: "df69fdb2ffea4db5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [timeout_ms, sd_busy_released()->1/0, SD_OK=con, ERR_WRITE_TIMEOUT=con]
+    finding: "S-022"

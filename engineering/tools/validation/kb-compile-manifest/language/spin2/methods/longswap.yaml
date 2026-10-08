@@ -1,0 +1,25 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/longswap.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "d71abe5c7ad8b7f3"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [value1, value2]
+    finding: "S-006"
+  - at: examples[1].code
+    fp: "b751454cfbfb84d4"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [i, size, array]
+    finding: "S-006"
+  - at: examples[2].code
+    fp: "a757b99ef726834e"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 45
+    assumes: [reg_a, reg_b]
+    finding: "S-006"

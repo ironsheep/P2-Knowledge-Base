@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/lockret.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "43a97e7c06dad77b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [lock_id]
+  - at: examples[1].code
+    fp: "72141765cb977194"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lock_id]
+  - at: examples[2].code
+    fp: "be1f39b99e5f7e2d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, num_locks, locks]

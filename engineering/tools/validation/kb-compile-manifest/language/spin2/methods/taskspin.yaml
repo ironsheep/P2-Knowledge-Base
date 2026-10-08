@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/taskspin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "c49a928f17c1b925"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [background_process()->1/0, main_work()->1/0]
+  - at: examples[1].code
+    fp: "375d5acc5a474d8d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [sensor_monitor()->1/2]
+  - at: examples[2].code
+    fp: "2fc55dde93e84a15"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [task1()->1/0, task2()->1/0, task3()->1/0]

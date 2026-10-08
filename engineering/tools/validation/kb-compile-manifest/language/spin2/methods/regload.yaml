@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/regload.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "a1da0b2f9f2b19c5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pasm_routines]
+  - at: examples[1].code
+    fp: "a05c93983bbc2afd"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [modify_pasm()->0/1, buffer, result]
+    finding: "S-010"
+  - at: examples[2].code
+    fp: "6c325208c9212e2b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, fast_routines, accurate_routines]

@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/polxy.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "29d31fa42459b2d9"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, y]
+  - at: examples[1].code
+    fp: "a3570df6dc40ac3d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [radius, angle, x, y, plot()->1/2, center_x, center_y]
+  - at: examples[2].code
+    fp: "d06487b19520e0b3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [angle, radius, x, y, plot()->1/2, center_x, center_y]

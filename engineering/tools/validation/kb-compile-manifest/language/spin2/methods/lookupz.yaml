@@ -1,0 +1,54 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/lookupz.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: index_mapping.example
+    fp: "5430e2a9ebc79a25"
+    compile: not-code
+    reason: "index-to-value mapping table (notation, not statements); includes non-code characters/words"
+  - at: examples[0].code
+    fp: "eccdba77ec6e1b18"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: examples[1].code
+    fp: "0cd915bd65d884d4"
+    compile: program
+  - at: examples[2].code
+    fp: "4fba48ff3a5406d1"
+    compile: program
+  - at: examples[3].code
+    fp: "5b59a47078c291be"
+    compile: program
+  - at: common_patterns[0].code
+    fp: "6dcef2f0b9535c2a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [char, value]
+  - at: common_patterns[1].code
+    fp: "9c06288ac0d37f3c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [speed, index]
+  - at: anti_patterns[0].wrong
+    fp: "5257c1b346f65ea8"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin, channel]
+    finding: "S-013"
+  - at: anti_patterns[0].correct
+    fp: "f30d9d6d3e543e36"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin, channel]
+    finding: "S-013"
+  - at: anti_patterns[1].wrong
+    fp: "09c763e245221b3d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [name, user_choice]
+  - at: anti_patterns[1].correct
+    fp: "033ce3f2e49eefbd"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [name, user_choice]

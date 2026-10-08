@@ -1,0 +1,21 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/longfill.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "c4464fb07774a3f3"
+    compile: program
+  - at: examples[1].code
+    fp: "757efa5a318be5e4"
+    compile: program
+  - at: examples[2].code
+    fp: "71af3bd63ed64604"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [default_handler()->0/0]
+  - at: examples[3].code
+    fp: "b6a7c7672bcf5541"
+    compile: program
+  - at: examples[4].code
+    fp: "f57c482cc5b8fa40"
+    compile: program

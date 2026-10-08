@@ -1,0 +1,40 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/wypin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "af28d97a00cb9203"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "345ee6539fef0462"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [period]
+  - at: examples[2].code
+    fp: "3c692878ab589a39"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin]
+  - at: examples[3].code
+    fp: "69854057c8620864"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [dac_pin]
+  - at: examples[4].code
+    fp: "3f8c8fdfb3fc1d1e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [spi_pin, data_long]
+  - at: data_transmission.uart_send
+    fp: "70db4d0d01d34c78"
+    compile: program
+  - at: data_transmission.pwm_update
+    fp: "1bf135759fce1720"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [X_VALUE=con]
+    finding: "S-019"
+  - at: data_transmission.burst_output
+    fp: "8fd5f78e19a1cdb4"
+    compile: program

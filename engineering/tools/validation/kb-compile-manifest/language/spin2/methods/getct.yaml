@@ -1,0 +1,33 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/getct.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "efc898ae26b319f0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [start, elapsed]
+  - at: examples[1].code
+    fp: "de297dba9954ccc1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [start, process_data()->1/0, elapsed_us]
+  - at: examples[2].code
+    fp: "de475be604d24d28"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [target]
+  - at: examples[3].code
+    fp: "081a6e1ff3983f74"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [next_time, do_10hz_task()->1/0]
+  - at: examples[4].code
+    fp: "62d3fccb5fd1fb28"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [timeout]
+  - at: pitfalls[0].consequence
+    fp: "c48f4f712e8793d0"
+    compile: not-code
+    reason: "pitfall 'consequence' prose (English sentences with inline code spans), not code"

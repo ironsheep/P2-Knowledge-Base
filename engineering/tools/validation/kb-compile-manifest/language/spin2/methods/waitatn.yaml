@@ -1,0 +1,18 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/waitatn.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "c427d9e37bb99fdc"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "84d786f0e5797644"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [command, shared_variable, process_command()->1/1]
+  - at: examples[2].code
+    fp: "aa2a9c95bd2b82ca"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [do_work_stage1()->1/0, signal_complete()->1/0, do_work_stage2()->1/0]

@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/rdpin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "7ea840bec8af709f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [adc_value]
+  - at: examples[1].code
+    fp: "c004cc67c03de25b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [width]
+  - at: examples[2].code
+    fp: "2ca44bd52b5518a6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, pin]

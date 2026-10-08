@@ -1,0 +1,28 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/cogspin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "cf5c97fe4724d15c"
+    compile: program
+  - at: examples[1].code
+    fp: "f11552f26804e68d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_adc()->1/1]
+  - at: examples[2].code
+    fp: "8db719da9631e293"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [serial.rx_handler(0)]
+  - at: examples[3].code
+    fp: "2a600d5d10a7391b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [process_chunk()->0/1]
+    finding: "S-009+S-019"
+  - at: production_patterns.indexed_stack_allocation.code
+    fp: "eb981343d2629908"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [NUM_COGS=con, STACK_SIZE=con, worker()->1/1]

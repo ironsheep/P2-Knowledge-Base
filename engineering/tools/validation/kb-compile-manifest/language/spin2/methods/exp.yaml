@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/exp.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "1f205bc930946f4d"
+    compile: program
+  - at: examples[1].code
+    fp: "ce864fe69dec13b8"
+    compile: program
+  - at: examples[2].code
+    fp: "6a333ce257bb77c8"
+    compile: program
+  - at: examples[3].code
+    fp: "f1d95de554958d82"
+    compile: program
+  - at: examples[4].code
+    fp: "a84031febdeed319"
+    compile: program

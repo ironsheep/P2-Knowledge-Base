@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/trunc.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "9b542ed823775332"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [float_val, int_val]
+  - at: examples[1].code
+    fp: "90b24fd46272c17c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [float_val, int_val]
+  - at: examples[2].code
+    fp: "179ab9fe6d2d386a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [temperature, whole_degrees]

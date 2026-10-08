@@ -1,0 +1,17 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/taskcont.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "641827ae0a30d6f0"
+    compile: program
+  - at: examples[1].code
+    fp: "53d9ac3ce6c83f4f"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker1, worker2, prepare_data()->1/0]
+  - at: examples[2].code
+    fp: "e8cf8bb803745054"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buffer_full, producer_task]

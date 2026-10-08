@@ -1,0 +1,43 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/lookdown.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: index_mapping.example
+    fp: "e8218ee0fc8ff9fe"
+    compile: not-code
+    reason: "index-to-value mapping table (notation, not statements); includes non-code characters/words"
+  - at: examples[0].code
+    fp: "e3d543f964eee303"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pos]
+  - at: examples[1].code
+    fp: "f56266239d69c4b2"
+    compile: program
+    finding: "S-016"
+  - at: examples[2].code
+    fp: "f746101e23a616fe"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CAT_DIGIT=con, CAT_UPPER=con, CAT_LOWER=con, CAT_OTHER=con]
+  - at: examples[3].code
+    fp: "bc9312e24680cb73"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [PINS_P0_P15=con, PINS_P16_P31=con, PINS_P32_P47=con]
+  - at: common_patterns[0].code
+    fp: "84807f90c5531cb0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [user_input, VALID1=con, VALID2=con, VALID3=con, process()->1/1, report_error()->1/0]
+  - at: common_patterns[1].code
+    fp: "d3793e3d7490cc24"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [voltage, PWR_7p4V=con, PWR_24p0V=con, valid]
+  - at: common_patterns[2].code
+    fp: "38a61c4b2e18ebae"
+    compile: program
+  - at: common_patterns[3].code
+    fp: "d30210b393f6287b"
+    compile: program

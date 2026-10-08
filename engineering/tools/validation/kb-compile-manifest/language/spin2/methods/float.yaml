@@ -1,0 +1,29 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/float.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "d8e5746ef083ca6b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [int_val, float_val]
+  - at: examples[1].code
+    fp: "fbd3dd1f756cae50"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [raw, read_adc()->1/0, voltage]
+  - at: examples[2].code
+    fp: "51e167a21a3a7b06"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [adc_value, read_temp_sensor()->1/0, temp_c]
+  - at: anti_patterns.conversion_in_loop.wrong
+    fp: "5eae5928cf596904"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, sum]
+  - at: anti_patterns.conversion_in_loop.correct
+    fp: "0059dec0f8b49034"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, int_sum, sum]

@@ -1,0 +1,22 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/longmove.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "e399dc330137d5be"
+    compile: program
+  - at: examples[1].code
+    fp: "cdf501a7508f570e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [cog_code]
+  - at: examples[2].code
+    fp: "0bce9c1f1da9a2f3"
+    compile: program
+    finding: "S-019"
+  - at: examples[3].code
+    fp: "53d97037c91387d3"
+    compile: program
+  - at: examples[4].code
+    fp: "6adbb51d9d2656c6"
+    compile: program

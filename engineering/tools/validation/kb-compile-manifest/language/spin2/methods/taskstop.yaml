@@ -1,0 +1,15 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/taskstop.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "16e6b75da5c8bf56"
+    compile: program
+  - at: examples[1].code
+    fp: "43db86654ee21214"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [shutdown_flag, do_work()->1/0]
+  - at: examples[2].code
+    fp: "b8947e8ec8bff445"
+    compile: program

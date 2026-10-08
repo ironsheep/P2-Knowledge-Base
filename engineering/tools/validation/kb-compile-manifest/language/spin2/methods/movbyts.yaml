@@ -1,0 +1,44 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/movbyts.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: common_patterns[0].example
+    fp: "5f0ee8d8c2fa075f"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: common_patterns[1].example
+    fp: "62f5d7fd239ac39c"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: common_patterns[2].example
+    fp: "df090daaaae8d575"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: common_patterns[3].example
+    fp: "b24f5aa30e171011"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: common_patterns[4].example
+    fp: "91cfbf6a72970a9b"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: common_patterns[5].example
+    fp: "0d8e7e59b26d7c00"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: common_patterns[6].example
+    fp: "aa4c1dbca6879664"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: examples[0].code
+    fp: "4827128c3754ac34"
+    compile: program
+  - at: examples[1].code
+    fp: "fa55882ae3a3735d"
+    compile: program
+  - at: examples[2].code
+    fp: "05915ffcae1f1612"
+    compile: program
+  - at: examples[3].code
+    fp: "afe57b26effcaef7"
+    compile: program

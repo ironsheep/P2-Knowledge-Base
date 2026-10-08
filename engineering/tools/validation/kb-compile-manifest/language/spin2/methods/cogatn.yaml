@@ -1,0 +1,42 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/cogatn.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "2948fdc1ca6291bd"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "5ce9f7df58c63da8"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "b1f2ad8b73230713"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "3e3249369e952e27"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "a9b6555a0d5ac0c7"
+    compile: program
+  - at: examples[4].code
+    fp: "0b1b3f97f517e4f4"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [produce_data()->1/0, consumer_cog, process_data()->1/0]
+  - at: receiving_methods.pasm
+    fp: "704e3ccdb16d0ba8"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: synchronization_patterns[0].code
+    fp: "782a59c8d67f8d2f"
+    compile: program
+  - at: synchronization_patterns[1].code
+    fp: "d72113a62af5e8b7"
+    compile: program
+  - at: synchronization_patterns[2].code
+    fp: "1934a46d4345fe97"
+    compile: program
+    finding: "S-019"

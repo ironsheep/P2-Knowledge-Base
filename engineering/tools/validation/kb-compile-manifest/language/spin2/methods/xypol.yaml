@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/xypol.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "d57956ed7989a956"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [rho, theta]
+  - at: examples[1].code
+    fp: "955fbcab59eb80bc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [dx, target_x, current_x, dy, target_y, current_y, distance, angle]
+  - at: examples[2].code
+    fp: "720f5a2cd6440522"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [magnitude, direction, joy_x, joy_y, threshold, move_player()->1/2]

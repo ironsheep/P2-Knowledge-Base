@@ -1,0 +1,27 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/pinread.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "c75bec0aa69930a4"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "6d183395bbf8c847"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [buttons]
+  - at: examples[2].code
+    fp: "1077c08cae01101a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [setting]
+  - at: examples[3].code
+    fp: "5c52e707d415f7d2"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[4].code
+    fp: "8e2cd3bad1b45d97"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [address, handle_device_0()->1/0, handle_device_1()->1/0, handle_others()->1/0]

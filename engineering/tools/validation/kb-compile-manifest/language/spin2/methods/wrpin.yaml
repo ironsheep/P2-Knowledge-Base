@@ -1,0 +1,33 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/wrpin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "0a23ce07f9a4f45b"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "584b3cfca0fe0e43"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode]
+  - at: examples[1].code
+    fp: "b91179556e34ab57"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode]
+  - at: examples[2].code
+    fp: "ba73750c64ae0fcc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode]
+  - at: examples[3].code
+    fp: "cdf5f8000195ca03"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, pin]
+  - at: examples[4].code
+    fp: "f836788fb21e0973"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin]

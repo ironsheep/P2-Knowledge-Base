@@ -1,0 +1,19 @@
+{
+ "swap-methods-missing-count": "S-006",
+ "var-declaration-name-before-type": "S-007",
+ "reserved-word-as-identifier": "S-008",
+ "two-dimensional-array": "S-009",
+ "call-regexec-used-as-expression": "S-010",
+ "undefined-pasm-symbol-result1": "S-011",
+ "statements-outside-method": "S-012",
+ "pasm-instruction-called-as-spin2-method": "S-013",
+ "string-literal-in-expression": "S-014",
+ "send-byte-array-form-invalid": "S-015",
+ "multiline-expression-without-continuation": "S-016",
+ "method-pointer-call-without-result-count": "S-017",
+ "undeclared-object-instance": "S-018",
+ "undeclared-local-in-complete-method": "S-019",
+ "return-value-without-declared-result": "S-020",
+ "undefined-clkmode-constants": "S-021",
+ "undecided-return-in-fragment": "S-022"
+}

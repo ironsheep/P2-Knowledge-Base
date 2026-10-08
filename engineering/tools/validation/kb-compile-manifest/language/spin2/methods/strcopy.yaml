@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/strcopy.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "699849bdbe2a4ccd"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [buffer, source]
+  - at: examples[1].code
+    fp: "86edecdc9f48c67e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [name, input]
+  - at: examples[2].code
+    fp: "2fd11e0dac6f6c0d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [message]

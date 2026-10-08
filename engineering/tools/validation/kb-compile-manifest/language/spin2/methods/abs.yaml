@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/abs.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "5b2f133fbbfea2c2"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, y, z]
+  - at: examples[1].code
+    fp: "9b165993cc8044dc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [distance, x2, x1]
+  - at: examples[2].code
+    fp: "2f49d303dcc735e9"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [error, target, actual, tolerance, correct_position()->1/0]

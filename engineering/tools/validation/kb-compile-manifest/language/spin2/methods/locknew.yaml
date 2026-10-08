@@ -1,0 +1,33 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/locknew.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "af11b59e14faa1a6"
+    compile: program
+  - at: examples[1].code
+    fp: "bdfcc6e267ffb285"
+    compile: program
+  - at: examples[2].code
+    fp: "06e0650ef719d461"
+    compile: program
+  - at: anti_patterns[0].wrong
+    fp: "678fa627b85457e8"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [my_lock]
+  - at: anti_patterns[0].correct
+    fp: "82e224f551043d0a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [my_lock]
+  - at: anti_patterns[1].wrong
+    fp: "6558849dbab8275e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [lock]
+  - at: anti_patterns[1].correct
+    fp: "b942b87cb0877d1a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [lock]

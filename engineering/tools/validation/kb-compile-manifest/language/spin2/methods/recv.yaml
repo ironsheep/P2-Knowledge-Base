@@ -1,0 +1,34 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/methods/recv.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "15bc1b66607514c7"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [char]
+  - at: examples[1].code
+    fp: "3bd530fd6fbf2d4a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, buffer]
+  - at: examples[2].code
+    fp: "e3216178ed402030"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [byte_in]
+  - at: examples[3].code
+    fp: "4197ffa1641e4c60"
+    compile: fragment
+    wrap: spin2-method
+  - at: as_method_pointer.usage
+    fp: "5215c8f4a0906923"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [data, inputMethod]
+    finding: "S-017"
+  - at: as_method_pointer.example
+    fp: "d1cac6c589361365"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-017+S-018"
