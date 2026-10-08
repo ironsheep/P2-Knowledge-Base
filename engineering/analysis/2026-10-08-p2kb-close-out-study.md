@@ -163,7 +163,13 @@ arbiter verifies its cited lines before a row enters the register. **Nothing in
 
 | # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution (change spec / bench Q / reclass) | Trivially safe? |
 |---|---|---|---|---|---|---|---|---|---|
-| | | | | *(empty until the scope is agreed)* | | | | | |
+| S-001 | B | new | **drives wrong code** | `code-examples/smart-pins-001-basic-io.yaml`: the `complete_program` block does not compile (`Expected an instruction or variable`, block line 2), yet the file serves `compilation_result: "success"` | `pnut-ts -q` on the block verbatim (byte-identical, checked 2026-10-08); YAML `:18`, `:63` | traced | PASM instruction written as a Spin2 statement; a false "success" stamp | to research | no |
+| S-002 | B | new | **drives wrong code** | `code-examples/smart-pins-002-button-reading.yaml`: same shape, `DIRL #BUTTON` in Spin2 (block line 5); serves `compilation_result: "success"` | as S-001; YAML `:18`, `:67` | traced | as S-001 | to research | no |
+| S-003 | B | new | **drives wrong code** | `architecture/smart-pins/smart-pin-01010-pwm-smps.yaml:51`, `:56`: `dirh(v_sense)`, `dirh(i_sense)`. `DIRH` is PASM2, not a Spin2 method; the block fails ("Expected an instruction or variable", block line 11) | ENH-03 design probe; YAML read 2026-10-08 | traced | PASM instruction written as a Spin2 call | to research (class: PASM-in-Spin2, with S-001/S-002) | no |
+| S-004 | F | new | hygiene | `deliverables/ai/P2/language/pasm2/add-missing-oneliners.py` is a tracked Python script inside the served YAML tree | `git ls-files deliverables/ai/P2 \| grep -v .yaml$` | traced | a generator left in the deliverables tree | to research (the other non-YAML files there are README/CHANGELOG/encoding reference/git hooks; check each is sanctioned) | no |
+
+*S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
+legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 
 ## 4. Root-cause groups
 
