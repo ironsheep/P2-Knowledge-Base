@@ -26,10 +26,14 @@ THE MODEL
       net 2  every multi-line string the COMPILER recognises as code-bearing: the
              string is elementized (`pnut-ts --pass elementize --log elementizer`)
              and taken when a line opens with a block keyword, an instruction
-             (an `if_*` condition prefix is allowed), an assembler directive or
-             DEBUG, or any line holds an assignment operator (`:=`, `+=`, ...).
-             The compiler's own token classes do the recognising: there is no
-             keyword list in this script.
+             (an `if_*` condition prefix is allowed), an assembler directive,
+             DEBUG, or a Spin2 flow-statement token (IF/ELSE/CASE/OTHER/REPEAT and
+             the `type_i_*` family: RETURN, ABORT, NEXT/QUIT, built-in method
+             statements), or any line holds an assignment operator (`:=`, `+=`, ...).
+             An elementize pass that ABORTS (e.g. a missing #INCLUDE file) makes the
+             string a candidate: when the compiler cannot tell, the finder includes.
+             The compiler's own token TYPES do the recognising: there is no keyword
+             spelling list in this script.
     The manifest decides what each candidate IS (the gate does not search for
     context at gate time: the manifest PINS it, 4.2).
 
@@ -76,11 +80,18 @@ MANIFEST SCHEMA
       never     the KB teaches the compile error: the gate asserts it FAILS at
                 `fails_at` (NEVER-COMPILES / NEVER-WRONG-REASON otherwise).
       not-code  prose, notation, shell command, listing... not compiled.
-    wrap (4.2):  spin2-top | spin2-method | pasm2-dat | pasm2-hub | pasm2-inline
+    wrap (4.2):  spin2-top | spin2-method | spin2-method-result | pasm2-dat | pasm2-hub
+                 | pasm2-inline
+      spin2-method-result  as spin2-method, but the wrapper declares one result
+                           (`PUB __kbgate() : __kbres`), for a method BODY that does
+                           `return <value>` (spin2-method declares none: S-022)
     assumes (the names the wrap declares, 4.2 / 4.4):
       NAME              operand: trailing `DAT NAME long 0`; for pasm2-inline a
                         LOCAL of the wrapper method (hub DAT longs fail there)
       NAME=con          trailing `CON NAME = 0`
+      NAME=con:V        trailing `CON NAME = V` (V an integer, may be negative): for a
+                        constant whose VALUE matters, e.g. an array / object count
+                        (`pca[NBUS]` needs `NBUS=con:4`; a 0 count is a different error)
       NAME()->R/N       callee stub `PRI NAME(p1..pN) : r1..rR`  (R, N optional)
       OBJ.METHOD(N)     method of a generated stub object; the object FILE is the
                         one the block's own `OBJ OBJ : "file"` line names
@@ -169,7 +180,7 @@ KB_DIR = os.path.join("deliverables", "ai", "P2")
 MANIFEST_DIR = os.path.join("engineering", "tools", "validation", "kb-compile-manifest")
 CODE_KEYS_FILE = "_code-keys.yaml"
 MAIN_NAME = "kb.spin2"
-WRAPS = ("spin2-top", "spin2-method", "pasm2-dat", "pasm2-hub", "pasm2-inline")
+WRAPS = ("spin2-top", "spin2-method", "spin2-method-result", "pasm2-dat", "pasm2-hub", "pasm2-inline")
 CLASSES = ("program", "fragment", "never", "not-code")
 ENTRY_KEYS = {"at", "fp", "compile", "wrap", "assumes", "reason", "fails_at",
               "spin2_version", "with", "finding"}
@@ -313,6 +324,18 @@ def needs_debug(text, files=None):
     return has_type_debug(toks)
 
 
+FLOW_TYPES = ("type_if", "type_ifnot", "type_elseif", "type_elseifnot", "type_else", "type_case",
+              "type_case_fast", "type_other", "type_repeat")
+
+
+def is_flow_type(typ):
+    """A Spin2 statement-opening token class: the compiler's own flow-statement classes
+    (IF/ELSE/CASE/OTHER/REPEAT) and its `type_i_*` family (RETURN, ABORT, NEXT/QUIT and the
+    built-in method statements). Read from the elementizer's token TYPES, never from keyword
+    spellings -- the compiler decides what a word is."""
+    return typ in FLOW_TYPES or typ.startswith("type_i_")
+
+
 def code_bearing(toks):
     """Net 2: does the compiler class this string as code-bearing? (3.1)"""
     by_line = defaultdict(list)
@@ -323,7 +346,7 @@ def code_bearing(toks):
         i = 0
         while i < len(ts) and ts[i].typ == "type_asm_cond":
             i += 1
-        if i < len(ts) and ts[i].typ in OPEN_TYPES:
+        if i < len(ts) and (ts[i].typ in OPEN_TYPES or is_flow_type(ts[i].typ)):
             return True
         for j, t in enumerate(ts):
             if t.typ == "type_assign":
@@ -447,7 +470,7 @@ def find_candidates(root, rels, code_keys):
         for (rel, (addr, key, value, line, style)), (toks, _out, ab) in zip(pending, results):
             if ab:
                 aborted += 1
-            if code_bearing(toks):
+            if ab or code_bearing(toks):  # fail safe: when the compiler cannot tell, the finder includes
                 per_file[rel].append(Cand(rel, addr, value, line, key, style, "shape"))
     for rel, cs in per_file.items():
         cs.sort(key=lambda c: (c.line, c.addr))
@@ -479,9 +502,9 @@ def parse_assume(s):
     m = re.fullmatch(r"(%s)" % NAME_RE, s)
     if m:
         return {"kind": "var", "name": s, "raw": s}
-    m = re.fullmatch(r"(%s)=con" % NAME_RE, s)
+    m = re.fullmatch(r"(%s)=con(?::(-?[0-9]+))?" % NAME_RE, s)
     if m:
-        return {"kind": "con", "name": m.group(1), "raw": s}
+        return {"kind": "con", "name": m.group(1), "raw": s, "value": int(m.group(2) or 0)}
     m = re.fullmatch(r"(%s)\(\)(?:->(\d+))?(?:/(\d+))?" % NAME_RE, s)
     if m:
         return {"kind": "stub", "name": m.group(1), "nret": int(m.group(2) or 0),
@@ -732,8 +755,8 @@ def build(wrap, body, assumes, version=None, withs=(), append_pub=False):
         add("body", None, bl)
         if append_pub:
             add("wrap", "pub", ["PUB __kbgate()"])
-    elif wrap == "spin2-method":
-        add("wrap", "head", ["PUB __kbgate()"])
+    elif wrap in ("spin2-method", "spin2-method-result"):
+        add("wrap", "head", ["PUB __kbgate()" + (" : __kbres" if wrap == "spin2-method-result" else "")])
         add("body", None, ind(2))
     elif wrap in ("pasm2-dat", "pasm2-hub"):
         add("wrap", "head", ["DAT", "\t\torg\t0" if wrap == "pasm2-dat" else "\t\torgh"])
@@ -754,7 +777,7 @@ def build(wrap, body, assumes, version=None, withs=(), append_pub=False):
     if conn:
         add("wrap", "hdr", ["", "CON"])
         for p in conn:
-            adddecl("%s = 0" % p["name"], p["raw"], "con")
+            adddecl("%s = %d" % (p["name"], p["value"]), p["raw"], "con")
     if stubs:
         add("wrap", "hdr", [""])
         for p in stubs:
@@ -954,6 +977,7 @@ def stub_for_missing(body, missing, extra):
     return [] if a in extra else [a]
 
 
+RETURN_VALUE_RE = re.compile(r"\s*return\s+[^\s']", re.I)   # `return <value>` (not a bare return / comment)
 _ACCEPTED = None
 _ACCEPTED_LOCK = threading.Lock()
 DIRECTIVE_PROBE = range(1, 100)
@@ -1029,7 +1053,12 @@ def harness(body, wrap, exclude=frozenset(), seed_dbg=None):
         last = (b, res)
 
         def result(kind):
-            return {"result": kind, "assumes": assumes, "dropped": list(st["dropped"]),
+            fail_text = None
+            if not res.ok and res.eline is not None:
+                lc = locate(b, res.efile, res.eline)
+                if lc[0] == "body" and 0 < lc[1] <= len(b.src_lines):
+                    fail_text = b.src_lines[lc[1] - 1]
+            return {"result": kind, "fail_text": fail_text, "assumes": assumes, "dropped": list(st["dropped"]),
                     "flagged": [fmt_decl(d) for d in st["decls"] if d["kind"] == "stub"] + list(st["extra"]),
                     "version": st["version"], "append_pub": st["append_pub"], "compiles": compiles,
                     "error": describe(b, res, None)[0] if not res.ok else None,
@@ -1126,7 +1155,9 @@ def harness(body, wrap, exclude=frozenset(), seed_dbg=None):
             return result("HARNESS")
         if loc[0] == "body":
             n = loc[1]
-            here = [d for d in st["decls"] if n in st["info"].get(d["name"].lower(), {"lines": ()})["lines"]]
+            if wrap == "spin2-method" and 0 < n <= len(b.src_lines) and RETURN_VALUE_RE.match(b.src_lines[n - 1]):
+                return result("FAIL")  # no assume can make `return <value>` legal here (S-022): the caller tries the result wrap
+            here =[d for d in st["decls"] if n in st["info"].get(d["name"].lower(), {"lines": ()})["lines"]]
             if uniq(msg):
                 if here:
                     for d in here:
@@ -1188,6 +1219,15 @@ def propose_one(cand):
         compiles += h["compiles"]
         tried.append((wrap, h["result"]))
         attempts.append((wrap, h))
+        if (wrap == "spin2-method" and h["result"] == "FAIL"
+                and RETURN_VALUE_RE.match(h.get("fail_text") or "")):
+            # the only error is a `return <value>` in a wrapper that declares no result (S-022)
+            h2 = harness(cand.text, "spin2-method-result")
+            compiles += h2["compiles"]
+            tried.append(("spin2-method-result", h2["result"]))
+            attempts.append(("spin2-method-result", h2))
+            if h2["result"] == "PASS":
+                wrap, h = "spin2-method-result", h2
         if h["result"] == "PASS":
             return {"outcome": "PASS", "compile": "fragment", "wrap": wrap, "assumes": h["assumes"],
                     "flagged": h["flagged"], "dropped": h["dropped"], "version": h["version"],
@@ -1328,7 +1368,7 @@ def print_report(rep, mode_label):
         order = ["FAIL", "NEVER-COMPILES", "NEVER-WRONG-REASON", "STALE", "UNCLASSIFIED", "ORPHAN"]
         parts = ["%d %s" % (kinds[k], k) for k in order if kinds.get(k)]
         nreg = sum(1 for p in problems if p.registered)
-        nunreg = len(problems) - nreg
+        nunreg = sum(1 for p in problems if p.kind in REGISTRABLE and not p.registered)
         print("FAIL: %d problems in %d files -- %s; %d REGISTERED (carry a finding), %d UNREGISTERED %s"
               % (len(problems), files, ", ".join(parts), nreg, nunreg, tail))
     else:
@@ -1934,6 +1974,49 @@ def run_negative_controls():
                                                  "PASS" if gate14 is None else gate14.kind),
         oracle is not None and prop14["outcome"] == "PASS" and prop14.get("version") == oracle
         and not stubbed14 and gate14 is None)
+    # NC15 the finder's net (S-109): flow statements under a NON-code key, and an aborted elementize
+    def nc_find_text(yaml_text):
+        r = tempfile.mkdtemp(dir=tmp_root())
+        write(os.path.join(r, KB_DIR, "nc.yaml"), yaml_text)
+        write(os.path.join(r, MANIFEST_DIR, CODE_KEYS_FILE), "code_keys: [code]\n")
+        per, _c = find_candidates(r, ["nc.yaml"], {"code"})
+        return [(c.addr, c.net) for c in per["nc.yaml"]]
+
+    f15 = nc_find_text("a:\n  correct: |\n    REPEAT\n      IF done\n        QUIT\n"
+                       "  wrong: |\n    CASE x\n      1: foo()\n"
+                       "  prose: |\n    Some plain words here\n    and more plain words follow\n")
+    rec("15a", "multi-line REPEAT/IF/CASE under non-code keys are netted; prose is not", "correct, wrong netted only",
+        str(f15), sorted(a for a, _n in f15) == ["a.correct", "a.wrong"])
+    f15b = nc_find_text('a:\n  note: |\n    plain words\n    #INCLUDE "no_such_file_kb"\n')
+    rec("15b", "a string whose elementize pass ABORTS (missing #INCLUDE) is a candidate (fail safe)", "netted",
+        str(f15b), [a for a, _n in f15b] == ["a.note"])
+    # NC16 a method BODY with `return <value>` (S-022)
+    frag16 = "x := 5\nreturn x\n"
+    root16 = nc_root([frag16], lambda cs: None)
+    per16, _c = find_candidates(root16, ["nc.yaml"], {"code"})
+    cand16 = per16["nc.yaml"][0]
+    prop16 = propose_one(cand16)
+    gate16 = None
+    errs16 = ["not proposed"]
+    if prop16["outcome"] == "PASS" and prop16["compile"] == "fragment":
+        e16 = {"at": cand16.addr, "fp": cand16.fp, "compile": "fragment", "wrap": prop16["wrap"],
+               "assumes": prop16["assumes"]}
+        errs16 = validate_entry(e16, "nc16")
+        gate16 = assert_entry(cand16, e16, [])
+    rec(16, "method body `return x`: proposer picks spin2-method-result; entry validates and the gate passes it",
+        "PASS, wrap spin2-method-result", "%s wrap=%s assumes=%s; validate %s; gate %s" % (
+            prop16["outcome"], prop16.get("wrap"), prop16["assumes"], errs16,
+            "PASS" if gate16 is None else gate16.kind),
+        prop16["outcome"] == "PASS" and prop16.get("wrap") == "spin2-method-result" and not errs16 and gate16 is None)
+    # NC17 NAME=con:V gives the constant its value (an array count of 0 is a different error)
+    frag17 = 'OBJ\n  pca[NBUS] : "nc_pca"\n\nPUB go()\n  pca[0].run()\n'
+    r0 = nc_run([frag17], lambda cs: [ent(cs[0], compile="fragment", wrap="spin2-top",
+                                          assumes=["NBUS=con", "pca.run(0)"])])
+    r4 = nc_run([frag17], lambda cs: [ent(cs[0], compile="fragment", wrap="spin2-top",
+                                          assumes=["NBUS=con:4", "pca.run(0)"])])
+    rec(17, "`NBUS=con` (0) fails as an object count; `NBUS=con:4` passes", "plain FAIL, valued PASS",
+        "plain %s; valued %s" % (nc_summary(r0), nc_summary(r4)),
+        [p.kind for p in r0["problems"]] == ["FAIL"] and not r4["problems"])
     ok = all(r[4] for r in results)
     for nid, desc, expected, observed, good in results:
         print("NC%-4s %-4s %s | expected %s | observed %s" % (nid, "ok" if good else "BAD", desc, expected, observed))
