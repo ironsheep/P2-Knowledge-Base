@@ -1,0 +1,44 @@
+# ENH-03 compile gate -- the code-named YAML keys (net 1 of the finder).
+#
+# audit-kb-code-compiles.py treats EVERY string scalar under one of these keys
+# as a candidate, whatever its length or shape. Each candidate must then carry
+# a manifest decision (program | fragment | never | not-code).
+#
+# This list is DATA, not a compiler keyword list. It was seeded from the host-key
+# table of the 2026-10-08 census (engineering/analysis/2026-10-08-enh-03-compile-
+# gate-design.md section 1.1: the keys under which the KB hosts code) and is to be
+# reviewed. Adding a key can only WIDEN the net (more candidates, each needing a
+# decision); removing a key can only narrow it, so a removal is a reviewed hunk.
+#
+# LEGALITY ONLY: the gate proves pnut-ts accepts a block in its declared context,
+# never that the code is correct (F-381, F-312).
+code_keys:
+  # the census's code-key set (tier 3)
+  - code
+  - code_example
+  - code_examples
+  - example
+  - examples
+  - implementation
+  - listing
+  - pasm
+  - pasm2
+  - pattern_code
+  - program
+  - snippet
+  - source_code
+  - spin
+  - spin2
+  - template
+  - usage
+  # code-named keys seen hosting multi-line blocks in the census (tier 2)
+  - fixed_code
+  - implementation_template
+  - obex_driver_usage
+  - pasm2_complete
+  - problematic_code
+  - setup_example
+  - spin2_code
+  - spin2_complete
+  - spin2_inline
+  - usage_example

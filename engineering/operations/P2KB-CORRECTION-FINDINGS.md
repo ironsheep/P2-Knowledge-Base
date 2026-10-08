@@ -3281,6 +3281,21 @@ drift.
   > rate; (3) wire the gate into both skills; (4) all close-out corrections are made under it.
   > F-381's "the example is correct" depends on it.
 
+  > **PROGRESS 2026-10-08 — B1+B2 built («#400»); B3 classification «#403» and B4 wiring «#404»
+  > open.** Design: `engineering/analysis/2026-10-08-enh-03-compile-gate-design.md` (approved).
+  > Gate: `engineering/tools/validation/audit-kb-code-compiles.py`; manifest root
+  > `engineering/tools/validation/kb-compile-manifest/` (sidecars, never shipped). Points (1) and (2)
+  > above are delivered: classes live in the sidecar manifest, not in the YAML, and the proposer
+  > attributes each collision to the one name that caused it. `--negative-control`: 17 controls
+  > (the 11 designed plus 6 opposite-case companions) all hold, and each fires when its guard is
+  > removed (arbiter re-run: PASS, 2.1 s). **Re-measured census** (supersedes the 1913/438 figure
+  > above): 1130 files, 0 parse errors; **2963 candidates in 581 files** (2476 under a code-named
+  > key, 897 of those single-line; 487 found by compiler-recognised shape only); 2066 multi-line
+  > in 498 files, 155 with `debug(`. Proposer over all 2963: 438 program, 1687 fragment,
+  > **836 FAIL (B3's triage input)**, 2 HARNESS. Speed (24 cores): a populated full sweep 26 s; the
+  > proposer 2 m 13 s — the "~25 min" estimate above does not hold. PNut-TS hang on a file with no
+  > final newline is worked around (the gate adds one) and filed as punch-list item 5.
+
   *Filed 2026-08-21;
   Stephen's call, and he asked for it in these words: "we must, for all code in YAML files, compile
   that code and assure ourselves that it compiles correctly. We do not publish a release unless all
