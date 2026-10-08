@@ -103,7 +103,22 @@ MODES (7.1)
     --refresh --files F... [--accept-assumes NAME...]
                                     rewrite at/fp for blocks that still hold their
                                     class; a new assumed name only if named here
-    --negative-control              the 11 synthetic controls (7.3)
+    --apply DECISIONS.json          write REVIEWED decisions to the sidecars. DECISIONS is a
+                                    JSON list of {"file": <kb-relative path, as --propose
+                                    prints it>, "at": <address>, "compile": program|fragment|
+                                    never|not-code, + optional wrap, assumes, with, fails_at,
+                                    reason, finding, spin2_version}. `fp` is computed from the
+                                    live candidate (supplying one is refused). ALL-OR-NOTHING:
+                                    every decision is validated (validate_entry) before any
+                                    file is written; refused, with nothing written, when an
+                                    address is not a live candidate, the sidecar already has
+                                    an entry there (no overwrite), an address is decided twice,
+                                    or an entry is invalid. Then the gate runs on exactly the
+                                    touched files and its report is printed. Writes the file
+                                    header (LEGALITY ONLY) on a new sidecar; extends an
+                                    existing one by appending.
+    --negative-control              the synthetic controls (7.3, plus --apply and the
+                                    REGISTERED/UNREGISTERED split)
     --census                        the finder's census only (no manifest, no compile)
     --json PATH                     machine-readable result to a scratch path
 
@@ -112,7 +127,16 @@ EXIT (7.2)
     1  any problem line
     2  cannot audit: pnut-ts not on PATH, KB tree / manifest unreadable, YAML parse
        failure, the proposer self-check, or ZERO candidates ("nothing audited" is
-       never a pass)
+       never a pass); for --apply also an unreadable decisions file
+    3  --apply only: the decisions were REFUSED and nothing was written (--apply
+       otherwise exits with the gate's code, 0 or 1, on the touched files)
+
+REGISTERED / UNREGISTERED (reporting only)
+    A failing block (FAIL / NEVER-COMPILES / NEVER-WRONG-REASON) whose entry carries
+    `finding:` is printed `REGISTERED(F-NNN)`; without one, `UNREGISTERED`. The summary
+    line counts both, and `--json` carries `finding` and `registered` per problem.
+    The exit code is 1 for ANY problem: a finding never changes the verdict (4.1).
+    UNCLASSIFIED, STALE and ORPHAN are never REGISTERED.
 
 The repo root is the WORKING DIRECTORY, never this script's path. Build outputs go
 to a temp directory outside the repo that is removed afterwards.
@@ -131,6 +155,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import threading
 from collections import Counter, defaultdict
 
 try:
@@ -929,6 +954,58 @@ def stub_for_missing(body, missing, extra):
     return [] if a in extra else [a]
 
 
+_ACCEPTED = None
+_ACCEPTED_LOCK = threading.Lock()
+DIRECTIVE_PROBE = range(1, 100)
+
+
+def accepted_versions():
+    """The {Spin2_vNN} directives THIS compiler accepts, ascending, found by probing
+    (never hardcoded: PNut-TS accepts a sparse set, and moves). Cached."""
+    global _ACCEPTED
+    with _ACCEPTED_LOCK:
+        if _ACCEPTED is None:
+            ok = []
+            for n in DIRECTIVE_PROBE:
+                b = build(None, "{Spin2_v%d}\nPUB __kbprobe()\n" % n, [])
+                if compile_built(b, False).ok:
+                    ok.append(n)
+            _ACCEPTED = ok
+        return _ACCEPTED
+
+
+def undefined_names(wrap, body, extra, version, append_pub):
+    """Lower-cased names the elementizer leaves type_undefined in the wrapped block, or
+    None when the elementize pass aborted."""
+    b = build(wrap, body, extra, version, (), append_pub)
+    toks, _out, ab = elementize(b.text, b.files)
+    if ab:
+        return None
+    return {t.name.lower() for t in toks if t.typ == "type_undefined" and t.name}
+
+
+def keyword_version(wrap, body, extra, append_pub):
+    """Language-version-gated built-ins (BYTECOMP, ...). The compiler lexes them as
+    undefined names until the right {Spin2_vNN} is given, so the proposer would stub them
+    as user methods and report a fake PASS. -> the LOWEST accepted N at which every name
+    that resolves under the HIGHEST accepted N resolves, or None when no name does."""
+    acc = accepted_versions()
+    if not acc:
+        return None
+    base = undefined_names(wrap, body, extra, None, append_pub)
+    top = undefined_names(wrap, body, extra, acc[-1], append_pub)
+    if not base or top is None:
+        return None
+    kw = base - top
+    if not kw:
+        return None
+    for n in acc:
+        u = undefined_names(wrap, body, extra, n, append_pub)
+        if u is not None and not (kw & u):
+            return n
+    return acc[-1]
+
+
 def harness(body, wrap, exclude=frozenset(), seed_dbg=None):
     """Propose the context for one block under one wrap. Returns a dict:
     result PASS | FAIL | HARNESS, assumes, flagged, dropped, version, append_pub,
@@ -982,6 +1059,12 @@ def harness(body, wrap, exclude=frozenset(), seed_dbg=None):
                 continue
         # (b) ask the compiler which names are undeclared
         if not st["known"]:
+            if st["version"] is None:
+                kv = keyword_version(wrap, body, st["extra"], st["append_pub"])
+                if kv is not None:
+                    st["version"] = kv
+                    maxit += 1
+                    continue  # recompile under the directive before naming any undeclared name
             base = build(wrap, body, st["extra"], st["version"], (), st["append_pub"])
             toks, out, _ab = elementize(base.text, base.files)
             undef = [t for t in toks if t.typ == "type_undefined"]
@@ -1123,15 +1206,29 @@ def propose_one(cand):
 
 # ============================================================ evaluate (the gate)
 
-class Problem:
-    __slots__ = ("kind", "file", "line", "addr", "cls", "detail", "echo")
+REGISTRABLE = ("FAIL", "NEVER-COMPILES", "NEVER-WRONG-REASON")
 
-    def __init__(self, kind, file, line, addr, cls, detail, echo=None):
+
+class Problem:
+    __slots__ = ("kind", "file", "line", "addr", "cls", "detail", "echo", "finding")
+
+    def __init__(self, kind, file, line, addr, cls, detail, echo=None, finding=None):
         self.kind, self.file, self.line, self.addr = kind, file, line, addr
         self.cls, self.detail, self.echo = cls, detail, echo
+        self.finding = finding
+
+    @property
+    def registered(self):
+        """REGISTERED: a verdict failure (FAIL / NEVER-*) whose entry carries `finding:`.
+        Reporting only -- the exit code does not read this. UNCLASSIFIED, STALE and
+        ORPHAN are never registered (a finding cannot excuse a missing, stale or
+        orphaned entry)."""
+        return bool(self.finding) and self.kind in REGISTRABLE
 
     def as_dict(self):
-        return {k: getattr(self, k) for k in self.__slots__}
+        d = {k: getattr(self, k) for k in self.__slots__}
+        d["registered"] = self.registered
+        return d
 
 
 def cls_label(entry):
@@ -1173,7 +1270,8 @@ def evaluate(root, files=None, strict=True):
                 how = ("fp changed; the carried class is asserted on the new text; run --refresh after review"
                        if r.state == "CHANGED" else "fp found at a different path (was %s); run --refresh" % e["at"])
                 if strict:
-                    problems.append(Problem("STALE (%s)" % r.state, rel, c.line, c.addr, cls_label(e), how))
+                    problems.append(Problem("STALE (%s)" % r.state, rel, c.line, c.addr, cls_label(e), how,
+                                            finding=e.get("finding")))
                 else:  # edit-time: reported, not failed (3.3)
                     notes.append(Problem("STALE (%s)" % r.state, rel, c.line, c.addr, cls_label(e),
                                          how + " (edit-time check: reported, not failed)"))
@@ -1185,18 +1283,21 @@ def evaluate(root, files=None, strict=True):
                     break
                 withs.append((w, tr.cand.text))
             if bad:
-                problems.append(Problem("FAIL", rel, c.line, c.addr, cls_label(e), bad))
+                problems.append(Problem("FAIL", rel, c.line, c.addr, cls_label(e), bad,
+                                        finding=e.get("finding")))
                 continue
             jobs.append((r, withs))
         for _ei, e in orphans:
             problems.append(Problem("ORPHAN", rel, 0, e["at"], cls_label(e),
-                                    "entry whose block is gone; delete it (that records the removal)"))
+                                    "entry whose block is gone; delete it (that records the removal)",
+                                    finding=e.get("finding")))
     with cf.ThreadPoolExecutor(max_workers=NWORK) as ex:
         verdicts = list(ex.map(lambda j: assert_entry(j[0].cand, j[0].entry, j[1]), jobs))
     for (r, _w), v in zip(jobs, verdicts):
         if v is not None:
             c = r.cand
-            problems.append(Problem(v.kind, c.file, c.line, c.addr, cls_label(r.entry), v.detail, v.echo))
+            problems.append(Problem(v.kind, c.file, c.line, c.addr, cls_label(r.entry), v.detail, v.echo,
+                                    finding=r.entry.get("finding")))
     problems.sort(key=lambda p: (p.file, p.line, p.addr))
     notes.sort(key=lambda p: (p.file, p.line, p.addr))
     return {"problems": problems, "notes": notes, "counts": dict(counts), "census": census, "scope": scope}
@@ -1211,7 +1312,10 @@ def print_report(rep, mode_label):
     for p in problems:
         loc = "%s:%s" % (p.file, p.line) if p.line else p.file
         cls = "  [%s]" % p.cls if p.cls else ""
-        print("%-17s %s  %s%s  %s" % (p.kind, loc, p.addr, cls, p.detail))
+        reg = ""
+        if p.kind in REGISTRABLE:
+            reg = ("  REGISTERED(%s)" % p.finding) if p.registered else "  UNREGISTERED"
+        print("%-17s %s  %s%s%s  %s" % (p.kind, loc, p.addr, cls, reg, p.detail))
         if p.echo is not None:
             print("%-17s |   %s" % ("", p.echo.strip()))
     c = rep["counts"]
@@ -1223,7 +1327,10 @@ def print_report(rep, mode_label):
         files = len({p.file for p in problems})
         order = ["FAIL", "NEVER-COMPILES", "NEVER-WRONG-REASON", "STALE", "UNCLASSIFIED", "ORPHAN"]
         parts = ["%d %s" % (kinds[k], k) for k in order if kinds.get(k)]
-        print("FAIL: %d problems in %d files -- %s %s" % (len(problems), files, ", ".join(parts), tail))
+        nreg = sum(1 for p in problems if p.registered)
+        nunreg = len(problems) - nreg
+        print("FAIL: %d problems in %d files -- %s; %d REGISTERED (carry a finding), %d UNREGISTERED %s"
+              % (len(problems), files, ", ".join(parts), nreg, nunreg, tail))
     else:
         print("PASS: every block holds its declared class %s" % tail)
     print(LEGALITY_NOTE)
@@ -1417,6 +1524,117 @@ def do_refresh(root, files, accept):
     return 1 if refused else 0
 
 
+class Refused(Exception):
+    """Exit 3: --apply refused the decisions file; nothing was written."""
+
+
+SIDECAR_HEADER = (
+    "# engineering/tools/validation/kb-compile-manifest/%s\n"
+    "# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the\n"
+    "# context declared here, never that the code is correct (F-381, F-312).\n"
+    "blocks:\n")
+
+
+def apply_decisions(root, decisions):
+    """Validate EVERY decision, then write. -> sorted list of touched KB-relative files.
+    Raises Refused (nothing written) on any problem. A decision is
+    {"file", "at", "compile", + optional wrap, assumes, with, fails_at, reason, finding,
+    spin2_version}; `fp` is computed from the live candidate and may not be supplied."""
+    check_pnut()
+    code_keys = load_code_keys(root)
+    errs = []
+    if not isinstance(decisions, list) or not decisions:
+        raise Refused("decisions must be a non-empty JSON list")
+    by_file = defaultdict(list)  # rel -> [(index, decision)]
+    for i, d in enumerate(decisions):
+        if not isinstance(d, dict):
+            errs.append("decision %d: not an object" % i)
+        elif not isinstance(d.get("file"), str) or not d["file"] or not isinstance(d.get("at"), str):
+            errs.append("decision %d: `file` and `at` must be non-empty strings" % i)
+        elif "fp" in d:
+            errs.append("decision %d: `fp` is computed from the live candidate; do not supply it" % i)
+        else:
+            by_file[d["file"]].append((i, d))
+    if errs:
+        raise Refused("; ".join(errs))
+    base = os.path.join(root, KB_DIR)
+    new_text = {}  # rel -> full new sidecar text
+    for rel in sorted(by_file):
+        where = "decision file %s" % rel
+        if safe_join(base, rel) is None or not rel.endswith(".yaml") or not os.path.isfile(os.path.join(base, rel)):
+            errs.append("%s: not an existing KB YAML file" % where)
+            continue
+        per_file, _c = find_candidates(root, [rel], code_keys)
+        live = {c.addr: c for c in per_file[rel]}
+        try:
+            existing = load_manifest(root, only={rel}).get(rel, [])
+        except CannotAudit as e:
+            errs.append("%s: existing sidecar unreadable (%s)" % (where, e))
+            continue
+        have = {e["at"] for e in existing}
+        seen = set()
+        add = []
+        for i, d in by_file[rel]:
+            at = d["at"]
+            tag = "decision %d (%s %s)" % (i, rel, at)
+            if at not in live:
+                errs.append("%s: not a live candidate address" % tag)
+                continue
+            if at in have:
+                errs.append("%s: the sidecar already has an entry at this address (no overwrite)" % tag)
+                continue
+            if at in seen:
+                errs.append("%s: address decided twice in this run" % tag)
+                continue
+            seen.add(at)
+            e = {"at": at, "fp": live[at].fp}
+            e.update({k: v for k, v in d.items() if k not in ("file", "at")})
+            ee = validate_entry(e, tag)
+            if ee:
+                errs.extend(ee)
+                continue
+            add.append(e)
+        if add:
+            body = "".join(emit_entry(e) for e in add)
+            p = sidecar_path(root, rel)
+            if os.path.isfile(p):
+                with open(p, encoding="utf-8") as fh:
+                    old = fh.read()
+                if not re.search(r"^blocks:\s*(\[\s*\])?\s*$", old, re.M):
+                    errs.append("%s: existing sidecar has no plain `blocks:` line to extend" % where)
+                    continue
+                old = re.sub(r"^blocks:\s*(\[\s*\])?\s*$", "blocks:", old, count=1, flags=re.M)
+                if not old.endswith("\n"):
+                    old += "\n"
+                new_text[rel] = old + body
+            else:
+                new_text[rel] = SIDECAR_HEADER % rel + body
+    if errs:
+        raise Refused("%d problem(s), nothing written:\n  " % len(errs) + "\n  ".join(errs))
+    for rel, text in new_text.items():
+        write(sidecar_path(root, rel), text)
+    return sorted(new_text)
+
+
+def do_apply(root, path):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            decisions = json.load(fh)
+    except Exception as e:  # noqa: BLE001
+        raise CannotAudit("decisions file unreadable: %s (%s)" % (path, e)) from None
+    try:
+        touched = apply_decisions(root, decisions)
+    except Refused as e:
+        print("REFUSED: %s" % e)
+        return 3, None
+    print("APPLIED: %d entries written to %d sidecars" % (len(decisions), len(touched)))
+    print("pnut-ts: %s (run context; never written to the manifest or the KB)" % pnut_version())
+    rep = evaluate(root, files=touched, strict=True)
+    print_census(rep["census"])
+    print_report(rep, "")
+    return rep_exit(rep), rep
+
+
 def since_scope(root, rev):
     rc, out = run_cmd(["git", "diff", "--name-only", "%s..HEAD" % rev, "--", KB_DIR, MANIFEST_DIR], cwd=root, timeout=60)
     if rc != 0:
@@ -1496,9 +1714,14 @@ def emit_entry(e):
     out = ["  - at: %s\n" % yq(e["at"]), '    fp: "%s"\n' % e["fp"], "    compile: %s\n" % e["compile"]]
     for k in ("wrap", "reason", "fails_at", "spin2_version"):
         if k in e:
-            out.append("    %s: %s\n" % (k, json.dumps(e[k]) if isinstance(e[k], str) else e[k]))
+            plain = k == "wrap" and e[k] in WRAPS  # the same unquoted form --propose prints
+            out.append("    %s: %s\n" % (k, json.dumps(e[k]) if isinstance(e[k], str) and not plain else e[k]))
     if e.get("assumes"):
         out.append("    assumes: %s\n" % assumes_flow(e["assumes"]))
+    if e.get("with"):
+        out.append("    with: [%s]\n" % ", ".join(json.dumps(w) for w in e["with"]))
+    if "finding" in e:
+        out.append("    finding: %s\n" % json.dumps(e["finding"]))
     return "".join(out)
 
 
@@ -1612,6 +1835,105 @@ def run_negative_controls():
                        capture_output=True, text=True, timeout=120)
     rec(11, "pnut-ts replaced by an empty PATH", "exit 2", "exit %d: %s" % (p.returncode, (p.stdout + p.stderr).strip()[:100]),
         p.returncode == 2)
+    # NC12 --apply (B3 step 0): every refusal writes NOTHING; a valid decision lands with the live fp
+    def try_apply(root, decisions):
+        try:
+            return "applied", apply_decisions(root, decisions)
+        except Refused as ex:
+            return "refused", str(ex)
+
+    def sidecar_state(root):
+        p = sidecar_path(root, "nc.yaml")
+        if not os.path.isfile(p):
+            return None
+        with open(p, encoding="utf-8") as fh:
+            return fh.read()
+
+    root = nc_root([GOOD_PROG], lambda cs: None)
+    how, msg = try_apply(root, [{"file": "nc.yaml", "at": "examples[9].code", "compile": "program"}])
+    rec("12a", "--apply refuses an address that is not a live candidate; nothing written", "refused, no sidecar",
+        "%s; sidecar %s" % (how, "absent" if sidecar_state(root) is None else "WRITTEN"),
+        how == "refused" and "live candidate" in msg and sidecar_state(root) is None)
+    root = nc_root([GOOD_PROG], lambda cs: [ent(cs[0], compile="program")])
+    before = sidecar_state(root)
+    how, msg = try_apply(root, [{"file": "nc.yaml", "at": "examples[0].code", "compile": "not-code", "reason": "nc"}])
+    rec("12b", "--apply refuses to overwrite an existing entry; sidecar unchanged", "refused, unchanged",
+        "%s; sidecar %s" % (how, "unchanged" if sidecar_state(root) == before else "CHANGED"),
+        how == "refused" and "no overwrite" in msg and sidecar_state(root) == before)
+    root = nc_root([GOOD_PROG, GOOD_PROG.replace("56", "57")], lambda cs: None)
+    how, msg = try_apply(root, [
+        {"file": "nc.yaml", "at": "examples[0].code", "compile": "program"},
+        {"file": "nc.yaml", "at": "examples[1].code", "compile": "never", "wrap": "spin2-top", "reason": "nc"}])
+    rec("12c", "--apply refuses an invalid entry (never without fails_at); the valid one is not written either",
+        "refused, no sidecar", "%s; sidecar %s" % (how, "absent" if sidecar_state(root) is None else "WRITTEN"),
+        how == "refused" and "fails_at" in msg and sidecar_state(root) is None)
+    root = nc_root([GOOD_PROG], lambda cs: None)
+    how, touched = try_apply(root, [{"file": "nc.yaml", "at": "examples[0].code", "compile": "program"}])
+    txt = sidecar_state(root) or ""
+    rep12 = evaluate(root, files=["nc.yaml"], strict=True)
+    want_fp = fingerprint(GOOD_PROG)  # the parsed `|` scalar is GOOD_PROG (one trailing newline)
+    per12, _c = find_candidates(root, ["nc.yaml"], {"code"})
+    rec("12d", "--apply writes a program entry with the finder's fp, and the gate then PASSes it", "PASS",
+        "%s; fp in sidecar %s; gate %s" % (how, 'fp: "%s"' % want_fp in txt, nc_summary(rep12)),
+        how == "applied" and touched == ["nc.yaml"] and 'fp: "%s"' % want_fp in txt
+        and per12["nc.yaml"][0].fp == want_fp and not rep12["problems"]
+        and "LEGALITY ONLY" in txt and rep12["counts"].get("program") == 1)
+    # NC13 REGISTERED vs UNREGISTERED: reporting only, the verdict and the exit code do not move
+    import contextlib
+    import io
+
+    def report_text(rep):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            print_report(rep, "")
+        return buf.getvalue()
+
+    repR = nc_run([BAD_PROG], lambda cs: [ent(cs[0], compile="fragment", wrap="spin2-top", finding="F-999")])
+    tR = report_text(repR)
+    rec("13a", "failing fragment WITH finding: REGISTERED(F-999), exit code still 1", "REGISTERED, exit 1",
+        "kinds %s; exit %d" % ([p.kind for p in repR["problems"]], rep_exit(repR)),
+        [p.kind for p in repR["problems"]] == ["FAIL"] and repR["problems"][0].registered
+        and "REGISTERED(F-999)" in tR and "UNREGISTERED" not in tR.replace("0 UNREGISTERED", "")
+        and "1 REGISTERED (carry a finding), 0 UNREGISTERED" in tR and rep_exit(repR) == 1)
+    repU = nc_run([BAD_PROG], lambda cs: [ent(cs[0], compile="fragment", wrap="spin2-top")])
+    tU = report_text(repU)
+    rec("13b", "the same failing fragment WITHOUT finding: UNREGISTERED, exit code 1", "UNREGISTERED, exit 1",
+        "kinds %s; exit %d" % ([p.kind for p in repU["problems"]], rep_exit(repU)),
+        [p.kind for p in repU["problems"]] == ["FAIL"] and not repU["problems"][0].registered
+        and "  UNREGISTERED" in tU and "REGISTERED(" not in tU
+        and "0 REGISTERED (carry a finding), 1 UNREGISTERED" in tU and rep_exit(repU) == 1)
+    repS = nc_run([GOOD_PROG], lambda cs: [dict(ent(cs[0], compile="program", finding="F-999"), fp="0" * 16)])
+    rec("13c", "a finding never registers a STALE entry", "STALE, not registered",
+        "kinds %s; registered %s" % ([p.kind for p in repS["problems"]], [p.registered for p in repS["problems"]]),
+        [p.kind for p in repS["problems"]] == ["STALE (CHANGED)"] and not repS["problems"][0].registered
+        and rep_exit(repS) == 1)
+    # NC14 a version-gated built-in (BYTECOMP, {Spin2_v45}+) is a keyword, never a stubbed callee
+    frag14 = "PUB go() : r\n  r := BYTECOMP(@a, @b, 4)\n"
+    root14 = nc_root([frag14], lambda cs: None)
+    per14, _c = find_candidates(root14, ["nc.yaml"], {"code"})
+    cand14 = per14["nc.yaml"][0]
+    prop14 = propose_one(cand14)
+    # an oracle that shares no code with keyword_version: the lowest accepted directive under
+    # which the block compiles with BYTECOMP undeclared and only the operands assumed
+    oracle = None
+    for n in accepted_versions():
+        b14 = build("spin2-top", frag14, ["a", "b"], n)
+        if compile_built(b14, False).ok:
+            oracle = n
+            break
+    stubbed14 = [a for a in prop14["assumes"] if a.upper().startswith("BYTECOMP")]
+    gate14 = None
+    if prop14["outcome"] == "PASS" and prop14["compile"] == "fragment":
+        e14 = {"compile": "fragment", "wrap": prop14["wrap"], "assumes": prop14["assumes"]}
+        if prop14.get("version"):
+            e14["spin2_version"] = prop14["version"]
+        gate14 = assert_entry(cand14, e14, [])
+    rec(14, "fragment calling version-gated BYTECOMP: proposes spin2_version, no stub, and the gate passes it",
+        "PASS, spin2_version=%s, no BYTECOMP stub" % oracle,
+        "%s; version=%s; assumes=%s; gate %s" % (prop14["outcome"], prop14.get("version"), prop14["assumes"],
+                                                 "PASS" if gate14 is None else gate14.kind),
+        oracle is not None and prop14["outcome"] == "PASS" and prop14.get("version") == oracle
+        and not stubbed14 and gate14 is None)
     ok = all(r[4] for r in results)
     for nid, desc, expected, observed, good in results:
         print("NC%-4s %-4s %s | expected %s | observed %s" % (nid, "ok" if good else "BAD", desc, expected, observed))
@@ -1626,6 +1948,7 @@ def main(argv=None):
     ap.add_argument("--files", nargs="+", metavar="F")
     ap.add_argument("--since", metavar="REV")
     ap.add_argument("--propose", action="store_true")
+    ap.add_argument("--apply", metavar="DECISIONS.json")
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--accept-assumes", nargs="+", metavar="NAME", default=[])
     ap.add_argument("--negative-control", action="store_true")
@@ -1640,6 +1963,12 @@ def main(argv=None):
             if not args.files:
                 raise CannotAudit("--refresh needs --files")
             return do_refresh(root, norm_files(root, args.files), args.accept_assumes)
+        if args.apply:
+            code, rep = do_apply(root, args.apply)
+            if args.json and rep is not None:
+                write(args.json, json.dumps({"census": rep["census"], "counts": rep["counts"],
+                                             "problems": [p.as_dict() for p in rep["problems"]]}, indent=1))
+            return code
         if args.propose:
             files = norm_files(root, args.files) if args.files else None
             print("pnut-ts: %s (run context; never written to the manifest or the KB)" % pnut_version())

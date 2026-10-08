@@ -168,6 +168,11 @@ arbiter verifies its cited lines before a row enters the register. **Nothing in
 | S-003 | B | new | **drives wrong code** | `architecture/smart-pins/smart-pin-01010-pwm-smps.yaml:51`, `:56`: `dirh(v_sense)`, `dirh(i_sense)`. `DIRH` is PASM2, not a Spin2 method; the block fails ("Expected an instruction or variable", block line 11) | ENH-03 design probe; YAML read 2026-10-08 | traced | PASM instruction written as a Spin2 call | to research (class: PASM-in-Spin2, with S-001/S-002) | no |
 | S-004 | F | new | hygiene | `deliverables/ai/P2/language/pasm2/add-missing-oneliners.py` is a tracked Python script inside the served YAML tree | `git ls-files deliverables/ai/P2 \| grep -v .yaml$` | traced | a generator left in the deliverables tree | to research (the other non-YAML files there are README/CHANGELOG/encoding reference/git hooks; check each is sanctioned) | no |
 
+| S-005 | B | new | **drives wrong code** | `language/spin2/methods/bytecomp.yaml:3` and `wordcomp.yaml:3` describe the method as "Complement bytes/words within a long value". It compares two ranges of hub memory and returns -1 on match, 0 on mismatch | `spin2-v55-text.txt:582` (`BYTECOMP(AddrA, AddrB, Count) : Match`), `:146`, `:36` (v44) | traced | description written from the name, not the source | to research (class: all six v44 COMP/SWAP pages, with S-006) | no |
+| S-006 | B | new | **drives wrong code** | `language/spin2/methods/byteswap.yaml:6` (and `wordswap`/`longswap`): the syntax is `BYTESWAP(Address1, Address2)`, with no `Count`. The source has three arguments; the description "swap byte values between two memory locations" is a single-element swap | `spin2-v55-text.txt:579`, `:581` (`…SWAP(AddrA, AddrB, Count)`) | traced | as S-005 | to research (with S-005; also check the pages' `{Spin2_vNN}` gating — the compiler rejects BYTECOMP with no directive, m172, and accepts it from `{Spin2_v45}`) | no |
+
+*S-005/S-006 were found 2026-10-08 checking a proposer stub during ENH-03 B3 («#403»).*
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 
