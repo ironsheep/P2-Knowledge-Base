@@ -61,7 +61,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases and the register reconciliation (2026-10-04/07) — F-546 … F-552
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562
 
 ### F-562 — `hub75_adapter.yaml` names the OBEX driver and URL differently from OBEX 2850's own metadata — `NEEDS-VERIFICATION`
 Found 2026-10-07 by the independent check of F-556. `hardware/hub75_adapter.yaml:156,158` gives
@@ -328,6 +328,22 @@ entry; before removing anything, run the search in *"Unsourced" is a finding abo
 board facts are told apart from driver facts.
 
 ### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+
+> **DECIDED by Stephen 2026-10-08 about this entry's ingestion-tree edit: REVERT it, and AUDIT
+> the operator ingestion.** This entry's commit (`53855f4f`) also edited
+> `engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md`. That edit is reverted
+> byte-identical. ⛔ *"NEVER NEVER NEVER edit ingested docs!!!!!"* (doctrine: *The chain runs one
+> way*). Stephen: `<.`, `<=`, `+<=`, `<=.`, `<=>` and more are legitimate operators, and the
+> extraction appears to have lost spaces and glued them together, the likely origin of the
+> invented `+<=>`. Its comparison row also lacks the float forms.
+>
+> **Audit scope:** every operator table in the v51 and v55 ingestions against the Parallax text,
+> looking for glued, missing or invented operators. The findings are fixed through `ingest-source`
+> only, then carried through to `op_*.yaml`, `operators.yaml`, `precedence.yaml` and
+> `spin2-language-schema.yaml`. Also: `spin2-v55-text.txt` stores `<` and `>` as `&lt;` and
+> `&gt;`, so a literal grep misses them. Re-check every citation made against it, including this
+> entry's `:471-488`.
+
 > **Applied 2026-10-07.** `op_addlt`/`op_addlteq`/`op_addgteq`/`op_addgt` now state UNSIGNED and
 > name their signed and `.` siblings (v55 `:473`, `:476`, `:483`, `:486`); `op_lteqgt` states
 > SIGNED three-way, -1/0/1, no unsigned form, float return in CON (`:488`, `:505`). Each gained a
@@ -976,6 +992,10 @@ The 2026-09-05 findability pass regenerated the JSON **twice** and the gzip **ne
 
 ### F-398 — ~15 USD price sites across `p2-hardware-selection-guide.yaml`; needs a policy call, not a citation — `CONFIRMED`
 
+> **DECIDED by Stephen 2026-10-08 (option a): ready to fix.** Delete every dollar figure (22
+> sites). Keep the relative tiering: cheapest to dearest, and what each tier adds. Add one line:
+> "for current pricing, see the Parallax store."
+
 **Not fixed. Registered for a definition call, and it is the sibling of F-374.**
 
 `p2-hardware-selection-guide.yaml` states prices as first-class data — `cost_estimate: "$150-200"`
@@ -1532,6 +1552,22 @@ programme, not an edit; it should be scoped from the hole list rather than start
 
 ### F-381 — the Tier-2 advisory class is not "reviewed and accepted", it is "no control available" — `CONFIRMED`
 
+> **DECIDED by Stephen 2026-10-08: ready to fix.** The gate blocks on wholly-uncited files.
+> - **Source every number that drives code generation:** P2 limits, timings, register and field
+>   values, ranges, constants.
+> - **Numbers inside examples pass when the example is correct.** That means it compiles (ENH-03)
+>   and every P2 fact it states or relies on agrees with the sourced facts. This includes comments
+>   and formulas such as X = sysclk / baud. The example's own choices (baud, pins, "suppose 1 kHz")
+>   pass. A wrong P2 fact makes the example wrong, and it is fixed.
+> - **A P2 fact stated only inside an example** is sourced in its proper home, and the example
+>   stays.
+> - **How the gate tells them apart:** by location. Numbers in example blocks are exempt.
+> - **OBEX is self-referencing.** OBEX numbers are never sourced. Only check that OBEX
+>   references agree with the OBEX index.
+> - **"Be extremely careful":** removal is the last resort. Search the sources exhaustively
+>   first. A number we can test on the jumper bench becomes a bench item and stays served until the
+>   bench decides. Remove it only if it can be neither sourced nor tested.
+
 **How this was proved, rather than argued.** «#334» added silicon-limit citations to three clock
 files. `audit-yaml-claim-sourcing.py` went from **0 Tier-1 violations to 12** — not because
 anything was broken, but because the three files had previously cited *nothing anywhere*, which
@@ -1661,6 +1697,16 @@ file cannot read sentences.
 ## The delivery filter strips `documentation_source:` from every file it serves, and 706 of those values are real citations (2026-08-26, «#324» verification) — F-375
 
 ### F-375 — a remote agent receives 383 of our files with their source line deleted, and the gate that checks the filter cannot see it — `PARTIAL — gate half RESOLVED 2026-09-11; the 383-file rename remains Stephen's scope call`
+
+> **DECIDED by Stephen 2026-10-08 (no rename): ready to fix.** The delivery half was overtaken
+> by the 2026-09-19 ruling that *provenance is for us*: the certified delivery filter strips
+> `source:` as well, so a rename would deliver nothing. What is left:
+> - Teach `audit-yaml-claim-sourcing.py` `CITE_KEY_RE` to read `documentation_source:` and
+>   `enhancement_source:`. It is currently blind to about 363 real citations.
+> - Delete the ~40 bookkeeping words: `enhanced` (16), `original` (15), `p2_datasheet` (8),
+>   `code_analysis` (1).
+>
+> F-375 then closes.
 
 **The mechanism.** Both delivery paths run the same five-pattern line filter:
 `engineering/tools/p2kb/fetch-kb-file.sh:189` and the `FilterMetadata` contract recorded in
@@ -1920,7 +1966,19 @@ resolve. The instrument gap (no gate reads `yaml_file:`) remains open.
 
 - **F-359 — Seven `architecture/` files carry a provenance header citing source files that have
   never existed and datasheet pages beyond the end of the datasheet; the header itself satisfies
-  the citation regex, so six of the seven still pass the gate today.** — `PARTIAL` (re-verified 2026-10-05 «#386»: six files re-derived and shipped; 5 of the 8 non-derivable claims are still in the tree and their delete-or-keep call is undecided)
+  the citation regex, so six of the seven still pass the gate today.** — `PARTIAL` (re-verified 2026-10-05 «#386»: six files re-derived and shipped; 5 of the 8 non-derivable claims are still in the tree; **DECIDED 2026-10-08, see below**)
+
+  > **DECIDED by Stephen 2026-10-08 for the five remaining claims: ready to fix.**
+  > - `locks.yaml` `state_bits: 4`: **delete.** It does not matter to an agent producing code.
+  > - `cog_attention.yaml` `waiting: "0 clocks"`: **fix from the Datasheet** (WAITATN `2+`).
+  > - `debug_interrupt.yaml` `trace_buffer`, `debug_state` and `streamer_interaction`:
+  >   **answer from the Spin2 debugger and interpreter source.**
+  >
+  > Prerequisite found while recording: the ingested copies
+  > (`external-inputs/source-code/spin-{interpreter,debugger}/v51/`) are v51. The v55 interpreter
+  > (2026-05-07) exists only in the XBYTE guide's `REF-NO-COMMIT/pnut-ts-parts/` and is not
+  > ingested. The debugger there is byte-identical to v51. So the work starts by ingesting the v55
+  > interpreter and confirming which debugger is current.
 
   **How it surfaced.** Stephen asked whether `io_pin_timing.yaml`'s content might have come from
   our own I/O & Smart Pins manual rather than a Parallax source — i.e. whether the provenance was
@@ -3213,7 +3271,17 @@ drift.
 
 ## Open — enhancement proposals (new content, not corrections)
 
-- **ENH-03 — a gating compile step for every code block in `deliverables/ai/P2/`.** *Filed 2026-08-21;
+- **ENH-03 — a gating compile step for every code block in `deliverables/ai/P2/`.**
+  > **DECIDED by Stephen 2026-10-08: build it now, as the first item of the close-out. From here
+  > on it is a permanent part of the release gate** ("let's get this built and from here forward be
+  > part of our actual gate!"). It is a hard gate in `release-yamls` and an edit-time check in
+  > `yaml-knowledge-base-maintenance` on the files touched. Order: (1) the per-block markers
+  > (`compile: program` / `fragment` / `never` + reason, with `never` asserted to fail); (2) fix
+  > the prototype's auto-declare collision ("Symbol is already defined") before trusting any pass
+  > rate; (3) wire the gate into both skills; (4) all close-out corrections are made under it.
+  > F-381's "the example is correct" depends on it.
+
+  *Filed 2026-08-21;
   Stephen's call, and he asked for it in these words: "we must, for all code in YAML files, compile
   that code and assure ourselves that it compiles correctly. We do not publish a release unless all
   the code publishes correctly."* Nothing in this project compiles KB code examples, which is how
