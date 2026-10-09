@@ -1,0 +1,992 @@
+'' =============================================================================
+''
+''   File....... test-vo-f372-usb-wrpin-on-running-pair.spin2
+''   Purpose.... VO-F372 on SILICON: in USB mode %11011, does a new WRPIN on a RUNNING pair (DIR high) change
+''               drive <-> sniffer cleanly, or does it need a reset (DIR cycle)?
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED  (register VO-F372; close-out study step 8; bench-groupD-recheck.md section 4.2)
+
+  The sources disagree by edition about changing a running USB pair with a new WRPIN:
+    SAYS YES   p2-hardware-manual-text.txt:1488 "Using D data of %0_11011_0 will disable output drive and effectively create a USB
+               'sniffer'. A new WRPIN can be done to effect such a change without resetting the smart pin."  The same sentence is at
+               smart-pins-titus-text.txt:1381-1382 and silicon-doc/p2-documentation.txt:8885-8886.
+    OMITS IT   silicon-doc-text.txt:4579 (the newest capture) gives the sniffer sentence without it; :4581 allows only WXPIN
+               ("these settings can be changed on-the-fly without resetting the USB smart pins").
+    OPPOSITE   silicon-doc-text.txt:3856: "You could do a WRPIN while DIR is high, but the unregulated change in use of the 126 state
+               bits would cause unpredictable and quite certainly useless behavior" -- written about changing the five %SSSSS mode bits;
+               a same-mode TT change keeps %11011, so reading it as covering this case is an inference.
+    Working code (usbnew.spin2) always raises DIRL before WRPIN: silent.  EF-012 shows only that a WRPIN on a running pin is accepted.
+  This program asks: does WRPIN %0_11011_0 / %1_11011_0 on a running pair give the same line behaviour as the documented reset-based
+  reconfigure (DIRL, WRPIN, WXPIN, DIRH), and is the pair still intact afterwards (a framed packet round-trips)?
+
+  RIG  (BARE BOARD -- NOTHING ATTACHED)
+    One USB pair: P0 = DM (even, the lower pin) and P1 = DP (odd).  "The receiver receives not just input from another host/device,
+    but all local output, as well" (silicon-doc-text.txt:4614) -- so the pair reads its own output and no second pair and no jumper
+    is needed.  P0 and P1 are driven by the program (full-speed host, 12 Mbps) -- attach NOTHING to them.
+    SELF-SENSE WITHOUT THE 1.5k / 15k RESISTORS MAY BE AMBIGUOUS (a bare, floating pair; a sniffer pad can retain the last level it was
+    driven to).  This program is the self-sense form ONLY; it does not contain the jumpered arm.  The FALLBACK, to be built as a separate
+    test only if this run comes back INCONCLUSIVE for that reason (the INCONCLUSIVE lines say so), is the recheck's: a second USB pair
+    P2/P3 and two jumpers P0->P2 and P1->P3 (the second pair is the sniffer, a distinct receiver).  Pins P2/P3 are NOT used here.
+    Floating-pad defence in this program: the sniffer step writes J (WYPIN #3) and the back-to-drive step writes K (WYPIN #2), and
+    back-to-drive is accepted only when it reads exactly K (%010); a pad that merely retained J cannot pass it.
+
+  DEBUGGER (EF-057)
+    DEBUG_COGS = %0000_0001: the debug interrupt lives in cog 0 only.  Every pin operation runs in a dedicated PASM cog started by
+    COGINIT; it writes results to a hub mailbox; cog 0 reports.  Every printed line is built in a hub buffer and sent by ONE debug()
+    record.  Compile with pnut-ts -d; nothing on P62.
+
+  CONFIGURATION WORDS, FIELD BY FIELD (WRPIN D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0, silicon-doc-text.txt:3731; %SSSSS list :3807-:3841;
+  USB text :4579-:4593; Spin2 symbols spin2-v55-text.txt:1521-:1526, :1557)
+    drive   $0000_0076  AAAA=0000 BBBB=0000 FFF=000 M=0 TT=%01 SSSSS=%11011 bit0=0   = P_USB_PAIR | P_OE   (D data %1_11011_0, :4579)
+    sniffer $0000_0036  AAAA=0000 BBBB=0000 FFF=000 M=0 TT=%00 SSSSS=%11011 bit0=0   = P_USB_PAIR          (D data %0_11011_0, :4579)
+    TT bit 0 = output enable for all smart modes (:3795-:3797: "x0 = output disabled, regardless of DIR / x1 = output enabled").
+    WXPIN on the lower pin (:4583-:4587): D[15] = 1 host, D[14] = 1 full-speed, D[13:0] = (12_000_000 FRAC clkfreq) >> 16 = $0F5C = 3932
+    at 200 MHz  ->  $CF5C.  Cog 0 recomputes the baud with the Spin2 FRAC operator at run time and gates on it (control W).
+    Pair addressing: PAIR = DM | (1 << 6) = 64 -- S[10:6] = 1 additional pin, as the documentation's "bothpins" (:4595, and the WRPIN /
+    DIRH ADDPINS form used at :4424).
+
+  STATUS WORD (lower pin, silicon-doc-text.txt:4618-:4629): [2] SE0 in, [1] K in, [0] J in, [3] steady state, [4] SOP in, [5] EOP in,
+    [6] error, [7] byte toggle (cleared on SOP, toggled on each byte), [15:8] last byte.  WYPIN codes (:4597-:4605): 2 = K, 3 = J,
+    $80 = SOP then data bytes.  A "SNAPSHOT" below = SETTLE_CLK clocks of settling, then SAMPLES quiet reads (RQPIN) of the status word,
+    SPACE_CLK clocks apart; SEEN = the OR of (status AND %111) over the samples (which of SE0/K/J were ever seen), LAST = the last word.
+
+  SEQUENCE (the measuring cog; ROUNDS rounds; every pin operation here)
+    LIVE ARM
+      start   DIRL pair, WRPIN #0 pair, WRPIN drive pair, WXPIN host+FS+baud on DM, DIRH pair, wait         (the documented start, :4593)
+      (1) CONTROL  WYPIN #2 (K), snapshot -> must be SEEN = %010 ;  WYPIN #3 (J), snapshot -> must be SEEN = %001 ;
+                   framed packet: SOP, $A5, $5A, $3C, $C3, read back through the status word (byte toggle) -> must return the 4 bytes
+      (2) LIVE TO SNIFFER, DIR high   WRPIN sniffer pair (no DIR change, no WXPIN) ; snapshot (no write) ; WYPIN #3 (J) ; snapshot
+      (3) LIVE BACK TO DRIVE, DIR high   WRPIN drive pair ; snapshot ; WYPIN #2 (K) ; snapshot
+      (4) PACKET after the live changes (WYPIN #3 back to idle J first, so it starts from the control's state): the same framed packet as in (1)
+          characterization only (not in the verdict): WXPIN host+FS+baud re-issued on DM, then the packet again -- if (4) fails and
+          this passes, the live WRPIN lost the WXPIN settings
+    DIR-CYCLE ARM (what a reset-based reconfigure gives; the reference)
+      start (as above) ; DIRL pair, WRPIN sniffer pair, WXPIN, DIRH pair ; WYPIN #3 (J) ; snapshot
+                       ; DIRL pair, WRPIN drive pair, WXPIN, DIRH pair   ; WYPIN #2 (K) ; snapshot
+    After the last round the control arm (1) is run once more (control after).
+
+  CONTROLS (gating -- a failure prints RIG FAIL and NO VERDICT)
+    W : the configuration words decode to the fields above and equal their Spin2 symbol compositions; the baud word equals the FRAC
+        computation; DM is even, DP = DM + 1, both in the free set.
+    K : the control arm (1), every round AND once after the rounds: K snapshot SEEN = %010, J snapshot SEEN = %001.  (Proves the pair is
+        driving and that the receiver sees its own output.)
+    R : DIR-cycle arm: the "back to drive" snapshot SEEN = %010 (K) in every round (the documented reconfigure restores the drive and
+        the WYPIN #2 after it is seen).
+    O : DIR-cycle arm: the sniffer snapshot SEEN is the same in every round AND does not contain K (%010 clear) -- the sniffer is observable.
+        If not, nothing separates "drive" from "sniffer": INCONCLUSIVE (never a pass).
+    B : DIR-cycle arm: the sniffer snapshot SEEN is never exactly J (%001) in any round.  A sniffer that reads J-only is
+        indistinguishable from a pad that retained the J of the sniffer step's WYPIN #3, so it is not an independent receiver: if B fails
+        the BACK arm is INCONCLUSIVE (the sniffer arm and the packet arm may still decide BREAKS).
+    P : the control packet returned all 4 bytes in every round.  If not, the packet arm (4) is printed as characterization and does not
+        enter the verdict (the verdict then rests on (2) and (3), and its line ends "(packet arm excluded)").
+    T : the measuring cog reports done within RIG_TIMEOUT_SEC = 5 s (clkfreq x 5 = 1.0e9 stays below 2^31 = 2.147e9).
+
+  PRE-REGISTERED OUTCOMES (fixed before the run; printed by the program)
+    SNIFF_OK   : every round, the live-to-sniffer SEEN (after WYPIN #3) equals the DIR-cycle sniffer SEEN.
+    SNIFF_BAD  : in every round it differs.
+    BACK_OK    : every round, the live-back SEEN (after WYPIN #2) equals %010 (K) -- the same as the DIR-cycle arm.  A pad that merely
+                 retained J reads %001 and fails this.
+    BACK_BAD   : in every round it differs.
+    PKT_OK     : (gate P holding) every round, the packet after the live changes returns the same bytes as the control packet.
+    PKT_BAD    : (gate P holding) in every round it does not.
+    SURVIVES (the hardware manual / Titus / old Silicon Doc are right): SNIFF_OK and BACK_OK, and PKT_OK when gate P holds.
+    BREAKS   (the Silicon Doc 'unpredictable' reading is right for this case): SNIFF_BAD or BACK_BAD or PKT_BAD.
+    INCONCLUSIVE : anything else (mixed rounds), or the control arm / observability gates do not hold.  Every INCONCLUSIVE line names the
+                 fallback: a second pair with jumpers P0->P2 and P1->P3 (not part of this program).
+    The line states after each live WRPIN with no WYPIN (the 'snapshot (no write)') are printed as characterization only.
+
+  DEVIATIONS FROM THE BRIEF (bench-groupD-recheck.md section 4.2)
+    1. Arm (2) writes WYPIN #3 (J) and arm (3) writes WYPIN #2 (K) (the brief has #2 in both).  Before the sniffer step the transmitter's
+       last-set state is J (the control's last WYPIN #3); a floating sniffer pad that retains J would read J, so "back to drive" is
+       accepted only when it reads K, a level only the new drive WYPIN can produce.  The DIR-cycle reference uses the same two values.
+    2. Each observation is a SNAPSHOT of 8 reads (the OR of the line-state bits), not one read of "bit 1", so a line that flickers
+       (a floating sniffer) is seen as such instead of passing on one lucky read.  A sniffer's absolute state is not predicted: the sniffer
+       is compared with the DIR-cycle sniffer, not with a value.
+    3. The control arm is repeated before every live arm (every round) and once after the rounds.
+    4. The packet is read back through the receiver's byte toggle with a PASM polling loop (about 20 clocks per poll against 133 clocks per
+       byte at 12 Mbps).  The brief says "verify the status word's bytes".
+
+  VERIFIED OPCODES AND DATA (pnut-ts -d -l v1.55.8 build 9/19/2026, read from the .lst; object offsets, cog addresses in brackets)
+    Symbol table (listing): CFG_DRIVE = SYM_DRIVE = $0000_0076, CFG_SNIFF = SYM_SNIFF = $0000_0036, USB_HOST_FS = $C000,
+      USB_BAUD = $0F5C, X_USB = $0000_CF5C, PAIR = $40, RECW = $22 (34), MB_RES = $02, MB_POST = $AC, MB_LONGS = $B6 ;
+      record slots LX_N = $18 .. LX_EOP = $1D, DS_SEEN = $1E.  CLKMODE $010009FB, CLKFREQ 200_000_000, XINFREQ 20_000_000 (listing).
+    DEBUG: 2 records, 24 bytes of DEBUG data.  Engine at object offset $054; cog labels: usb_off [$02E] usb_start [$033] usb_cycle
+      [$034] control_arm [$03B] snap [$041] packet [$050] put [$090] cfg_drive_ [$093] x_usb_ [$095] txdata_ [$097]; registers cfg_ [$0A1],
+      seen_ [$0A2], st_ [$0A4], val_ [$0A6], nrx_ [$0A7], txi_ [$0A8], insop_ [$0A9], prevtg_ [$0AA], rx0_..rx3_ [$0AB..$0AE],
+      b_ [$0AF], eop_ [$0B0]; the cog image ends at $0B3 (self_id_).
+    Instructions read back from the hub image (the .bin; object base = bin offset 9242, engine = base + $54; condition IF_C = $C,
+    IF_C_AND_Z = $8, IF_NC = $3, IF_Z = $A in bits 31:28):
+      dirl #PAIR $FD648040   dirh #PAIR $FD648041   outl #PAIR $FD648048   wrpin #0,#PAIR $FC0C0040   waitx #100 $FD64C81F
+      wrpin cfg_,#PAIR $FC054240 (D=$0A1, S=64)   wxpin x_usb_,#PIN_DM $FC152A00 (D=$095, S=0)   ret $FD64002D
+      wypin #2,#PAIR $FC2C0440   wypin #3,#PAIR $FC2C0640   rqpin st_,#PIN_DM $FA854800   testp #PIN_DP wc $FD740240
+      cmp txi_,#NTX wc $F2155005   alts txi_,#txdata_ $F9955097   wypin b_,#PAIR $FC255E40   testb st_,#4 wc $F4154804
+      cmp insop_,#0 wz $F20D5200   if_z_and_c mov insop_,#1 $86055201   altd nrx_,#rx0_ / if_c mov 0-0,b_ $C98D4EAB / $C60000AF
+    The round body, read back in order: wrpin cfg_sniff_ $FC052840 / call snap / wypin #3 / call snap / wrpin cfg_drive_ $FC052640 /
+      call snap / wypin #2 / call snap / NEW: wypin #3 + waitx ##SETTLE_CLK ($FF800007 $FD67401F) / call packet / NEW: wxpin x_usb_,#PIN_DM
+      $FC152A00 + waitx ##START_CLK ($FF800027 $FD64401F) / call packet; then the DIR-cycle arm: wypin #3 then #2 ($FC2C0640, $FC2C0440).
+
+  HOW TO RUN
+    1. USB serial connected (DEBUG on P62/P63).  Compile: pnut-ts -d test-vo-f372-usb-wrpin-on-running-pair.spin2
+    2. Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10).
+    3. SAVE THE WHOLE CONSOLE OUTPUT -- it is the only record.
+    4. Expected run time: the engine about 100 ms (5 rounds), the report about 80 lines.  Done when you see one "VERDICT VO-F372: ..." line
+       (or "NO VERDICT"), then "=== END ===" and DEBUG_END_SESSION.  No END / DEBUG_END_SESSION line within 15 s = a hang or a lost
+       session: power-cycle the board and send the LAST line you saw.
+    5. Clock: _clkfreq = 200_000_000 assumes the board's 20 MHz crystal; the listing's CLKMODE is quoted in the VERIFIED block above.  The
+       12 Mbps baud word is computed from clkfreq, so another crystal changes the line rate too.
+    6. Pins: P0 (DM) and P1 (DP) are DRIVEN by the program as a USB host pair.  NOTHING may be attached to P0 or P1 (no jumper, no
+       resistor, no scope load that you cannot lose).  No other pin is touched.  (P2 / P3 are used only by the fallback described in the
+       RIG section, which is not part of this program.)
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  PIN_DM            = 0                 ' lower (even) pin of the pair
+  PIN_DP            = PIN_DM + 1        ' upper (odd) pin
+  PAIR              = PIN_DM | (1 << 6) ' DM plus one additional pin (S[10:6] = 1)
+  PIN_MAX_FREE_LOW  = 7                 ' free set: P0..P7 and P32..P47
+
+  ROUNDS            = 5
+  SAMPLES           = 8                 ' quiet status reads per snapshot
+  SPACE_CLK         = 400               ' clocks between the reads of a snapshot
+  SETTLE_CLK        = 4_000             ' clocks of settling before a snapshot (240 bit periods)
+  START_CLK         = 20_000            ' clocks after a start (DIRH) before the first write
+  PKT_TIMEOUT       = 1_000_000         ' clocks for a packet to complete (5 ms)
+  RIG_TIMEOUT_SEC   = 5
+  MBOX_DONE         = 1
+  NO_BYTE           = $FFFF_FFFF        ' a received-byte slot that never filled
+
+  USB_HOST_FS       = $C000             ' D[15] = 1 host, D[14] = 1 full-speed
+  USB_BAUD          = $0F5C             ' (12_000_000 FRAC 200_000_000) >> 16 = 3932
+  X_USB             = USB_HOST_FS | USB_BAUD
+
+  SEEN_J            = %001              ' status bit 0 = J in
+  SEEN_K            = %010              ' status bit 1 = K in
+  NBYTES            = 4                 ' data bytes of the framed packet (after SOP)
+  NTX               = NBYTES + 1        ' values written: SOP then the data
+  TX0               = $A5
+  TX1               = $5A
+  TX2               = $3C
+  TX3               = $C3
+
+CON ' ---- Configuration Words ----
+  CFG_DRIVE         = $0000_0076        ' P_USB_PAIR | P_OE  (D data %1_11011_0)
+  CFG_SNIFF         = $0000_0036        ' P_USB_PAIR         (D data %0_11011_0)
+  SYM_DRIVE         = P_USB_PAIR | P_OE
+  SYM_SNIFF         = P_USB_PAIR
+
+  ' WRPIN D field positions and widths (silicon-doc-text.txt:3731)
+  SHIFT_AAAA        = 28
+  MASK_AAAA         = %1111
+  SHIFT_BBBB        = 24
+  MASK_BBBB         = %1111
+  SHIFT_FFF         = 21
+  MASK_FFF          = %111
+  SHIFT_M           = 8
+  MASK_M            = %1_1111_1111_1111
+  SHIFT_TT          = 6
+  MASK_TT           = %11
+  SHIFT_SSSSS       = 1
+  MASK_SSSSS        = %1_1111
+  MASK_BIT0         = 1
+  SSSSS_USB         = %11011
+  TT_OFF            = %00
+  TT_ON             = %01
+
+CON ' ---- Mailbox Layout ----
+  ' per round record (RECW longs), written by the engine in this order:
+  '  CK_SEEN, CK_LAST        control K snapshot
+  '  CJ_SEEN, CJ_LAST        control J snapshot
+  '  CP_N, CP_B0..CP_B3, CP_EOP   control packet: bytes received, the four bytes, EOP-in seen
+  '  LS0_SEEN, LS0_LAST      after the live WRPIN to sniffer, no write
+  '  LS_SEEN, LS_LAST        live sniffer after WYPIN #3 (J)
+  '  LB0_SEEN, LB0_LAST      after the live WRPIN back to drive, no write
+  '  LB_SEEN, LB_LAST        live back after WYPIN #2 (K)
+  '  LP_N, LP_B0..LP_B3, LP_EOP   packet after the live changes
+  '  DS_SEEN, DS_LAST        DIR-cycle sniffer after WYPIN #3 (J)
+  '  DB_SEEN, DB_LAST        DIR-cycle back after WYPIN #2 (K)
+  #0, CK_SEEN, CK_LAST, CJ_SEEN, CJ_LAST, CP_N, CP_B0, CP_B1, CP_B2, CP_B3, CP_EOP
+  '  LX_N, LX_B0..LX_B3, LX_EOP   characterization: packet after the live changes and a re-issued WXPIN
+  #10, LS0_SEEN, LS0_LAST, LS_SEEN, LS_LAST, LB0_SEEN, LB0_LAST, LB_SEEN, LB_LAST
+  #18, LP_N, LP_B0, LP_B1, LP_B2, LP_B3, LP_EOP, LX_N, LX_B0, LX_B1, LX_B2, LX_B3, LX_EOP, DS_SEEN, DS_LAST, DB_SEEN, DB_LAST
+  RECW              = 34
+  CTL_LONGS         = 10                ' the control part of a record (CK..CP_EOP)
+
+  MB_DONE           = 0
+  MB_PROG           = 1
+  MB_RES            = 2
+  MB_POST           = MB_RES + ROUNDS * RECW     ' control after the rounds (CTL_LONGS)
+  MB_LONGS          = MB_POST + CTL_LONGS
+
+CON ' ---- Report Parameters ----
+  LINE_MAX          = 400
+  DEC_TOP           = 1_000_000_000
+  DEC_DIGITS        = 10
+  DEC_BASE          = 10
+  HEX_DIGITS        = 8
+  HEX_BITS          = 4
+  HEX_GROUP         = 4
+  HEX_LETTERS       = 10
+
+VAR ' ---- Mailbox & Analysis State ----
+  long mailbox[MB_LONGS]
+  long fail_count
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+
+PUB main() | engineCog, startTick
+'' Run the F372 rig: check the constants, start the measuring cog, wait for its done flag, report.
+''
+
+' Local Variables:
+' @local engineCog - cog id COGINIT returned (negative = no free cog)
+' @local startTick - CT when the wait for the done flag began
+
+  longfill(@mailbox, 0, MB_LONGS)
+  mailbox[MB_PROG] := 0
+  fail_count := 0
+  linePos := 0
+  say(string("=== VO-F372: USB %11011 -- does a new WRPIN on a RUNNING pair change drive / sniffer cleanly? ==="))
+  ln_s(string("pair DM = P"))
+  ln_u(PIN_DM)
+  ln_s(string(", DP = P"))
+  ln_u(PIN_DP)
+  ln_s(string(" (NOTHING attached; both are driven); host, full-speed, X = "))
+  ln_h(X_USB)
+  ln_s(string("; "))
+  ln_u(ROUNDS)
+  say(string(" rounds"))
+  print_predictions()
+  say(string(" "))
+  say(string("--- CONTROL W: configuration words, decoded into the published WRPIN fields ---"))
+  check_rig_constants()
+  if fail_count <> 0
+    say(string("NO VERDICT: a construction control failed (see RIG FAIL lines above); the measuring cog was not started"))
+  else
+    engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
+    if engineCog < 0
+      say(string("RIG FAIL: no free cog for the measuring engine"))
+      say(string("NO VERDICT: nothing was measured"))
+    else
+      startTick := getct()
+      repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
+      if mailbox[MB_DONE] <> MBOX_DONE
+        cogstop(engineCog)
+        pinclear(PIN_DM addpins 1)
+        ln_s(string("RIG FAIL: measuring cog did not report done within "))
+        ln_u(RIG_TIMEOUT_SEC)
+        ln_s(string(" s; it was in round "))
+        ln_u(mailbox[MB_PROG])
+        say(string("; the pair was cleared by cog 0"))
+        say(string("NO VERDICT: the measurement did not complete"))
+      else
+        ln_s(string("measuring cog = "))
+        ln_u(engineCog)
+        say(string(" (debugger restricted to cog 0)"))
+        report()
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  say(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_bin(numVal, digits) | idx
+' Append "%" and the low digits bits of a number.
+'
+' @param numVal - the number
+' @param digits - how many bits
+
+' Local Variables:
+' @local idx - bit index
+
+  ln_c("%")
+  repeat idx from digits - 1 to 0
+    ln_c("0" + ((numVal >> idx) & 1))
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI yes_no(bFlag) : pText
+' Printable YES / NO.
+'
+' @param bFlag - TRUE or FALSE
+' @returns pText - address of "YES" or "NO"
+
+  if bFlag
+    pText := string("YES")
+  else
+    pText := string("NO")
+
+' ---------------------------------------------------------------------------
+' pre-registered outcomes and construction controls
+' ---------------------------------------------------------------------------
+PRI print_predictions()
+' Print the outcomes fixed before the run.
+'
+
+  say(string("PRE-REGISTERED OUTCOMES (fixed before the run):"))
+  say(string("  SNAPSHOT = settle, then 8 quiet status reads; SEEN = OR of (status AND %111): bit0 J, bit1 K, bit2 SE0"))
+  say(string("  CONTROL (1): WYPIN #2 -> SEEN %010 ; WYPIN #3 -> SEEN %001 ; packet SOP,$A5,$5A,$3C,$C3 returns 4 bytes -- else RIG FAIL / NO VERDICT"))
+  say(string("  DIR-cycle reference: sniffer (after WYPIN #3 = J) SEEN stable across rounds, without K and never exactly J ; back-to-drive WYPIN #2 = K -> SEEN %010 -- else RIG FAIL / INCONCLUSIVE"))
+  say(string("  SNIFF_OK : live WRPIN to sniffer + WYPIN #3 gives the DIR-cycle sniffer SEEN in every round ; SNIFF_BAD : it differs in every round"))
+  say(string("  BACK_OK  : live WRPIN back to drive + WYPIN #2 gives SEEN %010 (K) in every round ; BACK_BAD : it differs in every round (a pad that retained J reads %001)"))
+  say(string("  PKT_OK   : packet after the live changes returns the control packet's bytes in every round ; PKT_BAD : it does not, in every round"))
+  say(string("  VERDICT SURVIVES : SNIFF_OK and BACK_OK (and PKT_OK when the packet control holds) -- hardware manual / Titus / old Silicon Doc right"))
+  say(string("  VERDICT BREAKS   : SNIFF_BAD or BACK_BAD or PKT_BAD -- the 'unpredictable' reading (silicon-doc-text.txt:3856) holds for this case"))
+  say(string("  VERDICT INCONCLUSIVE : anything else (mixed rounds, or a gate that is not a RIG FAIL does not hold); if gate P does not hold the verdict line ends (packet arm excluded)"))
+  say(string("  FALLBACK if INCONCLUSIVE because self-sense is ambiguous: a second USB pair P2/P3 with jumpers P0->P2 and P1->P3 (a separate test, not in this program)"))
+
+PRI check_rig_constants() | baudRun
+' Control W: the pair lies in the free set and is even/odd; every configuration word decodes to the
+' published fields and equals its Spin2 symbol composition; the baud word equals the FRAC computation.
+'
+
+' Local Variables:
+' @local baudRun - (12_000_000 FRAC clkfreq) >> 16 computed at run time
+
+  if (PIN_DM & 1) <> 0 or PIN_DP <> PIN_DM + 1 or PAIR <> PIN_DM | (1 << 6)
+    say(string("RIG FAIL: the pair is not an even/odd pair addressed as DM + one additional pin"))
+    fail_count++
+  if PIN_DM > PIN_MAX_FREE_LOW and (PIN_DM < 32 or PIN_DM > 46)
+    say(string("RIG FAIL: DM is outside the free set (P0..P7, P32..P47)"))
+    fail_count++
+  check_word(string("drive   "), CFG_DRIVE, SYM_DRIVE, TT_ON)
+  check_word(string("sniffer "), CFG_SNIFF, SYM_SNIFF, TT_OFF)
+  baudRun := (12_000_000 frac clkfreq) >> 16
+  ln_s(string("  WXPIN word "))
+  ln_h(X_USB)
+  ln_s(string(": D[15] host="))
+  ln_u((X_USB >> 15) & 1)
+  ln_s(string(" D[14] full-speed="))
+  ln_u((X_USB >> 14) & 1)
+  ln_s(string(" D[13:0] baud="))
+  ln_u(X_USB & $3FFF)
+  ln_s(string("  FRAC computation at "))
+  ln_u(clkfreq)
+  ln_s(string(" Hz = "))
+  ln_u(baudRun)
+  ln_out()
+  if baudRun <> USB_BAUD or (X_USB & $3FFF) <> baudRun or ((X_USB >> 14) & 3) <> %11
+    say(string("RIG FAIL: the WXPIN word does not hold host + full-speed + the computed 12 Mbps baud"))
+    fail_count++
+
+PRI check_word(pLabel, cfgWord, symWord, expTt)
+' Decode one WRPIN word into its published fields, print them, and count a
+' construction failure if any field or the symbol composition disagrees.
+'
+' @param pLabel - label string for the printed line
+' @param cfgWord - the configuration word the measuring cog writes
+' @param symWord - the same word composed from the Spin2 v55 symbols
+' @param expTt - expected %TT
+
+  ln_s(string("  "))
+  ln_s(pLabel)
+  ln_c(" ")
+  ln_h(cfgWord)
+  ln_s(string(": AAAA="))
+  ln_bin((cfgWord >> SHIFT_AAAA) & MASK_AAAA, 4)
+  ln_s(string(" BBBB="))
+  ln_bin((cfgWord >> SHIFT_BBBB) & MASK_BBBB, 4)
+  ln_s(string(" FFF="))
+  ln_bin((cfgWord >> SHIFT_FFF) & MASK_FFF, 3)
+  ln_s(string(" M="))
+  ln_bin((cfgWord >> SHIFT_M) & MASK_M, 13)
+  ln_s(string(" TT="))
+  ln_bin((cfgWord >> SHIFT_TT) & MASK_TT, 2)
+  ln_s(string(" SSSSS="))
+  ln_bin((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS, 5)
+  ln_s(string(" bit0="))
+  ln_u(cfgWord & MASK_BIT0)
+  ln_s(string("  symbols="))
+  ln_h(symWord)
+  ln_out()
+  if ((cfgWord >> SHIFT_AAAA) & MASK_AAAA) <> 0 or ((cfgWord >> SHIFT_BBBB) & MASK_BBBB) <> 0 or ((cfgWord >> SHIFT_FFF) & MASK_FFF) <> 0 or ((cfgWord >> SHIFT_M) & MASK_M) <> 0 or ((cfgWord >> SHIFT_TT) & MASK_TT) <> expTt or ((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS) <> SSSSS_USB or (cfgWord & MASK_BIT0) <> 0
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    say(string(" fields differ from the expected AAAA/BBBB/FFF/M = 0, TT, SSSSS = %11011, bit0 = 0"))
+    fail_count++
+  if cfgWord <> symWord
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    ln_s(string(" word "))
+    ln_h(cfgWord)
+    ln_s(string(" differs from its Spin2 symbol composition "))
+    ln_h(symWord)
+    ln_out()
+    fail_count++
+
+' ---------------------------------------------------------------------------
+' report
+' ---------------------------------------------------------------------------
+PRI rec(roundIdx, slotIdx) : recVal
+' One recorded long of a round.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param slotIdx - CK_SEEN..DB_LAST
+' @returns recVal - the recorded long
+
+  recVal := mailbox[MB_RES + roundIdx * RECW + slotIdx]
+
+PRI postrec(slotIdx) : recVal
+' One recorded long of the control run after the rounds.
+'
+' @param slotIdx - CK_SEEN..CP_EOP
+' @returns recVal - the recorded long
+
+  recVal := mailbox[MB_POST + slotIdx]
+
+PRI pkt_equal(roundA, roundB) : bEqual | byteIdx
+' Whether the packets of two records hold the same count and bytes.
+'
+' @param roundA - round whose control packet (CP_*) is compared
+' @param roundB - round whose live packet (LP_*) is compared
+' @returns bEqual - TRUE when count and four bytes agree
+
+' Local Variables:
+' @local byteIdx - byte index
+
+  bEqual := rec(roundA, CP_N) == rec(roundB, LP_N) and rec(roundA, CP_EOP) == rec(roundB, LP_EOP)
+  repeat byteIdx from 0 to NBYTES - 1
+    if rec(roundA, CP_B0 + byteIdx) <> rec(roundB, LP_B0 + byteIdx)
+      bEqual := FALSE
+
+PRI pkt_good(bytesBase, countVal) : bGood | byteIdx
+' Whether a packet record holds the 4 bytes that were sent.
+'
+' @param bytesBase - mailbox index of the packet's first byte
+' @param countVal - bytes counted
+' @returns bGood - TRUE when exactly the four bytes arrived in order
+
+' Local Variables:
+' @local byteIdx - byte index
+
+  bGood := countVal == NBYTES and mailbox[bytesBase] == TX0 and mailbox[bytesBase + 1] == TX1 and mailbox[bytesBase + 2] == TX2 and mailbox[bytesBase + 3] == TX3
+
+PRI report() | roundIdx, bCtl, bPkt, bRef, bSniffObs, bBackObs, bSniffOk, bSniffBad, bBackOk, bBackBad, bPktOk, bPktBad
+' Print the raw records, gate, decide. Single exit.
+'
+
+' Local Variables:
+' @local roundIdx - round
+' @local bCtl - control arm (1) holds in every round and after the rounds
+' @local bPkt - control packet returns the four bytes in every round and after
+' @local bRef - DIR-cycle back-to-drive snapshot is K in every round (gate R)
+' @local bSniffObs - DIR-cycle sniffer snapshot stable and without K (gate O)
+' @local bBackObs - DIR-cycle sniffer snapshot never exactly J (gate B)
+' @local bSniffOk - live sniffer snapshot equals the DIR-cycle one in every round
+' @local bSniffBad - ... differs in every round
+' @local bBackOk - live back snapshot is K in every round
+' @local bBackBad - ... is not K in every round
+' @local bPktOk - live packet equals the control packet in every round
+' @local bPktBad - ... differs in every round
+
+  say(string(" "))
+  say(string("--- RAW RECORDS per round (SEEN = OR of status AND %111 over 8 reads ; LAST = last status word) ---"))
+  repeat roundIdx from 0 to ROUNDS - 1
+    print_round(roundIdx)
+  ln_s(string("  control after the rounds: K seen "))
+  ln_bin(postrec(CK_SEEN), 3)
+  ln_s(string("  J seen "))
+  ln_bin(postrec(CJ_SEEN), 3)
+  ln_s(string("  packet n="))
+  ln_u(postrec(CP_N))
+  ln_s(string(" bytes "))
+  ln_h(postrec(CP_B0))
+  ln_c(" ")
+  ln_h(postrec(CP_B1))
+  ln_c(" ")
+  ln_h(postrec(CP_B2))
+  ln_c(" ")
+  ln_h(postrec(CP_B3))
+  ln_out()
+  say(string(" "))
+  say(string("--- GATES ---"))
+  bCtl := TRUE
+  bPkt := pkt_good(MB_POST + CP_B0, postrec(CP_N))
+  if postrec(CK_SEEN) <> SEEN_K or postrec(CJ_SEEN) <> SEEN_J
+    bCtl := FALSE
+  repeat roundIdx from 0 to ROUNDS - 1
+    if rec(roundIdx, CK_SEEN) <> SEEN_K or rec(roundIdx, CJ_SEEN) <> SEEN_J
+      bCtl := FALSE
+    if pkt_good(MB_RES + roundIdx * RECW + CP_B0, rec(roundIdx, CP_N)) == FALSE
+      bPkt := FALSE
+  ln_s(string("  K  control (1) K=%010 and J=%001 in every round and after: "))
+  ln_s(yes_no(bCtl))
+  ln_out()
+  if bCtl == FALSE
+    say(string("RIG FAIL: the control arm (1) does not show K / J on the pair's own receiver -- the pair is not driving, or self-sense does not work (the fallback is then needed: a second pair P2/P3 with jumpers P0->P2 and P1->P3, a separate test)"))
+    fail_count++
+  bRef := TRUE
+  bSniffObs := TRUE
+  bBackObs := TRUE
+  repeat roundIdx from 0 to ROUNDS - 1
+    if rec(roundIdx, DB_SEEN) <> SEEN_K
+      bRef := FALSE
+    if rec(roundIdx, DS_SEEN) <> rec(0, DS_SEEN) or (rec(roundIdx, DS_SEEN) & SEEN_K) <> 0
+      bSniffObs := FALSE
+    if rec(roundIdx, DS_SEEN) == SEEN_J
+      bBackObs := FALSE
+  ln_s(string("  R  DIR-cycle back-to-drive (WYPIN #2 = K) gives K in every round: "))
+  ln_s(yes_no(bRef))
+  ln_out()
+  if bRef == FALSE
+    say(string("RIG FAIL: the documented reconfigure (DIRL, WRPIN, WXPIN, DIRH) does not restore the drive"))
+    fail_count++
+  ln_s(string("  O  DIR-cycle sniffer snapshot identical in every round and without K: "))
+  ln_s(yes_no(bSniffObs))
+  ln_s(string("  (round 0 SEEN "))
+  ln_bin(rec(0, DS_SEEN), 3)
+  ln_c(")")
+  ln_out()
+  ln_s(string("  B  DIR-cycle sniffer snapshot never exactly J (%001) in any round (else the back arm is INCONCLUSIVE): "))
+  ln_s(yes_no(bBackObs))
+  ln_out()
+  ln_s(string("  P  control packet returned SOP-framed bytes $A5 $5A $3C $C3 in every round and after: "))
+  ln_s(yes_no(bPkt))
+  ln_out()
+  say(string(" "))
+  if fail_count <> 0
+    say(string("NO VERDICT: a gating control failed (see RIG FAIL lines above); the records are printed for diagnosis only"))
+  else
+    bSniffOk := TRUE
+    bSniffBad := TRUE
+    bBackOk := TRUE
+    bBackBad := TRUE
+    bPktOk := TRUE
+    bPktBad := TRUE
+    repeat roundIdx from 0 to ROUNDS - 1
+      if rec(roundIdx, LS_SEEN) == rec(roundIdx, DS_SEEN)
+        bSniffBad := FALSE
+      else
+        bSniffOk := FALSE
+      if rec(roundIdx, LB_SEEN) == SEEN_K
+        bBackBad := FALSE
+      else
+        bBackOk := FALSE
+      if pkt_equal(roundIdx, roundIdx)
+        bPktBad := FALSE
+      else
+        bPktOk := FALSE
+    ln_s(string("  SNIFF_OK "))
+    ln_s(yes_no(bSniffOk))
+    ln_s(string("  SNIFF_BAD "))
+    ln_s(yes_no(bSniffBad))
+    ln_s(string("   BACK_OK "))
+    ln_s(yes_no(bBackOk))
+    ln_s(string("  BACK_BAD "))
+    ln_s(yes_no(bBackBad))
+    ln_s(string("   PKT_OK "))
+    ln_s(yes_no(bPktOk))
+    ln_s(string("  PKT_BAD "))
+    ln_s(yes_no(bPktBad))
+    ln_out()
+    if bPkt == FALSE
+      say(string("  (gate P does not hold: the packet arm is characterization only and is left out of the verdict)"))
+      bPktOk := TRUE
+      bPktBad := FALSE
+    if bBackObs == FALSE
+      say(string("  (gate B does not hold: the DIR-cycle sniffer reads exactly J, so the back-to-drive arm is INCONCLUSIVE and is left out)"))
+      bBackOk := FALSE
+      bBackBad := FALSE
+    if bSniffObs == FALSE
+      ln_s(string("VERDICT VO-F372: INCONCLUSIVE - the DIR-cycle sniffer snapshot is not stable or still shows K: drive and sniffer cannot be told apart in this rig (records above); fallback: a second pair with jumpers P0->P2, P1->P3"))
+      excl_note(bPkt)
+      ln_out()
+    elseif bSniffBad or bBackBad or bPktBad
+      ln_s(string("VERDICT VO-F372: BREAKS - the live WRPIN differs from the reset-based reconfigure in every round for at least one of: sniffer snapshot, back-to-drive snapshot, packet"))
+      excl_note(bPkt)
+      ln_out()
+      say(string("  a new WRPIN on a running USB pair does NOT reproduce the DIR-cycle result: the 'without resetting the smart pin' sentence does not hold here"))
+    elseif bSniffOk and bBackOk and bPktOk
+      ln_s(string("VERDICT VO-F372: SURVIVES - the live WRPIN reproduces the DIR-cycle result in every round, and the pair carries a packet afterwards"))
+      excl_note(bPkt)
+      ln_out()
+      say(string("  a new WRPIN %0_11011_0 / %1_11011_0 on a running USB pair works without a reset (hardware manual / Titus / old Silicon Doc right)"))
+    else
+      ln_s(string("VERDICT VO-F372: INCONCLUSIVE - rounds disagree, or one live snapshot matches in some rounds only, or the back arm is not observable (records above); fallback: a second pair with jumpers P0->P2, P1->P3"))
+      excl_note(bPkt)
+      ln_out()
+
+PRI excl_note(bPktGate)
+' Append " (packet arm excluded)" to the line being built when gate P failed (the packet arm is then not in the verdict).
+'
+' @param bPktGate - gate P: the control packet returned the four bytes in every round
+
+  if bPktGate == FALSE
+    ln_s(string(" (packet arm excluded)"))
+
+PRI print_round(roundIdx)
+' Print one round's record as a few lines.
+'
+' @param roundIdx - 0..ROUNDS-1
+
+  ln_s(string("  round "))
+  ln_u(roundIdx + 1)
+  ln_s(string(" control: K "))
+  ln_bin(rec(roundIdx, CK_SEEN), 3)
+  ln_s(string(" J "))
+  ln_bin(rec(roundIdx, CJ_SEEN), 3)
+  ln_s(string(" packet n="))
+  ln_u(rec(roundIdx, CP_N))
+  ln_s(string(" bytes "))
+  ln_h(rec(roundIdx, CP_B0))
+  ln_c(" ")
+  ln_h(rec(roundIdx, CP_B1))
+  ln_c(" ")
+  ln_h(rec(roundIdx, CP_B2))
+  ln_c(" ")
+  ln_h(rec(roundIdx, CP_B3))
+  ln_s(string(" eop "))
+  ln_u(rec(roundIdx, CP_EOP))
+  ln_out()
+  ln_s(string("           live sniffer: after WRPIN "))
+  ln_bin(rec(roundIdx, LS0_SEEN), 3)
+  ln_s(string(" after WYPIN #3 (J) "))
+  ln_bin(rec(roundIdx, LS_SEEN), 3)
+  ln_s(string(" (last "))
+  ln_h(rec(roundIdx, LS_LAST))
+  ln_s(string(")   live back: after WRPIN "))
+  ln_bin(rec(roundIdx, LB0_SEEN), 3)
+  ln_s(string(" after WYPIN #2 (K) "))
+  ln_bin(rec(roundIdx, LB_SEEN), 3)
+  ln_s(string(" (last "))
+  ln_h(rec(roundIdx, LB_LAST))
+  ln_c(")")
+  ln_out()
+  ln_s(string("           live packet n="))
+  ln_u(rec(roundIdx, LP_N))
+  ln_s(string(" bytes "))
+  ln_h(rec(roundIdx, LP_B0))
+  ln_c(" ")
+  ln_h(rec(roundIdx, LP_B1))
+  ln_c(" ")
+  ln_h(rec(roundIdx, LP_B2))
+  ln_c(" ")
+  ln_h(rec(roundIdx, LP_B3))
+  ln_s(string(" eop "))
+  ln_u(rec(roundIdx, LP_EOP))
+  ln_out()
+  ln_s(string("           characterization, packet again after WXPIN re-issued: n="))
+  ln_u(rec(roundIdx, LX_N))
+  ln_s(string(" bytes "))
+  ln_h(rec(roundIdx, LX_B0))
+  ln_c(" ")
+  ln_h(rec(roundIdx, LX_B1))
+  ln_c(" ")
+  ln_h(rec(roundIdx, LX_B2))
+  ln_c(" ")
+  ln_h(rec(roundIdx, LX_B3))
+  ln_s(string(" eop "))
+  ln_u(rec(roundIdx, LX_EOP))
+  ln_out()
+  ln_s(string("           DIR-cycle: sniffer (J written) "))
+  ln_bin(rec(roundIdx, DS_SEEN), 3)
+  ln_s(string(" (last "))
+  ln_h(rec(roundIdx, DS_LAST))
+  ln_s(string(")  back (K written) "))
+  ln_bin(rec(roundIdx, DB_SEEN), 3)
+  ln_s(string(" (last "))
+  ln_h(rec(roundIdx, DB_LAST))
+  ln_c(")")
+  ln_out()
+
+{ MEASURING ENGINE -- runs in its own cog; the ONLY code that touches the pair.
+  No debug() here (DEBUG_COGS excludes this cog anyway). PTRA = @mailbox on entry.
+  respt_ walks the mailbox in the order the CK_SEEN..DB_LAST constants list (RECW longs
+  per round), then the CTL_LONGS of the control run after the rounds.
+}
+DAT             org     0        ' ---- Measuring Engine ----
+engine          mov     mb_, ptra
+                mov     respt_, mb_
+                add     respt_, #MB_RES * 4
+                mov     progp_, mb_
+                add     progp_, #MB_PROG * 4
+                mov     rnd_, #ROUNDS
+                mov     roundno_, #0
+
+.round          add     roundno_, #1
+                wrlong  roundno_, progp_
+
+                ' ---- LIVE ARM ----
+                mov     cfg_, cfg_drive_
+                call    #usb_start
+                call    #control_arm            ' (1) K, J, packet                      -> CK, CJ, CP
+                wrpin   cfg_sniff_, #PAIR       ' (2) live to sniffer, DIR high, no DIR change, no WXPIN
+                call    #snap                   '     after WRPIN, no write             -> LS0
+                wypin   #3, #PAIR               '     J (a pad that retains J is then not mistaken for a K)
+                call    #snap                   '     after WYPIN #3                    -> LS
+                wrpin   cfg_drive_, #PAIR       ' (3) live back to drive
+                call    #snap                   '     after WRPIN, no write             -> LB0
+                wypin   #2, #PAIR               '     K: only the drive can produce it after the J above
+                call    #snap                   '     after WYPIN #2                    -> LB
+                wypin   #3, #PAIR               '     back to J (idle) so the packet starts from the same state as the control's
+                waitx   ##SETTLE_CLK
+                call    #packet                 ' (4) packet after the live changes     -> LP
+                wxpin   x_usb_, #PIN_DM         '     characterization: WXPIN re-issued on the running pair
+                waitx   ##START_CLK
+                call    #packet                 '     packet again                      -> LX
+
+                ' ---- DIR-CYCLE ARM (the reset-based reference) ----
+                mov     cfg_, cfg_drive_
+                call    #usb_start              ' the documented start again
+                mov     cfg_, cfg_sniff_
+                call    #usb_cycle              ' DIRL, WRPIN sniffer, WXPIN, DIRH
+                wypin   #3, #PAIR               ' J, as in the live arm
+                call    #snap                   '                                       -> DS
+                mov     cfg_, cfg_drive_
+                call    #usb_cycle              ' DIRL, WRPIN drive, WXPIN, DIRH
+                wypin   #2, #PAIR               ' K, as in the live arm
+                call    #snap                   '                                       -> DB
+                djnz    rnd_, #.round
+
+                ' ---- control after the rounds ----
+                mov     cfg_, cfg_drive_
+                call    #usb_start
+                call    #control_arm            ' -> the post record (CTL_LONGS)
+
+                call    #usb_off                ' leave P0 / P1 safe
+                wrlong  #MBOX_DONE, ptra        ' done -- always the last write
+                cogid   self_id_
+                cogstop self_id_
+
+' All of it off: pair DIR low, smart pin off, OUT low.
+usb_off         dirl    #PAIR
+                wrpin   #0, #PAIR
+                outl    #PAIR
+                waitx   #100
+                ret
+
+' The documented start (silicon-doc-text.txt:4593): reset, WRPIN cfg_ on both pins, WXPIN on DM, DIRH both.
+usb_start       call    #usb_off
+usb_cycle       dirl    #PAIR                   ' (usb_cycle: DIRL, WRPIN new word, WXPIN, DIRH -- no WRPIN #0)
+                wrpin   cfg_, #PAIR
+                wxpin   x_usb_, #PIN_DM
+                dirh    #PAIR
+                waitx   ##START_CLK
+                ret
+
+' (1) CONTROL: WYPIN K, snapshot; WYPIN J, snapshot; packet.  Writes CTL_LONGS longs.
+control_arm     wypin   #2, #PAIR
+                call    #snap
+                wypin   #3, #PAIR
+                call    #snap
+                call    #packet
+                ret
+
+' Snapshot: settle, then SAMPLES quiet reads of the lower pin's status word.
+' Writes two longs: SEEN (OR of status AND %111), LAST (last status word).
+snap            waitx   ##SETTLE_CLK
+                mov     seen_, #0
+                mov     si_, #SAMPLES
+.s              rqpin   st_, #PIN_DM
+                mov     tg_, st_
+                and     tg_, #%111
+                or      seen_, tg_
+                waitx   #SPACE_CLK
+                djnz    si_, #.s
+                mov     val_, seen_
+                call    #put
+                mov     val_, st_
+                call    #put
+                ret
+
+' Framed packet: SOP and the four data bytes written as the FIFO has room (DP's IN high),
+' while the lower pin's status is polled; each toggle of the byte-toggle bit (bit 7), once SOP-in
+' (bit 4) has been seen, is a received byte.  Writes six longs: n, four bytes, EOP-in.
+packet          mov     nrx_, #0
+                mov     txi_, #0
+                mov     insop_, #0
+                mov     prevtg_, #0
+                mov     rx0_, nobyte_
+                mov     rx1_, nobyte_
+                mov     rx2_, nobyte_
+                mov     rx3_, nobyte_
+                getct   tp0_
+.loop           cmp     txi_, #NTX              wc      ' C = 1 while values remain to write
+        if_nc   jmp     #.rx
+                testp   #PIN_DP                 wc      ' DP IN high = the output FIFO has room
+        if_nc   jmp     #.rx
+                alts    txi_, #txdata_                  ' S of the next instruction = txdata_ + txi_
+                mov     b_, 0-0
+                wypin   b_, #PAIR                       ' writes DM and acknowledges DP
+                add     txi_, #1
+.rx             rqpin   st_, #PIN_DM
+                mov     tg_, st_
+                and     tg_, #$80
+                testb   st_, #4                 wc      ' SOP in
+                cmp     insop_, #0              wz
+        if_z_and_c mov  insop_, #1
+        if_z_and_c mov  prevtg_, tg_
+        if_z    jmp     #.chk                           ' not inside a packet yet
+                cmp     tg_, prevtg_            wz
+        if_z    jmp     #.chk                           ' no new byte
+                mov     prevtg_, tg_
+                mov     b_, st_
+                shr     b_, #8
+                and     b_, #$FF
+                cmp     nrx_, #NBYTES           wc
+        if_c    altd    nrx_, #rx0_
+        if_c    mov     0-0, b_
+                add     nrx_, #1
+.chk            cmp     txi_, #NTX              wz
+        if_nz   jmp     #.tmo
+                cmp     nrx_, #NBYTES           wc
+        if_c    jmp     #.tmo
+                testb   st_, #5                 wc      ' EOP in
+        if_c    jmp     #.done
+.tmo            getct   tp1_
+                sub     tp1_, tp0_
+                cmp     tp1_, ##PKT_TIMEOUT     wc
+        if_c    jmp     #.loop
+.done           testb   st_, #5                 wc
+        if_c    mov     eop_, #1
+        if_nc   mov     eop_, #0
+                mov     val_, nrx_
+                call    #put
+                mov     val_, rx0_
+                call    #put
+                mov     val_, rx1_
+                call    #put
+                mov     val_, rx2_
+                call    #put
+                mov     val_, rx3_
+                call    #put
+                mov     val_, eop_
+                call    #put
+                waitx   ##SETTLE_CLK
+                ret
+
+put             wrlong  val_, respt_
+                add     respt_, #4
+                ret
+
+cfg_drive_      long    CFG_DRIVE
+cfg_sniff_      long    CFG_SNIFF
+x_usb_          long    X_USB
+nobyte_         long    NO_BYTE
+txdata_         long    $80, TX0, TX1, TX2, TX3     ' SOP, then the data bytes (NTX longs)
+
+mb_             res     1
+respt_          res     1
+progp_          res     1
+rnd_            res     1
+roundno_        res     1
+cfg_            res     1
+seen_           res     1
+si_             res     1
+st_             res     1
+tg_             res     1
+val_            res     1
+nrx_            res     1
+txi_            res     1
+insop_          res     1
+prevtg_         res     1
+rx0_            res     1                       ' the four received bytes, consecutive
+rx1_            res     1
+rx2_            res     1
+rx3_            res     1
+b_              res     1
+eop_            res     1
+tp0_            res     1
+tp1_            res     1
+self_id_        res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+  See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

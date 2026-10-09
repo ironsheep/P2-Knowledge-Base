@@ -1,0 +1,904 @@
+'' ===========================================================================
+''
+''   File.......  test-vo-s037-cogatn-self.spin2
+''   Purpose....  VO-S037: does COGATN with the issuing cog's own bit set
+''                (COGATN(1 << COGID())) raise an attention event in that
+''                same cog?  PASM POLLATN / JATN / WAITATN and Spin2 POLLATN()
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+'' ===========================================================================
+
+{ WHAT IS DECIDED  (register VO-S037; close-out study step 8)
+
+  The sources do not say whether a cog can strobe itself:
+    - silicon-doc-text.txt:2020: "The 16 attention strobe outputs from all
+      cogs are OR'd together to form a composite set of 16 strobes, from
+      which each cog receives its particular strobe" - does not exclude the
+      issuing cog;
+    - SD:2053: "Event 14 = Attention was requested by another cog or other
+      cogs" - reads the other way;
+    - SD:2203: the POLLATN/WAITATN flag is "Set whenever any cogs request
+      attention", "Cleared on cog start", "Also cleared on POLLATN/WAITATN/
+      JATN/JNATN" (SD:2200-2204);
+    - spin2-v55-text.txt:526-528: COGATN(CogMask) "Strobe ATN input(s) of
+      cog(s) according to 16-bit CogMask"; POLLATN() "Check if this cog has
+      received an ATN strobe, AtnFlag = -1 if ATN strobed or 0 if not
+      strobed"; WAITATN() "Wait for this cog to receive an ATN strobe".
+  The KB page methods/cogatn.yaml says "Cannot signal yourself (no effect)":
+  unsourced.  The page's claim is deleted regardless of this bench (the
+  delete-the-claim fix needs no measurement); the bench only decides whether
+  the OPPOSITE may be stated.
+
+  THIS PROGRAM MEASURES AND PREDICTS NOTHING.  A target cog strobes ITSELF
+  and looks for the event, in four forms, each with a control and a negative
+  control on the very same cog, repetition by repetition:
+    F0  PASM POLLATN WC in a poll loop bounded by a window
+    F1  PASM JATN #hit in a loop bounded by a window
+    F2  PASM SETQ <CT target> + WAITATN WC (SD:2084: SETQ before WAITxxx gives
+        a CT timeout; "C will be set if the timeout occurred before the
+        event"); the wait is bounded by the CT target, so it cannot hang
+    F3  Spin2  COGATN(1 << COGID()) then a POLLATN() loop bounded by the
+        same window (a Spin2 WAITATN() has no timeout and is NOT used).  In
+        the Spin2 interpreter COGATN(mask) is the instruction "cogatn x"
+        (Spin2_interpreter.spin2:1109, bytecode $2E at :930) and POLLATN() is
+        "pollatn wc" (:1125 'waitatn_ pollatn wc'; bytecode $2F at :931), so F3 reaches the
+        same silicon instruction as F0 by the Spin2 route
+  For each form and repetition three CELLS run, in this order, with the
+  target's attention flag cleared first (two POLLATN/POLLATN() before the
+  cell; the second MUST read 0):
+    CTRL  a SECOND cog (the helper) strobes the target (documented use).
+          Must be delivered 8 of 8 or the rig is void.
+    SELF  the target strobes itself: the question.
+    NEG   nothing strobes: the window must read "no event" 8 of 8 or the
+          rig is void (a detector that fires with no strobe proves nothing).
+  The CTRL cell runs immediately before the SELF cell in every repetition:
+  it is the marker that the poll/jump/wait path of that form is alive in
+  THIS repetition.
+
+RIG
+  Bare P2 board, 200 MHz.  NO PINS, no jumper, nothing attached.
+  Cog 0 (Spin2, the only cog with the debugger, DEBUG_COGS = %0000_0001)
+  starts, in this order:
+    H  the helper (PASM): waits for a request (id, mask) in the mailbox,
+       executes COGATN <mask>, then writes the id to the ack long; it stops
+       on a stop flag or after 3 s;
+    T  the PASM target: runs forms F0, F1, F2 (8 repetitions x 3 cells each);
+    U  the Spin2 target (cogspin): runs form F3.
+  T and U run one after the other (never together); H serves both.  Cog 0
+  waits for each with a 1 s timeout, stops H, T and U if still running, and
+  reports.  Nothing runs concurrently with a measurement except H.
+  The interaction is STRUCTURAL, not timed: the target posts a request and
+  WAITS (bounded: 2 ms) for H's ack before opening the observation window; the
+  ack is written by H only AFTER its COGATN has executed.  The window is 100 us
+  (20,000 clocks), 10,000x longer than the 2-clock COGATN; an event that
+  arrives is polled until it is seen, never sampled once.  If H never
+  answers, the ack times out and the cell is flagged (RIG FAIL).
+
+THE CELL (PASM, target T)
+    pre-clear   POLLATN WC / WRC p1 / POLLATN WC / WRC p2   (p2 MUST be 0;
+                p1 is the residue of the previous cell and MUST be 0 too:
+                a late event from an earlier cell would show here)
+    stimulus    CTRL: write mask (1 << T's COGID), write the request id,
+                      wait for the ack     SELF: COGATN (1 << COGID)
+                NEG: none
+    window      form F0/F1: loop until the event or 20,000 clocks (GETCT)
+                form F2: SETQ (GETCT + 20,000) / WAITATN WC; C = timeout
+    record      4 longs: tag, delivered (1/0), clocks from the window's
+                start to the event (or 20,000), pre-flags (bit 0 p1, bit 1
+                p2, bit 2 = ack received, 1 when there was no request)
+  The tag is written in the same block; a cell never written shows a wrong
+  tag.
+
+PRE-REGISTERED READINGS OF THE SELF CELLS (printed BEFORE the run)
+    DELIVERED      SELF delivered in 8 of 8 repetitions, as CTRL: a cog can
+                   strobe itself
+    NOT DELIVERED  SELF delivered in 0 of 8, as NEG: a self strobe is lost
+    MIXED          anything else: reported as the finding, never a pass
+  One reading per form.  If the forms disagree that is printed as the finding.
+
+CHECKS (each failure prints RIG FAIL and NO VERDICT)
+    - H, T and U started, and T and U finished within 1 s;
+    - every cell has its tag;
+    - every cell's pre-clear read 0 twice (no residue);
+    - every CTRL cell got the helper's ack in time (SELF and NEG make no
+      request, so their ack flag is set by definition);
+    - CTRL delivered 8 of 8 in every form; NEG delivered 0 of 8 in every form.
+
+DEVIATION FROM THE BRIEF
+  The brief's arms (i)-(iv) are run per FORM and per repetition (8
+  repetitions, 4 forms) so a control and a negative control sit next to each
+  SELF cell.  The brief's "WAITATN with a timeout" is the SETQ form (F2),
+  because a plain WAITATN could hang the cog.  The brief's "JATN repeat" is
+  F1.  A Spin2 WAITATN() form is deliberately absent (no timeout).
+
+DEBUGGER
+  Every printed line is assembled in lineBuf from hub strings and numbers and
+  sent by the ONE debug(zstr_(@lineBuf)) record in ln_out(); the only other
+  record is debug("DEBUG_END_SESSION").
+
+OPCODES AND ADDRESSES  (pnut-ts -d -l, v1.55.8, read from the .lst)
+  The .lst is a hub-image dump plus a symbol table.  Two PASM cogs, each
+  assembled at cog address 0: the helper at object offset $54 (+ cog address
+  * 4), the target at $B4 (+ cog address * 4).  Encodings from the silicon
+  doc: COGATN D/# = EEEE 1101011 00L DDDDDDDDD 000111111 (silicon-doc-text.txt
+  :5351), POLLATN {WCZ} = EEEE 1101011 CZ0 000001110 000100100 (:5283),
+  WAITATN = ... 000011110 000100100 (:5300), JATN S/# = EEEE 1011110 01I
+  000001110 SSSSSSSSS (:5181).  Read from the .lst:
+    helper $070  cogatn h_mask        $FD60_2C3F   (D = h_mask $16, L = 0)
+    helper $074  wrlong h_id,ptra[2]  $FC64_2B02   (the ack, AFTER the cogatn)
+    helper $078  rdlong h_stop,ptra[3] $FB04_2F03
+    target $0F0  pollatn wc           $FD70_1C24   (pre-clear 1; again at $0F8)
+    target $140  cmp c_kind,#K_SELF wz $F20C_D801, then
+    target $144  if_z cogatn c_selfmask $AD60_D03F (D = c_selfmask $68; the
+                                                    question; conditional on SELF)
+    target $164  setq c_dl            $FD60_EA28   (D = c_dl $75)
+    target $168  waitatn wc           $FD70_3C24   (the very next long)
+    target $174  pollatn wc           $FD70_1C24   (F0 loop; w_poll)
+    target $190  jatn #w_hit          $FBCC_1C05   (F1 loop; w_jatn; rel9 +5)
+    target $204  setq #3              $FD64_0628   (RECW - 1) then
+    target $208  wrlong g_tag,c_idx   $FC60_EC6F   (the 4-long record)
+  Cog registers, target: c_window $62, c_ackbud $63, c_tagbase $64, c_donev
+  $65, c_recbase $66, c_me $67, c_selfmask $68, c_rid $69, c_rep $6A, c_form
+  $6B, c_kind $6C, c_prog $6D, c_tmp $6E, c_idx $6F, c_p1 $70, c_p2 $71,
+  c_ack $72, c_t0 $73, c_t1 $74, c_dl $75, record block g_tag $76, g_del $77,
+  g_lat $78, g_pre $79 (contiguous).  Helper: h_budget $11 .. h_stop $17.
+  Mailbox longs: MB_REQID 0, MB_MASK 1, MB_ACK 2, MB_STOP 3, MB_TREC 4,
+  MB_TCUR 5, MB_TDONE 6.
+  The listing reports 2 DEBUG records, 24 bytes of DEBUG data.
+  If you edit this file, recompile with -l and re-read every row above.
+
+HOW TO RUN
+  USB serial must be connected (DEBUG rides P62/P63).  Compile with
+  pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or PNut Ctrl-F10).
+  Runs once, in well under a second; nothing is written to flash.
+  SAVE THE WHOLE CONSOLE OUTPUT - it is the only record.
+  Expected run time: well under 1 s; at most about 2 s (each target is waited
+  for at most 1 s).  A run that prints no "=== END" line and no
+  DEBUG_END_SESSION within 10 s is a hang or a lost session: report it as
+  such, not as a reading.
+  Clock: _clkfreq = 200 MHz assumes the board's 20 MHz crystal (the listing's
+  CLKMODE is $010009FB, read from the .lst); the window (20,000 clocks), the
+  2 ms ack budget and the 1 s waits depend on it.
+  A STALLED target (progress long printed) voids its forms: their per-cell
+  lines are not printed and no VERDICT is given.
+  Output: the header and pre-registered readings, one line per form, the
+  VERDICT lines, the END line, then DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+  REPS            = 8                   ' repetitions of every cell
+  NFORM           = 4                   ' F0 POLLATN, F1 JATN, F2 WAITATN+SETQ, F3 Spin2
+  NPFORM          = 3                   ' forms run by the PASM target
+  NKIND           = 3                   ' CTRL, SELF, NEG
+  RECW            = 4                   ' longs per cell record
+  WINDOW          = 20_000              ' clocks of observation window (100 us)
+  ACK_BUDGET      = 400_000             ' clocks to wait for the helper's ack (2 ms)
+  HELPER_BUDGET   = 600_000_000         ' the helper stops by itself after 3 s
+  TAG_BASE        = $5037_0000          ' cell tag = TAG_BASE + form * 256 + kind * 16 + rep
+  RID_T           = $0100               ' request ids of the PASM target
+  RID_U           = $0200               ' request ids of the Spin2 target
+  DONE_V          = $0D0E_0D0E          ' a cog is done
+  UNWRITTEN       = $EEEE_EEEE          ' fill before a run
+
+  SPIN_STACK      = 64
+  LINE_MAX        = 480                 ' longest printed line (chars)
+  DEC_TOP         = 1_000_000_000
+  DEC_DIGITS      = 10
+  DEC_BASE        = 10
+  HEX_DIGITS      = 8
+  HEX_BITS        = 4
+  HEX_GROUP       = 4
+  HEX_LETTERS     = 10
+
+CON ' ---- Identifiers ----
+  ' forms
+  #0, F_POLL, F_JATN, F_WAIT, F_SPIN
+  ' cell kinds (the order they run in, inside a repetition)
+  #0, K_CTRL, K_SELF, K_NEG
+  ' cell record longs
+  #0, C_TAG, C_DEL, C_LAT, C_PRE
+  ' pre-flag bits
+  PRE_P1          = %001                ' residue read by the first pre-clear POLLATN
+  PRE_P2          = %010                ' residue read by the second pre-clear POLLATN
+  PRE_ACK         = %100                ' the helper's ack arrived (set when no request was made)
+  ' mailbox longs (cog 0, helper, targets)
+  '  MB_REQID  - request id (written last)   MB_MASK - attention mask
+  '  MB_ACK    - last id acknowledged by the helper (written after COGATN)
+  '  MB_STOP   - non-zero: the helper stops  MB_TREC - hub address of T's records
+  '  MB_TCUR   - T's progress: form * 256 + kind * 16 + rep
+  '  MB_TDONE  - DONE_V when T is done
+  #0, MB_REQID, MB_MASK, MB_ACK, MB_STOP, MB_TREC, MB_TCUR, MB_TDONE, MB_LEN
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  long tRecs[NPFORM * NKIND * REPS * RECW]  ' [form][kind][rep][field], PASM target
+  long uRecs[NKIND * REPS * RECW]           ' [kind][rep][field], Spin2 target
+  long uCur                             ' U progress: kind * 16 + rep
+  long uDone                            ' DONE_V when U is done
+  long spinStack[SPIN_STACK]
+  long failCnt                          ' RIG FAIL lines printed
+  long bTStall, bUStall
+  long cogH, cogT, cogU
+  long uMask                            ' U's own mask (for the report)
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | formIdx
+'' Start the helper, the PASM target and the Spin2 target one after the other,
+'' check the controls, report every form.
+''
+
+' Local Variables:
+' @local formIdx - form
+
+  linePos := 0
+  failCnt := 0
+  bTStall := FALSE
+  bUStall := FALSE
+  print_header()
+
+  longfill(@tRecs, UNWRITTEN, NPFORM * NKIND * REPS * RECW)
+  longfill(@uRecs, UNWRITTEN, NKIND * REPS * RECW)
+  longfill(@mbox, 0, MB_LEN)
+  mbox[MB_TREC] := @tRecs
+  mbox[MB_TCUR] := UNWRITTEN
+  uCur := UNWRITTEN
+  uDone := 0
+
+  cogH := coginit(COGEXEC_NEW, @helper, @mbox)
+  if cogH < 0
+    ln_s(string("RIG FAIL: coginit expected a free cog for the helper, got "))
+    ln_d(cogH)
+    ln_out()
+    say(string("=== END: RIG FAIL (no helper cog) - NO VERDICT ==="))
+    finish()
+
+  cogT := coginit(COGEXEC_NEW, @target, @mbox)
+  if cogT < 0
+    cogstop(cogH)
+    ln_s(string("RIG FAIL: coginit expected a free cog for the PASM target, got "))
+    ln_d(cogT)
+    ln_out()
+    say(string("=== END: RIG FAIL (no PASM target cog) - NO VERDICT ==="))
+    finish()
+  if not wait_done(@mbox[MB_TDONE])
+    bTStall := TRUE
+    cogstop(cogT)
+
+  cogU := cogspin(NEWCOG, spin_target(), @spinStack)
+  if cogU < 0
+    cogstop(cogH)
+    ln_s(string("RIG FAIL: cogspin expected a free cog for the Spin2 target, got "))
+    ln_d(cogU)
+    ln_out()
+    say(string("=== END: RIG FAIL (no Spin2 target cog) - NO VERDICT ==="))
+    finish()
+  if not wait_done(@uDone)
+    bUStall := TRUE
+    cogstop(cogU)
+
+  mbox[MB_STOP] := 1
+  cogstop(cogH)
+
+  ln_s(string("=== helper cog "))
+  ln_d(cogH)
+  ln_s(string(", PASM target cog "))
+  ln_d(cogT)
+  ln_s(string(" (mask "))
+  ln_h(1 << cogT)
+  ln_s(string("), Spin2 target cog "))
+  ln_d(cogU)
+  ln_s(string(" (mask "))
+  ln_h(uMask)
+  say(string(") ==="))
+  if bTStall
+    ln_s(string("RIG FAIL: STALLED - the PASM target did not finish within 1 s; progress long "))
+    ln_h(mbox[MB_TCUR])
+    ln_s(string(" (form * 256 + kind * 16 + rep, UNWRITTEN = never started)"))
+    ln_out()
+    failCnt++
+  if bUStall
+    ln_s(string("RIG FAIL: STALLED - the Spin2 target did not finish within 1 s; progress long "))
+    ln_h(uCur)
+    ln_s(string(" (kind * 16 + rep, UNWRITTEN = never started)"))
+    ln_out()
+    failCnt++
+  if bTStall or bUStall
+    say(string("RIG FAIL above: the per-cell lines of a STALLED target are NOT printed (its cells are unwritten, any reading would be noise - ignore); a target that finished is still reported"))
+
+  repeat formIdx from F_POLL to F_SPIN
+    if (formIdx == F_SPIN and bUStall) or (formIdx <> F_SPIN and bTStall)
+      ln_s(form_text(formIdx))
+      say(string(": not reported - its target stalled (see RIG FAIL above)"))
+    else
+      report_form(formIdx)
+  print_verdict()
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output.
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_d(numVal)
+' Append a signed decimal to the line.
+'
+' @param numVal - the number, read as signed
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_u(numVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_cnt(countVal)
+' Append "n of 8".
+'
+' @param countVal - the count
+
+  ln_d(countVal)
+  ln_s(string(" of "))
+  ln_d(REPS)
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI rig_fail(pStr)
+' Count one RIG FAIL and start its line; the caller appends the details and
+' sends the line.
+'
+' @param pStr - hub address of the text
+
+  failCnt++
+  ln_s(string("RIG FAIL: "))
+  ln_s(pStr)
+
+PRI wait_done(pFlag) : bDone | startCt
+' Wait up to 1 s for a cog to write DONE_V to its done long.
+'
+' @param pFlag - hub address of the done long
+' @returns bDone - TRUE when DONE_V arrived in time
+
+' Local Variables:
+' @local startCt - CT when the wait began
+
+  bDone := TRUE
+  startCt := getct()
+  repeat until long[pFlag] == DONE_V
+    if getct() - startCt > clkfreq
+      bDone := FALSE
+      quit
+
+' ---------------------------------------------------------------------------
+' header
+' ---------------------------------------------------------------------------
+PRI print_header()
+' Print the rig identity and the pre-registered readings, before any run.
+'
+
+  say(string("=== VO-S037: does COGATN(1 << COGID()) strobe the issuing cog? (pnut-ts v1.55.8 -d, clk 200 MHz, no pins) ==="))
+  say(string("Measured, not predicted: SD:2020 does not exclude the issuing cog, SD:2053 says 'another cog'; no source states it. Forms: F0 PASM POLLATN | F1 PASM JATN | F2 PASM SETQ+WAITATN WC | F3 Spin2 POLLATN()."))
+  say(string("Per form and repetition, three cells, flag cleared first (2 polls, the 2nd MUST read 0): CTRL = a helper cog strobes the target | SELF = the target strobes itself | NEG = no strobe. Window 20,000 clocks, polled to the end."))
+  say(string("Gates (else RIG FAIL, NO VERDICT): CTRL delivered 8 of 8 and NEG delivered 0 of 8 in every form; every pre-clear reads 0; every ack arrives; every cell has its tag."))
+  say(string("PRE-REGISTERED READINGS of the SELF cells (one per form; none predicted):"))
+  say(string("  DELIVERED     = SELF delivered 8 of 8, as CTRL: a cog can strobe itself"))
+  say(string("  NOT DELIVERED = SELF delivered 0 of 8, as NEG: a self strobe is lost"))
+  say(string("  MIXED         = anything else: the finding, never a pass"))
+
+' ---------------------------------------------------------------------------
+' records
+' ---------------------------------------------------------------------------
+PRI cell_at(formIdx, kindIdx, repIdx, fieldIdx) : fieldVal
+' One field of one cell.
+'
+' @param formIdx - F_POLL .. F_SPIN
+' @param kindIdx - K_CTRL, K_SELF, K_NEG
+' @param repIdx - repetition
+' @param fieldIdx - C_TAG .. C_PRE
+' @returns fieldVal - the recorded long
+
+  if formIdx == F_SPIN
+    fieldVal := uRecs[(kindIdx * REPS + repIdx) * RECW + fieldIdx]
+  else
+    fieldVal := tRecs[((formIdx * NKIND + kindIdx) * REPS + repIdx) * RECW + fieldIdx]
+
+PRI form_text(formIdx) : pText
+' @param formIdx - form
+' @returns pText - the form as printed
+
+  pText := lookupz(formIdx: string("F0 PASM POLLATN WC    "), string("F1 PASM JATN #hit     "), string("F2 PASM SETQ+WAITATN WC"), string("F3 Spin2 COGATN+POLLATN()"))
+
+PRI kind_text(kindIdx) : pText
+' @param kindIdx - cell kind
+' @returns pText - the kind as printed
+
+  pText := lookupz(kindIdx: string("CTRL helper->target"), string("SELF target->target"), string("NEG  no strobe     "))
+
+PRI delivered_cnt(formIdx, kindIdx) : delCnt | repIdx
+' How many repetitions of a cell kind delivered the event.
+'
+' @param formIdx - form
+' @param kindIdx - cell kind
+' @returns delCnt - repetitions with delivered = 1
+
+' Local Variables:
+' @local repIdx - repetition
+
+  delCnt := 0
+  repeat repIdx from 0 to REPS - 1
+    if cell_at(formIdx, kindIdx, repIdx, C_DEL) == 1
+      delCnt++
+
+PRI report_form(formIdx) | kindIdx, repIdx, tagCnt, preCnt, ackCnt, delCnt, latLo, latHi, latVal, tagWant
+' Check one form's 24 cells, print its lines and count the RIG FAILs.
+'
+' @param formIdx - form
+
+' Local Variables:
+' @local kindIdx - cell kind
+' @local repIdx - repetition
+' @local tagCnt - cells whose tag is right
+' @local preCnt - cells whose two pre-clear polls read 0
+' @local ackCnt - cells whose ack arrived
+' @local delCnt - repetitions that delivered the event
+' @local latLo - fewest clocks to the event over delivered cells
+' @local latHi - most clocks to the event over delivered cells
+' @local latVal - one cell's clocks
+' @local tagWant - the tag a cell must carry
+
+  repeat kindIdx from K_CTRL to K_NEG
+    tagCnt := 0
+    preCnt := 0
+    ackCnt := 0
+    latLo := POSX
+    latHi := NEGX
+    repeat repIdx from 0 to REPS - 1
+      tagWant := TAG_BASE + (formIdx << 8) + (kindIdx << 4) + repIdx
+      if cell_at(formIdx, kindIdx, repIdx, C_TAG) == tagWant
+        tagCnt++
+      if (cell_at(formIdx, kindIdx, repIdx, C_PRE) & (PRE_P1 | PRE_P2)) == 0
+        preCnt++
+      if (cell_at(formIdx, kindIdx, repIdx, C_PRE) & PRE_ACK) <> 0
+        ackCnt++
+      if cell_at(formIdx, kindIdx, repIdx, C_DEL) == 1
+        latVal := cell_at(formIdx, kindIdx, repIdx, C_LAT)
+        latLo <#= latVal
+        latHi #>= latVal
+    delCnt := delivered_cnt(formIdx, kindIdx)
+    ln_s(form_text(formIdx))
+    ln_c(" ")
+    ln_s(kind_text(kindIdx))
+    ln_s(string(": event delivered "))
+    ln_cnt(delCnt)
+    if delCnt <> 0
+      ln_s(string(" | clocks to the event "))
+      ln_d(latLo)
+      ln_s(string(".."))
+      ln_d(latHi)
+    ln_s(string(" | clean pre-clear "))
+    ln_cnt(preCnt)
+    ln_s(string(" | ack "))
+    ln_cnt(ackCnt)
+    ln_s(string(" | tags "))
+    ln_cnt(tagCnt)
+    ln_out()
+    ln_s(string("   raw delivered per rep (1 = event, clocks):"))
+    repeat repIdx from 0 to REPS - 1
+      ln_s(string(" | "))
+      ln_d(cell_at(formIdx, kindIdx, repIdx, C_DEL))
+      ln_c(" ")
+      ln_d(cell_at(formIdx, kindIdx, repIdx, C_LAT))
+    ln_out()
+    if tagCnt <> REPS
+      rig_fail(form_text(formIdx))
+      ln_s(string(" "))
+      ln_s(kind_text(kindIdx))
+      ln_s(string(" cells with the right tag "))
+      ln_cnt(tagCnt)
+      ln_out()
+    if preCnt <> REPS
+      rig_fail(form_text(formIdx))
+      ln_s(string(" "))
+      ln_s(kind_text(kindIdx))
+      ln_s(string(" pre-clear read an event in "))
+      ln_d(REPS - preCnt)
+      ln_s(string(" cell(s) - the attention flag was not clear before the cell"))
+      ln_out()
+    if kindIdx == K_CTRL and ackCnt <> REPS
+      rig_fail(form_text(formIdx))
+      ln_s(string(" CTRL helper ack arrived in "))
+      ln_cnt(ackCnt)
+      ln_s(string(" - the helper cog did not strobe/answer"))
+      ln_out()
+    if kindIdx == K_CTRL and delCnt <> REPS
+      rig_fail(form_text(formIdx))
+      ln_s(string(" CTRL (documented use) delivered "))
+      ln_cnt(delCnt)
+      ln_s(string(" (MUST be 8 of 8: the form cannot see a strobe)"))
+      ln_out()
+    if kindIdx == K_NEG and delCnt <> 0
+      rig_fail(form_text(formIdx))
+      ln_s(string(" NEG (no strobe) delivered "))
+      ln_cnt(delCnt)
+      ln_s(string(" (MUST be 0 of 8: a stray event)"))
+      ln_out()
+
+PRI print_verdict() | formIdx, selfCnt, nDel, nNot, nMixed
+' Print one reading per form when no gate failed.
+'
+
+' Local Variables:
+' @local formIdx - form
+' @local selfCnt - SELF repetitions that delivered
+' @local nDel - forms that read DELIVERED
+' @local nNot - forms that read NOT DELIVERED
+' @local nMixed - forms that read MIXED
+
+  ln_s(string("=== CONTROLS: "))
+  if failCnt == 0
+    say(string("all passed ==="))
+  else
+    ln_d(failCnt)
+    say(string(" RIG FAIL line(s) above ==="))
+    say(string("NO VERDICT: a control failed, the SELF cells are not interpretable"))
+    return
+  nDel := 0
+  nNot := 0
+  nMixed := 0
+  repeat formIdx from F_POLL to F_SPIN
+    selfCnt := delivered_cnt(formIdx, K_SELF)
+    ln_s(string("VERDICT "))
+    ln_s(form_text(formIdx))
+    if selfCnt == REPS
+      nDel++
+      say(string(": DELIVERED - the issuing cog received its own attention strobe (SELF 8 of 8, as CTRL)"))
+    elseif selfCnt == 0
+      nNot++
+      say(string(": NOT DELIVERED - a cog's own strobe did not reach it (SELF 0 of 8, as NEG)"))
+    else
+      nMixed++
+      say(string(": MIXED - SELF delivered in some repetitions only; INCONCLUSIVE, not a pass"))
+  if nMixed == 0 and nDel == NFORM
+    say(string("SUMMARY: all four forms DELIVERED - COGATN of the issuing cog's own bit raises that cog's attention event"))
+  elseif nMixed == 0 and nNot == NFORM
+    say(string("SUMMARY: all four forms NOT DELIVERED - a cog cannot strobe itself"))
+  else
+    say(string("SUMMARY: the forms do not agree, or a form is MIXED - the per-form lines above are the finding"))
+  say(string("=== END ==="))
+
+' ---------------------------------------------------------------------------
+' the Spin2 target (form F3)
+' ---------------------------------------------------------------------------
+PRI spin_target() | repIdx, kindIdx, rid, tStart, bAck, bFound, pre, lat, base
+' Spin2 target: for every repetition run the CTRL, SELF and NEG cells with
+' POLLATN() bounded by the window; write DONE_V at the end.
+'
+
+' Local Variables:
+' @local repIdx - repetition
+' @local kindIdx - cell kind
+' @local rid - request id counter
+' @local tStart - CT at the start of a wait or window
+' @local bAck - the helper's ack arrived (TRUE when no request was made)
+' @local bFound - the event was seen
+' @local pre - pre-flags
+' @local lat - clocks to the event
+' @local base - index into uRecs of the cell
+
+  uMask := 1 << cogid()
+  rid := RID_U
+  repeat repIdx from 0 to REPS - 1
+    repeat kindIdx from K_CTRL to K_NEG
+      uCur := (kindIdx << 4) + repIdx
+      pre := 0
+      if pollatn() <> 0
+        pre |= PRE_P1
+      if pollatn() <> 0
+        pre |= PRE_P2
+      bAck := TRUE
+      if kindIdx == K_CTRL
+        rid++
+        mbox[MB_MASK] := uMask
+        mbox[MB_REQID] := rid
+        tStart := getct()
+        repeat until mbox[MB_ACK] == rid
+          if getct() - tStart > ACK_BUDGET
+            bAck := FALSE
+            quit
+      elseif kindIdx == K_SELF
+        cogatn(1 << cogid())
+      tStart := getct()
+      bFound := FALSE
+      lat := WINDOW
+      repeat while getct() - tStart < WINDOW
+        if pollatn() <> 0
+          lat := getct() - tStart
+          bFound := TRUE
+          quit
+      if bAck
+        pre |= PRE_ACK
+      base := (kindIdx * REPS + repIdx) * RECW
+      uRecs[base + C_DEL] := bFound & 1
+      uRecs[base + C_LAT] := lat
+      uRecs[base + C_PRE] := pre
+      uRecs[base + C_TAG] := TAG_BASE + (F_SPIN << 8) + (kindIdx << 4) + repIdx
+  uDone := DONE_V
+
+' ===========================================================================
+' HELPER COG (PASM, cog exec).  PTRA on entry = @mbox.  Waits for a request id
+' it has not seen, reads the mask, executes COGATN <mask>, THEN writes the id
+' to the ack long.  Stops on MB_STOP or after HELPER_BUDGET clocks.
+' ===========================================================================
+DAT             org     0        ' ---- Helper Cog ----
+helper          getct   h_t0
+                mov     h_seen, #0
+h_lp            rdlong  h_id, ptra[MB_REQID]
+                cmp     h_id, h_seen                    wz
+        if_z    jmp     #h_chk                          ' nothing new
+                rdlong  h_mask, ptra[MB_MASK]           ' the mask was written BEFORE the id
+                mov     h_seen, h_id
+                cogatn  h_mask                          ' strobe the requested cog(s)
+                wrlong  h_id, ptra[MB_ACK]              ' acknowledge AFTER the strobe
+h_chk           rdlong  h_stop, ptra[MB_STOP]
+                tjnz    h_stop, #h_end
+                getct   h_t1
+                sub     h_t1, h_t0
+                cmp     h_t1, h_budget                  wc
+        if_c    jmp     #h_lp
+h_end           cogid   h_t1
+                cogstop h_t1
+
+h_budget        long    HELPER_BUDGET
+h_t0            long    0
+h_t1            long    0
+h_seen          long    0
+h_id            long    0
+h_mask          long    0
+h_stop          long    0
+helper_end
+
+' ===========================================================================
+' PASM TARGET COG (cog exec).  PTRA on entry = @mbox.  No debug(), no BRK, no
+' interrupt.  Runs forms F0..F2: for each repetition, form, kind: one cell.
+' ===========================================================================
+DAT             org     0        ' ---- PASM Target Cog ----
+target          rdlong  c_recbase, ptra[MB_TREC]        ' hub address of the cell records
+                cogid   c_me
+                mov     c_selfmask, #1
+                shl     c_selfmask, c_me                ' 1 << COGID
+                mov     c_rid, #RID_T
+                mov     c_rep, #0
+
+rep_lp          mov     c_form, #0
+form_lp         mov     c_kind, #0
+kind_lp         ' ---- one cell ----
+                mov     c_prog, c_form                  ' progress: form * 256 + kind * 16 + rep
+                shl     c_prog, #8
+                mov     c_tmp, c_kind
+                shl     c_tmp, #4
+                add     c_prog, c_tmp
+                add     c_prog, c_rep
+                wrlong  c_prog, ptra[MB_TCUR]
+                ' pre-clear: two polls; both MUST read 0
+                pollatn                                 wc
+                wrc     c_p1
+                pollatn                                 wc
+                wrc     c_p2
+                mov     c_ack, #1                       ' 1 = no request made, or acknowledged
+                cmp     c_kind, #K_CTRL                 wz
+        if_nz   jmp     #t_notctrl
+                ' CTRL: ask the helper cog to strobe me, wait (bounded) for its ack
+                add     c_rid, #1
+                wrlong  c_selfmask, ptra[MB_MASK]
+                wrlong  c_rid, ptra[MB_REQID]           ' the id is written LAST
+                getct   c_t0
+t_ackw          rdlong  c_tmp, ptra[MB_ACK]
+                cmp     c_tmp, c_rid                    wz
+        if_z    jmp     #t_window
+                getct   c_t1
+                sub     c_t1, c_t0
+                cmp     c_t1, c_ackbud                  wc
+        if_c    jmp     #t_ackw
+                mov     c_ack, #0                       ' no ack in time
+                jmp     #t_window
+t_notctrl       cmp     c_kind, #K_SELF                 wz
+        if_z    cogatn  c_selfmask                      ' THE QUESTION: strobe my own bit
+                ' (NEG: no stimulus)
+t_window        getct   c_t0                            ' the window starts here
+                cmp     c_form, #F_POLL                 wz
+        if_z    jmp     #w_poll
+                cmp     c_form, #F_JATN                 wz
+        if_z    jmp     #w_jatn
+                ' F2: SETQ <CT target> + WAITATN WC; C = the timeout fired first
+                mov     c_dl, c_t0
+                add     c_dl, c_window
+                setq    c_dl
+                waitatn                                 wc
+        if_c    jmp     #w_miss
+                jmp     #w_hit
+w_poll          pollatn                                 wc
+        if_c    jmp     #w_hit
+                getct   c_t1
+                sub     c_t1, c_t0
+                cmp     c_t1, c_window                  wc
+        if_c    jmp     #w_poll
+                jmp     #w_miss
+w_jatn          jatn    #w_hit                          ' jumps (and clears the flag) on an event
+                getct   c_t1
+                sub     c_t1, c_t0
+                cmp     c_t1, c_window                  wc
+        if_c    jmp     #w_jatn
+                jmp     #w_miss
+w_hit           getct   c_t1
+                sub     c_t1, c_t0
+                mov     g_lat, c_t1
+                mov     g_del, #1
+                jmp     #w_done
+w_miss          mov     g_lat, c_window
+                mov     g_del, #0
+w_done          mov     g_pre, c_p2                     ' pre-flags: bit 0 p1, bit 1 p2, bit 2 ack
+                shl     g_pre, #1
+                or      g_pre, c_p1                     ' p2 << 1 | p1
+                mov     c_tmp, c_ack
+                shl     c_tmp, #2
+                or      g_pre, c_tmp
+                mov     g_tag, c_prog
+                add     g_tag, c_tagbase
+                ' record address = recbase + ((form * 3 + kind) * REPS + rep) * RECW * 4
+                mov     c_idx, c_form
+                shl     c_idx, #1
+                add     c_idx, c_form                   ' form * 3
+                add     c_idx, c_kind
+                shl     c_idx, #3                       ' * REPS (8)
+                add     c_idx, c_rep
+                shl     c_idx, #4                       ' * RECW * 4 (16)
+                add     c_idx, c_recbase
+                setq    #RECW - 1
+                wrlong  g_tag, c_idx                    ' the record, 4 longs, tag first
+                add     c_kind, #1
+                cmp     c_kind, #NKIND                  wz
+        if_nz   jmp     #kind_lp
+                add     c_form, #1
+                cmp     c_form, #NPFORM                 wz
+        if_nz   jmp     #form_lp
+                add     c_rep, #1
+                cmp     c_rep, #REPS                    wz
+        if_nz   jmp     #rep_lp
+                wrlong  c_donev, ptra[MB_TDONE]
+                cogid   c_tmp
+                cogstop c_tmp
+
+'--- cog data
+c_window        long    WINDOW
+c_ackbud        long    ACK_BUDGET
+c_tagbase       long    TAG_BASE
+c_donev         long    DONE_V
+c_recbase       long    0
+c_me            long    0
+c_selfmask      long    0
+c_rid           long    0
+c_rep           long    0
+c_form          long    0
+c_kind          long    0
+c_prog          long    0
+c_tmp           long    0
+c_idx           long    0
+c_p1            long    0
+c_p2            long    0
+c_ack           long    0
+c_t0            long    0
+c_t1            long    0
+c_dl            long    0
+'--- the cell record, written as one 4-long block in this order (C_* order)
+g_tag           long    0
+g_del           long    0
+g_lat           long    0
+g_pre           long    0
+target_end
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

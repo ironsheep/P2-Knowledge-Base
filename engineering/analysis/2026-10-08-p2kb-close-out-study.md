@@ -149,9 +149,14 @@ Planning closes at that point. Tasking follows.
 6. [x] **Group F**, gate specs — done (S-382..S-389).
 7. [x] **Group G**, a class sweep per row (done as each row is read, and ticked here when the last
    row's sweep is in) — done: every row batch carries its sweep; prose classes included.
-8. [ ] **Bench specification**: tests written to house style. Each starts as a
+8. [x] **Bench specification**: tests written to house style. Each starts as a
    VERIFICATION-OPPORTUNITIES row, is written in the owning manual's `audit/verification-tests/`,
-   and is reviewed adversarially by a fresh agent before the run.
+   and is reviewed adversarially by a fresh agent before the run — done 2026-10-09 («#408»): eight
+   programs in `hardware-verification/campaigns/2026-10-p2kb-close-out/tests/` (the close-out has no
+   owning manual, so the campaign folder is their home), rows VO-J-005/006/028 updated and VO-J-029..034
+   added; each written by a fresh agent, reviewed adversarially by another (one blocker: S304's timeout
+   wrapped negative and measured nothing; the same overflow class found and fixed in J-005r), fixed,
+   and the fixes checked by a third. Run sheet: the campaign's `RUN-SHEET.md`.
 9. [ ] **Bench run, round 1 (Stephen)**: his run, with everything around it ours.
 10. [ ] **Results**: an EF entry for each result, rows updated. An inconclusive run or a new
     question gets a round-2 test.
@@ -931,6 +936,7 @@ Asked one at a time; each supersedes the "question for Stephen" note on its row.
 | S-391 | latent | KB content may carry other lines that came only from our catalog extract `smart-pins-catalog/…/spin2-v51-extract.md` | the Q6 trace | sweep the KB for strings unique to that extract; each one gets a Parallax source or is removed |
 | S-392 | hygiene | ~150 citations point at our text captures (`silicon-doc-text.txt:NNN`, `p2-datasheet-text.txt`, `spin2-v55-text.txt`, `pasm2-manual-text.txt`) and others at our summaries/registers (`complete-*.md`, `SOURCE-ERRATA.md`, the click-adapter netlist) — 131 files | `grep -rlE` over `deliverables/ai/P2`, 2026-10-09 | rewrite each to the Parallax document's title, edition and section/page; a claim with no Parallax document behind it is unsourced and goes through the search |
 | S-393 | latent | `audit-yaml-claim-sourcing.py` accepts our own files as citations (`complete-builtin-symbols.md` and `…-text.txt` are its own examples, `:153-169`) | the gate source | the gate counts only a Parallax document or an EF record; negative controls for an extraction path and a register path |
+| S-394 | latent | `language/pasm2/concepts/stack_operations.yaml:58` states the hardware stack is "22 bits (20-bit address + 2 flags)"; no source gives the stored width — the Datasheet gives only what CALL pushes, `{C, Z, 10'b0, PC[19:0]}` (`p2-datasheet-text.txt:1725-1726`), and PUSH D pushes a register | found by the VO-G028 review («#408») | bench: VO-G028 arm W reads it (32-bit vs 22-bit readings pre-registered); until the result, the sprint removes the width claim |
 
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*

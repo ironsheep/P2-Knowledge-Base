@@ -1,0 +1,962 @@
+'' ===========================================================================
+''
+''   File.......  test-vo-s059-xoro-zero-seed.spin2
+''   Purpose....  VO-S059: what do successive ??x return when x starts at
+''                0, and what is x afterwards?  (Spin2 ?? against the PASM
+''                XORO32 instruction, with non-zero seeds as controls)
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+'' ===========================================================================
+
+{ WHAT IS DECIDED  (register VO-S059; close-out study step 8)
+
+  No ingested source gives the recurrence, the period or the zero case of
+  the P2 xoroshiro32+ iteration.  The sources say only:
+    - the instruction: "XORO32 D - Iterate D with xoroshiro32+ PRNG algorithm
+      and put PRNG result into next instruction's S"
+      (p2-datasheet-text.txt:1557; the instruction CSV row 413; the PASM2
+      manual table 195 row 138);
+    - the Spin2 operator: "?? (pre) ??var - Iterate long var per XORO32,
+      return pseudo-random value" (spin2-v55-text.txt:412);
+    - the interpreter, which implements ??var as the two instructions
+      "xoro32 x" / "mov v,x" (Spin2_interpreter.spin2:319-320): x is the
+      long read from the variable, v receives the XORO32 result, x (the
+      iterated state) is written back, v is the value ??var returns;
+    - SD:1183 (silicon-doc-text.txt) "XORO32 executes - Q is set to the
+      XORO32 result", and SD:69 lists "XORO32 improved" (a revision note,
+      no algorithm).
+  An upstream lead (external-inputs/pnut_ts_facts/Random-Number-Usage-
+  Guide.md:304-349, NOT a source) asserts "zero seed produces zero forever",
+  but prints an xorshift that is not the xoroshiro32+ the Parallax documents
+  name.  The KB must not state the zero case on that evidence.
+
+  THIS PROGRAM MEASURES AND PREDICTS NOTHING ABOUT THE ZERO CASE.  It runs
+  the same iteration three ways on the same seeds:
+    P  a PASM cog: "xoro32 x" / "mov r,x" (the interpreter's own pair)
+    L  a Spin2 cog: r := ??x with x a method LOCAL variable
+    V  a Spin2 cog: r := ??x with x an object VAR variable
+  for four seeds, 8 results each, the iterated state after each result,
+  8 repetitions of every case.  No documented numeric result of XORO32
+  exists (DS:1557 documents the instruction by name only), so the CONTROLS
+  are CONSISTENCY controls: for a non-zero seed the three paths must agree
+  exactly, be deterministic over the 8 repetitions, and the PRNG must move
+  (the state changes, the results are not all equal).  They gate the rig:
+  a failure prints RIG FAIL and NO VERDICT.
+
+  SEEDS
+    0            the question (zero seed)
+    1            control seed (the brief's control)
+    $DEADBEEF    control seed with both halves non-zero
+    $0001_0000   half-zero seed (state bits [15:0] = 0, [31:16] = 1) -
+                 characterisation: gated for agreement only, no reading
+
+  ONE RUN (seed s, repetition r), on each path
+    MARKER   a second variable m = MK_BASE + s * 16 + r (non-zero, a
+             different seed for every run) is iterated once; its result and
+             state are recorded (F_MKRES, F_MKST).  All three paths must
+             record the SAME marker result for the same (s, r): proves the
+             pair "xoro32 / mov" is correctly formed on every path in every
+             repetition and that a result is not stale.
+    CASE     x := seed; eight times: r_k := ??x; record r_k and the state x.
+    The case's first result is compared with the marker's result and the
+    count "equal to the marker" is PRINTED for information only; it is not
+    gated.  Staleness is covered by two gates: the record tag (a record never
+    written shows a wrong tag) and the marker gate (the marker is a different
+    non-zero seed in every run and must be identical on P, L and V).
+  RECORD (19 longs): tag, marker result, marker state, results 0..7,
+    states 0..7 (the state after result k).  The tag
+    (TAG_BASE + s * 16 + r) is written in the same block; a record never
+    written shows a wrong tag.
+
+RIG
+  Bare P2 board, 200 MHz.  NO PINS, no jumper, nothing attached.
+  Cog 0 (Spin2, the only cog with the debugger, DEBUG_COGS = %0000_0001)
+  starts the PASM cog (COGINIT, cog execution: no debug interrupt, no
+  debug(), no BRK, and no interrupt is set up in it, so no interrupt can fall
+  between a XORO32 and the instruction after it; SD:2349 also lists XORO32
+  among the instructions that must not be executing when an interrupt branch
+  happens), waits for it (1 s timeout), then starts a Spin2 cog
+  (cogspin) that runs the L and V cases (no debug() in it), waits (1 s
+  timeout).  The cogs run one after the other, never concurrently: there is
+  no race.  Cog 0 checks and prints everything.  A cog that does not finish
+  within 1 s is stopped and named (STALLED), never waited for.
+
+PRE-REGISTERED READINGS OF THE ZERO SEED (printed by the program BEFORE the
+  run; none is predicted - "no source states it")
+    ABSORBING        all 8 results are 0 and the state stays 0 after every
+                     call, on all three paths and all 8 repetitions
+    LEAVES ZERO      a non-zero result or state appears: the first call at
+                     which it appears is printed
+    PATHS DISAGREE   Spin2 ?? and PASM XORO32 differ at the zero seed
+    RIG FAIL         a control or gate failed; no verdict is printed
+
+CHECKS (each failure prints RIG FAIL)
+  - the PASM cog and the Spin2 cog both finish within 1 s;
+  - every record has its tag; every marker is identical on P, L and V;
+  - every NON-ZERO seed: P, L and V identical in every field of every
+    repetition; DETERMINISTIC (8 of 8 repetitions identical);
+  - the seeds 1 and $DEADBEEF also MUST move: the state after the first
+    result differs from the seed and there are at least two distinct results
+    among the 8 (the half-zero seed $0001_0000 is not gated on moving: it is
+    characterised, and its movement is printed).
+  - The zero seed and its agreement/determinism are measured and printed;
+    they are never a RIG FAIL.
+
+DEVIATION FROM THE BRIEF
+  The brief asks for four ??x calls per seed.  This program records EIGHT
+  (the first four are the brief's; the state after the 4th is the brief's
+  "x after") so that a state that leaves zero late is still seen.  The brief
+  asks for the PASM XORO32 loop "for each seed on the measuring cog": it is
+  run on a separate PASM cog while the Spin2 paths run in a Spin2 cog, so
+  the interpreter and the PASM never share a cog.  Two storage kinds (L, V)
+  are run because the interpreter reads and writes a local and an object
+  variable through different paths.  The brief's second control seed
+  ($DEADBEEF) and a half-zero seed were added.
+
+DEBUGGER
+  Every printed line is assembled in lineBuf from hub strings and numbers and
+  sent by the ONE debug(zstr_(@lineBuf)) record in ln_out(); the only other
+  record is debug("DEBUG_END_SESSION").  The listing reports the DEBUG record
+  count and DEBUG data size (recorded below).
+
+OPCODES AND ADDRESSES  (pnut-ts -d -l, v1.55.8, read from the .lst)
+  The .lst is a hub-image dump plus a symbol table; the PASM cog's object
+  offset = $80 + cog address * 4 (pasm = $80, seedTbl = $70).  Read from it:
+  XORO32 is EEEE 1101011 000 DDDDDDDDD 001101000 (silicon-doc-text.txt:5406),
+  i.e. $FD60_0000 | D << 9 | $068.  Cog registers: c_mkbase $35, c_tagbase
+  $36, c_donev $37, c_tbl $38, c_rp $39, c_si $3A, c_rep $3B, c_t $3C, seedv
+  $3D, pmk $3E, pst $3F, record block r_tag $40, r_mkres $41, r_mkst $42,
+  r_a0..r_a7 $43..$4A, r_s0..r_s7 $4B..$52 (19 longs, contiguous).
+  Mailbox longs: MB_TBL 0, MB_REC 1, MB_CUR 2, MB_DONE 3.
+    $080  rdlong c_tbl,ptra[MB_TBL]   $FB04_7100
+    $0B0  xoro32 pmk                  $FD60_7C68   (D = $3E)
+    $0B4  mov r_mkres,pmk             $F600_823E   (the very next long: its S
+                                                    is replaced by the result)
+    $0B8  mov r_mkst,pmk              $F600_843E
+    $0C0  xoro32 pst                  $FD60_7E68   (D = $3F)
+    $0C4  mov r_a0,pst                $F600_863F   (the very next long)
+    $0C8  mov r_s0,pst                $F600_963F
+    ... the same xoro32 pst / mov r_aK,pst / mov r_sK,pst triple for K = 1..7
+    $120  setq #18                    $FD64_2428   (RECW - 1 = 18)
+    $124  wrlong r_tag,c_rp           $FC60_8039   (the 19-long block, tag first)
+  The Spin2 cog (method run_local, object offset $1521; run_var, $155D; the
+  offsets move with any edit of the Spin2 text above them - re-read them):
+    r := ??m  (m a method local, index 5)   D5 2B F6   (D0 + n = local n
+              reference; $2B = the ??var push bytecode as emitted; F0 + n =
+              pop into local n)
+    r := ??vm (vm an object VAR)            5C A0 3B 2B F4
+    The bytecode number $2B is read from the listing; it is not decoded
+    against the interpreter's table (the interpreter's ??var path is
+    Spin2_interpreter.spin2:319-320, 'l: ??var (isolated)', 'm: ??var (push)').
+  The listing reports 2 DEBUG records, 24 bytes of DEBUG data.
+  If you edit this file, recompile with -l and re-read every row above.
+
+HOW TO RUN
+  USB serial must be connected (DEBUG rides P62/P63).  Compile with
+  pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or PNut Ctrl-F10).
+  Runs once, in well under a second; nothing is written to flash.
+  SAVE THE WHOLE CONSOLE OUTPUT - it is the only record.
+  Expected run time: about 1 s at most (each cog is waited for at most 1 s).
+  A run that prints no "=== END" line and no DEBUG_END_SESSION within 10 s is
+  a hang or a lost session: report it as such, not as a reading.
+  Clock: _clkfreq = 200 MHz assumes the board's 20 MHz crystal (the listing's
+  CLKMODE is $010009FB, read from the .lst); the 1 s timeouts use clkfreq.
+  Output: the header and pre-registered readings, one line per seed per path
+  (plus a raw line for every repetition of a path that VARIES), the verdict
+  lines (each with the zero seed's repeatability on P, L and V), the END line,
+  then DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+  REPS            = 8                   ' repetitions of every case
+  NSEED           = 4                   ' seeds in seedTbl
+  NITER           = 8                   ' results per run
+  NPATH           = 3                   ' P (PASM), L (Spin2 local), V (Spin2 VAR)
+  RECW            = 19                  ' longs per record: tag, mk res, mk state, 8 res, 8 state
+  MK_BASE         = $0C0F_FEE1          ' marker seed = MK_BASE + seed * 16 + rep (never 0)
+  RUN_SHIFT       = 4                   ' seed * 16 + rep
+  TAG_BASE        = $5059_0000          ' record tag = TAG_BASE + seed * 16 + rep
+  DONE_V          = $0D0E_0D0E          ' a cog is done
+  UNWRITTEN       = $EEEE_EEEE          ' fill before a run
+  CUR_REP_MASK    = $F
+  CUR_SEED_MASK   = $F
+
+  SEED_ZERO       = 0                   ' the question
+  SEED_ONE        = 1
+  SEED_DEAD       = $DEADBEEF
+  SEED_HALF       = $0001_0000
+
+  LINE_MAX        = 480                 ' longest printed line (chars)
+  DEC_TOP         = 1_000_000_000
+  DEC_DIGITS      = 10
+  DEC_BASE        = 10
+  HEX_DIGITS      = 8
+  HEX_BITS        = 4
+  HEX_GROUP       = 4
+  HEX_LETTERS     = 10
+  SPIN_STACK      = 64
+
+CON ' ---- Identifiers ----
+  ' paths
+  #0, PATH_P, PATH_L, PATH_V
+  ' Spin2 storage kinds
+  #0, K_LOCAL, K_VAR
+  ' record longs
+  #0, F_TAG, F_MKRES, F_MKST
+  F_RES           = 3                   ' results 0..7
+  F_ST            = 11                  ' states 0..7
+  ' mailbox longs (cog 0 <-> PASM cog)
+  '  MB_TBL  - hub address of seedTbl     MB_REC  - hub address of the PASM records
+  '  MB_CUR  - progress: seed * 16 + rep  MB_DONE - DONE_V once every run is done
+  #0, MB_TBL, MB_REC, MB_CUR, MB_DONE, MB_LEN
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  long recs[NPATH * NSEED * REPS * RECW]  ' [path][seed][rep][field]
+  long spinCur                          ' Spin2 progress: kind * 256 + seed * 16 + rep
+  long spinDone                         ' DONE_V once every Spin2 run is done
+  long spinStack[SPIN_STACK]
+  long vx, vm                           ' the V path's variables (object VAR)
+  long failCnt                          ' RIG FAIL lines printed
+  long bPasmStall, bSpinStall
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | pasmCog, spinCog, seedIdx
+'' Run the PASM XORO32 cog and the Spin2 ?? cog on four seeds, check the
+'' controls, report the zero seed.
+''
+
+' Local Variables:
+' @local pasmCog - cog the PASM XORO32 cog started in
+' @local spinCog - cog the Spin2 ?? cog started in
+' @local seedIdx - seed index
+
+  linePos := 0
+  failCnt := 0
+  bPasmStall := FALSE
+  bSpinStall := FALSE
+  print_header()
+
+  longfill(@recs, UNWRITTEN, NPATH * NSEED * REPS * RECW)
+  mbox[MB_TBL] := @seedTbl
+  mbox[MB_REC] := @recs                 ' path P is the first block of recs
+  mbox[MB_CUR] := UNWRITTEN
+  mbox[MB_DONE] := 0
+  pasmCog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if pasmCog < 0
+    ln_s(string("RIG FAIL: coginit expected a free cog (0..7), got "))
+    ln_d(pasmCog)
+    ln_out()
+    say(string("=== END: RIG FAIL (no PASM cog) ==="))
+    finish()
+  if not wait_done(@mbox[MB_DONE])
+    bPasmStall := TRUE
+    cogstop(pasmCog)
+  ln_s(string("=== PASM cog "))
+  ln_d(pasmCog)
+  say(string(" ==="))
+
+  spinCur := UNWRITTEN
+  spinDone := 0
+  spinCog := cogspin(NEWCOG, spin_worker(), @spinStack)
+  if spinCog < 0
+    ln_s(string("RIG FAIL: cogspin expected a free cog (0..7), got "))
+    ln_d(spinCog)
+    ln_out()
+    say(string("=== END: RIG FAIL (no Spin2 cog) ==="))
+    finish()
+  if not wait_done(@spinDone)
+    bSpinStall := TRUE
+    cogstop(spinCog)
+  ln_s(string("=== Spin2 cog "))
+  ln_d(spinCog)
+  say(string(" ==="))
+
+  if bPasmStall
+    ln_s(string("RIG FAIL: STALLED - the PASM cog did not finish within 1 s; progress long "))
+    ln_h(mbox[MB_CUR])
+    ln_s(string(" (seed * 16 + rep, or UNWRITTEN = never started)"))
+    ln_out()
+    failCnt++
+  if bSpinStall
+    ln_s(string("RIG FAIL: STALLED - the Spin2 cog did not finish within 1 s; progress long "))
+    ln_h(spinCur)
+    ln_s(string(" (kind * 256 + seed * 16 + rep, or UNWRITTEN = never started)"))
+    ln_out()
+    failCnt++
+
+  repeat seedIdx from 0 to NSEED - 1
+    report_seed(seedIdx)
+  print_verdict()
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output.
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_d(numVal)
+' Append a signed decimal to the line.
+'
+' @param numVal - the number, read as signed
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_u(numVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_cnt(countVal)
+' Append "n of 8".
+'
+' @param countVal - the count
+
+  ln_d(countVal)
+  ln_s(string(" of "))
+  ln_d(REPS)
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI rig_fail(pStr)
+' Count one RIG FAIL and start its line; the caller appends the details and
+' sends the line.
+'
+' @param pStr - hub address of the text
+
+  failCnt++
+  ln_s(string("RIG FAIL: "))
+  ln_s(pStr)
+
+PRI wait_done(pFlag) : bDone | startCt
+' Wait up to 1 s for a cog to write DONE_V to its done long.
+'
+' @param pFlag - hub address of the done long
+' @returns bDone - TRUE when DONE_V arrived in time
+
+' Local Variables:
+' @local startCt - CT when the wait began
+
+  bDone := TRUE
+  startCt := getct()
+  repeat until long[pFlag] == DONE_V
+    if getct() - startCt > clkfreq
+      bDone := FALSE
+      quit
+
+' ---------------------------------------------------------------------------
+' header
+' ---------------------------------------------------------------------------
+PRI print_header()
+' Print the rig identity and the pre-registered readings, before any run.
+'
+
+  say(string("=== VO-S059: ??x with x = 0 - Spin2 ?? against PASM XORO32 (pnut-ts v1.55.8 -d, clk 200 MHz, no pins) ==="))
+  say(string("Measured, not predicted: no ingested source gives the xoroshiro32+ recurrence, period or zero case (DS:1557 names the instruction only)."))
+  say(string("Paths: P = PASM cog xoro32 x / mov r,x | L = Spin2 cog, r := ??x on a method LOCAL | V = Spin2 cog, r := ??x on an object VAR. 8 results and the state after each; 8 repetitions."))
+  say(string("Marker before every run: m = $0C0F_FEE1 + seed*16 + rep iterated once; its result MUST be identical on P, L and V (else RIG FAIL)."))
+  say(string("Controls (consistency, no documented value exists): seeds 1, $DEADBEEF, $0001_0000 MUST agree P = L = V in every field of every repetition; non-zero seeds MUST be DETERMINISTIC (8 of 8) and MUST move (state changes, >= 2 distinct results)."))
+  say(string("PRE-REGISTERED READINGS of seed 0 (none predicted):"))
+  say(string("  ABSORBING      = all 8 results 0 and the state 0 after every call, on P, L and V, in all 8 repetitions"))
+  say(string("  LEAVES ZERO    = a non-zero result or state appears (the first call is printed)"))
+  say(string("  PATHS DISAGREE = Spin2 ?? and PASM XORO32 differ at seed 0"))
+  say(string("  (an upstream note says 'zero stays zero' - that is a lead, not a source; this run decides)"))
+
+' ---------------------------------------------------------------------------
+' records
+' ---------------------------------------------------------------------------
+PRI rec_idx(pathIdx, seedIdx, repIdx, fieldIdx) : recIndex
+' Index into recs of one field of one run.
+'
+' @param pathIdx - PATH_P, PATH_L, PATH_V
+' @param seedIdx - seed index
+' @param repIdx - repetition
+' @param fieldIdx - record long
+' @returns recIndex - index into recs
+
+  recIndex := ((pathIdx * NSEED + seedIdx) * REPS + repIdx) * RECW + fieldIdx
+
+PRI rec_at(pathIdx, seedIdx, repIdx, fieldIdx) : fieldVal
+' One field of one run.
+'
+' @param pathIdx - PATH_P, PATH_L, PATH_V
+' @param seedIdx - seed index
+' @param repIdx - repetition
+' @param fieldIdx - record long
+' @returns fieldVal - the recorded long
+
+  fieldVal := recs[rec_idx(pathIdx, seedIdx, repIdx, fieldIdx)]
+
+PRI seed_of(seedIdx) : seedVal
+' @param seedIdx - seed index
+' @returns seedVal - the seed
+
+  seedVal := long[@seedTbl][seedIdx]
+
+PRI path_text(pathIdx) : pText
+' @param pathIdx - path
+' @returns pText - the path as printed
+
+  pText := lookupz(pathIdx: string("P PASM xoro32 "), string("L Spin2 local "), string("V Spin2 VAR   "))
+
+PRI run_same(pathA, pathB, seedIdx, repA, repB) : bSame | fieldIdx
+' Whether two runs of one seed agree in every field except the tag.
+'
+' @param pathA - first path
+' @param pathB - second path
+' @param seedIdx - seed index
+' @param repA - repetition of the first
+' @param repB - repetition of the second
+' @returns bSame - TRUE when F_MKRES .. the last state are all equal
+
+' Local Variables:
+' @local fieldIdx - record long
+
+  bSame := TRUE
+  repeat fieldIdx from F_MKRES to RECW - 1
+    if rec_at(pathA, seedIdx, repA, fieldIdx) <> rec_at(pathB, seedIdx, repB, fieldIdx)
+      bSame := FALSE
+
+PRI first_nz(pathIdx, seedIdx, repIdx, baseField) : iterIdx | k
+' The first iteration whose result (baseField = F_RES) or state
+' (baseField = F_ST) is non-zero.
+'
+' @param pathIdx - path
+' @param seedIdx - seed index
+' @param repIdx - repetition
+' @param baseField - F_RES or F_ST
+' @returns iterIdx - 0..7, or -1 when all 8 are zero
+
+' Local Variables:
+' @local k - iteration
+
+  iterIdx := -1
+  repeat k from 0 to NITER - 1
+    if rec_at(pathIdx, seedIdx, repIdx, baseField + k) <> 0
+      iterIdx := k
+      quit
+
+PRI distinct_results(pathIdx, seedIdx, repIdx) : distinctCnt | k, j, bSeen
+' How many distinct values among the 8 results of a run.
+'
+' @param pathIdx - path
+' @param seedIdx - seed index
+' @param repIdx - repetition
+' @returns distinctCnt - distinct results
+
+' Local Variables:
+' @local k - result index
+' @local j - earlier result index
+' @local bSeen - the result occurred earlier
+
+  distinctCnt := 0
+  repeat k from 0 to NITER - 1
+    bSeen := FALSE
+    if k > 0
+      repeat j from 0 to k - 1
+        if rec_at(pathIdx, seedIdx, repIdx, F_RES + j) == rec_at(pathIdx, seedIdx, repIdx, F_RES + k)
+          bSeen := TRUE
+    if not bSeen
+      distinctCnt++
+
+PRI ln_run(pathIdx, seedIdx, repIdx) | k
+' Append one run: marker, 8 results, 8 states.
+'
+' @param pathIdx - path
+' @param seedIdx - seed index
+' @param repIdx - repetition
+
+' Local Variables:
+' @local k - iteration
+
+  ln_s(string("mk "))
+  ln_h(rec_at(pathIdx, seedIdx, repIdx, F_MKRES))
+  ln_c("/")
+  ln_h(rec_at(pathIdx, seedIdx, repIdx, F_MKST))
+  ln_s(string(" | res"))
+  repeat k from 0 to NITER - 1
+    ln_c(" ")
+    ln_h(rec_at(pathIdx, seedIdx, repIdx, F_RES + k))
+  ln_s(string(" | state"))
+  repeat k from 0 to NITER - 1
+    ln_c(" ")
+    ln_h(rec_at(pathIdx, seedIdx, repIdx, F_ST + k))
+
+PRI report_seed(seedIdx) | pathIdx, repIdx, sameCnt, tagCnt, eqMkCnt, agreeCnt, mkAgreeCnt, bZeroSeed, bMove
+' Check one seed's runs on the three paths, update the gates and print
+' its lines.
+'
+' @param seedIdx - seed index
+
+' Local Variables:
+' @local pathIdx - path
+' @local repIdx - repetition
+' @local sameCnt - repetitions identical to repetition 0
+' @local tagCnt - records whose tag is right
+' @local eqMkCnt - repetitions whose first result equals the marker's result
+' @local agreeCnt - repetitions identical to the PASM path's
+' @local mkAgreeCnt - repetitions whose marker equals the PASM path's marker
+' @local bZeroSeed - this is the zero seed
+' @local bMove - the PRNG moved (state changed, >= 2 distinct results)
+
+  bZeroSeed := seed_of(seedIdx) == SEED_ZERO
+  ln_s(string("--- seed "))
+  ln_h(seed_of(seedIdx))
+  if bZeroSeed
+    ln_s(string(" (THE QUESTION)"))
+  say(string(" ---"))
+  repeat pathIdx from PATH_P to PATH_V
+    sameCnt := 0
+    tagCnt := 0
+    eqMkCnt := 0
+    agreeCnt := 0
+    mkAgreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      if run_same(pathIdx, pathIdx, seedIdx, 0, repIdx)
+        sameCnt++
+      if rec_at(pathIdx, seedIdx, repIdx, F_TAG) == TAG_BASE + (seedIdx << RUN_SHIFT) + repIdx
+        tagCnt++
+      if rec_at(pathIdx, seedIdx, repIdx, F_RES) == rec_at(pathIdx, seedIdx, repIdx, F_MKRES)
+        eqMkCnt++
+      if run_same(PATH_P, pathIdx, seedIdx, repIdx, repIdx)
+        agreeCnt++
+      if rec_at(pathIdx, seedIdx, repIdx, F_MKRES) == rec_at(PATH_P, seedIdx, repIdx, F_MKRES) and rec_at(pathIdx, seedIdx, repIdx, F_MKST) == rec_at(PATH_P, seedIdx, repIdx, F_MKST)
+        mkAgreeCnt++
+    ln_s(path_text(pathIdx))
+    ln_run(pathIdx, seedIdx, 0)
+    ln_out()
+    ln_s(string("   "))
+    ln_s(path_text(pathIdx))
+    if sameCnt == REPS
+      ln_s(string(" DETERMINISTIC (8 of 8 identical)"))
+    else
+      ln_s(string(" VARIES ("))
+      ln_cnt(sameCnt)
+      ln_s(string(" identical to rep 0)"))
+    ln_s(string(" | first result equal to the marker's "))
+    ln_cnt(eqMkCnt)
+    ln_s(string(" | identical to P "))
+    ln_cnt(agreeCnt)
+    ln_s(string(" | marker identical to P "))
+    ln_cnt(mkAgreeCnt)
+    ln_s(string(" | tags right "))
+    ln_cnt(tagCnt)
+    ln_out()
+    if sameCnt <> REPS
+      repeat repIdx from 0 to REPS - 1
+        ln_s(string("   raw rep "))
+        ln_d(repIdx)
+        ln_s(string(": "))
+        ln_run(pathIdx, seedIdx, repIdx)
+        ln_out()
+    ' ---- gates (every seed) ----
+    if tagCnt <> REPS
+      rig_fail(string("seed "))
+      ln_h(seed_of(seedIdx))
+      ln_s(string(" path "))
+      ln_s(path_text(pathIdx))
+      ln_s(string(" records with the right tag "))
+      ln_cnt(tagCnt)
+      ln_out()
+    if mkAgreeCnt <> REPS
+      rig_fail(string("seed "))
+      ln_h(seed_of(seedIdx))
+      ln_s(string(" path "))
+      ln_s(path_text(pathIdx))
+      ln_s(string(" markers identical to P in "))
+      ln_cnt(mkAgreeCnt)
+      ln_s(string(" (MUST be 8 of 8)"))
+      ln_out()
+    ' ---- controls (non-zero seeds) ----
+    if not bZeroSeed
+      if sameCnt <> REPS
+        rig_fail(string("non-zero seed "))
+        ln_h(seed_of(seedIdx))
+        ln_s(string(" path "))
+        ln_s(path_text(pathIdx))
+        ln_s(string(" is not DETERMINISTIC ("))
+        ln_cnt(sameCnt)
+        ln_s(string(" identical) - a seeded iteration MUST repeat exactly"))
+        ln_out()
+      if agreeCnt <> REPS
+        rig_fail(string("non-zero seed "))
+        ln_h(seed_of(seedIdx))
+        ln_s(string(" path "))
+        ln_s(path_text(pathIdx))
+        ln_s(string(" identical to P in "))
+        ln_cnt(agreeCnt)
+        ln_s(string(" (MUST be 8 of 8: ??var = XORO32)"))
+        ln_out()
+      bMove := rec_at(pathIdx, seedIdx, 0, F_ST) <> seed_of(seedIdx) and distinct_results(pathIdx, seedIdx, 0) >= 2
+      if not bMove and seed_of(seedIdx) <> SEED_HALF
+        rig_fail(string("non-zero seed "))
+        ln_h(seed_of(seedIdx))
+        ln_s(string(" path "))
+        ln_s(path_text(pathIdx))
+        ln_s(string(" did not move (state after result 0 = seed, or < 2 distinct results)"))
+        ln_out()
+
+PRI print_verdict() | pathIdx, repIdx, nzCnt, firstRes, firstSt, agreeCnt, bAbsorb, bDisagree
+' Print the zero seed's reading (seed index 0) when no gate failed.
+'
+
+' Local Variables:
+' @local pathIdx - path
+' @local repIdx - repetition
+' @local nzCnt - runs of this path with a non-zero result or state
+' @local firstRes - first non-zero result iteration (repetition 0)
+' @local firstSt - first non-zero state iteration (repetition 0)
+' @local agreeCnt - repetitions of the zero seed identical to P (L and V summed)
+' @local bAbsorb - every run of every path is all-zero
+' @local bDisagree - L or V differs from P at the zero seed in some repetition
+
+  ln_s(string("=== CONTROLS: "))
+  if failCnt == 0
+    say(string("all passed ==="))
+  else
+    ln_d(failCnt)
+    say(string(" RIG FAIL line(s) above ==="))
+    say(string("NO VERDICT: a control failed, the zero-seed result is not interpretable"))
+    return
+  bAbsorb := TRUE
+  bDisagree := FALSE
+  repeat pathIdx from PATH_P to PATH_V
+    nzCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      if first_nz(pathIdx, 0, repIdx, F_RES) >= 0 or first_nz(pathIdx, 0, repIdx, F_ST) >= 0
+        nzCnt++
+    firstRes := first_nz(pathIdx, 0, 0, F_RES)
+    firstSt := first_nz(pathIdx, 0, 0, F_ST)
+    ln_s(string("ZERO SEED "))
+    ln_s(path_text(pathIdx))
+    ln_s(string(": runs with a non-zero result or state "))
+    ln_cnt(nzCnt)
+    ln_s(string(" | rep 0 first non-zero result at call "))
+    ln_d(firstRes)
+    ln_s(string(", first non-zero state after call "))
+    ln_d(firstSt)
+    ln_s(string(" (-1 = never)"))
+    ln_out()
+    if nzCnt <> 0
+      bAbsorb := FALSE
+    agreeCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      if run_same(PATH_P, pathIdx, 0, repIdx, repIdx)
+        agreeCnt++
+    if agreeCnt <> REPS
+      bDisagree := TRUE
+  if bDisagree
+    ln_s(string("VERDICT: PATHS DISAGREE - Spin2 ?? and PASM XORO32 differ at seed 0 (raw lines above are the finding)"))
+  elseif bAbsorb
+    ln_s(string("VERDICT: ABSORBING - at seed 0, ??x returned 0 eight times and x stayed 0, identically on PASM, Spin2 local and Spin2 VAR (8 of 8 repetitions)"))
+  else
+    ln_s(string("VERDICT: LEAVES ZERO - at seed 0 a non-zero result or state appeared (first call above); zero is NOT absorbing, the raw sequences above are the finding"))
+  ln_zero_repeat()
+  ln_out()
+  say(string("=== END ==="))
+
+PRI ln_zero_repeat() | pathIdx, repIdx, sameCnt
+' Append the zero seed's repeatability on P, L and V: " | zero seed repeat: P
+' DETERMINISTIC; L VARIES (n of 8 identical to rep 0); V ...".
+'
+
+' Local Variables:
+' @local pathIdx - path
+' @local repIdx - repetition
+' @local sameCnt - repetitions identical to repetition 0
+
+  ln_s(string(" | zero seed repeat:"))
+  repeat pathIdx from PATH_P to PATH_V
+    sameCnt := 0
+    repeat repIdx from 0 to REPS - 1
+      if run_same(pathIdx, pathIdx, 0, 0, repIdx)
+        sameCnt++
+    ln_c(" ")
+    ln_c(byte[path_text(pathIdx)])
+    if sameCnt == REPS
+      ln_s(string(" DETERMINISTIC"))
+    else
+      ln_s(string(" VARIES ("))
+      ln_cnt(sameCnt)
+      ln_s(string(" identical to rep 0)"))
+    ln_c(";")
+
+' ---------------------------------------------------------------------------
+' the Spin2 cog: the L and V paths
+' ---------------------------------------------------------------------------
+PRI spin_worker() | seedIdx, repIdx, kind
+' Spin2 cog: run every seed, 8 repetitions, on the local and the VAR path;
+' write DONE_V at the end.
+'
+
+' Local Variables:
+' @local seedIdx - seed index
+' @local repIdx - repetition
+' @local kind - K_LOCAL or K_VAR
+
+  repeat kind from K_LOCAL to K_VAR
+    repeat seedIdx from 0 to NSEED - 1
+      repeat repIdx from 0 to REPS - 1
+        spinCur := (kind << 8) + (seedIdx << RUN_SHIFT) + repIdx
+        if kind == K_LOCAL
+          run_local(rec_idx(PATH_L, seedIdx, repIdx, 0), long[@seedTbl][seedIdx], MK_BASE + (seedIdx << RUN_SHIFT) + repIdx, TAG_BASE + (seedIdx << RUN_SHIFT) + repIdx)
+        else
+          run_var(rec_idx(PATH_V, seedIdx, repIdx, 0), long[@seedTbl][seedIdx], MK_BASE + (seedIdx << RUN_SHIFT) + repIdx, TAG_BASE + (seedIdx << RUN_SHIFT) + repIdx)
+  spinDone := DONE_V
+
+PRI run_local(baseIdx, seedVal, mkSeed, tagVal) | x, m, r, k
+' One run with x and m as method LOCAL variables: marker, then 8 x ??x.
+' The seed arrives as a parameter, so the compiler cannot fold it.
+'
+' @param baseIdx - index into recs of the record's first long
+' @param seedVal - the seed
+' @param mkSeed - the marker's seed
+' @param tagVal - the record tag
+
+' Local Variables:
+' @local x - the case variable
+' @local m - the marker variable
+' @local r - a ?? result
+' @local k - iteration
+
+  m := mkSeed
+  r := ??m
+  recs[baseIdx + F_MKRES] := r
+  recs[baseIdx + F_MKST] := m
+  x := seedVal
+  repeat k from 0 to NITER - 1
+    r := ??x
+    recs[baseIdx + F_RES + k] := r
+    recs[baseIdx + F_ST + k] := x
+  recs[baseIdx + F_TAG] := tagVal
+
+PRI run_var(baseIdx, seedVal, mkSeed, tagVal) | r, k
+' One run with x and m as object VAR variables: marker, then 8 x ??x.
+'
+' @param baseIdx - index into recs of the record's first long
+' @param seedVal - the seed
+' @param mkSeed - the marker's seed
+' @param tagVal - the record tag
+
+' Local Variables:
+' @local r - a ?? result
+' @local k - iteration
+
+  vm := mkSeed
+  r := ??vm
+  recs[baseIdx + F_MKRES] := r
+  recs[baseIdx + F_MKST] := vm
+  vx := seedVal
+  repeat k from 0 to NITER - 1
+    r := ??vx
+    recs[baseIdx + F_RES + k] := r
+    recs[baseIdx + F_ST + k] := vx
+  recs[baseIdx + F_TAG] := tagVal
+
+DAT ' ---- Seeds ----
+seedTbl         long    SEED_ZERO, SEED_ONE, SEED_DEAD, SEED_HALF
+
+' ===========================================================================
+' PASM COG (cog exec).  PTRA on entry = @mbox (from COGINIT).  No debug(), no
+' BRK, no interrupt in this cog (DEBUG_COGS excludes it).  Each XORO32 is
+' followed by the instruction whose S it replaces, as the Spin2 interpreter
+' does (Spin2_interpreter.spin2:319-320).
+' ===========================================================================
+DAT             org     0        ' ---- PASM XORO32 Cog ----
+pasm            rdlong  c_tbl, ptra[MB_TBL]             ' hub address of seedTbl
+                rdlong  c_rp, ptra[MB_REC]              ' hub address of the P records
+                mov     c_si, #0
+
+seed_lp         rdlong  seedv, c_tbl                    ' this seed
+                add     c_tbl, #4
+                mov     c_rep, #0
+
+rep_lp          mov     r_tag, c_si                     ' seed * 16 + rep
+                shl     r_tag, #RUN_SHIFT
+                add     r_tag, c_rep
+                wrlong  r_tag, ptra[MB_CUR]             ' progress: the run about to start
+                mov     pmk, c_mkbase
+                add     pmk, r_tag                      ' marker seed (never 0)
+                xoro32  pmk                             ' MARKER: iterate pmk ...
+                mov     r_mkres, pmk                    ' ... S := the XORO32 result
+                mov     r_mkst, pmk                     ' the iterated state
+                mov     pst, seedv
+                xoro32  pst                             ' CASE call 0
+                mov     r_a0, pst
+                mov     r_s0, pst
+                xoro32  pst
+                mov     r_a1, pst
+                mov     r_s1, pst
+                xoro32  pst
+                mov     r_a2, pst
+                mov     r_s2, pst
+                xoro32  pst
+                mov     r_a3, pst
+                mov     r_s3, pst
+                xoro32  pst
+                mov     r_a4, pst
+                mov     r_s4, pst
+                xoro32  pst
+                mov     r_a5, pst
+                mov     r_s5, pst
+                xoro32  pst
+                mov     r_a6, pst
+                mov     r_s6, pst
+                xoro32  pst
+                mov     r_a7, pst
+                mov     r_s7, pst
+                add     r_tag, c_tagbase
+                setq    #RECW - 1
+                wrlong  r_tag, c_rp                     ' the record, 19 longs, tag first
+                add     c_rp, #RECW * 4
+                add     c_rep, #1
+                cmp     c_rep, #REPS                    wz
+        if_nz   jmp     #rep_lp
+                add     c_si, #1
+                cmp     c_si, #NSEED                    wz
+        if_nz   jmp     #seed_lp
+                wrlong  c_donev, ptra[MB_DONE]
+                cogid   c_t
+                cogstop c_t
+
+'--- cog data
+c_mkbase        long    MK_BASE
+c_tagbase       long    TAG_BASE
+c_donev         long    DONE_V
+c_tbl           long    0
+c_rp            long    0
+c_si            long    0
+c_rep           long    0
+c_t             long    0
+seedv           long    0
+pmk             long    0
+pst             long    0
+'--- the record, written as one 19-long block in this order (R_* order)
+r_tag           long    0
+r_mkres         long    0
+r_mkst          long    0
+r_a0            long    0
+r_a1            long    0
+r_a2            long    0
+r_a3            long    0
+r_a4            long    0
+r_a5            long    0
+r_a6            long    0
+r_a7            long    0
+r_s0            long    0
+r_s1            long    0
+r_s2            long    0
+r_s3            long    0
+r_s4            long    0
+r_s5            long    0
+r_s6            long    0
+r_s7            long    0
+pasm_end
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

@@ -1,0 +1,1870 @@
+'' ===========================================================================
+''
+''   File.......  test-vo-j-005r-streamer-capture-ceiling-and-skew.spin2
+''   Purpose....  VO-J-005 REDUCED: the two source-silent facts about the
+''                streamer's pins-to-WRFAST digital capture - (E) the
+''                sustained capture rate, by an NCO ladder 1:16 .. 1:1 in the
+''                4-, 8- and 16-pin modes, and (S) whether a %FFF filter
+''                selection delays a lane against an unfiltered lane
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+'' ===========================================================================
+
+{ WHAT IS DECIDED  (register VO-J-005, reduced; close-out study step 8)
+
+  This rig replaces the full VO-J-005 rig for the bench run
+  (campaigns/2026-08-manual-corrections/tests/test-vo-j-005-streamer-pin-
+  capture.spin2, 699 lines, accepted and unchanged).  The recheck
+  (bench-groupD-recheck.md section 6) killed arms A-D as QUESTIONS (the
+  capture path is documented: silicon-doc-text.txt:1535, Parallax's worked
+  capture of a smart-pin TX through an adjacent pin at spin2-v55-text.txt
+  :1144; the IN rule at SD:3706 / SD:3767; arm B, base 12 vs 8, by SD:1443-
+  1454 and EF-059/064/065).  They run here ONLY AS GATES, and the run is aimed
+  at the two facts deliverables/ai/P2/architecture/streamer/pin-capture.yaml
+  :296-304 records as "NOT STATED ... never measured":
+
+  E  SUSTAINED CAPTURE RATE.  The NCO can roll over every clock (SD:1288-1296)
+     and the FIFO is described as moving "any combination of bytes, words, or
+     longs, at any rate, up to one long per clock" (SD:3003); no source states
+     a sustained CAPTURE rate, and nothing has been measured.  ("Sustained" here
+     means 1024 consecutive samples per capture = 512 / 1024 / 2048 bytes in the
+     4- / 8- / 16-pin mode: a limit that shows only on a long run, not a one-off
+     burst.  The FIFO depth is not stated in the silicon-doc text, so no figure
+     is claimed for how far past it the run goes.)  A stimulus that
+     toggles every 64 clocks (smart-pin TRANSITION mode, exact) is captured at
+     NCO 1:16, 1:8, 1:4, 1:2, 1:1 in three modes: 4 pins (WFBYTE, 0.5 byte per
+     sample), 8 pins (WFBYTE, 1 byte per sample) and 16 pins (WFWORD, 2 bytes
+     per sample).  At 1:N the recovered distance between consecutive edges
+     must be EXACTLY 64/N samples; a dropped sample shortens it, a stalled
+     streamer stretches it, a streamer that never finishes sets LATE.  The
+     fastest rung that is exact (with every slower rung exact) IS the measured
+     sustained ceiling of that mode.  NO CEILING IS PREDICTED.
+  S  FILTER SKEW.  Whether a %FFF = 100 (filt0) selection on a monitor pin
+     delays its lane against an unfiltered monitor of the same signal, and by
+     how many clocks.  SD Table 30 (:2808-2847) gives each filter a "low-pass
+     time" (clocks per sample x flip-flops; filt0 = 1 x 2); that is a time
+     constant, NOT a stated edge delay.  NO SKEW IS PREDICTED.  Measured at
+     1 sample per clock (1 clock resolution), rising and falling edges
+     separately, with a control (two UNFILTERED monitors: the lane-to-lane
+     skew of the capture path itself), with an ENGAGEMENT leg and with filt0
+     set to 2, 3, 5 and 8 flip-flops at tap 0 (HUBSET, SD:2784; restored to
+     the default at the end).  Tap 0 gives at most 8 clocks of delay, which a
+     capture path that ignored the filter could not be told apart from "no
+     delay"; so first the ENGAGEMENT leg sets filt0 to 5 flip-flops at tap 3
+     (HUBSET ##$4000_0043 = FILT0_BASE + 2 << 5 + 3, SD:2784 / SD:2605: length
+     field %10 = 5 flip-flops SD:2790, tap 3 = every 8th clock SD:2792) whose
+     low-pass time is 5 x 8 = 40 clocks.  If the captured lane is the filtered
+     pin state, MON_F lags MON_R by about 32..42 clocks on every edge (the
+     phase of the tap against the edge is not controlled).  The leg is
+     ENGAGED when every compared edge of every repetition lags by 16..63
+     clocks; otherwise every S reading prints "filter not observed to engage;
+     NO DELAY is void" and no NO DELAY verdict is possible.  Whether the
+     streamer's captured lane IS the filtered state is itself unstated here:
+     this leg decides it.
+
+  32-pin capture is NOT run: it reads 32 pins, more than the free set
+  (P0-P7, P32-P47) holds.  So the hub-limited rung (one long per clock) is
+  reachable here only through the 16-pin WFWORD mode (half a long per clock).
+  If no rung of any mode fails, the finding is "no ceiling at or below 16 bits
+  per clock"; the 32-bit rate stays open.
+
+RE-PIN  (the full rig used P8..P15, which are NOT free pins)
+  Base P32.  The 4-pin, 8-pin and 16-pin modes at pin group %ppp = %100
+  ("select pins 63..32", SD:1449) are expected to read P32..P35, P32..P39
+  and P32..P47: all inside the free set.  That the narrower modes take the
+  LOWEST pins of the group is an inference (SD:1549 says it for the ADC
+  modes: "the lower 8 or 16 pins of the 32 pins selected by the %ppp bits";
+  SD:1454 resolves sub-8-pin bases with D[19:17]); gate A is the check - it
+  drives P32 and P35 and requires lane N = pin P(32+N) in every mode, so a
+  group that read other pins would fail A, not pass silently.
+  4-pin: D[22:20] = %100 selects the group, D[19] = pin bit 2 = 0 -> base P32
+  (base << 17 = $0040_0000).  Re-derived from the layout table (SD:1370-1384):
+    4 pins   1110 dddd wppp p00a   X_4P_4DAC1_WFBYTE   %1110_DDDD_WPPP_P00A
+    8 pins   1110 dddd wppp 1110   X_8P_1DAC8_WFBYTE   %1110_DDDD_WPPP_1110
+    16 pins  1111 dddd wppp 0000   X_16P_2DAC8_WFWORD  %1111_DDDD_WPPP_0000
+  (spin2-v55-text.txt:1608-1613 gives the symbol names and templates).  Words
+  composed with | (never +): symbol | X_WRITE_ON | (32 << 17) | SAMPLES.
+
+RIG
+  Bare P2 board, 200 MHz.  NOTHING attached.  Pins touched: P32..P47 only.
+    P32 BUS    smart pin TRANSITION | P_OE, X = 64 clocks per transition; its
+               own IN is the completion flag
+    P33 MON_R  smart pin mode off, A = relative -1 (P32): the UNFILTERED
+               monitor of the BUS pin's level
+    P34 MON_F  smart pin mode off, A = relative -2 (P32), with %FFF = 100
+               (filt0): the FILTERED monitor (the skew legs; in the ladder it
+               is just a second lane); in the skew control leg it is
+               UNFILTERED
+    P35 NULL   plain pin driven low; rides in every capture and MUST read 0
+    P36..P47   held at a 15 k-ohm LOW (smart pin mode off, DIR high) so the
+               wider modes read a defined 0 on every lane they do not use
+  Before anything is driven hard P32..P47 are held at the 15 k-ohm LOW and
+  read back: a pin that reads 1 has something attached, and the run STOPS
+  naming it.
+  Cog 0 (Spin2, the only cog with the debugger, DEBUG_COGS = %0000_0001)
+  starts ONE Spin2 cog that owns the streamer and every pin; it measures and
+  reports nothing.  Cog 0 waits for it (30 s timeout), then analyses nothing
+  itself - it only prints the worker's records.  No debug() runs in the
+  measuring cog (EF-057: with -d the highest-priority interrupt is the
+  debugger's; DEBUG_COGS keeps it out of the streamer's cog).
+
+GATES  (a failure prints RIG FAIL and the dependent result is withheld)
+  CERT  P32..P47 read 0 under the weak low  (else STOP: pins busy)
+  CFG   the configuration and streamer command words equal the values decoded
+        below (compile-time symbols against typed constants)
+  A     per mode: six static captures (patterns, bit 0 = P32: %0000, %0001,
+        %1000, %0010, %0100, %0110) return EVERY sample equal to the driven
+        pattern, EXACTLY the expected number of bytes written (an over-run is
+        a failure too) and no sentinel byte left: the path writes,
+        discriminates, and lane N = pin P(32+N) for every lane 0..3
+  PAD   16 longs after the capture buffer are filled with $A5A5_A5A5 before
+        every capture and checked after it: any other value is an over-run of
+        the buffer by the streamer (RIG FAIL).  (The fill is not zero because
+        a zero over-run would be invisible in a quiet pattern.)
+  O     4-pin nibble order: the 1:16 capture is analysed with the low nibble
+        first (SD:1456 "bits bottom-first") AND with the high nibble first.
+        The order is decided ONLY when exactly one of the two analyses is
+        exact: if both are exact the capture cannot tell the orders apart
+        (the edges sit on the byte boundary), so the capture is repeated up
+        to 8 times, delaying the burst start by one 1:16 sample (16 clocks)
+        per try so the edge parity against the byte changes.  If no try
+        disagrees: "nibble order undetermined" and the gate FAILS (the 4-pin
+        mode is VOID: no ladder, no skew verdict); neither exact in every
+        try -> also VOID
+  C     (no streamer) over 20 ms the cog sees P33 CHANGE at least 20 times
+        (the stimulus runs); P32's own IN changes are counted and printed
+  D     one 4-pin 1:1 capture: the NULL lane (P35) is all zero and the MON_R
+        lane carries the waveform (>= 8 edges).  The BUS lane (P32) edge
+        count is printed: <= 1 is the documented IN rule (a lane with one
+        edge is a LIVE lane carrying the flag), >= 8 would refute it
+  E0    the 1:16 rung of each mode is EXACT in all repetitions (else that
+        mode has no ceiling reading: VOID)
+  S0    the unfiltered MON_R lane of every skew capture has every edge
+        interval = 64 samples (the 1:1 carrier is exact) else the skew of
+        that capture is void
+  ENG   (not a RIG FAIL: a reading) the ENGAGEMENT leg: every compared edge of
+        every repetition lags 16..63 clocks -> "ENGAGED"; anything else ->
+        "filter not observed to engage": every S reading then prints "filter
+        not observed to engage; NO DELAY is void" and no NO DELAY verdict
+        is issued (a 0 skew then says the captured lane ignores the filter, or
+        nothing about the filter - not that the filter has no delay)
+  The raw values of every capture are printed whether or not a gate passed.
+
+PRE-REGISTERED READINGS  (printed before the run; none predicted)
+  E, per mode:
+    NO CEILING REACHED  every rung 1:16 .. 1:1 EXACT: the mode sustains one
+                        sample per clock with this stimulus
+    CEILING 1:N         the fastest rung that is exact with all slower rungs
+                        exact; the first failing rung's raw record is the
+                        failure mode (fewer bytes, shortened/stretched
+                        intervals, LATE)
+    NON-MONOTONE        a faster rung is exact above a failing one
+  S engagement (filt0 = 5 flip-flops, tap 3, about 40 clocks expected):
+    ENGAGED         every compared edge lags 16..63 clocks
+    NOT OBSERVED    anything else: "filter not observed to engage"
+  S, per filter setting (rise and fall separately, over >= 3 repetitions;
+  valid as a NO DELAY verdict ONLY when the engagement leg read ENGAGED):
+    NO DELAY        skew = 0 clocks on both edges
+    EQUALS N-FF     skew = the number of flip-flops (2, 3, 5, 8)
+    EQUALS N-FF - 1 skew = flip-flops - 1
+    OTHER           any other constant, or varying: the numbers are the finding
+  The control leg (two unfiltered monitors) MUST read 0 on both edges; a
+  non-zero control means the capture path itself skews lanes and the filter
+  skew is not separable.
+
+DEVIATION FROM THE BRIEF
+  The brief asks for the old rig with arms A-D only as gates and arm E plus the
+  filter skew; the 8- and 16-pin ladders, the nibble-order gate, the
+  unfiltered-pair skew control, the engagement leg and the filter-length legs
+  are added (a ceiling
+  that only the 4-pin mode could show at 0.5 byte per clock would answer
+  little).  Arm B (base 12 vs 8) is dropped (killed by sources, F-361 closes
+  on them; the new base needs no alternate-base check because arm A's P32-high
+  and P35-high captures discriminate the lane mapping of the new base).  The
+  measuring cog is a launched Spin2 cog rather than cog 0 (reporting from a
+  non-measuring cog, EF-057).  The IN-contrast arms C and D print their
+  documented-rule outcome but gate only on "the stimulus runs".
+
+DEBUGGER
+  Every printed line is assembled in lineBuf from hub strings and numbers and
+  sent by the ONE debug(zstr_(@lineBuf)) record in ln_out(); the only other
+  record is debug("DEBUG_END_SESSION").  The listing reports the record count
+  and the DEBUG data size (recorded below).
+
+OPCODES, WORDS AND ADDRESSES  (pnut-ts -d -l, v1.55.8, read from the .lst)
+  Symbol values read from the .lst symbol table (the program also compares
+  each symbol composition with the decoded value below at run time, gate CFG):
+    CFG_BUS      $0000_004A   P_TRANSITION | P_OE: TT = %01 (bits 7:6, P_OE),
+                              SSSSS = %00101 (bits 5:1, transition), O = 0
+    CFG_MONR     $7000_0000   AAAA = %0111 (bits 31:28) = relative -1 for A;
+                              mode off (SSSSS = 0), FFF = %000
+    CFG_MONF     $6080_0000   AAAA = %0110 = relative -2 for A; FFF = %100
+                              (bits 23:21) = A, B filtered with filt0
+    CFG_MONF_NF  $6000_0000   the control: relative -2, FFF = %000
+    CAP_4P       $E0C0_0400   X_4P_4DAC1_WFBYTE $E000_0000 | X_WRITE_ON
+                              $0080_0000 | (32 << 17) $0040_0000 | 1024
+    CAP_8P       $E0CE_0400   X_8P_1DAC8_WFBYTE $E00E_0000 | ...
+    CAP_16P      $F0C0_0400   X_16P_2DAC8_WFWORD $F000_0000 | ...
+    FILT0_BASE   $4000_0000   HUBSET: + length << 5 + tap (SD:2784); length
+                              0..3 = 2, 3, 5, 8 flip-flops (SD:2790)
+    FILT0_ENG    $4000_0043   the engagement leg: FILT0_BASE + (2 << 5) + 3
+                              = length %10 (5 flip-flops), tap 3 (every 8th
+                              clock, SD:2792); 5 x 8 = 40 clocks; layout
+                              %0100_..._RRLL_TTTTT, SD:2605 (R = filter 0 here)
+    NCO_1_16 .. NCO_1_1  $0800_0000 $1000_0000 $2000_0000 $4000_0000
+                              $8000_0000 (SD:1294-1303)
+    Constants: NPAT 6, PAD_LONGS 16, PAD_FILL $A5A5_A5A5, NIB_TRIES 8,
+    NIB_SHIFT 16, ENG_MIN 16, ENG_MAX 63.
+  The inline PASM of method capture (hub-image bytes read from the .lst, as
+  little-endian longs; the local registers are method locals, so they move
+  with the parameter list): SETXFRQ xfrq $FD63_C21D (opcode ...000011101) ;
+  WRFAST #0,addr $FC88_01E7 ; GETCT t0 $FD63_D21A ; XINIT cmd,#0 $FCA7_CC00 ;
+  TJZ shiftClk,#.noshiftClk $FB97_C601 (EEEE 1011100 10I, SD:5159; I = 1, S =
+  +1 instruction: skips the WAITX when shiftClk = 0) ; WAITX shiftClk
+  $FD63_C61F (EEEE 1101011 CZL DDDDDDDDD 000011111, SD:5262) ; WYPIN
+  ycnt,#32 $FC27_C420 (S = #BUS = 32) ; POLLXFI WC $FD70_1624 (EEEE 1101011
+  CZ0 000001011 000100100, silicon-doc-text.txt:5280) ; XSTOP = XINIT #0,#0
+  $FCAC_0000 (SD:1405).  The 4-pin base: D[22:20] = %100, D[19] = 0, i.e.
+  base << 17 = $0040_0000, the only change from the full rig's (8 << 17).
+  The listing reports 2 DEBUG records, 24 bytes of DEBUG data.
+  If you edit this file, recompile with -l and re-read every row above.
+
+HOW TO RUN
+  USB serial must be connected (DEBUG rides P62/P63).  P32..P47 must be
+  COMPLETELY FREE: nothing attached to any of them (the program drives P32
+  hard and holds P36..P47 low through 15 kOhm; CERT reads P32..P47 under the
+  weak low first and STOPS the run, naming the pins, if any reads 1).
+  Compile with pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or PNut
+  Ctrl-F10); nothing is written to flash.
+  SAVE THE WHOLE CONSOLE OUTPUT - it is the only record.
+  Expected run time: the measuring cog makes about 110 captures, each
+  dominated by the 1 ms settle waits of its set-up: an estimate of roughly 1
+  to 5 s (not timed on silicon).  Cog 0 gives the measuring cog 30 s,
+  counted in whole seconds.  A run
+  that prints no "=== END" line and no DEBUG_END_SESSION within 45 s is a
+  hang or a lost session: report it as such, not as a reading.
+  Clock: _clkfreq = 200 MHz assumes the board's 20 MHz crystal (the listing's
+  CLKMODE is $010009FB, read from the .lst); the stimulus period (64 clocks),
+  the capture rates and the 30 s timeout all depend on it.
+  The 32-pin rung is not run (open: it reads more pins than the free set).
+  Output: the header and readings, the gate lines, one line per mode and rung,
+  the ceiling lines, one line per filter leg, the engagement and skew lines,
+  the PAD line, the END line, then DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+  BUS             = 32                  ' smart pin: TRANSITION output
+  MON_R           = BUS + 1             ' A from relative -1: unfiltered monitor
+  MON_F           = BUS + 2             ' A from relative -2: filtered monitor
+  NULLPIN         = BUS + 3             ' plain pin, low: rides in the capture
+  LANE_BUS        = 0                   ' lane = pin - BUS
+  LANE_MONR       = 1
+  LANE_MONF       = 2
+  LANE_NULL       = 3
+  GUARD_LO        = 32                  ' pins this program touches: P32..P47
+  GUARD_N         = 16
+  WEAK_LO         = 36                  ' held at 15k low so unused lanes read 0
+  WEAK_N          = 12
+
+  SAMPLES         = 1024                ' NCO rollovers per capture
+  BUF_LONGS       = 512                 ' 2048 bytes: the 16-pin mode's 1024 words
+  BUF_BYTES       = BUF_LONGS * 4
+  SENTINEL        = $A5                 ' not producible: lanes beyond 0..2 read 0
+
+  FAST_PER        = 64                  ' clocks per transition (ladder and skew)
+  SLOW_PER        = 60_000              ' 300 us per half-cycle (arm C)
+  BURST_E         = 600                 ' 600 * 64 clocks: outlasts the 1:16 window (16,384)
+  BURST_D         = 10                  ' 10 transitions: ends inside the 1:1 window
+  BURST_C         = 40                  ' 40 * 300 us = 12 ms of the 20 ms arm C window
+  C_SAMPLES       = 400
+  C_INTERVAL      = 50                  ' us between arm C reads
+  CAP_BUDGET      = 2_000_000           ' 10 ms: no capture may wait longer for XFI
+  MIN_EDGES       = 8
+  EDGE_MAX        = 16
+
+  NPAT            = 6                   ' gate A static patterns per mode
+  PAD_LONGS       = 16                  ' guard longs after bufl
+  PAD_FILL        = $A5A5_A5A5          ' their fill (not producible by a capture, not zero)
+  NIB_TRIES       = 8                   ' gate O: 1:16 captures, each started one sample later
+  NIB_SHIFT       = 16                  ' clocks of start delay per try = one sample at 1:16
+  ENG_MIN         = 16                  ' engagement leg: every skew must be >= this many clocks ...
+  ENG_MAX         = 63                  ' ... and < the 64-clock edge spacing
+
+  REPS            = 4                   ' repetitions of every ladder rung
+  SREPS           = 3                   ' repetitions of every skew leg
+  WORKER_SEC      = 30                 ' cog 0 waits this long for the worker (counted in whole seconds, so no clkfreq product wraps)
+  WORKER_STACK    = 200
+  DONE_V          = $0D0E_0D0E
+  UNWRITTEN       = $EEEE_EEEE
+
+  LINE_MAX        = 480
+  DEC_TOP         = 1_000_000_000
+  DEC_DIGITS      = 10
+  DEC_BASE        = 10
+  HEX_DIGITS      = 8
+  HEX_BITS        = 4
+  HEX_GROUP       = 4
+  HEX_LETTERS     = 10
+
+CON ' ---- Configuration Words (decoded field by field) ----
+  ' WRPIN word:  %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_O   (SD:3750-3769)
+  CFG_BUS         = P_TRANSITION | P_OE                   ' TT = %01 (P_OE), SSSSS = %00101 (transition)
+  CFG_MONR        = P_MINUS1_A                            ' AAAA = %0111: A = relative -1; mode off
+  CFG_MONF        = P_MINUS2_A | P_FILT0_AB               ' AAAA = %0110: A = relative -2; FFF = %100: filt0
+  CFG_MONF_NF     = P_MINUS2_A                            ' the control: A = relative -2, FFF = %000 (no filter)
+  CFG_BUS_X       = $0000_004A                            ' %01_00101_0 = $4A
+  CFG_MONR_X      = $7000_0000
+  CFG_MONF_X      = $6080_0000                            ' $6000_0000 | %100 << 21
+  CFG_MONF_NF_X   = $6000_0000
+  FILT0_BASE      = $4000_0000                            ' HUBSET: set filt0 = $4000_0000 + length << 5 + tap (SD:2784)
+  FILT0_ENG       = FILT0_BASE + (2 << 5) + 3             ' engagement leg: length %10 = 5 flip-flops, tap 3 = every 8th clock
+  FILT0_ENG_X     = $4000_0043                            ' $4000_0000 + $40 + 3
+
+  ' Streamer command words:  symbol | X_WRITE_ON | (32 << 17) | SAMPLES
+  CAP_4P          = X_4P_4DAC1_WFBYTE | X_WRITE_ON | (BUS << 17) | SAMPLES
+  CAP_8P          = X_8P_1DAC8_WFBYTE | X_WRITE_ON | (BUS << 17) | SAMPLES
+  CAP_16P         = X_16P_2DAC8_WFWORD | X_WRITE_ON | (BUS << 17) | SAMPLES
+  CAP_4P_X        = $E0C0_0400                            ' %1110_0000_1100_0000_0000_0100_0000_0000
+  CAP_8P_X        = $E0CE_0400                            ' %1110_0000_1100_1110_...
+  CAP_16P_X       = $F0C0_0400                            ' %1111_0000_1100_0000_...
+
+  ' NCO frequencies: frequency = $8000_0000 * (sample_rate / clkfreq)   (SD:1294-1303)
+  NCO_1_16        = $0800_0000
+  NCO_1_8         = $1000_0000
+  NCO_1_4         = $2000_0000
+  NCO_1_2         = $4000_0000
+  NCO_1_1         = $8000_0000
+
+CON ' ---- Identifiers ----
+  ' capture modes
+  #0, MD_4P, MD_8P, MD_16P
+  NMODE           = MD_16P + 1
+  ' ladder rungs, slowest first
+  #0, RG_1_16, RG_1_8, RG_1_4, RG_1_2, RG_1_1
+  NRATE           = RG_1_1 + 1
+  ' skew legs: the unfiltered-pair control, the ENGAGEMENT leg (5 flip-flops, tap 3),
+  ' then filt0 with 2, 3, 5, 8 flip-flops at tap 0
+  #0, SK_CTL, SK_ENG, SK_FF2, SK_FF3, SK_FF5, SK_FF8
+  NFILT           = SK_FF8 + 1
+  ' phases of the worker (progress, for a STALLED line)
+  #0, PH_NONE, PH_CERT, PH_A, PH_O, PH_C, PH_D, PH_E, PH_S, PH_END
+  ' arm A record longs
+  #0, AF_WROTE, AF_BAD, AF_FIRST
+  AW              = 3
+  ' ladder record longs
+  #0, EF_WROTE, EF_LATE, EF_EDGES, EF_FIRST, EF_LAST, EF_MIN, EF_MAX, EF_BAD, EF_NULL, EF_EXACT
+  EW              = 10
+  ' arm D record longs: wrote, late, then per lane edges, highs, first (lanes 0..3)
+  DW              = 14
+  ' skew record longs
+  #0, SF_WROTE, SF_LATE, SF_BAD, SF_NULL, SF_NA, SF_NB, SF_DIRMIS, SF_RMIN, SF_RMAX, SF_FMIN, SF_FMAX, SF_NR, SF_NF
+  SW              = 13
+
+VAR ' ---- Rig State ----
+  long bufl[BUF_LONGS]                  ' the capture buffer, long-aligned
+  long bufPad[PAD_LONGS]                ' guard: PAD_FILL before and after every capture (an over-run changes it)
+  ' ---- worker -> reporter ----
+  long wPhase, wDetail, wDone
+  long wStack[WORKER_STACK]
+  long certMask                         ' bit n = P(32+n) read 1 under the weak low
+  long modeOk[NMODE]
+  long nibHi                            ' 4-pin: 1 = high nibble first
+  long nibState                         ' 0 low first exact, 1 high first exact, 2 neither exact, 3 undetermined
+  long nibTries, nibBoth, nibNeither    ' gate O: captures made, tries where both / neither order was exact
+  long padHits, capCount                ' captures whose pad changed, captures made
+  long aRec[NMODE * NPAT * AW]
+  long cBus, cMon
+  long dRec[DW]
+  long eRec[NMODE * NRATE * REPS * EW]
+  long sRec[NFILT * SREPS * SW]
+  long sEdgeA[NFILT * EDGE_MAX], sEdgeB[NFILT * EDGE_MAX]   ' repetition 0's edges
+  long sEdgeNA[NFILT], sEdgeNB[NFILT]
+  ' ---- analysis scratch (worker) ----
+  long anEdges, anFirst, anLast, anMin, anMax, anBad, anNull
+  long tmpA[EDGE_MAX], tmpB[EDGE_MAX]
+  ' ---- reporter ----
+  long failCnt
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | workCog, startCt, secCnt
+'' Start the measuring cog, wait for it, print its records.
+''
+
+' Local Variables:
+' @local workCog - cog the measuring cog started in
+' @local startCt - CT at the start of the current second of the wait
+' @local secCnt - whole seconds waited so far
+
+  linePos := 0
+  failCnt := 0
+  print_header()
+  check_words()
+  longfill(@aRec, UNWRITTEN, NMODE * NPAT * AW)
+  longfill(@bufPad, PAD_FILL, PAD_LONGS)
+  padHits := 0
+  capCount := 0
+  nibTries := 0
+  nibBoth := 0
+  nibNeither := 0
+  longfill(@dRec, UNWRITTEN, DW)
+  longfill(@eRec, UNWRITTEN, NMODE * NRATE * REPS * EW)
+  longfill(@sRec, UNWRITTEN, NFILT * SREPS * SW)
+  longfill(@sEdgeNA, 0, NFILT)
+  longfill(@sEdgeNB, 0, NFILT)
+  longfill(@modeOk, 0, NMODE)
+  wPhase := PH_NONE
+  wDetail := 0
+  wDone := 0
+  certMask := 0
+  nibState := 2
+  nibHi := 0
+  cBus := UNWRITTEN
+  cMon := UNWRITTEN
+  workCog := cogspin(NEWCOG, worker(), @wStack)
+  if workCog < 0
+    ln_s(string("RIG FAIL: cogspin expected a free cog (0..7), got "))
+    ln_d(workCog)
+    ln_out()
+    say(string("=== END: RIG FAIL (no measuring cog) - NO VERDICT ==="))
+    finish()
+  startCt := getct()
+  secCnt := 0
+  repeat until wDone == DONE_V
+    ' whole seconds are counted one at a time: clkfreq * N wraps in 32-bit
+    ' arithmetic for N > 10 at 200 MHz
+    if getct() - startCt > clkfreq
+      startCt += clkfreq
+      secCnt++
+    if secCnt >= WORKER_SEC
+      cogstop(workCog)
+      pinclear(GUARD_LO addpins GUARD_N - 1)
+      hubset(FILT0_BASE)                ' the measuring cog may have left filt0 changed
+      ln_s(string("RIG FAIL: STALLED - the measuring cog did not finish within "))
+      ln_d(WORKER_SEC)
+      ln_s(string(" s; it stopped in phase "))
+      ln_d(wPhase)
+      ln_s(string(" detail "))
+      ln_d(wDetail)
+      ln_s(string(" (1 CERT, 2 A, 3 O, 4 C, 5 D, 6 E, 7 S); pins cleared by cog 0; the records written so far are reported"))
+      ln_out()
+      failCnt++
+      quit
+  ln_s(string("=== measuring cog "))
+  ln_d(workCog)
+  say(string(" ==="))
+  report_all()
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output.
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_d(numVal)
+' Append a signed decimal to the line.
+'
+' @param numVal - the number, read as signed
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_u(numVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_cnt(countVal, ofVal)
+' Append "n of m".
+'
+' @param countVal - the count
+' @param ofVal - the total
+
+  ln_d(countVal)
+  ln_s(string(" of "))
+  ln_d(ofVal)
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI rig_fail(pStr)
+' Count one RIG FAIL and start its line; the caller appends the details and
+' sends the line.
+'
+' @param pStr - hub address of the text
+
+  failCnt++
+  ln_s(string("RIG FAIL: "))
+  ln_s(pStr)
+
+' ---------------------------------------------------------------------------
+' header and word check (cog 0)
+' ---------------------------------------------------------------------------
+PRI print_header()
+' Print the rig identity and the pre-registered readings, before any run.
+'
+
+  say(string("=== VO-J-005r: streamer pin-capture - sustained ceiling (NCO ladder) and %FFF filter skew (pnut-ts v1.55.8 -d, clk 200 MHz, nothing attached) ==="))
+  say(string("Pins P32..P47 only: BUS P32 (TRANSITION, 64 clocks/transition) | MON_R P33 (A = rel -1, unfiltered) | MON_F P34 (A = rel -2, filt0 in the skew legs) | NULL P35 (low) | P36..P47 held at 15k low. Base P32 = pin group %100."))
+  say(string("Measured, not predicted: no source states a sustained capture rate or a filter lane delay (pin-capture.yaml 'NOT STATED'). Gates CERT, CFG, A, O, C, D, E0, S0 withhold dependent results, never the raw values."))
+  say(string("E: 4-, 8-, 16-pin captures of an exact 64-clock stimulus at NCO 1:16 .. 1:1, 1024 samples, 4 reps each. Rung EXACT = every edge interval = 64/N samples, all bytes written, no LATE, NULL lane silent."))
+  say(string("E readings per mode: NO CEILING REACHED | CEILING 1:N (fastest exact rung, all slower exact) | NON-MONOTONE. 32-pin capture is not run (reads more than the free pins)."))
+  say(string("S: edge position of MON_F minus MON_R at 1 sample/clock; control = both unfiltered (MUST be 0); ENGAGEMENT leg filt0 = 5 flip-flops tap 3 (about 40 clocks); then filt0 = 2, 3, 5, 8 flip-flops at tap 0."))
+  say(string("S readings: NO DELAY | EQUALS N-FF | EQUALS N-FF - 1 | OTHER. ENGAGEMENT: ENGAGED = every compared edge lags 16..63 clocks, else 'filter not observed to engage' and NO DELAY is void for every leg."))
+  say(string("Gate A: six patterns per mode (%0000 %0001 %1000 %0010 %0100 %0110). Gate PAD: 16 guard longs after the buffer. Gate O: low-first and high-first must DISAGREE in one of up to 8 captures, else 'nibble order undetermined'."))
+  say(string("Run needs USB serial (DEBUG on P62/P63); save the whole console output; P32..P47 must be completely free; no '=== END' within 45 s = hang / lost session. The 32-pin rung is not run (open)."))
+
+PRI check_words()
+' Compare each symbol-composed word with the value decoded in the header;
+' a mismatch is a RIG FAIL (the CFG gate).
+'
+
+  if CFG_BUS <> CFG_BUS_X or CFG_MONR <> CFG_MONR_X or CFG_MONF <> CFG_MONF_X or CFG_MONF_NF <> CFG_MONF_NF_X
+    rig_fail(string("CFG a configuration word differs from its decoded value"))
+    ln_out()
+  if CAP_4P <> CAP_4P_X or CAP_8P <> CAP_8P_X or CAP_16P <> CAP_16P_X
+    rig_fail(string("CFG a streamer command word differs from its decoded value"))
+    ln_out()
+  if FILT0_ENG <> FILT0_ENG_X
+    rig_fail(string("CFG the engagement HUBSET word differs from its decoded value"))
+    ln_out()
+  ln_s(string("WORDS (symbol composition = decoded value): BUS "))
+  ln_h(CFG_BUS)
+  ln_s(string(" MON_R "))
+  ln_h(CFG_MONR)
+  ln_s(string(" MON_F "))
+  ln_h(CFG_MONF)
+  ln_s(string(" MON_F unfiltered "))
+  ln_h(CFG_MONF_NF)
+  ln_s(string(" | capture 4P "))
+  ln_h(CAP_4P)
+  ln_s(string(" 8P "))
+  ln_h(CAP_8P)
+  ln_s(string(" 16P "))
+  ln_h(CAP_16P)
+  ln_s(string(" | engagement HUBSET "))
+  ln_h(FILT0_ENG)
+  ln_out()
+
+' ---------------------------------------------------------------------------
+' tables
+' ---------------------------------------------------------------------------
+PRI mode_text(modeIdx) : pText
+' @param modeIdx - capture mode
+' @returns pText - the mode as printed
+
+  pText := lookupz(modeIdx: string(" 4P"), string(" 8P"), string("16P"))
+
+PRI rate_text(rateIdx) : pText
+' @param rateIdx - ladder rung
+' @returns pText - the rung as printed
+
+  pText := lookupz(rateIdx: string("1:16"), string("1:8 "), string("1:4 "), string("1:2 "), string("1:1 "))
+
+PRI rate_nco(rateIdx) : ncoVal
+' @param rateIdx - ladder rung
+' @returns ncoVal - the SETXFRQ value
+
+  ncoVal := lookupz(rateIdx: NCO_1_16, NCO_1_8, NCO_1_4, NCO_1_2, NCO_1_1)
+
+PRI rate_want(rateIdx) : wantVal
+' @param rateIdx - ladder rung
+' @returns wantVal - samples between consecutive edges of the 64-clock stimulus
+
+  wantVal := lookupz(rateIdx: FAST_PER / 16, FAST_PER / 8, FAST_PER / 4, FAST_PER / 2, FAST_PER)
+
+PRI cap_word(modeIdx) : wordVal
+' @param modeIdx - capture mode
+' @returns wordVal - the streamer command word (count included)
+
+  wordVal := lookupz(modeIdx: CAP_4P, CAP_8P, CAP_16P)
+
+PRI cap_bytes(modeIdx) : byteCnt
+' @param modeIdx - capture mode
+' @returns byteCnt - bytes the capture must write for SAMPLES samples
+
+  byteCnt := lookupz(modeIdx: SAMPLES / 2, SAMPLES, SAMPLES * 2)
+
+PRI pat_val(patIdx) : patVal
+' @param patIdx - gate A pattern 0..NPAT-1
+' @returns patVal - the pattern driven on P32..P35 (bit 0 = P32)
+
+  patVal := lookupz(patIdx: %0000, %0001, %1000, %0010, %0100, %0110)
+
+PRI ln_pat(patVal)
+' Append a pattern as %dddd (bit 3 = P35 first).
+'
+' @param patVal - the pattern
+
+  ln_c("%")
+  ln_c("0" + ((patVal >> 3) & 1))
+  ln_c("0" + ((patVal >> 2) & 1))
+  ln_c("0" + ((patVal >> 1) & 1))
+  ln_c("0" + (patVal & 1))
+
+PRI filt_text(filtIdx) : pText
+' @param filtIdx - skew leg
+' @returns pText - the leg as printed
+
+  pText := lookupz(filtIdx: string("control, both monitors UNFILTERED"), string("ENGAGEMENT: filt0 = 5 flip-flops, tap 3 (about 40 clocks)"), string("filt0 = 2 flip-flops, tap 0"), string("filt0 = 3 flip-flops, tap 0"), string("filt0 = 5 flip-flops, tap 0"), string("filt0 = 8 flip-flops, tap 0"))
+
+PRI filt_ff(filtIdx) : ffCnt
+' @param filtIdx - skew leg
+' @returns ffCnt - flip-flops of the leg's filter (0 for the control; the engagement leg is not read against this)
+
+  ffCnt := lookupz(filtIdx: 0, 5, 2, 3, 5, 8)
+
+PRI filt_word(filtIdx) : hubWord
+' @param filtIdx - skew leg (not the control)
+' @returns hubWord - the HUBSET word that configures filt0 for the leg
+'                    (FILT0_BASE + length << 5 + tap; SD:2784)
+
+  hubWord := lookupz(filtIdx: FILT0_BASE, FILT0_ENG, FILT0_BASE + (0 << 5), FILT0_BASE + (1 << 5), FILT0_BASE + (2 << 5), FILT0_BASE + (3 << 5))
+
+' ===========================================================================
+' THE MEASURING COG (Spin2).  Owns the streamer, the buffer and every pin.
+' ===========================================================================
+PRI worker() | modeIdx, filtIdx
+' Run the gates and the two measurements; write DONE_V at the end.
+'
+
+' Local Variables:
+' @local modeIdx - capture mode
+' @local filtIdx - skew leg
+
+  wPhase := PH_CERT
+  certMask := certify_pins_free()
+  if certMask <> 0
+    wDone := DONE_V
+    return
+  wPhase := PH_A
+  repeat modeIdx from MD_4P to MD_16P
+    wDetail := modeIdx
+    arm_a(modeIdx)
+  wPhase := PH_O
+  calibrate_order()
+  wPhase := PH_C
+  arm_c()
+  wPhase := PH_D
+  arm_d()
+  wPhase := PH_E
+  arm_e()
+  wPhase := PH_S
+  repeat filtIdx from SK_CTL to SK_FF8
+    wDetail := filtIdx
+    arm_s(filtIdx)
+  hubset(FILT0_BASE)                    ' filt0 back to its default: length %00, tap 0 (SD:2808-2817)
+  release_all()
+  wPhase := PH_END
+  wDone := DONE_V
+
+PRI certify_pins_free() : busyMask
+' Hold P32..P47 at a 15 kOhm LOW and read them back: anything attached
+' overpowers 15 kOhm and reads 1.  Nothing is driven hard before this.
+'
+' @returns busyMask - bit n set when P(32+n) read 1 (0 = all free)
+
+  pinclear(GUARD_LO addpins GUARD_N - 1)
+  wrpin(GUARD_LO addpins GUARD_N - 1, P_LOW_15K)
+  pinlow(GUARD_LO addpins GUARD_N - 1)  ' DIR high, OUT low -> 15k to GIO
+  waitms(1)
+  busyMask := pinread(GUARD_LO addpins GUARD_N - 1)
+  pinclear(GUARD_LO addpins GUARD_N - 1)
+
+PRI release_all()
+' Stop the streamer and return P32..P47 to reset.
+'
+
+  org
+    xstop
+  end
+  pinclear(GUARD_LO addpins GUARD_N - 1)
+
+PRI hold_weak()
+' P36..P47 at a 15 kOhm low, so a wider capture reads 0 on lanes it does not use.
+'
+
+  wrpin(WEAK_LO addpins WEAK_N - 1, P_LOW_15K)
+  pinlow(WEAK_LO addpins WEAK_N - 1)
+
+PRI drive_pattern(nibVal) | i
+' Drive P32..P35 hard to the levels in the low four bits of nibVal
+' (bit 0 -> P32), plain pins, no smart mode, no routing.
+'
+' @param nibVal - the pattern
+
+' Local Variables:
+' @local i - pin index
+
+  release_all()
+  hold_weak()
+  repeat i from 0 to 3
+    pinclear(BUS + i)
+    if nibVal & (1 << i)
+      pinhigh(BUS + i)
+    else
+      pinlow(BUS + i)
+  waitms(1)
+
+PRI setup_stimulus(period, monfCfg)
+' reset (DIRL) -> configure (WRPIN/WXPIN) -> enable (DIRH) -> operate (WYPIN).
+' WYPIN comes after DIRH (EF-011: a WYPIN before enable is lost in the trigger
+' modes, and TRANSITION is one of them).
+'
+' @param period - BUS base period in clocks
+' @param monfCfg - the WRPIN word of MON_F (filtered or not)
+
+  release_all()
+  hold_weak()
+  pinclear(BUS)
+  wrpin(BUS, CFG_BUS)                   ' P_OE is required or the smart pin does not drive the pin
+  wxpin(BUS, period)                    ' X[15:0] = base period in clocks
+  pinlow(BUS)                           ' DIR high: enable; WYPIN (the start) comes after
+  pinclear(MON_R)
+  wrpin(MON_R, CFG_MONR)                ' DIR stays low: a monitor must not drive the net it watches
+  pinclear(MON_F)
+  wrpin(MON_F, monfCfg)
+  pinclear(NULLPIN)
+  pinlow(NULLPIN)                       ' the lane that must stay silent
+  waitms(1)
+
+PRI capture(modeIdx, xfrq, ycnt, shiftClk) : written, late | cmd, addr, budget, t0, t1
+' One streamer capture into bufl: WRFAST, XINIT, the burst started right
+' after (shiftClk clocks later when shiftClk is non-zero: gate O shifts the burst by
+' whole samples to change the edge parity against the byte), a BOUNDED wait
+' for the streamer to finish (a stalled streamer must not hang the cog), the
+' FIFO drain, XSTOP.  The guard pad after bufl is refilled before and checked
+' after every capture.
+'
+' @param modeIdx - capture mode
+' @param xfrq - SETXFRQ value
+' @param ycnt - transitions to start on BUS (0: none)
+' @param shiftClk - clocks to wait between XINIT and the burst start (0: none)
+' @returns written - bytes of bufl that are no longer the sentinel
+' @returns late - 1 when the streamer did not signal XFI within the budget
+
+' Local Variables:
+' @local cmd - the streamer command word
+' @local addr - hub address of the buffer
+' @local budget - clocks allowed for the streamer to finish
+' @local t0 - CT at XINIT
+' @local t1 - CT in the wait loop
+
+  bytefill(@bufl, SENTINEL, BUF_BYTES)
+  longfill(@bufPad, PAD_FILL, PAD_LONGS)
+  cmd := cap_word(modeIdx)
+  addr := @bufl
+  budget := CAP_BUDGET
+  org
+    setxfrq xfrq
+    wrfast  #0, addr
+    getct   t0
+    xinit   cmd, #0
+    tjz     shiftClk, #.noshiftClk        ' shiftClk = 0: no shift
+    waitx   shiftClk
+.noshiftClk
+    wypin   ycnt, #BUS          ' starts the burst; harmless when ycnt = 0
+.wait
+    getct   t1
+    sub     t1, t0
+    cmp     t1, budget      wc
+    if_nc   mov     late, #1        ' streamer never signalled XFI in budget
+    if_nc   jmp     #.done
+    pollxfi                 wc
+    if_nc   jmp     #.wait
+.done
+    waitx   ##10_000
+    xstop
+  end
+  written := bytes_written()
+  capCount++
+  if not pad_intact()
+    padHits++
+
+PRI pad_intact() : bIntact | i
+' Whether the guard longs after bufl still hold PAD_FILL (the streamer did not
+' write past the buffer).
+'
+' @returns bIntact - TRUE when no guard long changed
+
+' Local Variables:
+' @local i - guard long index
+
+  bIntact := TRUE
+  repeat i from 0 to PAD_LONGS - 1
+    if long[@bufPad][i] <> PAD_FILL
+      bIntact := FALSE
+
+PRI bytes_written() : n | i
+' How many bytes of the buffer are no longer the sentinel.
+'
+' @returns n - bytes written
+
+' Local Variables:
+' @local i - byte index
+
+  repeat i from 0 to BUF_BYTES - 1
+    if byte[@bufl][i] <> SENTINEL
+      n++
+
+PRI sample_val(modeIdx, n) : v
+' Sample n of the capture: 4, 8 or 16 bits, bit 0 = the base pin P32.
+' The 4-pin mode packs two samples per byte, the earlier one in the low
+' nibble unless nibHi says otherwise (gate O).
+'
+' @param modeIdx - capture mode
+' @param n - sample index
+' @returns v - the sample
+
+  case modeIdx
+    MD_4P:
+      v := (byte[@bufl][n >> 1] >> (((n & 1) ^ nibHi) << 2)) & $F
+    MD_8P:
+      v := byte[@bufl][n]
+    MD_16P:
+      v := word[@bufl][n]
+
+PRI count_not_equal(modeIdx, expectVal) : badCnt | n
+' Samples (of the first SAMPLES) that differ from expectVal.
+'
+' @param modeIdx - capture mode
+' @param expectVal - the required sample value
+' @returns badCnt - samples that differ
+
+' Local Variables:
+' @local n - sample index
+
+  repeat n from 0 to SAMPLES - 1
+    if sample_val(modeIdx, n) <> expectVal
+      badCnt++
+
+PRI analyze(modeIdx, wantVal) | n, v, b, prevB, lastEdge, iv
+' Statistics of the MON_R lane (edge count, first, last, shortest and longest
+' interval between consecutive edges, intervals not equal to wantVal) and of
+' the NULL lane (samples reading 1).  Results in the an* variables.
+'
+' @param modeIdx - capture mode
+' @param wantVal - the required interval in samples
+
+' Local Variables:
+' @local n - sample index
+' @local v - a sample
+' @local b - the MON_R bit
+' @local prevB - the previous MON_R bit (-1 before the first)
+' @local lastEdge - sample index of the previous edge (-1 before the first)
+' @local iv - interval between two consecutive edges
+
+  anEdges := 0
+  anFirst := -1
+  anLast := -1
+  anMin := POSX
+  anMax := 0
+  anBad := 0
+  anNull := 0
+  prevB := -1
+  lastEdge := -1
+  repeat n from 0 to SAMPLES - 1
+    v := sample_val(modeIdx, n)
+    anNull += (v >> LANE_NULL) & 1
+    b := (v >> LANE_MONR) & 1
+    if prevB <> -1 and b <> prevB
+      anEdges++
+      anLast := n
+      if lastEdge >= 0
+        iv := n - lastEdge
+        anMin <#= iv
+        anMax #>= iv
+        if iv <> wantVal
+          anBad++
+      else
+        anFirst := n
+      lastEdge := n
+    prevB := b
+
+PRI is_exact(modeIdx, wrote, late, wantVal) : bExact
+' Whether the analysed capture is EXACT: exactly the expected number of bytes
+' written (fewer = dropped, more = over-run), no LATE, NULL lane silent,
+' enough edges, every interval = wantVal.
+'
+' @param modeIdx - capture mode
+' @param wrote - bytes written
+' @param late - the LATE flag
+' @param wantVal - the required interval
+' @returns bExact - TRUE when exact
+
+  bExact := wrote == cap_bytes(modeIdx) and late == 0 and anNull == 0 and anEdges >= MIN_EDGES and anBad == 0 and anMin == wantVal and anMax == wantVal
+
+PRI lane_stats(modeIdx, lane) : edges, highs, first | n, b, prevB
+' Edge count, samples high, and the index of the first edge of one lane.
+'
+' @param modeIdx - capture mode
+' @param lane - lane (pin - P32)
+' @returns edges - changes
+' @returns highs - samples reading 1
+' @returns first - index of the first change, or SAMPLES
+
+' Local Variables:
+' @local n - sample index
+' @local b - the lane's bit
+' @local prevB - the previous bit
+
+  first := SAMPLES
+  prevB := (sample_val(modeIdx, 0) >> lane) & 1
+  highs := prevB
+  repeat n from 1 to SAMPLES - 1
+    b := (sample_val(modeIdx, n) >> lane) & 1
+    highs += b
+    if b <> prevB
+      edges++
+      if first == SAMPLES
+        first := n
+      prevB := b
+
+PRI collect_edges(modeIdx, lane, pArr) : cnt | n, b, prevB
+' The edges of one lane: each stored as (sample index << 1) | new level.
+'
+' @param modeIdx - capture mode
+' @param lane - lane
+' @param pArr - hub address of a long array of EDGE_MAX
+' @returns cnt - edges stored (at most EDGE_MAX)
+
+' Local Variables:
+' @local n - sample index
+' @local b - the lane's bit
+' @local prevB - the previous bit (-1 before the first sample)
+
+  prevB := -1
+  repeat n from 0 to SAMPLES - 1
+    b := (sample_val(modeIdx, n) >> lane) & 1
+    if prevB <> -1 and b <> prevB and cnt < EDGE_MAX
+      long[pArr][cnt] := (n << 1) | b
+      cnt++
+    prevB := b
+
+' ---------------------------------------------------------------------------
+' arm A - the capture-path control, per mode
+' ---------------------------------------------------------------------------
+PRI arm_a(modeIdx) | k, nibVal, wrote, late, bad, baseIdx
+' NPAT static captures per mode (patterns, bit 0 = P32: %0000, %0001, %1000,
+' %0010, %0100, %0110).  A mode whose captures are not every-sample exact,
+' write a different number of bytes than expected, or leave sentinel bytes,
+' is VOID.  A2 and A3 drive opposite ends of the base group, A4 and A5 the two
+' middle lanes (P33, P34) one at a time and A6 both together, so a lane
+' mapping that swaps or merges any of the four lanes fails one of them by
+' construction.
+'
+' @param modeIdx - capture mode
+
+' Local Variables:
+' @local k - A1..A6
+' @local nibVal - the driven pattern
+' @local wrote - bytes written
+' @local late - the LATE flag
+' @local bad - samples that differ from the pattern
+' @local baseIdx - index of the record
+
+  modeOk[modeIdx] := TRUE
+  repeat k from 0 to NPAT - 1
+    nibVal := pat_val(k)
+    drive_pattern(nibVal)
+    wrote, late := capture(modeIdx, NCO_1_4, 0, 0)
+    bad := count_not_equal(modeIdx, nibVal)
+    baseIdx := (modeIdx * NPAT + k) * AW
+    aRec[baseIdx + AF_WROTE] := wrote
+    aRec[baseIdx + AF_BAD] := bad
+    aRec[baseIdx + AF_FIRST] := sample_val(modeIdx, 0)
+    if wrote <> cap_bytes(modeIdx) or late <> 0 or bad <> 0
+      modeOk[modeIdx] := FALSE
+  release_all()
+
+' ---------------------------------------------------------------------------
+' arm O - 4-pin nibble order, measured at the slowest rung
+' ---------------------------------------------------------------------------
+PRI calibrate_order() | tryIdx, wrote, late, exLo, exHi
+' Capture the stimulus at 1:16 and analyse it BOTH low nibble first and high
+' nibble first.  The order is decided only when exactly one analysis is exact.
+' If both are exact the capture cannot tell the orders apart (every edge sits on
+' a byte boundary), so the capture is repeated, the burst starting one 1:16
+' sample (NIB_SHIFT clocks) later each try, up to NIB_TRIES times.  No try
+' disagrees: nibState 3 (undetermined) and the 4-pin mode is VOID; neither
+' analysis exact in any try that is not undetermined: nibState 2.
+'
+
+' Local Variables:
+' @local tryIdx - capture number
+' @local wrote - bytes written
+' @local late - the LATE flag
+' @local exLo - the capture is EXACT read low nibble first
+' @local exHi - the capture is EXACT read high nibble first
+
+  nibState := 2
+  nibHi := 0
+  nibTries := 0
+  nibBoth := 0
+  nibNeither := 0
+  if not modeOk[MD_4P]
+    return
+  repeat tryIdx from 0 to NIB_TRIES - 1
+    setup_stimulus(FAST_PER, CFG_MONF)
+    wrote, late := capture(MD_4P, NCO_1_16, BURST_E, tryIdx * NIB_SHIFT)
+    release_all()
+    nibTries := tryIdx + 1
+    nibHi := 0
+    analyze(MD_4P, rate_want(RG_1_16))
+    exLo := is_exact(MD_4P, wrote, late, rate_want(RG_1_16))
+    nibHi := 1
+    analyze(MD_4P, rate_want(RG_1_16))
+    exHi := is_exact(MD_4P, wrote, late, rate_want(RG_1_16))
+    if exLo and exHi
+      nibBoth++
+    elseif not exLo and not exHi
+      nibNeither++
+    else
+      if exHi
+        nibState := 1
+      else
+        nibState := 0
+      nibHi := nibState
+      quit
+  if nibState == 2
+    nibHi := 0
+    if nibBoth > 0
+      nibState := 3
+    modeOk[MD_4P] := FALSE
+
+' ---------------------------------------------------------------------------
+' arm C - the same contrast with NO STREAMER (the IN rule seen by the cog)
+' ---------------------------------------------------------------------------
+PRI arm_c() | i, busCh, monCh, busPrev, monPrev, v
+' While the BUS smart pin toggles, count the changes a plain cog read sees on
+' P32 (its own IN = the completion flag) and on P33 (the routed neighbour =
+' the pin level).  Count CHANGES, not levels: both signals sit high for about
+' half the window.  The simplest layer answers first.
+'
+
+' Local Variables:
+' @local i - read index
+' @local busCh - changes seen on P32
+' @local monCh - changes seen on P33
+' @local busPrev - previous read of P32
+' @local monPrev - previous read of P33
+' @local v - one read
+
+  setup_stimulus(SLOW_PER, CFG_MONF)
+  wypin(BUS, BURST_C)                   ' a 12 ms burst of 300 us half-cycles
+  busPrev := pinread(BUS)
+  monPrev := pinread(MON_R)
+  repeat i from 0 to C_SAMPLES - 1
+    v := pinread(BUS)
+    if v <> busPrev
+      busCh++
+      busPrev := v
+    v := pinread(MON_R)
+    if v <> monPrev
+      monCh++
+      monPrev := v
+    waitus(C_INTERVAL)
+  release_all()
+  cBus := busCh
+  cMon := monCh
+
+' ---------------------------------------------------------------------------
+' arm D - both signals in ONE capture (the gate, and the skew carrier)
+' ---------------------------------------------------------------------------
+PRI arm_d() | wrote, late, lane, edges, highs, first
+' One 4-pin 1:1 capture of a 10-transition burst that ENDS INSIDE the window,
+' so the BUS lane carries exactly one edge (the flag) if the IN rule holds.
+'
+
+' Local Variables:
+' @local wrote - bytes written
+' @local late - the LATE flag
+' @local lane - lane
+' @local edges - lane edges
+' @local highs - lane samples high
+' @local first - lane first edge
+
+  setup_stimulus(FAST_PER, CFG_MONF)
+  wrote, late := capture(MD_4P, NCO_1_1, BURST_D, 0)
+  release_all()
+  dRec[0] := wrote
+  dRec[1] := late
+  repeat lane from 0 to 3
+    edges, highs, first := lane_stats(MD_4P, lane)
+    dRec[2 + lane * 3] := edges
+    dRec[3 + lane * 3] := highs
+    dRec[4 + lane * 3] := first
+
+' ---------------------------------------------------------------------------
+' arm E - the sustained-rate ladder
+' ---------------------------------------------------------------------------
+PRI arm_e() | modeIdx, rateIdx, repIdx
+' Every mode that passed gate A (and O), every rung, REPS repetitions.
+'
+
+' Local Variables:
+' @local modeIdx - capture mode
+' @local rateIdx - ladder rung
+' @local repIdx - repetition
+
+  repeat modeIdx from MD_4P to MD_16P
+    if modeOk[modeIdx]
+      repeat rateIdx from RG_1_16 to RG_1_1
+        repeat repIdx from 0 to REPS - 1
+          wDetail := (modeIdx << 8) + (rateIdx << 4) + repIdx
+          one_rung(modeIdx, rateIdx, repIdx)
+
+PRI one_rung(modeIdx, rateIdx, repIdx) | wrote, late, baseIdx, bExact
+' One capture at one rung and its record.
+'
+' @param modeIdx - capture mode
+' @param rateIdx - ladder rung
+' @param repIdx - repetition
+
+' Local Variables:
+' @local wrote - bytes written
+' @local late - the LATE flag
+' @local baseIdx - index of the record
+' @local bExact - the rung is EXACT
+
+  setup_stimulus(FAST_PER, CFG_MONF)
+  wrote, late := capture(modeIdx, rate_nco(rateIdx), BURST_E, 0)
+  release_all()
+  analyze(modeIdx, rate_want(rateIdx))
+  bExact := is_exact(modeIdx, wrote, late, rate_want(rateIdx))
+  baseIdx := ((modeIdx * NRATE + rateIdx) * REPS + repIdx) * EW
+  eRec[baseIdx + EF_WROTE] := wrote
+  eRec[baseIdx + EF_LATE] := late
+  eRec[baseIdx + EF_EDGES] := anEdges
+  eRec[baseIdx + EF_FIRST] := anFirst
+  eRec[baseIdx + EF_LAST] := anLast
+  eRec[baseIdx + EF_MIN] := anMin
+  eRec[baseIdx + EF_MAX] := anMax
+  eRec[baseIdx + EF_BAD] := anBad
+  eRec[baseIdx + EF_NULL] := anNull
+  eRec[baseIdx + EF_EXACT] := bExact & 1
+
+' ---------------------------------------------------------------------------
+' arm S - filter skew at one sample per clock
+' ---------------------------------------------------------------------------
+PRI arm_s(filtIdx) | repIdx, wrote, late, monfCfg, cnA, cnB, i, n, d, baseIdx, rMin, rMax, fMin, fMax, nR, nF, dirMis
+' One skew leg: SREPS captures of the 10-transition burst at 1:1 in the 4-pin
+' mode; MON_R is always unfiltered, MON_F is unfiltered (the control leg) or
+' filtered with filt0 set to the leg's length.  Per capture: the position of
+' every MON_F edge minus the same-numbered MON_R edge, rising and falling.
+'
+' @param filtIdx - skew leg
+
+' Local Variables:
+' @local repIdx - repetition
+' @local wrote - bytes written
+' @local late - the LATE flag
+' @local monfCfg - the WRPIN word of MON_F for this leg
+' @local cnA - MON_R edges
+' @local cnB - MON_F edges
+' @local i - edge index
+' @local n - edges compared
+' @local d - MON_F position minus MON_R position
+' @local baseIdx - index of the record
+' @local rMin - least rising skew
+' @local rMax - greatest rising skew
+' @local fMin - least falling skew
+' @local fMax - greatest falling skew
+' @local nR - rising edges compared
+' @local nF - falling edges compared
+' @local dirMis - edge pairs whose directions differ
+
+  if not modeOk[MD_4P]
+    return
+  if filtIdx == SK_CTL
+    monfCfg := CFG_MONF_NF
+  else
+    monfCfg := CFG_MONF
+    hubset(filt_word(filtIdx))          ' filt0: the engagement leg (5 flip-flops, tap 3) or length L (2, 3, 5, 8 flip-flops), tap 0
+  repeat repIdx from 0 to SREPS - 1
+    setup_stimulus(FAST_PER, monfCfg)
+    wrote, late := capture(MD_4P, NCO_1_1, BURST_D, 0)
+    release_all()
+    analyze(MD_4P, FAST_PER)           ' MON_R lane: every interval must be 64 samples at 1:1
+    cnA := collect_edges(MD_4P, LANE_MONR, @tmpA)
+    cnB := collect_edges(MD_4P, LANE_MONF, @tmpB)
+    rMin := POSX
+    rMax := NEGX
+    fMin := POSX
+    fMax := NEGX
+    nR := 0
+    nF := 0
+    dirMis := 0
+    n := cnA <# cnB
+    if n > 0
+      repeat i from 0 to n - 1
+        if (tmpA[i] & 1) <> (tmpB[i] & 1)
+          dirMis++
+        else
+          d := (tmpB[i] >> 1) - (tmpA[i] >> 1)
+          if tmpA[i] & 1
+            rMin <#= d
+            rMax #>= d
+            nR++
+          else
+            fMin <#= d
+            fMax #>= d
+            nF++
+    baseIdx := (filtIdx * SREPS + repIdx) * SW
+    sRec[baseIdx + SF_WROTE] := wrote
+    sRec[baseIdx + SF_LATE] := late
+    sRec[baseIdx + SF_BAD] := anBad
+    sRec[baseIdx + SF_NULL] := anNull
+    sRec[baseIdx + SF_NA] := cnA
+    sRec[baseIdx + SF_NB] := cnB
+    sRec[baseIdx + SF_DIRMIS] := dirMis
+    sRec[baseIdx + SF_RMIN] := rMin
+    sRec[baseIdx + SF_RMAX] := rMax
+    sRec[baseIdx + SF_FMIN] := fMin
+    sRec[baseIdx + SF_FMAX] := fMax
+    sRec[baseIdx + SF_NR] := nR
+    sRec[baseIdx + SF_NF] := nF
+    if repIdx == 0
+      longmove(@sEdgeA[filtIdx * EDGE_MAX], @tmpA, EDGE_MAX)
+      longmove(@sEdgeB[filtIdx * EDGE_MAX], @tmpB, EDGE_MAX)
+      sEdgeNA[filtIdx] := cnA
+      sEdgeNB[filtIdx] := cnB
+
+' ===========================================================================
+' REPORTING (cog 0)
+' ===========================================================================
+PRI report_all() | modeIdx, filtIdx
+' Print every record, the gate lines and the readings.
+'
+
+' Local Variables:
+' @local modeIdx - capture mode
+' @local filtIdx - skew leg
+
+  if wPhase < PH_CERT
+    say(string("RIG FAIL: the measuring cog never started a phase - NO VERDICT"))
+    failCnt++
+  if certMask <> 0
+    ln_s(string("STOP: P32..P47 are not free - pins reading 1 under the weak low, mask (bit 0 = P32) "))
+    ln_h(certMask)
+    ln_out()
+    say(string("   Nothing was driven hard. Detach whatever is on those pins and run again."))
+    say(string("=== END: PINS BUSY - NO VERDICT ==="))
+    return
+  say(string("CERT passed: P32..P47 all read 0 under the 15k low"))
+  say(string("--- GATE A: static captures per mode (A1 %0000, A2 %0001, A3 %1000, A4 %0010, A5 %0100, A6 %0110; bit 0 = P32); bad = samples differing from the pattern ---"))
+  repeat modeIdx from MD_4P to MD_16P
+    report_a(modeIdx)
+  report_o()
+  report_c()
+  report_d()
+  say(string("--- ARM E: sustained capture rate (stimulus toggles every 64 clocks; rung EXACT = every interval = 64/N) ---"))
+  repeat modeIdx from MD_4P to MD_16P
+    report_e(modeIdx)
+  say(string("--- ARM S: filter skew (MON_F edge position minus MON_R edge position, clocks; positive = MON_F later) ---"))
+  repeat filtIdx from SK_CTL to SK_FF8
+    report_s(filtIdx)
+  report_s_verdict()
+  ln_s(string("PAD: the "))
+  ln_d(PAD_LONGS)
+  ln_s(string(" guard longs after the buffer were changed in "))
+  ln_cnt(padHits, capCount)
+  ln_s(string(" captures (0 = no over-run)"))
+  ln_out()
+  if padHits <> 0
+    rig_fail(string("PAD the streamer wrote past the end of the capture buffer - the capture buffer is overrun, the captures are not trustworthy"))
+    ln_out()
+  ln_s(string("=== GATES: "))
+  if failCnt == 0
+    say(string("all passed ==="))
+  else
+    ln_d(failCnt)
+    say(string(" RIG FAIL line(s) above - the results they cover are withheld, the raw values stand ==="))
+  say(string("=== END ==="))
+
+PRI report_a(modeIdx) | k, baseIdx
+' Gate A for one mode.
+'
+' @param modeIdx - capture mode
+
+' Local Variables:
+' @local k - A1..A6
+' @local baseIdx - index of the record
+
+  repeat k from 0 to NPAT - 1
+    baseIdx := (modeIdx * NPAT + k) * AW
+    ln_s(string("A"))
+    ln_d(k + 1)
+    ln_c(" ")
+    ln_s(mode_text(modeIdx))
+    ln_c(" ")
+    ln_pat(pat_val(k))
+    ln_s(string(": bytes written "))
+    ln_d(aRec[baseIdx + AF_WROTE])
+    ln_s(string(" (need exactly "))
+    ln_d(cap_bytes(modeIdx))
+    ln_s(string("), samples differing from the pattern "))
+    ln_d(aRec[baseIdx + AF_BAD])
+    ln_s(string(", sample 0 = "))
+    ln_h(aRec[baseIdx + AF_FIRST])
+    ln_out()
+  if modeOk[modeIdx]
+    ln_s(string("A PASSED "))
+    ln_s(mode_text(modeIdx))
+    say(string(": the path writes, discriminates, and lane N = pin P(32+N)"))
+  else
+    rig_fail(string("A "))
+    ln_s(mode_text(modeIdx))
+    ln_s(string(" - a static capture was not exact (or the order gate O failed): this mode is VOID, no ladder is run for it"))
+    ln_out()
+
+PRI report_o()
+' Gate O.
+'
+
+  ln_s(string("O: "))
+  ln_d(nibTries)
+  ln_s(string(" capture(s) at 1:16 (burst start shifted 16 clocks per try); tries where both orders were exact "))
+  ln_d(nibBoth)
+  ln_s(string(", neither "))
+  ln_d(nibNeither)
+  ln_out()
+  case nibState
+    0:
+      say(string("O PASSED: 4-pin samples are packed LOW nibble first (SD:1456 'bits bottom-first'); in the deciding capture low-first was exact and high-first was NOT"))
+    1:
+      say(string("O PASSED (finding): 4-pin samples are packed HIGH nibble first - the opposite of the low-nibble-first reading; in the deciding capture high-first was exact and low-first was NOT"))
+    3:
+      rig_fail(string("O nibble order undetermined: low-first and high-first were both exact in every usable try, so the capture cannot tell the orders apart - the 4-pin mode is VOID, no ladder or skew verdict"))
+      ln_out()
+    other:
+      if modeOk[MD_4P] == 0
+        rig_fail(string("O the 4-pin 1:16 capture was exact in NEITHER nibble order (or gate A failed first): the 4-pin mode is VOID"))
+        ln_out()
+
+PRI report_c()
+' Arm C: the IN contrast with no streamer.
+'
+
+  ln_s(string("C (no streamer, 20 ms, 300 us half-cycles, 50 us reads): P32 (BUS, its own IN) changes "))
+  ln_d(cBus)
+  ln_s(string(" | P33 (MON_R, the routed neighbour) changes "))
+  ln_d(cMon)
+  ln_out()
+  if cMon == UNWRITTEN
+    rig_fail(string("C was not run"))
+    ln_out()
+  elseif cMon < 20
+    rig_fail(string("C the stimulus did not run - P33 never tracked the wire; arm D and the ladder are not interpretable"))
+    ln_out()
+  elseif cBus <= 2
+    say(string("C as the documented IN rule says: the routed neighbour tracked the wire; the smart pin's own IN changed once (the completion flag)"))
+  elseif cBus >= 20
+    say(string("C FINDING: P32's own IN tracked the waveform too - the IN rule does not hold for this mode (the stimulus is alive)"))
+  else
+    say(string("C FINDING: P32's change count falls between the flag (<= 2) and the waveform (>= 20); the two counts above are the record"))
+
+PRI report_d() | lane
+' Arm D: the headline contrast in one capture, and the NULL-lane gate.
+'
+
+' Local Variables:
+' @local lane - lane
+
+  if dRec[0] == UNWRITTEN
+    rig_fail(string("D was not run"))
+    ln_out()
+    return
+  ln_s(string("D (4-pin, 1:1, 10-transition burst): bytes "))
+  ln_d(dRec[0])
+  ln_s(string(", late "))
+  ln_d(dRec[1])
+  ln_out()
+  repeat lane from 0 to 3
+    ln_s(string("   lane "))
+    ln_d(lane)
+    ln_c(" ")
+    ln_s(lookupz(lane: string("P32 BUS  smart pin "), string("P33 MON_R routed   "), string("P34 MON_F routed   "), string("P35 NULL  control  ")))
+    ln_s(string(": edges "))
+    ln_d(dRec[2 + lane * 3])
+    ln_s(string(" highs "))
+    ln_d(dRec[3 + lane * 3])
+    ln_s(string(" first edge at "))
+    ln_d(dRec[4 + lane * 3])
+    ln_out()
+  if dRec[2 + LANE_NULL * 3] <> 0 or dRec[3 + LANE_NULL * 3] <> 0
+    rig_fail(string("D the NULL lane (P35, driven low) carries data - the lane mapping is wrong for this capture"))
+    ln_out()
+  elseif dRec[2 + LANE_MONR * 3] < MIN_EDGES
+    rig_fail(string("D the MON_R lane is flat - the stimulus did not run in this capture"))
+    ln_out()
+  elseif dRec[2 + LANE_BUS * 3] <= 1
+    say(string("D as the documented IN rule says: the BUS lane carries at most one edge (the flag) while the routed lane carries the waveform"))
+  elseif dRec[2 + LANE_BUS * 3] >= MIN_EDGES
+    say(string("D FINDING: the BUS lane carries the WAVEFORM too - the IN rule does not hold in a capture either"))
+  else
+    say(string("D FINDING: the BUS lane edge count is between the flag and the waveform; the counts above are the record"))
+
+PRI rec_e(modeIdx, rateIdx, repIdx, fieldIdx) : fieldVal
+' One field of one ladder record.
+'
+' @param modeIdx - capture mode
+' @param rateIdx - ladder rung
+' @param repIdx - repetition
+' @param fieldIdx - EF_*
+' @returns fieldVal - the recorded long
+
+  fieldVal := eRec[((modeIdx * NRATE + rateIdx) * REPS + repIdx) * EW + fieldIdx]
+
+PRI exact_cnt(modeIdx, rateIdx) : cnt | repIdx
+' Repetitions of one rung that were EXACT.
+'
+' @param modeIdx - capture mode
+' @param rateIdx - ladder rung
+' @returns cnt - exact repetitions
+
+' Local Variables:
+' @local repIdx - repetition
+
+  repeat repIdx from 0 to REPS - 1
+    if rec_e(modeIdx, rateIdx, repIdx, EF_EXACT) == 1
+      cnt++
+
+PRI report_e(modeIdx) | rateIdx, repIdx, ceilIdx, bMono, bStopped
+' One mode's ladder: a line per rung, the raw records of a rung that is not
+' exact, then the reading.
+'
+' @param modeIdx - capture mode
+
+' Local Variables:
+' @local rateIdx - ladder rung
+' @local repIdx - repetition
+' @local ceilIdx - the fastest rung exact with every slower rung exact (-1: none)
+' @local bMono - no faster rung is exact above a failing one
+' @local bStopped - a failing rung has been seen
+
+  if not modeOk[modeIdx]
+    ln_s(string("E "))
+    ln_s(mode_text(modeIdx))
+    say(string(": VOID - gate A (or O) failed; no ladder was run"))
+    return
+  ceilIdx := -1
+  bMono := TRUE
+  bStopped := FALSE
+  repeat rateIdx from RG_1_16 to RG_1_1
+    ln_s(string("E "))
+    ln_s(mode_text(modeIdx))
+    ln_c(" ")
+    ln_s(rate_text(rateIdx))
+    ln_s(string(" want "))
+    ln_d(rate_want(rateIdx))
+    ln_s(string(": EXACT "))
+    ln_cnt(exact_cnt(modeIdx, rateIdx), REPS)
+    ln_s(string(" | rep 0: bytes "))
+    ln_d(rec_e(modeIdx, rateIdx, 0, EF_WROTE))
+    ln_s(string("/"))
+    ln_d(cap_bytes(modeIdx))
+    ln_s(string(" late "))
+    ln_d(rec_e(modeIdx, rateIdx, 0, EF_LATE))
+    ln_s(string(" edges "))
+    ln_d(rec_e(modeIdx, rateIdx, 0, EF_EDGES))
+    ln_s(string(" interval "))
+    ln_d(rec_e(modeIdx, rateIdx, 0, EF_MIN))
+    ln_s(string(".."))
+    ln_d(rec_e(modeIdx, rateIdx, 0, EF_MAX))
+    ln_s(string(" bad "))
+    ln_d(rec_e(modeIdx, rateIdx, 0, EF_BAD))
+    ln_s(string(" null "))
+    ln_d(rec_e(modeIdx, rateIdx, 0, EF_NULL))
+    ln_out()
+    if exact_cnt(modeIdx, rateIdx) <> REPS
+      repeat repIdx from 0 to REPS - 1
+        ln_s(string("      raw rep "))
+        ln_d(repIdx)
+        ln_s(string(": exact "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_EXACT))
+        ln_s(string(" bytes "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_WROTE))
+        ln_s(string(" late "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_LATE))
+        ln_s(string(" edges "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_EDGES))
+        ln_s(string(" first/last edge "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_FIRST))
+        ln_s(string("/"))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_LAST))
+        ln_s(string(" interval "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_MIN))
+        ln_s(string(".."))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_MAX))
+        ln_s(string(" bad "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_BAD))
+        ln_s(string(" null "))
+        ln_d(rec_e(modeIdx, rateIdx, repIdx, EF_NULL))
+        ln_out()
+    if exact_cnt(modeIdx, rateIdx) == REPS
+      if bStopped
+        bMono := FALSE
+      else
+        ceilIdx := rateIdx
+    else
+      bStopped := TRUE
+  ' ---- gate E0 and the reading ----
+  if exact_cnt(modeIdx, RG_1_16) <> REPS
+    rig_fail(string("E0 "))
+    ln_s(mode_text(modeIdx))
+    ln_s(string(" the 1:16 rung is not exact in every repetition - this mode has no ceiling reading (the stimulus or the analysis, not the rate)"))
+    ln_out()
+    return
+  ln_s(string("E READING "))
+  ln_s(mode_text(modeIdx))
+  ln_s(string(": "))
+  if not bMono
+    say(string("NON-MONOTONE - a faster rung is exact above a failing rung; the lines above are the finding"))
+  elseif ceilIdx == RG_1_1
+    say(string("NO CEILING REACHED - every rung 1:16 .. 1:1 EXACT in every repetition: this mode sustained one sample per clock with this stimulus"))
+  else
+    ln_s(string("CEILING "))
+    ln_s(rate_text(ceilIdx))
+    ln_s(string(" - the fastest exact rung; the first failing rung is "))
+    ln_s(rate_text(ceilIdx + 1))
+    say(string(" (its raw records above are the failure mode)"))
+
+PRI rec_s(filtIdx, repIdx, fieldIdx) : fieldVal
+' One field of one skew record.
+'
+' @param filtIdx - skew leg
+' @param repIdx - repetition
+' @param fieldIdx - SF_*
+' @returns fieldVal - the recorded long
+
+  fieldVal := sRec[(filtIdx * SREPS + repIdx) * SW + fieldIdx]
+
+PRI skew_stat(filtIdx, bRise, bMax) : valVal | repIdx, v
+' The least (bMax = FALSE) or greatest (TRUE) rising or falling skew over
+' the repetitions.
+'
+' @param filtIdx - skew leg
+' @param bRise - TRUE: rising edges, FALSE: falling
+' @param bMax - TRUE: the greatest, FALSE: the least
+' @returns valVal - the skew in clocks (POSX / NEGX when no edge was compared)
+
+' Local Variables:
+' @local repIdx - repetition
+' @local v - one repetition's value
+
+  if bMax
+    valVal := NEGX
+  else
+    valVal := POSX
+  repeat repIdx from 0 to SREPS - 1
+    if bRise and bMax
+      v := rec_s(filtIdx, repIdx, SF_RMAX)
+    elseif bRise
+      v := rec_s(filtIdx, repIdx, SF_RMIN)
+    elseif bMax
+      v := rec_s(filtIdx, repIdx, SF_FMAX)
+    else
+      v := rec_s(filtIdx, repIdx, SF_FMIN)
+    if bMax
+      valVal #>= v
+    else
+      valVal <#= v
+
+PRI carrier_ok(filtIdx) : bOk | repIdx
+' Gate S0 for one leg: in every repetition the MON_R lane is exact (bad = 0),
+' the NULL lane silent, every capture written and not late, both monitors saw
+' MIN_EDGES or more edges and the same number of them.
+'
+' @param filtIdx - skew leg
+' @returns bOk - TRUE when every repetition is a usable carrier
+
+' Local Variables:
+' @local repIdx - repetition
+
+  bOk := modeOk[MD_4P]
+  repeat repIdx from 0 to SREPS - 1
+    if rec_s(filtIdx, repIdx, SF_BAD) <> 0 or rec_s(filtIdx, repIdx, SF_NULL) <> 0 or rec_s(filtIdx, repIdx, SF_LATE) <> 0
+      bOk := FALSE
+    if rec_s(filtIdx, repIdx, SF_WROTE) <> cap_bytes(MD_4P) or rec_s(filtIdx, repIdx, SF_NA) < MIN_EDGES
+      bOk := FALSE
+    if rec_s(filtIdx, repIdx, SF_NA) <> rec_s(filtIdx, repIdx, SF_NB) or rec_s(filtIdx, repIdx, SF_DIRMIS) <> 0
+      bOk := FALSE
+
+PRI report_s(filtIdx) | repIdx, k, nA, nB
+' One skew leg: the per-repetition records, then rep 0's edge positions.
+'
+' @param filtIdx - skew leg
+
+' Local Variables:
+' @local repIdx - repetition
+' @local k - edge index
+' @local nA - MON_R edges stored
+' @local nB - MON_F edges stored
+
+  ln_s(string("S "))
+  ln_s(filt_text(filtIdx))
+  ln_out()
+  if not modeOk[MD_4P]
+    say(string("   VOID - the 4-pin mode failed gate A or O"))
+    return
+  repeat repIdx from 0 to SREPS - 1
+    ln_s(string("   rep "))
+    ln_d(repIdx)
+    ln_s(string(": MON_R edges "))
+    ln_d(rec_s(filtIdx, repIdx, SF_NA))
+    ln_s(string(" MON_F edges "))
+    ln_d(rec_s(filtIdx, repIdx, SF_NB))
+    ln_s(string(" direction mismatches "))
+    ln_d(rec_s(filtIdx, repIdx, SF_DIRMIS))
+    ln_s(string(" | rising skew "))
+    ln_d(rec_s(filtIdx, repIdx, SF_RMIN))
+    ln_s(string(".."))
+    ln_d(rec_s(filtIdx, repIdx, SF_RMAX))
+    ln_s(string(" (n "))
+    ln_d(rec_s(filtIdx, repIdx, SF_NR))
+    ln_s(string(") falling skew "))
+    ln_d(rec_s(filtIdx, repIdx, SF_FMIN))
+    ln_s(string(".."))
+    ln_d(rec_s(filtIdx, repIdx, SF_FMAX))
+    ln_s(string(" (n "))
+    ln_d(rec_s(filtIdx, repIdx, SF_NF))
+    ln_s(string(") | MON_R intervals not 64: "))
+    ln_d(rec_s(filtIdx, repIdx, SF_BAD))
+    ln_s(string(" NULL highs "))
+    ln_d(rec_s(filtIdx, repIdx, SF_NULL))
+    ln_s(string(" late "))
+    ln_d(rec_s(filtIdx, repIdx, SF_LATE))
+    ln_out()
+  nA := sEdgeNA[filtIdx]
+  nB := sEdgeNB[filtIdx]
+  ln_s(string("   rep 0 edge positions (sample << 1 | new level), MON_R:"))
+  if nA > 0
+    repeat k from 0 to nA - 1
+      ln_c(" ")
+      ln_d(sEdgeA[filtIdx * EDGE_MAX + k])
+  ln_out()
+  ln_s(string("   rep 0 edge positions, MON_F:"))
+  if nB > 0
+    repeat k from 0 to nB - 1
+      ln_c(" ")
+      ln_d(sEdgeB[filtIdx * EDGE_MAX + k])
+  ln_out()
+  if not carrier_ok(filtIdx)
+    rig_fail(string("S0 "))
+    ln_s(filt_text(filtIdx))
+    ln_s(string(": a capture was not a usable carrier (MON_R intervals not exact, NULL lane active, LATE, too few edges, edge counts or directions differ) - this leg's skew is withheld"))
+    ln_out()
+
+PRI eng_observed() : bEngaged | repIdx
+' Whether the ENGAGEMENT leg showed the filter: the carrier gate S0 passed and,
+' in every repetition, both edge directions were compared and every skew lies
+' in ENG_MIN..ENG_MAX clocks.
+'
+' @returns bEngaged - TRUE when the filter was observed to engage
+
+' Local Variables:
+' @local repIdx - repetition
+
+  bEngaged := modeOk[MD_4P] and carrier_ok(SK_ENG)
+  repeat repIdx from 0 to SREPS - 1
+    if rec_s(SK_ENG, repIdx, SF_NR) == 0 or rec_s(SK_ENG, repIdx, SF_NF) == 0
+      bEngaged := FALSE
+  if skew_stat(SK_ENG, TRUE, FALSE) < ENG_MIN or skew_stat(SK_ENG, FALSE, FALSE) < ENG_MIN
+    bEngaged := FALSE
+  if skew_stat(SK_ENG, TRUE, TRUE) > ENG_MAX or skew_stat(SK_ENG, FALSE, TRUE) > ENG_MAX
+    bEngaged := FALSE
+
+PRI skew_reading(filtIdx, bRise, bEngaged) : pText | lo, hi, ff
+' The pre-registered reading of one edge direction of one leg.  A 0 skew is
+' NO DELAY only when the engagement leg showed that the filter reaches the
+' captured lane; otherwise it is void.
+'
+' @param filtIdx - skew leg
+' @param bRise - TRUE: rising edges
+' @param bEngaged - the filter was observed to engage (the control leg ignores it)
+' @returns pText - the reading as text
+
+' Local Variables:
+' @local lo - least skew over the repetitions
+' @local hi - greatest skew over the repetitions
+' @local ff - flip-flops of the filter
+
+  lo := skew_stat(filtIdx, bRise, FALSE)
+  hi := skew_stat(filtIdx, bRise, TRUE)
+  ff := filt_ff(filtIdx)
+  if lo == POSX
+    pText := string("no edge compared")
+  elseif lo <> hi
+    pText := string("OTHER - the skew varies between edges or repetitions")
+  elseif lo == 0 and filtIdx <> SK_CTL and not bEngaged
+    pText := string("0 clocks (NO DELAY is VOID: filter not observed to engage)")
+  elseif lo == 0
+    pText := string("NO DELAY (0 clocks)")
+  elseif ff > 0 and lo == ff
+    pText := string("EQUALS N-FF (skew = the flip-flop count)")
+  elseif ff > 0 and lo == ff - 1
+    pText := string("EQUALS N-FF - 1")
+  else
+    pText := string("OTHER - a constant that is neither 0, N-FF nor N-FF - 1")
+
+PRI report_s_verdict() | filtIdx, bEngaged
+' Print the engagement reading, then the skew readings of the legs whose
+' carrier gate passed.
+'
+
+' Local Variables:
+' @local filtIdx - skew leg
+' @local bEngaged - the engagement leg showed the filter
+
+  say(string("--- S READINGS (a leg whose gate S0 failed is withheld) ---"))
+  bEngaged := eng_observed()
+  ln_s(string("S ENGAGEMENT "))
+  ln_s(filt_text(SK_ENG))
+  if modeOk[MD_4P] and carrier_ok(SK_ENG)
+    ln_s(string(": rising ["))
+    ln_d(skew_stat(SK_ENG, TRUE, FALSE))
+    ln_s(string(".."))
+    ln_d(skew_stat(SK_ENG, TRUE, TRUE))
+    ln_s(string("] falling ["))
+    ln_d(skew_stat(SK_ENG, FALSE, FALSE))
+    ln_s(string(".."))
+    ln_d(skew_stat(SK_ENG, FALSE, TRUE))
+    ln_s(string("] clocks (ENGAGED needs every skew in "))
+    ln_d(ENG_MIN)
+    ln_s(string(".."))
+    ln_d(ENG_MAX)
+    ln_s(string("): "))
+  else
+    ln_s(string(": withheld (4-pin mode void or gate S0 failed): "))
+  if bEngaged
+    say(string("ENGAGED - the captured lane follows the filtered pin; the tap-0 legs below are valid readings"))
+  else
+    say(string("filter not observed to engage; NO DELAY is void (a 0 skew below says nothing about the filter)"))
+  repeat filtIdx from SK_CTL to SK_FF8
+    if filtIdx <> SK_ENG and modeOk[MD_4P] and carrier_ok(filtIdx)
+      ln_s(string("S READING "))
+      ln_s(filt_text(filtIdx))
+      ln_s(string(": rising ["))
+      ln_d(skew_stat(filtIdx, TRUE, FALSE))
+      ln_s(string(".."))
+      ln_d(skew_stat(filtIdx, TRUE, TRUE))
+      ln_s(string("] "))
+      ln_s(skew_reading(filtIdx, TRUE, bEngaged))
+      ln_s(string(" | falling ["))
+      ln_d(skew_stat(filtIdx, FALSE, FALSE))
+      ln_s(string(".."))
+      ln_d(skew_stat(filtIdx, FALSE, TRUE))
+      ln_s(string("] "))
+      ln_s(skew_reading(filtIdx, FALSE, bEngaged))
+      if filtIdx <> SK_CTL and not bEngaged
+        ln_s(string(" | filter not observed to engage; NO DELAY is void"))
+      ln_out()
+  if modeOk[MD_4P] and carrier_ok(SK_CTL) and (skew_stat(SK_CTL, TRUE, FALSE) <> 0 or skew_stat(SK_CTL, TRUE, TRUE) <> 0 or skew_stat(SK_CTL, FALSE, FALSE) <> 0 or skew_stat(SK_CTL, FALSE, TRUE) <> 0)
+    rig_fail(string("S the control (two UNFILTERED monitors) is not 0: the capture path itself skews lanes, the filter skew is not separable from it"))
+    ln_out()
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

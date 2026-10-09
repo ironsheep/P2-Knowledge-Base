@@ -1,0 +1,1119 @@
+'' ===========================================================================
+''
+''   File.......  test-vo-g028-hw-stack-overflow.spin2
+''   Purpose....  VO-G028: what the P2 cog's 8-level hardware stack does when
+''                a 9th (and 10th) value is pushed - which value is lost, and
+''                does the documented pop-past-bottom copy hold afterwards?
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+'' ===========================================================================
+
+{ WHAT IS DECIDED  (register VO-G028, narrowed; close-out study step 8)
+
+  The sources state the depth and one end of the behaviour:
+    - depth: "8-level hardware stack for fastest subroutine calls/returns and
+      push/pop operations" (silicon-doc-text.txt:166; p2-datasheet-text.txt:
+      75; pasm2-manual-text.txt K / Stack: "The 8-level hardware stack used
+      for subroutine calls (stores C, Z, and PC) and temporary 32-bit
+      push/pop storage");
+    - the UNDER-run end: after 8 pushes "(bottom stack value gets copied
+      each _RET_ / RET)" (silicon-doc-text.txt:1149-1150) - popping/returning
+      past the bottom keeps returning the bottom value;
+    - PUSH D "Push D onto stack", POP D "Pop stack (K). D = K. C = K[31]"
+      (p2-datasheet-text.txt:2092-2093); CALL pushes {C, Z, 10'b0, PC[19:0]}
+      and RET pops it (p2-datasheet-text.txt:1725, :1762).
+  NOT STATED anywhere ingested: the OVER-run end - what a 9th (or 10th) PUSH /
+  CALL discards.  The debugger saves and restores the stack with exactly 8 POP
+  and 8 PUSH (Spin2_debugger.spin2:315-322, :400-407): consistent, silent on a
+  9th.  The KB pages deliverables/ai/P2/language/pasm2/concepts/
+  stack_operations.yaml:55-58 (call_stack: depth "8 levels", width "22 bits
+  (20-bit address + 2 flags)") and xbyte_engine.yaml:234 do not assert what a
+  9th push discards, so nothing waits on this bench for the overrun; the
+  stack_operations.yaml WIDTH claim (22 bits) is checked by arm W below.
+
+  THIS PROGRAM MEASURES AND PREDICTS NOTHING.  It prints the readings below
+  before the run and lets the recorded pops select one.
+
+RIG
+  Bare P2 board, 200 MHz.  NO PINS, no jumper, nothing attached.  Cog 0
+  (Spin2, the only cog with the debugger, DEBUG_COGS = %0000_0001) starts ONE
+  PASM cog (COGINIT, cog execution: no debug interrupt, no debug(), no BRK, no
+  interrupt, and it never uses CALL/RET or the stack except where an arm says
+  so - loops are REP / jumps through a register), waits for it (1 s timeout),
+  then checks and prints its records.  That cog only measures; cog 0 reports.
+  A cog that does not finish within 1 s is stopped and named (STALLED).
+  Values pushed are small (bits 19:0 only: CALL stores {C,Z,PC[19:0]}), so the
+  width of a stack entry cannot confound the arms; arm W measures the width
+  separately and is informational (it reads against the KB's 22-bit claim,
+  see THE READINGS OF ARM W).
+
+ONE REPETITION (8 repetitions, every record independent)
+  Before EVERY arm the stack is prefilled: 8 PUSH of POISON + rep*16 + k and 8
+  POP.  This is a poison DETECTOR, not a map of the slots: if the stack
+  shifts on pop and refills the bottom by the bottom-copy rule (SD:1149-1150),
+  all eight slots end up holding p0 = POISON + rep*16, not eight different
+  stale values.  A pop that returns a poison value where a pushed value
+  belongs is stale-slot evidence and is flagged.
+  v(k) = $000C_A000 + k.  Arms, in this order:
+    M   marker / control: the prefill itself, RECORDED.  8 pops MUST return
+        the 8 poison values in reverse (else RIG FAIL: the stack does not
+        work as a stack)
+    I   control: PUSH v1..v8, then 8 POP.  MUST return v8..v1
+    II  PUSH v1..v9, then 12 POP   (the question: the 9th push)
+    IIB PUSH v1..v10, then 12 POP  (the 9th and 10th pushes)
+    III the stated end: PUSH v1..v8, then 9 POP.  MUST return v8..v1, then v1
+        (the bottom copy; SD:1150, as a control - else RIG FAIL)
+    W   PUSH $A5A5_0001..$A5A5_0008, 8 POP: do all 32 bits of an entry
+        survive?  (informational: PUSH/POP is the instrument here; the
+        reading is pre-registered below and the program prints which one it
+        matched)
+    IV  nine nested CALLs, one return site per level (site k logs k then
+        RETs); the sites visited, in order, are the RET targets.  The log is
+        bounded to 16 steps; a loop of repeated returns aborts there.
+  Record: 75 longs (tag, M 8, I 8, II 12, IIB 12, III 9, W 8, IV steps, IV
+  log 16), tag first, written in the same block so a record never written
+  shows a wrong tag.
+
+THE READINGS (printed BEFORE the run; in terms of the pushes v1..v9 of arm II)
+    HOLDS 9+      v9 v8 .. v1 in the FIRST 9 pops (arm IIB: v10 .. v1 in the first
+                  10); the stack is deeper than documented.  Only that prefix is
+                  classified: a deeper stack's tail is not "v1 v1 v1" (the bottom
+                  copy applies at ITS bottom, and slots below may be stale
+                  poison), so the tail pops are printed raw, never judged
+    DROP-OLDEST   v9 v8 .. v2 then v2 v2 v2 v2  (the 9th push shifts the oldest out;
+                  the bottom copy is the new bottom)
+    RING          v9 v8 .. v2 then v9 v8 v7 v6  (the 9th push overwrites the oldest slot
+                  in a circular buffer)
+    DROP-NEWEST   v8 v7 .. v1 then v1 v1 v1 v1  (the 9th push is ignored)
+    OVERWRITE-TOP v9 v7 v6 .. v1 then v1 v1 v1 v1  (the 9th push overwrites the newest)
+    OTHER         anything else (the raw pops are the finding)
+  Arm IIB and arm IV (the sites RET returns to) must select the SAME reading as
+  arm II or the reading is not a single model and the lines are the finding.
+  Arm IV per reading: HOLDS 9+ = 8 7 6 5 4 3 2 1 0 (9 steps); DROP-OLDEST =
+  8 7 6 5 4 3 2 1 then 1 repeated to the 16-step cap; RING = 8 7 6 5 4 3 2 1
+  8 7 6 5 4 3 2 1 (cap); DROP-NEWEST = 7 6 5 4 3 2 1 0; OVERWRITE-TOP = 8 6 5
+  4 3 2 1 0.
+
+  RING AND THE ARM III GATE.  A pure 8-slot circular buffer returns v8 (not
+  v1) on the 9th pop of arm III, so arm III - the gate that requires the
+  bottom copy for POP - FAILS in that model.  RING can therefore be selected
+  ONLY together with a failed arm III.  When arm III is the ONLY failed gate,
+  the program does not stop at NO VERDICT: it prints the readings of arms II,
+  IIB and IV with the note "III refuted the bottom copy for POP" (the readings
+  then stand on those arms alone, no VERDICT line is issued, the arm III raw
+  pops are the finding).  Any other failed gate still gives NO VERDICT.
+
+THE READINGS OF ARM W (printed BEFORE the run; informational, never a gate)
+  The KB page deliverables/ai/P2/language/pasm2/concepts/stack_operations.yaml
+  (lines 55-58, call_stack) claims width "22 bits (20-bit address + 2 flags)";
+  CALL stores {C, Z, 10'b0, PC[19:0]} (p2-datasheet-text.txt:1725), i.e. C and Z
+  in bits 31:30, zeros in 29:20, PC in 19:0.  Arm W pushes $A5A5_0001 ..
+  $A5A5_0008 and pops 8, so the first pop is the last push ($A5A5_0008):
+    32-BIT   the pops return $A5A5_0008, $A5A5_0007 .. $A5A5_0001 unchanged
+             (every bit of an entry survives)
+    22-BIT   the pops return $8005_0008, $8005_0007 .. $8005_0001, that is
+             value & $C00F_FFFF (bits 31:30 kept = $8000_0000, bits 29:20
+             zero, bits 19:0 kept = $5_000k).  Derived: $A5A5_000k has
+             bits 31:30 = %10, bits 19:0 = $5_000k.
+    OTHER    anything else (the raw pops are the finding)
+  The program prints which one repetition 0 matched and in how many of the 8
+  repetitions.
+
+CHECKS (each failure prints RIG FAIL and NO VERDICT; the raw lines are still
+  printed and are still the finding)
+    - the PASM cog finishes within 1 s; every record has its tag;
+    - arm M right in 8 of 8 repetitions; arm I right in 8 of 8, no poison;
+    - arm III right in 8 of 8 (v8..v1, then v1); a failure of THIS gate alone
+      still prints the II / IIB / IV readings, with the note above, and no
+      VERDICT;
+    - arms I, II, IIB, III, W, IV: identical in all 8 repetitions
+      (DETERMINISTIC); a VARIES prints INCONCLUSIVE, not a reading.  Poison
+      values are compared as a rep-independent token p(k), so a stale slot
+      that is the same slot in every repetition does not read as VARIES.
+
+DEVIATION FROM THE BRIEF
+  The brief's arm (ii) records 9 pops; this program records 12, to see the tail
+  after an overflow (the ring and drop-oldest readings differ only there).
+  Arm IIB (10 pushes) and arm W (entry width) and the poison prefill are
+  additions.  The brief's arm (iv) records "each RET target": the target is
+  identified by the site that runs after it (site k logs k); the log is
+  capped at 16 steps so a repeating return cannot hang the cog.  The brief
+  says (iii) is a gate "confirming SD:1150": SD:1150 says _RET_ / RET, arm III
+  tests POP and arm IV tests RET, so arm III failing says the POP behaviour
+  differs from the stated RET behaviour, which is itself a finding.
+
+DEBUGGER
+  Every printed line is assembled in lineBuf from hub strings and numbers and
+  sent by the ONE debug(zstr_(@lineBuf)) record in ln_out(); the only other
+  record is debug("DEBUG_END_SESSION").
+
+OPCODES AND ADDRESSES  (pnut-ts -d -l, v1.55.8, read from the .lst)
+  The .lst is a hub-image dump plus a symbol table; the PASM cog's object
+  offset = $154 + cog address * 4 (pasm = $154, long-aligned by the alignl
+  after the byte tables).  Encodings from the silicon doc: PUSH D/# = EEEE
+  1101011 00L DDDDDDDDD 000101010 (silicon-doc-text.txt:5320), POP D = EEEE
+  1101011 CZ0 DDDDDDDDD 000101011 (:5321).  Read from the .lst:
+    $178  rep @.m1,#8               $FCDC_0408   (D = 2 instructions, S = #8)
+    $17C  push val                  $FD61_222A   (D = val $91, L = 0)
+    $184  rep @.m2,#8               $FCDC_0408
+    $188  pop tmp                   $FD61_242B   (D = tmp $92)
+    $18C  wrlong tmp,ptrb++         $FC65_25E1
+    $230  (arm IV) call #n1         $FDB0_000C ; site0 at $234: wrlong #0,ptrb++
+          $FC6C_01E1 (D is an immediate; site1 at $244 is $FC6C_03E1)
+    each site (site1 at $244): cmp c_steps,#MAXSTEP wc  $F215_2010 (at $24C) ;
+          if_nc jmp #nest_end  $3D90_00xx (at $250) ; ret  $FD64_002D (at $254;
+          RET is EEEE 1101011 CZ1 000000000 000101101, silicon-doc-text.txt
+          :5325; REP {#}D,{#}S is described at :757-775, "Any branch within
+          the repeating instruction block will cancel REP activity" - the REP
+          bodies here contain no branch)
+    $358  arm_go: rep @.g1,a_np     $FCD8_0494   (S = a_np $94, a register)
+  Cog registers: c_vbase $88, c_wbase $89, c_poisbase $8A, c_tagbase $8B,
+  c_donev $8C, c_rp $8D, c_rep $8E, c_pois $8F, c_steps $90, val $91, tmp $92,
+  a_base $93, a_np $94, a_npop $95, pfret $96, armret $97.  Mailbox longs:
+  MB_REC 0, MB_CUR 1, MB_DONE 2.
+  The listing reports 2 DEBUG records, 24 bytes of DEBUG data.
+  If you edit this file, recompile with -l and re-read every row above.
+
+HOW TO RUN
+  USB serial must be connected (DEBUG rides P62/P63).  Compile with
+  pnut-ts -d, load to RAM with DEBUG on (pnut-term-ts, or PNut Ctrl-F10).
+  Runs once, in well under a second; nothing is written to flash.
+  SAVE THE WHOLE CONSOLE OUTPUT - it is the only record.
+  Expected run time: well under 1 s; the PASM cog is waited for at most 1 s.
+  A run that prints no "=== END" line and no DEBUG_END_SESSION within 10 s is
+  a hang or a lost session: report it as such, not as a reading.
+  Clock: _clkfreq = 200 MHz assumes the board's 20 MHz crystal (the listing's
+  CLKMODE is $010009FB, read from the .lst); the 1 s timeout depends on it.
+  Output: the header and readings, one line per arm, the reading lines (arm W:
+  which width it matched), the VERDICT line, the END line, then
+  DEBUG_END_SESSION.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+  REPS            = 8                   ' repetitions
+  VBASE           = $000C_A000          ' v(k) = VBASE + k (bits 19:0 only)
+  WBASE           = $A5A5_0000          ' arm W entries = WBASE + k
+  POISON          = $000B_AD00          ' poison prefill = POISON + rep * 16 + k
+  POISON_SHIFT    = 4
+  TAG_BASE        = $6028_0000          ' record tag = TAG_BASE + rep
+  DONE_V          = $0D0E_0D0E          ' the cog is done
+  UNWRITTEN       = $EEEE_EEEE          ' fill before a run
+  MAXSTEP         = 16                  ' cap of the nested-CALL log
+  NMODEL          = 5                   ' readings with an expected table
+  NIV_ENTRIES     = 16
+  HOLD_PFX_II     = 9                   ' HOLDS 9+ is classified on the first 9 pops of arm II ...
+  HOLD_PFX_IIB    = 10                  ' ... and the first 10 of arm IIB (v10 .. v1)
+  W_MASK22        = $C00F_FFFF          ' a 22-bit entry keeps bits 31:30 and 19:0
+  POISON_TOKEN    = $5A5A_0000          ' rep-independent token for poison slot k: POISON_TOKEN + k
+
+  LINE_MAX        = 480                 ' longest printed line (chars)
+  DEC_TOP         = 1_000_000_000
+  DEC_DIGITS      = 10
+  DEC_BASE        = 10
+  HEX_DIGITS      = 8
+  HEX_BITS        = 4
+  HEX_GROUP       = 4
+  HEX_LETTERS     = 10
+
+CON ' ---- Identifiers ----
+  ' record layout (longs)
+  O_TAG           = 0
+  O_M             = 1                   ' 8 pops
+  O_I             = 9                   ' 8 pops
+  O_II            = 17                  ' 12 pops
+  O_IIB           = 29                  ' 12 pops
+  O_III           = 41                  ' 9 pops
+  O_W             = 50                  ' 8 pops
+  O_STEPS         = 58                  ' arm IV: sites visited
+  O_LOG           = 59                  ' arm IV: 16 site ids
+  RECW            = 75
+  ' arms
+  #0, ARM_M, ARM_I, ARM_II, ARM_IIB, ARM_III, ARM_W, ARM_IV
+  NARM            = ARM_IV + 1
+  ' readings
+  #0, M_HOLD, M_DROPOLD, M_RING, M_DROPNEW, M_OVERTOP, M_OTHER
+  ' arm W readings
+  #0, W_32, W_22, W_OTHER
+  ' mailbox longs
+  '  MB_REC  - hub address of the records   MB_CUR  - progress: the repetition
+  '  MB_DONE - DONE_V once every repetition is done
+  #0, MB_REC, MB_CUR, MB_DONE, MB_LEN
+
+VAR ' ---- Rig State ----
+  long mbox[MB_LEN]
+  long recs[REPS * RECW]
+  long failCnt                          ' RIG FAIL lines printed
+  long iiiFailCnt                       ' of those, the arm III bottom-copy gate (see print_verdict)
+  long bStall
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+PUB main() | pasmCog, armIdx
+'' Run the stack arms on the PASM cog, check the controls, report the readings.
+''
+
+' Local Variables:
+' @local pasmCog - cog the PASM cog started in
+' @local armIdx - arm
+
+  linePos := 0
+  failCnt := 0
+  iiiFailCnt := 0
+  bStall := FALSE
+  print_header()
+
+  longfill(@recs, UNWRITTEN, REPS * RECW)
+  mbox[MB_REC] := @recs
+  mbox[MB_CUR] := UNWRITTEN
+  mbox[MB_DONE] := 0
+  pasmCog := coginit(COGEXEC_NEW, @pasm, @mbox)
+  if pasmCog < 0
+    ln_s(string("RIG FAIL: coginit expected a free cog (0..7), got "))
+    ln_d(pasmCog)
+    ln_out()
+    say(string("=== END: RIG FAIL (no PASM cog) - NO VERDICT ==="))
+    finish()
+  if not wait_done(@mbox[MB_DONE])
+    bStall := TRUE
+    cogstop(pasmCog)
+  ln_s(string("=== PASM cog "))
+  ln_d(pasmCog)
+  say(string(" ==="))
+  if bStall
+    ln_s(string("RIG FAIL: STALLED - the PASM cog did not finish within 1 s; progress long "))
+    ln_h(mbox[MB_CUR])
+    ln_s(string(" (the repetition it was in, UNWRITTEN = never started)"))
+    ln_out()
+    failCnt++
+
+  repeat armIdx from ARM_M to ARM_IV
+    report_arm(armIdx)
+  print_verdict()
+  finish()
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output.
+'
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_d(numVal)
+' Append a signed decimal to the line.
+'
+' @param numVal - the number, read as signed
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_u(numVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_cnt(countVal)
+' Append "n of 8".
+'
+' @param countVal - the count
+
+  ln_d(countVal)
+  ln_s(string(" of "))
+  ln_d(REPS)
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI rig_fail(pStr)
+' Count one RIG FAIL and start its line; the caller appends the details and
+' sends the line.
+'
+' @param pStr - hub address of the text
+
+  failCnt++
+  ln_s(string("RIG FAIL: "))
+  ln_s(pStr)
+
+PRI wait_done(pFlag) : bDone | startCt
+' Wait up to 1 s for a cog to write DONE_V to its done long.
+'
+' @param pFlag - hub address of the done long
+' @returns bDone - TRUE when DONE_V arrived in time
+
+' Local Variables:
+' @local startCt - CT when the wait began
+
+  bDone := TRUE
+  startCt := getct()
+  repeat until long[pFlag] == DONE_V
+    if getct() - startCt > clkfreq
+      bDone := FALSE
+      quit
+
+' ---------------------------------------------------------------------------
+' header
+' ---------------------------------------------------------------------------
+PRI print_header()
+' Print the rig identity and the readings, before any run.
+'
+
+  say(string("=== VO-G028: the 8-level hardware stack past 8 entries (pnut-ts v1.55.8 -d, clk 200 MHz, no pins) ==="))
+  say(string("Measured, not predicted: depth 8 and the under-run end (SD:1150, bottom value copied) are stated; what a 9th PUSH/CALL discards is not."))
+  say(string("Run needs USB serial (DEBUG on P62/P63); save the whole console output; no '=== END' within 10 s = hang / lost session."))
+  say(string("Before every arm: poison prefill (8 PUSH POISON+rep*16+k, 8 POP). v(k) = $000C_A000+k; p(k) = a poison slot. 8 repetitions, every record independent."))
+  say(string("Arms: M poison round trip (control) | I push v1..v8, pop 8 (control) | II push v1..v9, pop 12 | IIB push v1..v10, pop 12 | III push v1..v8, pop 9 (control: v8..v1 then v1) | W 32-bit entries | IV nine nested CALLs, sites logged."))
+  ln_s(string("READINGS of arm II (none predicted): HOLDS9+ = v9..v1 in the first 9 pops (IIB: v10..v1 in the first 10; tail printed raw, not judged) | "))
+  say(string("DROP-OLDEST = v9..v2 then v2 | RING = v9..v2 then v9 v8 v7 v6 | DROP-NEWEST = v8..v1 then v1 | OVERWRITE-TOP = v9 v7..v1 then v1 | OTHER = raw is the finding."))
+  say(string("Arms IIB and IV must select the same reading as arm II. Gates: M, I, III right in 8 of 8; every arm identical in 8 of 8 (else INCONCLUSIVE; poison compared as token p(k))."))
+  say(string("RING = a pure 8-slot ring would return v8 on the 9th pop of arm III, so RING can appear only with gate III failing: then II, IIB, IV are still printed with the note 'III refuted the bottom copy for POP', no VERDICT."))
+  say(string("ARM W (informational), pushes $A5A5_0001..$A5A5_0008: 32-BIT = pops $A5A5_0008..$A5A5_0001 | 22-BIT (KB stack_operations.yaml:58 '22 bits (20-bit address + 2 flags)') = pops $8005_0008..$8005_0001 (value & $C00F_FFFF) | OTHER = raw."))
+
+' ---------------------------------------------------------------------------
+' records
+' ---------------------------------------------------------------------------
+PRI rec_at(repIdx, fieldIdx) : fieldVal
+' One long of one repetition's record.
+'
+' @param repIdx - repetition
+' @param fieldIdx - record long (O_*, or O_* + index)
+' @returns fieldVal - the recorded long
+
+  fieldVal := recs[repIdx * RECW + fieldIdx]
+
+PRI arm_base(armIdx) : baseField
+' @param armIdx - arm
+' @returns baseField - the arm's first record long
+
+  baseField := lookupz(armIdx: O_M, O_I, O_II, O_IIB, O_III, O_W, O_STEPS)
+
+PRI arm_len(armIdx) : lenVal
+' @param armIdx - arm
+' @returns lenVal - the arm's number of record longs (arm IV: steps + log)
+
+  lenVal := lookupz(armIdx: 8, 8, 12, 12, 9, 8, 17)
+
+PRI arm_text(armIdx) : pText
+' @param armIdx - arm
+' @returns pText - the arm as printed
+
+  pText := lookupz(armIdx: string("M   poison round trip (8 pushes, 8 pops)   "), string("I   control (push v1..v8, pop 8)         "), string("II  push v1..v9, pop 12                  "), string("IIB push v1..v10, pop 12                 "), string("III stated end (push v1..v8, pop 9)      "), string("W   32-bit entries (push 8, pop 8)       "), string("IV  nine nested CALLs, sites visited      "))
+
+PRI model_text(modelIdx) : pText
+' @param modelIdx - M_*
+' @returns pText - the reading as printed
+
+  pText := lookupz(modelIdx: string("HOLDS 9+"), string("DROP-OLDEST"), string("RING"), string("DROP-NEWEST"), string("OVERWRITE-TOP"), string("OTHER"))
+
+PRI same_as_rep0(armIdx, repIdx) : bSame | k
+' Whether a repetition's arm values equal repetition 0's.
+'
+' @param armIdx - arm
+' @param repIdx - repetition
+' @returns bSame - TRUE when every long of the arm is equal
+
+' Local Variables:
+' @local k - long within the arm
+
+  bSame := TRUE
+  repeat k from 0 to arm_len(armIdx) - 1
+    if norm_val(repIdx, rec_at(repIdx, arm_base(armIdx) + k)) <> norm_val(0, rec_at(0, arm_base(armIdx) + k))
+      bSame := FALSE
+
+PRI poison_of(repIdx, k) : poisonVal
+' @param repIdx - repetition
+' @param k - slot 0..7
+' @returns poisonVal - the poison value pushed into slot k of this repetition
+
+  poisonVal := POISON + (repIdx << POISON_SHIFT) + k
+
+PRI is_poison(repIdx, valueVal) : bPoison
+' @param repIdx - repetition
+' @param valueVal - a popped value
+' @returns bPoison - TRUE when it is one of this repetition's poison values
+
+  bPoison := valueVal >= poison_of(repIdx, 0) and valueVal <= poison_of(repIdx, 7)
+
+PRI norm_val(repIdx, valueVal) : normVal
+' A popped value with this repetition's poison (POISON + rep * 16 + k) replaced
+' by the rep-independent token POISON_TOKEN + k, so that the same stale slot in
+' two repetitions compares equal.
+'
+' @param repIdx - repetition
+' @param valueVal - a popped value
+' @returns normVal - valueVal, or POISON_TOKEN + k for poison slot k
+
+  if is_poison(repIdx, valueVal)
+    normVal := POISON_TOKEN + valueVal - poison_of(repIdx, 0)
+  else
+    normVal := valueVal
+
+PRI ln_val(repIdx, valueVal)
+' Append one popped value: v(k), p(k) for a poison slot, or hex.
+'
+' @param repIdx - repetition
+' @param valueVal - the value
+
+  if valueVal >= VBASE and valueVal < VBASE + 100
+    ln_c("v")
+    ln_d(valueVal - VBASE)
+  elseif is_poison(repIdx, valueVal)
+    ln_c("p")
+    ln_d(valueVal - poison_of(repIdx, 0))
+  elseif valueVal == UNWRITTEN
+    ln_s(string("--"))
+  else
+    ln_h(valueVal)
+
+PRI expect_pop(modelIdx, tblSel, k) : kVal
+' The pushed index an expected-reading table says pop k returns.
+'
+' @param modelIdx - M_HOLD .. M_OVERTOP
+' @param tblSel - 0: arm II table, 1: arm IIB table
+' @param k - pop index 0..11
+' @returns kVal - the v(k) index expected
+
+  if tblSel == 0
+    kVal := byte[@expII][modelIdx * 12 + k]
+  else
+    kVal := byte[@expIIB][modelIdx * 12 + k]
+
+PRI classify_pops(repIdx, baseField, tblSel) : modelIdx | m, k, bMatch, nJudge
+' Which reading a repetition's 12 pops of arm II (tblSel 0) or IIB (1) match.
+' HOLDS 9+ is judged on the first 9 pops (arm II) / 10 pops (arm IIB) only: the
+' tail of a deeper stack is not derivable.  The other readings use all 12.
+'
+' @param repIdx - repetition
+' @param baseField - O_II or O_IIB
+' @param tblSel - 0 or 1
+' @returns modelIdx - M_HOLD .. M_OVERTOP, or M_OTHER
+
+' Local Variables:
+' @local m - reading
+' @local k - pop index
+' @local bMatch - all judged pops match reading m
+' @local nJudge - pops judged for reading m
+
+  modelIdx := M_OTHER
+  repeat m from M_HOLD to M_OVERTOP
+    bMatch := TRUE
+    nJudge := 12
+    if m == M_HOLD
+      nJudge := HOLD_PFX_II + tblSel * (HOLD_PFX_IIB - HOLD_PFX_II)
+    repeat k from 0 to nJudge - 1
+      if rec_at(repIdx, baseField + k) <> VBASE + expect_pop(m, tblSel, k)
+        bMatch := FALSE
+    if bMatch
+      modelIdx := m
+      quit
+
+PRI iv_steps(repIdx) : stepCnt
+' The sites arm IV visited, clamped to the log size (an unwritten or wild
+' value reads 0).
+'
+' @param repIdx - repetition
+' @returns stepCnt - 0..16
+
+  stepCnt := rec_at(repIdx, O_STEPS)
+  if stepCnt +> NIV_ENTRIES
+    stepCnt := 0
+
+PRI classify_iv(repIdx) : modelIdx | m, k, steps, bMatch
+' Which reading a repetition's arm IV log matches.
+'
+' @param repIdx - repetition
+' @returns modelIdx - M_HOLD .. M_OVERTOP, or M_OTHER
+
+' Local Variables:
+' @local m - reading
+' @local k - log index
+' @local steps - the sites visited
+' @local bMatch - steps and log match reading m
+
+  modelIdx := M_OTHER
+  steps := iv_steps(repIdx)
+  if steps == 0
+    return
+  repeat m from M_HOLD to M_OVERTOP
+    bMatch := steps == byte[@expIV][m * (NIV_ENTRIES + 1)]
+    if bMatch
+      repeat k from 0 to steps - 1
+        if rec_at(repIdx, O_LOG + k) <> byte[@expIV][m * (NIV_ENTRIES + 1) + 1 + k]
+          bMatch := FALSE
+    if bMatch
+      modelIdx := m
+      quit
+
+PRI classify_w(repIdx) : wIdx | k, wantVal, bFull, b22
+' Which width reading a repetition's arm W pops match: pops 0..7 must be
+' WBASE+8 .. WBASE+1 (32-BIT) or the same & W_MASK22 (22-BIT).
+'
+' @param repIdx - repetition
+' @returns wIdx - W_32, W_22 or W_OTHER
+
+' Local Variables:
+' @local k - pop index
+' @local wantVal - the 32-bit value pushed that this pop must return
+' @local bFull - every pop is the full 32-bit value
+' @local b22 - every pop is the value with bits 29:20 cleared
+
+  bFull := TRUE
+  b22 := TRUE
+  repeat k from 0 to 7
+    wantVal := WBASE + 8 - k
+    if rec_at(repIdx, O_W + k) <> wantVal
+      bFull := FALSE
+    if rec_at(repIdx, O_W + k) <> (wantVal & W_MASK22)
+      b22 := FALSE
+  if bFull
+    wIdx := W_32
+  elseif b22
+    wIdx := W_22
+  else
+    wIdx := W_OTHER
+
+PRI w_text(wIdx) : pText
+' @param wIdx - W_*
+' @returns pText - the width reading as printed
+
+  pText := lookupz(wIdx: string("32-BIT (all 32 bits of an entry survived)"), string("22-BIT (bits 31:30 and 19:0 kept, bits 29:20 zero: matches the KB's 22 bits)"), string("OTHER (neither; the raw pops are the finding)"))
+
+PRI arm_right(armIdx, repIdx) : bRight | k
+' Whether a CONTROL arm (M, I, III) returned exactly what it must.
+'
+' @param armIdx - ARM_M, ARM_I or ARM_III
+' @param repIdx - repetition
+' @returns bRight - TRUE when every pop is as required
+
+' Local Variables:
+' @local k - pop index
+
+  bRight := TRUE
+  case armIdx
+    ARM_M:
+      repeat k from 0 to 7
+        if rec_at(repIdx, O_M + k) <> poison_of(repIdx, 7 - k)
+          bRight := FALSE
+    ARM_I:
+      repeat k from 0 to 7
+        if rec_at(repIdx, O_I + k) <> VBASE + 8 - k
+          bRight := FALSE
+    ARM_III:
+      repeat k from 0 to 7
+        if rec_at(repIdx, O_III + k) <> VBASE + 8 - k
+          bRight := FALSE
+      if rec_at(repIdx, O_III + 8) <> VBASE + 1
+        bRight := FALSE
+
+PRI report_arm(armIdx) | repIdx, sameCnt, tagCnt, rightCnt, poisonCnt, k, modelIdx, pfx, wMatch
+' Check one arm over the 8 repetitions, print its lines and any RIG FAIL.
+'
+' @param armIdx - arm
+
+' Local Variables:
+' @local repIdx - repetition
+' @local sameCnt - repetitions identical to repetition 0
+' @local tagCnt - records whose tag is right
+' @local rightCnt - repetitions a control arm got right
+' @local poisonCnt - repetitions in which an arm returned a poison value
+' @local k - long within the arm
+' @local modelIdx - reading of repetition 0
+' @local pfx - pops judged for HOLDS 9+ in this arm
+' @local wMatch - repetitions with the same arm W reading as repetition 0
+
+  sameCnt := 0
+  tagCnt := 0
+  rightCnt := 0
+  poisonCnt := 0
+  repeat repIdx from 0 to REPS - 1
+    if same_as_rep0(armIdx, repIdx)
+      sameCnt++
+    if rec_at(repIdx, O_TAG) == TAG_BASE + repIdx
+      tagCnt++
+    if armIdx == ARM_M or armIdx == ARM_I or armIdx == ARM_III
+      if arm_right(armIdx, repIdx)
+        rightCnt++
+    if armIdx <> ARM_M and armIdx <> ARM_W and armIdx <> ARM_IV
+      repeat k from 0 to arm_len(armIdx) - 1
+        if is_poison(repIdx, rec_at(repIdx, arm_base(armIdx) + k))
+          poisonCnt++
+          quit
+  ' ---- the arm's line: repetition 0 ----
+  ln_s(arm_text(armIdx))
+  ln_s(string("| "))
+  if armIdx == ARM_IV
+    ln_s(string("steps "))
+    ln_h(rec_at(0, O_STEPS))
+    ln_s(string(", sites"))
+    if iv_steps(0) > 0
+      repeat k from 0 to iv_steps(0) - 1
+        ln_c(" ")
+        ln_d(rec_at(0, O_LOG + k))
+  else
+    repeat k from 0 to arm_len(armIdx) - 1
+      ln_val(0, rec_at(0, arm_base(armIdx) + k))
+      ln_c(" ")
+  ln_out()
+  ln_s(string("   "))
+  if sameCnt == REPS
+    ln_s(string("DETERMINISTIC (8 of 8 identical)"))
+  else
+    ln_s(string("VARIES ("))
+    ln_cnt(sameCnt)
+    ln_s(string(" identical to rep 0)"))
+  ln_s(string(" | tags right "))
+  ln_cnt(tagCnt)
+  if armIdx == ARM_M or armIdx == ARM_I or armIdx == ARM_III
+    ln_s(string(" | control as required "))
+    ln_cnt(rightCnt)
+  if armIdx <> ARM_M and armIdx <> ARM_W and armIdx <> ARM_IV
+    ln_s(string(" | repetitions that returned a poison value "))
+    ln_d(poisonCnt)
+  if armIdx == ARM_W
+    ln_s(string(" | rep 0 as hex: "))
+    repeat k from 0 to 7
+      ln_h(rec_at(0, O_W + k))
+      ln_c(" ")
+  ln_out()
+  if sameCnt <> REPS
+    repeat repIdx from 0 to REPS - 1
+      ln_s(string("   raw rep "))
+      ln_d(repIdx)
+      ln_s(string(":"))
+      if armIdx == ARM_IV
+        ln_s(string(" steps "))
+        ln_h(rec_at(repIdx, O_STEPS))
+        if iv_steps(repIdx) > 0
+          repeat k from 0 to iv_steps(repIdx) - 1
+            ln_c(" ")
+            ln_d(rec_at(repIdx, O_LOG + k))
+      else
+        repeat k from 0 to arm_len(armIdx) - 1
+          ln_c(" ")
+          ln_val(repIdx, rec_at(repIdx, arm_base(armIdx) + k))
+      ln_out()
+  ' ---- readings (arms II, IIB, IV) ----
+  if armIdx == ARM_II or armIdx == ARM_IIB or armIdx == ARM_IV
+    ln_s(string("   READING of rep 0: "))
+    case armIdx
+      ARM_II:
+        modelIdx := classify_pops(0, O_II, 0)
+      ARM_IIB:
+        modelIdx := classify_pops(0, O_IIB, 1)
+      ARM_IV:
+        modelIdx := classify_iv(0)
+    ln_s(model_text(modelIdx))
+    if modelIdx == M_HOLD and armIdx <> ARM_IV
+      ln_s(string(" (judged on the first "))
+      if armIdx == ARM_II
+        ln_d(HOLD_PFX_II)
+        pfx := HOLD_PFX_II
+      else
+        ln_d(HOLD_PFX_IIB)
+        pfx := HOLD_PFX_IIB
+      ln_s(string(" pops only; tail, NOT judged:"))
+      repeat k from pfx to 11
+        ln_c(" ")
+        ln_val(0, rec_at(0, arm_base(armIdx) + k))
+      ln_c(")")
+    ln_out()
+  ' ---- reading (arm W, informational) ----
+  if armIdx == ARM_W
+    wMatch := 0
+    repeat repIdx from 0 to REPS - 1
+      if classify_w(repIdx) == classify_w(0)
+        wMatch++
+    ln_s(string("   READING of rep 0 (informational): "))
+    ln_s(w_text(classify_w(0)))
+    ln_s(string(" | same reading in "))
+    ln_cnt(wMatch)
+    ln_out()
+  ' ---- gates ----
+  if tagCnt <> REPS
+    rig_fail(string("arm "))
+    ln_s(arm_text(armIdx))
+    ln_s(string(" records with the right tag "))
+    ln_cnt(tagCnt)
+    ln_out()
+  if armIdx == ARM_M or armIdx == ARM_I or armIdx == ARM_III
+    if rightCnt <> REPS
+      rig_fail(string("control arm "))
+      ln_s(arm_text(armIdx))
+      ln_s(string(" right in "))
+      ln_cnt(rightCnt)
+      ln_s(string(" (MUST be 8 of 8)"))
+      if armIdx == ARM_III
+        iiiFailCnt++
+        ln_s(string(" - III refuted the bottom copy for POP (a pure 8-slot ring would return v8 on the 9th pop); II, IIB and IV are still read below, no VERDICT"))
+      ln_out()
+  if armIdx == ARM_I and poisonCnt <> 0
+    rig_fail(string("control arm I returned a poison value in "))
+    ln_d(poisonCnt)
+    ln_s(string(" repetition(s) - a stale slot was read"))
+    ln_out()
+
+PRI print_verdict() | repIdx, modelII, modelIIB, modelIV, nSame
+' Print the reading when no gate failed.
+'
+
+' Local Variables:
+' @local repIdx - repetition
+' @local modelII - reading from arm II (repetition 0)
+' @local modelIIB - reading from arm IIB
+' @local modelIV - reading from arm IV
+' @local nSame - arms II, IIB, IV (and W, III) identical in 8 of 8
+
+  ln_s(string("=== CONTROLS: "))
+  if failCnt == 0
+    say(string("all passed ==="))
+  elseif failCnt == iiiFailCnt
+    say(string("all passed except the arm III bottom-copy gate ==="))
+    say(string("NOTE: III refuted the bottom copy for POP - the readings below stand on arms II, IIB and IV alone; NO VERDICT is issued (RING appears only in this case)"))
+  else
+    ln_d(failCnt)
+    say(string(" RIG FAIL line(s) above ==="))
+    say(string("NO VERDICT: a control failed; the raw lines above are still the finding"))
+    return
+  nSame := 0
+  repeat repIdx from 0 to REPS - 1
+    if same_as_rep0(ARM_II, repIdx) and same_as_rep0(ARM_IIB, repIdx) and same_as_rep0(ARM_IV, repIdx)
+      nSame++
+  if nSame <> REPS
+    say(string("INCONCLUSIVE: arm II, IIB or IV varies between repetitions; the raw lines above are the finding"))
+    say(string("=== END ==="))
+    return
+  modelII := classify_pops(0, O_II, 0)
+  modelIIB := classify_pops(0, O_IIB, 1)
+  modelIV := classify_iv(0)
+  ln_s(string("READINGS: arm II "))
+  ln_s(model_text(modelII))
+  ln_s(string(" | arm IIB "))
+  ln_s(model_text(modelIIB))
+  ln_s(string(" | arm IV "))
+  ln_s(model_text(modelIV))
+  ln_out()
+  if iiiFailCnt <> 0
+    ln_s(string("NO VERDICT (arm III failed): arm II "))
+    ln_s(model_text(modelII))
+    if modelII == modelIIB and modelII == modelIV
+      say(string(", arms IIB and IV agree - but III refuted the bottom copy for POP, so the raw pops of all arms are the finding"))
+    else
+      say(string(", arms II, IIB and IV do not agree - the raw pops of all arms are the finding"))
+    say(string("=== END ==="))
+    return
+  if modelII == M_OTHER
+    say(string("VERDICT: OTHER - the 12 pops of arm II match none of the pre-registered readings; the raw pops are the finding"))
+  elseif modelII == modelIIB and modelII == modelIV
+    ln_s(string("VERDICT: "))
+    ln_s(model_text(modelII))
+    say(string(" - arms II, IIB and the CALL/RET chain agree (arm III confirmed the bottom copy for POP)"))
+  else
+    say(string("VERDICT: NOT ONE MODEL - arms II, IIB and IV select different readings; the lines above are the finding"))
+  say(string("=== END ==="))
+
+DAT ' ---- Expected readings ----
+' arm II: pop k returns v(this index).  rows = M_HOLD, M_DROPOLD, M_RING, M_DROPNEW, M_OVERTOP
+' (the M_HOLD rows are used for their first 9 / 10 pops only: HOLD_PFX_II / HOLD_PFX_IIB;
+' the trailing 1, 1, 1 of the M_HOLD rows are NOT a prediction and are never compared)
+expII           byte    9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1
+                byte    9, 8, 7, 6, 5, 4, 3, 2, 2, 2, 2, 2
+                byte    9, 8, 7, 6, 5, 4, 3, 2, 9, 8, 7, 6
+                byte    8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1
+                byte    9, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1
+' arm IIB (10 pushes): M_HOLD = a stack of 10 or more
+expIIB          byte    10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1
+                byte    10, 9, 8, 7, 6, 5, 4, 3, 3, 3, 3, 3
+                byte    10, 9, 8, 7, 6, 5, 4, 3, 10, 9, 8, 7
+                byte    8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1
+                byte    10, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1
+' arm IV: per reading: steps, then 16 site ids (entries beyond steps unused)
+expIV           byte    9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 255, 255, 255, 255, 255, 255, 255
+                byte    16, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1
+                byte    16, 8, 7, 6, 5, 4, 3, 2, 1, 8, 7, 6, 5, 4, 3, 2, 1
+                byte    8, 7, 6, 5, 4, 3, 2, 1, 0, 255, 255, 255, 255, 255, 255, 255, 255
+                byte    8, 8, 6, 5, 4, 3, 2, 1, 0, 255, 255, 255, 255, 255, 255, 255, 255
+                alignl                                  ' the PASM cog image below must start long-aligned
+
+' ===========================================================================
+' PASM COG (cog exec).  PTRA on entry = @mbox.  No debug(), no BRK, no
+' interrupt in this cog.  The stack is touched ONLY by PUSH / POP in the REP
+' blocks and by the CALL / RET chain of arm IV; subroutines are entered by a
+' register JMP with the return address in a register.
+' ===========================================================================
+DAT             org     0        ' ---- Stack Cog ----
+pasm            rdlong  c_rp, ptra[MB_REC]              ' hub address of the records
+                mov     c_rep, #0
+
+rep_lp          wrlong  c_rep, ptra[MB_CUR]             ' progress: the repetition about to start
+                mov     c_pois, c_rep
+                shl     c_pois, #POISON_SHIFT
+                add     c_pois, c_poisbase              ' POISON + rep * 16
+                mov     ptrb, c_rp
+                add     ptrb, #4                        ' pops are recorded from record long 1
+
+                ' ---- arm M: the prefill itself, recorded ----
+                mov     val, c_pois
+                rep     @.m1, #8
+                push    val                             ' pushes poison+0 .. poison+7
+                add     val, #1
+.m1
+                rep     @.m2, #8
+                pop     tmp
+                wrlong  tmp, ptrb++
+.m2
+                ' ---- arm I: control ----
+                mov     pfret, #ai0
+                jmp     #prefill
+ai0             mov     a_base, c_vbase
+                mov     a_np, #8
+                mov     a_npop, #8
+                mov     armret, #ai1
+                jmp     #arm_go
+ai1             ' ---- arm II: push v1..v9, pop 12 ----
+                mov     pfret, #aii0
+                jmp     #prefill
+aii0            mov     a_base, c_vbase
+                mov     a_np, #9
+                mov     a_npop, #12
+                mov     armret, #aii1
+                jmp     #arm_go
+aii1            ' ---- arm IIB: push v1..v10, pop 12 ----
+                mov     pfret, #aiib0
+                jmp     #prefill
+aiib0           mov     a_base, c_vbase
+                mov     a_np, #10
+                mov     a_npop, #12
+                mov     armret, #aiib1
+                jmp     #arm_go
+aiib1           ' ---- arm III: the stated end, push v1..v8, pop 9 ----
+                mov     pfret, #aiii0
+                jmp     #prefill
+aiii0           mov     a_base, c_vbase
+                mov     a_np, #8
+                mov     a_npop, #9
+                mov     armret, #aiii1
+                jmp     #arm_go
+aiii1           ' ---- arm W: 32-bit entries ----
+                mov     pfret, #aw0
+                jmp     #prefill
+aw0             mov     a_base, c_wbase
+                mov     a_np, #8
+                mov     a_npop, #8
+                mov     armret, #aw1
+                jmp     #arm_go
+aw1             ' ---- arm IV: nine nested CALLs ----
+                mov     pfret, #aiv0
+                jmp     #prefill
+aiv0            mov     c_steps, #0
+                mov     ptrb, c_rp
+                add     ptrb, #O_LOG * 4                ' the site log starts at record long 59
+                call    #n1                             ' push 1: returns to site0
+site0           wrlong  #0, ptrb++
+                add     c_steps, #1
+                jmp     #nest_end
+n1              call    #n2
+site1           wrlong  #1, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n2              call    #n3
+site2           wrlong  #2, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n3              call    #n4
+site3           wrlong  #3, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n4              call    #n5
+site4           wrlong  #4, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n5              call    #n6
+site5           wrlong  #5, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n6              call    #n7
+site6           wrlong  #6, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n7              call    #n8
+site7           wrlong  #7, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n8              call    #n9                             ' push 9: the 9th push
+site8           wrlong  #8, ptrb++
+                add     c_steps, #1
+                cmp     c_steps, #MAXSTEP               wc
+        if_nc   jmp     #nest_end
+                ret
+n9              ret                                     ' the first pop of the chain
+nest_end        mov     tmp, c_rp
+                add     tmp, #O_STEPS * 4
+                wrlong  c_steps, tmp                    ' how many sites were visited
+                ' ---- the record's tag, last ----
+                mov     tmp, c_rep
+                add     tmp, c_tagbase
+                wrlong  tmp, c_rp
+                add     c_rp, #RECW * 4
+                add     c_rep, #1
+                cmp     c_rep, #REPS                    wz
+        if_nz   jmp     #rep_lp
+                wrlong  c_donev, ptra[MB_DONE]
+                cogid   tmp
+                cogstop tmp
+
+'--- subroutine: prefill the stack with poison (8 PUSH, 8 POP), not recorded
+prefill         mov     val, c_pois
+                rep     @.p1, #8
+                push    val                             ' the same poison+0 .. poison+7 as arm M
+                add     val, #1
+.p1
+                rep     @.p2, #8
+                pop     tmp
+.p2
+                jmp     pfret
+
+'--- subroutine: push a_np values (a_base+1 ..), then pop a_npop values, recorded
+arm_go          mov     val, a_base
+                rep     @.g1, a_np
+                add     val, #1
+                push    val
+.g1
+                rep     @.g2, a_npop
+                pop     tmp
+                wrlong  tmp, ptrb++
+.g2
+                jmp     armret
+
+'--- cog data
+c_vbase         long    VBASE
+c_wbase         long    WBASE
+c_poisbase      long    POISON
+c_tagbase       long    TAG_BASE
+c_donev         long    DONE_V
+c_rp            long    0
+c_rep           long    0
+c_pois          long    0
+c_steps         long    0
+val             long    0
+tmp             long    0
+a_base          long    0
+a_np            long    0
+a_npop          long    0
+pfret           long    0
+armret          long    0
+pasm_end
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

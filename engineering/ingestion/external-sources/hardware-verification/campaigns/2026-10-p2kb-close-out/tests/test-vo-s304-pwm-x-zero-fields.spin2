@@ -1,0 +1,952 @@
+'' =============================================================================
+''
+''   File....... test-vo-s304-pwm-x-zero-fields.spin2
+''   Purpose.... VO-S304 on SILICON: in PWM sawtooth %01001 and triangle %01000, what do X[15:0] = 0 (base period)
+''               and X[31:16] = 0 (frame count) do -- base period and frame time?
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED  (register VO-S304; close-out study step 8; bench-groupD-recheck.md section 4.3)
+
+  No ingested source gives the PWM X zero case.  The PWM pages say only that X.[15..0] "establishes a base period in clock cycles"
+  and X.[31..16] "establishes a PWM frame period in terms of base periods" (silicon-doc-text.txt:4038, :4040, :4057, :4059), and that
+  "Y.[15..0] is captured, IN is raised, and the process repeats" at the end of a frame (:4044, :4063).  A "zero = 65,536" statement
+  exists only for the DAC modes (:3925, "set X.[15..0] to zero (65,536 clocks)", %00001); EF-014 measured that sibling (DAC-noise X=0,
+  period 65,534).  Titus prints "0 < n < 65,536" for the NCO modes and X[15:0] = 1 for PWM only (smart-pins-titus-text.txt:511, :551,
+  :593-:659).  So for PWM: is a zero field 65,536, 1, or something that never completes a frame?  This program MEASURES it and predicts nothing.
+
+  RIG  (BARE BOARD -- NOTHING ATTACHED, NO PIN IS DRIVEN)
+    P4 = M, the PWM smart pin.  TT = %00 (output disabled regardless of DIR, silicon-doc-text.txt:3796), so the pad is never driven.
+    The observation is M's own IN: "At the end of a frame ... IN is raised" -- the frame time is the interval between IN rises.
+    (The study's 'second smart pin on a jumper' is not needed: recheck section 4.3.)
+
+  DEBUGGER (EF-057)
+    DEBUG_COGS = %0000_0001: the debug interrupt lives in cog 0 only.  Every pin operation and every timestamp is taken in a dedicated PASM
+    cog started by COGINIT; cog 0 only checks constants, reads the hub mailbox and reports.  Every printed line is built in a hub buffer and
+    sent by ONE debug() record.  Compile with pnut-ts -d; nothing on P62.
+
+  CONFIGURATION WORDS, FIELD BY FIELD (WRPIN D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0, silicon-doc-text.txt:3731; %SSSSS list :3807-:3841;
+  Spin2 symbols spin2-v55-text.txt:1521, :1538-:1539)
+    sawtooth  $0000_0012  AAAA=0000 BBBB=0000 FFF=000 M=0 TT=%00 SSSSS=%01001 bit0=0   = P_PWM_SAWTOOTH
+    triangle  $0000_0010  AAAA=0000 BBBB=0000 FFF=000 M=0 TT=%00 SSSSS=%01000 bit0=0   = P_PWM_TRIANGLE
+    Neither uses the A or B input.  WXPIN word X = X[31:16] (frame count, in base periods) : X[15:0] (base period, in clocks):
+      control  $0010_0010  frame 16, base 16        zero base   $0004_0000  frame 4, base 0        zero frame  $0000_0010  frame 0, base 16
+    Cog 0 decodes the words at run time, prints the fields and gates on them and on the symbol compositions (control W).
+
+  FRAME TIME (what the documentation implies; the control arm checks it)
+    sawtooth: the counter "counts from one up to the frame period" (:4063) -> one frame = FRAME x BASE clocks.
+    triangle: "counts from the frame period down to one, then from one back up to the frame period ... the overall update time is TWO frame
+    periods times the base period" (:4044-:4046) -> one frame = 2 x FRAME x BASE clocks.
+    Control X = $0010_0010: sawtooth 16 x 16 = 256 clocks, triangle 2 x 16 x 16 = 512 clocks.
+
+  ARMS (per mode; each arm preceded by DIRL and WRPIN #0; then WRPIN mode, WXPIN X, DIRH, then WYPIN #1 -- Y after DIRH, the working order,
+  EF-011; Y = 1 has no effect on IN)
+    C   control      X = $0010_0010      predicted interval 256 (sawtooth) / 512 (triangle); the gate is stability plus a mean within one base
+                                         period (16 clocks) of the model, see CONTROLS; else RIG FAIL
+    Z1  zero base    X = $0004_0000      H65536: 4 x 65,536 = 262,144 clocks (x2 triangle) ; FAST: frames faster than the loop (the H1 value would be about 4 clocks, x2) ; STUCK: no IN in the window
+    Z2  zero frame   X = $0000_0010      H65536: 65,536 x 16 = 1,048,576 clocks (x2) ; FAST: frames faster than the loop (the H1 value would be about 16 clocks, x2) ; STUCK: no IN in the window
+    After the six arms the two control arms run again (control after).  Each arm runs REPEATS times; the first IN is discarded (it ends the
+    first frame, begun at DIRH), then NINT intervals are timed (20 for C, 5 for Z1 and Z2).  A wait for an IN is bounded by a window of
+    3 x the H65536 interval + 4,000 clocks.  On a timeout the engine reads the pin's IN (TESTP) into the record: IN LOW at the timeout =
+    no IN (STUCK, or ONE when one IN came first); IN HIGH at the timeout = FAST (frames come faster than the acknowledge loop).
+
+  HOW THE INTERVAL IS TIMED
+    SETSE1 selects "INA bit of pin 4 rises" (%001_PPPPPP, silicon-doc-text.txt:2255) -- the pin's IN flag; the event flag is cleared by
+    POLLSE1 WC (:2241).  The cog polls it and reads CT at the detection (the detection delay is under one loop of about 16 clocks), then
+    acknowledges the pin with AKPIN so that IN can rise again.  The mean over N intervals has an error of under 16 / N clocks (under 1 clock
+    for the 20-frame control).  Frames shorter than the acknowledge loop cannot be resolved: IN can be re-raised before the AKPIN, so no
+    rising edge follows and the wait times out with IN HIGH, or the measured interval is the loop's floor (about 44-46 clocks per
+    poll-acknowledge cycle -- a count of this engine's instructions made in the review, not a documented figure).  An interval of at most
+    FAST_LIMIT = 128 clocks (well above that floor; the next real class, H65536 of the zero-base arm, starts near 262,144) is therefore
+    reported as FAST = "FASTER THAN THE LOOP (<= 128 clocks)" -- this says nothing about whether the zero field acts as 1; the printed H1
+    prediction is for context only.  The IN level at a timeout is read with TESTP (silicon-doc-text.txt:1984, "read pin D bit in INx";
+    the same poll-IN idiom at :3851).
+
+  CONTROLS (gating -- a failure prints RIG FAIL and NO VERDICT)
+    W : the configuration and X words decode to the fields above and equal their Spin2 symbol compositions.
+    C : both control arms, before AND after the Z arms, in every repeat: the first IN arrives, all 20 intervals are timed, the arm is STABLE
+        (max - min of the intervals at most CTL_SPAN_MAX = 24 clocks, and the repeat's mean equal to repeat 1's within CTL_REP_TOL = 2 clocks;
+        the "after" arms also against the "before" arm of the same mode) and the mean is within +-one base period (CTL_MODEL_TOL = 16 clocks)
+        of the frame-time model.  The measured offset (mean - model) of every repeat is PRINTED.  (Proves the IN-interval method; the frame
+        model is checked only to one base period because the engine's detection delay is not an exact constant.)
+    T : the measuring cog reports done within RIG_TIMEOUT_SEC = 10 s (clkfreq x 10 = 2.0e9 stays below 2^31 = 2.147e9; 20 would wrap negative).
+
+  PRE-REGISTERED OUTCOMES (nothing is predicted; printed by the program before the run)
+    Per (mode, zero field) every repeat of the arm falls in one class:
+      H65536 : every interval within max(40, 1 %) clocks of the H65536 value  -> the zero field acts as 65,536
+      FAST   : every interval at most 128 clocks, or IN high at the timeout     -> frames FASTER THAN THE LOOP (<= 128 clocks); no "= 1" claim
+      STUCK  : no IN within the window and IN LOW at the timeout               -> no frame completes
+      ONE    : one IN, then none within the window and IN LOW at the timeout
+      OTHER  : anything else (the raw intervals are printed)
+    DETERMINISTIC = all repeats in the same class.  VERDICT lines: ZERO = 65,536 | FASTER THAN THE LOOP (<= 128 clocks) | STUCK | ONE-SHOT |
+    OTHER | INCONCLUSIVE (the repeats disagree).  FAST with fewer intervals timed than asked (NDONE < NINT) says so in the verdict.
+    S-304 stays 'kept served until the bench decides'.
+
+  DEVIATIONS FROM THE BRIEF (bench-groupD-recheck.md section 4.3)
+    1. The brief says 'AKPIN between' the intervals and '+-2 clocks' for every match.  A cog polling a flag cannot time a single interval to 2
+       clocks, so the control gate is stability + a mean within one base period (with the offset printed) and the long H65536 intervals use max(40, 1 %).
+    2. The 'H1' hypothesis (4 or 16 clocks, x2 for the triangle) cannot be told from any faster-than-the-loop frame, so it is reported as FAST.
+    3. The control arms are run twice (before and after the Z arms) and in every repeat.
+
+  VERIFIED OPCODES AND DATA (pnut-ts -d -l v1.55.8 build 9/19/2026, read from the .lst; object offsets, cog addresses in brackets)
+    Symbol table (listing): CFG_SAW = SYM_SAW = $0000_0012, CFG_TRI = SYM_TRI = $0000_0010, X_CONTROL = $0010_0010, X_ZERO_BASE =
+      $0004_0000, X_ZERO_FRAME = $0000_0010, SE1_EVENT = $44 (%001_000100), MB_LONGS = $AB (3 + 8 x 3 x 7).
+    DEBUG: 2 records, 24 bytes of DEBUG data.  Hub image: armTbl $070 (8 rows x 8 longs), engine $170.  Row 0 = $12, $0010_0010, $14 (20),
+      $12A0 (4768 = 3 x 256 + 4,000), $100 (256), $100, 0, 0.  Row 1 = $12, $0004_0000, 5, $000C_0FA0 (790,432 = 3 x 262,144 + 4,000),
+      $0004_0000 (262,144), 4, 1, 0.  Row 2 = $12, $0000_0010, 5, $0030_0FA0, $0010_0000 (1,048,576), $10, 2, 0.
+    Cog labels: reset_m [$019] one_repeat [$01E] wait_ev [$055] put [$062]; registers a_cfg_..a_win_ [$06D..$070] (setq #3 block read),
+      min_ [$07B], inhi_ [$07E], self_id_ [$080].
+    Instructions read back from the hub image (the .bin, engine base = armTbl + $100):
+      dirl #4 $FD640840   wrpin #0,#4 $FC0C0004   outl #4 $FD640848   waitx #100 $FD64C81F   dirh #4 $FD640841   ret $FD64002D
+      setse1 #68 $FD648820   getct tdir_ $FD60E21A   wypin #1,#4 $FC2C0204   pollse1 wc $FD700824
+      NEW in the timeout path of wait_ev: testp #4 wc $FD740840   wrc inhi_ $FD60FC6C   cmp inhi_,#0 wc $F214FC00   (then ret $FD64002D)
+      (TESTP D/# WC is encoded 001000000 in the S field, silicon-doc-text.txt:5353; WRC D at :5410)
+
+  HOW TO RUN
+    1. USB serial connected (DEBUG on P62/P63).  Compile: pnut-ts -d test-vo-s304-pwm-x-zero-fields.spin2
+    2. Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10).
+    3. SAVE THE WHOLE CONSOLE OUTPUT -- it is the only record.
+    4. Expected run time: the engine under 1 s, the report about 90 lines.  Done when the "VERDICT VO-S304 ..." lines appear, then
+       "=== END ===" and DEBUG_END_SESSION.  No END / DEBUG_END_SESSION line within 15 s = a hang or a lost session: power-cycle the board and
+       send the LAST line you saw.
+    5. Clock: _clkfreq = 200_000_000 assumes the board's 20 MHz crystal; the listing's CLKMODE is $010009FB.  On another crystal every clock
+       count here is off by the ratio.
+    6. Pins: ONLY P4 is used (TT = %00, never driven, its own IN is read).  NOTHING may be attached to P4.  No other pin is touched.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  PIN_M             = 4                 ' the PWM smart pin (its own IN is the observable)
+  SE1_EVENT         = (%001 << 6) | PIN_M    ' SETSE1: INA bit of PIN_M rises (silicon-doc-text.txt:2255)
+
+  REPEATS           = 3                 ' repeats of every arm
+  NINT_C            = 20                ' intervals timed in a control arm
+  NINT_Z            = 5                 ' intervals timed in a zero arm
+  WIN_MARGIN        = 4_000             ' clocks added to 3 x the H65536 interval for the wait window
+  FAST_LIMIT        = 128               ' at most this = FAST (the loop floor is ~44-46 clocks; the next real class starts near 262,144)
+  CTL_MODEL_TOL     = 16                ' control: mean within +-one base period (BASE_C) of the frame-time model
+  CTL_SPAN_MAX      = 24                ' control: max - min of the intervals of one repeat at most this
+  CTL_REP_TOL       = 2                 ' control: repeat means (and before/after means) equal within this many clocks
+  CLS_ABS_TOL       = 40                ' H65536: tolerance, at least this
+  RIG_TIMEOUT_SEC   = 10                ' clkfreq * 10 = 2.0e9 < 2^31; 20 would wrap negative (4.0e9)
+  MBOX_DONE         = 1
+
+  ' control X and the zero-field X words
+  BASE_C            = 16
+  FRAME_C           = 16
+  FRAME_Z1          = 4                 ' zero base arm: frame count
+  BASE_Z2           = 16                ' zero frame arm: base period
+  ZERO_EFF          = 65_536            ' the H65536 hypothesis
+  X_CONTROL         = (FRAME_C << 16) | BASE_C
+  X_ZERO_BASE       = (FRAME_Z1 << 16) | 0
+  X_ZERO_FRAME      = (0 << 16) | BASE_Z2
+
+CON ' ---- Configuration Words ----
+  CFG_SAW           = $0000_0012        ' P_PWM_SAWTOOTH
+  CFG_TRI           = $0000_0010        ' P_PWM_TRIANGLE
+  SYM_SAW           = P_PWM_SAWTOOTH
+  SYM_TRI           = P_PWM_TRIANGLE
+
+  ' WRPIN D field positions and widths (silicon-doc-text.txt:3731)
+  SHIFT_AAAA        = 28
+  MASK_AAAA         = %1111
+  SHIFT_BBBB        = 24
+  MASK_BBBB         = %1111
+  SHIFT_FFF         = 21
+  MASK_FFF          = %111
+  SHIFT_M           = 8
+  MASK_M            = %1_1111_1111_1111
+  SHIFT_TT          = 6
+  MASK_TT           = %11
+  SHIFT_SSSSS       = 1
+  MASK_SSSSS        = %1_1111
+  MASK_BIT0         = 1
+  SSSSS_SAW         = %01001
+  SSSSS_TRI         = %01000
+
+CON ' ---- Arms and Mailbox ----
+  ' arm rows in run order: three arms per mode, then the controls again
+  #0, ARM_SAW_C, ARM_SAW_Z1, ARM_SAW_Z2, ARM_TRI_C, ARM_TRI_Z1, ARM_TRI_Z2, ARM_SAW_C2, ARM_TRI_C2
+  ARMS              = 8
+  ' arm table longs: the engine reads the first four, cog 0 all
+  #0, AC_CFG, AC_X, AC_NINT, AC_WIN, AC_P65, AC_P1, AC_KIND, AC_MODE
+  ARM_LONGS         = 8
+  ARM_BYTES         = ARM_LONGS * 4
+  #0, KIND_C, KIND_Z1, KIND_Z2
+  #0, MODE_SAW, MODE_TRI
+
+  ' per arm per repeat: GOT0 (the first IN arrived), NDONE (intervals timed), TOTAL (clocks first IN -> last IN),
+  ' MIN and MAX interval, T0 (clocks DIRH -> first IN), INHI (the pin's IN level read at a timeout: 1 = HIGH, 0 = LOW or no timeout)
+  #0, R_GOT0, R_NDONE, R_TOTAL, R_MIN, R_MAX, R_T0, R_INHI
+  R_LONGS           = 7
+
+  MB_DONE           = 0
+  MB_PROG           = 1
+  MB_ARMTBL         = 2
+  MB_RES            = 3
+  MB_LONGS          = MB_RES + ARMS * REPEATS * R_LONGS
+
+  ' classes
+  #0, CL_H65536, CL_FAST, CL_STUCK, CL_ONE, CL_OTHER, CL_NONE
+
+CON ' ---- Report Parameters ----
+  LINE_MAX          = 400
+  DEC_TOP           = 1_000_000_000
+  DEC_DIGITS        = 10
+  DEC_BASE          = 10
+  HEX_DIGITS        = 8
+  HEX_BITS          = 4
+  HEX_GROUP         = 4
+  HEX_LETTERS       = 10
+
+VAR ' ---- Mailbox & Analysis State ----
+  long mailbox[MB_LONGS]
+  long fail_count
+  long armClass[ARMS * REPEATS]
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+
+PUB main() | engineCog, startTick
+'' Run the S304 rig: check the constants, start the measuring cog, wait for its done flag, report.
+''
+
+' Local Variables:
+' @local engineCog - cog id COGINIT returned (negative = no free cog)
+' @local startTick - CT when the wait for the done flag began
+
+  longfill(@mailbox, 0, MB_LONGS)
+  mailbox[MB_ARMTBL] := @armTbl
+  fail_count := 0
+  linePos := 0
+  say(string("=== VO-S304: PWM sawtooth %01001 / triangle %01000 with X[15:0] = 0 and with X[31:16] = 0 ==="))
+  ln_s(string("M = P"))
+  ln_u(PIN_M)
+  ln_s(string(" (TT = %00, never driven; its own IN is timed); "))
+  ln_u(REPEATS)
+  say(string(" repeats per arm; NOTHING attached"))
+  print_predictions()
+  say(string(" "))
+  say(string("--- CONTROL W: configuration and X words ---"))
+  check_rig_constants()
+  if fail_count <> 0
+    say(string("NO VERDICT: a construction control failed (see RIG FAIL lines above); the measuring cog was not started"))
+  else
+    engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
+    if engineCog < 0
+      say(string("RIG FAIL: no free cog for the measuring engine"))
+      say(string("NO VERDICT: nothing was measured"))
+    else
+      startTick := getct()
+      repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
+      if mailbox[MB_DONE] <> MBOX_DONE
+        cogstop(engineCog)
+        pinclear(PIN_M)
+        ln_s(string("RIG FAIL: measuring cog did not report done within "))
+        ln_u(RIG_TIMEOUT_SEC)
+        ln_s(string(" s; it was in arm index "))
+        ln_u(mailbox[MB_PROG])
+        say(string("; P4 cleared by cog 0"))
+        say(string("NO VERDICT: the measurement did not complete"))
+      else
+        ln_s(string("measuring cog = "))
+        ln_u(engineCog)
+        say(string(" (debugger restricted to cog 0)"))
+        report()
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  say(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_bin(numVal, digits) | idx
+' Append "%" and the low digits bits of a number.
+'
+' @param numVal - the number
+' @param digits - how many bits
+
+' Local Variables:
+' @local idx - bit index
+
+  ln_c("%")
+  repeat idx from digits - 1 to 0
+    ln_c("0" + ((numVal >> idx) & 1))
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI yes_no(bFlag) : pText
+' Printable YES / NO.
+'
+' @param bFlag - TRUE or FALSE
+' @returns pText - address of "YES" or "NO"
+
+  if bFlag
+    pText := string("YES")
+  else
+    pText := string("NO")
+
+' ---------------------------------------------------------------------------
+' names, pre-registered outcomes and construction controls
+' ---------------------------------------------------------------------------
+PRI arm_ptr(armIdx) : pArm
+' @param armIdx - 0..ARMS-1
+' @returns pArm - hub address of the arm's table entry
+
+  pArm := @armTbl + armIdx * ARM_BYTES
+
+PRI arm_name(armIdx) : pText
+' Printable name of an arm.
+'
+' @param armIdx - 0..ARMS-1
+' @returns pText - address of the name
+
+  pText := lookupz(armIdx: string("sawtooth control     "), string("sawtooth X[15:0]=0   "), string("sawtooth X[31:16]=0  "), string("triangle control     "), string("triangle X[15:0]=0   "), string("triangle X[31:16]=0  "), string("sawtooth control (2) "), string("triangle control (2) "))
+
+PRI class_name(clsVal) : pText
+' Printable class.
+'
+' @param clsVal - CL_*
+' @returns pText - address of the name
+
+  pText := lookupz(clsVal: string("H65536"), string("FAST"), string("STUCK"), string("ONE"), string("OTHER"), string("(none)"))
+
+PRI print_predictions() | armIdx, pArm
+' Print the outcomes fixed before the run, and the arms.
+'
+
+' Local Variables:
+' @local armIdx - arm being printed
+' @local pArm - the arm's table entry
+
+  say(string("PRE-REGISTERED OUTCOMES (fixed before the run; nothing about the zero fields is predicted):"))
+  say(string("  frame time = interval between IN rises: sawtooth FRAME x BASE clocks, triangle 2 x FRAME x BASE (silicon-doc-text.txt:4044, :4063)"))
+  say(string("  control arm (X=$0010_0010): stable (max-min <= 24, repeats equal within 2) and mean within +-16 (one base period) of 256 / 512, else RIG FAIL / NO VERDICT; the offset is printed"))
+  say(string("  zero arm class per repeat : H65536 = every interval within max(40, 1%) of the H65536 value ; FAST = every interval <= 128 clocks or IN HIGH at the timeout"))
+  say(string("                              STUCK = no IN in the window and IN LOW ; ONE = one IN then none and IN LOW ; OTHER = anything else (raw intervals printed)"))
+  say(string("  VERDICT per (mode, field): ZERO = 65,536 | FASTER THAN THE LOOP (<= 128 clocks) | STUCK | ONE-SHOT | OTHER | INCONCLUSIVE (repeats disagree)"))
+  say(string("  arms (X, wait window, H65536 interval, H1 interval for context):"))
+  repeat armIdx from 0 to ARMS - 1
+    pArm := arm_ptr(armIdx)
+    ln_s(string("    "))
+    ln_s(arm_name(armIdx))
+    ln_s(string(" X="))
+    ln_h(long[pArm][AC_X])
+    ln_s(string(" intervals "))
+    ln_u(long[pArm][AC_NINT])
+    ln_s(string(" window "))
+    ln_u(long[pArm][AC_WIN])
+    ln_s(string(" H65536 "))
+    ln_u(long[pArm][AC_P65])
+    ln_s(string(" H1 "))
+    ln_u(long[pArm][AC_P1])
+    ln_out()
+
+PRI check_rig_constants()
+' Control W: every configuration word decodes to the published fields and equals its Spin2 symbol composition;
+' the X words hold the intended fields.
+'
+
+  check_word(string("sawtooth "), CFG_SAW, SYM_SAW, SSSSS_SAW)
+  check_word(string("triangle "), CFG_TRI, SYM_TRI, SSSSS_TRI)
+  check_x(string("control   "), X_CONTROL, FRAME_C, BASE_C)
+  check_x(string("zero base "), X_ZERO_BASE, FRAME_Z1, 0)
+  check_x(string("zero frame"), X_ZERO_FRAME, 0, BASE_Z2)
+  if SE1_EVENT <> 68
+    say(string("RIG FAIL: SE1_EVENT is not %001_000100 (rise of the INA bit of pin 4)"))
+    fail_count++
+
+PRI check_x(pLabel, xWord, expFrame, expBase)
+' Print one WXPIN word's fields and count a failure if they differ from the intended ones.
+'
+' @param pLabel - label string
+' @param xWord - the word
+' @param expFrame - intended X[31:16]
+' @param expBase - intended X[15:0]
+
+  ln_s(string("  X "))
+  ln_s(pLabel)
+  ln_c(" ")
+  ln_h(xWord)
+  ln_s(string(": X[31:16] (frame) = "))
+  ln_u(xWord >> 16)
+  ln_s(string("  X[15:0] (base) = "))
+  ln_u(xWord & $FFFF)
+  ln_out()
+  if (xWord >> 16) <> expFrame or (xWord & $FFFF) <> expBase
+    ln_s(string("RIG FAIL: X word "))
+    ln_s(pLabel)
+    say(string(" does not hold the intended frame / base fields"))
+    fail_count++
+
+PRI check_word(pLabel, cfgWord, symWord, expSssss)
+' Decode one WRPIN word into its published fields, print them, and count a
+' construction failure if any field or the symbol composition disagrees.
+'
+' @param pLabel - label string for the printed line
+' @param cfgWord - the configuration word the measuring cog writes
+' @param symWord - the same word composed from the Spin2 v55 symbols
+' @param expSssss - expected %SSSSS
+
+  ln_s(string("  "))
+  ln_s(pLabel)
+  ln_c(" ")
+  ln_h(cfgWord)
+  ln_s(string(": AAAA="))
+  ln_bin((cfgWord >> SHIFT_AAAA) & MASK_AAAA, 4)
+  ln_s(string(" BBBB="))
+  ln_bin((cfgWord >> SHIFT_BBBB) & MASK_BBBB, 4)
+  ln_s(string(" FFF="))
+  ln_bin((cfgWord >> SHIFT_FFF) & MASK_FFF, 3)
+  ln_s(string(" M="))
+  ln_bin((cfgWord >> SHIFT_M) & MASK_M, 13)
+  ln_s(string(" TT="))
+  ln_bin((cfgWord >> SHIFT_TT) & MASK_TT, 2)
+  ln_s(string(" SSSSS="))
+  ln_bin((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS, 5)
+  ln_s(string(" bit0="))
+  ln_u(cfgWord & MASK_BIT0)
+  ln_s(string("  symbols="))
+  ln_h(symWord)
+  ln_out()
+  if ((cfgWord >> SHIFT_AAAA) & MASK_AAAA) <> 0 or ((cfgWord >> SHIFT_BBBB) & MASK_BBBB) <> 0 or ((cfgWord >> SHIFT_FFF) & MASK_FFF) <> 0 or ((cfgWord >> SHIFT_M) & MASK_M) <> 0 or ((cfgWord >> SHIFT_TT) & MASK_TT) <> %00 or ((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS) <> expSssss or (cfgWord & MASK_BIT0) <> 0
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    say(string(" fields differ from the expected AAAA/BBBB/FFF/M = 0, TT = %00, SSSSS, bit0 = 0"))
+    fail_count++
+  if cfgWord <> symWord
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    ln_s(string(" word "))
+    ln_h(cfgWord)
+    ln_s(string(" differs from its Spin2 symbol composition "))
+    ln_h(symWord)
+    ln_out()
+    fail_count++
+
+' ---------------------------------------------------------------------------
+' report
+' ---------------------------------------------------------------------------
+PRI rec(armIdx, repIdx, fieldIdx) : recVal
+' One recorded long.
+'
+' @param armIdx - arm
+' @param repIdx - repeat
+' @param fieldIdx - R_*
+' @returns recVal - the recorded long
+
+  recVal := mailbox[MB_RES + (armIdx * REPEATS + repIdx) * R_LONGS + fieldIdx]
+
+PRI near(valA, valB, tolVal) : bNear
+' @param valA - a value
+' @param valB - another
+' @param tolVal - tolerance
+' @returns bNear - TRUE when they differ by at most tolVal
+
+  bNear := abs(valA - valB) <= tolVal
+
+PRI classify(armIdx, repIdx) : clsVal | pArm, meanVal, p65, tolVal
+' Class of one repeat of a zero arm.
+'
+' @param armIdx - arm
+' @param repIdx - repeat
+' @returns clsVal - CL_*
+
+' Local Variables:
+' @local pArm - the arm's table entry
+' @local meanVal - mean interval, clocks
+' @local p65 - the H65536 interval
+' @local tolVal - tolerance for H65536
+
+  pArm := arm_ptr(armIdx)
+  p65 := long[pArm][AC_P65]
+  tolVal := (p65 / 100) #> CLS_ABS_TOL
+  if rec(armIdx, repIdx, R_GOT0) == 0
+    if rec(armIdx, repIdx, R_INHI) == 1
+      clsVal := CL_FAST                 ' IN high at the timeout: frames faster than the acknowledge loop
+    else
+      clsVal := CL_STUCK
+  elseif rec(armIdx, repIdx, R_NDONE) == 0
+    if rec(armIdx, repIdx, R_INHI) == 1
+      clsVal := CL_FAST
+    else
+      clsVal := CL_ONE
+  else
+    meanVal := rec(armIdx, repIdx, R_TOTAL) / rec(armIdx, repIdx, R_NDONE)
+    if rec(armIdx, repIdx, R_MAX) <= FAST_LIMIT and (rec(armIdx, repIdx, R_NDONE) == long[pArm][AC_NINT] or rec(armIdx, repIdx, R_INHI) == 1)
+      clsVal := CL_FAST
+    elseif rec(armIdx, repIdx, R_NDONE) == long[pArm][AC_NINT] and near(meanVal, p65, tolVal) and rec(armIdx, repIdx, R_MIN) >= p65 - tolVal and rec(armIdx, repIdx, R_MAX) <= p65 + tolVal
+      clsVal := CL_H65536
+    else
+      clsVal := CL_OTHER
+
+PRI ctl_ref_arm(armIdx) : refArm
+' The control arm a control repeat is compared with: the "before" arm of the same mode (itself for the "before" arms).
+'
+' @param armIdx - control arm
+' @returns refArm - the reference arm
+
+  case armIdx
+    ARM_SAW_C2:
+      refArm := ARM_SAW_C
+    ARM_TRI_C2:
+      refArm := ARM_TRI_C
+    other:
+      refArm := armIdx
+
+PRI ctl_mean(armIdx, repIdx) : meanVal
+' Mean interval of one repeat (0 when no interval was timed).
+'
+' @param armIdx - arm
+' @param repIdx - repeat
+' @returns meanVal - mean interval, whole clocks
+
+  if rec(armIdx, repIdx, R_NDONE) == 0
+    meanVal := 0
+  else
+    meanVal := rec(armIdx, repIdx, R_TOTAL) / rec(armIdx, repIdx, R_NDONE)
+
+PRI control_ok(armIdx, repIdx) : bOk | pArm, pred, refArm
+' Whether one repeat of a control arm is stable and near the frame-time model.
+'
+' @param armIdx - control arm
+' @param repIdx - repeat
+' @returns bOk - TRUE when the first IN arrived, all intervals were timed, max - min <= CTL_SPAN_MAX, the mean equals repeat 1's
+'                (and the "before" arm's) within CTL_REP_TOL and is within CTL_MODEL_TOL of the model
+
+' Local Variables:
+' @local pArm - the arm's table entry
+' @local pred - the predicted interval
+' @local refArm - the arm whose first repeat this one is compared with
+
+  pArm := arm_ptr(armIdx)
+  pred := long[pArm][AC_P65]
+  refArm := ctl_ref_arm(armIdx)
+  bOk := rec(armIdx, repIdx, R_GOT0) == 1 and rec(armIdx, repIdx, R_NDONE) == long[pArm][AC_NINT]
+  if bOk
+    bOk := rec(refArm, 0, R_GOT0) == 1 and rec(refArm, 0, R_NDONE) == long[pArm][AC_NINT]
+  if bOk
+    bOk := rec(armIdx, repIdx, R_MAX) - rec(armIdx, repIdx, R_MIN) <= CTL_SPAN_MAX and near(ctl_mean(armIdx, repIdx), ctl_mean(refArm, 0), CTL_REP_TOL) and near(ctl_mean(armIdx, repIdx), pred, CTL_MODEL_TOL)
+
+PRI ln_signed(numVal)
+' Append a signed decimal ("+12", "-3", "+0").
+'
+' @param numVal - the number
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_c("+")
+    ln_u(numVal)
+
+PRI print_arm(armIdx) | repIdx, meanVal
+' Print the records of one arm: per repeat the intervals' count, mean, min, max and time to the first IN.
+'
+' @param armIdx - arm
+
+' Local Variables:
+' @local repIdx - repeat
+' @local meanVal - mean interval
+
+  repeat repIdx from 0 to REPEATS - 1
+    ln_s(string("  "))
+    ln_s(arm_name(armIdx))
+    ln_s(string(" repeat "))
+    ln_u(repIdx + 1)
+    ln_s(string(": first IN "))
+    if rec(armIdx, repIdx, R_GOT0) == 1
+      ln_u(rec(armIdx, repIdx, R_T0))
+      ln_s(string(" clocks after DIRH"))
+    else
+      ln_s(string("NONE in the window"))
+    ln_s(string(" ; intervals timed "))
+    ln_u(rec(armIdx, repIdx, R_NDONE))
+    if rec(armIdx, repIdx, R_NDONE) > 0
+      meanVal := rec(armIdx, repIdx, R_TOTAL) / rec(armIdx, repIdx, R_NDONE)
+      ln_s(string(" mean "))
+      ln_u(meanVal)
+      ln_s(string(" min "))
+      ln_u(rec(armIdx, repIdx, R_MIN))
+      ln_s(string(" max "))
+      ln_u(rec(armIdx, repIdx, R_MAX))
+    if rec(armIdx, repIdx, R_GOT0) == 0 or rec(armIdx, repIdx, R_NDONE) < long[arm_ptr(armIdx)][AC_NINT]
+      ln_s(string(" ; wait timed out, IN at the timeout = "))
+      if rec(armIdx, repIdx, R_INHI) == 1
+        ln_s(string("HIGH"))
+      else
+        ln_s(string("LOW"))
+    ln_out()
+
+PRI zero_verdict(zeroArm, pText) | repIdx, clsFirst, bSame, nShort
+' The verdict of one zero arm: class per repeat, determinism, one VERDICT line.
+'
+' @param zeroArm - the zero arm
+' @param pText - printable name of the (mode, field)
+
+' Local Variables:
+' @local repIdx - repeat
+' @local clsFirst - class of repeat 0
+' @local bSame - all repeats in the same class
+' @local nShort - repeats that timed fewer intervals than asked
+
+  clsFirst := classify(zeroArm, 0)
+  bSame := TRUE
+  nShort := 0
+  repeat repIdx from 0 to REPEATS - 1
+    if rec(zeroArm, repIdx, R_NDONE) < long[arm_ptr(zeroArm)][AC_NINT]
+      nShort++
+  ln_s(string("  "))
+  ln_s(pText)
+  ln_s(string(": classes by repeat"))
+  repeat repIdx from 0 to REPEATS - 1
+    ln_c(" ")
+    ln_s(class_name(classify(zeroArm, repIdx)))
+    if classify(zeroArm, repIdx) <> clsFirst
+      bSame := FALSE
+  ln_out()
+  ln_s(string("VERDICT VO-S304 "))
+  ln_s(pText)
+  ln_s(string(": "))
+  if bSame == FALSE
+    ln_s(string("INCONCLUSIVE - the repeats disagree (records above)"))
+  else
+    case clsFirst
+      CL_H65536:
+        ln_s(string("ZERO = 65,536 - the field acts as 65,536 (interval within max(40, 1 %) of "))
+        ln_u(long[arm_ptr(zeroArm)][AC_P65])
+        ln_s(string(" clocks)"))
+      CL_FAST:
+        ln_s(string("FASTER THAN THE LOOP (<= "))
+        ln_u(FAST_LIMIT)
+        ln_s(string(" clocks) - frames come faster than the acknowledge loop can resolve (an H1 value would be "))
+        ln_u(long[arm_ptr(zeroArm)][AC_P1])
+        ln_s(string("; not distinguishable below the loop floor, so no claim about the value of the zero field)"))
+        if nShort > 0
+          ln_s(string("; in "))
+          ln_u(nShort)
+          ln_s(string(" of "))
+          ln_u(REPEATS)
+          ln_s(string(" repeats fewer than "))
+          ln_u(long[arm_ptr(zeroArm)][AC_NINT])
+          ln_s(string(" intervals could be timed (NDONE < NINT: IN was already high when the loop looked)"))
+      CL_STUCK:
+        ln_s(string("STUCK - no IN within the window and IN LOW at the timeout; no frame completes (or it is longer than the window)"))
+      CL_ONE:
+        ln_s(string("ONE-SHOT - one IN, then none within the window (IN LOW at the timeout)"))
+      other:
+        ln_s(string("OTHER - the intervals match none of 65,536 / fast / stuck (records above)"))
+  ln_out()
+
+PRI report() | armIdx, repIdx, bControls
+' Print the records, gate on the control arms, decide. Single exit.
+'
+
+' Local Variables:
+' @local armIdx - arm
+' @local repIdx - repeat
+' @local bControls - every control arm repeat is as predicted
+
+  say(string(" "))
+  say(string("--- RECORDS (intervals between IN rises, clocks) ---"))
+  repeat armIdx from 0 to ARMS - 1
+    print_arm(armIdx)
+  say(string(" "))
+  say(string("--- GATE C: control arms, before and after the zero arms ---"))
+  bControls := TRUE
+  repeat armIdx from 0 to ARMS - 1
+    if long[arm_ptr(armIdx)][AC_KIND] == KIND_C
+      repeat repIdx from 0 to REPEATS - 1
+        ln_s(string("  "))
+        ln_s(arm_name(armIdx))
+        ln_s(string(" repeat "))
+        ln_u(repIdx + 1)
+        ln_s(string(": model "))
+        ln_u(long[arm_ptr(armIdx)][AC_P65])
+        ln_s(string(" measured mean "))
+        ln_u(ctl_mean(armIdx, repIdx))
+        ln_s(string(" offset "))
+        ln_signed(ctl_mean(armIdx, repIdx) - long[arm_ptr(armIdx)][AC_P65])
+        ln_s(string(" span (max-min) "))
+        ln_u(rec(armIdx, repIdx, R_MAX) - rec(armIdx, repIdx, R_MIN))
+        ln_out()
+        if control_ok(armIdx, repIdx) == FALSE
+          bControls := FALSE
+          ln_s(string("RIG FAIL: "))
+          ln_s(arm_name(armIdx))
+          ln_s(string(" repeat "))
+          ln_u(repIdx + 1)
+          ln_s(string(" is not stable / not within one base period of the model ("))
+          ln_u(long[arm_ptr(armIdx)][AC_P65])
+          say(string(" clocks per frame; span <= 24, repeat means equal within 2, mean within +-16)"))
+          fail_count++
+  ln_s(string("  every control repeat stable and within one base period of the model: "))
+  ln_s(yes_no(bControls))
+  ln_out()
+  say(string(" "))
+  if fail_count <> 0
+    say(string("NO VERDICT: a gating control failed (see RIG FAIL lines above); the records are printed for diagnosis only"))
+  else
+    zero_verdict(ARM_SAW_Z1, string("sawtooth X[15:0] = 0 (base period zero)"))
+    zero_verdict(ARM_SAW_Z2, string("sawtooth X[31:16] = 0 (frame count zero)"))
+    zero_verdict(ARM_TRI_Z1, string("triangle X[15:0] = 0 (base period zero)"))
+    zero_verdict(ARM_TRI_Z2, string("triangle X[31:16] = 0 (frame count zero)"))
+
+DAT ' ---- Arm Table (read by cog 0 and by the engine) ----
+        ' engine fields: cfg, x, intervals to time, wait window (clocks)
+        ' cog 0 fields : H65536 interval, H1 interval, kind, mode
+        ' control: frame time = m x FRAME_C x BASE_C ; zero base: m x 65,536 x FRAME_Z1 (H1: m x 1 x FRAME_Z1) ;
+        ' zero frame: m x BASE_Z2 x 65,536 (H1: m x BASE_Z2 x 1) ; m = 1 sawtooth, 2 triangle
+armTbl  long    CFG_SAW, X_CONTROL,    NINT_C, 3 * 1 * FRAME_C * BASE_C + WIN_MARGIN,   1 * FRAME_C * BASE_C,      1 * FRAME_C * BASE_C,  KIND_C,  MODE_SAW
+        long    CFG_SAW, X_ZERO_BASE,  NINT_Z, 3 * 1 * ZERO_EFF * FRAME_Z1 + WIN_MARGIN, 1 * ZERO_EFF * FRAME_Z1,  1 * 1 * FRAME_Z1,      KIND_Z1, MODE_SAW
+        long    CFG_SAW, X_ZERO_FRAME, NINT_Z, 3 * 1 * BASE_Z2 * ZERO_EFF + WIN_MARGIN, 1 * BASE_Z2 * ZERO_EFF,    1 * BASE_Z2 * 1,       KIND_Z2, MODE_SAW
+        long    CFG_TRI, X_CONTROL,    NINT_C, 3 * 2 * FRAME_C * BASE_C + WIN_MARGIN,   2 * FRAME_C * BASE_C,      2 * FRAME_C * BASE_C,  KIND_C,  MODE_TRI
+        long    CFG_TRI, X_ZERO_BASE,  NINT_Z, 3 * 2 * ZERO_EFF * FRAME_Z1 + WIN_MARGIN, 2 * ZERO_EFF * FRAME_Z1,  2 * 1 * FRAME_Z1,      KIND_Z1, MODE_TRI
+        long    CFG_TRI, X_ZERO_FRAME, NINT_Z, 3 * 2 * BASE_Z2 * ZERO_EFF + WIN_MARGIN, 2 * BASE_Z2 * ZERO_EFF,    2 * BASE_Z2 * 1,       KIND_Z2, MODE_TRI
+        long    CFG_SAW, X_CONTROL,    NINT_C, 3 * 1 * FRAME_C * BASE_C + WIN_MARGIN,   1 * FRAME_C * BASE_C,      1 * FRAME_C * BASE_C,  KIND_C,  MODE_SAW
+        long    CFG_TRI, X_CONTROL,    NINT_C, 3 * 2 * FRAME_C * BASE_C + WIN_MARGIN,   2 * FRAME_C * BASE_C,      2 * FRAME_C * BASE_C,  KIND_C,  MODE_TRI
+
+{ MEASURING ENGINE -- runs in its own cog; the ONLY code that touches the pin.
+  No debug() here (DEBUG_COGS excludes this cog anyway). PTRA = @mailbox on entry.
+  respt_ walks the mailbox in the order the arms run (arm-major, repeat-major, R_LONGS per repeat).
+}
+DAT             org     0        ' ---- Measuring Engine ----
+engine          mov     mb_, ptra
+                mov     ptrb, mb_
+                add     ptrb, #MB_ARMTBL * 4
+                rdlong  armtbl_, ptrb
+                mov     respt_, mb_
+                add     respt_, #MB_RES * 4
+                mov     progp_, mb_
+                add     progp_, #MB_PROG * 4
+                mov     armptr_, armtbl_
+                mov     arm_, #0
+
+.arm            wrlong  arm_, progp_
+                mov     ptrb, armptr_
+                setq    #3
+                rdlong  a_cfg_, ptrb            ' a_cfg_, a_x_, a_nint_, a_win_
+                add     armptr_, #ARM_BYTES
+                mov     rep_, #REPEATS
+.rep            call    #one_repeat
+                djnz    rep_, #.rep
+                add     arm_, #1
+                cmp     arm_, #ARMS             wz
+        if_nz   jmp     #.arm
+
+                call    #reset_m                ' leave P4 safe
+                wrlong  #MBOX_DONE, ptra        ' done -- always the last write
+                cogid   self_id_
+                cogstop self_id_
+
+reset_m         dirl    #PIN_M
+                wrpin   #0, #PIN_M
+                outl    #PIN_M
+                waitx   #100
+                ret
+
+' One repeat of the current arm: reset, configure (TT = %00: never driven), SETSE1 on IN rising,
+' DIRH, WYPIN #1 (Y after DIRH), time the first IN, then a_nint_ intervals.  Writes R_LONGS longs.
+one_repeat      call    #reset_m
+                wrpin   a_cfg_, #PIN_M
+                wxpin   a_x_, #PIN_M
+                setse1  #SE1_EVENT              ' clears the SE1 flag
+                dirh    #PIN_M
+                getct   tdir_
+                wypin   #1, #PIN_M
+                mov     got0_, #0
+                mov     ndone_, #0
+                mov     total_, #0
+                mov     min_, big_
+                mov     max_, #0
+                mov     t0_, #0
+                mov     inhi_, #0
+                call    #wait_ev                ' the first IN: ends the first frame
+        if_nc   jmp     #.fin
+                mov     got0_, #1
+                mov     t0_, wnow_
+                sub     t0_, tdir_
+                mov     tfirst_, wnow_
+                mov     tprev_, wnow_
+                akpin   #PIN_M                  ' IN low; the next frame's end raises it again
+.k              call    #wait_ev
+        if_nc   jmp     #.fin
+                mov     dt_, wnow_
+                sub     dt_, tprev_
+                mov     tprev_, wnow_
+                akpin   #PIN_M
+                cmp     dt_, min_               wc
+        if_c    mov     min_, dt_
+                cmp     max_, dt_               wc
+        if_c    mov     max_, dt_
+                add     ndone_, #1
+                cmp     ndone_, a_nint_         wc
+        if_c    jmp     #.k
+.fin            cmp     ndone_, #0              wz
+        if_nz   mov     total_, tprev_
+        if_nz   sub     total_, tfirst_
+        if_z    mov     min_, #0
+                mov     val_, got0_
+                call    #put
+                mov     val_, ndone_
+                call    #put
+                mov     val_, total_
+                call    #put
+                mov     val_, min_
+                call    #put
+                mov     val_, max_
+                call    #put
+                mov     val_, t0_
+                call    #put
+                mov     val_, inhi_
+                call    #put
+                call    #reset_m
+                ret
+
+' Wait for the SE1 event (IN of M rose) for up to a_win_ clocks: C = 1 and wnow_ = CT at the detection,
+' C = 0 on timeout.  POLLSE1 WC returns the event flag in C and clears it.  On a timeout the pin's IN level is read
+' (TESTP WC) into inhi_ (1 = HIGH): frames faster than the acknowledge loop leave IN high with no rising edge to see.
+wait_ev         getct   w0_
+.p              pollse1                         wc
+        if_c    jmp     #.hit
+                getct   w1_
+                sub     w1_, w0_
+                cmp     w1_, a_win_             wc
+        if_c    jmp     #.p
+                testp   #PIN_M                  wc
+                wrc     inhi_
+                cmp     inhi_, #0               wc      ' C = 0: nothing is below 0
+                ret                             ' timeout: C = 0
+.hit            getct   wnow_
+                ret                             ' C still 1 from POLLSE1 (GETCT without WC)
+
+put             wrlong  val_, respt_
+                add     respt_, #4
+                ret
+
+big_            long    $7FFF_FFFF
+
+mb_             res     1
+armtbl_         res     1
+armptr_         res     1
+respt_          res     1
+progp_          res     1
+arm_            res     1
+rep_            res     1
+a_cfg_          res     1                       ' arm fields, in table order (setq block read)
+a_x_            res     1
+a_nint_         res     1
+a_win_          res     1
+tdir_           res     1
+tfirst_         res     1
+tprev_          res     1
+w0_             res     1
+w1_             res     1
+wnow_           res     1
+dt_             res     1
+got0_           res     1
+ndone_          res     1
+total_          res     1
+min_            res     1
+max_            res     1
+t0_             res     1
+inhi_           res     1
+val_            res     1
+self_id_        res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+  See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

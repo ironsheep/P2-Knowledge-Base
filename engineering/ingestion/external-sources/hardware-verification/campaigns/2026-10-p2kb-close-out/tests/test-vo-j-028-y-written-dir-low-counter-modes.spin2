@@ -1,0 +1,1588 @@
+'' =============================================================================
+''
+''   File....... test-vo-j-028-y-written-dir-low-counter-modes.spin2
+''   Purpose.... VO-J-028 + VO-G006a on SILICON: does a Y written with WYPIN while DIR is low survive into
+''               operation in the counter/measuring modes %01111, %10010..%10111 and the ADC mode %11001?
+''               (VO-G006a rides in the same program: NCO duty %00111 with Y = 0.)
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED  (register VO-J-028 and VO-G006a; close-out study step 8)
+
+  PART 1 -- VO-J-028 (feeds F-386).
+    The P2 Documentation gives the general rule (silicon-doc-text.txt:3854):
+    "A smart pin should be configured while its DIR bit is low, holding it in
+    reset. During that time, WRPIN/WXPIN/WYPIN can be used to establish the
+    mode and related parameters."  Its per-mode pages then contradict a
+    blanket reading: "Y is set to zero" during reset for pulse and transition
+    (:3984, :3997), "Y.[15..0] is captured" for DAC/PWM (:3946, :4050), and
+    the counter modes %01100..%10111 and %11001 describe reset only for Z
+    (:4116..:4254) -- silent on Y.  EF-011 measured pulse, transition and
+    async TX (a Y written in reset never triggers) and the value modes
+    (order-independent); EF-090 measured sync TX %11100 (a word written in
+    reset IS sent).  The one counter-family control we hold is after-DIRH only
+    (EF-019 (a)).  Eight KB pages (%01111, %10010..%10111, %11001) write their
+    configuration Y BEFORE DIRH.  This program asks, per mode: is that Y
+    still in force once DIRH is raised, or is it lost?
+
+  PART 2 -- VO-G006a.
+    NCO duty %00111 with Y = 0: the documented adder (:4025-:4029: "Y.[31..0]
+    will be added into Z.[31..0] at each base period. The pin output will
+    reflect Z overflow. IN will be raised whenever Z overflows.") gives no
+    output and no IN event for Y = 0, but that is an inference and no
+    measurement exists (EF-013 is %00110 only).  Measured here, together with
+    an in-run repeat of EF-013 (%00110, Y = 0).
+
+  RIG  (BARE BOARD -- NOTHING ATTACHED; every connection is an internal input selector)
+    P4 = M  the pin under test.  Smart pin with A = relative +1 pin (P5),
+            B = relative +2 pin (P6) or the same pin as A, per mode.  TT = %00:
+            M NEVER drives its pad.
+    P5 = S  source 1, DRIVEN by the smart pin of an NCO mode (P_OE) or held
+            low by a plain DRVL.
+    P6 = S2 source 2 (the B input / clock), driven by an NCO frequency pin.
+    P4, P5 and P6 are driven by the program -- do not attach anything to them.
+    (This follows the recheck bench-groupD-recheck.md section 4.1, which
+    replaces the filed row's jumper method; the technique is the one of
+    test-f526-sync-tx-prime-in-reset.spin2, EF-090.)
+
+  DEBUGGER (EF-057)
+    DEBUG_COGS = %0000_0001: the debug interrupt lives in cog 0 only.  Every pin
+    operation and every INA read runs in a dedicated PASM cog started by COGINIT;
+    cog 0 only checks constants, reads the hub mailbox and reports.  Every
+    printed line is built in a hub buffer and sent by ONE debug() record
+    (DEBUG data stays small).  Compile with pnut-ts -d; nothing on P62.
+
+  ARMS (per row, 5 rounds, each round runs Z, B, A, A0 in that order).  EVERY run
+  starts from "DIRL + WRPIN #0 on P4, P5, P6", then a SCRUB of M (WRPIN, WXPIN,
+  DIRH, WYPIN y0, DIRL -- so a Y that is retained across a reset is the known
+  "inactive" y0 before the arm begins), then:
+    Z  (no Y write)  DIRL, WRPIN, WXPIN, DIRH                 -- Y never written in this arm: it holds y0 (from the scrub) if a reset
+                                                                  retains Y, else the reset default (gate D checks that it separates from A)
+    B  (the pages)   DIRL, WRPIN, WXPIN, WYPIN y1, DIRH       -- Y written in reset
+    A  (EF-011 order, the control)  DIRL, WRPIN, WXPIN, DIRH, WYPIN y1
+    A0 (the write-act control)      DIRL, WRPIN, WXPIN, DIRH, WYPIN y0   -- the A sequence with the INACTIVE value y0 written after DIRH
+  A0 exists because Z-vs-A alone cannot tell the VALUE of Y from the ACT of a WYPIN: an acknowledge/Y write after DIRH can restart a
+  measurement (EF-015).  If the act itself moved the sample, A0 would leave Z's range even though y0 is the inactive value.  A0 must
+  lie in Z's range; if it does not, the row is INCONCLUSIVE ("write act matters").  Caution: for R2 and R8 (y0 not 0) a reset default
+  of Y that differs from y0 would also move A0 away from Z; that case is likewise reported INCONCLUSIVE, with the A0 samples printed.
+  y1 is the value that makes the mode behave observably differently from the
+  default y0 on the source below.  The sources (S, S2) are configured and
+  started by the same code in every arm, immediately before DIRH of M, so M
+  sees the identical source in Z, B, A and A0.  Sources are written Y AFTER DIRH
+  (EF-011 order) and are scrubbed the same way.
+
+  ROWS (X, y0 -> y1, source profile; the value read is Z at IN, the clocks
+  from DIRH to IN, or the interval between IN rises)
+    R1 %01111 P_COUNT_HIGHS   X=25600  y0=0   y1=1   A = P5 NCO freq 128-clock period, 50 %; B = A inverted.
+        y=1 -> net (A highs - B highs) ~ 0 ; y=0 -> A highs ~ 12800.
+    R2 %10010 P_EVENTS_TICKS  X=4000   y0=%001 y1=%101  A = P5 held LOW (stopped source).
+        y1 has Y[2]=1 timeout -> IN after ~4000 clocks; y0 counts 4000 rises that never come -> no IN.
+    R3 %10011 P_PERIODS_TICKS X=8      y0=%00 y1=%11   A = B = P5, NCO duty 25 %, 128-clock period.
+        8 periods rise->rise = 1024 clocks ; edge->edge = 4*32 + 4*96 = 512.
+    R4 %10100 P_PERIODS_HIGHS X=8      y0=%00 y1=%11   same source.  rise->rise: 8*32 = 256 ; edge->edge: 4*32 = 128.
+    R5 %10101 P_COUNTER_TICKS X=2600   y0=%00 y1=%01   A = P5 duty 25 %, B = P6 NCO freq 32-clock period (phase set so the A rise falls
+        inside a B high).  rise->rise = 24 clocks/period ; rise->edge = 8 clocks/period.  Read: Z and the time to IN.
+    R6 %10110 P_COUNTER_HIGHS X=2600   y0=%00 y1=%01   same sources; states counted while A is high = the same 24 / 8 per period.
+    R7 %10111 P_COUNTER_PERIODS X=2600 y0=%00 y1=%11   A = B = P5 duty 25 %.  periods: ~21 (rise->rise) against ~42 (edge->edge).
+    R8 %11001 P_ADC_EXT       X=%10_0100 y0=16 y1=40   A = P5 held low, B = P6 NCO freq 8-clock period (the clock).
+        X[5:4] = %10 SINC3, X[3:0] = %0100 -> 16 clocks per sample ; Y overrides it (:4387).  Interval between IN rises:
+        16 B-rises = 128 clocks (default) against 40 B-rises = 320 clocks (Y in force).
+    R9 %01110 P_COUNT_RISES   X=25600  y0=0   y1=1   R1's pattern: A = P5 NCO freq 128-clock period, 50 %; B = A inverted.  The same Y[0]
+        family as %01111 (silicon-doc-text.txt:4130-4133: "%01110 AND !Y.[0] = Count A-input positive edges", "AND Y.[0] = Increment on
+        A-input positive edge and decrement on B-input positive edge"; Spin2 symbol P_COUNT_RISES, spin2-v55-text.txt:1544).  y=0 -> the
+        A rises of 25,600 clocks, about 200 ; y=1 -> A rises minus B rises (B rises when A falls), about 0.  Added as VERIFICATION-OPPORTUNITIES.md:73 asks.
+    G  (VO-G006a) S = P5 alone, M = P4 as a plain read (A = +1): NCO duty and NCO frequency, base 100, each with Y = 0 and Y > 0.
+  Source numbers are predictions for the printed report only -- the verdict never depends on them (see the rule below).
+
+  GATES (a failure prints RIG FAIL and NO VERDICT for the row, or for everything when the failure is global)
+    W  every configuration word decodes to the published fields and equals its Spin2 symbol composition.
+    K  path control, before and after all rows: P5 and P6 each driven high then low as plain pins; M (A = +1, then A = +2) must read
+       4096 of 4096 and 0 of 4096.
+    S  source-runs control, before and after each row, with the row's profile running: the reads of S (and S2) fall in the
+       profile's band (stopped source 0 ; 50 % about 2048 ; 25 % about 1024).
+    T  the measuring cog reports done within RIG_TIMEOUT_SEC = 10 s (clkfreq x 10 = 2.0e9 stays below 2^31 = 2.147e9).
+    D  per row and observable: A and Z must SEPARATE (below).  If they do not, Y is not observable in this rig for that mode:
+       INCONCLUSIVE ("not observable"), never a pass.
+    A0 per row and observable: the A0 samples (the A sequence with y0, the inactive value, written after DIRH) must lie in Z's range;
+       otherwise the write ACT, not the VALUE of Y, moves the sample and the row is INCONCLUSIVE ("write act matters").
+
+  RULE (fixed before the run; printed by the program)
+    "X lies in Y's range" : min(Y arm) - TOL <= X <= max(Y arm) + TOL (TOL per row and observable, in the units of the sample).
+    "X SEPARATES from Y"  : NO sample of X lies in Y's range (the so9 rule, widened by TOL).
+    SURVIVES     : A sep Z and Z sep A (gate D) ; every A0 sample lies in Z's range (gate A0) ; every B sample lies in A's range ; no B sample lies in Z's range.
+    LOST         : gates D and A0 ; every B sample lies in Z's range ; no B sample lies in A's range.
+    INCONCLUSIVE : gate D passes and either gate A0 fails ("write act matters") or neither of the two holds (mixed or neither).
+    NOT OBSERVABLE : gate D fails.  (For R5 and R6 this may be a phase miss of the two sources, not a property of the mode.)
+    One verdict line per row and observable, then one summary: "order-safe" (SURVIVES) or "reorder to the general order" (LOST) per mode.
+
+  CONFIGURATION WORDS, FIELD BY FIELD (WRPIN D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0, silicon-doc-text.txt:3731; selector
+  codes :3733-:3755; %SSSSS list :3807-:3841; Spin2 symbols spin2-v55-text.txt:1426-:1445, :1521-:1561)
+    word          AAAA  BBBB  FFF  M[12:0]          TT  SSSSS  Spin2 composition
+    $1900_001C    0001  1001  000  0_0000_0000_0000 00  01110  P_COUNT_RISES | P_PLUS1_A | P_PLUS1_B | P_INVERT_B
+    $1900_001E    0001  1001  000  0_0000_0000_0000 00  01111  P_COUNT_HIGHS | P_PLUS1_A | P_PLUS1_B | P_INVERT_B
+    $1000_0024    0001  0000  000  0                00  10010  P_EVENTS_TICKS | P_PLUS1_A
+    $1100_0026    0001  0001  000  0                00  10011  P_PERIODS_TICKS | P_PLUS1_A | P_PLUS1_B
+    $1100_0028    0001  0001  000  0                00  10100  P_PERIODS_HIGHS | P_PLUS1_A | P_PLUS1_B
+    $1200_002A    0001  0010  000  0                00  10101  P_COUNTER_TICKS | P_PLUS1_A | P_PLUS2_B
+    $1200_002C    0001  0010  000  0                00  10110  P_COUNTER_HIGHS | P_PLUS1_A | P_PLUS2_B
+    $1100_002E    0001  0001  000  0                00  10111  P_COUNTER_PERIODS | P_PLUS1_A | P_PLUS1_B
+    $1200_0032    0001  0010  000  0                00  11001  P_ADC_EXT | P_PLUS1_A | P_PLUS2_B
+    $1000_0000    0001  0000  000  0                00  00000  P_PLUS1_A           (M plain read of P5)
+    $2000_0000    0010  0000  000  0                00  00000  P_PLUS2_A           (M plain read of P6)
+    $0000_004C    0000  0000  000  0                01  00110  P_NCO_FREQ | P_OE   (source)
+    $0000_004E    0000  0000  000  0                01  00111  P_NCO_DUTY | P_OE   (source)
+    Selector %0001 = relative +1, %0010 = relative +2, %1xxx = inverted (:3733-:3743).  TT=%01 in a smart mode = output enabled
+    regardless of DIR (:3795-:3797); TT=%00 = output disabled, so M never drives.  Cog 0 decodes all of them at run time, prints
+    the fields, and gates on them and on the symbol compositions (control W).
+
+  PHASE OF THE TWO SOURCES (rows R5, R6 only)
+    NCO frequency: "Upon WXPIN, X.[31..16] is written to Z.[31..16] to allow phase setting, even during reset" (:4006); output
+    reflects Z.[31] (:4010).  With Y = $0800_0000 (2^27) Z advances 2^27 per clock: 32-clock period, Z[31] high for 16 clocks.
+    The start code runs DIRH S2 / WYPIN S2 / CMP / DIRH S / WYPIN S, so DIRH of S falls 4 clocks after the Y write of S2
+    (S2_LEAD_CLK).  S's duty output (base 32, Y=2^30) overflows at the 4th base period, so S's rises are on DIRH(S) + 128n (mod 32 = 0).
+    X[31:16] of S2 is set so that S2's rises fall 24 clocks after S's rises (mod 32): the S rise then lies 8 clocks after a B rise
+    and 8 before the B fall -- the middle of a B high.  The margin each side is 8 clocks; the pin-to-pin latency of the two NCO
+    pins is NOT known to be equal (see NOT CHECKED).  If the phase is off, R5/R6 simply do not separate A from Z: NOT OBSERVABLE --
+    which may be a phase miss, not a property of the mode (the program prints that sentence with every R5/R6 NOT OBSERVABLE line).
+
+  DEVIATION FROM THE BRIEF (bench-groupD-recheck.md section 4.1 / 4.5)
+    1. A SCRUB of M precedes every arm (see ARMS).  The brief starts each run from WRPIN #0 only; if a Y survives a reset, the arm
+       before would have left its y1 in force and a "survives" would be indistinguishable from a retained Y.
+    2. B input: the brief's B = "relative +2, or A inverted" is used as given; R3, R4, R7 use B = A (the same pin: "The B-input can be
+       set to the same pin as the A-input for single-pin cycle measurement", :4220, :4242) because it needs no second source.
+    3. %10101 and %10110 (the brief says "likewise"): a single-pin source cannot separate the two Y values by total time or states
+       (every full period covers all of the high time); a second source S2 gives B its own edges.  The values chosen are %00 against %01.
+       Because :4244 can be read as "X counts wall clocks" or "X counts clocks inside periods", both Z and the time to IN are analysed.
+    4. %11001: the clock B is P6 (relative +2) and A is P5 held low; the brief says "B routed (relative +1 clock)".  A is not used by
+       an external-clock bitstream experiment; either choice is an internal selector.
+    5. The pass rule requires every B sample inside A's range for SURVIVES (the brief: B does not separate from A, i.e. at least one).
+    6. VO-G006a arms: Y = 0 written AFTER DIRH (the working order), not left to the default; the control is NCO duty with Y = $1999_999A.
+       The G006a control gate is split: the OUTPUT control (reads of M in the Y>0 band) and the IN control (IN raised every round) are
+       gated separately; if only the IN control fails the verdict is "output CONFIRMED/REFUTED; IN not observable".
+    7. Sources are written Y after DIRH, and are scrubbed to Y = 0 first, so their start time is the same in every run.
+    8. A fourth arm A0 (the A sequence with y0) and a ninth row R9 (%01110) were added after the adversarial review; the brief names neither.
+
+  VERIFIED OPCODES AND DATA (pnut-ts -d -l v1.55.8 build 9/19/2026, read from the .lst; object offsets, cog addresses
+  in brackets)
+    Symbol table (listing): CFG_01111 = SYM_01111 = $1900_001E, CFG_10010 = SYM_10010 = $1000_0024, CFG_10011 = SYM_10011 =
+      $1100_0026, CFG_10100 = SYM_10100 = $1100_0028, CFG_10101 = SYM_10101 = $1200_002A, CFG_10110 = SYM_10110 = $1200_002C,
+      CFG_10111 = SYM_10111 = $1100_002E, CFG_11001 = SYM_11001 = $1200_0032, CFG_K1 = SYM_K1 = $1000_0000, CFG_K2 = SYM_K2 =
+      $2000_0000, CFG_SRC_FREQ = SYM_SRC_FREQ = $0000_004C, CFG_SRC_DUTY = SYM_SRC_DUTY = $0000_004E ; S2_K_RISE = $1C (28),
+      S2_PHASE_HI = $A000, X_S2_PAIR = $A000_0001 ; Y_NCOF128 = $0200_0000, Y_NCOF32 = $0800_0000, Y_NCOF8 = $2000_0000,
+      Y_DUTY25 = $4000_0000, Y_TENTH = $1999_999A ; CFG_01110 = SYM_01110 = $1900_001C ; ARMS = 4 (ARM_A0 = 3), ROWS = 9 ;
+      MB_KROW = $0D, MB_RES = $31, MB_G = $199, MB_LONGS = $1C1.  CLKMODE $010009FB, CLKFREQ 200_000_000, XINFREQ 20_000_000 (listing).
+    Hub image: rowTbl $0A8 (9 rows x 14 longs; row 1 = $1900_001E, $0000_6400 (25600), 0, 1, 1, 0, $0001_86A0 (100000), ...; row 9 =
+      $1900_001C, 25600, 0, 1, 1, 0, 100000, $1900_001C, 1, 8, 0, 1, 9, $0E),
+      profTbl $2A0 (5 x 10 longs; profile 3 = $4E, 32, $4000_0000, $4C, $A000_0001, $0800_0000, 800, 1250, 1700, 2400),
+      gaTbl $368, engine $398.  The cog image ends at cog address $114; DEBUG: 2 records, 24 bytes of DEBUG data.
+    Cog registers: rw_cfg_ $0F5 .. rw_win_ $0FB (setq #6 / rdlong block), pf_cfgs_ $0FC .. pf_s2hi_ $105 (setq #9 block),
+      ga_cfg_ $106 .. ga_y_ $108 (setq #2 block), arm_ $0F2, tstart_ $109, ysel_ $10A, val_z_ $10F, val_t_ $110, count_ $111,
+      insnap_ $113, reads_ $0E2.  Labels: reset_all [$040] one_run [$04B] prof_apply [$064] observe [$07A] obs_int [$08A] wait_in [$098]
+      k_check [$0A2] path_ctrl [$0B0] g_run [$0C5] do_sample [$0DA].
+    Instructions read back from the hub image (the .bin; engine base = rowTbl + $2F0; condition IF_Z = $A, IF_C = $C, IF_NC = $3 in bits 31:28):
+      dirl #4 / #5 / #6   $FD640840 / $FD640A40 / $FD640C40      dirh #4   $FD640841       outl #4  $FD640848
+      wrpin #0,#4 / #5 / #6  $FC0C0004 / $FC0C0005 / $FC0C0006    waitx #100  $FD64C81F     waitx #40  $FD64501F
+      wrpin rw_cfg_,#4  $FC05EA04 (D=$0F5, I=1, S=#4)    wypin rw_y0_,#4  $FC25EE04    if_z wypin rw_y1_,#4  $AC25F004
+      cmp arm_,#1 wz  $F20DE401                         getct tstart_  $FD62121A      testp #4 wc  $FD740840
+      rep #3,reads_  $FCD806E2     mov insnap_,ina  $F60227FE     testb insnap_,#4 wc  $F4162604     if_c add count_,#1  $C1062201
+      ret  $FD64002D
+    NEW for arm A0 (all read back):  mov ysel_,rw_y1_  $F60214F8   cmp arm_,#3 wz  $F20DE403   if_z mov ysel_,rw_y0_  $A60214F7
+      cmp arm_,#2 wc  $F215E402   if_nc wypin ysel_,#4  $3C261404.
+    The sequence in one_run is: call reset_all / wrpin / wxpin / dirh / wypin y0 / waitx #40 / dirl / wrpin / wxpin / [if_z wypin
+      y1 (cmp arm_,#1)] / mov ysel_ / cmp arm_,#3 / [if_z mov ysel_,y0] / call prof_apply / dirh #4 / getct / cmp arm_,#2 wc /
+      [if_nc wypin ysel_ (arms A, A0)] / call observe -- the same number of instructions in every arm (a skipped conditional
+      instruction still takes its two clocks); the Y write of A and A0 is the same instruction at the same place.
+
+  HOW TO RUN
+    1. USB serial connected (DEBUG on P62/P63).  Compile: pnut-ts -d test-vo-j-028-y-written-dir-low-counter-modes.spin2
+    2. Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10).
+    3. SAVE THE WHOLE CONSOLE OUTPUT -- it is the only record.
+    4. Expected run time: the engine well under a second (about 1 s at most); the report about 190 lines.  Done when you see the
+       "=== SUMMARY" block, the VO-G006a lines, then "=== END ===" and DEBUG_END_SESSION.  No END / DEBUG_END_SESSION line within
+       20 s = a hang or a lost session: power-cycle the board and send the LAST line you saw.
+    5. Clock: _clkfreq = 200_000_000 assumes the board's 20 MHz crystal; the listing's CLKMODE is quoted in the VERIFIED block above.
+       On another crystal every clock count here is off by the ratio.
+    6. Pins: P4, P5 and P6 are driven by the program (P4 only as a smart-pin input, P5 and P6 as sources / plain pins).  NOTHING may be
+       attached to P4, P5 or P6.  No other pin is touched.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  PIN_M             = 4                 ' pin under test
+  PIN_S             = PIN_M + 1         ' source 1 (A input = relative +1)
+  PIN_S2            = PIN_M + 2         ' source 2 (B input = relative +2)
+
+  ROUNDS            = 5                 ' runs per arm per row
+  READS             = 4096              ' INA reads per source/path sample
+  SETTLE_CLK        = 10_000            ' WAITX before a source/path sample
+  RIG_TIMEOUT_SEC   = 10                ' host wait cap for the whole engine
+  MBOX_DONE         = 1
+  NO_IN             = 1_000_000_000     ' recorded when no IN arrived within the window
+  UNUSED            = -1_000_000        ' recorded for a source that the profile does not run
+
+  K_HIGH_EXPECT     = READS             ' plain pin driven high, seen by M
+  K_LOW_EXPECT      = 0
+
+CON ' ---- Arms, Rows, Profiles ----
+  #0, ARM_Z, ARM_B, ARM_A, ARM_A0       ' A0: the A sequence with the inactive y0 (write-act control)
+  ARMS              = 4
+
+  ROWS              = 9
+  #0, RD_IN, RD_INT                     ' RD_IN: wait for IN, read Z.  RD_INT: interval between three IN rises
+  OBS_Z             = 1                 ' analyse slot 0 (Z, or the interval)
+  OBS_T             = 2                 ' analyse slot 1 (clocks from DIRH to IN)
+  SLOTS             = 2
+
+  ' row table longs: engine reads the first ROW_ENG_LONGS, cog 0 reads all
+  #0, RC_CFG, RC_X, RC_Y0, RC_Y1, RC_PROF, RC_READ, RC_WIN, RC_SYM, RC_OBS, RC_TOLZ, RC_TOLT, RC_AAAA, RC_BBBB, RC_SSSSS
+  ROW_ENG_LONGS     = 7
+  ROW_LONGS         = 14
+  ROW_BYTES         = ROW_LONGS * 4
+
+  ' source profile table longs (engine reads all)
+  #0, PC_CFGS, PC_XS, PC_YS, PC_CFGS2, PC_XS2, PC_YS2, PC_SLO, PC_SHI, PC_S2LO, PC_S2HI
+  PF_LONGS          = 10
+  PF_BYTES          = PF_LONGS * 4
+  PROFS             = 5
+  #0, PF_STOP, PF_NCOF128, PF_DUTY25, PF_PAIR, PF_CLK8
+
+  ' VO-G006a arm table (cfg, x, y)
+  #0, GA_DUTY_Y, GA_DUTY_0, GA_FREQ_Y, GA_FREQ_0
+  GA_COUNT          = 4
+  GA_LONGS          = 3
+  GA_BYTES          = GA_LONGS * 4
+
+CON ' ---- Configuration Words ----
+  ' the words (derivation in the header)
+  CFG_01111         = $1900_001E
+  CFG_10010         = $1000_0024
+  CFG_10011         = $1100_0026
+  CFG_10100         = $1100_0028
+  CFG_10101         = $1200_002A
+  CFG_10110         = $1200_002C
+  CFG_10111         = $1100_002E
+  CFG_11001         = $1200_0032
+  CFG_01110         = $1900_001C
+  CFG_K1           = $1000_0000
+  CFG_K2            = $2000_0000
+  CFG_SRC_FREQ      = $0000_004C
+  CFG_SRC_DUTY      = $0000_004E
+  ' the same words composed from the Spin2 v55 symbols (control W)
+  SYM_01111         = P_COUNT_HIGHS | P_PLUS1_A | P_PLUS1_B | P_INVERT_B
+  SYM_10010         = P_EVENTS_TICKS | P_PLUS1_A
+  SYM_10011         = P_PERIODS_TICKS | P_PLUS1_A | P_PLUS1_B
+  SYM_10100         = P_PERIODS_HIGHS | P_PLUS1_A | P_PLUS1_B
+  SYM_10101         = P_COUNTER_TICKS | P_PLUS1_A | P_PLUS2_B
+  SYM_10110         = P_COUNTER_HIGHS | P_PLUS1_A | P_PLUS2_B
+  SYM_10111         = P_COUNTER_PERIODS | P_PLUS1_A | P_PLUS1_B
+  SYM_11001         = P_ADC_EXT | P_PLUS1_A | P_PLUS2_B
+  SYM_01110         = P_COUNT_RISES | P_PLUS1_A | P_PLUS1_B | P_INVERT_B
+  SYM_K1           = P_PLUS1_A
+  SYM_K2            = P_PLUS2_A
+  SYM_SRC_FREQ      = P_NCO_FREQ | P_OE
+  SYM_SRC_DUTY      = P_NCO_DUTY | P_OE
+
+  ' WRPIN D field positions and widths (silicon-doc-text.txt:3731)
+  SHIFT_AAAA        = 28
+  MASK_AAAA         = %1111
+  SHIFT_BBBB        = 24
+  MASK_BBBB         = %1111
+  SHIFT_FFF         = 21
+  MASK_FFF          = %111
+  SHIFT_M           = 8
+  MASK_M            = %1_1111_1111_1111
+  SHIFT_M_TOP       = 10
+  MASK_M_TOP        = %111
+  SHIFT_TT          = 6
+  MASK_TT           = %11
+  SHIFT_SSSSS       = 1
+  MASK_SSSSS        = %1_1111
+  MASK_BIT0         = 1
+
+  ' expected field values
+  SEL_LOCAL         = %0000
+  SEL_PLUS1         = %0001
+  SEL_PLUS2         = %0010
+  SEL_PLUS1_INV     = %1001
+  TT_OFF            = %00
+  TT_ON             = %01
+
+CON ' ---- Sources and Phase ----
+  ' S2 phase (rows R5/R6): see the header.  D_S - W_S2 = 4 clocks in the start code (S2_LEAD_CLK).
+  S2_LEAD_CLK       = 4
+  B_RISE_REL_S      = 24                ' B rise, mod 32, relative to the S rise: the S rise is 8 after it
+  S2_K_RISE         = (B_RISE_REL_S + S2_LEAD_CLK) // 32
+  S2_PHASE_HI       = ($8000 - S2_K_RISE * $0800) & $FFFF
+  X_S2_PAIR         = (S2_PHASE_HI << 16) | 1
+
+  Y_NCOF128         = $0200_0000        ' 2^25: period 128 clocks (base 1)
+  Y_NCOF32          = $0800_0000        ' 2^27: period 32 clocks
+  Y_NCOF8           = $2000_0000        ' 2^29: period 8 clocks
+  Y_DUTY25          = $4000_0000        ' 2^30 with base 32: period 128, high 32
+  Y_TENTH           = $1999_999A        ' about 2^32 / 10
+
+CON ' ---- Mailbox Layout ----
+  ' mailbox longs, in the order the engine uses them:
+  '  MB_DONE      MBOX_DONE once the engine has finished
+  '  MB_PROG      row the engine is in (diagnosis if it stalls)
+  '  MB_ROWTBL..  hub addresses of the row, profile and G006a tables (written by cog 0)
+  '  MB_KPATH     plain-pin path control: before (S hi, S lo, S2 hi, S2 lo), after (same)
+  '  MB_KROW      per row: source reads before (S, S2), after (S, S2)
+  '  MB_RES       per row, per round, per arm: slot 0 (Z or interval), slot 1 (clocks to IN)
+  '  MB_G         per G006a arm, per round: reads of M that were high, S IN flag after the window
+  MB_DONE           = 0
+  MB_PROG           = 1
+  MB_ROWTBL         = 2
+  MB_PROFTBL        = 3
+  MB_GATBL          = 4
+  MB_KPATH          = 5
+  MB_KROW           = MB_KPATH + 8
+  MB_RES            = MB_KROW + ROWS * 4
+  MB_G              = MB_RES + ROWS * ROUNDS * ARMS * SLOTS
+  MB_LONGS          = MB_G + GA_COUNT * ROUNDS * 2
+
+CON ' ---- Report Parameters ----
+  LINE_MAX          = 400
+  DEC_TOP           = 1_000_000_000
+  DEC_DIGITS        = 10
+  DEC_BASE          = 10
+  HEX_DIGITS        = 8
+  HEX_BITS          = 4
+  HEX_GROUP         = 4
+  HEX_LETTERS       = 10
+
+  ' verdict codes
+  #0, VC_NONE, VC_SURVIVES, VC_LOST, VC_INCONCLUSIVE, VC_NOT_OBSERVABLE
+
+  ' VO-G006a bands: reads of M high, out of READS
+  GA_DUTY_LO        = 350               ' Y = $1999_999A, base 100: 10 % of 4096 is about 410
+  GA_DUTY_HI        = 480
+  GA_FREQ_LO        = 1700              ' 50 % of 4096 is about 2048
+  GA_FREQ_HI        = 2400
+
+VAR ' ---- Mailbox & Analysis State ----
+  long mailbox[MB_LONGS]
+  long fail_count                       ' global gating failures
+  long rowGate[ROWS]                    ' TRUE while the row's source-runs control holds
+  long rowCode[ROWS]                    ' combined verdict code per row
+  long amin[ARMS]                       ' range of each arm for the slot being analysed
+  long amax[ARMS]
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+
+PUB main() | engineCog, startTick
+'' Run the J-028 + G006a rig: check the constants and configuration words, start
+'' the measuring cog, wait for its done flag, then print the controls, every sample and the verdicts.
+''
+
+' Local Variables:
+' @local engineCog - cog id COGINIT returned (negative = no free cog)
+' @local startTick - CT when the wait for the done flag began
+
+  longfill(@mailbox, 0, MB_LONGS)
+  mailbox[MB_ROWTBL] := @rowTbl
+  mailbox[MB_PROFTBL] := @profTbl
+  mailbox[MB_GATBL] := @gaTbl
+  fail_count := 0
+  linePos := 0
+  say(string("=== VO-J-028 + VO-G006a: Y written while DIR is low, counter modes; NCO duty with Y = 0 ==="))
+  ln_s(string("M = P"))
+  ln_u(PIN_M)
+  ln_s(string(" (A = P"))
+  ln_u(PIN_S)
+  ln_s(string(", B = P"))
+  ln_u(PIN_S2)
+  ln_s(string(" or A), S = P"))
+  ln_u(PIN_S)
+  ln_s(string(", S2 = P"))
+  ln_u(PIN_S2)
+  ln_s(string("; "))
+  ln_u(READS)
+  ln_s(string(" INA reads per source sample; "))
+  ln_u(ROUNDS)
+  say(string(" rounds per arm; NOTHING attached to P4, P5, P6 (they are driven)"))
+  print_predictions()
+  say(string(" "))
+  say(string("--- CONTROL W: configuration words, decoded into the published WRPIN fields ---"))
+  check_rig_constants()
+  if fail_count <> 0
+    say(string("NO VERDICT: a construction control failed (see RIG FAIL lines above); the measuring cog was not started"))
+  else
+    engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
+    if engineCog < 0
+      say(string("RIG FAIL: no free cog for the measuring engine"))
+      say(string("NO VERDICT: nothing was measured"))
+    else
+      startTick := getct()
+      repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
+      if mailbox[MB_DONE] <> MBOX_DONE
+        cogstop(engineCog)
+        pinclear(PIN_M addpins 2)
+        ln_s(string("RIG FAIL: measuring cog did not report done within "))
+        ln_u(RIG_TIMEOUT_SEC)
+        ln_s(string(" s; it was in row index "))
+        ln_u(mailbox[MB_PROG])
+        say(string("; pins P4..P6 cleared by cog 0"))
+        say(string("NO VERDICT: the measurement did not complete"))
+      else
+        ln_s(string("measuring cog = "))
+        ln_u(engineCog)
+        say(string(" (debugger restricted to cog 0)"))
+        report()
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  say(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_d(numVal)
+' Append a signed decimal to the line.
+'
+' @param numVal - the number, read as signed
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_u(numVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_bin(numVal, digits) | idx
+' Append "%" and the low digits bits of a number.
+'
+' @param numVal - the number
+' @param digits - how many bits
+
+' Local Variables:
+' @local idx - bit index
+
+  ln_c("%")
+  repeat idx from digits - 1 to 0
+    ln_c("0" + ((numVal >> idx) & 1))
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI yes_no(bFlag) : pText
+' Printable YES / NO.
+'
+' @param bFlag - TRUE or FALSE
+' @returns pText - address of "YES" or "NO"
+
+  if bFlag
+    pText := string("YES")
+  else
+    pText := string("NO")
+
+' ---------------------------------------------------------------------------
+' names
+' ---------------------------------------------------------------------------
+PRI row_name(rowIdx) : pText
+' Printable name of a row.
+'
+' @param rowIdx - 0..ROWS-1
+' @returns pText - address of the name
+
+  pText := lookupz(rowIdx: string("R1 %01111 count highs   "), string("R2 %10010 event timing  "), string("R3 %10011 periods time  "), string("R4 %10100 periods states"), string("R5 %10101 X+ clk time   "), string("R6 %10110 X+ clk states "), string("R7 %10111 X+ periods    "), string("R8 %11001 ADC ext clock "), string("R9 %01110 count rises   "))
+
+PRI mode_name(rowIdx) : pText
+' Printable mode of a row.
+'
+' @param rowIdx - 0..ROWS-1
+' @returns pText - address of the mode
+
+  pText := lookupz(rowIdx: string("%01111"), string("%10010"), string("%10011"), string("%10100"), string("%10101"), string("%10110"), string("%10111"), string("%11001"), string("%01110"))
+
+PRI prof_name(profIdx) : pText
+' Printable name of a source profile.
+'
+' @param profIdx - PF_*
+' @returns pText - address of the name
+
+  pText := lookupz(profIdx: string("P0 S held low"), string("P1 S nco-freq 128 clk 50%"), string("P2 S nco-duty 128 clk 25%"), string("P3 S nco-duty 25% + S2 nco-freq 32 clk"), string("P4 S held low + S2 nco-freq 8 clk"))
+
+PRI pred_text(rowIdx) : pText
+' Printable prediction (information only; the verdict never uses it).
+'
+' @param rowIdx - 0..ROWS-1
+' @returns pText - address of the text
+
+  pText := lookupz(rowIdx: string("Z-arm Z about 12800 ; A-arm Z about 0 (A highs minus B highs)"), string("Z-arm no IN (NO_IN) ; A-arm clocks to IN about 4000"), string("Z-arm Z about 1024 ; A-arm Z about 512"), string("Z-arm Z about 256 ; A-arm Z about 128"), string("Z-arm Z about 480..504 ; A-arm Z about 160..168 (wall-clock reading of X); the tracked-clock reading gives separate clocks-to-IN"), string("Z-arm Z about 480..504 ; A-arm Z about 160..168 (same reading note as R5)"), string("Z-arm Z about 21 ; A-arm Z about 41..42"), string("Z-arm interval about 128 clocks ; A-arm interval about 320 clocks"), string("Z-arm Z about 200 (A rises) ; A-arm Z about 0 (A rises minus B rises)"))
+
+PRI cond_name(armIdx) : pText
+' Printable name of an arm.
+'
+' @param armIdx - ARM_Z, ARM_B, ARM_A
+' @returns pText - address of the name
+
+  pText := lookupz(armIdx: string("Z default"), string("B in reset"), string("A after DIRH"), string("A0 y0 after DIRH"))
+
+PRI code_text(codeVal) : pText
+' Printable verdict code.
+'
+' @param codeVal - VC_*
+' @returns pText - address of the text
+
+  pText := lookupz(codeVal: string("NO VERDICT"), string("SURVIVES"), string("LOST"), string("INCONCLUSIVE"), string("NOT OBSERVABLE"))
+
+PRI row_ptr(rowIdx) : pRow
+' @param rowIdx - 0..ROWS-1
+' @returns pRow - hub address of the row's table entry
+
+  pRow := @rowTbl + rowIdx * ROW_BYTES
+
+PRI prof_ptr(profIdx) : pProf
+' @param profIdx - PF_*
+' @returns pProf - hub address of the profile's table entry
+
+  pProf := @profTbl + profIdx * PF_BYTES
+
+' ---------------------------------------------------------------------------
+' pre-registered outcomes and construction controls
+' ---------------------------------------------------------------------------
+PRI print_predictions() | rowIdx, pRow
+' Print the outcomes and the rule fixed before the run, then each row's parameters.
+'
+
+' Local Variables:
+' @local rowIdx - row being printed
+' @local pRow - the row's table entry
+
+  say(string("PRE-REGISTERED RULE (fixed before the run):"))
+  say(string("  arms per row, 5 rounds: Z = Y never written ; B = Y written in reset (DIRL, WRPIN, WXPIN, WYPIN y1, DIRH) ; A = Y written after DIRH (control) ; A0 = y0 (inactive) written after DIRH (write-act control)"))
+  say(string("  every run starts DIRL+WRPIN #0 on P4..P6 then a scrub of M to y0; sources are started identically before DIRH of M in every arm"))
+  say(string("  X IN-RANGE of Y : min(Y arm) - TOL <= X <= max(Y arm) + TOL  ;  X SEPARATES from Y : no X sample is in Y's range"))
+  say(string("  gate D : A separates from Z and Z separates from A, else NOT OBSERVABLE (never a pass; for R5/R6 it may be a phase miss, not a property of the mode)"))
+  say(string("  gate A0 : A0 (the A sequence writing the inactive y0 after DIRH) must lie in Z's range in every round, else INCONCLUSIVE (write act matters)"))
+  say(string("  SURVIVES : gates D and A0, every B sample in A's range, no B sample in Z's range  -> the pages' order (Y before DIRH) is order-safe"))
+  say(string("  LOST     : gates D and A0, every B sample in Z's range, no B sample in A's range   -> reorder the page to the general order"))
+  say(string("  INCONCLUSIVE : gate D passes and gate A0 fails, or neither holds.   RIG FAIL / NO VERDICT : a gate (W, K, S, T) fails"))
+  say(string("  VO-G006a : output CONFIRMED = NCO duty Y=0 reads low in every sample, gated by the Y>0 output control (reads in band) ; IN CONFIRMED = no IN in any round, gated by the Y>0 IN control"))
+  say(string("             REFUTED = any high read or IN ; if only the IN control fails: output CONFIRMED/REFUTED, IN not observable"))
+  say(string("  rows (X, y0 -> y1, source profile, tolerances, informational prediction):"))
+  repeat rowIdx from 0 to ROWS - 1
+    pRow := row_ptr(rowIdx)
+    ln_s(string("  "))
+    ln_s(row_name(rowIdx))
+    ln_s(string(" X="))
+    ln_u(long[pRow][RC_X])
+    ln_s(string(" y0="))
+    ln_u(long[pRow][RC_Y0])
+    ln_s(string(" y1="))
+    ln_u(long[pRow][RC_Y1])
+    ln_s(string(" "))
+    ln_s(prof_name(long[pRow][RC_PROF]))
+    ln_s(string(" tolZ="))
+    ln_u(long[pRow][RC_TOLZ])
+    ln_s(string(" tolT="))
+    ln_u(long[pRow][RC_TOLT])
+    ln_out()
+    ln_s(string("      predicted (info only): "))
+    ln_s(pred_text(rowIdx))
+    ln_out()
+
+PRI check_rig_constants() | rowIdx, pRow
+' Control W: every configuration word decodes to the published fields and
+' equals its Spin2 symbol composition.
+'
+
+' Local Variables:
+' @local rowIdx - row being checked
+' @local pRow - the row's table entry
+
+  repeat rowIdx from 0 to ROWS - 1
+    pRow := row_ptr(rowIdx)
+    check_word(row_name(rowIdx), long[pRow][RC_CFG], long[pRow][RC_SYM], long[pRow][RC_AAAA], long[pRow][RC_BBBB], TT_OFF, long[pRow][RC_SSSSS])
+  check_word(string("K1 M reads P5     "), CFG_K1, SYM_K1, SEL_PLUS1, SEL_LOCAL, TT_OFF, %00000)
+  check_word(string("K2 M reads P6     "), CFG_K2, SYM_K2, SEL_PLUS2, SEL_LOCAL, TT_OFF, %00000)
+  check_word(string("S NCO frequency   "), CFG_SRC_FREQ, SYM_SRC_FREQ, SEL_LOCAL, SEL_LOCAL, TT_ON, %00110)
+  check_word(string("S NCO duty        "), CFG_SRC_DUTY, SYM_SRC_DUTY, SEL_LOCAL, SEL_LOCAL, TT_ON, %00111)
+  ln_s(string("  S2 phase word X = "))
+  ln_h(X_S2_PAIR)
+  ln_s(string(" : X[15:0] = 1 (base period 1), X[31:16] = "))
+  ln_h(S2_PHASE_HI)
+  ln_s(string(" = $8000 - "))
+  ln_u(S2_K_RISE)
+  say(string(" * $0800 (S2 rise 28 clocks after its Y write)"))
+  if (X_S2_PAIR & $FFFF) <> 1 or (X_S2_PAIR >> 16) <> S2_PHASE_HI
+    say(string("RIG FAIL: the S2 phase word does not hold X[15:0] = 1 and the computed phase"))
+    fail_count++
+
+PRI check_word(pLabel, cfgWord, symWord, expAaaa, expBbbb, expTt, expSssss) | fldM
+' Decode one WRPIN word into its published fields, print them, and count a
+' construction failure if any field or the symbol composition disagrees.
+'
+' @param pLabel - label string for the printed line
+' @param cfgWord - the configuration word the measuring cog writes
+' @param symWord - the same word composed from the Spin2 v55 symbols
+' @param expAaaa - expected %AAAA
+' @param expBbbb - expected %BBBB
+' @param expTt - expected %TT
+' @param expSssss - expected %SSSSS
+
+' Local Variables:
+' @local fldM - decoded %M (13 bits)
+
+  fldM := (cfgWord >> SHIFT_M) & MASK_M
+  ln_s(string("  "))
+  ln_s(pLabel)
+  ln_c(" ")
+  ln_h(cfgWord)
+  ln_s(string(": AAAA="))
+  ln_bin((cfgWord >> SHIFT_AAAA) & MASK_AAAA, 4)
+  ln_s(string(" BBBB="))
+  ln_bin((cfgWord >> SHIFT_BBBB) & MASK_BBBB, 4)
+  ln_s(string(" FFF="))
+  ln_bin((cfgWord >> SHIFT_FFF) & MASK_FFF, 3)
+  ln_s(string(" M="))
+  ln_bin(fldM, 13)
+  ln_s(string(" (M[12:10]="))
+  ln_bin((fldM >> SHIFT_M_TOP) & MASK_M_TOP, 3)
+  ln_s(string(") TT="))
+  ln_bin((cfgWord >> SHIFT_TT) & MASK_TT, 2)
+  ln_s(string(" SSSSS="))
+  ln_bin((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS, 5)
+  ln_s(string(" bit0="))
+  ln_u(cfgWord & MASK_BIT0)
+  ln_s(string("  symbols="))
+  ln_h(symWord)
+  ln_out()
+  if ((cfgWord >> SHIFT_AAAA) & MASK_AAAA) <> expAaaa or ((cfgWord >> SHIFT_BBBB) & MASK_BBBB) <> expBbbb or ((cfgWord >> SHIFT_FFF) & MASK_FFF) <> 0 or fldM <> 0 or ((cfgWord >> SHIFT_TT) & MASK_TT) <> expTt or ((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS) <> expSssss or (cfgWord & MASK_BIT0) <> 0
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    say(string(" fields differ from the expected AAAA/BBBB/TT/SSSSS (FFF, M, bit0 zero)"))
+    fail_count++
+  if cfgWord <> symWord
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    ln_s(string(" word "))
+    ln_h(cfgWord)
+    ln_s(string(" differs from its Spin2 symbol composition "))
+    ln_h(symWord)
+    ln_out()
+    fail_count++
+
+' ---------------------------------------------------------------------------
+' report
+' ---------------------------------------------------------------------------
+PRI report() | rowIdx
+' Print the controls, every raw sample, the verdict per row and observable,
+' the summary, and the VO-G006a result. Single exit.
+'
+
+' Local Variables:
+' @local rowIdx - row being reported
+
+  say(string(" "))
+  say(string("--- CONTROL K: plain-pin path (P5 and P6 driven high / low as plain pins; M reads them) ---"))
+  check_path_controls()
+  say(string(" "))
+  say(string("--- CONTROL S: source-runs, with each row's profile running (reads of M that were high, of 4096) ---"))
+  repeat rowIdx from 0 to ROWS - 1
+    check_source_runs(rowIdx)
+  say(string(" "))
+  say(string("--- RAW SAMPLES (slot Z = Z at IN or the IN interval ; slot T = clocks from DIRH of M to IN ; NO_IN = no IN in the window) ---"))
+  repeat rowIdx from 0 to ROWS - 1
+    print_raw(rowIdx)
+  say(string(" "))
+  say(string("--- VERDICTS, one line per row and observable ---"))
+  repeat rowIdx from 0 to ROWS - 1
+    analyse_row(rowIdx)
+  say(string(" "))
+  print_summary()
+  say(string(" "))
+  say(string("--- VO-G006a: NCO duty %00111 with Y = 0 (and the in-run repeat of EF-013, %00110) ---"))
+  g006a()
+
+PRI mbox_k(rowIdx, slotIdx) : countVal
+' @param rowIdx - row
+' @param slotIdx - 0 S before, 1 S2 before, 2 S after, 3 S2 after
+' @returns countVal - the recorded source read count
+
+  countVal := mailbox[MB_KROW + rowIdx * 4 + slotIdx]
+
+PRI check_path_controls()
+' Control K: P5 and P6 driven as plain pins; M must read every read high, then every read low.
+'
+
+  ln_s(string("  before: S high "))
+  ln_u(mailbox[MB_KPATH])
+  ln_s(string("  S low "))
+  ln_u(mailbox[MB_KPATH + 1])
+  ln_s(string("  S2 high "))
+  ln_u(mailbox[MB_KPATH + 2])
+  ln_s(string("  S2 low "))
+  ln_u(mailbox[MB_KPATH + 3])
+  ln_out()
+  ln_s(string("  after : S high "))
+  ln_u(mailbox[MB_KPATH + 4])
+  ln_s(string("  S low "))
+  ln_u(mailbox[MB_KPATH + 5])
+  ln_s(string("  S2 high "))
+  ln_u(mailbox[MB_KPATH + 6])
+  ln_s(string("  S2 low "))
+  ln_u(mailbox[MB_KPATH + 7])
+  ln_out()
+  ln_s(string("  expected: high "))
+  ln_u(K_HIGH_EXPECT)
+  ln_s(string("  low "))
+  ln_u(K_LOW_EXPECT)
+  ln_out()
+  if mailbox[MB_KPATH] <> K_HIGH_EXPECT or mailbox[MB_KPATH + 2] <> K_HIGH_EXPECT or mailbox[MB_KPATH + 1] <> K_LOW_EXPECT or mailbox[MB_KPATH + 3] <> K_LOW_EXPECT
+    say(string("RIG FAIL: path control before the rows -- M does not follow P5 / P6 driven as plain pins"))
+    fail_count++
+  if mailbox[MB_KPATH + 4] <> K_HIGH_EXPECT or mailbox[MB_KPATH + 6] <> K_HIGH_EXPECT or mailbox[MB_KPATH + 5] <> K_LOW_EXPECT or mailbox[MB_KPATH + 7] <> K_LOW_EXPECT
+    say(string("RIG FAIL: path control after the rows -- M does not follow P5 / P6 driven as plain pins"))
+    fail_count++
+
+PRI in_band(countVal, loVal, hiVal) : bOk
+' A source read count is acceptable when its band is not "unused" (low bound negative) and it lies in the band.
+'
+' @param countVal - the recorded count (UNUSED when the profile does not run that source)
+' @param loVal - lowest acceptable (negative = not checked)
+' @param hiVal - highest acceptable
+' @returns bOk - TRUE when acceptable
+
+  if loVal < 0
+    bOk := TRUE
+  else
+    bOk := countVal >= loVal and countVal <= hiVal
+
+PRI check_source_runs(rowIdx) | pProf, profIdx
+' Control S for one row: the profile's sources read in their bands before and after the row's rounds.
+'
+' @param rowIdx - row
+
+' Local Variables:
+' @local pProf - the row's profile entry
+' @local profIdx - the row's profile
+
+  profIdx := long[row_ptr(rowIdx)][RC_PROF]
+  pProf := prof_ptr(profIdx)
+  rowGate[rowIdx] := TRUE
+  ln_s(string("  "))
+  ln_s(row_name(rowIdx))
+  ln_s(string(" ["))
+  ln_s(prof_name(profIdx))
+  ln_s(string("] before: S "))
+  ln_d(mbox_k(rowIdx, 0))
+  ln_s(string(" S2 "))
+  ln_d(mbox_k(rowIdx, 1))
+  ln_s(string(" | after: S "))
+  ln_d(mbox_k(rowIdx, 2))
+  ln_s(string(" S2 "))
+  ln_d(mbox_k(rowIdx, 3))
+  ln_s(string(" | band S "))
+  ln_d(long[pProf][PC_SLO])
+  ln_s(string(".."))
+  ln_d(long[pProf][PC_SHI])
+  ln_s(string(" S2 "))
+  ln_d(long[pProf][PC_S2LO])
+  ln_s(string(".."))
+  ln_d(long[pProf][PC_S2HI])
+  ln_out()
+  if in_band(mbox_k(rowIdx, 0), long[pProf][PC_SLO], long[pProf][PC_SHI]) == FALSE or in_band(mbox_k(rowIdx, 2), long[pProf][PC_SLO], long[pProf][PC_SHI]) == FALSE or in_band(mbox_k(rowIdx, 1), long[pProf][PC_S2LO], long[pProf][PC_S2HI]) == FALSE or in_band(mbox_k(rowIdx, 3), long[pProf][PC_S2LO], long[pProf][PC_S2HI]) == FALSE
+    ln_s(string("RIG FAIL: "))
+    ln_s(row_name(rowIdx))
+    say(string(" source-runs control -- a source did not read in its band; this row gets NO VERDICT"))
+    rowGate[rowIdx] := FALSE
+
+PRI rsample(rowIdx, roundIdx, armIdx, slotIdx) : sampleVal
+' One recorded sample.
+'
+' @param rowIdx - row
+' @param roundIdx - round, 0..ROUNDS-1
+' @param armIdx - ARM_Z, ARM_B, ARM_A
+' @param slotIdx - 0 = Z or interval, 1 = clocks from DIRH to IN
+' @returns sampleVal - the recorded long
+
+  sampleVal := mailbox[MB_RES + (((rowIdx * ROUNDS + roundIdx) * ARMS + armIdx) * SLOTS) + slotIdx]
+
+PRI print_raw(rowIdx) | slotIdx, armIdx, roundIdx
+' Print every raw sample of a row: per slot, per arm, in round order.
+'
+' @param rowIdx - row
+
+' Local Variables:
+' @local slotIdx - slot
+' @local armIdx - arm
+' @local roundIdx - round
+
+  repeat slotIdx from 0 to SLOTS - 1
+    repeat armIdx from ARM_Z to ARM_A0
+      ln_s(string("  "))
+      ln_s(row_name(rowIdx))
+      if slotIdx == 0
+        ln_s(string(" Z "))
+      else
+        ln_s(string(" T "))
+      ln_s(cond_name(armIdx))
+      ln_c(":")
+      repeat roundIdx from 0 to ROUNDS - 1
+        ln_c(" ")
+        ln_d(rsample(rowIdx, roundIdx, armIdx, slotIdx))
+      ln_out()
+
+PRI compute_ranges(rowIdx, slotIdx) | armIdx, roundIdx, sampleVal
+' Smallest and largest sample of every arm for one slot.
+'
+' @param rowIdx - row
+' @param slotIdx - slot
+
+' Local Variables:
+' @local armIdx - arm
+' @local roundIdx - round
+' @local sampleVal - the sample under inspection
+
+  repeat armIdx from ARM_Z to ARM_A0
+    amin[armIdx] := rsample(rowIdx, 0, armIdx, slotIdx)
+    amax[armIdx] := amin[armIdx]
+    repeat roundIdx from 1 to ROUNDS - 1
+      sampleVal := rsample(rowIdx, roundIdx, armIdx, slotIdx)
+      if sampleVal < amin[armIdx]
+        amin[armIdx] := sampleVal
+      if sampleVal > amax[armIdx]
+        amax[armIdx] := sampleVal
+
+PRI in_range_count(rowIdx, slotIdx, xArm, yArm, tolVal) : countVal | roundIdx, sampleVal
+' How many samples of arm X lie in arm Y's range (widened by TOL on both sides).
+'
+' @param rowIdx - row
+' @param slotIdx - slot
+' @param xArm - the arm whose samples are tested
+' @param yArm - the arm whose range is the reference
+' @param tolVal - tolerance, in the units of the sample
+' @returns countVal - samples of X inside [min Y - TOL, max Y + TOL]
+
+' Local Variables:
+' @local roundIdx - round
+' @local sampleVal - the sample under test
+
+  countVal := 0
+  repeat roundIdx from 0 to ROUNDS - 1
+    sampleVal := rsample(rowIdx, roundIdx, xArm, slotIdx)
+    if sampleVal >= amin[yArm] - tolVal and sampleVal <= amax[yArm] + tolVal
+      countVal++
+
+PRI analyse_slot(rowIdx, slotIdx) : codeVal | tolVal, nAZ, nZA, nBA, nBZ, nA0Z
+' The verdict of one row and one observable; prints one line.
+'
+' @param rowIdx - row
+' @param slotIdx - 0 = Z or interval, 1 = clocks to IN
+' @returns codeVal - VC_*
+
+' Local Variables:
+' @local tolVal - TOL for this observable
+' @local nAZ - A samples inside Z's range
+' @local nZA - Z samples inside A's range
+' @local nBA - B samples inside A's range
+' @local nBZ - B samples inside Z's range
+' @local nA0Z - A0 samples inside Z's range (gate A0: must be every round)
+
+  if slotIdx == 0
+    tolVal := long[row_ptr(rowIdx)][RC_TOLZ]
+  else
+    tolVal := long[row_ptr(rowIdx)][RC_TOLT]
+  compute_ranges(rowIdx, slotIdx)
+  nAZ := in_range_count(rowIdx, slotIdx, ARM_A, ARM_Z, tolVal)
+  nZA := in_range_count(rowIdx, slotIdx, ARM_Z, ARM_A, tolVal)
+  nBA := in_range_count(rowIdx, slotIdx, ARM_B, ARM_A, tolVal)
+  nBZ := in_range_count(rowIdx, slotIdx, ARM_B, ARM_Z, tolVal)
+  nA0Z := in_range_count(rowIdx, slotIdx, ARM_A0, ARM_Z, tolVal)
+  if nAZ <> 0 or nZA <> 0
+    codeVal := VC_NOT_OBSERVABLE
+  elseif nA0Z <> ROUNDS
+    codeVal := VC_INCONCLUSIVE          ' the write act moved the sample: Y's value is not the only cause
+  elseif nBA == ROUNDS and nBZ == 0
+    codeVal := VC_SURVIVES
+  elseif nBZ == ROUNDS and nBA == 0
+    codeVal := VC_LOST
+  else
+    codeVal := VC_INCONCLUSIVE
+  ln_s(string("  "))
+  ln_s(row_name(rowIdx))
+  if slotIdx == 0
+    ln_s(string(" Z: Z-arm "))
+  else
+    ln_s(string(" T: Z-arm "))
+  ln_d(amin[ARM_Z])
+  ln_s(string(".."))
+  ln_d(amax[ARM_Z])
+  ln_s(string(" B-arm "))
+  ln_d(amin[ARM_B])
+  ln_s(string(".."))
+  ln_d(amax[ARM_B])
+  ln_s(string(" A-arm "))
+  ln_d(amin[ARM_A])
+  ln_s(string(".."))
+  ln_d(amax[ARM_A])
+  ln_s(string(" A0-arm "))
+  ln_d(amin[ARM_A0])
+  ln_s(string(".."))
+  ln_d(amax[ARM_A0])
+  ln_s(string(" tol "))
+  ln_u(tolVal)
+  ln_s(string(" | A in Z-range "))
+  ln_u(nAZ)
+  ln_s(string(", Z in A-range "))
+  ln_u(nZA)
+  ln_s(string(" | B in A-range "))
+  ln_u(nBA)
+  ln_s(string(", B in Z-range "))
+  ln_u(nBZ)
+  ln_s(string(" of "))
+  ln_u(ROUNDS)
+  ln_s(string(", A0 in Z-range "))
+  ln_u(nA0Z)
+  ln_s(string(" of "))
+  ln_u(ROUNDS)
+  ln_s(string(" -> "))
+  ln_s(code_text(codeVal))
+  ln_out()
+  if codeVal == VC_INCONCLUSIVE and nA0Z <> ROUNDS
+    say(string("      write act matters: y0 written after DIRH left Z's range, so the WYPIN act, not only Y's value, moves the sample"))
+  if codeVal == VC_NOT_OBSERVABLE and long[row_ptr(rowIdx)][RC_PROF] == PF_PAIR
+    say(string("      NOT OBSERVABLE here may be a phase miss, not a property of the mode (the two sources' phase is not known to hold)"))
+
+PRI analyse_row(rowIdx) | obsMask, slotIdx, codeVal, nSurv, nLost, nInc
+' All observables of a row; combines them into the row's code.
+'
+' @param rowIdx - row
+
+' Local Variables:
+' @local obsMask - observables to analyse (OBS_Z, OBS_T)
+' @local slotIdx - slot
+' @local codeVal - verdict code of one slot
+' @local nSurv - slots that say SURVIVES
+' @local nLost - slots that say LOST
+' @local nInc - slots that say INCONCLUSIVE
+
+  if rowGate[rowIdx] == FALSE or fail_count <> 0
+    rowCode[rowIdx] := VC_NONE
+    ln_s(string("  "))
+    ln_s(row_name(rowIdx))
+    say(string(" NO VERDICT (a gate failed)"))
+  else
+    obsMask := long[row_ptr(rowIdx)][RC_OBS]
+    nSurv := 0
+    nLost := 0
+    nInc := 0
+    repeat slotIdx from 0 to SLOTS - 1
+      if obsMask & (1 << slotIdx)
+        codeVal := analyse_slot(rowIdx, slotIdx)
+        if codeVal == VC_SURVIVES
+          nSurv++
+        elseif codeVal == VC_LOST
+          nLost++
+        elseif codeVal == VC_INCONCLUSIVE
+          nInc++
+    if nSurv > 0 and nLost == 0 and nInc == 0
+      rowCode[rowIdx] := VC_SURVIVES
+    elseif nLost > 0 and nSurv == 0 and nInc == 0
+      rowCode[rowIdx] := VC_LOST
+    elseif nSurv + nLost + nInc == 0
+      rowCode[rowIdx] := VC_NOT_OBSERVABLE
+    else
+      rowCode[rowIdx] := VC_INCONCLUSIVE
+    ln_s(string("VERDICT "))
+    ln_s(mode_name(rowIdx))
+    ln_s(string(": "))
+    ln_s(code_text(rowCode[rowIdx]))
+    ln_out()
+
+PRI print_list(codeVal) | rowIdx, nFound
+' Print the modes whose combined verdict is one code.
+'
+' @param codeVal - VC_*
+
+' Local Variables:
+' @local rowIdx - row
+' @local nFound - how many were printed
+
+  nFound := 0
+  repeat rowIdx from 0 to ROWS - 1
+    if rowCode[rowIdx] == codeVal
+      ln_c(" ")
+      ln_s(mode_name(rowIdx))
+      nFound++
+  if nFound == 0
+    ln_s(string(" (none)"))
+  ln_out()
+
+PRI print_summary()
+' One summary per page: order-safe, reorder, inconclusive, not observable.
+'
+
+  say(string("=== SUMMARY (F-386 sweep) ==="))
+  ln_s(string("ORDER-SAFE: a Y written in reset is in force after DIRH (SURVIVES):"))
+  print_list(VC_SURVIVES)
+  ln_s(string("REORDER TO THE GENERAL ORDER: the Y written in reset is lost (LOST):"))
+  print_list(VC_LOST)
+  ln_s(string("INCONCLUSIVE:"))
+  print_list(VC_INCONCLUSIVE)
+  ln_s(string("NOT OBSERVABLE in this rig (A does not separate from Z):"))
+  print_list(VC_NOT_OBSERVABLE)
+  ln_s(string("NO VERDICT (a gate failed):"))
+  print_list(VC_NONE)
+
+PRI gsample(armIdx, roundIdx, flagIdx) : sampleVal
+' One recorded VO-G006a sample.
+'
+' @param armIdx - GA_*
+' @param roundIdx - round
+' @param flagIdx - 0 = reads of M that were high, 1 = S's IN flag after the window
+' @returns sampleVal - the recorded long
+
+  sampleVal := mailbox[MB_G + (armIdx * ROUNDS + roundIdx) * 2 + flagIdx]
+
+PRI ga_name(armIdx) : pText
+' Printable name of a VO-G006a arm.
+'
+' @param armIdx - GA_*
+' @returns pText - address of the name
+
+  pText := lookupz(armIdx: string("duty %00111 Y=$1999_999A (control)"), string("duty %00111 Y=0                "), string("freq %00110 Y=$1999_999A (control)"), string("freq %00110 Y=0 (EF-013 repeat)"))
+
+PRI ga_reads(armIdx, loVal, hiVal) : bAll | roundIdx
+' Whether every round of an arm has its read count of M in [lo, hi] (the OUTPUT observable).
+'
+' @param armIdx - GA_*
+' @param loVal - lowest acceptable count
+' @param hiVal - highest acceptable count
+' @returns bAll - TRUE when every round matches
+
+' Local Variables:
+' @local roundIdx - round
+
+  bAll := TRUE
+  repeat roundIdx from 0 to ROUNDS - 1
+    if gsample(armIdx, roundIdx, 0) < loVal or gsample(armIdx, roundIdx, 0) > hiVal
+      bAll := FALSE
+
+PRI ga_flags(armIdx, flagVal) : bAll | roundIdx
+' Whether every round of an arm has its IN flag equal to flagVal (the IN observable).
+'
+' @param armIdx - GA_*
+' @param flagVal - the IN flag every round must show
+' @returns bAll - TRUE when every round matches
+
+' Local Variables:
+' @local roundIdx - round
+
+  bAll := TRUE
+  repeat roundIdx from 0 to ROUNDS - 1
+    if gsample(armIdx, roundIdx, 1) <> flagVal
+      bAll := FALSE
+
+PRI g_decide(pLabel, ctlArm, zeroArm, loVal, hiVal, pYes, pNo) | bOutCtl, bInCtl, bOutLow, bInNone
+' One VO-G006a-style verdict with the OUTPUT and the IN observables gated separately.
+' OUTPUT control: the Y>0 arm reads in [lo, hi] every round.  IN control: the Y>0 arm raised IN every round.
+'
+' @param pLabel - label string for the VERDICT line
+' @param ctlArm - the Y>0 control arm
+' @param zeroArm - the Y=0 arm
+' @param loVal - lowest acceptable control read count
+' @param hiVal - highest acceptable control read count
+' @param pYes - word for "the Y=0 arm showed neither a high read nor an IN"
+' @param pNo - word for "the Y=0 arm showed a high read or an IN"
+
+' Local Variables:
+' @local bOutCtl - the output control holds
+' @local bInCtl - the IN control holds
+' @local bOutLow - the Y=0 arm read low in every sample
+' @local bInNone - the Y=0 arm raised no IN in any round
+
+  bOutCtl := ga_reads(ctlArm, loVal, hiVal)
+  bInCtl := ga_flags(ctlArm, 1)
+  bOutLow := ga_reads(zeroArm, 0, 0)
+  bInNone := ga_flags(zeroArm, 0)
+  ln_s(string("VERDICT "))
+  ln_s(pLabel)
+  ln_s(string(": "))
+  if fail_count <> 0
+    ln_s(string("NO VERDICT (a global gate failed)"))
+  elseif bOutCtl == FALSE
+    ln_s(string("NO VERDICT (the Y>0 output control is outside its band -- the source or the read path is not seen)"))
+  elseif bInCtl
+    if bOutLow and bInNone
+      ln_s(pYes)
+      ln_s(string(" - with Y = 0 the output reads low in every sample and no IN is raised; the Y>0 control did both"))
+    else
+      ln_s(pNo)
+      ln_s(string(" - with Y = 0 a high read or an IN event occurred (see the Y=0 samples above)"))
+  else
+    if bOutLow
+      ln_s(string("output CONFIRMED (Y = 0 reads low in every sample)"))
+    else
+      ln_s(string("output REFUTED (Y = 0 produced a high read)"))
+    ln_s(string("; IN not observable (the Y>0 control did not raise IN in every round, so a missing IN proves nothing)"))
+  ln_out()
+
+PRI g006a() | armIdx, roundIdx
+' Print the VO-G006a samples, gate on the controls (output and IN separately), decide.
+'
+
+' Local Variables:
+' @local armIdx - arm
+' @local roundIdx - round
+
+  repeat armIdx from GA_DUTY_Y to GA_FREQ_0
+    ln_s(string("  "))
+    ln_s(ga_name(armIdx))
+    ln_s(string(": reads high / IN flag per round:"))
+    repeat roundIdx from 0 to ROUNDS - 1
+      ln_c(" ")
+      ln_u(gsample(armIdx, roundIdx, 0))
+      ln_c("/")
+      ln_u(gsample(armIdx, roundIdx, 1))
+    ln_out()
+  ln_s(string("  control bands: duty Y>0 reads "))
+  ln_u(GA_DUTY_LO)
+  ln_s(string(".."))
+  ln_u(GA_DUTY_HI)
+  ln_s(string(" and IN every round ; freq Y>0 reads "))
+  ln_u(GA_FREQ_LO)
+  ln_s(string(".."))
+  ln_u(GA_FREQ_HI)
+  say(string(" and IN every round"))
+  g_decide(string("VO-G006a (NCO duty %00111, Y = 0)"), GA_DUTY_Y, GA_DUTY_0, GA_DUTY_LO, GA_DUTY_HI, string("CONFIRMED"), string("REFUTED"))
+  g_decide(string("EF-013 repeat (NCO frequency %00110, Y = 0)"), GA_FREQ_Y, GA_FREQ_0, GA_FREQ_LO, GA_FREQ_HI, string("AGREES with EF-013"), string("DIFFERS from EF-013"))
+
+DAT ' ---- Row Table (read by cog 0 and by the engine) ----
+        ' engine fields : cfg, x, y0, y1, profile, read, window (clocks)
+        ' cog 0 fields  : symbols, observables, tolZ, tolT, expected AAAA, BBBB, SSSSS
+rowTbl  long    CFG_01111, 25600, 0, 1, PF_NCOF128, RD_IN, 100_000, SYM_01111, OBS_Z, 800, 0, SEL_PLUS1, SEL_PLUS1_INV, %01111
+        long    CFG_10010, 4000, %001, %101, PF_STOP, RD_IN, 12_000, SYM_10010, OBS_T, 0, 300, SEL_PLUS1, SEL_LOCAL, %10010
+        long    CFG_10011, 8, %00, %11, PF_DUTY25, RD_IN, 100_000, SYM_10011, OBS_Z, 40, 0, SEL_PLUS1, SEL_PLUS1, %10011
+        long    CFG_10100, 8, %00, %11, PF_DUTY25, RD_IN, 100_000, SYM_10100, OBS_Z, 24, 0, SEL_PLUS1, SEL_PLUS1, %10100
+        long    CFG_10101, 2600, %00, %01, PF_PAIR, RD_IN, 300_000, SYM_10101, OBS_Z | OBS_T, 40, 2000, SEL_PLUS1, SEL_PLUS2, %10101
+        long    CFG_10110, 2600, %00, %01, PF_PAIR, RD_IN, 300_000, SYM_10110, OBS_Z | OBS_T, 40, 2000, SEL_PLUS1, SEL_PLUS2, %10110
+        long    CFG_10111, 2600, %00, %11, PF_DUTY25, RD_IN, 100_000, SYM_10111, OBS_Z, 4, 0, SEL_PLUS1, SEL_PLUS1, %10111
+        long    CFG_11001, %10_0100, 16, 40, PF_CLK8, RD_INT, 4_000, SYM_11001, OBS_Z, 24, 0, SEL_PLUS1, SEL_PLUS2, %11001
+        long    CFG_01110, 25600, 0, 1, PF_NCOF128, RD_IN, 100_000, SYM_01110, OBS_Z, 8, 0, SEL_PLUS1, SEL_PLUS1_INV, %01110
+
+DAT ' ---- Source Profile Table ----
+        ' cfgS, xS, yS, cfgS2, xS2, yS2, S band lo, S band hi, S2 band lo, S2 band hi
+        ' cfgS = 0 : S is a plain pin held low.  cfgS2 = 0 : S2 stays in reset (unused).  band lo < 0 : not checked.
+profTbl long    0, 0, 0, 0, 0, 0, 0, 0, -1, -1
+        long    CFG_SRC_FREQ, 1, Y_NCOF128, 0, 0, 0, 1700, 2400, -1, -1
+        long    CFG_SRC_DUTY, 32, Y_DUTY25, 0, 0, 0, 800, 1250, -1, -1
+        long    CFG_SRC_DUTY, 32, Y_DUTY25, CFG_SRC_FREQ, X_S2_PAIR, Y_NCOF32, 800, 1250, 1700, 2400
+        long    0, 0, 0, CFG_SRC_FREQ, 1, Y_NCOF8, 0, 0, 1700, 2400
+
+DAT ' ---- VO-G006a Table ----
+        ' cfg, x (base period 100), y
+gaTbl   long    CFG_SRC_DUTY, 100, Y_TENTH
+        long    CFG_SRC_DUTY, 100, 0
+        long    CFG_SRC_FREQ, 100, Y_TENTH
+        long    CFG_SRC_FREQ, 100, 0
+
+{ MEASURING ENGINE -- runs in its own cog; the ONLY code that touches pins.
+  No debug() here (DEBUG_COGS excludes this cog anyway). PTRA = @mailbox on entry.
+  Hub writes: kpath_ walks MB_KPATH, kpt_ walks MB_KROW, respt_ walks MB_RES,
+  gpt_ walks MB_G -- each in the order the mailbox layout lists, so cog 0 can index them.
+}
+DAT             org     0        ' ---- Measuring Engine ----
+engine          mov     mb_, ptra
+                mov     ptrb, mb_
+                add     ptrb, #MB_ROWTBL * 4
+                rdlong  rowtbl_, ptrb
+                add     ptrb, #4
+                rdlong  proftbl_, ptrb
+                add     ptrb, #4
+                rdlong  gatbl_, ptrb
+                mov     progp_, mb_
+                add     progp_, #MB_PROG * 4
+                mov     kpath_, mb_
+                add     kpath_, #MB_KPATH * 4
+                mov     kpt_, mb_
+                add     kpt_, #MB_KROW * 4
+                mov     respt_, mb_
+                add     respt_, #MB_RES * 4
+                mov     gpt_, mb_
+                add     gpt_, ##MB_G * 4
+
+                call    #path_ctrl              ' K before the rows (4 longs)
+
+                mov     row_, #0
+                mov     rowptr_, rowtbl_
+.row            wrlong  row_, progp_
+                mov     ptrb, rowptr_
+                setq    #ROW_ENG_LONGS - 1
+                rdlong  rw_cfg_, ptrb           ' rw_cfg_..rw_win_
+                add     rowptr_, #ROW_BYTES
+                mov     tmp_, rw_prof_
+                mul     tmp_, #PF_BYTES
+                add     tmp_, proftbl_
+                mov     ptrb, tmp_
+                setq    #PF_LONGS - 1
+                rdlong  pf_cfgs_, ptrb          ' pf_cfgs_..pf_s2hi_
+
+                call    #k_check                ' source-runs control before (2 longs)
+                mov     rnd_, #ROUNDS
+.rnd            mov     arm_, #ARM_Z
+                call    #one_run
+                mov     arm_, #ARM_B
+                call    #one_run
+                mov     arm_, #ARM_A
+                call    #one_run
+                mov     arm_, #ARM_A0
+                call    #one_run
+                djnz    rnd_, #.rnd
+                call    #k_check                ' source-runs control after (2 longs)
+                add     row_, #1
+                cmp     row_, #ROWS             wz
+        if_nz   jmp     #.row
+
+                call    #path_ctrl              ' K after the rows (4 longs)
+
+                ' VO-G006a
+                mov     ga_, #0
+                mov     gptr_, gatbl_
+.ga             setq    #GA_LONGS - 1
+                rdlong  ga_cfg_, gptr_          ' ga_cfg_, ga_x_, ga_y_
+                add     gptr_, #GA_BYTES
+                mov     rnd_, #ROUNDS
+.gr             call    #g_run
+                djnz    rnd_, #.gr
+                add     ga_, #1
+                cmp     ga_, #GA_COUNT          wz
+        if_nz   jmp     #.ga
+
+                call    #reset_all              ' leave P4..P6 safe
+                wrlong  #MBOX_DONE, ptra        ' done -- always the last write
+                cogid   self_id_
+                cogstop self_id_
+
+' All three pins: DIR low, smart pin off, OUT low.
+reset_all       dirl    #PIN_M
+                dirl    #PIN_S
+                dirl    #PIN_S2
+                wrpin   #0, #PIN_M
+                wrpin   #0, #PIN_S
+                wrpin   #0, #PIN_S2
+                outl    #PIN_M
+                outl    #PIN_S
+                outl    #PIN_S2
+                waitx   #100
+                ret
+
+' One run of the current row in arm arm_: reset, scrub M to y0, configure M in reset
+' (arm B writes y1 here), start the sources, DIRH M (arm A writes y1 after it), observe, record.
+one_run         call    #reset_all
+                wrpin   rw_cfg_, #PIN_M         ' scrub: leave Y at y0 whatever a reset retains
+                wxpin   rw_x_, #PIN_M
+                dirh    #PIN_M
+                wypin   rw_y0_, #PIN_M
+                waitx   #40
+                dirl    #PIN_M
+                wrpin   rw_cfg_, #PIN_M         ' the arm proper: M configured in reset
+                wxpin   rw_x_, #PIN_M
+                cmp     arm_, #ARM_B            wz
+        if_z    wypin   rw_y1_, #PIN_M          ' arm B: Y written while DIR is low
+                mov     ysel_, rw_y1_           ' the value written after DIRH: y1 (arm A) ...
+                cmp     arm_, #ARM_A0           wz
+        if_z    mov     ysel_, rw_y0_           ' ... or y0 (arm A0, the write-act control)
+                call    #prof_apply             ' sources configured and started (same code in every arm)
+                dirh    #PIN_M
+                getct   tstart_
+                cmp     arm_, #ARM_A            wc      ' C = 1 for arms Z and B (ARM_Z, ARM_B < ARM_A)
+        if_nc   wypin   ysel_, #PIN_M           ' arms A and A0: Y written after DIRH
+                call    #observe
+                wrlong  val_z_, respt_
+                add     respt_, #4
+                wrlong  val_t_, respt_
+                add     respt_, #4
+                ret
+
+' The row's source profile: configure S and S2 in reset (Y scrubbed to 0), then start S2, then S.
+' Y is written AFTER DIRH (EF-011 order).  DIRH of S falls 4 clocks after the Y write of S2.
+prof_apply      cmp     pf_cfgs_, #0            wz
+        if_nz   wrpin   pf_cfgs_, #PIN_S
+        if_nz   dirh    #PIN_S
+        if_nz   wypin   #0, #PIN_S
+        if_nz   waitx   #40
+        if_nz   dirl    #PIN_S
+        if_nz   wxpin   pf_xs_, #PIN_S
+                cmp     pf_cfgs2_, #0           wz
+        if_nz   wrpin   pf_cfgs2_, #PIN_S2
+        if_nz   dirh    #PIN_S2
+        if_nz   wypin   #0, #PIN_S2
+        if_nz   waitx   #40
+        if_nz   dirl    #PIN_S2
+        if_nz   wxpin   pf_xs2_, #PIN_S2
+                cmp     pf_cfgs2_, #0           wz
+        if_nz   dirh    #PIN_S2
+        if_nz   wypin   pf_ys2_, #PIN_S2        ' <- W_S2
+                cmp     pf_cfgs_, #0            wz
+        if_nz   dirh    #PIN_S                  ' <- D_S = W_S2 + 4 clocks (S2_LEAD_CLK)
+        if_nz   wypin   pf_ys_, #PIN_S
+        if_z    drvl    #PIN_S                  ' profile with a stopped source: held low
+                ret
+
+' Observe: RD_IN waits for IN of M (window rw_win_), reads Z, records the clocks from DIRH;
+' RD_INT measures the interval between two successive IN rises.  No IN -> NO_IN.
+observe         mov     val_z_, no_in_
+                mov     val_t_, no_in_
+                cmp     rw_read_, #RD_INT       wz
+        if_z    jmp     #obs_int
+.poll           testp   #PIN_M                  wc
+        if_c    jmp     #.got
+                getct   w1_
+                sub     w1_, tstart_
+                cmp     w1_, rw_win_            wc
+        if_c    jmp     #.poll
+                ret
+.got            getct   w1_
+                sub     w1_, tstart_
+                mov     val_t_, w1_
+                rdpin   val_z_, #PIN_M          ' read and acknowledge
+                ret
+
+obs_int         call    #wait_in                ' IN #1 (start-up period, discarded)
+        if_nc   ret
+                akpin   #PIN_M
+                waitx   #20
+                call    #wait_in                ' IN #2
+        if_nc   ret
+                mov     wa_, wnow_
+                akpin   #PIN_M
+                waitx   #20
+                call    #wait_in                ' IN #3
+        if_nc   ret
+                sub     wnow_, wa_
+                mov     val_z_, wnow_           ' the interval IN #2 -> IN #3
+                ret
+
+' Wait for IN of M for up to rw_win_ clocks: C = 1 and wnow_ = CT when it came, C = 0 on timeout.
+wait_in         getct   w0_
+.p              testp   #PIN_M                  wc
+        if_c    jmp     #.hit
+                getct   w1_
+                sub     w1_, w0_
+                cmp     w1_, rw_win_            wc
+        if_c    jmp     #.p
+                ret                             ' timeout: C = 0 from the CMP
+.hit            getct   wnow_
+                ret                             ' C still 1 from TESTP (GETCT without WC)
+
+' Source-runs control: the row's profile running, M a plain read of P5 then P6.
+k_check         call    #reset_all
+                call    #prof_apply
+                wrpin   cfgk1_, #PIN_M          ' M smart off, A = relative +1 (P5), DIR low
+                call    #sample_settled
+                wrlong  count_, kpt_
+                add     kpt_, #4
+                cmp     pf_cfgs2_, #0           wz
+        if_z    mov     count_, unused_
+        if_nz   wrpin   cfgk2_, #PIN_M          ' A = relative +2 (P6)
+        if_nz   call    #sample_settled
+                wrlong  count_, kpt_
+                add     kpt_, #4
+                call    #reset_all
+                ret
+
+' Plain-pin path control: P5 then P6 driven high and low as plain pins; M reads them.
+path_ctrl       call    #reset_all
+                wrpin   cfgk1_, #PIN_M
+                drvh    #PIN_S
+                call    #sample_settled
+                wrlong  count_, kpath_
+                add     kpath_, #4
+                drvl    #PIN_S
+                call    #sample_settled
+                wrlong  count_, kpath_
+                add     kpath_, #4
+                wrpin   cfgk2_, #PIN_M
+                drvh    #PIN_S2
+                call    #sample_settled
+                wrlong  count_, kpath_
+                add     kpath_, #4
+                drvl    #PIN_S2
+                call    #sample_settled
+                wrlong  count_, kpath_
+                add     kpath_, #4
+                call    #reset_all
+                ret
+
+' VO-G006a run: S alone (NCO duty or frequency, base 100), Y written after DIRH,
+' acknowledge, then READS reads of M (plain, A = +1) and the IN flag of S afterwards.
+g_run           call    #reset_all
+                wrpin   cfgk1_, #PIN_M
+                wrpin   ga_cfg_, #PIN_S
+                wxpin   ga_x_, #PIN_S
+                dirh    #PIN_S
+                wypin   ga_y_, #PIN_S
+                waitx   ##SETTLE_CLK
+                akpin   #PIN_S                  ' IN low from here; any later IN is an event inside the window
+                waitx   #10
+                call    #do_sample
+                testp   #PIN_S                  wc
+        if_c    mov     flag_, #1
+        if_nc   mov     flag_, #0
+                wrlong  count_, gpt_
+                add     gpt_, #4
+                wrlong  flag_, gpt_
+                add     gpt_, #4
+                ret
+
+' READS reads of INA, counting the reads in which bit M = 1.
+sample_settled  waitx   ##SETTLE_CLK
+do_sample       mov     count_, #0
+                rep     #3, reads_
+                mov     insnap_, ina
+                testb   insnap_, #PIN_M         wc
+        if_c    add     count_, #1
+                ret
+
+no_in_          long    NO_IN
+unused_         long    UNUSED
+reads_          long    READS
+cfgk1_          long    CFG_K1
+cfgk2_          long    CFG_K2
+
+mb_             res     1
+rowtbl_         res     1
+proftbl_        res     1
+gatbl_          res     1
+progp_          res     1
+kpath_          res     1
+kpt_            res     1
+respt_          res     1
+gpt_            res     1
+rowptr_         res     1
+gptr_           res     1
+row_            res     1
+rnd_            res     1
+arm_            res     1
+ga_             res     1
+tmp_            res     1
+rw_cfg_         res     1                       ' row fields, in table order (setq block read)
+rw_x_           res     1
+rw_y0_          res     1
+rw_y1_          res     1
+rw_prof_        res     1
+rw_read_        res     1
+rw_win_         res     1
+pf_cfgs_        res     1                       ' profile fields, in table order (setq block read)
+pf_xs_          res     1
+pf_ys_          res     1
+pf_cfgs2_       res     1
+pf_xs2_         res     1
+pf_ys2_         res     1
+pf_slo_         res     1
+pf_shi_         res     1
+pf_s2lo_        res     1
+pf_s2hi_        res     1
+ga_cfg_         res     1                       ' G006a arm fields (setq block read)
+ga_x_           res     1
+ga_y_           res     1
+tstart_         res     1
+ysel_           res     1
+w0_            res     1
+w1_             res     1
+wa_             res     1
+wnow_           res     1
+val_z_          res     1
+val_t_          res     1
+count_          res     1
+flag_           res     1
+insnap_         res     1
+self_id_        res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+  See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}

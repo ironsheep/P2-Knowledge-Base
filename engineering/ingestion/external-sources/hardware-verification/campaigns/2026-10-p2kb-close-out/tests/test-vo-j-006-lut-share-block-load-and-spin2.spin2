@@ -1,0 +1,1305 @@
+'' =============================================================================
+''
+''   File....... test-vo-j-006-lut-share-block-load-and-spin2.spin2
+''   Purpose.... VO-J-006 arms D and F on SILICON: does a block load (SETQ2 + RDLONG) into the sender's LUT reach the
+''               partner cog's LUT, and what happens with a Spin2 cog as the sender (its start-up block loads, and its
+''               own WRLUTs), depending on when the receiver executes SETLUTS #1?  Plus: does SETLUTS survive a COGINIT?
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED  (register VO-J-006, arms D and F; close-out study step 8; bench-groupD-recheck.md section 6)
+
+  What the sources say (silicon-doc-text.txt:491-504): adjacent cogs whose IDs differ only in the LSB "can each allow their lookup
+  RAMs to be written by the other cog via its local lookup RAM writes"; SETLUTS #0 = "disallow writes from other cog (default)",
+  SETLUTS #1 = "allow writes from other cog"; COGINIT with %x_1_xxx1 finds and starts an even/odd pair "with the same parameters".
+  GETBRK WC returns "D[26] = 1 if LUT sharing enabled (established by SETLUTS)" (:2565).  Arms A, B, C, E of the filed row are
+  answered by that text (recheck section 6) and are run here only as CONTROLS.  What no source states:
+    D : which writes count as "local lookup RAM writes"?  WRLUT is the obvious one; the Spin2 interpreter fills its LUT by a
+        SETQ2 + RDLONG BLOCK load (Spin2_interpreter.spin2:2044-2048: "setq2 #(lut_code-1) & $1FF / rdlong 0,ptrb" clears LUT
+        $000..$00F and "setq2 #lut_end-lut_code-1 / rdlong lut_code & $1FF,rdf" loads the interpreter into LUT $010..).  Does a
+        block load into the sender's LUT arrive in the receiver's LUT?
+    F : with a Spin2 cog as sender (the interpreter owns LUT $010..$1FF, spin2-v55-text.txt:806, :834; LUT $000..$00F is free for
+        any use), does the interpreter's LUT content arrive in a receiver that executed SETLUTS #1 before the launch?  after
+        it?  Does a WRLUT executed by Spin2 inline PASM arrive?
+    S : is the SETLUTS state kept when a cog is COGINITed again (the silicon-doc says only that locks are released at COGINIT,
+        :3698)?  Two small arms: restart the receiver after SETLUTS #1 (S1); restart the sender (S2: does a sender restart disturb the
+        RECEIVER's enable -- the sender itself never executed SETLUTS).
+  This program MEASURES D, F and S and predicts nothing about them.  Controls with known results gate the rig.
+
+  RIG  (NO PINS, NO JUMPER, NOTHING ATTACHED)
+    Cog 0 (Spin2, the only cog with the debugger, DEBUG_COGS = %0000_0001) orchestrates and reports.  COGINIT with
+    COGEXEC_NEW_PAIR starts an even/odd pair of free cogs; both run the same PASM program `node`, which reads its COGID, announces
+    itself, and then executes commands that cog 0 posts to its own command slot in a hub mailbox (one slot per cog: command,
+    arg0, arg1).  Cog 0 posts a command and waits for the slot to read 0 (done) -- EVERY ORDERING IS A HANDSHAKE, nothing depends
+    on timing.  The even cog is the SENDER, the odd cog the RECEIVER.  Observation = each cog dumps its own 512-long LUT to a hub
+    buffer (RDLUT loop) when asked.  The Spin2 sender (arms F) is started with COGSPIN onto the even cog (the same cog id) and
+    answers cog 0 through its own mailbox slots with inline PASM (RDLUT dump, WRLUT).  No debug() is ever executed outside cog 0.
+
+  COMMANDS OF `node` (cog 0 -> a pair cog)
+    1 SETLUTS a0 (0 / 1)     2 FILL a0     (LUT[i] := a0 + i for i = 0..511, local WRLUTs)
+    3 WRLIST a0 (hub address of  count, addr0, val0, addr1, val1 ... : WRLUT val, addr)
+    4 BLOCK_A  SETQ2 #127 / RDLONG $040, blk   (128 longs into LUT $040..$0BF)
+    5 BLOCK_B  SETQ2 #63  / RDLONG $1C0, blk   (64 longs into LUT $1C0..$1FF, the top of the LUT)
+    6 DUMP     (own LUT $000..$1FF -> the cog's dump buffer in hub)       7 GETFLAG (GETBRK WC, D[26] -> hub)
+
+  PATTERNS (all distinct): receiver fill PAT_R + i = $5A5A_0000 + i ; sender fill PAT_S + i = $A5A5_0000 + i ; block source
+  BLK + i = $B10C_0000 + i ; WRLIST values V_k = $C0DE_0000 + k at LUT $000, $0FF, $100, $1FF ; Spin2 WRLIST XV_k = $5E1D_0000 + k at
+  LUT $000, $005, $00A, $00F.
+
+  ARMS (each starts from a fresh COGEXEC_NEW_PAIR; as soon as the pair has announced, cog 0 sends SETLUTS #0 to BOTH cogs, so every arm
+  starts with sharing explicitly disabled whatever state a stopped cog may have retained; ROUNDS rounds.  If the pair does not start,
+  the arm returns at once with its handshake flag false -- no later command and no restart is issued with a missing cog id)
+    NEG   S FILL(PAT_S) ; R FILL(PAT_R) ; [receiver stays at SETLUTS #0] ; S WRLIST(V) ; dumps
+          CONTROL: the receiver is UNCHANGED everywhere (512 of 512 = PAT_R) and the sender holds V (4 of 4).
+    POS   S FILL(PAT_S) ; R FILL(PAT_R) ; R SETLUTS(1) ; S WRLIST(V) ; dumps
+          CONTROL: V arrives at the receiver (4 of 4) and nothing else changes (508 of 508).
+    DIR   S FILL(PAT_S) ; R SETLUTS(1) ; R FILL(PAT_R) ; sender dump
+          CONTROL (direction): the sender is UNCHANGED (512 of 512 = PAT_S): the receiver's own writes do not reach a sender
+          that never enabled.
+    BLK0  S FILL ; R FILL ; [R at SETLUTS #0] ; S BLOCK_A ; S BLOCK_B ; dumps
+          CONTROL: the block load lands in the SENDER (128 + 64 of 192) and nothing arrives at the receiver (512 of 512 = PAT_R).
+    BLK   S FILL ; R FILL ; R SETLUTS(1) ; S BLOCK_A ; S BLOCK_B ; dumps          <- ARM D
+          sender local gate: 128 + 64 of 192.  Measured: how many of the 128 + 64 longs arrived in the receiver, and whether
+          anything else changed.
+    F1    R FILL(PAT_R) ; R SETLUTS(1) ; COGSPIN the Spin2 sender onto the even cog ; wait for "spin up" ; X DUMP (Spin2
+          inline-PASM RDLUT of its own LUT) ; R DUMP (dump 1) ; X WRLIST(XV) (inline-PASM WRLUT) ; R DUMP (dump 2)   <- ARM F, before
+    F2    R FILL(PAT_R) ; [receiver at SETLUTS #0] ; COGSPIN the Spin2 sender ; wait ; X DUMP ; R DUMP (dump 1) ; R SETLUTS(1) ;
+          X WRLIST(XV) ; R DUMP (dump 2)                                                                      <- ARM F, after
+          Measured: dump 1 against the Spin2 sender's dump (equal longs of 512), against PAT_R (changed longs of 512), LUT
+          $000..$00F zero (16 of 16 if the interpreter's clear arrived); dump 2: the 4 XV values at $000, $005, $00A, $00F.
+    S1    S FILL ; R SETLUTS(1) ; R FILL ; GETFLAG ; COGINIT the receiver again (same program, does NOT execute SETLUTS) ; GETFLAG ;
+          S WRLIST(V) ; R DUMP.      Measured: GETBRK D[26] before / after the restart and V arrival (4 of 4 = sharing survived).
+    S2    S FILL ; R SETLUTS(1) ; R FILL ; COGINIT the sender again ; S WRLIST(V) ; R DUMP.       Measured: V arrival.
+
+  CONTROLS (gating -- a failure prints RIG FAIL and NO VERDICT for D and F)
+    W : the pair started with COGEXEC_NEW_PAIR is an even/odd pair (even id, odd id = even + 1), every round of every arm; SETLUTS #0 is
+        then sent to both cogs (no arm inherits a sharing state retained by a stopped cog).
+    N : NEG and BLK0 leave the receiver unchanged (the rig can see 'no sharing').  K : POS delivers V (4 of 4) and changes nothing else
+        (the documented mechanism works).  C : DIR leaves the sender unchanged.  L : BLK0 / BLK land in the sender (128 + 64).
+    H : every handshake completes within CMD_TIMEOUT; the Spin2 sender reports up within SPIN_TIMEOUT.  A timeout is a RIG FAIL.
+    G : (S1 only -- it does not gate D, F or S2) GETBRK D[26] reads 0 at the start of S1 (after the explicit SETLUTS #0) and 1 after
+        SETLUTS #1; when it does not, the S1 verdict rests on the arrival of writes alone and says so.
+    Determinism: ROUNDS = 3 rounds of every arm; a verdict needs all rounds equal.
+
+  PRE-REGISTERED OUTCOMES (fixed before the run; printed by the program; nothing is predicted for D, F, S)
+    D  : PROPAGATES (every block long arrived, in every round) | DOES NOT PROPAGATE (none, every round) | PARTIAL (counts printed) |
+         INCONCLUSIVE (rounds disagree).
+    F1 : IMAGE ARRIVES (the receiver's LUT equals the Spin2 sender's dump at all 512 longs) | NOTHING ARRIVES (the receiver is unchanged,
+         512 of 512 = PAT_R) | PARTIAL (counts printed).
+    F2 : NOT RETROACTIVE (dump 1 unchanged, 512 of 512 = PAT_R) | START-UP WRITES ARRIVED (changed longs, although the receiver was
+         still at SETLUTS #0 during the launch) .
+    F  : Spin2 inline WRLUT (dump 2): ARRIVES (4 of 4 XV values) | DOES NOT ARRIVE (0 of 4), in F1 and in F2.
+    S1 : SETLUTS SURVIVES A COGINIT OF THE RECEIVER (flag 1 after the restart AND V arrives) | RESET BY COGINIT (flag 0 AND V does not
+         arrive) | INCONSISTENT (the flag and the arrival disagree).
+    S2 : SENDER RESTART DOES NOT DISTURB THE RECEIVER'S ENABLE (V arrives) | SENDER RESTART DISTURBS THE RECEIVER'S ENABLE (V does not
+         arrive).
+
+  CONFIGURATION AND ENCODINGS RELIED ON (no smart-pin words here)
+    COGEXEC_NEW_PAIR = %01_0001 (spin2-v55-text.txt:1664; silicon-doc-text.txt:413 / :502).  COGEXEC = %00_0000: coginit(cogid, @node, @mailbox)
+    starts a given cog in cogexec mode (restarting it if it runs, :417-:418).  GETBRK WC D[26] (:2565).  LUT block-load D operand =
+    the LUT address as a register number (Spin2_interpreter.spin2:2047-2048: "rdlong lut_code & $1FF,rdf").
+
+  DEVIATIONS FROM THE BRIEF (bench-groupD-recheck.md section 6)
+    1. The brief gives the arm-F timing as 'SETLUTS #1 before the launch, and again after'; here 'after' (F2) is a separate arm with the
+       receiver at SETLUTS #0 during the launch and enabled afterwards, so that the 'before' and 'after' effects cannot be confused.
+    2. The 'does sharing survive COGINIT' arm is split in two (S1 restarts the receiver, S2 the sender) and reads the SETLUTS state back
+       with GETBRK D[26] as well as by the arrival of writes.
+    3. Arm D writes into the sender at two places (LUT $040..$0BF and the top, $1C0..$1FF) so that an address-dependent propagation
+       is visible.
+    4. The Spin2 sender dumps its own LUT through inline PASM (RDLUT) so that arm F compares the receiver with the sender's actual LUT,
+       not with an assumed interpreter image.
+
+  VERIFIED OPCODES AND DATA (pnut-ts -d -l v1.55.8 build 9/19/2026, read from the .lst; object offsets, cog addresses in brackets)
+    Symbol table (listing): BLKA_LUT = $040, BLKA_N = $80 (128), BLKB_LUT = $1C0, BLKB_N = $40 (64), BLK_LONGS = $80, BLK_BASE = $B10C_0000,
+      N_SETLUTS..N_GETFLAG = 1..7, MB_ID_E = 0, MB_ID_O = 1, MB_CMD_E = 2, MB_CMD_O = 5, MB_XCMD = 8, MB_SPINUP = 9, MB_P_SDUMP = $0A,
+      MB_P_RDUMP = $0B, MB_P_BLK = $0C, MB_FLAG_E = $0D, MB_FLAG_O = $0E, MB_LONGS = $0F.
+    CLKMODE $010009FB, CLKFREQ 200_000_000 (listing).  The node PASM is unchanged by the review fixes (re-compiled: same labels and
+      offsets); the fixes are Spin2 (SETLUTS #0 after the pair announces, early returns, the restart_node guard, verdict wording).
+    DEBUG: 2 records, 24 bytes of DEBUG data.  Hub image: node at object offset $0AC; cog labels: node_poll [$014] node_done [$02A]
+      do_setluts [$02C] do_fill [$02E] do_wrlist [$036] do_blka [$03F] do_blkb [$042] do_dump [$045] do_getflag [$04E] lutsz_ [$051];
+      registers mb_ [$052] .. blksrc_ [$058] .. q_ [$061].
+    Instructions read back from the hub image (the block loads are the point of arm D):
+      setq2 #127  $FD64FE29    rdlong $040,blksrc_  $FB008058  (D = $040 = the LUT start address as a register number, S = blksrc_ $058)
+      setq2 #63   $FD647E29    rdlong $1C0,blksrc_  $FB038058  (D = $1C0)
+      setluts a0_ $FD60B637    getbrk v_ wc  $FD70BC35    wrlong #0,cmdp_  $FC680054    cogid me_  $FD60A601
+      The block-load form is the one the Spin2 interpreter uses at Spin2_interpreter.spin2:2047-2048 (D a constant register number).
+    The Spin2 inline PASM (x_dump: rdlut lutVal,idx ; x_wrlist: wrlut wrVal,wrAddr) compiled without error in the same listing.
+
+  HOW TO RUN
+    1. USB serial connected (DEBUG on P62/P63).  Compile: pnut-ts -d test-vo-j-006-lut-share-block-load-and-spin2.spin2
+    2. Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10).
+    3. SAVE THE WHOLE CONSOLE OUTPUT -- it is the only record.
+    4. Expected run time: well under a second when every handshake works (27 pair starts, a few hundred commands); the report is about
+       80 lines.  Done when you see the "VERDICT VO-J-006 ..." lines, then "=== END ===" and DEBUG_END_SESSION.  A failing handshake costs
+       up to 0.2 s (a Spin2 start-up up to 0.5 s) and is printed as RIG FAIL.  No END / DEBUG_END_SESSION line within 60 s = a hang or a
+       lost session: power-cycle the board and send the LAST line you saw.
+    5. Clock: _clkfreq = 200_000_000 assumes the board's 20 MHz crystal; the listing's CLKMODE is $010009FB (see the VERIFIED block).  All
+       waits here are handshakes or clkfreq divisions, not fixed clock counts, so a different crystal changes only the timeouts.
+    6. Pins: NONE.  No pin is driven or read, no jumper, nothing needs to be attached (P62/P63 carry DEBUG as usual).  The test uses
+       two cogs besides cog 0 (a free even/odd pair; the Spin2 sender of arms F is started onto the even cog of that pair).
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  ROUNDS            = 3
+  LUT_LONGS         = 512
+  CMD_TIMEOUT_DIV   = 5                 ' handshake timeout = clkfreq / 5 = 200 ms
+  SPIN_TIMEOUT_DIV  = 2                 ' Spin2 start-up timeout = clkfreq / 2 = 500 ms
+
+  PAT_R             = $5A5A_0000        ' receiver fill: LUT[i] = PAT_R + i
+  PAT_S             = $A5A5_0000        ' sender fill
+  BLK_BASE          = $B10C_0000        ' block source: BLK_BASE + i
+  V_BASE            = $C0DE_0000        ' WRLIST values V_k = V_BASE + k
+  XV_BASE           = $5E1D_0000        ' Spin2 WRLIST values
+
+  ' block-load regions (LUT address as a register number, and length)
+  BLKA_LUT          = $040
+  BLKA_N            = 128
+  BLKB_LUT          = $1C0
+  BLKB_N            = 64
+  BLK_LONGS         = 128               ' the block source buffer
+
+  ' WRLIST addresses
+  V_ADDR0           = $000
+  V_ADDR1           = $0FF
+  V_ADDR2           = $100
+  V_ADDR3           = $1FF
+  X_ADDR0           = $000
+  X_ADDR1           = $005
+  X_ADDR2           = $00A
+  X_ADDR3           = $00F
+
+CON ' ---- Commands and Mailbox ----
+  #0, N_NOP, N_SETLUTS, N_FILL, N_WRLIST, N_BLOCK_A, N_BLOCK_B, N_DUMP, N_GETFLAG
+  #0, XC_NONE, XC_DUMP, XC_WRLIST
+
+  ' mailbox longs
+  MB_ID_E           = 0                 ' the even cog announces its id here (-1 until it does)
+  MB_ID_O           = 1                 ' the odd cog
+  MB_CMD_E          = 2                 ' even cog slot: command, arg0, arg1
+  MB_CMD_O          = 5                 ' odd cog slot: command, arg0, arg1
+  MB_XCMD           = 8                 ' Spin2 sender command
+  MB_SPINUP         = 9                 ' the Spin2 sender writes 1 when it is up
+  MB_P_SDUMP        = 10                ' hub address of the sender dump buffer (written by cog 0)
+  MB_P_RDUMP        = 11                ' hub address of the receiver dump buffer
+  MB_P_BLK          = 12                ' hub address of the block source buffer
+  MB_FLAG_E         = 13                ' GETFLAG result of the even cog
+  MB_FLAG_O         = 14                ' GETFLAG result of the odd cog
+  MB_LONGS          = 15
+  SLOT_LONGS        = 3
+
+CON ' ---- Arms and Results ----
+  #0, A_NEG, A_POS, A_DIR, A_BLK0, A_BLK, A_F1, A_F2, A_S1, A_S2
+  ARMS              = 9
+
+  ' per (arm, round) result fields
+  #0, RF_RECV_UNCH, RF_RECV_V, RF_SEND_V, RF_SEND_UNCH, RF_BLKA_R, RF_BLKB_R, RF_BLKA_S, RF_BLKB_S, RF_EQ_SEND, RF_CHANGED, RF_ZERO16, RF_X_ARR, RF_UNCH_OUT, RF_FLAG0, RF_FLAG_SET, RF_FLAG1, RF_DIFF, RF_OK
+  RF_LONGS          = 18
+
+  ' classes of a quantity over the rounds
+  #0, Q_ALL, Q_NONE, Q_PART, Q_VARIES
+
+CON ' ---- Report Parameters ----
+  LINE_MAX          = 400
+  DEC_TOP           = 1_000_000_000
+  DEC_DIGITS        = 10
+  DEC_BASE          = 10
+  HEX_DIGITS        = 8
+  HEX_BITS          = 4
+  HEX_GROUP         = 4
+  HEX_LETTERS       = 10
+  SPIN_STACK_LONGS  = 100
+
+VAR ' ---- Mailbox, Buffers & Analysis State ----
+  long mailbox[MB_LONGS]
+  long blkSrc[BLK_LONGS]                ' block-load source
+  long sdump[LUT_LONGS]                 ' sender LUT dump
+  long rdump[LUT_LONGS]                 ' receiver LUT dump (dump 1 / the only dump)
+  long listV[9]                         ' count, (addr, val) x 4
+  long listX[9]
+  long results[ARMS * ROUNDS * RF_LONGS]
+  long spinStack[SPIN_STACK_LONGS]
+  long evenId, oddId                    ' the pair cogs (-1 = none)
+  long curArm, curRound
+  long hsFail                           ' handshake failures (loud)
+  long fail_count
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+
+PUB main() | roundIdx, idx
+'' Run the J-006 D+F rig: check constants, run every arm ROUNDS times, report.
+''
+
+' Local Variables:
+' @local roundIdx - round
+' @local idx - loop index
+
+  longfill(@mailbox, 0, MB_LONGS)
+  longfill(@results, 0, ARMS * ROUNDS * RF_LONGS)
+  repeat idx from 0 to BLK_LONGS - 1
+    blkSrc[idx] := BLK_BASE + idx
+  listV[0] := 4
+  listV[1] := V_ADDR0
+  listV[2] := V_BASE + 0
+  listV[3] := V_ADDR1
+  listV[4] := V_BASE + 1
+  listV[5] := V_ADDR2
+  listV[6] := V_BASE + 2
+  listV[7] := V_ADDR3
+  listV[8] := V_BASE + 3
+  listX[0] := 4
+  listX[1] := X_ADDR0
+  listX[2] := XV_BASE + 0
+  listX[3] := X_ADDR1
+  listX[4] := XV_BASE + 1
+  listX[5] := X_ADDR2
+  listX[6] := XV_BASE + 2
+  listX[7] := X_ADDR3
+  listX[8] := XV_BASE + 3
+  mailbox[MB_P_SDUMP] := @sdump
+  mailbox[MB_P_RDUMP] := @rdump
+  mailbox[MB_P_BLK] := @blkSrc
+  evenId := -1
+  oddId := -1
+  hsFail := 0
+  fail_count := 0
+  linePos := 0
+  say(string("=== VO-J-006 arms D + F: LUT write-sharing, block-load path and a Spin2 sender; no pins, nothing attached ==="))
+  print_predictions()
+  say(string(" "))
+  say(string("--- CONTROL W (construction): constants ---"))
+  check_rig_constants()
+  if fail_count == 0
+    repeat roundIdx from 0 to ROUNDS - 1
+      curRound := roundIdx
+      arm_neg_pos(A_NEG, FALSE)
+      arm_neg_pos(A_POS, TRUE)
+      arm_dir()
+      arm_blk(A_BLK0, FALSE)
+      arm_blk(A_BLK, TRUE)
+      arm_f(A_F1, TRUE)
+      arm_f(A_F2, FALSE)
+      arm_s1()
+      arm_s2()
+    stop_pair()
+    report()
+  else
+    say(string("NO VERDICT: a construction control failed (see RIG FAIL lines above); nothing was started"))
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  say(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_d(numVal)
+' Append a signed decimal to the line.
+'
+' @param numVal - the number, read as signed
+
+  if numVal < 0
+    ln_c("-")
+    ln_u(-numVal)
+  else
+    ln_u(numVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+' ---------------------------------------------------------------------------
+' pre-registered outcomes and construction controls
+' ---------------------------------------------------------------------------
+PRI print_predictions()
+' Print the outcomes fixed before the run.
+'
+
+  say(string("PRE-REGISTERED (fixed before the run; nothing is predicted for D, F, S -- no ingested source states them):"))
+  say(string("  every arm starts from a fresh COGEXEC_NEW_PAIR; cog 0 posts a command and waits for the cog's slot to read 0 (a handshake, not timing)"))
+  say(string("  controls (gate, else RIG FAIL / NO VERDICT for D and F): NEG receiver unchanged 512/512 ; POS V arrives 4/4 and nothing else changes ; DIR sender unchanged 512/512 ;"))
+  say(string("                BLK0 block lands in the sender 192/192 and nothing arrives (512/512 unchanged) ; the pair is even/odd ; handshakes complete"))
+  say(string("  (S1 only) GETBRK D[26] reads 0 then 1 around SETLUTS #1 -- if not, S1 is judged on arrival alone"))
+  say(string("  D  (arm BLK): PROPAGATES = every one of the 128 + 64 block longs arrived, all rounds | DOES NOT PROPAGATE = none arrived, all rounds | PARTIAL | INCONCLUSIVE (rounds differ)"))
+  say(string("  F1 (Spin2 sender, receiver enabled BEFORE the launch): IMAGE ARRIVES = receiver LUT equals the Spin2 sender's dump at all 512 | NOTHING ARRIVES = receiver unchanged | PARTIAL"))
+  say(string("  F2 (receiver enabled AFTER the launch): NOT RETROACTIVE = dump 1 unchanged | START-UP WRITES ARRIVED = changed longs ; the Spin2 inline WRLUT (4 values) ARRIVES / DOES NOT ARRIVE, in F1 and in F2"))
+  say(string("  S1 (receiver COGINITed after SETLUTS #1): SURVIVES = GETBRK D[26] = 1 after the restart AND V arrives | RESET BY COGINIT = flag 0 AND V does not arrive | INCONSISTENT"))
+  say(string("  S2 (sender COGINITed): SENDER RESTART DOES NOT DISTURB THE RECEIVER'S ENABLE = V arrives | DISTURBS IT = V does not arrive"))
+  say(string("  every arm: after the pair announces, SETLUTS #0 is sent to both cogs, so sharing starts disabled whatever a stopped cog retained"))
+
+PRI check_rig_constants()
+' Control W: the constants are what the arms assume.
+'
+
+  ln_s(string("  COGEXEC_NEW_PAIR = "))
+  ln_h(COGEXEC_NEW_PAIR)
+  ln_s(string(" (expected %01_0001 = $0000_0011) ; BLKA "))
+  ln_h(BLKA_LUT)
+  ln_s(string(" x "))
+  ln_u(BLKA_N)
+  ln_s(string(" ; BLKB "))
+  ln_h(BLKB_LUT)
+  ln_s(string(" x "))
+  ln_u(BLKB_N)
+  ln_s(string(" ; block source "))
+  ln_u(BLK_LONGS)
+  say(string(" longs"))
+  if COGEXEC_NEW_PAIR <> %01_0001
+    say(string("RIG FAIL: COGEXEC_NEW_PAIR is not %01_0001"))
+    fail_count++
+  if BLKA_LUT + BLKA_N - 1 > $1FF or BLKB_LUT + BLKB_N - 1 <> $1FF or BLKA_N > BLK_LONGS or BLKB_N > BLK_LONGS
+    say(string("RIG FAIL: block-load regions do not fit the LUT or the source buffer"))
+    fail_count++
+  if BLKA_LUT + BLKA_N > BLKB_LUT or V_ADDR0 >= BLKA_LUT or V_ADDR1 < BLKA_LUT + BLKA_N or V_ADDR2 >= BLKB_LUT
+    say(string("RIG FAIL: the WRLIST addresses overlap the block regions in a way the arms do not expect"))
+    fail_count++
+
+' ---------------------------------------------------------------------------
+' handshakes and pair management
+' ---------------------------------------------------------------------------
+PRI stop_pair()
+' Stop both cogs of the pair, if started.
+'
+
+  if evenId >= 0
+    cogstop(evenId)
+  if oddId >= 0
+    cogstop(oddId)
+  evenId := -1
+  oddId := -1
+
+PRI fresh_pair() : bOk | startTick, startedCog
+' Stop any pair, start a new even/odd pair running `node` and wait until both cogs have announced.
+'
+' @returns bOk - TRUE when both announced and form an even/odd pair
+
+' Local Variables:
+' @local startTick - CT when the wait began
+' @local startedCog - the cog COGINIT reports starting (-1 = none free)
+
+  stop_pair()
+  mailbox[MB_ID_E] := -1
+  mailbox[MB_ID_O] := -1
+  longfill(@mailbox[MB_CMD_E], 0, 2 * SLOT_LONGS)
+  mailbox[MB_XCMD] := 0
+  mailbox[MB_SPINUP] := 0
+  startedCog := coginit(COGEXEC_NEW_PAIR, @node, @mailbox)
+  if startedCog < 0
+    bOk := FALSE
+  else
+    startTick := getct()
+    repeat until (mailbox[MB_ID_E] >= 0 and mailbox[MB_ID_O] >= 0) or (getct() - startTick) > clkfreq / CMD_TIMEOUT_DIV
+    evenId := mailbox[MB_ID_E]
+    oddId := mailbox[MB_ID_O]
+    bOk := evenId >= 0 and oddId >= 0 and (evenId & 1) == 0 and oddId == evenId + 1
+    if bOk == FALSE
+      ' a pair that started but did not announce is stopped here, so it cannot hold
+      ' cogs the next arm's COGINIT needs (stop_pair only knows announced ids)
+      cogstop(startedCog & !1)
+      cogstop(startedCog | 1)
+      evenId := -1
+      oddId := -1
+  if bOk == FALSE
+    hsFail++
+    say(string("RIG FAIL: COGEXEC_NEW_PAIR did not give an even/odd pair that announced"))
+  else
+    bOk &= node_cmd(0, N_SETLUTS, 0, 0)         ' every arm starts with sharing disabled in both cogs,
+    bOk &= node_cmd(1, N_SETLUTS, 0, 0)         ' whatever state a stopped cog retained
+
+PRI node_cmd(who, cmdCode, arg0, arg1) : bOk | pSlot, startTick
+' Post one command to the even (who = 0) or odd (who = 1) cog and wait for its slot to read 0.
+'
+' @param who - 0 = even cog (sender), 1 = odd cog (receiver)
+' @param cmdCode - N_*
+' @param arg0 - first argument
+' @param arg1 - second argument
+' @returns bOk - TRUE when the cog completed the command in time
+
+' Local Variables:
+' @local pSlot - mailbox index of the cog's slot
+' @local startTick - CT when the wait began
+
+  pSlot := MB_CMD_E + who * SLOT_LONGS
+  mailbox[pSlot + 1] := arg0
+  mailbox[pSlot + 2] := arg1
+  mailbox[pSlot] := cmdCode
+  startTick := getct()
+  repeat until mailbox[pSlot] == 0 or (getct() - startTick) > clkfreq / CMD_TIMEOUT_DIV
+  bOk := mailbox[pSlot] == 0
+  if bOk == FALSE
+    hsFail++
+    mailbox[pSlot] := 0
+    say(string("RIG FAIL: a pair cog did not complete a command within the handshake timeout"))
+
+PRI restart_node(who) : bOk | pSlot, startTick, tgtCog, pId
+' Restart the even or odd cog with the `node` program (COGINIT onto a running cog) and wait for its announcement.
+'
+' @param who - 0 = even cog, 1 = odd cog
+' @returns bOk - TRUE when the cog announced again
+
+' Local Variables:
+' @local pSlot - mailbox index of the cog's slot
+' @local startTick - CT when the wait began
+' @local tgtCog - the cog restarted
+' @local pId - mailbox index of the cog's id slot
+
+  pSlot := MB_CMD_E + who * SLOT_LONGS
+  pId := MB_ID_E + who
+  if who == 0
+    tgtCog := evenId
+  else
+    tgtCog := oddId
+  if tgtCog < 0
+    ' no cog id (the pair did not start): coginit(-1, ...) would mean "any free cog or pair" and launch a stray pair
+    hsFail++
+    say(string("RIG FAIL: restart_node has no target cog (the pair did not start); nothing was restarted"))
+    bOk := FALSE
+    return
+  mailbox[pSlot] := 0
+  mailbox[pId] := -1
+  coginit(tgtCog, @node, @mailbox)
+  startTick := getct()
+  repeat until mailbox[pId] == tgtCog or (getct() - startTick) > clkfreq / CMD_TIMEOUT_DIV
+  bOk := mailbox[pId] == tgtCog
+  if bOk == FALSE
+    hsFail++
+    say(string("RIG FAIL: a restarted pair cog did not announce"))
+
+PRI set_res(armIdx, fieldIdx, valueVal)
+' Record one result field of the current round.
+'
+' @param armIdx - A_*
+' @param fieldIdx - RF_*
+' @param valueVal - the value
+
+  results[(armIdx * ROUNDS + curRound) * RF_LONGS + fieldIdx] := valueVal
+
+PRI get_res(armIdx, roundIdx, fieldIdx) : valueVal
+' One recorded result field.
+'
+' @param armIdx - A_*
+' @param roundIdx - round
+' @param fieldIdx - RF_*
+' @returns valueVal - the value
+
+  valueVal := results[(armIdx * ROUNDS + roundIdx) * RF_LONGS + fieldIdx]
+
+PRI count_eq(pDump, baseVal, firstIdx, lastIdx) : countVal | idx
+' How many longs of a dump equal baseVal + index over an index range.
+'
+' @param pDump - hub address of a 512-long dump
+' @param baseVal - the pattern base
+' @param firstIdx - first index
+' @param lastIdx - last index
+' @returns countVal - matches
+
+' Local Variables:
+' @local idx - index
+
+  countVal := 0
+  repeat idx from firstIdx to lastIdx
+    if long[pDump][idx] == baseVal + idx
+      countVal++
+
+PRI count_v(pDump, pList, baseVal) : countVal | idx
+' How many of the four WRLIST (address, value) pairs are present in a dump.
+'
+' @param pDump - hub address of a 512-long dump
+' @param pList - hub address of the WRLIST (count, addr, val ...)
+' @param baseVal - unused, kept for symmetry
+' @returns countVal - pairs whose value is at its address
+
+' Local Variables:
+' @local idx - pair index
+
+  countVal := 0
+  repeat idx from 0 to long[pList][0] - 1
+    if long[pDump][long[pList][1 + idx * 2]] == long[pList][2 + idx * 2]
+      countVal++
+
+PRI count_unch(pDump, baseVal, bExcludeV, bExcludeBlk) : countVal | idx, bSkip
+' How many longs equal baseVal + index, leaving out the WRLIST addresses and/or the two block regions.
+'
+' @param pDump - hub address of a 512-long dump
+' @param baseVal - the pattern base
+' @param bExcludeV - TRUE leaves out the four V addresses
+' @param bExcludeBlk - TRUE leaves out the two block-load regions
+' @returns countVal - matches in the places that were not left out
+
+' Local Variables:
+' @local idx - index
+' @local bSkip - this index is left out
+
+  countVal := 0
+  repeat idx from 0 to LUT_LONGS - 1
+    bSkip := FALSE
+    if bExcludeV and (idx == V_ADDR0 or idx == V_ADDR1 or idx == V_ADDR2 or idx == V_ADDR3)
+      bSkip := TRUE
+    if bExcludeBlk and ((idx >= BLKA_LUT and idx < BLKA_LUT + BLKA_N) or (idx >= BLKB_LUT and idx < BLKB_LUT + BLKB_N))
+      bSkip := TRUE
+    if bSkip == FALSE and long[pDump][idx] == baseVal + idx
+      countVal++
+
+PRI count_blk(pDump, firstIdx, countN) : countVal | idx
+' How many longs of a block region equal the block source pattern.
+'
+' @param pDump - hub address of a 512-long dump
+' @param firstIdx - first LUT address of the region
+' @param countN - length of the region
+' @returns countVal - longs equal to BLK_BASE + (index - firstIdx)
+
+' Local Variables:
+' @local idx - index within the region
+
+  countVal := 0
+  repeat idx from 0 to countN - 1
+    if long[pDump][firstIdx + idx] == BLK_BASE + idx
+      countVal++
+
+' ---------------------------------------------------------------------------
+' the arms (each from a fresh pair)
+' ---------------------------------------------------------------------------
+PRI arm_neg_pos(armIdx, bEnable) | bOk
+' NEG (receiver at the default SETLUTS #0) and POS (receiver SETLUTS #1): the sender fills, the receiver fills,
+' the sender WRLUTs the four V values; both LUTs are dumped.
+'
+' @param armIdx - A_NEG or A_POS
+' @param bEnable - TRUE for POS
+
+' Local Variables:
+' @local bOk - every handshake completed
+
+  bOk := fresh_pair()
+  if bOk == FALSE
+    set_res(armIdx, RF_OK, FALSE)
+    return
+  bOk &= node_cmd(0, N_FILL, PAT_S, 0)
+  bOk &= node_cmd(1, N_FILL, PAT_R, 0)
+  if bEnable
+    bOk &= node_cmd(1, N_SETLUTS, 1, 0)
+  bOk &= node_cmd(0, N_WRLIST, @listV, 0)
+  bOk &= node_cmd(0, N_DUMP, 0, 0)
+  bOk &= node_cmd(1, N_DUMP, 0, 0)
+  set_res(armIdx, RF_OK, bOk)
+  set_res(armIdx, RF_RECV_UNCH, count_eq(@rdump, PAT_R, 0, LUT_LONGS - 1))
+  set_res(armIdx, RF_RECV_V, count_v(@rdump, @listV, 0))
+  set_res(armIdx, RF_SEND_V, count_v(@sdump, @listV, 0))
+  set_res(armIdx, RF_UNCH_OUT, count_unch(@rdump, PAT_R, TRUE, FALSE))
+
+PRI arm_dir() | bOk
+' DIR: the receiver enables and fills its own LUT; the sender (never enabled) must be unchanged.
+'
+
+' Local Variables:
+' @local bOk - every handshake completed
+
+  bOk := fresh_pair()
+  if bOk == FALSE
+    set_res(A_DIR, RF_OK, FALSE)
+    return
+  bOk &= node_cmd(0, N_FILL, PAT_S, 0)
+  bOk &= node_cmd(1, N_SETLUTS, 1, 0)
+  bOk &= node_cmd(1, N_FILL, PAT_R, 0)
+  bOk &= node_cmd(0, N_DUMP, 0, 0)
+  set_res(A_DIR, RF_OK, bOk)
+  set_res(A_DIR, RF_SEND_UNCH, count_eq(@sdump, PAT_S, 0, LUT_LONGS - 1))
+
+PRI arm_blk(armIdx, bEnable) | bOk
+' BLK0 / BLK (arm D): the sender block-loads two regions of its own LUT (SETQ2 + RDLONG); both LUTs are dumped.
+'
+' @param armIdx - A_BLK0 or A_BLK
+' @param bEnable - TRUE when the receiver executes SETLUTS #1 first
+
+' Local Variables:
+' @local bOk - every handshake completed
+
+  bOk := fresh_pair()
+  if bOk == FALSE
+    set_res(armIdx, RF_OK, FALSE)
+    return
+  bOk &= node_cmd(0, N_FILL, PAT_S, 0)
+  bOk &= node_cmd(1, N_FILL, PAT_R, 0)
+  if bEnable
+    bOk &= node_cmd(1, N_SETLUTS, 1, 0)
+  bOk &= node_cmd(0, N_BLOCK_A, 0, 0)
+  bOk &= node_cmd(0, N_BLOCK_B, 0, 0)
+  bOk &= node_cmd(0, N_DUMP, 0, 0)
+  bOk &= node_cmd(1, N_DUMP, 0, 0)
+  set_res(armIdx, RF_OK, bOk)
+  set_res(armIdx, RF_BLKA_S, count_blk(@sdump + BLKA_LUT * 4, 0, BLKA_N))
+  set_res(armIdx, RF_BLKB_S, count_blk(@sdump + BLKB_LUT * 4, 0, BLKB_N))
+  set_res(armIdx, RF_BLKA_R, count_blk(@rdump + BLKA_LUT * 4, 0, BLKA_N))
+  set_res(armIdx, RF_BLKB_R, count_blk(@rdump + BLKB_LUT * 4, 0, BLKB_N))
+  set_res(armIdx, RF_RECV_UNCH, count_eq(@rdump, PAT_R, 0, LUT_LONGS - 1))
+  set_res(armIdx, RF_UNCH_OUT, count_unch(@rdump, PAT_R, FALSE, TRUE))
+
+PRI arm_f(armIdx, bBefore) | bOk, startTick, spinCog, idx, diffFirst, eqCount
+' F1 (receiver enabled BEFORE the Spin2 launch) and F2 (AFTER): a Spin2 cog is started onto the even cog;
+' it dumps its own LUT and later WRLUTs four values with inline PASM.
+'
+' @param armIdx - A_F1 or A_F2
+' @param bBefore - TRUE for F1
+
+' Local Variables:
+' @local bOk - every handshake completed
+' @local startTick - CT when the wait for the Spin2 cog began
+' @local spinCog - cog id COGSPIN returned
+' @local idx - index
+' @local diffFirst - first LUT address where the receiver differs from the sender dump (-1 none)
+' @local eqCount - longs equal in the receiver dump and the sender dump
+
+  bOk := fresh_pair()
+  if bOk == FALSE
+    set_res(armIdx, RF_OK, FALSE)
+    return
+  bOk &= node_cmd(1, N_FILL, PAT_R, 0)
+  if bBefore
+    bOk &= node_cmd(1, N_SETLUTS, 1, 0)
+  mailbox[MB_SPINUP] := 0
+  mailbox[MB_XCMD] := XC_NONE
+  spinCog := cogspin(evenId, spin_sender(), @spinStack)
+  if spinCog < 0
+    bOk := FALSE
+    hsFail++
+    say(string("RIG FAIL: COGSPIN of the Spin2 sender failed"))
+  startTick := getct()
+  repeat until mailbox[MB_SPINUP] == 1 or (getct() - startTick) > clkfreq / SPIN_TIMEOUT_DIV
+  if mailbox[MB_SPINUP] <> 1
+    bOk := FALSE
+    hsFail++
+    say(string("RIG FAIL: the Spin2 sender did not report up"))
+  else
+    bOk &= x_cmd(XC_DUMP)                       ' the Spin2 sender's own LUT -> sdump
+    bOk &= node_cmd(1, N_DUMP, 0, 0)            ' receiver dump 1 -> rdump
+    set_res(armIdx, RF_CHANGED, LUT_LONGS - count_eq(@rdump, PAT_R, 0, LUT_LONGS - 1))
+    set_res(armIdx, RF_RECV_UNCH, count_eq(@rdump, PAT_R, 0, LUT_LONGS - 1))
+    diffFirst := -1
+    eqCount := 0
+    repeat idx from 0 to LUT_LONGS - 1
+      if rdump[idx] == sdump[idx]
+        eqCount++
+      elseif diffFirst < 0
+        diffFirst := idx
+    set_res(armIdx, RF_EQ_SEND, eqCount)
+    set_res(armIdx, RF_DIFF, diffFirst)
+    set_res(armIdx, RF_ZERO16, 16 - count_nonzero(@rdump, 0, 15))
+    if bBefore == FALSE
+      bOk &= node_cmd(1, N_SETLUTS, 1, 0)
+    bOk &= x_cmd(XC_WRLIST)                     ' Spin2 inline-PASM WRLUT of the four XV values
+    bOk &= node_cmd(1, N_DUMP, 0, 0)            ' receiver dump 2 -> rdump
+    set_res(armIdx, RF_X_ARR, count_v(@rdump, @listX, 0))
+  set_res(armIdx, RF_OK, bOk)
+
+PRI count_nonzero(pDump, firstIdx, lastIdx) : countVal | idx
+' How many longs of a dump range are non-zero.
+'
+' @param pDump - hub address of a 512-long dump
+' @param firstIdx - first index
+' @param lastIdx - last index
+' @returns countVal - non-zero longs
+
+' Local Variables:
+' @local idx - index
+
+  countVal := 0
+  repeat idx from firstIdx to lastIdx
+    if long[pDump][idx] <> 0
+      countVal++
+
+PRI x_cmd(xCode) : bOk | startTick
+' Post a command to the Spin2 sender and wait for it to clear.
+'
+' @param xCode - XC_*
+' @returns bOk - TRUE when the Spin2 sender completed the command in time
+
+' Local Variables:
+' @local startTick - CT when the wait began
+
+  mailbox[MB_XCMD] := xCode
+  startTick := getct()
+  repeat until mailbox[MB_XCMD] == XC_NONE or (getct() - startTick) > clkfreq / SPIN_TIMEOUT_DIV
+  bOk := mailbox[MB_XCMD] == XC_NONE
+  if bOk == FALSE
+    hsFail++
+    mailbox[MB_XCMD] := XC_NONE
+    say(string("RIG FAIL: the Spin2 sender did not complete a command within the timeout"))
+
+PRI arm_s1() | bOk
+' S1: the receiver enables, fills, is restarted with COGINIT (the program does not execute SETLUTS again);
+' the flag is read before and after with GETBRK; the sender then WRLUTs V.
+'
+
+' Local Variables:
+' @local bOk - every handshake completed
+
+  bOk := fresh_pair()
+  if bOk == FALSE
+    set_res(A_S1, RF_OK, FALSE)
+    return
+  bOk &= node_cmd(1, N_GETFLAG, 0, 0)
+  set_res(A_S1, RF_FLAG0, (mailbox[MB_FLAG_O] >> 26) & 1)            ' RF_FLAG0: the flag at the start (expected 0)
+  bOk &= node_cmd(0, N_FILL, PAT_S, 0)
+  bOk &= node_cmd(1, N_SETLUTS, 1, 0)
+  bOk &= node_cmd(1, N_GETFLAG, 0, 0)
+  set_res(A_S1, RF_FLAG_SET, (mailbox[MB_FLAG_O] >> 26) & 1)          ' RF_FLAG_SET: the flag after SETLUTS #1 (expected 1)
+  bOk &= node_cmd(1, N_FILL, PAT_R, 0)
+  bOk &= restart_node(1)
+  bOk &= node_cmd(1, N_GETFLAG, 0, 0)
+  set_res(A_S1, RF_FLAG1, (mailbox[MB_FLAG_O] >> 26) & 1)            ' RF_FLAG1: the flag after the COGINIT
+  bOk &= node_cmd(0, N_WRLIST, @listV, 0)
+  bOk &= node_cmd(1, N_DUMP, 0, 0)
+  set_res(A_S1, RF_OK, bOk)
+  set_res(A_S1, RF_RECV_V, count_v(@rdump, @listV, 0))
+  set_res(A_S1, RF_UNCH_OUT, count_unch(@rdump, PAT_R, TRUE, FALSE))
+
+PRI arm_s2() | bOk
+' S2: the sender is restarted with COGINIT after the receiver enabled; the sender then WRLUTs V.
+'
+
+' Local Variables:
+' @local bOk - every handshake completed
+
+  bOk := fresh_pair()
+  if bOk == FALSE
+    set_res(A_S2, RF_OK, FALSE)
+    return
+  bOk &= node_cmd(0, N_FILL, PAT_S, 0)
+  bOk &= node_cmd(1, N_SETLUTS, 1, 0)
+  bOk &= node_cmd(1, N_FILL, PAT_R, 0)
+  bOk &= restart_node(0)
+  bOk &= node_cmd(0, N_WRLIST, @listV, 0)
+  bOk &= node_cmd(1, N_DUMP, 0, 0)
+  set_res(A_S2, RF_OK, bOk)
+  set_res(A_S2, RF_RECV_V, count_v(@rdump, @listV, 0))
+
+' ---------------------------------------------------------------------------
+' the Spin2 sender (arms F): runs in the even cog after COGSPIN; every LUT access is inline PASM
+' ---------------------------------------------------------------------------
+PRI spin_sender() | xCode
+' Report up, then serve cog 0's commands forever.
+'
+
+' Local Variables:
+' @local xCode - the command read
+
+  mailbox[MB_SPINUP] := 1
+  repeat
+    xCode := mailbox[MB_XCMD]
+    case xCode
+      XC_DUMP:
+        x_dump()
+        mailbox[MB_XCMD] := XC_NONE
+      XC_WRLIST:
+        x_wrlist()
+        mailbox[MB_XCMD] := XC_NONE
+
+PRI x_dump() | idx, lutVal
+' Copy this cog's LUT $000..$1FF into sdump with inline-PASM RDLUT.
+'
+
+' Local Variables:
+' @local idx - LUT address
+' @local lutVal - the long read
+
+  repeat idx from 0 to LUT_LONGS - 1
+    org
+        rdlut   lutVal, idx
+    end
+    sdump[idx] := lutVal
+
+PRI x_wrlist() | idx, wrAddr, wrVal
+' WRLUT the (address, value) pairs of listX with inline PASM.
+'
+
+' Local Variables:
+' @local idx - pair index
+' @local wrAddr - LUT address
+' @local wrVal - value
+
+  repeat idx from 0 to listX[0] - 1
+    wrAddr := listX[1 + idx * 2]
+    wrVal := listX[2 + idx * 2]
+    org
+        wrlut   wrVal, wrAddr
+    end
+
+' ---------------------------------------------------------------------------
+' report
+' ---------------------------------------------------------------------------
+PRI all_rounds(armIdx, fieldIdx, expVal) : bAll | roundIdx
+' Whether a field equals a value in every round.
+'
+' @param armIdx - A_*
+' @param fieldIdx - RF_*
+' @param expVal - the value
+' @returns bAll - TRUE when every round matches
+
+' Local Variables:
+' @local roundIdx - round
+
+  bAll := TRUE
+  repeat roundIdx from 0 to ROUNDS - 1
+    if get_res(armIdx, roundIdx, fieldIdx) <> expVal
+      bAll := FALSE
+
+PRI class_of(armIdx, fieldIdx, fullVal) : classVal | roundIdx, firstVal, bSame
+' Class of a count over the rounds: all of fullVal, none, partial, or the rounds differ.
+'
+' @param armIdx - A_*
+' @param fieldIdx - RF_*
+' @param fullVal - the count meaning 'all'
+' @returns classVal - Q_ALL, Q_NONE, Q_PART or Q_VARIES
+
+' Local Variables:
+' @local roundIdx - round
+' @local firstVal - round 0's value
+' @local bSame - every round equals round 0
+
+  firstVal := get_res(armIdx, 0, fieldIdx)
+  bSame := TRUE
+  repeat roundIdx from 1 to ROUNDS - 1
+    if get_res(armIdx, roundIdx, fieldIdx) <> firstVal
+      bSame := FALSE
+  if bSame == FALSE
+    classVal := Q_VARIES
+  elseif firstVal == fullVal
+    classVal := Q_ALL
+  elseif firstVal == 0
+    classVal := Q_NONE
+  else
+    classVal := Q_PART
+
+PRI print_arm(armIdx, pName, field1, field2, field3, field4)
+' Print one arm's per-round values for up to four result fields.
+'
+' @param armIdx - A_*
+' @param pName - arm name
+' @param field1 - RF_* or -1
+' @param field2 - RF_* or -1
+' @param field3 - RF_* or -1
+' @param field4 - RF_* or -1
+
+  print_field(armIdx, pName, field1)
+  print_field(armIdx, pName, field2)
+  print_field(armIdx, pName, field3)
+  print_field(armIdx, pName, field4)
+
+PRI print_field(armIdx, pName, fieldIdx) | roundIdx
+' Print one result field over the rounds.
+'
+' @param armIdx - A_*
+' @param pName - arm name
+' @param fieldIdx - RF_* or -1 (nothing printed)
+
+' Local Variables:
+' @local roundIdx - round
+
+  if fieldIdx >= 0
+    ln_s(string("  "))
+    ln_s(pName)
+    ln_c(" ")
+    ln_s(field_name(fieldIdx))
+    ln_c(":")
+    repeat roundIdx from 0 to ROUNDS - 1
+      ln_c(" ")
+      ln_d(get_res(armIdx, roundIdx, fieldIdx))
+    ln_out()
+
+PRI field_name(fieldIdx) : pText
+' Printable name of a result field.
+'
+' @param fieldIdx - RF_*
+' @returns pText - address of the name
+
+  pText := lookupz(fieldIdx: string("receiver unchanged (of 512)"), string("V arrived at receiver (of 4)"), string("V present at sender (of 4)"), string("sender unchanged (of 512)"), string("block A at receiver (of 128)"), string("block B at receiver (of 64)"), string("block A at sender (of 128)"), string("block B at sender (of 64)"), string("receiver equals sender dump (of 512)"), string("receiver changed (of 512)"), string("LUT $000..$00F zero at receiver (of 16)"), string("XV arrived at receiver after the Spin2 WRLUT (of 4)"), string("unchanged outside the written places"), string("GETBRK D[26] at start"), string("GETBRK D[26] after SETLUTS #1"), string("GETBRK D[26] after the COGINIT"), string("first LUT address where receiver and sender dump differ (-1 none)"), string("handshakes ok (-1 = yes)"))
+
+PRI yes_no(bFlag) : pText
+' Printable YES / NO.
+'
+' @param bFlag - TRUE or FALSE
+' @returns pText - address of "YES" or "NO"
+
+  if bFlag
+    pText := string("YES")
+  else
+    pText := string("NO")
+
+PRI report() | armIdx, bControls, bFlagOk, qA, qB
+' Print the controls and every arm, gate, decide. Single exit.
+'
+
+' Local Variables:
+' @local armIdx - arm
+' @local bControls - every control holds
+' @local bFlagOk - the GETBRK readback follows SETLUTS (S1 only)
+' @local qA - class of block A arrival
+' @local qB - class of block B arrival
+
+  say(string(" "))
+  say(string("--- RAW RESULTS per round ---"))
+  print_arm(A_NEG, string("NEG "), RF_RECV_UNCH, RF_SEND_V, RF_RECV_V, RF_OK)
+  print_arm(A_POS, string("POS "), RF_RECV_V, RF_SEND_V, RF_UNCH_OUT, RF_OK)
+  print_arm(A_DIR, string("DIR "), RF_SEND_UNCH, RF_OK, -1, -1)
+  print_arm(A_BLK0, string("BLK0"), RF_BLKA_S, RF_BLKB_S, RF_BLKA_R, RF_BLKB_R)
+  print_arm(A_BLK0, string("BLK0"), RF_RECV_UNCH, RF_OK, -1, -1)
+  print_arm(A_BLK, string("BLK "), RF_BLKA_S, RF_BLKB_S, RF_BLKA_R, RF_BLKB_R)
+  print_arm(A_BLK, string("BLK "), RF_RECV_UNCH, RF_UNCH_OUT, RF_OK, -1)
+  print_arm(A_F1, string("F1  "), RF_CHANGED, RF_EQ_SEND, RF_ZERO16, RF_DIFF)
+  print_arm(A_F1, string("F1  "), RF_RECV_UNCH, RF_X_ARR, RF_OK, -1)
+  print_arm(A_F2, string("F2  "), RF_CHANGED, RF_EQ_SEND, RF_ZERO16, RF_DIFF)
+  print_arm(A_F2, string("F2  "), RF_RECV_UNCH, RF_X_ARR, RF_OK, -1)
+  print_arm(A_S1, string("S1  "), RF_FLAG0, RF_FLAG_SET, RF_FLAG1, RF_RECV_V)
+  print_arm(A_S1, string("S1  "), RF_UNCH_OUT, RF_OK, -1, -1)
+  print_arm(A_S2, string("S2  "), RF_RECV_V, RF_OK, -1, -1)
+  say(string(" "))
+  say(string("--- CONTROLS (gate) ---"))
+  bControls := TRUE
+  if hsFail <> 0
+    ln_s(string("RIG FAIL: "))
+    ln_u(hsFail)
+    say(string(" handshake / start-up failure(s) were reported above"))
+    bControls := FALSE
+  repeat armIdx from 0 to ARMS - 1
+    if all_rounds(armIdx, RF_OK, TRUE) == FALSE
+      bControls := FALSE
+      ln_s(string("RIG FAIL: a handshake of arm index "))
+      ln_u(armIdx)
+      say(string(" did not complete in every round"))
+  bControls &= control(string("W/H: every arm completed its handshakes in every round"), bControls)
+  bControls &= control(string("NEG: receiver unchanged 512 of 512, sender holds V 4 of 4"), all_rounds(A_NEG, RF_RECV_UNCH, LUT_LONGS) and all_rounds(A_NEG, RF_SEND_V, 4))
+  bControls &= control(string("POS: V arrives 4 of 4, nothing else changes 508 of 508, sender holds V"), all_rounds(A_POS, RF_RECV_V, 4) and all_rounds(A_POS, RF_UNCH_OUT, LUT_LONGS - 4) and all_rounds(A_POS, RF_SEND_V, 4))
+  bControls &= control(string("DIR: sender unchanged 512 of 512"), all_rounds(A_DIR, RF_SEND_UNCH, LUT_LONGS))
+  bControls &= control(string("BLK0: block lands in the sender (128 + 64) and nothing arrives (512 of 512 unchanged)"), all_rounds(A_BLK0, RF_BLKA_S, BLKA_N) and all_rounds(A_BLK0, RF_BLKB_S, BLKB_N) and all_rounds(A_BLK0, RF_RECV_UNCH, LUT_LONGS))
+  bControls &= control(string("BLK: block lands in the sender (128 + 64)"), all_rounds(A_BLK, RF_BLKA_S, BLKA_N) and all_rounds(A_BLK, RF_BLKB_S, BLKB_N))
+  bFlagOk := all_rounds(A_S1, RF_FLAG0, 0) and all_rounds(A_S1, RF_FLAG_SET, 1)
+  ln_s(string("  G (S1 only): GETBRK D[26] reads 0 at the start and 1 after SETLUTS #1: "))
+  ln_s(yes_no(bFlagOk))
+  ln_out()
+  if bFlagOk == FALSE
+    say(string("  (the GETBRK readback does not follow SETLUTS here: the S1 verdict rests on the arrival of writes alone; D, F and S2 are not affected)"))
+  say(string(" "))
+  if bControls == FALSE
+    say(string("NO VERDICT: a gating control failed (see RIG FAIL lines above); the results are printed for diagnosis only"))
+  else
+    say(string("--- VERDICTS ---"))
+    qA := class_of(A_BLK, RF_BLKA_R, BLKA_N)
+    qB := class_of(A_BLK, RF_BLKB_R, BLKB_N)
+    if qA == Q_ALL and qB == Q_ALL
+      say(string("VERDICT VO-J-006 D: PROPAGATES - a SETQ2 + RDLONG block load into the sender's LUT arrives in the receiver (128 of 128 and 64 of 64, every round)"))
+    elseif qA == Q_NONE and qB == Q_NONE
+      say(string("VERDICT VO-J-006 D: DOES NOT PROPAGATE - none of the 128 + 64 block-loaded longs arrived in the receiver (every round); the block landed locally (control L)"))
+    elseif qA == Q_VARIES or qB == Q_VARIES
+      say(string("VERDICT VO-J-006 D: INCONCLUSIVE - the rounds differ (results above)"))
+    else
+      say(string("VERDICT VO-J-006 D: PARTIAL - some but not all block-loaded longs arrived (counts above)"))
+    verdict_f(A_F1, string("F1 (receiver enabled BEFORE the Spin2 launch)"))
+    verdict_f(A_F2, string("F2 (receiver enabled AFTER the Spin2 launch)"))
+    verdict_s1(bFlagOk)
+    if all_rounds(A_S2, RF_RECV_V, 4)
+      say(string("VERDICT VO-J-006 S2: SENDER RESTART DOES NOT DISTURB THE RECEIVER'S ENABLE - V arrived (4 of 4, every round) after the sender was COGINITed"))
+    elseif all_rounds(A_S2, RF_RECV_V, 0)
+      say(string("VERDICT VO-J-006 S2: SENDER RESTART DISTURBS THE RECEIVER'S ENABLE - V did not arrive after the sender was COGINITed (every round)"))
+    else
+      say(string("VERDICT VO-J-006 S2: INCONCLUSIVE - the rounds differ (results above)"))
+
+PRI control(pText, bHolds) : bOut
+' Print one control and its result; count a failure.
+'
+' @param pText - the control, as text
+' @param bHolds - TRUE when it holds
+' @returns bOut - bHolds
+
+  ln_s(string("  "))
+  ln_s(pText)
+  if bHolds
+    say(string("  -> ok"))
+  else
+    say(string("  -> FAILED"))
+    ln_s(string("RIG FAIL: control failed: "))
+    say(pText)
+    fail_count++
+  bOut := bHolds
+
+PRI verdict_f(armIdx, pName) | qEq, qCh, qX
+' The verdict lines of one F arm.
+'
+' @param armIdx - A_F1 or A_F2
+' @param pName - arm name, as text
+
+' Local Variables:
+' @local qEq - class of 'receiver equals the sender dump'
+' @local qCh - class of 'receiver changed'
+' @local qX - class of the Spin2 inline WRLUT arrival
+
+  qEq := class_of(armIdx, RF_EQ_SEND, LUT_LONGS)
+  qCh := class_of(armIdx, RF_CHANGED, LUT_LONGS)
+  qX := class_of(armIdx, RF_X_ARR, 4)
+  ln_s(string("VERDICT VO-J-006 "))
+  ln_s(pName)
+  ln_s(string(": start-up writes: "))
+  if qEq == Q_ALL
+    if armIdx == A_F2
+      ln_s(string("START-UP WRITES ARRIVED - although the receiver was still at SETLUTS #0 during the launch, its LUT equals the Spin2 sender's dump at all 512 longs (every round)"))
+    else
+      ln_s(string("IMAGE ARRIVES - the receiver's LUT equals the Spin2 sender's dump at all 512 longs (every round)"))
+  elseif qCh == Q_VARIES or qEq == Q_VARIES
+    ln_s(string("INCONCLUSIVE - the rounds differ"))
+  elseif all_rounds(armIdx, RF_CHANGED, 0)
+    if armIdx == A_F2
+      ln_s(string("NOT RETROACTIVE - dump 1 is unchanged (512 of 512 = its fill), every round: the start-up writes did not reach a receiver enabled only afterwards"))
+    else
+      ln_s(string("NOTHING ARRIVES - the receiver is unchanged (512 of 512 = its fill), every round"))
+  else
+    ln_s(string("PARTIAL - receiver changed at "))
+    ln_u(get_res(armIdx, 0, RF_CHANGED))
+    ln_s(string(" longs, equals the sender at "))
+    ln_u(get_res(armIdx, 0, RF_EQ_SEND))
+    ln_s(string(" of 512; LUT $000..$00F zero at "))
+    ln_u(get_res(armIdx, 0, RF_ZERO16))
+    ln_s(string(" of 16; first difference at LUT "))
+    ln_d(get_res(armIdx, 0, RF_DIFF))
+  ln_out()
+  ln_s(string("VERDICT VO-J-006 "))
+  ln_s(pName)
+  ln_s(string(": Spin2 inline WRLUT after the enable: "))
+  if qX == Q_ALL
+    ln_s(string("ARRIVES (4 of 4, every round)"))
+  elseif qX == Q_NONE
+    ln_s(string("DOES NOT ARRIVE (0 of 4, every round)"))
+  elseif qX == Q_VARIES
+    ln_s(string("INCONCLUSIVE - the rounds differ"))
+  else
+    ln_s(string("PARTIAL (counts above)"))
+  ln_out()
+
+PRI verdict_s1(bFlagOk)
+' The verdict line of S1.
+'
+' @param bFlagOk - TRUE when the GETBRK readback followed SETLUTS in this run (so it may enter the verdict)
+
+  if bFlagOk
+    if all_rounds(A_S1, RF_FLAG1, 1) and all_rounds(A_S1, RF_RECV_V, 4)
+      say(string("VERDICT VO-J-006 S1: SETLUTS SURVIVES A COGINIT OF THE RECEIVER - GETBRK D[26] = 1 after the restart and V arrived (every round)"))
+    elseif all_rounds(A_S1, RF_FLAG1, 0) and all_rounds(A_S1, RF_RECV_V, 0)
+      say(string("VERDICT VO-J-006 S1: SETLUTS IS RESET BY COGINIT - GETBRK D[26] = 0 after the restart and V did not arrive (every round)"))
+    else
+      say(string("VERDICT VO-J-006 S1: INCONSISTENT or INCONCLUSIVE - the flag and the arrival disagree, or the rounds differ (results above)"))
+  elseif all_rounds(A_S1, RF_RECV_V, 4)
+    say(string("VERDICT VO-J-006 S1: SETLUTS SURVIVES A COGINIT OF THE RECEIVER - V arrived (every round); the GETBRK readback was not usable"))
+  elseif all_rounds(A_S1, RF_RECV_V, 0)
+    say(string("VERDICT VO-J-006 S1: SETLUTS IS RESET BY COGINIT - V did not arrive (every round); the GETBRK readback was not usable"))
+  else
+    say(string("VERDICT VO-J-006 S1: INCONCLUSIVE - the rounds differ (results above)"))
+
+DAT ' ---- Node: the program both pair cogs run ----
+' cog 0 posts a command into the cog's slot (command, arg0, arg1); the cog executes it and writes 0 to the command long.
+' PTRA = @mailbox on entry.  No debug() here.
+DAT             org     0
+node            mov     mb_, ptra
+                cogid   me_
+                mov     cmdp_, mb_
+                mov     idp_, mb_
+                mov     flgp_, mb_
+                mov     tmp_, mb_
+                testb   me_, #0                 wc      ' C = 1 for the odd cog (the receiver)
+        if_nc   add     cmdp_, #MB_CMD_E * 4
+        if_c    add     cmdp_, #MB_CMD_O * 4
+        if_nc   add     idp_, #MB_ID_E * 4
+        if_c    add     idp_, #MB_ID_O * 4
+        if_nc   add     flgp_, #MB_FLAG_E * 4
+        if_c    add     flgp_, #MB_FLAG_O * 4
+        if_nc   add     tmp_, #MB_P_SDUMP * 4
+        if_c    add     tmp_, #MB_P_RDUMP * 4
+                rdlong  dmp_, tmp_                      ' this cog's dump buffer
+                mov     tmp_, mb_
+                add     tmp_, #MB_P_BLK * 4
+                rdlong  blksrc_, tmp_                   ' the block source buffer
+                wrlong  me_, idp_                       ' announce
+
+node_poll       rdlong  cmd_, cmdp_
+                cmp     cmd_, #0                wz
+        if_z    jmp     #node_poll
+                mov     tmp_, cmdp_
+                add     tmp_, #4
+                rdlong  a0_, tmp_
+                add     tmp_, #4
+                rdlong  a1_, tmp_
+                cmp     cmd_, #N_SETLUTS        wz
+        if_z    jmp     #do_setluts
+                cmp     cmd_, #N_FILL           wz
+        if_z    jmp     #do_fill
+                cmp     cmd_, #N_WRLIST         wz
+        if_z    jmp     #do_wrlist
+                cmp     cmd_, #N_BLOCK_A        wz
+        if_z    jmp     #do_blka
+                cmp     cmd_, #N_BLOCK_B        wz
+        if_z    jmp     #do_blkb
+                cmp     cmd_, #N_DUMP           wz
+        if_z    jmp     #do_dump
+                cmp     cmd_, #N_GETFLAG        wz
+        if_z    jmp     #do_getflag
+node_done       wrlong  #0, cmdp_                       ' done -- the last write of every command
+                jmp     #node_poll
+
+do_setluts      setluts a0_
+                jmp     #node_done
+
+' LUT[i] := a0 + i, i = 0..511: local WRLUTs
+do_fill         mov     i_, #0
+.l              mov     v_, a0_
+                add     v_, i_
+                wrlut   v_, i_
+                add     i_, #1
+                cmp     i_, lutsz_              wz
+        if_nz   jmp     #.l
+                jmp     #node_done
+
+' a0 = hub address of: count, addr0, val0, addr1, val1 ... ; WRLUT val, addr
+do_wrlist       rdlong  n_, a0_
+                add     a0_, #4
+.l              rdlong  ad_, a0_
+                add     a0_, #4
+                rdlong  v_, a0_
+                add     a0_, #4
+                wrlut   v_, ad_
+                djnz    n_, #.l
+                jmp     #node_done
+
+' block loads into this cog's LUT: SETQ2 n-1 / RDLONG <LUT address as a register number>, hub source
+do_blka         setq2   #BLKA_N - 1
+                rdlong  BLKA_LUT, blksrc_
+                jmp     #node_done
+
+do_blkb         setq2   #BLKB_N - 1
+                rdlong  BLKB_LUT, blksrc_
+                jmp     #node_done
+
+' own LUT $000..$1FF -> this cog's dump buffer in hub
+do_dump         mov     i_, #0
+                mov     q_, dmp_
+.l              rdlut   v_, i_
+                wrlong  v_, q_
+                add     q_, #4
+                add     i_, #1
+                cmp     i_, lutsz_              wz
+        if_nz   jmp     #.l
+                jmp     #node_done
+
+' GETBRK WC: D[26] = LUT sharing enabled -> the cog's flag long in the mailbox
+do_getflag      getbrk  v_                      wc
+                wrlong  v_, flgp_
+                jmp     #node_done
+
+lutsz_          long    LUT_LONGS
+
+mb_             res     1
+me_             res     1
+cmdp_           res     1
+idp_            res     1
+flgp_           res     1
+dmp_            res     1
+blksrc_         res     1
+tmp_            res     1
+cmd_            res     1
+a0_             res     1
+a1_             res     1
+i_              res     1
+v_              res     1
+n_              res     1
+ad_             res     1
+q_              res     1
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+  See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}
