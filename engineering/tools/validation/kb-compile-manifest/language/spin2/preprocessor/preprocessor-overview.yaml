@@ -1,0 +1,57 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/preprocessor-overview.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "827190d4c2265855"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [run_application()->1/0]
+  - at: examples[1].code
+    fp: "0db08aa0af273d7a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [configure_rev_b_pins()->1/0]
+  - at: examples[2].code
+    fp: "23a4ae9a67e1a6a2"
+    compile: fragment
+    wrap: spin2-method
+  - at: anti_patterns[1].wrong
+    fp: "5075bc95d882d1a2"
+    compile: never
+    wrap: spin2-top
+    reason: "`wrong:` block of the unbalanced_conditionals anti-pattern (severity compile_error): the #IFDEF is never closed, and the compiler stops with 'Expected #ENDIF' (the example's own comment: 'Error: #ENDIF never found')"
+    fails_at: 1
+  - at: anti_patterns[1].correct
+    fp: "80b027714d20497b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [process()->1/0]
+  - at: anti_patterns[2].correct
+    fp: "a40c335a7528bc0f"
+    compile: never
+    wrap: spin2-top
+    reason: "the page's teaching point is the build stop: with none of the guarding symbols defined (the situation shown; the harness passes no -D) the #ERROR directive fires and compilation fails with the block's own message (the `correct:` form of the contradictory-conditions pattern: its #ELSE/#ERROR fall-through is the point)"
+    fails_at: 7
+  - at: anti_patterns[3].wrong
+    fp: "126c2ef768a0ea6e"
+    compile: never
+    wrap: spin2-top
+    reason: "`wrong:` block of the no_if_expression_directive anti-pattern (severity compile_error): #IF/#ELSEIF do not exist and the build fails. The page says the failure is reported at the #ENDIF with 'Must be preceeded by #IFDEF or #IFNDEF'; pnut-ts reports it at the #IF line (block line 2) as '#if is not a supported preprocessor directive' -- see observation O2"
+    fails_at: 2
+  - at: anti_patterns[4].correct
+    fp: "9c0c8ac28ab09056"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [SENSOR_TYPE_1=con, sensor1_read()->1/0, SENSOR_TYPE_2=con, sensor2_read()->1/0]
+  - at: anti_patterns[6].wrong
+    fp: "6ca31482dff7bb7a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:utils.spin2, file:other.spin2]
+    finding: "S-020"
+  - at: anti_patterns[6].correct
+    fp: "075dedd1d858cc77"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-020"

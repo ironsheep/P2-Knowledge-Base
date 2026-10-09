@@ -1,0 +1,30 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/else.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "3606e3ce4127702a"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[1].code
+    fp: "fb4f5490c1c6be72"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [PIN_TX=con, PIN_RX=con]
+    finding: "S-140"
+  - at: examples[2].code
+    fp: "2909e4b770041751"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-140"
+  - at: examples[3].code
+    fp: "0d391ce82e7d1105"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [init_serial_output()->1/0]
+  - at: examples[4].code
+    fp: "fba274ae88d06936"
+    compile: never
+    wrap: spin2-method
+    reason: "the page's teaching point is the forced compile error: with neither VALID_CONFIG symbol defined, the #ELSE branch leaves the bare undefined identifier INVALID_CONFIGURATION_ERROR in the method body, which the compiler rejects (the example's own comment: 'Force compile error for invalid config'). The proposer's pasm2-dat PASS reads that identifier as a DAT label, which hides the point"
+    fails_at: 8

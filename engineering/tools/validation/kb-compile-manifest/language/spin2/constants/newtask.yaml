@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constants/newtask.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "5308600d5d25aeac"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker()->1/0]
+  - at: examples[1].code
+    fp: "c8596e0ca003034c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [handler()->1/1]

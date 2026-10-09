@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/spin2_slew_easing_engine.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "49fe7a0b3b7ea894"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [MAX_STEP=con, writeActuator()->1/1]

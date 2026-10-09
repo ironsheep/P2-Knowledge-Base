@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/array_architecture.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "fe9e392e77593208"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [initialize_array_communication()->0/0, check_node_status()->0/0, handle_array_commands()->0/0, balance_array_load()->0/0, ACK=con, NODE_HEALTHY=con, NODE_FAILED=con, calculate_optimal_topology()->1/1, extract_chunk()->1/3, combine_result()->0/2, redistribute_failed_tasks()->0/1, comm_bus.ping_node(1), comm_bus.send_task(2), comm_bus.get_result(1), node_mgr.__kbstub(0)]
+    finding: "S-019+S-077"

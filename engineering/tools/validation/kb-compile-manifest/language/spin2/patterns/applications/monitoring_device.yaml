@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/monitoring_device.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "dee7bd7e84ee8afe"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [setup_monitoring_system()->1/0, log_sensor_reading()->1/3, should_transmit()->1/0, MONITORING_INTERVAL=con, TEMP_HIGH=con, TEMP_LOW=con, trigger_temperature_alert()->1/1, HUMID_HIGH=con, trigger_humidity_alert()->1/1, PRESS_LOW=con, trigger_pressure_alert()->1/1, temp_sensor.read_celsius(0), humidity.read_percent(0), pressure.read_pascals(0), storage.__kbstub(0), comm.send_status_update(0)]

@@ -1,0 +1,1775 @@
+[
+ {
+  "slug": "semicolon-comment",
+  "finding": "S-PENDING-semicolon-comment",
+  "statement": "assembly-directives/byte.yaml, long.yaml, word.yaml and file.yaml give each directive's `examples:` list as one-liners with a `;` comment (`BYTE  $FF              ; Single byte value`, `FILE  \"image.bmp\"      ; Include bitmap file`, ...). `;` is not a comment character in Spin2/PASM2 (a comment starts with an apostrophe); the compiler rejects the first `;` on every one of the 17 lines. (The directive part of each line is legal: with `'` for `;` all 17 compile.)",
+  "compiler_error": "Unrecognized character []($3b) (block line 1, at the `;`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:333 (`To end of line | a := 0 'comment here | initiated by apostrophe, rest of line is ignored`)",
+  "verified_fix": "each of the 17 lines with `'` instead of `;` compiles under its own wrap/assumes (scratch variants.py semi_6 .. semi_40; byte.yaml:10/long.yaml:9/word.yaml:9 `value`, long.yaml:10 `@label` and word.yaml:10 `(@label - @base) >> 1` need DAT symbols, word.yaml:10 under pasm2-hub because a WORD leaves a following DAT label unaligned in cog mode)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/assembly-directives/byte.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "decision_index": 6,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "BYTE  $FF              ; Single byte value",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/byte.yaml",
+    "addr": "examples[1]",
+    "key_line": 8,
+    "decision_index": 7,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "BYTE  10, 20, 30       ; Multiple byte values",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/byte.yaml",
+    "addr": "examples[2]",
+    "key_line": 9,
+    "decision_index": 8,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "BYTE  \"Hello\", 0       ; String with null terminator",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/byte.yaml",
+    "addr": "examples[3]",
+    "key_line": 10,
+    "decision_index": 9,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "BYTE  value[16]        ; Duplicate value 16 times",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "value=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/file.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "decision_index": 14,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "FILE  \"image.bmp\"      ; Include bitmap file",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "file:image.bmp"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/file.yaml",
+    "addr": "examples[1]",
+    "key_line": 8,
+    "decision_index": 15,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "FILE  \"data.bin\"       ; Include binary data",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "file:data.bin"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/file.yaml",
+    "addr": "examples[2]",
+    "key_line": 9,
+    "decision_index": 16,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "FILE  \"font8x8.dat\"    ; Include font data",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "file:font8x8.dat"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/file.yaml",
+    "addr": "examples[3]",
+    "key_line": 10,
+    "decision_index": 17,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "datastart  FILE \"config.dat\"  ; Label the included data",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "file:config.dat"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/long.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "decision_index": 20,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "LONG  $12345678        ; Single long value",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/long.yaml",
+    "addr": "examples[1]",
+    "key_line": 8,
+    "decision_index": 21,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "LONG  -1, 0, 1         ; Multiple long values",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/long.yaml",
+    "addr": "examples[2]",
+    "key_line": 9,
+    "decision_index": 22,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "LONG  value[4]          ; Duplicate value 4 times",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "value=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/long.yaml",
+    "addr": "examples[3]",
+    "key_line": 10,
+    "decision_index": 23,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "LONG  @label            ; Address of label",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "label"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/long.yaml",
+    "addr": "examples[4]",
+    "key_line": 11,
+    "decision_index": 24,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "LONG  %%3210            ; Quaternary literal",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/word.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "decision_index": 37,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "WORD  $1234            ; Single word value",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/word.yaml",
+    "addr": "examples[1]",
+    "key_line": 8,
+    "decision_index": 38,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "WORD  1000, 2000, 3000 ; Multiple word values",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/word.yaml",
+    "addr": "examples[2]",
+    "key_line": 9,
+    "decision_index": 39,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "WORD  value[8]          ; Duplicate value 8 times",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "value=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/word.yaml",
+    "addr": "examples[3]",
+    "key_line": 10,
+    "decision_index": 40,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "WORD  (@label - @base) >> 1  ; Address calculation",
+    "intended_class": "fragment/pasm2-hub",
+    "intended_assumes": [
+     "label",
+     "base"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 17
+ },
+ {
+  "slug": "wc-wz-written-as-pair",
+  "finding": "S-PENDING-wc-wz-written-as-pair",
+  "statement": "debug-commands/c-z.yaml examples[1..3] write the flag effects as `wc, wz` (`add a, b wc, wz`, `cmp x, y wc, wz`, `shl value, #8 wc, wz`). PASM2 has no comma-separated effect pair; both flags are written WCZ. (Plain `wc wz` without the comma is refused too.)",
+  "compiler_error": "Expected end of line (m281) (at the `,` after `wc`, block line 6 / 6 / 5)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:299, :303 (the C update is written `WC` or `WCZ`, the Z update `WZ` or `WCZ`)",
+  "verified_fix": "`add a, b wcz`, `cmp x, y wcz`, `shl value, #8 wcz` compile (scratch variants.py wcwz_100..102); `wc wz` fails (scratch t/c2_wcwz_ok)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/debug-commands/c-z.yaml",
+    "addr": "examples[1].code",
+    "key_line": 34,
+    "decision_index": 100,
+    "gate_first_error": "block line 6 (YAML line 40): Expected end of line (m281)",
+    "source_line_of_error": "add     a, b        wc, wz      ' Add with flag update",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/debug-commands/c-z.yaml",
+    "addr": "examples[2].code",
+    "key_line": 45,
+    "decision_index": 101,
+    "gate_first_error": "block line 6 (YAML line 51): Expected end of line (m281)",
+    "source_line_of_error": "cmp     x, y        wc, wz      ' Compare sets flags",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/debug-commands/c-z.yaml",
+    "addr": "examples[3].code",
+    "key_line": 56,
+    "decision_index": 102,
+    "gate_first_error": "block line 5 (YAML line 61): Expected end of line (m281)",
+    "source_line_of_error": "shl     value, #8   wc, wz      ' Shift left, check for overflow",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "condition-prefix-written-as-spin2-statement",
+  "finding": "S-PENDING-condition-prefix-written-as-spin2-statement",
+  "statement": "debug-commands/c-z.yaml examples[4] (`conditional_debug`) follows an inline `org ... end` block (`test result, result wz`) with a bare `if_z` on its own line and DEBUG calls indented under it, as if `if_z` were a Spin2 flow statement. `if_z` is the PASM2 condition prefix of one instruction (`if_z mov result, #1` inside org..end compiles); it is not a Spin2 statement and Spin2 code cannot test the Z flag after `end`.",
+  "compiler_error": "Expected an instruction or variable (at `if_z`, block line 7)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:299-303 (the Z flag is set by a WZ/WCZ instruction and tested by the instruction condition prefixes); the Spin2 test is `if result == 0`",
+  "verified_fix": "`if result == 0` / `DEBUG(\"Result is ZERO\")` / `else` compiles (scratch variants.py ifz_103); `if_z mov result, #1` inside org..end compiles (scratch t/c5_ifz_inl)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/debug-commands/c-z.yaml",
+    "addr": "examples[4].code",
+    "key_line": 66,
+    "decision_index": 103,
+    "gate_first_error": "block line 7 (YAML line 73): Expected an instruction or variable",
+    "source_line_of_error": "if_z",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "some_operation()->1/0"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "block-designator-indented-in-conditional",
+  "finding": "S-PENDING-block-designator-indented-in-conditional",
+  "statement": "Five preprocessor examples indent the block designators (`CON`, `OBJ`, `PUB`) four spaces inside an #IFDEF/#ELSE branch (`    CON PIN_TX = 62`, `    OBJ sensor : \"dht22_driver\"`, `    OBJ` / `        comm : \"usb_serial\"`, `    PUB feature_init()`). A block designator must start in column 1; the active branch is rejected as written. (A single indented CON at the very start of a file is accepted, which is why else.yaml examples[0] compiles.)",
+  "compiler_error": "Block designator must be in first column (at the indented designator of the active branch)",
+  "correct_source": "pnut-ts 1.55.8 error text (the v55 text states no column rule)",
+  "verified_fix": "the same branches with the designator in column 1 compile (scratch variants.py indent_269, indent_270, indent_274, indent_276, indent_282; stub objects generated for the OBJ files)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/preprocessor/else.yaml",
+    "addr": "examples[1].code",
+    "key_line": 48,
+    "decision_index": 269,
+    "gate_first_error": "block line 8 (YAML line 56): Block designator must be in first column",
+    "source_line_of_error": "CON PIN_RX = 63",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "PIN_TX=con",
+     "PIN_RX=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/else.yaml",
+    "addr": "examples[2].code",
+    "key_line": 60,
+    "decision_index": 270,
+    "gate_first_error": "block line 10 (YAML line 70): Block designator must be in first column",
+    "source_line_of_error": "OBJ sensor : \"sensor_stub\"",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/elseifdef.yaml",
+    "addr": "examples[1].code",
+    "key_line": 56,
+    "decision_index": 274,
+    "gate_first_error": "block line 12 (YAML line 68): Block designator must be in first column",
+    "source_line_of_error": "OBJ",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/elseifdef.yaml",
+    "addr": "examples[3].code",
+    "key_line": 94,
+    "decision_index": 276,
+    "gate_first_error": "block line 12 (YAML line 106): Block designator must be in first column",
+    "source_line_of_error": "CON OLED_HEIGHT = 64",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/endif.yaml",
+    "addr": "examples[0].code",
+    "key_line": 24,
+    "decision_index": 282,
+    "gate_first_error": "block line 5 (YAML line 29): Block designator must be in first column",
+    "source_line_of_error": "PUB feature_init()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 5
+ },
+ {
+  "slug": "backtick-in-comment-after-debug",
+  "finding": "S-PENDING-backtick-in-comment-after-debug",
+  "statement": "debug-displays/plot.yaml examples[3] ends the CROP line with `' blit 32x32 frame (expr needs `(...) to evaluate)`. A backtick inside the trailing comment of a `DEBUG(`...)` line is still seen by the DEBUG parser, which starts a second display element there; the block does not compile (the error is reported on the NEXT line, the WAITMS).",
+  "compiler_error": "Expression terms must return a single result (block line 6, the line after the CROP statement)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1075, :1084 (a backtick in a DEBUG message starts an element/escape; everything after it is parsed)",
+  "verified_fix": "the same line with the backtick removed from the comment compiles (scratch variants.py btick_184; t/h2_nocomment_d); a tick comment without a backtick compiles (t/h3_tick_only_d); with the backtick it fails (t/h5_tick_bt2_d)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/debug-displays/plot.yaml",
+    "addr": "examples[3].code",
+    "key_line": 106,
+    "decision_index": 184,
+    "gate_first_error": "block line 6 (YAML line 112): Expression terms must return a single result",
+    "source_line_of_error": "WAITMS(100)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "frame"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "var-declaration-inside-method-body",
+  "finding": "S-PENDING-var-declaration-inside-method-body",
+  "statement": "debug-displays/logic.yaml examples[3] and scope.yaml examples[3] (the 'packed full-window array feed' examples) put `VAR long buff[16]` / `VAR long buff[128]` as the first line of a statement listing, directly above DEBUG(...) and REPEAT statements with no PUB header: the block mixes a VAR declaration and method-body statements, so no wrap can hold it.",
+  "compiler_error": "Block designator must be in first column (at `VAR`, block line 4 in both)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:852 (VAR declarations sit in their own block above the PUB that uses them)",
+  "verified_fix": "a `VAR long buff[16]` block followed by `PUB main() | j, i, packed` and the same statements compiles (scratch variants.py vardecl_178, vardecl_189)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/debug-displays/logic.yaml",
+    "addr": "examples[3].code",
+    "key_line": 98,
+    "decision_index": 178,
+    "gate_first_error": "block line 4 (YAML line 102): Block designator must be in first column",
+    "source_line_of_error": "VAR long buff[16]                         ' 16 longs x 16 pairs = 256 samples",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "buff",
+     "j",
+     "packed",
+     "i"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/debug-displays/scope.yaml",
+    "addr": "examples[3].code",
+    "key_line": 91,
+    "decision_index": 189,
+    "gate_first_error": "block line 4 (YAML line 95): Block designator must be in first column",
+    "source_line_of_error": "VAR long buff[128]                          ' 128 longs x 4 values = 256 A,B sample-sets",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "buff",
+     "i",
+     "pack_next_four_samples()->1/0"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "p1-bare-not-statement",
+  "finding": "S-PENDING-p1-bare-not-statement",
+  "statement": "registers/outa.yaml examples[1] gives `!OUTA[led_pin]` as a statement (P1 Spin's pin toggle). In Spin2 a unary `!` is not a statement; the in-place NOT is the assignment form `!= OUTA[led_pin]`, or `OUTA[led_pin] := !OUTA[led_pin]`.",
+  "compiler_error": "Expected \"=\" (block line 1)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:429 (`! | !x | 2 | != var | 1 | Bitwise NOT`: the assign form is `!= var`)",
+  "verified_fix": "`!= OUTA[led_pin]` compiles (scratch variants.py not_372, t/k2_neq_outa); `!OUTA[3]` fails (t/i3_notouta_lit)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/registers/outa.yaml",
+    "addr": "examples[1]",
+    "key_line": 8,
+    "decision_index": 372,
+    "gate_first_error": "block line 1: Expected \"=\"",
+    "source_line_of_error": "!OUTA[led_pin]",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "led_pin=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "case-with-no-cases",
+  "finding": "S-PENDING-case-with-no-cases",
+  "statement": "patterns/implementation/spin2_latest_wins_mailbox.yaml's consumeCommand ends with `case requestedCmd` followed only by a comment ('... act on requestedCmd / args[] ...'): a CASE with no match line. The comment stands for the cases the reader will add, but as written the compiler refuses a CASE with no cases (an `other:` line alone does not count).",
+  "compiler_error": "No cases encountered (m460) (at `case requestedCmd`, block line 29)",
+  "correct_source": "pnut-ts 1.55.8 error text (m460)",
+  "verified_fix": "one match line under the CASE (`0: args[0] := 0`) compiles (scratch variants.py case_243); `other:` alone still fails",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/implementation/spin2_latest_wins_mailbox.yaml",
+    "addr": "implementation",
+    "key_line": 29,
+    "decision_index": 243,
+    "gate_first_error": "block line 29 (YAML line 58): No cases encountered (m460)",
+    "source_line_of_error": "case requestedCmd",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "method-call-through-dot-on-long",
+  "finding": "S-PENDING-method-call-through-dot-on-long",
+  "statement": "patterns/implementation/spin2_plugin_system.yaml's call_plugins calls `plugin_table[i].call(method)` on a long-array element, as if the stored long were an object with a `.call()` method. A method pointer is called as `ptr(params)` (with `:N` for returns); `.call` is not a member of a long.",
+  "compiler_error": "Expected \"[\" (at `.call(`, block line 12)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:640-653 (`LongVar(Par1, Par2)` calls the method whose pointer a long holds)",
+  "verified_fix": "`plugin_table[i](method)` compiles (scratch variants.py dotcall_248)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/implementation/spin2_plugin_system.yaml",
+    "addr": "implementation",
+    "key_line": 5,
+    "decision_index": 248,
+    "gate_first_error": "block line 12 (YAML line 17): Expected \"[\"",
+    "source_line_of_error": "plugin_table[i].call(method)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "invented-predefined-symbol",
+  "finding": "S-PENDING-invented-predefined-symbol",
+  "statement": "preprocessor/error.yaml common_patterns[2] ('minimum_version_check') tests `#IFNDEF COMPILER_V48_FEATURES` and #ERRORs 'This code requires compiler v48+ features'. No compiler defines COMPILER_V48_FEATURES: v55 names `__DEBUG__` as its only predefined preprocessor symbol and the KB's own external-symbols.yaml lists the `__*__` set; so the check fires on EVERY compile, including by a v55 compiler, and the 'minimum version check' cannot work.",
+  "compiler_error": "This code requires compiler v48+ features (the #ERROR at block line 2 fires)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:40 (`__DEBUG__ This preprocessor symbol is defined when DEBUG compilation is enabled`); deliverables/ai/P2/language/spin2/preprocessor/external-symbols.yaml predefined_symbols",
+  "verified_fix": "with `#DEFINE COMPILER_V48_FEATURES` ahead of it the block compiles (scratch variants.py sym_295): the symbol, not the syntax, is the whole failure",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/preprocessor/error.yaml",
+    "addr": "common_patterns[2].code",
+    "key_line": 100,
+    "decision_index": 295,
+    "gate_first_error": "block line 2 (YAML line 102): This code requires compiler v48+ features",
+    "source_line_of_error": "#ERROR \"This code requires compiler v48+ features\"",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "symbol-exceeds-30-characters",
+  "finding": "S-PENDING-symbol-exceeds-30-characters",
+  "statement": "patterns/applications/multi_instance_coordination.yaml names a method `initiate_synchronized_operation` (31 characters; called at block line 68, declared at line 94). pnut-ts refuses symbols over 30 characters.",
+  "compiler_error": "Symbol exceeds 30 characters (at `initiate_synchronized_operation()`, block line 68)",
+  "correct_source": "pnut-ts 1.55.8 error text; no limit is stated in v55",
+  "verified_fix": "`initiate_sync_operation` compiles (scratch variants.py len_212, together with the declared `instance_count`)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/multi_instance_coordination.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 212,
+    "gate_first_error": "block line 68 (YAML line 101): Symbol exceeds 30 characters",
+    "source_line_of_error": "initiate_synchronized_operation()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_instance()->0/0",
+     "update_instance_registry()->0/0",
+     "handle_coordinated_tasks()->0/0",
+     "COORDINATION_CYCLE_MS=con",
+     "add_instance_to_registry()->0/1",
+     "has_pending_tasks()->1/0",
+     "get_next_task()->1/0",
+     "find_best_instance_for_task()->1/1",
+     "assign_task_to_instance()->0/2",
+     "check_instance_health()->0/0",
+     "time_for_sync_operation()->1/0",
+     "execute_assigned_task()->0/1",
+     "report_task_completion()->0/1",
+     "participate_in_sync_operation()->0/1",
+     "send_heartbeat_to_leader()->0/0",
+     "get_unique_sync_id()->1/0",
+     "SYNC_START_OPERATION=con",
+     "SYNC_EXECUTE=con",
+     "SYNC_ABORT=con",
+     "wait_for_sync_responses()->1/1",
+     "perform_local_sync_operation()->0/0",
+     "comm.broadcast_discovery(1)",
+     "comm.wait_for_response(1)",
+     "comm.get_sender_id(1)",
+     "comm.broadcast_leader_announcement(1)",
+     "comm.check_for_assignment(0)",
+     "comm.check_for_sync_command(0)",
+     "comm.broadcast_sync_command(2)",
+     "sync.__kbstub(0)"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "var-arrays-exceed-hub-ram",
+  "finding": "S-PENDING-var-arrays-exceed-hub-ram",
+  "statement": "patterns/applications/animation_engine.yaml declares `long frame_buffer_a[76800]` and `long frame_buffer_b[76800]` ('320x240 display'): 2 x 307,200 bytes = 614,400 bytes, more than the P2's 512 KB hub RAM, so the program cannot be built whatever the rest of the template does. (The gate's first error on the block is the parameter/constant-name collision, S-071; this one is reached after those are repaired.)",
+  "compiler_error": "Program requirement exceeds 512KB hub RAM by 98112 bytes (end of file, after the other defects are repaired)",
+  "correct_source": "pnut-ts 1.55.8 error text; scratch t/m1_bigvar (two 76800-long arrays fail, one compiles)",
+  "verified_fix": "two 38400-long arrays compile (scratch variants.py hub_198, with the names and locals repaired)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/animation_engine.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 198,
+    "gate_first_error": "block line 64 (YAML line 97): Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB create_animation(type, x, y, vx, vy, data) : anim_id",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "ANIM_LINEAR_MOVE=con",
+     "ANIM_BOUNCE=con",
+     "ANIM_FADE=con",
+     "ANIM_ROTATE=con",
+     "ANIM_SPRITE=con",
+     "DISPLAY_WIDTH=con",
+     "DISPLAY_HEIGHT=con",
+     "STATE=con",
+     "ANIM_COMPLETE=con",
+     "ANIM_ACTIVE=con",
+     "FRAME=con",
+     "TYPE=con",
+     "X=con",
+     "Y=con",
+     "VX=con",
+     "VY=con",
+     "DATA=con",
+     "initialize_animation_engine()->0/0",
+     "get_current_buffer()->1/0",
+     "swap_buffers()->0/0",
+     "update_bounce_animation()->0/1",
+     "update_fade_animation()->0/1",
+     "update_rotation_animation()->0/1",
+     "update_sprite_animation()->0/1",
+     "get_render_buffer()->1/0",
+     "clear_buffer()->0/1",
+     "render_animation_object()->0/2",
+     "display.show_buffer(1)",
+     "timer.__kbstub(0)"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "utility-library-calls-undefined-max",
+  "finding": "S-PENDING-utility-library-calls-undefined-max",
+  "statement": "patterns/applications/utility_library.yaml's 'utility library' defines min, constrain and map; constrain calls `max(val, low)` which the page does not define, so the library is incomplete as written (the proposer's stub for max was removed: it is the thing the page documents). In Spin2 the two operations are the operators `#>` (max) and `<#` (min).",
+  "compiler_error": "Expected an expression term (m172) (at `max(`, block line 5; undefined method)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:468-469 (`x #> y` force x => y, `x <# y` force x <= y)",
+  "verified_fix": "adding `PUB max(a, b) : result` / `result := a > b ? a : b` compiles (scratch variants.py max_220); `result := val #> low <# high` is the one-expression form",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/utility_library.yaml",
+    "addr": "implementation",
+    "key_line": 5,
+    "decision_index": 220,
+    "gate_first_error": "block line 5 (YAML line 10): Expected an expression term (m172)",
+    "source_line_of_error": "result := min(max(val, low), high)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-121",
+  "statement": "`//` used as a comment: assembly-directives/fit.yaml, org.yaml, orgf.yaml, res.yaml examples (`FIT $1F0  // Must fit in COG space`, `ORG 0  // Start at COG address 0`, `ORGF $100  // Align to address $100`, `RES 16  // Reserve 16 locations`) and registers/dira.yaml, dirb.yaml examples (`DIRA := %11111111  // Set pins 0-7 as outputs`). `//` is the signed-remainder operator, not a comment (comment = apostrophe, v55:333); the line then fails (`Undefined symbol` after the directive, `Expected an expression term` after `:=`). With `'` each compiles (scratch variants.py slash_19/26/27/36; t/i8_dira_tick, i9_dirb_tick).",
+  "sites": [
+   {
+    "file": "language/spin2/assembly-directives/fit.yaml",
+    "addr": "examples[0]",
+    "key_line": 8,
+    "decision_index": 19,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "FIT $1F0  // Must fit in COG space",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/org.yaml",
+    "addr": "examples[0]",
+    "key_line": 8,
+    "decision_index": 26,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "ORG 0  // Start at COG address 0",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/orgf.yaml",
+    "addr": "examples[0]",
+    "key_line": 8,
+    "decision_index": 27,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "ORGF $100  // Align to address $100",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/assembly-directives/res.yaml",
+    "addr": "examples[0]",
+    "key_line": 8,
+    "decision_index": 36,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "RES 16  // Reserve 16 locations",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/registers/dira.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "decision_index": 361,
+    "gate_first_error": "block line 1: Expected an expression term (m172)",
+    "source_line_of_error": "DIRA := %11111111  // Set pins 0-7 as outputs",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/registers/dirb.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "decision_index": 362,
+    "gate_first_error": "block line 1: Expected an expression term (m172)",
+    "source_line_of_error": "DIRB := $FF000000  // Set pins 56-63 as outputs",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 6
+ },
+ {
+  "slug": "S-013",
+  "statement": "`waitx(ticks)` written as a Spin2 method (system-variables/clkfreq.yaml usage_patterns.timing_calculations): WAITX is the PASM2 instruction; the Spin2 delays are WAITUS()/WAITMS()/WAITCT(). `waitct(getct() + ticks)` compiles (scratch variants.py waitx_389).",
+  "sites": [
+   {
+    "file": "language/spin2/system-variables/clkfreq.yaml",
+    "addr": "usage_patterns.timing_calculations.code",
+    "key_line": 39,
+    "decision_index": 389,
+    "gate_first_error": "block line 3 (YAML line 42): Expected an instruction or variable",
+    "source_line_of_error": "waitx(ticks)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-018",
+  "statement": "an object instance used with no OBJ line: preprocessor/define.yaml examples[1] and ifndef.yaml examples[0] (`serial.start(...)`), ifdef.yaml examples[2] (`oled.init(...)`, `lcd.init(...)`). Adding `OBJ serial : \"...\"` / `OBJ oled : \"...\"` compiles (scratch variants.py ser_265, ser_311, oled_309).",
+  "sites": [
+   {
+    "file": "language/spin2/preprocessor/define.yaml",
+    "addr": "examples[1].code",
+    "key_line": 45,
+    "decision_index": 265,
+    "gate_first_error": "block line 9 (YAML line 54): Expected an instruction or variable",
+    "source_line_of_error": "serial.start(921600)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/ifdef.yaml",
+    "addr": "examples[2].code",
+    "key_line": 64,
+    "decision_index": 309,
+    "gate_first_error": "block line 8 (YAML line 72): Expected an instruction or variable",
+    "source_line_of_error": "oled.init(SDA_PIN, SCL_PIN)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "SDA_PIN=con",
+     "SCL_PIN=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/ifndef.yaml",
+    "addr": "examples[0].code",
+    "key_line": 32,
+    "decision_index": 311,
+    "gate_first_error": "block line 9 (YAML line 41): Expected an instruction or variable",
+    "source_line_of_error": "serial.start(BAUD_RATE)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 3
+ },
+ {
+  "slug": "S-020",
+  "statement": "`return <value>` in a PUB that declares no result: preprocessor/include.yaml (common_patterns[2] `process(x)`, anti_patterns[0] wrong and correct `helper_func()`) and preprocessor-overview.yaml anti_patterns[6] wrong and correct. Declaring a result (`PUB helper_func() : r`) compiles (scratch t/e5_327b).",
+  "sites": [
+   {
+    "file": "language/spin2/preprocessor/include.yaml",
+    "addr": "common_patterns[2].code",
+    "key_line": 120,
+    "decision_index": 325,
+    "gate_first_error": "block line 9 (YAML line 129): Expected end of line (m280)",
+    "source_line_of_error": "return clamp(x, 0, 255)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "file:math_utils.spin2"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/include.yaml",
+    "addr": "anti_patterns[0].wrong",
+    "key_line": 135,
+    "decision_index": 326,
+    "gate_first_error": "block line 3 (YAML line 138): Expected end of line (m280)",
+    "source_line_of_error": "return 0",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "file:utils.spin2",
+     "file:other.spin2"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/include.yaml",
+    "addr": "anti_patterns[0].correct",
+    "key_line": 144,
+    "decision_index": 327,
+    "gate_first_error": "block line 6 (YAML line 150): Expected end of line (m280)",
+    "source_line_of_error": "return 0",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/preprocessor-overview.yaml",
+    "addr": "anti_patterns[6].wrong",
+    "key_line": 285,
+    "decision_index": 348,
+    "gate_first_error": "block line 3 (YAML line 288): Expected end of line (m280)",
+    "source_line_of_error": "return 0",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "file:utils.spin2",
+     "file:other.spin2"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/preprocessor/preprocessor-overview.yaml",
+    "addr": "anti_patterns[6].correct",
+    "key_line": 293,
+    "decision_index": 349,
+    "gate_first_error": "block line 6 (YAML line 299): Expected end of line (m280)",
+    "source_line_of_error": "return 0",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 5
+ },
+ {
+  "slug": "S-014",
+  "statement": "quoted multi-character literal passed as a string value: patterns/implementation/spin2_diagnostic_output.yaml (`tx_string(\": \")`), patterns/applications/debug_enabled.yaml (`debug_checkpoint(\"main_loop_start\")`, `debug_print(..., \"=== SYSTEM STATE DUMP ===\")`, `printf(\"[%d] %s: %s\\n\", ...)`) and dual_communication.yaml (`log_failover_event(\"Primary channel degraded, using secondary\")`). `@\"...\"` / `string(\"...\")` compile (scratch t/e7_240_ok; tpl runs r204, r206).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/debug_enabled.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 204,
+    "gate_first_error": "block line 26 (YAML line 59): Expected \")\" (m301)",
+    "source_line_of_error": "debug_checkpoint(\"main_loop_start\")",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "setup_debug_system()->0/0",
+     "perform_main_operations()->0/0",
+     "monitor_system_health()->0/0",
+     "level_name()->1/1",
+     "get_free_memory()->1/0",
+     "dump_variable_states()->0/0",
+     "dump_object_states()->0/0",
+     "dump_hardware_states()->0/0",
+     "test_memory_system()->1/0",
+     "test_communication()->1/0",
+     "test_sensors()->1/0",
+     "debug_out.printf(4)",
+     "logger.log_message(3)",
+     "monitor.get_cpu_usage(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/dual_communication.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 206,
+    "gate_first_error": "block line 69 (YAML line 102): Expected an instruction or variable",
+    "source_line_of_error": "message := get_next_outgoing_message()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "manage_secondary_channel()->0/0",
+     "WIFI_SSID=con",
+     "WIFI_PASSWORD=con",
+     "CHANNEL_INITIALIZING=con",
+     "SERIAL_TX=con",
+     "SERIAL_RX=con",
+     "CHANNEL_READY=con",
+     "SECONDARY_CHANNEL=con",
+     "MSG_TELEMETRY=con",
+     "PRIMARY_PREFERRED=con",
+     "MSG_COMMAND=con",
+     "BOTH_CHANNELS=con",
+     "MSG_DEBUG=con",
+     "SECONDARY_ONLY=con",
+     "MSG_EMERGENCY=con",
+     "MSG_FILE_TRANSFER=con",
+     "PRIMARY_ONLY=con",
+     "PRIMARY_CHANNEL=con",
+     "QUALITY_THRESHOLD=con",
+     "NO_CHANNEL=con",
+     "CHANNEL_FAILED=con",
+     "process_incoming_message()->0/2",
+     "has_outgoing_message()->1/0",
+     "get_next_outgoing_message()->1/0",
+     "get_message_type()->1/1",
+     "send_on_channel()->1/2",
+     "log_redundant_transmission()->0/3",
+     "log_failover_event()->0/1",
+     "handle_communication_loss()->0/0",
+     "attempt_primary_recovery()->0/0",
+     "primary_comm.start(2)",
+     "primary_comm.has_message(0)",
+     "primary_comm.receive_message(0)",
+     "primary_comm.is_connected(0)",
+     "primary_comm.connection_failed(0)",
+     "primary_comm.get_signal_strength(0)",
+     "secondary_comm.start(3)",
+     "secondary_comm.has_message(0)",
+     "secondary_comm.receive_message(0)",
+     "secondary_comm.get_connection_quality(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/implementation/spin2_diagnostic_output.yaml",
+    "addr": "implementation",
+    "key_line": 5,
+    "decision_index": 240,
+    "gate_first_error": "block line 7 (YAML line 12): Expected \")\" (m301)",
+    "source_line_of_error": "tx_string(\": \")",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "tx()->1/1",
+     "tx_string()->1/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 3
+ },
+ {
+  "slug": "S-008",
+  "statement": "reserved words as identifiers: patterns/implementation/spin2_timing_control.yaml quick_reference.periodic_execution (`next := getct()` -- NEXT), patterns/applications/multi_motor_system.yaml (an object method named `step`, called `motors[motor_id].step(next_step)` -- STEP). Renaming compiles (scratch t/e7_255_ok; r213 with `do_step`).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/multi_motor_system.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 213,
+    "gate_first_error": "inside stepper_motor.spin2: Expected a unique method name",
+    "source_line_of_error": "",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "MOTION_IDLE=con",
+     "MOTION_PLANNING=con",
+     "MOTION_EXECUTING=con",
+     "MOTION_HOMING=con",
+     "initialize_motor_system()->0/0",
+     "check_for_new_commands()->0/0",
+     "calculate_motion_profile()->0/0",
+     "update_motor_positions()->0/0",
+     "monitor_motion_errors()->0/0",
+     "signal_motion_complete()->0/0",
+     "all_motors_homed()->1/0",
+     "motors.step(1)",
+     "motors.start_homing(0)",
+     "encoders.__kbstub(0)",
+     "planner.get_next_step(1)",
+     "planner.calculate_trajectory(2)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/implementation/spin2_timing_control.yaml",
+    "addr": "quick_reference.periodic_execution",
+    "key_line": 20,
+    "decision_index": 255,
+    "gate_first_error": "block line 2 (YAML line 22): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "next := getct()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "do_work()->0/0"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 2
+ },
+ {
+  "slug": "S-019",
+  "statement": "complete templates in patterns/applications/ use names no declaration introduces. Temporaries assigned inside one method with no local: animation_engine.yaml (`current_time`, `anim_ptr`, `anim_id`), array_architecture.yaml (`task_chunk`), dual_communication.yaml (`message`), hardware_specific_app.yaml (`calibrated_value`, `offset`, `scale`), iot_device.yaml (`sensor_data`, `processed_data`, `upload_status`, `encrypted_data`), multi_display_system.yaml (`display_id` in synchronized_update_all), multi_instance_coordination.yaml (`instance_count`, a never-declared VAR), multi_motor_system.yaml (`next_step`), robotics.yaml (`base_speed`, `turn_correction`), sensor_fusion.yaml (`fused_altitude`, `total_weight`, `sat_count`, `hdop`), single_communication.yaml (`message`). The proposer made these compile by assuming each as a DAT symbol; they are the page's own gaps (names assumed only for externally supplied pieces: helper methods, constants, objects). Declaring them compiles (tpl runs r198..r218).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/animation_engine.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 198,
+    "gate_first_error": "block line 64 (YAML line 97): Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB create_animation(type, x, y, vx, vy, data) : anim_id",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "ANIM_LINEAR_MOVE=con",
+     "ANIM_BOUNCE=con",
+     "ANIM_FADE=con",
+     "ANIM_ROTATE=con",
+     "ANIM_SPRITE=con",
+     "DISPLAY_WIDTH=con",
+     "DISPLAY_HEIGHT=con",
+     "STATE=con",
+     "ANIM_COMPLETE=con",
+     "ANIM_ACTIVE=con",
+     "FRAME=con",
+     "TYPE=con",
+     "X=con",
+     "Y=con",
+     "VX=con",
+     "VY=con",
+     "DATA=con",
+     "initialize_animation_engine()->0/0",
+     "get_current_buffer()->1/0",
+     "swap_buffers()->0/0",
+     "update_bounce_animation()->0/1",
+     "update_fade_animation()->0/1",
+     "update_rotation_animation()->0/1",
+     "update_sprite_animation()->0/1",
+     "get_render_buffer()->1/0",
+     "clear_buffer()->0/1",
+     "render_animation_object()->0/2",
+     "display.show_buffer(1)",
+     "timer.__kbstub(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/array_architecture.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 199,
+    "gate_first_error": "block line 48 (YAML line 81): Expected \"[\"",
+    "source_line_of_error": "chunk_size := task_data.size / node_count",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_array_communication()->0/0",
+     "check_node_status()->0/0",
+     "handle_array_commands()->0/0",
+     "balance_array_load()->0/0",
+     "ACK=con",
+     "NODE_HEALTHY=con",
+     "NODE_FAILED=con",
+     "calculate_optimal_topology()->1/1",
+     "extract_chunk()->1/3",
+     "combine_result()->0/2",
+     "redistribute_failed_tasks()->0/1",
+     "comm_bus.ping_node(1)",
+     "comm_bus.send_task(2)",
+     "comm_bus.get_result(1)",
+     "node_mgr.__kbstub(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/dual_communication.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 206,
+    "gate_first_error": "block line 69 (YAML line 102): Expected an instruction or variable",
+    "source_line_of_error": "message := get_next_outgoing_message()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "manage_secondary_channel()->0/0",
+     "WIFI_SSID=con",
+     "WIFI_PASSWORD=con",
+     "CHANNEL_INITIALIZING=con",
+     "SERIAL_TX=con",
+     "SERIAL_RX=con",
+     "CHANNEL_READY=con",
+     "SECONDARY_CHANNEL=con",
+     "MSG_TELEMETRY=con",
+     "PRIMARY_PREFERRED=con",
+     "MSG_COMMAND=con",
+     "BOTH_CHANNELS=con",
+     "MSG_DEBUG=con",
+     "SECONDARY_ONLY=con",
+     "MSG_EMERGENCY=con",
+     "MSG_FILE_TRANSFER=con",
+     "PRIMARY_ONLY=con",
+     "PRIMARY_CHANNEL=con",
+     "QUALITY_THRESHOLD=con",
+     "NO_CHANNEL=con",
+     "CHANNEL_FAILED=con",
+     "process_incoming_message()->0/2",
+     "has_outgoing_message()->1/0",
+     "get_next_outgoing_message()->1/0",
+     "get_message_type()->1/1",
+     "send_on_channel()->1/2",
+     "log_redundant_transmission()->0/3",
+     "log_failover_event()->0/1",
+     "handle_communication_loss()->0/0",
+     "attempt_primary_recovery()->0/0",
+     "primary_comm.start(2)",
+     "primary_comm.has_message(0)",
+     "primary_comm.receive_message(0)",
+     "primary_comm.is_connected(0)",
+     "primary_comm.connection_failed(0)",
+     "primary_comm.get_signal_strength(0)",
+     "secondary_comm.start(3)",
+     "secondary_comm.has_message(0)",
+     "secondary_comm.receive_message(0)",
+     "secondary_comm.get_connection_quality(0)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/patterns/applications/hardware_specific_app.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 207,
+    "gate_first_error": "block line 37 (YAML line 70): Expected \"]\" (m311)",
+    "source_line_of_error": "dira[59..58] := %00  ' Set as inputs",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "BOARD_REV_A=con",
+     "BOARD_REV_B=con",
+     "BOARD_REV_C=con",
+     "BOARD_REV_D=con",
+     "SENSOR_OFFSET=con",
+     "SENSOR_SCALE=con",
+     "configure_for_revision()->0/1",
+     "load_calibration_data()->0/0",
+     "handle_board_button_press()->0/0",
+     "board_leds.initialize(2)",
+     "board_leds.show_startup_pattern(0)",
+     "board_leds.set_level(1)",
+     "board_uart.initialize(3)",
+     "board_uart.print_string(1)",
+     "board_uart.send_sensor_data(1)",
+     "custom_hw.initialize(1)",
+     "custom_hw.read_sensor(1)",
+     "custom_hw.configure_timing(1)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/iot_device.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 208,
+    "gate_first_error": "block line 17 (YAML line 50): Expected an instruction or variable",
+    "source_line_of_error": "sensor_data := sensors.read_all()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_iot_device()->0/0",
+     "process_locally()->1/1",
+     "should_cache_data()->1/0",
+     "time_to_upload()->1/0",
+     "handle_upload_response()->0/1",
+     "queue_for_later_upload()->0/1",
+     "process_cloud_command()->0/1",
+     "power_management_sleep()->0/0",
+     "SUCCESS=con",
+     "clear_cached_data()->0/0",
+     "increment_retry_counter()->0/0",
+     "wifi.is_connected(0)",
+     "wifi.has_message(0)",
+     "wifi.get_message(0)",
+     "wifi.post_data(2)",
+     "sensors.read_all(0)",
+     "crypto.encrypt(1)",
+     "storage.save_data(1)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/multi_display_system.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 211,
+    "gate_first_error": "block line 62 (YAML line 95): Expected an expression term (m172)",
+    "source_line_of_error": "repeat display_id from 0 to MAX_DISPLAYS-1",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_display_system()->0/0",
+     "check_content_changes()->0/0",
+     "process_display_events()->0/0",
+     "optimize_display_power()->0/0",
+     "CONTENT_DASHBOARD=con",
+     "CONTENT_STATUS=con",
+     "CONTENT_MENU=con",
+     "CONTENT_GRAPH=con",
+     "render_dashboard_to_buffer()->0/1",
+     "render_status_to_buffer()->0/1",
+     "render_menu_to_buffer()->0/1",
+     "render_graph_to_buffer()->0/1",
+     "all_displays_updated()->1/0",
+     "displays.update_screen(1)",
+     "graphics.__kbstub(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/multi_instance_coordination.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 212,
+    "gate_first_error": "block line 68 (YAML line 101): Symbol exceeds 30 characters",
+    "source_line_of_error": "initiate_synchronized_operation()",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_instance()->0/0",
+     "update_instance_registry()->0/0",
+     "handle_coordinated_tasks()->0/0",
+     "COORDINATION_CYCLE_MS=con",
+     "add_instance_to_registry()->0/1",
+     "has_pending_tasks()->1/0",
+     "get_next_task()->1/0",
+     "find_best_instance_for_task()->1/1",
+     "assign_task_to_instance()->0/2",
+     "check_instance_health()->0/0",
+     "time_for_sync_operation()->1/0",
+     "execute_assigned_task()->0/1",
+     "report_task_completion()->0/1",
+     "participate_in_sync_operation()->0/1",
+     "send_heartbeat_to_leader()->0/0",
+     "get_unique_sync_id()->1/0",
+     "SYNC_START_OPERATION=con",
+     "SYNC_EXECUTE=con",
+     "SYNC_ABORT=con",
+     "wait_for_sync_responses()->1/1",
+     "perform_local_sync_operation()->0/0",
+     "comm.broadcast_discovery(1)",
+     "comm.wait_for_response(1)",
+     "comm.get_sender_id(1)",
+     "comm.broadcast_leader_announcement(1)",
+     "comm.check_for_assignment(0)",
+     "comm.check_for_sync_command(0)",
+     "comm.broadcast_sync_command(2)",
+     "sync.__kbstub(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/multi_motor_system.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 213,
+    "gate_first_error": "inside stepper_motor.spin2: Expected a unique method name",
+    "source_line_of_error": "",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "MOTION_IDLE=con",
+     "MOTION_PLANNING=con",
+     "MOTION_EXECUTING=con",
+     "MOTION_HOMING=con",
+     "initialize_motor_system()->0/0",
+     "check_for_new_commands()->0/0",
+     "calculate_motion_profile()->0/0",
+     "update_motor_positions()->0/0",
+     "monitor_motion_errors()->0/0",
+     "signal_motion_complete()->0/0",
+     "all_motors_homed()->1/0",
+     "motors.step(1)",
+     "motors.start_homing(0)",
+     "encoders.__kbstub(0)",
+     "planner.get_next_step(1)",
+     "planner.calculate_trajectory(2)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/patterns/applications/robotics.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 215,
+    "gate_first_error": "block line 49 (YAML line 82): Expected an instruction or variable",
+    "source_line_of_error": "base_speed := distance_error * KP_DISTANCE",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_robot_systems()->0/0",
+     "STATE_IDLE=con",
+     "STATE_MOVING=con",
+     "STATE_TURNING=con",
+     "STATE_AVOIDING=con",
+     "update_position_estimate()->0/0",
+     "scan_environment()->0/0",
+     "idle_behavior()->0/0",
+     "turning_behavior()->0/0",
+     "apply_motor_commands()->0/0",
+     "CONTROL_LOOP_MS=con",
+     "calculate_distance_to_target()->1/0",
+     "calculate_angle_error()->1/0",
+     "POSITION_TOLERANCE=con",
+     "stop_all_motors()->0/0",
+     "KP_DISTANCE=con",
+     "KP_ANGLE=con",
+     "LEFT=con",
+     "RIGHT=con",
+     "limit_motor_speeds()->0/0",
+     "SAFE_DISTANCE=con",
+     "TURN_SPEED=con",
+     "motors.__kbstub(0)",
+     "encoders.__kbstub(0)",
+     "imu.__kbstub(0)",
+     "sonar.read_distance(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/sensor_fusion.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 216,
+    "gate_first_error": "block line 77 (YAML line 110): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m241)",
+    "source_line_of_error": "PUB fuse_altitude_sources() : altitude | gps_alt, baro_alt, gps_weight, baro_weight",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_sensor_fusion()->0/0",
+     "validate_fused_data()->0/0",
+     "adapt_fusion_weights()->0/0",
+     "predict_state_from_imu()->0/0",
+     "FUSION_UPDATE_RATE=con",
+     "IMU_ACCEL_X=con",
+     "IMU_ACCEL_Y=con",
+     "IMU_ACCEL_Z=con",
+     "IMU_GYRO_X=con",
+     "IMU_GYRO_Y=con",
+     "IMU_GYRO_Z=con",
+     "GPS_LAT=con",
+     "GPS_LON=con",
+     "GPS_SENSOR=con",
+     "MAG_HEADING=con",
+     "GPS_MIN_CONFIDENCE=con",
+     "MAG_SENSOR=con",
+     "MAG_MIN_CONFIDENCE=con",
+     "BARO_SENSOR=con",
+     "GPS_ALT=con",
+     "BARO_ALT=con",
+     "imu.read_accel_x(0)",
+     "imu.read_accel_y(0)",
+     "imu.read_accel_z(0)",
+     "imu.read_gyro_x(0)",
+     "imu.read_gyro_y(0)",
+     "imu.read_gyro_z(0)",
+     "gps.has_fix(0)",
+     "gps.read_latitude(0)",
+     "gps.read_longitude(0)",
+     "gps.read_altitude(0)",
+     "gps.get_satellite_count(0)",
+     "gps.get_hdop(0)",
+     "magnetometer.read_heading(0)",
+     "barometer.read_altitude(0)",
+     "filter.update_position(2)",
+     "filter.update_heading(1)",
+     "filter.update_altitude(1)",
+     "filter.get_state(1)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/patterns/applications/single_communication.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 218,
+    "gate_first_error": "block line 102 (YAML line 135): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB attempt_connection() : success",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "DISCONNECTED=con",
+     "CONNECTED=con",
+     "BAUD_RATE=con",
+     "TX_PIN=con",
+     "RX_PIN=con",
+     "MSG_COMMAND=con",
+     "MSG_REQUEST=con",
+     "MSG_KEEPALIVE=con",
+     "ERROR_UNKNOWN_MESSAGE=con",
+     "CMD_SET_VALUE=con",
+     "CMD_GET_VALUE=con",
+     "CMD_RESET=con",
+     "ERROR_UNKNOWN_COMMAND=con",
+     "ERROR_QUEUE_FULL=con",
+     "COMMUNICATION_TIMEOUT=con",
+     "SUCCESS=con",
+     "parse_message_type()->1/1",
+     "process_request_message()->0/1",
+     "process_keepalive_message()->0/0",
+     "send_error_response()->0/1",
+     "get_command_from_message()->1/1",
+     "get_parameter_1()->1/1",
+     "get_parameter_2()->1/1",
+     "set_device_value()->1/2",
+     "get_device_value()->1/1",
+     "perform_device_reset()->0/0",
+     "queue_space_available()->1/0",
+     "build_response_message()->1/2",
+     "add_to_queue()->0/1",
+     "queue_has_messages()->1/0",
+     "get_from_queue()->1/0",
+     "time_for_keepalive()->1/0",
+     "send_keepalive()->0/0",
+     "send_connection_established()->0/0",
+     "handle_communication_loss()->0/0",
+     "comm.start(3)",
+     "comm.rx_ready(0)",
+     "comm.receive_message(1)",
+     "comm.send_immediate_error(1)",
+     "comm.tx_ready(0)",
+     "comm.send_message(1)",
+     "comm.is_connected(0)",
+     "comm.attempt_connect(0)"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 11
+ },
+ {
+  "slug": "S-052",
+  "statement": "`level =< debug_level` (P1 operator spelling) in patterns/applications/debug_enabled.yaml (debug_print); `<=` compiles (tpl r204).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/debug_enabled.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 204,
+    "gate_first_error": "block line 26 (YAML line 59): Expected \")\" (m301)",
+    "source_line_of_error": "debug_checkpoint(\"main_loop_start\")",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "setup_debug_system()->0/0",
+     "perform_main_operations()->0/0",
+     "monitor_system_health()->0/0",
+     "level_name()->1/1",
+     "get_free_memory()->1/0",
+     "dump_variable_states()->0/0",
+     "dump_object_states()->0/0",
+     "dump_hardware_states()->0/0",
+     "test_memory_system()->1/0",
+     "test_communication()->1/0",
+     "test_sensors()->1/0",
+     "debug_out.printf(4)",
+     "logger.log_message(3)",
+     "monitor.get_cpu_usage(0)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-124",
+  "statement": "`string(\"CHECKPOINT: \", checkpoint_name)`, `string(\"Memory free: \", dec(memory_free))`, `string(\"CPU usage: \", dec(cpu_usage), \"%\")` in patterns/applications/debug_enabled.yaml: STRING() composes constant text only; it cannot embed a variable or a `dec()` conversion (and `dec` is a P1 object method name, not a Spin2 built-in). Rejected once the quoted-literal errors are repaired (tpl r204: 'Expected a constant, unary operator, or \"(\"').",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/debug_enabled.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 204,
+    "gate_first_error": "block line 26 (YAML line 59): Expected \")\" (m301)",
+    "source_line_of_error": "debug_checkpoint(\"main_loop_start\")",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "setup_debug_system()->0/0",
+     "perform_main_operations()->0/0",
+     "monitor_system_health()->0/0",
+     "level_name()->1/1",
+     "get_free_memory()->1/0",
+     "dump_variable_states()->0/0",
+     "dump_object_states()->0/0",
+     "dump_hardware_states()->0/0",
+     "test_memory_system()->1/0",
+     "test_communication()->1/0",
+     "test_sensors()->1/0",
+     "debug_out.printf(4)",
+     "logger.log_message(3)",
+     "monitor.get_cpu_usage(0)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-077",
+  "statement": "`chunk_size := task_data.size / node_count` in patterns/applications/array_architecture.yaml: `.size` is invented member access on a plain long parameter (same family as `ptr.value`); error Expected \"[\" (block line 48). `task_data` alone compiles (tpl r199).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/array_architecture.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 199,
+    "gate_first_error": "block line 48 (YAML line 81): Expected \"[\"",
+    "source_line_of_error": "chunk_size := task_data.size / node_count",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_array_communication()->0/0",
+     "check_node_status()->0/0",
+     "handle_array_commands()->0/0",
+     "balance_array_load()->0/0",
+     "ACK=con",
+     "NODE_HEALTHY=con",
+     "NODE_FAILED=con",
+     "calculate_optimal_topology()->1/1",
+     "extract_chunk()->1/3",
+     "combine_result()->0/2",
+     "redistribute_failed_tasks()->0/1",
+     "comm_bus.ping_node(1)",
+     "comm_bus.send_task(2)",
+     "comm_bus.get_result(1)",
+     "node_mgr.__kbstub(0)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-088",
+  "statement": "P1-style bit-range indexing of a pin register: patterns/applications/hardware_specific_app.yaml `dira[59..58] := %00` and `id_pins := ina[59..58]` (DIRA/INA only cover pins 0..31 as well). `ina[hi..lo]` is refused by pnut-ts in every form (scratch t/l1..l5); `pinfloat(58 addpins 1)` / `pinread(58 addpins 1)` compile (tpl r207).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/hardware_specific_app.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 207,
+    "gate_first_error": "block line 37 (YAML line 70): Expected \"]\" (m311)",
+    "source_line_of_error": "dira[59..58] := %00  ' Set as inputs",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "BOARD_REV_A=con",
+     "BOARD_REV_B=con",
+     "BOARD_REV_C=con",
+     "BOARD_REV_D=con",
+     "SENSOR_OFFSET=con",
+     "SENSOR_SCALE=con",
+     "configure_for_revision()->0/1",
+     "load_calibration_data()->0/0",
+     "handle_board_button_press()->0/0",
+     "board_leds.initialize(2)",
+     "board_leds.show_startup_pattern(0)",
+     "board_leds.set_level(1)",
+     "board_uart.initialize(3)",
+     "board_uart.print_string(1)",
+     "board_uart.send_sensor_data(1)",
+     "custom_hw.initialize(1)",
+     "custom_hw.read_sensor(1)",
+     "custom_hw.configure_timing(1)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-071",
+  "statement": "constants and variables differing only in case: patterns/applications/animation_engine.yaml (field-offset constants `TYPE`, `X`, `Y`, `VX`, `VY`, `DATA` used as `long[anim_ptr][X]`, against create_animation's parameters `type, x, y, vx, vy, data`) and sensor_fusion.yaml (`GPS_ALT`/`BARO_ALT` constants against the locals `gps_alt`/`baro_alt`). Error m220/m241 once the constants are declared; renaming one side compiles (tpl r198, r216).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/animation_engine.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 198,
+    "gate_first_error": "block line 64 (YAML line 97): Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB create_animation(type, x, y, vx, vy, data) : anim_id",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "ANIM_LINEAR_MOVE=con",
+     "ANIM_BOUNCE=con",
+     "ANIM_FADE=con",
+     "ANIM_ROTATE=con",
+     "ANIM_SPRITE=con",
+     "DISPLAY_WIDTH=con",
+     "DISPLAY_HEIGHT=con",
+     "STATE=con",
+     "ANIM_COMPLETE=con",
+     "ANIM_ACTIVE=con",
+     "FRAME=con",
+     "TYPE=con",
+     "X=con",
+     "Y=con",
+     "VX=con",
+     "VY=con",
+     "DATA=con",
+     "initialize_animation_engine()->0/0",
+     "get_current_buffer()->1/0",
+     "swap_buffers()->0/0",
+     "update_bounce_animation()->0/1",
+     "update_fade_animation()->0/1",
+     "update_rotation_animation()->0/1",
+     "update_sprite_animation()->0/1",
+     "get_render_buffer()->1/0",
+     "clear_buffer()->0/1",
+     "render_animation_object()->0/2",
+     "display.show_buffer(1)",
+     "timer.__kbstub(0)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/patterns/applications/sensor_fusion.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 216,
+    "gate_first_error": "block line 77 (YAML line 110): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m241)",
+    "source_line_of_error": "PUB fuse_altitude_sources() : altitude | gps_alt, baro_alt, gps_weight, baro_weight",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "initialize_sensor_fusion()->0/0",
+     "validate_fused_data()->0/0",
+     "adapt_fusion_weights()->0/0",
+     "predict_state_from_imu()->0/0",
+     "FUSION_UPDATE_RATE=con",
+     "IMU_ACCEL_X=con",
+     "IMU_ACCEL_Y=con",
+     "IMU_ACCEL_Z=con",
+     "IMU_GYRO_X=con",
+     "IMU_GYRO_Y=con",
+     "IMU_GYRO_Z=con",
+     "GPS_LAT=con",
+     "GPS_LON=con",
+     "GPS_SENSOR=con",
+     "MAG_HEADING=con",
+     "GPS_MIN_CONFIDENCE=con",
+     "MAG_SENSOR=con",
+     "MAG_MIN_CONFIDENCE=con",
+     "BARO_SENSOR=con",
+     "GPS_ALT=con",
+     "BARO_ALT=con",
+     "imu.read_accel_x(0)",
+     "imu.read_accel_y(0)",
+     "imu.read_accel_z(0)",
+     "imu.read_gyro_x(0)",
+     "imu.read_gyro_y(0)",
+     "imu.read_gyro_z(0)",
+     "gps.has_fix(0)",
+     "gps.read_latitude(0)",
+     "gps.read_longitude(0)",
+     "gps.read_altitude(0)",
+     "gps.get_satellite_count(0)",
+     "gps.get_hdop(0)",
+     "magnetometer.read_heading(0)",
+     "barometer.read_altitude(0)",
+     "filter.update_position(2)",
+     "filter.update_heading(1)",
+     "filter.update_altitude(1)",
+     "filter.get_state(1)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 2
+ },
+ {
+  "slug": "S-050",
+  "statement": "result name `success` collides with the constant `SUCCESS` (patterns/applications/single_communication.yaml: `PUB attempt_connection() : success`, `send_response(CMD_RESET, SUCCESS)`): Expected a unique result name (m230). Renaming the result (`: ok`) compiles (tpl r218).",
+  "sites": [
+   {
+    "file": "language/spin2/patterns/applications/single_communication.yaml",
+    "addr": "implementation_template",
+    "key_line": 33,
+    "decision_index": 218,
+    "gate_first_error": "block line 102 (YAML line 135): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB attempt_connection() : success",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "DISCONNECTED=con",
+     "CONNECTED=con",
+     "BAUD_RATE=con",
+     "TX_PIN=con",
+     "RX_PIN=con",
+     "MSG_COMMAND=con",
+     "MSG_REQUEST=con",
+     "MSG_KEEPALIVE=con",
+     "ERROR_UNKNOWN_MESSAGE=con",
+     "CMD_SET_VALUE=con",
+     "CMD_GET_VALUE=con",
+     "CMD_RESET=con",
+     "ERROR_UNKNOWN_COMMAND=con",
+     "ERROR_QUEUE_FULL=con",
+     "COMMUNICATION_TIMEOUT=con",
+     "SUCCESS=con",
+     "parse_message_type()->1/1",
+     "process_request_message()->0/1",
+     "process_keepalive_message()->0/0",
+     "send_error_response()->0/1",
+     "get_command_from_message()->1/1",
+     "get_parameter_1()->1/1",
+     "get_parameter_2()->1/1",
+     "set_device_value()->1/2",
+     "get_device_value()->1/1",
+     "perform_device_reset()->0/0",
+     "queue_space_available()->1/0",
+     "build_response_message()->1/2",
+     "add_to_queue()->0/1",
+     "queue_has_messages()->1/0",
+     "get_from_queue()->1/0",
+     "time_for_keepalive()->1/0",
+     "send_keepalive()->0/0",
+     "send_connection_established()->0/0",
+     "handle_communication_loss()->0/0",
+     "comm.start(3)",
+     "comm.rx_ready(0)",
+     "comm.receive_message(1)",
+     "comm.send_immediate_error(1)",
+     "comm.tx_ready(0)",
+     "comm.send_message(1)",
+     "comm.is_connected(0)",
+     "comm.attempt_connect(0)"
+    ],
+    "role": "co-class: the block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-073",
+  "statement": "passing site(s) of an already-registered row in this group (no gate failure; the class is the claim)",
+  "sites": [],
+  "claim_sites": [
+   {
+    "file": "language/spin2/patterns/applications/motor_controller.yaml",
+    "line": "11",
+    "claim": "`wypin(MULDIV64(angle, clkfreq, 1_000_000), pin)` -- value first, pin second; WYPIN is (PinField, Data) (v55:541). Decision #210 is a passing fragment (the compiler cannot tell the two expressions apart); the sibling spin2_pin_control.yaml:7-9 has the order right"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "harness-gap-never-error-at-eof",
+  "class_kind": "tooling-gap (not a KB defect)",
+  "statement": "a `never` entry is asserted to fail at a BODY line (fails_at). pnut-ts reports some errors only at END OF FILE (a deficiency check made after the whole source has been read): `_rcfast = TRUE` together with `_clkfreq` gives 'Conflicting or deficient _CLKFREQ/_XTLFREQ/_XINFREQ/_RCFAST/_RCSLOW symbols found' at line (last line + 1). The gate locates that in the wrapper (`wrap eof`), so the entry reads NEVER-WRONG-REASON although the page's whole point (the compiler rejects this) is exactly what happens. Suggested: when the error is at EOF, accept it for a `never` entry whose fails_at is the last body line, or add a `fails_at: eof` value.",
+  "compiler_error": "Conflicting or deficient _CLKFREQ/_XTLFREQ/_XINFREQ/_RCFAST/_RCSLOW symbols found (reported at end of file)",
+  "correct_source": "n/a (tool behaviour)",
+  "verified_fix": "the entry is `never`/spin2-top with fails_at 3; the gate prints NEVER-WRONG-REASON: inside the wrapper (eof, line 5)",
+  "sites": [
+   {
+    "file": "language/spin2/constants/special-configuration-symbols.yaml",
+    "addr": "clock_anti_patterns.conflicting_sources.wrong",
+    "key_line": 219,
+    "decision_index": 71,
+    "gate_first_error": "expected to fail at block line 3; inside the wrapper (eof, line 5): Conflicting or deficient _CLKFREQ/_XTLFREQ/_XINFREQ/_RCFAST/_RCSLOW symbols found",
+    "source_line_of_error": "",
+    "intended_class": "never/spin2-top",
+    "intended_assumes": [],
+    "role": "the only site"
+   }
+  ],
+  "site_count": 1
+ }
+]

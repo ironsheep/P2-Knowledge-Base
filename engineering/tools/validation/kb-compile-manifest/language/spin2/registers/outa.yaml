@@ -1,0 +1,15 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/registers/outa.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "a42aa6f0ba56b1ba"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [led_pattern]
+  - at: examples[1]
+    fp: "b668807c0504b65b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [led_pin=con]
+    finding: "S-143"

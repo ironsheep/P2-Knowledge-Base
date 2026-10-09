@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/registers/pb.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "64dfaea7a109b4ad"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [function]
+  - at: examples[1]
+    fp: "f187f959fd774837"
+    compile: fragment
+    wrap: pasm2-dat

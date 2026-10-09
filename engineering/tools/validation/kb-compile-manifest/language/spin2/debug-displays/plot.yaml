@@ -1,0 +1,26 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/debug-displays/plot.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "9e5714ee8889d714"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "db4d7d6fa4fcc55f"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "5020a761af9d36d7"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "751bf16ba7a68fcb"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [frame]
+    finding: "S-141"
+  - at: examples[4].code
+    fp: "44688663cecd23f0"
+    compile: fragment
+    wrap: spin2-method

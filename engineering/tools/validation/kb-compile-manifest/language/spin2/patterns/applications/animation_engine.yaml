@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/animation_engine.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "eb03187a49fc572e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [ANIM_LINEAR_MOVE=con, ANIM_BOUNCE=con, ANIM_FADE=con, ANIM_ROTATE=con, ANIM_SPRITE=con, DISPLAY_WIDTH=con, DISPLAY_HEIGHT=con, STATE=con, ANIM_COMPLETE=con, ANIM_ACTIVE=con, FRAME=con, TYPE=con, X=con, Y=con, VX=con, VY=con, DATA=con, initialize_animation_engine()->0/0, get_current_buffer()->1/0, swap_buffers()->0/0, update_bounce_animation()->0/1, update_fade_animation()->0/1, update_rotation_animation()->0/1, update_sprite_animation()->0/1, get_render_buffer()->1/0, clear_buffer()->0/1, render_animation_object()->0/2, display.show_buffer(1), timer.__kbstub(0)]
+    finding: "S-019+S-071+S-148"

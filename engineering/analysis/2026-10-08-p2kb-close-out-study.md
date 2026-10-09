@@ -351,6 +351,44 @@ root seeded with the 23 top-up files' real sidecars (same result); `spin2-v55-te
 | S-135 | B | G4 | hygiene | AND/OR/XOR/SCA/SCAS `category: Unary`; `||`/`^^` `category: Bitwise` | O11 | traced | — | to research | yes |
 | S-136 | F | G4 | hygiene (tooling) | **not a KB defect**: 12 VAR declaration lines (`BYTE flag`, `^LONG pValues`) have no VAR wrap, so they sit as not-code and are not gated | reviewer DEVIATIONS | traced | harness gap | **RESOLVED 2026-10-09:** wrap `spin2-var`, preferred by the proposer over `pasm2-dat` for declaration-only blocks (NC18/NC18b). The 12 entries reclassified to `fragment`/`spin2-var` and pass | yes |
 
+**ENH-03 B3, group G5 (`language/spin2/` debug-commands, debug-displays, preprocessor, constants,
+system-variables, registers, patterns, assembly-directives; 398 blocks, 121 files), 2026-10-09.**
+Evidence: `b3-g5-defects.json` (new classes; new sites for S-008, S-013, S-014, S-018, S-019 ×11,
+S-020 ×5, S-050, S-052, S-071, S-077, S-088, S-121 ×6, S-124; claim site for S-073),
+`b3-g5-class-map.json`, `b3-g5-observations.json`. Arbiter checks: re-applied in a fresh scratch
+root (same result); the ten `never` entries read — nine are `#ERROR`/unbalanced/`#IF` blocks whose
+point is the build stop with no symbol defined; source lines `spin2-v55-text.txt:40` (preprocessor
+is v48) and `:1006` (C_Z) and the interpreter's `taskhlt res 1` (`Spin2_interpreter.spin2:417`)
+re-read and holding.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-137 | B | G5 | **drives wrong code** | `;` used as a comment in BYTE/WORD/LONG/FILE directive examples (17); `'` is the comment | defects `semicolon-comment` | traced | other-assembler habit | to research (class sweep: `;` comments anywhere in KB code) | no |
+| S-138 | B | G5 | drives wrong code | `wc, wz` written as a pair in `c-z.yaml` (3); the form is `wcz` | defects `wc-wz-written-as-pair` | traced | — | to research | no |
+| S-139 | B | G5 | drives wrong code | a bare `if_z` condition prefix used as a Spin2 statement | defects `condition-prefix-written-as-spin2-statement` | traced | PASM in Spin2 (class with S-013) | to research | no |
+| S-140 | B | G5 | drives wrong code | `CON`/`OBJ`/`PUB` indented inside `#IFDEF` branches (5) | defects `block-designator-indented-in-conditional` | traced | — | to research | no |
+| S-141 | B | G5 | drives wrong code | a backtick in a trailing comment on a DEBUG line breaks the compile | defects `backtick-in-comment-after-debug` | traced | — | to research | no |
+| S-142 | B | G5 | drives wrong code | a `VAR` line inside a method-body listing (2) | defects `var-declaration-inside-method-body` | traced | — | to research | no |
+| S-143 | B | G5 | drives wrong code | P1 `!OUTA[pin]` as a statement; Spin2 is `!= OUTA[pin]` | defects `p1-bare-not-statement` | traced | P1 carry-over (class with S-121, S-087) | to research | no |
+| S-144 | B | G5 | wrong, not code-driving | a CASE with no cases (comment only) | defects `case-with-no-cases` | traced | — | to research | no |
+| S-145 | B | G5 | drives wrong code | `plugin_table[i].call(m)` — method call through a dot on a LONG | defects `method-call-through-dot-on-long` | traced | other-language habit | to research | no |
+| S-146 | B | G5 | **drives wrong code** | `COMPILER_V48_FEATURES` presented as a predefined symbol; no compiler defines it | defects `invented-predefined-symbol` | traced | invented name | to research | no |
+| S-147 | B | G5 | drives wrong code | a 31-character method name (the limit is 30) | defects `symbol-exceeds-30-characters` | traced | — | to research | no |
+| S-148 | B | G5 | drives wrong code | two 76 800-long VAR arrays — more than 512 KB of hub RAM | defects `var-arrays-exceed-hub-ram` | traced | — | to research | no |
+| S-149 | B | G5 | wrong, not code-driving | utility library's `constrain` calls `max`, which the page never defines | defects `utility-library-calls-undefined-max` | traced | incomplete example | to research | no |
+| S-150 | F | G5 | hygiene (tooling) | **not a KB defect**: `special-configuration-symbols.yaml:219` (a `wrong:` block of conflicting clock symbols) is a correct `never`, but the compiler reports the conflict at end of file, so no `fails_at` body line matches and the gate prints NEVER-WRONG-REASON | defects `harness-gap-never-error-at-eof` | traced | harness gap | fix the harness (a `fails_at: eof` value) in the next B3 tooling pass | yes |
+| S-151 | B | G5 | wrong, not code-driving | `elseifndef.yaml:56-67`: the "undefined symbol" error the example claims is not the error the compiler gives (it fails on the 30-character limit) | O1 | traced | — | to research (with S-147) | no |
+| S-152 | B | G5 | wrong, not code-driving | `preprocessor-overview.yaml:209-224`: `#IF` "fails at the #ENDIF"; pnut-ts rejects the `#IF` line itself (PNut-TS v1.55.8 shipped that diagnostic) | O2; `DRAFTS/PNUT-TS-PUNCH-LIST.md` item 2 (shipped) | traced | stale tool behaviour stated as fact | to research (doctrine: tool behaviour is not a KB fact — likely remove) | no |
+| S-153 | B | G5 | wrong, not code-driving | every preprocessor page says "v47+"; the preprocessor arrived in v48, and `preprocessor-overview.yaml:304` contradicts `:308` | O3; `spin2-v55-text.txt:40` | traced | stale gating (with S-046, S-090) | to research (one gating sweep) | yes |
+| S-154 | B | G5 | drives wrong code | `sensor_fusion.yaml:115-116`: integer `* 0.3` multiplies by a float bit pattern | O4 | traced | float/int confusion (with S-025) | to research | no |
+| S-155 | B | G5 | **drives wrong code** | `hardware_specific_app.yaml:126`: `clkset(CRYSTAL_FREQ, CPU_FREQ)` passes the crystal frequency as the mode | O5 | traced | — | to research (with S-021) | no |
+| S-156 | B | G5 | wrong, not code-driving | `taskhlt.yaml:15`: TASKHLT at "512 ($200)", which is LUT space; it is an interpreter register (`taskhlt res 1`) | O6; `Spin2_interpreter.spin2:417` (v51); `spin2-v55-text.txt:149` | traced | invented address | to research | no |
+| S-157 | B | G5 | drives wrong code | `c-z.yaml:25-77`: what `DEBUG(C_Z)` prints after Spin2 statements; the source says only "useful in PASM code" — Spin2 statements do not set C/Z | O7; `spin2-v55-text.txt:1006` | inferred | invented behaviour | to research (sources; bench only if silent) | no |
+| S-158 | B | G5 | drives wrong code | `spin2_memory_allocation.yaml:5-14`: heap of 1024 longs indexed as bytes with a 1024 limit | O8 | traced | unit confusion | to research | no |
+| S-159 | B | G5 | **drives wrong code** | `configuration_manager.yaml:5-13`: `longmove(@config_data, addr, 32)` into a 19-byte structure (overruns 109 bytes) | O9 | traced | — | to research | no |
+| S-160 | B | G5 | drives wrong code | `multi_motor_system.yaml:85` and a sibling: a parameter indexed as an array | O10 | traced | — | to research | no |
+| S-161 | B | G5 | drives wrong code | `orgf.yaml:3`: ORGF "set origin with forced alignment", "align to $100"; ORGF fills with zeros up to the given address | O11 | traced | — | to research | no |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

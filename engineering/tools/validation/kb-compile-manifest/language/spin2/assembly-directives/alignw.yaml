@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/assembly-directives/alignw.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage_notes
+    fp: "416974f15f29f3ff"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "43b07e8e04c3d824"
+    compile: program
+  - at: examples[1].code
+    fp: "03f132e9d4a56dac"
+    compile: program

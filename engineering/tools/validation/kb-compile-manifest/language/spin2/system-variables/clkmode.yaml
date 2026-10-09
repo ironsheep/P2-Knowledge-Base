@@ -1,0 +1,16 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/system-variables/clkmode.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "6d0b2c8e95678911"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "d7007ef442e129e2"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "5257285316ffca5b"
+    compile: fragment
+    wrap: spin2-method

@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/iot_device.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "a278365d67c886b8"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [initialize_iot_device()->0/0, process_locally()->1/1, should_cache_data()->1/0, time_to_upload()->1/0, handle_upload_response()->0/1, queue_for_later_upload()->0/1, process_cloud_command()->0/1, power_management_sleep()->0/0, SUCCESS=con, clear_cached_data()->0/0, increment_retry_counter()->0/0, wifi.is_connected(0), wifi.has_message(0), wifi.get_message(0), wifi.post_data(2), sensors.read_all(0), crypto.encrypt(1), storage.save_data(1)]
+    finding: "S-019"

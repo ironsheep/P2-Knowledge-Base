@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/structural/few_objects.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "6f780ad30c428065"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [display.init(0), display.show_value(1), sensor.start(0), sensor.read_temp(0)]

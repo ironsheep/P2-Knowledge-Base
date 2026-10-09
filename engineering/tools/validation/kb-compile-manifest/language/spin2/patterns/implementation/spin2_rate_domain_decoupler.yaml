@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/spin2_rate_domain_decoupler.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "454ac30d44ec3f11"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [handleVoice()->1/1]

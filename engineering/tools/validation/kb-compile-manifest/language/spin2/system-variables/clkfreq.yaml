@@ -1,0 +1,33 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/system-variables/clkfreq.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: initialization.description
+    fp: "5be6e7c0bc120cfc"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: usage_patterns.read_frequency.code
+    fp: "f8d0d64027e8b451"
+    compile: program
+  - at: usage_patterns.timing_calculations.code
+    fp: "b17eda924a594400"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-013"
+  - at: usage_patterns.frequency_verification.code
+    fp: "395aa39cc8b60ebd"
+    compile: program
+  - at: examples[0].code
+    fp: "ae99f4792acd7eda"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "7ec06b9d2a8ba17d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [cycles]
+  - at: examples[2].code
+    fp: "a3c4e509bb2579f3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [new_mode]

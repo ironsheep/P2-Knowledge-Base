@@ -1,0 +1,76 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/debug-commands/debug-formatters-complete.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: decimal.UDEC.example
+    fp: "469bc7de90b9392f"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: decimal.UDEC_.example
+    fp: "73475cb40a568e8d"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: decimal.SDEC.example
+    fp: "8d6d5cc46f6c7a85"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: decimal.SDEC_.example
+    fp: "3294faa23e2599ca"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: hexadecimal.UHEX.example
+    fp: "dd25b59439344a14"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: hexadecimal.UHEX_.example
+    fp: "78177f1b0aa4b272"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: hexadecimal.SHEX.example
+    fp: "c5473a39c6de39f9"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: hexadecimal.SHEX_.example
+    fp: "42942dba96c09f7c"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: binary.UBIN.example
+    fp: "d517bfff89d82ebe"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: binary.UBIN_.example
+    fp: "e812e5c16fe42586"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: binary.SBIN.example
+    fp: "c3b2f84bb243b965"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: binary.SBIN_.example
+    fp: "359a77251ed10262"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: floating.FDEC.example
+    fp: "496aabf3162f1034"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: floating.FDEC_.example
+    fp: "c0740dd25c9de39b"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: arrays.example
+    fp: "0c293f8dbe6298a6"
+    compile: not-code
+    reason: "a DEBUG() call (or a bare formatter call) followed by an arrow and a gloss of the text it prints ('-> buffer = $45, $67, ...' / 'forces 8-bit display'); usage-plus-output notation, not a statement"
+  - at: boolean.BOOL.example
+    fp: "19e081dbe1cec916"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: boolean.BOOL_.example
+    fp: "dfe88090c5ed7ac2"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"
+  - at: flags.C_Z.example
+    fp: "437ab9301dfc4e2c"
+    compile: not-code
+    reason: "a sample of the TEXT a DEBUG formatter prints (terminal output such as `count = 42`, `-%0101`, `TRUE`), not source code; the proposer's PASS of some of these is the output read as a CON assignment"

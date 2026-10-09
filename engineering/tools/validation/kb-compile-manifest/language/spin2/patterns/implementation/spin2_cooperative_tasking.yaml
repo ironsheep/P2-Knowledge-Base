@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "0474b691ec06976f"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [frameTicks, advanceFrame()->1/0, refreshAttitude()->1/0, consumePendingCommands()->1/0]

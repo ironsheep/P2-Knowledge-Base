@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/define.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "94d3f51e855fe963"
+    compile: program
+  - at: examples[1].code
+    fp: "9dcd5bd3f3a45ca4"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-018"
+  - at: examples[2].code
+    fp: "5a8a5570d7768ec7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [init_leds()->1/0, init_temp_sensor()->1/0]
+  - at: examples[3].code
+    fp: "6805b305a5524ad5"
+    compile: program

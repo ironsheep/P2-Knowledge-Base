@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/ifndef.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "04c9f7ded304a17c"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-018"
+  - at: examples[1].code
+    fp: "badea1503daaaaa9"
+    compile: program
+  - at: examples[2].code
+    fp: "c7f47f2f20d3836a"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "3b1a2b21be9802c5"
+    compile: program
+  - at: examples[4].code
+    fp: "ced0df9e4c0aedaa"
+    compile: fragment
+    wrap: spin2-method

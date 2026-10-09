@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/spin2_layered_architecture.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "f97b082ef032a5bd"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [hal.initialize(0), hal.get_interface(0), svc.configure(1), svc.get_services(0), app.run(1)]

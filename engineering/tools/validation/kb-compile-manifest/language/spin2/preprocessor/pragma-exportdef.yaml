@@ -1,0 +1,51 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/pragma-exportdef.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "03d9e1a5a3f34823"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "d4c5149dc64ad704"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [flash.__kbstub(0)]
+  - at: examples[1].code
+    fp: "d1e861dd8f0d2a82"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [driver.__kbstub(0)]
+  - at: examples[2].code
+    fp: "4f471528f2df949d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [core.__kbstub(0)]
+  - at: examples[3].code
+    fp: "c845bf62694ed44f"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [app.__kbstub(0)]
+  - at: examples[4].code
+    fp: "17ef720d877f05b9"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [sensor.__kbstub(0)]
+  - at: anti_patterns[0].wrong
+    fp: "b9a89bb35351804a"
+    compile: fragment
+    wrap: spin2-top
+  - at: anti_patterns[0].correct
+    fp: "0940e0242324432a"
+    compile: fragment
+    wrap: spin2-top
+  - at: common_patterns[0].code
+    fp: "ea86e7e7e307b793"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [driver1.__kbstub(0), driver2.__kbstub(0), lib1.__kbstub(0)]
+  - at: common_patterns[1].code
+    fp: "437a2b28fbd6032c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [module1.__kbstub(0), module2.__kbstub(0)]

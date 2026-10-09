@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/debug-displays/bitmap.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "88be493890f8d487"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pixel]
+  - at: examples[1].code
+    fp: "3681447241e41e3d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [color]

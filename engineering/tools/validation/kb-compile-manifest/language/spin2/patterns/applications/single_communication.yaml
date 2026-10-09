@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/single_communication.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "7d2145ae7ad21d95"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [DISCONNECTED=con, CONNECTED=con, BAUD_RATE=con, TX_PIN=con, RX_PIN=con, MSG_COMMAND=con, MSG_REQUEST=con, MSG_KEEPALIVE=con, ERROR_UNKNOWN_MESSAGE=con, CMD_SET_VALUE=con, CMD_GET_VALUE=con, CMD_RESET=con, ERROR_UNKNOWN_COMMAND=con, ERROR_QUEUE_FULL=con, COMMUNICATION_TIMEOUT=con, SUCCESS=con, parse_message_type()->1/1, process_request_message()->0/1, process_keepalive_message()->0/0, send_error_response()->0/1, get_command_from_message()->1/1, get_parameter_1()->1/1, get_parameter_2()->1/1, set_device_value()->1/2, get_device_value()->1/1, perform_device_reset()->0/0, queue_space_available()->1/0, build_response_message()->1/2, add_to_queue()->0/1, queue_has_messages()->1/0, get_from_queue()->1/0, time_for_keepalive()->1/0, send_keepalive()->0/0, send_connection_established()->0/0, handle_communication_loss()->0/0, comm.start(3), comm.rx_ready(0), comm.receive_message(1), comm.send_immediate_error(1), comm.tx_ready(0), comm.send_message(1), comm.is_connected(0), comm.attempt_connect(0)]
+    finding: "S-019+S-050"

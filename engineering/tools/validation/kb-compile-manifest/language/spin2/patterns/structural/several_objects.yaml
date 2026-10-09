@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/structural/several_objects.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "ae18dda16b1ed346"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [RX0=con, TX0=con, BAUD=con, RX1=con, TX1=con, SDA=con, SCL=con, MISO=con, MOSI=con, SCK=con, CS=con, uart.start(3), i2c.init(2), i2c.get_bus(0), spi.start(4), rtc.configure(1)]

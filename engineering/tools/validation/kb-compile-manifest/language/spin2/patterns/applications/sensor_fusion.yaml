@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/sensor_fusion.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "a1bccb95540fed7d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [initialize_sensor_fusion()->0/0, validate_fused_data()->0/0, adapt_fusion_weights()->0/0, predict_state_from_imu()->0/0, FUSION_UPDATE_RATE=con, IMU_ACCEL_X=con, IMU_ACCEL_Y=con, IMU_ACCEL_Z=con, IMU_GYRO_X=con, IMU_GYRO_Y=con, IMU_GYRO_Z=con, GPS_LAT=con, GPS_LON=con, GPS_SENSOR=con, MAG_HEADING=con, GPS_MIN_CONFIDENCE=con, MAG_SENSOR=con, MAG_MIN_CONFIDENCE=con, BARO_SENSOR=con, GPS_ALT=con, BARO_ALT=con, imu.read_accel_x(0), imu.read_accel_y(0), imu.read_accel_z(0), imu.read_gyro_x(0), imu.read_gyro_y(0), imu.read_gyro_z(0), gps.has_fix(0), gps.read_latitude(0), gps.read_longitude(0), gps.read_altitude(0), gps.get_satellite_count(0), gps.get_hdop(0), magnetometer.read_heading(0), barometer.read_altitude(0), filter.update_position(2), filter.update_heading(1), filter.update_altitude(1), filter.get_state(1)]
+    finding: "S-019+S-071"

@@ -1,0 +1,17 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/debug-commands/pc_key.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: pointer.spin2
+    fp: "a98deab93da5b720"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: pointer.pasm2
+    fp: "3adfe29526fa5b40"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "4d65be854abb58ce"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [handle_key()->1/1]

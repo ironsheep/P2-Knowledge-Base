@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/debug_enabled.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "cc725e962db84101"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [setup_debug_system()->0/0, perform_main_operations()->0/0, monitor_system_health()->0/0, level_name()->1/1, get_free_memory()->1/0, dump_variable_states()->0/0, dump_object_states()->0/0, dump_hardware_states()->0/0, test_memory_system()->1/0, test_communication()->1/0, test_sensors()->1/0, debug_out.printf(4), logger.log_message(3), monitor.get_cpu_usage(0)]
+    finding: "S-014+S-052+S-124"

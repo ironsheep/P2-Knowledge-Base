@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/multimedia_device.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "f3dad33c42a86b37"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [initialize_multimedia_system()->1/0, STATE_STOPPED=con, handle_media_selection()->1/0, STATE_LOADING=con, STATE_PLAYING=con, STATE_PAUSED=con, maintain_pause_state()->1/0, handle_user_input()->1/0, audio_buffer_low()->1/0, add_to_audio_buffer()->1/1, video_buffer_low()->1/0, add_to_video_buffer()->1/1, time_for_next_frame()->1/0, get_current_video_frame()->1/0, time_for_audio_chunk()->1/0, get_current_audio_chunk()->1/0, audio_buffer_full()->1/0, video_buffer_full()->1/0, audio.play_chunk(1), display.show_frame(1), storage.__kbstub(0), decoder.get_next_audio(0), decoder.get_next_frame(0), decoder.has_data(0)]

@@ -1,0 +1,80 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/debug-commands/debug-strategy-guide.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "bdd23c18063545dd"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: reducing_bytes_and_records.over_on_records.fix
+    fp: "03d3d6a2553071e8"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: reducing_bytes_and_records.over_on_records.also_helps
+    fp: "693fa9b2d7bec100"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: deduplication.example.code
+    fp: "6f5c262410047ae6"
+    compile: program
+  - at: mechanism_details.compiler_flag.examples[0].code
+    fp: "2b916c1e57f4530f"
+    compile: not-code
+    reason: "shell command lines (`pnut-ts -d myapp.spin2`) under `#` comment headings: a command line, not source code"
+  - at: mechanism_details.debug_disable.example.code
+    fp: "f7c3e02337f1496c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [val]
+  - at: mechanism_details.debug_mask.per_object
+    fp: "64ee34c8d9cc4e22"
+    compile: not-code
+    reason: "YAML text block (`per_object`) of English sentences with one embedded override line (`OBJ  drv : \"driver\" | DEBUG_MASK = %1 ...`); mixed prose + excerpt, not one compilable unit"
+  - at: mechanism_details.debug_mask.example_subsystem.code
+    fp: "986b60f99ce9a29b"
+    compile: program
+  - at: mechanism_details.debug_mask.example_verbosity.code
+    fp: "2c3a0031af0dc4d8"
+    compile: program
+  - at: mechanism_details.runtime_mechanisms.debug_cogs.example
+    fp: "9e8ecf1a30a818f8"
+    compile: fragment
+    wrap: spin2-top
+  - at: mechanism_details.runtime_mechanisms.debug_if.example
+    fp: "fd76d747e24027e9"
+    compile: program
+  - at: decision_guide.scenarios[1].recommendation
+    fp: "e129397d818450d2"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: decision_guide.scenarios[3].recommendation
+    fp: "4f309655a95977cb"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: decision_guide.scenarios[5].recommendation
+    fp: "d122ab26936530a6"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: recommended_setups.small_project.code
+    fp: "808293d99b39c3c1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [readSensor()->1/0]
+  - at: recommended_setups.medium_project.code
+    fp: "90a38a3c7372202a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [readTemp()->1/0, dutyCycle]
+  - at: recommended_setups.large_project.code
+    fp: "d01852b6d115d4e7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [ax, rpm, addr]
+  - at: common_mistakes[0].explanation
+    fp: "942e9dad0bb35d0f"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: common_mistakes[3].explanation
+    fp: "e78caa9a5d4fe019"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

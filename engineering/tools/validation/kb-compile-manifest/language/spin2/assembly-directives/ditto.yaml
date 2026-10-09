@@ -1,0 +1,17 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/assembly-directives/ditto.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "95e8dc446ef1c540"
+    compile: program
+  - at: examples[1].code
+    fp: "a3dee41f3ad5b462"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [BasePin=con]
+  - at: examples[2].code
+    fp: "8432e2fee0d0232d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [speed, BasePin=con]

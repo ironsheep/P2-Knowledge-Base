@@ -1,0 +1,16 @@
+{
+ "semicolon-comment": "S-137",
+ "wc-wz-written-as-pair": "S-138",
+ "condition-prefix-written-as-spin2-statement": "S-139",
+ "block-designator-indented-in-conditional": "S-140",
+ "backtick-in-comment-after-debug": "S-141",
+ "var-declaration-inside-method-body": "S-142",
+ "p1-bare-not-statement": "S-143",
+ "case-with-no-cases": "S-144",
+ "method-call-through-dot-on-long": "S-145",
+ "invented-predefined-symbol": "S-146",
+ "symbol-exceeds-30-characters": "S-147",
+ "var-arrays-exceed-hub-ram": "S-148",
+ "utility-library-calls-undefined-max": "S-149",
+ "harness-gap-never-error-at-eof": "S-150"
+}

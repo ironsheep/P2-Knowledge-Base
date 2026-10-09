@@ -1,0 +1,29 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/endif.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "e12495d8ef5bb19a"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "4bf5741d6329d1b9"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-140"
+  - at: examples[1].code
+    fp: "98622f7a9eca358f"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "fb3da52af610c68e"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[3].code
+    fp: "a6718bfdbf48a0dd"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[4].code
+    fp: "3f2fcee3cd0e8018"
+    compile: fragment
+    wrap: spin2-method

@@ -1,0 +1,34 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/constants/debug-mask.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax.usage
+    fp: "b6653d98b39cf85d"
+    compile: not-code
+    reason: "`syntax:` template: `channel` and `output` are placeholders for the user's bit number and DEBUG arguments, not names of anything; the page's concrete forms are its `examples:` entries"
+  - at: examples[0].code
+    fp: "8eb65b635828a8fb"
+    compile: program
+  - at: examples[1].code
+    fp: "5caf0378b8305b0c"
+    compile: program
+  - at: examples[2].code
+    fp: "131f746dfdffdef2"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_work()->1/0]
+  - at: examples[3].code
+    fp: "7ddb0bd9b7cc9666"
+    compile: program
+  - at: examples[4].code
+    fp: "aec12d82f66934d5"
+    compile: program
+  - at: debug_cogs_interaction.combined_behavior
+    fp: "67c4018815612bb9"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: debug_cogs_interaction.example
+    fp: "ce1dace1ce737f6a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [stack]

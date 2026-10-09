@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/elseifndef.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "8f84a5037f945428"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [init_standard()->1/0]
+  - at: examples[1].code
+    fp: "d8bcd0444d690ce0"
+    compile: never
+    wrap: spin2-top
+    reason: "the page's teaching point is the forced compile error: with nothing defined, #DEFINE CONFIG_ERROR is reached and the last #IFDEF leaves the bare identifier CONFIGURATION_ERROR_CHECK_SETTINGS in the source ('This will cause a compile error by using undefined symbol'). The compiler does stop there, but with 'Symbol exceeds 30 characters' (the name is 34 characters), not with an undefined-symbol error: see observation O1"
+    fails_at: 16
+  - at: examples[2].code
+    fp: "63e81ec6959bb9ae"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[3].code
+    fp: "dba3a84650684cfa"
+    compile: fragment
+    wrap: spin2-method

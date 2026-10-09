@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/spin2_diagnostic_output.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "86a8fbeb9fd94828"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [tx()->1/1, tx_string()->1/1]
+    finding: "S-014"

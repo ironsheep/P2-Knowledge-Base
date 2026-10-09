@@ -1,0 +1,71 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/include.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "91df07787a849889"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: file_resolution.extension.example
+    fp: "1a36c87c04e19625"
+    compile: not-code
+    reason: "a statement of equivalence between two #INCLUDE spellings (`#INCLUDE \"utils\" is equivalent to #INCLUDE \"utils.spin2\"`): prose around two directive spellings, not one source line"
+  - at: examples[0].code
+    fp: "3dad46e085607cb0"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [init_system()->0/0, run_application()->0/0, file:utility_methods.spin2]
+  - at: examples[1].code
+    fp: "789369d3f287c192"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [file:drivers/serial_driver.spin2, file:inc/common_constants.spin2]
+  - at: examples[2].code
+    fp: "3b6eed0bc23fc279"
+    compile: program
+  - at: examples[3].code
+    fp: "2bbc6150462fbad5"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:board_config.spin2, CLK_FREQ=con:200000000, init_board()->0/0]
+  - at: examples[4].code
+    fp: "2f38740c7c1d4ca0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [file:driver_advanced.spin2, file:driver_simple.spin2]
+  - at: common_patterns[0].code
+    fp: "767a17113d24ca17"
+    compile: fragment
+    wrap: spin2-method
+  - at: common_patterns[1].code
+    fp: "b2b9767515374d42"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:config.spin2]
+  - at: common_patterns[2].code
+    fp: "3d62d4e5225711bb"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:math_utils.spin2]
+    finding: "S-020"
+  - at: anti_patterns[0].wrong
+    fp: "0833b4cec80ff480"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:utils.spin2, file:other.spin2]
+    finding: "S-020"
+  - at: anti_patterns[0].correct
+    fp: "075dedd1d858cc77"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-020"
+  - at: anti_patterns[1].wrong
+    fp: "8d3039f2d8555792"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:methods.spin2]
+  - at: anti_patterns[1].correct
+    fp: "52c6322d2a03a7be"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:methods.spin2]

@@ -1,0 +1,18 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/spin2_timing_control.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: quick_reference.periodic_execution
+    fp: "7e6b04857cdb2ae4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [do_work()->0/0]
+    finding: "S-008"
+  - at: quick_reference.timeout_polling
+    fp: "3e80609a6ccd084e"
+    compile: fragment
+    wrap: spin2-method-result
+    assumes: [deadline, timeout_ms, condition_met()->1/0]
+  - at: quick_reference.pulse_generation
+    fp: "32ed0f41c6bd5d48"
+    compile: program

@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/applications/robotics.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_template
+    fp: "abfc7665bea8dee5"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [initialize_robot_systems()->0/0, STATE_IDLE=con, STATE_MOVING=con, STATE_TURNING=con, STATE_AVOIDING=con, update_position_estimate()->0/0, scan_environment()->0/0, idle_behavior()->0/0, turning_behavior()->0/0, apply_motor_commands()->0/0, CONTROL_LOOP_MS=con, calculate_distance_to_target()->1/0, calculate_angle_error()->1/0, POSITION_TOLERANCE=con, stop_all_motors()->0/0, KP_DISTANCE=con, KP_ANGLE=con, LEFT=con, RIGHT=con, limit_motor_speeds()->0/0, SAFE_DISTANCE=con, TURN_SPEED=con, motors.__kbstub(0), encoders.__kbstub(0), imu.__kbstub(0), sonar.read_distance(0)]
+    finding: "S-019"

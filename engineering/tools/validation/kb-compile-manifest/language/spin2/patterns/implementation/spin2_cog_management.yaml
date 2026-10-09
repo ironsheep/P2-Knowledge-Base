@@ -1,0 +1,80 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/spin2_cog_management.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: patterns[0].code
+    fp: "9e7dc32b1fc51c32"
+    compile: program
+  - at: patterns[1].code
+    fp: "f619bfe68a0aa13e"
+    compile: program
+  - at: patterns[2].code
+    fp: "4b0f1349baaa68bf"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_start()->1/1, do_read()->1/0]
+  - at: patterns[3].code
+    fp: "20482437a52e050a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [generate_item()->1/0, process_item()->1/1]
+  - at: patterns[4].code
+    fp: "e8138196a769247e"
+    compile: program
+  - at: anti_patterns[0].wrong
+    fp: "4297ee6bc12b4927"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [complex_method()->1/0]
+  - at: anti_patterns[0].correct
+    fp: "a36ceb99dd5441e5"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [complex_method()->1/0]
+  - at: anti_patterns[1].wrong
+    fp: "d7df74dabd464f91"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker()->1/0, stack]
+  - at: anti_patterns[1].correct
+    fp: "f7860cf61df9f0a0"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker()->1/0, stack]
+  - at: anti_patterns[2].wrong
+    fp: "df747d5e059eebff"
+    compile: fragment
+    wrap: spin2-top
+  - at: anti_patterns[2].correct
+    fp: "502b653af2487c4b"
+    compile: program
+  - at: anti_patterns[3].wrong
+    fp: "cace703b52728ab9"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lock_a, lock_b]
+  - at: anti_patterns[3].correct
+    fp: "10199c2e2ef0c785"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [lock_a, lock_b]
+  - at: anti_patterns[4].wrong
+    fp: "65b6eb9a418fb0a1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [my_lock]
+  - at: anti_patterns[4].correct
+    fp: "aa821ad8b15abfa4"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [my_lock]
+  - at: anti_patterns[5].wrong
+    fp: "0df2315515150e33"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [process_command()->1/0]
+  - at: anti_patterns[5].correct
+    fp: "a14875c7b45cce50"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [process_command()->1/0]

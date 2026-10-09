@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/structural/single_object.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "3d4e9e4f31dd3296"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [LED_PIN=con, driver.init(1), driver.set_brightness(1)]

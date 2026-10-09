@@ -1,0 +1,35 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/assembly-directives/long.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "9add90d2a25c01cf"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: examples[1]
+    fp: "f34580334525a5d8"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: examples[2]
+    fp: "01afc8ecfb165c42"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value=con]
+    finding: "S-137"
+  - at: examples[3]
+    fp: "e3baf7eaafc6abd4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [label]
+    finding: "S-137"
+  - at: examples[4]
+    fp: "1db80c96310cff6f"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: usage
+    fp: "d7494fce7448225c"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

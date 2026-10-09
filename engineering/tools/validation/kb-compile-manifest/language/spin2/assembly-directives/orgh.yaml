@@ -1,0 +1,30 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/assembly-directives/orgh.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "eec65923c003cf84"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: syntax.inline_spin2
+    fp: "b471f2f5e2e907cf"
+    compile: not-code
+    reason: "`syntax:` notation: `PUB/PRI method()` is an alternation of two block designators and a placeholder name, with a comment in place of the code; the page's concrete forms are its `examples:` entries"
+  - at: examples[0].code
+    fp: "60f237ec47dff133"
+    compile: program
+  - at: examples[1].code
+    fp: "6b56352cc429d68e"
+    compile: program
+  - at: examples[2].code
+    fp: "700d94f0f001085d"
+    compile: program
+  - at: examples[3].code
+    fp: "fc379a886ac55bfc"
+    compile: program
+  - at: examples[4].code
+    fp: "2a593bcc4be7d593"
+    compile: program
+  - at: examples[5].code
+    fp: "8f27fa341e134091"
+    compile: program

@@ -1,0 +1,32 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/debug-commands/c-z.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "4ce447c74d975a4b"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "fdfd13449122428e"
+    compile: program
+  - at: examples[1].code
+    fp: "aa7d0dc07b007d4f"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-138"
+  - at: examples[2].code
+    fp: "4cc5ba47030cc048"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-138"
+  - at: examples[3].code
+    fp: "34a34f4bb4d7e80f"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-138"
+  - at: examples[4].code
+    fp: "8394e84a9db99e30"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [some_operation()->1/0]
+    finding: "S-139"

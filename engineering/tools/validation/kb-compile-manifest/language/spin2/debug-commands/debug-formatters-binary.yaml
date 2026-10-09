@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/debug-commands/debug-formatters-binary.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "accf75ba8b89ad26"
+    compile: not-code
+    reason: "a DEBUG() call (or a bare formatter call) followed by an arrow and a gloss of the text it prints ('-> buffer = $45, $67, ...' / 'forces 8-bit display'); usage-plus-output notation, not a statement"
+  - at: examples[1]
+    fp: "a32688d56399dde4"
+    compile: not-code
+    reason: "a DEBUG() call (or a bare formatter call) followed by an arrow and a gloss of the text it prints ('-> buffer = $45, $67, ...' / 'forces 8-bit display'); usage-plus-output notation, not a statement"
+  - at: examples[2]
+    fp: "85ec921b9242c646"
+    compile: not-code
+    reason: "a DEBUG() call (or a bare formatter call) followed by an arrow and a gloss of the text it prints ('-> buffer = $45, $67, ...' / 'forces 8-bit display'); usage-plus-output notation, not a statement"
+  - at: examples[3]
+    fp: "f5aa371f1faa7204"
+    compile: not-code
+    reason: "a DEBUG() call (or a bare formatter call) followed by an arrow and a gloss of the text it prints ('-> buffer = $45, $67, ...' / 'forces 8-bit display'); usage-plus-output notation, not a statement"

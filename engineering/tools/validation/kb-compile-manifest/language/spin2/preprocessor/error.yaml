@@ -1,0 +1,49 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/preprocessor/error.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "e9e2c0432f513b4f"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "3dd432b032818703"
+    compile: never
+    wrap: spin2-top
+    reason: "the page's teaching point is the build stop: with none of the guarding symbols defined (the situation shown; the harness passes no -D) the #ERROR directive fires and compilation fails with the block's own message"
+    fails_at: 5
+  - at: examples[1].code
+    fp: "9c61ac828afb1d20"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "88e524c979586c4f"
+    compile: never
+    wrap: spin2-top
+    reason: "the page's teaching point is the build stop: with none of the guarding symbols defined (the situation shown; the harness passes no -D) the #ERROR directive fires and compilation fails with the block's own message"
+    fails_at: 3
+  - at: examples[3].code
+    fp: "0655482e6d2aed81"
+    compile: never
+    wrap: spin2-top
+    reason: "the page's teaching point is the build stop: with none of the guarding symbols defined (the situation shown; the harness passes no -D) the #ERROR directive fires and compilation fails with the block's own message"
+    fails_at: 9
+  - at: examples[4].code
+    fp: "81fd313a8c36fc4d"
+    compile: fragment
+    wrap: spin2-method
+  - at: common_patterns[0].code
+    fp: "008317c759fe8d43"
+    compile: never
+    wrap: spin2-top
+    reason: "the page's teaching point is the build stop: with none of the guarding symbols defined (the situation shown; the harness passes no -D) the #ERROR directive fires and compilation fails with the block's own message"
+    fails_at: 4
+  - at: common_patterns[1].code
+    fp: "358583a608563c3a"
+    compile: fragment
+    wrap: spin2-method
+  - at: common_patterns[2].code
+    fp: "50a4f4d5e433802a"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-146"

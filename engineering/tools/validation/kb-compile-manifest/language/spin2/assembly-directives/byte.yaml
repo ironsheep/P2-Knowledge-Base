@@ -1,0 +1,29 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/assembly-directives/byte.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "bcd3ea58f40605b6"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: examples[1]
+    fp: "743f48ef4ab1b679"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: examples[2]
+    fp: "e45cf4256d832b93"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: examples[3]
+    fp: "5a90e6e43d28a7d6"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value=con]
+    finding: "S-137"
+  - at: usage
+    fp: "1831641942e9d327"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
