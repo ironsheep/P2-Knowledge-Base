@@ -673,6 +673,22 @@ example defects surfaced; one bench question.
 | S-308 | `engineering/tools/validation/audit-yaml-claim-sourcing.py` (decision D4 gate) | wholly-uncited files are advisory | (a) exempt example blocks by location: block names matching `^(\w+_)?examples?$` plus `quick_example`, `complete_example`, `usage_example`, any block with `authority_tier: EXAMPLE`, `worked_escape`, and one-line `wrong:`/`correct:`; NOT `anti_patterns`/`common_patterns`; (b) Tier 2 blocks (`main()` ~`:820-824`), switched on once S-295..S-307 are applied; (c) skip `community/obex/objects/` and add a small check of OBEX metadata against the index; (d) recognise `part\d+-…\.txt` silicon-doc citations in `INLINE_CITE_RE` (`:277-280`) — the smart-pin files cite that way and are wrongly "uncited"; negative controls: four must-not-fire (example blocks) and four must-still-fire (uncited prose, `notes` beside exempt examples, PRINCIPLE-tier figures, `common_patterns`) | decision D4; reviewer's line map of the script | build spec |
 | S-309 | OBEX 4727, 4858 | "80MHz to 320MHz", "1.5/12 Mbps", "13-bit at 16k sps at 200MHz" in `description_full` | not checkable: the index text is truncated at 100 characters; 4012 matches exactly | `p2kb_obex_get` | reclassification (OBEX self-referencing; checked as far as the index goes) |
 
+**F-547 cascade (2026-10-09).** Every KB operator page against the re-ingested reference
+(`sources/spin2-v55/spin2-v55-operator-reference.md`). The page-by-page specs — 37 items, with the
+arbiter's compile probes that decide each "probe needed" — are in
+`2026-10-08-p2kb-close-out-evidence/f547-operator-cascade-specs.md`. They complete rows S-052,
+S-053, S-054, S-056, S-057, S-058, S-121, S-129, S-130, S-131, S-132 (POW is level 8, left to right,
+and needs `{Spin2_v51}` — probed), S-135, S-252, S-267..S-275, S-279. New:
+
+| # | File, block | Current | Correct | Authority | State |
+|---|---|---|---|---|---|
+| S-310 | `operators/op_notandand.yaml`, `op_eqeqeq.yaml`, `op_ltshr.yaml` (S-270) | pages for `!&&`, `===`, `<>>` | no KB `related:` points at them; they are published keys, so the sprint chooses **delete or a redirect stub** in the `modulo_add.yaml` style (targets in the evidence file §A.3). Recommendation: redirect stubs — an agent that asks for `===` learns it is `==` | compiler rejects all three | change spec (stub targets set) |
+| S-311 | `operators/op_addmodulo.yaml:88`, `:105`, `:122` | `(head - tail) +// BUFFER_SIZE` "any buffer size works" | holds only for power-of-2 sizes (probe `-3 +// 30` = 13); restrict the claim or rewrite the example | arbiter probe | change spec (**drives wrong code**) |
+| S-312 | `spin2-language-complete-map.yaml:49-62` | unsourced counts (74 / 72 / 100 %); float variants written `.+ .- .* ./` | the reference's counts; `+. -. *. /.` | reference | change spec |
+| S-313 | `special-symbols/at.yaml:21` | `block_usage: "All blocks"` | "PUB/PRI only" (address operators, T:421) | reference; probe `CON x = @y` fails | change spec |
+| S-314 | `concepts/floating_point.yaml:73` | float `<.` "returns TRUE/FALSE" | "returns 0 or -1" | reference row #61 | change spec |
+| S-315 | operator coverage | no page for bitwise `!`, `&`, `^`, `|`, unary `-`, `\`, CON `=`, compound and unary assign forms | coverage work for the sprint (new pages), not a correction | reference | noted (coverage) |
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
