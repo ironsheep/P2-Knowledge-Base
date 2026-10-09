@@ -1,0 +1,84 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/register-operations.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "b9891e8022ddbf23"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [char_cnt, text_cols]
+  - at: idioms[0].examples[1]
+    fp: "80d34c584dc97991"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [strikethru_line, font_height]
+  - at: idioms[0].examples[2]
+    fp: "a3c3f60b6f041522"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [stride, text_cols]
+  - at: idioms[1].examples[0]
+    fp: "0e761e681afd644e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sine_phase, sine_freq]
+  - at: idioms[1].examples[1]
+    fp: "9d1ceaaffbf5d154"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [toggle_phase, toggle_freq]
+  - at: idioms[1].examples[2]
+    fp: "a006e4c1ed62d788"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sample, centerfreq]
+  - at: idioms[2].examples[0]
+    fp: "641607ac38a00a40"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [fSum, nVel]
+  - at: idioms[2].examples[1]
+    fp: "8a0fad332f190101"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [nVel, oPos]
+  - at: idioms[2].examples[2]
+    fp: "2e5236467100b341"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [nVel, cor]
+  - at: idioms[3].examples[0]
+    fp: "b103e8217b303901"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dacmode_s, mycogid]
+  - at: idioms[3].examples[1]
+    fp: "94cfaaa700cca36e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dacmode_c, mycogid]
+  - at: idioms[3].examples[2]
+    fp: "df5b5f58cfeec768"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [curchar, mask_ffff]
+  - at: idioms[4].examples[0]
+    fp: "5ff947af7ab1a357"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [line_effects, field_effects]
+  - at: idioms[4].examples[1]
+    fp: "78c777ae030a812e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [cureff, line_effects]
+  - at: idioms[5].examples[0]
+    fp: "f6daed141fc4e8b2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [curchar, mask_ffff]
+  - at: idioms[5].examples[1]
+    fp: "05cb5ddfe65f74fd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, pattern]

@@ -1,0 +1,85 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/labels.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: label_types.global_labels.example
+    fp: "665de95a94472247"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [x]
+  - at: label_types.local_labels.example
+    fp: "9b1c9f256734dcd0"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [x, ptr, tx_pin, rx_pin]
+  - at: reference_operators.operators.immediate_cog.example
+    fp: "2c7e205fae503789"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [main_loop]
+  - at: reference_operators.operators.immediate_local.example
+    fp: "76d34f7451a06501"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [counter]
+    finding: "S-198"
+  - at: reference_operators.operators.absolute_cog.example
+    fp: "d415b2c8cb15ba25"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [helper]
+  - at: reference_operators.operators.hub_address.example
+    fp: "8072b4084cf29082"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [ptr, hub_data]
+  - at: reference_operators.operators.object_relative.example
+    fp: "17ac6e6ed6d1388b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [method_table]
+    finding: "S-191"
+  - at: reference_operators.operators.current_cog_address.example
+    fp: "788a11b96656d210"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-199"
+  - at: reference_operators.operators.current_hub_address.example
+    fp: "db0731b4b73d0281"
+    compile: fragment
+    wrap: pasm2-hub
+    finding: "S-192"
+  - at: scope_boundaries.boundaries[0].example
+    fp: "d247623960c6f00d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x]
+  - at: scope_boundaries.boundaries[1].example
+    fp: "22b0fab4ca7a5ea5"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: scope_boundaries.example
+    fp: "b0dd313079ec6a80"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [x, y]
+  - at: rep_instruction_usage.example
+    fp: "e6593db57fc5cebf"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, x, ptr, sum]
+  - at: common_patterns.loop_with_local.code
+    fp: "d5de28d9d3a82c99"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count]
+  - at: common_patterns.multiple_exits.code
+    fp: "14d36a2ecf98483b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, value, target, result]
+  - at: common_patterns.rep_with_label.code
+    fp: "90d7e15fee81b415"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pattern]

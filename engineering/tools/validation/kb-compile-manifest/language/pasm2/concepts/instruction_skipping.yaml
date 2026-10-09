@@ -1,0 +1,56 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/instruction_skipping.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: skip_instructions.SKIP.examples[0]
+    fp: "285455adb7dcb8ed"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y, z]
+  - at: skip_instructions.SKIPF.examples[0]
+    fp: "c5a004334135dff7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pattern]
+  - at: skip_instructions.EXECF.examples[0]
+    fp: "ccf6b906f30106b9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y, z]
+  - at: pattern_encoding.pattern_size.examples[0]
+    fp: "782ad7995a103fb3"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: pattern_encoding.pattern_size.examples[1]
+    fp: "8234aec00f8f33c0"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: pattern_encoding.pattern_size.examples[2]
+    fp: "6a3bb5a3c2fd8c1b"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_patterns.conditional_block.code
+    fp: "65253a6215090a29"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, threshold, accumulator, flags, PROCESSED=con, process]
+  - at: common_patterns.sparse_execution.code
+    fp: "0d695a6a140373ea"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sparse_pattern]
+  - at: common_patterns.conditional_sequence.code
+    fp: "488fafca6fc08ce8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags, MODE_MASK=con, x, y, z]
+  - at: common_patterns.early_termination.code
+    fp: "5cb8e034369d71b4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [body]
+  - at: execf_branching.examples[0]
+    fp: "e37b9d00fa0d3a32"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [next_section]

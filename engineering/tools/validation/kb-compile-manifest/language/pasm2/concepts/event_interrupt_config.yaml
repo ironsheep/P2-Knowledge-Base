@@ -1,0 +1,41 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/event_interrupt_config.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: overview
+    fp: "4a2233fd7e9b58ca"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: interrupt_system.interrupt_operations.SETINT1.example
+    fp: "66d1ccc72e5fa8ad"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: interrupt_system.return_instructions.RETI0_3.example
+    fp: "66575ab83523effd"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-187"
+  - at: interrupt_context.context_preservation.code
+    fp: "d92eeabe82e53e9d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [work_reg]
+    finding: "S-187"
+  - at: common_patterns.timer_interrupt.code
+    fp: "2b8d7a7218622b17"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [base_time, period=con]
+  - at: common_patterns.pin_event.code
+    fp: "f7b6726d652ac02c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin]
+  - at: common_patterns.attention_handler.code
+    fp: "b7e5f922d7875c73"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_patterns.critical_section.code
+    fp: "6a9cf077544fce20"
+    compile: fragment
+    wrap: pasm2-dat

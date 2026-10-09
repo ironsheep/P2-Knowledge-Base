@@ -1,0 +1,265 @@
+[
+ {
+  "id": "O1",
+  "kind": "wrong-flag-sense (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/basic-io.yaml:404-405"
+  ],
+  "claim": "lock_coordination_example: `LOCKTRY lock_id WC        ' Try to acquire lock` / `IF_C  JMP #try_again      ' C=1 means locked by other COG`. LOCKTRY sets C=1 when the lock WAS taken (C=0: held by another cog or not allocated), so the retry branch is inverted -- the cog that got the lock jumps back and tries again, and a cog that did not get it goes on to drive the pin. The correct test is `IF_NC JMP #try_again`. multi_cog_synchronization.yaml:30 and :33-34 on the same subject state it correctly (`C=1 if acquired`; `if_nc ret ' Failed`). The block compiles, so the gate cannot see it.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:270 (LOCKTRY: `C = 1 if got LOCK`); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3688"
+ },
+ {
+  "id": "O2",
+  "kind": "wrong-operand (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/register_indirection.yaml:78-81",
+   "language/pasm2/concepts/register_indirection.yaml:171-177",
+   "language/pasm2/concepts/register_indirection.yaml:72-75"
+  ],
+  "claim": "ALTB examples do not address what the comments say. `ALTB bit_num, #0` then `BITH flags, #0-0 ' Actually sets bit 7` (and bit_scan `ALTB bit_pos` + `TESTB flags, #0-0 WC`): ALTB replaces the next instruction's D field (the register) with (D[13:5] + S) & $1FF and leaves S alone, so the target register becomes register 0 (bit_num[13:5]=0, S=0) -- `flags` is never touched -- and the bit number stays the literal `#0-0` = 0. The silicon-doc form is `ALTB bitindex,#base` then `BITC 0,bitindex` (D placeholder, S = the register holding the bit index). The page's own description (:73-75 'Next instruction's bit field = base + bit_reg[4:0]') is the same misreading. All of it compiles.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:546-560 (`ALTB bitindex,#base` / `BITC 0,bitindex`; `ALTB bitindex` / `TESTB 0,bitindex WC`); engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:144-145"
+ },
+ {
+  "id": "O3",
+  "kind": "wrong-operand (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/register_indirection.yaml:47-51"
+  ],
+  "claim": "`MOV offset, #3` / `ALTR offset, #0` / `ADD base_reg, value ' Result goes to base_reg+3`: ALTR sets the result register to (D + S) & $1FF = 3 + 0 = register 3, not base_reg+3 (the base must be the S operand: `ALTR offset, #base_reg`), and the ADD's own D (`base_reg`) is then only the operand read. Same family: addressing_modes.yaml:110 `ALTR index ' Next result = cog[D + index]` (the one-operand form sets the result register to D[8:0], i.e. cog[index]).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:529 (`ALTR index,#table` sets next write to table+index), :542; engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:138-139"
+ },
+ {
+  "id": "O4",
+  "kind": "wrong-constant (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/event_interrupt_config.yaml:236-240",
+   "language/pasm2/concepts/event_interrupt_config.yaml:104-106"
+  ],
+  "claim": "attention_handler: `SETINT3 #12      ' ATN event`. Event 12 is 'streamer NCO rollover'; attention (ATN) is event 14 -- the same page's own table (:104, :106) says so. As written the ISR fires on streamer rollovers and never on COGATN.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2051, :2053 (Event 12 = Streamer NCO rollover; Event 14 = Attention)"
+ },
+ {
+  "id": "O5",
+  "kind": "wrong-semantics (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/event_interrupt_config.yaml:84-88"
+  ],
+  "claim": "RESIx described as 'Resume from interrupt (continue interrupted code) / Like RETI but continues interrupted instruction'. RESIx = `CALLD IJMPx,IRETx WCZ`: it returns to the interrupted program but records the ISR's next address in IJMPx, so the NEXT interrupt resumes the ISR after the RESI (a co-routine style ISR); RETIx restarts at IJMPx each time.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2313-2317"
+ },
+ {
+  "id": "O6",
+  "kind": "wrong-semantics (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/branch_addressing.yaml:64-72",
+   "language/pasm2/concepts/branch_addressing.yaml:198",
+   "language/pasm2/concepts/stack_operations.yaml:70-78"
+  ],
+  "claim": "CALLA/CALLB: 'operation: PTRx = PC + 4, then jump' / 'Return address in PTRA' / 'Save return in PTRA, not stack'. CALLA writes {C, Z, 10'b0, PC[19:0]} to the hub long at PTRA++ (CALLB: PTRB++), i.e. it PUSHES onto a hub stack addressed by PTRA, and RETA/RETB pop it. PTRA is not set to the return address; PTRA is advanced by 4 per call and the hub write costs 5...12 (cog) / 14...32 clocks, so 'no stack needed' / 'leaf functions' (:72, :198) is also off -- it needs a stack in hub RAM.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:344, :346, :428-429 (CALLA/CALLB write to hub long at PTRA++/PTRB++)"
+ },
+ {
+  "id": "O7",
+  "kind": "wrong-semantics (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/special_registers.yaml:22",
+   "language/pasm2/concepts/special_registers.yaml:76"
+  ],
+  "claim": "`GETPTR reg ' Read PTRA/PTRB value` and 'explicit via GETPTR/SETPTR'. GETPTR returns the current hub FIFO pointer (D = FIFO hub address), not PTRA/PTRB (those are ordinary registers $1F8/$1F9: `MOV x, PTRA`). There is no SETPTR instruction (0 hits in the instruction table).",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:352 (`GETPTR D ... Get current FIFO hub pointer into D`); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5336, :1174"
+ },
+ {
+  "id": "O8",
+  "kind": "wrong-claim",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/special_registers.yaml:54",
+   "language/pasm2/concepts/special_registers.yaml:84",
+   "language/pasm2/concepts/special_registers.yaml:43"
+  ],
+  "claim": "special_registers.yaml:54 `features: True random based on thermal noise` (GETRND is the xoroshiro128** PRNG; registered S-023); :84 `Q receives quotient from DIV operations` and :43 'Quotient/auxiliary register': P2 has no DIV instruction, SETQ sets Q for the NEXT block/CORDIC instruction, and CORDIC results come from GETQX/GETQY (QDIV quotient in X).",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:337 (SETQ: `Set Q to D`); S-023 rows in the study"
+ },
+ {
+  "id": "O9",
+  "kind": "wrong-claim (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/cordic_solver.yaml:105-109",
+   "language/pasm2/concepts/cordic_solver.yaml:155-157"
+  ],
+  "claim": "non_blocking_check: `POLLQMT WC ' C=1 if pipeline empty` / `IF_NC GETQX result ' Retrieve only if available`. The QMT event flag is set when a GETQX/GETQY ALREADY executed with no result queued or in progress (event 15), and POLLQMT reads-and-clears that history bit; it says nothing about a result still being computed, and a GETQX issued while a result is in flight simply waits for it. The page states the event correctly itself at :155-157. There is no non-blocking 'result ready' poll for the CORDIC.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2054, :2207-2211, :3413"
+ },
+ {
+  "id": "O10",
+  "kind": "wrong-count (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/rep_instruction.yaml:115-119",
+   "language/pasm2/concepts/rep_instruction.yaml:133-139",
+   "language/pasm2/concepts/rep_instruction.yaml:190-195",
+   "language/pasm2/concepts/register_indirection.yaml:99-104",
+   "language/pasm2/concepts/register_indirection.yaml:156-161"
+  ],
+  "claim": "REP block-size operands that do not match the body: bit_reversal `REP #32, #32` over a 2-instruction body (it repeats the next 32 instructions); multiply_accumulate `REP #2, #16` over THREE instructions (RDLONG/MUL/ADD); register_indirection increment_modes `REP #4, #10` and array_copy `REP #2, count` over three instructions each. `conditional_rep`: `IF_NZ REP #4, count ' Loop body executes only if count > 0` -- when the REP is skipped (count = 0) the four body instructions still run once as ordinary code (and a REP executed with S = 0 repeats forever). The blocks compile, the gate cannot see the mismatch.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:257 (`REP`: next D[8:0] instructions S times; S = 0 repeats infinitely); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:757-759"
+ },
+ {
+  "id": "O11",
+  "kind": "wrong-limit",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/rep_instruction.yaml:15",
+   "language/pasm2/concepts/rep_instruction.yaml:22",
+   "language/pasm2/concepts/rep_instruction.yaml:66",
+   "language/pasm2/concepts/rep_instruction.yaml:67",
+   "language/pasm2/concepts/rep_instruction.yaml:94"
+  ],
+  "claim": "rep_instruction.yaml:15 gives block_size '0-511 with #, 0-2^32-1 with ## or register' and :22 'block_size: Extended via AUGD prefix (0 to 2^32-1)', yet :66 says 'Maximum 511 instructions per block (9-bit D field)' -- only D[8:0] is used (0..511). :67 'Maximum 512 iterations (immediate)': a `#` immediate is 0..511, and the count is S[31:0]. :94 lists JMP/CALL/RET as not allowed in a REP block while :202 teaches `IF_Z JMP #found ' Exits REP block` and the silicon doc says any branch inside simply cancels REP.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:757-759, :775"
+ },
+ {
+  "id": "O12",
+  "kind": "wrong-count",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/idioms/loop-control.yaml:64-65",
+   "language/pasm2/idioms/loop-control.yaml:57-60"
+  ],
+  "claim": "DJNF: 'loop body runs max(1, count) times; SAFE for count=0'. DJNF decrements and jumps while the result is not $FFFF_FFFF, so the body runs count+1 times (count = 0 once, count = 3 four times). The zero-start remark (:58-60) is right; the general formula is not.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:195 (`DJNF D,{#}S` ... jump if result is not $FFFF_FFFF)"
+ },
+ {
+  "id": "O13",
+  "kind": "internal-contradiction",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/cog_hub_execution.yaml:209-210",
+   "language/pasm2/concepts/cog_hub_execution.yaml:32-36",
+   "language/pasm2/concepts/cog_hub_execution.yaml:100"
+  ],
+  "claim": "performance_comparison.timing_critical.hubexec opens `' REP not available; use DJNZ` and ends `lack of REP`, while the same page states at :32-36, :100, :124, :172 and :415-425 that REP works in hubexec (hidden jump, 13+ clocks per iteration).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:773"
+ },
+ {
+  "id": "O14",
+  "kind": "wrong-claim",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/basic-io.yaml:394-395"
+  ],
+  "claim": "`consequence: Behavior undefined if COGs drive conflicting states (not documented in P2 spec)` / `No documented conflict resolution, wire-OR, or priority scheme`. The silicon doc states that the cogs' DIR and OUT bits are OR'd before going to the pins.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3725 (`... in the same way DIR and OUT bits are OR'd before going to the pins`)"
+ },
+ {
+  "id": "O15",
+  "kind": "wrong-formula",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/streamer_smartpin_control.yaml:346",
+   "language/pasm2/concepts/streamer_smartpin_control.yaml:348-353"
+  ],
+  "claim": "`bits_per_streamer_clk = 2^32 / SETXFRQ_value`: the NCO fraction is SETXFRQ_value / $8000_0000 (full scale $8000_0000, not 2^32) and it is the fraction of sysclk, not 'bits per streamer clock' of the inverse. With the page's own numbers the formula gives 2^32/$4000_0000 = 4 where the text says 1 bit per 2 sysclks. The worked values ($4000_0000 = sysclk/2, $2000_0000 = sysclk/4) are right.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1294-1305"
+ },
+ {
+  "id": "O16",
+  "kind": "wrong-semantics (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/patterns/implementation/pasm2_hub_synchronization.yaml:13-14",
+   "language/pasm2/patterns/implementation/pasm2_hub_synchronization.yaml:18"
+  ],
+  "claim": "`rdlong value, hub_ptr  wc ' Read from hub, set C if non-zero` -- RDLONG WC puts the MSB (bit 31) of the long in C, not 'non-zero' (WZ gives zero); and `waitx ##20-2 ' Wait for hub window` -- WAITX only burns clocks, the hub access aligns itself to the egg-beater slot (9...16 clocks); there is no hub-window wait to code. The pattern ('hub synchronization') therefore synchronizes nothing.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:178 (`RDLONG ... C = MSB of long`)"
+ },
+ {
+  "id": "O17",
+  "kind": "wrong-claim",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/conditional_execution.yaml:146",
+   "language/pasm2/concepts/conditional_execution.yaml:22",
+   "language/pasm2/concepts/conditional_execution.yaml:324"
+  ],
+  "claim": "`use: Unsigned below/equal, signed less/equal` is given for IF_NC_OR_Z (%1011, C=0 OR Z=1); below-or-equal is %1110 IF_C_OR_Z (also listed at :170, with IF_BE/IF_LE). And :22/:29/:324/:370 ('EVERY PASM2 instruction can ... be executed conditionally', 'Works on ALL instructions') are contradicted by NOP (see defect conditional-nop).",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:444, :454-458 (IF_NC_OR_Z has no BE/LE alias; IF_C_OR_Z = IF_LE = IF_BE)"
+ },
+ {
+  "id": "O18",
+  "kind": "not-an-instruction",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/idioms/loop-control.yaml:27-35"
+  ],
+  "claim": "loop_instruction: `pattern: \"loop\"`, 'Loop instruction marker' / 'Loop end marker for REP instruction' with examples `sample_cy loop`, `Field loop`, `main loop` (and related: `rep.yaml # LOOP end marker is documented within rep.yaml`, :100). PASM2 has no LOOP instruction or marker; the examples are corpus tokens (a label word followed by the word loop) and compile only as label + label.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv (no LOOP row); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:766-771 (REP @.end form)"
+ },
+ {
+  "id": "O19",
+  "kind": "internal-contradiction",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/register_indirection.yaml:106-113",
+   "language/pasm2/concepts/register_indirection.yaml:128",
+   "language/pasm2/concepts/register_indirection.yaml:186",
+   "language/pasm2/concepts/register_indirection.yaml:188"
+  ],
+  "claim": "The page both teaches back-to-back ALT stacking (`ALTS src_index` / `ALTD dst_index` / `MOV 0-0, 0-0`, :106-113; 'Back-to-back ALTx possible', :128) and denies it ('Cannot chain (each affects only next instruction)', :186; 'Cannot modify ALTx instructions themselves', :188). Also :14-15 'Next_S = base + index_reg[8:0]' omits that D += S[17:9] (the update the `++` fiction at :95-97 distorts).",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:140-143; engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:513-520"
+ },
+ {
+  "id": "O20",
+  "kind": "wrong-timing",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/branch_addressing.yaml:53",
+   "language/pasm2/concepts/branch_addressing.yaml:121-124",
+   "language/pasm2/concepts/branch_addressing.yaml:106"
+  ],
+  "claim": "'pipeline: 2-cycle latency for all jumps', 'Branch taken: 2-cycle penalty', 'RET instruction: 2-cycle penalty' -- a taken cog branch is 4 clocks and a hub-exec branch 13...20 (cog_hub_execution.yaml:26, :31 on the same subject); and `long_branches: Branches beyond +-1MB: Use AUGS for extended range` -- the hub is 1 MB (20-bit addresses) and AUGS only extends an immediate; there is no beyond-1MB branch.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:193, :195 (DJNZ/DJNF `2 or 4`, hub `2 or 13...20`); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:750-751"
+ },
+ {
+  "id": "O21",
+  "kind": "wrong-test (compiles)",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/concepts/conditional_execution.yaml:231-234",
+   "language/pasm2/concepts/conditional_execution.yaml:224-227"
+  ],
+  "claim": "`TEST value, #$80 WZ ' Test sign bit / IF_Z ADD sum, value ' Add if positive`: `#$80` tests bit 7 (a byte's sign), not the sign bit of the 32-bit register (bit 31, `#$8000_0000` needs `##`), and TEST WZ sets Z when the masked bits are all ZERO, so IF_Z means 'bit clear'. Also `branchless_min_max` (:224) uses unsigned CMP (`IF_C MOV min_val, a`), fine for unsigned only.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv (TEST D,S: AND, flags only)"
+ },
+ {
+  "id": "O22",
+  "kind": "copy-paste-example",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/pasm2/groups/counter_event_polls.yaml:21",
+   "language/pasm2/groups/counter_event_waits.yaml:21",
+   "language/pasm2/groups/counter_event_jumps.yaml:27"
+  ],
+  "claim": "The same example (ADDCT1 + `JCT1 #timeout_handler`) is the only example on the POLL group and the WAIT group pages, where JCT1 (a jump) is neither a poll nor a wait; counter_event_jumps.yaml:21-23 also carries `timing_details: 'Timing: 1'` (a stub value) while the polls/waits pages say 'See individual instructions'.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:169-206 (POLLCTx / WAITCTx / JCTx rows)"
+ },
+ {
+  "id": "O23",
+  "kind": "wrong-operand (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/pasm2/concepts/labels.yaml:110",
+   "language/pasm2/concepts/labels.yaml:101-104"
+  ],
+  "claim": "`MOV ptr, @hub_data` for 'Hub address of label' (see S-042 site): needs `##@hub_data`. And absolute_cog `#\\label` is documented as 'Absolute COG-relative address (forces 9-bit)'; the backslash forces ABSOLUTE addressing (R=0) of the 20-bit field (`JMP #\\@hub` 'hub to hub, force absolute'), not a 9-bit form.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:750-751; engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:428-429 (`\"\\\\\" forces R = 0`)"
+ }
+]

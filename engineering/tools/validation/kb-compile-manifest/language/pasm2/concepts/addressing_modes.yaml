@@ -1,0 +1,147 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/addressing_modes.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: modes.immediate.examples[0]
+    fp: "d1548bb5f090b636"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183+S-008"
+  - at: modes.immediate.examples[1]
+    fp: "d1548bb5f090b636"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183+S-008"
+  - at: modes.immediate.examples[2]
+    fp: "d1548bb5f090b636"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183+S-008"
+  - at: modes.register_direct.examples[0]
+    fp: "7fedf26d5aa74353"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dest, source]
+  - at: modes.register_direct.examples[1]
+    fp: "b13c9b97f5903d21"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [accumulator, value]
+  - at: modes.register_indirect.examples[0]
+    fp: "f22152bd122ed57f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value]
+  - at: modes.register_indirect.examples[1]
+    fp: "d04f6a34c285e127"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value]
+  - at: modes.indexed.examples[0]
+    fp: "c4bfdcec2577e496"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: modes.indexed.examples[1]
+    fp: "1e64ee3ebb63830f"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: modes.auto_increment.examples[0]
+    fp: "7cdb1addeaeab995"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: modes.auto_increment.examples[1]
+    fp: "475a36629f109a3e"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: modes.auto_increment.examples[2]
+    fp: "e03acbd4ad1cf5fd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value]
+  - at: modes.auto_decrement.examples[0]
+    fp: "c462ecb1b7694d06"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: modes.auto_decrement.examples[1]
+    fp: "1e06486f76382b75"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value]
+  - at: modes.post_modify.examples[0]
+    fp: "f9cc4f2f675d68a9"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: modes.post_modify.examples[1]
+    fp: "1df3098d20829134"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008+S-185"
+  - at: modes.absolute.examples[0]
+    fp: "f03fa4d283207d35"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183+S-008"
+  - at: modes.absolute.examples[1]
+    fp: "b6a8cd0bffba3c7c"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183+S-008"
+  - at: modes.bit_addressing.examples[0]
+    fp: "33a97e1a7b75b6e0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags]
+    finding: "S-183"
+  - at: modes.bit_addressing.examples[1]
+    fp: "4525333785d24264"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags, READY_BIT=con]
+    finding: "S-183"
+  - at: modes.bit_addressing.examples[2]
+    fp: "5412a0336bed6b0b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags]
+    finding: "S-183"
+  - at: special_cases.altx_modified.examples[0]
+    fp: "407434258c10d8a0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [index]
+  - at: special_cases.altx_modified.examples[1]
+    fp: "ba478c9c6d95ef65"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [index]
+  - at: special_cases.altx_modified.examples[2]
+    fp: "3d5a853926d6ee81"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [index]
+  - at: special_cases.setq_block.examples[0]
+    fp: "4c61a10e4e0730d6"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183"
+  - at: special_cases.setq_block.examples[1]
+    fp: "0becbe1492904b47"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [base, hub_ptr]
+  - at: special_cases.rep_block.examples[0]
+    fp: "8d65b9eee5e4cf25"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183"
+  - at: special_cases.rep_block.examples[1]
+    fp: "a6b66fd4774bd9f7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [end_label, count]

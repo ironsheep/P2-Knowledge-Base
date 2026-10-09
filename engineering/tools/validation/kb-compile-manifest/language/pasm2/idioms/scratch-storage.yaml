@@ -1,0 +1,32 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/scratch-storage.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "72476fc829a1dfc7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, x, computed_value]
+    finding: "S-197"
+  - at: idioms[1].pattern
+    fp: "968cd8fff57fec6e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [base=con]
+  - at: idioms[1].examples[0]
+    fp: "2c73ed9d253d0bb7"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[2].description
+    fp: "0d97f97657210ed7"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: idioms[2].examples[0]
+    fp: "9cfb45e1530440a8"
+    compile: not-code
+    reason: "comment-only block (one `'` line); there is no statement to compile"
+  - at: idioms[2].examples[1]
+    fp: "1c070ce41fcd2aa8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [accumulator]

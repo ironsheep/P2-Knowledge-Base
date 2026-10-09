@@ -1,0 +1,128 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/setq_block_ops.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: overview
+    fp: "f9e4ac560964595f"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: silicon_errata.intervening_altx_augs_augd_cancels_ptrx_block_delta.description
+    fp: "76fe827e549800f3"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: silicon_errata.intervening_altx_augs_augd_cancels_ptrx_block_delta.example
+    fp: "548f33a524adc8a1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [start_reg]
+  - at: setq_instructions.SETQ.example
+    fp: "be9561c716af8b14"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: setq_instructions.SETQ2.example
+    fp: "91a588ffabe45557"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: block_operations.hub_to_cog_transfer.syntax
+    fp: "b624a98954293d31"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:16, first_cog_reg, hub_address]
+  - at: block_operations.hub_to_cog_transfer.example
+    fp: "8350325685de28cd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [buffer, source_data=con]
+  - at: block_operations.hub_to_cog_transfer.debug_use
+    fp: "73499404faee4d71"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [regh]
+  - at: block_operations.cog_to_hub_transfer.syntax
+    fp: "4937deead78b13d0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:16, first_cog_reg, hub_address]
+  - at: block_operations.cog_to_hub_transfer.example
+    fp: "6e81f521562f7b17"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [results]
+  - at: block_operations.hub_to_lut_transfer.syntax
+    fp: "8d931b627bfa2d9f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:16, hub_address]
+  - at: block_operations.hub_to_lut_transfer.critical_pattern
+    fp: "7921db37aecb3f57"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sine_table_hub=con, value, phase]
+  - at: block_operations.lut_to_hub_transfer.syntax
+    fp: "9b35408b16bf5d64"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:16, hub_address]
+  - at: block_operations.lut_to_hub_transfer.debug_pattern
+    fp: "2a75d23c69a5946f"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: production_patterns.waveform_buffer_management.code
+    fp: "eee68c2643fa1383"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sample_ptr, index, sample, dc_offset, output_ptr]
+  - at: special_operations.full_width_q_value.description
+    fp: "1b88a0e34968959a"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: block_fill.hub_fill.syntax
+    fp: "63b16c4c4868031d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:16, value=con, hub_address]
+  - at: block_fill.hub_fill.example
+    fp: "32eefe94be8a287c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [buffer_hub=con]
+  - at: common_patterns.array_copy.code
+    fp: "fe6012b7b1b6c571"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [array_size=con:16, dest_array, source_ptr]
+  - at: common_patterns.buffer_clear.code
+    fp: "aec6893db697bc9c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [buffer_size=con:16, buffer_start=con]
+  - at: common_patterns.context_save.code
+    fp: "d943fe7eff8abd0f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [context_ptr]
+  - at: common_patterns.context_restore.code
+    fp: "b6b5b1d8928f02f1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [context_ptr]
+  - at: common_patterns.lut_table_load.code
+    fp: "cb4fe7a238384266"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sine_table=con]
+  - at: common_patterns.fast_memcpy.code
+    fp: "b099a16c52830214"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [temp_buffer, src_ptr, dst_ptr, count]
+  - at: advanced_usage.partial_transfers.example
+    fp: "22c737f1ee12c02c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, actual_size, buffer]
+  - at: advanced_usage.strided_access.example
+    fp: "c556c409347c8fd5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [index, temp, source_ptr, buffer, count]

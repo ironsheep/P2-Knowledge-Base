@@ -1,0 +1,117 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/conditional_execution.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax_rules.condition_prefix.examples[0]
+    fp: "79ece95b023552c9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: syntax_rules.condition_prefix.examples[1]
+    fp: "d9a2ea544adf3180"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x]
+  - at: syntax_rules.condition_prefix.examples[2]
+    fp: "63fe03d67ecfaf67"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: syntax_rules.flag_suffixes.examples[0]
+    fp: "cda384f247fd52b5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: syntax_rules.flag_suffixes.examples[1]
+    fp: "3096c6824a5c1db4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: syntax_rules.flag_suffixes.examples[2]
+    fp: "03a94fd640d414fd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: usage_patterns.any_instruction_conditional.code
+    fp: "708bc8bbe084079b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y, mask, pattern, flags, value, ptr, address, error_handler, process_zero]
+    finding: "S-186"
+  - at: usage_patterns.branchless_min_max.code
+    fp: "c37953dd6242515d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [a, b, min_val]
+  - at: usage_patterns.conditional_accumulation.code
+    fp: "51da54fda85e1151"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, sum]
+  - at: usage_patterns.multi_way_decision.code
+    fp: "6b4b9918340beb35"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [state, state0, state1, state2, default]
+  - at: ret_prefix_rule.full_semantics
+    fp: "592b22ef61b16ad6"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: ret_prefix_rule.on_branching_instructions
+    fp: "401cf3369d4951a5"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: ret_prefix_rule.correct_form
+    fp: "d890326db0587040"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [helper]
+  - at: special_patterns.return_conditions.code
+    fp: "7c37de4942646a71"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, limit]
+  - at: special_patterns.conditional_flag_updates.code
+    fp: "66d9755998658c81"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: special_patterns.test_and_branch_alternative.traditional
+    fp: "7190ca28d3f595b2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags, READY_BIT=con, wait_loop]
+  - at: special_patterns.test_and_branch_alternative.efficient
+    fp: "00099a859beb66f1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags, READY_BIT=con]
+  - at: common_mistakes[0].right
+    fp: "78e71e808700a8eb"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [helper]
+  - at: common_mistakes[1].wrong
+    fp: "f681d82b092bdbe1"
+    compile: not-code
+    reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"
+  - at: common_mistakes[1].right
+    fp: "2fdf6685552fc21d"
+    compile: not-code
+    reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"
+  - at: common_mistakes[3].wrong
+    fp: "8541085be1368597"
+    compile: not-code
+    reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"
+  - at: common_mistakes[3].right
+    fp: "84c0e1b5318bf05b"
+    compile: not-code
+    reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"
+  - at: common_mistakes[4].wrong
+    fp: "c133f12a5aae2009"
+    compile: not-code
+    reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"
+  - at: common_mistakes[4].right
+    fp: "287ba05522db6e3b"
+    compile: not-code
+    reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"

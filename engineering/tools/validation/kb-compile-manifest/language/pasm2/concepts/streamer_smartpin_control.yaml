@@ -1,0 +1,98 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/streamer_smartpin_control.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: streamer_system.streamer_commands.XINIT.critical_timing
+    fp: "ccea1786cabfa897"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_ck=con, rmode]
+  - at: smart_pin_system.configuration.WRPIN.example
+    fp: "94cfa8611ba3fb20"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [tx_pin=con]
+  - at: smart_pin_system.configuration.WXPIN.spi_clock_example
+    fp: "93e80c03e0fa7c85"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_ck=con]
+  - at: smart_pin_system.configuration.WYPIN.multiple_uses
+    fp: "5dd3b5dd5a1f6ca1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [drive_pins, drive_u_, pin_pwm_u_l, adc_pins]
+  - at: smart_pin_system.status_operations.RDPIN.example
+    fp: "a9255c0964bedadf"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, process_received_byte, rx_pin=con]
+    finding: "S-195"
+  - at: smart_pin_system.status_operations.TESTP.hall_sensor_example
+    fp: "4682773dd0a1619e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_hall_w, hall_, pin_hall_v, pin_hall_u]
+  - at: smart_pin_modes.serial_modes.async_tx.example
+    fp: "ec312b2b679ad0fe"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin=con, baud_timing, char]
+  - at: smart_pin_modes.serial_modes.async_rx.example
+    fp: "c2d3012e78297783"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin=con, baud_timing, char]
+  - at: smart_pin_modes.serial_modes.spi_modes.transition_clock.code
+    fp: "7e9e19eea7650445"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_ck=con]
+  - at: smart_pin_modes.pulse_modes.pwm_sawtooth.dead_time_critical
+    fp: "4669ed4560b83ded"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [drive_u_, dead_gap_, pin_pwm_u_l, pin_pwm_u_h]
+  - at: smart_pin_modes.measurement_modes.quadrature_decoder.code
+    fp: "7640a5e4d6f8b1e9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [encoder_pin_a, position]
+  - at: smart_pin_modes.adc_modes.calibrated_adc.calibration_sequence
+    fp: "b13eee793dc9f65a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [adc_modes, adc_pins, adc_fram, gio_levels, pin_adc_u_i, vio_levels]
+  - at: smart_pin_modes.repository_mode.data_mailbox.code
+    fp: "7013854be88f4522"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [repo_pin, data_value, received]
+  - at: common_patterns.spi_flash_access.code
+    fp: "523e4295867cd221"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_ck=con, x, wmode]
+  - at: common_patterns.motor_control_pwm.code
+    fp: "238245692a463980"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pwmn, pin_pwm_u_l, pwmt, pin_pwm_u_h, fram, drive_pins, drive_u_, dead_gap_]
+  - at: coordination.bit_edge_lockstep.rule
+    fp: "40e6859c1b9799e2"
+    compile: not-code
+    reason: "prose rule with pseudo-formulas (`bits_per_streamer_clk = 2^32 / SETXFRQ_value`, `->` arrows) and a worked list; English text with arithmetic notation, neither Spin2 nor PASM2 source"
+  - at: coordination.bit_edge_lockstep.worked_examples
+    fp: "65ba083c94ecf991"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [SCK_PIN=con]
+  - at: coordination.alignment_pad.code
+    fp: "eacd1ce13a38d84e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [bit_count_doubled, SCK_PIN=con, input_streamer_mode]
+  - at: coordination.alignment_pad.timing_theory
+    fp: "d0193c052e527cf9"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

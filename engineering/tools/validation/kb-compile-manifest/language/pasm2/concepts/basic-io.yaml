@@ -1,0 +1,121 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/basic-io.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: single_pin_operations.set_output_high.example
+    fp: "ec61c90838869ee2"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: single_pin_operations.set_output_low.example
+    fp: "e7c4f3f5b3cabbce"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: single_pin_operations.toggle_output.example
+    fp: "4f770ea277c2d595"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: single_pin_operations.float_pin.example
+    fp: "da7469d6ab96fde6"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: single_pin_operations.read_pin.example
+    fp: "61d51348a1c3b7fb"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: single_pin_operations.read_pin_inverted.example
+    fp: "68e612c284eac676"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: multi_pin_operations.set_direction.example
+    fp: "a3c3545b5750b72c"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-184"
+  - at: multi_pin_operations.set_output.example
+    fp: "12465c4ec3dd4a70"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-184"
+  - at: multi_pin_operations.drive_pins.example
+    fp: "d6f46c126c6c95d0"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-184"
+  - at: multi_pin_operations.register_masking.example
+    fp: "154b88043ae2a528"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mask]
+  - at: pin_field_encoding.addpins_operator.example
+    fp: "6c357796570a73af"
+    compile: not-code
+    reason: "operand-notation gloss `#8 ADDPINS #7 = pins 8 through 15`: an operand expression followed by a prose result, not a statement (its `ADDPINS #7` spelling is the class registered for addressing_modes-style examples, see defects addpins-hash-count)"
+  - at: pin_field_encoding.manual_encoding.example
+    fp: "68943a5d52882d19"
+    compile: not-code
+    reason: "arithmetic gloss `(7 << 6) | 8 = $1C8 = pins 8-15`: an expression with its value, not a statement"
+  - at: pin_span_setq_override.dir_out_instructions.example
+    fp: "cdd8ca5117cd3d6d"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: pin_span_setq_override.smart_pin_instructions.example
+    fp: "120e01f267e7b4a0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mode]
+  - at: internal_pull_resistors.pull_a_line_high.example
+    fp: "7958f4b72a54b799"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: internal_pull_resistors.pull_a_line_low.example
+    fp: "b5b4394272fc2f3d"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: smart_pin_to_basic_io_transition.clearing_smart_pin.example
+    fp: "ec016565028f7e8e"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: smart_pin_to_basic_io_transition.safe_reconfiguration.sequence
+    fp: "6bd9aa67c2943545"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin, mode, x, y]
+  - at: safe_initialization_patterns.avoid_glitches.wrong
+    fp: "a1edfd43b9371270"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: safe_initialization_patterns.avoid_glitches.correct
+    fp: "166aa00c9b37a116"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: safe_initialization_patterns.use_combined_instructions.example
+    fp: "df53e0b96cc9ff3c"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_patterns.led_blink.code
+    fp: "ab07d4a9d71d69de"
+    compile: program
+  - at: common_patterns.button_read.code
+    fp: "d3851d3de793abff"
+    compile: program
+  - at: common_patterns.parallel_bus_write.code
+    fp: "52b3a07ef54c5c6d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [temp, data]
+    finding: "S-184"
+  - at: common_patterns.parallel_bus_read.code
+    fp: "5b2237ed111b9852"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data]
+    finding: "S-184"
+  - at: multi_cog_pin_coordination.coordination_strategies.single_cog_ownership.implementation
+    fp: "0c5be21237159bbb"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: multi_cog_pin_coordination.lock_coordination_example.code
+    fp: "7fcc663b6a5f8919"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_id, try_again]

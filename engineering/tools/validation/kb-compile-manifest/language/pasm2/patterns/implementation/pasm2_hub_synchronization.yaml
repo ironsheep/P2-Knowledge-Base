@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/patterns/implementation/pasm2_hub_synchronization.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation
+    fp: "3efd291725306c78"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [process_data]

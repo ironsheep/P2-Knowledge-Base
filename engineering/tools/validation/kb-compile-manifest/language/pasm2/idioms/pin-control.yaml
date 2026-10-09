@@ -1,0 +1,44 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/pin-control.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].description
+    fp: "f269ab1aa71d2f98"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: idioms[0].examples[0]
+    fp: "b9bd9207e23460b1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [LED_BASE=con]
+  - at: idioms[0].examples[1]
+    fp: "72879e7c46dbc55e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_di=con]
+  - at: idioms[0].examples[2]
+    fp: "6dc54fb3c5cccd01"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data_bus=con]
+  - at: idioms[1].examples[0]
+    fp: "d965cc6f787dbaba"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_di=con]
+  - at: idioms[1].examples[1]
+    fp: "1cc057cfd6ca0e7d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [parallel_data=con]
+  - at: idioms[2].examples[0]
+    fp: "f5e6cedc91c04d9f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [addr_bus=con]
+    finding: "S-167"
+  - at: idioms[2].examples[1]
+    fp: "b2025d84ed87d784"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [ctrl_bus=con]

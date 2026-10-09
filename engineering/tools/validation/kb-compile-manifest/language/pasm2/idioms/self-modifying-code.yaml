@@ -1,0 +1,35 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/self-modifying-code.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "b275ef2f06935fb1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dest_reg]
+    finding: "S-198"
+  - at: idioms[1].examples[0]
+    fp: "7943e90e3fa0eab8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [current_addr]
+    finding: "S-198"
+  - at: idioms[2].pattern
+    fp: "6aae1b039f3233cc"
+    compile: not-code
+    reason: "`pattern:` TEMPLATE with `{placeholder}` fields (e.g. `{interface_base}`, `{count - 1}`); the braces are fill-in marks, not source; the page's concrete forms are its `examples:` entries"
+  - at: idioms[2].examples[0]
+    fp: "6d032c4865504b19"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [op_erase_64k=con, op_erase_4k=con]
+    finding: "S-198"
+  - at: idioms[3].description
+    fp: "ac864db6e7578b42"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: idioms[3].examples[0]
+    fp: "8daccb89c662d30c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [index, base_reg, value]

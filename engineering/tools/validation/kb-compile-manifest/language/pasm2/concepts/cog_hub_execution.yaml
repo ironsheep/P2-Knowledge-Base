@@ -1,0 +1,89 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/cog_hub_execution.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: dynamic_overlay_system.debug_overlay_implementation.architecture
+    fp: "320c4a49057677c3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dbg_addr, bp_handler, debugger, overlay_begin, overlay_end=con:16]
+  - at: execution_control.switching_modes.cog_to_hub.example
+    fp: "2a505ce128c0e113"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [hub_routine]
+  - at: execution_control.switching_modes.hub_to_cog.example
+    fp: "27698943ef8fa646"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [load_cog_code]
+  - at: performance_comparison.timing_critical.cogexec
+    fp: "5227f9871de55c88"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [a, b, c, d, e]
+  - at: performance_comparison.timing_critical.hubexec
+    fp: "e7a2e9d7483d26dd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, a, b, c, d, e]
+  - at: performance_comparison.memory_intensive.cogexec
+    fp: "4ab94a68c954dbe3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, ptr]
+  - at: performance_comparison.memory_intensive.hubexec
+    fp: "fd909a0ac78de143"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, ptr]
+  - at: code_organization.hybrid_approach.example
+    fp: "a5ffc62823acfd49"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [load_critical_code, data, sum, peak, valley]
+    finding: "S-167+S-189"
+  - at: loading_strategies.initial_load.code
+    fp: "bd3d2a518f360dbd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [cog_code, parameters]
+    finding: "S-190"
+  - at: loading_strategies.dynamic_load.code
+    fp: "b13c13494b8fb7b1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [cog_start, cog_end=con:16]
+  - at: loading_strategies.overlay_system.code
+    fp: "20d8c37129d16f42"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [overlay1, overlay2]
+  - at: loading_strategies.demand_paging.code
+    fp: "1354a65193aaaaf3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [loaded_func, requested_func, load_function, function_base]
+  - at: common_mistakes[0].wrong
+    fp: "6f730c7e6ae3cc83"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_mistakes[0].right
+    fp: "5d0168a0a5a41169"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_mistakes[1].right
+    fp: "97aba672a07384a0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [load_cog_code]
+  - at: common_mistakes[5].wrong
+    fp: "e3d11aea99b85e29"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [overlay_base]
+  - at: common_mistakes[5].right
+    fp: "6dcb4ee23e20863f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [overlay_base]

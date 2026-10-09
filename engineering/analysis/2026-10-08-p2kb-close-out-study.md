@@ -420,6 +420,54 @@ behaviour reproduced with pnut-ts and filed as `DRAFTS/PNUT-TS-PUNCH-LIST.md` it
 | S-181 | B | G7 | hygiene | `debug.yaml:4`, `:11-13`: encoding and timing "TBD", description a placeholder | O12 | traced | stub page | to research (fill from the silicon doc and v55) | no |
 | S-182 | B | G7 | **drives wrong code** | `xinit.yaml:55-72`: the receive example's streamer count D[15:0] is 0 and the `setword` that sets it is missing | O13 | traced | — | to research | no |
 
+**ENH-03 B3, group G8 (`language/pasm2/` concepts, groups, idioms, patterns, registers; 396
+blocks, 35 files), 2026-10-09.** Evidence: `b3-g8-defects.json` (new classes; new sites for
+S-008 ×20, S-164 ×5, S-137 ×3, S-167 ×2, S-162, S-042, S-023), `b3-g8-class-map.json`,
+`b3-g8-observations.json`, and the arbiter's KB-wide sweep for S-183,
+`s183-yaml-hash-truncation-sweep.json`. Arbiter checks: re-applied in a fresh scratch root (same
+result); `silicon-doc-text.txt:3688` (LOCKTRY C = taken) and `:2051`, `:2053` (event 12 streamer,
+14 ATN) re-read and holding. Reviewer O8 joins S-023, O14 joins S-064, O23 joins S-042.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-183 | B | G8 | **drives wrong code** | **YAML eats PASM immediates.** A plain YAML scalar followed by ` #…` on the same line is cut there, because YAML reads ` #` as a comment: `- MOV reg, #42` is served as `MOV reg,`. 22 gated example sites, and the arbiter's KB-wide sweep finds **47 served strings in 15 files cut this way, including `syntax:` lines** (CALLD's syntax is served as `CALLD PA|PB|PTRA|PTRB,`) — most of them outside the compile gate's net | defects `yaml-hash-comment-truncates-code`; `s183-yaml-hash-truncation-sweep.json` (every site, the served text, the lost text) | traced | YAML authoring: unquoted scalars holding `#` | to research (quote every site; and the gate in S-200) | no |
+| S-184 | B | G8 | drives wrong code | `ADDPINS #7`; the count is a plain constant (5) | defects `addpins-hash-count` | traced | — | to research | no |
+| S-185 | B | G8 | drives wrong code | `PTRB++[-1]`; the index must be 1..16 | defects `ptrx-postmodify-negative-index` | traced | — | to research | no |
+| S-186 | B | G8 | drives wrong code | `IF_C NOP` (NOP is the all-zero word, so it cannot take a condition) | defects `conditional-nop` | traced | — | to research | no |
+| S-187 | B | G8 | drives wrong code | `RETI1 WCZ` (2); RETIx is already `CALLD … WCZ` | defects `reti-flag-effect` | traced | — | to research | no |
+| S-188 | B | G8 | drives wrong code | `#` used as a PASM comment inside block scalars (2) | defects `hash-comment-in-code` | traced | class with S-137 | to research (with S-137) | no |
+| S-189 | B | G8 | **drives wrong code** | P1 `MAX`/`MIN` instructions; P2 has FGE/FLE | defects `p1-max-min-instructions` | traced | P1 carry-over | to research (P1 class sweep) | no |
+| S-190 | B | G8 | drives wrong code | COGINIT with three operands (2); it takes two, with SETQ before it | defects `coginit-three-operands` | traced | — | to research (with S-172) | no |
+| S-191 | B | G8 | drives wrong code | `LONG @@x` in DAT | defects `at-at-operator-in-dat` | traced | — | to research (with S-107) | no |
+| S-192 | B | G8 | drives wrong code | `$$` used as the hub origin | defects `dollar-dollar-not-hub-origin` | traced | class with S-119 | to research (with S-119) | no |
+| S-193 | B | G8 | drives wrong code | an instruction mnemonic used as a constant: `##(ADD | …)` | defects `instruction-mnemonic-as-constant` | traced | — | to research | no |
+| S-194 | B | G8 | drives wrong code | `ALTS index++` (2); no such syntax | defects `alt-postincrement-syntax` | traced | invented syntax | to research | no |
+| S-195 | B | G8 | drives wrong code | `IF_C routine`, where `IF_C CALL #routine` is meant | defects `bare-label-as-instruction` | traced | — | to research | no |
+| S-196 | B | G8 | drives wrong code | one-operand `ADDCT1 ##n` on three group pages | defects `addct1-missing-operand` | traced | — | to research | no |
+| S-197 | B | G8 | drives wrong code | `ptr++` on a register that is not PTRA/PTRB (3) | defects `postincrement-on-plain-register` | traced | — | to research | no |
+| S-198 | F | G8 | hygiene (tooling) | **not a KB defect**: six excerpts reference a `.local` label defined outside them; the assume grammar has no local-label kind, and `with:` text lands before the `DAT`/`org` head, so PASM context cannot be supplied | defects `harness-gap-undefined-local-label` | traced | harness gap | fix in the next B3 tooling pass (a local-label kind, or `with` inside the wrap), then reclassify | yes |
+| S-199 | F | G8 | hygiene (tooling) | **not a KB defect**: one excerpt opens with a relative `$`-address on its first line | defects `harness-gap-relative-dollar-first-line` | traced | harness gap | with S-198 | yes |
+| S-200 | F | G8 | latent (gate) | no gate catches a YAML scalar silently cut by a same-line comment (S-183): every KB gate reads the parsed value, which looks fine | arbiter sweep method (compose the YAML; a plain scalar whose line continues with ` #<non-space>`) | traced | absent guard | build spec: a structural check in the YAML gate set, run at edit time and release | no |
+| S-201 | B | G8 | **drives wrong code** | `basic-io.yaml:404-405` (pasm2): `LOCKTRY … WC` then `IF_C JMP #try_again` "C=1 means locked by another"; C=1 means the lock was taken | O1; `silicon-doc-text.txt:3688`; instruction CSV `:270` | traced | flag inverted | to research | no |
+| S-202 | B | G8 | **drives wrong code** | `register_indirection.yaml:78-81`, `:171-177`: ALTB examples address register 0, not the named register | O2; `silicon-doc-text.txt:546-560` | traced | — | to research | no |
+| S-203 | B | G8 | drives wrong code | `register_indirection.yaml:47-51`: ALTR result register misdescribed | O3 | traced | — | to research | no |
+| S-204 | B | G8 | **drives wrong code** | `event_interrupt_config.yaml:236-240`: `SETINT3 #12 ' ATN event`; ATN is event 14, 12 is streamer rollover | O4; `silicon-doc-text.txt:2051`, `:2053` | traced | — | to research | no |
+| S-205 | B | G8 | drives wrong code | `event_interrupt_config.yaml:84-88`: RESIx "like RETI but continues the interrupted instruction" | O5 | traced | — | to research | no |
+| S-206 | B | G8 | **drives wrong code** | `branch_addressing.yaml:64-72`: CALLA/CALLB "PTRx = PC+4", "return address in PTRA"; they write {C,Z,PC} to hub at PTRx++ | O6; instruction CSV | traced | — | to research | no |
+| S-207 | B | G8 | drives wrong code | `special_registers.yaml:22`: `GETPTR` "reads PTRA/PTRB", and a SETPTR; GETPTR returns the FIFO hub pointer; there is no SETPTR | O7 | traced | invented instruction | to research | no |
+| S-208 | B | G8 | drives wrong code | `cordic_solver.yaml:105-109`: POLLQMT used as a non-blocking "result ready" check; the page itself says otherwise at `:155-157` | O9 | traced | self-contradiction | to research | no |
+| S-209 | B | G8 | drives wrong code | `rep_instruction.yaml:115-119`, `:135`: REP block sizes that do not match the bodies | O10 | traced | — | to research | no |
+| S-210 | B | G8 | wrong, not code-driving | `rep_instruction.yaml:15`, `:22`: block size "0-2^32-1 with ##"; D is 9 bits (as `rep.yaml` says) | O11 | traced | self-contradiction | to research | no |
+| S-211 | B | G8 | drives wrong code | `loop-control.yaml:64-65`: DJNF "runs max(1, count) times; safe for count=0" | O12 | traced | — | to research | no |
+| S-212 | B | G8 | wrong, not code-driving | `cog_hub_execution.yaml:209-210`: "REP not available" in hubexec, against the same page | O13 | traced | self-contradiction | to research | no |
+| S-213 | B | G8 | drives wrong code | `streamer_smartpin_control.yaml:346`: NCO full scale given as 2^32; it is $8000_0000 | O15 | traced | — | to research | no |
+| S-214 | B | G8 | **drives wrong code** | `pasm2_hub_synchronization.yaml`: `rdlong … wc ' set C if non-zero`; WC takes the MSB | O16 | traced | flag misreading | to research | no |
+| S-215 | B | G8 | drives wrong code | `conditional_execution.yaml:146`: IF_NC_OR_Z given as "unsigned below/equal"; that is IF_C_OR_Z | O17 | traced | — | to research | no |
+| S-216 | B | G8 | wrong, not code-driving | `loop-control.yaml:27-35`: a "loop" instruction/marker that does not exist | O18 | traced | invented | to research | no |
+| S-217 | B | G8 | latent | `register_indirection.yaml:106-113`: back-to-back ALT stacking taught, and contradicted elsewhere on the page | O19 | undetermined | self-contradiction | to research (silicon doc; bench only if silent) | no |
+| S-218 | B | G8 | wrong, not code-driving | `branch_addressing.yaml:53`: "2-cycle latency for all jumps" — branch timing misstated | O20 | traced | — | to research | no |
+| S-219 | B | G8 | drives wrong code | `conditional_execution.yaml:231-234`: `TEST value, #$80 WZ ' test sign bit` tests bit 7; `counter_event_polls.yaml:21`: the POLL and WAIT group pages share one JCT1 example that fits neither | O21; O22 | traced | — | to research | no |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

@@ -1,0 +1,78 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/stack_operations.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: stack_configurations.ascending_stack.example
+    fp: "c7d463354497abcb"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [stack_base=con, value, dest]
+  - at: stack_configurations.descending_stack.example
+    fp: "fdaea7a846139afd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [stack_top=con, value, dest]
+  - at: stack_configurations.circular_stack.implementation
+    fp: "2330b925f2c07594"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [STACK_MASK=con]
+  - at: auto_increment_modes.post_increment.example
+    fp: "a5b44614687db3fe"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: auto_increment_modes.pre_decrement.example
+    fp: "19323e6f26c33f00"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: auto_increment_modes.indexed_post_modify.example
+    fp: "1bac4f2b64024820"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: common_patterns.function_prologue.code
+    fp: "f679e8ed0000a791"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [old_ptra, work_reg1, work_reg2]
+  - at: common_patterns.function_epilogue.code
+    fp: "c71502c3db0cee1b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [work_reg2, work_reg1, old_ptra]
+  - at: common_patterns.parameter_passing.code
+    fp: "938716c79cd3eadd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [param3, param2, param1]
+  - at: common_patterns.local_variables.code
+    fp: "5fdac90b52bdd768"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_patterns.mixed_stacks.code
+    fp: "8f323ba38a6160e2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data_value, subroutine, leaf_function]
+  - at: stack_operations_advanced.block_push.code
+    fp: "5e4ce8ddabd3ef3c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [first_reg]
+  - at: stack_operations_advanced.block_pop.code
+    fp: "26a3dba67d3c6c7e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [first_reg]
+  - at: stack_operations_advanced.stack_check.code
+    fp: "d3da3b59fbc55726"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [stack_limit=con, stack_overflow]
+  - at: stack_operations_advanced.stack_trace.code
+    fp: "9ebd54fb4ed90eeb"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [stack_base=con, value]

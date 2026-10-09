@@ -1,0 +1,36 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/skipf_branching.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: overview
+    fp: "2b923401f2dc1ac2"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: execf_encoding.example
+    fp: "76fb22290c83850b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [next_phase]
+  - at: automatic_branch_before_skipping.example
+    fp: "d9da15cf04ca205a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [addr, pat]
+  - at: branch_timing.total_clocks.cog_lut_leap_case.example
+    fp: "56d1865d427e29e8"
+    compile: not-code
+    reason: "comment-only block (two `'` lines of timing arithmetic); there is no statement to compile"
+  - at: branch_timing.total_clocks.cancel_case_or_hub_exec.example
+    fp: "deaf4e9d92058b89"
+    compile: not-code
+    reason: "comment-only block (two `'` lines of timing arithmetic); there is no statement to compile"
+  - at: advanced_patterns.bytecode_dispatch.code
+    fp: "1269b4c760f40c56"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [i, e]
+  - at: advanced_patterns.shared_sequence_selection.code
+    fp: "27a4b71ac0fa5886"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pat, m, pbase, vbase, dbase, i]

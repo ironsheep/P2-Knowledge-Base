@@ -1,0 +1,53 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/special_registers.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: registers.interrupt_vectors[3].usage
+    fp: "8084c43ed79d6caf"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: access_patterns.explicit_access[1].examples[0]
+    fp: "c668200215b7d378"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: access_patterns.explicit_access[1].examples[1]
+    fp: "63c51fb2d9512085"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: access_patterns.explicit_access[1].examples[2]
+    fp: "411f574dfec9977c"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: access_patterns.explicit_access[1].examples[3]
+    fp: "657e01e168e916b4"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"
+  - at: access_patterns.implicit_access[1].examples[0]
+    fp: "f300b664d8b789d8"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: access_patterns.implicit_access[1].examples[1]
+    fp: "25c68c5635bd2639"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: access_patterns.implicit_access[1].examples[2]
+    fp: "ab638eea836c4d0b"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: access_patterns.implicit_access[1].examples[3]
+    fp: "928304cd5a327575"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: access_patterns.block_operations[1].examples[0]
+    fp: "4c61a10e4e0730d6"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-183"
+  - at: access_patterns.block_operations[1].examples[1]
+    fp: "7077b4de43186fea"
+    compile: fragment
+    wrap: pasm2-dat

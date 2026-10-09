@@ -1,0 +1,36 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/execution_modes.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: overview
+    fp: "39a30c978a97f9e4"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: mode_transitions.cog_to_hub.example
+    fp: "2b71f8279e60a2d1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [hub_func]
+  - at: mode_transitions.hub_to_cog.example
+    fp: "1a6120b88bd77346"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [cog_func]
+  - at: mode_transitions.lut_transitions.example
+    fp: "9265365cdb9c3fbc"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: code_organization.mixed_mode.example
+    fp: "ab5e279bacbdca15"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: code_organization.loading_code.to_cog
+    fp: "47bf033038b4b99c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x=con, first_reg, hub_addr]
+  - at: code_organization.loading_code.to_lut
+    fp: "de0c2248d8b599e1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [hub_addr]

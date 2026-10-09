@@ -1,0 +1,19 @@
+{
+ "yaml-hash-comment-truncates-code": "S-183",
+ "addpins-hash-count": "S-184",
+ "ptrx-postmodify-negative-index": "S-185",
+ "conditional-nop": "S-186",
+ "reti-flag-effect": "S-187",
+ "hash-comment-in-code": "S-188",
+ "p1-max-min-instructions": "S-189",
+ "coginit-three-operands": "S-190",
+ "at-at-operator-in-dat": "S-191",
+ "dollar-dollar-not-hub-origin": "S-192",
+ "instruction-mnemonic-as-constant": "S-193",
+ "alt-postincrement-syntax": "S-194",
+ "bare-label-as-instruction": "S-195",
+ "addct1-missing-operand": "S-196",
+ "postincrement-on-plain-register": "S-197",
+ "harness-gap-undefined-local-label": "S-198",
+ "harness-gap-relative-dollar-first-line": "S-199"
+}

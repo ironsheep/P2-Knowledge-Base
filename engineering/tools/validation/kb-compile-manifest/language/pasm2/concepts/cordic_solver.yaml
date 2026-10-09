@@ -1,0 +1,33 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/cordic_solver.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage_patterns.basic_pattern.code
+    fp: "9ad34c052b656f5d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [multiplicand, multiplier, product_lo, product_hi]
+  - at: usage_patterns.pipelined_pattern.code
+    fp: "49ecc953e9d1f899"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [a0, b0, a1, b1, a2, b2, result_lo, result_hi, a_next, b_next, count]
+  - at: usage_patterns.non_blocking_check.code
+    fp: "5a29e230a3fe627c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [result]
+  - at: interrupt_protection.basic_protection.code
+    fp: "2674ecb4ed1ae61c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [multiplicand, multiplier, result_lo, result_hi]
+  - at: interrupt_protection.extended_protection.code
+    fp: "17729a1a0def0c8e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, output, result]
+  - at: result_retrieval.blocking_behavior
+    fp: "08adff0ccfce3d1d"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

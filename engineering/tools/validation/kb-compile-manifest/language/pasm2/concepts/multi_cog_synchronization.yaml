@@ -1,0 +1,74 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/multi_cog_synchronization.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: hardware_primitives.locks.lock_operations.LOCKTRY.example
+    fp: "fef2aed89100d4f0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [RESOURCE_LOCK=con]
+  - at: hardware_primitives.attention_signals.operations.COGATN.example
+    fp: "5d078881a1bb8176"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: hardware_primitives.shared_memory.coordination_pattern
+    fp: "47413ddcdd194448"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [request, flag]
+    finding: "S-164"
+  - at: resource_protection_patterns.simple_mutex.code
+    fp: "bc4e096d3a3c691b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_select, spi_transfer, spi_deselect]
+    finding: "S-164"
+  - at: resource_protection_patterns.timeout_mutex.code
+    fp: "32a82cbba7c6052a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timeout, RESOURCE_LOCK=con, result]
+  - at: resource_protection_patterns.multi_resource.code
+    fp: "a43002091d16c73d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [LOCK_A=con, LOCK_B=con, LOCK_C=con]
+  - at: resource_protection_patterns.scoped_lock.code
+    fp: "082f0b44675c60de"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, flags, HAVE_LOCK=con, complex_work]
+  - at: producer_consumer_patterns.ring_buffer.code
+    fp: "bd98ea6993137b00"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [head, next_head, tail, data, addr]
+    finding: "S-164+S-162"
+  - at: producer_consumer_patterns.mailbox_system.code
+    fp: "bde9faaf9eda778d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mask, target_cog, flag, message, handle_message]
+    finding: "S-164"
+  - at: smart_pin_repository.pattern
+    fp: "dd312f29a121332b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [REPO_PIN=con, data_value]
+  - at: parallel_processing_patterns.work_distribution.code
+    fp: "c649440084045ece"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [work_index, cog_num, worker_code, WORK_CHUNK=con, mask]
+    finding: "S-190"
+  - at: parallel_processing_patterns.barrier_synchronization.code
+    fp: "167fdb2c14d82a31"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [old, new, check, count]
+    finding: "S-164"
+  - at: synchronization_hazards.deadlock.example
+    fp: "ed452f8b8c013c2f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [LOCK_1=con, LOCK_2=con]

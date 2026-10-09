@@ -1,0 +1,331 @@
+[
+ {
+  "file": "language/pasm2/calld.yaml",
+  "line": 2,
+  "key": "syntax",
+  "served": "CALLD PA|PB|PTRA|PTRB,",
+  "lost": "#{\\}Addr | CALLD Dest, {#}Src {WC|WZ|WCZ}"
+ },
+ {
+  "file": "language/pasm2/calld.yaml",
+  "line": 58,
+  "key": "syntax_variants",
+  "served": "CALLD PA,",
+  "lost": "#Addr"
+ },
+ {
+  "file": "language/pasm2/calld.yaml",
+  "line": 59,
+  "key": "syntax_variants",
+  "served": "CALLD PB,",
+  "lost": "#Addr"
+ },
+ {
+  "file": "language/pasm2/calld.yaml",
+  "line": 60,
+  "key": "syntax_variants",
+  "served": "CALLD PTRA,",
+  "lost": "#Addr"
+ },
+ {
+  "file": "language/pasm2/calld.yaml",
+  "line": 61,
+  "key": "syntax_variants",
+  "served": "CALLD PTRB,",
+  "lost": "#Addr"
+ },
+ {
+  "file": "language/pasm2/rep.yaml",
+  "line": 15,
+  "key": "constraints",
+  "served": "Instruction count is D[8:0] only (maximum 511 instructions, whether D is",
+  "lost": "#immediate or a register); it does not extend beyond 9 bits"
+ },
+ {
+  "file": "language/pasm2/rep.yaml",
+  "line": 16,
+  "key": "constraints",
+  "served": "Maximum 511 iterations with",
+  "lost": "#immediate; use ## or register for S up to 2^32-1"
+ },
+ {
+  "file": "language/pasm2/augd.yaml",
+  "line": 75,
+  "key": "description",
+  "served": "Using",
+  "lost": "## syntax (compiler auto-generates AUGD)"
+ },
+ {
+  "file": "language/pasm2/callb.yaml",
+  "line": 2,
+  "key": "syntax",
+  "served": "CALLB",
+  "lost": "#{\\}Addr | CALLB Dest {WC|WZ|WCZ}"
+ },
+ {
+  "file": "language/pasm2/adds.yaml",
+  "line": 5,
+  "key": "description",
+  "served": "ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use",
+  "lost": "##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of (D + S) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative). C is NOT a signed-overflow indicator. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero. To add signed, multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values."
+ },
+ {
+  "file": "language/pasm2/call.yaml",
+  "line": 2,
+  "key": "syntax",
+  "served": "CALL",
+  "lost": "#{\\}Addr | CALL Dest {WC|WZ|WCZ}"
+ },
+ {
+  "file": "language/pasm2/call.yaml",
+  "line": 50,
+  "key": "syntax_variants",
+  "served": "CALL",
+  "lost": "#Addr"
+ },
+ {
+  "file": "language/pasm2/call.yaml",
+  "line": 51,
+  "key": "syntax_variants",
+  "served": "CALL",
+  "lost": "#\\Addr"
+ },
+ {
+  "file": "language/pasm2/xzero.yaml",
+  "line": 50,
+  "key": "XSTOP",
+  "served": "Stop streamer immediately (alias for XINIT",
+  "lost": "#0,#0)"
+ },
+ {
+  "file": "language/pasm2/calla.yaml",
+  "line": 2,
+  "key": "syntax",
+  "served": "CALLA",
+  "lost": "#{\\}Addr | CALLA Dest {WC|WZ|WCZ}"
+ },
+ {
+  "file": "language/pasm2/wrpin.yaml",
+  "line": 64,
+  "key": "description",
+  "served": "A smart pin should be configured by WRPIN while DIR is low; WRPIN",
+  "lost": "#0 on a running pin resets it with no DIR cycle"
+ },
+ {
+  "file": "language/pasm2/setxfrq.yaml",
+  "line": 39,
+  "key": "notes",
+  "served": "Use",
+  "lost": "## for 32-bit immediate values"
+ },
+ {
+  "file": "language/pasm2/augs.yaml",
+  "line": 2,
+  "key": "syntax",
+  "served": "AUGS",
+  "lost": "#Src"
+ },
+ {
+  "file": "language/pasm2/augs.yaml",
+  "line": 95,
+  "key": "description",
+  "served": "Using",
+  "lost": "## syntax (compiler inserts AUGS automatically)"
+ },
+ {
+  "file": "language/pasm2/concepts/rep_instruction.yaml",
+  "line": 15,
+  "key": "block_size",
+  "served": "Number of instructions to repeat (0-511 with",
+  "lost": "#, 0-2^32-1 with ## or register)"
+ },
+ {
+  "file": "language/pasm2/concepts/rep_instruction.yaml",
+  "line": 16,
+  "key": "count",
+  "served": "Number of iterations (0-511 with",
+  "lost": "#, 0-2^32-1 with ## or register)"
+ },
+ {
+  "file": "language/pasm2/concepts/special_registers.yaml",
+  "line": 89,
+  "key": "examples",
+  "served": "SETQ",
+  "lost": "#15       ' Setup for 16 long transfer"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 18,
+  "key": "examples",
+  "served": "JMP",
+  "lost": "#@forward_label    # Jump to label (relative)"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 19,
+  "key": "examples",
+  "served": "CALL",
+  "lost": "#@subroutine      # Call with relative address"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 20,
+  "key": "examples",
+  "served": "IF_Z JMP",
+  "lost": "#@skip        # Conditional relative jump"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 29,
+  "key": "examples",
+  "served": "JMP",
+  "lost": "#\\\\hub_routine      # Jump to absolute hub address"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 30,
+  "key": "examples",
+  "served": "CALL",
+  "lost": "#\\\\$10000          # Call absolute address"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 31,
+  "key": "examples",
+  "served": "JMP",
+  "lost": "#cog_routine       # Jump within cog (absolute)"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 68,
+  "key": "examples",
+  "served": "CALLA",
+  "lost": "#@function       # Return address in PTRA"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 69,
+  "key": "examples",
+  "served": "CALLB",
+  "lost": "#@function       # Return address in PTRB"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 79,
+  "key": "examples",
+  "served": "CALLD link_reg,",
+  "lost": "#@function"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 100,
+  "key": "examples",
+  "served": "JMP",
+  "lost": "#\\\\$400            # Enter hub execution"
+ },
+ {
+  "file": "language/pasm2/concepts/branch_addressing.yaml",
+  "line": 101,
+  "key": "examples",
+  "served": "CALL",
+  "lost": "#@hub_function   # Call hub from cog"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 16,
+  "key": "9-bit",
+  "served": "",
+  "lost": "#0 to #511 (literal fits the instruction's 9-bit S or D field)"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 17,
+  "key": "32-bit",
+  "served": "",
+  "lost": "##$0 to ##$FFFFFFFF (full 32-bit literal via an augment prefix)"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 19,
+  "key": "examples",
+  "served": "MOV reg,",
+  "lost": "#42          ' 9-bit immediate"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 20,
+  "key": "examples",
+  "served": "MOV reg,",
+  "lost": "##1000       ' 32-bit Src immediate (AUGS prefix added)"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 21,
+  "key": "examples",
+  "served": "MOV reg,",
+  "lost": "##$12345678  ' 32-bit Src immediate (AUGS prefix added)"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 88,
+  "key": "range",
+  "served": "",
+  "lost": "##$00000 to ##$FFFFF"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 90,
+  "key": "examples",
+  "served": "RDLONG reg,",
+  "lost": "##$10000  ' Read from hub[$10000]"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 91,
+  "key": "examples",
+  "served": "WRLONG reg,",
+  "lost": "##buffer  ' Write to hub[buffer]"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 99,
+  "key": "examples",
+  "served": "BITH flags,",
+  "lost": "#7        ' Set bit 7 of flags"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 100,
+  "key": "examples",
+  "served": "BITL flags,",
+  "lost": "#READY_BIT' Clear READY_BIT"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 101,
+  "key": "examples",
+  "served": "TESTB flags,",
+  "lost": "#4 WC    ' Test bit 4, update C"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 116,
+  "key": "examples",
+  "served": "SETQ",
+  "lost": "#15              ' Next RDLONG reads 16 longs"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 123,
+  "key": "examples",
+  "served": "REP",
+  "lost": "#4, #10           ' Repeat next 4 instructions 10 times"
+ },
+ {
+  "file": "language/pasm2/concepts/addressing_modes.yaml",
+  "line": 130,
+  "key": "automatic",
+  "served": "",
+  "lost": "## forces augmented encoding"
+ }
+]

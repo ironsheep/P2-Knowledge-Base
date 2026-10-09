@@ -1,0 +1,80 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/loop-control.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "4b3f9512733f3266"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[0].examples[1]
+    fp: "8f3dbe1d7542ba08"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[0].examples[2]
+    fp: "ddaa9d4486dae654"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[1].examples[0]
+    fp: "9f8ab8b2884b3f20"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [y, line]
+  - at: idioms[1].examples[1]
+    fp: "bf1da19d81337c36"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [y, blank]
+  - at: idioms[1].examples[2]
+    fp: "85f14b419293c0f9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [a, pinloop]
+  - at: idioms[2].examples[0]
+    fp: "3c6b7e3b77c9adf4"
+    compile: not-code
+    reason: "corpus token pair (a label name followed by the word `loop`: `sample_cy loop`, `Field loop`, `main loop`) listed as example forms of a \"loop\" marker; not a statement (PASM2 has no LOOP instruction)"
+  - at: idioms[2].examples[1]
+    fp: "038a06119821a8af"
+    compile: not-code
+    reason: "corpus token pair (a label name followed by the word `loop`: `sample_cy loop`, `Field loop`, `main loop`) listed as example forms of a \"loop\" marker; not a statement (PASM2 has no LOOP instruction)"
+  - at: idioms[2].examples[2]
+    fp: "2edf6d302e659b11"
+    compile: not-code
+    reason: "corpus token pair (a label name followed by the word `loop`: `sample_cy loop`, `Field loop`, `main loop`) listed as example forms of a \"loop\" marker; not a statement (PASM2 has no LOOP instruction)"
+  - at: idioms[3].examples[0]
+    fp: "7500e5aa63060635"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [main_loop]
+  - at: idioms[3].examples[1]
+    fp: "5d4a645886e3c0c9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [start]
+  - at: idioms[4].examples[0]
+    fp: "96ae168b6a6754e4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [t]
+    finding: "S-198"
+  - at: idioms[4].examples[1]
+    fp: "f58f48f7748dbf99"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, process_loop]
+  - at: idioms[5].pattern
+    fp: "e8a53d7e51faba10"
+    compile: not-code
+    reason: "`pattern:` TEMPLATE with `{placeholder}` fields (e.g. `{interface_base}`, `{count - 1}`); the braces are fill-in marks, not source; the page's concrete forms are its `examples:` entries"
+  - at: idioms[5].examples[0]
+    fp: "2402bfd61fb51131"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, x, sum]
+    finding: "S-197"
+  - at: idioms[5].examples[1]
+    fp: "96825906d6f003d0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, x]
+    finding: "S-197"

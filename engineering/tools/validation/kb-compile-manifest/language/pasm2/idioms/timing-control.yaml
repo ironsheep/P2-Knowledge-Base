@@ -1,0 +1,50 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/timing-control.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "39978a2f34d870ae"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [c]
+  - at: idioms[0].examples[1]
+    fp: "e11297c865dacde9"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[0].examples[2]
+    fp: "800a8a638eaad83b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [delay]
+  - at: idioms[1].examples[0]
+    fp: "cd4aedfa5415c3f4"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[1].examples[1]
+    fp: "dcaa58d60aff8bb7"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[2].examples[0]
+    fp: "fa18ab33d82466a4"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[2].examples[1]
+    fp: "56e4a415245bf38f"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[3].examples[0]
+    fp: "868dba5bc1269239"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[3].examples[1]
+    fp: "188ac62587c7a854"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[4].examples[0]
+    fp: "0a5405190a6d60aa"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[4].examples[1]
+    fp: "c93366a62980b1ec"
+    compile: fragment
+    wrap: pasm2-dat

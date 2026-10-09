@@ -1,0 +1,22 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/halt-and-fault-response.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "81f06db11faed527"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: idioms[1].examples[0]
+    fp: "0c6975b8fedcc6ff"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_di=con]
+  - at: idioms[2].pattern
+    fp: "8c3a0f3ba6a049a4"
+    compile: not-code
+    reason: "`pattern:` TEMPLATE with `{placeholder}` fields (e.g. `{interface_base}`, `{count - 1}`); the braces are fill-in marks, not source; the page's concrete forms are its `examples:` entries"
+  - at: idioms[2].examples[0]
+    fp: "630a7eabd48b9f04"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_di=con]

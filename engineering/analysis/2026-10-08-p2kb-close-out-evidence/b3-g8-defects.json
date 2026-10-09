@@ -1,0 +1,1371 @@
+[
+ {
+  "slug": "yaml-hash-comment-truncates-code",
+  "finding": "S-PENDING-yaml-hash-comment-truncates-code",
+  "statement": "an example list item is a YAML PLAIN scalar whose immediate begins with `#` preceded by a space (`- MOV reg, #42   ' ...`, `- JMP #@label  # ...`). YAML starts a comment at ` #`, so the stored example is cut at the first immediate: addressing_modes.yaml:19-21 read `MOV reg,`, :90-91 `RDLONG reg,` / `WRLONG reg,`, :99-101 `BITH flags,` / `BITL flags,` / `TESTB flags,`, :116 `SETQ`, :123 `REP`; branch_addressing.yaml:18-20 `JMP` / `CALL` / `IF_Z JMP`, :29-31 `JMP` / `CALL` / `JMP`, :68-69 `CALLA` / `CALLB`, :79 `CALLD link_reg,`, :100-101 `JMP` / `CALL`; special_registers.yaml:89 `SETQ`. The reader sees an instruction with its operand missing (a bare `JMP`, `REP`, `SETQ`). The same file's `|` block-scalar examples (branch_addressing.yaml:87-89, `EXECF ##%1010...`) are unaffected: quote the item or use `|`. (branch_addressing.yaml:29-30,100 also write `#\\\\label` in a plain scalar, where `\\\\` stays two backslashes.)",
+  "compiler_error": "Expected a constant, unary operator, or \"(\" (block line 1, after the truncated mnemonic/comma)",
+  "correct_source": "the full text of each YAML line (addressing_modes.yaml:19 `MOV reg, #42 ...` etc.); `|` block form as in branch_addressing.yaml:87-89",
+  "verified_fix": "verify.py sites 0,1,2,16,17,18,19,20,24,26,55-60,64,65,68,71,72,254: the restored lines (with `reg` renamed where it applies, `skip` renamed at 57) compile in the same wrap",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.immediate.examples[0]",
+    "key_line": 19,
+    "decision_index": 0,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.immediate.examples[1]",
+    "key_line": 20,
+    "decision_index": 1,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.immediate.examples[2]",
+    "key_line": 21,
+    "decision_index": 2,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.absolute.examples[0]",
+    "key_line": 90,
+    "decision_index": 16,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.absolute.examples[1]",
+    "key_line": 91,
+    "decision_index": 17,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "WRLONG reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.bit_addressing.examples[0]",
+    "key_line": 99,
+    "decision_index": 18,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "BITH flags,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "flags"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.bit_addressing.examples[1]",
+    "key_line": 100,
+    "decision_index": 19,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "BITL flags,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "flags",
+     "READY_BIT=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.bit_addressing.examples[2]",
+    "key_line": 101,
+    "decision_index": 20,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "TESTB flags,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "flags"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "special_cases.setq_block.examples[0]",
+    "key_line": 116,
+    "decision_index": 24,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "SETQ",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "special_cases.rep_block.examples[0]",
+    "key_line": 123,
+    "decision_index": 26,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "REP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "addressing_modes.relative_immediate.examples[0]",
+    "key_line": 18,
+    "decision_index": 55,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "JMP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "forward_label"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "addressing_modes.relative_immediate.examples[1]",
+    "key_line": 19,
+    "decision_index": 56,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "CALL",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "subroutine"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "addressing_modes.relative_immediate.examples[2]",
+    "key_line": 20,
+    "decision_index": 57,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "IF_Z JMP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "addressing_modes.absolute_immediate.examples[0]",
+    "key_line": 29,
+    "decision_index": 58,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "JMP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "hub_routine"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "addressing_modes.absolute_immediate.examples[1]",
+    "key_line": 30,
+    "decision_index": 59,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "CALL",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "addressing_modes.absolute_immediate.examples[2]",
+    "key_line": 31,
+    "decision_index": 60,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "JMP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "cog_routine"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "branch_types[\"CALLA/CALLB\"].examples[0]",
+    "key_line": 68,
+    "decision_index": 64,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "CALLA",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "function"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "branch_types[\"CALLA/CALLB\"].examples[1]",
+    "key_line": 69,
+    "decision_index": 65,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "CALLB",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "function"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "branch_types.CALLD.examples[0]",
+    "key_line": 79,
+    "decision_index": 68,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "CALLD link_reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "link_reg",
+     "function"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "special_addressing.hub_execution.examples[0]",
+    "key_line": 100,
+    "decision_index": 71,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "JMP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "special_addressing.hub_execution.examples[1]",
+    "key_line": 101,
+    "decision_index": 72,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "CALL",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "hub_function"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/special_registers.yaml",
+    "addr": "access_patterns.block_operations[1].examples[0]",
+    "key_line": 89,
+    "decision_index": 254,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "SETQ",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 22
+ },
+ {
+  "slug": "addpins-hash-count",
+  "finding": "S-PENDING-addpins-hash-count",
+  "statement": "`ADDPINS #7` / `ADDPINS #3`: the count after ADDPINS is a plain constant, not an immediate. basic-io.yaml:126-127 (`DIRH #8 ADDPINS #7`, `DIRL #0 ADDPINS #3`), :133-134 (OUTH/OUTL), :140 (`DRVH #16 ADDPINS #7`), :357 and :367 (`DIRH #16 ADDPINS #7`, `DIRL #16 ADDPINS #7`); also the syntax lines :124, :131, :138 and the notation :157 / :169 / :170 (`#8 ADDPINS #7 = pins 8 through 15`). The same file states the correct form at :120 (`base_pin ADDPINS count`), and the idioms pages use it (`drvh #LED_BASE addpins 7`, pin-control.yaml:15).",
+  "compiler_error": "Expected a constant, unary operator, or \"(\" (at `#7`)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3659 (`pins32 long 0 addpins 31`); basic-io.yaml:120; idioms/pin-control.yaml:15-17",
+  "verified_fix": "verify.py sites 34,35,36,51,52: `ADDPINS 7` / `ADDPINS 3` compile (cases c4.py p_dir, p_out, p_drv, p_bus_w, p_bus_r); `ADDPINS #7` fails (p_drv_asis)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/basic-io.yaml",
+    "addr": "multi_pin_operations.set_direction.example",
+    "key_line": 125,
+    "decision_index": 34,
+    "gate_first_error": "block line 1 (YAML line 126): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "DIRH #8 ADDPINS #7  ' Pins 8-15 as outputs",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/basic-io.yaml",
+    "addr": "multi_pin_operations.set_output.example",
+    "key_line": 132,
+    "decision_index": 35,
+    "gate_first_error": "block line 1 (YAML line 133): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "OUTH #8 ADDPINS #7  ' Pins 8-15 output high",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/basic-io.yaml",
+    "addr": "multi_pin_operations.drive_pins.example",
+    "key_line": 140,
+    "decision_index": 36,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "DRVH #16 ADDPINS #7  ' Pins 16-23 drive high",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/basic-io.yaml",
+    "addr": "common_patterns.parallel_bus_write.code",
+    "key_line": 355,
+    "decision_index": 51,
+    "gate_first_error": "block line 2 (YAML line 357): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "DIRH  #16 ADDPINS #7      ' All outputs",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "temp",
+     "data"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/basic-io.yaml",
+    "addr": "common_patterns.parallel_bus_read.code",
+    "key_line": 365,
+    "decision_index": 52,
+    "gate_first_error": "block line 2 (YAML line 367): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "DIRL  #16 ADDPINS #7      ' All inputs",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "data"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 5
+ },
+ {
+  "slug": "ptrx-postmodify-negative-index",
+  "finding": "S-PENDING-ptrx-postmodify-negative-index",
+  "statement": "addressing_modes.yaml:82 `WRLONG reg, PTRB++[-1]' Write to hub[PTRB], then PTRB -= 4`: the PTRx++[index] / PTRx--[index] constant must be 1..16 (compiler: 'PTRA/PTRB index constant must range from 1 to 16'); the decrementing form is `PTRB--[1]`. The page's own `index_range` (:79) says '1 to 16 (magnitude; ++ forms add INDEX*SCALE, -- forms subtract...)', which the example contradicts. (The block also carries the reserved-word `reg`, S-008, and the line is glued to the comment: `PTRB++[-1]'`.)",
+  "compiler_error": "PTRA/PTRB index constant must range from 1 to 16 (c1.py ptrb_m1); at the gate it is masked by the earlier `reg` error",
+  "correct_source": "addressing_modes.yaml:79 (the page itself); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3172 (`INDEX = 1..16 for ++'s and --'s`), :3198-3199",
+  "verified_fix": "verify.py site 15: `WRLONG x, PTRB--[1]` compiles",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.post_modify.examples[1]",
+    "key_line": 82,
+    "decision_index": 15,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "WRLONG reg, PTRB++[-1]' Write to hub[PTRB], then PTRB -= 4",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "conditional-nop",
+  "finding": "S-PENDING-conditional-nop",
+  "statement": "conditional_execution.yaml:219-220 (usage_patterns.any_instruction_conditional, `' Even NOP!` / `IF_C    NOP`): PASM2 rejects a condition (or _RET_) on NOP, because NOP is the all-zero instruction word (EEEE=0000 encodes _RET_, not 'never') -- the page teaches that every instruction, even NOP, can be conditional (also :22, :29, :324, :370 'EVERY instruction ... ANY instruction conditional').",
+  "compiler_error": "NOP cannot have a condition or _RET_ (block line 18)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:25 (`NOP ... 0000 0000000 000 000000000 000000000`); pnut-ts error text",
+  "verified_fix": "verify.py site 104: the block without the `IF_C NOP` line compiles; `IF_C MOV x, x` is the legal stand-in (c4.py n_fix)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/conditional_execution.yaml",
+    "addr": "usage_patterns.any_instruction_conditional.code",
+    "key_line": 202,
+    "decision_index": 104,
+    "gate_first_error": "block line 18 (YAML line 220): NOP cannot have a condition or _RET_",
+    "source_line_of_error": "IF_C    NOP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "x",
+     "y",
+     "mask",
+     "pattern",
+     "flags",
+     "value",
+     "ptr",
+     "address",
+     "error_handler",
+     "process_zero"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "reti-flag-effect",
+  "finding": "S-PENDING-reti-flag-effect",
+  "statement": "`RETI1 WCZ` taught as 'Return and restore both flags': event_interrupt_config.yaml:79 (syntax `RETI0/1/2/3 {WC/WZ/WCZ}`), :82 (`RETI1 WCZ  ' Return and restore both flags`), :205 (`RETI1 WCZ        ' Restore flags`). RETIx takes no effect: it IS `CALLD ..., IRETx WCZ` (the WCZ is part of the alias and restores C/Z), so an added WCZ is rejected.",
+  "compiler_error": "This effect is not allowed for this instruction",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2304-2311 (`RETI1 = CALLD INB,IRET1 WCZ`); engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:188 (`RETI1 ... Return from INT1. (CALLD $1FF,$1F5 WCZ)`)",
+  "verified_fix": "verify.py sites 130,131: `RETI1` alone compiles (c4.py r_fix, r_fix2)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/event_interrupt_config.yaml",
+    "addr": "interrupt_system.return_instructions.RETI0_3.example",
+    "key_line": 82,
+    "decision_index": 130,
+    "gate_first_error": "block line 1: This effect is not allowed for this instruction",
+    "source_line_of_error": "RETI1 WCZ  ' Return and restore both flags",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/event_interrupt_config.yaml",
+    "addr": "interrupt_context.context_preservation.code",
+    "key_line": 199,
+    "decision_index": 131,
+    "gate_first_error": "block line 6 (YAML line 205): This effect is not allowed for this instruction",
+    "source_line_of_error": "  RETI1 WCZ        ' Restore flags",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "work_reg"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "hash-comment-in-code",
+  "finding": "S-PENDING-hash-comment-in-code",
+  "statement": "`#` used as the comment character in PASM code: branch_addressing.yaml:110 (`JMP #@far_label       # Combined for 32-bit range`) and :169 (`JMP #@other_function    # Tail call optimization`) -- inside `|` block scalars, so the `#` reaches the compiler. The PASM2 comment is `'`; the sibling lines in the same blocks use `'`.",
+  "compiler_error": "Expected an assembly effect or end of line (block line 2, at `#`)",
+  "correct_source": "branch_addressing.yaml:152 and :160 (`' Loop body`, `' Continue after return` in the same file)",
+  "verified_fix": "verify.py sites 74,79: with `'` for `#` both compile (c4.py h_fix1, h_fix2); the `#` forms fail (h_asis1, h_asis2)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "special_addressing.long_branches.examples[0]",
+    "key_line": 108,
+    "decision_index": 74,
+    "gate_first_error": "block line 2 (YAML line 110): Expected an assembly effect or end of line",
+    "source_line_of_error": "JMP #@far_label       # Combined for 32-bit range",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "high_bits",
+     "far_label"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "common_patterns.tail_call.code",
+    "key_line": 167,
+    "decision_index": 79,
+    "gate_first_error": "block line 2 (YAML line 169): Expected an assembly effect or end of line",
+    "source_line_of_error": "JMP #@other_function    # Tail call optimization",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "other_function"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "p1-max-min-instructions",
+  "finding": "S-PENDING-p1-max-min-instructions",
+  "statement": "cog_hub_execution.yaml:266-267 (code_organization.hybrid_approach.example) uses `MAX peak, data` / `MIN valley, data`. P1 mnemonics: PASM2 has no MAX/MIN; the P2 forms are FGE/FLE (unsigned) and FGES/FLES (signed): `FGE D,S` forces D >= S, i.e. keeps the larger. The block is hidden behind the first error (REP #4,#1000 at :263, S-167) and appears only after that is fixed. (P1 carry-over class with S-087/S-121/S-143.)",
+  "compiler_error": "Expected a unique name, BYTE, WORD, LONG, or assembly instruction (at `MAX`, after the `REP #4, #1000` error is repaired; c4.py m_asis)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:50-53 (FGE, FLE, FGES, FLES)",
+  "verified_fix": "verify.py site 88: `REP #4, ##1000`, `FGE peak, data`, `FLE valley, data` compile (c4.py hy_fix_full)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/cog_hub_execution.yaml",
+    "addr": "code_organization.hybrid_approach.example",
+    "key_line": 249,
+    "decision_index": 88,
+    "gate_first_error": "block line 14 (YAML line 263): Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "        REP   #4, #1000",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "load_critical_code",
+     "data",
+     "sum",
+     "peak",
+     "valley"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "coginit-three-operands",
+  "finding": "S-PENDING-coginit-three-operands",
+  "statement": "COGINIT written with three operands: cog_hub_execution.yaml:274 (`COGINIT #16, #@cog_code, #@parameters`) and multi_cog_synchronization.yaml:291 (`coginit cog_num, #worker_code, work_index`). COGINIT takes two operands, D (cog select) and S (hub start address and PTRB); the PTRA value comes from a SETQ BEFORE it. (Also :274 writes the hub addresses with a single `#`, which cannot hold them: `##` is needed.)",
+  "compiler_error": "Expected an assembly effect or end of line (at the third operand)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:258 (`COGINIT {#}D,{#}S {WC}` ... `Prior SETQ sets PTRA of cog`); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:404-411",
+  "verified_fix": "verify.py sites 89, 180: `SETQ ##parameters` + `COGINIT #16, ##cog_code`, and `SETQ work_index` + `COGINIT cog_num, #worker_code`, compile (c3.py coginit_fix, coginit_init_fix; c4.py c_fix_full)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/cog_hub_execution.yaml",
+    "addr": "loading_strategies.initial_load.code",
+    "key_line": 273,
+    "decision_index": 89,
+    "gate_first_error": "block line 1 (YAML line 274): Expected an assembly effect or end of line",
+    "source_line_of_error": "COGINIT #16, #@cog_code, #@parameters",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "cog_code",
+     "parameters"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/multi_cog_synchronization.yaml",
+    "addr": "parallel_processing_patterns.work_distribution.code",
+    "key_line": 282,
+    "decision_index": 180,
+    "gate_first_error": "block line 9 (YAML line 291): Expected an assembly effect or end of line",
+    "source_line_of_error": "        coginit cog_num, #worker_code, work_index",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "work_index",
+     "cog_num",
+     "worker_code",
+     "WORK_CHUNK=con",
+     "mask"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "at-at-operator-in-dat",
+  "finding": "S-PENDING-at-at-operator-in-dat",
+  "statement": "labels.yaml:116 (reference_operators.operators.object_relative.example) shows `LONG @@method_table` in a DAT/PASM block. `@@` is the Spin2 operator that turns a DAT offset into an absolute address inside a method (`@@StrList[i]`); it is not accepted as a DAT data expression. In DAT the stored value is `@label`.",
+  "compiler_error": "Expected a constant, unary operator, or \"(\" (at `@@`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:300, :308, :425 (`@@` is a Spin2 operator; DAT pointers are `@label`)",
+  "verified_fix": "verify.py site 160: `LONG @method_table` compiles (c3.py at1_fix)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/labels.yaml",
+    "addr": "reference_operators.operators.object_relative.example",
+    "key_line": 116,
+    "decision_index": 160,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "LONG @@method_table",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "method_table"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "dollar-dollar-not-hub-origin",
+  "finding": "S-PENDING-dollar-dollar-not-hub-origin",
+  "statement": "labels.yaml:125-128 (current_hub_address): `$$` taught as 'Current Hub address', `LONG $$ + 4`. `$$` is the DITTO block index (valid only inside a DITTO block); the current address in hub mode is `$` (after ORGH).",
+  "compiler_error": "\"$$\" (DITTO index) is only allowed within a DITTO block, inside a DAT block",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:42 (v50: DITTO `$$` iterates 0..count-1; use `$` for the origin)",
+  "verified_fix": "verify.py site 162: `LONG $ + 4` under ORGH compiles (c3.py dd_fix)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/labels.yaml",
+    "addr": "reference_operators.operators.current_hub_address.example",
+    "key_line": 128,
+    "decision_index": 162,
+    "gate_first_error": "block line 1: \"$$\" (DITTO index) is only allowed within a DITTO block, inside a DAT block",
+    "source_line_of_error": "LONG $$ + 4        ' Address of next long",
+    "intended_class": "fragment/pasm2-hub",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "instruction-mnemonic-as-constant",
+  "finding": "S-PENDING-instruction-mnemonic-as-constant",
+  "statement": "register_indirection.yaml:64 `MOV exec_reg, ##(ADD | (dst<<9) | src)` builds an instruction word by OR-ing the mnemonic `ADD` into a constant. A mnemonic is not a numeric constant; the opcode field must be written as a number. (The ALTI usage itself -- `ALTI exec_reg` executes the register in place of the next instruction -- matches the instruction table.)",
+  "compiler_error": "Expected a constant, unary operator, or \"(\" (at `ADD`)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:147 (`ALTI D ... Execute D in place of next instruction`); ADD opcode EEEE 0001000 CZI = $F100_0000 with EEEE=%1111",
+  "verified_fix": "verify.py site 186: `MOV exec_reg, ##$F100_0000 | (dst<<9) | src` / `ALTI exec_reg` / `NOP` compiles (c3.py alti_fix)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/register_indirection.yaml",
+    "addr": "altx_instructions.ALTI.examples[0]",
+    "key_line": 63,
+    "decision_index": 186,
+    "gate_first_error": "block line 1 (YAML line 64): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV exec_reg, ##(ADD | (dst<<9) | src)",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "exec_reg",
+     "dst=con",
+     "src=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "alt-postincrement-syntax",
+  "finding": "S-PENDING-alt-postincrement-syntax",
+  "statement": "`ALTS index++`, `ALTD dst_ptr++` (and the claimed `--` variants, :96-97): register_indirection.yaml:102 (increment_modes) and :158-159 (array_copy). ALTx takes no `++`/`--`; the post-update is the signed S[17:9] added to D, written as an augmented immediate (`ALTS index, ##$200` adds 1 to index). Both blocks also give REP a block count (#4 / #2) that does not match the three instructions that follow.",
+  "compiler_error": "Expected an assembly effect or end of line (at `++`)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:142 (`ALTS D,{#}S ... D += sign-extended S[17:9]`)",
+  "verified_fix": "verify.py sites 188,193: `ALTS index, ##$200` (REP #3) and `ALTS src_ptr, ##$200` / `ALTD dst_ptr, ##$200` compile (c3.py alts_inc_fix, copy_fix)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/register_indirection.yaml",
+    "addr": "advanced_features.increment_modes.examples[0]",
+    "key_line": 99,
+    "decision_index": 188,
+    "gate_first_error": "block line 3 (YAML line 102): Expected an assembly effect or end of line",
+    "source_line_of_error": "  ALTS index++          ' Index increments after use",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "index",
+     "sum",
+     "total"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/register_indirection.yaml",
+    "addr": "common_patterns.array_copy.code",
+    "key_line": 156,
+    "decision_index": 193,
+    "gate_first_error": "block line 2 (YAML line 158): Expected an assembly effect or end of line",
+    "source_line_of_error": "  ALTS src_ptr++",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "count",
+     "src_ptr",
+     "dst_ptr"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "harness-gap-undefined-local-label",
+  "finding": "S-PENDING-harness-gap-undefined-local-label",
+  "statement": "HARNESS GAP (not a KB defect): an excerpt references a local label defined elsewhere in the surrounding source: labels.yaml:98 (`DJNZ counter, #.loop`), rep_instruction.yaml:24 (`REP @.end, ##1000`), loop-control.yaml:52 (`djnf t, #.move`), self-modifying-code.yaml:15 (`setd .target, dest_reg`), :29 (`sets .read_op, current_addr`), :49-50 (`mov .cmd_template, #op_erase_64k`). The gate's `assumes` can only declare plain names, not `.local` labels, and `with` text is placed BEFORE the DAT/org head (so it cannot supply a preceding label inside the DAT body). A forward REP end label cannot be satisfied by a backward definition (`REP block end is out of range`). Best intended entry: the stated fragment; the label would need an assume kind `.name` (a `.name` line after the body) or a `with` that lands inside the wrap.",
+  "compiler_error": "Undefined symbol",
+  "correct_source": "n/a (the excerpts are legal once the label exists)",
+  "verified_fix": "verify.py sites 157,198,340,375,376,378: with the label supplied after/before the excerpt, each compiles (c4.py g_* cases; verify.py)",
+  "class_kind": "harness-gap",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/labels.yaml",
+    "addr": "reference_operators.operators.immediate_local.example",
+    "key_line": 98,
+    "decision_index": 157,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "DJNZ counter, #.loop",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "counter"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/rep_instruction.yaml",
+    "addr": "syntax.extended_form[2].example",
+    "key_line": 24,
+    "decision_index": 198,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "REP @.end, ##1000  ' 1000 iterations using AUGS prefix",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/idioms/loop-control.yaml",
+    "addr": "idioms[4].examples[0]",
+    "key_line": 52,
+    "decision_index": 340,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "djnf t, #.move",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "t"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/idioms/self-modifying-code.yaml",
+    "addr": "idioms[0].examples[0]",
+    "key_line": 15,
+    "decision_index": 375,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "setd .target, dest_reg     ' .target instruction's D field now = dest_reg",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "dest_reg"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/idioms/self-modifying-code.yaml",
+    "addr": "idioms[1].examples[0]",
+    "key_line": 29,
+    "decision_index": 376,
+    "gate_first_error": "block line 1: Undefined symbol",
+    "source_line_of_error": "sets .read_op, current_addr   ' .read_op now reads from current_addr",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "current_addr"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/idioms/self-modifying-code.yaml",
+    "addr": "idioms[2].examples[0]",
+    "key_line": 47,
+    "decision_index": 378,
+    "gate_first_error": "block line 2 (YAML line 49): Undefined symbol",
+    "source_line_of_error": "if_z   mov .cmd_template, #op_erase_64k",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "op_erase_64k=con",
+     "op_erase_4k=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 6
+ },
+ {
+  "slug": "harness-gap-relative-dollar-first-line",
+  "finding": "S-PENDING-harness-gap-relative-dollar-first-line",
+  "statement": "HARNESS GAP (not a KB defect): labels.yaml:122 `JMP #$-1  ' Jump back one instruction` is a one-line example of the `$` operator; as the first instruction of any wrap it addresses -1 (`Address must not exceed $FFFFF`). It compiles after any preceding instruction. No wrap can place an instruction before the body (`with` is emitted before the DAT head).",
+  "compiler_error": "Address must not exceed $FFFFF (m001)",
+  "correct_source": "n/a",
+  "verified_fix": "verify.py site 161: `nop` + `JMP #$-1` compiles (c5.py dat_hexorg / inl_dollar2)",
+  "class_kind": "harness-gap",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/labels.yaml",
+    "addr": "reference_operators.operators.current_cog_address.example",
+    "key_line": 122,
+    "decision_index": 161,
+    "gate_first_error": "block line 1: Address must not exceed $FFFFF (m001)",
+    "source_line_of_error": "JMP #$-1           ' Jump back one instruction",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "bare-label-as-instruction",
+  "finding": "S-PENDING-bare-label-as-instruction",
+  "statement": "streamer_smartpin_control.yaml:128 `IF_C process_received_byte`: a routine name written where an instruction goes (Spin2 call habit). PASM2 needs `CALL #process_received_byte`; the block also needs the pin as `#rx_pin`.",
+  "compiler_error": "Expected an assembly instruction (block line 2)",
+  "correct_source": "PASM2 syntax: a branch is an instruction (engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:181 CALLD/CALL family)",
+  "verified_fix": "verify.py site 275: `IF_C CALL #process_received_byte` compiles (c3.py rdpin_ifc_fix)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/streamer_smartpin_control.yaml",
+    "addr": "smart_pin_system.status_operations.RDPIN.example",
+    "key_line": 126,
+    "decision_index": 275,
+    "gate_first_error": "block line 2 (YAML line 128): Expected an assembly instruction",
+    "source_line_of_error": "IF_C process_received_byte",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "data",
+     "process_received_byte",
+     "rx_pin=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "addct1-missing-operand",
+  "finding": "S-PENDING-addct1-missing-operand",
+  "statement": "`ADDCT1  ##1_000_000` with a single operand, in the shared example of the three counter-event group pages (groups/counter_event_jumps.yaml:27, counter_event_polls.yaml:21, counter_event_waits.yaml:21). ADDCT1 is `ADDCT1 D,{#}S`: D is the register holding the timestamp (from GETCT) and S the delta; an immediate cannot be D. The example also uses `;` for its comment (S-137), which is what the gate reports first.",
+  "compiler_error": "Unrecognized character `;` (block line 2); after that is fixed: Expected a constant, unary operator, or \"(\" (block line 1)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:169 (`ADDCT1 D,{#}S ... Set CT1 event to trigger on CT = D + S. Adds S into D.`)",
+  "verified_fix": "verify.py sites 290-292: `GETCT t` / `ADDCT1 t, ##1_000_000` / `' ... do work ...` / `JCT1 #timeout_handler` compiles (c3.py addct_ok); `ADDCT1 ##1_000_000` alone fails (addct_one)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/groups/counter_event_jumps.yaml",
+    "addr": "examples[0].code",
+    "key_line": 27,
+    "decision_index": 290,
+    "gate_first_error": "block line 2: Unrecognized character []($3b)",
+    "source_line_of_error": "; ... do work ...",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "timeout_handler"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/groups/counter_event_polls.yaml",
+    "addr": "examples[0].code",
+    "key_line": 21,
+    "decision_index": 291,
+    "gate_first_error": "block line 2: Unrecognized character []($3b)",
+    "source_line_of_error": "; ... do work ...",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "timeout_handler"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/groups/counter_event_waits.yaml",
+    "addr": "examples[0].code",
+    "key_line": 21,
+    "decision_index": 292,
+    "gate_first_error": "block line 2: Unrecognized character []($3b)",
+    "source_line_of_error": "; ... do work ...",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "timeout_handler"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "postincrement-on-plain-register",
+  "finding": "S-PENDING-postincrement-on-plain-register",
+  "statement": "`ptr++`, `src++`, `dst++` where ptr/src/dst are ordinary cog registers: loop-control.yaml:84 (`rdlong x, ptr++`), :89-90 (`rdlong x, src++` / `wrlong x, dst++`), scratch-storage.yaml:31 (`rdlong x, ptr++`). Auto-increment is a property of PTRA/PTRB only; the names are used as if they were pointer aliases (the page cites flash_loader.spin2, where they presumably are). A user copying the example gets a compile error.",
+  "compiler_error": "Expected an assembly effect or end of line (at `++`)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:178 (`RDLONG D,{#}S/P`, P = PTRx expression)",
+  "verified_fix": "verify.py sites 343,344,369: `ptra++` / `ptrb++` compile (c4.py q_fix1, q_fix2, q_fix3)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/idioms/loop-control.yaml",
+    "addr": "idioms[5].examples[0]",
+    "key_line": 81,
+    "decision_index": 343,
+    "gate_first_error": "block line 3 (YAML line 84): Expected an assembly effect or end of line",
+    "source_line_of_error": "rdlong  x, ptr++",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "count",
+     "x",
+     "sum"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/idioms/loop-control.yaml",
+    "addr": "idioms[5].examples[1]",
+    "key_line": 86,
+    "decision_index": 344,
+    "gate_first_error": "block line 3 (YAML line 89): Expected an assembly effect or end of line",
+    "source_line_of_error": "rdlong  x, src++",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "count",
+     "x"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/idioms/scratch-storage.yaml",
+    "addr": "idioms[0].examples[0]",
+    "key_line": 21,
+    "decision_index": 369,
+    "gate_first_error": "block line 10 (YAML line 31): Expected an assembly effect or end of line",
+    "source_line_of_error": "rdlong x, ptr++",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "count",
+     "x",
+     "computed_value"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "S-008",
+  "statement": "`reg` (the Spin2 REG[] keyword) used as the placeholder register name in PASM examples: addressing_modes.yaml:19-21, :48-49, :61-62, :71, :81-82, :90-91; special_registers.yaml:73-76 (GETCT/GETRND/GETQX/GETPTR reg); stack_operations.yaml:122, :128, :133. Also `skip` (a reserved word, the SKIP instruction) as a branch-target label in branch_addressing.yaml:20 `IF_Z JMP #@skip`: a `skip` DAT label is rejected ('Expected a DAT symbol'). Compiler: 'Expected a constant, unary operator, or \"(\"' at `reg`. With a different name (`x`) each compiles (verify.py sites 7,8,9,10,12,14,15,246-249,259-261; c4.py a_idx, a_get; a_*_reg fail).",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.immediate.examples[0]",
+    "key_line": 19,
+    "decision_index": 0,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.immediate.examples[1]",
+    "key_line": 20,
+    "decision_index": 1,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.immediate.examples[2]",
+    "key_line": 21,
+    "decision_index": 2,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.indexed.examples[0]",
+    "key_line": 48,
+    "decision_index": 7,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg, PTRA[4]   ' Read from hub[PTRA + 16] (index scaled by 4)",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.indexed.examples[1]",
+    "key_line": 49,
+    "decision_index": 8,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "WRWORD reg, PTRB[-2]  ' Write to hub[PTRB - 4] (index scaled by 2)",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.auto_increment.examples[0]",
+    "key_line": 61,
+    "decision_index": 9,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg, PTRA++    ' Read from hub[PTRA], then PTRA += 4",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.auto_increment.examples[1]",
+    "key_line": 62,
+    "decision_index": 10,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "WRWORD reg, PTRB++    ' Write to hub[PTRB], then PTRB += 2",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.auto_decrement.examples[0]",
+    "key_line": 71,
+    "decision_index": 12,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg, --PTRA    ' PTRA -= 4, then read from hub[PTRA]",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.post_modify.examples[0]",
+    "key_line": 81,
+    "decision_index": 14,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg, PTRA++[8] ' Read from hub[PTRA], then PTRA += 32",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.post_modify.examples[1]",
+    "key_line": 82,
+    "decision_index": 15,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "WRLONG reg, PTRB++[-1]' Write to hub[PTRB], then PTRB -= 4",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.absolute.examples[0]",
+    "key_line": 90,
+    "decision_index": 16,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/addressing_modes.yaml",
+    "addr": "modes.absolute.examples[1]",
+    "key_line": 91,
+    "decision_index": 17,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "WRLONG reg,",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/branch_addressing.yaml",
+    "addr": "addressing_modes.relative_immediate.examples[2]",
+    "key_line": 20,
+    "decision_index": 57,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "IF_Z JMP",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/special_registers.yaml",
+    "addr": "access_patterns.explicit_access[1].examples[0]",
+    "key_line": 73,
+    "decision_index": 246,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "GETCT reg      ' Read system counter",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/special_registers.yaml",
+    "addr": "access_patterns.explicit_access[1].examples[1]",
+    "key_line": 74,
+    "decision_index": 247,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "GETRND reg     ' Get random number",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/special_registers.yaml",
+    "addr": "access_patterns.explicit_access[1].examples[2]",
+    "key_line": 75,
+    "decision_index": 248,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "GETQX  reg     ' Get CORDIC X result",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/special_registers.yaml",
+    "addr": "access_patterns.explicit_access[1].examples[3]",
+    "key_line": 76,
+    "decision_index": 249,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "GETPTR reg     ' Read PTRA/PTRB value",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/stack_operations.yaml",
+    "addr": "auto_increment_modes.post_increment.example",
+    "key_line": 122,
+    "decision_index": 259,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg, PTRA++",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/stack_operations.yaml",
+    "addr": "auto_increment_modes.pre_decrement.example",
+    "key_line": 128,
+    "decision_index": 260,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "WRLONG reg, --PTRB",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/stack_operations.yaml",
+    "addr": "auto_increment_modes.indexed_post_modify.example",
+    "key_line": 133,
+    "decision_index": 261,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "RDLONG reg, PTRA++[2]  ' PTRA += 8",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-164",
+  "statement": "`NAME = value` constant definitions inside PASM blocks with no CON: multi_cog_synchronization.yaml:82 (`mailbox_base = $7F000`), :100 (`SPI_LOCK = 5`), :169-173 (`ring_base`, `ring_size`, `ring_mask`, `head_ptr`, `tail_ptr`), :217-218 (`mailbox_size`, `mailbox_base`), :307-308 (`barrier_count`, `barrier_target`). Compiler: 'Expected a unique name, BYTE, WORD, LONG, or assembly instruction'. With a CON block they compile (verify.py sites 172,173,177,178,181; c3.py mailbox_fix, spi_fix, ring_fix, mbox_fix, barrier_fix).",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/multi_cog_synchronization.yaml",
+    "addr": "hardware_primitives.shared_memory.coordination_pattern",
+    "key_line": 80,
+    "decision_index": 172,
+    "gate_first_error": "block line 2 (YAML line 82): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "mailbox_base    = $7F000",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "request",
+     "flag"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/multi_cog_synchronization.yaml",
+    "addr": "resource_protection_patterns.simple_mutex.code",
+    "key_line": 98,
+    "decision_index": 173,
+    "gate_first_error": "block line 2 (YAML line 100): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "SPI_LOCK = 5",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "spi_select",
+     "spi_transfer",
+     "spi_deselect"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/multi_cog_synchronization.yaml",
+    "addr": "producer_consumer_patterns.ring_buffer.code",
+    "key_line": 167,
+    "decision_index": 177,
+    "gate_first_error": "block line 2 (YAML line 169): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "ring_base       = $70000",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "head",
+     "next_head",
+     "tail",
+     "data",
+     "addr"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/multi_cog_synchronization.yaml",
+    "addr": "producer_consumer_patterns.mailbox_system.code",
+    "key_line": 215,
+    "decision_index": 178,
+    "gate_first_error": "block line 2 (YAML line 217): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "mailbox_size    = 16         ' Bytes per mailbox",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "mask",
+     "target_cog",
+     "flag",
+     "message",
+     "handle_message"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/concepts/multi_cog_synchronization.yaml",
+    "addr": "parallel_processing_patterns.barrier_synchronization.code",
+    "key_line": 305,
+    "decision_index": 181,
+    "gate_first_error": "block line 2 (YAML line 307): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "barrier_count   = $7FFF0",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "old",
+     "new",
+     "check",
+     "count"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-162",
+  "statement": "multi_cog_synchronization.yaml:177-215 (ring_buffer): after the `=` lines are moved to CON, `incmod next_head, ring_mask` and `incmod tail, ring_mask` give the constant `ring_mask` (=1023) as a register operand without `#`/`##`: 'Register cannot exceed $1FF' (c3.py ring_asis_conop). With `##ring_mask` it compiles (ring_fix).",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/multi_cog_synchronization.yaml",
+    "addr": "producer_consumer_patterns.ring_buffer.code",
+    "key_line": 167,
+    "decision_index": 177,
+    "gate_first_error": "block line 2 (YAML line 169): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "ring_base       = $70000",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "head",
+     "next_head",
+     "tail",
+     "data",
+     "addr"
+    ],
+    "role": "second error in the same block, appears after the S-164 `=` lines are moved to CON"
+   }
+  ]
+ },
+ {
+  "slug": "S-167",
+  "statement": "immediates over 511 with a single `#`: cog_hub_execution.yaml:263 `REP   #4, #1000`; pin-control.yaml:57 `drvl #addr_bus addpins 15` (the ADDPINS count 15 sets bits [10:6], so the 9-bit immediate is 16+(15<<6) = 976 > 511; the same page says at :29 that `##` is needed above ADDPINS 7). Compiler: 'Constant must be from 0 to 511 (m130)'. With `##` both compile (c4.py i_fix, i_pins_fix).",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/cog_hub_execution.yaml",
+    "addr": "code_organization.hybrid_approach.example",
+    "key_line": 249,
+    "decision_index": 88,
+    "gate_first_error": "block line 14 (YAML line 263): Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "        REP   #4, #1000",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "load_critical_code",
+     "data",
+     "sum",
+     "peak",
+     "valley"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/idioms/pin-control.yaml",
+    "addr": "idioms[2].examples[0]",
+    "key_line": 57,
+    "decision_index": 351,
+    "gate_first_error": "block line 1: Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "drvl #addr_bus addpins 15    ' drive 16-pin address bus all low",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "addr_bus=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-137",
+  "statement": "`;` comment in code: groups/counter_event_jumps.yaml:28, counter_event_polls.yaml:22, counter_event_waits.yaml:22 (`; ... do work ...`). Compiler: 'Unrecognized character ;'. (These blocks also carry S-PENDING-addct1-missing-operand.)",
+  "sites": [
+   {
+    "file": "language/pasm2/groups/counter_event_jumps.yaml",
+    "addr": "examples[0].code",
+    "key_line": 27,
+    "decision_index": 290,
+    "gate_first_error": "block line 2: Unrecognized character []($3b)",
+    "source_line_of_error": "; ... do work ...",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "timeout_handler"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/groups/counter_event_polls.yaml",
+    "addr": "examples[0].code",
+    "key_line": 21,
+    "decision_index": 291,
+    "gate_first_error": "block line 2: Unrecognized character []($3b)",
+    "source_line_of_error": "; ... do work ...",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "timeout_handler"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/groups/counter_event_waits.yaml",
+    "addr": "examples[0].code",
+    "key_line": 21,
+    "decision_index": 292,
+    "gate_first_error": "block line 2: Unrecognized character []($3b)",
+    "source_line_of_error": "; ... do work ...",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "timeout_handler"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-042",
+  "statement": "`MOV ptr, @hub_data` (labels.yaml:110, reference_operators.operators.hub_address.example) gives the hub address of a label as a bare register operand: with a real hub label (address >= $200) it fails 'Register cannot exceed $1FF', and with a low one it silently reads cog register (address). The immediate form is `MOV ptr, ##@hub_data`. The block compiles in the gate only because the assumed placeholder `hub_data` sits at a low cog address.",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/labels.yaml",
+    "addr": "reference_operators.operators.hub_address.example",
+    "key_line": 110,
+    "decision_index": 159,
+    "gate_first_error": "compiles",
+    "source_line_of_error": "",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "ptr",
+     "hub_data"
+    ],
+    "role": "compiling block (placeholder hides the defect)"
+   }
+  ]
+ },
+ {
+  "slug": "S-023",
+  "statement": "special_registers.yaml:54 `features: True random based on thermal noise` for GETRND (line 74 `GETRND reg ' Get random number` is the example). GETRND is the xoroshiro128** PRNG, not a true-random source (registered S-023; the other registered site is xoro32.yaml:37, :74-76).",
+  "sites": [
+   {
+    "file": "language/pasm2/concepts/special_registers.yaml",
+    "addr": "registers.random_generator[3]",
+    "key_line": 54,
+    "decision_index": null,
+    "gate_first_error": "n/a (prose key, not a candidate)",
+    "source_line_of_error": "- features: True random based on thermal noise",
+    "intended_class": "n/a",
+    "intended_assumes": [],
+    "role": "prose site (:54)"
+   }
+  ]
+ }
+]

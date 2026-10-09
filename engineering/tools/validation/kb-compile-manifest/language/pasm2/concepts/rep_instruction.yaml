@@ -1,0 +1,81 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/concepts/rep_instruction.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: overview
+    fp: "bc1be22bfded26e4"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: syntax.basic_form[2].example
+    fp: "da217011c61e4022"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: syntax.extended_form[2].example
+    fp: "b557c65a7367bd95"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-198"
+  - at: syntax.register_count[2].example
+    fp: "c75912a3bec0a337"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [loop_count]
+  - at: syntax.label_form[2].example
+    fp: "89e4f56dfea6636c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sum, value]
+  - at: common_patterns.array_sum.code
+    fp: "5ec42fb0f69a3ca6"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sum, count, value]
+  - at: common_patterns.bit_reversal.code
+    fp: "8dd2f5782a43e6f8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [input, output]
+  - at: common_patterns.delay_loop.code
+    fp: "81d90b8e40ce2bc4"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_patterns.block_fill.code
+    fp: "43addf26efe9ceb4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pattern]
+  - at: common_patterns.multiply_accumulate.code
+    fp: "9055c7c29d45963e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [multiplicand, coefficient, accumulator]
+  - at: common_patterns.interrupt_protection.code
+    fp: "fac060dd9f05c87f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [y, x]
+  - at: common_patterns.extended_interrupt_stall.code
+    fp: "564a3777dd702811"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, result]
+  - at: common_patterns.i2c_bitbang.code
+    fp: "61caf2a7127616e3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, sda, scl, delay]
+  - at: advanced_usage.conditional_rep.code
+    fp: "5a553028717b1046"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count]
+  - at: advanced_usage.early_exit.code
+    fp: "e0752e4eeae36c1b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, target, found]
+  - at: advanced_usage.computed_blocks.code
+    fp: "4d57c561fc0613a4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [iterations, array_size]

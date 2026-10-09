@@ -1,0 +1,52 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/idioms/conditional-execution.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: idioms[0].examples[0]
+    fp: "f484148671a302fd"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[0].examples[1]
+    fp: "5f9d71732afaf1e2"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[0].examples[2]
+    fp: "e0e690a081d4de1d"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[1].examples[0]
+    fp: "0632981efbab0bd3"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[1].examples[1]
+    fp: "946a76c724cd7f65"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[1].examples[2]
+    fp: "f2681484511663f7"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[2].examples[0]
+    fp: "b328378177c84348"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[2].examples[1]
+    fp: "1e2a39b5643aca03"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[2].examples[2]
+    fp: "16810d5685b1faf0"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[3].examples[0]
+    fp: "2ecb3f1b1a2da02a"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[3].examples[1]
+    fp: "73d64e29b3912ca4"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
+  - at: idioms[3].examples[2]
+    fp: "d08dfedf37add185"
+    compile: not-code
+    reason: "condition prefix + bare mnemonic (operands omitted), a corpus usage listing of which instructions follow the condition; instruction-form notation, not a statement"
