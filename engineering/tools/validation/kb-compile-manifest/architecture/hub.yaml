@@ -1,0 +1,36 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/hub.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: memory_organization.write_protection.examples[0]
+    fp: "ea8f3232728b1d19"
+    compile: not-code
+    reason: "instruction operand followed by `--` and an English gloss; the HUBSET operand values are verbatim from the silicon doc (silicon-doc-text.txt:2765-2770), the `--` text is prose, and `--` is not a PASM2 comment"
+  - at: memory_organization.write_protection.examples[1]
+    fp: "1dd07d6148eb7ac4"
+    compile: not-code
+    reason: "instruction operand followed by `--` and an English gloss; the HUBSET operand values are verbatim from the silicon doc (silicon-doc-text.txt:2765-2770), the `--` text is prose, and `--` is not a PASM2 comment"
+  - at: memory_organization.write_protection.examples[2]
+    fp: "ab8c85c0a6219364"
+    compile: not-code
+    reason: "instruction operand followed by `--` and an English gloss; the HUBSET operand values are verbatim from the silicon doc (silicon-doc-text.txt:2765-2770), the `--` text is prose, and `--` is not a PASM2 comment"
+  - at: programming_patterns.hub_to_cog_transfer.code
+    fp: "26d63a15a74a7120"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:16, start_addr, hub_addr]
+  - at: programming_patterns.cog_to_hub_transfer.code
+    fp: "5ca9bb88b66bfa66"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:16, start_addr, hub_addr]
+  - at: programming_patterns.fifo_streaming.code
+    fp: "7b2d759528c4c645"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [hub_addr, count=con:16, data]
+  - at: programming_patterns.circular_buffer.code
+    fp: "3f88f332978d91f1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mask, hub_addr]

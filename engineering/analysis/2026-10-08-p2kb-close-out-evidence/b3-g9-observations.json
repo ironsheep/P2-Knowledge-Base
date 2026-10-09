@@ -1,0 +1,317 @@
+[
+ {
+  "id": "O1",
+  "kind": "wrong-mode-constant (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml:49-51",
+   "architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml:119"
+  ],
+  "claim": "`pinstart(adc_pin, $8_C600, %00_0111, 0)` does not configure the ADC. $8_C600 has %SSSSS (D[5:1]) = 0, so the smart pin stays off, and M[12:10] = %010, not the %100 the page itself requires (:13, :50). Internally clocked ADC is P_ADC_1X | P_ADC = $0011_8030 (M = %1000110000000 at D[20:8], %SSSSS = %11000). The same page's PASM literal `%0000_0000_000_100011_0000000_00_11000_0` (= $0011_8030) is right; the Spin2 call and its comment `%100011 in bits 17:12` (the field is D[20:15]) are not. The block compiles.",
+  "source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1469 (P_ADC_1X), :1554 (P_ADC); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3731, :4420 (`WRPIN ##%100011_0000000_00_11000_0`)",
+  "mark": "traced"
+ },
+ {
+  "id": "O2",
+  "kind": "wrong-field-order (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/smart-pins/smart-pin-00100-pulse-cycle-output.yaml:27",
+   ":29",
+   ":74",
+   ":85",
+   ":107-108"
+  ],
+  "claim": "Pulse/cycle X halves are swapped. The base period is X[15:0] and the compare value X[31:16] (high while the counter, counting down from X[15:0], is above X[31:16]). `X=$0003_0002 ... 3-clock period` (:27) and `$0010_0008 ... 16-clock period, 50% duty` (:29, :74) and `pattern := $0003_0002 ' 3-clock period, high when > 2` (:85) put the compare value in the period half: $0003_0002 has period 2 and compare 3 (never high); the source's 0-0-1 example is X[15:0]=3, X[31:16]=2 (= $0002_0003), and 16 clocks at 50% is $0008_0010. `SHL x,#16 ' X[31:16] = 0 (continuous)` (:107-108) moves the width INTO the compare half and leaves a base period of 0 (65,536 clocks). The blocks compile.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3970-3972, :3980; the page's own square_wave routine (:118-126) has the right order",
+  "mark": "traced"
+ },
+ {
+  "id": "O3",
+  "kind": "wrong-arithmetic (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/smart-pins/smart-pin-00111-nco-duty.yaml:62",
+   ":73",
+   ":76",
+   ":114-115"
+  ],
+  "claim": "NCO-duty arithmetic cannot produce the stated duty. (1) `y_value := (duty_percent * $FFFFFFFF) / 100` (:62): $FFFFFFFF is -1 in Spin2, so 50 * -1 / 100 = 0 -- duty 0 for every percentage. (2) `y_value := MULDIV64(...) * ($FFFFFFFF / period)` (:76): $FFFFFFFF / period = -1 / 4,000,000 = 0, so y_value = 0. (3) `period := _clkfreq / 50` (:73) is 4,000,000 at 200 MHz, but X[15:0] is the base period (16 bits) and X[31:16] is the initial phase, so WXPIN(PWM_PIN, period) loads a phase. (4) PASM `MUL y_value, ##$28F5C29 ' x (2^32/100)` then `SHL y_value, #2` (:114-115): MUL is a 16x16 multiply of D[15:0] * S[15:0], so only $5C29 of the constant is used. All compile.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:161 (MUL: `D = unsigned (D[15:0] * S[15:0])`); engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4021-4025 (NCO duty X[15:0] base period, X[31:16] -> Z[31:16])",
+  "mark": "traced"
+ },
+ {
+  "id": "O4",
+  "kind": "wrong-instruction-order (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml:136-139"
+  ],
+  "claim": "`receive_msb` calls `receive_byte` (which already does `SHR data,#24`, leaving the byte in D[7:0]), then `REV data` and `ZEROX data,#7`: REV moves the byte to D[31:24] and ZEROX #7 keeps only D[7:0], so the result is always 0. For MSB-first words the order is REV of the raw MSB-justified Z, then trim. The page's own Spin2 `receive_msb_first` (:97-102) has the right order (REV the raw RDPIN, then mask).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4681 (`REV D` + `ZEROX D,#8` on the received word)",
+  "mark": "traced"
+ },
+ {
+  "id": "O5",
+  "kind": "cog-address-used-as-hub-address (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml:82",
+   "architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml:80",
+   ":89",
+   ":97",
+   "architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml:130",
+   "architecture/smart-pins/smart-pin-00111-nco-duty.yaml:139"
+  ],
+  "claim": "In cog-mode DAT code a label's value is a COG address. `mov ptra, ##message` (11110:82), `mov ptra, ##buffer` (11111:80), `MOV ptra, #sine_table` (00010:130) and `MOV ptra, #breath_table` (00111:139) then use that cog address as a HUB pointer for RDBYTE/WRBYTE, so they read and write hub RAM near address 0, not the table or buffer (the hub address is `##@label`). `cmp count, #buffer_size wz` (11111:89) compares with the cog address of the `buffer_size` label, not the 256 stored there (register form: `cmp count, buffer_size wz`). `buffer long 0[256] ' 256-byte buffer` (:97) is 256 longs = 1,024 bytes of cog RAM. All compile.",
+  "source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:311, :320 (`#IncPins` is the cog address, `@IncPins` the hub address)",
+  "mark": "traced"
+ },
+ {
+  "id": "O6",
+  "kind": "operands-swapped (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/cordic.yaml:157-163 (programming_patterns.divide_64_32; the swap is at :159)"
+  ],
+  "claim": "`SETQ dividend_high` / `QDIV divisor, dividend_low`: QDIV divides {Q, D} by S, so D is the LOW dividend long and S the divisor; the example has them the other way round (divisor in D, dividend_low in S), dividing by dividend_low. Correct: `QDIV dividend_low, divisor`. (The `qdiv clkf, #10` lines in smart-pin-01101-a-rise-inc-dec-by-b.yaml and smart-pin-10010 / 10101 are in the right order.)",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:260 (QDIV: `{SETQ value or 32'b0, D} / S`)",
+  "mark": "traced"
+ },
+ {
+  "id": "O7",
+  "kind": "wrong-feedback-roles (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/smart-pins/smart-pin-01010-pwm-smps.yaml:59",
+   ":70",
+   ":39"
+  ],
+  "claim": "The SMPS example routes `P_MINUS1_A | P_PLUS1_B` with smps_out = 20, i_sense = 19 and v_sense = 21, so input A is the CURRENT sense (pin 19) and input B the VOLTAGE feedback (pin 21). The mode's A input is the voltage detector (a low A starts a new cycle) and B the over-current detector (a high B truncates the cycle) -- as the page itself says at :10-13, :34-35. Roles are swapped. Also :39 `100kHz switching`: base 25 clocks x frame 256 at 250 MHz is 39 kHz.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4080-4082, :4090-4091",
+  "mark": "traced"
+ },
+ {
+  "id": "O8",
+  "kind": "mode-not-configured (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/smart-pins/smart-pin-00101-transition-output.yaml:68-77",
+   ":104-110"
+  ],
+  "claim": "The sync-serial 'companion' examples never set up the TX pin as a sync-serial transmitter with a clock route: Spin2 `sync_serial_clock()` only does `PINHIGH(TX_PIN)` (:75) -- TX_PIN never gets WRPIN P_SYNC_TX -- and the PASM `WRPIN ##P_SYNC_TX | P_OE, pin` (:108) has no B-input route (the clock is on pin 40, TX on pin 41: P_MINUS1_B). The sync-TX page calls the route MANDATORY (smart-pin-11100-sync-serial-transmit.yaml:16-31): without it the pin never sees a clock edge and never transmits.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4644 (new bit on a positive edge of the B input)",
+  "mark": "traced"
+ },
+ {
+  "id": "O9",
+  "kind": "invalid-barrier-count (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/cog_attention.yaml:221-235 (programming_patterns[1], Synchronization point; MOV count,#7 at :231, WAITATN at :233)"
+  ],
+  "claim": "The barrier waits for '7 signals' with seven WAITATN. ATN is a single event FLAG (set by a strobe, cleared by POLLATN/WAITATN/JATN/JNATN); strobes from several cogs in the same clock are OR'd into one per-cog strobe and several strobes before a WAITATN set the same one bit. Waiting for seven separate events can hang. `MOV mask,#1` / `SHL mask, my_id` (:226-227) compute a mask that nothing uses, and `COGATN #%11111111` strobes the cog itself.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2020, :2200-2204 (flag, cleared on POLLATN/WAITATN/JATN/JNATN)",
+  "mark": "inferred"
+ },
+ {
+  "id": "O10",
+  "kind": "self-contradiction (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/locks.yaml:121",
+   ":142-143",
+   ":182"
+  ],
+  "claim": "(1) :121 `LOCKTRY lock_num` ... `' Lock was busy, owner ID is in lock_num`: LOCKTRY does not write D (the page says so at :115). Only `LOCKREL D WC` with a register D writes the owner. (2) :142-143 `LOCKREL lock_num` (no WC) then `IF_NC JMP #not_owner ' Jump if we didn't own it`: with no WC, C is not written, and WC would report whether the lock is currently TAKEN, not ownership. (3) :182 `LOCKRET lock_num` ... `' Previous owner (if any) is returned in lock_num`: LOCKRET does not write D (the page says so at :178).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3688, :3700",
+  "mark": "traced"
+ },
+ {
+  "id": "O11",
+  "kind": "invented-fact",
+  "severity": "latent",
+  "sites": [
+   "architecture/locks.yaml:367-372"
+  ],
+  "claim": "debugging_tips[2]: 'System Lock Assignments: Lock 0: Hub mailbox system; Lock 1: CORDIC engine; Lock 2: Serial port A; Lock 3: Shared buffer pool; Locks 4-15 available' -- the hub has 16 locks allocated dynamically by LOCKNEW; no lock number is reserved for a system function, and the CORDIC is not lock-based.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3674-3684",
+  "mark": "traced"
+ },
+ {
+  "id": "O12",
+  "kind": "wrong-number",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/p2-architecture-mental-model.yaml:120-121"
+  ],
+  "claim": "`A hub operation (RDLONG, WRLONG, etc.) completes in 2-9 clocks`: RDLONG is 9...16 clocks and WRLONG 3...10 (cog-exec), RDBYTE 9...16.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:176, :178, :247 (RDBYTE, RDLONG, WRLONG timing columns)",
+  "mark": "traced"
+ },
+ {
+  "id": "O13",
+  "kind": "self-contradiction",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/system-registers/ptra-register.yaml:29",
+   ":49"
+  ],
+  "claim": "`auto_decrement: WRLONG value, PTRB-- (decrement by 4 then write)` (:29) says the post-decrement form decrements BEFORE the write; the same page defines `PTRA-- decrements after use` (:49). (Pre-decrement is `--PTRx`.) The example also uses PTRB on the PTRA page.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3172-3199 (PTR expression forms)",
+  "mark": "traced"
+ },
+ {
+  "id": "O14",
+  "kind": "wrong-fact",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/smart_pins.yaml:54",
+   ":496-499",
+   ":548"
+  ],
+  "claim": "The pin ADC is described as a `12-bit SAR ADC`, `SAR (Successive Approximation)`, `Up to 1 MSPS`. It is a delta-sigma ADC (1-bit stream, SINC2/SINC3 filtered, sampled every clock); no SAR ADC or 1 MSPS figure appears in the sources.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:200 (`Delta-sigma ADC with 5 ranges, 2 sources, and VIO/GIO calibration`), :4262, :4264-4390",
+  "mark": "traced"
+ },
+ {
+  "id": "O15",
+  "kind": "wrong-count / wrong-name",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/system-registers/complete-system-registers-index.yaml:23",
+   ":27",
+   "architecture/system-registers/dira-dirb-registers.yaml:59"
+  ],
+  "claim": "(1) :23 `total_registers: 16 special-purpose + 8 dual-purpose + 496 general-purpose` = 520; the page's own memory map (:35-52) has 8 special-purpose ($1F8-$1FF), 8 dual-purpose and 496 general: 512. (2) :27 says 'Three per-register files exist alongside it' and lists two (ptra-register.yaml, dira-dirb-registers.yaml); two exist. (3) dira-dirb-registers.yaml:59 `set_input: DRVL #pin_num (sets DIR bit and drives low)` -- DRVL is an output drive; the input forms are FLTx (:60).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2296-2301; engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:397 (DRVL: DIR bits = 1, OUT bits = 0), :389 (FLTL: DIR = 0)",
+  "mark": "traced"
+ },
+ {
+  "id": "O16",
+  "kind": "example-violates-own-rule",
+  "severity": "drives wrong code",
+  "sites": [
+   "architecture/clock_system.yaml:235-243",
+   ":247-255",
+   ":104",
+   ":129"
+  ],
+  "claim": "The 160 MHz example uses VCO = 20 MHz x 16 = 320 MHz and the 250 MHz example VCO = 500 MHz (`VCO / 2`), while the page states the VCO should stay within 100-200 MHz (:104) and that 350 MHz (VCO / 1, %PPPP = 15) is the overclock ceiling (:129, :272). 500 MHz is beyond that ceiling; 250 MHz out needs VCO 250 MHz with %PPPP = 15.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2643, :2682",
+  "mark": "inferred"
+ },
+ {
+  "id": "O17",
+  "kind": "unsourced",
+  "severity": "latent",
+  "sites": [
+   "architecture/clock_system.yaml:214",
+   ":278"
+  ],
+  "claim": "`switching_time: ~5 microseconds typical` and `adc_clock: System clock / 2` are unsourced; the latter contradicts the ADC mode text (the A input is sampled on every clock).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4262",
+  "mark": "traced"
+ },
+ {
+  "id": "O18",
+  "kind": "history-stamp",
+  "severity": "hygiene",
+  "sites": [
+   "architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml:78"
+  ],
+  "claim": "`(This page previously showed WYPIN before DIRH.)` -- a change note inside served content; the KB states what is true now.",
+  "source": "doctrine: the KB is always the latest, no history stamps",
+  "mark": "traced"
+ },
+ {
+  "id": "O19",
+  "kind": "wrong-instruction (compiles)",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/event_system.yaml:339-350",
+   ":354-370"
+  ],
+  "claim": "`Monitor pins 7:0 for any change` reads `RDPIN last_state, #0` / `AND #$FF`, and `Sample all inputs` reads `RDPIN sample1, #0 ...#2`. RDPIN returns smart pin n's result Z (and acknowledges it); pin input levels are read from INA/INB, or with TESTP. Nothing in the sources gives RDPIN on a non-smart pin the level of pins 7:0. Three RDPINs in a row are also not a simultaneous sample.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3715-3722 (RDPIN), :2296 and the register map for INA",
+  "mark": "inferred"
+ },
+ {
+  "id": "O20",
+  "kind": "wrong-address-register (compiles)",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/fifo.yaml:165-174 (programming_patterns[0], lines 170-171)"
+  ],
+  "claim": "`mov dest, temp ' Store in COG RAM` / `add dest, #1 ' Next COG location`: `dest` is itself the destination register, so the loop overwrites `dest` 64 times and adds to its contents; storing to successive cog registers needs ALTD/ALTI (or INDA-style addressing).",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:141 (ALTD)",
+  "mark": "inferred"
+ },
+ {
+  "id": "O21",
+  "kind": "example-differs-from-source",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml:100-110"
+  ],
+  "claim": "The SINC3 post-processing takes three SUB/ADD difference stages (`diff1`, `diff2`, `diff3`) after `shl x,#5`; the silicon doc's SINC3 example takes two (`diff1`, `diff2`), with no prescale shift, then `SHR x,#7` / `ZEROX x,#13`.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4466-4483",
+  "mark": "traced"
+ },
+ {
+  "id": "O22",
+  "kind": "unsourced",
+  "severity": "latent",
+  "sites": [
+   "architecture/event_system.yaml:435"
+  ],
+  "claim": "`JMPREL #0 ' Pipeline sync`: JMPREL D jumps ahead by D instructions; #0 is a jump to the next instruction. No source gives it a pipeline-synchronising role.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:348 (JMPREL)",
+  "mark": "traced"
+ },
+ {
+  "id": "O23",
+  "kind": "wrong-register (compiles)",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml:31-32"
+  ],
+  "claim": "`y_register: Trigger level for scope modes (not used in basic ADC mode)`: the scope mode's trigger values are set through X (WXPIN); Y is unused (the scope page's own example says so at smart-pin-11010-adc-scope-trigger.yaml, code_examples[0] comment).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4536-4540",
+  "mark": "traced"
+ },
+ {
+  "id": "O24",
+  "kind": "undefined-register (compiles)",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/debug_interrupt.yaml:213",
+   ":231"
+  ],
+  "claim": "The debug ISR handlers `WRLONG PC, trace_ptr` / `WRLONG PC, break_log` store a register `PC` that nothing sets; the interrupted return address is IRET0 (INB inside a debug ISR) -- as the page's own programming_patterns[0] does (`WRLONG INB, trace_ptr`, :264+).",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2423, :2420",
+  "mark": "traced"
+ },
+ {
+  "id": "O25",
+  "kind": "incomplete-table",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "architecture/smart_pins.yaml:59-62"
+  ],
+  "claim": "`00010: Long repository` and `00011: Long repository` list only the non-DAC meaning; with M[12:10] = %101 the same codes are the 16-bit DAC dither modes (P_DAC_DITHER_RND / P_DAC_DITHER_PWM), which have their own pages here.",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3808-3813",
+  "mark": "traced"
+ },
+ {
+  "id": "O26",
+  "kind": "unsourced-external-object",
+  "severity": "latent",
+  "sites": [
+   "architecture/multi_resource_management.yaml:101-109"
+  ],
+  "claim": "The serial multiplexer example calls an object `isp_octoport_serial` (`addPort(rx, tx, mode, baud, pull-up)`, `start()`, `txStr(port, str)`). The object is not in the KB or in OBEX search; its API is not sourced, and the gate can only stub the calls named in the example.",
+  "source": "repo grep: the name occurs only in this page (and its published copies)",
+  "mark": "traced"
+ }
+]

@@ -1,0 +1,64 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/interrupts.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: instructions[0].usage_example
+    fp: "9b17f155ca840335"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[1].usage_example
+    fp: "5f1defd0adeec0c9"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[2].usage_example
+    fp: "60b2d6ca9b69549c"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[3].usage_example
+    fp: "d9c93ebec80eb0e8"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[4].usage_example
+    fp: "95eab2203cfb5290"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[5].usage_example
+    fp: "1e550332d17b5c6a"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[11].operation
+    fp: "8c1ea8d49a810d61"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[11].usage_example
+    fp: "fc0576f5d2585b84"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: interrupt_sources_detail[1].setup
+    fp: "09792467bba06df4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timeout]
+  - at: programming_patterns[0].code
+    fp: "2867ad67d4fd8eda"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timeout]
+  - at: programming_patterns[1].code
+    fp: "84ad23454bcdcfd8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [PIN=con]
+  - at: programming_patterns[2].code
+    fp: "3591838b0b8567be"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: programming_patterns[3].code
+    fp: "369685afd6b9bab7"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: debugging_considerations[0].code
+    fp: "3fab918e038a3d64"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [start_time, end_time]

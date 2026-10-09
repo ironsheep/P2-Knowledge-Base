@@ -1,0 +1,36 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/system-registers/dira-dirb-registers.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage_patterns.all_outputs.code
+    fp: "48b2fbd8c21cfb7c"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: usage_patterns.selective_outputs.code
+    fp: "8daab39acacf92d2"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: usage_patterns.pin_manipulation.code
+    fp: "a1d732be803daa47"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: bit_operations.set_multiple_outputs.code
+    fp: "76f92a9246e1e67c"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: bit_operations.clear_multiple_outputs.code
+    fp: "22246904ff999786"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: bit_operations.toggle_direction.code
+    fp: "954c6ca266e76ab4"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples.led_control.code
+    fp: "1d94ff8c18def0d9"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples.serial_communication.code
+    fp: "1e1e753488750ad4"
+    compile: fragment
+    wrap: pasm2-dat

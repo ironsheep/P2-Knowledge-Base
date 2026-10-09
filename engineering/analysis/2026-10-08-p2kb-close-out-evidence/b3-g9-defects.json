@@ -1,0 +1,623 @@
+[
+ {
+  "slug": "dat-pasm-register-same-name-as-method-local",
+  "finding": "S-PENDING-dat-pasm-register-same-name-as-method-local",
+  "statement": "A combined Spin2 + PASM2 example listing uses, in its DAT code, registers whose names are locals of the same listing's `PUB main()`, and declares them nowhere in the DAT: smart-pin-01011-quadrature-encoder.yaml:67 (`rdpin position, #enc_a`; `position` is a local of main), smart-pin-01100-count-a-rise-b-high.yaml:62 (`rdpin count, #sig_pin`; `count`), smart-pin-10000-time-a-states.yaml:70 (`rdpin duration, #pwm_pin wc`; `duration`, `high_time`, `low_time`), smart-pin-10001-time-a-highs.yaml:65 (`rdpin pulse_width, #pulse_pin`; `pulse_width`; the block also never declares `pulse_count`), smart-pin-11110-async-serial-transmit.yaml:73 (`mov bit_period, ##(_clkfreq / baud) << 16`; second error behind the S-074 alignment error), smart-pin-11111-async-serial-receive.yaml:71 (`mov bit_period, ...`). The DAT sees no method locals, so each use is an undefined symbol; declaring the register in the DAT does not help, because a DAT symbol with a method local's name is refused at the local's declaration (m242 'Expected a unique variable name'). The listing can only be repaired by renaming one side. (Sibling of S-045, inline PASM register vs parameter.)",
+  "compiler_error": "Undefined symbol (block line 30 / 25 / 32 / 28 / 31) at the first such register; with a DAT declaration added: 'Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m242)' on the `PUB main() | position` line (c2.py a222_dat, a222_dat2, a222_res)",
+  "correct_source": "the PASM2 half keeps its register names and the Spin2 half uses different local names (or the two halves are separate listings); each register is declared in the DAT (`position res 1`)",
+  "verified_fix": "verify.py sites 222, 223, 228, 229, 261, 264: locals renamed (`position_v` ...) and the DAT registers declared with `res 1` (`alignl` before `data long 0` for 261) -- each compiles (program for 222, 223, 228, 261, 264; spin2-top with `pulse_count` assumed for 229)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "architecture/smart-pins/smart-pin-01011-quadrature-encoder.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 37,
+    "decision_index": 222,
+    "gate_first_error": "block line 30 (YAML line 67): Undefined symbol",
+    "source_line_of_error": "rdpin   position, #enc_a                 ' Read position",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-01100-count-a-rise-b-high.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 37,
+    "decision_index": 223,
+    "gate_first_error": "block line 25 (YAML line 62): Undefined symbol",
+    "source_line_of_error": "rdpin   count, #sig_pin                  ' Read current count",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-10000-time-a-states.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 38,
+    "decision_index": 228,
+    "gate_first_error": "block line 32 (YAML line 70): Undefined symbol",
+    "source_line_of_error": "rdpin   duration, #pwm_pin wc            ' Read duration, C=state",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-10001-time-a-highs.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 37,
+    "decision_index": 229,
+    "gate_first_error": "block line 28 (YAML line 65): Undefined symbol",
+    "source_line_of_error": "rdpin   pulse_width, #pulse_pin          ' Read high duration",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "pulse_count"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 40,
+    "decision_index": 261,
+    "gate_first_error": "block line 62 (YAML line 102): Cog symbol must be long-aligned",
+    "source_line_of_error": "data    long    0",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "second error in the same block (first reported error is S-074, the unaligned `data long 0`)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 40,
+    "decision_index": 264,
+    "gate_first_error": "block line 31 (YAML line 71): Undefined symbol",
+    "source_line_of_error": "mov     bit_period, ##(_clkfreq / baud) << 16",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 6
+ },
+ {
+  "slug": "p1-counter-names",
+  "finding": "S-PENDING-p1-counter-names",
+  "statement": "P1 counter names used as P2 code: cog_attention.yaml:384-386 `IF_C WRLONG cnt, atn_log_ptr` (P1 `cnt` register; P2 has no CNT: the counter is read with GETCT) and smart-pin-11010-adc-scope-trigger.yaml:108 `waitct(getcnt() + (_clkfreq / 100_000))` (P1 `getcnt`; the P2 method is GETCT()). Both are rejected by the compiler; a gate harness that assumed the name would have hidden them (the proposer accepted `cnt` and `getcnt()->1/0` as assumes). Class with S-035 (CNT in prose), S-070, S-087 (P1 carry-over).",
+  "compiler_error": "Undefined symbol (cog_attention block line 2); 'Expected an expression term (m172)' (adc-scope-trigger block line 23)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2015-2030 (P2 reads the counter with GETCT); engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547 (`GETCT() : Count`)",
+  "verified_fix": "verify.py sites 40, 245: `GETCT ct` + `WRLONG ct, atn_log_ptr`, and `waitct(getct() + ...)` compile",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "architecture/cog_attention.yaml",
+    "addr": "debugging_tips[0].code",
+    "key_line": 384,
+    "decision_index": 40,
+    "gate_first_error": "block line 2 (YAML line 386): Undefined symbol",
+    "source_line_of_error": "IF_C    WRLONG  cnt, atn_log_ptr",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "atn_log_ptr"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml",
+    "addr": "code_examples[1].code",
+    "key_line": 85,
+    "decision_index": 245,
+    "gate_first_error": "block line 23 (YAML line 108): Expected an expression term (m172)",
+    "source_line_of_error": "waitct(getcnt() + (_clkfreq / 100_000))  ' Sample rate",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "rev-instruction-as-spin2-unary",
+  "finding": "S-PENDING-rev-instruction-as-spin2-unary",
+  "statement": "smart-pin-11101-sync-serial-receive.yaml:101 (`receive_msb_first`): `data := REV data` -- PASM2's whole-long `REV D` written as a Spin2 prefix operator. In Spin2 REV is the binary `x REV y` (reverse bits 0..y); there is no unary REV. The block ALSO fails earlier on `buffer[idx++] := data` with `idx` never declared (S-019), so the gate reports that line first; this class is the second error (reached only after `idx` is declared).",
+  "compiler_error": "Expected an expression term (m172) at `REV data` (verify.py shows it after idx is declared)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:448 (`x REV y`)",
+  "verified_fix": "verify.py site 258: `long idx` declared and `data := data REV 31` compiles",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml",
+    "addr": "spin2_complete",
+    "key_line": 66,
+    "decision_index": 258,
+    "gate_first_error": "block line 16 (YAML line 82): Expected an expression term (m172)",
+    "source_line_of_error": "buffer[idx++] := data",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "second error in the same block (first reported error is S-019, `idx` undeclared)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "con-block-followed-by-pasm",
+  "finding": "S-PENDING-con-block-followed-by-pasm",
+  "statement": "smart_pin_patterns.yaml:40-56 (spi_patterns.spi_full_duplex.setup): a `CON` block (SPI_CLK, SPI_MOSI, SPI_MISO) is followed directly by PASM2 instructions (`wrpin ##P_TRANSITION | P_OE, #SPI_CLK` ...) with no `DAT` / `org` between: the instructions sit in the CON section, where only constant definitions are legal.",
+  "compiler_error": "Expected a unique constant name, \"#\", or STRUCT (m211) at the first `wrpin` (block line 8)",
+  "correct_source": "the same listing with `DAT` + `        org` before `' Clock generator`",
+  "verified_fix": "verify.py site 272: `DAT` / `org` inserted after the CON lines, `clk_period` assumed as a constant -- compiles",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "architecture/smart_pin_patterns.yaml",
+    "addr": "spi_patterns.spi_full_duplex.setup",
+    "key_line": 36,
+    "decision_index": 272,
+    "gate_first_error": "block line 8 (YAML line 44): Expected a unique constant name, \"#\", or STRUCT (m211)",
+    "source_line_of_error": "wrpin   ##P_TRANSITION | P_OE, #SPI_CLK",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "clk_period=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-003",
+  "statement": "smart-pin-01010-pwm-smps.yaml:51, :56: `dirh(v_sense)`, `dirh(i_sense)` -- PASM2 DIRH written as a Spin2 call (the registered S-003 site, now in the gate). Fixed variant `pinh(v_sense)` / `pinh(i_sense)` compiles (verify.py 221). The same block also swaps the SMPS A/B input roles (observation O7).",
+  "sites": [
+   {
+    "file": "architecture/smart-pins/smart-pin-01010-pwm-smps.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 40,
+    "decision_index": 221,
+    "gate_first_error": "block line 11 (YAML line 51): Expected an instruction or variable",
+    "source_line_of_error": "dirh(v_sense)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-013",
+  "statement": "PASM2 instruction (or an invented lookalike) written as a Spin2 call or statement: multi_resource_management.yaml:119 `drvl chipSelect[device]` and :121 `drvh chipSelect[device]` as Spin2 statements; :128 `wypin dutyCycle[channel], pwmPin[channel]` (PASM operand order, as a Spin2 statement); smart-pin-00110-nco-frequency.yaml:72-73 `QFRAC(freq_hz * x_div, _clkfreq)` / `y_value := GETQX()` (neither is a Spin2 method; the Spin2 form is the `FRAC` operator); dds-goertzel.yaml:156 `wrlut(t, i)` (no Spin2 method; needs inline PASM). Fixed variants compile (verify.py 160, 161, 210, 303).",
+  "sites": [
+   {
+    "file": "architecture/multi_resource_management.yaml",
+    "addr": "common_applications.multi_spi_manager.example",
+    "key_line": 115,
+    "decision_index": 160,
+    "gate_first_error": "block line 4 (YAML line 119): Expected an instruction or variable",
+    "source_line_of_error": "drvl    chipSelect[device]",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "device",
+     "MAX_DEVICES=con",
+     "deviceActive",
+     "chipSelect",
+     "sendSPI()->1/1",
+     "deviceData"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/multi_resource_management.yaml",
+    "addr": "common_applications.pwm_channel_controller.example",
+    "key_line": 125,
+    "decision_index": 161,
+    "gate_first_error": "block line 3 (YAML line 128): Expected \"(\"",
+    "source_line_of_error": "wypin   dutyCycle[channel], pwmPin[channel]",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "channel",
+     "MAX_CHANNELS=con",
+     "dutyCycle",
+     "pwmPin"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-00110-nco-frequency.yaml",
+    "addr": "spin2_complete",
+    "key_line": 45,
+    "decision_index": 210,
+    "gate_first_error": "block line 27 (YAML line 72): Expected an instruction or variable",
+    "source_line_of_error": "QFRAC(freq_hz * x_div, _clkfreq)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/streamer/dds-goertzel.yaml",
+    "addr": "lut_setup.example",
+    "key_line": 147,
+    "decision_index": 303,
+    "gate_first_error": "block line 9 (YAML line 156): Expected an instruction or variable",
+    "source_line_of_error": "wrlut(t, i)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "i",
+     "cos",
+     "sin",
+     "t"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-018",
+  "statement": "click_module_integration.yaml:137 (`spi.start(...)`, `spi.transfer(...)`), :163 (`i2c.setup(...)`), :177 (`serial.start(...)`): the three Click pattern snippets call driver objects `spi`, `i2c`, `serial` that no OBJ line declares. With an OBJ line and stub objects each compiles (verify.py 5, 6, 7).",
+  "sites": [
+   {
+    "file": "architecture/click_module_integration.yaml",
+    "addr": "implementation_patterns.spi_click_pattern.code",
+    "key_line": 128,
+    "decision_index": 5,
+    "gate_first_error": "block line 9 (YAML line 137): Expected an instruction or variable",
+    "source_line_of_error": "spi.start(sckPin, mosiPin, misoPin, SPI_MODE, SPI_CLK_MHZ)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "CLICK_OFST_CS=con",
+     "CLICK_OFST_SCK=con",
+     "CLICK_OFST_MOSI=con",
+     "CLICK_OFST_MISO=con",
+     "SPI_MODE=con",
+     "SPI_CLK_MHZ=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/click_module_integration.yaml",
+    "addr": "implementation_patterns.i2c_click_pattern.code",
+    "key_line": 156,
+    "decision_index": 6,
+    "gate_first_error": "block line 7 (YAML line 163): Expected an instruction or variable",
+    "source_line_of_error": "i2c.setup(sclPin, sdaPin, I2C_SPEED, I2C_PULLUP)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "CLICK_OFST_SCL=con",
+     "CLICK_OFST_SDA=con",
+     "I2C_SPEED=con",
+     "I2C_PULLUP=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/click_module_integration.yaml",
+    "addr": "implementation_patterns.uart_click_pattern.code",
+    "key_line": 170,
+    "decision_index": 7,
+    "gate_first_error": "block line 7 (YAML line 177): Expected an instruction or variable",
+    "source_line_of_error": "serial.start(rxPin, txPin, MODE, BAUD)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "CLICK_OFST_TX=con",
+     "CLICK_OFST_RX=con",
+     "MODE=con",
+     "BAUD=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-019",
+  "statement": "undeclared variables in complete methods: click_module_integration.yaml:142-152 `spiTransaction` uses `csPin` at :144 (a local of the OTHER method `initializeSPI`, :129); smart-pin-11101-sync-serial-receive.yaml:82 `buffer[idx++] := data` with `idx` never declared. Fixed variants compile (verify.py 5, 258).",
+  "sites": [
+   {
+    "file": "architecture/click_module_integration.yaml",
+    "addr": "implementation_patterns.spi_click_pattern.code",
+    "key_line": 128,
+    "decision_index": 5,
+    "gate_first_error": "block line 9 (YAML line 137): Expected an instruction or variable",
+    "source_line_of_error": "spi.start(sckPin, mosiPin, misoPin, SPI_MODE, SPI_CLK_MHZ)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "CLICK_OFST_CS=con",
+     "CLICK_OFST_SCK=con",
+     "CLICK_OFST_MOSI=con",
+     "CLICK_OFST_MISO=con",
+     "SPI_MODE=con",
+     "SPI_CLK_MHZ=con"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml",
+    "addr": "spin2_complete",
+    "key_line": 66,
+    "decision_index": 258,
+    "gate_first_error": "block line 16 (YAML line 82): Expected an expression term (m172)",
+    "source_line_of_error": "buffer[idx++] := data",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-020",
+  "statement": "click_module_integration.yaml:142 and :152: `PRI spiTransaction(data) | result` ends `return result`: a value returned from a method that declares no result (`result` is declared as a LOCAL, not as `: result`). pnut-ts: 'Expected end of line (m280)' at the `return` (c5.py r_d). The fix is `PRI spiTransaction(data) : result` (verify.py 5).",
+  "sites": [
+   {
+    "file": "architecture/click_module_integration.yaml",
+    "addr": "implementation_patterns.spi_click_pattern.code",
+    "key_line": 128,
+    "decision_index": 5,
+    "gate_first_error": "block line 9 (YAML line 137): Expected an instruction or variable",
+    "source_line_of_error": "spi.start(sckPin, mosiPin, misoPin, SPI_MODE, SPI_CLK_MHZ)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "CLICK_OFST_CS=con",
+     "CLICK_OFST_SCK=con",
+     "CLICK_OFST_MOSI=con",
+     "CLICK_OFST_MISO=con",
+     "SPI_MODE=con",
+     "SPI_CLK_MHZ=con"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-050",
+  "statement": "smart-pin-11111-async-serial-receive.yaml:126: `PUB receive_with_timeout(timeout_ms)` -- a PARAMETER named like the CON constant `timeout_ms` (CON at :115): 'Expected a unique parameter name (m220)' (c3.py timeout_param). Renaming the parameter compiles (verify.py 265).",
+  "sites": [
+   {
+    "file": "architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml",
+    "addr": "code_examples[1].code",
+    "key_line": 105,
+    "decision_index": 265,
+    "gate_first_error": "block line 21 (YAML line 126): Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB receive_with_timeout(timeout_ms) : value | deadline",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-074",
+  "statement": "smart-pin-11110-async-serial-transmit.yaml:102: `data long 0` follows `message byte \"Hello!\", 13, 10, 0` (10 bytes) in a cog-mode DAT: 'Cog symbol must be long-aligned'. `alignl` before the label fixes it (verify.py 261).",
+  "sites": [
+   {
+    "file": "architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml",
+    "addr": "code_examples[0].code",
+    "key_line": 40,
+    "decision_index": 261,
+    "gate_first_error": "block line 62 (YAML line 102): Cog symbol must be long-aligned",
+    "source_line_of_error": "data    long    0",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-120",
+  "statement": "smart-pin-00011-dac-16bit-pwm-dither.yaml:92 `value16 := $8000 + (SIN(angle, $7FFF) >> 16)`: `SIN()` is not a Spin2 built-in (the sine methods are QSIN/QCOS). The proposer's `SIN()->1/2` assume was a look-alike built-in and was refused. `QSIN($7FFF, angle, 360)` compiles (verify.py 192). Same class as the registered `sin()` in a constant expression.",
+  "sites": [
+   {
+    "file": "architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml",
+    "addr": "spin2_complete",
+    "key_line": 63,
+    "decision_index": 192,
+    "gate_first_error": "block line 29 (YAML line 92): Expected an expression term (m172)",
+    "source_line_of_error": "value16 := $8000 + (SIN(angle, $7FFF) >> 16)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-137",
+  "statement": "`;` used as the comment character in PASM2 examples: complete-system-registers-index.yaml:281, :282, :293, :294, :324, :332 (`MOV $1F8, ##$3000  ; Same as MOV PTRA, ##$3000` ...). 'Unrecognized character ;'. With `'` each compiles (verify.py 324, 325, 328, 329, 330, 332).",
+  "sites": [
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "access_patterns.direct_addressing.examples[0]",
+    "key_line": 281,
+    "decision_index": 324,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "MOV $1F8, ##$3000  ; Same as MOV PTRA, ##$3000",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "access_patterns.direct_addressing.examples[1]",
+    "key_line": 282,
+    "decision_index": 325,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "MOV result, $1FE   ; Same as MOV result, INA",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "access_patterns.bit_manipulation.examples[0]",
+    "key_line": 293,
+    "decision_index": 328,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "OR DIRA, ##%00001111     ; Set P3-P0 as outputs",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "access_patterns.bit_manipulation.examples[1]",
+    "key_line": 294,
+    "decision_index": 329,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "ANDN OUTB, ##%11110000   ; Clear P35-P32 outputs",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "usage_patterns.memory_operations.example",
+    "key_line": 324,
+    "decision_index": 330,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "RDLONG data, PTRA++  ; Read and advance pointer",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "data"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "usage_patterns.pin_manipulation.example",
+    "key_line": 332,
+    "decision_index": 332,
+    "gate_first_error": "block line 1: Unrecognized character []($3b)",
+    "source_line_of_error": "OR DIRA, pin_bit  ; Enable output for one pin",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "pin_bit"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-164",
+  "statement": "cog_attention.yaml:281-283 (programming_patterns[4]): `GROUP_A = %00001111`, `GROUP_B = ...`, `ALL_COGS = ...` as constant assignments inside a PASM2 block with no CON. With a CON block they compile (verify.py 35).",
+  "sites": [
+   {
+    "file": "architecture/cog_attention.yaml",
+    "addr": "programming_patterns[4].code",
+    "key_line": 279,
+    "decision_index": 35,
+    "gate_first_error": "block line 2 (YAML line 281): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "GROUP_A = %00001111     ' COGs 0-3",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-165",
+  "statement": "prose/separator inside a code string: complete-system-registers-index.yaml:328 `MOV DIRA, pin_mask / MOV OUTA, initial_states` and :336 `SETQ ##params / COGINIT #cog, ##entry` -- two instructions joined by ` / ` on one line (the registered class is the `--or--` separator). On two lines each compiles (verify.py 331, 333).",
+  "sites": [
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "usage_patterns.io_initialization.example",
+    "key_line": 328,
+    "decision_index": 331,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV DIRA, pin_mask / MOV OUTA, initial_states",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "pin_mask",
+     "initial_states"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "architecture/system-registers/complete-system-registers-index.yaml",
+    "addr": "usage_patterns.parameter_passing.example",
+    "key_line": 336,
+    "decision_index": 333,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "SETQ ##params / COGINIT #cog, ##entry",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "params",
+     "cog",
+     "entry"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-167",
+  "statement": "smart-pin-00111-nco-duty.yaml:126: `WXPIN #1000, pin` -- an immediate over 511 with one `#`. 'Constant must be from 0 to 511 (m130)'. `##1000` compiles (verify.py 218).",
+  "sites": [
+   {
+    "file": "architecture/smart-pins/smart-pin-00111-nco-duty.yaml",
+    "addr": "pasm2_complete",
+    "key_line": 97,
+    "decision_index": 218,
+    "gate_first_error": "block line 29 (YAML line 126): Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "WXPIN #1000, pin",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-198",
+  "statement": "HARNESS GAP (not a KB defect): locks.yaml:223-241 (programming_patterns[1]) references `.timeout_error`, defined outside the excerpt (`JMP #.timeout_error`). With the label supplied after the excerpt it compiles (verify.py 137).",
+  "sites": [
+   {
+    "file": "architecture/locks.yaml",
+    "addr": "programming_patterns[1].code",
+    "key_line": 221,
+    "decision_index": 137,
+    "gate_first_error": "block line 11 (YAML line 232): Undefined symbol",
+    "source_line_of_error": "JMP     #.timeout_error",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "timeout",
+     "lock_num",
+     "current"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-091",
+  "statement": "architecture/patterns-analysis/asm_integration_analysis.yaml:23, :41, :88 say method parameters / result live in PR0 / PR1 / 'result overlaps PR0'. The method's first 16 longs are $1E0..$1EF under their own names; PR0..PR7 ($1D8..$1DF) are separate general-purpose registers. The block at :34 (implementation_template) compiles -- it addresses value1/value2/result by NAME, which is correct -- only its comments are wrong.",
+  "sites": [
+   {
+    "file": "architecture/patterns-analysis/asm_integration_analysis.yaml",
+    "addr": "implementation_template",
+    "key_line": 41,
+    "decision_index": 164,
+    "gate_first_error": "n/a (compiles; claim site)",
+    "source_line_of_error": "' by NAME: value1 = PR0, value2 = PR1, result overlaps PR0.",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "claim site inside a compiling block (:41); also prose :23, :88"
+   }
+  ]
+ },
+ {
+  "slug": "S-102",
+  "statement": "architecture/system-registers/ptra-register.yaml:66 (examples.parameter_passing) `COGINIT #0, ##entry_point ' entry_point goes to new cog's PTRB`: D = #0 selects cog 0 (restarts the running cog 0), not a new cog; a free cog is `#%1_0000` (silicon-doc-text.txt:411, `COGINIT #%0_1_0000,addr 'load and start a free cog`). Same mistake as the registered COGINIT(COGEXEC, ...) site, here in PASM2.",
+  "sites": [
+   {
+    "file": "architecture/system-registers/ptra-register.yaml",
+    "addr": "examples.parameter_passing.code",
+    "key_line": 66,
+    "decision_index": 343,
+    "gate_first_error": "n/a (compiles; claim site)",
+    "source_line_of_error": "COGINIT #0, ##entry_point     ' entry_point goes to new cog's PTRB",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "param_block=con",
+     "entry_point=con",
+     "param1",
+     "param2"
+    ],
+    "role": "claim site inside a compiling block"
+   }
+  ]
+ }
+]

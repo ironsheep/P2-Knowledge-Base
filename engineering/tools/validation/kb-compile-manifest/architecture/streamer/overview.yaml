@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/streamer/overview.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage_pattern.code
+    fp: "20acf701290d2991"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [buffer_addr=con, frequency_value=con, mode_command=con, next_command=con]
+  - at: debug_interaction.fix
+    fp: "44e275425065d003"
+    compile: fragment
+    wrap: spin2-top

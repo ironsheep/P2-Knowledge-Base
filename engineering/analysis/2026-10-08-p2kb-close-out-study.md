@@ -468,6 +468,47 @@ result); `silicon-doc-text.txt:3688` (LOCKTRY C = taken) and `:2051`, `:2053` (e
 | S-218 | B | G8 | wrong, not code-driving | `branch_addressing.yaml:53`: "2-cycle latency for all jumps" — branch timing misstated | O20 | traced | — | to research | no |
 | S-219 | B | G8 | drives wrong code | `conditional_execution.yaml:231-234`: `TEST value, #$80 WZ ' test sign bit` tests bit 7; `counter_event_polls.yaml:21`: the POLL and WAIT group pages share one JCT1 example that fits neither | O21; O22 | traced | — | to research | no |
 
+**ENH-03 B3, group G9 (`architecture/**`, 353 blocks, 68 files), 2026-10-09.** Evidence:
+`b3-g9-defects.json` (new classes; new sites for S-003, S-013 ×4, S-018 ×3, S-019, S-020, S-050,
+S-074, S-120, S-137 ×6, S-164, S-165 ×2, S-167, S-198; claim sites for S-091, S-102),
+`b3-g9-class-map.json`, `b3-g9-observations.json`. Arbiter checks: re-applied in a fresh scratch
+root (same result); `silicon-doc-text.txt:200` (delta-sigma ADC), `:3970-3980` (pulse X halves),
+`spin2-v55-text.txt:1469` (P_ADC) re-read and holding. The reviewer overturned three proposer
+passes that rested on assumed P1 names (`cnt`, `getcnt()`) or a look-alike built-in (`SIN()`).
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-220 | B | G9 | drives wrong code | combined Spin2+PASM listings whose PASM registers share names with `main()`'s locals (6; m242) | defects `dat-pasm-register-same-name-as-method-local` | traced | — | to research (with S-045) | no |
+| S-221 | B | G9 | **drives wrong code** | P1 counter names: `cnt` in PASM, `getcnt()` in Spin2 (2) | defects `p1-counter-names` | traced | P1 carry-over | to research (P1 class sweep) | no |
+| S-222 | B | G9 | drives wrong code | `data := REV data` — REV is a binary Spin2 operator / a PASM instruction | defects `rev-instruction-as-spin2-unary` | traced | PASM in Spin2 (class with S-013) | to research | no |
+| S-223 | B | G9 | drives wrong code | PASM instructions directly after a CON block, with no DAT/ORG | defects `con-block-followed-by-pasm` | traced | — | to research | no |
+| S-224 | B | G9 | **drives wrong code** | `smart-pin-11000…yaml:51`, `:119`: `pinstart(adc_pin, $8_C600, …)` leaves the smart pin off (SSSSS = 0); ADC mode is `$0011_8030`-class | O1; `spin2-v55-text.txt:1469`, `:1554`; `silicon-doc-text.txt:4420` | traced | — | to research | no |
+| S-225 | B | G9 | **drives wrong code** | `smart-pin-00100…yaml:27,29,74,85`: pulse/cycle X halves swapped (base period X[15:0], compare X[31:16]) | O2; `silicon-doc-text.txt:3970-3980` | traced | — | to research | no |
+| S-226 | B | G9 | **drives wrong code** | `smart-pin-00111…yaml:62,76,114`: `$FFFFFFFF` (-1) makes duty 0; MUL takes only 16 bits | O3; instruction CSV (MUL) | traced | — | to research | no |
+| S-227 | B | G9 | drives wrong code | `smart-pin-11101…yaml:136-139`: REV after SHR always gives 0 | O4; `silicon-doc-text.txt:4681` | traced | — | to research | no |
+| S-228 | B | G9 | **drives wrong code** | `smart-pin-11110/11111…yaml`: `mov ptra, ##message` in cog-mode DAT loads a cog address, not a hub address | O5 | traced | cog/hub address confusion | to research (with S-042) | no |
+| S-229 | B | G9 | **drives wrong code** | `cordic.yaml:157-163`: `QDIV divisor, dividend_low` — operands swapped | O6; instruction CSV (QDIV) | traced | — | to research | no |
+| S-230 | B | G9 | **drives wrong code** | `smart-pin-01010-pwm-smps.yaml:59,70`: A/B inputs routed to current and voltage the wrong way round | O7; `silicon-doc-text.txt:4080-4091` | traced | — | to research (with S-003) | no |
+| S-231 | B | G9 | drives wrong code | `smart-pin-00101…yaml`: sync-serial "companion" examples never set the TX pin up as a sync transmitter with a clock route | O8 | traced | — | to research | no |
+| S-232 | B | G9 | drives wrong code | `cog_attention.yaml:221-235`: a barrier waits for "7 signals" with seven WAITATN; ATN is one flag | O9 | inferred | — | to research (silicon doc) | no |
+| S-233 | B | G9 | **drives wrong code** | `locks.yaml:121`, `:142-143`, `:182`: "owner ID is in lock_num" after LOCKTRY — LOCKTRY does not write D | O10 | traced | — | to research (with S-201) | no |
+| S-234 | B | G9 | wrong, not code-driving | `locks.yaml:367-372`: "system lock assignments" (lock 0 hub mailbox, lock 1 CORDIC…) — invented | O11 | traced | invented | to research | no |
+| S-235 | B | G9 | drives wrong code | `p2-architecture-mental-model.yaml:120-121`: hub ops "2-9 clocks"; RDLONG 9…16, WRLONG 3…10 | O12; instruction CSV | traced | — | to research | no |
+| S-236 | B | G9 | drives wrong code | `ptra-register.yaml:29`, `:49`: `PTRB--` "decrement then write" — post-decrement writes first | O13 | traced | — | to research | no |
+| S-237 | B | G9 | **drives wrong code** | `smart_pins.yaml:54`, `:496-499`, `:548`: pin ADC called "12-bit SAR, up to 1 MSPS"; it is delta-sigma | O14; `silicon-doc-text.txt:200` | traced | invented spec | to research | no |
+| S-238 | B | G9 | wrong, not code-driving | `complete-system-registers-index.yaml:23`: register totals that do not add to the page's own map | O15 | traced | — | to research | no |
+| S-239 | B | G9 | **drives wrong code** | `clock_system.yaml:235-255`, `:104`, `:129`: 160 MHz and 250 MHz examples use VCO values against the page's own limits | O16 | traced | — | to research | no |
+| S-240 | B | G9 | latent | `clock_system.yaml:214`, `:278`: "switching ~5 µs", "ADC clock = sysclk/2" — unsourced | O17 | inferred | unsourced numbers | to research | no |
+| S-241 | B | G9 | hygiene | `smart-pin-01110…yaml`: "(This page previously showed WYPIN before DIRH.)" — a change note in served content | O18 | traced | doctrine: the KB states what is true now | to research (delete the note) | yes |
+| S-242 | B | G9 | drives wrong code | `event_system.yaml:339-370`: pin-change monitoring reads RDPIN where INA is meant | O19 | inferred | — | to research | no |
+| S-243 | B | G9 | drives wrong code | `fifo.yaml:165-174`: `mov dest, temp` / `add dest, #1` — `dest` is the destination itself, not a pointer (needs ALTD) | O20 | inferred | — | to research | no |
+| S-244 | B | G9 | drives wrong code | `smart-pin-11001…yaml`: SINC3 post-processing stages do not match the silicon doc's | O21 | traced | — | to research | no |
+| S-245 | B | G9 | wrong, not code-driving | `event_system.yaml:435`: `JMPREL #0 ' pipeline sync` — no source | O22 | traced | invented idiom | to research | no |
+| S-246 | B | G9 | wrong, not code-driving | `smart-pin-11000…yaml`: "Y = trigger level for scope modes" | O23 | traced | — | to research | no |
+| S-247 | B | G9 | drives wrong code | `debug_interrupt.yaml:213`, `:231`: ISR stores a register `PC` that nothing sets | O24 | traced | — | to research (with F-359, study group A) | no |
+| S-248 | B | G9 | wrong, not code-driving | `smart_pins.yaml:59-62`: modes %00010/%00011 listed only as "long repository"; with DAC M bits they are DAC modes | O25 | traced | — | to research | no |
+| S-249 | B | G9 | drives wrong code | `multi_resource_management.yaml:101-109`: an object `isp_octoport_serial` and its API are not in the OBEX index | O26 | traced | invented object | to research (check the OBEX index; per D4, OBEX references are checked against it only) | no |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

@@ -1,0 +1,42 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/xbyte_engine.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: starting_xbyte.setup.code
+    fp: "2d1cf9bd6240bc74"
+    compile: not-code
+    reason: "instruction-syntax notation: `SETQ {#}D` / `SETQ2 {#}D` where `{#}` marks an optional immediate; PNut reads `{...}` as a brace comment, so the lines compile vacuously as `SETQ D`; the facts (SETQ = persistent XBYTE mode, SETQ2 = next bytecode only) match silicon-doc-text.txt:965-969"
+  - at: starting_xbyte.configuration.stack_note
+    fp: "ae7c47ae2b6eec9b"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: configuration_patterns.compressed_16_bytecodes.operation
+    fp: "16d3ad9ff956a1a3"
+    compile: not-code
+    reason: "compression-threshold rule (`If bytecode[7:4] < %BBBB ...`), English notation"
+  - at: flag_control.flag_mapping.usage
+    fp: "7382773c805006cf"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: special_registers.pa_register.usage
+    fp: "80d0d891ebe19bce"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: special_registers.pb_register.usage
+    fp: "bdfa54b51d87d109"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: programming_examples.simple_interpreter.code
+    fp: "26a233dadf75a862"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [bytecode_table, bytecode_ptr]
+  - at: programming_examples.bytecode_routine_example.code
+    fp: "b8d2190567a8dceb"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, stack_ptr]
+  - at: programming_examples.compressed_mode.code
+    fp: "a09b01c60d991701"
+    compile: fragment
+    wrap: pasm2-dat

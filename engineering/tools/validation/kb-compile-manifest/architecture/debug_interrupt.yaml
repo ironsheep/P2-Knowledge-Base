@@ -1,0 +1,73 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/debug_interrupt.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: instructions[0].usage_example
+    fp: "e6709cf4b8b8f832"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[1].usage_example
+    fp: "61749136aba936ee"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[2].operation
+    fp: "2998b8af499dfa5d"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[2].usage_example
+    fp: "7b2dfcf53b0e205e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [status]
+  - at: debug_modes[0].configuration
+    fp: "6972087d73574e96"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: debug_modes[0].handler
+    fp: "8efb2a2a06f65910"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [PC, trace_ptr]
+  - at: debug_modes[1].configuration
+    fp: "cc6ca3bc2491f99d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [break_addr=con]
+  - at: debug_modes[1].handler
+    fp: "3171729fe21f99d0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [PC, break_log, value, watch_addr]
+  - at: debug_modes[2].configuration
+    fp: "ade8df117152e1af"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: debug_modes[2].handler
+    fp: "6fdbe4a8dcc3677d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [status]
+  - at: programming_patterns[0].code
+    fp: "fba3f4b3fa1563e1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [trace_ptr, TRACE_BUFFER=con, TRACE_END=con]
+  - at: programming_patterns[1].code
+    fp: "e08140fccbfa6cde"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, watch_var, break_value, debug_cog, debug_value]
+  - at: programming_patterns[2].code
+    fp: "e03aed2a3ffc8f7f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [current_time, last_time, total_time, instruction_count]
+  - at: programming_patterns[3].code
+    fp: "6db53bccf6827029"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [target_cog=con, target_pc, debug_data, some_var]
+  - at: debugging_capabilities[0].implementation
+    fp: "b8a68e0ce2ba94b2"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

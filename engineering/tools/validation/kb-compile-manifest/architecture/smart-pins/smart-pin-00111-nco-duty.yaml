@@ -1,0 +1,31 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-00111-nco-duty.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: constants.spin2
+    fp: "8a5ce9f22c7c1c0e"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: constants.pasm2
+    fp: "8a5ce9f22c7c1c0e"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: y_register.examples[0]
+    fp: "21f14ed1150ad5a9"
+    compile: not-code
+    reason: "value gloss (a number or field value followed by its meaning), not a statement"
+  - at: y_register.examples[1]
+    fp: "add55f0a925e4c59"
+    compile: not-code
+    reason: "value gloss (a number or field value followed by its meaning), not a statement"
+  - at: y_register.examples[2]
+    fp: "c22972cf8a9d049f"
+    compile: not-code
+    reason: "value gloss (a number or field value followed by its meaning), not a statement"
+  - at: spin2_complete
+    fp: "8e115212bd6fce58"
+    compile: program
+  - at: pasm2_complete
+    fp: "a5c600ed28968902"
+    compile: program
+    finding: "S-167"

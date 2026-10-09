@@ -1,0 +1,35 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: constants.spin2
+    fp: "ce49a43adf32ffbb"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: constants.pasm2
+    fp: "ce49a43adf32ffbb"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: dac_requirement
+    fp: "4cce7aadb9f74037"
+    compile: not-code
+    reason: "mixed note: a field requirement (`M[12:10] MUST be %101`) plus a `Use:` line and a list of option names; notation and prose, not a statement (the DAC option names are real P_ constants, the field rule matches silicon-doc-text.txt:3779)"
+  - at: x_register.example
+    fp: "a5160c2a32d7084f"
+    compile: not-code
+    reason: "list of example X values with their decimal gloss (`$100 (256), $200 (512), $400 (1024)`), not a statement"
+  - at: z_register.usage
+    fp: "eb32b0bfe2bffc39"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: spin2_complete
+    fp: "8d00133fc2a1acd8"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-120"
+  - at: pasm2_complete
+    fp: "5481950d0beea979"
+    compile: program
+  - at: spin2_inline
+    fp: "9816612668570bad"
+    compile: program

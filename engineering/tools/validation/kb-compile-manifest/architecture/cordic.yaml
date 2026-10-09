@@ -1,0 +1,37 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/cordic.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: operations.fractional_divide.usage
+    fp: "a7eec36a07918234"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source"
+  - at: operations.rotate.setup
+    fp: "5b8d19b6480d0ffc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [Y, X, angle]
+  - at: pipeline_behavior.event_generation.usage
+    fp: "a539baca8b8861df"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: programming_patterns.basic_multiply.code
+    fp: "9d8ef71bc27bf82a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value1, value2, result_low, result_high]
+  - at: programming_patterns.divide_64_32.code
+    fp: "90c09aedd163eca5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dividend_high, divisor, dividend_low, quotient, remainder]
+  - at: programming_patterns.vector_magnitude.code
+    fp: "4f9a51f1f888990b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x_coord, y_coord, magnitude, angle]
+  - at: programming_patterns.rotation_matrix.code
+    fp: "339a075362bc661a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [y_coord, x_coord, angle, new_x, new_y]

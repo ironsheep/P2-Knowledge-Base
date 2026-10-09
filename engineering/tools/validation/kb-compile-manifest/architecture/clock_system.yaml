@@ -1,0 +1,29 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/clock_system.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: hubset_configuration.worked_sequence.code
+    fp: "1a0d7a2ae4cedcf9"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: clock_sources.rcslow.usage
+    fp: "a8f09605252fae3b"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: programming_examples.basic_crystal_20mhz.code
+    fp: "8bf6c1bac21e02a7"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: programming_examples.pll_160mhz_from_20mhz_crystal.code
+    fp: "f0609086723e4475"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: programming_examples.overclock_250mhz.code
+    fp: "ae4a6ee26c134f87"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: frequency_measurement.measuring_actual_frequency.code
+    fp: "f4ee91f1fb720a59"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [start_count, measure_time=con, end_count]

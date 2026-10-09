@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "b1fbd6daa4948ea5"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [count]
+  - at: configuration_order.follows_the_general_order
+    fp: "211b5922c45c2bc9"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

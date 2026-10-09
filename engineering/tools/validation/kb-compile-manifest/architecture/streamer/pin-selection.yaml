@@ -1,0 +1,37 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/streamer/pin-selection.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: sub_pin_selection.bits_free_by_width[0].template
+    fp: "41e6881cbe142f68"
+    compile: not-code
+    reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
+  - at: sub_pin_selection.bits_free_by_width[1].template
+    fp: "5bae9bd5b1b7b191"
+    compile: not-code
+    reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
+  - at: sub_pin_selection.bits_free_by_width[2].template
+    fp: "d146fbf1da2a7076"
+    compile: not-code
+    reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
+  - at: sub_pin_selection.bits_free_by_width[3].template
+    fp: "ae14e59269b46f84"
+    compile: not-code
+    reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
+  - at: pin_base_encoding.example
+    fp: "1bc23906467e8fe6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, count]
+  - at: common_configs.vga_pins_0_3.code
+    fp: "bf310db4e684c153"
+    compile: not-code
+    reason: "operand-expression notation (`mode | (0<<17)`): a value expression with `mode` standing for a streamer mode word, not a statement"
+  - at: common_configs.hdmi_pins_8_15.code
+    fp: "189281443b302cd6"
+    compile: not-code
+    reason: "operand-expression notation (`mode | (0<<17)`): a value expression with `mode` standing for a streamer mode word, not a statement"
+  - at: common_configs.spi_single_pin.code
+    fp: "c61f302cff3bd7f5"
+    compile: not-code
+    reason: "operand-expression notation: an OR of streamer constants and `(pin<<17)`, a value to be assigned, not a statement"

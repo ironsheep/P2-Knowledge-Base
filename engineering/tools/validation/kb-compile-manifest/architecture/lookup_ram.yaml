@@ -1,0 +1,49 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/lookup_ram.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: instructions[0].operation
+    fp: "75c178f8d51fdd79"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[0].usage_example
+    fp: "03c3c01515b60a59"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, value, index]
+  - at: instructions[1].operation
+    fp: "e2bcdcb6eedba406"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[1].usage_example
+    fp: "360244de4aa5cbaa"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, index]
+  - at: instructions[2].operation
+    fp: "40451895ef517dab"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[2].usage_example
+    fp: "b0a0ce6e643a6de1"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: programming_patterns[0].code
+    fp: "2c2d58a56d3a5d9d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sine_table_ptr, angle, sine_val]
+  - at: programming_patterns[1].code
+    fp: "48aa977c782baf15"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flag, data, message]
+  - at: debugging_considerations[0].code
+    fp: "62c234b25cbb93c0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dump_ptr]
+  - at: debugging_considerations[1].code
+    fp: "ee40d9bd1ac1c672"
+    compile: not-code
+    reason: "comment-only block (three `'` lines narrating a cog-to-cog LUT test); there is no statement to compile"

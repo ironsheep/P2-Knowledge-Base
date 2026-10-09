@@ -1,0 +1,25 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-00000-normal-mode.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: constants.spin2
+    fp: "72c06a843b7c674b"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: constants.pasm2
+    fp: "72c06a843b7c674b"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: spin2_complete
+    fp: "2fbddc1055c50dec"
+    compile: program
+  - at: pasm2_complete
+    fp: "00bcb3ce3b1916bd"
+    compile: program
+  - at: spin2_inline
+    fp: "4d6c921b96798242"
+    compile: program
+  - at: transition_to_smart
+    fp: "8747428ffc974b5b"
+    compile: not-code
+    reason: "English explanation of WRPIN / DIR behaviour (prose), not code"

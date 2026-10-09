@@ -1,0 +1,29 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: constants.spin2
+    fp: "7e1fc6037fb4e1d2"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: constants.pasm2
+    fp: "7e1fc6037fb4e1d2"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: dac_requirement
+    fp: "b3d8d2702bbb3ea1"
+    compile: not-code
+    reason: "mixed note: a field requirement (`M[12:10] MUST be %101`) plus a `Use:` line and a list of option names; notation and prose, not a statement (the DAC option names are real P_ constants, the field rule matches silicon-doc-text.txt:3779)"
+  - at: z_register.usage
+    fp: "eb32b0bfe2bffc39"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: spin2_complete
+    fp: "c3834566012fa92a"
+    compile: program
+  - at: pasm2_complete
+    fp: "c7028944c21cceb5"
+    compile: program
+  - at: spin2_inline
+    fp: "909879d454d95b06"
+    compile: program

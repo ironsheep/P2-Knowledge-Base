@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/streamer/pin-capture.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: the_question_this_answers
+    fp: "430ab38271f7b240"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

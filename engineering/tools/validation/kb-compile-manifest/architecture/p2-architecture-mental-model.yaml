@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/p2-architecture-mental-model.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: shared_resources.egg_beater.description
+    fp: "a504dd2b81e871ab"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

@@ -1,0 +1,109 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/cog_attention.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: architecture.signaling_modes[0].example
+    fp: "416b39dde0b9b12d"
+    compile: not-code
+    reason: "notation `COG a signals COG b`: an English description of which cog signals which, not an instruction"
+  - at: architecture.signaling_modes[1].example
+    fp: "269acfb3d20109f3"
+    compile: not-code
+    reason: "notation `COG a signals COG b`: an English description of which cog signals which, not an instruction"
+  - at: architecture.signaling_modes[2].example
+    fp: "9b3dc439d207a0ae"
+    compile: not-code
+    reason: "notation `COG a signals COG b`: an English description of which cog signals which, not an instruction"
+  - at: architecture.signaling_modes[3].example
+    fp: "fa566eaca4a2e29a"
+    compile: not-code
+    reason: "notation `COG a signals COG b`: an English description of which cog signals which, not an instruction"
+  - at: instructions[0].usage_example
+    fp: "cc9f7819882d4ea1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [cog_mask]
+  - at: instructions[1].operation
+    fp: "8223e661ae37ca4a"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source"
+  - at: instructions[1].usage_example
+    fp: "ac59e939c39e85bc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [handle_atn]
+  - at: instructions[2].usage_example
+    fp: "cc1f630e43b32b79"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[3].operation
+    fp: "a038a68221f64753"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source"
+  - at: instructions[3].usage_example
+    fp: "140611ff639c7343"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [handle_atn]
+  - at: instructions[4].usage_example
+    fp: "7c1536970820c406"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [keep_working]
+  - at: instructions[5].usage_example
+    fp: "20860324f00f95a8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [my_id]
+  - at: event_configuration.attention_event.setup_for_interrupt
+    fp: "bf9238dd03bbd379"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: programming_patterns[0].code
+    fp: "a2394948a6977ee2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [new_command]
+  - at: programming_patterns[1].code
+    fp: "037ebea0d0acab91"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [my_id, mask, count]
+  - at: programming_patterns[2].code
+    fp: "aabd61aa5a9a3b39"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, buffer_ptr, consumer_mask]
+  - at: programming_patterns[3].code
+    fp: "0bef19b53e68b78f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [command, mailbox, result]
+  - at: programming_patterns[4].code
+    fp: "ca4746220752c3d7"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-164"
+  - at: common_applications[0].example
+    fp: "4d2daa8f0ac56e30"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [task, task_queue, idle_worker_mask]
+  - at: common_applications[1].example
+    fp: "ca17b7936d8e75f0"
+    compile: not-code
+    reason: "comment-only block (two `'` lines describing a pattern); there is no statement to compile"
+  - at: common_applications[2].example
+    fp: "096e26daa6018fc6"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_applications[3].example
+    fp: "54ba84d629543042"
+    compile: not-code
+    reason: "comment-only block (two `'` lines describing a pattern); there is no statement to compile"
+  - at: debugging_tips[0].code
+    fp: "7b6a7f981285825a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [atn_log_ptr]
+    finding: "S-221"

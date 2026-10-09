@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/decomposition/cross-cutting-forces.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: forces.list[0].example
+    fp: "8bf1bffe6573bfa4"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: forces.list[1].example
+    fp: "9471aa813258d971"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: forces.list[2].example
+    fp: "29724cf591df1836"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: forces.list[3].example
+    fp: "9426b65aa5b33fc3"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: forces.list[4].example
+    fp: "3fee9109f585e339"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

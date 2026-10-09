@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-01011-quadrature-encoder.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "2aebf4b40df0d9dc"
+    compile: program
+    finding: "S-220"

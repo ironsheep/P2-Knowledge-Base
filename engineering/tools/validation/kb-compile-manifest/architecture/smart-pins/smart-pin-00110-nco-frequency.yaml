@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-00110-nco-frequency.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: constants.spin2
+    fp: "eb1855223f0931af"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: constants.pasm2
+    fp: "eb1855223f0931af"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: spin2_complete
+    fp: "ba808a9ab6d3e480"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-013"
+  - at: pasm2_complete
+    fp: "16bd7a5e746c347d"
+    compile: program

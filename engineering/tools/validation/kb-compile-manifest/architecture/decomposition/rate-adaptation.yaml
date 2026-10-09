@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/decomposition/rate-adaptation.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: how_it_cuts.decimation_placement.observability_note
+    fp: "5752a1ef2a0d45d1"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

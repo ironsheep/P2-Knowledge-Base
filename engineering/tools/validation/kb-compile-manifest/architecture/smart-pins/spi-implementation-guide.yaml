@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/spi-implementation-guide.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: common_mistake.wrong_code
+    fp: "7798594dad80c9f0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, mosi_pin]
+  - at: common_mistake.correct_code
+    fp: "8e35232db628fbfc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, mosi_pin]
+  - at: complete_spi_master_example.spin2
+    fp: "97c0a5e37bca40a2"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [clk_period]
+  - at: complete_spi_master_example.pasm2
+    fp: "2cb3233d53b302b0"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [clk_period=con]

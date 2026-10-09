@@ -1,0 +1,28 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/fifo.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: configuration.fblock.usage
+    fp: "2253592b49d366bf"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: programming_patterns[0].code
+    fp: "a7d44ba2d5924faa"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [hub_buffer=con, temp, dest]
+  - at: programming_patterns[1].code
+    fp: "9f7a1e303d52958d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [hub_dest=con, count=con:16, temp, source]
+  - at: programming_patterns[2].code
+    fp: "b378bcb96f33209f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [buf_size=con, buffer_start=con, data]
+  - at: programming_patterns[3].code
+    fp: "8176199d6657b2c1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [buf_size=con, buffer_a=con, buffer_b=con, data]

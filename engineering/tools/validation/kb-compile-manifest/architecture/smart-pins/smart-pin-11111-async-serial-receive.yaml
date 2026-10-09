@@ -1,0 +1,15 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "5172b101030ba841"
+    compile: program
+    finding: "S-220"
+  - at: code_examples[1].code
+    fp: "fb36fadc7528ef41"
+    compile: program
+    finding: "S-050"
+  - at: code_examples[2].code
+    fp: "bdde314f6d2e15f4"
+    compile: program

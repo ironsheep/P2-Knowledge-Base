@@ -1,0 +1,7 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-01001-pwm-sawtooth.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "5a3a0413817e95c4"
+    compile: program

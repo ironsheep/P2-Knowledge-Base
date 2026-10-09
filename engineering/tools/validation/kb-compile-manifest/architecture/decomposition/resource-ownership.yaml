@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/decomposition/resource-ownership.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: how_it_cuts.singleton_vs_instance.many_cogs_one_bus
+    fp: "d3efbb4eca7d1f92"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/system-registers/ptra-register.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples.setup_example.code
+    fp: "705196909d56c9f9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [hub_buffer=con, count, data]
+  - at: examples.parameter_passing.code
+    fp: "f6159ace5cf311e3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [param_block=con, entry_point=con, param1, param2]

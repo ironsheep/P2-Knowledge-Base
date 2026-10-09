@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/decomposition/shared-bus-broker.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: the_pattern.skeleton
+    fp: "bc141b49154d86df"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [mailbox, serviceOnBus()->1/2, encode()->1/1]

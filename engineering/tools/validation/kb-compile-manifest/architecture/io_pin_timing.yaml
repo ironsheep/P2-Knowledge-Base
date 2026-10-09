@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/io_pin_timing.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: instruction_to_pin_timing.output_latency.example
+    fp: "41e061c54de6d3fd"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instruction_to_pin_timing.smart_pin_in_flag_reset.required_pattern
+    fp: "1bb8dc0332c2f381"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mode, pin=con]
+  - at: timing_measurement_techniques.using_counters
+    fp: "44ac37f07178cb35"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [start_time, end_time]
+  - at: timing_measurement_techniques.using_smart_pins
+    fp: "f099602627cc32b8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [width]

@@ -1,0 +1,55 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart_pin_patterns.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: spi_patterns.spi_clock_generation.setup
+    fp: "7085ea090c556b13"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_ck=con]
+  - at: spi_patterns.spi_full_duplex.setup
+    fp: "d7fb3c3e77dadb62"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [clk_period=con]
+    finding: "S-223"
+  - at: pwm_patterns.motor_pwm_with_deadtime.setup
+    fp: "1a1448462adbd89a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_pwm_h, pin_pwm_l, pwm_frame_ticks]
+  - at: pwm_patterns.motor_pwm_with_deadtime.dead_time_handling
+    fp: "7b85c87f0f0c0d49"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [high_duty, dead_time, low_duty, pin_pwm_h, pin_pwm_l]
+  - at: pwm_patterns.dac_dithered_output.setup
+    fp: "e2265d14771626df"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dac_pin, value_16bit]
+  - at: adc_patterns.calibrated_adc_reading.calibration
+    fp: "d164974edad080d2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [adc_modes, adc_pins, adc_fram, gio_levels, pin_adc_u_i, vio_levels]
+  - at: timing_patterns.pulse_width_measurement.setup
+    fp: "a267569c015314ba"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [input_pin, width]
+  - at: timing_patterns.frequency_measurement.setup
+    fp: "e32b1c0974fb40e0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [freq_pin, frequency]
+  - at: repository_patterns.shared_data_repository.setup
+    fp: "158e6855d4148610"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [repo_pin, data_value, received]
+  - at: synchronization.streamer_smartpin_sync.critical_pattern
+    fp: "a5d4ffa4178d8f7c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [spi_ck=con, rmode]

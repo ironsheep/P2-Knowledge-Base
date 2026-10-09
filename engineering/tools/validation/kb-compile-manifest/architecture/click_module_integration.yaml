@@ -1,0 +1,47 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/click_module_integration.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: p2_adapter_mapping.code
+    fp: "8699103a51433bca"
+    compile: fragment
+    wrap: spin2-top
+  - at: implementation_patterns.base_pin_configuration.code
+    fp: "16c456288f5466c1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [csPin, CLICK_OFST_CS=con, sckPin, CLICK_OFST_SCK=con, mosiPin, CLICK_OFST_MOSI=con, misoPin, CLICK_OFST_MISO=con]
+  - at: implementation_patterns.spi_click_pattern.code
+    fp: "f20775d1a4fd31df"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CLICK_OFST_CS=con, CLICK_OFST_SCK=con, CLICK_OFST_MOSI=con, CLICK_OFST_MISO=con, SPI_MODE=con, SPI_CLK_MHZ=con]
+    finding: "S-018+S-019+S-020"
+  - at: implementation_patterns.i2c_click_pattern.code
+    fp: "68070353bcc09c95"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CLICK_OFST_SCL=con, CLICK_OFST_SDA=con, I2C_SPEED=con, I2C_PULLUP=con]
+    finding: "S-018"
+  - at: implementation_patterns.uart_click_pattern.code
+    fp: "90555c1aed5a870b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CLICK_OFST_TX=con, CLICK_OFST_RX=con, MODE=con, BAUD=con]
+    finding: "S-018"
+  - at: configuration_api_patterns.enum_based_config.code
+    fp: "7cce7b404e854524"
+    compile: program
+  - at: configuration_api_patterns.multi_device_support.code
+    fp: "6aa0b90395122320"
+    compile: program
+  - at: debugging.pin_verification
+    fp: "973f1dae1303a861"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [CLICK_OFST_CS=con, CLICK_OFST_SCK=con, CLICK_OFST_MOSI=con, CLICK_OFST_MISO=con, CLICK_OFST_RST=con]
+  - at: debugging.connection_test
+    fp: "2a05f60ae3f98da1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [readDeviceID()->1/1]

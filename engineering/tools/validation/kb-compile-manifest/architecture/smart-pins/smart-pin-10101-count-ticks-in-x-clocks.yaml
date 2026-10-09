@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "8ae3c1fc6e5481fb"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [signal_pin=con, clkf, window, elapsed_ticks]

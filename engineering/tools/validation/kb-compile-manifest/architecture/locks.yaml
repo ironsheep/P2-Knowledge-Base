@@ -1,0 +1,104 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/locks.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: pattern_prerequisite.allocate_first
+    fp: "8deb91365cb73e25"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, no_locks_left]
+  - at: instructions[0].operation
+    fp: "ae9b7c716d6906f2"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[0].usage_example
+    fp: "de8048c2cb4b2bd7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, got_lock]
+  - at: instructions[1].operation
+    fp: "a64887120b592a7d"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[1].usage_example
+    fp: "30080ef9109d9e40"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, not_owner]
+  - at: instructions[2].operation
+    fp: "0369281eb67aa3d8"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[2].usage_example
+    fp: "4bc29039c5096888"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [my_lock, no_locks]
+  - at: instructions[3].operation
+    fp: "0faa649a042f9f2c"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[3].usage_example
+    fp: "35c56a807c332fec"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num]
+  - at: instructions[4].operation
+    fp: "0ac55951a3afc86e"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[4].usage_example
+    fp: "f11978a18d16573c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, lock_free]
+  - at: programming_patterns[0].code
+    fp: "51ae83bdcd1a8719"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num]
+  - at: programming_patterns[1].code
+    fp: "66b02bb0d299137a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timeout, lock_num, current]
+    finding: "S-198"
+  - at: programming_patterns[2].code
+    fp: "8f01da41bc92c813"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [LOCK_A=con, LOCK_B=con, retry]
+  - at: programming_patterns[3].code
+    fp: "af6d226b8270d5de"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [my_lock, no_locks_error, saved_lock]
+  - at: common_applications[0].example
+    fp: "e1f1f1c7e420ef5f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, data, buffer_ptr]
+  - at: common_applications[1].example
+    fp: "aec0f72e60a9e426"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, LED_PIN=con]
+  - at: common_applications[2].example
+    fp: "9bdb32a383b3cef7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, item, queue_tail]
+  - at: common_applications[3].example
+    fp: "c3399f071c4ce52d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, do_initialization]
+  - at: debugging_tips[0].code
+    fp: "d6b38e5d35adb85b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num]
+  - at: debugging_tips[2].example
+    fp: "ac84e53c26aeda2c"
+    compile: not-code
+    reason: "comment-only block (a list of \"system lock assignments\" in `'` lines); there is no statement to compile (the assignments themselves are unsourced, see the observations)"

@@ -1,0 +1,6 @@
+{
+ "dat-pasm-register-same-name-as-method-local": "S-220",
+ "p1-counter-names": "S-221",
+ "rev-instruction-as-spin2-unary": "S-222",
+ "con-block-followed-by-pasm": "S-223"
+}

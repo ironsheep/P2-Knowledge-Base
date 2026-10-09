@@ -1,0 +1,27 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: constants.spin2
+    fp: "5e230d30d77bb4ca"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: constants.pasm2
+    fp: "5e230d30d77bb4ca"
+    compile: not-code
+    reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
+  - at: critical_requirements.clock_routing
+    fp: "e234b9d01d097ee7"
+    compile: not-code
+    reason: "prose rule with `WRONG:` / `RIGHT:` labelled one-line contrasts; the labels and English make it notation (the two code lines are compiled in spi-implementation-guide.yaml common_mistake)"
+  - at: spin2_complete
+    fp: "b452a1f8f0303d03"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [first_data, second_data, get_next_data()->1/0]
+  - at: pasm2_complete
+    fp: "5e367b0ca24512ff"
+    compile: program
+  - at: spin2_inline
+    fp: "4fdb1964e1d46d5b"
+    compile: program

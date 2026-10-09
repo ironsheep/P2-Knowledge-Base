@@ -1,0 +1,40 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/multi_resource_management.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implementation_patterns.configuration_structure.code
+    fp: "0cac6f9e7178f33b"
+    compile: fragment
+    wrap: spin2-top
+  - at: implementation_patterns.round_robin_servicing.code
+    fp: "7a1ca2e06f42cb7e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [index, pin_array, current_pin, service_resource, max_index]
+  - at: implementation_patterns.hub_cog_transfer.code
+    fp: "cc2aac8d599d58d1"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [activeCount, count, CONFIG_LONGS=con:16, config_start]
+  - at: common_applications.serial_port_multiplexer.example
+    fp: "f66ed018c2890a0e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [RX1=con, TX1=con, MODE_NONE=con, PU_3K3=con, RX2=con, TX2=con, serial.addPort(5), serial.start(0), serial.txStr(2)]
+  - at: common_applications.multi_spi_manager.example
+    fp: "30c3d8677104bbcd"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [device, MAX_DEVICES=con, deviceActive, chipSelect, sendSPI()->1/1, deviceData]
+    finding: "S-013"
+  - at: common_applications.pwm_channel_controller.example
+    fp: "bd4277a79bf42eb3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [channel, MAX_CHANNELS=con, dutyCycle, pwmPin]
+    finding: "S-013"
+  - at: debugging_techniques.visualization
+    fp: "7e509e10198ef4b0"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [activeCount, rxCount, txCount, errorFlags]

@@ -1,0 +1,12 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-10100-count-highs-x-periods.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "da8000e0df0e83bd"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [high_time]
+  - at: code_examples[1].code
+    fp: "db52c2f097b02468"
+    compile: program

@@ -1,0 +1,12 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-11010-adc-scope-trigger.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "38b44bcb64d45647"
+    compile: program
+  - at: code_examples[1].code
+    fp: "dddf0a64ce6e0ebe"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-221"

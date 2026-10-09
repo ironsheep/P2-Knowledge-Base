@@ -1,0 +1,108 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/event_system.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: instructions[0].operation
+    fp: "5893dff8a3fbaebc"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source"
+  - at: instructions[0].usage_example
+    fp: "336666099a5739ea"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[4].operation
+    fp: "692759d4cb850817"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source"
+  - at: instructions[4].usage_example
+    fp: "2f495a42bbf8e1aa"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [event1_handler]
+  - at: instructions[8].usage_example
+    fp: "16cb89a21aed73cf"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instructions[12].operation
+    fp: "cc65ee875bc02fb2"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: instructions[12].usage_example
+    fp: "bd6ef39710b1162d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mask, pattern]
+  - at: event_configurations.pin_edge_detection.setup_example
+    fp: "69405b3eabf77939"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: event_configurations.pin_level_detection.setup_example
+    fp: "187555d9d9f2eef9"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: event_configurations.pattern_matching.setup_example
+    fp: "77bde6c9f18b3b05"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mask, pattern]
+  - at: event_configurations.timer_events.setup_example
+    fp: "e84e71b7fe26e1c7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timeout]
+  - at: programming_patterns[0].code
+    fp: "b1a12e298e63b272"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timeout, handle_pin1, handle_pin2, handle_pin3, handle_lock, handle_timeout, handle_atn]
+  - at: programming_patterns[1].code
+    fp: "e0b15010c3011353"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [state, STATE_IDLE=con, STATE_ACTIVE=con, STATE_DONE=con, done_state, timeout]
+  - at: programming_patterns[2].code
+    fp: "372633a77f25858c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [last_state, current, pins_changed]
+  - at: programming_patterns[3].code
+    fp: "9a7be5a7869a4612"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [next_sample, sample1, sample2, sample3, ptr]
+  - at: event_interrupt_mapping.configuration
+    fp: "a5fb610bd767d619"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [event_config=con, event_config2=con, event_config3=con]
+  - at: event_interrupt_mapping.event_to_interrupt_codes[0].code
+    fp: "a5cedae178f39f05"
+    compile: not-code
+    reason: "a bare binary value (`%0100`) giving the SETINTx event selector for the row it sits in; a literal with no statement"
+  - at: event_interrupt_mapping.event_to_interrupt_codes[1].code
+    fp: "1781de880ed2883f"
+    compile: not-code
+    reason: "a bare binary value (`%0100`) giving the SETINTx event selector for the row it sits in; a literal with no statement"
+  - at: event_interrupt_mapping.event_to_interrupt_codes[2].code
+    fp: "63e85bbf90f2359f"
+    compile: not-code
+    reason: "a bare binary value (`%0100`) giving the SETINTx event selector for the row it sits in; a literal with no statement"
+  - at: event_interrupt_mapping.event_to_interrupt_codes[3].code
+    fp: "b1535326c2d19886"
+    compile: not-code
+    reason: "a bare binary value (`%0100`) giving the SETINTx event selector for the row it sits in; a literal with no statement"
+  - at: common_applications[0].implementation
+    fp: "78f5802b60e896fd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [BUTTON_PIN=con, state]
+  - at: common_applications[1].implementation
+    fp: "ad739bce6595a718"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [PULSE_PIN=con, start_time, end_time]
+  - at: common_applications[2].implementation
+    fp: "55d2e4fbccb66dd2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timeout, DATA_PIN=con, timeout_handler, data_received]

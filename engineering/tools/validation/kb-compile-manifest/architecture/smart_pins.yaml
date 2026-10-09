@@ -1,0 +1,99 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart_pins.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: critical_requirements.reset_before_configure.correct_sequence.pasm2[0]
+    fp: "8814983126c5e661"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin]
+  - at: critical_requirements.reset_before_configure.correct_sequence.pasm2[1]
+    fp: "c4802838fe4be01f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mode, pin]
+  - at: critical_requirements.reset_before_configure.correct_sequence.pasm2[2]
+    fp: "3ca83c2c29fabcae"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, pin]
+  - at: critical_requirements.reset_before_configure.correct_sequence.pasm2[3]
+    fp: "6ad70b2607568f6b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin]
+  - at: critical_requirements.reset_before_configure.correct_sequence.pasm2[4]
+    fp: "2f6091a9795edb4b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [y, pin]
+  - at: critical_requirements.reset_before_configure.correct_sequence.spin2[0]
+    fp: "23130083f2879046"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin]
+  - at: critical_requirements.reset_before_configure.correct_sequence.spin2[1]
+    fp: "abcce25bac96d33a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin, mode]
+  - at: critical_requirements.reset_before_configure.correct_sequence.spin2[2]
+    fp: "54e67b1148aa03e5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin, x]
+  - at: critical_requirements.reset_before_configure.correct_sequence.spin2[3]
+    fp: "168335e9038fabe3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin]
+  - at: critical_requirements.reset_before_configure.correct_sequence.spin2[4]
+    fp: "85b10c679b764d08"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin, y]
+  - at: x_y_z_registers.x_register.usage
+    fp: "452d58b73af54740"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.x_register.examples[0]
+    fp: "8747e092bd3bf744"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.x_register.examples[1]
+    fp: "7725616e1a5b096c"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.x_register.examples[2]
+    fp: "9e4f2d3d4c56fbe4"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.y_register.usage
+    fp: "7d087e0693643af4"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.y_register.examples[0]
+    fp: "4ae2f7bdcf65dc36"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.y_register.examples[1]
+    fp: "ff01aa11f0b64140"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.y_register.examples[2]
+    fp: "7b41f061d9bc1400"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.z_register.usage
+    fp: "8adf9b62bee9fd3a"
+    compile: not-code
+    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: in_flag.event_driven_waiting.example
+    fp: "ef686e675636db99"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin=con, result]
+  - at: live_update_behavior.principle
+    fp: "5fcb3c21e5acb902"
+    compile: not-code
+    reason: "English explanation of WRPIN / DIR behaviour (prose), not code"

@@ -1,0 +1,59 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/system-registers/complete-system-registers-index.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: access_patterns.direct_addressing.examples[0]
+    fp: "2a45f6fe94ce91ab"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: access_patterns.direct_addressing.examples[1]
+    fp: "7726a211508baf6f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [result]
+    finding: "S-137"
+  - at: access_patterns.symbolic_addressing.examples[0]
+    fp: "562c642a8af8973a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [buffer_address=con]
+  - at: access_patterns.symbolic_addressing.examples[1]
+    fp: "4690820f260daef0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_mask=con]
+  - at: access_patterns.bit_manipulation.examples[0]
+    fp: "a8af1f2c1a82149f"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: access_patterns.bit_manipulation.examples[1]
+    fp: "b49eafae7a5f17c1"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-137"
+  - at: usage_patterns.memory_operations.example
+    fp: "a8902d72b0305a28"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data]
+    finding: "S-137"
+  - at: usage_patterns.io_initialization.example
+    fp: "e5e1663eea25a228"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_mask, initial_states]
+    finding: "S-165"
+  - at: usage_patterns.pin_manipulation.example
+    fp: "3fdd8a1ff5baa72c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_bit]
+    finding: "S-137"
+  - at: usage_patterns.parameter_passing.example
+    fp: "61b6592180059fcf"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [params, cog, entry]
+    finding: "S-165"

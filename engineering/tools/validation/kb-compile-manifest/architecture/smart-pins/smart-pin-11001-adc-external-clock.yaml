@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_examples[0].code
+    fp: "5da1b5fb54d44d1d"
+    compile: program
+  - at: code_examples[1].code
+    fp: "25d0b852fb55ed2e"
+    compile: program
+  - at: code_examples[2].code
+    fp: "62ce90648d6babe8"
+    compile: program

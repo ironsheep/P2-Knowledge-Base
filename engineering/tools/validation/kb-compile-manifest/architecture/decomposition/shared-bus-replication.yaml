@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/decomposition/shared-bus-replication.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: solution_families.families[0].snippet
+    fp: "5a75de5e7bc1db86"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [NBUS=con:4]

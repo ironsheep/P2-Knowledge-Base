@@ -1,0 +1,12 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/boot-rom/spi-flash-boot.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "e07f465529e9974c"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: phase_2_post_load_state.cog_clock.custom_loader_caveat
+    fp: "a58a733b39f3d9ff"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

@@ -1,0 +1,43 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/streamer/dds-goertzel.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: operation.goertzel_calculation
+    fp: "a7b1df8010e469e6"
+    compile: not-code
+    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
+  - at: lut_setup.example
+    fp: "b54822a3f8fa97ba"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, cos, sin, t]
+    finding: "S-013"
+  - at: lut_setup.sinc2_amplitude
+    fp: "7c40f014afccadf7"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, cos, sin]
+  - at: reading_results.reading_protocol
+    fp: "fa91ef92f94d0827"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: reading_results.example
+    fp: "9ec5914b346bd3bc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [cos_result, sin_result]
+  - at: reading_results.magnitude_calculation
+    fp: "dacdbcadfe244474"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [cos_result, sin_result, magnitude, phase]
+  - at: frequency.example
+    fp: "603e78f11243060d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [clkf, xfrq]
+  - at: usage_pattern.code
+    fp: "8013623bd45e424d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [sine_table=con, adc_pin=con, clkf, target_freq, xfrq, dds_cmd, cycles, dds_s, cos_acc, sin_acc, magnitude]
