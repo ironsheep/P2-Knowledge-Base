@@ -1,0 +1,7 @@
+{Spin2_v45}
+' CP-004 proof: in Spin2, DEBUG(C_Z) under {Spin2_v45} is rejected.
+' Run from the repository root with -d and this file's repository-relative path.
+' Expected: the compiler stops with "Expected an expression term (m172)".
+
+PUB main()
+  debug(c_z)

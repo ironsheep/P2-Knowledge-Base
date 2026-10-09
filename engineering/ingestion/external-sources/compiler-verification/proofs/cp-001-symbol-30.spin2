@@ -1,0 +1,10 @@
+' CP-001 proof, outcome 1 of 3: a 30-character symbol compiles.
+' The symbol is abcdefgh10abcdefgh20abcdefgh30; each "NN" ends at character NN.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+CON
+  abcdefgh10abcdefgh20abcdefgh30 = 1
+
+PUB main() : r
+  r := abcdefgh10abcdefgh20abcdefgh30

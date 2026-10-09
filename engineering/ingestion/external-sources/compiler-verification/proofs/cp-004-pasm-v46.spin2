@@ -1,0 +1,12 @@
+{Spin2_v46}
+' CP-004 proof: in a DAT PASM block, DEBUG(C_Z) under {Spin2_v46} is rejected.
+' Run from the repository root with -d and this file's repository-relative path.
+' Expected: the compiler stops with Expected "(".
+
+PUB main()
+  coginit(newcog, @entry, 0)
+
+DAT
+        org
+entry   debug(c_z)
+        jmp     #$

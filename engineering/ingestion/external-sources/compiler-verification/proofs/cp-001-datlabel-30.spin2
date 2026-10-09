@@ -1,0 +1,10 @@
+' CP-001 proof: a 30-character DAT label compiles.
+' The label is abcdefgh10abcdefgh20abcdefgh30; each "NN" ends at character NN.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+DAT
+abcdefgh10abcdefgh20abcdefgh30  long    1
+
+PUB main() : r
+  r := abcdefgh10abcdefgh20abcdefgh30

@@ -1,0 +1,7 @@
+' CP-001 proof: a 31-character method name is rejected.
+' The name is abcdefgh10abcdefgh20abcdefgh30x; each "NN" ends at character NN.
+' Run from the repository root with this file's repository-relative path.
+' Expected: the compiler stops with "Symbol exceeds 30 characters".
+
+PUB abcdefgh10abcdefgh20abcdefgh30x()
+  repeat

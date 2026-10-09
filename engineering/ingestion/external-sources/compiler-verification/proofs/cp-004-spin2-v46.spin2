@@ -1,0 +1,7 @@
+{Spin2_v46}
+' CP-004 proof: in Spin2, DEBUG(C_Z) under {Spin2_v46} compiles.
+' Run from the repository root with -d and this file's repository-relative path.
+' Expected: compiles with no error.
+
+PUB main()
+  debug(c_z)

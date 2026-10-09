@@ -1,0 +1,12 @@
+{Spin2_v55}
+' CP-004 control: the same DAT PASM DEBUG site with UHEX(entry) in place of C_Z compiles.
+' Run from the repository root with -d and this file's repository-relative path.
+' Expected: compiles with no error.
+
+PUB main()
+  coginit(newcog, @entry, 0)
+
+DAT
+        org
+entry   debug(uhex(entry))
+        jmp     #$

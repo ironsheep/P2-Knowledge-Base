@@ -1,0 +1,11 @@
+' CP-001 proof, outcome 2 of 3: a 31-character symbol is rejected.
+' The symbol is abcdefgh10abcdefgh20abcdefgh30x; each "NN" ends at character NN,
+' and the trailing x is character 31.
+' Run from the repository root with this file's repository-relative path.
+' Expected: the compiler stops with "Symbol exceeds 30 characters".
+
+CON
+  abcdefgh10abcdefgh20abcdefgh30x = 1
+
+PUB main() : r
+  r := abcdefgh10abcdefgh20abcdefgh30x

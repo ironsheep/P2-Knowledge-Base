@@ -1,0 +1,6 @@
+' CP-003 proof: an unknown escape sequence (\d) in an @\"..." string is rejected.
+' Run from the repository root with this file's repository-relative path.
+' Expected: the compiler stops with "Expected end of line (m281)".
+
+PUB main() : p
+  p := @\"a\db"

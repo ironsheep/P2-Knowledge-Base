@@ -1,0 +1,7 @@
+' CP-002 proof: var\x written alone as a statement is rejected.
+' Run from the repository root with this file's repository-relative path.
+' Expected: the compiler stops with "Variable needs an operator".
+
+PUB main() : w | v
+  v := 1
+  v\3

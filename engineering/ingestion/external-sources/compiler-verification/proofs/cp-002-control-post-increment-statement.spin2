@@ -1,0 +1,7 @@
+' CP-002 control: var++, from the same v55 table rows, written alone as a statement compiles.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+PUB main() : w | v
+  v := 1
+  v++

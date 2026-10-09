@@ -1,0 +1,7 @@
+' CP-001 proof: a 30-character local-variable name compiles.
+' The name is abcdefgh10abcdefgh20abcdefgh30; each "NN" ends at character NN.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+PUB main() | abcdefgh10abcdefgh20abcdefgh30
+  abcdefgh10abcdefgh20abcdefgh30 := 1

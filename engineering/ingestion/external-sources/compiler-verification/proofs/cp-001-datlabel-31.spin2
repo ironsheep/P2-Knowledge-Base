@@ -1,0 +1,10 @@
+' CP-001 proof: a 31-character DAT label is rejected.
+' The label is abcdefgh10abcdefgh20abcdefgh30x; each "NN" ends at character NN.
+' Run from the repository root with this file's repository-relative path.
+' Expected: the compiler stops with "Symbol exceeds 30 characters".
+
+DAT
+abcdefgh10abcdefgh20abcdefgh30x long    1
+
+PUB main() : r
+  r := abcdefgh10abcdefgh20abcdefgh30x

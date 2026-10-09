@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-020`**
+> **Next erratum ID: `E-024`**
 
 ## What this register is for
 
@@ -102,6 +102,10 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-016 | PASM2 Manual 2022-11-01 | **ADDS** prose says C is *signed overflow*; its own table on the same page says *sign of (D + S)* — **sibling sweep done 2026-08-27**: same defect in `SUBS`, `ADDSX`, `SUBSX`; `SUM*` (4) and `CMPS`/`CMPSX` clean | diverges deliberately on ADDS/SUBS · **ADDSX + SUBSX copied the wrong sentence** → corrections register | `CONFIRMED` |
 | E-018 | Spin2 Documentation v55 | the operator table's `//` row gives the term as **`x // 7`**; every other binary row uses `x <op> y` | never carried | `CONFIRMED` |
 | E-019 | Spin2 Documentation v55 | NEXT/QUIT levels: the REPEAT section says **1..16, default 1 = the current level**; the version history says **1..15, `NEXT 1` = the 1st-outer level** | follows the history (and the compiler) | `CONFIRMED` |
+| E-020 | Spin2 Documentation v55 | symbol names "up to **32** characters"; the compiler rejects **31** (CP-001) | **follows the source** in `identifier-rules.yaml`, `pasm-labels.yaml` (S-251) | `CONFIRMED` |
+| E-021 | Spin2 Documentation v55 | the operator table lists `var\x` as an assign (statement) form; the compiler accepts it only as a term (CP-002) | never carried | `CONFIRMED` |
+| E-022 | Spin2 Documentation v55 | unknown escapes in `@\"..."` "passed verbatim"; the compiler rejects them (CP-003) | **follows the source** in `escape-strings.yaml` (S-345) | `CONFIRMED` |
+| E-023 | Spin2 Documentation v55 | PASM DEBUG() "can output … C/Z flags", `C_Z` "useful in PASM code"; the compiler rejects `C_Z` in PASM (CP-004) | never carried as code | `CONFIRMED` |
 
 ---
 
@@ -604,6 +608,89 @@ KB?** **No** — no operator page carries `x // 7` (searched `deliverables/ai/P2
 compiler agree with each other. **Evidence tier:** the document against itself, decided by the compiler
 (PNut-TS; PNut not run). · **Reached our KB?** **Follows the history** — `next.yaml`, `quit.yaml`,
 `repeat.yaml:142-149` match the compiler. No KB change. Found 2026-10-09 by the close-out study («#407»).
+
+---
+
+## E-020 — symbol length: v55 says names can be **up to 32 characters**; the compiler rejects **31** · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | the introduction, the language overview list | *"Symbolic names can be up to 32 characters in length."* | `sources/spin2-v55/spin2-v55-text.txt:166` |
+| Against (compiler) | PNut-TS v1.55.8 | — | 30-character CON, method, VAR, local and DAT-label names compile; the 31-character name of each kind, and a 32-character CON name, → `Symbol exceeds 30 characters` (exit status 1) | `external-sources/compiler-verification/COMPILE-PROOFS.md` **CP-001** |
+
+**OUR FINDING.** A Spin2 symbol name may be at most **30** characters; 31 or more is a compile error.
+
+**Evidence tier:** the document against the compiler — legality, decided by our compile (PNut-TS;
+PNut not run, study Q9). · **Reached our KB?** **Follows the source** in
+`language/fundamentals/identifier-rules.yaml` (`maximum_length: 32`, `:20-21`; its "32-char" valid
+example, `:67`) and in `language/fundamentals/pasm-labels.yaml:17` ("32 chars max"); **follows the
+compiler** in `language/spin2/constructs/method_definition.yaml:160`,
+`language/pasm2/concepts/labels.yaml:37,183`, `guides/spin2-getting-started.yaml:478` and
+`language/spin2/conventions/spin2-naming-jonnymac.yaml:143` (all "30"). The KB fix is study row
+S-251 (plan §6 item 3). `language/spin2/preprocessor/define.yaml:99` and
+`preprocessor/external-symbols.yaml:55,280` claim 32 for **preprocessor** symbols, which CP-001
+does not run — undecided. Filed 2026-10-09 from the close-out study («#411»).
+
+---
+
+## E-021 — the operator table lists `var\x` as an **assign** (statement) form; the compiler accepts it only as a **term** · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | Operators table, Var-Postfix Operators, the `\` row: columns "Term (PUB/PRI only)" and "Assign (PUB/PRI only)" | `\| (post) \ \| var\x \| 1 \| var\x \| 1 \| Return var, p ost-assign x to var \|` ("p ost" is the extraction's split) | `sources/spin2-v55/spin2-v55-text.txt:418` (column heads `:413`) |
+| Against (compiler) | PNut-TS v1.55.8 | — | `w := v\3` compiles; `v\3` alone → `Variable needs an operator` (exit status 1); control: `v++` alone, the Assign form of a sibling row, compiles | `external-sources/compiler-verification/COMPILE-PROOFS.md` **CP-002** |
+
+**OUR FINDING.** `var\x` is a term only: its value must be used (`w := v\3`); written alone as a
+statement it does not compile, so the row's Assign-column entry is wrong.
+
+**Evidence tier:** the document against the compiler — legality, decided by our compile (PNut-TS;
+PNut not run, study Q9). · **Reached our KB?** **Never carried** — no KB page carries `var\x`
+(searched `deliverables/ai/P2/language/spin2/` for a name followed by `\`); the only mention of `\`
+is the level-1 list in `language/spin2/operators/precedence.yaml:11`. Study row S-280; teaching the
+term form is plan §6 item 3. Filed 2026-10-09 from the close-out study («#411»).
+
+---
+
+## E-022 — v55 says unknown escape sequences in `@\"..."` are **passed verbatim**; the compiler **rejects** them · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | version history, v50, the `@\"string\n"` escape list | *"Unknown sequences are just passed verbatim (i.e. \d = "\d" )."* (the extraction renders the quotes as `&quot;`) | `sources/spin2-v55/spin2-v55-text.txt:59` |
+| Against (compiler) | PNut-TS v1.55.8 | — | `p := @\"a\db"` → `Expected end of line (m281)` (exit status 1); the same shape with `\n`, `\\`, `\x01` and `\x00` compiles | `external-sources/compiler-verification/COMPILE-PROOFS.md` **CP-003** |
+
+**OUR FINDING.** An unknown escape sequence in an `@\"..."` string is a compile error, not passed
+through.
+
+**Evidence tier:** the document against the compiler — legality, decided by our compile (PNut-TS;
+PNut not run, study Q9). `\x00` compiling is outside the list's "\x01 to \xFF" (`:58`) but is not a
+contradiction: the document is silent on it. · **Reached our KB?** **Follows the source** —
+`language/spin2/constructs/escape-strings.yaml` `restrictions` (`:120`, "Passes through
+literally") and `notes` (`:147`); the same page also says `\x00` is "Not allowed" (`:118-119`,
+`:146`), which the compiler contradicts. The KB fix is study row S-345 (plan §6 item 3). Filed
+2026-10-09 from the close-out study («#411»).
+
+---
+
+## E-023 — v55 says PASM DEBUG() can output the **C/Z flags** and `C_Z` is "useful in PASM code"; the compiler **rejects** `C_Z` in PASM · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | DEBUG section, the overview list | *"For PASM, DEBUG() statements can output register values/arrays, hub byte/word/long arrays, C/Z flags, and constants. PASM syntax is used: implied register or #immediate."* | `sources/spin2-v55/spin2-v55-text.txt:913` |
+| The claim (same document) | same | DEBUG output commands, Miscellaneous table, `C_Z` row | `\| C_Z \| Output the C and Z flags as "C=? Z=?". Useful in PASM code.` (quotes rendered `&quot;` in the extraction) | `sources/spin2-v55/spin2-v55-text.txt:1006` |
+| Against (compiler) | PNut-TS v1.55.8, `-d` | — | `debug(c_z)` in a DAT PASM block → `Expected "("` under `{Spin2_v46}` and `{Spin2_v55}`; in inline PASM (`ORG`..`END`) under `{Spin2_v55}`, the same (exit status 1); control: the same DAT site with `debug(uhex(entry))` compiles. In a Spin2 method `debug(c_z)` compiles under `{Spin2_v46}` and is rejected with none or `{Spin2_v45}` (`Expected an expression term (m172)`) | `external-sources/compiler-verification/COMPILE-PROOFS.md` **CP-004** |
+
+**OUR FINDING.** `C_Z` is accepted only in a Spin2 DEBUG(), from `{Spin2_v46}`; in PASM DEBUG()
+— DAT or inline — the compiler rejects it.
+
+**Evidence tier:** the document against the compiler — legality, decided by our compile (PNut-TS;
+PNut not run, study Q9). What `C_Z` prints is not decided here (study row S-157, Spin2 half, waits
+for the bench). · **Reached our KB?** **Never carried as code** — no KB example puts `C_Z` inside
+PASM: every `C_Z` example in `language/spin2/debug-commands/c-z.yaml` calls `DEBUG(C_Z)` from
+Spin2 (four of the five after an `ORG`..`END` block), and `debug-commands/debug-formatters-complete.yaml:111` gives no
+context. `c-z.yaml`'s prose frames it as a PASM debugging aid ("Essential for debugging PASM2
+inline assembly", `:11`; use case "Debugging PASM2 inline assembly code", `:102`); its version
+gate (`requires_version: "Spin2_v46"`, `:5`) matches the compiler. Teaching where `C_Z` compiles is
+plan §6 item 3. Filed 2026-10-09 from the close-out study («#411»).
 
 ---
 

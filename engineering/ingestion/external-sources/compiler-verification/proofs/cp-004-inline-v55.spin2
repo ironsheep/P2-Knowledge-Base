@@ -1,0 +1,9 @@
+{Spin2_v55}
+' CP-004 proof: in inline PASM (ORG..END in a method), DEBUG(C_Z) under {Spin2_v55} is rejected.
+' Run from the repository root with -d and this file's repository-relative path.
+' Expected: the compiler stops with Expected "(".
+
+PUB main()
+  org
+        debug(c_z)
+  end

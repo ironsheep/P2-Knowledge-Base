@@ -1,0 +1,4 @@
+# Compiler-verification evidence: track the proofs (.spin2) + the register (.md);
+# do NOT track compiler output (example .bin files are never committed repo-wide).
+*.bin
+*.lst

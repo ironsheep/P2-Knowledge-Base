@@ -1,0 +1,9 @@
+' CP-003 proof: the escapes \n, \\, \x01 and \x00 in @\"..." strings compile.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+PUB main() : p
+  p := @\"a\nb"
+  p := @\"a\\b"
+  p := @\"a\x01b"
+  p := @\"a\x00b"
