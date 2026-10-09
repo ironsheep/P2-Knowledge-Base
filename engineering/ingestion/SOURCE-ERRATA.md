@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-018`**
+> **Next erratum ID: `E-019`**
 
 ## What this register is for
 
@@ -100,6 +100,7 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-014 | P2 Documentation v35 (Rev B/C) | the booter description omits **microSD boot**, which the Hardware Manual documents with a pin table | follows the better sources | `CONFIRMED` |
 | E-015 | P2 Documentation v35 (Rev B/C) | **KNOWN SILICON BUGS** omits the RDFAST corruption bug the designer confirms in the document's own comments | never carried | `CONFIRMED` |
 | E-016 | PASM2 Manual 2022-11-01 | **ADDS** prose says C is *signed overflow*; its own table on the same page says *sign of (D + S)* — **sibling sweep done 2026-08-27**: same defect in `SUBS`, `ADDSX`, `SUBSX`; `SUM*` (4) and `CMPS`/`CMPSX` clean | diverges deliberately on ADDS/SUBS · **ADDSX + SUBSX copied the wrong sentence** → corrections register | `CONFIRMED` |
+| E-018 | Spin2 Documentation v55 | the operator table's `//` row gives the term as **`x // 7`**; every other binary row uses `x <op> y` | never carried | `CONFIRMED` |
 
 ---
 
@@ -570,6 +571,23 @@ in `parallax_worked_example` and carries a `known_source_defect_in_that_passage`
 erratum, so the quote can be used without propagating the word. The accrual rule itself is stated in
 `architecture/streamer/pin-selection.yaml` `enable_control.input_modes` from the Silicon Doc, not
 from this paragraph.
+
+---
+
+## E-018 — the v55 operator table's `//` row reads **`x // 7`** where every other binary row reads `x <op> y` · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | Operators table, `//` row | `\| // \| x // 7 \| 7 \| var //= y \| 17 \| Signed divide, return remainder \|` | `sources/spin2-v55/spin2-v55-text.txt:459` |
+| Against (the same row) | same | the row's own assign form | `var //= y` — the operand is `y` | same line |
+| Against (the same table) | same | the neighbouring rows | `x / y`, `x +/ y`, `x +// y` (`:457-460`) | `sources/spin2-v55/spin2-v55-text.txt:457-460` |
+
+**OUR FINDING.** A typo in the source: `7` for `y`. It is faithful in our extraction — the DOCX
+run and the v51 PDF carry the same `x // 7` — so it is Parallax's, not an extraction defect (found by
+the «#402» operator-ingestion audit, 2026-10-09).
+
+**Evidence tier:** the row contradicts its own assign form and every sibling row. · **Reached our
+KB?** **No** — no operator page carries `x // 7` (searched `deliverables/ai/P2/language/spin2/operators/`).
 
 ---
 

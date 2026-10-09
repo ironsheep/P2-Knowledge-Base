@@ -132,8 +132,10 @@ Planning closes at that point. Tasking follows.
      `sources/spin2-v55/spin-interpreter-v55-delta-analysis.md`;
    - [x] (b) confirm which debugger is current — **done:** the v51 debugger source is current for
      v55 (PNut-TS v1.55.8 embeds exactly its compiled image). No document is missing;
-   - (c) audit the operator ingestion: glued, missing or invented operators, and the `&lt;`/`&gt;`
-     entities in `spin2-v55-text.txt`.
+   - [x] (c) audit the operator ingestion: glued, missing or invented operators, and the `&lt;`/`&gt;`
+     entities in `spin2-v55-text.txt` — **done 2026-10-09 («#402»):** nothing is glued; the invented
+     tokens come from the authored v51 summary. Rows S-267..S-278, erratum E-018, F-547's summary
+     hunk reverted (`e5f5ab3d`). Re-ingestion of the operator reference is owed (S-267, S-276).
 1. ~~Group E, field-report reconciliation~~ (dropped: every field report has been processed).
 2. [ ] **Group A**, decided items: F-359, F-375, F-398, F-381 (24 files), F-547 cascade.
 3. [ ] **Group B** by KB area: architecture, then language/spin2, then language/pasm2, then
@@ -557,6 +559,39 @@ four marked ✓.
 | S-033 | SEND/RECV are per-frame cog registers saved and restored across calls, cleared at launch, called through the method-pointer path (unset RECV returns 0; unset SEND is dropped) | `v55:439-440`, `:675-685`, `:1397-1413`, `:2038`, `:1528-1546` | mechanism traced; the assignment syntax is the document's (`spin2-v55-text.txt:662-667`) |
 | S-156 | `taskhlt` is an interpreter cog register (`res 1`), not LUT space; halt bit n belongs to task 31-n | `v55:430`, `:2959-2960`, `:2995-2997` | traced; its address ($1CC) is derived by counting, not stated — do not publish it |
 | S-017 | the method-pointer call bytecode carries no result count; the callee's header supplies it | `v55:884`, `:1570-1578` | partial — the call-site `:N` rule is the document's and the compiler's |
+
+**Operator-ingestion audit («#402», 2026-10-09).** Read-only audit of the operator table: the v55
+DOCX (`word/document.xml`) is primary, against both PDFs, `spin2-v55-text.txt` and
+`spin2-v51/complete-spin2-operators.md`. **The "glued operators" hypothesis is not supported:**
+the DOCX, the v55 PDF, the v51 PDF and the text extraction all carry the same 84-row table with
+every comparison token correctly spaced (`spin2-v55-text.txt:472-488`). The invented tokens come
+from `complete-spin2-operators.md`, which is an authored summary, not an extraction — it says "52
+operators, 16 levels" (the table has 84 rows, priorities 1–17) and its levels disagree with the
+table at nearly every row. **Arbiter compile probes (pnut-ts v1.55.8, `CON x = 3 <op> 5`):**
+`===`, `<>>`, `!&&`, `!||`, `+<=>`, `<<=>` are rejected; `<=>`, `+<=`, `<=.`, `==.` compile;
+`a AND= b`, `OR=`, `XOR=` compile (compiler aliases absent from the table); `a := ??` is rejected
+(m251), `??a` compiles. The F-547 hunk to the summary was reverted byte-identical (`e5f5ab3d`).
+Previously registered and only referenced here: S-052, S-053, S-054, S-057, S-131, S-132, S-135,
+S-252.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-267 | A | F-547 | **drives wrong code** | `complete-spin2-operators.md` (ingested, authored summary) invents `+<=>`, `===`, `<>>`, `!&&`, `!||`, and unary `||x`/`^^x` (P1 encode/decode); the compiler rejects every one | `complete-spin2-operators.md:25-28`, `:71-72`, `:164`, `:174-175`, `:185`, `:189`; DOCX table = `spin2-v55-text.txt:472-488`; arbiter probes | traced | a model-authored summary carried as an ingestion artifact, with P1 carry-over | **re-ingest via `ingest-source`**: a new operator reference generated from the DOCX table, the old summary marked superseded (never edited) | no |
+| S-268 | A | F-547 | **drives wrong code** | the same summary swaps `!` (bitwise NOT) and `NOT` (logical), and says float operators auto-convert integers (they reinterpret the bits; FLOAT/ROUND/TRUNC exist for that) | `:58-59`, `:343` vs `spin2-v55-text.txt:428-429`, `:346` | traced | as S-267 | as S-267; then sweep every KB page carrying either claim | no |
+| S-269 | A | F-547 | wrong, not code-driving | the summary's levels 8–15 are shifted by one, XOR is misplaced, ADDBITS/ADDPINS and the float compares are missing, ternary and postfix forms are mislabelled | `:4`, `:14-30`, `:384` vs `spin2-v55-text.txt:410-501` | traced | as S-267 | as S-267 | no |
+| S-270 | A | F-547 | **drives wrong code** | KB pages for tokens that do not exist: `op_notandand.yaml` (`!&&`), `op_eqeqeq.yaml` (`===`), `op_ltshr.yaml` (`<>>`); `precedence.yaml:53`, `:59` list `!&&`, `!||` | files cited; probes | traced | KB built from the summary | remove with Sacred Rule 7 redirects (inbound `related:` → the real operator pages) — the compiler probe is done | no |
+| S-271 | A | F-547 | wrong, not code-driving | inherited summary text: `op_andand.yaml:4` "Boolean AND/NAND"; `op_eqeq.yaml:4`, `op_ltgt.yaml:4` "equal/not equal (logical/bitwise)" | files cited vs DOCX rows | traced | as S-270 | rewrite from the DOCX rows | no |
+| S-272 | B | G4 | **drives wrong code** | `if_elseif_else.yaml:141-143`: invented `<<=>` "signed comparison result", `IF x <<=> y == 1` | probe (rejected) | traced | typo of `<=>` (class with S-076) | to research (with S-076) | no |
+| S-273 | A | F-547 | wrong, not code-driving | `op_ABS.yaml:3-5`: description is a broken table fragment and `category: \``; `op_ADDBITS.yaml` already S-129 | `op_ABS.yaml:3-5` vs `spin2-v55-text.txt:432` | traced | a table row split during generation | rewrite from the DOCX row | yes |
+| S-274 | A | F-547 | wrong, not code-driving | `concepts/operators.yaml:118-139`: REV/ZEROX/SIGNX under "unary" (they are binary, level 3); `:260-276` float list incomplete (`-.`, `<=.`, `>=.`, `==.`, `<>.`); `:21` "+variants for unsigned" beside `<=>` suggests `+<=>`; `:282-283` bare `??` (rejected, S-047) | file cited; DOCX table | traced | not checked against the table | to research (with S-053, S-054, S-057) | no |
+| S-275 | A | F-547 | wrong, not code-driving | `spin2-language-schema.yaml:2`, `:19`, `:43-44`, `:427`, `:447`, `:450`: "16 levels", range [1,16], "52 operators", cites the summary as a source; the table has priorities 1–17 and 84 rows | file cited | traced | built from the summary | to research (state the DOCX counts; drop the summary as a source) | no |
+| S-276 | — | ingestion | latent | `spin2-v55-text.txt` inserts a space at DOCX run boundaries: `p ost-increment` (×7, `:414-420`), `ENCOD = var` (`:434`), `ADDPINS = y` (`:471`). No operator is lost or glued | text vs DOCX runs and PDF | traced | the extractor joins runs with a space | re-ingest via `ingest-source` (join runs without a separator); nothing edited | no |
+| S-277 | — | ingestion | hygiene | the v55 extraction audit repeats the "16 levels" miscount and marks it CLOSED | `spin2-v55-complete-extraction-audit.md:54` | traced | audit copied the summary's count | correct in the re-ingestion's audit (a new audit of record, never an edit) | no |
+| S-278 | B | F-547 | hygiene | citation drift: `op_lteqgt.yaml:13` cites `:471-488` (the block is `:472-488`); `concepts/operators.yaml:329` cites `:409-491` (the table runs `:409-501`) | files cited | traced | line drift | to research | yes |
+
+**Source erratum filed:** the v55 table's `+//` row reads `x // 7` where `x // y` is meant
+(`spin2-v55-text.txt:459`; faithful to the DOCX, so Parallax's typo, not ours) —
+`engineering/ingestion/SOURCE-ERRATA.md`.
 
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
