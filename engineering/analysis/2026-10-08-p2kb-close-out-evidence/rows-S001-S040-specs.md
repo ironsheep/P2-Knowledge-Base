@@ -21,6 +21,9 @@ PUB the_essentials()
 compile. Compile in sprint. Sweep: only 001/002 in `code-examples/` (class S-003, S-013, S-139, S-222).
 
 ## S-002 (+ S-261) `code-examples/smart-pins-002-button-reading.yaml`
+> **CORRECTED 2026-10-09 (study row S-350):** `INA[BUTTON]` is a register index — it compiles
+> byte-identical to `REG[INA][BUTTON]`, not a pin bit. The pin read is `INA.[BUTTON]` (P0–P31) or
+> `PINREAD(BUTTON)` (any pin); for P32 use `INB.[0]` or `PINREAD(32)`. Apply S-350 to the option below.
 `:20` `BUTTON = 32`, `:23` `DIRL #BUTTON`, `:24` `if INA[BUTTON]` — pin 32 is in INB (v55:360). Correct
 (option A, keep INA): `BUTTON = 16`; `ORG` / `DIRL #BUTTON` / `END`; `if INA[BUTTON]`; `:20`, `:33`, `:61`
 P32 → P16. (Option B: keep P32, `INB[BUTTON - 32]`, retitle `:1`, `:6`, `:44`, `:76`.) `:25-29` if/else

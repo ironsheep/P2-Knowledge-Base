@@ -770,6 +770,33 @@ relative is what `@` stores in DAT data (v55:297-300).
 default 1 = the current level" vs `:92-100` "NEXT 1 = 1st-outer", range 1..15; the compiler agrees with
 `:92-100`, and so does the KB. No KB change.
 
+### Rows S-111..S-161 — change specs («#407», 2026-10-09)
+
+All 51 rows done; specs in `2026-10-08-p2kb-close-out-evidence/rows-S111-S161-specs.md` (222 probe
+compiles; 7 items "compile in sprint"). States: change spec 47 (S-127 answered by S-336; S-153 carries
+the one v44/v47 gating sweep with S-046, S-090, S-174); RESOLVED tooling — S-123, S-136, S-150;
+undetermined — S-147 (punch list item 7); bench question — S-157 (VO-S157). Sweeps widened: S-137 `;`
+comments reach 27 more lines in 22 files; S-140 27 indented-designator lines in 5 preprocessor files;
+S-160 a third site; S-156 TASKHLT is `$1CC` (assembled v55 interpreter, INT:430), and
+`p2an005-cooperative-multitasking-tasks.yaml:90,131` carry the same wrong address; S-133's speed figures
+are false (BYTEMOVE and LONGMOVE share one path, INT:2166-2168); S-114 — every operation on
+`typed-pointers.yaml` is inverted, not two blocks. Sprint choices D1–D6, D9 are in the file.
+**Arbiter verified the headline finding (S-350):** `x := INA[3]` and `x := REG[INA][3]` compile to
+identical binaries, and differ from `x := INA.[3]` (v55:366-367: `AnyVar[index]` indexes longs,
+`.[bitfield]` selects bits).
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-350 | B | NF-1 | **drives wrong code** | `INA[pin]`, `OUTA[pin]`, `ina[0]` used as pin bits — they index registers (INA[3] = register INA+3). ~17 lines in 9 files: `smart-pins-002-button-reading.yaml:24,38`; `spin2_protocol_implementation.yaml:7-13`; `motor_controller.yaml:15,17`; `hardware_specific_app.yaml:108`; `registers/ina.yaml:7`; `registers/outa.yaml:8`; `smart-pin-01101…:55`, `01011…:55`, `01110…:54`. **Corrects the S-002/S-261 spec and S-143's `!= OUTA[pin]`** | arbiter byte-identity probe; v55:366-367 | traced | P1 idiom (P1 `INA[n]` was a bit) | change spec: `INA.[pin]` / `OUTA.[pin]`, or PINREAD/PINWRITE/PINTOGGLE; class sweep for `IN[AB]\[`, `OUT[AB]\[`, `DIR[AB]\[` | no |
+| S-351 | B | NF-3 | wrong, not code-driving | `keywords/REPEAT.yaml:6-14` omits `REPEAT n WITH var` and the test-at-end WHILE/UNTIL forms | v55:756-773 | traced | — | change spec | yes |
+| S-352 | B | NF-4 | wrong, not code-driving | `special-symbols/dollar.yaml`: `$` only as a hex prefix — it is also the current origin (cog register in ORG, hub address in ORGH) | v55:312, :321 | traced | — | change spec | yes |
+| S-353 | B | NF-5 | drives wrong code | `pasm2/groups/counter_event_*.yaml`: `ADDCT1 ##1_000_000` with one operand (class with S-196) | DS:1851; compiler | traced | — | change spec (with S-137) | no |
+| S-354 | B | NF-7 | latent | `preprocessor/external-symbols.yaml:149`, `:162`: glued `-DTARGET_P2_EDGE` — confirm the CLI accepts it | CLI help `-D, --Define <symbol...>` | undetermined | — | check in the sprint (tool behaviour: state the documented form only) | no |
+
+**Bench question VO-S157 registered** (sources silent on what `DEBUG(C_Z)` prints from Spin2). PNut-TS
+rejecting `DEBUG(C_Z)` between PASM instructions goes to the punch list (item 10), checked against PNut
+first.
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
@@ -796,6 +823,7 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 | VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
 | VO-F372 | S-324 | with a USB pair running, does a new WRPIN with DIR high switch host ↔ device without a DIR cycle? | `sniffer` · 5 files · sources disagree (`HW:1488` vs `SD:4579`) | to write | sources disagree |
 | VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | to write | sources disagree |
+| VO-S157 | S-157 | what does `DEBUG(C_Z)` print after a Spin2 statement (e.g. `x := 0`) — the interpreter's flags at the interrupt, or anything tied to the statement? No pins | v55:913, :1006; debugger DBG:629-633 (prints bits 31/30 of the interrupt return word) · no source gives values for Spin2 · control v55:1006 | to write | sources silent on values |
 | VO-S059 | S-059 | with `x := 0`, what do four successive `??x` return, and what is `x` after? Control `x := 1`. No pins (DEBUG read-out) | `seed\|zero\|period\|never` near `xoro32\|xoroshiro32\|??` · SD, DS, v55, v51, PASM2 manual, HW manual, INT, EF ledger · control DS:1557 | to write | sources silent |
 | VO-S337 | S-337 | a pin driven high in output mode (`P_HIGH_150K` on P0) while jumpered to a pin driven low (P1): does INA[0] read the pin or the output latch? | SD:3706 states only "the pin's read state" | to write | sources silent on the latch case |
 | VO-S037 | S-037 | does `COGATN(1 << COGID())` deliver an attention event to the issuing cog (POLLATN/WAITATN)? No pins | `own\|self\|itself` near `attention\|COGATN` · `sources/` · control SD:2020 | to write | sources silent |
