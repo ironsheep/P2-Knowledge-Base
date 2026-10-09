@@ -856,6 +856,32 @@ choices recorded in the file.
 | S-374 | B | NF-13 | latent | add-on pages' `use_cases`/`applications`/`advantages` lists beyond the Product Guide (`addon-serial-host.yaml:96-106`, `:132-161`; others unread) | guide text | inferred | unsourced capability lists | class sweep in the sprint (with S-258, S-320) | no |
 | S-375 | B | NF-14 | latent | `p2-architecture-mental-model.yaml:130-137` CORDIC "7-8 in flight", "55 clocks", "1 result per cog every 8 clocks" | SD:3413 (54-clock pipeline) | inferred | — | re-derive in the sprint (with S-355) | no |
 
+### Group C — the 16 knowledge gaps («#407», 2026-10-09)
+
+Specs in `2026-10-08-p2kb-close-out-evidence/gaps-groupC-specs.md`. Arbiter re-read
+`p2-datasheet-text.txt:331-333` (bypass caps, GND pad), `silicon-doc-text.txt:4074`, and the KB's
+`addon-hyperram-hyperflash.yaml:153`. States: **ANSWERED** — G-009 (part numbers, read from the guide's
+rendered page 7), G-012 (`+N` header convention, read from the figures), G-023 (SMPS IN rises when A reads
+low, SD:4080, :4090), G-025 (BITx S[9:5] is the span field — not a BITC defect), and the cadence half of
+G-002, the Y-timing half of G-004, the scope half of G-005; **ALREADY CLOSED** — G-006 for `%00110` (EF-013),
+G-024 for the KB; **BENCH** — G-027 (VO-F372, reworded below), G-028 (VO-G028), two G-006 sub-questions
+(VO-G006a, VO-G006b); **OUT OF REACH** — G-015 (#64009 / #64010 example archives not held), G-019 (Q-007),
+G-022 (the mikroBUS specification — Q-010), G-029 (designer — Q-011), the thermal half of G-020, the ENOB
+half of G-002 (Q-008). The proposed `KNOWLEDGE-GAPS.md` row moves are in the evidence file's last table and
+are applied to the registry with this study's next commit set.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-376 | B | G-004 | drives wrong code | `smart-pin-01010-pwm-smps.yaml:16`, `:23`: base period "system clock ÷ X[15:0]" / "divisor" — X[15:0] is the base period in clocks | SD:4074 | traced | — | change spec (with S-003, S-230, S-300) | yes |
+| S-377 | B | G-009 | wrong, not code-driving | `addon-hyperram-hyperflash.yaml:153`: `IS26KL256S-DABL100 [VERIFY]` — the guide's page 7 reads `IS26KL256S-DABLI00` (letter I, then two zeros) | 64004-ES Product Guide p.7 (rendered) | traced | OCR carried into the KB | change spec (drop `[VERIFY]`) | yes |
+| S-378 | — | G-009 | latent | ingested OCR text `sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:153,155` carries two OCR errors in the part numbers | rendered page | traced | OCR | ingestion head: re-extract via `ingest-source` (never edited) | no |
+| S-379 | B | G-020 | latent | the KB carries no PCB guidance; the datasheet states bypass caps close to every VDD/Vxxyy pin and the GND pad on a solid ground plane with multiple vias | DS:331-333 | traced | missed source | add to the hardware design page (sprint picks the home) | no |
+| S-380 | B | G-025 | drives wrong code | `bitc`, `bitnc`, `bith`, `bitl`, `bitz`, `bitnz.yaml` omit the S[9:5] span rule (a non-zero S[9:5] changes several bits) | CSV row 44; SD:60; PM:1064, :1501-1503 | traced | — | change spec (one line each; `altb.yaml:5` already carries it) | yes |
+| S-381 | B | G-027 | wrong, not code-driving | `smart-pin-11011-usb-host-device.yaml:17-29`: conflict note says the documents are "the same document" — three sources carry the sentence, only the newest silicon-doc edition omits it | HW:1488; Titus :1382; `p2-documentation.txt:8885-8886`; SD:4579 | traced | — | change spec (with S-324) | no |
+
+**VO-F372 reworded:** host ↔ device is a WXPIN field, already documented as changeable live (SD:4581);
+the open question is whether a **WRPIN** sniffer/drive change takes effect without a DIR cycle.
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
@@ -880,7 +906,10 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 | VO id | Row(s) | Question | Sources-silent proof (terms · files · control hit) | Test file | Status |
 |---|---|---|---|---|---|
 | VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
-| VO-F372 | S-324 | with a USB pair running, does a new WRPIN with DIR high switch host ↔ device without a DIR cycle? | `sniffer` · 5 files · sources disagree (`HW:1488` vs `SD:4579`) | to write | sources disagree |
+| VO-F372 | S-324, S-381, G-027 | with a USB pair running, does a new **WRPIN** (sniffer / drive change) take effect with DIR high, without a DIR cycle? (host ↔ device is a WXPIN field, documented live-changeable, SD:4581) | `sniffer` · 5 files · three documents carry the sentence (HW:1488, Titus :1382, `p2-documentation.txt:8885`), the newest silicon doc omits it (SD:4579) | to write | sources disagree |
+| VO-G028 | G-028 | push nine values onto the 8-level hardware stack, pop nine: what does the ninth pop return? Pure silicon, no pins | stack depth `8` · SD, PM, CSV · control SD:166, PM:776 (depth 8 stated; overflow silent) | to write | sources silent |
+| VO-G006a | G-006 | NCO duty `%00111` with Y = 0: output level? Pure silicon (read back via IN or a jumpered pin) | SD %00111 section; EF-013 covers `%00110` only | to write | sources silent |
+| VO-G006b | G-006 | NCO frequency interval jitter (cycle-to-cycle) at a non-integer ratio — catalogue only if it needs an instrument | SD %00110/%00111 sections | to write (or catalogue) | sources silent |
 | VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | to write | sources disagree |
 | VO-S367 | S-367 | do ADC-scope (`%11010`) and ADC-external-clock (`%11001`) smart-pin modes need the ADC enable bits (M[12:10] = %100) to sample? Compare `P_ADC_SCOPE` alone vs `P_ADC_SCOPE \| P_ADC_1X` on a pin fed by a DAC pin (jumper, free pins) | SD smart-pin %11001/%11010 sections · the page's own PASM literal (`:77`) carries the bits · no statement either way | to write | sources silent |
 | VO-S157 | S-157 | what does `DEBUG(C_Z)` print after a Spin2 statement (e.g. `x := 0`) — the interpreter's flags at the interrupt, or anything tied to the statement? No pins | v55:913, :1006; debugger DBG:629-633 (prints bits 31/30 of the interrupt return word) · no source gives values for Spin2 · control v55:1006 | to write | sources silent on values |
