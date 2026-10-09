@@ -903,6 +903,35 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 
 ## 5. Bench questions
 
+**Group D adversarial re-check (2026-10-09, «#407») — this verdict supersedes the Status column below.**
+Every question was re-searched against all ingested sources, harder than the first time; detail, search
+records, test outlines and house-style exemplars in
+`2026-10-08-p2kb-close-out-evidence/bench-groupD-recheck.md`. The arbiter rendered and read Datasheet
+2022-11-01 pp.27 and 31 (`external-inputs/archive/Propeller2-P2X8C4M64P-Datasheet-20221101.pdf`): in
+Logic mode IN is taken from the PIN node through the input buffer; in `%101` DAC-with-ADC, DIR enables the
+DAC driver and OUT enables the ADC.
+
+| Question | Verdict | Why |
+|---|---|---|
+| VO-S337 | **KILLED** | Datasheet p.27: IN reads the pin node, not the latch (+ SD:3706, DS:1227) → S-337 becomes a change spec |
+| VO-F337 | **KILLED** | no conflict: DS:1175 names the DAC enable (DIR), SD:3790 the ADC enable (OUT); Datasheet p.31 shows both; EF-055, EF-071 → S-325 becomes a change spec |
+| VO-S367 | **KILLED** | composition of sourced statements: A input defaults to the pin read state (SD:3736), which is the ADC bit only in an ADC pad mode (v55:1465-1469; DS p.31); SD:4262 → the page needs the bits (its own `:140` says so) |
+| VO-S157 | **KILLED** | C/Z are rewritten by XBYTE at every bytecode dispatch (SD:1046; INT:406), so no Spin2 statement's flags reach `DEBUG(C_Z)`; the digits depend on interrupt timing — state none; all five `c-z.yaml` examples go |
+| VO-G006b | **KILLED** | the documented adder (SD:4004-4012) fixes the interval set; no KB claim depends on jitter |
+| VO-J-005 arm B | **KILLED** | SD:1443-1454, v55:1608-1613, EF-059, EF-064, EF-065; arms A, C, D kept as in-rig controls; **J-005 survives reduced** (sustained-rate ceiling and filter skew only) |
+| VO-J-006 arms A, B, C, E | **KILLED** | SD:493-499, SD:2249; **J-006 survives reduced** to one test (arms D+F merged — the interpreter loads LUT by SETQ2, INT:2044-2048) |
+| VO-J-028 | **SURVIVES** | silent for the eight modes; EF-011 vs EF-090 shows the behaviour is mode-dependent; three arms, DEBUG read-out; **VO-G006a merged into it** |
+| VO-F372 | **SURVIVES** | contradictory by edition; one USB pair on P0/P1, no jumper (SD:4614: the receiver sees its own output) |
+| VO-S304 | **SURVIVES** | silent for PWM; frame period read from the pin's own IN interval — no second pin |
+| VO-G028 | **SURVIVES (narrowed)** | pop-past-bottom is stated (SD:1150); what a ninth push discards is not; pure silicon |
+| VO-S059 | **SURVIVES** | the sources name xoroshiro32+ but give no recurrence or zero case |
+| VO-S037 | **SURVIVES** | SD:2020 does not exclude the issuing cog; SD:2053 says "another cog"; blocks no fix (`cogatn.yaml:138` is deleted now) |
+
+**Bench round 1 = seven tests:** VO-J-028 (+G006a), VO-F372, VO-S304, VO-G028, VO-S059, VO-S037, and the
+reduced VO-J-005 and VO-J-006 (nine questions in seven rigs: J-005 and J-006 are already partly written).
+None needs an external instrument; only VO-F372's fallback uses a jumper (free pins). No surviving question
+is about a tool.
+
 | VO id | Row(s) | Question | Sources-silent proof (terms · files · control hit) | Test file | Status |
 |---|---|---|---|---|---|
 | VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
