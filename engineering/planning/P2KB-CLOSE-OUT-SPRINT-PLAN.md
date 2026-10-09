@@ -8,8 +8,8 @@ row (and the evidence file it names); a register entry's state lives in
 `engineering/operations/P2KB-CORRECTION-FINDINGS.md`; a bench fact lives in
 `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md`.
 
-**Status:** READY FOR STEPHEN — §0 questions resolved and §0.2 design decisions each decided or tied
-to a standing ruling (2026-10-09). Next: `sprint-start` when he chooses, then `plan-to-tasks`.
+**Status:** STARTED 2026-10-09 (Stephen's go: "if we can start the sprint without having to wait
+let's do so"). Sprint-start record below; next: `plan-to-tasks`.
 
 ---
 
@@ -81,7 +81,28 @@ program, 1932 fragment, 17 never, 627 not-code; `audit-kb-code-compiles.py`).
 `deliverables/ai/p2kb-index.json(.gz)` = the 2026-10-07 local regeneration carrying the delivery
 filter (schema 3.6.0, «#398»; its `remove_fields` already strips `documentation_source`,
 `enhancement_source`, `source`, `sources` … from served content). Left as is; §9 regenerates the
-index after the release commit. Untracked: the VO-J-035 test («#409», in review).
+index after the release commit. The VO-J-035 test («#409») was then committed (439771aa).
+
+## Sprint start (2026-10-09)
+
+- **Outgoing build: KB v1.24.0** — the planned v1.24.0 is this release (standing ruling, 2026-10-08:
+  "v1.24.0 folds into the single close-out release"; last release v1.23.3).
+- **Working tree** (`git status --short`, live): the index pair above (left as is; §9 regenerates)
+  and «#409»'s files — VO-J-035 run 1 recorded in the campaign README and the VO row, and the test
+  under rework (its run 1 was NO VERDICT from a rig defect). «#409» runs alongside the sprint and
+  commits its own change set; nothing in §1–§4 or §6–§8 waits on it. §5's USB-page sentence waits on
+  its EF (Named unknowns).
+- **Tracking readiness:** 162 completed tasks archived (`tasks/archives/archive_20261009_201229.md`);
+  42 obsolete context keys deleted (superseded resume snapshots, breadcrumbs of finished tasks) after a
+  dump (`tasks/backups/project_dump_20261009_201229.json`) — 82 keys remain. Leftover tasks: «#387»
+  (register open set) is subsumed by this sprint's tasks and closes when they are generated; «#398»
+  is §9's server half and follows the sprint; «#373» (P2 Errata) waits on Chip's amendment, outside
+  this sprint. `MEMORY.md` is at 150 lines (the audit threshold): a feedback-to-doctrine routing pass
+  is owed, not a readiness blocker. **Verdict: ready.**
+- **Entry baseline** (`python3 engineering/tools/validate-dod-release.py`, re-run live): unchanged
+  from the measurement above — every gate PASS except KB Code Compiles, 352 FAIL in 176 files, all
+  352 REGISTERED, 0 unregistered. These are §2's scope, not a deferral. The exit check compares
+  against this run.
 
 ## §1 Gates first (study Group F; S-308; S-393)
 
@@ -228,6 +249,50 @@ Both are sprint scope (§8). Other artifacts this sprint's changes describe:
 - **§2's unsourced examples**: how many blocks have no source for their behaviour (removed per D-B);
   known only as each row is worked.
 
+## Tasks (plan-to-tasks, 2026-10-09)
+
+**Shape.** Rows were mapped to sections and KB areas by a read-only survey (396 study rows: §1 13, §2
+106, §3 235, §4 7, §5 8, §6 7, §7 5, §8 2, closed/no-op 13). §2 and §3 rows share files heavily (e.g.
+`constructs/repeat.yaml` carries §2, §3, §4 and §6 rows), so **§2 and §3 are worked together per KB
+area**, each file opened once; §5's EF results land in the area task that owns the page. The
+tree-wide sweeps (§4 citations, S-396) run after the content tasks so no citation is rewritten on a
+block about to be removed. The compile manifest counts 353 entries in 175 files against the gate's
+352 FAIL in 176 — reconciled in «#410».
+
+| Plan § | Deliverable | Task | seq |
+|---|---|---|---|
+| §1 | Gates: plain-scalar, pointer control, index integrity, revision scope, findability, one-line code, D3; manifest reconcile | «#410» | 1 |
+| §6 (1–2) | Compile-proof register, CP-001..004, E-020..E-023 (two-phase) | «#411» | 2 |
+| §1 (S-308, S-393) | Sourcing gate: Parallax docs, EF, CP only | «#412» | 3 |
+| §7 | Stephen's Q2/Q6/Q7/Q8 decisions + D-D tree hygiene | «#413» | 4 |
+| §2+§3 | language/spin2 methods | «#414» | 5 |
+| §2+§3+§5 | spin2 concepts/constructs/symbols (+EF-101) | «#415» | 6 |
+| §2+§3 | spin2 operators — F-547 cascade, S-310..S-315 | «#416» | 7 |
+| §2+§3 | spin2 preprocessor/conventions/patterns (S-153 class) | «#417» | 8 |
+| §2+§3+§5 | language/pasm2 (+EF-094, EF-101) | «#418» | 9 |
+| §2+§3+§5 | architecture + smart-pins (+EF-093, 095–100; F-563) | «#419» | 10 |
+| §2+§3 | hardware, guides, fundamentals, app notes, tools, code-examples | «#420» | 11 |
+| §6 (3–5) | Teach what compiles (CP); S-396 `pnut_ts` sweep | «#421» | 12 |
+| §4 | Citations and provenance (S-292, 293, 327, 328, 390, 391, 392) | «#422» | 13 |
+| §8 + Blast Radius | Registers, gaps ledger, guide-conformance, docs | «#423» | 14 |
+| §9 | Release KB v1.24.0 (§1.5 audit, Stephen's review), then server, F-439 | «#398» | 15 |
+| §5 (VO-J-035) | Bench round 2, runs alongside; the USB sentence waits on its EF | «#409» | — |
+
+«#387» (the register's open set) superseded by «#410»–«#423». «#373» (P2 Errata, waiting on Chip) is
+outside this sprint, seq 16.
+
+**Dispatch.** `arbiter-serial` (the project default for the YAML head): every area task edits shared
+KB files and the compile manifest, so no two run at once. **Two-phase:** «#411» (the CP register's
+shape is consumed by «#412», «#421» and every CP citation). **Atomic green-units:** «#410» and «#412»
+leave new gates red on today's population by design. Each body says so, and the area tasks and
+«#422» drive them to 0. **Gate over the sprint's output:** «#423» runs the exit baseline after every
+content task; the §1.5 change-set audit in «#398» follows it.
+
+**Undetermined rows carried into their tasks** (resolved from the source in the pass, or the claim
+removed and a blocker registered): S-333, S-349, S-361, S-319, S-379, S-315 (page list), S-327 (census),
+S-370, S-374, S-390, S-391, S-322 item 1 (#64013 schematic), F-352, F-562.
+
 ## Revision log
 
-*(none yet)*
+- 2026-10-09 — sprint started; tasks «#410»–«#423» generated; «#387» superseded; F-563 (USB status
+  bits, found by «#409») added to «#419»'s scope.

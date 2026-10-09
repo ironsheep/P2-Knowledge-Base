@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-563`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-564`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,24 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework)
+
+### F-563 — `smart-pin-11011-usb-host-device.yaml` gives the USB receiver status bits [6] and [3..0] from the superseded PDF-era capture — `CONFIRMED`
+Found 2026-10-09 by the VO-J-035 rework writer («#409»). `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml:61-67`
+ships `[6] … EOP SE0 > 3 bits, or SE1`, `[3] SE1 in (illegal) — cleared on !SE1, set on 1+ bits of SE1`,
+`[2] SE0 in (RESET) — … set on 1+ bits of SE0`, `[1] K in (RESUME) — … set on 7+ bits of K`,
+`[0] J in (IDLE) — … set on 7+ bits of J`. That wording is the superseded `p2-documentation.txt:8962-8982`
+(PDF-era, see `sources/silicon-doc/SUPERSEDED-BY-2026-08-26-DOCX.md`; the Hardware Manual
+`p2-hardware-manual-text.txt:1507-1510` and Titus `:1411-1414` carry the same older text). The canonical
+DOCX capture of the P2 Documentation v35 (`silicon-doc-text.txt:4621-4629`) gives `[6] … EOP SE0 > 2 bit
+periods or SE1`, `[3] steady state — cleared on DP/DM state change, set on 7 bit periods of no change`,
+and `[2]`/`[1]`/`[0]` SE0/K/J in as "high when DP/DM state is" SE0/K/J. **Silicon agrees with the DOCX:**
+VO-J-035 run 1 (`campaigns/2026-10-p2kb-close-out/tests/logs/debug_261009-140053.log`) read status `$0C`
+on an idle bare pair — bits 3 and 2 set together, which the "SE1 in" reading makes impossible (SE1 and
+SE0 cannot both hold); as "steady + SE0" it is the documented host idle. Not yet an EF (run 1 was NO
+VERDICT for its own question). **Class sweep** (`grep -rn "SE1 in\|EOP SE0 > 3\|set on 7+ bits of J\|steady state" deliverables/ai/P2`):
+this file only. **Fix:** replace lines 61-67's [6] and [3..0] with the DOCX wording, cited to the P2
+Documentation v35, *USB smart pin* section; close-out sprint (KB v1.24.0).
 
 ### F-562 — `hub75_adapter.yaml` names the OBEX driver and URL differently from OBEX 2850's own metadata — `NEEDS-VERIFICATION`
 Found 2026-10-07 by the independent check of F-556. `hardware/hub75_adapter.yaml:156,158` gives
