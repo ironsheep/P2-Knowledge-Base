@@ -496,13 +496,17 @@ PRI run_same(pathA, pathB, seedIdx, repA, repB) : bSame | fieldIdx
 ' @param seedIdx - seed index
 ' @param repA - repetition of the first
 ' @param repB - repetition of the second
-' @returns bSame - TRUE when F_MKRES .. the last state are all equal
+' @returns bSame - TRUE when the 8 results and 8 states (F_RES .. the last state) are all equal
+'   The marker fields are NOT compared here: the marker seed differs per repetition by design
+'   ($0C0F_FEE1 + seed*16 + rep), so including them made every cross-repetition comparison
+'   fail (bench run 2026-10-09: 9 false RIG FAILs). Marker agreement across paths is checked
+'   on its own in report_seed (mkAgreeCnt).
 
 ' Local Variables:
 ' @local fieldIdx - record long
 
   bSame := TRUE
-  repeat fieldIdx from F_MKRES to RECW - 1
+  repeat fieldIdx from F_RES to RECW - 1
     if rec_at(pathA, seedIdx, repA, fieldIdx) <> rec_at(pathB, seedIdx, repB, fieldIdx)
       bSame := FALSE
 
@@ -706,6 +710,7 @@ PRI print_verdict() | pathIdx, repIdx, nzCnt, firstRes, firstSt, agreeCnt, bAbso
     ln_d(failCnt)
     say(string(" RIG FAIL line(s) above ==="))
     say(string("NO VERDICT: a control failed, the zero-seed result is not interpretable"))
+    say(string("=== END ==="))
     return
   bAbsorb := TRUE
   bDisagree := FALSE

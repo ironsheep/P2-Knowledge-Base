@@ -21,7 +21,7 @@ disproved the claim) · `NOT-OBSERVED` (could not reproduce; not asserted) ·
 > test, *we* ran it, so its rig, its scope and its failure modes are ours to answer for. An
 > `XF` entry names whose bench it was and carries that project's own scope statement verbatim.
 
-**Campaigns:** [2026-06 — DEBUG windows & smart pins](campaigns/2026-06-debug-windows-and-smart-pins/README.md) · [2026-08 — manual corrections](campaigns/2026-08-manual-corrections/README.md)
+**Campaigns:** [2026-06 — DEBUG windows & smart pins](campaigns/2026-06-debug-windows-and-smart-pins/README.md) · [2026-08 — manual corrections](campaigns/2026-08-manual-corrections/README.md) · [2026-09 — P2 errata predictions](campaigns/2026-09-p2-errata-predictions/README.md) · [2026-10 — KB findings](campaigns/2026-10-kb-findings/README.md) · [2026-10 — P2KB close-out, bench round 1](campaigns/2026-10-p2kb-close-out/README.md)
 
 ---
 
@@ -1670,6 +1670,143 @@ skipped; this shows the rule is load-bearing, not advisory, and that the guide's
 runs. *Limits:* one board, Rev C, cog execution under XBYTE (SKIPF patterns from EXECF); one body
 layout; the failure mode of the relative form (where the call lands) was not traced, only its
 effect. *Source:* `…/tests/test-f537-absolute-call-skip.spin2`.
+
+*EF-093..EF-100 come from the P2KB close-out bench, round 1 (campaign `2026-10-p2kb-close-out`, run by
+Stephen 2026-10-09, one board, Rev C, 200 MHz from the 20 MHz crystal, bare board, `pnut-ts -d` 1.55.8;
+each `.bin` byte-identical to a build of the committed source). Each program was written by a fresh
+agent, reviewed adversarially, fixed, and the fixes checked independently before the run; each printed
+its readings before measuring and gated its verdict on in-run controls. Every verdict below was
+re-derived from the raw log lines.*
+
+### EF-093 · A live `WRPIN` that switches a running USB pair between drive and sniffer takes effect without a reset — `CONFIRMED` (documentary conflict decided)
+*KB:* `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml`
+*How proven:* `test-vo-f372-usb-wrpin-on-running-pair` (VO-J-032), pair P0/P1, full-speed host
+(WXPIN `$CF5C`), nothing attached, the receiver sensing the pair's own output. Drive word `$76`
+(TT = %01), sniffer word `$36` (TT = %00). Per round: control (WYPIN K, J, a 4-byte packet), live WRPIN
+to sniffer then WYPIN J, live WRPIN back to drive then WYPIN K (a different line state from the one the
+sniffer step left), a packet after, and a DIR-cycle reference doing the same changes through reset; 5
+rounds. *Result (log `debug_261009-123836`, first run; `.bin` 17,574 bytes):* every gate held in every
+round (control K = %010, J = %001, packet `$A5 $5A $3C $C3`; DIR-cycle back gives K; DIR-cycle sniffer
+stable at SE0 %100, never J). Live sniffer status %100 = the DIR-cycle sniffer; live back-to-drive
+%010 (K) — not a retained J; the packet after the live changes returned all 4 bytes, 5 of 5.
+Pre-registered verdict printed: `SURVIVES`.
+**Grounds:** decides F-372 (study S-324). The Hardware Manual's and Titus's "A new WRPIN can be done …
+without resetting the smart pin" holds for this case; the P2 Documentation's general rule (configure with
+DIR low, `silicon-doc-text.txt:3856`) is not required here. *Characterisation, not asked:* re-issuing
+WXPIN on the running pair after the live changes left the next packet empty (n = 0) in 5 of 5 — a lead,
+not a finding; it was not a question of this test. *Limits:* one pair, full speed, host mode, no
+external device or resistors; live changes of TT only. *Source:* `…/tests/test-vo-f372-usb-wrpin-on-running-pair.spin2`.
+
+### EF-094 · The 8-level hardware stack discards its OLDEST entry on a 9th push, and holds full 32-bit values — `CONFIRMED` (characterisation)
+*KB:* `language/pasm2/concepts/stack_operations.yaml`; `language/pasm2/push.yaml`; `language/pasm2/pop.yaml`; `language/pasm2/call.yaml`; `language/pasm2/ret.yaml`
+*How proven:* `test-vo-g028-hw-stack-overflow` (VO-J-031), no pins, PASM in cog 1; each arm after an
+8-push poison prefill; 8 repetitions. *Result (log `debug_261009-123852`, first run; `.bin` 16,630
+bytes):* all controls 8 of 8 (poison round trip; push 8 / pop 8 → v8..v1; push 8 / pop 9 → v8..v1 then
+v1, the stated bottom copy). **Push v1..v9, pop 12 → v9 v8 … v2, then v2 v2 v2 v2**; push v1..v10, pop
+12 → v10 … v3, then v3 v3; nine nested CALLs return through eight sites, the oldest return lost, then
+repeat the bottom one. All deterministic (8 of 8), no poison value returned. Arms II, IIB and the
+CALL/RET chain agree: `DROP-OLDEST`. **Width:** pushing `$A5A5_0001..$A5A5_0008` popped all 32 bits
+unchanged, 8 of 8.
+**Grounds:** G-028 and S-394. The P2 Documentation states the depth (8) and the under-run end ("bottom
+value copied", `silicon-doc-text.txt:1149-1150`) but not the over-run end or the stored width; the
+Datasheet gives only what CALL pushes, `{C, Z, 10'b0, PC[19:0]}` (`p2-datasheet-text.txt:1725`). The
+KB's "22 bits (20-bit address + 2 flags)" (`stack_operations.yaml:58`) is wrong: entries hold 32 bits.
+*Limits:* one board; PUSH/POP and CALL/RET in cog execution; values chosen to separate five models.
+*Source:* `…/tests/test-vo-g028-hw-stack-overflow.spin2`.
+
+### EF-095 · Streamer digital pin capture sustains one sample per clock in the 4-, 8- and 16-pin modes; an input filter of N flip-flops at tap 0 delays its lane by N + 1 clocks — `CONFIRMED` (characterisation)
+*KB:* `architecture/streamer/pin-capture.yaml`; `architecture/smart_pins.yaml` (input filters)
+*How proven:* `test-vo-j-005r-streamer-capture-ceiling-and-skew` (VO-J-005, reduced), pins P32–P47, base
+P32 (group %100). Stimulus P32 = TRANSITION, one transition every 64 clocks; MON_R P33 (A = relative −1,
+unfiltered), MON_F P34 (A = relative −2, takes filt0), NULL P35 low, P36–P47 held low. *Result (log
+`debug_261009-123908`, first run; `.bin` 22,914 bytes; all gates passed):* CERT; gate A — six static
+patterns per mode, every sample exact, lane N = P(32+N); gate O — 4-pin samples packed **low nibble
+first**; C/D — the smart pin's own lane carries one edge (its completion flag) while a routed
+neighbour carries the waveform (the documented IN rule); no buffer over-run in 98 captures.
+**Ceiling (arm E):** 4-, 8- and 16-pin captures of 1024 samples at NCO 1:16, 1:8, 1:4, 1:2 and **1:1**
+were EXACT in 4 of 4 repetitions at every rung (every edge interval = 64/N samples, all bytes written,
+no LATE): `NO CEILING REACHED` — each mode sustained one sample per clock. **Skew (arm S):** both
+monitors unfiltered → 0 clocks; filt0 at tap 0 with 2, 3, 5, 8 flip-flops → **3, 4, 6, 9 clocks**, rising
+and falling alike, constant over 3 repetitions; engagement leg (5 flip-flops, tap 3 = every 8th clock)
+→ 37 clocks. The program's pre-registered skew readings (N, N − 1) did not include N + 1, so it printed
+`OTHER`; the raw delays are the finding.
+**Grounds:** the two facts `pin-capture.yaml` records as NOT STATED (sustained rate; filter lane
+delay). Arms A–D agree with the P2 Documentation (`silicon-doc-text.txt:1443-1456`, `:3706`).
+*Limits:* 32-pin capture not run (needs more pins than the free set); 1024-sample bursts, one hub
+pattern, no other cog loading the hub; one stimulus rate; tap 0 lengths plus one tap-3 point.
+*Source:* `…/tests/test-vo-j-005r-streamer-capture-ceiling-and-skew.spin2`.
+
+### EF-096 · LUT write-sharing carries `SETQ2` block loads, so a Spin2 cog's start-up image reaches an enabled partner; a COGINIT of the receiver resets its enable — `CONFIRMED` (characterisation)
+*KB:* `architecture/lookup_ram.yaml`; `language/pasm2/setluts.yaml`
+*How proven:* `test-vo-j-006-lut-share-block-load-and-spin2` (VO-J-006, arms D + F), no pins; each arm
+from a fresh `COGEXEC_NEW_PAIR` with `SETLUTS #0` sent to both cogs; hub handshakes, 3 rounds. *Result
+(log `debug_261009-123919`, first run; `.bin` 20,198 bytes):* controls all held (receiver at #0
+unchanged 512/512; WRLUT arrives 4/4 and nothing else changes; the sender is not written by the
+receiver; a block load with sharing off lands only in the sender). **D:** a `SETQ2` + `RDLONG` block
+load into the sender's LUT arrives in the receiver, 128 of 128 and 64 of 64, every round —
+`PROPAGATES`. **F1:** with the receiver enabled before a Spin2 sender is launched, the receiver's LUT
+equals the sender's own dump at all 512 longs (the interpreter's start-up loads arrive); **F2:** enabled
+after the launch, nothing earlier arrives (not retroactive); in both, the Spin2 sender's inline WRLUT
+arrives 4/4. **S1:** after a COGINIT of the receiver, GETBRK D[26] reads 0 (it read 1 after SETLUTS #1)
+and writes no longer arrive — the enable is reset. **S2:** a COGINIT of the sender leaves the
+receiver's enable in force.
+**Grounds:** the P2 Documentation says only "its local lookup RAM writes" (`silicon-doc-text.txt:493`)
+and does not say whether block loads count or what a COGINIT does to the enable. *Limits:* one pair at a
+time; cog execution; the timing of a write against a concurrent enable not explored. *Source:*
+`…/tests/test-vo-j-006-lut-share-block-load-and-spin2.spin2`.
+
+### EF-097 · In counter modes %01110, %01111, %10010–%10111 and ADC %11001, a Y written with WYPIN while DIR is low is in force after DIRH — `CONFIRMED` (documentary silence decided)
+*KB:* `architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml`, `…-01111-count-highs-optional-dec.yaml`, `…-10010-time-x-a-events.yaml`, `…-10011-count-time-x-periods.yaml`, `…-10100-count-highs-x-periods.yaml`, `…-10101-count-ticks-in-x-clocks.yaml`, `…-10110-count-highs-in-x-clocks.yaml`, `…-10111-count-periods-in-x-clocks.yaml`, `…-11001-adc-external-clock.yaml`
+*How proven:* `test-vo-j-028-y-written-dir-low-counter-modes` (VO-J-028), measured pin P4 with inputs
+from P5/P6 through the relative-pin selectors (NCO sources), nothing attached. Per mode four arms × 5
+rounds, each from a reset and a scrub of Y: Z (Y never written), B (Y written in reset), A (Y after
+DIRH, control), A0 (the inactive value written after DIRH — separates the value from the act of
+writing). *Result (log `debug_261009-123933`, first run; `.bin` 20,762 bytes):* every construction
+control held (words decoded = symbol compositions; plain-pin path 4096/0 before and after; each source
+in band before and after). In all nine modes A separated from Z, A0 matched Z (the write act alone
+changes nothing), and **every B sample lay in A's range, none in Z's** — e.g. %10011 Z 1024 / B 512 /
+A 512 / A0 1024; %11001 Z 116 / B 326 / A 326 / A0 116; %10010 (event timing, Y = 5) Z no event / B
+4014 / A 4028 clocks. All deterministic over 5 rounds. Pre-registered summary: `ORDER-SAFE` for all
+nine. (The clocks-to-IN observable of %10101/%10110 did not separate A from Z and was reported NOT
+OBSERVABLE; their Z observable decided them.)
+**Grounds:** decides F-386: the P2 Documentation states Y's reset behaviour for pulse, transition and
+PWM but is silent for these modes (`silicon-doc-text.txt:4116-4254`, `:4387`); the KB's mode pages that
+write Y before DIRH are order-safe. *Limits:* one board; one Y value pair per mode; internal routing
+only. *Source:* `…/tests/test-vo-j-028-y-written-dir-low-counter-modes.spin2`.
+
+### EF-098 · NCO duty %00111 with Y = 0 gives no output and raises no IN; the EF-013 frequency-mode result repeats — `CONFIRMED`
+*KB:* `architecture/smart-pins/smart-pin-00111-nco-duty.yaml`; `architecture/smart-pins/smart-pin-00110-nco-frequency.yaml`
+*How proven:* measured inside `test-vo-j-028-y-written-dir-low-counter-modes` (VO-J-034), 5 rounds.
+*Result (log `debug_261009-123933`):* duty Y = `$1999_999A` control: 400 high reads of 4096 and IN in
+every round; **duty Y = 0: 0 high reads and no IN, 5 of 5**; frequency %00110 Y = `$1999_999A` control
+2032 / IN; frequency Y = 0: 0 / no IN (EF-013 agrees).
+**Grounds:** G-006's duty half: EF-013 measured %00110 only; for %00111 it was an inference from the
+adder. *Limits:* one board; output read through a routed neighbour. *Source:* as EF-097.
+
+### EF-099 · `COGATN` with the issuing cog's own bit raises that cog's attention event — `CONFIRMED` (documentary silence decided)
+*KB:* `language/pasm2/cogatn.yaml`; `language/spin2/methods/cogatn.yaml`; `architecture/cog_attention.yaml`
+*How proven:* `test-vo-s037-cogatn-self` (VO-J-030), no pins; detectors `POLLATN WC`, `JATN`, `SETQ` +
+`WAITATN WC` (timeout) and Spin2 `POLLATN()`; per form and repetition a helper-cog strobe (control), a
+self strobe and no strobe, flag cleared first; 8 repetitions. *Result (log `debug_261009-123949`, first
+run; `.bin` 14,806 bytes):* controls held in every form (helper strobe 8 of 8, no strobe 0 of 8, clean
+pre-clears, acks, tags). **Self strobe delivered 8 of 8 in all four forms** (14 / 16 / 24 clocks in
+PASM — equal to the helper's strobe — and 344 in Spin2 against the helper's 352). Pre-registered verdict: `DELIVERED`.
+**Grounds:** the P2 Documentation describes strobing other cogs (`silicon-doc-text.txt:2020`, `:2053`)
+and does not exclude the issuing cog; now measured. *Limits:* one board; cog execution; the attention
+interrupt path not tested (event flag only). *Source:* `…/tests/test-vo-s037-cogatn-self.spin2`.
+
+### EF-100 · In PWM triangle and sawtooth, a zero base period (X[15:0]) or a zero frame count (X[31:16]) acts as 65,536 — `CONFIRMED` (documentary silence decided)
+*KB:* `architecture/smart-pins/smart-pin-01000-pwm-triangle.yaml`; `architecture/smart-pins/smart-pin-01001-pwm-sawtooth.yaml`
+*How proven:* `test-vo-s304-pwm-x-zero-fields` (VO-J-033), P4 never driven; frame time = interval
+between the pin's own IN rises (SETSE1 + GETCT); 3 repeats per arm; controls before and after.
+*Result (log `debug_261009-124012`, first run; `.bin` 16,030 bytes):* controls X = `$0010_0010` →
+sawtooth 256 (offset 0), triangle 511 (offset −1), span 14, identical before and after. **Sawtooth
+X = `$0004_0000` (base 0, frame 4) → 262,144 clocks (= 4 × 65,536); X = `$0000_0010` (frame 0, base 16)
+→ 1,048,577 (= 65,536 × 16). Triangle → 524,288 and 2,097,152 (twice those).** Every repeat within
+max(40, 1 %); pre-registered verdict `ZERO = 65,536` for all four.
+**Grounds:** decides S-304; the P2 Documentation's "zero = 65,536" is stated only for the DAC/NCO modes
+(`silicon-doc-text.txt:3925`). *Limits:* one board; one non-zero partner value per field. *Source:*
+`…/tests/test-vo-s304-pwm-x-zero-fields.spin2`.
 
 
 ## Open / pending empirical questions

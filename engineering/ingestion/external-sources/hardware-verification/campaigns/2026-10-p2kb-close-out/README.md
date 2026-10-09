@@ -7,18 +7,21 @@ our ingested source documentation." Group D of the study re-checked the queue ag
 first and killed five questions; these eight programs carry the nine that survived
 (`engineering/analysis/2026-10-08-p2kb-close-out-evidence/bench-groupD-recheck.md`).
 
-**Result:** not yet run.
+**Result:** run by Stephen 2026-10-09, first run each (logs `debug_261009-1238xx`..`-124012`, not
+versioned). **Seven decided → EF-093..EF-100; one (VO-J-029) gave NO VERDICT from a rig defect** — its
+repeatability check compared the per-repetition marker — and is fixed and awaiting a rerun. Each `.bin`
+that ran was byte-identical to a build of the committed source.
 
 | # | Test (`tests/`) | Row | Question | Pins | Verdict | EF |
 |---|---|---|---|---|---|---|
-| 1 | `test-vo-s059-xoro-zero-seed.spin2` | VO-J-029 | what `??x` returns with `x = 0`, and `x` after | none | — | — |
-| 2 | `test-vo-s037-cogatn-self.spin2` | VO-J-030 | does `COGATN(1 << COGID())` strobe the issuing cog? | none | — | — |
-| 3 | `test-vo-g028-hw-stack-overflow.spin2` | VO-J-031 | what a 9th/10th push loses; the stored entry width | none | — | — |
-| 4 | `test-vo-s304-pwm-x-zero-fields.spin2` | VO-J-033 | PWM with `X[15:0] = 0` / `X[31:16] = 0` | P4 (never driven) | — | — |
-| 5 | `test-vo-j-028-y-written-dir-low-counter-modes.spin2` | VO-J-028, VO-J-034 | does a Y written in reset survive, nine counter/ADC modes; NCO duty with Y = 0 | P4–P6 (P5, P6 driven) | — | — |
-| 6 | `test-vo-f372-usb-wrpin-on-running-pair.spin2` | VO-J-032 | a live `WRPIN` drive ↔ sniffer on a running USB pair | P0/P1 (driven) | — | — |
-| 7 | `test-vo-j-006-lut-share-block-load-and-spin2.spin2` | VO-J-006 | does a block load propagate through LUT sharing; a Spin2 sender | none | — | — |
-| 8 | `test-vo-j-005r-streamer-capture-ceiling-and-skew.spin2` | VO-J-005 | streamer pin-capture ceiling; filter skew | P32–P47 (P32 driven, P36–P47 held low) | — | — |
+| 1 | `test-vo-s059-xoro-zero-seed.spin2` | VO-J-029 | what `??x` returns with `x = 0`, and `x` after | none | NO VERDICT (rig defect, fixed) — rerun owed | — |
+| 2 | `test-vo-s037-cogatn-self.spin2` | VO-J-030 | does `COGATN(1 << COGID())` strobe the issuing cog? | none | DELIVERED (all four forms) | EF-099 |
+| 3 | `test-vo-g028-hw-stack-overflow.spin2` | VO-J-031 | what a 9th/10th push loses; the stored entry width | none | DROP-OLDEST; 32-bit entries | EF-094 |
+| 4 | `test-vo-s304-pwm-x-zero-fields.spin2` | VO-J-033 | PWM with `X[15:0] = 0` / `X[31:16] = 0` | P4 (never driven) | ZERO = 65,536 (both fields, both modes) | EF-100 |
+| 5 | `test-vo-j-028-y-written-dir-low-counter-modes.spin2` | VO-J-028, VO-J-034 | does a Y written in reset survive, nine counter/ADC modes; NCO duty with Y = 0 | P4–P6 (P5, P6 driven) | ORDER-SAFE, all nine; duty Y = 0 CONFIRMED | EF-097, EF-098 |
+| 6 | `test-vo-f372-usb-wrpin-on-running-pair.spin2` | VO-J-032 | a live `WRPIN` drive ↔ sniffer on a running USB pair | P0/P1 (driven) | SURVIVES | EF-093 |
+| 7 | `test-vo-j-006-lut-share-block-load-and-spin2.spin2` | VO-J-006 | does a block load propagate through LUT sharing; a Spin2 sender | none | PROPAGATES; start-up image arrives; receiver COGINIT resets | EF-096 |
+| 8 | `test-vo-j-005r-streamer-capture-ceiling-and-skew.spin2` | VO-J-005 | streamer pin-capture ceiling; filter skew | P32–P47 (P32 driven, P36–P47 held low) | no ceiling to 1 sample/clock; filter delay N + 1 | EF-095 |
 
 **Nothing attached.** Every program is bare-board: pins come only from the bench's free set
 (P0–P7, P32–P47), and the smart-pin tests route between neighbours through the relative-pin input

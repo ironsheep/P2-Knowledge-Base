@@ -157,9 +157,13 @@ Planning closes at that point. Tasking follows.
    added; each written by a fresh agent, reviewed adversarially by another (one blocker: S304's timeout
    wrapped negative and measured nothing; the same overflow class found and fixed in J-005r), fixed,
    and the fixes checked by a third. Run sheet: the campaign's `RUN-SHEET.md`.
-9. [ ] **Bench run, round 1 (Stephen)**: his run, with everything around it ours.
+9. [ ] **Bench run, round 1 (Stephen)**: his run, with everything around it ours — run 2026-10-09,
+   all eight; seven decided. **Open: the VO-J-029 (S-059) rerun** — its program withheld a verdict
+   because of a rig defect (the repeatability check compared the per-repetition marker), now fixed.
 10. [ ] **Results**: an EF entry for each result, rows updated. An inconclusive run or a new
-    question gets a round-2 test.
+    question gets a round-2 test — **EF-093..EF-100** written 2026-10-09, VO rows marked DONE, campaign
+    README filled; results applied to the study rows in §5's *Round 1 results* below. Open: S-059
+    (rerun).
 11. [ ] **Planning closes**: every row in a done state (§1). Hand-off to `sprint-plan`.
 
 After the sprint's tasks, the single close-out release goes through `release-yamls` **§1.5,
@@ -992,18 +996,39 @@ is about a tool.
 
 | VO id | Row(s) | Question | Sources-silent proof (terms · files · control hit) | Test file | Status |
 |---|---|---|---|---|---|
-| VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
-| VO-F372 | S-324, S-381, G-027 | with a USB pair running, does a new **WRPIN** (sniffer / drive change) take effect with DIR high, without a DIR cycle? (host ↔ device is a WXPIN field, documented live-changeable, SD:4581) | `sniffer` · 5 files · three documents carry the sentence (HW:1488, Titus :1382, `p2-documentation.txt:8885`), the newest silicon doc omits it (SD:4579) | to write | sources disagree |
-| VO-G028 | G-028 | push nine values onto the 8-level hardware stack, pop nine: what does the ninth pop return? Pure silicon, no pins | stack depth `8` · SD, PM, CSV · control SD:166, PM:776 (depth 8 stated; overflow silent) | to write | sources silent |
-| VO-G006a | G-006 | NCO duty `%00111` with Y = 0: output level? Pure silicon (read back via IN or a jumpered pin) | SD %00111 section; EF-013 covers `%00110` only | to write | sources silent |
-| VO-G006b | G-006 | NCO frequency interval jitter (cycle-to-cycle) at a non-integer ratio — catalogue only if it needs an instrument | SD %00110/%00111 sections | to write (or catalogue) | sources silent |
-| VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | to write | sources disagree |
-| VO-S367 | S-367 | do ADC-scope (`%11010`) and ADC-external-clock (`%11001`) smart-pin modes need the ADC enable bits (M[12:10] = %100) to sample? Compare `P_ADC_SCOPE` alone vs `P_ADC_SCOPE \| P_ADC_1X` on a pin fed by a DAC pin (jumper, free pins) | SD smart-pin %11001/%11010 sections · the page's own PASM literal (`:77`) carries the bits · no statement either way | to write | sources silent |
-| VO-S157 | S-157 | what does `DEBUG(C_Z)` print after a Spin2 statement (e.g. `x := 0`) — the interpreter's flags at the interrupt, or anything tied to the statement? No pins | v55:913, :1006; debugger DBG:629-633 (prints bits 31/30 of the interrupt return word) · no source gives values for Spin2 · control v55:1006 | to write | sources silent on values |
-| VO-S059 | S-059 | with `x := 0`, what do four successive `??x` return, and what is `x` after? Control `x := 1`. No pins (DEBUG read-out) | `seed\|zero\|period\|never` near `xoro32\|xoroshiro32\|??` · SD, DS, v55, v51, PASM2 manual, HW manual, INT, EF ledger · control DS:1557 | to write | sources silent |
-| VO-S337 | S-337 | a pin driven high in output mode (`P_HIGH_150K` on P0) while jumpered to a pin driven low (P1): does INA[0] read the pin or the output latch? | SD:3706 states only "the pin's read state" | to write | sources silent on the latch case |
-| VO-S037 | S-037 | does `COGATN(1 << COGID())` deliver an attention event to the issuing cog (POLLATN/WAITATN)? No pins | `own\|self\|itself` near `attention\|COGATN` · `sources/` · control SD:2020 | to write | sources silent |
-| VO-S304 | S-304 | PWM_TRIANGLE / PWM_SAWTOOTH with `X[15:0] = 0` and with `X[31:16] = 0`: what base period and frame count result? (second smart pin on a jumper, free pins only) | `65,?536`, `X.[15..0]` · `silicon-doc-text.txt` PWM sections `:4034-4067` · control: `:3925` (DAC/NCO "zero = 65,536") | to write (step 8) | sources silent |
+| VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | `test-vo-j-028-…` (nine modes, %01110 added) | **EF-097: order-safe, all nine** |
+| VO-F372 | S-324, S-381, G-027 | with a USB pair running, does a new **WRPIN** (sniffer / drive change) take effect with DIR high, without a DIR cycle? (host ↔ device is a WXPIN field, documented live-changeable, SD:4581) | `sniffer` · 5 files · three documents carry the sentence (HW:1488, Titus :1382, `p2-documentation.txt:8885`), the newest silicon doc omits it (SD:4579) | `test-vo-f372-…` | **EF-093: survives** |
+| VO-G028 | G-028 | push nine values onto the 8-level hardware stack, pop nine: what does the ninth pop return? Pure silicon, no pins | stack depth `8` · SD, PM, CSV · control SD:166, PM:776 (depth 8 stated; overflow silent) | `test-vo-g028-…` | **EF-094: drop-oldest; 32-bit entries (S-394)** |
+| VO-G006a | G-006 | NCO duty `%00111` with Y = 0: output level? Pure silicon (read back via IN or a jumpered pin) | SD %00111 section; EF-013 covers `%00110` only | in `test-vo-j-028-…` | **EF-098: no output, no IN** |
+| VO-G006b | G-006 | NCO frequency interval jitter (cycle-to-cycle) at a non-integer ratio — catalogue only if it needs an instrument | SD %00110/%00111 sections | — | killed in Group D (closed by mechanism) |
+| VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | — | killed in Group D (Datasheet pp.27/31) |
+| VO-S367 | S-367 | do ADC-scope (`%11010`) and ADC-external-clock (`%11001`) smart-pin modes need the ADC enable bits (M[12:10] = %100) to sample? Compare `P_ADC_SCOPE` alone vs `P_ADC_SCOPE \| P_ADC_1X` on a pin fed by a DAC pin (jumper, free pins) | SD smart-pin %11001/%11010 sections · the page's own PASM literal (`:77`) carries the bits · no statement either way | — | killed in Group D (change spec) |
+| VO-S157 | S-157 | what does `DEBUG(C_Z)` print after a Spin2 statement (e.g. `x := 0`) — the interpreter's flags at the interrupt, or anything tied to the statement? No pins | v55:913, :1006; debugger DBG:629-633 (prints bits 31/30 of the interrupt return word) · no source gives values for Spin2 · control v55:1006 | — | killed in Group D (change spec) |
+| VO-S059 | S-059 | with `x := 0`, what do four successive `??x` return, and what is `x` after? Control `x := 1`. No pins (DEBUG read-out) | `seed\|zero\|period\|never` near `xoro32\|xoroshiro32\|??` · SD, DS, v55, v51, PASM2 manual, HW manual, INT, EF ledger · control DS:1557 | `test-vo-s059-…` | **NO VERDICT (rig defect, fixed) — rerun owed** |
+| VO-S337 | S-337 | a pin driven high in output mode (`P_HIGH_150K` on P0) while jumpered to a pin driven low (P1): does INA[0] read the pin or the output latch? | SD:3706 states only "the pin's read state" | — | killed in Group D (Datasheet pp.27/31) |
+| VO-S037 | S-037 | does `COGATN(1 << COGID())` deliver an attention event to the issuing cog (POLLATN/WAITATN)? No pins | `own\|self\|itself` near `attention\|COGATN` · `sources/` · control SD:2020 | `test-vo-s037-…` | **EF-099: delivered** |
+| VO-S304 | S-304 | PWM_TRIANGLE / PWM_SAWTOOTH with `X[15:0] = 0` and with `X[31:16] = 0`: what base period and frame count result? (second smart pin on a jumper, free pins only) | `65,?536`, `X.[15..0]` · `silicon-doc-text.txt` PWM sections `:4034-4067` · control: `:3925` (DAC/NCO "zero = 65,536") | `test-vo-s304-…` | **EF-100: zero acts as 65,536** |
+
+**Round 1 results (2026-10-09), applied to the rows.** Bench round 1 also ran VO-J-005 (reduced) and
+VO-J-006 D+F (filed earlier in VERIFICATION-OPPORTUNITIES, not in this table). Each result below
+replaces the change spec's "until the bench decides" branch:
+
+| Result | Rows it settles | What the sprint writes |
+|---|---|---|
+| EF-093 | S-324 (F-372), S-381, G-027 | `smart-pin-11011-usb-host-device.yaml` keeps "a new WRPIN can switch drive ↔ sniffer without resetting the smart pin", cited to the Hardware Manual and EF-093 |
+| EF-094 | G-028, S-394 | `stack_operations.yaml` (+ `push`/`pop`/`call`/`ret` where they speak to depth): a 9th push discards the oldest entry; entries hold 32 bits (the "22 bits" claim goes) |
+| EF-095 | VO-J-005 (pin-capture `NOT STATED` rows) | `pin-capture.yaml`: one sample per clock sustained in the 4-, 8- and 16-pin modes (1024 samples); 32-pin open. `smart_pins.yaml` filters: N flip-flops at tap 0 delay the lane N + 1 clocks |
+| EF-096 | VO-J-006 (F-428 lead; P2AN007 input) | `lookup_ram.yaml` / `setluts.yaml`: block loads propagate; a Spin2 cog's start-up image reaches a partner enabled before its launch; a receiver COGINIT clears the enable, a sender COGINIT does not |
+| EF-097 | S-323 (F-386, the ten mode pages) | the nine mode pages' Y-before-DIRH order is order-safe: state it, cite EF-097; no reorder |
+| EF-098 | G-006 (duty half) | `smart-pin-00111-nco-duty.yaml`: Y = 0 gives no output and no IN |
+| EF-099 | S-037 | `cogatn.yaml` (PASM and Spin2), `cog_attention.yaml`: a cog may strobe itself; replaces the removed claim with the measured fact |
+| EF-100 | S-304 | `smart-pin-01000/01001`: a zero base period or frame count acts as 65,536 |
+
+**New lead from round 1 (S-395).** In VO-J-032's characterisation step, re-issuing `WXPIN` on the running
+USB pair after the live `WRPIN` changes left the next packet empty, 5 of 5. The P2 Documentation says
+the WXPIN settings "can be changed on-the-fly without resetting" (`silicon-doc-text.txt:4581`). The
+step was not a question of that test and its packet routine was not built to judge it, so this is a
+finding for planning, not a KB fact: a round-2 question if the sprint needs it, otherwise recorded.
 
 ## 6. Not read, and why
 
