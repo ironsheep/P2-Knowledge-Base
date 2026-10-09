@@ -590,6 +590,15 @@ S-252.
 | S-277 | — | ingestion | hygiene | the v55 extraction audit repeats the "16 levels" miscount and marks it CLOSED | `spin2-v55-complete-extraction-audit.md:54` | traced | audit copied the summary's count | correct in the re-ingestion's audit (a new audit of record, never an edit) | no |
 | S-278 | B | F-547 | hygiene | citation drift: `op_lteqgt.yaml:13` cites `:471-488` (the block is `:472-488`); `concepts/operators.yaml:329` cites `:409-491` (the table runs `:409-501`) | files cited | traced | line drift | to research | yes |
 
+| S-279 | A | F-547 | hygiene | `op_addmodulo.yaml:21`, `:145` and `spin2-language-schema.yaml:19` cite the superseded summary (`op_addmodulo` cites `:715` of a 384-line file) | `git grep complete-spin2-operators` | traced | KB sourced from the summary | re-point to `sources/spin2-v55/spin2-v55-operator-reference.md` (with S-275) | yes |
+| S-280 | B | F-547 | latent | the v55 table lists `var\x` as an assign form; pnut-ts rejects `v\3` as a statement ("Variable needs an operator") while the term form `w := v\3` compiles | `spin2-v55-operator-reference.md` row 8 probe | undetermined | document vs compiler | a fact for PNut (ground truth) — add to the PNut-TS punch-list check; no KB page asserts the statement form today | no |
+
+**Re-ingestion done («#405», 2026-10-09):** `sources/spin2-v55/spin2-v55-operator-reference.md`,
+generated from the DOCX table (84 rows, priorities 1–17, 137 of 138 forms accepted by pnut-ts,
+the five invented tokens rejected as negative controls), with a redirect beside the superseded
+summary and an audit of record. S-267/S-276/S-277's re-ingestion half is done; the KB half waits
+for the sprint.
+
 **Source erratum filed:** the v55 table's `+//` row reads `x // 7` where `x // y` is meant
 (`spin2-v55-text.txt:459`; faithful to the DOCX, so Parallax's typo, not ours) —
 `engineering/ingestion/SOURCE-ERRATA.md`.
