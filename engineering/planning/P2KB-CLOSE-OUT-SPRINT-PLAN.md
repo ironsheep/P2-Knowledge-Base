@@ -8,8 +8,8 @@ row (and the evidence file it names); a register entry's state lives in
 `engineering/operations/P2KB-CORRECTION-FINDINGS.md`; a bench fact lives in
 `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md`.
 
-**Status:** DRAFT — §0 questions open; design decisions in §0.2 await Stephen's per-decision
-confirmation before any YAML edit (sprint-plan overlay).
+**Status:** READY FOR STEPHEN — §0 questions resolved and §0.2 design decisions each decided or tied
+to a standing ruling (2026-10-09). Next: `sprint-start` when he chooses, then `plan-to-tasks`.
 
 ---
 
@@ -36,8 +36,9 @@ confirmation before any YAML edit (sprint-plan overlay).
   — follows *no unsourced claims* and *our reasoning is not a source* (Sacred Rule #7 for any
   `related:` it held).
 - **D-C** Rows whose fix is "remove" remove the claim; nothing is rewritten from memory — same rulings.
-- **D-D** *Open — asked 2026-10-09:* where the generated PASM2 encoding reference goes when it leaves
-  the served tree (Q8).
+- **D-D** **Decided 2026-10-09 (A):** the generated PASM2 encoding reference is deleted, not moved —
+  "not versioning a generated file is the right fix here"; `gen-pasm2-encoding-reference.py` (default
+  output `/tmp`) is its only source.
 - **D-E** Proven compiler-vs-document disagreements filed as `SOURCE-ERRATA` E-020..E-023, each
   pointing at its CP record — follows Q9 and Q12.
 
@@ -75,6 +76,12 @@ PASS except **KB Code Compiles — 352 FAIL in 176 files, all REGISTERED** (3077
 program, 1932 fragment, 17 never, 627 not-code; `audit-kb-code-compiles.py`).
 
 ---
+
+**Tree state at planning (sprint-start check, 2026-10-09):** on `main`; uncommitted
+`deliverables/ai/p2kb-index.json(.gz)` = the 2026-10-07 local regeneration carrying the delivery
+filter (schema 3.6.0, «#398»; its `remove_fields` already strips `documentation_source`,
+`enhancement_source`, `source`, `sources` … from served content). Left as is; §9 regenerates the
+index after the release commit. Untracked: the VO-J-035 test («#409», in review).
 
 ## §1 Gates first (study Group F; S-308; S-393)
 
@@ -167,10 +174,12 @@ not exist (negative control); `grep -rn "pnut_ts" deliverables/ai/P2` = 0.
 Recorded in the study (*Stephen's decisions on the queued questions*): delete
 `debug_interrupt.yaml` `memory_usage`; drop `high_side_weak_with_low_side_floated` and its register
 self-cite; remove the unsourced Serial Device "3.3 V supply"; tree hygiene — remove
-`deliverables/ai/P2/CHANGELOG.md`, `.git-hooks/`, `language/pasm2/add-missing-oneliners.py`, move
-the encoding reference (D-D), drop README's *Release record* section.
+`deliverables/ai/P2/CHANGELOG.md`, `.git-hooks/`, `language/pasm2/add-missing-oneliners.py` and
+`language/PASM2-ENCODING-REFERENCE.md` (D-D: not versioned; the generator is its source — its
+docstring gains a line saying the output is never committed), drop README's *Release record* section.
 **Verify:** `find deliverables/ai/P2 -type f ! -name '*.yaml'` returns only `README.md`; the
-generator writes to its new path.
+generator still runs to `/tmp`; no live doc links the deleted files (`git grep` — the dated audit
+report and the study keep their historical mentions).
 
 ## §8 Registers and registries
 
@@ -205,7 +214,10 @@ Both are sprint scope (§8). Other artifacts this sprint's changes describe:
 - **Skills** `release-yamls` / `yaml-knowledge-base-maintenance` — gate names and counts for §1's new
   gates.
 - **Counts**: the DoD runner's gate list; `audit-kb-code-compiles.py` totals; the study's row count.
-- **Duplicated material:** the encoding reference (generated) moves to one home (D-D).
+- **Duplicated material:** the generated encoding reference is removed (D-D); the YAMLs are the one
+  home for encodings.
+- **New register:** `compiler-verification/COMPILE-PROOFS.md` + README (§6); the ingestion dashboard
+  and the `ingest-source` / verification skill text that name the proof registers gain it.
 
 ## Named unknowns
 
