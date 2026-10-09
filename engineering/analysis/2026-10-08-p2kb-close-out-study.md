@@ -690,6 +690,28 @@ and needs `{Spin2_v51}` — probed), S-135, S-252, S-267..S-275, S-279. New:
 | S-314 | `concepts/floating_point.yaml:73` | float `<.` "returns TRUE/FALSE" | "returns 0 or -1" | reference row #61 | change spec |
 | S-315 | operator coverage | no page for bitwise `!`, `&`, `^`, `|`, unary `-`, `\`, CON `=`, compound and unary assign forms | coverage work for the sprint (new pages), not a correction | reference | noted (coverage) |
 
+### Group B — register items («#407», 2026-10-09)
+
+Read-only research; specs in `2026-10-08-p2kb-close-out-evidence/groupB-register-items-specs.md`.
+Arbiter re-read `p2-hardware-manual-text.txt:1488`, `:1611`, `:1634`, `silicon-doc-text.txt:3946`,
+`:4579`.
+
+| # | Item | Severity | State | Summary |
+|---|---|---|---|---|
+| S-316 | F-550 | **drives wrong code** | change spec | serial loader: command syntax, `Prop_Ver G`, Prop_Clk's five fields, reply characters, the checksum long — all from the Hardware Manual's loader section |
+| S-317 | F-562 | wrong, not code-driving | change spec | hub75 OBEX name and URL → "ISP Hub75 Matrix Driver" (OBEX 2850 metadata) |
+| S-318 | F-561 (YAML) | drives wrong code | change spec | p2an003 init order: not "universal"; DAC modes capture Y while DIR is low (SD:3946); prose twin in P2AN003 changes in the same release |
+| S-319 | F-392 | latent | change spec | top-level cog stack documented from the v55 interpreter (frame 6 longs + locals, grows up, no limit check); home file decided in the sprint |
+| S-320 | F-548 | wrong, not code-driving | change spec | driver/API restatement removed from hardware pages (edge-32mb + 5 siblings); unsourced `power_sharing` lines removed |
+| S-321 | F-551 | **drives wrong code** | change spec (block by block) | pasm2 getting-started guide: LUT access, C = carry, `$` origin, QMUL timing, Spin2 DEBUG in a PASM guide, dangling next-steps |
+| S-322 | F-354 | latent | 1 blocked (schematic), 2 change spec (sizes from the guide's drawings), 3 blocked + **question for Stephen** | board facts |
+| S-323 | F-386 | latent | **bench question VO-J-028** (eight pages, not ten) | Y written before DIRH in eight counter modes |
+| S-324 | F-372 | latent | **bench question VO-F372** + small edit | USB WRPIN switch without reset — the sources disagree |
+| S-325 | F-337 | latent | **bench question VO-F337** + interim conflict note | DAC_MODE `%TT=00`: DIR vs OUT |
+| S-326 | F-336 | latent | change spec + **question for Stephen** | `P_HIGH_15K \| P_LOW_FLOAT` as a documentary idiom |
+| S-327 | F-545 | hygiene | change spec (partial — key census to finish in the sprint) | provenance keys folded or removed; `authority_tier` is content |
+| S-328 | F-560 | hygiene | change spec + **question for Stephen** (quick-bytes tags) | 78 label-valued `source:` lines |
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
@@ -713,6 +735,9 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 
 | VO id | Row(s) | Question | Sources-silent proof (terms · files · control hit) | Test file | Status |
 |---|---|---|---|---|---|
+| VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
+| VO-F372 | S-324 | with a USB pair running, does a new WRPIN with DIR high switch host ↔ device without a DIR cycle? | `sniffer` · 5 files · sources disagree (`HW:1488` vs `SD:4579`) | to write | sources disagree |
+| VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | to write | sources disagree |
 | VO-S304 | S-304 | PWM_TRIANGLE / PWM_SAWTOOTH with `X[15:0] = 0` and with `X[31:16] = 0`: what base period and frame count result? (second smart pin on a jumper, free pins only) | `65,?536`, `X.[15..0]` · `silicon-doc-text.txt` PWM sections `:4034-4067` · control: `:3925` (DAC/NCO "zero = 65,536") | to write (step 8) | sources silent |
 
 ## 6. Not read, and why
