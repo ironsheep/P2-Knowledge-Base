@@ -640,6 +640,15 @@ accept them (the `pnut` token matches inside `PNUT_TS`).**
 | S-292 | 40 sites (`f375-bookkeeping-token-sites.txt`) | `documentation_source: enhanced` (16) / `original` (15) / `p2_datasheet` (8) / `code_analysis` (1) | delete each line — except the 8 `p2_datasheet` sites (all CORDIC: `qvector`, `qfrac`, `qdiv`, `qrotate`, `qmul`, `qsqrt`, `qlog`, `qexp`): there, replace with the real datasheet citation **if** the page's facts are in the Datasheet's CORDIC section (check each), else delete — a citation hint is not removed when it can be made true (D4: do not remove useful things) | decision D2; evidence file | change spec |
 | S-293 | 356 `enhancement_source:` lines | `PNUT_TS_v2.0_…_2025-09-13` labels | **not a citation**: do not teach `CITE_KEY_RE` this key (it would count 356 labels as sources); the labels are bookkeeping like S-292's words | as above | **queued question for Stephen** — his D2 said to teach both keys; the values show the second carries no documents. Recommendation: teach `documentation_source` only, and delete the 356 `enhancement_source` lines with S-292 |
 
+**F-398 (2026-10-09, arbiter inline).** Every dollar figure in the KB is in one file: a sweep for
+price strings (`\$NN-NN"`, `+\$NN`, `\$NN USD/each/per`) across `deliverables/ai/P2/` hits only
+`hardware/p2-hardware-selection-guide.yaml`; every other `$` in `hardware/` is a hex value (I²C
+addresses, registers).
+
+| # | File, block | Current | Correct | Authority | State |
+|---|---|---|---|---|---|
+| S-294 | `hardware/p2-hardware-selection-guide.yaml` — 22 lines: `:23`, `:29`, `:38`, `:44`, `:53`, `:59`, `:68`, `:74` (`cost_estimate`), `:82`, `:105` (`total_investment`), `:121`, `:141`, `:152`, `:156`, `:160` (`cost`), `:127`, `:133` (`additional_cost`), `:165`, `:172`, `:179` (`total_cost`), `:166` (`programming: "PropPlug programmer required (+$30)"`), `:193` (`cost_difference: "$30-50 between P2-EC and P2-EC32MB"`) | dollar ranges | delete each price-only key; on `:166` keep the sentence and drop `(+$30)`; on `:193` delete the key (the memory-upgrade advice stands on `:194-195`). **Keep the tiering** (entry / balanced / maximized; "lower cost", "cost-effective" wording). Add once, at the file's top level: `pricing: "For current pricing, see the Parallax store (parallax.com)."` | decision D3 | change spec |
+
 **Queued question for Stephen (one, at the hand-off): S-285/S-286.** Both keys describe how much
 hub or cog state the *debugger program* uses — a tool limit, which the doctrine says is not a KB
 fact. Recommendation: keep the keys with the silicon-only text above (the 16 KB region, its write
