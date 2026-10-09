@@ -138,7 +138,8 @@ Planning closes at that point. Tasking follows.
      tokens come from the authored v51 summary. Rows S-267..S-278, erratum E-018, F-547's summary
      hunk reverted (`e5f5ab3d`). Re-ingestion of the operator reference is owed (S-267, S-276).
 1. ~~Group E, field-report reconciliation~~ (dropped: every field report has been processed).
-2. [ ] **Group A**, decided items: F-359, F-375, F-398, F-381 (24 files), F-547 cascade.
+2. [x] **Group A**, decided items: F-359, F-375, F-398, F-381 (24 files), F-547 cascade — done
+   2026-10-09 («#406»): rows S-281..S-315, bench question VO-S304, two questions for Stephen queued.
 3. [ ] **Group B** by KB area: architecture, then language/spin2, then language/pasm2, then
    hardware, then guides.
 4. [ ] **Group C**, knowledge gaps: the sources searched exhaustively for each one.
