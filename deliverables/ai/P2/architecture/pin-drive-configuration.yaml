@@ -233,7 +233,7 @@ idioms:
     as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it
     -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements
     (a jumper-continuity check and streamer pin placement). Neither is a pull-up/drive-strength
-    finding, and the ledger contains none; see the gap noted under not_documented_here. Constant wording from the
+    finding, and the ledger contains none; see gap_no_dedicated_bench_test below. Constant wording from the
     Spin2 v55 symbol table, spin2-v55-text.txt:1504 and :1514."
 
   weak_high:
@@ -294,12 +294,7 @@ not_documented_here:
     open_drain: "not stated by any Parallax source as a P_* composition"
     open_source: "not stated by any Parallax source as a P_* composition"
     keeper_or_bus_hold: "no source"
-    high_side_weak_with_low_side_floated: "the P_HIGH_15K with P_LOW_FLOAT variant has no
-      Parallax documentary statement and no empirical record; a gap is filed for it
-      rather than content shipped here"
     per_pin_current_or_impedance: "nothing beyond the eight ladder rungs the legend states"
-    sources:
-      - "high_side_weak_with_low_side_floated: gap filed in the P2KB corrections register, engineering/operations/P2KB-CORRECTION-FINDINGS.md"
 
 related:
   - architecture/smart_pins.yaml

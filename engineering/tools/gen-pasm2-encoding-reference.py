@@ -2,6 +2,7 @@
 """Generate a single PASM2 disassembly reference from the per-instruction YAMLs.
 Source of truth: deliverables/ai/P2/language/pasm2/*.yaml
 Output: a grouped markdown table with each instruction's 32-bit encoding pattern.
+The output is never committed: this script is its source (plan D-D, 2026-10-09).
 """
 import glob, os, sys, yaml, re
 

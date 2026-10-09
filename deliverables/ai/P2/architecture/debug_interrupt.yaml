@@ -376,10 +376,6 @@ performance_impact:
   breakpoint_overhead:
     on_hit: "ISR dispatch overhead + ISR body execution time"
     when_not_hit: "0 additional clocks (debug interrupt only fires when its event condition is met)"
-  
-  memory_usage:
-    trace_buffer: "Typically 4KB-16KB in hub"
-    debug_state: "~100 longs for full state capture"
 
 limitations:
   - limitation: "single_debug_level"

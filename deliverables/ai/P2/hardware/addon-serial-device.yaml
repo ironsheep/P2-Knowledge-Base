@@ -86,7 +86,6 @@ advantages:
   - "P2 can emulate multiple device types simultaneously"
   - "Visual activity feedback with two LEDs (red + blue) per port"
   - "Standard microUSB connectors"
-  - "No external power required (bus-powered)"
   - "Flexible device class implementation in software"
   - "Educational value for USB device development"
 
@@ -101,7 +100,6 @@ compatibility:
   stacking:
     position: "Any 2x6 header position on the host board"
     conflicts: "Uses all 8 pins - check with other add-ons"
-    power_sharing: "Low power device - compatible with other add-ons"
   host_compatibility:
     windows: "Standard USB device drivers"
     mac_linux: "Standard USB device support"
