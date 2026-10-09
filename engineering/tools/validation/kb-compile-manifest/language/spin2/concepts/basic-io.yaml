@@ -40,7 +40,7 @@ blocks:
     compile: not-code
     reason: "pin-field notation with a gloss ('8 ADDPINS 7 = pins 8 through 15'); notation, not a statement"
   - at: pin_field_encoding.range_operator.example
-    fp: "55a72ca749158679"
+    fp: "fdf2ab3fe7164add"
     compile: not-code
     reason: "pin-field notation with a gloss ('8 ADDPINS 7 = pins 8 through 15'); notation, not a statement"
   - at: internal_pull_resistors.pull_a_line_high.example

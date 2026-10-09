@@ -1,36 +1,37 @@
 method: QLOG
 type: method
 description: |
-  Calculate natural logarithm using hardware CORDIC
+  Convert an unsigned 32-bit value to its base-2 logarithm in 5:27 fixed-point
+  format (the top 5 bits hold the whole part of the power-of-2 exponent, the
+  bottom 27 bits hold the fractional part), using the hardware CORDIC engine.
 category: Math/CORDIC Operations
 syntax: "result := QLOG(Value)"
 parameters:
   - name: "Value"
     type: "long"
-    description: "Input value (unsigned 32-bit)"
+    description: "Input value (unsigned 32-bit integer)"
 returns:
   type: "long"
-  description: "Natural logarithm in 5.27 fixed-point format"
+  description: "Base-2 logarithm of Value in 5:27 fixed-point format (5 whole bits, 27 fractional bits)"
 examples:
   - code: |
-      ' Calculate natural log
-      ln_value := QLOG($1000_0000)  ' ln(0.0625)
-      ' Result in 5.27 fixed-point format
+      ' Calculate log base 2
+      log2_value := QLOG($1000_0000)  ' $1000_0000 is 2^28, so the result is 28 << 27 = $E000_0000
+      ' Result in 5:27 fixed-point format
     description: "Basic logarithm calculation"
   - code: |
-      ' Calculate log base 10
-      log10_value := QLOG(value) * 39457 >> 17  ' Convert ln to log10
-    description: "Convert natural log to log base 10"
+      ' Calculate log base 10 (log10(v) = log2(v) * 0.30103)
+      log10_value := MULDIV64(QLOG(value), 39457, 131072)  ' result in 5:27 format
+    description: "Convert base-2 log to log base 10"
   - code: |
-      ' Audio decibel calculation
-      db := QLOG(amplitude) * 1717 >> 12  ' 20*log10(amplitude)
-    description: "Calculate decibels from amplitude"
+      ' Audio decibel calculation: 20*log10(amplitude) = log2(amplitude) * 6.0206
+      ' QLOG(amplitude) >> 8 keeps the product within 32 bits; the sum rounds to whole dB
+      db := (MULDIV64(QLOG(amplitude) >> 8, 60206, 10_000) + (1 << 18)) >> 19
+    description: "Calculate whole decibels from amplitude"
 notes:
   - "Uses P2's hardware CORDIC engine"
-  - "Input range: 0.0625 to 2.0 (in unsigned 32-bit format)"
-  - "Result is natural logarithm (base e)"
-  - "Output in 5.27 fixed-point format"
-  - "For values outside range, scale appropriately"
+  - "Result is the base-2 logarithm in 5:27 fixed-point format"
+  - "Operator precedence: shifts (priority 3) bind tighter than * (priority 7), so QLOG(value) * 39457 >> 17 means QLOG(value) * (39457 >> 17), i.e. QLOG(value) * 0; use MULDIV64 to scale a QLOG result"
 timing:
   description: "Uses the CORDIC solver. The underlying CORDIC latency is a hardware property of the engine; the total Spin2-method time also includes interpreter overhead and is not separately specified here."
   see: "language/spin2/concepts/cordic_solver.yaml for the underlying CORDIC engine."

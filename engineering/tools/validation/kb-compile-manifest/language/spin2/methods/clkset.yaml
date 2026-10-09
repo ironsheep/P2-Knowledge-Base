@@ -3,18 +3,15 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "ee06c049d8a6bc18"
+    fp: "89ffdd98ff30382c"
     compile: fragment
     wrap: spin2-method
-    finding: "S-021"
   - at: examples[1].code
-    fp: "c042ecb771d58c96"
+    fp: "ad9adee0a39b2525"
     compile: fragment
     wrap: spin2-method
-    finding: "S-021"
   - at: examples[2].code
-    fp: "167aca445f7665be"
+    fp: "492ca4b7e8cebc77"
     compile: fragment
     wrap: spin2-method
     assumes: [battery_low]
-    finding: "S-021"

@@ -63,7 +63,7 @@ common_patterns:
   - pattern: "array_simulation"
     description: "Inline constant array without DAT section"
     code: |
-      ' Equivalent to: motor_speeds := long[4]{1000, 2000, 3000, 4000}[index]
+      ' An inline constant array: index 0..3 selects the value
       speed := LOOKUPZ(index : 1000, 2000, 3000, 4000)
 
 anti_patterns:
@@ -71,11 +71,11 @@ anti_patterns:
     description: "Assuming LOOKUPZ always returns valid value"
     wrong: |
       pin := LOOKUPZ(channel : 16, 17, 18, 19)
-      DRVH(pin)  ' If channel >= 4, pin is 0, drives wrong pin!
+      PINHIGH(pin)  ' If channel >= 4, pin is 0, drives wrong pin!
     correct: |
       if channel < 4
         pin := LOOKUPZ(channel : 16, 17, 18, 19)
-        DRVH(pin)
+        PINHIGH(pin)
 
   - anti_pattern: "confusion_with_lookup"
     description: "Using LOOKUPZ when expecting 1-based indexing"
@@ -105,7 +105,7 @@ notes:
   - "Supports ranges with .. operator"
   - "More common than LOOKUP for array-like access"
   - "Values evaluated at compile time if possible"
-  - "Efficient for small lookup tables (~20 items max)"
+  - "Suited to small lookup tables"
   - "Inverse operation: LOOKDOWNZ (find index of value)"
 
 related:

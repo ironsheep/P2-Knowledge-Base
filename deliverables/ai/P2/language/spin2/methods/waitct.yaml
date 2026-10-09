@@ -30,19 +30,29 @@ examples:
         ' Do periodic task
     description: "Precise periodic timing"
   - code: |
-      ' Synchronize multiple cogs
-      sync_time := GETCT() + clkfreq
-      WAITCT(sync_time)  ' All cogs wait for same time
-    description: "Multi-cog synchronization"
+      ' Synchronize multiple cogs: ONE cog computes the target and shares it
+      VAR
+        LONG sync_time         ' shared by every cog running these methods
+
+      PUB coordinator()
+        sync_time := GETCT() + clkfreq   ' publish the target for the other cogs to read
+        WAITCT(sync_time)
+
+      PUB follower()
+        WAITCT(sync_time)                ' same absolute time as the coordinator
+    description: "Multi-cog synchronization (the target must be computed once and shared; each cog computing its own GETCT() + clkfreq would wait for a different time)"
 notes:
-  - "Blocks execution until system counter matches Tick value"
-  - "System counter wraps every ~53 seconds at 80MHz"
+  - "Blocks execution until the system counter has passed the Tick value (MSB of CT - Tick is 0); not an exact match"
+  - "The 32-bit system counter wraps every 2^32 clocks (see counter_wrap)"
   - "More precise than WAITMS/WAITUS for exact timing"
   - "Handles counter wraparound correctly"
   - "Use GETCT() to read current counter value"
   - "Resolution is 1 system clock cycle"
+counter_wrap:
+  statement: "GETCT and WAITCT use the 32-bit system counter, which wraps every 2^32 clocks: about 53.7 s at 80 MHz"
+  derived_from: "Parallax Propeller 2 Spin2 Language Documentation v55, Timing Methods (GETCT returns the 32-bit system counter); 2^32 / 80_000_000 = 53.687 s"
 timing:
-  description: "Waits until exact counter match"
+  description: "Waits until the counter has passed Tick, not until an exact match"
   cycles: "Variable based on target tick"
 related:
   - GETCT

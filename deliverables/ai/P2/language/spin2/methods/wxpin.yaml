@@ -1,5 +1,5 @@
 # Spin2 Method: WXPIN
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Write X parameter to smart pin
 
 method: "WXPIN"
@@ -18,7 +18,7 @@ parameters:
     description: |
       Specifies which pin(s) to configure. Can be:
       - Single pin number (0-63)
-      - Pin range using '..' operator (Bottom..Top)
+      - Pin range using '..' operator, written Top..Bottom (e.g. 15..8 is pins 8 through 15; wraps within the 32-pin block if Top < Bottom)
       - Multiple pins using ADDPINS operator
       - Variable or expression that evaluates to a pin field
       
@@ -27,9 +27,10 @@ parameters:
     description: |
       32-bit value for X register.
       Interpretation depends on smart pin mode:
-      - Timing periods for serial modes
-      - Frequency values for NCO modes
-      - Configuration bits for special modes
+      - Bit timing and word size for async serial modes; word size and update/sample mode for sync serial modes
+      - Base period (X[15:0]) plus frame count (X[31:16]) for the PWM modes
+      - Base period and initial phase for the NCO modes (the frequency goes in Y, via WYPIN)
+      - Measurement period for the counting and quadrature modes
 
 returns: "none"
 
@@ -42,18 +43,25 @@ x_register_usage_by_mode:
     Formula:  X = ((CLKFREQ / baud_rate) << 16) | (data_bits - 1)
 
   sync_serial_modes: |
-    Sync serial (P_SYNC_TX %11100 / P_SYNC_RX %11101):
-      X[5:0]  = word size minus 1
-      X[31:6] = clocking options (see mode pages)
+    Sync serial (P_SYNC_TX %11100 / P_SYNC_RX %11101); words shift LSB first,
+    clocked by the B input:
+      X[4:0] = word size minus 1 (1 to 32 bits)
+      X[5]   = TX: 0 = continuous mode, 1 = start-stop mode
+               RX: 0 = sample A just before the B edge, 1 = sample coincident with the B edge
 
   pwm_modes: |
-    PWM period:
-    X = period_in_clocks - 1
-    
+    PWM (triangle, sawtooth, SMPS):
+      X[15:0]  = base period in clocks
+      X[31:16] = frame period in base periods
+    The output value (0 up to the frame period) is written to Y with WYPIN.
+
   nco_modes: |
-    Frequency value:
-    X = frequency * (2^32 / CLKFREQ)
-    
+    NCO frequency (P_NCO_FREQ):
+      X[15:0]  = base period in clocks
+      X[31:16] = initial phase (written to Z[31:16])
+    The frequency goes in Y: Y is added into Z at each base period, so with a
+    base period of 1, Y = frequency FRAC CLKFREQ.
+
   measurement: |
     Measurement window:
     X = measurement_period_clocks
@@ -67,15 +75,15 @@ examples:
     description: "Configure async UART baud rate and word size"
     
   - code: |
-      ' Set PWM period to 1000 clocks
-      WXPIN(56, 999)  ' 1000 - 1
-    description: "Set PWM period"
-    
+      ' Set a PWM frame of 1000 base periods, base period 1 clock
+      WXPIN(56, (1000 << 16) | 1)
+    description: "Set PWM base period and frame count"
+
   - code: |
-      ' Configure 1MHz NCO frequency
+      ' Configure 1MHz NCO frequency: base period 1 clock, frequency in Y
       freq := 1_000_000
-      x_val := freq * ($8000_0000 / (CLKFREQ / 2))
-      WXPIN(pin, x_val)
+      WXPIN(pin, 1)
+      WYPIN(pin, freq FRAC CLKFREQ)
     description: "Set NCO frequency"
     
   - code: |
@@ -85,33 +93,34 @@ examples:
     
   - code: |
       ' Configure 16-bit SPI transfer
-      WXPIN(spi_pin, %1_00111)  ' 16 bits, MSB first
+      WXPIN(spi_pin, %1_01111)  ' 16-bit words, start-stop
     description: "SPI configuration"
 
 mode_specific_x_values:
-  P_ASYNC_TX: "Bit period for transmit"
-  P_ASYNC_RX: "Bit period for receive"
-  P_PULSE: "High time period"
-  P_TRANSITION: "Transition period"
-  P_NCO_FREQ: "Frequency value"
-  P_NCO_DUTY: "Base period"
-  P_PWM_TRIANGLE: "Frame period"
-  P_PWM_SAWTOOTH: "Frame period"
-  P_QUADRATURE: "Filter period"
+  P_ASYNC_TX: "Clocks per bit in X[31:16] (fraction in X[15:10]), word size minus 1 in X[4:0]"
+  P_ASYNC_RX: "Clocks per bit in X[31:16] (fraction in X[15:10]), word size minus 1 in X[4:0]"
+  P_PULSE: "Base period in X[15:0]; X[31:16] is compared with the base period counter (output high while the counter is above it)"
+  P_TRANSITION: "Base period in X[15:0]"
+  P_NCO_FREQ: "Base period in X[15:0], initial phase in X[31:16]; the frequency goes in Y"
+  P_NCO_DUTY: "Base period in X[15:0], initial phase in X[31:16]; the duty goes in Y"
+  P_PWM_TRIANGLE: "Base period in X[15:0], frame period (in base periods) in X[31:16]"
+  P_PWM_SAWTOOTH: "Base period in X[15:0], frame period (in base periods) in X[31:16]"
+  P_QUADRATURE: "Measurement period in clocks (0 = continuous count, like a totalizer)"
   P_COUNT_RISES: "Measurement period"
   P_COUNT_HIGHS: "Measurement period"
 
 calculation_examples:
   uart_baud: |
     ' Configure async UART for any baud rate, 8 data bits
-    PUB set_baud(pin, baud)
+    PUB set_baud(pin, baud) | x
       x := ((CLKFREQ / baud) << 16) | 7    ' bits[31:16]=clocks/bit, bits[4:0]=N-1
       WXPIN(pin, x)
-      
+
   pwm_frequency: |
-    ' Set PWM by frequency
-    PUB set_pwm_freq(pin, freq)
-      x := CLKFREQ / freq - 1
+    ' Set PWM by frequency: base period 1 clock, frame of CLKFREQ / freq base periods
+    ' (the frame count is X[31:16], so CLKFREQ / freq must fit in 16 bits)
+    PUB set_pwm_freq(pin, freq) | x
+      x := ((CLKFREQ / freq) << 16) | 1
       WXPIN(pin, x)
       
   measurement_time: |
@@ -120,7 +129,7 @@ calculation_examples:
     ' At 200 MHz the safe range is ms <= ~10_737 (~10.7 s). For longer
     ' measurement windows, reconsider the approach — see
     ' language/spin2/concepts/timing_operations.yaml (method_selection).
-    PUB set_measure_ms(pin, ms)
+    PUB set_measure_ms(pin, ms) | x
       x := CLKFREQ / 1000 * ms
       WXPIN(pin, x)
 
@@ -139,7 +148,7 @@ related_methods:
   - "PINSTART"
 
 timing_considerations:
-  - "X value takes effect on next period"
+  - "In the NCO modes, WXPIN writes X[31:16] into Z[31:16] (the phase), even during reset"
   - "Can be changed while pin is active"
   - "Some modes latch X at specific times"
   - "Check mode documentation for specifics"

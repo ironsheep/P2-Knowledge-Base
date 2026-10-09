@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-564`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-565`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,25 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»)
+
+### F-564 — what a stopped cog leaves on the pins and in smart-pin modes is stated nowhere in the ingested sources; `cogstop.yaml` shipped three claims about it — `NEEDS-VERIFICATION` (bench question)
+Found 2026-10-09 by «#414» fixing `language/spin2/methods/cogstop.yaml`. The page shipped "All pins
+controlled by the cog are released to float state", `pin_control: All DIR bits cleared (pins become
+inputs) / Smart pin modes disabled / Pin states float`, "Cog RAM contents preserved but inaccessible",
+"Power saving (stopped cogs use less power)" and the warning "Pins float - may need external
+pull-up/down resistors". Checked 2026-10-09: the P2 Documentation v35 says only that a stopped cog
+returns to the pool of free cogs (`silicon-doc-text.txt:364`, `:421-431`) and that a held lock is
+released (`:3688`, `:3698`); the Datasheet's COGSTOP row says "Stop cog D[3:0]"
+(`p2-datasheet-text.txt:1790`); the v55 interpreter's `cogstop` is the instruction itself; no EF
+entry observes pins after a COGSTOP (the only COGSTOP in the ledger, EF-087, is a rig step). A smart
+pin keeps its own mode register, so "Smart pin modes disabled" is doubtful. **Applied now:** the
+claims are removed; the page says the pin and smart-pin state after a stop "is not established by an
+ingested source; do not rely on it", and keeps the sourced `WAITX #20` before a self-stop after
+`WRFAST` (`silicon-doc-text.txt:3120`). **Bench question (no external pins needed beyond a
+jumper-free read-back):** start a cog that drives P0 high, sets a smart-pin mode on P1 (e.g. NCO) and
+enables it, COGSTOP it from another cog, read P0's DIR/OUT/IN and P1's mode behaviour from the
+surviving cog. **Fix when answered:** state the measured result on `cogstop.yaml`, cite the EF.
 
 ### F-563 — `smart-pin-11011-usb-host-device.yaml` gives the USB receiver status bits [6] and [3..0] from the superseded PDF-era capture — `CONFIRMED`
 Found 2026-10-09 by the VO-J-035 rework writer («#409»). `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml:61-67`
@@ -1069,6 +1087,13 @@ on ordering, not amounts.
 > shipped KB targets v55**. Writing v51 internals as current v55 behaviour is precisely the
 > tier-mismatch this register exists to prevent, so it waits for a v55 interpreter source rather
 > than being guessed. That is the named expiry, not an open-ended deferral.
+>
+> **Applied 2026-10-09 («#414», `PENDING-VALIDATION` for this part only).** Two more sites carried the
+> same unsourced floor and contradicted the fix above: `cogspin.yaml` `parameters` → `StackAddress`
+> ("Minimum 32 longs recommended") now reads "Size it for the method's worst case; see
+> stack_requirements below", and `guides/quick-queries.yaml` ("Check stack size (minimum 32 longs)")
+> now tells the reader to check the COGSPIN stack against the method's worst case and measure the
+> high-water mark. Class sweep `grep -rn -i -E "minimum (of )?[0-9]+ longs"` over `deliverables/ai/P2`: no hit remains.
 
 **Class: OMISSION + UNSOURCED CLAIM.**
 

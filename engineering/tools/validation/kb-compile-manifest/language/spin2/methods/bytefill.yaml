@@ -12,9 +12,8 @@ blocks:
     fp: "0329b0681e3b8e02"
     compile: program
   - at: examples[3].code
-    fp: "0de586c271f2b3b9"
+    fp: "198714182f4792e6"
     compile: program
-    finding: "S-008"
   - at: examples[4].code
     fp: "2995aefebdc2576f"
     compile: program
@@ -24,7 +23,7 @@ blocks:
     wrap: spin2-method
     assumes: [i, count, dest, value]
   - at: performance_comparison.bytefill
-    fp: "60a8412df1d6d1ee"
+    fp: "de6366aeb24ba9ba"
     compile: fragment
     wrap: spin2-method
     assumes: [dest, value, count]

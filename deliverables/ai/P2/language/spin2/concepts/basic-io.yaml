@@ -155,9 +155,9 @@ pin_field_encoding:
     encoding: "Compiler generates 11-bit pin field value"
 
   range_operator:
-    syntax: "bottom_pin..top_pin"
-    example: "8..15 = pins 8 through 15"
-    wrapping_note: "Wraps if top_pin < bottom_pin"
+    syntax: "top_pin..bottom_pin"
+    example: "15..8 = pins 8 through 15 (same pin field as 8 ADDPINS 7)"
+    wrapping_note: "Wraps within the 32-pin block if top_pin < bottom_pin"
     use_case: "Primarily for constants and readability"
 
   wrapping_behavior:

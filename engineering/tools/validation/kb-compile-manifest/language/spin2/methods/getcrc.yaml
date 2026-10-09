@@ -3,16 +3,11 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "1dfccfbe1316ee11"
+    fp: "5329a3cb75414658"
     compile: fragment
     wrap: spin2-method
     assumes: [crc32, data, size]
   - at: examples[1].code
-    fp: "d18945e243fe4a1d"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [crc16, buffer, length]
-  - at: examples[2].code
     fp: "ea160f319ced742c"
     compile: fragment
     wrap: spin2-method

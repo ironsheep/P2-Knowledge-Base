@@ -23,10 +23,14 @@ blocks:
     compile: not-code
     reason: "byte-order mapping notation (value -> result), not code"
   - at: common_patterns[5].example
-    fp: "0d8e7e59b26d7c00"
+    fp: "cdf5555d833faf5e"
     compile: not-code
     reason: "byte-order mapping notation (value -> result), not code"
   - at: common_patterns[6].example
+    fp: "0d8e7e59b26d7c00"
+    compile: not-code
+    reason: "byte-order mapping notation (value -> result), not code"
+  - at: common_patterns[7].example
     fp: "aa4c1dbca6879664"
     compile: not-code
     reason: "byte-order mapping notation (value -> result), not code"
@@ -37,7 +41,7 @@ blocks:
     fp: "fa55882ae3a3735d"
     compile: program
   - at: examples[2].code
-    fp: "05915ffcae1f1612"
+    fp: "0e1f865dcdd18ea7"
     compile: program
   - at: examples[3].code
     fp: "afe57b26effcaef7"

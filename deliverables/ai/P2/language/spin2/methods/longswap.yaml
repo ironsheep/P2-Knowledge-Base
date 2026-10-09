@@ -1,38 +1,43 @@
 method: LONGSWAP
 type: method
-description: |
-  Swap long values between two memory locations
 category: Memory Operations
-syntax: "LONGSWAP(Address1, Address2)"
+
+requires_version: "Spin2_v45"
+version_directive: "{Spin2_v45}"
+
+description: |
+  Swap Count longs of data between the ranges starting at AddrA and AddrB.
+  REQUIRES: {Spin2_v45} or later version directive at start of source file.
+syntax: "LONGSWAP(AddrA, AddrB, Count)"
 parameters:
-  - name: "Address1"
+  - name: "AddrA"
     type: "address"
-    description: "First hub RAM address containing long to swap"
-  - name: "Address2"
+    description: "Hub RAM address of the first long range"
+  - name: "AddrB"
     type: "address"
-    description: "Second hub RAM address containing long to swap"
+    description: "Hub RAM address of the second long range"
+  - name: "Count"
+    type: "integer"
+    description: "Number of longs to swap (in elements: one element is one long)"
 returns:
   type: "void"
   description: "No return value"
 examples:
   - code: |
       ' Swap two long values
-      LONGSWAP(@value1, @value2)
+      LONGSWAP(@value1, @value2, 1)
     description: "Exchange long values between variables"
   - code: |
       ' Reverse long order in array
       repeat i from 0 to size/2-1
-        LONGSWAP(@array[i], @array[size-1-i])
+        LONGSWAP(@array[i], @array[size-1-i], 1)
     description: "Reverse array using long swapping"
   - code: |
-      ' Swap register values
-      LONGSWAP(@reg_a, @reg_b)
-    description: "Exchange 32-bit register values"
+      ' Swap two variables
+      LONGSWAP(@reg_a, @reg_b, 1)
+    description: "Exchange two 32-bit values"
 notes:
-  - "Atomically exchanges the 32-bit long values"
-  - "Both addresses must be long-aligned (addresses divisible by 4)"
   - "No temporary variable needed for swap"
-  - "Efficient single-operation exchange"
   - "Each long is 4 bytes"
 timing:
   execution_model: |

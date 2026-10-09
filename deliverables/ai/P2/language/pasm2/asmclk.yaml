@@ -61,6 +61,7 @@ compiler_effects: []
 expansion_details:
   external_clock:
     description: For crystal/external clock modes with PLL
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup"
     expands_to:
       - "HUBSET ##clkmode_ & !%11    ' Start external clock, stay in RCFAST"
       - "WAITX ##20_000_000/100      ' Wait ~10ms for clock stabilization"

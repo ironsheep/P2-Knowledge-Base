@@ -1,5 +1,5 @@
 # Spin2 Method: LONGMOVE
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Copy longs from source to destination
 
 method: "LONGMOVE"
@@ -8,7 +8,6 @@ type: "method"
 description: |
   Copy a specified number of longs (32-bit values) from source to destination in hub RAM.
   Handles overlapping regions correctly with automatic direction detection.
-  More efficient than BYTEMOVE for long-aligned data.
 
 syntax: "LONGMOVE(Destination, Source, Count)"
 
@@ -17,16 +16,12 @@ parameters:
     type: "address"
     description: |
       Hub RAM destination address.
-      Should be long-aligned for best performance.
-      Misalignment handled but slower.
-      
+
   - name: "Source"
     type: "address"
     description: |
       Hub RAM source address.
-      Should be long-aligned for best performance.
-      Misalignment handled but slower.
-      
+
   - name: "Count"
     type: "long"
     description: |
@@ -61,7 +56,7 @@ examples:
         
       PUB setup_cog_params(src_params)
         LONGMOVE(@params, src_params, 8)
-        COGINIT(NEWCOG, @cog_code, @params)
+        COGINIT(COGEXEC_NEW, @cog_code, @params)
     description: "Copy parameter block for cog"
     
   - code: |
@@ -69,7 +64,7 @@ examples:
       VAR
         LONG array[50]
         
-      PUB remove_first()
+      PUB remove_first() : result
         result := array[0]
         LONGMOVE(@array[0], @array[1], 49)
         array[49] := 0
@@ -103,20 +98,6 @@ common_uses:
   - "Buffer management"
   - "Data structure initialization"
 
-performance_benefits:
-  vs_bytemove: |
-    ' BYTEMOVE for 100 longs (400 bytes)
-    BYTEMOVE(@dest, @source, 400)  ' ~808 cycles
-    
-    ' LONGMOVE for 100 longs
-    LONGMOVE(@dest, @source, 100)  ' ~408 cycles
-    ' Nearly 2x faster for aligned data
-
-alignment_impact:
-  aligned: "Fastest - direct 32-bit transfers"
-  misaligned: "Works but requires byte-by-byte for edges"
-  recommendation: "Always align long data on 4-byte boundaries"
-
 related_methods:
   - "BYTEMOVE"
   - "WORDMOVE"
@@ -127,8 +108,7 @@ related_methods:
 notes:
   - "Count is in longs, not bytes"
   - "Safe for overlapping regions"
-  - "Direction chosen automatically"
-  - "Alignment affects performance only"
+  - "Direction chosen automatically: reverse when Source < Destination, forward otherwise"
   - "Works with any hub RAM location"
 
 conversion_note: |
@@ -140,7 +120,6 @@ conversion_note: |
 warnings:
   - "Count is LONGS not BYTES"
   - "Ensure destination has enough space"
-  - "Misalignment degrades performance"
   - "Cannot copy to/from cog or LUT RAM directly"
 
 see_also:

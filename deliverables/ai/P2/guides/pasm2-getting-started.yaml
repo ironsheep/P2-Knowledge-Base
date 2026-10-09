@@ -605,7 +605,7 @@ timing_considerations:
     
   clock_frequency:
     source: "P2 Datasheet 2022/11/01, AC Characteristics (p.48) -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200, footnote 2 at :2209. Compiler default from Parallax Spin2 Documentation v55 -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1718. framing: E-007 in engineering/ingestion/SOURCE-ERRATA.md."
-    framing: "These are the DATASHEET's absolute limits, not the Hardware Manual's recommended-use range. The two documents differ in framing, not in fact; see E-007."
+    framing: "These are the DATASHEET's absolute limits, not the Hardware Manual's recommended-use range. The two documents differ in framing, not in fact."
     compiler_default: "RCFAST -- selected whenever no clock-setup symbol is declared and DEBUG mode is off. It is NOT a crystal-plus-PLL default. Its frequency is the rcfast row below: 20 MHz min, 24 MHz typical, 30 MHz max. See file_structure.clock_setup above for how to declare something else."
     rcfast: "20 MHz min, 24 MHz typical, 30 MHz max (internal)."
     rcslow: "12 kHz min, 20 kHz typical, 30 kHz max (internal)."

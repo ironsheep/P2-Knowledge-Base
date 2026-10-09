@@ -9,13 +9,11 @@ blocks:
     fp: "8971f2d8505c32f7"
     compile: program
   - at: examples[2].code
-    fp: "854f8f5a0c450d35"
+    fp: "f5d1ed69ff44b294"
     compile: program
-    finding: "S-019"
   - at: examples[3].code
-    fp: "426a6af42b8f6157"
+    fp: "348f5650974a46a8"
     compile: program
-    finding: "S-009"
   - at: examples[4].code
     fp: "9c3055e3bc73af74"
     compile: program

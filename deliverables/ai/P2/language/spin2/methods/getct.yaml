@@ -1,5 +1,5 @@
 # Spin2 Method: GETCT
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Get current system counter value
 
 method: "GETCT"
@@ -89,7 +89,7 @@ examples:
 
 underlying_pasm:
   instruction: "GETCT"
-  description: "Direct access to CNT register"
+  description: "Reads the low 32 bits of the system counter CT (the P2 has no CNT register)"
 
 common_uses:
   - "Execution time measurement"
@@ -148,7 +148,6 @@ wraparound_handling: |
 
 precision_considerations:
   - "Single clock accuracy when reading"
-  - "Hub access may add 0-7 clock variance"
   - "Use WAITCT for cycle-accurate delays"
   - "GETCT itself takes 2 clocks to execute"
 

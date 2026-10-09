@@ -1,5 +1,5 @@
 # Spin2 Method: WRPIN
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Configure smart pin mode
 
 method: "WRPIN"
@@ -18,7 +18,7 @@ parameters:
     description: |
       Specifies which pin(s) to configure. Can be:
       - Single pin number (0-63)
-      - Pin range using '..' operator (Bottom..Top)
+      - Pin range using '..' operator, written Top..Bottom (e.g. 15..8 is pins 8 through 15; wraps within the 32-pin block if Top < Bottom)
       - Multiple pins using ADDPINS operator
       - Variable or expression that evaluates to a pin field
       
@@ -73,25 +73,25 @@ tt_field:
 examples:
   - code: |
       ' Configure pin for UART TX (async serial)
-      mode := %0000_0000_000_0000000000000_01_00111
+      mode := %0000_0000_000_0000000000000_01_11110_0    ' P_ASYNC_TX | P_OE
       WRPIN(30, mode)
     description: "Setup UART transmit mode"
     
   - code: |
       ' Configure for PWM output
-      mode := %0000_0000_000_0000000000000_01_01001
+      mode := %0000_0000_000_0000000000000_01_01001_0    ' P_PWM_SAWTOOTH | P_OE
       WRPIN(56, mode)
     description: "Setup PWM mode"
     
   - code: |
       ' Configure quadrature encoder
-      mode := %0000_0001_000_0000000000000_00_01011
+      mode := %0000_0001_000_0000000000000_00_01011_0    ' P_QUADRATURE, B input from the pin at relative +1
       WRPIN(0, mode)
     description: "Setup quadrature decoder"
     
   - code: |
       ' Configure ADC mode
-      mode := %0000_0000_000_0000000000000_11_10011
+      mode := %0000_0000_000_1000110000000_00_11000_0    ' P_ADC_1X | P_ADC
       WRPIN(pin, mode)
     description: "Setup ADC conversion mode"
     
@@ -115,7 +115,7 @@ smart_pin_workflow:
   1_configure: "WRPIN(pin, mode) - Set mode"
   2_set_x: "WXPIN(pin, x_value) - Set timing/config"
   3_set_y: "WYPIN(pin, y_value) - Set data/count"
-  4_enable: "DIRH(pin) - Enable smart pin"
+  4_enable: "Set DIR high to enable the smart pin. PINSTART(PinField, Mode, Xval, Yval) does the whole sequence: DIR=0, then WRPIN, WXPIN and WYPIN, then DIR=1"
   5_operate: "Use RDPIN/RQPIN to read results"
 
 common_uses:
@@ -144,7 +144,7 @@ notes:
   - "Smart pins operate independently of cog"
 
 mode_persistence:
-  - "Mode remains until changed or cog stopped"
+  - "Mode remains until changed"
   - "Survives DIR changes"
   - "Not affected by OUT changes"
   - "Cleared by PINCLEAR or mode 0"

@@ -368,5 +368,10 @@ S-370, S-374, S-390, S-391, S-322 item 1 (#64013 schematic), F-352, F-562.
 
 - 2026-10-09 — sprint started; tasks «#410»–«#423» generated; «#387» superseded; F-563 (USB status
   bits, found by «#409») added to «#419»'s scope.
+- 2026-10-09 — «#414» boundary: the DoD's *Internal IDs in Shipped Content* check caught an `EF-099`
+  written into served prose; its pattern now also covers `CP-NNN` and `E-NNN` (both internal registers)
+  and found two errata ids in served text, fixed. Every area-task brief («#415»–«#422») names this check
+  among the agent's narrow checks: an id belongs in a stripped field (`source:`/`sources:`), never in
+  served prose.
 - 2026-10-09 — VO-J-035 rerun SURVIVES → EF-102; «#419» now writes the on-the-fly WXPIN sentence (baud
   only) on the USB page, cited to the P2 Documentation and EF-102.

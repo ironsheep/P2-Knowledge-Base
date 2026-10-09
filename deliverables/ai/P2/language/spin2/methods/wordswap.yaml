@@ -1,38 +1,43 @@
 method: WORDSWAP
 type: method
-description: |
-  Swap word values between two memory locations
 category: Memory Operations
-syntax: "WORDSWAP(Address1, Address2)"
+
+requires_version: "Spin2_v45"
+version_directive: "{Spin2_v45}"
+
+description: |
+  Swap Count words of data between the ranges starting at AddrA and AddrB.
+  REQUIRES: {Spin2_v45} or later version directive at start of source file.
+syntax: "WORDSWAP(AddrA, AddrB, Count)"
 parameters:
-  - name: "Address1"
+  - name: "AddrA"
     type: "address"
-    description: "First hub RAM address containing word to swap"
-  - name: "Address2"
+    description: "Hub RAM address of the first word range"
+  - name: "AddrB"
     type: "address"
-    description: "Second hub RAM address containing word to swap"
+    description: "Hub RAM address of the second word range"
+  - name: "Count"
+    type: "integer"
+    description: "Number of words to swap (in elements: one element is one word)"
 returns:
   type: "void"
   description: "No return value"
 examples:
   - code: |
       ' Swap two word values
-      WORDSWAP(@value1, @value2)
+      WORDSWAP(@value1, @value2, 1)
     description: "Exchange word values between variables"
   - code: |
       ' Reverse word order in array
       repeat i from 0 to size/2-1
-        WORDSWAP(@array[i], @array[size-1-i])
+        WORDSWAP(@array[i], @array[size-1-i], 1)
     description: "Reverse array using word swapping"
   - code: |
-      ' Swap words for endian conversion
-      WORDSWAP(@data[0], @data[1])
-    description: "Swap words for byte order conversion"
+      ' Swap two words
+      WORDSWAP(@data[0], @data[1], 1)
+    description: "Swap two adjacent words (for the bytes within a word, see ENDIANW)"
 notes:
-  - "Atomically exchanges the 16-bit word values"
-  - "Both addresses must be word-aligned (even addresses)"
   - "No temporary variable needed for swap"
-  - "Efficient single-operation exchange"
   - "Each word is 2 bytes"
 timing:
   execution_model: |

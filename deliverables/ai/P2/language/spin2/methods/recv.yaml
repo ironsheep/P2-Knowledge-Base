@@ -1,18 +1,21 @@
 method: RECV
 type: method
 description: |
-  Receive data byte using configured input method
+  RECV is a special method pointer, inherited from the calling method and
+  conveyed to all called methods. Its purpose is to provide an efficient input
+  mechanism for data: RECV() calls the method that RECV points to and returns
+  the single value that method returns.
 category: Miscellaneous
-syntax: "byte := RECV()"
+syntax: "value := RECV()"
 parameters: []
 returns:
-  type: "byte"
-  description: "Received byte value (0-255)"
+  type: "long"
+  description: "The single value returned by the method RECV points to"
 examples:
   - code: |
-      ' Receive single byte
+      ' Receive single value
       char := RECV()
-    description: "Receive one byte"
+    description: "Receive one value"
   - code: |
       ' Build string from input
       repeat i from 0 to 79
@@ -34,38 +37,33 @@ examples:
     description: "Wait for start marker"
 as_method_pointer:
   description: |
-    RECV can be assigned to a LONG variable as a method pointer,
-    enabling flexible I/O abstraction.
-  syntax: "inputMethod := RECV"
-  usage: "data := inputMethod()"
+    RECV is a special method pointer. Assign it like a method pointer;
+    it must point to a method that takes no parameters and returns a single value.
+  syntax: "RECV := @InMethod"
+  usage: "data := RECV()"
   restrictions:
-    - "Takes no parameters"
-    - "Always returns exactly one value"
-    - "Cannot use abort syntax with RECV"
+    - "Must point to a method that takes no parameters"
+    - "Must point to a method that returns a single value"
   example: |
-    VAR
-      LONG inputMethod
-      
-    PUB SetupMailbox()
-      inputMethod := RECV         ' Use inter-cog mailbox
-      
-    PUB SetupSerial()
-      inputMethod := @serial.rx   ' Use serial port
-      
-    PUB GetInput() : data
-      data := inputMethod()       ' Works with either source
+    OBJ
+      serial : "serial_driver"
+
+    PUB setup()
+      RECV := @serial.rx
+      SEND := @serial.tx
+
+    PUB echo() | c
+      c := RECV()
+      SEND(c)
 
 notes:
-  - "Input method must be configured first"
-  - "Typically used with serial drivers"
-  - "Blocking operation - waits for byte"
-  - "Returns single byte (0-255)"
+  - "Assign RECV (RECV := @InMethod) before calling RECV(); if RECV has not been assigned, RECV() returns 0"
+  - "A called method inherits the current RECV pointer and may change it for its own purposes; on return the RECV pointer is back to what it was before the call (it propagates in method calls, not in method returns)"
   - "Works with user-defined input methods"
-  - "Common for user input and data reception"
-  - "Can be assigned to LONG variable as method pointer for flexible I/O"
+  - "Whether RECV() blocks, and what range of values it returns, is set by the method RECV points to"
 timing:
-  description: "Depends on input method"
-  cycles: "Variable - blocks until data available"
+  description: "Depends on the method RECV points to"
+  cycles: "Variable - set by the input method"
 related:
   - SEND
   - DEBUG

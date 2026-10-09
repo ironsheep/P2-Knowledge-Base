@@ -1,5 +1,5 @@
 # Spin2 Method: COGATN
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Signal attention to other cogs
 
 method: "COGATN"
@@ -17,11 +17,11 @@ parameters:
   - name: "CogMask"
     type: "long"
     description: |
-      16-bit mask specifying which cogs to signal:
-      - Bits 0-7: Target cog selection (1 = signal that cog)
-      - Bits 8-15: Must be zero
+      16-bit value in which bits 0..15 represent cogs 0..15:
+      - Each set bit strobes the corresponding cog
       - Can signal multiple cogs simultaneously
       - Use (1 << cog_num) to signal specific cog
+      - The issuing cog may set its own bit (see self_attention)
 
 returns: "none"
 
@@ -76,10 +76,13 @@ examples:
     description: "Producer-consumer synchronization"
 
 signal_mechanism:
-  hardware: "Dedicated attention network between cogs"
-  persistence: "Signal is edge-triggered (strobe)"
-  clearing: "Automatically cleared when polled/waited"
-  queueing: "No queueing - multiple signals before check are seen as one"
+  hardware: "Dedicated attention network between cogs: the 16 attention strobe outputs from all cogs are OR'd together into a composite set of 16 strobes, from which each cog receives its own"
+  persistence: "Signal is a strobe that causes an attention event, tracked until polled or waited for"
+  clearing: "The event flag is cleared when polled (POLLATN)"
+
+self_attention:
+  behavior: "COGATN(1 << COGID()) delivers the strobe to the issuing cog: its own attention event is raised, exactly as when another cog strobes it"
+  verified_against: "EF-099"
 
 common_uses:
   - "Event notification"
@@ -129,14 +132,13 @@ synchronization_patterns:
   
   - pattern: "Round-robin scheduling"
     code: |
-      PUB scheduler()
+      PUB scheduler() | cog
         REPEAT cog FROM 0 TO 7
           COGATN(1 << cog)  ' Give time slice
           WAITMS(10)
 
 notes:
-  - "Cannot signal yourself (no effect)"
-  - "Signal doesn't queue - multiple signals merge"
+  - "A cog can signal itself: its own bit in the mask raises its own attention event (see self_attention)"
   - "No payload - just a signal"
   - "Target cog must be running to receive"
   - "More efficient than hub RAM polling"
@@ -150,7 +152,6 @@ best_practices:
 
 limitations:
   - "No data payload"
-  - "No delivery guarantee if cog not waiting"
   - "Single bit per cog - no message types"
   - "No built-in acknowledgment"
 

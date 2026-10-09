@@ -9,7 +9,7 @@ description: |
   Rearranges the bytes of a 32-bit value according to a quaternary pattern. Each 
   digit in the pattern (0-3) specifies which source byte maps to that destination 
   position. This is the Spin2 function version of the PASM2 MOVBYTS instruction.
-  Available in PNut/pnut_ts v52 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v52 and later compilers. No version directive required.
 
 syntax: "result := MOVBYTS(value, order)"
 
@@ -53,9 +53,12 @@ common_patterns:
   - pattern: "%%3333"
     effect: "Broadcast byte 3 to all"
     example: "$12_34_56_78 → $12_12_12_12"
-  - pattern: "%%1032"
-    effect: "Swap adjacent pairs"
+  - pattern: "%%2301"
+    effect: "Swap adjacent bytes within each word"
     example: "$12_34_56_78 → $34_12_78_56"
+  - pattern: "%%1032"
+    effect: "Swap the two words"
+    example: "$12_34_56_78 → $56_78_12_34"
   - pattern: "%%0321"
     effect: "Rotate right 1 byte"
     example: "$12_34_56_78 → $78_12_34_56"
@@ -79,9 +82,9 @@ examples:
     description: "Broadcast byte 0 to all positions"
     
   - code: |
-      ' Swap word-aligned byte pairs
+      ' Swap the two bytes within each word
       PUB swap_pairs(value) : result
-        result := MOVBYTS(value, %%1032)
+        result := MOVBYTS(value, %%2301)
         ' $12_34_56_78 becomes $34_12_78_56
     description: "Swap adjacent byte pairs"
     

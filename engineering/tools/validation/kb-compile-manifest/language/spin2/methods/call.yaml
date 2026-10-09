@@ -3,19 +3,15 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "5b0f57a7726a2541"
+    fp: "1e0f39fa43542cd8"
     compile: fragment
     wrap: spin2-top
-    assumes: [result]
-    finding: "S-010+S-012+S-011"
   - at: examples[1].code
-    fp: "00e560770385090b"
+    fp: "30c38604c9f571f5"
     compile: fragment
     wrap: spin2-method
     assumes: [input_data, output_buffer, process_data]
   - at: examples[2].code
-    fp: "654da41f3ce0a787"
+    fp: "2186d71dcacecaed"
     compile: fragment
     wrap: spin2-top
-    assumes: [value]
-    finding: "S-010+S-012+S-011"

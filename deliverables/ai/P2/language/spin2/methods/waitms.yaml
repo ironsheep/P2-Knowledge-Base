@@ -125,11 +125,11 @@ anti_patterns:
         waitms(100)    ' 100ms AFTER work completes
     correct: |
       ' Use WAITCT for jitter-free periodic execution
-      next := getct()
+      next_time := getct()
       REPEAT
-        next += clkfreq / 10
+        next_time += clkfreq / 10
         do_work()
-        waitct(next)   ' Wait UNTIL next period
+        waitct(next_time)   ' Wait UNTIL next period
 
 see_also:
   - "language/spin2/methods/waitus.yaml"

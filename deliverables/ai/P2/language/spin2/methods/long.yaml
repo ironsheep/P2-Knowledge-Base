@@ -4,7 +4,7 @@ description: |
   Declare long data or access long-sized memory
 category: Data Creation
 syntax: |
-  Declaration: LONG [Count]
+  Declaration: LONG Name[Count]
   Access: LONG[BaseAddress][Index]
   Inline: LONG(Value1, Value2, ...)
 contexts:
@@ -12,7 +12,7 @@ contexts:
     syntax: "Label LONG Value1 {, Value2, ...}"
     description: "Declare long data in DAT section"
   - name: "VAR section declaration"
-    syntax: "Name LONG [Count]"
+    syntax: "LONG Name[Count]"
     description: "Declare long variable(s) in VAR section"
   - name: "Memory access"
     syntax: "LONG[Address][Index]"
@@ -27,7 +27,7 @@ examples:
     description: "Declare long data in DAT section"
   - code: |
       VAR
-        results  LONG[512]  ' 512-long array
+        LONG results[512]  ' 512-long array
     description: "Declare long array in VAR section"
   - code: |
       ' Write long to hub memory
@@ -42,7 +42,7 @@ examples:
     description: "Inline long data creation"
 notes:
   - "LONG is 32 bits (full range of P2 native word size)"
-  - "Long addresses must be long-aligned (addresses divisible by 4)"
+  - "VAR variables are packed in declaration order starting at a long-aligned address; ALIGNL advances the variable pointer to a long boundary"
   - "Arrays are zero-indexed"
   - "Each array index represents 4 bytes in memory"
   - "Can use @ operator to get address of long variable"

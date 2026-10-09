@@ -1,5 +1,5 @@
 # Spin2 Method: COGID
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Get current cog's ID number
 
 method: "COGID"
@@ -61,7 +61,7 @@ examples:
     description: "Identify cog in debug output"
     
   - code: |
-      PUB stop_all_except_me()
+      PUB stop_all_except_me() | n
         REPEAT n FROM 0 TO 7
           IF n <> COGID()
             COGSTOP(n)
@@ -85,10 +85,10 @@ typical_patterns:
   - pattern: "Per-cog data structures"
     code: |
       VAR
-        LONG cog_data[8][10]  ' 10 longs per cog
-        
+        LONG cog_data[8 * 10]  ' 10 longs per cog
+
       PUB my_data() : ptr
-        ptr := @cog_data[COGID()]
+        ptr := @cog_data[COGID() * 10]
     
   - pattern: "Cog-specific pin assignments"
     code: |
@@ -106,7 +106,7 @@ typical_patterns:
 
 notes:
   - "Always returns 0-7, never -1"
-  - "Cog 0 always starts first at boot"
+  - "After reset, cog 0 loads and runs the ROM booter; after a serial load the booter relaunches cog 0 (COGINIT #0,#0) with the user program"
   - "Value doesn't change during cog's lifetime"
   - "Can be called from PASM via Spin2"
   - "Useful for multicore coordination"

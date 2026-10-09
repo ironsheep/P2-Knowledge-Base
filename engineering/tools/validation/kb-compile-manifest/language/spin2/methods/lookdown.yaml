@@ -12,9 +12,8 @@ blocks:
     wrap: spin2-method
     assumes: [pos]
   - at: examples[1].code
-    fp: "f56266239d69c4b2"
+    fp: "45e250e2fc080315"
     compile: program
-    finding: "S-016"
   - at: examples[2].code
     fp: "f746101e23a616fe"
     compile: fragment
@@ -52,11 +51,12 @@ blocks:
     wrap: spin2-method
     assumes: [user_input, VALID1=con, VALID2=con, VALID3=con, process()->1/1]
   - at: anti_patterns[1].wrong
-    fp: "799f3a6aa45d3ac8"
-    compile: fragment
+    fp: "3591eb6eaab3c65b"
+    compile: never
     wrap: spin2-method
     assumes: [char, process_uppercase()->0/0]
-    finding: "S-122"
+    fails_at: 1
+    reason: "teaches the compile error: LOOKDOWN returns a value, so a call used as a statement is not an instruction (Expected an instruction or variable)"
   - at: anti_patterns[1].correct
     fp: "7a8ac94d96d2ebf6"
     compile: fragment

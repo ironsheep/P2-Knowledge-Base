@@ -7,7 +7,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[1].code
-    fp: "345ee6539fef0462"
+    fp: "9df0f5794ef85a15"
     compile: fragment
     wrap: spin2-method
     assumes: [period]
@@ -27,14 +27,12 @@ blocks:
     wrap: spin2-method
     assumes: [spi_pin, data_long]
   - at: data_transmission.uart_send
-    fp: "70db4d0d01d34c78"
+    fp: "e75fd4f9f8cecc46"
     compile: program
   - at: data_transmission.pwm_update
-    fp: "1bf135759fce1720"
+    fp: "fdfd170305775b91"
     compile: fragment
     wrap: spin2-top
-    assumes: [X_VALUE=con]
-    finding: "S-019"
   - at: data_transmission.burst_output
     fp: "8fd5f78e19a1cdb4"
     compile: program

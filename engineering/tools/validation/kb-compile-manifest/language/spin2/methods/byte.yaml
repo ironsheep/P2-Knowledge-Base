@@ -6,16 +6,16 @@ blocks:
     fp: "abaa8450d9843f9d"
     compile: program
   - at: examples[1].code
-    fp: "c3c266b9b01a2fd5"
+    fp: "88211fa72204b26f"
     compile: fragment
     wrap: spin2-top
-    finding: "S-007"
   - at: examples[2].code
     fp: "8eb5b77a49c8c6cf"
     compile: fragment
     wrap: spin2-method
     assumes: [value]
   - at: examples[3].code
-    fp: "3cc52a13fe43aeda"
+    fp: "c737f7cef17dbe7f"
     compile: fragment
     wrap: spin2-method
+    assumes: [print_str()->0/1]

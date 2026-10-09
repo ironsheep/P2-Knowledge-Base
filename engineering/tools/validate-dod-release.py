@@ -656,7 +656,9 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     return result
 
 
-INTERNAL_ID_PATTERN = re.compile(r'\b(?:EF|XF|F)-\d{3}\b|\bVO-[A-Z]-\d{3}\b')
+# CP-NNN (compile proofs) and E-NNN (SOURCE-ERRATA) added 2026-10-09 («#414»): both
+# registers are internal provenance, exactly like EF/XF.
+INTERNAL_ID_PATTERN = re.compile(r'\b(?:EF|XF|F|CP|E)-\d{3}\b|\bVO-[A-Z]-\d{3}\b')
 
 # Repo locators a consumer cannot open (F-523, 2026-10-03): a path into this repo,
 # a document file cited by line (`silicon-doc-text.txt:2726`, `pasm2-manual-text :2087`),
@@ -707,7 +709,7 @@ def validate_internal_ids(verbose: bool = False) -> ValidationResult:
         for h in hits:
             result.info(f"  {h}")
     else:
-        result.ok("No EF/XF/F/VO identifier, repo path or file:line cite reaches a consumer")
+        result.ok("No EF/XF/F/CP/E/VO identifier, repo path or file:line cite reaches a consumer")
     return result
 
 

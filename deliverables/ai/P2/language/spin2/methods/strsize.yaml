@@ -20,18 +20,17 @@ examples:
   - code: |
       ' Check if string fits in buffer
       if STRSIZE(@input) < buffer_size
-        STRCOPY(@buffer, @input, buffer_size)
+        STRCOPY(@buffer, @input, buffer_size - 1)
     description: "Validate before copying"
   - code: |
       ' Calculate total message size
       total := STRSIZE(@part1) + STRSIZE(@part2) + 1
     description: "Calculate combined length"
 notes:
-  - "Returns character count, not byte count"
+  - "Counts the bytes of the zero-terminated string"
   - "Does not include null terminator in count"
   - "Stops counting at first null (0) byte"
   - "Returns 0 for empty string (immediate null)"
-  - "No maximum length limit"
   - "Useful for buffer allocation"
 timing:
   execution_model: |

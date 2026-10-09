@@ -1,38 +1,44 @@
 method: BYTESWAP
 type: method
-description: |
-  Swap byte values between two memory locations
 category: Memory Operations
-syntax: "BYTESWAP(Address1, Address2)"
+
+requires_version: "Spin2_v45"
+version_directive: "{Spin2_v45}"
+
+description: |
+  Swap Count bytes of data between the ranges starting at AddrA and AddrB.
+  REQUIRES: {Spin2_v45} or later version directive at start of source file.
+syntax: "BYTESWAP(AddrA, AddrB, Count)"
 parameters:
-  - name: "Address1"
+  - name: "AddrA"
     type: "address"
-    description: "First hub RAM address containing byte to swap"
-  - name: "Address2"
+    description: "Hub RAM address of the first byte range"
+  - name: "AddrB"
     type: "address"
-    description: "Second hub RAM address containing byte to swap"
+    description: "Hub RAM address of the second byte range"
+  - name: "Count"
+    type: "integer"
+    description: "Number of bytes to swap (in elements: one element is one byte)"
 returns:
   type: "void"
   description: "No return value"
 examples:
   - code: |
       ' Swap two byte values
-      BYTESWAP(@value1, @value2)
+      BYTESWAP(@value1, @value2, 1)
     description: "Exchange byte values between variables"
   - code: |
       ' Reverse byte order in array
       repeat i from 0 to size/2-1
-        BYTESWAP(@array[i], @array[size-1-i])
+        BYTESWAP(@array[i], @array[size-1-i], 1)
     description: "Reverse array using byte swapping"
   - code: |
-      ' Swap bytes at specific hub addresses
-      BYTESWAP($1000, $2000)
-    description: "Exchange bytes at hub memory locations"
+      ' Swap 16 bytes between two hub addresses
+      BYTESWAP($1000, $2000, 16)
+    description: "Exchange 16 bytes between two hub memory ranges"
 notes:
-  - "Atomically exchanges the byte values"
   - "Both addresses must be valid hub RAM locations"
   - "No temporary variable needed for swap"
-  - "Efficient single-operation exchange"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

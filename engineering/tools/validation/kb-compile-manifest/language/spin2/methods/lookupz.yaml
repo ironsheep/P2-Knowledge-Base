@@ -26,22 +26,20 @@ blocks:
     wrap: spin2-method
     assumes: [char, value]
   - at: common_patterns[1].code
-    fp: "9c06288ac0d37f3c"
+    fp: "a70f3f293fd31037"
     compile: fragment
     wrap: spin2-method
     assumes: [speed, index]
   - at: anti_patterns[0].wrong
-    fp: "5257c1b346f65ea8"
+    fp: "6f33801cad452c69"
     compile: fragment
     wrap: spin2-method
     assumes: [pin, channel]
-    finding: "S-013"
   - at: anti_patterns[0].correct
-    fp: "f30d9d6d3e543e36"
+    fp: "626477e0d757bd23"
     compile: fragment
     wrap: spin2-method
     assumes: [pin, channel]
-    finding: "S-013"
   - at: anti_patterns[1].wrong
     fp: "09c763e245221b3d"
     compile: fragment

@@ -3,17 +3,17 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "699849bdbe2a4ccd"
+    fp: "e35f0021a3fc4a06"
     compile: fragment
     wrap: spin2-method
     assumes: [buffer, source]
   - at: examples[1].code
-    fp: "86edecdc9f48c67e"
+    fp: "22da05971e826a85"
     compile: fragment
     wrap: spin2-method
     assumes: [name, input]
   - at: examples[2].code
-    fp: "2fd11e0dac6f6c0d"
+    fp: "cf8da821640e5603"
     compile: fragment
     wrap: spin2-method
     assumes: [message]

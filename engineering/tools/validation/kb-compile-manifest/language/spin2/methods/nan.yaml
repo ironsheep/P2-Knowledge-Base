@@ -8,10 +8,10 @@ blocks:
     wrap: spin2-method
     assumes: [result]
   - at: examples[1].code
-    fp: "97aca835b153f02e"
+    fp: "a76357d32cc50dca"
     compile: fragment
     wrap: spin2-method
-    assumes: [value]
+    assumes: [value, x]
   - at: examples[2].code
     fp: "de300fb0515809da"
     compile: fragment

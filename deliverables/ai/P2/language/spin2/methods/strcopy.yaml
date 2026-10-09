@@ -13,31 +13,30 @@ parameters:
     description: "Source string address (null-terminated)"
   - name: "MaxCount"
     type: "integer"
-    description: "Maximum characters to copy (including null)"
+    description: "Maximum number of characters to copy; the copied string occupies up to MaxCount+1 bytes, including the zero terminator"
 returns:
   type: "void"
   description: "No return value"
 examples:
   - code: |
       ' Copy string with buffer limit
-      STRCOPY(@buffer, @source, 80)  ' Max 79 chars + null
+      STRCOPY(@buffer, @source, 80)  ' Up to 80 chars + zero (81-byte buffer)
     description: "Safe string copy with limit"
   - code: |
       ' Copy user input
-      STRCOPY(@name, @input, 32)  ' Limit name to 31 chars
+      STRCOPY(@name, @input, 32)  ' Up to 32 chars + zero (33-byte buffer)
     description: "Copy with length protection"
   - code: |
       ' Build compound string
-      STRCOPY(@message, STRING("Error: "), 100)
+      STRCOPY(@message, STRING("Error: "), 100)  ' message needs 101 bytes
       ' Then append more...
     description: "Start building message"
 notes:
   - "Always null-terminates destination"
-  - "Stops at source null or MaxCount-1 characters"
-  - "MaxCount includes space for null terminator"
-  - "Prevents buffer overflow"
-  - "If MaxCount is 0, nothing is copied"
-  - "Destination buffer must be at least MaxCount bytes"
+  - "Stops after the source's terminator or after MaxCount characters, then writes the zero"
+  - "MaxCount does NOT include the zero terminator: the destination needs MaxCount+1 bytes"
+  - "If MaxCount is 0, only the zero byte is written"
+  - "Destination buffer must be at least MaxCount+1 bytes"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

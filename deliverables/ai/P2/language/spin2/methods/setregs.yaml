@@ -20,29 +20,33 @@ returns:
 examples:
   - code: |
       ' Load PASM code into cog
-      SETREGS(@pasm_code, $100, 50)  ' Load 50 longs
+      SETREGS(@pasm_code, $100, 16)  ' Load 16 longs into $100..$10F
     description: "Load PASM code to cog RAM"
   - code: |
-      ' Restore saved registers
+      ' Restore the general-purpose registers PR0..PR7 ($1D8..$1DF)
       VAR
-        LONG saved_regs[16]
-      
-      SETREGS(@saved_regs, $1F0, 16)  ' Restore $1F0-$1FF
+        LONG saved_regs[8]
+
+      PUB restore_regs()
+        SETREGS(@saved_regs, $1D8, 8)
     description: "Restore cog register state"
   - code: |
       ' Initialize PASM variables
       VAR
         LONG init_data[10]
-      
-      repeat i from 0 to 9
-        init_data[i] := i * 100
-      SETREGS(@init_data, $100, 10)
+
+      PUB init_regs() | i
+        repeat i from 0 to 9
+          init_data[i] := i * 100
+        SETREGS(@init_data, $100, 10)
     description: "Set PASM variables in cog"
 notes:
   - "Copies from hub RAM to cog RAM"
   - "Cog addresses are 0-511 (2KB)"
   - "Each register is 32 bits (1 long)"
   - "Can overwrite running code - use caution"
+  - "Registers $120..$1D7 and LUT $010..$1FF hold the Spin2 interpreter; do not write them"
+  - "Do not write $1F0..$1FF: that range includes PA, PB, PTRA and PTRB, which the interpreter uses (PTRA is the Spin2 stack pointer), so restoring a saved copy corrupts the running cog"
   - "Useful for loading PASM code/data"
   - "Count must not exceed remaining registers"
 timing:

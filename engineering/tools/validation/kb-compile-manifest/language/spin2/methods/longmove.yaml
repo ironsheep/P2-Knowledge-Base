@@ -6,25 +6,19 @@ blocks:
     fp: "e399dc330137d5be"
     compile: program
   - at: examples[1].code
-    fp: "cdf501a7508f570e"
+    fp: "c3175550f4e78919"
     compile: fragment
     wrap: spin2-top
     assumes: [cog_code]
   - at: examples[2].code
-    fp: "0bce9c1f1da9a2f3"
+    fp: "b22b4466cb96fd4e"
     compile: program
-    finding: "S-019"
   - at: examples[3].code
     fp: "53d97037c91387d3"
     compile: program
   - at: examples[4].code
     fp: "6adbb51d9d2656c6"
     compile: program
-  - at: performance_benefits.vs_bytemove
-    fp: "14f2979b9d8d94a7"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [dest, source]
   - at: conversion_note
     fp: "6dad7e7abb6b3f1e"
     compile: not-code

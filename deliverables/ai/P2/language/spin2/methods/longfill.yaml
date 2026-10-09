@@ -1,5 +1,5 @@
 # Spin2 Method: LONGFILL
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Fill memory region with long value
 
 method: "LONGFILL"
@@ -17,7 +17,6 @@ parameters:
     type: "address"
     description: |
       Hub RAM destination address.
-      Should be long-aligned for correct operation.
       Starting address for the fill operation.
       
   - name: "Value"
@@ -123,28 +122,14 @@ related_methods:
   - "LONGMOVE"
   - "LONGCOMP"
 
-performance_notes:
-  - "Much faster than loops for large counts"
-  - "Optimized hub operations"
-  - "Alignment critical for correctness"
-  - "Count > 4 shows significant speedup"
-
 notes:
   - "Count is in LONGS, not bytes"
-  - "Destination should be long-aligned"
   - "Full 32-bit value is written"
   - "Count of 0 is safe (no operation)"
   - "Cannot fill cog or LUT RAM directly"
 
-alignment_requirement: |
-  CRITICAL: Destination must be long-aligned
-  Good: LONG buffer[100]  ' Aligned by declaration
-  Bad:  BYTE buffer[400]  ' May not be aligned
-  Fix:  LONG buffer[100]  ' Use proper type
-
 warnings:
   - "Count is LONGS not BYTES"
-  - "Misalignment causes incorrect results"
   - "Ensure destination has enough space"
   - "Overwrites existing data"
 

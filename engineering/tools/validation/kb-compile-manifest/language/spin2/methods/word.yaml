@@ -6,10 +6,9 @@ blocks:
     fp: "3e82e07601c15703"
     compile: program
   - at: examples[1].code
-    fp: "9298c26e851cfb88"
+    fp: "b9a3886c0e42e09e"
     compile: fragment
     wrap: spin2-top
-    finding: "S-007"
   - at: examples[2].code
     fp: "34e6eff03e51b9e6"
     compile: fragment

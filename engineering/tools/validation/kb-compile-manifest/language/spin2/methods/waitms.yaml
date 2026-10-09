@@ -18,11 +18,10 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: anti_patterns[0].correct
-    fp: "ff8da2732a20385e"
+    fp: "844576c8345371b2"
     compile: fragment
     wrap: spin2-method
-    assumes: [do_work()->0/0]
-    finding: "S-008"
+    assumes: [next_time, do_work()->0/0]
   - at: anti_patterns[0].wrong
     fp: "09eb33a257a84ace"
     compile: fragment

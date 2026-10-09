@@ -3,17 +3,17 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "ca2c9cf2198a6748"
+    fp: "40d4359d683db0ab"
     compile: fragment
     wrap: spin2-method
-    assumes: [ln_value]
+    assumes: [log2_value]
   - at: examples[1].code
-    fp: "02426e64d5b24168"
+    fp: "a8744648d469c0b0"
     compile: fragment
     wrap: spin2-method
     assumes: [log10_value, value]
   - at: examples[2].code
-    fp: "276c99afccfd5c46"
+    fp: "a91fd858111d7ecf"
     compile: fragment
     wrap: spin2-method
     assumes: [db, amplitude]

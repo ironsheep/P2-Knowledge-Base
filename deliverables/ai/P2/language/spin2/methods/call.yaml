@@ -3,50 +3,52 @@ type: method
 description: |
   Call inline PASM2 code from Spin2
 category: Miscellaneous
-syntax: "result := CALL(PASMAddress)"
+syntax: "CALL(RegisterOrHubAddr)"
 parameters:
-  - name: "PASMAddress"
+  - name: "RegisterOrHubAddr"
     type: "address"
-    description: "Address of PASM2 code to execute"
+    description: "Hub address (CALL(@label)) or cog register address (CALL(#label)) of the PASM2 code to execute"
 returns:
-  type: "long"
-  description: "Value returned in PASM result register"
+  type: "void"
+  description: "No return value; pass data to and from the PASM code through PR0..PR7 (cog registers $1D8..$1DF, usable from both Spin2 and PASM)"
 examples:
   - code: |
-      ' Call inline PASM routine
-      result := CALL(@pasm_code)
-      
+      PUB demo() | x
+        CALL(@pasm_code)      ' result comes back in PR0
+        x := pr0
+
       DAT
+        ORGH
       pasm_code
-        mov result1, #42
+        mov   pr0, #42
         ret
     description: "Call simple PASM routine"
   - code: |
-      ' Pass parameters via PTRA/PTRB
-      PTRA := @input_data
-      PTRB := @output_buffer
+      ' Pass parameters via PR0/PR1
+      pr0 := @input_data
+      pr1 := @output_buffer
       CALL(@process_data)
     description: "Call PASM with parameters"
   - code: |
-      ' Fast calculation in PASM
-      value := CALL(@fast_multiply)
-      
+      PUB demo() | value
+        pr0 := 6
+        pr1 := 7
+        CALL(@fast_multiply)
+        value := pr0
+
       DAT
+        ORGH
       fast_multiply
-        mov pa, ptra
-        mov pb, ptrb
-        mul pa, pb
-        mov result1, pa
+        mul   pr0, pr1
         ret
     description: "PASM for fast math"
 notes:
-  - "Executes PASM2 code in current cog"
-  - "PASM must end with RET instruction"
-  - "Parameters passed via PTRA/PTRB registers"
-  - "Result returned in result1 register"
-  - "Preserves Spin2 interpreter state"
+  - "Executes PASM2 code in current cog: CALL(@label) for hub RAM code, CALL(#label) for code already loaded into cog registers (for example by REGLOAD)"
+  - "PASM must end with RET (or _RET_) to return to Spin2"
+  - "Parameters and results pass through PR0..PR7"
+  - "Saves and restores the Spin2 bytecode address and PTRA around the call; PTRA is the Spin2 stack pointer, so the called code may use it freely"
+  - "The called code should avoid cog registers $120..$1D7 and LUT $010..$1FF, which the Spin2 interpreter occupies"
   - "Useful for performance-critical code"
-  - "PASM code must be in DAT section"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

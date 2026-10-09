@@ -1,5 +1,5 @@
 # Spin2 Method: COGSTOP
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Stop a running cog
 
 method: "COGSTOP"
@@ -8,7 +8,6 @@ type: "method"
 description: |
   Stop a specified cog immediately.
   The cog stops executing and becomes available for reuse.
-  All pins controlled by the cog are released to float state.
   No effect if the cog is already stopped.
 
 syntax: "COGSTOP(CogNum)"
@@ -20,7 +19,7 @@ parameters:
       Cog number to stop:
       - 0-7: Stop specific cog
       - Can use COGID() to stop current cog
-      - Invalid numbers have no effect
+      - COGSTOP uses the 4 low bits of CogNum; ids 8-15 do not exist on 8-cog silicon
 
 returns: "none"
 
@@ -59,7 +58,7 @@ examples:
     description: "Stop current cog (suicide)"
     
   - code: |
-      PUB restart_cog(n, code_addr, param)
+      PUB restart_cog(n, code_addr, param) : cog
         COGSTOP(n)  ' Ensure stopped first
         RETURN COGINIT(n, code_addr, param)
     description: "Restart a specific cog with new code"
@@ -67,14 +66,11 @@ examples:
 effects:
   immediate:
     - "Cog execution halts"
-    - "Cog RAM contents preserved but inaccessible"
-    - "Cog becomes available for COGINIT"
-    
-  pin_control:
-    - "All DIR bits cleared (pins become inputs)"
-    - "Smart pin modes disabled"
-    - "Pin states float"
-    
+    - "Cog becomes available for COGINIT (it returns to the pool of free cogs)"
+
+  pin_state_after_stop:
+    - "What a stopped cog leaves on the pins and in smart pin modes it configured is not established by an ingested source; do not rely on it"
+
   resources:
     - "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it"
     - "The lock's ALLOCATION does not go free. The number stays issued and LOCKNEW will not hand it out again. Only LOCKRET returns a lock number to the pool"
@@ -87,7 +83,6 @@ common_uses:
   - "Resource management"
   - "Error recovery"
   - "Dynamic cog allocation"
-  - "Power saving (stopped cogs use less power)"
 
 related_methods:
   - "COGINIT"
@@ -97,7 +92,8 @@ related_methods:
 
 notes:
   - "Safe to call on already-stopped cog"
-  - "Cannot stop cog -1 (no effect)"
+  - "COGSTOP uses the 4 low bits of the cog number, so COGSTOP(-1) addresses id 15, which does not exist on 8-cog silicon"
+  - "A cog that has written hub RAM with WRFAST and then stops itself should first execute WAITX #20, to let lingering FIFO data reach the hub"
   - "Stopping current cog ends execution immediately"
   - "No cleanup code runs in stopped cog"
   - "LOCKRET every lock the cog owns before stopping it. Not to free the lock - stopping frees the held state by itself - but because LOCKRET is the only thing that returns the NUMBER to the pool"
@@ -111,7 +107,6 @@ best_practices:
 
 warnings:
   - "Stopping a cog does not clean up its resources, and the one it appears to clean up it does not: a held lock reads free afterwards while its number stays permanently allocated"
-  - "Pins float - may need external pull-up/down resistors"
   - "Cannot recover cog state after stopping"
   - "No notification to other cogs"
 

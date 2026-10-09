@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "15bc1b66607514c7"
+    fp: "9f986f87cfba9e8e"
     compile: fragment
     wrap: spin2-method
     assumes: [char]
@@ -22,13 +22,12 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: as_method_pointer.usage
-    fp: "5215c8f4a0906923"
+    fp: "54da35227225ad4d"
     compile: fragment
     wrap: spin2-method
-    assumes: [data, inputMethod]
-    finding: "S-017"
+    assumes: [data]
   - at: as_method_pointer.example
-    fp: "d1cac6c589361365"
+    fp: "6af5feb7f7c5b6cf"
     compile: fragment
     wrap: spin2-top
-    finding: "S-017+S-018"
+    assumes: [serial.rx(0), serial.tx(1)]

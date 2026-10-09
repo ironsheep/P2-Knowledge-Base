@@ -16,11 +16,10 @@ blocks:
     wrap: spin2-top
     assumes: [serial.rx_handler(0)]
   - at: examples[3].code
-    fp: "2a600d5d10a7391b"
+    fp: "6e781567cf5b7d53"
     compile: fragment
     wrap: spin2-top
     assumes: [process_chunk()->0/1]
-    finding: "S-009+S-019"
   - at: production_patterns.indexed_stack_allocation.code
     fp: "eb981343d2629908"
     compile: fragment

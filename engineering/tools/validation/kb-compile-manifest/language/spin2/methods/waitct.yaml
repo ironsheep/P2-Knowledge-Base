@@ -13,7 +13,6 @@ blocks:
     wrap: spin2-method
     assumes: [next_time]
   - at: examples[2].code
-    fp: "a95540eb33327f45"
+    fp: "106383cddf5e89a4"
     compile: fragment
-    wrap: spin2-method
-    assumes: [sync_time]
+    wrap: spin2-top

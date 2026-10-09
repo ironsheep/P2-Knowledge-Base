@@ -15,9 +15,8 @@ blocks:
     fp: "b5033ee6c676e4fd"
     compile: program
   - at: examples[2].code
-    fp: "a4684a96074be444"
+    fp: "07f5ab45ed412a5f"
     compile: program
-    finding: "S-016"
   - at: examples[3].code
     fp: "e4732b2f6928d9ed"
     compile: fragment
@@ -39,14 +38,12 @@ blocks:
     wrap: spin2-method
     assumes: [index, pin, PIN_A=con, PIN_B=con, PIN_C=con]
   - at: anti_patterns[1].wrong
-    fp: "4158aaa160533300"
+    fp: "cd041ddbc5a72c50"
     compile: fragment
     wrap: spin2-method
     assumes: [day_name, day_num, print_string()->0/1]
-    finding: "S-016"
   - at: anti_patterns[1].correct
-    fp: "bd390ca24939950e"
+    fp: "25fc12f336997991"
     compile: fragment
     wrap: spin2-method
     assumes: [day_name, day_num, print_string()->0/1]
-    finding: "S-016"

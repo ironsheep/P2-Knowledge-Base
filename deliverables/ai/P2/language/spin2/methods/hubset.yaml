@@ -13,35 +13,39 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Direct clock configuration
-      HUBSET(clkmode_bits)
+      ' Direct clock configuration: apply the compiled clock mode
+      HUBSET(clkmode_)
     description: "Set clock mode directly"
 
   - code: |
-      ' Safe PLL switching pattern
-      PUB switch_to_pll() | mode
-        ' Step 1: Configure PLL but stay on RCFAST
-        mode := clkmode & !%11         ' Clear source bits
-        hubset(mode)                   ' Configure PLL
+      ' Safe PLL switching pattern (the sequence the compiler uses for the compiled clock mode)
+      PUB switch_to_pll()
+        ' Step 1: start the crystal/PLL but stay on RCFAST
+        hubset(clkmode_ & !%11)
 
-        ' Step 2: Wait for PLL to lock
-        waitms(10)                     ' PLL settling time
+        ' Step 2: allow about 10 ms for the crystal/PLL to settle; RCFAST runs at
+        ' 20 MHz or a little more, so count 20_000_000 / 100 clocks (WAITMS scales by the clkfreq variable,
+        ' which need not equal the 20 MHz that RCFAST is running at)
+        waitct(getct() + 20_000_000 / 100)
 
-        ' Step 3: Switch to PLL
-        mode |= %11                    ' Set PLL source
-        hubset(mode)
-        clkfreq := 200_000_000         ' Update frequency variable
-    description: "Safe clock switching to PLL with proper lock time"
-
-  - code: |
-      ' Chip reset
-      HUBSET($8000_0000)               ' Bit 31 = reset chip
-    description: "Reset the entire chip"
+        ' Step 3: switch to the crystal/PLL
+        hubset(clkmode_)
+    description: "Safe clock switching to PLL with proper lock time; HUBSET does not update the clkmode / clkfreq variables (use CLKSET for that)"
 
   - code: |
-      ' Modify hub configuration
-      HUBSET(config & !$100)           ' Clear bit 8
-    description: "Selective bit modification"
+      ' Reboot the chip
+      HUBSET($1000_0000)               ' generates an internal reset pulse to reboot
+    description: "Reset and reboot the entire chip"
+
+  - code: |
+      ' Seed the PRNG
+      HUBSET($8000_0000 | seed_value)  ' MSB set: seeds 32 bits of the PRNG state
+    description: "Seed 32 bits of the xoroshiro128** PRNG that GETRND reads"
+
+  - code: |
+      ' Set smart pin digital filter 0 to length code 1 (3 flipflops), timing tap 4
+      HUBSET($4000_0000 + (1 << 5) + 4)
+    description: "Configure a smart pin input filter"
 notes:
   - "Low-level hub configuration"
   - "Directly executes HUBSET instruction"

@@ -7,7 +7,7 @@ syntax: "address := STRING(StringLiteral)"
 parameters:
   - name: "StringLiteral"
     type: "string_literal"
-    description: "String literal in quotes"
+    description: "Quoted characters, plus numeric values 1..255, separated by commas (e.g. STRING(\"Text\", 13))"
 returns:
   type: "address"
   description: "Hub RAM address of null-terminated string"
@@ -33,12 +33,9 @@ examples:
     description: "Create menu strings"
 notes:
   - "Creates null-terminated string in hub RAM"
-  - "String is stored in DAT section"
   - "Returns starting address of string"
   - "Automatically adds null terminator"
-  - "Escape sequences supported (\\n, \\t, etc.)"
-  - "Multiple identical strings may share storage"
-  - "Read-only string constant"
+  - "STRING() takes quoted characters plus numeric values 1..255; backslash escapes belong only to the @\"...\" form"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

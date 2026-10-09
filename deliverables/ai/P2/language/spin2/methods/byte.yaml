@@ -4,7 +4,7 @@ description: |
   Declare byte data or access byte-sized memory
 category: Data Creation
 syntax: |
-  Declaration: BYTE [Count]
+  Declaration: BYTE Name[Count]
   Access: BYTE[BaseAddress][Index]
   Inline: BYTE(Value1, Value2, ...)
 contexts:
@@ -12,7 +12,7 @@ contexts:
     syntax: "Label BYTE Value1 {, Value2, ...}"
     description: "Declare byte data in DAT section"
   - name: "VAR section declaration"
-    syntax: "Name BYTE [Count]"
+    syntax: "BYTE Name[Count]"
     description: "Declare byte variable(s) in VAR section"
   - name: "Memory access"
     syntax: "BYTE[Address][Index]"
@@ -27,7 +27,7 @@ examples:
     description: "Declare byte data in DAT section"
   - code: |
       VAR
-        buffer  BYTE[256]  ' 256-byte array
+        BYTE buffer[256]  ' 256-byte array
     description: "Declare byte array in VAR section"
   - code: |
       ' Write byte to hub memory
@@ -37,15 +37,15 @@ examples:
       value := BYTE[$1000]
     description: "Direct hub memory byte access"
   - code: |
-      ' Send byte sequence
-      send(BYTE($48, $65, $6C, $6C, $6F))  ' "Hello"
-    description: "Inline byte data creation"
+      ' Pass a zero-terminated byte sequence to a method (print_str takes a string address)
+      print_str(BYTE($48, $65, $6C, $6C, $6F, 0))  ' "Hello"
+    description: "Inline byte data creation; BYTE(...) returns the address of the composed bytes"
 notes:
-  - "BYTE is 8 bits (0-255 unsigned, -128 to 127 signed)"
+  - "BYTE is 8 bits (0-255); use SIGNX to sign-extend a byte read"
   - "Hub memory is byte-addressable"
   - "Arrays are zero-indexed"
   - "Can use @ operator to get address of byte variable"
-  - "Alignment is automatic in VAR section"
+  - "VAR variables are packed in declaration order starting at a long-aligned address; ALIGNW / ALIGNL advance the variable pointer to a word / long boundary"
 related:
   - WORD
   - LONG

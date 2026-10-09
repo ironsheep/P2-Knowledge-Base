@@ -20,7 +20,8 @@ examples:
     description: "Check and handle NaN"
   - code: |
       ' Validate calculation
-      value := sqrt(-1.0)  ' Creates NaN
+      x := -1.0
+      value := fsqrt(x)  ' Creates NaN
       if NAN(value)
         debug("Invalid operation")
     description: "Detect invalid math operation"
@@ -32,9 +33,10 @@ examples:
     description: "Skip NaN values in processing"
 notes:
   - "NaN results from invalid floating-point operations"
-  - "Examples: 0.0/0.0, sqrt(-1), inf-inf"
-  - "NaN != NaN in comparisons"
-  - "Any operation with NaN produces NaN"
+  - "Examples: 0.0 /. 0.0, FSQRT of a negative value, LOG of a non-positive value, a float result too large to represent"
+  - "Every float comparison is false when either operand is NaN, including <>."
+  - "Float arithmetic (+. -. *. /.) with a NaN operand produces NaN"
+  - "A NaN produced by float math is $FFFF_FFFF"
   - "IEEE 754 floating-point standard"
   - "Important for robust float handling"
 timing:

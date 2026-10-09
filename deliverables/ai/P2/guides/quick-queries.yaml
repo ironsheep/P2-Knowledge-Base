@@ -195,7 +195,7 @@ questions:
 troubleshooting:
   "why won't my COG start":
     checklist:
-      - "Check stack size (minimum 32 longs)"
+      - "Check the stack passed to COGSPIN against the method's worst case (no source states a minimum; measure the high-water mark -- see language/spin2/methods/cogspin.yaml)"
       - "Verify COG code is in DAT section"
       - "Check COGINIT return value"
     keys:

@@ -1,5 +1,5 @@
 # Spin2 Method: COGSPIN
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Start Spin2 method in a cog
 
 method: "COGSPIN"
@@ -43,7 +43,7 @@ parameters:
       worker(), @stk) therefore starts TWO cogs running worker(), both handed
       the SAME @stk -- two interpreters pushing call frames into one buffer with
       no arbitration -- and returns the even/lower cog's ID, so a later
-      cogstop(id) stops only one of them. Confirmed with pnut_ts v1.55.4
+      cogstop(id) stops only one of them. Confirmed with pnut-ts v1.55.4
       (2026-08-30): the -1 form emits $A0 (bc_con_n1_14), the NEWCOG form emits
       $42 $10 (push byte 16) -- different constants, different binaries.
       -1 IS the failure RETURN value; see returns.
@@ -61,7 +61,7 @@ parameters:
     description: |
       Hub address of stack space for the new cog.
       Use @stack_array to get address.
-      Minimum 32 longs recommended, more for complex code.
+      Size it for the method's worst case; see stack_requirements below.
 
 returns:
   name: "CogID"
@@ -140,11 +140,11 @@ examples:
     
   - code: |
       VAR
-        LONG cog_stacks[4][64]
-        
-      PUB parallel_process()
+        LONG cog_stacks[4 * 64]
+
+      PUB parallel_process() | i
         REPEAT i FROM 0 TO 3
-          COGSPIN(NEWCOG, process_chunk(i), @cog_stacks[i])
+          COGSPIN(NEWCOG, process_chunk(i), @cog_stacks[i * 64])
     description: "Launch multiple parallel processors"
 
 method_execution:

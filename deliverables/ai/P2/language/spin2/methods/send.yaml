@@ -1,13 +1,16 @@
 method: SEND
 type: method
 description: |
-  Send data bytes using configured output method
+  SEND is a special method pointer, inherited from the calling method and
+  conveyed to all called methods. Its purpose is to provide an efficient output
+  mechanism for data: SEND(...) passes each parameter, as a long, to the method
+  that SEND points to.
 category: Miscellaneous
 syntax: "SEND(DataItems...)"
 parameters:
   - name: "DataItems"
     type: "variable"
-    description: "One or more data items to send (bytes, strings, arrays)"
+    description: "One or more data items to send; each is passed as a long to the method SEND points to (values, expressions, quoted characters, method return values)"
 returns:
   type: "void"
   description: "No return value"
@@ -18,49 +21,47 @@ examples:
     description: "Send single byte"
   - code: |
       ' Send string
-      SEND(STRING("Hello, World!"))
-    description: "Send string constant"
+      SEND("Hello, World!")
+    description: "Send the characters of a quoted string"
   - code: |
       ' Send multiple items
-      SEND($0D, $0A, STRING("Ready"), $0D, $0A)
+      SEND($0D, $0A, "Ready", $0D, $0A)
     description: "Send mixed data types"
   - code: |
       ' Send array data
-      SEND(BYTE[@buffer, 10])  ' Send 10 bytes from buffer
+      repeat i from 0 to 9
+        SEND(BYTE[@buffer][i])  ' Send 10 bytes from buffer
     description: "Send array contents"
 as_method_pointer:
   description: |
-    SEND can be assigned to a LONG variable as a method pointer,
-    enabling flexible I/O abstraction.
-  syntax: "outputMethod := SEND"
-  usage: "outputMethod(data)"
+    SEND is a special method pointer. Assign it like a method pointer;
+    it must point to a method that takes one parameter and has no return values.
+  syntax: "SEND := @OutMethod"
+  usage: "SEND(data)"
   restrictions:
-    - "Returns no value (cannot be used as a term)"
-    - "Cannot use abort syntax with SEND"
+    - "Must point to a method that takes one parameter"
+    - "Must point to a method that has no return values"
   example: |
-    VAR
-      LONG outputMethod
-      
-    PUB SetupMailbox()
-      outputMethod := SEND        ' Use inter-cog mailbox
-      
-    PUB SetupSerial()
-      outputMethod := @serial.tx  ' Use serial port
-      
-    PUB SendData(data)
-      outputMethod(data)          ' Works with either destination
+    OBJ
+      serial : "serial_driver"
+
+    PUB setup()
+      RECV := @serial.rx
+      SEND := @serial.tx
+
+    PUB echo() | c
+      c := RECV()
+      SEND(c)
 
 notes:
-  - "Output method must be configured first"
-  - "Typically used with serial drivers"
-  - "Can send bytes, words, longs, strings, arrays"
-  - "Blocking operation - waits for each byte"
+  - "Assign SEND (SEND := @OutMethod) before using it; if SEND has not been assigned, SEND(...) does nothing"
+  - "Any methods called within the SEND parameters inherit the SEND pointer, so they can do SEND(...) too"
+  - "A called method inherits the current SEND pointer and may change it for its own purposes; on return the SEND pointer is back to what it was before the call (it propagates in method calls, not in method returns)"
   - "Works with user-defined output methods"
-  - "Common for debug output"
-  - "Can be assigned to LONG variable as method pointer for flexible I/O"
+  - "SEND passes parameters, including values returned by called methods, in order"
 timing:
-  description: "Depends on output method"
-  cycles: "Variable based on driver"
+  description: "Depends on the method SEND points to"
+  cycles: "Variable - set by the output method"
 related:
   - RECV
   - DEBUG

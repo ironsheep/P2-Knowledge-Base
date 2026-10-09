@@ -3,19 +3,22 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "6179eafbf3dfb056"
+    fp: "a11f5aefd0e26869"
     compile: fragment
     wrap: spin2-method
-    assumes: [clkmode_bits]
   - at: examples[1].code
-    fp: "b9f455a0a99a103f"
+    fp: "721b62de6e074290"
     compile: program
   - at: examples[2].code
-    fp: "9d134900a1d76903"
+    fp: "55a2b07f38394f4d"
     compile: fragment
     wrap: spin2-method
   - at: examples[3].code
-    fp: "cade816a6a913ba4"
+    fp: "f0c6f4d6f67b18e5"
     compile: fragment
     wrap: spin2-method
-    assumes: [config]
+    assumes: [seed_value]
+  - at: examples[4].code
+    fp: "40af7ae6b0c95aab"
+    compile: fragment
+    wrap: spin2-method

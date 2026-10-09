@@ -34,7 +34,7 @@ examples:
     code: |
       PUB is_vowel(char) : result
         ' Returns 1-10 if vowel, 0 if not
-        result := LOOKDOWN(char : "A", "E", "I", "O", "U",
+        result := LOOKDOWN(char : "A", "E", "I", "O", "U", ...
                                   "a", "e", "i", "o", "u")
 
   - description: "Character classification with ranges"
@@ -95,9 +95,9 @@ anti_patterns:
         process(user_input)
 
   - anti_pattern: "ignoring_return_value"
-    description: "Not using LOOKDOWN result for anything"
+    description: "Not using LOOKDOWN result for anything; LOOKDOWN returns a value, so a call used as a statement does not compile (Expected an instruction or variable)"
     wrong: |
-      LOOKDOWN(char : "A".."Z")  ' Result discarded!
+      LOOKDOWN(char : "A".."Z")  ' Result discarded - compile error!
       process_uppercase()
     correct: |
       if LOOKDOWN(char : "A".."Z")

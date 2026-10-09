@@ -1,5 +1,5 @@
 # Spin2 Method: WYPIN
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Write Y parameter to smart pin
 
 method: "WYPIN"
@@ -18,7 +18,7 @@ parameters:
     description: |
       Specifies which pin(s) to write. Can be:
       - Single pin number (0-63)
-      - Pin range using '..' operator (Bottom..Top)
+      - Pin range using '..' operator, written Top..Bottom (e.g. 15..8 is pins 8 through 15; wraps within the 32-pin block if Top < Bottom)
       - Multiple pins using ADDPINS operator
       - Variable or expression that evaluates to a pin field
       
@@ -42,7 +42,7 @@ y_register_usage_by_mode:
     
   pwm_modes: |
     Duty cycle value:
-    Y = high_time (0 to X value)
+    Y[15:0] = output value, from 0 up to the frame period (X[31:16])
     
   pulse_modes: |
     Number of pulses/cycles:
@@ -59,9 +59,9 @@ examples:
     description: "UART transmit character"
     
   - code: |
-      ' Set 50% PWM duty cycle
+      ' Set 50% PWM duty cycle: frame of 1000 base periods, base period 1 clock
       period := 1000
-      WXPIN(56, period - 1)
+      WXPIN(56, (period << 16) | 1)
       WYPIN(56, period / 2)  ' 50% duty
     description: "Set PWM duty cycle"
     
@@ -85,10 +85,10 @@ mode_specific_y_values:
   P_ASYNC_RX: "Not used for receive"
   P_PULSE: "Number of pulses"
   P_TRANSITION: "Number of transitions"
-  P_NCO_FREQ: "Not used"
-  P_NCO_DUTY: "High time value"
-  P_PWM_TRIANGLE: "Duty cycle (0 to X)"
-  P_PWM_SAWTOOTH: "Duty cycle (0 to X)"
+  P_NCO_FREQ: "Frequency increment, added into the NCO accumulator at each base period (base period 1: Y = freq FRAC CLKFREQ)"
+  P_NCO_DUTY: "Duty increment, added into the NCO accumulator at each base period"
+  P_PWM_TRIANGLE: "Output value, 0 to the frame period X[31:16]"
+  P_PWM_SAWTOOTH: "Output value, 0 to the frame period X[31:16]"
   P_DAC_DITHER_PWM: "16-bit DAC value"
   P_REPOSITORY: "32-bit value to store"
 
@@ -96,12 +96,14 @@ data_transmission:
   uart_send: |
     PUB send_byte(pin, data)
       WYPIN(pin, data)
-      REPEAT UNTIL RDPIN(pin) & $100  ' Wait for completion
-      
+      REPEAT WHILE RDPIN(pin) & $8000_0000  ' Wait for completion: the busy flag comes back in bit 31
+
   pwm_update: |
-    PUB set_duty_percent(pin, percent)
-      period := X_VALUE  ' Previously set with WXPIN
-      duty := period * percent / 100
+    CON
+      X_VALUE = 1000                ' frame period previously set with WXPIN
+
+    PUB set_duty_percent(pin, percent) | duty
+      duty := X_VALUE * percent / 100
       WYPIN(pin, duty)
       
   burst_output: |

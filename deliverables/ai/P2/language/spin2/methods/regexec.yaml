@@ -1,49 +1,42 @@
 method: REGEXEC
 type: method
 description: |
-  Load and execute PASM2 code from hub RAM
-category: Miscellaneous
-syntax: "result := REGEXEC(HubAddress)"
+  Load a self-defined chunk of PASM2 code from hub RAM into cog registers,
+  then CALL the chunk's start register. The chunk is preceded by two words:
+  the starting register and the number of registers (longs) to load, minus 1.
+syntax: "REGEXEC(HubAddress)"
 parameters:
   - name: "HubAddress"
     type: "address"
-    description: "Hub address of PASM2 code to load and execute"
+    description: "Hub address of the chunk: two header words (start register, register count minus 1), then the code and/or data"
 returns:
-  type: "long"
-  description: "Value returned in result1 register"
+  type: "void"
+  description: "No return value; pass data through PR0..PR7"
 examples:
   - code: |
-      ' Execute PASM from hub
-      result := REGEXEC(@hub_pasm_code)
-      
+      PUB demo()
+        REGEXEC(@chunk)
+
       DAT
-      hub_pasm_code
-        ' PASM code here
-        mov result1, #123
+      chunk
+        WORD start, finish-start-1   ' chunk header: start register, size-1
+        ORG $118                     ' org can be $000..$120-size
+      start
+        mov   pr0, #123
         ret
-    description: "Execute hub-based PASM code"
+      finish
+    description: "Execute a hub-based PASM chunk"
   - code: |
       ' Dynamic code execution
-      build_pasm_code(@buffer)  ' Generate code
-      result := REGEXEC(@buffer)  ' Execute it
+      build_pasm_code(@buffer)  ' Generate a chunk: two header words, then the code
+      REGEXEC(@buffer)          ' Load it into registers and execute it
     description: "Execute dynamically generated code"
-  - code: |
-      ' Large PASM routine
-      result := REGEXEC(@big_routine)
-      
-      DAT
-      big_routine
-        ' Can be > 512 longs
-        ' Loaded and executed in chunks
-    description: "Execute large PASM routine"
 notes:
-  - "Loads PASM from hub to cog then executes"
-  - "Can execute code larger than cog RAM"
+  - "Loads a chunk from hub into cog registers, then CALLs its start register"
+  - "The chunk must fit cog registers $000..$11F; the Spin2 interpreter occupies $120..$1D7 and LUT $010..$1FF"
   - "Preserves Spin2 interpreter"
-  - "Result in result1 register"
-  - "PASM must end with RET"
-  - "Parameters via PTRA/PTRB"
-  - "More flexible than CALL"
+  - "PASM must end with RET (or _RET_) to return to Spin2"
+  - "Data passes through PR0..PR7"
 timing:
   description: "Load time + execution time"
   cycles: "Variable based on code size"

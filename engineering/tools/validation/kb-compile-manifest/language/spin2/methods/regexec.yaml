@@ -3,20 +3,11 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "6ced5925d9d5a375"
+    fp: "4179ba5334bfcb9e"
     compile: fragment
     wrap: spin2-top
-    assumes: [result]
-    finding: "S-010+S-012+S-011"
   - at: examples[1].code
-    fp: "f192aa183b9ad648"
+    fp: "47defa0b6a6ea7d1"
     compile: fragment
     wrap: spin2-method
-    assumes: [build_pasm_code()->0/1, buffer, result]
-    finding: "S-010"
-  - at: examples[2].code
-    fp: "4f3e2fe27f54a9f0"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [result]
-    finding: "S-010+S-012"
+    assumes: [build_pasm_code()->0/1, buffer]

@@ -1,7 +1,8 @@
 method: GETCRC
 type: method
 description: |
-  Calculate CRC using hardware CRC engine
+  Compute a CRC of Count bytes starting at DataAddress using a custom
+  polynomial of up to 32 bits.
 category: Miscellaneous
 syntax: "crc := GETCRC(DataAddress, Polynomial, Count)"
 parameters:
@@ -10,7 +11,7 @@ parameters:
     description: "Address of data to calculate CRC for"
   - name: "Polynomial"
     type: "long"
-    description: "CRC polynomial to use"
+    description: "CRC polynomial to use (up to 32 bits)"
   - name: "Count"
     type: "integer"
     description: "Number of bytes to process"
@@ -19,13 +20,9 @@ returns:
   description: "Calculated CRC value"
 examples:
   - code: |
-      ' Calculate CRC-32
+      ' Calculate a 32-bit CRC
       crc32 := GETCRC(@data, $EDB88320, size)
-    description: "Calculate standard CRC-32"
-  - code: |
-      ' Calculate CRC-16
-      crc16 := GETCRC(@buffer, $8005, length) & $FFFF
-    description: "Calculate CRC-16"
+    description: "Calculate a CRC with the 32-bit polynomial $EDB88320"
   - code: |
       ' Verify data integrity
       calculated := GETCRC(@packet, polynomial, packet_size)
@@ -33,12 +30,9 @@ examples:
         ' Data is valid
     description: "Verify data with CRC"
 notes:
-  - "Uses P2's hardware CRC engine"
-  - "Common polynomials: CRC-32=$EDB88320, CRC-16=$8005"
-  - "Processes byte by byte"
-  - "Fast hardware implementation"
-  - "Initial CRC value is 0"
-  - "Result may need masking for < 32-bit CRCs"
+  - "Processes byte by byte, two CRCNIB steps per byte"
+  - "The CRC starts from all ones across the polynomial's width (the highest set bit of the polynomial and every bit below it)"
+  - "A Count of 0 returns that starting value"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

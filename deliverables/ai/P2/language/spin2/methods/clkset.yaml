@@ -16,19 +16,19 @@ returns:
   description: "No return value"
 examples:
   - code: |
-      ' Set to 200MHz with PLL
-      CLKSET(clkmode_pll, 200_000_000)
-    description: "Set high-speed PLL mode"
+      ' Re-apply the compiled clock mode and frequency
+      CLKSET(clkmode_, clkfreq_)
+    description: "Set the compiled PLL/crystal mode (clkmode_ and clkfreq_ come from the CON clock symbols, e.g. _xtlfreq and _clkfreq)"
   - code: |
       ' Drop to RCFAST for low power
-      CLKSET(clkmode_rcfast, 20_000_000)
+      CLKSET(0, 20_000_000)  ' mode %00_00 = RCFAST
     description: "Switch to internal RC oscillator"
   - code: |
-      ' Dynamic frequency scaling
+      ' Dynamic frequency scaling between RCFAST and the compiled mode
       if battery_low
-        CLKSET(clkmode_pll, 80_000_000)  ' Reduce to 80MHz
+        CLKSET(0, 20_000_000)  ' Drop to RCFAST
       else
-        CLKSET(clkmode_pll, 180_000_000)  ' Normal 180MHz
+        CLKSET(clkmode_, clkfreq_)  ' Back to the compiled clock mode
     description: "Adjust clock for power management"
 notes:
   - "Performs safe clock transition"
@@ -37,10 +37,11 @@ notes:
   - "Mode bits configure PLL, crystal, dividers"
   - "Affects all timing-dependent operations"
   - "Maximum frequency depends on chip specs"
-  - "Use predefined clkmode_ constants"
+  - "The compiler defines clkmode_ and clkfreq_ from the CON clock symbols; there are no other predefined clkmode_ constants"
 timing:
   description: "Clock stabilization delay"
-  cycles: "~10-20ms for PLL lock"
+  cycles: "~10 ms (20_000_000/100 clocks at RCFAST), only when the new clkmode selects the crystal or PLL (bit 1 of the mode set); otherwise no wait"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup"
 related:
   - language/spin2/methods/hubset.yaml
   - language/spin2/system-variables/clkfreq.yaml

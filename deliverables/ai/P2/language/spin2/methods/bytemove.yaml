@@ -1,5 +1,5 @@
 # Spin2 Method: BYTEMOVE
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Copy bytes from source to destination
 
 method: "BYTEMOVE"
@@ -41,11 +41,10 @@ timing:
     Spin2 methods execute via the bytecode interpreter. The interpreter is
     engineered to run at minimum cost. We do not publish a clock count for
     this method because we do not have a verifiable measurement.
-  overlap_handling: "Automatic, no performance penalty"
 
 direction_logic:
-  forward_copy: "When Dest < Source or Dest >= Source + Count"
-  reverse_copy: "When Dest > Source and Dest < Source + Count"
+  forward_copy: "When Source >= Destination"
+  reverse_copy: "When Source < Destination"
   purpose: "Prevents overwriting source data before it's copied"
 
 examples:
@@ -70,7 +69,7 @@ examples:
     
   - code: |
       ' Copy string with length check
-      PUB safe_strcopy(dest, source, max_len)
+      PUB safe_strcopy(dest, source, max_len) | len
         len := STRSIZE(source) <# (max_len - 1)
         BYTEMOVE(dest, source, len)
         BYTE[dest][len] := 0  ' Null terminate
@@ -79,11 +78,11 @@ examples:
   - code: |
       ' Scroll buffer up one line (80 chars)
       VAR
-        BYTE screen[25][80]
-        
+        BYTE screen[25 * 80]
+
       PUB scroll_up()
-        BYTEMOVE(@screen[0], @screen[1], 24 * 80)
-        BYTEFILL(@screen[24], " ", 80)
+        BYTEMOVE(@screen[0], @screen[80], 24 * 80)
+        BYTEFILL(@screen[24 * 80], " ", 80)
     description: "Scroll text display"
     
   - code: |
@@ -118,12 +117,6 @@ related_methods:
   - "BYTEFILL"
   - "BYTECOMP"
   - "BYTESWAP"
-
-performance_notes:
-  - "Optimized for common cases"
-  - "Handles alignment automatically"
-  - "Bulk transfers use efficient hub operations"
-  - "Small copies have minimal overhead"
 
 notes:
   - "Safe for overlapping regions"

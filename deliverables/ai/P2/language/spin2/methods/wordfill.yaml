@@ -33,7 +33,6 @@ examples:
 notes:
   - "Fills memory efficiently using hub operations"
   - "Each word is 2 bytes (16 bits)"
-  - "Address should be word-aligned for best performance"
   - "Count of 0 fills no memory"
   - "Only lower 16 bits of Value are used"
 timing:

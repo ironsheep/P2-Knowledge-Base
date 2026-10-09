@@ -3,17 +3,17 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "2e4cb293dc7d3ae3"
+    fp: "e14931eea1e7a7e0"
     compile: fragment
     wrap: spin2-method
     assumes: [result]
   - at: examples[1].code
-    fp: "e559768a449925cd"
+    fp: "fdb77649c95f233f"
     compile: fragment
     wrap: spin2-method
     assumes: [power10, x]
   - at: examples[2].code
-    fp: "58119a1430bfee90"
+    fp: "73c9587b2b1f7c68"
     compile: fragment
     wrap: spin2-method
-    assumes: [value, initial, rate, time]
+    assumes: [growth, value, initial, time, doubling_time]

@@ -7,26 +7,25 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[1].code
-    fp: "32ff5e18c4c27087"
+    fp: "96802204579d0955"
     compile: fragment
     wrap: spin2-method
   - at: examples[2].code
-    fp: "b219d09e6a9491f8"
+    fp: "41636676ad6df4e0"
     compile: fragment
     wrap: spin2-method
   - at: examples[3].code
-    fp: "f446650d1445fe7a"
+    fp: "b7e9b1e8bc79ff7c"
     compile: fragment
     wrap: spin2-method
-    assumes: [buffer]
-    finding: "S-015"
+    assumes: [i, buffer]
   - at: as_method_pointer.usage
-    fp: "d31071bd5db807a4"
+    fp: "70618a97bd3d7b54"
     compile: fragment
     wrap: spin2-method
-    assumes: [outputMethod, data]
+    assumes: [data]
   - at: as_method_pointer.example
-    fp: "4346a60514a7dd3a"
+    fp: "6af5feb7f7c5b6cf"
     compile: fragment
     wrap: spin2-top
-    finding: "S-018"
+    assumes: [serial.rx(0), serial.tx(1)]

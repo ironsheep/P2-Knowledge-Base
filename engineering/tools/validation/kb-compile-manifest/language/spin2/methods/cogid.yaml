@@ -17,13 +17,11 @@ blocks:
     fp: "26a35204257bf9e1"
     compile: program
   - at: examples[4].code
-    fp: "a4172615bedff340"
+    fp: "bd42fdee7a7509f7"
     compile: program
-    finding: "S-019"
   - at: typical_patterns[0].code
-    fp: "d36c06478901ccd6"
+    fp: "989dedd4a59fee42"
     compile: program
-    finding: "S-009"
   - at: typical_patterns[1].code
     fp: "1547a81a04cf82b0"
     compile: program

@@ -8,33 +8,30 @@ blocks:
     wrap: spin2-method
     assumes: [baud, x_val]
   - at: examples[1].code
-    fp: "2984645cba7fd9fb"
+    fp: "bd72ec7885c19c81"
     compile: fragment
     wrap: spin2-method
   - at: examples[2].code
-    fp: "02bbd24dae33c815"
+    fp: "9ce3c073945c899b"
     compile: fragment
     wrap: spin2-method
-    assumes: [freq, x_val, pin]
+    assumes: [freq, pin]
   - at: examples[3].code
     fp: "c925997af84c67ee"
     compile: fragment
     wrap: spin2-method
     assumes: [pin]
   - at: examples[4].code
-    fp: "93a8c69e537c267b"
+    fp: "19933469d2067aba"
     compile: fragment
     wrap: spin2-method
     assumes: [spi_pin]
   - at: calculation_examples.uart_baud
-    fp: "fff6e4b829e4d326"
+    fp: "b8e3c4ada4695506"
     compile: program
-    finding: "S-019"
   - at: calculation_examples.pwm_frequency
-    fp: "bb3286e050a283b1"
+    fp: "8d128bcaeb8f3aac"
     compile: program
-    finding: "S-019"
   - at: calculation_examples.measurement_time
-    fp: "542249a36892c546"
+    fp: "d23feb703e25d406"
     compile: program
-    finding: "S-019"

@@ -7,22 +7,22 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "584b3cfca0fe0e43"
+    fp: "54da1701fe07d90a"
     compile: fragment
     wrap: spin2-method
     assumes: [mode]
   - at: examples[1].code
-    fp: "b91179556e34ab57"
+    fp: "b09004fae92c5518"
     compile: fragment
     wrap: spin2-method
     assumes: [mode]
   - at: examples[2].code
-    fp: "ba73750c64ae0fcc"
+    fp: "ecd7ba6a7114eb15"
     compile: fragment
     wrap: spin2-method
     assumes: [mode]
   - at: examples[3].code
-    fp: "cdf5f8000195ca03"
+    fp: "4703564ba6629536"
     compile: fragment
     wrap: spin2-method
     assumes: [mode, pin]

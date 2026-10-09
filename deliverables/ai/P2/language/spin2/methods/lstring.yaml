@@ -16,7 +16,7 @@ returns:
 examples:
   - code: |
       ' Create length-prefixed string
-      lstr := LSTRING("Hello, World!")
+      lstr_ptr := LSTRING("Hello, World!")
       ' First byte contains 13 (length)
     description: "Create length-prefixed string"
   - code: |
@@ -36,8 +36,6 @@ notes:
   - "No null terminator added"
   - "Maximum length is 255 characters"
   - "Useful for binary protocols"
-  - "More efficient than null-terminated for known-length strings"
-  - "Stored in DAT section"
   - "REQUIRES {Spin2_v43} or later version directive at start of source file (introduced v42, namespace-gated from v43); without it the compiler defaults to v41 and LSTRING is not recognized"
 timing:
   execution_model: |

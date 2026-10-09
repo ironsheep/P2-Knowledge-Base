@@ -8,11 +8,10 @@ blocks:
     wrap: spin2-method
     assumes: [pasm_routines]
   - at: examples[1].code
-    fp: "a05c93983bbc2afd"
+    fp: "140de1694814f084"
     compile: fragment
-    wrap: spin2-method
-    assumes: [modify_pasm()->0/1, buffer, result]
-    finding: "S-010"
+    wrap: spin2-top
+    assumes: [modify_chunk()->0/1]
   - at: examples[2].code
     fp: "6c325208c9212e2b"
     compile: fragment

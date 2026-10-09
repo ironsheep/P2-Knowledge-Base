@@ -1,5 +1,5 @@
 # Spin2 Method: COGCHK
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Check if a cog is running
 
 method: "COGCHK"
@@ -17,14 +17,14 @@ parameters:
     type: "long"
     description: |
       Cog number to check (0-7).
-      Values outside 0-7 return 0.
+      Only the 4 low bits are used; ids 8-15 do not exist on 8-cog silicon.
 
 returns:
   name: "Running"
   type: "long"
   description: |
     - -1 (TRUE): Cog is running
-    - 0 (FALSE): Cog is stopped or invalid number
+    - 0 (FALSE): Cog is stopped, or its id (4 low bits) is 8-15
 
 timing:
   execution_model: |
@@ -41,7 +41,7 @@ examples:
         
       PUB ensure_driver_running()
         IF NOT COGCHK(driver_cog)
-          driver_cog := COGINIT(NEWCOG, @driver, 0)
+          driver_cog := COGINIT(COGEXEC_NEW, @driver, 0)
     description: "Restart driver if not running"
     
   - code: |
@@ -51,7 +51,7 @@ examples:
     description: "Wait for cog to stop"
     
   - code: |
-      PUB count_running_cogs() : count
+      PUB count_running_cogs() : count | n
         count := 0
         REPEAT n FROM 0 TO 7
           IF COGCHK(n)
@@ -91,7 +91,7 @@ return_value_usage:
     
   in_expressions: |
     running_count += COGCHK(n) & 1
-    status := COGCHK(n) ? "Running" : "Stopped"
+    status := COGCHK(n) ? @"Running" : @"Stopped"
 
 related_methods:
   - "COGID"
@@ -102,7 +102,7 @@ related_methods:
 notes:
   - "Non-invasive - doesn't affect checked cog"
   - "Can check current cog (always returns -1)"
-  - "Invalid cog numbers return 0 (stopped)"
+  - "COGCHK uses the 4 low bits of the cog number; ids 8-15 do not exist on 8-cog silicon and return 0"
   - "Cannot determine what cog is running"
   - "Just checks running/stopped state"
 
@@ -120,7 +120,7 @@ typical_patterns:
     
   - pattern: "Wait for startup"
     code: |
-      cog := COGINIT(NEWCOG, @code, 0)
+      cog := COGINIT(COGEXEC_NEW, @code, 0)
       REPEAT UNTIL COGCHK(cog)
     
   - pattern: "Restart on failure"

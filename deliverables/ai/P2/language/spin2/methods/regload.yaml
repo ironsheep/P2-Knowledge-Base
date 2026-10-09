@@ -1,13 +1,15 @@
 method: REGLOAD
 type: method
 description: |
-  Load PASM2 code from hub to cog registers
+  Load a self-defined chunk of PASM2 code and/or data from hub RAM into cog
+  registers. The chunk is preceded by two words: the starting register and the
+  number of registers (longs) to load, minus 1.
 category: Miscellaneous
 syntax: "REGLOAD(HubAddress)"
 parameters:
   - name: "HubAddress"
     type: "address"
-    description: "Hub address of PASM2 code to load"
+    description: "Hub address of the chunk: two header words (start register, register count minus 1), then the code and/or data"
 returns:
   type: "void"
   description: "No return value"
@@ -18,10 +20,19 @@ examples:
       ' Code now in cog, ready to CALL
     description: "Load PASM for later execution"
   - code: |
-      ' Update PASM code
-      modify_pasm(@buffer)  ' Modify code
-      REGLOAD(@buffer)      ' Reload it
-      result := CALL($100)  ' Execute at cog address
+      PUB go()
+        modify_chunk(@chunk)  ' Modify the chunk's code
+        REGLOAD(@chunk)       ' Reload it into registers
+        CALL(#start)          ' Call the program within the chunk, by register address
+
+      DAT
+      chunk
+        WORD start, finish-start-1   ' chunk header: start register, size-1
+        ORG $100                     ' org can be $000..$120-size
+      start
+        mov   pr0, #1
+        ret
+      finish
     description: "Dynamic code modification"
   - code: |
       ' Load different routines
@@ -32,10 +43,9 @@ examples:
     description: "Conditional code loading"
 notes:
   - "Loads code but doesn't execute"
-  - "Use CALL to execute after loading"
+  - "Use CALL(#start) to execute after loading, where start is the chunk's start register"
   - "Overwrites cog registers"
-  - "Preserves Spin2 interpreter area"
-  - "Maximum 496 longs can be loaded"
+  - "A chunk must fit registers $000..$11F; the Spin2 interpreter occupies $120..$1D7 and LUT $010..$1FF"
   - "Useful for swapping PASM routines"
 timing:
   execution_model: |

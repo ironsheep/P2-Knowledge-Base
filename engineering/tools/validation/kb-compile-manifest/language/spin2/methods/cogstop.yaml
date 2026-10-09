@@ -15,6 +15,5 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[3].code
-    fp: "15b3159ebfa04078"
+    fp: "80435feace66bf5b"
     compile: program
-    finding: "S-020"

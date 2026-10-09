@@ -1,5 +1,5 @@
 # Spin2 Method: PINREAD
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Read pin(s) state
 
 method: "PINREAD"
@@ -20,7 +20,7 @@ parameters:
     description: |
       Specifies which pin(s) to read. Can be:
       - Single pin number (0-63)
-      - Pin range using '..' operator (Bottom..Top)
+      - Pin range using '..' operator, written Top..Bottom (e.g. 15..8 is pins 8 through 15; wraps within the 32-pin block if Top < Bottom)
       - Multiple pins using ADDPINS operator
       - Variable or expression that evaluates to a pin field
 

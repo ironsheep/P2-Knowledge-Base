@@ -8,7 +8,7 @@ blocks:
     wrap: spin2-method
     assumes: [len, message]
   - at: examples[1].code
-    fp: "7dc3024e6dee6235"
+    fp: "fa45869abb50b52d"
     compile: fragment
     wrap: spin2-method
     assumes: [input, buffer_size, buffer]

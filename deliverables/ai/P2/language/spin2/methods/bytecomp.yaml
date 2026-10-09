@@ -1,7 +1,14 @@
 method: BYTECOMP
 type: method
-description: Complement bytes within a long value
 category: Memory Operations
+
+requires_version: Spin2_v45
+version_directive: '{Spin2_v45}'
+
+description: |
+  Compare Count bytes of data starting at Address1 and Address2; return -1
+  (TRUE) if they match, 0 (FALSE) if they differ.
+  REQUIRES: {Spin2_v45} or later version directive at start of source file.
 syntax: result := BYTECOMP(Address1, Address2, Count)
 parameters:
 - name: Address1
@@ -28,10 +35,8 @@ examples:
   description: Search for byte pattern in data
 notes:
 - Returns TRUE (-1) if all bytes match
-- Returns FALSE (0) on first mismatch
-- Count of 0 always returns TRUE
-- Efficient block comparison operation
-- Case-sensitive byte-by-byte comparison
+- Returns FALSE (0) if any byte differs
+- Count of 0 returns 0 (FALSE), not TRUE
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. The interpreter is

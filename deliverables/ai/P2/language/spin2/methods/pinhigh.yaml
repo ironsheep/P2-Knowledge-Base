@@ -1,5 +1,5 @@
 # Spin2 Method: PINHIGH
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Drive pin(s) high
 
 method: "PINHIGH"
@@ -19,7 +19,7 @@ parameters:
     description: |
       Specifies which pin(s) to drive high. Can be:
       - Single pin number (0-63)
-      - Pin range using '..' operator (Bottom..Top)
+      - Pin range using '..' operator, written Top..Bottom (e.g. 15..8 is pins 8 through 15; wraps within the 32-pin block if Top < Bottom)
       - Multiple pins using ADDPINS operator
       - Variable or expression that evaluates to a pin field
 
@@ -48,7 +48,7 @@ examples:
     description: "Drive pins 0 through 7 high simultaneously"
     
   - code: "PINHIGH(15..8)"
-    description: "Drive pins 8 through 15 high (note: reverse range)"
+    description: "Drive pins 8 through 15 high (ranges are written Top..Bottom)"
     
   - code: |
       CON

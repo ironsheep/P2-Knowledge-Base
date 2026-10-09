@@ -3,22 +3,19 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "bfcd63920c6846b6"
+    fp: "60c728294bca4d1f"
     compile: fragment
     wrap: spin2-method
     spin2_version: 45
     assumes: [value1, value2]
-    finding: "S-006"
   - at: examples[1].code
-    fp: "4c19e4d312b3b7d7"
+    fp: "397bee51d0cbdf8f"
     compile: fragment
     wrap: spin2-method
     spin2_version: 45
     assumes: [i, size, array]
-    finding: "S-006"
   - at: examples[2].code
-    fp: "c830049035bc6ca6"
+    fp: "396d9d630d1d1d84"
     compile: fragment
     wrap: spin2-method
     spin2_version: 45
-    finding: "S-006"

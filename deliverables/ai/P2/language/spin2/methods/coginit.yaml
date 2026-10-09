@@ -1,5 +1,5 @@
 # Spin2 Method: COGINIT
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Start PASM code in a cog
 
 method: "COGINIT"
@@ -87,8 +87,8 @@ examples:
         WAITX ##25_000_000
         JMP   #.loop
         
-      PUB start_blinker()
-        cog := COGINIT(COGEXEC_NEW, @blink_code, 0)
+      PUB start_blinker() | cog
+        cog :=COGINIT(COGEXEC_NEW, @blink_code, 0)
         IF cog == -1
           ' Failed to start
     description: "Start PASM blinker in any available cog"
@@ -146,7 +146,6 @@ notes:
 limitations:
   - "COGINIT loads $000-$1F7 = 504 longs of code/data; the $1F8-$1FF special-purpose registers are not overwritten by COGINIT"
   - "Only 8 cogs available total"
-  - "Cannot determine which cog when using COGEXEC_NEW"
   - "No automatic cleanup if cog crashes"
 
 see_also:

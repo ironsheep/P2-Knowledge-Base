@@ -1,5 +1,5 @@
 # Spin2 Method: BYTEFILL
-# Source: Spin2 v51 documentation
+# Source: Spin2 documentation
 # Purpose: Fill memory region with byte value
 
 method: "BYTEFILL"
@@ -41,7 +41,6 @@ timing:
     Spin2 methods execute via the bytecode interpreter. The interpreter is
     engineered to run at minimum cost. We do not publish a clock count for
     this method because we do not have a verifiable measurement.
-  performance: "Faster than a Spin2 loop for count > 4"
 
 examples:
   - code: |
@@ -71,13 +70,13 @@ examples:
   - code: |
       ' Initialize lookup table
       VAR
-        BYTE lookup[256]
-        
+        BYTE lookup_tbl[256]
+
       PUB init_table()
-        BYTEFILL(@lookup, $FF, 256)  ' All entries invalid
+        BYTEFILL(@lookup_tbl, $FF, 256)  ' All entries invalid
         ' Then set specific valid entries
-        lookup[10] := 1
-        lookup[20] := 2
+        lookup_tbl[10] := 1
+        lookup_tbl[20] := 2
     description: "Initialize lookup table"
     
   - code: |
@@ -118,9 +117,8 @@ performance_comparison:
       BYTE[dest][i] := value
       
   bytefill: |
-    ' Optimized implementation
+    ' Built-in fill
     BYTEFILL(dest, value, count)
-    ' 3-10x faster for count > 10
 
 notes:
   - "Only uses lower 8 bits of value"

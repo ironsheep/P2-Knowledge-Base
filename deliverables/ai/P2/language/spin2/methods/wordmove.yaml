@@ -28,9 +28,8 @@ examples:
     description: "Shift array elements with overlap handling"
 notes:
   - "Automatically handles overlapping source and destination regions"
-  - "Copies in appropriate direction to preserve data integrity"
+  - "Copies in appropriate direction to preserve data integrity: reverse when Source < Destination, forward otherwise"
   - "Each word is 2 bytes (16 bits)"
-  - "Addresses must be word-aligned for optimal performance"
   - "Count of 0 copies no data"
 timing:
   execution_model: |
