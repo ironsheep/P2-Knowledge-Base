@@ -22,11 +22,7 @@ Spin2 has 52 operators organized in 16 precedence levels, with additional floati
 | **9** | `+` `+.` | Add | Integer/float addition | All blocks |
 | **10** | `-` `-.` | Subtract | Integer/float subtraction | All blocks |
 | **11** | `#>` `<#` | Limit | Max/min limiting | All blocks |
-| **12** | `<` `+<` `>` `+>` `<=` `+<=` `>=` `+>=` `<=>` | Comparison | Signed (`<` `>` `<=` `>=` `<=>`) / unsigned (`+` forms) compare | All blocks |
-
-> **Correction 2026-10-07 (F-547):** this table formerly listed `+<=>`. It is in no Parallax
-> source (v55 operator table, `spin2-v55-text.txt:471-488`, has no such row) and pnut-ts 1.55.8
-> rejects it; `<=>` is signed only.
+| **12** | `<` `+<` `>` `+>` `<=` `+<=` `>=` `+>=` `<=>` `+<=>` | Comparison | Signed/unsigned compare | All blocks |
 | **13** | `==` `<>` `===` `<>>` | Equality | Equal/not equal (logical/bitwise) | All blocks |
 | **14** | `&&` `AND` `!&&` | Logical AND | Boolean AND/NAND | All blocks |
 | **15** | `\|\|` `OR` `XOR` `!\|\|` | Logical OR | Boolean OR/XOR/NOR | All blocks |
@@ -165,7 +161,7 @@ a +< b    ' Unsigned less than
 a +> b    ' Unsigned greater than
 a +<= b   ' Unsigned less than or equal
 a +>= b   ' Unsigned greater than or equal
-' (no `+<=>`: `<=>` is signed only -- see the correction note above)
+a +<=> b  ' Unsigned comparison (-1, 0, or 1)
 ```
 
 **Block Usage**: All blocks
