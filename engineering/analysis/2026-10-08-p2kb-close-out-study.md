@@ -824,6 +824,38 @@ INB); NF-11 sits in S-102's block (check in the sprint).
 | S-362 | B | NF-8 | wrong, not code-driving | `cog_hub_execution.yaml:217`: DJNZ in hubexec "13-14 clocks taken"; CSV gives 2 or 13…20 | CSV:193 | traced | — | change spec ("at least 13") | yes |
 | S-363 | B | NF-9 | wrong, not code-driving | `loop-control.yaml:66`, `:96`; `scratch-storage.yaml:46` cite `flash_loader.spin2` lines for code the source does not contain (it reads through the FIFO) | `flash_loader.spin2:56-60` | traced | citation drift | change spec (re-cite or reword) | no |
 
+### Rows S-220..S-280 — change specs («#407», 2026-10-09)
+
+All 61 rows done; specs in `2026-10-08-p2kb-close-out-evidence/rows-S220-S280-specs.md` (28 code rows
+compiled; 16 prose/YAML rows "compile in sprint"). States: change spec 44; pointer rows 14 (S-247 → S-288,
+S-261 → S-350, S-267..S-275 and S-279 → the F-547 cascade, S-276/S-277 done by «#405»); reclassified —
+S-249; undetermined — S-251, S-280 (punch list 7, 8). **Two study resolutions corrected:** S-255 — there
+is no plain `DEC`; the forms are `UDEC(value)` / `SDEC(value)` (`spin2-v55-text.txt:947`, `:956` — arbiter
+re-read); S-249 — `isp_octoport_serial` is real (OBEX 4257, ingested `isp_octoport_serial.spin2:173,289,440`),
+so the row is not "invented object"; what remains is the page passing the object's `MODE_NONE`/`PU_3K3`
+without the `serial.` prefix. **Arbiter decisions on the file's D-list:** D5 — delete every change note in
+served text (the KB states what is true now); D6 — remove the `:label` spelling from the teaching pages (no
+Parallax source; accepted by pnut-ts only — punch list item 11 checks PNut); D8 — fix the command name,
+delete `common_errors`, point to `--help` (tool behaviour is not a KB fact); D9 — fix the ~10 served sites
+that say "Silicon Doc"; `source:` lines are never served, so the official-title change there is cosmetic and
+done mechanically in the sprint; D2 — a bench question (VO-S367). D1, D3, D4, D7, D10, D11 are sprint
+choices recorded in the file.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-364 | B | NF-3 | **drives wrong code** | `smart-pin-11001-adc-external-clock.yaml:77`, `:115`: mode literal puts a 1 in M[0] and none in the B selector, while the comment says "P_PLUS1_B for clock" | SD:3731, :3737-3743 | traced | digit placement | change spec | no |
+| S-365 | B | NF-5 | drives wrong code | `wxpin.yaml:94`, `:96`, `:100`: X meanings for P_PULSE, P_NCO_FREQ, P_QUADRATURE wrong (rides with S-030) | SD:3970-3972, :4004-4012, :4095-4097 | traced | — | change spec | no |
+| S-366 | B | NF-6 | wrong, not code-driving | `complete-system-registers-index.yaml:315-316`: "all register access completes in a single clock", hub timing — unsourced/wrong | CSV (most instructions 2 clocks) | traced | — | change spec | no |
+| S-367 | B | NF-4 | latent | `smart-pin-11010-adc-scope-trigger.yaml:53`, `:97`, `:131`: `pinstart(adc_pin, P_ADC_SCOPE, …)` without the ADC-enable bits its own PASM literal carries | page `:77`; sources silent on whether %11010/%11001 need M[12:10] = %100 | undetermined | — | **bench question VO-S367**; interim: make the page self-consistent (`P_ADC_SCOPE \| P_ADC_1X`) | no |
+| S-368 | B | NF-7 | latent | `:label` local-label spelling (`pasm-labels.yaml:29-35,38,59-61,68,90-92`; `identifier-rules.yaml:133,141-144`) — no Parallax source; pnut-ts accepts it | greps of SD, v55, v51, PASM2 manual, datasheet | traced | — | remove from teaching pages (arbiter D6); punch list item 11 | no |
+| S-369 | — | NF-8 | latent | `sources/spin2-v51/experimental-findings.md:9-12,73-80`: pnut_ts v1.51.5 compiled 31–35-character symbols; v1.55.8 rejects ≥31 — a lead for punch list item 7 | ingested note | traced | tool change | attach to punch list item 7 | yes |
+| S-370 | B | NF-9 | latent | `obex-projects/2842-…/jm_fullduplexserial.spin2:403` declares a local `field`, now reserved — the object the KB recommends does not compile unmodified | compiler | traced | language change | note on the KB pages that recommend it (OBEX is self-referencing; no fix to the object) | no |
+| S-371 | B | NF-10 | drives wrong code | `debug_enabled.yaml:82-83`: `string("Memory free: ", dec(memory_free))` — STRING takes literals; `dec()` is an object method | v55:592 | traced | — | change spec | no |
+| S-372 | B | NF-11 | wrong, not code-driving | `smart_pins.yaml:48` "per-pin 16-bit configuration" (WRPIN D is 32 bits); `:546-547` toggle-rate figures unsourced | SD:3731 | traced | — | change spec | no |
+| S-373 | B | NF-12 | hygiene | ~10 served scalars and ~14 YAML comments carry change notes ("previously showed…") — S-241 class | sweep | traced | doctrine: state what is true now | delete all (arbiter D5) | yes |
+| S-374 | B | NF-13 | latent | add-on pages' `use_cases`/`applications`/`advantages` lists beyond the Product Guide (`addon-serial-host.yaml:96-106`, `:132-161`; others unread) | guide text | inferred | unsourced capability lists | class sweep in the sprint (with S-258, S-320) | no |
+| S-375 | B | NF-14 | latent | `p2-architecture-mental-model.yaml:130-137` CORDIC "7-8 in flight", "55 clocks", "1 result per cog every 8 clocks" | SD:3413 (54-clock pipeline) | inferred | — | re-derive in the sprint (with S-355) | no |
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
@@ -850,6 +882,7 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 | VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
 | VO-F372 | S-324 | with a USB pair running, does a new WRPIN with DIR high switch host ↔ device without a DIR cycle? | `sniffer` · 5 files · sources disagree (`HW:1488` vs `SD:4579`) | to write | sources disagree |
 | VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | to write | sources disagree |
+| VO-S367 | S-367 | do ADC-scope (`%11010`) and ADC-external-clock (`%11001`) smart-pin modes need the ADC enable bits (M[12:10] = %100) to sample? Compare `P_ADC_SCOPE` alone vs `P_ADC_SCOPE \| P_ADC_1X` on a pin fed by a DAC pin (jumper, free pins) | SD smart-pin %11001/%11010 sections · the page's own PASM literal (`:77`) carries the bits · no statement either way | to write | sources silent |
 | VO-S157 | S-157 | what does `DEBUG(C_Z)` print after a Spin2 statement (e.g. `x := 0`) — the interpreter's flags at the interrupt, or anything tied to the statement? No pins | v55:913, :1006; debugger DBG:629-633 (prints bits 31/30 of the interrupt return word) · no source gives values for Spin2 · control v55:1006 | to write | sources silent on values |
 | VO-S059 | S-059 | with `x := 0`, what do four successive `??x` return, and what is `x` after? Control `x := 1`. No pins (DEBUG read-out) | `seed\|zero\|period\|never` near `xoro32\|xoroshiro32\|??` · SD, DS, v55, v51, PASM2 manual, HW manual, INT, EF ledger · control DS:1557 | to write | sources silent |
 | VO-S337 | S-337 | a pin driven high in output mode (`P_HIGH_150K` on P0) while jumpered to a pin driven low (P1): does INA[0] read the pin or the output latch? | SD:3706 states only "the pin's read state" | to write | sources silent on the latch case |
