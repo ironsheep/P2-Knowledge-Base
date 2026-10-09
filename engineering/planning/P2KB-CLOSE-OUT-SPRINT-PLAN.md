@@ -15,13 +15,10 @@ confirmation before any YAML edit (sprint-plan overlay).
 
 ## §0 Open questions (each with a recommendation; asked one at a time)
 
-1. **What does a KB entry cite for a fact our own compile proved** (symbol length 30, `\d` rejected,
-   `v\3` not a statement, `C_Z` not in PASM)? Q4 allowed one self-created source: an accepted EF
-   record for a fact *measured on silicon*. A compile is not silicon. *Recommendation:* record each
-   compile proof in the EF ledger as a `HOST`-status entry (the ledger already defines `HOST` — "a
-   toolchain/host behavior") with the exact source, command and output, so the KB cites `EF-NNN` and
-   the `SOURCE-ERRATA` row cites the same entry — one home for the proof, and the gate's single
-   exception stays a ledger entry.
+1. ~~What does a KB entry cite for a fact our own compile proved?~~ **RESOLVED 2026-10-09 (study
+   Q12):** a separate compile-proof register, `CP-NNN` — "to keep our registers pure". Legality facts
+   stay CP; behaviour facts move to EF when a P2 run proves them. Citations are internal provenance.
+   Built in §6.
 2. **Citation format for the S-392 rewrite** (~150 citations now pointing at our text captures).
    *Recommendation:* `"<Parallax title> <edition>, <section heading>"`, plus `p.N` where the
    document is a paginated PDF (Datasheet, Hardware Manual, PASM2 Manual); no line numbers, no
@@ -56,8 +53,9 @@ confirmation before any YAML edit (sprint-plan overlay).
 - **Never edit ingested docs** (2026-10-08; scope confirmed 2026-10-09 Q1) — documents, our
   extractions, accepted results; registries and bench workflow via their skills.
 - **Bench only where the sources are silent** (2026-10-08).
-- **Citations name official Parallax documents; the one self-created exception is an accepted EF
-  record for a silicon fact** (2026-10-09, Q3/Q4).
+- **Citations name official Parallax documents; the self-created exceptions are an EF record (silicon)
+  and a CP record (compile proof), in separate registers; citations are internal provenance**
+  (2026-10-09, Q3/Q4/Q12).
 - **Our reasoning is not a source** (2026-10-09) — an unexplained observation stays open.
 - **Tests we publish from prove their answer beyond doubt** (2026-10-09).
 - **Doc vs compiler: teach what compiles; file proven errata; no PNut checks** (2026-10-09, Q9).
@@ -150,11 +148,21 @@ on-the-fly claim.
   C/Z flags"; :1006 "Useful in PASM code");
 - S-354: `-DTARGET_P2_EDGE` and `-D TARGET_P2_EDGE` both define the symbol — **not a defect**;
 - S-396 (new): `pnut_ts` appears 110 times in 53 KB files; the only executable is `pnut-ts`.
-**Target:** the KB teaches what compiles (`identifier-rules.yaml`, `escape-strings.yaml`,
-`debug-commands/c-z.yaml`, the operator pages); E-020..E-023 filed in `SOURCE-ERRATA.md` with the
-proof (D-E; citation per §0 Q1); S-396 swept.
-**Verify:** each taught form compiles in the compile gate; each erratum carries source line, command,
-output; `grep -rn "pnut_ts" deliverables/ai/P2` = 0.
+**Target:**
+1. **Stand up the compile-proof register** (Stephen's request, Q12): `engineering/ingestion/external-sources/compiler-verification/COMPILE-PROOFS.md`
+   (`CP-NNN`: fact · legality or behaviour · source file in `proofs/` · command · `pnut-ts` version ·
+   verbatim output · KB home · `→ EF-NNN` when a P2 run later proves a behaviour fact), with a README
+   stating that lifecycle. Teach the sourcing gate (§1, S-393) `CP-NNN` as the second self-created
+   citation, and add a CP -> KB-home check alongside the bench ledger's.
+2. **CP-001..CP-004** from the proofs above (symbol length; `var\x` statement; unknown escape; `C_Z`
+   in PASM), each a versioned `.spin2` that reproduces the output.
+3. The KB teaches what compiles (`identifier-rules.yaml`, `escape-strings.yaml`,
+   `debug-commands/c-z.yaml`, the operator pages), provenance `CP-NNN`.
+4. E-020..E-023 filed in `SOURCE-ERRATA.md`, each pointing at its CP record (D-E).
+5. S-396 swept.
+**Verify:** each CP source reproduces its recorded output under `pnut-ts`; each taught form compiles
+in the compile gate; each erratum names its CP; the gate fires on a KB citation of a CP id that does
+not exist (negative control); `grep -rn "pnut_ts" deliverables/ai/P2` = 0.
 
 ## §7 Stephen's decisions Q1–Q8 (2026-10-09)
 

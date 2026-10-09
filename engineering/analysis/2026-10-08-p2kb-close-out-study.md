@@ -934,6 +934,7 @@ Asked one at a time; each supersedes the "question for Stephen" note on its row.
 
 | Q9 | S-147, S-251, S-280, S-345, S-157 (PASM half), S-354 | **A, "if we have proven the errata".** Where the Spin2 v55 document and `pnut-ts` disagree on legality, the KB teaches what compiles and the document's error is filed in `SOURCE-ERRATA.md` with the source line, the command and the compiler output — only once our compile proves it. No PNut checks: `pnut-ts` emits PNut's binary (Stephen's 700+ regression tests); a PNut check is a last resort for a real suspicion. The punch-list "check first: PNut" lines (items 7–11) are struck. S-354 is checked here with `pnut-ts`. |
 | Q10 | F-352 | **In the sprint, if closeable:** the click half closes if the ingested P2 Eval Click Adapter documentation states the offsets; otherwise the row records why. |
+| Q12 | S-147, S-251, S-280, S-345, S-157 (proof home) | **A separate compile-proof register** (`CP-NNN`), not the bench ledger: "to keep our registers pure this should likely be a separate register". Legality facts stay CP; a behaviour fact moves to EF when a P2 run proves it. The sourcing gate accepts CP and EF as the two self-created citations; citations are internal provenance. |
 | Q11 | S-395 | **A — a test decides it** (VO-J-035, «#409»); the USB page states the result. Stephen also set the standard for every test we publish from (doctrine: *A test we publish from must prove its answer beyond doubt*). |
 
 **New rows raised by the decisions:**
