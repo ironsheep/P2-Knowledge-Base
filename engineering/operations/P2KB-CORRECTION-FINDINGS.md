@@ -3296,6 +3296,23 @@ drift.
   > proposer 2 m 13 s — the "~25 min" estimate above does not hold. PNut-TS hang on a file with no
   > final newline is worked around (the gate adds one) and filed as punch-list item 5.
 
+  > **PROGRESS 2026-10-09 — B3 done («#403»); B4 wiring «#404» open.** Every candidate is
+  > classified: **3077 blocks — 501 program, 1932 fragment, 17 never (asserted to fail), 627
+  > not-code (each with its reason)**, in sidecars under `kb-compile-manifest/`. A full sweep takes
+  > 27 s and fails on **352 blocks, every one REGISTERED** against a close-out study row (105
+  > distinct rows) — none unclassified, none unregistered, no tooling gap left. Ten review groups,
+  > each a fresh reviewer, verified by the arbiter in a fresh scratch root before writing the real
+  > manifest; evidence in `engineering/analysis/2026-10-08-p2kb-close-out-evidence/`. The review
+  > also produced **266 study rows** (S-001..S-266) — compile defects and the prose defects the
+  > reviewers read on the way — in `engineering/analysis/2026-10-08-p2kb-close-out-study.md` §3.
+  > Five tooling passes widened the harness honestly (version-gated built-ins, flow statements in
+  > the net, result/VAR wraps, valued constants, STRUCT types, PASM labels, end-of-file `never`);
+  > 37 negative controls, each shown to fire when its guard is removed. The census grew 2963 →
+  > 3077 when the net learned flow statements (S-109). Two compiler questions went to the PNut-TS
+  > punch list (items 6, 7), each to be checked against PNut first. Still outside the net by design:
+  > single-line strings (S-256 asks whether tutorial one-liners should come in) and text YAML has
+  > already cut (S-183/S-200: 47 served strings truncated at ` #`; needs its own gate).
+
   *Filed 2026-08-21;
   Stephen's call, and he asked for it in these words: "we must, for all code in YAML files, compile
   that code and assure ourselves that it compiles correctly. We do not publish a release unless all

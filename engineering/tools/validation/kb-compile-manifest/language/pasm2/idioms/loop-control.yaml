@@ -55,8 +55,7 @@ blocks:
     fp: "96ae168b6a6754e4"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [t]
-    finding: "S-198"
+    assumes: [t, label:.move]
   - at: idioms[4].examples[1]
     fp: "f58f48f7748dbf99"
     compile: fragment

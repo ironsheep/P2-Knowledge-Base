@@ -68,7 +68,11 @@ MANIFEST SCHEMA
             wrap: pasm2-dat               # fragment / never only (below)
             assumes: [x_coord, y_coord]   # fragment / never only (below)
             reason: ...                   # REQUIRED for never and not-code
-            fails_at: 3                   # never only: block-relative line (5)
+            fails_at: 3                   # never only: block-relative line (5), or `eof`:
+                                          #   the error lands AFTER the block's last line,
+                                          #   in wrapper text (tail / past end of file),
+                                          #   for whole-file checks the compiler reports
+                                          #   one line past EOF (S-150)
             spin2_version: 45             # optional, wraps only: {Spin2_v45} line 1
             with: [examples[0].code]      # optional, wraps only: prepend siblings
             finding: F-381                # optional, reporting only; NEVER changes
@@ -106,6 +110,12 @@ MANIFEST SCHEMA
       OBJ.struct:NAME(MEMBERS)   a structure the generated stub object OBJ EXPORTS, so the
                                 block can say `OBJ.NAME` in a VAR / parameter (the object
                                 file gets `CON` + `STRUCT NAME(MEMBERS)`)
+      label:NAME        (pasm2-dat / pasm2-hub) a label line `NAME` right AFTER the block: a
+      label:.NAME       label the excerpt jumps to but does not define. `.NAME` is a local
+                        (PNut accepts a `.local` with no global label above it, so no
+                        anchor line is added; probed with the label-less excerpts) (S-198)
+      lead:N            (pasm2-dat / pasm2-hub) N `nop` lines BEFORE the block (1..16), for
+                        an excerpt whose first line says `$-1` (a relative address) (S-199)
       NAME:TYPE         trailing `VAR` + `  TYPE NAME`: a variable of a declared
                         structure type (TYPE may be `^TYPE` or `OBJ.TYPE`)
     A program never gets a wrap, an assumes list or a language directive: it must
@@ -529,6 +539,12 @@ def parse_assume(s):
     m = re.fullmatch(r"file:(.+)", s)
     if m:
         return {"kind": "file", "name": m.group(1), "raw": s}
+    m = re.fullmatch(r"label:(\.?%s)" % NAME_RE, s)
+    if m:
+        return {"kind": "label", "name": m.group(1), "raw": s}
+    m = re.fullmatch(r"lead:([0-9]+)", s)
+    if m and 1 <= int(m.group(1)) <= 16:
+        return {"kind": "lead", "n": int(m.group(1)), "raw": s}
     m = re.fullmatch(r"struct:(%s)\((.+)\)" % NAME_RE, s)
     if m:
         return {"kind": "struct", "name": m.group(1), "members": m.group(2), "raw": s}
@@ -576,8 +592,8 @@ def validate_entry(e, where):
                 errs.append("%s: malformed assumes entry %r" % (where, a))
     if c == "never":
         fa = e.get("fails_at")
-        if not (isinstance(fa, int) and not isinstance(fa, bool) and fa >= 1):
-            errs.append("%s: `fails_at` (block-relative line, >= 1) is required for never" % where)
+        if not (fa == "eof" or (isinstance(fa, int) and not isinstance(fa, bool) and fa >= 1)):
+            errs.append("%s: `fails_at` (block-relative line >= 1, or `eof`) is required for never" % where)
     elif "fails_at" in e:
         errs.append("%s: `fails_at` is for never only" % where)
     if "spin2_version" in e:
@@ -795,7 +811,13 @@ def build(wrap, body, assumes, version=None, withs=(), append_pub=False):
         add("wrap", "pub", ["", "PUB __kbgate()"])
     elif wrap in ("pasm2-dat", "pasm2-hub"):
         add("wrap", "head", ["DAT", "\t\torg\t0" if wrap == "pasm2-dat" else "\t\torgh"])
+        labels = [p for p in parsed if p and p["kind"] == "label"]
+        leads = sum(p["n"] for p in parsed if p and p["kind"] == "lead")
+        if leads:  # instructions BEFORE the block, for a first line that reads `$-1` (relative address)
+            add("wrap", "lead", ["\t\tnop"] * leads)
         add("body", None, bl)
+        if labels:  # labels the block references but does not define, placed right after it
+            add("wrap", "labels", [p["name"] for p in labels])
     elif inline:
         locs = [p["name"] for p in parsed if p and p["kind"] == "var"]
         add("wrap", "head", ["PUB __kbgate()" + (" | " + ", ".join(locs) if locs else ""), "  org"])
@@ -856,6 +878,8 @@ def build(wrap, body, assumes, version=None, withs=(), append_pub=False):
     for p in parsed:
         if p and p["kind"] == "file":
             b.files.setdefault(p["name"], "")
+        if p and p["kind"] in ("label", "lead") and wrap not in ("pasm2-dat", "pasm2-hub"):
+            b.error = "assumes %r needs a pasm2-dat / pasm2-hub wrap (not %s)" % (p["raw"], wrap)
     b.segs = segs
     return b
 
@@ -953,6 +977,18 @@ def at_eof(b, res):
     return res.efile == MAIN_NAME and res.eline is not None and res.eline > b.text.count("\n")
 
 
+def error_past_block(b, res, loc):
+    """`fails_at: eof`: the compiler's error lands in the main file strictly AFTER the block's
+    last line and in wrapper text (the wrapper tail, or past the end of the file) -- a whole-
+    file check such as 'Conflicting or deficient _CLKFREQ/_XTLFREQ/... symbols found', which
+    PNut-TS reports one line past EOF. An error on a block line, in a prerequisite `with`
+    block, in an assumed declaration or in another file does NOT count."""
+    if res.efile != MAIN_NAME or res.eline is None or loc[0] != "wrap":
+        return False
+    body_end = max((e for k, _l, _s, e in b.segs if k == "body"), default=0)
+    return res.eline > body_end
+
+
 def assert_entry(cand, entry, withs):
     """-> None when the block holds its declared class, else a Verdict."""
     cls = entry["compile"]
@@ -973,13 +1009,17 @@ def assert_entry(cand, entry, withs):
         detail, echo, _loc = describe(b, res, cand)
         return Verdict("FAIL", detail, echo)
     # never: asserted to fail, at fails_at
+    fa = entry["fails_at"]
+    where = "the end of the block (`eof`)" if fa == "eof" else "block line %d" % fa
     if res.ok:
-        return Verdict("NEVER-COMPILES", "expected to fail at block line %d; it compiles" % entry["fails_at"])
+        return Verdict("NEVER-COMPILES", "expected to fail at %s; it compiles" % where)
     detail, echo, loc = describe(b, res, cand)
-    if loc[0] == "body" and loc[1] == entry["fails_at"]:
+    if fa == "eof":
+        if error_past_block(b, res, loc):
+            return None
+    elif loc[0] == "body" and loc[1] == fa:
         return None
-    return Verdict("NEVER-WRONG-REASON",
-                   "expected to fail at block line %d; %s" % (entry["fails_at"], detail), echo)
+    return Verdict("NEVER-WRONG-REASON", "expected to fail at %s; %s" % (where, detail), echo)
 
 
 # ============================================================ the proposer (4.3)
@@ -2140,6 +2180,48 @@ def run_negative_controls():
         "PASS / FAIL", "with %s %s; without %s" % ("PASS" if v_obj is None else v_obj.kind, errs,
                                                     "PASS" if v_noobj is None else v_noobj.kind),
         v_obj is None and not errs and v_noobj is not None and v_noobj.kind == "FAIL")
+    # NC20 fails_at: eof (S-150)
+    clk = "CON\n  _rcfast = TRUE\n  _clkfreq = 200_000_000\n"
+    def never_verdict(text, fails_at, **extra):
+        r = nc_root([text], lambda cs: None)
+        pr, _c = find_candidates(r, ["nc.yaml"], {"code"})
+        e = {"compile": "never", "wrap": "spin2-top", "reason": "nc", "fails_at": fails_at, **extra}
+        v = assert_entry(pr["nc.yaml"][0], e, [])
+        return validate_entry(dict(e, at="x", fp="0" * 16), "nc20"), v
+    e1, v_eof = never_verdict(clk, "eof")
+    _e, v_line = never_verdict(clk, 3)
+    _e, v_body = never_verdict(BAD_PROG, "eof")     # fails on a BLOCK line: not an eof failure
+    _e, v_ok = never_verdict(GOOD_PROG, "eof")
+    _e, v_decl = never_verdict("CON\n  x = 5\n", "eof", assumes=["x=con"])      # error in an ASSUMED declaration
+    _e, v_head = never_verdict(GOOD_PROG, "eof", spin2_version=56)           # error in the wrapper HEAD (bad directive)
+    kinds = lambda v: "PASS" if v is None else v.kind
+    rec("20", "never `fails_at: eof`: whole-file error past the block passes; a body-line error, a pinned line "
+        "that is not the error, a block that compiles, an error in an assumed declaration and one in the "
+        "wrapper head all fail", "PASS / WRONG / WRONG / NEVER-COMPILES / WRONG / WRONG",
+        "%s %s / %s / %s / %s / %s / %s" % (kinds(v_eof), e1, kinds(v_line), kinds(v_body), kinds(v_ok),
+                                            kinds(v_decl), kinds(v_head)),
+        v_eof is None and not e1 and kinds(v_line) == "NEVER-WRONG-REASON"
+        and kinds(v_body) == "NEVER-WRONG-REASON" and kinds(v_ok) == "NEVER-COMPILES"
+        and kinds(v_decl) == "NEVER-WRONG-REASON" and kinds(v_head) == "NEVER-WRONG-REASON")
+    # NC21 labels the PASM excerpt references but does not define (S-198)
+    def pasm_verdict(text, assumes):
+        r = nc_root([text], lambda cs: None)
+        pr, _c = find_candidates(r, ["nc.yaml"], {"code"})
+        e = {"compile": "fragment", "wrap": "pasm2-dat", "assumes": assumes}
+        return validate_entry(dict(e, at="x", fp="0" * 16), "nc21"), assert_entry(pr["nc.yaml"][0], e, [])
+    loc21 = ".a\n        nop\n        djnz counter, #.a\n        jmp #.out\n"
+    e_a, v_a = pasm_verdict(loc21, ["counter", "label:.out"])
+    _e, v_a0 = pasm_verdict(loc21, ["counter"])
+    e_g, v_g = pasm_verdict("jmp #target\n", ["label:target"])
+    _e, v_g0 = pasm_verdict("jmp #target\n", [])
+    rec("21", "PASM excerpt jumping to a label defined outside it: `label:.out` / `label:target` pass; without fail",
+        "PASS / FAIL / PASS / FAIL", "%s %s / %s / %s %s / %s" % (kinds(v_a), e_a, kinds(v_a0), kinds(v_g), e_g, kinds(v_g0)),
+        v_a is None and not e_a and kinds(v_a0) == "FAIL" and v_g is None and not e_g and kinds(v_g0) == "FAIL")
+    # NC22 an excerpt whose FIRST line is `$`-relative (S-199)
+    e_l, v_l = pasm_verdict("jmp #$-1\n", ["lead:1"])
+    _e, v_l0 = pasm_verdict("jmp #$-1\n", [])
+    rec("22", "first line `jmp #$-1`: `lead:1` (one nop before) passes; without it fails", "PASS / FAIL",
+        "%s %s / %s" % (kinds(v_l), e_l, kinds(v_l0)), v_l is None and not e_l and kinds(v_l0) == "FAIL")
     ok = all(r[4] for r in results)
     for nid, desc, expected, observed, good in results:
         print("NC%-4s %-4s %s | expected %s | observed %s" % (nid, "ok" if good else "BAD", desc, expected, observed))

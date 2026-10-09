@@ -6,14 +6,12 @@ blocks:
     fp: "b275ef2f06935fb1"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [dest_reg]
-    finding: "S-198"
+    assumes: [dest_reg, label:.target]
   - at: idioms[1].examples[0]
     fp: "7943e90e3fa0eab8"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [current_addr]
-    finding: "S-198"
+    assumes: [current_addr, label:.read_op]
   - at: idioms[2].pattern
     fp: "6aae1b039f3233cc"
     compile: not-code
@@ -22,8 +20,7 @@ blocks:
     fp: "6d032c4865504b19"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [op_erase_64k=con, op_erase_4k=con]
-    finding: "S-198"
+    assumes: [op_erase_64k=con, op_erase_4k=con, label:.cmd_template]
   - at: idioms[3].description
     fp: "ac864db6e7578b42"
     compile: not-code

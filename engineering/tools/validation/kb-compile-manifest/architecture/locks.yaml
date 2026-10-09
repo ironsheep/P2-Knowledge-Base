@@ -61,8 +61,7 @@ blocks:
     fp: "66b02bb0d299137a"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [timeout, lock_num, current]
-    finding: "S-198"
+    assumes: [timeout, lock_num, current, label:.timeout_error]
   - at: programming_patterns[2].code
     fp: "8f01da41bc92c813"
     compile: fragment

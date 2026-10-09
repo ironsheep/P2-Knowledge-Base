@@ -21,8 +21,7 @@ blocks:
     fp: "76d34f7451a06501"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [counter]
-    finding: "S-198"
+    assumes: [counter, label:.loop]
   - at: reference_operators.operators.absolute_cog.example
     fp: "d415b2c8cb15ba25"
     compile: fragment
@@ -43,7 +42,7 @@ blocks:
     fp: "788a11b96656d210"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-199"
+    assumes: [lead:1]
   - at: reference_operators.operators.current_hub_address.example
     fp: "db0731b4b73d0281"
     compile: fragment

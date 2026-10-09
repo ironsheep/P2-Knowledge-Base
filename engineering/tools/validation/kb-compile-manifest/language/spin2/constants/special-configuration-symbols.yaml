@@ -62,9 +62,8 @@ blocks:
     fp: "e78de2064518779d"
     compile: never
     wrap: spin2-top
-    reason: "`wrong:` block whose stated point is that the compiler rejects `_rcfast = TRUE` together with `_clkfreq`; pnut-ts does reject it ('Conflicting or deficient _CLKFREQ/_XTLFREQ/_XINFREQ/_RCFAST/_RCSLOW symbols found'), but reports the error at END OF FILE, not at a body line, so the gate cannot pin it (harness-gap-never-error-at-eof); fails_at 3 is the line the block itself marks 'ERROR: conflicting settings'"
-    fails_at: 3
-    finding: "S-150"
+    reason: "`wrong:` block whose stated point is that the compiler rejects `_rcfast = TRUE` together with `_clkfreq`; pnut-ts rejects it ('Conflicting or deficient _CLKFREQ/_XTLFREQ/_XINFREQ/_RCFAST/_RCSLOW symbols found'). The check is whole-file, so the compiler reports it one line past the end of the file, hence fails_at: eof"
+    fails_at: eof
   - at: clock_anti_patterns.assumed_crystal.wrong
     fp: "b28f3cc7cd72c254"
     compile: fragment

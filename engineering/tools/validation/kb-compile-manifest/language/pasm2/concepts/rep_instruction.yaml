@@ -14,7 +14,7 @@ blocks:
     fp: "b557c65a7367bd95"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-198"
+    assumes: [label:.end]
   - at: syntax.register_count[2].example
     fp: "c75912a3bec0a337"
     compile: fragment
