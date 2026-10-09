@@ -603,6 +603,33 @@ for the sprint.
 (`spin2-v55-text.txt:459`; faithful to the DOCX, so Parallax's typo, not ours) —
 `engineering/ingestion/SOURCE-ERRATA.md`.
 
+### Group A — change specs («#406»)
+
+**F-359 (2026-10-09).** Read-only research; the arbiter re-read `p2-datasheet-text.txt:1914`
+(WAITATN `2+`), `silicon-doc-text.txt:467-468`, `:2399`, `:2427-2429`, `:2480`, `:2484`, `:2517`,
+and the two KB lines being changed. Sources: the v51 debugger (current for v55), the v55
+interpreter, the silicon doc, the datasheet, the instruction CSV, the empirical ledger.
+
+| # | File, block | Current text | Correct text | Authority | State |
+|---|---|---|---|---|---|
+| S-281 | `architecture/locks.yaml:26` | `state_bits: 4  # Per lock: 3 bits COG ID + 1 bit owned flag` | **delete the line** (Stephen: no value to an agent). Nothing else references the key. Review `lock_states` (`:28-37`), which describes the same invented 4-bit encoding, in the same pass against `silicon-doc-text.txt:3673-3700` | decision D1; `grep state_bits` (one hit) | change spec |
+| S-282 | `architecture/cog_attention.yaml:346` | `waiting: "0 clocks after signal arrives"` | `waiting: "2+ clocks (2 minimum, plus the wait for the event)"`. Same file `:123` and `:104` are already right. Also review `:358` "instant notification" (unsourced) | `p2-datasheet-text.txt:1914` (`2+`); instruction CSV `:325` (`2+`) | change spec |
+| S-283 | `language/pasm2/waitatn.yaml:31-33` (class sweep) | `cycles: 2`, `type: variable` | `2+`, as its own encoding block at `:39` already says | as S-282 | change spec |
+| S-284 | `architecture/decomposition/worked-derivation-streaming-pipeline.yaml:76` (class sweep) | "COGATN/WAITATN, 2-clock" | WAITATN is `2+` (COGATN 2) | as S-282 | change spec |
+| S-285 | `architecture/debug_interrupt.yaml:381` `trace_buffer` | "Typically 4KB-16KB in hub" | replace the number with the silicon fact: the upper 16 KB of hub ($FC000..$FFFFF) can be write-protected so only a debug ISR writes it, and is shared with the per-cog save areas at $FF800.. | `silicon-doc-text.txt:2399`, `:2872`, `:2427-2429`; the debugger source has no trace buffer | change spec — **and a question for Stephen** (the debugger's own hub use is a tool limit; see below) |
+| S-286 | `architecture/debug_interrupt.yaml:382` `debug_state` | "~100 longs for full state capture" | the silicon facts only: the ROM entry routine saves registers $000..$00F (16 longs) per cog; the ISR can read GETBRK status, the return address in INB, the stack by POP, and CT; anything more is the debugger's choice | `silicon-doc-text.txt:2427-2429`, `:2433`; no source gives ~100 | change spec — question for Stephen as S-285 |
+| S-287 | `architecture/debug_interrupt.yaml:393-395` `streamer_interaction` | "Debug can disrupt streamer operations" / "Disable debug when using streamer" | scope it to what was measured: with every cog debug-enabled (the default), streamer-based Goertzel results were corrupted and restricting DEBUG_COGS to one cog fixed them (EF-057); the streamer pin/DAC output itself was unchanged with a live debug interrupt (VO-J-004 / EF-062, EF-063). No source states a mechanism | `P2-EMPIRICAL-FINDINGS.md:761-775`, `:861-865`; `silicon-doc-text.txt:2484` | change spec (mechanism bench test only if Stephen wants it) |
+| S-288 | `architecture/debug_interrupt.yaml:213`, `:231` (S-247) | `WRLONG PC, trace_ptr` / `WRLONG PC, break_log` | `WRLONG INB, …` — the debug interrupt's return address (with C and Z in its top bits, address in [19:0]) is in INB (IRET0); the page's own tracer already uses INB at `:272`, `:320`. **S-247 is answered by this row** | `silicon-doc-text.txt:467-468`, `:2420`, `:2423`; `Spin2_debugger.spin2:323` | change spec |
+| S-289 | `architecture/debug_interrupt.yaml` ISR examples (`:210-216`, `:228-235`, `:247-252`, `:271-276`, `:282-292`, `:298-304`, `:319-323`) | ISR bodies that never execute BRK before exit | add the re-arming `BRK` each needs, or say the example fires once: "bits L to A are cleared on ISR entry; a BRK must be executed before exiting … if a subsequent debug interrupt is desired" | `silicon-doc-text.txt:2517`; the debugger re-arms (`Spin2_debugger.spin2:240`) | change spec |
+| S-290 | `architecture/debug_interrupt.yaml` class sweep | `:326-328` "monitor without modifying execution timing"; `:330-336` "FIFO/Streamer status" accessible; `:362-364` "prevents security vulnerabilities"; `:366-378` hubexec entry "13-20 clocks", "0 additional clocks"; `:385-387` "cannot debug the debug ISR"; ISRs writing registers with no note that redirecting IJMP0 loses the ROM save; `:407-434` stale metadata | correct or remove each per the evidence: an ISR costs cog clocks (EF-057); status is only GETBRK D[21]/D[20] + GETPTR; the rest is unsourced | `silicon-doc-text.txt:2480`, `:2484`, `:2536-2537`, `:2760`; EF-057 | to finish in the sprint pass on this file (all evidence is here) |
+
+**Queued question for Stephen (one, at the hand-off): S-285/S-286.** Both keys describe how much
+hub or cog state the *debugger program* uses — a tool limit, which the doctrine says is not a KB
+fact. Recommendation: keep the keys with the silicon-only text above (the 16 KB region, its write
+protection, the 16-long ROM save) and state no debugger figures. The v51 debugger's own figures, for
+his reference only: it saves $010..$1F7 (488 longs) at $FEA00, 504 longs in all with the ROM's 16;
+the debugger and its overlays occupy $FF1A0..$FFC00 (2656 bytes).
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 
