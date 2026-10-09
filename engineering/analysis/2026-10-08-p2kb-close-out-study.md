@@ -712,6 +712,28 @@ Arbiter re-read `p2-hardware-manual-text.txt:1488`, `:1611`, `:1634`, `silicon-d
 | S-327 | F-545 | hygiene | change spec (partial — key census to finish in the sprint) | provenance keys folded or removed; `authority_tier` is content |
 | S-328 | F-560 | hygiene | change spec + **question for Stephen** (quick-bytes tags) | 78 label-valued `source:` lines |
 
+### Rows S-001..S-040 — change specs («#407», 2026-10-09)
+
+Every row S-001..S-040 is in a done state; the specs (current → correct → authority, plus class-sweep
+sites) are in `2026-10-08-p2kb-close-out-evidence/rows-S001-S040-specs.md`. Arbiter re-read INT
+`:2268-2270`, `:2328-2332`, `:2681-2682`, `silicon-doc-text.txt:4090-4091`, `spin2-v55-text.txt:337`,
+`:360`. States: change spec — S-001..S-021, S-023..S-036, S-039, S-040 (S-040 answered from the sources,
+no bench); RESOLVED — S-022; bench question — S-037 (VO-S037); reclassified sourced — S-038. Code marked
+"compile in sprint" is compiled under the ENH-03 gate when applied. Sprint-time choices (not Stephen's):
+S-003 PINHIGH vs PINSTART; S-021 an authored PLL-mode example. Noteworthy new truths: `x /. 0.0` and float
+overflow give NaN, not Infinity (INT:2681-2682, 2859-2860); COGSTOP/COGCHK use the 4 low bits, so
+`COGSTOP(16)` stops cog 0; GETCRC starts from all ones.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-329 | B | S-026 sweep | **drives wrong code** | `qlog.yaml:22,26`, `qexp.yaml:22,26`: `QLOG(v) * 39457 >> 17` etc. — shifts bind tighter than `*`, so the scale is `* 0` / `* 2` | v55:443, :454 (priorities 3 and 7) | traced | precedence | change spec (MULDIV64 forms; numeric check in sprint) | no |
+| S-330 | B | S-004 | hygiene | `.git-hooks/pre-commit`, `post-commit` in the served tree point at the dead `engineering/knowledge-base/P2` | `git ls-files` | traced | stale tooling | remove (or move to `engineering/`) with the stray `.py`; **question for Stephen:** README/CHANGELOG under the YAML-only rule | yes |
+| S-331 | B | S-012 sweep | **drives wrong code** | `setregs.yaml:25-31`, `getregs.yaml:21-26` save/restore `$1F0-$1FF`, which includes PTRA, the Spin2 stack pointer — restoring it corrupts the cog | v55:806; INT:2136 | traced | — | change spec (rewrite the range; sprint) | no |
+| S-332 | B | S-013 sweep | **drives wrong code** | `architecture/streamer/dds-goertzel.yaml:147-161`: a 512-entry LUT table built by `wrlut()` from Spin2 — there is no Spin2 WRLUT, and the interpreter owns LUT $010..$1FF | v55:806 | traced | — | change spec (rewrite as a PASM cog; sprint) | no |
+| S-333 | B | S-028 sweep | drives wrong code | `hubset.yaml:22-33`: `waitms(10)` while on RCFAST, with `clkfreq` still holding the PLL value | v55:1725 (the CLKSET sequence) | inferred | — | to verify in the sprint (compile + read) | no |
+| S-334 | B | S-025 sweep | **drives wrong code** | `concepts/floating_point.yaml:96-101`: `x / 0` and overflow "→ ±Infinity"; the interpreter returns NaN | INT:2681-2682, 2859-2860 | traced | assumed IEEE behaviour | change spec | no |
+| S-335 | B | S-040 | wrong, not code-driving | `cogstop.yaml:23`, `:100`; `cogchk.yaml:19-20`: "invalid numbers have no effect", "values outside 0-7 return 0" — both use the 4 low bits | DS:1788, :1790; SD:421; INT:2076-2077 | traced | — | change spec | no |
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
@@ -738,6 +760,7 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 | VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
 | VO-F372 | S-324 | with a USB pair running, does a new WRPIN with DIR high switch host ↔ device without a DIR cycle? | `sniffer` · 5 files · sources disagree (`HW:1488` vs `SD:4579`) | to write | sources disagree |
 | VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | to write | sources disagree |
+| VO-S037 | S-037 | does `COGATN(1 << COGID())` deliver an attention event to the issuing cog (POLLATN/WAITATN)? No pins | `own\|self\|itself` near `attention\|COGATN` · `sources/` · control SD:2020 | to write | sources silent |
 | VO-S304 | S-304 | PWM_TRIANGLE / PWM_SAWTOOTH with `X[15:0] = 0` and with `X[31:16] = 0`: what base period and frame count result? (second smart pin on a jumper, free pins only) | `65,?536`, `X.[15..0]` · `silicon-doc-text.txt` PWM sections `:4034-4067` · control: `:3925` (DAC/NCO "zero = 65,536") | to write (step 8) | sources silent |
 
 ## 6. Not read, and why
