@@ -879,6 +879,25 @@ are applied to the registry with this study's next commit set.
 | S-380 | B | G-025 | drives wrong code | `bitc`, `bitnc`, `bith`, `bitl`, `bitz`, `bitnz.yaml` omit the S[9:5] span rule (a non-zero S[9:5] changes several bits) | CSV row 44; SD:60; PM:1064, :1501-1503 | traced | — | change spec (one line each; `altb.yaml:5` already carries it) | yes |
 | S-381 | B | G-027 | wrong, not code-driving | `smart-pin-11011-usb-host-device.yaml:17-29`: conflict note says the documents are "the same document" — three sources carry the sentence, only the newest silicon-doc edition omits it | HW:1488; Titus :1382; `p2-documentation.txt:8885-8886`; SD:4579 | traced | — | change spec (with S-324) | no |
 
+### Group F — gate build specs («#407», 2026-10-09)
+
+Specs in `2026-10-08-p2kb-close-out-evidence/gates-groupF-specs.md`, each with today's population (read-only
+scratch counts), home, rule, negative controls, runner and what a green does not certify. The
+`KNOWLEDGE-GAPS.md` registry was updated from group C/D in the same pass (backup
+`.backups/engineering/ingestion/KNOWLEDGE-GAPS.md.20261009-055543`).
+
+| # | Gate | Catches | Population today | Home | State |
+|---|---|---|---|---|---|
+| S-382 | S-200 | YAML plain scalar cut by a same-line ` #` | 52 in 15 files | new `audit-yaml-plain-scalar-comment.py` | build spec |
+| S-383 | F-364 | dangling `yaml_file:` pointers | 0 — **already gated** by `validate-crossref-keys.py` (`:545-567`) | add a negative-control case | build spec (register note added) |
+| S-384 | F-441 | index `sha256` vs the committed blob | committed index 38 of 1131 stale | new `audit-index-integrity.py` (sha256 limb) | build spec |
+| S-385 | F-405 | index freshness (regenerate in a clone, compare) | committed index stale; `.gz` pair consistent | same script, freshness limb, `--post-commit` on the DoD runner | build spec (register note: the "nothing runs it" half is stale) |
+| S-386 | F-454 | a hardware rating stated without its board revision | 5 rating scalars in 3 files | new `audit-hardware-revision-scope.py` | build spec |
+| S-387 | F-389 | a directory name that reaches only some of its files | 8 directories (135 files) partial | new `audit-index-findability.py` with a reviewed baseline | build spec |
+| S-388 | S-256 | one-line code outside the compile gate's net | 123 candidates under 13 seed keys | extend `audit-kb-code-compiles.py` (`_oneline-code-keys.yaml`) | build spec |
+| S-389 | D3 | a built-in constant used as a bare PASM operand (`mov flag, TRUE`) | 8 sites in 4 files | extend `audit-kb-code-compiles.py` (elementizer token types) | build spec — **partial by nature**: user constants the harness declares are invisible; review covers the rest |
+| — | S-308 | claim sourcing per D4 | — | `audit-yaml-claim-sourcing.py` | spec in row S-308 |
+
 **VO-F372 reworded:** host ↔ device is a WXPIN field, already documented as changeable live (SD:4581);
 the open question is whether a **WRPIN** sniffer/drive change takes effect without a DIR cycle.
 

@@ -961,6 +961,13 @@ the word. Anyone scoping F-356 off its original wording will do the wrong repair
 
 ### F-405 — `validate-dod-release.py` exits 1 on a stale gzip, and nothing in this project makes it run — `PARTIAL`
 
+> **Re-checked 2026-10-09 (close-out study «#407», group F):** the "nothing makes it run" half is
+> stale — `release-yamls` (§5.5, §6c) and `baseline-health`'s project overlay invoke the DoD runner, and
+> the ENH-03 compile gate is now armed through it (`audit-gate-arming.py`). What is still owed is the
+> **freshness** limb (regenerate the index in a clone of the commit and compare): build spec in
+> `engineering/analysis/2026-10-08-p2kb-close-out-evidence/gates-groupF-specs.md` (new
+> `audit-index-integrity.py`, run post-commit). Today the committed index is stale against HEAD.
+
 **Location:** `deliverables/ai/p2kb-index.json` / `deliverables/ai/p2kb-index.json.gz`, and the absence of any trigger for `engineering/tools/validate-dod-release.py`.
 
 **What was measured.** Run at `b0057ec1` before any repair, the release validator reported **`❌ Gzip Compression: FAIL — Gzip content does not match JSON file`** and exited **1** (*VALIDATION FAILURES - DO NOT RELEASE*). The other ten checks passed.
@@ -1852,6 +1859,12 @@ document staged*. It has one. That plan line is wrong and is corrected in «#318
 ## The COG register map's PA/PB row lost the return-vs-parameter distinction, and its index dangles 13 of 16 pointers (2026-08-26, silicon-doc DOCX re-extraction) — F-363 · F-364
 
 ### F-364 — the same index advertises 16 register files; 13 of the pointers do not exist — `PARTIAL` (re-verified 2026-10-05 «#386»: pointers removed and shipped; the gate reading `yaml_file:` is not built)
+
+> **Re-checked 2026-10-09 (close-out study «#407», group F):** the gate exists —
+> `validate-crossref-keys.py` checks every path token in every string, `yaml_file:` values included
+> (`check_path_token`, `:545-567`), and today's 3 pointers resolve. What is owed is a negative-control case
+> proving a dangling `yaml_file:` fails (spec in `…/close-out-evidence/gates-groupF-specs.md`); then F-364
+> closes.
 
 **What was measured.** Every `yaml_file:` pointer in
 `complete-system-registers-index.yaml`, resolved against its own directory:
