@@ -1,0 +1,27 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/augs.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: silicon_errata.setq_ptrx_block_size_delta_cancelled.description
+    fp: "14f170e717386c47"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: silicon_errata.intervening_altx_immediate_s_consumes_augs.description
+    fp: "3a3bf1e3214bf4dd"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: silicon_errata.intervening_altx_immediate_s_consumes_augs.example
+    fp: "052b8a235a606fd8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [index, base]
+  - at: examples[0].code
+    fp: "98e6d2e3022df7e7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [address, idx, far_away]
+  - at: examples[1].code
+    fp: "23d929689547c4c3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [address, far_away, idx]

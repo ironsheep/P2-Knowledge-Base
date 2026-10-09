@@ -1,0 +1,139 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/special-registers.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: dual_purpose_registers.IJMP3.usage
+    fp: "50e426ad9cff6125"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.IRET3.usage
+    fp: "d4adab774f7eefc7"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.IJMP2.usage
+    fp: "9c838ed42407b877"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.IRET2.usage
+    fp: "f0a81107b3d8ea93"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.IJMP1.usage
+    fp: "7256cf1e2ae4e9eb"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.IRET1.usage
+    fp: "58ead168fa856224"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.PA.usage
+    fp: "6e61c2eba63f6f3e"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.PA.examples[0].code
+    fp: "01c50e8f59b1cfbc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [subroutine, param, handler, label]
+  - at: dual_purpose_registers.PB.usage
+    fp: "ce0c22c9c347c259"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: dual_purpose_registers.PB.examples[0].code
+    fp: "a58613b9c00ff966"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [subroutine, param, handler, label]
+  - at: fixed_special_registers.PTRA.usage
+    fp: "f2b31d20676bcbab"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.PTRA.examples[0].code
+    fp: "d05d80f7c8331e3b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, hub_addr]
+  - at: fixed_special_registers.PTRB.usage
+    fp: "fed20e9f5691dca3"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.PTRB.examples[0].code
+    fp: "3221a5e2127d5794"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data, hub_addr]
+  - at: fixed_special_registers.DIRA.usage
+    fp: "ea2a005a463895dd"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.DIRA.examples[0].code
+    fp: "dec1dd99674d0b2c"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: fixed_special_registers.DIRB.usage
+    fp: "8be293501ee79458"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.DIRB.examples[0].code
+    fp: "34419ac4aa3ebe5b"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: fixed_special_registers.OUTA.usage
+    fp: "fe942c251a40d202"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.OUTA.examples[0].code
+    fp: "0cad510058f568c1"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: fixed_special_registers.OUTB.usage
+    fp: "66798d3f38d7b801"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.OUTB.examples[0].code
+    fp: "cfe6b39a18d1de0a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pattern, mask]
+  - at: fixed_special_registers.INA.usage
+    fp: "6d85f92ae3b7a26c"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.INA.examples[0].code
+    fp: "2a4fe4d38f04234a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [state, inputs]
+  - at: fixed_special_registers.INB.usage
+    fp: "1c6482bd6515a9f7"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: fixed_special_registers.INB.examples[0].code
+    fp: "94eb5b0e7e84a3ef"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [state]
+  - at: common_patterns[0].code
+    fp: "734bb0a39d97f4b9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_mask]
+  - at: common_patterns[1].code
+    fp: "d2f707d6c0f7d042"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_mask]
+  - at: common_patterns[2].code
+    fp: "e7b0a2a026d1ff07"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_patterns[3].code
+    fp: "3c8cf564fd88b6c5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [new_pattern]
+  - at: common_patterns[4].code
+    fp: "65ba43d7893f6637"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count=con:4, buffer]

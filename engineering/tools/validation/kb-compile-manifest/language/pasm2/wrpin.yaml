@@ -1,0 +1,21 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/wrpin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: timing.in_flag_reset_latency
+    fp: "e2e513b54ffaefb6"
+    compile: not-code
+    reason: "YAML timing prose with an embedded WRPIN/NOP/TESTP excerpt after an English lead-in (the same three lines are in the silicon doc); the string as a whole is a sentence"
+  - at: examples[0].code
+    fp: "086e93e2e4067f21"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples[1].code
+    fp: "9f1bdb437c4d4782"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples[2].code
+    fp: "374c3bca72ca1175"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mode]

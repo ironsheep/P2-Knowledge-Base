@@ -1,0 +1,27 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/muxq.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "73e1ab4f7a5211da"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "3f4b05753412389e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [maskRgb12, reg_value]
+  - at: examples[1].code
+    fp: "ee3c6c140ed5d2f9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [update_mask, status, new_bits, config]
+  - at: examples[2].code
+    fp: "752e9abdcb8124a9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mask, dest, source]
+  - at: examples[3].code
+    fp: "b14441d248dedde6"
+    compile: fragment
+    wrap: pasm2-dat

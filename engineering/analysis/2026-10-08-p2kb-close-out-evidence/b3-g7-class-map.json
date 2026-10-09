@@ -1,0 +1,11 @@
+{
+ "const-as-register-operand": "S-162",
+ "augx-register-operand": "S-163",
+ "const-assign-in-code": "S-164",
+ "or-separator-in-example": "S-165",
+ "djnz-flag-effect": "S-166",
+ "imm-over-511-no-aug": "S-167",
+ "folded-single-quoted-code": "S-168",
+ "orgh-example-beyond-hub": "S-169",
+ "modz-as-modulo": "S-170"
+}

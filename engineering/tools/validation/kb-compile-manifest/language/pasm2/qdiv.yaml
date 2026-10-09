@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/qdiv.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "22ad07d8658a1ff1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, quotient, remainder]
+  - at: examples[1].code
+    fp: "1b9ed6e96ab67784"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [quotient, remainder]
+  - at: examples[2].code
+    fp: "346a313d15783ac6"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [dividend_high, dividend_low, divisor, result_quotient, result_remainder, exact_division]
+  - at: examples[3].code
+    fp: "6f4480fe0e79fb70"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [fixed_point_low, scaled_low, scaled_high, final_result]

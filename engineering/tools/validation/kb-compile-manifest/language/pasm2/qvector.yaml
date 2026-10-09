@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/qvector.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "32bd0b21bdd5b149"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [length, angle]
+  - at: examples[1].code
+    fp: "0b760dceaeec34ed"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x_coord, y_coord, magnitude, phase_angle]

@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/posx.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage
+    fp: "6663090d1c19eec3"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "8ee0c13364d27936"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, overflow]
+    finding: "S-162"
+  - at: examples[1].code
+    fp: "c901fcef9e02cce7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [limit, value]
+    finding: "S-162"

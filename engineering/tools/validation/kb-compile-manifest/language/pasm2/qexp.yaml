@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/qexp.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "55abe8fc30e2648f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [log_value, integer_result]
+  - at: examples[1].code
+    fp: "cc76babd78d3935b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [base, log_base, exponent, log_result, power_result]
+  - at: examples[2].code
+    fp: "77dbf9b6de6893d3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [logarithm, exponential]

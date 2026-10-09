@@ -1,0 +1,29 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/xinit.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "68340fce50930935"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [rmode, tranp, spi_ck=con]
+  - at: examples[1].code
+    fp: "8a5db048cf7ab343"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [bmode, spi_ck=con]
+  - at: examples[2].code
+    fp: "80b8859511d6a70f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, spi_ck=con, wmode]
+  - at: patterns[0].implementation
+    fp: "92f7fe36ede2b0f1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mode, data, count, clk_pin=con]
+  - at: large_transfer_chunking.implementation
+    fp: "1b77ef004223cb79"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, count, mode, clk_pin=con]

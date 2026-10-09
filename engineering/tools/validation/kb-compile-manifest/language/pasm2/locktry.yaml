@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/locktry.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "42d2a1732e83cd2f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [RESOURCE_LOCK=con, value, shared_addr]
+  - at: examples[1].code
+    fp: "09570489686f0f31"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples[2].code
+    fp: "93658c4c2a650844"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lock_num, timeout]
+  - at: examples[3].code
+    fp: "a594ff9a973372b2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [LOCK_A=con, LOCK_B=con, LOCK_C=con]

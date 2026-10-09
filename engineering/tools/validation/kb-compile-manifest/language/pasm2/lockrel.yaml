@@ -1,0 +1,29 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/lockrel.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "4210e9c7365066a7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [DATA_LOCK=con, data, shared_ptr]
+  - at: examples[1].code
+    fp: "4b74cef2988c07dd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [regh]
+  - at: examples[2].code
+    fp: "fc05d2891fc4e851"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count, lock_num]
+  - at: examples[3].code
+    fp: "66a7a4955e94beba"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [my_cog, lock_check, lock_num, not_owner]
+  - at: examples[4].code
+    fp: "c3f7a18584dcc556"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [CRITICAL_LOCK=con, flags, HAVE_LOCK=con, complex_operation]

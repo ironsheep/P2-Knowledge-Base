@@ -1,0 +1,17 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/orgh.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "db28617a9d4257a6"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples[1].code
+    fp: "4be7d74cc0eba11d"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples[2].code
+    fp: "5bb0a1f82da4636c"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-169"

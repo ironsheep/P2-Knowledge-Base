@@ -1,0 +1,31 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/hubset.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: safe_clock_switching.sequence.step_1.code
+    fp: "99ae2ac683d207b0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pll_config_mode=con]
+  - at: safe_clock_switching.sequence.step_2.code
+    fp: "09d1105e8820fd21"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [clkf, pll_wait]
+  - at: safe_clock_switching.sequence.step_3.code
+    fp: "b7debfe69372c97f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pll_active_mode]
+  - at: examples.enable_crystal.code
+    fp: "a420fed2ee6adc9b"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples.pll_200mhz.code
+    fp: "36451d6307143fb0"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples.chip_reset.code
+    fp: "437ab0d2e2b0205e"
+    compile: fragment
+    wrap: pasm2-dat

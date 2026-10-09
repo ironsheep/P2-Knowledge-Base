@@ -1,0 +1,32 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/testp.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: timing.pin_sampling_latency
+    fp: "210f4497779fd2ae"
+    compile: not-code
+    reason: "YAML timing prose (English sentences about pin-sampling latency), not code"
+  - at: description
+    fp: "890388c996bce40f"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "2d033ff7b8837876"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin_hall_w, hall_, pin_hall_v, pin_hall_u]
+  - at: examples[1].code
+    fp: "36f95c5e6a9cef81"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [input_pin, flag_reg]
+  - at: examples[2].code
+    fp: "d9e91eaf54b7dede"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [status, FLAG_BIT=con, sensor_pin]
+  - at: examples[3].code
+    fp: "b0ba69d725b7a9bc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [PIN_A=con, PIN_B=con, PIN_C=con, not_ready]

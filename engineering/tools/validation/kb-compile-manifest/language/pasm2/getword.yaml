@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/getword.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "5960b68ac0221ed5"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

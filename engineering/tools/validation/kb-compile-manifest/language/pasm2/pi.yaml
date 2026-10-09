@@ -1,0 +1,18 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/pi.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage
+    fp: "7728819b5e4fdbd3"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "c9568c8f8c0761cd"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [fnum]
+  - at: examples[1].code
+    fp: "6e586bfe4b6d0f41"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [y_coord, x_coord, new_x, new_y]

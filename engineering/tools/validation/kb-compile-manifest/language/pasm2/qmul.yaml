@@ -1,0 +1,28 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/qmul.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "da1f387223cc29f7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [lower_32, upper_32]
+  - at: examples[1].code
+    fp: "e7b47d8730c5918c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [multiplicand, multiplier, product_low, product_high]
+  - at: examples[2].code
+    fp: "cee59195d991ca0f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [acc_low, acc_high, a1, b1, prod_low, prod_high]
+  - at: examples[3].code
+    fp: "48f06e9fb4e5e3ac"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [a1, b1, a2, b2, result1_low, result1_high, result2_low, result2_high]
+  - at: interrupt_protection
+    fp: "19e6564fddefe046"
+    compile: not-code
+    reason: "YAML prose (\"For timing-critical PASM2 code ... use REP with a single iteration ...\") with an indented REP/QMUL/GETQX/GETQY excerpt embedded after an English lead-in; the excerpt itself compiles as a fragment (scratch check) but the string as a whole is a sentence"

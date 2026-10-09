@@ -1,0 +1,23 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/alts.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage_notes
+    fp: "699a998993df2328"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "5b79dcbdaa9278ba"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [portctr, rxpin, rxd]
+  - at: examples[1].code
+    fp: "3cce63fb36100598"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [portctr, rxpin, rxd, txpin, txd, rx_service, tx_service]
+  - at: examples[2].code
+    fp: "134735899bf35eb8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [portctr, p_rxbuf, buffer_ptr, p_rxhead, head_ptr, head_idx]

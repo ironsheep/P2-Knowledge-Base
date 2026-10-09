@@ -1,0 +1,366 @@
+[
+ {
+  "slug": "augx-register-operand",
+  "finding": "S-PENDING-augx-register-operand",
+  "statement": "augd.yaml:48-54 (`silicon_errata.setq_ptrx_block_size_delta_cancelled.example`) shows `AUGD   start_reg` with a register operand. AUGD and AUGS take only an immediate (`AUGD #n`, a 23-bit value queued for the next #D); the compiler rejects the register form. The example is meant to show an AUGD between SETQ and RDLONG ptra++.",
+  "compiler_error": "Expected \"#\" (block line 2)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:433 (`AUGD    #n`)",
+  "verified_fix": "scratch cases1.py augd_fix: `SETQ #16-1` / `AUGD #$123456` / `RDLONG 0,ptra++` compiles (12 bytes, pnut-ts); the same text with `AUGD start_reg` fails (augd_reg)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/augd.yaml",
+    "addr": "silicon_errata.setq_ptrx_block_size_delta_cancelled.example",
+    "key_line": 52,
+    "decision_index": 23,
+    "gate_first_error": "block line 2 (YAML line 54): Expected \"#\"",
+    "source_line_of_error": "AUGD   start_reg     ' AUGD here cancels the block-size PTRx delta!",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "const-assign-in-code",
+  "finding": "S-PENDING-const-assign-in-code",
+  "statement": "brk.yaml:31-40 (examples[2]) opens a PASM block with four constant definitions (`DEBUG_TRACE     = 1` ... `DEBUG_ERROR     = 4`) and then uses `brk #DEBUG_WARNING`. A constant definition `NAME = value` is legal only in a CON block; in DAT/PASM the line is rejected, and the example has no `CON` header.",
+  "compiler_error": "Expected a unique name, BYTE, WORD, LONG, or assembly instruction (block line 2, at the `=`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt: constants are declared in CON blocks (the compiler's own error in the gate run)",
+  "verified_fix": "scratch cases1.py brk_fix: `CON` + the four `NAME = n` lines, then `DAT` / `org 0` / `brk #DEBUG_WARNING` compiles (4 bytes); brk_asis (same lines under DAT) fails with the error above",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/brk.yaml",
+    "addr": "examples[2].code",
+    "key_line": 31,
+    "decision_index": 34,
+    "gate_first_error": "block line 2: Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "DEBUG_TRACE     = 1",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "or-separator-in-example",
+  "finding": "S-PENDING-or-separator-in-example",
+  "statement": "coginit.yaml:50-67: four of the ten `examples[].code` entries carry a literal `--or--` line (examples[0], [2], [4], [6]); in examples[4] it is followed by a `SETQ ptra_val` line. `--or--` is the alternative-forms separator of the source syntax listing, not code; the compiler rejects it. (The instruction on the first line is legal.)",
+  "compiler_error": "Expected a unique name, BYTE, WORD, LONG, or assembly instruction (block line 2, at `--or--`)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:406-418 (the same forms, one per line, with no `--or--`)",
+  "verified_fix": "scratch cases1.py coginit_ok1: the four COGINIT lines with the separators removed compile (28 bytes); coginit_or (line + `--or--`) fails",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/coginit.yaml",
+    "addr": "examples[0].code",
+    "key_line": 50,
+    "decision_index": 45,
+    "gate_first_error": "block line 2: Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "--or--",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/coginit.yaml",
+    "addr": "examples[2].code",
+    "key_line": 55,
+    "decision_index": 47,
+    "gate_first_error": "block line 2: Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "--or--",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/coginit.yaml",
+    "addr": "examples[4].code",
+    "key_line": 61,
+    "decision_index": 49,
+    "gate_first_error": "block line 2: Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "--or--",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "addr",
+     "ptra_val"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/coginit.yaml",
+    "addr": "examples[6].code",
+    "key_line": 64,
+    "decision_index": 51,
+    "gate_first_error": "block line 2: Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "--or--",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "addr"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 4
+ },
+ {
+  "slug": "djnz-flag-effect",
+  "finding": "S-PENDING-djnz-flag-effect",
+  "statement": "conditional-debug.yaml:81-95 (examples[3]) writes `djnz    count, #.loop   wz      ' Z set when done`. DJNZ has no flag effects (instruction table: `DJNZ D,{#}S`, no WC/WZ/WCZ), so the compiler rejects the `wz`; the two conditional DEBUG lines that follow depend on that Z.",
+  "compiler_error": "This effect is not allowed for this instruction (block line 8)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:193 (`DJNZ    D,{#}S`, no flag effects)",
+  "verified_fix": "scratch cases1.py cdbg3_fix_d (pnut-ts -d): `sub count, #1 wz` / `if_nz DEBUG(..)` / `if_nz jmp #.loop` / `if_z DEBUG(\"Loop complete\")` compiles; cdbg3_asis_d (the block as shown) fails with the error above",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/conditional-debug.yaml",
+    "addr": "examples[3].code",
+    "key_line": 81,
+    "decision_index": 61,
+    "gate_first_error": "block line 8 (YAML line 89): This effect is not allowed for this instruction",
+    "source_line_of_error": "djnz    count, #.loop   wz      ' Z set when done",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "imm-over-511-no-aug",
+  "finding": "S-PENDING-imm-over-511-no-aug",
+  "statement": "an immediate operand above 511 written with a single `#` (no `##`, the augmented-immediate form). conditional-debug.yaml:97-108 `test    result, #$8000_0000 wz`; qlog.yaml:39 `QLOG    #1000`; hubexec.yaml:18 `COGINIT #HUBEXEC+1, #$400`. A `#` immediate holds 0..511; larger values need `##`. (The sibling blocks that use `##` for large values, e.g. qdiv.yaml:40 `MOV x, ##1_000_000`, compile.)",
+  "compiler_error": "Constant must be from 0 to 511 (m130)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt (augmented immediates: `##` for 32-bit constants); the compiler error text",
+  "verified_fix": "scratch cases1.py qlog_fix (`QLOG ##1000`), cdbg4_fix_d (`test result, ##$8000_0000 wz`) and cases4.py hubexec_fix (`COGINIT #HUBEXEC+1, ##$400`) compile; the originals fail (qlog_asis etc.)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/conditional-debug.yaml",
+    "addr": "examples[4].code",
+    "key_line": 97,
+    "decision_index": 62,
+    "gate_first_error": "block line 5 (YAML line 102): Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "test    result, #$8000_0000 wz  ' Check error bit",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/hubexec.yaml",
+    "addr": "examples[0].code",
+    "key_line": 18,
+    "decision_index": 115,
+    "gate_first_error": "block line 1: Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "COGINIT #HUBEXEC+1, #$400   ' Start Cog 1 executing from Hub RAM $400",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/qlog.yaml",
+    "addr": "examples[0].code",
+    "key_line": 39,
+    "decision_index": 175,
+    "gate_first_error": "block line 2: Constant must be from 0 to 511 (m130)",
+    "source_line_of_error": "QLOG    #1000          ' Begin log conversion",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "log_result"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "folded-single-quoted-code",
+  "finding": "S-PENDING-folded-single-quoted-code",
+  "statement": "orgf.yaml:20-45: all three `examples[].code` are single-quoted YAML scalars written over several lines with NO blank line between them, so the YAML parser folds each line break into a space: examples[0] reads as ONE line `DAT ORG  0 entry   jmp  #main ' ... some code ...` (the first `'` is a comment, so everything after it on that line is lost) and a second line `ORGF $100 ' Fill ... table   long 1,2,3 ' Table ...`; examples[1] likewise; examples[2] reads `DAT ' Create fixed-size code block ORG  0 block_start ...` which is a DAT line holding only a comment, so it compiles vacuously (the gate passes it; it contains no ORGF). The directive text the reader sees is not the multi-line listing the author wrote. (Other pages avoid this with a blank line after every line or with a `|` block scalar.)",
+  "compiler_error": "Expected end of line (m281) (block line 1) for examples[0] and [1]; examples[2] passes vacuously",
+  "correct_source": "orgf.yaml:20-45 as written (the author's intended line structure); block-scalar `|` form used elsewhere in the tree (ditto.yaml:30)",
+  "verified_fix": "scratch cases1.py orgf1 (with a main label), orgf2 (with a process label) and orgf3 / orgf3_nocode: the intended multi-line listings compile (1040, 72, 256, 256 bytes); the folded one-line forms are what the gate compiled",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/orgf.yaml",
+    "addr": "examples[0].code",
+    "key_line": 20,
+    "decision_index": 152,
+    "gate_first_error": "block line 1: Expected end of line (m281)",
+    "source_line_of_error": "DAT ORG  0 entry   jmp  #main ' ... some code ...",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "main"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/orgf.yaml",
+    "addr": "examples[1].code",
+    "key_line": 29,
+    "decision_index": 153,
+    "gate_first_error": "block line 1: Expected end of line (m281)",
+    "source_line_of_error": "DAT ORG  0 nop nop ORGF $10             ' Advance to $10, filling $02-$0F with zeros handler jmp  #process",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "process"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/orgf.yaml",
+    "addr": "examples[2].code",
+    "key_line": 37,
+    "decision_index": 154,
+    "gate_first_error": "passes vacuously: the whole block is `DAT` plus one comment",
+    "source_line_of_error": "DAT ' Create fixed-size code block ORG  0 block_start ' ... code ... ORGF block_start + 64 ...",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "compiles but contains no code (everything after the first quote is a comment)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "orgh-example-beyond-hub",
+  "finding": "S-PENDING-orgh-example-beyond-hub",
+  "statement": "orgh.yaml:22 (examples[2]) `ORGH $FC000,$FC800  ' hub origin = $FC000, origin limit = $FC800` cannot be built: the hub is 512 KB ($80000), and PNut fills the image with zeros up to the ORGH address, so a program holding this line fails. $FC000..$FFFFF is the debug-only mirror of the last 16 KB, not an address an application image can be assembled at. (Bare `ORGH $FC000` fails the same way.)",
+  "compiler_error": "Program requirement exceeds 512KB hub RAM by 507904 bytes (reported at end of file)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2399 (upper 16 KB of hub RAM mapped to $FC000..$FFFFF for debug use); orgh.yaml:28 itself says ORGH fills hub memory with zeros up to the given address",
+  "verified_fix": "scratch cases2.py orgh_fix: `ORGH $7C000,$7C800` compiles; orgh_bare / orgh_fc (`ORGH $FC000` forms) fail with the error above",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/orgh.yaml",
+    "addr": "examples[2].code",
+    "key_line": 22,
+    "decision_index": 157,
+    "gate_first_error": "inside the wrapper (eof, line 4): Program requirement exceeds 512KB hub RAM by 507904 bytes",
+    "source_line_of_error": "ORGH $FC000,$FC800  ' hub origin = $FC000, origin limit = $FC800",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "const-as-register-operand",
+  "finding": "S-PENDING-const-as-register-operand",
+  "statement": "a value constant written as a bare operand where an immediate is needed, so the compiler reads it as a register address. posx.yaml:18 `cmp     value, POSX     wc` and :24 `mov     limit, POSX` (POSX = $7FFF_FFFF) fail; the same mistake COMPILES in negx.yaml:18, :24 (`cmps value, NEGX wc`, `mov limit, NEGX`), false.yaml:18, :24 (`mov flag, FALSE`, `mov flag, TRUE`) and true.yaml:20, :22 (`mov result, TRUE`, `mov result, FALSE`) but assembles the wrong operand (see observation O3: `mov flag, TRUE` assembles to $FFFF_FFFF). A 32-bit constant as S needs `##`; a 0/-1 flag needs `#0` / `neg r,#1`.",
+  "compiler_error": "Register cannot exceed $1FF (block line 1)",
+  "correct_source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt (`#` = 9-bit immediate, `##` = augmented 32-bit immediate); compiler error text",
+  "verified_fix": "scratch cases1.py posx_fix (`cmp value, ##POSX wc`, `mov limit, ##POSX`) and negx_fix (`cmps value, ##NEGX wc`, `mov limit, ##NEGX`) compile",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/posx.yaml",
+    "addr": "examples[0].code",
+    "key_line": 18,
+    "decision_index": 163,
+    "gate_first_error": "block line 1: Register cannot exceed $1FF",
+    "source_line_of_error": "cmp     value, POSX     wc  ' Check if value exceeds max positive",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "value",
+     "overflow"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/pasm2/posx.yaml",
+    "addr": "examples[1].code",
+    "key_line": 24,
+    "decision_index": 164,
+    "gate_first_error": "block line 1: Register cannot exceed $1FF",
+    "source_line_of_error": "mov     limit, POSX         ' Set limit to maximum positive value",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "limit",
+     "value"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "modz-as-modulo",
+  "finding": "S-PENDING-modz-as-modulo",
+  "statement": "xoro32.yaml:49-52 (examples[1], 'Random number in range') uses `MODZ    temp, #100        ' temp = seed mod 100 (0-99)`. MODZ is the flag-modify alias `MODZ z {WZ}` (one operand, a 4-bit condition pattern); PASM2 has no modulo instruction. The remainder comes from QDIV (`QDIV temp,#100` then `GETQY temp`).",
+  "compiler_error": "Expected an assembly effect or end of line (block line 3, after `MODZ temp`)",
+  "correct_source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:423 (`MODZ    z               {WZ}`)",
+  "verified_fix": "scratch cases1.py modz_fix: `XORO32 seed` / `MOV temp, seed` / `QDIV temp, #100` / `GETQY temp` compiles (24 bytes)",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/pasm2/xoro32.yaml",
+    "addr": "examples[1].code",
+    "key_line": 49,
+    "decision_index": 287,
+    "gate_first_error": "block line 3 (YAML line 52): Expected an assembly effect or end of line",
+    "source_line_of_error": "MODZ    temp, #100        ' temp = seed mod 100 (0-99)",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "seed",
+     "temp"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-008",
+  "statement": "long.yaml:12-14 (examples[0]) `ptrs    long  @start, @end`: `end` is a reserved word (it closes inline PASM / DITTO), so `@end` is rejected even when a label `end` is defined (scratch long_dat3). With a different name (`fin`) the block compiles (long_dat2).",
+  "sites": [
+   {
+    "file": "language/pasm2/long.yaml",
+    "addr": "examples[0].code",
+    "key_line": 12,
+    "decision_index": 138,
+    "gate_first_error": "block line 3: Expected a DAT symbol",
+    "source_line_of_error": "ptrs    long  @start, @end       ' Address pointers",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "start"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-023",
+  "statement": "xoro32.yaml:37 `GETRND  seed           ' Get true random` (block compiles; decision #285) and the prose at xoro32.yaml:74-76 (`vs_getrnd.getrnd_advantages`: 'True randomness from thermal noise', 'Cryptographically suitable', 'No seeding required'). GETRND is the xoroshiro128** PRNG (seeded at boot), not a true-random source.",
+  "sites": [
+   {
+    "file": "language/pasm2/xoro32.yaml",
+    "addr": "critical_warning.solution",
+    "key_line": 35,
+    "decision_index": 285,
+    "gate_first_error": "compiles",
+    "source_line_of_error": "GETRND  seed           ' Get true random",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "seed"
+    ],
+    "role": "comment in a compiling block"
+   },
+   {
+    "file": "language/pasm2/xoro32.yaml",
+    "addr": "vs_getrnd.getrnd_advantages",
+    "key_line": 74,
+    "decision_index": null,
+    "gate_first_error": "n/a (prose key, not a candidate)",
+    "source_line_of_error": "- \"True randomness from thermal noise\"",
+    "intended_class": "n/a",
+    "intended_assumes": [],
+    "role": "prose site (:74-76)"
+   }
+  ]
+ }
+]

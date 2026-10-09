@@ -1,0 +1,55 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/coginit.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "46e32c72b5ec57a0"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-165"
+  - at: examples[1].code
+    fp: "2dd471bf1407d767"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: examples[2].code
+    fp: "7423f5675d632f82"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-165"
+  - at: examples[3].code
+    fp: "0a97c511dd183688"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [ptra_val]
+  - at: examples[4].code
+    fp: "60baf771e0124b43"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [addr, ptra_val]
+    finding: "S-165"
+  - at: examples[5].code
+    fp: "8f860ae4b86d5ec9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [addr]
+  - at: examples[6].code
+    fp: "18ec6ee918c17192"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [addr]
+    finding: "S-165"
+  - at: examples[7].code
+    fp: "ab1aafe172a27a1e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [addr]
+  - at: examples[8].code
+    fp: "63f1222fd20a6900"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [id, addr, myID]
+  - at: examples[9].code
+    fp: "a89c238abc68ba6d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [myID]

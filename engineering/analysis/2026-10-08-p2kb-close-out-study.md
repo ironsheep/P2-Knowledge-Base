@@ -389,6 +389,37 @@ re-read and holding.
 | S-160 | B | G5 | drives wrong code | `multi_motor_system.yaml:85` and a sibling: a parameter indexed as an array | O10 | traced | — | to research | no |
 | S-161 | B | G5 | drives wrong code | `orgf.yaml:3`: ORGF "set origin with forced alignment", "align to $100"; ORGF fills with zeros up to the given address | O11 | traced | — | to research | no |
 
+**ENH-03 B3, group G7 (files directly in `language/pasm2/`, the instruction pages; 291 blocks,
+118 files), 2026-10-09.** Evidence: `b3-g7-defects.json`, `b3-g7-class-map.json`,
+`b3-g7-observations.json`. Arbiter checks: re-applied in a fresh scratch root (same result); the
+100 not-code reasons read (94 are description prose that opens with an instruction word);
+`silicon-doc-text.txt:410-411` (SETQ before COGINIT) re-read; the TRUE/NEGX register-operand
+behaviour reproduced with pnut-ts and filed as `DRAFTS/PNUT-TS-PUNCH-LIST.md` item 6 (reviewer O14).
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-162 | B | G7 | **drives wrong code** | constants used as register operands without `#`/`##`: `cmp value, POSX` (rejected, 2 sites) and — compiling silently into the wrong operand — `mov flag, TRUE`, `mov flag, FALSE`, `cmps value, NEGX` (`false.yaml:18,24`, `true.yaml:20`, …) | defects `const-as-register-operand`; O3; pnut-ts listing | traced | missing immediate marker | to research (class sweep: every named constant used as a PASM operand) | no |
+| S-163 | B | G7 | drives wrong code | `AUGD start_reg` — AUGD/AUGS take an immediate | defects `augx-register-operand` | traced | — | to research | no |
+| S-164 | B | G7 | drives wrong code | `NAME = 1` constant assignments inside a PASM block with no CON | defects `const-assign-in-code` | traced | — | to research | no |
+| S-165 | B | G7 | wrong, not code-driving | a literal `--or--` line inside `coginit.yaml` code examples (4) | defects `or-separator-in-example` | traced | prose inside a code block | to research | yes |
+| S-166 | B | G7 | drives wrong code | DJNZ written with `wz`; DJNZ takes no flag effect | defects `djnz-flag-effect` | traced | — | to research | no |
+| S-167 | B | G7 | **drives wrong code** | immediates over 511 with one `#` (`#$8000_0000`, `QLOG #1000`, `#$400`; 3) | defects `imm-over-511-no-aug` | traced | class with S-042 | to research (one sweep with S-042) | no |
+| S-168 | B | G7 | drives wrong code | `orgf.yaml` code folded onto one line by YAML quoting; one block then compiles vacuously (3) | defects `folded-single-quoted-code` | traced | YAML authoring | to research (class sweep: single-quoted multi-line code scalars) | no |
+| S-169 | B | G7 | wrong, not code-driving | `ORGH $FC000,$FC800` example cannot build into a 512 KB hub | defects `orgh-example-beyond-hub` | traced | — | to research | no |
+| S-170 | B | G7 | **drives wrong code** | `MODZ temp,#100` taught as modulo; MODZ modifies Z — use QDIV then GETQY | defects `modz-as-modulo` | traced | name-guessing | to research | no |
+| S-171 | B | G7 | **drives wrong code** | `altgb.yaml:59-60`, `:81`: `altgb ptr, ##$100 ' auto-increment by 1`; S[17:9] is 0, so nothing increments (`##$200`) | O1 | traced | — | to research | no |
+| S-172 | B | G7 | **drives wrong code** | `coginit.yaml:59-62`: SETQ placed after COGINIT; it must precede it | O2; `silicon-doc-text.txt:410-411` | traced | — | to research | no |
+| S-173 | B | G7 | drives wrong code | `conditional-debug.yaml:70-71`: after `cmp a, b wcz`, `if_c_and_z` labelled "a == b AND overflow" | O4 | traced | flag misreading | to research | no |
+| S-174 | B | G7 | wrong, not code-driving | `conditional-debug.yaml:5`: "available in v47+, prior caused compile errors" — not in the v55 change log | O5 | traced | stale gating (with S-153) | to research | no |
+| S-175 | B | G7 | **drives wrong code** | `testp.yaml:60-66`, `:80`: rising-edge detection tests the wrong flags; `wz` described as XOR | O6 | traced | flag misreading | to research | no |
+| S-176 | B | G7 | drives wrong code | `qlog.yaml:65-71`: the mantissa is shifted away, then an unloaded register is ANDed | O7 | traced | — | to research (with S-026) | no |
+| S-177 | B | G7 | drives wrong code | `xoro32.yaml:16-28`, `:74-76`: the three-step "xoroshiro32+" algorithm is unsourced and is not that algorithm | O8 | traced | invented algorithm (class with S-059) | to research (with S-059) | no |
+| S-178 | B | G7 | drives wrong code | `locktry.yaml:56-62`: the routine returns its outcome by `setd .result`, rewriting its own RET | O9 | traced | — | to research | no |
+| S-179 | B | G7 | wrong, not code-driving | `fit.yaml:18-21`, `:34`: `FIT $1F0` "before the special-register area"; the area starts at $1F0 and other limits apply ($1F8 etc.) | O10 | traced | — | to research | no |
+| S-180 | B | G7 | wrong, not code-driving | `hubexec.yaml:47`: "set hub execution mode for subsequent code"; HUBEXEC is a COGINIT constant | O11 | traced | — | to research | no |
+| S-181 | B | G7 | hygiene | `debug.yaml:4`, `:11-13`: encoding and timing "TBD", description a placeholder | O12 | traced | stub page | to research (fill from the silicon doc and v55) | no |
+| S-182 | B | G7 | **drives wrong code** | `xinit.yaml:55-72`: the receive example's streamer count D[15:0] is 0 and the `setword` that sets it is missing | O13 | traced | — | to research | no |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

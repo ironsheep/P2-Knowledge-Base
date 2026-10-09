@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/getbrk.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "bdca31c1d5069098"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [status, streamer_busy]
+  - at: examples[1].code
+    fp: "2228348273b494be"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [brkinfo, handle_trace, handle_watch]
+  - at: examples[2].code
+    fp: "baebb6b2f70a794b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pattern, no_pattern]
+  - at: examples[3].code
+    fp: "4da01795a2c20041"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [skipstate, depth]

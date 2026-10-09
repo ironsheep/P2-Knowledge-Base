@@ -1,0 +1,35 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/conditional-debug.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "78c37bf1a321b5eb"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: implementation
+    fp: "cb7c8dc5c5dd8425"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "4b3ed0db6df064c2"
+    compile: program
+  - at: examples[1].code
+    fp: "64186dc24cea2190"
+    compile: program
+  - at: examples[2].code
+    fp: "bcfc6dadc26cd3e8"
+    compile: program
+  - at: examples[3].code
+    fp: "4130d9156d4b1999"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-166"
+  - at: examples[4].code
+    fp: "d82bb2c3ae9fa0fb"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-167"
+  - at: generated_code
+    fp: "cf22da77911b7e35"
+    compile: not-code
+    reason: "YAML prose describing the compiler translation of a conditional DEBUG, with the generated-code lines embedded in English text (notation of what the compiler emits, not a program)"
