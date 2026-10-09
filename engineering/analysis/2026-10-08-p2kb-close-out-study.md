@@ -927,8 +927,8 @@ DAC driver and OUT enables the ADC.
 | VO-S059 | **SURVIVES** | the sources name xoroshiro32+ but give no recurrence or zero case |
 | VO-S037 | **SURVIVES** | SD:2020 does not exclude the issuing cog; SD:2053 says "another cog"; blocks no fix (`cogatn.yaml:138` is deleted now) |
 
-**Bench round 1 = seven tests:** VO-J-028 (+G006a), VO-F372, VO-S304, VO-G028, VO-S059, VO-S037, and the
-reduced VO-J-005 and VO-J-006 (nine questions in seven rigs: J-005 and J-006 are already partly written).
+**Bench round 1 = eight rigs for nine questions:** VO-J-028 (+ VO-G006a merged), VO-F372, VO-S304,
+VO-G028, VO-S059, VO-S037, and the reduced VO-J-005 and VO-J-006 (VO-J-005's rig is already written).
 None needs an external instrument; only VO-F372's fallback uses a jumper (free pins). No surviving question
 is about a tool.
 
