@@ -24,6 +24,35 @@ let's do so"). Sprint-start record below; next: `plan-to-tasks`.
    edition, section or page), not our file"). Applied: `"<Parallax title> <edition>, <section
    heading>"`, plus `p.N` for paginated PDFs; no line numbers or repo paths. Citations are internal
    provenance (Q12), so the format serves the auditor and the gate.
+   **Canonical citation titles** («#412», read off each document's own cover/footer; the gate's
+   `CANONICAL_TITLES` in `audit-yaml-claim-sourcing.py` carries the printed alternates and the
+   file:line provenance; codenames such as "Silicon Doc" are refused). `p.N` is required where
+   marked **P**. Document → citation title · edition form:
+   - Silicon doc → `Parallax Propeller 2 Documentation` · `v35 (Rev B/C silicon)`, section
+   - Spin2 → `Parallax Propeller 2 Spin2 Language Documentation` · `v55`, section
+   - PASM2 manual → `Propeller 2 Assembly Language (PASM2) Manual` · `Nov 1, 2022 Release` **P**
+   - Datasheet → `Parallax Propeller 2 (P2X8C4M64P) Datasheet` · `2022/11/01` **P**
+   - Hardware manual → `Propeller 2 P2X8C4M64P Hardware Manual` · `Nov 1, 2022 Release` **P**
+   - P2 Instructions sheet → `P2 Instructions` · `v35 - Rev B/C Silicon`, row/section
+   - Spec sheet → `Propeller P2X8C4M64P (P2) Multicore Microcontroller Spec Sheet`, section
+   - Eval Board → `Propeller 2 Eval Board Rev C (64000)` · `v2.0 29/6/2020` **P**
+   - Edge Module → `P2 Edge Module Rev D (#P2-EC)` · `v3.0 6/3/2022` **P**
+   - Edge 32MB → `P2 Edge Module with 32MB RAM (#P2-EC32MB)` · `v2.0 5/23/2022` **P**
+   - Edge Breakout → `P2 Edge Breakout Board (#64029)` · `v1.0 03/01/2023` **P**
+   - Edge Mini Breakout → `P2 Edge Mini Breakout Board (#64019)` · `v1.1 11/30/2020` **P**
+   - Edge Breadboard → `P2 Edge Module Breadboard (#64020)` · `v1.2 01/07/2021` **P**
+   - Add-on Boards → `P2 Eval Add-on Boards (#64006 Series)` · `v2.0 1/12/2021` **P**
+   - Motor Driver → `Universal Motor Driver P2 Add-on Board (#64010)` · `v2.0 5/5/2022` **P**
+   - microSD → `P2 microSD Add-on Board (#64009)` · `v1.0 22/02/2021` **P**
+   - RTC → `P2 RTC Add-on (#64013)` · `v1.0 11/29/2022` **P**
+   - HD Audio → `P2 HD Audio Add-on Set (#64014)` · `v1.0 10/16/2022` **P**
+   - HyperRAM/Flash → `P2-ES Eval HyperRAM/Flash Add-on (#64004-ES)` · `1.0 11/5/2019` **P**
+   - WX Adapter → `P2 WX Adapter Add-on Board (#64007)` · `v1.0 11/12/2020` **P**
+   - WX Wi-Fi → `Parallax WX ESP8266 Wi-Fi Modules` · `v1.0 05/12/2016` **P**
+   - Prop Plug → `Prop Plug (#32201) Rev E` · `v3.0 2/03/2021` **P**
+   - Click Adapter → `P2 mikroBUS Adapter` · `Part Number 64008, Revision A` (one-page schematic)
+   Not citable by title (source listings with no printed title): the ROM booter and the flash
+   loader. Not Parallax-authored, so never cited: Smart Pins (Titus), TAQOZ guide, HUB75 notes.
 3. ~~`pnut_ts` → `pnut-ts`~~ — **not a question**: the only installed executable is `pnut-ts`
    (`which`, 2026-10-09), so the KB's `pnut_ts` is a defect seen, fixed under *fix everything seen*.
 
@@ -142,6 +171,26 @@ Manifest reconciliation: before, 354 `finding:` entries in 176 files against 352
 (`language/pasm2/orgf.yaml examples[2].code` `S-168`, `language/pasm2/xoro32.yaml critical_warning.solution`
 `S-023`) named a finding on a block that compiles; those two `finding:` lines were removed (the S-rows
 stay open in the study). After: 379 entries with `finding:` = the 379 failing blocks.
+
+**Built «#412» (2026-10-09) — the sourcing gate accepts only Parallax documents, EF, CP; red by
+design, driven to 0 by the citations task.** `audit-yaml-claim-sourcing.py` (script that produced every
+number; run from the repo root on the working tree, 999 files scanned). Before: PASS, 0 Tier 1, 27
+Tier 2 advisory. After (titles read off the documents' own covers — see §0 Q2): **FAIL — 33 Tier 1 +
+1,438 BAD_CITATION**, Tier 2 **123** (advisory). BAD_CITATION by class, counted per citation value:
+extraction path **523** · register path **30** · KB-file pointer **21** · line locator **133** · batch
+label (`parallax-quick-bytes`) **42** · bookkeeping word (`documentation_source:
+enhanced/original/p2_datasheet/…`) **49** · title without edition **1** · paginated PDF without
+`p.N` **42** · other (no printed Parallax title, EF or CP) **597**. (First cut, titles taken from the
+dashboard's row names: NO_EDITION 9, NO_PAGE 76, other 214, total 1,097, Tier 1 37, Tier 2 121 —
+superseded; it accepted informal names the documents never print.) The large "other" class is mostly
+informal names the KB uses today — `PASM2 Manual 2022/11/01 Pages 31-147`, `64013 P2 RTC Add-on
+Guide`, `P2 Datasheet` — which «#422» rewrites to the canonical titles. Tier 1/Tier 2 grew because a
+block's citation no longer counts unless it passes the same rule. The `enhancement_source:`
+lines (356) are not flagged — they simply stop counting; their deletion is «#422». **Owed to the
+citations task:** the Tier-2 switch-on (`TIER2_BLOCKING` in the script, or `--tier2-blocking`) after
+S-295..S-307; the OBEX-metadata-vs-index check (S-308c) is not built. The compile-proof register's
+`*KB:*` home check lives in `validate-dod-release.py::validate_ledger_kb_home` (CP entries added to
+`LEDGERS`).
 
 ## §2 Compile-gate drain (R1)
 

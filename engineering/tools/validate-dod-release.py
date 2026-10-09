@@ -714,8 +714,12 @@ def validate_internal_ids(verbose: bool = False) -> ValidationResult:
 LEDGERS = [
     Path("engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"),
     Path("engineering/ingestion/external-sources/hardware-verification/EXTERNAL-HARDWARE-FINDINGS.md"),
+    # «#412» (Q12): the compile-proof register is the second self-created citation
+    # the sourcing gate accepts, so its `### CP-NNN` entries carry the same
+    # `*KB:*` home line and are checked the same way.
+    Path("engineering/ingestion/external-sources/compiler-verification/COMPILE-PROOFS.md"),
 ]
-LEDGER_ENTRY = re.compile(r'^### ((?:EF|XF)-\d{3})\b')
+LEDGER_ENTRY = re.compile(r'^### ((?:EF|XF|CP)-\d{3})\b')
 NOT_A_KB_FACT = re.compile(r'not a KB fact\s*[—-]\s*\S')
 
 
@@ -731,7 +735,7 @@ def validate_ledger_kb_home(verbose: bool = False) -> ValidationResult:
     without one and on a named path that does not exist. A new bench result is not
     finished until this line names where it was written.
     """
-    result = ValidationResult("Bench Ledger -> KB Home")
+    result = ValidationResult("Bench Ledger + Compile Proofs -> KB Home")
     problems, entries = [], 0
     for ledger in LEDGERS:
         lines = ledger.read_text(encoding="utf-8").split("\n")
@@ -761,7 +765,8 @@ def validate_ledger_kb_home(verbose: bool = False) -> ValidationResult:
         for p in problems:
             result.info(f"  {p}")
     else:
-        result.ok("Every bench entry names where its fact lives (or why it is not a KB fact)")
+        result.ok("Every bench and compile-proof entry names where its fact lives "
+                  "(or why it is not a KB fact)")
     return result
 
 

@@ -88,6 +88,32 @@ WHAT COUNTS AS A CITATION -- and what deliberately does not
 
     So the key name is not the test; the VALUE is. See CITE_VALUE_RE.
 
+WHAT MAY BE CITED -- THE ACCEPTANCE RULE («#412», S-393; Stephen Q3/Q4/Q5/Q12)
+    A citation names an official Parallax document, never one we created. A
+    citation VALUE counts only when it carries ONE of:
+
+      * a Parallax document TITLE from the ingested-source registry
+        (CANONICAL_TITLES below, each READ OFF the document's own cover/footer),
+        with its edition or section, plus `p.N` when the document is a
+        paginated PDF -- `"<Parallax title> <edition>, <section heading>"`;
+      * an EF-NNN that EXISTS as a `### EF-NNN` entry in
+        P2-EMPIRICAL-FINDINGS.md (a fact measured on silicon);
+      * a CP-NNN that EXISTS as a `### CP-NNN` entry in COMPILE-PROOFS.md
+        (a compile proof, Q12).
+
+    ...and it carries NONE of: an extraction path (`silicon-doc-text.txt:NNN`,
+    any `engineering/` path), a register or summary of ours (`SOURCE-ERRATA.md`,
+    `complete-*.md`, `P2 Errata`), a batch label (`parallax-quick-bytes`), a line
+    locator, or an EF/CP/XF id that does not exist. Catalog entries under
+    community/quick-bytes/ are cited by their parallax.com `url:` (Q5).
+
+    `enhancement_source:` is NOT a citation key (Q3) -- its 356 lines are labels,
+    deleted by «#422». CITE_KEY_RE teaches `documentation_source` only.
+
+    BAD_CITATION (this rule applied to every claimed citation, wherever it sits)
+    BLOCKS, and so does Tier 1. Tier 2 is built SWITCHABLE (TIER2_BLOCKING) --
+    its switch-on follows S-295..S-307 and is OWED to the citations task.
+
 EXIT STATUS
     0  no Tier 1 violations
     1  one or more Tier 1 violations
@@ -98,6 +124,7 @@ USAGE
 """
 
 import argparse
+import functools
 import re
 import sys
 from pathlib import Path
@@ -116,7 +143,12 @@ SCOPE_NOTE = (
     "  untouched, and Tier 2 (a file that cites nothing anywhere) is ADVISORY:\n"
     "  it does not block, and its population is not zero.\n"
     "  A citation being PRESENT is not the same as the citation being RIGHT --\n"
-    "  nothing here reads the cited document. Guide rules R6, R7 and R9 have no\n"
+    "  nothing here reads the cited document -- a Parallax title, an EF or a CP\n"
+    "  id is checked for EXISTING, not for supporting the claim beside it.\n"
+    "  Only keys in FLAG_KEYS are judged; a citation in any other key, or in\n"
+    "  prose with no cite key, is seen only by the per-line inline test.\n"
+    "  Community/obex/objects/ is skipped, and the OBEX-metadata-vs-index check\n"
+    "  (S-308c) is NOT built. Guide rules R6, R7 and R9 have no\n"
     "  instrument and are held by review. A clean run means NOT CAUGHT BY THESE\n"
     "  CHECKS -- never `correct`.")
 
@@ -132,8 +164,18 @@ SCOPE_NOTE = (
 # which is why the gap was invisible.
 CITE_KEY_RE = re.compile(
     r"^(\s*)-?\s*(source|sources|source_document|source_documents|citation|citations|"
-    r"reference|references|authority|derived_from|verified_against|documentation)\s*:\s*(.*)$",
+    r"reference|references|authority|derived_from|verified_against|documentation|"
+    r"documentation_source)\s*:\s*(.*)$",
     re.IGNORECASE)
+# `documentation_source` is taught (Q3, 2026-10-09). `enhancement_source` is
+# deliberately ABSENT: its values are bookkeeping labels, not documents.
+
+# The keys whose claimed value is JUDGED by the acceptance rule (BAD_CITATION).
+# `reference`/`references` are left out on purpose: they list cross-reference
+# paths, which are not citations and must not be reported as bad ones.
+FLAG_KEYS = {"source", "sources", "source_document", "source_documents",
+             "citation", "citations", "authority", "derived_from",
+             "verified_against", "documentation", "documentation_source"}
 
 # ...because `source:` is the most overloaded key in this knowledge base. Of the
 # 312 cite-KEY lines in the corpus, 224 do not name a document at all:
@@ -253,31 +295,9 @@ CODE_MARKER_RE = re.compile(r"^\s*(?:'|(?:PUB|PRI)\s+\w)")
 # the name of the key -- applied to the other value shape.
 QUOTED_SCALAR_RE = re.compile(r'^(\s*)-?\s*[\w.-]+\s*:\s*"')
 
-# An INLINE attribution is a citation. The question this tool asks is "does this
-# claim say where it came from", and `"343.75ns at 160MHz (55 clocks per Silicon
-# Doc v35 verbatim)"` answers it perfectly well without a `source:` field.
-# Demanding one particular spelling would turn a correctly-attributed claim into
-# a violation, which teaches people the gate is wrong rather than that the claim
-# was.
-# `rev\s*[BC]\b` was in this vocabulary and is deliberately NOT any more. It was
-# reasoning from `Silicon Doc Rev C` prose, but in a hardware file `Rev B` is the
-# board's OWN IDENTITY, not a document reference --
-#     power_configuration: "5V shunt jumper required on P2-ES Eval Board Rev B"
-# -- and that one string marked the whole `specifications` block cited, hiding
-# 500mA/1A/~2mA. It did its worst damage exactly where it fired most: the board
-# tree, where every file legitimately names a board revision.
-#
-# Nothing genuine was lost with it. Measured across all 1129 files: every real
-# citation in the corpus that contains a revision also names the document it is
-# a revision OF -- `"P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim"`,
-# `"Propeller 2 Documentation v35 - Rev B/C Silicon"`, `"#64000 Propeller 2 Eval
-# Board Rev C Guide v2.0"` -- so each is still recognised by `silicon doc`,
-# `p2 documentation` or the `guide` value token. The ten blocks the token was
-# holding up were board and silicon revisions, every one.
-INLINE_CITE_RE = re.compile(
-    r"(silicon\s*doc|datasheet|data\s*sheet|spin2\s*v\d|p2\s*documentation|"
-    r"hardware[- ]verified|empirical|EF-\d+|per\s+the\s+doc|verbatim|"
-    r"parallax\s+p2)", re.IGNORECASE)
+# An INLINE attribution is a citation (`inline_cite`, judged per line by the same
+# acceptance rule as a cite key). A board revision alone (`Rev B`) is the board's
+# own identity, not a document reference -- it never makes a line a citation.
 
 # ---------------------------------------------------------------------------
 # A CITATION POINTS **AT** A SOURCE FOR THE CLAIM. THREE THINGS POINT AWAY.
@@ -320,7 +340,7 @@ INLINE_CITE_RE = re.compile(
 # same sentence reads `"Sinks 150mA per pin; see the datasheet for package
 # limits."` just as easily -- and an anchor would miss it, which is how a veto
 # becomes another one-off patch. `per the doc` is deliberately ABSENT: that form
-# attributes, and `INLINE_CITE_RE` already accepts it.
+# attributes, and `classify()` judges it like any other citation.
 DEFERRAL_RE = re.compile(
     r"\b(?:check|see|refer\s+to|consult|look\s*up|lookup|read|review|contact|"
     r"visit|ask)\s+(?:the\s+|a\s+|an\s+|your\s+|its\s+)?(?:\w+\s+){0,2}?"
@@ -344,27 +364,343 @@ def points_away(value):
     return bool(DEFERRAL_RE.search(v)) and not bool(IDENTITY_RE.search(v))
 
 
+# ---------------------------------------------------------------------------
+# THE ACCEPTANCE RULE («#412», S-393). A citation names an official Parallax
+# document, an accepted EF record, or a CP record -- nothing we wrote.
+#
+# CANONICAL_TITLES is READ OFF THE DOCUMENTS, not remembered and not taken from the
+# ingestion dashboard's row names (the first cut of this table did that and
+# rejected the documents' own printed titles -- «#412» correction, 2026-10-09).
+# Scope: the Parallax-authored sources in engineering/ingestion/README.md. Left OUT
+# on purpose: Smart Pins (Titus), chip-gracey-clarifications, p2-qa-spreadsheet,
+# p2docs-github-io (community / upstream leads); pnut-ts-pasm-ref,
+# iron-sheep-compiler, quick-bytes-code (not Parallax documents); the TAQOZ Bit
+# Bashers Guide (Peter Jakacki); p2-hub75-adapter (manufacturer is not Parallax);
+# the AK5704 datasheet (third party). rom-booter and flash-loader are SOURCE
+# LISTINGS with no printed document title (ROM_Booter.lst:1 opens `CON`;
+# flash_loader.spin2:1 is a code comment), so they are not citable by title here.
+# Codenames ("Silicon Doc", "Blue Book") are NOT titles and are refused.
+#
+# Row = (key, [printed title forms], edition form as printed, paginated PDF?,
+# provenance). The FIRST form is the canonical one a citation should use. Further
+# forms are ones the document ITSELF prints (a running footer/header) or, for the
+# DOCX-primary Parallax publications, the DOCX filename the source folder holds.
+# Nothing is invented. A part-number suffix is part of the title because the
+# cover/footer prints it. Provenance paths are under engineering/ingestion/sources/
+# and "pdftotext p1" means `pdftotext -l 1 -layout <pdf>` of the PDF named.
+CANONICAL_TITLES = [
+    ("silicon-doc",
+     ["Parallax Propeller 2 Documentation", "Propeller 2 Documentation", "P2 Documentation"],
+     "v35 (Rev B/C silicon), 2021-05-18", False,
+     "silicon-doc/silicon-doc-text.txt:3-6 (cover); `Parallax Propeller 2 Documentation v35 - "
+     "Rev B_C Silicon.docx` and `P2 Documentation v35 - Rev B_C Silicon-Part1of5.pdf` (filenames)"),
+    ("spin2-v55",
+     ["Parallax Propeller 2 Spin2 Language Documentation", "Parallax Spin2 Documentation",
+      "Spin2 Language Documentation"],
+     "v55, 2026-05-07", False,
+     "spin2-v55/spin2-v55-text.txt:1-4 (cover: `Parallax Propeller 2 / Spin2 Language "
+     "Documentation`, `v 55`); `Parallax Spin2 Documentation v55.docx` (filename)"),
+    ("pasm2-manual",
+     ["Propeller 2 Assembly Language (PASM2) Manual", "Propeller 2 Assembly Language Manual"],
+     "Nov 1, 2022 Release (2022/11/01)", True,
+     "pasm2-manual/P2-Assembly-Language-PASM2-Manual-Draft-221117.pdf pdftotext p1 (cover and "
+     "footer `Propeller 2 Assembly Language Manual   Page 1`); `Propeller 2 Assembly Language "
+     "(PASM2) Manual - 20221101.docx` (filename)"),
+    ("p2-datasheet",
+     ["Parallax Propeller 2 (P2X8C4M64P) Datasheet", "Propeller 2 (P2X8C4M64P) Datasheet"],
+     "Release November 1, 2022 (2022/11/01)", True,
+     "p2-datasheet/p2-datasheet-text.txt:1 and :14 (cover), :64 (footer `Parallax Propeller 2 "
+     "(P2X8C4M64P) Datasheet   Page 1`)"),
+    ("p2-hardware-manual",
+     ["Propeller 2 P2X8C4M64P Hardware Manual", "Propeller 2 Hardware Manual"],
+     "Nov 1, 2022 Release", True,
+     "p2-hardware-manual/p2-hardware-manual-text.txt:2-4 (cover); `Propeller 2 Hardware Manual - "
+     "20221101.docx` (filename)"),
+    ("p2-instructions-csv",
+     ["P2 Instructions"],
+     "v35 - Rev B/C Silicon", False,
+     "p2-instructions-csv/`P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv` (filename; a "
+     "spreadsheet -- no cover)"),
+    ("p2-spec-sheet",
+     ["Propeller P2X8C4M64P (P2) Multicore Microcontroller Spec Sheet"],
+     "none printed on the first page", False,
+     "p2-spec-sheet/p2-spec-sheet-narrative.txt:5 (title line; source PDF not held)"),
+    ("p2-eval-board",
+     ["Propeller 2 Eval Board Rev C (64000)", "Propeller 2 ES Evaluation Board Rev C (64000)"],
+     "v2.0 29/6/2020", True,
+     "p2-eval-board/p2-eval-board-text.txt:10 (cover), :52 (footer), :103 (running footer "
+     "`Propeller 2 ES Evaluation Board Rev C (64000)  v2.0 29/6/2020 Page 2 of 17`)"),
+    ("edge-standard-module",
+     ["P2 Edge Module Rev D (#P2-EC)", "P2 Edge Module (#P2-EC)"],
+     "v3.0 6/3/2022", True,
+     "edge-standard-module/edge-standard-module-text.txt:9 (cover); P2-EC-Edge-Module-RevD-"
+     "Product-Guide-3.0.pdf pdftotext p1 footer `P2 Edge Module (#P2-EC)  v3.0 6/3/2022 Page 1 of 13`"),
+    ("edge-32mb-module",
+     ["P2 Edge Module with 32MB RAM (#P2-EC32MB)", "P2 Edge Module (#P2-EC32MB)"],
+     "v2.0 5/23/2022", True,
+     "edge-32mb-module/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf pdftotext p1 (cover and footer "
+     "`P2 Edge Module (#P2-EC32MB)  v2.0 5/23/2022 Page 1 of 13`)"),
+    ("edge-breakout-board",
+     ["P2 Edge Breakout Board (#64029)"],
+     "v1.0 03/01/2023", True,
+     "edge-breakout-board/64029-P2-Edge-Breakout-Board-Guide-20230301.pdf pdftotext p1 (cover and footer)"),
+    ("edge-mini-breakout",
+     ["P2 Edge Mini Breakout Board (#64019)"],
+     "v1.1 11/30/2020", True,
+     "edge-mini-breakout/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf pdftotext p1 (cover and footer)"),
+    ("edge-module-breadboard",
+     ["P2 Edge Module Breadboard (#64020)"],
+     "v1.2 01/07/2021", True,
+     "edge-module-breadboard/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf pdftotext p1 "
+     "(cover and footer; the cover does not print `Rev B`)"),
+    ("p2-eval-add-on-boards",
+     ["P2 Eval Add-on Boards (#64006 Series)", "P2 Eval Add-on Boards"],
+     "v2.0 1/12/2021", True,
+     "p2-eval-add-on-boards/64006-P2-Eval-Add-on-Boards-Product-Guide.pdf pdftotext p1 (cover "
+     "`P2 Eval Add-on Boards`; footer `P2 Eval Add-on Boards (#64006 Series)  v2.0 1/12/2021 Page 1 of 12`)"),
+    ("p2-universal-motor-driver",
+     ["Universal Motor Driver P2 Add-on Board (#64010)"],
+     "v2.0 5/5/2022", True,
+     "p2-universal-motor-driver/64010-UniversalMotorDriverP2AddOnGuide-RevB-v2.0.pdf pdftotext p1 "
+     "(cover and footer)"),
+    ("p2-microSD-addon",
+     ["P2 microSD Add-on Board (#64009)", "microSD Add-on Board (#64009)"],
+     "v1.0 22/02/2021", True,
+     "p2-microSD-addon/64009-P2-microSD-AddOn-Guide-v1.0.pdf pdftotext p1 (cover; footer omits `P2`)"),
+    ("P2-RTC-Add-on",
+     ["P2 RTC Add-on (#64013)", "P2 RTC Add-on Board (#64013)"],
+     "v1.0 11/29/2022", True,
+     "P2-RTC-Add-on/64013-P2-RTC-Add-on-Guide-20221129.pdf pdftotext p1 (cover; footer adds `Board`)"),
+    ("P2-HD-Audio-Add-on",
+     ["P2 HD Audio Add-on Set (#64014)"],
+     "v1.0 10/16/2022", True,
+     "P2-HD-Audio-Add-on/64014-P2-HD-Audio-Add-on-Set-Guide.pdf pdftotext p1 (cover and footer)"),
+    ("hyperRam-n-hyperFlash",
+     ["P2-ES Eval HyperRAM/Flash Add-on (#64004-ES)", "P2-ES Eval HyperRAM_Flash Memory Board Product Guide"],
+     "1.0 11/5/2019", True,
+     "hyperRam-n-hyperFlash/`64004-ES P2-ES Eval HyperRAM_Flash Memory Board Product Guide.pdf` "
+     "pdftotext p1 footer `P2-ES Eval HyperRAM/Flash Add-on (#64004-ES)  1.0 11/5/2019 Page 1 of 9` "
+     "(the cover glyphs are garbled in the text layer; the second form is the filename)"),
+    ("p2-wx-adapter",
+     ["P2 WX Adapter Add-on Board (#64007)"],
+     "v1.0 11/12/2020", True,
+     "p2-wx-adapter/64007-P2-WX-Adapter-Guide-v1.0.pdf pdftotext p1 (cover and footer)"),
+    ("parallax-wx-wifi",
+     ["Parallax WX ESP8266 Wi-Fi Modules", "ESP8266 Wi-Fi Module (#32420)"],
+     "v1.0 05/12/2016", True,
+     "parallax-wx-wifi/32420-Parallax-WX-WiFi-Module-Guide-v1.0.pdf pdftotext p1 (cover; footer "
+     "`ESP8266 Wi-Fi Module (#32420)  v1.0 05/12/2016 Page 1 of 12`)"),
+    ("propplug-rev-e",
+     ["Prop Plug (#32201) Rev E"],
+     "v3.0 2/03/2021", True,
+     "propplug-rev-e/32201-PropPlugRev-Guide-RevE.pdf pdftotext p1 (cover and footer)"),
+    ("p2-click-adapter",
+     ["P2 mikroBUS Adapter"],
+     "Part Number 64008, Revision A", False,
+     "p2-click-adapter/p2-click-adapter-text.txt:6, :11, :13 (the schematic's title block; a "
+     "one-page schematic, so no page number)"),
+]
+_TITLES = [(row[0], [re.sub(r"\s+", " ", t.lower()) for t in row[1]], row[3])
+           for row in CANONICAL_TITLES]
+
+
+def _norm(s):
+    """Case-insensitive, whitespace-normalised, dash-normalised."""
+    return re.sub(r"\s+", " ", s.replace("–", "-").replace("—", "-").lower())
+
+
+# After a title there must be an EDITION (v35, 2022/11/01, Rev C, a month-year) or
+# a SECTION (a comma, then a heading).
+EDITION_RE = re.compile(
+    r"(\bv\s?\d+(?:\.\d+)?\b|\b\d{4}[-/]\d{2}[-/]\d{2}\b|\brev\s*[a-z]\b|"
+    r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[ -]\d{4}\b|\b(?:19|20)\d{2}\b)",
+    re.IGNORECASE)
+SECTION_RE = re.compile(r",\s*\S")
+PAGE_RE = re.compile(r"\bpp?\.\s*\d", re.IGNORECASE)
+
+# What a citation must NOT carry, whatever else it names.
+FORBIDDEN = [
+    ("BATCH_LABEL", re.compile(r"\bparallax-quick-bytes\b|\bPNUT_TS_v[\w.-]*", re.IGNORECASE)),
+    ("EXTRACTION_PATH", re.compile(
+        r"[\w.-]*-text\.txt|\bpart\d+-[\w-]+\.txt|\.txt\b|\bengineering/|\bdeliverables/|"
+        r"\bingestion/|\.csv\b|\.docx\b", re.IGNORECASE)),
+    ("REGISTER_PATH", re.compile(
+        r"SOURCE-ERRATA|P2KB-CORRECTION|P2-EMPIRICAL-FINDINGS\.md|COMPILE-PROOFS\.md|"
+        r"\bcomplete-[\w-]+\.md|\.md\b|click-adapter\s+netlist|\bP2\s+Errata\b",
+        re.IGNORECASE)),
+    # A pointer at another KB file is our own page, not a Parallax document.
+    ("KB_PATH", re.compile(r"\.ya?ml\b", re.IGNORECASE)),
+    ("LINE_LOCATOR", re.compile(
+        r"\blines?\s+\d|(?<=[A-Za-z_])\:\d{1,5}\b|(?:^|[\s,(])\:\d{2,5}\b", re.IGNORECASE)),
+]
+ID_RE = re.compile(r"\b(?:EF|CP|XF)-\d+\b")
+_CLASS_ORDER = ["BATCH_LABEL", "EXTRACTION_PATH", "REGISTER_PATH", "KB_PATH", "LINE_LOCATOR",
+                "BAD_ID", "NO_EDITION", "NO_PAGE", "BOOKKEEPING", "NO_PARALLAX_DOC"]
+
+EF_LEDGER = REPO / "engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"
+CP_REGISTER = REPO / "engineering/ingestion/external-sources/compiler-verification/COMPILE-PROOFS.md"
+
+
+def _ledger_ids(path, prefix):
+    """The ids that EXIST as `### PREFIX-NNN` headings, or None if the register is
+    missing -- a missing register must never read as 'no ids are wrong'."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    return set(re.findall(rf"^### ({prefix}-\d{{3}})\b", text, re.M))
+
+
+EF_IDS = _ledger_ids(EF_LEDGER, "EF")
+CP_IDS = _ledger_ids(CP_REGISTER, "CP")
+
+
+def classify(value):
+    """Judge one citation VALUE by the acceptance rule. Returns (ok, classes)."""
+    v = value.strip().strip('"').strip("'").strip()
+    classes = [name for name, rx in FORBIDDEN if rx.search(v)]
+    good = False
+    for m in ID_RE.finditer(v):
+        i = m.group(0)
+        known = (EF_IDS if i.startswith("EF-") else CP_IDS if i.startswith("CP-") else set()) or set()
+        if i in known:
+            good = True
+        elif "BAD_ID" not in classes:
+            classes.append("BAD_ID")
+    nv = _norm(v)
+    for _, forms, paginated in _TITLES:
+        end = max((nv.find(f) + len(f) for f in forms if f in nv), default=-1)
+        if end < 0:
+            continue
+        if not (EDITION_RE.search(nv) or SECTION_RE.search(nv[end:])):
+            if "NO_EDITION" not in classes:
+                classes.append("NO_EDITION")
+        elif paginated and not PAGE_RE.search(v):
+            if "NO_PAGE" not in classes:
+                classes.append("NO_PAGE")
+        else:
+            good = True
+    if not good and not classes:
+        classes.append("BOOKKEEPING" if re.fullmatch(r"[\w-]+", v) else "NO_PARALLAX_DOC")
+    return (good and not classes), classes
+
+
+def primary_class(classes):
+    return next((c for c in _CLASS_ORDER if c in classes), classes[0] if classes else "")
+
+
+@functools.lru_cache(maxsize=None)
 def is_citation(value):
-    """A cite key's VALUE counts only when it names a document (or an empirical
-    record) AND that naming attributes the claim rather than deferring it."""
+    """A cite key's VALUE counts only when it passes the acceptance rule AND
+    attributes the claim rather than deferring it. Pure (the EF/CP id sets are
+    fixed at import), so the per-line repeats across file and block scans are cached."""
     v = value.strip().strip('"').strip("'").strip()
     if points_away(v):
         return False
-    return bool(CITE_VALUE_RE.search(v))
+    return classify(v)[0]
 
 
 def inline_cite(text):
-    """An inline attribution, judged PER LINE so a deferral cannot silence the
-    line it sits on. `INLINE_CITE_RE` matched the bare word `datasheet` anywhere
-    in a block body, which is the other half of how F-335(e) passed."""
+    """An inline attribution, judged PER LINE by the SAME acceptance rule -- a
+    deferral cannot silence the line it sits on, and neither can the bare word
+    `datasheet` or `Silicon Doc` (the retired keyword vocabulary), which named no
+    document we are willing to cite."""
     for ln in text.split("\n"):
-        if not INLINE_CITE_RE.search(ln):
-            continue
         seg = ln.split(":", 1)[1] if ":" in ln else ln
-        if points_away(seg):
-            continue
-        return True
+        if is_citation(seg):
+            return True
     return False
+
+
+def _line_value(ln):
+    """The value part of one nested body line: `key: value`, `- value`, or text."""
+    s = ln.strip()
+    if s.startswith("- "):
+        s = s[2:].strip()
+    m = re.match(r"^[\w.-]+\s*:\s+(.*)$", s)
+    return m.group(1) if m else s
+
+
+def full_value(lines, i, indent, value):
+    """A plain or quoted scalar may continue on the lines below (indented deeper
+    than its key). A citation is judged WHOLE: `P2 Eval Add-on Boards ... v2.0
+    (Parallax Inc.,` on one line and `2020), Board A, p.5` on the next is one
+    citation, not a title with no page."""
+    cont = [ln.strip() for ln in _nested_body(lines, i, indent).split("\n") if ln.strip()]
+    if cont and not any(re.match(r"^[\w.-]+\s*:(\s|$)", c) or c.startswith("- ") for c in cont):
+        return " ".join([value] + cont)
+    return value
+
+
+def citation_values(lines):
+    """Every claimed citation value: (lineno, key, value). A structure-valued cite
+    key (`sources:` + a list, `documentation:` -> `primary:`) yields its body line
+    by line. Only FLAG_KEYS are judged -- see their comment."""
+    for i, line in enumerate(lines):
+        m = CITE_KEY_RE.match(line)
+        if not m or m.group(2).lower() not in FLAG_KEYS:
+            continue
+        key, value = m.group(2).lower(), m.group(3).strip()
+        if value in _STRUCTURE_VALUE:
+            body = _nested_body(lines, i, len(m.group(1))).split("\n")
+            for k, ln in enumerate(body):
+                if ln.strip():
+                    yield i + 2 + k, key, _line_value(ln)
+        else:
+            yield i + 1, key, full_value(lines, i, len(m.group(1)), value)
+
+
+def claimed(key, value):
+    """Is this value an attempt at a citation (so the rule judges it)? Any value
+    under `documentation_source`; elsewhere `source:` is overloaded (a power
+    supply, a pattern category), so only a value that LOOKS like a citation or
+    carries a forbidden token is judged."""
+    v = value.strip().strip('"').strip("'").strip()
+    if not v:
+        return False
+    if key == "documentation_source":
+        return True
+    if SLUG_RE.match(v):
+        return False
+    nv = _norm(v)
+    if any(f in nv for _, forms, _p in _TITLES for f in forms):
+        return True
+    return (bool(CITE_VALUE_RE.search(v)) or bool(ID_RE.search(v))
+            or any(rx.search(v) for _, rx in FORBIDDEN))
+
+
+CATALOG_DIR = "community/quick-bytes"
+CATALOG_URL_RE = re.compile(r"^\s*url:\s*[\"']?https?://(?:www\.)?parallax\.com/\S+", re.MULTILINE)
+
+
+def is_catalog(rel):
+    return CATALOG_DIR in rel.as_posix()
+
+
+def catalog_cited(lines):
+    """Q5: a catalog entry is cited by its parallax.com `url:`."""
+    return bool(CATALOG_URL_RE.search("\n".join(lines)))
+
+
+# The Tier-2 switch («#412», S-308b). Tier 2 (a file that cites nothing anywhere)
+# stays ADVISORY until S-295..S-307 are applied in the architecture/spin2 area
+# tasks. SWITCH-ON IS OWED TO THE CITATIONS TASK: flip this to True (or pass
+# --tier2-blocking) and record it there.
+TIER2_BLOCKING = False
+
+# S-308a: example blocks are the author's chosen parameters, exempt by LOCATION.
+# NOT anti_patterns / common_patterns -- those state claims.
+EXAMPLE_BLOCK_RE = re.compile(
+    r"^(?:(?:\w+_)?examples?|quick_example|complete_example|usage_example|worked_escape)$")
+
+
+def is_example_block(name, body_lines):
+    if EXAMPLE_BLOCK_RE.match(name):
+        return True
+    if any(re.match(r"^\s*authority_tier\s*:\s*EXAMPLE\b", ln) for ln in body_lines):
+        return True
+    content = [ln for ln in body_lines[1:] if ln.strip()]
+    return name in ("wrong", "correct") and len(content) <= 1
 
 
 def _nested_body(lines, i, indent):
@@ -399,10 +735,10 @@ def cites_in(lines, lo=0, hi=None):
             # `sources:` -> a list), and judging the whole body as one string
             # would let a deferral on one line be rescued by an identity token
             # on another.
-            if any(is_citation(ln.split(":", 1)[-1]) for ln in value.split("\n")):
+            if any(is_citation(_line_value(ln)) for ln in value.split("\n") if ln.strip()):
                 return True
             continue
-        if is_citation(value):
+        if is_citation(full_value(lines, i, len(m.group(1)), value)):
             return True
     return False
 
@@ -568,25 +904,42 @@ def quantities_in(text):
 
 
 def audit():
-    if not KB_ROOT.is_dir():
-        return None, None, 0
+    if not KB_ROOT.is_dir() or EF_IDS is None or CP_IDS is None:
+        return None, None, 0, None
     tier1, tier2, scanned = [], [], 0
+    bad = []        # (class, "rel:line", key, excerpt) -- BAD_CITATION, blocking
     for path in sorted(KB_ROOT.rglob("*.yaml")):
+        rel = path.relative_to(REPO)
+        if "community/obex/objects" in rel.as_posix():
+            continue                      # S-308c: third-party objects, not our claims
         try:
             lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
         except OSError:
             continue
         scanned += 1
-        rel = path.relative_to(REPO)
-        file_cites = cites_in(lines) or inline_cite("\n".join(lines))
+        catalog = is_catalog(rel)
+        cat_url = catalog and catalog_cited(lines)
+        if catalog and not cat_url:
+            bad.append(("NO_CATALOG_URL", f"{rel}:1", "url",
+                        "catalog entry has no parallax.com `url:` (Q5)"))
+        for lineno, key, value in citation_values(lines):
+            if not claimed(key, value):
+                continue
+            ok, classes = classify(value)
+            if not ok:
+                bad.append((primary_class(classes), f"{rel}:{lineno}", key,
+                            value.strip()[:100]))
+        file_cites = cat_url or cites_in(lines) or inline_cite("\n".join(lines))
         prose = strip_code_regions(lines)
 
         for name, start, end in top_level_blocks(lines):
+            if is_example_block(name, lines[start:end]):
+                continue
             body = "\n".join(prose[start:end])
             qty = quantities_in(body)
             if not qty:
                 continue
-            block_cites = cites_in(lines, start, end) or inline_cite(body)
+            block_cites = cat_url or cites_in(lines, start, end) or inline_cite(body)
             if block_cites:
                 continue
             units = sorted({u for u in qty})
@@ -598,7 +951,7 @@ def audit():
                                     f"— its own other sections are the control"))
             else:
                 tier2.append((name, f"{detail}; file cites nothing anywhere"))
-    return tier1, tier2, scanned
+    return tier1, tier2, scanned, bad
 
 
 def negative_control():
@@ -704,30 +1057,37 @@ def negative_control():
         ("`sources:` listing EVENT NAMES is not a citation — MUST FIRE",
          ['events:', '  sources: ["CT-passed-CT1", "CT-passed-CT2"]',
           '  resolution: "1 clock at 160MHz"'], True),
-        ("short-form document citation — MUST NOT FIRE",
-         ['absolute_maximum:', '  source: "P2 Datasheet"',
+        # «#412»: the fixtures below were rewritten to the OFFICIAL-TITLE form.
+        # Their old spellings (`P2 Datasheet`, `P2 Silicon Doc v35`, a
+        # `flash_loader.spin2 line 259`, a repo path to the ledger) are exactly
+        # what the acceptance rule now refuses -- see the rule cases further down.
+        ("official-title document citation with page — MUST NOT FIRE",
+         ['absolute_maximum:',
+          '  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, DC Characteristics, p.47"',
           '  vdd_max: "3.6V"'], False),
         ("versioned document citation — MUST NOT FIRE",
-         ['timing:', '  source: "P2 Silicon Doc v35"',
+         ['timing:', '  source: "Propeller 2 Documentation v35, Branch Timing"',
           '  branch: "13 clocks at 160MHz"'], False),
         ("a GENUINE citation that also carries a revision — MUST NOT FIRE",
-         ['known_bug:', '  source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim"',
+         ['known_bug:', '  source: "Propeller 2 Documentation v35 (KNOWN BUGS, Rev C)"',
           '  delta: "PTRx advances 4 ns later"'], False),
-        ("`derived_from:` naming a source file + line — MUST NOT FIRE",
-         ['loader:', '  derived_from: "Parallax P2 flash_loader.spin2 line 259"',
+        ("`derived_from:` naming a Parallax source by title + section — MUST NOT FIRE",
+         ['loader:', '  derived_from: "Parallax Propeller 2 Documentation v35, Boot Sequence"',
           '  spi_clock: "2 MHz"'], False),
-        ("`verified_against:` naming the empirical ledger — MUST NOT FIRE",
+        ("`verified_against:` naming an EF record that EXISTS — MUST NOT FIRE",
          ['drive:',
-          '  verified_against: "engineering/ingestion/external-sources/'
-          'hardware-verification/P2-EMPIRICAL-FINDINGS.md EF-053 (2026-08-14)"',
+          '  verified_against: "EF-053 (2026-08-14)"',
           '  sink: "50 mA"'], False),
         ("`sources:` introducing a LIST of documents — MUST NOT FIRE",
          ['adc:', '  sources:',
           '    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey)"',
           '  sample_period: "1024 clocks at 160MHz"'], False),
         ("inline attribution with no cite key at all — MUST NOT FIRE",
-         ['branch_cost: "343.75ns at 160MHz (55 clocks per Silicon Doc v35 verbatim)"'],
+         ['branch_cost: "343.75ns at 160MHz (55 clocks per Propeller 2 Documentation v35, Branch Timing)"'],
          False),
+        ("inline `Silicon Doc` (a codename, not a title) — MUST FIRE",
+         ['branch_cost: "343.75ns at 160MHz (55 clocks per Silicon Doc v35 verbatim)"'],
+         True),
         # F-335(e) — a DEFERRAL points the reader AWAY. This one shipped
         # `max_current_per_pin: "150mA"` against the datasheet's ±30 mA through
         # two purges, because the bare word `datasheet` marked the block cited.
@@ -738,7 +1098,7 @@ def negative_control():
         ("an inline deferral in prose is not a citation — MUST FIRE",
          ['note: "Sinks 150mA per pin; see the datasheet for package limits."'], True),
         ("a deferral that NAMES the document IS an attribution — MUST NOT FIRE",
-         ['timing:', '  source: "See the P2 Silicon Doc v35, KNOWN BUGS"',
+         ['timing:', '  source: "See the Propeller 2 Documentation v35, KNOWN BUGS"',
           '  branch: "13 clocks at 160MHz"'], False),
         # F-335(d) — a slug names a pattern CATEGORY, not a document. These got
         # through because a bare `pasm2` / `validat` token sits INSIDE the
@@ -753,7 +1113,7 @@ def negative_control():
         # scored wholly-uncited, so Tier 1 could never apply to them at all.
         ("`documentation:` -> `primary: \"<doc>\"` IS a citation — MUST NOT FIRE",
          ['documentation:',
-          '  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"',
+          '  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0, Board A, p.5"',
           'specifications:',
           '  supply_voltage: "3.3V from host"'], False),
     ]
@@ -766,9 +1126,135 @@ def negative_control():
         ok &= good
         print(f"  [{'PASS' if good else 'FAIL'}] {label}: fired={fired} expected={want}")
 
-    total = len(cases) + len(region_cases) + len(cite_cases)
+    # ACCEPTANCE-RULE cases («#412», S-393). Each MUST-FIRE line is a REAL line
+    # from deliverables/ai/P2 (file:line quoted, 2026-10-09) unless marked
+    # CONSTRUCTED; `want_class` is the class the line must be reported under.
+    # The MUST-PASS lines are the other half: the rule has not been tightened
+    # into refusing a good citation. A register that is missing is not a pass.
+    print()
+    if EF_IDS is None or CP_IDS is None:
+        print("  [FAIL] the EF ledger or the CP register is missing -- cannot judge ids")
+        return 1
+    rule_cases = [
+        ("EXTRACTION PATH `silicon-doc-text.txt:NNN`, valid title beside it -- "
+         "language/pasm2/setq2.yaml:35",
+         '  source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 '
+         '(SETQ2 + RDLONG reads hub longs into lookup RAM)"', "EXTRACTION_PATH"),
+        ("REGISTER PATH `SOURCE-ERRATA.md` -- guides/pasm2-getting-started.yaml:607",
+         '    source: "P2 Datasheet 2022/11/01, AC Characteristics (p.48) -- '
+         'engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200, '
+         'footnote 2 at :2209. Compiler default from Parallax Spin2 Documentation v55 -- '
+         'engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1718. framing: '
+         'E-007 in engineering/ingestion/SOURCE-ERRATA.md."', "REGISTER_PATH"),
+        ("BATCH LABEL `parallax-quick-bytes` -- community/quick-bytes/tetris.yaml:33",
+         "    source: parallax-quick-bytes", "BATCH_LABEL"),
+        ("EF id that does not exist (CONSTRUCTED: language/pasm2/getxacc.yaml:27 with "
+         "EF-069 -> EF-999)",
+         '    source: "Hardware-verified on Rev C (EF-999): 50 of 50 idle/non-Goertzel '
+         'reads equal the prior value; 8 of 8 mid-burst partitions exact."', "BAD_ID"),
+        ("CP id that does not exist (CONSTRUCTED: language/pasm2/brk.yaml:22 with "
+         "EF-085 -> CP-999)",
+         '  source: "Parallax Spin2 Documentation v55 (conditional DEBUG: \'an '
+         'opposite-condition SKIP instruction is placed before it\'); compiles '
+         '(CP-999)"', "BAD_ID"),
+        ("S-292 bookkeeping word -- language/pasm2/qvector.yaml:75",
+         "documentation_source: p2_datasheet", "BOOKKEEPING"),
+        ("Parallax paginated PDF cited WITHOUT p.N (CONSTRUCTED: variant of "
+         "guides/pasm2-getting-started.yaml:607)",
+         '  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics"',
+         "NO_PAGE"),
+        ("codename `Silicon Doc v35` is not a title (the arbiter's probe)",
+         '  source: "Silicon Doc v35, Clock Setup"', "NO_PARALLAX_DOC"),
+        ("a title the document does not print: `P2 Datasheet` (the arbiter's probe)",
+         '  source: "P2 Datasheet 2022/11/01, PASM2 instruction table, p.12"', "NO_PARALLAX_DOC"),
+        ("a title the document does not print: `Parallax Propeller 2 Datasheet` (probe)",
+         '  source: "Parallax Propeller 2 Datasheet 2022-11-01, Absolute Maximum Ratings, p.4"',
+         "NO_PARALLAX_DOC"),
+        ("a title the cover does not print: `32201 Prop Plug Guide` (probe)",
+         '  source: "32201 Prop Plug Guide v3.0, Specifications, p.2"', "NO_PARALLAX_DOC"),
+        ("a registry-excluded community document is not a Parallax title (CONSTRUCTED)",
+         '  source: "Smart Pins (Titus) rev 5, WRPIN selector table"', "NO_PARALLAX_DOC"),
+    ]
+    rule_pass = [
+        ("Parallax title + edition + EF that exists -- language/pasm2/brk.yaml:22",
+         '  source: "Parallax Spin2 Documentation v55 (conditional DEBUG: \'an '
+         'opposite-condition SKIP instruction is placed before it\'); behaviour '
+         'hardware-verified (EF-085)"'),
+        ("a real EF with no document -- architecture/smart-pins/"
+         "smart-pin-11000-adc-internal-clock.yaml:181",
+         '  source: "Hardware-verified on P2 silicon (Rev C): hardware-verification '
+         'ledger EF-024 (F-202)."'),
+        ("a real CP (CONSTRUCTED: no KB line cites a CP yet) -- CP-001 exists",
+         '  source: "Compiler-proved (CP-001)"'),
+        ("official title + edition + section + p.N (CONSTRUCTED)",
+         '  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"'),
+    ]
+    # One positive per CANONICAL_TITLES document and per printed form: the form,
+    # an edition, a section, and `p.N` where the document is paginated.
+    for key, forms, edition, paginated, _prov in CANONICAL_TITLES:
+        for form in forms:
+            cite = f"{form} {edition}, Section Heading" + (", p.7" if paginated else "")
+            rule_pass.append((f"canonical title [{key}] form `{form}` (CONSTRUCTED)",
+                              f'  source: "{cite}"'))
+    for label, text, want_class in rule_cases:
+        found = list(citation_values([text]))
+        hit = [(v, classify(v)) for _, k, v in found if claimed(k, v)]
+        fired = bool(hit) and not hit[0][1][0]
+        classes = hit[0][1][1] if hit else []
+        good = fired and want_class in classes
+        ok &= good
+        print(f"  [{'PASS' if good else 'FAIL'}] {label}: fired={fired} "
+              f"classes={classes} expected={want_class}")
+    for label, text in rule_pass:
+        found = list(citation_values([text]))
+        hit = [(v, classify(v)) for _, k, v in found if claimed(k, v)]
+        passed = bool(hit) and hit[0][1][0]
+        ok &= passed
+        print(f"  [{'PASS' if passed else 'FAIL'}] {label}: accepted={passed}")
+
+    # Q3: `enhancement_source` must not count as a citation (real line
+    # language/pasm2/qvector.yaml:84), Q5: catalog url rule.
+    extra = []
+    ql = ['timing:', '  latency: "55 clocks at 160MHz"',
+          'enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13']
+    extra.append(("`enhancement_source:` does not cite -- qvector.yaml:84 -- block stays uncited",
+                  not cites_in(ql)))
+    tetris_head = ["metadata:", "  url: https://www.parallax.com/tetris/", "  source: parallax-quick-bytes"]
+    extra.append(("catalog entry WITH a parallax.com url IS cited (quick-bytes/tetris.yaml:4)",
+                  catalog_cited(tetris_head)))
+    extra.append(("catalog entry WITHOUT a url is NOT cited (CONSTRUCTED: tetris.yaml head, url removed)",
+                  not catalog_cited(["metadata:", "  source: parallax-quick-bytes"])))
+    extra.append(("catalog entry with a NON-parallax url is NOT cited (CONSTRUCTED)",
+                  not catalog_cited(["metadata:", "  url: https://example.com/tetris/"])))
+    for label, passed in extra:
+        ok &= passed
+        print(f"  [{'PASS' if passed else 'FAIL'}] {label}")
+
+    # S-308a: example blocks are exempt by LOCATION; claim-bearing blocks are not.
+    def _block_fires(blk):
+        name = blk[0].split(":")[0]
+        return (not is_example_block(name, blk)) and bool(quantities_in("\n".join(blk)))
+    exempt = [
+        ("`examples:` block", ["examples:", "  - clk: 160MHz"], False),
+        ("`quick_example:` block", ["quick_example:", "  clk: 160MHz"], False),
+        ("`usage_example:` block", ["usage_example: |", "  waitms at 160MHz"], False),
+        ("`authority_tier: EXAMPLE` block", ["worked:", "  authority_tier: EXAMPLE", "  clk: 160MHz"], False),
+        ("uncited prose", ["description: |", "  Runs at 160MHz."], True),
+        ("`notes` beside an exempt example", ["notes:", "  - Runs at 160MHz."], True),
+        ("PRINCIPLE-tier figures", ["rule:", "  authority_tier: PRINCIPLE", "  clk: 160MHz"], True),
+        ("`common_patterns` is NOT exempt", ["common_patterns:", "  - clk: 160MHz"], True),
+    ]
+    for label, blk, want in exempt:
+        fired = _block_fires(blk)
+        good = fired == want
+        ok &= good
+        print(f"  [{'PASS' if good else 'FAIL'}] S-308a {label}: fired={fired} expected={want}")
+
+    total = (len(cases) + len(region_cases) + len(cite_cases) + len(rule_cases)
+             + len(rule_pass) + len(extra) + len(exempt))
     print(f"\n{total} case(s): quantity {len(cases)} · region {len(region_cases)} "
-          f"· citation {len(cite_cases)}")
+          f"· citation {len(cite_cases)} · acceptance rule {len(rule_cases)} refuse + "
+          f"{len(rule_pass)} accept · Q3/Q5 {len(extra)} · S-308a {len(exempt)}")
     print()
     print(SCOPE_NOTE)
     print("Negative control PASSED -- quantities detected, P2 syntax not "
@@ -785,20 +1271,49 @@ def main():
     ap.add_argument("--advisory", action="store_true", help="also print Tier 2 in full")
     ap.add_argument("--negative-control", action="store_true",
                     help="prove the tool can fail; audits nothing")
+    ap.add_argument("--tier2-blocking", action="store_true",
+                    help="make Tier 2 BLOCK too (the S-308b switch; owed to the citations task)")
+    ap.add_argument("--list", action="store_true",
+                    help="list every BAD_CITATION (default: first 5 per class; counts are always complete)")
     args = ap.parse_args()
 
     if args.negative_control:
         return negative_control()
 
-    tier1, tier2, scanned = audit()
+    tier1, tier2, scanned, bad = audit()
     if tier1 is None:
-        print(f"ERROR  {KB_ROOT} not found — nothing audited. Not a pass.")
+        print(f"ERROR  {KB_ROOT} or the EF ledger / CP register not found — "
+              f"nothing audited. Not a pass.")
         return 2
+    t2_block = TIER2_BLOCKING or args.tier2_blocking
 
     if args.inventory:
         print(f"scanned   {scanned} YAML file(s) under {KB_ROOT.relative_to(REPO)}")
         print(f"Tier 1    {len(tier1)} uncited quantitative block(s) in citing files")
         print(f"Tier 2    {len(tier2)} uncited quantitative block(s) in non-citing files\n")
+
+    # BAD_CITATION -- the acceptance rule applied to every claimed citation.
+    by_class = {}
+    for cls, where, key, excerpt in bad:
+        by_class.setdefault(cls, []).append((where, key, excerpt))
+    if bad:
+        print(f"BAD_CITATION -- a citation that names something we may not cite "
+              f"({len(bad)}) -- these block")
+        print("  by class: " + " · ".join(
+            f"{c} {len(by_class[c])}" for c in _CLASS_ORDER + ["NO_CATALOG_URL"]
+            if c in by_class) + "\n")
+        for cls in _CLASS_ORDER + ["NO_CATALOG_URL"]:
+            rows = by_class.get(cls, [])
+            if not rows:
+                continue
+            print(f"  {cls}: {len(rows)}")
+            for where, key, excerpt in (rows if args.list else rows[:5]):
+                print(f"        {where} [{key}] {excerpt}")
+            if not args.list and len(rows) > 5:
+                print(f"        ... {len(rows) - 5} more (--list)")
+        print()
+    else:
+        print("BAD_CITATION: none\n")
 
     if tier1:
         print(f"TIER 1 -- UNCITED IN A CITING FILE ({len(tier1)}) -- these block\n")
@@ -817,10 +1332,14 @@ def main():
         print(f"TIER 2 -- ADVISORY: {len(tier2)} block(s) in wholly-uncited files "
               f"(run with --advisory to list)\n")
 
-    if tier1:
-        print(f"FAIL  {len(tier1)} Tier 1 violation(s) across {scanned} file(s)")
+    blocking = len(tier1) + len(bad) + (len(tier2) if t2_block else 0)
+    if blocking:
+        print(f"FAIL  {len(tier1)} Tier 1 + {len(bad)} BAD_CITATION"
+              f"{f' + {len(tier2)} Tier 2' if t2_block else ''} violation(s) across "
+              f"{scanned} file(s); Tier 2 is "
+              f"{'BLOCKING' if t2_block else 'advisory (switch-on owed to the citations task)'}")
         return 1
-    print(f"PASS  no Tier 1 violations across {scanned} file(s); "
+    print(f"PASS  no Tier 1 or BAD_CITATION violations across {scanned} file(s); "
           f"{len(tier2)} Tier 2 advisory block(s) remain (advisory, not blocking)")
     print()
     print(SCOPE_NOTE)
