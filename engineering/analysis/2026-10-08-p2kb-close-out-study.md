@@ -797,6 +797,33 @@ identical binaries, and differ from `x := INA.[3]` (v55:366-367: `AnyVar[index]`
 rejecting `DEBUG(C_Z)` between PASM instructions goes to the punch list (item 10), checked against PNut
 first.
 
+### Rows S-162..S-219 — change specs («#407», 2026-10-09)
+
+All 58 rows done; specs in `2026-10-08-p2kb-close-out-evidence/rows-S162-S219-specs.md` (142 probe
+compiles; every instruction line in the fences matches a probe). States: change spec 55; build spec —
+S-200 (a structural rule that flags 52 cut scalars today and 0 after the S-183 edit); RESOLVED — S-198,
+S-199. **Two diagnoses changed:** S-169 — `ORGH $FC000,$FC800` builds in a Spin2+PASM program and fails
+only PASM-only (context, not impossibility); S-217 — answered by the PASM2 Manual (the ALT instructions
+alter the next instruction regardless of its kind, `pasm2-manual-text.txt:1071`, `:1097`), so a change
+spec, not undetermined. **S-183 widened:** an independent sweep reproduces the 47 cut strings and finds 5
+more (`calld.yaml:51`, `addressing_modes.yaml:131`, `branch_addressing.yaml:40`, `:41`, `:80`); the quoted
+replacements were applied to scratch copies and re-parsed clean. Sprint choices D1, D2, D4–D8 are in the
+file; D3 (a gate for lower-case CON constants used bare as operands — undetectable by regexp) goes to
+group F as a gate question; D9 (optional ALT silicon check) is not needed. NF-10 is S-288 (answered:
+INB); NF-11 sits in S-102's block (check in the sprint).
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-355 | B | NF-1 | wrong, not code-driving | `special_registers.yaml:96`: "CORDIC results must be read before the next CORDIC operation" — commands may be overlapped; results are read in order | SD:3413 | traced | — | change spec | yes |
+| S-356 | B | NF-2 | wrong, not code-driving | `addressing_modes.yaml:134-137`: AUGS vs AUGD chosen "by value size"; the split is by field (S vs D) | CSV:432-433; the page's own `:22` | traced | — | change spec | no |
+| S-357 | B | NF-3 | **drives wrong code** | `multi_cog_synchronization.yaml:305-334` barrier: writes a register never loaded, retry compare cannot work, no atomic add exists | P2 has no hub atomic add; lock version compiled | traced | — | change spec (lock-guarded counter, compiled) | no |
+| S-358 | B | NF-4 | **drives wrong code** | `loop-control.yaml:8`: `rep #{iterations}, #{instructions}` — operands swapped (D = instruction count, S = iterations) | SD:757; CSV:257 | traced | — | change spec | yes |
+| S-359 | B | NF-5 | drives wrong code | `multi_cog_synchronization.yaml:289-290`: `shl work_index, #16` every pass shifts the packed cog number out | reading of the code | traced | — | change spec (scratch register) | no |
+| S-360 | B | NF-6 | wrong, not code-driving | `branch_addressing.yaml:15`: relative branch range "±1MB" — a 20-bit signed byte offset spans ±512 KB | SD:731, :748 (derived) | inferred | — | change spec (state as derived) | no |
+| S-361 | B | NF-7 | drives wrong code | `conditional_execution.yaml:309,315`: `TEST flags, #READY_BIT WZ` — tests the wrong mask if READY_BIT is a bit number | page neighbours use bit numbers | undetermined | — | sprint: decide from the page's own constant; TESTB form compiled | no |
+| S-362 | B | NF-8 | wrong, not code-driving | `cog_hub_execution.yaml:217`: DJNZ in hubexec "13-14 clocks taken"; CSV gives 2 or 13…20 | CSV:193 | traced | — | change spec ("at least 13") | yes |
+| S-363 | B | NF-9 | wrong, not code-driving | `loop-control.yaml:66`, `:96`; `scratch-storage.yaml:46` cite `flash_loader.spin2` lines for code the source does not contain (it reads through the FIFO) | `flash_loader.spin2:56-60` | traced | citation drift | change spec (re-cite or reword) | no |
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
