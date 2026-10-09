@@ -932,6 +932,10 @@ Asked one at a time; each supersedes the "question for Stephen" note on its row.
 | Q7 | S-322 item 3 | **Stephen:** the Rev B jumper is an Eval-board fact — the old P2-ES Eval Board Rev B needs the ACC HDR/5V shunt to put 5 V on the header pins, which matters for any add-on that uses header 5 V. The KB already models it so (`p2-hardware-feature-comparison.yaml:430`, `addon-serial-host.yaml:78,89`). Fix: remove the unsourced "3.3 V supply" from `addon-serial-device.yaml` and state no supply for it. No erratum. |
 | Q8 | S-330 | **A, modified.** Remove `.git-hooks/`, `language/pasm2/add-missing-oneliners.py` **and `CHANGELOG.md`** ("why carry a pointer to somewhere else?"); move `language/PASM2-ENCODING-REFERENCE.md` out to `engineering/` and repoint its generator; keep `README.md` as the tree's only non-YAML file, and drop its *Release record* section that links the deleted CHANGELOG. |
 
+| Q9 | S-147, S-251, S-280, S-345, S-157 (PASM half), S-354 | **A, "if we have proven the errata".** Where the Spin2 v55 document and `pnut-ts` disagree on legality, the KB teaches what compiles and the document's error is filed in `SOURCE-ERRATA.md` with the source line, the command and the compiler output — only once our compile proves it. No PNut checks: `pnut-ts` emits PNut's binary (Stephen's 700+ regression tests); a PNut check is a last resort for a real suspicion. The punch-list "check first: PNut" lines (items 7–11) are struck. S-354 is checked here with `pnut-ts`. |
+| Q10 | F-352 | **In the sprint, if closeable:** the click half closes if the ingested P2 Eval Click Adapter documentation states the offsets; otherwise the row records why. |
+| Q11 | S-395 | **A — a test decides it** (VO-J-035, «#409»); the USB page states the result. Stephen also set the standard for every test we publish from (doctrine: *A test we publish from must prove its answer beyond doubt*). |
+
 **New rows raised by the decisions:**
 
 | # | Severity | Finding | Evidence | Disposition |
@@ -1039,9 +1043,9 @@ the question asked 2026-10-09.
 
 Stated by the reviewers in each batch's NOT CHECKED, gathered here:
 
-- **No PNut runs.** Every compiler fact is PNut-TS v1.55.8; where PNut might differ the question is on
-  `DRAFTS/PNUT-TS-PUNCH-LIST.md` items 5–11 (Stephen's machine). Rows S-147, S-251, S-280, S-345, S-354,
-  S-368 wait on them.
+- **No PNut runs, by decision (Q9).** Every compiler fact is PNut-TS v1.55.8, which emits PNut's binary;
+  rows S-147, S-251, S-280, S-345, S-354, S-368 no longer wait on PNut — the KB teaches what compiles and
+  proven document errors go to `SOURCE-ERRATA.md`.
 - **No silicon runs.** Run-time claims rest on the documents, the interpreter source and EF entries; the
   surviving bench questions (§5) are the planned exceptions.
 - **Prose not read end to end:** the hardware add-on pages' `use_cases`/`applications` blocks beyond three
