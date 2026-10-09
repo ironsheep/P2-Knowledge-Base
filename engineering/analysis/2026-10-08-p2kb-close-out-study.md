@@ -125,7 +125,8 @@ Planning closes at that point. Tasking follows.
 
 ## 2. Read order — written before reading (tick as covered)
 
-0. [ ] **Ingestion prerequisites** (through `ingest-source` only):
+0. [x] **Ingestion prerequisites** (through `ingest-source` only) — done 2026-10-09; the operator
+   re-ingestion it found owed is task «#405»:
    - [x] (a) ingest the v55 Spin2 interpreter — **done 2026-10-09 («#401»):** new edition at
      `engineering/ingestion/external-inputs/source-code/spin-interpreter/v55/` (byte-identical;
      PNut-TS v1.55.8 embeds exactly its compiled image); delta in
