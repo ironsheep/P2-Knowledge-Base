@@ -242,7 +242,8 @@ Both are sprint scope (§8). Other artifacts this sprint's changes describe:
 
 ## Named unknowns
 
-- **VO-J-035's result** («#409»): the USB page's on-the-fly sentence waits on it.
+- ~~**VO-J-035's result** («#409»)~~ — **decided 2026-10-09: EF-102, SURVIVES.** The USB page states the
+  P2 Documentation's on-the-fly sentence for the baud, cited to EF-102, in «#419».
 - **S-390**: what the parallax.com article lists as code author.
 - **E-023 (C_Z in PASM)**: whether the document or the compiler is the party in error — filed as a
   disagreement either way; Parallax decides.
@@ -276,7 +277,7 @@ block about to be removed. The compile manifest counts 353 entries in 175 files 
 | §4 | Citations and provenance (S-292, 293, 327, 328, 390, 391, 392) | «#422» | 13 |
 | §8 + Blast Radius | Registers, gaps ledger, guide-conformance, docs | «#423» | 14 |
 | §9 | Release KB v1.24.0 (§1.5 audit, Stephen's review), then server, F-439 | «#398» | 15 |
-| §5 (VO-J-035) | Bench round 2, runs alongside; the USB sentence waits on its EF | «#409» | — |
+| §5 (VO-J-035) | Bench round 2 — done, EF-102 (SURVIVES); the USB sentence lands in «#419» | «#409» | — |
 
 «#387» (the register's open set) superseded by «#410»–«#423». «#373» (P2 Errata, waiting on Chip) is
 outside this sprint, seq 16.
@@ -296,3 +297,5 @@ S-370, S-374, S-390, S-391, S-322 item 1 (#64013 schematic), F-352, F-562.
 
 - 2026-10-09 — sprint started; tasks «#410»–«#423» generated; «#387» superseded; F-563 (USB status
   bits, found by «#409») added to «#419»'s scope.
+- 2026-10-09 — VO-J-035 rerun SURVIVES → EF-102; «#419» now writes the on-the-fly WXPIN sentence (baud
+  only) on the USB page, cited to the P2 Documentation and EF-102.

@@ -1825,6 +1825,45 @@ implements `??` as `XORO32` then a copy (`Spin2_interpreter.spin2:319-320`). A `
 seeded with 0. *Limits:* one board; four seeds; 8 calls per seed (the period is not measured). *Source:*
 `…/tests/test-vo-s059-xoro-zero-seed.spin2`.
 
+*EF-102 comes from the close-out bench, round 2 (same campaign, run by Stephen 2026-10-09, same board and
+conditions as round 1). The program was written by a fresh agent, reviewed adversarially, fixed, and the
+fixes checked by a third agent; its verdict was re-derived from the raw record lines by a separate parse.*
+
+### EF-102 · A WXPIN on a running USB pair takes effect with no reset: the baud it sets is in force for the next packet, which arrives intact — `CONFIRMED` (documentary claim decided)
+*KB:* `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml`
+*How proven:* `test-vo-j-035-usb-wxpin-on-running-pair` (VO-J-035), pair P0/P1, host mode, nothing
+attached, the receiver sensing the pair's own output. Each arm: the documented start (DIRL, WRPIN
+`$76`, WXPIN, DIRH), J driven and settled 4,000 clocks, then at a GETCT-marked site the arm's WXPIN step
+(none in the controls), then one packet `SOP $A5 $5A $3C $C3` written at fixed deadlines for the speed
+under test. A packet is GOOD when the 4 bytes arrive in order between SOP-in and EOP-in and the
+first-to-fourth byte time is within ±25 % of 24 bit periods at that speed (FS 400, LS 3,203 clocks), so
+the baud in force is measured, not assumed. Arms: re-issue the same word (FS, LS), FS→LS, LS→FS, FS→LS
+then back to FS on the same pair, and FS→LS / LS→FS with no settle (~119 clocks from the WXPIN to the SOP
+write); matched no-WXPIN controls at both speeds and both settles; negative controls (2-byte packet,
+nothing sent, an FS pair written at the LS schedule); 5 rounds. *Result (log `debug_261009-145113`,
+2026-10-09; `.bin` 30,214 bytes, byte-identical to a build of the committed source):* every gate held
+(J before every arm and at every control baseline; every write within 48 clocks of its deadline,
+largest 30; no log overflow). **All 15 arms 5 of 5: each WXPIN arm's packet was GOOD with its duration
+in the new speed's window** (FS→LS arms 3,206 clocks in every round, LS→FS arms 398–416; expected
+3,203 and 400), the controls GOOD, the mismatched
+schedule not intact, the short and empty packets read as short and empty. Pre-registered verdict:
+`SURVIVES`; the separate re-derivation from the 75 raw records gives the same.
+*Observed, printed, not judged:* the DP pin's IN did not rise within 10,000 clocks after a fresh DIRH
+in 70 of 75 arms (the J was written regardless), and rose in 8 clocks in all 5 D2 arms, which follow a
+packet; at the baseline read just after an LS→FS WXPIN with no settle (arm SC) the steady bit (3) read 0
+in 5 of 5, line J; at the same point after an FS→LS WXPIN (arm SB) the line read K once in 5, and that
+packet was still GOOD.
+**Grounds:** decides S-395. The P2 Documentation's "Once established, these settings can be changed
+on-the-fly without resetting the USB smart pins" (`silicon-doc-text.txt:4581`) holds for the baud.
+The empty packet after a re-issued WXPIN in VO-J-032's unjudged characterisation step (EF-093) does not
+recur here: with the line driven to J first, every re-issue arm carried its packet. What emptied that
+step's packet was not measured. The first run of this test (log `debug_261009-140053`) gave NO VERDICT
+from a rig defect: its packets started from the host IDLE line, which with nothing attached reads SE0,
+and none arrived. *Limits:* one board, Rev C; one pair, self-sensing; host mode only; D[14]
+(FS/LS signalling) is not observable on a self-sensing pair, so "FS/LS mode changed" is NOT claimed, only
+the baud (D[13:0]); the shortest WXPIN-to-packet gap tested is ~119 clocks; nothing attached, so no
+device's view of the line. *Source:* `…/tests/test-vo-j-035-usb-wxpin-on-running-pair.spin2`.
+
 
 ## Open / pending empirical questions
 

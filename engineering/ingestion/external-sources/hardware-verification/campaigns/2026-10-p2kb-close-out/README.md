@@ -28,7 +28,7 @@ byte-identical to a build of the committed source.
 
 | # | Test (`tests/`) | Row | Question | Pins | Verdict | EF |
 |---|---|---|---|---|---|---|
-| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | VO-J-035 | does a WXPIN re-issued or changed FS ↔ LS on a running USB pair take effect (its baud) and leave the next packet intact, after a long and a short settle? | P0/P1 (driven) | first run NO VERDICT (rig defect, below); reworked, rerun owed | — |
+| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | VO-J-035 | does a WXPIN re-issued or changed FS ↔ LS on a running USB pair take effect (its baud) and leave the next packet intact, after a long and a short settle? | P0/P1 (driven) | SURVIVES (rerun; the first run's rig defect fixed) | EF-102 |
 
 **#9, first run** (`debug_261009-140053`, 2026-10-09; `.bin` 24,942 bytes, byte-identical to a build
 of the committed source): **NO VERDICT** — gates K and N1 failed (RIG FAIL), and L and S also failed.
@@ -48,6 +48,11 @@ observed on silicon). Written by a fresh agent, reviewed adversarially (one cond
 DP-IN gate resting on unobserved behaviour — made an observation; one major: the low-speed J and bit 3
 were hard-gated — degraded like gate L), fixed, and the fixes checked by a third agent (PASS; one
 header miscount corrected). On the run sheet as #9 RERUN.
+
+**#9, rerun** (`debug_261009-145113`, 2026-10-09; `.bin` 30,214 bytes, byte-identical to a build of
+the committed source): **SURVIVES** — every gate held, all 15 arms 5 of 5, each WXPIN arm's packet GOOD
+in the new speed's duration window; a separate parse of the 75 raw records re-derives the same verdict
+→ **EF-102**.
 
 **Nothing attached.** Every program is bare-board: pins come only from the bench's free set
 (P0–P7, P32–P47), and the smart-pin tests route between neighbours through the relative-pin input
