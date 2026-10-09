@@ -649,6 +649,35 @@ addresses, registers).
 |---|---|---|---|---|---|
 | S-294 | `hardware/p2-hardware-selection-guide.yaml` — 22 lines: `:23`, `:29`, `:38`, `:44`, `:53`, `:59`, `:68`, `:74` (`cost_estimate`), `:82`, `:105` (`total_investment`), `:121`, `:141`, `:152`, `:156`, `:160` (`cost`), `:127`, `:133` (`additional_cost`), `:165`, `:172`, `:179` (`total_cost`), `:166` (`programming: "PropPlug programmer required (+$30)"`), `:193` (`cost_difference: "$30-50 between P2-EC and P2-EC32MB"`) | dollar ranges | delete each price-only key; on `:166` keep the sentence and drop `(+$30)`; on `:193` delete the key (the memory-upgrade advice stands on `:194-195`). **Keep the tiering** (entry / balanced / maximized; "lower cost", "cost-effective" wording). Add once, at the file's top level: `pricing: "For current pricing, see the Parallax store (parallax.com)."` | decision D3 | change spec |
 
+**F-381 (2026-10-09).** Read-only research over the 27 Tier-2 blocks
+(`audit-yaml-claim-sourcing.py --advisory`), classified per D4. Arbiter re-read
+`Spin2_interpreter.spin2:1953-1966` (CLKSET's 10 ms wait), `silicon-doc-text.txt:4158`, `:4080`,
+`spin2-v55-text.txt:1725`. **No number is unsourced-and-untestable, so nothing is removed.** Four
+example defects surfaced; one bench question.
+
+| # | File, block | Current | Correct | Authority | State |
+|---|---|---|---|---|---|
+| S-295 | `language/spin2/methods/getms.yaml:54`, `getsec.yaml:38` (`silicon_errata`) | correct values, no citation | add `verified_against: "…/P2-EMPIRICAL-FINDINGS.md EF-068, EF-080, EF-082"` (getsec: EF-068, EF-082) | EF ledger `:1001-1018`, `:1334`, `:1374-1378` | change spec |
+| S-296 | `waitct.yaml:37`, `single_communication.yaml:149`, `smart-pin-01111…yaml:97`, `smart-pin-10000…yaml:8`, `10001…:8`, `10010…:8`, `10011…:8` | correct derived wrap times (~53 s at 80 MHz; ~21 s; ~10.7 s at 200 MHz) | add `derived_from`/`source`: the counter/Z width + the arithmetic (`spin2-v55-text.txt:547`, `:553`; `silicon-doc-text.txt:4147`, `:4158`, `:4169`, `:4186`, `:4193`, `:4222`) | as cited | change spec |
+| S-297 | `clkset.yaml:41` (`timing`) | "~10-20ms for PLL lock" | "~10 ms (20_000_000/100 clocks at RCFAST), only when the new clkmode sets the PLL/crystal bit; otherwise no wait"; cite it | `Spin2_interpreter.spin2:1953-1966` (v55); `spin2-v55-text.txt:1725`, `:1738`; `silicon-doc-text.txt:2613` | change spec (the KB value is wrong) |
+| S-298 | `asmclk.yaml:61` | "~10ms" (correct) | add `source: "Spin2 v55 documentation (spin2-v55-text.txt:1725, :1738)"` | as cited | change spec |
+| S-299 | `smart-pin-01000-pwm-triangle.yaml:34` | example description "1µs base period" | "40 ns base period" (X[15:0] = 1 clock at 25 MHz); the rest of the arithmetic checks | `silicon-doc-text.txt:4034-4050` | change spec (wrong P2 fact in an example) |
+| S-300 | `smart-pin-01010-pwm-smps.yaml:37` | "100kHz switching" | "~39 kHz maximum (frame 256 × 25 clocks at 250 MHz); each cycle starts when A reads low" | `silicon-doc-text.txt:4070-4091` | change spec (with S-003, S-230) |
+| S-301 | `smart-pin-01111…yaml` example | `duty_percent := (high_time * 100) / _clkfreq` overflows signed 32-bit above ~10 % duty; the PASM half (X = 0) and Spin half (X = clkfreq) are not equivalent as claimed | `muldiv64(high_time, 100, _clkfreq)`; align or reword the "equivalent" claim | 32-bit arithmetic | change spec (**drives wrong code**) |
+| S-302 | `smart-pin-10010…yaml` example | `frequency := (_clkfreq * 100) / period` overflows | `muldiv64(_clkfreq, 100, period)` | 32-bit arithmetic | change spec (**drives wrong code**) |
+| S-303 | `waitct.yaml:32-36` example 3 | "All cogs wait for same time" while each cog computes its own `GETCT() + clkfreq` | share `sync_time`, or fix the comment | — | change spec |
+| S-304 | `smart-pin-01000/01001/01010` `registers` | base period and frame "1-65536" | **bench question VO-S304** (below); kept served until the bench decides | sources silent: searched `65,?536`, `X.[15..0]` in the silicon doc; control hit `:3925` (DAC/NCO "zero = 65,536") | bench question |
+| S-305 | `smart-pin-10001…yaml:75` | "Servo pulse measurement (1-2ms pulses)" | an RC-servo convention, not a P2 fact: move the 1-2 ms into an `example:` child (or label it as the servo convention); keep the application | searched `servo` in the silicon doc and v55: none | reclassification |
+| S-306 | decomposition: `worked-derivation-robot-dog.yaml:30`, `:41`; `worked-derivation-streaming-pipeline.yaml:30`, `:45` | scenario cadences in blocks tagged `authority_tier: EXAMPLE` | no content change — the gate exempts EXAMPLE-tier blocks (S-307) | the blocks' own tier | reclassification |
+| S-307 | `first-contact-procedure.yaml:26`; `rate-adaptation.yaml:5`, `:51`; `spatial-computing.yaml:65` | scenario cadences in PRINCIPLE-tier prose | move the figures into `example:` children (rate-adaptation already has one at `:101-120`); `spatial-computing`'s sit in `worked_escape` — exempted by S-308 | — | change spec |
+| S-308 | `engineering/tools/validation/audit-yaml-claim-sourcing.py` (decision D4 gate) | wholly-uncited files are advisory | (a) exempt example blocks by location: block names matching `^(\w+_)?examples?$` plus `quick_example`, `complete_example`, `usage_example`, any block with `authority_tier: EXAMPLE`, `worked_escape`, and one-line `wrong:`/`correct:`; NOT `anti_patterns`/`common_patterns`; (b) Tier 2 blocks (`main()` ~`:820-824`), switched on once S-295..S-307 are applied; (c) skip `community/obex/objects/` and add a small check of OBEX metadata against the index; (d) recognise `part\d+-…\.txt` silicon-doc citations in `INLINE_CITE_RE` (`:277-280`) — the smart-pin files cite that way and are wrongly "uncited"; negative controls: four must-not-fire (example blocks) and four must-still-fire (uncited prose, `notes` beside exempt examples, PRINCIPLE-tier figures, `common_patterns`) | decision D4; reviewer's line map of the script | build spec |
+| S-309 | OBEX 4727, 4858 | "80MHz to 320MHz", "1.5/12 Mbps", "13-bit at 16k sps at 200MHz" in `description_full` | not checkable: the index text is truncated at 100 characters; 4012 matches exactly | `p2kb_obex_get` | reclassification (OBEX self-referencing; checked as far as the index goes) |
+
+**Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
+period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
+smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
+for these modes; its only "zero = 65,536" statement is for the DAC/NCO modes (`:3925`).
+
 **Queued question for Stephen (one, at the hand-off): S-285/S-286.** Both keys describe how much
 hub or cog state the *debugger program* uses — a tool limit, which the doctrine says is not a KB
 fact. Recommendation: keep the keys with the silicon-only text above (the 16 KB region, its write
@@ -667,6 +696,7 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 
 | VO id | Row(s) | Question | Sources-silent proof (terms · files · control hit) | Test file | Status |
 |---|---|---|---|---|---|
+| VO-S304 | S-304 | PWM_TRIANGLE / PWM_SAWTOOTH with `X[15:0] = 0` and with `X[31:16] = 0`: what base period and frame count result? (second smart pin on a jumper, free pins only) | `65,?536`, `X.[15..0]` · `silicon-doc-text.txt` PWM sections `:4034-4067` · control: `:3925` (DAC/NCO "zero = 65,536") | to write (step 8) | sources silent |
 
 ## 6. Not read, and why
 
