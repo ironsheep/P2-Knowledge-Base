@@ -19,29 +19,27 @@ confirmation before any YAML edit (sprint-plan overlay).
    Q12):** a separate compile-proof register, `CP-NNN` — "to keep our registers pure". Legality facts
    stay CP; behaviour facts move to EF when a P2 run proves them. Citations are internal provenance.
    Built in §6.
-2. **Citation format for the S-392 rewrite** (~150 citations now pointing at our text captures).
-   *Recommendation:* `"<Parallax title> <edition>, <section heading>"`, plus `p.N` where the
-   document is a paginated PDF (Datasheet, Hardware Manual, PASM2 Manual); no line numbers, no
-   repo paths (those name our files). Example: `"Parallax P2 Documentation v35 (Rev B/C), Smart Pins:
-   USB host/device %11011"`.
-3. **`pnut_ts` → `pnut-ts`** (S-396, 110 lines in 53 files): the only installed executable is
-   `pnut-ts`; the compiler's banner prints `'pnut_ts'`. *Recommendation:* the KB names the command a
-   reader types — `pnut-ts` — everywhere.
+2. ~~Citation format for the S-392 rewrite~~ — **settled by standing ruling** (doctrine, Q3,
+   2026-10-09: "A claim learned from our capture of a Parallax document cites that document (title,
+   edition, section or page), not our file"). Applied: `"<Parallax title> <edition>, <section
+   heading>"`, plus `p.N` for paginated PDFs; no line numbers or repo paths. Citations are internal
+   provenance (Q12), so the format serves the auditor and the gate.
+3. ~~`pnut_ts` → `pnut-ts`~~ — **not a question**: the only installed executable is `pnut-ts`
+   (`which`, 2026-10-09), so the KB's `pnut_ts` is a defect seen, fixed under *fix everything seen*.
 
 ### §0.2 Design decisions to flag (overlay: confirm each before edits start)
 
-- **D-A** Gates land before content (§1 before §2–§7), so every content edit is checked by the gate
-  that will judge it at release.
+- **D-A** Gates land before content (§1 before §2–§7) — sequencing; follows *Gates must run when the
+  fix is cheap*.
 - **D-B** The compile-gate drain (§2) edits each failing block to compile *and* agree with its
-  source (F-381: correct = compiles AND sourced); where no source states the example's behaviour,
-  the block is removed, not invented (Sacred Rule #7 for any `related:` it held).
-- **D-C** Rows whose fix is "remove" (R4 invented facts, R9 tool limits, P1 carry-over) remove the
-  claim; nothing is rewritten from memory to fill the gap.
-- **D-D** Decision Q8: `language/PASM2-ENCODING-REFERENCE.md` moves to
-  `engineering/standards/pasm2-encoding-reference.md` (generated), and
-  `engineering/tools/gen-pasm2-encoding-reference.py`'s default output path moves with it.
-- **D-E** Proven compiler-vs-document disagreements are filed as `SOURCE-ERRATA` E-020..E-023 (Q9),
-  reported to Parallax through Stephen.
+  source (F-381); where no source states the example's behaviour, the block is removed, not invented
+  — follows *no unsourced claims* and *our reasoning is not a source* (Sacred Rule #7 for any
+  `related:` it held).
+- **D-C** Rows whose fix is "remove" remove the claim; nothing is rewritten from memory — same rulings.
+- **D-D** *Open — asked 2026-10-09:* where the generated PASM2 encoding reference goes when it leaves
+  the served tree (Q8).
+- **D-E** Proven compiler-vs-document disagreements filed as `SOURCE-ERRATA` E-020..E-023, each
+  pointing at its CP record — follows Q9 and Q12.
 
 ---
 
