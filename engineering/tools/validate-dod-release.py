@@ -829,7 +829,7 @@ def validate_cross_references(verbose: bool = False) -> ValidationResult:
 
 
 def _run_gate(result: ValidationResult, script: Path, args: List[str],
-              label: str, verbose: bool) -> None:
+              label: str, verbose: bool, timeout: int = 300) -> None:
     """Run one instrument and let its EXIT STATUS decide the release.
 
     Three outcomes, and the third is the one that has to be spelled out:
@@ -845,7 +845,7 @@ def _run_gate(result: ValidationResult, script: Path, args: List[str],
         return
     try:
         proc = subprocess.run(['python3', str(script)] + args,
-                              capture_output=True, text=True, timeout=300)
+                              capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
         result.fail(f"{label}: timed out — nothing audited, which is not a pass")
         return
@@ -915,6 +915,31 @@ def validate_claim_sourcing(verbose: bool = False) -> ValidationResult:
     _run_gate(result, script, [], "audit", verbose)
     result.info("Scope: QUANTITATIVE CLAIMS only, and only that a citation is "
                 "PRESENT — nothing here reads the cited document.")
+    return result
+
+
+def validate_kb_code_compiles(verbose: bool = False) -> ValidationResult:
+    """BLOCKING (ENH-03). Does every code block in the shipped KB compile in its
+    declared context?
+
+    Every candidate block carries a reviewed class in the sidecar manifest
+    (`kb-compile-manifest/`): program, fragment, never (asserted to FAIL at its
+    line) or not-code (with a reason). A block that fails its class, an
+    unclassified block, a stale fingerprint or an orphan entry all fail the
+    release. A failing block that names its finding is still a failure: the
+    finding is reported, it never changes the verdict.
+
+    Timeout: a full sweep measured 27 s wall on 24 cores (about 520 s of CPU),
+    2026-10-09, «#404». 900 s covers a single-core run of that CPU time with
+    headroom; the inherited 300 s would not.
+    """
+    result = ValidationResult("KB Code Compiles (ENH-03 compile gate)")
+    script = Path("engineering/tools/validation/audit-kb-code-compiles.py")
+    _run_gate(result, script, ['--negative-control'], "negative control", verbose)
+    _run_gate(result, script, [], "audit", verbose, timeout=900)
+    result.info("Scope: LEGALITY ONLY. A pass means pnut-ts accepts each block in "
+                "its declared context — not that the code does what its text says, "
+                "and not that any P2 fact in it is right.")
     return result
 
 
@@ -1254,6 +1279,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_cross_references,
         validate_constant_fidelity,
         validate_claim_sourcing,
+        validate_kb_code_compiles,
         validate_source_lock,
         validate_duplicate_keys,
         validate_adc_encoding,

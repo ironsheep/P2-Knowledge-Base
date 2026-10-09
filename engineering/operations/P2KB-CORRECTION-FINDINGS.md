@@ -3296,7 +3296,20 @@ drift.
   > proposer 2 m 13 s — the "~25 min" estimate above does not hold. PNut-TS hang on a file with no
   > final newline is worked around (the gate adds one) and filed as punch-list item 5.
 
-  > **PROGRESS 2026-10-09 — B3 done («#403»); B4 wiring «#404» open.** Every candidate is
+  > **PROGRESS 2026-10-09 — B4 done («#404»): the gate is a permanent release gate.**
+  > `validate-dod-release.py` runs `validate_kb_code_compiles()` (negative control, then the full
+  > sweep with its own 900 s timeout — measured 27 s wall / ~520 s CPU on 24 cores; the inherited
+  > 300 s would not cover a single-core machine). `audit-gate-arming.py --show-tiers` lists it
+  > ARMED by the runner. `release-yamls` names it as a BLOCKING §1 precondition, a §1.5 standing
+  > check (`--since "$PREV"` plus an audit of the manifest diff — moves into `never`/`not-code`,
+  > new `assumes` names and deleted entries are the hunks auditors read), in §5.5's command list
+  > and in *What a green gate does NOT certify*. `yaml-knowledge-base-maintenance` gained §2.6
+  > *Compile the code you touched* and a hand-back line. A DoD run now includes it and is RED on
+  > the 352 registered blocks: no release until the close-out fixes them, as decided. Full sweep
+  > time on Stephen's machine is not yet measured. The ENH-03 build is complete; this entry closes
+  > when the close-out release ships green.
+
+  > **PROGRESS 2026-10-09 — B3 done («#403»).** Every candidate is
   > classified: **3077 blocks — 501 program, 1932 fragment, 17 never (asserted to fail), 627
   > not-code (each with its reason)**, in sidecars under `kb-compile-manifest/`. A full sweep takes
   > 27 s and fails on **352 blocks, every one REGISTERED** against a close-out study row (105
