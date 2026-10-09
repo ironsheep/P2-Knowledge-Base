@@ -27,7 +27,15 @@ result, then `=== END ===` and `DEBUG_END_SESSION`.
 
 | # | Program | Pins in use (keep clear) | Runs | Hang limit | Look for |
 |---|---|---|---|---|---|
-| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | **P0/P1** (driven) | < 1 s | 15 s | one `VERDICT VO-J-035` line (SURVIVES / DISTURBED / INCONCLUSIVE) and its settle line |
+| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | **P0/P1** (driven) | < 1 s | 15 s | one `VERDICT VO-J-035` line (SURVIVES / DISTURBED / INCONCLUSIVE) or `NO VERDICT`, any `NOT JUDGED in this verdict:` line, and the `(observation, not a gate) DP IN not high within …` line |
+
+**#9 — RERUN (reworked 2026-10-09).** Run 1 (`debug_261009-140053`) gave NO VERDICT: no packet arrived,
+because every packet started from the idle SE0 line. The reworked program drives J before each arm
+and checks it. **Same board, same pins, nothing attached, nothing to change on your side** — build
+`pnut-ts -d` (30,214 bytes), load, save the whole log. New lines you will see: `JS` / `JB` (the line
+before each arm), a `(observation, not a gate) DP IN not high within …` count (not a failure), and possibly
+`NOT JUDGED in this verdict:` (some arms left out of the verdict, with the gate that left them out).
+Any `RIG FAIL` or `NO VERDICT`: send the log as is.
 
 A `RIG FAIL` on gate P (a late write) means the run's timing missed a deadline — send the log; it is a
 rerun, not a result.

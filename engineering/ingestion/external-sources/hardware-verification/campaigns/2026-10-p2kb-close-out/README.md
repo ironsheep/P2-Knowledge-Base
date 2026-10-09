@@ -24,11 +24,30 @@ byte-identical to a build of the committed source.
 | 7 | `test-vo-j-006-lut-share-block-load-and-spin2.spin2` | VO-J-006 | does a block load propagate through LUT sharing; a Spin2 sender | none | PROPAGATES; start-up image arrives; receiver COGINIT resets | EF-096 |
 | 8 | `test-vo-j-005r-streamer-capture-ceiling-and-skew.spin2` | VO-J-005 | streamer pin-capture ceiling; filter skew | P32–P47 (P32 driven, P36–P47 held low) | no ceiling to 1 sample/clock; filter delay N + 1 | EF-095 |
 
-**Round 2 (one test, written 2026-10-09, not yet run):**
+**Round 2 (one test, written 2026-10-09):**
 
 | # | Test (`tests/`) | Row | Question | Pins | Verdict | EF |
 |---|---|---|---|---|---|---|
-| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | VO-J-035 | does a WXPIN re-issued or changed FS ↔ LS on a running USB pair take effect (its baud) and leave the next packet intact, after a long and a short settle? | P0/P1 (driven) | — | — |
+| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | VO-J-035 | does a WXPIN re-issued or changed FS ↔ LS on a running USB pair take effect (its baud) and leave the next packet intact, after a long and a short settle? | P0/P1 (driven) | first run NO VERDICT (rig defect, below); reworked, rerun owed | — |
+
+**#9, first run** (`debug_261009-140053`, 2026-10-09; `.bin` 24,942 bytes, byte-identical to a build
+of the committed source): **NO VERDICT** — gates K and N1 failed (RIG FAIL), and L and S also failed.
+Every arm, every round: n = 0, no status event, baseline `$0C` (steady + SE0). Gates P, Q, O held; N2
+and X held only because nothing arrived. The receiver saw no SOP from any packet, controls included.
+**Rig defect, not a result:** every arm sent SOP straight from the host IDLE state, which with nothing
+attached is SE0 (the host's 15k pull-downs, `silicon-doc-text.txt:4597`; the baseline reads it). The
+test this one was built from (#6, EF-093, same pair) drove J (`WYPIN #3`) and let it settle before
+every packet, and its packets arrived. The event mask (status bits 4–15) hid the line-state bits, so
+this run cannot show whether the transmitter sent anything.
+
+**#9, rework (2026-10-09, 30,214 bytes):** every arm drives J and settles before its WXPIN site; the
+line is judged on bits 2..0 (J = %001) — a miss where J was driven at full speed is a RIG FAIL, a miss
+at low speed (gate JL) or on D2 (gate JD) takes those arms out of the verdict, as gate L does; bit 3
+(steady), the DP-IN wait and the line states seen are printed, not judged (none of them has been
+observed on silicon). Written by a fresh agent, reviewed adversarially (one conditional blocker: a
+DP-IN gate resting on unobserved behaviour — made an observation; one major: the low-speed J and bit 3
+were hard-gated — degraded like gate L), fixed, and the fixes checked by a third agent (PASS; one
+header miscount corrected). On the run sheet as #9 RERUN.
 
 **Nothing attached.** Every program is bare-board: pins come only from the bench's free set
 (P0–P7, P32–P47), and the smart-pin tests route between neighbours through the relative-pin input
