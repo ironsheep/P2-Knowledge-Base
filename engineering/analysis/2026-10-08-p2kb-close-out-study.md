@@ -140,13 +140,15 @@ Planning closes at that point. Tasking follows.
 1. ~~Group E, field-report reconciliation~~ (dropped: every field report has been processed).
 2. [x] **Group A**, decided items: F-359, F-375, F-398, F-381 (24 files), F-547 cascade — done
    2026-10-09 («#406»): rows S-281..S-315, bench question VO-S304, two questions for Stephen queued.
-3. [ ] **Group B** by KB area: architecture, then language/spin2, then language/pasm2, then
-   hardware, then guides.
-4. [ ] **Group C**, knowledge gaps: the sources searched exhaustively for each one.
-5. [ ] **Group D**, the bench queue: re-checked against the sources.
-6. [ ] **Group F**, gate specs.
-7. [ ] **Group G**, a class sweep per row (done as each row is read, and ticked here when the last
-   row's sweep is in).
+3. [x] **Group B** by KB area: architecture, then language/spin2, then language/pasm2, then
+   hardware, then guides — done 2026-10-09 («#407»): the 13 register items and every S-row (S-001..S-381)
+   in a done state; specs in `2026-10-08-p2kb-close-out-evidence/rows-*.md`, `groupB-register-items-specs.md`.
+4. [x] **Group C**, knowledge gaps: the sources searched exhaustively for each one — done; registry updated.
+5. [x] **Group D**, the bench queue: re-checked against the sources — done; five questions killed, round 1
+   is eight rigs for nine questions.
+6. [x] **Group F**, gate specs — done (S-382..S-389).
+7. [x] **Group G**, a class sweep per row (done as each row is read, and ticked here when the last
+   row's sweep is in) — done: every row batch carries its sweep; prose classes included.
 8. [ ] **Bench specification**: tests written to house style. Each starts as a
    VERIFICATION-OPPORTUNITIES row, is written in the owning manual's `audit/verification-tests/`,
    and is reviewed adversarially by a fresh agent before the run.
@@ -918,7 +920,21 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 
 ## 4. Root-cause groups
 
-*(filled as rows accrue)*
+Each group is a candidate section of the sprint plan; rows can sit in more than one.
+
+| # | Root cause | Representative rows | What fixes the class (not just the rows) |
+|---|---|---|---|
+| R1 | **Code never compiled.** Examples written and served without a compiler; 352 blocks fail today | the ENH-03 failures; S-001..S-021, S-041..S-052, S-074..S-088, S-111..S-122, S-137..S-149, S-162..S-170, S-183..S-197, S-220..S-223, S-250 | the ENH-03 gate (built, blocking); fix every registered block before release |
+| R2 | **Propeller 1 carry-over.** P1 names, operators and idioms served as Spin2/PASM2 | S-035, S-051, S-052, S-070, S-087, S-121, S-143, S-189, S-221, **S-350** (`INA[pin]`) | one P1-carry-over class sweep; S-389's operand check; review |
+| R3 | **Other-language habits.** C/assembler forms: `;` and `#` comments, two-index arrays, string literals as values, `IF … :`, method chaining, `jnz` | S-009, S-014, S-016, S-075, S-081, S-082, S-137, S-188, S-250 | R1's gate catches the illegal ones; review for the legal-but-wrong |
+| R4 | **Invented facts and features.** Instructions, syntax, algorithms, register maps and assignments no source states | S-080, S-084, S-088, S-128, S-146, S-207, S-216, S-234, S-059, S-177 | "no unsourced claims" sweep per page; the claim-sourcing gate (S-308) |
+| R5 | **Authored summaries treated as sources.** An AI-written summary ingested as if extracted; KB pages built from it | S-267..S-275 (operator summary), S-277, S-279 | re-ingest from the primary (done for operators, «#405»); flag derived notes as non-sources (G-019, G-020) |
+| R6 | **Arithmetic and field-layout errors.** Bit positions, field widths, off-by-one, scale constants, wrap times, precedence | S-027, S-029, S-030, S-031, S-053, S-054, S-056, S-224..S-229, S-299..S-302, S-329, S-358, S-364 | compile + fold the constants (`CON x = …`) in the sprint; derive, don't copy |
+| R7 | **Semantics read backwards or from the name.** Flags, pointers, enables, return values | S-005, S-010, S-061, S-114, S-173, S-175, S-201, S-206, S-214, S-215, S-233 | read the source at the line; the interpreter source now answers Spin2 semantics |
+| R8 | **YAML mechanics.** Unquoted `#` truncation, folded scalars | S-168, S-183 (52 strings) | S-200's structural gate (S-382) |
+| R9 | **Unsourced numbers and tool limits stated as facts.** | S-104, S-133, S-240, S-258, S-262, S-285, S-286, S-297, F-381 rows | D4's gate (S-308); doctrine: tool limits are not KB facts |
+| R10 | **Stale version gating and change notes.** v44/v47 stamps, "previously showed" | S-046, S-090, S-153, S-174, S-241, S-373 | one gating sweep against v55's history; delete change notes |
+| R11 | **Partial fixes and missing gates.** Siblings left behind; defects no gate could see | five of seven 2026-10-07 audit findings; S-109, S-200, S-256 | doctrine (fix the class in the pass); the §1.5 change-set audit; group F gates |
 
 ## 5. Bench questions
 
@@ -968,7 +984,22 @@ is about a tool.
 
 ## 6. Not read, and why
 
-*(filled at hand-off)*
+Stated by the reviewers in each batch's NOT CHECKED, gathered here:
+
+- **No PNut runs.** Every compiler fact is PNut-TS v1.55.8; where PNut might differ the question is on
+  `DRAFTS/PNUT-TS-PUNCH-LIST.md` items 5–11 (Stephen's machine). Rows S-147, S-251, S-280, S-345, S-354,
+  S-368 wait on them.
+- **No silicon runs.** Run-time claims rest on the documents, the interpreter source and EF entries; the
+  surviving bench questions (§5) are the planned exceptions.
+- **Prose not read end to end:** the hardware add-on pages' `use_cases`/`applications` blocks beyond three
+  files (S-374); about 35 smart-pin `TESTP … WC` lines; the full re-derivation of the PASM2
+  getting-started guide (F-551, block-level only); the F-545 per-key census; `p2-architecture-mental-model`
+  CORDIC figures (S-375). Each is named on its row as sprint work.
+- **Documents not held:** the #64013 RTC and #64006F Serial Device schematics (S-322); the #64009/#64010
+  example archives (G-015); the mikroBUS specification (G-022, Q-010); ISSI/APS chip datasheets (S-320).
+- **Designer-only:** G-029 / Q-011 (LUT as a smart-pin data source).
+- **Out of scope by agreement (§1):** manual/PDF-head items, MCP-server items, ENH-01/02, and the
+  PENDING-VALIDATION register entries (read only where a sweep passed through their files).
 
 ## 7. Hand-off to `sprint-plan`
 
