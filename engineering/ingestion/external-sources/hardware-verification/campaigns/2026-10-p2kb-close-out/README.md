@@ -9,12 +9,13 @@ first and killed five questions; these eight programs carry the nine that surviv
 
 **Result:** run by Stephen 2026-10-09, first run each (logs `debug_261009-1238xx`..`-124012`, not
 versioned). **Seven decided → EF-093..EF-100; one (VO-J-029) gave NO VERDICT from a rig defect** — its
-repeatability check compared the per-repetition marker — and is fixed and awaiting a rerun. Each `.bin`
-that ran was byte-identical to a build of the committed source.
+repeatability check compared the per-repetition marker — was fixed, and its rerun the same day
+(`debug_261009-125412`) decided it → EF-101. **All eight decided.** Each `.bin` that ran was
+byte-identical to a build of the committed source.
 
 | # | Test (`tests/`) | Row | Question | Pins | Verdict | EF |
 |---|---|---|---|---|---|---|
-| 1 | `test-vo-s059-xoro-zero-seed.spin2` | VO-J-029 | what `??x` returns with `x = 0`, and `x` after | none | NO VERDICT (rig defect, fixed) — rerun owed | — |
+| 1 | `test-vo-s059-xoro-zero-seed.spin2` | VO-J-029 | what `??x` returns with `x = 0`, and `x` after | none | ABSORBING (rerun; the first run's rig defect fixed) | EF-101 |
 | 2 | `test-vo-s037-cogatn-self.spin2` | VO-J-030 | does `COGATN(1 << COGID())` strobe the issuing cog? | none | DELIVERED (all four forms) | EF-099 |
 | 3 | `test-vo-g028-hw-stack-overflow.spin2` | VO-J-031 | what a 9th/10th push loses; the stored entry width | none | DROP-OLDEST; 32-bit entries | EF-094 |
 | 4 | `test-vo-s304-pwm-x-zero-fields.spin2` | VO-J-033 | PWM with `X[15:0] = 0` / `X[31:16] = 0` | P4 (never driven) | ZERO = 65,536 (both fields, both modes) | EF-100 |

@@ -1808,6 +1808,23 @@ max(40, 1 %); pre-registered verdict `ZERO = 65,536` for all four.
 (`silicon-doc-text.txt:3925`). *Limits:* one board; one non-zero partner value per field. *Source:*
 `…/tests/test-vo-s304-pwm-x-zero-fields.spin2`.
 
+### EF-101 · A zero state is absorbing for `XORO32` and Spin2 `??`: with x = 0, `??x` returns 0 and x stays 0 — `CONFIRMED` (characterisation)
+*KB:* `language/spin2/operators/op_rand.yaml`; `language/pasm2/xoro32.yaml`
+*How proven:* `test-vo-s059-xoro-zero-seed` (VO-J-029), no pins; seeds 0, 1, `$DEADBEEF`, `$0001_0000` on
+three paths — PASM `XORO32 x` / `MOV r,x`, Spin2 `??x` on a method local, and on an object VAR — 8 calls
+each (result and state after every call), 8 repetitions, a marker seed iterated before every run.
+*Result (log `debug_261009-125412`, 2026-10-09; `.bin` 14,806 bytes = the build):* controls all passed
+— the three nonzero seeds deterministic 8 of 8, P = L = V in every field, every marker identical across
+paths, the state moving. **Seed 0: all 8 results 0 and the state 0 after every call, on all three
+paths, in 8 of 8 repetitions.** Pre-registered verdict: `ABSORBING`. (The first run, log
+`debug_261009-124002`, gave NO VERDICT from a rig defect — its repeatability check compared the
+per-repetition marker; its raw values are identical to this run's.)
+**Grounds:** S-059. No ingested source gives the zero case: the P2 Datasheet names `XORO32`
+(`p2-datasheet-text.txt:1557`), Spin2 v55 names `??` (`spin2-v55-text.txt:412`), and the v55 interpreter
+implements `??` as `XORO32` then a copy (`Spin2_interpreter.spin2:319-320`). A `??` generator must not be
+seeded with 0. *Limits:* one board; four seeds; 8 calls per seed (the period is not measured). *Source:*
+`…/tests/test-vo-s059-xoro-zero-seed.spin2`.
+
 
 ## Open / pending empirical questions
 

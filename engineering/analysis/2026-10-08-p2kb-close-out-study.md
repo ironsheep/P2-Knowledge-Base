@@ -157,13 +157,13 @@ Planning closes at that point. Tasking follows.
    added; each written by a fresh agent, reviewed adversarially by another (one blocker: S304's timeout
    wrapped negative and measured nothing; the same overflow class found and fixed in J-005r), fixed,
    and the fixes checked by a third. Run sheet: the campaign's `RUN-SHEET.md`.
-9. [ ] **Bench run, round 1 (Stephen)**: his run, with everything around it ours — run 2026-10-09,
-   all eight; seven decided. **Open: the VO-J-029 (S-059) rerun** — its program withheld a verdict
-   because of a rig defect (the repeatability check compared the per-repetition marker), now fixed.
-10. [ ] **Results**: an EF entry for each result, rows updated. An inconclusive run or a new
-    question gets a round-2 test — **EF-093..EF-100** written 2026-10-09, VO rows marked DONE, campaign
-    README filled; results applied to the study rows in §5's *Round 1 results* below. Open: S-059
-    (rerun).
+9. [x] **Bench run, round 1 (Stephen)**: his run, with everything around it ours — run 2026-10-09,
+   all eight; seven decided first time. VO-J-029 (S-059) withheld its verdict because of a rig defect
+   (the repeatability check compared the per-repetition marker); fixed, rerun the same day, decided.
+10. [x] **Results**: an EF entry for each result, rows updated. An inconclusive run or a new
+    question gets a round-2 test — **EF-093..EF-101** written 2026-10-09, VO rows marked DONE, campaign
+    README filled; results applied to the study rows in §5's *Round 1 results* below. No round 2 is
+    owed for the round-1 questions; S-395 (a lead from round 1) is for planning.
 11. [ ] **Planning closes**: every row in a done state (§1). Hand-off to `sprint-plan`.
 
 After the sprint's tasks, the single close-out release goes through `release-yamls` **§1.5,
@@ -1004,7 +1004,7 @@ is about a tool.
 | VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | — | killed in Group D (Datasheet pp.27/31) |
 | VO-S367 | S-367 | do ADC-scope (`%11010`) and ADC-external-clock (`%11001`) smart-pin modes need the ADC enable bits (M[12:10] = %100) to sample? Compare `P_ADC_SCOPE` alone vs `P_ADC_SCOPE \| P_ADC_1X` on a pin fed by a DAC pin (jumper, free pins) | SD smart-pin %11001/%11010 sections · the page's own PASM literal (`:77`) carries the bits · no statement either way | — | killed in Group D (change spec) |
 | VO-S157 | S-157 | what does `DEBUG(C_Z)` print after a Spin2 statement (e.g. `x := 0`) — the interpreter's flags at the interrupt, or anything tied to the statement? No pins | v55:913, :1006; debugger DBG:629-633 (prints bits 31/30 of the interrupt return word) · no source gives values for Spin2 · control v55:1006 | — | killed in Group D (change spec) |
-| VO-S059 | S-059 | with `x := 0`, what do four successive `??x` return, and what is `x` after? Control `x := 1`. No pins (DEBUG read-out) | `seed\|zero\|period\|never` near `xoro32\|xoroshiro32\|??` · SD, DS, v55, v51, PASM2 manual, HW manual, INT, EF ledger · control DS:1557 | `test-vo-s059-…` | **NO VERDICT (rig defect, fixed) — rerun owed** |
+| VO-S059 | S-059 | with `x := 0`, what do four successive `??x` return, and what is `x` after? Control `x := 1`. No pins (DEBUG read-out) | `seed\|zero\|period\|never` near `xoro32\|xoroshiro32\|??` · SD, DS, v55, v51, PASM2 manual, HW manual, INT, EF ledger · control DS:1557 | `test-vo-s059-…` | **EF-101: absorbing** (rerun) |
 | VO-S337 | S-337 | a pin driven high in output mode (`P_HIGH_150K` on P0) while jumpered to a pin driven low (P1): does INA[0] read the pin or the output latch? | SD:3706 states only "the pin's read state" | — | killed in Group D (Datasheet pp.27/31) |
 | VO-S037 | S-037 | does `COGATN(1 << COGID())` deliver an attention event to the issuing cog (POLLATN/WAITATN)? No pins | `own\|self\|itself` near `attention\|COGATN` · `sources/` · control SD:2020 | `test-vo-s037-…` | **EF-099: delivered** |
 | VO-S304 | S-304 | PWM_TRIANGLE / PWM_SAWTOOTH with `X[15:0] = 0` and with `X[31:16] = 0`: what base period and frame count result? (second smart pin on a jumper, free pins only) | `65,?536`, `X.[15..0]` · `silicon-doc-text.txt` PWM sections `:4034-4067` · control: `:3925` (DAC/NCO "zero = 65,536") | `test-vo-s304-…` | **EF-100: zero acts as 65,536** |
@@ -1023,6 +1023,7 @@ replaces the change spec's "until the bench decides" branch:
 | EF-098 | G-006 (duty half) | `smart-pin-00111-nco-duty.yaml`: Y = 0 gives no output and no IN |
 | EF-099 | S-037 | `cogatn.yaml` (PASM and Spin2), `cog_attention.yaml`: a cog may strobe itself; replaces the removed claim with the measured fact |
 | EF-100 | S-304 | `smart-pin-01000/01001`: a zero base period or frame count acts as 65,536 |
+| EF-101 | S-059 | `op_rand.yaml`, `xoro32.yaml`: a zero state is absorbing — `??x` with x = 0 returns 0 and x stays 0; never seed with 0 |
 
 **New lead from round 1 (S-395).** In VO-J-032's characterisation step, re-issuing `WXPIN` on the running
 USB pair after the live `WRPIN` changes left the next packet empty, 5 of 5. The P2 Documentation says
