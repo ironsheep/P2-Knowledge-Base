@@ -23,3 +23,8 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [i, count, dest, value]
+  - at: performance_comparison.bytefill
+    fp: "60a8412df1d6d1ee"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [dest, value, count]

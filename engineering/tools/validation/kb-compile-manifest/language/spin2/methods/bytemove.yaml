@@ -19,3 +19,13 @@ blocks:
   - at: examples[4].code
     fp: "9c3055e3bc73af74"
     compile: program
+  - at: overlap_examples.safe_right_shift
+    fp: "5deff45042b8638d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [buffer]
+  - at: overlap_examples.safe_left_shift
+    fp: "82336ce00cfcd12a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [buffer]

@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/IF.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax
+    fp: "d08b779d931d61e3"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `condition`, `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: examples[0]
+    fp: "9fecd1fe3a0402c8"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [temperature, turn_on_fan()->1/0]

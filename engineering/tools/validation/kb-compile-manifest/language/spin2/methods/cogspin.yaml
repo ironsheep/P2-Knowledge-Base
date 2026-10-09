@@ -26,3 +26,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [NUM_COGS=con, STACK_SIZE=con, worker()->1/1]
+  - at: parameters[0].description
+    fp: "8a9ab4fe349f4641"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code (parameter description)"

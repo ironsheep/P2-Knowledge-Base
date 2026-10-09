@@ -33,3 +33,15 @@ blocks:
     fp: "8ca0029148fb02b9"
     compile: not-code
     reason: "pin-field operand expression shown standalone (operand notation); legal only as an argument, not a statement"
+  - at: description
+    fp: "6321fe8903258c5e"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: critical_requirement.description
+    fp: "def26a83b19c0fd0"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: output_enable_note
+    fp: "0a0eb1b64b71334f"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

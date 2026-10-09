@@ -17,3 +17,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [calculate_step()->1/1]
+  - at: description
+    fp: "556326d6dcf47637"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

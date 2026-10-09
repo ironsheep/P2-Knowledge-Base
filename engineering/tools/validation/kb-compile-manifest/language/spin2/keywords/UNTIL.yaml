@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/UNTIL.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax
+    fp: "6b8fc6e1f185bb69"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `condition`, `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: examples[0]
+    fp: "04cf34864aeb1672"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [sensor_triggered, check_sensor()->1/0]

@@ -1,0 +1,75 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_rand.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: algorithm.description
+    fp: "1a04f67909568947"
+    compile: fragment
+    wrap: spin2-method-result
+    assumes: [state]
+  - at: critical_requirement.description
+    fp: "c9a75b2e131c7bf2"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code (critical_requirement.description)"
+  - at: critical_requirement.solution
+    fp: "575247aeacaeeea7"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [seed]
+  - at: examples[0].code
+    fp: "151a3fd2c81d15cc"
+    compile: program
+  - at: examples[1].code
+    fp: "d34261ffdcb94ab9"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed]
+  - at: examples[2].code
+    fp: "0b0eea5b9f70c1af"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed]
+  - at: examples[3].code
+    fp: "d42b91c9e1a1c9d7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [noise_state]
+  - at: common_patterns[0].code
+    fp: "307615de97c3a671"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [prng_state]
+  - at: common_patterns[1].code
+    fp: "fe6fb26cfc426caf"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [prng_state]
+  - at: common_patterns[2].code
+    fp: "37ee264dd0965f3b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [random_value, state]
+  - at: anti_patterns[0].wrong
+    fp: "08ee613155f66fe6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [seed, value]
+  - at: anti_patterns[0].correct
+    fp: "b0ac061f3b922a30"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [seed, value]
+  - at: anti_patterns[1].wrong
+    fp: "2c7e3feb078e6ef6"
+    compile: program
+  - at: anti_patterns[1].correct
+    fp: "d1fe6a6c774c2e99"
+    compile: program
+  - at: anti_patterns[2].wrong
+    fp: "bb2f930a32f0cf3e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [seed]
+  - at: anti_patterns[2].correct
+    fp: "bdaf9432ae63ffa1"
+    compile: program

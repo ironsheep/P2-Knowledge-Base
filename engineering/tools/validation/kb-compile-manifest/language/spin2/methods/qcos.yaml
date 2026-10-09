@@ -17,3 +17,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [x_pos, center_x, radius, ang]
+  - at: description
+    fp: "40aab3f61d5a8160"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

@@ -52,3 +52,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [key, selection, process_selection()->1/1]
+  - at: critical_warning.description
+    fp: "5da9451750ad2f9a"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

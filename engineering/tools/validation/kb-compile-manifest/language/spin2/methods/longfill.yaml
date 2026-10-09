@@ -19,3 +19,18 @@ blocks:
   - at: examples[4].code
     fp: "f57c482cc5b8fa40"
     compile: program
+  - at: memory_patterns.debug
+    fp: "a2a8ecb555621886"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [memory, count]
+  - at: memory_patterns.cleared
+    fp: "155f341eb942c78e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [memory, count]
+  - at: memory_patterns.invalid
+    fp: "11191516d0bd28a7"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [memory, count]

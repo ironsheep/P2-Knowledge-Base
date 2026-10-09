@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/precedence.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "763bac63c3ca8d47"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, a, b, c]
+  - at: examples[1].code
+    fp: "7a661116e1c43b37"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, a, b, c]
+  - at: examples[2].code
+    fp: "41ea40c4044902ed"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, a, b, c]

@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/double_dot.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "0365e7fc412c21e5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, low_range()->1/0, high_range()->1/0]

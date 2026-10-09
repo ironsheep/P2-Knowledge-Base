@@ -1,0 +1,19 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_line_continuation.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "3a922f523ae49f96"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value1, value2, value3, value4]
+  - at: examples[1]
+    fp: "34e9d62fa183004a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [condition1, condition2, condition3, condition4]
+  - at: examples[2]
+    fp: "f6500d86800d36e4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [count, increment_value]

@@ -1,0 +1,17 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/DAT.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax
+    fp: "ea4a615ad02d4a28"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `label`, `type`, `value1`, `value2` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: examples[0].code
+    fp: "8ba76ae7e00d4cb0"
+    compile: program
+  - at: examples[1].code
+    fp: "282b8464b36dc0b4"
+    compile: program
+  - at: examples[2].code
+    fp: "909f62587b0be3d3"
+    compile: program

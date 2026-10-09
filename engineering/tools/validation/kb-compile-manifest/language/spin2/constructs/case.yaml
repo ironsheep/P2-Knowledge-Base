@@ -50,3 +50,56 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, max_case=con, case_other, case_0, case_1, case_2]
+  - at: design_philosophy
+    fp: "938b17f1fff85d95"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code (design_philosophy: a bulleted paragraph that opens with CASE)"
+  - at: syntax_forms[0].syntax
+    fp: "a7452ad738a33cc8"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `expression`, `match1`, `action1`, `match2`, `action2`, `default_action` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: syntax_forms[1].syntax
+    fp: "43381f05c94beec2"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, digit_handler()->1/0, two_digit_handler()->1/0, three_digit_handler()->1/0, large_number_handler()->1/0]
+  - at: syntax_forms[2].syntax
+    fp: "37a4697e6d6d7cf4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [key, handle_yes()->1/0, handle_no()->1/0, handle_invalid()->1/0]
+  - at: syntax_forms[3].syntax
+    fp: "5ebfe2f77aa99f73"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `expression`, `match1`, `action1`, `match2`, `action2` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: why_this_matters.efficiency
+    fp: "19cb7676bf3431a8"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code (why_this_matters paragraph that opens with CASE_FAST)"
+  - at: pitfalls[0].wrong
+    fp: "f2fe7f56b3c085f0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, max_value, process()->1/0]
+  - at: pitfalls[0].correct
+    fp: "89e51dc5da86f2bc"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, max_value, process()->1/0]
+  - at: pitfalls[1].wrong
+    fp: "2836bf0e8f978259"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [state, idle()->1/0, running()->1/0, stopped()->1/0]
+  - at: pitfalls[2].wrong
+    fp: "649d3b356aebb65f"
+    compile: never
+    wrap: spin2-method
+    reason: "the pitfall's teaching point: CASE_FAST requires its match values to lie within 255 of each other; the block's own comment says 'ERROR: range > 255' and the compiler confirms (CASE_FAST values must be within 255 of each other) at the 1000 line. The page pairs it with the corrected form (regular CASE) in the next block"
+    fails_at: 4
+    assumes: [code, handle_1()->1/0, handle_100()->1/0, handle_1000()->1/0]
+  - at: pitfalls[2].correct
+    fp: "685aa538443adf80"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [code, handle_1()->1/0, handle_100()->1/0, handle_1000()->1/0]

@@ -313,6 +313,44 @@ so it is an accepted assume; the block still fails on S-014.
 | S-109 | F | G3 | latent (gate coverage) | the finder's net misses some code under `wrong`/`correct`/`syntax` that opens with a Spin2 flow statement (IF/CASE/REPEAT); arbiter census 2026-10-08: ~65 code-shaped multi-line strings outside the net | O21; arbiter scan | traced | net 2 counts block keywords and instructions, not flow statements | **RESOLVED 2026-10-08 (53ff8f9f, NC15a/b):** flow statements counted; an aborted elementize is a candidate. +114 blocks netted (3077 candidates); the 60 in G1–G3 files are classified in the G4 top-up | no |
 | S-110 | B | G3 | wrong, not code-driving | `debug.yaml:218`: "automatic type detection", "processed at compile time" | O22; the page's own `:83-91` | traced | — | to research | no |
 
+**ENH-03 B3, group G4 (`language/spin2/keywords/`, `operators/`, `special-symbols/`, `symbols/`,
+284 blocks) plus the G1–G3 top-up (60 blocks the widened net caught), 2026-10-09.** Evidence:
+`b3-g4-defects.json` (new classes; new sites for S-008 ×8, S-049 ×7, S-044 ×4, S-014 ×3, S-009,
+S-012, S-019, S-020, S-077; claim sites for S-023, S-038, S-056, S-058, S-059, S-096, S-105),
+`b3-g4-class-map.json`, `b3-g4-observations.json`. Arbiter checks: re-applied in a fresh scratch
+root seeded with the 23 top-up files' real sidecars (same result); `spin2-v55-text.txt:249-256`
+(typed pointers) and `:470` (ADDBITS) re-read and holding. The one `never` is
+`case.yaml` `pitfalls[2].wrong` (CASE_FAST values more than 255 apart; its point is the error).
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-111 | B | G4 | drives wrong code | `WITH serial` taught as a Spin2 statement | defects `with-object-context-statement` | traced | invented statement | to research | no |
+| S-112 | B | G4 | wrong, not code-driving | the ELSE, ELSEIF, ELSEIFNOT pages' only examples are the clause alone (3) | defects `orphan-clause-example` | traced | — | to research | no |
+| S-113 | B | G4 | drives wrong code | `abort()` written as a call after OR/`||` (2) | defects `abort-written-as-call` | traced | — | to research | no |
+| S-114 | B | G4 | **drives wrong code** | `typed-pointers.yaml:53-62`, `:261`: `ptr := @x` and `ptr++` taught to set and advance a typed pointer, and "[ptr]++ increments the value"; the source says the reverse — bare `ptr` is the pointed-to variable, `[ptr]` is the pointer itself (2 gated, 8 claim sites) | defects `typed-pointer-assignment-and-increment`; O1; `spin2-v55-text.txt:249-256` | traced | inverted semantics | to research | no |
+| S-115 | B | G4 | drives wrong code | `STRUCT node(^node next, ...)` self-referencing member | defects `struct-self-pointer-member` | traced | — | to research | no |
+| S-116 | B | G4 | drives wrong code | `: ^BYTE` result with no name | defects `pointer-result-without-name` | traced | — | to research | no |
+| S-117 | B | G4 | drives wrong code | `READY_BITS = 3..1` as a CON constant | defects `con-bit-range-constant` | traced | — | to research | no |
+| S-118 | B | G4 | drives wrong code | `LONG @State0` in DAT where State0 is a PRI | defects `method-address-in-dat` | traced | — | to research | no |
+| S-119 | B | G4 | **drives wrong code** | `$$` used as the current address (3 gated + prose); the source gives `$` | defects `ditto-index-used-as-current-address` | traced | — | to research | no |
+| S-120 | B | G4 | drives wrong code | `sin()` in a constant expression | defects `sin-in-constant-expression` | traced | invented function | to research | no |
+| S-121 | B | G4 | drives wrong code | prefix `~flag`, `~~flag` (P1 sign-extend/post-set) and `//` as a comment (2) | defects `prefix-tilde-operator` | traced | P1 carry-over | to research (P1 class sweep with S-087) | no |
+| S-122 | B | G4 | drives wrong code | bare `LOOKDOWN(...)` as a statement | defects `lookdown-used-as-statement` | traced | — | to research | no |
+| S-123 | F | G4 | hygiene (tooling) | **not a KB defect**: 5 blocks need a STRUCT type the harness cannot declare (`STRUCT.yaml:105`, `:121`, `:168`, `:171`; `typed-pointers.yaml:193`) | defects `struct-types-not-declarable-in-harness` | traced | harness gap | fix the harness in the next B3 tooling pass (a struct-type assume, or a sibling-file `with`), then reclassify | yes |
+| S-124 | B | G4 | drives wrong code | `STRING(number)` presented as converting a number to text; it passes only because `number` is a declared symbol | defects `string-converts-expression` | traced | invented behaviour | to research | no |
+| S-125 | B | G4 | drives wrong code | `LOOKUP(day : "Sun","Mon","Tue")` presented as a list of three strings; it is a list of nine characters | defects `lookup-list-quoted-strings` | traced | as S-014 | to research (with S-014) | no |
+| S-126 | B | G4 | **drives wrong code** | `FILE.yaml:4-8`: FILE described as a file-inclusion directive (`FILE "config.spin2"`); it is a DAT data directive | O2 | traced | — | to research | no |
+| S-127 | B | G4 | latent | `at.yaml:10-12` (@ object-relative in Spin2+PASM) contradicts `double_at.yaml:164` (@ "already absolute") | O3 | undetermined | — | to research (sources; bench only if silent) | no |
+| S-128 | B | G4 | wrong, not code-driving | `hash.yaml:105-112`: cog register map ($120-$13F "reserved", "$140-$1CF LUT access window") | O4 | traced | invented map | to research | no |
+| S-129 | B | G4 | **drives wrong code** | `op_ADDBITS.yaml:4`: ADDBITS "add bit count to pin number"; it makes a bitfield | O5; `spin2-v55-text.txt:470` | traced | — | to research | no |
+| S-130 | B | G4 | wrong, not code-driving | `op_addmodulo.yaml:50-52`: description contradicts the file's own header | O6 | traced | — | to research | no |
+| S-131 | B | G4 | wrong, not code-driving | `precedence.yaml:15`, `:64`, `:86`: NOT at level 2, ternary "PUB/PRI only" | O7 | traced | — | to research (with «#402» and S-057) | no |
+| S-132 | B | G4 | drives wrong code | `op_POW.yaml:29-31`: POW at level 6; it groups at level 8 with +/- | O8 (compiled probes) | traced | — | to research (with S-057) | no |
+| S-133 | B | G4 | latent | unsourced speed figures: "3-10x faster", "~808 cycles", "nearly 2x" (`bytefill.yaml:123`, `longmove.yaml`) | O9 | traced | unsourced numbers | to research | no |
+| S-134 | B | G4 | wrong, not code-driving | `if_elseif_else.yaml:218-226`: over-indented statement "not in IF block"; it compiles identically | O10 | traced | — | to research | no |
+| S-135 | B | G4 | hygiene | AND/OR/XOR/SCA/SCAS `category: Unary`; `||`/`^^` `category: Bitwise` | O11 | traced | — | to research | yes |
+| S-136 | F | G4 | hygiene (tooling) | **not a KB defect**: 12 VAR declaration lines (`BYTE flag`, `^LONG pValues`) have no VAR wrap, so they sit as not-code and are not gated | reviewer DEVIATIONS | traced | harness gap | add a VAR wrap in the next B3 tooling pass, then reclassify | yes |
+
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 

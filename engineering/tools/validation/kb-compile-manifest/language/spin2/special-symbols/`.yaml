@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/`.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "4c1d9c679ba3dbf8"
+    compile: not-code
+    reason: "DEBUG backtick notation (`` `expression ``) shown as a symbol example; not a statement"

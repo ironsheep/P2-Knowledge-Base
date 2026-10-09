@@ -1,0 +1,22 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_ONES.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "d50ff264580109a3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [count]
+  - at: examples[1].code
+    fp: "366cb17980955e98"
+    compile: program
+  - at: examples[2].code
+    fp: "608fe3b910e8cd1b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [active_count, active_flags]
+  - at: common_patterns[0].code
+    fp: "bb29ca8ccddab019"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [is_even_parity, value]

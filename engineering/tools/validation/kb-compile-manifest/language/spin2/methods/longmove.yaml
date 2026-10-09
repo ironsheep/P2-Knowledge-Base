@@ -20,3 +20,12 @@ blocks:
   - at: examples[4].code
     fp: "6adbb51d9d2656c6"
     compile: program
+  - at: performance_benefits.vs_bytemove
+    fp: "14f2979b9d8d94a7"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [dest, source]
+  - at: conversion_note
+    fp: "6dad7e7abb6b3f1e"
+    compile: not-code
+    reason: "conversion note: prose and arithmetic ('Bytes to longs: divide by 4 / 100 bytes = 25 longs') around two calls; notation, not a statement sequence"

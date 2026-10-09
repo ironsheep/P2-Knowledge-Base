@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_BMASK.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "cdba9bbf30bf7be2"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mask]
+  - at: examples[1].code
+    fp: "28401af4c15bcaff"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [data]
+    finding: "S-008"
+  - at: examples[2].code
+    fp: "943058eedd3ddf23"
+    compile: program
+    finding: "S-008"
+  - at: common_patterns[0].code
+    fp: "4fead96b87c591e6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [low_byte, value]

@@ -1,0 +1,35 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/double_dollar.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: contexts.pasm2_address.usage
+    fp: "b9ff29d56db227e2"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code (`usage:` text)"
+  - at: examples[0].code
+    fp: "755c27eb4b54c9b5"
+    compile: program
+    finding: "S-119"
+  - at: examples[1].code
+    fp: "3f3c625734c1e8b5"
+    compile: program
+    finding: "S-119"
+  - at: examples[2].code
+    fp: "ab0b4779ad887fcd"
+    compile: program
+    finding: "S-119"
+  - at: examples[3].code
+    fp: "4baf435a567e124b"
+    compile: program
+  - at: examples[4].code
+    fp: "8f6f3548b0c98e82"
+    compile: program
+  - at: examples[5].code
+    fp: "6d75732827b8afb3"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-008"
+  - at: examples[6].code
+    fp: "b79b9eda7beb0bee"
+    compile: program
+    finding: "S-120"

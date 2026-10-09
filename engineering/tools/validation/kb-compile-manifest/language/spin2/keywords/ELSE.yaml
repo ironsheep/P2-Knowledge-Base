@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/ELSE.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax
+    fp: "707a141500d8011f"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: examples[0]
+    fp: "ec15277e6d85153a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result]
+    finding: "S-112"

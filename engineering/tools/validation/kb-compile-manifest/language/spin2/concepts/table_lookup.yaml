@@ -60,3 +60,17 @@ blocks:
     fp: "39515a6f19d13b0c"
     compile: not-code
     reason: "excerpt with an elision ('values long 0, 1, 2, ...') -- the proposer's PASS is an accident: '...' is the Spin2 line-continuation token, and TABLE_SIZE is undefined"
+  - at: index_relationship.diagram
+    fp: "cc9dd7cbad0b112d"
+    compile: not-code
+    reason: "diagram / table of index mappings with English labels ('out of range returns 0'); not code"
+  - at: anti_patterns[4].wrong
+    fp: "4dd0de0a0746b779"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [user_input, VALID1=con, VALID2=con, process()->1/1]
+  - at: anti_patterns[4].correct
+    fp: "8d6004ce5640a325"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [user_input, VALID1=con, VALID2=con, process()->1/1]

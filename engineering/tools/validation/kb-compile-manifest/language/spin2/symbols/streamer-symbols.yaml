@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/symbols/streamer-symbols.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage_example
+    fp: "8be6c26b510088cf"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, base]

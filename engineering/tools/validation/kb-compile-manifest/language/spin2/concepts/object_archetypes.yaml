@@ -106,3 +106,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [STATE_IDLE=con, STATE_RUNNING=con, STATE_ERROR=con, state]
+  - at: archetypes[8].description
+    fp: "aea96053d80d001b"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

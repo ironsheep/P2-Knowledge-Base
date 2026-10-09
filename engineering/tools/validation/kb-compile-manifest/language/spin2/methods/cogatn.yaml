@@ -40,3 +40,7 @@ blocks:
     fp: "1934a46d4345fe97"
     compile: program
     finding: "S-019"
+  - at: receiving_methods.polling
+    fp: "1649e7ef58773ff2"
+    compile: fragment
+    wrap: spin2-method

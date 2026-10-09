@@ -1,0 +1,30 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/QUIT.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "688cea1facee9894"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [error_condition, process_data()->1/0]
+  - at: examples[1].code
+    fp: "417a52162c9e7613"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, array_size, array, target, found_index]
+  - at: examples[2].code
+    fp: "5c2d6e5e83a56de2"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, b, c, found_it, skip_rest_of_b, skip_rest_of_c]
+  - at: examples[3].code
+    fp: "25820c2e803e447d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [outer, max_outer, inner, max_inner, result, process()->1/2, error_code, handle_error()->1/1]
+  - at: examples[4].code
+    fp: "dea4fb52b12ddd8b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [row, rows, col, cols, matrix, target, found_row, found_col]
+    finding: "S-009"

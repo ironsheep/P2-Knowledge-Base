@@ -41,3 +41,24 @@ blocks:
   - at: common_patterns[3].code
     fp: "d30210b393f6287b"
     compile: program
+  - at: anti_patterns[0].wrong
+    fp: "df7a2d6b24688901"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [user_input, VALID1=con, VALID2=con, VALID3=con, process()->1/1]
+  - at: anti_patterns[0].correct
+    fp: "4f3f92589794565c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [user_input, VALID1=con, VALID2=con, VALID3=con, process()->1/1]
+  - at: anti_patterns[1].wrong
+    fp: "799f3a6aa45d3ac8"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [char, process_uppercase()->0/0]
+    finding: "S-122"
+  - at: anti_patterns[1].correct
+    fp: "7a8ac94d96d2ebf6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [char, process_uppercase()->1/0]

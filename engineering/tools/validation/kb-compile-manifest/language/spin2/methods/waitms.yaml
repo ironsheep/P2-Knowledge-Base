@@ -23,3 +23,8 @@ blocks:
     wrap: spin2-method
     assumes: [do_work()->0/0]
     finding: "S-008"
+  - at: anti_patterns[0].wrong
+    fp: "09eb33a257a84ace"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [do_work()->1/0]

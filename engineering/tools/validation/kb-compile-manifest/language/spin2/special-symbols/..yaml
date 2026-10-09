@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/..yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "534dbfd5dc461287"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [float_val]
+  - at: examples[1]
+    fp: "71a3aa1133e32985"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-008"

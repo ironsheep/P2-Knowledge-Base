@@ -1,0 +1,53 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/LONG.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: usage_contexts[0].example
+    fp: "4c9ed878a0a78f65"
+    compile: not-code
+    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing"
+  - at: usage_contexts[1].example
+    fp: "5f092cb55d77a66d"
+    compile: program
+  - at: usage_contexts[2].example
+    fp: "df63e114d3ba456b"
+    compile: program
+    finding: "S-049"
+  - at: usage_contexts[3].example
+    fp: "ecbab5e3e1665b1a"
+    compile: program
+    finding: "S-049"
+  - at: usage_contexts[4].example
+    fp: "e89cd0174fc1d9c6"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: usage_contexts[5].example
+    fp: "22a682b00b527910"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [val]
+  - at: usage_contexts[6].example
+    fp: "48a07a51dc8838a4"
+    compile: not-code
+    reason: "bare `myArray.LONG[0]` size-override access shown standalone: a term, legal only inside a statement (`myLong.BYTE[0] := $FF`, the sibling BYTE page's form, is a statement)"
+  - at: usage_contexts[7].example
+    fp: "c0f3aef5af6ef0a7"
+    compile: not-code
+    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing (a typed-pointer declaration, `^BYTE`/`^LONG`; compiles under {Spin2_v45} in VAR)"
+  - at: usage_contexts[8].example
+    fp: "5a291ebe45fddd07"
+    compile: not-code
+    reason: "bare data-constructor term shown standalone; legal only as an expression term / argument (`emit(BYTE($48, $65, $6C))` compiles, scratch t/b1_bytector), never as a statement"
+  - at: usage_contexts[9].example
+    fp: "248f1b09d388bd3f"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 54
+  - at: examples[0]
+    fp: "1ad9a497c12e2f63"
+    compile: not-code
+    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing"
+  - at: examples[1]
+    fp: "bccaec9d04ca4325"
+    compile: not-code
+    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing"

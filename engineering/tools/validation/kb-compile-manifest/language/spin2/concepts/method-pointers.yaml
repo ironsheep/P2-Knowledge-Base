@@ -78,3 +78,8 @@ blocks:
     wrap: spin2-top
     assumes: [handlers, ActualNoParam()->1/0, ActualOneParam()->1/1]
     finding: "S-017"
+  - at: null_check.pattern
+    fp: "3f76d684d6611f90"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [callback, data]

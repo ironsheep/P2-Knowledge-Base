@@ -1,0 +1,26 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/ABORT.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "44cf9209e9c523bc"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: examples[0].code
+    fp: "315a1f259cd8fafe"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[1].code
+    fp: "d476df6163e54a81"
+    compile: fragment
+    wrap: spin2-method
+  - at: examples[2].code
+    fp: "063db3e129e2a7b5"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-012"
+  - at: trap_operator.example
+    fp: "b5b78c1ef0ef163f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [err, risky_operation()->1/0, handle_error()->1/1]

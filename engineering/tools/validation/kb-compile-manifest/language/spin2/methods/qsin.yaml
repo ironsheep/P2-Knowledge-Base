@@ -17,3 +17,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [ang, y, amplitude, plot()->1/2, x, center_y]
+  - at: description
+    fp: "1bdf6901e8df3dca"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

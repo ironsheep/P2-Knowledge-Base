@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/percent.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "06bf627f316fc07d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mask]
+  - at: examples[1]
+    fp: "729eb7e1aa2323eb"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pattern]

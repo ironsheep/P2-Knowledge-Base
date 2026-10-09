@@ -121,3 +121,29 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, y]
+  - at: syntax_forms[1].syntax
+    fp: "a1c8b730110ed3eb"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `condition`, `true_block`, `false_block` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: syntax_forms[2].syntax
+    fp: "9c24b61307f856a4"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `condition1..3`, `block1..3`, `default_block` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: pitfalls[2].wrong
+    fp: "93480874a69d6384"
+    compile: not-code
+    reason: "indentation contrast pair written with placeholder statements (`statement1`, `statement2`, `condition`): pseudo-code for a layout rule, nothing named is a real statement. (Its claim -- the over-indented `statement2` is 'not in IF block' -- is wrong; see observation O10)"
+  - at: pitfalls[2].correct
+    fp: "b07dc10883f9b727"
+    compile: not-code
+    reason: "indentation contrast pair written with placeholder statements (`statement1`, `statement2`, `condition`): pseudo-code for a layout rule, nothing named is a real statement. (Its claim -- the over-indented `statement2` is 'not in IF block' -- is wrong; see observation O10)"
+  - at: pitfalls[3].wrong
+    fp: "2d0780a3d346d28d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, b, c, do_something()->1/0, do_other()->1/0, do_third()->1/0, do_fourth()->1/0]
+  - at: pitfalls[3].correct
+    fp: "7650576bd641daaa"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, handle_non_positive_a()->1/0, b, handle_non_positive_b()->1/0, c, do_something()->1/0, do_other()->1/0]

@@ -1,0 +1,17 @@
+{
+ "with-object-context-statement": "S-111",
+ "orphan-clause-example": "S-112",
+ "abort-written-as-call": "S-113",
+ "typed-pointer-assignment-and-increment": "S-114",
+ "struct-self-pointer-member": "S-115",
+ "pointer-result-without-name": "S-116",
+ "con-bit-range-constant": "S-117",
+ "method-address-in-dat": "S-118",
+ "ditto-index-used-as-current-address": "S-119",
+ "sin-in-constant-expression": "S-120",
+ "prefix-tilde-operator": "S-121",
+ "lookdown-used-as-statement": "S-122",
+ "struct-types-not-declarable-in-harness": "S-123",
+ "string-converts-expression": "S-124",
+ "lookup-list-quoted-strings": "S-125"
+}

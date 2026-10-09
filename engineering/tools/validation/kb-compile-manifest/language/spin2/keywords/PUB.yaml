@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/PUB.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax
+    fp: "9caa3f18f66ed058"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `method_name`, `parameters`, `return_variables`, `local_variables`, `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: examples[0]
+    fp: "e28feaa01b04b3ce"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [configure_pin()->1/1]

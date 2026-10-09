@@ -1,0 +1,27 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/caret_at.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: why_use_caret_at.cog_registers.example
+    fp: "db50110529a72865"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [fieldPtr]
+  - at: why_use_caret_at.bitfields.example
+    fp: "f95789f699de228a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [fieldPtr, myVar]
+  - at: examples[0].code
+    fp: "76f2820fcce274c5"
+    compile: program
+  - at: examples[1].code
+    fp: "c9fc8d1fd3ac6943"
+    compile: program
+  - at: examples[2].code
+    fp: "9156e5c94ac3629d"
+    compile: program
+  - at: examples[3].code
+    fp: "531ef725aeeb3f5b"
+    compile: program
+    finding: "S-117"

@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_FABS.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "defd9926c6e9bb02"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [distance, float_difference]

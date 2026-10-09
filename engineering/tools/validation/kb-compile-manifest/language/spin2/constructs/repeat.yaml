@@ -135,3 +135,21 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [value, read_input()->1/0, VALID=con, process()->1/1]
+  - at: variants[9].syntax
+    fp: "4d3187eca0b7d9e9"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE (post-test REPEAT form): the words `statements`, `condition` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: variants[10].syntax
+    fp: "8e9b6b3d9675e74b"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE (post-test REPEAT form): the words `statements`, `condition` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: pitfalls[0].wrong
+    fp: "9fef3f7eff2974ad"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [done]
+  - at: pitfalls[0].correct
+    fp: "31e36d047c0756f3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [done]

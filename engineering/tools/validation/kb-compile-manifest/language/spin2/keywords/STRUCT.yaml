@@ -1,0 +1,70 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/STRUCT.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "025263c4f21e7a7a"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[1].code
+    fp: "6bbe7da02aa8d614"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[2].code
+    fp: "e2eef2896295c186"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[3].code
+    fp: "98727d854dfd1f2e"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[4].code
+    fp: "bf1895d461d21369"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[5].code
+    fp: "52acd3bcbba69bdc"
+    compile: program
+  - at: examples[6].code
+    fp: "6c597aac31bfe159"
+    compile: program
+  - at: examples[7].code
+    fp: "56baf09d9b418f0a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [sens.get_reading(0)]
+    finding: "S-123"
+  - at: examples[8].code
+    fp: "c7fa77d5ef9e512a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [gfx.move_to(2)]
+    finding: "S-123"
+  - at: examples[9].code
+    fp: "a83ac8bf2ff5e1bf"
+    compile: program
+  - at: examples[10].code
+    fp: "16da6e78c27f64a4"
+    compile: program
+  - at: operations[0].example
+    fp: "f13d0e5b0c145c41"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-123"
+  - at: operations[1].example
+    fp: "c106cb633d842fb9"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-123"
+  - at: v54_enhancements.named_bitfields_on_members.example
+    fp: "9f8fc0f9ae855c63"
+    compile: program
+  - at: v54_enhancements.nameless_single_member.example
+    fp: "4ddb772f891b72de"
+    compile: program
+  - at: gotchas.struct_pointer_obj_returns.example
+    fp: "dc294807adc61bfa"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+    assumes: [sensor.getConfig(0)]

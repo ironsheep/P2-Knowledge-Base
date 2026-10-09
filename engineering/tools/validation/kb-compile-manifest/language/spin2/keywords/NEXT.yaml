@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/NEXT.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "86717ebf39f02f82"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i]
+  - at: examples[1].code
+    fp: "0f8bf3defd26a703"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i, process_odd()->1/1]
+  - at: examples[2].code
+    fp: "ec166bab3fcc7f09"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, b, c, some_condition, other_condition, third_condition]
+  - at: examples[3].code
+    fp: "fd5ed4355c3d3498"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [row, col, skip_row_condition()->1/2, process_cell()->1/2]

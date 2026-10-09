@@ -98,3 +98,11 @@ blocks:
     wrap: spin2-top
     assumes: [request_reading()->0/0]
     finding: "S-050"
+  - at: system_counter.rollover_safe_subtraction
+    fp: "4829c7fd1055a671"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: method_selection.description
+    fp: "a2dd92e2b45eb342"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

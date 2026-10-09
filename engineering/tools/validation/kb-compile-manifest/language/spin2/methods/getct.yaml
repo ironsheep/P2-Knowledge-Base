@@ -31,3 +31,11 @@ blocks:
     fp: "c48f4f712e8793d0"
     compile: not-code
     reason: "pitfall 'consequence' prose (English sentences with inline code spans), not code"
+  - at: pitfalls[0].what_the_source_says
+    fp: "08aaebe762bde795"
+    compile: not-code
+    reason: "quotation of the Parallax source text (`GETCT() : Count -- \"Get 32-bit system counter.\"` ...); documentation quoted verbatim, not code"
+  - at: wraparound_handling
+    fp: "135e9e74e59a206b"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

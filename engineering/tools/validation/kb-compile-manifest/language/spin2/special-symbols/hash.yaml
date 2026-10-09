@@ -1,0 +1,46 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/hash.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: predefined_registers.examples[0]
+    fp: "9ddb5eebee0820da"
+    compile: not-code
+    reason: "an expression or symbol followed by a prose gloss ('resolves to $1D8', 'resolve WORD-sized pointer'); notation, not a statement"
+  - at: predefined_registers.examples[1]
+    fp: "faebf4dbc80583ad"
+    compile: not-code
+    reason: "an expression or symbol followed by a prose gloss ('resolves to $1D8', 'resolve WORD-sized pointer'); notation, not a statement"
+  - at: predefined_registers.examples[2]
+    fp: "d8329ac85ab98310"
+    compile: not-code
+    reason: "an expression or symbol followed by a prose gloss ('resolves to $1D8', 'resolve WORD-sized pointer'); notation, not a statement"
+  - at: predefined_registers.examples[3]
+    fp: "b0ac2b7db9a9b47e"
+    compile: not-code
+    reason: "an expression or symbol followed by a prose gloss ('resolves to $1D8', 'resolve WORD-sized pointer'); notation, not a statement"
+  - at: predefined_registers.examples[4]
+    fp: "cee2cd798a2ec586"
+    compile: not-code
+    reason: "an expression or symbol followed by a prose gloss ('resolves to $1D8', 'resolve WORD-sized pointer'); notation, not a statement"
+  - at: examples[0].code
+    fp: "ae713f0f09515044"
+    compile: program
+  - at: examples[1].code
+    fp: "94b7e8ce83145420"
+    compile: program
+  - at: examples[2].code
+    fp: "df6abadb04d89742"
+    compile: program
+  - at: examples[3].code
+    fp: "f5c8e327bd88764c"
+    compile: program
+  - at: spin2_vs_pasm_context.in_spin2.example
+    fp: "8095e05a198aa60d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [reg_addr]
+  - at: spin2_vs_pasm_context.in_pasm.example
+    fp: "83c8e78df3bb7062"
+    compile: fragment
+    wrap: pasm2-dat
+    finding: "S-008"

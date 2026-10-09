@@ -1,0 +1,34 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_DECOD.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "5a2b92476989cab3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mask]
+  - at: examples[1].code
+    fp: "d1ae695ebbfe8280"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin_mask, pin_number]
+  - at: common_patterns[0].code
+    fp: "f2dea5a1af60506c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con]
+  - at: common_patterns[1].code
+    fp: "869215c4e7bf1b6b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con]
+  - at: common_patterns[2].code
+    fp: "5d512b727fac1e66"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con]
+  - at: common_patterns[3].code
+    fp: "f3131766928581df"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, N=con, bit_is_set()->1/0]

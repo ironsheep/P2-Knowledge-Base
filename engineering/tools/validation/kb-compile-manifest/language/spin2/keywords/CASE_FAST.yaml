@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/CASE_FAST.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax
+    fp: "897539b0d7aeb157"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `expression`, `value`, `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: examples[0]
+    fp: "6848edd1d9f74672"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [status, handle_ok()->1/0, handle_error()->1/0]

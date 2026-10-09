@@ -1,0 +1,62 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/typed-pointers.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "7814737d9530aeb6"
+    compile: fragment
+    wrap: spin2-top
+  - at: examples[1].code
+    fp: "d1c862bae6de1a72"
+    compile: program
+  - at: examples[2].code
+    fp: "b43e7347c4d4a337"
+    compile: program
+    finding: "S-049"
+  - at: examples[3].code
+    fp: "db5eb010551b6b48"
+    compile: program
+  - at: examples[4].code
+    fp: "32128e9872758fde"
+    compile: program
+    finding: "S-114"
+  - at: common_patterns.array_traversal
+    fp: "8d0a8944998c78f3"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buffer]
+  - at: common_patterns.string_length
+    fp: "66e2c6f0d2705845"
+    compile: program
+  - at: common_patterns.string_copy
+    fp: "eaca2cfa14ac563d"
+    compile: program
+  - at: common_patterns.structure_array
+    fp: "460985b8353a1e88"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+    finding: "S-123+S-114"
+  - at: common_patterns.linked_list
+    fp: "bb60159d06f0c953"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+    assumes: [processNode()->0/1]
+    finding: "S-008+S-115"
+  - at: common_patterns.pointer_table_workaround
+    fp: "f7fb43502b1420d7"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buffer0, buffer1]
+  - at: gotchas.struct_pointer_obj_returns.example
+    fp: "dc294807adc61bfa"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+    assumes: [sensor.getConfig(0)]
+  - at: gotchas.pointer_arrays_not_supported.example
+    fp: "3eb329a3e1022292"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buffer0]

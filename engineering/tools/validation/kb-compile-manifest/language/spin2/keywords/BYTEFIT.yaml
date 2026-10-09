@@ -1,0 +1,13 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/BYTEFIT.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "f685106e7206098d"
+    compile: program
+  - at: examples[1].code
+    fp: "fc64940c06cd4c73"
+    compile: program
+  - at: examples[2].code
+    fp: "f5133b049684d56d"
+    compile: program

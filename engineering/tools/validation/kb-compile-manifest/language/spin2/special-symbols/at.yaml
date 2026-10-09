@@ -1,0 +1,50 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/at.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0].code
+    fp: "2e39b0825c73dde6"
+    compile: program
+  - at: examples[1].code
+    fp: "f9c5d0472edf91a7"
+    compile: program
+  - at: examples[2].code
+    fp: "19107ca0d1a38d9a"
+    compile: program
+  - at: examples[3].code
+    fp: "764a2561983587f6"
+    compile: program
+  - at: examples[4].code
+    fp: "c45440c44d8521f6"
+    compile: program
+  - at: examples[5].code
+    fp: "a304bd3a16520537"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [child.process(0)]
+  - at: examples[6].code
+    fp: "e5a2b124badf4baa"
+    compile: program
+  - at: examples[7].code
+    fp: "eb0ce83e4f7c4d23"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+  - at: examples[8].code
+    fp: "4dba74d75c4c0699"
+    compile: fragment
+    wrap: spin2-top
+    spin2_version: 45
+    finding: "S-077"
+  - at: common_patterns.pointer_to_buffer
+    fp: "697db96977a7c33d"
+    compile: program
+    finding: "S-116"
+  - at: common_patterns.pass_data_to_cog
+    fp: "aa107fce187fff34"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [cog_code]
+  - at: common_patterns.string_table_access
+    fp: "3f104cfa11d8fcaa"
+    compile: program

@@ -135,3 +135,37 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [value, ADC_PIN=con]
+  - at: internal_pull_resistors.corrected_2026_08_25
+    fp: "9f7811aa53c3cd6c"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
+  - at: smart_pin_to_basic_io_transition.safe_reconfiguration.using_pinclear
+    fp: "cbfcfc30f7a05506"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, x, y]
+  - at: smart_pin_to_basic_io_transition.safe_reconfiguration.manual_sequence
+    fp: "3740998b109c7d59"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, x, y]
+  - at: anti_patterns[0].wrong
+    fp: "92f965897c9f1773"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [PWM_PIN=con, period, duty]
+  - at: anti_patterns[0].correct
+    fp: "6bc090bfef5319df"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [PWM_PIN=con, period, duty]
+  - at: anti_patterns[4].wrong
+    fp: "f04746206703de15"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [TX_PIN=con]
+  - at: anti_patterns[4].correct
+    fp: "cd2c7a08a892fb26"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [TX_PIN=con, x_val]

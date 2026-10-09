@@ -1,0 +1,22 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/keywords/OBJ.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax
+    fp: "aa6d37faca9c140c"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: the words `name`, `\"filename\"` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
+  - at: overrides
+    fp: "9d07b71d835110f3"
+    compile: not-code
+    reason: "prose with an embedded code excerpt (an `overrides:` text block opening 'A child's overridable CON constants can be set ...'); mixed prose + excerpt, not one compilable unit. The excerpt's concrete forms are the page's `examples:` entries"
+  - at: examples[0]
+    fp: "d9f2d08db7224370"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [serial.__kbstub(0)]
+  - at: examples[1]
+    fp: "199d289e4145224a"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [pca.__kbstub(0)]

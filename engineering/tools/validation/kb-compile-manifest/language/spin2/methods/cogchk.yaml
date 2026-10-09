@@ -43,3 +43,8 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [driver_cog, restart_driver()->1/0]
+  - at: return_value_usage.as_boolean
+    fp: "bcf2b5f909919ebe"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [n]

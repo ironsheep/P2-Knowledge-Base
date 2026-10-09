@@ -1,0 +1,14 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_assign.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "5eae55a9d74efb65"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [variable, value]
+  - at: examples[1]
+    fp: "8128a7cb31f89a9b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, calculate()->1/2, x, y]

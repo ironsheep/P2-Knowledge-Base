@@ -1,0 +1,40 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/special-symbols/double_at.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: syntax.with_type_and_index.examples[0]
+    fp: "4b4fdbb959c1b31b"
+    compile: not-code
+    reason: "an expression or symbol followed by a prose gloss ('resolves to $1D8', 'resolve WORD-sized pointer'); notation, not a statement"
+  - at: syntax.with_type_and_index.examples[1]
+    fp: "c1dffd1075443a94"
+    compile: not-code
+    reason: "an expression or symbol followed by a prose gloss ('resolves to $1D8', 'resolve WORD-sized pointer'); notation, not a statement"
+  - at: examples[0].code
+    fp: "fa53d01b0cf971d7"
+    compile: program
+  - at: examples[1].code
+    fp: "182a13d854234e5c"
+    compile: program
+  - at: examples[2].code
+    fp: "49842f3dec919fbf"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [process_type_a, process_type_b]
+  - at: examples[3].code
+    fp: "783b81be8342d5b9"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [mydata]
+  - at: examples[4].code
+    fp: "b8f6839c8c41c2a4"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [buffer1, buffer2, buffer3]
+  - at: examples[5].code
+    fp: "9ae68184dd89b2cd"
+    compile: program
+  - at: examples[6].code
+    fp: "dae8a8d89316eddc"
+    compile: program
+    finding: "S-118"

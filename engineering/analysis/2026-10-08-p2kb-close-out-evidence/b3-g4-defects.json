@@ -1,0 +1,1009 @@
+[
+ {
+  "slug": "with-object-context-statement",
+  "finding": "S-PENDING-with-object-context-statement",
+  "statement": "keywords/WITH.yaml documents `WITH object` as an 'Object context specifier for method calls' with the example `WITH serial` / `  str(\"Hello World\")`. Spin2 has no such statement. `WITH` exists only in `REPEAT <count> WITH <variable>` (v40); a child object's method is called as `object_name.method_name(...)`, one call per term.",
+  "compiler_error": "Expected an instruction or variable (at `WITH`, block line 1)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:758 (`REPEAT <positive_count> WITH <variable>`, the only WITH), :32 (v40); :233-236 (`object_name.method_name({any_parameters})`)",
+  "verified_fix": "`OBJ serial : \"ser\"` + `serial.str(@\"Hello World\")` compiles (scratch t/i2_with_fix)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/keywords/WITH.yaml",
+    "addr": "examples[0]",
+    "key_line": 8,
+    "gate_first_error": "block line 1 (YAML line 9): Expected an instruction or variable",
+    "source_line_of_error": "WITH serial",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "serial",
+     "str()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "orphan-clause-example",
+  "finding": "S-PENDING-orphan-clause-example",
+  "statement": "ELSE.yaml, ELSEIF.yaml and ELSEIFNOT.yaml each give, as their only `examples:` entry, the clause alone (`ELSE` / `  result := 0`; `ELSEIF x > 10` / `  result := \"high\"`; `ELSEIFNOT flag` / `  result := \"false case\"`). An ELSE/ELSEIF/ELSEIFNOT clause is legal only inside an IF/IFNOT decision tree at the same indentation; alone it is rejected. The ELSEIF and ELSEIFNOT examples also assign a quoted multi-character literal (S-014), which the compiler rejects once the IF is supplied.",
+  "compiler_error": "Expected an instruction or variable (at the clause keyword, block line 1)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:728-736 (the IF construct: ELSEIF / ELSEIFNOT / ELSE are optional parts of the tree 'at the same level of indentation')",
+  "verified_fix": "`IF a` / `ELSE` (t/u7_else_fix), `IF a` / `ELSEIFNOT flag` with `result := @\"false case\"` (t/u6_elseifnot_fix) and `IF x > 100` / `ELSEIF x > 10` with `result := @\"high\"` (t/u4_elseif_ok2) compile; the orphan forms fail (t/u1, u2, u5); `result := \"high\"` fails once the IF is there (t/u3_elseif_ok)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/keywords/ELSE.yaml",
+    "addr": "examples[0]",
+    "key_line": 10,
+    "gate_first_error": "block line 1 (YAML line 11): Expected an instruction or variable",
+    "source_line_of_error": "ELSE",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "result"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/ELSEIF.yaml",
+    "addr": "examples[0]",
+    "key_line": 10,
+    "gate_first_error": "block line 1 (YAML line 11): Expected an instruction or variable",
+    "source_line_of_error": "ELSEIF x > 10",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "x",
+     "result"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/ELSEIFNOT.yaml",
+    "addr": "examples[0]",
+    "key_line": 10,
+    "gate_first_error": "block line 1 (YAML line 11): Expected an instruction or variable",
+    "source_line_of_error": "ELSEIFNOT flag",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "flag",
+     "result"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 3
+ },
+ {
+  "slug": "abort-written-as-call",
+  "finding": "S-PENDING-abort-written-as-call",
+  "statement": "operators/op_or.yaml and op_oror.yaml both give `IF error OR timeout` (resp. `IF error || timeout`) followed by `abort()`. ABORT is a statement keyword (`ABORT` / `ABORT value`), not a method; with parentheses it is rejected. (The `||` form itself is the legal binary logical OR: `IF error || timeout` + `abort` compiles.)",
+  "compiler_error": "Expected an expression term (m172) (at the `(` after `abort`, block line 2)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:624, :633, :636 (`ABORT`, `ABORT ErrorCode`, 'If no value is specified after ABORT, then zero will be returned')",
+  "verified_fix": "`abort` and `abort -1` on the line after the IF compile (scratch t/k2_abort_fix, k3_oror_fix, ab1_abort_value)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_or.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "gate_first_error": "block line 2: Expected an expression term (m172)",
+    "source_line_of_error": "abort()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "error",
+     "timeout"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/op_oror.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "gate_first_error": "block line 2: Expected an expression term (m172)",
+    "source_line_of_error": "abort()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "error",
+     "timeout"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "typed-pointer-assignment-and-increment",
+  "finding": "S-PENDING-typed-pointer-assignment-and-increment",
+  "statement": "typed-pointers.yaml teaches `ptr := @buffer`, `ptr++`, `ptr := @points[0]` and `ptr--` as the way to POINT and STEP a `^BYTE`/`^WORD`/`^LONG`/`^struct` pointer, and notes `[ptr]++ increments the VALUE at ptr; ptr++ advances the POINTER itself`. The v55 pointer table says the opposite: `ptr` alone (and `ptr++`) is the pointed-to variable; `[ptr]` is the pointer itself, `[ptr] := @var` points it, `[ptr]++` steps it, and `ptr[++]` steps it after use. The one gate-visible failure: on a `^point` pointer the compiler reads `ptr := @points[0]` as a multi-value assignment into the pointed-to structure.",
+  "compiler_error": "Expected \",\" (at `ptr := @points[0]`, block line 10; the same read of `ptr := @points`, block line 7 of the scalePoints block)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:249-256 (`ptrvar` = the pointed-to variable; `[ptrvar]` = 'read/modify/write the pointer, itself'; `[ptrvar] := @regvar` 'point the pointer'; `[ptrvar]++` 'post-inc the pointer'), :258-260",
+  "verified_fix": "`[ptr] := @points[0]`, `ptr.x := 100`, `[ptr]++` compiles (scratch t/n2b_structptr_fix); `[ptr] := @buffer`, `ptr := $FF`, `[ptr]++` compiles for ^BYTE (t/p4_ptr_bracket). The page's OWN gotcha (typed-pointers.yaml:229-231, STRUCT.yaml) already uses `[pCfg] := sensor.getConfig()` to set a pointer: that compiles with a real child (t/v4_parent_bracket) and `pCfg := sensor.getConfig()` is rejected (t/v5_parent_nobracket, Expected a variable m251) -- the page contradicts itself. Legality only: the pointer/value semantics rest on v55:249-260 and are not bench-proved (O1)",
+  "class_kind": "defect",
+  "claim_sites": [
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "53-62",
+    "claim": "`ptr := @buffer` / `BYTE[ptr] := $FF` / `ptr++ ' Advance by 1 byte` on a ^BYTE local (decision #213, passing program)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "64-69",
+    "claim": "`BYTE[pBuffer++] := 0 ' Clear and advance` (#214; its gate error is the LONG parameter, S-049)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "95-162",
+    "claim": "operations: address_of `ptr := @variable`, increment `ptr++` 'Advance pointer by element size', `ptr[++]`, struct_dereference `[ptr]` 'Read or write entire structure through pointer', bracket_value_modification `[ptr]++` 'Increment value at ptr'"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "164-172",
+    "claim": "pointer_arithmetic: `ptr++` 'Advances by 1/2/4 bytes / structure size'"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "175-179",
+    "claim": "array_traversal: `ptr := @buffer` then `BYTE[ptr++] := 0` (decision #217, passing fragment)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "212-219",
+    "claim": "pointer_table_workaround: `ptr := ptrTable[0] ' Assign to typed pointer for use` (decision #222, passing fragment)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "246-251",
+    "claim": "pointer_arrays_not_supported: `ptr := ptrTable[0] ' Assign to typed pointer` (decision #224, passing fragment)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "line": "261",
+    "claim": "notes: '[ptr]++ increments the VALUE at ptr; ptr++ advances the POINTER itself' -- the reverse of v55:249-256"
+   }
+  ],
+  "sites": [
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "addr": "examples[4].code",
+    "key_line": 80,
+    "gate_first_error": "block line 10 (YAML line 90): Expected \",\"",
+    "source_line_of_error": "ptr := @points[0]",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "addr": "common_patterns.structure_array",
+    "key_line": 193,
+    "gate_first_error": "block line 1 (YAML line 194): Expected BYTE, WORD, LONG, or STRUCT name",
+    "source_line_of_error": "PUB scalePoints(scale) | ^point ptr",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "co-class: the block's gate error is attributed to another class on the same block (see its finding)"
+   }
+  ],
+  "site_count": 10
+ },
+ {
+  "slug": "struct-self-pointer-member",
+  "finding": "S-PENDING-struct-self-pointer-member",
+  "statement": "typed-pointers.yaml's linked_list pattern declares `STRUCT node(^node next, data)`. A STRUCT member is BYTE/WORD/LONG/substructure plus a name; a `^pointer` member is rejected. The block also names a member `next`, which is the reserved word NEXT (S-008) -- masked by the first error.",
+  "compiler_error": "Expected \")\" (m301) (at `^node`, block line 2)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:205 (`STRUCT structname(BYTE|WORD|LONG|substructname membername{[arraysize]}, ...)`: no pointer member)",
+  "verified_fix": "`STRUCT node(nxt, data)` with a `^node` local walking `[current] := current.nxt` compiles (scratch t/n4f_linked_fix); `STRUCT node(^node nxt, data)` still fails (t/n4g_selfptr_dat); `next` as a member fails (t/n4i_next_member)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "addr": "common_patterns.linked_list",
+    "key_line": 201,
+    "gate_first_error": "block line 2 (YAML line 203): Expected \")\" (m301)",
+    "source_line_of_error": "STRUCT node(^node next, data)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "processNode()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "pointer-result-without-name",
+  "finding": "S-PENDING-pointer-result-without-name",
+  "statement": "at.yaml's pointer_to_buffer pattern declares `PUB getData() : ^BYTE` (no result name) and returns `@buffer`. A typed-pointer result still needs a name; the page's own syntax in typed-pointers.yaml:42 (`PUB method() : ^TYPE result`) is the correct form.",
+  "compiler_error": "Expected a unique result name (m230) (at `^BYTE`, block line 3)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:278, :288 (`^BYTE`, `^WORD`, `^LONG`, `^StructName` overrides make a result a pointer: the result keeps its name)",
+  "verified_fix": "`PUB getData() : ^BYTE p` compiles with or without {Spin2_v45} (scratch t/n5c_getdata_named, n8_getdata_nodir)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/special-symbols/at.yaml",
+    "addr": "common_patterns.pointer_to_buffer",
+    "key_line": 192,
+    "gate_first_error": "block line 3 (YAML line 195): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB getData() : ^BYTE",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "con-bit-range-constant",
+  "finding": "S-PENDING-con-bit-range-constant",
+  "statement": "caret_at.yaml's last example defines `READY_BITS = 3..1` and `MODE_BITS = 7..4` in a CON block and uses them as `^@status_reg.[MODE_BITS]`. A CON constant is one integer; `a..b` is not an expression there.",
+  "compiler_error": "Expected \",\" or end of line (at the `..` in `READY_BITS  = 3..1`, block line 4)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:470 (`x ADDBITS y`: 'Make bitfield, (x & $1F) | (y & $1F) << 5' -- the constant form of a bitfield); the `.[hi..lo]` bitfield is written with two values",
+  "verified_fix": "two constants (`MODE_HI = 7`, `MODE_LO = 4`) with `^@status_reg.[MODE_HI..MODE_LO]` compile (scratch t/o2_caret_con_fix); so does a single `MODE_BITS = 7 ADDBITS 3` used as `.[MODE_BITS]` (t/o3_caret_con_ranges)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/special-symbols/caret_at.yaml",
+    "addr": "examples[3].code",
+    "key_line": 112,
+    "gate_first_error": "block line 4 (YAML line 116): Expected \",\" or end of line",
+    "source_line_of_error": "READY_BITS  = 3..1",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "method-address-in-dat",
+  "finding": "S-PENDING-method-address-in-dat",
+  "statement": "double_at.yaml's state-machine example stores method addresses in DAT (`stateHandlers LONG @State0, @State1, @State2`) where State0..State2 are PRI methods, then resolves them with `@@stateHandlers[i]` and calls the result. `@name` in DAT takes DAT symbols only; a method pointer is `@method` in PUB/PRI code. The dispatch example before it (`handler0 LONG @process_type_a`, comment 'Get method address', `CALL(handler_addr)`) compiles only because the gate declares process_type_a/b as DAT symbols; CALL takes a PASM address, not a method pointer.",
+  "compiler_error": "Expected a DAT symbol (at `@State0`, block line 2)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:642-648 (method pointers: assign a long variable `@MethodName` in code), :300-307 (DAT `@Symbol` / `@@SymbolName` are for data symbols)",
+  "verified_fix": "a LONG array filled in code (`stateHandlers[0] := @State0` ...) and `currentHandler := stateHandlers[1]` with `currentHandler()` compiles (scratch t/p2_handlers_fix)",
+  "class_kind": "defect",
+  "claim_sites": [
+   {
+    "file": "language/spin2/special-symbols/double_at.yaml",
+    "line": "78-86",
+    "claim": "`handler0 LONG @process_type_a` ... `handler_addr := @@handler0[type]  ' Get method address` / `CALL(handler_addr)` (decision #252, passing fragment: process_type_a/b declared as DAT symbols by the gate)"
+   }
+  ],
+  "sites": [
+   {
+    "file": "language/spin2/special-symbols/double_at.yaml",
+    "addr": "examples[6].code",
+    "key_line": 125,
+    "gate_first_error": "block line 2 (YAML line 127): Expected a DAT symbol",
+    "source_line_of_error": "stateHandlers   LONG    @State0, @State1, @State2",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "ditto-index-used-as-current-address",
+  "finding": "S-PENDING-ditto-index-used-as-current-address",
+  "statement": "double_dollar.yaml gives `$$` a first meaning, 'current cog address in PASM2', and uses it in three examples (`jmp #$$` 'Jump to self', `entry0 + ($$ - entry0)`, `mov pa, #$$ + 3`). The current origin is `$`; `$$` is only the DITTO iteration index. Outside a DITTO block the compiler refuses it. The page's description, `contexts.pasm2_address`, notes and example descriptions repeat the invented meaning (and say `$` is the 'current hub address').",
+  "compiler_error": "\"$$\" (DITTO index) is only allowed within a DITTO block, inside a DAT block (at the `$$` line of each example)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:312, :321 (`JMP #$ '$ is the current origin`, steps by 1 in cog-exec, by 4 in hub-exec), :42 (v50: 'A special index variable $$ is available within the block, which iterates from 0 to count - 1')",
+  "verified_fix": "`jmp #$` (scratch t/q1b_dd_self_fix), `mov pa, entry0 + ($ - entry0)` (q2_dd_tbl) and `mov pa, #$ + 3` (q3b_dd_start2) compile",
+  "class_kind": "defect",
+  "claim_sites": [
+   {
+    "file": "language/spin2/special-symbols/double_dollar.yaml",
+    "line": "5-14, 16-21, 38, 50, 58",
+    "claim": "description / contexts.pasm2_address / example descriptions: '$$ ... current cog address' for self-jumps, relative offsets and forward reference"
+   },
+   {
+    "file": "language/spin2/special-symbols/double_dollar.yaml",
+    "line": "102-103, 106-107",
+    "claim": "notes: 'In PASM2, $$ represents current cog address (not hub address)', 'Value is in cog longs', 'Single $ represents current hub address (different from $$)' -- v55:312, :321 make `$` the current origin (cog or hub), and `$$` only the DITTO index"
+   }
+  ],
+  "sites": [
+   {
+    "file": "language/spin2/special-symbols/double_dollar.yaml",
+    "addr": "examples[0].code",
+    "key_line": 32,
+    "gate_first_error": "block line 5 (YAML line 37): \"$$\" (DITTO index) is only allowed within a DITTO block, inside a DAT block",
+    "source_line_of_error": "jmp     #$$                        ' Jump to self (infinite loop)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/special-symbols/double_dollar.yaml",
+    "addr": "examples[1].code",
+    "key_line": 40,
+    "gate_first_error": "block line 9 (YAML line 49): \"$$\" (DITTO index) is only allowed within a DITTO block, inside a DAT block",
+    "source_line_of_error": "mov     pa, entry0 + ($$ - entry0) ' Calculate relative offset",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/special-symbols/double_dollar.yaml",
+    "addr": "examples[2].code",
+    "key_line": 52,
+    "gate_first_error": "block line 4 (YAML line 56): \"$$\" (DITTO index) is only allowed within a DITTO block, inside a DAT block",
+    "source_line_of_error": "start   mov     pa, #$$ + 3                ' pa = address of 'start' + 3",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 5
+ },
+ {
+  "slug": "sin-in-constant-expression",
+  "finding": "S-PENDING-sin-in-constant-expression",
+  "statement": "double_dollar.yaml's sine-table example uses `round(sin(float($$) * PI / 30.0) * 65535.0)` inside a DITTO block. Constant expressions have FLOAT(), ROUND(), TRUNC() and the float operators, not trigonometric functions; QSIN() is a run-time CORDIC method.",
+  "compiler_error": "Expected \")\" (m301) (at the `(` after `sin`, block line 7)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:499-501 (the complete float-conversion list: FLOAT(), ROUND(), TRUNC()), :564 (`QSIN(length, step, stepsInCircle) : y`, a method)",
+  "verified_fix": "`round(float($$) * PI / 30.0 * 65535.0)` compiles (scratch t/q5b_dittosin_nosin) but is not a sine; a run-time table `table[i] := qsin(65535, i, 64)` for i = 0..15 compiles (t/q5c_qsin_runtime). Legality only",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/special-symbols/double_dollar.yaml",
+    "addr": "examples[6].code",
+    "key_line": 90,
+    "gate_first_error": "block line 7 (YAML line 97): Expected \")\" (m301)",
+    "source_line_of_error": "long    round(sin(float($$) * PI / 30.0) * 65535.0)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "prefix-tilde-operator",
+  "finding": "S-PENDING-prefix-tilde-operator",
+  "statement": "special-symbols/~.yaml and ~~.yaml describe 'post-clear' / 'post-set' operators and give `value := ~flag  // use flag then clear it` and `value := ~~flag  // use flag then set to -1`. The operators are POSTFIX (`flag~`, `flag~~`); a prefix `~` is not a term. The trailing `//` is not a comment in Spin2 (it is the signed-remainder operator; a comment is `'`), so the corrected expression still fails with `//`.",
+  "compiler_error": "Expected an expression term (m172) (at the prefix `~`, block line 1)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:419-420 (`var~` post-clear, `var~~` post-set), :459 (`//` signed remainder)",
+  "verified_fix": "`value := flag~  ' use flag then clear it` and `value := flag~~  ' use flag then set to -1` compile (scratch t/r1c_tilde_fix, r2c_tilde2_fix); `value := flag~  // use flag ...` fails (t/r1d_tilde_fix_cm)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/special-symbols/~.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "gate_first_error": "block line 1: Expected an expression term (m172)",
+    "source_line_of_error": "value := ~flag  // use flag then clear it",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value",
+     "flag"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/special-symbols/~~.yaml",
+    "addr": "examples[0]",
+    "key_line": 7,
+    "gate_first_error": "block line 1: Expected an expression term (m172)",
+    "source_line_of_error": "value := ~~flag  // use flag then set to -1",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value",
+     "flag"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "lookdown-used-as-statement",
+  "finding": "S-PENDING-lookdown-used-as-statement",
+  "statement": "methods/lookdown.yaml anti_patterns[1].wrong shows `LOOKDOWN(char : \"A\"..\"Z\")  ' Result discarded!` followed by `process_uppercase()`, as legal code that merely ignores the result. LOOKDOWN is an expression term; as a statement the compiler rejects it, so the 'wrong' form cannot be written at all.",
+  "compiler_error": "Expected an instruction or variable (at `LOOKDOWN`, block line 1)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:602 (`LOOKDOWN(Value: v1, v2..v3, etc) : Index` -- a term returning the index)",
+  "verified_fix": "the page's own `correct` form `if LOOKDOWN(char : \"A\"..\"Z\")` / `process_uppercase()` compiles (scratch t/s4_lookdown_fix)",
+  "class_kind": "defect",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/methods/lookdown.yaml",
+    "addr": "anti_patterns[1].wrong",
+    "key_line": 99,
+    "gate_first_error": "block line 1 (YAML line 100): Expected an instruction or variable",
+    "source_line_of_error": "LOOKDOWN(char : \"A\"..\"Z\")  ' Result discarded!",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "char",
+     "process_uppercase()->0/0"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "struct-types-not-declarable-in-harness",
+  "finding": "S-PENDING-struct-types-not-declarable-in-harness",
+  "statement": "TOOLING GAP, not a KB defect (as S-022): the gate's `assumes` can declare plain longs, constants, callee and object-method stubs, not a STRUCT type or a struct-typed variable, and a stub child object cannot export a STRUCT. Four blocks need exactly that: STRUCT.yaml's two OBJ-import examples (`sens.reading_t my_reading`, `gfx.point_t cursor_pos`: a real child file compiles them, scratch t/x1_sens_import), the operations cells `p.x := 100` and `line.a.x := 0` (need a struct-typed `p`/`line`), and typed-pointers.yaml's structure_array pattern (needs `point` and `points`; it also carries the typed-pointer class). They stay red and registered until the harness can declare a struct type (a `struct:` assume) or take a sibling child source.",
+  "compiler_error": "Expected an object constant, structure, or method (at the imported type, STRUCT.yaml:105 / :121); Expected an instruction or variable (at `p.x`); Expected BYTE, WORD, LONG, or STRUCT name (at `^point`)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:41 (v49: `VAR Object.StructA StructJ`, `PUB Name(^Object.StructA StructL)` -- imported STRUCT types are legal), :205-212 (structure variables and `structvar.member`)",
+  "verified_fix": "a real child `sensor.spin2` exporting `STRUCT reading_t`/`config_t` makes the parent block compile (scratch t/x1_sens_import); `CON STRUCT point(x, y)` + `VAR point points[100]` makes the scalePoints block reach its own (typed-pointer) error (t/n3_scalepoints)",
+  "class_kind": "tooling-gap (not a KB defect)",
+  "claim_sites": [],
+  "sites": [
+   {
+    "file": "language/spin2/keywords/STRUCT.yaml",
+    "addr": "examples[7].code",
+    "key_line": 105,
+    "gate_first_error": "block line 7 (YAML line 112): Expected an object constant, structure, or method",
+    "source_line_of_error": "sens.reading_t  my_reading           ' Import structure from sensor object",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "sens.get_reading(0)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/STRUCT.yaml",
+    "addr": "examples[8].code",
+    "key_line": 121,
+    "gate_first_error": "block line 6 (YAML line 127): Expected an object constant, structure, or method",
+    "source_line_of_error": "gfx.point_t   cursor_pos",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "gfx.move_to(2)"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/STRUCT.yaml",
+    "addr": "operations[0].example",
+    "key_line": 168,
+    "gate_first_error": "block line 1: Expected an instruction or variable",
+    "source_line_of_error": "p.x := 100",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/STRUCT.yaml",
+    "addr": "operations[1].example",
+    "key_line": 171,
+    "gate_first_error": "block line 1: Expected an instruction or variable",
+    "source_line_of_error": "line.a.x := 0",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "addr": "common_patterns.structure_array",
+    "key_line": 193,
+    "gate_first_error": "block line 1 (YAML line 194): Expected BYTE, WORD, LONG, or STRUCT name",
+    "source_line_of_error": "PUB scalePoints(scale) | ^point ptr",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 5
+ },
+ {
+  "slug": "string-converts-expression",
+  "finding": "S-PENDING-string-converts-expression",
+  "statement": "keywords/STRING.yaml: description 'Convert expression to string representation', syntax `STRING(expression)`, example `text := STRING(number)`. STRING() composes a zero-terminated string constant from quoted characters and values 1..255 and returns its address; it converts nothing. With `number` a runtime variable the compiler rejects it; the gate's PASS exists only because the harness declares `number` as a DAT symbol (an address, hence a constant).",
+  "compiler_error": "(with a local `number`: Expected a constant, unary operator, or \"(\" -- scratch t/h1_string_var; with a DAT symbol or a constant it compiles -- t/h4_string_dat, h2_string_con)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:592 (`STRING(\"Text\",13) : StringAddress` -- 'Compose a zero-terminated string (quoted characters and values 1..255), return address of string')",
+  "verified_fix": "`text := STRING(\"Hello\", 13)` compiles (scratch t/h3_string_ok). The class is the claim: the block compiles, so it cannot be REGISTERED",
+  "class_kind": "claim (compiles; inferred row, gate cannot register it)",
+  "sites": [
+   {
+    "file": "language/spin2/keywords/STRING.yaml",
+    "line": "4-8",
+    "claim": "description 'Convert expression to string representation'; syntax `STRING(expression)`; example `text := STRING(number)` (passing fragment, decision #86)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "lookup-list-quoted-strings",
+  "finding": "S-PENDING-lookup-list-quoted-strings",
+  "statement": "keywords/LOOKUP.yaml and LOOKDOWN.yaml give `day_name := LOOKUP(day : \"Sun\", \"Mon\", \"Tue\")` and `index := LOOKDOWN(day : \"Mon\", \"Tue\", \"Wed\")` as day-name lookups. The lists take values; a quoted multi-character literal expands to its single characters, so the first list is a nine-entry list of characters (`LOOKUP` returns one character, 'S' for day 1, 'u' for day 2) and `day_name` never holds a name.",
+  "compiler_error": "(compiles; the generated bytecode of the string list equals that of the nine-character list: scratch t/lk1 vs t/lk3, `cmp` identical)",
+  "correct_source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:600-603 (`LOOKUP(Index: v1, v2..v3, etc) : Value` -- 'values and ranges allowed')",
+  "verified_fix": "none needed for legality; a name lookup needs a table of string addresses (`LOOKUP(day : @sun, @mon, @tue)` pointing at DAT strings). The class is the claim: the blocks compile, so they cannot be REGISTERED",
+  "class_kind": "claim (compiles; inferred row, gate cannot register it)",
+  "sites": [
+   {
+    "file": "language/spin2/keywords/LOOKUP.yaml",
+    "line": "8",
+    "claim": "`day_name := LOOKUP(day : \"Sun\", \"Mon\", \"Tue\")` (decision #57, passing)"
+   },
+   {
+    "file": "language/spin2/keywords/LOOKDOWN.yaml",
+    "line": "8",
+    "claim": "`index := LOOKDOWN(day : \"Mon\", \"Tue\", \"Wed\")` (decision #55, passing)"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-008",
+  "statement": "reserved word used as an identifier: `field` (op_BMASK.yaml:21, :26 -- a local and a result name; FIELD keyword), `frac` (op_FRAC.yaml:10 -- the FRAC operator), `step` (op_addmodulo.yaml:80 -- the STEP keyword), `next` (typed-pointers.yaml:201, struct member -- masked by the self-pointer error), `obj` (special-symbols/..yaml:8 -- `obj.method()` reads `obj` as the OBJ block designator), `reg` (double_dollar.yaml:80, hash.yaml:98 -- the REG keyword as a PASM register label). Renaming compiles (scratch t/j2_field_fix, j4_field_res_fix, j6_frac_fix, l3_modular, q4c_regname, s3b_hash_mov).",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_BMASK.yaml",
+    "addr": "examples[1].code",
+    "key_line": 21,
+    "gate_first_error": "block line 2 (YAML line 23): Expected \"[\"",
+    "source_line_of_error": "field := (data >> 4) & BMASK 3   ' BMASK 3 = $0F (4 bits)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "data"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/op_BMASK.yaml",
+    "addr": "examples[2].code",
+    "key_line": 26,
+    "gate_first_error": "block line 1 (YAML line 27): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB extract_bits(value, start, width) : field",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/op_FRAC.yaml",
+    "addr": "examples[0]",
+    "key_line": 10,
+    "gate_first_error": "block line 1: Expected an instruction or variable",
+    "source_line_of_error": "frac := dividend FRAC divisor",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "dividend",
+     "divisor"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/op_addmodulo.yaml",
+    "addr": "examples.modulo_arithmetic.code",
+    "key_line": 80,
+    "gate_first_error": "block line 5 (YAML line 85): Expected an expression term (m172)",
+    "source_line_of_error": "position := (position + step) +// MAX_POSITION",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "index",
+     "BUFFER_SIZE=con",
+     "position",
+     "MAX_POSITION=con",
+     "distance",
+     "head",
+     "tail"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "addr": "common_patterns.linked_list",
+    "key_line": 201,
+    "gate_first_error": "block line 2 (YAML line 203): Expected \")\" (m301)",
+    "source_line_of_error": "STRUCT node(^node next, data)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "processNode()->0/1"
+    ],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/special-symbols/..yaml",
+    "addr": "examples[1]",
+    "key_line": 8,
+    "gate_first_error": "block line 1: Block designator must be in first column",
+    "source_line_of_error": "obj.method()",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/special-symbols/double_dollar.yaml",
+    "addr": "examples[5].code",
+    "key_line": 80,
+    "gate_first_error": "block line 6 (YAML line 86): Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "mov     reg + $$, #0               ' Clear reg+0, reg+1, reg+2, reg+3",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/special-symbols/hash.yaml",
+    "addr": "spin2_vs_pasm_context.in_pasm.example",
+    "key_line": 98,
+    "gate_first_error": "block line 1: Expected a constant, unary operator, or \"(\"",
+    "source_line_of_error": "MOV reg, #$FF   ' Load immediate value $FF",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 8
+ },
+ {
+  "slug": "S-009",
+  "statement": "two-index array `matrix[row][col]` in keywords/QUIT.yaml's matrix-search example (examples[4]); `matrix[row*cols+col]` is the one-index form. Scratch t/m1_quit_matrix.",
+  "sites": [
+   {
+    "file": "language/spin2/keywords/QUIT.yaml",
+    "addr": "examples[4].code",
+    "key_line": 70,
+    "gate_first_error": "block line 4 (YAML line 74): Expected end of line (m281)",
+    "source_line_of_error": "IF matrix[row][col] == target",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "row",
+     "rows",
+     "col",
+     "cols",
+     "matrix",
+     "target",
+     "found_row",
+     "found_col"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-012",
+  "statement": "keywords/ABORT.yaml examples[2]: `CON ERR_TIMEOUT = -1` / `' ...` / `ABORT ERR_TIMEOUT` -- the statement sits at top level, outside any method.",
+  "sites": [
+   {
+    "file": "language/spin2/keywords/ABORT.yaml",
+    "addr": "examples[2].code",
+    "key_line": 27,
+    "gate_first_error": "block line 3 (YAML line 30): Expected a unique constant name, \"#\", or STRUCT (m211)",
+    "source_line_of_error": "ABORT ERR_TIMEOUT",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-014",
+  "statement": "quoted multi-character literal used as a string value: `month_name := \"January\"` (keywords/CASE.yaml:11), `result := \"high\"` (ELSEIF.yaml:10), `result := \"false case\"` (ELSEIFNOT.yaml:10); `@\"...\"` compiles (scratch t/e2_case_months_fix, u4_elseif_ok2, u6_elseifnot_fix).",
+  "sites": [
+   {
+    "file": "language/spin2/keywords/CASE.yaml",
+    "addr": "examples[0]",
+    "key_line": 11,
+    "gate_first_error": "block line 2 (YAML line 13): Expected end of line (m281)",
+    "source_line_of_error": "1: month_name := \"January\"",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "day",
+     "month_name"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/ELSEIF.yaml",
+    "addr": "examples[0]",
+    "key_line": 10,
+    "gate_first_error": "block line 1 (YAML line 11): Expected an instruction or variable",
+    "source_line_of_error": "ELSEIF x > 10",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "x",
+     "result"
+    ],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   },
+   {
+    "file": "language/spin2/keywords/ELSEIFNOT.yaml",
+    "addr": "examples[0]",
+    "key_line": 10,
+    "gate_first_error": "block line 1 (YAML line 11): Expected an instruction or variable",
+    "source_line_of_error": "ELSEIFNOT flag",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "flag",
+     "result"
+    ],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 3
+ },
+ {
+  "slug": "S-019",
+  "statement": "op_addmodulo.yaml circular_buffer_increment: a complete PUB `addByte(data)` uses `nextTail` without declaring it (scratch t/l1_addmod_prog vs t/l2_addmod_fix).",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_addmodulo.yaml",
+    "addr": "examples.circular_buffer_increment.code",
+    "key_line": 59,
+    "gate_first_error": "block line 7 (YAML line 66): Expected an instruction or variable",
+    "source_line_of_error": "nextTail := (tail + 1) +// 32",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-020",
+  "statement": "same block: `return FALSE` / `return TRUE` in a PUB that declares no result (op_addmodulo.yaml:59); declaring `: ok` compiles (t/l2_addmod_fix).",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_addmodulo.yaml",
+    "addr": "examples.circular_buffer_increment.code",
+    "key_line": 59,
+    "gate_first_error": "block line 7 (YAML line 66): Expected an instruction or variable",
+    "source_line_of_error": "nextTail := (tail + 1) +// 32",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "co-class: block also carries another class; the gate error shown is the first one"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-044",
+  "statement": "`:=:` on plain variables / array elements / `long[...]` terms: op_swap.yaml examples[0], [2], [3], [4] (`a :=: b`, `buffer1[i] :=: buffer2[i]`, `long[arr][j] :=: long[arr][j + 1]`, `x :=: y`). `:=:` swaps structures (v45); the sibling STRUCT swap (examples[1]) compiles.",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_swap.yaml",
+    "addr": "examples[0].code",
+    "key_line": 30,
+    "gate_first_error": "block line 4 (YAML line 34): Variable needs an operator",
+    "source_line_of_error": "a :=: b                                ' Swap values",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/op_swap.yaml",
+    "addr": "examples[2].code",
+    "key_line": 54,
+    "gate_first_error": "block line 11 (YAML line 65): Variable needs an operator",
+    "source_line_of_error": "buffer1[i] :=: buffer2[i]            ' Swap element by element",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/op_swap.yaml",
+    "addr": "examples[3].code",
+    "key_line": 68,
+    "gate_first_error": "block line 5 (YAML line 73): Variable needs an operator",
+    "source_line_of_error": "long[arr][j] :=: long[arr][j + 1]  ' Swap adjacent elements",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/op_swap.yaml",
+    "addr": "examples[4].code",
+    "key_line": 76,
+    "gate_first_error": "block line 6 (YAML line 82): Variable needs an operator",
+    "source_line_of_error": "x :=: y                                ' x<->y: x gets old y",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 4
+ },
+ {
+  "slug": "S-049",
+  "statement": "BYTE/WORD/LONG-typed parameters and results: keywords/BYTE.yaml (`PUB setChannel(BYTE ch)`, `PUB getStatus() : BYTE status`), WORD.yaml (`setValue(WORD value)`, `readSensor() : WORD result`), LONG.yaml (`setAddress(LONG addr)`, `getValue() : LONG result`), operators/typed-pointers.yaml (`processBuffer(^BYTE pBuffer, LONG length)` -- the `^BYTE` is fine, the `LONG length` is rejected). Plain names compile (scratch t/n1b_ptr_param_fix).",
+  "sites": [
+   {
+    "file": "language/spin2/keywords/BYTE.yaml",
+    "addr": "usage_contexts[2].example",
+    "key_line": 22,
+    "gate_first_error": "block line 1: Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB setChannel(BYTE ch)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/BYTE.yaml",
+    "addr": "usage_contexts[3].example",
+    "key_line": 25,
+    "gate_first_error": "block line 1: Expected a unique result name (m230)",
+    "source_line_of_error": "PUB getStatus() : BYTE status",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/LONG.yaml",
+    "addr": "usage_contexts[2].example",
+    "key_line": 24,
+    "gate_first_error": "block line 1: Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB setAddress(LONG addr)  ' or just: (addr)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/LONG.yaml",
+    "addr": "usage_contexts[3].example",
+    "key_line": 27,
+    "gate_first_error": "block line 1: Expected a unique result name (m230)",
+    "source_line_of_error": "PUB getValue() : LONG result  ' or just: : result",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/WORD.yaml",
+    "addr": "usage_contexts[2].example",
+    "key_line": 22,
+    "gate_first_error": "block line 1: Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB setValue(WORD value)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/keywords/WORD.yaml",
+    "addr": "usage_contexts[3].example",
+    "key_line": 25,
+    "gate_first_error": "block line 1: Expected a unique result name (m230)",
+    "source_line_of_error": "PUB readSensor() : WORD result",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/spin2/operators/typed-pointers.yaml",
+    "addr": "examples[2].code",
+    "key_line": 64,
+    "gate_first_error": "block line 2 (YAML line 66): Expected a unique parameter name (m220)",
+    "source_line_of_error": "PUB processBuffer(^BYTE pBuffer, LONG length)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 7
+ },
+ {
+  "slug": "S-077",
+  "statement": "`ptr.x := 0` on a plain-long `ptr` in special-symbols/at.yaml examples[8] (structure array traversal); `ptr` must be a `^point` pointer, and then it is stepped with `[ptr] += 8` (scratch t/n6b_clearall_fix).",
+  "sites": [
+   {
+    "file": "language/spin2/special-symbols/at.yaml",
+    "addr": "examples[8].code",
+    "key_line": 175,
+    "gate_first_error": "block line 11 (YAML line 186): Expected \"[\"",
+    "source_line_of_error": "ptr.x := 0",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ],
+  "claim_sites": [],
+  "site_count": 1
+ },
+ {
+  "slug": "S-038",
+  "statement": "passing / not-code sites in this group for an already-registered row (no gate failure; the class is the claim)",
+  "sites": [
+   {
+    "file": "language/spin2/methods/bytemove.yaml",
+    "line": "105-111",
+    "claim": "`BYTEMOVE(@buffer[10], @buffer[0], 90) ' Copies in reverse to prevent corruption` and the left-shift twin ' Copies forward, no overlap issue' (decisions #320, #321, passing)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-059",
+  "statement": "passing / not-code sites in this group for an already-registered row (no gate failure; the class is the claim)",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_rand.yaml",
+    "line": "5, 11-22",
+    "claim": "'xoroshiro32+', the `algorithm.description` pseudo-code (`state ^= state >> 2` ... `return state`) and `period: 2^32 - 1` (decision #184, passing fragment)"
+   },
+   {
+    "file": "language/spin2/operators/op_rand.yaml",
+    "line": "147",
+    "claim": "'Period is 2^32 - 1 (never returns to starting state via zero)'"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-023",
+  "statement": "passing / not-code sites in this group for an already-registered row (no gate failure; the class is the claim)",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_rand.yaml",
+    "line": "131",
+    "claim": "`key := GETRND()  ' Hardware true random` (decision #199, passing program)"
+   },
+   {
+    "file": "language/spin2/operators/op_rand.yaml",
+    "line": "139-142",
+    "claim": "getrnd_advantages: 'True randomness from thermal noise', 'Cryptographically suitable'"
+   }
+  ],
+  "site_count": 2
+ },
+ {
+  "slug": "S-058",
+  "statement": "passing / not-code sites in this group for an already-registered row (no gate failure; the class is the claim)",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_rand.yaml",
+    "line": "21, 135, 150",
+    "claim": "'Single P2 instruction - very fast', 'Much faster (single instruction vs 2-9 cycles)', 'Equivalent to PASM2 XORO32 instruction' -- unsourced speed / mechanism claims for `??`"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-056",
+  "statement": "passing / not-code sites in this group for an already-registered row (no gate failure; the class is the claim)",
+  "sites": [
+   {
+    "file": "language/spin2/operators/op_ENCOD.yaml",
+    "line": "25-27",
+    "claim": "`PUB next_power_of_two(n) : result` / `result := DECOD ENCOD (n - 1)` under 'Next power of 2' (decision #145, passing program)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-096",
+  "statement": "passing / not-code sites in this group for an already-registered row (no gate failure; the class is the claim)",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/case.yaml",
+    "line": "172-173",
+    "claim": "`0..max_value: process()  ' Won't work if max_value is variable` (decision #304, passing fragment: the compiler accepts it)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-105",
+  "statement": "passing / not-code sites in this group for an already-registered row (no gate failure; the class is the claim)",
+  "sites": [
+   {
+    "file": "language/spin2/constructs/case.yaml",
+    "line": "110-112",
+    "claim": "'CASE_FAST generates jump tables in COG RAM' (decision #303, not-code prose; same text as the registered site)"
+   }
+  ],
+  "site_count": 1
+ }
+]
