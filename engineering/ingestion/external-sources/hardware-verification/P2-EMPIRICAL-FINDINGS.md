@@ -1756,7 +1756,7 @@ time; cog execution; the timing of a write against a concurrent enable not explo
 `…/tests/test-vo-j-006-lut-share-block-load-and-spin2.spin2`.
 
 ### EF-097 · In counter modes %01110, %01111, %10010–%10111 and ADC %11001, a Y written with WYPIN while DIR is low is in force after DIRH — `CONFIRMED` (documentary silence decided)
-*KB:* `architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml`, `…-01111-count-highs-optional-dec.yaml`, `…-10010-time-x-a-events.yaml`, `…-10011-count-time-x-periods.yaml`, `…-10100-count-highs-x-periods.yaml`, `…-10101-count-ticks-in-x-clocks.yaml`, `…-10110-count-highs-in-x-clocks.yaml`, `…-10111-count-periods-in-x-clocks.yaml`, `…-11001-adc-external-clock.yaml`
+*KB:* `architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml`; `architecture/smart-pins/smart-pin-01111-count-highs-optional-dec.yaml`; `architecture/smart-pins/smart-pin-10010-time-x-a-events.yaml`; `architecture/smart-pins/smart-pin-10011-count-time-x-periods.yaml`; `architecture/smart-pins/smart-pin-10100-count-highs-x-periods.yaml`; `architecture/smart-pins/smart-pin-10101-count-ticks-in-x-clocks.yaml`; `architecture/smart-pins/smart-pin-10110-count-highs-in-x-clocks.yaml`; `architecture/smart-pins/smart-pin-10111-count-periods-in-x-clocks.yaml`; `architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml`
 *How proven:* `test-vo-j-028-y-written-dir-low-counter-modes` (VO-J-028), measured pin P4 with inputs
 from P5/P6 through the relative-pin selectors (NCO sources), nothing attached. Per mode four arms × 5
 rounds, each from a reset and a scrub of Y: Z (Y never written), B (Y written in reset), A (Y after
