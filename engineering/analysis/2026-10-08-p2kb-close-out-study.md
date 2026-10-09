@@ -908,12 +908,29 @@ period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measu
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
 for these modes; its only "zero = 65,536" statement is for the DAC/NCO modes (`:3925`).
 
-**Queued question for Stephen (one, at the hand-off): S-285/S-286.** Both keys describe how much
-hub or cog state the *debugger program* uses — a tool limit, which the doctrine says is not a KB
-fact. Recommendation: keep the keys with the silicon-only text above (the 16 KB region, its write
-protection, the 16-long ROM save) and state no debugger figures. The v51 debugger's own figures, for
-his reference only: it saves $010..$1F7 (488 longs) at $FEA00, 504 longs in all with the ROM's 16;
-the debugger and its overlays occupy $FF1A0..$FFC00 (2656 bytes).
+### Stephen's decisions on the queued questions (2026-10-09)
+
+Asked one at a time; each supersedes the "question for Stephen" note on its row.
+
+| # | Rows | Decision |
+|---|---|---|
+| Q1 | (scope) | **"yes A".** The never-edit rule covers ingested documents, our extractions of them, and accepted bench results. The ingestion registries and the bench workflow (`VERIFICATION-OPPORTUNITIES.md`, new campaigns, the EF ledger) are maintained through their own skills. Doctrine overlay *The chain runs one way* reworded. |
+| Q2 | S-285, S-286 | **C — delete the whole `memory_usage` block** of `architecture/debug_interrupt.yaml` (`trace_buffer`, `debug_state`). Stephen: keep it only if it guides code an agent writes; the one such fact (writes to the top 16 KB are dropped in a debug build) is already at `debug-strategy-guide.yaml:93`, `hub.yaml:36-57` and `debug_interrupt.yaml:80-83`. |
+| Q3 | S-293 | **A.** Teach `CITE_KEY_RE` `documentation_source` only; delete all 356 `enhancement_source:` lines. New principle: *a citation names an official Parallax document, never one we created* (doctrine overlay, *Provenance is for us*). |
+| Q4 | S-392, S-393 (new) | **A.** The one self-created source a claim may cite is an accepted EF record, for a fact measured on silicon. |
+| Q5 | S-328 | **A.** Delete `metadata.source: parallax-quick-bytes` from the 42 Quick Bytes entries, keep `scraped:`; the entry's `url:` (all parallax.com) is its citation, and the sourcing gate learns that rule for catalog entries, with a negative control. |
+| Q6 | S-326 | **Drop it.** The `P_HIGH_15K \| P_LOW_FLOAT` "Weak Pull-Up" line exists only in our own catalog extract (`smart-pins-catalog/ingestionSources/basic-io/spin2-v51-extract.md:284-287`), no Parallax document. Remove `not_documented_here.high_side_weak_with_low_side_floated` and that block's `sources:` line (a register self-cite) from `pin-drive-configuration.yaml`; F-336 closes with no content and no bench run; the ladder sweep is not owed. Sweep for other KB lines from that extract (S-391). |
+| Q7 | S-322 item 3 | **Stephen:** the Rev B jumper is an Eval-board fact — the old P2-ES Eval Board Rev B needs the ACC HDR/5V shunt to put 5 V on the header pins, which matters for any add-on that uses header 5 V. The KB already models it so (`p2-hardware-feature-comparison.yaml:430`, `addon-serial-host.yaml:78,89`). Fix: remove the unsourced "3.3 V supply" from `addon-serial-device.yaml` and state no supply for it. No erratum. |
+| Q8 | S-330 | **A, modified.** Remove `.git-hooks/`, `language/pasm2/add-missing-oneliners.py` **and `CHANGELOG.md`** ("why carry a pointer to somewhere else?"); move `language/PASM2-ENCODING-REFERENCE.md` out to `engineering/` and repoint its generator; keep `README.md` as the tree's only non-YAML file, and drop its *Release record* section that links the deleted CHANGELOG. |
+
+**New rows raised by the decisions:**
+
+| # | Severity | Finding | Evidence | Disposition |
+|---|---|---|---|---|
+| S-390 | latent | `code_author: Jane Doe` on one Quick Bytes entry reads as a placeholder | `grep -h code_author: community/quick-bytes/*.yaml` (1 of 42) | check the article's page on parallax.com; remove if the page does not name her |
+| S-391 | latent | KB content may carry other lines that came only from our catalog extract `smart-pins-catalog/…/spin2-v51-extract.md` | the Q6 trace | sweep the KB for strings unique to that extract; each one gets a Parallax source or is removed |
+| S-392 | hygiene | ~150 citations point at our text captures (`silicon-doc-text.txt:NNN`, `p2-datasheet-text.txt`, `spin2-v55-text.txt`, `pasm2-manual-text.txt`) and others at our summaries/registers (`complete-*.md`, `SOURCE-ERRATA.md`, the click-adapter netlist) — 131 files | `grep -rlE` over `deliverables/ai/P2`, 2026-10-09 | rewrite each to the Parallax document's title, edition and section/page; a claim with no Parallax document behind it is unsourced and goes through the search |
+| S-393 | latent | `audit-yaml-claim-sourcing.py` accepts our own files as citations (`complete-builtin-symbols.md` and `…-text.txt` are its own examples, `:153-169`) | the gate source | the gate counts only a Parallax document or an EF record; negative controls for an extraction path and a register path |
 
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
