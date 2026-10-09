@@ -1030,8 +1030,10 @@ USB pair after the live `WRPIN` changes left the next packet empty, 5 of 5. The 
 the WXPIN settings "can be changed on-the-fly without resetting" (`silicon-doc-text.txt:4581`). The
 step was not a question of that test and its packet routine was not built to judge it, so this is a
 finding for planning, not a KB fact: a round-2 question if the sprint needs it, otherwise recorded.
-**Disposition (2026-10-09):** filed as VO-J-035 (identified, not authored). No KB text depends on it —
-the KB follows the Documentation's "on-the-fly" — so it does not block the sprint.
+**State (2026-10-09):** recorded as VO-J-035 (identified, not authored); the observation is
+unexplained. The KB's USB page (`smart-pin-11011-usb-host-device.yaml`) does not carry the
+Documentation's "on-the-fly" sentence today (grep `fly`: no hit). Disposition is Stephen's call — see
+the question asked 2026-10-09.
 
 ## 6. Not read, and why
 
