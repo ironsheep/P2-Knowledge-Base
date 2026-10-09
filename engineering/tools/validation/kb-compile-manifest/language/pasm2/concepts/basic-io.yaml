@@ -119,3 +119,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_id, try_again]
+  - at: pin_field_encoding.manual_encoding.formula
+    fp: "2ab2dc6256b89b56"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

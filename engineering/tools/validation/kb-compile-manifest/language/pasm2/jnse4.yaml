@@ -6,3 +6,9 @@ blocks:
     fp: "7db508bcc63cab07"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
+  - at: quick_example
+    fp: "e43962d588f300f6"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [handler=con]
+    finding: "S-137"

@@ -33,3 +33,7 @@ blocks:
     fp: "cf22da77911b7e35"
     compile: not-code
     reason: "YAML prose describing the compiler translation of a conditional DEBUG, with the generated-code lines embedded in English text (notation of what the compiler emits, not a program)"
+  - at: syntax.basic
+    fp: "587096bffeedb643"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"

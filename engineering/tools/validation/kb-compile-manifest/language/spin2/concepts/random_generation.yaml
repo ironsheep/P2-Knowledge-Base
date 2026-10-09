@@ -91,3 +91,18 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [value]
+  - at: anti_patterns[2].wrong
+    fp: "a19716107b4ea67e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: anti_patterns[2].correct
+    fp: "16c7619c43360f00"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: anti_patterns[5].wrong
+    fp: "a4aa2c73f67621d6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]

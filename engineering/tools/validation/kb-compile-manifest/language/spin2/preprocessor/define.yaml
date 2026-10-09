@@ -18,3 +18,7 @@ blocks:
   - at: examples[3].code
     fp: "6805b305a5524ad5"
     compile: program
+  - at: syntax.basic
+    fp: "b4532cc5518d7dee"
+    compile: fragment
+    wrap: spin2-method

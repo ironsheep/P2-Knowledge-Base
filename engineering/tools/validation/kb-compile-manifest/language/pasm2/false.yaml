@@ -11,3 +11,4 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [flag, x, y]
+    finding: "S-162"

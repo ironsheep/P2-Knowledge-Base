@@ -65,3 +65,18 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [value, prng_state]
+  - at: anti_patterns[0].wrong
+    fp: "9ec33e1cd00dc569"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: anti_patterns[0].correct
+    fp: "6665471d999626a9"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+  - at: anti_patterns[1].wrong
+    fp: "a4aa2c73f67621d6"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]

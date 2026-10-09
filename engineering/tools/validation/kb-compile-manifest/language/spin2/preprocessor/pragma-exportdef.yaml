@@ -49,3 +49,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [module1.__kbstub(0), module2.__kbstub(0)]
+  - at: syntax.basic
+    fp: "0d6e1aaa4ced9a63"
+    compile: fragment
+    wrap: spin2-method

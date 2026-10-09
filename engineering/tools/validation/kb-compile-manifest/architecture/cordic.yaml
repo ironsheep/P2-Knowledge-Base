@@ -35,3 +35,34 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [y_coord, x_coord, angle, new_x, new_y]
+  - at: operations.multiply.setup
+    fp: "11d1f13b75e1a91f"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: operations.divide.setup
+    fp: "cd5257c9ebd196ac"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: operations.fractional_divide.setup
+    fp: "ac9d26f894437293"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: operations.square_root.setup
+    fp: "ca77f18697913de0"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: operations.vector.setup
+    fp: "cd39362d47998a61"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [X, Y]
+  - at: operations.logarithm.setup
+    fp: "54530c35b600d3a3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [D]
+  - at: operations.exponential.setup
+    fp: "4eb3929c111abba2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [D]

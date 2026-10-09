@@ -15,3 +15,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [streamer_mode=con]
+  - at: frequency_formula.formula
+    fp: "670e43b25b5afbbc"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

@@ -15,7 +15,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed]
-    finding: "S-023"
   - at: examples[0].code
     fp: "8e45f74277895fb1"
     compile: fragment

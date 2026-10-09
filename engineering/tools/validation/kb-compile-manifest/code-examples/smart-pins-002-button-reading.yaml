@@ -6,3 +6,17 @@ blocks:
     fp: "36e6c95dc8eedcb6"
     compile: program
     finding: "S-002"
+  - at: code_content.code_comments[0].comment
+    fp: "4250e18b5c79cabe"
+    compile: fragment
+    wrap: spin2-top
+  - at: code_content.code_comments[1].comment
+    fp: "70b289d2643350ae"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [BUTTON=con:32]
+  - at: code_content.code_comments[2].comment
+    fp: "804d13af8603878a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [BUTTON=con:32]

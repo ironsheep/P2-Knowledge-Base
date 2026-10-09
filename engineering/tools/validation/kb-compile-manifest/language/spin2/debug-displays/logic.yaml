@@ -22,3 +22,11 @@ blocks:
     wrap: spin2-method
     assumes: [buff, j, packed, i]
     finding: "S-142"
+  - at: syntax.create
+    fp: "2b0ca595f0abe456"
+    compile: fragment
+    wrap: spin2-method
+  - at: syntax.update
+    fp: "774828ad79a46b76"
+    compile: fragment
+    wrap: spin2-method

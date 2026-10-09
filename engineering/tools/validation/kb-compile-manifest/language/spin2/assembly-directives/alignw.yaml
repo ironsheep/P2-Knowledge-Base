@@ -12,3 +12,11 @@ blocks:
   - at: examples[1].code
     fp: "03f132e9d4a56dac"
     compile: program
+  - at: examples[0].comment
+    fp: "3314639e6334860b"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: examples[1].comment
+    fp: "a28457d6d6f2c9d3"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

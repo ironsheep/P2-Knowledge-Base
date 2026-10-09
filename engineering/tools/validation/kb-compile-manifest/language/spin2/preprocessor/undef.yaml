@@ -15,3 +15,7 @@ blocks:
     fp: "30cbc91c1b1512bd"
     compile: fragment
     wrap: spin2-method
+  - at: syntax.basic
+    fp: "5d5bca1bb1db7e10"
+    compile: fragment
+    wrap: spin2-method

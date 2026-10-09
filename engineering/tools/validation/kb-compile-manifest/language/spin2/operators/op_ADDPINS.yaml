@@ -6,3 +6,7 @@ blocks:
     fp: "18b0004d9dcfd858"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
+  - at: encoding.formula
+    fp: "981763a4a046db37"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

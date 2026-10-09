@@ -27,3 +27,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [index, BUFFER_SIZE=con]
+  - at: operation.formula
+    fp: "e1c7b12fd646d09f"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

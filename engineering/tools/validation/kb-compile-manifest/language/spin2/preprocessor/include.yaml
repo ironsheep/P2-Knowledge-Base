@@ -69,3 +69,8 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [file:methods.spin2]
+  - at: syntax.basic
+    fp: "9568e2929329ff56"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [file:filename.spin2]

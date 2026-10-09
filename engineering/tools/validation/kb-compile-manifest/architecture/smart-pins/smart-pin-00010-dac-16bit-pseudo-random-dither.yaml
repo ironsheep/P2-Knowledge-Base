@@ -27,3 +27,7 @@ blocks:
   - at: spin2_inline
     fp: "909879d454d95b06"
     compile: program
+  - at: y_register.update
+    fp: "29979967127ef144"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

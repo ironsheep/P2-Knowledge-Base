@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/boot-rom/_index.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: boot_timing.sequence
+    fp: "7d73ada77f2d7e32"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

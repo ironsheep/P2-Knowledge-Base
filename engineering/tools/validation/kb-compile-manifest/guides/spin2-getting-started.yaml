@@ -158,3 +158,20 @@ blocks:
   - at: string_handling.string_constants.example
     fp: "ef08a1c9512c42c9"
     compile: program
+  - at: method_signature_components.parameters.examples.basic
+    fp: "1a21ab3df41101c5"
+    compile: program
+  - at: method_signature_components.return_values.examples.basic
+    fp: "1335dc9dd6a4b918"
+    compile: program
+  - at: method_signature_components.local_variables.examples.basic
+    fp: "7e453f1557b254e6"
+    compile: program
+  - at: essential_operators.arithmetic.basic
+    fp: "2af3e0d651272206"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: essential_operators.assignment.basic
+    fp: "2c4e68664fd39392"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"

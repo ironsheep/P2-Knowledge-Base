@@ -11,8 +11,10 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [value, underflow]
+    finding: "S-162"
   - at: examples[1].code
     fp: "603540c7d884238a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [limit, value]
+    finding: "S-162"

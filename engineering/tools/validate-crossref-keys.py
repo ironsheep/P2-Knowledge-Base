@@ -661,6 +661,13 @@ def run_negative_control(base_path: Path, index: Dict) -> int:
         ('nc/prose_in_related.yaml', {'documentation': {'related': ['Some Vendor Datasheet Title']}}, 'unresolved_name'),
         ('nc/bare_in_prose.yaml', {'note': 'see cog.yaml for details'}, 'not_full_path'),
         ('nc/relative_path.yaml', {'related': ['../pasm2/mov.yaml']}, 'relative_path'),
+        # F-364 / S-383: a pointer field (`yaml_file:`) that nothing resolves. The register
+        # claimed the gate did not read this field; these cases prove it does.
+        ('nc/yaml_file_dangling.yaml',
+         {'registers': [{'yaml_file': 'architecture/system-registers/no-such-register.yaml'}]}, 'missing'),
+        ('nc/yaml_file_bare.yaml', {'registers': [{'yaml_file': 'dual-pa-register.yaml'}]}, 'missing'),
+        ('nc/yaml_file_good.yaml',
+         {'registers': [{'yaml_file': 'architecture/system-registers/ptra-register.yaml'}]}, None),
         ('nc/positive_control.yaml', {
             'related': ['language/pasm2/mov.yaml', 'MOV'],
             'x': {'related_symbols': ['EVENT_CT1']},

@@ -6,3 +6,19 @@ blocks:
     fp: "c3ca60b8d2749c29"
     compile: program
     finding: "S-001"
+  - at: code_content.code_comments[0].comment
+    fp: "5d90f88ec521f3a7"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: code_content.code_comments[1].comment
+    fp: "9ab49fc223a06ded"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: code_content.code_comments[2].comment
+    fp: "9adecf2b3d340942"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: code_content.code_comments[3].comment
+    fp: "e4251757ebe656d7"
+    compile: fragment
+    wrap: pasm2-dat

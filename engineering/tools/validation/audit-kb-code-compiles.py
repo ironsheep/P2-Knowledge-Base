@@ -23,6 +23,12 @@ THE MODEL
     including the decision that it is not code.
       net 1  every string scalar under a code-named key  (kb-compile-manifest/
              _code-keys.yaml -- DATA, seeded from the census, reviewed);
+      net 3  (S-256) every SINGLE-LINE string scalar under a key of the reviewed list
+             kb-compile-manifest/_oneline-code-keys.yaml (`oneline_code_keys: [...]`): real
+             one-line programs (`correct: result := value * 2`, `con_symbols: CON _clkfreq =
+             ...`) that live under non-code keys. Chosen BY KEY, never by shape: admitting
+             every one-line string the compiler classes as code would pull in `syntax:`
+             notation and prose. Many will be decided `not-code` (with a reason) or `fragment`.
       net 2  every multi-line string the COMPILER recognises as code-bearing: the
              string is elementized (`pnut-ts --pass elementize --log elementizer`)
              and taken when a line opens with a block keyword, an instruction
@@ -78,6 +84,7 @@ MANIFEST SCHEMA
             finding: F-381                # optional, reporting only; NEVER changes
                                           #   the verdict (a known-broken block stays
                                           #   program/fragment and stays red)
+            bare_const_ok: [NAME]         # optional, with a mandatory `reason:` (D3, below)
     compile:
       program   compiles BYTE FOR BYTE as shown; no wrap, no assumes.
       fragment  compiles inside `wrap` with exactly `assumes` declared.
@@ -164,8 +171,29 @@ EXIT (7.2)
     3  --apply only: the decisions were REFUSED and nothing was written (--apply
        otherwise exits with the gate's code, 0 or 1, on the touched files)
 
+BARE-CONST (D3 / S-389)
+    `mov flag, TRUE` assembles (TRUE is just the number -1) but reads the REGISTER at address
+    -1 & $1FF instead of loading the value: the author meant `#TRUE`. Legality cannot see it,
+    so for every program / fragment / never block that holds its class the built text is
+    elementized and, for each `type_asm_inst` line inside the block body (a leading
+    `type_asm_cond` skipped), operands D and S are examined, split on top-level `type_comma`.
+    An operand that is a single token with NO `type_pound` FAILs (`BARE-CONST`) when
+      (a) its type starts `type_con` and the source text at its column is an identifier
+          (so `mov x, 5` is not flagged, `mov x, TRUE` is), or
+      (b) it is `type_undefined` and its lower-cased name is in the CONSTANT SET: the entry's
+          `assumes: NAME=con[:V]` names + names the block's own CON section declares
+          (`type_undefined` followed by `type_equal`).
+    Directives (`long TRUE`, `res`, `orgh`) are `type_asm_dir`, not instructions, and are not
+    examined. Escape: a manifest entry may list `bare_const_ok: [NAME]` with a mandatory
+    `reason:` (an intentional read of the register at address NAME). BLIND TO: a constant the
+    author declared as a plain operand (`assumes: [limit]` without `=con` -- the manifest SAYS it
+    is a register), a constant from an `#include`d file or another object, blocks classed
+    `not-code`, the non-PASM Spin2 blocks, and one-liners outside the net. Spin2-side misuse is
+    a different class. It does not check that a `#` operand is the RIGHT constant or that the
+    value fits 9 bits (the compiler does that).
+
 REGISTERED / UNREGISTERED (reporting only)
-    A failing block (FAIL / NEVER-COMPILES / NEVER-WRONG-REASON) whose entry carries
+    A failing block (FAIL / NEVER-COMPILES / NEVER-WRONG-REASON / BARE-CONST) whose entry carries
     `finding:` is printed `REGISTERED(F-NNN)`; without one, `UNREGISTERED`. The summary
     line counts both, and `--json` carries `finding` and `registered` per problem.
     The exit code is 1 for ANY problem: a finding never changes the verdict (4.1).
@@ -201,12 +229,14 @@ except ImportError:  # pragma: no cover
 KB_DIR = os.path.join("deliverables", "ai", "P2")
 MANIFEST_DIR = os.path.join("engineering", "tools", "validation", "kb-compile-manifest")
 CODE_KEYS_FILE = "_code-keys.yaml"
+ONELINE_KEYS_FILE = "_oneline-code-keys.yaml"     # net 3 (S-256)
+NET_DATA_FILES = (CODE_KEYS_FILE, ONELINE_KEYS_FILE)
 MAIN_NAME = "kb.spin2"
 WRAPS = ("spin2-top", "spin2-method", "spin2-method-result", "spin2-var", "pasm2-dat", "pasm2-hub",
          "pasm2-inline")
 CLASSES = ("program", "fragment", "never", "not-code")
 ENTRY_KEYS = {"at", "fp", "compile", "wrap", "assumes", "reason", "fails_at",
-              "spin2_version", "with", "finding"}
+              "spin2_version", "with", "finding", "bare_const_ok"}
 NWORK = max(1, os.cpu_count() or 4)
 COMPILE_TIMEOUT = 30       # a compile takes ~0.1 s; PNut-TS has inputs it never finishes on
 ELEMENTIZE_TIMEOUT = 20    # (see with_final_newline): a hung run also grows to GBs, so stay short
@@ -452,6 +482,21 @@ def load_code_keys(root):
     return set(keys)
 
 
+def load_oneline_keys(root):
+    """Net 3 (S-256): the reviewed list of keys whose SINGLE-LINE strings are candidates.
+    A missing or malformed file is CannotAudit: deleting it would silently narrow the net."""
+    p = os.path.join(root, MANIFEST_DIR, ONELINE_KEYS_FILE)
+    try:
+        with open(p, encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+        keys = data["oneline_code_keys"]
+        if not isinstance(keys, list) or not keys or not all(isinstance(k, str) for k in keys):
+            raise ValueError("oneline_code_keys must be a non-empty list of strings")
+    except Exception as e:  # noqa: BLE001
+        raise CannotAudit("manifest unreadable: %s (%s)" % (p, e)) from None
+    return set(keys)
+
+
 def kb_files(root):
     base = os.path.join(root, KB_DIR)
     if not os.path.isdir(base):
@@ -465,8 +510,9 @@ def kb_files(root):
     return out
 
 
-def find_candidates(root, rels, code_keys):
-    """-> ({rel: [Cand]}, census dict). Net 1 + net 2 (3.1)."""
+def find_candidates(root, rels, code_keys, oneline_keys=frozenset()):
+    """-> ({rel: [Cand]}, census dict). Net 1 + net 2 (3.1) + net 3 (S-256): a single-line
+    string under a key of `oneline_keys` (the real flows pass load_oneline_keys(root))."""
     base = os.path.join(root, KB_DIR)
     per_file = {}
     pending = []  # net-2 jobs: (rel, tuple(item))
@@ -485,6 +531,8 @@ def find_candidates(root, rels, code_keys):
                 cs.append(Cand(rel, addr, value, line, key, style, "key"))
             elif len([l for l in value.splitlines() if l.strip()]) >= 2:
                 pending.append((rel, (addr, key, value, line, style)))
+            elif key in oneline_keys:
+                cs.append(Cand(rel, addr, value, line, key, style, "oneline"))
         per_file[rel] = cs
     aborted = 0
     if pending:
@@ -502,6 +550,8 @@ def find_candidates(root, rels, code_keys):
     census["files_with_candidates"] = len({c.file for c in allc})
     census["net_key"] = sum(1 for c in allc if c.net == "key")
     census["net_shape_only"] = sum(1 for c in allc if c.net == "shape")
+    census["net_oneline"] = sum(1 for c in allc if c.net == "oneline")
+    census["net_oneline_files"] = len({c.file for c in allc if c.net == "oneline"})
     census["key_single_line"] = sum(1 for c in allc if c.net == "key" and not c.multi)
     census["key_multi_line"] = sum(1 for c in allc if c.net == "key" and c.multi)
     census["multi_line_candidates"] = sum(1 for c in allc if c.multi)
@@ -610,6 +660,14 @@ def validate_entry(e, where):
             errs.append("%s: `with` must be a list of addresses" % where)
     if "finding" in e and not isinstance(e["finding"], str):
         errs.append("%s: `finding` must be a string" % where)
+    if "bare_const_ok" in e:
+        bo = e["bare_const_ok"]
+        if c == "not-code":
+            errs.append("%s: `bare_const_ok` is for compiled blocks only" % where)
+        elif not (isinstance(bo, list) and bo and all(isinstance(x, str) and x.strip() for x in bo)):
+            errs.append("%s: `bare_const_ok` must be a non-empty list of constant names" % where)
+        if not (isinstance(e.get("reason"), str) and e["reason"].strip()):
+            errs.append("%s: `reason` is required with `bare_const_ok` (why the register read is intended)" % where)
     return errs
 
 
@@ -625,7 +683,7 @@ def load_manifest(root, only=None):
         for f in sorted(fn):
             if f.endswith(".yaml"):
                 rel = os.path.relpath(os.path.join(dp, f), base).replace(os.sep, "/")
-                if rel != CODE_KEYS_FILE:
+                if rel not in NET_DATA_FILES:
                     rels.append(rel)
     out, errs = {}, []
     for rel in rels:
@@ -942,10 +1000,11 @@ def compile_built(b, dbg):
 # ============================================================ gate: assert a class
 
 class Verdict:
-    __slots__ = ("kind", "detail", "echo")
+    __slots__ = ("kind", "detail", "echo", "extra")
 
     def __init__(self, kind, detail, echo=None):
         self.kind, self.detail, self.echo = kind, detail, echo
+        self.extra = None    # a second verdict on the same block (BARE-CONST beside a FAIL)
 
 
 def describe(b, res, cand, withlabels=()):
@@ -989,6 +1048,91 @@ def error_past_block(b, res, loc):
     return res.eline > body_end
 
 
+PASM_CONTEXT_RE = re.compile(r"(?i)\b(?:dat|orgh?)\b")
+
+
+def bare_const_sites(b, entry):
+    """D3 (S-389): operand sites where a CONSTANT is used as a bare D/S operand of a PASM
+    instruction (`mov flag, TRUE`). -> [(block line, "D"|"S", name, source line)].
+    Read from the compiler's own token types; see the BARE-CONST section of the docstring.
+    An elementize pass that aborts leaves the block unread (no sites): the gate is blind there."""
+    if not PASM_CONTEXT_RE.search(b.text):   # PASM lives only in DAT or inline ORG/ORGH: skip the pass
+        return []
+    toks, _out, ab = elementize(b.text, b.files)
+    if ab:
+        return []
+    body = [(s, e) for k, _l, s, e in b.segs if k == "body"]
+    if not body:
+        return []
+    s0, e0 = body[0]
+    src = b.text.split("\n")
+    consts = set()
+    for a in entry.get("assumes", []) or []:
+        p = parse_assume(a)
+        if p and p["kind"] == "con":
+            consts.add(p["name"].lower())
+    for i, t in enumerate(toks):          # the block's own CON declarations: `NAME =`
+        if t.typ == "type_undefined" and t.name and i + 1 < len(toks) \
+                and toks[i + 1].typ == "type_equal" and toks[i + 1].line == t.line:
+            consts.add(t.name.lower())
+    ok = {n.lower() for n in (entry.get("bare_const_ok") or [])}
+    by_line = defaultdict(list)
+    for t in toks:
+        if t.typ not in ("type_end", "type_end_file"):
+            by_line[t.line].append(t)
+    sites = []
+    for ln in sorted(by_line):
+        if not (s0 <= ln <= e0):
+            continue
+        ts = sorted(by_line[ln], key=lambda t: t.col)
+        i = 0
+        while i < len(ts) and ts[i].typ == "type_asm_cond":
+            i += 1
+        if i >= len(ts) or ts[i].typ != "type_asm_inst":
+            continue
+        rest = ts[i + 1:]
+        while rest and rest[-1].typ == "type_asm_effect":
+            rest.pop()
+        operands, cur, depth = [], [], 0
+        for t in rest:
+            if t.typ == "type_left":
+                depth += 1
+            elif t.typ == "type_right":
+                depth -= 1
+            if t.typ == "type_comma" and depth == 0:
+                operands.append(cur)
+                cur = []
+            else:
+                cur.append(t)
+        operands.append(cur)
+        text = src[ln - 1] if 0 < ln <= len(src) else ""
+        for opi, op in enumerate(operands[:2]):
+            if len(op) != 1:             # a `#` / `##` prefix, an expression or a register list: not bare
+                continue
+            t = op[0]
+            ident = re.match(NAME_RE, text[t.col:])
+            if t.typ.startswith("type_con") and ident:
+                name = ident.group(0)
+            elif t.typ == "type_undefined" and t.name and t.name.lower() in consts:
+                name = t.name
+            else:
+                continue
+            if name.lower() in ok:
+                continue
+            sites.append((ln - s0 + 1, "D" if opi == 0 else "S", name, text.strip()))
+    return sites
+
+
+def bare_const_verdict(b, entry):
+    sites = bare_const_sites(b, entry)
+    if not sites:
+        return None
+    detail = "; ".join("block line %d, %s operand: bare constant %s reads the register at address %s -- "
+                       "to load the value write #%s (or ##%s)" % (n, w, name, name, name, name)
+                       for n, w, name, _t in sites)
+    return Verdict("BARE-CONST", detail, sites[0][3])
+
+
 def assert_entry(cand, entry, withs):
     """-> None when the block holds its declared class, else a Verdict."""
     cls = entry["compile"]
@@ -1005,9 +1149,11 @@ def assert_entry(cand, entry, withs):
         res = compile_built(b, dbg)
     if cls in ("program", "fragment"):
         if res.ok:
-            return None
+            return bare_const_verdict(b, entry)
         detail, echo, _loc = describe(b, res, cand)
-        return Verdict("FAIL", detail, echo)
+        v = Verdict("FAIL", detail, echo)
+        v.extra = bare_const_verdict(b, entry)   # D3 is independent of legality: report both
+        return v
     # never: asserted to fail, at fails_at
     fa = entry["fails_at"]
     where = "the end of the block (`eof`)" if fa == "eof" else "block line %d" % fa
@@ -1016,9 +1162,9 @@ def assert_entry(cand, entry, withs):
     detail, echo, loc = describe(b, res, cand)
     if fa == "eof":
         if error_past_block(b, res, loc):
-            return None
+            return bare_const_verdict(b, entry)
     elif loc[0] == "body" and loc[1] == fa:
-        return None
+        return bare_const_verdict(b, entry)
     return Verdict("NEVER-WRONG-REASON", "expected to fail at %s; %s" % (where, detail), echo)
 
 
@@ -1366,7 +1512,7 @@ def propose_one(cand):
 
 # ============================================================ evaluate (the gate)
 
-REGISTRABLE = ("FAIL", "NEVER-COMPILES", "NEVER-WRONG-REASON")
+REGISTRABLE = ("FAIL", "NEVER-COMPILES", "NEVER-WRONG-REASON", "BARE-CONST")
 
 
 class Problem:
@@ -1400,6 +1546,7 @@ def evaluate(root, files=None, strict=True):
     """The gate. -> dict(problems, counts, census, scope). Raises CannotAudit."""
     check_pnut()
     code_keys = load_code_keys(root)
+    oneline_keys = load_oneline_keys(root)
     kb_all = kb_files(root)
     if files is None:
         manifest = load_manifest(root)
@@ -1407,7 +1554,7 @@ def evaluate(root, files=None, strict=True):
     else:
         scope = sorted(set(files))
         manifest = load_manifest(root, only=set(scope))
-    per_file, census = find_candidates(root, scope, code_keys)
+    per_file, census = find_candidates(root, scope, code_keys, oneline_keys)
     if census.get("candidates", 0) == 0 and not any(manifest.get(r) for r in scope):
         raise CannotAudit("nothing audited: zero candidates and zero manifest entries in scope")
     problems, notes = [], []
@@ -1458,6 +1605,9 @@ def evaluate(root, files=None, strict=True):
             c = r.cand
             problems.append(Problem(v.kind, c.file, c.line, c.addr, cls_label(r.entry), v.detail, v.echo,
                                     finding=r.entry.get("finding")))
+            if v.extra is not None:
+                problems.append(Problem(v.extra.kind, c.file, c.line, c.addr, cls_label(r.entry), v.extra.detail,
+                                        v.extra.echo, finding=r.entry.get("finding")))
     problems.sort(key=lambda p: (p.file, p.line, p.addr))
     notes.sort(key=lambda p: (p.file, p.line, p.addr))
     return {"problems": problems, "notes": notes, "counts": dict(counts), "census": census, "scope": scope}
@@ -1485,7 +1635,7 @@ def print_report(rep, mode_label):
     if problems:
         kinds = Counter(p.kind.split(" ")[0] for p in problems)
         files = len({p.file for p in problems})
-        order = ["FAIL", "NEVER-COMPILES", "NEVER-WRONG-REASON", "STALE", "UNCLASSIFIED", "ORPHAN"]
+        order = ["FAIL", "NEVER-COMPILES", "NEVER-WRONG-REASON", "BARE-CONST", "STALE", "UNCLASSIFIED", "ORPHAN"]
         parts = ["%d %s" % (kinds[k], k) for k in order if kinds.get(k)]
         nreg = sum(1 for p in problems if p.registered)
         nunreg = sum(1 for p in problems if p.kind in REGISTRABLE and not p.registered)
@@ -1499,9 +1649,11 @@ def print_report(rep, mode_label):
 def print_census(census):
     c = census
     print("census (finder, real): %d YAML files in scope; %d candidates in %d files "
-          "(net 1 code-named key: %d, of which %d single-line; net 2 compiler-recognised shape only: %d)"
+          "(net 1 code-named key: %d, of which %d single-line; net 2 compiler-recognised shape only: %d; "
+          "net 3 one-line key: %d in %d files)"
           % (c.get("files", 0), c.get("candidates", 0), c.get("files_with_candidates", 0),
-             c.get("net_key", 0), c.get("key_single_line", 0), c.get("net_shape_only", 0)))
+             c.get("net_key", 0), c.get("key_single_line", 0), c.get("net_shape_only", 0),
+             c.get("net_oneline", 0), c.get("net_oneline_files", 0)))
     print("census: multi-line candidates %d in %d files; %d with debug(; under a code-named key %d, "
           "under another key %d; distinct host keys %d (%d among multi-line)"
           % (c.get("multi_line_candidates", 0), c.get("multi_line_files", 0), c.get("multi_line_with_debug", 0),
@@ -1548,8 +1700,9 @@ def entry_text(c, prop):
 def do_propose(root, files):
     check_pnut()
     code_keys = load_code_keys(root)
+    oneline_keys = load_oneline_keys(root)
     scope = files if files is not None else kb_files(root)
-    per_file, census = find_candidates(root, sorted(scope), code_keys)
+    per_file, census = find_candidates(root, sorted(scope), code_keys, oneline_keys)
     cands = [c for rel in sorted(per_file) for c in per_file[rel]]
     if not cands:
         raise CannotAudit("nothing audited: zero candidates in scope")
@@ -1634,9 +1787,10 @@ def rewrite_sidecar(path, edits):
 def do_refresh(root, files, accept):
     check_pnut()
     code_keys = load_code_keys(root)
+    oneline_keys = load_oneline_keys(root)
     scope = sorted(set(files))
     manifest = load_manifest(root, only=set(scope))
-    per_file, _census = find_candidates(root, scope, code_keys)
+    per_file, _census = find_candidates(root, scope, code_keys, oneline_keys)
     refused = 0
     changed = 0
     for rel in scope:
@@ -1702,6 +1856,7 @@ def apply_decisions(root, decisions):
     spin2_version}; `fp` is computed from the live candidate and may not be supplied."""
     check_pnut()
     code_keys = load_code_keys(root)
+    oneline_keys = load_oneline_keys(root)
     errs = []
     if not isinstance(decisions, list) or not decisions:
         raise Refused("decisions must be a non-empty JSON list")
@@ -1724,7 +1879,7 @@ def apply_decisions(root, decisions):
         if safe_join(base, rel) is None or not rel.endswith(".yaml") or not os.path.isfile(os.path.join(base, rel)):
             errs.append("%s: not an existing KB YAML file" % where)
             continue
-        per_file, _c = find_candidates(root, [rel], code_keys)
+        per_file, _c = find_candidates(root, [rel], code_keys, oneline_keys)
         live = {c.addr: c for c in per_file[rel]}
         try:
             existing = load_manifest(root, only={rel}).get(rel, [])
@@ -1806,7 +1961,7 @@ def since_scope(root, rev):
             scope.add(l[len(KB_DIR) + 1:])
         elif l.startswith(MANIFEST_DIR.replace(os.sep, "/") + "/") and l.endswith(".yaml"):
             rel = l[len(MANIFEST_DIR) + 1:]
-            if rel != CODE_KEYS_FILE:
+            if rel not in NET_DATA_FILES:
                 scope.add(rel)
     rc, stat = run_cmd(["git", "diff", "--stat", "%s..HEAD" % rev, "--", MANIFEST_DIR], cwd=root, timeout=60)
     return sorted(scope), stat.strip()
@@ -1860,14 +2015,29 @@ def nc_root(blocks, entries_fn):
     entries as dicts."""
     root = tempfile.mkdtemp(dir=tmp_root())
     write(os.path.join(root, KB_DIR, "nc.yaml"), nc_yaml(blocks))
+    return nc_finish(root, entries_fn)
+
+
+def nc_finish(root, entries_fn, oneline=("correct", "prose")):
+    """Write the scratch net-data files, run the real finder on nc.yaml and write the sidecar
+    entries_fn(candidates) returns (None = no sidecar)."""
     write(os.path.join(root, MANIFEST_DIR, CODE_KEYS_FILE), "code_keys: [code]\n")
-    per_file, _c = find_candidates(root, ["nc.yaml"], {"code"})
+    write(os.path.join(root, MANIFEST_DIR, ONELINE_KEYS_FILE),
+          "oneline_code_keys: [%s]\n" % ", ".join(oneline))
+    per_file, _c = find_candidates(root, ["nc.yaml"], {"code"}, set(oneline))
     cands = per_file["nc.yaml"]
     ents = entries_fn(cands)
     if ents is not None:
         write(os.path.join(root, MANIFEST_DIR, "nc.yaml"),
               "blocks:\n" + "".join(emit_entry(e) for e in ents))
     return root
+
+
+def nc_root_text(yaml_text, entries_fn):
+    """Like nc_root, but with the scratch KB YAML given verbatim (net-3 controls)."""
+    root = tempfile.mkdtemp(dir=tmp_root())
+    write(os.path.join(root, KB_DIR, "nc.yaml"), yaml_text)
+    return nc_finish(root, entries_fn)
 
 
 def emit_entry(e):
@@ -1880,6 +2050,8 @@ def emit_entry(e):
         out.append("    assumes: %s\n" % assumes_flow(e["assumes"]))
     if e.get("with"):
         out.append("    with: [%s]\n" % ", ".join(json.dumps(w) for w in e["with"]))
+    if e.get("bare_const_ok"):
+        out.append("    bare_const_ok: [%s]\n" % ", ".join(json.dumps(w) for w in e["bare_const_ok"]))
     if "finding" in e:
         out.append("    finding: %s\n" % json.dumps(e["finding"]))
     return "".join(out)
@@ -2222,6 +2394,60 @@ def run_negative_controls():
     _e, v_l0 = pasm_verdict("jmp #$-1\n", [])
     rec("22", "first line `jmp #$-1`: `lead:1` (one nop before) passes; without it fails", "PASS / FAIL",
         "%s %s / %s" % (kinds(v_l), e_l, kinds(v_l0)), v_l is None and not e_l and kinds(v_l0) == "FAIL")
+    # NC23 net 3 (S-256): one-line code under a reviewed non-code key
+    def kinds_of(rep):
+        return [p.kind for p in rep["problems"]]
+
+    line23 = "a:\n  correct: result := value * 2\n"
+    r23a = evaluate(nc_root_text(line23, lambda cs: None), files=None, strict=True)
+    rec("23a", "one-line `correct: result := value * 2` under a net-3 key with no manifest entry", "UNCLASSIFIED",
+        str(kinds_of(r23a)), kinds_of(r23a) == ["UNCLASSIFIED"])
+    r23b = evaluate(nc_root_text(line23, lambda cs: [ent(cs[0], compile="fragment", wrap="spin2-method",
+                                                          assumes=["result", "value"])]),
+                    files=None, strict=True)
+    rec("23b", "the same line decided `fragment` with its assumes", "PASS", nc_summary(r23b), kinds_of(r23b) == [])
+    r23c = nc_root_text("a:\n  syntax: result := value * 2\n", lambda cs: [])
+    pf23, _c = find_candidates(r23c, ["nc.yaml"], {"code"}, {"correct", "prose"})
+    rec("23c", "the same string under `syntax:` (not a net-3 key) is not a candidate", "no candidate",
+        str([c.addr for c in pf23["nc.yaml"]]), pf23["nc.yaml"] == [])
+    prose23 = "a:\n  prose: Some plain words here\n"
+    r23d = evaluate(nc_root_text(prose23, lambda cs: None), files=None, strict=True)
+    r23e = evaluate(nc_root_text(prose23, lambda cs: [ent(cs[0], compile="not-code", reason="nc: prose")]),
+                    files=None, strict=True)
+    rec("23d", "prose under a net-3 key is UNCLASSIFIED until a `not-code` entry with a reason is added",
+        "UNCLASSIFIED / PASS", "%s / %s" % (kinds_of(r23d), nc_summary(r23e)),
+        kinds_of(r23d) == ["UNCLASSIFIED"] and kinds_of(r23e) == [])
+    # NC24 D3 (S-389): a bare constant as a PASM D/S operand
+    d3_con = "CON\n  myc = 5\n\nDAT\n        org 0\n        mov flag, myc\nflag    long 0\n"
+    r24a = nc_run([d3_con], lambda cs: [ent(cs[0], compile="program")])
+    rec("24a", "`mov flag, myc` with `CON myc = 5` in the block", "BARE-CONST", nc_summary(r24a),
+        kinds_of(r24a) == ["BARE-CONST"])
+    r24b = nc_run(["mov flag, TRUE\n"], lambda cs: [ent(cs[0], compile="fragment", wrap="pasm2-dat", assumes=["flag"])])
+    rec("24b", "`mov flag, TRUE` (built-in constant)", "BARE-CONST", nc_summary(r24b), kinds_of(r24b) == ["BARE-CONST"])
+    r24c = nc_run(["mov flag, limit\n"], lambda cs: [ent(cs[0], compile="fragment", wrap="pasm2-dat",
+                                                         assumes=["flag", "limit=con"])])
+    rec("24c", "`mov flag, limit` with `assumes: limit=con` and no CON in the block", "BARE-CONST",
+        nc_summary(r24c), kinds_of(r24c) == ["BARE-CONST"])
+    clean24 = ("CON\n  myc = 5\n\nDAT\n        org 0\n        mov flag, #myc\n        mov flag, #FALSE\n"
+               "        mov flag, ##TRUE\n        mov flag, ##myc\n        mov flag, buf\n        mov flag, 5\n"
+               "flag    long TRUE\nbuf     long 0\n")
+    r24d = nc_run([clean24, "mov flag, limit\n"],
+                  lambda cs: [ent(cs[0], compile="program"),
+                              ent(cs[1], compile="fragment", wrap="pasm2-dat", assumes=["flag", "limit"])])
+    rec("24d", "`#myc`, `#FALSE`, `##TRUE`, `##myc`, a label, a numeral, a `long TRUE` directive and a plain-operand "
+        "assume are NOT bare constants", "PASS", nc_summary(r24d), kinds_of(r24d) == [])
+    r24e = nc_run(["mov flag, TRUE\n"], lambda cs: [ent(cs[0], compile="fragment", wrap="pasm2-dat", assumes=["flag"],
+                                                         bare_const_ok=["TRUE"], reason="nc: intended register read")])
+    rec("24e", "`bare_const_ok: [TRUE]` with a reason is the escape", "PASS", nc_summary(r24e), kinds_of(r24e) == [])
+    bad24 = validate_entry({"at": "x", "fp": "0" * 16, "compile": "fragment", "wrap": "pasm2-dat",
+                            "bare_const_ok": ["TRUE"]}, "nc24")
+    rec("24f", "`bare_const_ok` without a `reason` is an invalid entry", "validate_entry error",
+        str(bad24[:1]), any("reason" in m for m in bad24))
+    r24g = nc_run(["mov flag, TRUE\nmov flag, #9999\n"],
+                  lambda cs: [ent(cs[0], compile="fragment", wrap="pasm2-dat", assumes=["flag"], finding="F-999")])
+    rec("24g", "a block that FAILS to compile and also holds a bare constant reports both, each REGISTERED",
+        "FAIL + BARE-CONST", "%s; registered %s" % (kinds_of(r24g), [p.registered for p in r24g["problems"]]),
+        sorted(kinds_of(r24g)) == ["BARE-CONST", "FAIL"] and all(p.registered for p in r24g["problems"]))
     ok = all(r[4] for r in results)
     for nid, desc, expected, observed, good in results:
         print("NC%-4s %-4s %s | expected %s | observed %s" % (nid, "ok" if good else "BAD", desc, expected, observed))
@@ -2267,7 +2493,7 @@ def main(argv=None):
         if args.census:
             check_pnut()
             code_keys = load_code_keys(root)
-            _pf, census = find_candidates(root, kb_files(root), code_keys)
+            _pf, census = find_candidates(root, kb_files(root), code_keys, load_oneline_keys(root))
             print_census(census)
             if args.json:
                 write(args.json, json.dumps(census, indent=1))

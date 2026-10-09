@@ -12,3 +12,11 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [rf]
+  - at: syntax.create
+    fp: "1676c9ff10bb04f4"
+    compile: fragment
+    wrap: spin2-method
+  - at: syntax.update
+    fp: "ec673110f346dc1d"
+    compile: fragment
+    wrap: spin2-method

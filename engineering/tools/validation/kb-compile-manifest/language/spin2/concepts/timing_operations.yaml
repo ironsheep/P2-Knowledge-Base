@@ -106,3 +106,23 @@ blocks:
     fp: "a2dd92e2b45eb342"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
+  - at: time_conversions.formulas[0].formula
+    fp: "dfa9e8448404ae70"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [cycles, ms]
+  - at: time_conversions.formulas[1].formula
+    fp: "8954ab10fea58b71"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [cycles, us]
+  - at: time_conversions.formulas[2].formula
+    fp: "a963e3f6f1c9bb66"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ms, cycles]
+  - at: time_conversions.formulas[3].formula
+    fp: "34a107412e0b45c1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [us, cycles]

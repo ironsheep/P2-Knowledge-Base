@@ -1,0 +1,40 @@
+# ENH-03 compile gate -- the one-line code keys (net 3 of the finder; S-256).
+#
+# audit-kb-code-compiles.py treats EVERY SINGLE-LINE string scalar under one of these
+# keys as a candidate, whatever its shape. Each candidate must then carry a manifest
+# decision (program | fragment | never | not-code), exactly like net 1 and net 2.
+# Multi-line strings under these keys are already caught by net 2 when the compiler
+# classes them as code.
+#
+# WHY A KEY LIST AND NOT A SHAPE TEST. The compiler classes about 1,700 single-line
+# strings outside the code keys as code-bearing, but most are `syntax:` notation or
+# `description:` prose that the elementizer misreads. Admitting every one would flood the
+# manifest with `not-code` decisions and bury the real programs. These keys are the ones
+# that measurably host real one-line programs (`wrong:` / `correct:` pairs, a
+# `quick_example:`, `create:` / `update:` DEBUG lines, `con_symbols: CON _clkfreq = ...`).
+#
+# This list is DATA, not a compiler keyword list. It was seeded from the 2026-10-09
+# close-out measurement (engineering/analysis/2026-10-08-p2kb-close-out-evidence/
+# gates-groupF-specs.md, S-256) and is to be reviewed. Adding a key can only WIDEN the net
+# (more candidates, each needing a decision); removing a key can only narrow it, so a
+# removal is a reviewed hunk.
+#
+# S-308 interaction: S-256 sends `wrong` / `correct` one-liners to the compile gate
+# (legality); S-308 exempts them from the claim-sourcing gate (no quantity claim).
+#
+# LEGALITY ONLY: the gate proves pnut-ts accepts a block in its declared context,
+# never that the code is correct (F-381, F-312).
+oneline_code_keys:
+  - wrong
+  - correct
+  - quick_example
+  - spin2_examples
+  - create
+  - update
+  - setup
+  - con_symbols
+  - basic
+  - comment
+  - expands_to
+  - sequence
+  - formula

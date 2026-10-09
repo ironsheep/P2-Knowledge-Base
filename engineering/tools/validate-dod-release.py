@@ -12,6 +12,8 @@ Options:
     --verbose, -v     Show detailed output
     --incremental     Only validate YAMLs changed since last run
     --full            Force full validation (ignore history)
+    --post-commit     Run after the content commit (release step 6c): the index
+                      freshness limb treats a dirty deliverables/ai/P2 tree as an error
     --help, -h        Show this help
 
 Exit codes:
@@ -1016,6 +1018,76 @@ def validate_adc_encoding(verbose: bool = False) -> ValidationResult:
     return result
 
 
+def _two_phase_gate(title: str, script_name: str, scope: str, verbose: bool,
+                    audit_args: List[str] = (), timeout: int = 120) -> ValidationResult:
+    """Run a gate's --negative-control, then its audit, and record its scope note."""
+    result = ValidationResult(title)
+    script = Path("engineering/tools/validation") / script_name
+    _run_gate(result, script, ['--negative-control'], "negative control", verbose, timeout=timeout)
+    _run_gate(result, script, list(audit_args), "audit", verbose, timeout=timeout)
+    result.info(scope)
+    return result
+
+
+def validate_plain_scalar_comment(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Is any YAML plain scalar silently cut short by a same-line ` #` comment?
+
+    S-200 / S-183: `- MOV reg, #42` is served as the scalar `MOV reg,` with the
+    comment `#42`. Every other gate reads the parsed value, which looks fine. This
+    reads the composed node tree and the source line. Measured 2.5 s wall on the
+    1,129-file tree (2026-10-09, «#410»), so the 120 s timeout is ample.
+    """
+    return _two_phase_gate(
+        "YAML Plain Scalar Cut By Comment (S-200)", "audit-yaml-plain-scalar-comment.py",
+        "Scope: PLAIN scalars cut by a ` #` comment only. A quoted scalar "
+        "that lost text, a flow `[a, b #c]` collection, or a `#` with no "
+        "whitespace before it are outside the rule.", verbose)
+
+
+def validate_index_integrity(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Does the index agree with what is committed (F-441 / F-405)?
+
+    sha256 limb: every entry's sha256 equals SHA-256 of `git show HEAD:<path>`; no
+    HEAD-tracked YAML is missing from the index. fresh limb: the index equals a
+    fresh regeneration at HEAD (clean tree only; with --post-commit a dirty tree
+    is an error). gz limb: the .gz decompresses to the index's bytes.
+
+    Timeout: the fresh limb clones the repo and runs the generator. Measured 22 s
+    wall for the fresh limb alone on 2026-10-09 («#410»); 600 s is generous.
+    """
+    return _two_phase_gate(
+        "Index Integrity vs Committed Blobs (F-441/F-405)", "audit-index-integrity.py",
+        "Scope: the index's sha256/freshness/.gz against git. Not the "
+        "CONTENT of any entry, not the published tree, not findability.", verbose,
+        audit_args=['--post-commit'] if '--post-commit' in sys.argv else [], timeout=600)
+
+
+def validate_hardware_revision_scope(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Is a rating in a revision-declaring hardware YAML stated with its board revision?
+
+    F-454 / S-386: a correct current-revision number stripped of the scope that
+    made it correct (Rev A/B VIN max 5.5 V; Rev C+ 16 V). The gate cannot judge
+    the number; it enforces that the decision is made and recorded.
+    """
+    return _two_phase_gate(
+        "Hardware Revision Scope (F-454)", "audit-hardware-revision-scope.py",
+        "Scope: that a scope decision is recorded and ratings are "
+        "qualified; NOT that any rating is right for its revision.", verbose)
+
+
+def validate_index_findability(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Does a directory's own name reach all of its files, or only some (F-389)?
+
+    Reads the regenerated index (key + aliases + category names). A partial-reach
+    directory not in the reviewed baseline fails. Reached-by-none directories are
+    advisory (structural).
+    """
+    return _two_phase_gate(
+        "Index Findability by Directory Term (F-389)", "audit-index-findability.py",
+        "Scope: path-term reachability only; a vocabulary gap (a query "
+        "no alias answers) is invisible to it.", verbose)
+
+
 def validate_fetch_script_parity(verbose: bool = False) -> ValidationResult:
     """Verify bash and PowerShell scripts have matching behavior."""
     result = ValidationResult("Fetch Script Parity")
@@ -1283,6 +1355,10 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_source_lock,
         validate_duplicate_keys,
         validate_adc_encoding,
+        validate_plain_scalar_comment,
+        validate_index_integrity,
+        validate_hardware_revision_scope,
+        validate_index_findability,
         validate_fetch_script_parity,
         validate_filter_rule_readback,
         validate_nojq_lookup,

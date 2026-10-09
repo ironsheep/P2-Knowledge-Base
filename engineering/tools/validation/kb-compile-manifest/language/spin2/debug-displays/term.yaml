@@ -15,3 +15,11 @@ blocks:
     fp: "3e67571d1c2af04c"
     compile: fragment
     wrap: spin2-method
+  - at: syntax.create
+    fp: "21d73c6a9194a357"
+    compile: fragment
+    wrap: spin2-method
+  - at: syntax.update
+    fp: "bc2d3348c7a8cb4a"
+    compile: fragment
+    wrap: spin2-method

@@ -61,3 +61,17 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [buffer0]
+  - at: gotchas.struct_pointer_obj_returns.wrong
+    fp: "9c71ef7898432349"
+    compile: not-code
+    reason: "calls a method on object instance `sensor`, which a one-line string cannot declare (no OBJ line), so no wrap can supply it"
+  - at: gotchas.struct_pointer_obj_returns.correct
+    fp: "50624af19bc69d0d"
+    compile: not-code
+    reason: "calls a method on object instance `sensor`, which a one-line string cannot declare (no OBJ line), so no wrap can supply it"
+  - at: gotchas.pointer_arrays_not_supported.wrong
+    fp: "24fc6c8b42c57a49"
+    compile: never
+    wrap: spin2-var
+    reason: "the example demonstrates the error; the compiler rejects it (Pointers cannot be arrays)"
+    fails_at: 1

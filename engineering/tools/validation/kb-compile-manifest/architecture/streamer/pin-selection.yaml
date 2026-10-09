@@ -35,3 +35,7 @@ blocks:
     fp: "c61f302cff3bd7f5"
     compile: not-code
     reason: "operand-expression notation: an OR of streamer constants and `(pin<<17)`, a value to be assigned, not a statement"
+  - at: pin_base_encoding.formula
+    fp: "78fb0e6e95bae93e"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

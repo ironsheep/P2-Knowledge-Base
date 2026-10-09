@@ -74,3 +74,20 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [user_input, VALID1=con, VALID2=con, process()->1/1]
+  - at: range_support.examples[0].expands_to
+    fp: "5794d05e613be7a0"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: range_support.examples[1].expands_to
+    fp: "28805e765a7a4cac"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: range_support.examples[2].expands_to
+    fp: "82ed86d755f9e997"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: anti_patterns[0].correct
+    fp: "865c9f971ccd2f29"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [pin, index, PIN_A, PIN_B]

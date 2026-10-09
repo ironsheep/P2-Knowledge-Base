@@ -12,3 +12,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x_val, threshold]
+  - at: goertzel_usage.setup
+    fp: "90fc9bdf8cf9a18e"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

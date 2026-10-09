@@ -31,3 +31,13 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [new_mode]
+  - at: anti_patterns.hardcoded_timing.wrong
+    fp: "2d841b69507fe55d"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-256"
+  - at: anti_patterns.hardcoded_timing.correct
+    fp: "a5618d9e17dd0f39"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-256"

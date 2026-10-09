@@ -22,3 +22,15 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [clk_period=con]
+  - at: recommended_pin_layout.layout_1.comment
+    fp: "00938df40d493468"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: recommended_pin_layout.layout_2.comment
+    fp: "1b1726f6ca042f58"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: recommended_pin_layout.layout_3.comment
+    fp: "bf86ce8c3286bed0"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

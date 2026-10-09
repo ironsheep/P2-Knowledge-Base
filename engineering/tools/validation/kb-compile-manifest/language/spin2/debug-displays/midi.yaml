@@ -11,3 +11,11 @@ blocks:
     fp: "7a7be9415f4362a7"
     compile: fragment
     wrap: spin2-method
+  - at: syntax.create
+    fp: "7f0ee264494ca0b3"
+    compile: fragment
+    wrap: spin2-method
+  - at: syntax.update
+    fp: "0db1b5081eb6e058"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"

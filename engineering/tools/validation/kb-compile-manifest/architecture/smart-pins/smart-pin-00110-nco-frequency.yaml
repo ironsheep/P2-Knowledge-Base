@@ -18,3 +18,7 @@ blocks:
   - at: pasm2_complete
     fp: "16bd7a5e746c347d"
     compile: program
+  - at: y_register.formula
+    fp: "b75f09c352f1ad74"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

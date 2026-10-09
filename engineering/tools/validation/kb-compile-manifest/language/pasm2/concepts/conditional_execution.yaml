@@ -115,3 +115,13 @@ blocks:
     fp: "287ba05522db6e3b"
     compile: not-code
     reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"
+  - at: common_mistakes[0].wrong
+    fp: "38124e68fd048366"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [helper]
+  - at: common_mistakes[2].wrong
+    fp: "a0f105ab2ad9397d"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]

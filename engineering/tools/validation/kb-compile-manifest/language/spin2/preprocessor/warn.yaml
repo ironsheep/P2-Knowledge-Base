@@ -34,3 +34,7 @@ blocks:
     fp: "97cd20a33ad2f2cd"
     compile: fragment
     wrap: spin2-method
+  - at: syntax.basic
+    fp: "4b86970ad3635fc0"
+    compile: fragment
+    wrap: spin2-method

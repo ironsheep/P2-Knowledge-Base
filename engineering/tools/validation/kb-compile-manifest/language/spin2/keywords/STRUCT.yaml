@@ -70,3 +70,15 @@ blocks:
     wrap: spin2-top
     spin2_version: 45
     assumes: [sensor.getConfig(0)]
+  - at: syntax.basic
+    fp: "a4ca4becf331ef42"
+    compile: not-code
+    reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
+  - at: gotchas.struct_pointer_obj_returns.wrong
+    fp: "9c71ef7898432349"
+    compile: not-code
+    reason: "calls a method on object instance `sensor`, which a one-line string cannot declare (no OBJ line), so no wrap can supply it"
+  - at: gotchas.struct_pointer_obj_returns.correct
+    fp: "50624af19bc69d0d"
+    compile: not-code
+    reason: "calls a method on object instance `sensor`, which a one-line string cannot declare (no OBJ line), so no wrap can supply it"

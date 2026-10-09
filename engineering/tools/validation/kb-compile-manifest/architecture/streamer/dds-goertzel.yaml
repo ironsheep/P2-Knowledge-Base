@@ -41,3 +41,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [sine_table=con, adc_pin=con, clkf, target_freq, xfrq, dds_cmd, cycles, dds_s, cos_acc, sin_acc, magnitude]
+  - at: frequency.formula
+    fp: "805c4c5f2a8a1293"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

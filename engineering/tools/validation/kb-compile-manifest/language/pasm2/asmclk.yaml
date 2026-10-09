@@ -11,3 +11,23 @@ blocks:
   - at: examples[2].code
     fp: "ac6bf56bfebcd2c7"
     compile: program
+  - at: expansion_details.external_clock.expands_to[0]
+    fp: "3435eb6316f586c8"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: expansion_details.external_clock.expands_to[1]
+    fp: "9aa6e3ebfab63950"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: expansion_details.external_clock.expands_to[2]
+    fp: "b92c8dedca73b8ae"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: expansion_details.rcslow.expands_to[0]
+    fp: "0d78ab6f4202a75f"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: expansion_details.rcfast.expands_to[0]
+    fp: "d30f034d04581467"
+    compile: fragment
+    wrap: pasm2-dat

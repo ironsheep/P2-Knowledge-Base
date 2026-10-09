@@ -13,3 +13,7 @@ blocks:
   - at: code_examples[2].code
     fp: "bdde314f6d2e15f4"
     compile: program
+  - at: configuration_constants.bit_period_calculation.formula
+    fp: "39311a4574358349"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

@@ -91,3 +91,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [sensor, read_sensor()->1/0]
+  - at: syntax.basic
+    fp: "297b750831adc652"
+    compile: fragment
+    wrap: spin2-method

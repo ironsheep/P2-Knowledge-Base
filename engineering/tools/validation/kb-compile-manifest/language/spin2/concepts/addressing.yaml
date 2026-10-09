@@ -80,3 +80,7 @@ blocks:
   - at: address_arithmetic.type_aware_indexing.example
     fp: "4c1086fb54092174"
     compile: program
+  - at: address_operators.double_at.formula
+    fp: "17572fab82fa5614"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

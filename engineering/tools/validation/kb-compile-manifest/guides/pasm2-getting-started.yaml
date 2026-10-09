@@ -297,3 +297,39 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [start_time, end_time]
+  - at: file_structure.clock_setup.declaration_combinations[0].con_symbols
+    fp: "89e0c7bdb040aa8f"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_structure.clock_setup.declaration_combinations[1].con_symbols
+    fp: "9a586d0aeb2283ff"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_structure.clock_setup.declaration_combinations[2].con_symbols
+    fp: "fcbf6fe38bfeee0a"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_structure.clock_setup.declaration_combinations[3].con_symbols
+    fp: "67c60b65513c5255"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_structure.clock_setup.declaration_combinations[4].con_symbols
+    fp: "210d680c3244821b"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_structure.clock_setup.declaration_combinations[5].con_symbols
+    fp: "fe1a87040bdf7c52"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_structure.clock_setup.declaration_combinations[6].con_symbols
+    fp: "dafa95410ee7b0d2"
+    compile: fragment
+    wrap: spin2-top
+  - at: file_structure.clock_setup.declaration_combinations[7].con_symbols
+    fp: "c602c027d78b7bcd"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: file_structure.clock_setup.declaration_combinations[8].con_symbols
+    fp: "67ec03bcb4c69c00"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

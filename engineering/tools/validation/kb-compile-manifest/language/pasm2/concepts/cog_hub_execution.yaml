@@ -87,3 +87,19 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [overlay_base]
+  - at: common_mistakes[1].wrong
+    fp: "11b4b99b968d8b24"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_mistakes[2].wrong
+    fp: "428755ac053cc9b6"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: common_mistakes[3].wrong
+    fp: "9e58416465fe15fb"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: common_mistakes[4].wrong
+    fp: "8d38582ca321e3f7"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

@@ -58,3 +58,57 @@ blocks:
     fp: "0329d52ede6716d8"
     compile: fragment
     wrap: spin2-top
+  - at: reserved_words.spin2_examples[0]
+    fp: "479b74f1d545ffd0"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[1]
+    fp: "22ffd0cc81da6f4d"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[2]
+    fp: "b0398cdfc1c0635e"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[3]
+    fp: "70214179ace63e61"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[4]
+    fp: "a3dbc4b644a9a2c5"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[5]
+    fp: "efc7d8331b43d049"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[6]
+    fp: "f920cc53a16501b7"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[7]
+    fp: "7020fd7aaf1656de"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: reserved_words.spin2_examples[8]
+    fp: "d35114736c127b0a"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: common_pitfalls[0].wrong
+    fp: "007aa5b07623fd5e"
+    compile: never
+    wrap: spin2-method
+    reason: "the example IS an over-long identifier; the compiler rejects it (Symbol exceeds 30 characters)"
+    fails_at: 1
+  - at: common_pitfalls[0].correct
+    fp: "620c926446a58f6e"
+    compile: not-code
+    reason: "a bare identifier shown as a naming example, not a statement"
+  - at: common_pitfalls[1].wrong
+    fp: "c553b6378ab2aa7d"
+    compile: not-code
+    reason: "a bare identifier shown as a naming example, not a statement"
+  - at: common_pitfalls[1].correct
+    fp: "40eb2b32d2ef713f"
+    compile: not-code
+    reason: "a bare identifier shown as a naming example, not a statement"

@@ -169,3 +169,12 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [TX_PIN=con, x_val]
+  - at: pin_field_encoding.structure.formula
+    fp: "4e1d767a0ddbee54"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
+  - at: anti_patterns[3].wrong
+    fp: "18e419bc7e225320"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, SERIAL_RX]

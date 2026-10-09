@@ -27,3 +27,13 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [i, int_sum, sum]
+  - at: anti_patterns.unnecessary_conversion.wrong
+    fp: "6f0f5bfcea019758"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value]
+  - at: anti_patterns.unnecessary_conversion.correct
+    fp: "ee8754b10e19ec64"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value]

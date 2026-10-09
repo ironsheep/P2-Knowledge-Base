@@ -153,3 +153,13 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [done]
+  - at: pitfalls[1].wrong
+    fp: "0a7646f5a221d584"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i]
+  - at: pitfalls[1].correct
+    fp: "da85b14ccf4595a4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [i]

@@ -23,3 +23,11 @@ blocks:
     wrap: spin2-method
     assumes: [buff, i, pack_next_four_samples()->1/0]
     finding: "S-142"
+  - at: syntax.create
+    fp: "b30b82ce48ec87a1"
+    compile: fragment
+    wrap: spin2-method
+  - at: syntax.update
+    fp: "37ca3cf691a5e1de"
+    compile: fragment
+    wrap: spin2-method

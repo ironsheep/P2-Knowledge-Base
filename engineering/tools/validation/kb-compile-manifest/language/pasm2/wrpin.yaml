@@ -19,3 +19,28 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [mode]
+  - at: critical_requirement.sequence[0]
+    fp: "ee9c28299fce251e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin]
+  - at: critical_requirement.sequence[1]
+    fp: "2b882a026a60c4f0"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [mode, pin]
+  - at: critical_requirement.sequence[2]
+    fp: "7fcf673fd117405a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, pin]
+  - at: critical_requirement.sequence[3]
+    fp: "5cb8fa1a9aebdeba"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pin]
+  - at: critical_requirement.sequence[4]
+    fp: "a4a94fa1f513c63c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [y, pin]

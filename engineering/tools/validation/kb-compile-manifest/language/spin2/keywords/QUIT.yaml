@@ -28,3 +28,7 @@ blocks:
     wrap: spin2-method
     assumes: [row, rows, col, cols, matrix, target, found_row, found_col]
     finding: "S-009"
+  - at: syntax.basic
+    fp: "a872f67384948f79"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"

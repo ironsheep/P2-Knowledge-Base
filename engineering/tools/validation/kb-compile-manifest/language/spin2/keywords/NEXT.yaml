@@ -22,3 +22,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [row, col, skip_row_condition()->1/2, process_cell()->1/2]
+  - at: syntax.basic
+    fp: "7a66eabf637f6a4c"
+    compile: not-code
+    reason: "a bare keyword or operator listed as an example item, not a statement"

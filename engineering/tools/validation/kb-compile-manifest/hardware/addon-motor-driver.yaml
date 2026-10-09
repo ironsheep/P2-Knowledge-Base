@@ -6,3 +6,7 @@ blocks:
     fp: "3743d4528bc93e7f"
     compile: not-code
     reason: "YAML description prose (English sentences about the board, a header or a resource), not code"
+  - at: current_sense.formula
+    fp: "3a2ac2fc651c5f44"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

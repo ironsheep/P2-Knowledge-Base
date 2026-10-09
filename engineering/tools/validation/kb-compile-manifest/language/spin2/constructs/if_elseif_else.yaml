@@ -147,3 +147,9 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [a, handle_non_positive_a()->1/0, b, handle_non_positive_b()->1/0, c, do_something()->1/0, do_other()->1/0]
+  - at: pitfalls[0].wrong
+    fp: "26b9e40989e8cc85"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x]
+    finding: "S-256"

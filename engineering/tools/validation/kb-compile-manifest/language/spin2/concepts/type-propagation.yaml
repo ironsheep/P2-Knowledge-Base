@@ -21,3 +21,27 @@ blocks:
   - at: rules.dat_block.example.code
     fp: "282b8464b36dc0b4"
     compile: program
+  - at: common_mistakes[0].wrong
+    fp: "f306cda8ddc47eec"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-256"
+  - at: common_mistakes[0].correct
+    fp: "3205c50b296e4274"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-256"
+  - at: common_mistakes[1].wrong
+    fp: "0fef7abcf6c311d9"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_mistakes[1].correct
+    fp: "a59739a3473f72f7"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_mistakes[2].wrong
+    fp: "d996d4156f893328"
+    compile: program
+  - at: common_mistakes[2].correct
+    fp: "707752b9d6e12321"
+    compile: program

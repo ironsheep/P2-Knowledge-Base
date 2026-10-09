@@ -47,3 +47,9 @@ blocks:
     compile: fragment
     wrap: spin2-top
     finding: "S-146"
+  - at: syntax.basic
+    fp: "e08a1e5e6544a937"
+    compile: never
+    wrap: spin2-method
+    reason: "#ERROR halts the compile by design; the compiler stops at line 1 with the message"
+    fails_at: 1

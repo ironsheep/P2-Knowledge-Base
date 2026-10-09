@@ -17,4 +17,3 @@ blocks:
   - at: examples[2].code
     fp: "c538311851777766"
     compile: program
-    finding: "S-168"

@@ -17,3 +17,11 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [rho, theta]
+  - at: syntax.create
+    fp: "ce65e42f3985dc76"
+    compile: fragment
+    wrap: spin2-method
+  - at: syntax.update
+    fp: "37a1e11c27bcbebc"
+    compile: fragment
+    wrap: spin2-method

@@ -63,3 +63,32 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [result, value, handle_error()->1/0, use_result()->1/1]
+  - at: anti_patterns.float_equality.wrong
+    fp: "82296708df063c15"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result]
+  - at: anti_patterns.accumulating_errors.correct
+    fp: "a8ed8b08e2c8578c"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.unnecessary_conversion.wrong
+    fp: "6f0f5bfcea019758"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value]
+  - at: anti_patterns.unnecessary_conversion.correct
+    fp: "ee8754b10e19ec64"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value]
+  - at: anti_patterns.mixing_operators.wrong
+    fp: "432a9c3b28a9c687"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, a, b, c]
+  - at: anti_patterns.mixing_operators.correct
+    fp: "dc2fabd18e1b8468"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, a, b, c]

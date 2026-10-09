@@ -34,3 +34,11 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [pat, m, pbase, vbase, dbase, i]
+  - at: branch_timing.total_clocks.cog_lut_leap_case.formula
+    fp: "625bb602da698182"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: branch_timing.total_clocks.cancel_case_or_hub_exec.formula
+    fp: "bd3cad2571c0cd21"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

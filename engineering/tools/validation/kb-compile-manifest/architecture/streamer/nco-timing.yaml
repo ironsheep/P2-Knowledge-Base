@@ -15,3 +15,11 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [mode, data]
+  - at: operation.formula
+    fp: "23a1bc3c63598ac9"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
+  - at: frequency_calculation.formula
+    fp: "0cab146060adf603"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

@@ -11,3 +11,27 @@ blocks:
     fp: "44e275425065d003"
     compile: fragment
     wrap: spin2-top
+  - at: data_paths.hub_to_pins.setup
+    fp: "fc87c50a8b557ad3"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: data_paths.immediate_to_pins.setup
+    fp: "ff5b3f1471091ec5"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: data_paths.lut_lookup.setup
+    fp: "bc20890698547434"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: data_paths.pins_to_hub.setup
+    fp: "636860aa2d170cf7"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: data_paths.rgb_video.setup
+    fp: "153fce19e2e21699"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: data_paths.dds_goertzel.setup
+    fp: "82792c166679af3c"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

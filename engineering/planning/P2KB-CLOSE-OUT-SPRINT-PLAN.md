@@ -121,6 +121,28 @@ population exactly as the spec's counts say, then driven to 0 by §2–§7.
 inside a quoted scalar must NOT fire); error — each negative control fires; the DoD runner's total
 includes the new gate.
 
+**Built «#410» (2026-10-09) — red by design; §2–§8 drive each count to 0.** Each count names the
+script that produced it, run from the repo root on the working tree (HEAD `EF-102`, the two index
+files uncommitted as of the sprint start):
+
+| Gate (row) | Script | Today's count |
+|---|---|---|
+| S-382 / S-200 plain scalar cut by ` #` | `audit-yaml-plain-scalar-comment.py` | **52** flagged in **15** files (168 comment-after-plain scalars seen; 1,129 files) |
+| S-383 / F-364 `yaml_file:` pointer | `validate-crossref-keys.py --negative-control` | gate already existed; owed control added (dangling, bare, good); no population count (0 dangling) |
+| S-384 / F-441 index sha256 vs HEAD blob | `audit-index-integrity.py --limb sha256` | working-tree index: **21** stale of 1,130; `--committed-index`: **38** stale + **1** path absent at HEAD of 1,131 |
+| S-385 / F-405 index freshness | `audit-index-integrity.py --limb fresh` | working-tree index differs from a fresh regeneration at HEAD (**21** entries, **24** alias keys, `total_aliases`); gz pair consistent (`--limb gz` clean) |
+| S-386 / F-454 revision scope | `audit-hardware-revision-scope.py` | **12** findings in **7** of 29 files: R-A **7** (of 8 revision-declaring), R-B **5** |
+| S-387 / F-389 directory-term findability | `audit-index-findability.py` | **8** partial-reach directories (**135** files unreachable); advisory **14** reached-by-none (**423** files); 31 qualifying |
+| S-388 / S-256 one-line code keys | `audit-kb-code-compiles.py` | net 3 = **204** candidates in **86** files under 13 keys (136 of them compiler-code-bearing); all decided in the manifest: **113** fragment, **5** program, **3** never, **83** not-code; **23** FAIL (**18** `S-137` `;` comments, **5** `S-256`) |
+| S-389 / D3 bare constant | `audit-kb-code-compiles.py` | **7** `BARE-CONST` blocks, **10** sites, in 5 files (`false`, `true`, `negx`, `posx`, `multi_cog_synchronization`); all registered `S-162` |
+
+Compile gate totals (`audit-kb-code-compiles.py`, full sweep): **375** FAIL + **7** BARE-CONST =
+**382** problems on **379** blocks in **197** files, all REGISTERED (was 352 FAIL in 176 files).
+Manifest reconciliation: before, 354 `finding:` entries in 176 files against 352 FAIL — two entries
+(`language/pasm2/orgf.yaml examples[2].code` `S-168`, `language/pasm2/xoro32.yaml critical_warning.solution`
+`S-023`) named a finding on a block that compiles; those two `finding:` lines were removed (the S-rows
+stay open in the study). After: 379 entries with `finding:` = the 379 failing blocks.
+
 ## §2 Compile-gate drain (R1)
 
 **Starting point:** 352 registered failures in 176 files (instrument output above); each carries

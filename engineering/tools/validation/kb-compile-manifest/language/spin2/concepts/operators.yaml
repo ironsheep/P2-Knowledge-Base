@@ -137,3 +137,58 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [result, condition, true_val, false_val]
+  - at: anti_patterns[0].wrong
+    fp: "a65bacf683b12b68"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, MASK, EXPECTED]
+  - at: anti_patterns[0].correct
+    fp: "ee2122ad9414beba"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, MASK, EXPECTED]
+  - at: anti_patterns[1].wrong
+    fp: "de01de99b953857d"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value]
+  - at: anti_patterns[1].correct
+    fp: "5c1c5b9933657946"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [result, value]
+  - at: anti_patterns[2].wrong
+    fp: "81813a19c61ad732"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [addr1, addr2]
+  - at: anti_patterns[2].correct
+    fp: "4ef35c02505d92d5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [addr1, addr2]
+  - at: anti_patterns[3].wrong
+    fp: "ffb0869d8d98c622"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, b]
+  - at: anti_patterns[3].correct
+    fp: "4922c0e5d0e62654"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [a, b]
+  - at: anti_patterns[4].wrong
+    fp: "f96fbf76bd27de8b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, a, b]
+  - at: anti_patterns[4].correct
+    fp: "74ec90acbe4a59ef"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flags, a, b]
+  - at: anti_patterns[5].wrong
+    fp: "186a7e47289ca565"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [average, a, b]

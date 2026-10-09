@@ -38,3 +38,17 @@ blocks:
     fp: "dae8a8d89316eddc"
     compile: program
     finding: "S-118"
+  - at: how_it_works.formula
+    fp: "650ada0174a6f5b0"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
+  - at: common_mistakes[0].wrong
+    fp: "6d856f209bbff39c"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [addr, myvar]
+  - at: common_mistakes[1].wrong
+    fp: "a2539ede6150d112"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [str, STRLIST, i]

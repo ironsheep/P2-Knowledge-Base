@@ -12,3 +12,11 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [color]
+  - at: syntax.create
+    fp: "063ff5949bfe7880"
+    compile: fragment
+    wrap: spin2-method
+  - at: syntax.update
+    fp: "3abc533aa19b85e3"
+    compile: fragment
+    wrap: spin2-method

@@ -27,3 +27,51 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [start_count, measure_time=con, end_count]
+  - at: clock_switching.sequence[0]
+    fp: "a12bd96280cf5224"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: clock_switching.sequence[1]
+    fp: "711cbb1926a5af6c"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: clock_switching.sequence[2]
+    fp: "5d4f3adc2bd21ab8"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: clock_switching.sequence[3]
+    fp: "db84e0ef884e64cf"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: clock_switching.sequence[4]
+    fp: "622641f106f5dee4"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.conflicting_definitions.wrong
+    fp: "657ad8a0f9a6084a"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.missing_crystal_frequency.wrong
+    fp: "7fc877f3eed73e84"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.missing_crystal_frequency.correct
+    fp: "62872282994d4152"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.no_stabilization_wait.wrong
+    fp: "7ee023ca1aa7d6fa"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.no_stabilization_wait.correct
+    fp: "7ed12cffa57109c9"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.unsafe_switch_away_from_pll.wrong
+    fp: "4e14c0fb72e95c8a"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.unsafe_switch_away_from_pll.correct
+    fp: "6f2d8064b1d25205"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

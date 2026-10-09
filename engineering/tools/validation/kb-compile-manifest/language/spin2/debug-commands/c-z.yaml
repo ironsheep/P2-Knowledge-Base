@@ -30,3 +30,8 @@ blocks:
     wrap: spin2-top
     assumes: [some_operation()->1/0]
     finding: "S-139"
+  - at: syntax.basic
+    fp: "1a6099f4f43575f3"
+    compile: fragment
+    wrap: spin2-method
+    spin2_version: 46

@@ -42,3 +42,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [ctrl_bus=con]
+  - at: idioms[0].encoding.formula
+    fp: "1a52173edc25dc76"
+    compile: not-code
+    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
