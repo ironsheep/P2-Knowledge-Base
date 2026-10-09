@@ -126,8 +126,12 @@ Planning closes at that point. Tasking follows.
 ## 2. Read order — written before reading (tick as covered)
 
 0. [ ] **Ingestion prerequisites** (through `ingest-source` only):
-   - (a) ingest the v55 Spin2 interpreter (now only in the XBYTE guide's `REF-NO-COMMIT/pnut-ts-parts/`);
-   - (b) confirm which debugger is current (the copy we hold is byte-identical to v51);
+   - [x] (a) ingest the v55 Spin2 interpreter — **done 2026-10-09 («#401»):** new edition at
+     `engineering/ingestion/external-inputs/source-code/spin-interpreter/v55/` (byte-identical;
+     PNut-TS v1.55.8 embeds exactly its compiled image); delta in
+     `sources/spin2-v55/spin-interpreter-v55-delta-analysis.md`;
+   - [x] (b) confirm which debugger is current — **done:** the v51 debugger source is current for
+     v55 (PNut-TS v1.55.8 embeds exactly its compiled image). No document is missing;
    - (c) audit the operator ingestion: glued, missing or invented operators, and the `&lt;`/`&gt;`
      entities in `spin2-v55-text.txt`.
 1. ~~Group E, field-report reconciliation~~ (dropped: every field report has been processed).
@@ -537,6 +541,22 @@ only by PNut-TS.
 | S-264 | B | G10 | latent | `pasm-labels.yaml:78`: "local labels can shadow global labels" — unsourced | O14 | traced | — | to research | no |
 | S-265 | B | G10 | hygiene | `pasm2-getting-started.yaml:599`, `:603`: "Silicon Doc v35" and a "Green Book" file name in served content | O15 | traced | codenames and repo file names in served text | to research | yes |
 | S-266 | B | G10 | drives wrong code | `pasm2-getting-started.yaml:203`: `ADD x, y WC ' set C if overflow`; C is the unsigned carry | O16 | traced | — | to research | no |
+
+**Answers from the v55 interpreter source («#401», 2026-10-09).** From
+`engineering/ingestion/sources/spin2-v55/spin-interpreter-v55-delta-analysis.md` §4; `v55:` is
+`external-inputs/source-code/spin-interpreter/v55/Spin2_interpreter.spin2`. The arbiter re-read the
+four marked ✓.
+
+| Row | What the interpreter settles | Evidence | Effect on the row |
+|---|---|---|---|
+| S-061 | PINREAD of one pin returns 0 or 1 (lsb-justified, zero-extended), never -1 ✓ | `v55:2467-2473` | traced; source now the v55 edition |
+| S-038 | BYTE/WORD/LONGMOVE choose direction (`cmp ptrb,ptra` → `move_fwd` / `move_rev`) ✓ — so overlapping moves are safe, **the KB claim is right**; it needs this citation, not removal and not a bench run | `v55:2185-2187` | reclassify: unsourced → sourced (keep the claim, cite it) |
+| S-099, S-263 | REPEAT FROM/TO: the sign of STEP is ignored (`abs`), direction comes from FROM vs TO ✓; so `FROM 10 TO 0 STEP 1` counts down — the KB's "never executes" is wrong. A compiler-emitted pre-test is not visible here | `v55:345-356` | traced (interpreter); no bench question |
+| S-031 | STRCOPY copies up to Max characters then the terminator (Max+1 bytes) ✓ | `v55:2310-2318` | traced |
+| S-094 | `bc_logand`/`bc_logor` combine two already-evaluated operands; whether the right side is skipped is a compiler decision not visible in the interpreter | `v55:295-310`, `:1043-1045` | partial — still needs the compiler/doc answer before any bench question |
+| S-033 | SEND/RECV are per-frame cog registers saved and restored across calls, cleared at launch, called through the method-pointer path (unset RECV returns 0; unset SEND is dropped) | `v55:439-440`, `:675-685`, `:1397-1413`, `:2038`, `:1528-1546` | mechanism traced; the assignment syntax is the document's (`spin2-v55-text.txt:662-667`) |
+| S-156 | `taskhlt` is an interpreter cog register (`res 1`), not LUT space; halt bit n belongs to task 31-n | `v55:430`, `:2959-2960`, `:2995-2997` | traced; its address ($1CC) is derived by counting, not stated — do not publish it |
+| S-017 | the method-pointer call bytecode carries no result count; the callee's header supplies it | `v55:884`, `:1570-1578` | partial — the call-site `:N` rule is the document's and the compiler's |
 
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*

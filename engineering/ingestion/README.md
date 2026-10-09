@@ -144,7 +144,7 @@ _P1 = first Propeller. The P1 corpus now has its **own dashboard + quad** (names
 |--------|-----------------|----------|-------|
 | Architecture (cogs/hub/CORDIC/streamer/events) | silicon-doc · p2-datasheet | _(verify)_ | |
 | PASM2 instruction set | p2-instructions-csv · pnut-ts-pasm-ref · silicon-doc | _(verify)_ | X/491 instructions |
-| Spin2 language | spin2-v55 · pnut_ts | _(verify)_ | |
+| Spin2 language | spin2-v55 · pnut_ts · Spin2 interpreter v55 + debugger v51 (source code) | _(verify)_ | Interpreter v55 added 2026-10-09 as a new edition (`external-inputs/source-code/spin-interpreter/v55/`); PNut-TS v1.55.8 embeds exactly its image, and exactly the v51 debugger's — see `DOCUMENT-LINEAGE.md` *Source-code inputs* |
 | Smart Pins | smart-pins · smart-pins-titus (rev5) · silicon-doc | _(verify)_ | |
 | Hardware ecosystem (boards/add-ons) | edge-* · eval-board · datasheets | _(verify)_ | |
 | Boot & loaders | rom-booter · flash-loader · silicon-doc | _(verify)_ | |

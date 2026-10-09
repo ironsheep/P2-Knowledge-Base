@@ -85,7 +85,9 @@ the **new** edition (it may confirm, refine, or overturn them).
 ## Source-code inputs  ‹analyzed production source — carried from old DOCUMENT-LINEAGE›
 | Source code | Origin / attribution | Produced | Trust |
 |-------------|----------------------|----------|-------|
-| `spin-interpreter/v51/Spin2_interpreter.spin2` | Parallax official (SPIN2 v51 distribution) | `spin-interpreter-v51-complete-analysis.md` → (planned) P2 Bytecode Spec | 🟢 |
+| `spin-interpreter/v55/Spin2_interpreter.spin2` ‹**current**, added 2026-10-09 «#401»› | Parallax official (`v55 - 2026.05.07`), copied byte-identical from the PNut-TS distribution parts; md5 `174468bb85003c9dedadfb2d86beb244`. **PNut-TS v1.55.8 embeds the compiled image of exactly this file** (whole image found once in the executable; the v51 image is absent) | `sources/spin2-v55/spin-interpreter-v55-delta-analysis.md` (the v51→v55 delta) | 🟢 |
+| `spin-interpreter/v51/Spin2_interpreter.spin2` ‹superseded by v55, kept for lineage› | Parallax official (SPIN2 v51 distribution) | `spin-interpreter-v51-complete-analysis.md` → (planned) P2 Bytecode Spec | 🟢 |
+| `spin-debugger/v51/Spin2_debugger.spin2` ‹**current for v55**› | Parallax official (`v51 - 2025.04.02`), md5 `34280aa8da6bb791256229e35db53e13`. **No newer debugger exists in the v55 toolchain:** PNut-TS v1.55.8 embeds the compiled image of exactly this v51 source (whole image found once, 2026-10-09 «#401»), and the PNut-TS distribution parts pair this same file with the v55 interpreter | — | 🟢 |
 | `chip-flash-filesystem/flash_fs_v2.0.0.spin2` | **Core:** Chip Gracey · **Production enhancements:** Stephen M. Moraco (Iron Sheep Productions, LLC) — File System API, multi-COG locking, 1000+ unit tests · **Additional:** Jon McPhalen | `chip-flash-filesystem-complete-analysis.md` → 35+ production P2 patterns | 🟢 |
 
 ## Planned outputs  ‹**OPEN/deferred** 2026-06-12 — still planned or stale? (see dashboard parked ideas)›
