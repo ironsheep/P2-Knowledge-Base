@@ -1,0 +1,44 @@
+# F-375: the 40 bookkeeping-word values of documentation_source (study row S-292)
+# Command (2026-10-09, from deliverables/ai/P2):
+#   grep -rnE "^\s*-?\s*(documentation_source|enhancement_source|source)\s*:\s*\"?(enhanced|original|p2_datasheet|code_analysis)\"?\s*$" --include=*.yaml .
+# Counts: enhanced 16, original 15, p2_datasheet 8, code_analysis 1 = 40 (matches the register's figures).
+language/spin2/methods/pinstart.yaml:18 documentation_source: enhanced
+language/spin2/methods/cogspin.yaml:13 documentation_source: enhanced
+language/pasm2/crcbit.yaml:16 documentation_source: original
+language/pasm2/setq.yaml:22 documentation_source: original
+language/pasm2/getbrk.yaml:58 documentation_source: enhanced
+language/pasm2/skip.yaml:17 documentation_source: original
+language/pasm2/setq2.yaml:25 documentation_source: enhanced
+language/pasm2/waitx.yaml:25 documentation_source: enhanced
+language/pasm2/rdfast.yaml:19 documentation_source: enhanced
+language/pasm2/qvector.yaml:75 documentation_source: p2_datasheet
+language/pasm2/wrfast.yaml:17 documentation_source: original
+language/pasm2/lockrel.yaml:32 documentation_source: enhanced
+language/pasm2/qfrac.yaml:110 documentation_source: p2_datasheet
+language/pasm2/setpat.yaml:25 documentation_source: original
+language/pasm2/wxpin.yaml:21 documentation_source: original
+language/pasm2/wypin.yaml:47 documentation_source: enhanced
+language/pasm2/fblock.yaml:17 documentation_source: original
+language/pasm2/qdiv.yaml:124 documentation_source: p2_datasheet
+language/pasm2/qrotate.yaml:103 documentation_source: p2_datasheet
+language/pasm2/setluts.yaml:17 documentation_source: original
+language/pasm2/wrpin.yaml:112 documentation_source: enhanced
+language/pasm2/seussr.yaml:17 documentation_source: original
+language/pasm2/qmul.yaml:142 documentation_source: p2_datasheet
+language/pasm2/rgbsqz.yaml:16 documentation_source: original
+language/pasm2/loc.yaml:19 documentation_source: original
+language/pasm2/locktry.yaml:29 documentation_source: enhanced
+language/pasm2/skipf.yaml:17 documentation_source: original
+language/pasm2/seussf.yaml:17 documentation_source: original
+language/pasm2/qsqrt.yaml:140 documentation_source: p2_datasheet
+language/pasm2/testp.yaml:47 documentation_source: enhanced
+language/pasm2/crcnib.yaml:16 documentation_source: original
+language/pasm2/qlog.yaml:87 documentation_source: p2_datasheet
+language/pasm2/concepts/setq_block_ops.yaml:5 documentation_source: enhanced
+language/pasm2/concepts/event_interrupt_config.yaml:5 documentation_source: enhanced
+language/pasm2/concepts/streamer_smartpin_control.yaml:5 documentation_source: enhanced
+language/pasm2/concepts/cog_hub_execution.yaml:8 documentation_source: enhanced
+architecture/multi_resource_management.yaml:5 documentation_source: code_analysis
+architecture/smart_pin_patterns.yaml:10 documentation_source: enhanced
+language/pasm2/wmlong.yaml:21 documentation_source: original
+language/pasm2/qexp.yaml:95 documentation_source: p2_datasheet

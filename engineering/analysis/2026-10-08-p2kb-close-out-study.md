@@ -623,6 +623,23 @@ interpreter, the silicon doc, the datasheet, the instruction CSV, the empirical 
 | S-289 | `architecture/debug_interrupt.yaml` ISR examples (`:210-216`, `:228-235`, `:247-252`, `:271-276`, `:282-292`, `:298-304`, `:319-323`) | ISR bodies that never execute BRK before exit | add the re-arming `BRK` each needs, or say the example fires once: "bits L to A are cleared on ISR entry; a BRK must be executed before exiting … if a subsequent debug interrupt is desired" | `silicon-doc-text.txt:2517`; the debugger re-arms (`Spin2_debugger.spin2:240`) | change spec |
 | S-290 | `architecture/debug_interrupt.yaml` class sweep | `:326-328` "monitor without modifying execution timing"; `:330-336` "FIFO/Streamer status" accessible; `:362-364` "prevents security vulnerabilities"; `:366-378` hubexec entry "13-20 clocks", "0 additional clocks"; `:385-387` "cannot debug the debug ISR"; ISRs writing registers with no note that redirecting IJMP0 loses the ROM save; `:407-434` stale metadata | correct or remove each per the evidence: an ISR costs cog clocks (EF-057); status is only GETBRK D[21]/D[20] + GETPTR; the rest is unsourced | `silicon-doc-text.txt:2480`, `:2484`, `:2536-2537`, `:2760`; EF-057 | to finish in the sprint pass on this file (all evidence is here) |
 
+**F-375 (2026-10-09, arbiter inline).** `CITE_KEY_RE` (`audit-yaml-claim-sourcing.py:133-136`)
+lists `source`, `sources`, `citation`, `reference`, `authority`, `derived_from`, `verified_against`,
+`documentation` and kin — not `documentation_source` or `enhancement_source`. A key counts only when
+its value also matches `CITE_VALUE_RE` (`:161-169`, a document vocabulary). Value tally (grep of
+`deliverables/ai/P2/`): `documentation_source` names a real document ~345 times (`PASM2 Manual
+2022/11/01 Pages 31-147` 145, `PASM2 Manual 2022-11-01` 116, `PASM2 Manual 2022/11/01` 60, the DEBUG
+directive matrix 9, …); **`enhancement_source` has two values only, `PNUT_TS_v2.0_complete_operand_
+integration_2025-09-13` (346) and `PNUT_TS_v2.0_operand_fixes_2025-09-13` (10) — labels of an
+internal 2025-09-13 pass (there is no PNut-TS v2.0), not documents. `CITE_VALUE_RE` would still
+accept them (the `pnut` token matches inside `PNUT_TS`).**
+
+| # | File, block | Current | Correct | Authority | State |
+|---|---|---|---|---|---|
+| S-291 | `engineering/tools/validation/audit-yaml-claim-sourcing.py:133-136` | `CITE_KEY_RE` blind to `documentation_source` | add `documentation_source` to the key alternation; add a negative control proving a `documentation_source:` naming a manual counts and one holding a bookkeeping word does not; re-run the gate and record the Tier 1/2 movement | decision D2; `:133-136`, `:161-169` | change spec |
+| S-292 | 40 sites (`f375-bookkeeping-token-sites.txt`) | `documentation_source: enhanced` (16) / `original` (15) / `p2_datasheet` (8) / `code_analysis` (1) | delete each line — except the 8 `p2_datasheet` sites (all CORDIC: `qvector`, `qfrac`, `qdiv`, `qrotate`, `qmul`, `qsqrt`, `qlog`, `qexp`): there, replace with the real datasheet citation **if** the page's facts are in the Datasheet's CORDIC section (check each), else delete — a citation hint is not removed when it can be made true (D4: do not remove useful things) | decision D2; evidence file | change spec |
+| S-293 | 356 `enhancement_source:` lines | `PNUT_TS_v2.0_…_2025-09-13` labels | **not a citation**: do not teach `CITE_KEY_RE` this key (it would count 356 labels as sources); the labels are bookkeeping like S-292's words | as above | **queued question for Stephen** — his D2 said to teach both keys; the values show the second carries no documents. Recommendation: teach `documentation_source` only, and delete the 356 `enhancement_source` lines with S-292 |
+
 **Queued question for Stephen (one, at the hand-off): S-285/S-286.** Both keys describe how much
 hub or cog state the *debugger program* uses — a tool limit, which the doctrine says is not a KB
 fact. Recommendation: keep the keys with the silicon-only text above (the 16 KB region, its write
