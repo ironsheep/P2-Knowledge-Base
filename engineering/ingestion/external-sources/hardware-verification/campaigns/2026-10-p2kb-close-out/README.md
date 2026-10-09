@@ -24,6 +24,12 @@ byte-identical to a build of the committed source.
 | 7 | `test-vo-j-006-lut-share-block-load-and-spin2.spin2` | VO-J-006 | does a block load propagate through LUT sharing; a Spin2 sender | none | PROPAGATES; start-up image arrives; receiver COGINIT resets | EF-096 |
 | 8 | `test-vo-j-005r-streamer-capture-ceiling-and-skew.spin2` | VO-J-005 | streamer pin-capture ceiling; filter skew | P32–P47 (P32 driven, P36–P47 held low) | no ceiling to 1 sample/clock; filter delay N + 1 | EF-095 |
 
+**Round 2 (one test, written 2026-10-09, not yet run):**
+
+| # | Test (`tests/`) | Row | Question | Pins | Verdict | EF |
+|---|---|---|---|---|---|---|
+| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | VO-J-035 | does a WXPIN re-issued or changed FS ↔ LS on a running USB pair take effect (its baud) and leave the next packet intact, after a long and a short settle? | P0/P1 (driven) | — | — |
+
 **Nothing attached.** Every program is bare-board: pins come only from the bench's free set
 (P0–P7, P32–P47), and the smart-pin tests route between neighbours through the relative-pin input
 selectors. VO-J-032 names one conditional fallback (a second USB pair with jumpers P0→P2, P1→P3)

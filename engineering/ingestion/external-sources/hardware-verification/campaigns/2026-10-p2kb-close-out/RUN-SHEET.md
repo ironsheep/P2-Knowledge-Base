@@ -23,6 +23,15 @@ result, then `=== END ===` and `DEBUG_END_SESSION`.
 | 7 | `test-vo-j-006-lut-share-block-load-and-spin2.spin2` | none | < 1 s | 60 s | `VERDICT VO-J-006` lines |
 | 8 | `test-vo-j-005r-streamer-capture-ceiling-and-skew.spin2` | **P32–P47** (P32 driven, P36–P47 held low) | 1–5 s | 45 s | `CERT` passes, E ladder, `S ENGAGEMENT`, S readings |
 
+**Round 2 (added 2026-10-09)** — same rules as above:
+
+| # | Program | Pins in use (keep clear) | Runs | Hang limit | Look for |
+|---|---|---|---|---|---|
+| 9 | `test-vo-j-035-usb-wxpin-on-running-pair.spin2` | **P0/P1** (driven) | < 1 s | 15 s | one `VERDICT VO-J-035` line (SURVIVES / DISTURBED / INCONCLUSIVE) and its settle line |
+
+A `RIG FAIL` on gate P (a late write) means the run's timing missed a deadline — send the log; it is a
+rerun, not a result.
+
 **Two things that may happen and are not failures of the run**
 - **#6 prints INCONCLUSIVE** (the bare USB pair could not sense its own line state). Then, only
   if you choose to, the fallback is jumpers P0→P2 and P1→P3 and a second-pair version, which I

@@ -1,0 +1,1772 @@
+'' =============================================================================
+''
+''   File....... test-vo-j-035-usb-wxpin-on-running-pair.spin2
+''   Purpose.... VO-J-035 on SILICON: on a RUNNING USB smart-pin pair (%11011, DIR high), does a WXPIN -- re-issued with the same
+''               word, or changed full-speed <-> low-speed -- take effect without a reset, so that the baud the WXPIN set is in force and
+''               the NEXT packet is transmitted and received intact?  (The baud is what is proved; the FS/LS bit D[14] is not observable
+''               on this self-sensing pair -- see WHAT IS DECIDED.)
+''   Authors.... Iron Sheep Productions, LLC
+''   E-mail..... stephen@ironsheep.biz
+''   Started.... Oct 2026
+''   Updated.... Oct 2026
+''
+'' =============================================================================
+
+{ WHAT IS DECIDED  (register VO-J-035; study S-395; task 409)
+
+  The P2 Documentation says of WXPIN on the lower pin of a USB pair (silicon-doc-text.txt:4581): "Once established, these settings can
+  be changed on-the-fly without resetting the USB smart pins. This is necessary when talking to both 'full-speed' and 'low-speed'
+  devices over a USB hub."  D[15] = 1 host, D[14] = 1 full-speed / 0 low-speed, D[13:0] = (rate FRAC clkfreq) >> 16 (:4583-:4587).
+  The earlier test test-vo-f372-usb-wrpin-on-running-pair.spin2 (result EF-093, P2-EMPIRICAL-FINDINGS.md:1681-1698) re-issued WXPIN on
+  the running pair AFTER its live WRPIN changes, as a step nobody judged; the next packet then came back empty (n = 0) in 5 of 5
+  (EF-093 "Characterisation, not asked", :1695-1697).  Nobody knows whether that was the pin or the packet routine, because that
+  routine writes a value only while the upper pin's IN is high (F372 packet routine: testp #PIN_DP), and a WXPIN/WYPIN/WRPIN/RDPIN/AKPIN
+  is an acknowledge that lowers IN until the next event (silicon-doc-text.txt:3845-:3849; for the USB pair :4589: "You must do an AKPIN
+  on the upper pin to return its IN pin to a low state, in order to detect the next FIFO-not-full signal").
+  THIS PROGRAM SEPARATES THE TWO, AND PROVES THE NEW SETTING IS IN FORCE:
+    * its packet routine does NOT read any IN flag.  Value k is written at a FIXED deadline measured from the SOP write (below);
+    * after every WXPIN (and in the control arms, where there is no WXPIN) it re-establishes a clean baseline before the packet:
+      settle, AKPIN on both pins (silicon-doc-text.txt:3722, :3847-:3849), RQPIN of the status word -- and the baseline is JUDGED:
+      SOP-in (bit 4) and EOP-in (bit 5) must be clear, or the arm's round is not GOOD;
+    * the receiver shares the baud generator with the transmitter (:4614 "Only the baud generator is common"), so a pair that IGNORED
+      a WXPIN would still decode its own output.  The new BAUD is therefore proved two ways: (a) the MEASURED DURATION of the packet
+      (first byte received -> fourth byte received, three byte periods = 24 bit periods) must read the baud the WXPIN selected, and
+      (b) the mismatch control X shows a pair that is NOT at the baud of the schedule returns a packet that is not intact.
+
+  SCOPE OF THE SPEED PROOF  (review finding 1)
+    The WXPIN word has three fields: D[15] host/device, D[14] full-speed/low-speed signalling, D[13:0] baud (:4583-:4587).  What this
+    test proves is the BAUD (D[13:0]): the duration of the packet, the schedule that X shows is wrong at the other baud, and the
+    self-sensing decode are all functions of the baud generator only.  The baud differs between the FS and LS words (3932 vs 491)
+    and so does D[14], but the packet cannot tell which of the two changed.  EVERY reading below therefore says "the baud set by the
+    WXPIN is in force and the next packet is intact" -- it never says "FS/LS mode changed".
+    D[14] (idle polarity: FS idle = DM low / DP high, LS idle = DP low / DM high, :4585) has no documented, judgeable observable on this pair, and no
+    judged observation for it was built, for these reasons: (1) the only observer is the pair's own receiver, which reads the pair's own
+    output (:4614) in the same speed convention as the driver -- its status line-state bits 0..3 (J in, K in, SE0 in, steady state,
+    :4626-:4629) report J / K relative to the speed in force, so a pair that applied D[14] to driver and receiver and a pair that
+    ignored it both read their own J as J and their own SOP (KJKJKJKK, :4604) as an SOP; (2) the Silicon Doc gives no status-bit
+    polarity per speed to compare against, only idle line levels, and the pad levels cannot be read back: the lower pin's IN is the
+    smart pin's own event output (:4591), not the pad; (3) any independent observer (another pin, a scope, an attached device) is
+    outside this rig (P0/P1 only, bare board).  A claim about D[14] needs a different rig (a device or an analyser on the lines).
+
+  SETTLE  (review finding 2)
+    The first version waited WX_CLK = 20,000 clocks (100 us) after every WXPIN, which would hide an effect that is only immediate.
+    Every arm now takes a GETCT at the "WXPIN site" (just before the WXPIN, or where it would be) and the engine records the clocks from
+    there to the SOP write (A_STL, printed as stl, held in a band by gate Q).  Two settles are run:
+      LONG  (CFS CLS A1 A2 B C D1 D2 N1 N2 X)   WXPIN, call sched (14 clocks), WX_CLK wait 20,000 clocks, AKPIN + baseline, packet:
+                                                 stl = 20,000 + about 110-120 clocks (gate Q band 20,000..20,300).
+      SHORT (SCF SCL SB SC)                      WXPIN, call sched (14 clocks), AKPIN + baseline, packet, NO wait: stl = the code path
+                                                 only, about 110-120 clocks by instruction count (2 clocks per ALU instruction, 4 per
+                                                 CALL / RET / JMP, 3..10 for the one hub write; gate Q band 0..300).  That path is the
+                                                 minimum the engine needs: the baseline (AKPIN, RQPIN, record write) is judged and the
+                                                 packet routine must start; about 6.6 FS bit periods, 0.8 LS bit period.
+    SB / SC are the short-settle versions of B / C.  SCF (start FS) and SCL (start LS) are their controls: the same instructions in
+    the same order, and the same times, as SB / SC, minus only the WXPIN itself (2 clocks); they must be GOOD (gate S) or SB and SC are
+    not judged.  The long arms' controls are CFS / CLS the same way.  The settle used by each arm is printed per arm (stl), in the
+    per-arm count line (min..max), and in every VERDICT line.
+
+  RIG  (BARE BOARD -- NOTHING ATTACHED)
+    One USB pair: P0 = DM (even, lower) and P1 = DP (odd).  "The receiver receives not just input from another host/device, but all
+    local output, as well" (silicon-doc-text.txt:4614), so the pair reads its own output (the same self-sense as F372, which carried
+    $A5 $5A $3C $C3 in every round, EF-093).  P0 and P1 are DRIVEN by the program (host); attach NOTHING to them: they carry no external
+    load.  No other pin is used.
+
+  PACING  (BLOCKER 1 of the adversarial review: the old routine wrote value k on the first poll pass after a gap, and a pass took 50-70
+    clocks, so at full speed a data byte could land after the shifter emptied -> automatic EOP -> a false short packet whose occurrence
+    depended on the baud phase.  Replaced by deadlines.)
+    * Value 0 (SOP) is written at once; its write instant T0 is taken with GETCT immediately before the WYPIN.  Value k (k = 1..4) is
+      DUE at T0 + G0 + (k-1) * STEP, i.e. at (8k - 4) bit periods after T0: G0 = 4 bit periods, STEP = 8 bit periods (a byte is 8 bit
+      periods on the wire; SOP = KJKJKJKK, 8 bits, :4604).  FS bit = 65536 / 3932 = 16.667 clocks: G0 = 67, STEP = 133.  LS bit = 65536 / 491
+      = 133.476 clocks: G0 = 534, STEP = 1068 (each = the bit-period count rounded to the nearest clock; control W recomputes them).
+    * One cog does both jobs.  ADDCT1 sets CT1 to the next deadline; the loop samples the status of DM (RQPIN) about every 16 clocks,
+      logs every change of status bits 4..15 with the CT, and POLLCT1 tells it the deadline has passed.  A second cog was not used: the
+      single loop already samples every 16 clocks (byte period at full speed = 133 clocks), and one cog keeps the write instant and the
+      receive instants on one clock with no hand-off.  Pass lengths: a plain pass is 16 clocks (RQPIN, MOV, AND, CMP, not-taken JMP,
+      POLLCT1 = six 2-clock instructions, then the taken JMP = 4); a pass that logs an event is 36 (the event handler adds 24).  The
+      GETCT that takes the write instant executes 12 clocks after the start of the POLLCT1 that saw the deadline pass (POLLCT1 2,
+      not-taken JMP 2, CMP 2, not-taken JMP 2, ALTS 2, MOV 2).  Worst case: the deadline passes just after a POLLCT1 and the next pass
+      logs an event: 6 + 36 + 12 = 54 clocks, +2 to the WYPIN = 56 (typical <= 34).  That worst case needs a logged event in the pass
+      that straddles a deadline; the events the schedule produces (SOP-in, then each received byte) are EXPECTED (from the byte timing,
+      not measured) about 4 bit periods (66 FS clocks) from the nearest deadline, farther than the 16 + 36 clocks of the pass that logs
+      one, so the worst case is not expected; if a
+      receiver event does land that close and a write is later than LATE_MARGIN, gate P fails the run (NO VERDICT) -- it can never
+      produce a reading.
+    * Each write's instant (GETCT taken 2 clocks before the WYPIN) is stored relative to T0 (A_W1..A_W4, printed as "w a/b/c/d") with the
+      largest lateness (instant - deadline, A_LATE).  GATE P: a lateness above LATE_MARGIN = 48 clocks in ANY arm = RIG FAIL (not only
+      in the controls: a late write makes the arm uninterpretable).  Derivation of the 48 (review finding 3): value k is written into
+      the second FIFO level while value k-1 is in the shifter; value k-1 ends at (8k + d) bit periods after T0 (d in 0..1 = the wait for
+      the next bit boundary), value k is due at (8k - 4), so the write may arrive at most 4 bit periods = 66.67 FS clocks late before
+      the shifter empties and the pin sends an automatic EOP (:4604).  The write reaches the pin after the lateness measured (GETCT
+      instant - deadline) by: the 2-clock GETCT-to-WYPIN gap (WYPIN_CLK) plus the WYPIN-to-smart-pin latency, which is NOT measured
+      here.  The part of that latency that is constant is common to the SOP write and the data writes (every deadline is measured from
+      the SOP write instant) and cancels; only its jitter counts, and it is covered by an ASSUMED allowance PIN_LAT_ALLOW = 12 clocks
+      (an assumption, stated, not measured).  48 + 2 + 12 = 62 < 66 (control W checks it against 66.7 rounded down; the rounded G0_FS
+      is 67).  The old margin of 60 left 66.7 - 60 - 2 = 4.7 clocks for that latency.  The other way: value k-1 enters the shifter at
+      (8(k-1) + d) <= (8k - 7) bit periods, before value k is written at (8k - 4), so the holding level is empty and the two-level FIFO
+      (:4589) never overflows.  At low speed the same margin is 0.36 bit period.
+    * The observation window is OBS_BITS = 80 bit periods from the start of the routine (FS 1333, LS 10678 clocks); the last write is due
+      at 28, its byte ends at about 40-41 bit periods and the EOP about 3 later: W checks 80 > 28 + 8 + 3 + 16 (= 55, conservative).  Every wait is bounded by CT1 events; the packet
+      routine ends at the window end whatever the status says.
+
+  DURATION  (BLOCKER 2b)
+    The first byte received (byte-toggle change after SOP-in) to the fourth byte received is exactly three byte periods = 24 bit periods:
+    the four bytes $A5 $5A $3C $C3 contain no run of six 1-bits, so no bit stuffing changes the period (A5 = 1010_0101, 5A = 0101_1010,
+    3C = 0011_1100, C3 = 1100_0011, LSB first; the longest run is the 1111 of 3C).  FS: 24 x 16.667 = 400 clocks (1,572,864 / 3932 =
+    400.0).  LS: 24 x 133.476 = 3,203 clocks (1,572,864 / 491 = 3203.4).  Tolerance +/- 25 % (DUR_TOL_PCT): FS 300..500, LS 2402..4003.
+    Why 25 %: the measurement error is <= one polling gap at each end (<= 54 clocks near a write, 16 elsewhere; the bookkeeping after a
+    write takes about 38 clocks) plus the receiver's one-bit resolution (17 FS clocks): <= 71 clocks of 400 at full speed, a few
+    percent at low speed; and the two windows are 4.8x apart, so a wrong baud can never fall inside (control W checks the windows
+    are disjoint).  A GOOD arm needs the bytes AND its duration inside the window of the baud it is supposed to be at.
+
+  ARMS  (each arm = a fresh documented start of the pair, START_CLK 20,000 clocks, GETCT at the WXPIN site, the arm's WXPIN step if
+         any, then settle + AKPIN + RQPIN baseline (settle: LONG = 20,000-clock wait, SHORT = none), then ONE packet: SOP, $A5, $5A,
+         $3C, $C3.  The fresh start = DIRL, WRPIN drive, WXPIN <start word> on DM, DIRH, wait -- the documented start,
+         silicon-doc-text.txt:4593.  FS = host full-speed word, LS = host low-speed word.)
+         Timing of every arm, clocks (all arms: START_CLK 20,000 after DIRH, then GETCT; stl = GETCT to SOP write):
+           arm        start  WXPIN at the site   schedule  settle   stl expected
+           CFS        FS     none                FS        long     20,000 + path (path = about 110-120)
+           CLS        LS     none                LS        long     20,000 + path
+           A1         FS     FS (same)           FS        long     20,000 + path + 2
+           A2         LS     LS (same)           LS        long     20,000 + path + 2
+           B          FS     LS                  LS        long     20,000 + path + 2
+           C          LS     FS                  FS        long     20,000 + path + 2
+           D1         FS     LS                  LS        long     20,000 + path + 2
+           D2         (D1's pair, still running) FS FS     long     20,000 + path + 2   (D1's SETTLE_CLK 4,000 precedes the GETCT)
+           N1, N2     FS     none                FS        long     20,000 + path (N1 sends SOP + 2 bytes, N2 nothing)
+           X          FS     none                LS        long     20,000 + path
+           SCF        FS     none                FS        short    path (control of SB, SC)
+           SCL        LS     none                LS        short    path (control of SB, SC)
+           SB         FS     LS                  LS        short    path + 2
+           SC         LS     FS                  FS        short    path + 2
+         The controls differ from their WXPIN arms only by the WXPIN instruction (2 clocks); gate Q holds every arm in its band.
+    CFS  control, positive   start FS, no WXPIN step, packet at FS schedule.   Must be GOOD (FS) every round.        (gate K)
+    CLS  control, positive   start LS, no WXPIN step, packet at LS schedule.   Must be GOOD (LS) every round.        (gate L)
+    A1   re-issue, same      start FS, WXPIN FS (same word) on the running pair, packet at FS.       GOOD (FS baud)?
+    A2   re-issue, same      start LS, WXPIN LS (same word) on the running pair, packet at LS.       GOOD (LS baud)?
+    B    change FS -> LS     start FS, WXPIN LS on the running pair, packet at LS.                   GOOD (LS baud)?
+    C    change LS -> FS     start LS, WXPIN FS on the running pair, packet at FS.                   GOOD (FS baud)?
+    D1   change, middle      start FS, WXPIN LS, packet at LS  (the low-speed step in the middle of D, now judged).  GOOD (LS baud)?
+    D2   change back         the same pair, still running: WXPIN FS, packet at FS.                  GOOD (FS baud)?
+    N1   negative control    start FS, no WXPIN step, only SOP, $A5, $5A are sent.   Must return exactly n = 2: $A5 $5A.  (gate N1)
+    N2   negative control    start FS, no WXPIN step, NOTHING is sent.               Must return exactly n = 0, no byte.  (gate N2)
+    X    negative control    start FS, no WXPIN step, the packet written at the LS SCHEDULE.  Must NOT be intact.        (gate X)
+    SCF  control, positive   start FS, no WXPIN step, packet at FS, SHORT settle.      Must be GOOD (FS) every round.      (gate S)
+    SCL  control, positive   start LS, no WXPIN step, packet at LS, SHORT settle.      Must be GOOD (LS) every round.      (gate S)
+    SB   B, short settle     start FS, WXPIN LS, the packet after the code path only (no wait), at LS.   GOOD (LS baud)?
+    SC   C, short settle     start LS, WXPIN FS, the packet after the code path only (no wait), at FS.   GOOD (FS baud)?
+  N1 and N2 are certain by construction: a transmitter that is given two data bytes cannot put four on the wire, and one that is given
+  none cannot put any.  They prove the decoder reports "fewer than four / none arrived" as fewer than four / none.
+  X is certain to be not intact, from the documentation alone: the SOP occupies the full-speed transmitter for 8 bit periods (:4604); with
+  the FIFO then empty the pin sends the automatic EOP (:4604) and EOP-in rises about 10-11 FS bit periods (about 180 clocks) after the SOP
+  write; the first data byte is written 4 LS bit periods (534 clocks) after the SOP write, 3x later.  The decoder counts bytes only
+  between SOP-in and the first EOP-in and ignores everything after it, so whatever the pin does with the late bytes cannot make it
+  four bytes in order.  Its outcome therefore does not rest on any undocumented pin behaviour.  If X comes back intact the speed is not
+  what the rig thinks: RIG FAIL.  X is the proof that a pair NOT at the baud of its schedule returns a non-intact packet.
+  WHAT AN IGNORED WXPIN LOOKS LIKE, per arm (review finding 4):
+    B, D1, SB  (an FS pair, the WXPIN to LS ignored, given the LS schedule): the same situation as X, so it reads like X -- n < 4
+               with an early EOP-in, not GOOD, counted NONE (or MIXED).
+    C, D2, SC  (an LS pair, the WXPIN to FS ignored, given the FS schedule): this is the mirror of X and is NOT a control, because the
+               pair is then given five values inside 467 clocks while the LS SOP alone takes 1068 clocks, and what a WYPIN does when the
+               two-level FIFO is full is undocumented (:4608 only says to wait for the upper pin's IN).  The outcome is therefore NOT
+               pre-registered beyond this: such an arm cannot be GOOD (not four bytes in order AND a duration in the FS window), so it is
+               NONE / MIXED by count or duration; if a WYPIN stalls instead, the next write is late and gate P fails the run (NO VERDICT).
+    A1, A2     (the same word re-issued): an ignored re-issue cannot be told from a taken one; they prove only that re-issuing does not
+               disturb the packet.
+  Every raw line prints dwin, which window (FS / LS / none) the measured duration fell in, and each NONE
+  arm's count line says in how many rounds the duration was in the OTHER baud's window.
+  The low-speed direction is carried by the DURATION: arms CLS, A2, B, D1, SCL, SB must measure LS (2402..4003) and CFS, A1, C, D2, SCF,
+  SC FS (300..500).
+
+  CONTROLS (a failure of W, P, Q, O, K, N1, N2 or X prints RIG FAIL and NO VERDICT)
+    W  : the pair is even/odd and in the free set; the drive word decodes to its fields and equals its Spin2 symbol composition; both
+         WXPIN words decode (D[15] = 1 host, D[14] = 1 FS / 0 LS, D[13:0] = the FRAC computation done at run time, two MSBs 0); the
+         schedule constants (G0, STEP, DUR, OBS) of both speeds equal the bit-period counts computed at run time; LATE_MARGIN plus the
+         GETCT-to-WYPIN gap plus PIN_LAT_ALLOW (48 + 2 + 12 = 62) is below the 4-bit-period under-run bound (66.7; checked against 66);
+         the two duration windows are disjoint; the window covers the packet.
+    P  : in EVERY arm and round the largest write lateness <= LATE_MARGIN = 48 clocks.
+    Q  : in EVERY arm and round the settle (stl) is in its band: the short arms SCF SCL SB SC 0..300 clocks, every other arm 20,000..20,300.
+         (This proves the short arms were short and the long ones long, so the settle the verdict line states is the one that ran.)
+    O  : no arm's event log overflowed (LOGMAX = 24 events kept per arm; a GOOD packet logs about 8).
+    K  : arm CFS GOOD in every round.
+    N1 : arm N1 returned exactly n = 2 with bytes $A5 $5A and the other two slots unfilled, every round (clean baseline too).
+    N2 : arm N2 returned exactly n = 0 with all four slots unfilled, every round (clean baseline too).
+    X  : arm X NOT intact (clean baseline, and not [n = 4 with the four bytes in order]) in every round.
+    L  : arm CLS GOOD in every round.  If it does not hold, the low-speed arms (A2, B, C, D1, SB, SC) are NOT JUDGED (they are printed
+         raw), the verdict line says so, and a SURVIVES cannot be printed.  (Not a RIG FAIL: the full-speed half is still judged.)
+    S  : arms SCF and SCL (short settle, no WXPIN) GOOD in every round.  If it does not hold, SB and SC are NOT JUDGED, the verdict line
+         says so, and a SURVIVES cannot be printed.  (Not a RIG FAIL: the long-settle arms are still judged.)
+    T  : the measuring cog reports done within RIG_TIMEOUT_SEC = 5 s (clkfreq x 5 = 1.0e9, below 2^31).
+
+  DECODING  (done by cog 0 from the engine's event log; every step below is exercised by a judged arm)
+    The engine logs (status word, CT) at every change of status bits 4..15 (SOP-in, EOP-in, error, byte toggle, last byte).  Cog 0 walks
+    the log in order: SOP-in rising before any EOP-in opens the packet and fixes the toggle reference; while the packet is open and EOP-in
+    has not been seen, each change of the toggle bit is one received byte (its value = bits 15:8); the first EOP-in rising closes the
+    packet for good (bytes after it are never counted).  n = bytes counted (may exceed 4); tb1 / tb4 = CT of the first / fourth byte;
+    dur = tb4 - tb1.  The EOP-in time and the error bit (:4623) are PRINTED but are not part of GOOD (EOP-in is used only to close the
+    packet).  Other printed, unjudged diagnostics: SOP-in time, last status word, per-write times, event count, and -- for an arm that
+    missed its required record -- its whole event list.
+
+  PRE-REGISTERED READINGS (fixed before the run; printed by the program).  GOOD round of a packet arm = clean baseline (bits 4 and 5
+  clear) AND n = 4 with $A5 $5A $3C $C3 in order AND dur inside the window of the arm's expected baud.  Each judged arm is classed
+  ALL (GOOD in all 5 rounds), NONE (in none) or MIXED.  Judged arms are A1 and D2; A2, B, C, D1 when gate L holds; SB and SC when
+  gates L and S hold.  Every VERDICT line carries the settle of every arm (long arms and short arms, min..max clocks, measured).
+    SURVIVES     : gates W, P, Q, O, K, N1, N2, X hold, gates L and S hold, and every judged arm is ALL -- WXPIN on a running pair (same word,
+                   FS <-> LS, and back; after a 20,000-clock settle and after the short code-path settle) takes effect without a reset:
+                   the baud set by the WXPIN is in force and the next packet is intact.  It does NOT say "FS/LS mode changed" (D[14] is
+                   not observable here, see SCOPE OF THE SPEED PROOF).
+    DISTURBED    : gates W, P, Q, O, K, N1, N2, X hold (L and S may not -- then their arms are not judged and the line says so) and at
+                   least one judged arm is NONE -- the packet after that WXPIN step was not GOOD in any round while its own no-WXPIN
+                   control was.  Two causes, told apart by the raw record: the WXPIN did not take effect (B, D1, SB then read
+                   like X: n < 4, an early EOP-in; C, D2, SC are not GOOD by count or duration, behaviour beyond that undocumented :4608),
+                   or the pair was disturbed.  The line names the NONE arms and also the MIXED arms.  A SB / SC NONE with B / C ALL says
+                   the effect needs the settle.
+    INCONCLUSIVE : gates hold, no judged arm is NONE, and (a) some judged arm is MIXED, or (b) all judged arms are ALL but gate L or S failed.
+    NO VERDICT   : a gate W, P, Q, O, K, N1, N2 or X failed (the records are printed for diagnosis), or the measuring cog did not finish.
+    The raw record of every arm in every round is printed (baseline status word, n, the four bytes, SOP-in / first-byte / fourth-byte /
+    EOP-in times, duration, duration window, settle, lateness, write times, event count, last status word), so any result outside
+    these readings is read from the log.
+
+  DEBUGGER (EF-057): DEBUG_COGS = %0000_0001: the debug interrupt lives in cog 0 only.  Every pin operation runs in a dedicated PASM
+    cog started by COGINIT; it writes results to a hub mailbox; cog 0 reports.  Every printed line is built in a hub buffer and
+    sent by ONE debug() record.  Compile with pnut-ts -d; nothing on P62.
+
+  CONFIGURATION WORDS  (WRPIN D = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0, silicon-doc-text.txt:3731; %SSSSS :3807-:3841; USB :4579-:4593)
+    drive  $0000_0076  TT=%01 SSSSS=%11011 bit0=0 = P_USB_PAIR | P_OE   (D data %1_11011_0, :4579)
+    FS     X = $0000_CF5C  = host + full-speed + (12_000_000 FRAC 200_000_000) >> 16 = 3932 = $0F5C
+    LS     X = $0000_81EB  = host + low-speed  + (1_500_000  FRAC 200_000_000) >> 16 = 491  = $01EB
+    Pair addressing PAIR = DM | (1 << 6): S[10:6] = 1 additional pin (silicon-doc-text.txt:62 and :4424).
+    WYPIN codes (:4597-:4605): $80 = SOP, then data bytes.  Status word (:4618-:4629): [5] EOP in, [4] SOP in, [7] byte toggle (cleared
+    on SOP, toggled on each byte received), [15:8] last byte.  A byte is received when the toggle changes after SOP-in (:4632-:4637).
+
+  VERIFIED OPCODES AND DATA  (pnut-ts -d -l v1.55.8 build 9/19/2026, read back from the .lst; hub offsets from the object start,
+    cog addresses in brackets; condition IF_C = $C, IF_NC = $3, IF_NZ = $5 in bits 31:28)
+    Symbol table (listing): X_FS = $0000_CF5C, X_LS = $0000_81EB, CFG_DRIVE = SYM_DRIVE = $0000_0076, G0_FS = $43 (67), STEP_FS = $85 (133),
+      DUR_FS = $190 (400), OBS_FS = $535 (1333), G0_LS = $216 (534), STEP_LS = $42C (1068), DUR_LS = $C83 (3203), OBS_LS = $29B6 (10678),
+      LATE_MARGIN = $30 (48), PIN_LAT_ALLOW = $C (12), WYPIN_CLK = 2, DUR_TOL_PCT = $19 (25), DUR_BITS = $18, OBS_BITS = $50,
+      WX_CLK = START_CLK = $4E20 (20000), SHORT_MAX_CLK = $12C (300), SETTLE_CLK = $FA0, LOGMAX = $18, A_STL = 9, A_LOG = $A, ARMW = $3A (58),
+      NARMS = $F, ROUNDW = $366 (870), MB_LONGS = $1100 (4352), DF = $B, LINE_MAX = $2BC (700), NO_TIME = $8000_0000, NO_BYTE = $FFFF_FFFF,
+      BASE_MASK = $30, BIT_SOP = $10, BIT_EOP = $20, BIT_TOG = $80, ARM_D1 = 6, ARM_D2 = 7, ARM_X = $A, ARM_SCF = $B, ARM_SCL = $C,
+      ARM_SB = $D, ARM_SC = $E.  CLKMODE $010009FB, CLKFREQ 200_000_000, XINFREQ 20_000_000.  DEBUG: 2 records, 24 bytes of DEBUG data.
+      Object (OBJ) 15,700 bytes, VAR 21,484 bytes; the compiled binary 24,942 bytes (after the 2026-10-09 verdict-text fix; DAT offsets unchanged).
+    Engine at object offset $0A0; cog labels: usb_off [$061] usb_start [$066] sched_fs [$06E] sched_ls [$072] pkt4s [$076] pkt4 [$078]
+      pktgen [$079] baseline [$07B] packet [$081] .poll [$094] .chkt [$099] .first [$0A8] .wr [$0AB] .event [$0B4] .finish [$0BF]
+      put [$0DB] cfg_drive_ [$0DE] .. txdata_ [$0E8]; registers mb_ [$0ED] respt_ [$0EE] progp_ [$0EF] rnd_ [$0F0] roundno_ [$0F1] xs_ [$0F2]
+      g0_ [$0F3] step_ [$0F4] obs_ [$0F5] nvals_ [$0F6] st_ [$0F7] tg_ [$0F8] val_ [$0F9] txi_ [$0FA] prevm_ [$0FB] b_ [$0FC] t0_ [$0FD]
+      tsop_ [$0FE] dl_ [$0FF] tend_ [$100] tw_ [$101] tl_ [$102] ts_ [$103] te_ [$104] late_ [$105] lgi_ [$106] novf_ [$107]
+      w0_..w4_ [$108..$10C] self_id_ [$10D] twx_ [$10E] logbuf_ [$10F..$13E].
+    Instructions read back from the hub image (.lst hex dump):
+      getct t0_ $FD61FA1A   cmp txi_,nvals_ wc $F211F4F6   if_c addct1 dl_,#0 $CA65FE00   if_nc addct1 tend_,#0 $3A660000
+      rqpin st_,#PIN_DM $FA85EE00   and tg_,mask_ $F501F0E7   cmp tg_,prevm_ wz $F209F0FB   if_nz jmp #.event $5D90006C
+      pollct1 wc $FD700224   if_nc jmp #.poll $3D9FFFE4   if_nc jmp #.finish $3D900088
+      alts txi_,#txdata_ $F995F4E8   mov b_,0-0 $F601F800   getct tw_ $FD62021A   wypin b_,#PAIR $FC25F840   tjz txi_,#.first $FB95F406
+      sub tl_,dl_ $F18204FF   cmps late_,tl_ wc $F2520B02   if_c mov late_,tl_ $C6020B02   add dl_,step_ $F101FEF4   jmp #.wr $FD90000C
+      altd txi_,#w0_ $F98DF508   add txi_,#1 $F105F401
+      .event: getct te_ $FD62081A   cmp lgi_,#$30 wc $F2160C30   if_c altd lgi_,#logbuf_ $C98E0D0F   if_c mov 0-0,st_ $C60000F7
+      if_c add lgi_,#1 $C1060C01   if_c mov 0-0,te_ $C6000104   if_nc add novf_,#1 $31060E01   jmp #.chkt $FD9FFF68
+      .finish: setq #47 $FD645E28   wrlong logbuf_,respt_ $FC621EEE   add respt_,#$C0 $F105DCC0   shr val_,#1 $F045F201
+      A_STL (new): mov val_,tsop_ $F601F2FE   sub val_,twx_ $F181F30E   then call #put (the same sequence as the A_T0 put)
+      GETCT at the WXPIN site: getct twx_ $FD621C1A   (the same word before every arm's WXPIN / non-WXPIN site, 15 arms + D2)
+      wxpin x_fs_,#PIN_DM $FC15BE00   wxpin x_ls_,#PIN_DM $FC15C000   akpin #PAIR $FC0C0240 (= wrpin #1,#PAIR, silicon-doc-text.txt:5488)
+      pkt4s: mov nvals_,#5 $F605EC05  then jmp #baseline $FD90000C ; pkt4: mov nvals_,#5 $F605EC05 ; N1: mov nvals_,#3 $F605EC03 ; N2: mov nvals_,#0 $F605EC00
+      ret $FD64002D   wrlong #MBOX_DONE,ptra as the last write.
+    Semantics read from the P2KB (p2kb_get, not from memory): ADDCT1 D,S sets CT1 = D + S and writes D; the event fires once CT has
+      PASSED CT1 (MSB of CT - CT1 = 0), a target already in the past fires at once; POLLCT1 copies the CT1 event flag to C and clears it;
+      the flag is also cleared by ADDCT1.  RQPIN and WYPIN are 2 clocks each (WYPIN does not stall the cog).
+    The round body, read back in order (each arm: mov xs_, usb_start, getct twx_, [wxpin], sched, packet call; the call targets were
+      resolved from the relative call words against the label offsets above): CFS (xs_ = x_fs_, usb_start, getct twx_, sched_fs, pkt4),
+      CLS (x_ls_, sched_ls, pkt4), A1 (x_fs_, wxpin x_fs_, sched_fs, pkt4), A2 (x_ls_, wxpin x_ls_, sched_ls, pkt4), B (x_fs_, wxpin x_ls_,
+      sched_ls, pkt4), C (x_ls_, wxpin x_fs_, sched_fs, pkt4), D1 (x_fs_, wxpin x_ls_, sched_ls, pkt4) then D2 (getct twx_, wxpin x_fs_,
+      sched_fs, pkt4), N1 (x_fs_, sched_fs, nvals_ #3, pktgen), N2 (x_fs_, sched_fs, nvals_ #0, pktgen), X (x_fs_, sched_ls, pkt4),
+      SCF (x_fs_, sched_fs, pkt4s), SCL (x_ls_, sched_ls, pkt4s), SB (x_fs_, wxpin x_ls_, sched_ls, pkt4s), SC (x_ls_, wxpin x_fs_,
+      sched_fs, pkt4s), then djnz rnd_ (one round = 15 arms, 16 getct twx_ sites).
+
+  HOW TO RUN
+    1. USB serial connected (DEBUG on P62/P63).  P0 and P1 carry no external load -- nothing attached to either.
+       Compile: pnut-ts -d test-vo-j-035-usb-wxpin-on-running-pair.spin2
+    2. Load to RAM with DEBUG enabled (pnut-term-ts, or PNut Ctrl-F10).
+    3. SAVE THE WHOLE CONSOLE OUTPUT to a file and RECORD ITS FILE NAME (with the board and date) in the bench-round record -- it is the
+       only record, and an EF entry cites it.
+    4. Expected run time: well under a second (5 rounds x 15 arms) and about 220 printed lines (more if arms miss their record: each
+       such arm also lists its event log).  Done when you see one "VERDICT VO-J-035: ..." line (or "NO VERDICT"), then "=== END ===" and
+       DEBUG_END_SESSION.  No END / DEBUG_END_SESSION line within 15 s = a hang or a lost session: power-cycle the board and send the
+       LAST line you saw.
+    5. Clock: _clkfreq = 200_000_000 is a compile-time constant that ASSUMES the board's 20 MHz crystal; the program cannot measure the
+       crystal.  Control W checks the baud words and every schedule constant against that constant only (the run-time clkfreq is the
+       compile-time value).  A board with a different crystal shows itself as broken or garbled DEBUG output (the debug link baud is
+       derived from the same constant): do not use such a run.
+    6. Pins: P0 (DM) and P1 (DP) are DRIVEN by the program as a USB host pair.  NOTHING may be attached to P0 or P1.  No other pin is touched.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq          = 200_000_000
+  DEBUG_COGS        = %0000_0001        ' EF-057: debugger in cog 0 ONLY
+
+  PIN_DM            = 0                 ' lower (even) pin of the pair
+  PIN_DP            = PIN_DM + 1        ' upper (odd) pin
+  PAIR              = PIN_DM | (1 << 6) ' DM plus one additional pin (S[10:6] = 1)
+  PIN_MAX_FREE_LOW  = 7                 ' free set: P0..P7 and P32..P47
+
+  ROUNDS            = 5
+  START_CLK         = 20_000            ' clocks after a start (DIRH) before the next step
+  WX_CLK            = 20_000            ' LONG settle: clocks waited after a start / a WXPIN, before the baseline (100 us); the short-settle arms skip it
+  SHORT_MAX_CLK     = 300               ' gate Q: a short-settle arm must reach its SOP write within this many clocks of the WXPIN site (code path ~110-120 by instruction count)
+  SETTLE_CLK        = 4_000             ' clocks after a packet
+  RIG_TIMEOUT_SEC   = 5
+  MBOX_DONE         = 1
+  NO_BYTE           = $FFFF_FFFF        ' a byte slot that never filled (a received byte is 0..255, never -1)
+  NO_TIME           = $8000_0000        ' a time / duration that never filled (a real time of -1 clock is printed as -1, not as "none")
+
+  RATE_FS           = 12_000_000        ' full-speed bit rate
+  RATE_LS           = 1_500_000         ' low-speed bit rate
+
+  X_HOST_FS         = $C000             ' D[15] = 1 host, D[14] = 1 full-speed
+  X_HOST_LS         = $8000             ' D[15] = 1 host, D[14] = 0 low-speed
+  BAUD_FS           = $0F5C             ' (12_000_000 FRAC 200_000_000) >> 16 = 3932
+  BAUD_LS           = $01EB             ' (1_500_000 FRAC 200_000_000) >> 16 = 491
+  X_FS              = X_HOST_FS | BAUD_FS
+  X_LS              = X_HOST_LS | BAUD_LS
+
+  ' Schedule, in bit periods of the speed the schedule is written for.  A clock count = (bits * 65536 + baud / 2) / baud.
+  SCHED_G0_BITS     = 4                 ' SOP written -> first data byte written
+  SCHED_STEP_BITS   = 8                 ' between data-byte writes (a byte is 8 bit periods on the wire)
+  DUR_BITS          = 24                ' first byte received -> fourth byte received (three byte periods)
+  OBS_BITS          = 80                ' observation window from the start of the packet routine
+  G0_FS             = 67                ' = 4 x 16.667
+  STEP_FS           = 133               ' = 8 x 16.667
+  DUR_FS            = 400               ' = 24 x 16.667
+  OBS_FS            = 1333              ' = 80 x 16.667
+  G0_LS             = 534               ' = 4 x 133.476
+  STEP_LS           = 1068              ' = 8 x 133.476
+  DUR_LS            = 3203              ' = 24 x 133.476
+  OBS_LS            = 10678             ' = 80 x 133.476
+  LATE_MARGIN       = 48                ' clocks a write may be later than its deadline (gate P); 2.9 FS bit periods
+  WYPIN_CLK         = 2                 ' clocks from the GETCT that takes the write instant to the WYPIN that writes
+  PIN_LAT_ALLOW     = 12                ' ASSUMED allowance (not measured) for the WYPIN-to-smart-pin latency jitter; bound check in control W
+  DUR_TOL_PCT       = 25                ' the duration window is expected +/- 25 %
+
+  NBYTES            = 4                 ' data bytes of the framed packet (after SOP)
+  NTX               = NBYTES + 1        ' values written: SOP then the data
+  NSHORT            = 2                 ' data bytes of the short packet (arm N1)
+  TX0               = $A5
+  TX1               = $5A
+  TX2               = $3C
+  TX3               = $C3
+
+  BIT_SOP           = $10               ' status [4] SOP in
+  BIT_EOP           = $20               ' status [5] EOP in
+  BIT_TOG           = $80               ' status [7] byte toggle
+  BASE_MASK         = $30               ' baseline must have neither SOP in nor EOP in
+
+CON ' ---- Configuration Words ----
+  CFG_DRIVE         = $0000_0076        ' P_USB_PAIR | P_OE  (D data %1_11011_0)
+  SYM_DRIVE         = P_USB_PAIR | P_OE
+
+  ' WRPIN D field positions and widths (silicon-doc-text.txt:3731)
+  SHIFT_AAAA        = 28
+  MASK_AAAA         = %1111
+  SHIFT_BBBB        = 24
+  MASK_BBBB         = %1111
+  SHIFT_FFF         = 21
+  MASK_FFF          = %111
+  SHIFT_M           = 8
+  MASK_M            = %1_1111_1111_1111
+  SHIFT_TT          = 6
+  MASK_TT           = %11
+  SHIFT_SSSSS       = 1
+  MASK_SSSSS        = %1_1111
+  MASK_BIT0         = 1
+  SSSSS_USB         = %11011
+  TT_ON             = %01
+
+CON ' ---- Mailbox Layout ----
+  ' arms, in the order the engine runs them within a round
+  ' ARM_SCF / ARM_SCL / ARM_SB / ARM_SC = the SHORT-settle arms (no WX_CLK wait between the WXPIN site and the baseline)
+  #0, ARM_CFS, ARM_CLS, ARM_A1, ARM_A2, ARM_B, ARM_C, ARM_D1, ARM_D2, ARM_N1, ARM_N2, ARM_X, ARM_SCF, ARM_SCL, ARM_SB, ARM_SC
+  NARMS             = 15
+
+  LOGMAX            = 24                ' status-change events kept per arm
+
+  ' per arm record (ARMW longs), written by the engine in this order:
+  '  A_BASE   baseline status word (RQPIN of DM after the settle and AKPIN, before the packet)
+  '  A_T0     CT at the SOP write (arm N2: CT at the start of the routine)
+  '  A_LATE   largest lateness (write instant - deadline, clocks) over the data-byte writes
+  '  A_W1..A_W4  write instant of data byte 1..4 relative to the SOP write (0 = not written)
+  '  A_NLOG   status-change events seen (may exceed LOGMAX)
+  '  A_LAST   last status word read, at the end of the window
+  '  A_STL    settle: clocks from the GETCT at the WXPIN site (taken in EVERY arm, before the WXPIN if the arm has one) to the SOP write
+  '  A_LOG    LOGMAX pairs (status word of bits 4..15 changing, CT at the sample)
+  #0, A_BASE, A_T0, A_LATE, A_W1, A_W2, A_W3, A_W4, A_NLOG, A_LAST, A_STL, A_LOG
+  ARMW              = A_LOG + LOGMAX * 2
+  ROUNDW            = NARMS * ARMW
+
+  MB_DONE           = 0
+  MB_PROG           = 1
+  MB_RES            = 2
+  MB_LONGS          = MB_RES + ROUNDS * ROUNDW
+
+  ' decoded record per arm and round (made by cog 0 from the log)
+  #0, D_N, D_B0, D_B1, D_B2, D_B3, D_TSOP, D_TB1, D_TB4, D_DUR, D_TEOP, D_OVF
+  DF                = 11
+
+CON ' ---- Report Parameters ----
+  LINE_MAX          = 700
+  DEC_TOP           = 1_000_000_000
+  DEC_DIGITS        = 10
+  DEC_BASE          = 10
+  HEX_DIGITS        = 8
+  HEX_BITS          = 4
+  HEX_GROUP         = 4
+  HEX_LETTERS       = 10
+
+VAR ' ---- Mailbox & Analysis State ----
+  long mailbox[MB_LONGS]
+  long dec[ROUNDS * NARMS * DF]
+  long cnt[NARMS]
+  long fail_count
+  byte lineBuf[LINE_MAX + 1]
+  long linePos
+
+
+PUB main() | engineCog, startTick
+'' Run the J-035 rig: check the constants, start the measuring cog, wait for its done flag, report.
+''
+
+' Local Variables:
+' @local engineCog - cog id COGINIT returned (negative = no free cog)
+' @local startTick - CT when the wait for the done flag began
+
+  longfill(@mailbox, 0, MB_LONGS)
+  mailbox[MB_PROG] := 0
+  fail_count := 0
+  linePos := 0
+  say(string("=== VO-J-035: USB %11011 -- does a WXPIN on a RUNNING pair take effect and leave the next packet intact? ==="))
+  ln_s(string("pair DM = P"))
+  ln_u(PIN_DM)
+  ln_s(string(", DP = P"))
+  ln_u(PIN_DP)
+  ln_s(string(" (NOTHING attached; both are driven); host; FS X = "))
+  ln_h(X_FS)
+  ln_s(string(", LS X = "))
+  ln_h(X_LS)
+  ln_s(string("; "))
+  ln_u(ROUNDS)
+  say(string(" rounds"))
+  print_predictions()
+  say(string(" "))
+  say(string("--- CONTROL W: configuration words and schedule constants, decoded / recomputed ---"))
+  check_rig_constants()
+  if fail_count <> 0
+    say(string("NO VERDICT: a construction control failed (see RIG FAIL lines above); the measuring cog was not started"))
+  else
+    engineCog := coginit(COGEXEC_NEW, @engine, @mailbox)
+    if engineCog < 0
+      say(string("RIG FAIL: no free cog for the measuring engine"))
+      say(string("NO VERDICT: nothing was measured"))
+    else
+      startTick := getct()
+      repeat until mailbox[MB_DONE] == MBOX_DONE or (getct() - startTick) > clkfreq * RIG_TIMEOUT_SEC
+      if mailbox[MB_DONE] <> MBOX_DONE
+        cogstop(engineCog)
+        pinclear(PIN_DM addpins 1)
+        ln_s(string("RIG FAIL: measuring cog did not report done within "))
+        ln_u(RIG_TIMEOUT_SEC)
+        ln_s(string(" s; it was in round "))
+        ln_u(mailbox[MB_PROG])
+        say(string("; the pair was cleared by cog 0"))
+        say(string("NO VERDICT: the measurement did not complete"))
+      else
+        ln_s(string("measuring cog = "))
+        ln_u(engineCog)
+        say(string(" (debugger restricted to cog 0)"))
+        report()
+  finish()
+
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output (--headless or --exit-on-end-session).
+'
+
+  say(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------------------
+' line output.  Text lives in hub (string(...)), not in DEBUG data: each line
+' is built in lineBuf and sent by the single debug() record in ln_out().
+' ---------------------------------------------------------------------------
+PRI ln_c(ch)
+' Append one character to the line (cut at LINE_MAX).
+'
+' @param ch - the character
+
+  if linePos < LINE_MAX
+    lineBuf[linePos++] := ch
+
+PRI ln_s(pStr) | ch
+' Append a zero-terminated hub string to the line.
+'
+' @param pStr - hub address of the string
+
+' Local Variables:
+' @local ch - the character being copied
+
+  repeat
+    ch := byte[pStr++]
+    if ch == 0
+      quit
+    ln_c(ch)
+
+PRI ln_u(numVal) | divisor, digitVal, bStarted
+' Append an unsigned decimal to the line.
+'
+' @param numVal - the number, read as unsigned
+
+' Local Variables:
+' @local divisor - the decimal place being printed
+' @local digitVal - the digit at that place
+' @local bStarted - a non-zero digit has been printed
+
+  divisor := DEC_TOP
+  bStarted := FALSE
+  repeat DEC_DIGITS
+    digitVal := numVal +/ divisor
+    if digitVal <> 0 or bStarted or divisor == 1
+      ln_c("0" + digitVal)
+      bStarted := TRUE
+    numVal := numVal +// divisor
+    divisor /= DEC_BASE
+
+PRI ln_t(timeVal)
+' Append a time / duration in clocks: the word none for the NO_TIME sentinel (a value that never filled), else a decimal
+' (with a sign if negative, so a real -1 prints as -1).
+'
+' @param timeVal - the value
+
+  if timeVal == NO_TIME
+    ln_s(string("none"))
+  elseif timeVal < 0
+    ln_c("-")
+    ln_u(-timeVal)
+  else
+    ln_u(timeVal)
+
+PRI ln_h(numVal) | idx, nibble
+' Append a long in hex as $XXXX_XXXX.
+'
+' @param numVal - the number
+
+' Local Variables:
+' @local idx - nibble index, 7 (top) .. 0
+' @local nibble - the nibble value
+
+  ln_c("$")
+  repeat idx from HEX_DIGITS - 1 to 0
+    nibble := (numVal >> (idx * HEX_BITS)) & $F
+    if nibble < HEX_LETTERS
+      ln_c("0" + nibble)
+    else
+      ln_c("A" + nibble - HEX_LETTERS)
+    if idx == HEX_GROUP
+      ln_c("_")
+
+PRI ln_bin(numVal, digits) | idx
+' Append "%" and the low digits bits of a number.
+'
+' @param numVal - the number
+' @param digits - how many bits
+
+' Local Variables:
+' @local idx - bit index
+
+  ln_c("%")
+  repeat idx from digits - 1 to 0
+    ln_c("0" + ((numVal >> idx) & 1))
+
+PRI ln_out()
+' Send the line built so far as one debug() record and start a new line.
+'
+
+  lineBuf[linePos] := 0
+  debug(zstr_(@lineBuf))
+  linePos := 0
+
+PRI say(pStr)
+' Append a string and send the line.
+'
+' @param pStr - hub address of the string
+
+  ln_s(pStr)
+  ln_out()
+
+PRI yes_no(bFlag) : pText
+' Printable YES / NO.
+'
+' @param bFlag - TRUE or FALSE
+' @returns pText - address of "YES" or "NO"
+
+  if bFlag
+    pText := string("YES")
+  else
+    pText := string("NO")
+
+PRI arm_name(armIdx) : pText
+' Printable arm name.
+'
+' @param armIdx - ARM_CFS..ARM_X
+' @returns pText - address of the name
+
+  case armIdx
+    ARM_CFS: pText := string("CFS control FS            ")
+    ARM_CLS: pText := string("CLS control LS            ")
+    ARM_A1:  pText := string("A1  WXPIN FS->FS same     ")
+    ARM_A2:  pText := string("A2  WXPIN LS->LS same     ")
+    ARM_B:   pText := string("B   WXPIN FS->LS          ")
+    ARM_C:   pText := string("C   WXPIN LS->FS          ")
+    ARM_D1:  pText := string("D1  WXPIN FS->LS (middle) ")
+    ARM_D2:  pText := string("D2  WXPIN LS->FS (back)   ")
+    ARM_N1:  pText := string("N1  negative: short (2)   ")
+    ARM_N2:  pText := string("N2  negative: none sent   ")
+    ARM_X:   pText := string("X   negative: FS, LS sched")
+    ARM_SCF: pText := string("SCF control FS short      ")
+    ARM_SCL: pText := string("SCL control LS short      ")
+    ARM_SB:  pText := string("SB  WXPIN FS->LS short    ")
+    ARM_SC:  pText := string("SC  WXPIN LS->FS short    ")
+    other:   pText := string("?                          ")
+
+PRI arm_fast(armIdx) : bFast
+' The speed an arm's packet is expected to be received at.
+'
+' @param armIdx - ARM_CFS..ARM_D2, ARM_SCF..ARM_SC
+' @returns bFast - TRUE = full-speed, FALSE = low-speed
+
+  bFast := armIdx == ARM_CFS or armIdx == ARM_A1 or armIdx == ARM_C or armIdx == ARM_D2 or armIdx == ARM_SCF or armIdx == ARM_SC
+
+PRI is_packet_arm(armIdx) : bPkt
+' The arms whose requirement is a GOOD packet (everything except the negative controls N1, N2, X).
+'
+' @param armIdx - arm index
+' @returns bPkt - TRUE when the arm is a GOOD-packet arm
+
+  bPkt := armIdx <> ARM_N1 and armIdx <> ARM_N2 and armIdx <> ARM_X
+
+PRI judged(armIdx, bGateL, bGateS) : bJ
+' Whether an arm is a JUDGED arm in this run.  A1 and D2 always; A2, B, C, D1 need gate L (the low-speed control CLS);
+' SB and SC need gate L and gate S (the short-settle controls SCF and SCL).  The controls and negatives are gates, not judged arms.
+'
+' @param armIdx - arm index
+' @param bGateL - gate L holds
+' @param bGateS - gate S holds
+' @returns bJ - TRUE when the arm is judged
+
+  case armIdx
+    ARM_A1, ARM_D2: bJ := TRUE
+    ARM_A2, ARM_B, ARM_C, ARM_D1: bJ := bGateL
+    ARM_SB, ARM_SC: bJ := bGateL and bGateS
+    other: bJ := FALSE
+
+PRI clk_bits(nBits, baudVal) : clks
+' Clocks in nBits bit periods at a baud word: (nBits * 65536 + baud / 2) / baud, i.e. rounded to the nearest clock.
+'
+' @param nBits - bit periods
+' @param baudVal - the 14-bit baud word
+' @returns clks - clocks
+
+  clks := (nBits * 65536 + baudVal / 2) / baudVal
+
+' ---------------------------------------------------------------------------
+' pre-registered readings and construction controls
+' ---------------------------------------------------------------------------
+PRI print_predictions()
+' Print the readings fixed before the run.
+'
+
+  say(string("PRE-REGISTERED READINGS (fixed before the run):"))
+  say(string("  SCOPE: what is proved is the BAUD (WXPIN D[13:0]): the baud set by the WXPIN is in force and the next packet is intact. The FS/LS bit D[14] is NOT observable on this self-sensing pair"))
+  say(string("    (the pair's receiver reads its own output in the same speed convention; the status line-state bits 0..3 cannot show the pad polarity; no other observer is in the rig) -- no verdict says 'FS/LS mode changed'"))
+  say(string("  each arm = fresh start, [GETCT at the WXPIN site, WXPIN step], settle, AKPIN + RQPIN baseline, ONE packet SOP,$A5,$5A,$3C,$C3"))
+  say(string("  SETTLE between the WXPIN site and the baseline: LONG arms (CFS CLS A1 A2 B C D1 D2 N1 N2 X) wait 20000 clocks (100 us) ;"))
+  say(string("    SHORT arms (SCF SCL SB SC) wait nothing: WXPIN, then the code path (~110-120 clocks by instruction count, measured per arm as stl, gate Q <= 300)"))
+  say(string("    SCF / SCL = the controls of SB / SC: the same code and timing with no WXPIN (2 clocks less) ; CFS / CLS = the controls of the long arms"))
+  say(string("  value k is written at a FIXED deadline: k=1 at 4 bit periods after the SOP write, then every 8 bit periods (FS 67 then +133 clocks, LS 534 then +1068); no IN flag is read"))
+  say(string("  GOOD round of a packet arm = baseline has SOP-in and EOP-in clear ; n=4 bytes $A5 $5A $3C $C3 in order, counted between SOP-in and EOP-in"))
+  say(string("    and first->fourth byte time within +/-25 % of the speed's expected 24 bit periods (FS 400, LS 3203 clocks). EOP-in and the error bit are printed, not part of GOOD"))
+  say(string("  arm class ALL = GOOD in all rounds, NONE = in no round, MIXED = otherwise. Judged arms: A1, D2, and A2, B, C, D1 when gate L holds, and SB, SC when gates L and S hold"))
+  say(string("  GATES (failure = RIG FAIL + NO VERDICT): W constants ; P every write within 48 clocks of its deadline, in every arm ; O no event log overflow ; K arm CFS GOOD every round ; Q settle bands"))
+  say(string("    N1 short packet = exactly n=2 $A5 $5A ; N2 nothing sent = exactly n=0 ; X FS pair written at the LS schedule = NOT intact, every round"))
+  say(string("  GATE L (not a RIG FAIL): arm CLS (low-speed, no WXPIN) GOOD every round ; if it fails the low-speed arms A2, B, C, D1, SB, SC are NOT JUDGED"))
+  say(string("  GATE S (not a RIG FAIL): arms SCF and SCL (short settle, no WXPIN) GOOD every round ; if it fails the short-settle arms SB, SC are NOT JUDGED"))
+  say(string("  SURVIVES     : gates hold, gates L and S hold, every judged arm ALL -- after a WXPIN on a running pair (same word, FS<->LS, and back;"))
+  say(string("    after a long and after a short settle) the baud set by the WXPIN is in force and the next packet is intact"))
+  say(string("  DISTURBED    : gate K holds (L and S may not: their arms are then unjudged) and at least one judged arm NONE (named, with MIXED ones) -- the packet after that WXPIN step was not GOOD in any round"))
+  say(string("    B, D1, SB (an FS pair given the LS schedule): an ignored WXPIN reads like control X (n<4, early EOP-in, not GOOD)"))
+  say(string("    C, D2, SC (an LS pair given the FS schedule): overrun is undocumented (:4608); the arm is not GOOD by count or duration, and a WYPIN stall trips gate P = NO VERDICT"))
+  say(string("    A1, A2 re-issue the same word, so an ignored re-issue cannot be told from a taken one -- they prove only that the re-issue does not disturb the packet"))
+  say(string("  INCONCLUSIVE : gates hold, no judged arm NONE, and some judged arm MIXED, or every judged arm ALL but gate L or S failed (those arms not judged)"))
+  say(string("  NO VERDICT   : gate W, P, O, K, N1, N2, X or Q failed, or the measuring cog did not finish ; raw records are printed in every case"))
+
+PRI check_rig_constants() | baudFs, baudLs
+' Control W: the pair lies in the free set and is even/odd; the drive word decodes to the published fields and
+' equals its Spin2 symbol composition; both WXPIN words equal the FRAC computation; the schedule constants equal
+' bit-period counts at the run-time baud words, the late margin is below the under-run bound, the windows are disjoint.
+'
+
+' Local Variables:
+' @local baudFs - (12_000_000 FRAC clkfreq) >> 16 computed at run time
+' @local baudLs - (1_500_000 FRAC clkfreq) >> 16 computed at run time
+
+  if (PIN_DM & 1) <> 0 or PIN_DP <> PIN_DM + 1 or PAIR <> PIN_DM | (1 << 6)
+    say(string("RIG FAIL: the pair is not an even/odd pair addressed as DM + one additional pin"))
+    fail_count++
+  if PIN_DM > PIN_MAX_FREE_LOW and (PIN_DM < 32 or PIN_DM > 46)
+    say(string("RIG FAIL: DM is outside the free set (P0..P7, P32..P47)"))
+    fail_count++
+  check_word(string("drive   "), CFG_DRIVE, SYM_DRIVE, TT_ON)
+  baudFs := (RATE_FS frac clkfreq) >> 16
+  baudLs := (RATE_LS frac clkfreq) >> 16
+  check_xword(string("FS"), X_FS, baudFs, 1)
+  check_xword(string("LS"), X_LS, baudLs, 0)
+  check_sched(string("FS"), baudFs, G0_FS, STEP_FS, DUR_FS, OBS_FS)
+  check_sched(string("LS"), baudLs, G0_LS, STEP_LS, DUR_LS, OBS_LS)
+  ln_s(string("  late margin "))
+  ln_u(LATE_MARGIN)
+  ln_s(string(" + GETCT-to-WYPIN "))
+  ln_u(WYPIN_CLK)
+  ln_s(string(" + assumed pin-latency allowance "))
+  ln_u(PIN_LAT_ALLOW)
+  ln_s(string(" = "))
+  ln_u(LATE_MARGIN + WYPIN_CLK + PIN_LAT_ALLOW)
+  ln_s(string(" clocks vs under-run bound (4 FS bit periods = "))
+  ln_u(G0_FS)
+  ln_s(string(" rounded; 66.7 exact) ; duration windows FS "))
+  ln_u(DUR_FS * (100 - DUR_TOL_PCT) / 100)
+  ln_c("-")
+  ln_u(DUR_FS * (100 + DUR_TOL_PCT) / 100)
+  ln_s(string(" , LS "))
+  ln_u(DUR_LS * (100 - DUR_TOL_PCT) / 100)
+  ln_c("-")
+  ln_u(DUR_LS * (100 + DUR_TOL_PCT) / 100)
+  ln_out()
+  if LATE_MARGIN + WYPIN_CLK + PIN_LAT_ALLOW >= G0_FS - 1
+    say(string("RIG FAIL: the late margin plus the GETCT-to-WYPIN time plus the pin-latency allowance is not below the under-run bound (4 full-speed bit periods, 66.7 clocks)"))
+    fail_count++
+  if DUR_FS * (100 + DUR_TOL_PCT) / 100 >= DUR_LS * (100 - DUR_TOL_PCT) / 100
+    say(string("RIG FAIL: the full-speed and low-speed duration windows overlap"))
+    fail_count++
+  if OBS_BITS <= (SCHED_G0_BITS + (NBYTES - 1) * SCHED_STEP_BITS) + 8 + 3 + 16
+    say(string("RIG FAIL: the observation window does not cover the last write, its byte, the EOP and a margin"))
+    fail_count++
+
+PRI check_sched(pLabel, baudRun, g0Const, stepConst, durConst, obsConst)
+' Print one speed's schedule constants beside the run-time bit-period count and count a construction failure if they differ.
+'
+' @param pLabel - label string
+' @param baudRun - the FRAC computation at run time
+' @param g0Const - G0 constant
+' @param stepConst - STEP constant
+' @param durConst - DUR constant
+' @param obsConst - OBS constant
+
+  ln_s(string("  schedule "))
+  ln_s(pLabel)
+  ln_s(string(" (clocks: constant / computed): first gap "))
+  ln_u(g0Const)
+  ln_c("/")
+  ln_u(clk_bits(SCHED_G0_BITS, baudRun))
+  ln_s(string(" , step "))
+  ln_u(stepConst)
+  ln_c("/")
+  ln_u(clk_bits(SCHED_STEP_BITS, baudRun))
+  ln_s(string(" , duration "))
+  ln_u(durConst)
+  ln_c("/")
+  ln_u(clk_bits(DUR_BITS, baudRun))
+  ln_s(string(" , window "))
+  ln_u(obsConst)
+  ln_c("/")
+  ln_u(clk_bits(OBS_BITS, baudRun))
+  ln_out()
+  if g0Const <> clk_bits(SCHED_G0_BITS, baudRun) or stepConst <> clk_bits(SCHED_STEP_BITS, baudRun) or durConst <> clk_bits(DUR_BITS, baudRun) or obsConst <> clk_bits(OBS_BITS, baudRun)
+    ln_s(string("RIG FAIL: the "))
+    ln_s(pLabel)
+    say(string(" schedule constants differ from the bit-period counts at this clkfreq"))
+    fail_count++
+
+PRI check_xword(pLabel, xWord, baudRun, bFast)
+' Decode one WXPIN word, print it, and count a construction failure if it differs from host + speed + the FRAC baud.
+'
+' @param pLabel - label string
+' @param xWord - the word the measuring cog writes
+' @param baudRun - the FRAC computation at run time
+' @param bFast - 1 for full-speed (D[14] = 1), 0 for low-speed
+
+  ln_s(string("  WXPIN word "))
+  ln_s(pLabel)
+  ln_c(" ")
+  ln_h(xWord)
+  ln_s(string(": D[15] host="))
+  ln_u((xWord >> 15) & 1)
+  ln_s(string(" D[14] full-speed="))
+  ln_u((xWord >> 14) & 1)
+  ln_s(string(" D[13:0] baud="))
+  ln_u(xWord & $3FFF)
+  ln_s(string("  FRAC computation at "))
+  ln_u(clkfreq)
+  ln_s(string(" Hz = "))
+  ln_u(baudRun)
+  ln_out()
+  if (xWord >> 15) <> 1 or ((xWord >> 14) & 1) <> bFast or (xWord & $3FFF) <> baudRun or (baudRun >> 12) <> 0
+    ln_s(string("RIG FAIL: the WXPIN word "))
+    ln_s(pLabel)
+    say(string(" does not hold host + its speed bit + the computed baud with the two MSBs 0"))
+    fail_count++
+
+PRI check_word(pLabel, cfgWord, symWord, expTt)
+' Decode one WRPIN word into its published fields, print them, and count a
+' construction failure if any field or the symbol composition disagrees.
+'
+' @param pLabel - label string for the printed line
+' @param cfgWord - the configuration word the measuring cog writes
+' @param symWord - the same word composed from the Spin2 v55 symbols
+' @param expTt - expected %TT
+
+  ln_s(string("  "))
+  ln_s(pLabel)
+  ln_c(" ")
+  ln_h(cfgWord)
+  ln_s(string(": AAAA="))
+  ln_bin((cfgWord >> SHIFT_AAAA) & MASK_AAAA, 4)
+  ln_s(string(" BBBB="))
+  ln_bin((cfgWord >> SHIFT_BBBB) & MASK_BBBB, 4)
+  ln_s(string(" FFF="))
+  ln_bin((cfgWord >> SHIFT_FFF) & MASK_FFF, 3)
+  ln_s(string(" M="))
+  ln_bin((cfgWord >> SHIFT_M) & MASK_M, 13)
+  ln_s(string(" TT="))
+  ln_bin((cfgWord >> SHIFT_TT) & MASK_TT, 2)
+  ln_s(string(" SSSSS="))
+  ln_bin((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS, 5)
+  ln_s(string(" bit0="))
+  ln_u(cfgWord & MASK_BIT0)
+  ln_s(string("  symbols="))
+  ln_h(symWord)
+  ln_out()
+  if ((cfgWord >> SHIFT_AAAA) & MASK_AAAA) <> 0 or ((cfgWord >> SHIFT_BBBB) & MASK_BBBB) <> 0 or ((cfgWord >> SHIFT_FFF) & MASK_FFF) <> 0 or ((cfgWord >> SHIFT_M) & MASK_M) <> 0 or ((cfgWord >> SHIFT_TT) & MASK_TT) <> expTt or ((cfgWord >> SHIFT_SSSSS) & MASK_SSSSS) <> SSSSS_USB or (cfgWord & MASK_BIT0) <> 0
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    say(string(" fields differ from the expected AAAA/BBBB/FFF/M = 0, TT, SSSSS = %11011, bit0 = 0"))
+    fail_count++
+  if cfgWord <> symWord
+    ln_s(string("RIG FAIL: "))
+    ln_s(pLabel)
+    ln_s(string(" word "))
+    ln_h(cfgWord)
+    ln_s(string(" differs from its Spin2 symbol composition "))
+    ln_h(symWord)
+    ln_out()
+    fail_count++
+
+' ---------------------------------------------------------------------------
+' report
+' ---------------------------------------------------------------------------
+PRI rec(roundIdx, armIdx, slotIdx) : recVal
+' One recorded long of an arm in a round.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param armIdx - ARM_CFS..ARM_X
+' @param slotIdx - A_BASE..A_LOG+2*LOGMAX-1
+' @returns recVal - the recorded long
+
+  recVal := mailbox[MB_RES + roundIdx * ROUNDW + armIdx * ARMW + slotIdx]
+
+PRI dget(roundIdx, armIdx, fldIdx) : decVal
+' One decoded field of an arm in a round.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param armIdx - ARM_CFS..ARM_X
+' @param fldIdx - D_N..D_OVF
+' @returns decVal - the decoded value
+
+  decVal := dec[(roundIdx * NARMS + armIdx) * DF + fldIdx]
+
+PRI decode(roundIdx, armIdx) | rb, db, nUse, evIdx, stv, tv, t0v, bInSop, bInEop, prevTg, nb
+' Decode one arm's event log into the decoded record.  The log holds every change of status bits 4..15 (SOP-in, EOP-in,
+' error, byte toggle, last byte) seen by the polling loop, in time order, as (status, CT) pairs.
+'   SOP-in rising (before any EOP-in)  opens the packet; the toggle bit at that moment is the reference.
+'   A change of the toggle bit while the packet is open and EOP-in has not been seen = one received byte (n counts all of them).
+'   EOP-in rising closes the packet for good: nothing after it is counted.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param armIdx - ARM_CFS..ARM_X
+
+' Local Variables:
+' @local rb - mailbox index of the arm record
+' @local db - dec[] index of the decoded record
+' @local nUse - events decoded (capped at LOGMAX)
+' @local evIdx - event index
+' @local stv - status word of the event
+' @local tv - event time relative to A_T0
+' @local t0v - A_T0
+' @local bInSop - SOP-in has been seen
+' @local bInEop - EOP-in has been seen
+' @local prevTg - the toggle bit last accounted for
+' @local nb - bytes counted
+
+  rb := MB_RES + roundIdx * ROUNDW + armIdx * ARMW
+  db := (roundIdx * NARMS + armIdx) * DF
+  dec[db + D_N] := 0
+  dec[db + D_B0] := NO_BYTE
+  dec[db + D_B1] := NO_BYTE
+  dec[db + D_B2] := NO_BYTE
+  dec[db + D_B3] := NO_BYTE
+  dec[db + D_TSOP] := NO_TIME
+  dec[db + D_TB1] := NO_TIME
+  dec[db + D_TB4] := NO_TIME
+  dec[db + D_DUR] := NO_TIME
+  dec[db + D_TEOP] := NO_TIME
+  dec[db + D_OVF] := FALSE
+  nUse := mailbox[rb + A_NLOG]
+  if nUse > LOGMAX
+    dec[db + D_OVF] := TRUE
+    nUse := LOGMAX
+  t0v := mailbox[rb + A_T0]
+  bInSop := FALSE
+  bInEop := FALSE
+  prevTg := 0
+  nb := 0
+  evIdx := 0
+  repeat while evIdx < nUse
+    stv := mailbox[rb + A_LOG + evIdx * 2]
+    tv := mailbox[rb + A_LOG + evIdx * 2 + 1] - t0v
+    if bInSop and bInEop == FALSE and (stv & BIT_TOG) <> prevTg
+      prevTg := stv & BIT_TOG
+      nb++
+      if nb <= NBYTES
+        dec[db + D_B0 + nb - 1] := (stv >> 8) & $FF
+      if nb == 1
+        dec[db + D_TB1] := tv
+      if nb == NBYTES
+        dec[db + D_TB4] := tv
+    if bInEop == FALSE and (stv & BIT_EOP) <> 0
+      bInEop := TRUE
+      dec[db + D_TEOP] := tv
+    if bInSop == FALSE and bInEop == FALSE and (stv & BIT_SOP) <> 0
+      bInSop := TRUE
+      prevTg := stv & BIT_TOG
+      dec[db + D_TSOP] := tv
+    evIdx++
+  dec[db + D_N] := nb
+  if dec[db + D_TB1] <> NO_TIME and dec[db + D_TB4] <> NO_TIME
+    dec[db + D_DUR] := dec[db + D_TB4] - dec[db + D_TB1]
+
+PRI base_clean(roundIdx, armIdx) : bClean
+' Whether the baseline status read before the packet has neither SOP-in nor EOP-in set.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param armIdx - arm
+' @returns bClean - TRUE when bits 4 and 5 of A_BASE are clear
+
+  bClean := (rec(roundIdx, armIdx, A_BASE) & BASE_MASK) == 0
+
+PRI bytes_intact(roundIdx, armIdx) : bOk
+' Whether the decoded packet is n = 4 with the bytes $A5 $5A $3C $C3 in order.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param armIdx - arm
+' @returns bOk - TRUE when intact
+
+  bOk := dget(roundIdx, armIdx, D_N) == NBYTES and dget(roundIdx, armIdx, D_B0) == TX0 and dget(roundIdx, armIdx, D_B1) == TX1 and dget(roundIdx, armIdx, D_B2) == TX2 and dget(roundIdx, armIdx, D_B3) == TX3
+
+PRI dur_ok(durVal, bFast) : bOk
+' Whether a measured first->fourth byte duration is within DUR_TOL_PCT of the speed's expected duration.
+'
+' @param durVal - the duration in clocks, or NO_TIME
+' @param bFast - TRUE = full-speed expected, FALSE = low-speed
+' @returns bOk - TRUE when inside the window
+
+  if bFast
+    bOk := durVal <> NO_TIME and durVal >= DUR_FS * (100 - DUR_TOL_PCT) / 100 and durVal <= DUR_FS * (100 + DUR_TOL_PCT) / 100
+  else
+    bOk := durVal <> NO_TIME and durVal >= DUR_LS * (100 - DUR_TOL_PCT) / 100 and durVal <= DUR_LS * (100 + DUR_TOL_PCT) / 100
+
+PRI dur_window(durVal) : pText
+' Which speed's duration window a measured duration falls in (diagnostic, printed on every raw line).
+'
+' @param durVal - the duration in clocks, or NO_TIME
+' @returns pText - address of "FS", "LS" or "none"
+
+  if dur_ok(durVal, TRUE)
+    pText := string("FS")
+  elseif dur_ok(durVal, FALSE)
+    pText := string("LS")
+  else
+    pText := string("none")
+
+PRI count_other(armIdx) : nOther | roundIdx
+' For a GOOD-packet arm: in how many rounds the measured duration fell in the OTHER speed's window than the arm requires.
+'
+' @param armIdx - a GOOD-packet arm
+' @returns nOther - rounds whose duration is in the other speed's window
+
+' Local Variables:
+' @local roundIdx - round
+
+  nOther := 0
+  repeat roundIdx from 0 to ROUNDS - 1
+    if dur_ok(dget(roundIdx, armIdx, D_DUR), arm_fast(armIdx) == FALSE)
+      nOther++
+
+PRI stl_lim(firstArm, lastArm, bMax) : limVal | roundIdx, armIdx, stlVal
+' The smallest or largest settle (A_STL) over a range of arms and all rounds.
+'
+' @param firstArm - first arm index
+' @param lastArm - last arm index
+' @param bMax - TRUE = largest, FALSE = smallest
+' @returns limVal - the limit, in clocks
+
+' Local Variables:
+' @local roundIdx - round
+' @local armIdx - arm
+' @local stlVal - the settle of one record
+
+  limVal := -1
+  repeat armIdx from firstArm to lastArm
+    repeat roundIdx from 0 to ROUNDS - 1
+      stlVal := rec(roundIdx, armIdx, A_STL)
+      if limVal == -1 or (bMax and stlVal > limVal) or (bMax == FALSE and stlVal < limVal)
+        limVal := stlVal
+
+PRI ln_settle()
+' Append the settle every arm used, to the verdict line being built.
+'
+
+  ln_s(string(" | settle WXPIN-site to SOP write, clocks: long arms CFS..X "))
+  ln_u(stl_lim(ARM_CFS, ARM_X, FALSE))
+  ln_s(string(".."))
+  ln_u(stl_lim(ARM_CFS, ARM_X, TRUE))
+  ln_s(string(" (= a "))
+  ln_u(WX_CLK)
+  ln_s(string("-clock wait + the code path) ; short arms SCF SCL SB SC "))
+  ln_u(stl_lim(ARM_SCF, ARM_SC, FALSE))
+  ln_s(string(".."))
+  ln_u(stl_lim(ARM_SCF, ARM_SC, TRUE))
+  ln_s(string(" (the code path only, no wait)"))
+
+PRI arm_ok(roundIdx, armIdx) : bOk
+' Whether an arm's record in a round is what that arm is required to return.
+' N1 / N2 / X are the negative controls: their required record is the SHORT / EMPTY / NOT-INTACT one.
+' Every other arm is GOOD: clean baseline, the full packet in order, at its expected speed.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param armIdx - ARM_CFS..ARM_SC
+' @returns bOk - TRUE when the record is the required one
+
+  case armIdx
+    ARM_N1:
+      bOk := base_clean(roundIdx, armIdx) and dget(roundIdx, armIdx, D_N) == NSHORT and dget(roundIdx, armIdx, D_B0) == TX0 and dget(roundIdx, armIdx, D_B1) == TX1 and dget(roundIdx, armIdx, D_B2) == NO_BYTE and dget(roundIdx, armIdx, D_B3) == NO_BYTE
+    ARM_N2:
+      bOk := base_clean(roundIdx, armIdx) and dget(roundIdx, armIdx, D_N) == 0 and dget(roundIdx, armIdx, D_B0) == NO_BYTE and dget(roundIdx, armIdx, D_B1) == NO_BYTE and dget(roundIdx, armIdx, D_B2) == NO_BYTE and dget(roundIdx, armIdx, D_B3) == NO_BYTE
+    ARM_X:
+      bOk := base_clean(roundIdx, armIdx) and bytes_intact(roundIdx, armIdx) == FALSE
+    other:
+      bOk := base_clean(roundIdx, armIdx) and bytes_intact(roundIdx, armIdx) and dur_ok(dget(roundIdx, armIdx, D_DUR), arm_fast(armIdx))
+
+PRI arm_class(armIdx) : pText
+' Class of an arm from its count of required rounds.
+'
+' @param armIdx - ARM_CFS..ARM_X
+' @returns pText - ALL, NONE or MIXED
+
+  if cnt[armIdx] == ROUNDS
+    pText := string("ALL")
+  elseif cnt[armIdx] == 0
+    pText := string("NONE")
+  else
+    pText := string("MIXED")
+
+PRI count_late() : nBad | roundIdx, armIdx, lateVal
+' Gate P: print and count every arm record whose largest write lateness exceeds LATE_MARGIN (or is negative).
+'
+' @returns nBad - how many arm records are late
+
+' Local Variables:
+' @local roundIdx - round
+' @local armIdx - arm
+' @local lateVal - A_LATE of the record
+
+  nBad := 0
+  repeat roundIdx from 0 to ROUNDS - 1
+    repeat armIdx from 0 to NARMS - 1
+      lateVal := rec(roundIdx, armIdx, A_LATE)
+      if lateVal > LATE_MARGIN or lateVal < 0
+        ln_s(string("  late write: r"))
+        ln_u(roundIdx + 1)
+        ln_c(" ")
+        ln_s(arm_name(armIdx))
+        ln_s(string(" lateness "))
+        ln_t(lateVal)
+        ln_s(string(" clocks (margin "))
+        ln_u(LATE_MARGIN)
+        ln_c(")")
+        ln_out()
+        nBad++
+
+PRI count_ovf() : nBad | roundIdx, armIdx
+' Gate O: print and count every arm record whose event log overflowed.
+'
+' @returns nBad - how many arm records overflowed
+
+' Local Variables:
+' @local roundIdx - round
+' @local armIdx - arm
+
+  nBad := 0
+  repeat roundIdx from 0 to ROUNDS - 1
+    repeat armIdx from 0 to NARMS - 1
+      if dget(roundIdx, armIdx, D_OVF)
+        ln_s(string("  log overflow: r"))
+        ln_u(roundIdx + 1)
+        ln_c(" ")
+        ln_s(arm_name(armIdx))
+        ln_s(string(" events "))
+        ln_u(rec(roundIdx, armIdx, A_NLOG))
+        ln_s(string(" (kept "))
+        ln_u(LOGMAX)
+        ln_c(")")
+        ln_out()
+        nBad++
+
+PRI count_settle() : nBad | roundIdx, armIdx, stlVal, bShort
+' Gate Q: print and count every arm record whose settle (A_STL) is outside its band: a short-settle arm (SCF SCL SB SC) must be
+' 0..SHORT_MAX_CLK ; every other arm must be WX_CLK..WX_CLK+SHORT_MAX_CLK (the long wait plus the same code path).
+'
+' @returns nBad - how many arm records are outside their band
+
+' Local Variables:
+' @local roundIdx - round
+' @local armIdx - arm
+' @local stlVal - A_STL of the record
+' @local bShort - the arm is a short-settle arm
+
+  nBad := 0
+  repeat roundIdx from 0 to ROUNDS - 1
+    repeat armIdx from 0 to NARMS - 1
+      stlVal := rec(roundIdx, armIdx, A_STL)
+      bShort := armIdx >= ARM_SCF
+      if (bShort and (stlVal < 0 or stlVal > SHORT_MAX_CLK)) or (bShort == FALSE and (stlVal < WX_CLK or stlVal > WX_CLK + SHORT_MAX_CLK))
+        ln_s(string("  settle out of band: r"))
+        ln_u(roundIdx + 1)
+        ln_c(" ")
+        ln_s(arm_name(armIdx))
+        ln_s(string(" settle "))
+        ln_t(stlVal)
+        ln_s(string(" clocks (short arms 0.."))
+        ln_u(SHORT_MAX_CLK)
+        ln_s(string(", others "))
+        ln_u(WX_CLK)
+        ln_s(string(".."))
+        ln_u(WX_CLK + SHORT_MAX_CLK)
+        ln_c(")")
+        ln_out()
+        nBad++
+
+PRI report() | roundIdx, armIdx, bGateL, bGateS, nAll, nNone, nMixed, nLate, nOvf, nStl
+' Decode, print the raw records, gate, decide. Single exit.
+'
+
+' Local Variables:
+' @local roundIdx - round
+' @local armIdx - arm
+' @local bGateL - the low-speed control (CLS) was GOOD in every round
+' @local bGateS - the short-settle controls (SCF and SCL) were GOOD in every round
+' @local nStl - arm records whose settle is outside its band
+' @local nAll - judged arms of class ALL
+' @local nNone - judged arms of class NONE
+' @local nMixed - judged arms of class MIXED
+' @local nLate - arm records with a late write
+' @local nOvf - arm records whose log overflowed
+
+  repeat roundIdx from 0 to ROUNDS - 1
+    repeat armIdx from 0 to NARMS - 1
+      decode(roundIdx, armIdx)
+  say(string(" "))
+  say(string("--- RAW RECORDS per round and arm (base = baseline status; n = bytes counted between SOP-in and EOP-in; bytes ---"))
+  say(string("    sop / tb1 / tb4 / eop = SOP-in, first byte, fourth byte, EOP-in times in clocks after the SOP write ; dur = tb4 - tb1 ; late = largest write lateness"))
+  say(string("    dwin = which speed's duration window dur falls in (FS / LS / none) ; stl = settle, clocks from the GETCT at the WXPIN site to the SOP write"))
+  say(string("    w = the four data-byte write times after the SOP write ; ev = status-change events ; last = last status ; req = the arm's required record met) ---"))
+  repeat roundIdx from 0 to ROUNDS - 1
+    repeat armIdx from 0 to NARMS - 1
+      print_arm(roundIdx, armIdx)
+  longfill(@cnt, 0, NARMS)
+  repeat armIdx from 0 to NARMS - 1
+    repeat roundIdx from 0 to ROUNDS - 1
+      if arm_ok(roundIdx, armIdx)
+        cnt[armIdx]++
+  say(string(" "))
+  say(string("--- PER-ARM COUNT of rounds meeting the arm's requirement (GOOD; N1, N2: the short / empty record; X: not intact) ---"))
+  repeat armIdx from 0 to NARMS - 1
+    ln_s(string("  "))
+    ln_s(arm_name(armIdx))
+    ln_u(cnt[armIdx])
+    ln_s(string(" of "))
+    ln_u(ROUNDS)
+    ln_c(" ")
+    ln_s(arm_class(armIdx))
+    ln_s(string("  settle "))
+    ln_u(stl_lim(armIdx, armIdx, FALSE))
+    ln_s(string(".."))
+    ln_u(stl_lim(armIdx, armIdx, TRUE))
+    if is_packet_arm(armIdx) and cnt[armIdx] == 0
+      ln_s(string("  (dur in the OTHER speed's window in "))
+      ln_u(count_other(armIdx))
+      ln_s(string(" of "))
+      ln_u(ROUNDS)
+      ln_s(string(" rounds)"))
+    ln_out()
+  say(string(" "))
+  say(string("--- GATES ---"))
+  nLate := count_late()
+  ln_s(string("  P  every write within "))
+  ln_u(LATE_MARGIN)
+  ln_s(string(" clocks of its deadline, all arms, all rounds: "))
+  ln_s(yes_no(nLate == 0))
+  ln_out()
+  if nLate <> 0
+    say(string("RIG FAIL: a value was written late -- the packet's pacing was not the schedule, so no arm can be judged"))
+    fail_count++
+  nStl := count_settle()
+  ln_s(string("  Q  settle in band, all arms, all rounds (short arms 0.."))
+  ln_u(SHORT_MAX_CLK)
+  ln_s(string(" clocks, the others "))
+  ln_u(WX_CLK)
+  ln_s(string(".."))
+  ln_u(WX_CLK + SHORT_MAX_CLK)
+  ln_s(string("): "))
+  ln_s(yes_no(nStl == 0))
+  ln_out()
+  if nStl <> 0
+    say(string("RIG FAIL: an arm's settle was not the settle the program states -- the short-settle arms were not short, or the long ones not long"))
+    fail_count++
+  nOvf := count_ovf()
+  ln_s(string("  O  no event log overflow, all arms, all rounds: "))
+  ln_s(yes_no(nOvf == 0))
+  ln_out()
+  if nOvf <> 0
+    say(string("RIG FAIL: an event log overflowed -- the decoded packet may be incomplete"))
+    fail_count++
+  ln_s(string("  K  arm CFS (no WXPIN, FS) GOOD in every round: "))
+  ln_s(yes_no(cnt[ARM_CFS] == ROUNDS))
+  ln_out()
+  if cnt[ARM_CFS] <> ROUNDS
+    say(string("RIG FAIL: the control packet with no WXPIN step was not GOOD in every round -- the rig cannot carry a packet at full speed"))
+    fail_count++
+  ln_s(string("  N1 arm N1 (only 2 data bytes sent) returned exactly n=2 $A5 $5A in every round: "))
+  ln_s(yes_no(cnt[ARM_N1] == ROUNDS))
+  ln_out()
+  if cnt[ARM_N1] <> ROUNDS
+    say(string("RIG FAIL: the short-packet negative control was not seen as a short packet in every round"))
+    fail_count++
+  ln_s(string("  N2 arm N2 (nothing sent) returned exactly n=0 in every round: "))
+  ln_s(yes_no(cnt[ARM_N2] == ROUNDS))
+  ln_out()
+  if cnt[ARM_N2] <> ROUNDS
+    say(string("RIG FAIL: the nothing-sent negative control was not seen as an empty window in every round"))
+    fail_count++
+  ln_s(string("  X  arm X (FS pair, packet written at the LS schedule) NOT intact in every round: "))
+  ln_s(yes_no(cnt[ARM_X] == ROUNDS))
+  ln_out()
+  if cnt[ARM_X] <> ROUNDS
+    say(string("RIG FAIL: a full-speed pair given the low-speed schedule returned an intact packet (or a dirty baseline) -- the speed is not what the rig thinks"))
+    fail_count++
+  bGateL := cnt[ARM_CLS] == ROUNDS
+  ln_s(string("  L  arm CLS (no WXPIN, LS) GOOD in every round: "))
+  ln_s(yes_no(bGateL))
+  ln_out()
+  if bGateL == FALSE
+    say(string("  (gate L does not hold: the low-speed arms A2, B, C, D1, SB, SC are NOT JUDGED; their records are printed above)"))
+  bGateS := cnt[ARM_SCF] == ROUNDS and cnt[ARM_SCL] == ROUNDS
+  ln_s(string("  S  arms SCF and SCL (no WXPIN, short settle) GOOD in every round: "))
+  ln_s(yes_no(bGateS))
+  ln_out()
+  if bGateS == FALSE
+    say(string("  (gate S does not hold: the short-settle arms SB, SC are NOT JUDGED; their records are printed above)"))
+  say(string(" "))
+  if fail_count <> 0
+    say(string("NO VERDICT: a gating control failed (see RIG FAIL lines above); the records are printed for diagnosis only"))
+  else
+    nAll := 0
+    nNone := 0
+    nMixed := 0
+    repeat armIdx from 0 to NARMS - 1
+      if judged(armIdx, bGateL, bGateS) == FALSE
+        next
+      if cnt[armIdx] == ROUNDS
+        nAll++
+      elseif cnt[armIdx] == 0
+        nNone++
+      else
+        nMixed++
+    ln_s(string("  judged arms: ALL "))
+    ln_u(nAll)
+    ln_s(string("  NONE "))
+    ln_u(nNone)
+    ln_s(string("  MIXED "))
+    ln_u(nMixed)
+    ln_out()
+    if nNone <> 0
+      ln_s(string("VERDICT VO-J-035: DISTURBED - the packet after the WXPIN step was not GOOD in any round for:"))
+      list_class(bGateL, bGateS, 0)
+      if nMixed <> 0
+        ln_s(string(" ; and not GOOD in every round (MIXED) for:"))
+        list_class(bGateL, bGateS, 1)
+      ln_settle()
+      ln_out()
+      if bGateL and bGateS
+        say(string("  while the no-WXPIN controls carried the packet GOOD in every round, a full-speed pair given the low-speed schedule did not, and the short / empty negative controls read short / empty"))
+      else
+        say(string("  control CFS carried the packet GOOD in every round, but CLS (gate L) or SCF / SCL (gate S) did NOT: the arms that need a failed control are not judged and are not listed above"))
+      say(string("  scope: the baud set by the WXPIN, not D[14] (FS/LS signalling is not observable on this pair)"))
+    elseif nMixed <> 0
+      ln_s(string("VERDICT VO-J-035: INCONCLUSIVE - rounds differ for at least one judged arm (per-arm counts and raw records above); MIXED:"))
+      list_class(bGateL, bGateS, 1)
+      ln_settle()
+      ln_out()
+    elseif bGateL and bGateS
+      ln_s(string("VERDICT VO-J-035: SURVIVES - after a WXPIN on the running pair (same word, FS to LS, LS to FS, FS-LS-FS; after a long and after a short settle) the baud set by the WXPIN was in force and the next packet was intact, in every round"))
+      ln_settle()
+      ln_out()
+      say(string("  the no-WXPIN controls (FS and LS, long and short settle) carried the packet GOOD every round; the mismatched-schedule control X, the short and the empty negative controls read as not intact / short / empty"))
+      say(string("  scope: the baud set by the WXPIN, not D[14] -- 'FS/LS mode changed' is NOT claimed (the FS/LS signalling bit is not observable on this pair)"))
+    else
+      ln_s(string("VERDICT VO-J-035: INCONCLUSIVE - every judged arm is GOOD in every round but a control failed (gate L: CLS, or gate S: SCF / SCL), so the arms that need it are not judged (L: A2 B C D1 SB SC ; S: SB SC)"))
+      ln_settle()
+      ln_out()
+
+PRI list_class(bGateL, bGateS, wantMixed) | armIdx
+' Append the names of the judged arms of class NONE (wantMixed 0) or MIXED (wantMixed 1) to the line being built.
+'
+' @param bGateL - the low-speed control held
+' @param bGateS - the short-settle controls held
+' @param wantMixed - 0 = list NONE arms, 1 = list MIXED arms
+
+' Local Variables:
+' @local armIdx - arm
+
+  repeat armIdx from 0 to NARMS - 1
+    if judged(armIdx, bGateL, bGateS) == FALSE
+      next
+    if wantMixed == 0 and cnt[armIdx] == 0
+      ln_c(" ")
+      ln_s(arm_name(armIdx))
+    if wantMixed <> 0 and cnt[armIdx] <> 0 and cnt[armIdx] <> ROUNDS
+      ln_c(" ")
+      ln_s(arm_name(armIdx))
+
+PRI print_arm(roundIdx, armIdx) | evIdx, nUse
+' Print one arm's record in one round as a line; an arm that missed its required record also lists its event log.
+'
+' @param roundIdx - 0..ROUNDS-1
+' @param armIdx - ARM_CFS..ARM_X
+
+' Local Variables:
+' @local evIdx - event index
+' @local nUse - events listed
+
+  ln_s(string("  r"))
+  ln_u(roundIdx + 1)
+  ln_c(" ")
+  ln_s(arm_name(armIdx))
+  ln_s(string(" base "))
+  ln_h(rec(roundIdx, armIdx, A_BASE))
+  ln_s(string(" n="))
+  ln_u(dget(roundIdx, armIdx, D_N))
+  ln_s(string(" bytes "))
+  ln_h(dget(roundIdx, armIdx, D_B0))
+  ln_c(" ")
+  ln_h(dget(roundIdx, armIdx, D_B1))
+  ln_c(" ")
+  ln_h(dget(roundIdx, armIdx, D_B2))
+  ln_c(" ")
+  ln_h(dget(roundIdx, armIdx, D_B3))
+  ln_s(string(" sop "))
+  ln_t(dget(roundIdx, armIdx, D_TSOP))
+  ln_s(string(" tb1 "))
+  ln_t(dget(roundIdx, armIdx, D_TB1))
+  ln_s(string(" tb4 "))
+  ln_t(dget(roundIdx, armIdx, D_TB4))
+  ln_s(string(" dur "))
+  ln_t(dget(roundIdx, armIdx, D_DUR))
+  ln_s(string(" dwin "))
+  ln_s(dur_window(dget(roundIdx, armIdx, D_DUR)))
+  ln_s(string(" eop "))
+  ln_t(dget(roundIdx, armIdx, D_TEOP))
+  ln_s(string(" stl "))
+  ln_t(rec(roundIdx, armIdx, A_STL))
+  ln_s(string(" late "))
+  ln_t(rec(roundIdx, armIdx, A_LATE))
+  ln_s(string(" w "))
+  ln_u(rec(roundIdx, armIdx, A_W1))
+  ln_c("/")
+  ln_u(rec(roundIdx, armIdx, A_W2))
+  ln_c("/")
+  ln_u(rec(roundIdx, armIdx, A_W3))
+  ln_c("/")
+  ln_u(rec(roundIdx, armIdx, A_W4))
+  ln_s(string(" ev "))
+  ln_u(rec(roundIdx, armIdx, A_NLOG))
+  ln_s(string(" last "))
+  ln_h(rec(roundIdx, armIdx, A_LAST))
+  ln_s(string(" req "))
+  ln_s(yes_no(arm_ok(roundIdx, armIdx)))
+  ln_out()
+  if arm_ok(roundIdx, armIdx) == FALSE
+    nUse := rec(roundIdx, armIdx, A_NLOG)
+    if nUse > LOGMAX
+      nUse := LOGMAX
+    evIdx := 0
+    repeat while evIdx < nUse
+      ln_s(string("      event "))
+      ln_u(evIdx + 1)
+      ln_s(string(": status "))
+      ln_h(rec(roundIdx, armIdx, A_LOG + evIdx * 2))
+      ln_s(string(" at "))
+      ln_t(rec(roundIdx, armIdx, A_LOG + evIdx * 2 + 1) - rec(roundIdx, armIdx, A_T0))
+      ln_out()
+      evIdx++
+
+{ MEASURING ENGINE -- runs in its own cog; the ONLY code that touches the pair.
+  No debug() here (DEBUG_COGS excludes this cog anyway). PTRA = @mailbox on entry.
+  respt_ walks the mailbox: per round, per arm in ARM_ order, A_BASE..A_LOG+2*LOGMAX-1 (ARMW longs).
+  The packet routine reads NO IN flag.  One loop does everything: it samples the status of DM (RQPIN, about 16 clocks per
+  pass) and logs every change of bits 4..15 with the CT; when CT1 (set with ADDCT1 to the next write deadline) has passed
+  (POLLCT1) it writes the next value at once.  Value 0 (SOP) is written at the start; value k >= 1 is due at
+  (SOP write instant) + g0_ + (k-1) * step_.  After the last write CT1 is set to the end of the observation window.
+}
+DAT             org     0        ' ---- Measuring Engine ----
+engine          mov     mb_, ptra
+                mov     respt_, mb_
+                add     respt_, #MB_RES * 4
+                mov     progp_, mb_
+                add     progp_, #MB_PROG * 4
+                mov     rnd_, #ROUNDS
+                mov     roundno_, #0
+
+.round          add     roundno_, #1
+                wrlong  roundno_, progp_
+
+                ' Every arm takes GETCT twx_ at the "WXPIN site" (just before the WXPIN, or where it would be): A_STL = SOP write - twx_.
+                ' LONG arms go through pkt4 / pktgen (WX_CLK wait); SHORT arms through pkt4s (no wait).
+
+                ' ---- CFS: control, start FS, no WXPIN step, FS schedule ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                call    #sched_fs
+                call    #pkt4
+
+                ' ---- CLS: control, start LS, no WXPIN step, LS schedule ----
+                mov     xs_, x_ls_
+                call    #usb_start
+                getct   twx_
+                call    #sched_ls
+                call    #pkt4
+
+                ' ---- A1: start FS, WXPIN FS (same word), FS schedule ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                wxpin   x_fs_, #PIN_DM
+                call    #sched_fs
+                call    #pkt4
+
+                ' ---- A2: start LS, WXPIN LS (same word), LS schedule ----
+                mov     xs_, x_ls_
+                call    #usb_start
+                getct   twx_
+                wxpin   x_ls_, #PIN_DM
+                call    #sched_ls
+                call    #pkt4
+
+                ' ---- B: start FS, WXPIN LS, LS schedule ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                wxpin   x_ls_, #PIN_DM
+                call    #sched_ls
+                call    #pkt4
+
+                ' ---- C: start LS, WXPIN FS, FS schedule ----
+                mov     xs_, x_ls_
+                call    #usb_start
+                getct   twx_
+                wxpin   x_fs_, #PIN_DM
+                call    #sched_fs
+                call    #pkt4
+
+                ' ---- D1 / D2: start FS, WXPIN LS, packet at LS (D1), WXPIN FS, packet at FS (D2) ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                wxpin   x_ls_, #PIN_DM
+                call    #sched_ls
+                call    #pkt4
+                getct   twx_
+                wxpin   x_fs_, #PIN_DM
+                call    #sched_fs
+                call    #pkt4
+
+                ' ---- N1: negative control, start FS, no WXPIN, SOP + 2 data bytes only ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                call    #sched_fs
+                mov     nvals_, #NSHORT + 1
+                call    #pktgen
+
+                ' ---- N2: negative control, start FS, no WXPIN, nothing sent ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                call    #sched_fs
+                mov     nvals_, #0
+                call    #pktgen
+
+                ' ---- X: negative control, start FS, no WXPIN, the packet written at the LS schedule ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                call    #sched_ls
+                call    #pkt4
+
+                ' ---- SCF: control of SB / SC, start FS, no WXPIN, FS schedule, SHORT settle ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                call    #sched_fs
+                call    #pkt4s
+
+                ' ---- SCL: control of SB / SC, start LS, no WXPIN, LS schedule, SHORT settle ----
+                mov     xs_, x_ls_
+                call    #usb_start
+                getct   twx_
+                call    #sched_ls
+                call    #pkt4s
+
+                ' ---- SB: start FS, WXPIN LS, LS schedule, SHORT settle ----
+                mov     xs_, x_fs_
+                call    #usb_start
+                getct   twx_
+                wxpin   x_ls_, #PIN_DM
+                call    #sched_ls
+                call    #pkt4s
+
+                ' ---- SC: start LS, WXPIN FS, FS schedule, SHORT settle ----
+                mov     xs_, x_ls_
+                call    #usb_start
+                getct   twx_
+                wxpin   x_fs_, #PIN_DM
+                call    #sched_fs
+                call    #pkt4s
+
+                djnz    rnd_, #.round
+
+                call    #usb_off                ' leave P0 / P1 safe
+                wrlong  #MBOX_DONE, ptra        ' done -- always the last write
+                cogid   self_id_
+                cogstop self_id_
+
+' All of it off: pair DIR low, smart pin off, OUT low.
+usb_off         dirl    #PAIR
+                wrpin   #0, #PAIR
+                outl    #PAIR
+                waitx   #100
+                ret
+
+' The documented start (silicon-doc-text.txt:4593): reset, WRPIN drive on both pins, WXPIN xs_ on DM, DIRH both.
+usb_start       call    #usb_off
+                dirl    #PAIR
+                wrpin   cfg_drive_, #PAIR
+                wxpin   xs_, #PIN_DM
+                dirh    #PAIR
+                waitx   ##START_CLK
+                ret
+
+' The write schedule and the observation window of one speed.
+sched_fs        mov     g0_, g0fs_
+                mov     step_, stepfs_
+                mov     obs_, obsfs_
+                ret
+
+sched_ls        mov     g0_, g0ls_
+                mov     step_, stepls_
+                mov     obs_, obsls_
+                ret
+
+' The full packet (SOP + 4 data bytes) after the baseline.  pkt4s = SHORT settle: straight to the baseline, no WX_CLK wait.
+pkt4s           mov     nvals_, #NTX
+                jmp     #baseline
+pkt4            mov     nvals_, #NTX
+
+' Baseline, then one packet.  Settle (pktgen: WX_CLK wait; pkt4s skips it), AKPIN both pins (clears any IN left by the WXPIN /
+' WRPIN / WYPIN), RQPIN the status word of DM and record it (A_BASE), then the packet.  The packet reads no IN flag.
+pktgen          waitx   ##WX_CLK
+baseline        akpin   #PAIR
+                rqpin   st_, #PIN_DM
+                mov     val_, st_
+                call    #put
+                call    #packet
+                ret
+
+' One packet.  nvals_ values (SOP, then data bytes) are written on the deadline schedule; the status of DM is sampled
+' continuously; every change of status bits 4..15 is logged with its CT.  The routine ends at the end of the observation
+' window (CT1 = t0 + obs_), not on any status bit.  Writes the record fields after A_BASE (see the CON block).
+packet          mov     prevm_, st_                     ' baseline status, bits 4..15: the reference for "a change"
+                and     prevm_, mask_
+                mov     txi_, #0
+                mov     late_, #0
+                mov     lgi_, #0
+                mov     novf_, #0
+                mov     w0_, #0
+                mov     w1_, #0
+                mov     w2_, #0
+                mov     w3_, #0
+                mov     w4_, #0
+                getct   t0_
+                mov     tsop_, t0_                      ' replaced by the SOP write instant when there is a SOP
+                mov     dl_, t0_                        ' the SOP is due at once
+                mov     tend_, t0_
+                add     tend_, obs_
+                cmp     txi_, nvals_            wc      ' C = 1 when there is anything to write
+        if_c    addct1  dl_, #0                         ' CT1 = the SOP deadline
+        if_nc   addct1  tend_, #0                       ' nothing to write: CT1 = the end of the window
+
+.poll           rqpin   st_, #PIN_DM
+                mov     tg_, st_
+                and     tg_, mask_
+                cmp     tg_, prevm_             wz      ' Z = 1 while bits 4..15 are unchanged
+        if_nz   jmp     #.event
+.chkt           pollct1                         wc      ' C = 1 when CT1 has passed
+        if_nc   jmp     #.poll
+                cmp     txi_, nvals_            wc      ' C = 1: a value is due ; NC: the window is over
+        if_nc   jmp     #.finish
+                alts    txi_, #txdata_                  ' S of the next instruction = txdata_ + txi_
+                mov     b_, 0-0                         ' the value, fetched BEFORE the write instant is taken
+                getct   tw_                             ' the write instant, 2 clocks before the WYPIN executes
+                wypin   b_, #PAIR                       ' writes DM (and acknowledges DP, not read)
+                tjz     txi_, #.first
+                mov     tl_, tw_
+                sub     tl_, dl_                        ' lateness of this write (>= 0)
+                cmps    late_, tl_              wc      ' C = 1 when this lateness is the larger
+        if_c    mov     late_, tl_
+                add     dl_, step_                      ' the next deadline
+                jmp     #.wr
+.first          mov     tsop_, tw_                      ' the SOP write instant: the origin of every deadline
+                mov     dl_, tw_
+                add     dl_, g0_
+.wr             mov     ts_, tw_
+                sub     ts_, tsop_
+                altd    txi_, #w0_                      ' D of the next instruction = w0_ + txi_
+                mov     0-0, ts_
+                add     txi_, #1
+                cmp     txi_, nvals_            wc      ' C = 1 while more values remain
+        if_c    addct1  dl_, #0                         ' CT1 = the next deadline
+        if_nc   addct1  tend_, #0                       ' all written: CT1 = the end of the window
+                jmp     #.poll
+
+.event          getct   te_
+                mov     prevm_, tg_
+                cmp     lgi_, #LOGMAX * 2       wc      ' C = 1 while the log has room
+        if_c    altd    lgi_, #logbuf_
+        if_c    mov     0-0, st_
+        if_c    add     lgi_, #1
+        if_c    altd    lgi_, #logbuf_
+        if_c    mov     0-0, te_
+        if_c    add     lgi_, #1
+        if_nc   add     novf_, #1
+                jmp     #.chkt
+
+.finish         rqpin   st_, #PIN_DM                    ' the last status (A_LAST)
+                mov     val_, tsop_
+                call    #put                            ' A_T0
+                mov     val_, late_
+                call    #put                            ' A_LATE
+                mov     val_, w1_
+                call    #put                            ' A_W1
+                mov     val_, w2_
+                call    #put
+                mov     val_, w3_
+                call    #put
+                mov     val_, w4_
+                call    #put                            ' A_W4
+                mov     val_, lgi_
+                shr     val_, #1
+                add     val_, novf_
+                call    #put                            ' A_NLOG: events seen, kept or not
+                mov     val_, st_
+                call    #put                            ' A_LAST
+                mov     val_, tsop_
+                sub     val_, twx_
+                call    #put                            ' A_STL: SOP write (N2: start of the routine) - GETCT at the WXPIN site
+                setq    #LOGMAX * 2 - 1
+                wrlong  logbuf_, respt_                 ' A_LOG: the whole log buffer
+                add     respt_, #LOGMAX * 8
+                waitx   ##SETTLE_CLK
+                ret
+
+put             wrlong  val_, respt_
+                add     respt_, #4
+                ret
+
+cfg_drive_      long    CFG_DRIVE
+x_fs_           long    X_FS
+x_ls_           long    X_LS
+g0fs_           long    G0_FS
+stepfs_         long    STEP_FS
+obsfs_          long    OBS_FS
+g0ls_           long    G0_LS
+stepls_         long    STEP_LS
+obsls_          long    OBS_LS
+mask_           long    $FFF0                           ' status bits 4..15 (not the line-state bits 0..3)
+txdata_         long    $80, TX0, TX1, TX2, TX3         ' SOP, then the data bytes
+
+mb_             res     1
+respt_          res     1
+progp_          res     1
+rnd_            res     1
+roundno_        res     1
+xs_             res     1
+g0_             res     1
+step_           res     1
+obs_            res     1
+nvals_          res     1
+st_             res     1
+tg_             res     1
+val_            res     1
+txi_            res     1
+prevm_          res     1
+b_              res     1
+t0_             res     1
+tsop_           res     1
+dl_             res     1
+tend_           res     1
+tw_             res     1
+tl_             res     1
+ts_             res     1
+te_             res     1
+late_           res     1
+lgi_            res     1
+novf_           res     1
+w0_             res     1                       ' write instants rel. to the SOP write, consecutive: w0_ (SOP, 0), w1_..w4_
+w1_             res     1
+w2_             res     1
+w3_             res     1
+w4_             res     1
+self_id_        res     1
+twx_            res     1
+logbuf_         res     LOGMAX * 2
+
+{{
+ -----------------------------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+  See the repository LICENSE file for the full text.
+ -----------------------------------------------------------------------------------------------
+}}
