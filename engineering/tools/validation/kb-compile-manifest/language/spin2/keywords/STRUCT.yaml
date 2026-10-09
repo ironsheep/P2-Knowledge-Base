@@ -32,14 +32,14 @@ blocks:
     fp: "56baf09d9b418f0a"
     compile: fragment
     wrap: spin2-top
-    assumes: [sens.get_reading(0)]
-    finding: "S-123"
+    spin2_version: 45
+    assumes: ["sens.get_reading(0)->reading_t", "sens.struct:reading_t(LONG timestamp, LONG value, BYTE status)", "sens.struct:config_t(WORD rate, BYTE flags, BYTE channel)"]
   - at: examples[8].code
     fp: "c7fa77d5ef9e512a"
     compile: fragment
     wrap: spin2-top
-    assumes: [gfx.move_to(2)]
-    finding: "S-123"
+    spin2_version: 45
+    assumes: [gfx.move_to(2), "gfx.struct:point_t(LONG x, LONG y)", "gfx.struct:rect_t(LONG x, LONG y, LONG w, LONG h)"]
   - at: examples[9].code
     fp: "a83ac8bf2ff5e1bf"
     compile: program
@@ -50,12 +50,14 @@ blocks:
     fp: "f13d0e5b0c145c41"
     compile: fragment
     wrap: spin2-method
-    finding: "S-123"
+    spin2_version: 45
+    assumes: ["struct:point_t(LONG x, LONG y)", "p:point_t"]
   - at: operations[1].example
     fp: "c106cb633d842fb9"
     compile: fragment
     wrap: spin2-method
-    finding: "S-123"
+    spin2_version: 45
+    assumes: ["struct:point_t(LONG x, LONG y)", "struct:line_t(point_t a, point_t b)", "line:line_t"]
   - at: v54_enhancements.named_bitfields_on_members.example
     fp: "9f8fc0f9ae855c63"
     compile: program

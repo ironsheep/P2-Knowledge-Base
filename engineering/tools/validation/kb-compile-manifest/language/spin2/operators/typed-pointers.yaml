@@ -36,7 +36,8 @@ blocks:
     compile: fragment
     wrap: spin2-top
     spin2_version: 45
-    finding: "S-123+S-114"
+    assumes: ["struct:point(LONG x, LONG y)", "points[100]:point"]
+    finding: "S-114"
   - at: common_patterns.linked_list
     fp: "bb60159d06f0c953"
     compile: fragment

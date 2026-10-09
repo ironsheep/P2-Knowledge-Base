@@ -4,8 +4,8 @@
 blocks:
   - at: usage_contexts[0].example
     fp: "0749ff88b43ca89d"
-    compile: not-code
-    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing"
+    compile: fragment
+    wrap: spin2-var
   - at: usage_contexts[1].example
     fp: "b3b67ed169f8220d"
     compile: program
@@ -33,8 +33,8 @@ blocks:
     assumes: [myLong]
   - at: usage_contexts[7].example
     fp: "d4f3188e63c028cb"
-    compile: not-code
-    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing (a typed-pointer declaration, `^WORD`; compiles under {Spin2_v45} in VAR)"
+    compile: fragment
+    wrap: spin2-var
   - at: usage_contexts[8].example
     fp: "bf505e791854020c"
     compile: not-code
@@ -46,9 +46,9 @@ blocks:
     spin2_version: 54
   - at: examples[0]
     fp: "cd7f92c3239ee848"
-    compile: not-code
-    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing"
+    compile: fragment
+    wrap: spin2-var
   - at: examples[1]
     fp: "6f46213d5eaacc3d"
-    compile: not-code
-    reason: "a VAR-section declaration line shown without its VAR header: legal only inside a VAR block (the same words compile inside `VAR`, scratch t/a1_var_byte, a2_var_ptrs, a3_var_word) and no wrap supplies a VAR context. The proposer's pasm2-dat PASS, where it exists, reads the words as a DAT fill-value, a different thing"
+    compile: fragment
+    wrap: spin2-var

@@ -85,6 +85,9 @@ MANIFEST SCHEMA
       spin2-method-result  as spin2-method, but the wrapper declares one result
                            (`PUB __kbgate() : __kbres`), for a method BODY that does
                            `return <value>` (spin2-method declares none: S-022)
+      spin2-var            `VAR` + the block indented + a trailing `PUB __kbgate()`: for
+                           VAR-section declaration lines (`BYTE flag`, `^LONG pValues`,
+                           `LONG buf[16]`) shown without their VAR header (S-136)
     assumes (the names the wrap declares, 4.2 / 4.4):
       NAME              operand: trailing `DAT NAME long 0`; for pasm2-inline a
                         LOCAL of the wrapper method (hub DAT longs fail there)
@@ -95,7 +98,16 @@ MANIFEST SCHEMA
       NAME()->R/N       callee stub `PRI NAME(p1..pN) : r1..rR`  (R, N optional)
       OBJ.METHOD(N)     method of a generated stub object; the object FILE is the
                         one the block's own `OBJ OBJ : "file"` line names
+      OBJ.METHOD(N)->T  the same, its result typed T (a structure the object exports)
       file:NAME         an empty file NAME in the compile directory (FILE/#include)
+      struct:NAME(MEMBERS)       a leading `CON` + `  STRUCT NAME(MEMBERS)` (BEFORE the block:
+                                a method header may use the type): a structure type the
+                                block uses but does not define (S-123)
+      OBJ.struct:NAME(MEMBERS)   a structure the generated stub object OBJ EXPORTS, so the
+                                block can say `OBJ.NAME` in a VAR / parameter (the object
+                                file gets `CON` + `STRUCT NAME(MEMBERS)`)
+      NAME:TYPE         trailing `VAR` + `  TYPE NAME`: a variable of a declared
+                        structure type (TYPE may be `^TYPE` or `OBJ.TYPE`)
     A program never gets a wrap, an assumes list or a language directive: it must
     compile as shown. The manifest carries NO compiler version (PL-004).
 
@@ -180,7 +192,8 @@ KB_DIR = os.path.join("deliverables", "ai", "P2")
 MANIFEST_DIR = os.path.join("engineering", "tools", "validation", "kb-compile-manifest")
 CODE_KEYS_FILE = "_code-keys.yaml"
 MAIN_NAME = "kb.spin2"
-WRAPS = ("spin2-top", "spin2-method", "spin2-method-result", "pasm2-dat", "pasm2-hub", "pasm2-inline")
+WRAPS = ("spin2-top", "spin2-method", "spin2-method-result", "spin2-var", "pasm2-dat", "pasm2-hub",
+         "pasm2-inline")
 CLASSES = ("program", "fragment", "never", "not-code")
 ENTRY_KEYS = {"at", "fp", "compile", "wrap", "assumes", "reason", "fails_at",
               "spin2_version", "with", "finding"}
@@ -509,12 +522,22 @@ def parse_assume(s):
     if m:
         return {"kind": "stub", "name": m.group(1), "nret": int(m.group(2) or 0),
                 "nparam": int(m.group(3) or 0), "raw": s}
-    m = re.fullmatch(r"(%s)\.(%s)\((\d+)\)" % (NAME_RE, NAME_RE), s)
+    m = re.fullmatch(r"(%s)\.(%s)\((\d+)\)(?:->(%s))?" % (NAME_RE, NAME_RE, NAME_RE), s)
     if m:
-        return {"kind": "objm", "inst": m.group(1), "name": m.group(2), "n": int(m.group(3)), "raw": s}
+        return {"kind": "objm", "inst": m.group(1), "name": m.group(2), "n": int(m.group(3)),
+                "rtype": m.group(4), "raw": s}
     m = re.fullmatch(r"file:(.+)", s)
     if m:
         return {"kind": "file", "name": m.group(1), "raw": s}
+    m = re.fullmatch(r"struct:(%s)\((.+)\)" % NAME_RE, s)
+    if m:
+        return {"kind": "struct", "name": m.group(1), "members": m.group(2), "raw": s}
+    m = re.fullmatch(r"(%s)\.struct:(%s)\((.+)\)" % (NAME_RE, NAME_RE), s)
+    if m:
+        return {"kind": "objstruct", "inst": m.group(1), "name": m.group(2), "members": m.group(3), "raw": s}
+    m = re.fullmatch(r"(%s(?:\[[0-9]+\])?):(\^?%s(?:\.%s)?)" % (NAME_RE, NAME_RE, NAME_RE), s)
+    if m:
+        return {"kind": "typed", "name": m.group(1), "type": m.group(2), "raw": s}
     return None
 
 
@@ -750,6 +773,14 @@ def build(wrap, body, assumes, version=None, withs=(), append_pub=False):
         add("wrap", "version", ["{Spin2_v%d}" % version])
     for label, t in withs:
         add("with", label, dedent_lines(t))
+    # structure types the block uses but does not define come FIRST: a method header such as
+    # `PUB m() | ^point ptr` needs the type before it is read
+    structs = [p for p in parsed if p and p["kind"] == "struct"]
+    if structs:
+        add("wrap", "hdr", ["CON"])
+        for p in structs:
+            adddecl("  STRUCT %s(%s)" % (p["name"], p["members"]), p["raw"], "struct")
+        add("wrap", "hdr", [""])
     ind = lambda n: ["%s%s" % (" " * n, l) if l.strip() else l for l in bl]  # noqa: E731
     if wrap == "spin2-top":
         add("body", None, bl)
@@ -758,6 +789,10 @@ def build(wrap, body, assumes, version=None, withs=(), append_pub=False):
     elif wrap in ("spin2-method", "spin2-method-result"):
         add("wrap", "head", ["PUB __kbgate()" + (" : __kbres" if wrap == "spin2-method-result" else "")])
         add("body", None, ind(2))
+    elif wrap == "spin2-var":
+        add("wrap", "head", ["VAR"])
+        add("body", None, ind(2))
+        add("wrap", "pub", ["", "PUB __kbgate()"])
     elif wrap in ("pasm2-dat", "pasm2-hub"):
         add("wrap", "head", ["DAT", "\t\torg\t0" if wrap == "pasm2-dat" else "\t\torgh"])
         add("body", None, bl)
@@ -784,25 +819,40 @@ def build(wrap, body, assumes, version=None, withs=(), append_pub=False):
             params = ", ".join("p%d" % i for i in range(1, p["nparam"] + 1))
             rets = ", ".join("r%d" % i for i in range(1, p["nret"] + 1))
             adddecl("PRI %s(%s)%s" % (p["name"], params, (" : " + rets) if rets else ""), p["raw"], "stub")
+    typed = [p for p in parsed if p and p["kind"] == "typed"]
+    if typed:
+        add("wrap", "hdr", ["", "VAR"])
+        for p in typed:
+            adddecl("  %s %s" % (p["type"], p["name"]), p["raw"], "typed")
     b.text = "\n".join(lines) + "\n"
     # stub objects and files (generated into the compile directory)
-    objm = [p for p in parsed if p and p["kind"] == "objm"]
+    objm = [p for p in parsed if p and p["kind"] in ("objm", "objstruct")]
     if objm:
         omap = obj_decls(b.text)
         byfile = defaultdict(dict)
+        structs_in = defaultdict(list)  # object file -> [struct decl line]
         for p in objm:
             lit = omap.get(p["inst"].lower())
             if lit is None:
                 b.error = "assumes %r but the block declares no OBJ instance %r" % (p["raw"], p["inst"])
                 continue
             meths = byfile[obj_filename(lit)]
+            if p["kind"] == "objstruct":  # a structure the stub object EXPORTS (`obj.NAME` types)
+                structs_in[obj_filename(lit)].append("  STRUCT %s(%s)" % (p["name"], p["members"]))
+                continue
             k = p["name"].lower()  # Spin2 names are case-insensitive: one stub method per name
             if k not in meths or meths[k][1] < p["n"]:
-                meths[k] = (p["name"], p["n"])
+                meths[k] = (p["name"], p["n"], p.get("rtype"))
         for fn, meths in byfile.items():
-            b.files[fn] = "".join(
-                "PUB %s(%s) : r\n" % (m, ", ".join("p%d" % i for i in range(1, n + 1)))
-                for m, n in meths.values())
+            text = ""
+            if structs_in.get(fn):  # the exporting object needs the block's language version too
+                text = ("{Spin2_v%d}\n" % version if version else "") + "CON\n" + "\n".join(structs_in[fn]) + "\n\n"
+            if structs_in.get(fn) and not meths:
+                meths = {"__kbstub": ("__kbstub", 0, None)}  # an object file must hold a method
+            b.files[fn] = text + "".join(
+                "PUB %s(%s) : %sr\n" % (m, ", ".join("p%d" % i for i in range(1, n + 1)),
+                                        (rt + " ") if rt else "")
+                for m, n, rt in meths.values())
     for p in parsed:
         if p and p["kind"] == "file":
             b.files.setdefault(p["name"], "")
@@ -1181,8 +1231,38 @@ def harness(body, wrap, exclude=frozenset(), seed_dbg=None):
             "error": "loop bound reached (last: %s)" % describe(b, res, None)[0], "names": []}
 
 
+def var_only(toks):
+    """True when EVERY code line of the bare block is a VAR-section declaration, read from
+    the compiler's token types: each comma-separated part opens with an optional `^`
+    (type_op) then a size token (BYTE/WORD/LONG, type_size) then the declared name
+    (type_undefined). Executable statements never open that way."""
+    by_line = defaultdict(list)
+    for t in toks:
+        if t.typ not in ("type_end", "type_end_file"):
+            by_line[t.line].append(t)
+    if not by_line:
+        return False
+    for _ln, ts in by_line.items():
+        ts = sorted(ts, key=lambda t: t.col)
+        parts, cur = [], []
+        for t in ts:
+            if t.typ == "type_comma":
+                parts.append(cur)
+                cur = []
+            else:
+                cur.append(t)
+        parts.append(cur)
+        for p in parts:
+            i = 1 if p and p[0].typ == "type_op" else 0
+            if not (len(p) > i + 1 and p[i].typ == "type_size" and p[i + 1].typ == "type_undefined"):
+                return False
+    return True
+
+
 def shape_order(toks):
     """Wrap order from what the compiler saw in the bare block."""
+    if var_only(toks):  # a VAR declaration read as DAT data is a false pass (S-136): VAR first
+        return ["spin2-var", "pasm2-dat", "spin2-method"]
     top = pasm = False
     for t in toks:
         if t.typ == "type_block" and t.col == 0:
@@ -2017,6 +2097,49 @@ def run_negative_controls():
     rec(17, "`NBUS=con` (0) fails as an object count; `NBUS=con:4` passes", "plain FAIL, valued PASS",
         "plain %s; valued %s" % (nc_summary(r0), nc_summary(r4)),
         [p.kind for p in r0["problems"]] == ["FAIL"] and not r4["problems"])
+    # NC18 VAR declaration lines (S-136): the proposer picks spin2-var, never DAT-data pasm2-dat
+    def propose_text(text):
+        r = nc_root([text], lambda cs: None)
+        pr, _c = find_candidates(r, ["nc.yaml"], {"code"})
+        return pr["nc.yaml"][0], propose_one(pr["nc.yaml"][0])
+
+    c18, p18 = propose_text("BYTE flag\nLONG buf[16]\n")
+    gate18 = None
+    if p18["outcome"] == "PASS" and p18["compile"] == "fragment":
+        gate18 = assert_entry(c18, {"compile": "fragment", "wrap": p18["wrap"], "assumes": p18["assumes"]}, [])
+    rec(18, "block of VAR declaration lines: proposer picks spin2-var (not pasm2-dat), gate passes it", "PASS, spin2-var",
+        "%s wrap=%s; gate %s" % (p18["outcome"], p18.get("wrap"), "PASS" if gate18 is None else gate18.kind),
+        p18["outcome"] == "PASS" and p18.get("wrap") == "spin2-var" and gate18 is None)
+    v_stmt = var_only(elementize("x := 5\nbuf[1] := x\n")[0])
+    v_data = var_only(elementize("BYTE 1, 2, 3\n")[0])    # DAT data: a size token then a constant
+    v_decl = var_only(elementize("LONG a, BYTE b[4]\n^LONG p\n")[0])
+    rec("18b", "executable statements and DAT data are NOT VAR declarations; a declaration list is",
+        "False / False / True", "%s / %s / %s" % (v_stmt, v_data, v_decl),
+        v_stmt is False and v_data is False and v_decl is True)
+    # NC19 structure types the block does not define (S-123)
+    def run_entry(text, **entry):
+        r = nc_root([text], lambda cs: None)
+        pr, _c = find_candidates(r, ["nc.yaml"], {"code"})
+        e = dict(compile="fragment", **entry)
+        errs = validate_entry(dict(e, at="x", fp="0" * 16), "nc19")
+        v = assert_entry(pr["nc.yaml"][0], e, [])
+        return errs, v
+
+    sdef = "struct:point_t(LONG x, LONG y)"
+    errs, v_with = run_entry("p.x := 100\n", wrap="spin2-method", spin2_version=45, assumes=[sdef, "p:point_t"])
+    _e, v_wo = run_entry("p.x := 100\n", wrap="spin2-method", spin2_version=45, assumes=["p:point_t"])
+    rec("19a", "local structure type: `struct:` + `NAME:TYPE` passes; without the struct it fails", "PASS / FAIL",
+        "with %s %s; without %s" % ("PASS" if v_with is None else v_with.kind, errs,
+                                    "PASS" if v_wo is None else v_wo.kind),
+        v_with is None and not errs and v_wo is not None and v_wo.kind == "FAIL")
+    imp = 'OBJ\n  sens : "sensor"\n\nVAR\n  sens.reading_t r\n\nPUB main()\n  r := sens.get()\n'
+    errs, v_obj = run_entry(imp, wrap="spin2-top", spin2_version=45,
+                            assumes=["sens.get(0)->reading_t", "sens.struct:reading_t(LONG a, LONG b)"])
+    _e, v_noobj = run_entry(imp, wrap="spin2-top", spin2_version=45, assumes=["sens.get(0)->reading_t"])
+    rec("19b", "imported structure type: `OBJ.struct:` exported by the stub object passes; without it fails",
+        "PASS / FAIL", "with %s %s; without %s" % ("PASS" if v_obj is None else v_obj.kind, errs,
+                                                    "PASS" if v_noobj is None else v_noobj.kind),
+        v_obj is None and not errs and v_noobj is not None and v_noobj.kind == "FAIL")
     ok = all(r[4] for r in results)
     for nid, desc, expected, observed, good in results:
         print("NC%-4s %-4s %s | expected %s | observed %s" % (nid, "ok" if good else "BAD", desc, expected, observed))
