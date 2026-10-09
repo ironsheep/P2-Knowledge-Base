@@ -1,0 +1,60 @@
+# engineering/tools/validation/kb-compile-manifest/language/fundamentals/identifier-rules.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: invalid_identifier_examples[0].example
+    fp: "dd130a849d7b29e5"
+    compile: not-code
+    reason: "an identifier shown as an INVALID name (a bare token, not a statement): alone it fails because a lone token is no statement, which is not the rule it illustrates, so a `never` would assert nothing about the identifier rule; the rule itself was checked separately (this token as a VAR / local name is rejected by pnut-ts)"
+  - at: invalid_identifier_examples[1].example
+    fp: "4a2e07ca12ef2348"
+    compile: not-code
+    reason: "an identifier shown as an INVALID name (a bare token, not a statement): alone it fails because a lone token is no statement, which is not the rule it illustrates, so a `never` would assert nothing about the identifier rule; the rule itself was checked separately (this token as a VAR / local name is rejected by pnut-ts)"
+  - at: invalid_identifier_examples[2].example
+    fp: "c7a5f1487238bc89"
+    compile: not-code
+    reason: "an identifier shown as an INVALID name (a bare token, not a statement): alone it fails because a lone token is no statement, which is not the rule it illustrates, so a `never` would assert nothing about the identifier rule; the rule itself was checked separately (this token as a VAR / local name is rejected by pnut-ts)"
+  - at: invalid_identifier_examples[3].example
+    fp: "02d3d41bc7c33298"
+    compile: not-code
+    reason: "an identifier shown as an INVALID name (a bare token, not a statement): alone it fails because a lone token is no statement, which is not the rule it illustrates, so a `never` would assert nothing about the identifier rule; the rule itself was checked separately (this token as a VAR / local name is rejected by pnut-ts)"
+  - at: invalid_identifier_examples[4].example
+    fp: "19dce2cf1676a12f"
+    compile: never
+    wrap: spin2-method
+    reason: "the identifier is shown as invalid because it is too long; pnut-ts rejects it at line 1 with \"Symbol exceeds 30 characters\". The teaching point (too long is a compile error) holds; the page states the limit as 32 and the name as 33 characters, both wrong (limit 30, name 34): see the observation"
+    fails_at: 1
+  - at: invalid_identifier_examples[5].example
+    fp: "b4c3cf09c8448cf3"
+    compile: not-code
+    reason: "an identifier shown as an INVALID name (a bare token, not a statement): alone it fails because a lone token is no statement, which is not the rule it illustrates, so a `never` would assert nothing about the identifier rule; the rule itself was checked separately (this token as a VAR / local name is rejected by pnut-ts)"
+  - at: naming_conventions.common_patterns.constants.example
+    fp: "7bc1ee3003503b6d"
+    compile: not-code
+    reason: "a list of example identifier names in a naming-convention table (comma-separated names, with `:retry` / `.local_label` shown as label spellings); notation, not a statement. As PASM or a CON enumeration it would compile by accident"
+  - at: naming_conventions.common_patterns.variables.example
+    fp: "953d2e1008a00f19"
+    compile: not-code
+    reason: "a list of example identifier names in a naming-convention table (comma-separated names, with `:retry` / `.local_label` shown as label spellings); notation, not a statement. As PASM or a CON enumeration it would compile by accident"
+  - at: naming_conventions.common_patterns.methods.example
+    fp: "594a8a6fd356b073"
+    compile: not-code
+    reason: "a list of example identifier names in a naming-convention table (comma-separated names, with `:retry` / `.local_label` shown as label spellings); notation, not a statement. As PASM or a CON enumeration it would compile by accident"
+  - at: naming_conventions.common_patterns.private_elements.example
+    fp: "899a251b534989ce"
+    compile: not-code
+    reason: "a list of example identifier names in a naming-convention table (comma-separated names, with `:retry` / `.local_label` shown as label spellings); notation, not a statement. As PASM or a CON enumeration it would compile by accident"
+  - at: naming_conventions.common_patterns.labels.example
+    fp: "3962b4a60a197b15"
+    compile: not-code
+    reason: "a list of example identifier names in a naming-convention table (comma-separated names, with `:retry` / `.local_label` shown as label spellings); notation, not a statement. As PASM or a CON enumeration it would compile by accident"
+  - at: common_pitfalls[2].wrong
+    fp: "a727530560dd57b1"
+    compile: never
+    wrap: spin2-top
+    reason: "a `wrong:` block whose teaching point is the compile error: `repeat` is a reserved word and cannot name a variable (the block comments \"'repeat' is a keyword\"); pnut-ts rejects line 2"
+    fails_at: 2
+  - at: common_pitfalls[2].correct
+    fp: "0329d52ede6716d8"
+    compile: fragment
+    wrap: spin2-top

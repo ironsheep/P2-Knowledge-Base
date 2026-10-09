@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/guides/quick-queries.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: "questions[\"how do I blink an LED\"].example"
+    fp: "9f80dca3f912f4a3"
+    compile: program
+  - at: "questions[\"how do I read a button\"].example"
+    fp: "64f9b82db07fc557"
+    compile: fragment
+    wrap: spin2-method
+  - at: "questions[\"how do I set up the clock\"].example"
+    fp: "c65c84165448c4be"
+    compile: fragment
+    wrap: spin2-top
+  - at: "questions[\"how do I start another COG\"].example"
+    fp: "63701a77fe4dcf36"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [method()->0/0, stack]

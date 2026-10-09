@@ -1,0 +1,99 @@
+# engineering/tools/validation/kb-compile-manifest/language/fundamentals/variable-scoping-best-practices.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: variable_shadowing.example.code
+    fp: "297209359f9a9967"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-083"
+  - at: critical_best_practice.implementation[0]
+    fp: "bffd8dbdce0e6bb2"
+    compile: not-code
+    reason: "YAML advice sentence (English), not code"
+  - at: critical_best_practice.implementation[1]
+    fp: "294dd7dcca4bda16"
+    compile: not-code
+    reason: "YAML advice sentence (English), not code"
+  - at: critical_best_practice.implementation[2]
+    fp: "859adaae1f3ff20a"
+    compile: not-code
+    reason: "YAML advice sentence (English), not code"
+  - at: naming_strategies.prevent_conflicts.var_variables.examples[0]
+    fp: "62eabfc101a3719a"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.var_variables.examples[1]
+    fp: "219b707648177616"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.var_variables.examples[2]
+    fp: "9b49b60865fe2c53"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.parameters.examples[0]
+    fp: "b500bc78ac328010"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.parameters.examples[1]
+    fp: "3209852dc2cf9995"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.parameters.examples[2]
+    fp: "df580484a0ef3f03"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.return_values.examples[0]
+    fp: "f6a214f7a5fcda0c"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.return_values.examples[1]
+    fp: "aee408847d35e44e"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.return_values.examples[2]
+    fp: "343a156d81205e53"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.local_variables.examples[0]
+    fp: "a6864eb339b0e1f6"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.local_variables.examples[1]
+    fp: "2d51f2b60d1f1997"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: naming_strategies.prevent_conflicts.local_variables.examples[2]
+    fp: "663c5d886c36735c"
+    compile: not-code
+    reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
+  - at: common_shadowing_scenarios[0].problematic_code
+    fp: "d5073e0e70cb415d"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_register()->1/0]
+    finding: "S-083"
+  - at: common_shadowing_scenarios[0].fixed_code
+    fp: "af3e6853c69b3241"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [read_register()->1/0]
+  - at: common_shadowing_scenarios[1].problematic_code
+    fp: "611656ec1779da98"
+    compile: fragment
+    wrap: spin2-top
+    finding: "S-083"
+  - at: common_shadowing_scenarios[1].fixed_code
+    fp: "dc7e9f933dd9dd91"
+    compile: program
+  - at: common_shadowing_scenarios[2].problematic_code
+    fp: "56d714a3e1cbb113"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_something()->0/1]
+    finding: "S-083"
+  - at: common_shadowing_scenarios[2].fixed_code
+    fp: "baf6b713b15ab35b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [do_something()->0/1]

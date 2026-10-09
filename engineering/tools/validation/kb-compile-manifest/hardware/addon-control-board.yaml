@@ -1,0 +1,18 @@
+# engineering/tools/validation/kb-compile-manifest/hardware/addon-control-board.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_patterns.spin2.obex_driver_usage
+    fp: "48a16c071b152267"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [ctrl.start(1), ctrl.wr_leds(1), ctrl.rd_btns(0)]
+  - at: code_patterns.spin2.initialization
+    fp: "29621392c25ab514"
+    compile: program
+  - at: code_patterns.spin2.led_control
+    fp: "d3fced97ca1deb6a"
+    compile: program
+  - at: code_patterns.spin2.button_read
+    fp: "dd5cd940902071fa"
+    compile: program

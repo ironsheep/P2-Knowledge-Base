@@ -1,0 +1,24 @@
+# engineering/tools/validation/kb-compile-manifest/hardware/edge-32mb-module.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_patterns.spin2.obex_driver_usage
+    fp: "19afcad9dc6e5ef9"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [src_buf, dst_buf, psram.start(0), psram.write(3), psram.read(3)]
+  - at: code_patterns.spin2.initialization
+    fp: "719904db69812dcd"
+    compile: program
+  - at: code_patterns.spin2.read_write
+    fp: "b29e80b109e3860d"
+    compile: program
+  - at: code_patterns.spin2.fill_operations
+    fp: "5e5667355f494253"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [fill()->1/5]
+  - at: code_patterns.spin2.error_codes
+    fp: "1752e488c1509818"
+    compile: fragment
+    wrap: spin2-top

@@ -1,0 +1,20 @@
+# engineering/tools/validation/kb-compile-manifest/tools/pnut-ts-compiler.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: pnut_ts.validation_workflow.step1_validate.example
+    fp: "907e07f6b7d640be"
+    compile: not-code
+    reason: "shell session: command lines and comments (`pnut_ts ...`, `pnut-term-ts ...`, `echo ... > test.spin2`), a terminal transcript, not Spin2 / PASM2 source; the PASM2 inside the echo quotes is a three-line `DAT` snippet with no stand-alone block of its own"
+  - at: pnut_ts.validation_workflow.step2_listing.example
+    fp: "e80786e20f114834"
+    compile: not-code
+    reason: "shell session: command lines and comments (`pnut_ts ...`, `pnut-term-ts ...`, `echo ... > test.spin2`), a terminal transcript, not Spin2 / PASM2 source; the PASM2 inside the echo quotes is a three-line `DAT` snippet with no stand-alone block of its own"
+  - at: pnut_ts.validation_workflow.step3_includes.example
+    fp: "53f64dec7e50bbac"
+    compile: not-code
+    reason: "shell session: command lines and comments (`pnut_ts ...`, `pnut-term-ts ...`, `echo ... > test.spin2`), a terminal transcript, not Spin2 / PASM2 source; the PASM2 inside the echo quotes is a three-line `DAT` snippet with no stand-alone block of its own"
+  - at: pnut_term_ts.workflow.example
+    fp: "22786c21544d8a1b"
+    compile: not-code
+    reason: "shell session: command lines and comments (`pnut_ts ...`, `pnut-term-ts ...`, `echo ... > test.spin2`), a terminal transcript, not Spin2 / PASM2 source; the PASM2 inside the echo quotes is a three-line `DAT` snippet with no stand-alone block of its own"

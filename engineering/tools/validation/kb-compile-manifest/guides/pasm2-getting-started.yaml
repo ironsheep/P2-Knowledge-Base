@@ -1,0 +1,299 @@
+# engineering/tools/validation/kb-compile-manifest/guides/pasm2-getting-started.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: file_structure.minimal_program.example
+    fp: "e61ad3a44b8d6463"
+    compile: program
+  - at: file_structure.clock_setup.manual_switch_example
+    fp: "f6652f13d081ef20"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: instruction_format.basic_syntax.examples[0]
+    fp: "84f4ac430b8a62dc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: instruction_format.basic_syntax.examples[1]
+    fp: "4e57495af61ee662"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [total, value]
+  - at: instruction_format.basic_syntax.examples[2]
+    fp: "b3731af34cd421af"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [loop]
+  - at: instruction_format.operand_types.register.example
+    fp: "c7403bae847a8fd5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: instruction_format.operand_types.immediate.examples[0]
+    fp: "c85d76ab734844ea"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x]
+  - at: instruction_format.operand_types.immediate.examples[1]
+    fp: "d65c0c7b5d54d9b9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x]
+  - at: instruction_format.operand_types.address.example
+    fp: "ab1755887bdb9ebf"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [loop]
+  - at: instruction_format.instruction_effects.WC.usage
+    fp: "1ee9f4cc55ece458"
+    compile: not-code
+    reason: "YAML `usage:` text, an English description of what the C / Z flag effect does; prose, not code"
+  - at: instruction_format.instruction_effects.WC.example
+    fp: "f80a32d3a119943e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: instruction_format.instruction_effects.WZ.usage
+    fp: "5fef27551e411955"
+    compile: not-code
+    reason: "YAML `usage:` text, an English description of what the C / Z flag effect does; prose, not code"
+  - at: instruction_format.instruction_effects.WZ.example
+    fp: "7d209f91464c2d7b"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: instruction_format.instruction_effects.WCZ.usage
+    fp: "c109634bbc4794ce"
+    compile: not-code
+    reason: "YAML `usage:` text, an English description of what the C / Z flag effect does; prose, not code"
+  - at: instruction_format.instruction_effects.WCZ.example
+    fp: "a199bc079905a095"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y]
+  - at: core_instructions.data_movement.MOV.example
+    fp: "dc9cb49a031533b8"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [result, input]
+  - at: core_instructions.data_movement.SETS.example
+    fp: "10eb0b65d4566153"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [patch, target]
+  - at: core_instructions.data_movement.SETD.example
+    fp: "455658908d4a5346"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [patch, target]
+  - at: core_instructions.arithmetic.ADD.example
+    fp: "dfd9d1497ec8c9b5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [total, value]
+  - at: core_instructions.arithmetic.SUB.example
+    fp: "2238079fc85dc432"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count]
+  - at: core_instructions.arithmetic.MUL.example
+    fp: "a3ef82b38df55475"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [product, factor]
+  - at: core_instructions.arithmetic.NEG.example
+    fp: "cd33ae10e0b5303c"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value]
+  - at: core_instructions.logical.AND.example
+    fp: "5fd67475cfcede08"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags]
+  - at: core_instructions.logical.OR.example
+    fp: "cbfdc2d445aa87b6"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [config]
+  - at: core_instructions.logical.XOR.example
+    fp: "052cdfbcf942e8f5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, mask]
+  - at: core_instructions.logical.NOT.example
+    fp: "4015f3f171c591dc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [inverted, original]
+  - at: core_instructions.comparison.CMP.example
+    fp: "fc7a60d57356ba4e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count]
+  - at: core_instructions.comparison.TEST.example
+    fp: "e754de8fd165e25a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [status]
+  - at: core_instructions.branching.JMP.example
+    fp: "5b32cbbcf7f30ea3"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [done]
+  - at: core_instructions.branching.CALL.example
+    fp: "3330cb8fec5b67a4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [process_data]
+  - at: core_instructions.branching.RET.example
+    fp: "e961e779171076be"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: core_instructions.branching.DJNZ.example
+    fp: "c2cea712c94e82e9"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [counter, start]
+  - at: core_instructions.branching.TJZ.example
+    fp: "7e2c5c2b0a8742a7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [countdown, done]
+  - at: core_instructions.branching.TJNZ.example
+    fp: "9ae8dbb4e92851b5"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [pending, start]
+  - at: core_instructions.conditional_execution.IF_NZ.example
+    fp: "178077f325998791"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [continue]
+  - at: core_instructions.conditional_execution.IF_C.example
+    fp: "2a8f64145d242577"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [below]
+  - at: core_instructions.hub_access.RDLONG.example
+    fp: "b8c453d2bbc7f21a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value]
+  - at: core_instructions.hub_access.WRLONG.example
+    fp: "3a02630512825be7"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [result]
+  - at: core_instructions.hub_access.RDBYTE.example
+    fp: "2c9c13f542706735"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [char]
+  - at: core_instructions.hub_access.WRBYTE.example
+    fp: "1989a79d9bc3d0cc"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [char]
+  - at: core_instructions.timing.WAITX.example
+    fp: "a182a96dc19400da"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: core_instructions.timing.GETCT.example
+    fp: "d3e7d903b00855f1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [timestamp]
+  - at: addressing_modes.immediate.examples[0]
+    fp: "ab01541ccff8699e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x]
+  - at: addressing_modes.immediate.examples[1]
+    fp: "674c0a2136a6e853"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x]
+  - at: addressing_modes.register_direct.example
+    fp: "cac7f5ba708eaf51"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [total, amount]
+  - at: addressing_modes.pointer_with_auto_increment.PTRA_increment.example
+    fp: "90520ea2c0559660"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data]
+  - at: addressing_modes.pointer_with_auto_increment.PTRA_decrement.example
+    fp: "8b0de453b517edc4"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data]
+  - at: addressing_modes.pointer_with_auto_increment.PTRB_increment.example
+    fp: "86e883292e86a102"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [data]
+  - at: common_patterns.loop_with_counter.pattern
+    fp: "321bf9cde58fbc5e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [counter]
+  - at: common_patterns.subroutine.pattern
+    fp: "c961cae37f04d19e"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: common_patterns.conditional_execution.pattern
+    fp: "cabdfb6ec7b075b1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [value, threshold=con, result, equal_value=con, not_equal_value=con]
+  - at: common_patterns.hub_memory_access.pattern
+    fp: "be1b92bcd7bce19e"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [source_addr, dest_addr, count, data]
+  - at: inline_pasm2_in_spin2.basic_inline.example
+    fp: "ee905d20ee30285f"
+    compile: program
+  - at: inline_pasm2_in_spin2.accessing_parameters.example
+    fp: "1fc9542498b552e0"
+    compile: program
+  - at: inline_pasm2_in_spin2.returning_values.example
+    fp: "5bccc480a7e98cb4"
+    compile: program
+  - at: labels_and_symbols.global_labels.example
+    fp: "3a0c39a3f9340279"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [process]
+  - at: labels_and_symbols.local_labels.example
+    fp: "4ad84ec3d9a79cea"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count]
+  - at: assembler_directives.ORG.example
+    fp: "0e6739cd5c48f935"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: assembler_directives.FIT.example
+    fp: "416ac2e66d795875"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: assembler_directives.BYTE_WORD_LONG.example
+    fp: "e37e77506e377583"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: string_handling.accessing_strings.pattern
+    fp: "dd1ea0040fa7700c"
+    compile: program
+  - at: flag_behavior.flag_persistence.example
+    fp: "0fecd258a6ff268a"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, y, a, b, result]
+  - at: timing_considerations.precise_timing.example
+    fp: "d178d0e6c1a277a2"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [start_time, end_time]

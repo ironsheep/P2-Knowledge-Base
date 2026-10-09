@@ -1,0 +1,12 @@
+# engineering/tools/validation/kb-compile-manifest/hardware/addon-digital-video-out.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: unused_connector_signals.acc_5v_bridge.implementation
+    fp: "36f2198f8d160118"
+    compile: not-code
+    reason: "YAML description prose (English sentences about the board, a header or a resource), not code"
+  - at: unused_connector_signals.acc_5v_bridge.usage
+    fp: "acb068937e4d1e0c"
+    compile: not-code
+    reason: "YAML description prose (English sentences about the board, a header or a resource), not code"

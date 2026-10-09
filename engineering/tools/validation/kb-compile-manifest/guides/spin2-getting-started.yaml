@@ -1,0 +1,160 @@
+# engineering/tools/validation/kb-compile-manifest/guides/spin2-getting-started.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: core_block_types.CON.example
+    fp: "f86d1ae84c9a4a92"
+    compile: fragment
+    wrap: spin2-top
+  - at: core_block_types.OBJ.example
+    fp: "ac804dcb8d849cc0"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [serial.__kbstub(0), led.__kbstub(0)]
+  - at: core_block_types.VAR.example
+    fp: "67fc318b0b7ce7d9"
+    compile: fragment
+    wrap: spin2-top
+  - at: core_block_types.DAT.example
+    fp: "97c223d6a6d33f97"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [x]
+    finding: "S-078"
+  - at: core_block_types.PUB.example
+    fp: "b58c90295840ac48"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [currentValue]
+  - at: core_block_types.PRI.example
+    fp: "22e5f97e3020b849"
+    compile: fragment
+    wrap: spin2-top
+  - at: method_signature_components.complete_signature.example
+    fp: "551e152b231a8168"
+    compile: program
+  - at: control_flow.conditional.IF_THEN.example
+    fp: "a0b5508839d89ddf"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x]
+    finding: "S-075"
+  - at: control_flow.conditional.IF_ELSEIF_ELSE.example
+    fp: "6d4b54d5d0ecafc0"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [temp, status, FROZEN=con, BOILING=con, NORMAL=con]
+  - at: control_flow.conditional.CASE.example
+    fp: "1b80ac2744d8f9ae"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, digit, multiple, invalid]
+  - at: control_flow.loops.REPEAT_FOREVER.usage
+    fp: "2ec1d5b449ffe5ec"
+    compile: not-code
+    reason: "YAML `usage:` text, an English description (a heading phrase); prose, not code"
+  - at: control_flow.loops.REPEAT_FOREVER.example
+    fp: "4d5cb57b083e8b34"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [checkSensors()->0/0, updateDisplay()->0/0]
+  - at: control_flow.loops.REPEAT_COUNT.example
+    fp: "c098d5c3cf8cd73b"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [flash_led()->0/0]
+  - at: control_flow.loops.REPEAT_WITH_VARIABLE.example
+    fp: "663669a55e9e65bb"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [idx, buffer, process()->0/1]
+  - at: control_flow.loops.REPEAT_WHILE.example
+    fp: "4bdf6b699c73ffd5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [count, maximum]
+  - at: control_flow.loops.REPEAT_UNTIL.example
+    fp: "82a5c3b7a0b7e2c1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ready]
+  - at: control_flow.loops.loop_control.example
+    fp: "d4e8658299ac8304"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [error, done, process()->0/0]
+  - at: essential_operators.logical.example
+    fp: "fbff0ba6d6a92ff1"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x]
+  - at: essential_operators.assignment.example
+    fp: "2148b2fc5aa8a5e3"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x]
+  - at: memory_access.direct_variable.example
+    fp: "d7ec66e8b1fe0bb5"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, myVariable]
+  - at: memory_access.pointer_syntax.example
+    fp: "217996829ca8a48a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, myVariable, ptrBuffer, index, data]
+  - at: memory_access.address_of.usage
+    fp: "eb92e018b5898abd"
+    compile: not-code
+    reason: "YAML `usage:` text, an English description (a heading phrase); prose, not code"
+  - at: memory_access.address_of.example
+    fp: "32fb3852ed954976"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ptr, buffer]
+  - at: object_usage.calling_methods.example
+    fp: "227bab2a409e5c79"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]
+    finding: "S-018"
+  - at: object_usage.object_arrays.example
+    fp: "30739b0b596cfa72"
+    compile: fragment
+    wrap: spin2-method
+    finding: "S-018"
+  - at: inline_pasm2.basic_inline.example
+    fp: "b26187e9a2c14b73"
+    compile: program
+  - at: inline_pasm2.data_exchange.spin_to_pasm.example
+    fp: "e4e351784513ccc7"
+    compile: program
+  - at: inline_pasm2.data_exchange.pasm_to_spin.example
+    fp: "beb347c9582e4be0"
+    compile: program
+  - at: common_patterns.application_structure.pattern
+    fp: "b69b5adeb43cea86"
+    compile: program
+  - at: common_patterns.using_objects.pattern
+    fp: "c75fd0154719a791"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [RX_PIN=con, TX_PIN=con, serial.start(3), serial.str(1)]
+  - at: common_patterns.state_machine.pattern
+    fp: "ce2eeea86dcc6aab"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [STATE_INIT=con, STATE_ACTIVE=con, doInit()->0/0, doWork()->0/0]
+  - at: language_version_directives.version_requirements.Spin2_v45.example
+    fp: "5634f1f74ec82af7"
+    compile: fragment
+    wrap: spin2-top
+  - at: language_version_directives.version_requirements.Spin2_v46.example
+    fp: "5fcc175b13476792"
+    compile: program
+  - at: language_version_directives.version_requirements.Spin2_v50.example
+    fp: "7f5b2ae6528455e6"
+    compile: program
+  - at: string_handling.string_constants.example
+    fp: "ef08a1c9512c42c9"
+    compile: program

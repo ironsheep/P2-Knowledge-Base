@@ -1,0 +1,209 @@
+[
+ {
+  "id": "O1",
+  "kind": "wrong-limit-and-wrong-examples (prose; the valid example does not compile)",
+  "severity": "drives wrong code",
+  "sites": [
+   "language/fundamentals/identifier-rules.yaml:15",
+   "language/fundamentals/identifier-rules.yaml:20-21",
+   "language/fundamentals/identifier-rules.yaml:66-67",
+   "language/fundamentals/identifier-rules.yaml:82-83",
+   "language/fundamentals/identifier-rules.yaml:154-156"
+  ],
+  "claim": "The page states the symbol-length limit as 32 and builds its examples on it. pnut-ts v1.55.8 rejects a 31-character name with 'Symbol exceeds 30 characters' (VAR + `LONG this_is_exactly_31_characters_x`; a 30-character name compiles: idcheck.py id8/id9). The 'valid, 32 chars' example `this_is_exactly_32_characters_x` (:67) is 31 characters and is rejected. The invalid example `this_identifier_is_way_too_long_33` (:82) is 34 characters, not 33. `the_current_motor_speed_value_now` (:155, '30 chars') is 33. The same KB says 30 in spin2-getting-started.yaml:478 and S-147 registers 30; the v55 text itself says 32 (spin2-v55-text.txt:166), so v55 and the compiler disagree and the page followed the document. The gated block #153 (the 34-char name) is a `never` whose compile error is real ('Symbol exceeds 30 characters') while the page's number is wrong.",
+  "source": "pnut-ts -q on scratch files (g10/t/n31.spin2, g10/idcheck.py); engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:166",
+  "mark": "traced (compiler); the document-vs-compiler conflict itself is an upstream lead"
+ },
+ {
+  "id": "O2",
+  "kind": "wrong-operator-facts (prose)",
+  "severity": "drives wrong code",
+  "sites": [
+   "guides/spin2-getting-started.yaml:294",
+   "guides/spin2-getting-started.yaml:299-300",
+   "guides/spin2-getting-started.yaml:311"
+  ],
+  "claim": "Four operator statements in the tutorial's essential_operators table are wrong. (1) :294 comparison operators `== <> < > =< =>`: Spin2 spells them `<=` and `>=`; `=<` is rejected (g10/t/c1.spin2: 'Expected end of line (m281)'); class of S-052, here in prose. (2) :300 `bitwise: \"&& || ! (bitwise versions)\"`: `&&` and `||` are the LOGICAL AND / OR (synonyms of AND, OR; the table :489, :491 'Logical AND/OR ... returns 0 or -1'); only `!` is a bitwise operator (bitwise NOT), and `&` `|` `^` are the bitwise AND/OR/XOR the same page lists in :304. (3) :299 lists NOT as the logical NOT but not its symbol `!!`. (4) :311 `post_effects: \"~~ (post-set), !! (post-clear)\"`: `var~` is post-clear and `var~~` post-set; `var!!` is post-logical-NOT (0 -> -1, non-0 -> 0); `!!` is not post-clear.",
+  "source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:416-420 (postfix operators), :428-429 (!!/NOT, !), :489 (&&), :491 (||)",
+  "mark": "traced"
+ },
+ {
+  "id": "O3",
+  "kind": "wrong-symbol (compiles)",
+  "severity": "drives wrong code",
+  "sites": [
+   "guides/spin2-getting-started.yaml:455",
+   "guides/spin2-getting-started.yaml:460"
+  ],
+  "claim": "The DITTO iteration index is `$$` (v50), not `$`: the feature line reads '$ (double-dollar) - iteration index within DITTO blocks' and the example is `LONG $77777777 + $   ' $ is 0, 1, 2, 3`. In the source `$$` is the 0..count-1 index and `$` is the origin (use of `$` is for branching inside the block). The block compiles (gate: program, PASS), but it generates $77777777 plus the origin, not +0..+3, so the comment is false; with `$$` it compiles too (g10/t/c5.spin2). Related to S-119 / S-192, which have the symbols the other way round.",
+  "source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:42 (v50 note: 'A special index variable $$ ... iterates from 0 to count - 1 ... To branch within the block, use $ (origin)')",
+  "mark": "traced"
+ },
+ {
+  "id": "O4",
+  "kind": "wrong-arity-against-the-real-object (stub hides it)",
+  "severity": "drives wrong code",
+  "sites": [
+   "guides/spin2-getting-started.yaml:336",
+   "guides/spin2-getting-started.yaml:397"
+  ],
+  "claim": "`serial.start(63, 62, 115_200)` and `serial.start(RX_PIN, TX_PIN, 115_200)` call jm_fullduplexserial's start with three arguments. The object is `pub start(rxpin, txpin, mode, baud) : result` (four parameters): the baud rate would land in `mode` and `baud` would be missing, so the call does not compile against the real object. The gate passes :397 because the harness stub `serial.start(3)` takes the three arguments the block uses; the stub cannot know the object's real signature. (The other objects in the tutorial check out: jm_pwm exists; the P2ES control / matrix methods used on the hardware pages exist with the arities used.)",
+  "source": "engineering/ingestion/external-inputs/source-code/obex-projects/2842-Full_Duplex_Serial/jm_fullduplexserial.spin2:121",
+  "mark": "traced"
+ },
+ {
+  "id": "O5",
+  "kind": "wrong-syntax (does not compile; block not in the gate's candidate set)",
+  "severity": "drives wrong code",
+  "sites": [
+   "guides/spin2-getting-started.yaml:506-507"
+  ],
+  "claim": "`debugging_support.basic_example` is `DEBUG(\"Value: \", DEC value)`. DEBUG formatters take parentheses; `DEC value` is rejected inside a method with 'Expected an expression term (m172)' (g10/t/d1.spin2, pnut-ts -d). The correct form is `DEBUG(\"Value: \", DEC(value))`. The sibling in the PASM2 guide (`DEBUG(\"Counter: \", UDEC(count))`, pasm2-getting-started.yaml:553-554) compiles in a method and in a DAT (d2, d3). Neither is a gate candidate (see O6).",
+  "source": "pnut-ts -d -q on g10/t/d1.spin2 (error) and d2.spin2 (parenthesised form compiles)",
+  "mark": "traced"
+ },
+ {
+  "id": "O6",
+  "kind": "gate coverage (finder misses guide code)",
+  "severity": "latent (gate coverage)",
+  "sites": [
+   "guides/pasm2-getting-started.yaml:519 (`defining_strings.syntax`)",
+   "guides/pasm2-getting-started.yaml:523-529 (`defining_strings.examples.simple / multiple / with_escapes`)",
+   "guides/pasm2-getting-started.yaml:553-554 (`debugging_support.basic_example`)",
+   "guides/spin2-getting-started.yaml:506-507 (`debugging_support.basic_example`)"
+  ],
+  "claim": "Code the two tutorials present is not a gate candidate, so it cannot be classified or compiled: `examples:` held as a mapping (`simple: |`, `multiple: |`, `with_escapes: |`) is not under net 1 (the key holds a mapping, the children are named simple/multiple/with_escapes), the lines open with a symbol (`message BYTE ...`) so net 2 does not recognise them, and the two `basic_example: |` DEBUG lines are not taken either. The one that matters is O5, a tutorial line that does not compile. Same family as S-109 (finder coverage).",
+  "source": "g10/input.json (no candidate for these addresses); gate census 192 candidates in 19 files",
+  "mark": "traced"
+ },
+ {
+  "id": "O7",
+  "kind": "tool-behaviour stated as KB fact; wrong command name and error texts",
+  "severity": "drives wrong code (every command line fails when copied)",
+  "sites": [
+   "tools/pnut-ts-compiler.yaml:10",
+   "tools/pnut-ts-compiler.yaml:22-31",
+   "tools/pnut-ts-compiler.yaml:62",
+   "tools/pnut-ts-compiler.yaml:67",
+   "tools/pnut-ts-compiler.yaml:73",
+   "tools/pnut-ts-compiler.yaml:112",
+   "tools/pnut-ts-compiler.yaml:121",
+   "tools/pnut-ts-compiler.yaml:75-83"
+  ],
+  "claim": "The compiler is called `pnut_ts` throughout (underscore). The installed command is `pnut-ts` (hyphen; `which pnut_ts` finds nothing, `pnut-ts --help` shows the options); the page's terminal command is `pnut-term-ts` (hyphen) in the same file, so the page is also inconsistent with itself. The option list (-l -v -q -o -d -F -D -I) matches `pnut-ts --help` v1.55.8, which also has -m -a -i -O -U -C and others the page omits. `common_errors` quotes four messages as the compiler's: 'Expected unique symbol', 'Symbol is not defined', \"Expected '#' or constant\", 'Value exceeds $1FF'. pnut-ts v1.55.8 says 'Symbol is already defined (m540)' (duplicate label), 'Undefined symbol', and 'Constant must be from 0 to 511 (m130)' (a 512 immediate); no message with the other wording was found. `jmp done` (no #) compiles, so \"Expected '#' or constant\" is not what a missing # produces either. pnut-term-ts is not installed here: its options (-d -t -p -b -l, default 2000000 baud) are NOT CHECKED. Doctrine: tool behaviour is not a KB fact; these belong to the tool's own help, not a table of quoted messages.",
+  "source": "pnut-ts --help; pnut-ts -q on g10/t/e1..e5.spin2 (m130, m540, 'Undefined symbol')",
+  "mark": "traced (pnut-ts); pnut-term-ts untested"
+ },
+ {
+  "id": "O8",
+  "kind": "unsourced figures in hardware pages",
+  "severity": "latent",
+  "sites": [
+   "hardware/addon-control-board.yaml:115-124 (pwm 1000 / 50 / 100000 Hz, 256 levels; debounce 20 ms; LED response 100 ns)",
+   "hardware/addon-led-matrix.yaml:104-110 (refresh_recommended_hz 120, at_120hz_pixel_us 148)",
+   "hardware/addon-serial-host.yaml:132-161 (capability claims beyond the guide: USB specification compliant power management, storage, camera, gaming controllers, Standard HID devices supported)"
+  ],
+  "claim": "The Product Guide's text (p2-eval-add-on-boards-text.txt) has none of these numbers or capabilities: for the Control board it says only 'Use PWM for brightness control' (:74-80), for the Matrix 'at least 50 times a second (50 Hz)' and ~4 mA per LED (:189-197), for the Serial Host 'keyboard and a mouse' and 500 mA load switches (:99-115). 148 us is 1e6/(120*56) = 148.8 truncated. All are presented as board facts.",
+  "source": "engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:74-80, :99-115, :189-197; grep for debounce / PWM frequency found nothing in boards/addon-control-64006a.md",
+  "mark": "traced (absence)"
+ },
+ {
+  "id": "O9",
+  "kind": "formula typo and a figure that does not follow",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "hardware/edge-32mb-module.yaml:299-301"
+  ],
+  "claim": "`burst_size.calculation` is '((MAX_CS_LOW_USEC * (freq/1000000)) - 132) >> 4) << 4': the parentheses do not balance (one opening parenthesis is missing at the front). The driver's line is `burst := (((MAX_CS_LOW_USEC*(freq/1000000)) - 132) >> 4) << 4`. `typical_at_200mhz: \"approximately 1280 bytes per burst\"` does not follow from it: at 200 MHz, 8*200 - 132 = 1468, >> 4 << 4 = 1456. The block-level API in code_patterns (:337-390) matches the driver (start, startx, read, write, fill*, ERR_* values).",
+  "source": "engineering/ingestion/external-inputs/source-code/obex-projects/4162-MegaYume_-_Mega_Drive_emulator/MegaYume-1.3/MegaYume-1.3/memstuff/psram.spin2:94 (formula), :50-55 (error codes), :70-84, :164, :191, :232-238 (signatures)",
+  "mark": "traced"
+ },
+ {
+  "id": "O10",
+  "kind": "wrong-equivalence (prose)",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "language/fundamentals/case-sensitivity.yaml:49-50"
+  ],
+  "claim": "`group: [LED_PIN, led_pin, Led_Pin, LedPin, ledpin]  meaning: All refer to the same constant`. Case is ignored; underscores are not. `LedPin` and `ledpin` are a different name from `LED_PIN` / `led_pin` / `Led_Pin`. Two groups (:43, :46) are right.",
+  "source": "language rule (case-insensitive, underscore is a character); the identifier rules the same file cites",
+  "mark": "traced"
+ },
+ {
+  "id": "O11",
+  "kind": "wrong-register-for-pin (compiles)",
+  "severity": "drives wrong code (inferred)",
+  "sites": [
+   "code-examples/smart-pins-002-button-reading.yaml:19-24"
+  ],
+  "claim": "`BUTTON = 32` then `if INA[BUTTON]` and the comment 'Read current state of button pin from INA register' (:39). INA holds P31..P0 (the KB's own register map: pasm2-getting-started.yaml:227-232 INA P31..P0, INB P63..P32), so P32 is INB[0]. `INA[32]` compiles (g10/t/c6.spin2) but names a bit beyond the 32-bit register; what it reads is not shown by a source. The block is already red under S-002 for `DIRL #BUTTON`; its fix should use PINREAD(BUTTON) or INB[0].",
+  "source": "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt (INA/INB definition) and the pasm2 guide register table; semantics of INA[32] undetermined",
+  "mark": "inferred"
+ },
+ {
+  "id": "O12",
+  "kind": "unsourced / unverifiable names and numbers",
+  "severity": "latent",
+  "sites": [
+   "guides/quick-queries.yaml:198 ('minimum 32 longs' stack)",
+   "guides/spin2-getting-started.yaml:501 ('jm_strings')"
+  ],
+  "claim": "`Check stack size (minimum 32 longs)`: spin2-v55-text.txt has no minimum stack size for COGSPIN (grep of 'stack' finds none); the jm_p2-es_matrix driver happens to use `long stack[32]`. `\"jm_strings\" - string utilities` names an object that is not in the OBEX index (p2kb_obex_find 'jm_strings' returns other objects) nor in any ingested source; the number-to-string object `jm_nstr` is real.",
+  "source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt (no match); p2kb_obex_find 'jm_strings'; find over engineering/ingestion for jm_strings*",
+  "mark": "traced (absence)"
+ },
+ {
+  "id": "O13",
+  "kind": "possible wrong example (undetermined)",
+  "severity": "latent",
+  "sites": [
+   "guides/spin2-getting-started.yaml:261"
+  ],
+  "claim": "`REPEAT idx FROM 99 TO 0 STEP -1`. The tutorial itself says 'FROM/TO order determines direction' (:256) and the v55 form is 'stepping by +/-<delta>' (spin2-v55-text.txt:763-766), i.e. the direction comes from FROM/TO and the delta is a magnitude. A negative STEP in a downward loop is the S-099 question (direction override); it compiles but the runtime behaviour was not tested here (no silicon).",
+  "source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:763-766",
+  "mark": "undetermined"
+ },
+ {
+  "id": "O14",
+  "kind": "unsourced rule and unsourced syntax in prose",
+  "severity": "latent",
+  "sites": [
+   "language/fundamentals/pasm-labels.yaml:78",
+   "language/fundamentals/pasm-labels.yaml:29-35"
+  ],
+  "claim": "'Local labels can shadow global labels within their scope' has no source (spin2-v55-text.txt documents local symbols only as 'regular and local symbols ... not accessible outside your in-line PASM code', :813); a `.name` local carries its global's prefix, so there is nothing to shadow. The colon-prefix local label `:retry` compiles in a DAT (gate: fragment pass) but is not described in v55 or the silicon doc; it is stated as a peer of the dot form.",
+  "source": "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:813 (only mention); gate PASS for :retry",
+  "mark": "inferred"
+ },
+ {
+  "id": "O15",
+  "kind": "codenames and version stamps in served content",
+  "severity": "hygiene",
+  "sites": [
+   "guides/pasm2-getting-started.yaml:599",
+   "guides/pasm2-getting-started.yaml:603",
+   "code-examples/code-example-schema.yaml:43",
+   "code-examples/smart-pins-001-basic-io.yaml:9",
+   "code-examples/smart-pins-002-button-reading.yaml:9",
+   "language/fundamentals/variable-scoping-best-practices.yaml:2",
+   "language/fundamentals/case-sensitivity.yaml:2",
+   "language/fundamentals/case-sensitivity.yaml:26",
+   "language/fundamentals/identifier-rules.yaml:2",
+   "language/fundamentals/pasm-labels.yaml:80"
+  ],
+  "claim": "'Silicon Doc v35' is a codename for the P2 documentation (:599, :603); 'P2-Smart-Pins-Green-Book-Tutorial.md' (a retired tutorial) is the example source_document in the schema and the cited source in both smart-pins example files; several headers cite 'Spin2 v51 documentation' / 'Spin2 v51 Grammar Reference' as the source (KB is always the latest; stamps are deleted, not maintained).",
+  "source": "doctrine (official titles, no codenames; no version citations)",
+  "mark": "traced"
+ },
+ {
+  "id": "O16",
+  "kind": "imprecise wording",
+  "severity": "wrong, not code-driving",
+  "sites": [
+   "guides/pasm2-getting-started.yaml:203"
+  ],
+  "claim": "`ADD x, y  WC      ' Set C if overflow`. The instruction's own entry in the same file says C = carry of (D + S) (:262); 'overflow' reads as signed overflow, which ADD WC does not report.",
+  "source": "engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv (ADD row: 'C = carry of (D + S)'); the guide's own :262",
+  "mark": "traced"
+ }
+]

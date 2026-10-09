@@ -373,7 +373,7 @@ re-read and holding.
 | S-144 | B | G5 | wrong, not code-driving | a CASE with no cases (comment only) | defects `case-with-no-cases` | traced | — | to research | no |
 | S-145 | B | G5 | drives wrong code | `plugin_table[i].call(m)` — method call through a dot on a LONG | defects `method-call-through-dot-on-long` | traced | other-language habit | to research | no |
 | S-146 | B | G5 | **drives wrong code** | `COMPILER_V48_FEATURES` presented as a predefined symbol; no compiler defines it | defects `invented-predefined-symbol` | traced | invented name | to research | no |
-| S-147 | B | G5 | drives wrong code | a 31-character method name (the limit is 30) | defects `symbol-exceeds-30-characters` | traced | — | to research | no |
+| S-147 | B | G5 | latent | a 31-character method name — rejected by PNut-TS (30), legal by the v55 document (32) | defects `symbol-exceeds-30-characters`; S-251 | undetermined | document vs compiler | decided by S-251's PNut check (punch list item 7); not a KB defect if PNut takes 32 | no |
 | S-148 | B | G5 | drives wrong code | two 76 800-long VAR arrays — more than 512 KB of hub RAM | defects `var-arrays-exceed-hub-ram` | traced | — | to research | no |
 | S-149 | B | G5 | wrong, not code-driving | utility library's `constrain` calls `max`, which the page never defines | defects `utility-library-calls-undefined-max` | traced | incomplete example | to research | no |
 | S-150 | F | G5 | hygiene (tooling) | **not a KB defect**: `special-configuration-symbols.yaml:219` (a `wrong:` block of conflicting clock symbols) is a correct `never`, but the compiler reports the conflict at end of file, so no `fails_at` body line matches and the gate prints NEVER-WRONG-REASON | defects `harness-gap-never-error-at-eof` | traced | harness gap | fix the harness (a `fails_at: eof` value) in the next B3 tooling pass | yes |
@@ -508,6 +508,35 @@ passes that rested on assumed P1 names (`cnt`, `getcnt()`) or a look-alike built
 | S-247 | B | G9 | drives wrong code | `debug_interrupt.yaml:213`, `:231`: ISR stores a register `PC` that nothing sets | O24 | traced | — | to research (with F-359, study group A) | no |
 | S-248 | B | G9 | wrong, not code-driving | `smart_pins.yaml:59-62`: modes %00010/%00011 listed only as "long repository"; with DAC M bits they are DAC modes | O25 | traced | — | to research | no |
 | S-249 | B | G9 | drives wrong code | `multi_resource_management.yaml:101-109`: an object `isp_octoport_serial` and its API are not in the OBEX index | O26 | traced | invented object | to research (check the OBEX index; per D4, OBEX references are checked against it only) | no |
+
+**ENH-03 B3, group G10 (everything left: `guides/`, `language/fundamentals/`, `code-examples/`,
+`hardware/`, `tools/`, one app note; 192 blocks, 19 files), 2026-10-09.** Evidence:
+`b3-g10-defects.json` (S-075 widened with the `IF … THEN` one-line form; new sites for S-001,
+S-002, S-018 ×2, S-071, S-078, S-083 ×4), `b3-g10-class-map.json`, `b3-g10-observations.json`.
+Arbiter checks: re-applied in a fresh scratch root (same result); `spin2-v55-text.txt:166` (32
+characters) re-read and the 30/31-character compile reproduced (`DRAFTS/PNUT-TS-PUNCH-LIST.md` item
+7). **This makes S-147 undetermined:** its 31-character name is legal by the document and rejected
+only by PNut-TS.
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-250 | B | G10 | **drives wrong code** | `pasm-labels.yaml:46`: `jnz .loop` (not a PASM2 instruction), `cmp` with no WZ, `tjz temp, :retry` without `#` | defects `jnz-not-a-p2-instruction` | traced | other-assembler habit | to research | no |
+| S-251 | B | G10 | latent | symbol-length limit: v55 says 32, PNut-TS enforces 30; `identifier-rules.yaml:15-83` teaches 32 and its "32-char" example is 31 | O1; `spin2-v55-text.txt:166`; punch list item 7 | undetermined | document vs compiler | **a fact for PNut (ground truth), not a bench question** — the punch-list check decides it; S-147 follows | no |
+| S-252 | B | G10 | **drives wrong code** | `spin2-getting-started.yaml:294,300,311`: `=<`/`=>` taught as Spin2; `&&`/`||` called bitwise; `!!` called post-clear | O2; `spin2-v55-text.txt:416-420`, `:489`, `:491` | traced | — | to research (with S-052, «#402») | no |
+| S-253 | B | G10 | wrong, not code-driving | `spin2-getting-started.yaml:455,460`: DITTO index given as `$`; it is `$$` | O3; `spin2-v55-text.txt:42` | traced | — | to research (with S-119) | no |
+| S-254 | B | G10 | drives wrong code | `spin2-getting-started.yaml:336`: `serial.start(63, 62, 115_200)` — jm_fullduplexserial's `start` takes four arguments | O4; `jm_fullduplexserial.spin2:121` (ingested OBEX source) | traced | — | to research | no |
+| S-255 | B | G10 | **drives wrong code** | `spin2-getting-started.yaml:506-507`: `DEBUG("Value: ", DEC value)`; the form is `DEC(value)` (m172) | O5 | traced | — | to research | no |
+| S-256 | F | G10 | latent (gate coverage) | code the tutorials present as single-line strings (an `examples:` heading, a DEBUG line, string definitions) is outside the gate's net — design §11 Q3 accepted that limit for notation, but these are real one-line programs | O6 | traced | design limit | to research (decide whether the net admits single-line strings under tutorial keys) | no |
+| S-257 | B | G10 | wrong, not code-driving | `tools/pnut-ts-compiler.yaml`: the command written `pnut_ts`; quoted error messages do not match the compiler | O7 | traced | stale tool text (doctrine: tool behaviour is not a KB fact) | to research | no |
+| S-258 | B | G10 | latent | `addon-control-board.yaml:115-124`: PWM and other figures absent from the add-on Product Guide | O8 | traced | unsourced numbers | to research | no |
+| S-259 | B | G10 | drives wrong code | `edge-32mb-module.yaml:299-301`: burst-size formula with unbalanced parentheses, and its "~1280 bytes" does not follow (1456) | O9 | traced | — | to research | no |
+| S-260 | B | G10 | wrong, not code-driving | `case-sensitivity.yaml:49-50`: five spellings "refer to the same constant" — `LedPin` and `ledpin` are the same, but the list mixes in `LED_PIN` (a different name) | O10 | traced | — | to research | yes |
+| S-261 | B | G10 | **drives wrong code** | `smart-pins-002-button-reading.yaml:19-24`, `:39`: `BUTTON = 32` then `INA[BUTTON]` — pin 32 is in INB | O11 | traced | — | to research (with S-002) | no |
+| S-262 | B | G10 | latent | `quick-queries.yaml:198`: "minimum 32 longs" of stack — unsourced | O12 | traced | unsourced number | to research | no |
+| S-263 | B | G10 | drives wrong code | `spin2-getting-started.yaml:261`: `REPEAT idx FROM 99 TO 0 STEP -1` against the tutorial's own rule that FROM/TO sets direction | O13 | inferred | — | to research (with S-099) | no |
+| S-264 | B | G10 | latent | `pasm-labels.yaml:78`: "local labels can shadow global labels" — unsourced | O14 | traced | — | to research | no |
+| S-265 | B | G10 | hygiene | `pasm2-getting-started.yaml:599`, `:603`: "Silicon Doc v35" and a "Green Book" file name in served content | O15 | traced | codenames and repo file names in served text | to research | yes |
+| S-266 | B | G10 | drives wrong code | `pasm2-getting-started.yaml:203`: `ADD x, y WC ' set C if overflow`; C is the unsigned carry | O16 | traced | — | to research | no |
 
 *S-001..S-003 were found by the ENH-03 design probe («#399»); the compiler is the authority for
 legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*

@@ -1,0 +1,22 @@
+# engineering/tools/validation/kb-compile-manifest/language/fundamentals/pasm-labels.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: label_types.global_labels.example
+    fp: "a71b633a8d134052"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: label_types.local_labels.dot_prefix.example
+    fp: "a2441ec768e7befd"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: label_types.local_labels.colon_prefix.example
+    fp: "05814561d3ac1058"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: usage_examples.global_and_local.code
+    fp: "8eaf4c3aef8ab775"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, value, temp, ptr]
+    finding: "S-250"

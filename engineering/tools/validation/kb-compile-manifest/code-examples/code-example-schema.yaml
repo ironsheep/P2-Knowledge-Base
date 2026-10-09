@@ -1,0 +1,84 @@
+# engineering/tools/validation/kb-compile-manifest/code-examples/code-example-schema.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_example_schema.core_fields.example_id.examples[0]
+    fp: "baeaaba6029c185b"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.core_fields.example_id.examples[1]
+    fp: "61d7582d0790b5fa"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.core_fields.example_id.examples[2]
+    fp: "6bd2e0e24efec97e"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.source_metadata.source_document.examples[0]
+    fp: "266b69ac67f50e59"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.source_metadata.source_document.examples[1]
+    fp: "18f579eba3e83cc3"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.technical_analysis.instructions_used.examples[0]
+    fp: "9b755274bf5556dd"
+    compile: not-code
+    reason: "schema field `instructions_used.examples:` value: an instruction mnemonic given as an example value of a list-of-names field (a bare name, no operands); not a statement"
+  - at: code_example_schema.technical_analysis.instructions_used.examples[1]
+    fp: "abd5e28b0b69a668"
+    compile: not-code
+    reason: "schema field `instructions_used.examples:` value: an instruction mnemonic given as an example value of a list-of-names field (a bare name, no operands); not a statement"
+  - at: code_example_schema.technical_analysis.instructions_used.examples[2]
+    fp: "61976b92aaa31d26"
+    compile: not-code
+    reason: "schema field `instructions_used.examples:` value: an instruction mnemonic given as an example value of a list-of-names field (a bare name, no operands); not a statement"
+  - at: code_example_schema.technical_analysis.instructions_used.examples[3]
+    fp: "3098b1708ea4f0f6"
+    compile: not-code
+    reason: "schema field `instructions_used.examples:` value: an instruction mnemonic given as an example value of a list-of-names field (a bare name, no operands); not a statement"
+  - at: code_example_schema.technical_analysis.instructions_used.examples[4]
+    fp: "0ecba1370ba1753f"
+    compile: not-code
+    reason: "schema field `instructions_used.examples:` value: an instruction mnemonic given as an example value of a list-of-names field (a bare name, no operands); not a statement"
+  - at: code_example_schema.technical_analysis.features_demonstrated.examples[0]
+    fp: "053a6821dc071e53"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.technical_analysis.features_demonstrated.examples[1]
+    fp: "e3cf3397f6c38034"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.technical_analysis.features_demonstrated.examples[2]
+    fp: "d9d4a5e416238d24"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.technical_analysis.programming_patterns.examples[0]
+    fp: "4acf57f9f9bf03a8"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.technical_analysis.programming_patterns.examples[1]
+    fp: "ec6bfcaf25d5752b"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.technical_analysis.programming_patterns.examples[2]
+    fp: "6854ddf68e72733c"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.application_context.hardware_requirements.examples[0]
+    fp: "a778fe5e7f5e1985"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.application_context.hardware_requirements.examples[1]
+    fp: "3693e7913a44ffcf"
+    compile: not-code
+    reason: "schema field `hardware_requirements.examples:` value: a hardware name (Encoder, ADC) as an example field value; as PASM a lone word compiles only as a label, so the gate would pass it for the wrong reason"
+  - at: code_example_schema.application_context.hardware_requirements.examples[2]
+    fp: "daa5c7f47ad89bd6"
+    compile: not-code
+    reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
+  - at: code_example_schema.application_context.hardware_requirements.examples[3]
+    fp: "3baabdc5922ea276"
+    compile: not-code
+    reason: "schema field `hardware_requirements.examples:` value: a hardware name (Encoder, ADC) as an example field value; as PASM a lone word compiles only as a label, so the gate would pass it for the wrong reason"

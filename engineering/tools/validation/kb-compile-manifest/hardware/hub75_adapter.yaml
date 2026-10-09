@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/hardware/hub75_adapter.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: resources.github.examples
+    fp: "47e4a1ba1f020b4e"
+    compile: not-code
+    reason: "YAML description prose (English sentences about the board, a header or a resource), not code"

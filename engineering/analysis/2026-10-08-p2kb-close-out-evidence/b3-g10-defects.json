@@ -1,0 +1,211 @@
+[
+ {
+  "slug": "if-then-one-line-form",
+  "finding": "S-PENDING-if-then-one-line-form",
+  "statement": "guides/spin2-getting-started.yaml:208-210 teaches a one-line `IF condition THEN statement` form (syntax `IF condition THEN statement`, example `IF (x > 100) THEN x := 100`). Spin2 has no THEN keyword and no one-line IF: the body goes on the following indented lines (`grep -n -i THEN` over spin2-v55-text.txt returns English-prose hits only, no IF form with THEN). BASIC habit. Sibling of S-075 (`IF cond : stmt`, another invented one-line IF); the arbiter may merge the two into one class.",
+  "compiler_error": "block line 1: Expected end of line (m281) (the parser stops after the condition and finds THEN)",
+  "correct_source": "IF (x > 100)\n  x := 100",
+  "verified_fix": "t/c2.spin2 (a PUB with the two-line form) compiles with pnut-ts -q",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "guides/spin2-getting-started.yaml",
+    "addr": "control_flow.conditional.IF_THEN.example",
+    "key_line": 209,
+    "decision_index": 97,
+    "gate_first_error": "block line 1 (YAML line 210): Expected end of line (m281)",
+    "source_line_of_error": "IF (x > 100) THEN x := 100",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "x"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "jnz-not-a-p2-instruction",
+  "finding": "S-PENDING-jnz-not-a-p2-instruction",
+  "statement": "language/fundamentals/pasm-labels.yaml:46-62 (`usage_examples.global_and_local.code`, the page's only complete routine) uses `jnz .loop`. PASM2 has no JNZ instruction (conditional jumps are `IF_NZ JMP #label`, or TJNZ/DJNZ on a register); the assembler stops at it. Behind that error the block has two more faults that only show once JNZ is fixed: `cmp x, #10` carries no WZ/WC, so no flag is written for the branch to test; and `tjz temp, :retry` names the local label as the S operand without `#` (a register address, not a jump target: TJZ D,{#}S needs `#:retry`). JNZ is another assembler family's mnemonic (P1 has no JNZ either), an invented instruction like S-080's.",
+  "compiler_error": "block line 7 (YAML line 53): Expected a unique name, BYTE, WORD, LONG, or assembly instruction (at `jnz`; wrap pasm2-dat, assumes x, value, temp, ptr)",
+  "correct_source": "    cmp     x, #10 wz\n    if_nz   jmp #.loop\n ...\n    tjz     temp, #:retry",
+  "verified_fix": "t/c3.spin2 (DAT, ORG, the corrected routine and its four longs) compiles with pnut-ts -q",
+  "class_kind": "defect",
+  "sites": [
+   {
+    "file": "language/fundamentals/pasm-labels.yaml",
+    "addr": "usage_examples.global_and_local.code",
+    "key_line": 46,
+    "decision_index": 165,
+    "gate_first_error": "block line 7 (YAML line 53): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "jnz     .loop   ' Jump to local .loop",
+    "intended_class": "fragment/pasm2-dat",
+    "intended_assumes": [
+     "x",
+     "value",
+     "temp",
+     "ptr"
+    ],
+    "role": "primary (gate error)"
+   }
+  ],
+  "site_count": 1
+ },
+ {
+  "slug": "S-001",
+  "statement": "smart-pins-001-basic-io.yaml:18 (the registered S-001 site, now in the gate): DIRL/DIRH/OUTL/OUTH written as Spin2 statements; the file serves `compilation_result: \"success\"`.",
+  "sites": [
+   {
+    "file": "code-examples/smart-pins-001-basic-io.yaml",
+    "addr": "code_content.code",
+    "key_line": 18,
+    "decision_index": 21,
+    "gate_first_error": "block line 2 (YAML line 20): Expected an instruction or variable",
+    "source_line_of_error": "DIRL #56              ' Make P56 an input (Direction Low)",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-002",
+  "statement": "smart-pins-002-button-reading.yaml:18 (the registered S-002 site): `DIRL #BUTTON` as a Spin2 statement (block line 5); also serves `compilation_result: \"success\"`.",
+  "sites": [
+   {
+    "file": "code-examples/smart-pins-002-button-reading.yaml",
+    "addr": "code_content.code",
+    "key_line": 18,
+    "decision_index": 22,
+    "gate_first_error": "block line 5 (YAML line 23): Expected an instruction or variable",
+    "source_line_of_error": "DIRL #BUTTON                  ' Make button pin an input",
+    "intended_class": "program",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-078",
+  "statement": "spin2-getting-started.yaml:128 (`core_block_types.DAT.example`): a `DAT { PASM2 code }` section closed with `END` after `ORG` / `mov x, #0`; END closes inline PASM only, so the assembler rejects it (block line 8). Fixed variant (END dropped, `x long 0` declared) compiles: t/c4.spin2.",
+  "sites": [
+   {
+    "file": "guides/spin2-getting-started.yaml",
+    "addr": "core_block_types.DAT.example",
+    "key_line": 128,
+    "decision_index": 93,
+    "gate_first_error": "block line 8 (YAML line 136): Expected a unique name, BYTE, WORD, LONG, or assembly instruction",
+    "source_line_of_error": "END",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "x"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-018",
+  "statement": "spin2-getting-started.yaml:335 `serial.start(63, 62, 115_200)` / `value := sensor.read()` and :341 `led[0].start(56)` / `led[1].start(57)`: object calls shown with no OBJ line declaring `serial`, `sensor`, `led` (the syntax illustrations of `objectName.methodName(params)`); the gate cannot declare an object the block does not name. Both stay red under the registered class. (Separate observation: the 3-argument `serial.start` does not match the real jm_fullduplexserial.)",
+  "sites": [
+   {
+    "file": "guides/spin2-getting-started.yaml",
+    "addr": "object_usage.calling_methods.example",
+    "key_line": 335,
+    "decision_index": 113,
+    "gate_first_error": "block line 1 (YAML line 336): Expected an instruction or variable",
+    "source_line_of_error": "serial.start(63, 62, 115_200)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [
+     "value"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "guides/spin2-getting-started.yaml",
+    "addr": "object_usage.object_arrays.example",
+    "key_line": 341,
+    "decision_index": 114,
+    "gate_first_error": "block line 1 (YAML line 342): Expected an instruction or variable",
+    "source_line_of_error": "led[0].start(56)",
+    "intended_class": "fragment/spin2-method",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-071",
+  "statement": "case-sensitivity.yaml:91 (`best_practices[0].example`): the `Good` and `Poor` method headers are written in one block, `PUB SetMotorSpeed(speed)` and `Pub SETMotorSPEED(SPEED)`; names are case-insensitive, so the block declares one method twice (block line 6: 'Expected a unique method name'; m243 family). The page's own rule is 'never create two identifiers that differ only in case'. Widening of S-071 from constants-vs-variables to method names, and to a contrast written as one listing; the two styles need separate blocks.",
+  "sites": [
+   {
+    "file": "language/fundamentals/case-sensitivity.yaml",
+    "addr": "best_practices[0].example",
+    "key_line": 91,
+    "decision_index": 144,
+    "gate_first_error": "block line 6 (YAML line 97): Expected a unique method name",
+    "source_line_of_error": "Pub SETMotorSPEED(SPEED)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "motor_speed"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ },
+ {
+  "slug": "S-083",
+  "statement": "variable-scoping-best-practices.yaml teaches local / parameter / return names shadowing a VAR or DAT name as legal; the compiler refuses all of them as duplicate names. Four gated sites: :55 (`PUB method(value) : count | temp` over `LONG count`, m230), :96 (`PUB check_device() : status` over `LONG status`, m230), :113 (`PUB fill_buffer(buffer, size)` over DAT `buffer`, m221), :129 (`PUB process() | index` over `LONG index`, m241). Prose that teaches the same wrong rule, not gated: :21-29 (`precedence_order` 1..6 'Higher precedence shadows lower'), :50-52, :64-65 ('VAR count is inaccessible', 'VAR count is never modified'), :152-161 (debugging_shadowing symptoms). The page's own fixed_code and best-practice rules (distinct names) are correct and compile; only the premise that the shadowing compiles is wrong.",
+  "sites": [
+   {
+    "file": "language/fundamentals/variable-scoping-best-practices.yaml",
+    "addr": "variable_shadowing.example.code",
+    "key_line": 55,
+    "decision_index": 166,
+    "gate_first_error": "block line 4 (YAML line 59): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB method(value) : count | temp",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/fundamentals/variable-scoping-best-practices.yaml",
+    "addr": "common_shadowing_scenarios[0].problematic_code",
+    "key_line": 96,
+    "decision_index": 182,
+    "gate_first_error": "block line 4 (YAML line 100): Expected a unique result name (m230)",
+    "source_line_of_error": "PUB check_device() : status",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "read_register()->1/0"
+    ],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/fundamentals/variable-scoping-best-practices.yaml",
+    "addr": "common_shadowing_scenarios[1].problematic_code",
+    "key_line": 113,
+    "decision_index": 184,
+    "gate_first_error": "block line 4 (YAML line 117): Expected a unique parameter name (m221)",
+    "source_line_of_error": "PUB fill_buffer(buffer, size)",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [],
+    "role": "primary (gate error)"
+   },
+   {
+    "file": "language/fundamentals/variable-scoping-best-practices.yaml",
+    "addr": "common_shadowing_scenarios[2].problematic_code",
+    "key_line": 129,
+    "decision_index": 186,
+    "gate_first_error": "block line 4 (YAML line 133): Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, \"^\", ALIGNW, or ALIGNL (m241)",
+    "source_line_of_error": "PUB process() | index",
+    "intended_class": "fragment/spin2-top",
+    "intended_assumes": [
+     "do_something()->0/1"
+    ],
+    "role": "primary (gate error)"
+   }
+  ]
+ }
+]

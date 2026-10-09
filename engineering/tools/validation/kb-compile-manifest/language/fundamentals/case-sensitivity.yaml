@@ -1,0 +1,35 @@
+# engineering/tools/validation/kb-compile-manifest/language/fundamentals/case-sensitivity.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: implications_for_code_generation.naming_conflicts.example
+    fp: "abd8cb062e73c0f5"
+    compile: never
+    wrap: spin2-top
+    reason: "the teaching point is the compile error: `LONG count` then `LONG COUNT` is a duplicate name because identifiers are case-insensitive (the block comments \"ERROR: Redefinition\"); pnut-ts rejects line 3 with m240 \"Expected a unique variable name\""
+    fails_at: 3
+  - at: best_practices[0].example
+    fp: "cbeb5ee516140176"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [motor_speed]
+    finding: "S-071"
+  - at: best_practices[1].wrong
+    fp: "85d0860a8407d84d"
+    compile: never
+    wrap: spin2-top
+    reason: "a `wrong:` block whose teaching point is the compile error: `LONG value` then `LONG Value` is a duplicate name (the block comments \"WON'T WORK!\"); pnut-ts rejects line 3 with m240 \"Expected a unique variable name\""
+    fails_at: 3
+  - at: best_practices[1].correct
+    fp: "ff27e73c42870752"
+    compile: fragment
+    wrap: spin2-top
+  - at: common_pitfalls[0].wrong
+    fp: "32a2a05b070722fa"
+    compile: never
+    wrap: spin2-top
+    reason: "a `wrong:` block whose teaching point is the compile error: the locals `temp, TEMP` are one name (the block comments \"ERROR: TEMP is same as temp\"); pnut-ts rejects line 1 with m242 \"Expected a unique variable name\""
+    fails_at: 1
+  - at: common_pitfalls[0].correct
+    fp: "4815a8a42044e1f1"
+    compile: program

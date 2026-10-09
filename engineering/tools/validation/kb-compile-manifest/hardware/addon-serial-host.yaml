@@ -1,0 +1,10 @@
+# engineering/tools/validation/kb-compile-manifest/hardware/addon-serial-host.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: code_patterns.spin2.enable_both_ports
+    fp: "2211d4e0d790aeca"
+    compile: program
+  - at: code_patterns.spin2.activity_led_control
+    fp: "90d9808049a56587"
+    compile: program
