@@ -734,6 +734,42 @@ overflow give NaN, not Infinity (INT:2681-2682, 2859-2860); COGSTOP/COGCHK use t
 | S-334 | B | S-025 sweep | **drives wrong code** | `concepts/floating_point.yaml:96-101`: `x / 0` and overflow "→ ±Infinity"; the interpreter returns NaN | INT:2681-2682, 2859-2860 | traced | assumed IEEE behaviour | change spec | no |
 | S-335 | B | S-040 | wrong, not code-driving | `cogstop.yaml:23`, `:100`; `cogchk.yaml:19-20`: "invalid numbers have no effect", "values outside 0-7 return 0" — both use the 4 low bits | DS:1788, :1790; SD:421; INT:2076-2077 | traced | — | change spec | no |
 
+### Rows S-041..S-110 — change specs («#407», 2026-10-09)
+
+All 70 rows are in a done state; the specs are in
+`2026-10-08-p2kb-close-out-evidence/rows-S041-S110-specs.md` (232 probe compiles; ~70 corrected blocks
+compiled; 5 marked "compile in sprint"). States: change spec — S-041..S-108, S-110; RESOLVED — S-109.
+**Settled without a bench:** S-094 (`&&`/AND evaluate both operands — `a && f()` and `a & f()` compile to
+the same size and differ only in the operator byte; pnut-ts evidence), S-099 (STEP sign ignored,
+INT:353-356). One bench question VO-S059 (inside S-059). Class sweeps widened several rows: S-062 — nine
+method pages say "(Bottom..Top)"; S-044 — all of `op_swap.yaml` rests on scalar `:=:`; S-049 — the
+BYTE/WORD/LONG keyword pages teach typed parameters. Arbiter re-read `spin2-v55-text.txt:92-100`, `:783`.
+Sprint choices recorded in the file (D1–D5, D8, D9); D6 (block order) is taken by the arbiter as the
+file recommends: each convention page states its own order as a convention and says any order compiles —
+the only sourced fact. **NF-1 answers S-127:** `@` in PUB/PRI code is the hub address (v55:311); object-
+relative is what `@` stores in DAT data (v55:297-300).
+
+| # | Group | Item | Severity | Finding | Evidence | Mark | Root cause | Resolution | Trivially safe? |
+|---|---|---|---|---|---|---|---|---|---|
+| S-336 | B | NF-1 | **drives wrong code** | `concepts/addressing.yaml:9-11`, `:55`, `:95`: "`@` returns RELATIVE addresses in Spin2+PASM programs" — in code it is the hub address; relative is what `@` stores in DAT data (also settles S-127) | v55:297-300, :311 | traced | — | change spec | no |
+| S-337 | B | NF-2 | latent | `basic-io.yaml:420-428`: a pin in output mode "reads the output latch, not the pin" — unsourced (SD:3706: IN returns the pin's read state) | SD:3706 | inferred | — | **bench question VO-S337** (jumper P0→P1) | no |
+| S-338 | B | NF-3 | wrong, not code-driving | `blocks.yaml:90-94`: VAR "LONGs first, WORDs next, BYTEs last" — packed in declaration order | v55:262 | traced | — | change spec | no |
+| S-339 | B | NF-4 | wrong, not code-driving | `timing_operations.yaml:164`: overflow at "~21 µs" at 200 MHz — ~10 µs | arithmetic | traced | — | change spec | yes |
+| S-340 | B | NF-5 | drives wrong code | `if_elseif_else.yaml:275-278`: PASM illustration takes the wrong branch | compiled counter-form | traced | — | removed with S-105 (D8) | no |
+| S-341 | B | NF-6 | drives wrong code | `method_definition.yaml:73-74`: "methods without return values return 0" — used as a term it is a compile error | v55:606, :623; compiler | traced | — | change spec | no |
+| S-342 | B | NF-7 | **drives wrong code** | `inline_pasm.yaml:261-269`: RDLONG/ADD/WRLONG taught as "atomic"; not against other cogs, and interrupts run during inline PASM | v55:815; SD:3673-3700 | traced | — | change spec (LOCK guard) | no |
+| S-343 | B | NF-8 | **drives wrong code** | `spin2-pasm2-integration.yaml:209-215`: the timer ISR keeps its target in PA, the interpreter's scratch; v55:847 uses PR0 | SD:1173; INT:2455; v55:847 | traced | — | change spec (compile in sprint) | no |
+| S-344 | B | NF-9 | wrong, not code-driving | `method-pointers.yaml:30-31`: `LONG ptr : 16` is not a declaration form | compiler | traced | — | change spec | no |
+| S-345 | B | NF-10 | latent | `escape-strings.yaml:117-147`: unknown escapes "passed verbatim" (v55:59) but pnut-ts rejects them; `\x00` accepted though outside `\x01..\xFF`; error-message list does not match | v55:59; compiler | undetermined | document vs compiler | a fact for PNut (punch-list item 9), not a bench question | no |
+| S-346 | B | NF-11 | drives wrong code | `spin2-naming-jonnymac.yaml:318`, `spin2-formatting-standards.yaml:37`: `serial.start(…)` with three arguments; jm_fullduplexserial (OBEX 2842) takes four (with S-254) | ingested OBEX source `:121` | traced | — | change spec | no |
+| S-347 | B | NF-12 | wrong, not code-driving | `repeat.yaml:228-239`: changing the loop variable is "undefined behavior" — the interpreter reads it each pass | INT:366-381 | traced | — | change spec | no |
+| S-348 | B | NF-13 | wrong, not code-driving | `statements/debug.yaml:212`: DEBUG "non-blocking" — each DEBUG() runs a debug interrupt and shares the serial pins through LOCK[15] | v55:897-909, :926; EF-057 | traced | — | change spec | no |
+| S-349 | B | NF-14 | latent | JonnyMac pages: `longfill(@rx_pin, -1, 4)` fills four longs; their VAR example declares three | page text | undetermined | — | check the real `jm_fullduplexserial.spin2` `stop()` in the sprint | no |
+
+**Source erratum E-019 filed (NF-17):** v55 contradicts itself on NEXT/QUIT levels — `:783` "1..16,
+default 1 = the current level" vs `:92-100` "NEXT 1 = 1st-outer", range 1..15; the compiler agrees with
+`:92-100`, and so does the KB. No KB change.
+
 **Bench question VO-S304 (to §5).** With `X[15:0] = 0`, and separately `X[31:16] = 0`, what base
 period and frame count does a PWM_TRIANGLE (and PWM_SAWTOOTH) pin produce? Measure with a second
 smart pin on a jumper (free pins P0–P7 / P32–P47). Sources silent: the silicon doc gives no range
@@ -760,6 +796,8 @@ legality only. Their class (PASM2 written as Spin2) gets a class sweep in G.*
 | VO-J-028 | S-323 (F-386) | eight counter modes (`%01111`, `%10010`–`%10111`, `%11001`): does a Y written while DIR is low survive into operation, versus written after DIRH? | `During reset` · SD, HW, Titus, smart-pin narrative · control: pulse/transition and PWM Y-at-reset statements (`HW:1087`, `:1097`, `:1107`, `:1114`) | to write (step 8) | sources silent |
 | VO-F372 | S-324 | with a USB pair running, does a new WRPIN with DIR high switch host ↔ device without a DIR cycle? | `sniffer` · 5 files · sources disagree (`HW:1488` vs `SD:4579`) | to write | sources disagree |
 | VO-F337 | S-325 | smart pin off, DAC_MODE `%TT=00`: DIR×OUT four arms — DAC on DIR alone? ADC on OUT alone? | DS `:1175`, `HW:897` vs `part4-smart-pins.txt:83` · EF-071 covers the smart-mode row only | to write | sources disagree |
+| VO-S059 | S-059 | with `x := 0`, what do four successive `??x` return, and what is `x` after? Control `x := 1`. No pins (DEBUG read-out) | `seed\|zero\|period\|never` near `xoro32\|xoroshiro32\|??` · SD, DS, v55, v51, PASM2 manual, HW manual, INT, EF ledger · control DS:1557 | to write | sources silent |
+| VO-S337 | S-337 | a pin driven high in output mode (`P_HIGH_150K` on P0) while jumpered to a pin driven low (P1): does INA[0] read the pin or the output latch? | SD:3706 states only "the pin's read state" | to write | sources silent on the latch case |
 | VO-S037 | S-037 | does `COGATN(1 << COGID())` deliver an attention event to the issuing cog (POLLATN/WAITATN)? No pins | `own\|self\|itself` near `attention\|COGATN` · `sources/` · control SD:2020 | to write | sources silent |
 | VO-S304 | S-304 | PWM_TRIANGLE / PWM_SAWTOOTH with `X[15:0] = 0` and with `X[31:16] = 0`: what base period and frame count result? (second smart pin on a jumper, free pins only) | `65,?536`, `X.[15..0]` · `silicon-doc-text.txt` PWM sections `:4034-4067` · control: `:3925` (DAC/NCO "zero = 65,536") | to write (step 8) | sources silent |
 

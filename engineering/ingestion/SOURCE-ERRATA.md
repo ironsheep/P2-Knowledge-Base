@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-019`**
+> **Next erratum ID: `E-020`**
 
 ## What this register is for
 
@@ -101,6 +101,7 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-015 | P2 Documentation v35 (Rev B/C) | **KNOWN SILICON BUGS** omits the RDFAST corruption bug the designer confirms in the document's own comments | never carried | `CONFIRMED` |
 | E-016 | PASM2 Manual 2022-11-01 | **ADDS** prose says C is *signed overflow*; its own table on the same page says *sign of (D + S)* — **sibling sweep done 2026-08-27**: same defect in `SUBS`, `ADDSX`, `SUBSX`; `SUM*` (4) and `CMPS`/`CMPSX` clean | diverges deliberately on ADDS/SUBS · **ADDSX + SUBSX copied the wrong sentence** → corrections register | `CONFIRMED` |
 | E-018 | Spin2 Documentation v55 | the operator table's `//` row gives the term as **`x // 7`**; every other binary row uses `x <op> y` | never carried | `CONFIRMED` |
+| E-019 | Spin2 Documentation v55 | NEXT/QUIT levels: the REPEAT section says **1..16, default 1 = the current level**; the version history says **1..15, `NEXT 1` = the 1st-outer level** | follows the history (and the compiler) | `CONFIRMED` |
 
 ---
 
@@ -588,6 +589,21 @@ the «#402» operator-ingestion audit, 2026-10-09).
 
 **Evidence tier:** the row contradicts its own assign form and every sibling row. · **Reached our
 KB?** **No** — no operator page carries `x // 7` (searched `deliverables/ai/P2/language/spin2/operators/`).
+
+---
+
+## E-019 — NEXT/QUIT nesting levels: the REPEAT section says **1..16, default 1 = current**; the version history says **1..15, `NEXT 1` = 1st-outer** · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | REPEAT section | *"NEXT and QUIT can each be followed by an integer value 1..16 to alter the nesting level at which they are to occur. If no integer value is expressed, the default value of 1 is used, which means the current …"* | `sources/spin2-v55/spin2-v55-text.txt:783` |
+| Against (same document) | same | version history (v52) | *"NEXT and QUIT can now be followed by an integer 1..15 to indicate an alternate REPEAT level"*; `NEXT 1 'do the next iteration in the 1st-outer REPEAT block` | `sources/spin2-v55/spin2-v55-text.txt:92-100` (and `:116`, v52a "changed by one") |
+| Against (compiler) | PNut-TS v1.55.8 | — | `quit 1` in two nested loops compiles differently from bare `quit`; `quit 2` there → "NEXT/QUIT is not sufficiently nested"; 16 and 17 → "NEXT/QUIT level must be from 1 to 15" | close-out study evidence `rows-S041-S110-specs.md` NF-17 |
+
+**OUR FINDING.** The REPEAT-section paragraph predates the v52a renumbering; the history and the
+compiler agree with each other. **Evidence tier:** the document against itself, decided by the compiler
+(PNut-TS; PNut not run). · **Reached our KB?** **Follows the history** — `next.yaml`, `quit.yaml`,
+`repeat.yaml:142-149` match the compiler. No KB change. Found 2026-10-09 by the close-out study («#407»).
 
 ---
 
