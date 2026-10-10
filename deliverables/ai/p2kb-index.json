@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-10T22:56:47.777763",
-    "total_entries": 1136,
-    "total_categories": 59,
-    "total_aliases": 3494,
-    "multi_target_aliases": 199,
+    "generated": "2026-10-10T23:10:36.248184",
+    "total_entries": 1137,
+    "total_categories": 60,
+    "total_aliases": 3580,
+    "multi_target_aliases": 213,
     "source": "deliverables/ai/P2/"
   },
   "delivery_filter": {
@@ -469,6 +469,9 @@
     ],
     "architecture_execution": [
       "p2kbArchXbyteEngine"
+    ],
+    "architecture_errata": [
+      "p2kbArchSiliconErrata"
     ],
     "architecture_decomposition": [
       "p2kbArchAltitudeLayering",
@@ -1284,6 +1287,9 @@
     "ADJACENT PIN ROUTING": [
       "p2kbPasm2Wrpin"
     ],
+    "AFTER A NO-WAIT RDFAST, THE NEXT HUB INSTRUCTION CAN COMPLETE EARLY": [
+      "p2kbPasm2Rdfast"
+    ],
     "AK5704 ADD-ON": [
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
@@ -1349,6 +1355,15 @@
     ],
     "ALTSW": [
       "p2kbPasm2Altsw"
+    ],
+    "ALTX IMMEDIATE S CONSUMES AUGS": [
+      "p2kbPasm2Augs"
+    ],
+    "ALTx immediate S consumes AUGS": [
+      "p2kbPasm2Augs"
+    ],
+    "AN IMMEDIATE ALTX TAKES A PENDING AUGS": [
+      "p2kbPasm2Augs"
     ],
     "ANALOG DISPLAY": [
       "p2kbSpin2Scope"
@@ -1419,6 +1434,12 @@
     ],
     "Address-Of Operator": [
       "p2kbSpin2SymAt"
+    ],
+    "After a No-Wait RDFAST, the Next Hub Instruction Can Complete Early": [
+      "p2kbPasm2Rdfast"
+    ],
+    "An Immediate ALTx Takes a Pending AUGS": [
+      "p2kbPasm2Augs"
     ],
     "Asynchronous Serial Receive": [
       "p2kbArchSmartPin11111AsyncSerialReceive"
@@ -2101,11 +2122,17 @@
     "DAC CHANNEL ROUTING": [
       "p2kbArchDacRouting"
     ],
+    "DAC MODE OUT DOES NOT START ADC": [
+      "p2kbArchSmartPins"
+    ],
     "DAC OUTPUT": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
     ],
     "DAC channel routing": [
       "p2kbArchDacRouting"
+    ],
+    "DAC mode OUT does not start ADC": [
+      "p2kbArchSmartPins"
     ],
     "DAC output": [
       "p2kbAppNoteP2an003DacAnalogSignalGeneration"
@@ -2510,6 +2537,72 @@
     "Decomposition Reasoning Layer \u2014 Glossary, Authority-Tier Legend, and Reference Canon": [
       "p2kbArchDecompositionGlossary"
     ],
+    "E1": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E1 ERRATUM": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "E1 erratum": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "E1-E7": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E2": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E2 ERRATUM": [
+      "p2kbPasm2Augs"
+    ],
+    "E2 erratum": [
+      "p2kbPasm2Augs"
+    ],
+    "E3": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E3 ERRATUM": [
+      "p2kbPasm2Getct"
+    ],
+    "E3 erratum": [
+      "p2kbPasm2Getct"
+    ],
+    "E4": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E4 ERRATUM": [
+      "p2kbPasm2Getxacc"
+    ],
+    "E4 erratum": [
+      "p2kbPasm2Getxacc"
+    ],
+    "E5": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E5 ERRATUM": [
+      "p2kbPasm2Getxacc"
+    ],
+    "E5 erratum": [
+      "p2kbPasm2Getxacc"
+    ],
+    "E6": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E6 ERRATUM": [
+      "p2kbArchSmartPins"
+    ],
+    "E6 erratum": [
+      "p2kbArchSmartPins"
+    ],
+    "E7": [
+      "p2kbArchSiliconErrata"
+    ],
+    "E7 ERRATUM": [
+      "p2kbPasm2Rdfast"
+    ],
+    "E7 erratum": [
+      "p2kbPasm2Rdfast"
+    ],
     "EDGE BOARD PINOUT": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
@@ -2579,6 +2672,40 @@
     ],
     "EQUATE": [
       "p2kbSpin2OpOpEquate"
+    ],
+    "ERRATA": [
+      "p2kbArchSiliconErrata"
+    ],
+    "ERRATUM": [
+      "p2kbArchSiliconErrata"
+    ],
+    "ERRATUM E1": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "ERRATUM E2": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Augs"
+    ],
+    "ERRATUM E3": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Getct"
+    ],
+    "ERRATUM E4": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Getxacc"
+    ],
+    "ERRATUM E5": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Getxacc"
+    ],
+    "ERRATUM E6": [
+      "p2kbArchSiliconErrata",
+      "p2kbArchSmartPins"
+    ],
+    "ERRATUM E7": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Rdfast"
     ],
     "ERROR PROPAGATION": [
       "p2kbSpin2Abort"
@@ -2963,6 +3090,12 @@
     "GETCT ERRATUM E3": [
       "p2kbPasm2Getct"
     ],
+    "GETCT RETURNS A STALE UPPER LONG": [
+      "p2kbPasm2Getct"
+    ],
+    "GETCT Returns a Stale Upper Long": [
+      "p2kbPasm2Getct"
+    ],
     "GETCT WC STALE UPPER LONG": [
       "p2kbPasm2Getct"
     ],
@@ -3004,6 +3137,12 @@
       "p2kbPasm2Getword"
     ],
     "GETXACC": [
+      "p2kbPasm2Getxacc"
+    ],
+    "GETXACC CLEARS ONLY DURING A GOERTZEL BURST": [
+      "p2kbPasm2Getxacc"
+    ],
+    "GETXACC Clears Only During a Goertzel Burst": [
       "p2kbPasm2Getxacc"
     ],
     "GETXACC DOES NOT CLEAR": [
@@ -3237,6 +3376,9 @@
     "IMAGE DISPLAY": [
       "p2kbSpin2Bitmap"
     ],
+    "IN A DAC SMART-PIN MODE, OUT NEEDS TT BIT 0 TO RUN THE ADC": [
+      "p2kbArchSmartPins"
+    ],
     "IN FLAG": [
       "p2kbArchSmartPins"
     ],
@@ -3353,6 +3495,9 @@
     ],
     "Identifier Rules": [
       "p2kbLanguageIdentifierRules"
+    ],
+    "In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC": [
+      "p2kbArchSmartPins"
     ],
     "Include Binary File": [
       "p2kbSpin2AsmFile"
@@ -3506,6 +3651,9 @@
     ],
     "JonnyMac programming standard": [
       "p2kbSpin2JohnnyMacDocumentationStyle"
+    ],
+    "KNOWN SILICON BUGS": [
+      "p2kbArchSiliconErrata"
     ],
     "LABELS": [
       "p2kbPasm2Labels"
@@ -4254,6 +4402,30 @@
     "P2 EDGE STANDARD MODULE": [
       "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
+    "P2 ERRATA": [
+      "p2kbArchSiliconErrata"
+    ],
+    "P2 ERRATUM E1": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "P2 ERRATUM E2": [
+      "p2kbPasm2Augs"
+    ],
+    "P2 ERRATUM E3": [
+      "p2kbPasm2Getct"
+    ],
+    "P2 ERRATUM E4": [
+      "p2kbPasm2Getxacc"
+    ],
+    "P2 ERRATUM E5": [
+      "p2kbPasm2Getxacc"
+    ],
+    "P2 ERRATUM E6": [
+      "p2kbArchSmartPins"
+    ],
+    "P2 ERRATUM E7": [
+      "p2kbPasm2Rdfast"
+    ],
     "P2 EVAL A/V BREAKOUT ADD-ON BOARD": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout"
     ],
@@ -4383,6 +4555,12 @@
     "P2 RTC Add-on Board": [
       "p2kbHwAddonRtcAddonRtc"
     ],
+    "P2 SILICON ERRATA": [
+      "p2kbArchSiliconErrata"
+    ],
+    "P2 SILICON ERRATA E1-E7": [
+      "p2kbArchSiliconErrata"
+    ],
     "P2 SOURCE FILE ORGANIZATION": [
       "p2kbSpin2P2SourceFileOrganizationStandard"
     ],
@@ -4391,6 +4569,9 @@
     ],
     "P2 STACK OPERATIONS": [
       "p2kbPasm2StackOperations"
+    ],
+    "P2 Silicon Errata E1-E7": [
+      "p2kbArchSiliconErrata"
     ],
     "P2 Source File Organization": [
       "p2kbSpin2P2SourceFileOrganizationStandard"
@@ -4422,6 +4603,30 @@
     "P2 development board": [
       "p2kbHwP2EvalBoardP2EvalBoard"
     ],
+    "P2 errata": [
+      "p2kbArchSiliconErrata"
+    ],
+    "P2 erratum E1": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "P2 erratum E2": [
+      "p2kbPasm2Augs"
+    ],
+    "P2 erratum E3": [
+      "p2kbPasm2Getct"
+    ],
+    "P2 erratum E4": [
+      "p2kbPasm2Getxacc"
+    ],
+    "P2 erratum E5": [
+      "p2kbPasm2Getxacc"
+    ],
+    "P2 erratum E6": [
+      "p2kbArchSmartPins"
+    ],
+    "P2 erratum E7": [
+      "p2kbPasm2Rdfast"
+    ],
     "P2 evaluation board": [
       "p2kbHwP2EvalBoardP2EvalBoard"
     ],
@@ -4436,6 +4641,9 @@
     ],
     "P2 programmer": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "P2 silicon errata": [
+      "p2kbArchSiliconErrata"
     ],
     "P2 source file organization conventions": [
       "p2kbSpin2P2SourceFileOrganizationStandard"
@@ -6039,6 +6247,18 @@
     "SETQ": [
       "p2kbPasm2Setq"
     ],
+    "SETQ BLOCK PTRX STEP LOST": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "SETQ BLOCK TRANSFERS LOSE THEIR POINTER STEP": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "SETQ Block Transfers Lose Their Pointer Step": [
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "SETQ block PTRx step lost": [
+      "p2kbPasm2SetqBlockOps"
+    ],
     "SETQ/SETQ2 BLOCK OPERATIONS": [
       "p2kbPasm2SetqBlockOps"
     ],
@@ -6200,6 +6420,12 @@
     "SIGNX": [
       "p2kbPasm2Signx",
       "p2kbSpin2OpOpSIGNX"
+    ],
+    "SILICON ERRATA": [
+      "p2kbArchSiliconErrata"
+    ],
+    "SILICON_ERRATA": [
+      "p2kbArchSiliconErrata"
     ],
     "SINC1": [
       "p2kbArchDdsGoertzel"
@@ -6946,6 +7172,9 @@
     "TEXT WINDOW": [
       "p2kbSpin2Term"
     ],
+    "THE GOERTZEL ACCUMULATORS TRAIL BY ONE CLOCK": [
+      "p2kbPasm2Getxacc"
+    ],
     "THE RESOURCE BUDGET \u2014 A REQUIRED DESIGN ARTIFACT": [
       "p2kbArchResourceBudget"
     ],
@@ -7072,6 +7301,9 @@
     ],
     "Table Lookup Functions": [
       "p2kbSpin2TableLookup"
+    ],
+    "The Goertzel Accumulators Trail by One Clock": [
+      "p2kbPasm2Getxacc"
     ],
     "The Resource Budget \u2014 A Required Design Artifact": [
       "p2kbArchResourceBudget"
@@ -8837,6 +9069,40 @@
     "equate": [
       "p2kbSpin2OpOpEquate"
     ],
+    "errata": [
+      "p2kbArchSiliconErrata"
+    ],
+    "erratum": [
+      "p2kbArchSiliconErrata"
+    ],
+    "erratum E1": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2SetqBlockOps"
+    ],
+    "erratum E2": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Augs"
+    ],
+    "erratum E3": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Getct"
+    ],
+    "erratum E4": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Getxacc"
+    ],
+    "erratum E5": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Getxacc"
+    ],
+    "erratum E6": [
+      "p2kbArchSiliconErrata",
+      "p2kbArchSmartPins"
+    ],
+    "erratum E7": [
+      "p2kbArchSiliconErrata",
+      "p2kbPasm2Rdfast"
+    ],
     "error propagation": [
       "p2kbSpin2Abort"
     ],
@@ -9346,6 +9612,9 @@
     ],
     "jxro": [
       "p2kbPasm2Jxro"
+    ],
+    "known silicon bugs": [
+      "p2kbArchSiliconErrata"
     ],
     "labels": [
       "p2kbPasm2Labels"
@@ -10641,6 +10910,12 @@
     "signx": [
       "p2kbPasm2Signx"
     ],
+    "silicon errata": [
+      "p2kbArchSiliconErrata"
+    ],
+    "silicon_errata": [
+      "p2kbArchSiliconErrata"
+    ],
     "sine and cosine": [
       "p2kbAppNoteP2an002CordicForRealWork"
     ],
@@ -11704,6 +11979,11 @@
       "mtime": 1791615115,
       "sha256": "e8437b4bf00fa8f735ad8d3c077de65e52bb628535f1e55121ec98d18ebec94e"
     },
+    "p2kbArchSiliconErrata": {
+      "path": "deliverables/ai/P2/architecture/silicon_errata.yaml",
+      "mtime": 1791673796,
+      "sha256": "fb9a2a7b0cbf73a7112cb88f2ad5d13604227ffe59288b407198e3eff6d028a2"
+    },
     "p2kbArchSmartPin00000NormalMode": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00000-normal-mode.yaml",
       "mtime": 1787645736,
@@ -11876,8 +12156,8 @@
     },
     "p2kbArchSmartPins": {
       "path": "deliverables/ai/P2/architecture/smart_pins.yaml",
-      "mtime": 1791615115,
-      "sha256": "1e0f01c10401ed5dcd0f3da29ef32526272a4dbd6e7909ccda45a0d000f2d01c"
+      "mtime": 1791673796,
+      "sha256": "8bf37b84f8dad33ced930fcdb5915814eacabdcb1b16bacc6ccbf656a80f5800"
     },
     "p2kbArchStreamerIndex": {
       "path": "deliverables/ai/P2/architecture/streamer/_index.yaml",
@@ -11891,8 +12171,8 @@
     },
     "p2kbArchDdsGoertzel": {
       "path": "deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml",
-      "mtime": 1791615115,
-      "sha256": "72ee7ba064c4d75899ca920d0c3858c2bf0acdaf3705422c8089db75d9458571"
+      "mtime": 1791673796,
+      "sha256": "81a62a8be05b558c8135cf0fdc84f5719dd654ea9be4fa6061b926564366e748"
     },
     "p2kbArchModesReference": {
       "path": "deliverables/ai/P2/architecture/streamer/modes-reference.yaml",
@@ -13141,13 +13421,13 @@
     },
     "p2kbPasm2Augd": {
       "path": "deliverables/ai/P2/language/pasm2/augd.yaml",
-      "mtime": 1791615115,
-      "sha256": "820890ecf1b25bc77fdef1fd50fa4ab217e478a7da089072a14e62d53d3e1acc"
+      "mtime": 1791673796,
+      "sha256": "e9f6a6f14d609d4311753d6c687fef91fec3550dc3cd94d9e63700580cbc4b2e"
     },
     "p2kbPasm2Augs": {
       "path": "deliverables/ai/P2/language/pasm2/augs.yaml",
-      "mtime": 1791615115,
-      "sha256": "9bf3f295d19dfddce0c77f5b074452f8350409693456d1f37aeb061e229443d2"
+      "mtime": 1791673796,
+      "sha256": "bdc01f5e96915601bd5b44233148ae22bbbbf7a504c30d0b7b1ea325ff555718"
     },
     "p2kbPasm2Bitc": {
       "path": "deliverables/ai/P2/language/pasm2/bitc.yaml",
@@ -13376,8 +13656,8 @@
     },
     "p2kbPasm2SetqBlockOps": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml",
-      "mtime": 1791615115,
-      "sha256": "2a16ac091a9980248b2a03838326ae0b6059a71a53b1f08b81b8ca4c580b7a83"
+      "mtime": 1791673796,
+      "sha256": "850a5bfc8ceb46a2a636d5a6c9b4d8cdbf65d6890f9d777a8bd66e385ebea5ff"
     },
     "p2kbPasm2SkipfBranching": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/skipf_branching.yaml",
@@ -13631,8 +13911,8 @@
     },
     "p2kbPasm2Getct": {
       "path": "deliverables/ai/P2/language/pasm2/getct.yaml",
-      "mtime": 1791615115,
-      "sha256": "b0070bb0fe78c445276302817e142eba1fb4c52d1da5695508d8f417c23a1db6"
+      "mtime": 1791673796,
+      "sha256": "7a83ec813341c29830ed946d1dd679380405b72af56c89bf80ed53cbd3f18ebc"
     },
     "p2kbPasm2Getnib": {
       "path": "deliverables/ai/P2/language/pasm2/getnib.yaml",
@@ -13671,8 +13951,8 @@
     },
     "p2kbPasm2Getxacc": {
       "path": "deliverables/ai/P2/language/pasm2/getxacc.yaml",
-      "mtime": 1791615115,
-      "sha256": "b94fa49b61102d1ebbdb297fb1250914f79a199086212382770ee93f14bce832"
+      "mtime": 1791673796,
+      "sha256": "bd3c7e08b2d896239cb2fbe55e35823c0d26fe2d3a99a32f30c9647da10ddec4"
     },
     "p2kbPasm2CounterEventJumps": {
       "path": "deliverables/ai/P2/language/pasm2/groups/counter_event_jumps.yaml",
@@ -14391,8 +14671,8 @@
     },
     "p2kbPasm2Rdfast": {
       "path": "deliverables/ai/P2/language/pasm2/rdfast.yaml",
-      "mtime": 1791615115,
-      "sha256": "6293444cfd1dd3d388b14b0ab32064076feb9fd1809c51ef4464c8d88b5c7262"
+      "mtime": 1791673796,
+      "sha256": "15517e17f112802a99fdfdf8b1a68c733740ff8205e1a8af666fc89ccd9b999e"
     },
     "p2kbPasm2Rdlong": {
       "path": "deliverables/ai/P2/language/pasm2/rdlong.yaml",
