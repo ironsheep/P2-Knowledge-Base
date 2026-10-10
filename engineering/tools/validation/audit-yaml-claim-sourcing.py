@@ -605,9 +605,12 @@ _LISTING_CURRENT = {row[0]: LISTING_EDITION_RE[row[0]].match(row[2].lower()).gro
 # Chip makers' datasheets (route 3): a title with a SECTION but no revision is not enough
 # -- a datasheet is revised in place, and a register or address fact belongs to one
 # revision. The citation must write the printed revision (`Rev. 7`, `Rev.1`); a different
-# one is STALE_EDITION. Value = the revision number of the ingested edition.
-DATASHEET_REVISION = {"pcf8523-datasheet": "7", "ak5704-datasheet": "1"}
+# one is STALE_EDITION. Value = the revision number of the ingested edition, read off the
+# row's own edition string (as _LISTING_CURRENT is), so a revision bump is one edit.
 DATASHEET_REV_RE = re.compile(r"\brev\.?\s*(\d+)\b")
+DATASHEET_REVISION = {row[0]: DATASHEET_REV_RE.search(row[2].lower()).group(1)
+                      for row in CANONICAL_TITLES
+                      if row[0] in ("pcf8523-datasheet", "ak5704-datasheet")}
 
 
 def listing_edition_class(key, nv, end):

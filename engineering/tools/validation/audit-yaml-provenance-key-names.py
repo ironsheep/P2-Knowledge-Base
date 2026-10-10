@@ -17,11 +17,12 @@ hit -- it merely contains the letters (`resources` is a content key on 53 pages)
 that is prose rather than an identifier (it contains a space or `?`, e.g. the
 boot-ROM decision-tree questions) is content and is not examined.
 
+WHAT IS NOT EXAMINED. A name the delivery filter removes (read from its one definition,
+DELIVERY_FILTER in generate-p2kb-index.py), and every key UNDER one, never reaches an
+agent -- tracking data sits there (today: scrape_tracking). The same bookkeeping name
+outside a filtered key is examined like any other, and fails as unlisted.
+
 THE ALLOW-LIST is held in this script, one line per name, each with a kind and a reason:
-    filtered  the delivery filter removes it. Checked against the rule in
-              generate-p2kb-index.py: a name listed here but absent from the rule fails.
-    tracking  scraper bookkeeping. Every occurrence must sit under a key the filter
-              removes (today: scrape_tracking), or it reaches the agent -- fails.
     content   a real content key; its name only happens to read like provenance.
     open      provenance that DOES reach consumers today and is awaiting a decision.
               Listed so the gate is green, and counted in the summary line so it is never
@@ -33,7 +34,7 @@ Usage:
     audit-yaml-provenance-key-names.py [path ...]    # default: deliverables/ai/P2
     audit-yaml-provenance-key-names.py --self-test   # alias: --negative-control
 
-Exit 0 clean, 1 an unlisted name (or a listed name misused), 2 nothing measured.
+Exit 0 clean, 1 an unlisted name, 2 nothing measured.
 """
 import importlib.util
 import os
@@ -48,24 +49,13 @@ except ImportError:
     print("PyYAML not available", file=sys.stderr)
     sys.exit(2)
 
+# libyaml's composer when built in; the node tree (and so every key and line) is the same
+LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
 ROOT = Path(__file__).resolve().parents[3]
 
 # name -> (kind, one-line reason). Built from the census of 1,135 shipped files, 2026-10-10.
 ALLOW = {
-    # ---- removed by the delivery filter (kind 'filtered') -------------------------------
-    "source":                 ("filtered", "provenance; the filter's primary field"),
-    "sources":                ("filtered", "provenance; the filter's list form"),
-    "documentation_source":   ("filtered", "provenance; per-file citation of the ingested document"),
-    "verified_against":       ("filtered", "provenance; what a claim was checked against"),
-    "manual_extraction_date": ("filtered", "provenance; process date of the extraction"),
-    "scrape_tracking":        ("filtered", "OBEX / Quick Bytes scraper bookkeeping (Stephen, 2026-10-10)"),
-    # ---- scraper bookkeeping; only valid inside a filtered key (kind 'tracking') --------
-    "scraped":                ("tracking", "Quick Bytes scrape date, inside scrape_tracking"),
-    "import_source":          ("tracking", "OBEX import origin, inside scrape_tracking"),
-    "rescrape_source":        ("tracking", "OBEX re-scrape label, inside scrape_tracking"),
-    "last_author_extraction":    ("tracking", "OBEX author-extraction timestamp, inside scrape_tracking"),
-    "last_author_re_extraction": ("tracking", "OBEX author re-extraction timestamp, inside scrape_tracking"),
-    "last_complete_extraction":  ("tracking", "OBEX complete-extraction timestamp, inside scrape_tracking"),
     # ---- real content whose name reads like provenance (kind 'content') -----------------
     "authority_tier":         ("content", "decomposition pages: how authoritative a statement is; F-545 decided it stays; the sourcing gate reads EXAMPLE"),
     "authority_tier_legend":  ("content", "decomposition glossary: the legend for authority_tier"),
@@ -122,19 +112,12 @@ IDENT_RE = re.compile(r"^[A-Za-z0-9_\-.%]+$")
 NOT_HITS = {"resource", "resources"}
 
 
-def hit_words(key):
-    """The words of `key` that make it provenance-shaped; [] if it is not examined or clean."""
+def is_provenance_shaped(key):
+    """True if a word of `key` reads like provenance; a prose key (spaces, '?') is content."""
     if not IDENT_RE.match(key):
-        return []                       # a prose key (spaces, '?') is content
-    words = [w for w in re.split(r"[_\-.]", key.lower()) if w]
-    out = []
-    for w in words:
-        if w in NOT_HITS:
-            continue
-        if w.startswith("source") or w.endswith("source") or w.endswith("sources") \
-                or any(w.startswith(s) for s in STEMS):
-            out.append(w)
-    return out
+        return False
+    return any(w not in NOT_HITS and (w.startswith(("source",) + STEMS) or w.endswith(("source", "sources")))
+               for w in re.split(r"[_\-.]", key.lower()) if w)
 
 
 def load_filter_fields():
@@ -158,27 +141,24 @@ def walk(node, ancestors, out):
 
 
 def analyse(files, filtered):
-    """Return (unlisted, misplaced, parse_fail, seen) for the given files."""
-    unlisted, misplaced, parse_fail = {}, [], []
+    """Return (unlisted, parse_fail, seen) for the given files."""
+    unlisted, parse_fail = {}, []
     seen = {}                                    # name -> occurrence count
     for f in files:
         keys = []
         try:
             with open(f, encoding="utf-8") as fh:
-                walk(yaml.compose(fh), [], keys)
+                walk(yaml.compose(fh, Loader=LOADER), [], keys)
         except Exception as exc:                 # a file we cannot parse is a finding
             parse_fail.append((f, str(exc).splitlines()[0]))
             continue
         for key, anc, line in keys:
-            if not hit_words(key):
-                continue
+            if key in filtered or set(anc) & filtered or not is_provenance_shaped(key):
+                continue                         # never served, or not provenance-shaped
             seen[key] = seen.get(key, 0) + 1
-            entry = ALLOW.get(key)
-            if entry is None:
+            if key not in ALLOW:
                 unlisted.setdefault(key, []).append((f, line))
-            elif entry[0] == "tracking" and not (set(anc) & filtered):
-                misplaced.append((f, line, key, ".".join(anc)))
-    return unlisted, misplaced, parse_fail, seen
+    return unlisted, parse_fail, seen
 
 
 def collect(paths):
@@ -195,16 +175,11 @@ def collect(paths):
 def audit(paths):
     filtered = load_filter_fields()
     problems = 0
-    for name, (kind, reason) in sorted(ALLOW.items()):
-        if kind == "filtered" and name not in filtered:
-            print(f"  ALLOW-LIST ERROR  '{name}' is listed as filtered but is not in the delivery "
-                  f"filter's remove_fields ({sorted(filtered)})")
-            problems += 1
     files = collect(paths)
     if not files:
         print("NOTHING MEASURED -- no .yaml files found under the given path(s). This is not a pass.")
         return 2
-    unlisted, misplaced, parse_fail, seen = analyse(files, filtered)
+    unlisted, parse_fail, seen = analyse(files, filtered)
     for f, why in parse_fail:
         print(f"  PARSE-FAIL  {f}: {why}")
         problems += 1
@@ -215,19 +190,12 @@ def audit(paths):
               f"            a provenance-shaped key name that has not been reviewed. Put the provenance in\n"
               f"            source: / sources: (the filter removes them) or, if it is real content, add it\n"
               f"            to ALLOW in this script with a reason.")
-    for f, line, key, anc in misplaced[:50]:
-        problems += 1
-        print(f"  MISPLACED  '{key}' at {f}:{line} (under {anc or '<root>'}) is scraper bookkeeping "
-              f"outside any key the delivery filter removes")
-    if len(misplaced) > 50:
-        print(f"  ... and {len(misplaced) - 50} more misplaced")
-    open_n = sum(n for k, n in seen.items() if ALLOW.get(k, ("",))[0] == "open")
-    open_names = sorted(k for k in seen if ALLOW.get(k, ("",))[0] == "open")
+    open_seen = {k: n for k, n in seen.items() if ALLOW.get(k, ("",))[0] == "open"}
     unused = sorted(k for k in ALLOW if k not in seen)
-    print(f"\n  files scanned: {len(files)}   distinct provenance-shaped names: {len(seen)}   "
-          f"unlisted: {len(unlisted)}   misplaced: {len(misplaced)}")
-    print(f"  OPEN (reaches consumers, awaiting a decision): {open_n} occurrence(s) of "
-          f"{len(open_names)} name(s): {', '.join(open_names) or 'none'}")
+    print(f"\n  files scanned: {len(files)}   distinct provenance-shaped names served: {len(seen)}   "
+          f"unlisted: {len(unlisted)}")
+    print(f"  OPEN (reaches consumers, awaiting a decision): {sum(open_seen.values())} occurrence(s) of "
+          f"{len(open_seen)} name(s): {', '.join(sorted(open_seen)) or 'none'}")
     if unused:
         print(f"  allow-list names no longer present (delete their lines): {', '.join(unused)}")
     if problems == 0:
@@ -254,20 +222,16 @@ def self_test():
          "m:\n  metadata:\n    last_author_extraction: x\n", True),
     ]
     ok = True
-    for label, body, want_fail in cases:
-        d = tempfile.mkdtemp()
+    with tempfile.TemporaryDirectory() as d:
         p = os.path.join(d, "t.yaml")
-        with open(p, "w") as fh:
-            fh.write(body)
-        unlisted, misplaced, parse_fail, _ = analyse([p], filtered)
-        got_fail = bool(unlisted or misplaced or parse_fail)
-        good = got_fail == want_fail
-        ok = ok and good
-        print(f"  [{'PASS' if good else '**FAIL**'}] {label}: got {'FAIL' if got_fail else 'clean'}")
-    bad_allow = [n for n, (k, _) in ALLOW.items() if k == "filtered" and n not in filtered]
-    if bad_allow:
-        ok = False
-        print(f"  [**FAIL**] allow-list 'filtered' names missing from the delivery filter: {bad_allow}")
+        for label, body, want_fail in cases:
+            with open(p, "w") as fh:
+                fh.write(body)
+            unlisted, parse_fail, _ = analyse([p], filtered)
+            got_fail = bool(unlisted or parse_fail)
+            good = got_fail == want_fail
+            ok = ok and good
+            print(f"  [{'PASS' if good else '**FAIL**'}] {label}: got {'FAIL' if got_fail else 'clean'}")
     print()
     print("Self-test PASSED -- the gate fires on a new provenance-shaped key and on bookkeeping outside\n"
           "scrape_tracking, and passes listed names, `resources` and prose keys." if ok else "Self-test FAILED.")
