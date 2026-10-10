@@ -1,5 +1,5 @@
 # Language Fundamental: Case Sensitivity
-# Source: Spin2 v51 documentation, PASM2 compiler behavior
+# Source: Spin2 documentation, PASM2 compiler behavior
 # Critical for: Code generation, identifier resolution
 
 fundamental: "Case Sensitivity"
@@ -23,7 +23,7 @@ core_rule: |
 detailed_specification:
   spin2:
     rule: "Case-insensitive throughout"
-    source: "Spin2 v51 documentation - 'Source code is case-insensitive'"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Overview - 'Source code is case-insensitive'"
     implications:
       - "MyVar = myvar = MYVAR = myVAR"
       - "PUB = pub = Pub"
@@ -46,8 +46,11 @@ identifier_examples:
     - group: ["MyMethod", "mymethod", "MYMETHOD", "myMethod"]
       meaning: "All refer to the same method"
     
-    - group: ["LED_PIN", "led_pin", "Led_Pin", "LedPin", "ledpin"]
-      meaning: "All refer to the same constant"
+    - group: ["LED_PIN", "led_pin", "Led_Pin"]
+      meaning: "All refer to the same constant (case is ignored; the underscore is part of the name)"
+
+    - group: ["LedPin", "ledpin", "LEDPIN"]
+      meaning: "All refer to one constant -- a different one from LED_PIN, because the underscore is part of the name"
 
 documentation_conventions: |
   While the languages are case-insensitive, documentation uses case conventions for clarity:
@@ -92,11 +95,18 @@ best_practices:
       ' Good: Consistent style
       PUB SetMotorSpeed(speed)
         motor_speed := speed
-      
-      ' Poor: Inconsistent style  
-      Pub SETMotorSPEED(SPEED)
-        Motor_SPEED := speed
-  
+
+  - practice: "inconsistent_case_style_to_avoid"
+    description: "Poor: the compiler accepts it, but the same name is spelled three ways"
+    rationale: "Readers see three different-looking names for one thing"
+    example: |
+      ' Poor: Inconsistent style
+      VAR
+        LONG motor_speed
+
+      Pub SETMotorSPEED(speed_in)
+        Motor_SPEED := speed_in
+
   - practice: "meaningful_distinctions"
     description: "Use meaningful names, not case, to distinguish identifiers"
     wrong: |

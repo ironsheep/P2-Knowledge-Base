@@ -10,6 +10,7 @@ version: "1.0"
 last_updated: "2025-09-06"
 
 description: "Comprehensive decision-making guide for selecting optimal P2 hardware configurations based on project requirements, budget constraints, experience level, and application domain."
+pricing: "For current pricing, see the Parallax store (parallax.com)."
 
 decision_tree:
   primary_question: "What is your primary use case?"
@@ -20,13 +21,11 @@ decision_tree:
         recommendation: "P2 Eval Board + Control Board Add-on"
         part_numbers: ["64000", "64006A"]
         rationale: "Complete development environment with programming, debugging, and simple I/O"
-        cost_estimate: "$150-200"
         next_steps: "Add more add-on boards as needed"
       experienced_user:
         recommendation: "P2 Eval Board + Complete Add-on Set"
         part_numbers: ["64000", "64006-ES"]
         rationale: "Full ecosystem access for comprehensive development"
-        cost_estimate: "$250-300"
         next_steps: "Transition to breakout boards for production"
         
     prototyping_experimentation:
@@ -35,13 +34,11 @@ decision_tree:
         recommendation: "P2 Eval Board"
         part_numbers: ["64000"]
         rationale: "Built-in FTDI USB-to-serial programming over the PC micro-USB socket (there is no USB-C socket on the #64000), extensive prototyping area"
-        cost_estimate: "$100-150"
         expansion_options: ["Add-on boards as needed", "Breadboard integration"]
       external_programming_ok:
         recommendation: "P2 Edge Standard Breakout + P2-EC"
         part_numbers: ["64029", "P2-EC"]
         rationale: "Lower cost, all pins accessible, breadboard compatible"
-        cost_estimate: "$60-80"
         additional_needed: "PropPlug or similar programmer"
         
     embedded_systems:
@@ -50,13 +47,11 @@ decision_tree:
         recommendation: "P2 Edge Mini Breakout + P2-EC"
         part_numbers: ["64019", "P2-EC"]
         rationale: "Smallest carrier footprint -- 3.15 x 1.4 in (80 x 35.5 mm) -- with 40 of the 64 I/O pins at headers"
-        cost_estimate: "$50-70"
         mounting: "Four plated mounting holes attached to the ground plane; the P2 Edge Module drops into the board's edge socket. The word \"castellation\" appears nowhere in the #64019 guide -- this is not a castellated surface-mount part."
       size_moderate:
         recommendation: "P2 Edge Standard Breakout + P2-EC"
         part_numbers: ["64029", "P2-EC"]
         rationale: "Larger but easier to work with, header pin access"
-        cost_estimate: "$60-80"
         mounting: "Through-hole headers or breadboard mounting"
         
     production_ready:
@@ -65,13 +60,11 @@ decision_tree:
         recommendation: "P2 Edge Mini Breakout + P2-EC32MB"
         part_numbers: ["64019", "P2-EC32MB"]
         rationale: "Production-ready form factor with maximum memory"
-        cost_estimate: "$80-120"
         memory: "16MB Flash + 32MB PSRAM"
       standard_programs:
         recommendation: "P2 Edge Mini Breakout + P2-EC"
         part_numbers: ["64019", "P2-EC"]
         rationale: "Cost-effective production solution"
-        cost_estimate: "$50-70"
         memory: "16MB Flash (no PSRAM) sufficient for most applications"
 
 application_specific_guides:
@@ -79,7 +72,6 @@ application_specific_guides:
     primary_hardware: "P2 Eval Board"
     required_addons: ["64006H - A/V Breakout Board"]
     optional_addons: ["64006D - Digital Video Out", "64006C - LED Matrix"]
-    total_investment: "$200-350"
     capabilities:
       # The #64006H guide lists sockets and signal formats, not a resolution
       # ceiling.
@@ -101,12 +93,9 @@ application_specific_guides:
   usb_communication_projects:
     primary_hardware: "P2 Eval Board"
     required_addons: ["64006B - Serial Host", "64006F - Serial Device"]
-    total_investment: "$250-350"
     capabilities:
-      - "USB host for connecting peripherals"
-      - "USB device emulation (HID, CDC, custom)"
-      - "Dual-port configurations for complex scenarios"
-      - "Device enumeration and power management"
+      - "USB host for connecting peripherals (two USB-type A sockets on the Serial Host board)"
+      - "USB device emulation (up to two USB devices on the Serial Device board)"
     development_path:
       1: "Start with basic USB programming via the Eval Board PC micro-USB socket"
       2: "Add Serial Host for connecting USB devices"
@@ -117,19 +106,16 @@ application_specific_guides:
     beginner_level:
       hardware: "P2 Eval Board + Control Board"
       concepts: ["Basic I/O", "LED control", "Switch input", "Programming basics"]
-      cost: "$150-200"
       duration: "4-6 weeks"
     intermediate_level:
       hardware: "Previous + LED Matrix + Mini Prototyping"
       addons: ["64006C", "64006E"]
       concepts: ["Matrix control", "Charlieplexing", "Custom circuits", "Advanced I/O"]
-      additional_cost: "$100-150"
       duration: "6-8 weeks"
     advanced_level:
       hardware: "Previous + USB boards + A/V breakout"
       addons: ["64006B", "64006F", "64006H"]
       concepts: ["Communication protocols", "A/V interfaces", "System integration"]
-      additional_cost: "$200-300"
       duration: "8-12 weeks"
       
   maker_hobbyist_projects:
@@ -137,7 +123,6 @@ application_specific_guides:
       hardware: "P2 Eval Board"
       immediate_addons: ["64006A - Control", "64006E - Prototyping"]
       rationale: "Maximum flexibility with simple I/O and custom circuit capability"
-      cost: "$200-250"
     expansion_priority:
       1: "64006C - LED Matrix (visual projects)"
       2: "64006H - A/V Breakout (multimedia)"
@@ -148,34 +133,28 @@ application_specific_guides:
     development_phase:
       hardware: "P2 Eval Board"
       focus: "Proof of concept, protocol development"
-      cost: "$150-200"
     prototype_phase:
       hardware: "P2 Edge Standard Breakout + P2-EC"
       focus: "Custom circuit integration, field testing"
-      cost: "$60-80"
     production_phase:
       hardware: "P2 Edge Mini Breakout + P2-EC/32MB"
       focus: "Size optimization, cost reduction"
-      cost: "$50-120"
       
 budget_optimization_strategies:
   ultra_budget_entry:
     configuration: "P2 Edge Standard Breakout + P2-EC"
-    total_cost: "$60-80"
-    programming: "PropPlug programmer required (+$30)"
+    programming: "PropPlug programmer required"
     limitations: "No integrated development environment"
     best_for: "Experienced developers, cost-critical projects"
     
   value_balanced:
     configuration: "P2 Eval Board"
-    total_cost: "$100-150"
     programming: "Integrated programming -- built-in FTDI USB-to-serial over the PC micro-USB socket"
     expansion: "Add specific add-on boards as needed"
     best_for: "Most users, balanced cost/capability"
     
   capability_maximized:
     configuration: "P2 Eval Board + Complete Add-on Set"
-    total_cost: "$300-400"
     programming: "Full development environment"
     expansion: "Complete P2 ecosystem access"
     best_for: "Educational institutions, comprehensive development"
@@ -189,7 +168,6 @@ memory_sizing_guide:
     data_logging: "Large in-RAM data sets - P2-EC32MB (32MB PSRAM)"
     
   memory_upgrade_decision:
-    cost_difference: "$30-50 between P2-EC and P2-EC32MB"
     performance_impact: "None - same processing capability"
     when_to_upgrade: "Large programs, data logging, future-proofing"
     when_standard_sufficient: "Educational use, simple projects, cost optimization"
@@ -280,7 +258,7 @@ upgrade_and_expansion_paths:
     education: ["Control Board", "LED Matrix", "Prototyping"]
 
 final_recommendations:
-  most_versatile: "P2 Eval Board - handles 90% of use cases effectively"
+  most_versatile: "P2 Eval Board - the broadest single-board starting point"
   best_value: "P2 Edge Standard Breakout + P2-EC - minimal cost for full capability"
   most_compact: "P2 Edge Mini Breakout + P2-EC - production-ready size"
   educational_optimal: "P2 Eval Board + Control Board + Prototyping Board"

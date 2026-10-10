@@ -250,12 +250,11 @@ boot_modes:
   printed_reference: "the correct DIP-switch settings for microSD boot are also printed on the back of the Edge module"
 
 # =============================================================================
-# PROTOCOL CONSTRAINTS - FOR DRIVER DEVELOPMENT
+# PROTOCOL CONSTRAINTS
 # =============================================================================
 protocol_constraints:
   flash:
     interface: "SPI"
-    max_clock_mhz: 133  # Per W25Q128JV datasheet
     addressing: "24-bit (16MB)"
 
   serial:
@@ -273,7 +272,7 @@ resources:
       date: "2022-06-03"
       publisher: "Parallax Inc."
     references:
-      - "P2 Silicon Documentation (Propeller 2 Datasheet)"
+      - "Parallax Propeller 2 (P2X8C4M64P) Datasheet"
       - "Winbond W25Q128JV Flash Datasheet"
 
   edge_connectors:

@@ -31,7 +31,7 @@ getting_started_guides:
     description: "Complete Spin2 high-level language introduction"
   compiler:
     key: p2kbToolsPnutTsCompiler
-    description: "pnut_ts compiler setup and usage"
+    description: "pnut-ts compiler setup and usage"
 
 # =============================================================================
 # ARCHITECTURE FUNDAMENTALS - Core P2 concepts

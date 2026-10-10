@@ -81,12 +81,12 @@ statistics:
   percentage: "28.8%"
 
 compiler_note: >
-  Inline PASM in this KB uses the Parallax pnut_ts / PNut syntax: ORG ... END
+  Inline PASM in this KB uses the Parallax pnut-ts / PNut syntax: ORG ... END
   inside a PUB/PRI method. The asm ... endasm form is FlexSpin (fastspin)
-  syntax — it will NOT compile with pnut_ts, so do not use it in P2KB example
+  syntax — it will NOT compile with pnut-ts, so do not use it in P2KB example
   code. Inside the block, method parameters, the return value, and locals are
   addressed by NAME (each by its own name);
-  do not route them through PTRA/PTRB. Example above compile-verified with pnut_ts.
+  do not route them through PTRA/PTRB. Example above compile-verified with pnut-ts.
 
 see_also:
   - "Canonical inline-PASM construct (ORG..END, execution model, register mapping): p2kbSpin2InlinePasm"

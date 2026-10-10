@@ -3,9 +3,8 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_content.code
-    fp: "c3ca60b8d2749c29"
+    fp: "a3ca902aad9be9b0"
     compile: program
-    finding: "S-001"
   - at: code_content.code_comments[0].comment
     fp: "5d90f88ec521f3a7"
     compile: fragment

@@ -1,5 +1,5 @@
 # Language Fundamental: Identifier Rules
-# Source: Spin2 v51 documentation, PASM2 manual
+# Source: Spin2 documentation, PASM2 manual, compiler behavior (symbol length)
 # Critical for: Valid code generation, naming conventions
 
 fundamental: "Identifier Rules"
@@ -12,13 +12,14 @@ metadata:
   complexity: "beginner"
   critical_for_ai: true
   common_mistakes:
-    - "Creating identifiers longer than 32 characters"
+    - "Creating identifiers longer than 30 characters"
     - "Starting identifiers with numbers"
     - "Using special characters in identifiers"
 
 core_rules:
-  maximum_length: 32
-  length_description: "Identifiers can be up to 32 characters long"
+  maximum_length: 30
+  length_description: "Identifiers can be up to 30 characters long. The compiler accepts a 30-character CON, method, VAR, local or DAT-label name and rejects a 31-character one with 'Symbol exceeds 30 characters'; the Spin2 documentation states 32."
+  source: "CP-001; Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Overview (the documentation's own statement of 32)"
   
   valid_characters:
     first_character: ["letter", "underscore"]
@@ -64,7 +65,7 @@ valid_identifier_examples:
     - "i2c_400khz"
     
   maximum_length:
-    - "this_is_exactly_32_characters_x"  # 32 chars - valid
+    - "this_is_exactly_30_characters_"  # 30 chars - valid
     
 invalid_identifier_examples:
   - example: "123abc"
@@ -79,8 +80,8 @@ invalid_identifier_examples:
   - example: "pin@56"
     reason: "@ symbol not allowed"
     
-  - example: "this_identifier_is_way_too_long_33"
-    reason: "Exceeds 32 character limit (33 chars)"
+  - example: "this_is_exactly_31_characters_x"
+    reason: "Exceeds 30 character limit (31 chars)"
     
   - example: "my variable"
     reason: "Spaces not allowed"
@@ -130,7 +131,7 @@ naming_conventions:
       
     labels:
       style: "Mixed conventions"
-      example: "main_loop, :retry, .local_label"
+      example: "main_loop, .retry, .local_label"
 
 special_prefixes_pasm2:
   dot_prefix:
@@ -147,7 +148,7 @@ length_considerations:
     - "i2c_write_byte"     # 14 chars - specific
     
   poor_examples:
-    - "the_current_motor_speed_value_now"  # 30 chars - too verbose
+    - "the_current_motor_speed_value"      # 29 chars - too verbose
     - "gettempfromsensorandconvert"        # 27 chars - hard to read
 
 best_practices:
@@ -168,7 +169,7 @@ best_practices:
 
 common_pitfalls:
   - pitfall: "exceeding_length"
-    description: "Creating identifiers over 32 characters"
+    description: "Creating identifiers over 30 characters"
     wrong: "this_is_a_really_long_identifier_name"
     correct: "long_identifier"
     

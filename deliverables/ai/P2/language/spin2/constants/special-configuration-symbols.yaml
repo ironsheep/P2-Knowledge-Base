@@ -328,7 +328,7 @@ debug_output_control:
       32-bit mask for selective DEBUG compilation.
       Use DEBUG[bit](params) to gate specific debug statements.
       Each bit corresponds to a debug channel (0-31).
-      Introduced in PNut/pnut_ts v46; no {Spin2_v##} version directive required.
+      Introduced in PNut/pnut-ts v46; no {Spin2_v##} version directive required.
     introduced_in_version: "v46"
     default: "undefined"
     example: |
@@ -340,7 +340,7 @@ debug_output_control:
         DEBUG[1]("Channel 1 message")   ' Compiled - bit 1 set
         DEBUG[4]("Channel 4 message")   ' NOT compiled - bit 4 not set
     notes:
-      - "Introduced in PNut/pnut_ts v46; no {Spin2_v##} version directive required"
+      - "Introduced in PNut/pnut-ts v46; no {Spin2_v##} version directive required"
       - "Standard debug() without channel number is always available"
       - "Each bit enables corresponding debug[N]() channel"
       - "Mask of 0 disables all numbered channels"

@@ -2,11 +2,12 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: variable_shadowing.example.code
-    fp: "297209359f9a9967"
-    compile: fragment
+  - at: duplicate_names.example.code
+    fp: "b0521076c094cfc3"
+    compile: never
     wrap: spin2-top
-    finding: "S-083"
+    reason: "the teaching point is the compile error: the result name `count` duplicates the VAR `count`; pnut-ts rejects the PUB line with m230 \"Expected a unique result name\""
+    fails_at: 4
   - at: critical_best_practice.implementation[0]
     fp: "bffd8dbdce0e6bb2"
     compile: not-code
@@ -67,32 +68,35 @@ blocks:
     fp: "663c5d886c36735c"
     compile: not-code
     reason: "a single suggested identifier name (an example of a naming convention); not a statement. As a PASM line a lone word compiles only as a label, so a pass would mean nothing"
-  - at: common_shadowing_scenarios[0].problematic_code
-    fp: "d5073e0e70cb415d"
-    compile: fragment
+  - at: common_duplicate_name_scenarios[0].problematic_code
+    fp: "dd8018c476c9a474"
+    compile: never
     wrap: spin2-top
     assumes: [read_register()->1/0]
-    finding: "S-083"
-  - at: common_shadowing_scenarios[0].fixed_code
+    reason: "a `problematic_code:` block whose teaching point is the compile error: the result name `status` duplicates the VAR `status`; pnut-ts rejects the PUB line with m230 \"Expected a unique result name\""
+    fails_at: 4
+  - at: common_duplicate_name_scenarios[0].fixed_code
     fp: "af3e6853c69b3241"
     compile: fragment
     wrap: spin2-top
     assumes: [read_register()->1/0]
-  - at: common_shadowing_scenarios[1].problematic_code
-    fp: "611656ec1779da98"
-    compile: fragment
+  - at: common_duplicate_name_scenarios[1].problematic_code
+    fp: "576e238a569881b0"
+    compile: never
     wrap: spin2-top
-    finding: "S-083"
-  - at: common_shadowing_scenarios[1].fixed_code
+    reason: "a `problematic_code:` block whose teaching point is the compile error: the parameter name `buffer` duplicates the DAT symbol `buffer`; pnut-ts rejects the PUB line with m221 \"Expected a unique parameter name\""
+    fails_at: 4
+  - at: common_duplicate_name_scenarios[1].fixed_code
     fp: "dc7e9f933dd9dd91"
     compile: program
-  - at: common_shadowing_scenarios[2].problematic_code
-    fp: "56d714a3e1cbb113"
-    compile: fragment
+  - at: common_duplicate_name_scenarios[2].problematic_code
+    fp: "f19deef216d78503"
+    compile: never
     wrap: spin2-top
     assumes: [do_something()->0/1]
-    finding: "S-083"
-  - at: common_shadowing_scenarios[2].fixed_code
+    reason: "a `problematic_code:` block whose teaching point is the compile error: the local name `index` duplicates the VAR `index`; pnut-ts rejects the PUB line with m241 \"Expected a unique variable name\""
+    fails_at: 4
+  - at: common_duplicate_name_scenarios[2].fixed_code
     fp: "baf6b713b15ab35b"
     compile: fragment
     wrap: spin2-top

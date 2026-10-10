@@ -6,8 +6,8 @@ title: "Reading Button Input with INA Register"
 description: "Demonstrates how to read digital input from a button using the INA register and proper pin configuration"
 
 source_metadata:
-  source_document: "P2-Smart-Pins-Green-Book-Tutorial.md"
-  source_section: "Chapter 0: P2 I/O Fundamentals - Reading Inputs"
+  source_document: "P2 Instructions v35 - Rev B/C Silicon, row DIRL; Parallax Propeller 2 Spin2 Language Documentation v55, Cog Registers (the example itself is illustrative, not a published listing)"
+  source_section: null
   source_page: null
   extraction_context: "Following basic output control, showing input reading fundamentals"
   extraction_date: "2025-09-07"

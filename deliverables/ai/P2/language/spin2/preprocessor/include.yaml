@@ -88,8 +88,8 @@ examples:
 
 command_line:
   option: "-I"
-  syntax: "pnut_ts -I path source.spin2"
-  multiple: "pnut_ts -I ./common -I ./drivers source.spin2"
+  syntax: "pnut-ts -I path source.spin2"
+  multiple: "pnut-ts -I ./common -I ./drivers source.spin2"
   description: "Add directories to include search path"
 
 common_patterns:

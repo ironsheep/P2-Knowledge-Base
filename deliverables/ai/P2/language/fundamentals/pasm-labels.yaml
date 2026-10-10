@@ -14,7 +14,7 @@ label_types:
       - "No prefix character required"
       - "Visible throughout the entire PASM2 code section"
       - "Must be unique within the code section"
-      - "Follow standard identifier rules (32 chars max, alphanumeric and underscore)"
+      - "Follow standard identifier rules (30 chars max, alphanumeric and underscore)"
   
   local_labels:
     description: "Labels with local scope, limited to the current routine"
@@ -58,8 +58,8 @@ best_practices:
   naming:
     - "Use descriptive names for global labels"
     - "Use short, clear names for local labels"
-    - "Be consistent with prefix choice (. or :) within a project"
-  
+    - "Prefix local labels with '.' (dot) and keep names short and consistent within a project"
+
   scope_management:
     - "Use local labels for routine-internal jumps"
     - "Use global labels for entry points and major sections"
@@ -67,11 +67,9 @@ best_practices:
 
 compiler_behavior:
   case_sensitivity: "Labels are case-insensitive (like all PASM2 identifiers)"
-  resolution: "Local labels are resolved within their scope first"
-  conflicts: "Local labels can shadow global labels within their scope"
+  resolution: "A local label (.name) belongs to the global label above it, so the same local name can be reused under different global labels"
 
-documentation_source: "Spin2 v51 Grammar Reference"
-extraction_date: "2025-01-23"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT blocks (local labels); CP-001 (symbol length)"
 verified_in: "PNUT compiler and Spin2 documentation"
 
 related_concepts:
@@ -80,8 +78,8 @@ related_concepts:
   
 ai_generation_notes:
   critical_concept: |
-    PASM2 supports both global and local labels. Local labels use 
-    either a dot (.) or colon (:) prefix and have limited scope,
+    PASM2 supports both global and local labels. Local labels use
+    a dot (.) prefix and have limited scope,
     allowing reuse of common label names across different routines.
   
   common_pitfalls:

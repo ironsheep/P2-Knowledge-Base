@@ -16,11 +16,9 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: core_block_types.DAT.example
-    fp: "97c223d6a6d33f97"
+    fp: "e94b5bb66e401e36"
     compile: fragment
     wrap: spin2-top
-    assumes: [x]
-    finding: "S-078"
   - at: core_block_types.PUB.example
     fp: "b58c90295840ac48"
     compile: fragment
@@ -34,11 +32,10 @@ blocks:
     fp: "551e152b231a8168"
     compile: program
   - at: control_flow.conditional.IF_THEN.example
-    fp: "a0b5508839d89ddf"
+    fp: "0c72e36ea64add3d"
     compile: fragment
     wrap: spin2-method
     assumes: [x]
-    finding: "S-075"
   - at: control_flow.conditional.IF_ELSEIF_ELSE.example
     fp: "6d4b54d5d0ecafc0"
     compile: fragment
@@ -64,7 +61,7 @@ blocks:
     wrap: spin2-method
     assumes: [flash_led()->0/0]
   - at: control_flow.loops.REPEAT_WITH_VARIABLE.example
-    fp: "663669a55e9e65bb"
+    fp: "383a7b6bcee12344"
     compile: fragment
     wrap: spin2-method
     assumes: [idx, buffer, process()->0/1]
@@ -113,16 +110,15 @@ blocks:
     wrap: spin2-method
     assumes: [ptr, buffer]
   - at: object_usage.calling_methods.example
-    fp: "227bab2a409e5c79"
+    fp: "979b697bcbf3d9fe"
     compile: fragment
-    wrap: spin2-method
-    assumes: [value]
-    finding: "S-018"
+    wrap: spin2-top
+    assumes: [serial.start(4), sensor.read(0)]
   - at: object_usage.object_arrays.example
-    fp: "30739b0b596cfa72"
+    fp: "43053fd4358363af"
     compile: fragment
-    wrap: spin2-method
-    finding: "S-018"
+    wrap: spin2-top
+    assumes: [led.start(4)]
   - at: inline_pasm2.basic_inline.example
     fp: "b26187e9a2c14b73"
     compile: program
@@ -136,10 +132,10 @@ blocks:
     fp: "b69b5adeb43cea86"
     compile: program
   - at: common_patterns.using_objects.pattern
-    fp: "c75fd0154719a791"
+    fp: "75194cb53dbaf24b"
     compile: fragment
     wrap: spin2-top
-    assumes: [RX_PIN=con, TX_PIN=con, serial.start(3), serial.str(1)]
+    assumes: [RX_PIN=con, TX_PIN=con, serial.start(4), serial.str(1)]
   - at: common_patterns.state_machine.pattern
     fp: "ce2eeea86dcc6aab"
     compile: fragment
@@ -153,7 +149,7 @@ blocks:
     fp: "5fcc175b13476792"
     compile: program
   - at: language_version_directives.version_requirements.Spin2_v50.example
-    fp: "7f5b2ae6528455e6"
+    fp: "7886038125b6b7c2"
     compile: program
   - at: string_handling.string_constants.example
     fp: "ef08a1c9512c42c9"
@@ -175,3 +171,8 @@ blocks:
     fp: "2c4e68664fd39392"
     compile: not-code
     reason: "a bare keyword or operator listed as an example item, not a statement"
+  - at: debugging_support.basic_example
+    fp: "e9e398c0e336aff4"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value]

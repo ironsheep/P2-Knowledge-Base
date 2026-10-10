@@ -333,3 +333,20 @@ blocks:
     fp: "67ec03bcb4c69c00"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: string_handling.defining_strings.examples[0].code
+    fp: "829e39204ecbfd55"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: string_handling.defining_strings.examples[1].code
+    fp: "484a91a356600d19"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: string_handling.defining_strings.examples[2].code
+    fp: "8e53a2191c79d6af"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: debugging_support.basic_example
+    fp: "3d8aec9fdbad9447"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [count]

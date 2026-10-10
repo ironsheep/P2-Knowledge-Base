@@ -9,7 +9,7 @@ description: |
   symbol is NOT defined. This is the inverse of #IFDEF. The block extends until 
   a matching #ELSE, #ELSEIFDEF, #ELSEIFNDEF, or #ENDIF directive. Commonly used 
   for include guards and default configurations.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: |

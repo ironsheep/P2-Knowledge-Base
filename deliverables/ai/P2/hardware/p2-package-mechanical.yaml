@@ -84,14 +84,22 @@ pin_numbering:
     different question -- see hardware/p2-eval-board.yaml and the boot-pin records for
     signal-level pin assignments.
 
+board_design_guidance:
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, Minimal Propeller 2 Connections, p.7"
+  bypass_capacitors: "All VDD and all Vxxyy pins must have closely-located bypass caps to GND."
+  ground_pad: >-
+    The common GND (EP) pad under the chip is also used for thermal dissipation. The
+    datasheet recommends connecting the GND pad to a solid ground plane with multiple vias.
+  supplies: "All VDD pins must be connected to a single 1.8 V supply. All Vxxyy pins must be connected to 3.3 V; they can share a common 3.3 V supply or be split across multiple supplies, typically with the pins powering analog and digital functions on different supplies."
+  test_pin: "The TEST pin must always be connected to GND."
+  reset_pin: "The RESN (reset) pin must always have a pullup resistor to 3.3 V (typically 10 KΩ)."
+
 thermal_note:
-  source: >-
-    Absence measured 2026-08-26 across the completed silicon-doc extraction and the
-    P2 Datasheet -- see engineering/ingestion/KNOWLEDGE-GAPS.md G-020.
   status: >-
-    The drawing gives the exposed-pad dimensions (D2/E2, 9.50 REF) but NO thermal resistance
-    figure, derating curve, or land-pattern thermal-via guidance exists in any ingested source.
-    Do not infer a thermal solution from the pad size alone. G-020 remains open.
+    The package drawing gives the exposed-pad dimensions (D2/E2, 9.50 REF). The datasheet
+    gives no thermal resistance figure or derating curve; its only thermal guidance is the
+    ground-pad recommendation under board_design_guidance. Do not infer a thermal solution
+    from the pad size alone.
 
 see_also:
   - hardware/p2-eval-board.yaml

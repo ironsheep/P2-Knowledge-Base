@@ -9,7 +9,7 @@ description: |
   will no longer be recognized by #IFDEF and will be recognized by #IFNDEF.
   Useful for conditionally redefining symbols or disabling features partway 
   through a file.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: "#UNDEF symbol"

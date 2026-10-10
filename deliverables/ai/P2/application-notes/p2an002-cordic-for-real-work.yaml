@@ -75,13 +75,13 @@ runnable_code:
     - {id: pipeline-throughput, file: cordic-pipeline-throughput.spin2, note: "Recipe 6 — fill/steady/drain: one result ~every 8 clocks"}
   ceiling_reference:
     note: "Three-phase field-oriented motor control (Park transform = QROTATE ops) — DESCRIBED/LINKED only; complete impl is OBEX #2811 (ManAtWork)"
-  toolchain: "pnut_ts, _clkfreq = 200_000_000, compiled with -d (uses debug())"
+  toolchain: "pnut-ts, _clkfreq = 200_000_000, compiled with -d (uses debug())"
 
 key_parameters:
   pipeline_stages: 54
   result_latency_clocks: 55
   issue_interval_clocks: 8            # a cog's hub-access window
-  ops_in_flight_per_cog: "several (~6-7, derived 54/8) — Silicon Doc states no hard count"
+  ops_in_flight_per_cog: "several (~6-7, derived 54/8) — the Propeller 2 Documentation states no hard count"
   binary_angle: "full circle = 2^32; $4000_0000=90deg, $8000_0000=180deg, $C000_0000=270deg, $5555_5555=120deg, $AAAA_AAAA=240deg"
   operations:
     - "QMUL 32x32->64 (unsigned)"

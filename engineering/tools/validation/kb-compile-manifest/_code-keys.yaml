@@ -42,3 +42,5 @@ code_keys:
   - spin2_complete
   - spin2_inline
   - usage_example
+  # S-256: one-line programs the two getting-started guides present under this key
+  - basic_example

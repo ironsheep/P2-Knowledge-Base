@@ -153,9 +153,9 @@ source: P2 HUB75 LED Matrix Driver Study
 resources:
   obex:
     id: 2850
-    name: "P2-HUB75 LED Matrix Driver"
+    name: "ISP Hub75 Matrix Driver"
     author: "Stephen M Moraco (Iron Sheep Productions)"
-    url: "https://obex.parallax.com/obex/p2-hub75-led-matrix-driver/"
+    url: "https://obex.parallax.com/obex/isp-hub75-matrix-driver/"
     complexity: "complex_driver"
     recommendation: "Use OBEX driver - do not attempt to implement manually"
 

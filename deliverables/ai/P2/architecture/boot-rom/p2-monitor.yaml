@@ -5,6 +5,11 @@
 #   - rom-booter ingestion (ROM residence)
 
 component: P2_Monitor
+aliases:
+  - "P2 Monitor"
+  - "boot ROM monitor"
+  - "boot ROM P2 Monitor"
+  - "ROM monitor"
 category: boot_rom_interface
 description: |
   Interactive debug / memory-inspection interface built into the P2's 16KB

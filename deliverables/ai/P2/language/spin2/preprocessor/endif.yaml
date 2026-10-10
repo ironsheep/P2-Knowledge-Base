@@ -8,7 +8,7 @@ description: |
   Terminates a conditional compilation block started by #IFDEF or #IFNDEF.
   Every #IFDEF and #IFNDEF must have exactly one matching #ENDIF. Missing 
   #ENDIF directives cause a compile error.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: |

@@ -9,7 +9,7 @@ description: |
   following #ELSE is compiled when all preceding conditions (#IFDEF, #IFNDEF, 
   #ELSEIFDEF, #ELSEIFNDEF) were false. #ELSE is optional and must be the last 
   branch before #ENDIF.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 syntax:
   with_ifdef: |

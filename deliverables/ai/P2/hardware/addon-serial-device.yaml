@@ -62,37 +62,27 @@ usb_device_capabilities:
     quantity: 2
     connector_type: "microUSB sockets"
     function: "USB device ports (not host)"
-    simultaneous_operation: "P2 can emulate 2 USB devices simultaneously"
+    simultaneous_operation: "P2 can behave as up to 2 USB devices simultaneously"
   device_emulation:
     capability: "P2 appears as USB devices to a connected host"
-    host_connection: "Connect to PC, laptop, or other USB host"
-    device_types: "HID, CDC, custom device classes"
-    enumeration: "P2 handles the USB device enumeration protocol"
+    host_connection: "Connect to a USB host such as a computer or another USB-capable microcontroller"
 
 use_cases:
   primary:
-    - "USB HID device emulation (keyboard, mouse, gamepad)"
-    - "USB CDC (serial port) device emulation"
     - "Custom USB device development and testing"
     - "USB communication protocol development"
   secondary:
-    - "Data acquisition device emulation"
-    - "USB sensor interface development"
     - "Educational USB protocol learning"
-    - "Multi-device USB testing scenarios"
 
 advantages:
   - "Dual independent USB device ports"
-  - "P2 can emulate multiple device types simultaneously"
   - "Visual activity feedback with two LEDs (red + blue) per port"
   - "Standard microUSB connectors"
-  - "Flexible device class implementation in software"
   - "Educational value for USB device development"
 
 limitations:
   - "Device mode only (not USB host)"
   - "Requires complex USB device protocol implementation"
-  - "Limited by P2 processing power for high-speed USB"
   - "microUSB connectors (not USB-C)"
   - "Activity LEDs require manual control in software"
 
@@ -100,10 +90,6 @@ compatibility:
   stacking:
     position: "Any 2x6 header position on the host board"
     conflicts: "Uses all 8 pins - check with other add-ons"
-  host_compatibility:
-    windows: "Standard USB device drivers"
-    mac_linux: "Standard USB device support"
-    embedded_hosts: "Any system with USB host capability"
 
 educational:
   complexity_level: "advanced"

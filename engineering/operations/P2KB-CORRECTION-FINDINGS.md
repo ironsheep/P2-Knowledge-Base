@@ -132,6 +132,14 @@ Found 2026-10-07 by the independent check of F-556. `hardware/hub75_adapter.yaml
 gives "ISP Hub75 Matrix Driver" and `.../isp-hub75-matrix-driver/`. Which is current is unverified
 (no network probe here). **Fix:** confirm against the OBEX listing the user can open; use that.
 
+> **Applied 2026-10-10 («#420»); the entry stays NEEDS-VERIFICATION until Stephen opens the live
+> listing.** `hub75_adapter.yaml` `resources.obex` now reads "ISP Hub75 Matrix Driver" and
+> `https://obex.parallax.com/obex/isp-hub75-matrix-driver/` — the form in `2850_metadata.yaml:51,57`
+> (downloaded 2025-09-13) and in the KB's own OBEX object page (`community/obex/objects/2850.yaml:50,56`),
+> which already agreed with each other; the old name was the GitHub repository's. **Not verifiable
+> here:** whether the live OBEX listing still carries that title and path (no network). Stephen:
+> open `https://obex.parallax.com/obex/isp-hub75-matrix-driver/` and say if it resolves.
+
 ### F-561 — P2AN003 (app note + YAML companion) says reversing the DAC init order "leaves the first output cycle undefined"; the P2 Documentation says Y is captured in reset — `CONFIRMED` (manual change)
 Found 2026-10-07 by the independent check of F-554. `app-notes/P2AN003/opus-master/P2AN003.md:541`
 and its companion `application-notes/p2an003-dac-analog-signal-generation.yaml:98` ("the universal
@@ -141,6 +149,13 @@ the P2 Documentation says "During reset (DIR=0), IN is low and Y.[15..0] is capt
 source states the "undefined" outcome, and "universal" overclaims (EF-090 exception). **Fix:** the
 app note and its companion together (the agreement gate), as an app-note correction release —
 state the order as the general one and drop the unsourced consequence, or source it.
+
+> **Half applied 2026-10-10 («#420»), by the agreement gate's own rule.** The companion
+> `p2an003-dac-analog-signal-generation.yaml` `gotchas[0]` no longer says "the universal smart-pin init
+> order" (the app note never said it). The clause "Reversing it leaves the first output cycle
+> undefined" is **kept in both** — the published app-note text (`P2AN003.md:541`) states the same, so
+> changing the companion alone would put them in disagreement. It changes in the app-note release
+> together with the prose.
 
 ### F-560 — 78 `source:` fields in 58 files name a label, not a document — `CONFIRMED` (L; planning item)
 Found 2026-10-07 by the F-553 class sweep: `grep -rn -E "^\s+source: *['\"]?[A-Za-z0-9_-]+['\"]?\s*$" deliverables/ai/P2/`
@@ -416,6 +431,26 @@ limits are chip facts and stay), replace driver restatement with a pointer to th
 entry; before removing anything, run the search in *"Unsourced" is a finding about our search* so
 board facts are told apart from driver facts.
 
+> **Class sweep applied 2026-10-10 («#420»); the entry stays CONFIRMED until a release serves it.**
+> `edge-32mb-module.yaml`: `code_patterns` (the whole `psram.spin2` API block), `protocol_constraints.psram`
+> driver settings (sysclk/N rates, burst formula — which also removes S-259's wrong formula —, input-delay
+> table), the flash 133 MHz line (no source), `resources.obex.features`, the OBEX-documentation reference
+> and the two driver `advantages` are gone; kept: the chip's 133/84 MHz (guide §13) and the 8 µs CS-low
+> figure (named as the driver's own statement, `psram16drv.spin2:171`). `addon-control-board.yaml`:
+> `protocol_constraints` (PWM frequency, brightness levels, debounce, response time — absent from the
+> guide, S-258) → one sourced line; the `jm_p2-es_control` driver block and the driver's LED/button
+> remap; `power_sharing`. `addon-led-matrix.yaml`: `refresh_recommended_hz`/`at_120hz_pixel_us` →
+> `at_50hz_pixel_us` (derived), `cog_required`, the `jm_p2-es_matrix` driver block, the unsourced
+> `plot_pixel` snippet, the driver feature list, `power_sharing`. `addon-goertzel-touch.yaml`: the
+> "dedicated cog for the Goertzel driver" limitation and `power_sharing`. `addon-digital-video-out.yaml`:
+> `power_sharing`, `current_consumption`, the unsourced `monitor_compatibility` block.
+> `addon-serial-host.yaml`: `power_sharing` plus the S-258 capability lists (storage, sensors, camera,
+> gaming controllers, "USB specification compliant"). `addon-serial-device.yaml`: the S-374 class
+> (HID/CDC/data-acquisition use cases, host-OS compatibility). `edge-standard-module.yaml`: the
+> "133 MHz per W25Q128JV datasheet" flash clock (the datasheet is not held; the guide gives only "SPI"
+> and the 16 MB capacity). Siblings read and left: `addon-rtc`,
+> `addon-microsd`, `addon-hd-audio`, `addon-wx-*`, `addon-av-breakout` (their lists track their guides).
+
 ### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 
 > **DECIDED by Stephen 2026-10-08 about this entry's ingestion-tree edit: REVERT it, and AUDIT
@@ -601,6 +636,14 @@ classify each key (provenance vs content — e.g. `resources`, `reference_links`
 sweep with the «#376» verification method (structural checker, word diffs, gates). Also add a gate that
 fails on a NEW key name containing source/extract/verified/provenance/authority that is not in the
 list, so the drift cannot recur.
+
+> **`source_document` of the two code examples dispositioned 2026-10-10 («#420»).** The retired
+> "Green Book" tutorial citation was replaced, not deleted: `audit-yaml-source-lock.py` counts the
+> key as a citation (removing it was a NAMED → ABSENT regression). `smart-pins-001-basic-io.yaml` now
+> cites "P2 Instructions v35 - Rev B/C Silicon, rows DIRL, DIRH, OUTL, OUTH" and
+> `smart-pins-002-button-reading.yaml` the same sheet's DIRL row plus the Spin2 v55 Cog Registers table,
+> each saying the example itself is illustrative, not a published listing. The key stays (the schema
+> now lists it as optional); it still reaches consumers.
 
 ### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 > **Applied 2026-10-07 — and the defect was wider than filed.** The example's `source: P2-FLASH-FS`
@@ -808,6 +851,16 @@ already held, so restoring them was transcription, not research.
 > current-revision number stripped of the revision scope that made it correct.** Deleting a revision
 > history silently converts a true claim into a destructive one, and no instrument we have looks for
 > it. A gate that flags a shipped absolute-maximum stated without its board revision is owed.
+
+> **Gate built («#410») and driven to 0 («#420», 2026-10-10).** `audit-hardware-revision-scope.py`
+> went 12 findings in 7 files → 0. Each file now records its scope decision against its guide's
+> Revision History: `board_revisions:` (Rev B/earlier deltas, source + page) in `edge-32mb-module`
+> (also "(Rev B)" on `vin` and `input_voltage`), `edge-breadboard-carrier` (Rev B power-switch discharge;
+> "(Rev B; no change from Rev A)" on the 5 / 5.5 VDC ratings), `p2-eval-board` (the Rev C "What's New"
+> list; "(Rev C)" on the USB supply rating), `addon-motor-driver` (Rev B vs Rev A) and
+> `addon-goertzel-touch` (touch pads vs probe posts); `revision_scope_reviewed:` in `edge-mini-breakout`
+> (v1.1: guide edits only) and `edge-standard-breakout` (v1.0: single version). No file states a
+> rating for a revision whose guide gives none: the Rev A figures are marked "not asserted".
 
 ## Two release-path defects, one root cause — F-440, F-441
 
@@ -1687,6 +1740,22 @@ aliases carrying the **task and symptom vocabulary**, not only the name of the t
 strings among them. **92% of shipped files carry zero aliases** (1048 of 1132), so (3) is a corpus-wide
 programme, not an edit; it should be scoped from the hole list rather than started blind.
 
+> **Gate built («#410»); its 8 partial-reach directories dispositioned («#420», 2026-10-10).**
+> `audit-index-findability.py` (term = the directory's own name; reach = key + alias + category) found 8
+> partial directories (141 files). Four gained aliases so the directory's name reaches every file:
+> `architecture/boot-rom` (`p2-monitor`, `taqoz-forth`: "boot ROM monitor", "boot ROM TAQOZ" …),
+> `architecture/system-registers` (`ptra-register`), `language/spin2/conventions` (five pages: "Spin2
+> conventions JonnyMac", "Spin2 formatting conventions" …), `language/spin2/debug-commands` (`c-z`,
+> `dly`, `pc_key`, `pc_mouse`: "debug command …"). Four are in the new reviewed baseline
+> `engineering/tools/validation/baselines/index-findability.json`, each with its reason:
+> `language/spin2/operators` (1/83), `registers` (1/18), `patterns/implementation` (1/19),
+> `preprocessor` (2/14) — one page per operator / register / pattern / directive, found by that page's own
+> name, the directory word being a grouping word. **The 12 alias additions are not yet visible to the
+> gate:** it reads `deliverables/ai/p2kb-index.json`, which is regenerated after commit (index
+> generator needs history); until then it still reports those four directories. The baselining of the
+> four wide directories is a judgement the arbiter may overrule — the alternative is a literal
+> "operators"/"registers"/… alias on 129 pages.
+
 ---
 
 ## Citing ONE block in a wholly-uncited file turns its other blocks Tier-1 RED — 32 uncited quantity blocks across 24 files are structurally invisible to the blocking gate (2026-08-29, «#334», proved by accident) — F-381
@@ -2539,6 +2608,16 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > G-number rather than collide; the header is left for whoever owns that ledger to correct
 > deliberately.
 
+> **Click half CLOSED 2026-10-10 («#420»); the entry's `io_pin_timing` half stands.** The P2 Eval Click
+> Adapter's documentation *is* ingested now: `sources/p2-click-adapter/p2-click-adapter-netlist.md`
+> ("Consolidated offset map", `:122-144`, from the 64008 Rev A schematic) states all twelve offsets
+> (+0 SDA … +11 MOSI, +12..+15 no-connect, SPI four on header B), and
+> `architecture/click_module_integration.yaml` `p2_adapter_mapping` already matches it value for value
+> (re-read against the netlist, no difference). What the schematic does **not** state, and the page
+> already labels as the driver's idiom (`source: P2-Click-eInk`, `provenance.code_patterns`): the three
+> base-pin positions (`PINS_P0_P15` / `P16_P31` / `P32_P47`) and the mikroBUS signal meanings (the
+> mikroBUS standard is not held).
+
 ---
 
 ## `hardware/` repopulated from the board guides — the return record, and the wrong scalars the source-first read exposed (2026-08-25, «#307» Plan §8 part 2) — F-353 · F-354
@@ -2575,9 +2654,9 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > | HUB75 **"maximum 3 chains"**, **"no streamer"** | **CLOSED 2026-10-07 — driver facts, out of scope.** `notes.gap_chain_limit` deleted. The `led_driver_chips` table (the driver's per-chipset configuration) removed for the same reason. |
 > | HUB75 **board current 35 mA**, per-panel currents | **CLOSED (verified 2026-10-07).** The board's own draw ships sourced (`specifications.electrical.board_consumption`, "under 50 mA", `official-specs.md:126`); the held `power_requirements` block is gone from the tree; panel currents are the panel's. |
 > | **"One cog consumed by the PSRAM driver"** (32 MB module) | **CLOSED 2026-10-07 — driver fact, out of scope.** The `(uses 1 cog)` comment removed from `code_patterns.spin2.obex_driver_usage`. The rest of that file's driver restatement (`code_patterns`, `protocol_constraints` driver settings) is the class sweep **F-548**. |
-> | Whether the **#64013 RTC board carries its own SDA/SCL pull-ups** | **OPEN** — `addon-rtc.yaml` `pin_mode_tip.scl_pull_up_caveat`. A board fact that changes how it is connected. Needs the #64013 schematic (referenced by the guide, not ingested). |
-> | Numeric **PCB dimensions for the #64006 add-on boards** | **OPEN, low** — `addon-goertzel-touch.yaml` `specifications.pcb_size_class`. A board fact that matters to neither code nor connection; the guide gives a drawing and a three-size class (`p2-eval-add-on-boards-text.txt:45-46`, `:381-396`). Resolve the drawing to numbers, or let the size class stand. |
-> | `addon-serial-device.yaml` **"3.3 V supply"** | **OPEN** — held block. A board fact that changes how it is connected; the mounting holes are sourced (`:39-42`), the supply voltage is not. Needs the #64006 schematics. |
+> | Whether the **#64013 RTC board carries its own SDA/SCL pull-ups** | **OPEN** — `addon-rtc.yaml` `pin_mode_tip.scl_pull_up_caveat`. A board fact that changes how it is connected. Needs the #64013 schematic (referenced by the guide, not ingested). **BLOCKED — missing document, re-checked 2026-10-10 («#420»):** `sources/P2-RTC-Add-on/` holds the guide, the PCF8523 datasheet and the example archive, no schematic. The page asserts nothing about pull-ups (it says in so many words that neither the guide nor any ingested source states it), so there is no claim to remove. **Stephen / ingestion:** obtain and ingest the #64013 schematic from the 64013 product page (www.parallax.com, search 64013). |
+> | Numeric **PCB dimensions for the #64006 add-on boards** | **CLOSED 2026-10-10 («#420»).** Read off the guide's PCB Dimensions drawings (pp.11-12, rendered): A/V 3.2 x 1.3 in, Goertzel 3.2 x 1.2 in, small modules 1.6 x 0.8 in (drawn for the LED Matrix). `addon-goertzel-touch.yaml` `specifications.pcb_size_class` replaced by `pcb_size` (3.2 x 1.2 in, 81.3 x 30.5 mm) and the contradicting `size_class: small_addon` → `medium_addon`. The other small boards inherit the guide's "small modules" grouping; no per-board dimensions are stated for them and none were set. |
+> | `addon-serial-device.yaml` **"3.3 V supply"** | **APPLIED 2026-10-09/10 («#413», «#420»)** — the unsourced voltage and `power_sharing` lines are removed and the page states no supply, per Stephen's Q7 (study decisions, 2026-10-09): the Rev B ACC HDR/5V shunt jumper is an Eval-board fact that matters for any add-on using header 5 V, already modelled on `p2-hardware-feature-comparison.yaml` and `addon-serial-host.yaml`; no erratum. (A `power_note` added in «#420» restating the guide's Serial Host vs Revision History wording was removed by the arbiter as contrary to Q7.) |
 >
 > Status: `PARTIAL` — five closed by removal (ship in the next KB release); three need Parallax
 > schematics or the drawing.

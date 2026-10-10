@@ -7,7 +7,7 @@ blocks:
     compile: not-code
     reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
   - at: code_example_schema.core_fields.example_id.examples[1]
-    fp: "61d7582d0790b5fa"
+    fp: "5bbad7caf04fedc6"
     compile: not-code
     reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
   - at: code_example_schema.core_fields.example_id.examples[2]
@@ -15,11 +15,11 @@ blocks:
     compile: not-code
     reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
   - at: code_example_schema.source_metadata.source_document.examples[0]
-    fp: "266b69ac67f50e59"
+    fp: "ac7d927f43142f23"
     compile: not-code
     reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
   - at: code_example_schema.source_metadata.source_document.examples[1]
-    fp: "18f579eba3e83cc3"
+    fp: "686fac825b673bd2"
     compile: not-code
     reason: "schema field `examples:` value: a metadata string (an example id, a source-document name, or a feature / pattern / hardware phrase) shown to illustrate what the field holds; not source code"
   - at: code_example_schema.technical_analysis.instructions_used.examples[0]

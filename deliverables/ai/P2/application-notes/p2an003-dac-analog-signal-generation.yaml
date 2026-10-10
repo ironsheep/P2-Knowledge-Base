@@ -86,7 +86,7 @@ runnable_code:
     - {id: mixing-panning,      file: dac-mixing-panning.spin2,      note: "Recipe 5 — three voices summed and panned to a stereo pair of DAC pins"}
   ceiling_reference:
     note: "32-stream software audio mixer to 1-8 output pins (volume/pan/pitch/format) + MOD player — DESCRIBED/LINKED only; complete impl is OBEX #2861 reSound (Johannes Ahlebrand, ~955 lines)"
-  toolchain: "pnut_ts, _clkfreq = 200_000_000; Recipes 1-5 compile plain, the Tier-0 verify snippet uses debug() so needs -d"
+  toolchain: "pnut-ts, _clkfreq = 200_000_000; Recipes 1-5 compile plain, the Tier-0 verify snippet uses debug() so needs -d"
 
 prerequisites:
   - "Configuring a smart pin (WRPIN/WXPIN/WYPIN, raise DIR to enable) and starting a cog with COGINIT"
@@ -95,7 +95,7 @@ prerequisites:
 
 gotchas:
   - flag: pitfall
-    text: "Write the mode (WRPIN/WXPIN) BEFORE raising DIR, and the first value (WYPIN) AFTER — the universal smart-pin init order. Reversing it leaves the first output cycle undefined."
+    text: "Write the mode (WRPIN/WXPIN) BEFORE raising DIR, and the first value (WYPIN) AFTER. Reversing it leaves the first output cycle undefined."
   - flag: pitfall
     text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (256 minimum). A non-multiple produces incorrect dithering; if you need a different period, use PRNG dither instead."
   - flag: pitfall
@@ -132,7 +132,7 @@ hardware_status: |
   audio-quality figures — SNR, THD, true effective bit depth after filtering — depend on the
   analog filter and the measurement bench and are NOT asserted here; they defer to a
   characterization run on real silicon (-> EF ledger when accepted), exactly as P2AN001 defers
-  its ENOB figure. Every embedded and example-library program compiles clean under pnut_ts.
+  its ENOB figure. Every embedded and example-library program compiles clean under pnut-ts.
 
 provenance:
   primary_sources:

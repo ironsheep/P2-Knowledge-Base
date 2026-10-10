@@ -6,8 +6,8 @@ title: "Essential P2 I/O Instructions"
 description: "Demonstrates the four fundamental P2 I/O instructions for controlling pin direction and output state"
 
 source_metadata:
-  source_document: "P2-Smart-Pins-Green-Book-Tutorial.md"
-  source_section: "Chapter 0: P2 I/O Fundamentals"
+  source_document: "P2 Instructions v35 - Rev B/C Silicon, rows DIRL, DIRH, OUTL, OUTH (the behaviour of each instruction; the example itself is illustrative, not a published listing)"
+  source_section: null
   source_page: null
   extraction_context: "Introduction to basic I/O control before Smart Pins coverage"
   extraction_date: "2025-09-07"
@@ -17,21 +17,23 @@ code_content:
   code_type: "method"
   code: |
     PUB the_essentials()
-      DIRL #56              ' Make P56 an input (Direction Low)
-      DIRH #56              ' Make P56 an output (Direction High)
-      OUTL #56              ' Set P56 output to 0 (Output Low)
-      OUTH #56              ' Set P56 output to 1 (Output High)
+      ORG
+        DIRL #56            ' Make P56 an input (Direction Low)
+        DIRH #56            ' Make P56 an output (Direction High)
+        OUTL #56            ' Set P56 output to 0 (Output Low)
+        OUTH #56            ' Set P56 output to 1 (Output High)
+      END
   code_comments:
-    - line_number: 2
+    - line_number: 3
       comment: "DIRL #56"
       explanation: "Sets pin direction to input by clearing DIR bit for pin 56"
-    - line_number: 3
-      comment: "DIRH #56"  
-      explanation: "Sets pin direction to output by setting DIR bit for pin 56"
     - line_number: 4
+      comment: "DIRH #56"
+      explanation: "Sets pin direction to output by setting DIR bit for pin 56"
+    - line_number: 5
       comment: "OUTL #56"
       explanation: "Sets output value to low by clearing OUT bit for pin 56"
-    - line_number: 5
+    - line_number: 6
       comment: "OUTH #56"
       explanation: "Sets output value to high by setting OUT bit for pin 56"
 
@@ -59,9 +61,9 @@ application_context:
 
 validation_status:
   syntax_validated: true
-  syntax_validation_date: "2025-09-07"
+  syntax_validation_date: "2026-10-10"
   compilation_result: "success"
-  validation_notes: "Basic Spin2 syntax, no special requirements"
+  validation_notes: "The four pin instructions are PASM2 instructions, so they sit in an inline-PASM ORG ... END region inside the Spin2 method"
   hardware_tested: false
   test_platform: null
 

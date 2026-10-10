@@ -8,7 +8,7 @@ description: |
   V50 allows register names (INA, INB, OUTA, OUTB, DIRA, DIRB, etc.) to be used 
   as constant values in CON blocks. This enables defining named constants based 
   on register addresses for indirect register access and improved code readability.
-  Available in PNut/pnut_ts v50 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v50 and later compilers. No version directive required.
 
 location: CON block
 
@@ -120,7 +120,7 @@ use_cases:
   - "Self-documenting I/O code"
 
 notes:
-  - "Available in PNut/pnut_ts v50 and later compilers"
+  - "Available in PNut/pnut-ts v50 and later compilers"
   - "No version directive required - this is NOT a gated feature"
   - "Only valid inside CON blocks"
   - "Returns the register's address/index value"

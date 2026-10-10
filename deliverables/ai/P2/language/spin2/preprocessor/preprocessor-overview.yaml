@@ -8,7 +8,7 @@ description: |
   The Spin2 preprocessor provides conditional compilation and symbol definition 
   capabilities. Preprocessor directives begin with # and are processed before 
   compilation, allowing code to be included or excluded based on defined symbols.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 directives:
   symbol_definition:
@@ -330,31 +330,31 @@ compiler_portability:
   divergences:
     - topic: "Conditional nesting depth"
       pnut: "Maximum 8 levels of #IFDEF/#IFNDEF nesting"
-      pnut_ts: "No documented limit"
+      pnut-ts: "No documented limit"
       portable: "Keep nesting to 8 levels or fewer"
     - topic: "#ERROR / #WARN / #INCLUDE / #PRAGMA"
       pnut: "Not provided"
-      pnut_ts: "PNut-TS extensions, with wording of their own"
+      pnut-ts: "PNut-TS extensions, with wording of their own"
       portable: "Source that must build under PNut cannot rely on these"
     - topic: "Symbol values and text substitution"
       pnut: "A symbol has no value -- #DEFINE symbol makes it defined, nothing more"
-      pnut_ts: "A symbol carries substitution text (everything after the name; 1 if omitted), replacing the symbol wherever it appears, including inside a quoted string"
+      pnut-ts: "A symbol carries substitution text (everything after the name; 1 if omitted), replacing the symbol wherever it appears, including inside a quoted string"
       portable: "Use presence only, tested with #IFDEF/#IFNDEF; do not rely on a symbol substituting"
     - topic: "Command-line options"
       pnut: "-D only"
-      pnut_ts: "-D, plus -U (blocks #PRAGMA EXPORTDEF) and -I (include search path)"
+      pnut-ts: "-D, plus -U (blocks #PRAGMA EXPORTDEF) and -I (include search path)"
       portable: "Only -D is available in both, and only in its presence form -- there is no -D symbol=value in either"
     - topic: "Number of command-line symbols"
       pnut: "Up to 16"
-      pnut_ts: "No enforced cap"
+      pnut-ts: "No enforced cap"
       portable: "Keep to 16 or fewer"
     - topic: "#UNDEF of a predefined __*__ symbol"
       pnut: "Not documented"
-      pnut_ts: "Refused -- warning 'cannot undefine built-in symbol [NAME]', the symbol stays defined, the build continues"
+      pnut-ts: "Refused -- warning 'cannot undefine built-in symbol [NAME]', the symbol stays defined, the build continues"
       portable: "Do not #UNDEF a predefined symbol"
     - topic: "Function-like #DEFINE"
       pnut: "Not provided -- there are no parameterized macros"
-      pnut_ts: "Error: '#define does not support arguments — only simple symbol definitions'"
+      pnut-ts: "Error: '#define does not support arguments — only simple symbol definitions'"
       portable: "There are no macros with arguments in either compiler"
   shared_diagnostic_wording: >-
     Several diagnostics use identical wording in both compilers, so one search matches

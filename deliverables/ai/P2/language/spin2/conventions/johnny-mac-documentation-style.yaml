@@ -1,5 +1,9 @@
 title: Johnny Mac Complete Spin Programming Standard
 id: johnny-mac-documentation-style
+aliases:
+  - "JonnyMac programming standard"
+  - "Spin2 conventions JonnyMac"
+  - "Spin2 coding conventions"
 style_name: Johnny Mac Complete Programming Standard
 version: 2.0.0
 derived_from: Analysis of 27+ OBEX objects and formal programming standards document

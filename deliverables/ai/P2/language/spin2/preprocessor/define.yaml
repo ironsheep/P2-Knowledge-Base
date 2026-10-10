@@ -8,7 +8,7 @@ description: |
   Defines a preprocessor symbol that can be tested with #IFDEF or #IFNDEF
   conditional compilation directives. The symbol persists from the point of
   definition until the end of the file or until removed with #UNDEF.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
   The two compilers differ on whether a symbol carries a VALUE. Under PNut a
   symbol is presence-only -- it is defined or it is not. Under PNut-TS a symbol

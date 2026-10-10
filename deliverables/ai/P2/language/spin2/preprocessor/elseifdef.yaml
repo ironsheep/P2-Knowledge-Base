@@ -9,7 +9,7 @@ description: |
   when the preceding condition was false AND the specified symbol IS defined.
   Allows chaining multiple conditions without deep nesting. Must appear between 
   #IFDEF/#IFNDEF and #ENDIF.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: |

@@ -72,9 +72,8 @@ specifications:
     engineering/ingestion/sources/hyperRam-n-hyperFlash/complete-hyperram-hyperflash-reference.md:25-39
     (Specifications table) and
     engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:22
-    (target board). The capture was made with forced OCR because the PDF's embedded
-    text layer is ciphered; part numbers and URLs carrying transcription risk are
-    flagged [VERIFY] in the datasheets block below. acc_hdr_jumper: 64004-ES Product
+    (target board). The datasheet part numbers and URLs are as printed on page 7
+    (Resources and Downloads) of the guide. acc_hdr_jumper: 64004-ES Product
     Guide v1.0, engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:57
   ram: "16 MB / 128 Mb (16 Mb x 8) Parallel PSRAM"
   flash: "32 MB / 256 Mb (32 Mb x 8) Parallel NOR Flash"
@@ -147,11 +146,11 @@ quick_start:
   - "To enable the HyperBUS memory, assert RESET# (IO+15) High. Disable in user code by asserting RESET# Low."
 
 datasheets:
-  verify_status: "UNVERIFIED - OCR-transcribed; confirm against the ISSI datasheets / the 64004-ES product page before relying on these."
-  hyperram: "ISSI IS66WVH16M8BLL-100B1LI [VERIFY]"
-  hyperram_url: "http://www.issi.com/WW/pdf/66-67WVH16M8ALL-BLL.pdf [VERIFY]"
-  hyperflash: "ISSI IS26KL256S-DABL100 [VERIFY]"
-  hyperflash_url: "http://www.issi.com/WW/pdf/26KS-KL128S-256S-512S.pdf [VERIFY]"
+  source: "P2-ES Eval HyperRAM/Flash Add-on (#64004-ES) 1.0 11/5/2019, Resources and Downloads, p.7"
+  hyperram: "ISSI IS66WVH16M8BLL-100B1LI"
+  hyperram_url: "http://www.issi.com/WW/pdf/66-67WVH16M8ALL-BLL.pdf"
+  hyperflash: "ISSI IS26KL256S-DABLI00"
+  hyperflash_url: "http://www.issi.com/WW/pdf/26KS-KL128S-256S-512S.pdf"
 
 provenance:
   board_revision: "A (schematic last updated 21 Jul 2019)"
@@ -167,7 +166,6 @@ use_cases:
 
 limitations:
   - "Limited edition; targets the #64000-ES limited-edition Eval Board"
-  - "Datasheet part numbers/URLs are OCR-transcribed and unverified"
   - "Auxiliary power recommended (burst current may exceed PC-USB)"
 
 documentation:

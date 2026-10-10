@@ -4,6 +4,17 @@ series: "P2 Accessory Add-on Boards"
 manufacturer: "Parallax Inc."
 status: "active_production"
 board_revision: "Rev B (Guide v2.0)"
+board_revisions:
+  source: "Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Revision History, p.12"
+  rev_b:
+    applies_to: "Every figure in this file, including the voltage, current and power ratings, is the guide's v2.0 figure for Rev B hardware."
+    changes_from_rev_a:
+      - "PCB size change from 80x64 mm to 70x70 mm"
+      - "MOSFET drivers upgraded for improved reliability with hub wheel motors"
+      - "Current sense amplifier added to low-side shunt resistor"
+  rev_a:
+    applies_to: "The original Rev A hardware (guide version 1.0; version 1.1 fixed a typo in the PCB dimensions)"
+    rating_note: "The guide states no separate ratings for Rev A, so the Rev B ratings are not asserted for it."
 p2kb_key: "p2kbHwAddonMotorDriver"
 category: addon
 aliases:

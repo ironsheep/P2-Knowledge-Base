@@ -6,14 +6,17 @@ aliases:
   - "64029"
   - "edge breakout headers"
 # Part Number: 64029
-# Revision: Current
+# Revision: guide v1.0 (original release)
 # Documentation: 64029-P2-Edge-Breakout-Board-Guide
 
 hardware_type: "carrier_board"
 part_number: "64029"
 manufacturer: "Parallax Inc."
-revision: "Current"
+revision: "Original release (guide v1.0, 03/01/2023)"
 status: "active_production"
+revision_scope_reviewed:
+  source: "P2 Edge Breakout Board (#64029) v1.0 03/01/2023, Revision History, p.11"
+  finding: "The revision history lists a single version (version 1.0, original release). It names no board hardware revision and states no rating that differs between versions, so nothing in this file is revision-scoped."
 
 basic_info:
   name: "P2 Edge Standard Breakout"
@@ -157,7 +160,7 @@ documentation:
     - "hardware/edge-32mb-module.yaml"
   references:
     - "Edge module documentation"
-    - "P2 Silicon Documentation"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
     - "Pin mapping references"
     
 availability:

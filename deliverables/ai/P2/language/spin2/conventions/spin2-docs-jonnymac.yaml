@@ -1,5 +1,8 @@
 title: Spin2 JonnyMac Documentation Style
 id: spin2-docs-jonnymac
+aliases:
+  - "JonnyMac documentation style"
+  - "Spin2 documentation conventions JonnyMac"
 version: 1.0.0
 layer: "Layer 3 - Documentation Style (JonnyMac)"
 derived_from: language/spin2/conventions/johnny-mac-documentation-style.yaml v2.0.0

@@ -15,6 +15,17 @@ part_number: "64020"
 manufacturer: "Parallax Inc."
 revision: "Rev B"
 status: "active_production"
+board_revisions:
+  source: "P2 Edge Module Breadboard (#64020) v1.2 01/07/2021, Revision History, p.11; 8. Power Switch and Power Indicator LED"
+  rev_b:
+    applies_to: "The figures in this file are the guide's v1.2 figures for Rev B hardware"
+    changes_from_rev_a:
+      - "Power switch in off position discharges the 5V outputs to ground (via a 10K resistor)"
+      - "Silk screen markings added/improved"
+      - "PCB corners rounded slightly"
+  rev_a:
+    applies_to: "The original production release (guide versions 1.0 and 1.1)"
+    rating_note: "The guide's revision history lists no change to the 5 VDC input rating or the 5.5 VDC absolute maximum between Rev A and Rev B."
 
 basic_info:
   name: "P2 Edge Module Breadboard"
@@ -67,8 +78,8 @@ power:
     The removed-wording ledger is
     engineering/analysis/archived/2026-08-25-yaml-release-change-ledger.md (item 7).
   input_connector: "2.1 mm center-positive DC barrel jack"
-  input_voltage: "5 VDC"
-  absolute_maximum: "5.5 VDC"
+  input_voltage: "5 VDC (Rev B; no change from Rev A)"
+  absolute_maximum: "5.5 VDC (Rev B; no change from Rev A)"
   input_voltage_note: >-
     The jack accepts 5 VDC only. "CAUTION! Use a well-regulated power supply and do
     not exceed 5.5 VDC!" There is no wide-input regulator on this board.
@@ -105,10 +116,8 @@ power:
 module_compatibility:
   excellent_pairing:
     - module: "P2-EC"
-      efficiency: "Perfect - 100% pin utilization"
       use_case: "Complex prototyping and education"
     - module: "P2-EC32MB"
-      efficiency: "Professional memory platform"
       use_case: "Advanced development with memory"
       
 use_cases:
@@ -128,17 +137,12 @@ advantages:
   - "Integrated full-size breadboard"
   - "8 dedicated servo ports with power"
   - "All 64 P2 pins accessible"
-  - "Professional power management"
   - "Excellent for education and training"
-  - "Handles any project complexity"
   - "Visual power and status indicators"
-  
+
 limitations:
   - "Very large footprint (28 sq in)"
-  - "Highest cost in Edge ecosystem"
   - "Not portable - stationary platform"
-  - "Overkill for simple projects"
-  - "Requires dedicated workspace"
   - "External power supply recommended"
   
 development_workflow:
@@ -185,14 +189,11 @@ comparison_with_alternatives:
   vs_standard_breakout:
     prototyping: "Integrated breadboard vs headers only"
     size: "Much larger vs standard"
-    cost: "Much higher vs moderate"
-    capabilities: "Professional vs basic"
-    
+
   vs_mini_breakout:
     size: "28 vs 4.41 square inches (6x larger)"
     pins: "64 vs 40 accessible"
     features: "Full platform vs minimal"
-    cost: "Professional vs budget"
     
   vs_eval_board:
     flexibility: "Modular vs integrated"
@@ -238,7 +239,7 @@ documentation:
   references:
     - "Edge module documentation"
     - "Servo control programming guides"
-    - "P2 Silicon Documentation"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
     - "Educational lab manuals"
     
 availability:

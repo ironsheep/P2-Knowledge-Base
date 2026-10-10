@@ -45,7 +45,7 @@ signal_map:
     - offset: 0
       signal: "Blue LED 0"
       direction: out
-      notes: "470 ohm series resistor; assert high to light. PWM-capable for brightness (P_PWM_SAWTOOTH | P_OE)."
+      notes: "470 ohm series resistor; assert high to light. Use PWM for brightness control."
     - offset: 1
       signal: "Blue LED 1"
       direction: out
@@ -75,15 +75,11 @@ signal_map:
       direction: in
       notes: "470 ohm series resistor; active high (pressed = high). Weak low drive as on offset 4; software debounce."
 
-# Physical placement differs from pin order; the OBEX driver remaps to MSB..LSB
-# (left-to-right, top-to-bottom). Offsets above are the electrical truth.
-physical_layout_remap:
-  silk: |
-    [3]  [2]
-    (*)CONTROL
-    [1]  [0]
-  led_remap: {logical_0: "base+0", logical_1: "base+1", logical_2: "base+3", logical_3: "base+2"}
-  button_remap: {logical_0: "base+5", logical_1: "base+4", logical_2: "base+7", logical_3: "base+6"}
+# Physical placement differs from pin order; the offsets above are the electrical truth.
+physical_layout:
+  source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Control Add-on Board (#64006A), p.2 (board photo with pin numbers)"
+  buttons: "Offsets 6 and 7 along the top, 4 and 5 along the bottom (left to right)"
+  leds: "Offsets 3 and 2 along the top, 1 and 0 along the bottom (left to right)"
 
 specifications:
   source: >-
@@ -114,25 +110,10 @@ specifications:
 
 protocol_constraints:
   pwm:
-    recommended_frequency_hz: 1000
-    min_frequency_hz: 50
-    max_frequency_hz: 100000
-    brightness_levels: 256
-    notes: "Higher frequencies waste CPU cycles without visible benefit."
-  timing:
-    button_debounce_ms: 20
-    led_response_time_ns: 100
+    notes: "Use PWM for LED brightness (Product Guide, P2 Eval Control Add-on Board (#64006A), p.2)."
 
 code_patterns:
   spin2:
-    obex_driver_usage: |
-      OBJ
-        ctrl : "jm_p2-es_control"
-
-      PUB main() | btn
-        ctrl.start(0)                    ' Initialize at base pin 0 (Header A)
-        ctrl.wr_leds(%1010)              ' Light LEDs 1 and 3
-        btn := ctrl.rd_btns()            ' Read all 4 buttons as 4-bit value
     initialization: |
       PUB init_control_board(base_pin)
         ' LEDs: base..base+3
@@ -199,7 +180,6 @@ limitations:
 compatibility:
   stacking:
     position: "Any 2x6 header position on the host board"
-    power_sharing: "Low power - compatible with multiple boards"
   mounting:
     eval_board: "Can mount all 8 add-on boards simultaneously"
     edge_carriers: "Compatible with 2x6 headers"

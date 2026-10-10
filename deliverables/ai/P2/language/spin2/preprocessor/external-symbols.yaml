@@ -11,7 +11,7 @@ description: |
   - -D: Define a symbol (as if #DEFINE appeared at file start). Both compilers.
   - -U: Block a #PRAGMA EXPORTDEF of that symbol. PNut-TS only.
   - -I: Add directories to the #INCLUDE search path. PNut-TS only.
-  Available in PNut/pnut_ts v48 and later compilers.
+  Available in PNut/pnut-ts v48 and later compilers.
 
   A command-line symbol is DEFINED ONLY -- it carries no value. There is no
   -D symbol=value form in either compiler: the symbol is presence-only, testable
@@ -44,10 +44,10 @@ syntax:
 
 command_line:
   pnut: "pnut -D DEBUG_MODE -D BOARD_P2EDGE myprogram.spin2"
-  pnut_ts: "pnut_ts -D DEBUG_MODE -D BOARD_P2EDGE myprogram.spin2"
-  with_export_block: "pnut_ts -U USE_PSRAM source.spin2"
-  with_include: "pnut_ts -I ./includes -I ./drivers source.spin2"
-  combined: "pnut_ts -D RELEASE -U USE_PSRAM -I ./lib source.spin2"
+  pnut-ts: "pnut-ts -D DEBUG_MODE -D BOARD_P2EDGE myprogram.spin2"
+  with_export_block: "pnut-ts -U USE_PSRAM source.spin2"
+  with_include: "pnut-ts -I ./includes -I ./drivers source.spin2"
+  combined: "pnut-ts -D RELEASE -U USE_PSRAM -I ./lib source.spin2"
 
 parameters:
   - name: "symbol"
@@ -135,7 +135,7 @@ predefined_symbols:
 examples:
   - code: |
       ' Source file: myprogram.spin2
-      ' Compile with: pnut_ts -DDEBUG_MODE myprogram.spin2
+      ' Compile with: pnut-ts -DDEBUG_MODE myprogram.spin2
       
       PUB main()
       #IFDEF DEBUG_MODE
@@ -146,7 +146,7 @@ examples:
     
   - code: |
       ' Build script defines target platform
-      ' Compile with: pnut_ts -DTARGET_P2_EDGE myprogram.spin2
+      ' Compile with: pnut-ts -DTARGET_P2_EDGE myprogram.spin2
       
       #IFDEF TARGET_P2_EDGE
       CON FLASH_SIZE = $800000
@@ -159,7 +159,7 @@ examples:
     
   - code: |
       ' Multiple external symbols for build configuration
-      ' Compile with: pnut_ts -D RELEASE -D OPTIMIZE app.spin2
+      ' Compile with: pnut-ts -D RELEASE -D OPTIMIZE app.spin2
       
       #IFDEF RELEASE
           #IFNDEF DEBUG_MODE
@@ -186,7 +186,7 @@ examples:
     
   - code: |
       ' An external symbol is an ORDINARY symbol -- it can be undefined in source
-      ' Compile with: pnut_ts -D BUILD_CONFIG myprogram.spin2
+      ' Compile with: pnut-ts -D BUILD_CONFIG myprogram.spin2
 
       #IFDEF BUILD_CONFIG
           ' Compiled -- the command line defined it
@@ -214,8 +214,8 @@ examples:
       #ENDIF
         run_app()
 
-      ' Debug build:   pnut_ts source.spin2
-      ' Release build: pnut_ts -D RELEASE source.spin2
+      ' Debug build:   pnut-ts source.spin2
+      ' Release build: pnut-ts -D RELEASE source.spin2
     description: "Release vs debug selection -- the portable pattern, since -U cannot remove a symbol"
 
   - code: |
@@ -233,12 +233,12 @@ examples:
       #INCLUDE "serial"    ' Found via -I ./drivers
 
       ' Compile with:
-      ' pnut_ts -I ./common -I ./drivers main.spin2
+      ' pnut-ts -I ./common -I ./drivers main.spin2
     description: "Using -I for include directory search paths"
 
   - code: |
       ' Combined options for CI/CD builds
-      ' pnut_ts -D RELEASE -U LOCAL_OVERRIDE -I ./lib source.spin2
+      ' pnut-ts -D RELEASE -U LOCAL_OVERRIDE -I ./lib source.spin2
 
       #IFDEF RELEASE
         ' Production code paths

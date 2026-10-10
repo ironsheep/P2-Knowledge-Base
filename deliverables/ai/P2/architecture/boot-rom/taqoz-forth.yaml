@@ -7,6 +7,11 @@
 # grounding plan for the remaining gaps are tracked in the project's ingestion tree.
 
 component: TAQOZ_Forth
+aliases:
+  - "TAQOZ Forth"
+  - "boot ROM TAQOZ"
+  - "boot ROM Forth"
+  - "ROM Forth"
 category: boot_rom_interface
 description: |
   TAQOZ is a Forth interpreter built into the P2's 16KB mask ROM by Peter

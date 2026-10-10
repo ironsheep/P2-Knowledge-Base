@@ -1,4 +1,9 @@
 command: "PC_MOUSE"
+aliases:
+  - "PC_MOUSE"
+  - "DEBUG PC_MOUSE"
+  - "debug command PC_MOUSE"
+  - "debug mouse input"
 type: debug_command
 category: "Debug Control"
 description: |

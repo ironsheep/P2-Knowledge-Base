@@ -119,7 +119,6 @@ specifications:
     - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
   electrical:
     supply_voltage: "3.3V from host"
-    current_consumption: "Signal-level only (very low power)"
   physical:
     size: "Small module"
     connector: "2x6 pass-through socket"
@@ -157,16 +156,12 @@ use_cases:
     - "Differential signaling education"
   secondary:
     - "Video output for embedded systems"
-    - "Digital display driving"
-    - "Video streaming applications"
     - "Custom resolution and timing experiments"
 
 advantages:
   - "True HDMI-type connector for standard compatibility"
-  - "Differential pair implementation for signal integrity"
+  - "Differential pair signal lines"
   - "All TMDS clock and data lanes brought out to P2 pins"
-  - "Flexible video standard support via software"
-  - "Low power consumption (signal level only)"
   - "Optional monitor power supply via the ACC bridge (see `unused_connector_signals`)"
   - "Educational value for digital video concepts"
 
@@ -181,11 +176,6 @@ compatibility:
   stacking:
     position: "Any 2x6 header position on the host board"
     conflicts: "Uses all 8 pins - check with other add-ons"
-    power_sharing: "Very low power - compatible with other boards"
-  monitor_compatibility:
-    standard_monitors: "May work with simple video protocols"
-    hdmi_compliance: "Full HDMI compliance requires extensive software"
-    custom_protocols: "Best suited for custom video standards"
 
 educational:
   complexity_level: "advanced"

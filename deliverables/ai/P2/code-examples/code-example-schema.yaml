@@ -21,7 +21,7 @@ code_example_schema:
       required: true
       format: "[source]-[concept]-[sequence]"
       description: "Unique identifier for the code example"
-      examples: ["smart-pins-pwm-001", "silicon-doc-cordic-002", "forum-multiword-003"]
+      examples: ["smart-pins-pwm-001", "p2-doc-cordic-002", "forum-multiword-003"]
       
     title:
       type: "string"
@@ -38,9 +38,9 @@ code_example_schema:
   source_metadata:
     source_document:
       type: "string"
-      required: true
-      description: "Original document containing the example"
-      examples: ["P2-Smart-Pins-Green-Book-Tutorial.md", "silicon-doc-v35-facts-only.md"]
+      required: false
+      description: "Original document containing the example; omit it for an illustrative example that is not taken from a published listing"
+      examples: ["Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins", "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, p.2"]
       
     source_section:
       type: "string"
@@ -158,7 +158,7 @@ code_example_schema:
     syntax_validated:
       type: "boolean"
       required: true
-      description: "Whether code has been validated with pnut_ts compiler"
+      description: "Whether code has been validated with pnut-ts compiler"
       
     syntax_validation_date:
       type: "string"

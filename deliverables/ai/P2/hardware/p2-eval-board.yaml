@@ -14,6 +14,23 @@ part_number: "64000"
 manufacturer: "Parallax Inc."
 revision: "Rev C"
 status: "active_production"
+board_revisions:
+  source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, What's New for Rev C?, p.3; Revision History, p.17"
+  rev_c:
+    applies_to: "Every figure in this file, including the USB supply ratings, is the guide's figure for Rev C hardware"
+    changes_from_rev_b:
+      - "Production-approved P2X8C4M64P engineering sample Rev C silicon"
+      - "P0-P15 and P32-P47 are trace-length matched for high-speed data experiments (such as HyperRAM)"
+      - "BOD (Brown Out Detection) removed from the dip switch; RESn is permanently connected to the 1.8 V regulator PG (Power Good) signal, holding the P2 in reset if the regulator voltage drops below ~1.5 V"
+      - "USB RES is on the dip switch, letting the user disconnect the USB reset (DTR) signal from the Propeller RESn pin"
+      - "The 5V pin next to P30 removed (that pin is now unconnected)"
+      - "The 5V pin next to P62 replaced with a RESET input to the Propeller RESn"
+      - "The unpopulated DTR/RESn pads Rev B had (near the SD socket) removed"
+      - "Improvements to the USB power circuit to improve protection from edge-case faults"
+      - "WX WiFi compatible: the P56-P63 edge header works with the Parallax SIP WiFi module for wireless programming"
+  earlier_revisions:
+    applies_to: "Eval Board Rev A (guide version 1.0) and Rev B (guide version 2.0 of the Rev B document)"
+    rating_note: "Those revisions are described by earlier guide documents, which are not the source of this file; the Rev C USB supply ratings are not asserted for them."
 
 basic_info:
   name: "P2 Eval Board"
@@ -60,7 +77,7 @@ specifications:
   core_voltage: "1.8 V"
   power:
     inputs: "two micro-USB sockets -- PC USB (programming + serial + power) and AUX USB (power input only)"
-    supply_voltage: "USB 5 VDC, absolute maximum 5.5 VDC"
+    supply_voltage: "USB 5 VDC, absolute maximum 5.5 VDC (Rev C)"
     pc_usb_current_limit: "500 mA (the protection circuit disables the supply above 500 mA)"
     aux_usb_current_limit: "2000 mA (a 2 A rated device is recommended; AUX takes priority over PC-USB)"
     aux_pads: "optional 5V + GND pads at 0.1 inch spacing; input range 4.5 V to 5.5 V and MUST NOT exceed 5.5 V. Do not connect a source to both the USB socket and the 5 V pads at once."
@@ -229,7 +246,7 @@ target_audience:
 documentation:
   primary: "64000 Propeller 2 Eval Board Rev C Guide"
   references:
-    - "P2 Silicon Documentation"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
     - "Add-on board documentation (#64006)"
     - "PASM2/Spin2 language references"
     

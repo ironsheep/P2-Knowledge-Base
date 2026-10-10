@@ -19,7 +19,7 @@ blocks:
     compile: not-code
     reason: "an identifier shown as an INVALID name (a bare token, not a statement): alone it fails because a lone token is no statement, which is not the rule it illustrates, so a `never` would assert nothing about the identifier rule; the rule itself was checked separately (this token as a VAR / local name is rejected by pnut-ts)"
   - at: invalid_identifier_examples[4].example
-    fp: "19dce2cf1676a12f"
+    fp: "263b285ee92b1f19"
     compile: never
     wrap: spin2-method
     reason: "the identifier is shown as invalid because it is too long; pnut-ts rejects it at line 1 with \"Symbol exceeds 30 characters\". The teaching point (too long is a compile error) holds; the page states the limit as 32 and the name as 33 characters, both wrong (limit 30, name 34): see the observation"
@@ -45,7 +45,7 @@ blocks:
     compile: not-code
     reason: "a list of example identifier names in a naming-convention table (comma-separated names, with `:retry` / `.local_label` shown as label spellings); notation, not a statement. As PASM or a CON enumeration it would compile by accident"
   - at: naming_conventions.common_patterns.labels.example
-    fp: "3962b4a60a197b15"
+    fp: "11abf5fdb0e3ca06"
     compile: not-code
     reason: "a list of example identifier names in a naming-convention table (comma-separated names, with `:retry` / `.local_label` shown as label spellings); notation, not a statement. As PASM or a CON enumeration it would compile by accident"
   - at: common_pitfalls[2].wrong

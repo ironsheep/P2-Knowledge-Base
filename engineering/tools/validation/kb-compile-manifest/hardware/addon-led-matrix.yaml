@@ -2,16 +2,6 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: code_patterns.spin2.obex_driver_usage
-    fp: "9e2e82eb2f65d19f"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [matrix.start(1), matrix.putc(1), matrix.scroll(2)]
   - at: code_patterns.spin2.manual_led_control
     fp: "5720a3cf1902d36b"
     compile: program
-  - at: code_patterns.spin2.plot_pixel
-    fp: "4b28f2ad12d1beb4"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [pixels]

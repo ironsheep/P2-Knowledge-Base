@@ -78,7 +78,7 @@ runnable_code:
     - {id: rc-decay-reader,     file: rc-decay-reader.spin2,     note: "R1 — time a capacitor's discharge through a resistive/capacitive sensor (P_HIGH_TICKS)"}
     - {id: light-to-freq-reader, file: light-to-freq-reader.spin2, note: "R2 — reciprocal frequency counter turns a TSL235R's output frequency into an irradiance"}
     - {id: quadrature-knob,     file: quadrature-knob.spin2,     note: "R3 — drop-in encoder knob (detent normalize, preset, clamp, debounced button) with a two-jumper self-test"}
-  toolchain: "pnut_ts, _clkfreq = 200_000_000; all three recipes use debug() so compile with -d"
+  toolchain: "pnut-ts, _clkfreq = 200_000_000; all three recipes use debug() so compile with -d"
 
 key_parameters:
   r1_mode: "P_HIGH_TICKS (%10001) — Z = duration of the high state in clocks; IN raised on the high->low crossing only; RC_MODE = P_HIGH_TICKS | P_SCHMITT_A | P_OE | P_LOW_FLOAT"
@@ -117,7 +117,7 @@ hardware_status: |
   (R1's count moves with sensor resistance; R2's frequency moves with light), but turning those into
   a calibrated lux, temperature, or absolute irradiance needs a known reference and DEFERS to a
   characterization run on real silicon (-> EF ledger when accepted). No invented sensor numbers are
-  printed. Every embedded and example-library program compiles clean under pnut_ts (-d).
+  printed. Every embedded and example-library program compiles clean under pnut-ts (-d).
 
 provenance:
   primary_sources:

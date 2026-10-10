@@ -9,7 +9,7 @@ description: |
   condition codes. The DEBUG output is only generated when the specified 
   condition is met. This allows for efficient conditional debugging without 
   requiring separate conditional branch instructions.
-  Available in PNut/pnut_ts v50 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v50 and later compilers. No version directive required.
 
 syntax:
   basic: "IF_condition DEBUG(...)"

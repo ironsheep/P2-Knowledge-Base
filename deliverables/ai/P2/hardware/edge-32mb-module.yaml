@@ -26,6 +26,19 @@ module_revision: "Rev B"
 document_version: "v2.0"
 document_date: "2022-05-23"
 status: "active_production"
+board_revisions:
+  source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, Revision History, p.13; Features, p.1"
+  rev_b:
+    applies_to: "The figures in this file are the guide's v2.0 figures for Rev B hardware, including the Recommended and Absolute Maximum Ratings (VIN 5 V recommended, 16 V maximum; I/O pins and RESn 3.3 V recommended, 3.6 V maximum)."
+    changes_from_the_earlier_hardware:
+      - "On-board switching power supplies changed (supply issues)"
+      - "On-board switching power supplies maximum output current ratings increased from 2 A to 3 A"
+      - "On-board switching power supplies nominal switching frequency changed from 2.5 MHz to 750 kHz"
+      - "Layer count increased from 4 layers to 6 layers"
+      - "Additional thermal PCB layer for improved thermal performance"
+  earlier_hardware:
+    applies_to: "Hardware before Rev B (guide versions 1.0 and 1.1)"
+    rating_note: "The guide's Revision History lists no change to the input-voltage rating and states no separate rating for the earlier hardware, so the Rev B VIN figures are not asserted for it."
 
 # =============================================================================
 # BASIC INFORMATION
@@ -81,7 +94,7 @@ specifications:
     8 I/Os; a further 18 Smart I/O pins are dedicated to the on-board RAM.
   io_logic_voltage: "3.3 V"
   power:
-    input_voltage: "5-16 VDC, with reverse-polarity protection"
+    input_voltage: "5-16 VDC, with reverse-polarity protection (Rev B)"
     input_current: "100 mA recommended minimum; 500-1000 mA typical"
     vdd_supply: "1.8 V up to 3 A, 750 kHz nominal switching frequency (switching buck regulator for the P2 core)"
     io_preregulator: "an additional 3 A switcher supplies conditioned voltage to the 3.3 V VIO LDO regulators (3.8 V rail)"
@@ -96,7 +109,7 @@ specifications:
   operating_temperature: "-40 to +85 C (-40 to +185 F)"
   pcb: "1.45 in x 2.04 in (37 mm x 51.7 mm); 6-layer with an integrated thermal plane"
   ratings:
-    vin: "5 V recommended, 16 V maximum"
+    vin: "5 V recommended, 16 V maximum (Rev B)"
     any_io_pin_p0_p63: "3.3 V recommended, 3.6 V maximum"
     resn: "3.3 V recommended, 3.6 V maximum"
 
@@ -267,127 +280,25 @@ development_workflow:
     - "Propeller Tool is the recommended tool for programming in SPIN and PASM; other languages (C, BASIC, Forth) are possible using third-party tools."
   psram_driver_note: >-
     The product guide neither ships nor describes a PSRAM driver. Using the
-    on-module PSRAM requires a community driver -- see resources.obex and
-    code_patterns in this file for the psram.spin2 API those entries describe.
+    on-module PSRAM requires a community driver; see resources.obex in this
+    file for the OBEX object that carries one.
 
 # =============================================================================
-# PROTOCOL CONSTRAINTS - FOR DRIVER DEVELOPMENT
+# PROTOCOL CONSTRAINTS
 # =============================================================================
 protocol_constraints:
   psram:
-    # Hardware limits from PSRAM chip
+    # The PSRAM chip's limits; the driver's API and settings are the driver's own to document
     chip_max_clock_mhz: 133
     chip_alternate_clock_mhz: 84
-
-    # Recommended driver settings
-    recommended_clock: "sysclk/2"
-    supported_rates:
-      - mode: "sysclk/1"
-        description: "Fast mode - check stability"
-      - mode: "sysclk/2"
-        description: "Standard mode - reliable operation"
-      - mode: "sysclk/3"
-        description: "Conservative mode"
-      - mode: "sysclk/4"
-        description: "Low-power mode"
-
-    # Critical timing
+    source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, 13. SRAM Memory, p.8 (133 MHz and the 133/84 MHz part rating)"
     max_cs_low_us: 8
-    cs_low_note: "Must release CE# within 8us for internal DRAM refresh"
-
-    # Burst calculation
-    burst_size:
-      calculation: "((MAX_CS_LOW_USEC * (freq/1000000)) - 132) >> 4) << 4"
-      typical_at_200mhz: "approximately 1280 bytes per burst"
-
-    # Input delay configuration (from driver)
-    input_delay:
-      description: "Automatically computed based on system clock frequency"
-      delay_table:
-        - freq_under_mhz: 92
-          delay: 7
-        - freq_under_mhz: 150
-          delay: 8
-        - freq_under_mhz: 206
-          delay: 9
-        - freq_under_mhz: 258
-          delay: 10
-        - freq_under_mhz: 310
-          delay: 11
-        - freq_under_mhz: 333
-          delay: 12
-        - freq_over_mhz: 333
-          delay: 13
-
-  flash:
-    interface: "SPI"
-    max_clock_mhz: 133  # Per W25Q128JV datasheet
-    addressing: "24-bit (16MB)"
+    cs_low_note: "Maximum CS (CE#) low time of 8us, as stated by the MegaYume PSRAM driver (OBEX 4162)"
 
   serial:
     max_baud: 2000000
     pins: "P62 (TX), P63 (RX)"
     compatible_programmer: "PropPlug #32201"
-
-# =============================================================================
-# CODE PATTERNS - PSRAM DRIVER USAGE
-# =============================================================================
-code_patterns:
-  spin2:
-    obex_driver_usage: |
-      OBJ
-        psram : "psram"
-
-      PUB main() | err
-        err := psram.start()                  ' Initialize PSRAM driver
-        IF err >= 0
-          psram.write(@src_buf, $100000, 1024)  ' Write 1KB to address 0x100000
-          psram.read(@dst_buf, $100000, 1024)   ' Read it back
-
-    initialization: |
-      ' Start PSRAM driver with automatic configuration
-      PUB start() : result
-        return startx(0, 0, 0, -1)
-
-      ' Extended start with custom parameters
-      PUB startx(freq, burst, delay, desiredcog) : result
-        ' freq: 0 = use current clkfreq
-        ' burst: 0 = auto-compute for 8us CS low time
-        ' delay: 0 = auto-compute from frequency table
-        ' desiredcog: -1 = auto-allocate cog
-
-    read_write: |
-      PUB read(dstHubAddr, srcPsramAddr, count) : result
-        ' Read from PSRAM to Hub RAM
-        ' dstHubAddr: Hub RAM destination address
-        ' srcPsramAddr: PSRAM source address (25-bit, 0-33554431)
-        ' count: Number of bytes to read
-        ' Returns: 0 on success, negative error code on failure
-
-      PUB write(srcHubAddr, dstPsramAddr, count) : result
-        ' Write from Hub RAM to PSRAM
-        ' srcHubAddr: Hub RAM source address
-        ' dstPsramAddr: PSRAM destination address (25-bit)
-        ' count: Number of bytes to write
-
-    fill_operations: |
-      PUB fillBytes(addr, pattern, count, listPtr) : r
-        return fill(addr, pattern, count, listPtr, 1)
-
-      PUB fillWords(addr, pattern, count, listPtr) : r
-        return fill(addr, pattern, count, listPtr, 2)
-
-      PUB fillLongs(addr, pattern, count, listPtr) : r
-        return fill(addr, pattern, count, listPtr, 4)
-
-    error_codes: |
-      CON
-        ERR_INVALID      = -6   ' Invalid arguments
-        ERR_TOO_SLOW     = -14  ' P2 frequency too low for PSRAM
-        ERR_INACTIVE     = -15  ' Driver not running
-        ERR_ABORTED      = -16  ' Driver was shutdown
-        ERR_NO_LOCK      = -26  ' No LOCK available
-        ERR_MAILBOX_BUSY = -28  ' Mailbox operation pending
 
 # =============================================================================
 # RESOURCES AND REFERENCES
@@ -401,23 +312,15 @@ resources:
     driver_files:
       - "psram.spin2"
       - "psram16drv.spin2"
-    features:
-      - "16-bit PSRAM burst read/write"
-      - "Fill operations (byte/word/long)"
-      - "Multi-cog mailbox access"
-      - "Automatic timing configuration"
-      - "QoS per-cog priority control"
+    note: "The driver's API, settings and error codes are documented by the OBEX object itself."
 
   documentation:
     primary:
-      title: "P2-EC32MB Edge Module Rev B Guide v2.0"
-      date: "2022-05-23"
+      title: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022 (Rev B), p.1-13"
       publisher: "Parallax Inc."
     references:
-      - "P2 Silicon Documentation (Propeller 2 Datasheet)"
       - "AP Memory APS6404L PSRAM Datasheet"
       - "Winbond W25Q128JV Flash Datasheet"
-      - "PSRAM driver documentation in OBEX"
 
   edge_connectors:
     - part: "450-00308"
@@ -484,10 +387,8 @@ target_applications:
 advantages:
   - "32MB PSRAM - 64x Hub RAM capacity"
   - "16-bit parallel interface for high bandwidth (>300 MB/s)"
-  - "Automatic timing configuration in driver"
-  - "Multi-cog concurrent access via mailboxes"
   - "Same physical form factor as standard P2-EC module"
-  - "Compatible with all Edge carrier boards"
+  - "Fits the P2 Edge Module Breadboard, the P2 Edge Mini Breakout Board and the P2 Edge 80-pin Adapter Kit"
   - "16MB Flash for large programs and data"
   - "High-precision TCXO (+/- 0.5 PPM)"
   - "6-layer PCB with thermal plane"

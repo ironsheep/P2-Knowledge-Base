@@ -29,6 +29,7 @@ aliases:
   - spin2_docs_vscode
   - spin2_documentation_style
   - vscode_spin2_comments
+  - "VSCode PNut documentation conventions"
 
 oneliner: "Spin2 comment conventions for VSCode hover, doc generator, and outline panel"
 

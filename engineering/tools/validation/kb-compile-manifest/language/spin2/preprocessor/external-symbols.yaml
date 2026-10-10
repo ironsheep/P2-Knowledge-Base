@@ -14,37 +14,37 @@ blocks:
     fp: "75539b26da43cd7c"
     compile: program
   - at: examples[0].code
-    fp: "5d1f555b0c09c27e"
+    fp: "fd59c1cf614ff13a"
     compile: fragment
     wrap: spin2-top
     assumes: [run_application()->1/0]
   - at: examples[1].code
-    fp: "00f1a622217d7901"
+    fp: "7e1aa2c46c5d60b0"
     compile: fragment
     wrap: spin2-top
   - at: examples[2].code
-    fp: "af6e183c02158dce"
+    fp: "868f0f7d156fe1be"
     compile: fragment
     wrap: spin2-method
   - at: examples[3].code
     fp: "1883cc40f5a922c1"
     compile: program
   - at: examples[4].code
-    fp: "32b21f9c247c6850"
+    fp: "ec1f79bf18944f11"
     compile: fragment
     wrap: spin2-method
   - at: examples[5].code
-    fp: "d601d4aed6393228"
+    fp: "400f207849b08530"
     compile: fragment
     wrap: spin2-top
     assumes: [run_app()->1/0]
   - at: examples[6].code
-    fp: "62c86fe4b255fd40"
+    fp: "4f061c47c9171ab6"
     compile: fragment
     wrap: spin2-method
     assumes: [file:utils.spin2, file:serial.spin2]
   - at: examples[7].code
-    fp: "0548a64e241e72b0"
+    fp: "f323f90d5681e9e3"
     compile: fragment
     wrap: spin2-method
     assumes: [file:common_utils.spin2]

@@ -96,14 +96,8 @@ development_workflow:
 use_cases:
   primary:
     - "USB keyboard and mouse input"
-    - "USB storage device access"
-    - "USB sensor and measurement device interfaces"
-    - "Human interface device (HID) connectivity"
   secondary:
-    - "USB-to-serial converter connections"
-    - "USB camera interfaces"
     - "Educational USB protocol development"
-    - "USB device testing and validation"
 
 code_patterns:
   spin2:
@@ -126,39 +120,20 @@ code_patterns:
 advantages:
   - "True USB host capability (not just device)"
   - "Dual ports for multiple simultaneous devices"
-  - "Hardware current limiting prevents damage"
+  - "Current-limited load switch on each port"
   - "Individual port enable control"
   - "Activity LEDs for visual feedback"
-  - "USB specification compliant power management"
-  - "Comprehensive protection circuitry"
+  - "Reverse current blocking, short-circuit protection, over-temperature protection and VBUS soft start"
 
 compatibility:
   stacking:
     position: "Any 2x6 header position on the host board"
-    conflicts: "High power usage - check total system power budget"
-    power_sharing: "May limit number of other high-power add-ons"
-  device_compatibility:
-    keyboard_mouse: "Standard HID devices supported"
-    storage_devices: "USB flash drives, external drives"
-    sensors: "USB measurement and sensor devices"
-    limitation: "Complex devices may require extensive software support"
+    conflicts: "Each port allows up to 500 mA continuous, subject to overall available system power - check the total system power budget"
 
 applications:
   human_interface:
-    - "Computer-style keyboard input"
-    - "Mouse and pointing device control"
-    - "Gaming controller interfaces"
-    - "Specialized input devices"
-  data_acquisition:
-    - "USB sensor reading and logging"
-    - "Measurement device interfaces"
-    - "Test equipment connectivity"
-    - "Data collection from USB instruments"
-  storage_access:
-    - "File system access via USB drives"
-    - "Data logging to external storage"
-    - "Firmware updates from USB media"
-    - "Configuration file loading"
+    - "USB keyboard input"
+    - "USB mouse input"
 
 educational:
   complexity_level: "advanced"

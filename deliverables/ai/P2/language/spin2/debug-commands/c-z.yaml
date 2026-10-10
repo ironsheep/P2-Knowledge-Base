@@ -1,4 +1,9 @@
 formatter: C_Z
+aliases:
+  - "C_Z"
+  - "DEBUG C_Z"
+  - "debug command C_Z"
+  - "debug carry and zero flags"
 type: debug_formatter
 category: Debug Flag Formatters
 

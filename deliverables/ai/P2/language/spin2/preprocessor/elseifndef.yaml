@@ -9,7 +9,7 @@ description: |
   when the preceding condition was false AND the specified symbol is NOT defined.
   This is the inverse of #ELSEIFDEF. Useful for testing absence of symbols in 
   chained conditionals.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: |

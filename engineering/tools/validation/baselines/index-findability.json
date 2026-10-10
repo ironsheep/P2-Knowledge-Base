@@ -1,0 +1,6 @@
+{
+  "language/spin2/operators": "One page per Spin2 operator, keyed by the operator's own name (p2kbSpin2OpOp<Name>); a searcher looks an operator up by its name or symbol, which each page's aliases carry. 'operators' is the directory's grouping word, not part of any page's own name or title. Reviewed 2026-10-10 (task 420): 82 of 83 pages lack the word; a per-page 'operators' alias would only repeat the directory name 82 times.",
+  "language/spin2/registers": "One page per Spin2 cog register (DIRA, INA, IJMP1 ...), keyed by the register's own name (p2kbSpin2Reg<Name>) and found by that name. 'registers' is the directory's grouping word, not part of any page's own name or title. Reviewed 2026-10-10 (task 420).",
+  "language/spin2/patterns/implementation": "One page per named implementation pattern (BufferManagement, CogManagement, ErrorHandling ...), found by the pattern's own name. 'implementation' is the directory's grouping word and says nothing about a pattern's subject. Reviewed 2026-10-10 (task 420).",
+  "language/spin2/preprocessor": "One page per preprocessor directive (#DEFINE, #ELSE, #ENDIF, #ERROR ...), keyed by the directive's own name (p2kbSpin2Define, p2kbSpin2Else ...) and found by that name. 'preprocessor' is the directory's grouping word; the overview page carries it. Reviewed 2026-10-10 (task 420)."
+}

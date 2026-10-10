@@ -1,5 +1,8 @@
 title: P2 Source File Organization Standard
 id: p2-source-file-organization-standard
+aliases:
+  - "P2 source file organization conventions"
+  - "source file layout conventions"
 style_name: P2 Community File Structure Standard
 version: 1.0.0
 applies_to: All SPIN2 and PASM2 source files

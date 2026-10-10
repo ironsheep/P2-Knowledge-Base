@@ -9,7 +9,7 @@ description: |
   symbol IS defined. The block extends until a matching #ELSE, #ELSEIFDEF, 
   #ELSEIFNDEF, or #ENDIF directive. PNut allows conditional blocks to be nested 
   up to 8 levels deep; PNut-TS imposes no such limit.
-  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: |

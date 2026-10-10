@@ -132,7 +132,7 @@ core_block_types:
       DAT { PASM2 code }
         ORG
           mov     x, #0
-        END
+          x       LONG    0
 
   PUB:
     purpose: "Public methods (callable from other objects)"
@@ -204,10 +204,13 @@ method_signature_components:
 control_flow:
   conditional:
     IF_THEN:
-      syntax: "IF condition THEN statement"
+      syntax: "IF condition"
+      notes:
+        - "The statement goes on the following indented line; Spin2 has no one-line IF and no THEN."
       example: |
-        IF (x > 100) THEN x := 100
-        
+        IF (x > 100)
+          x := 100
+
     IF_ELSEIF_ELSE:
       syntax: "IF...ELSEIF...ELSE block"
       example: |
@@ -252,12 +255,12 @@ control_flow:
       syntax: "REPEAT variable FROM start TO end STEP increment"
       notes:
         - STEP is optional (defaults to 1)
-        - FROM/TO order determines direction
+        - STEP is a size; its sign is ignored (FROM/TO order determines direction)
       example: |
         REPEAT idx FROM 0 TO 99
           buffer[idx] := 0
-          
-        REPEAT idx FROM 99 TO 0 STEP -1
+
+        REPEAT idx FROM 99 TO 0
           process(buffer[idx])
 
     REPEAT_WHILE:
@@ -331,15 +334,26 @@ memory_access:
 object_usage:
   calling_methods:
     syntax: "objectName.methodName(params)"
+    note: "The object must be declared in an OBJ block, and the call must match the object's own method signature (jm_fullduplexserial.start takes rxpin, txpin, mode, baud)."
     example: |
-      serial.start(63, 62, 115_200)
-      value := sensor.read()
-      
+      OBJ
+        serial : "jm_fullduplexserial"
+        sensor : "my_sensor"
+
+      PUB demo() | value
+        serial.start(63, 62, %0000, 115_200)
+        value := sensor.read()
+
   object_arrays:
     syntax: "objectName[index].methodName(params)"
+    note: "jm_pwm.start takes pin, dc (duty cycle 0 to 255), hz and mode (0 sawtooth, 1 triangle)."
     example: |
-      led[0].start(56)
-      led[1].start(57)
+      OBJ
+        led[2] : "jm_pwm"
+
+      PUB demo()
+        led[0].start(56, 128, 1_000, 0)
+        led[1].start(57, 64, 1_000, 0)
 
 inline_pasm2:
   basic_inline:
@@ -394,7 +408,7 @@ common_patterns:
         serial : "jm_fullduplexserial"
         
       PUB main()
-        serial.start(RX_PIN, TX_PIN, 115_200)
+        serial.start(RX_PIN, TX_PIN, %0000, 115_200)
         serial.str(string("Hello"))
 
   state_machine:
@@ -452,12 +466,12 @@ language_version_directives:
       directive: "{Spin2_v50}"
       features:
         - "DITTO - code/data replication directive"
-        - "$ (double-dollar) - iteration index within DITTO blocks"
+        - "$$ - iteration index within DITTO blocks (0 to count-1); the single $ is the origin"
       example: |
         {Spin2_v50}
         DAT
                 DITTO   4
-                LONG    $77777777 + $   ' $ is 0, 1, 2, 3
+                LONG    $77777777 + $$  ' $$ is 0, 1, 2, 3
                 DITTO   END
                 
   base_language_features:
@@ -504,14 +518,14 @@ string_handling:
 debugging_support:
   overview: "DEBUG statements output runtime data to terminal during development"
   basic_example: |
-    DEBUG("Value: ", DEC value)
+    DEBUG("Value: ", UDEC(value))
   see_also:
     statement:
       key: p2kbSpin2Debug
       description: "Complete DEBUG statement reference"
     formatters:
       key: p2kbSpin2DbgDebugFormattersOverview
-      description: "Format specifiers (DEC, HEX, BIN, etc.)"
+      description: "Format specifiers (UDEC, SDEC, UHEX, UBIN, etc.)"
 
 next_steps:
   essential_reading:

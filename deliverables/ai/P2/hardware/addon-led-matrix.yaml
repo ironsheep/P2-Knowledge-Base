@@ -102,23 +102,13 @@ protocol_constraints:
   charlieplex:
     max_simultaneous_leds: 1
     refresh_minimum_hz: 50
-    refresh_recommended_hz: 120
-    cog_required: true
-    cog_reason: "Continuous refresh loop needed for persistence of vision."
+    source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval LED Matrix Add-on Board (#64006C), p.5 (switching each LED on and off at least 50 times a second)"
   timing:
     pixel_on_time_us: "1000000 / (refresh_hz * 56)"
-    at_120hz_pixel_us: 148
+    at_50hz_pixel_us: 357  # derived: 1000000 / (50 * 56)
 
 code_patterns:
   spin2:
-    obex_driver_usage: |
-      OBJ
-        matrix : "jm_p2-es_matrix"
-
-      PUB main()
-        matrix.start(0)                  ' Start charlieplex cog at base pin 0
-        matrix.putc("A")                 ' Display character 'A'
-        matrix.scroll(@"Hello!", 100)    ' Scroll message with 100ms delay
     manual_led_control: |
       ' Light a single LED without the driver (for simple tests)
       PUB light_led(basepin, high_offset, low_offset)
@@ -128,15 +118,6 @@ code_patterns:
 
       PUB led_off(basepin)
         PINFLOAT(basepin ADDPINS 7)      ' Float all = all off
-    plot_pixel: |
-      PUB plot(x, y, mode) | mask
-        ' Plot pixel at x (column 0-7), y (row 0-6); mode 0=off 1=on 2=toggle
-        IF ((x >= 0) && (x < 8)) && ((y >= 0) && (y < 7))
-          mask := %10000000 >> x
-          CASE mode
-            0: pixels[y] &= !mask
-            1: pixels[y] |= mask
-            2: pixels[y] ^= mask
 
 resources:
   obex:
@@ -145,11 +126,7 @@ resources:
     author: "Jon 'JonnyMac' McPhalen"
     url: "https://obex.parallax.com/obex/p2es-matrix/"
     driver_file: "jm_p2-es_matrix.spin2"
-    features:
-      - "8x7 charlieplex refresh in a dedicated cog"
-      - "ASCII character display with a 5x7 font"
-      - "Text scrolling, pixel plotting, line drawing"
-      - "Bar graph and level indicators"
+    note: "The driver's API and features are documented by the OBEX object itself."
   quick_bytes:
     - title: "LED Matrix used as an I/O Test Utility"
       url: "https://www.parallax.com/i-o-test-utility-with-led-matrix/"
@@ -168,18 +145,16 @@ use_cases:
 advantages:
   - "56 LEDs from only 8 I/O pins (Charlieplexing)"
   - "Low instantaneous current — one LED lit at a time (figure stated under `description`)"
-  - "OBEX driver provides text, scrolling, and graphics"
+  - "An OBEX driver exists for the board (see resources.obex)"
 
 limitations:
   - "Only one LED truly lit at a time (relies on persistence of vision)"
-  - "Requires a dedicated cog for continuous refresh"
   - "Green LEDs only"
   - "Requires a P2 Eval Board or Edge system"
 
 compatibility:
   stacking:
     position: "Any 2x6 header position on the host board"
-    power_sharing: "Low power - compatible with multiple boards"
 
 documentation:
   primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"

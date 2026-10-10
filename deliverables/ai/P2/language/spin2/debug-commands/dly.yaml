@@ -1,4 +1,9 @@
 command: "DLY"
+aliases:
+  - "DLY"
+  - "DEBUG DLY"
+  - "debug command DLY"
+  - "debug delay"
 type: debug_command
 category: "Debug Control"
 description: |

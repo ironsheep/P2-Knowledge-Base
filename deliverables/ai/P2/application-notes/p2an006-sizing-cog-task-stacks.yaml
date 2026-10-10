@@ -43,7 +43,7 @@ summary: |
   watches a hub buffer, so it does not care whether the buffer feeds a cog or a task). Built around
   the isp_stack_check utility (Stephen M. Moraco), shipped in the example library. The
   hub method stack sized here is NOT the P2 8-level hardware call stack. Every recipe compiles clean
-  under pnut_ts -d; observing the overflow halt fire is a bench step.
+  under pnut-ts -d; observing the overflow halt fire is a bench step.
 audience: [human, agent]
 
 # ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
@@ -67,7 +67,7 @@ runnable_code:
     - {id: high-water-mark,      file: high-water-mark.spin2,      note: "R2 — reportStackUse reads the high-water mark; right-size to ~1.5x N"}
     - {id: pinpoint-overflow,    file: pinpoint-overflow.spin2,    note: "R3 — granular checkStack between init calls localizes the overrunning routine"}
     - {id: size-task-stack,      file: size-task-stack.spin2,      note: "R4 — the same technique on a TASKSPIN task stack ({Spin2_v47})"}
-  toolchain: "pnut_ts, _clkfreq = 200_000_000; each recipe OBJ-includes isp_stack_check.spin2 (uses debug()) so compile with -d. R1-R3 need no directive; R4 needs {Spin2_v47}"
+  toolchain: "pnut-ts, _clkfreq = 200_000_000; each recipe OBJ-includes isp_stack_check.spin2 (uses debug()) so compile with -d. R1-R3 need no directive; R4 needs {Spin2_v47}"
 
 key_parameters:
   constants: "isp_stack_check: NOT_WRITTEN_MARK = $a5a50df0 (fill every stack long before launch); DO_NOT_WRITE_MARK = $addee5e5 (sentinel in the long JUST PAST the buffer)"
@@ -97,12 +97,12 @@ gotchas:
   - flag: tip
     text: "Ship the guard, not just the measurement. A checkStack in a slow supervisory loop costs one long-compare and turns any future overflow (a new deep branch, a bigger input) into a clear halt instead of silent corruption."
   - flag: tip
-    text: "P2 operator is `<=` not `=<` (pnut_ts rejects `=<`). Caught while authoring the recursion in R2/R4."
+    text: "P2 operator is `<=` not `=<` (pnut-ts rejects `=<`). Caught while authoring the recursion in R2/R4."
   - flag: verify
     text: "R1/R3/R4: silent guard = pass; shrink the stack below what the code needs and checkStack prints '^^^ STACK Overflow! Depth greater than N longs' and halts. R2: reportStackUse prints '^^^ STACK used N of M'; deepen the call chain and N rises."
 
 hardware_status: |
-  Every recipe and the isp_stack_check instrument compile clean under pnut_ts -d (v1.55.0, _clkfreq =
+  Every recipe and the isp_stack_check instrument compile clean under pnut-ts -d (v1.55.0, _clkfreq =
   200_000_000); each recipe OBJ-includes the utility from the example library. The overflow DETECTION,
   the '^^^ STACK Overflow!' message, the high-water 'STACK used N of M' output, and the lockup-for-
   analysis halt are runtime behaviors described from the utility's design; observing them fire (shrink
@@ -113,7 +113,7 @@ provenance:
   primary_sources:
     - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — cogspin/coginit stack requirements, TASKSPIN task stacks, and the parameters-then-results-then-locals stack layout"
   tool_ground_truth:
-    - "pnut_ts — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
+    - "pnut-ts — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
   cross_check_sources:
     - "P2 Knowledge Base language/spin2/methods/cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; language/pasm2/concepts/stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
   community_examples:

@@ -1,5 +1,8 @@
 title: Spin2 Professional Formatting Standards
 id: spin2-formatting-standards
+aliases:
+  - "Spin2 formatting conventions"
+  - "Spin2 formatting standards"
 version: 1.0.0
 layer: "Layer 2 - Universal Professional Formatting"
 purpose: Professional code structure and organization standards

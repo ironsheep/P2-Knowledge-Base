@@ -153,7 +153,6 @@ advantages:
   - "Both host power rails available at the grid (named under `power_rails`)"
   - "Ground connections distributed throughout the grid"
   - "Modifiable interconnections via bottom-side trace cutting"
-  - "Standard 0.1 inch hole spacing"
   - "No mounting hole allows flexible positioning"
 
 limitations:
@@ -168,10 +167,6 @@ compatibility:
     position: "Any 2x6 header position on the host board"
     conflicts: "Check component height clearance with other add-ons"
     mechanical: "No mounting hole - may need additional support"
-  component_compatibility:
-    through_hole: "Standard 0.1 inch pitch components"
-    surface_mount: "Can be adapted with breakout techniques"
-    wire_connections: "Standard hookup wire fits holes"
 
 educational:
   complexity_level: "intermediate"

@@ -1,4 +1,9 @@
 command: "PC_KEY"
+aliases:
+  - "PC_KEY"
+  - "DEBUG PC_KEY"
+  - "debug command PC_KEY"
+  - "debug keyboard input"
 type: debug_command
 category: "Debug Control"
 documentation_source: Spin2 v51 (debug-section.txt) + PNut v55 directive matrix

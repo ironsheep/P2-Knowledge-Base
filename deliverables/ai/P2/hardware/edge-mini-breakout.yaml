@@ -14,6 +14,9 @@ part_number: "64019"
 manufacturer: "Parallax Inc."
 revision: "v1.1"
 status: "active_production"
+revision_scope_reviewed:
+  source: "P2 Edge Mini Breakout Board (#64019) v1.1 11/30/2020, Revision History, p.10"
+  finding: "The revision history lists only guide edits (version 1.0 original release; version 1.1 pinout images updated). It names no board hardware revision and states no rating that differs between versions, so nothing in this file is revision-scoped."
 
 basic_info:
   name: "P2 Edge Mini Breakout"
@@ -189,7 +192,7 @@ documentation:
     - "hardware/edge-32mb-module.yaml"
   references:
     - "32MB Edge module documentation (optimal pairing)"
-    - "P2 Silicon Documentation"  
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
     - "Pin mapping and limitations guide"
     
 availability:
