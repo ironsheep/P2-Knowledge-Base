@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: "9...16 (cog) / 9...26 (hub-exec)"
   type: variable
-  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.154"
   notes: "Hub-window dependent; minimum 9 clocks when window is hit. +1 clock if the word crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: '{WC/WZ/WCZ}     Read zero-extended word from hub address {#}S/PTRx into
   D. C = MSB of word. *                                          9...16 1 / 9...26'
@@ -18,7 +18,7 @@ flags_affected:
   Z: Set if result equals zero
 silicon_errata:
   after_no_wait_rdfast: "Started fewer than 16 clocks after a no-wait RDFAST (D[31]=1), RDWORD can complete before its own read: D gets the word at its own offset within the PREVIOUS hub read's long, and C/Z are set from that wrong value. Rule: use the waiting RDFAST (D[31]=0), or start this RDWORD at least 16 clocks after the no-wait RDFAST (e.g. WAITX #12 directly after it). Full account: language/pasm2/rdfast.yaml silicon_errata."
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_dsp

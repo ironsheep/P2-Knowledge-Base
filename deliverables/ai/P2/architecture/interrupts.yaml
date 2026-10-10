@@ -1,21 +1,13 @@
 # P2 Interrupt System
 # Sources:
-#   Propeller 2 Documentation v35 (Rev B/C Silicon), section INTERRUPTS --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2262-2392
-#     (event-source table :2274-2291; IJMPx/IRETx map :2296-2301;
-#      RETIx/RESIx aliases :2304-2317; deferral conditions :2349-2354;
-#      dispatch mechanism :2359)
-#   Instruction encodings, same document, PASM2 encoding table --
-#     silicon-doc-text.txt:5302-5315 (ALLOWI/STALLI/TRGINTx/NIXINTx/SETINTx)
-#     and :5478-5486 (RESIx/RETIx alias definitions)
-#   Per-instruction encodings for the RETIx aliases are carried in this knowledge
-#     base's own language/pasm2/reti0.yaml, language/pasm2/reti1.yaml, language/pasm2/reti2.yaml and language/pasm2/reti3.yaml
-#     (the RESIx counterparts are resi0.yaml .. resi3.yaml). Written out rather
-#     than abbreviated: "reti0..3.yaml" is not a path any reader can resolve.
-#   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has NO interrupt section; it
-#     carries the IJMPx/IRETx register rows at
-#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:558-563 and
-#     the interrupt instructions in the PASM2 table at :1954
+#   Parallax Propeller 2 Documentation v35 (Rev B/C silicon), section INTERRUPTS
+#     (event-source table; IJMPx/IRETx map; RETIx/RESIx aliases; deferral
+#     conditions; dispatch mechanism)
+#   Instruction encodings, same document, Assembly Language (instruction encodings:
+#     ALLOWI/STALLI/TRGINTx/NIXINTx/SETINTx, and the RESIx/RETIx alias definitions)
+#   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01 -- the datasheet has NO
+#     interrupt section; it carries the IJMPx/IRETx register rows (Special-purpose
+#     registers) and the interrupt instructions in the PASM2 table
 
 component_name: "Interrupt System"
 
@@ -51,17 +43,15 @@ architecture:
       - "Return address -- into IRETx"
       - "C and Z flags -- into IRETx (the CALLD carries WCZ)"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2294 and :2359.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS.
     context_switch_time: "0 clocks -- IJMPx/IRETx are dedicated registers; nothing is swapped"
   
   interrupt_sources:
     total_sources: 16
     selection: "A 4-bit pattern, 0..15, written by SETINT1 / SETINT2 / SETINT3"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS -- the sixteen interrupt event
-      sources, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2274-2291.
-      The full list is in `interrupt_sources_detail` below.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS -- the sixteen
+      interrupt event sources. The full list is in `interrupt_sources_detail` below.
     source_types:
       - type: "off"
         sources: ["0 = <off>"]
@@ -103,12 +93,10 @@ architecture:
 
 configuration_registers:
   source: >-
-    Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2296-2301; P2 Datasheet
-    2022/11/01 cog special-purpose register table --
-    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:558-563. Both list
-    INT3 at the LOWEST addresses and INT1 at the highest; the RETIx alias definitions at
-    silicon-doc-text.txt:5483-5485 agree (RETI1 = CALLD INB,$1F5).
+    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS.
+    Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-Purpose Registers (cog special-purpose register table), p.13.
+    Both list INT3 at the LOWEST addresses and INT1 at the highest; the RETIx alias definitions in
+    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language, agree (RETI1 = CALLD INB,$1F5).
   registers:
     - register: "IJMP3"
       address: "$1F0"
@@ -145,9 +133,8 @@ instructions:
     encoding: "EEEE 1101011 000 000100001 000100100"
     description: "Stall INT1/INT2/INT3 interrupt BRANCHES indefinitely, until ALLOWI"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2272, :2344;
-      encoding at silicon-doc-text.txt:5303.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; encoding:
+      Assembly Language (instruction encodings).
     operation: |
       Hold off the interrupt branch for all three levels indefinitely.
       Events still occur and interrupts still become pending; what is stalled is
@@ -162,9 +149,8 @@ instructions:
     encoding: "EEEE 1101011 000 000100000 000100100"
     description: "Allow stalled and future interrupt branches to occur (default on cog start)"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2272, :2343;
-      encoding at silicon-doc-text.txt:5302.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; encoding:
+      Assembly Language (instruction encodings).
     operation: |
       Release the STALLI hold. Any interrupt already pending may then branch,
       with priority given to INT1, then INT2, then INT3.
@@ -175,11 +161,8 @@ instructions:
     encoding: "EEEE 1101011 00L DDDDDDDDD 000100101"
     description: "Set the INT1 event source to D[3:0] (0..15)"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2322-2324 and the
-      event-source table :2274-2291; encoding at silicon-doc-text.txt:5313; P2 Datasheet
-      2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1954.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS and its event-source table; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.44.
     operation: |
       Set the INT1 event source to D[3:0].
       0 = <off>, the default on cog start.
@@ -234,10 +217,8 @@ instructions:
       `CALLD INB,INB WCZ`; INB and INA become the writable IRET0/IJMP0 registers only
       inside a debug ISR.
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), alias definitions --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5486; DEBUG INTERRUPT
-      -- silicon-doc-text.txt:2420, :2439, :2482. Encoding from this knowledge base's own
-      language/pasm2/reti0.yaml.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language
+      (alias definitions); DEBUG INTERRUPT.
     operation: |
       RETI0 = CALLD INB,INB WCZ
       Returns to the interrupted cog program and restores C and Z from IRET0.
@@ -250,30 +231,24 @@ instructions:
     encoding: "EEEE 1011001 110 111111111 111110101"
     description: "Return from INT1 -- an alias for `CALLD INB,IRET1 WCZ` (IRET1 = $1F5)"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2306-2311; alias
-      definition at silicon-doc-text.txt:5485. Encoding from this knowledge base's own
-      language/pasm2/reti1.yaml.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; alias
+      definition: Assembly Language (alias definitions).
     timing: "4 clocks"
   
   - instruction: "RETI2"
     encoding: "EEEE 1011001 110 111111111 111110011"
     description: "Return from INT2 -- an alias for `CALLD INB,IRET2 WCZ` (IRET2 = $1F3)"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2306-2311; alias
-      definition at silicon-doc-text.txt:5484. Encoding from this knowledge base's own
-      language/pasm2/reti2.yaml.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; alias
+      definition: Assembly Language (alias definitions).
     timing: "4 clocks"
   
   - instruction: "RETI3"
     encoding: "EEEE 1011001 110 111111111 111110001"
     description: "Return from INT3 -- an alias for `CALLD INB,IRET3 WCZ` (IRET3 = $1F1)"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), INTERRUPTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2306-2311; alias
-      definition at silicon-doc-text.txt:5483. Encoding from this knowledge base's own
-      language/pasm2/reti3.yaml.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; alias
+      definition: Assembly Language (alias definitions).
     timing: "4 clocks"
 
 interrupt_sources_detail:
@@ -426,7 +401,7 @@ best_practices:
       PTRB, the CORDIC queue and every general register are shared with the interrupted
       code -- an ISR that touches them must save and restore them itself.
     rationale: "There are no shadow register banks"
-    source: "rationale: Silicon Doc, silicon-doc-text.txt:2294, :2359"
+    source: "rationale: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS"
   
   - practice: "avoid_hub_ops"
     description: "Minimize hub operations in ISRs"
@@ -467,8 +442,8 @@ performance_characteristics:
   interrupt_rate:
     note: |
       Sustained rate is limited by entry overhead (4 clocks cog / 13-20 clocks
-      hub), exit overhead (same), and the ISR body. We do not publish a 'one
-      interrupt every N clocks' figure because the achievable rate depends on
+      hub), exit overhead (same), and the ISR body. No 'one
+      interrupt every N clocks' figure applies because the achievable rate depends on
       ISR length and execution mode.
     sustained: "Limited by ISR execution time + entry/exit overhead"
   
@@ -508,18 +483,19 @@ related_topics:
     relationship: "ATN signals can trigger interrupts"
 
 sources:
-    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
-      sections:
-        - "INTERRUPTS -- lines 2262-2392"
-        - "PASM2 encoding table -- lines 5302-5315"
-        - "RESIx / RETIx alias definitions -- lines 5478-5486"
-    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
-      sections:
-        - "Cog special-purpose register table, IJMPx/IRETx -- lines 558-563"
-        - "PASM2 instruction table, SETINTx -- line 1954"
-    - document: "This knowledge base's own per-instruction YAMLs"
-      source: "deliverables/ai/P2/language/pasm2/"
-      sections:
-        - "language/pasm2/reti0.yaml, language/pasm2/reti1.yaml, language/pasm2/reti2.yaml, language/pasm2/reti3.yaml -- alias encodings"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings; RESIx / RETIx alias definitions)"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-Purpose Registers (IJMPx/IRETx), p.13"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (SETINTx), p.44"
+
+# Per-instruction encodings for the RETIx aliases are carried in the RETI0..3
+# entries (the RESIx counterparts are language/pasm2/resi0.yaml .. resi3.yaml).
+related:
+  - language/pasm2/reti0.yaml
+  - language/pasm2/reti1.yaml
+  - language/pasm2/reti2.yaml
+  - language/pasm2/reti3.yaml
+  - language/pasm2/resi0.yaml
+  - language/pasm2/resi1.yaml
+  - language/pasm2/resi2.yaml
+  - language/pasm2/resi3.yaml

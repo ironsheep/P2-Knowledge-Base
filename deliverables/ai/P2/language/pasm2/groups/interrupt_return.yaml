@@ -21,4 +21,4 @@ examples:
 - title: Interrupt handler pattern
   code: "debug_isr\n    ' save state\n    ' handle the debug interrupt\n    RESI0   ' or RETI0 to return"
 created: '2025-09-19T15:11:04.926035'
-source: PASM2 Manual 2022-11-01
+source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"

@@ -23,7 +23,7 @@ examples:
   code: "' Verify application checksum\n        rdfast  #0, #0                  ' Sum\
     \ all application longs\n        rep     #2, app_longs2\n        rflong  x\n\
     \        add     app_sum, x        wz    ' z=1 if verified\n"
-  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:270-273"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Verify application checksum"
 - name: Block Copy with FIFO
   description: Fast block copy using FIFO for reading
   code: "' Copy block using FIFO read and sequential write\n        rdfast  #0, source_addr\
@@ -63,7 +63,7 @@ silicon_errata:
     workaround: "Rule at each use: use the waiting form (D[31]=0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts -- e.g. WAITX #12 directly after it (2 + 14 = 16 clocks), or 7 two-clock non-hub instructions (a SETQ counts as one). The waiting form and the 16-clock spacing are proven on silicon for every read and write width, SETQ block reads and a following RDFAST (spacing tested with WAITX and NOPs only)."
     not_affected: "A no-wait WRFAST releases nothing. A blocking first RDFAST removes the RDFAST-after-RDFAST case."
     untested: "RETA and other hub-stack instructions, WMLONG, SETQ2 block reads, SETQ block writes, an interrupt inside the window, the streamer."
-    source: "Hardware-verified on Rev C silicon, 200 MHz: EF-074, EF-077, EF-084, EF-086, EF-087, EF-088. Not listed in the Silicon Doc's KNOWN BUGS. P2 Errata E7."
+    source: "Hardware-verified on Rev C silicon, 200 MHz: EF-074, EF-077, EF-084, EF-086, EF-087, EF-088. Not listed in the Silicon Doc's KNOWN BUGS."
 
 streamer_pairing:
   rule: |
@@ -79,7 +79,7 @@ streamer_pairing:
     similarly sets up writes-to-hub, which serves streaming INPUT
     (pin → streamer → FIFO → hub). The streamer's direction is the
     INVERSE of the verb's apparent direction.
-  example_source: "Parallax P2 flash_loader.spin2 line 109 (RDFAST → output stream to spi_di)"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash (RDFAST #0,#@loader, then the streamer outputs hub data to spi_di)"
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#

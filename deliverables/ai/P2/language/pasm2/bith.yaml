@@ -19,7 +19,7 @@ description: >-
 flags_affected:
   C: Set to original D[S[4:0]]
   Z: Set to original D[S[4:0]]
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITH / BITL, p.52"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_bitx

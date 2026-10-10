@@ -22,5 +22,5 @@ notes:
   - "The three dots must be the last non-comment item on the line"
   - "The continuation appears on the next line with appropriate indentation"
   - "Comments can appear after the ellipsis"
-documentation_source: "SPIN2 Language Reference"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Language, Comments (Continue code on next line)"
 documentation_level: comprehensive

@@ -14,7 +14,7 @@ description: Jump to S if SE1 (selector 1) event flag is clear.
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JSE1/2/3/4 / JNSE1/2/3/4, p.94"
 documentation_level: structured
 compiler_operand_format:
   name: operand_jpoll

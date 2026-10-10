@@ -14,7 +14,7 @@ description: Return from INT0. (CALLD $1FF,$1FF WCZ).
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
 documentation_level: structured
 compiler_operand_format:
   name: operand_xlat

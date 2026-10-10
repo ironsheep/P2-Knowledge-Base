@@ -31,9 +31,8 @@ long_description: 'The QSQRT instruction performs square root calculation using 
   across the full 64-bit range is important.
 
 
-  The result is the largest integer whose square does not exceed the input value.
-  For perfect squares, the result is exact; for non-perfect squares, the result is
-  the floor of the true square root.
+  How the 32-bit result is rounded when the input is not a perfect square is not
+  documented.
 
   '
 examples:
@@ -128,15 +127,13 @@ operand_details:
   S: Upper 32 bits of 64-bit input value
   D: Lower 32 bits of 64-bit input value
 result_details:
-  GETQX: 32-bit square root result (floor of true square root)
+  GETQX: 32-bit square root result
 timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
   one CORDIC instruction per hub window (every 8 clocks).
 usage_notes: Input formed as {S, D} where S contains upper 32 bits. For 32-bit square
-  roots, use S=0. Result is floor(sqrtinput).
+  roots, use S=0.
 applications: Distance calculations, RMS computations, geometric algorithms, signal
   processing, mathematical operations requiring high-precision square roots.
-mathematical_note: 'Result R satisfies: R² <= input < (R+1)², making it the largest
-  integer whose square doesn''t exceed the input.'
 documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.45; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
 compiler_operand_format:

@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: streamer_system.streamer_commands.XINIT.critical_timing
-    fp: "ccea1786cabfa897"
+    fp: "455411b544d1f0f6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [spi_ck=con, rmode]
@@ -68,7 +68,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [repo_pin, data_value, received]
   - at: common_patterns.spi_flash_access.code
-    fp: "523e4295867cd221"
+    fp: "54cf57c98a5130f3"
     compile: fragment
     wrap: pasm2-dat
     assumes: [spi_ck=con, x, wmode]
@@ -78,11 +78,11 @@ blocks:
     wrap: pasm2-dat
     assumes: [pwmn, pin_pwm_u_l, pwmt, pin_pwm_u_h, fram, drive_pins, drive_u_, dead_gap_]
   - at: coordination.bit_edge_lockstep.rule
-    fp: "44827ef0b8aec11f"
+    fp: "1ea616ef9303c5fa"
     compile: not-code
     reason: "prose rule with pseudo-formulas (`sysclks_per_streamer_bit = $8000_0000 / SETXFRQ_value`,`->` arrows) and a worked list; English text with arithmetic notation, neither Spin2 nor PASM2 source"
   - at: coordination.bit_edge_lockstep.worked_examples
-    fp: "65ba083c94ecf991"
+    fp: "435cd112a76dfe1c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [SCK_PIN=con]
@@ -91,7 +91,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [bit_count_doubled, SCK_PIN=con, input_streamer_mode]
-  - at: coordination.alignment_pad.timing_theory
-    fp: "d0193c052e527cf9"
+  - at: coordination.alignment_pad.rate_dependence
+    fp: "abaa3d2e56d3128f"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"

@@ -6,9 +6,9 @@ description: |
   or data-export features. Instead, its update phase is a full 2-D drawing command
   set (points, lines, shapes, text, sprites, layered bitmaps), making it the most
   capable of the nine DEBUG display windows.
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, PLOT Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (PLOT display implementation: Configure/Update/GetXY) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, PLOT Display; behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - plot

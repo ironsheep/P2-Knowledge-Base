@@ -2,7 +2,7 @@ concept: multi_cog_synchronization
 title: Multi-COG Synchronization and Coordination
 category: parallel_processing
 description: Hardware and software mechanisms for coordinating multiple COGs in P2
-documentation_source: production_code_analysis
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS; COG ATTENTION; SMART PINS (long repository mode)"
 documentation_level: comprehensive
 created: 2025-09-09
 
@@ -403,7 +403,6 @@ best_practices:
 
 references:
   - silicon_doc: Lock and COGATN instructions
-  - Spin2_debugger.spin2: Debug monitor pattern
-  - flash_loader.spin2: Resource protection
+  - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (LOCKTRY #15 / LOCKREL #15 give one cog at a time ownership of the save buffer and tx/rx pins)"
   - isp_bldc_motor.spin2: Multi-COG coordination
   - parallel_algorithms: Work distribution patterns

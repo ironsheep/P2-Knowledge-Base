@@ -45,7 +45,7 @@ encoding:
   clocks: '2'
 encoding_notes:
 - C = last bit shifted out if Src[4:0] > 0, else C = Dest[31].
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, RCL, p.116"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds

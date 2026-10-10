@@ -1,0 +1,6 @@
+' CP-009 proof (control): a single-brace comment between two terms of an expression.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+PUB scaled(speed) : result
+  result := speed {comment between terms} + 1

@@ -6,7 +6,8 @@ description: |
   resource, each at its own cadence. This is the resolution of the Force 1 x Force 3
   tension: when several devices on one bus want different cadences (servos 50 Hz, IMU
   100 Hz, battery 1 Hz), Force 1 forbids splitting the bus across cogs, so the cadences
-  are separated as tasks WITHIN the single owning cog instead. Each task yields with
+  are separated as tasks WITHIN the single owning cog instead.
+  (Parallax Propeller 2 Spin2 Language Documentation v55, Document Status, v47 -- cooperative multitasking, up to 32 tasks per cog) Each task yields with
   tasknext(); a task always COMPLETES its bus transaction before yielding, so the bus
   stays coherent with no lock.
 

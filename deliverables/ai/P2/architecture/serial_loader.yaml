@@ -9,7 +9,9 @@ description: |
   configuring the P2 chip via serial connection.
 
 boot_sequence:
-  source: "P2 Hardware Manual -- Boot Pattern table :269-282, Download Propeller Application :1592-1595, Prop_Hex checksum response :1666 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt; rom_listing_confirmation: Prop2 silicon ROM booter listing, engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:758-760"
+  source:
+    - "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Boot Up (Boot Pattern table), p.11; Download Propeller Application, p.61; Prop_Hex (checksum response), p.63"
+    - "rom_listing_confirmation: Parallax Propeller 2 ROM Booter v33_01j, Serial done (serial_done)"
   see_pattern_table: architecture/boot-rom/boot-pattern-selection.yaml
 
   serial_triggered_when:
@@ -43,6 +45,7 @@ auto_baud_detection:
     common: [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 2000000]
 
 protocol_commands:
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Download Propeller Application (Serial Loading Protocol Commands), p.61; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SERIAL LOADING PROTOCOL"
   whitespace: "Whitespace is required between command keywords and data. TAB ($09), LF ($0A), CR ($0D), SPACE ($20) and '=' ($3D, Base64 padding), singly or in any contiguous combination, constitute a single whitespace."
   chip_identifier: "Each command keyword is followed by four 32-bit hex values <INAmask> <INAdata> <INBmask> <INBdata>; the normal case is zeros for each, which talks to any and all connected chips."
 
@@ -162,16 +165,12 @@ error_handling:
 terminal_software:
   requirements:
     - "ASCII terminal mode"
-    - "No flow control"
     - "8N1 format (8 bits, no parity, 1 stop)"
     - "CR line endings"
-    
-  compatible_software:
-    - "PuTTY"
-    - "Tera Term"
-    - "minicom"
-    - "screen"
-    - "loadp2 utility"
+
+  terminal_software_named:
+    claim: "For the interactive mode (P2 Monitor / TAQOZ), the Datasheet names Parallax Serial Terminal, TeraTerm and RealTerm as serial terminal software, with character echo disabled."
+    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, HOST COMMUNICATION, p.11"
 
 validation_format:
   checksum_calculation:
@@ -185,10 +184,6 @@ special_features:
   error_recovery: "Non-destructive errors"
   clock_switching: "Can change frequency before loading"
 
-security_considerations:
-  no_authentication: "No password protection"
-  physical_access: "Requires serial connection"
-
 related_components:
   boot_rom: "Contains serial loader code"
   smart_pins: "Used for UART communication"
@@ -196,9 +191,7 @@ related_components:
   clock_system: "Can be configured via loader"
 
 see_also:
-  - "Boot ROM source code"
-  - "loadp2 utility documentation"
-  - "Base64 encoding RFC 4648"
+  - "Parallax Propeller 2 ROM Booter v33_01j"
 
 related:
   - architecture/boot-rom/_index.yaml

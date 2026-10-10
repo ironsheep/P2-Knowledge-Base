@@ -4,7 +4,7 @@ quick_byte:
   url: https://www.parallax.com/simple-analog-input/
   published_date: '2021-01-11'
   author: Ken Gracey
-  code_author: Jane Doe
+  code_author: ''
   capability:
     domain: B
     leaf: adc

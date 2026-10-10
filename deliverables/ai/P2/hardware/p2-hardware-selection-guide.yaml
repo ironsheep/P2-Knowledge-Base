@@ -78,7 +78,7 @@ application_specific_guides:
       # Resolution is a function of
       # the streamer/NCO timing you drive, not of the breakout board -- see
       # architecture/streamer/nco-timing.yaml.
-# Source: P2 Eval Add-on Boards guide (#64006H feature list), engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:326-334
+      # Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval A/V Breakout Add-on Board (#64006H), p.9
       - "VGA output on a 15-pin VGA socket"
       - "Component video to RCA 4-band (composite sync, RGBS), digital component video on RCA, and composite video on RCA"
       - "Stereo audio with multiple output formats"
@@ -195,21 +195,13 @@ compatibility_considerations:
   # The #64006 guide gives a current figure for two of its eight boards and none
   # for the rest.
   source: >-
-    64000 Propeller 2 Eval Board Rev C Guide (Parallax Inc.) --
-    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:47
-    (5 VDC, absolute maximum 5.5 VDC), :55-56 (PC-USB 500 mA, AUX-USB 2000 mA),
-    :58 (VIO 3.3 V up to 300 mA per 8 I/O pins), :76 (dual micro-USB inputs),
-    :115 (AUX 5V/GND pads, 4.5-5.5 V, MUST NOT exceed 5.5 V).
-    64029 P2 Edge Breakout Board Guide (2023-03-01) --
-    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:53-57;
-    64019 P2 Edge Mini Breakout Board Guide v1.1 --
-    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:55-59;
-    64020 P2 Edge Module Breadboard Product Guide REV B --
-    engineering/ingestion/sources/edge-module-breadboard/edge-module-breadboard-narrative.txt:61-66.
-    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (2021-01-12) --
-    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:99-115
-    (Serial Host: up to 500 mA continuous per USB socket), :195-197 (LED Matrix:
-    ~4 mA per lit LED).
+    Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, Key Specifications (5 VDC, absolute maximum 5.5 VDC; PC-USB 500 mA, AUX-USB 2000 mA; VIO 3.3 V up to 300 mA per 8 I/O pins; dual micro-USB inputs), p.2.
+    Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, Feature Descriptions (AUX 5V/GND pads, 4.5-5.5 V, MUST NOT exceed 5.5 V), p.8.
+    P2 Edge Breakout Board (#64029) v1.0 03/01/2023, Key Specifications, p.1.
+    P2 Edge Mini Breakout Board (#64019) v1.1 11/30/2020, Key Specifications, p.2.
+    P2 Edge Module Breadboard (#64020) v1.2 01/07/2021, Key Specifications, p.2.
+    P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Serial Host Add-on Board (#64006B) (up to 500 mA continuous per USB socket), p.3.
+    P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval LED Matrix Add-on Board (#64006C) (~4 mA per lit LED), p.5.
   power_supply_requirements:
     eval_board: "5 VDC (absolute maximum 5.5 VDC) at either micro-USB socket -- PC-USB is limited to 500 mA, AUX-USB to 2000 mA, and the source is auto-selected. Optional AUX 5V/GND pads accept 4.5-5.5 V. The #64000 has no USB-C socket and no barrel jack."
     breakouts: "5 VDC only, absolute maximum 5.5 VDC, at the 2.1 mm centre-positive barrel jack -- the same on #64029, #64019 and #64020. Recommended minimum 100 mA; the #64020 additionally states 1000 mA typical. VIO 3.3 V (up to 300 mA per 8 I/O pins) is supplied by the P2 Edge Module, not by the carrier."

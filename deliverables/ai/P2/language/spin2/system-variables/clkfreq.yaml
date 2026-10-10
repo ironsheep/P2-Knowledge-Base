@@ -73,7 +73,8 @@ notes:
 
 anti_patterns:
   hardcoded_timing:
-    wrong: "waitct(getct() + 200_000)  ' Assumes 200 MHz!"
+    wrong: "waitct(getct() + 200_000)  ' Assumes one fixed clock frequency!"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (clkfreq, the current clock frequency, located at LONG[$44])"
     correct: "waitct(getct() + clkfreq / 1000)  ' Works at any frequency"
     reason: "Hardcoded values break when clock frequency changes"
 

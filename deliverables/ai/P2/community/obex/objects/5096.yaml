@@ -31,7 +31,6 @@ object_metadata:
     discovery_date: '2026-06-29T00:00:00'
     kb_integration: none
     last_scraped: '2026-06-29T00:00:00'
-    quality_score: 5
     rescrape_source: v2.2 re-scrape 2026-06-29
   object_id: '5096'
   technical_details:

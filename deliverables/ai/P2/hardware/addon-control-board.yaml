@@ -17,9 +17,8 @@ description: >-
   Four push-buttons and four blue LEDs for simple user-interface control. Each
   active-high blue LED has a 470 ohm series resistor and sits next to a button;
   each active-high tactile push switch has a 470 ohm series resistor so the I/O
-  pin reads high while the button is pressed — per the Parallax P2 Eval Add-on
-  Boards (#64006 Series) Product Guide v2.0, "P2 Eval Control Add-on Board
-  (#64006A)".
+  pin reads high while the button is pressed.
+  P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Control Add-on Board (#64006A), p.2.
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
@@ -35,12 +34,7 @@ pin_group:
     serial pins - not recommended.
 
 signal_map:
-  source: >-
-    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
-    2021-01-12), Control board I/O Pin table --
-    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:52-93;
-    per-board capture at
-    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-control-64006a.md.
+  source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Control Add-on Board (#64006A), I/O Pin table, p.2"
   pins:
     - offset: 0
       signal: "Blue LED 0"
@@ -82,16 +76,7 @@ physical_layout:
   leds: "Offsets 3 and 2 along the top, 1 and 0 along the bottom (left to right)"
 
 specifications:
-  source: >-
-    P2 Eval Add-on Boards (#64006 Series) Product Guide v2.0 (Parallax Inc.,
-    2021-01-12) --
-    engineering/ingestion/sources/p2-eval-add-on-boards/p2-eval-add-on-boards-text.txt:52-93
-    (the Control board) and :24-46 (shared connector / compatibility / mounting
-    facts); per-board capture at
-    engineering/ingestion/sources/p2-eval-add-on-boards/boards/addon-control-64006a.md.
-    Host VIO rail: P2 Eval Board (#64000) Rev C Guide --
-    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:58
-    ("VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins").
+  source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Control Add-on Board (#64006A), p.2, and the shared connector / compatibility / mounting facts, p.1. Host VIO rail: Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, Key Specifications (\"VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins\"), p.2"
   requires_host: true
   io_pins_used: 8
   compatible_hosts:
@@ -195,7 +180,7 @@ educational:
     - "Smart Pin configuration"
 
 documentation:
-  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Control Add-on Board (#64006A), p.2"
 
 availability:
   vendor: "Parallax Inc."

@@ -324,6 +324,6 @@ related:
   - architecture/hub.yaml
   - architecture/cog.yaml
 
-source_reference: "Spin2 Documentation v51 - DAT section, Address Operators, and program type descriptions"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks and Operators (Address Operators table)"
 
 oneliner: "P2 addressing model - when to use @, @@, ^@, and # operators for hub, cog, and field access"

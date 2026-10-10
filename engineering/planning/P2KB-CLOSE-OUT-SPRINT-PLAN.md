@@ -369,6 +369,26 @@ S-370, S-374, S-390, S-391, S-322 item 1 (#64013 schematic), F-352, F-562.
 
 - 2026-10-09 — sprint started; tasks «#410»–«#423» generated; «#387» superseded; F-563 (USB status
   bits, found by «#409») added to «#419»'s scope.
+- 2026-10-10 — «#422» split into dispatch A (decided deletions; done, bd75d347) and dispatch B (S-392
+  rewrites, Tier-1 drain, Tier-2 switch-on, S-327 folds). Arbiter decisions on the keys F-545's census left
+  open: `extraction_metadata` / `extraction_date` (process dates that ship and cite nothing) are removed;
+  the OBEX objects' `metadata:` process fields are left (the p2kb-mcp OBEX tools may read them — outside
+  this task). **Stephen ruled 2026-10-10** ("if we accept the source listings can change with each
+  revision of the compiler, then yes"): Parallax's published source listings (Spin2 interpreter v55, ROM
+  booter, flash loader) are citable, pinned to their edition, and a newer ingested edition makes older
+  citations stale (doctrine overlay, *Provenance is for us*). Dispatch B leaves listing-backed facts
+  untouched and lists them; a follow-up dispatch C (still «#422») adds the listing titles + the
+  edition-staleness check to the sourcing gate and rewrites those citations. S-390: the article URL is 404;
+  `code_author` emptied; F-566 filed.
+- 2026-10-10 — «#422» dispatch C done: listing rows in `CANONICAL_TITLES` with the staleness check
+  (`STALE_EDITION`); BAD_CITATION 44 → 0. Two edition calls by the arbiter, not printed text: the ROM
+  booter is cited as `v33_01j` (its last revision record and filename), because its banner `v32i` is shared
+  with the FPGA build and does not identify the silicon ROM (F-421); the flash loader prints no edition and is
+  cited as `v51`, the PNut distribution it came from. A DoD change-history-prose check was added. C also
+  corrected two false idioms against the flash loader (`HUBSET #%0010` stops the clock because %CC=%00;
+  the erase loop patches operands, not opcodes). Dispatch D (still «#422») takes C's leftovers: XF
+  citability in the gate, served research notes/speculation, the JonnyMac pages' content pass and OBEX
+  citation. `hub75_adapter.yaml` (an Iron Sheep board: no Parallax document can cite it) is Stephen's call.
 - 2026-10-10 — «#416» boundary, **planning gap found**: the golden-source lock ratchet
   (`audit-yaml-source-lock.py`, in the DoD) ranks a repo-path citation (RESOLVABLE) above a document
   title (NAMED), so the canonical rewrite the citation rule requires (§0 Q2; Q3/Q4/Q12) reads as a

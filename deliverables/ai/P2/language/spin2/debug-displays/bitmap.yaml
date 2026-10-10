@@ -7,9 +7,9 @@ description: |
   positioning, and interactive PC_KEY/PC_MOUSE input. Maximum pixel depth is RGB24
   (24-bit) -- there is NO 32-bit/alpha mode, NO zoom/pan, NO animation engine, and
   NO sprites (sprites belong to the PLOT window).
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, BITMAP Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (BITMAP display implementation: 19 color modes, TRACE, SET/SCROLL; PC_MOUSE Y-inverted wire value) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, BITMAP Display (19 color modes, TRACE, SET/SCROLL); behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - bitmap

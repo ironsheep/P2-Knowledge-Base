@@ -19,7 +19,7 @@ part_number: "P2-EC32MB"
 # NOTE: this module has no second Parallax SKU. The guide names it "#P2-EC32MB"
 # throughout. #64000-ES is a
 # DIFFERENT product -- the limited-edition P2-ES Eval Board.
-# Source: edge-32mb-module-narrative.txt:17, :41, :46, :557; p2-eval-add-on-boards-text.txt:42; hyperram-hyperflash-text.txt:22
+# Source: P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, title and Features, p.1; P2-ES Eval HyperRAM/Flash Add-on (#64004-ES) 1.0 11/5/2019, p.1.
 p2kb_key: "p2kbHwEdge32mbModule"
 manufacturer: "Parallax Inc."
 module_revision: "Rev B"
@@ -58,13 +58,7 @@ basic_info:
 # KEY SPECIFICATIONS
 # =============================================================================
 specifications:
-  source: >-
-    P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
-    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:113-127
-    (Key Specifications), :71-94 (Features), :216-220 (5. Flash Memory),
-    :389-396 (13. SRAM Memory), :569-608 (Recommended and Absolute Maximum Ratings).
-    chip_marking_note: P2-EC32MB Edge Module Rev B Guide v2.0,
-    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:143-146.
+  source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, Key Specifications and Features, p.2; 5. Flash Memory, p.5; 13. SRAM Memory, p.8; Recommended and Absolute Maximum Ratings, p.12; chip_marking_note: 1. Propeller 2 P2X8C4M64P, p.3"
   propeller_chip: "P2X8C4M64P (8 cogs, 512 KB shared hub RAM, 64 smart pins)"
   chip_marking_note: >-
     A limited number of P2 Rev C chips carry the extended part number
@@ -118,13 +112,8 @@ specifications:
 # =============================================================================
 pin_mapping:
   source: >-
-    P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
-    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:416-489
-    (Edge Connector Pin Assignments), :497-524 (32 MB RAM Smart I/O pins),
-    :526-550 (Other Pins), :353-376 (12. microSD card socket),
-    :170-187 (3. LDO regulators for I/O Pin Voltage).
-    boot_pin_direction_note: Parallax ROM_Booter listing,
-    engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:135-138.
+    P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, Edge Connector Pin Assignments, p.10; 32 MB RAM Smart I/O pins, p.11; Other Pins, p.11; 12. microSD card socket, p.7; 3. LDO regulators for I/O Pin Voltage, p.4.
+    boot_pin_direction_note: Parallax Propeller 2 ROM Booter v33_01j, CON block (spi_cs, spi_ck, spi_di, spi_do pin definitions with their sd_ aliases) and Try to load from SPI memory (try_spi).
   summary: >-
     "Smart I/O pins P0-P39 are fully free; P40-P57 are routed to on-module 32 MB
     RAM, P58-P63 are routed to peripheral circuits and/or have special functions
@@ -166,9 +155,7 @@ pin_mapping:
     P58 is the P2 INPUT (flash/card data OUT, i.e. MISO) and P59 the P2 OUTPUT
     (flash/card data IN, i.e. MOSI). P60 and P61 SWAP roles between the two
     boot sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60
-    and microSD CLK on P61. The P2 boot ROM listing states both directly
-    (spi_cs = 61 'also sd_ck; spi_ck = 60 'also sd_cs; spi_di = 59 'also sd_di;
-    spi_do = 58 'also sd_do).
+    and microSD CLK on P61.
   microsd_socket:
     power: "supplied by the VIO5663 LDO regulator"
     pins:
@@ -196,10 +183,7 @@ pin_mapping:
       architecture/pin-drive-configuration.yaml (idioms.weak_high /
       idioms.weak_low, and drive_ladder.no_other_rungs).
     disable: "the DIP switch marked LED removes power from both LEDs"
-    source: >-
-      P2-EC32MB Edge Module Rev B Guide v2.0, 7. LED Buffer and 8. LEDs P38 and P39 --
-      engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:305-330.
-      do_not_copy_the_guides_wording: engineering/ingestion/SOURCE-ERRATA.md E-010.
+    source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, 7. LED Buffer and 8. LEDs P38 and P39, pp.6-7. The guide's own wording of the weak-drive alternative is not carried (it names a pull-up that does not exist on this part)"
   other_pins:
     RESn: >-
       Internally pulled up to 3.3 V with a 10K resistor. The Propeller chip resets
@@ -217,10 +201,7 @@ pin_mapping:
 # BOOT MODE SELECTION
 # =============================================================================
 boot_modes:
-  source: >-
-    P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23),
-    6. Mode Selection Switch Bank --
-    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:222-303.
+  source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, 6. Mode Selection Switch Bank, pp.5-6"
   switch_bank: >-
     Four DIP switches control LED power and boot-mode selection. They are not set
     to any particular state on a new module, although all four are usually OFF.
@@ -249,11 +230,7 @@ boot_modes:
 # LIMITATIONS
 # =============================================================================
 limitations:
-  source: >-
-    P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
-    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:417-418
-    (P40-P57 / P58-P63 routing), :446-447 (P24-P31 caution), :536-537 (16 V limit),
-    :380-381 (microSD card not included), :83-84 (46 accessible / 18 dedicated).
+  source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, Edge Connector Pin Assignments (P40-P57 / P58-P63 routing; P24-P31 caution), p.10; Other Pins (16 V limit), p.11; 12. microSD card socket (microSD card not included), p.7; Key Specifications (46 accessible / 18 dedicated), p.2"
   items:
     - "Only 46 of the 64 Smart I/O pins reach the edge connector; 18 are dedicated to the on-board RAM."
     - "P40-P57 are routed to the on-module 32 MB RAM and are not available as user I/O."
@@ -266,12 +243,7 @@ limitations:
 # DEVELOPMENT WORKFLOW
 # =============================================================================
 development_workflow:
-  source: >-
-    P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
-    engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:35-39
-    (carrier options), :341-351 (11. Edge connector + socket part numbers),
-    :378-379 (microSD boot switch settings), :536-546 (VIN pads),
-    :552-557 (Programming Software).
+  source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, carrier options, p.1; 11. Edge connector + socket part numbers, p.7; 12. microSD card socket (microSD boot switch settings), p.7; Other Pins (VIN pads), and Programming Software, p.11"
   steps:
     - "Fit the module into the card-edge socket of a P2 Edge Module Breadboard, a P2 Edge Mini Breakout Board, or a P2 Edge 80-pin Adapter Kit. For product integration, use one of the card-edge sockets #450-00308 / #450-00309 / #450-00310."
     - "Connect both edge-connector VIN pads to a 5-16 VDC supply; recommended minimum supply current 100 mA."
@@ -316,11 +288,11 @@ resources:
 
   documentation:
     primary:
-      title: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022 (Rev B), p.1-13"
-      publisher: "Parallax Inc."
-    references:
-      - "AP Memory APS6404L PSRAM Datasheet"
-      - "Winbond W25Q128JV Flash Datasheet"
+      title: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022 (Rev B), pp.1-13"
+
+  references:
+    - "AP Memory APS6404L PSRAM Datasheet"
+    - "Winbond W25Q128JV Flash Datasheet"
 
   edge_connectors:
     - part: "450-00308"

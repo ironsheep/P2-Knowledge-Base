@@ -51,10 +51,7 @@ flags_affected:
   Z: >-
     With WZ: Z = 1 when NO SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), and
     Z = 0 when a pattern IS queued (D <> 0).
-  source: >-
-    Propeller 2 Documentation v35 (Rev B/C), GETBRK D WZ --
-    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2591: "Z = 1 if no
-    SKIP/SKIPF/EXECF/XBYTE pattern queued (D = 0) or 0 if pattern queued (D <> 0)".
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), GETBRK D WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern queued (D = 0) or 0 if pattern queued (D <> 0)"
 documentation_level: comprehensive
 examples:
 - name: Read Cog Internal Status
@@ -63,7 +60,7 @@ examples:
     \          wcz      ' C=STALLI mode, Z=hubexec start, D=cog status\n        \n\
     \        ' Test whether the streamer is currently active (D[21])\n        test \
     \   status, ##(1<<21)   wz\nif_nz   jmp     #streamer_busy\n"
-  source: Silicon Doc (GETBRK D WCZ)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), GETBRK D WCZ"
 - name: Get Debug Break Code
   description: In a debug ISR, recover the 8-bit break code from D[31:24] (WCZ)
   code: "' In a debug ISR, WCZ returns the last BRK code in D[31:24]\n        getbrk\
@@ -72,21 +69,21 @@ examples:
     \  \n        ' Dispatch based on the break code\n        cmp     brkinfo, #1   \
     \  wz\nif_z    jmp     #handle_trace\n        cmp     brkinfo, #2     wz\nif_z \
     \   jmp     #handle_watch\n"
-  source: Silicon Doc (GETBRK D WCZ, debug ISR)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), GETBRK D WCZ (debug ISR)"
 - name: Detect a Queued Skip Pattern
   description: WZ reports whether a SKIP/SKIPF/EXECF/XBYTE pattern is queued, and returns it
   code: "' WZ: Z=1 if no pattern queued (D=0), D=32-bit pattern if queued\n       \
     \ getbrk  pattern         wz       ' Z set when no pattern is pending\nif_z    jmp\
     \     #no_pattern              ' nothing queued, skip applying it\n        \n  \
     \      ' A pattern is queued; apply it LSB-first\n        skipf   pattern\n"
-  source: Silicon Doc (GETBRK D WZ)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), GETBRK D WZ"
 - name: Read Skip/XBYTE State Flags
   description: WC returns the pattern LSB plus CALL depth, XBYTE mode, and event traps
   code: "' WC: C=pattern LSB, D[15:00]=event-trap flags, D[31:16]=skip/XBYTE state\n\
     \        getbrk  skipstate       wc       ' C=LSB of active pattern\n        \n\
     \        ' Extract 4-bit CALL depth since the pattern (D[31:28])\n        mov  \
     \   depth, skipstate\n        shr     depth, #28\n"
-  source: Silicon Doc (GETBRK D WC)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), GETBRK D WC"
 related_instructions:
 - BRK: Trigger breakpoint with code (also configures breakpoint conditions when in Debug ISR)
 - COGBRK: Trigger breakpoint in another COG

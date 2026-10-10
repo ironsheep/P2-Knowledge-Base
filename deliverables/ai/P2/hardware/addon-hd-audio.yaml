@@ -17,10 +17,7 @@ aliases:
   - "#64014 add-on board"
 
 description:
-  source: >-
-    P2 HD Audio Add-on Set (#64014) Guide v1.0 (Parallax Inc., 2022-10-26) --
-    engineering/ingestion/sources/P2-HD-Audio-Add-on/P2-HD-Audio-Add-on-text.txt:14-35
-    and :111-118.
+  source: "P2 HD Audio Add-on Set (#64014) Guide v1.0 10/26/2022 (Parallax Inc.), Overview, p.1; P2 HD Audio DAC Features, p.4"
   text: >-
     Two-board kit. "The P2 HD Audio Add-On Set comprises a 4-channel 32 bit 192 k
     Audio ADC (Analog to Digital Converter) and a 2-channel 16-bit 18-990 ohm Audio
@@ -33,6 +30,7 @@ description:
 
 # === ADC BOARD (AK5704EN) ===
 adc_board:
+  source: "P2 HD Audio Add-on Set (#64014) Guide v1.0 10/26/2022 (Parallax Inc.), P2 HD Audio ADC, Features and Key Specifications, p.2; Pin Connections, p.3; the I2C address, register range and SDTO2 default below are not stated in the guide (see source_trace)"
   codec: "AKM AK5704EN (28-pin QFN), 32-bit 4ch ADC with MIC pre-amplifier"
   eval_header_occupant: true
   pin_group:
@@ -66,9 +64,7 @@ adc_board:
   source_trace: >-
     AK5704 I2C address + register usage resolved from the official Parallax
     #64014 driver AK5704_Driver.spin2 (M. Mulholland, MIT; AK5704_DEVICE_ID=$20
-    @ 400 kHz) and the AKM AK5704 datasheet + the 64014-RevA schematic - staged
-    under sources/P2-HD-Audio-Add-on/ (datasheet + crosscheck) and NO-COMMIT/
-    (driver + schematic; NOT committed). (Gaps G-014 / Q-006 resolved.)
+    @ 400 kHz), the AKM AK5704 datasheet and the 64014-RevA schematic.
   inputs: "4 input channels via two stereo 3.5 mm jacks, or two unpopulated 0.1\" 3-way header pad sets."
   specs:
     max_bits: "32 bit"
@@ -81,15 +77,7 @@ adc_board:
 
 # === DAC BOARD (P2 Smart Pin DAC - no codec IC) ===
 dac_board:
-  source: >-
-    P2 HD Audio Add-on Set (#64014) Guide v1.0 (Parallax Inc., 2022-10-26),
-    "P2 HD Audio DAC" Features / Key Specifications / Pin Connections --
-    engineering/ingestion/sources/P2-HD-Audio-Add-on/P2-HD-Audio-Add-on-text.txt:106-169;
-    curated capture at
-    engineering/ingestion/sources/P2-HD-Audio-Add-on/complete-P2-HD-Audio-Add-on-reference.md:77-121.
-    The P_DAC_* constant NAMES below come from the Spin2 v55 built-in symbol table --
-    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1476-1479 -- which
-    lists exactly the four drive options this guide enumerates.
+  source: "P2 HD Audio Add-on Set (#64014) Guide v1.0 10/26/2022 (Parallax Inc.), P2 HD Audio DAC, Features / Key Specifications / Pin Connections, p.4-5; the P_DAC_* constant names come from Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration (DAC Output Modes), which lists exactly the four drive options this guide enumerates"
   codec: "none - the board is designed to leverage the Parallax P2 Smart Pin DAC modes"
   eval_header_occupant: true
   pin_group:
@@ -149,7 +137,7 @@ limitations:
   - "No code in the board guide itself; an official MIT Spin2 driver set is on the product page"
 
 documentation:
-  primary: "64014 P2 HD Audio Add-on Set Guide v1.0 (Parallax, 2022-10-26)"
+  primary: "P2 HD Audio Add-on Set (#64014) Guide v1.0 10/26/2022 (Parallax), p.1"
 
 resources:
   product_page: "www.parallax.com (search 64014) - latest guide, schematics, example code"

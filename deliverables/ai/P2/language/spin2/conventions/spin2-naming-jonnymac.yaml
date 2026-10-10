@@ -1,422 +1,91 @@
 title: Spin2 JonnyMac Naming Conventions
 id: spin2-naming-jonnymac
-version: 1.0.0
 layer: "Layer 4 - Naming Conventions (JonnyMac)"
-derived_from: language/spin2/conventions/johnny-mac-documentation-style.yaml v2.0.0
-purpose: Complete JonnyMac naming and indentation standard
-applies_to: Projects adopting full JonnyMac community standard
+source: "OBEX 2842 (Full Duplex Serial, jm_fullduplexserial.spin2, Jon McPhalen); OBEX 2824 (NEC RX, jm_nec_rx_demo.spin2, Jon McPhalen)"
+basis: "Naming, case and indentation conventions observed in OBEX 2842 and OBEX 2824, community objects by Jon McPhalen (jonnymac); not a Parallax publication. Where those two objects do not show a rule, this page does not state one."
+purpose: How the two JonnyMac objects name constants, variables, objects, methods and PASM2 labels, and how they indent
+applies_to: Projects that choose the JonnyMac naming and indentation style
 
 summary: |
-  Complete JonnyMac naming conventions and indentation requirements. This optional layer provides
-  strict naming patterns (UPPERCASE constants, snake_case methods, etc.) and 2-space indentation
-  standard. Use only when explicitly choosing the full JonnyMac community standard.
+  The naming layer of the JonnyMac conventions: UPPERCASE constants, lowercase variables,
+  objects and methods, a capitalised DAT data label, lowercase Spin2 keywords, and two-space
+  indentation. Spin2 is case-insensitive (see language/fundamentals/case-sensitivity.yaml), so
+  these are style choices; the compiler treats RX_PIN and rx_pin as one name.
+  The full set of conventions is in language/spin2/conventions/johnny-mac-documentation-style.yaml.
 
-description: |
-  Layer 4 is the most opinionated layer - enforcing specific naming patterns and indentation style.
-  This completes the full JonnyMac standard when combined with Layers 1-3. Only adopt this layer
-  when you want strict naming discipline and consistent indentation throughout your codebase.
+keywords:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), whole files"
+  rule: "Every block keyword, statement keyword and built-in method is lowercase: con, obj, var, pub, pri, dat, org, res, fit, repeat, if, elseif, quit, return, case, coginit, cogstop, longmove, longfill, pinstart, getct, waitct, waitms, strsize, lookdown, abs."
 
-indentation_standard:
+indentation:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), block entries and method bodies"
   type: "spaces"
   amount: 2
-  usage: "Block indentation"
-  
-  rationale:
-    - "Consistent across all JonnyMac code"
-    - "Balances readability with horizontal space"
-    - "Works well with nested structures"
-    - "Standard in P2 community examples"
-    
-  application:
-    - "All block structures (IF, REPEAT, CASE)"
-    - "Method bodies"
-    - "Nested structures"
-    
-  example: |
-    PUB main()
-      setup()
-      
-      REPEAT
-        IF (sensor_active)
-          read_sensor()
-          process_data()
+  applies_to: "Entries inside con, var, obj and dat blocks, method bodies, and nested if, repeat and case statements"
+  conditions: "Conditions are written in parentheses: if (rxtail <> rxhead), repeat while (rxtail == rxhead)."
 
-naming_conventions:
+naming:
   constants:
-    style: "UPPERCASE_WITH_UNDERSCORES"
-    location: "CON block"
-    rules:
-      - "All uppercase letters"
-      - "Underscores separate words"
-      - "Numbers allowed"
-      - "IO pin names are constants"
-      - "Spin2 names are not case-sensitive: a constant RX_PIN and a variable rx_pin are the same name (error m240). Variables must differ from constants by more than case."
-
-    examples:
-      - "BAUD_115200"
-      - "TX_PIN"
-      - "BUFFER_SIZE"
-      - "MS_001"
-      - "CLK_FREQ"
-      
-    rationale:
-      - "Immediately identifies compile-time constants"
-      - "Prevents accidental modification attempts"
-      - "Clear visual distinction from variables"
-      
+    source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), con blocks"
+    style: "UPPERCASE; words separated by underscores; digits allowed"
+    observed: ["BUF_SIZE", "PGM_RX", "CLK_FREQ", "MS_001", "US_001", "BR_TERM", "CRSR_XY", "CLS", "LED1", "RX1", "IR_SENSE"]
+    pin_names: "Pin numbers are constants with a direction tag in braces after the value: IR_SENSE = 15  { I }, SF_CS = 61  { O }."
+    enumerations: "OBEX 2824 declares enumerations with # lists: #true, ON, OFF and #false, NO, YES."
+    clock_symbol: "The system clock is set with the lowercase special symbol _clkfreq = CLK_FREQ (OBEX 2824)."
   variables:
-    style: "lowercase or camelCase"
-    location: "VAR block"
-    
-    rules:
-      preferred: "lowercase"
-      alternative: "camelCase (if consistent throughout project)"
-      trailing_numbers: "Allowed"
-      local_variables: "Should be short"
-      
-    lowercase_examples:
-      - "irpacket"
-      - "buffer"
-      - "count"
-      - "idx"
-      - "sensor_value"
-      
-    camelCase_examples:
-      - "irPacket"
-      - "txBuffer"
-      - "rxCount"
-      - "sensorIdx"
-      
-    rationale:
-      - "Lowercase is preferred JonnyMac style"
-      - "camelCase permitted for team consistency"
-      - "Short locals improve code readability"
-      
-  pre_initialized_data:
-    style: "PascalCase"
-    location: "DAT block"
-    
-    rules:
-      - "First letter of each word capitalized"
-      - "No underscores between words"
-      - "Clear distinction from variables"
-      
-    examples:
-      - "DamageTable"
-      - "ConfigData"
-      - "MessageStrings"
-      - "LookupValues"
-      
-    rationale:
-      - "Distinguishes DAT symbols from VAR variables"
-      - "Indicates pre-initialized/static data"
-      - "Follows established community pattern"
-      
+    source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), var blocks and method signatures"
+    style: "lowercase; mostly single words joined together"
+    observed: ["cog", "rxp", "txp", "rxhub", "rxhead", "rxtail", "txdelay", "rxbuf", "pbuf", "ircog"]
+    declaration: "The type (long, byte) is lowercase, followed by two spaces and then the name."
+    pointer_parameters: "A parameter that holds an address is prefixed p_: p_str, p_args."
+    locals: "Locals follow the | after the signature and are short lowercase names: | idx, c, asc, field."
+  data_labels:
+    source: "OBEX 2824 (NEC RX), dat block"
+    style: "Capitalised: Banner (a byte string in a dat block)"
   objects:
-    style: "lowercase"
-    location: "OBJ block"
-    
-    rules:
-      - "Only lowercase letters allowed"
-      - "Numbers may be used"
-      - "No underscores"
-      - "No other characters allowed"
-      
-    examples:
-      - 'time : "jm_time_200"'
-      - 'irrx : "jm_nec_rx"'
-      - 'serial : "jm_fullduplexserial"'
-      - 'led0 : "jm_pwm"'
-      
-    rationale:
-      - "Consistent with Spin2 object naming tradition"
-      - "Clear, simple instance names"
-      - "Easy to type and remember"
-      
+    source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), obj blocks"
+    style: "Short lowercase instance names: nstr, ir, term. The referenced object files are lowercase with a jm_ prefix: \"jm_nstr\", \"jm_nec_rx\", \"jm_fullduplexserial\"."
+    layout: "The colons of the instances in a block are aligned."
   methods:
-    style: "snake_case"
-    location: "PUB and PRI blocks"
-    
-    rules:
-      - "Lowercase with underscores between words"
-      - "Functions that do things named for that thing (verbs)"
-      - "Functions that return values named for what they return (nouns)"
-      - "Maximum length: 30 characters"
-      
-    action_examples:
-      - "start"
-      - "stop"
-      - "setup"
-      - "tx"
-      - "rx"
-      - "read_sensor"
-      - "update_display"
-      - "check_status"
-      
-    getter_examples:
-      - "get_packet"
-      - "damage_points"
-      - "random"
-      - "rxcheck"
-      - "current_position"
-      
-    rationale:
-      - "Clear, readable method names"
-      - "Consistent throughout community"
-      - "Verb/noun distinction aids comprehension"
-      
-  assembly_labels:
-    style: "snake_case"
-    location: "PASM2 code sections"
-    
-    rules:
-      - "Defined like method names"
-      - "Lowercase with underscores"
-      - "Descriptive of purpose"
-      
-    examples:
-      - "read_loop"
-      - "wait_done"
-      - "tx_byte"
-      - "process_buffer"
-      
-    local_labels:
-      prefix: "."
-      examples:
-        - ".loop"
-        - ".done"
-        - ".retry"
+    source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), pub and pri methods"
+    style: "lowercase. A single word where one will do (start, stop, tx, rx, str, available, rxcheck, txflush, padstr, substr, tstart); underscores between words when several are needed (fmt_number, get_hex, get_nargs, wait_for_terminal)"
+    parentheses: "Always written, even with no parameters: pub null(), pub stop(), pub setup()."
+    results: "Declared after a colon, lowercase: : b, : count, : result, : p_str1, value."
+    private: "pri get_hex() and pri get_nargs() (OBEX 2842) are the private helpers of the object."
+  pasm2_labels:
+    source: "OBEX 2842 (Full Duplex Serial), dat { smart pin uart/buffer manager }"
+    style: "lowercase, with underscores between words (uart_mgr, uart_main, rx_serial); registers are short lowercase names (rxd, txd, t1, t2, t3, p_rxbuf)"
 
-code_structure_requirements:
-  line_length:
-    maximum: 100
-    includes: "Code with end-of-line comments"
-    inherited_from: "Layer 2 (language/spin2/conventions/spin2-formatting-standards.yaml)"
-    
-  symbol_names:
-    maximum_length: 30
-    applies_to: "All constants, variables, methods, and labels"
-    
-  method_spacing:
-    blank_lines: 2
-    between: "All method definitions"
-    inherited_from: "Layer 2 (language/spin2/conventions/spin2-formatting-standards.yaml)"
-    
-  keywords:
-    case: "lowercase"
-    applies_to: "All Spin keywords and symbols"
-
-naming_pattern_examples:
-  complete_constant_section: |
-    CON { timing }
-      CLK_FREQ = 270_000_000
-      MS_001   = CLK_FREQ / 1_000
-      US_001   = CLK_FREQ / 1_000_000
-      
-    CON { io pins }
-      RX_PIN = 63
-      TX_PIN = 62
-      LED_PIN = 56
-      
-    CON { configuration }
-      BAUD_115200 = 115_200
-      BUFFER_SIZE = 256
-      
-  complete_variable_section: |
-    VAR
-      ' Communication state (lowercase style)
-      LONG rx_pin_num
-      LONG tx_pin_num
-      LONG baud_rate
-      
-      ' Buffers
-      BYTE tx_buffer[BUFFER_SIZE]
-      BYTE rx_buffer[BUFFER_SIZE]
-      
-  complete_data_section: |
-    DAT
-      DamageTable   BYTE  1, 2, 4, 5, 7, 10
-      MessageText   BYTE  "Ready", 0
-      ConfigValues  LONG  100, 200, 300
-      
-  complete_object_section: |
-    OBJ
-      time   : "jm_time_200"
-      serial : "jm_fullduplexserial"
-      led    : "jm_pwm"
-
-method_naming_patterns:
-  initialization:
-    - "start"
-    - "setup"
-    - "init"
-    - "begin"
-    
-  cleanup:
-    - "stop"
-    - "cleanup"
-    - "shutdown"
-    - "close"
-    
-  data_operations:
-    - "read_sensor"
-    - "write_buffer"
-    - "clear_data"
-    - "copy_values"
-    
-  state_queries:
-    - "is_ready"
-    - "has_data"
-    - "get_status"
-    - "check_error"
-    
-  getters:
-    - "get_value"
-    - "current_position"
-    - "buffer_count"
-    
-  setters:
-    - "set_mode"
-    - "update_config"
-    - "configure_pins"
-
-complete_example:
-  description: "Complete example showing all naming conventions"
+example_declarations:
+  source: "OBEX 2824 (NEC RX), con and obj blocks"
   code: |
-    CON { timing }
-      CLK_FREQ = 270_000_000
-      MS_001   = CLK_FREQ / 1_000
-      
-    CON { io pins }
-      RX_PIN = 63
-      TX_PIN = 62
-      
-    CON { configuration }
-      BAUD_115200 = 115_200
-      BUFFER_SIZE = 64
-      
-    OBJ
-      time   : "jm_time_200"
-      serial : "jm_fullduplexserial"
+    con { fixed io pins }
 
-    VAR
-      BYTE ir_packet[BUFFER_SIZE]
-      LONG seed
-      
-    DAT
-      DamageTable  BYTE  1, 2, 4, 5, 7, 10
-      
-      
-    PUB main()
-      setup()
-      
-      REPEAT
-        process_packets()
-        
-        
-    PUB setup()
-      time.start()
-      serial.start(RX_PIN, TX_PIN, %0000, BAUD_115200)
-      seed := GETCT()
-      
-      
-    PUB process_packets() | idx
-      read_packet(@ir_packet)
-      idx := ir_packet[0] & $0F
-      IF (idx >= 0) AND (idx <= 15)
-        apply_damage(damage_points(idx))
-        
-        
-    PUB damage_points(idx) : points
-      IF (idx < 0) OR (idx > 15)
-        RETURN 0
-      ELSE
-        RETURN DamageTable[idx]
-        
-        
-    PRI apply_damage(points)
-      ' Process damage
-      
-      
-    PRI read_packet(ptr_buffer)
-      ' Read IR packet
+      RX1      = 63  { I }                                          ' programming / debug
+      TX1      = 62  { O }
 
-enforcement_guidelines:
-  strict_enforcement:
-    - "All constants must be UPPERCASE_WITH_UNDERSCORES"
-    - "All methods must be snake_case"
-    - "All DAT symbols must be PascalCase"
-    - "All objects must be lowercase"
-    - "All code must use 2-space indentation"
-    
-  code_review_checklist:
-    - "□ Constants properly named"
-    - "□ Variables follow lowercase or camelCase consistently"
-    - "□ Methods use snake_case"
-    - "□ Objects are lowercase only"
-    - "□ DAT symbols use PascalCase"
-    - "□ Indentation is 2 spaces throughout"
-    - "□ Symbol names under 30 characters"
 
-migration_from_other_styles:
-  from_natural_style:
-    - "Rename constants to UPPERCASE"
-    - "Convert method names to snake_case"
-    - "Adjust indentation to 2 spaces"
-    - "Update DAT symbols to PascalCase"
-    
-  tools:
-    - "Search and replace for common patterns"
-    - "Editor regex for bulk renames"
-    - "Gradual migration file by file"
+    con
 
-why_these_conventions:
-  community_alignment:
-    - "15+ years of JonnyMac OBEX contributions"
-    - "Widely recognized in P2 community"
-    - "Consistent with published examples"
-    
-  readability:
-    - "Clear visual distinction between element types"
-    - "Consistent patterns aid comprehension"
-    - "2-space indentation balances clarity and space"
-    
-  maintainability:
-    - "Enforced naming prevents ambiguity"
-    - "Consistent style across projects"
-    - "Easy onboarding for P2 developers"
+      #true,  ON, OFF
+      #false, NO, YES
 
-integration_notes:
-  requires:
-    layer_1: "guides/spin2-getting-started.yaml (language mechanics)"
-    layer_2: "language/spin2/conventions/spin2-formatting-standards.yaml (professional structure)"
-    layer_3: "language/spin2/conventions/spin2-docs-jonnymac.yaml (documentation style)"
-    
-  creates:
-    complete_standard: "Full JonnyMac programming standard (all 4 layers)"
-    
-  alternative_layer_3:
-    note: "Can combine with language/spin2/conventions/vscode-pnut-documentation-style.yaml instead of language/spin2/conventions/spin2-docs-jonnymac.yaml"
-    result: "JonnyMac naming + VSCode documentation style"
+
+    obj
+
+    ' main                                                          ' * master Spin cog
+      ir   : "jm_nec_rx"                                            ' * NEC decoding
+      term : "jm_fullduplexserial"                                  ' * serial IO for terminal
+
+    ' * uses cog when loaded
 
 known_issues:
-  - "The OBJ examples use jm_fullduplexserial (OBEX 2842). Its published source declares a local named field in format(); FIELD is now a reserved Spin2 word, so the object does not compile with the current compiler until that local is renamed."
+  - "OBEX 2842 declares a local named field in format(). FIELD is now a reserved Spin2 word, so the object as published does not compile with the current compiler until that local is renamed."
 
-adoption_decision:
-  choose_this_layer_if:
-    - "You want full JonnyMac standard compliance"
-    - "Your team values strict naming discipline"
-    - "You're contributing to JonnyMac-style OBEX objects"
-    - "You want maximum community alignment"
-    
-  skip_this_layer_if:
-    - "Your team prefers flexible naming"
-    - "You use different indentation (tabs or 4 spaces)"
-    - "You want minimal style constraints"
-    - "You have existing codebase with different conventions"
-
-see_also:
-  full_standard: language/spin2/conventions/johnny-mac-documentation-style.yaml
-  layer_1: guides/spin2-getting-started.yaml
-  layer_2: language/spin2/conventions/spin2-formatting-standards.yaml
-  layer_3: language/spin2/conventions/spin2-docs-jonnymac.yaml
+related:
+  - language/spin2/conventions/johnny-mac-documentation-style.yaml
+  - language/spin2/conventions/spin2-docs-jonnymac.yaml
+  - language/spin2/conventions/spin2-formatting-standards.yaml
+  - language/spin2/conventions/vscode-pnut-documentation-style.yaml
+  - language/fundamentals/case-sensitivity.yaml
+  - guides/spin2-getting-started.yaml

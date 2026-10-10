@@ -76,7 +76,7 @@ idioms:
     constraints:
       - "SETQ count = N-1 (zero-based) — count of 0 transfers 1 long"
       - "Destination cog registers must be contiguous"
-    source: "Propeller 2 Documentation v35, FAST BLOCK MOVES -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3257-3267"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
     related_instructions:
       - language/pasm2/setq.yaml
       - language/pasm2/setq2.yaml
@@ -91,7 +91,7 @@ idioms:
       Block-transfer a run of contiguous cog registers to hub with one WRLONG.
       SETQ2 transfers from LUT RAM instead. Registers $1F8..$1FF cannot be
       transferred to hub this way.
-    source: "description: Silicon Doc, silicon-doc-text.txt:3276"
+    source: "description: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
     examples:
       - |
         setq    #16-1
@@ -114,10 +114,11 @@ idioms:
       Used when both source and destination are in hub but a fast
       block copy is needed.
     context: |
-      The production flash loader uses this exact pattern for the
-      application copy phase. See code-examples/flash-loader-case-study.yaml for
+      The flash loader's programmer uses this pattern to move the application
+      down to hub $00000 (SETQ2 #$200-1 with RDLONG 0,PTRA++ then WRLONG 0,PTRB++,
+      looped by DJNF). See code-examples/flash-loader-case-study.yaml for
       the full sequence.
-    source: "Parallax P2 flash loader -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:148-152"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Move application down to $00000+ (.move loop)"
     related: code-examples/flash-loader-case-study.yaml
 
 related:

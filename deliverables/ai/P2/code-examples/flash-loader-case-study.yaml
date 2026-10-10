@@ -1,18 +1,16 @@
-# Code Example: Flash Loader (flash_loader.spin2) — Annotated Reference
+# Code Example: SPI Flash Programmer and Boot Loader — Annotated Reference
 
 example_id: "flash-loader-case-study"
-title: "Flash Loader (flash_loader.spin2) — Annotated Reference Case Study"
+title: "SPI Flash Programmer and Boot Loader v51 — Annotated Reference Case Study"
 description: |
-  Reference entry pointing at flash_loader.spin2 — the compiler-embedded
-  boot loader authored by Chip Gracey that ships compiled into every
+  Reference entry pointing at the Parallax SPI Flash Programmer and Boot Loader v51 — the compiler-embedded
+  boot loader that ships compiled into every
   PNut/PNut-TS binary built for SPI flash boot. This is NOT a tutorial;
   it catalogs the techniques the loader exercises with one-line summaries
   and cross-references into the canonical KB entry for each technique.
 
 source_metadata:
-  primary_source: "Parallax P2 flash_loader.spin2 (boot ROM flash loader source)"
-  authority: "GOLDEN — compiled into every flash-boot binary; behaviors silicon-validated by production use"
-  author: "Chip Gracey (Parallax)"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51"
   size: "298 lines"
 
 what_the_loader_is:
@@ -22,73 +20,75 @@ what_the_loader_is:
     the loader then loads the rest of the app from flash to hub and
     starts user code via COGINIT #0,#$00000. See
     architecture/boot-rom/spi-flash-boot.yaml for the full handoff.
-  two_halves: "A one-shot programmer (initial flash write) and a per-boot loader, sharing the SPI setup and a 256-long cog image; self-modifying code reconfigures shared instructions for each role"
+  two_halves: "A programmer, which runs once from the serial download and writes the loader and the application to flash, and a loader, the 256-long image the ROM loads from flash on every boot. The programmer uses the loader's data longs as its own scratch (zeroa/zerob/zeroc) and writes their real values (app_longs, app_longs2, app_sum, loader_sum) into the image it programs."
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, header comment (Use: steps 1-5), Programmer (Write settings into loader) and Loader (header comment)"
 
-# 15 techniques the loader demonstrates — each is a one-line summary + cross-ref.
+# 16 techniques the loader demonstrates — each is a one-line summary + cross-ref.
 # Don't restate the technique here; the linked entry is the canonical place.
+# `section` names the listing section (its comment headings) where each appears.
 techniques_demonstrated:
   - technique: "ROM-handoff exploitation — continue flash READ mid-stream"
-    lines: "209-225 (contract documented in comments); entry implements it"
+    section: "Loader header comment (the state on entry); Read in remaining application longs"
     canonical: architecture/boot-rom/spi-flash-boot.yaml
 
   - technique: "Streamer + smart-pin two-channel DMA (P_TRANSITION clock + streamer data)"
-    lines: "100-107, 246, 258-261"
+    section: "Get ready to program flash; Read in remaining application longs"
     canonical: language/pasm2/concepts/streamer_smartpin_control.yaml
 
   - technique: "Hub FIFO direction pairing (RDFAST for output, WRFAST for input)"
-    lines: "109 (RDFAST→output); 248 (WRFAST→input)"
+    section: "Get ready to program flash (RDFAST, output); Read in remaining application longs (WRFAST, input)"
     canonical: language/pasm2/rdfast.yaml
 
   - technique: "Bit-counted streamer chunking (>2047 longs requires looped XINIT)"
-    lines: "250-261"
+    section: "Read in remaining application longs (.block)"
     canonical: language/pasm2/xinit.yaml
 
-  - technique: "SETQ + RDLONG block transfers (memcpy substitute)"
-    lines: "148-151"
+  - technique: "SETQ2 block transfers through the LUT (hub-to-hub copy)"
+    section: "Move application down to $00000+ (.move)"
     canonical: language/pasm2/idioms/hub-memory.yaml
 
-  - technique: "Self-modifying inner loops via SETD/SETS field patching"
-    lines: "114-116 (erase opcode and boundary mask)"
+  - technique: "Operand patching with SETD/SETS (erase command and block-boundary mask)"
+    section: "Program flash - erase 64KB/4KB blocks, program 256/16 sequential 256-byte pages (.block)"
     canonical: language/pasm2/idioms/self-modifying-code.yaml
 
   - technique: "Dead-on-arrival scratch long pattern (data words as accumulators)"
-    lines: "60, 78, 84, 286-291"
+    section: "Get number of bytes ... verify checksum; Write settings into loader; Loader Data (zeroa/zerob/zeroc)"
     canonical: language/pasm2/idioms/scratch-storage.yaml
 
-  - technique: "DJNF for at-least-once-then-while-not-full loops"
-    lines: "152"
+  - technique: "DJNF loop closing the block copy"
+    section: "Move application down to $00000+ (.move)"
     canonical: language/pasm2/idioms/loop-control.yaml
 
   - technique: "REP for zero-overhead inner loops"
-    lines: "58-59, 76-77, 82-83"
+    section: "Get number of bytes ... verify checksum; Write settings into loader; Verify application checksum"
     canonical: language/pasm2/idioms/loop-control.yaml
 
-  - technique: "FLTL with ADDPINS pin-range float (atomic multi-pin release)"
-    lines: "275"
+  - technique: "FLTL with ADDPINS pin-range float (three SPI pins in one instruction)"
+    section: "Verify application checksum (stop)"
     canonical: language/pasm2/idioms/pin-control.yaml
 
-  - technique: "HUBSET halt-on-fault via dead external clock"
-    lines: "275-276 (the stop label)"
+  - technique: "HUBSET #%0010 stops the clock until the next reset on a failed checksum"
+    section: "Verify application checksum (stop)"
     canonical: language/pasm2/idioms/halt-and-fault-response.yaml
 
   - technique: "Bit-edge lockstep between SETXFRQ NCO and SCK smart pin"
-    lines: "100-107, 246"
+    section: "Get ready to program flash; Read in remaining application longs; Loader Data (clk2)"
     canonical: language/pasm2/concepts/streamer_smartpin_control.yaml
 
-  - technique: "WAITX alignment pad between WYPIN and XINIT (3-clock pipeline align)"
-    lines: "258-261"
+  - technique: "WAITX alignment pad between WYPIN and XINIT (3 clocks)"
+    section: "Read in remaining application longs (.block)"
     canonical: language/pasm2/concepts/streamer_smartpin_control.yaml
 
   - technique: '"Prop" checksum correction long (loader_sum = "Prop" - sum_of_first_256_longs)'
-    lines: "throughout programmer phase"
+    section: "Write settings into loader (loader checksum); Loader Data (loader_sum)"
     canonical: architecture/boot-rom/spi-flash-boot.yaml
 
   - technique: "GETPTR for serial-download size detection (loader-specific idiom)"
-    lines: "50"
+    section: "Get number of bytes, add $400 zero bytes after download, verify checksum"
     canonical: language/pasm2/getptr.yaml
 
-  - technique: "RCFAST-locked, clock-mode-agnostic SPI rate selection (fixed timing constants work regardless of user's _clkfreq)"
-    lines: "all SPI setup paths (lines 100-107 programmer, 241-244 loader)"
+  - technique: "SPI rate fixed in system clocks (streamer at clk/2, spi_ck at one clock per transition); the header's program/boot timings are for RCFAST"
+    section: "header (Program/Boot performance table); Get ready to program flash; Read in remaining application longs"
     canonical: architecture/boot-rom/spi-flash-boot.yaml
 
 technical_analysis:
@@ -98,7 +98,7 @@ technical_analysis:
 how_to_use_this_entry:
   - "Skim techniques_demonstrated for orientation"
   - "Follow canonical links for depth on each technique"
-  - "Read flash_loader.spin2 itself for source-of-truth"
+  - "Read the flash loader listing itself (Parallax SPI Flash Programmer and Boot Loader) for the full code"
 
 # Cross-references — one block, no duplication with technique canonicals above
 related:

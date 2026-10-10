@@ -81,13 +81,14 @@ runnable_code:
   toolchain: "pnut-ts, _clkfreq = 200_000_000; all three recipes use debug() so compile with -d"
 
 key_parameters:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES (%10001, %01011, %10101, %10111); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (PLL row), p.48"
   r1_mode: "P_HIGH_TICKS (%10001) — Z = duration of the high state in clocks; IN raised on the high->low crossing only; RC_MODE = P_HIGH_TICKS | P_SCHMITT_A | P_OE | P_LOW_FLOAT"
   r1_mechanism: "pinh charges the node through a 220 ohm series resistor; pinf (DIR low) resets the accumulator; pinl (OUT=0, DIR high) floats the pin via P_LOW_FLOAT and starts timing; RDPIN reads the latched high-tick count. us = clocks / (clkfreq / 1_000_000)"
   r2_reciprocal: "frequency = MULDIV64(periods, clkfreq, ticks); P_COUNTER_TICKS on SIG_PIN (default-local A/B) + P_COUNTER_PERIODS on SIG_PIN+1 routed back one pin (P_MINUS1_A | P_MINUS1_B) over the same X window; both raise IN when the period-aligned window closes"
-  r2_tsl235r: "datasheet (ams/TAOS TAOS038E, cross-check tier -- see provenance.cross_check_sources): calibration point fO = 250 kHz typ at Ee = 430 uW/cm^2, lambda_p = 635 nm, the reference this note's formula scales from. Ee[uW/cm^2] = freq * 430 / 250_000, folded as muldiv64(freq, CAL_UW*100, CAL_HZ) for two-decimal fixed point without 32-bit overflow. Supply range and dark-output figures are not restated here -- see gotchas below."
+  r2_tsl235r: "calibration point taken from the sensor's own datasheet (ams/TAOS TAOS038E, a third-party document and not a Parallax one -- check it before relying on it): fO = 250 kHz typ at Ee = 430 uW/cm^2, lambda_p = 635 nm, the reference this note's formula scales from. Ee[uW/cm^2] = freq * 430 / 250_000, folded as muldiv64(freq, CAL_UW*100, CAL_HZ) for two-decimal fixed point without 32-bit overflow. Supply range and dark-output figures are not restated here -- see gotchas below."
   r3_quadrature: "P_QUADRATURE (%01011) | P_PLUS1_B (B from the next pin up); continuous totalizer X=0 -> Z always holds the live signed count; 4 counts per detent -> `rdpin sar 2` normalizes to one-per-detent; zero by pulsing DIR low (pinf/pinl); optional P_FILT1_AB for contact bounce"
   gate_window: "R2 window: gate = (clkfreq / 1000) * GATE_MS clocks; longer window resolves low frequency finer, shorter updates faster"
-  measurement_ceiling: "keep the measured frequency well below clkfreq (many system-clock ticks per input period); every reading inherits the P2 clock's ppm accuracy; runs at 200 MHz, well inside the datasheet's PLL system-clock range (180 MHz typical, 320 MHz maximum -- p2-datasheet-text.txt AC Characteristics). 300 MHz is not a specified silicon maximum: it is the compiler's accepted ceiling and the board feature list's overclocking threshold"
+  measurement_ceiling: "keep the measured frequency well below clkfreq (many system-clock ticks per input period); every reading inherits the P2 clock's ppm accuracy; runs at 200 MHz, well inside the datasheet's PLL system-clock range (180 MHz typical, 320 MHz maximum -- Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48). 300 MHz is not a specified silicon maximum: it is the compiler's accepted ceiling and the board feature list's overclocking threshold"
 
 prerequisites:
   - "Configuring a smart pin (WRPIN/WXPIN/WYPIN, or the Spin2 pinstart that wraps them) and reading it back with RDPIN"
@@ -95,7 +96,7 @@ prerequisites:
   - "P2 32-bit integer / fixed-point model (no floating-point hardware)"
 
 gotchas:
-  source: "Legality checked with pnut-ts v1.55.3 (compiler, legality only); pin-drive semantics from the P2 Datasheet 2022/11/01 p.24 Pin Mode Legend -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147 (documentary, and the authority for the pin-drive statements here; EF-063 and EF-064 -- engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840 -- corroborate the mechanism only INCIDENTALLY, as rig apparatus for a streamer-fed DAC %TT finding (:813) and a streamer pin-placement finding (:834); neither is a drive-strength finding); A/B input selectors from Propeller 2 Documentation v35 -- engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:13-36"
+  source: "Legality checked with pnut-ts v1.55.3 (compiler, legality only); pin-drive semantics from the Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (Pin Mode Legend), p.24 (documentary, and the authority for the pin-drive statements here; EF-063 and EF-064 corroborate the mechanism only INCIDENTALLY, as rig apparatus for a streamer-fed DAC %TT finding and a streamer pin-placement finding; neither is a drive-strength finding); A/B input selectors from Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (the %AAAA and %BBBB input selectors)"
   items:
     - flag: pitfall
       text: "P_B_A_INPUT does not exist -- it is undefined in pnut-ts and appears in no Parallax symbol table. Single-pin routing is the bare mode constant (the %AAAA and %BBBB selectors both default to 'this pin's read state') plus P_MINUS1_A|P_MINUS1_B for the reciprocal-periods cell, or P_PLUS1_B for quadrature. Never add P_B_A_INPUT."
@@ -108,7 +109,7 @@ gotchas:
     - flag: tip
       text: "Detent normalization is a property of the encoder, not of the P2: a 4-counts-per-detent encoder needs the count shifted right by 2, an un-detented one needs no shift. Getting this wrong shows up as exactly 4x the expected magnitude."
     - flag: gap
-      text: "Sensor-specific electrical figures (supply range, dark output, decoupling) belong to the sensor's own datasheet, which is not in this project's ingestion tree. They are deliberately not restated here."
+      text: "Sensor-specific electrical figures (supply range, dark output, decoupling) belong to the sensor's own datasheet (the TSL235R-LF Light-to-Frequency Converter Datasheet, ams/TAOS TAOS038E, a third-party document and not a Parallax one). They are deliberately not restated here."
 
 hardware_status: |
   R3 (quadrature) is Tier-0 self-verified: a two-jumper stimulus drives a known detent count (5 fwd,
@@ -119,15 +120,14 @@ hardware_status: |
   characterization run on real silicon (-> EF ledger when accepted). No invented sensor numbers are
   printed. Every embedded and example-library program compiles clean under pnut-ts (-d).
 
-provenance:
-  primary_sources:
-    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey, Parallax Inc.) — Smart Pins measurement modes %10001 (P_HIGH_TICKS), %10101 (P_COUNTER_TICKS), %10111 (P_COUNTER_PERIODS), %01011 (P_QUADRATURE), and the A/B input routing modifiers (period = A-input rise to B-input rise)"
-    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — PINSTART, WRPIN, RDPIN, MULDIV64, and the pin-control methods (pinh/pinl/pinf/pinw/pinread)"
-  cross_check_sources:
-    - "TSL235R-LF Light-to-Frequency Converter Datasheet (ams/TAOS, TAOS038E) — a 3rd-party datasheet (cross-check tier, NOT Parallax-primary): output frequency 250 kHz typ at Ee = 430 uW/cm^2 (lambda_p = 635 nm, VDD = 5 V), 2.7-5.5 V operating range, dark output frequency 0.4-10 Hz"
-  community_examples:
-    - "OBEX #2831 P2_rctime (phonoclese) — the RC-decay donor, incl. the REGEXEC background-ISR pattern (org $1B0, RETI1) referenced in Going Further"
-    - "OBEX #2829 Quadrature Encoder (Jon McPhalen / jonnymac) — the production-encoder donor behind R3 (range limiting, preset, det4x, debounced button)"
-    - "Parallax Quick Bytes 'Using Smart Pins to Measure Frequency Output of TSL235R' (Ken Gracey; code by Francis Bauer, Jon McPhalen, Chip Gracey) — grounded R2, incl. the F. Bauer fb_measfreq2P single-pin reciprocal routing"
-  companion_publication:
-    - "P2 I/O & Smart Pins User Guide (Ch.13 time, Ch.14 counting/quadrature, Ch.15 frequency/period); application note P2AN001 (companion P2 Knowledge Base publications)"
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, measurement modes %10001 (P_HIGH_TICKS), %10101 (P_COUNTER_TICKS), %10111 (P_COUNTER_PERIODS), %01011 (P_QUADRATURE), and the A/B input routing modifiers (period = A-input rise to B-input rise)"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (PINSTART, WRPIN, RDPIN, MULDIV64, and the pin-control methods pinh/pinl/pinf/pinw/pinread)"
+
+community_examples:
+  - "OBEX #2831 P2_rctime (phonoclese) — the RC-decay donor, incl. the REGEXEC background-ISR pattern (org $1B0, RETI1) referenced in Going Further"
+  - "OBEX #2829 Quadrature Encoder (Jon McPhalen / jonnymac) — the production-encoder donor behind R3 (range limiting, preset, det4x, debounced button)"
+  - "Parallax Quick Bytes 'Using Smart Pins to Measure Frequency Output of TSL235R' (Ken Gracey; code by Francis Bauer, Jon McPhalen, Chip Gracey) — grounded R2, incl. the F. Bauer fb_measfreq2P single-pin reciprocal routing"
+
+companion_publication:
+  - "P2 I/O & Smart Pins User Guide (Ch.13 time, Ch.14 counting/quadrature, Ch.15 frequency/period); application note P2AN001 (companion P2 Knowledge Base publications)"

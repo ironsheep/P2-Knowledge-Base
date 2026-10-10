@@ -43,7 +43,7 @@ encoding:
   z: Result == 0
   clocks: '2'
   notes: Syntax 2 - negate Dest (S=D)
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NEG, p.102"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_du

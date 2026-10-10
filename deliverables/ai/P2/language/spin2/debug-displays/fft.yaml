@@ -7,9 +7,9 @@ description: |
   has NO measurement features: no THD/SNR/bandwidth, no peak-frequency detection, no
   harmonic analysis, no averaging, no waterfall (that is the separate SPECTRO window),
   and no markers/cursors. The only window function is a fixed Hanning -- it is not selectable.
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, FFT Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (FFT display implementation: channel def, fixed-Hanning window, FFTmax=2048 / FFTexpMax=11; PC_MOUSE raw-pixel) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, FFT Display (channel def, windowed results, 4..2048 points); behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - spectrum

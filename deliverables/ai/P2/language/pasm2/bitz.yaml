@@ -13,7 +13,7 @@ description: BITZ alters the Dest bit(s) designated by Src to equal the state of
 flags_affected:
   C: Set to original D[S[4:0]] (original state of target bit)
   Z: Set to original D[S[4:0]] (original state of target bit)
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITZ / BITNZ, p.54"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_bitx

@@ -26,7 +26,7 @@ operation: |
 accuracy_caveat: |
   The "16-bit" output is a NOMINAL, time-averaged figure: the smart pin dithers
   the underlying 8-bit DAC between adjacent levels to achieve 16-bit DAC output
-  averaged over time (Silicon Doc part4-smart-pins.txt).
+  averaged over time (Parallax Propeller 2 Documentation v35, SMART PIN MODES).
 
 # Parameters
 x_register:

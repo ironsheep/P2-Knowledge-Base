@@ -112,7 +112,7 @@ gotchas:
   - flag: tip
     text: "Self-halt and self-stop are clean idioms: TASKHALT(THISTASK) pauses the caller and yields in one step; TASKSTOP(THISTASK) (or returning from the task's top method) frees the slot."
   - flag: hardware
-    text: "The taskptr table occupies cog registers $100..$11F (filling downward), overlapping the inline-PASM ORG..END area — heavy multitasking and heavy inline PASM in the same cog compete for those registers. Ordinary Spin2 tasks never hit this. (Chip Gracey clarification, recorded in the KB.)"
+    text: "The taskptr table occupies cog registers $100..$11F (filling downward), overlapping the inline-PASM ORG..END area — heavy multitasking and heavy inline PASM in the same cog compete for those registers. Ordinary Spin2 tasks never hit this. (Parallax Propeller 2 Spin2 Language Documentation v55, Document Status, v47, and IN-LINE PASM CODE.)"
   - flag: verify
     text: "R1: two LEDs blink at independent rates (interleaving proof); only one blinking means a task never yields. R2: the heartbeat line advances between crunch-pass lines (responsiveness). R3: the producer flips TASKCHK state 1<->2 as the ring fills/drains. R4: census shows running=workers+1 (the supervisor counts itself), then worker-census=0 after shutdown."
 
@@ -124,15 +124,15 @@ hardware_status: |
   runtime property described from the Spin2 v47+ documentation and DEFERS to a bench pass on real
   silicon (-> EF ledger when accepted). No invented DEBUG captures. TASKWAIT was probed and excluded.
 
-provenance:
-  sources:
-    - "Spin2 v55 keyword table: Spin2 v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149"
-  primary_sources:
-    - "Spin2 Language Documentation, v47 and later (Chip Gracey, Parallax Inc.) — the TASK method family (TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), the NEWTASK/THISTASK constants, and the TASKHLT register (reversed halt bits @ $1CC)"
-    - "Spin2 v55 keyword table — the authoritative TASK keyword list (TASKWAIT is absent)"
-  tool_ground_truth:
-    - "pnut-ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword"
-  cross_check_sources:
-    - "P2 Knowledge Base cooperative-tasking pattern (language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
-  companion_publication:
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: cooperative multitasking) and New Keywords Introduced by New Versions (the authoritative TASK keyword list; TASKWAIT is absent)"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (the TASK method family TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), Built-In Symbol for TASKSPIN() Usage (NEWTASK/THISTASK), and the TASKHLT register (reversed halt bits @ $1CC)"
+
+tool_ground_truth:
+  - "pnut-ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword"
+
+related_pages:
+  - "P2 Knowledge Base cooperative-tasking pattern (language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"
+
+companion_publication:
     - "P2AN006 Sizing Cog & Task Stacks; P2AN007 Data Structures with the New Language Facilities (companion P2 Knowledge Base publications)"

@@ -176,6 +176,6 @@ related:
   - language/spin2/methods/word.yaml
   - language/spin2/methods/long.yaml
 
-source_reference: "Spin2 Documentation v51 - 'Field pointer to any hub or register variable, including bitfield'"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators, Address Operators table ('Field pointer to any hub or register variable, including bitfield')"
 
 oneliner: "Field pointer operator - creates pointer encoding address AND bit range for FIELD[] operations"

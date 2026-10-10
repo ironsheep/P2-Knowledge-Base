@@ -70,7 +70,6 @@ compiler_behavior:
   resolution: "A local label (.name) belongs to the global label above it, so the same local name can be reused under different global labels"
 
 documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT blocks (local labels); CP-001 (symbol length)"
-verified_in: "PNUT compiler and Spin2 documentation"
 
 related_concepts:
   - "p2kbLanguageIdentifierRules"

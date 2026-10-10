@@ -25,7 +25,7 @@ compiler_encoding:
   operandFormat: 26
 syntax_variants:
 - EXECF {#}D
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
 documentation_level: enhanced
 last_updated: '2025-09-19T16:04:16.915391'
 category: Branch

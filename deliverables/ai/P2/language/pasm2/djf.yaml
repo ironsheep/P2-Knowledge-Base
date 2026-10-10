@@ -21,7 +21,7 @@ result: >-
   Dest is decremented. If the result equals $FFFF_FFFF (full), PC is set to a new
   relative (#Src) or absolute (Src) address; otherwise execution continues with
   the next instruction.
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DJF / DJNF, p.74"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_dsj

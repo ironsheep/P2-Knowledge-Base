@@ -1,0 +1,85 @@
+'' probe-ch14-scope-create.spin2  ->  isolate WHY ch14-scope-trace's SCOPE never opens
+''
+'' SYMPTOM (Stephen, 2026-07-26, PNut/Windows): running examples-library/ch14-scope-trace.spin2,
+'' the TERM "Panel" window opens but NO SCOPE window appears. The TERM create is issued AFTER
+'' the SCOPE create, so the program is running and the debug link is healthy -- only the SCOPE
+'' create is being rejected.
+''
+'' COUNTER-EVIDENCE this probe has to explain: figure-generators/screenshots/
+'' fig-14-scope-trace-scope_WDW.bmp (2026-07-11) shows a window titled "Trace - SCOPE" with
+'' channel "Signal" rendered, produced by a BYTE-IDENTICAL create sequence. So either something
+'' changed on the bench (PNut version, display scaling, window placement) or one token in that
+'' create line is conditionally fatal.
+''
+'' METHOD -- five SCOPE creates that differ by exactly ONE thing each, all in one run, each fed
+'' the same waveform, with a TERM narrating what was attempted. Windows are named A/B/C/D/Trace
+'' (none is a debug keyword; the Jul-11 capture proves `Trace` is legal, this re-tests it anyway).
+''
+''   A      SIZE 400 220 only                    <- known-good shape; also clears SIZE height 220
+''   B      SIZE + SAMPLES                       <- SAMPLES alone (ch07 proves this works)
+''   C      POS 460 0 + SIZE + SAMPLES           <- POS+SAMPLES together, POS non-zero
+''   D      POS 0 0 + SIZE + SAMPLES             <- POS+SAMPLES together, POS zero
+''   E      SIZE + SAMPLES + POS (order swapped) <- is the parse ORDER-sensitive?
+''   Trace  the EXACT failing line, byte-for-byte from ch14-scope-trace.spin2
+''
+'' DIFFERENTIAL FROM THE LIBRARY (2026-07-26): across all 34 examples, POS alone on a SCOPE
+'' create works (ch14-multiwindow: POS 0 0 SIZE 400 200) and SAMPLES alone works (ch07 x3), but
+'' POS *and* SAMPLES on the same SCOPE create line appears ONLY in ch14-scope-trace -- the one
+'' that fails. C/D/E are the direct test of that conjunction; A/B are the controls.
+''
+'' The TERM window is created FIRST here (the example creates it last) so you have a running
+'' narration even if every SCOPE fails.
+''
+'' WHAT TO REPORT BACK: which of the five SCOPE windows appeared. That single list isolates the
+'' token. If ALL FIVE appear, our code is fine and the failure is environmental -- then re-run
+'' figure-generators/fig-14-scope-trace.spin2 (known-good on 2026-07-11) to confirm.
+'' Note: A and B are placed by PNut (no POS) and may land on top of each other -- drag them apart
+'' before counting. D and Trace both sit at POS 0 0 and WILL overlap; drag the top one aside.
+
+CON _clkfreq = 200_000_000
+
+PUB main() | ang, signal, n
+  debug(`TERM Log POS 460 260 SIZE 44 12 TITLE 'probe-ch14-scope-create')
+  debug(`Log 0 'SCOPE create probe' 13 13)
+
+  debug(`Log 'A: SIZE only' 13)
+  debug(`SCOPE A SIZE 400 220)
+  debug(`A 'Signal' -1000 1000)
+
+  debug(`Log 'B: SIZE + SAMPLES' 13)
+  debug(`SCOPE B SIZE 400 220 SAMPLES 256)
+  debug(`B 'Signal' -1000 1000)
+
+  debug(`Log 'C: POS 460 0 + SIZE + SAMPLES' 13)
+  debug(`SCOPE C POS 460 0 SIZE 400 220 SAMPLES 256)
+  debug(`C 'Signal' -1000 1000)
+
+  debug(`Log 'D: POS 0 0 + SIZE + SAMPLES' 13)
+  debug(`SCOPE D POS 0 0 SIZE 400 220 SAMPLES 256)
+  debug(`D 'Signal' -1000 1000)
+
+  debug(`Log 'E: SIZE + SAMPLES + POS (order swapped)' 13)
+  debug(`SCOPE E SIZE 400 220 SAMPLES 256 POS 460 260)
+  debug(`E 'Signal' -1000 1000)
+
+  debug(`Log 'F: the exact ch14 line' 13 13)
+  debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256)   ' create with config only
+  debug(`Trace 'Signal' -1000 1000)                       ' channel-def as a separate feed
+
+  debug(`Log 'feeding all five...' 13)
+
+  ang := 0
+  repeat n from 1 to 300
+    signal := qsin(1000, ang, 256)
+    debug(`A `(signal))
+    debug(`B `(signal))
+    debug(`C `(signal))
+    debug(`D `(signal))
+    debug(`E `(signal))
+    debug(`Trace `(signal))
+    ang += 4
+    waitms(10)
+
+  debug(`Log 13 'DONE - count the SCOPE windows.' 13 'Expect 6: A B C D E Trace' 13)
+  repeat                                   ' idle so the windows stay up
+    waitms(1000)

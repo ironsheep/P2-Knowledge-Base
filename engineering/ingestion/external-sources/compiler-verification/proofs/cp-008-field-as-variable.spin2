@@ -1,0 +1,6 @@
+' CP-008 proof (contrast): FIELD used as a Spin2 local-variable name.
+' Run from the repository root with this file's repository-relative path.
+' Expected: rejected with exit status 1 (FIELD is a Spin2 reserved word).
+
+PUB main() | field
+  field := 1

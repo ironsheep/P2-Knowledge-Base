@@ -42,6 +42,6 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: output_enable_note
-    fp: "0a0eb1b64b71334f"
+    fp: "85120049aaefef04"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"

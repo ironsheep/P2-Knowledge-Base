@@ -34,10 +34,10 @@ blocks:
     wrap: pasm2-dat
     assumes: [buffer, source_data=con]
   - at: block_operations.hub_to_cog_transfer.debug_use
-    fp: "73499404faee4d71"
+    fp: "ebd5a887f4a626d2"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [regh]
+    assumes: [dbg_addr=con]
   - at: block_operations.cog_to_hub_transfer.syntax
     fp: "4937deead78b13d0"
     compile: fragment

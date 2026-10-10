@@ -4,7 +4,7 @@ brief_description: Cog identification
 category: Hub Control
 description: 'COGID writes the current cog''s ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of cog D/# (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax''s PASM2 Manual, COGID Explanation) (if WC is given). Without WC the current cog''s ID is returned in D[3:0] with upper bits cleared. If the WC effect is specified, the C flag is set (1) if cog D/# is busy (running), or is cleared (0) if free (stopped or never started).'
 sources:
-  - "COGID current-cog ID in D[3:0]: Silicon Doc, silicon-doc-text.txt:429"
+  - "COGID current-cog ID in D[3:0]: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS"
 result: Current cog's ID is written to Dest or C is set (1) or cleared (0) if the
   Dest cog is running or stopped.
 parameters:
@@ -26,7 +26,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: Cog Running
   z: —
   clocks: 2–9, +2 if result
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGID, p.64"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_l

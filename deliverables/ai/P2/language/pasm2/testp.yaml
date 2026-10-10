@@ -44,6 +44,7 @@ description: 'Test the state of pin D[5:0] and write it to C or Z (WC/WZ), or co
 flags_affected:
   C: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with C
   Z: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with Z
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP/TESTPN read the state of the pin registered two clocks before the start of the instruction)"
 documentation_level: comprehensive
 examples:
 - name: Hall Sensor Reading
@@ -53,7 +54,7 @@ examples:
     \        testp   pin_hall_v                  wc\n        rcl     hall_, #1\n\
     \        testp   pin_hall_u                  wc\n        rcl     hall_, #1\n\
     \        and     hall_, #%111_111                ' (old << 3 | new) [_x_:ooo:nnn]\n"
-  source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2041-2047"
+  source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
 - name: Edge Detection
   description: Detect a rising edge (0 -> 1 transition) on an input pin
   code: |

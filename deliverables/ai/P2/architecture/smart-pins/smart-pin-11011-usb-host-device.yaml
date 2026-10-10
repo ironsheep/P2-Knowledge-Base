@@ -84,7 +84,7 @@ flags:
   out_override: "OUT signals overridden for USB differential control"
 
 electrical_characteristics: >-
-  NOT STATED BY ANY SOURCE WE HOLD. The receiver front-end thresholds for the
+  NOT DOCUMENTED. The receiver front-end thresholds for the
   J / K / SE0 / SE1 line-state detectors are not in the P2 datasheet -- the datasheet
   names USB only twice, as a capability, and contains no line-state or SE0 material --
   nor in the Silicon Doc. Do not point a reader at the datasheet for them.

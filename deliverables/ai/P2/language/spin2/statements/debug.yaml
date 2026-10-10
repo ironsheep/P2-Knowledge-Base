@@ -5,7 +5,7 @@ description: |
   Uses backtick syntax to display variables, expressions, and formatted output
   in multiple display types including terminal, oscilloscope, logic analyzer, and more.
 category: Debugging
-documentation_source: Spin2 v51
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG"
 documentation_level: comprehensive
 
 syntax:
@@ -13,28 +13,17 @@ syntax:
   inline: "DEBUG(\"text\", value)   ' plain output to the default TERM -- no backtick needed"
 
 window_name_rules:
-  documentation_source: "PNut v55 compiler source (p2com.asm: check_word_chr_initial/check_word_chr @8888, debug_symbols table @19335, parse_debug_string, symbol_size_limit=30); hardware-isolated on real silicon 2026-07-27"
+  source: "CP-008 (the compiler stores a window name as plain text); EF-103 (a SCOPE named Trace did not open under PNut v55)"
+  basis: "Parallax publishes no rule for what a DEBUG window may be named. Two results are known: the compiler stores a window name as plain text and checks it against nothing, and a SCOPE named Trace -- TRACE is a SPECTRO and BITMAP directive -- did not open under PNut v55, while creates identical to it but for the name opened."
   note: |
-    TWO INDEPENDENT VOCABULARIES -- only one can collide with a window name. The compiler emits the
-    display name as RAW TEXT and never interprets it, so Spin2 reserved words are FREE to use as
-    window names (a PLOT named `Field` works and is hardware-run, though FIELD is a Spin2 keyword).
-    Only the 103 reserved DEBUG-DISPLAY words below can collide.
-  definition: "A window name is legal IF AND ONLY IF all five rules below hold."
-  rules:
-    - "1. CHARACTER SET -- starts with a letter or _, then letters/digits/_ only. A LEADING DIGIT makes the token parse as a NUMBER and aborts (a distinct failure, not a keyword collision)."
-    - "2. NOT one of the 103 reserved debug-display words (9 display types + 11 colors + 19 color modes + 12 packed modes + 52 directives -- full list in reserved_words below)."
-    - "3. NOT the name of a display that is CURRENTLY OPEN (it resolves to the existing display). After CLOSE the name reverts to unknown and IS REUSABLE."
-    - "4. MATCHING IS CASE-INSENSITIVE -- Trace, TRACE and trace are the SAME symbol, so case gives no escape from rule 2. The DISPLAYED name keeps your original casing."
-    - "5. TRUNCATED AT 30 CHARACTERS -- extra characters are silently dropped, so two names sharing their first 30 characters COLLIDE."
-  failure_mode: "SILENT AT BOTH LAYERS. A name violating rule 1 or 2 raises NO compile error and NO host error: no display is declared, the window never opens, and every later feed addressed to that name goes nowhere. Hardware-isolated on PNut v55: six SCOPE creates differing ONLY by name -- five opened, the one named `Trace` did not."
-  guidance: "When generating code, pick a short name that is not in reserved_words (Scan, Panel, Waves, Status, Probe, Mon). Do NOT treat one window's directive list as the reserved set -- a color name, a color-mode name, or ANOTHER window's directive is equally fatal."
-  reserved_words:
-    display_types: [LOGIC, SCOPE, SCOPE_XY, FFT, SPECTRO, PLOT, TERM, BITMAP, MIDI]
-    colors: [BLACK, WHITE, ORANGE, BLUE, GREEN, CYAN, RED, MAGENTA, YELLOW, GRAY, GREY]
-    color_modes: [LUT1, LUT2, LUT4, LUT8, LUMA8, LUMA8W, LUMA8X, HSV8, HSV8W, HSV8X, RGBI8, RGBI8W, RGBI8X, RGB8, HSV16, HSV16W, HSV16X, RGB16, RGB24]
-    packed_modes: [LONGS_1BIT, LONGS_2BIT, LONGS_4BIT, LONGS_8BIT, LONGS_16BIT, WORDS_1BIT, WORDS_2BIT, WORDS_4BIT, WORDS_8BIT, BYTES_1BIT, BYTES_2BIT, BYTES_4BIT]
-    directives: [ALT, AUTO, BACKCOLOR, BOX, CARTESIAN, CHANNEL, CIRCLE, CLEAR, CLOSE, COLOR, CROP, DEPTH, DOT, DOTSIZE, HIDEXY, HOLDOFF, LAYER, LINE, LINESIZE, LOGSCALE, LUTCOLORS, MAG, OBOX, OPACITY, ORIGIN, OVAL, PC_KEY, PC_MOUSE, POLAR, POS, PRECISE, RANGE, RATE, SAMPLES, SAVE, SCROLL, SET, SIGNED, SIZE, SPACING, SPARSE, SPRITE, SPRITEDEF, TEXT, TEXTANGLE, TEXTSIZE, TEXTSTYLE, TITLE, TRACE, TRIGGER, UPDATE, WINDOW]
-  
+    The compiler gives no warning for a window named after a directive or after a Spin2 reserved word:
+    a SCOPE named Trace and a SCOPE named Field both compile cleanly, exactly as one named A does,
+    although FIELD is rejected as a Spin2 variable name. Compiling says nothing about whether
+    the window opens -- that is the host's behaviour, and only Trace has been run.
+  known_failure: "Under PNut v55, debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256) opened no window, while the same create line named D opened one. The build gave no error."
+  not_tested: "Every other directive, color, color-mode and packed-mode word used as a window name; a name starting with a digit; a name of 30 or more characters; names differing only in case; reusing a name after CLOSE. No result is claimed for any of these."
+  guidance: "When generating code, give a window a plain short name that is not a display type, a directive of any window, or a color word (Scan, Panel, Waves, Status, Probe, Mon). Only Trace is proven to fail; the rest are untested, so avoid them rather than rely on them. A directive of ANOTHER window counts too -- TRACE is a SPECTRO and BITMAP directive, and it was the name of a SCOPE when the window failed to open -- so do not take one window's directive list as the whole set to avoid."
+
 display_types:
   - name: TERM
     description: "Terminal/text display (default)"
@@ -122,7 +111,7 @@ string_quoting:
     Display strings have no escape mechanism: the first ' closes the string, so a literal
     apostrophe cannot be embedded in a TITLE/SAVE/etc.
   save_extension: "SAVE auto-appends .bmp — give the base name only (SAVE 'shot' produces shot.bmp)."
-  verified_against: "PNut/Spin2 compiler — backtick text emitted raw (debugTickString); host display parser recognizes only the apostrophe as a string delimiter (check_dd_str)."
+  verified_against: "EF-001 (backtick display TEXT must be single-quoted); PNut compiler behaviour: backtick text is emitted raw, and the host display parser recognizes only the apostrophe as a string delimiter."
 
 window_placement:
   pos_optional: |

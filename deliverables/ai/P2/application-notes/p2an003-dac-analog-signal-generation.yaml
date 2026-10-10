@@ -110,7 +110,7 @@ gotchas:
     text: "Tier-0 known answer: a fixed code produces V=(code/65536)*Vfs; jumper the DAC pin to a P2AN001 ADC pin and it reads that voltage back — proves the whole path with no bench gear. reSound (OBEX #2861) is a described reference ceiling, not a starting point."
 
 key_parameters:
-  source: "Propeller 2 Documentation v35 -- DAC dither modes engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:253-269 (pseudo-random) and :284-308 (PWM); ADC sample/filter/capture :811-864; DAC pin-mode constants from the Spin2 v55 symbol table -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1454-1519"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00010 and DAC_MODE = DAC 16-bit with pseudo-random dither and %00011 and DAC_MODE = DAC 16-bit with PWM dither; %11000 ADC sample/filter/capture, internally clocked; DAC pin-mode constants from Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
   dac_native_bits: 8
   dac_output_bits: "16-bit nominal, produced by dithering the 8-bit DAC between adjacent levels and time-averaging. No ENOB/SNR/THD figure is stated by any source and none is asserted here."
   dither_modes:
@@ -134,14 +134,15 @@ hardware_status: |
   characterization run on real silicon (-> EF ledger when accepted), exactly as P2AN001 defers
   its ENOB figure. Every embedded and example-library program compiles clean under pnut-ts.
 
-provenance:
-  primary_sources:
-    - "Propeller 2 Documentation v35 - Rev B/C Silicon (Chip Gracey, Parallax Inc.) — Smart Pins, DAC modes %00001/%00010/%00011: the 8-bit DAC and its dithering, the four output configs, the sample-period and IN-flag behavior (incl. the Fclock/256 @ -48 dB PWM-dither line)"
-    - "Propeller 2 Datasheet (Parallax Inc.) — DAC electrical characteristics and output configurations"
-    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — WRPIN/WXPIN/WYPIN, QSIN/QROTATE, MULDIV64, and the `frac` operator"
-  community_examples:
-    - "OBEX #2861 reSound (Johannes Ahlebrand) — the 32-stream, up-to-8-pin software audio mixer + MOD player behind The Ceiling"
-    - "OBEX #2860 EZ Sound (Jon McPhalen / jonnymac) — NCO-frequency square-wave tone player (a non-DAC contrast, not a recipe)"
-    - "Parallax 'Analog Frequency to DAC' and 'Digital Sample ADC to DAC' example code (Michael Mulholland, Chip Gracey) — grounded the synthesis and passthrough recipes"
-  companion_publication:
-    - "P2 I/O & Smart Pins User Guide (Ch.10 DAC, Ch.16 ADC); P2 Streamer Programming Guide; application note P2AN001 (companion P2 Knowledge Base publications)"
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00001/%00010/%00011 DAC modes: the 8-bit DAC and its dithering, the four output configs, the sample-period and IN-flag behavior (incl. the Fclock/256 @ -48 dB PWM-dither line)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (DAC 990 ohm / 600 ohm / 123.75 ohm / 75 ohm output configurations), p.24"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (WRPIN/WXPIN/WYPIN, QSIN/QROTATE, MULDIV64, and the `frac` operator)"
+
+community_examples:
+  - "OBEX #2861 reSound (Johannes Ahlebrand) — the 32-stream, up-to-8-pin software audio mixer + MOD player behind The Ceiling"
+  - "OBEX #2860 EZ Sound (Jon McPhalen / jonnymac) — NCO-frequency square-wave tone player (a non-DAC contrast, not a recipe)"
+  - "Parallax 'Analog Frequency to DAC' and 'Digital Sample ADC to DAC' example code (Michael Mulholland, Chip Gracey) — grounded the synthesis and passthrough recipes"
+
+companion_publication:
+  - "P2 I/O & Smart Pins User Guide (Ch.10 DAC, Ch.16 ADC); P2 Streamer Programming Guide; application note P2AN001 (companion P2 Knowledge Base publications)"

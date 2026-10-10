@@ -59,7 +59,7 @@ examples:
         addr := #OUTA             ' $1FC - output A register
         addr := #INA              ' $1FE - input A register
     description: "Getting addresses of predefined registers"
-    source: "PNut v47 release notes"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: In Spin2 expressions, #register now returns the register's address)"
     
   - code: |
       DAT
@@ -128,6 +128,6 @@ related:
   - language/spin2/assembly-directives/res.yaml
   - language/pasm2/registers/pr-registers.yaml
 
-source_reference: "Spin2 Documentation v51 - 'Register address of cog/LUT symbol' and PNut v47 release notes"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators, Address Operators table ('Register address of cog/LUT symbol'); Document Status (v47: In Spin2 expressions, #register now returns the register's address)"
 
 oneliner: "Register address operator - returns cog/LUT register address of ORG-defined symbol (not hub address)"

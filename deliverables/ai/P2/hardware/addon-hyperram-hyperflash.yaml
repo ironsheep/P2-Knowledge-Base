@@ -66,15 +66,7 @@ devices:
   note: "Each device may be a RAM, Flash, or dual-memory; memory-type configuration resistors set CS# routing per device."
 
 specifications:
-  source: >-
-    64004-ES P2-ES Eval HyperRAM/Flash Memory Board Product Guide v1.0
-    (Parallax Inc., board Rev A) --
-    engineering/ingestion/sources/hyperRam-n-hyperFlash/complete-hyperram-hyperflash-reference.md:25-39
-    (Specifications table) and
-    engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:22
-    (target board). The datasheet part numbers and URLs are as printed on page 7
-    (Resources and Downloads) of the guide. acc_hdr_jumper: 64004-ES Product
-    Guide v1.0, engineering/ingestion/sources/hyperRam-n-hyperFlash/hyperram-hyperflash-text.txt:57
+  source: "P2-ES Eval HyperRAM/Flash Add-on (#64004-ES) 1.0 11/5/2019, Specifications, p.2; target board, p.1; acc_hdr_jumper note, p.2; datasheet part numbers and URLs, Resources and Downloads, p.7"
   ram: "16 MB / 128 Mb (16 Mb x 8) Parallel PSRAM"
   flash: "32 MB / 256 Mb (32 Mb x 8) Parallel NOR Flash"
   supply_voltage: "+3.3 VDC, supplied by the P2-ES Eval Board I/O LDO regulator"
@@ -95,10 +87,7 @@ specifications:
   stacking: "up to four add-on boards can be stacked, one per side of the P2-ES Eval Board"
 
 configuration:
-  source: >-
-    64004-ES P2-ES Eval HyperRAM/Flash Memory Board Product Guide v1.0
-    (Parallax Inc., board Rev A), Feature Descriptions sections 3-8 --
-    engineering/ingestion/sources/hyperRam-n-hyperFlash/complete-hyperram-hyperflash-reference.md:57-85.
+  source: "P2-ES Eval HyperRAM/Flash Add-on (#64004-ES) 1.0 11/5/2019, Feature Descriptions sections 3-9, p.4-7"
   reset_pads:
     label: "Optional RES / GND pads (section 3) -- access to the HyperBUS reset signal."
     standard: >-
@@ -152,9 +141,8 @@ datasheets:
   hyperflash: "ISSI IS26KL256S-DABLI00"
   hyperflash_url: "http://www.issi.com/WW/pdf/26KS-KL128S-256S-512S.pdf"
 
-provenance:
-  board_revision: "A (schematic last updated 21 Jul 2019)"
-  product_guide_version: "1.0 (Original Release)"
+sources:
+  - "P2-ES Eval HyperRAM/Flash Add-on (#64004-ES) 1.0 11/5/2019 (Original Release), Revision History, p.9; board Rev A, schematic last updated 21 Jul 2019"
 
 use_cases:
   primary:
@@ -169,7 +157,7 @@ limitations:
   - "Auxiliary power recommended (burst current may exceed PC-USB)"
 
 documentation:
-  primary: "64004-ES P2-ES Eval HyperRAM/Flash Memory Board Product Guide v1.0"
+  primary: "P2-ES Eval HyperRAM/Flash Add-on (#64004-ES) 1.0 11/5/2019, Pin Definition and Ratings, p.8"
 
 ecosystem_position: "external_memory"
 hardware_family: "p2_eval_addons"

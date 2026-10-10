@@ -54,7 +54,7 @@ idioms:
         - DJNF: "at least once, then while not underflowed" — loop body runs
           count + 1 times (count = 0 runs it once; start at count - 1 to run it count times);
           SAFE for count=0
-    source_example: "Parallax P2 flash_loader.spin2 line 152"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Move application down to $00000+ (djnf t,#.move)"
     related_instructions:
       - language/pasm2/djnf.yaml
       - language/pasm2/djnz.yaml
@@ -84,7 +84,7 @@ idioms:
       iteration branch cost makes this the fastest option for short
       bodies (1-8 instructions). The body cannot contain certain
       instructions (branches, REP itself) — see REP instruction docs.
-    source_example: "Adapted from Parallax P2 flash_loader.spin2 lines 56-60, which reads through the FIFO (rdfast, then rep #2,s with rflong v / add)"
+    source: "Adapted from Parallax SPI Flash Programmer and Boot Loader v51, Programmer, 'Get number of bytes, add $400 zero bytes after download, verify checksum', which reads through the FIFO (rdfast, then rep #2,s with rflong v / add)"
     related_instruction: language/pasm2/rep.yaml
 
 related:

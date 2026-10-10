@@ -1,0 +1,6 @@
+' CP-009 proof (control): a double-brace documentation comment after a complete statement.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+PUB scaled(speed) : result
+  result := speed * 2 {{documentation comment after the statement}}

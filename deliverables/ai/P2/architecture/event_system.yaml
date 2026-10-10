@@ -1,17 +1,13 @@
 # P2 Event System
 # Sources:
-#   Propeller 2 Documentation v35 (Rev B/C Silicon), section EVENTS --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2035-2261
-#     (the sixteen events :2037-2054; POLLxxx :2061-2079; WAITxxx :2082-2100;
-#      Jxxx/JNxxx :2104-2121; per-flag detail :2124-2213;
-#      Selectable Events + SETSEn encoding :2230-2260)
-#   Pattern-match (PAT) event rules -- silicon-doc-text.txt:2155-2161
-#   Instruction encodings, same document, PASM2 encoding table --
-#     silicon-doc-text.txt:5264-5267 (SETSEn), :5273-5276 (POLLSEn),
-#     :5290-5293 (WAITSEn), :5204 (SETPAT)
-#   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has no events section; it
-#     carries SETPAT's C/Z selection rule in the PASM2 table at
-#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1909
+#   Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS
+#     (the sixteen events; POLLxxx; WAITxxx; Jxxx/JNxxx; per-flag detail;
+#      Selectable Events + SETSEn encoding)
+#   Pattern-match (PAT) event rules, same section
+#   Instruction encodings, same document, Assembly Language (instruction encoding list):
+#     SETSEn, POLLSEn, WAITSEn, SETPAT
+#   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01 -- the datasheet has no events
+#     section; it carries SETPAT's C/Z selection rule in its PASM2 instruction table
 
 component_name: "Event System"
 
@@ -30,10 +26,8 @@ architecture:
   
   the_sixteen_events:
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), EVENTS -- "Cogs monitor and track 16
-      different background events, numbered 0..15",
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2037-2054.
-      note: Silicon Doc, silicon-doc-text.txt:2102.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS ("Cogs monitor and track 16 different background events, numbered 0..15").
+      note: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS.
     list:
       - {event: 0,  name: "interrupt occurred",        poll: "POLLINT"}
       - {event: 1,  name: "CT passed CT1",             poll: "POLLCT1"}
@@ -98,10 +92,9 @@ instructions:
     encoding: "EEEE 1101011 00L DDDDDDDDD 000100000"
     description: "Configure selectable event 1"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), EVENTS > Selectable Events --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2230-2260; encodings
-      for SETSE1..4 at silicon-doc-text.txt:5264-5267, for POLLSE1..4 at :5273-5276, for
-      WAITSE1..4 at :5290-5293.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS, Selectable
+      Events; encodings for SETSE1..4, POLLSE1..4 and WAITSE1..4: Assembly Language
+      (instruction encodings).
     operation: |
       SE1 := D[8:0] event configuration (9 bits)
       SETSE can ONLY configure pin, LUT, or lock events (NOT timer/ATN/pattern events)
@@ -191,10 +184,8 @@ instructions:
     encoding: "EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS"
     description: "Set the pin pattern that raises the PAT event (event 8)"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), EVENTS > POLLPAT/WAITPAT event flag --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2155-2161; encoding
-      at silicon-doc-text.txt:5204; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1909.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS, POLLPAT/WAITPAT event flag; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43.
     operation: |
       D = mask, S = match value.
       C and Z are read as INPUTS at the moment SETPAT executes -- they are not
@@ -532,12 +523,6 @@ related_topics:
     relationship: "PAT instructions work with event system"
 
 sources:
-    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
-      sections:
-        - "EVENTS -- lines 2035-2260"
-        - "PASM2 encoding table -- lines 5204, 5264-5267, 5273-5276, 5290-5293"
-    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
-      sections:
-        - "PASM2 instruction table, SETPAT -- line 1909"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings)"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (SETPAT), p.43"

@@ -20,9 +20,9 @@ description: >-
   final Z flag. To subtract signed multi-long values, use SUB (not SUBS) followed
   possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.
 sources:
-  - "C flag sign: PASM2 Manual Table 169, sources/pasm2-manual/pasm2-manual-text.txt:3983"
-  - "C flag sign: PASM2 Manual TJV description, :4196, restated :5168 (pasm2-manual-text.txt)"
-  - "C flag sign erratum: engineering/ingestion/SOURCE-ERRATA.md E-016"
+  - "C flag sign: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUBSX encoding table (sign of D-(S+C)), p.131; PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.150"
+  - "C flag sign: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV description (C holds the correct sign), p.138"
+  - "C flag sign, source disagreement: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUBSX, p.131 (its prose says Result[31]; its own encoding table says sign of D-(S+C))"
 result: >-
   Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally
   the C and Z flags are updated to the extended sign and zero status.
@@ -46,7 +46,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: sign of D-(S+C)
   z: Z AND (Result == 0)
   clocks: '2'
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUBSX, p.131"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds

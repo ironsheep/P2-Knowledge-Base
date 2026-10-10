@@ -1,8 +1,0 @@
-# engineering/tools/validation/kb-compile-manifest/architecture/boot-rom/sd-card-boot.yaml
-# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
-# context declared here, never that the code is correct (F-381, F-312).
-blocks:
-  - at: chase_targets.rom_booter_listing.listing
-    fp: "d29100b3e8e6a8ea"
-    compile: not-code
-    reason: "title line naming the ROM listing (`rom_booter_v33_01j.lst`); the listing itself is not in this YAML, and a ROM listing is not code to compile"

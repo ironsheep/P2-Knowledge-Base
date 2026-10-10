@@ -14,7 +14,7 @@ description: 'Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].'
 flags_affected:
   C: Set to K[31] (bit 31 of popped stack value)
   Z: Set to K[30] (bit 30 of popped stack value)
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_xlat
@@ -40,9 +40,8 @@ ret_prefix_form: >-
   performed ONLY IF that instruction did not branch. On a BRANCHING instruction
   the branch stands and no return occurs, so '_RET_ CALL #target' is silently a
   plain CALL and never returns -- write 'CALL #target' followed by 'RET' instead.
-  Sources: P2 Assembly Language Manual (2022-11-01) condition table p.68; P2
-  Instructions v35 Rev B/C Silicon row 410. Full rule:
-  language/pasm2/concepts/conditional_execution.yaml (ret_prefix_rule).
+  Full rule: language/pasm2/concepts/conditional_execution.yaml (ret_prefix_rule).
+  Sources: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68; P2 Instructions v35 - Rev B/C Silicon, row 410
 related:
 - language/pasm2/call.yaml
 - language/pasm2/concepts/conditional_execution.yaml

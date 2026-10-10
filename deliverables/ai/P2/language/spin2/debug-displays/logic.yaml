@@ -6,9 +6,9 @@ description: |
   a mask/match EDGE trigger and holdoff. It is raw sample capture: there are NO
   protocol decoders (I2C/SPI/UART/CAN), NO automatic baud detection, and NO
   timing-measurement/analysis tools.
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, LOGIC Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (LOGIC display implementation: channel def, TRIGGER/detect, HOLDOFF, SetPack) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, LOGIC Display (channel def, TRIGGER, HOLDOFF, packed-data modes); behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - logic analyzer
@@ -36,7 +36,7 @@ where_the_data_comes_from:
   parallax_worked_example: "The Spin2 v55 LOGIC section builds both halves together --
     a smart pin transmitting async serial, the streamer capturing it through an
     adjacent non-smart pin, and this display unpacking the result with LONGS_2BIT."
-  source: "parallax_worked_example: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144"
+  source: "parallax_worked_example: Parallax Propeller 2 Spin2 Language Documentation v55, LOGIC Display (the 333 Mbaud capture example)"
 
 syntax:
   create: "DEBUG(`LOGIC MyLog <config directives> <channel-def strings>)"

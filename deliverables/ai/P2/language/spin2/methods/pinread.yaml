@@ -42,9 +42,7 @@ returns:
 
 timing:
   execution_model: |
-    Spin2 methods execute via the bytecode interpreter. The interpreter is
-    engineered to run at minimum cost. We do not publish a clock count for
-    the method-call path because we do not have a verifiable measurement.
+    Spin2 methods execute via the bytecode interpreter. Method-call clock count: not documented.
   underlying_pasm: "TESTP"
   underlying_pasm_timing: "2 clocks (fixed; same in cogexec/lutexec/hubexec — pin instructions have no execution-mode distinction per per-instruction YAMLs)"
   pin_sampling: "TESTP samples pin state 2 clocks before instruction; reads via INA register lag by 3 clocks (per language/pasm2/testp.yaml / architecture/io_pin_timing.yaml)"

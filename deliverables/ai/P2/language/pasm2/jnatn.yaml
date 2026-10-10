@@ -21,7 +21,7 @@ encoding:
   clocks: 2 or 4
 encoding_notes:
 - PC is written only when the ATN event ﬂag is set (or is clear in syntax 2).
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JATN / JNATN, p.90"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_jpoll

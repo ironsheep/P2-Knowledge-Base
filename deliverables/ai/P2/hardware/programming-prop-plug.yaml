@@ -23,10 +23,7 @@ aliases:
 eval_header_occupant: false
 
 description:
-  source: >-
-    32201 Prop Plug Guide v3.0 (Parallax Inc., Rev E, 2021-02-03), Overview and
-    "What's new in Rev E" --
-    engineering/ingestion/sources/propplug-rev-e/complete-propplug-rev-e-reference.md:20-37.
+  source: "Prop Plug (#32201) Rev E v3.0 2/03/2021, overview, p.1"
   text: >-
     USB-to-serial adapter for microcontroller programming and communication. It
     slips onto a 4-pin, 0.1 inch spaced male header, providing in-system
@@ -40,11 +37,7 @@ description:
     down, and a customer-selectable reset option pad (see reset_option).
 
 reset_option:
-  source: >-
-    32201 Prop Plug Guide v3.0 (Parallax Inc., Rev E, 2021-02-03),
-    "Customer Reset Option (new in Rev E)" --
-    engineering/ingestion/sources/propplug-rev-e/complete-propplug-rev-e-reference.md:74-84;
-    pulse width also in the Specifications table, :50.
+  source: "Prop Plug (#32201) Rev E v3.0 2/03/2021, Customer Reset Option, p.2; pulse width also in the Specifications table, p.2"
   default: "DTR-controlled reset - the component sits to the LEFT of the option pad, connecting RES and DTR. This is how every previous version behaved."
   alternative: "RTS-controlled reset - move the component to the RIGHT, connecting RES and RTS."
   disabled: "No reset pulse - remove the component."
@@ -55,10 +48,7 @@ reset_option:
   marking: "a white silk area is provided for marking units configured differently from the default."
 
 specifications:
-  source: >-
-    32201 Prop Plug Guide v3.0 (Parallax Inc., Rev E, 2021-02-03),
-    Specifications table --
-    engineering/ingestion/sources/propplug-rev-e/complete-propplug-rev-e-reference.md:39-55.
+  source: "Prop Plug (#32201) Rev E v3.0 2/03/2021, Specifications, p.2"
   power_requirements: "powered by the USB port (5 VDC)"
   current_requirements: "approximately 15 mA typical"
   usb_interface: "USB 2.0 Full Speed"
@@ -83,11 +73,11 @@ header_pinout:
 p2_note: >-
   The guide's Interface figure illustrates a Propeller 1 (DIP-40) target; P2
   programming uses the same four signals against the P2's serial programming pins.
-  Corroborated as the typical P2 Edge programmer by the #64010 and #64007 guides.
+  Corroborated as the typical P2 Edge programmer by Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Typical connections, p.3 ("A Prop Plug (not shown) is typically required for programming the P2 Edge module").
 
 drivers:
   requirement: "FTDI USB drivers required"
-  source: "https://www.parallax.com/usbdrivers (Windows + Mac)"
+  source: "Prop Plug (#32201) Rev E v3.0 2/03/2021, PC Drivers Installation, p.2 (https://www.parallax.com/usbdrivers, Windows + Mac)"
   macos: "macOS 10.15 Catalina and later: drivers included in the OS, no install needed"
   note: "Parallax software that relies on the FTDI drivers normally installs them automatically."
 
@@ -110,7 +100,7 @@ limitations:
   - "Requires FTDI drivers (auto-installed by most Parallax software; built in on macOS 10.15+)"
 
 documentation:
-  primary: "32201 Prop Plug Guide v3.0 (Parallax, Rev E, 2021-02-03)"
+  primary: "Prop Plug (#32201) Rev E v3.0 2/03/2021 (Parallax), p.1"
 
 resources:
   product_page: "www.parallax.com (search 32201) - schematic, prior-version docs, resources"

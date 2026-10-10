@@ -52,15 +52,7 @@ pin_group:
 # PIN MAP - P2 DUAL ACCESSORY HEADER (16 pins)
 # =============================================================================
 signal_map:
-  source: >-
-    64010 Universal Motor Driver P2 Add-on Board Guide v2.0 (Parallax Inc.,
-    Rev B), "1. Dual 2x6 way P2 Accessory Headers" header pinout tables and the
-    two "Pin Definitions" tables --
-    engineering/ingestion/sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md:138-152,
-    :255-283; raw text layer at
-    engineering/ingestion/sources/p2-universal-motor-driver/p2-universal-motor-driver-text.txt:214-244.
-    pin_label_errata: p2-universal-motor-driver-text.txt:637-646, and
-    engineering/ingestion/SOURCE-ERRATA.md.
+  source: "Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Feature Descriptions 1 (header pinout tables), p.6, and Pin Definitions for the P2 Dual Accessory Header Block 15-8 and Block 7-0, p.9-11; pin_label_errata: the same guide, p.6 against p.10"
   upper_header_note: "offsets 15..8 carry the PWM drive signals; VIO3V3 and GND are on the same header."
   lower_header_note: "offsets 7..0 carry the Hall and sense feedback signals; VIO3V3 and GND are on the same header."
   pins:
@@ -92,17 +84,12 @@ signal_map:
     P2 Accessory Headers" pinout table labels them PWM_UH and PWM_UL; its
     "Pin Definitions for the P2 Dual Accessory Header Block 15-8" table labels
     them PWM_XH and PWM_XL, duplicating the X channel and leaving channel U
-    undocumented. This IS in the source PDF, not an extraction artifact - the
-    raw text layer carries it too. The header pinout table is
+    undocumented. The contradiction is in the guide itself. The header pinout table is
     right: the board has four channels U/V/W/X and eight PWM pins, so 9/8 are
     the U channel.
 
 pwm_control:
-  source: >-
-    64010 Universal Motor Driver P2 Add-on Board Guide v2.0 (Parallax Inc.,
-    Rev B), "4. MOSFET Drivers" and the Specifications table --
-    engineering/ingestion/sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md:162-172,
-    :234-245, :259-263.
+  source: "Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Feature Descriptions 4 (MOSFET Drivers), p.6-7; Specifications table, p.9; Pin Definitions Block 15-8, p.9"
   logic: "active high"
   low_side_priority: >-
     "When both signals are driven high, PWM L has priority. PWM H will only
@@ -123,11 +110,7 @@ pwm_control:
   drivers: "four Texas Instruments UCC27211D half-bridge MOSFET drivers, one per output channel U, V, W, X"
 
 current_sense:
-  source: >-
-    64010 Universal Motor Driver P2 Add-on Board Guide v2.0 (Parallax Inc.,
-    Rev B), "8. Current Sense Resistor with Amplifier" --
-    engineering/ingestion/sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md:204-220,
-    :277.
+  source: "Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Feature Descriptions 8 (Current Sense Resistor with Amplifier), p.8; Pin Definitions Block 7-0 (SENSE_COMMON), p.10"
   technique: "low-side sensing, with a 3 mOhm current sense resistor between the common MOSFET GND and the common system GND"
   amplifier: "INA180B2 current sense amplifier beside the shunt, gain 50 V/V"
   conversion: "Vsense = 3 mOhm x 50 V/V gain = 150 mV per Amp (mV/A)"
@@ -137,11 +120,7 @@ current_sense:
   usage: "typically used to determine overall system load and provide overcurrent protection"
 
 specifications:
-  source: >-
-    64010 Universal Motor Driver P2 Add-on Board Guide v2.0 (Parallax Inc.,
-    Rev B), Specifications / Absolute Maximum Ratings / Features --
-    engineering/ingestion/sources/p2-universal-motor-driver/complete-p2-universal-motor-driver-content.md:45-66,
-    :232-253, :31-43, :222-226.
+  source: "Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Specifications, p.1-2 and p.9; Absolute Maximum Ratings, p.9; Features, p.1; Feature Descriptions 2, 3, 5, 6 and 9, p.6-8"
   io_pins_used: 16
   connector: "dual 2x6 pass-thru headers with 0.1 inch spacing, following the standard P2 header pinout"
   compatible_hosts:
@@ -194,7 +173,7 @@ limitations:
   - "High-current board - power-source and cable ratings are the user's responsibility"
 
 documentation:
-  primary: "64010 Universal Motor Driver P2 Add-on Board Guide v2.0 (Parallax, Rev B)"
+  primary: "Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022 (Parallax, Rev B), p.1"
 
 resources:
   product_page: "www.parallax.com (search 64010) - latest guide, free software, example programs, schematic"

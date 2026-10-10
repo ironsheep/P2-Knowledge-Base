@@ -40,7 +40,7 @@ see_also:
 - WORD
 - LONG
 - ALIGNL
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data: FILE \"Filename\"); IN-LINE PASM CODE (FILE is not allowed within in-line PASM code)"
 created_date: '2025-09-19'
 group: Data Declaration
 last_updated: '2025-09-19T16:04:17.650517'

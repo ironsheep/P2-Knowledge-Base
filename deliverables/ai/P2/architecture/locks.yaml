@@ -1,12 +1,9 @@
 # P2 Hardware Locks System
 # Sources:
-#   Propeller 2 Documentation v35 (Rev B/C Silicon), section LOCKS --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3673-3700
-#   Instruction encodings, same document, PASM2 encoding table --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5236-5239
-#   P2X8C4M64P Datasheet 2022/11/01, "Locks" p.19-20 --
-#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:877-905
-#     and the PASM2 instruction table p.42 -- p2-datasheet-text.txt:1791-1797
+#   Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS
+#   Instruction encodings, same document, Assembly Language (instruction encoding list)
+#   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Locks, p.19-20
+#     and the PASM2 instruction table, p.42
 
 component_name: "Hardware Locks"
 
@@ -45,7 +42,7 @@ architecture:
       safety: "Only owning COG can release its lock"
 
 state_versus_allocation:
-  source: "Propeller 2 Documentation v35, Locks -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3686 (LOCKRET returns an allocated lock, any cog may), :3696 (only the cog that has taken the lock can release it), :3698 (a lock is implicitly released if the holding cog is stopped via COGSTOP or restarted via COGINIT, or if LOCKRET is executed for it)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS (LOCKRET returns an allocated lock, any cog may; only the cog that has taken the lock can release it; a lock is implicitly released if the holding cog is stopped via COGSTOP or restarted via COGINIT, or if LOCKRET is executed for it)"
   summary: >-
     A lock has TWO independent pieces of state and they are freed by different things.
     Confusing them is the most expensive mistake available with locks, because the
@@ -99,10 +96,8 @@ instructions:
     encoding: "EEEE 1101011 C0L DDDDDDDDD 000000110"
     description: "Try to take lock D[3:0]. C = 1 if the lock was taken."
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Using Locks --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3688; encoding at
-      silicon-doc-text.txt:5238; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1796-1797.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS, Using Locks; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.41.
     operation: |
       Attempt to take lock D[3:0].
       C := 1 if the lock was successfully taken (it is now held by this cog)
@@ -121,10 +116,8 @@ instructions:
       Release lock D[3:0]. With WC and a register D, also reports the lock's status in C
       and its current/last owner in D.
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Using Locks --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3696, :3700; encoding at
-      silicon-doc-text.txt:5239; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1792-1795.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS, Using Locks; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.41.
     operation: |
       Release lock D[3:0]. Only the cog holding the lock can release it.
       With WC: C := 1 if the lock is currently taken, 0 if it is not.
@@ -140,10 +133,8 @@ instructions:
     encoding: "EEEE 1101011 C00 DDDDDDDDD 000000100"
     description: "Find and acquire first available lock"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Allocating Locks --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3684; encoding at
-      silicon-doc-text.txt:5236; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1791.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS, Allocating Locks; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.41.
     operation: |
       Allocate a lock from the hub's pool of 16.
       If an unallocated lock is available, its number is written into D.
@@ -160,11 +151,8 @@ instructions:
     encoding: "EEEE 1101011 00L DDDDDDDDD 000000101"
     description: "Return lock D[3:0] to the unallocated lock pool for reallocation"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Allocating Locks --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3686; encoding at
-      silicon-doc-text.txt:5237; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1795 -- LOCKRET's
-        row.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS, Allocating Locks; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.41 (LOCKRET's row).
     operation: |
       Return lock D[3:0] to the unallocated lock pool. Any cog can return an
       allocated lock, even one it did not allocate with LOCKNEW.
@@ -179,8 +167,7 @@ instructions:
       LOCKREL is the instruction that reports lock status and ownership -- LOCKTRY has no
       status-only form. LOCKTRY always attempts to take the lock.
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), LOCKS > Using Locks --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3700.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS, Using Locks.
     operation: |
       C := 1 if the lock is currently taken, 0 if it is not.
       D (a register, not an immediate) := cog ID of the current owner (if held)
@@ -376,13 +363,7 @@ related_topics:
     relationship: "Lock operations are atomic even with interrupts enabled"
 
 sources:
-    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
-      sections:
-        - "LOCKS, incl. Allocating Locks and Using Locks -- lines 3673-3700"
-        - "PASM2 encoding table, LOCKNEW/LOCKRET/LOCKTRY/LOCKREL -- lines 5236-5239"
-    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
-      sections:
-        - "Locks, p.19-20 -- lines 877-905"
-        - "PASM2 instruction table, lock rows, p.42 -- lines 1791-1797"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS (Allocating Locks and Using Locks)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings: LOCKNEW/LOCKRET/LOCKTRY/LOCKREL)"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Locks, pp.19-20"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (lock rows), p.41"

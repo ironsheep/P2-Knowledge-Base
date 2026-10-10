@@ -23,7 +23,7 @@ spi_patterns:
       wxpin   #1, #spi_ck              ' timebase = 1 clock per transition
       drvl    #spi_ck                  ' enable smart pin
       wypin   #16, #spi_ck             ' start 16 clock transitions
-    source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:101-103,167"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash and SPI command, 1 byte (spi_cmd1: wypin #16,#spi_ck)"
 
   spi_full_duplex:
     description: Complete SPI master with CLK, MOSI, MISO on adjacent pins
@@ -84,12 +84,8 @@ pwm_patterns:
       add     low_duty,  dead_time     ' low side switches off earlier
       wypin   high_duty, pin_pwm_h
       wypin   low_duty,  pin_pwm_l
-    source: "isp_bldc_motor.spin2 (OBEX 2874, ISP BLDC Motor Control)"
-    authority: >-
-      Two-pin requirement confirmed by Chip Gracey (2026-07-16); mechanism
-      grounded in isp_bldc_motor.spin2 (two WRPIN, high=true / low=inverted,
-      software dead-gap offset).
-    
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES (%01000 PWM triangle, %01001 PWM sawtooth and %01010 PWM switch-mode power supply are the complete PWM mode set; none is a complementary-output or dead-band mode). The two-pin arrangement with a software dead-gap offset (two WRPIN, high=true / low=inverted) is the pattern of the ISP BLDC Motor Control example (OBEX 2874)."
+
   dac_dithered_output:
     description: 16-bit DAC using 8-bit DAC with dithering
     mode: P_DAC_DITHER_PWM
@@ -123,7 +119,6 @@ adc_patterns:
       sub     vio_levels+0, gio_levels+0      ' sub gio from vio to get range
     measurement: |
       qdiv    numerator, vio_levels+0         ' CORDIC divide to get calibrated value
-    source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:1610-1642"
 
 timing_patterns:
   pulse_width_measurement:
@@ -173,22 +168,23 @@ synchronization:
   streamer_smartpin_sync:
     description: Synchronize streamer with smart pin SPI clock
     critical_pattern: |
-      ' Critical: enable the smart pin BEFORE the streamer
+      ' The flash loader enables the clock smart pin during setup
       wrpin   #%01_00101_0,#spi_ck     ' set spi_ck for transition output
       wxpin   #1,#spi_ck               ' set timebase to 1 clock per transition
       drvl    #spi_ck                  ' enable smart pin
 
       ' ... later, start the streamer ...
       xinit   rmode, pa                ' start outputting bits via streamer
-    source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:100-103,126"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash and Program flash (.page: xinit rmode,pa)"
     
 notes:
   - "Each smart pin has an outgoing 33-bit bus which conveys its Z result and a special flag. RDPIN and RQPIN are used to multiplex and read these buses, so that a pin's Z result is read into D and its special flag can be read into C."
   - "Long-repository mode (%SSSSS = %00001..%00011 with M[12:10] != %101) turns the smart pin into a long repository, where WXPIN writes the long and RDPIN/RQPIN can read the long -- the cog-to-cog mailbox pattern."
-  - "Streamer/smart-pin configuration order is critical for SPI: configure and start the smart pin before XINIT starts the streamer. The worked sequence and its source (Parallax flash_loader.spin2) are in the streamer_smartpin_sync pattern above."
+  - "For SPI the flash loader configures and enables its clock smart pin during setup, before XINIT starts the streamer; the worked sequence is the streamer_smartpin_sync pattern above."
   - "Client code using these protocols (SPI / sync-serial / async-serial) typically needs timing/timeout idioms. For multi-second protocol timeouts (SD card busy-wait, slow peripheral response), use GETMS -- a GETCT-based deadline has a safe window of only 2^31 / CLKFREQ seconds and fails silently past it. The per-frequency ceilings are in language/spin2/concepts/timing_operations.yaml method_selection."
-# Sources: notes, first item (33-bit bus) -- Silicon Doc, engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:1-3
-#   notes, second item (long-repository mode) -- Silicon Doc, engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:222-224
+# Sources: notes, first item (33-bit bus) -- Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS
+#   notes, second item (long-repository mode) -- Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES
+#   notes, third item (setup order) -- Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash
 
 
 related:

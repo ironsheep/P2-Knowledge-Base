@@ -48,7 +48,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [repo_pin, data_value, received]
   - at: synchronization.streamer_smartpin_sync.critical_pattern
-    fp: "a5d4ffa4178d8f7c"
+    fp: "7145a31d56b58db2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [spi_ck=con, rmode]

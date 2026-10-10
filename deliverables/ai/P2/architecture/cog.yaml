@@ -221,7 +221,7 @@ cog_communication:
     operation: "Signal attention to COG(s)"
     d_parameter: "16-bit mask (bit n = cog n, bits 0..15)"
     sources:
-      - "d_parameter: Silicon Doc, silicon-doc-text.txt:2020"
+      - "d_parameter: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COG ATTENTION"
     
   synchronization:
     locks: "Atomic test-and-set"

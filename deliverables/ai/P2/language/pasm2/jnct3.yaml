@@ -20,7 +20,7 @@ encoding:
   clocks: 2 or 4
 encoding_notes:
 - PC is written only when the CT3 event flag is clear.
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JCT1/2/3 / JNCT1/2/3, p.91"
 documentation_level: structured
 compiler_operand_format:
   name: operand_jpoll

@@ -9,16 +9,9 @@
 component: streamer_pins
 description: Pin group selection via %ppp field and sub-pin selection
 
-# LOCATORS REPAIRED 2026-08-30. Five locators (lines 3653, 3603-3605,
-# 3654-3655, 3661-3662 and 6693-6701) were superseded p2-documentation.txt line
-# numbers attributed to silicon-doc-text.txt. Lines
-# 1443 and 1535 were already correct. Every replacement below was opened and read;
-# the CLAIMS were right in each case, only the locators were wrong.
-source: "Propeller 2 Documentation v35, Streamer -- the %ppp pin-group rule and the
-  sub-8-pin resolution rule at
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443 and :1454;
-  the %e / %w meanings at :1439-1441; per-mode D[19:16] templates from the Spin2 v55
-  streamer symbol table, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1608-1637."
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER -- the %ppp pin-group
+  rule and the sub-8-pin resolution rule; the %e / %w meanings; per-mode D[19:16] templates
+  from the Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Streamer Modes."
 
 aliases:
   - "streamer pin selection"
@@ -115,18 +108,16 @@ sub_pin_selection:
     bits land in D[19:16], which is the MODE field -- see pin_base_encoding below and
     architecture/streamer/modes-reference.yaml field_notation_caveat. Bench-proven, twice, in two different
     mode families."
-  source: "Propeller 2 Documentation v35: \"In every mode, the three %ppp bits in
-    D[22:20] select the pin group, in 8-pin increments\"
-    (engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443) and \"For
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER: \"In every mode,
+    the three %ppp bits in D[22:20] select the pin group, in 8-pin increments\" and \"For
     modes which involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are
-    used to further resolve the pin number(s)\" (:1454). Per-width templates from the
-    Spin2 v55 streamer symbol table -- X_1P_1DAC1_WFBYTE %1100_DDDD_WPPP_PPPA,
+    used to further resolve the pin number(s)\". Per-width templates from the
+    Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Streamer
+    Modes -- X_1P_1DAC1_WFBYTE %1100_DDDD_WPPP_PPPA,
     X_2P_2DAC1_WFBYTE %1101_DDDD_WPPP_PP0A, X_4P_4DAC1_WFBYTE %1110_DDDD_WPPP_P00A,
-    X_8P_4DAC2_WFBYTE %1110_DDDD_WPPP_0110 --
-    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1608-1613. Hardware
+    X_8P_4DAC2_WFBYTE %1110_DDDD_WPPP_0110. Hardware
     corroboration: EF-064 (1-pin mode reached P20 exactly) and EF-065 (an 8-pin mode
-    at base 20 landed at P24..P31),
-    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md."
+    at base 20 landed at P24..P31)."
 
 # Enable control
 enable_control:
@@ -148,8 +139,7 @@ enable_control:
       command twice, differing only in DIR -- 4 of 8 with DIR low, 8 of 8 with DIRH,
       against an 8-of-8 plain-drive control. The DIR-high leg started from OUT = 0, so passing proves
       the streamer overrode OUT rather than the OUT bit doing the work."
-    source: "Propeller 2 Documentation v35,
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1439 for the
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, for the
       OR rule and the %e requirement; EF-062 for the DIR result."
 
   input_modes:
@@ -188,11 +178,10 @@ enable_control:
       the neighbour-routing composition that gets the waveform instead, are in
       architecture/streamer/pin-capture.yaml; the IN rule itself is in
       architecture/smart_pins.yaml in_signal_semantics."
-    source: "Propeller 2 Documentation v35, Pins => DACs/WRFAST at
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535 (the read
-      source, the widths, the %w rule and the accrual rule), the %w statement at
-      :1441, the bit-order rule at :1456, and the WRFAST prerequisite at
-      :1460 with the WRFAST operand definitions at :3030-3036."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, Pins => DACs/WRFAST
+      (the read source, the widths, the %w rule and the accrual rule), the %w statement and
+      the bit-order rule in STREAMER, and the WRFAST prerequisite with the WRFAST operand
+      definitions in HUB RAM, FAST SEQUENTIAL FIFO INTERFACE."
 
 # Alternate bit order
 alt_bit_order:
@@ -217,9 +206,8 @@ alt_bit_order:
     capture gets built on a bit that does nothing to it.
   what_to_do_in_8_bit_modes: |
     Reorder the byte after capture (REV / MOVBYTS), or select a mode whose grouping the
-    %a bit actually reaches. NOT STATED HERE: which of those two is cheaper in a given
-    pipeline — no source we hold compares them, and this page will not invent a
-    recommendation it cannot ground.
+    %a bit actually reaches. Which of those two is cheaper in a given pipeline is not
+    documented: no Parallax document compares them.
 
 # Pin base calculation
 pin_base_encoding:
@@ -254,8 +242,7 @@ pin_base_encoding:
       by EF-065 (X_IMM_4X8_1DAC8 + 20<<17 drove P24..P31 against an aligned control
       that drove P16..P23) and, in a third, by EF-059 (adc_pin<<17 in
       X_1ADC8_0P_1DAC8_WFBYTE changed the mode, proven by the bytes-per-rollover
-      signature: 1,024 / 2,048 / 4,096 bytes at adc_pin 0 / 1 / 2) --
-      engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md."
+      signature, 1,024 / 2,048 / 4,096 bytes at adc_pin 0 / 1 / 2)."
 
 # Common pin configurations
 common_configs:

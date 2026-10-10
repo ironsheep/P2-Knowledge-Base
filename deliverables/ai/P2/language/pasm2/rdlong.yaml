@@ -16,7 +16,7 @@ compiler_encoding:
 timing:
   cycles: "9...16 (cog) / 9...26 (hub-exec)"
   type: variable
-  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.154"
   notes: "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: '{WC/WZ/WCZ}                                                                                                                            9...16
   1 / 9...26'
@@ -43,7 +43,7 @@ compiler_effects:
   value: 3
   description: Write Carry and Zero flags
   bitPattern: '11'
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_dsp

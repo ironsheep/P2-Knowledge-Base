@@ -31,7 +31,7 @@ examples:
     \         ' Transfer 512 longs\n        rdlong  0, ptra                  ' Load\
     \ to LUT[0..511]\n        ret\n        \n' Later, read from LUT for waveform generation\n\
     \        rdlut   amplitude, phase         ' Direct LUT access\n"
-  source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 (SETQ2 + RDLONG reads hub longs into lookup RAM)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (SETQ2 + RDLONG reads hub longs into lookup RAM)"
 - name: Buffer Management
   description: Use LUT as intermediate buffer for data processing
   code: "' Copy data block from HUB to LUT for processing\n        setq2   #128-1\
@@ -43,7 +43,7 @@ examples:
     \ tjnz    index, #.loop\n        \n' Write processed data back to HUB\n      \
     \  setq2   #128-1                   ' 128 longs\n        wrlong  0, dest_addr\
     \             ' Write from LUT[0..127]\n"
-  source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 and :3278-3281 (SETQ2 block transfer into and out of lookup RAM)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (SETQ2 block transfer into and out of lookup RAM)"
 notes:
 - SETQ2 specifically targets LUT RAM (512 longs)
 - SETQ targets COG RAM for block transfers

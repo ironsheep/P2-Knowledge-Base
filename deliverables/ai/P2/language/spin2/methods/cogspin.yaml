@@ -1,5 +1,5 @@
 # Spin2 Method: COGSPIN
-# Source: Spin2 documentation
+# Source: Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage
 # Purpose: Start Spin2 method in a cog
 
 method: "COGSPIN"
@@ -24,14 +24,7 @@ parameters:
         COGSPIN table defines
 
       DO NOT pass -1. It is not a synonym for NEWCOG -- see not_an_input below.
-    source: >-
-      Spin2 v55 Language Documentation, "Built-In Symbol for COGSPIN() Usage" --
-      engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1667-1669
-      (NEWCOG = %01_0000 is the ONLY symbol listed); :1673 (-1 is NEWTASK,
-      TASKSPIN's symbol). Spin2 v51 lists the same single value --
-      engineering/ingestion/sources/spin2-v51/spin2-text.txt:12516-12520.
-      P2 Documentation v35 Rev B/C, COGINIT D operand --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:381-390.
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage (NEWCOG = %01_0000 is the ONLY symbol listed; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand)"
     not_an_input: >-
       -1 does NOT mean "any available cog". The interpreter's cogspin_ ORs in
       hubexec (#%10_0000) and passes the operand to COGINIT without masking, so
@@ -75,7 +68,7 @@ stack_requirements:
   # Do not cite them as authority. `application-notes/p2an006-sizing-cog-task-stacks.yaml`
   # currently cites this file for them, which makes the authority circular -- the only
   # way to settle a stack size is to measure the high-water mark of YOUR code.
-  provenance: "heuristic, unsourced -- no Parallax document states these"
+  caveat: "The two figures below are heuristics, unsourced -- no Parallax document states them."
   minimum: "32 longs (128 bytes) -- heuristic floor, not a specified minimum"
   typical: "64-128 longs (256-512 bytes) -- heuristic for moderate Spin2 code"
   how_to_settle_it: >-
@@ -189,8 +182,8 @@ synchronization:
   shared_variables: "Use locks for thread-safe access"
   communication: "Use hub RAM for data exchange"
   coordination: "Use COGATN/POLLATN for signaling"
-  file_system_access: "The Flash Filesystem driver (OBEX 4261, v1.4.0 on) supports multiple cogs and takes its own lock inside each of its operations"
-  source: "file_system_access: OBEX 4261 flash_fs.spin2 -- engineering/ingestion/external-inputs/source-code/obex-projects/4261-P2_FLASH_Filesystem/flash_fs.spin2:19 (multi-cog support), :146 (fsLock), :221 and :248 (locktry/lockrel around an operation)"
+  file_system_access: "The P2 FLASH Filesystem driver supports multi-cog access without consuming a cog"
+  source: "OBEX 4261 (P2 FLASH Filesystem), object description. A community object, not a Parallax publication."
 
 notes:
   - "Method runs until it returns or cog is stopped"

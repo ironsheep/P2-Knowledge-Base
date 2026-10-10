@@ -17,12 +17,7 @@ aliases:
   - "#64008 add-on board"
 
 description:
-  source: >-
-    P2 to mikroBUS Click Adapter product page (Parallax Inc.) --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-catalog-page.txt:1-12;
-    wiring from 64008 Rev A schematic (Parallax Inc., 2020-08-10, Open Source
-    Hardware CC BY-SA 4.0) --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  source: "Product description: the Parallax P2 to mikroBUS Click Adapter product page (parallax.com); wiring: P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (Parallax Inc., 2020-08-10, Open Source Hardware CC BY-SA 4.0)"
   text: >-
     Passive adapter that presents a MikroElektronika mikroBUS socket on two adjacent
     P2 2x6 accessory headers, letting MikroE Click series modules plug into a P2
@@ -91,9 +86,7 @@ signal_map:
 interface: multi_protocol
 
 header_split:
-  source: >-
-    64008 Rev A schematic, connectors J100/J101 vs J102/J103 --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  source: "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (connectors J100/J101 vs J102/J103)"
   fact: >-
     The four SPI signals (CS +8, SCK +9, MISO +10, MOSI +11) all land on header B;
     every other mikroBUS signal lands on header A. The schematic establishes the
@@ -104,9 +97,7 @@ header_split:
     socket straddles two groups, and the SPI bus sits entirely in the second one.
 
 power:
-  source: >-
-    64008 Rev A schematic, J102 pin 2 and J103 pin 2 --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  source: "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (J102 pin 2 and J103 pin 2)"
   mikrobus_3v3: "Fed from VIO_3V3_A -- header A's 3.3 V rail."
   mikrobus_5v: "Fed from 5V_A -- header A's 5 V rail."
   ground: "Vss, common to both headers and both mikroBUS rows."
@@ -115,18 +106,13 @@ power:
     mikroBUS socket, and does not show whether the _A and _B rails are commoned.
 
 orientation:
-  source: >-
-    64008 Rev A schematic, note printed on the sheet --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md.
+  source: "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (note printed on the sheet)"
   note: >-
     "If this adapter is plugged into the P2-EVAL top edge, then P2 MISO/MOSI are
     aligned with the mikroBUS MISO/MOSI" -- verbatim from the schematic sheet.
 
 uart_direction_caveat:
-  source: >-
-    Absence established by reading the 64008 Rev A schematic --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md
-    ("What this sheet does NOT establish").
+  source: "Absence established by reading the P2 mikroBUS Adapter Part Number 64008, Revision A, schematic, which names the UART nets but does not say whose transmit they are"
   caveat: >-
     The schematic gives UART net NAMES only (TX -> IO+2, RX -> IO+3). Whether "TX"
     denotes the P2's transmit or the Click module's transmit is NOT settled by any
@@ -150,9 +136,7 @@ specifications:
     assembly: "PCBs assembled, tested, and completed in Rocklin, California, USA"
 
 compatible_hosts:
-  source: >-
-    P2 to mikroBUS Click Adapter product page --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-catalog-page.txt:5.
+  source: "Product description: the Parallax P2 to mikroBUS Click Adapter product page (parallax.com); host boards' accessory headers: P2 Edge Module Breadboard (#64020) v1.2 01/07/2021, Features, p.2; P2 Edge Mini Breakout Board (#64019) v1.1 11/30/2020, Features, p.1"
   boards:
     - "P2 Eval Board Rev C (#64000)"
     - "P2 Edge Module Breadboard (#64020) with a P2 Edge Module (#P2-EC)"
@@ -173,12 +157,13 @@ limitations:
   - "Click module itself is not included"
 
 documentation:
-  primary: "64008 Rev A schematic (Parallax, 2020-08-10) - Open Source Hardware, CC BY-SA 4.0"
-  note: >-
-    There is no Parallax user guide for this board. The schematic plus the
-    MikroElektronika mikroBUS standard are the complete documentation set - the
-    schematic supplies the P2-side offsets, and the Click standard supplies the
-    module-side pin meanings.
+  primary: "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (Parallax, 2020-08-10) - Open Source Hardware, CC BY-SA 4.0"
+
+documentation_note: >-
+  There is no Parallax user guide for this board. The schematic plus the
+  MikroElektronika mikroBUS standard are the complete set of board documents -
+  the schematic supplies the P2-side offsets, and the Click standard supplies the
+  module-side pin meanings.
 
 resources:
   product_page: "https://www.parallax.com/product/p2-to-mikrobus-click-adapter"

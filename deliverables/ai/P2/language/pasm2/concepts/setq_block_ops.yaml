@@ -64,10 +64,10 @@ block_operations:
       RDLONG buffer, ##source_data
       ' Reads hub[source_data..source_data+127] to cog[buffer..buffer+31]
     debug_use: |
-      ' Save registers $010..$1F7 to the save buffer
-      setq    #$1F7-$010
-      wrlong  $010, regh
-    source: "Spin2 debugger v51 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:204-205; timing: Silicon Doc, silicon-doc-text.txt:3257"
+      ' Load the debugger into registers $004..$1F7
+      setq    #$1F7-$004
+      rdlong  $004, ##dbg_addr
+    source: "Parallax Spin2/PASM Debugger v51 (2025.04.02), Debug ISR (debug_isr); timing: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
 
   cog_to_hub_transfer:
     instruction: "SETQ + WRLONG"
@@ -80,7 +80,7 @@ block_operations:
       SETQ #63           ' 64 longs
       WRLONG results, PTRA
       ' Writes cog[results..results+63] to hub[PTRA..PTRA+255]
-    source: "timing: Silicon Doc, silicon-doc-text.txt:3257"
+    source: "timing: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
 
   hub_to_lut_transfer:
     instruction: "SETQ2 + RDLONG"
@@ -98,7 +98,7 @@ block_operations:
       
       ' Later access via RDLUT
               rdlut   value, phase    ' 3-clock lookup
-    source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 (SETQ2 + RDLONG reads hub longs into lookup RAM)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (SETQ2 + RDLONG reads hub longs into lookup RAM)"
 
   lut_to_hub_transfer:
     instruction: "SETQ2 + WRLONG"
@@ -117,7 +117,7 @@ block_operations:
               setq2   pb              'write block of longs
               wrlong  0,ptrb++
               _ret_   tjnz    pa,#.block      'another block?
-    source: "Spin2 debugger v51 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:151-162"
+    source: "Parallax Spin2/PASM Debugger v51 (2025.04.02), Debugger Setup, move routine ('Move pa bytes from @ptra to @ptrb')"
 
 production_patterns:
   waveform_buffer_management:
@@ -142,7 +142,7 @@ production_patterns:
               ' Write processed data back
               setq2   #128-1
               wrlong  0, output_ptr
-    source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3264-3267 and :3278-3281 (SETQ2 block transfer into and out of lookup RAM)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (SETQ2 block transfer into and out of lookup RAM)"
     
 special_operations:
   block_math:
@@ -168,14 +168,14 @@ special_operations:
       It does NOT extend a block-move COUNT beyond 512. SETQ/SETQ2 block transfers
       target cog register RAM or cog lookup RAM, each of which is 512 longs, so the
       maximum block transfer is 512 longs (count field = number of longs minus 1).
-    source: "P2 Silicon Doc v35 (cog and LUT are each 512 x 32-bit longs; FAST BLOCK MOVES: 'x = number of longs, minus 1')"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM, LOOKUP RAM (cog and LUT are each 512 x 32-bit longs); FAST BLOCK MOVES ('x = number of longs, minus 1')"
 
 block_fill:
   cog_fill:
     instruction: "none"
     operation: "No SETQ block form fills cog registers with a value"
     note: "WRLONG/WMLONG write HUB memory, so SETQ + WRLONG cannot fill cog registers; SETQ + RDLONG copies hub longs INTO the cog."
-    source: "note: Silicon Doc, silicon-doc-text.txt:3257-3262"
+    source: "note: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
 
   hub_fill:
     instruction: "SETQ + WRLONG/WMLONG with an immediate D"
@@ -187,11 +187,11 @@ block_fill:
       SETQ #15
       WRLONG #0, ##buffer_hub  ' Clear 16 hub longs
     note: "Only an immediate D fills; a register D writes that many cog-register longs to hub instead."
-    source: "note: Silicon Doc, silicon-doc-text.txt:3269"
+    source: "note: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
 
 performance:
   transfer_rate: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (the FIFO gets priority and the block move waits for the slice to come around again)"
-  source: "Propeller 2 Documentation v35 -- silicon-doc-text.txt:3257"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
   lut_advantage: "After load, RDLUT reads a LUT long in 3 clocks and WRLUT writes one in 2"
 
   limitations:
@@ -300,8 +300,8 @@ best_practices:
 references:
   - silicon_doc: SETQ/SETQ2 block operations
   - instruction_set: SETQ/SETQ2 encoding
-  - flash_loader.spin2: Buffer management
-  - Spin2_debugger.spin2: State preservation
+  - "Parallax SPI Flash Programmer and Boot Loader v51, Loader (SETQ moves code from cog to hub) and Move application down to $00000+ (SETQ2 block copy)"
+  - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (SETQ saves and restores registers $010..$1F7 to the save buffer)"
   - optimization_guide: Fast memory transfers
 
 related:

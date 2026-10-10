@@ -1,8 +1,4 @@
 # P2 Monitor — Boot ROM Interactive Debug Interface
-# Sources (primary, cross-verified):
-#   - P2 Datasheet (entry sequence, capability description, command examples)
-#   - Silicon Doc v35 (entry sequence)
-#   - rom-booter ingestion (ROM residence)
 
 component: P2_Monitor
 aliases:
@@ -13,11 +9,17 @@ aliases:
 category: boot_rom_interface
 description: |
   Interactive debug / memory-inspection interface built into the P2's 16KB
-  boot ROM. Allows viewing and manipulating memory (register RAM, hub RAM)
-  and loading code from microSD. Accessible from any serial terminal during
-  the early boot window, before flash/SD autorun engages.
+  boot ROM. Allows viewing and manipulating memory (register RAM, lookup RAM,
+  hub RAM) and loading and running code from microSD. Accessible from any
+  serial terminal during the early boot window, before flash/SD autorun
+  engages.
 
 entry_sequence:
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Interactive Mode, p.65; Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, P2 Monitor, p.65; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, HOST COMMUNICATION, p.11"
+  terminal_setup:
+    - "Run serial terminal software (such as Parallax Serial Terminal, TeraTerm or RealTerm)"
+    - "Disable character echo"
+    - "Any baud rate from 9600 baud to 2 Mbaud (2 Mbaud recommended), 8 data bits, 1 stop bit, no parity"
   prerequisite: "Reset the P2 (Reset button, power cycle, or RESn pin low-to-high)"
   keystrokes:
     - 'Type "> " (greater-than character + space)'
@@ -25,24 +27,34 @@ entry_sequence:
   timing: "Must occur during the early boot window, before autorun"
   prompt: '"*" — the Monitor prompt after entry'
 
+how_the_rom_recognizes_entry:
+  source: "Parallax Propeller 2 ROM Booter v33_01j, Autobaud ISR (detects initial \"> \") and Attempt to get serial command (get_command)"
+  baud_rate: "The booter's receiver interrupt measures the bit timing of the '>' character ($3E) and sets the serial receiver and transmitter baud rate from it."
+  dispatch: "In the booter's serial command loop, a received ESC ($1B) starts TAQOZ and a received Ctrl+D ($04) starts the Monitor."
+  on_start: "The Monitor disables the booter's autobaud interrupt and the timing smart pins on P0 and P1 while leaving the UART running, sends a carriage return, sends the version line 'P2-MONITOR V1.3' CR LF, and then prompts."
+
 relationship_to_taqoz:
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, P2 Monitor, p.65; Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, TAQOZ, p.66"
   shared_prompt: '"> " (greater-than + space)'
   selector:
     monitor: "Ctrl+D → P2 Monitor"
     taqoz: "ESC → TAQOZ Forth"
+  switching:
+    monitor_to_taqoz: "Type ESC followed by the Enter key"
+    taqoz_to_monitor: "Type Ctrl+D"
   functional_distinction:
     monitor: "Memory inspector / manipulator"
     taqoz: "Interactive Forth programming environment"
 
 capabilities:
-  source: "P2 Datasheet"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, P2 Monitor, p.11"
   documented:
     - "View memory contents (register RAM, hub RAM)"
     - "Manipulate (change) RAM contents"
     - "Load and run code from microSD memory"
 
-# Verbatim from Datasheet — these are the only command examples in primary sources
 datasheet_examples:
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, P2 Monitor, p.11"
   list_register_ram:
     input: "000-010L"
     purpose: "List first 16 longs of Register RAM in long format"
@@ -60,28 +72,50 @@ datasheet_examples:
       *0000-0010L
       00000: FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF ...
 
-# Honest gaps — what we do NOT have authoritative sources for
+command_line:
+  source: "Parallax Propeller 2 ROM Booter v33_01j, LMM Monitor (_HubMonitor, Receive String _HubRxString, Parse hex input _ParseHex)"
+  line_form: "An optional hexadecimal address, then one command character, then the command's operands, ended by carriage return."
+  prompt_and_echo: "The Monitor prompts with '*' and echoes what is typed. Backspace removes the previous character and is echoed as backspace, space, backspace. A carriage return is echoed with a line feed."
+  line_length: "The input buffer is 80 bytes at hub address $FC000 (the listing's comment on it: 'overwrite Booter'); once 78 characters are held, further characters are ignored except backspace and carriage return."
+  hex_values: "Digits are 0-9, a-f and A-F. Spaces before a value and underscores inside a value are skipped. The first character that is not a hex digit ends the value; it is converted to upper case and read as the command character, so command letters are not case-sensitive."
+  address_space: "An address of fewer than four hex digits addresses cog register RAM ($000-$1FF) or lookup RAM (up to $3FF); an address of four or more hex digits addresses hub RAM, so 100 and 0100 are different addresses. Cog and lookup RAM addresses count longs; hub addresses count bytes."
+  unknown_command: "An unrecognized command is answered with '?' CR LF and a new prompt."
+
+commands:
+  source: "Parallax Propeller 2 ROM Booter v33_01j, LMM Monitor (LMM DEBUGGER - SUPPORTED COMMANDS table, _HubMonitor dispatch, _Cmd_List, _Cmd_CR, _Download, _Cmd_G, _Cmd_Run)"
+  list:
+    form: "addr1 - [addr2] [L]"
+    effect: "Lists memory from addr1 up to but not including addr2 (one line if addr2 is omitted). With L the longs are shown as eight hex digits each; without L each long is shown as its bytes in memory order with a space between byte pairs."
+    line_format: "The address (three hex digits preceded by two spaces for cog and lookup RAM, five hex digits for hub RAM), a colon and a space, four longs each followed by a space, then a space, an apostrophe, the 16 bytes as characters (bytes below $20 and above $7E are shown as '.'), an apostrophe, and CR LF. A line covers four longs."
+  repeat_list:
+    form: "<cr> alone"
+    effect: "Repeats the previous list command with the next addresses, covering the same length again. If no list command has been given, the answer is '?'."
+  download:
+    form: "addr : xx xx xx ... <cr>"
+    effect: "Writes the hex values that follow to consecutive addresses starting at addr; this is the command that changes memory. Input with no hex digit ends the command."
+    hub_sizes: "In hub RAM a value of one or two digits is written as a byte, three or four digits as a word, five to eight digits as a long."
+    cog_and_lookup_sizes: "In cog and lookup RAM each write is a long: one value of eight digits, or four two-digit values read as four bytes with the first typed byte the least significant."
+  goto:
+    form: "addr G <cr>"
+    effect: "Calls the code at a cog, lookup or hub RAM address; code that returns comes back to the prompt."
+    reboot: "The address $FC000 is treated as a ROM reboot: after a one-millisecond delay for the last character to leave, the Monitor executes HUBSET ##$1000_0000 to reboot the chip."
+  load_file:
+    form: "L filename.ext <cr>"
+    effect: "Loads a file from the SD card without running it. The file name is an 8+3 name written with a period between name and extension, and is case sensitive."
+    reply: "'=' CR LF when the file loaded, '!' CR LF when the operation failed."
+  run_file:
+    form: "R filename.ext <cr>"
+    effect: "Loads a file from the SD card and runs it, with the same 8+3 case-sensitive file name as L. On success the loaded program runs and the command does not return; on failure the Monitor sends '!' CR LF."
+  quit:
+    form: "Q <cr>"
+    effect: "Returns from the Monitor routine to its caller. The listing's command table describes it as 'Quit Rom Monitor and return to the User Program'. When the Monitor is entered from the ROM's serial command loop, that loop calls it again ('loop back in case of Q<cr>'), so Q there gives a new '*' prompt."
+  taqoz:
+    form: "<esc> <cr>"
+    effect: "Enters TAQOZ."
+
 knowledge_gaps:
-  full_command_grammar:
-    status: "Beyond the 2 Datasheet examples, the complete Monitor command syntax is not documented in primary sources we have ingested"
-    chase: "Mine the Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build) for the Monitor's command parser; search Parallax forums for community-documented usage"
-
-  modify_commands:
-    status: "Datasheet states 'manipulate memory' capability but does not show modify-command syntax"
-    chase: "Same as above"
-
-  microsd_load_run:
-    status: "Datasheet states microSD load/run capability but does not show command syntax"
-    chase: "Same as above"
-
-  exit_mechanism:
-    status: "How to leave Monitor without resetting is not documented"
-
-  invalid_input_behavior:
-    status: "Not documented"
-
   invocation_from_user_code:
-    status: "Unknown whether Monitor can be invoked from a running user program (vs. boot-window only)"
+    status: "Not documented. No Parallax document describes calling the Monitor from a running user program; the ROM listing shows it started only from the booter's serial command loop and from Ctrl+D typed in TAQOZ"
 
 # Cross-references
 related:

@@ -11,9 +11,9 @@ description: |
   display. It returns the current mouse status as a 7-LONG structure written through
   a caller-supplied pointer. The mechanism is identical for all nine DEBUG display
   windows; only the reported coordinate basis differs per window.
-documentation_source: Spin2 v51 (debug-section.txt) + PNut v55 directive matrix
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: PC_MOUSE)"
 documentation_level: comprehensive
-source: "Parallax Spin2 Language Reference v51a (PC_MOUSE P2-side API + 7-long mouse struct); host-side coordinate mapping per PNut/Spin2 v55 DebugDisplayUnit.pas"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: the PC_MOUSE statement, P2-side API and 7-long mouse structure)"
 
 syntax: "PC_MOUSE(pointer_to_7_longs)"
 

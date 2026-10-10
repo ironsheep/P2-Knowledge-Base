@@ -509,3 +509,129 @@ differ by site (m480 VAR, m481 local).
 *Limits:* `^BYTE` only; `^WORD`, `^LONG`, `^structName` arrays are not run, nor a method
 parameter or result declared as a pointer array. One compiler version.
 *→ EF:* none — legality stays CP.
+
+---
+
+## DEBUG (continued)
+
+### CP-008 · `pnut-ts -d` raises no error for a DEBUG window named `Trace` (a SPECTRO and BITMAP directive) or `Field` (a Spin2 reserved word), and stores the name as text exactly as it stores `A` — `LEGALITY`
+*KB:* `language/spin2/statements/debug.yaml`
+*Class:* legality. Three programs that differ only in the window name (`A`, `Trace`, `Field`) each
+compile with exit status 0, and the DEBUG text each binary holds carries the name unchanged in the
+create message and in the channel message. Whether a host opens the window is not shown: the
+compiler gives the three the same treatment.
+*Source:* `proofs/cp-008-name-control.spin2` (`A`), `proofs/cp-008-name-directive.spin2` (`Trace`),
+`proofs/cp-008-name-spin2-keyword.spin2` (`Field`): a SCOPE create, a channel message and one value
+feed. Contrast `proofs/cp-008-field-as-variable.spin2`: `FIELD` as a Spin2 local-variable name.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d` (the contrast without it).
+
+*Command (control):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-control.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-control.spin2
+pnut-ts: Compiling with DEBUG
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-control.bin (9291 bytes)
+pnut-ts: Done
+```
+*Command (`Trace`):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-directive.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-directive.spin2
+pnut-ts: Compiling with DEBUG
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-directive.bin (9303 bytes)
+pnut-ts: Done
+```
+*Command (`Field`):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-spin2-keyword.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-spin2-keyword.spin2
+pnut-ts: Compiling with DEBUG
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-spin2-keyword.bin (9303 bytes)
+pnut-ts: Done
+```
+*Command (the stored text):* ``grep -a -o "`SCOPE [A-Za-z]* SIZE 400 220\|`[A-Za-z]* 'S' -1000 1000" engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-control.bin engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-directive.bin engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-spin2-keyword.bin``
+*Output (2026-10-10; the three `.bin` files just written):*
+```text
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-control.bin:`SCOPE A SIZE 400 220
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-control.bin:`A 'S' -1000 1000
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-directive.bin:`SCOPE Trace SIZE 400 220
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-directive.bin:`Trace 'S' -1000 1000
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-spin2-keyword.bin:`SCOPE Field SIZE 400 220
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-name-spin2-keyword.bin:`Field 'S' -1000 1000
+```
+The two longer binaries are 12 bytes larger than the control: the name is 4 characters longer and
+sits in three messages.
+*Command (contrast, no `-d`):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-field-as-variable.spin2`
+*Output (2026-10-10; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-field-as-variable.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-008-field-as-variable.spin2:5:error:Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, "^", ALIGNW, or ALIGNL (m241)
+```
+The error line is the `| field` local list (line 5).
+**Grounds:** no ingested Parallax document states what a DEBUG window name may be (the Spin2
+Documentation v55 DEBUG tables give display types and directives, and no naming rule). The record
+shows only that the compiler does not check a window name: a directive word and a Spin2 reserved
+word are accepted and stored like any other. That a host then declines to open a window named
+`Trace` is the bench's finding, EF-103.
+*Limits:* three names, one display type (SCOPE). Digit-led names, names of 30 characters or more,
+colour, colour-mode and packed-mode words, the other directives, and the reuse of a name after
+`CLOSE` are not run here. One compiler version.
+*→ EF:* none — legality stays CP; the run-time result is EF-103.
+
+---
+
+## Comments
+
+### CP-009 · A double-brace documentation comment between two terms of an expression is rejected (`Expected end of line (m281)`); the same comment after a complete statement, and a single-brace comment between the same terms, compile — `LEGALITY`
+*KB:* `language/spin2/conventions/vscode-pnut-documentation-style.yaml`
+*Class:* legality. The failing run stops with exit status 1 at the statement; the two controls compile.
+Whether the compiled result differs is not shown (the controls differ in form).
+*Source:* `proofs/cp-009-doc-brace-between-terms.spin2` (`result := speed {{comment between terms}} + 1`),
+`proofs/cp-009-brace-between-terms.spin2` (the same with single braces),
+`proofs/cp-009-doc-brace-after-statement.spin2` (`result := speed * 2 {{documentation comment after the statement}}`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (double brace between terms):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-doc-brace-between-terms.spin2`
+*Output (2026-10-10; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-doc-brace-between-terms.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-doc-brace-between-terms.spin2:7:error:Expected end of line (m281)
+```
+*Command (single brace between terms):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-brace-between-terms.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-brace-between-terms.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-brace-between-terms.bin (6296 bytes)
+pnut-ts: Done
+```
+*Command (double brace after a statement):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-doc-brace-after-statement.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-doc-brace-after-statement.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-009-doc-brace-after-statement.bin (6296 bytes)
+pnut-ts: Done
+```
+The error line is the `result :=` line (7).
+**Grounds:** the Parallax *Spin2 Language Documentation* v55 (2026-05-07), Comments table, row
+"Intra-line or multi-line (documentation)", gives the example `x := 4, {{comment here}} y := 5` and
+says "Everything within double braces is ignored" (`spin2-v55-text.txt:336`). That example places the
+comment after a comma between two assignments, not between two terms of one expression, and is not itself a
+compiling program; the record decides only the between-terms placement.
+*Limits:* one expression shape (`:=` with `+`); a double-brace comment between statements on one
+line is not run; the multi-line double-brace form is run only in the KB example, not here. One
+compiler version.
+*→ EF:* none — legality stays CP.

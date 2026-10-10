@@ -61,7 +61,7 @@ file_structure:
 
   minimal_program:
     description: "The Parallax minimal PASM-only program, verbatim from Spin2 v55 -- reproduced here in its own line layout."
-    source: "Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:188"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Program Structure (Minimal PASM Program)"
     example: |
       DAT             ORG                      'start PASM at hub $00000 for cog $000
       loop            DRVRND  #0 ADDPINS 7     'write a random pattern to P7..P0
@@ -78,39 +78,30 @@ file_structure:
       - con_symbols: "CON _clkfreq = 250_000_000, _errfreq = 0"
         effect: "Selects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
         hubset_cc_ss: "%10_11"
-        source_reference: 1711
       - con_symbols: "CON _xtlfreq = 12_000_000, _clkfreq = 148_500_000, _errfreq = 150_000"
         effect: "Selects XI/XO-crystal-plus-PLL mode, along with frequencies. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
         hubset_cc_ss: "%1x_11"
-        source_reference: 1712
       - con_symbols: "CON _xinfreq = 32_000_000, _clkfreq = 297_500_000, _errfreq = 100_000"
         effect: "Selects XI-input-plus-PLL mode, along with frequencies. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
         hubset_cc_ss: "%01_11"
-        source_reference: 1713
       - con_symbols: "CON _xtlfreq = 16_000_000"
         effect: "Selects XI/XO-crystal mode and frequency."
         hubset_cc_ss: "%1x_10"
-        source_reference: 1714
       - con_symbols: "CON _xinfreq = 100_000_000"
         effect: "Selects XI-input mode and frequency."
         hubset_cc_ss: "%01_10"
-        source_reference: 1715
       - con_symbols: "CON _rcslow"
         effect: "Selects internal RCSLOW oscillator which runs at ~20 KHz."
         hubset_cc_ss: "%00_01"
-        source_reference: 1716
       - con_symbols: "CON _rcfast"
         effect: "Selects internal RCFAST oscillator which runs at 20 MHz+."
         hubset_cc_ss: "%00_00"
-        source_reference: 1717
       - con_symbols: "No symbol and not DEBUG mode"
         effect: "Selects internal RCFAST oscillator which runs at 20 MHz+."
         hubset_cc_ss: "%00_00"
-        source_reference: 1718
       - con_symbols: "No symbol and DEBUG mode"
         effect: "Selects XI/XO-crystal mode and 20 MHz to facilitate DEBUG."
         hubset_cc_ss: "%10_10"
-        source_reference: 1719
     errfreq_is_optional: "_errfreq is optional wherever the table shows it; it defaults to 1_000_000. All three PLL forms above were confirmed to compile without it."
     the_x_bit: "In the %1x_ CC values, x is the crystal-loading bit: if _xtlfreq >= 16_000_000 then x=0, for 15 pF per XI/XO; otherwise x=1, for 30 pF per XI/XO."
     combinations_are_compiler_verified: "Every form above was assembled clean by pnut-ts inside a PASM-only file. That establishes LEGALITY only -- the effect and %CC_SS columns are v55's statements, not the compiler's."
@@ -213,7 +204,7 @@ instruction_format:
       example: "SUB  x, y  WCZ     ' C = borrow of (x - y), Z = result is zero"
 
 register_model:
-  source: "P2 Documentation -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:139 (512 KB hub RAM), :153-154 and :472 (register and lookup RAM), :437-467 (register map); hub and LUT access from the P2 Instructions v35 Rev B/C spreadsheet -- engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv, order 151-154, 220-223"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (512 KB hub RAM; register and lookup RAM), COGS, COG RAM (register map), LOOKUP RAM; hub and LUT access from P2 Instructions v35 - Rev B/C Silicon, order 151-154, 220-223"
   cog_registers:
     size: "512 longs of dual-port register RAM, $000-$1FF"
     general_purpose: "$000-$1EF -- general-purpose registers for code and data"
@@ -241,7 +232,7 @@ register_model:
     timing: "RDLONG 9...16 clocks (cog exec) / 9...26 (hub exec); WRLONG 3...10 / 3...20"
 
 core_instructions:
-  source: "P2 Instructions v35 Rev B/C spreadsheet -- engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv, rows by the sheet's `order` column: MOV 58, SETS 126, SETD 125, ADD 10, SUB 14, MUL 137, NEG 63, AND 50, OR 52, XOR 53, NOT 59, CMP 18, TEST 81, JMP 402, CALL 403, RET 319, DJNZ 169, TJZ 174, TJNZ 175, IF_Z 441, IF_NZ 426, IF_C 447, IF_NC 419, RDLONG 154, WRLONG 223, RDBYTE 152, WRBYTE 221, WAITX 266, GETCT 260 (hub timing cells carry the sheet's '*' = +1 if crossing a hub long; figures for 8 cogs). In the sheet, a `*` on a flag description means Z = (result == 0). GETCT WC caveat: P2-EMPIRICAL-FINDINGS.md EF-068 (cogs 4-7) and EF-079 (cogs 0-3 behave the same). Every example below compiles (pnut-ts)."
+  source: "P2 Instructions v35 - Rev B/C Silicon, rows by the sheet's `order` column: MOV 58, SETS 126, SETD 125, ADD 10, SUB 14, MUL 137, NEG 63, AND 50, OR 52, XOR 53, NOT 59, CMP 18, TEST 81, JMP 402, CALL 403, RET 319, DJNZ 169, TJZ 174, TJNZ 175, IF_Z 441, IF_NZ 426, IF_C 447, IF_NC 419, RDLONG 154, WRLONG 223, RDBYTE 152, WRBYTE 221, WAITX 266, GETCT 260 (hub timing cells carry the sheet's '*' = +1 if crossing a hub long; figures for 8 cogs). In the sheet, a `*` on a flag description means Z = (result == 0). GETCT WC caveat: EF-068 (cogs 4-7) and EF-079 (cogs 0-3 behave the same). Every example below compiles (pnut-ts)."
   data_movement:
     MOV:
       syntax: "MOV  D,{#}S  {WC/WZ/WCZ}"
@@ -496,7 +487,7 @@ labels_and_symbols:
   detailed_reference: "language/pasm2/concepts/labels.yaml"
 
 assembler_directives:
-  source: "Parallax Spin2 Documentation v55 -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:302-303 (DAT symbols and data), :313 (ORG), :316 (FIT, cog), :322-323 (ORGH, FIT, hub), :326-327 (ORGH in Spin2+PASM vs PASM-only programs)"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT symbols and data; ORG; FIT, cog; ORGH, FIT, hub; ORGH in Spin2+PASM vs PASM-only programs)"
   ORG:
     syntax: "ORG  {address{,limit}}"
     description: "Set cog-exec mode. Bare ORG: cog address $000, cog limit $1F8 (both defaults); ORG $100: address $100, limit $1F8; ORG $100,$120: address $100, limit $120."
@@ -568,7 +559,7 @@ debugging_support:
       description: "DEBUG beginner tutorial"
 
 critical_gotchas:
-  source: "P2 Instructions v35 Rev B/C spreadsheet (engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv), order 18, 154, 169, 174, 175, 223, 319, 403, 408 and the encoding column; P2 Documentation -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:452-453 (PA/PB), :3189-3193 (PTRA forms), :5571-5572 (## invokes AUGS/AUGD)"
+  source: "P2 Instructions v35 - Rev B/C Silicon, order 18, 154, 169, 174, 175, 223, 319, 403, 408 and the encoding column; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (PA/PB), HUB RAM, RANDOM ACCESS INTERFACE (PTRA forms), Assembly Language (## invokes AUGS/AUGD)"
   items:
     - "Every instruction is one 32-bit long."
     - "An immediate #S or #D is 9 bits (0-511); ## instead of # makes the assembler insert an AUGS or AUGD that supplies the upper 23 bits, making it 32 bits."

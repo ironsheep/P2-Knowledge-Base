@@ -22,7 +22,7 @@ pin_state_legend:
 
 # THE AUTHORITATIVE TABLE — Hardware Manual 2022-11-01
 boot_pattern_table:
-  source: "Hardware Manual 2022-11-01"
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Boot Up (Boot Pattern table), p.11"
   patterns:
     - p61: float
       p60: float
@@ -62,10 +62,15 @@ boot_pattern_table:
 
 # Boot-time clock state — applies to ALL ROM boot paths
 boot_time_clock_state:
-  source: "P2 Datasheet %SS clock-source table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:834; P2 Hardware Manual, Download Propeller Application -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1593; Prop2 silicon ROM booter listing -- engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:154,434; rcfast_range_to_calibrate_against: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2199; the_one_boot_time_clock_change: P2 Hardware Manual, engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1610-1611, and the Prop2 silicon ROM booter listing, engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:586-595; shutdown_clock: Prop2 silicon ROM booter listing, engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:762-764"
-  oscillator_at_boot: "RCFAST -- '20+ MHz (nominally ~24 MHz) can be switched to at any time— used on boot up.'"
+  source:
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (%SS clock-source table), p.18; Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Download Propeller Application, p.61"
+    - "rom_own_calibration: Parallax Propeller 2 ROM Booter v33_01j, CON block (rc_max) and Constants / initialized variables (timeout_per)"
+    - "rcfast_range_to_calibrate_against: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"
+    - "the_one_boot_time_clock_change: Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Download Propeller Application (Serial Loading Protocol Commands), p.61, and Parallax Propeller 2 ROM Booter v33_01j, Command - clock setup (command_clk)"
+    - "shutdown_clock: Parallax Propeller 2 ROM Booter v33_01j, Serial done (shut_down)"
+  oscillator_at_boot: "RCFAST -- '20+ MHz (nominally ~24 MHz) can be switched to at any time— used on boot up.' (Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18)"
   loader_time_base: "The loader adapts its baud rate from every '>' character 'to keep the baud rate tightly calibrated to the internal RC oscillator that the loader uses during the boot process.'"
-  rcfast_range_to_calibrate_against: "20 MHz min / 24 MHz typ / 30 MHz max"
+  rcfast_range_to_calibrate_against: "20 MHz min / 24 MHz typ / 30 MHz max (Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48)"
   rom_own_calibration: "The boot ROM sizes its serial timeouts against the RCFAST maximum, not a nominal value: 'rc_max = 30_000_000 -- max frequency of RC oscillator' and 'timeout_per long rc_max/10 -- 100ms timeout for serial receive'."
   implication: "Boot-time code (flash loaders, serial download stubs, SD loaders) runs under RCFAST. Timing-sensitive boot-time activity must be calibrated for the RCFAST range, not for the frequency the user application will later select."
   the_one_boot_time_clock_change: "The serial loader's Prop_Clk command changes the clock setting before any application runs -- 'Change Clock Setting: Prop_Clk <INAmask> <INAdata> <INBmask> <INBdata> <HUBSETclocksetting>'. The ROM performs it with the same two-step the datasheet prescribes: HUBSET to the requested setting with the source bits cleared ('switch to partial setting, but in RC fast mode'), WAITX ##rc_max/200 ('wait 5ms'), then HUBSET to the full setting."
@@ -76,7 +81,7 @@ boot_time_clock_state:
 
 # Pins serve multiple roles in sequence
 pin_triple_duty:
-  source: "P2 Hardware Manual -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1881, and the Host Serial and Boot Memory Connections table :285-291; P2 Datasheet pin table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:294"
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, GENERAL PURPOSE I/O PIN EXCEPTIONS, p.69, and the Host Serial and Boot Memory Connections table, Boot Up, p.11; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Descriptions, p.6"
   statement: "P58–P63 : upon power-up/reset the pins have the special purpose of detecting the boot up configuration and communicating with an external flash or SD memory, or with a host system for programming.  After boot up, they become general purpose for the user application (aside from that imposed by any hardware attached to them)."
   datasheet_restatement: "P58-P63 serve in the boot process, then general purpose after."
   roles:
@@ -87,7 +92,7 @@ pin_triple_duty:
 
 # Parallax Edge module switch implementation
 edge_module_switch_mapping:
-  source: "edge-standard-module and edge-32mb-module narratives"
+  source: "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 6. Mode Selection Switch Bank, p.5; P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, 6. Mode Selection Switch Bank, p.5"
   switchable:
     p61:
       switch_label: "FLASH"
@@ -101,11 +106,8 @@ edge_module_switch_mapping:
       warning: "Switching BOTH △ and ▽ ON creates a contradiction — only ONE should be ON"
   not_directly_switchable:
     p60:
-      verification_pending: |
-        How the Edge module asserts the P60 pull-up needed for SD boot
-        is not cleanly extractable from PDF-derived narratives we have.
-        Likely tied to SD card socket presence-detect or one of the SD
-        signal lines. Verify via the Edge schematic PDF or on hardware.
+      sd_boot_pullup: "The pull-up on P60 that SD boot needs is built into the microSD card; the mode selection switch bank has no P60 switch."
+      source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Boot Up (Boot Pattern table, footnote 2 'Built into microSD card'), p.11"
 
 # Cross-references
 related:

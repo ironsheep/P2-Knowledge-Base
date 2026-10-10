@@ -89,7 +89,7 @@ related_instructions:
 version_notes:
   v35v: "ASMCLK no longer needed at start of PASM-only programs; automatic 16-long clock-setter prepended"
   v46: "_AUTOCLK = 0 can inhibit automatic clock-setter, allowing manual ASMCLK use"
-documentation_source: Spin2_v51_documentation
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (ASMCLK)"
 documentation_level: complete
 last_updated: '2025-12-04'
 category: System Control

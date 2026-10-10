@@ -234,6 +234,6 @@ related:
   - language/spin2/methods/setregs.yaml
   - language/spin2/methods/getregs.yaml
 
-source_reference: "Spin2 Documentation v51 - Address Operators table and DAT Data Pointers section"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators, Address Operators table; DAT Blocks, DAT Data Pointers"
 
 oneliner: "Address-of operator - hub address of a VAR/DAT variable or method (an @ stored in DAT data is object-relative in Spin2+PASM; convert with @@)"

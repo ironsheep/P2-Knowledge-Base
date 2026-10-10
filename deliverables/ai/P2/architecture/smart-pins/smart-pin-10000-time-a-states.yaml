@@ -26,7 +26,7 @@ registers:
     function: "Not used in this mode"
   z_register:
     function: "Duration of previous state in clock cycles (max $80000000)"
-    reset_value: "$00000001 during reset (DIR=0); IN is low (Silicon part4-smart-pins.txt)"
+    reset_value: "$00000001 during reset (DIR=0); IN is low (Parallax Propeller 2 Documentation v35, SMART PIN MODES)"
 
 flags:
   in_flag: "Raised on every state transition"

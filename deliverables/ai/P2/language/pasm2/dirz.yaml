@@ -38,7 +38,7 @@ result: >-
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's DIR bit
   Z: Set to the original (pre-instruction) state of the base pin's DIR bit
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRZ / DIRNZ, p.73"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop

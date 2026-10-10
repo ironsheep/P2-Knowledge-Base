@@ -3,330 +3,95 @@ id: spin2-docs-jonnymac
 aliases:
   - "JonnyMac documentation style"
   - "Spin2 documentation conventions JonnyMac"
-version: 1.0.0
 layer: "Layer 3 - Documentation Style (JonnyMac)"
-derived_from: language/spin2/conventions/johnny-mac-documentation-style.yaml v2.0.0
-purpose: Plain English documentation style without formal tags
-applies_to: Projects using JonnyMac community documentation conventions
+source: "OBEX 2842 (Full Duplex Serial, jm_fullduplexserial.spin2, Jon McPhalen); OBEX 2824 (NEC RX, jm_nec_rx_demo.spin2, Jon McPhalen)"
+basis: "Documentation conventions observed in OBEX 2842 and OBEX 2824, community objects by Jon McPhalen (jonnymac); not a Parallax publication. Where those two objects do not show a rule, this page does not state one."
+purpose: How the two JonnyMac objects document methods, code and PASM2
+applies_to: Projects that choose the JonnyMac comment style
 
 summary: |
-  JonnyMac's plain English documentation style emphasizing clarity, completeness, and self-contained
-  documentation without external tool dependencies. Uses double apostrophes for methods, focuses on
-  WHAT methods do rather than HOW, and achieves 98%+ documentation coverage.
-
-description: |
-  Layer 3 documentation style from JonnyMac's complete programming standard. This layer provides
-  only the documentation conventions - no naming requirements, no indentation mandates. Combines
-  with Layer 1 (language) and Layer 2 (formatting) for complete foundation.
-
-documentation_philosophy:
-  principles:
-    - "Document everything internal with 98%+ coverage"
-    - "Use consistent format with identical patterns"
-    - "Prioritize clarity over brevity"
-    - "Write in plain English without formal tags"
-    - "Create self-documenting code that stands alone"
-    
-  coverage_targets:
-    public_methods: "100%"
-    private_methods: "95%+"
-    assembly_code: "50%+ (optimal balance)"
-    constants_variables: "Significant items documented"
+  The documentation layer of the JonnyMac conventions: a method is documented with '' lines
+  placed after its signature, written in plain English with no tags; code is commented with a
+  single apostrophe in a fixed column. The full set of conventions is in
+  language/spin2/conventions/johnny-mac-documentation-style.yaml.
 
 comment_types:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), comment usage"
   method_documentation:
     prefix: "''"
-    usage: "All method documentation"
-    placement: "Immediately after method signature"
-    language: "Plain English descriptions"
-    
+    placement: "After the method signature (see method_documentation_layout)"
+    language: "Plain English sentences; no @param or @returns tags appear in either object"
   code_comments:
     prefix: "'"
-    usage: "In-line code comments and explanations"
-    placement: "After code statements or on separate lines"
-    
-  assembly_comments:
+    placement: "Trailing, starting in column 65 (one comment in OBEX 2842 starts in column 64); lowercase, no closing period"
+  pasm2_comments:
     prefix: "'"
-    usage: "PASM2 assembly documentation"
-    placement: "Inline after instructions or as block comments"
-    coverage: "51.4% (proven optimal balance)"
+    placement: "Trailing, starting in column 65, after the optional WC/WZ column (see pasm2_layout in language/spin2/conventions/johnny-mac-documentation-style.yaml)"
+    style: "Describe the meaning of a step, using := to state the effect: ' t1 := @rxbuf. Not every instruction has a comment."
 
-method_documentation_pattern:
+method_documentation_layout:
+  source: "OBEX 2842 (Full Duplex Serial), pub methods (null, tstart, start, stop, rx, rxcheck, rxtime, padstr, format)"
   structure:
-    - "Zero blank lines between signature and documentation"
-    - "First line explains WHAT the method does"
-    - "Optional secondary lines with '--' prefix for details"
-    - "Documentation before any implementation code"
-    - "Blank line after documentation before code"
-    
-  content_guidelines:
-    primary_line:
-      focus: "Explain WHAT the method does"
-      style: "Purpose-oriented, not implementation-focused"
-      voice: "Active voice when possible"
-      length: "Concise but complete"
-      
-    secondary_lines:
-      prefix: "'-- "
-      content:
-        - "Explain constraints or special conditions"
-        - "Clarify complex parameters or return values"
-        - "Note side effects or state changes"
-        - "Document assumptions or preconditions"
+    - "Signature line."
+    - "ONE blank line."
+    - "Documentation: '' lines. The first line says what the method does."
+    - "Further lines start with '' -- and add a constraint, a parameter or a return value."
+    - "ONE blank line."
+    - "Body, indented two spaces."
+  coverage: "Not every method is documented: lower() in OBEX 2842 and main(), setup() and wait_for_terminal() in OBEX 2824 have no documentation lines."
+  parameter_lists: "Parameters are listed with dots filling the name column ('' -- rxpin... receive pin (-1 if not used)); a value table continues on '' lines aligned under the text."
+  content_observed:
+    - "First line is a verb phrase stating the action: 'Pulls byte from receive buffer if available', 'Emit z-string at p_str', 'Wait for transmit buffer to empty'."
+    - "A '' -- line states a blocking behavior or a special return value: '-- will wait if buffer is empty', '-- returns -1 if buffer is empty'."
 
-method_templates:
-  simple_method:
-    pattern: |
-      PUB start(value)
-      '' Seed prng for predictable "random" sequences
-      '' -- good for memory games like Simon
-      
-        IF (value == 0)
-          seed := DFLT_SEED
-        ELSE
-          seed := value
-          
-    notes:
-      - "Primary line explains purpose"
-      - "Secondary line provides usage context"
-      - "Blank line before implementation"
-      
-  method_with_return:
-    pattern: |
-      PUB random() : result
-      '' Returns new psuedo-random number
-      
-        result := ??seed
-        
-    notes:
-      - "Brief, clear purpose statement"
-      - "No @returns tag needed - obvious from signature"
-      
-  complex_method:
-    pattern: |
-      PUB tx(txbyte)
-      '' Transmit byte through smart pin
-      '' -- will wait if buffer is full
-      
-        REPEAT
-          IF (rqs_full() == FALSE)
-            WYPIN(TX_PIN, txbyte)
-            QUIT
-          ELSE
-            WAITCT(GETCT() + TX_BIT_TICKS)
-            
-    notes:
-      - "Primary line: what it does"
-      - "Secondary line: important behavior note"
-      - "No parameter documentation needed for obvious cases"
-      
-  method_with_complex_params:
-    pattern: |
-      PUB rx_check() : rxbyte | check
-      '' Check for received byte (no blocking)
-      '' -- returns -1 if no byte available
-      '' -- returns byte (0..255) if available
-      
-        rxbyte := -1
-        check := RDPIN(RX_PIN)
-        IF (check)
-          rxbyte := RDPIN(RX_PIN) >> 24
-          
-    notes:
-      - "Primary line: core function"
-      - "Secondary lines: clarify return value behavior"
-      - "Explain special values (-1 vs 0..255)"
+example_documented_method:
+  source: "OBEX 2842 (Full Duplex Serial), pub start()"
+  code: |
+    pub start(rxpin, txpin, mode, baud) : result | baudcfg, spmode
 
-special_method_types:
-  null_placeholder:
-    pattern: |
-      PUB null()
-      '' This is not a top-level object
-      
-        ' null method for non-top-level objects
-        
-  initialization:
-    pattern: |
-      PUB start(rxpin, txpin, mode, baud) : result | baudcfg, spmode
-      '' Start simple serial coms on rxpin and txpin at baud
-      '' -- rxpin... receive pin (-1 if not used)
-      '' -- txpin... transmit pin (-1 if not used)
-      '' -- mode.... %0xx1 = invert rx
-      ''             %0x1x = invert tx
-      ''             %01xx = open-drain/open-source tx
+    '' Start simple serial coms on rxpin and txpin at baud
+    '' -- rxpin... receive pin (-1 if not used)
+    '' -- txpin... transmit pin (-1 if not used)
+    '' -- mode.... %0xx1 = invert rx
+    ''             %0x1x = invert tx
+    ''             %01xx = open-drain/open-source tx
 
-        stop()
-        ' [implementation continues...]
-        
-  cleanup:
-    pattern: |
-      PUB stop()
-      '' Disable smart pin serial coms
-      
-        IF (rx_pin_num >= 0)
-          PINF(rx_pin_num)
-        IF (tx_pin_num >= 0)
-          PINF(tx_pin_num)
-        LONGFILL(@rx_pin_num, -1, 2)         ' mark both pins unused
+      stop()
 
-pasm2_documentation:
-  philosophy:
-    coverage: "51.4% (optimal balance)"
-    rationale: "Comprehensive without cluttering simple operations"
-    
-  style_rules:
-    - "Single apostrophe for all assembly comments"
-    - "Inline comments after instructions when practical"
-    - "Block comments before code sections"
-    - "Consistent alignment at reasonable column"
-    - "Focus on register usage and algorithm explanation"
-    
-  what_to_comment:
-    - "Register assignments and their purpose"
-    - "Algorithm steps and logic flow"
-    - "Hardware interactions and pin operations"
-    - "Timing considerations and delays"
-    - "Loop logic and control flow"
-    
-  what_not_to_comment:
-    - "Obvious operations like simple moves"
-    - "Redundant information restating the instruction"
-    
-  inline_example: |
-    CON
-    
-      SENSOR_DELAY = 1_000                     ' clocks between sample points
-    
-    PUB read_sensor(sensor_pin) : sensor_value | pin_config, delay_count, bit_counter
-    '' Read one byte from a bit-banged sensor
-    '' -- requires precise bit-banging for this sensor type
-    '' -- the sensor line idles high and the sensor pulls it low
-    
-      ORG
-        ' Hold the line high through a weak drive so the sensor can pull it low
-        MOV     pin_config, ##P_HIGH_15K       ' drive high 15 kOhm
-        WRPIN   pin_config, sensor_pin         ' apply to sensor pin
-        DRVH    sensor_pin                     ' DIR=1, OUT=1 - a drive is live only while DIR is high
-        
-        ' Timing loop for sensor reading
-        MOV     delay_count, ##SENSOR_DELAY    ' load delay constant
-        MOV     bit_counter, #8                ' read 8 bits
-        
-    read_loop
-        WAITX   delay_count                    ' precise timing delay
-        TESTP   sensor_pin              WC     ' sample the line into C
-        RCL     sensor_value, #1               ' shift C in as the next bit, msb first
-        DJNZ    bit_counter, #read_loop        ' continue for all bits
-      END
+example_null_method:
+  source: "OBEX 2842 (Full Duplex Serial), pub null()"
+  code: |
+    pub null()
 
-constants_and_variables:
-  constant_documentation:
-    style: "Inline comments with clear explanations"
-    format: "Explain purpose, include units"
-    example: |
-      CON
-        ' Serial communication configuration
-        BAUD_115200   = 115_200              ' standard high-speed baud rate
-        BAUD_230400   = 230_400              ' maximum reliable baud rate
-        
-        ' Pin assignments for standard configuration
-        RX_PIN        = 63                   ' receive pin (P63)
-        TX_PIN        = 62                   ' transmit pin (P62)
-        
-        ' Timing and buffer constants
-        TIMEOUT_MS    = 5000                 ' 5 second timeout for operations
-        BUFFER_SIZE   = 256                  ' circular buffer size (power of 2)
-        
-  variable_documentation:
-    style: "Inline comments describing purpose and valid ranges"
-    format: "Explain function, note special values"
-    example: |
-      VAR
-        ' Communication state variables
-        LONG  rx_pin_num                    ' receive pin number (-1 if disabled)
-        LONG  tx_pin_num                    ' transmit pin number (-1 if disabled)
-        LONG  baud_rate                     ' current baud rate setting
-        
-        ' Buffer management
-        BYTE  tx_buffer[BUFFER_SIZE]        ' transmit circular buffer
-        BYTE  rx_buffer[BUFFER_SIZE]        ' receive circular buffer
-        
-  content_guidelines:
-    constants:
-      - "Explain purpose and what the constant controls"
-      - "Include units (Hz, ms, bytes, pins, etc.)"
-      - "Note valid ranges for configuration values"
-      - "Clarify relationships between constants"
-      
-    variables:
-      - "Describe function and what data the variable holds"
-      - "Specify data ranges and valid values"
-      - "Explain relationships between variables"
-      - "Note special values like -1 for 'disabled'"
+    '' This is not a top-level object
 
-comment_quality_guidelines:
-  excellent_comments:
-    - "Explain the WHY behind code decisions"
-    - "Clarify complex logic with clear explanations"
-    - "Document assumptions and preconditions"
-    - "Note side effects or state changes"
-    - "Explain algorithm steps and calculations"
-    
-  poor_comments_to_avoid:
-    - "Restating obvious code operations"
-    - "Providing redundant information"
-    - "Using vague descriptions"
-    - "Writing incomplete fragments"
-    
-  formatting_standards:
-    spacing: "Single space after apostrophes"
-    alignment: "Consistent column alignment for inline comments"
-    sentences: "Use complete sentences for clarity"
+declaration_comments:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), con and var blocks"
+  rules:
+    - "Constants and variables carry a short trailing comment in column 65. The var entries of OBEX 2842 read ' cog flag/id', ' rx smart pin', ' hub address of rxbuf'. A few entries have none, for example txbuf."
+    - "A pin constant carries its direction in braces after the value: IR_SENSE = 15  { I }."
+    - "A block label in braces after con or dat names the group: con { fixed io pins }."
 
-automation_instructions:
-  parsing:
-    - "Identify methods needing documentation"
-    - "Extract method signature components"
-    - "Determine visibility level (PUB/PRI)"
-    - "Parse parameters, returns, and locals"
-    
-  generation:
-    - "Place documentation immediately after signature"
-    - "Use double apostrophes for all methods"
-    - "Write clear WHAT descriptions"
-    - "Add '--' prefixed details for complex cases"
-    - "No formal tags, use plain English"
-    - "Maintain consistent formatting"
+example_declarations:
+  source: "OBEX 2824 (NEC RX), con blocks"
+  code: |
+    con { timing }
 
-why_this_style_works:
-  simplicity:
-    - "No tools required to read documentation"
-    - "Plain English accessible to all"
-    - "Self-contained within source code"
-    
-  effectiveness:
-    - "98%+ method coverage proven achievable"
-    - "51.4% assembly coverage optimal balance"
-    - "15+ years of community adoption"
-    
-  maintainability:
-    - "Easy to follow patterns"
-    - "Consistent presentation throughout"
-    - "Scales from small utilities to complex systems"
+      CLK_FREQ = 200_000_000                                        ' system freq as a constant
+      MS_001   = CLK_FREQ / 1_000                                   ' ticks in 1ms
+      US_001   = CLK_FREQ / 1_000_000                               ' ticks in 1us
 
-integration_notes:
-  combine_with:
-    layer_1: "guides/spin2-getting-started.yaml (language mechanics)"
-    layer_2: "language/spin2/conventions/spin2-formatting-standards.yaml (professional structure)"
-    
-  optional:
-    layer_4: "language/spin2/conventions/spin2-naming-jonnymac.yaml (full JonnyMac standard)"
-    
-  standalone_usage:
-    - "Can use JonnyMac docs with any naming style"
-    - "Works with VSCode tooling (though VSCode style may be preferred for IntelliSense)"
-    - "Compatible with team preferences on indentation"
+      _clkfreq = CLK_FREQ                                           ' set system clock
 
-see_also:
-  full_standard: language/spin2/conventions/johnny-mac-documentation-style.yaml
-  organization_standard: language/spin2/conventions/p2-source-file-organization-standard.yaml
+
+    con { app io pins }
+
+      IR_SENSE = 15  { I }                                          ' ir sensor (38kHz)
+
+related:
+  - language/spin2/conventions/johnny-mac-documentation-style.yaml
+  - language/spin2/conventions/spin2-naming-jonnymac.yaml
+  - language/spin2/conventions/spin2-formatting-standards.yaml
+  - language/spin2/conventions/p2-source-file-organization-standard.yaml
+  - language/spin2/conventions/vscode-pnut-documentation-style.yaml
+  - guides/spin2-getting-started.yaml

@@ -33,10 +33,7 @@ pin_access:
   pin_organization: "Logical grouping by availability"
 
 connectivity:
-  source: >-
-    64019 P2 Edge Mini Breakout Board Guide v1.1 (Parallax Inc., 2020-11-30) --
-    engineering/ingestion/sources/edge-mini-breakout/edge-mini-breakout-narrative.txt:16-33
-    (overview + accessible pins), :34-45 (Features), :54-65 (Key Specifications).
+  source: "P2 Edge Mini Breakout Board (#64019) v1.1 11/30/2020, overview and accessible pins, and Features, p.1; Key Specifications, p.2"
   accessible_pins:
     count: 40
     range: "P0-P31 and P56-P63 are available at pin headers"
@@ -187,14 +184,16 @@ physical_advantages:
   weight: "Minimal impact on battery-powered designs"
   
 documentation:
-  primary: "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1"
-  related:
-    - "hardware/edge-32mb-module.yaml"
-  references:
-    - "32MB Edge module documentation (optimal pairing)"
-    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
-    - "Pin mapping and limitations guide"
-    
+  primary: "P2 Edge Mini Breakout Board (#64019) v1.1 11/30/2020, p.1"
+
+references:
+  - "32MB Edge module documentation (optimal pairing)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
+  - "Pin mapping and limitations guide"
+
+related:
+  - "hardware/edge-32mb-module.yaml"
+
 availability:
   vendor: "Parallax Inc."
   website: "parallax.com"

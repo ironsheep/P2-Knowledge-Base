@@ -90,5 +90,5 @@ notes:
 cross_references:
   - pasm2_pr_registers: "language/pasm2/registers/pr-registers"
 
-documentation_source: "PASM2 Manual 2022/11/01 Page 118"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Registers, p.118"
 last_updated: "2025-12-04"

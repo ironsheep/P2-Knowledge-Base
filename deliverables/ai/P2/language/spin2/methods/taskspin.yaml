@@ -26,7 +26,7 @@ returns:
   description: |
     As a statement, TASKSPIN returns nothing. Used as an expression term, it
     returns the assigned task number (0-31), or -1 if no task slot was free.
-    Source: Spin2 v55 keyword reference (v47 change note).
+    Source: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: TASKSPIN).
 examples:
   - code: |
       {Spin2_v47}                              ' REQUIRED directive
@@ -73,13 +73,10 @@ taskptr_table_location: |
   LOWER portion of $100..$11F free for user code as well. This range
   overlaps the ORG..END inline-PASM code area ($000..$11F), so multitasking
   and large inline-PASM blocks compete for the same space.
-  Source: Chip Gracey clarification 2026-05-02 verbatim.
+  Source: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100); IN-LINE PASM CODE (free cog registers $000..$11F).
 timing:
   execution_model: |
-    Spin2 methods execute via the bytecode interpreter. The interpreter is
-    engineered to run at minimum cost. We do not publish a clock count for
-    this method because we do not have a verifiable measurement (no clean
-    single-PASM-instruction backing to cite).
+    Spin2 methods execute via the bytecode interpreter. Clock count: not documented.
 
 related:
   - language/spin2/methods/taskstop.yaml

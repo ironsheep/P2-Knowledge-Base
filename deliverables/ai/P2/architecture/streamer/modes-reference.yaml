@@ -56,15 +56,9 @@ encoding:
     The defect is invisible in testing -- the capture "works", the buffer fills, and
     the data is simply the wrong shape.
   source: >-
-    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md
-    -- EF-065 (grounds F-309) and EF-059 (grounds F-260), both real P2, 2026-08-20 and
-    2026-08-14. Per-width alignment rules are in
-    architecture/streamer/pin-selection.yaml sub_pin_selection.bits_free_by_width; the
-    DDS/Goertzel D[22:19] multiple-of-four form is in
-    architecture/streamer/dds-goertzel.yaml adc_input_pins.pin_block_selection.
-    field_notation: Silicon Doc, silicon-doc-text.txt:3004-3015 immediate,
-    :3128-3139 RDFAST, :3292-3303 WRFAST. The "a" bit: Silicon Doc,
-    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1456.
+    EF-065 and EF-059, both real P2, 2026-08-20 and 2026-08-14.
+    field_notation: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB RAM, FAST SEQUENTIAL FIFO INTERFACE (immediate, RDFAST, WRFAST).
+    The "a" bit: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER.
   
 # Mode categories by D[31:28]
 categories:

@@ -18,7 +18,7 @@ description: >-
   C=0,Z=0: (INA & D) != S; C=0,Z=1: (INA & D) == S;
   C=1,Z=0: (INB & D) != S; C=1,Z=1: (INB & D) == S
 sources:
-  - "description (PAT event four cases): Silicon Doc, silicon-doc-text.txt:2157-2161"
+  - "description (PAT event four cases): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (POLLPAT/WAITPAT event flag)"
 flags_affected:
   C: No effect (read as input)
   Z: No effect (read as input)

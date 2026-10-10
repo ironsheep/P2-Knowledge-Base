@@ -38,7 +38,7 @@ encoding:
   z: —
   clocks: '2 or 4 / 2 or 13-20'
   notes: PC is written only when Dest is signed
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJS / TJNS, p.137"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_dsj

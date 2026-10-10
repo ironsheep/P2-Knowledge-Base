@@ -177,7 +177,7 @@ debug_interaction:
       DEBUG_COGS = %0000_0001   ' only the reporting cog carries the debug interrupt
   measured_cost: "With the default mask a streamer probe crashed into the single-step debugger's memory dump and its Goertzel accumulators read 1,000,000-7,000,000 of corruption; restricting DEBUG_COGS to cog 0 collapsed them to their true values in the hundreds."
   general_rule: "Any hardware sequencer measured under the debugger may be perturbed by it. Restrict DEBUG_COGS to the reporting cog when measuring."
-  source: "engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md EF-057 (2026-08-14); the limitation is also recorded in architecture/debug_interrupt.yaml (limitations.streamer_interaction)"
+  source: "EF-057 (2026-08-14)"
   see_also:
     - "architecture/debug_interrupt.yaml"
     - "language/spin2/constants/special-configuration-symbols.yaml"

@@ -1,270 +1,53 @@
-title: P2 Source File Organization Standard
+title: P2 Source File Organization
 id: p2-source-file-organization-standard
 aliases:
   - "P2 source file organization conventions"
   - "source file layout conventions"
-style_name: P2 Community File Structure Standard
+style_name: Source file header and license block, as shown in two community objects
 version: 1.0.0
-applies_to: All SPIN2 and PASM2 source files
-summary: Community standard for organizing P2 source files with consistent structure, proper attribution, and legal compliance
+applies_to: Spin2 source files
+source: "OBEX 2842 (Full Duplex Serial, jm_fullduplexserial.spin2, Jon McPhalen); OBEX 2824 (NEC RX, jm_nec_rx_demo.spin2, Jon McPhalen)"
+summary: How OBEX 2842 and OBEX 2824 open a source file with a header banner and close it with a license block
 
 description: |
-  Establishes the community standard for organizing P2 source files, regardless of internal documentation style. These structural conventions ensure all P2 code follows consistent, professional practices that benefit the entire community.
-  
-  Key principle: Every P2 source file should be self-documenting with proper attribution, clear purpose, and legal compliance.
+  OBEX 2842 and OBEX 2824 are community objects by Jon McPhalen, not Parallax publications.
+  Both open with a header banner of documentation comment lines and both close with a license
+  block. This page records that structure as the two files show it. Where the two objects do
+  not show a rule, this page does not state one.
 
-universal_file_structure: |
-  [FILE HEADER - Required]
-  ↓
-  [CODE SECTIONS - Flexible Organization]
-  ↓  
-  [LICENSE FOOTER - Required]
+universal_file_structure: "header banner, then the code blocks, then con { license } as the last block"
 
-section_organization:
-  flexibility_rules:
-    - CON sections can be repeated for grouping related constants
-    - VAR sections can be repeated for organizing variables by function
-    - DAT sections can be repeated for multiple data/assembly blocks
-    - OBJ sections can be repeated (typically used once)
-    - PUB/PRI sections are implicit and can be mixed throughout
-    - The compiler accepts blocks in any order; the order below is this standard's convention for readability
+header_banner:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), file header comment"
+  prefix: "Every banner line starts with two apostrophes, so the banner is a documentation comment."
+  rule_lines: "The banner opens and closes with a line of two apostrophes, a space and 97 equals signs (100 characters in all), and an empty documentation comment line follows the opening rule and precedes the closing rule."
+  fields:
+    - "File: the file name"
+    - "Purpose: a one-line description; OBEX 2842 continues it on '-- ' lines"
+    - "Author or Authors: OBEX 2824 writes Jon \"JonnyMac\" McPhalen, then a Copyright (c) 2020 line, then '-- see below for terms of use'; OBEX 2842 writes Jon McPhalen, then '-- based on work by Chip Gracey', then '-- see below for terms of use'"
+    - "E-mail: a contact address"
+    - "Started: left empty in both objects"
+    - "Updated: a date written as DD MMM YYYY (15 DEC 2020, 04 JAN 2022); OBEX 2842 adds a '-- ' line describing the change"
+    - "{$P2}: the last field line, before the closing rule"
+  dot_leaders: "Each label is followed by dots so that every value starts in the same column."
 
-  standard_single_section_order:
-    - con { constants and configuration }
-    - dat { shared data and assembly code }
-    - obj { object dependencies }
-    - var { instance variables }
-    - pub [public methods]
-    - pri [private methods]
-    - con { license }
+license_block:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), final con { license } block"
+  placement: "The last block of the file."
+  form: "A con { license } block holding a {{ ... }} comment."
+  text: "The comment starts 'Terms of Use: MIT License' and gives the MIT permission text, from 'Permission is hereby granted, free of charge' to 'OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'"
 
-file_header_requirements:
-  required_components:
-    file_name:
-      format: "''   File....... actual_filename.spin2"
-      requirement: "Must exactly match actual file name"
-      purpose: "Identifies files when viewing code excerpts"
-      
-    purpose_statement:
-      format: "''   Purpose.... Clear description of what this object does"
-      requirement: "One-line preferred, can extend if needed"
-      purpose: "Focus on WHAT the object provides"
-      
-    author_attribution:
-      format: |
-        ''   Author..... Full Name "Nickname" LastName
-        ''               Copyright (c) YYYY Full Legal Name
-        ''               -- see below for terms of use
-      requirement: "Copyright must match license block"
-      purpose: "Legal attribution and community identity"
-      
-  optional_components:
-    contact_info:
-      format: "''   E-mail..... author@domain.com"
-      alternatives: ["GitHub profile", "Forum username"]
-      
-    version_info:
-      format: |
-        ''   Started.... DD MMM YYYY
-        ''   Updated.... DD MMM YYYY
-      date_format: "DD MMM YYYY (e.g., 15 JUN 2024)"
-      
-  header_template: |
-    '' =================================================================================================
-    ''
-    ''   File....... filename.spin2
-    ''   Purpose.... Brief but complete description of functionality
-    ''   Author..... Your Name "Nickname" LastName
-    ''               Copyright (c) YYYY Your Legal Name
-    ''               -- see below for terms of use
-    ''   E-mail..... your.email@domain.com
-    ''   Started.... DD MMM YYYY
-    ''   Updated.... DD MMM YYYY
-    ''
-    '' =================================================================================================
-    
-  formatting_rules:
-    separator: "Exactly 97 equals signs (=)"
-    prefix: "All header lines use '' prefix"
-    dot_leaders: "Minimum 7 dots, aligned consistently"
-    blank_lines: "Empty comment lines after opening and before closing"
+file_names:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), file names"
+  observed: "Lowercase with underscores and a shared jm_ prefix: jm_fullduplexserial.spin2, jm_nec_rx.spin2, jm_nec_rx_demo.spin2."
 
-code_section_guidelines:
-  con_section:
-    purpose: "Constants and configuration"
-    best_practices:
-      - Group related constants with comment headers
-      - Use meaningful names explaining purpose
-      - Include units in comments (Hz, ms, bytes)
-      - Document special requirements
-      
-  dat_section:
-    purpose: "Shared data and assembly code"
-    usage:
-      - Variables accessed by both SPIN2 and PASM2
-      - Lookup tables and constant data arrays
-      - PASM2 cog code for background operations
-      
-  obj_section:
-    purpose: "Object dependencies"
-    guidelines:
-      - List all required objects with purpose comments
-      - Use meaningful instance names
-      - Document why each object is needed
-      
-  var_section:
-    purpose: "Instance variables"
-    organization:
-      - Group variables by functional purpose
-      - Document data types, ranges, special values
-      - Explain relationships between variables
-      
-  pub_section:
-    method_order:
-      1: "Main/Entry point (if top-level)"
-      2: "Initialization methods (start, begin, init)"
-      3: "Core functionality methods"
-      4: "Utility methods"
-      5: "Status/Query methods"
-      6: "Cleanup methods (stop, close, shutdown)"
-      
-  pri_section:
-    usage: "Private helper methods (optional)"
-    guidelines: "Keep focused and single-purpose"
+block_order:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), block structure"
+  observed: "The two objects order their code blocks differently (OBEX 2842: con, obj, var, pub and pri, dat; OBEX 2824: con, obj, dat, var, pub), and both repeat CON blocks with different labels. The block layout and the formatting conventions are in language/spin2/conventions/spin2-formatting-standards.yaml."
 
-license_footer_requirements:
-  placement: "Always at end of file"
-  format: "Block comment using {{ }}"
-  standard_license: "MIT License"
-  
-  mit_license_decoration: |
-    con { license }
-    
-    {{
-    
-      Copyright (c) YYYY Your Legal Name
-    
-      Terms of Use: MIT License
-    
-      Permission is hereby granted, free of charge, to any person obtaining a copy of this
-      software and associated documentation files (the "Software"), to deal in the Software
-      without restriction, including without limitation the rights to use, copy, modify,
-      merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
-      permit persons to whom the Software is furnished to do so, subject to the following
-      conditions:
-    
-      The above copyright notice and this permission notice shall be included in all copies
-      or substantial portions of the Software.
-    
-      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-      INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-      PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-      CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
-      OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-    
-    }}
-    
-  requirements:
-    - Always include license for legal protection
-    - Use standard MIT License as community standard
-    - Include copyright decoration at top of license block
-    - Match header copyright with license copyright
-    - Use block comment format with {{ }}
-
-professional_attribution:
-  author_formats:
-    with_nickname: "Jon \"JonnyMac\" McPhalen"
-    multiple_authors: |
-      Authors.... Original Author (original implementation)
-                  Contributing Author (enhancements)
-    corporate: |
-      Author..... Company Name
-      Developer.. Individual Name
-      
-  copyright_formats:
-    single_year: "Copyright (c) 2024 Author Name"
-    year_range: "Copyright (c) 2020-2024 Author Name"
-    multiple_holders: |
-      Copyright (c) 2024 Original Author
-      Portions Copyright (c) 2024 Contributor
-
-file_naming_conventions:
-  standard_files:
-    format: "descriptive_name.spin2"
-    style: "lowercase with underscores"
-    examples: ["sensor_interface.spin2", "motor_controller.spin2"]
-    
-  library_files:
-    format: "author_initials_description.spin2"
-    examples: ["jm_serial.spin2", "js_math_utils.spin2"]
-    purpose: "Identify author/source, prevent conflicts"
-    
-  project_files:
-    format: "project_context_purpose.spin2"
-    examples: ["robot_main.spin2", "sensor_test.spin2"]
-
-quality_checklist:
-  file_structure:
-    - Complete file header with required components
-    - Proper section organization
-    - License block present at end
-    - Consistent formatting throughout
-    
-  attribution:
-    - Author name matches license copyright
-    - Copyright year reflects development timeframe
-    - Contact information current
-    - Purpose statement clearly describes functionality
-    
-  legal_compliance:
-    - MIT license text matches standard wording
-    - No conflicting license statements
-    - All dependencies properly attributed
-    - Third-party code properly credited
-    
-  professional_presentation:
-    - Consistent code style
-    - Meaningful variable names
-    - No inappropriate content
-    - Spelling and grammar checked
-
-common_issues_to_avoid:
-  header_problems:
-    - Missing or incomplete file headers
-    - Copyright year mismatch
-    - File name doesn't match actual filename
-    - No contact information
-    
-  organization_issues:
-    - Sections in wrong order
-    - Mixed public/private methods
-    - Unclear variable purposes
-    - Missing object dependencies
-    
-  license_problems:
-    - No license block
-    - Modified license text
-    - Copyright mismatch between header and license
-    - Conflicting license statements
-
-compatibility_with_documentation_styles:
-  note: "This organizational standard works with any internal documentation style"
-  supported_styles:
-    - VSCode Spin2 Extension style
-    - Johnny Mac documentation style
-    - Other documentation approaches
-  principle: "Focuses on structure, not specific documentation format"
-
-implementation_priority:
-  1: "File headers - Most visible improvement"
-  2: "License blocks - Essential for legal compliance"
-  3: "Section organization - Improves readability"
-  4: "Consistent formatting - Professional polish"
-
-key_benefits:
-  - Universal structure works with any documentation approach
-  - Professional standards elevate community code quality
-  - Legal clarity ensures proper attribution
-  - Easy maintenance through consistent patterns
-  - Community growth through professional appearance
+related:
+  - language/spin2/conventions/spin2-formatting-standards.yaml
+  - language/spin2/conventions/johnny-mac-documentation-style.yaml
+  - language/spin2/conventions/spin2-docs-jonnymac.yaml
+  - language/spin2/conventions/spin2-naming-jonnymac.yaml
+  - language/spin2/conventions/vscode-pnut-documentation-style.yaml

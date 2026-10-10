@@ -28,7 +28,7 @@ description: 'WC/WZ   Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].'
 flags_affected:
   C: Set to D[S[4:0]] (tested bit value), or AND/OR/XOR with C
   Z: Set to D[S[4:0]] (tested bit value), or AND/OR/XOR with Z
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTB / TESTBN, p.134"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_testb

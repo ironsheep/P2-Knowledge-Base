@@ -6,15 +6,13 @@ description: |
   Both keys (p2kbSpin2InlinePasm and p2kbSpin2InlinePasm2) are kept indexed
   for back-compat with existing references; this stub eliminates content
   drift between the two locations.
-documentation_source: redirect_stub
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE"
 documentation_level: stub
 created: 2025-09-09
 updated: 2026-04-29
 
 status: |
-  This file was previously a parallel description of inline PASM2. It has
-  been demoted to a stub on 2026-04-29 because it duplicated and (in places)
-  drifted from the canonical entry. All authoritative content now lives in
+  Redirect stub. All authoritative content on inline PASM2 is in
   language/spin2/constructs/inline_pasm.yaml.
 
 key_facts_summary:
@@ -27,14 +25,14 @@ key_facts_summary:
     V50+ adds an ORGH...END inline option where code stays in hub RAM and
     runs as hub-exec (no cog-RAM copy of code); the 16-long variable buffer
     at $1E0..$1EF behaves identically. See language/spin2/assembly-directives/orgh.yaml.
-  variable_limit: "16 long variables (params + result + locals only); copied to cog $1E0..$1EF. Per Spin2 v51 documentation verbatim."
+  variable_limit: "16 long variables (params + result + locals only); copied to cog $1E0..$1EF. Per Spin2 Language Documentation v55 (IN-LINE PASM CODE) verbatim."
   code_size: "For ORG..END: inline code area is $000..$11F (288 longs) when no multitasking is in use, plus LUT $000..$00F. For ORGH..END (V50+): up to $FFFF longs in hub RAM. Code is buffered separately from the 16-long variable area in either case."
   multitasking_caveat: |
     $100..$11F is the multitasking taskptr table, building DOWNWARD from $11F.
     Programs using fewer than 32 software tasks leave the LOWER portion of
     $100..$11F free for user code. This range overlaps the ORG..END inline
     code area, so multitasking and large inline-PASM blocks compete for the
-    same space. Source: Chip Gracey clarification 2026-05-02 verbatim.
+    same space. Source: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100).
   label_rule: "Inline PASM labels are local to the ORG..END block; a plain label (lp), a '.'-prefixed (.lp) or a ':'-prefixed (:lp) label all work"
 
 canonical_source: language/spin2/constructs/inline_pasm.yaml

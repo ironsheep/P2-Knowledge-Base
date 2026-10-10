@@ -1,5 +1,5 @@
 # Complete P2 System Registers Index
-# Source: Silicon Doc v35, COG-RAM-REGISTER-MAP.md
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM, GENERAL PURPOSE REGISTERS
 # Comprehensive reference for all P2 system registers
 
 
@@ -18,8 +18,7 @@ aliases:
 metadata:
   title: "P2 System Registers Complete Index"
   description: "All P2 system registers with addresses, functions, and key characteristics"
-  source: "Silicon Doc v35"
-  extraction_date: "2025-09-06"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM"
   total_registers: "8 special-purpose ($1F8-$1FF) + 8 dual-purpose ($1F0-$1F7) + 496 general-purpose ($000-$1EF) = 512"
   per_register_files: >-
     This index carries the full content for every register it lists -- address, normal and
@@ -85,12 +84,10 @@ dual_purpose_registers:
     special_function: "PA"
     description: "CALLD-imm return, CALLPA parameter, or LOC address"
     source: >-
-      Cell-identical in three ingested authorities: Propeller 2 Documentation v35 (Rev
-      B/C), engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:452; P2
-      Hardware Manual 2022/11/01,
-      engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:357;
-      P2 Datasheet 2022/11/01,
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:564.
+      Cell-identical in the three documents below.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Dual-Purpose Registers).
+      Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Dual-Purpose Registers, p.15.
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Register RAM, p.13.
     note: >-
       PA holds the RETURN address written by a CALLD with an immediate operand -- it is
       not that instruction's parameter. Separately, PA is the parameter register read by
@@ -101,12 +98,10 @@ dual_purpose_registers:
     special_function: "PB"
     description: "CALLD-imm return, CALLPB parameter, or LOC address"
     source: >-
-      Cell-identical in three ingested authorities: Propeller 2 Documentation v35 (Rev
-      B/C), engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:453; P2
-      Hardware Manual 2022/11/01,
-      engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:357;
-      P2 Datasheet 2022/11/01,
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:565.
+      Cell-identical in the three documents below.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Dual-Purpose Registers).
+      Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Dual-Purpose Registers, p.15.
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Register RAM, p.13.
     note: >-
       PB mirrors PA: the CALLD-imm return address, and the parameter register read by
       CALLPB (not CALLPA). These two rows are deliberately NOT identical: the sources
@@ -343,8 +338,4 @@ see_also:
   - "Debug ISR System"
 
 source:
-  document: "Silicon Doc v35"
-  section: "COG RAM Register Map"
-  page_reference: "COG-RAM-REGISTER-MAP.md"
-  extraction_date: "2025-09-06"
-  completeness: "All system registers documented with addresses and functions"
+  document: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Dual-Purpose Registers and Special-Purpose Registers)"

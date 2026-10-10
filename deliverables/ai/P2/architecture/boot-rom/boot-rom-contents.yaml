@@ -2,32 +2,28 @@
 # Sources:
 #   - Hardware Manual 2022-11-01 (boot ROM size and content list)
 #     (boot ROM size/content consolidated from the Hardware Manual)
-#   - Parallax P2 boot ROM listing (rom_booter_v33_01j.lst — assembly listing of the Prop2 silicon ROM)
+#   - Parallax Propeller 2 ROM Booter v33_01j (assembly listing of the Prop2 silicon ROM)
 #   - Parallax P2 Datasheet (cross-reference)
 #   - P2 Silicon Doc v35 (cross-reference)
 
 component: boot_rom_contents
 category: boot_rom
 description: |
-  The P2 has 16KB of mask-programmed ROM that contains the boot subsystem
-  plus several utility resources. The ROM is programmed during chip
-  fabrication and is identical on every shipping P2 unit. This entry
-  inventories what lives in that ROM and how each component is used.
+  The P2 has 16KB of ROM that contains the boot subsystem plus several
+  utility resources. This entry inventories what lives in that ROM and
+  how each component is used.
 
 # Top-level summary
 rom_facts:
   total_size: "16 KB (16,384 bytes)"
-  location: "Mask ROM in the P2 silicon"
-  modification: "Cannot be modified post-fabrication"
-  identical_across_units: true
+  location: "ROM in the P2 silicon"
   hub_write_protection: "Hub also has a write-protectable upper 16KB used for debug state — see architecture/hub.yaml. NOTE: that 16KB is HUB space, distinct from the ROM 16KB documented here."
 
 # The one authoritative statement of what the ROM CONTAINS.
 authoritative_content_list:
   statement: "ROM | 16 KB (Bootloader, P2 Monitor debug interface, and TAQOZ (Forth) command interface)"
   names: 3
-  source: "P2 Hardware Manual 2022-11-01 -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:210; what_other_sources_say: P2 Datasheet, p2-datasheet-text.txt:99, and Silicon Doc, silicon-doc-text.txt:189"
-  verified_against: "Same three-item list recorded in engineering/ingestion/extraction-matrices/BOOT-PROCESS-COMPLETE.md ('Boot ROM Contents (16 KB)')."
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, OVERVIEW (Specifications table, ROM row), p.9; what_other_sources_say: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (16KB boot ROM), p.2, and Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features: 16KB boot ROM)"
   what_other_sources_say: "The P2 Datasheet and the Silicon Doc state only '16KB boot ROM' and inventory nothing. No ingested source inventories the ROM more finely than the line above."
 
 # ROM residents (per Hardware Manual + ROM booter narrative)
@@ -35,14 +31,12 @@ residents:
   bootloader:
     role: "Power-on / reset boot logic"
     description: |
-      First code that executes on power-up or reset. Handles initial chip
-      configuration, clock setup, memory initialization, and boot source
-      detection. Reads the P59-P61 pattern (see architecture/boot-rom/boot-pattern-selection.yaml),
+      First code that executes on power-up or reset. Reads the P59-P61
+      pattern (see architecture/boot-rom/boot-pattern-selection.yaml),
       selects a boot path (serial / SPI flash / SD card), and either loads
       and jumps to user code or hands off to one of the interactive
       interfaces (Monitor or TAQOZ) on the appropriate keystroke trigger.
-    source_listing: "Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build, revision v33_01j of 2019; ROM_Booter.lst is an earlier revision, v141 of 2018, built for the Prop123-A9 / BeMicro-A9 FPGA boards)"
-    source: "rom_booter_v33_01j.lst:87-93 (2019 revisions v33_01a..j; 'j use \"G\" for Prop2 silicon v2'), :125-131 (\"A\" commented out, ver = \"G\" active); ROM_Booter.lst:84-85 (history ends at v141, 2018-05-27), :118 (ver = \"A\" 'Prop123-A9 / BeMicro-A9) -- both under engineering/ingestion/sources/rom-booter/; FPGA boards: P2 Documentation, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2876, :2950-2951"
+    source: "Parallax Propeller 2 ROM Booter v33_01j, Cog init (pull-up checks on spi_di, spi_cs and spi_ck choose serial, SPI memory or SD card; try_spi) and Attempt to get serial command (get_command: ESC starts TAQOZ, Ctrl-D starts the Monitor)"
     canonical_entries:
       - architecture/boot-rom/_index.yaml
       - architecture/boot-rom/boot-pattern-selection.yaml
@@ -54,7 +48,7 @@ residents:
     role: "Interactive debug / memory inspection interface"
     description: |
       Built-in terminal interface for viewing and manipulating memory
-      (register RAM, hub RAM) and loading code from microSD. Accessible
+      (register RAM, lookup RAM, hub RAM) and loading code from microSD. Accessible
       only during the early boot window via the serial-escape sequence.
     entry_keystroke: '"> " (greater-than + space) then Ctrl+D'
     canonical_entry: architecture/boot-rom/p2-monitor.yaml
@@ -62,40 +56,26 @@ residents:
   taqoz_forth:
     role: "Interactive Forth programming environment"
     description: |
-      Forth interpreter authored by Peter Jakacki. Provides a full
-      interactive programming environment with hardware access words,
-      smart-pin helpers, and SD/flash utilities. Accessible only during
-      the early boot window via the serial-escape sequence.
+      Forth interpreter based on Tachyon Forth. Its ROM dictionary of 432
+      words includes smart-pin words, cog-control words, SPI-flash words
+      and SD-card words (see architecture/boot-rom/taqoz-forth.yaml).
+      Accessible only during the early boot window via the serial-escape
+      sequence.
     entry_keystroke: '"> " (greater-than + space) then ESC'
     canonical_entry: architecture/boot-rom/taqoz-forth.yaml
-
-  # REMOVED 2026-09-08: `character_font_data` and `math_tables` were
-  # listed here as ROM residents carrying
-  # `verification_status: "Existence confirmed"`. Existence was NOT confirmed.
-  # Their only source was rom-booter-narrative.txt, which is OUR OWN GENERATED SUMMARY of the
-  # listing (commit 9fcf7d84, "Complete narrative text generation"), not a
-  # Parallax document. The Hardware Manual states the ROM's contents in one line
-  # and names three things, not five or six (see authoritative_content_list
-  # below), and the ROM assembly listing itself returns ZERO hits for font,
-  # glyph, sine, sin_ and log2 in both editions -- while returning 48 for TAQOZ
-  # and 40 for Monitor/debugger, so the search is not blind to real residents.
-  #
-  # This does NOT assert that the ROM contains no font or math data. A 16 KB mask
-  # ROM can hold unlabelled data blocks no symbol name would reveal. It records
-  # that no source we hold supports them, so the KB does not state them. Open
-  # question for Chip Gracey, not for a document.
-# Source: rom-booter narrative, engineering/ingestion/sources/rom-booter/rom-booter-narrative.txt:51-56
 
   utility_routines:
     role: "Shared subroutines called by the ROM components"
     description: |
-      The ROM listing contains subroutines called from the bootloader, Monitor
-      and TAQOZ paths. This is an observation about the code in the listing, NOT
-      a documented ROM component -- the Hardware Manual's content line names
-      three residents and does not break out helper code as a fourth. Not
-      callable from user code.
-    status: "observed in the listing; not a documented ROM component"
-    source: "engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst (call sites)"
+      The ROM components share routines. The Monitor and TAQOZ entry points
+      (_Start_Monitor, _Start_TAQOZ) both first call _reset_booter, which resets
+      the booter's serial interrupts and autobaud. The booter's SD-card boot path
+      (_Start_SDcard) and the Monitor's run- and load-from-SD commands
+      (_Run_SDfile, _Load_SDfile) share the SD routines _readFILE and _releaseDO.
+      The Hardware Manual's content line names three residents and does not
+      break out these shared routines as a fourth.
+    status: "shared routines in the listing; not a separately documented ROM component"
+    source: "Parallax Propeller 2 ROM Booter v33_01j, LMM Monitor (_reset_booter, _Start_Monitor; the R/L SD-file command), Start TAQOZ (_Start_TAQOZ) and SD Card (_Start_SDcard, _Run_SDfile, _Load_SDfile)"
 
 # What's NOT in the boot ROM (common misconceptions)
 not_in_rom:

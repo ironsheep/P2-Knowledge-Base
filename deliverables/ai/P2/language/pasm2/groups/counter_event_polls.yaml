@@ -25,4 +25,4 @@ examples:
     POLLCT1 wc                 ' C = 1 if the CT1 event flag was set (the flag is cleared)
     if_c    jmp #timeout_handler
 created: '2025-09-19T15:11:04.920168'
-source: PASM2 Manual 2022-11-01
+source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLCT1/2/3, p.111"

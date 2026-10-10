@@ -17,10 +17,9 @@ spin2_language_schema:
   schema_date: "2025-09-06"
   sources:
     - "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
-    - "complete-spin2-methods.md" 
-    - "complete-builtin-symbols.md"
-    - "spin2-language-comprehensive.md"
-    - "spin2-pasm-integration-deep-dive.md"
+    - "Parallax Propeller 2 Spin2 Language Documentation v55, Methods"
+    - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
+    - "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE"
   
   # Comprehensive schema definition for all Spin2 language constructs
   language_constructs:
@@ -413,34 +412,3 @@ spin2_language_schema:
             type: "string"
           description: "Special syntax rules for this block"
           required: true
-
-# Validation rules for completeness and consistency
-validation_rules:
-  operator_precedence:
-    description: "Verify operator precedence levels are unique and sequential"
-    requirement: "All precedence levels 1-17 must be assigned"
-    
-  method_coverage:
-    description: "Verify all documented methods are included"
-    requirement: "All 135+ methods from source documentation"
-    
-  symbol_completeness:
-    description: "Verify comprehensive symbol coverage"
-    requirement: "All SmartPin, Clock, Events, Streamer symbols included"
-    
-  cross_references:
-    description: "Verify cross-references are valid"
-    requirement: "All referenced operators/methods/symbols must exist"
-    
-  example_validity:
-    description: "Verify syntax examples are valid Spin2"
-    requirement: "All examples should compile successfully"
-
-# Metadata for extraction tracking
-extraction_metadata:
-  total_operators_expected: 84   # rows of the v55 operator table
-  total_methods_expected: 135
-  total_symbols_expected: 500
-  precedence_levels: 17
-  block_types: 6
-  integration_patterns: 15

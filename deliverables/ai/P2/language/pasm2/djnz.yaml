@@ -31,7 +31,7 @@ encoding:
 encoding_notes:
 - Dest is always written; PC is written (the jump is taken) only when the result in
   Dest is NOT zero.
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DJZ / DJNZ, p.74"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_dsj

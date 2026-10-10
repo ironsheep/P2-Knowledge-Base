@@ -9,7 +9,7 @@ description: 'COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of 
 
   '
 sources:
-  - "COGSTOP target cog ID in Dest[3:0]: Silicon Doc, silicon-doc-text.txt:421"
+  - "COGSTOP target cog ID in Dest[3:0]: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS"
 result: Cog indicated by Dest is terminated (stopped).
 flags_affected:
   C: No effect
@@ -28,7 +28,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: —
   z: —
   clocks: 2–9
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGSTOP, p.67"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_l

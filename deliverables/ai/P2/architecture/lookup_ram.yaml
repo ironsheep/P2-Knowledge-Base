@@ -1,16 +1,12 @@
 # P2 Lookup RAM (LUT)
 # Sources:
-#   Propeller 2 Documentation v35 (Rev B/C Silicon), section LOOKUP RAM --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:471-504
-#   Instruction encodings, same document, PASM2 encoding table --
-#     silicon-doc-text.txt:5140 (RDLUT), :5209 (WRLUT), :5340 (SETLUTS)
-#   P2X8C4M64P Datasheet 2022/11/01, "Lookup RAM" p.14 --
-#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:592-616
-#     and the PASM2 instruction table -- p2-datasheet-text.txt:2061 (RDLUT), :2063
-#     (SETLUTS), :2065 (WRLUT); the cog/LUT block-transfer note lives on RDLONG's
-#     row at :1830-1832 ("Prior SETQ/SETQ2 invokes cog/LUT block transfer").
-#   Spin2 Language Documentation v55, inline PASM2 cog register and LUT areas --
-#     engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:805-806, :833-834
+#   Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOOKUP RAM
+#   Instruction encodings, same document, Assembly Language (instruction encoding list):
+#     RDLUT, WRLUT, SETLUTS
+#   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Lookup RAM, p.14
+#     and the PASM2 instruction table (RDLUT, SETLUTS, WRLUT); the cog/LUT block-transfer
+#     note lives on RDLONG's row ("Prior SETQ/SETQ2 invokes cog/LUT block transfer").
+#   Spin2 Language Documentation v55, inline PASM2 cog register and LUT areas
 
 component_name: "Lookup RAM (LUT)"
 
@@ -37,28 +33,21 @@ architecture:
   organization: "512 × 32 bits, dual-port"
   address_range: "$200-$3FF in the cog's address space; $000-$1FF as seen by RDLUT/WRLUT"
   source: >-
-    Propeller 2 Documentation v35 (Rev B/C), LOOKUP RAM --
-    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:472 (512 x 32-bit
-    dual-port) and :486 ("the 32-bit words are addressible from $000 to $1FF" when using
-    RDLUT/WRLUT); P2 Datasheet 2022/11/01 "Lookup RAM" --
-    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:608 ("the Lookup
-    RAM's locations $200..$3FF are addressable as $000..$1FF").
+    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM (512 x 32-bit dual-port; "the 32-bit words are addressible from $000 to $1FF" when using RDLUT/WRLUT).
+    Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Lookup RAM, p.14 ("the Lookup RAM's locations $200..$3FF are addressable as $000..$1FF").
   
   access_modes:
     - mode: "direct"
       description: "Read/write via the RDLUT and WRLUT instructions"
       timing: "3 clocks for RDLUT, 2 clocks for WRLUT"
       source: >-
-        P2 Datasheet 2022/11/01 PASM2 instruction table --
-        engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2061 (RDLUT, 3)
-        and :2065 (WRLUT, 2).
+        Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (RDLUT, 3 clocks; WRLUT, 2 clocks), p.45.
     
     - mode: "pointer"
       description: "RDLUT/WRLUT accept a PTRx pointer expression in place of S"
       timing: "Same as direct -- 3 clocks for RDLUT, 2 for WRLUT"
       source: >-
-        Syntax `RDLUT D,{#}S/PTRx` / `WRLUT {#}D,{#}S/PTRx` --
-        engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2061, :2065.
+        Syntax `RDLUT D,{#}S/PTRx` / `WRLUT {#}D,{#}S/PTRx` -- Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.45.
     
     - mode: "shared"
       description: >-
@@ -66,24 +55,20 @@ architecture:
         RAM. Sharing is a write path, not a read path -- there is no instruction that
         reads another cog's LUT.
       source: >-
-        Propeller 2 Documentation v35 (Rev B/C), LOOKUP RAM > RAM SHARING BETWEEN PAIRED
-        COGS -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:491-500.
-    
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS.
+
     - mode: "streamer"
       description: "The streamer can use the LUT as a source or destination"
       timing: "Uses the LUT's 2nd port, which adjacent-cog writes also use"
       source: >-
-        Propeller 2 Documentation v35 (Rev B/C), LOOKUP RAM --
-        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:474, :500.
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM.
   
   special_features:
     - feature: "LUT_to_DAC_streaming"
       description: "Streamer can read LUT contents and output to DACs"
       use_case: "Arbitrary waveform generation using streamer with LUT as source"
       source: >-
-        Propeller 2 Documentation v35 (Rev B/C) feature list ("Ability to stream hub RAM
-        and/or lookup RAM to DACs and pins or HDMI modulator") --
-        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:159.
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (feature list: "Ability to stream hub RAM and/or lookup RAM to DACs and pins or HDMI modulator").
     
     - feature: "LUT_sharing"
       description: >-
@@ -94,11 +79,9 @@ architecture:
         collision, and the two are not intended to be used together.
       pairs: [[0,1], [2,3], [4,5], [6,7]]
       source: >-
-        Propeller 2 Documentation v35 (Rev B/C), LOOKUP RAM > RAM SHARING BETWEEN PAIRED
-        COGS -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:491-500; P2
-        Datasheet 2022/11/01 "Paired-Cog Communication Mechanism" --
-        engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:610-616; the
-        the measured block: EF-096.
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS.
+        Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Lookup RAM (Paired-Cog Communication Mechanism), p.14.
+        The measured block: EF-096.
       measured: >-
         Block loads count as writes: a SETQ2 + RDLONG block load into the sending cog's LUT
         arrives in the enabled partner (128 of 128 and 64 of 64 longs). A Spin2 cog's start-up
@@ -115,8 +98,7 @@ architecture:
         For handshaking between cogs sharing lookup RAM, SETSE1..SETSE4 can raise an event
         when this cog, or its odd/even companion cog, reads or writes LUT address %1111111AA.
       source: >-
-        Propeller 2 Documentation v35 (Rev B/C) --
-        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:504, :2246-2249.
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM and EVENTS.
 
     - feature: "pair_start"
       description: >-
@@ -124,8 +106,7 @@ architecture:
         with the same parameters; the program must then tell the even cog from the odd one,
         and possibly restart one or both.
       source: >-
-        Propeller 2 Documentation v35 (Rev B/C) --
-        engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:413, :502.
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS and LOOKUP RAM.
 
     - feature: "spin2_lut_area"
       description: >-
@@ -133,18 +114,15 @@ architecture:
         ideal for streamer modes which use the LUT; avoid writing LUT $010..$1FF, which the
         interpreter occupies.
       source: >-
-        Spin2 Language Documentation v55 --
-        engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:805-806, :833-834.
+        Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2.
 
 instructions:
   - instruction: "RDLUT"
     encoding: "EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS"
     description: "Read data from LUT address S/PTRx into D"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), PASM2 encoding table --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5140; P2 Datasheet
-      2022/11/01 PASM2 instruction table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2061.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.45.
     operation: |
       D := LUT[S[8:0]]
       A literal S reaches only #0..#255; use a register or a PTRx expression to reach
@@ -159,10 +137,8 @@ instructions:
     encoding: "EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS"
     description: "Write D to LUT address S/PTRx"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), PASM2 encoding table --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5209; P2 Datasheet
-      2022/11/01 PASM2 instruction table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2065.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.45.
     operation: |
       LUT[S[8:0]] := D
       D carries the DATA, S carries the ADDRESS -- syntax is `WRLUT {#}D,{#}S/PTRx`.
@@ -177,10 +153,8 @@ instructions:
     encoding: "EEEE 1101011 00L DDDDDDDDD 000110111"
     description: "Enable or disable receiving lookup-RAM writes from the adjacent cog"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), LOOKUP RAM > RAM SHARING BETWEEN PAIRED
-      COGS -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:495-498;
-      encoding at silicon-doc-text.txt:5340; P2 Datasheet 2022/11/01 PASM2 instruction
-      table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2063.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.45.
     operation: |
       SETLUTS #0   ' disallow writes from the other cog of this pair (default)
       SETLUTS #1   ' allow writes from the other cog of this pair
@@ -251,8 +225,7 @@ programming_patterns:
 
 uses:
   source: >-
-    P2 Datasheet 2022/11/01 "Lookup RAM" --
-    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:596-601.
+    Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Lookup RAM, p.14.
   list:
     - use: "Scratch space"
       see: "this file -- RDLUT/WRLUT and the SETQ2 block transfer"
@@ -273,17 +246,15 @@ performance_characteristics:
     write: "2 clock cycles"
     block_transfer: "one long per clock via SETQ2 + RDLONG/WRLONG/WMLONG, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C) --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3257.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), FAST BLOCK MOVES.
   
   comparison_to_hub:
     lut_read: "3 clocks fixed (RDLUT)"
     hub_read: "9...16 clocks in cogexec, 9...26 in hubexec (RDLONG), varying with hub alignment"
     advantage: "LUT read is fixed-latency; a hub long read is not"
     source: >-
-      P2 Datasheet 2022/11/01 PASM2 instruction table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2061 (RDLUT, 3)
-      and :1831 (RDLONG, `9...16 / 9...26`).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (RDLUT, 3 clocks), p.45.
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (RDLONG, `9...16 / 9...26`), p.42.
 
 limitations:
   - limitation: "size"
@@ -327,19 +298,10 @@ related:
   - architecture/fifo.yaml
 
 sources:
-    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
-      sections:
-        - "LOOKUP RAM, incl. LOAD/STORE ACCESS and RAM SHARING BETWEEN PAIRED COGS -- lines 471-504"
-        - "PASM2 encoding table -- lines 5140 (RDLUT), 5209 (WRLUT), 5340 (SETLUTS)"
-        - "COGINIT pair start -- lines 413, 502; SETSE LUT events -- lines 504, 2246-2249"
-        - "SETQ2 block transfer to and from lookup RAM -- lines 3257-3281"
-    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
-      sections:
-        - "Lookup RAM, p.14 -- lines 592-616"
-        - "PASM2 instruction table -- lines 1831 (RDLONG), 2061-2065 (RDLUT/SETLUTS/WRLUT)"
-    - document: "Spin2 Language Documentation v55"
-      source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt"
-      sections:
-        - "Inline PASM2 cog register and LUT areas -- lines 805-806, 833-834"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM (including LOAD/STORE ACCESS and RAM SHARING BETWEEN PAIRED COGS)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings: RDLUT, WRLUT, SETLUTS)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS (COGINIT pair start) and EVENTS (SETSE LUT events)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), FAST BLOCK MOVES (SETQ2 block transfer to and from lookup RAM)"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Lookup RAM, p.14"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (RDLONG, p.42; RDLUT/SETLUTS/WRLUT, p.45)"
+    - "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (cog register and LUT areas) and CALLING PASM FROM SPIN2"

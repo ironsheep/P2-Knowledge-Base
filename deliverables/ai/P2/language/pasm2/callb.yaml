@@ -32,7 +32,7 @@ encoding:
   clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
 encoding_notes:
 - Stores return context at PTRB address then increments PTRB by 4
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_call

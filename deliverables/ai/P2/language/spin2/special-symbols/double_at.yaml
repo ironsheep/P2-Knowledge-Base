@@ -62,7 +62,7 @@ examples:
     description: |
       Classic string table pattern. @STRx stores offsets, @@STRLIST[i] 
       retrieves absolute addresses. From Parallax documentation.
-    source: "Spin2 v51 Documentation - DAT Data Pointers"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Data Pointers)"
     
   - code: |
       DAT
@@ -181,6 +181,6 @@ related:
   - language/spin2/operators/typed-pointers.yaml
   - language/spin2/assembly-directives/org.yaml
 
-source_reference: "Spin2 Documentation v51 - 'Hub address of this object + x'"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators, Address Operators table ('Hub address of this object + x'); DAT Blocks, DAT Data Pointers"
 
 oneliner: "Absolute address operator - converts object-relative @offset to absolute hub address (for DAT pointer tables)"

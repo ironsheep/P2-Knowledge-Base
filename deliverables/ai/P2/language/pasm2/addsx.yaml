@@ -4,9 +4,9 @@ brief_description: Add signed, extended
 category: Math and Logic
 description: ADDSX sums the signed values of Dest and Src plus C together and stores the result into the Dest register. The ADDSX instruction is used to perform signed multi-long (extended) addition, such as 64-bit addition. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of (D + S + C) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); it is NOT Result[31]. The manual's prose here says Result[31]; its own Table 9 says `sign of (D+S+C)`, and the manual's TJV description requires C to hold the CORRECT sign, which Result[31] would not give in the overflow case TJV exists to detect. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag. If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest + Src + C is zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper final Z flag. To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values.
 sources:
-  - "C flag sign: PASM2 Manual Table 9, sources/pasm2-manual/pasm2-manual-text.txt:912"
-  - "C flag sign: PASM2 Manual TJV description, :4196, restated :5168 (pasm2-manual-text.txt)"
-  - "C flag sign erratum: engineering/ingestion/SOURCE-ERRATA.md E-016"
+  - "C flag sign: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDSX encoding table (sign of (D+S+C)), p.34; PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148"
+  - "C flag sign: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV description (C holds the correct sign), p.138"
+  - "C flag sign, source disagreement: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDSX, p.34 (its prose says Result[31]; its own encoding table says sign of (D+S+C))"
 result: Sum of signed Src plus C and signed Dest is stored in Dest.
 parameters:
 - Dest is a register containing the value to add Src plus C to, and is where the result
@@ -28,7 +28,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: sign of (D+S+C)
   z: Z AND (Result == 0)
   clocks: '2'
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDSX, p.34"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds

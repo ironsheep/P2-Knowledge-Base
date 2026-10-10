@@ -42,15 +42,7 @@ basic_info:
 # KEY SPECIFICATIONS
 # =============================================================================
 specifications:
-  source: >-
-    #64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax Inc., 2020-06-29) --
-    engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:43-84
-    (Key Specifications + Feature list, p.2), :103-127 (the 20 numbered features),
-    :151-194 (I/O Pin Assignments, pp.15-16), :253-269 (PCB Dimensions, p.17).
-    That capture is the forced-OCR re-ingestion (F-250); every quantity in it is
-    triple-validated against the OCR text, the original text layer, and the
-    rendered page.
-    physical.dimensions_note: engineering/ingestion/SOURCE-ERRATA.md.
+  source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, Key Specifications and Features, p.2; Feature Descriptions (the 20 numbered features), pp.4-14; I/O Pin Assignments, pp.15-16; PCB Dimensions, p.17"
   microcontroller:
     part: "P2X8C4M64PES"
     silicon_revision: "Rev C silicon, approved for production (engineering sample, not a production chip)"
@@ -151,12 +143,7 @@ built_in_peripherals:
       P62: "PC-USB RXD (P2 TXD)"
       P63: "PC-USB TXD (P2 RXD)"
     caution: "P62/P63 carry the PC-USB serial link -- driving them disturbs programming"
-    source: >-
-      #64000 Propeller 2 Eval Board Rev C Guide v2.0 (Parallax, 2020), feature 12
-      "LED Bank" and feature 20 "LED Buffer", plus the P56-P63 alternative-function
-      table --
-      engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:119
-      (feature 12), :127 (feature 20), :173-184 (alternative functions).
+    source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, 12. LED Bank, p.10; 20. LED Buffer, p.13; and the P56-P63 alternative-function table, p.15"
   switches:
     reset_switch: "Hardware reset"
     purpose: "User input, mode selection"
@@ -244,11 +231,12 @@ target_audience:
   production: "Not a production form factor -- the Edge modules are the deployable part"
   
 documentation:
-  primary: "64000 Propeller 2 Eval Board Rev C Guide"
-  references:
-    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
-    - "Add-on board documentation (#64006)"
-    - "PASM2/Spin2 language references"
+  primary: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, p.1"
+
+references:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
+  - "Add-on board documentation (#64006)"
+  - "PASM2/Spin2 language references"
     
 availability:
   vendor: "Parallax Inc."

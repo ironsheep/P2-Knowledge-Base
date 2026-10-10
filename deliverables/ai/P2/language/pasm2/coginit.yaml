@@ -26,7 +26,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: No cog available
   z: —
   clocks: 2–9, +2 if result
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGINIT, p.64"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ls

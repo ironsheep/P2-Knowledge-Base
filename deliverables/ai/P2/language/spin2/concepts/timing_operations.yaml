@@ -13,6 +13,7 @@ description: |
   1 / CLKFREQ -- not a figure any source states. The frequencies used are the P2
   Datasheet's rated clock sources. Spin2 also provides time-unit
   functions for delays and measurements.
+  (Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48)
 
   Timing Categories:
   - Counter access: GETCT (raw counter), POLLCT/WAITCT (events)
@@ -22,8 +23,8 @@ description: |
   The counter rolls over approximately every 21.5 seconds at 200 MHz.
 
 sources:
-  - "description (GETCT WC returns the upper 32; quoted 'System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.'): Silicon Doc, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55"
-  - "description (rated clock sources): P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200"
+  - "description (GETCT WC returns the upper 32; quoted 'System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.'): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status"
+  - "description (rated clock sources): Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"
 
 system_counter:
   description: |
@@ -31,7 +32,7 @@ system_counter:
     see the same counter value; it is not affected by cog start/stop. The counter is
     64 bits wide -- GETCT reads the low 32 bits, GETCT WC the upper 32. The rollover
     table below is 2^32 / CLKFREQ, computed, and applies to the 32-bit GETCT value.
-  source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 -- \"System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.\" Rollover periods and cycle times below are arithmetic on that width and the P2 Datasheet's rated clock frequencies (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200), not figures either source states."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status -- \"System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.\" Rollover periods and cycle times below are arithmetic on that width and the rated clock frequencies of the Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48, not figures either source states."
   resolution: "Single clock cycle"
   range: "GETCT alone returns 0 to $FFFF_FFFF (2^32 - 1); the full counter is 64-bit"
 
@@ -95,8 +96,8 @@ timing_functions:
     use_for: "Uptime, coarse timestamps"
 
 method_selection:
-  derived_from: "Arithmetic on the 32-bit GETCT value and CLKFREQ. The safe-span figures are 2^31 / CLKFREQ, computed here -- no source states them."
-  source: "Silicon Doc, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 for the counter; P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200 for the rated frequencies"
+  computation_note: "Arithmetic on the 32-bit GETCT value and CLKFREQ. The safe-span figures are 2^31 / CLKFREQ, computed here -- no source states them."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status, for the counter; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48, for the rated frequencies"
   description: |
     GETCT, GETMS, and GETSEC return time at three different scales. The choice
     is not just about resolution — each has a different safe-span ceiling driven
@@ -145,8 +146,8 @@ method_selection:
     straightforward. See anti_patterns.getct_long_timeout below.
 
 time_conversions:
-  derived_from: "Arithmetic on the 32-bit GETCT value and CLKFREQ. The ~10_737 ms overflow bound at 200 MHz is 2^31 / (CLKFREQ/1000), computed here -- no source states it."
-  source: "Silicon Doc, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55"
+  computation_note: "Arithmetic on the 32-bit GETCT value and CLKFREQ. The ~10_737 ms overflow bound at 200 MHz is 2^31 / (CLKFREQ/1000), computed here -- no source states it."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status (the counter width)"
   formulas:
     - from: "milliseconds"
       to: "cycles"
@@ -190,14 +191,11 @@ time_conversions:
 
 minimum_resolution:
   description: |
-    One clock cycle is the counter's resolution at a given frequency. A prior form of
-    this block also carried a `min_practical` column (~1 us / ~100 ns / ~50 ns /
-    ~30 ns) and the claim that "Spin2 interpreter overhead adds several microseconds
-    to any operation". No Parallax source states either and no bench result here
-    measures them, so neither is carried (cite-or-omit). Interpreter overhead is real;
-    a figure for it has to be measured on silicon before the KB can state one.
-  derived_from: "one_cycle is 1 / CLKFREQ, computed. Frequencies are the P2 Datasheet's rated clock sources."
-  source: "P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200"
+    One clock cycle is the counter's resolution at a given frequency. The practical
+    resolution of a Spin2 timing loop is coarser, because each Spin2 operation takes
+    interpreter time; no Parallax document gives a figure for that overhead.
+  computation_note: "one_cycle is 1 / CLKFREQ, computed. Frequencies are the P2 Datasheet's rated clock sources."
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (Oscillator Frequency table), p.48"
   table:
     - clock_freq: "20 MHz"
       one_cycle: "50 ns"
@@ -210,8 +208,8 @@ minimum_resolution:
 
 patterns:
   - pattern: "periodic_execution"
-    derived_from: "Silicon Doc (Parallax Propeller 2 Documentation) v35 for the counter width; the interval bound below is 2^31 / (CLKFREQ/1000), computed here, not a figure any source states."
-    source: "Silicon Doc, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 for the counter width (derived_from and constraints)"
+    computation_note: "The interval bound below is 2^31 / (CLKFREQ/1000), computed here, not a figure any source states."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status, for the counter width"
     description: "Jitter-free periodic task execution"
     key_insight: "Add period to target, don't wait after work"
     constraints: |
@@ -359,11 +357,8 @@ anti_patterns:
       PUB good_wait(ms)
         waitms(ms)
 
-  # Every quantity in this block is arithmetic on the 32-bit GETCT value and CLKFREQ.
-# Source: engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55 for the counter width;
-#  engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200 for the rated frequencies.
-  # No source states these bounds; they are computed.
   - anti_pattern: "ignoring_rollover"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status, for the counter width; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48, for the rated frequencies; every quantity in this block is arithmetic on the 32-bit GETCT value and CLKFREQ, and no source states these bounds"
     severity: "logic_error"
     description: "Comparing counter values instead of subtracting"
     wrong: |

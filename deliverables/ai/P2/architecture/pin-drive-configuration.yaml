@@ -22,7 +22,7 @@ last_updated: "2026-08-25"
 # word too, not a concession to loose speech.
 # Measured 2026-09-09: only 2 of 17 pull-vocabulary forms resolved; `pullup`,
 # `pull up`, `pull-up resistor` and `bias resistor` all returned nothing.
-# Source: Silicon Doc, silicon-doc-text.txt:4599 (USB mode pull-up/pull-down wording)
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (USB mode pull-up/pull-down wording)
 aliases:
   - "pin drive configuration"
   - "drive strength"
@@ -73,13 +73,12 @@ description: |
   weak drive and then left with DIR low is simply a high-impedance input, and the
   selection does nothing.
 
-source: "Parallax P2 Datasheet 2022/11/01 p.24, the (M) Pin Mode table and the Pin Mode
-  Legend, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1095-1147;
-  cell-identical in the P2 Hardware Manual 2022/11/01,
-  engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:828-873;
-  Silicon Doc v35, engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:10-76;
-  sub-field masks from the Spin2 v55 symbol table,
-  engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1454-1519"
+source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (the (M) Pin Mode
+  table and the Pin Mode Legend), p.24; cell-identical in the Propeller 2 P2X8C4M64P
+  Hardware Manual Nov 1, 2022 Release, Pin Modes, p.32; Parallax Propeller 2
+  Documentation v35 (Rev B/C silicon), SMART PINS (the WRPIN D operand layout); sub-field
+  masks from the Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols
+  for Smart Pin Configuration"
 
 field_position:
   wrpin_d_operand: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
@@ -90,10 +89,10 @@ field_position:
   full_word_reference: "architecture/smart_pins.yaml (configuration_format) carries the
     whole 32-bit word: all six fields, their bit ranges, the composition rule, and the
     %TT behaviour-by-context table"
-  source: "Silicon Doc v35, part4-smart-pins.txt:10 (the D operand layout) and :55-58
-    (%M..M: low-level pin control, and the deferral to the Spin2 predefined labels);
-    P2 Datasheet 2022/11/01 p.23, p2-datasheet-text.txt:1052-1059; P2 Hardware Manual
-    2022/11/01, p2-hardware-manual-text.txt:785-791"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (the D
+    operand layout; %M..M: low-level pin control, and the deferral to the Spin2
+    predefined labels); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes,
+    p.23; Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Pin Modes, p.32"
 
 sub_fields:
   how_the_field_is_stated: |
@@ -106,10 +105,11 @@ sub_fields:
       1100_CDDDDDDDD .. 1111_CDDDDDDDD   level comparison
     The Spin2 v55 symbol table states the same letters as masks over the whole D
     operand, which is where each position below comes from.
-  source: "P2 Datasheet 2022/11/01 p.24 (M) Pin Mode, p2-datasheet-text.txt:1100-1123,
-    and the Pin Mode Legend at :1131-1147; identical rows in the P2 Hardware Manual,
-    p2-hardware-manual-text.txt:832-835 and legend at :847-873; Spin2 v55 sub-mode
-    masks, spin2-v55-text.txt:1464, 1474, 1480, 1486, 1489, 1493, 1497, 1501, 1511"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes ((M) Pin Mode
+    table and the Pin Mode Legend), p.24; identical rows in the Propeller 2 P2X8C4M64P
+    Hardware Manual Nov 1, 2022 Release, Pin Modes, p.32; sub-mode masks from the
+    Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart
+    Pin Configuration"
 
   mode_select:
     bits: "M[12:9] for the logic / Schmitt / comparator family and for the
@@ -181,15 +181,12 @@ drive_ladder:
     - { bits: "%111", drive: "Float",  high_constant: "P_HIGH_FLOAT", low_constant: "P_LOW_FLOAT" }
   definitions_live_in: "language/spin2/symbols/spin2-builtin-symbols-complete.yaml -- the
     per-constant record for each name above, with its wording, value and bit pattern"
-  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend, HHH / LLL Drive table,
-    engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1139-1147; the same
-    eight rows in the P2 Hardware Manual 2022/11/01,
-    engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:859-861;
-    reconciled table at
-    engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:257-268; the
-    same ladder is drawn on the equivalent-schematic figures, datasheet pp.27-32, read at
-    engineering/ingestion/sources/p2-datasheet/complete-tables-reference.md:326-338; and the datasheet feature list states it in one
-    line at p2-datasheet-text.txt:117"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (Pin Mode
+    Legend, HHH / LLL Drive table), p.24; the same eight rows in the Propeller 2
+    P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Pin Modes, p.32; the same ladder is
+    drawn on the equivalent-schematic figures, Parallax Propeller 2 (P2X8C4M64P) Datasheet
+    2022/11/01, Equivalent Schematics for Each Unique I/O Pin Configuration, pp.27-32; and
+    the datasheet feature list states it in one line, FEATURES, p.2"
   no_other_rungs: "The legend enumerates these eight and no others. Any per-pin current
     or impedance figure beyond them is not in the source."
 
@@ -209,10 +206,10 @@ dir_and_out_rule:
     (configuration_format.fields.tt.behavior_by_context) -- %TT does not have one
     meaning; which of the four meaning-sets applies depends on whether the smart pin is
     on and whether DAC_MODE is active"
-  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend, p2-datasheet-text.txt:1134,
-    1141-1142, 1144, 1146; identical in the P2 Hardware Manual 2022/11/01,
-    p2-hardware-manual-text.txt:867, 870-871; Silicon Doc v35,
-    part4-smart-pins.txt:73-76"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (Pin Mode
+    Legend), p.24; identical in the Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022
+    Release, Pin Modes, p.32; Parallax Propeller 2 Documentation v35 (Rev B/C silicon),
+    SMART PINS (%TT: pin DIR/OUT control)"
 
 idioms:
   note: |
@@ -224,17 +221,17 @@ idioms:
     Both compositions below were run on real P2 silicon. Neither is a documentary
     idiom: the Spin2 v55 symbol table defines each constant individually and composes
     them into no idiom at all, so what is stated here is the hardware-verified form.
-  source: "P2 Datasheet 2022/11/01 p.24 Pin Mode Legend
-    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1131-1147) for the field
-    semantics and the drive ladder, and the Spin2 v55 built-in symbol table
-    (sources/spin2-v55/spin2-v55-text.txt:1500-1509) for each constant's wording. THAT IS THE
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (Pin Mode Legend),
+    p.24, for the field semantics and the drive ladder, and the Parallax Propeller 2 Spin2
+    Language Documentation v55, Built-In Symbols for Smart Pin Configuration, for each
+    constant's wording. THAT IS THE
     AUTHORITY FOR THIS FILE -- documentary, not empirical. EF-063 and EF-064
-    (P2-EMPIRICAL-FINDINGS.md:827,840, real P2, 2026-08-20) corroborate that the MECHANISM behaves
+    (real P2, 2026-08-20) corroborate that the MECHANISM behaves
     as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it
     -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements
     (a jumper-continuity check and streamer pin placement). Neither is a pull-up/drive-strength
     finding, and the ledger contains none; see gap_no_dedicated_bench_test below. Constant wording from the
-    Spin2 v55 symbol table, spin2-v55-text.txt:1504 and :1514."
+    Spin2 v55 symbol table (Built-In Symbols for Smart Pin Configuration)."
 
   weak_high:
     intent: "hold a line high weakly, so a stronger external drive can overpower it"
@@ -251,11 +248,9 @@ idioms:
       level := pinread(pin)         ' reads 1 unless something stronger holds the line low
     source: "Hardware-verified. EF-063 certifies a jumper digitally by holding the net
       through a 15 kOhm drive at one pin while the other drives it hard, so an open
-      circuit reads the opposite value instead of an undefined float
-      (P2-EMPIRICAL-FINDINGS.md:827). The code above is the rig routine that did it --
-      weak_read() at
-      engineering/ingestion/external-sources/hardware-verification/campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2:212-220,
-      called with P_HIGH_15K at :185 and :193. Date/rig 2026-08-20, real P2."
+      circuit reads the opposite value instead of an undefined float. The code above
+      is the rig routine that did it -- weak_read(), called with P_HIGH_15K. Date/rig
+      2026-08-20, real P2."
 
   weak_low:
     intent: "hold a line low weakly, so an undriven pin reads 0 for a stated reason"
@@ -272,9 +267,8 @@ idioms:
       level := pinread(pin)         ' reads 0 unless something stronger holds the line high
     source: "Hardware-verified. EF-064 held P8..P31 at a 15 kOhm low with DIR high as a
       canvas, so an undriven pin reads 0 for a stated reason instead of floating, while
-      any driven pin overpowers the pull and reads 1 (P2-EMPIRICAL-FINDINGS.md:840). The
-      code above is the same rig routine, called with P_LOW_15K at
-      test-f272-streamer-dac-tt.spin2:184 and :192. Date/rig 2026-08-20, real P2."
+      any driven pin overpowers the pull and reads 1. The code above is the same rig
+      routine, called with P_LOW_15K. Date/rig 2026-08-20, real P2."
 
   gap_no_dedicated_bench_test:
     status: "open -- documentary only, never bench-verified directly"

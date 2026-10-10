@@ -24,4 +24,4 @@ examples:
     ' ... do work ...
     WAITCT1                    ' Wait for the CT1 event flag, then clear it
 created: '2025-09-19T15:11:04.918589'
-source: PASM2 Manual 2022-11-01
+source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITCT1/2/3, p.139"

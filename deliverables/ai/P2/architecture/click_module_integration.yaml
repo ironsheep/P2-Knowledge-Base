@@ -2,7 +2,7 @@ concept: click_module_integration
 title: MikroElektronika Click Module Integration Patterns
 category: hardware_interface
 description: Standard patterns for integrating Click modules with P2 using offset-based pin mapping
-documentation_source: schematic_primary
+documentation_source: "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic"
 documentation_level: comprehensive
 created: 2025-09-09
 updated: 2026-08-26
@@ -17,28 +17,20 @@ aliases:
   - "Click pin offsets"
   - "CLICK_OFST"
 
-provenance:
-  pin_offsets: >-
-    The twelve CLICK_OFST_* values below are established by the 64008 Rev A
-    schematic (Parallax Inc., 2020-08-10, Open Source Hardware CC BY-SA 4.0).
-    They were originally derived from the P2-Click-eInk driver by code analysis;
-    the 2026-08-26 schematic ingestion confirmed all twelve exactly, with zero
-    corrections. The driver-derived values and the primary source agree.
-  mikrobus_signal_meanings: >-
-    Signal MEANINGS on the Click side come from the MikroElektronika mikroBUS
-    standard, which is NOT held in this repo. The Parallax schematic supplies the
-    P2-side offsets only. See uart_direction_caveat.
-  code_patterns: >-
-    The Spin2 patterns below remain code_analysis, sourced from the P2-Click-eInk
-    driver. They are idiom examples, not authority.
-  sources:
-    - "pin_offsets: 64008 Rev A schematic netlist, engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md"
+sources:
+  - "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (Parallax Inc., 2020-08-10, Open Source Hardware CC BY-SA 4.0): the twelve CLICK_OFST_* pin offsets"
 
 overview: |
   Click modules from MikroElektronika provide standardized hardware interfaces
   that can be easily integrated with the P2. This concept covers the architectural
   patterns for creating portable, reusable Click module drivers using offset-based
   pin mapping and enum-based configuration APIs.
+  The twelve CLICK_OFST_* values are established by the 64008 Rev A schematic and
+  agree with the P2-Click-eInk driver they were first derived from. Signal MEANINGS on
+  the Click side come from the MikroElektronika mikroBUS standard, which is not
+  held in this knowledge base; the Parallax schematic supplies the P2-side offsets
+  only (see uart_direction_caveat). The Spin2 patterns below are idiom examples
+  derived from the P2-Click-eInk driver by code analysis, not authority.
 
 click_standard:
   description: "MikroBUS standard pinout used by all Click modules"
@@ -83,10 +75,8 @@ p2_adapter_mapping:
       
       PIN_NOT_USED = -1
   source: >-
-    64008 Rev A schematic (Parallax Inc., 2020-08-10) --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md,
-    "Consolidated offset map". All twelve offsets confirmed against the sheet
-    2026-08-26. Constant NAMES and the Spin2 idiom are from the P2-Click-eInk driver.
+    P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (Parallax Inc., 2020-08-10), the consolidated offset map.
+    All twelve offsets confirmed against the sheet. Constant NAMES and the idiom are from the P2-Click-eInk driver.
   header_span: >-
     The adapter occupies TWO adjacent 2x6 accessory headers -- 16 consecutive P2
     I/O -- and uses 12 of them. Offsets +12..+15 are no-connects at the socket
@@ -241,9 +231,7 @@ debugging:
 
 uart_direction_caveat:
   source: >-
-    Absence established by reading the 64008 Rev A schematic --
-    engineering/ingestion/sources/p2-click-adapter/p2-click-adapter-netlist.md
-    ("What this sheet does NOT establish").
+    Absence established by reading the P2 mikroBUS Adapter Part Number 64008, Revision A, schematic: it names the UART nets but does not say whose transmit they are.
   caveat: >-
     The Parallax schematic gives UART net NAMES only (TX -> offset +2, RX ->
     offset +3). Whether "TX" denotes the P2's transmit or the Click module's

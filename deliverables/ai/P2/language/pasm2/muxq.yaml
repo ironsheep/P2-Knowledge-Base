@@ -32,7 +32,7 @@ encoding:
   c: —
   z: —
   clocks: '2'
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MUXQ, p.101"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -51,7 +51,7 @@ examples:
     ' write our 6 color bits
             SETQ    maskRgb12        ' load Q bit w/ RGB[12] mask
             MUXQ    OUTA, reg_value  ' write contents of LS-byte anded with mask to output pins
-  source: "OBEX 2850 ISP HUB75 Matrix Driver -- engineering/ingestion/external-inputs/source-code/obex-projects/2850-ISP_Hub75_Matrix_Driver/isp_hub75_rgb3bit.spin2:932-934"
+  source: "OBEX 2850 (ISP HUB75 Matrix Driver), isp_hub75_rgb3bit.spin2 (example code, not a Parallax document)"
 - name: Masked Bit Update
   description: Update specific bits without affecting others
   code: |

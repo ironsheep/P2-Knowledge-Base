@@ -1,0 +1,7 @@
+' CP-009 proof: a double-brace documentation comment between two terms of an expression.
+' Same as cp-009-brace-between-terms.spin2 with doubled braces.
+' Run from the repository root with this file's repository-relative path.
+' Expected: rejected with exit status 1 at the statement line.
+
+PUB scaled(speed) : result
+  result := speed {{comment between terms}} + 1

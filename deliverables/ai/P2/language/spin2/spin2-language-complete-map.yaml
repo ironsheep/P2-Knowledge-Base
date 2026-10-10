@@ -1,219 +1,128 @@
-# Spin2 Language - Complete Map and Coverage Report
-# Updated with SPIN2 Language Specification Integration
-# Generated: 2025-09-13
+# Spin2 language map: where each part of the language is documented.
 
-
-# Findability index (2026-09-05). This file named itself in no
-# top-level field, so neither it nor anything it documents was reachable by
-# name through the published index -- only by guessing its camelCase key.
-# An alias is a lookup key, never a definition; every name below is defined
-# in this file.
 aliases:
   - "Spin2 language map"
   - "Spin2 complete map"
   - "Spin2 coverage report"
 
 spin2_language_complete_map:
-  schema_version: "2.0.0"
-  completion_date: "2025-09-13"
-  integration: "SPIN2-Language-Specification.json from PNUT-TS compiler"
-  
-  # Executive Summary
-  completion_status:
-    status: "COMPREHENSIVE_COVERAGE"
-    total_constructs_documented: 287
-    coverage_percentage: 95.0
-    coverage_increase: "+177% from v1.0"
-    technical_accuracy: "compiler_verified"
-    ai_code_generation_readiness: "PRODUCTION_READY"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Language"
+  scope: "Which directory under language/spin2/ documents which part of the Spin2 language, and what each directory covers."
 
-  # Detailed Coverage Breakdown
-  language_construct_coverage:
-    
+  areas:
     keywords:
-      total_documented: 36
-      categories:
+      directory: "language/spin2/keywords/"
+      covers:
         - "Block Structure (CON, DAT, OBJ, PUB, PRI, VAR)"
         - "Control Flow (IF, ELSE, CASE, REPEAT, etc.)"
         - "Data Types (BYTE, WORD, LONG, BYTEFIT, WORDFIT)"
         - "Built-in Functions (LOOKDOWN, LOOKUP variants)"
         - "Special (FILE, ORG, FIT)"
-      completeness_score: 100
-      extraction_quality:
-        - "All 36 SPIN2 keywords documented"
-        - "Compiler-accurate syntax and descriptions"
-        - "Complete examples for each keyword"
-        - "Category classifications verified"
-      
+
     operators:
-      operator_table_rows: 84   # rows of the v55 operator table
-      categories:
+      directory: "language/spin2/operators/"
+      covers:
         - "Arithmetic (basic and floating-point)"
         - "Bitwise operations"
         - "Logical operations"
         - "Comparison (integer and float)"
         - "Assignment and swap"
         - "Special (ternary, CORDIC, etc.)"
-      extraction_quality:
         - "Float variants (+. -. *. /. and the float comparisons)"
         - "Operators that share a PASM2 instruction's name (BMASK, DECOD, etc.)"
-        - "Precedence hierarchy: the 17 priority levels of the v55 operator table"
-    
+        - "Precedence hierarchy"
+
     assembly_directives:
-      total_documented: 8
-      directives:
+      directory: "language/spin2/assembly-directives/"
+      covers:
         - "ALIGNL, ALIGNW - Alignment directives"
         - "ORG, ORGH, ORGF - Origin directives"
         - "FIT - Size constraint directive"
         - "RES - Space reservation"
-        - "DITTO - Instruction repeat (v50+)"
-      completeness_score: 100
-      extraction_quality:
-        - "All PASM2 assembly directives documented"
-        - "Inline assembly integration context"
-        - "COG/HUB addressing distinctions"
-    
+        - "DITTO - Instruction repeat"
+
     registers:
-      total_documented: 25
-      categories:
+      directory: "language/spin2/registers/"
+      covers:
         - "I/O Registers (INA, INB, OUTA, OUTB, DIRA, DIRB)"
         - "Interrupt Vectors (IJMP1-3, IRET1-3)"
         - "General Purpose (PR0-PR7)"
         - "Pointers (PTRA, PTRB, PA, PB)"
         - "Task Management (TASKHLT)"
-      completeness_score: 100
-      extraction_quality:
-        - "All 25 system registers documented"
-        - "Hardware interaction notes included"
-        - "Access syntax and restrictions defined"
-    
+
     debug_commands:
-      total_documented: 23
-      categories:
+      directory: "language/spin2/debug-commands/"
+      covers:
         - "Debug Control (DEBUG, DLY)"
         - "Numeric Formatting (UDEC, SDEC, UHEX, UBIN variants)"
         - "String Formatting (ZSTR, LSTR)"
         - "Boolean Formatting (BOOL)"
         - "Input Control (PC_KEY, PC_MOUSE)"
-      completeness_score: 100
-      extraction_quality:
-        - "All 23 debug commands documented"
-        - "Format specifiers and output types"
-        - "Byte/word/long variants covered"
-    
+
     special_symbols:
-      total_documented: 12
-      symbols:
+      directory: "language/spin2/special-symbols/"
+      covers:
         - "Addressing symbols ($, $$, @, @@)"
         - "Method access operators"
         - "Number formatting symbols (%, %%)"
         - "Case range operators (.., ...)"
-        - "Special syntax elements"
-      completeness_score: 100
-      extraction_quality:
-        - "All 12 special symbols documented"
-        - "Context restrictions defined"
-        - "Usage patterns explained"
-    
+
     system_variables:
-      total_documented: 3
-      variables:
+      directory: "language/spin2/system-variables/"
+      covers:
         - "CLKFREQ - System clock frequency"
         - "CLKMODE - Clock configuration mode"
         - "VARBASE - Variable base address"
-      completeness_score: 100
-      extraction_quality:
-        - "All 3 system variables documented"
-        - "Data types and access patterns"
-        - "Runtime behavior explained"
-    
+
     methods:
-      total_documented: 87
-      categories:
+      directory: "language/spin2/methods/"
+      covers:
         - "COG Control (coginit, cogstop, cogspin, etc.)"
         - "Pin Control (pinread, pinwrite, pinstart, etc.)"
         - "Memory Operations (bytemove, wordmove, longmove, etc.)"
         - "Timing Functions (waitct, waitms, waitus, etc.)"
         - "Math Functions (muldiv64, rotxy, polxy, etc.)"
         - "String Operations (strcomp, strcopy, strsize)"
-      completeness_score: 100
-      extraction_quality:
-        - "Complete method documentation"
-        - "Enhanced with compiler metadata"
-        - "Comprehensive examples"
-    
-    statements:
-      total_documented: 1
-      completeness_score: 100
-    
-    constructs:
-      total_documented: 6
-      completeness_score: 100
-    
-    constants:
-      total_documented: 2
-      completeness_score: 100
-    
-    concepts:
-      total_documented: 1
-      completeness_score: 100
-    
-    debug_displays:
-      total_documented: 8
-      completeness_score: 100
-    
-    symbols:
-      total_documented: 1
-      completeness_score: 100
 
-  # Integration Summary
-  integration_impact:
-    previous_coverage: 134
-    current_coverage: 287
-    improvement_percentage: 114.2
-    new_capabilities:
-      - "Compiler-verified language definitions"
-      - "Complete operator precedence hierarchy"
-      - "Inline PASM2 assembly support"
-      - "Debug system comprehensive coverage"
-      - "Float operation support"
-    
-  # Quality Metrics
-  quality_assurance:
-    source_authority: "PNUT-TS compiler v1.51.5"
-    validation_method: "Direct compiler extraction"
-    consistency_check: "YAML syntax validated"
-    cross_references: "Internal links verified"
-    
-  # File Organization
-  directory_structure:
-    language_root: "language/spin2/"
-    fundamentals_root: "language/fundamentals/"
-    new_directories:
-      - "keywords/ - All SPIN2 keywords"
-      - "assembly-directives/ - PASM2 directives"
-      - "registers/ - System registers"
-      - "debug-commands/ - Debug commands"
-      - "special-symbols/ - Special syntax symbols"
-      - "system-variables/ - System state variables"
-    fundamentals_files:
-      - "language/fundamentals/case-sensitivity.yaml - Case insensitivity rules"
-      - "language/fundamentals/identifier-rules.yaml - Naming rules and limits"
-      - "language/fundamentals/variable-scoping-best-practices.yaml - Scope hierarchy and conflict prevention"
-      - "language/fundamentals/ - the fundamentals directory (the per-directory manifest scheme was retired; no index file replaces it)"
-    existing_enhanced:
-      - "operators/ - Enhanced with missing operators"
-      - "methods/ - Enhanced with compiler metadata"
-      - "language/spin2/constructs/method_definition.yaml - Added explicit method limits (127 params, 15 returns, 64KB locals)"
-      - "conventions/ - Comment style documentation (2 styles)"
-      
-  # Next Steps
-  recommendations:
-    immediate:
-      - "Update operations dashboard with new metrics"
-      - "Create enhancement summary document"
-      - "Generate compiler conflict audit report"
-    future:
-      - "Integrate with AI code generation systems"
-      - "Create automated validation tests"
-      - "Develop language server protocol support"
+    statements:
+      directory: "language/spin2/statements/"
+      covers:
+        - "DEBUG"
+
+    constructs:
+      directory: "language/spin2/constructs/"
+      covers:
+        - "Control-flow and method constructs (IF/ELSEIF/ELSE, CASE, REPEAT, NEXT, QUIT, ABORT, method definition)"
+        - "Blocks, inline PASM, register constants and escape strings"
+
+    constants:
+      directory: "language/spin2/constants/"
+      covers:
+        - "DEBUG_END_SESSION, DEBUG_MASK, NEWTASK, THISTASK and the special configuration symbols"
+
+    concepts:
+      directory: "language/spin2/concepts/"
+      covers:
+        - "Cross-cutting language topics (addressing, floating point, operators, inline PASM2, method pointers, type propagation, and others)"
+
+    debug_displays:
+      directory: "language/spin2/debug-displays/"
+      covers:
+        - "The DEBUG display windows (TERM, SCOPE, SCOPE_XY, LOGIC, PLOT, FFT, SPECTRO, BITMAP, MIDI)"
+
+    symbols:
+      directory: "language/spin2/symbols/"
+      covers:
+        - "Built-in symbols and streamer symbols"
+
+  other_locations:
+    fundamentals:
+      directory: "language/fundamentals/"
+      files:
+        - "language/fundamentals/case-sensitivity.yaml - Case insensitivity rules"
+        - "language/fundamentals/identifier-rules.yaml - Naming rules and limits"
+        - "language/fundamentals/variable-scoping-best-practices.yaml - Scope hierarchy and conflict prevention"
+        - "language/fundamentals/pasm-labels.yaml - PASM labels"
+    conventions:
+      directory: "language/spin2/conventions/"
+      covers: "Comment forms and source-file layout conventions"

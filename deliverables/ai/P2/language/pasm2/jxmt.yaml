@@ -14,7 +14,7 @@ description: >-
   JXMT checks the cog's streamer empty event flag and jumps to the address described
   by Src if the flag is set. PC is set to a new relative (#Src) or absolute (Src)
   address. The flag is cleared after the check.
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JXMT / JNXMT, p.95"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_jpoll

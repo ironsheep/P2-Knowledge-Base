@@ -33,7 +33,7 @@ related:
   - language/pasm2/setse1.yaml
   - language/pasm2/waitse3.yaml
   - language/pasm2/pollse3.yaml
-documentation_source: Silicon Doc v35, PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.156; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (Selectable Events)"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_l

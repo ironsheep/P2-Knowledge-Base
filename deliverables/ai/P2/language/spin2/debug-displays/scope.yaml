@@ -7,9 +7,9 @@ description: |
   is NO automatic measurement (no Vpp/RMS/frequency/period/duty/rise-fall), NO
   cursors, NO XY/phase mode (that is the separate SCOPE_XY window), and NO FFT
   overlay (FFT is its own window).
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, SCOPE Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (SCOPE display implementation: channel def, TRIGGER, Draw, Range; PC_MOUSE raw-pixel) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, SCOPE Display (channel def, TRIGGER, range); behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - oscilloscope

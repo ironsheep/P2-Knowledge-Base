@@ -5,9 +5,9 @@ description: |
   keys from a MIDI note-on/note-off byte stream, filling each key to a height set by
   its velocity. It is a live keyboard display only: it has NO event list,
   piano-roll/timeline, analysis, filtering, or MIDI-file import/export.
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, MIDI Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (MIDI display implementation: Configure/Update) + Parallax Spin2 Language Reference v51a (DEBUG displays, MIDI usage example); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, MIDI Display (MIDI usage example); behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - MIDI

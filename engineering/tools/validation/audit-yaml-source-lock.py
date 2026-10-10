@@ -348,6 +348,13 @@ def negative_control() -> int:
           classify_value(CANON_OK + " engineering/tools/validation/audit-yaml-source-lock.py",
                          root)[0] != "CANONICAL", True)
     check("process label -> WEAK", classify_value("enhanced", root)[0], "WEAK")
+    # --- OBEX object citations: the object id IS the citation, so a real id is CANONICAL
+    check("existing OBEX 2842 -> CANONICAL",
+          classify_value("OBEX 2842 (Full Duplex Serial)", root)[0], "CANONICAL")
+    check("nonexistent OBEX 99999 is not CANONICAL",
+          classify_value("OBEX 99999 (Imaginary Driver)", root)[0] != "CANONICAL", True)
+    check("the bare word OBEX with no id is not CANONICAL",
+          classify_value("OBEX community objects", root)[0] != "CANONICAL", True)
 
     # --- Q5 catalog-url controls (catalog_url_cited)
     qb = "community/quick-bytes/tetris.yaml"

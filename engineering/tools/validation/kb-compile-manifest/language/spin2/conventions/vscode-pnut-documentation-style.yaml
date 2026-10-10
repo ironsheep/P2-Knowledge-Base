@@ -2,82 +2,31 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: documentation_tags[0].usage
-    fp: "0faad88498bd1f50"
-    compile: not-code
-    reason: "usage description (English words), not code"
-  - at: documentation_tags[0].example
-    fp: "653c4bf0ac37bb0c"
-    compile: not-code
-    reason: "documentation-tag notation ('@param frequency - ...'); a comment tag shown standalone, not code"
-  - at: documentation_tags[1].usage
-    fp: "322127125fae1399"
-    compile: not-code
-    reason: "usage description (English words), not code"
-  - at: documentation_tags[1].example
-    fp: "92f7348e90d13883"
-    compile: not-code
-    reason: "documentation-tag notation ('@param frequency - ...'); a comment tag shown standalone, not code"
-  - at: documentation_tags[2].usage
-    fp: "359b69bfa9e03ce9"
-    compile: not-code
-    reason: "usage description (English words), not code"
-  - at: documentation_tags[2].example
-    fp: "e5135da6691bdd90"
-    compile: not-code
-    reason: "documentation-tag notation ('@param frequency - ...'); a comment tag shown standalone, not code"
-  - at: section_documentation.description
-    fp: "d3dcf79ffa5ddea5"
-    compile: not-code
-    reason: "prose with two example header lines containing a non-ASCII arrow (\u2190); English text, not code"
-  - at: section_documentation.example
-    fp: "0c340e9cd1ffcf81"
+  - at: comment_forms.forms[0].example
+    fp: "6a783f0a71218569"
     compile: fragment
-    wrap: spin2-top
-  - at: doc_generator.two_pass_process.pass_2.description
-    fp: "1381526bf5e68e98"
-    compile: not-code
-    reason: "YAML prose (English sentences), not code"
-  - at: outline_panel.dat_children
-    fp: "c32e6320b113ae52"
-    compile: not-code
-    reason: "YAML prose (English sentences), not code"
-  - at: templates.well_structured_file.template
-    fp: "1df361dab563c162"
+    wrap: spin2-method
+    assumes: [a]
+  - at: comment_forms.forms[1].example
+    fp: "60844521a4a0d4f8"
     compile: fragment
-    wrap: spin2-top
-    assumes: [serial.start(1)]
-  - at: templates.public_method_full.template
-    fp: "8a31f3c81544d7f7"
-    compile: program
-  - at: templates.method_with_multiple_returns.template
-    fp: "1d57e10b012670fc"
+    wrap: spin2-method
+    assumes: [b]
+  - at: comment_forms.forms[2].example
+    fp: "81d4fb3f6ddf9301"
     compile: fragment
-    wrap: spin2-top
-    assumes: [current_x_pos, current_y_pos, current_z_pos]
-  - at: templates.method_without_params_or_returns.template
-    fp: "ced3f4cb1016a538"
+    wrap: spin2-method
+    assumes: [x]
+  - at: comment_forms.forms[3].example
+    fp: "91fda8eb358819d6"
     compile: fragment
-    wrap: spin2-top
-    assumes: [configure_pins()->1/0, reset_variables()->1/0]
-  - at: templates.private_method.template
-    fp: "86f6422971a72624"
+    wrap: spin2-method
+    assumes: [x]
+  - at: comment_forms.forms[4].example
+    fp: "ed77d0d68945c939"
     compile: fragment
-    wrap: spin2-top
-  - at: constants_and_variables_documentation.examples.con_section
-    fp: "0b48f9c2bdaa5a0e"
-    compile: fragment
-    wrap: spin2-top
-  - at: constants_and_variables_documentation.examples.var_section
-    fp: "857e66b873baa0d1"
-    compile: fragment
-    wrap: spin2-top
-  - at: constants_and_variables_documentation.examples.dat_section
-    fp: "396de6c503cda141"
-    compile: program
-  - at: migration_from_traditional.example_before
-    fp: "7580fd7c15bb8976"
-    compile: program
-  - at: migration_from_traditional.example_after
-    fp: "11666f1e0ec5abe1"
+    wrap: spin2-method
+    assumes: [z]
+  - at: examples[0].code
+    fp: "de1572fc98cdad7c"
     compile: program

@@ -1,0 +1,9 @@
+' CP-008 proof: the same program as cp-008-name-control.spin2 with the window named Field
+' (FIELD is a Spin2 reserved word). Only the name differs.
+' Run from the repository root with -d and this file's repository-relative path.
+' Expected: compiles with no error; the DEBUG text holds the name Field in all three messages.
+
+PUB main() | x
+  debug(`SCOPE Field SIZE 400 220)
+  debug(`Field 'S' -1000 1000)
+  debug(`Field `(x))

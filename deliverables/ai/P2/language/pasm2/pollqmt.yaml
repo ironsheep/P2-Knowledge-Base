@@ -12,7 +12,7 @@ description: >-
   execution of POLLQMT, JQMT, or JNQMT instructions (there is no WAITQMT: the event
   could not happen while waiting).
 sources:
-  - "description (no WAITQMT): Silicon Doc, silicon-doc-text.txt:2102"
+  - "description (no WAITQMT): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the WAITxxx list: there is no WAITQMT because the event could not happen while waiting)"
 result: CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then
   it is cleared.
 flags_affected:
@@ -31,7 +31,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: QMT Event
   z: QMT Event
   clocks: '2'
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLQMT, p.113"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait

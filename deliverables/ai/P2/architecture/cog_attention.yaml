@@ -1,15 +1,11 @@
 # P2 COG Attention System
 # Sources:
-#   Propeller 2 Documentation v35 (Rev B/C Silicon), section COG ATTENTION --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2013-2033
-#   Event numbering, same document, section EVENTS --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2053 (Event 14 = ATN)
-#   Instruction encodings, same document, PASM2 encoding table --
-#     silicon-doc-text.txt:5351 (COGATN), :5283 (POLLATN), :5300 (WAITATN),
-#     :5181 (JATN), :5198 (JNATN), :5234 (COGID)
-#   P2X8C4M64P Datasheet 2022/11/01, "Cog Attention" p.15-16 --
-#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:681-695
-#     and the PASM2 instruction table -- p2-datasheet-text.txt:1854, :1893, :1914
+#   Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION
+#   Event numbering, same document, EVENTS (Event 14 = ATN)
+#   Instruction encodings, same document, Assembly Language (instruction encoding list):
+#     COGATN, POLLATN, WAITATN, JATN, JNATN, COGID
+#   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog Attention, p.15-16
+#     and the PASM2 instruction table
 
 component_name: "COG Attention System"
 
@@ -29,7 +25,7 @@ architecture:
     Datasheet describes the lower 8 bits and a composite set of 8 strobes, which is
     the shape the eight physical cogs use.
   sources:
-    - "operand_field: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:682-692"
+    - "operand_field: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog Attention, pp.15-16"
   
   attention_flags:
     per_cog: 1
@@ -64,17 +60,13 @@ architecture:
     
     - method: "interrupt"
       description: "Trigger interrupt on ATN"
-      latency: "Silicon Doc v35 INTERRUPTS section describes the dispatch mechanism (interrupt branches realized by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline) but does not publish a specific clock-count latency. We do not publish a number here because we do not have a verifiable measurement."
+      latency: "Parallax Propeller 2 Documentation v35, INTERRUPTS describes the dispatch mechanism (interrupt branches realized by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline) but gives no clock-count latency. Clock-count latency: not documented."
 
 instructions:
   - instruction: "COGATN"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000111111"
     description: "Strobe the attention signal of the cog(s) selected by D"
-    source: >-
-      Propeller 2 Documentation v35 (Rev B/C), COG ATTENTION --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2017, :2020;
-      encoding at silicon-doc-text.txt:5351; P2 Datasheet 2022/11/01 "Cog Attention" --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:682-692.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COG ATTENTION; encoding: Assembly Language (instruction encodings); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog Attention, pp.15-16"
     operation: |
       FOR each set bit N in D:
         strobe cog N's attention signal
@@ -91,11 +83,7 @@ instructions:
   - instruction: "POLLATN"
     encoding: "EEEE 1101011 CZ0 000001110 000100100"
     description: "Get the attention-requested event flag into C and/or Z, then clear it"
-    source: >-
-      Propeller 2 Documentation v35 (Rev B/C), EVENTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2061, :2078, :2200-2204;
-      encoding at silicon-doc-text.txt:5283; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1893.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS; encoding: Assembly Language (instruction encodings); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43"
     operation: |
       C and/or Z := attention-requested event flag (per WC / WZ / WCZ)
       The event flag is then cleared, unless the event sensor is setting it again
@@ -109,11 +97,7 @@ instructions:
   - instruction: "WAITATN"
     encoding: "EEEE 1101011 CZ0 000011110 000100100"
     description: "Wait for the attention-requested event flag, then clear it"
-    source: >-
-      Propeller 2 Documentation v35 (Rev B/C), EVENTS --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2082, :2100;
-      encoding at silicon-doc-text.txt:5300; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1914.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS; encoding: Assembly Language (instruction encodings); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43"
     operation: |
       Wait until the attention-requested event flag is set (it may already be),
       then clear it, unless the event sensor is setting it again on the same clock.
@@ -129,9 +113,7 @@ instructions:
     encoding: "EEEE 1011110 01I 000001110 SSSSSSSSS"
     description: "Jump to S/# if the attention-requested event flag is set"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), COG ATTENTION --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2028; EVENTS --
-      silicon-doc-text.txt:2104, :2120; encoding at silicon-doc-text.txt:5181.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COG ATTENTION and EVENTS; encoding: Assembly Language (instruction encodings).
     operation: |
       IF attention-requested event flag is set THEN jump to S/#
       The flag is cleared whether or not the branch is taken, unless the event
@@ -143,9 +125,8 @@ instructions:
     encoding: "EEEE 1011110 01I 000011110 SSSSSSSSS"
     description: "Jump to S/# if the attention-requested event flag is clear"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), COG ATTENTION --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2030; EVENTS --
-      silicon-doc-text.txt:2104, :2120; encoding at silicon-doc-text.txt:5198.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COG ATTENTION and
+      EVENTS; encoding: Assembly Language (instruction encodings).
     usage_example: |
       JNATN   #keep_working   ' Branch if no attention has been requested
 
@@ -155,9 +136,8 @@ instructions:
       Write this cog's ID into D (D a register, WC omitted), or with WC report whether
       the cog selected by D[2:0] is running.
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), PASM2 encoding table --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:5234; and this
-      knowledge base's own language/pasm2/cogid.yaml.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language
+      (instruction encodings).
     flags_affected: "C (with WC) = 1 if the D[2:0] cog is running, 0 if stopped"
     timing: "2 clocks"
     usage_example: |
@@ -167,12 +147,10 @@ event_configuration:
   attention_event:
     event_number: 14
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), EVENTS -- "Event 14 = Attention was
-      requested by another cog or other cogs",
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2053; and the
-      INTERRUPTS event-source table, silicon-doc-text.txt:2290. Event 15 is
-      GETQX/GETQY-with-no-CORDIC-result, not attention. setup_for_event: Silicon Doc,
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2246-2260.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS ("Event 14 =
+      Attention was requested by another cog or other cogs"); and the INTERRUPTS
+      event-source table. Event 15 is GETQX/GETQY-with-no-CORDIC-result, not attention.
+      setup_for_event: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS.
     trigger: "An attention strobe from another cog sets this cog's ATN event flag"
     
     setup_for_interrupt: |
@@ -390,14 +368,8 @@ related_topics:
     relationship: "Can use with locks for complex synchronization"
 
 sources:
-    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
-      sections:
-        - "COG ATTENTION -- lines 2013-2033"
-        - "EVENTS, event numbering and POLL/WAIT/J flag rules -- lines 2037-2260"
-        - "PASM2 encoding table -- lines 5181, 5198, 5234, 5283, 5300, 5351"
-    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
-      sections:
-        - "Cog Attention, p.15-16 -- lines 681-695"
-        - "PASM2 instruction table -- lines 1854, 1893, 1914"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COG ATTENTION"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS (event numbering and POLL/WAIT/J flag rules)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings)"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog Attention, pp.15-16"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, pp.42-43"

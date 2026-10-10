@@ -19,20 +19,22 @@ idioms:
       restore boilerplate is required.
     examples:
       - |
-        ' From the flash loader: zeroa starts at 0, is used as a checksum
-        ' accumulator during the validation phase, then is overwritten
-        ' with its real "post-validation" value before the loader proceeds.
-        zeroa  long 0
-        zerob  long 0
-        zeroc  long 0
-        ...
-        ' checksum loop uses zeroa as accumulator:
-        rep    #2, count
-        rdlong x, ptra++
-        add    zeroa, x        ' zeroa accumulates checksum
-        ...
-        ' validation passes; zeroa is now overwritten with its real meaning:
-        mov    zeroa, computed_value
+        ' From the flash loader. Its loader data longs are zero in the downloaded
+        ' image, so the programmer also names them zeroa/zerob/zeroc and uses
+        ' them as scratch: zeroa accumulates the download checksum, and is 0
+        ' again afterwards if the checksum passes.
+                rdfast  #0,#0                   'verify checksum
+                rep     #2,s
+                rflong  v
+                add     zeroa,v         wz      '(if checksum passes, zeroa = 0 afterwards)
+        if_nz   jmp     #stop                   'if checksum failed, float spi pins and stop clock
+
+        zeroa                                   '(used by programmer as long 0)
+        app_longs       long    0               'number of longs in application
+        zerob                                   '(used by programmer as long 0)
+        app_longs2      long    0
+        zeroc                                   '(used by programmer as long 0)
+        app_sum         long    0
     context: |
       Useful in cog-resident code where the 512-long cog RAM budget is
       tight. Requires careful reasoning about the lifetime of the data:
@@ -43,7 +45,7 @@ idioms:
       - "Order of operations is load-bearing — a maintainer changing the code must understand the scratch-vs-real boundary"
       - "Best used in self-contained tight code (cog images, ISR-like sequences) where the full lifetime is visible at once"
       - "AVOID in large or evolving code where reasoning about the scratch boundary becomes brittle"
-    source: "Parallax P2 flash_loader.spin2 lines 60, 78, 84, 286-291; the checksum loop shown is adapted from lines 56-60, which read through the FIFO (rdfast, then rep #2,s with rflong v)"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer ('Get number of bytes, add $400 zero bytes after download, verify checksum'; 'Write settings into loader') and Loader Data (zeroa/zerob/zeroc '(used by programmer as long 0)'); the example writes the listing's @zeroa/4 cog-register operands as plain labels"
 
   - name: aliased_register_through_org
     pattern: |

@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "023c65c72f57aa7a"
+    fp: "869eb0b414839058"
     compile: fragment
     wrap: spin2-method
     assumes: [x, y, z]

@@ -1,18 +1,14 @@
 # P2 Debug Interrupt System
 # Sources:
-#   Propeller 2 Documentation v35 (Rev B/C Silicon), section DEBUG INTERRUPT --
-#     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2393-2593
-#     (enable + per-cog scope :2395-2397; upper-hub buffer :2399;
-#      $1F8..$1FF ROM routines :2401-2421; IJMP0/IRET0 remap :2423-2439;
-#      per-cog save/restore map, table 25 :2446-2477; RETI0/RESI0 :2482;
-#      BRK D format :2489-2517; COGBRK :2520-2524; GETBRK :2527-2596)
-#   Instruction encodings, same document, PASM2 encoding table --
-#     silicon-doc-text.txt:5337 (GETBRK), :5338 (COGBRK), :5339 (BRK)
-#   P2X8C4M64P Datasheet 2022/11/01 -- the datasheet has no debug-interrupt
-#     section; it names the mechanism in the feature list at
-#     engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:74, notes the
-#     INA/INB remap at :542, and carries BRK/COGBRK/GETBRK in the PASM2 table at
-#     :1938-1944
+#   Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT
+#     (enable + per-cog scope; upper-hub buffer; $1F8..$1FF ROM routines;
+#      IJMP0/IRET0 remap; per-cog save/restore map, table 25; RETI0/RESI0;
+#      BRK D format; COGBRK; GETBRK)
+#   Instruction encodings, same document, Assembly Language (instruction encoding list):
+#     GETBRK, COGBRK, BRK
+#   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01 -- the datasheet has no
+#     debug-interrupt section; it names the mechanism in its feature list, notes the
+#     INA/INB remap, and carries BRK/COGBRK/GETBRK in its PASM2 instruction table
 
 component_name: "Debug Interrupt"
 
@@ -36,7 +32,7 @@ architecture:
   trigger_modes:
     source: >-
       The complete set, taken from the BRK D-operand format --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2500-2512. There are
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT. There are
       exactly these conditions; each is one enable bit in BRK's D operand.
     modes:
     - mode: "breakpoint_address_match"
@@ -81,9 +77,8 @@ architecture:
       $FC000..$FFFFF, holds these buffers and the initial debug ISR code, and can be
       write-protected so that it is writable only from within a debug ISR.
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2399, :2401,
-      :2411-2420, :2423-2439, and the per-cog address table at :2446-2477.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT,
+      including its per-cog address table.
 
 configuration:
   note: >-
@@ -92,8 +87,7 @@ configuration:
     hold its vectors. SKIP and SKIPF are ordinary PASM2 instructions with no debug role.
   brk_operand_format:
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > BRK D/# --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2498-2517.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT, BRK D/#.
     layout: "%aaaaaaaaaaaaaaaaeeee_LKJIHGFEDCBA"
     fields:
       - bits: "D[31:12]"
@@ -137,10 +131,8 @@ instructions:
       interrupt carrying an 8-bit code. Inside a debug ISR, BRK establishes the next
       debug interrupt's trigger condition(s).
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > BRK D/# --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2489-2512; encoding
-      at silicon-doc-text.txt:5339; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1938-1939.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT, BRK D/#; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43.
     operation: |
       In normal program execution:
         D/# = %BBBBBBBB, an 8-bit BRK code readable inside the debug ISR.
@@ -160,10 +152,8 @@ instructions:
     encoding: "EEEE 1101011 00L DDDDDDDDD 000110101"
     description: "Trigger an asynchronous breakpoint in another cog"
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > COGBRK D/# --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2520-2524; encoding
-      at silicon-doc-text.txt:5338; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1942.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT, COGBRK D/#; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43.
     operation: |
       D/# = %CCCC, the cog in which to trigger an asynchronous breakpoint.
       TWO preconditions, both required:
@@ -179,10 +169,8 @@ instructions:
       Read cog status. GETBRK does NOT read back a break configuration -- the effect
       selector chooses which of three unrelated status words it returns.
     source: >-
-      Propeller 2 Documentation v35 (Rev B/C), DEBUG INTERRUPT > GETBRK --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2527-2593; encoding
-      at silicon-doc-text.txt:5337; P2 Datasheet 2022/11/01 PASM2 table --
-      engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1944.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT, GETBRK; encoding: Assembly Language (instruction encodings).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43.
     operation: |
       GETBRK D WCZ  -- cog internal status:
         C = 1 if STALLI mode, 0 if ALLOWI mode; Z = 1 if started in hubexec
@@ -377,7 +365,7 @@ performance_impact:
     cogexec_entry: "4 clocks for the dispatched CALLD"
     cogexec_exit: "4 clocks for the RETIx-equivalent return"
     cogexec_round_trip_minimum: "8 clocks (excluding ISR body)"
-    note: "A debug ISR executes strictly in cog register space, so it does not disturb the hub FIFO state. Total per-instruction single-step cost = round-trip overhead + ISR body length. We do not publish a single 'minimal ISR' clock count because the ISR body is user-defined."
+    note: "A debug ISR executes strictly in cog register space, so it does not disturb the hub FIFO state. Total per-instruction single-step cost = round-trip overhead + ISR body length. No single 'minimal ISR' clock count applies because the ISR body is user-defined."
 
   breakpoint_overhead:
     on_hit: "ISR dispatch overhead + ISR body execution time"
@@ -406,14 +394,8 @@ related_topics:
     relationship: "Basis for software debuggers"
 
 sources:
-    - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
-      source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
-      sections:
-        - "DEBUG INTERRUPT -- lines 2393-2593"
-        - "PASM2 encoding table -- lines 5337 (GETBRK), 5338 (COGBRK), 5339 (BRK)"
-    - document: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01"
-      source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
-      sections:
-        - "Feature list, hidden debug interrupt -- line 74"
-        - "Cog register note, INA/INB as debug call/return -- line 542"
-        - "PASM2 instruction table, BRK/COGBRK/GETBRK -- lines 1938-1944"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings: GETBRK, COGBRK, BRK)"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (hidden debug interrupt), p.2"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Register RAM (cog register note: INA/INB as debug call/return), p.13"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (BRK/COGBRK/GETBRK), p.43"

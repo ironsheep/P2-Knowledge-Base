@@ -49,7 +49,7 @@ critical_usage_pattern:
       This states the TESTED SHAPE, not a law. The measurement shows WHERE results are
       lost, not why; not every hub operation or cadence was tested. Do not generalize
       it to "any hub access anywhere" and do not prescribe a clock-level discipline.
-    source: "engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md EF-053 (2026-08-14)"
+    source: "EF-053"
 
 operations:
   multiply:
@@ -179,15 +179,8 @@ programming_patterns:
 
 accuracy:
   source: >-
-    Propeller 2 Documentation v35 (Rev B/C), CORDIC solver summary --
-    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:175-182, which states the
-    solver and each operation's result format verbatim. REPOPULATED 2026-09-10 (F-416, F-419):
-    the previous block was uncited and four of its six values disagreed with this source and
-    with the KB's own per-instruction entries -- square root given as "16-bit result" where the
-    source says 64-bit -> 32-bit, logarithm and exponential both given as "5.32 fixed-point"
-    where the source says 5.27, and a "~28 bits of precision" trig figure that no Parallax
-    source states. Per-operation detail lives in the instruction entries below; this block
-    states only the result formats and does not restate them.
+    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features: CORDIC solver summary), which states the solver and each operation's result format verbatim.
+    Per-operation detail lives in the instruction entries below; this block states only the result formats and does not restate them.
   solver: "32-bit, pipelined, with scale-factor correction (Silicon Doc verbatim)"
   multiply: "Exact -- 32 x 32 unsigned, 64-bit result (see language/pasm2/qmul.yaml)"
   divide: "Exact -- 64 / 32 unsigned, 32-bit quotient and 32-bit remainder (see language/pasm2/qdiv.yaml)"
@@ -239,8 +232,9 @@ applications:
     - "Error correction codes"
 
 performance:
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (hub: each cog can start CORDIC operations every 8 clocks and get results 55 clocks later), p.2; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS. The rates below are arithmetic on those stated intervals."
   throughput: "160 MOPS at 160MHz clock (1 op per clock system-wide via hub rotation)"
-  latency: "343.75ns at 160MHz (55 clocks per Silicon Doc v35 verbatim)"
+  latency: "343.75ns at 160MHz (55 clocks, as stated in the Parallax Propeller 2 Documentation)"
   efficiency: "~100% utilization possible by overlapping operations across the 54-stage pipeline"
 
 related_components:

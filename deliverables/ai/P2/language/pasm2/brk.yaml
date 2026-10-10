@@ -13,7 +13,7 @@ description: 'BRK triggers a breakpoint in the current cog and either defines a 
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55"
 documentation_level: comprehensive
 examples:
 - name: Conditional Breakpoint

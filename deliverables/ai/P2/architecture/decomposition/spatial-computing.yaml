@@ -88,7 +88,7 @@ smells:
       grounding: "Smart-pin autonomous modes that absorb the protocol — architecture/smart_pins.yaml"
       worked_escape:
         note: "A smell is a signature to CHECK, not a verdict. A worked instance where the signature fired and bit-banging was the RIGHT call, with the escape recorded:"
-        situation: "[EXAMPLE, illustrative] An OLED/SPI panel with a ~17 ms blocking transfer per frame, streamed by a cog via inline PASM instead of a smart-pin sync-serial mode."
+        situation: "[EXAMPLE, illustrative] An OLED/SPI panel with a long blocking transfer per frame, streamed by a cog via inline PASM instead of a smart-pin sync-serial mode."
         signature_fired: true
         why_kept: "Bulk framebuffer streaming that a single smart pin cannot pace efficiently; a tight inline-PASM loop meets the per-frame budget. The signature fired, was evaluated against the blocking constraint, and inline-PASM was chosen deliberately."
         escape_condition: "Re-evaluate if the SPI path moves to streamer/DMA — then smart-pin / hardware-streaming absorption becomes the better cut. The escape and its re-evaluation trigger are recorded, so the deviation is a decision, not an oversight."

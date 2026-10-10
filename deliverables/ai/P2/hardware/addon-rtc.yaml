@@ -16,9 +16,7 @@ aliases:
   - "#64013 add-on board"
 
 description:
-  source: >-
-    P2 RTC Add-on (#64013) Guide v1.0 (Parallax Inc., 2022-11-29) --
-    engineering/ingestion/sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:15-37.
+  source: "P2 RTC Add-on (#64013) v1.0 11/29/2022, overview and Features, p.1"
   text: >-
     "The P2 RTC Add-On Board provides a real time clock with calendar and alarm
     functionality to the Propeller 2 (P2X8C4M64P) multicore microcontroller." Built
@@ -43,7 +41,7 @@ pin_group:
   base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
 
 power:
-  source: "64013 P2 RTC Add-on Guide, pin table -- engineering/ingestion/sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:56"
+  source: "P2 RTC Add-on (#64013) v1.0 11/29/2022, Pin Connections, p.2; Key Specifications, p.2"
   VIO3V3: >-
     3.3 V supply voltage. It powers the RTC board AND trickle-charges the on-board
     backup battery. The trickle charge is why the cell holds time across a power
@@ -72,19 +70,10 @@ signal_map:
 interface: i2c
 pin_mode_tip:
   source: >-
-    Board fact from the Parallax P2 RTC Add-on (#64013) Guide v1.0 (2022-11-29),
-    "Code Tip" --
-    engineering/ingestion/sources/P2-RTC-Add-on/P2-RTC-Add-on-text.txt:72-77.
-    The P2-side mechanism is corrected against the Spin2 v55 built-in symbol table
-    (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1500-1509), the
-    P2 Datasheet Pin Mode legend
-    (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1144). Those
-    documentary sources are the authority. EF-063 and EF-064
-    (engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md:827,840,
-    real P2, 2026-08-20) corroborate the mechanism only INCIDENTALLY: they are rig
-    apparatus for a streamer-fed DAC %TT finding (:813) and a streamer
-    pin-placement finding (:834). Neither is a drive-strength finding.
-    do_not_copy_the_guides_wording: engineering/ingestion/SOURCE-ERRATA.md E-004.
+    Board fact: P2 RTC Add-on (#64013) v1.0 11/29/2022, Code Tip, p.2.
+    The P2-side mechanism is corrected against the Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration, and the Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (Pin Mode Legend), p.24.
+    Those documentary sources are the authority. EF-063 and EF-064 (real P2, 2026-08-20) corroborate the mechanism only INCIDENTALLY: they are rig apparatus for a streamer-fed DAC %TT finding and a streamer pin-placement finding. Neither is a drive-strength finding.
+    The board document's own wording of the weak-drive alternative is not carried (see the caveat below).
   board_fact: >-
     SCL, INT and CLKOUT share the single +0 IO pin, so only one of the three can
     be in use at a time. To use INT or CLKOUT, first configure them over I2C per
@@ -111,6 +100,7 @@ pin_mode_tip:
     board schematic would settle it.
 
 rtc_chip:
+  source: "P2 RTC Add-on (#64013) v1.0 11/29/2022, Features and Key Specifications (the PCF8523; I2C bus 100, 400, 1000 kHz; +3.3 VDC), pp.1-2"
   part: "NXP PCF8523"
   type: "CMOS real-time clock + calendar + alarm"
   bus: "I2C (open-drain), up to 1000 kbit/s"
@@ -160,16 +150,16 @@ limitations:
   - "No code in the board guide itself; an official MIT Spin2 driver is on the product page"
 
 documentation:
-  primary: "64013 P2 RTC Add-on Guide v1.0 (Parallax, 2022-11-29)"
+  primary: "P2 RTC Add-on (#64013) v1.0 11/29/2022, p.1"
 
 resources:
   product_page: "www.parallax.com (search 64013) - latest guide, schematic, example code"
   rtc_datasheet: "NXP PCF8523 datasheet (www.nxp.com) - authoritative for I2C address + register map"
-  example_driver: "Parallax 64013 RTC Driver/Example (Spin2) - on the 64013 product page; uses jm_i2c at 400 kHz with that library's 3.3K pull-up setting (see pin_mode_tip for what the P2 actually does)"
+  example_driver: "Parallax 64013 RTC Driver/Example (Spin2) - on the 64013 product page; uses jm_i2c with that library's 3.3K pull-up setting (see pin_mode_tip for what the P2 actually does)"
   battery_datasheet: "Seiko MS421R (https://www.sii.co.jp/en/)"
 
 physical_and_battery:
-  source: "64013 P2 RTC Add-on reference -- engineering/ingestion/sources/P2-RTC-Add-on/complete-P2-RTC-Add-on-reference.md:54-67"
+  source: "P2 RTC Add-on (#64013) v1.0 11/29/2022, Key Specifications, p.2; Lithium Battery, p.3"
   cell: "Seiko MS421R rechargeable lithium-metal, built-in and non-removable"
   cell_capacity: "1.5 mAh nominal, 0.11 g"
   pcb_dimensions: "0.8 x 1 in (20.32 x 25.4 mm)"

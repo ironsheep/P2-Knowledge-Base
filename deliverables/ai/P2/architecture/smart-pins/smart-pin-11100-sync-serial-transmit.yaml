@@ -143,7 +143,7 @@ spin2_inline: |
 # Key Points
 timing:
   continuous_mode: "Double-buffered for gapless transmission. Write the FIRST word with WYPIN while DIR is low: it primes the shifter and is the first word sent. Then raise DIR and WYPIN the second word into the buffer. Written after DIR rises, the first of two words is lost and the second is sent twice."
-  source: "continuous_mode: P2 Documentation, silicon-doc-text.txt %11100 section ('a first word is written via WYPIN during reset (DIR=0) to prime the shifter'); bench-measured, P2-EMPIRICAL-FINDINGS.md EF-090"
+  source: "continuous_mode: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 = synchronous serial transmit ('a first word is written via WYPIN during reset (DIR=0) to prime the shifter'); bench-measured, EF-090"
   start_stop_mode: "Can modify data before clock starts"
   hold_time: "Data stable 2+ clocks after edge when X[5]=1"
 

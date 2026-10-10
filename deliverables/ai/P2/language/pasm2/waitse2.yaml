@@ -14,7 +14,7 @@ description: Wait for SE2 event flag, then clear it. WAITSE2 waits for selectabl
 flags_affected:
   C: Set if timeout occurred before event
   Z: Set if timeout occurred before event
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITSE1/2/3/4, p.142"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait

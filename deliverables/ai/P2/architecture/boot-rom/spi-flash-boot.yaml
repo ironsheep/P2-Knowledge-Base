@@ -1,10 +1,8 @@
 # SPI Flash Boot — Two-Phase Path from Power-Up to Running Application
-# Sources (primary, golden):
-#   - Hardware Manual 2022-11-01 (boot pattern, pin functions)
-#   - Parallax P2 flash_loader.spin2
-#     GOLDEN — compiled into every flash-bootable P2 binary; the ROM contract
-#     it depends on is silicon-validated by every shipping unit
-#   - Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build)
+# Sources:
+#   - Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release (boot pattern, pin functions)
+#   - Parallax SPI Flash Programmer and Boot Loader v51 (the flash loader listing)
+#   - Parallax Propeller 2 ROM Booter v33_01j (the silicon ROM listing)
 
 component: spi_flash_boot
 category: boot_rom
@@ -16,18 +14,14 @@ description: |
   from flash into hub RAM, verifies it, and starts the user code via
   COGINIT #0,#$00000.
 
-# Authority — why facts here are reliable
-authority:
-  rom_behavior: "Described in Hardware Manual; assembly in the Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build)"
-  flash_loader_behavior: |
-    flash_loader.spin2 is GOLDEN source — compiled into every binary
-    PNut/PNut-TS build for flash boot. Behavioral contracts it depends
-    on (such as the post-load SPI state) are silicon-validated by every
-    shipping flash-boot binary.
+# Where the facts on this page come from
+sources:
+  - "rom_behavior: Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Boot Up, p.11; Parallax Propeller 2 ROM Booter v33_01j, Cog init (try_spi) and Serial done (serial_done, shut_down)"
+  - "flash_loader_behavior: Parallax SPI Flash Programmer and Boot Loader v51, Loader (header comment: the post-load SPI state; Read in remaining application longs; Verify application checksum)"
 
 # When this path is taken
 boot_pattern_trigger:
-  source: "P2 Hardware Manual, Boot Up -- Boot Pattern table -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:275-276"
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Boot Up (Boot Pattern table), p.11"
   see: architecture/boot-rom/boot-pattern-selection.yaml
   flash_priority_patterns:
     - pattern: "P61=pull-up, P60=don't care, P59=float"
@@ -45,7 +39,7 @@ pin_assignment:
 
 # Phase 1: ROM Booter (silicon behavior)
 phase_1_rom_booter:
-  autoprobe: "ROM autoprobes for a recognized SPI flash on the fixed pin assignment (W25Q128JV-series and pin-compatible)"
+  autoprobe: "ROM probes for SPI memory on the fixed pin assignment: it sends exit-quad and exit-dual sequences, reset-enable and reset ($66, $99) and write-disable ($04), then reads the status register ($05); if WEL is still high there is no SPI memory, and if BUSY is high it waits"
   read_operation:
     flash_address_range: "$000000..$0003FF (first 1KB = 256 longs)"
     destination: "Cog 0 register space $000..$0FF"
@@ -53,7 +47,7 @@ phase_1_rom_booter:
     algorithm: "Sum all 256 loaded longs as 32-bit values"
     required_sum: '$706F7250 (ASCII "Prop")'
     on_success: "ROM does JMP #0 → execution starts at the loaded code"
-    on_failure: "Chip stalls; no code executes"
+    on_failure: "The loaded code is not run. With a pull-up on P60 the ROM tries the SD card; otherwise, with P59 floating it falls back to serial loading (60 s window), and with P59 pulled down it shuts down"
     flash_writer_responsibility: |
       The program that writes flash must insert a correction long so
       the 256-long sum equals exactly $706F7250. Canonical formula:
@@ -63,10 +57,7 @@ phase_1_rom_booter:
 phase_2_post_load_state:
   description: |
     When the ROM does JMP #0, the SPI bus is left in a specific state
-    that the loader exploits. This is a hard behavioral contract:
-    every shipping P2 leaves the bus this way after a successful
-    flash boot, and the production loader's continued production
-    use silicon-validates the contract.
+    that the loader relies on to read the rest of the application.
   bus_state:
     spi_cs: "Low output (asserted — flash still selected)"
     spi_ck: "Low output (parked between edges)"
@@ -79,7 +70,8 @@ phase_2_post_load_state:
   cog_clock:
     source: |
       RCFAST is active. The ROM does not switch clocks before JMP #0;
-      the cog runs at the RCFAST rate (20-30 MHz; see architecture/clock_system.yaml).
+      the cog runs at the RCFAST rate (20-30 MHz).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48.
     significance: |
       The flash loader executes its entire SPI dance under RCFAST. The
       user's _clkfreq only takes effect AFTER the loader's final COGINIT
@@ -87,30 +79,25 @@ phase_2_post_load_state:
       identical code and timing regardless of what crystal/PLL config
       the user program ultimately selects.
     spi_rate_consequence: |
-      SCK = sysclk/2 under RCFAST gives SCK ~10-15 MHz, well below the
-      W25Q128's 100+ MHz tolerance. The flash is always faster than the
-      loader can talk; the loader is always slow enough to never overrun
-      the flash. No retiming, PLL-stable wait, or upper-bound check on
-      sysclk is required.
+      The loader runs SCK at sysclk/2 (one clock per spi_ck transition),
+      so under RCFAST (20-30 MHz) SCK is about 10-15 MHz.
     custom_loader_caveat: |
       Custom flash loaders wishing to use a faster sysclk must HUBSET to
-      switch clocks AND rebalance the streamer NCO / WXPIN pair to
-      maintain bit-edge lockstep (see language/pasm2/concepts/streamer_smartpin_control.yaml).
-      They must also reconsider the WAITX #3 alignment pad between
-      WYPIN and XINIT, calibrated for the RCFAST sysclk/2 regime.
-  benefit: "Saves code space and boot latency; the production loader does exactly this"
+      switch clocks AND keep the streamer NCO / WXPIN pair in bit-edge
+      lockstep (see language/pasm2/concepts/streamer_smartpin_control.yaml).
+      The flash loader uses its WAITX #3 alignment pad between WYPIN and
+      XINIT only at its own sysclk/2 setting.
 
 # Phase 3: Flash loader handoff
 phase_3_flash_loader:
-  source_of_truth: "Parallax P2 flash_loader.spin2"
   case_study: code-examples/flash-loader-case-study.yaml
   cog_image_layout:
     total: "256 longs (the 1KB the ROM loaded)"
     partitions:
-      - "One-shot programmer code (runs only when initially writing flash)"
-      - "Per-boot loader code (runs on every flash boot)"
-      - "Shared data words and constants"
-      - "First slice of user application (whatever fits in remaining cog space)"
+      - "Loader code (runs on every flash boot)"
+      - "Loader data longs set by the programmer: app_longs, app_longs2, app_sum, loader_sum"
+      - "First slice of the user application (app_start..$0FF)"
+    programmer_note: "The programmer runs once, from the serial download, and writes the loader and the application to flash; it is not part of the 1KB image the ROM loads"
   loader_flow:
     - "Continue reading from flash $400 via the mid-stream SPI state (no new READ)"
     - "Stream application bytes from flash to hub RAM starting at $00000"
@@ -122,8 +109,8 @@ phase_3_flash_loader:
 # Failure modes (terse)
 failure_modes:
   flash_unresponsive: "ROM autoprobe fails → falls through to next configured boot path (per pattern), or shuts down"
-  prop_checksum_fail: "Chip stalls; no code executes. Recovery: hardware reset to attempt a different boot pattern (e.g., serial recovery)"
-  application_checksum_fail: "Loader floats SPI pins and halts via HUBSET. Recovery: hardware reset; reflash from serial"
+  prop_checksum_fail: "The ROM does not run the loaded code; it tries the SD card (pull-up on P60), else serial loading (P59 floating) or shutdown (P59 pulled down), per the boot pattern"
+  application_checksum_fail: "Loader floats SPI pins and stops the clock via HUBSET until the next reset"
 
 # Cross-references
 related:

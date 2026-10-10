@@ -7,9 +7,9 @@ description: |
   modes (LUMA8/HSV16 families only) -- there are NO named color maps (Heat/Rainbow/etc.),
   NO persistence/accumulate mode, and NO time-frequency cursors or pattern-recognition
   features.
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, SPECTRO Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (SPECTRO display implementation: color-mode restriction, TRACE bitfield) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, SPECTRO Display (color modes, TRACE); behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - spectrogram

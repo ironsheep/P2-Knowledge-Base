@@ -11,11 +11,12 @@ category: addon
 manufacturer: Iron Sheep Productions, LLC
 status: "retiring_limited_stock"
 
+# The board is designed and sold by Iron Sheep Productions, LLC, not by Parallax.
+# Every figure in this file is the board designer's own; no Parallax-published
+# document describes this board.
+authorship: "Board designed and sold by Iron Sheep Productions, LLC; the figures in this file are the designer's own, not from a Parallax publication."
+
 description:
-  source: >-
-    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
-    Productions LLC (the board's manufacturer) --
-    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:13-33, :55-61.
   text: >-
     Adapter board that connects HUB75 RGB LED matrix panels to a Propeller 2. It
     provides robust 3.3 V to 5 V level shifting for ALL HUB75 signals at the HUB75
@@ -26,14 +27,6 @@ description:
     address lines.
 
 specifications:
-  source: >-
-    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
-    Productions LLC (the board's manufacturer) --
-    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:15-33, :122-126;
-    pin-offset map at
-    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-complete-pinout.md:8-27, :105-115;
-    panel_clock_note from the board designer's HUB75Adapter.md "Specifications" note,
-    github.com/ironsheep/P2-HUB75-LED-Matrix-Driver.
   physical:
     pcb_dimensions: "1.9 x 2.8 inches (48 x 71 mm)"
     form_factor: "dual 2x6-pin female pass-through headers, 0.1 inch spacing"
@@ -66,12 +59,6 @@ software_features:
     releases -- this entry does not restate them.
 
 notes:
-  source: >-
-    P2 Eval HUB75 Adapter Board (64032) - Official Specifications, Iron Sheep
-    Productions LLC --
-    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-official-specs.md:22-27, :24-27,
-    :128-142; and
-    engineering/ingestion/sources/p2-hub75-adapter/p2-hub75-adapter-complete-pinout.md:112-115.
   items:
     - "LED panels require a separate 5 V power supply. Never power a panel through the P2 board - the adapter passes 5 V through from the P2 board only for its own level shifters and the connector."
     - "Panel scan patterns follow the address lines fitted: A-B-C is a 1/8 scan, A-B-C-D a 1/16 scan, A-B-C-D-E a 1/32 scan."
@@ -147,8 +134,6 @@ compatibility:
     - Propeller Tool compatible
     - PNut compatible
 
-source: P2 HUB75 LED Matrix Driver Study
-
 # RESOURCE REFERENCES (MANDATORY - with URLs)
 resources:
   obex:
@@ -161,14 +146,15 @@ resources:
 
   github:
     url: "https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver"
-    documentation: "Comprehensive API and panel configuration guides"
+    contents: "Comprehensive API and panel configuration write-ups"
     examples: "Multiple demo applications included"
 
   quick_bytes: []
 
-documentation:
-  primary: "GitHub repository documentation"
+further_reading:
+  primary: "The driver's GitHub repository"
   obex: "P2 Object Exchange (OBEX)"
-  references:
-    - "HUB75 protocol specification"
-    - "Panel-specific LED driver datasheets"
+
+references:
+  - "HUB75 protocol specification"
+  - "Panel-specific LED driver datasheets"

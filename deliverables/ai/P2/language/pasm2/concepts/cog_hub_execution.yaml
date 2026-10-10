@@ -1,5 +1,5 @@
 # COG vs HUB Execution Models
-# Source: Silicon Doc v35, P2 Architecture, Production Code Analysis
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION MODES, HUB EXECUTION
 # Critical for: Understanding P2 execution modes, performance, and overlay systems
 
 concept: "COG vs HUB Execution"
@@ -34,10 +34,8 @@ fundamental_concept: |
        pays the 13+ clock hub-branch cost, so REP loops in hubexec are
        slower than in cogexec but still functional.
      - All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/
-       ALTGN/ALTGB/ALTGW) work in hubexec (none are in the Silicon Doc HUB
-       EXECUTION forbidden list). Confirmed by Chip Gracey clarification
-       2026-05-02: "REP is allowed in hubexec and so is ALTI or any other
-       ALTx instruction."
+       ALTGN/ALTGB/ALTGW) are not excluded from hubexec (none are in the
+       Silicon Doc HUB EXECUTION forbidden list).
      - FIFO/streamer instructions ARE forbidden in hubexec
        (see `hubexec_forbidden_instructions:` below)
   
@@ -121,8 +119,8 @@ hubexec_forbidden_instructions:
     - "XCONT (when streamer mode engages the FIFO)"
   also_works_in_hubexec_but_with_caveat:
     REP: "Works in hubexec per Silicon Doc v35 verbatim: 'REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions.' Each iteration's hidden jump pays the 13+-clock hub-branch cost, so REP loops are slower in hubexec than in cogexec."
-    ALTx_family: "All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) work in hubexec. None are in the Silicon Doc HUB EXECUTION forbidden list. ALTx mechanisms (modifying the next pipelined instruction's fields or substituting a full opcode) operate on the instruction in the pipeline regardless of whether it came from cog/LUT memory or the hub-prefetch FIFO. Source: Chip Gracey clarification 2026-05-02 verbatim: 'REP is allowed in hubexec and so is ALTI or any other ALTx instruction.'"
-  source: "Silicon Doc v35, HUB EXECUTION section"
+    ALTx_family: "None of the ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) is in the HUB EXECUTION list of instructions that cannot be used in hub execution, so they are not excluded from hubexec."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
 
 dynamic_overlay_system:
   concept: "Load code segments on-demand to maximize COG RAM usage"
@@ -137,7 +135,7 @@ dynamic_overlay_system:
                    rdlong  overlay_begin, pb
 
                    jmp     #bp_handler
-    source: "Spin2 debugger v51 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:382-386"
+    source: "Parallax Spin2/PASM Debugger v51 (2025.04.02), DEBUG interrupt entry or STALL return (debug_entry, .breakpoint)"
     
 
 execution_control:
@@ -169,7 +167,7 @@ instruction_availability:
     - "Some self-modifying code patterns (e.g., patching the just-prefetched-into-FIFO instructions has no effect, since the FIFO already holds them)"
   works_in_both_modes_with_caveats:
     - "REP — works in hubexec but each iteration's hidden jump back to top costs 13+ clocks (hub-branch FIFO refill)"
-    - "All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) — work in both modes; modify the next pipelined instruction regardless of source (cog/LUT or FIFO). Source: Chip Gracey clarification 2026-05-02."
+    - "All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) — not in the HUB EXECUTION list of instructions that cannot be used in hub execution"
   
   hubexec_only:
     - "None — hubexec is a strict subset (with the forbidden list above)"
@@ -305,9 +303,8 @@ loading_strategies:
 
 fifo_behavior:
   # CANONICAL MENTAL MODEL — read this first when reasoning about hubexec timing.
-# Sources: All numbers verified against Silicon Doc v35 HUB EXECUTION section
-#   (P2 Silicon Doc v35) and
-#   per-instruction YAMLs in deliverables/ai/P2/language/pasm2/.
+# Sources: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION,
+#   and the per-instruction pages in language/pasm2/.
   summary: |
     Hubexec instruction timing is governed by the per-cog instruction-prefetch
     FIFO. Per Silicon Doc verbatim, 'The FIFO contains (cogs+11) stages' —
@@ -322,19 +319,19 @@ fifo_behavior:
     stages: "(cogs+11) = 19 stages on an 8-cog P2"
     refill_threshold: "FIFO loads continuously whenever fewer than (cogs+7) = 15 stages are filled"
     overflow_margin: "After threshold reached, up to 5 more longs may stream in, potentially filling all (cogs+11) stages"
-    source: "Silicon Doc v35 verbatim"
-  
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, HUB RAM (The FIFO contains (cogs+11) stages ...)"
+
   streaming_mode:
     description: "Default mode while executing straight-line hubexec code"
     cost_per_instruction: "2 clocks (SAME as COGEXEC — the FIFO ensures no per-instruction hub-window penalty)"
     mechanism: "FIFO continuously prefetches instructions; instruction pipeline drains at 2 clocks each as long as FIFO is fed"
-    source: "Silicon Doc v35 + Chip Gracey clarification (Silicon Doc describes the streaming mechanism qualitatively; Chip's clarification supplies the explicit '2 clocks' figure for sequential hubexec)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (the FIFO spools up instructions for continuous execution); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (Clocks, Cog & LUT / Hub: one value covers both modes), p.148-159"
   
   branch_refill:
     minimum_cost: "13 clocks"
     misalignment_cost: "+1 clock if target instruction is not long-aligned"
     typical_range: "13-14 clocks (most cases); up to ~20 with hub-window misalignment"
-    source: "Silicon Doc v35 verbatim: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Per-instruction YAMLs (jmp/call/ret) cite range 13...20."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Per-instruction pages (jmp/call/ret) cite range 13...20."
     branches_that_trigger_refill:
       - "JMP, CALL, CALLA, CALLB, CALLD, CALLPA, CALLPB — unconditional branches to a new address"
       - "RET, RETA, RETB, RETI0/1/2/3, RESI0/1/2/3 — returns to a different address"
@@ -345,8 +342,8 @@ fifo_behavior:
     # NOT a timing penalty — these simply cannot be used while in hubexec.
     instructions: ["RDFAST", "WRFAST", "FBLOCK", "RFBYTE", "RFWORD", "RFLONG", "RFVAR", "RFVARS", "WFBYTE", "WFWORD", "WFLONG", "XINIT", "XZERO", "XCONT (when streamer engages FIFO)"]
     rationale: "FIFO is dedicated to instruction prefetch; these instructions repurpose or consume the FIFO"
-    source: "Silicon Doc v35 HUB EXECUTION section verbatim"
-  
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
+
   hub_io_in_hubexec:
     # RDLONG/WRLONG and friends DO work in hubexec, with normal hub-access timing.
     instructions: ["RDBYTE", "RDWORD", "RDLONG", "WRBYTE", "WRWORD", "WRLONG"]
@@ -492,7 +489,7 @@ related:
   - language/spin2/constructs/inline_pasm.yaml
 
 references:
-  - silicon_doc_v35: "HUB EXECUTION section. Verbatim: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Verbatim FIFO depth: 'The FIFO contains (cogs+11) stages.' Verbatim forbidden list: 'While in hub execution mode, the FIFO cannot be used for anything else. So, during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO.'"
-  - chip_gracey_clarification_2026: "Sequential hubexec instructions stream through the FIFO at 2 clocks each (same as cogexec). Silicon Doc describes the mechanism but doesn't print this exact figure for the sequential case; Chip's clarification fills that gap."
+  - propeller_2_documentation_v35: "HUB EXECUTION section. Verbatim: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Verbatim FIFO depth: 'The FIFO contains (cogs+11) stages.' Verbatim forbidden list: 'While in hub execution mode, the FIFO cannot be used for anything else. So, during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO.'"
+  - sequential_hubexec_clocks: "Sequential hubexec instructions stream through the FIFO at 2 clocks each (same as cogexec): the Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148-159, gives one Clocks value for Cog & LUT and Hub execution on each sequential instruction, and Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION, describes the FIFO spooling up the stream."
   - per_instruction_yamls: "language/pasm2/jmp.yaml: clocks 4 (cog), range 4 / 13...20. language/pasm2/call.yaml: cycles 4, notes '4 cycles for Cog/LUT, 13-20 cycles for Hub execution'. language/pasm2/ret.yaml: range 4 / 13...20. language/pasm2/djnz.yaml: clocks '2 or 4', range 13...20. language/pasm2/add.yaml: cycles 2 fixed. language/pasm2/mov.yaml: cycles 2."
-  - Spin2_debugger.spin2: Overlay implementation
+  - "Parallax Spin2/PASM Debugger v51, Breakpoint Handler Overlay (SETQ + RDLONG loads the overlay code into cog registers)"

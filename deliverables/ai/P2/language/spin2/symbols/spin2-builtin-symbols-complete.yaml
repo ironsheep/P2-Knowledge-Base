@@ -1,9 +1,9 @@
 # Spin2 Built-In Symbols - Complete Reference
-# Source: complete-builtin-symbols.md
+# Source: Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols
 # Layer 1: Direct extraction from the Spin2 documentation. The 116 smart-pin
 # configuration symbols (P_*) carry the wording of the CURRENT edition, Spin2 v55
-# (engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1419-1562), which
-# supersedes v51; the remaining records are from the original v51 extraction.
+# (Built-In Symbols for Smart Pin Configuration), which supersedes v51; the
+# remaining records are from the original v51 extraction.
 
 # Findability index. `generate-p2kb-index.py` harvests TOP-LEVEL `aliases:` only,
 # so without this block not one of the smart-pin constants defined below is
@@ -129,8 +129,7 @@ aliases:
 
 spin2_builtin_symbols:
   schema_version: "1.0.0"
-  extraction_date: "2025-09-06"
-  source: "complete-builtin-symbols.md"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
   # Count of the records actually present in this file's `symbols:` list below,
   # derived by walking that list -- not the size of the upstream symbol universe.
   # This field read 1224 until 2026-08-26; 1224 is the sum of
@@ -1703,7 +1702,7 @@ spin2_builtin_symbols:
 
     # Event and Interrupt Symbols
 # Source: Spin2 Language Documentation v55, "Built-In Symbols for Events and Interrupt Sources
-# (PASM only, see silicon doc)" -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1638-1656.
+# (PASM only, see silicon doc)".
     # Value = the event number (also the SETINTx interrupt-source code); description = the table's text.
     - symbol_id: "event_int"
       symbol_name: "EVENT_INT"
@@ -2035,18 +2034,3 @@ symbol_relationships:
   streamer_sequences: "Streamer modes require specific flag combinations"
   clock_dependencies: "Clock symbols must be used in specific combinations for stable operation"
   event_hierarchies: "Event symbols have priority and interaction rules"
-
-# Validation metadata
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  sources:
-    - document: "complete-builtin-symbols.md"
-      section: "Complete built-in symbols with categories"
-  validation_status: "draft"
-  completeness_score: 95
-  technical_accuracy: "spin2_v55_verified for the 116 P_* smart-pin configuration symbols; spin2_v51 for the remainder"
-  # Records in `spin2_builtin_symbols.symbols`. See the note on
-  # `spin2_builtin_symbols.total_symbols` for why this was 1224.
-  total_symbols_extracted: 136
-  categories_covered: 6
-  categories_with_records: 5

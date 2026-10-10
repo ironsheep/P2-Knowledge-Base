@@ -13,7 +13,7 @@ description: Issue streamer command immediately, zeroing phase.
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: enhanced_from_code_study
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.159"
 documentation_level: comprehensive
 examples:
 - context: SPI Flash Programming with Smart Pin Coordination
@@ -34,7 +34,7 @@ examples:
     '' tranp = 256 * 8 * 2              '' Number of clock transitions
 
     '
-  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:126-128"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Program flash (.page) and Data (rmode, tranp)"
 - context: SPI Command Transmission
   code: ''' Single byte command
 
@@ -50,7 +50,7 @@ examples:
     '' bmode = $4081_0008 + spi_di<<17  '' 1-pin output, bytes-msb-first, 1 byte from S
 
     '
-  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:166-168"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, SPI command, 1 byte (spi_cmd1) and Data (bmode)"
 - context: High-Speed Data Reception
   code: |
     ' Receive data from SPI flash to hub
@@ -64,7 +64,7 @@ examples:
 
     ' Where:
     ' wmode = $C081_0000 + spi_do<<17  ' 1-pin input, bytes-msb-first, to hub; D[15:0] (the bit count) is set by the SETWORD above
-  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:254-261"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Read in remaining application longs (.block) and Data (wmode)"
 patterns:
 - name: Streamer-SmartPin Synchronization
   description: 'Combines streamer for data transfer with smart pin for clock generation,
@@ -101,7 +101,7 @@ notes:
 - "WHAT THE COUNT COUNTS, which resolves the per-mode question: D[15:0] is an initial counter value decremented on each NCO ROLLOVER, with each rollover moving new streamer data. That is the same 16-bit field and the same $FFFE terminating maximum in EVERY mode — granularity does not change the count limit. What granularity changes is how much DATA one rollover moves, so a command's capacity is (count x data-per-rollover) and the bit-granularity figure above (2047 longs) is that arithmetic for a 32-bits-per-rollover mode. For the data-per-rollover of a specific mode see architecture/streamer/modes-reference.yaml."
 - "Maximum block per XINIT for bit-counted streamer modes: 2047 longs (65504 bits). The streamer's bit-count field is 16 bits, and `$FFFF` is reserved for perpetual streaming, so a terminating transfer in a bit-granularity mode must satisfy `longs * 32 <= 65534`. For larger payloads, chunk by looping with successive XINIT calls — the hub FIFO is configured once via RDFAST/WRFAST and does not need to be reissued per chunk. See pattern `large_transfer_chunking` below."
 sources:
-  - "notes (S supplies data, selects sub-modes, or is ignored): Silicon Doc, silicon-doc-text.txt:1309, :1313"
+  - "notes (S supplies data, selects sub-modes, or is ignored): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
 
 large_transfer_chunking:
   name: Large-transfer chunking
@@ -123,7 +123,7 @@ large_transfer_chunking:
                 xinit   mode, #0            ' start streamer with patched count
                 waitxfi                     ' wait for chunk to complete
                 tjnz    count, #.block      ' loop until all chunks done
-  source: "Parallax P2 flash_loader.spin2 lines 250-261"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Read in remaining application longs (.block: 'try max streamer block size for longs ($7FF)')"
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#

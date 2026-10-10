@@ -1,0 +1,8 @@
+' CP-008 proof (control): a SCOPE window named A, created, given a channel, fed one value.
+' Run from the repository root with -d and this file's repository-relative path.
+' Expected: compiles with no error; the DEBUG text holds the name A in all three messages.
+
+PUB main() | x
+  debug(`SCOPE A SIZE 400 220)
+  debug(`A 'S' -1000 1000)
+  debug(`A `(x))

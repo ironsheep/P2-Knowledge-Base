@@ -1,7 +1,7 @@
 title: "Debug Strategy Guide: Keeping a Debug Build Within the Compiler's Limits"
 type: guide
 category: Debugging
-documentation_source: "pnut-ts Debug-Strategy-Guide.md"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Things to know about the DEBUG system); DEBUG() memory utilization; DEBUG and interrupts"
 documentation_level: comprehensive
 
 aliases:
@@ -119,7 +119,7 @@ what_a_debug_build_takes_from_your_program:
     cogs that are not running ISRs in the background; if the ISRs tolerate skew and
     nothing depends on the interrupt continuing to cycle, DEBUG is usable with understood
     timing degradation. CT-based interrupts are not prone to it.
-  source: "the_compilers_limits (how the listing reports and how a build fails), reducing_bytes_and_records, mechanisms_overview reduces_debug_bytes and mechanism_details.debug_mask.per_object: behaviour observed with pnut-ts 1.55.8 (-d -l listing lines and compile errors m150/m151/m153), 2026-10-07; IF() inside debug() per v55 :920; figures deliberately not stated (Stephen, 2026-10-07: tool limits are soft and change with each compiler release -- teach the techniques, not the limits); value-only '_' forms per Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:918. interrupt_retrigger_can_stop_for_good: Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1070-1071; hub_memory: same, :900; protected_region_use: the Parallax Spin2 debugger source (Spin2_debugger.spin2 v51), engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:7-10, :20-50, and the per-cog blocks per P2 Documentation, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2399, :2446-2477"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (IF() inside DEBUG() statements; value-only '_' forms; Things to know about the DEBUG system, hub RAM use); DEBUG and interrupts (interrupt_retrigger_can_stop_for_good); protected_region_use: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (upper-hub buffer; per-cog save/restore map). The compiler limits and listing behaviour (the_compilers_limits, reducing_bytes_and_records, mechanisms_overview, mechanism_details.debug_mask.per_object) were observed with pnut-ts 1.55.8 (-d -l listing lines and compile errors m150/m151/m153), 2026-10-07; figures deliberately not stated (Stephen, 2026-10-07: tool limits are soft and change with each compiler release -- teach the techniques, not the limits)"
   clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived clock of at least 10 MHz."
   measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000."
 

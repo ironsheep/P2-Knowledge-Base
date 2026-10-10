@@ -20,14 +20,14 @@ hardware_stacks:
         operation: "WRLONG value, PTRA++ (hub[PTRA] = value, then PTRA += 4)"
         timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pusha.yaml encoding)"
         description: "Write then post-increment push (ascending stack)"
-        source: "operation: Silicon Doc, silicon-doc-text.txt:5490"
+        source: "operation: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Assembly Language (instruction aliases: PUSHA register/# = WRLONG register/#,PTRA++)"
 
       POPA:
         syntax: "POPA dest"
         operation: "RDLONG dest, --PTRA (PTRA -= 4, then dest = hub[PTRA])"
         timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popa.yaml encoding)"
         description: "Pre-decrement then read pop (ascending stack)"
-        source: "operation: Silicon Doc, silicon-doc-text.txt:5475"
+        source: "operation: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Assembly Language (instruction aliases: POPA register = RDLONG register,--PTRA)"
 
       manual:
         push: |
@@ -44,13 +44,13 @@ hardware_stacks:
         syntax: "PUSHB value"
         operation: "WRLONG value, PTRB++ (hub[PTRB] = value, then PTRB += 4)"
         timing: "3 clocks (range 3...10 cog / 3...20 hub-exec; per language/pasm2/pushb.yaml encoding)"
-        source: "operation: Silicon Doc, silicon-doc-text.txt:5491"
+        source: "operation: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Assembly Language (instruction aliases: PUSHB register/# = WRLONG register/#,PTRB++)"
       
       POPB:
         syntax: "POPB dest"
         operation: "RDLONG dest, --PTRB (PTRB -= 4, then dest = hub[PTRB])"
         timing: "9 clocks (range 9...16 cog / 9...26 hub-exec; per language/pasm2/popb.yaml encoding)"
-        source: "operation: Silicon Doc, silicon-doc-text.txt:5476"
+        source: "operation: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Assembly Language (instruction aliases: POPB register = RDLONG register,--PTRB)"
 
   call_stack:
     type: "Internal hardware stack"

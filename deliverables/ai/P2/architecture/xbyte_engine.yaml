@@ -102,15 +102,14 @@ starting_xbyte:
       Lets one XBYTE-driven VM operate two dispatch tables: a default table
       (armed once with SETQ) and an alternate table borrowed for exactly one
       opcode at a time (via SETQ2), after which dispatch returns to the default
-      table on its own. This is a general bytecode-VM pattern — for example, a
-      "setup bytecode then alternate-table bytecode" pairing that keeps the
-      bytecode stream compact while supporting an alternate handler set on demand.
+      table on its own. The Spin2 interpreter uses it this way: its variable-setup
+      bytecode routines end in '_ret_ setq2 #$081', so the next bytecode (a
+      variable operator) is dispatched through the alternate table at $215.
     mnemonic_aid: |
-      Mirrors the SETQ/SETQ2 personality split elsewhere in the ISA: SETQ targets
-      COG-RAM block transfers / SETQ2 targets LUT-RAM block transfers; here SETQ
-      sets the persistent XBYTE mode / SETQ2 sets the transient one. The "2"
-      variant is consistently the alternate / one-shot form.
-    source: "Chip Gracey, P2 silicon designer; v55 Spin2 interpreter Theory-of-Operations review."
+      Mirrors the SETQ/SETQ2 split in block transfers: SETQ precedes COG-RAM block
+      transfers / SETQ2 precedes LUT-RAM block transfers; here SETQ sets the
+      persistent XBYTE mode / SETQ2 sets the one-shot one.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE) ('_RET_ SETQ2 {#}D' alters the XBYTE mode for the next bytecode only) and FAST BLOCK MOVES; use_case example: Parallax Spin2 Interpreter v55 (2026.05.07), 'Variable operator bytecodes at $215' table and 'Setup reg variable / Set incdec' routine ('_ret_ setq2 #$081')"
 
 configuration_patterns:
   legend: |
@@ -121,7 +120,7 @@ configuration_patterns:
 
   index_form_bit:
     name: "Mode-operand bit 1 -- index-form selector"
-    status: "DEFINED. Documentary (full Silicon Doc v35 mode table) and confirmed by Chip Gracey."
+    status: "DEFINED. Documentary (full Silicon Doc v35 mode table)."
     detail: |
       Bit 1 selects WHICH HALF of the bytecode indexes the dispatch table:
         bit 1 = 0  -> index from the bytecode's LOW  bits (the 'primary' form)
@@ -134,8 +133,7 @@ configuration_patterns:
       In the 256-entry mode the bytecode already fills all eight index bits, so
       there is no low/high choice to make and bit 1 is IGNORED -- a genuine
       don't-care in that mode only. This is why the two 256 patterns print it as
-      a bare %x. (Chip Gracey: "there is nothing to switch between with 8-bit,
-      so the bit is ignored.")
+      a bare %x.
     not_a_stack_pop_control: "Bit 1 is not a stack-pop control; the demo's 'no stack pop' comment is unrelated to it."
     guidance: "Leave bit 1 = 0 unless you deliberately want a smaller table's high-bits index form."
 
@@ -273,6 +271,7 @@ programming_examples:
       ' 1    = F, write the bytecode's index LSBs to C and Z
 
 performance:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING (the software bytecode interpreter loop, 2+3+4 or 9 clocks; XBYTE, a total overhead of only 6 clocks); OVERVIEW (6-clock custom-bytecode executor). The 160 MHz throughput is arithmetic on the 6-clock overhead."
   overhead_per_bytecode: "6 clocks"
   throughput: "At 160MHz: 26.7M bytecodes/second (overhead only)"
   comparison:

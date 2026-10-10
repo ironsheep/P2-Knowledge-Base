@@ -6,10 +6,6 @@ blocks:
     fp: "1a0d7a2ae4cedcf9"
     compile: fragment
     wrap: pasm2-dat
-  - at: clock_sources.rcslow.usage
-    fp: "a8f09605252fae3b"
-    compile: not-code
-    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: programming_examples.basic_crystal_20mhz.code
     fp: "8bf6c1bac21e02a7"
     compile: fragment

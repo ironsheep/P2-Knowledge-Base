@@ -30,7 +30,7 @@ compiler_operand_format:
   description: Debug instruction - no operands
   valueType: 37
 compiler_effects: []
-documentation_source: PNUT_TS_compiler_analysis
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (plain DEBUG resolves to BRK #0, DEBUG() to BRK #1..255; PASM DEBUG instructions)"
 documentation_level: comprehensive
 last_updated: '2025-09-19T16:04:17.215079'
 category: Debug Directives

@@ -1865,6 +1865,25 @@ the baud (D[13:0]); the shortest WXPIN-to-packet gap tested is ~119 clocks; noth
 device's view of the line. *Source:* `…/tests/test-vo-j-035-usb-wxpin-on-running-pair.spin2`.
 
 
+### EF-103 · Under PNut v55 a SCOPE create named `Trace` (TRACE is a SPECTRO and BITMAP directive) does not open its window; a create identical to it but for the name `D` does — `CONFIRMED (PNut)`
+*KB:* `language/spin2/statements/debug.yaml`
+*How proven:* `probe-ch14-scope-create` (campaign `2026-07-debug-conflict-tests`), one program, one run. A TERM
+log window, then six SCOPE creates, each given a channel by a separate message and fed the same sine wave:
+`A` (`SIZE`), `B` (`SIZE` `SAMPLES`), `C` (`POS 460 0` `SIZE` `SAMPLES`), `D` (`POS 0 0` `SIZE 400 220`
+`SAMPLES 256`), `E` (the same keywords in another order), and `Trace` (`POS 0 0` `SIZE 400 220` `SAMPLES 256`).
+`D` and `Trace` are byte-identical apart from the name, so `D` is the control for `Trace`. *Result (Stephen,
+recorded 2026-07-27 in the corrections register, F-228):* **`A` to `E` all opened; `Trace` did not.** The
+compiler raised no error for the `Trace` create (CP-008).
+*Date/rig:* 2026-07-26/27, real P2, PNut v55 on Windows (Stephen). *Not reproduced under pnut-term-ts:* a
+2026-07-11 pnut-term-ts capture of a create line naming a window `Trace` shows a window titled "Trace - SCOPE",
+so the two hosts differ on this name; PNut is the ground truth here.
+**Grounds:** no ingested Parallax document states a naming rule for a DEBUG window. The result is one name on
+one display type: it shows that a directive word used as a window name can leave the window unopened, and
+nothing about any other name. *Limits:* one board; one name tried that is also a directive (`Trace`); the
+other directives, colour, colour-mode and packed-mode words, a name of 30 or more characters, a digit-led name,
+a name differing only in case, and a name reused after `CLOSE` were not run. The raw log is not versioned (the
+program regenerates it). *Source:* `campaigns/2026-07-debug-conflict-tests/probe-ch14-scope-create.spin2`.
+
 ## Open / pending empirical questions
 
 - **SINC2 XZS-S2 start-up sample moved with the restyled cog-0 code (2026-09-26).** In

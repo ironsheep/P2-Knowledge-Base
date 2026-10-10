@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: "3...10 (cog) / 3...20 (hub-exec)"
   type: variable
-  range_source: "encoding.clocks per PASM2 Manual 2022/11/01"
+  source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.155"
   notes: "Hub-window dependent; minimum 3 clocks when window is hit. +1 clock if the word crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: Write word in D[15:0] to hub address {#}S/PTRx.                                                               3...10
   1 / 3...20
@@ -18,7 +18,7 @@ flags_affected:
   Z: No effect
 silicon_errata:
   after_no_wait_rdfast: "Started fewer than 16 clocks after a no-wait RDFAST (D[31]=1), WRWORD can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Rule: use the waiting RDFAST (D[31]=0), or start this WRWORD at least 16 clocks after the no-wait RDFAST (e.g. WAITX #12 directly after it). Full account: language/pasm2/rdfast.yaml silicon_errata."
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.155"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_lsp

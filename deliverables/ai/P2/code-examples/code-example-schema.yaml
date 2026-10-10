@@ -51,19 +51,7 @@ code_example_schema:
       type: "integer"
       required: false
       description: "Page number in original document if applicable"
-      
-    extraction_context:
-      type: "string"
-      required: true
-      description: "Context around the example in original source"
-      max_length: 200
-      
-    extraction_date:
-      type: "string"
-      required: true
-      format: "YYYY-MM-DD"
-      description: "Date when example was extracted"
-      
+
   code_content:
     language:
       type: "string"
@@ -126,13 +114,7 @@ code_example_schema:
       required: true
       enum: ["beginner", "intermediate", "advanced", "expert"]
       description: "Skill level required to understand the example"
-      
-    complexity_score:
-      type: "integer"
-      required: true
-      range: [1, 10]
-      description: "Numerical complexity rating (1=simple, 10=very complex)"
-      
+
   application_context:
     domain:
       type: "string"
@@ -154,41 +136,13 @@ code_example_schema:
       description: "Specific hardware needed to run the example"
       examples: ["P2 Eval Board", "Encoder", "LED strip", "ADC"]
       
-  validation_status:
-    syntax_validated:
-      type: "boolean"
-      required: true
-      description: "Whether code has been validated with pnut-ts compiler"
-      
-    syntax_validation_date:
+  notes:
+    type: "array"
+    items:
       type: "string"
-      required: false
-      format: "YYYY-MM-DD"
-      description: "Date of last syntax validation"
-      
-    compilation_result:
-      type: "string"
-      required: false
-      enum: ["success", "warning", "error", "not_tested"]
-      description: "Result of compilation attempt"
-      
-    validation_notes:
-      type: "string"
-      required: false
-      max_length: 300
-      description: "Notes about validation process or issues"
-      
-    hardware_tested:
-      type: "boolean"
-      required: false
-      default: false
-      description: "Whether example has been tested on actual hardware"
-      
-    test_platform:
-      type: "string"
-      required: false
-      description: "Hardware platform used for testing"
-      
+    required: false
+    description: "Reader notes about the example, such as why a construct is written as it is"
+
   cross_references:
     related_instructions:
       type: "array"
@@ -214,79 +168,6 @@ code_example_schema:
       items:
         type: "string"
       description: "Prerequisites or foundational examples"
-      
-  quality_metrics:
-    completeness_score:
-      type: "integer"
-      required: true
-      range: [1, 10]
-      description: "How complete/comprehensive the example is"
-      
-    clarity_score:
-      type: "integer"
-      required: true
-      range: [1, 10]
-      description: "How clear and well-commented the example is"
-      
-    authority_level:
-      type: "string"
-      required: true
-      enum: ["official", "community_verified", "extracted", "unverified"]
-      description: "Authority/trustworthiness of the example"
-      
-  extraction_metadata:
-    extractor_version:
-      type: "string"
-      required: true
-      description: "Version of extraction tool/process used"
-      
-    extraction_method:
-      type: "string"
-      required: true
-      enum: ["manual", "automated", "hybrid"]
-      description: "Method used to extract the example"
-      
-    extracted_by:
-      type: "string"
-      required: false
-      description: "Person or system that extracted the example"
-      
-    review_status:
-      type: "string"
-      required: false
-      enum: ["unreviewed", "peer_reviewed", "expert_reviewed", "chip_verified"]
-      description: "Level of review the example has received"
-      
-    update_history:
-      type: "array"
-      items:
-        type: "object"
-        properties:
-          date:
-            type: "string"
-            format: "YYYY-MM-DDTHH:MM:SSZ"
-          changes:
-            type: "string"
-          updated_by:
-            type: "string"
-      description: "History of updates to the example"
-
-  integration_targets:
-    instruction_database:
-      type: "boolean"
-      description: "Whether example should be linked to instruction entries"
-      
-    tutorial_integration:
-      type: "boolean"
-      description: "Whether example is suitable for tutorial inclusion"
-      
-    reference_documentation:
-      type: "boolean"
-      description: "Whether example should appear in reference docs"
-      
-    automated_testing:
-      type: "boolean"
-      description: "Whether example should be included in automated test suite"
 
 # Example Categories for Organization
 categories:
@@ -319,15 +200,6 @@ categories:
 validation:
   required_for_all:
     - "example_id must be unique within knowledge base"
-    - "code must compile without errors (if syntax_validated=true)"
+    - "code must compile without errors"
     - "instructions_used must reference valid P2 instructions"
     - "All cross-references must point to existing entries"
-    
-  quality_thresholds:
-    minimum_completeness: 6
-    minimum_clarity: 6
-
-  authority_requirements:
-    official: "Must come from Parallax documentation"
-    community_verified: "Must have peer review"
-    chip_verified: "Must have Chip Gracey confirmation"

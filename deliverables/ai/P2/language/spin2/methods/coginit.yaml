@@ -1,5 +1,5 @@
 # Spin2 Method: COGINIT
-# Source: Spin2 documentation
+# Source: Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for COGINIT() Usage
 # Purpose: Start PASM code in a cog
 
 method: "COGINIT"
@@ -28,12 +28,7 @@ parameters:
 
       DO NOT pass -1. It is not a synonym for "any available cog" -- see
       not_an_input below.
-    source: >-
-      Spin2 v55 Language Documentation, "Built-In Symbols for COGINIT() Usage" --
-      engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1658-1665
-      (the six symbols and their values); :1673 (-1 is NEWTASK, TASKSPIN's
-      symbol). P2 Documentation v35 Rev B/C, COGINIT D operand --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:381-390.
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for COGINIT() Usage (the six symbols and their values; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand)"
     not_an_input: >-
       -1 does NOT mean "any available cog". It reaches COGINIT as $FFFF_FFFF, so
       the silicon decodes D[5:0] = %111111 -- D[4]=1 selects the free-cog search

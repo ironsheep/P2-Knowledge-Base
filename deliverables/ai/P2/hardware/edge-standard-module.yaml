@@ -41,13 +41,7 @@ basic_info:
 # KEY SPECIFICATIONS
 # =============================================================================
 specifications:
-  source: >-
-    P2-EC Edge Module Rev D Product Guide v3.0 (Parallax Inc., 2022-06-03) --
-    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:73-90
-    (Key Specifications), :50-71 (Features), :169-173 (5. Flash Memory),
-    :470-509 (Recommend and Absolute Maximum Ratings).
-    chip_marking_note: P2-EC Edge Module Rev D Product Guide v3.0,
-    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:104-107.
+  source: "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, Key Specifications and Features, p.2; 5. Flash Memory, p.5; Recommend and Absolute Maximum Ratings, p.11; chip_marking_note: 1. Propeller 2 P2X8C4M64P, p.3"
   propeller_chip: "P2X8C4M64P (8 cogs, 512 KB shared hub RAM, 64 smart pins)"
   chip_marking_note: >-
     A limited number of P2 Rev C chips carry the extended part number
@@ -91,7 +85,7 @@ specifications:
   # revisions, and one of those changes is destructive if applied to the wrong board:
   # VIN maximum was 5.5 V until Rev C. A module in hand is not necessarily Rev D.
   board_revisions:
-    source: "P2 Edge Module (#P2-EC) Product Guide v3.0, Revision History -- engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:519-549"
+    source: "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, Revision History, pp.12-13"
     why_this_matters: >-
       Every rating in this file is a Rev D rating unless it says otherwise. The VIN
       maximum in particular rose from 5.5 V to 16 V only at Rev C, so a Rev A or Rev B
@@ -126,12 +120,8 @@ specifications:
 # =============================================================================
 pin_mapping:
   source: >-
-    P2-EC Edge Module Rev D Product Guide v3.0 (Parallax Inc., 2022-06-03) --
-    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:343-425
-    (Edge Connector Pin Assignments), :433-457 (Other Pins),
-    :297-312 (12. microSD card socket), :129-146 (3. LDO regulators for I/O Pin Voltage).
-    boot_pin_direction_note: Parallax ROM_Booter listing,
-    engineering/ingestion/sources/rom-booter/rom_booter_v33_01j.lst:135-138.
+    P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, Edge Connector Pin Assignments, p.10; Other Pins, p.11; 12. microSD card socket, p.7; 3. LDO regulators for I/O Pin Voltage, p.4.
+    boot_pin_direction_note: Parallax Propeller 2 ROM Booter v33_01j, CON block (spi_cs, spi_ck, spi_di, spi_do pin definitions with their sd_ aliases) and Try to load from SPI memory (try_spi).
   summary: >-
     "Smart I/O pins P0-P55 are fully free; P56-P63 are routed to peripheral
     circuits and/or have special functions related to Propeller 2 boot sequence
@@ -168,7 +158,7 @@ pin_mapping:
     P58 is the P2 INPUT (flash/card data OUT, i.e. MISO) and P59 the P2 OUTPUT
     (flash/card data IN, i.e. MOSI). P60 and P61 SWAP roles between the two
     boot sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60
-    and microSD CLK on P61. The P2 boot ROM listing states both directly.
+    and microSD CLK on P61.
   microsd_socket:
     added_in: "Rev C"
     power: "supplied by the VIO5663 LDO regulator"
@@ -200,10 +190,7 @@ pin_mapping:
       architecture/pin-drive-configuration.yaml (idioms.weak_high /
       idioms.weak_low, and drive_ladder.no_other_rungs).
     disable: "the DIP switch marked LED removes power from both LEDs"
-    source: >-
-      P2-EC Edge Module Rev D Product Guide v3.0, 7. LED Buffer and 8. LEDs P56 and P57 --
-      engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:257-282.
-      do_not_copy_the_guides_wording: engineering/ingestion/SOURCE-ERRATA.md E-010.
+    source: "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 7. LED Buffer and 8. LEDs P56 and P57, pp.6-7. The guide's own wording of the weak-drive alternative is not carried (it names a pull-up that does not exist on this part)"
   other_pins:
     RESn: >-
       Internally pulled up to 3.3 V with a 10K resistor. The Propeller chip resets
@@ -221,10 +208,7 @@ pin_mapping:
 # BOOT MODE SELECTION
 # =============================================================================
 boot_modes:
-  source: >-
-    P2-EC Edge Module Rev D Product Guide v3.0 (Parallax Inc., 2022-06-03),
-    6. Mode Selection Switch Bank --
-    engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:174-255.
+  source: "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 6. Mode Selection Switch Bank, pp.5-6"
   switch_bank: >-
     Four DIP switches control LED power and boot-mode selection. They are not set
     to any particular state on a new module, although all four are usually OFF.
@@ -268,12 +252,12 @@ protocol_constraints:
 resources:
   documentation:
     primary:
-      title: "P2-EC Edge Module Rev D Product Guide v3.0"
+      title: "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, p.1"
       date: "2022-06-03"
-      publisher: "Parallax Inc."
-    references:
-      - "Parallax Propeller 2 (P2X8C4M64P) Datasheet"
-      - "Winbond W25Q128JV Flash Datasheet"
+
+  references:
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, p.1"
+    - "Winbond W25Q128JV Flash Datasheet"
 
   edge_connectors:
     - part: "450-00308"
@@ -375,11 +359,7 @@ comparison_with_32mb:
     accessible_pins: 46
     led_pins: "P38, P39"
     psram_pins: "P40-P57 dedicated"
-    source: >-
-      P2-EC32MB Edge Module Rev B Guide v2.0 (Parallax Inc., 2022-05-23) --
-      engineering/ingestion/sources/edge-32mb-module/edge-32mb-module-narrative.txt:120
-      ("Smart I/O pins: 46 accessible, 40 fully free") and :417 ("P0-P39 are fully
-      free"). The value shipped here was 38, which no source states.
+    source: "P2 Edge Module with 32MB RAM (#P2-EC32MB) v2.0 5/23/2022, Key Specifications (\"Smart I/O pins: 46 accessible, 40 fully free\"), p.2, and Edge Connector Pin Assignments (\"P0-P39 are fully free\"), p.10"
 
   note: "Choose P2-EC for maximum GPIO, P2-EC32MB for external memory"
 

@@ -58,7 +58,6 @@ object_metadata:
     discovery_date: "2025-09-12..."    # When indexed
     last_verified: "2025-09-12..."     # Last verification
     extraction_status: "author_extracted"  # Status
-    quality_score: 5                   # 1-10 rating
     created_date: "2020-05-09 12:00:00"    # Original upload date
 ```
 

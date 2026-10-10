@@ -44,7 +44,7 @@ streamer_pairing:
         (after READING from pins) → use for INPUT streaming
     Remember: the verb describes what HUB I/O direction the FIFO is
     configured for, not what the streamer's payload direction is.
-  example_source: "Parallax P2 flash_loader.spin2 line 248 (WRFAST → input capture from spi_do)"
+  source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Read in remaining application longs (WRFAST, then the streamer writes spi_do bits to hub)"
 
 related:
   - language/pasm2/rdfast.yaml

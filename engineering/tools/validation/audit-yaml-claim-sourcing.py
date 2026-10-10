@@ -96,10 +96,22 @@ WHAT MAY BE CITED -- THE ACCEPTANCE RULE («#412», S-393; Stephen Q3/Q4/Q5/Q12)
         (CANONICAL_TITLES below, each READ OFF the document's own cover/footer),
         with its edition or section, plus `p.N` when the document is a
         paginated PDF -- `"<Parallax title> <edition>, <section heading>"`;
+      * a Parallax published SOURCE LISTING (the Spin2 interpreter, the Spin2
+        debugger, the ROM booter, the flash loader -- rows marked in
+        LISTING_EDITION_RE), named WITH the edition that is currently ingested,
+        then the routine or section: `"<listing title> <edition>, <routine>"`.
+        A listing citation with no edition is NO_EDITION; one naming any other
+        edition is STALE_EDITION (Stephen, 2026-10-10: a listing changes with
+        each compiler/firmware revision, so a newer ingested edition makes every
+        citation of an older one stale until re-checked). Never by line;
       * an EF-NNN that EXISTS as a `### EF-NNN` entry in
         P2-EMPIRICAL-FINDINGS.md (a fact measured on silicon);
       * a CP-NNN that EXISTS as a `### CP-NNN` entry in COMPILE-PROOFS.md
-        (a compile proof, Q12).
+        (a compile proof, Q12);
+      * an OBEX object by id -- `OBEX 2842 (Full Duplex Serial)` -- when that id
+        EXISTS as `<id>.yaml` in community/obex/objects/ (the object is the artifact
+        and the id is its citation). A nonexistent id is BAD_ID; the bare word OBEX
+        with no id names no object and is refused.
 
     ...and it carries NONE of: an extraction path (`silicon-doc-text.txt:NNN`,
     any `engineering/` path), a register or summary of ours (`SOURCE-ERRATA.md`,
@@ -376,9 +388,10 @@ def points_away(value):
 # p2docs-github-io (community / upstream leads); pnut-ts-pasm-ref,
 # iron-sheep-compiler, quick-bytes-code (not Parallax documents); the TAQOZ Bit
 # Bashers Guide (Peter Jakacki); p2-hub75-adapter (manufacturer is not Parallax);
-# the AK5704 datasheet (third party). rom-booter and flash-loader are SOURCE
-# LISTINGS with no printed document title (ROM_Booter.lst:1 opens `CON`;
-# flash_loader.spin2:1 is a code comment), so they are not citable by title here.
+# the AK5704 datasheet (third party). Parallax's published SOURCE LISTINGS (the
+# Spin2 interpreter, the Spin2 debugger, the ROM booter, the flash loader) ARE
+# citable since Stephen's ruling of 2026-10-10, pinned to their edition -- they
+# are the rows at the END of this table, each marked in LISTING_EDITION_RE.
 # Codenames ("Silicon Doc", "Blue Book") are NOT titles and are refused.
 #
 # Row = (key, [printed title forms], edition form as printed, paginated PDF?,
@@ -499,9 +512,69 @@ CANONICAL_TITLES = [
      "Part Number 64008, Revision A", False,
      "p2-click-adapter/p2-click-adapter-text.txt:6, :11, :13 (the schematic's title block; a "
      "one-page schematic, so no page number)"),
+    # --- PUBLISHED SOURCE LISTINGS (Stephen, 2026-10-10). For these rows the edition
+    # field is the CURRENTLY INGESTED edition, written as a citation writes it -- the
+    # staleness check reads the current edition from HERE and nowhere else. When a
+    # newer edition is ingested, change the edition field of its row: every citation
+    # of the old edition then fails STALE_EDITION until it is re-checked. Provenance
+    # paths are under engineering/ingestion/; titles are the listing's own banner.
+    ("spin2-interpreter",
+     ["Spin2 Interpreter"],
+     "v55 (2026.05.07)", False,
+     "external-inputs/source-code/spin-interpreter/v55/Spin2_interpreter.spin2:4 (banner "
+     "`Spin2 Interpreter - v55 - 2026.05.07`). Editions held: v51 (`v51 - 2025.04.02`, "
+     "spin-interpreter/v51/:4) and v55; v55 is current (DOCUMENT-LINEAGE.md, Source-code "
+     "inputs). Stephen's ruling writes it `Parallax Spin2 Interpreter v55 (2026.05.07)`, "
+     "which contains the printed title"),
+    ("spin2-debugger",
+     ["Spin2/PASM Debugger"],
+     "v51 (2025.04.02)", False,
+     "external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:2 (banner "
+     "`Spin2/PASM Debugger - v51 - 2025.04.02`). The only edition held; current for the v55 "
+     "toolchain (DOCUMENT-LINEAGE.md: PNut-TS v1.55.8 embeds exactly this v51 image)"),
+    ("rom-booter",
+     ["Propeller 2 ROM Booter"],
+     "v33_01j", False,
+     "sources/rom-booter/rom_booter_v33_01j.lst:118 (banner `Propeller 2 ROM Booter`) and "
+     ":87-93 (revision history ending `v33_01a .. j  use \"G\" for Prop2 silicon v2`), :131 "
+     "(`ver = \"G\" 'Prop2 Silicon v2`). The SILICON listing. Its banner still prints "
+     "`5/28/2018 - v32i`, as does ROM_Booter.lst:113 -- the FPGA build (`ver = \"A\"`, :118), an "
+     "EARLIER revision whose history ends at v141 (:84; F-421, F-555) -- so the banner version "
+     "does not identify the silicon ROM and v33_01j, the listing's last revision record, is the "
+     "edition a citation names"),
+    ("flash-loader",
+     ["SPI Flash Programmer and Boot Loader"],
+     "v51", False,
+     "sources/flash-loader/flash_loader.spin2:1 (header `*** SPI FLASH PROGRAMMER AND BOOT "
+     "LOADER`). The listing prints NO edition; v51 is the Spin2/PNut distribution it was taken "
+     "from (external-inputs/source-code/spin-flash-loader/v51/flash_loader.spin2, byte-identical "
+     "to the sources/ copy by `diff`, 2026-10-10). The only edition held"),
 ]
 _TITLES = [(row[0], [re.sub(r"\s+", " ", t.lower()) for t in row[1]], row[3])
            for row in CANONICAL_TITLES]
+
+# How a citation writes an EDITION of each source listing, as a pattern whose group 1
+# is the edition token. Membership in this map is what makes a CANONICAL_TITLES row a
+# LISTING: for those rows the edition must FOLLOW the title (`<title> <edition>, ...`)
+# and must equal the token in the row's edition field (the current edition).
+LISTING_EDITION_RE = {
+    "spin2-interpreter": re.compile(r"v\s?(\d+)\b"),
+    "spin2-debugger": re.compile(r"v\s?(\d+)\b"),
+    "rom-booter": re.compile(r"v(\d+(?:_\d+)?[a-z]?)\b"),
+    "flash-loader": re.compile(r"v\s?(\d+)\b"),
+}
+_LISTING_CURRENT = {row[0]: LISTING_EDITION_RE[row[0]].match(row[2].lower()).group(1)
+                    for row in CANONICAL_TITLES if row[0] in LISTING_EDITION_RE}
+
+
+def listing_edition_class(key, nv, end):
+    """Judge the edition written right AFTER a listing title that ends at `end` in the
+    normalised value `nv`. Returns None (current edition), "STALE_EDITION" (some other
+    edition) or "NO_EDITION" (none written)."""
+    m = LISTING_EDITION_RE[key].match(nv[end:].lstrip(" -("))
+    if not m:
+        return "NO_EDITION"
+    return None if m.group(1) == _LISTING_CURRENT[key] else "STALE_EDITION"
 
 
 def _norm(s):
@@ -535,10 +608,13 @@ FORBIDDEN = [
 ]
 ID_RE = re.compile(r"\b(?:EF|CP|XF)-\d+\b")
 _CLASS_ORDER = ["BATCH_LABEL", "EXTRACTION_PATH", "REGISTER_PATH", "KB_PATH", "LINE_LOCATOR",
-                "BAD_ID", "NO_EDITION", "NO_PAGE", "BOOKKEEPING", "NO_PARALLAX_DOC"]
+                "BAD_ID", "STALE_EDITION", "NO_EDITION", "NO_PAGE", "BOOKKEEPING",
+                "NO_PARALLAX_DOC"]
 
 EF_LEDGER = REPO / "engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"
 CP_REGISTER = REPO / "engineering/ingestion/external-sources/compiler-verification/COMPILE-PROOFS.md"
+# XF = the external-project hardware tier, equal in standing to EF.
+XF_LEDGER = REPO / "engineering/ingestion/external-sources/hardware-verification/EXTERNAL-HARDWARE-FINDINGS.md"
 
 
 def _ledger_ids(path, prefix):
@@ -551,8 +627,26 @@ def _ledger_ids(path, prefix):
     return set(re.findall(rf"^### ({prefix}-\d{{3}})\b", text, re.M))
 
 
+# An OBEX object is cited by its catalog ID: `OBEX 2842 (Full Duplex Serial)`. The
+# catalog stores one `<id>.yaml` per object, so the id EXISTS when that file does.
+# The bare word OBEX, with no id, names no object and is not a citation. A catalog
+# that is missing reads as None -- never as "no id is wrong".
+OBEX_CATALOG = KB_ROOT / "community" / "obex" / "objects"
+OBEX_ID_RE = re.compile(r"\bOBEX\s+#?(\d+)\b", re.IGNORECASE)
+
+
+def _obex_ids(path):
+    try:
+        return {p.stem for p in path.glob("*.yaml") if p.stem.isdigit()} or None
+    except OSError:
+        return None
+
+
+OBEX_IDS = _obex_ids(OBEX_CATALOG)
+
 EF_IDS = _ledger_ids(EF_LEDGER, "EF")
 CP_IDS = _ledger_ids(CP_REGISTER, "CP")
+XF_IDS = _ledger_ids(XF_LEDGER, "XF")
 
 
 def classify(value):
@@ -562,13 +656,33 @@ def classify(value):
     good = False
     for m in ID_RE.finditer(v):
         i = m.group(0)
-        known = (EF_IDS if i.startswith("EF-") else CP_IDS if i.startswith("CP-") else set()) or set()
+        known = (EF_IDS if i.startswith("EF-") else CP_IDS if i.startswith("CP-")
+                 else XF_IDS if i.startswith("XF-") else set()) or set()
         if i in known:
             good = True
         elif "BAD_ID" not in classes:
             classes.append("BAD_ID")
+    for m in OBEX_ID_RE.finditer(v):
+        if m.group(1) in (OBEX_IDS or set()):
+            good = True
+        elif "BAD_ID" not in classes:
+            classes.append("BAD_ID")
     nv = _norm(v)
-    for _, forms, paginated in _TITLES:
+    for key, forms, paginated in _TITLES:
+        if key in LISTING_EDITION_RE:
+            # A source listing: EVERY occurrence of its title must carry the current
+            # edition right after it. A section alone does not do -- the routine it
+            # names may differ between editions.
+            for f in forms:
+                at = nv.find(f)
+                while at >= 0:
+                    cls = listing_edition_class(key, nv, at + len(f))
+                    if cls is None:
+                        good = True
+                    elif cls not in classes:
+                        classes.append(cls)
+                    at = nv.find(f, at + 1)
+            continue
         end = max((nv.find(f) + len(f) for f in forms if f in nv), default=-1)
         if end < 0:
             continue
@@ -904,7 +1018,7 @@ def quantities_in(text):
 
 
 def audit():
-    if not KB_ROOT.is_dir() or EF_IDS is None or CP_IDS is None:
+    if not KB_ROOT.is_dir() or EF_IDS is None or CP_IDS is None or OBEX_IDS is None:
         return None, None, 0, None
     tier1, tier2, scanned = [], [], 0
     bad = []        # (class, "rel:line", key, excerpt) -- BAD_CITATION, blocking
@@ -1132,8 +1246,9 @@ def negative_control():
     # The MUST-PASS lines are the other half: the rule has not been tightened
     # into refusing a good citation. A register that is missing is not a pass.
     print()
-    if EF_IDS is None or CP_IDS is None:
-        print("  [FAIL] the EF ledger or the CP register is missing -- cannot judge ids")
+    if EF_IDS is None or CP_IDS is None or XF_IDS is None or OBEX_IDS is None:
+        print("  [FAIL] the EF ledger, XF ledger, CP register or OBEX catalog is missing "
+              "-- cannot judge ids")
         return 1
     rule_cases = [
         ("EXTRACTION PATH `silicon-doc-text.txt:NNN`, valid title beside it -- "
@@ -1157,6 +1272,9 @@ def negative_control():
          '  source: "Parallax Spin2 Documentation v55 (conditional DEBUG: \'an '
          'opposite-condition SKIP instruction is placed before it\'); compiles '
          '(CP-999)"', "BAD_ID"),
+        ("XF id that does not exist (CONSTRUCTED: XF-999)",
+         '  source: "Hardware-verified on P2 silicon (XF-999): write-side pad is a phase of period hp."',
+         "BAD_ID"),
         ("S-292 bookkeeping word -- language/pasm2/qvector.yaml:75",
          "documentation_source: p2_datasheet", "BOOKKEEPING"),
         ("Parallax paginated PDF cited WITHOUT p.N (CONSTRUCTED: variant of "
@@ -1174,6 +1292,27 @@ def negative_control():
          '  source: "32201 Prop Plug Guide v3.0, Specifications, p.2"', "NO_PARALLAX_DOC"),
         ("a registry-excluded community document is not a Parallax title (CONSTRUCTED)",
          '  source: "Smart Pins (Titus) rev 5, WRPIN selector table"', "NO_PARALLAX_DOC"),
+        # Source listings (Stephen, 2026-10-10): pinned to the CURRENT ingested edition.
+        ("listing at an OLDER edition: interpreter v51 while v55 is current (CONSTRUCTED)",
+         '  source: "Parallax Spin2 Interpreter v51 (2025.04.02), PINHIGH routine"',
+         "STALE_EDITION"),
+        ("listing at the banner edition the FPGA build shares: ROM booter v32i (CONSTRUCTED)",
+         '  source: "Parallax Propeller 2 ROM Booter v32i, shut_down routine"', "STALE_EDITION"),
+        ("OBEX id that does not exist in the catalog (CONSTRUCTED: OBEX 99999)",
+         '  source: "OBEX 99999 (Imaginary Driver)"', "BAD_ID"),
+        ("the bare word OBEX with no id names no object (CONSTRUCTED)",
+         '  source: "OBEX community objects"', "NO_PARALLAX_DOC"),
+        ("a real OBEX id beside a nonexistent one is still refused (CONSTRUCTED)",
+         '  source: "OBEX 2842 (Full Duplex Serial); OBEX 99999 (Imaginary Driver)"', "BAD_ID"),
+        ("listing with NO edition (CONSTRUCTED)",
+         '  source: "Parallax Spin2 Interpreter, PINHIGH routine"', "NO_EDITION"),
+        ("listing edition written BEFORE the title, not after -- architecture/xbyte_engine.yaml:113",
+         '    source: "Chip Gracey, P2 silicon designer; v55 Spin2 interpreter '
+         'Theory-of-Operations review."', "NO_EDITION"),
+        ("listing cited by LINE NUMBER, current edition and all (CONSTRUCTED from "
+         "streamer_smartpin_control.yaml:407 `flash_loader.spin2 line 259`)",
+         '    source: "Parallax SPI Flash Programmer and Boot Loader v51 line 259"',
+         "LINE_LOCATOR"),
     ]
     rule_pass = [
         ("Parallax title + edition + EF that exists -- language/pasm2/brk.yaml:22",
@@ -1183,11 +1322,21 @@ def negative_control():
         ("a real EF with no document -- architecture/smart-pins/"
          "smart-pin-11000-adc-internal-clock.yaml:181",
          '  source: "Hardware-verified on P2 silicon (Rev C): hardware-verification '
-         'ledger EF-024 (F-202)."'),
+         'ledger EF-024."'),
+        ("a real OBEX object by id -- OBEX 2842 exists in the catalog",
+         '  source: "OBEX 2842 (Full Duplex Serial)"'),
+        ("two real OBEX objects in one citation -- OBEX 2842 and OBEX 2824",
+         '  source: "OBEX 2842 (Full Duplex Serial); OBEX 2824 (NEC RX)"'),
+        ("a real XF with no document (CONSTRUCTED) -- XF-001 exists",
+         '  source: "Hardware-verified on P2 silicon (XF-001)"'),
         ("a real CP (CONSTRUCTED: no KB line cites a CP yet) -- CP-001 exists",
          '  source: "Compiler-proved (CP-001)"'),
         ("official title + edition + section + p.N (CONSTRUCTED)",
          '  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"'),
+        ("listing at the CURRENT edition, routine named -- the form of Stephen's ruling",
+         '  source: "Parallax Spin2 Interpreter v55 (2026.05.07), PINHIGH routine"'),
+        ("listing in the banner's own spelling `<title> - v55 - <date>` (CONSTRUCTED)",
+         '  source: "Spin2 Interpreter - v55 - 2026.05.07, PINHIGH routine"'),
     ]
     # One positive per CANONICAL_TITLES document and per printed form: the form,
     # an edition, a section, and `p.N` where the document is paginated.

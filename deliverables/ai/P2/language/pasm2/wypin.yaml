@@ -40,7 +40,7 @@ description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknow
 
   '
 sources:
-  - "description (Y register by smart pin mode): Silicon Doc, silicon-doc-text.txt:3938, :3974, :3993, :4042, :4089, :4133, :4387, :4656"
+  - "description (Y register by smart pin mode): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES"
 flags_affected:
   C: No effect
   Z: No effect

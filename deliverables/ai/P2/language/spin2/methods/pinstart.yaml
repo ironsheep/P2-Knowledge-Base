@@ -13,7 +13,7 @@ description: |
   written while DIR is low primes its shifter and is sent once clocking starts, so
   PINSTART's Yval is the first word transmitted.
 sources:
-  - "description (%11100 keeps the reset-time word): P2 Documentation, silicon-doc-text.txt %11100 section; bench-verified in continuous mode, P2-EMPIRICAL-FINDINGS.md EF-090"
+  - "description (%11100 keeps the reset-time word): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%11100 section); bench-verified in continuous mode, EF-090"
 category: Smart Pin Operations
 documentation_level: comprehensive
 syntax: "PINSTART(PinField, Mode, Xval, Yval)"
@@ -53,7 +53,7 @@ examples:
       Configure pin as ADC input. X.[5..4] selects the mode (%00 = SINC2 sampling) and
       the sample period is 2^X.[3..0] clocks (%1010 = 1,024 clocks, 11-bit resolution).
       X = 0 would select a 1-clock period, which the P2 Documentation marks impractical.
-    source: "P2 Documentation, silicon-doc-text.txt:4257-4268 and table 34 (%11000 ADC modes, X.[5..4] and X.[3..0] rows); P_ADC/P_ADC_1X per spin2-v55-text.txt:1469, :1554"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%11000 ADC modes, table 34: X.[5..4] and X.[3..0] rows); P_ADC and P_ADC_1X per Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
   - code: |
       ' Start PWM on pin 8: base period 1 clock, frame 1000 base periods, duty 500
       PINSTART(8, P_PWM_TRIANGLE | P_OE, 1000 << 16 | 1, 500)
@@ -61,13 +61,13 @@ examples:
       Configure triangle PWM. X.[15..0] is the base period in clocks and X.[31..16] the
       frame period in base periods; Y.[15..0] is the output value, from zero to the frame
       period.
-    source: "P2 Documentation, silicon-doc-text.txt:4034-4044 (%01000 PWM triangle)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01000 PWM triangle)"
   - code: |
       ' Start async serial TX on pin 62 at 115200 baud, 8 data bits
       ' X = (clocks/bit << 16) | (data_bits - 1)
       PINSTART(62, P_ASYNC_TX | P_OE, ((clkfreq/115200) << 16) | 7, 0)
     description: "Configure asynchronous serial transmit"
-    source: "P2 Documentation, silicon-doc-text.txt:4684-4694 (%11110: X.[31..16] clocks per bit period, X.[4..0] bits minus 1)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%11110: X.[31..16] clocks per bit period, X.[4..0] bits minus 1)"
   - code: |
       ' Quadrature encoder: A on pin 32, B on pin 33 (B input = pin+1)
       PINSTART(32, P_QUADRATURE | P_PLUS1_B, 0, 0)   ' X = 0: continuous count
@@ -76,7 +76,7 @@ examples:
       Configure a quadrature encoder on ONE smart pin whose A input is its own pin and
       whose B input is selected relative to it. Starting both pins with ADDPINS does not
       pair them: each pin's B input defaults to its own pin.
-    source: "P2 Documentation, silicon-doc-text.txt:4093-4097 (%01011 quadrature, X = 0 continuous), :3746-3756 (B input selector, x000 = this pin by default); P_PLUS1_B per spin2-v55-text.txt:1438"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01011 quadrature, X = 0 continuous), and SMART PINS (B input selector, x000 = this pin by default); P_PLUS1_B per Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
   - code: |
       ' Smart-pin SPI (mode 0) on the P2 boot flash pins
       CON
@@ -99,10 +99,7 @@ examples:
       Configure smart-pin SPI: the data pins clock from SCK through the mode word's
       B-input selector (a relative pin offset), not through X; X carries only the
       sync-serial mode bit and the word size minus 1.
-    source: >-
-      Pattern of jm_ez_spi.spin2 start() (OBEX 2841, Jon McPhalen); X and B-input
-      encodings per P2 Documentation, silicon-doc-text.txt %11100/%11101 and %00100
-      sections; P_PLUS1_B/P_PLUS2_B per spin2-v55-text.txt:1438-1439.
+    source: "X and B-input encodings per Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%11100, %11101 and %00100 sections); P_PLUS1_B and P_PLUS2_B per Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration; pattern of jm_ez_spi.spin2 start() per OBEX 2841 (a community object, not a Parallax document)"
 pin_field_operators:
   ADDPINS:
     syntax: "base_pin ADDPINS count"
@@ -147,10 +144,7 @@ operations:
   - "DIR[pin] := 1 (enable)"
 timing:
   execution_model: |
-    Spin2 methods execute via the bytecode interpreter. The interpreter is
-    engineered to run at minimum cost. We do not publish a clock count for
-    this method because we do not have a verifiable measurement (no clean
-    single-PASM-instruction backing to cite).
+    Spin2 methods execute via the bytecode interpreter. Clock count: not documented.
 
 related:
   - PINCLEAR
@@ -166,7 +160,7 @@ output_enable_note: |
   a pin replaces any P_OE set by an earlier group call. Output modes (NCO, PWM,
   pulse, transition, serial TX, DAC, USB) produce no pin activity without it and
   still compile clean. Receive/measuring modes (ADC, RX, counters) omit it.
-  Authority: language/spin2/methods/wrpin.yaml tt_field.p_oe_required_for
+  Authority: the wrpin method page, tt_field.p_oe_required_for
 see_also:
   - "Smart pin modes"
   - "Smart pin configuration"

@@ -162,12 +162,14 @@ hardware_status: |
   No invented DEBUG captures. Implementation-only: the contract-choice reasoning is deferred to
   the P2 Architect's Guide.
 
-provenance:
-  primary_sources:
-    - "Spin2 Language Documentation, v45 and later (Chip Gracey, Parallax Inc.) — the STRUCT facility (declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET"
-  tool_ground_truth:
-    - "pnut-ts — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods"
-  cross_check_sources:
-    - "P2 Knowledge Base architecture/locks.yaml (16 locks, atomic test-and-set, deadlock ordering, release-on-all-paths) and architecture/decomposition/data-flow-contracts.yaml + the latest-wins-mailbox / buffer-management patterns (the mechanisms this note implements; the CHOICE among them is an Architect's Guide topic)"
-  companion_publication:
-    - "P2 Architect's Guide (contract decisions); P2AN005 Cooperative Multitasking (companion P2 Knowledge Base publications)"
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, DATA STRUCTURES (the STRUCT facility: declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and Built-In Methods (the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET)"
+
+tool_ground_truth:
+  - "pnut-ts — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods"
+
+related_pages:
+  - "P2 Knowledge Base architecture/locks.yaml (16 locks, atomic test-and-set, deadlock ordering, release-on-all-paths) and architecture/decomposition/data-flow-contracts.yaml + the latest-wins-mailbox / buffer-management patterns (the mechanisms this note implements; the CHOICE among them is an Architect's Guide topic)"
+
+companion_publication:
+  - "P2 Architect's Guide (contract decisions); P2AN005 Cooperative Multitasking (companion P2 Knowledge Base publications)"

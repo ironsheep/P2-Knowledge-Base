@@ -1,5 +1,5 @@
 # DIRA/DIRB Registers - I/O Pin Direction Control
-# Source: Silicon Doc v35, COG-RAM-REGISTER-MAP.md
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM, GENERAL PURPOSE REGISTERS
 
 
 # Findability index. This file named itself in no
@@ -146,8 +146,4 @@ see_also:
   - "Smart Pin Configuration"
   - "Pin driving instructions (DRVH/DRVL/FLTL)"
 
-source:
-  document: "Silicon Doc v35"
-  section: "COG RAM Register Map"  
-  page_reference: "COG-RAM-REGISTER-MAP.md"
-  extraction_date: "2025-09-06"
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Special-Purpose Registers)"

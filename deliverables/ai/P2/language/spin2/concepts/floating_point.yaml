@@ -105,8 +105,7 @@ performance_comparison:
   note: |
     Spin2 floating-point operations are software-implemented; they execute
     via the bytecode interpreter and call into a software float library.
-    We do not publish per-operation clock counts because we do not have
-    a verifiable measurement.
+    Per-operation clock counts: not documented.
     
     Integer operations in Spin2 also execute via the bytecode interpreter
     and likewise are not given a clock count here.

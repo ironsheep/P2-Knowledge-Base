@@ -39,7 +39,7 @@ memory_layout_example: "Without ALIGNW:\n  L0                          L1       
   \    B7    B8    B9    B10   B11\n  $11   $00   $22   $22   $33   $33   $33   $33   --    --    -- \
   \   --\n       [pad]\n"
 group: Assembly
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALIGNW, p.36"
 documentation_level: comprehensive
 related:
 - ALIGNL

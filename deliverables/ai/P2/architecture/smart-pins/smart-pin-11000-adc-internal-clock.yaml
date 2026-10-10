@@ -162,9 +162,9 @@ configuration_constants:
     - "Lower 4 bits control sample period/resolution"
 
   sources:
-    - "adc_input_modes (5 ranges, 2 sources, VIO/GIO calibration): Silicon Doc, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:200"
-    - "adc_input_modes (mode-name glosses): Spin2 v55, spin2-v55-text.txt:1466-1473"
-    - "P_ADC_FLOAT: Silicon Doc, silicon-doc-text.txt:115"
+    - "adc_input_modes (5 ranges, 2 sources, VIO/GIO calibration): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (smart I/O pin functions)"
+    - "adc_input_modes (mode-name glosses): Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
+    - "P_ADC_FLOAT: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Design Status (2020_02_24)"
 
 notes:
   - "Requires M[12:10] = %100 in WRPIN configuration to enable ADC"
@@ -178,7 +178,7 @@ notes:
 
 gain_mode_window:
   fact: "The gain-mode window is CENTERED ON MID-SUPPLY (~VIO/2), not referenced up from 0V: centered at ~1.64V for every gain. A ground-referenced small-signal source needs a mid-rail bias network before it can be read through a gain mode."
-  source: "Hardware-verified on P2 silicon (Rev C): hardware-verification ledger EF-024 (F-202)."
+  source: "Hardware-verified on P2 silicon (Rev C): hardware-verification ledger EF-024."
 
 power_domain:
   fact: |

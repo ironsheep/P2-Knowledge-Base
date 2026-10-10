@@ -45,7 +45,7 @@ examples:
     \  #$1F7-$010          ' Restore registers $010..$1F7 to free the save buffer\n\
     \        rdlong  $010, regh\n\n        lockrel #15                 ' Release\
     \ lock[15] so other cogs can own the save buffer and tx/rx pins\n"
-  source: "Spin2_debugger.spin2 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:232-235"
+  source: "Parallax Spin2/PASM Debugger v51 (2025.04.02), Debugger exit (debug_exit)"
 - name: Error Recovery
   description: Release all locks on error
   code: "' Emergency release of all held locks\nemergency_release\n        mov   \

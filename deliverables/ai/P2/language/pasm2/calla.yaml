@@ -23,7 +23,7 @@ description: Write current C and Z flags and address of the next instruction int
 flags_affected:
   C: Set to D[31] if WC/WCZ specified
   Z: Set to D[30] if WZ/WCZ specified
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_call

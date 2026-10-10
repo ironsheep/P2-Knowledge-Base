@@ -1,594 +1,161 @@
-title: Johnny Mac Complete Spin Programming Standard
+title: JonnyMac Spin2 Source Conventions
 id: johnny-mac-documentation-style
 aliases:
   - "JonnyMac programming standard"
   - "Spin2 conventions JonnyMac"
   - "Spin2 coding conventions"
-style_name: Johnny Mac Complete Programming Standard
-version: 2.0.0
-derived_from: Analysis of 27+ OBEX objects and formal programming standards document
-coverage_metrics:
-  public_method_documentation: "100%"
-  private_method_documentation: "95%+"
-  pasm2_comment_coverage: "51.4%"
-  documentation_consistency: "100%"
-  naming_convention_compliance: "100%"
-summary: Complete Spin programming standard covering naming conventions, code structure, documentation patterns, and compilation requirements for professional P2 development
+style_name: JonnyMac source conventions, as shown in two community objects
+source: "OBEX 2842 (Full Duplex Serial, jm_fullduplexserial.spin2, Jon McPhalen); OBEX 2824 (NEC RX, jm_nec_rx_demo.spin2, Jon McPhalen)"
+basis: "Conventions observed in OBEX 2842 and OBEX 2824, community objects by Jon McPhalen (jonnymac); not a Parallax publication. Where those two objects do not show a rule, this page does not state one."
+summary: Layout, naming, indentation and comment conventions that OBEX 2842 and OBEX 2824 follow
 
 description: |
-  Johnny Mac's complete programming standard represents 15+ years of P2 community leadership and professional embedded development. This comprehensive standard covers all aspects of Spin2 programming including naming conventions, code structure requirements, documentation patterns, and compilation standards.
-  
-  The standard achieves 98%+ method documentation coverage across analyzed code while maintaining strict naming conventions and structural requirements. It uses plain English documentation without formal tags, clear naming patterns for all code elements, and consistent formatting throughout.
-  
-  This is the authoritative reference for the complete JonnyMac Spin2 programming methodology, combining documentation excellence with professional code structure standards.
+  OBEX 2842 (Full Duplex Serial, jm_fullduplexserial.spin2) is a driver object and OBEX 2824
+  (NEC RX, jm_nec_rx_demo.spin2) is a demo program that uses it. Both are written by Jon McPhalen
+  in one consistent style. This page records what that style is, item by item, as the two
+  source files show it. Each convention names the object(s) that show it.
 
-philosophy:
-  documentation_principles:
-    - Document everything internal with 98%+ coverage
-    - Use consistent internal format with identical patterns
-    - Prioritize clarity over brevity with clear explanations
-    - Write in plain English without formal tags or markup
-    - Create self-documenting code that stands alone
-  
-  coding_principles:
-    - Maintain consistent naming conventions throughout
-    - Keep code readable with proper spacing and indentation
-    - Follow established patterns for code organization
-    - Ensure common libraries remain unchanged
-    - Write maintainable code for long-term support
+  Spin2 is case-insensitive (see language/fundamentals/case-sensitivity.yaml), so every case
+  rule below is a matter of style, not of compiler behavior.
 
-compilation_requirements:
-  compatible_tools:
-    - Parallax PNut/Propeller Tool
-    - PNUT_TS (identical to PNut)
-    - BST (P1 only)
-    - Spin Tools IDE
-  
-  library_management:
-    - Common libraries must remain common
-    - No forking between related applications
-    - Maintain compatibility across tools
+file_header:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), file header comment"
+  layout: |
+    The file opens with a comment banner made of '' lines between two rule lines of "=" characters.
+    Inside the banner, one labelled field per line:
+      File.......  the file name
+      Purpose....  one-line purpose (OBEX 2842 adds "--" continuation lines)
+      Author(s)..  OBEX 2842 "Authors" and OBEX 2824 "Author"; names the author, and OBEX 2842
+                   adds "-- based on work by Chip Gracey"
+      E-mail.....  contact address
+      Started....  left empty in both objects
+      Updated....  date; OBEX 2842 adds a "--" line describing the change
+    OBEX 2824 also carries a Copyright line, and both objects write "see below for terms of use".
+    The marker {$P2} is the last field line, before the closing rule line.
+  license_block: "Both objects end with a block labelled con { license } holding a {{ ... }} comment that starts 'Terms of Use: MIT License' and gives the MIT permission text."
+  note: "File headers and license text are covered by language/spin2/conventions/p2-source-file-organization-standard.yaml."
 
-code_structure_requirements:
-  line_length:
-    maximum: 100
-    includes: "Code with end-of-line comments"
-    
-  symbol_names:
-    maximum_length: 30
-    applies_to: "All constants, variables, methods, and labels"
-    
-  indentation:
-    type: "spaces"
-    amount: 2
-    usage: "Block indentation"
-    
-  method_spacing:
-    blank_lines: 2
-    between: "All method definitions"
-    
-  keywords:
-    case: "lowercase"
-    applies_to: "All Spin keywords and symbols"
+block_layout:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), block structure"
+  rules:
+    - "Block keywords are lowercase: con, obj, var, pub, pri, dat."
+    - "A con or dat block carries a short lowercase label in braces after the keyword: con { fixed io pins }, con { timing }, con { app io pins }, con { pst / formatting }, con { license }, dat { smart pin uart/buffer manager }. Some blocks are unlabelled (con, obj, var)."
+    - "One blank line follows the block keyword line; entries are indented two spaces."
+    - "Two blank lines separate blocks, and two blank lines separate methods."
+  order_observed: "OBEX 2842: header, doc comment, con blocks, obj, var, pub and pri methods, dat (PASM2), con { license }. OBEX 2824: header, con blocks, obj, dat, var, pub methods, con { license }."
 
-naming_conventions:
+indentation_and_width:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), method bodies and block entries"
+  indentation: "Two spaces per level, in block entries and in method bodies and nested statements. No tabs."
+  line_width: "No line of OBEX 2842 or of OBEX 2824 (jm_nec_rx_demo.spin2) is longer than 100 characters; the longest lines are exactly 100 (the header rule lines, and in OBEX 2842 the rule line above the PASM2 variables)."
+  statements: "Conditions are written in parentheses: if (rxtail <> rxhead), repeat while (rxtail == rxhead), elseif (c == \"\\\"). OBEX 2824 also writes if not (ir.sensor_check())."
+  keywords: "Every Spin2 keyword and built-in method is lowercase in both objects: repeat, if, elseif, quit, return, case, coginit, cogstop, longmove, longfill, muldiv64, pinstart, getct, waitct, waitms, strsize, lookdown, abs."
+
+naming:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), declarations"
   constants:
-    style: "UPPERCASE_WITH_UNDERSCORES"
-    location: "CON block"
-    examples:
-      - "BAUD_115200"
-      - "TX_PIN"
-      - "BUFFER_SIZE"
-      - "MS_001"
-    note: "IO pin names are considered constants"
-    case_insensitive_names: "Spin2 names are not case-sensitive: a constant RX_PIN and a variable rx_pin are the same name (error m240). Variables must differ from constants by more than case."
-
+    style: "UPPERCASE; words separated by underscores; digits allowed"
+    observed: ["BUF_SIZE", "PGM_RX", "CLK_FREQ", "MS_001", "US_001", "BR_TERM", "CRSR_XY", "CLS", "LED1", "RX1", "IR_SENSE"]
+    pin_names: "Pin numbers are constants and carry a direction tag in braces after the value: IR_SENSE = 15  { I }, SF_CS = 61  { O }."
+    enumerations: "OBEX 2824 declares enumerations with # lists: #true, ON, OFF and #false, NO, YES."
+    clock_symbol: "OBEX 2824 sets the system clock with the lowercase special symbol _clkfreq = CLK_FREQ, where CLK_FREQ = 200_000_000 is an ordinary constant."
   variables:
-    style: "lowercase or camelCase"
-    location: "VAR block"
-    rules:
-      - "Lowercase is preferred"
-      - "Trailing numbers allowed"
-      - "camelCase permitted if consistent throughout project"
-      - "Local variables should be short"
-    examples:
-      lowercase: ["irpacket", "buffer", "count", "idx"]
-      camelCase: ["irPacket", "txBuffer", "rxCount", "sensorIdx"]
-      
-  pre_initialized_data:
-    style: "PascalCase"
-    location: "DAT block"
-    examples:
-      - "DamageTable"
-      - "ConfigData"
-      - "MessageStrings"
-      
+    style: "lowercase; most names are single words joined together (rxhead, rxtail, txdelay, rxbuf); a one- or two-letter name is used for short locals"
+    observed: ["cog", "rxp", "txp", "rxhub", "rxhead", "txdelay", "rxbuf", "pbuf", "ircog"]
+    declaration: "The type (long, byte) is lowercase, followed by two spaces and then the name; in OBEX 2842 most variables have a trailing comment."
+    pointers: "A parameter that holds an address is prefixed p_: p_str, p_args."
+    locals: "Locals follow the | after the signature and are short lowercase names: | idx, c, asc, field."
   objects:
-    style: "lowercase"
-    location: "OBJ block"
-    rules:
-      - "Only lowercase letters allowed"
-      - "Numbers may be used"
-      - "No other characters allowed"
-    examples:
-      - 'time : "jm_time_200"'
-      - 'irrx : "jm_nec_rx"'
-      - 'serial : "jm_fullduplexserial"'
-
+    style: "lowercase instance names, short: nstr, ir, term"
+    files: "The referenced object files are lowercase with a jm_ prefix: \"jm_nstr\", \"jm_nec_rx\", \"jm_fullduplexserial\"."
+    cog_marker: "OBEX 2824 marks objects that start a cog with a leading * in the comment and explains the mark under the block: '* uses cog when loaded'. The master Spin cog is listed in a comment line: ' main  ' * master Spin cog."
   methods:
-    style: "snake_case"
-    location: "PUB and PRI blocks"
-    rules:
-      - "Lowercase with underscores between words"
-      - "Functions that do things named for that thing"
-      - "Functions that return values named for what they return"
-    examples:
-      actions: ["start", "stop", "setup", "tx", "rx"]
-      getters: ["get_packet", "damage_points", "random", "rxcheck"]
-      complex: ["read_sensor", "update_display", "check_status"]
-      
-  assembly_labels:
-    style: "snake_case"
-    location: "PASM2 code sections"
-    rules: "Defined like method names"
-    examples: ["read_loop", "wait_done", "tx_byte"]
+    style: "lowercase. A single word where one will do (start, stop, tx, rx, str, available, rxcheck, txflush, padstr, substr, tstart); underscores between words when several are needed (fmt_number, get_hex, get_nargs, wait_for_terminal)"
+    signature: "Parentheses are always written, even with no parameters: pub null(), pub stop(), pub setup(). A result is declared after a colon, lowercase: : b, : count, : result, : p_str1, value."
+    first_methods: "OBEX 2824 begins with pub main(), which calls setup() first; OBEX 2842 begins with pub null() (doc: 'This is not a top-level object')."
+  data_labels: "A DAT data label is capitalised: Banner (OBEX 2824). PASM2 labels and registers are lowercase: uart_mgr, uart_main, rx_serial, rxd, t1, p_rxbuf."
 
-code_organization:
-  required_structure:
-    first_method:
-      name: "main"
-      purpose: "Entry point for application"
-      requirement: "Must be first function in application"
-      
-    second_method:
-      name: "setup"
-      purpose: "Initialize IO and instantiate objects"
-      requirement: "Called by main to initialize application"
-      
-  method_pattern: |
-    obj
+comments:
+  source: "OBEX 2842 (Full Duplex Serial) and OBEX 2824 (NEC RX), comment placement"
+  method_documentation: "A method's documentation is written with '' (two apostrophes) lines. The signature line is followed by ONE blank line, then the '' lines, then one blank line, then the body."
+  doc_continuations: "Extra lines start with '' -- . Parameters may be listed with dots filling the name column ('' -- rxpin... receive pin), and a value table continues on '' lines aligned under the text."
+  not_every_method: "Not every method has documentation: lower() in OBEX 2842 and main(), setup() and wait_for_terminal() in OBEX 2824 have none."
+  trailing_comments: "A single apostrophe. Trailing comments start in column 65 in both objects (declarations, statements and PASM2; one comment in OBEX 2842 starts in column 64), lowercase, without a closing period."
+  section_comments: "OBEX 2842 puts a full-width rule line (apostrophe then dashes) between the PASM2 code and its res variables."
 
-      time   : "jm_time_200"
-      serial : "jm_fullduplexserial"
+pasm2_layout:
+  source: "OBEX 2842 (Full Duplex Serial), dat { smart pin uart/buffer manager }"
+  rules:
+    - "The dat block opens with org, then code."
+    - "Labels start in column 1 and are lowercase with underscores (uart_mgr, uart_main, rx_serial)."
+    - "The instruction mnemonic starts in column 17 and the first operand in column 27."
+    - "A WC or WZ effect sits in column 57; the trailing comment starts in column 65."
+    - "A conditional prefix (if_nc, if_e, if_c) and the _ret_ prefix are indented four spaces, ahead of the mnemonic column."
+    - "Two blank lines separate routines. Working registers are declared with res after a rule line, and the block ends with fit 496."
+    - "Comments describe what a step means, not what the mnemonic does, and use := to state the effect: ' t1 := @rxbuf, ' rxbuf[rxhead] := t3. Not every instruction has a comment."
 
-    pub main()
-      setup()
+example_documented_method:
+  source: "OBEX 2842 (Full Duplex Serial), pub start()"
+  note: "Excerpt: signature, one blank line, documentation, one blank line, body."
+  code: |
+    pub start(rxpin, txpin, mode, baud) : result | baudcfg, spmode
 
-      repeat
-        ' main application loop
+    '' Start simple serial coms on rxpin and txpin at baud
+    '' -- rxpin... receive pin (-1 if not used)
+    '' -- txpin... transmit pin (-1 if not used)
+    '' -- mode.... %0xx1 = invert rx
+    ''             %0x1x = invert tx
+    ''             %01xx = open-drain/open-source tx
 
-    pub setup()
-    '' Setup IO and objects for application
+      stop()
 
-      time.start()                         ' setup timing & delays
-      serial.start(RX_PIN, TX_PIN, %0000, BAUD_115200)
-
-  p1_specific:
-    return_variable: "Must be explicitly named in P1 methods"
-    example: "pub random() : result"
-
-style_characteristics:
-  - Method documentation immediately after signatures using double apostrophes
-  - Plain English descriptions without @param/@returns tags
-  - Assembly comments with 51.4% coverage using single quotes
-  - Consistent formatting and professional presentation
-  - Focus on WHAT methods do, not HOW they do it
-
-comment_types:
-  method_documentation:
-    prefix: "''"
-    usage: "All method documentation"
-    placement: "Immediately after method signature"
-    
-  code_comments:
-    prefix: "'"
-    usage: "In-line code comments and explanations"
-    placement: "After code statements or on separate lines"
-    
-  assembly_comments:
-    prefix: "'"
-    usage: "PASM2 assembly documentation"
-    placement: "Inline after instructions or as block comments"
-
-method_documentation_pattern:
-  structure:
-    - Zero blank lines between signature and documentation
-    - First line explains WHAT the method does
-    - Optional secondary lines with "--" prefix for details
-    - Documentation before any implementation code
-    
-  content_guidelines:
-    primary_line:
-      - Explain WHAT the method does
-      - Focus on purpose, not implementation
-      - Use active voice when possible
-      - Be concise but complete
-      
-    secondary_lines:
-      - Prefix with "--" to indicate supplementary information
-      - Explain constraints or special conditions
-      - Clarify complex parameters or return values
-      - Note side effects or state changes
-
-method_templates:
-  simple_method:
-    template: |
-      pub start(value)
-      
-      '' Seed prng for predictable "random" sequences
-      '' -- good for memory games like Simon
-      
-        if (value == 0)
-          seed := DFLT_SEED
-        else
-          seed := value
-          
-  method_with_return:
-    template: |
-      pub random() : result
-      
-      '' Returns new psuedo-random number
-      
-        result := ??seed
-        
-  complex_method:
-    template: |
-      pub tx(txbyte)
-      
-      '' Transmit byte through smart pin
-      '' -- will wait if buffer is full
-      
-        repeat
-          if (rqs_full() == false)
-            wypin(TX_PIN, txbyte)
-            quit
-          else
-            waitct(getct() + TX_BIT_TICKS)
-            
-  method_with_complex_params:
-    template: |
-      pub rx_check() : rxbyte | check
-      
-      '' Check for received byte (no blocking)
-      '' -- returns -1 if no byte available
-      '' -- returns byte (0..255) if available
-      
-        rxbyte := -1
-        check := rdpin(RX_PIN)
-        if (check)
-          rxbyte := rdpin(RX_PIN) >> 24
-
-special_method_types:
-  null_placeholder:
-    template: |
-      pub null()
-      
-      '' This is not a top-level object
-      
-        ' null method for non-top-level objects
-        
-  initialization:
-    template: |
-      pub start(rxpin, txpin, mode, baud) : result | baudcfg, spmode
-
-      '' Start simple serial coms on rxpin and txpin at baud
-      '' -- rxpin... receive pin (-1 if not used)
-      '' -- txpin... transmit pin (-1 if not used)
-      '' -- mode.... %0xx1 = invert rx
-      ''             %0x1x = invert tx
-      ''             %01xx = open-drain/open-source tx
-
-        stop()
-        ' [implementation continues...]
-        
-  cleanup:
-    template: |
-      pub stop()
-      
-      '' Disable smart pin serial coms
-      
-        if (rx_pin_num >= 0)
-          pinf(rx_pin_num)
-        if (tx_pin_num >= 0)
-          pinf(tx_pin_num)
-        longfill(@rx_pin_num, -1, 2)         ' mark both pins unused
-
-pasm2_documentation:
-  philosophy:
-    target_coverage: "51.4%"
-    rationale: "Optimal balance between comprehensive documentation and readability"
-    
-  style_rules:
-    - Single apostrophe for all assembly comments
-    - Inline comments after instructions when practical
-    - Block comments before code sections
-    - Consistent alignment of comments at reasonable column
-    - Focus on register usage and algorithm explanation
-    
-  inline_pasm2_example: |
-    con
-    
-      SENSOR_DELAY = 1_000                     ' clocks between sample points
-    
-    pub read_sensor(sensor_pin) : sensor_value | pin_config, delay_count, bit_counter
-    
-    '' Read one byte from a bit-banged sensor
-    '' -- requires precise bit-banging for this sensor type
-    '' -- the sensor line idles high and the sensor pulls it low
-    
-      org
-        ' Hold the line high through a weak drive so the sensor can pull it low
-        mov     pin_config, ##P_HIGH_15K       ' drive high 15 kOhm
-        wrpin   pin_config, sensor_pin         ' apply to sensor pin
-        drvh    sensor_pin                     ' DIR=1, OUT=1 - a drive is live only while DIR is high
-        
-        ' Timing loop for sensor reading
-        mov     delay_count, ##SENSOR_DELAY    ' load delay constant
-        mov     bit_counter, #8                ' read 8 bits
-        
-    read_loop
-        waitx   delay_count                    ' precise timing delay
-        testp   sensor_pin              wc     ' sample the line into C
-        rcl     sensor_value, #1               ' shift C in as the next bit, msb first
-        djnz    bit_counter, #read_loop        ' continue for all bits
-      end
-      
-  what_to_comment:
-    - Register assignments and their purpose
-    - Algorithm steps and logic flow
-    - Hardware interactions and pin operations
-    - Timing considerations and delays
-    - Loop logic and control flow
-    
-  what_not_to_comment:
-    - Obvious operations like simple moves
-    - Redundant information that restates the instruction
-
-constants_and_variables:
-  constant_documentation:
-    style: "Inline comments with clear explanations"
-    example: |
-      con
-        ' Serial communication configuration
-        BAUD_115200   = 115_200              ' standard high-speed baud rate
-        BAUD_230400   = 230_400              ' maximum reliable baud rate  
-        
-        ' Pin assignments for standard configuration
-        RX_PIN        = 63                   ' receive pin (P63)
-        TX_PIN        = 62                   ' transmit pin (P62)
-        
-        ' Timing and buffer constants
-        TIMEOUT_MS    = 5000                 ' 5 second timeout for operations
-        BUFFER_SIZE   = 256                  ' circular buffer size (power of 2)
-        
-  variable_documentation:
-    style: "Inline comments describing purpose and valid ranges"
-    example: |
-      var
-        ' Communication state variables  
-        long  rx_pin_num                    ' receive pin number (-1 if disabled)
-        long  tx_pin_num                    ' transmit pin number (-1 if disabled)
-        long  baud_rate                     ' current baud rate setting
-        
-        ' Buffer management
-        byte  tx_buffer[BUFFER_SIZE]        ' transmit circular buffer
-        byte  rx_buffer[BUFFER_SIZE]        ' receive circular buffer
-        
-  content_guidelines:
-    constants:
-      - Explain purpose and what the constant controls
-      - Include units (Hz, ms, bytes, pins, etc.)
-      - Note valid ranges for configuration values
-      - Clarify relationships between constants
-      
-    variables:
-      - Describe function and what data the variable holds
-      - Specify data ranges and valid values
-      - Explain relationships between variables
-      - Note special values like -1 for "disabled"
-
-comment_quality_guidelines:
-  excellent_comments:
-    - Explain the WHY behind code decisions
-    - Clarify complex logic with clear explanations
-    - Document assumptions and preconditions
-    - Note side effects or state changes
-    - Explain algorithm steps and calculations
-    
-  poor_comments_to_avoid:
-    - Restating obvious code operations
-    - Providing redundant information
-    - Using vague descriptions
-    - Writing incomplete fragments
-    
-  formatting_standards:
-    spacing: "Single space after apostrophes"
-    alignment: "Consistent column alignment for inline comments"
-    sentences: "Use complete sentences for clarity"
-
-quality_metrics:
-  achievement_levels:
-    johnny_mac_level:
-      public_methods: "100%"
-      private_methods: "95%+"
-      assembly_code: "51.4%"
-      consistency: "100%"
-      
-    industry_standard:
-      public_methods: "70-80%"
-      private_methods: "30-50%"
-      assembly_code: "20-30%"
-      consistency: "50-70%"
-      
-  quality_indicators:
-    excellent:
-      - Methods documented with clear purpose statements
-      - Assembly code explains algorithm logic
-      - Variables include units and ranges
-      - Comments add genuine value beyond code
-      - Consistent professional presentation
-      
-    good:
-      - Most methods documented with basic descriptions
-      - Some assembly comments explain key operations
-      - Major variables have purpose comments
-      - Consistent style maintained throughout
-      
-    poor:
-      - Missing method documentation
-      - Assembly code lacks comments
-      - Variables undefined or unclear
-      - Inconsistent comment styles
-
-implementation_guidelines:
-  adoption_approach:
-    1: "Document every public method with clear descriptions"
-    2: "Target 50%+ comment coverage in PASM2 code"
-    3: "Use inline comments for significant constants"
-    4: "Maintain consistent patterns across all methods"
-    5: "Apply same professional tone throughout"
-    
-  priority_order:
-    1: "Document complex public methods first"
-    2: "Focus on methods others will use frequently"
-    3: "Add assembly comments to time-critical code"
-    4: "Document variables and constants with clear purposes"
-    
-  integration_with_organization_standard:
-    - File headers and footers handled by organization standard
-    - Internal method documentation uses Johnny Mac's double apostrophe style
-    - Assembly comments use Johnny Mac's single quote approach
-    - Variable/constant documentation uses Johnny Mac's inline style
-
-automation_instructions:
-  parsing:
-    - Identify methods needing documentation
-    - Extract method signature components
-    - Determine visibility level (PUB/PRI)
-    - Parse parameters, returns, and locals
-    
-  generation:
-    - Place documentation immediately after signature
-    - Use double apostrophes for all methods
-    - Write clear WHAT descriptions
-    - Add "--" prefixed details for complex cases
-    - No formal tags, use plain English
-    - Maintain consistent formatting
-
-best_practices:
-  - Write self-documenting code that doesn't require external tools
-  - Focus on clarity and completeness over brevity
-  - Document everything that matters for understanding
-  - Maintain professional presentation throughout
-  - Use consistent patterns that others can follow
-  - Achieve high coverage metrics (98%+ for methods)
-
-why_this_works:
-  - Simple to follow with clear patterns
-  - Comprehensive coverage documents everything important
-  - Self-contained without external tool dependencies
-  - Proven effectiveness over 15+ years
-  - Scalable from small utilities to complex systems
-  - Professional appearance elevates community standards
-
-complete_example:
-  description: "Complete example demonstrating all naming conventions, code structure, and documentation standards"
+example_program:
+  source: "Layout shown by OBEX 2824 (NEC RX): con blocks, var block, main() calling setup(). The program itself is illustrative, not part of either object."
   code: |
     con { timing }
-    
-      _clkfreq = 200_000_000                   ' system frequency (PNut sets the clock from this)
 
-      MS_001   = _clkfreq / 1_000              ' ticks in 1ms
-      US_001   = _clkfreq / 1_000_000          ' ticks in 1us
+      CLK_FREQ = 200_000_000                                        ' system freq as a constant
+      MS_001   = CLK_FREQ / 1_000                                   ' ticks in 1ms
 
-    con { io pins }
-    
-      IR_IN    = 0     { I }                   ' input from IR sensor
-      TX_PIN   = 62                            ' transmit pin
-      RX_PIN   = 63                            ' receive pin
-      
-    con
-    
-      BUF_SIZE = 64                            ' buffer size for packets
+      _clkfreq = CLK_FREQ                                           ' set system clock
 
-    obj
-    
-      ' main                                   ' * master Spin2 cog
-      time  : "jm_time_200"                    '   timing and delays (200MHz)
-      irrx  : "ir_receiver"                    ' * IR input (your own object)
-      
+
+    con { app io pins }
+
+      LED1     = 56  { O }                                          ' Eval and Edge LEDs
+
+
     var
-    
-      byte  irpacket[BUF_SIZE]                 ' IR packet buffer
-      long  seed                               ' random seed value
+
+      long  blinks                                                  ' number of blinks so far
 
 
     pub main()
-    
+
       setup()
 
       repeat
-        irrx.get_packet(@irpacket)
-        process_packet(@irpacket)
+        pinhigh(LED1)
+        waitms(125)
+        pinlow(LED1)
+        waitms(125)
+        ++blinks
 
 
     pub setup()
-    
-    '' Setup IO and objects for application
-    
-      time.start()                             ' setup timing & delays
-      irrx.start(IR_IN)                        ' connect to IR sensor
-      seed := getct()                          ' seed random number
 
+    '' Prepare the application
+    '' -- clears the blink count
 
-    pub process_packet(p_buffer) | idx
-    
-    '' Process received IR packet
-    '' -- p_buffer points to packet data
-    '' -- handles damage calculation
-    
-      idx := byte[p_buffer][0] & $0F           ' extract damage index
-      if (idx >= 0) and (idx <= 15)
-        apply_damage(damage_points(idx))
-
-
-    pub damage_points(idx) : points
-    
-    '' Convert index to damage points
-    '' -- transmitted in bullet packet
-    '' -- returns 0 for invalid index
-    
-      if (idx < 0) or (idx > 15)
-        return 0
-      else
-        return DamageTable[idx]
-
-
-    pub apply_damage(points)
-    
-    '' Apply damage points to player
-    '' -- updates health status
-    '' -- triggers damage effects
-    
-      ' damage processing code here
-      
-      
-    dat { pre-initialized data }
-    
-      DamageTable   byte  1, 2, 4, 5, 7, 10, 15, 17
-                    byte  20, 25, 30, 35, 40, 50, 75, 100
-
-  highlights:
-    - "All constants use UPPERCASE_WITH_UNDERSCORES"
-    - "Variables use lowercase (irpacket, seed)"
-    - "Methods use snake_case (damage_points, apply_damage)"
-    - "DAT symbols use PascalCase (DamageTable)"
-    - "Objects use lowercase only"
-    - "Every public method documented with double apostrophes"
-    - "2 blank lines between methods"
-    - "2-space indentation throughout"
-    - "main() calls setup() pattern"
-    - "Comments explain purpose, not implementation"
+      blinks := 0
 
 known_issues:
-  - "The OBJ examples use jm_fullduplexserial (OBEX 2842). Its published source declares a local named field in format(); FIELD is now a reserved Spin2 word, so the object does not compile with the current compiler until that local is renamed."
+  - "OBEX 2842 declares a local named field in format(). FIELD is now a reserved Spin2 word, so the object as published does not compile with the current compiler until that local is renamed."
+
+related:
+  - language/spin2/conventions/spin2-docs-jonnymac.yaml
+  - language/spin2/conventions/spin2-naming-jonnymac.yaml
+  - language/spin2/conventions/spin2-formatting-standards.yaml
+  - language/spin2/conventions/p2-source-file-organization-standard.yaml
+  - language/spin2/conventions/vscode-pnut-documentation-style.yaml
+  - language/fundamentals/case-sensitivity.yaml

@@ -74,7 +74,7 @@ vs_getrnd:
     - "No state to keep and no seeding required"
     - "Draws on the cog's xoroshiro128** PRNG, seeded at boot and iterating every clock (not a true-random source)"
 
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.151"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_d

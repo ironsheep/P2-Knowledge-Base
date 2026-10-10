@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: idioms[0].examples[0]
-    fp: "81f06db11faed527"
+    fp: "21d95e169855247d"
     compile: fragment
     wrap: pasm2-dat
   - at: idioms[1].examples[0]

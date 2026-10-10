@@ -50,7 +50,7 @@ aliases:
   - DEBUG_WINDOWS_OFF
 
 # Clock Configuration Constants
-# Source: pnut-ts Clock-Configuration-Usage-Guide.md (compiler-verified)
+# Source: Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the symbol combinations and their effect)
 #
 # READ THE `range:` FIELDS AS COMPILER LIMITS, NOT SILICON LIMITS. Every range in
 # this block is what pnut-ts ACCEPTS; the P2's own limits are lower in all three
@@ -65,7 +65,7 @@ clock_configuration:
       to achieve this frequency. If used alone, assumes 20 MHz crystal input.
     range: "3,333,333 Hz to 500,000,000 Hz -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
     silicon_limit: "The P2 Datasheet rates the PLL at 3.33 MHz min, 180 MHz typical, 320 MHz MAXIMUM, with the note that nominal PLL frequency is 180 MHz at up to 105 degC. The Parallax Propeller 2 Documentation adds that for fastest overclocking the PLL can be pushed to 350 MHz using the 'VCO / 1' mode, %PPPP = 15. So the compiler will accept a _clkfreq 180 MHz above the datasheet maximum and 150 MHz above the documented overclock ceiling."
-    source: "silicon_limit: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200 (PLL 3.33 MHz min, 180 MHz typical, 320 MHz maximum) and engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2209 (nominal PLL frequency 180 MHz at up to 105 degC); Parallax Propeller 2 Documentation (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545 (350 MHz overclock, VCO / 1 mode, %PPPP = 15)"
+    source: "silicon_limit: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (PLL 3.33 MHz min, 180 MHz typical, 320 MHz maximum; nominal PLL frequency 180 MHz at up to 105 degC), p.48; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (350 MHz overclock, VCO / 1 mode, %PPPP = 15); the compiler acceptance range is pnut-ts behaviour that no Parallax publication states"
     example: "CON _clkfreq = 200_000_000  ' 200 MHz using PLL"
     notes:
       - "Used by timing functions (WAITMS, WAITUS, WAITX)"
@@ -83,7 +83,7 @@ clock_configuration:
       _clkfreq (crystal + PLL multiplication).
     range: "1 MHz to 60 MHz typical -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
     silicon_limit: "The P2 Datasheet rates a crystal between XI and XO at 1 MHz min to 50 MHz MAXIMUM. The compiler accepts 10 MHz beyond that."
-    source: "silicon_limit: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2199"
+    source: "silicon_limit: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (Crystal between XI and XO, 1 MHz min, 50 MHz max), p.48"
     example: "CON _xtlfreq = 25_000_000  ' 25 MHz crystal"
     notes:
       - "Crystals >= 16 MHz use 15pF internal loading capacitors"
@@ -97,7 +97,7 @@ clock_configuration:
       external oscillator or clock source instead of a crystal.
     range: "250 kHz to 500 MHz -- COMPILER ACCEPTANCE RANGE (pnut-ts), not a silicon rating"
     silicon_limit: "The P2 Datasheet rates direct drive into XI at DC to 200 MHz MAXIMUM. The compiler accepts 300 MHz beyond that."
-    source: "silicon_limit: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2198"
+    source: "silicon_limit: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (Direct drive into XI, DC to 200 MHz), p.48"
     example: "CON _xinfreq = 10_000_000  ' 10 MHz external clock"
     notes:
       - "For external oscillator modules or shared clock sources"
@@ -157,7 +157,7 @@ clock_configuration:
       - "Contains PLL dividers, multipliers, and source selection"
 
 clock_configuration_rules:
-  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the allowed combinations of clock-setup symbols and their effect). The rules below restate that table as compiler behaviour; rules 1 and 5 go beyond it and are pnut-ts behaviour that no Parallax publication states. The silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   rule_1:
     description: "Only ONE clock configuration per program"
     note: "Define clock constants in top-level object's CON block only"
@@ -181,7 +181,7 @@ clock_configuration_rules:
     note: "Internal oscillators ignore crystal/PLL configuration"
 
 clock_configuration_examples:
-  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the allowed combinations of clock-setup symbols and their effect). The silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   common_200mhz:
     description: "Most common: 200 MHz with default 20 MHz crystal"
     code: |
@@ -214,7 +214,7 @@ clock_configuration_examples:
         _rcslow = TRUE  ' ~20 kHz internal
 
 clock_anti_patterns:
-  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the allowed combinations of clock-setup symbols; compilation fails if _clkfreq +/- _errfreq is unachievable). The silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   conflicting_sources:
     wrong: |
       CON
@@ -316,7 +316,7 @@ debug_serial:
     default: "62"
 
 debug_output_control:
-  source: "Spin2 v55 language documentation -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1018 (DEBUG_TIMESTAMP: \"each DEBUG message will be time-stamped with the 64-bit CT value\") and :1027 (DEBUG_MASK: a 32-bit mask gating individual DEBUG statements via DEBUG[bit]). The 64-bit CT is the system counter of Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:55."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG, Symbols you can define to modify DEBUG behavior (DEBUG_TIMESTAMP: \"each DEBUG message will be time-stamped with the 64-bit CT value\"; DEBUG_MASK: a 32-bit mask gating individual DEBUG statements via DEBUG[bit]). The 64-bit CT is the system counter of Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status."
   DEBUG_TIMESTAMP:
     description: Adds 64-bit CT timestamp to each DEBUG message
     default: "undefined"

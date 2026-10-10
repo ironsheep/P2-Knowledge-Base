@@ -19,11 +19,7 @@ aliases:
   - "package outline"
 
 description:
-  source: >-
-    ON Semiconductor MECHANICAL CASE OUTLINE / PACKAGE DIMENSIONS sheet, reproduced in the
-    Propeller 2 Documentation v35 (Rev B/C Silicon) -- extracted as
-    engineering/ingestion/sources/silicon-doc/assets/images-silicon-doc-2026-08-26/silicon-034.png.
-    CASE 932BR, ISSUE O, dated 03 JUL 2018, document 98AON94348G.
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PACKAGING, p.49 (the ON Semiconductor MECHANICAL CASE OUTLINE / PACKAGE DIMENSIONS sheet: CASE 932BR, ISSUE O, dated 03 JUL 2018, document 98AON94348G)"
   text: >-
     The P2X8C4M64P ships in a 100-pin TQFP, 14x14 mm body on a 0.5 mm pitch. This record
     carries the package outline and the recommended mounting footprint.
@@ -42,11 +38,7 @@ package:
 # with both reads agreeing. Deliberately NOT OCR'd: tesseract misreads digits on these
 # sheets (@/Q for 0, 4 for 1), and these are precision values.
 dimensions_mm:
-  source: >-
-    ON Semiconductor CASE 932BR ISSUE O dimension table, read from the rendered drawing at
-    engineering/ingestion/sources/silicon-doc/assets/images-silicon-doc-2026-08-26/silicon-034.png;
-    transcription verified in
-    engineering/analysis/2026-08-26-silicon-doc-retest-of-source-silent-verdicts.md.
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PACKAGING (CASE 932BR ISSUE O dimension table), p.49"
   table:
     - {dim: "A",  min: null,   nom: null,   max: 1.20,  note: "overall height"}
     - {dim: "A1", min: 0.05,   nom: null,   max: 0.15,  note: "standoff"}
@@ -65,9 +57,7 @@ dimensions_mm:
     - {dim: "M",  min: "0 deg", nom: null,  max: "7 deg", note: "lead angle"}
 
 recommended_mounting_footprint:
-  source: >-
-    Same drawing, RECOMMENDED MOUNTING FOOTPRINT panel --
-    engineering/ingestion/sources/silicon-doc/assets/images-silicon-doc-2026-08-26/silicon-034.png.
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PACKAGING (RECOMMENDED MOUNTING FOOTPRINT panel), p.49"
   outer_span: "16.83 mm"
   inner_span: "9.60 mm"
   pad_length: "1.49 mm (100X)"
@@ -75,8 +65,7 @@ recommended_mounting_footprint:
   pitch: "0.50 mm"
 
 pin_numbering:
-  source: >-
-    Same drawing, TOP VIEW -- corner pin callouts and the PIN ONE INDICATOR.
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PACKAGING (TOP VIEW: corner pin callouts and the PIN ONE INDICATOR), p.49"
   corners: "pins 1, 25, 26, 50, 51, 75, 76, 100"
   pin_one: "marked by a PIN ONE INDICATOR on the top view"
   note: >-

@@ -13,7 +13,7 @@ description: Buffer new streamer command to execute on final NCO rollover, conti
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: PASM2 Manual 2022-11-01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_ls
@@ -61,7 +61,7 @@ notes:
 - XINIT starts the streamer from any state (XCONT does not need an active command to be legal)
 - Stalls until command buffer is empty if buffer is full
 sources:
-  - "notes (waits for the prior command's last clock cycle): Silicon Doc, silicon-doc-text.txt:1407"
+  - "notes (waits for the prior command's last clock cycle): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
 
 related_instructions:
 - XINIT: Start immediately with zero phase

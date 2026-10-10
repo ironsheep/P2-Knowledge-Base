@@ -25,7 +25,7 @@ encoding:
 encoding_notes:
 - PC is written only when the streamer LUT RAM rollover event ﬂag is set (or is clear
   in syntax 2).
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JXRL / JNXRL, p.96"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_jpoll

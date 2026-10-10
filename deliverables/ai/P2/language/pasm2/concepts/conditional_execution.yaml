@@ -266,16 +266,10 @@ ret_prefix_rule:
     afterwards is whatever code happens to sit next in cog RAM. The routine's own
     side effects all occur, so the symptom appears far from the cause.
   works_as_expected_on: "Any NON-branching instruction. '_RET_ OR x,#0', '_RET_ CMP x,#0 WZ' and '_RET_ SETQ #mode' (the XBYTE arming form) all execute and then return."
-  source: |
-    Two independent Parallax primary sources state the qualifier:
-    - P2 Assembly Language Manual (Parallax, 2022-11-01), condition table p.68:
-      "_RET_  %0000  always; execute instruction then return if no branch; no context restore"
-    - P2 Instructions v35 - Rev B/C Silicon spreadsheet, row 410 (encoding
-      "0000 ------- --- --------- ---------", stack effect "Pop"):
-      "Execute <inst> always and return if no branch. If <inst> is not branching
-      then return by popping stack[19:0] into PC."
-    Corroborated on real P2 silicon 2026-08-14 (EF-058): a handler ending in
-    '_RET_ CALL' fell through into the following handler, which executed in full.
+  source:
+    - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68: _RET_ %0000 always; execute instruction then return if no branch; no context restore"
+    - "P2 Instructions v35 - Rev B/C Silicon, row 410 (encoding 0000 ------- --- --------- ---------, stack effect Pop): Execute <inst> always and return if no branch. If <inst> is not branching then return by popping stack[19:0] into PC."
+    - "Corroborated on real P2 silicon 2026-08-14 (EF-058): a handler ending in _RET_ CALL fell through into the following handler, which executed in full."
 
 special_patterns:
   return_conditions:

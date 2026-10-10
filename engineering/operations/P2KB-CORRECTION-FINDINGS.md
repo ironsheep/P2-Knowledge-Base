@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-566`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-567`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,17 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»)
+
+### F-566 — Quick Bytes entry `simple-analog-input.yaml` cites an article URL that returns 404 — `NEEDS-VERIFICATION` (Stephen: current URL, or retired)
+Found 2026-10-10 by «#422» checking S-390. `community/quick-bytes/simple-analog-input.yaml` `url:` and
+`modalities.article` are `https://www.parallax.com/simple-analog-input/`; the arbiter's fetch on 2026-10-10
+returned HTTP 404. Under Stephen's Q5 that url IS the entry's citation, so the entry is currently cited to a
+dead page. S-390 applied meanwhile: `code_author: Jane Doe` (a placeholder-looking name no reachable page
+confirms) emptied to `''`, as two other entries already are. **Owed:** Stephen supplies the article's current
+parallax.com URL (then restore the url and re-check the author), or confirms it was retired (then the entry
+goes, and the KB's other references to it are redirected per Sacred Rule #7). Other Quick Bytes urls were not
+probed in this pass.
 
 ### F-565 — `keywords/STRUCT.yaml` `gotchas.struct_pointer_obj_returns` said `pCfg := sensor.getConfig()` is a COMPILE ERROR for structures over 15 longs; no ingested source and no compile-proof record states it — `NEEDS-VERIFICATION` (compile probe)
 Found 2026-10-09 by «#415» fixing `language/spin2/keywords/STRUCT.yaml`. The page carried a
@@ -179,6 +189,17 @@ driver contradicted its attributions; the HUB75 examples were invented code unde
 > relabelled: none of them is a Parallax document, and a repo path is not a citation. The example code
 > stays; the compile gate still covers it. `waitx.yaml` lost its only provenance with the labels and now
 > cites the PASM2 Manual (p.159) and the P2 Instructions sheet.
+
+> **Applied 2026-10-10 («#422», dispatch B) — community-code attributions.** The example attributions that
+> name a community artifact rather than a Parallax document (`muxq.yaml` and `testp.yaml` examples,
+> `streamer_smartpin_control.yaml` `isp_bldc_motor.spin2` examples, `pinstart.yaml` `jm_ez_spi.spin2`,
+> `cogspin.yaml` OBEX 4261) no longer carry a repo path in a citation key: each is now an `origin:` /
+> `obex_object:` note that says what the code is and that it is "not a Parallax document". The example
+> code is unchanged and still passes the compile gate. `testp.yaml` lost its only citation with the move
+> and now cites the PASM2 Manual (p.136) and the Silicon Doc's I/O Pin Timing. The facts whose ONLY
+> source is the flash-loader source, the Spin2 debugger v51 source, the ROM booter listing or the v55
+> interpreter Theory-of-Operations review (44 citation lines) are left exactly as they were, pending
+> Stephen's ruling; they are the whole of what the sourcing gate still reports.
 
 ### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
 > **Applied 2026-10-07.** `debug-strategy-guide.yaml` rewritten to the ruling: no compiler or
@@ -674,6 +695,21 @@ list, so the drift cannot recur.
 > `last_author_deep_search`, `last_description_fix`, `last_created_date_fix`, `page_discovered`,
 > `quality_score`): recommended for the same removal, awaiting the call.
 > `import_source` / `rescrape_source` occur only in 28 OBEX objects, same class.
+
+> **Folds and removals applied 2026-10-10 («#422», dispatch B).** `provenance:` / `primary_sources:`
+> (`p2an001`–`p2an007`, `click_module_integration.yaml`, `addon-hyperram-hyperflash.yaml`) are folded into
+> `sources:`, each entry rewritten to the Parallax title, edition and page it was read from.
+> `cross_check_sources:` in `p2an005`–`p2an007` points at P2KB pages, which are not sources and which a
+> `sources:` line would have rejected as a KB path, so the key is renamed `related_pages:` (the paths
+> still resolve). `range_source` is folded into `source:` in all 12 `language/pasm2/` pages (the PASM2
+> Manual "in Brief" page; `wmlong.yaml` cites the P2 Instructions sheet). `derived_from` in
+> `timing_operations.yaml` is now a `computation_note:` and `provenance: "heuristic, unsourced"` in
+> `cogspin.yaml` is a `caveat:` — reader caveats stay as content. `extraction_metadata` /
+> `extraction_date` are removed from `spin2-builtin-symbols-complete.yaml`,
+> `spin2-pasm2-integration.yaml`, `io_pin_timing.yaml`, the system-register pages and the two code
+> examples (process dates; each page keeps a real citation). Not touched: `extraction_metadata` in
+> `spin2-language-schema.yaml` (record counts, no dates) and the key's definition in
+> `code-example-schema.yaml`; the OBEX `metadata:` bookkeeping, which the spec says to leave.
 
 ### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 > **Applied 2026-10-07 — and the defect was wider than filed.** The example's `source: P2-FLASH-FS`
@@ -1960,6 +1996,14 @@ file cannot read sentences.
 > description was a truncated fragment ("Q = Q << 4.") and is now the table's full text. A final grep of the
 > four words over the tree found none left. Closes with the next release that serves it.
 
+> **Continued 2026-10-10 («#422», dispatch B).** The remaining `documentation_source:` values that were not
+> a document are rewritten to the real citation: `production_code_analysis`, `PNUT_TS_compiler_analysis`,
+> `redirect_stub`, `enhanced_from_code_study` and `Spin2_v51_documentation` (each page now cites the
+> Silicon Doc, Spin2 v55 or PASM2 Manual section the page's facts come from), and about 230
+> `language/pasm2/` `documentation_source:` one-liners now read "Propeller 2 Assembly Language (PASM2)
+> Manual Nov 1, 2022 Release, <instruction>, p.N" (the page read from the manual's own table of contents or
+> its "in Brief" table). The sourcing gate reads every one of them.
+
 **The mechanism.** Both delivery paths run the same five-pattern line filter:
 `engineering/tools/p2kb/fetch-kb-file.sh:189` and the `FilterMetadata` contract recorded in
 `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md`, designed in
@@ -2659,6 +2703,13 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > already labels as the driver's idiom (`source: P2-Click-eInk`, `provenance.code_patterns`): the three
 > base-pin positions (`PINS_P0_P15` / `P16_P31` / `P32_P47`) and the mikroBUS signal meanings (the
 > mikroBUS standard is not held).
+
+> **Click citations rewritten 2026-10-10 («#422», dispatch B).** `addon-click-adapter.yaml` and
+> `click_module_integration.yaml` now cite the schematic by the title block it prints, "P2 mikroBUS
+> Adapter Part Number 64008, Revision A, schematic", instead of the netlist capture and the catalog
+> page. The product-page statements stay as prose that names the Parallax product page; the three
+> base-pin positions and the mikroBUS signal meanings are still labelled as the driver's idiom and the
+> mikroBUS standard.
 
 ---
 

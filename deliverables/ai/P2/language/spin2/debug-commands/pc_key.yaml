@@ -6,9 +6,9 @@ aliases:
   - "debug keyboard input"
 type: debug_command
 category: "Debug Control"
-documentation_source: Spin2 v51 (debug-section.txt) + PNut v55 directive matrix
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: PC_KEY)"
 documentation_level: comprehensive
-source: "Parallax Spin2 Language Reference v51a (PC_KEY P2-side API + key-code table); host-side key handling per PNut/Spin2 v55 DebugDisplayUnit.pas; description (PC_KEY statement): Parallax Spin2 Documentation v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1004"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: the PC_KEY statement, P2-side API and key-code table)"
 
 syntax: "PC_KEY(pointer_to_long)"
 
@@ -20,9 +20,10 @@ description: |
   must have focus for keypresses to be noticed."
   The 100 ms latch is what sets the poll rate: a loop that polls more slowly than
   that will miss keypresses, and one that polls faster simply reads 0 between them.
+  (Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG, Miscellaneous commands, PC_KEY)
 
 usage_rules:
-  source: "Parallax Spin2 Documentation v55 -- PC_KEY entry engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1004; backtick-escape mechanism :1084 and :1094"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: the PC_KEY entry); Graphical DEBUG Displays (backtick-escape mechanism)"
   rules:
     - "FOR USE IN GRAPHICAL DEBUG() DISPLAYS."
     - "Must be the last command in a DEBUG() statement."

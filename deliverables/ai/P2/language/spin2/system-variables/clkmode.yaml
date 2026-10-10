@@ -17,7 +17,7 @@ hub_address: "$00040"
 access: read_write
 
 bit_fields:
-  source: "Silicon Doc (Parallax Propeller 2 Documentation) v35 clock setup word -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2621 (HUBSET ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS 'set clock mode') and the %CC field table at :2687. The RCFAST ~20 MHz and RCSLOW ~20 kHz figures and the 15 pF / 30 pF crystal loading capacitances are the P2 Datasheet's (engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2197 and :2204-2205)."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (HUBSET ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS 'set clock mode'; the %PPPP table and the %CC field table). The RCFAST ~20 MHz and RCSLOW ~20 kHz figures and the 15 pF / 30 pF crystal loading capacitances are the P2 Datasheet's: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48."
   d24:
     name: "PLL Enable"
     description: "1 = PLL powered on, 0 = PLL off"
@@ -34,25 +34,33 @@ bit_fields:
   
   d7_4:
     name: "Post Divider (PPPP)"
-    description: "PLL output post-divider - 1"
+    description: "PLL output divider (4 bits): %0000 = VCO / 2, %0001 = VCO / 4, ... %1110 = VCO / 30 (VCO / ((PPPP+1)*2)), and %1111 = VCO / 1"
     values:
-      0: "Divide by 1"
-      1: "Divide by 2"
-      3: "Divide by 4"
-      5: "Divide by 6"
-      7: "Divide by 8"
-      9: "Divide by 10"
-      11: "Divide by 12"
-      13: "Divide by 14"
-      15: "Divide by 16"
-  
+      0: "VCO / 2"
+      1: "VCO / 4"
+      2: "VCO / 6"
+      3: "VCO / 8"
+      4: "VCO / 10"
+      5: "VCO / 12"
+      6: "VCO / 14"
+      7: "VCO / 16"
+      8: "VCO / 18"
+      9: "VCO / 20"
+      10: "VCO / 22"
+      11: "VCO / 24"
+      12: "VCO / 26"
+      13: "VCO / 28"
+      14: "VCO / 30"
+      15: "VCO / 1"
+
   d3_2:
-    name: "Crystal Capacitance (CC)"
-    description: "Internal loading capacitors for crystal"
+    name: "Crystal Configuration (CC)"
+    description: "XI / XO status, impedance and internal loading capacitors"
     values:
-      0b00: "No capacitors (external clock input)"
-      0b01: "15pF capacitors (crystals >= 16 MHz)"
-      0b11: "30pF capacitors (crystals < 16 MHz)"
+      0b00: "XI ignored, XO floats; Hi-Z; loading caps OFF"
+      0b01: "XI input, XO 600-ohm drive; 1M-ohm feedback; loading caps OFF"
+      0b10: "XI input, XO 600-ohm drive; 1M-ohm feedback; 15pF per pin (crystals >= 16 MHz)"
+      0b11: "XI input, XO 600-ohm drive; 1M-ohm feedback; 30pF per pin (crystals < 16 MHz)"
   
   d1_0:
     name: "Clock Source (SS)"
@@ -64,6 +72,7 @@ bit_fields:
       0b11: "PLL output"
 
 clock_source_modes:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the %SS clock-source table); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"
   rcfast:
     bits: "0b00"
     frequency: "~20 MHz"
@@ -86,8 +95,8 @@ clock_source_modes:
     bits: "0b11"
     frequency: "Calculated from PLL settings"
     description: "PLL output (requires PLL enable)"
-    use_case: "High-speed operation. The P2 Datasheet rates the PLL at 320 MHz maximum, 180 MHz typical; the Parallax Propeller 2 Documentation notes it can be pushed to 350 MHz in 'VCO / 1' mode. A prior form of this line said 'up to 500 MHz', which is the pnut-ts compiler's acceptance limit rather than a silicon rating -- see language/spin2/constants/special-configuration-symbols.yaml."
-    source: "use_case: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2200 (PLL 320 MHz maximum, 180 MHz typical); Parallax Propeller 2 Documentation (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545 (350 MHz in 'VCO / 1' mode)"
+    use_case: "High-speed operation. The P2 Datasheet rates the PLL at 320 MHz maximum, 180 MHz typical; the Parallax Propeller 2 Documentation notes it can be pushed to 350 MHz in 'VCO / 1' mode. The 500 MHz figure sometimes quoted is the pnut-ts compiler's acceptance limit, not a silicon rating -- see language/spin2/constants/special-configuration-symbols.yaml."
+    source: "use_case: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (PLL 320 MHz maximum, 180 MHz typical), p.48; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (350 MHz in 'VCO / 1' mode)"
 
 examples:
   - description: "Read current clock mode"
@@ -114,7 +123,7 @@ notes:
   - "PLL must lock before switching to PLL source (~10 ms). Silicon Doc (Parallax Propeller 2 Documentation) v35 -- \"XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source.\""
 
 sources:
-  - "notes (PLL lock, 10 ms crystal+PLL stabilization): Silicon Doc (Parallax Propeller 2 Documentation) v35, engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2635"
+  - "notes (PLL lock, 10 ms crystal+PLL stabilization): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the PLL Setting table, %E row)"
 
 related:
   - language/spin2/system-variables/clkfreq.yaml

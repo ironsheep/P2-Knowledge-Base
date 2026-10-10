@@ -19,13 +19,13 @@ description: |
   SILICON layer (true on every board): "the Propeller 2 Smart I/O pins are grouped
   such that each 4 I/O's have a dedicated voltage supply connection" — VIO_0_3 /
   GIO_0_3 through VIO_60_63 / GIO_60_63, sixteen groups across the 64 pins.
-  Source: the Edge standard module narrative;
-  and the P2 Datasheet features summary, "Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins."
+  Source: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4;
+  and Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.3, "Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins."
 
   BOARD layer (P2 Edge modules): "the voltage supply connections have been brought
   out in groups of 8 I/O pins each. Each group has a dedicated LDO regulator with
   the VIO output labeled Vxx at the edge connector."
-  Source: the Edge standard module narrative.
+  Source: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4.
 
   The distinction decides which pins may be grouped for an absolute (ratiometric)
   ADC measurement: the ADC references its own SILICON group, so a shared-node
@@ -35,9 +35,9 @@ description: |
   this particular module."
 
 sources:
-  - "description, silicon layer: Edge standard module narrative, engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:133-135"
-  - "description, board layer: Edge standard module narrative, engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:138-141"
-  - "description, distributed power scheme quotation: Edge standard module narrative, engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:145-146"
+  - "description, silicon layer: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
+  - "description, board layer: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
+  - "description, distributed power scheme quotation: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
 
 silicon_power_grouping:
   scope: "The P2X8C4M64P package itself — true on every board."
@@ -70,7 +70,7 @@ adc_reference:
 
 board_power_grouping:
   scope: "P2 Edge modules (standard and 32MB) — the BOARD layer, not the chip."
-  source: "engineering/ingestion/sources/edge-standard-module/edge-standard-module-narrative.txt:86,130,138-141,356-392; silicon_absolute_maximum: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2140,2142"
+  source: "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, Key Specifications, p.2; 3. LDO regulators for I/O Pin Voltage, p.4; Edge Connector Pin Assignments, p.10; silicon_absolute_maximum: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Electrical Ratings, p.47"
   regulator_count: "The 8 LDO regulators are fixed 3.3 V low-noise regulators, which power the P2 I/O smart-pins. Each regulator has short-circuit and over-current protection."
   per_group_current: "VIO Power Supplies: Low noise LDO 3.3V up to 300 mA per 8 I/O pins."
   naming_rule: "The two digits after the V refer to the first of 8 I/O pins that the LDO provides power to. For example, V08 would mean VIO voltage for I/O pins 8 to 15."
@@ -88,10 +88,10 @@ board_power_grouping:
   budget_rule: "Eight pins at the 30 mA per-pin figure is 240 mA, inside the 300 mA the group's LDO supplies — but the edge-connector Vxx pin draws from the same 300 mA, so an add-on board powered from Vxx spends the same budget the eight pins do."
 
 evidence:
-  - "P2 Silicon Doc v35, Part 1 page 9 — the TQFP-100 package pinout figure. Sixteen VIO package pins labelled VIO_0_3 through VIO_60_63, and sixteen internal GIO_0_3 through GIO_60_63 blocks."
-  - "P2 Datasheet, features summary: 'Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins.'"
-  - "P2 Silicon Doc, pin table: VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y} (per-group supply pairs; a pin's ADC references its own group's rails for calibration)."
-  - "P2 Edge module / Edge Mini Breakout electrical spec: 8 independent 3.3 V LDO regulators, V00 through V56, one per 8-pin header group at 300 mA — the BOARD grouping."
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — the TQFP-100 package pinout figure. Sixteen VIO package pins labelled VIO_0_3 through VIO_60_63, and sixteen internal GIO_0_3 through GIO_60_63 blocks."
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.3: 'Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins.'"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — pin table: VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y} (per-group supply pairs; a pin's ADC references its own group's rails for calibration)."
+  - "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4, and Edge Connector Pin Assignments, p.10: 8 independent 3.3 V LDO regulators, V00 through V56, one per 8-pin header group at 300 mA — the BOARD grouping."
 
 related:
   - architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml

@@ -1,5 +1,5 @@
 # Spin2 Language Construct: Method Definitions (PUB/PRI)
-# Source: Spin2 v51 documentation
+# Source: Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks
 # Critical for: Program structure and code organization
 
 construct: "Method Definitions"
@@ -158,12 +158,12 @@ method_limits:
   symbol_names:
     maximum: 30
     description: "Maximum 30 characters for method and parameter names"
-    source: "Spin2 v51 documentation"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Overview (states symbolic names up to 32 characters; the compiler enforces 30 -- see the identifier rules page)"
 
   parameters:
     maximum: 127
     description: "Maximum 127 parameters per method"
-    source: "Spin2 v51 documentation - line 2087"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks (0 to 127 input parameter longs)"
     default_type: "LONG (32-bit)"
     type_overrides:
       pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
@@ -173,7 +173,7 @@ method_limits:
   return_values:
     maximum: 15
     description: "Maximum 15 return values per method"
-    source: "Spin2 v51 documentation - line 2089"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks (0 to 15 output result longs)"
     default_type: "LONG (32-bit)"
     type_overrides:
       pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
@@ -183,7 +183,7 @@ method_limits:
   local_variables:
     maximum: "64KB"
     description: "Up to 64KB of local variables per method"
-    source: "Spin2 v51 documentation - line 1302-1307"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks (up to 64KB of local variables; BYTE, WORD, LONG, and StructName overrides)"
     default_type: "LONG (32-bit)"
     type_overrides:
       basic_types: "BYTE, WORD, LONG, STRUCT"

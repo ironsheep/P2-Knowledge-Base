@@ -23,12 +23,12 @@ description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge sm
   \ gives unpredictable behavior. Exception:\
   \ WRPIN #0 resets a running smart pin without a DIR cycle.\n"
 sources:
-  - "description (configure while DIR is low): Silicon Doc, silicon-doc-text.txt:3854-3856"
+  - "description (configure while DIR is low): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
 flags_affected:
   C: No effect
   Z: No effect
 d_operand_format:
-# Source: Silicon Doc part4-smart-pins.txt:6-47
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, PIN CONFIGURATION MODES
   layout: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
   fields:
     # One home per fact. All six fields, with their bit ranges and purposes, live in
@@ -38,13 +38,13 @@ d_operand_format:
     reference: "architecture/smart_pins.yaml (configuration_format.fields) -- all six
       fields, with bit ranges and purposes."
     sources:
-      - "reference: Silicon Doc v35 part4-smart-pins.txt:10, 13, 26, 39, 55, 63, 107; P2 Datasheet 2022/11/01 p.23, p2-datasheet-text.txt:1052-1059"
+      - "reference: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), PIN CONFIGURATION MODES; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Smart I/O Pins (the WRPIN D operand format), p.23"
     m_sub_fields: "architecture/pin-drive-configuration.yaml -- the 13-bit %M..M field:
       its sub-fields with bit ranges, the drive ladder stated by encoding, and the
       DIR/OUT rule that decides when a drive setting is active."
     input_selectors: "see input_selectors below -- the AAAA/BBBB encoding, in full"
 input_selectors:
-# Source: Silicon Doc part4-smart-pins.txt:13-36. AAAA and BBBB share this encoding.
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), PIN CONFIGURATION MODES. AAAA and BBBB share this encoding.
   description: |
     A smart pin's A and B inputs can be routed from a NEIGHBORING pin's read
     state, which is how SPI-style "clock from the adjacent pin" wiring works
@@ -74,7 +74,7 @@ critical_requirement:
     effect). Exception: synchronous serial transmit %11100 in continuous mode needs its
     first word written with WYPIN during reset -- enabling first loses that word.'
   consequence_of_skipping: Selecting a new mode while DIR is high gives unpredictable, useless behavior
-  source: "description: Silicon Doc, silicon-doc-text.txt:3854; consequence_of_skipping: Silicon Doc, silicon-doc-text.txt:3856; note: P2-EMPIRICAL-FINDINGS.md EF-011 (pulse, transition, async TX) and EF-090 (sync TX %11100 continuous), Silicon Doc silicon-doc-text.txt:4650 (prime during reset)"
+  source: "description and consequence_of_skipping: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS; note: EF-011 (pulse, transition, async TX) and EF-090 (sync TX %11100 continuous), Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (prime during reset)"
 usage_notes:
 - Configure with WRPIN while DIR is low (DIRL first) when selecting or changing a mode
 - 'WRPIN #0, pin clears all smart pin configuration, and resets a running smart pin even with DIR high'

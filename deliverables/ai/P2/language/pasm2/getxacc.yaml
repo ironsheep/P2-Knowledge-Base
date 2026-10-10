@@ -24,12 +24,12 @@ flags_affected:
 silicon_errata:
   clear_only_during_goertzel_burst:
     effect: "With the streamer idle, or running any non-Goertzel mode, GETXACC returns the live accumulator and clears nothing: repeated reads -- including right after XINIT of a non-Goertzel command -- return the same value, and the accumulators keep growing from one burst to the next. During a Goertzel burst the clear does act, and partitions the burst exactly (a read inside it plus the next read = one unread burst)."
-    source: "Hardware-verified on Rev C (EF-069): 50 of 50 idle/non-Goertzel reads equal the prior value; 8 of 8 mid-burst partitions exact. Contradicts the Silicon Doc's capture-and-clear statement. P2 Errata E4."
+    source: "Hardware-verified on Rev C (EF-069): 50 of 50 idle/non-Goertzel reads equal the prior value; 8 of 8 mid-burst partitions exact. Contradicts the Silicon Doc's capture-and-clear statement."
   last_term_lands_in_next_burst:
     effect: "A reading after a Goertzel burst of N clocks holds N-1 terms; the last term waits in an internal register no instruction reads and is added on the first active clock of the NEXT Goertzel burst. Waiting does not deliver it."
-    evidence: "Hardware-verified on Rev C: 16 of 16 sequences, N = 64 and 65, both signs. P2 Errata E5. (SINC2's iteration-count corruption is a separate, documented behaviour -- see goertzel_usage.sinc2_constraint.)"
+    evidence: "Hardware-verified on Rev C: 16 of 16 sequences, N = 64 and 65, both signs. (SINC2's iteration-count corruption is a separate, documented behaviour -- see goertzel_usage.sinc2_constraint.)"
   workaround: "Helper routine (SINC1): take each burst's sums as the difference of two idle reads, and deliver the held term before each: (1) a zero-term burst -- XINIT with the caller's D at count 4 and the caller's S with S[15:12] = 0 (every summed input off) -- then WAITXFI; (2) GETXACC idle = baseline; (3) the caller's burst, WAITXFI; (4) another zero-term burst, WAITXFI; (5) GETXACC idle; (6) subtract. Returned exactly N terms in 60 of 60 calls, N = 1..1001, back to back. Not for SINC2 (its first stage is a running integral the zero burst does not flush)."
-documentation_source: "Silicon Doc silicon-doc-text.txt:1604 (the documented capture/clear/repeat-read statement); silicon behaviour: hardware-verified EF-069, EF-070, EF-076"
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the documented capture/clear/repeat-read statement); silicon behaviour: hardware-verified EF-069, EF-070, EF-076"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_d
@@ -65,6 +65,7 @@ examples:
       cmp     x_val, threshold  wc  ' Compare to threshold
     notes: For simple detection, magnitude approximation may suffice
 goertzel_usage:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (NOTE ABOUT GOERTZEL SINC2 MODE, 2024.12.16); EF-072 and EF-056 (measured)"
   setup: "Configure streamer in DDS/Goertzel mode (X_DDS_GOERTZEL_SINC1 / X_DDS_GOERTZEL_SINC2)"
   target_frequency: "Set via SETXFRQ to match tone being detected"
   sample_count: "Run for power-of-2 samples (64, 128, 256 typical)"

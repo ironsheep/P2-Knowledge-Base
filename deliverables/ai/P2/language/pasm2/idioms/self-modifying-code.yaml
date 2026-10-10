@@ -5,7 +5,7 @@ frequency: medium
 
 idioms:
   - name: setd_field_patch
-    pattern: "setd #{instruction_label}, {new_d_value}"
+    pattern: "setd {instruction_label}, {new_d_value}"
     description: |
       Patch the D (destination) field of a target instruction at runtime.
       Used when a tight inner loop needs to switch between operating on
@@ -20,7 +20,7 @@ idioms:
     related_instruction: language/pasm2/setd.yaml
 
   - name: sets_field_patch
-    pattern: "sets #{instruction_label}, {new_s_value}"
+    pattern: "sets {instruction_label}, {new_s_value}"
     description: |
       Patch the S (source) field of a target instruction at runtime.
       Common use case: walking through registers/data by repeatedly
@@ -33,27 +33,30 @@ idioms:
       instruction.
     related_instruction: language/pasm2/sets.yaml
 
-  - name: opcode_variant_switch
+  - name: immediate_operand_switch
     pattern: |
-      setd #{instruction_label}, {variant_a_opcode}
-      ...
-      setd #{instruction_label}, {variant_b_opcode}
+      if_{cond}  setd  {instruction_label}, #{new_d_value}
+      if_{cond}  sets  {instruction_label}, #{new_s_value}
     description: |
-      Patch the entire upper half of an instruction (which includes the
-      opcode bits) to switch between two opcode variants without branching.
-      Useful when the same algorithm structure applies but the actual
-      operation differs based on a condition decided in an outer loop.
+      Patch the immediate D or S operand of instructions that run later, so
+      one instruction sequence serves two configurations. The opcode is not
+      changed: SETD replaces only the D field and SETS only the S field.
     examples:
       - |
-        ' Switch between 4 KB and 64 KB flash erase opcodes:
-        if_z   mov .cmd_template, #op_erase_64k
-        if_nz  mov .cmd_template, #op_erase_4k
-        ' (subsequent inner-loop iterations use whichever was selected)
+        ' Flash loader: once 64 or fewer pages remain, use 4 KB erase blocks
+        .block  cmp     s,#$40          wcz     'if pages <= $40, set 4KB erase @25ms
+        if_be   setd    .cmd,#$20               '(initially set for 64KB erase @140ms)
+        if_be   sets    .tst,#$0F
+                callpa  #$06,#spi_cmd1          'enable write
+        .cmd    callpa  #$D8,#spi_cmd4          'erase 64KB/4KB block
+        .tst    test    zeroa,#$00FF    wz
     context: |
-      The production flash loader uses this to switch between 4 KB and
-      64 KB flash erase strategies based on alignment, without paying
-      branch cost in the per-block loop.
-    source: "Parallax P2 flash_loader.spin2 lines 114-116"
+      The flash loader's programmer starts each erase block with the 64 KB
+      erase command ($D8) in the D operand of a CALLPA and a 256-page
+      block-boundary mask ($FF) in the S operand of a TEST. When 64 or fewer
+      pages remain it patches them to the 4 KB erase command ($20) and a
+      16-page mask ($0F).
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, 'Program flash - erase 64KB/4KB blocks, program 256/16 sequential 256-byte pages' (.block, .cmd, .tst); the example writes the listing's @zeroa/4 operand as a plain label"
 
   - name: alttrampolines
     pattern: "altd / alts / altr"

@@ -40,7 +40,7 @@ examples:
   description: Spin-wait for lock[15] to own the debugger's save buffer and tx/rx pins
   code: "' Wait for lock[15] so that we own the save buffer and tx/rx pins\n.wait\
     \   locktry #15                  wc\nif_nc   jmp     #.wait\n"
-  source: "Spin2_debugger.spin2 -- engineering/ingestion/external-inputs/source-code/spin-debugger/v51/Spin2_debugger.spin2:201-202"
+  source: "Parallax Spin2/PASM Debugger v51 (2025.04.02), Debug ISR (debug_isr)"
 - name: Spin Lock Implementation
   description: Wait until lock acquired
   code: "' Spin until lock acquired\nspin_lock\n        locktry lock_num         \

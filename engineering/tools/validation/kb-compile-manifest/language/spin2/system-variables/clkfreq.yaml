@@ -31,7 +31,7 @@ blocks:
     wrap: spin2-method
     assumes: [new_mode]
   - at: anti_patterns.hardcoded_timing.wrong
-    fp: "81d0a1558ee1dbd1"
+    fp: "3be9cbf4897d4a05"
     compile: fragment
     wrap: spin2-method
   - at: anti_patterns.hardcoded_timing.correct

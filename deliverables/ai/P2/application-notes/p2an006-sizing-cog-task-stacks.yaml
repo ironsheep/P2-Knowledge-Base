@@ -109,14 +109,17 @@ hardware_status: |
   a stack below what its code needs) is a bench step on real silicon (Stephen runs hardware externally;
   -> EF ledger when accepted). No invented DEBUG captures.
 
-provenance:
-  primary_sources:
-    - "Spin2 Language Documentation (Chip Gracey, Parallax Inc.) — cogspin/coginit stack requirements, TASKSPIN task stacks, and the parameters-then-results-then-locals stack layout"
-  tool_ground_truth:
-    - "pnut-ts — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
-  cross_check_sources:
-    - "P2 Knowledge Base language/spin2/methods/cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; language/pasm2/concepts/stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
-  community_examples:
-    - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC) — the sentinel-fill stack-overflow utility the note is built around; shipped verbatim in the example library"
-  companion_publication:
-    - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication)"
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (COGSPIN/COGINIT stack requirements, TASKSPIN task stacks) and Built-In Symbols for COGINIT() Usage, COGSPIN() Usage and TASKSPIN() Usage; the parameters-then-results-then-locals stack layout"
+
+tool_ground_truth:
+  - "pnut-ts — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
+
+related_pages:
+  - "P2 Knowledge Base language/spin2/methods/cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; language/pasm2/concepts/stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
+
+community_examples:
+  - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC) — the sentinel-fill stack-overflow utility the note is built around; shipped verbatim in the example library"
+
+companion_publication:
+  - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication)"

@@ -18,7 +18,7 @@ result: >-
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's OUT bit
   Z: Set to the original (pre-instruction) state of the base pin's OUT bit
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, OUTC / OUTNC, p.107"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop

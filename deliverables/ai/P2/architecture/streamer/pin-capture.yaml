@@ -58,27 +58,12 @@ description: |
   selector routes 'A' from the bus pin. That neighbour's IN then carries the bus
   pin's level, and the capture records the waveform.
 
-# LOCATORS REPAIRED 2026-08-30. Every locator in this block except the
-# capture-path one was a p2-documentation.txt line number attributed to
-# silicon-doc-text.txt. Each landed IN RANGE on
-# unrelated content (line 3604 was CORDIC example code), or past the end of the
-# file, so no range check could see it. The claims themselves were correct; only
-# the locators were wrong. Every replacement below was opened and read.
-source: "Propeller 2 Documentation v35 -- the capture path at
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1535, the %w rule
-  at engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1441, the
-  pin-group and alignment rules at
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1443-1452 and
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1454, and the
-  IN-signal handshake at
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3845 with the
-  non-smart-pin case at
-  engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3767 (section
-  extraction: engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-157
-  and :50). The composition itself is stated and worked by Parallax in the Spin2 v55
-  LOGIC display section, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144.
-  Encoding hazards are hardware-verified: EF-065, EF-059, EF-062, EF-057 in
-  engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md."
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, Pins => DACs/WRFAST
+  (the capture path), STREAMER (the %w rule, and the pin-group and alignment rules), and
+  SMART PINS (the IN-signal handshake, with the non-smart-pin case). The composition
+  itself is stated and worked by Parallax in the Parallax Propeller 2 Spin2 Language
+  Documentation v55, Graphical DEBUG Displays (the LOGIC display).
+  Encoding hazards are hardware-verified: EF-065, EF-059, EF-062, EF-057."
 
 the_question_this_answers: |
   "My smart pins are running an SPI interface on four pins. Can I capture their pin
@@ -178,7 +163,7 @@ parallax_worked_example:
   what_it_is: "Parallax's own Spin2 v55 documentation builds exactly this composition
     -- a smart pin transmitting async serial, captured by the streamer through a
     non-smart neighbour, displayed in a DEBUG LOGIC window. It is the closest thing to
-    a canonical form we have, and it predates this file."
+    a canonical form for this composition."
   verbatim: "\"The LOGIC display can be used to display data that was captured at high
     speed. In the example below, the P2 is generating 8-N-1 serial at 333 Mbaud using a
     smart pin. This bit stream can be captured by the streamer. On every clock, the
@@ -202,7 +187,7 @@ parallax_worked_example:
   known_source_defect_in_that_passage: "The sentence says \"it does an RFBYTE\". The
     mode is a WRFAST (capture) mode and the code in the same example issues WRFAST, so
     the write is a WFBYTE; quote the mechanism, not that word."
-  source_reference: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1144; known_source_defect_in_that_passage: E-011 in engineering/ingestion/SOURCE-ERRATA.md"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, LOGIC Display (the 333 Mbaud capture example)"
 
 what_the_capture_path_writes:
   one_home: "architecture/streamer/pin-selection.yaml enable_control.input_modes carries
@@ -250,10 +235,7 @@ dir_rule_does_not_apply_here:
     stays low, and raising it would make the monitor drive the very net it is watching."
   what_does_still_apply: "If the same program ALSO drives pins with the streamer, that
     output leg needs DIR high. The two legs do not share the rule."
-  source: "EF-062 (grounds F-308) in
-    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md;
-    the output-side statement is in architecture/streamer/pin-selection.yaml
-    enable_control.output_modes."
+  source: "EF-062"
 
 measurement_hygiene:
   debug_interrupt: "Compiling with -d -- the normal way to debug -- puts the P2's
@@ -267,8 +249,7 @@ measurement_hygiene:
     restricted."
   detail_home: "architecture/streamer/overview.yaml debug_interaction -- the full
     write-up, the CON snippet and the general rule."
-  source: "EF-057 (grounds F-266) in
-    engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"
+  source: "EF-057"
 
 displaying_a_capture:
   debug_logic_window: "The P2's DEBUG LOGIC display is the digital-waveform window built

@@ -2,19 +2,16 @@
 # Download-on-demand manifest for P2 Boot ROM subsystem
 # Use this file to identify which file contains the information you need
 # Sources: Hardware Manual (BOOT-PROCESS-COMPLETE), Silicon Doc v35, P2 Datasheet,
-#          Parallax P2 boot ROM listing (rom_booter_v33_01j.lst, the Prop2 silicon build),
-#          Parallax P2 flash_loader.spin2 (golden flash loader),
+#          Parallax Propeller 2 ROM Booter v33_01j (the silicon ROM listing),
+#          Parallax SPI Flash Programmer and Boot Loader v51 (the flash loader listing),
 #          P2 Edge Standard Module (Edge DIP-switch mapping),
-#          P2 Edge 32MB Module (Edge 32MB DIP-switch mapping),
-#          TAQOZ preliminary research (tracked in the ingestion tree)
+#          P2 Edge 32MB Module (Edge 32MB DIP-switch mapping)
 
 component: boot_rom
 description: |
-  The P2's boot subsystem — a 16KB mask ROM containing the Bootloader, the
-  P2 Monitor debug interface, and the TAQOZ Forth interpreter. (Those three are
-  what the Hardware Manual's content line names; a prior form of this sentence
-  added utility routines, character font data and math tables, which no source
-  states.) On power-up or reset, the Bootloader
+  The P2's boot subsystem — a 16KB ROM containing the Bootloader, the
+  P2 Monitor debug interface, and the TAQOZ Forth interpreter (the three the
+  Hardware Manual names). On power-up or reset, the Bootloader
   reads three boot pattern pins (P59-P61) and selects one of three boot
   paths: serial (P63/P62), SPI flash (P58-P61), or microSD card. Each path
   has documented fallback behavior. The Monitor and TAQOZ are interactive
@@ -25,7 +22,7 @@ last_updated: "2026-05-23"
 
 # Boot timing (from Hardware Manual)
 boot_timing:
-  source: "P2 Hardware Manual, Boot Up -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:262-263; reset_to_bootloader: P2 Datasheet, engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:436; serial_loader_active: P2 Hardware Manual, engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:1595"
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Boot Up, p.11; reset_to_bootloader: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, OPERATION, p.11; serial_loader_active: Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Download Propeller Application, p.61"
   trigger: "Upon any power-up, reset (RESn) pin low-to-high, or software reset event."
   sequence: "The Propeller 2 delays for 3 ms, engages the fast clock, then loads up Cog 0 with the ROM-resident Bootloader within 2 ms."
   reset_to_bootloader: "Within 5 ms, the Propeller 2 loads its Bootloader into cog 0."
@@ -81,7 +78,7 @@ files:
       - 'ROM contract (read first 1KB from flash, verify "Prop" checksum, JMP #0)'
       - "Post-load SPI bus state (the behavioral contract the flash_loader exploits)"
       - 'Prop checksum mechanism'
-      - "Flash loader handoff (cited to flash_loader.spin2 as golden source)"
+      - "Flash loader handoff (what the loader does with the rest of the image)"
 
   sd_card_boot:
     path: sd-card-boot.yaml
@@ -92,38 +89,36 @@ files:
       - "Diagnosing SD boot failures"
     contains:
       - SD card boot pin pattern requirement (P60 = pull-up)
-      - File system constraints (FAT32 — see verification note)
+      - File system constraints (FAT32 partition types the ROM accepts)
       - Fallback behavior (serial 60s window vs shutdown)
-      - Edge module SD wiring note (verification_pending for P60 generation)
+      - Edge module note (the P60 pull-up is built into the microSD card)
 
   p2_monitor:
     path: p2-monitor.yaml
-    size: ~70 lines
+    size: ~120 lines
     use_when:
       - "Inspecting or modifying P2 memory interactively"
       - "Debugging boot or early-runtime issues"
       - "Looking up the entry sequence from a serial terminal"
+      - "Looking up a Monitor command (list, download, goto, load and run a file, quit)"
     contains:
       - Entry sequence (`> ` + Ctrl+D after reset)
-      - Sourced command example (`000-010L` lists 16 longs of register RAM)
+      - The command set read from the ROM listing, with the datasheet's `000-010L` example
       - Distinction from TAQOZ (Monitor inspects/manipulates; TAQOZ programs)
-      - Known capability surface; explicit gap markers for full command reference
+      - Explicit markers for what is not documented
 
   taqoz_forth:
     path: taqoz-forth.yaml
-    size: ~120 lines
+    size: ~580 lines
     use_when:
       - "Looking up how to enter the ROM Forth interpreter"
-      - "Distinguishing ROM TAQOZ from TAQOZ Reloaded"
-      - "Finding authoritative TAQOZ documentation"
-      - "Understanding TAQOZ's role as a soft boot loader"
+      - "Looking up which words the ROM TAQOZ dictionary contains"
+      - "Looking up the console control characters"
     contains:
       - Entry sequence (`> ` + ESC after reset)
-      - High-confidence facts (entry mechanism, ROM residence, Peter Jakacki as author)
-      - Preliminary-research facts with confidence tiers (banner string, word categories, BACKUP/RESTORE)
-      - Distinction from TAQOZ Reloaded
-      - Pointers to primary documentation (Parallax forums, TAQOZ.spin2 source)
-      - Explicit gap markers for unverified claims
+      - Entry mechanism, ROM residence, hub memory layout
+      - The 432-word ROM dictionary, and the BACKUP and RESTORE flash words
+      - Explicit markers for what is not documented
 
 # Quick decision tree
 decision_tree:
@@ -136,7 +131,8 @@ decision_tree:
   "How do I use the serial loader protocol?": architecture/serial_loader.yaml
   "How do I enter the debug monitor?": p2-monitor.yaml
   "How do I enter the Forth interpreter?": taqoz-forth.yaml
-  "What's the difference between ROM TAQOZ and TAQOZ Reloaded?": taqoz-forth.yaml
+  "Which words does the ROM TAQOZ contain?": taqoz-forth.yaml
+  "What commands does the P2 Monitor accept?": p2-monitor.yaml
   "Where is the flash loader source?": code-examples/flash-loader-case-study.yaml
 
 # Related resources outside this directory
@@ -157,7 +153,7 @@ related:
 
 # Boot path summary (orientation for new readers)
 boot_paths_summary:
-  source: "P2 Hardware Manual, Boot Up -- Boot Pattern table -- engineering/ingestion/sources/p2-hardware-manual/p2-hardware-manual-text.txt:269-282; Host Serial and Boot Memory Connections table -- :285-291"
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Boot Up (Boot Pattern table; Host Serial and Boot Memory Connections table), p.11"
   pattern_notation: "Set by floating connection 'f', pull-up resistor 'up', or pull-down resistor 'down'. Don't care is 'any'."
   serial:
     pins: "P63 (in) = TX from host; P62 (out) = RX at host"

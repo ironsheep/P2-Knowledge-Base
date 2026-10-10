@@ -48,10 +48,7 @@ signal_map:
   - {offset: 7, signal: "DO (-> WiFi module TXD)", direction: in, notes: "module -> P2 serial (module TXD)."}
 
 power_signals:
-  source: >-
-    64007 P2 WX Adapter Guide v1.0 (Parallax Inc.), accessory-header pin table --
-    engineering/ingestion/sources/p2-wx-adapter/p2-wx-adapter-text.txt:68
-    ("VIO3V3 | 3.3V | Supply voltage to WiFi module").
+  source: "P2 WX Adapter Add-on Board (#64007) v1.0 11/12/2020, Pin Connections (VIO3V3, 3.3V, Supply voltage to WiFi module), p.6"
   VIO3V3: "3.3V supply to the Wi-Fi module."
   GND: "Common ground."
 
@@ -95,11 +92,7 @@ use_cases:
     - "Untethered debug / data viewing over Wi-Fi"
 
 sole_p2_wx_adapter:
-  source: >-
-    64007 P2 WX Adapter Guide v1.0 (Parallax Inc.) --
-    engineering/ingestion/sources/p2-wx-adapter/p2-wx-adapter-text.txt:10, :21;
-    DIP-variant host from the 32420 module guide --
-    engineering/ingestion/sources/parallax-wx-wifi/parallax-wx-wifi-text.txt:29-30, :136.
+  source: "P2 WX Adapter Add-on Board (#64007) v1.0 11/12/2020, overview and Specifications, p.1; DIP-variant host: ESP8266 Wi-Fi Module (#32420) v1.0 05/12/2016, Features, p.1, and Functional Description (2), p.4"
   note: >-
     The WX module ships in two form factors, but only the SIP one has a P2
     accessory-header path. #64007 carries the 2x6 footprint and takes the SIP
@@ -114,7 +107,7 @@ limitations:
   - "No P2 code ships with the board"
 
 documentation:
-  primary: "64007 P2 WX Adapter Guide v1.0 (Parallax, 2020-11-12)"
+  primary: "P2 WX Adapter Add-on Board (#64007) v1.0 11/12/2020 (Parallax), p.1"
 
 resources:
   product_page: "www.parallax.com (search 64007) - latest guide, schematic, P2 firmware + example binary"

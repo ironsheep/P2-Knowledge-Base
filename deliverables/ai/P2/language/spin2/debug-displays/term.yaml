@@ -7,9 +7,9 @@ description: |
   a named display window. It is NOT a VT100/ANSI terminal: there are no escape
   sequences, no scrollback buffer, no copy/paste, and no character read-back (TERM
   holds only pixels + cursor/color state, not a readable character grid).
-documentation_source: PNut v55 (DebugDisplayUnit.pas) via DEBUG-WINDOW-DIRECTIVE-MATRIX.md
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, TERM Display"
 documentation_level: comprehensive
-source: "PNut/Spin2 v55 DebugDisplayUnit.pas (TERM display implementation: numeric control codes; size range cols/rows 1..256) + Parallax Spin2 Language Reference v51a (DEBUG displays); examples compile-verified with pnut-ts"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, TERM Display (numeric control codes, size); behaviours beyond that documentation are PNut display-host behaviour; examples compile-verified with pnut-ts"
 
 aliases:
   - terminal

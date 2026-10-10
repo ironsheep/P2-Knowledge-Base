@@ -29,11 +29,9 @@ memory_organization:
       
   write_protection:
     source: >-
-      P2 Documentation v35 Rev B/C, "Write-Protecting the Last 16KB of Hub RAM
-      and Enabling Debug Interrupts" --
-      engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2743-2762
-      (the operand format and the L/W/D field definitions), :2765-2772 (the three
-      worked examples).
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, "Write-Protecting
+      the Last 16KB of Hub RAM and Enabling Debug Interrupts" (the operand format and
+      the L/W/D field definitions, and the three worked examples).
     last_16kb: "Can be write-protected via HUBSET"
     debug_area: "Upper 16KB used for debug state storage"
     hubset_operand: "%0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD"
@@ -244,10 +242,9 @@ special_features:
 
 debugging:
   source: >-
-    P2 Documentation v35 Rev B/C, DEBUG INTERRUPT --
-    engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2427-2431
-    (the $1F8 entry sequence: save $000..$00F, load $000..$00F, JMP #$000) and
-    :2437-2439 (the $1FD exit routine restores $000..$00F, then RETI0).
+    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT
+    (the $1F8 entry sequence: save $000..$00F, load $000..$00F, JMP #$000; and the
+    $1FD exit routine restores $000..$00F, then RETI0).
   protected_area: "Last 16KB for debug state"
   write_protect: "HUBSET can protect debug area"
   state_preservation: >-

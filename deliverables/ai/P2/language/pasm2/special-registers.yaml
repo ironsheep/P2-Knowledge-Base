@@ -11,7 +11,7 @@ description: |
 
 category: Special Registers
 documentation_level: complete
-documentation_source: Silicon Documentation v35
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-purpose Registers, p.14; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM"
 
 dual_purpose_registers:
   description: |

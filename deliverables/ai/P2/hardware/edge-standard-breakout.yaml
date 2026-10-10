@@ -32,10 +32,7 @@ pin_access:
   pin_organization: "Logical grouping by function"
 
 connectivity:
-  source: >-
-    64029 P2 Edge Breakout Board Guide v1.0 (Parallax Inc., 2023-03-01) --
-    engineering/ingestion/sources/edge-breakout-board/edge-breakout-board-narrative.txt:11-22
-    (overview + accessible pins), :24-35 (Features), :42-64 (Key Specifications).
+  source: "P2 Edge Breakout Board (#64029) v1.0 03/01/2023, overview and accessible pins, Features, and Key Specifications, p.1"
   accessible_pins:
     count: 64
     range: "all 64 P2 Edge Smart I/O pins are available at eight 0.1 inch pin header sockets"
@@ -154,15 +151,17 @@ optimal_configurations:
       use_case: "Standard form factor with memory needs"
   
 documentation:
-  primary: "64029-P2-Edge-Breakout-Board-Guide"
-  related:
-    - "hardware/edge-standard-module.yaml"
-    - "hardware/edge-32mb-module.yaml"
-  references:
-    - "Edge module documentation"
-    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
-    - "Pin mapping references"
-    
+  primary: "P2 Edge Breakout Board (#64029) v1.0 03/01/2023, p.1"
+
+references:
+  - "Edge module documentation"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
+  - "Pin mapping references"
+
+related:
+  - "hardware/edge-standard-module.yaml"
+  - "hardware/edge-32mb-module.yaml"
+
 availability:
   vendor: "Parallax Inc."
   website: "parallax.com"

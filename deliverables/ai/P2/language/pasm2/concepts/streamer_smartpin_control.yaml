@@ -8,8 +8,6 @@ overview: |
   The P2 includes a hardware streamer for high-bandwidth data movement and 64 Smart Pins capable of
   autonomous operation. The streamer handles DMA-like transfers between hub memory and pins, while
   Smart Pins implement various protocols and timing functions independently of the cog.
-  
-  CRITICAL: Proper initialization order is essential for reliable operation.
 
 streamer_system:
   streamer_engine:
@@ -29,11 +27,11 @@ streamer_system:
         mode: "32-bit mode configuration"
         count: "Transfer count"
       critical_timing: |
-        ' CRITICAL: Start Smart Pin BEFORE XINIT!
+        ' The flash loader enables the clock smart pin during setup,
+        ' then later starts the streamer
         drvl    #spi_ck           ' enable smart pin (clock) first
         xinit   rmode, pa         ' then start streamer outputting bits
-        ' This order prevents data corruption
-      source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:103,126"
+      source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash (drvl #spi_ck) and Program flash (.page: xinit rmode,pa)"
     
     XSTOP:
       syntax: "XSTOP"
@@ -94,7 +92,7 @@ smart_pin_system:
       spi_clock_example: |
         ' For SPI clock generation
         wxpin   #1, #spi_ck       ' set timebase to 1 clock per transition
-      source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:102"
+      source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash"
     
     WYPIN:
       syntax: "WYPIN value, #pin"
@@ -105,7 +103,7 @@ smart_pin_system:
         wypin   #0, drive_pins           ' PWM: force outputs off
         wypin   drive_u_, pin_pwm_u_l    ' PWM: set duty on a driven pin
         wypin   #0, adc_pins             ' ADC: start/acknowledge sampling
-      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2025,2027,1613"
+      source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
     
     DIRH:
       syntax: "DIRH #pin"
@@ -149,7 +147,7 @@ smart_pin_system:
         testp   pin_hall_u      wc
         rcl     hall_, #1
         ' hall_ = 3-bit Hall pattern
-      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2041-2046"
+      source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
 
 smart_pin_modes:
   serial_modes:
@@ -184,7 +182,7 @@ smart_pin_modes:
           wrpin   #%01_00101_0, #spi_ck   ' transition output, starts out low
           wxpin   #1, #spi_ck             ' timebase = 1 clock per transition
           drvl    #spi_ck                 ' enable smart pin
-        source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:101-103"
+        source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash"
       
       sync_tx:
         mode: "P_SYNC_TX"
@@ -214,7 +212,8 @@ smart_pin_modes:
       description: "PWM for motor control (one output pin per Smart Pin)"
       complementary_note: >-
         A complementary half-bridge pair (high + low side) is NOT one Smart Pin:
-        the P2 has no single-pin dead-band mode (confirmed by Chip Gracey, 2026-07-16).
+        the P2 has no single-pin dead-band mode (none of the smart modes listed in the
+        Silicon Doc SMART PIN MODES is a dead-band mode).
         Use TWO Smart Pins -- one per side, low side inverted (P_INVERT_OUTPUT),
         enabled together -- and insert dead-time in software. Full pattern in
         architecture/smart_pin_patterns.yaml (motor_pwm_with_deadtime).
@@ -225,7 +224,7 @@ smart_pin_modes:
         if_nc   wypin   drive_u_, pin_pwm_u_l
         sub     drive_u_, dead_gap_             ' high side turns on later
         if_nc   wypin   drive_u_, pin_pwm_u_h
-      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2026-2029"
+      source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
       
     nco_frequency:
       mode: "P_NCO_FREQ"
@@ -278,7 +277,7 @@ smart_pin_modes:
 
         ' Calculate scale factor
         sub     vio_levels+0, gio_levels+0
-      source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:1610-1642"
+      source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
   
   repository_mode:
     data_mailbox:
@@ -297,16 +296,16 @@ common_patterns:
   spi_flash_access:
     description: "SPI flash read with streamer (single clock smart pin; data moves through the streamer, not per-line smart pins)"
     code: |
-      ' Setup the clock smart pin (ORDER CRITICAL!)
+      ' Set up the clock smart pin
       wrpin   #%01_00101_0, #spi_ck    ' transition output, starts out low
       wxpin   #1, #spi_ck              ' timebase = 1 clock per transition
-      drvl    #spi_ck                  ' enable smart pin BEFORE the streamer
+      drvl    #spi_ck                  ' enable smart pin
 
-      ' Now start streamer to move the actual data
+      ' Then start the clock and the streamer to move the actual data
       wypin   x, #spi_ck               ' start spi_ck transitions
       waitx   #3                       ' align spi_ck transitions with sampling
       xinit   wmode, #0                ' start inputting bits to hub via streamer
-    source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:101-103,258-260"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Read in remaining application longs (the smart-pin setup and the .block loop)"
 
   motor_control_pwm:
     description: "3-phase motor control PWM with dead-time (Smart Pin per side, high side true / low side inverted)"
@@ -321,13 +320,12 @@ common_patterns:
       wypin   drive_u_, pin_pwm_u_l
       sub     drive_u_, dead_gap_       ' high side turns on later
       wypin   drive_u_, pin_pwm_u_h
-    source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:1600-1608,2026-2029"
+    source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
 
 coordination:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (SETXFRQ: the NCO frequency is a multiplier of $8000_0000; XINIT/XZERO/XCONT commands); SMART PIN MODES (%00101 transition output, WXPIN timebase); setup_order: Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash, and Loader, Read in remaining application longs"
   streamer_smartpin:
-    critical_order: "Smart Pins MUST start (DIRH) before XINIT"
-    reason: "Prevents data corruption and timing issues"
-    verified_in: "flash_loader.spin2"
+    setup_order: "The flash loader configures and enables its spi_ck smart pin (WRPIN, WXPIN, DRVL) during setup, before any XINIT starts the streamer"
     pin_output_hierarchy: |
       Streamer P[31:0] feeds through OUTA/OUTB (the OUT bit path).
       Smart pin with TT=%x1 (P_OE) overrides OUT entirely via SMART output.
@@ -347,51 +345,32 @@ coordination:
         SETXFRQ = $4000_0000 (= 1 bit per 2 sysclks)
         WXPIN   = 1          (= 1 sysclk between SCK edges)
         → 1 streamer bit = 2 sysclks = 1 full SCK cycle (2 edges). Lockstep.
-      Halving the SCK rate (WXPIN = 2) MUST be matched by halving the
-      streamer NCO (SETXFRQ = $2000_0000), or bits will be silently
-      dropped or duplicated.
+      The flash loader uses this one setting (clk/2 NCO value and a
+      timebase of 1 clock per transition); no source gives the pairing for
+      any other SCK rate.
     worked_examples: |
-      ' sysclk/2 SPI (max-rate single-bit SPI)
+      ' sysclk/2 SPI (the flash loader's setting)
       setxfrq ##$4000_0000     ' streamer: 1 bit per 2 sysclks
       wxpin   #1, #SCK_PIN     ' smart pin: 1 sysclk between SCK edges
-
-      ' sysclk/4 SPI (half-rate)
-      setxfrq ##$2000_0000     ' streamer: 1 bit per 4 sysclks
-      wxpin   #2, #SCK_PIN     ' smart pin: 2 sysclks between SCK edges
-    authority: "GOLDEN — these specific values are what the production flash loader uses on every shipping P2; lockstep is silicon-validated"
-    source: "Parallax P2 flash_loader.spin2 lines 100-107, 246"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash (WXPIN #1 'set timebase to 1 clock per transition'; SETXFRQ 'set streamer rate to clk/2'), Loader, Read in remaining application longs, and Loader Data (clk2 = $4000_0000 'clk/2 nco value for streamer'); NCO and timebase definitions: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER and SMART PIN MODES"
 
   alignment_pad:
     rule: |
       When the streamer SAMPLES an input pin (e.g., MISO/spi_do) that is
       driven by a remote device clocked by our P_TRANSITION smart pin,
-      a 3-clock WAITX between starting the SCK clock and starting the
-      streamer aligns the streamer's first sample with the middle of
-      the first valid bit on the input.
+      the flash loader puts a 3-clock WAITX between starting the SCK
+      transitions (WYPIN) and starting the streamer (XINIT), to "align
+      spi_ck transitions with spi_do sampling".
     code: |
       wypin   bit_count_doubled, #SCK_PIN  ' start SCK transitions
       waitx   #3                           ' pipeline alignment pad
       xinit   input_streamer_mode, #0      ' streamer begins sampling
       waitxfi
-    timing_theory: |
-      WYPIN takes 2 sysclks to take effect on the smart pin; XINIT also
-      takes 2 sysclks to engage the streamer. A WAITX of 3 sysclks
-      empirically pads the pipeline so the streamer's first read happens
-      AFTER the flash has presented a fresh bit on the SCK edge.
-    authority: |
-      The PATTERN (waitx between wypin and xinit) is GOLDEN — production-
-      validated by the flash loader on every shipping P2.
-      The specific value of 3 is GOLDEN at the SCK/streamer rates in
-      bit_edge_lockstep above; this value would change at different rates.
-      The TIMING THEORY (why exactly 3) is INTERPRETIVE — our cycle-accounting
-      explanation is plausible given that XINIT and WYPIN are both
-      documented as 2-cycle instructions, but the empirical correctness of
-      "3" is the load-bearing fact.
     rate_dependence: |
-      The 3-clock pad is correct for the SCK rate and NCO setup in
-      bit_edge_lockstep above. Different SCK rates may need different
-      pad values — verify with a logic analyzer if you change either
-      WXPIN or SETXFRQ.
+      The flash loader uses the 3-clock pad at one rate only, the SCK
+      timebase and streamer NCO in bit_edge_lockstep above: a WXPIN of 1
+      with an NCO value of $4000_0000. No source gives the pad for any
+      other timebase or NCO setting.
     write_side: |
       The WRITE direction (streamer driving a P_SYNC_TX MOSI against a
       P_TRANSITION SCK) has its own pad, and its failure is silent. SCK starts on
@@ -402,7 +381,7 @@ coordination:
       the losing one at another (a pad safe at hp = 7 lost at hp = 5, which a
       201-250 MHz sysclk reaches at an ordinary 25 MHz SPI clock). Verify the
       write pad at every SCK rate you use; it is not portable across rates.
-    source: "Parallax P2 flash_loader.spin2 line 259"
+    source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Read in remaining application longs (.block: waitx #3 'align spi_ck transitions with spi_do sampling'); write_side: hardware-verified on P2 silicon (XF-001)"
 
   multi_pin_sync:
     - "Configure all pins first"
@@ -429,7 +408,6 @@ debugging:
     - "Use lock[15] for debug monitor"
     
   common_issues:
-    - "Wrong initialization order (pins before streamer!)"
     - "Missing ADC calibration"
     - "Incorrect X/Y parameters"
     - "Forgetting DIRH to enable"
@@ -437,7 +415,6 @@ debugging:
     - "Missing PWM dead-time (hardware damage!)"
 
 best_practices:
-  - "ALWAYS start Smart Pins before XINIT"
   - "Calibrate ADC before measurements"
   - "Include dead-time for motor control"
   - "Use repository mode for COG communication"
@@ -447,14 +424,14 @@ best_practices:
   - "Use LUT for lookup tables"
 
 references:
-  - silicon_doc: Streamer section
-  - silicon_doc: Smart Pins section
-  - flash_loader.spin2: SPI coordination
-  - isp_bldc_motor.spin2: PWM and ADC patterns
-  - Spin2_debugger.spin2: Debug infrastructure
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES"
+  - "Parallax SPI Flash Programmer and Boot Loader v51, Programmer and Loader (SPI coordination)"
+  - "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document): PWM and ADC patterns"
+  - "Parallax Spin2/PASM Debugger v51, debug infrastructure"
 
 protocol_client_code_note:
-  source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:547,553"
+  source: "Parallax Spin2 Documentation v55, Timing Methods (GETCT and GETMS rows)"
   scope: "This page covers the smart-pin / streamer side of protocol implementation. Client code driving these modes (SPI flash, sync/async serial) typically also needs timing/timeout idioms outside the smart pin itself: busy-wait, response timeout, retry intervals."
   which_timebase: "GETCT() is \"Get 32-bit system counter\"; GETMS() is \"Get milliseconds since booting, uses 64-bit system counter and CLKFREQ, rolls over every 49.7 days.\" A multi-second protocol timeout belongs on GETMS -- a GETCT deadline is bounded by that 32-bit counter and fails silently past its signed half."
   full_rule: language/spin2/concepts/timing_operations.yaml

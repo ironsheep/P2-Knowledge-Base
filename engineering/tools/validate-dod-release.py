@@ -713,6 +713,181 @@ def validate_internal_ids(verbose: bool = False) -> ValidationResult:
     return result
 
 
+# Register ids that are NEVER served, in ANY value -- source fields included (#422,
+# 2026-10-10). EF-/XF-/CP- are citable records (the claim-sourcing gate resolves them
+# and a reader can be told "EF-024"); F- (finding), E- (source erratum), S- (study
+# decision) and VO- (verification opportunity) are our own bookkeeping and name nothing
+# a reader or a citation may rest on. validate_internal_ids reads the delivery-filtered
+# PAYLOAD, where source fields are already stripped, so it cannot see these; this reads
+# the parsed source file's string VALUES (comments are not values).
+REGISTER_ID_PATTERN = re.compile(r'(?<![A-Za-z0-9])(?:[FES]-\d{3}|VO-[A-Z]-\d{3})\b')
+
+REGISTER_ID_CONTROL = [
+    # (text, must_fire)
+    ("Hardware-verified on P2 silicon (Rev C): hardware-verification ledger EF-024 (F-202).", True),
+    ("Parallax Propeller 2 Documentation v35, SMART PINS; erratum E-007.", True),
+    ("Study decision S-393 applies.", True),
+    ("Opportunity VO-B-014 covers it.", True),
+    # Citable records and ordinary text -- MUST NOT fire.
+    ("Hardware-verified on P2 silicon (EF-024).", False),
+    ("Compiler-proved (CP-001); measured on silicon (XF-001).", False),
+    ("RS-232 and RS-485 line drivers.", False),
+    ("The ATN-100 filter has a 3 dB corner.", False),
+    ("DIV-007 is not a register id.", False),
+]
+
+
+def register_id_negative_control():
+    """Return the control cases that misbehave (empty list == control passes)."""
+    return [(text, want) for text, want in REGISTER_ID_CONTROL
+            if bool(REGISTER_ID_PATTERN.search(text)) != want]
+
+
+def validate_register_ids_in_values(verbose: bool = False) -> ValidationResult:
+    """No F-/E-/S-/VO- register id in any shipped YAML value, source fields included.
+    The negative control runs first: a check that cannot fire is not run."""
+    result = ValidationResult("Register Ids in YAML Values (source fields included)")
+    bad_control = register_id_negative_control()
+    if bad_control:
+        result.fail(f"negative control FAILED on {len(bad_control)} case(s) -- do not trust this run")
+        for text, want in bad_control:
+            result.info(f"  must_fire={want}: {text}")
+        return result
+    result.ok(f"Negative control: {sum(w for _, w in REGISTER_ID_CONTROL)} register-id shapes fire, "
+              f"{sum(not w for _, w in REGISTER_ID_CONTROL)} citable or ordinary strings do not")
+
+    live, _ = _shipped_payload()
+    hits = []
+    for _, path in live:
+        try:
+            doc = yaml.safe_load(Path(path).read_text(encoding='utf-8'))
+        except (yaml.YAMLError, OSError):
+            continue                    # an unparseable file is Metadata Filter's finding
+        for key, value in _walk_string_values(doc):
+            for m in REGISTER_ID_PATTERN.finditer(value):
+                hits.append(f"{path} [{key}] {m.group(0)} -- {value.strip()[:90]!r}")
+
+    result.info(f"Files checked (parsed source values): {len(live)}")
+    if hits:
+        result.fail(f"{len(hits)} F-/E-/S-/VO- register id(s) in YAML values -- remove them; "
+                    f"EF-/XF-/CP- are the only ids a value may carry")
+        for h in hits:
+            result.info(f"  {h}")
+    else:
+        result.ok("No F-/E-/S-/VO- register id in any YAML value")
+    return result
+
+
+# Change-history phrasing (#422, 2026-10-10): the shipped entry states the FACT, never
+# the story of its own edits -- "a prior form of this entry said...", "was fabricated",
+# "until now", "added 2026-08-25". That story is provenance; it belongs in the
+# register entry (F-NNN) or a YAML comment, both of which the consumer never sees.
+# Every pattern is written against the SHAPE of an edit note, and the negative
+# control below proves each one fires while ordinary technical prose that shares a
+# word ("the previously configured mode", "added to the accumulator") does not.
+HISTORY_PROSE_PATTERNS = [
+    ("prior-form", re.compile(r"\ba prior (?:form|version|revision) of\b", re.I)),
+    ("earlier-form", re.compile(r"\ban earlier (?:form|version|revision) of this\b", re.I)),
+    ("previously-said", re.compile(
+        r"\bpreviously (?:stood|said|stated|carried|claimed|asserted|read|listed|gave)\b", re.I)),
+    ("this-was-previously", re.compile(
+        r"\b(?:this|the) (?:file|entry|page|block|section) was previously\b", re.I)),
+    ("fabricated", re.compile(r"\bwas fabricat", re.I)),
+    ("until-now", re.compile(r"\buntil now\b", re.I)),
+    ("not-restored", re.compile(
+        r"\b(?:claim|figure|statement|sentence|entry|value|text|row) is not restored\b", re.I)),
+    ("dated-edit", re.compile(
+        r"\b(?:added|removed|corrected|changed|fixed|rewritten|deleted|demoted|retired|"
+        r"replaced)\b[^.\n]{0,40}?\b20\d\d-\d\d-\d\d\b", re.I)),
+]
+
+
+def history_prose_hits(text):
+    """The (pattern name, match) pairs of change-history phrasing in one string."""
+    return [(name, m.group(0)) for name, rx in HISTORY_PROSE_PATTERNS
+            for m in rx.finditer(text)]
+
+
+def _walk_string_values(node, path=""):
+    """Yield (key path, string) for every string VALUE in a parsed YAML tree.
+    Parsing is what excludes comments: a YAML comment never reaches a consumer."""
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield from _walk_string_values(v, f"{path}.{k}" if path else str(k))
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            yield from _walk_string_values(v, f"{path}[{i}]")
+    elif isinstance(node, str):
+        yield path, node
+
+
+HISTORY_PROSE_CONTROL = [
+    # (text, must_fire)
+    ("A prior form of this entry gave 150 mA per pin.", True),
+    ("An earlier version of this page listed six modes.", True),
+    ("The table previously stated a 3 ns rise time.", True),
+    ("This file was previously a parallel description of inline PASM2.", True),
+    ("The drive ladder was fabricated and has been removed.", True),
+    ("Until now the KB carried no write-side figure.", True),
+    ("The 300 mA figure is not restored here.", True),
+    ("Added 2026-08-25 from the bench run.", True),
+    ("It has been demoted to a stub on 2026-04-29.", True),
+    # Ordinary technical prose sharing a word -- MUST NOT fire.
+    ("Restores the previously configured mode on exit.", False),
+    ("The carry is added to the accumulator each cycle.", False),
+    ("Continue a task that was previously halted with TASKHALT.", False),
+    ("Z is set if Z was previously set and the result is zero.", False),
+    ("The clock stays stopped until the next reset.", False),
+    ("The C flag is not restored by RETI.", False),
+    ("An earlier version of PNut accepted this form.", False),
+    ("Released 2026-05-07 as v55.", False),
+]
+
+
+def history_prose_negative_control():
+    """Return the control cases that misbehave (empty list == control passes)."""
+    return [(text, want) for text, want in HISTORY_PROSE_CONTROL
+            if bool(history_prose_hits(text)) != want]
+
+
+def validate_history_prose(verbose: bool = False) -> ValidationResult:
+    """No change-history prose in shipped YAML values (#422, 2026-10-10).
+
+    Reads the PAYLOAD the consumer receives (the shipped filter's own output), parses
+    it, and tests every string value -- comments are excluded because a parsed tree
+    has none. Its negative control runs first: a check that cannot fire is not run."""
+    result = ValidationResult("Change-History Prose in Shipped Content")
+    bad_control = history_prose_negative_control()
+    if bad_control:
+        result.fail(f"negative control FAILED on {len(bad_control)} case(s) -- do not trust this run")
+        for text, want in bad_control:
+            result.info(f"  must_fire={want}: {text}")
+        return result
+    result.ok(f"Negative control: {sum(w for _, w in HISTORY_PROSE_CONTROL)} edit-note shapes fire, "
+              f"{sum(not w for _, w in HISTORY_PROSE_CONTROL)} ordinary sentences do not")
+
+    live, shipped = _shipped_payload()
+    hits = []
+    for _, path in live:
+        try:
+            doc = yaml.safe_load(shipped[str(path)])
+        except yaml.YAMLError:
+            continue                    # a payload that does not parse is Metadata Filter's finding
+        for key, value in _walk_string_values(doc):
+            for name, text in history_prose_hits(value):
+                hits.append(f"{path} [{key}] {name}: {text!r}")
+
+    result.info(f"Files checked (shipped payload): {len(live)}")
+    if hits:
+        result.fail(f"{len(hits)} change-history phrase(s) in shipped content -- state the fact; "
+                    f"the edit history belongs in the register entry or a YAML comment")
+        for h in hits:
+            result.info(f"  {h}")
+    else:
+        result.ok("No change-history prose reaches a consumer")
+    return result
+
+
 LEDGERS = [
     Path("engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"),
     Path("engineering/ingestion/external-sources/hardware-verification/EXTERNAL-HARDWARE-FINDINGS.md"),
@@ -1354,6 +1529,8 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_timestamps,
         validate_metadata_filter,
         validate_internal_ids,
+        validate_register_ids_in_values,
+        validate_history_prose,
         validate_ledger_kb_home,
         validate_cross_references,
         validate_constant_fidelity,
