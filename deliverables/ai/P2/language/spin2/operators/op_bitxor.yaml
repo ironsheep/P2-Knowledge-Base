@@ -1,0 +1,27 @@
+operator: "^"
+type: operator
+category: Bitwise
+description: |
+  Bitwise XOR: `x ^ y` XORs the two values bit by bit. Priority 5. The logical XOR,
+  which returns 0 or -1, is `^^` / `XOR`. The field-pointer operator `^@` is a different
+  token.
+priority: 5
+term_form: "x ^ y"
+assign_form: "var ^= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "toggled := value ^ $01"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "^"
+  - "bitwise xor"
+  - "exclusive or"
+related:
+  - language/spin2/operators/op_bitand.yaml
+  - language/spin2/operators/op_bitor.yaml
+  - language/spin2/operators/op_bitnot.yaml
+  - language/spin2/operators/op_xorxor.yaml
+  - language/spin2/operators/op_xor.yaml
+  - language/spin2/special-symbols/caret_at.yaml
+  - language/pasm2/xor.yaml
+  - language/spin2/operators/precedence.yaml

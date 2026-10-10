@@ -1,5 +1,20 @@
 operator: "ROL"
 type: operator
-description: |
-  Bit manipulation
 category: Shift/Rotate
+description: |
+  Rotate left: `x ROL y` rotates x left by y bits; the bits shifted out of the top
+  re-enter at the bottom. Priority 3.
+priority: 3
+term_form: "x ROL y"
+assign_form: "var ROL= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "rotated := $8000_0001 ROL 4   ' $18"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "ROL"
+  - "rotate left"
+related:
+  - language/spin2/operators/op_ROR.yaml
+  - language/spin2/operators/op_shl.yaml
+  - language/spin2/operators/precedence.yaml

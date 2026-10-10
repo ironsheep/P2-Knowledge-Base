@@ -1,7 +1,21 @@
 operator: "QLOG"
 type: operator
-description: |
-  Quick logarithm (also PASM2 instruction)
 category: Unary
+description: |
+  Unsigned value to logarithm: `QLOG x` returns a 32-bit value laid out as
+  { 5'whole, 27'fraction }. Priority 2. QEXP is its inverse (logarithm to unsigned
+  value).
+priority: 2
+term_form: "QLOG x"
+assign_form: "QLOG= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "log_val := QLOG(value)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "QLOG"
+  - "quick logarithm"
+related:
+  - language/spin2/operators/op_QEXP.yaml
+  - language/pasm2/qlog.yaml
+  - language/spin2/operators/precedence.yaml

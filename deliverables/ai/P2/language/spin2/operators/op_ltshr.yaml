@@ -1,5 +1,21 @@
-operator: "<>>"
-type: operator
+name: "<>> is not a Spin2 operator"
+type: operator_redirect
+category: Comparison
+not_an_operator: "<>>"
 description: |
-  Equal/not equal (logical/bitwise)
-category: Equality
+  `<>>` is not a Spin2 operator; the compiler rejects it. Not-equal is `<>` (returns
+  0 or -1); shift right is `>>` (shift x right by y bits, inserting 0's); the
+  arithmetic shift right that inserts copies of the MSB is `SAR`.
+
+definition_home: language/spin2/operators/op_ltgt.yaml
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+
+aliases:
+  - "<>>"
+
+related:
+  - language/spin2/operators/op_ltgt.yaml
+  - language/spin2/operators/op_shr.yaml
+  - language/spin2/operators/op_SAR.yaml
+  - language/spin2/operators/precedence.yaml

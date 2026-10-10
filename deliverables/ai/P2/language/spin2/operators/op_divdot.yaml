@@ -1,5 +1,20 @@
 operator: "/."
 type: operator
+category: Float
 description: |
-  Divide/float/modulo/unsigned
-category: Divide
+  Floating-point divide: `x /. y`. Priority 7, a term in all blocks. It has no assignment
+  form. The floating-point operators treat long values as floats: they do not convert an
+  integer operand, so convert with `FLOAT()` first.
+priority: 7
+term_form: "x /. y"
+block_usage: "Term in all blocks"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "/."
+  - "float divide"
+  - "floating point divide"
+related:
+  - language/spin2/operators/op_div.yaml
+  - language/spin2/operators/op_muldot.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/operators/precedence.yaml

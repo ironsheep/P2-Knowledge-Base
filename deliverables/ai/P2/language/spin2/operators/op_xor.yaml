@@ -1,7 +1,25 @@
 operator: "XOR"
 type: operator
+category: Logical
 description: |
-  Logical XOR (also PASM2 instruction)
-category: Unary
+  Logical XOR, the word spelling of `^^`: x XOR y is -1 when exactly one of x <> 0 and
+  y <> 0 holds, otherwise 0 (it returns 0 or -1). It is not the bitwise XOR (use `^`),
+  and it is not the PASM2 instruction XOR, which XORs two registers bit by bit.
+priority: 14
+term_form: "x XOR y"
+assign_form: "var ^^= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "IF state1 XOR state2\n  toggle()"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "XOR"
+  - "logical xor"
+related:
+  - language/spin2/operators/op_xorxor.yaml
+  - language/spin2/operators/op_bitxor.yaml
+  - language/spin2/operators/op_and.yaml
+  - language/spin2/operators/op_or.yaml
+  - language/spin2/operators/op_not.yaml
+  - language/pasm2/xor.yaml
+  - language/spin2/operators/precedence.yaml

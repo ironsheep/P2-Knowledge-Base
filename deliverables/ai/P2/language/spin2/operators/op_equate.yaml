@@ -1,0 +1,26 @@
+operator: "="
+type: operator
+category: Assignment
+description: |
+  Equate: `symbol = x` sets a symbolic constant to x in a CON block. Priority 17, CON
+  only. Several equates can share a line, separated by commas. Run-time assignment in a
+  PUB or PRI method is the different operator `:=`.
+priority: 17
+assign_form: "symbol = x"
+block_usage: "CON only"
+examples:
+  - |
+    CON
+      EnableFlow = 8                'single assignment
+      x = 5, y = -5, z = 1          'comma-separated assignments
+      HalfPi = 1.5707963268         'IEEE-754 single-precision float value
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "="
+  - "equate"
+  - "constant assignment"
+  - "CON assignment"
+related:
+  - language/spin2/operators/op_assign.yaml
+  - language/spin2/operators/op_eqeq.yaml
+  - language/spin2/operators/precedence.yaml

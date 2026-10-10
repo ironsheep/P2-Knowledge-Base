@@ -1,7 +1,21 @@
 operator: "? :"
 type: operator
+category: Ternary
 description: |
-  Ternary conditional operator
-category: Assignment
+  Ternary conditional: `x ? y : z` returns y if x <> 0, otherwise z. Priority 16.
+  It is a term in all blocks, including CON; it has no assignment form.
+priority: 16
+term_form: "x ? y : z"
+block_usage: "Term (all blocks)"
 examples:
   - "result := condition ? true_value : false_value"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "? :"
+  - "ternary"
+  - "conditional operator"
+  - "inline if"
+related:
+  - language/spin2/operators/op_question.yaml
+  - language/spin2/operators/op_colon.yaml
+  - language/spin2/operators/precedence.yaml

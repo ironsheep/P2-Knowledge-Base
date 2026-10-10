@@ -1,5 +1,27 @@
 operator: "-."
 type: operator
+category: Float
 description: |
-  Integer/float subtraction
-category: Subtract
+  Floating-point subtract (binary, priority 8): `x -. y`. The same token is also the
+  floating-point negate (unary, priority 2): `-.x` toggles the MSB (the sign bit) of x.
+  Both are terms in all blocks and neither has an assignment form. The floating-point
+  operators treat long values as floats: they do not convert an integer operand, so
+  convert with `FLOAT()` first. A negative floating-point constant can be written with a
+  plain `-`; `-.` is needed for variables and expressions.
+priority: 8
+unary_priority: 2
+term_form: "x -. y   (subtract);   -.x   (negate)"
+block_usage: "Term in all blocks"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "-."
+  - "float subtract"
+  - "floating point subtract"
+  - "float negate"
+  - "floating point negate"
+related:
+  - language/spin2/operators/op_sub.yaml
+  - language/spin2/operators/op_adddot.yaml
+  - language/spin2/operators/op_FABS.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/operators/precedence.yaml

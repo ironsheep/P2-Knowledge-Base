@@ -1,0 +1,26 @@
+operator: "&"
+type: operator
+category: Bitwise
+description: |
+  Bitwise AND: `x & y` ANDs the two values bit by bit. Priority 4, so it binds tighter
+  than the comparisons (priority 11): `flags & MASK == EXPECTED` means
+  `(flags & MASK) == EXPECTED`. The logical AND, which returns 0 or -1, is `&&` / `AND`.
+priority: 4
+term_form: "x & y"
+assign_form: "var &= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "low_nibble := value & $0F"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "&"
+  - "bitwise and"
+  - "mask bits"
+related:
+  - language/spin2/operators/op_bitor.yaml
+  - language/spin2/operators/op_bitxor.yaml
+  - language/spin2/operators/op_bitnot.yaml
+  - language/spin2/operators/op_andand.yaml
+  - language/spin2/operators/op_and.yaml
+  - language/pasm2/and.yaml
+  - language/spin2/operators/precedence.yaml

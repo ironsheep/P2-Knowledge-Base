@@ -1,5 +1,21 @@
 operator: "<>"
 type: operator
 description: |
-  Equal/not equal (logical/bitwise)
+  Not equal: `x <> y` returns -1 (true) or 0 (false). Priority 11. A term in all blocks,
+  no assignment form. In a CON block applied to floating-point constants or symbols it
+  returns 1.0 or 0.0 rather than the integer -1 or 0. The floating-point form is `<>.`;
+  the equal operator is `==`.
 category: Equality
+priority: 11
+term_form: "x <> y"
+block_usage: "Term in all blocks; no assignment form"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "<>"
+  - "not equal"
+  - "inequality"
+related:
+  - language/spin2/operators/op_eqeq.yaml
+  - language/spin2/operators/op_ltgtdot.yaml
+  - language/spin2/operators/op_ltshr.yaml
+  - language/spin2/operators/precedence.yaml

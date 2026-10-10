@@ -1,7 +1,21 @@
 operator: "<=."
 type: operator
 description: |
-  Floating point less than or equal comparison
+  Floating-point less than or equal: `x <=. y` returns -1 (true) or 0 (false). Priority
+  11, a term in all blocks, no assignment form. The signed integer form is `<=`.
 category: Float Compare
+priority: 11
+term_form: "x <=. y"
+block_usage: "Term in all blocks; no assignment form"
 examples:
   - "IF count <=. limit\n  continue()"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "<=."
+  - "float less than or equal"
+  - "floating point less than or equal"
+related:
+  - language/spin2/operators/op_lteq.yaml
+  - language/spin2/operators/op_ltdot.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/operators/precedence.yaml

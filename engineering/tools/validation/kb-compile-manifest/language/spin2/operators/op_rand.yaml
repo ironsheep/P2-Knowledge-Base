@@ -2,16 +2,7 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: algorithm.description
-    fp: "1a04f67909568947"
-    compile: fragment
-    wrap: spin2-method-result
-    assumes: [state]
-  - at: critical_requirement.description
-    fp: "c9a75b2e131c7bf2"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code (critical_requirement.description)"
-  - at: critical_requirement.solution
+  - at: seeding.solution
     fp: "575247aeacaeeea7"
     compile: fragment
     wrap: spin2-method
@@ -44,13 +35,8 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [prng_state]
-  - at: common_patterns[2].code
-    fp: "37ee264dd0965f3b"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [random_value, state]
   - at: anti_patterns[0].wrong
-    fp: "08ee613155f66fe6"
+    fp: "afa82957d56df53a"
     compile: fragment
     wrap: spin2-method
     assumes: [seed, value]
@@ -60,16 +46,20 @@ blocks:
     wrap: spin2-method
     assumes: [seed, value]
   - at: anti_patterns[1].wrong
-    fp: "2c7e3feb078e6ef6"
+    fp: "b654536b0afb973b"
     compile: program
   - at: anti_patterns[1].correct
     fp: "d1fe6a6c774c2e99"
     compile: program
   - at: anti_patterns[2].wrong
-    fp: "bb2f930a32f0cf3e"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [seed]
+    fp: "21bd3b963b433a8d"
+    compile: never
+    wrap: spin2-method
+    assumes: [value]
+    reason: "the example demonstrates the error; the compiler rejects ?? with no variable operand"
+    fails_at: 1
   - at: anti_patterns[2].correct
-    fp: "bdaf9432ae63ffa1"
-    compile: program
+    fp: "0b2fbe4a6ba72bb2"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [value, seed]

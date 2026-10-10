@@ -1,7 +1,24 @@
 operator: "||"
 type: operator
+category: Logical
 description: |
-  Logical OR operator
-category: Bitwise
+  Logical OR: x || y is -1 when x <> 0 or y <> 0, otherwise 0 (it returns 0 or -1).
+  `OR` is the same operator, spelled as a word. For a bit-by-bit OR use `|`.
+priority: 15
+term_form: "x || y"
+assign_form: "var ||= y"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
-  - "IF error || timeout\n  abort()"
+  - "IF error || timeout\n  ABORT -1"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "||"
+  - "logical or"
+  - "boolean or"
+related:
+  - language/spin2/operators/op_or.yaml
+  - language/spin2/operators/op_bitor.yaml
+  - language/spin2/operators/op_andand.yaml
+  - language/spin2/operators/op_xorxor.yaml
+  - language/spin2/operators/op_not.yaml
+  - language/spin2/operators/precedence.yaml

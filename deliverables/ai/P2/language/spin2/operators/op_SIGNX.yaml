@@ -1,5 +1,22 @@
 operator: "SIGNX"
 type: operator
-description: |
-  Bit manipulation
 category: Shift/Rotate
+description: |
+  Sign-extend: `x SIGNX y` sign-extends x from bit y, copying bit y into every higher
+  bit. Priority 3.
+priority: 3
+term_form: "x SIGNX y"
+assign_form: "var SIGNX= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "extended := $FF SIGNX 7   ' -1 ($FFFF_FFFF)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "SIGNX"
+  - "sign extend"
+  - "sign-extend"
+related:
+  - language/spin2/operators/op_ZEROX.yaml
+  - language/spin2/operators/op_SAR.yaml
+  - language/pasm2/signx.yaml
+  - language/spin2/operators/precedence.yaml

@@ -1,0 +1,30 @@
+operator: "!"
+type: operator
+category: Bitwise
+description: |
+  Bitwise NOT (1's complement): `!x` inverts every bit of x. Priority 2, a term in all
+  blocks. The logical NOT, which turns 0 into -1 and any non-0 value into 0, is the
+  different operator `!!` / `NOT` (priority 12).
+priority: 2
+term_form: "!x"
+assign_form: "!= var   (inverts var in place; PUB/PRI only, priority 1)"
+postfix_form: "var!   (returns var, then bitwise-NOTs var in place; PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment and postfix forms in PUB/PRI only"
+examples:
+  - "inverted := !value"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "!"
+  - "bitwise not"
+  - "ones complement"
+  - "1's complement"
+  - "invert bits"
+  - "var!"
+  - "post-bitwise-NOT"
+related:
+  - language/spin2/operators/op_not.yaml
+  - language/spin2/operators/op_bitand.yaml
+  - language/spin2/operators/op_bitor.yaml
+  - language/spin2/operators/op_bitxor.yaml
+  - language/pasm2/not.yaml
+  - language/spin2/operators/precedence.yaml

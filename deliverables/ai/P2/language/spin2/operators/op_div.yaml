@@ -6,6 +6,15 @@ description: |
   CORDIC (QDIV) and negates the quotient when the operand signs differ, so it rounds
   toward zero: -1000 / 3 = -333, 1000 / -3 = -333, -1000 / -3 = 333.
 category: Divide
+priority: 7
+term_form: "x / y"
+assign_form: "var /= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "/"
+  - "divide"
+  - "signed divide"
 divide_by_zero: "x / 0 does not trap: it returns $FFFF_FFFF (-1) for x >= 0 and 1 for x < 0, every time; x /= 0 the same. The CORDIC quotient for a zero divisor is $FFFF_FFFF, negated when x is negative. Guard the divisor if a zero is possible."
 related:
   - language/spin2/operators/op_divdiv.yaml

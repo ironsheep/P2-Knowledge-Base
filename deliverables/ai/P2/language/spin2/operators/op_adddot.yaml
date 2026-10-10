@@ -1,5 +1,21 @@
 operator: "+."
 type: operator
+category: Float
 description: |
-  Integer/float addition
-category: Add
+  Floating-point add: `x +. y`. Priority 8, a term in all blocks. It has no assignment
+  form. The floating-point operators treat long values as floats: they do not convert an
+  integer operand, so convert with `FLOAT()` first.
+priority: 8
+term_form: "x +. y"
+block_usage: "Term in all blocks"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "+."
+  - "float add"
+  - "floating point add"
+related:
+  - language/spin2/operators/op_add.yaml
+  - language/spin2/operators/op_subdot.yaml
+  - language/spin2/operators/op_muldot.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/operators/precedence.yaml

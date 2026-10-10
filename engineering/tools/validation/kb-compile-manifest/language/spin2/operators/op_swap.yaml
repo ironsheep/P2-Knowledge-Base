@@ -3,28 +3,25 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "e9f08e03c15ae000"
+    fp: "bba230bb5631a5e8"
     compile: program
-    finding: "S-044"
   - at: examples[1].code
-    fp: "4eea980208efa245"
-    compile: fragment
-    wrap: spin2-top
-    spin2_version: 45
+    fp: "2533bac87032da2a"
+    compile: program
   - at: examples[2].code
-    fp: "35578d0d6e99b333"
+    fp: "f57a43f6c5278cee"
     compile: program
-    finding: "S-044"
   - at: examples[3].code
-    fp: "201d50d5311d0e77"
+    fp: "4ecf24ffc2eac969"
     compile: program
-    finding: "S-044"
   - at: examples[4].code
-    fp: "cdd40402cb6c8bba"
+    fp: "d4f4c2e152895d45"
     compile: program
-    finding: "S-044"
   - at: comparison[0].traditional
     fp: "6bfab1c7770ac119"
     compile: fragment
     wrap: spin2-method
     assumes: [temp, a, b]
+  - at: examples[5].code
+    fp: "1e09205dae3ac347"
+    compile: program

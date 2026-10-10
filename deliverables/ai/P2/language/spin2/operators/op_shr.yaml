@@ -1,5 +1,23 @@
 operator: ">>"
 type: operator
-description: |
-  Bit manipulation
 category: Shift/Rotate
+description: |
+  Shift right: `x >> y` shifts x right by y bits, inserting 0's. Priority 3. To insert
+  copies of the MSB instead (an arithmetic shift), use `SAR`.
+priority: 3
+term_form: "x >> y"
+assign_form: "var >>= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "shifted := $F0 >> 4   ' $0F"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - ">>"
+  - "shift right"
+  - "logical shift right"
+related:
+  - language/spin2/operators/op_shl.yaml
+  - language/spin2/operators/op_SAR.yaml
+  - language/spin2/operators/op_ROR.yaml
+  - language/spin2/operators/op_ltshr.yaml
+  - language/spin2/operators/precedence.yaml

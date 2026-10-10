@@ -1,7 +1,23 @@
 operator: "SCAS"
 type: operator
+category: Multiply/Divide
 description: |
-  Scale value signed (also PASM2 instruction)
-category: Unary
+  Signed scale: `x SCAS y` is (x * y) >> 30, treating both operands as signed. Priority
+  7. The PASM2 instruction SCAS is a different operation (it scales the low 16 bits of
+  its operands; see language/pasm2/scas.yaml).
+priority: 7
+term_form: "x SCAS y"
+assign_form: "var SCAS= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "scaled := value SCAS factor"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "SCAS"
+  - "signed scale"
+related:
+  - language/spin2/operators/op_SCA.yaml
+  - language/spin2/operators/op_FRAC.yaml
+  - language/spin2/operators/op_mul.yaml
+  - language/pasm2/scas.yaml
+  - language/spin2/operators/precedence.yaml

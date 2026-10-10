@@ -3,22 +3,20 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples.circular_buffer_increment.code
-    fp: "a6135059eae8e2e3"
+    fp: "c0cc9d8aa60e5d6b"
     compile: program
-    finding: "S-019+S-020"
   - at: examples.modulo_arithmetic.code
-    fp: "a63e16305c66581c"
+    fp: "5e027da4fb8021e1"
     compile: fragment
     wrap: spin2-method
-    assumes: [index, BUFFER_SIZE=con, position, MAX_POSITION=con, distance, head, tail]
-    finding: "S-008"
+    assumes: [index, BUFFER_SIZE=con, position, step_size, MAX_POSITION=con, distance, head, tail]
   - at: examples.queue_management.code
     fp: "c5f552f3a621e148"
     compile: fragment
     wrap: spin2-top
     assumes: [NO_CHAR=con, rxTailIdx, rxHeadIdx, BUF_SIZE=con, pRxBuf]
   - at: comparison_with_alternatives.and_mask_method.code
-    fp: "3846f770c198aadf"
+    fp: "c3b8b556b1d2d1ce"
     compile: fragment
     wrap: spin2-method
     assumes: [index, BUFFER_SIZE=con]

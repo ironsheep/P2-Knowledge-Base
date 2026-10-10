@@ -1,7 +1,20 @@
 operator: "QEXP"
 type: operator
-description: |
-  Quick exponential (also PASM2 instruction)
 category: Unary
+description: |
+  Logarithm to unsigned value: `QEXP x` converts a logarithm in the { 5'whole,
+  27'fraction } layout back to an unsigned value. Priority 2. QLOG is its inverse.
+priority: 2
+term_form: "QEXP x"
+assign_form: "QEXP= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "exp_val := QEXP(value)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "QEXP"
+  - "quick exponential"
+related:
+  - language/spin2/operators/op_QLOG.yaml
+  - language/pasm2/qexp.yaml
+  - language/spin2/operators/precedence.yaml

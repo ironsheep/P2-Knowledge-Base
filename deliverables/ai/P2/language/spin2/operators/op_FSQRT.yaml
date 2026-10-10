@@ -1,7 +1,20 @@
 operator: "FSQRT"
 type: operator
+category: Float
 description: |
-  Floating point square root
-category: Math
+  Floating-point square root: `FSQRT x`. Priority 2, a term in all blocks. It has no
+  assignment form. For an unsigned integer square root use `SQRT`.
+priority: 2
+term_form: "FSQRT x"
+block_usage: "Term in all blocks"
 examples:
   - "side := FSQRT(float_area)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "FSQRT"
+  - "float square root"
+  - "floating point square root"
+related:
+  - language/spin2/operators/op_SQRT.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/operators/precedence.yaml

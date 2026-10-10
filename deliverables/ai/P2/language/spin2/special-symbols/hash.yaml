@@ -19,7 +19,7 @@ description: |
 syntax:
   form: "#reg_symbol"
   returns: "Register address of cog/LUT symbol"
-  block_usage: "Spin2 expressions"
+  block_usage: "PUB/PRI only (as a term, priority 1)"
   range: 
     cog: "$000-$1FF (0-511)"
     lut: "$200-$3FF (512-1023)"

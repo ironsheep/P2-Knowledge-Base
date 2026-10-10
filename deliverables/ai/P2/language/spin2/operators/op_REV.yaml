@@ -1,5 +1,24 @@
 operator: "REV"
 type: operator
-description: |
-  Bit manipulation
 category: Shift/Rotate
+description: |
+  Reverse bits: `x REV y` reverses the order of bits 0..y of x and zero-extends. y is the
+  index of the top bit, so `REV 7` reverses 8 bits and `REV 31` reverses all 32. Priority
+  3. The PASM2 instruction REV is a different form, with no bit-count operand.
+priority: 3
+term_form: "x REV y"
+assign_form: "var REV= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "reversed := $A3 REV 7   ' %1010_0011 becomes %1100_0101, $C5"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "REV"
+  - "reverse bits"
+  - "bit reverse"
+related:
+  - language/spin2/operators/op_ZEROX.yaml
+  - language/spin2/operators/op_SIGNX.yaml
+  - language/pasm2/rev.yaml
+  - language/spin2/idioms/bit-manipulation.yaml
+  - language/spin2/operators/precedence.yaml

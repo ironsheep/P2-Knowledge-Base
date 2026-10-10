@@ -1,10 +1,20 @@
 operator: "BMASK"
 type: operator
 description: |
-  Create a bit mask with N+1 lowest bits set.
-  BMASK(7) creates an 8-bit mask ($FF).
-  Also available as PASM2 instruction.
+  Bitmask: `BMASK x` is (2 << (x & $1F)) - 1, a mask with the lowest x+1 bits set.
+  BMASK 7 creates an 8-bit mask ($FF). Priority 2. The PASM2 instruction BMASK does the
+  same job on a register.
 category: Unary
+priority: 2
+term_form: "BMASK x"
+assign_form: "BMASK= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "BMASK"
+  - "bitmask"
+  - "bit mask"
+  - "low bits mask"
 syntax: "mask := BMASK count"
 returns: "32-bit value with (count+1) lowest bits set to 1"
 
@@ -20,12 +30,12 @@ examples:
   - description: "Extract bit field"
     code: |
       ' Extract 4 bits starting at bit 4
-      field := (data >> 4) & BMASK 3   ' BMASK 3 = $0F (4 bits)
+      fld := (data >> 4) & BMASK 3   ' BMASK 3 = $0F (4 bits)
 
   - description: "Create variable-width mask"
     code: |
-      PUB extract_bits(value, start, width) : field
-        field := (value >> start) & BMASK (width - 1)
+      PUB extract_bits(value, start, width) : fld
+        fld := (value >> start) & BMASK (width - 1)
 
 common_patterns:
   - pattern: "mask_low_bits"
@@ -37,7 +47,8 @@ notes:
   - "BMASK n creates mask for n+1 bits (0-based count)"
   - "BMASK 7 = $FF (8 bits), not BMASK 8"
   - "Use for extracting bit fields after right-shifting"
-  - "Complement (!BMASK n) gives upper bits mask"
+  - "Complement (!BMASK n) is the mask of the bits above bit n"
+  - "BMASK counts modulo 32: BMASK 31 is $FFFF_FFFF, and the operand is taken as x & $1F"
 
 related:
   - language/spin2/operators/op_DECOD.yaml

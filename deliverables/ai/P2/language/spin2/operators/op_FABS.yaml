@@ -1,7 +1,22 @@
 operator: "FABS"
 type: operator
+category: Float
 description: |
-  Floating point absolute value
-category: Math
+  Floating-point absolute value: `FABS x` clears the MSB (the sign bit) of x. Priority 2,
+  a term in all blocks. It has no assignment form. For an integer absolute value use
+  `ABS`.
+priority: 2
+term_form: "FABS x"
+block_usage: "Term in all blocks"
 examples:
   - "distance := FABS(float_difference)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "FABS"
+  - "float absolute value"
+  - "floating point absolute value"
+related:
+  - language/spin2/operators/op_ABS.yaml
+  - language/spin2/operators/op_subdot.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/operators/precedence.yaml

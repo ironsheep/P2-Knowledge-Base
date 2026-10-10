@@ -2,46 +2,51 @@ operator: ":=:"
 type: assignment_operator
 category: Assignment
 
-minimum_version: "v46"
+minimum_version: "v45"
+requires_version: "Spin2_v45"
+version_directive: "{Spin2_v45}"
 
 description: |
-  Swap operator that atomically exchanges the values of two variables.
-  Works with scalar variables (BYTE, WORD, LONG) and structure instances.
-  Both operands must be the same type and size.
-  Available in PNut/pnut_ts v46 and later compilers. No version directive required.
+  Swap operator that exchanges the contents of two structure variables of the same
+  STRUCT type (v45): `structureA :=: structureB`. It is not defined for plain BYTE,
+  WORD or LONG variables or for array elements of those types; swap those with multiple
+  assignment, `a, b := b, a`. Structures are gated: `{Spin2_v45}` (or later) must open
+  the source file.
 
-syntax: "variable1 :=: variable2"
+syntax: "structureA :=: structureB"
 
 operands:
-  - name: "variable1"
-    type: "any assignable"
-    description: "First variable to swap"
-  - name: "variable2"
-    type: "any assignable"
-    description: "Second variable (must be same type as first)"
+  - name: "structureA"
+    type: "structure variable (same STRUCT type as structureB)"
+    description: "First structure to swap"
+  - name: "structureB"
+    type: "structure variable (same STRUCT type as structureA)"
+    description: "Second structure"
 
 behavior:
-  - "Exchanges values atomically in single operation"
+  - "Exchanges the contents of the two structures"
   - "Both operands are both read and written"
-  - "Type checking ensures both operands are compatible"
-  - "Works with scalars, structures, and pointer targets"
+  - "Both operands must be structure variables of the same STRUCT type"
+  - "Works with structure variables and structure array elements"
+  - "A structure member is not a structure: p1.x :=: p2.x is rejected"
 
 examples:
   - code: |
       PUB swap_demo() | a, b
         a := 10
         b := 20
-        a :=: b                                ' Swap values
+        a, b := b, a                           ' Swap values (multiple assignment)
         ' Now: a = 20, b = 10
-    description: "Basic variable swap"
-    
+    description: "Swapping plain variables uses multiple assignment, not :=:"
+
   - code: |
+      {Spin2_v45}
       CON
         STRUCT point(x, y)
-      
+
       VAR
         point p1, p2
-      
+
       PUB swap_points()
         p1.x := 10
         p1.y := 20
@@ -50,66 +55,81 @@ examples:
         p1 :=: p2                              ' Swap entire structures
         ' Now: p1 = (30,40), p2 = (10,20)
     description: "Swapping structure instances"
-    
+
+  - code: |
+      {Spin2_v45}
+      CON
+        STRUCT point(x, y)
+
+      VAR
+        point pts[4]
+
+      PUB swap_elements(i, j)
+        pts[i] :=: pts[j]                      ' Swap two structure array elements
+    description: "Swapping structure array elements"
+
   - code: |
       VAR
         byte buffer1[10], buffer2[10]
-      
+
       PUB swap_bytes() | i
         ' Initialize buffers
         repeat i from 0 to 9
           buffer1[i] := i
           buffer2[i] := i + 100
-        
+
         repeat i from 0 to 9
-          buffer1[i] :=: buffer2[i]            ' Swap element by element
-    description: "Swapping array elements"
-    
+          buffer1[i], buffer2[i] := buffer2[i], buffer1[i]   ' Swap element by element
+    description: "Swapping plain array elements uses multiple assignment"
+
   - code: |
       PUB bubble_sort(arr, count) | i, j
         repeat i from 0 to count - 2
           repeat j from 0 to count - i - 2
             if long[arr][j] > long[arr][j + 1]
-              long[arr][j] :=: long[arr][j + 1]  ' Swap adjacent elements
-    description: "Using swap in sorting algorithm"
-    
+              long[arr][j], long[arr][j + 1] := long[arr][j + 1], long[arr][j]   ' Swap adjacent elements
+    description: "Using a swap in a sorting algorithm"
+
   - code: |
       VAR
         long x, y, z
-      
+
       PUB rotate_left()
-        ' Rotate values: x <- y <- z <- x
-        x :=: y                                ' x<->y: x gets old y
-        y :=: z                                ' y<->z: y gets old z, z gets original x
-    description: "Rotating values with chained swaps"
+        ' Rotate values: x gets old y, y gets old z, z gets old x
+        x, y, z := y, z, x
+    description: "Rotating values with one multiple assignment"
 
 comparison:
   - traditional: |
       temp := a
       a := b
       b := temp
-    swap_operator: "a :=: b"
-    description: "Three operations vs one operator"
+    swap_operator: "a, b := b, a"
+    description: "Three statements vs one multiple assignment"
 
 notes:
-  - "Available in PNut/pnut_ts v46 and later compilers"
-  - "No version directive required - this is NOT a gated feature"
-  - "Both operands must be the same type"
-  - "Works with variables, array elements, and structure members"
-  - "For large structures, uses BYTEMOVE internally for efficiency"
+  - "Structures were introduced in v45; STRUCT requires {Spin2_v45} or later at the start of the source file"
+  - "Both operands must be structure variables of the same STRUCT type"
   - "Cannot swap constants or immediate values"
-  - "Requires both operands to be writable (lvalues)"
+  - "Requires both operands to be writable"
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Version History (v45)"
+
+aliases:
+  - ":=:"
+  - "swap"
+  - "swap structures"
+  - "exchange"
 
 related:
   - language/spin2/keywords/STRUCT.yaml
+  - language/spin2/operators/op_assign.yaml
   - language/spin2/methods/byteswap.yaml
   - language/spin2/methods/wordswap.yaml
   - language/spin2/methods/longswap.yaml
-  - language/spin2/methods/bytemove.yaml
 
 see_also:
-  - "Memory operations"
   - "Structure operations"
   - "Assignment operators"
 
-oneliner: "Atomically swap values of two variables (v46+)"
+oneliner: "Swap the contents of two structure variables of the same type (v45+)"

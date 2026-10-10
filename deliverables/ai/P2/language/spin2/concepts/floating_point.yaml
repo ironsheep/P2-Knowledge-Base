@@ -70,12 +70,12 @@ operators:
     "-. (unary)": "Float negation"
   
   comparison:
-    "<.": "Less than (returns TRUE/FALSE)"
-    ">.": "Greater than"
-    "<=.": "Less than or equal"
-    ">=.": "Greater than or equal"
-    "==.": "Equal"
-    "<>.": "Not equal"
+    "<.": "Less than (returns 0 or -1)"
+    ">.": "Greater than (returns 0 or -1)"
+    "<=.": "Less than or equal (returns 0 or -1)"
+    ">=.": "Greater than or equal (returns 0 or -1)"
+    "==.": "Equal (returns 0 or -1)"
+    "<>.": "Not equal (returns 0 or -1)"
 
 functions:
   FABS:

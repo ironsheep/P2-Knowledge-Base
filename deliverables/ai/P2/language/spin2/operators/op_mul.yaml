@@ -1,5 +1,21 @@
 operator: "*"
 type: operator
-description: |
-  Integer/float multiply
 category: Multiply
+description: |
+  Signed multiply: `x * y`. Priority 7. To multiply floating-point values use `*.` (the
+  floating-point operators treat long values as floats). In a CON block `*` takes on
+  floating-point functionality when applied to floating-point constants or symbols.
+priority: 7
+term_form: "x * y"
+assign_form: "var *= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "*"
+  - "multiply"
+  - "multiplication"
+related:
+  - language/spin2/operators/op_muldot.yaml
+  - language/spin2/operators/op_div.yaml
+  - language/spin2/operators/op_SCA.yaml
+  - language/spin2/operators/precedence.yaml

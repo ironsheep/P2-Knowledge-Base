@@ -1,7 +1,29 @@
 operator: "NOT"
 type: operator
+category: Logical
 description: |
-  Logical NOT (also PASM2 instruction)
-category: Unary
+  `!!` and `NOT` are one operator, Logical NOT: 0 becomes -1, any non-0 value becomes 0.
+  Its priority is 12, so it binds looser than every comparison (priority 11):
+  `NOT a == b` means `NOT (a == b)`. The bitwise NOT (1's complement) is the different
+  operator `!` (priority 2).
+priority: 12
+term_form: "!!x   or   NOT x"
+postfix_form: "var!!   (returns var, then logically NOTs var in place; PUB/PRI only, priority 1)"
+assign_form: "!!= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment and postfix forms in PUB/PRI only"
 examples:
   - "IF NOT ready\n  wait()"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "!!"
+  - "NOT"
+  - "logical not"
+  - "boolean not"
+  - "var!!"
+  - "post-logical-NOT"
+related:
+  - language/spin2/operators/op_bitnot.yaml
+  - language/spin2/operators/op_andand.yaml
+  - language/spin2/operators/op_oror.yaml
+  - language/pasm2/not.yaml
+  - language/spin2/operators/precedence.yaml

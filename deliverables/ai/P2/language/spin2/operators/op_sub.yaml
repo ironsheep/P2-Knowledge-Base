@@ -1,5 +1,33 @@
 operator: "-"
 type: operator
-description: |
-  Integer/float subtraction
 category: Subtract
+description: |
+  The `-` token has two forms:
+  - subtract (binary, priority 8): `x - y`. It is an integer subtract; to subtract
+    floating-point values use `-.` (the floating-point operators treat long values as
+    floats).
+  - negate (unary, priority 2): `-x` is the 2's complement of x.
+  Both are terms in all blocks. In a CON block `-` takes on floating-point functionality
+  when applied to a floating-point constant or symbol.
+priority: 8
+unary_priority: 2
+term_form: "x - y   (subtract);   -x   (negate)"
+assign_form: "var -= y   (subtract); -= var   (negate var in place); both PUB/PRI only; priority 17 and 1"
+block_usage: "Term in all blocks; assignment forms in PUB/PRI only"
+examples:
+  - "negated := -value"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "-"
+  - "subtract"
+  - "subtraction"
+  - "-x"
+  - "negate"
+  - "unary minus"
+  - "twos complement"
+  - "2's complement"
+related:
+  - language/spin2/operators/op_subdot.yaml
+  - language/spin2/operators/op_add.yaml
+  - language/spin2/operators/op_ABS.yaml
+  - language/spin2/operators/precedence.yaml

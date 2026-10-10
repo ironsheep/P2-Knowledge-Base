@@ -340,7 +340,8 @@ block about to be removed. The compile manifest counts 353 entries in 175 files 
 | §2+§3 | language/spin2 methods | «#414» | 5 |
 | §2+§3+§5 | spin2 concepts/constructs/symbols (+EF-101) | «#415» | 6 |
 | §2+§3 | spin2 operators — F-547 cascade, S-310..S-315 | «#416» | 7 |
-| §2+§3 | spin2 preprocessor/conventions/patterns (S-153 class) | «#417» | 8 |
+| §1 (rev. 2026-10-10) | Re-tier the source-lock ratchet to the citation rule | «#424» | 8 |
+| §2+§3 | spin2 preprocessor/conventions/patterns (S-153 class) | «#417» | 9 |
 | §2+§3+§5 | language/pasm2 (+EF-094, EF-101) | «#418» | 9 |
 | §2+§3+§5 | architecture + smart-pins (+EF-093, 095–100; F-563) | «#419» | 10 |
 | §2+§3 | hardware, guides, fundamentals, app notes, tools, code-examples | «#420» | 11 |
@@ -368,6 +369,14 @@ S-370, S-374, S-390, S-391, S-322 item 1 (#64013 schematic), F-352, F-562.
 
 - 2026-10-09 — sprint started; tasks «#410»–«#423» generated; «#387» superseded; F-563 (USB status
   bits, found by «#409») added to «#419»'s scope.
+- 2026-10-10 — «#416» boundary, **planning gap found**: the golden-source lock ratchet
+  (`audit-yaml-source-lock.py`, in the DoD) ranks a repo-path citation (RESOLVABLE) above a document
+  title (NAMED), so the canonical rewrite the citation rule requires (§0 Q2; Q3/Q4/Q12) reads as a
+  regression — first hit `op_addmodulo.yaml`; «#422» would trip it on every rewrite. New §1 item:
+  **re-tier the ratchet to the citation rule** — a top tier for a value `audit-yaml-claim-sourcing.py`
+  accepts (canonical Parallax title + edition [+ p.N], or an existing EF/CP), repo paths below it,
+  baseline re-recorded — task «#424», ordered before «#417». Also from «#416»: POW precedence and
+  "pointers cannot be arrays" rest on compile probes with no CP record — added to «#421» (CP-006/007).
 - 2026-10-09 — «#414» boundary: the DoD's *Internal IDs in Shipped Content* check caught an `EF-099`
   written into served prose; its pattern now also covers `CP-NNN` and `E-NNN` (both internal registers)
   and found two errata ids in served text, fixed. Every area-task brief («#415»–«#422») names this check

@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_andand.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: examples[0]
+    fp: "45e88d9be7b41f9e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [ready, enabled, start()->1/0]

@@ -12,3 +12,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [result, calculate()->1/2, x, y]
+  - at: description
+    fp: "eac76ad1c2a9f907"
+    compile: not-code
+    reason: "YAML description prose (English sentences) quoting the assignment forms `var := x`, not code"

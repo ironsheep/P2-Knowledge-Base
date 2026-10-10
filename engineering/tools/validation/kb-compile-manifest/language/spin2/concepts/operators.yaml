@@ -2,10 +2,6 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: overview
-    fp: "824382aa3a43b96b"
-    compile: not-code
-    reason: "YAML prose (English sentences), not code"
   - at: operator_categories.limit.operators[0].example
     fp: "a7d36248aec70b15"
     compile: not-code
@@ -30,20 +26,20 @@ blocks:
     fp: "db95b03099cd1b0f"
     compile: not-code
     reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
-  - at: operator_categories.unary_bit_operations[4].example
+  - at: operator_categories.shift_and_extend.operators[0].example
     fp: "a67b3bf8032b12f4"
     compile: not-code
     reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
-  - at: operator_categories.unary_bit_operations[5].example
+  - at: operator_categories.shift_and_extend.operators[1].example
     fp: "495491002ef5e188"
     compile: not-code
     reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
-  - at: operator_categories.unary_bit_operations[6].example
+  - at: operator_categories.shift_and_extend.operators[2].example
     fp: "6c8ebeebd1d9caa9"
     compile: not-code
     reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
   - at: common_patterns[0].code
-    fp: "e1fb320004a5b1ca"
+    fp: "cb183e5c43271450"
     compile: program
   - at: common_patterns[1].code
     fp: "f2dea5a1af60506c"
@@ -96,7 +92,7 @@ blocks:
     wrap: spin2-method
     assumes: [a, b]
   - at: anti_patterns[5].correct
-    fp: "2bf80f138eac81af"
+    fp: "caa4c9d4a24dcbcb"
     compile: fragment
     wrap: spin2-method
     assumes: [average, a, b]
@@ -115,21 +111,21 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [x, flag]
-  - at: special_operators[3].example
+  - at: special_operators[6].example
     fp: "32fb3852ed954976"
     compile: fragment
     wrap: spin2-method
     assumes: [ptr, buffer]
-  - at: special_operators[4].example
+  - at: special_operators[7].example
     fp: "24ba18a30676bd87"
     compile: fragment
     wrap: spin2-method
     assumes: [addr, strings, index]
-  - at: special_operators[5].example
+  - at: special_operators[10].example
     fp: "2f69e5a412d9f325"
     compile: not-code
     reason: "range-operator notation ('0..9 expands to 0, 1, 2, ..., 9'); notation with a gloss, not a statement"
-  - at: special_operators[6].example
+  - at: special_operators[11].example
     fp: "f987e574127ce706"
     compile: fragment
     wrap: spin2-method
@@ -189,3 +185,28 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [average, a, b]
+  - at: special_operators[3].example
+    fp: "d01481b212d9178a"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, flag]
+  - at: special_operators[4].example
+    fp: "b3c3da4f1f781920"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, flag]
+  - at: special_operators[5].example
+    fp: "830f4ad6e601e00f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [x, value]
+  - at: special_operators[8].example
+    fp: "7a1fdd3d2570341e"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [fieldPtr, flags]
+  - at: special_operators[9].example
+    fp: "cd738eeaaa9ebe5f"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [addr, regsym]

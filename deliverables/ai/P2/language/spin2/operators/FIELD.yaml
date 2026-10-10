@@ -68,7 +68,7 @@ examples:
 
   - code: |
       DAT
-        idStorage     WORD    0[150]        ' WORDs for 12-bit IDs
+        idStorage     LONG    0[75]         ' LONGs for 12-bit IDs (ten bits or larger need a LONG array)
         
       VAR
         LONG  idField
@@ -81,7 +81,7 @@ examples:
         
       PUB GetID(index) : id
         id := FIELD[idField][index]
-    description: "12-bit ID values packed in word storage"
+    description: "12-bit ID values packed in long storage"
 
 bitfield_specifications:
   - specifier: ".[0]"
@@ -102,7 +102,7 @@ bitfield_specifications:
     max_value: 255
   - specifier: ".[11..0]"
     width: "12 bits"
-    values_per_word: 1
+    array_storage: "LONG (ten bits or larger need a LONG array)"
     max_value: 4095
 
 operations:
@@ -167,9 +167,9 @@ when_to_use_field:
 notes:
   - "Part of base Spin2 language - no version directive required"
   - "Field pointer encodes both address and bit range"
-  - "Use BYTE storage for fields up to 8 bits"
-  - "Use WORD storage for fields 9-16 bits"
+  - "Pick an array size (BYTE/WORD/LONG) large enough that an indexed access never crosses its boundary: single-bit fields always work within a BYTE array, three-bit fields can span two bytes so they need a WORD array, and anything ten bits or larger needs a LONG array because it may span three bytes"
   - "Fields are NOT aligned - they pack contiguously"
+  - "Non-power-of-two field widths work only when the pointer is to a WORD or LONG in hub memory"
   - "V54+: For named bitfields on a single backing byte/word/long (rather than an indexed array), prefer STRUCT named bitfields — see language/spin2/concepts/struct-bitfields.yaml"
 
 related:
@@ -178,5 +178,13 @@ related:
   - language/spin2/keywords/LONG.yaml
   - language/spin2/keywords/STRUCT.yaml
   - language/spin2/concepts/struct-bitfields.yaml
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Field Pointers"
+
+aliases:
+  - "FIELD"
+  - "field pointer"
+  - "FIELD[ptr]"
+  - "^@ field pointer"
 
 oneliner: "Access packed bit-fields in memory for efficient small-value storage"

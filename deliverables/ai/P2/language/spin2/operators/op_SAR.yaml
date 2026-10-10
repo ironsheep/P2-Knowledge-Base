@@ -1,5 +1,23 @@
 operator: "SAR"
 type: operator
-description: |
-  Bit manipulation
 category: Shift/Rotate
+description: |
+  Shift arithmetic right: `x SAR y` shifts x right by y bits, inserting copies of the
+  MSB (the sign bit). Priority 3. `>>` shifts right inserting 0's instead.
+priority: 3
+term_form: "x SAR y"
+assign_form: "var SAR= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "shifted := $8000_0000 SAR 4   ' $F800_0000"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "SAR"
+  - "arithmetic shift right"
+  - "sign-extending shift"
+related:
+  - language/spin2/operators/op_shr.yaml
+  - language/spin2/operators/op_shl.yaml
+  - language/spin2/operators/op_SIGNX.yaml
+  - language/pasm2/sar.yaml
+  - language/spin2/operators/precedence.yaml

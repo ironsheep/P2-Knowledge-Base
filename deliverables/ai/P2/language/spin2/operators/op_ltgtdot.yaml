@@ -1,7 +1,21 @@
 operator: "<>."
 type: operator
 description: |
-  Floating point inequality comparison
+  Floating-point not equal: `x <>. y` returns -1 (true) or 0 (false). Priority 11, a term
+  in all blocks, no assignment form. The integer form is `<>`.
 category: Float Compare
+priority: 11
+term_form: "x <>. y"
+block_usage: "Term in all blocks; no assignment form"
 examples:
   - "IF result <>. 0.0\n  handle_error()"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "<>."
+  - "float not equal"
+  - "floating point not equal"
+related:
+  - language/spin2/operators/op_ltgt.yaml
+  - language/spin2/operators/op_eqeqdot.yaml
+  - language/spin2/concepts/floating_point.yaml
+  - language/spin2/operators/precedence.yaml

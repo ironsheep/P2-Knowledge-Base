@@ -1,5 +1,21 @@
 operator: "+"
 type: operator
-description: |
-  Integer/float addition
 category: Add
+description: |
+  Add: `x + y`. Priority 8. It is an integer add; to add floating-point values use `+.`
+  (the floating-point operators treat long values as floats). In a CON block `+` takes
+  on floating-point functionality when applied to floating-point constants or symbols.
+priority: 8
+term_form: "x + y"
+assign_form: "var += y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "+"
+  - "add"
+  - "addition"
+related:
+  - language/spin2/operators/op_adddot.yaml
+  - language/spin2/operators/op_sub.yaml
+  - language/spin2/operators/op_mul.yaml
+  - language/spin2/operators/precedence.yaml

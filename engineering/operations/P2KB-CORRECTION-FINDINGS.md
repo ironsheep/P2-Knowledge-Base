@@ -78,8 +78,10 @@ the pointer, `[pCfg] :=` stores the pointer) and keeps the compiled bracket-form
 (compile probe, no hardware):** with a child object returning a `^StructName` of 16 or more longs,
 does `pCfg := child.getConfig()` fail to compile, and with what message? **Fix when answered:** record a
 CP-NNN in `COMPILE-PROOFS.md`; if it fails, restore the "wrong" form as a `never` block citing it. The
-same pair sits in `operators/typed-pointers.yaml` (`gotchas.struct_pointer_obj_returns`), which
-belongs to «#416».
+same pair sat in `operators/typed-pointers.yaml` (`gotchas.struct_pointer_obj_returns`); **«#416»
+applied the same treatment there on 2026-10-10** (the pair, the compile-error claim and the scope sentence
+removed, the v55 pointer semantics stated, the bracket-form example kept). The CP-NNN question above
+now covers both pages.
 
 ### F-564 — what a stopped cog leaves on the pins and in smart-pin modes is stated nowhere in the ingested sources; `cogstop.yaml` shipped three claims about it — `NEEDS-VERIFICATION` (bench question)
 Found 2026-10-09 by «#414» fixing `language/spin2/methods/cogstop.yaml`. The page shipped "All pins
@@ -412,6 +414,36 @@ board facts are told apart from driver facts.
 > floating-point compares v55 puts at the same priority — now the 17 operators of `:472-488`, in
 > v55's order. The derived `sources/spin2-v51/complete-spin2-operators.md` (`:25`, `:164`) carries
 > a dated correction note instead of the `+<=>` row.
+
+> **Cascade applied 2026-10-10 («#416»); the entry stays PENDING-VALIDATION until a release serves
+> it.** Authority: `sources/spin2-v55/spin2-v55-operator-reference.md` (84 rows, 17 levels) and
+> `spin2-v55-text.txt:409-505`. (1) The three invented-token pages `op_notandand` (`!&&`), `op_eqeqeq`
+> (`===`) and `op_ltshr` (`<>>`) are now `operator_redirect` stubs in the `modulo_add.yaml` style
+> (published keys kept; no `operator:` key; each says the token is not Spin2 and points to
+> `&&`/`AND`/`!!`, `==`, `<>`/`>>`/`SAR`); `op_colon` and `op_question`, the two halves of the ternary,
+> are stubs pointing at `op_ternary`. (2) `precedence.yaml`: `NOT` leaves level 2 (unary `-.` added),
+> level 12 is `!!`/NOT, the invented `!&&`/`!||` are gone, the ternary is a term in all blocks, level 17
+> gains `=` (CON equate) and the missing `&&= ^^= ||= SCA= SCAS= FRAC=`. (3) Every `op_*.yaml` stub now
+> carries the v55 row's description, priority, term/assign forms and block scope; `op_ABS`, `op_ADDBITS`,
+> `op_ADDPINS`, the logical pages, `op_not`, `op_eqeq`/`op_ltgt`, `op_SCA`/`op_SCAS`, the shift family,
+> `op_min`/`op_max`, `op_add`/`op_sub`/`op_mul`, the float pages, `op_inc`/`op_dec`, `op_assign`,
+> `op_QLOG`/`op_QEXP`, `op_SQRT`/`op_FSQRT`/`op_FABS` and the compare pages were rewritten; `op_POW`
+> is level 8 (left), the NaN/efficiency claims removed; `op_addmodulo` states `+//` is the unsigned
+> remainder and that `(head - tail) +// size` fails for a negative difference (`-3 +// 30` = 13); `op_rand`
+> lost the invented algorithm, period and speed claims. (4) `concepts/operators.yaml`: FRAC, REV/ZEROX/SIGNX
+> (binary, priority 3), float list and CON float rule, `@`/`@@`/`^@`/`#`/`\`/`!`/`!!` entries,
+> `wrap_modulo`, `safe_division`. (5) Coverage: new pages `op_bitnot` (`!`), `op_bitand`, `op_bitxor`,
+> `op_bitor`, `op_postassign` (`\`), `op_equate` (`=`); unary `-` (negate) is documented on `op_sub`
+> (one page per token, as `-.` is on `op_subdot`); the compound and unary assign forms sit on the page
+> of the operator that owns them. (6) `spin2-language-schema.yaml`
+> (17 priorities, 84 rows, no associativity field), `spin2-language-complete-map.yaml` (unsourced counts
+> removed), `floating_point.yaml` (compares return 0 or -1), `guides/spin2-getting-started.yaml`
+> (`<= >=`, `AND OR XOR NOT`, postfix forms), `special-symbols/hash.yaml` (PUB/PRI only), `FIELD.yaml`
+> (v55: ten bits or larger need a LONG array, so the 12-bit example moved to LONG storage).
+> **Open:** the precedence of POW is not in the v55 table; the page states it from the arbiter's compile
+> probes (`2.0 POW 3.0 +. 1.0` = 9.0, `1.0 +. 3.0 POW 2.0` = 16.0, `2.0 POW 3.0 POW 2.0` = 64.0) and a
+> CP record for them is owed. The compiler's `Pointers cannot be arrays` is likewise asserted only by the
+> compile gate's `never` block, not by a CP record.
 Found 2026-10-05 re-verifying F-443 («#386»). `language/spin2/operators/op_addlt.yaml` (`+<`), `op_addgt.yaml`
 (`+>`), `op_addlteq.yaml` (`+<=`), `op_addgteq.yaml` (`+>=`), `op_lteqgt.yaml` (`<=>`) and `op_addlteqgt.yaml`
 (`+<=>`) each carry the one-line description `Signed/unsigned compare`, which tells an agent nothing about which.

@@ -8,7 +8,15 @@ description: |
   In a CON block applied to floating-point constants or symbols, the relational
   operators return 1.0 or 0.0 rather than the integer -1 or 0.
 category: Comparison
-
+priority: 11
+term_form: "x >= y"
+block_usage: "Term in all blocks; no assignment form"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - ">="
+  - "greater than or equal"
+  - "signed greater than or equal"
 related:
   - language/spin2/operators/op_addgteq.yaml
   - language/spin2/operators/op_gteqdot.yaml
+  - language/spin2/operators/precedence.yaml

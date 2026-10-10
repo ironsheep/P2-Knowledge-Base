@@ -1,7 +1,24 @@
 operator: "SCA"
 type: operator
+category: Multiply/Divide
 description: |
-  Scale value (also PASM2 instruction)
-category: Unary
+  Unsigned scale: `x SCA y` is (x * y) >> 32, treating both operands as unsigned. Priority
+  7. The PASM2 instruction SCA is a different operation (it scales the low 16 bits of its
+  operands; see language/pasm2/sca.yaml).
+priority: 7
+term_form: "x SCA y"
+assign_form: "var SCA= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "scaled := value SCA factor"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "SCA"
+  - "unsigned scale"
+  - "fractional multiply"
+related:
+  - language/spin2/operators/op_SCAS.yaml
+  - language/spin2/operators/op_FRAC.yaml
+  - language/spin2/operators/op_mul.yaml
+  - language/pasm2/sca.yaml
+  - language/spin2/operators/precedence.yaml

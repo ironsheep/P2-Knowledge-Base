@@ -2,15 +2,21 @@ operator: "ADDPINS"
 type: operator
 category: Pin
 description: |
-  Encodes a pin-range count into a pin operand for use with pin
-  instructions that accept ranges (FLTL, FLTH, DRVH, DRVL, DIRH, DIRL,
-  OUTH, OUTL, etc.). The result is an operand value where bits [5:0]
-  are the base pin number and bits [10:6] are the additional-pin count.
-  Pin instructions that decode this operand apply to (count + 1)
-  contiguous pins starting at the base pin.
+  Make a pinfield: `x ADDPINS y` is (x & $3F) | (y & $1F) << 6. A pinfield is an 11-bit
+  value holding a base-pin number in bits 5..0 and an additional-pins number in bits
+  10..6; it selects a range of I/O pins within the same 32-pin block (P63..P32 or
+  P31..P0), wrapping around inside that block. Instructions that interface to pins
+  (FLTL, FLTH, DRVH, DRVL, DIRH, DIRL, OUTH, OUTL, etc.) apply to (count + 1)
+  contiguous pins starting at the base pin. Priority 10. The bit-range counterpart is
+  `ADDBITS`.
+priority: 10
+term_form: "x ADDPINS y"
+assign_form: "var ADDPINS= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
 
 encoding:
-  formula: "base_pin + (count << 6)"
+  formula: "(base_pin & $3F) | ((count & $1F) << 6)"
   base_pin_bits: "[5:0] — pin number 0..63"
   count_bits: "[10:6] (5 bits) — additional-pin count; value N means N+1 total pins affected"
   pins_affected: "count + 1 contiguous pins, starting at base_pin"
@@ -24,7 +30,6 @@ examples:
       then ADDPINS 2 means "base + 0", "base + 1", "base + 2" → pins 59,
       60, 61. The single instruction floats the entire 3-pin SPI bus
       simultaneously.
-    source_example: "Parallax P2 flash_loader.spin2 line 275"
 
   - syntax: "DRVH #LED_BASE ADDPINS 7"
     pasm2_form: "drvh #LED_BASE addpins 7"
@@ -54,7 +59,14 @@ usage_pattern:
     - "Non-contiguous pin sets — ADDPINS cannot skip pins; use separate instructions or pin masks"
     - "Single-pin operations — ADDPINS 0 affects 1 pin but adds no value over a plain pin operand"
 
+aliases:
+  - "ADDPINS"
+  - "make pinfield"
+  - "pin range"
+  - "pin group"
+
 related:
+  - language/spin2/operators/op_ADDBITS.yaml
   - language/pasm2/fltl.yaml
   - language/pasm2/flth.yaml
   - language/pasm2/drvh.yaml

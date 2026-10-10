@@ -1,5 +1,22 @@
-operator: "==="
-type: operator
+name: "=== is not a Spin2 operator"
+type: operator_redirect
+category: Comparison
+not_an_operator: "==="
 description: |
-  Equal/not equal (logical/bitwise)
-category: Equality
+  `===` is not a Spin2 operator; the compiler rejects it. Equality is `==` (returns
+  0 or -1), inequality is `<>`, and the floating-point forms are `==.` and `<>.`.
+
+definition_home: language/spin2/operators/op_eqeq.yaml
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+
+aliases:
+  - "==="
+  - "strict equality"
+  - "identical"
+
+related:
+  - language/spin2/operators/op_eqeq.yaml
+  - language/spin2/operators/op_ltgt.yaml
+  - language/spin2/operators/op_eqeqdot.yaml
+  - language/spin2/operators/precedence.yaml

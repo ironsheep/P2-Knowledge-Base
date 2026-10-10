@@ -1,0 +1,25 @@
+operator: "|"
+type: operator
+category: Bitwise
+description: |
+  Bitwise OR: `x | y` ORs the two values bit by bit. Priority 6. The logical OR, which
+  returns 0 or -1, is `||` / `OR`.
+priority: 6
+term_form: "x | y"
+assign_form: "var |= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "combined := value | $80"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "|"
+  - "bitwise or"
+  - "set bits"
+related:
+  - language/spin2/operators/op_bitand.yaml
+  - language/spin2/operators/op_bitxor.yaml
+  - language/spin2/operators/op_bitnot.yaml
+  - language/spin2/operators/op_oror.yaml
+  - language/spin2/operators/op_or.yaml
+  - language/pasm2/or.yaml
+  - language/spin2/operators/precedence.yaml

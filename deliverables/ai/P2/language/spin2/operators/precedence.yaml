@@ -5,14 +5,13 @@ category: "Language Rules"
 
 precedence_table:
   # Level numbers follow the Spin2 v55 "Term Priority" column (1 = highest).
-  # v55 reserves level 12 for the unary !! / NOT form, so the binary chain
-  # skips from 11 to 13.
+  # Seventeen levels: 1-16 are term priorities, 17 is the assignment priority.
   - level: 1
     operators: ["++", "--", "??", "\\", "~", "~~", "@", "@@", "^@", "#"]
     type: "Var-modify / Address"
-    note: "Pre/post inc-dec, random, post-clear/set, address-of (postfix var!, var!! are also priority 1)"
+    note: "Pre/post inc-dec, random, post-clear/set, address-of; the postfix forms var!, var!! are also priority 1. All PUB/PRI only. The assignment forms of the unary operators (-= != !!= ABS= ENCOD= DECOD= BMASK= ONES= SQRT= QLOG= QEXP=) are priority 1 as well"
   - level: 2
-    operators: ["!", "NOT", "-", "ABS", "FABS", "ENCOD", "DECOD", "BMASK", "ONES", "SQRT", "FSQRT", "QLOG", "QEXP"]
+    operators: ["!", "-", "-.", "ABS", "FABS", "ENCOD", "DECOD", "BMASK", "ONES", "SQRT", "FSQRT", "QLOG", "QEXP"]
     type: "Unary"
     note: "Single operand operations"
   - level: 3
@@ -31,7 +30,7 @@ precedence_table:
   - level: 7
     operators: ["*", "*.", "/", "/.", "+/", "//", "+//", "SCA", "SCAS", "FRAC"]
     type: "Multiply/Divide/Scale"
-    note: "Signed/float/unsigned multiply, divide, modulus, scale — one priority in v55"
+    note: "Signed/float/unsigned multiply, divide, remainder, scale — one priority in v55"
   - level: 8
     operators: ["+", "+.", "-", "-."]
     type: "Add/Subtract"
@@ -43,29 +42,33 @@ precedence_table:
   - level: 10
     operators: ["ADDBITS", "ADDPINS"]
     type: "Bitfield/Pinfield"
-    note: "Make bitfield (x | y<<5) / pinfield (x | y<<6)"
+    note: "Make bitfield (x & $1F) | (y & $1F) << 5 / pinfield (x & $3F) | (y & $1F) << 6"
   - level: 11
     operators: ["<", "+<", "<.", "<=", "+<=", "<=.", "==", "==.", "<>", "<>.", ">=", "+>=", ">=.", ">", "+>", ">.", "<=>"]
     type: "Compare/Equality"
     note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority in v55"
-    source: "Parallax Spin2 Documentation v55 operator table -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:472-488"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+  - level: 12
+    operators: ["!!", "NOT"]
+    type: "Logical NOT"
+    note: "Unary only. Binds looser than the comparisons: NOT a == b means NOT (a == b)"
   - level: 13
-    operators: ["&&", "AND", "!&&"]
+    operators: ["&&", "AND"]
     type: "Logical AND"
   - level: 14
     operators: ["^^", "XOR"]
     type: "Logical XOR"
   - level: 15
-    operators: ["||", "OR", "!||"]
+    operators: ["||", "OR"]
     type: "Logical OR"
   - level: 16
     operators: ["?", ":"]
     type: "Ternary"
-    note: "PUB/PRI only"
+    note: "A term in all blocks, including CON"
   - level: 17
-    operators: [":=", "+=", "-=", "*=", "/=", "//=", "+/=", "+//=", "#>=", "<#=", "&=", "|=", "^=", ">>=", "<<=", "SAR=", "ROR=", "ROL=", "REV=", "ZEROX=", "SIGNX=", "ADDBITS=", "ADDPINS=", "AND=", "OR=", "XOR="]
+    operators: [":=", "=", "+=", "-=", "*=", "/=", "//=", "+/=", "+//=", "#>=", "<#=", "&=", "|=", "^=", ">>=", "<<=", "SAR=", "ROR=", "ROL=", "REV=", "ZEROX=", "SIGNX=", "SCA=", "SCAS=", "FRAC=", "ADDBITS=", "ADDPINS=", "&&=", "^^=", "||="]
     type: "Assignment"
-    note: "PUB/PRI only (lowest priority)"
+    note: "Lowest priority. := and the compound forms are PUB/PRI only; = is the CON equate. The compiler also accepts AND=, OR= and XOR=, which are not in the v55 operator table"
 
 examples:
   - code: "x := a + b * c"
@@ -81,7 +84,13 @@ examples:
 notes:
   - "Lower numbers = higher priority (execute first); numbering follows Spin2 v55"
   - "v55 groups *, / at one priority (7); +, - at one (8); all comparisons/equality at one (11)"
-  - "Level 12 is reserved in v55 for the unary !! / NOT form"
+  - "Level 12 is the unary !! / NOT; the binary logical operators start at level 13"
   - "Assignment operators have lowest priority"
-  - "Ternary and assignment only in PUB/PRI blocks"
+  - "Assignment is PUB/PRI only (the CON equate = is CON only); the ternary is a term in all blocks"
+  - "A var\\x written alone as a statement is rejected by the compiler; it compiles where its value is used (w := v\\3)"
   - "Use parentheses to override default precedence"
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+
+related:
+  - language/spin2/concepts/operators.yaml

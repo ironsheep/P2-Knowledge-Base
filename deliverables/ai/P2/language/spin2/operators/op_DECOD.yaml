@@ -1,10 +1,19 @@
 operator: "DECOD"
 type: operator
 description: |
-  Create a value with a single bit set at position N.
-  Equivalent to 1 << N or 2^N.
-  Also available as PASM2 instruction.
+  Decode: `DECOD x` is 1 << (x & $1F), a value with a single bit set at position x.
+  Priority 2. The PASM2 instruction DECOD does the same job on a register.
 category: Unary
+priority: 2
+term_form: "DECOD x"
+assign_form: "DECOD= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "DECOD"
+  - "decode"
+  - "single bit mask"
+  - "1 << n"
 syntax: "mask := DECOD bit_position"
 returns: "32-bit value with only bit at position set to 1"
 
@@ -41,9 +50,8 @@ common_patterns:
         bit_is_set()
 
 notes:
-  - "DECOD n = 1 << n = 2^n"
-  - "ENCOD is the inverse operation"
-  - "Primary use: creating single-bit masks for bit manipulation"
+  - "DECOD n = 1 << (n & $1F), so n counts modulo 32"
+  - "ENCOD reverses it: ENCOD (DECOD n) = n for n in 0..31"
   - "DECOD 5 = 32 = %0010_0000"
 
 related:

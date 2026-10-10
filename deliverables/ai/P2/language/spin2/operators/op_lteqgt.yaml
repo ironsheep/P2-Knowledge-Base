@@ -5,12 +5,13 @@ description: |
   There is no unsigned form: `+<=>` is not a Spin2 operator.
   In a CON block applied to floating-point constants or symbols, it returns -1.0,
   0.0 or 1.0 rather than the integer -1, 0 or 1.
+  It shares priority 11 with `==` and the other comparisons, so parenthesise it when it
+  is compared: `(x <=> y) == 1`.
 category: Comparison
-source: >-
-  Parallax Spin2 Documentation v55, operator table --
-  engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:488 ("Signed comparison
-  (<,=,> returns -1,0,1)"), CON floating-point footnote at :505. No `+<=>` row exists
-  in the table (:471-488).
+priority: 11
+term_form: "x <=> y"
+block_usage: "Term in all blocks; no assignment form"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
 aliases:
   - "<=>"
   - "three-way comparison"
@@ -19,3 +20,4 @@ related:
   - language/spin2/operators/op_lt.yaml
   - language/spin2/operators/op_gt.yaml
   - language/spin2/operators/op_eqeq.yaml
+  - language/spin2/operators/precedence.yaml

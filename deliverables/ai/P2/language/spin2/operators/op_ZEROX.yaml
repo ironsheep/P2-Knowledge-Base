@@ -1,5 +1,22 @@
 operator: "ZEROX"
 type: operator
-description: |
-  Bit manipulation
 category: Shift/Rotate
+description: |
+  Zero-extend: `x ZEROX y` clears every bit of x above bit y, so the result keeps bits
+  0..y. Priority 3.
+priority: 3
+term_form: "x ZEROX y"
+assign_form: "var ZEROX= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "low_bits := $1FF ZEROX 7   ' $FF"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "ZEROX"
+  - "zero extend"
+  - "zero-extend"
+related:
+  - language/spin2/operators/op_SIGNX.yaml
+  - language/spin2/operators/op_REV.yaml
+  - language/pasm2/zerox.yaml
+  - language/spin2/operators/precedence.yaml

@@ -1,5 +1,5 @@
 # Spin2 Operators - Comprehensive Guide
-# Source: pnut_ts Operators-Usage-Guide.md
+# Source: Parallax Propeller 2 Spin2 Language Documentation v55, Operators
 # Critical for: Correct expression evaluation, avoiding common bugs
 
 concept: "Spin2 Operators"
@@ -18,9 +18,10 @@ metadata:
 overview: |
   Spin2 provides a comprehensive set of operators organized into categories:
   - Arithmetic: +, -, *, /, //, SCA, SCAS, FRAC
-  - Comparison: ==, <>, <, >, <=, >=, <=> (with +variants for unsigned)
+  - Comparison, all priority 11: signed == <> < > <= >= <=>; unsigned +< +> +<= +>=; floating-point ==. <>. <. >. <=. >=.
   - Logical: AND/&&, OR/||, XOR/^^, NOT/!!
-  - Bitwise: &, |, ^, !, >>, <<, SAR, ROR, ROL, REV
+  - Bitwise: &, |, ^, !
+  - Shift/rotate and bit-field, priority 3: >>, <<, SAR, ROR, ROL, REV, ZEROX, SIGNX
   - Limit: #> (min), <# (max)
   - Assignment: :=, multiple assignment (a, b := b, a), compound forms (+=, -=, etc.); :=: swaps two structure variables (v45)
   - Special: ??, ~, ~~, @, @@, .., ? :, ++, --
@@ -49,7 +50,7 @@ operator_categories:
       - operator: "SCAS"
         description: "Signed scale: (a * b) >> 30"
       - operator: "FRAC"
-        description: "Fractional: high 32 bits of (a << 32) / b"
+        description: "Unsigned fraction: (a << 32) / b"
 
   comparison:
     signed:
@@ -79,6 +80,21 @@ operator_categories:
         description: "Equal to"
       - operator: "<>"
         description: "Not equal to"
+    floating_point:
+      note: "Float comparisons add a . suffix; like every comparison they return 0 or -1 and have priority 11"
+      operators:
+        - operator: "<."
+          description: "Less than (float)"
+        - operator: ">."
+          description: "Greater than (float)"
+        - operator: "<=."
+          description: "Less than or equal (float)"
+        - operator: ">=."
+          description: "Greater than or equal (float)"
+        - operator: "==."
+          description: "Equal (float)"
+        - operator: "<>."
+          description: "Not equal (float)"
 
   bitwise_vs_logical:
     critical_distinction: |
@@ -128,15 +144,19 @@ operator_categories:
     - operator: "ONES"
       description: "Count number of 1 bits (population count)"
       example: "ONES %1010_1010  ' Returns 4"
-    - operator: "REV"
-      description: "Reverse order of bits 0..y of x and zero-extend"
-      example: "%1010_0011 REV 7  ' Returns %1100_0101"
-    - operator: "ZEROX"
-      description: "Zero extend from bit N"
-      example: "$FF ZEROX 7  ' Returns $0000_00FF"
-    - operator: "SIGNX"
-      description: "Sign extend from bit N"
-      example: "$FF SIGNX 7  ' Returns $FFFF_FFFF (-1)"
+
+  shift_and_extend:
+    note: "Binary operators, priority 3: x OP y"
+    operators:
+      - operator: "REV"
+        description: "Reverse order of bits 0..y of x and zero-extend"
+        example: "%1010_0011 REV 7  ' Returns %1100_0101"
+      - operator: "ZEROX"
+        description: "Zero-extend above bit y"
+        example: "$FF ZEROX 7  ' Returns $0000_00FF"
+      - operator: "SIGNX"
+        description: "Sign-extend from bit y"
+        example: "$FF SIGNX 7  ' Returns $FFFF_FFFF (-1)"
 
 signed_vs_unsigned:
   when_to_use_unsigned:
@@ -152,10 +172,10 @@ signed_vs_unsigned:
 
 common_patterns:
   - pattern: "safe_division"
-    description: "Avoid division by zero"
+    description: "Avoid dividing by zero (x / 0 does not trap, it returns a fixed value: -1 for x >= 0)"
     code: |
       PUB safe_divide(a, b) : result
-        result := b ? a / b : 0  ' Ternary avoids crash
+        result := b ? a / b : 0  ' Ternary guards the zero divisor
 
   - pattern: "bit_set"
     description: "Set bit at position N"
@@ -184,7 +204,7 @@ common_patterns:
     code: "clamped := value #> min_val <# max_val"
 
   - pattern: "wrap_modulo"
-    description: "Keep value in 0 to max-1 range"
+    description: "Keep a non-negative value in 0 to max-1 range (// is the signed remainder: a negative value gives a negative result)"
     code: "wrapped := value // max_val"
 
   - pattern: "is_power_of_two"
@@ -251,29 +271,45 @@ anti_patterns:
     wrong: |
       average := (a + b) / 2         ' Truncates
     correct: |
-      average := (a + b + 1) / 2     ' Round to nearest
+      average := (a + b + 1) / 2     ' Rounds a half up (non-negative values)
       ' Or use float if precision needed
       average := (FLOAT(a) +. FLOAT(b)) /. 2.0
 
 floating_point:
   note: "P2 has no floating-point hardware instructions: the Spin2 float operators run as software routines in the interpreter; the KB publishes no per-operation timing"
+  raw_bits: "The float operators treat long values as floats: they act on the raw 32 bits and do not convert an integer operand. Convert with FLOAT(), ROUND() and TRUNC()."
+  con_blocks: "In a CON block, + - * / ABS #> <# (and unary -) and the signed comparisons take on floating-point functionality when applied to floating-point constants and symbols; the relational operators (< <= == <> >= >) then return 1.0 or 0.0 instead of -1 or 0, and <=> returns -1.0, 0.0 or 1.0."
   operators:
     - operator: "+."
       description: "Float addition"
     - operator: "-."
-      description: "Float subtraction"
+      description: "Float subtraction (binary, priority 8); unary -.x is the float negate (priority 2, toggles the MSB)"
     - operator: "*."
       description: "Float multiplication"
     - operator: "/."
       description: "Float division"
     - operator: "<."
-      description: "Float less than"
+      description: "Float less than (returns 0 or -1)"
     - operator: ">."
-      description: "Float greater than"
+      description: "Float greater than (returns 0 or -1)"
+    - operator: "<=."
+      description: "Float less than or equal (returns 0 or -1)"
+    - operator: ">=."
+      description: "Float greater than or equal (returns 0 or -1)"
+    - operator: "==."
+      description: "Float equal (returns 0 or -1)"
+    - operator: "<>."
+      description: "Float not equal (returns 0 or -1)"
     - operator: "FABS"
-      description: "Float absolute value"
+      description: "Float absolute value (clears the MSB)"
     - operator: "FSQRT"
       description: "Float square root"
+    - operator: "FLOAT()"
+      description: "Convert integer x to float"
+    - operator: "ROUND()"
+      description: "Convert float x to rounded integer"
+    - operator: "TRUNC()"
+      description: "Convert float x to truncated integer"
 
 special_operators:
   - operator: "??"
@@ -294,13 +330,36 @@ special_operators:
       x := flag~~    ' x gets flag's value, then flag becomes -1
     note: "P2 Spin2 semantics; not P1 sign-extend. For sign-extend use SIGNX."
 
+  - operator: "!!"
+    description: "Post-logical-NOT (postfix) - return variable's value, then replace it by its logical NOT (0 becomes -1, non-0 becomes 0)"
+    example: |
+      x := flag!!    ' x gets flag's value, then flag is logically inverted
+
+  - operator: "!"
+    description: "Post-bitwise-NOT (postfix) - return variable's value, then invert all of its bits"
+    example: |
+      x := flag!     ' x gets flag's value, then every bit of flag is inverted
+
+  - operator: "\\"
+    description: "Post-assign (postfix) - return variable's value, then assign x to the variable (var\\x)"
+    example: |
+      x := value\5   ' x gets value's old contents, then value becomes 5
+
   - operator: "@"
-    description: "Address of variable in hub"
+    description: "Hub address of a VAR/PUB/PRI/DAT variable (@hubvar); pointer to a method (@method, @object.method, may be @object[i].method)"
     example: "ptr := @buffer"
 
   - operator: "@@"
-    description: "Resolve DAT pointer to hub address"
+    description: "Hub address of this object + x, where x is an object-relative value such as a DAT long holding @dat_symbol"
     example: "addr := @@strings[index]"
+
+  - operator: "^@"
+    description: "Field pointer to any hub or register variable, including a bitfield (^@anyvar)"
+    example: "fieldPtr := ^@flags.[3..0]"
+
+  - operator: "#"
+    description: "Register address of a cog/LUT symbol (#reg_symbol)"
+    example: "addr := #regsym"
 
   - operator: ".."
     description: "Range operator (in CASE and LOOKUP)"
@@ -320,21 +379,12 @@ changed_from_p1:
   description: |
     Spin (P1) operators whose token is gone or means something else in Spin2. A P1 habit
     that fails to compile costs a minute; one that still compiles gives a wrong value
-    with no error. Each row was compiled on pnut-ts 1.55.8; where a P1 form compiles,
-    its Spin2 meaning was proven by a byte-identical binary.
-  source: >-
-    P1: Propeller Manual v1.2 Table 2-9 --
-    engineering/ingestion/sources/p1-propeller-manual-v1.2/p1-propeller-manual-v1.2-layout-text.txt:4943-4973.
-    P2: Parallax Spin2 Documentation v55 operator table --
-    engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:409-491.
-    Compile results: pnut-ts 1.55.8, 2026-10-07.
-    Lines per row (P1 / v55): ~> 4952 / 419 (post-clear ~), 445 (SAR);
-    <- 4958 / 447 (ROL); <= >= assignment forms 4970-4971 / 475, 482 (compares);
-    || 4949 / 491 (logical OR), 432 (ABS); ?x x? 4953, 5522-5535 (reversible LFSR) / 412 (??), 493 (ternary);
-    ^^ 4948 / 438 (SQRT), 490 (logical XOR); ~x ~~x 4950-4951, 5463 and 5498 (always assignment) / 450 (SIGNX, SIGNX=), 419-420 (postfix x~ x~~);
-    ** 4943; |< 4954 / 435 (DECOD); >| 4955, 5577-5588 (highest bit plus 1) / 434 (ENCOD); -> 4959 / 446 (ROR);
-    ENCOD spelling checked by compile: ENCOD 0 = 0, (x <> 0) ? ENCOD x + 1 : 0 gives 0 / 8 / 32 / 21 for P1's four examples.
-    >< 4960, 5681-5683 / 448 (REV); =< => 4972-4973 / 475, 482.
+    with no error. Each row was compiled on pnut-ts 1.55.8 (2026-10-07); where a P1 form
+    compiles, its Spin2 meaning was proven by a byte-identical binary. The P1 side is the
+    Spin operator table of the Propeller Manual v1.2 (Table 2-9). ENCOD spelling checked by
+    compile: ENCOD 0 = 0, (x <> 0) ? ENCOD x + 1 : 0 gives 0 / 8 / 32 / 21 for P1's four
+    examples.
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
   compiles_with_a_different_meaning:
     - p1: "a ~> 2 -- shift arithmetic right"
       spin2_reads_it_as: "(a~) > 2 -- a comparison that also CLEARS a (post-clear ~)"

@@ -26,9 +26,17 @@ returns:
   description: "base^exponent result as 32-bit float"
 
 precedence:
-  level: 6
+  level: 8
   associates: "left"
   same_level: "+, -, +., -."
+  note: "The v55 operator table has no POW row. This level was established by compiling mixed expressions with pnut-ts: POW groups with + - +. -. (2.0 POW 3.0 +. 1.0 is 9.0 and 1.0 +. 3.0 POW 2.0 is 16.0, both left to right), *. binds tighter (2.0 *. 3.0 POW 2.0 is about 36.0), and 2.0 POW 3.0 POW 2.0 is 64.0, so it associates left."
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, New Keywords Introduced by New Versions"
+aliases:
+  - "POW"
+  - "power"
+  - "exponentiation"
+  - "x to the power of y"
 
 
 examples:
@@ -71,11 +79,9 @@ examples:
 notes:
   - "REQUIRES {Spin2_v51} or later at start of source file"
   - "Computed as EXP2(exponent * LOG2(base)) internally"
-  - "Returns NaN if base is negative (except for integer exponents)"
-  - "Returns NaN for 0^0 (mathematically undefined)"
   - "Left-associative: a POW b POW c = (a POW b) POW c"
-  - "Same precedence as + and - operators"
-  - "For integer powers of 2, EXP2() is more efficient"
+  - "Same precedence as + and - operators (priority 8)"
+  - "v55 gives 3.0 POW 4.0 = 81.0"
 
 related:
   - language/spin2/methods/log2.yaml

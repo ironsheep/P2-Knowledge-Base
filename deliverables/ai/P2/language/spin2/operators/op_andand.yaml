@@ -1,5 +1,24 @@
 operator: "&&"
 type: operator
+category: Logical
 description: |
-  Boolean AND/NAND
-category: Logical AND
+  Logical AND: x && y is -1 when x <> 0 and y <> 0, otherwise 0 (it returns 0 or -1).
+  `AND` is the same operator, spelled as a word. For a bit-by-bit AND use `&`.
+priority: 13
+term_form: "x && y"
+assign_form: "var &&= y"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "IF ready && enabled\n  start()"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "&&"
+  - "logical and"
+  - "boolean and"
+related:
+  - language/spin2/operators/op_and.yaml
+  - language/spin2/operators/op_bitand.yaml
+  - language/spin2/operators/op_oror.yaml
+  - language/spin2/operators/op_xorxor.yaml
+  - language/spin2/operators/op_not.yaml
+  - language/spin2/operators/precedence.yaml

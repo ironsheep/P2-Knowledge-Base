@@ -291,13 +291,13 @@ essential_operators:
     description: "Standard math operations"
     
   comparison:
-    operators: "== <> < > =< =>"
+    operators: "== <> < > <= >="
     returns: "TRUE (-1) or FALSE (0)"
     note: "Use == for equality, <> for not equal"
     
   logical:
-    operators: "AND OR NOT"
-    bitwise: "&& || ! (bitwise versions)"
+    operators: "AND OR XOR NOT"
+    symbols: "&& || ^^ !! (the symbol forms of AND OR XOR NOT; logical, return 0 or -1)"
     example: "IF (x > 0) AND (x < 100)"
     
   bitwise:
@@ -308,7 +308,7 @@ essential_operators:
   assignment:
     basic: ":="
     compound: "+= -= *= /= &= |= ^="
-    post_effects: "~~ (post-set), !! (post-clear)"
+    post_effects: "var~ (post-clear), var~~ (post-set), var!! (post-logical-NOT), var! (post-bitwise-NOT)"
     example: "x := 100  ' assign 100 to x"
 
 memory_access:

@@ -1,5 +1,24 @@
 operator: "--"
 type: operator
-description: |
-  Pre/post increment/decrement/random
 category: Var-modify
+description: |
+  Decrement, in two forms, both priority 1 and both PUB/PRI only:
+  - pre-decrement `--var` decrements var, then returns var;
+  - post-decrement `var--` returns var, then decrements var.
+  As a statement on its own, either form just decrements var.
+priority: 1
+term_form: "--var   or   var--"
+assign_form: "--var   or   var--   (PUB/PRI only)"
+block_usage: "PUB/PRI only"
+examples:
+  - "value := --count   ' count is decremented, then value gets count"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "--"
+  - "decrement"
+  - "pre-decrement"
+  - "post-decrement"
+related:
+  - language/spin2/operators/op_inc.yaml
+  - language/spin2/operators/op_sub.yaml
+  - language/spin2/operators/precedence.yaml

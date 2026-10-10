@@ -1,5 +1,22 @@
 operator: "ABS"
 type: operator
+category: Unary
 description: |
-  ` `^^` `ENCOD` `DECOD` `ONES` `SQRT` `QLOG` `QEXP`
-category: \
+  Absolute value: `ABS x`. Priority 2, a term in all blocks. In a CON block the operator
+  takes on floating-point functionality when applied to a floating-point constant or
+  symbol; elsewhere use `FABS` for a float.
+priority: 2
+term_form: "ABS x"
+assign_form: "ABS= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "magnitude := ABS delta"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "ABS"
+  - "absolute value"
+related:
+  - language/spin2/operators/op_FABS.yaml
+  - language/spin2/operators/op_sub.yaml
+  - language/pasm2/abs.yaml
+  - language/spin2/operators/precedence.yaml

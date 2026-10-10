@@ -1,7 +1,25 @@
 operator: "AND"
 type: operator
+category: Logical
 description: |
-  Logical AND (also PASM2 instruction)
-category: Unary
+  Logical AND, the word spelling of `&&`: x AND y is -1 when x <> 0 and y <> 0,
+  otherwise 0 (it returns 0 or -1). It is not the bitwise AND (use `&`), and it is not
+  the PASM2 instruction AND, which ANDs two registers bit by bit.
+priority: 13
+term_form: "x AND y"
+assign_form: "var &&= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "IF ready AND enabled\n  start()"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "AND"
+  - "logical and"
+related:
+  - language/spin2/operators/op_andand.yaml
+  - language/spin2/operators/op_bitand.yaml
+  - language/spin2/operators/op_or.yaml
+  - language/spin2/operators/op_xor.yaml
+  - language/spin2/operators/op_not.yaml
+  - language/pasm2/and.yaml
+  - language/spin2/operators/precedence.yaml

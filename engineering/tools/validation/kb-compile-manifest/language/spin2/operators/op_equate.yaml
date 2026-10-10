@@ -1,0 +1,12 @@
+# engineering/tools/validation/kb-compile-manifest/language/spin2/operators/op_equate.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "1be9e358290f85f6"
+    compile: not-code
+    reason: "YAML description prose (English sentences) quoting the equate form `symbol = x`, not code"
+  - at: examples[0]
+    fp: "04749ad00c482657"
+    compile: fragment
+    wrap: spin2-top

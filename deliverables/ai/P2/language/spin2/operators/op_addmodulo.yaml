@@ -14,15 +14,15 @@ name: Unsigned Remainder
 type: operator
 category: Arithmetic
 description: |
-  Unsigned remainder (modulo). The `+` prefix selects the unsigned form of `//`;
-  it does not add.
+  Unsigned divide, return remainder: `x +// y`. The `+` prefix selects the unsigned form
+  of `//`; it does not add. Priority 7, the same as `*`, `/`, `+/`, `//`, SCA, SCAS and
+  FRAC.
+priority: 7
+term_form: "x +// y"
+assign_form: "var +//= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 
-source: >-
-  Spin2 operator reference -- engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:715
-  ("`+//` | Remainder (unsigned) | `a +// b`"), precedence group at :62
-  ("`*` `/` `+/` `//` `+//` `SCA` `SCAS` `FRAC` | Multiply/Divide"), and the unsigned
-  rule at :103 ("The `+/` and `+//` operators treat both operands as unsigned 32-bit
-  integers").
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
 
 aliases:
   - "+//"
@@ -47,10 +47,11 @@ syntax:
 
 operation:
   description: |
-    Performs (value % modulus) where % is unsigned modulo.
-    Result ranges from 0 to (modulus - 1).
-    Equivalent to: value // modulus
-  
+    The unsigned remainder of value divided by modulus (both operands treated as
+    unsigned 32-bit values). Result ranges from 0 to (modulus - 1).
+    Gives the same result as value // modulus only while both operands are below
+    $8000_0000 (// is the SIGNED remainder).
+
   formula: "result = value MOD modulus (unsigned)"
 
 examples:
@@ -61,20 +62,19 @@ examples:
         LONG head, tail
         BYTE buffer[32]
       
-      PUB addByte(data)
+      PUB addByte(data) : ok | nextTail
         ' Calculate next tail position
         nextTail := (tail + 1) +// 32
-        
+
         ' Check if buffer full
         if nextTail == head
           return FALSE  ' Buffer full
-          
+
         ' Add data and update tail
         buffer[tail] := data
         tail := nextTail
         return TRUE
-    source: P2-OctoSerial pattern
-    
+
   modulo_arithmetic:
     description: Various modulo operations
     code: |
@@ -82,11 +82,11 @@ examples:
       index := (index + 1) +// BUFFER_SIZE
       
       ' Increment by N with wrap
-      position := (position + step) +// MAX_POSITION
-      
-      ' Calculate distance in circular buffer
-      distance := (head - tail) +// BUFFER_SIZE
-    
+      position := (position + step_size) +// MAX_POSITION
+
+      ' Calculate distance in circular buffer (add BUFFER_SIZE first: head - tail can be negative)
+      distance := (head - tail + BUFFER_SIZE) +// BUFFER_SIZE
+
   queue_management:
     description: Circular queue push operation
     code: |
@@ -97,12 +97,12 @@ examples:
           rxHeadIdx[portHandle] := (rxHeadIdx[portHandle] + 1) +// BUF_SIZE
           ' Read from new head position
           nChar := BYTE[pRxBuf[portHandle]][rxHeadIdx[portHandle]]
-    source: P2-OctoSerial
 
 common_patterns:
   buffer_sizes:
-    - "Power of 2 not required (unlike & mask method)"
-    - "Any buffer size works: +// 30, +// 100, etc."
+    - "Power of 2 not required (unlike & mask method) for the wrap step (index + 1) +// size"
+    - "That wrap step works for any size: +// 30, +// 100, etc."
+    - "A subtraction that can go below 0 needs size added first: (head - tail) +// 30 gives 13 when head - tail is -3, not 27"
     - "Typically used with constants for clarity"
     
   typical_usage:
@@ -118,7 +118,7 @@ comparison_with_alternatives:
       ' Only works with power-of-2 sizes
       index := (index + 1) & (BUFFER_SIZE - 1)  ' BUFFER_SIZE must be 2^n
       
-      ' +// works with any size
+      ' +// works with any size for the wrap step
       index := (index + 1) +// BUFFER_SIZE      ' Any size works
   
   manual_method:
@@ -141,19 +141,14 @@ related_operators:
   - "//": Signed remainder (modulo) -- the signed counterpart of this operator
   - "+/": Unsigned divide quotient
   - "&": AND mask (alternative for power-of-2)
-source_reference: >-
-  engineering/ingestion/sources/spin2-v51/complete-spin2-operators.md:62 and :103.
-  The pre-merge form of this block (in language/spin2/operators/modulo_add.yaml) called `//` the UNSIGNED
-  remainder, inverting the single distinction this file exists to draw, and listed
-  `%%` as "Signed modulo" -- `%%` is not a Spin2 operator and appears in neither
-  operator reference, so it is removed rather than relabelled.
 
 notes:
   - Works with any modulus value, not only powers of two
   - Result range is 0 to (modulus - 1)
   - "Modulus 0: x +// 0 does not trap -- it returns x unchanged, every time (x +//= 0 the same)."
-  - The worked patterns above come from production driver code (P2-OctoSerial);
-    they are usage examples, not a Parallax statement about the operator
+  - The worked patterns above come from production driver code; they are usage
+    examples, not a Parallax statement about the operator
+  - "Unsigned means a negative left operand is read as a large positive number: -3 +// 30 is 13, while -3 // 30 is -3"
 
 related:
   - language/spin2/operators/modulo_add.yaml

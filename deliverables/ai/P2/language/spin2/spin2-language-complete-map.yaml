@@ -46,7 +46,7 @@ spin2_language_complete_map:
         - "Category classifications verified"
       
     operators:
-      total_documented: 74
+      operator_table_rows: 84   # rows of the v55 operator table
       categories:
         - "Arithmetic (basic and floating-point)"
         - "Bitwise operations"
@@ -54,12 +54,10 @@ spin2_language_complete_map:
         - "Comparison (integer and float)"
         - "Assignment and swap"
         - "Special (ternary, CORDIC, etc.)"
-      completeness_score: 100
       extraction_quality:
-        - "All 72 operators from compiler specification"
-        - "Float variants (.+, .-, .*, ./, etc.)"
-        - "PASM2 instruction operators (BMASK, DECOD, etc.)"
-        - "Complete precedence hierarchy maintained"
+        - "Float variants (+. -. *. /. and the float comparisons)"
+        - "Operators that share a PASM2 instruction's name (BMASK, DECOD, etc.)"
+        - "Precedence hierarchy: the 17 priority levels of the v55 operator table"
     
     assembly_directives:
       total_documented: 8

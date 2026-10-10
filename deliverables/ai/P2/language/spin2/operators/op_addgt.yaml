@@ -5,13 +5,14 @@ description: |
   The leading `+` selects the unsigned form: both operands are compared as unsigned
   32-bit values. The signed form is `>`; the floating-point form is `>.`.
 category: Comparison
-source: >-
-  Parallax Spin2 Documentation v55, operator table --
-  engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:486 ("Unsigned greater
-  than (returns 0 or -1)"); signed `>` at :485, floating-point `>.` at :487.
+priority: 11
+term_form: "x +> y"
+block_usage: "Term in all blocks; no assignment form"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
 aliases:
   - "+>"
   - "unsigned greater than"
 related:
   - language/spin2/operators/op_gt.yaml
   - language/spin2/operators/op_gtdot.yaml
+  - language/spin2/operators/precedence.yaml

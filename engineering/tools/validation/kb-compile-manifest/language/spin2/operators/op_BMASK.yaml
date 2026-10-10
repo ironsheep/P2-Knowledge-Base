@@ -8,15 +8,13 @@ blocks:
     wrap: spin2-method
     assumes: [mask]
   - at: examples[1].code
-    fp: "28401af4c15bcaff"
+    fp: "19c00868d6d613f3"
     compile: fragment
     wrap: spin2-method
-    assumes: [data]
-    finding: "S-008"
+    assumes: [fld, data]
   - at: examples[2].code
-    fp: "943058eedd3ddf23"
+    fp: "857e6520a98135bf"
     compile: program
-    finding: "S-008"
   - at: common_patterns[0].code
     fp: "4fead96b87c591e6"
     compile: fragment

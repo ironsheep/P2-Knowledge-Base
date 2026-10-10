@@ -15,10 +15,13 @@ version_directive: "{Spin2_v45}"
 description: |
   Typed pointer declarations using ^BYTE, ^WORD, ^LONG, and ^structName syntax.
   Pointers are 32-bit values holding memory addresses with type information
-  that enables proper pointer arithmetic and type-safe dereferencing.
+  that sets the step size when the pointer is advanced and the size of the
+  variable it points to.
+  A pointer variable named alone is the variable it points to; `[ptr]` is the pointer
+  itself.
   REQUIRES: {Spin2_v45} or later version directive at the start of the source file.
-  
-  Note: Basic pointer operations using @ (address-of) and BYTE[]/WORD[]/LONG[] 
+
+  Note: Basic pointer operations using @ (address-of) and BYTE[]/WORD[]/LONG[]
   memory access are part of base Spin2 and do NOT require a version directive.
 
 pointer_types:
@@ -54,160 +57,151 @@ examples:
       {Spin2_v45}
       VAR
         BYTE  buffer[256]
-        
+
       PUB example() | ^BYTE ptr
-        ptr := @buffer            ' Get address of buffer
-        BYTE[ptr] := $FF          ' Write through pointer
-        ptr++                     ' Advance by 1 byte
-    description: "Local pointer variable with address-of and increment"
+        [ptr] := @buffer          ' Point the pointer at buffer
+        ptr := $FF                ' Write through the pointer: buffer[0] := $FF
+        [ptr]++                   ' Advance the pointer by 1 byte
+    description: "Local pointer: [ptr] := @buffer points it, ptr reads/writes the pointed-to byte, [ptr]++ steps the pointer"
 
   - code: |
       {Spin2_v45}
-      PUB processBuffer(^BYTE pBuffer, LONG length)
+      PUB processBuffer(^BYTE pBuffer, length)
         repeat length
-          BYTE[pBuffer++] := 0    ' Clear and advance
-    description: "Pointer as method parameter"
+          pBuffer[++] := 0        ' Clear the pointed-to byte, then advance the pointer
+    description: "Pointer as method parameter (the other parameter is a plain long)"
 
   - code: |
       {Spin2_v45}
       VAR
         LONG values[100]
-        
-      PUB getValues() : ^LONG result
-        result := @values
+
+      PUB getValues() : ^LONG pValues
+        return @values
     description: "Returning a pointer from a method"
 
   - code: |
       {Spin2_v45}
       CON
         STRUCT point(x, y)
-        
+
       VAR
         point points[10]
         ^point ptr
-        
+
       PUB example()
-        ptr := @points[0]
-        ptr.x := 100              ' Access member through pointer
-        ptr++                     ' Advance by 8 bytes (size of point)
+        [ptr] := @points[0]       ' Point at the first structure
+        ptr.x := 100              ' Member access through the pointer
+        [ptr]++                   ' Advance by 8 bytes (size of point)
     description: "Structure pointer with member access"
 
 operations:
   address_of:
-    syntax: "ptr := @variable"
-    description: "Get address of variable, array element, or structure member"
-    
+    syntax: "[ptr] := @variable"
+    description: "Point the pointer at a variable, array element, or structure member"
+
   read_through_pointer:
-    syntax: "value := BYTE[ptr] / WORD[ptr] / LONG[ptr]"
-    description: "Read value at pointer address"
-    
+    syntax: "value := ptr"
+    description: "Read the pointed-to variable (the pointer's type sets its size)"
+
   write_through_pointer:
-    syntax: "BYTE[ptr] := value"
-    description: "Write value at pointer address"
-    
+    syntax: "ptr := value"
+    description: "Write the pointed-to variable"
+
   indexed_access:
-    syntax: "value := BYTE[ptr][index]"
-    description: "Access element at offset from pointer"
-    
-  increment:
-    syntax: "ptr++"
-    description: "Advance pointer by element size"
-    
-  decrement:
-    syntax: "ptr--"
-    description: "Move pointer back by element size"
-    
+    syntax: "value := ptr[index]"
+    description: "Element at an index from the pointed-to variable (array syntax)"
+
+  pointer_increment:
+    syntax: "[ptr]++"
+    description: "Advance the pointer by the element size (decrement: [ptr]--)"
+
   pre_increment:
-    syntax: "++ptr"
-    description: "Increment first, then use"
-    
-  post_increment:
-    syntax: "ptr++"
-    description: "Use current value, then increment"
-    
-  bracket_post_increment:
-    syntax: "ptr[++]"
-    description: "Return current address, then advance"
-    
-  bracket_pre_increment:
     syntax: "[++]ptr"
-    description: "Advance first, then return new address"
-    
+    description: "Advance the pointer first, then read/modify/write the pointed-to variable ([--]ptr likewise)"
+
+  post_increment:
+    syntax: "ptr[++]"
+    description: "Read/modify/write the pointed-to variable, then advance the pointer (ptr[--] likewise)"
+
   struct_member_access:
     syntax: "ptr.member"
     description: "Access structure member through pointer"
-    
-  struct_dereference:
-    syntax: "[ptr]"
-    description: "Read or write entire structure through pointer (temp := [ptr] or [ptr] := temp)"
+
+  struct_whole:
+    syntax: "ptr"
+    description: "The pointed-to structure as a whole: temp := ptr copies it out, ptr := temp copies one in. [ptr] is the pointer"
 
   modify_assign_through_pointer:
-    syntax: "LONG[ptr] += value / BYTE[ptr] |= mask / etc."
-    description: "Arithmetic and bitwise modify-and-assign at pointer address"
+    syntax: "ptr += value / ptr |= mask / etc."
+    description: "Arithmetic and bitwise modify-and-assign on the pointed-to variable"
     operators:
-      - "LONG[ptr] += v    ' Add"
-      - "BYTE[ptr] -= v    ' Subtract"
-      - "WORD[ptr] *= v    ' Multiply"
-      - "BYTE[ptr] |= mask ' Bitwise OR (set bits)"
-      - "BYTE[ptr] &= mask ' Bitwise AND (clear bits)"
-      - "LONG[ptr] ^= mask ' Bitwise XOR (toggle bits)"
+      - "ptr += v    ' Add"
+      - "ptr -= v    ' Subtract"
+      - "ptr *= v    ' Multiply"
+      - "ptr |= mask ' Bitwise OR (set bits)"
+      - "ptr &= mask ' Bitwise AND (clear bits)"
+      - "ptr ^= mask ' Bitwise XOR (toggle bits)"
 
-  bracket_value_modification:
+  pointed_value_modification:
+    syntax: "ptr++ / ptr-- / ptr~ / ptr~~"
+    description: "Modify the pointed-to variable (increment, decrement, clear, set all bits)"
+
+  pointer_value_modification:
     syntax: "[ptr]++ / [ptr]-- / [ptr]~ / [ptr]~~"
-    description: "Modify the value at the pointer address (not the pointer itself)"
-    operations:
-      - "[ptr]++   ' Increment value at ptr"
-      - "[ptr]--   ' Decrement value at ptr"
-      - "[ptr]~    ' Clear value at ptr (set to 0)"
-      - "[ptr]~~   ' Set all bits at ptr (set to -1)"
+    description: "Modify the POINTER itself ([ptr]~ nulls it, [ptr]~~ sets it to -1)"
 
 pointer_arithmetic:
   - type: "^BYTE"
-    "ptr++": "Advances by 1 byte"
+    "[ptr]++": "Advances by 1 byte"
   - type: "^WORD"
-    "ptr++": "Advances by 2 bytes"
+    "[ptr]++": "Advances by 2 bytes"
   - type: "^LONG"
-    "ptr++": "Advances by 4 bytes"
+    "[ptr]++": "Advances by 4 bytes"
   - type: "^structName"
-    "ptr++": "Advances by structure size"
+    "[ptr]++": "Advances by structure size"
 
 common_patterns:
   array_traversal: |
     PUB clearBuffer() | ^BYTE ptr
-      ptr := @buffer
+      [ptr] := @buffer
       repeat 256
-        BYTE[ptr++] := 0
-        
+        ptr[++] := 0
+
   string_length: |
     PUB strlen(^BYTE pStr) : length
       length := 0
-      repeat while BYTE[pStr++] <> 0
+      repeat while pStr[++] <> 0
         length++
 
   string_copy: |
     PUB strcpy(^BYTE pDest, ^BYTE pSrc)
-      repeat while BYTE[pSrc] <> 0
-        BYTE[pDest++] := BYTE[pSrc++]
-      BYTE[pDest] := 0          ' Null terminator
-        
+      repeat while pSrc <> 0
+        pDest[++] := pSrc[++]
+      pDest := 0                ' Null terminator
+
   structure_array: |
+    CON
+      STRUCT point(x, y)
+    VAR
+      point points[100]
     PUB scalePoints(scale) | ^point ptr
-      ptr := @points
+      [ptr] := @points
       repeat 100
         ptr.x *= scale
         ptr.y *= scale
-        ptr++
+        [ptr]++
 
   linked_list: |
     CON
-      STRUCT node(^node next, data)
+      STRUCT node(nxt, data)       ' nxt holds the address of the next node (a plain long member)
     VAR
       ^node head
     PUB traverseList() | ^node current
-      current := head
-      repeat while current <> 0
-        processNode(current)
-        current := current.next
+      [current] := [head]
+      repeat while [current] <> 0
+        processNode([current])
+        [current] := current.nxt
 
   pointer_table_workaround: |
     ' Pointers cannot be arrays, but LONG arrays can store raw addresses:
@@ -216,20 +210,19 @@ common_patterns:
     PUB example() | ^BYTE ptr
       ptrTable[0] := @buffer0
       ptrTable[1] := @buffer1
-      ptr := ptrTable[0]        ' Assign to typed pointer for use
+      [ptr] := ptrTable[0]      ' Point the typed pointer at the stored address
 
 gotchas:
   struct_pointer_obj_returns:
     description: |
-      When a method in a child object returns a struct pointer (^structName)
-      and the caller receives it through an OBJ reference, the compiler may
-      interpret the return as the full structure rather than a single LONG
-      pointer value. If the structure exceeds 15 longs, this produces a
-      compile error even though the return is only a pointer (one LONG).
+      A pointer variable named alone is the variable it points to; [pCfg] is the
+      pointer itself. A method in a child object that returns a struct pointer
+      (^structName) returns one LONG pointer value, so store it in the receiving
+      pointer variable through its bracket form, [pCfg] := sensor.getConfig().
+      The unbracketed pCfg := ... writes through the pointer into the pointed-to
+      structure instead.
     rule: "When receiving ^structName from an object method, use bracket notation on the receiver"
-    wrong: "pCfg := sensor.getConfig()          ' COMPILE ERROR for large structs"
-    correct: "[pCfg] := sensor.getConfig()        ' OK: receives pointer value, not struct"
-    scope: "Only across OBJ boundaries; within the same object file this is not needed"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Blocks (pointer variables)"
     example: |
       OBJ
           sensor : "sensor_driver"
@@ -240,27 +233,28 @@ gotchas:
           debug("rate = ", sdec_(pCfg.rate))   ' Then access members normally
 
   pointer_arrays_not_supported:
-    description: "Pointer variables cannot be declared as arrays"
+    description: "Pointer variables cannot be declared as arrays (the compiler reports: Pointers cannot be arrays)"
     wrong: "^BYTE pArray[10]         ' ERROR: pointers cannot be arrays"
-    workaround: "Use a LONG array to store raw addresses, then assign to typed pointer for use"
+    workaround: "Use a LONG array to store raw addresses, then point a typed pointer at one of them"
     example: |
       VAR
         LONG ptrTable[10]         ' Array of raw addresses
       PUB example() | ^BYTE ptr
         ptrTable[0] := @buffer0
-        ptr := ptrTable[0]        ' Assign to typed pointer
+        [ptr] := ptrTable[0]      ' Point the typed pointer at the stored address
 
 notes:
   - "REQUIRES {Spin2_v45} or later at start of source file"
   - "Basic @ and BYTE[]/WORD[]/LONG[] are base Spin2 (no version needed)"
-  - "Typed pointers enable type-safe pointer arithmetic"
+  - "A typed pointer steps by the size of the type it points to"
   - "Pointers themselves cannot be arrays: ^BYTE ptr[10] is invalid"
   - "Initialize pointers before use to avoid accessing invalid memory"
-  - "P2 handles misaligned access but aligned is more efficient"
-  - "Null pointer value is 0 - check before dereferencing"
-  - "[ptr]++ increments the VALUE at ptr; ptr++ advances the POINTER itself"
-  - "LONG[ptr] += v modifies value in-place without separate read/write"
+  - "[ptr]++ advances the POINTER; ptr++ increments the pointed-to variable"
+  - "ptr += v modifies the pointed-to variable in place"
+  - "In PUB/PRI parameter and result lists every name is a long unless it carries ^BYTE, ^WORD, ^LONG or ^StructName, which makes that one name a pointer"
   - "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries"
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Blocks (pointer variables)"
 
 related:
   - language/spin2/methods/byte.yaml

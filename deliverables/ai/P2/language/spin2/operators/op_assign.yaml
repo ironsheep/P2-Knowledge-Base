@@ -1,8 +1,24 @@
 operator: ":="
 type: operator
-description: |
-  Assignment operator
 category: Assignment
+description: |
+  Assign: `var := x` sets var to x. `v1, v2 := x, y` sets v1 to x and v2 to y, and so on
+  for more variables; an `_` on the left ignores the matching value. Priority 17,
+  PUB/PRI only. In a CON block the equate `=` sets a symbol instead.
+priority: 17
+assign_form: "var := x   or   v1, v2 := x, y"
+block_usage: "PUB/PRI only"
 examples:
   - "variable := value"
   - "result := calculate(x, y)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - ":="
+  - "assignment"
+  - "assign"
+  - "multiple assignment"
+related:
+  - language/spin2/operators/op_equate.yaml
+  - language/spin2/operators/op_swap.yaml
+  - language/spin2/operators/op_postassign.yaml
+  - language/spin2/operators/precedence.yaml

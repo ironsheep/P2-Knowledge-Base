@@ -13,7 +13,7 @@ blocks:
     wrap: spin2-method
     assumes: [log2_val]
   - at: examples[2].code
-    fp: "4add02442101a3e6"
+    fp: "0f51d1d9303fc092"
     compile: program
   - at: common_patterns[0].code
     fp: "6e2f07d3619cd5b3"

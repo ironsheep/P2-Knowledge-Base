@@ -1,5 +1,20 @@
 operator: "ROR"
 type: operator
-description: |
-  Bit manipulation
 category: Shift/Rotate
+description: |
+  Rotate right: `x ROR y` rotates x right by y bits; the bits shifted out of the bottom
+  re-enter at the top. Priority 3.
+priority: 3
+term_form: "x ROR y"
+assign_form: "var ROR= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "rotated := 7 ROR 1   ' $8000_0003"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "ROR"
+  - "rotate right"
+related:
+  - language/spin2/operators/op_ROL.yaml
+  - language/spin2/operators/op_shr.yaml
+  - language/spin2/operators/precedence.yaml

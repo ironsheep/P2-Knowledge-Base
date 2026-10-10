@@ -1,10 +1,20 @@
 operator: "ENCOD"
 type: operator
 description: |
-  Find position of highest set bit (0-31).
-  Returns 0 if input is 0 (no bits set).
-  Also available as PASM2 instruction.
+  Encode MSB: `ENCOD x` returns the position (0..31) of the highest set bit.
+  Returns 0 if input is 0 (no bits set). Priority 2. The PASM2 instruction ENCOD does the
+  same job on a register.
 category: Unary
+priority: 2
+term_form: "ENCOD x"
+assign_form: "ENCOD= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "ENCOD"
+  - "encode"
+  - "highest set bit"
+  - "top bit position"
 syntax: "result := ENCOD value"
 returns: "Bit position (0-31) of highest set bit, or 0 if value is 0"
 
@@ -21,10 +31,10 @@ examples:
       ' For power of 2, ENCOD gives log2
       log2_val := ENCOD 256         ' Returns 8 (2^8 = 256)
 
-  - description: "Next power of 2"
+  - description: "Next power of 2 (n = 1 needs the guard, because ENCOD 0 is 0)"
     code: |
       PUB next_power_of_two(n) : result
-        result := DECOD ENCOD (n - 1)
+        result := n > 1 ? DECOD (ENCOD (n - 1) + 1) : 1
 
 common_patterns:
   - pattern: "find_priority_bit"
@@ -35,8 +45,8 @@ common_patterns:
 
 notes:
   - "Returns 0 for input 0 - cannot distinguish from input 1"
-  - "DECOD is the inverse operation"
-  - "Useful for priority encoding and log2 calculations"
+  - "DECOD reverses it for a single set bit: DECOD (ENCOD x) is the highest set bit of x, alone"
+  - "ENCOD x is the base-2 logarithm, rounded down, of a positive x"
 
 related:
   - language/spin2/operators/op_DECOD.yaml

@@ -1,0 +1,24 @@
+operator: "\\"
+type: operator
+category: Var-modify
+description: |
+  Post-assign: `var\x` returns var, then assigns x to var. Priority 1, PUB/PRI only.
+  Written where its value is used (`old := var\x`) it compiles. Written alone as a
+  statement (`var\x` on a line by itself) the compiler rejects it with "Variable needs
+  an operator". To assign without using the old value, write `var := x`.
+priority: 1
+term_form: "var\\x   (returns var, then assigns x to var)"
+block_usage: "Term in PUB/PRI only"
+examples:
+  - "old := value\\5"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators; CP-002"
+aliases:
+  - "\\"
+  - "var\\x"
+  - "post-assign"
+  - "return then assign"
+related:
+  - language/spin2/operators/op_assign.yaml
+  - language/spin2/operators/op_inc.yaml
+  - language/spin2/operators/op_dec.yaml
+  - language/spin2/operators/precedence.yaml

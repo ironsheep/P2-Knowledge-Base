@@ -1,5 +1,24 @@
 operator: "=="
 type: operator
 description: |
-  Equal/not equal (logical/bitwise)
+  Equal: `x == y` returns -1 (true) or 0 (false). Priority 11. A term in all blocks, no
+  assignment form. In a CON block applied to floating-point constants or symbols it
+  returns 1.0 or 0.0 rather than the integer -1 or 0. The floating-point form is `==.`;
+  the not-equal operator is `<>`. A single `=` is not a comparison: it is the CON equate
+  (`=`) and has its own page.
 category: Equality
+priority: 11
+term_form: "x == y"
+block_usage: "Term in all blocks; no assignment form"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "=="
+  - "equal"
+  - "equals"
+  - "equality"
+related:
+  - language/spin2/operators/op_ltgt.yaml
+  - language/spin2/operators/op_eqeqdot.yaml
+  - language/spin2/operators/op_equate.yaml
+  - language/spin2/operators/op_eqeqeq.yaml
+  - language/spin2/operators/precedence.yaml

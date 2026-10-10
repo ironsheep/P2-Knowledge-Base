@@ -1,5 +1,23 @@
 operator: "#>"
 type: operator
-description: |
-  Max/min limiting
 category: Limit
+description: |
+  Limit minimum: `x #> y` forces x >= y, signed (the result is y when x is less than y,
+  otherwise x). Priority 9. In a CON block it takes on floating-point functionality when
+  applied to floating-point constants or symbols. Chained with `<#` it clamps a value to
+  a range: `value #> low <# high`.
+priority: 9
+term_form: "x #> y"
+assign_form: "var #>= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+examples:
+  - "limited := value #> 0"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "#>"
+  - "limit minimum"
+  - "clamp low"
+  - "lower limit"
+related:
+  - language/spin2/operators/op_min.yaml
+  - language/spin2/operators/precedence.yaml

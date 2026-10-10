@@ -1,7 +1,27 @@
 operator: "ADDBITS"
 type: operator
+category: Bitfield
 description: |
-  Add bit count to pin number
-category: Pin
+  Make a bitfield: `x ADDBITS y` is (x & $1F) | (y & $1F) << 5. A bitfield is a 10-bit
+  value holding a base-bit number in bits 4..0 and an additional-bits number in bits
+  9..5, so `5 ADDBITS 7` selects bits 12..5 (the base bit 5 plus 7 more above it).
+  It can be written inside the brackets of a bitfield, `.[5 ADDBITS 7]`, or computed once
+  as a constant, `CON BitfieldCon = 9 ADDBITS 4` (bits 13..9). A bitfield wraps around
+  when the base bit plus the additional bits exceeds 31. Priority 10. The pin-range
+  counterpart is `ADDPINS`.
+priority: 10
+term_form: "x ADDBITS y"
+assign_form: "var ADDBITS= y   (PUB/PRI only, priority 17)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
-  - "pin_range := start_pin ADDBITS bit_count"
+  - "field_bits := 5 ADDBITS 7   ' bits 12..5"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "ADDBITS"
+  - "make bitfield"
+  - "bitfield"
+  - "bit range"
+related:
+  - language/spin2/operators/op_ADDPINS.yaml
+  - language/spin2/special-symbols/caret_at.yaml
+  - language/spin2/operators/precedence.yaml

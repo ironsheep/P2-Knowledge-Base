@@ -1,7 +1,25 @@
 operator: "OR"
 type: operator
+category: Logical
 description: |
-  Logical OR (also PASM2 instruction)
-category: Unary
+  Logical OR, the word spelling of `||`: x OR y is -1 when x <> 0 or y <> 0, otherwise
+  0 (it returns 0 or -1). It is not the bitwise OR (use `|`), and it is not the PASM2
+  instruction OR, which ORs two registers bit by bit.
+priority: 15
+term_form: "x OR y"
+assign_form: "var ||= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
-  - "IF error OR timeout\n  abort()"
+  - "IF error OR timeout\n  ABORT"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "OR"
+  - "logical or"
+related:
+  - language/spin2/operators/op_oror.yaml
+  - language/spin2/operators/op_bitor.yaml
+  - language/spin2/operators/op_and.yaml
+  - language/spin2/operators/op_xor.yaml
+  - language/spin2/operators/op_not.yaml
+  - language/pasm2/or.yaml
+  - language/spin2/operators/precedence.yaml

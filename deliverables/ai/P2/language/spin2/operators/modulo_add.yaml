@@ -12,7 +12,7 @@
 # published key breaks any consumer that cached it. It resolves, it is findable,
 # and it now says one true thing instead of a conflicting definition.
 
-operator: "+//"
+redirect_for_operator: "+//"
 name: Unsigned Remainder (see language/spin2/operators/op_addmodulo.yaml)
 type: operator_redirect
 category: Arithmetic

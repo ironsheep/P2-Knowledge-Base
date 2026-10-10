@@ -1,7 +1,21 @@
 operator: "SQRT"
 type: operator
+category: Unary
 description: |
-  Integer square root
-category: Math
+  Square root of an unsigned value: `SQRT x`. Priority 2. For a floating-point square
+  root use `FSQRT`.
+priority: 2
+term_form: "SQRT x"
+assign_form: "SQRT= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "side := SQRT(area)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "SQRT"
+  - "square root"
+  - "integer square root"
+related:
+  - language/spin2/operators/op_FSQRT.yaml
+  - language/pasm2/qsqrt.yaml
+  - language/spin2/operators/precedence.yaml

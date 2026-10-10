@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "2c83246b3841301c"
+    fp: "51e0ac155cd57082"
     compile: fragment
     wrap: spin2-method
-    assumes: [dividend, divisor]
-    finding: "S-008"
+    assumes: [frac_part, dividend, divisor]

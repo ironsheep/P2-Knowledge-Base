@@ -1,10 +1,20 @@
 operator: "ONES"
 type: operator
 description: |
-  Count number of set bits (population count / Hamming weight).
-  Returns count of 1 bits in the 32-bit value.
-  Also available as PASM2 instruction.
+  Sum all '1' bits: `ONES x` returns the number of 1 bits in the 32-bit value x, 0..32.
+  Priority 2. The PASM2 instruction ONES does the same job on a register.
 category: Unary
+priority: 2
+term_form: "ONES x"
+assign_form: "ONES= var   (PUB/PRI only, priority 1)"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "ONES"
+  - "population count"
+  - "popcount"
+  - "count set bits"
+  - "count ones"
 syntax: "count := ONES value"
 returns: "Number of 1 bits (0-32)"
 
@@ -32,8 +42,6 @@ common_patterns:
       is_even_parity := (ONES value // 2) == 0
 
 notes:
-  - "Also known as popcount, population count, or Hamming weight"
-  - "Single hardware instruction - very fast"
   - "Useful for: parity, power-of-2 check, counting active items"
 
 related:

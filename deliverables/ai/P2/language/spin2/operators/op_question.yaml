@@ -1,5 +1,22 @@
-operator: "?"
-type: operator
-description: |
-  Conditional selection
+name: "? is the first half of the ternary operator"
+type: operator_redirect
 category: Ternary
+not_an_operator: "?"
+description: |
+  `?` is not an operator on its own. It follows the condition in the ternary operator
+  `x ? y : z` (if x <> 0 then y, else z). The ternary operator is defined in full on the
+  `? :` operator page. The pseudo-random operator is `??`, a different token with its
+  own page.
+
+definition_home: language/spin2/operators/op_ternary.yaml
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+
+aliases:
+  - "?"
+  - "ternary condition"
+
+related:
+  - language/spin2/operators/op_ternary.yaml
+  - language/spin2/operators/op_rand.yaml
+  - language/spin2/operators/precedence.yaml

@@ -2,11 +2,7 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: description
-    fp: "18b0004d9dcfd858"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: encoding.formula
-    fp: "981763a4a046db37"
+    fp: "2161bace26026890"
     compile: not-code
     reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

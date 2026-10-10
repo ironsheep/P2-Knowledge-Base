@@ -1,5 +1,5 @@
 # Spin2 Language Schema - Comprehensive Structure for All Language Constructs
-# Layer 1: Direct extraction from Spin2 v51 documentation
+# Layer 1: Direct extraction from Spin2 v55 documentation
 # Schema version: 1.0.0
 
 
@@ -16,7 +16,7 @@ spin2_language_schema:
   schema_version: "1.0.0"
   schema_date: "2025-09-06"
   sources:
-    - "complete-spin2-operators.md"
+    - "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
     - "complete-spin2-methods.md" 
     - "complete-builtin-symbols.md"
     - "spin2-language-comprehensive.md"
@@ -40,16 +40,10 @@ spin2_language_schema:
           
         precedence_level:
           type: "integer"
-          description: "Operator precedence (1=highest, 16=lowest)"
-          range: [1, 16]
+          description: "Operator precedence (1=highest, 17=lowest)"
+          range: [1, 17]
           required: true
-          
-        associativity:
-          type: "string"
-          enum: ["left", "right", "none"]
-          description: "Operator associativity"
-          required: true
-          
+
         operand_count:
           type: "integer"
           enum: [1, 2, 3]
@@ -73,8 +67,8 @@ spin2_language_schema:
         block_usage:
           type: "array"
           items:
-            enum: ["CON", "VAR", "OBJ", "PUB", "PRI", "DAT"]
-          description: "Block types where operator is valid"
+            enum: ["all_blocks", "pub_pri_only", "con_only"]
+          description: "Where the operator is valid, as the v55 operator table states it: all blocks, PUB/PRI only, or CON only"
           required: true
           
         description:
@@ -424,7 +418,7 @@ spin2_language_schema:
 validation_rules:
   operator_precedence:
     description: "Verify operator precedence levels are unique and sequential"
-    requirement: "All precedence levels 1-16 must be assigned"
+    requirement: "All precedence levels 1-17 must be assigned"
     
   method_coverage:
     description: "Verify all documented methods are included"
@@ -444,9 +438,9 @@ validation_rules:
 
 # Metadata for extraction tracking
 extraction_metadata:
-  total_operators_expected: 52
+  total_operators_expected: 84   # rows of the v55 operator table
   total_methods_expected: 135
   total_symbols_expected: 500
-  precedence_levels: 16
+  precedence_levels: 17
   block_types: 6
   integration_patterns: 15

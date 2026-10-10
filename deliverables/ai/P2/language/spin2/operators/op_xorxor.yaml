@@ -1,7 +1,25 @@
 operator: "^^"
 type: operator
+category: Logical
 description: |
-  Logical XOR operator
-category: Bitwise
+  Logical XOR: x ^^ y is -1 when exactly one of x <> 0 and y <> 0 holds, otherwise 0
+  (it returns 0 or -1). `XOR` is the same operator, spelled as a word. For a bit-by-bit
+  XOR use `^`.
+priority: 14
+term_form: "x ^^ y"
+assign_form: "var ^^= y"
+block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "IF state1 ^^ state2\n  toggle()"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+aliases:
+  - "^^"
+  - "logical xor"
+  - "boolean xor"
+related:
+  - language/spin2/operators/op_xor.yaml
+  - language/spin2/operators/op_bitxor.yaml
+  - language/spin2/operators/op_andand.yaml
+  - language/spin2/operators/op_oror.yaml
+  - language/spin2/operators/op_not.yaml
+  - language/spin2/operators/precedence.yaml
