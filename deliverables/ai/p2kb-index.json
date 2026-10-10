@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-10T22:54:22.690128",
+    "generated": "2026-10-10T22:56:47.777763",
     "total_entries": 1136,
     "total_categories": 59,
     "total_aliases": 3494,
@@ -12841,28 +12841,28 @@
     },
     "p2kbHwAddonAvBreakoutAddonAvBreakout": {
       "path": "deliverables/ai/P2/hardware/addon-av-breakout.yaml",
-      "mtime": 1791672830,
-      "sha256": "c2f8848f404f78caba0fdf437312d3e226286f444b9873e81293b230940e0cd9"
+      "mtime": 1791672972,
+      "sha256": "acbae9970c76764b01f8bd3eb208583214cecc84223a9ec534ee74f78745763b"
     },
     "p2kbHwAddonClickAdapterAddonClickAdapter": {
       "path": "deliverables/ai/P2/hardware/addon-click-adapter.yaml",
-      "mtime": 1791672830,
-      "sha256": "1c9d6e1e919cdc6885b0c48d9c49f3b7fca44a97c3b564f9491517cf87f761ce"
+      "mtime": 1791672972,
+      "sha256": "cd201122fb3373f5507359df37e817396d9fd535e547c1a6f47a667bb20afd93"
     },
     "p2kbHwAddonControlBoardAddonControlBoard": {
       "path": "deliverables/ai/P2/hardware/addon-control-board.yaml",
-      "mtime": 1791672830,
-      "sha256": "78bc8c69794328f0290a9ead08e845bd3731104f8c87fa9f29711d2321e399c9"
+      "mtime": 1791672972,
+      "sha256": "b25b615c53341aaa8eee0526af8effc0f0780647e218584a6a761fefdf5d901f"
     },
     "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut": {
       "path": "deliverables/ai/P2/hardware/addon-digital-video-out.yaml",
-      "mtime": 1791672830,
-      "sha256": "742736dd8a8c767886deab9949b35af8e32ca4357534e75f78a9d002047f1474"
+      "mtime": 1791672972,
+      "sha256": "e760d03dbd0678383b5170a1764d7fa55f7d535ff21ee1375fa6e5da6cdb1ea2"
     },
     "p2kbHwAddonGoertzelTouchAddonGoertzelTouch": {
       "path": "deliverables/ai/P2/hardware/addon-goertzel-touch.yaml",
-      "mtime": 1791672830,
-      "sha256": "d386608a394f264e16146691584e6489e8ada7571d00bd77891c149486760bb4"
+      "mtime": 1791672972,
+      "sha256": "f49d3e946b2242216e255788c3a2fae6d73b188c9b589cb0a9839e1a53e6f7bf"
     },
     "p2kbHwAddonHdAudioAddonHdAudio": {
       "path": "deliverables/ai/P2/hardware/addon-hd-audio.yaml",
@@ -12871,48 +12871,48 @@
     },
     "p2kbHwAddonHyperramHyperflashAddonHyperramHyperflash": {
       "path": "deliverables/ai/P2/hardware/addon-hyperram-hyperflash.yaml",
-      "mtime": 1791672830,
-      "sha256": "248f0b52d201cda8dd32634b6f541099fecd3a92d13835ff39122a73f7a9feb8"
+      "mtime": 1791672972,
+      "sha256": "f279fce96ce45be66a27a92f8afca34d222b9a17e756d30ec9109b1adaa69858"
     },
     "p2kbHwAddonLedMatrixAddonLedMatrix": {
       "path": "deliverables/ai/P2/hardware/addon-led-matrix.yaml",
-      "mtime": 1791672830,
-      "sha256": "631b13d957aa05ccd64a74a8dc5adb9848f17493b1398ebdc44efbe65fd1543e"
+      "mtime": 1791672972,
+      "sha256": "1c413ac1bef47705789a8f807b2009960d4d8731ad5d0cbaabc85c3a833e6c76"
     },
     "p2kbHwAddonMicrosdAddonMicrosd": {
       "path": "deliverables/ai/P2/hardware/addon-microsd.yaml",
-      "mtime": 1791672830,
-      "sha256": "4a4d93f0d19585ff2faa3c2b3cc907575faec45fdac49b1ad1cd1d1a3624b26d"
+      "mtime": 1791672972,
+      "sha256": "a7e859b9a4ff682e1388e082c9af454a7b3b5f3e73f07d9717d62e1e29bce0c0"
     },
     "p2kbHwAddonMiniPrototypingAddonMiniPrototyping": {
       "path": "deliverables/ai/P2/hardware/addon-mini-prototyping.yaml",
-      "mtime": 1791672830,
-      "sha256": "1df57f4945a1ac4b4027629f548e04c753d714c91166177e726c47bae99e2990"
+      "mtime": 1791672972,
+      "sha256": "e757fde4494d0075c7356e3fa288de96cc087051cce3e52515c6b79fd220ffae"
     },
     "p2kbHwAddonMotorDriverAddonMotorDriver": {
       "path": "deliverables/ai/P2/hardware/addon-motor-driver.yaml",
-      "mtime": 1791672830,
-      "sha256": "a9de47a40d7bda9fbb2ce7df14c55fe78f6089f43550e084e8fc704512ae5521"
+      "mtime": 1791672972,
+      "sha256": "bd8ce2c0860036e6bf7b843da00b3ba26914ae2df2b508dc5f548daf22e534da"
     },
     "p2kbHwAddonRtcAddonRtc": {
       "path": "deliverables/ai/P2/hardware/addon-rtc.yaml",
-      "mtime": 1791672830,
-      "sha256": "dc02ecfa5d832a292ed2fe9f4283ddfe722deac149d0f83eebc3b0025d61c634"
+      "mtime": 1791672972,
+      "sha256": "cf02b876f16d51a3866157f4b046f5a5ee1fc7d97e6e1f02feb5b9ba2c7f0d2f"
     },
     "p2kbHwAddonSerialDeviceAddonSerialDevice": {
       "path": "deliverables/ai/P2/hardware/addon-serial-device.yaml",
-      "mtime": 1791672830,
-      "sha256": "15ec0827af54d1169621e61e691fd1fd03d63e918538b2aa2553036ddcecdee8"
+      "mtime": 1791672972,
+      "sha256": "24f54baa0ead5a8be7667c140eacf147365042653299d917d0986bb39c574cd2"
     },
     "p2kbHwAddonSerialHostAddonSerialHost": {
       "path": "deliverables/ai/P2/hardware/addon-serial-host.yaml",
-      "mtime": 1791672830,
-      "sha256": "ea13d550a184a67f23ef00d7797712d34ffa4e420e871571c61c5818d4cb4468"
+      "mtime": 1791672972,
+      "sha256": "036ef3fc426f723bd75b86d708400c88baa4b2039649a3a5d0fca88c912ad690"
     },
     "p2kbHwAddonWxAdapterAddonWxAdapter": {
       "path": "deliverables/ai/P2/hardware/addon-wx-adapter.yaml",
-      "mtime": 1791672830,
-      "sha256": "fa5088f715a81d8de98886ac41c6bf762013e02c16cd5109159da4e4983b307c"
+      "mtime": 1791672972,
+      "sha256": "e1c570ab288293642204f3b1b29083ab0fb8f692eab5c933726ec07318ab62e5"
     },
     "p2kbHwAddonWxWifiAddonWxWifi": {
       "path": "deliverables/ai/P2/hardware/addon-wx-wifi.yaml",
@@ -12946,13 +12946,13 @@
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
-      "mtime": 1791672000,
-      "sha256": "4ae1283baa370d261b2a2551862d999b7a3462f34ee7457e5d2969f9aaf4567e"
+      "mtime": 1791672972,
+      "sha256": "abb99399db82dddec3fb010593213168ae7778c632f0d7524207f31cead1426d"
     },
     "p2kbHwHub75AdapterHub75Adapter": {
       "path": "deliverables/ai/P2/hardware/hub75_adapter.yaml",
-      "mtime": 1791672830,
-      "sha256": "e9b595e6fc99c07e5d4c31fa62cccc16e539ebf07848c1b9b650bc3640537338"
+      "mtime": 1791672972,
+      "sha256": "fd14b050437e6dedfa38d73609c008cefb7be8d83639fe4181b714d616dd11cc"
     },
     "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet": {
       "path": "deliverables/ai/P2/hardware/p1_rom_font_character_set.yaml",
