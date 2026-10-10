@@ -35,11 +35,11 @@ blocks:
     compile: not-code
     reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
   - at: naming_conventions.objects.examples[0]
-    fp: "7a24958769cdcd9a"
+    fp: "401f158298ae2fa1"
     compile: not-code
     reason: "one OBJ-block line shown as a naming example without its OBJ header (`name : \"file\"`); not a compilable unit on its own"
   - at: naming_conventions.objects.examples[1]
-    fp: "5b87b58595cdbde0"
+    fp: "131508bbab6ab991"
     compile: not-code
     reason: "one OBJ-block line shown as a naming example without its OBJ header (`name : \"file\"`); not a compilable unit on its own"
   - at: naming_conventions.objects.examples[2]
@@ -59,11 +59,10 @@ blocks:
     compile: not-code
     reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
   - at: code_organization.method_pattern
-    fp: "28dbe5a10db77bcc"
+    fp: "1b2063e7f8ccb6dc"
     compile: fragment
     wrap: spin2-top
-    assumes: [RX_PIN=con, TX_PIN=con, BAUD_115200=con]
-    finding: "S-018+S-051"
+    assumes: [RX_PIN=con, TX_PIN=con, BAUD_115200=con, time.start(0), serial.start(4)]
   - at: code_organization.p1_specific.example
     fp: "45691130a018656a"
     compile: program
@@ -90,11 +89,10 @@ blocks:
     wrap: spin2-top
     assumes: [seed]
   - at: method_templates.complex_method.template
-    fp: "6e884d4156650830"
+    fp: "219dbdaebe1e3ae4"
     compile: fragment
     wrap: spin2-top
     assumes: [rqs_full()->1/0, TX_PIN=con, TX_BIT_TICKS=con]
-    finding: "S-013"
   - at: method_templates.method_with_complex_params.template
     fp: "d98759df74f08443"
     compile: fragment
@@ -104,15 +102,15 @@ blocks:
     fp: "b03e770848fa90d5"
     compile: program
   - at: special_method_types.initialization.template
-    fp: "bac22731ecf0e3d6"
+    fp: "be6d93d41b0282b6"
     compile: fragment
     wrap: spin2-top
     assumes: [stop()->0/0]
   - at: special_method_types.cleanup.template
-    fp: "6a122e6c00744497"
+    fp: "d41dce222830121c"
     compile: fragment
     wrap: spin2-top
-    assumes: [rx_pin, tx_pin]
+    assumes: [rx_pin_num, tx_pin_num]
   - at: pasm2_documentation.inline_pasm2_example
     fp: "a5d976831edece8a"
     compile: program
@@ -121,11 +119,12 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: constants_and_variables.variable_documentation.example
-    fp: "3b33ae3ab58aa902"
+    fp: "b98fbe4d7e13e960"
     compile: fragment
     wrap: spin2-top
     assumes: [BUFFER_SIZE=con]
   - at: complete_example.code
-    fp: "9af4df94f1a4d41b"
-    compile: program
-    finding: "S-070"
+    fp: "f30d8c7433110a3b"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [time.start(0), irrx.get_packet(1), irrx.start(1)]

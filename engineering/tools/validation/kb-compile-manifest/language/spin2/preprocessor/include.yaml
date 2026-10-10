@@ -43,22 +43,19 @@ blocks:
     wrap: spin2-top
     assumes: [file:config.spin2]
   - at: common_patterns[2].code
-    fp: "3d62d4e5225711bb"
+    fp: "95abc43f08c33827"
     compile: fragment
     wrap: spin2-top
     assumes: [file:math_utils.spin2]
-    finding: "S-020"
   - at: anti_patterns[0].wrong
-    fp: "0833b4cec80ff480"
+    fp: "00d6a11aaabf4269"
     compile: fragment
     wrap: spin2-top
     assumes: [file:utils.spin2, file:other.spin2]
-    finding: "S-020"
   - at: anti_patterns[0].correct
-    fp: "075dedd1d858cc77"
+    fp: "f86a0e234aef827e"
     compile: fragment
     wrap: spin2-top
-    finding: "S-020"
   - at: anti_patterns[1].wrong
     fp: "8d3039f2d8555792"
     compile: fragment

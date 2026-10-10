@@ -107,10 +107,10 @@ method_templates:
       
         REPEAT
           IF (rqs_full() == FALSE)
-            WYPIN(txbyte, TX_PIN)
+            WYPIN(TX_PIN, txbyte)
             QUIT
           ELSE
-            WAITX(TX_BIT_TICKS)
+            WAITCT(GETCT() + TX_BIT_TICKS)
             
     notes:
       - "Primary line: what it does"
@@ -144,11 +144,14 @@ special_method_types:
         
   initialization:
     pattern: |
-      PUB start(mode, rxpin, txpin, baud) : result | bitmode, bittix, pin_setup
-      '' Start simple serial coms on specified pins
-      '' -- mode: 0 = 3.3v, 1 = open-drain/open-source
-      '' -- uses P2 smart pins for buffered rx/tx
-      
+      PUB start(rxpin, txpin, mode, baud) : result | baudcfg, spmode
+      '' Start simple serial coms on rxpin and txpin at baud
+      '' -- rxpin... receive pin (-1 if not used)
+      '' -- txpin... transmit pin (-1 if not used)
+      '' -- mode.... %0xx1 = invert rx
+      ''             %0x1x = invert tx
+      ''             %01xx = open-drain/open-source tx
+
         stop()
         ' [implementation continues...]
         
@@ -157,11 +160,11 @@ special_method_types:
       PUB stop()
       '' Disable smart pin serial coms
       
-        IF (rx_pin >= 0)
-          PINF(rx_pin)
-        IF (tx_pin >= 0)
-          PINF(tx_pin)
-        LONGFILL(@rx_pin, -1, 4)
+        IF (rx_pin_num >= 0)
+          PINF(rx_pin_num)
+        IF (tx_pin_num >= 0)
+          PINF(tx_pin_num)
+        LONGFILL(@rx_pin_num, -1, 2)         ' mark both pins unused
 
 pasm2_documentation:
   philosophy:
@@ -237,8 +240,8 @@ constants_and_variables:
     example: |
       VAR
         ' Communication state variables
-        LONG  rx_pin                        ' receive pin number (-1 if disabled)
-        LONG  tx_pin                        ' transmit pin number (-1 if disabled)
+        LONG  rx_pin_num                    ' receive pin number (-1 if disabled)
+        LONG  tx_pin_num                    ' transmit pin number (-1 if disabled)
         LONG  baud_rate                     ' current baud rate setting
         
         ' Buffer management

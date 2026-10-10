@@ -13,9 +13,10 @@ blocks:
     wrap: spin2-top
     assumes: [configure_rev_b_pins()->1/0]
   - at: examples[2].code
-    fp: "23a4ae9a67e1a6a2"
+    fp: "2a5323e01ce5b2c6"
     compile: fragment
-    wrap: spin2-method
+    wrap: spin2-top
+    assumes: [serial.start(1)]
   - at: anti_patterns[1].wrong
     fp: "5075bc95d882d1a2"
     compile: never
@@ -34,10 +35,10 @@ blocks:
     reason: "the page's teaching point is the build stop: with none of the guarding symbols defined (the situation shown; the harness passes no -D) the #ERROR directive fires and compilation fails with the block's own message (the `correct:` form of the contradictory-conditions pattern: its #ELSE/#ERROR fall-through is the point)"
     fails_at: 7
   - at: anti_patterns[3].wrong
-    fp: "126c2ef768a0ea6e"
+    fp: "36d457d0cc774287"
     compile: never
     wrap: spin2-top
-    reason: "`wrong:` block of the no_if_expression_directive anti-pattern (severity compile_error): #IF/#ELSEIF do not exist and the build fails. The page says the failure is reported at the #ENDIF with 'Must be preceeded by #IFDEF or #IFNDEF'; pnut-ts reports it at the #IF line (block line 2) as '#if is not a supported preprocessor directive' -- see observation O2"
+    reason: "`wrong:` block of the no_if_expression_directive anti-pattern (severity compile_error): #IF/#ELSEIF do not exist and the build fails. pnut-ts reports it at the #IF line (block line 2) as '#if is not a supported preprocessor directive'"
     fails_at: 2
   - at: anti_patterns[4].correct
     fp: "9c0c8ac28ab09056"
@@ -45,13 +46,11 @@ blocks:
     wrap: spin2-top
     assumes: [SENSOR_TYPE_1=con, sensor1_read()->1/0, SENSOR_TYPE_2=con, sensor2_read()->1/0]
   - at: anti_patterns[6].wrong
-    fp: "6ca31482dff7bb7a"
+    fp: "12bd262a74db2df4"
     compile: fragment
     wrap: spin2-top
     assumes: [file:utils.spin2, file:other.spin2]
-    finding: "S-020"
   - at: anti_patterns[6].correct
-    fp: "075dedd1d858cc77"
+    fp: "f86a0e234aef827e"
     compile: fragment
     wrap: spin2-top
-    finding: "S-020"

@@ -2,7 +2,7 @@ directive: "#ERROR"
 type: preprocessor
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "PNut-TS only"
 
 description: |
   Generates a compile-time error with a custom message, stopping compilation.
@@ -95,11 +95,11 @@ common_patterns:
       #ENDIF
       #ENDIF
 
-  - pattern: "minimum_version_check"
-    description: "Ensure required feature availability"
+  - pattern: "require_pnut_ts"
+    description: "Stop the build unless the PNut-TS extensions (#ERROR, #WARN, #INCLUDE, #PRAGMA) are available"
     code: |
-      #IFNDEF COMPILER_V48_FEATURES
-      #ERROR "This code requires compiler v48+ features"
+      #IFNDEF __PNUT_TS__
+      #ERROR "This code needs the PNut-TS compiler"
       #ENDIF
 
 notes:
@@ -124,4 +124,4 @@ see_also:
   - "Build system integration"
   - "Error handling"
 
-oneliner: "Generate compile-time error with custom message, stopping compilation (v47+)"
+oneliner: "Generate compile-time error with custom message, stopping compilation (PNut-TS extension)"

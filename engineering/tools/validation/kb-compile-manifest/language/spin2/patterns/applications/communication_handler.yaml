@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation
-    fp: "6fbfa01a8589b12d"
+    fp: "67485ff7f6ae8be6"
     compile: fragment
     wrap: spin2-top
     assumes: [tx_char()->1/1, rx_char()->1/0]

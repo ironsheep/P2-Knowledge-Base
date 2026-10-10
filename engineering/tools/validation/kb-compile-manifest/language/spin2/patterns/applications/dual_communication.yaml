@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation_template
-    fp: "16cab3f5cbbae74f"
+    fp: "cec19f90e0020db6"
     compile: fragment
     wrap: spin2-top
     assumes: [manage_secondary_channel()->0/0, WIFI_SSID=con, WIFI_PASSWORD=con, CHANNEL_INITIALIZING=con, SERIAL_TX=con, SERIAL_RX=con, CHANNEL_READY=con, SECONDARY_CHANNEL=con, MSG_TELEMETRY=con, PRIMARY_PREFERRED=con, MSG_COMMAND=con, BOTH_CHANNELS=con, MSG_DEBUG=con, SECONDARY_ONLY=con, MSG_EMERGENCY=con, MSG_FILE_TRANSFER=con, PRIMARY_ONLY=con, PRIMARY_CHANNEL=con, QUALITY_THRESHOLD=con, NO_CHANNEL=con, CHANNEL_FAILED=con, process_incoming_message()->0/2, has_outgoing_message()->1/0, get_next_outgoing_message()->1/0, get_message_type()->1/1, send_on_channel()->1/2, log_redundant_transmission()->0/3, log_failover_event()->0/1, handle_communication_loss()->0/0, attempt_primary_recovery()->0/0, primary_comm.start(2), primary_comm.has_message(0), primary_comm.receive_message(0), primary_comm.is_connected(0), primary_comm.connection_failed(0), primary_comm.get_signal_strength(0), secondary_comm.start(3), secondary_comm.has_message(0), secondary_comm.receive_message(0), secondary_comm.get_connection_quality(0)]
-    finding: "S-014+S-019"

@@ -3,20 +3,18 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "3606e3ce4127702a"
+    fp: "485d5d7f9708bc44"
     compile: fragment
     wrap: spin2-top
   - at: examples[1].code
-    fp: "fb4f5490c1c6be72"
+    fp: "19f0bf5ae67e4718"
     compile: fragment
     wrap: spin2-top
-    assumes: [PIN_TX=con, PIN_RX=con]
-    finding: "S-140"
   - at: examples[2].code
-    fp: "2909e4b770041751"
+    fp: "ee61e0f763cb9e91"
     compile: fragment
     wrap: spin2-top
-    finding: "S-140"
+    assumes: [sensor.start(0)]
   - at: examples[3].code
     fp: "0d391ce82e7d1105"
     compile: fragment

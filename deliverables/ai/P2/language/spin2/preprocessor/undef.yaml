@@ -2,14 +2,14 @@ directive: "#UNDEF"
 type: preprocessor
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "v48"
 
 description: |
   Removes a previously defined preprocessor symbol. After #UNDEF, the symbol 
   will no longer be recognized by #IFDEF and will be recognized by #IFNDEF.
   Useful for conditionally redefining symbols or disabling features partway 
   through a file.
-  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: "#UNDEF symbol"
@@ -76,7 +76,7 @@ examples:
     description: "Managing default vs custom configuration symbols"
 
 notes:
-  - "Available in v47+ compilers - no version directive required"
+  - "Available in v48+ compilers - no version directive required"
   - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "Undefining a non-existent symbol is allowed: it is a WARNING, not an error -- the build continues and output artifacts are written. Diagnostic text: '#undef symbol [NAME] not found'"
   - "Do not use a defensive #UNDEF to force mutual exclusivity: it warns whenever the symbol was never defined. An #ELSEIFDEF chain is already exclusive -- see preprocessor-overview contradictory_conditions"
@@ -96,4 +96,4 @@ see_also:
   - "Conditional compilation"
   - "Symbol management"
 
-oneliner: "Remove a previously defined preprocessor symbol (v47+)"
+oneliner: "Remove a previously defined preprocessor symbol (v48+)"

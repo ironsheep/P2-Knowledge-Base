@@ -7,16 +7,15 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[1].code
-    fp: "bb29606e105c9bc3"
+    fp: "d2fd4110fb6f9c72"
     compile: fragment
     wrap: spin2-top
-    finding: "S-140"
+    assumes: [comm.start(0)]
   - at: examples[2].code
     fp: "475168de3a49c8c8"
     compile: fragment
     wrap: spin2-method
   - at: examples[3].code
-    fp: "89a6213e372f6dc2"
+    fp: "88a92976e154e87c"
     compile: fragment
     wrap: spin2-top
-    finding: "S-140"

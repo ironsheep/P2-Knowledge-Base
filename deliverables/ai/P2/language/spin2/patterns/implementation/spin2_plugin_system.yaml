@@ -14,7 +14,7 @@ implementation: |
   PUB call_plugins(method) | i
     repeat i from 0 to plugin_count-1
       if plugin_table[i]
-        plugin_table[i].call(method)
+        plugin_table[i](method)              ' call the method pointer stored in the table (register_plugin(@hello) supplies it)
 resources:
   memory: "table + plugin code"
   flexibility: "runtime extension"

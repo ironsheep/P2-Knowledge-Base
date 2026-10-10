@@ -6,10 +6,10 @@ blocks:
     fp: "94d3f51e855fe963"
     compile: program
   - at: examples[1].code
-    fp: "9dcd5bd3f3a45ca4"
+    fp: "aeeb14c37f3c01cc"
     compile: fragment
     wrap: spin2-top
-    finding: "S-018"
+    assumes: [serial.start(1)]
   - at: examples[2].code
     fp: "5a8a5570d7768ec7"
     compile: fragment

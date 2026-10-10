@@ -10,10 +10,9 @@ blocks:
     fp: "f8d0d64027e8b451"
     compile: program
   - at: usage_patterns.timing_calculations.code
-    fp: "b17eda924a594400"
+    fp: "629496c3f91301e8"
     compile: fragment
     wrap: spin2-top
-    finding: "S-013"
   - at: usage_patterns.frequency_verification.code
     fp: "395aa39cc8b60ebd"
     compile: program
@@ -32,12 +31,10 @@ blocks:
     wrap: spin2-method
     assumes: [new_mode]
   - at: anti_patterns.hardcoded_timing.wrong
-    fp: "2d841b69507fe55d"
+    fp: "81d0a1558ee1dbd1"
     compile: fragment
     wrap: spin2-method
-    finding: "S-256"
   - at: anti_patterns.hardcoded_timing.correct
-    fp: "a5618d9e17dd0f39"
+    fp: "edc0ee41ac3bfc84"
     compile: fragment
     wrap: spin2-method
-    finding: "S-256"

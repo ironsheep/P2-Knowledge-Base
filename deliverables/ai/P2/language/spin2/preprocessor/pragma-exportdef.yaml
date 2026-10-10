@@ -2,7 +2,7 @@ directive: "#PRAGMA EXPORTDEF"
 type: preprocessor
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "PNut-TS only"
 
 description: |
   Exports the PRESENCE of a preprocessor symbol to the rest of the compilation.
@@ -178,4 +178,4 @@ see_also:
   - "Object hierarchy"
   - "Build system integration"
 
-oneliner: "Export a symbol's presence to child objects and dependencies (v47+, PNut-TS only)"
+oneliner: "Export a symbol's presence to child objects and dependencies (PNut-TS only)"

@@ -2,14 +2,14 @@ directive: "#ELSEIFNDEF"
 type: preprocessor
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "v48"
 
 description: |
   Provides an else-if branch in a conditional compilation block that is compiled 
   when the preceding condition was false AND the specified symbol is NOT defined.
   This is the inverse of #ELSEIFDEF. Useful for testing absence of symbols in 
   chained conditionals.
-  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: |
@@ -62,19 +62,19 @@ examples:
       #ENDIF
       
       #IFDEF CONFIG_ERROR
-          ' This will cause a compile error by using undefined symbol
-          CONFIGURATION_ERROR_CHECK_SETTINGS
+      CONFIG_ERROR_CHECK_SETTINGS
+          ' deliberate compile error: this name is not defined anywhere
       #ENDIF
     description: "Configuration validation logic"
     
   - code: |
       ' Fallback chain with absence tests
       #IFDEF CUSTOM_CLOCK_FREQ
-          CON _clkfreq = CUSTOM_CLOCK_FREQ
+      CON _clkfreq = CUSTOM_CLOCK_FREQ
       #ELSEIFNDEF LOW_POWER_MODE
-          CON _clkfreq = 200_000_000    ' Full speed default
+      CON _clkfreq = 200_000_000    ' Full speed default
       #ELSE
-          CON _clkfreq = 20_000_000     ' Low power mode
+      CON _clkfreq = 20_000_000     ' Low power mode
       #ENDIF
     description: "Clock frequency selection with low-power fallback"
     
@@ -92,7 +92,8 @@ examples:
     description: "Mixed presence and absence tests"
 
 notes:
-  - "Available in v47+ compilers - no version directive required"
+  - "Available in v48+ compilers - no version directive required"
+  - "Block designators (CON, VAR, OBJ, DAT, PUB, PRI) must start in column 1, also inside a conditional branch"
   - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "Must appear after #IFDEF or #IFNDEF"
   - "Must appear before #ELSE (if present) and #ENDIF"
@@ -112,4 +113,4 @@ see_also:
   - "Conditional compilation"
   - "Symbol absence testing"
 
-oneliner: "Else-if branch when preprocessor symbol is NOT defined (v47+)"
+oneliner: "Else-if branch when preprocessor symbol is NOT defined (v48+)"

@@ -34,7 +34,7 @@ line_length:
     
   examples:
     good: |
-      serial.start(RX_PIN, TX_PIN, BAUD_115200)  ' Initialize serial communication
+      serial.start(RX_PIN, TX_PIN, %0000, BAUD_115200)  ' Initialize serial communication
       
     acceptable: |
       complexCalculation := (sensorValue * scaleFactor + offset) / denominator
@@ -99,19 +99,16 @@ vertical_spacing:
             result := currentValue
 
 section_organization:
-  required_order:
+  recommended_order:
     1: "CON - Constants"
     2: "OBJ - Objects"
     3: "VAR - Variables"
     4: "DAT - Data/PASM"
     5: "PUB - Public methods"
     6: "PRI - Private methods"
-    
+
   rationale:
-    - "Matches compiler expectations"
-    - "Constants defined before use"
-    - "Objects declared before method code"
-    - "Variables declared before use"
+    - "A convention for readability; the compiler accepts blocks in any order and allows them to repeat (a method may use a constant declared in a later CON block)"
     - "Public interface before private implementation"
     
   section_labels:
@@ -140,7 +137,7 @@ section_organization:
       setup()
       
     PRI setup()
-      serial.start(63, 62, BAUD_RATE)
+      serial.start(63, 62, %0000, BAUD_RATE)
 
 application_structure:
   entry_point_pattern:
@@ -336,7 +333,7 @@ why_these_standards:
   evidence_based:
     - "100-char standard from decades of industry practice"
     - "Vertical spacing improves scanability (research-backed)"
-    - "Section ordering matches compiler and cognitive flow"
+    - "Section ordering follows a consistent reading flow (the compiler itself accepts any order)"
     - "Main/setup pattern is established embedded systems practice"
     
   practical_benefits:
@@ -349,6 +346,9 @@ why_these_standards:
     - "Compatible with existing P2 code conventions"
     - "Works with both JonnyMac and VSCode styles"
     - "Doesn't conflict with personal naming preferences"
+
+known_issues:
+  - "The examples use jm_fullduplexserial (OBEX 2842). Its published source declares a local named field in format(); FIELD is now a reserved Spin2 word, so the object does not compile with the current compiler until that local is renamed."
 
 integration_with_other_layers:
   layer_1:

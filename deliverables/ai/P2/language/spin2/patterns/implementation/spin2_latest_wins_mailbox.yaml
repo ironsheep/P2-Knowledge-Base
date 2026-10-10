@@ -55,8 +55,9 @@ implementation: |
     requestedCmd := bCmdId
     longmove(@args, @bCmdArg, 4)           ' copy EVERY arg out of shared memory...
     bAckSeq := bCmdSeq                     ' ...THEN acknowledge (slot is free again)
-    case requestedCmd
-      ' ... act on requestedCmd / args[] (the local copies) ...
+    case requestedCmd                      ' act on requestedCmd / args[] (the local copies)
+      1: handleCommand1(args[0], args[1])  ' one match line per command id (handleCommand1, handleUnknown: the caller's own methods)
+      other: handleUnknown(requestedCmd)
 
 anti_patterns:
   - "Bumping the seq BEFORE writing the args -- the reader can latch stale/torn arguments."

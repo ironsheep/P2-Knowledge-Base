@@ -76,9 +76,9 @@ implementation_template: |
     ' Determine optimal topology
     array_topology := calculate_optimal_topology(node_count)
     
-  PUB distribute_task(task_data) | node_id, chunk_size
+  PUB distribute_task(task_data, task_size) | node_id, chunk_size, task_chunk
     ' Divide task among available nodes
-    chunk_size := task_data.size / node_count
+    chunk_size := task_size / node_count
     
     repeat node_id from 0 to node_count-1
       if fault_status[node_id] == NODE_HEALTHY

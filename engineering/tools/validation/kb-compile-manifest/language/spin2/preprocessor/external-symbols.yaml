@@ -19,7 +19,7 @@ blocks:
     wrap: spin2-top
     assumes: [run_application()->1/0]
   - at: examples[1].code
-    fp: "46144b5dcca29915"
+    fp: "00f1a622217d7901"
     compile: fragment
     wrap: spin2-top
   - at: examples[2].code

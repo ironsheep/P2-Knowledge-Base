@@ -89,7 +89,7 @@ implementation_template: |
     ' Barometric altitude
     sensor_data[BARO_ALT] := barometer.read_altitude()
     
-  PUB execute_fusion_algorithm()
+  PUB execute_fusion_algorithm() | fused_altitude
     ' Predict step (based on IMU integration)
     predict_state_from_imu()
     
@@ -107,22 +107,22 @@ implementation_template: |
     ' Extract fused state
     filter.get_state(@fused_state)
     
-  PUB fuse_altitude_sources() : altitude | gps_alt, baro_alt, gps_weight, baro_weight
-    gps_alt := sensor_data[GPS_ALT]
-    baro_alt := sensor_data[BARO_ALT]
-    
-    ' Weight based on GPS accuracy and barometer stability
-    gps_weight := sensor_weights[GPS_SENSOR] * 0.3
-    baro_weight := sensor_weights[BARO_SENSOR] * 0.7
-    
+  PUB fuse_altitude_sources() : altitude | gps_alt_m, baro_alt_m, gps_weight, baro_weight, total_weight
+    gps_alt_m := sensor_data[GPS_ALT]
+    baro_alt_m := sensor_data[BARO_ALT]
+
+    ' Weight based on GPS accuracy and barometer stability (weights are integer percents)
+    gps_weight := sensor_weights[GPS_SENSOR] * 3 / 10
+    baro_weight := sensor_weights[BARO_SENSOR] * 7 / 10
+
     ' Normalize weights
     total_weight := gps_weight + baro_weight
     if total_weight > 0
-      altitude := (gps_alt * gps_weight + baro_alt * baro_weight) / total_weight
+      altitude := (gps_alt_m * gps_weight + baro_alt_m * baro_weight) / total_weight
     else
-      altitude := baro_alt  ' Fallback to barometer
-      
-  PUB calculate_gps_confidence() : confidence
+      altitude := baro_alt_m  ' Fallback to barometer
+
+  PUB calculate_gps_confidence() : confidence | sat_count, hdop
     ' Calculate GPS confidence based on satellite count and HDOP
     sat_count := gps.get_satellite_count()
     hdop := gps.get_hdop()

@@ -41,6 +41,7 @@ implementation_template: |
     
   VAR
     long instance_id
+    long instance_count
     long known_instances[MAX_INSTANCES]
     long instance_states[MAX_INSTANCES]
     long instance_last_seen[MAX_INSTANCES]

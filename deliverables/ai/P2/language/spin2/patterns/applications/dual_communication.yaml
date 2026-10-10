@@ -97,7 +97,7 @@ implementation_template: |
       secondary_msg := secondary_comm.receive_message()
       process_incoming_message(secondary_msg, SECONDARY_CHANNEL)
       
-  PUB route_outgoing_messages() | msg_type, routing_rule, channel_mask
+  PUB route_outgoing_messages() | message, msg_type, routing_rule, channel_mask
     if has_outgoing_message()
       message := get_next_outgoing_message()
       msg_type := get_message_type(message)
@@ -141,7 +141,7 @@ implementation_template: |
     elseif secondary_state == CHANNEL_READY
       active_channel := SECONDARY_CHANNEL
       if failover_enabled
-        log_failover_event("Primary channel degraded, using secondary")
+        log_failover_event(@"Primary channel degraded, using secondary")
     else
       active_channel := NO_CHANNEL
       handle_communication_loss()

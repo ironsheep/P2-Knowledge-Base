@@ -2,14 +2,14 @@ feature: Conditional DEBUG
 type: pasm2-feature
 category: Debug Instructions
 
-minimum_version: "v47"
+minimum_version: "v50"
 
 description: |
   DEBUG instructions in PASM2 assembly code can be prefixed with execution 
   condition codes. The DEBUG output is only generated when the specified 
   condition is met. This allows for efficient conditional debugging without 
   requiring separate conditional branch instructions.
-  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+  Available in PNut/pnut_ts v50 and later compilers. No version directive required.
 
 syntax:
   basic: "IF_condition DEBUG(...)"
@@ -119,8 +119,7 @@ generated_code: |
               brk     #debug_data     ' BRK with debug parameters
 
 notes:
-  - "Available in v47+ compilers - no version directive required"
-  - "Prior to v47, conditions before DEBUG caused compile errors"
+  - "Available in v50+ compilers - no version directive required"
   - "All standard PASM2 condition codes are supported"
   - "_RET_ before DEBUG is allowed (no SKIP generated)"
   - "Unconditional DEBUG (no prefix) always executes"
@@ -139,4 +138,4 @@ see_also:
   - "PASM2 debugging"
   - "Flag-based execution"
 
-oneliner: "Execute DEBUG only when condition flags match (v47+)"
+oneliner: "Execute DEBUG only when condition flags match (v50+)"

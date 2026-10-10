@@ -11,11 +11,10 @@ blocks:
     fp: "ebf6b50c79251b37"
     compile: program
   - at: examples[2].code
-    fp: "b185a9714e3ee803"
+    fp: "7181b54888e022d1"
     compile: fragment
     wrap: spin2-top
-    assumes: [SDA_PIN=con, SCL_PIN=con]
-    finding: "S-018"
+    assumes: [SDA_PIN=con, SCL_PIN=con, oled.init(2), lcd.init(3)]
   - at: examples[3].code
     fp: "64d96c7fb16ade11"
     compile: fragment

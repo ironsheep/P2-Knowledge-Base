@@ -6,7 +6,8 @@ object_metadata:
     leaf: uart-serial
   compatibility:
     dependencies: []
-    known_issues: []
+    known_issues:
+    - 'jm_fullduplexserial.spin2 declares a local variable named field in the format() method. FIELD is now a reserved Spin2 word, so the object as published does not compile with the current compiler until that local is renamed.'
     p2_chip_versions:
     - all
     tested_platforms: []

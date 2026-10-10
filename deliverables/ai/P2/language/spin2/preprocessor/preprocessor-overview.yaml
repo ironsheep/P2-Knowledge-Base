@@ -2,13 +2,13 @@ feature: Preprocessor System
 type: overview
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "v48"
 
 description: |
   The Spin2 preprocessor provides conditional compilation and symbol definition 
   capabilities. Preprocessor directives begin with # and are processed before 
   compilation, allowing code to be included or excluded based on defined symbols.
-  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
 
 directives:
   symbol_definition:
@@ -115,6 +115,10 @@ examples:
     
   - code: |
       ' Nested conditionals (PNut allows up to 8 levels)
+      OBJ
+        serial : "serial_driver"    ' your own serial object
+
+      PUB start_comms()
       #IFDEF FEATURE_SERIAL
           #IFDEF USE_HIGH_SPEED
               serial.start(921600)
@@ -209,19 +213,17 @@ anti_patterns:
   - anti_pattern: "no_if_expression_directive"
     severity: "compile_error"
     description: >-
-      Writing #IF or #ELSEIF. Neither exists in this preprocessor -- there is no
-      expression evaluation. The #IF line does not open a conditional and does not
-      gate anything, so its body compiles UNCONDITIONALLY; the matching #ENDIF is
-      then a stray and the build fails with 'Must be preceeded by #IFDEF or #IFNDEF'.
-      The failure is reported at the #ENDIF, several lines away from the #IF that
-      caused it.
+      Writing #IF or #ELSEIF. They do not exist: the conditional directives are
+      #IFDEF, #IFNDEF, #ELSEIFDEF, #ELSEIFNDEF, #ELSE and #ENDIF, and there is no
+      expression evaluation, so a numeric comparison cannot select code. The build
+      fails.
     wrong: |
       #DEFINE BOARD_REV 2
-      #IF BOARD_REV == 2
-        ' compiled no matter what BOARD_REV is
+      #IF BOARD_REV == 2          ' no such directive
+        ' ...
       #ELSEIF BOARD_REV == 1
-        ' also not gated
-      #ENDIF          ' error: Must be preceeded by #IFDEF or #IFNDEF
+        ' ...
+      #ENDIF
     correct: |
       ' Encode each choice as its own flag symbol and test presence
       #DEFINE BOARD_REV_2
@@ -284,7 +286,7 @@ anti_patterns:
     description: "Including same file multiple times causes duplicate definitions"
     wrong: |
       ' utils.spin2 (no guard):
-      PUB helper_func()
+      PUB helper_func() : r
         return 0
 
       ' main.spin2:
@@ -295,13 +297,14 @@ anti_patterns:
       #IFNDEF UTILS_INCLUDED
       #DEFINE UTILS_INCLUDED
 
-      PUB helper_func()
+      PUB helper_func() : r
         return 0
 
       #ENDIF
 
 notes:
-  - "Available in v47+ compilers - no version directive required"
+  - "Available in v48+ compilers - no version directive required"
+  - "Block designators (CON, VAR, OBJ, DAT, PUB, PRI) must start in column 1, also inside a conditional branch"
   - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap -- keep to 8 for portability"
   - "Symbols defined with #DEFINE persist until #UNDEF or end of file"
@@ -380,4 +383,4 @@ see_also:
   - "Debug builds"
   - "File organization"
 
-oneliner: "Preprocessor system for conditional compilation (v47+ compiler, no directive)"
+oneliner: "Preprocessor system for conditional compilation (v48+ compiler, no directive)"

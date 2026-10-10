@@ -90,10 +90,10 @@ implementation_template: |
       current_content[display_id] := content_type
       update_flags[display_id] := TRUE
       
-  PUB synchronized_update_all(content_array)
-    ' Update all displays simultaneously
+  PUB synchronized_update_all(content_array) | display_id
+    ' Update all displays simultaneously (content_array is the address of an array of MAX_DISPLAYS longs)
     repeat display_id from 0 to MAX_DISPLAYS-1
-      current_content[display_id] := content_array[display_id]
+      current_content[display_id] := long[content_array][display_id]
       update_flags[display_id] := TRUE
       
     ' Wait for all updates to complete

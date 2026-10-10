@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation_template
-    fp: "db0d1f52cfc0905c"
+    fp: "169e0175ba1df8f2"
     compile: fragment
     wrap: spin2-top
     assumes: [initialize_display_system()->0/0, check_content_changes()->0/0, process_display_events()->0/0, optimize_display_power()->0/0, CONTENT_DASHBOARD=con, CONTENT_STATUS=con, CONTENT_MENU=con, CONTENT_GRAPH=con, render_dashboard_to_buffer()->0/1, render_status_to_buffer()->0/1, render_menu_to_buffer()->0/1, render_graph_to_buffer()->0/1, all_displays_updated()->1/0, displays.update_screen(1), graphics.__kbstub(0)]
-    finding: "S-019"

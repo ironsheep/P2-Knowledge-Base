@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation
-    fp: "86a8fbeb9fd94828"
+    fp: "2c4c97a79325c57c"
     compile: fragment
     wrap: spin2-top
     assumes: [tx()->1/1, tx_string()->1/1]
-    finding: "S-014"

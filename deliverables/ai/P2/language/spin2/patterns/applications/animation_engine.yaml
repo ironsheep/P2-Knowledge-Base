@@ -43,12 +43,12 @@ implementation_template: |
   VAR
     long animation_objects[MAX_ANIMATIONS * 8]  ' x, y, vx, vy, state, frame, type, data
     long active_animations
-    long frame_buffer_a[76800]  ' 320x240 display
-    long frame_buffer_b[76800]
+    word frame_buffer_a[76800]  ' 320x240 pixels at 16 bits = 153,600 bytes
+    word frame_buffer_b[76800]
     long current_buffer
     long last_frame_time
     
-  PUB main()
+  PUB main() | current_time
     initialize_animation_engine()
     
     repeat
@@ -94,25 +94,25 @@ implementation_template: |
     if long[anim_ptr][Y] < 0 or long[anim_ptr][Y] > DISPLAY_HEIGHT
       long[anim_ptr][STATE] := ANIM_COMPLETE
       
-  PUB create_animation(type, x, y, vx, vy, data) : anim_id
+  PUB create_animation(anim_type, start_x, start_y, vel_x, vel_y, anim_data) : anim_id | anim_ptr
     if active_animations < MAX_ANIMATIONS
       anim_id := active_animations
       anim_ptr := @animation_objects[anim_id * 8]
-      
-      long[anim_ptr][X] := x
-      long[anim_ptr][Y] := y
-      long[anim_ptr][VX] := vx
-      long[anim_ptr][VY] := vy
+
+      long[anim_ptr][X] := start_x
+      long[anim_ptr][Y] := start_y
+      long[anim_ptr][VX] := vel_x
+      long[anim_ptr][VY] := vel_y
       long[anim_ptr][STATE] := ANIM_ACTIVE
       long[anim_ptr][FRAME] := 0
-      long[anim_ptr][TYPE] := type
-      long[anim_ptr][DATA] := data
+      long[anim_ptr][TYPE] := anim_type
+      long[anim_ptr][DATA] := anim_data
       
       active_animations++
     else
       return -1  ' No slots available
       
-  PUB render_frame() | buffer_ptr
+  PUB render_frame() | buffer_ptr, anim_id, anim_ptr
     buffer_ptr := get_render_buffer()
     
     ' Clear buffer

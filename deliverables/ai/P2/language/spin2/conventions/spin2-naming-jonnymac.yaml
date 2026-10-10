@@ -50,7 +50,8 @@ naming_conventions:
       - "Underscores separate words"
       - "Numbers allowed"
       - "IO pin names are constants"
-      
+      - "Spin2 names are not case-sensitive: a constant RX_PIN and a variable rx_pin are the same name (error m240). Variables must differ from constants by more than case."
+
     examples:
       - "BAUD_115200"
       - "TX_PIN"
@@ -122,8 +123,8 @@ naming_conventions:
       - "No other characters allowed"
       
     examples:
-      - 'time : "jm_time_80"'
-      - 'irrx : "jm_elte_irrx"'
+      - 'time : "jm_time_200"'
+      - 'irrx : "jm_nec_rx"'
       - 'serial : "jm_fullduplexserial"'
       - 'led0 : "jm_pwm"'
       
@@ -224,8 +225,8 @@ naming_pattern_examples:
   complete_variable_section: |
     VAR
       ' Communication state (lowercase style)
-      LONG rx_pin
-      LONG tx_pin
+      LONG rx_pin_num
+      LONG tx_pin_num
       LONG baud_rate
       
       ' Buffers
@@ -240,7 +241,7 @@ naming_pattern_examples:
       
   complete_object_section: |
     OBJ
-      time   : "jm_time_80"
+      time   : "jm_time_200"
       serial : "jm_fullduplexserial"
       led    : "jm_pwm"
 
@@ -295,9 +296,9 @@ complete_example:
       BUFFER_SIZE = 64
       
     OBJ
-      time   : "jm_time_80"
+      time   : "jm_time_200"
       serial : "jm_fullduplexserial"
-      
+
     VAR
       BYTE ir_packet[BUFFER_SIZE]
       LONG seed
@@ -315,14 +316,14 @@ complete_example:
         
     PUB setup()
       time.start()
-      serial.start(RX_PIN, TX_PIN, BAUD_115200)
+      serial.start(RX_PIN, TX_PIN, %0000, BAUD_115200)
       seed := GETCT()
       
       
     PUB process_packets() | idx
       read_packet(@ir_packet)
       idx := ir_packet[0] & $0F
-      IF (idx => 0) AND (idx =< 15)
+      IF (idx >= 0) AND (idx <= 15)
         apply_damage(damage_points(idx))
         
         
@@ -397,6 +398,9 @@ integration_notes:
   alternative_layer_3:
     note: "Can combine with language/spin2/conventions/vscode-pnut-documentation-style.yaml instead of language/spin2/conventions/spin2-docs-jonnymac.yaml"
     result: "JonnyMac naming + VSCode documentation style"
+
+known_issues:
+  - "The OBJ examples use jm_fullduplexserial (OBEX 2842). Its published source declares a local named field in format(); FIELD is now a reserved Spin2 word, so the object does not compile with the current compiler until that local is renamed."
 
 adoption_decision:
   choose_this_layer_if:

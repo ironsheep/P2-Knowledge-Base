@@ -3,10 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "04c9f7ded304a17c"
+    fp: "8e1f2b8a04f45af0"
     compile: fragment
     wrap: spin2-top
-    finding: "S-018"
+    assumes: [serial.start(1)]
   - at: examples[1].code
     fp: "badea1503daaaaa9"
     compile: program

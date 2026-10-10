@@ -2,7 +2,7 @@ directive: "#INCLUDE"
 type: preprocessor
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "PNut-TS only"
 
 description: |
   Inserts the contents of another Spin2 file at the directive location.
@@ -125,7 +125,7 @@ common_patterns:
       ' app.spin2:
       #INCLUDE "math_utils"
 
-      PUB process(x)
+      PUB process(x) : r
         return clamp(x, 0, 255)
 
 anti_patterns:
@@ -134,7 +134,7 @@ anti_patterns:
     description: "Including same file multiple times causes duplicate definitions"
     wrong: |
       ' utils.spin2 (no guard):
-      PUB helper_func()
+      PUB helper_func() : r
         return 0
 
       ' main.spin2:
@@ -146,7 +146,7 @@ anti_patterns:
       #IFNDEF UTILS_INCLUDED
       #DEFINE UTILS_INCLUDED
 
-      PUB helper_func()
+      PUB helper_func() : r
         return 0
 
       #ENDIF
@@ -187,4 +187,4 @@ see_also:
   - "Code reuse"
   - "Modular design"
 
-oneliner: "Include contents of another Spin2 file at directive location (v47+)"
+oneliner: "Include contents of another Spin2 file at directive location (PNut-TS extension)"

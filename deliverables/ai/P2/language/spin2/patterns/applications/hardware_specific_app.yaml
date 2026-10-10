@@ -35,7 +35,9 @@ implementation_template: |
     ' Hardware-specific constants for target board
     CRYSTAL_FREQ = 20_000_000
     CPU_FREQ = 200_000_000
-    
+    _xtlfreq = CRYSTAL_FREQ   ' crystal frequency: the compiler builds the clock mode from these two
+    _clkfreq = CPU_FREQ       ' system clock frequency
+
     ' Board-specific pin assignments
     LED_PIN = 56
     BUTTON_PIN = 57
@@ -122,8 +124,5 @@ implementation_template: |
     calibrated := (raw_value - offset) * scale / 1000
     
   PUB setup_board_clocking()
-    ' Configure clocking specific to this board's crystal
-    clkset(CRYSTAL_FREQ, CPU_FREQ)
-    
-    ' Setup board-specific timing references
-    custom_hw.configure_timing(CPU_FREQ)
+    ' The clock is established before the program starts (compiled mode in CLKMODE, frequency in CLKFREQ)
+    custom_hw.configure_timing(clkfreq)

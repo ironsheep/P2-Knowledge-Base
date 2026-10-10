@@ -8,7 +8,7 @@ description: |
   
   This variable is automatically initialized by the compiler based on _clkfreq
   and related CON block constants. It reflects the actual operating frequency
-  and is used by timing functions (WAITMS, WAITUS, WAITX) to calculate delays.
+  and is used by timing functions (WAITMS, WAITUS) to calculate delays.
   
   CLKFREQ must accurately reflect the actual clock frequency for timing-dependent
   code to work correctly. When changing clock configuration at runtime via HUBSET
@@ -39,7 +39,7 @@ usage_patterns:
     code: |
       PUB delay_microseconds(us) | ticks
         ticks := clkfreq / 1_000_000 * us
-        waitx(ticks)
+        waitct(getct() + ticks)
       
       PUB calculate_baud_divisor(baud) : divisor
         divisor := clkfreq / baud
@@ -73,8 +73,8 @@ notes:
 
 anti_patterns:
   hardcoded_timing:
-    wrong: "waitx(200_000)  ' Assumes 200 MHz!"
-    correct: "waitx(clkfreq / 1000)  ' Works at any frequency"
+    wrong: "waitct(getct() + 200_000)  ' Assumes 200 MHz!"
+    correct: "waitct(getct() + clkfreq / 1000)  ' Works at any frequency"
     reason: "Hardcoded values break when clock frequency changes"
 
 related:

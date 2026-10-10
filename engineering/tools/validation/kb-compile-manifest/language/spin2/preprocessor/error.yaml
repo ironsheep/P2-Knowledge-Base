@@ -43,10 +43,9 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: common_patterns[2].code
-    fp: "50a4f4d5e433802a"
+    fp: "e26bfcf4106791ba"
     compile: fragment
     wrap: spin2-top
-    finding: "S-146"
   - at: syntax.basic
     fp: "e08a1e5e6544a937"
     compile: never

@@ -25,11 +25,10 @@ blocks:
     wrap: spin2-top
     assumes: [seed]
   - at: method_templates.complex_method.pattern
-    fp: "ce5f1f1f42cf3c7e"
+    fp: "99dfe45fee78a41e"
     compile: fragment
     wrap: spin2-top
     assumes: [rqs_full()->1/0, TX_PIN=con, TX_BIT_TICKS=con]
-    finding: "S-013"
   - at: method_templates.method_with_complex_params.pattern
     fp: "5cc49cc8808a20e8"
     compile: fragment
@@ -39,15 +38,15 @@ blocks:
     fp: "9d6e4a5f17d1d272"
     compile: program
   - at: special_method_types.initialization.pattern
-    fp: "73612b198adaae0f"
+    fp: "8dac32d5165528f8"
     compile: fragment
     wrap: spin2-top
     assumes: [stop()->0/0]
   - at: special_method_types.cleanup.pattern
-    fp: "5987e5fb86b57605"
+    fp: "9fd8cfef91af8668"
     compile: fragment
     wrap: spin2-top
-    assumes: [rx_pin, tx_pin]
+    assumes: [rx_pin_num, tx_pin_num]
   - at: pasm2_documentation.inline_example
     fp: "1189e3013da3cf00"
     compile: program
@@ -56,7 +55,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: constants_and_variables.variable_documentation.example
-    fp: "40d28f36691b0cda"
+    fp: "8397308b3df7ad1c"
     compile: fragment
     wrap: spin2-top
     assumes: [BUFFER_SIZE=con]

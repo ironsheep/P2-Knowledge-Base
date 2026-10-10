@@ -235,7 +235,7 @@ templates:
   well_structured_file:
     description: "Complete file showing all conventions working together"
     template: |
-      {Spin2_v44}
+      {Spin2_v45}
       '' Object description for file-top documentation
       '' Additional description lines
 
@@ -249,7 +249,7 @@ templates:
 
       OBJ { Child Objects }
 
-        serial : "jm_serial"
+        serial : "serial_driver"
 
       PUB start(basePin, pinCount) : ok
       '' Start the driver with given pins

@@ -149,11 +149,11 @@ examples:
       ' Compile with: pnut_ts -DTARGET_P2_EDGE myprogram.spin2
       
       #IFDEF TARGET_P2_EDGE
-          CON FLASH_SIZE = $800000
+      CON FLASH_SIZE = $800000
       #ELSEIFDEF TARGET_P2_EVAL
-          CON FLASH_SIZE = $200000
+      CON FLASH_SIZE = $200000
       #ELSE
-          CON FLASH_SIZE = 0
+      CON FLASH_SIZE = 0
       #ENDIF
     description: "Platform selection via external symbol"
     
@@ -274,6 +274,7 @@ include_search_order:
 
 notes:
   - "Available in v48+ compilers"
+  - "Block designators (CON, VAR, OBJ, DAT, PUB, PRI) must start in column 1, also inside a conditional branch"
   - "-D symbols are case-insensitive, like all Spin2 symbols"
   - "There is NO -D symbol=value form in either compiler. PNut-TS REJECTS the attempt: `-D VERS=200` gives `-D VERS=200 is not supported; -D takes a presence-only symbol name (use -D VERS)`, exits non-zero, and writes no output files. It rejects an illegal symbol name the same way (`-D 9BAD`, `-D BAD-NAME`). Older PNut-TS builds accepted the text silently and left the symbol undefined, so a build script carrying `=value` used to compile and quietly take the #ELSE branch -- if you meet that, the script was always wrong. To carry a value, use a source #DEFINE (PNut-TS only)"
   - "PNut accepts up to 16 external symbols via -D; PNut-TS does not enforce that cap -- keep to 16 for portability"

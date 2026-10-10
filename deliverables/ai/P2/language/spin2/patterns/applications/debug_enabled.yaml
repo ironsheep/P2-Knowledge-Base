@@ -56,21 +56,21 @@ implementation_template: |
     repeat
       ' Normal operation with debug checkpoints
       if debug_enabled
-        debug_checkpoint("main_loop_start")
+        debug_checkpoint(@"main_loop_start")
         
       perform_main_operations()
       
       if debug_enabled
         monitor_system_health()
-        debug_checkpoint("main_loop_end")
+        debug_checkpoint(@"main_loop_end")
         
   PUB debug_print(level, message) | timestamp
-    if debug_enabled and level =< debug_level
+    if debug_enabled and level <= debug_level
       timestamp := getms()
-      debug_out.printf("[%d] %s: %s\n", timestamp, level_name(level), message)
-      
+      debug_out.printf(@\"[%d] %s: %s\n", timestamp, level_name(level), message)
+
       ' Also log to persistent storage
-      if level =< DEBUG_LEVEL_WARN
+      if level <= DEBUG_LEVEL_WARN
         logger.log_message(timestamp, level, message)
         
   PUB debug_checkpoint(checkpoint_name) | memory_free, cpu_usage
@@ -78,39 +78,40 @@ implementation_template: |
       memory_free := get_free_memory()
       cpu_usage := monitor.get_cpu_usage()
       
-      debug_print(DEBUG_LEVEL_VERBOSE, string("CHECKPOINT: ", checkpoint_name))
-      debug_print(DEBUG_LEVEL_VERBOSE, string("Memory free: ", dec(memory_free)))
-      debug_print(DEBUG_LEVEL_VERBOSE, string("CPU usage: ", dec(cpu_usage), "%"))
+      ' STRING() takes constants only, so numbers are printed with DEBUG formatters
+      debug_print(DEBUG_LEVEL_VERBOSE, checkpoint_name)
+      debug("Memory free: ", udec(memory_free))
+      debug("CPU usage: ", udec(cpu_usage), "%")
       
   PUB debug_dump_state()
     if debug_enabled
-      debug_print(DEBUG_LEVEL_INFO, "=== SYSTEM STATE DUMP ===")
+      debug_print(DEBUG_LEVEL_INFO, @"=== SYSTEM STATE DUMP ===")
       dump_variable_states()
       dump_object_states()
       dump_hardware_states()
-      debug_print(DEBUG_LEVEL_INFO, "=== END STATE DUMP ===")
-      
+      debug_print(DEBUG_LEVEL_INFO, @"=== END STATE DUMP ===")
+
   PUB self_test() : result
-    debug_print(DEBUG_LEVEL_INFO, "Starting self-test sequence")
-    
+    debug_print(DEBUG_LEVEL_INFO, @"Starting self-test sequence")
+
     result := TRUE
-    
+
     ' Test each subsystem
     if not test_memory_system()
-      debug_print(DEBUG_LEVEL_ERROR, "Memory system test FAILED")
+      debug_print(DEBUG_LEVEL_ERROR, @"Memory system test FAILED")
       result := FALSE
-      
+
     if not test_communication()
-      debug_print(DEBUG_LEVEL_ERROR, "Communication test FAILED")
+      debug_print(DEBUG_LEVEL_ERROR, @"Communication test FAILED")
       result := FALSE
-      
+
     if not test_sensors()
-      debug_print(DEBUG_LEVEL_ERROR, "Sensor test FAILED")
+      debug_print(DEBUG_LEVEL_ERROR, @"Sensor test FAILED")
       result := FALSE
-      
+
     if result
-      debug_print(DEBUG_LEVEL_INFO, "Self-test PASSED")
+      debug_print(DEBUG_LEVEL_INFO, @"Self-test PASSED")
     else
-      debug_print(DEBUG_LEVEL_ERROR, "Self-test FAILED")
+      debug_print(DEBUG_LEVEL_ERROR, @"Self-test FAILED")
       
     return result

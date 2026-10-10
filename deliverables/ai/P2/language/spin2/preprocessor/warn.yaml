@@ -2,7 +2,7 @@ directive: "#WARN"
 type: preprocessor
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "PNut-TS only"
 
 description: |
   Generates a compile-time warning with a custom message without stopping
@@ -112,4 +112,4 @@ see_also:
   - "Deprecation strategy"
   - "Build warnings"
 
-oneliner: "Generate compile-time warning without stopping compilation (v47+)"
+oneliner: "Generate compile-time warning without stopping compilation (PNut-TS extension)"

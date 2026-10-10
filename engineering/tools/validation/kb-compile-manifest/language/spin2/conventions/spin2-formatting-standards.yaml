@@ -41,10 +41,10 @@ blocks:
     fp: "ca4c003d406e64d4"
     compile: program
   - at: section_organization.example
-    fp: "c14fee7305747bcc"
+    fp: "826f6537c9c89eae"
     compile: fragment
     wrap: spin2-top
-    assumes: [serial.start(3)]
+    assumes: [serial.start(4)]
   - at: application_structure.recommended_template
     fp: "79f2e9747e8a3178"
     compile: program

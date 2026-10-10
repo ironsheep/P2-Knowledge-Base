@@ -42,7 +42,7 @@ implementation_template: |
     long cloud_endpoint[20]
     long last_upload_time
     
-  PUB main()
+  PUB main() | sensor_data, processed_data, upload_status
     initialize_iot_device()
     
     repeat
@@ -67,12 +67,12 @@ implementation_template: |
         
       power_management_sleep()
       
-  PUB send_to_cloud(data) : status
+  PUB send_to_cloud(data) : status | encrypted_data
     ' Prepare secure payload
     encrypted_data := crypto.encrypt(data)
-    
-    ' Send via HTTPS/MQTT
-    status := wifi.post_data(cloud_endpoint, encrypted_data)
+
+    ' Send via HTTPS/MQTT (cloud_endpoint is a buffer, so pass its address)
+    status := wifi.post_data(@cloud_endpoint, encrypted_data)
     
     ' Handle response
     if status == SUCCESS

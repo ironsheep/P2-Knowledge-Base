@@ -12,8 +12,8 @@ implementation: |
       
   PUB rx_line(buffer, max) : len
     repeat while len < max
-      buffer[len] := rx_char()
-      if buffer[len] == 13
+      byte[buffer][len] := rx_char()      ' buffer is the address of a byte buffer
+      if byte[buffer][len] == 13
         quit
       len++
 resources:

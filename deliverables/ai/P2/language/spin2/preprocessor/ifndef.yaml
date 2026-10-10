@@ -2,14 +2,14 @@ directive: "#IFNDEF"
 type: preprocessor
 category: Preprocessor Directives
 
-minimum_version: "v47"
+minimum_version: "v48"
 
 description: |
   Begins a conditional compilation block that is compiled only if the specified 
   symbol is NOT defined. This is the inverse of #IFDEF. The block extends until 
   a matching #ELSE, #ELSEIFDEF, #ELSEIFNDEF, or #ENDIF directive. Commonly used 
   for include guards and default configurations.
-  Available in PNut/pnut_ts v47 and later compilers. No version directive required.
+  Available in PNut/pnut_ts v48 and later compilers. No version directive required.
 
 syntax:
   basic: |
@@ -31,12 +31,16 @@ parameters:
 examples:
   - code: |
       ' Default configuration pattern - no version directive needed
+      ' (a symbol that carries a value, as BAUD_RATE does here, is PNut-TS only)
       #IFNDEF CUSTOM_BAUD_RATE
           #DEFINE BAUD_RATE  115200
       #ELSE
           #DEFINE BAUD_RATE  CUSTOM_BAUD_RATE
       #ENDIF
-      
+
+      OBJ
+        serial : "serial_driver"    ' your own serial object
+
       PUB init_serial()
           serial.start(BAUD_RATE)
     description: "Default value with override capability"
@@ -94,7 +98,7 @@ examples:
     description: "Combined conditional logic"
 
 notes:
-  - "Available in v47+ compilers - no version directive required"
+  - "Available in v48+ compilers - no version directive required"
   - "Symbol names are case-insensitive (Spin2 source is case-insensitive)"
   - "#IFNDEF is the logical inverse of #IFDEF"
   - "PNut's maximum nesting depth is 8 levels; PNut-TS has no such cap -- keep to 8 for portability"
@@ -117,4 +121,4 @@ see_also:
   - "Include guards"
   - "Default configurations"
 
-oneliner: "Compile block if preprocessor symbol is NOT defined (v47+)"
+oneliner: "Compile block if preprocessor symbol is NOT defined (v48+)"

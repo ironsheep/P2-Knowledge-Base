@@ -68,7 +68,7 @@ implementation_template: |
       
       waitms(CONTROL_LOOP_MS)
       
-  PUB movement_behavior() | distance_error, angle_error
+  PUB movement_behavior() | distance_error, angle_error, base_speed, turn_correction
     ' Calculate position error
     distance_error := calculate_distance_to_target()
     angle_error := calculate_angle_error()

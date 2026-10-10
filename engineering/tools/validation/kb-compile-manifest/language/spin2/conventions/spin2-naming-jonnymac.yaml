@@ -48,11 +48,11 @@ blocks:
     compile: not-code
     reason: "an identifier shown as a naming-convention example (a name, not a statement); the proposer's pasm2-dat PASS is a label declaration by coincidence"
   - at: naming_conventions.objects.examples[0]
-    fp: "7a24958769cdcd9a"
+    fp: "401f158298ae2fa1"
     compile: not-code
     reason: "one OBJ-block line shown as a naming example without its OBJ header (`name : \"file\"`); not a compilable unit on its own"
   - at: naming_conventions.objects.examples[1]
-    fp: "5b87b58595cdbde0"
+    fp: "131508bbab6ab991"
     compile: not-code
     reason: "one OBJ-block line shown as a naming example without its OBJ header (`name : \"file\"`); not a compilable unit on its own"
   - at: naming_conventions.objects.examples[2]
@@ -96,7 +96,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: naming_pattern_examples.complete_variable_section
-    fp: "fc177c9653f91c46"
+    fp: "19bd4dc7e1b2ea48"
     compile: fragment
     wrap: spin2-top
     assumes: [BUFFER_SIZE=con]
@@ -104,13 +104,12 @@ blocks:
     fp: "626829244e66969d"
     compile: program
   - at: naming_pattern_examples.complete_object_section
-    fp: "d6f33d4239379115"
+    fp: "2a8b91e4257a2e70"
     compile: fragment
     wrap: spin2-top
-    assumes: [time.start(0), serial.start(3), led.start(1)]
+    assumes: [time.start(0), serial.start(4), led.start(1)]
   - at: complete_example.code
-    fp: "3aa750b8f86f4d28"
+    fp: "fbc4d0f5ab4739f3"
     compile: fragment
     wrap: spin2-top
-    assumes: [time.start(0), serial.start(3)]
-    finding: "S-052"
+    assumes: [time.start(0), serial.start(4)]

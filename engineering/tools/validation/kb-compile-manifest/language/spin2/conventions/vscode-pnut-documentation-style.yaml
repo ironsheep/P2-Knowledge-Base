@@ -43,11 +43,10 @@ blocks:
     compile: not-code
     reason: "YAML prose (English sentences), not code"
   - at: templates.well_structured_file.template
-    fp: "df0bb704db0d4b58"
+    fp: "1df361dab563c162"
     compile: fragment
     wrap: spin2-top
-    assumes: [serial.start(2)]
-    finding: "S-046"
+    assumes: [serial.start(1)]
   - at: templates.public_method_full.template
     fp: "8a31f3c81544d7f7"
     compile: program

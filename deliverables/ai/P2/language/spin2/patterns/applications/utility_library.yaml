@@ -5,12 +5,17 @@ when_use:
 implementation: |
   PUB min(a, b) : result
     result := a < b ? a : b
-    
+
+  PUB max(a, b) : result
+    result := a > b ? a : b
+
   PUB constrain(val, low, high) : result
     result := min(max(val, low), high)
     
   PUB map(val, in_min, in_max, out_min, out_max) : result
     result := (val-in_min)*(out_max-out_min)/(in_max-in_min)+out_min
+notes:
+  - "constrain() in one expression: result := val #> low <# high (#> raises val to at least low, <# caps it at high)"
 resources:
   memory: "minimal"
   cogs: 0

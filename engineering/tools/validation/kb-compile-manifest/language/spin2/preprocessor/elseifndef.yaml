@@ -8,13 +8,13 @@ blocks:
     wrap: spin2-method
     assumes: [init_standard()->1/0]
   - at: examples[1].code
-    fp: "d8bcd0444d690ce0"
+    fp: "d56f59d92cf028af"
     compile: never
     wrap: spin2-top
-    reason: "the page's teaching point is the forced compile error: with nothing defined, #DEFINE CONFIG_ERROR is reached and the last #IFDEF leaves the bare identifier CONFIGURATION_ERROR_CHECK_SETTINGS in the source ('This will cause a compile error by using undefined symbol'). The compiler does stop there, but with 'Symbol exceeds 30 characters' (the name is 34 characters), not with an undefined-symbol error: see observation O1"
-    fails_at: 16
+    reason: "the page's teaching point is the forced compile error: with nothing defined, #DEFINE CONFIG_ERROR is reached and the last #IFDEF leaves the bare identifier CONFIG_ERROR_CHECK_SETTINGS (27 characters) in the source ('deliberate compile error: this name is not defined anywhere'). At top level the compiler stops there with 'Expected a unique constant name, \"#\", or STRUCT (m210)'"
+    fails_at: 15
   - at: examples[2].code
-    fp: "63e81ec6959bb9ae"
+    fp: "9b9958e7547bcde5"
     compile: fragment
     wrap: spin2-top
   - at: examples[3].code

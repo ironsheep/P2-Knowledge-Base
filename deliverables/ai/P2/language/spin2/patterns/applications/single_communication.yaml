@@ -106,7 +106,7 @@ implementation_template: |
       other:
         send_error_response(ERROR_UNKNOWN_COMMAND)
         
-  PUB send_response(command, data)
+  PUB send_response(command, data) | message
     ' Queue response message for transmission
     if queue_space_available()
       message := build_response_message(command, data)
@@ -115,7 +115,7 @@ implementation_template: |
       ' Queue full - send error
       comm.send_immediate_error(ERROR_QUEUE_FULL)
       
-  PUB process_outgoing_queue()
+  PUB process_outgoing_queue() | message
     if queue_has_messages() and comm.tx_ready()
       message := get_from_queue()
       comm.send_message(message)
@@ -132,7 +132,7 @@ implementation_template: |
         else
           connection_state := DISCONNECTED
           
-  PUB attempt_connection() : success
+  PUB attempt_connection() : ok
     if comm.attempt_connect()
       connection_state := CONNECTED
       send_connection_established()

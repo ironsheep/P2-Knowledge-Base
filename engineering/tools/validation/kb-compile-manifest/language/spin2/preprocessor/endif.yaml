@@ -3,14 +3,13 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: description
-    fp: "e12495d8ef5bb19a"
+    fp: "daa6fc93b12c5b0a"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "4bf5741d6329d1b9"
+    fp: "6b8233588e5ff9d5"
     compile: fragment
     wrap: spin2-top
-    finding: "S-140"
   - at: examples[1].code
     fp: "98622f7a9eca358f"
     compile: fragment

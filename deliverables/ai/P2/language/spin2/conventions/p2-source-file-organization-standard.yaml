@@ -24,7 +24,8 @@ section_organization:
     - DAT sections can be repeated for multiple data/assembly blocks
     - OBJ sections can be repeated (typically used once)
     - PUB/PRI sections are implicit and can be mixed throughout
-    
+    - The compiler accepts blocks in any order; the order below is this standard's convention for readability
+
   standard_single_section_order:
     - con { constants and configuration }
     - dat { shared data and assembly code }

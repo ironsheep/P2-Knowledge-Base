@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation
-    fp: "8cdbc4f98462dd36"
+    fp: "c04318c3681ca46f"
     compile: fragment
     wrap: spin2-top
-    finding: "S-144"
+    assumes: [handleCommand1()->0/2, handleUnknown()->0/1]
