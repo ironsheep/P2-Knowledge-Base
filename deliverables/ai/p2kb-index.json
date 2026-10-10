@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-10T07:31:14.725259",
+    "generated": "2026-10-10T08:20:21.893085",
     "total_entries": 1136,
     "total_categories": 59,
     "total_aliases": 3492,
@@ -12609,213 +12609,213 @@
     },
     "p2kbCommunity1WireDriverWithDs18b20TemperatureSensorDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/1-wire-driver-with-ds18b20-temperature-sensor-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "6b9dab615a6f9e2e4db4931147afd023e30b8588c25d6f05e36b622434a05703"
+      "mtime": 1791620394,
+      "sha256": "2535223eeacb5195e78fe41d2f007a8b3faf12df69df15d38f8808bba9112859"
     },
     "p2kbCommunity32ChannelAdcObject": {
       "path": "deliverables/ai/P2/community/quick-bytes/32-channel-adc-object.yaml",
-      "mtime": 1791605271,
-      "sha256": "8c5cd9c01e01ff9b1f3bdad3020025540b6c3dc7e573341b5272edcb37c608a9"
+      "mtime": 1791620394,
+      "sha256": "6d0e6ae4162208bf41aee8ab08a866f4e7d9bed112a8004a4da33fbba4855251"
     },
     "p2kbCommunity320x240LcdDriverForIli9341ControllerAndXpt2046TouchScreen": {
       "path": "deliverables/ai/P2/community/quick-bytes/320x240-lcd-driver-for-ili9341-controller-and-xpt2046-touch-screen.yaml",
-      "mtime": 1791605271,
-      "sha256": "a7c14eadc53911f74a543dc8ee3faaa098fdad42ab3be2f14f37082e899bcdd1"
+      "mtime": 1791620394,
+      "sha256": "44551289ca95f7278cd3f8905c56818fe9a514b0eacb9eff43bae3fdf4e96279"
     },
     "p2kbCommunityArloConversionToP2WithTheUniversalMotorController": {
       "path": "deliverables/ai/P2/community/quick-bytes/arlo-conversion-to-p2-with-the-universal-motor-controller.yaml",
-      "mtime": 1791605271,
-      "sha256": "52da45004095a7e8f1033a8d66889b691f15cfb3909b6c35341f35bb5148a9cd"
+      "mtime": 1791620394,
+      "sha256": "5bf255cbbb6176c9c871d706b84dd48ccc7946edff84e44cbc5f9936b57075f1"
     },
     "p2kbCommunityBreakoutBoardOptionsForP2": {
       "path": "deliverables/ai/P2/community/quick-bytes/breakout-board-options-for-p2.yaml",
-      "mtime": 1791605271,
-      "sha256": "b7abb92d52a8646f7897a54e1a200e4cc969ffd92fbc3aaa0478d935fd94d0c2"
+      "mtime": 1791620394,
+      "sha256": "03ca453fdb0afc27431de380172d7e1137bcd7c9803e015dfee7e4a64a079c0e"
     },
     "p2kbCommunityBrushlessDcMotorControlDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/brushless-dc-motor-control-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "23facc41cbb12a05e6e4c810ec045340e80ccee590499dd949daccbafc872172"
+      "mtime": 1791620394,
+      "sha256": "5d172cd120588c55c4d914c4899fb8bb364e03dd32dfa9cb3c8f6f67cadcb926"
     },
     "p2kbCommunityColorfulTerminalOutputWithAnsiEscapeSequences": {
       "path": "deliverables/ai/P2/community/quick-bytes/colorful-terminal-output-with-ansi-escape-sequences.yaml",
-      "mtime": 1791605271,
-      "sha256": "a9771505627a591b0531dff91e8d502543fe0924e9521fe4983eb4d953a24596"
+      "mtime": 1791620394,
+      "sha256": "9139e5345702952c4029089ed0624f7a3a16ea76fe72f533b1edc7fa6939305f"
     },
     "p2kbCommunityDht11Dht22Cm2302Object": {
       "path": "deliverables/ai/P2/community/quick-bytes/dht11-dht22-cm2302-object.yaml",
-      "mtime": 1791605271,
-      "sha256": "7a0550fd4e62e2b89cb7b3a8d1f2108e4db1398e0882b94edb77707de1c19fe9"
+      "mtime": 1791620394,
+      "sha256": "81a4079b794bf9f1448e3e5e9aaf6e6bd47b7d89fb609f10bd78980c8f9b4627"
     },
     "p2kbCommunityDigitalSampleAdcToDacAnalogFrequencyToDac": {
       "path": "deliverables/ai/P2/community/quick-bytes/digital-sample-adc-to-dac-analog-frequency-to-dac.yaml",
-      "mtime": 1791605271,
-      "sha256": "82334f4e22db14fe6dadc493b43423d9373ce790d636d59eadb5e2e30476f90b"
+      "mtime": 1791620394,
+      "sha256": "63c45788b83edc36715597c71735d92db80d585a339b6c8ea95cb64d2124816c"
     },
     "p2kbCommunityDs3231RealTimeClockI2cDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/ds3231-real-time-clock-i2c-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "ef4a3b9a244665c4585f533478fab80dcff478f84a37e0bcce4774cee93f8971"
+      "mtime": 1791620394,
+      "sha256": "42439a3e71a65b4af2a7bddfb78950706a89d8727bbf697c00a879d774706944"
     },
     "p2kbCommunityDviVgaTextDriverDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/dvi-vga-text-driver-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "2a940bd68bb64e7c8b9eb4eeeb1a3c24e5b9ca4bf354d9b042a51a108bc87e21"
+      "mtime": 1791620394,
+      "sha256": "d510ed5b7e823e9a689463ed791f7a281eb6d2b7e3ada9c7585c03b14680a0b9"
     },
     "p2kbCommunityEInkDisplayDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/e-ink-display-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "78701a4f286d0d615e404072d9359735da5fd8daeb535a64ae7b9ffb3529c3cf"
+      "mtime": 1791620394,
+      "sha256": "90ff4ac932a11bd6f7a5013a9aae79d452ea7644c250d9eda3fca166c812c066"
     },
     "p2kbCommunityFiveButtonsOnOnePin": {
       "path": "deliverables/ai/P2/community/quick-bytes/five-buttons-on-one-pin.yaml",
-      "mtime": 1791605271,
-      "sha256": "f7bd287bbe6a4378151f730acef215ae5aa814e17e893fa2a0993a81e55fa602"
+      "mtime": 1791620394,
+      "sha256": "c16b9078f573112feb6d037bf12325c76481a641ab6cf905835fd3dd875a28f4"
     },
     "p2kbCommunityFloatingPointMath": {
       "path": "deliverables/ai/P2/community/quick-bytes/floating-point-math.yaml",
-      "mtime": 1791605271,
-      "sha256": "743d489bbe349321a8a035b33558251c37813b23b664fb21255786b988744e20"
+      "mtime": 1791620394,
+      "sha256": "c4c1cb39a883c11588931af1271854350aa27b0251811880853fde7cc387ab88"
     },
     "p2kbCommunityGoertzelOperationWithUltrasonicTransducers": {
       "path": "deliverables/ai/P2/community/quick-bytes/goertzel-operation-with-ultrasonic-transducers.yaml",
-      "mtime": 1791605271,
-      "sha256": "7da95bada72ba664ba64bffd404c5838f713e415e28b11bc5d98868cfe143c6c"
+      "mtime": 1791620394,
+      "sha256": "df0efd2a9f4083364cb889710515025ff512bd353bb7ea8662aebf0ff44adffd"
     },
     "p2kbCommunityIOTestUtilityWithLedMatrix": {
       "path": "deliverables/ai/P2/community/quick-bytes/i-o-test-utility-with-led-matrix.yaml",
-      "mtime": 1791605271,
-      "sha256": "249d134b1d3ddf0af09ccc67bb51a99c4897bb35dd7c84c523246df669fc77eb"
+      "mtime": 1791620394,
+      "sha256": "0800819b4bf805cad6a0dd7f8d7a48be859f5b5c160e48b054235c1655513f4d"
     },
     "p2kbCommunityI2cDeviceBusScanner": {
       "path": "deliverables/ai/P2/community/quick-bytes/i2c-device-bus-scanner.yaml",
-      "mtime": 1791605271,
-      "sha256": "ba2ca43c1fb637fb6106023ccf0916bfe96ae9e5fee6e5290621fa1e223bb678"
+      "mtime": 1791620394,
+      "sha256": "7a5c10a57449ba5441ce03cdd89ed62819b077ecca18ee831dd9d65f7e675816"
     },
     "p2kbCommunityLedsBeyondTheBasics": {
       "path": "deliverables/ai/P2/community/quick-bytes/leds-beyond-the-basics.yaml",
-      "mtime": 1791605271,
-      "sha256": "2a4c7a93d9e0a4e7f73bd76b85e37cddc51746179783c7f9ddb294390728ba15"
+      "mtime": 1791620394,
+      "sha256": "1084395fe0f2513ee29f8e2c8bda78b95d37b15e4d45b02a81c0731aa91e7846"
     },
     "p2kbCommunityMax7219LedDisplaySpiDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/max7219-led-display-spi-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "7162b39f5f2fefaa041e7ec2331de9a690a68a5622b4d5e96cf09cf5163e6b5f"
+      "mtime": 1791620394,
+      "sha256": "5926b80ff3ece874bc53ae19c781592d57fb6e15b88101fe38ae1d30a2019eae"
     },
     "p2kbCommunityMultipleSerialPort16Object": {
       "path": "deliverables/ai/P2/community/quick-bytes/multiple-serial-port-16-object.yaml",
-      "mtime": 1791605271,
-      "sha256": "7df65fed54632050bb92601d5daef1fc91f63fc0f6f83c291d8b1cd86bb2712a"
+      "mtime": 1791620394,
+      "sha256": "8013a5bdf9eb65581b774faaab4316fb9a8c46c1d0586b6f07a65d60f1e21d35"
     },
     "p2kbCommunityMultipleServoControlUpTo64Object": {
       "path": "deliverables/ai/P2/community/quick-bytes/multiple-servo-control-up-to-64-object.yaml",
-      "mtime": 1791605271,
-      "sha256": "5dd43a9241aba0d5ade7aa273210238733dda066dc1f24cffed2ab7ff4b789db"
+      "mtime": 1791620394,
+      "sha256": "fb1694613c480a8dd52f8ec79b9329a42b3729ab9b76e48be2500f69cb631dcc"
     },
     "p2kbCommunityNmeaGpsStringParsing": {
       "path": "deliverables/ai/P2/community/quick-bytes/nmea-gps-string-parsing.yaml",
-      "mtime": 1791605271,
-      "sha256": "118fa241cb588e9d6a5cbaa2cd67c8123a74604d609fd706710604901e5a035b"
+      "mtime": 1791620394,
+      "sha256": "5fd0c06e292071f333623158fbae4c64791c6ed2ccdd50af31b8368f63c791a1"
     },
     "p2kbCommunityP2Edge16MbFlashReaderAndExplorerUtility": {
       "path": "deliverables/ai/P2/community/quick-bytes/p2-edge-16-mb-flash-reader-and-explorer-utility.yaml",
-      "mtime": 1791605271,
-      "sha256": "ec9e8b9688c4c9366f29d3dc73bdcb63ddf64b53d52e0820a482ba5c29c18592"
+      "mtime": 1791620394,
+      "sha256": "9bbb5e890aa3f709c8be3f1dace0de443f5dacccfb3c0ffbfad3a98c4f21b02f"
     },
     "p2kbCommunityP2RtcAddOnBoardDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/p2-rtc-add-on-board-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "da6b101c595c3208c72a0009714ad4130851497c9390386d560c0ce843ac3664"
+      "mtime": 1791620394,
+      "sha256": "9577c29213da0e3fbf3ee8cf7d2c8bf2a86cd177d0957bffa754114baa3df0f0"
     },
     "p2kbCommunityP2RtcAddOnWithGpsModule": {
       "path": "deliverables/ai/P2/community/quick-bytes/p2-rtc-add-on-with-gps-module.yaml",
-      "mtime": 1791605271,
-      "sha256": "c6bf8005c1881059949d3ef44257fc04b5a9c97e49e4d621384f47763ee3ccd7"
+      "mtime": 1791620394,
+      "sha256": "72c5c0ab7b3328a91973d9178391ec6f3f4ea99ad8184f7560f36ba9674e2fba"
     },
     "p2kbCommunityP2SimpleVideoDriverUsingImagesIntroToUsingVideo2Of3": {
       "path": "deliverables/ai/P2/community/quick-bytes/p2-simple-video-driver-using-images-intro-to-using-video-2-of-3.yaml",
-      "mtime": 1791605271,
-      "sha256": "a0504bcb2a2d8d014ce789a1766dc76a5c87b1acad61e5f01aff76d8423e8946"
+      "mtime": 1791620394,
+      "sha256": "19e5df0132e2bdf4c096c0293d4e198b224bfed742146f2652257e2a3c0167a9"
     },
     "p2kbCommunityPcf8574I2cLcdDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/pcf8574-i2c-lcd-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "f3f33abfcefb655cbabbed35df84afd1f138ed2f643ed329410406797fb97061"
+      "mtime": 1791620394,
+      "sha256": "415bf953f89026eb3c3329fb9e2b9ebea050f1a0b681aa527e6a6c7a6ea5b6c8"
     },
     "p2kbCommunityPingUltrasonicDistanceSensorWithGraphicalDebugDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/ping-ultrasonic-distance-sensor-with-graphical-debug-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "62329be33b0de79ed9f3efdcbb512deef8e5a5d2f8bcc74a938562f6e1a572aa"
+      "mtime": 1791620394,
+      "sha256": "3371396621235a16a427544879a64890200700eccc24321cd4367a0799a2ac6d"
     },
     "p2kbCommunityRotaryEncoder": {
       "path": "deliverables/ai/P2/community/quick-bytes/rotary-encoder.yaml",
-      "mtime": 1791605271,
-      "sha256": "d4f192ddd8b126ba8fef2fee9cdfb839707b656d439f8a876a2f1ccd1ff485db"
+      "mtime": 1791620394,
+      "sha256": "ddcec70f24b799544a9e85ff7d38c869417bd1fd24fe0bed151914448660e34d"
     },
     "p2kbCommunitySendEmailFromThePropeller2UsingTheIotGatewayOnRaspberryPi": {
       "path": "deliverables/ai/P2/community/quick-bytes/send-email-from-the-propeller-2-using-the-iot-gateway-on-raspberry-pi.yaml",
-      "mtime": 1791605271,
-      "sha256": "ee923015421d625ae61a0a656d7979b404cb35ecda3ed8bf087ff368dee9818b"
+      "mtime": 1791620394,
+      "sha256": "eb7223780241d3d2e2bc7b528c27f71a4e82ff1e0272477feaa410d3bc1e30ab"
     },
     "p2kbCommunitySimpleAnalogInput": {
       "path": "deliverables/ai/P2/community/quick-bytes/simple-analog-input.yaml",
-      "mtime": 1791615115,
-      "sha256": "b134849f98637982a146ad7805b2e1c1c4b404fa836de0bf5c63fda4b7bb980b"
+      "mtime": 1791620394,
+      "sha256": "5730cd9cd26b2573e5f7adf5f542e54138db969ae4f2de463ce357e05c876292"
     },
     "p2kbCommunitySimpleSoundEngineDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/simple-sound-engine-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "67f281b5cba8a62e09b567b08423c2c0402fdb20e67a22684c123a2b8ab57197"
+      "mtime": 1791620394,
+      "sha256": "3fc0b480f6e196924c46fe39f5a906ad4dc3fcdd1e541f3b9790a96592cb776d"
     },
     "p2kbCommunitySmartPinsTsl235r": {
       "path": "deliverables/ai/P2/community/quick-bytes/smart-pins-tsl235r.yaml",
-      "mtime": 1791605271,
-      "sha256": "60e6ebe22df0cc0f5bce57992b0ca6b5d5c34c957fab7e9bfe57b5e991ae974e"
+      "mtime": 1791620394,
+      "sha256": "15e71bded6e6cac864daaed0f856d68cec4ce2e0d61cba8da6ce1ee91c14d427"
     },
     "p2kbCommunitySolarPanelMonitoringDemoIntroToUsingVideo3Of3": {
       "path": "deliverables/ai/P2/community/quick-bytes/solar-panel-monitoring-demo-intro-to-using-video-3-of-3.yaml",
-      "mtime": 1791605271,
-      "sha256": "def33590a407d779fb348dbc6afb1b6651284616a00e41dd0969ad0177e65f67"
+      "mtime": 1791620394,
+      "sha256": "7ca94cda130ff5ca593bd27e89abec3f4e48ea83146af94c0334c9e8ab331929"
     },
     "p2kbCommunityStartingYourP2ProjectWithASpin2Template": {
       "path": "deliverables/ai/P2/community/quick-bytes/starting-your-p2-project-with-a-spin2-template.yaml",
-      "mtime": 1791605271,
-      "sha256": "a290882fcf79607186fda2ca6bbbd36211f7a9f60d744c268c64f1865c2eb295"
+      "mtime": 1791620394,
+      "sha256": "7d7cfa9fa36d987ba06548d22e542c2a6a71897bf0ff01638ca462c59f8157c5"
     },
     "p2kbCommunityTetris": {
       "path": "deliverables/ai/P2/community/quick-bytes/tetris.yaml",
-      "mtime": 1791605271,
-      "sha256": "cfea7195af580416ed48f746f4264893e7b50b022efa2926d21cd5693240888a"
+      "mtime": 1791620394,
+      "sha256": "17b2bdc4222b486b00eadf5f771ccacde4f17f17a171d471d47a34b0228e5740"
     },
     "p2kbCommunityVideoHardwareCharacterMap": {
       "path": "deliverables/ai/P2/community/quick-bytes/video-hardware-character-map.yaml",
-      "mtime": 1791605271,
-      "sha256": "faa686f5c20ae93a361eedcb9b4e72f4ae96514ea9b6a83d7e3491088a907998"
+      "mtime": 1791620394,
+      "sha256": "1c2398169bbcca1494fee25ac6e0757f7a71ad52028532cdcdd2a93769790513"
     },
     "p2kbCommunityVisualStudio": {
       "path": "deliverables/ai/P2/community/quick-bytes/visual-studio.yaml",
-      "mtime": 1791605271,
-      "sha256": "c17f8d912c5acd7088ebccc204a9c46fec682be091ba823ca6ea5ce2dfce5633"
+      "mtime": 1791620394,
+      "sha256": "0917fe56f5cc037cb134e11507e6c7e91859582e4faf081f1592da8924f0beed"
     },
     "p2kbCommunityWebPageControlOfWs2811LedsUsingTheIotGatewayOnRaspberryPi": {
       "path": "deliverables/ai/P2/community/quick-bytes/web-page-control-of-ws2811-leds-using-the-iot-gateway-on-raspberry-pi.yaml",
-      "mtime": 1791605271,
-      "sha256": "95469c73ba63669b417434c3e78f0b9fc12d26e4766523c7bf3abac9fd4a57c0"
+      "mtime": 1791620394,
+      "sha256": "c6653ef893e97c11c495a29ecb69e6199ee50292738a9970b71cb20eb86c4eca"
     },
     "p2kbCommunityWirelessProgramming": {
       "path": "deliverables/ai/P2/community/quick-bytes/wireless-programming.yaml",
-      "mtime": 1791605271,
-      "sha256": "f28a2966483e9f217f23c7e546ce3e676493d77347ba9f55d478c9f949dcad52"
+      "mtime": 1791620394,
+      "sha256": "3e08d31bfb0ec339aa31337bd70ccd262852c07cb3dff8111b8810c6efbab34e"
     },
     "p2kbCommunityWs2811Ws2812Ws2812bWs2813Sk6812xNeopixelObject": {
       "path": "deliverables/ai/P2/community/quick-bytes/ws2811-ws2812-ws2812b-ws2813-sk6812x-neopixel-object.yaml",
-      "mtime": 1791605271,
-      "sha256": "383ec46aabe36f018a052bbd56d2b61715d2daba8d5d301e96bcedbf623c30af"
+      "mtime": 1791620394,
+      "sha256": "e4b99d5adb685b36d03927ef8e566d2eaef071e474f76219fbb7b717efd6cfb5"
     },
     "p2kbCommunityXbeeRfTransparentAndApiModeDemo": {
       "path": "deliverables/ai/P2/community/quick-bytes/xbee-rf-transparent-and-api-mode-demo.yaml",
-      "mtime": 1791605271,
-      "sha256": "471a33a357ab66aa95076cac2804abb1fe6612b9a52d6cd48f38ddb806bb0c5a"
+      "mtime": 1791620394,
+      "sha256": "717b4b67bc7fed270ef8f6827ba7480424e220480af84956957df3c809ad2097"
     },
     "p2kbGuidePasm2GettingStarted": {
       "path": "deliverables/ai/P2/guides/pasm2-getting-started.yaml",
@@ -12834,18 +12834,18 @@
     },
     "p2kbHwAddonAvBreakoutAddonAvBreakout": {
       "path": "deliverables/ai/P2/hardware/addon-av-breakout.yaml",
-      "mtime": 1791615115,
-      "sha256": "4323aee8b72c3f513b8b08ef3d246a58c58a2fb63f00d3bdb4fd3bc6e8821d3d"
+      "mtime": 1791620394,
+      "sha256": "0f12e89d3c59184bfff893aac94f4ff88279be33ac52dbd43fcaefe89152c603"
     },
     "p2kbHwAddonClickAdapterAddonClickAdapter": {
       "path": "deliverables/ai/P2/hardware/addon-click-adapter.yaml",
-      "mtime": 1791615115,
-      "sha256": "3451bb4610cc74784dea2f55a411ad41cea98d635190ba705965a14c40ea7d34"
+      "mtime": 1791620394,
+      "sha256": "19b82071c5a4ba48cc53c5dbb7264ba0109b9b7fcbd896f9af7bc788071fb191"
     },
     "p2kbHwAddonControlBoardAddonControlBoard": {
       "path": "deliverables/ai/P2/hardware/addon-control-board.yaml",
-      "mtime": 1791615115,
-      "sha256": "6533502c1147149944c8fe098bb2492cf9bd13d4f6f91dc89d0139ea79781b5b"
+      "mtime": 1791620394,
+      "sha256": "a773d7273c39e8a7e6ba72333ba10cf2c1307d772191496d431343f97702157b"
     },
     "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut": {
       "path": "deliverables/ai/P2/hardware/addon-digital-video-out.yaml",
@@ -12854,8 +12854,8 @@
     },
     "p2kbHwAddonGoertzelTouchAddonGoertzelTouch": {
       "path": "deliverables/ai/P2/hardware/addon-goertzel-touch.yaml",
-      "mtime": 1791615115,
-      "sha256": "43134dbc2dcab482f7120105fcfdeed112bf79185b6990c971d9ed98c366b75d"
+      "mtime": 1791620394,
+      "sha256": "5c3b21e113f9f786cd00fd67eebf1aac507eb5560136102a1969e5f5bfd54c73"
     },
     "p2kbHwAddonHdAudioAddonHdAudio": {
       "path": "deliverables/ai/P2/hardware/addon-hd-audio.yaml",
@@ -12869,8 +12869,8 @@
     },
     "p2kbHwAddonLedMatrixAddonLedMatrix": {
       "path": "deliverables/ai/P2/hardware/addon-led-matrix.yaml",
-      "mtime": 1791615115,
-      "sha256": "f3e8421b7f25bad21ef51b6e2f5e72a8c4cc881edf90dbfff9121264dd17c2e7"
+      "mtime": 1791620394,
+      "sha256": "e7424f1f21019c72ea41e180846c459b9fbf6e50cf64b65e5269fa7005d42a63"
     },
     "p2kbHwAddonMicrosdAddonMicrosd": {
       "path": "deliverables/ai/P2/hardware/addon-microsd.yaml",
