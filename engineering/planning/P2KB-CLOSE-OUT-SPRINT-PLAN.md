@@ -9,7 +9,9 @@ row (and the evidence file it names); a register entry's state lives in
 `engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md`.
 
 **Status:** STARTED 2026-10-09 (Stephen's go: "if we can start the sprint without having to wait
-let's do so"). Sprint-start record below; next: `plan-to-tasks`.
+let's do so"). Content tasks «#410»–«#422» and «#424» landed (git log, 2026-10-09/10); the registers,
+gap ledger, guide-conformance findings and docs (§8) were closed 2026-10-10 by «#423» (exit record
+below, uncommitted until the arbiter commits). Next: «#398», the release (§9).
 
 ---
 
@@ -132,6 +134,46 @@ index after the release commit. The VO-J-035 test («#409») was then committed 
   from the measurement above — every gate PASS except KB Code Compiles, 352 FAIL in 176 files, all
   352 REGISTERED, 0 unregistered. These are §2's scope, not a deferral. The exit check compares
   against this run.
+
+## Exit record (2026-10-10, «#423»)
+
+Every number below was produced by the script named beside it, run from the repo root on the
+working tree after «#422» (HEAD 89eb8c02; the index regenerated at 6d39bccd), then again at the end of
+«#423». None is copied from a report.
+
+**Exit baseline vs entry baseline** (`python3 engineering/tools/validate-dod-release.py`, 1 m 53 s):
+
+| | Checks | PASS | FAIL | The red |
+|---|---|---|---|---|
+| Entry (2026-10-09) | 20 | 19 | 1 | KB Code Compiles — 352 FAIL in 176 files |
+| **Exit (2026-10-10)** | **26** | **24** | **2** | **Claim Sourcing** — 3 Tier 1, all in `hardware/hub75_adapter.yaml`; **Golden-source lock** — `WEAKENED: hardware/hub75_adapter.yaml  RESOLVABLE -> NAMED` |
+
+The six checks added since entry: Register Ids in YAML Values, Change-History Prose in Shipped
+Content, YAML Plain Scalar Cut By Comment, Index Integrity vs Committed Blobs, Hardware Revision
+Scope, Index Findability by Directory Term. KB Code Compiles went from the only red to PASS. **The
+two exit reds are one file and one decision** — `hub75_adapter.yaml` is an Iron Sheep board no
+Parallax document describes; the file is untouched and the ratchet baseline is not re-recorded. The
+call is Stephen's (register F-567).
+
+**Instruments at their final values** (script · result):
+
+| Script | Final value |
+|---|---|
+| `audit-kb-code-compiles.py` | PASS: 3,166 blocks — 493 program, 2,002 fragment, 30 never, 641 not-code; 0 FAIL (was 352 FAIL / 3,077 blocks at entry); census 1,136 YAML files, 3,166 candidates in 627 files |
+| `audit-yaml-claim-sourcing.py` | FAIL: 3 Tier 1 + 0 BAD_CITATION + 0 Tier 2 across 1,005 files; Tier 2 blocking (entry: PASS, 0 Tier 1, 27 Tier 2 advisory) |
+| `audit-yaml-source-lock.py` | 1,005 audited, 131 exempt: CANONICAL 672 (66.9 %), RESOLVABLE 0, NAMED 8, WEAK 0, ABSENT 325; block-level junk citations 0; self-declared source conflicts 5 in 5 files; DoD ratchet: 1 regression (hub75) |
+| `audit-constant-fidelity.py` | PASS: 120 source-defined constants, 0 Tier 1, 0 Tier 2 |
+| `audit-yaml-plain-scalar-comment.py` | PASS: 1,135 files, 108 comment-after-plain scalars seen, 0 flagged (was 52 in 15 files) |
+| `audit-hardware-revision-scope.py` | PASS: 29 files, 8 declare a revision, R-A 0, R-B 0 (was 12 findings in 7 files) |
+| `audit-index-findability.py` | PASS: 31 qualifying directories, 0 partial not baselined, 4 baselined (each with a reason), 14 reached by none (advisory) (was 8 partial, 135 files unreachable) |
+| `audit-index-integrity.py` | PASS: 1,136 entries; sha256 stale 0, absent at HEAD 0, tracked YAML with no entry 0; index equals a fresh regeneration at HEAD; `.gz` equals the index bytes (was 21 stale in the working tree) |
+| `validate-crossref-keys.py --negative-control` | PASS: 12 of 12 planted cases (dangling and bare `yaml_file:` fail, good one passes); cross-reference resolution 100.0 % |
+| `audit-yaml-duplicate-keys.py` | CLEAN: 1,135 files, 0 with duplicate keys |
+| `audit-adc-encoding.py` | PASS |
+| `audit-register-hygiene.py` (corrections register / gap ledger) | CLEAN: 65 live findings, 525 archived ids, 0 unaccounted / CLEAN: 40 live rows (and the errata register: 23 entries) |
+| `audit-guide-conformance.py --inventory` | PASS: 0 findings across 48 files (was 2: D1 `APP-NOTE-VOICE-GUIDE.md:185`, D4 `p2-errata/creation-guide.md:28`) |
+| `grep -rn "pnut_ts" deliverables/ai/P2` | 0 hits (was 110 in 53 files) |
+| `find deliverables/ai/P2 -type f ! -name '*.yaml'` | `README.md` only; 1,136 YAML files |
 
 ## §1 Gates first (study Group F; S-308; S-393)
 
@@ -397,6 +439,17 @@ S-370, S-374, S-390, S-391, S-322 item 1 (#64013 schematic), F-352, F-562.
   accepts (canonical Parallax title + edition [+ p.N], or an existing EF/CP), repo paths below it,
   baseline re-recorded — task «#424», ordered before «#417». Also from «#416»: POW precedence and
   "pointers cannot be arrays" rest on compile probes with no CP record — added to «#421» (CP-006/007).
+- 2026-10-10 — «#423» closed §8 and the Blast Radius (exit record above). Register: 20 entries re-statused and
+  rewritten in place (F-545, F-547, F-548, F-550, F-551, F-560, F-561, F-563, F-337, F-352, F-354, F-359, F-372,
+  F-375, F-381, F-386, F-389, F-392, F-398, F-454), F-356's references to F-336 reworded; **F-218, F-336, F-364, F-405, F-441 swept** to
+  `correction-sweeps/2026-10-10-close-out-sprint-P2KB-CORRECTION-FINDINGS-archive.md`; **F-567 filed**
+  (`hub75_adapter.yaml`, Stephen's call — the only exit red); every applied entry is `PENDING-VALIDATION`
+  until the release serves it. Found while closing: **the top-level cog stack (F-392, study row S-319) was
+  never written** — its named expiry (the v55 interpreter ingestion) arrived 2026-10-09 and no task took it;
+  it is owed. Gap ledger: G-006, G-027, G-028 moved to ANSWERED by EF-098, EF-093, EF-094 with file:line; six
+  rows re-tested and left open with reasons. Docs: `release-yamls` (§5.5, §6c, gate list), 
+  `yaml-knowledge-base-maintenance` (§2.7), `ingest-source` (proof-register rows), the ingestion dashboard, the
+  P2 README claims, the study's status and row count, two guide-conformance findings.
 - 2026-10-09 — «#414» boundary: the DoD's *Internal IDs in Shipped Content* check caught an `EF-099`
   written into served prose; its pattern now also covers `CP-NNN` and `E-NNN` (both internal registers)
   and found two errata ids in served text, fixed. Every area-task brief («#415»–«#422») names this check

@@ -84,6 +84,8 @@ related:
   - language/spin2/methods/taskcont.yaml
   - language/spin2/methods/taskchk.yaml
   - language/spin2/methods/tasknext.yaml
+  - language/spin2/methods/cogspin.yaml
+  - application-notes/p2an006-sizing-cog-task-stacks.yaml
 see_also:
   - "Cooperative multitasking"
   - "Task management"

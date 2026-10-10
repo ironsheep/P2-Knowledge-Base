@@ -25,7 +25,7 @@ restated here or anywhere else in this folder. Three consequences govern authori
   erratum, however much it bites. There is **no** "behaviours mistaken for errata" section.
   The front matter defines the three classes, once, and points to the peer manual.
 - **Final classification is made here**, where the clean-room reading, Parallax's published
-  intent and a run on P2 hardware meet. Published intent (the Silicon Doc) counts as design
+  intent and a run on P2 hardware meet. Published intent (the Parallax Propeller 2 Documentation) counts as design
   material.
 - **Proven on silicon before it enters.** An item whose bench run has not decided it is not a
   chapter. (At v0.2.0 the second bench session decided three more items: the DAC-mode ADC

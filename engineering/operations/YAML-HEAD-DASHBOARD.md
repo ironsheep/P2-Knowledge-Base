@@ -71,7 +71,7 @@ Each board YAML is self-contained and carries this directly: `eval_header_occupa
 true`, `pin_group.size` (8 or 16), and a `signal_map` of `{offset, signal,
 direction, notes}`. **Direction** is the P2-side role (out/in/bidir), stated only
 where the source documents it. The browse-time answer to *"what eval boards do we
-know about?"* is the `eval_addon_boards` category (10 boards).
+know about?"* is the `eval_addon_boards` category (16 boards).
 
 ## Known-hardware inventory
 
@@ -89,6 +89,12 @@ know about?"* is the `eval_addon_boards` category (10 boards).
 | 64006H | A/V Breakout (VGA + RCA + audio) | 8 | active |
 | 64032 | HUB75 Adapter (RGB LED panel) | 16 | retiring (limited stock) |
 | 64004-ES | HyperRAM + HyperFlash (16 MB + 32 MB) | 16 | limited edition |
+| 64009 | microSD | 8 | active |
+| 64013 | RTC | 8 | active |
+| 64014 | HD Audio | 8 | active |
+| 64007 | WX Adapter | 8 | active |
+| 64010 | Universal Motor Driver | 16 | active |
+| 64008 | mikroBUS Click Adapter | 16 | active |
 
 ### Host boards, modules, carriers & reference
 
@@ -97,7 +103,9 @@ know about?"* is the `eval_addon_boards` category (10 boards).
 | p2-eval-board | Host eval board (64000) |
 | edge-standard-module · edge-32mb-module | Edge CPU modules |
 | edge-breadboard-carrier · edge-mini-breakout · edge-standard-breakout | Edge carriers/breakouts |
-| hardware-compatibility-matrix · p2-hardware-feature-comparison · p2-hardware-selection-guide · p1_rom_font_character_set | Reference data |
+| hardware-compatibility-matrix · p2-hardware-feature-comparison · p2-hardware-selection-guide · p1_rom_font_character_set · p2-package-mechanical | Reference data |
+| addon-wx-wifi (32420) | Connectivity module (`connectivity`) |
+| programming-prop-plug (32201) | Programming tool (`programming_tools`) |
 
 > Inventory and categories are kept 1:1 with the served files — adding or removing
 > a board updates the file, `engineering/tools/p2kb-categories.json`, and this

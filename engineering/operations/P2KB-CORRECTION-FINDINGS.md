@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-567`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-568`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -41,6 +41,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-05 after the Assembly Reference v3.1.11 release (4 findings: F-527 `RESOLVED-INVALID`, F-528, F-530, F-541) → `correction-sweeps/2026-10-05-assembly-release-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-05 after the deSilva v3.0.9 release (3 findings: F-529, F-532, F-276) → `correction-sweeps/2026-10-05-desilva-release-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-05 by the register reconciliation «#386» (130 findings verified closed against the tree and the release tags; 63 emptied section headings moved with them) → `correction-sweeps/2026-10-05-register-reconciliation-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-10-10 by the close-out sprint «#423» (5 findings with nothing left to validate or ship: F-218, F-336, F-364, F-405, F-441) → `correction-sweeps/2026-10-10-close-out-sprint-P2KB-CORRECTION-FINDINGS-archive.md`
 
 > **Swept 2026-08-19** per `punch-list-maintenance`, as **rename-then-trim** (the archive is a
 > git-tracked rename of the original; both files are subtractions from a preserved copy — see the
@@ -61,7 +62,22 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»)
+
+### F-567 — `hardware/hub75_adapter.yaml` is an Iron Sheep board no Parallax document describes, so it fails the claim-sourcing gate (3 Tier 1) and the source-lock ratchet — `NEEDS-VERIFICATION` (Stephen's call)
+Found 2026-10-10 by «#422» and carried through «#423»'s exit baseline. `audit-yaml-claim-sourcing.py` (Tier 2
+blocking since 89eb8c02) reports 3 Tier-1 blocks in this file — `description` (`:19`, 2 quantities in V),
+`specifications` (`:29`, 5 quantities in MHz, V, mA), `notes` (`:61`, 3 quantities in MHz, V) — "this file DOES
+cite elsewhere, its own other sections are the control". `audit-yaml-source-lock.py` reports `WEAKENED:
+hardware/hub75_adapter.yaml  RESOLVABLE -> NAMED` against `baselines/yaml-source-lock.json`, because the
+citation rule (a canonical Parallax title with its edition, an EF/CP/XF id, a pinned listing, an OBEX id)
+cannot be met by a document the board's designer wrote: the file itself says "Every figure in this file is
+the board designer's own; no Parallax-published document describes this board" (`:15-16`). These two
+failures are the **only red in the close-out exit baseline** (`validate-dod-release.py`). The file is left
+exactly as it is and the ratchet baseline is not re-recorded. **The call is Stephen's:** teach both gates
+a way to cite a designer-authored specification of a non-Parallax board (a new acceptance class, which
+changes what "cited" means), or remove the quantities the gate names, or move the board out of the served
+tree. Until he decides, the release cannot go green.
 
 ### F-566 — Quick Bytes entry `simple-analog-input.yaml` cites an article URL that returns 404 — `NEEDS-VERIFICATION` (Stephen: current URL, or retired)
 Found 2026-10-10 by «#422» checking S-390. `community/quick-bytes/simple-analog-input.yaml` `url:` and
@@ -111,7 +127,7 @@ jumper-free read-back):** start a cog that drives P0 high, sets a smart-pin mode
 enables it, COGSTOP it from another cog, read P0's DIR/OUT/IN and P1's mode behaviour from the
 surviving cog. **Fix when answered:** state the measured result on `cogstop.yaml`, cite the EF.
 
-### F-563 — `smart-pin-11011-usb-host-device.yaml` gives the USB receiver status bits [6] and [3..0] from the superseded PDF-era capture — `CONFIRMED`
+### F-563 — `smart-pin-11011-usb-host-device.yaml` gives the USB receiver status bits [6] and [3..0] from the superseded PDF-era capture — `PENDING-VALIDATION` (applied 2026-10-10, «#419»; closes when the next KB release serves it)
 Found 2026-10-09 by the VO-J-035 rework writer («#409»). `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml:61-67`
 ships `[6] … EOP SE0 > 3 bits, or SE1`, `[3] SE1 in (illegal) — cleared on !SE1, set on 1+ bits of SE1`,
 `[2] SE0 in (RESET) — … set on 1+ bits of SE0`, `[1] K in (RESUME) — … set on 7+ bits of K`,
@@ -123,8 +139,9 @@ periods or SE1`, `[3] steady state — cleared on DP/DM state change, set on 7 b
 and `[2]`/`[1]`/`[0]` SE0/K/J in as "high when DP/DM state is" SE0/K/J. **Silicon agrees with the DOCX:**
 VO-J-035 run 1 (`campaigns/2026-10-p2kb-close-out/tests/logs/debug_261009-140053.log`) read status `$0C`
 on an idle bare pair — bits 3 and 2 set together, which the "SE1 in" reading makes impossible (SE1 and
-SE0 cannot both hold); as "steady + SE0" it is the documented host idle. Not yet an EF (run 1 was NO
-VERDICT for its own question). **Class sweep** (`grep -rn "SE1 in\|EOP SE0 > 3\|set on 7+ bits of J\|steady state" deliverables/ai/P2`):
+SE0 cannot both hold); as "steady + SE0" it is the documented host idle. Not an EF: run 1 was NO VERDICT for
+its own question, and the rerun that decided it (EF-102) answers the WXPIN baud question only — its
+status-bit readings are printed there "not judged". **Class sweep** (`grep -rn "SE1 in\|EOP SE0 > 3\|set on 7+ bits of J\|steady state" deliverables/ai/P2`):
 this file only. **Fix:** replace lines 61-67's [6] and [3..0] with the DOCX wording, cited to the P2
 Documentation v35, *USB smart pin* section; close-out sprint (KB v1.24.0).
 
@@ -150,7 +167,7 @@ gives "ISP Hub75 Matrix Driver" and `.../isp-hub75-matrix-driver/`. Which is cur
 > here:** whether the live OBEX listing still carries that title and path (no network). Stephen:
 > open `https://obex.parallax.com/obex/isp-hub75-matrix-driver/` and say if it resolves.
 
-### F-561 — P2AN003 (app note + YAML companion) says reversing the DAC init order "leaves the first output cycle undefined"; the P2 Documentation says Y is captured in reset — `CONFIRMED` (manual change)
+### F-561 — P2AN003 (app note + YAML companion) says reversing the DAC init order "leaves the first output cycle undefined"; the P2 Documentation says Y is captured in reset — `PARTIAL` (companion half applied 2026-10-10, «#420», and `PENDING-VALIDATION`; the app-note prose and the "undefined" clause change together at the app-note release)
 Found 2026-10-07 by the independent check of F-554. `app-notes/P2AN003/opus-master/P2AN003.md:541`
 and its companion `application-notes/p2an003-dac-analog-signal-generation.yaml:98` ("the universal
 smart-pin init order. Reversing it leaves the first output cycle undefined"). For the DAC modes
@@ -167,7 +184,7 @@ state the order as the general one and drop the unsourced consequence, or source
 > changing the companion alone would put them in disagreement. It changes in the app-note release
 > together with the prose.
 
-### F-560 — 78 `source:` fields in 58 files name a label, not a document — `CONFIRMED` (L; planning item)
+### F-560 — 78 `source:` fields in 58 files name a label, not a document — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; closes when the next KB release serves it)
 Found 2026-10-07 by the F-553 class sweep: `grep -rn -E "^\s+source: *['\"]?[A-Za-z0-9_-]+['\"]?\s*$" deliverables/ai/P2/`
 returns 78 lines in 58 files whose `source:` is a bare label: `parallax-quick-bytes` ×42 (a corpus
 not yet ingested — `quickbytes-integration` is NOT processed), `P2-OctoSerial` ×10, `P2-Click-eInk`
@@ -198,8 +215,12 @@ driver contradicted its attributions; the HUB75 examples were invented code unde
 > code is unchanged and still passes the compile gate. `testp.yaml` lost its only citation with the move
 > and now cites the PASM2 Manual (p.136) and the Silicon Doc's I/O Pin Timing. The facts whose ONLY
 > source is the flash-loader source, the Spin2 debugger v51 source, the ROM booter listing or the v55
-> interpreter Theory-of-Operations review (44 citation lines) are left exactly as they were, pending
-> Stephen's ruling; they are the whole of what the sourcing gate still reports.
+> interpreter (44 citation lines) were held for Stephen's ruling; he ruled 2026-10-10 that Parallax's
+> published source listings are citable, pinned to their edition («#422», dispatch C: listing titles
+> and the `STALE_EDITION` check in the sourcing gate; BAD_CITATION 44 → 0). After the sweep the only
+> `source:` values that are not a document title are EF/CP ids
+> (`grep -rn -E "^\s+source: *['\"]?[A-Za-z0-9_-]+['\"]?\s*$" deliverables/ai/P2/` returns only
+> EF-/CP- ids, 2026-10-10).
 
 ### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
 > **Applied 2026-10-07.** `debug-strategy-guide.yaml` rewritten to the ruling: no compiler or
@@ -359,7 +380,7 @@ next KB release. **Fix:** move each cite to the entry's `sources:` (where the cl
 reads it), keep the stated fact; re-run `validate-dod-release.py`. Not touched by the filter sprint —
 its certification bundle is frozen at HEAD and this stays a register item (Stephen, 2026-10-07).
 
-### F-551 — `guides/pasm2-getting-started.yaml` is uncited outside the blocks F-542 re-derived — `CONFIRMED` (L)
+### F-551 — `guides/pasm2-getting-started.yaml` is uncited outside the blocks F-542 re-derived — `PENDING-VALIDATION` (applied 2026-10-10, «#418»; closes when the next KB release serves it)
 Found 2026-10-07 scoping F-542. Of 729 lines only `file_structure` and `timing_considerations`
 carried a source; F-542 re-derived `register_model`, `core_instructions`, `assembler_directives`
 and `critical_gotchas`. Still uncited: `instruction_format`, `addressing_modes`, `common_patterns`,
@@ -370,7 +391,7 @@ most-copied beginner page in the set. **Fix:** `SOURCE-REPAIR-ORDER.md` — remo
 each block from the spreadsheet / P2 Documentation / v55, compile every example, report
 grounded · gaps · removals.
 
-> **Applied 2026-10-10 («#418»); the entry stays PENDING-VALIDATION until a release serves it.**
+> **Applied 2026-10-10 («#418»); closes when a release serves it.**
 > The remaining guide blocks, against the spreadsheet / P2 Documentation / v55: `operand_types`
 > "or LUT register" (LUT is reached with RDLUT/WRLUT, not as an operand); the `WC`/`WCZ` examples read C
 > as carry and borrow; `pointer_with_auto_increment` gained the step size (1/2/4, `INDEX` 1..16) and a
@@ -384,9 +405,9 @@ grounded · gaps · removals.
 > carried:** `:labelname` as a local-label form is accepted by pnut-ts (`:loop` assembles) but no
 > Parallax document states it — the guide and `concepts/labels.yaml` now say `.labelname` and
 > flag the colon form as compiler-accepted only; `language/fundamentals/pasm-labels.yaml` and
-> `identifier-rules.yaml` still list it as documented.
+> `identifier-rules.yaml` do not list it (0 hits for `:labelname` / `:label` in both, 2026-10-10).
 
-### F-550 — `serial_loader.yaml` `protocol_commands` gives the FPGA build's `Prop_Chk` answer and an invented `Prop_Clk` syntax — `CONFIRMED`
+### F-550 — `serial_loader.yaml` `protocol_commands` gives the FPGA build's `Prop_Chk` answer and an invented `Prop_Clk` syntax — `PENDING-VALIDATION` (applied 2026-10-10, «#419»; closes when the next KB release serves it)
 Found 2026-10-07 fixing F-421 in the same file. Against the P2 Hardware Manual (`p2-hardware-manual-text.txt:1629-1725`)
 and the Silicon Doc (`silicon-doc-text.txt:4860-4868`):
 - `prop_chk.response` "'Prop_Ver Au' (version A silicon)". Both documents: the Rev B/C silicon
@@ -414,7 +435,7 @@ timing from CR"; `validation_format` describes a `'Prop'` header at offset 0 wit
 **Fix (M-L):** per `.claude/skills/SOURCE-REPAIR-ORDER.md` — remove the uncited blocks and
 re-derive from HW Manual :1580-1725 (+ Silicon Doc :4860 ff.), every field quoted or cited.
 
-> **Applied 2026-10-10 («#419»); the entry stays PENDING-VALIDATION until a release serves it.**
+> **Applied 2026-10-10 («#419»); closes when a release serves it.**
 > `architecture/serial_loader.yaml` was re-derived from HW Manual `:1588-1725` and Silicon Doc `:4850-4868`:
 > `prop_chk` (four-field syntax, `Prop_Ver G`, A-F are FPGA builds, `rom_booter_v33_01j.lst:125-131`);
 > `prop_clk` (five fields, the HUBSET value, `.` reply, ~5 ms + 10 ms re-sync, the 148.5 MHz and boot-clock
@@ -448,7 +469,7 @@ pins. The sensor example configures eight pins as ADCs, then reconfigures the sa
 from an ingested driver, compiled, with a real `source:`. Per F-548, the HUB75 one should point to
 the driver rather than restate its setup.
 
-### F-548 — `hardware/` entries restate their drivers (API, timing, cog use, chipset tables), which every driver release can falsify — `CONFIRMED` (class sweep owed)
+### F-548 — `hardware/` entries restate their drivers (API, timing, cog use, chipset tables), which every driver release can falsify — `PENDING-VALIDATION` (class sweep applied 2026-10-10, «#420»; closes when the next KB release serves it)
 Found 2026-10-07 re-scoping F-354. Stephen's ruling: a hardware entry carries the board — pinout, pin
 budget, voltages, level shifting, the board's published ceiling — and names its driver; the driver's
 API, configuration, timing and resource use are the driver's (`.claude/doctrine-overlay.md`, *A
@@ -462,7 +483,7 @@ limits are chip facts and stay), replace driver restatement with a pointer to th
 entry; before removing anything, run the search in *"Unsourced" is a finding about our search* so
 board facts are told apart from driver facts.
 
-> **Class sweep applied 2026-10-10 («#420»); the entry stays CONFIRMED until a release serves it.**
+> **Class sweep applied 2026-10-10 («#420»); closes when a release serves it.**
 > `edge-32mb-module.yaml`: `code_patterns` (the whole `psram.spin2` API block), `protocol_constraints.psram`
 > driver settings (sysclk/N rates, burst formula — which also removes S-259's wrong formula —, input-delay
 > table), the flash 133 MHz line (no source), `resources.obex.features`, the OBEX-documentation reference
@@ -515,8 +536,7 @@ board facts are told apart from driver facts.
 > v55's order. The derived `sources/spin2-v51/complete-spin2-operators.md` (`:25`, `:164`) carries
 > a dated correction note instead of the `+<=>` row.
 
-> **Cascade applied 2026-10-10 («#416»); the entry stays PENDING-VALIDATION until a release serves
-> it.** Authority: `sources/spin2-v55/spin2-v55-operator-reference.md` (84 rows, 17 levels) and
+> **Cascade applied 2026-10-10 («#416»); closes when a release serves it.** Authority: `sources/spin2-v55/spin2-v55-operator-reference.md` (84 rows, 17 levels) and
 > `spin2-v55-text.txt:409-505`. (1) The three invented-token pages `op_notandand` (`!&&`), `op_eqeqeq`
 > (`===`) and `op_ltshr` (`<>>`) are now `operator_redirect` stubs in the `modulo_add.yaml` style
 > (published keys kept; no `operator:` key; each says the token is not Spin2 and points to
@@ -540,10 +560,10 @@ board facts are told apart from driver facts.
 > removed), `floating_point.yaml` (compares return 0 or -1), `guides/spin2-getting-started.yaml`
 > (`<= >=`, `AND OR XOR NOT`, postfix forms), `special-symbols/hash.yaml` (PUB/PRI only), `FIELD.yaml`
 > (v55: ten bits or larger need a LONG array, so the 12-bit example moved to LONG storage).
-> **Open:** the precedence of POW is not in the v55 table; the page states it from the arbiter's compile
-> probes (`2.0 POW 3.0 +. 1.0` = 9.0, `1.0 +. 3.0 POW 2.0` = 16.0, `2.0 POW 3.0 POW 2.0` = 64.0) and a
-> CP record for them is owed. The compiler's `Pointers cannot be arrays` is likewise asserted only by the
-> compile gate's `never` block, not by a CP record.
+> **Compile-proof records («#421»):** the precedence of POW is not in the v55 table; the page states it
+> from compile probes (`2.0 POW 3.0 +. 1.0` = 9.0, `1.0 +. 3.0 POW 2.0` = 16.0, `2.0 POW 3.0 POW 2.0` = 64.0)
+> and cites **CP-006** (`op_POW.yaml:34`). The compiler's `Pointers cannot be arrays` is **CP-007**
+> (`typed-pointers.yaml:238`). Both in `COMPILE-PROOFS.md`.
 Found 2026-10-05 re-verifying F-443 («#386»). `language/spin2/operators/op_addlt.yaml` (`+<`), `op_addgt.yaml`
 (`+>`), `op_addlteq.yaml` (`+<=`), `op_addgteq.yaml` (`+>=`), `op_lteqgt.yaml` (`<=>`) and `op_addlteqgt.yaml`
 (`+<=>`) each carry the one-line description `Signed/unsigned compare`, which tells an agent nothing about which.
@@ -651,7 +671,7 @@ compares the payload with YAML's own reading and fails on any content line the f
 matters for the MCP roll:** the MCP does not yet apply this filter, so MCP consumers still had the
 line; rolling the MCP filter before this fix would have spread the loss.
 
-### F-545 — provenance ships under keys the delivery filter does not list (`last_verified`, `extraction_status`, `authority_tier`, `grounding`, …) — `NEEDS-VERIFICATION` (classify, then move into the existing keys)
+### F-545 — provenance ships under keys the delivery filter does not list (`last_verified`, `extraction_status`, `authority_tier`, `grounding`, …) — `PARTIAL` (census and folds applied 2026-10-10, «#420»/«#422», `PENDING-VALIDATION`; the new-key gate is not built and the OBEX `metadata:` bookkeeping is left by the arbiter)
 Measured 2026-10-04 on the shipped payload (keys surviving the filter): `extraction_status` 131 files,
 `last_verified` 131, `last_author_extraction` 113, `last_complete_extraction` 73,
 `last_author_re_extraction` 29, `authority_tier` 92 lines / 15 files, `grounding` 28 / 10,
@@ -682,19 +702,15 @@ list, so the drift cannot recur.
 > keys a principle rests on) is content and stays; `extraction_status` and `last_verified` occur only
 > in the OBEX objects. Those two keys are **removed** from all 130 OBEX objects and from
 > `_template.yaml` (262 lines; no gate and no KB reader consumes them, and the OBEX-metadata parent
-> keeps its other children, so no null parent). **Still open, and assigned with S-392 because their
-> values are the very citations being rewritten:** `provenance:` / `primary_sources:` /
-> `cross_check_sources:` (application notes `p2an001`–`p2an007`, `click_module_integration.yaml`,
-> `addon-hyperram-hyperflash.yaml`) folding into `sources:`; `range_source` (12 `language/pasm2/`
-> pages) folding into `source:`. **Unclassified, needs a call:** `extraction_metadata` /
-> `extraction_date` (the spin2 symbol and integration pages, `io_pin_timing.yaml`, the system-register
-> pages, the two code examples) are process dates, recommended for removal; `cite:` (decomposition
-> method, KB-key pointers, content). The OBEX `metadata:` blocks still carry the same class of
-> scrape bookkeeping the spec did not name (`discovery_date`, `kb_integration`,
-> `last_author_extraction`, `last_complete_extraction`, `last_author_re_extraction`,
-> `last_author_deep_search`, `last_description_fix`, `last_created_date_fix`, `page_discovered`,
-> `quality_score`): recommended for the same removal, awaiting the call.
-> `import_source` / `rescrape_source` occur only in 28 OBEX objects, same class.
+> keeps its other children, so no null parent). `provenance:` / `primary_sources:` /
+> `cross_check_sources:` / `range_source` were assigned to S-392 (folded; next note).
+> **Decided by the arbiter 2026-10-10:** `extraction_metadata` / `extraction_date` (process dates) are
+> removed; `cite:` (decomposition method, KB-key pointers) is content and stays.
+> **Left, by the arbiter's call:** the OBEX objects' `metadata:` scrape bookkeeping — measured
+> 2026-10-10: `last_author_extraction` 113 files, `last_complete_extraction` 73,
+> `last_author_re_extraction` 29, `discovery_date` and `kb_integration` 131, `import_source` 12,
+> `rescrape_source` 17, `original_archiver_name` 6 — because the p2kb-mcp OBEX tools may read them
+> (outside this register's reach; a question for the MCP head, not a KB defect found here).
 
 > **Folds and removals applied 2026-10-10 («#422», dispatch B).** `provenance:` / `primary_sources:`
 > (`p2an001`–`p2an007`, `click_module_integration.yaml`, `addon-hyperram-hyperflash.yaml`) are folded into
@@ -707,9 +723,11 @@ list, so the drift cannot recur.
 > `cogspin.yaml` is a `caveat:` — reader caveats stay as content. `extraction_metadata` /
 > `extraction_date` are removed from `spin2-builtin-symbols-complete.yaml`,
 > `spin2-pasm2-integration.yaml`, `io_pin_timing.yaml`, the system-register pages and the two code
-> examples (process dates; each page keeps a real citation). Not touched: `extraction_metadata` in
-> `spin2-language-schema.yaml` (record counts, no dates) and the key's definition in
-> `code-example-schema.yaml`; the OBEX `metadata:` bookkeeping, which the spec says to leave.
+> examples (process dates; each page keeps a real citation).
+> **Owed (not built):** the gate this entry named — fail on a NEW key whose name contains
+> source/extract/verified/provenance/authority and is not in the reviewed list — does not exist
+> (checked 2026-10-10: nothing in `validate-dod-release.py` or `engineering/tools/validation/` reads key
+> names); until it is built the drift can recur.
 
 ### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 > **Applied 2026-10-07 — and the defect was wider than filed.** The example's `source: P2-FLASH-FS`
@@ -899,7 +917,7 @@ removed fabricated electricals, and 27 of its 48 hunks were delete-then-repopula
 inside the same file); it took four real facts with it. All four were confirmed verbatim in sources
 already held, so restoring them was transcription, not research.
 
-### F-454 — `edge-standard-module.yaml` lost its revision history, leaving a VIN maximum that destroys Rev A/B boards — `PARTIAL — applied 2026-09-22; the gate this entry names as owed (an absolute maximum stated without its board revision) is not built (re-verified 2026-10-05 «#386»)`
+### F-454 — `edge-standard-module.yaml` lost its revision history, leaving a VIN maximum that destroys Rev A/B boards — `PENDING-VALIDATION` (fix applied 2026-09-22; the gate this entry named built 2026-10-09, «#410», and driven to 0 on 2026-10-10, «#420»; closes when the next KB release serves the scope decisions)
 
 > **SEVERITY: BREAKS USERS (hardware damage).** The purge deleted the board's revision history. What
 > remained read `input_voltage: "5-16 VDC"` and `ratings.vin: "5 V recommended, 16 V maximum"` with
@@ -916,9 +934,11 @@ already held, so restoring them was transcription, not research.
 > absolute maximum) reached by a different route: **not a fabricated number, but a CORRECT
 > current-revision number stripped of the revision scope that made it correct.** Deleting a revision
 > history silently converts a true claim into a destructive one, and no instrument we have looks for
-> it. A gate that flags a shipped absolute-maximum stated without its board revision is owed.
+> it. The gate that flags a shipped absolute-maximum stated without its board revision was owed;
+> it is built (`audit-hardware-revision-scope.py`, below).
 
-> **Gate built («#410») and driven to 0 («#420», 2026-10-10).** `audit-hardware-revision-scope.py`
+> **Gate built («#410») and driven to 0 («#420», 2026-10-10); final run 2026-10-10: 29 files scanned,
+> 8 declare a revision, R-A 0, R-B 0.** `audit-hardware-revision-scope.py`
 > went 12 findings in 7 files → 0. Each file now records its scope decision against its guide's
 > Revision History: `board_revisions:` (Rev B/earlier deltas, source + page) in `edge-32mb-module`
 > (also "(Rev B)" on `vin` and `input_voltage`), `edge-breadboard-carrier` (Rev B power-switch discharge;
@@ -927,41 +947,6 @@ already held, so restoring them was transcription, not research.
 > `addon-goertzel-touch` (touch pads vs probe posts); `revision_scope_reviewed:` in `edge-mini-breakout`
 > (v1.1: guide edits only) and `edge-standard-breakout` (v1.0: single version). No file states a
 > rating for a revision whose guide gives none: the Rev A figures are marked "not asserted".
-
-## Two release-path defects, one root cause — F-440, F-441
-
-### F-441 — v1.19.1 published an index the integrity check could not verify — `PARTIAL — v1.19.2, 2026-09-19; published state re-verified against raw.githubusercontent.com; the owed index-sha256-vs-committed-blob gate is not built (re-verified 2026-10-05 «#386»)`
-
-v1.19.1's index carried the **pre-change** SHA-256 for the two files that release edited, so the
-MCP refused to serve them: *"Content for 'p2kbPasm2Xinit' is temporarily unavailable — verification
-failed."* The release was live and broken for `p2kbPasm2Xinit` and `p2kbArchOverview`.
-
-**Cause: step ordering.** `release-yamls` §6b regenerates derived artifacts **against the committed
-state**, and it is a separate step for exactly this reason — the generator hashes the **git blob**,
-so an index built while the edits are still uncommitted records the OLD hashes. This pass collapsed
-6a/6b and regenerated before committing content. The gates could not catch it: `validate-dod-release`
-checks index/gzip parity and structure, not whether each entry's sha256 matches its committed blob.
-
-**Same root cause as F-440**, one release apart: both are *reading from what I had done rather than
-from what was committed* — once into a release note, once into a derived artifact. The first was
-caught by auditing claims against the tree; the second by the consumer's own integrity check, which
-is the only reason it surfaced at all.
-
-**Fixed and verified on the artifact, not the gate:** index regenerated post-commit, then every
-entry's sha256 compared against `git cat-file blob HEAD:<path>` — **0 of 1131 mismatch**. Published
-state confirmed from outside: `raw.githubusercontent.com` serves the corrected `xinit.yaml`, its
-sha256 equals the published index's entry, and the content carries the fix.
-
-**Owed — the gate that would have caught it:** a release check asserting every index entry's sha256
-matches the committed blob it names. Cheap (one `git cat-file` per entry), and it makes the
-6a→6b ordering self-enforcing rather than a rule someone has to remember. Pairs with F-440's
-CHANGELOG-vs-diff check; both belong in `validate-dod-release.py`.
-
-**Not a defect, recorded so it is not chased:** `p2kb-mcp` still reports the failure in this session
-after the fix. It serves a boot-time snapshot and does not reload on republish — a stale read needs
-an MCP restart, not `p2kb_refresh`.
-
-F-440 (the CHANGELOG claim that was never applied) is archived — `correction-sweeps/2026-10-03-P2KB-CORRECTION-FINDINGS-archive.md`.
 
 ## The provenance strip reaches two of its three consumers — F-439
 
@@ -1195,53 +1180,18 @@ the word. Anyone scoping F-356 off its original wording will do the wrong repair
 ---
 
 
-## The index and its gzip drifted apart again and the release validator sat red in committed history for four days — F-357's defect, recurred (2026-09-09, ledger re-derivation) — F-405
-
-### F-405 — `validate-dod-release.py` exits 1 on a stale gzip, and nothing in this project makes it run — `PARTIAL`
-
-> **Re-checked 2026-10-09 (close-out study «#407», group F):** the "nothing makes it run" half is
-> stale — `release-yamls` (§5.5, §6c) and `baseline-health`'s project overlay invoke the DoD runner, and
-> the ENH-03 compile gate is now armed through it (`audit-gate-arming.py`). What is still owed is the
-> **freshness** limb (regenerate the index in a clone of the commit and compare): build spec in
-> `engineering/analysis/2026-10-08-p2kb-close-out-evidence/gates-groupF-specs.md` (new
-> `audit-index-integrity.py`, run post-commit). Today the committed index is stale against HEAD.
-
-**Location:** `deliverables/ai/p2kb-index.json` / `deliverables/ai/p2kb-index.json.gz`, and the absence of any trigger for `engineering/tools/validate-dod-release.py`.
-
-**What was measured.** Run at `b0057ec1` before any repair, the release validator reported **`❌ Gzip Compression: FAIL — Gzip content does not match JSON file`** and exited **1** (*VALIDATION FAILURES - DO NOT RELEASE*). The other ten checks passed.
-
-**Why.** Derived from `git log` on the two paths, not recalled:
-
-| | `p2kb-index.json` | `p2kb-index.json.gz` |
-|---|---|---|
-| last regenerated | `da896073` (2026-09-05) | **`b753a29d` (2026-08-30)** |
-| commits touching it since `9ab0433b` | `d55b6c7f`, `da896073` | **none** |
-
-The 2026-09-05 findability pass regenerated the JSON **twice** and the gzip **neither time**. **This is F-357 recurring while F-357 reads `RESOLVED`** — which is what makes it a regression rather than an open item.
-
-**A second, unrelated staleness in the same artifact.** The index was generated on 09-05 and the 09-08 boot-ROM pass (F-403) committed content afterwards. Regenerating updated exactly **two** entries — `p2kbArchBootRomContents` and `p2kbArchIndex` (`architecture/boot-rom/_index.yaml`), mtime and sha256 both — and added or removed none; the count stayed at 1,133. So the pair was *inconsistent* **and** the index was *stale*, and those are two different defects with two different remedies.
-
-**Repaired 2026-09-09.** Both regenerated together, in the required order (the index stores the git blob sha256, so it must be rebuilt after the content commit). `gzip -cd … | cmp -` is clean and the validator is green at 11 of 11.
-
-**Why this is `PARTIAL` and not `RESOLVED`.** The drift is gone; **the reason it happened is not.** The instrument worked — it caught the drift on its first run. What failed is that **nothing invokes the instrument**: a red release gate lived in committed history for four days and was found only because the change ledger was being re-derived. That is the same sentence F-360 has been carrying about the duplicate-key gate, now with a demonstration attached instead of a prediction.
-
-**What closes it — two checks, one wiring pass** (task «#339», block H):
-1. Wire `audit-yaml-duplicate-keys.py` into `validate-dod-release.py` as a blocking gate (F-360's open half).
-2. Add an **index-freshness** check: run `generate-p2kb-index.py`, then `git diff --quiet` on the pair. The pair-*consistency* check already exists and just proved itself; **freshness** is the one that is missing, and it is what would have caught the two stale boot-ROM entries.
-
-**The generalisable shape, stated so it is not relearned:** *a defect closed by a one-time repair, with no gate wired to the release path, is a defect scheduled to come back.* F-357 is the proof — repaired 2026-08-26, recurred 2026-09-05.
-
----
-
 ## The hardware selection guide ships 2025 US retail prices as data, in a set with no mechanism to age them (2026-08-30, release fix pass step 1) — F-398
 
-### F-398 — ~15 USD price sites across `p2-hardware-selection-guide.yaml`; needs a policy call, not a citation — `CONFIRMED`
+### F-398 — ~15 USD price sites across `p2-hardware-selection-guide.yaml`; needs a policy call, not a citation — `PENDING-VALIDATION` (applied 2026-10-10, «#420»; closes when the next KB release serves it)
 
-> **DECIDED by Stephen 2026-10-08 (option a): ready to fix.** Delete every dollar figure (22
-> sites). Keep the relative tiering: cheapest to dearest, and what each tier adds. Add one line:
-> "for current pricing, see the Parallax store."
+> **DECIDED by Stephen 2026-10-08 (option a) and APPLIED 2026-10-10 («#420»).** Every dollar figure
+> (22 sites) is deleted from `hardware/p2-hardware-selection-guide.yaml`; the relative tiering (cheapest
+> to dearest, and what each tier adds) stays; the file carries the one line
+> `pricing: "For current pricing, see the Parallax store (parallax.com)."` (`:13`). Verified 2026-10-10:
+> `grep -n '\$[0-9]'` over the file returns nothing and no `cost_estimate` / `total_investment` key
+> remains anywhere under `deliverables/ai/P2/hardware/`.
 
-**Not fixed. Registered for a definition call, and it is the sibling of F-374.**
+**Registered as a definition call, and it is the sibling of F-374.**
 
 `p2-hardware-selection-guide.yaml` states prices as first-class data — `cost_estimate: "$150-200"`
 (6 sites), `total_investment` (2), `cost` (4), `additional_cost` (2), `total_cost` (3),
@@ -1256,7 +1206,7 @@ money is wrong in a way the reader can check — which is the kind of wrong that
 everything else on the page. It is also the `feedback_durable_mechanism_over_perishable_catalog`
 shape: **vendor facts rot, and this set has no expiry mechanism.**
 
-**Why it is NOT being swept in this pass.** The disposition is a judgement with a real cost either
+**Why it waited for a decision before it was swept.** The disposition is a judgement with a real cost either
 way — deleting every price guts a guide whose entire purpose is budget-tiered selection, and the
 relative ordering (mini breakout cheapest, full add-on set dearest) is durable even when the
 absolute numbers are not. That is a definition call of exactly F-374's kind, and this register's
@@ -1272,7 +1222,7 @@ on ordering, not amounts.
 
 ## The whole top-level cog stack is missing from the KB — no entry says cog 0 has one, where it starts, which way it grows, or that nothing checks it (2026-08-30, debug/stack research) — F-392
 
-### F-392 — the KB documents `cogspin`/`TASKSPIN` stacks and is silent on the stack every Spin2 program already has; the sizing numbers it does ship are unsourced and are cited back as authority — `PARTIAL — the circular-authority half fixed 2026-09-22 («#351»); the top-level-stack documentation is carved out with an expiry`
+### F-392 — the KB documents `cogspin`/`TASKSPIN` stacks and is silent on the stack every Spin2 program already has; the sizing numbers it does ship are unsourced and are cited back as authority — `PENDING-VALIDATION` (applied 2026-10-10, «#423»; closes when the next KB release serves it)
 
 > **The dangerous half is fixed.** `language/spin2/methods/cogspin.yaml`'s `stack_requirements`
 > shipped `minimum: "32 longs"` and `typical: "64-128 longs"` with no source, and
@@ -1284,12 +1234,14 @@ on ordering, not amounts.
 > only way to settle a size, and record that P1's `_STACK`/`_FREE` do not exist in Spin2 and have no
 > effect if written.
 >
-> ⏳ **CARVED OUT, expiry: the next Spin2-interpreter ingestion.** Documenting the stack that every
+> ⏳ **CARVED OUT, and the named expiry has ARRIVED: the v55 interpreter was ingested 2026-10-09
+> («#401», `external-inputs/source-code/spin-interpreter/v55/`).** Documenting the stack that every
 > Spin2 program already has (the top-level cog's, its `DBASE` frame and the 6-long *Drop anchor*
-> entry) requires reading the interpreter listing, and **the copy in this repo is v51 while the
-> shipped KB targets v55**. Writing v51 internals as current v55 behaviour is precisely the
-> tier-mismatch this register exists to prevent, so it waits for a v55 interpreter source rather
-> than being guessed. That is the named expiry, not an open-ended deferral.
+> entry) needed a v55 interpreter source rather than v51 internals presented as v55 behaviour; that
+> source now exists. **Not landed:** no sprint task wrote it (study row S-319, "home file decided in
+> the sprint"; a search of `deliverables/ai/P2` for `DBASE`, *Drop anchor*, a top-level-stack entry
+> returns nothing, 2026-10-10). Owed: items (1)-(5) below, read off the v55 listing, in a home file
+> the next KB pass picks.
 >
 > **Applied 2026-10-09 («#414», `PENDING-VALIDATION` for this part only).** Two more sites carried the
 > same unsourced floor and contradicted the fix above: `cogspin.yaml` `parameters` → `StackAddress`
@@ -1297,6 +1249,20 @@ on ordering, not amounts.
 > stack_requirements below", and `guides/quick-queries.yaml` ("Check stack size (minimum 32 longs)")
 > now tells the reader to check the COGSPIN stack against the method's worst case and measure the
 > high-water mark. Class sweep `grep -rn -i -E "minimum (of )?[0-9]+ longs"` over `deliverables/ai/P2`: no hit remains.
+>
+> **Applied 2026-10-10 («#423»): the top-level stack, read off the v55 interpreter listing.** New
+> `top_level_stack:` block in `language/spin2/methods/cogspin.yaml` (placement after VAR space via
+> `dbase_init`/`var_longs`; 6-long first frame from `launch_spin`/`launch_method`; upward growth;
+> 6-long drop anchor + return-address long = 7 popped per return; size and overflow check stated
+> as **not documented**, since neither Spin2 v55 nor the listing states a size and the listing
+> compares `PTRA` against no limit). `related:` links added both ways with `taskspin.yaml` and
+> `p2an006`. **Corrections to the items below:** item 3's "exactly 6 longs" is the drop anchor
+> alone — a return pops 7 (`returnh`), the top-level first frame is 6; item 4's `$7FFFF`/`$7BFFF`
+> ceiling is **not** in the listing or Spin2 v55 (the listing's `$80000` is a zero-fill source in
+> `launch_spin`, not a stack bound) and was not carried; item 5 (observability, `COGBRK`) landed as
+> `cogspin.yaml` `stack_observability`, cited to the P2 Documentation v35 OVERVIEW / COGS / DEBUG
+> INTERRUPT, with a `related:` link to `debug_interrupt.yaml` (its "only route" wording not carried —
+> no source says *only*).
 
 **Class: OMISSION + UNSOURCED CLAIM.**
 
@@ -1601,7 +1567,7 @@ the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
 
 ## An improvement to the general smart-pin page made a contradiction with the mode page SHARPER (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-5) — F-386
 
-### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `PARTIAL` (the class sweep RUN 2026-10-07, «#387»; the general rule corrected; ten mode pages wait on VO-J-028)
+### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `PENDING-VALIDATION` (class sweep run 2026-10-07, «#387»; the nine mode pages settled by EF-097 on 2026-10-10, «#419»; closes when the next KB release serves it)
 > **Sweep run 2026-10-07 over all 33 files in `architecture/smart-pins/`.** Two shapes searched:
 > `pinstart` with a non-zero Y in a mode that loses it, and `wypin` before `dirh`.
 > **Trigger and async-TX pages are clean** — the only `pinstart` calls in those modes
@@ -1637,12 +1603,10 @@ the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
 > mode, so the general page's exclusion does not apply, and marks the immunity question as NOT
 > STATED by any source we hold.
 >
-> ⏳ **OWED, with a named expiry — the next smart-pin touch:** the finding also required sweeping
-> the other ~30 mode pages under `architecture/smart-pins/` for the same shape (`wypin` before
-> `dirh`, and `pinstart(...)` used in a trigger mode). That sweep has NOT been run. It is
-> mechanical and bounded; it is not a blocker for the current release because the demonstrated
-> defect is fixed, but it is exactly the "whole family, not the site you tripped over" rule and it
-> must not be left to be rediscovered.
+> **The sweep this entry required (the other ~30 mode pages under `architecture/smart-pins/`, for
+> `wypin` before `dirh` and for `pinstart(...)` in a trigger mode) was RUN 2026-10-07 — the first
+> block of this entry — and its one open question, the nine counter-mode pages, was decided on
+> silicon by EF-097 (the second block).**
 
 **Class: AMBIGUITY — and a regression created by a good change, which is the notable part.**
 
@@ -1722,7 +1686,22 @@ unlikely to be the only two, and this should be a class sweep, not a single edit
 
 ## The index returns partial results by construction: 27 of 60 debug files reachable, and nine DEBUG-window pages carry no searchable trace of the word (2026-08-30, measured; corroborates P2KB-GAPS-RUNNING-LOG FINDABLE-1/2/3) — F-389
 
-### F-389 — key generation abbreviates and drops path components, so whole subtrees vanish from the term that names them — `PARTIAL` (re-verified 2026-10-05 «#386»: alias vocabulary added in places; the generator still abbreviates and has no component-survival check)
+### F-389 — key generation abbreviates and drops path components, so whole subtrees vanish from the term that names them — `PENDING-VALIDATION` (gate built 2026-10-09, «#410»; partial-reach directories dispositioned 2026-10-10, «#420»; closes when the next KB release serves the aliases)
+
+> **Component-survival check built and driven to 0.**
+> `engineering/tools/validation/audit-index-findability.py` (in the DoD as *Index Findability by
+> Directory Term (F-389)*; term = a directory's own name, reach = key + alias + category) found 8
+> partial-reach directories (141 files) on 2026-10-10. Four gained aliases so the directory's name reaches
+> every file (`architecture/boot-rom`, `architecture/system-registers`, `language/spin2/conventions`,
+> `language/spin2/debug-commands`); four wide directories are in the reviewed baseline
+> `engineering/tools/validation/baselines/index-findability.json`, each with its reason
+> (`language/spin2/operators` 1/83, `registers` 1/18, `patterns/implementation` 1/19, `preprocessor` 2/14
+> — one page per operator / register / pattern / directive, found by that page's own name). Final run
+> 2026-10-10: 31 qualifying directories, 0 partial not baselined, 4 baselined, 14 reached by none
+> (advisory). **The generator's key abbreviation is unchanged** — key names are what consumers address
+> pages by; the remedy chosen (study S-387) is the gate plus alias vocabulary, and the four baselined
+> directories are a judgement the arbiter may overrule (the alternative is a literal "operators" /
+> "registers" alias on 129 pages). What the gate cannot see: a vocabulary gap — a query no alias answers.
 
 **Class: FINDABILITY — a defect in the index generator, not in any entry's content.**
 
@@ -1826,7 +1805,14 @@ programme, not an edit; it should be scoped from the hole list rather than start
 
 ## Citing ONE block in a wholly-uncited file turns its other blocks Tier-1 RED — 32 uncited quantity blocks across 24 files are structurally invisible to the blocking gate (2026-08-29, «#334», proved by accident) — F-381
 
-### F-381 — the Tier-2 advisory class is not "reviewed and accepted", it is "no control available" — `CONFIRMED`
+### F-381 — the Tier-2 advisory class is not "reviewed and accepted", it is "no control available" — `PENDING-VALIDATION` (Tier 2 blocking and at 0 since 2026-10-10, «#422»; closes when the next KB release serves the sourced files)
+
+> **APPLIED 2026-10-10 («#412», «#422»).** `audit-yaml-claim-sourcing.py` now blocks on wholly-uncited
+> files (`TIER2_BLOCKING` switched on, commit 89eb8c02) and accepts only a canonical Parallax title with
+> its edition (and page), a source listing pinned to its edition, an EF/CP/XF id or an OBEX id as a
+> citation. Final run 2026-10-10: **3 Tier 1 + 0 BAD_CITATION + 0 Tier 2** across 1,005 files, all 3 in
+> `hardware/hub75_adapter.yaml` (an Iron Sheep board no Parallax document can cite — F-567, Stephen's
+> call). The Tier-2 population this entry measured (32 blocks in 24 files) is now 0, and Tier 2 blocks.
 
 > **DECIDED by Stephen 2026-10-08: ready to fix.** The gate blocks on wholly-uncited files.
 > - **Source every number that drives code generation:** P2 limits, timings, register and field
@@ -1892,10 +1878,10 @@ filter stripping citations that ARE present. This one is about blocks that were 
 cannot be reported as blocking. F-340/F-373 are the cross-reference analogue — a gate printing
 green over sites it does not read.
 
-**Not started.** Deciding whether all 24 get cited, or whether some areas carry a declared
-exemption (OBEX object metadata is community-sourced and may not have a Parallax citation to give;
-the decomposition layer is a reasoning layer, not an extraction), is a scope call, not a repair to
-start unasked. What «#334» fixed is only the three files it touched.
+**The scope call was made** (Stephen, 2026-10-08, the decision block above): OBEX numbers are never
+sourced (the gate accepts an OBEX id), numbers inside correct example blocks pass by location, and every
+other quantity is sourced or comes out; the decomposition layer's worked examples are tagged
+`authority_tier: EXAMPLE`, which the gate reads.
 
 ---
 
@@ -1972,17 +1958,17 @@ file cannot read sentences.
 
 ## The delivery filter strips `documentation_source:` from every file it serves, and 706 of those values are real citations (2026-08-26, «#324» verification) — F-375
 
-### F-375 — a remote agent receives 383 of our files with their source line deleted, and the gate that checks the filter cannot see it — `PARTIAL — gate half RESOLVED 2026-09-11; the 383-file rename remains Stephen's scope call`
+### F-375 — a remote agent receives 383 of our files with their source line deleted, and the gate that checks the filter cannot see it — `PENDING-VALIDATION` (gate half resolved 2026-09-11; the rename overtaken by Stephen's 2026-10-08 ruling; the sourcing gate teaching and the bookkeeping-word cleanup applied 2026-10-10, «#412»/«#422»; closes when the next KB release serves it)
 
 > **DECIDED by Stephen 2026-10-08 (no rename): ready to fix.** The delivery half was overtaken
 > by the 2026-09-19 ruling that *provenance is for us*: the certified delivery filter strips
 > `source:` as well, so a rename would deliver nothing. What is left:
-> - Teach `audit-yaml-claim-sourcing.py` `CITE_KEY_RE` to read `documentation_source:` and
->   `enhancement_source:`. It is currently blind to about 363 real citations.
+> - Teach `audit-yaml-claim-sourcing.py` `CITE_KEY_RE` to read `documentation_source:` (Stephen's Q3,
+>   2026-10-09: `enhancement_source:` is not read and its 356 lines are deleted). Done in «#412».
 > - Delete the ~40 bookkeeping words: `enhanced` (16), `original` (15), `p2_datasheet` (8),
->   `code_analysis` (1).
+>   `code_analysis` (1). Done in «#422».
 >
-> F-375 then closes.
+> F-375 then closes (when a release serves it).
 
 > **Applied 2026-10-10 («#422», dispatch A).** All 356 `enhancement_source:` lines are deleted (the
 > sourcing gate already ignores the key; `enhancement_source` is in the delivery filter's stripped set,
@@ -2062,12 +2048,12 @@ what the delivery path does to files that were never part of the shape question 
 
 **Delivery-strip numbers re-derived and recorded** in the change ledger (now `2026-09-11-yaml-release-change-ledger.md` §1.5 — see the note below) so they reach Stephen's visual read: `filter_metadata` strips five fields; `documentation_source` is **396 values across 395 files**, of which **363 (91%) are real provenance** and only 33 are bookkeeping tokens (`enhanced` 16, `original` 15, `code_analysis` 1, `redirect_stub` 1). So the set satisfies cite-or-omit ON DISK and is delivered NOT satisfying it, and nine tenths of what the filter removes is the provenance the project's own rule requires. Filing drift noted rather than smoothed: the entry said 397/396, today measures 396/395.
 
-**REMAINS OPEN:** the 383-file rename is a scope call Stephen owns and was explicitly out of block I.
+**The 383-file rename was a scope call Stephen owned; he ruled 2026-10-08 that there is no rename** (the delivery filter strips `source:` too, so a rename would deliver nothing; provenance is for us). What was left — the gate learning `documentation_source:` and the bookkeeping words — is applied (the blocks above).
 
 ⚠ **Ledger correction 2026-09-11.** These numbers were first appended as §1.26 to `2026-08-27-yaml-release-change-ledger.md`. That ledger was **spent** — its declared range `v1.17.0..b0057ec1` shipped on 2026-09-10 as v1.18.0/v1.18.1 — so it could not gate an unshipped release. Stephen caught it. The append was reverted, that ledger archived byte-identical to its last committed revision, and the content re-derived against the correct `v1.18.1..HEAD` range in `2026-09-11-yaml-release-change-ledger.md`. **A release ledger expires the moment its range ships, and nothing in the process was checking that.**
 ## Our USB smart-pin entry states as fact a sentence the DOCX edition dropped, and it contradicts the general WRPIN rule (2026-08-26, «#320» citation re-anchor) — F-372
 
-### F-372 — `%11011` says a new WRPIN needs no reset; the same document's general rule says the opposite — `CONFIRMED`
+### F-372 — `%11011` says a new WRPIN needs no reset; the same document's general rule says the opposite — `PENDING-VALIDATION` (settled on silicon by EF-093, applied 2026-10-10, «#419»; closes when the next KB release serves it)
 
 **How this surfaced.** F-365's re-anchoring reads each stale citation's old target and finds that
 content in the new artifact. Twenty-two of twenty-three matched. **One did not exist in the new
@@ -2103,18 +2089,17 @@ Two readings, and **documents cannot separate them**:
 `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml` `configuration.wrpin_data` ends with
 the sentence verbatim, with no caveat, cited to the PDF-derived capture that is now superseded.
 
-**Applied here:** the claim keeps its place — it may well be right, and deleting a plausible
-documented behaviour is its own kind of damage — but it now carries the conflict, cites both
-editions, and points at the gap. **Routed to `KNOWLEDGE-GAPS` as G-027: bench-testable and
-jumper-only** — configure a USB pair, issue a new WRPIN with DIR high, and observe whether the pin
-continues or breaks. That is the only thing that settles it.
+**Applied 2026-08-26:** the claim kept its place — it may well be right, and deleting a plausible
+documented behaviour is its own kind of damage — and carried the conflict, citing both editions.
+**Routed to `KNOWLEDGE-GAPS` as G-027, bench-testable and jumper-only; the bench settled it
+(EF-093, below), and G-027 is ANSWERED.**
 
 > **Settled 2026-10-10 («#419»): EF-093 (WRPIN, drive ↔ sniffer) and EF-102 (WXPIN, baud).**
 > EF-093: a live WRPIN that switches a running USB pair between the drive word `$76` and the sniffer word
 > `$36` took effect without a reset or a DIR cycle, 5 of 5 (one pair, full speed, host mode, nothing
 > attached). The Hardware Manual's sentence stands. `smart-pin-11011-usb-host-device.yaml`
 > `configuration.wrpin_data_conflict` ("NOT SETTLED … the same document") is replaced by
-> `wrpin_data_on_a_running_pair`; `detailed_description.source` cites the P2 Documentation, the Hardware
+> `wrpin_data_on_a_running_pair` (`:21-31`); `detailed_description.source` cites the P2 Documentation, the Hardware
 > Manual, EF-093 and EF-102; `pin_pairing` names the overridden `%HHH_LLL` drive modes (`silicon-doc-text.txt:4579`).
 > EF-102 supplies the P2 Documentation's on-the-fly WXPIN sentence (`:4581`) for the **baud only**
 > (`configuration.wxpin_on_the_fly`); the FS/LS bit D[14] is not claimed.
@@ -2154,64 +2139,6 @@ as **needs Stephen's accept-or-fix**.
 **Also found there and NOT blocked as previously reported:** `Propeller 2 Questions & Answers.xlsx`
 — the `p2-qa-spreadsheet` row sits at 80% and was listed in this sprint's plan as having *no primary
 document staged*. It has one. That plan line is wrong and is corrected in «#318».
-
-## The COG register map's PA/PB row lost the return-vs-parameter distinction, and its index dangles 13 of 16 pointers (2026-08-26, silicon-doc DOCX re-extraction) — F-363 · F-364
-
-### F-364 — the same index advertises 16 register files; 13 of the pointers do not exist — `PARTIAL` (re-verified 2026-10-05 «#386»: pointers removed and shipped; the gate reading `yaml_file:` is not built)
-
-> **Re-checked 2026-10-09 (close-out study «#407», group F):** the gate exists —
-> `validate-crossref-keys.py` checks every path token in every string, `yaml_file:` values included
-> (`check_path_token`, `:545-567`), and today's 3 pointers resolve. What is owed is a negative-control case
-> proving a dangling `yaml_file:` fails (spec in `…/close-out-evidence/gates-groupF-specs.md`); then F-364
-> closes.
-
-**What was measured.** Every `yaml_file:` pointer in
-`complete-system-registers-index.yaml`, resolved against its own directory:
-
-| | |
-|---|---|
-| pointers declared | **16** |
-| resolve | **3** |
-| **dangle** | **13** (11 distinct filenames) |
-
-Missing: `dual-ijmp3` · `dual-iret3` · `dual-ijmp2` · `dual-iret2` · `dual-ijmp1` ·
-`dual-iret1` · `dual-pa` · `dual-pb` · `ptrb-register` · `outa-outb-registers` (×2) ·
-`ina-inb-registers` (×2). The directory contains exactly three files:
-`complete-system-registers-index.yaml`, `dira-dirb-registers.yaml`, `ptra-register.yaml`.
-
-**Why no gate caught it.** `validate-crossref-keys.py` exits 0 on this tree and has throughout.
-It validates `related:` keys; **`yaml_file:` is a different pointer field and nothing checks
-it.** So an index can promise thirteen files that were never written and every instrument stays
-green — the same shape as F-362 (a register gate reporting CLEAN on entries it never read) and
-F-359 (headers citing sources that do not exist). An agent following `yaml_file: dual-pa-register.yaml`
-to resolve F-363's own defect would find nothing there.
-
-**Disposition owed — this is a scope call, not a mechanical fix.** Either the eleven files get
-written (they are real registers and deserve entries), or the pointers are removed and the index
-carries the content inline. **Removing a pointer is not automatically Sacred Rule #7's forbidden
-delete** — that rule protects a `related:` link to a concept documented *elsewhere*, and here
-there is no elsewhere. But which way to go is {{USER_NAME}}'s call and is recorded as
-**needs Stephen's accept-or-fix**, not decided here.
-
-🟢 **RESOLVED 2026-08-26 («#323») — the thirteen dangling pointers were removed; the content
-stays inline.** Writing eleven thin files would have put one fact in two homes, which is the
-defect class this project keeps finding. **The index already holds everything a per-register file
-would need** — address, normal use, special function, description, access, category and key
-features — for every register it lists; that is now stated in `metadata.per_register_files`, so
-anyone who later wants per-register files can generate them from this file without new research.
-The three pointers that resolve (`ptra-register.yaml`, `dira-dirb-registers.yaml` ×2) were left
-untouched.
-
-Measured after: `yaml_file:` pointers across all of `deliverables/ai/P2/` — **3 declared, 3
-resolve, 0 dangle**. The resolver was shown to be live by pointing one of the three at a
-non-existent file, which it reported as DANGLE before being restored.
-
-**Instrument gap, still filed:** whatever the disposition, `yaml_file:` pointers should be
-resolved by a gate. Today nothing in the shipped tool set reads them — the resolution above was
-done by an ad-hoc walker, not by an armed check. With 3/3 resolving, arming it is cheap now.
-
-Status: `PARTIAL` (2026-10-05: the `yaml_file:` gate is still owed) — 13 dangling pointers removed, content kept inline, 3/3 remaining pointers
-resolve. The instrument gap (no gate reads `yaml_file:`) remains open.
 
 ## `pin-selection.yaml` printed the streamer's sub-pin table with the wrong bit weights, and shipped the EF-065 trap as its worked example (2026-08-26, found while composing the streamer pin-capture page) — F-361
 
@@ -2278,19 +2205,22 @@ resolve. The instrument gap (no gate reads `yaml_file:`) remains open.
 
 - **F-359 — Seven `architecture/` files carry a provenance header citing source files that have
   never existed and datasheet pages beyond the end of the datasheet; the header itself satisfies
-  the citation regex, so six of the seven still pass the gate today.** — `PARTIAL` (re-verified 2026-10-05 «#386»: six files re-derived and shipped; 5 of the 8 non-derivable claims are still in the tree; **DECIDED 2026-10-08, see below**)
+  the citation regex, so six of the seven still pass the gate today.** — `PENDING-VALIDATION` (six files re-derived and shipped by 2026-10-05, «#386»; the five remaining claims applied 2026-10-10, «#413»/«#418»/«#419»; closes when the next KB release serves them)
 
-  > **DECIDED by Stephen 2026-10-08 for the five remaining claims: ready to fix.**
-  > - `locks.yaml` `state_bits: 4`: **delete.** It does not matter to an agent producing code.
-  > - `cog_attention.yaml` `waiting: "0 clocks"`: **fix from the Datasheet** (WAITATN `2+`).
-  > - `debug_interrupt.yaml` `trace_buffer`, `debug_state` and `streamer_interaction`:
-  >   **answer from the Spin2 debugger and interpreter source.**
+  > **DECIDED by Stephen 2026-10-08 for the five remaining claims, and APPLIED.**
+  > - `locks.yaml` `state_bits: 4`: **deleted** (no `state_bits` key remains).
+  > - `cog_attention.yaml` `waiting: "0 clocks"`: **fixed from the Datasheet** — now
+  >   `latency: "2+ clocks (2 minimum, plus the wait for the event)"` (`cog_attention.yaml:57-59`).
+  > - `debug_interrupt.yaml` `trace_buffer` and `debug_state`: the whole `memory_usage` block is
+  >   **deleted** (Stephen's Q2, 2026-10-09: keep it only if it guides code; the one such fact, writes to
+  >   the top 16 KB dropped in a debug build, is at `debug-strategy-guide.yaml:93`, `hub.yaml:36-57` and
+  >   `debug_interrupt.yaml:80-83`). `streamer_interaction` now states the measured behaviour
+  >   (`debug_interrupt.yaml:381-385`: streamer Goertzel results corrupted with every cog
+  >   debug-enabled; pin and DAC output unchanged; no source states the mechanism), cited to EF-057,
+  >   EF-062 and EF-063.
   >
-  > Prerequisite found while recording: the ingested copies
-  > (`external-inputs/source-code/spin-{interpreter,debugger}/v51/`) are v51. The v55 interpreter
-  > (2026-05-07) exists only in the XBYTE guide's `REF-NO-COMMIT/pnut-ts-parts/` and is not
-  > ingested. The debugger there is byte-identical to v51. So the work starts by ingesting the v55
-  > interpreter and confirming which debugger is current.
+  > The v55 interpreter and debugger that the first decision wanted ingested are ingested (2026-10-09,
+  > «#401»; the debugger source is identical to v51).
 
   **How it surfaced.** Stephen asked whether `io_pin_timing.yaml`'s content might have come from
   our own I/O & Smart Pins manual rather than a Parallax source — i.e. whether the provenance was
@@ -2445,8 +2375,9 @@ resolve. The instrument gap (no gate reads `yaml_file:`) remains open.
   first: absent from the silicon doc, absent from every other file in `deliverables/ai/P2/`, and
   not accepted as instructions by pnut-ts v1.55.3.
 
-  Status: `PARTIAL` (2026-10-05: 5 of the 8 non-derivable claims still stand, call undecided) — all six re-derived and cited against live sources; eight non-derivable
-  claims listed above are left in place for Stephen's delete-or-keep call.
+  Status: `PENDING-VALIDATION` — all six re-derived and cited against live sources; the eight
+  non-derivable claims listed above are dispositioned (three removed by 2026-10-05, five decided and applied
+  in the block at the top of this entry).
 
 ---
 ## Carry-forward guardrails — investigated and settled; do NOT re-file (full detail in the archive)
@@ -2503,7 +2434,8 @@ because it is already **correct** (*"No pullup/pulldown by default — Use exter
 configure smart pin modes"*).
 
 **PARTIAL 2026-09-10 — the MECHANISM half is applied across IOSP and deSilva; the SOURCING half is
-not, and it is tracked by F-336.** Worked as part of the v1.18.0 sweep, under §1.24's reframing.
+not: no source or bench result exists for `P_HIGH_15K | P_LOW_FLOAT` (F-336, closed 2026-10-10 by
+Stephen's ruling that the composition is dropped, not benched).** Worked as part of the v1.18.0 sweep, under §1.24's reframing.
 
 ⚠️ **§1.24 changed what the repair is, and this entry's own site counts must be read through it.**
 Calling `P_HIGH_15K` a "15 kΩ pull-up" is now *acceptable vocabulary* — the Silicon Doc uses it for
@@ -2531,8 +2463,11 @@ the constants are presented:**
 
 **STILL OPEN — the sourcing half.** `P_HIGH_15K | P_LOW_FLOAT` still has no Parallax documentary
 statement and no bench result; the manual now explains the mechanism correctly but cannot *cite* the
-composition. That is **F-336**, which owns it, and it closes with a source or a silicon run — not
-with prose. This entry stays `PARTIAL` until F-336 resolves.
+composition. **F-336 closed 2026-10-10 without content** (Stephen's Q6, study decisions: the line
+exists only in our own catalog extract, no Parallax document states it, no bench run is owed, the KB
+dropped it). So the manual cannot cite the composition either: its four `P_HIGH_15K | P_LOW_FLOAT`
+sites must come out or be re-expressed with a documented form. That, with the rest of the chapter-scale
+pass below, is what keeps this entry `PARTIAL`.
 
 **What would settle it.** Nothing further to establish — the mechanism is closed (F-321 applied, the
 Pin Mode Legend cited, the idioms hardware-verified in
@@ -2544,8 +2479,8 @@ a source behind it. That is a chapter-scale pass on Chapters 2, 6 and 12 plus tw
 sweep.
 
 **Related:** F-321 (same mislabel, KB side, applied) · F-322 (the disable-the-drive inversion) ·
-F-325 (the ladder absent from the shipped KB) · F-336 (`P_HIGH_15K | P_LOW_FLOAT` has neither a
-Parallax statement nor a bench result) · F-341 (the same mislabel in our own derived analysis docs) ·
+F-325 (the ladder absent from the shipped KB) · F-336 (closed: `P_HIGH_15K | P_LOW_FLOAT` has neither a
+Parallax statement nor a bench result, and the KB no longer carries it) · F-341 (the same mislabel in our own derived analysis docs) ·
 `SOURCE-ERRATA.md` E-004 and **E-010** (Parallax's own guides state it).
 
 > 🔴 **F-341 IS SHARPER THAN "LATENT" — THOSE FILES INVENT PARALLAX PART NUMBERS. Confirmed by
@@ -2619,7 +2554,7 @@ Parallax statement nor a bench result) · F-341 (the same mislabel in our own de
 > Board". Those four were left strictly alone because Stephen confirmed three numbers, not seven,
 > and «#323» would have been widening its own scope to act on them.
 
-Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and deSilva (2026-09-10, in the v1.18.0 sweep, shipping in IOSP v1.0.10); the sourcing half for `P_HIGH_15K | P_LOW_FLOAT` is still owed and is tracked by F-336.
+Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and deSilva (2026-09-10, in the v1.18.0 sweep, shipping in IOSP v1.0.10); the `P_HIGH_15K | P_LOW_FLOAT` composition has no source and no bench result (F-336, closed 2026-10-10: dropped from the KB), so the four manual sites that teach it are still owed.
 
 ---
 
@@ -2654,7 +2589,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > not, for the same reason — the KB was their only home — and the rule set had no branch for that
 > once the purge had already removed them. Line numbers below were read off disk 2026-08-25.
 
-### F-352 — two shipped KB areas are authored-here content with NO upstream anywhere in the ingestion tree, and once their blocks were purged the promotion filter's sub-rule P had no branch left for them — `CONFIRMED`
+### F-352 — two shipped KB areas are authored-here content with NO upstream anywhere in the ingestion tree, and once their blocks were purged the promotion filter's sub-rule P had no branch left for them — `PENDING-VALIDATION` (click half closed and its citations rewritten 2026-10-10, «#420»/«#422»; the `io_pin_timing` half closes by staying closed; closes when the next KB release serves it)
 
 > **Found:** 2026-08-25 by «#299», working the sources tree-by-tree rather than the removal list.
 > Two of F-347's 60 rows could not be returned source-first, for the same underlying reason, and
@@ -2694,7 +2629,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > G-number rather than collide; the header is left for whoever owns that ledger to correct
 > deliberately.
 
-> **Click half CLOSED 2026-10-10 («#420»); the entry's `io_pin_timing` half stands.** The P2 Eval Click
+> **Click half CLOSED 2026-10-10 («#420»); the `io_pin_timing` half has nothing to ship (it is not a P2 fact and closes by staying closed).** The P2 Eval Click
 > Adapter's documentation *is* ingested now: `sources/p2-click-adapter/p2-click-adapter-netlist.md`
 > ("Consolidated offset map", `:122-144`, from the 64008 Rev A schematic) states all twelve offsets
 > (+0 SDA … +11 MOSI, +12..+15 no-connect, SPI four on header B), and
@@ -2721,7 +2656,7 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > `language/spin2/methods/getct.yaml description` — is outside this tree and belongs to «#299», so
 > **58** were in scope here. Every line number below was read off disk 2026-08-25.
 
-### F-354 — eight content-level holes in the repopulated `hardware/` blocks: the five driver-shaped ones are closed by removal (2026-10-07); three Parallax-board facts still need a schematic or drawing — `PARTIAL`
+### F-354 — eight content-level holes in the repopulated `hardware/` blocks: seven are closed or applied (the five driver-shaped ones by removal 2026-10-07; the PCB dimensions and the `addon-serial-device` supply 2026-10-10, «#420»), and one is BLOCKED on a document this repo does not hold (the #64013 schematic) — `PARTIAL`
 
 > **Why these are not "gaps" in the three-number sense.** Every ACTIONABLE block returned. What did
 > not return is *material inside* those blocks — figures the KB shipped that no ingested source
@@ -2751,8 +2686,8 @@ Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and d
 > | Numeric **PCB dimensions for the #64006 add-on boards** | **CLOSED 2026-10-10 («#420»).** Read off the guide's PCB Dimensions drawings (pp.11-12, rendered): A/V 3.2 x 1.3 in, Goertzel 3.2 x 1.2 in, small modules 1.6 x 0.8 in (drawn for the LED Matrix). `addon-goertzel-touch.yaml` `specifications.pcb_size_class` replaced by `pcb_size` (3.2 x 1.2 in, 81.3 x 30.5 mm) and the contradicting `size_class: small_addon` → `medium_addon`. The other small boards inherit the guide's "small modules" grouping; no per-board dimensions are stated for them and none were set. |
 > | `addon-serial-device.yaml` **"3.3 V supply"** | **APPLIED 2026-10-09/10 («#413», «#420»)** — the unsourced voltage and `power_sharing` lines are removed and the page states no supply, per Stephen's Q7 (study decisions, 2026-10-09): the Rev B ACC HDR/5V shunt jumper is an Eval-board fact that matters for any add-on using header 5 V, already modelled on `p2-hardware-feature-comparison.yaml` and `addon-serial-host.yaml`; no erratum. (A `power_note` added in «#420» restating the guide's Serial Host vs Revision History wording was removed by the arbiter as contrary to Q7.) |
 >
-> Status: `PARTIAL` — five closed by removal (ship in the next KB release); three need Parallax
-> schematics or the drawing.
+> Status: `PARTIAL` — seven closed or applied (they ship in the next KB release, `PENDING-VALIDATION`);
+> one blocked: the #64013 schematic is not ingested (Stephen / ingestion: obtain it from the 64013 product page).
 
 ---
 
@@ -2962,34 +2897,9 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > marked so; four are not this task's repair and are filed for the task that owns them. Every
 > number below was measured against disk on 2026-08-25, not carried from the design.
 
-### F-336 — the weak-drive idiom set is one composition wide: `P_HIGH_15K | P_LOW_FLOAT` has neither a Parallax statement nor a bench result, and the ladder has never been swept against a load — `CONFIRMED`
+### F-337 — the P2 Datasheet and the P2 Hardware Manual agree with each other and contradict the Silicon Doc on `%TT` in DAC_MODE, and the shipped YAML follows the minority source — `PENDING-VALIDATION` (smart-mode row settled by EF-071; smart-pin-off row applied 2026-10-10, «#419», with no bench needed; closes when the next KB release serves it)
 
-> **This is a GAP, filed instead of content.** Read the arbiter's F-322 attribution correction in
-> the section below first — it settles where the `P_HIGH_15K | P_LOW_FLOAT` string comes from
-> (`smart-pins-catalog/ingestionSources/basic-io/spin2-v51-extract.md:284-287`, our own derived
-> catalog extract) and it is not re-filed here.
->
-> **What is missing, stated positively.** Spin2 v55 — the current edition — defines both constants
-> individually (`spin2-v55-text.txt:1504` `P_HIGH_15K | Drive high 15kΩ`; `:1519` `P_LOW_FLOAT |
-> Float low`) and composes them into **no idiom at all**. The empirical ledger carries the
-> *other* composition: EF-063 and EF-064 both use `P_HIGH_15K` / `P_LOW_15K` with **DIR high** and
-> **never** `P_LOW_FLOAT` (`P2-EMPIRICAL-FINDINGS.md:827,840`). So the one-sided variant — weak on
-> one side, floating on the other, which is what an open-drain-style idiom actually needs — is
-> asserted by nothing.
->
-> **What is owed, and it is a bench item.** Extend the EF-063/EF-064 rig
-> (`campaigns/2026-08-manual-corrections/tests/test-f272-streamer-dac-tt.spin2:212-220` is the
-> routine) to (a) run `P_HIGH_15K | P_LOW_FLOAT` with DIR high against a known load and record
-> whether it behaves as a one-sided weak drive, and (b) sweep all eight ladder rungs on both sides
-> against the same load, so the KB can say what each rung does rather than only what the legend
-> calls it. Until then `architecture/pin-drive-configuration.yaml` ships the two verified idioms
-> and names this omission in its own `idioms.not_documented_here:` block.
->
-> **«#296» must not ship the `P_HIGH_15K | P_LOW_FLOAT` string as sourced.**
-
-### F-337 — the P2 Datasheet and the P2 Hardware Manual agree with each other and contradict the Silicon Doc on `%TT` in DAC_MODE, and the shipped YAML follows the minority source — `PARTIAL` (re-verified 2026-10-05 «#386»: EF-071 settles the smart-mode row; the smart-pin-off DAC_MODE %TT=00 row has no bench result)
-
-> **Applied 2026-10-10 («#419»); the entry stays PENDING-VALIDATION until a release serves it.** The
+> **Applied 2026-10-10 («#419»); closes when a release serves it.** The
 > smart-pin-off row needs no bench (`bench-groupD-recheck.md` §3.2): the texts do not conflict there — the
 > Datasheet names the DAC enable (DIR), the Silicon Doc the ADC enable (OUT), and Datasheet p.31 shows both;
 > EF-055 measured the DAC driving at `TT=%00` with no OUT write. `smart_pins.yaml`
@@ -3845,99 +3755,6 @@ drift.
 > only figures with evidence behind them, and they are labelled as such at their source.
 
 ---
-
-## XBYTE technique-mining sweep — reference implementations expose two doc defects (2026-07-14) — F-217, F-218
-
-> **Origin.** Stephen asked for a per-processor "what will hurt when you emulate this" table in the XBYTE
-> Guide, and proposed we ground it by studying **live, working emulators** rather than reasoning from ISA
-> facts. The study immediately surfaced two defects. Full evidence ledger:
-> `engineering/document-production/manuals/p2-xbyte-programming-guide/TECHNIQUE-MINING.md`
-> (per-source, because the techniques enter the manual body *anonymously* — the ledger is the only place
-> the lineage lives). **Note the path:** it lives at the manual **root**, not in `audit/`, because
-> `.gitignore:175` ignores `manuals/*/audit/` — a durable source-of-record cannot live there.
-
-### F-218 — `SingleStep-Debugger-Theory-of-Operations.md` §6.4 mislabels `GETBRK` D[25] as "C,Z affected by XBYTE" — `CONFIRMED` — **VERIFIED against the Silicon Doc 2026-08-25 («#300»); the KB was already correct, so no KB work is owed**
-
-**Our own ingested doc says:**
-
-> *"Displayed as 3 hex digits. A checkmark glyph appears if **bit 25** of `mBRKC` is set (**C,Z affected by
-> XBYTE**)."*
-
-**The Silicon Doc says otherwise.** Per P2KB `p2kbPasm2Getbrk`, `GETBRK D WC` returns:
-
-| Field | Meaning (Silicon Doc) |
-|---|---|
-| D[27] | 1 = SKIP · 0 = SKIPF/EXECF/XBYTE |
-| D[26] | LUT sharing enabled |
-| **D[25]** | **XBYTE pending on next `_RET_`/`RET`** |
-| D[24:16] | the 9-bit XBYTE mode |
-
-"C,Z affected by XBYTE" is the **F bit**, which is the *low bit of the mode operand* — i.e. **D[16]**, not
-D[25]. The two are different facts about different bits, and our doc appears to have conflated them.
-
-- **NOT SETTLED, and deliberately not fixed.** The checkmark's meaning is decided by the **host-side**
-  display code (PNut / term-ts), not by Chip's P2-side debug stub — `Spin2_debugger.spin2` only calls
-  `getbrk` and ships the word to the host. So the P2-side source **cannot** adjudicate this. Settling it
-  needs the host display source or Chip.
-- **Two possible truths:** (i) our gloss is simply wrong and D[25] means "XBYTE pending"; or (ii) the
-  debugger's checkmark genuinely reflects the F bit and our doc attributed it to the wrong bit index. Either
-  way **the doc as written is wrong**; only the repair differs.
-- **Consumer risk:** the XBYTE Guide is about to gain a "Debugging XBYTE" section citing `GETBRK` fields.
-  It will cite **the Silicon Doc layout**, not this doc, until this is resolved.
-- **Wider lesson (already a standing rule, freshly demonstrated):** our own ingested derivations are **peer
-  tier, not authority**. This was caught only because the field layout was cross-checked against P2KB
-  instead of being trusted.
-
-> ### ✅ VERIFICATION PERFORMED 2026-08-25 («#300») — this entry's `NEEDS-VERIFICATION` is discharged
->
-> The original entry rested on **P2KB** (`p2kbPasm2Getbrk`), which is circular inside this project — the KB
-> is what we publish. So it was re-grounded on the **Silicon Doc primary extraction**, and both halves of
-> the claim were checked independently. **What could have come back the other way:** had the Silicon Doc's
-> own `D[25]` line read *"C,Z affected by XBYTE"*, the finding would have become `RESOLVED-INVALID` and the
-> doc would have been right. It does not.
->
-> **Half 1 — what D[25] actually is.** `engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:445-446`,
-> verbatim, under `GETBRK D WC`:
->
-> > `D[25] = 1 if top of stack = $001FF, indicating XBYTE will execute on next _RET_/RET`
-> > `D[24:16] = 9-bit XBYTE mode, established by '_RET_ SETQ/SETQ2' when top of stack = $001FF`
->
-> **Half 2 — where "C,Z affected by XBYTE" really lives.** It is the `%F` bit, and `%F` is the **LSB of the
-> 9-bit mode**, so it lands at **D[16]**. `silicon-doc/p2-documentation.txt:2196-2202`, verbatim:
->
-> > *"The %F bit of the SETQ/SETQ2 {#}D value enables C and Z to receive bits 1 and 0 of the index field of
-> > the bytecode."* — with the table `%xxxxxxxx0` = *"Do not affect flags on XBYTE"* · `%xxxxxxxx1` =
-> > *"Write the bytecode's index LSBs to C and Z"*.
->
-> **VERDICT: `CONFIRMED`.** D[25] and D[16] are different bits with different meanings, and §6.4 fuses them.
-> The entry's premise holds on the primary source, not merely on P2KB.
->
-> **A SECOND SITE, same root cause, found by sweeping the doc (class-wide rule).** The same file's field-map
-> row contradicts its own body: `SingleStep-Debugger-Theory-of-Operations.md:1298` states
-> *"XBYTE (bits 25..16)"* — a **ten**-bit field that swallows D[25] into the mode — while `:763` computes the
-> field as `DebuggerMsg[mBRKC] >> 16 AND $1FF`, i.e. **D[24:16]**, which is correct. `:765` is the §6.4
-> sentence this finding names. So the defect is **two sites plus a self-contradiction**, not one sentence.
->
-> **🟢 NO KB WORK IS OWED — verified on disk, not assumed.**
-> `deliverables/ai/P2/language/pasm2/getbrk.yaml:33` already reads
-> *"…D[26] = LUT sharing enabled, **D[25] = XBYTE pending on next `_RET_`/`RET`**, D[24:16]…"* — correct, and
-> matching the Silicon Doc. No published manual carries the wrong gloss either (swept: zero hits for
-> `C,Z affected` across `manuals/*/opus-master/`). **The defect never reached anything we ship**, which is
-> why this closes without a KB edit rather than being left open for one.
->
-> **RESIDUAL GAP — narrowed, not closed, and it is not ours.** Which of the two repairs §6.4 needs still
-> depends on the **host display source**: if PNut/term-ts really tests bit 25, the *caption* is wrong; if it
-> tests bit 16, the *bit index* is wrong. **What would settle it:** the host-side display routine that draws
-> the XBYTE checkmark (PNut Pascal or the term-ts mirror), which this repo does not hold — `REF/` under
-> `p2-single-step-debugger-manual` carries only the user manual, a screenshot and an audit, no Pascal.
-> **This is an upstream document defect with no consumer here**, so it is routed, not worked: the bit
-> semantics above are now settled and citable regardless of which repair is chosen.
->
-> **Not relocated to `SOURCE-ERRATA.md`, deliberately.** That register's own test is *"if **Parallax** fixed
-> their document tomorrow, would this entry disappear?"* — and all nine of its entries are Parallax
-> documents. This document is the **pnut-ts side's** (`external-inputs/pnut_ts_facts/`, not a registered
-> ingested source), so it fails that test. It is also not a `PNUT-TS-PUNCH-LIST.md` item — that list is
-> compiler-behaviour items carrying a runnable repro, not documentation defects. Flagged here as the record.
 
 ## Render-verification wave — defects found by READING the generated PDFs (2026-08-17/19) — F-284…F-294, F-299…F-301
 

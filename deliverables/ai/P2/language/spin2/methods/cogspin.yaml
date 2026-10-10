@@ -83,12 +83,57 @@ stack_requirements:
     - "Parameter count"
     - "Expression complexity"
 
+top_level_stack:
+  summary: >-
+    Every Spin2 cog has a stack, including cog 0 running the top-level program, but only
+    COGSPIN and TASKSPIN take a StackAddress. The top-level program's stack is placed by the
+    compiler, grows upward, and has no documented size or limit.
+  placement: >-
+    The compiler supplies the stack's starting hub address (the initial dbase) in the
+    program's start-up header. The interpreter's start-up block clears
+    (dbase - vbase) / 4 longs of VAR space, so the stack begins at the first long after
+    VAR space. It then writes the initial pbase and vbase at that address and restarts
+    cog 0 with COGINIT, passing that address as the new cog's PTRA.
+  first_frame: >-
+    The interpreter's launch routine reads pbase and vbase from the first two longs of the
+    stack and writes a 6-long header there: pbase (with the trap flag), vbase, dbase,
+    mrecv, msend, and the return pointer (the bytecodes that stop the task or cog when the
+    top-level method returns). dbase is set 6 longs above the stack base; the method's
+    parameters, results and locals start there. COGSPIN builds the same layout at its
+    StackAddress: pbase and vbase at the address, parameters from 6 longs above it.
+  growth: >-
+    The stack grows upward, toward higher hub addresses: pushes are wrlong with ptra++
+    and pops are rdlong with --ptra. Every nested call pushes 6 longs at its drop anchor
+    (the caller's stack top, pbase with flags, vbase, dbase, mrecv, msend), plus one long
+    for the return address (a return pops 7 longs), then the called method's parameters,
+    results and local longs, which the call clears to zero.
+  size_and_limit: >-
+    Not documented. Neither the Spin2 v55 documentation nor the v55 interpreter listing
+    states a size for the top-level stack or an upper bound for it, and the interpreter
+    listing contains no comparison of the stack pointer against a limit, so no overflow
+    check is documented. How far the stack can grow before it reaches other hub data is
+    set by what the compiler places above it, which is not documented either. A COGSPIN
+    or TASKSPIN stack is a hub buffer you provide and size; see stack_requirements above
+    and how to measure it in application-notes/p2an006-sizing-cog-task-stacks.yaml.
+  source: "Parallax Spin2 Interpreter v55 (2026.05.07), start-up block (dbase_init, var_longs), launch_spin / launch_method, Drop anchor (drophot), callhot, returnh, build_stack"
+
+stack_observability:
+  description: >-
+    A COGSPIN or TASKSPIN stack is an ordinary hub buffer, so any cog can read it. The
+    stack pointer is PTRA, a register in the running cog's own RAM, so another cog cannot
+    read it directly: a supervising cog sees how far a stack has been used (for example
+    the high-water mark left in a fill pattern, as p2an006 measures) but not its current
+    depth. A cog in its own debug ISR can trigger an asynchronous breakpoint in another
+    cog with COGBRK, if that cog has its asynchronous breakpoint interrupt enabled; the
+    target's debug ISR can then inspect its own registers.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW and COGS (each cog has its own RAM); DEBUG INTERRUPT (COGBRK)"
+
 examples:
   - code: |
       VAR
         LONG stack[64]
         LONG cog_id
-        
+
       PUB main()
         cog_id := COGSPIN(NEWCOG, worker(), @stack)
         IF cog_id == -1
@@ -206,6 +251,11 @@ warnings:
   - "Insufficient stack causes crashes"
   - "VAR variables need synchronization"
   - "No automatic resource cleanup"
+
+related:
+  - language/spin2/methods/taskspin.yaml
+  - application-notes/p2an006-sizing-cog-task-stacks.yaml
+  - architecture/debug_interrupt.yaml
 
 see_also:
   - "language/spin2/methods/coginit.yaml"

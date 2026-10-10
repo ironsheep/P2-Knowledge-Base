@@ -1,7 +1,11 @@
 # P2KB close-out study
 
-**Status:** SCOPE AGREED by Stephen 2026-10-08 (group E dropped at his word). Reading has not
-started.
+**Status:** DONE. Scope agreed by Stephen 2026-10-08 (group E dropped at his word); steps 0–10
+done 2026-10-08/09; step 11 handed to the sprint plan
+(`engineering/planning/P2KB-CLOSE-OUT-SPRINT-PLAN.md`), whose tasks «#410»–«#423» ran 2026-10-09/10.
+**Rows:** S-001..S-396 = 396 ids — 395 are table rows in §3 (counted 2026-10-10 by
+`grep -o "^| S-[0-9]*"` over this file, distinct) and S-395 is the round-1 lead (VO-J-035, decided by
+EF-102), recorded in §5 prose.
 **Skill:** central `study`. The hand-off seeds the close-out sprint plan (`sprint-plan`).
 **Element:** `yaml:p2kb`.
 
@@ -164,7 +168,7 @@ Planning closes at that point. Tasking follows.
     question gets a round-2 test — **EF-093..EF-101** written 2026-10-09, VO rows marked DONE, campaign
     README filled; results applied to the study rows in §5's *Round 1 results* below. No round 2 is
     owed for the round-1 questions; S-395 (a lead from round 1) is for planning.
-11. [ ] **Planning closes**: every row in a done state (§1). Hand-off to `sprint-plan`.
+11. [x] **Planning closes** (2026-10-09, the sprint plan): every row in a done state (§1). Hand-off to `sprint-plan`.
 
 After the sprint's tasks, the single close-out release goes through `release-yamls` **§1.5,
 the change-set audit** (added 2026-10-08). Every hunk since the last tag is audited
