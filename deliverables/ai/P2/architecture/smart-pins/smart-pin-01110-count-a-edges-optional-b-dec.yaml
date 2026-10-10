@@ -51,7 +51,7 @@ code_examples:
           debug("Net count: ", sdec(net_count))
           
           ' Reset counter
-          if ina[0]
+          if ina.[0]
             pinclear(counter_pin)
             pinstart(counter_pin, P_COUNT_RISES | P_PLUS1_B, 0, 1)
       

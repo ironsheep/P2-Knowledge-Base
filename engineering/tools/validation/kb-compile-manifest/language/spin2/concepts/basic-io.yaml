@@ -73,7 +73,7 @@ blocks:
     fp: "99f5aae5336b6ec9"
     compile: program
   - at: common_patterns.button_read.code
-    fp: "4f672d0e1266a7a5"
+    fp: "04ec146a160c42e9"
     compile: fragment
     wrap: spin2-top
     assumes: [buttonPressed()->0/0]
@@ -93,45 +93,32 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [decodeKey()->1/2]
-  - at: application_examples.ws2812_bit_bang.code
-    fp: "331c0da0ca2b44b2"
-    compile: program
   - at: multi_cog_pin_coordination.coordination_strategies.single_cog_ownership.implementation
     fp: "0c5be21237159bbb"
     compile: not-code
     reason: "YAML prose (English sentences), not code"
   - at: anti_patterns[1].wrong
-    fp: "018552b334946800"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [INPUT_PIN=con, value]
-  - at: anti_patterns[1].correct
-    fp: "3bf008b2800480e1"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [INPUT_PIN=con, value]
-  - at: anti_patterns[2].wrong
     fp: "af0e6e44a7118a0a"
     compile: fragment
     wrap: spin2-method
     assumes: [ADC_PIN=con, value]
-  - at: anti_patterns[2].correct
+  - at: anti_patterns[1].correct
     fp: "454456c56fc0fc8b"
     compile: fragment
     wrap: spin2-method
     assumes: [ADC_PIN=con, value]
-  - at: anti_patterns[3].correct
-    fp: "2f1b4610386bc7f3"
+  - at: anti_patterns[2].correct
+    fp: "f76fed6b711fa541"
     compile: fragment
     wrap: spin2-method
-    assumes: [SERIAL_RX=con, timeout_reached()->1/0, value]
-  - at: anti_patterns[5].wrong
+    assumes: [SERIAL_RX=con, value]
+  - at: anti_patterns[4].wrong
     fp: "1226f623a413cd33"
     compile: fragment
     wrap: spin2-method
     assumes: [value, ADC_PIN=con]
-  - at: anti_patterns[5].correct
-    fp: "7685c23bd72f2961"
+  - at: anti_patterns[4].correct
+    fp: "c43329a753da1c0d"
     compile: fragment
     wrap: spin2-method
     assumes: [value, ADC_PIN=con]
@@ -159,12 +146,12 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [PWM_PIN=con, period, duty]
-  - at: anti_patterns[4].wrong
+  - at: anti_patterns[3].wrong
     fp: "f04746206703de15"
     compile: fragment
     wrap: spin2-method
     assumes: [TX_PIN=con]
-  - at: anti_patterns[4].correct
+  - at: anti_patterns[3].correct
     fp: "cd2c7a08a892fb26"
     compile: fragment
     wrap: spin2-method
@@ -173,8 +160,8 @@ blocks:
     fp: "4e1d767a0ddbee54"
     compile: not-code
     reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
-  - at: anti_patterns[3].wrong
-    fp: "18e419bc7e225320"
+  - at: anti_patterns[2].wrong
+    fp: "83c0734abe18d3fe"
     compile: fragment
     wrap: spin2-method
     assumes: [value, SERIAL_RX]

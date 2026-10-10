@@ -2,7 +2,10 @@ symbol: "$"
 type: special_symbol
 category: "Special"
 description: |
-  Hexadecimal number prefix
+  Hexadecimal number prefix ($FF). A $ on its own is the current origin: the cog
+  register address in cog-exec (ORG) code, stepping by 1 per instruction, or the
+  hub address in hub-exec (ORGH) code, stepping by 4.
 examples:
   - "value := $FF"
   - "address := $1000"
+  - "JMP #$     ' jump to self; $ alone is the current origin"

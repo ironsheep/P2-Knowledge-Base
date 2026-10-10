@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-565`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-566`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -61,7 +61,25 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»)
+
+### F-565 — `keywords/STRUCT.yaml` `gotchas.struct_pointer_obj_returns` said `pCfg := sensor.getConfig()` is a COMPILE ERROR for structures over 15 longs; no ingested source and no compile-proof record states it — `NEEDS-VERIFICATION` (compile probe)
+Found 2026-10-09 by «#415» fixing `language/spin2/keywords/STRUCT.yaml`. The page carried a
+`wrong:`/`correct:` pair (`pCfg := sensor.getConfig()  ' COMPILE ERROR for large structs` against
+`[pCfg] := sensor.getConfig()`), the explanation that "the compiler may interpret the return as the full
+structure", and the scope "only across OBJ boundaries". Both pair strings were manifest class `not-code`
+(a one-line string cannot declare the `sensor` OBJ), so the gate never compiled them. The only origin is
+the upstream lead `external-inputs/pnut_ts_facts/Pointer-Usage-Guide.md` (not an authority); Spin2 v55's
+VAR Blocks section states only that a pointer variable named alone is the pointed-to variable and
+`[ptrvar]` is the pointer itself (`spin2-v55-text.txt:249-261`); the interpreter has no typed-pointer
+bytecode; no EF or CP record covers the call. **Applied now:** the pair, the compile-error claim and the
+scope sentence are removed; the page states the v55 pointer semantics (a bare `pCfg :=` writes through
+the pointer, `[pCfg] :=` stores the pointer) and keeps the compiled bracket-form example. **Question
+(compile probe, no hardware):** with a child object returning a `^StructName` of 16 or more longs,
+does `pCfg := child.getConfig()` fail to compile, and with what message? **Fix when answered:** record a
+CP-NNN in `COMPILE-PROOFS.md`; if it fails, restore the "wrong" form as a `never` block citing it. The
+same pair sits in `operators/typed-pointers.yaml` (`gotchas.struct_pointer_obj_returns`), which
+belongs to «#416».
 
 ### F-564 — what a stopped cog leaves on the pins and in smart-pin modes is stated nowhere in the ingested sources; `cogstop.yaml` shipped three claims about it — `NEEDS-VERIFICATION` (bench question)
 Found 2026-10-09 by «#414» fixing `language/spin2/methods/cogstop.yaml`. The page shipped "All pins

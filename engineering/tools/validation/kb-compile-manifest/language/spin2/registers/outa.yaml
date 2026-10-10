@@ -8,8 +8,7 @@ blocks:
     wrap: spin2-method
     assumes: [led_pattern]
   - at: examples[1]
-    fp: "b668807c0504b65b"
+    fp: "85987bf0572a0b33"
     compile: fragment
     wrap: spin2-method
     assumes: [led_pin=con]
-    finding: "S-143"

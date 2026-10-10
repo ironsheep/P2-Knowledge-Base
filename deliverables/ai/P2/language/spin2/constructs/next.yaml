@@ -19,7 +19,7 @@ example: |
   ' Skip in nested loops (level counts outward from the current loop):
   REPEAT x FROM 0 TO 9
     REPEAT y FROM 0 TO 9
-      IF grid[x][y] < 0
+      IF grid[x*10+y] < 0
         NEXT 1      ' Skip to next x iteration (1 = 1st-outer loop)
 
 critical_behavior:
@@ -49,7 +49,7 @@ critical_pitfalls:
 comparison:
   next: "Continues with next iteration"
   quit: "Exits loop entirely"
-  abort: "Exits entire method"
+  abort: "Unwinds the call stack to the nearest trapped call (\\method()); with no trap the task or cog stops"
 
 related:
   - language/spin2/constructs/repeat.yaml

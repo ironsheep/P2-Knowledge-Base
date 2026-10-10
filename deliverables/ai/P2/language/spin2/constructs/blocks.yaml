@@ -43,13 +43,13 @@ block_types:
         TIMEOUT_MS = 1000
         
         ' Enumerations with auto-increment
-        #0, IDLE, RUNNING, ERROR    ' 0, 1, 2, 3
+        #0, IDLE, RUNNING, ERROR    ' 0, 1, 2
         
         ' Pin group definitions (P2-specific)
         LED_PINS = 56 ADDPINS 7      ' Pins 56..63
     
     unique_features:
-      - "Can define structures (v44+)"
+      - "Can define structures (STRUCT, v45+; needs {Spin2_v45})"
       - "Parent can override child CON values"
       - "Supports floating-point constants"
       - "ADDPINS operator for pin ranges"
@@ -83,15 +83,14 @@ block_types:
         WORD  buffer[128]
         BYTE  flags, state
         
-        ' Alignment matters for performance
+        ' ALIGNW / ALIGNL advance the variable pointer to a word / long boundary
         ALIGNL                    ' Align to long boundary
         LONG  aligned_variable
-    
+
     memory_allocation: |
-      - LONGs allocated first (4-byte aligned)
-      - WORDs allocated next (2-byte aligned)  
-      - BYTEs allocated last (1-byte aligned)
+      - Variables are packed in memory in the order they are declared, beginning at a long-aligned address
       - Arrays are contiguous
+      - ALIGNW / ALIGNL advance the variable pointer as necessary
     
     instance_example: |
       OBJ
@@ -116,7 +115,7 @@ block_types:
         gpio  : "parallel" | CLK_PIN = 10        ' With parameter override
         comm[4] : "protocol"                      ' Array of 4 instances
         
-        ' Conditional compilation (v44+)
+        ' Conditional compilation (preprocessor, v48+)
         #ifdef DEBUG
           debug : "debugger"
         #endif
@@ -167,6 +166,7 @@ block_types:
         BYTE  "Hello, P2!", 0
         
         ' Lookup tables
+        ALIGNL
       sine_table
         WORD  $0000, $0C8B, $1917, $2590[252]
 
@@ -197,7 +197,7 @@ block_order_rules:
   - "Blocks can appear in any order"
   - "Multiple blocks of same type are concatenated"
   - "At least one PUB required for main program"
-  - "Compiler processes all CON blocks first"
+  - "Symbolic constants can be referenced by every block within the file, including CON blocks"
 
 common_patterns:
   - pattern: "singleton_enforcement"
@@ -206,7 +206,7 @@ common_patterns:
       DAT
         initialized  BYTE  0
       
-      PUB start()
+      PUB start() : r
         IF initialized
           RETURN FALSE    ' Already running
         initialized := TRUE
@@ -221,14 +221,14 @@ common_patterns:
         command  LONG  0
         param1   LONG  0
         param2   LONG  0
-        result   LONG  0
-      
-      PUB send_command(cmd, p1, p2)
+        reply    LONG  0
+
+      PUB send_command(cmd, p1, p2) : r
         param1 := p1
         param2 := p2
         command := cmd    ' Write command last
         REPEAT WHILE command    ' Wait for completion
-        RETURN result
+        RETURN reply
   
   - pattern: "shared_resources"
     description: "DAT for resource pools"
@@ -253,8 +253,8 @@ performance_implications:
 p2_specific_insights:
   hub_memory: "All blocks allocate from 512KB hub RAM"
   cog_loading: "COGs load PASM2 from DAT via COGINIT"
-  alignment_matters: "Long-aligned access is fastest"
-  object_limit: "512 unique objects maximum"
+  alignment_matters: "ALIGNW / ALIGNL place variables and data on word / long boundaries; hub RAM has no special alignment rules for words and longs"
+  object_limit: "Up to 32 different child objects per parent object, instantiated singly or in arrays of up to 255, with up to 1024 child objects in all"
 
 related_constructs:
   - "p2kbSpin2MethodDefinition"

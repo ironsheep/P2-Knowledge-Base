@@ -5,6 +5,6 @@ description: |
   Output register A (pins 0-31)
 examples:
   - "OUTA := led_pattern"
-  - "!OUTA[led_pin]"
+  - "!= OUTA.[led_pin]   ' toggle the pin bit"
 address: "508"
 access: "read_write"

@@ -3,20 +3,19 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_content.code
-    fp: "36e6c95dc8eedcb6"
+    fp: "b1e8a102419ed7ab"
     compile: program
-    finding: "S-002"
   - at: code_content.code_comments[0].comment
-    fp: "4250e18b5c79cabe"
+    fp: "72877e689b7b3fde"
     compile: fragment
     wrap: spin2-top
   - at: code_content.code_comments[1].comment
     fp: "70b289d2643350ae"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [BUTTON=con:32]
+    assumes: [BUTTON=con:16]
   - at: code_content.code_comments[2].comment
-    fp: "804d13af8603878a"
+    fp: "f7e5c6b210181915"
     compile: fragment
     wrap: spin2-method
-    assumes: [BUTTON=con:32]
+    assumes: [BUTTON=con:16]

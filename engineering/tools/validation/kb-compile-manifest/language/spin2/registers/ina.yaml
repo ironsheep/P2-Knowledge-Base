@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "4dcb90ef37fc45d0"
+    fp: "97b111c6f2427e6c"
     compile: fragment
     wrap: spin2-method
     assumes: [button_state, button_pin]

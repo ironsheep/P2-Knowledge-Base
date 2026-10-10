@@ -19,11 +19,11 @@ when_use:
 quick_reference:
   periodic_execution: |
     ' Jitter-free periodic pattern
-    next := getct()
+    next_time := getct()
     REPEAT
-      next += clkfreq / 100    ' 10ms interval
+      next_time += clkfreq / 100    ' 10ms interval
       do_work()
-      waitct(next)             ' Wait until exact time
+      waitct(next_time)             ' Wait until exact time
 
   timeout_polling: |
     ' Wait with timeout

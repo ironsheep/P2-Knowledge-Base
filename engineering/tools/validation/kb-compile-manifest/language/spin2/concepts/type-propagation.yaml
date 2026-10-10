@@ -7,13 +7,11 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: rules.pub_pri_parameters.example.code
-    fp: "2c6a4981fd7a7b45"
+    fp: "fca72d429b586d54"
     compile: program
-    finding: "S-049"
   - at: rules.pub_pri_return_values.example.code
-    fp: "c38a9a4bbf569308"
+    fp: "2eac7a96183257eb"
     compile: program
-    finding: "S-049"
   - at: rules.pub_pri_locals.example.code
     fp: "3a98db8c37e424aa"
     compile: not-code
@@ -22,26 +20,34 @@ blocks:
     fp: "282b8464b36dc0b4"
     compile: program
   - at: common_mistakes[0].wrong
-    fp: "f306cda8ddc47eec"
+    fp: "244549c5a667452b"
     compile: fragment
     wrap: spin2-top
-    finding: "S-256"
   - at: common_mistakes[0].correct
-    fp: "3205c50b296e4274"
+    fp: "8bcfe66be55599ce"
     compile: fragment
     wrap: spin2-top
-    finding: "S-256"
   - at: common_mistakes[1].wrong
+    fp: "097fc3b5aebdbfd3"
+    compile: never
+    wrap: spin2-top
+    fails_at: 1
+    reason: "teaches the compile error: BYTE and WORD are not allowed on a PUB/PRI parameter (parameters are longs; only ^BYTE/^WORD/^LONG/^StructName overrides are allowed)"
+  - at: common_mistakes[1].correct
+    fp: "8321dc41b3e8d212"
+    compile: fragment
+    wrap: spin2-top
+  - at: common_mistakes[2].wrong
     fp: "0fef7abcf6c311d9"
     compile: fragment
     wrap: pasm2-dat
-  - at: common_mistakes[1].correct
+  - at: common_mistakes[2].correct
     fp: "a59739a3473f72f7"
     compile: fragment
     wrap: pasm2-dat
-  - at: common_mistakes[2].wrong
+  - at: common_mistakes[3].wrong
     fp: "d996d4156f893328"
     compile: program
-  - at: common_mistakes[2].correct
+  - at: common_mistakes[3].correct
     fp: "707752b9d6e12321"
     compile: program

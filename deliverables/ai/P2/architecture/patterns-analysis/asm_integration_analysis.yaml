@@ -20,7 +20,7 @@ selection_criteria:
 structural_signature:
   inline_assembly:
     - "ORG...END blocks within Spin2 methods (loaded into cog RAM, run as cog-exec)"
-    - "Method params/result/locals addressed by name (value1 = PR0, value2 = PR1, ...)"
+    - "Method params/result/locals addressed by name (each by its own name; first 16 longs at $1E0..$1EF; PR0..PR7 are separate general-purpose registers)"
     - "Custom instruction sequences"
   asm_functions:
     - "Pure assembly methods in Spin2 objects"
@@ -38,7 +38,7 @@ implementation_template: |
   PUB fast_operation(value1, value2) : result
     ' Critical section in inline PASM (ORG..END runs as cog-exec).
     ' Method params/result map directly to cog registers — reference them
-    ' by NAME: value1 = PR0, value2 = PR1, result overlaps PR0. Do NOT load
+    ' by NAME: value1, value2 and result each by their own name. Do NOT load
     ' parameters through PTRA/PTRB.
     ORG
       ADD   value1, value2        ' value1 += value2
@@ -85,7 +85,7 @@ compiler_note: >
   inside a PUB/PRI method. The asm ... endasm form is FlexSpin (fastspin)
   syntax — it will NOT compile with pnut_ts, so do not use it in P2KB example
   code. Inside the block, method parameters, the return value, and locals are
-  addressed by NAME (first param = PR0, second = PR1, return overlaps PR0);
+  addressed by NAME (each by its own name);
   do not route them through PTRA/PTRB. Example above compile-verified with pnut_ts.
 
 see_also:

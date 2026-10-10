@@ -17,11 +17,13 @@ code_content:
   code_type: "complete_program"
   code: |
     CON
-      BUTTON = 32                   ' Button on P32
+      BUTTON = 16                   ' Button on P16
 
     PUB read_button()
-      DIRL #BUTTON                  ' Make button pin an input
-      if INA[BUTTON]                ' Read the input state
+      ORG
+        DIRL #BUTTON                ' Make button pin an input
+      END
+      if INA.[BUTTON]               ' Read the input state
         ' Button is pressed (high)
         ' Add your code here
       else
@@ -29,14 +31,14 @@ code_content:
         ' Add your code here
   code_comments:
     - line_number: 2
-      comment: "BUTTON = 32"
-      explanation: "Defines constant for button pin number (P32)"
-    - line_number: 5
+      comment: "BUTTON = 16"
+      explanation: "Defines constant for button pin number (P16)"
+    - line_number: 6
       comment: "DIRL #BUTTON"
       explanation: "Configure button pin as input (high impedance)"
-    - line_number: 6
-      comment: "if INA[BUTTON]"
-      explanation: "Read current state of button pin from INA register"
+    - line_number: 8
+      comment: "if INA.[BUTTON]"
+      explanation: "Read the state of the button pin: INA.[BUTTON] selects bit BUTTON of the INA register (P0..P31)"
 
 technical_analysis:
   instructions_used:
@@ -58,7 +60,7 @@ application_context:
   use_case: "User interface, button detection, digital sensor reading"
   hardware_requirements:
     - "P2 microcontroller"
-    - "Button or switch connected to pin 32"
+    - "Button or switch connected to pin 16"
     - "External pull-up or pull-down resistor as needed"
 
 validation_status:

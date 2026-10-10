@@ -5,8 +5,10 @@ category: "Data Types"
 description: |
   8-bit data type. Unsigned range: 0 to 255. Signed range: -128 to 127.
   Used in multiple contexts: variable declarations (VAR), local variables,
-  method parameters, return types, DAT data, memory access operators,
-  type override (.BYTE[n]), typed pointers (^BYTE), and data constructors (BYTE(...)).
+  DAT data, memory access operators, type override (.BYTE[n]), typed pointers
+  (^BYTE, including pointer parameters and results), and data constructors (BYTE(...)).
+  PUB/PRI parameters and results are always longs (or pointers); there are no BYTE
+  parameters or results.
 
 syntax: "BYTE variable[count]"
 
@@ -17,12 +19,12 @@ usage_contexts:
   - context: "Local variable"
     syntax: "PUB method() | BYTE localVar"
     example: "PUB process() | BYTE temp, BYTE flags"
-  - context: "Parameter"
-    syntax: "PUB method(BYTE param)"
-    example: "PUB setChannel(BYTE ch)"
-  - context: "Return value"
-    syntax: "PUB method() : BYTE result"
-    example: "PUB getStatus() : BYTE status"
+  - context: "Parameter (pointer)"
+    syntax: "PUB method(^BYTE param)"
+    example: "PUB setBuffer(^BYTE pBuf)"
+  - context: "Return value (pointer)"
+    syntax: "PUB method() : ^BYTE result"
+    example: "PUB getBuffer() : ^BYTE pBuf"
   - context: "DAT data"
     syntax: "label BYTE value1, value2, ..."
     example: 'myStr BYTE "Hello", 0'
@@ -44,8 +46,9 @@ usage_contexts:
 
 type_propagation: |
   In VAR blocks, BYTE is sticky — applies to all names on the same line.
-  In PUB/PRI parameters, returns, and locals, BYTE is NOT sticky — each
-  name resets to LONG unless explicitly typed.
+  In PUB/PRI parameters and results every name is a long (or a pointer when it
+  carries ^BYTE/^WORD/^LONG/^StructName, per name); in locals a size applies only
+  to the name it precedes.
   See type-propagation concept for full rules.
 
 examples:

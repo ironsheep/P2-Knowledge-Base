@@ -3,20 +3,20 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: modes.immediate.examples[0]
-    fp: "d1548bb5f090b636"
+    fp: "a277a492de662784"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183+S-008"
+    assumes: [r0]
   - at: modes.immediate.examples[1]
-    fp: "d1548bb5f090b636"
+    fp: "c7359a9db0017dd3"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183+S-008"
+    assumes: [r0]
   - at: modes.immediate.examples[2]
-    fp: "d1548bb5f090b636"
+    fp: "2cf528fa4f9f993d"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183+S-008"
+    assumes: [r0]
   - at: modes.register_direct.examples[0]
     fp: "7fedf26d5aa74353"
     compile: fragment
@@ -38,60 +38,60 @@ blocks:
     wrap: pasm2-dat
     assumes: [value]
   - at: modes.indexed.examples[0]
-    fp: "c4bfdcec2577e496"
+    fp: "94a97d616eae3c30"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: modes.indexed.examples[1]
-    fp: "1e64ee3ebb63830f"
+    fp: "e3f9aebcbc71a70a"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: modes.auto_increment.examples[0]
-    fp: "7cdb1addeaeab995"
+    fp: "e68e5e488c04ebf8"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: modes.auto_increment.examples[1]
-    fp: "475a36629f109a3e"
+    fp: "a666c26c65ad5362"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: modes.auto_increment.examples[2]
     fp: "e03acbd4ad1cf5fd"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value]
   - at: modes.auto_decrement.examples[0]
-    fp: "c462ecb1b7694d06"
+    fp: "1ba48a5f9c1a3d07"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: modes.auto_decrement.examples[1]
     fp: "1e06486f76382b75"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value]
   - at: modes.post_modify.examples[0]
-    fp: "f9cc4f2f675d68a9"
+    fp: "3b419d28765b69cb"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: modes.post_modify.examples[1]
-    fp: "1df3098d20829134"
+    fp: "7411c5fb57dbaa87"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008+S-185"
+    assumes: [r0]
   - at: modes.absolute.examples[0]
-    fp: "f03fa4d283207d35"
+    fp: "6f58e20563897b2b"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183+S-008"
+    assumes: [r0]
   - at: modes.absolute.examples[1]
-    fp: "b6a8cd0bffba3c7c"
+    fp: "7bc01cf7102beec0"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183+S-008"
+    assumes: [r0, buffer]
   - at: modes.bit_addressing.examples[0]
     fp: "33a97e1a7b75b6e0"
     compile: fragment

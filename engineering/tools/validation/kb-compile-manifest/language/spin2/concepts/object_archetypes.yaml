@@ -33,20 +33,17 @@ blocks:
     wrap: spin2-top
     assumes: [handle_idle()->1/1, handle_connecting()->1/1, handle_connected()->1/1, handle_error()->1/1]
   - at: archetypes[7].template
-    fp: "42fa5f2b10b2e389"
+    fp: "98052bd7e524689a"
     compile: fragment
     wrap: spin2-top
-    assumes: [pin]
-    finding: "S-045"
   - at: archetypes[8].object_template
-    fp: "80b001d02b3bb492"
+    fp: "f0f87e926118b703"
     compile: program
   - at: archetypes[8].parent_usage
-    fp: "b9cc9046bfec474c"
+    fp: "df57d364161f91e2"
     compile: fragment
     wrap: spin2-top
-    assumes: [file:fast_calculator.spin2]
-    finding: "S-043"
+    assumes: [pasm_calc.entry_addr(0)]
   - at: data_sharing_patterns[0].code
     fp: "ded5096bff091c6a"
     compile: program
@@ -106,7 +103,3 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [STATE_IDLE=con, STATE_RUNNING=con, STATE_ERROR=con, state]
-  - at: archetypes[8].description
-    fp: "aea96053d80d001b"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"

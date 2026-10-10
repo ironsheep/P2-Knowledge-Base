@@ -47,5 +47,5 @@ specifics:
   counter_number: 3
   event_flag: CT3
   condition: not set
-quick_example: 'JNCT3 #handler  ; Jump if counter 3 event flag is NOT set'
+quick_example: "JNCT3 #handler  ' Jump if counter 3 event flag is NOT set"
 has_group_documentation: true

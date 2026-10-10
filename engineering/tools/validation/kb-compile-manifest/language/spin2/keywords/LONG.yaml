@@ -9,36 +9,44 @@ blocks:
   - at: usage_contexts[1].example
     fp: "5f092cb55d77a66d"
     compile: program
+  - at: description
+    fp: "428f0268b48eee04"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
   - at: usage_contexts[2].example
-    fp: "df63e114d3ba456b"
+    fp: "5fc4076d88b3d886"
     compile: program
-    finding: "S-049"
   - at: usage_contexts[3].example
-    fp: "ecbab5e3e1665b1a"
+    fp: "5df8c19f024b7d11"
     compile: program
-    finding: "S-049"
   - at: usage_contexts[4].example
+    fp: "097aed875620b1bc"
+    compile: program
+  - at: usage_contexts[5].example
+    fp: "496ab4b19df0201d"
+    compile: program
+  - at: usage_contexts[6].example
     fp: "e89cd0174fc1d9c6"
     compile: fragment
     wrap: pasm2-dat
-  - at: usage_contexts[5].example
+  - at: usage_contexts[7].example
     fp: "22a682b00b527910"
     compile: fragment
     wrap: spin2-method
     assumes: [val]
-  - at: usage_contexts[6].example
+  - at: usage_contexts[8].example
     fp: "48a07a51dc8838a4"
     compile: not-code
     reason: "bare `myArray.LONG[0]` size-override access shown standalone: a term, legal only inside a statement (`myLong.BYTE[0] := $FF`, the sibling BYTE page's form, is a statement)"
-  - at: usage_contexts[7].example
+  - at: usage_contexts[9].example
     fp: "c0f3aef5af6ef0a7"
     compile: fragment
     wrap: spin2-var
-  - at: usage_contexts[8].example
+  - at: usage_contexts[10].example
     fp: "5a291ebe45fddd07"
     compile: not-code
     reason: "bare data-constructor term shown standalone; legal only as an expression term / argument (`emit(BYTE($48, $65, $6C))` compiles, scratch t/b1_bytector), never as a statement"
-  - at: usage_contexts[9].example
+  - at: usage_contexts[11].example
     fp: "248f1b09d388bd3f"
     compile: fragment
     wrap: spin2-top

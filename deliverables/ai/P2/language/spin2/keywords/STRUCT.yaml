@@ -334,15 +334,14 @@ export_import:
 gotchas:
   struct_pointer_obj_returns:
     description: |
-      When a method in a child object returns a struct pointer (^structName)
-      and the caller receives it through an OBJ reference, the compiler may
-      interpret the return as the full structure rather than a single LONG
-      pointer value. For structures exceeding 15 longs, this produces a
-      compile error even though the return is only one LONG.
+      A pointer variable named alone is the variable it points to; [pCfg] is the
+      pointer itself. A method in a child object that returns a struct pointer
+      (^structName) returns one LONG pointer value, so store it in the receiving
+      pointer variable through its bracket form, [pCfg] := sensor.getConfig().
+      The unbracketed pCfg := ... writes through the pointer into the pointed-to
+      structure instead.
     rule: "When receiving ^structName from an object method, use bracket notation on the receiver"
-    wrong: "pCfg := sensor.getConfig()          ' COMPILE ERROR for large structs"
-    correct: "[pCfg] := sensor.getConfig()        ' OK: receives pointer value, not struct"
-    scope: "Only across OBJ boundaries; within same object file this is not needed"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Blocks (pointer variables)"
     example: |
       OBJ
           sensor : "sensor_driver"

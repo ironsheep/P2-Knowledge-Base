@@ -3,11 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: example
-    fp: "03ac4430398a5494"
+    fp: "198fc79a9acd9aea"
     compile: fragment
     wrap: spin2-method
     assumes: [i, array, process()->0/1, x, y, grid]
-    finding: "S-009"
   - at: common_patterns
     fp: "38e600908aba23e9"
     compile: fragment

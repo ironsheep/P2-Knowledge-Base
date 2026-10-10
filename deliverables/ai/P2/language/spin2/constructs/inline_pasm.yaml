@@ -91,7 +91,6 @@ syntax_forms:
       cog_entry
         ' PASM2 code for COG
         JMP   #cog_entry
-      END
     description: "PASM2 code in DAT to be loaded into a COG"
     execution: "Loaded via COGINIT, runs as cog-exec in target cog"
     
@@ -100,8 +99,7 @@ syntax_forms:
       DAT
         ORGH             ' Place in hub address space
       hub_code
-        ' PASM2 code for hub execution
-      END
+        NOP              ' PASM2 code for hub execution
     description: "PASM2 code in DAT that runs as hub-exec (separate from inline PASM)"
     execution: "Executes directly from hub memory through the (cogs+11)=19-stage prefetch FIFO. Sequential code: 2 clocks/instruction (same as cog-exec). Branches: minimum 13 clocks (+1 if not long-aligned) per Silicon Doc HUB EXECUTION. FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are FORBIDDEN in this mode. NOT the same as inline PASM in a method."
 
@@ -162,11 +160,12 @@ why_inline_pasm_matters:
 
 register_access:
   method_interface: |
-    Method parameters, result, and locals map to PASM2 registers:
-    - First parameter  → PR0 (also addressable as '0')
-    - Second parameter → PR1
-    - Return value     → PR0 (overlaps first parameter)
-    - Local variables  → next available registers after parameters
+    Method parameters, results and locals map to PASM2 registers BY NAME:
+    - The method's first 16 long variables (parameters, then results, then locals,
+      in declaration order) are copied to cog registers $1E0..$1EF at the start of the
+      block and copied back at END; inside the block each is addressed by its own name.
+    - PR0..PR7 ($1D8..$1DF) are separate general-purpose registers shared between
+      Spin2 and PASM code. They are not the parameters or the result.
     - Variable budget  → first 16 long variables go to $1E0..$1EF (params + result + locals only).
                        Code is NOT counted against this 16-long figure — for ORG..END inline, PASM
                        code is copied separately into cog registers starting at the ORG address
@@ -177,15 +176,15 @@ register_access:
                        Source: Spin2 v51 documentation + Chip Gracey clarification 2026-05-02.
   
   local_label_rule:
-    requirement: "Inline PASM labels must start with '.' (e.g. .loop) or ':' (e.g. :next)"
-    reason: "Inline PASM has no global label context; all labels are method-local"
+    requirement: "Inline PASM labels are local to the ORG..END block; a plain label (lp), a '.'-prefixed (.lp) or a ':'-prefixed (:lp) label all work"
+    reason: "Inline PASM symbols are not accessible outside the in-line PASM code"
     reference: "language/pasm2/concepts/labels.yaml"
-  
+
   example: |
     PUB multiply(x, y) : product
       ORG
-        MUL   x, y        ' x is PR0, y is PR1
-        GETQX product     ' product is PR0 (return)
+        QMUL  x, y        ' CORDIC multiply of the method's own variables
+        GETQX product     ' low 32 bits of the 64-bit product (waits for the CORDIC)
       END
 
 data_sharing_patterns:
@@ -199,34 +198,34 @@ data_sharing_patterns:
         END
     
   - pattern: "hub_variables"
-    description: "Access VAR/DAT from PASM"
+    description: "Access a VAR variable from inline PASM: take its address in Spin2 first"
     code: |
       VAR
         LONG shared_data
-      
-      PUB process()
+
+      PUB process() | p
+        p := @shared_data
         ORG
-          MOV   PTRA, @shared_data
-          RDLONG PA, PTRA
-          ADD   PA, #1
-          WRLONG PA, PTRA
+          RDLONG PA, p
+          ADD    PA, #1
+          WRLONG PA, p
         END
-    
+
   - pattern: "inline_optimization"
-    description: "Optimize hot spots"
+    description: "Optimize hot spots: CRC-32 (reflected polynomial) of a buffer"
     code: |
-      PUB checksum(buffer, size) : crc | ptr
+      PUB checksum(buffer, size) : crc | ptr, byt
         ptr := buffer
         crc := $FFFF_FFFF
-        
+
         REPEAT size
+          byt := BYTE[ptr++]
           ORG
-            RDBYTE PA, ptr
-            SETCRC crc, #$04C11DB7
-            CRC    PA, crc
-            ADD    ptr, #1
+            REP    #2, #8                 ' 8 bits per byte
+            SHR    byt, #1 WC             ' next data bit (LSB first) into C
+            CRCBIT crc, ##$EDB88320       ' if (C xor crc[0]) crc = (crc >> 1) xor poly, else crc >> 1
           END
-        
+
         crc ^= $FFFF_FFFF
 
 common_use_cases:
@@ -258,10 +257,10 @@ common_use_cases:
           DRVL  pin
         END
   
-  - use_case: "atomic_operations"
-    description: "Uninterruptible sequences"
+  - use_case: "read_modify_write"
+    description: "Read-modify-write of a hub long - not atomic: another cog can change the long between the read and the write; guard shared updates with a LOCK (LOCKTRY/LOCKREL)"
     code: |
-      PUB atomic_increment(address) : new_value
+      PUB increment_long(address) : new_value
         ORG
           RDLONG new_value, address
           ADD    new_value, #1
@@ -360,7 +359,7 @@ pitfalls:
     
   - pitfall: "register_confusion"
     description: "Not understanding parameter mapping"
-    solution: "Parameters are PR0, PR1, etc."
+    solution: "Parameters, results and locals are addressed by their own names (the first 16 longs, $1E0..$1EF); PR0..PR7 are separate registers"
     
   - pitfall: "address_modes"
     description: "Mixing COG and hub addresses"

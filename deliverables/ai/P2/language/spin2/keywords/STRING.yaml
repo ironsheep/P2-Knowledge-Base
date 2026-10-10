@@ -2,7 +2,7 @@ keyword: "STRING"
 type: keyword
 category: "Built-in Functions"
 description: |
-  Convert expression to string representation
-syntax: "STRING(expression)"
+  Compose a zero-terminated string in the object image from quoted characters and values 1..255, and return its address. STRING() converts nothing at run time: every argument must be a constant.
+syntax: 'STRING("Text", 13)'
 examples:
-  - "text := STRING(number)"
+  - "text := STRING(\"Hello\", 13)   ' address of the zero-terminated string"

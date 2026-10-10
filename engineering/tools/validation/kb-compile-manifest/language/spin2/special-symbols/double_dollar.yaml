@@ -2,34 +2,25 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: contexts.pasm2_address.usage
-    fp: "b9ff29d56db227e2"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code (`usage:` text)"
   - at: examples[0].code
-    fp: "755c27eb4b54c9b5"
+    fp: "29e5727f772b487c"
     compile: program
-    finding: "S-119"
   - at: examples[1].code
-    fp: "3f3c625734c1e8b5"
+    fp: "5c59d883fea43892"
     compile: program
-    finding: "S-119"
   - at: examples[2].code
-    fp: "ab0b4779ad887fcd"
+    fp: "ebc077694042a588"
     compile: program
-    finding: "S-119"
   - at: examples[3].code
-    fp: "4baf435a567e124b"
+    fp: "6474bc28e2ba31b3"
     compile: program
   - at: examples[4].code
-    fp: "8f6f3548b0c98e82"
+    fp: "33602e4a9fdf9e45"
     compile: program
   - at: examples[5].code
-    fp: "6d75732827b8afb3"
+    fp: "aae967c91eeb74ba"
     compile: fragment
     wrap: spin2-top
-    finding: "S-008"
   - at: examples[6].code
-    fp: "b79b9eda7beb0bee"
+    fp: "a67580475af1ea9c"
     compile: program
-    finding: "S-120"

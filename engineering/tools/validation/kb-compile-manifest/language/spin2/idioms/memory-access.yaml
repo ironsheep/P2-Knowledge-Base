@@ -47,10 +47,10 @@ blocks:
     compile: not-code
     reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
   - at: idioms[4].examples[0]
-    fp: "9cdc8cb233477286"
+    fp: "56204f4dd42b0fff"
     compile: not-code
     reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"
   - at: idioms[4].examples[1]
-    fp: "c87a368fa2e509fe"
+    fp: "1a4512c710f6a71c"
     compile: not-code
     reason: "address / indexed-address expression shown standalone (an idiom pattern's example); legal only inside a statement"

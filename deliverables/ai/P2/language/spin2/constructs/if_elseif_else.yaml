@@ -18,7 +18,7 @@ metadata:
 syntax_forms:
   - form: "simple_if"
     syntax: "IF condition"
-    description: "Execute next statement/block if condition is true"
+    description: "Execute the indented block if condition is true (non-zero); the statement goes on the following indented line - Spin2 has no one-line IF"
     example: |
       IF x > 10
         handle_overflow()
@@ -32,9 +32,9 @@ syntax_forms:
     description: "Execute one of two blocks based on condition"
     example: |
       IF sensor < threshold
-        LED.on()
+        PINHIGH(56)
       ELSE
-        LED.off()
+        PINLOW(56)
     
   - form: "if_elseif_chain"
     syntax: |
@@ -57,12 +57,6 @@ syntax_forms:
       ELSE
         state := NORMAL
     
-  - form: "inline_if"
-    syntax: "IF condition : single_statement"
-    description: "Single-line conditional execution"
-    example: |
-      IF button_pressed() : counter++
-
   - form: "ifnot"
     syntax: "IFNOT condition"
     description: "Execute block when condition is FALSE (zero)"
@@ -138,9 +132,9 @@ condition_expressions:
       description: "Greater than or equal"
 
   special_comparisons:
-    - operator: "<<=>"
-      description: "Signed comparison result (-1, 0, 1)"
-      example: "IF x <<=> y == 1  ' x > y"
+    - operator: "<=>"
+      description: "Signed comparison (<,=,> returns -1,0,1)"
+      example: "IF (x <=> y) == 1  ' x > y"
 
 common_patterns:
   - pattern: "range_check"
@@ -184,10 +178,20 @@ common_patterns:
             trigger_alarm()
 
 special_features:
-  - feature: "short_circuit_evaluation"
-    description: "AND/OR stop evaluating when result is known"
+  - feature: "guard_a_dereference"
+    description: "AND / OR (&&, ||) evaluate BOTH operands, so they cannot guard a dereference; nest the IFs"
     example: |
-      IF ptr AND ptr.value > 0   ' Won't access ptr.value if ptr is 0
+      {Spin2_v45}
+      CON
+        STRUCT node(value)
+
+      VAR
+        ^node ptr             ' typed pointer: ptr.value is the pointed-to member
+
+      PUB check() : positive
+        IF ptr
+          IF ptr.value > 0    ' reached only when ptr <> 0
+            positive := TRUE
     
   - feature: "assignment_in_condition"
     description: "Can assign and test in same expression"
@@ -215,15 +219,15 @@ pitfalls:
     consideration: "Always consider if final ELSE is needed"
 
   - pitfall: "indentation_errors"
-    description: "Wrong indentation changes block membership"
+    description: "A statement indented less than the body ends the IF block; a statement indented more than the first body line stays in the block"
     wrong: |
       IF condition
         statement1
-          statement2   ' Wrong indent - not in IF block!
+      statement2         ' Outdented - runs always, not part of the IF block
     correct: |
       IF condition
         statement1
-        statement2     ' Same indent - both in IF block
+        statement2       ' Same indent - both in IF block
 
   - pitfall: "deeply_nested_conditionals"
     description: "Deeply nested conditionals are hard to read and maintain"
@@ -257,25 +261,12 @@ pitfalls:
         do_other()
 
 performance:
-  evaluation_order: "Left to right with short-circuit"
-  overhead: "Minimal - translates to conditional jumps in PASM2"
+  evaluation_order: "Conditions are tested top to bottom; the first IF/ELSEIF whose condition is non-zero (IFNOT/ELSEIFNOT: zero) runs. AND/OR evaluate both operands, left first."
+  overhead: "The KB publishes no per-statement clock count; Spin2 statements run as interpreter bytecodes"
   optimization_tips:
     - "Put most likely condition first in ELSEIF chains"
     - "Use CASE for multiple equality tests on same variable"
     - "Consider lookup tables for complex mappings"
-
-pasm_equivalent:
-  description: "IF generates conditional jump patterns"
-  example:
-    spin2: |
-      IF x > 10
-        y := 20
-      ELSE
-        y := 30
-    pasm2: |
-      CMP     x, #10 WC
-      IF_NC   MOV y, #30
-      IF_C    MOV y, #20
 
 related:
   - language/spin2/constructs/case.yaml

@@ -3,58 +3,54 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: variants[0].example
-    fp: "baae3d49b3d1970a"
+    fp: "c2ac16c12a00777f"
     compile: fragment
     wrap: spin2-method
-    finding: "S-018"
   - at: variants[1].example
     fp: "34cdaedfef2e08e3"
     compile: fragment
     wrap: spin2-method
     assumes: [flash_led()->1/0]
   - at: variants[2].example
-    fp: "d3840ed4ef2e204b"
+    fp: "afc5550d36c16f02"
     compile: fragment
     wrap: spin2-method
     assumes: [x, increment]
   - at: variants[3].example
-    fp: "10979e272a2101a6"
+    fp: "2f0c7c7aee7a5318"
     compile: fragment
     wrap: spin2-method
     assumes: [button_pressed()->1/0, scan_sensors()->1/0]
   - at: variants[4].example
-    fp: "9605963f3c3905a0"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [sensor, threshold, process_data()->0/0]
-    finding: "S-084"
-  - at: variants[5].example
-    fp: "ffeb255e1b0bdf12"
+    fp: "e8607b6b64a348dd"
     compile: fragment
     wrap: spin2-method
     assumes: [timeout, data_ready()->1/0]
-    finding: "S-084"
-  - at: variants[6].example
+  - at: variants[4].syntax
+    fp: "f9bf67065bfa8331"
+    compile: not-code
+    reason: "`syntax:` TEMPLATE: `count` and `done_condition` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `example:` entry"
+  - at: variants[5].example
     fp: "83e8aa2cb55f7313"
     compile: fragment
     wrap: spin2-method
     assumes: [i, array]
-  - at: variants[7].example
+  - at: variants[6].example
     fp: "f8e1dff6755a68a0"
     compile: fragment
     wrap: spin2-method
     assumes: [j, pwm_value]
-  - at: variants[8].example
+  - at: variants[7].example
     fp: "f0dc7b2399756d01"
     compile: fragment
     wrap: spin2-method
     assumes: [i, indices]
-  - at: variants[9].example
+  - at: variants[8].example
     fp: "f597b28897680414"
     compile: fragment
     wrap: spin2-method
     assumes: [value, read_input()->1/0]
-  - at: variants[10].example
+  - at: variants[9].example
     fp: "8f4bc06cafd86b39"
     compile: fragment
     wrap: spin2-method
@@ -70,46 +66,24 @@ blocks:
     wrap: spin2-method
     assumes: [value, read_sensor()->1/0, limit, accumulate()->1/1]
   - at: control_keywords[2].example
-    fp: "b33e01d2a9f84359"
+    fp: "35eace32353729fa"
     compile: fragment
     wrap: spin2-method
     assumes: [x, y, grid, target]
-    finding: "S-009"
-  - at: pasm_equivalent.examples[0].spin2
-    fp: "e0742cd87bf4c740"
-    compile: fragment
-    wrap: spin2-method
-  - at: pasm_equivalent.examples[0].pasm2
-    fp: "fdc8583203efb6ee"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [repeat_count]
-  - at: pasm_equivalent.examples[1].spin2
-    fp: "a88fe99dba5f97ed"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [i]
-  - at: pasm_equivalent.examples[1].pasm2
-    fp: "67a056965fd9e7fa"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [i]
   - at: common_patterns[0].code
-    fp: "094664f102daee1d"
+    fp: "401f529da91f3192"
     compile: fragment
     wrap: spin2-method
-    finding: "S-086"
   - at: common_patterns[1].code
     fp: "970c360dca61d9b2"
     compile: fragment
     wrap: spin2-method
     assumes: [i, ARRAY_SIZE=con, array, initial_value]
   - at: common_patterns[2].code
-    fp: "031e46c9b10ab6ad"
+    fp: "2945a79ef0a40c88"
     compile: fragment
     wrap: spin2-method
     assumes: [pin]
-    finding: "S-085+S-084"
   - at: common_patterns[3].code
     fp: "bcc9be59b1da8f82"
     compile: fragment
@@ -135,11 +109,11 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [value, read_input()->1/0, VALID=con, process()->1/1]
-  - at: variants[9].syntax
+  - at: variants[8].syntax
     fp: "4d3187eca0b7d9e9"
     compile: not-code
     reason: "`syntax:` TEMPLATE (post-test REPEAT form): the words `statements`, `condition` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
-  - at: variants[10].syntax
+  - at: variants[9].syntax
     fp: "8e9b6b3d9675e74b"
     compile: not-code
     reason: "`syntax:` TEMPLATE (post-test REPEAT form): the words `statements`, `condition` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
@@ -153,13 +127,8 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [done]
-  - at: pitfalls[1].wrong
-    fp: "0a7646f5a221d584"
+  - at: pitfalls[1].example
+    fp: "4956f3746650dcf5"
     compile: fragment
     wrap: spin2-method
-    assumes: [i]
-  - at: pitfalls[1].correct
-    fp: "da85b14ccf4595a4"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [i]
+    assumes: [i, process()->0/1]

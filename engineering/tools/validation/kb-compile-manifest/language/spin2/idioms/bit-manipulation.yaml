@@ -23,11 +23,11 @@ blocks:
     compile: not-code
     reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
   - at: idioms[2].examples[0]
-    fp: "6d1dc283de2a9183"
+    fp: "54ec5b146d203a25"
     compile: not-code
     reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
   - at: idioms[2].examples[1]
-    fp: "9a03d19d67ca8075"
+    fp: "f38da5d63595ff70"
     compile: not-code
     reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
   - at: idioms[3].examples[0]
@@ -55,10 +55,10 @@ blocks:
     compile: not-code
     reason: "bare Spin2 expression shown standalone (an idiom pattern's example with no statement around it); legal only inside a statement, so there is no context in which it compiles by itself"
   - at: idioms[6].examples[0]
-    fp: "014fa28c621d6708"
+    fp: "aac243bfa87df814"
     compile: not-code
     reason: "Spin2 `REV` operator expression shown standalone; legal only inside a statement. (The proposer's pasm2-dat PASS is a label followed by the PASM instruction of the same name -- not the Spin2 operator)"
   - at: idioms[6].examples[1]
-    fp: "e5aced39e2627e90"
+    fp: "cb9546b637d82d80"
     compile: not-code
     reason: "Spin2 `REV` operator expression shown standalone; legal only inside a statement. (The proposer's pasm2-dat PASS is a label followed by the PASM instruction of the same name -- not the Spin2 operator)"

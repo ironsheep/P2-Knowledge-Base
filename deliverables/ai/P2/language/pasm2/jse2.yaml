@@ -43,7 +43,7 @@ specifics:
   selector_number: 2
   event_flag: SE2
   condition: set
-quick_example: 'JSE2 #handler  ; Jump if selector 2 event flag is set'
+quick_example: "JSE2 #handler  ' Jump if selector 2 event flag is set"
 has_group_documentation: true
 category: Event
 oneliner: Branch

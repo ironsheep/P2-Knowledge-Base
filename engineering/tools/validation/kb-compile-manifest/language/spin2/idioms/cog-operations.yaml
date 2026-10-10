@@ -45,14 +45,12 @@ blocks:
     wrap: spin2-method
     assumes: [entry, stack]
   - at: idioms[3].examples[0]
-    fp: "754248f86f01421c"
+    fp: "32a0b4876b0fb0d3"
     compile: fragment
     wrap: spin2-method
     assumes: [driver, params]
-    finding: "S-087"
   - at: idioms[3].examples[1]
-    fp: "bcf459c8f86c2f51"
+    fp: "b4a7db7da53f1a1d"
     compile: fragment
     wrap: spin2-method
     assumes: [pasm_code, mailbox]
-    finding: "S-087"

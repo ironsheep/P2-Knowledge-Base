@@ -87,7 +87,7 @@ key_parameters:
   taskchk: "TASKCHK(id) -> 0 free / 1 running / 2 halted (non-destructive)"
   taskhalt_cont: "TASKHALT(id) pauses (state+stack preserved); TASKHALT(THISTASK) halts the caller and AUTO-YIELDS; TASKCONT(id) resumes where it left off"
   taskstop: "TASKSTOP(id)/TASKSTOP(THISTASK) frees the slot; a top-level return from a task method is an implicit TASKSTOP(THISTASK); the last task's return stops the cog"
-  taskhlt_register: "TASKHLT @ $200, 32 halt bits in REVERSE order (bit 0 = task 31, bit 31 = task 0); read for a bulk bitmap, write to force halt/resume"
+  taskhlt_register: "TASKHLT @ $1CC, 32 halt bits in REVERSE order (bit 0 = task 31, bit 31 = task 0); read for a bulk bitmap, write to force halt/resume"
   yield_cadence: "R2 YIELD_EVERY: yield too rarely -> the responsive task stutters; too often -> the computation slows. Tune to the needed responsiveness"
   stacks: "each task gets its own stack (per-task @stack); size it for the deepest call chain — see P2AN006. Tasks share the cog's hub/register state; only stack + PC are per-task"
 
@@ -128,7 +128,7 @@ provenance:
   sources:
     - "Spin2 v55 keyword table: Spin2 v55, engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:39,149"
   primary_sources:
-    - "Spin2 Language Documentation, v47 and later (Chip Gracey, Parallax Inc.) — the TASK method family (TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), the NEWTASK/THISTASK constants, and the TASKHLT register (reversed halt bits @ $200)"
+    - "Spin2 Language Documentation, v47 and later (Chip Gracey, Parallax Inc.) — the TASK method family (TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), the NEWTASK/THISTASK constants, and the TASKHLT register (reversed halt bits @ $1CC)"
     - "Spin2 v55 keyword table — the authoritative TASK keyword list (TASKWAIT is absent)"
   tool_ground_truth:
     - "pnut_ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword"

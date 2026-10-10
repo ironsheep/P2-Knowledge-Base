@@ -22,25 +22,25 @@ rules:
       explanation: "On each VAR line, the type set by the first specifier persists across all comma-separated names"
 
   pub_pri_parameters:
-    name: "PUB/PRI Parameters — Type is NOT Sticky"
-    behavior: "Each parameter name independently defaults to LONG unless it has its own explicit type specifier"
+    name: "PUB/PRI Parameters — always long (or pointer); no BYTE/WORD parameters"
+    behavior: "A parameter is a long. A ^BYTE, ^WORD, ^LONG or ^StructName override makes that one parameter a pointer; the override applies only to the name it precedes"
     default: "LONG"
     example:
       code: |
-        PUB foo(BYTE a, b, WORD c)           ' a=BYTE, b=LONG(!), c=WORD
-        PUB foo(BYTE a, BYTE b, WORD c)      ' a=BYTE, b=BYTE, c=WORD (explicit each)
-      explanation: "The BYTE before 'a' does NOT carry to 'b' — each parameter resets to LONG"
-    gotcha: "This is opposite of VAR behavior and catches many programmers off guard"
+        PUB foo(^BYTE a, b, ^WORD c)           ' a=^BYTE pointer, b=LONG (override not sticky), c=^WORD pointer
+        PUB foo2(^BYTE a, ^BYTE b, ^WORD c)    ' a, b, c all pointers (explicit each)
+      explanation: "The ^BYTE before 'a' does NOT carry to 'b'. BYTE a or WORD c in a parameter list is a compile error."
+    gotcha: "Opposite of VAR, where a size carries to the following names on the line"
 
   pub_pri_return_values:
-    name: "PUB/PRI Return Values — Type is NOT Sticky"
-    behavior: "Each return value name independently defaults to LONG unless it has its own explicit type specifier"
+    name: "PUB/PRI Return Values — always long (or pointer); no BYTE/WORD results"
+    behavior: "A result is a long. A ^BYTE, ^WORD, ^LONG or ^StructName override makes that one result a pointer; the override applies only to the name it precedes"
     default: "LONG"
     example:
       code: |
-        PUB bar() : BYTE status, value       ' status=BYTE, value=LONG(!)
-        PUB bar() : BYTE status, BYTE value  ' status=BYTE, value=BYTE (explicit each)
-      explanation: "The BYTE before 'status' does NOT carry to 'value'"
+        PUB bar() : ^BYTE status, value        ' status=^BYTE pointer, value=LONG
+        PUB bar2() : ^BYTE status, ^BYTE value ' status and value both pointers (explicit each)
+      explanation: "The ^BYTE before 'status' does NOT carry to 'value'. BYTE status in a result list is a compile error."
 
   pub_pri_locals:
     name: "PUB/PRI Local Variables — Type is NOT Sticky"
@@ -74,12 +74,12 @@ summary_table:
     inline_override: "Per-value only, does NOT stick"
     default: "Required"
   - context: "PUB/PRI parameters"
-    sticky: "NO — resets each name"
-    inline_override: "N/A"
+    sticky: "NO — each name is its own"
+    inline_override: "^BYTE/^WORD/^LONG/^StructName only (pointer), per name"
     default: "LONG"
   - context: "PUB/PRI return values"
-    sticky: "NO — resets each name"
-    inline_override: "N/A"
+    sticky: "NO — each name is its own"
+    inline_override: "^BYTE/^WORD/^LONG/^StructName only (pointer), per name"
     default: "LONG"
   - context: "PUB/PRI local variables"
     sticky: "NO — resets each name"
@@ -87,9 +87,13 @@ summary_table:
     default: "LONG"
 
 common_mistakes:
-  - mistake: "Assuming PUB/PRI parameter types carry forward like VAR"
-    wrong: "PUB foo(BYTE a, b)    ' Expecting both to be BYTE"
-    correct: "PUB foo(BYTE a, BYTE b)  ' Explicitly type each parameter"
+  - mistake: "Assuming a PUB/PRI pointer override carries forward like a VAR type"
+    wrong: "PUB foo(^BYTE a, b)    ' Expecting both to be ^BYTE pointers"
+    correct: "PUB foo(^BYTE a, ^BYTE b)  ' Override each pointer parameter"
+
+  - mistake: "Declaring BYTE or WORD parameters"
+    wrong: "PUB foo(BYTE a, WORD b)  ' compile error: parameters are longs"
+    correct: "PUB foo(a, b)  ' longs; use ^BYTE/^WORD only for a pointer"
 
   - mistake: "Assuming DAT inline type override persists"
     wrong: "LONG $1234, BYTE $56, $78    ' Expecting $78 to be BYTE"
@@ -102,7 +106,6 @@ common_mistakes:
 notes:
   - "These rules apply to PNut-TS Spin2 compiler"
   - "The VAR sticky behavior matches traditional Spin1 behavior"
-  - "The PUB/PRI non-sticky behavior prevents accidental type truncation of parameters"
   - "LONG is always the default when no type is specified"
   - "Type propagation is a compile-time concept — no runtime cost"
 

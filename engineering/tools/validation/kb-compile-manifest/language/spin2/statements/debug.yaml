@@ -73,9 +73,8 @@ blocks:
     wrap: spin2-method
     assumes: [flags]
   - at: examples[7].code
-    fp: "98440bc1774db6c6"
+    fp: "c80297ca92795813"
     compile: program
-    finding: "S-008"
   - at: examples[8].code
     fp: "98a43e556d7432ce"
     compile: fragment

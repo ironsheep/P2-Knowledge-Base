@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "18c5af9408b57634"
+    fp: "b73c3ef8174a36f4"
     compile: fragment
     wrap: spin2-method
     assumes: [day_name, day]

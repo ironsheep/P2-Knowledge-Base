@@ -6,9 +6,12 @@ description: |
   The Propeller 2 has multiple memory spaces with different addressing requirements.
   Understanding when to use @, @@, ^@, and # is essential for correct code.
   
-  KEY INSIGHT: In Spin2+PASM programs, @ returns RELATIVE addresses (offsets from
-  object base). In PASM-only programs, @ returns ABSOLUTE addresses. This affects
-  how you store and retrieve addresses in data tables.
+  KEY INSIGHT: In PUB/PRI code, @ gives the hub address, ready for COGINIT,
+  BYTE[]/LONG[] and BYTEMOVE. The object-relative form applies to @ values STORED IN
+  DAT DATA (WORD @Str0): in a Spin2+PASM program they are stored as offsets from the
+  start of the object, so convert them with @@ when reading them back. In a
+  PASM-only program, stored values are absolute. This affects how you store and
+  retrieve addresses in data tables.
 
 memory_spaces:
   hub_ram:
@@ -52,8 +55,8 @@ address_operators:
     purpose: "Get hub address of variable/data/method"
     returns: "Hub memory address"
     context_behavior:
-      spin2_pasm: "Returns RELATIVE address (offset from object base)"
-      pasm_only: "Returns ABSOLUTE hub address"
+      spin2_pasm: "In PUB/PRI code, the hub address; an @ stored in DAT data is an offset from the object base (convert with @@)"
+      pasm_only: "Stored @ values are absolute hub addresses"
     examples:
       - "@myvar - address of VAR variable"
       - "@mydata - address of DAT data"
@@ -92,7 +95,7 @@ program_types:
       Programs with PUB/PRI methods and optional DAT/ORG assembly.
       Objects can be loaded at any hub location (relocatable).
     address_behavior:
-      - "@ returns relative offsets in DAT sections"
+      - "@ values stored in DAT data are offsets from the start of the object"
       - "@@ converts stored offsets to absolute addresses"
       - "Hub-exec code must use relative addressing"
     compile_command: "Standard .spin2 file with PUB block"
@@ -102,7 +105,7 @@ program_types:
       Programs with only DAT block, no PUB/PRI methods.
       Assembled to specific memory locations.
     address_behavior:
-      - "@ returns absolute addresses directly"
+      - "@ values stored in DAT data are absolute addresses"
       - "@@ typically not needed"
       - "Can use absolute addressing in hub-exec code"
     compile_command: ".spin2 file with only DAT block"
@@ -161,13 +164,14 @@ common_patterns:
       myregs  RES   4                  ' Reserve 4 cog longs
       
       PUB writeReg(index, value)
-        REG[#myregs + index] := value  ' Write to cog register
-        
+        REG[myregs][index] := value    ' Write to cog register
+
       PUB readReg(index) : value
-        value := REG[#myregs + index]  ' Read from cog register
+        value := REG[myregs][index]    ' Read from cog register
     notes:
-      - "# returns cog register address"
-      - "REG[] accesses cog memory from Spin2"
+      - "REG[register][index]: 'register' is a symbol declared in an ORG section; the index is its own [index], not an addition inside the brackets"
+      - "#myregs used as a term (outside REG[]) is that register's cog address"
+      - "REG[] accesses cog registers from Spin2"
 
 addressing_mode_comparison:
   hub_data_access:
@@ -177,7 +181,7 @@ addressing_mode_comparison:
     
   cog_register_access:
     operator: "#"
-    syntax: "REG[#myreg]"
+    syntax: "REG[myreg]  or  REG[myreg][index]"
     use: "Reading/writing cog registers"
     
   bitfield_access:
@@ -192,15 +196,16 @@ addressing_mode_comparison:
 
 address_alignment:
   description: |
-    For optimal performance, data should be properly aligned in memory.
-    Misaligned access works but may be slower.
+    Hub RAM has no special alignment rules for words and longs: cogs read and write
+    them at any hub address. ALIGNW and ALIGNL place the next data on a word or long
+    boundary when the layout needs it.
   directives:
     ALIGNL:
       purpose: "Align next data to long (4-byte) boundary"
-      use: "Before LONG data for optimal access"
+      use: "Before LONG data that must start on a long boundary"
     ALIGNW:
       purpose: "Align next data to word (2-byte) boundary"
-      use: "Before WORD data for optimal access"
+      use: "Before WORD data that must start on a word boundary"
   example: |
     DAT
             ALIGNL                    ' Align to long boundary
@@ -226,9 +231,10 @@ org_vs_orgh_addressing:
     DAT
             ORG     0                       ' COG mode
     cogCode
-            MOV     PA, #@hubData           ' Get hub address into PA
+            MOV     PA, ##@hubData          ' Get hub address into PA (## = 20-bit augmented immediate)
             JMP     #cogCode                ' COG-relative jump
-    
+    temp    RES     1
+
             ORGH    $400                    ' HUB mode
     hubCode
             RDLONG  temp, ##@hubData        ' Hub addressing

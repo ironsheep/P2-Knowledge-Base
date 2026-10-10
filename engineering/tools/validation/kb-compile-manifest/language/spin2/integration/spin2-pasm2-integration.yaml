@@ -12,7 +12,7 @@ blocks:
     fp: "49d60536eeda0d1a"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[3].syntax_examples[0].spin2_code
-    fp: "6051d0d7b73ad63d"
+    fp: "642c19355c557244"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[4].syntax_examples[0].spin2_code
     fp: "02308382712255a6"
@@ -21,7 +21,7 @@ blocks:
     fp: "e2f3e0150b04ae71"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[6].syntax_examples[0].spin2_code
-    fp: "01468cd2f9165306"
+    fp: "1712c481eabfc96f"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[7].syntax_examples[0].spin2_code
     fp: "57246cec8cf124d4"
@@ -36,8 +36,8 @@ blocks:
     fp: "f8773c21e6215634"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[11].syntax_examples[0].spin2_code
-    fp: "c80e5a98191a2d0f"
+    fp: "455c4d568aaeef0c"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[12].syntax_examples[0].spin2_code
-    fp: "d6b323c545ea0c09"
+    fp: "dc203f880b720d56"
     compile: program

@@ -3,7 +3,6 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "c3e26e4a4397c71e"
+    fp: "8e4afa680540fa6d"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-121"

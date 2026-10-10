@@ -3,12 +3,12 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: access_patterns.direct_addressing.examples[0]
-    fp: "2a45f6fe94ce91ab"
+    fp: "d7483b2179baa456"
     compile: fragment
     wrap: pasm2-dat
     finding: "S-137"
   - at: access_patterns.direct_addressing.examples[1]
-    fp: "7726a211508baf6f"
+    fp: "13434b4eaae610e6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [result]
@@ -24,17 +24,17 @@ blocks:
     wrap: pasm2-dat
     assumes: [pin_mask=con]
   - at: access_patterns.bit_manipulation.examples[0]
-    fp: "a8af1f2c1a82149f"
+    fp: "6230baf97bd47168"
     compile: fragment
     wrap: pasm2-dat
     finding: "S-137"
   - at: access_patterns.bit_manipulation.examples[1]
-    fp: "b49eafae7a5f17c1"
+    fp: "00aa370079185e84"
     compile: fragment
     wrap: pasm2-dat
     finding: "S-137"
   - at: usage_patterns.memory_operations.example
-    fp: "a8902d72b0305a28"
+    fp: "00b3bc35d83896c2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [data]
@@ -46,7 +46,7 @@ blocks:
     assumes: [pin_mask, initial_states]
     finding: "S-165"
   - at: usage_patterns.pin_manipulation.example
-    fp: "3fdd8a1ff5baa72c"
+    fp: "fbf649781654ad91"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pin_bit]

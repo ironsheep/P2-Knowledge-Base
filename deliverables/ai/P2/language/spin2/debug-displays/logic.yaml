@@ -99,15 +99,18 @@ examples:
       ' Packed full-window array feed. Two channels -> LONGS_2BIT (sub-sample
       ' width == channel count). Build one full window of packed longs, then feed
       ' the whole array in ONE message (not one packed long per DEBUG call).
-      VAR long buff[16]                         ' 16 longs x 16 pairs = 256 samples
-      DEBUG(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
-      REPEAT
-        REPEAT j FROM 0 TO 15
-          packed := 0
-          REPEAT i FROM 0 TO 15
-            packed := (packed << 2) | (getrnd() & %11)   ' bit0 -> D0, bit1 -> D1
-          buff[j] := packed
-        DEBUG(`Pair `uhex_long_array_(@buff, 16))         ' whole window, one message
+      VAR
+        long buff[16]                           ' 16 longs x 16 pairs = 256 samples
+
+      PUB main() | i, j, packed
+        DEBUG(`LOGIC Pair SAMPLES 256 'D0' 'D1' LONGS_2BIT)
+        REPEAT
+          REPEAT j FROM 0 TO 15
+            packed := 0
+            REPEAT i FROM 0 TO 15
+              packed := (packed << 2) | (getrnd() & %11)   ' bit0 -> D0, bit1 -> D1
+            buff[j] := packed
+          DEBUG(`Pair `uhex_long_array_(@buff, 16))         ' whole window, one message
     description: "Packed full-window array feed (LONGS_2BIT, two channels) -- the feed shape that fills a scrolling LOGIC window"
 
 not_supported:

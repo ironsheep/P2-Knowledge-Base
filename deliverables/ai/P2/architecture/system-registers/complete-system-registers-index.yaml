@@ -278,8 +278,8 @@ special_behaviors:
 access_patterns:
   direct_addressing:
     examples:
-      - "MOV $1F8, ##$3000  ; Same as MOV PTRA, ##$3000"
-      - "MOV result, $1FE   ; Same as MOV result, INA"
+      - "MOV $1F8, ##$3000  ' Same as MOV PTRA, ##$3000"
+      - "MOV result, $1FE   ' Same as MOV result, INA"
     advantage: "Can use immediate addresses in calculated addressing"
     
   symbolic_addressing:
@@ -290,8 +290,8 @@ access_patterns:
     
   bit_manipulation:
     examples:
-      - "OR DIRA, ##%00001111     ; Set P3-P0 as outputs"
-      - "ANDN OUTB, ##%11110000   ; Clear P35-P32 outputs"
+      - "OR DIRA, ##%00001111     ' Set P3-P0 as outputs"
+      - "ANDN OUTB, ##%00001111   ' Clear P35-P32 outputs"
     advantage: "Efficient multi-pin operations"
 
 # Register Interactions
@@ -321,7 +321,7 @@ performance_notes:
 usage_patterns:
   memory_operations:
     pattern: "PTRA/PTRB with auto-increment for buffer processing"
-    example: "RDLONG data, PTRA++  ; Read and advance pointer"
+    example: "RDLONG data, PTRA++  ' Read and advance pointer"
     
   io_initialization:
     pattern: "Set DIR then OUT for output pins"
@@ -329,7 +329,7 @@ usage_patterns:
     
   pin_manipulation:
     pattern: "Use bit operations for selective pin control" 
-    example: "OR DIRA, pin_bit  ; Enable output for one pin"
+    example: "OR DIRA, pin_bit  ' Enable output for one pin"
     
   parameter_passing:
     pattern: "SETQ before COGINIT for parameter block"

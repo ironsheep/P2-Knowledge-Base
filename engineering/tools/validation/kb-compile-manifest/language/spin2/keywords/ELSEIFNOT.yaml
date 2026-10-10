@@ -7,8 +7,7 @@ blocks:
     compile: not-code
     reason: "`syntax:` TEMPLATE: the words `condition`, `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
   - at: examples[0]
-    fp: "7ef2aa572eb2bb24"
+    fp: "e2dcfcf5330c3929"
     compile: fragment
     wrap: spin2-method
-    assumes: [flag, result]
-    finding: "S-014+S-112"
+    assumes: [flag, second, result]

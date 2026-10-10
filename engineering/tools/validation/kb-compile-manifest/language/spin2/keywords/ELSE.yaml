@@ -7,8 +7,7 @@ blocks:
     compile: not-code
     reason: "`syntax:` TEMPLATE: the words `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
   - at: examples[0]
-    fp: "ec15277e6d85153a"
+    fp: "5ccd1a792bc59846"
     compile: fragment
     wrap: spin2-method
-    assumes: [result]
-    finding: "S-112"
+    assumes: [a, result]

@@ -8,28 +8,21 @@ blocks:
     wrap: spin2-method
     assumes: [x, handle_overflow()->1/0]
   - at: syntax_forms[1].example
-    fp: "25c11d6eac7e968e"
+    fp: "452c2e386e3a23ec"
     compile: fragment
     wrap: spin2-method
     assumes: [sensor, threshold]
-    finding: "S-018"
   - at: syntax_forms[2].example
     fp: "38f8831c55134aaa"
     compile: fragment
     wrap: spin2-method
     assumes: [temperature, state, TOO_HOT=con, TOO_COLD=con, WARM=con, NORMAL=con]
   - at: syntax_forms[3].example
-    fp: "63c2eafe137a07b4"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [button_pressed()->1/0, counter]
-    finding: "S-075"
-  - at: syntax_forms[4].example
     fp: "e83c41a53e4aa44e"
     compile: fragment
     wrap: spin2-method
     assumes: [sensor_value, handle_no_signal()->1/0]
-  - at: syntax_forms[5].example
+  - at: syntax_forms[4].example
     fp: "0799084aa3039011"
     compile: fragment
     wrap: spin2-method
@@ -60,11 +53,10 @@ blocks:
     wrap: spin2-method
     assumes: [switch1, switch2]
   - at: condition_expressions.special_comparisons[0].example
-    fp: "b6b6a4d31d8e5dcf"
+    fp: "e005bb9be415c8a8"
     compile: fragment
     wrap: spin2-method
     assumes: [x, y]
-    finding: "S-076"
   - at: common_patterns[0].code
     fp: "fe954b85e86a3537"
     compile: fragment
@@ -91,11 +83,8 @@ blocks:
     wrap: spin2-method
     assumes: [mode, AUTO=con, sensor, threshold, alarm_active, trigger_alarm()->1/0]
   - at: special_features[0].example
-    fp: "673861065bd302d0"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [ptr]
-    finding: "S-077"
+    fp: "d08c2dac2c575f41"
+    compile: program
   - at: special_features[1].example
     fp: "4fc7d3c2c7f6cb1e"
     compile: fragment
@@ -111,16 +100,6 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [x]
-  - at: pasm_equivalent.example.spin2
-    fp: "f830e7d8cdd0f92b"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [x, y]
-  - at: pasm_equivalent.example.pasm2
-    fp: "28b15cc91b8fe528"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [x, y]
   - at: syntax_forms[1].syntax
     fp: "a1c8b730110ed3eb"
     compile: not-code
@@ -130,11 +109,11 @@ blocks:
     compile: not-code
     reason: "`syntax:` TEMPLATE: the words `condition1..3`, `block1..3`, `default_block` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
   - at: pitfalls[2].wrong
-    fp: "93480874a69d6384"
+    fp: "d0d6126c854f79a4"
     compile: not-code
     reason: "indentation contrast pair written with placeholder statements (`statement1`, `statement2`, `condition`): pseudo-code for a layout rule, nothing named is a real statement. (Its claim -- the over-indented `statement2` is 'not in IF block' -- is wrong; see observation O10)"
   - at: pitfalls[2].correct
-    fp: "b07dc10883f9b727"
+    fp: "f6a6598edb89c812"
     compile: not-code
     reason: "indentation contrast pair written with placeholder statements (`statement1`, `statement2`, `condition`): pseudo-code for a layout rule, nothing named is a real statement. (Its claim -- the over-indented `statement2` is 'not in IF block' -- is wrong; see observation O10)"
   - at: pitfalls[3].wrong
@@ -149,7 +128,8 @@ blocks:
     assumes: [a, handle_non_positive_a()->1/0, b, handle_non_positive_b()->1/0, c, do_something()->1/0, do_other()->1/0]
   - at: pitfalls[0].wrong
     fp: "26b9e40989e8cc85"
-    compile: fragment
+    compile: never
     wrap: spin2-method
+    reason: "teaches the compile error: Spin2 comparison is == (a single = is not an operator in an expression), so IF x = 10 is rejected (Expected end of line)"
+    fails_at: 1
     assumes: [x]
-    finding: "S-256"

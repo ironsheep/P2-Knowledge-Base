@@ -6,9 +6,10 @@ description: |
   32-bit data type and the default type for all Spin2 operations.
   Unsigned range: 0 to 4,294,967,295. Signed range: -2,147,483,648 to 2,147,483,647.
   Used in multiple contexts: variable declarations (VAR), local variables,
-  method parameters, return types, DAT data, memory access operators,
-  type override (.LONG[n]), typed pointers (^LONG), and data constructors (LONG(...)).
-  LONG is the implicit default when no type specifier is given.
+  DAT data, memory access operators, type override (.LONG[n]), typed pointers
+  (^LONG, including pointer parameters and results), and data constructors (LONG(...)).
+  LONG is the implicit default when no type specifier is given; PUB/PRI parameters and
+  results are always longs (or pointers), so they never carry a LONG specifier.
 
 syntax: "LONG variable[count]"
 
@@ -19,12 +20,18 @@ usage_contexts:
   - context: "Local variable"
     syntax: "PUB method() | LONG localVar"
     example: "PUB process() | LONG result  ' or just: | result"
-  - context: "Parameter"
-    syntax: "PUB method(LONG param)"
-    example: "PUB setAddress(LONG addr)  ' or just: (addr)"
-  - context: "Return value"
-    syntax: "PUB method() : LONG result"
-    example: "PUB getValue() : LONG result  ' or just: : result"
+  - context: "Parameter (long, no specifier)"
+    syntax: "PUB method(param)"
+    example: "PUB setAddress(addr)"
+  - context: "Return value (long, no specifier)"
+    syntax: "PUB method() : result"
+    example: "PUB getValue() : result"
+  - context: "Parameter (pointer)"
+    syntax: "PUB method(^LONG param)"
+    example: "PUB setValues(^LONG pValues)"
+  - context: "Return value (pointer)"
+    syntax: "PUB method() : ^LONG result"
+    example: "PUB getValues() : ^LONG pValues"
   - context: "DAT data"
     syntax: "label LONG value1, value2, ..."
     example: "myLongs LONG 1_000_000, $DEADBEEF"
@@ -47,16 +54,16 @@ usage_contexts:
 default_type_behavior: |
   LONG is the default type when no type specifier is given:
   - VAR: 'myVar' without a type is LONG
-  - PUB/PRI parameters: 'param' without a type is LONG
-  - PUB/PRI return values: 'result' without a type is LONG
+  - PUB/PRI parameters: 'param' is always a long (a ^BYTE/^WORD/^LONG/^StructName override makes that one name a pointer)
+  - PUB/PRI return values: 'result' is always a long (same pointer override, per name)
   - PUB/PRI local variables: 'temp' without a type is LONG
-  In PUB/PRI signatures, each comma-separated name resets to LONG
-  unless it has its own explicit type specifier.
+  In PUB/PRI signatures an override applies only to the name it precedes.
 
 type_propagation: |
   In VAR blocks, LONG is sticky — applies to all names on the same line.
-  In PUB/PRI parameters, returns, and locals, type is NOT sticky — each
-  name defaults to LONG independently.
+  In PUB/PRI parameters and results every name is a long (or a pointer when it
+  carries ^BYTE/^WORD/^LONG/^StructName, per name); in locals a size applies only
+  to the name it precedes.
   See type-propagation concept for full rules.
 
 examples:
@@ -67,7 +74,6 @@ notes:
   - "Size: 32 bits (4 bytes) — native word size of the P2"
   - "Unsigned range: 0 to 4,294,967,295"
   - "Signed range: -2,147,483,648 to 2,147,483,647"
-  - "Long addresses should be long-aligned (divisible by 4) for optimal performance"
   - "LONG is the implicit default type — omitting a type specifier means LONG"
   - "All pointers are LONG-sized regardless of what they point to"
   - "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See language/spin2/concepts/struct-bitfields.yaml"

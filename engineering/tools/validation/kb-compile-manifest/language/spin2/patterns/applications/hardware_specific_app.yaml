@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation_template
-    fp: "e2bcb0b8e6e2ffa0"
+    fp: "b6c6743bcb6c93b1"
     compile: fragment
     wrap: spin2-top
     assumes: [BOARD_REV_A=con, BOARD_REV_B=con, BOARD_REV_C=con, BOARD_REV_D=con, SENSOR_OFFSET=con, SENSOR_SCALE=con, configure_for_revision()->0/1, load_calibration_data()->0/0, handle_board_button_press()->0/0, board_leds.initialize(2), board_leds.show_startup_pattern(0), board_leds.set_level(1), board_uart.initialize(3), board_uart.print_string(1), board_uart.send_sensor_data(1), custom_hw.initialize(1), custom_hw.read_sensor(1), custom_hw.configure_timing(1)]
-    finding: "S-019+S-088"

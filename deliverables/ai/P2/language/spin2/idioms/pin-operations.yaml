@@ -45,18 +45,18 @@ idioms:
     context: Initialize smart pin with specific mode and parameters
 
   - name: pin_range_access
-    pattern: "pin[hla][{start}..{end}]"
-    description: Access range of pins
+    pattern: "pin<action>({top}..{bottom})"
+    description: Operate on a range of pins with one call; the range is written Top..Bottom
     examples:
-      - "pina[0..7]"
-      - "pinl[8..15]"
-      - "pinh[16..31]"
-    context: Read or write multiple pins simultaneously
+      - "value := pinread(7..0)"
+      - "pinlow(15..8)"
+      - "pinhigh(31..16)"
+    context: Read or drive multiple pins simultaneously (PINREAD, PINLOW, PINHIGH, PINFLOAT, PINTOGGLE, PINWRITE)
 
   - name: pin_toggle
-    pattern: "pin[hla][{pin}] ^^"
+    pattern: "pintoggle({pin})"
     description: Toggle pin state
     examples:
-      - "pina[16] ^^"
-      - "pinl[LED_PIN] ^^"
-    context: Invert current pin state
+      - "pintoggle(16)"
+      - "pintoggle(LED_PIN)"
+    context: Invert the current output state of the pin(s)

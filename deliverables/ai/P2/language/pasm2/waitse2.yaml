@@ -38,7 +38,7 @@ group_membership:
 specifics:
   selector_number: 2
   event_flag: SE2
-quick_example: WAITSE2  ; Wait for selector 2 event flag, then clear it
+quick_example: "WAITSE2  ' Wait for selector 2 event flag, then clear it"
 has_group_documentation: true
 category: Event
 result: Waits for SE2 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.

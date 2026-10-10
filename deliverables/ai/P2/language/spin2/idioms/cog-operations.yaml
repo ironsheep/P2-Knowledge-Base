@@ -35,9 +35,9 @@ idioms:
     context: Start cog with specific code and data
 
   - name: new_cog
-    pattern: "cognew(@{code}, @{params})"
-    description: Start new cog with code
+    pattern: "coginit(COGEXEC_NEW, @{code}, @{params})"
+    description: Start PASM code in the next free cog (P2 replacement for the P1 COGNEW; COGNEW does not exist on P2; Spin2 methods start with COGSPIN(NEWCOG, method(), stack))
     examples:
-      - "cognew(@driver, @params)"
-      - "cognew(@pasm_code, @mailbox)"
-    context: Launch code in next available cog
+      - "coginit(COGEXEC_NEW, @driver, @params)"
+      - "coginit(COGEXEC_NEW, @pasm_code, @mailbox)"
+    context: Launch code in the next available cog; as an expression term it returns the cog id (-1 if none free)

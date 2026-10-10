@@ -70,10 +70,10 @@ access_patterns:
   explicit_access:
     - method: Dedicated instructions
     - examples:
-      - GETCT reg      ' Read system counter
-      - GETRND reg     ' Get random number
-      - GETQX  reg     ' Get CORDIC X result
-      - GETPTR reg     ' Read PTRA/PTRB value
+      - GETCT r0       ' Read system counter
+      - GETRND r0      ' Get random number
+      - GETQX  r0      ' Get CORDIC X result
+      - GETPTR r0      ' Read PTRA/PTRB value
       
   implicit_access:
     - method: Automatic hardware use

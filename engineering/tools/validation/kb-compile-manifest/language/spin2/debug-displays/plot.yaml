@@ -15,11 +15,10 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[3].code
-    fp: "751bf16ba7a68fcb"
+    fp: "83da06acd3f13742"
     compile: fragment
     wrap: spin2-method
     assumes: [frame]
-    finding: "S-141"
   - at: examples[4].code
     fp: "44688663cecd23f0"
     compile: fragment

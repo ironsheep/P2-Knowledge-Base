@@ -6,11 +6,11 @@ priority: 1
 
 description: |
   The @@ operator converts an object-relative address to an absolute hub address.
-  
-  PURPOSE: In Spin2+PASM programs, the @ operator stores addresses RELATIVE to the
+
+  PURPOSE: In Spin2+PASM programs, an @symbol written in DAT data is stored RELATIVE to the
   object's base. When you store @symbol values in data tables and need to use them
   at runtime, you must convert them to absolute addresses using @@.
-  
+
   FORMULA: @@x = (hub address of this object) + x
   
   This is essential for data pointer tables where @ values are stored in DAT sections.
@@ -30,7 +30,7 @@ syntax:
       - "@@LONG[@pointerTable][i] - resolve LONG-sized pointer"
     
   equivalence:
-    note: "@@symbol is equivalent to @symbol + PBASE"
+    note: "@@x is the hub address of this object + x, where x is a stored @symbol (DAT x LONG @dat_symbol)"
 
 how_it_works:
   explanation: |
@@ -77,13 +77,17 @@ examples:
     
   - code: |
       DAT
-        handler0  LONG  @process_type_a
-        handler1  LONG  @process_type_b
-        
+              orgh
+      process_type_a
+              _ret_   mov     pa, #1
+      process_type_b
+              _ret_   mov     pa, #2
+      handlers  LONG  @process_type_a, @process_type_b  ' stored as object-relative offsets
+
       PUB dispatch(type) | handler_addr
-        handler_addr := @@handler0[type]  ' Get method address
-        CALL(handler_addr)                 ' Call the handler
-    description: "Jump table / dispatch table pattern"
+        handler_addr := @@handlers[type]          ' absolute hub address of the routine
+        CALL(handler_addr)                        ' run it
+    description: "Jump table / dispatch table pattern over PASM routines (DAT symbols)"
     
   - code: |
       ' WRONG - will not work correctly:
@@ -123,30 +127,34 @@ examples:
     description: "Buffer initialization from DAT section using @@ with LONGMOVE"
     
   - code: |
-      DAT
-      stateHandlers   LONG    @State0, @State1, @State2
-      
       VAR
+        LONG stateHandlers[3]
         LONG currentHandler
-        
+
       PUB Init()
-        currentHandler := @@stateHandlers[0]  ' Resolve first handler
-        
+        stateHandlers[0] := @State0       ' @Method in code is a method pointer - no @@ needed
+        stateHandlers[1] := @State1
+        stateHandlers[2] := @State2
+        currentHandler := stateHandlers[0]
+
       PUB Run()
-        currentHandler()                       ' Call current state
-        
+        currentHandler()                  ' Call through the pointer
+
       PRI State0()
-        ' ... state 0 logic ...
-        currentHandler := @@stateHandlers[1]  ' Transition to state 1
-    description: "Pointer-based state machine using @@ to resolve method addresses"
+        currentHandler := stateHandlers[1]    ' Transition to state 1
+      PRI State1()
+        currentHandler := stateHandlers[2]
+      PRI State2()
+        currentHandler := stateHandlers[0]
+    description: "Method-pointer state machine: @Method in PUB/PRI code (no @@ - these are not stored offsets)"
 
 spin2_vs_pasm_only:
   spin2_pasm:
-    description: "@ stores relative offsets, @@ converts to absolute"
+    description: "@ in DAT data stores relative offsets, @@ converts to absolute"
     example_comment: "'IN SPIN2, THESE ARE OFFSETS OF STRINGS RELATIVE TO START OF OBJECT"
     
   pasm_only:
-    description: "@ stores absolute addresses directly, @@ typically not needed"
+    description: "@ in DAT data stores absolute addresses directly, @@ typically not needed"
     example_comment: "'IN PASM-ONLY PROGRAMS, THESE ARE ABSOLUTE ADDRESSES OF STRINGS"
 
 notes:

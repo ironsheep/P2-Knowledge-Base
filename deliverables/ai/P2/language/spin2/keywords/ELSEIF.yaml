@@ -2,11 +2,14 @@ keyword: "ELSEIF"
 type: keyword
 category: "Control Flow"
 description: |
-  Additional conditional branch in IF statement
+  Additional conditional branch in IF statement.
+  Must have the same indentation as the IF/IFNOT that begins the decision tree.
 syntax: |
   ELSEIF condition
     statements
 examples:
   - |
+    IF x > 100
+      result := @"very high"
     ELSEIF x > 10
-      result := "high"
+      result := @"high"

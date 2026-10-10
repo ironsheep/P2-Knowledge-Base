@@ -8,6 +8,8 @@ aliases:
   - top-level application object
   - driver object
   - object composition patterns
+  - PASM-only object
+  - pasm_only_object
 
 description: |
   Canonical object archetypes for Spin2 development. Each archetype has specific
@@ -312,18 +314,23 @@ archetypes:
                   ORG     0
       pasm_driver
                   ' Get parameters from hub
-                  RDLONG  pin, PTRA[0]
+                  RDLONG  pin_reg, PTRA[0]
                   ' ... PASM implementation
+      pin_reg     RES     1
     related_patterns:
       - "language/spin2/patterns/implementation/spin2_cog_management.yaml"
       - "language/spin2/constructs/inline_pasm.yaml"
 
-  - archetype: "pasm_only_object"
+  - archetype: "pasm_driver_object"
     description: |
-      Contains only DAT section with PASM code, loaded and called by parent via
-      COGINIT. Maximum performance for compute-intensive tasks.
+      A child object whose work is done by a PASM program in its own cog. A Spin2
+      object needs at least one PUB (a file holding only a DAT block is a PASM-only
+      PROGRAM and cannot be an OBJ child), so the object carries one small PUB that
+      hands the PASM entry address to the parent. A parent reaches a child's methods
+      and constants only, never its DAT labels. Maximum performance for
+      compute-intensive tasks.
     characteristics:
-      - "No Spin2 methods, only DAT/PASM"
+      - "One small PUB returns the PASM entry address; everything else is DAT/PASM"
       - "Parent must use COGINIT to launch"
       - "Communication via parameter block"
       - "Maximum performance"
@@ -350,6 +357,10 @@ archetypes:
       out_ptr   RES     1
       result    RES     1
       temp      RES     1
+
+      PUB entry_addr() : addr
+      '' Hub address of the PASM entry point, for COGINIT
+        addr := @pasm_entry
     parent_usage: |
       OBJ
         pasm_calc : "fast_calculator"
@@ -362,7 +373,7 @@ archetypes:
         params[0] := data_ptr
         params[1] := length
         params[2] := @result
-        cog := COGINIT(COGEXEC_NEW, @pasm_calc.pasm_entry, @params)
+        cog := COGINIT(COGEXEC_NEW, pasm_calc.entry_addr(), @params)
         IF cog >= 0
           REPEAT WHILE COGCHK(cog)
           value := result

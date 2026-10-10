@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: quick_example
-    fp: "e081992df16375df"
+    fp: "f3892237023755a6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [handler=con]

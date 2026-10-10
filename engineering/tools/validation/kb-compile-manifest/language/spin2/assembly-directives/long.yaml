@@ -3,32 +3,27 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "9add90d2a25c01cf"
+    fp: "2184a4cad043789a"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-137"
   - at: examples[1]
-    fp: "f34580334525a5d8"
+    fp: "d169c58c59026c01"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-137"
   - at: examples[2]
-    fp: "01afc8ecfb165c42"
+    fp: "0c58049b4a3661d5"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value=con]
-    finding: "S-137"
   - at: examples[3]
-    fp: "e3baf7eaafc6abd4"
+    fp: "26f4c3ca5af1d1b6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [label]
-    finding: "S-137"
   - at: examples[4]
-    fp: "1db80c96310cff6f"
+    fp: "9521e5c623d50700"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-137"
   - at: usage
     fp: "d7494fce7448225c"
     compile: not-code

@@ -7,25 +7,25 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: access_patterns.explicit_access[1].examples[0]
-    fp: "c668200215b7d378"
+    fp: "b21970064a62ce2f"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: access_patterns.explicit_access[1].examples[1]
-    fp: "63c51fb2d9512085"
+    fp: "2f02ad7dd54ff637"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: access_patterns.explicit_access[1].examples[2]
-    fp: "411f574dfec9977c"
+    fp: "384570c8e320ac0a"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: access_patterns.explicit_access[1].examples[3]
-    fp: "657e01e168e916b4"
+    fp: "1508cce73a137e06"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: access_patterns.implicit_access[1].examples[0]
     fp: "f300b664d8b789d8"
     compile: not-code

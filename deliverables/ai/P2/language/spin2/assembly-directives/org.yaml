@@ -5,6 +5,6 @@ description: 'Set origin address for COG RAM
   '
 syntax: '[''ORG address'']'
 examples:
-- ORG 0  // Start at COG address 0
+- ORG 0  ' Start at cog address 0
 group: Assembly
 last_updated: '2025-09-19T16:04:17.658205'

@@ -94,11 +94,12 @@ functions:
     returns: "TRUE (-1) or FALSE (0)"
 
 special_results:
-  "0 / 0": "NaN"
-  "x / 0 (x != 0)": "+/- Infinity"
-  "sqrt(-x)": "NaN"
-  "Overflow": "+/- Infinity"
+  "0.0 /. 0.0": "NaN"
+  "x /. 0.0 (any x)": "NaN (a zero denominator gives NaN, not Infinity)"
+  "fsqrt(-x)": "NaN"
+  "Overflow": "NaN"
   "Underflow": "0"
+  nan_value: "A NaN result is the long $FFFF_FFFF; any comparison with a NaN operand (<. >. <>. ==. <=. >=.) is false"
 
 performance_comparison:
   note: |
@@ -144,6 +145,7 @@ patterns:
   moving_average:
     code: |
       CON ALPHA = 0.1
+      VAR LONG filtered
       PUB filter(new_sample) : result
         filtered := ALPHA *. float(new_sample) +. (1.0 -. ALPHA) *. filtered
         result := round(filtered)
@@ -160,7 +162,9 @@ anti_patterns:
     wrong: "if result ==. 0.0"
     correct: |
       CON EPSILON = 0.00001
-      if fabs(result -. 0.0) <. EPSILON
+
+      PUB is_zero(value) : zero
+        zero := fabs(value -. 0.0) <. EPSILON
     reason: "Float precision limits make exact equality unreliable"
 
   accumulating_errors:

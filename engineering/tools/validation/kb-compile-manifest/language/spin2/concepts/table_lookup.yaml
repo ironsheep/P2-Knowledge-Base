@@ -24,9 +24,8 @@ blocks:
     wrap: spin2-method
     assumes: [char, value]
   - at: common_patterns[4].code
-    fp: "442f8ac9ee1550b8"
+    fp: "bce8233920a497b0"
     compile: program
-    finding: "S-019"
   - at: anti_patterns[0].wrong
     fp: "0665e3cd84732213"
     compile: fragment

@@ -60,28 +60,24 @@ blocks:
     wrap: spin2-method
     assumes: [txp, spmode, baudcfg]
   - at: idioms[4].examples[0]
-    fp: "f539d66979e0b83a"
+    fp: "c9e81aa754b6d886"
     compile: fragment
     wrap: spin2-method
-    finding: "S-088"
+    assumes: [value]
   - at: idioms[4].examples[1]
-    fp: "c9e0d4e8dbe54385"
+    fp: "e249b3a35c4877a5"
     compile: fragment
     wrap: spin2-method
-    finding: "S-088"
   - at: idioms[4].examples[2]
-    fp: "eb378132f557673f"
+    fp: "25e8c077d4df416f"
     compile: fragment
     wrap: spin2-method
-    finding: "S-088"
   - at: idioms[5].examples[0]
-    fp: "97f6d6ab6dd6cb57"
+    fp: "a8ac6dc97bb57f9a"
     compile: fragment
     wrap: spin2-method
-    finding: "S-088"
   - at: idioms[5].examples[1]
-    fp: "b51216770859bebc"
+    fp: "250a20e4e9e25631"
     compile: fragment
     wrap: spin2-method
     assumes: [LED_PIN=con]
-    finding: "S-088"

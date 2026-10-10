@@ -95,7 +95,7 @@ spin2_vs_pasm_context:
     
   in_pasm:
     description: "# denotes immediate value - the value itself, not a register"
-    example: "MOV reg, #$FF   ' Load immediate value $FF"
+    example: "MOV rx, #$FF   ' Load immediate value $FF"
     note: "Different meaning! In PASM, # means immediate operand"
 
 memory_spaces:
@@ -103,13 +103,11 @@ memory_spaces:
     range: "$000-$1FF (0-511)"
     description: "512 long registers in each cog"
     sections:
-      - "$000-$11F: General purpose / user code space"
-      - "$120-$13F: Reserved"
-      - "$140-$1CF: LUT access window"
-      - "$1D0-$1D7: Special hardware registers"
-      - "$1D8-$1DF: PR0-PR7 general purpose registers"
-      - "$1E0-$1EF: Local variable window (inline PASM)"
-      - "$1F0-$1FF: I/O and special registers"
+      - "$000-$11F: user area - in-line ORG PASM code loads here; free for your own code and data"
+      - "$120-$1D7: occupied by the Spin2 interpreter - do not write (it includes the task halt bits, TASKHLT at $1CC)"
+      - "$1D8-$1DF: PR0-PR7, general-purpose registers shared by PASM and Spin2"
+      - "$1E0-$1EF: the executing method's first 16 long variables, under their own names (in-line PASM)"
+      - "$1F0-$1FF: IJMP3 IRET3 IJMP2 IRET2 IJMP1 IRET1 PA PB PTRA PTRB DIRA DIRB OUTA OUTB INA INB"
       
   lut_memory:
     range: "$200-$3FF (512-1023)"

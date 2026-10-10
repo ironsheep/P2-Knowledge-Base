@@ -22,7 +22,7 @@ variants:
     description: "Infinite loop - continues forever until QUIT or ABORT"
     example: |
       REPEAT
-        LED.toggle()
+        PINTOGGLE(56)
         WAITMS(500)
     
   - variant: "count"
@@ -32,34 +32,32 @@ variants:
       REPEAT 10
         flash_led()
         
-  - variant: "post_test_while"
+  - variant: "pre_test_while"
     syntax: "REPEAT WHILE condition"
-    description: "Continue while condition is true (test at end)"
+    description: "Continue while condition is true; the condition is tested BEFORE each pass, so the body may never run"
     example: |
       REPEAT WHILE x < 100
         x += increment
-        
-  - variant: "post_test_until"
+
+  - variant: "pre_test_until"
     syntax: "REPEAT UNTIL condition"
-    description: "Continue until condition becomes true (test at end)"
+    description: "Continue until condition becomes true; the condition is tested BEFORE each pass, so the body may never run"
     example: |
       REPEAT UNTIL button_pressed()
         scan_sensors()
-        
-  - variant: "pre_test_while"
-    syntax: "REPEAT count WHILE condition"
-    description: "Up to count times, while condition true"
+
+  - variant: "bounded_wait"
+    syntax: |
+      REPEAT count
+        IF done_condition
+          QUIT
+    description: "At most count passes, leaving early when the condition is met (Spin2 has no REPEAT count WHILE / UNTIL form)"
     example: |
-      REPEAT 1000 WHILE sensor < threshold
-        process_data()
-        
-  - variant: "pre_test_until"
-    syntax: "REPEAT count UNTIL condition"
-    description: "Up to count times, until condition true"
-    example: |
-      REPEAT timeout UNTIL data_ready()
+      REPEAT timeout
+        IF data_ready()
+          QUIT
         WAITMS(1)
-        
+
   - variant: "from_to"
     syntax: "REPEAT variable FROM start TO end"
     description: "Iterate variable from start to end (inclusive)"
@@ -69,7 +67,7 @@ variants:
         
   - variant: "from_to_step"
     syntax: "REPEAT variable FROM start TO end STEP increment"
-    description: "Iterate with custom step value (can be negative)"
+    description: "Iterate with a custom step size (direction comes from FROM and TO; the sign of STEP is ignored)"
     example: |
       REPEAT j FROM 100 TO 0 STEP -10
         pwm_value := j
@@ -145,46 +143,25 @@ control_keywords:
     example: |
       REPEAT x FROM 0 TO 9          ' outer loop
         REPEAT y FROM 0 TO 9        ' inner loop (current)
-          IF grid[x][y] == target
+          IF grid[x*10+y] == target
             QUIT 1       ' Exit the x loop (1st-outer), escaping both
 
 special_behaviors:
   - behavior: "zero_count"
     description: "REPEAT 0 skips the loop entirely"
     
-  - behavior: "negative_count"
-    description: "Negative counts treated as large positive (2^32 + count)"
-    
   - behavior: "variable_scope"
-    description: "Loop variable is local to the REPEAT block"
-    
-  - behavior: "step_direction"
-    description: "FROM/TO automatically determines direction, STEP can override"
+    description: "The loop variable must already be declared (VAR, parameter, result or local); REPEAT does not create it, and after the loop it holds <last> +/- <step> (REPEAT <variable> FROM ... TO ...)"
 
-pasm_equivalent:
-  description: "REPEAT generates different PASM2 based on variant"
-  examples:
-    - spin2: "REPEAT 10"
-      pasm2: |
-        MOV     repeat_count, #10
-        .loop
-        ' ... loop body ...
-        DJNZ    repeat_count, #.loop
-    
-    - spin2: "REPEAT i FROM 0 TO 9"
-      pasm2: |
-        MOV     i, #0
-        .loop
-        ' ... loop body ...
-        ADD     i, #1
-        CMP     i, #10 WC
-        IF_C    JMP #.loop
+  - behavior: "step_direction"
+    description: "FROM and TO set the direction (up when TO is above FROM, down when below); STEP only sets the size of the step - its sign is ignored"
 
 common_patterns:
   - pattern: "delay_loop"
     description: "Create precise timing delays"
     code: |
-      REPEAT WAITMS(1) * 1000    ' Wait 1 second
+      REPEAT 1000
+        WAITMS(1)          ' 1000 x 1 ms = 1 second
     
   - pattern: "array_init"
     description: "Initialize array elements"
@@ -195,7 +172,9 @@ common_patterns:
   - pattern: "polling_loop"
     description: "Poll until condition met with timeout"
     code: |
-      REPEAT 1000 UNTIL IN(pin)
+      REPEAT 1000
+        IF PINREAD(pin)
+          QUIT
         WAITUS(100)
     
   - pattern: "infinite_main"
@@ -218,15 +197,17 @@ pitfalls:
         IF done
           QUIT
 
-  - pitfall: "wrong_step_direction"
-    description: "Using positive step when going backward"
-    wrong: |
-      REPEAT i FROM 10 TO 0 STEP 1    ' Never executes!
-    correct: |
-      REPEAT i FROM 10 TO 0 STEP -1   ' Or just FROM 10 TO 0
+  - pitfall: "step_sign_is_ignored"
+    description: "The sign of STEP does not choose the direction; FROM versus TO does"
+    example: |
+      REPEAT i FROM 10 TO 0 STEP 1     ' counts DOWN 10..0: the sign of STEP is ignored
+        process(i)
+      REPEAT i FROM 10 TO 0 STEP -1    ' the identical loop
+        process(i)
+    note: "After the loop i = last +/- |step|"
 
   - pitfall: "modifying_loop_variable"
-    description: "Modifying loop variable in FROM..TO loop - undefined behavior"
+    description: "Modifying the loop variable inside a FROM..TO loop changes the loop's progress; usually a bug"
     wrong: |
       REPEAT i FROM 0 TO 10
         i += 2                   ' Don't do this!
@@ -254,9 +235,9 @@ pitfalls:
       UNTIL value == VALID
 
 performance:
-  overhead: "Minimal - typically 2-4 PASM2 instructions per iteration"
+  overhead: "The KB publishes no per-statement clock count; Spin2 statements run as interpreter bytecodes"
   optimization_tips:
-    - "Use REPEAT count for known iterations (faster than WHILE)"
+    - "Use REPEAT count for known iterations"
     - "Place most likely QUIT condition first in nested IFs"
     - "Consider unrolling small fixed loops"
 

@@ -2,11 +2,14 @@ keyword: "ELSE"
 type: keyword
 category: "Control Flow"
 description: |
-  Default case in IF statement
+  Default case in IF statement.
+  Must have the same indentation as the IF/IFNOT that begins the decision tree.
 syntax: |
   ELSE
     statements
 examples:
   - |
+    IF a
+      result := 1
     ELSE
       result := 0

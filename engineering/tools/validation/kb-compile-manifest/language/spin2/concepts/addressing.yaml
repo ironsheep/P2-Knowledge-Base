@@ -2,6 +2,10 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
+  - at: description
+    fp: "a5364a6e7ee8a553"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
   - at: critical_distinction_byte_vs_long.cog_lut.example
     fp: "e4166f406ffcd340"
     compile: not-code
@@ -54,9 +58,8 @@ blocks:
     wrap: spin2-top
     with: ["common_patterns.launch_cog.code"]
   - at: common_patterns.register_access.code
-    fp: "dcfb459b85abbb6c"
+    fp: "9eb5bbf6755186e3"
     compile: program
-    finding: "S-041"
   - at: address_alignment.example
     fp: "818a6355e7eeb560"
     compile: program
@@ -69,11 +72,9 @@ blocks:
     compile: not-code
     reason: "English sentence with an inline instruction ('JMP #label uses cog-relative address'), not code"
   - at: org_vs_orgh_addressing.example
-    fp: "6935423c659bfaa7"
+    fp: "73d1c2fd4b14946d"
     compile: fragment
     wrap: spin2-top
-    assumes: [temp]
-    finding: "S-042"
   - at: address_arithmetic.size_calculation.example
     fp: "dbec06b333e431d7"
     compile: program

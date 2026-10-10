@@ -23,11 +23,11 @@ idioms:
     context: Set single bit to 1
 
   - name: bit_clear_shift
-    pattern: "{var} & ~(1 << {bit})"
-    description: Clear specific bit using shift
+    pattern: "{var} & !(1 << {bit})"
+    description: Clear specific bit using shift (! is the bitwise NOT)
     examples:
-      - "flags & ~(1 << 4)"
-      - "register & ~(1 << bit_num)"
+      - "flags & !(1 << 4)"
+      - "register & !(1 << bit_num)"
     context: Clear single bit to 0
 
   - name: bit_extract
@@ -55,9 +55,9 @@ idioms:
     context: Circular shift right
 
   - name: bit_reverse
-    pattern: "{value} REV {bits}"
-    description: Reverse bit order
+    pattern: "{value} REV {top_bit}"
+    description: Reverse the order of bits 0..top_bit and zero-extend
     examples:
-      - "data REV 8"
-      - "value REV 32"
-    context: Mirror bits within specified range
+      - "data REV 7      ' reverses the low 8 bits"
+      - "value REV 31    ' reverses all 32 bits"
+    context: REV takes the index of the top bit to reverse; REV 7 reverses 8 bits, REV 31 all 32

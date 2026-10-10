@@ -8,17 +8,19 @@ description: |
   The @ operator returns the hub memory address of a variable, data label, or method.
   
   CRITICAL DISTINCTION:
-  - In Spin2+PASM programs: @ returns an address RELATIVE to the start of the object
-  - In PASM-only programs: @ returns an ABSOLUTE hub address
-  
+  - In PUB/PRI code @ gives the hub address, ready for COGINIT, BYTE[]/LONG[], BYTEMOVE and the like.
+  - The object-relative form applies to @ values STORED IN DAT DATA (WORD @Str0, LONG @Table):
+    in a Spin2+PASM program they are stored as offsets from the start of the object, so convert
+    them with @@ when reading them back. In a PASM-only program, stored values are absolute.
+
   This distinction is essential when storing addresses in DAT sections for later use.
-  When you need to convert a relative address to absolute at runtime, use the @@ operator.
+  When you need to convert a stored offset to an absolute address at runtime, use the @@ operator.
 
 syntax:
   variable_address:
     form: "@hubvar"
     returns: "Hub address of VAR/PUB/PRI/DAT variable"
-    block_usage: "All blocks (CON, VAR, DAT, PUB, PRI)"
+    block_usage: "PUB/PRI only (as a term); an @symbol written in DAT data is stored there as data"
     
   array_element:
     form: "@array[index]"
@@ -52,7 +54,7 @@ syntax:
         syntax: "@obj[i].MethodName"
         description: "Address of method in indexed child object array"
     block_usage: "PUB/PRI only"
-    storage: "Must store in LONG variable (no BYTE, WORD, or bitfields)"
+    storage: "Must be stored in a LONG variable (a method pointer is a LONG value)"
     notes: "See language/spin2/concepts/method-pointers.yaml for calling patterns"
 
 restrictions:
@@ -68,20 +70,19 @@ restrictions:
 
 address_types:
   relative_address:
-    context: "Spin2+PASM programs"
+    context: "@ values stored in DAT data in Spin2+PASM programs"
     description: |
-      Addresses are relative to the start of the object. This allows objects
-      to be loaded at any hub location. The actual runtime address depends
-      on where the object is placed in memory.
+      Stored as offsets from the start of the object so the object can be loaded
+      at any hub location; convert with @@ in PUB/PRI code. An @symbol written in
+      PUB/PRI code is not stored - it is the hub address.
     use_cases:
       - "Storing data pointers in DAT sections"
       - "Creating tables of addresses"
-      - "Passing addresses to COGINIT/COGSPIN"
-      
+
   absolute_address:
-    context: "PASM-only programs"
+    context: "PASM-only programs (stored @ values)"
     description: |
-      Addresses are absolute hub addresses. The code is assembled to run
+      Stored @ values are absolute hub addresses. The code is assembled to run
       at specific memory locations.
     use_cases:
       - "Direct hardware addresses"
@@ -122,7 +123,7 @@ examples:
       DAT
         STR0    BYTE  "Hello", 0
         STR1    BYTE  "World", 0
-        strings WORD  @STR0, @STR1    ' Store relative offsets
+        strings WORD  @STR0, @STR1    ' Stored as object-relative offsets
         
       PUB example() | i, str_addr
         repeat i from 0 to 1
@@ -179,20 +180,21 @@ examples:
         
       VAR
         point points[NUM_POINTS]
-        
-      PUB clearAll() | ptr, i
-        ptr := @points[0]            ' Address of first structure
+        ^point ptr                   ' Typed pointer: ptr.x is the pointed-to member
+
+      PUB clearAll()
+        [ptr] := @points             ' Point the pointer at the first structure
         repeat NUM_POINTS
           ptr.x := 0
           ptr.y := 0
-          ptr += 8                   ' Advance by structure size (2 LONGs)
+          [ptr] += 8                 ' Advance the pointer by structure size (2 LONGs)
     description: "Structure array traversal with pointer arithmetic"
 
 common_patterns:
   pointer_to_buffer: |
     VAR
       BYTE buffer[1024]
-    PUB getData() : ^BYTE
+    PUB getData() : ^BYTE pData
       return @buffer
       
   pass_data_to_cog: |
@@ -211,7 +213,7 @@ common_patterns:
 
 notes:
   - "@ returns hub addresses only - use # for cog/LUT register addresses"
-  - "In Spin2+PASM, @ addresses are object-relative, not absolute"
+  - "@ in PUB/PRI code is the hub address; an @ value stored in DAT data is object-relative in Spin2+PASM (use @@)"
   - "Use @@ to convert stored @ values to absolute addresses at runtime"
   - "Symbol without @ returns the DATA at that address, not the address itself"
   - "@method creates a 32-bit method pointer with index and VAR base encoded"
@@ -234,4 +236,4 @@ related:
 
 source_reference: "Spin2 Documentation v51 - Address Operators table and DAT Data Pointers section"
 
-oneliner: "Address-of operator - returns hub address of VAR/DAT/method (relative in Spin2+PASM, absolute in PASM-only)"
+oneliner: "Address-of operator - hub address of a VAR/DAT variable or method (an @ stored in DAT data is object-relative in Spin2+PASM; convert with @@)"

@@ -26,8 +26,9 @@ examples:
   - description: "Abort with named constant"
     code: |
       CON ERR_TIMEOUT = -1
-      ' ...
-      ABORT ERR_TIMEOUT
+
+      PUB wait_for_ready()
+        ABORT ERR_TIMEOUT
 
 trap_operator:
   description: "Use backslash (\\) to catch ABORT"

@@ -26,18 +26,15 @@ blocks:
     wrap: spin2-top
     assumes: [read_adc()->1/0]
   - at: patterns.moving_average.code
-    fp: "9171a670bdea3a04"
+    fp: "a9741de8eb59e16e"
     compile: program
-    finding: "S-019"
   - at: patterns.distance_calculation.code
     fp: "e1abd9628a283861"
     compile: program
   - at: anti_patterns.float_equality.correct
-    fp: "a1e8e383e5073f0c"
+    fp: "12793a92ebf8c0d6"
     compile: fragment
     wrap: spin2-top
-    assumes: [result]
-    finding: "S-012"
   - at: anti_patterns.accumulating_errors.wrong
     fp: "360205ebeed2277f"
     compile: fragment

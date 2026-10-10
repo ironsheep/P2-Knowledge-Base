@@ -8,7 +8,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [hub_buffer=con, count, data]
   - at: examples.parameter_passing.code
-    fp: "f6159ace5cf311e3"
+    fp: "9306552855b63b2d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [param_block=con, entry_point=con, param1, param2]

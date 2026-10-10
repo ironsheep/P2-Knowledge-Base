@@ -107,7 +107,12 @@ trap_operator:
 
   trapping_object_methods:
     syntax: "result := \\object.method()"
-    example: "result := \\child_objects[i].method()"
+    example: |
+      OBJ
+        child_objects[4] : "child"
+
+      PUB trap_child(i) : result
+        result := \child_objects[i].method()
 
   trapping_method_pointers:
     syntax: "result := \\method_ptr()"

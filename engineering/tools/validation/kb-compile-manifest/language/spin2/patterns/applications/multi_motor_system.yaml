@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation_template
-    fp: "dcb13dc844ee495b"
+    fp: "c3b9e3b80a573ebb"
     compile: fragment
     wrap: spin2-top
-    assumes: [MOTION_IDLE=con, MOTION_PLANNING=con, MOTION_EXECUTING=con, MOTION_HOMING=con, initialize_motor_system()->0/0, check_for_new_commands()->0/0, calculate_motion_profile()->0/0, update_motor_positions()->0/0, monitor_motion_errors()->0/0, signal_motion_complete()->0/0, all_motors_homed()->1/0, motors.step(1), motors.start_homing(0), encoders.__kbstub(0), planner.get_next_step(1), planner.calculate_trajectory(2)]
-    finding: "S-008+S-019"
+    assumes: [MOTION_IDLE=con, MOTION_PLANNING=con, MOTION_EXECUTING=con, MOTION_HOMING=con, initialize_motor_system()->0/0, check_for_new_commands()->0/0, calculate_motion_profile()->0/0, update_motor_positions()->0/0, monitor_motion_errors()->0/0, signal_motion_complete()->0/0, all_motors_homed()->1/0, motors.do_step(1), motors.start_homing(0), encoders.__kbstub(0), planner.get_next_step(1), planner.calculate_trajectory(2)]

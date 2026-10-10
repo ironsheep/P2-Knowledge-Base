@@ -3,12 +3,12 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: string_creation_methods[0].example
-    fp: "ec3b171fa06b87c5"
+    fp: "c03725db8f119f92"
     compile: fragment
     wrap: spin2-method
     assumes: [ptr]
   - at: string_creation_methods[1].example
-    fp: "9691c26b6d739d21"
+    fp: "5321094e9d3db1a2"
     compile: fragment
     wrap: spin2-method
     assumes: [ptr]
@@ -45,18 +45,17 @@ blocks:
     fp: "2e219135df21dec4"
     compile: program
   - at: common_patterns[0].code
-    fp: "be2ece78d908c5e2"
+    fp: "5460d6890e4acfac"
     compile: fragment
     wrap: spin2-top
-    assumes: [print_string()->0/3, print_char()->0/1]
-    finding: "S-048"
+    assumes: [print_string()->0/1, print_char()->0/1]
   - at: common_patterns[1].code
-    fp: "f77654b8a5c6d74c"
+    fp: "e5ee02bdea121ec9"
     compile: fragment
     wrap: spin2-top
     assumes: [count, status]
   - at: common_patterns[2].code
-    fp: "6435e0c48bd9b248"
+    fp: "bf34971cfedc667b"
     compile: fragment
     wrap: spin2-top
     assumes: [print_string()->1/1, print_dec()->1/1]
@@ -82,11 +81,10 @@ blocks:
     fp: "c828aae55a1474fd"
     compile: program
   - at: anti_patterns[1].wrong
-    fp: "998122529a8d4402"
+    fp: "d952dfb3e0a691e8"
     compile: program
-    finding: "S-019"
   - at: anti_patterns[1].correct
-    fp: "647ca47451b4618d"
+    fp: "9047f01eb8e36ad6"
     compile: program
   - at: anti_patterns[2].wrong
     fp: "79c1eb2df9c24aeb"
@@ -97,22 +95,20 @@ blocks:
     wrap: spin2-top
     with: ["anti_patterns[2].wrong"]
   - at: anti_patterns[3].wrong
-    fp: "4dc5c1850c0d0de7"
+    fp: "2284a7ea19f10b89"
     compile: fragment
     wrap: spin2-top
-    with: ["string_utility_functions[1].code"]
   - at: anti_patterns[3].correct
-    fp: "5f02079d0441e86a"
+    fp: "eaceb4a2937f2de9"
     compile: fragment
     wrap: spin2-top
-    assumes: [buffer]
   - at: anti_patterns[4].wrong
-    fp: "a75f658f3b7aa363"
+    fp: "8caf826aba8745f9"
     compile: program
   - at: anti_patterns[4].correct
-    fp: "b8487dd3c4908efc"
+    fp: "fb2d3212acec0ea3"
     compile: program
   - at: memory_considerations.alignment_tip
-    fp: "a573d62901c05757"
+    fp: "1e98a45477d2a555"
     compile: not-code
     reason: "prose sentence followed by a short DAT excerpt; mixed prose + excerpt, not one compilable unit"

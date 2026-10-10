@@ -12,3 +12,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [address]
+  - at: examples[2]
+    fp: "237a52a1a2a2590b"
+    compile: fragment
+    wrap: pasm2-dat

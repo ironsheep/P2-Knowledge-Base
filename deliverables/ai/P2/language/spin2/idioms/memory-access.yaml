@@ -44,9 +44,9 @@ idioms:
     context: Indexed access to 16-bit array elements
 
   - name: absolute_address
-    pattern: "@@{variable}"
-    description: Get absolute hub address
+    pattern: "@@{table}[{index}]"
+    description: Convert an object-relative offset stored in DAT data (e.g. WORD @Str0) to an absolute hub address; @@x = hub address of this object + x. The general address-of operator is @
     examples:
-      - "@@buffer"
-      - "@@code_start"
-    context: Used when absolute addressing is needed
+      - "@@StrList[i]"
+      - "@@pointer_table[index]"
+    context: Reading pointer tables built in DAT with @label entries

@@ -9,14 +9,16 @@ blocks:
   - at: usage_contexts[1].example
     fp: "fd93be0d48b4c9e6"
     compile: program
+  - at: description
+    fp: "7393d1c86baabe5c"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"
   - at: usage_contexts[2].example
-    fp: "031bc736c3817234"
+    fp: "176485d24b7e6b62"
     compile: program
-    finding: "S-049"
   - at: usage_contexts[3].example
-    fp: "d3646d3d982ea4e1"
+    fp: "7fe6178d68d9e5ea"
     compile: program
-    finding: "S-049"
   - at: usage_contexts[4].example
     fp: "dd62bb6d3f614e93"
     compile: fragment

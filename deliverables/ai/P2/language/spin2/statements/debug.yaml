@@ -176,7 +176,7 @@ examples:
     
   - code: |
       ' Multiple display types in program
-      PUB test() | value
+      PUB run_test() | value
         value := 1000
         DEBUG(`TERM Status)                       ' create a TERM window
         DEBUG(`Status 'Starting test...', 13)     ' feed text by name (SINGLE quotes)
@@ -209,17 +209,17 @@ examples:
     description: "Continuous plotting of a sensor series on a SCOPE window"
 
 features:
-  - "Non-blocking operation - doesn't halt program execution"
+  - "Each DEBUG statement invokes the debugging program in the cog that executes it, and all cogs time-share the DEBUG serial pins through a lock during their debug interrupts"
   - "Multiple simultaneous display windows"
   - "Real-time data visualization"
   - "Conditional compilation - can be disabled for production"
   - "Rich formatting options"
   - "Backtick syntax prevents string interpretation issues"
-  - "Automatic type detection for variables"
+  - "Output format is chosen per value (UDEC, SDEC, UHEX, UBIN, FDEC, ZSTR ...); UHEX/UBIN size themselves to the value"
   - "Configurable display properties per window"
 
 usage_notes:
-  - "DEBUG statements are processed at compile time"
+  - "Each DEBUG statement compiles to a BRK instruction that calls the debugger at run time; the compiler ignores DEBUG statements when not compiling for DEBUG"
   - "Each display type opens in its own window"
   - "Windows persist across program runs until closed"
   - "Use meaningful titles for multiple displays"

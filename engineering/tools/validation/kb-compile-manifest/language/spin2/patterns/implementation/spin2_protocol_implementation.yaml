@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation
-    fp: "994cd4badce88509"
+    fp: "f1b3fd9bd50a6e0f"
     compile: fragment
     wrap: spin2-top
     assumes: [CS=con, MOSI=con, CLK=con, MISO=con]

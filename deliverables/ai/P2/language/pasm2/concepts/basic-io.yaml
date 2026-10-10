@@ -373,7 +373,7 @@ multi_cog_pin_coordination:
   architecture:
     per_cog_registers: "DIR/OUT/IN registers at $1FA-$1FF exist in each COG's private register RAM"
     independence: "Each COG controls only its own pin drivers via its DIR bits"
-    shared_access: "All COGs can access all 64 pins, but each COG's DIR determines if IT drives"
+    shared_access: "All cogs can access all 64 pins; a pin is driven when any cog's DIR bit for it is 1"
 
   coordination_strategies:
     single_cog_ownership:
@@ -390,9 +390,9 @@ multi_cog_pin_coordination:
       use_cases: "Bidirectional protocols, time-multiplexed pin usage, COG handoff"
 
   critical_rule:
-    avoid: "Multiple COGs simultaneously setting DIR=1 for same pin"
-    consequence: "Behavior undefined if COGs drive conflicting states (not documented in P2 spec)"
-    hardware_note: "No documented conflict resolution, wire-OR, or priority scheme"
+    avoid: "Multiple cogs simultaneously setting DIR=1 for the same pin unless their combined result is what you want"
+    consequence: "The DIR and OUT bits of all cogs are OR'd before they reach the pins: the pin's output enable is the OR of every cog's DIR bit and its output level is the OR of every cog's OUT bit, so a cog cannot pull low a pin that another cog sets high"
+    hardware_note: "Smart-pin write buses (WRPIN/WXPIN/WYPIN/RDPIN/AKPIN) are OR'd the same way; use RQPIN to read a smart pin from several cogs without bus conflict"
 
   safe_operations:
     reading: "All COGs can read any pin (INA/INB) simultaneously without coordination"

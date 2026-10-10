@@ -47,7 +47,7 @@ specifics:
   counter_number: 1
   event_flag: CT1
   condition: set
-quick_example: 'JCT1 #handler  ; Jump if counter 1 event flag is set'
+quick_example: "JCT1 #handler  ' Jump if counter 1 event flag is set"
 has_group_documentation: true
 category: Event
 oneliner: Jump if counter 1 event flag is set

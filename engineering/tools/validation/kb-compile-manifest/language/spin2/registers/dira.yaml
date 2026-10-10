@@ -3,7 +3,6 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "04ac5cfc6c7921e8"
+    fp: "8a72240f199c0d73"
     compile: fragment
     wrap: spin2-method
-    finding: "S-121"

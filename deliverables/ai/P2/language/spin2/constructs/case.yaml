@@ -20,7 +20,7 @@ design_philosophy: |
   - Supports ranges and multiple values per condition
   - No fall-through behavior (no break needed)
   - Can use expressions, not just constants
-  - Optimizes to jump tables when possible
+  - CASE_FAST uses an indexed jump table when the match values are constants
 
 syntax_forms:
   - form: "basic_case"
@@ -34,7 +34,7 @@ syntax_forms:
       CASE command
         "A": add_item()
         "D": delete_item()
-        "Q": quit()
+        "Q": quit_app()
         OTHER: show_error()
     
   - form: "range_matching"
@@ -59,7 +59,7 @@ syntax_forms:
       CASE_FAST expression
         match1: action1
         match2: action2
-    description: "Optimized for speed, generates jump table for O(1) dispatch"
+    description: "Uses an indexed jump table of up to 256 entries to branch straight to the matching code"
     constraints:
       - "All case values must be within 255 of each other"
       - "Works best with dense integer ranges (0, 1, 2, 3...)"
@@ -73,10 +73,6 @@ syntax_forms:
       - "Sparse value sets"
       - "Ranges spanning more than 255"
 
-  - form: "inline_case"
-    syntax: "CASE x : 1: a(), 2: b(), OTHER: c()"
-    description: "Single-line case for simple dispatching"
-
 special_features:
   - feature: "expression_matching"
     description: "Can use full expressions in match conditions"
@@ -87,13 +83,13 @@ special_features:
         x == target: handle_match()
         OTHER: handle_normal()
     
-  - feature: "string_matching"
-    description: "Direct string comparison support"
+  - feature: "string_comparison"
+    description: "CASE compares numbers, not strings: a multi-character quoted literal in a match list is a list of single-character values. Compare strings with STRCOMP under CASE TRUE"
     example: |
-      CASE command_string
-        "START": begin_process()
-        "STOP": end_process()
-        "PAUSE": pause_process()
+      CASE TRUE
+        STRCOMP(command_string, @"START"): begin_process()
+        STRCOMP(command_string, @"STOP"): end_process()
+        STRCOMP(command_string, @"PAUSE"): pause_process()
     
   - feature: "no_fall_through"
     description: "Each case is independent, no break needed"
@@ -108,9 +104,10 @@ why_this_matters:
     - Pin multiplexing decisions
   
   efficiency: |
-    CASE_FAST generates jump tables in COG RAM, providing
-    constant-time dispatch regardless of case count.
-    This is critical for deterministic timing in real-time systems.
+    CASE_FAST dispatches through an indexed jump table of up to 256 entries in the
+    compiled bytecode, branching straight to the matching code instead of testing the
+    matches in sequence. It saves time at a possible cost of larger compiled code.
+    The KB publishes no clock count for it.
 
 common_patterns:
   - pattern: "state_machine"
@@ -152,7 +149,7 @@ common_patterns:
           show_help()
           
         OTHER:
-          send_string("Unknown command")
+          send_string(@"Unknown command")
     
   - pattern: "value_categorization"
     description: "Categorize sensor readings"
@@ -167,14 +164,16 @@ common_patterns:
         OTHER: status := EXTREME_HOT
 
 pitfalls:
-  - pitfall: "variable_in_range"
-    description: "Using variables in range definitions"
+  - pitfall: "variable_in_case_fast"
+    description: "CASE_FAST needs constant match values and ranges; plain CASE accepts variables and expressions"
     wrong: |
-      CASE x
-        0..max_value: process()  ' Won't work if max_value is variable
+      PUB classify(x) | max_value
+        CASE_FAST x
+          0..max_value: process()  ' error: max_value is a variable
     correct: |
-      IF x >= 0 AND x <= max_value
-        process()
+      PUB classify(x) | max_value
+        CASE x
+          0..max_value: process()  ' CASE evaluates the bounds at run time
 
   - pitfall: "forgetting_other"
     description: "Not handling unexpected values - silent failure if unmatched"
@@ -190,7 +189,7 @@ pitfalls:
         1: running()
         2: stopped()
         OTHER:
-          log_error("Unknown state")
+          log_error(@"Unknown state")
           state := 0
 
   - pitfall: "case_fast_sparse_values"
@@ -221,29 +220,7 @@ performance:
     description: "Jump table dispatch"
     complexity: "O(1) constant time"
     use_when: "Matching against compile-time constants"
-    limitation: "Requires contiguous or near-contiguous values"
-
-pasm_equivalent:
-  regular_case: |
-    ' CASE x
-    '   1: action1()
-    '   2: action2()
-    CMP x, #1 WZ
-    IF_Z  JMP #action1
-    CMP x, #2 WZ
-    IF_Z  JMP #action2
-  
-  fast_case: |
-    ' CASE_FAST x (with jump table)
-    CMP x, #max_case WC
-    IF_NC JMP #case_other
-    ADD x, #jump_table
-    JMP x
-    
-    jump_table
-    JMP #case_0
-    JMP #case_1
-    JMP #case_2
+    limitation: "Match values and ranges must be unique constants, all within 255 of each other"
 
 related:
   - language/spin2/constructs/if_elseif_else.yaml

@@ -52,7 +52,7 @@ code_examples:
             last_pos := position
           
           ' Reset position on button press
-          if ina[0]
+          if ina.[0]
             pinclear(step_pin)
             pinstart(step_pin, P_REG_UP_DOWN | P_PLUS1_B, 0, 0)
       

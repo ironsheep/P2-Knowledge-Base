@@ -1,10 +1,10 @@
 directive: ORGF
 type: assembly_directive
-description: 'Set origin address with forced alignment
+description: 'Fill with zeros up to a cog address (cog mode only)
 
   '
-syntax: '[''ORGF address'']'
+syntax: '[''ORGF cog_address'']'
 examples:
-- ORGF $100  // Align to address $100
+- ORGF $100  ' Fill with zeros up to cog address $100
 group: Assembly
 last_updated: '2025-09-19T16:04:17.655294'

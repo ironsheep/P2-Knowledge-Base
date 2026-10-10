@@ -12,7 +12,7 @@ blocks:
     fp: "19107ca0d1a38d9a"
     compile: program
   - at: examples[3].code
-    fp: "764a2561983587f6"
+    fp: "33a5f269472f39bf"
     compile: program
   - at: examples[4].code
     fp: "c45440c44d8521f6"
@@ -31,15 +31,13 @@ blocks:
     wrap: spin2-top
     spin2_version: 45
   - at: examples[8].code
-    fp: "4dba74d75c4c0699"
+    fp: "ac9fffe81af147f9"
     compile: fragment
     wrap: spin2-top
     spin2_version: 45
-    finding: "S-077"
   - at: common_patterns.pointer_to_buffer
-    fp: "697db96977a7c33d"
+    fp: "4d015633d225c069"
     compile: program
-    finding: "S-116"
   - at: common_patterns.pass_data_to_cog
     fp: "aa107fce187fff34"
     compile: fragment

@@ -4,11 +4,11 @@ description: Insert long (32-bit) data into the assembly image at the current or
   at assembly time
 syntax: LONG value1 {, value2, ...}
 examples:
-- LONG  $12345678        ; Single long value
-- LONG  -1, 0, 1         ; Multiple long values
-- LONG  value[4]          ; Duplicate value 4 times
-- LONG  @label            ; Address of label
-- LONG  %%3210            ; Quaternary literal
+- LONG  $12345678        ' Single long value
+- LONG  -1, 0, 1         ' Multiple long values
+- LONG  value[4]          ' Duplicate value 4 times
+- LONG  @label            ' Address of label
+- LONG  %%3210            ' Quaternary literal
 usage: 'LONG is used in DAT sections to define long-sized (32-bit) data values. Data
 
   is placed at the current assembly origin — in COG RAM, LUT RAM, or Hub RAM

@@ -62,7 +62,7 @@ implementation_template: |
       update_motor_positions()
       monitor_motion_errors()
       
-  PUB execute_coordinated_motion() | motor_id, steps_remaining
+  PUB execute_coordinated_motion() | motor_id, steps_remaining, next_step
     steps_remaining := 0
     
     ' Update each motor
@@ -70,7 +70,7 @@ implementation_template: |
       if motor_positions[motor_id] <> target_positions[motor_id]
         ' Calculate next step
         next_step := planner.get_next_step(motor_id)
-        motors[motor_id].step(next_step)
+        motors[motor_id].do_step(next_step)
         motor_positions[motor_id] += next_step
         steps_remaining++
         
@@ -82,7 +82,7 @@ implementation_template: |
   PUB move_to_position(new_positions) | motor_id
     ' Set new target positions
     repeat motor_id from 0 to MAX_MOTORS-1
-      target_positions[motor_id] := new_positions[motor_id]
+      target_positions[motor_id] := long[new_positions][motor_id]   ' new_positions is the address of an array of MAX_MOTORS longs
       
     ' Plan coordinated motion
     planner.calculate_trajectory(@motor_positions, @target_positions)

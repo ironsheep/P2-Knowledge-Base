@@ -113,8 +113,8 @@ examples:
       CON
         ' Bit field definitions for a status register
         ERROR_BIT   = 0
-        READY_BITS  = 3..1
-        MODE_BITS   = 7..4
+        READY_BITS  = 1 ADDBITS 2      ' bits 3..1 (base bit 1, 2 more above it)
+        MODE_BITS   = 4 ADDBITS 3      ' bits 7..4
         
       VAR
         LONG status_reg

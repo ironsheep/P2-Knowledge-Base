@@ -3,7 +3,11 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "daefab4a6e13658f"
+    fp: "d43f2bee93543ca0"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [file:config.spin2]
+    assumes: [file:data.bin]
+  - at: description
+    fp: "4f63d2cbeccdc3f6"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

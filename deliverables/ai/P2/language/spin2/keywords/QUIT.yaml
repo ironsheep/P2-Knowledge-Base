@@ -71,7 +71,7 @@ examples:
       ' Matrix search with multi-level exit
       REPEAT row FROM 0 TO rows - 1
         REPEAT col FROM 0 TO cols - 1           ' current loop
-          IF matrix[row][col] == target
+          IF matrix[row*cols+col] == target
             found_row := row
             found_col := col
             QUIT 1                             ' Exit the row loop (1st-outer) -> escapes both

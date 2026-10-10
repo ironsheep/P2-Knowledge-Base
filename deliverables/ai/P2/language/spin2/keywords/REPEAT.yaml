@@ -4,11 +4,16 @@ category: "Control Flow"
 description: |
   Loop construct with various forms
 syntax: |
-  REPEAT [count]
+  REPEAT
+  REPEAT count
+  REPEAT positive_count WITH variable
   REPEAT variable FROM start TO end [STEP increment]
   REPEAT WHILE condition
   REPEAT UNTIL condition
+  REPEAT ... WHILE condition   (test at end)
+  REPEAT ... UNTIL condition   (test at end)
 examples:
   - "REPEAT 10"
+  - "REPEAT 10 WITH i"
   - "REPEAT i FROM 1 TO 100 STEP 2"
   - "REPEAT WHILE sensor_active"

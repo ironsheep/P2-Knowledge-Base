@@ -161,7 +161,7 @@ time_conversions:
       to: "cycles"
       formula: "cycles := clkfreq / 1_000_000 * us"
       better: "cycles := MULDIV64(clkfreq, us, 1_000_000)"
-      better_note: "MULDIV64 uses a 64-bit intermediate: full precision (no divide-first truncation) AND no 32-bit overflow. Plain clkfreq * us / 1_000_000 overflows once us exceeds ~21 at 200 MHz."
+      better_note: "MULDIV64 uses a 64-bit intermediate: full precision (no divide-first truncation) AND no 32-bit overflow. Plain clkfreq * us / 1_000_000 overflows once us exceeds ~10 at 200 MHz."
     - from: "cycles"
       to: "milliseconds"
       formula: "ms := cycles / (clkfreq / 1000)"
@@ -177,8 +177,9 @@ time_conversions:
       cycles := clkfreq / 1000 * ms
 
     PUB us_to_cycles(us) : cycles
-      ' Same overflow class as ms_to_cycles; us-scale ceiling is ~2.1B us at
-      ' 200 MHz — rarely a practical concern.
+      ' Same overflow class as ms_to_cycles; us-scale ceiling is ~10.7 million us
+      ' (~10.7 s) at 200 MHz: clkfreq / 1_000_000 * us is 200 * us there, which
+      ' overflows signed 32-bit above 2^31 / 200 = 10,737,418 us.
       cycles := clkfreq / 1_000_000 * us
 
     PUB cycles_to_ms(cycles) : ms
@@ -366,14 +367,14 @@ anti_patterns:
     severity: "logic_error"
     description: "Comparing counter values instead of subtracting"
     wrong: |
-      PUB bad_elapsed() | start, stop
+      PUB bad_elapsed() : elapsed | start, stop
         start := getct()
         do_work()
         stop := getct()
         IF stop > start              ' May be false after rollover!
           RETURN stop - start
     correct: |
-      PUB good_elapsed() | start, stop
+      PUB good_elapsed() : elapsed | start, stop
         start := getct()
         do_work()
         stop := getct()
@@ -441,7 +442,7 @@ anti_patterns:
     severity: "design"
     description: "Long blocking delays in time-critical code"
     wrong: |
-      PUB bad_sensor_read()
+      PUB bad_sensor_read() : reading
         request_reading()
         waitms(100)                  ' Blocks everything for 100ms
         RETURN get_reading()
@@ -460,11 +461,11 @@ anti_patterns:
         sensor_deadline := getms() + 100
         sensor_state := WAITING
 
-      PUB check_sensor_read() : ready
+      PUB check_sensor_read() : is_ready
         IF sensor_state == WAITING
           IF getms() >= sensor_deadline
             sensor_state := READY
-            ready := TRUE
+            is_ready := TRUE
 
 notes:
   - "GETCT resolution is single clock cycle"

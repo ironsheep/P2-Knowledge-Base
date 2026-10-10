@@ -5,4 +5,4 @@ description: |
   Returns value from list at given index
 syntax: "LOOKUP(index : list)"
 examples:
-  - "day_name := LOOKUP(day : \"Sun\", \"Mon\", \"Tue\")"
+  - "day_name := LOOKUP(day : @\"Sun\", @\"Mon\", @\"Tue\")"

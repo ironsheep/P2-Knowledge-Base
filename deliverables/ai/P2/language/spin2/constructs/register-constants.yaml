@@ -103,11 +103,13 @@ examples:
         INA_ADDR = INA
         OUTA_ADDR = OUTA
       
-      PUB fast_io() | value
+      PUB fast_io() | value, addr
+        addr := INA_ADDR
         org
-              rdlong  value, ##INA_ADDR        ' Read via constant
+              alts    addr              ' next instruction's S field := the register at that address
+              mov     value, 0          ' reads INA through its address
         end
-    description: "Register constants in inline assembly"
+    description: "Register constants in inline assembly: indirect register access with ALTS"
 
 use_cases:
   - "Hardware abstraction layers"

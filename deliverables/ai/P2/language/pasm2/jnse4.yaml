@@ -51,5 +51,5 @@ specifics:
   selector_number: 4
   event_flag: SE4
   condition: not set
-quick_example: 'JNSE4 #handler  ; Jump if selector 4 event flag is NOT set'
+quick_example: "JNSE4 #handler  ' Jump if selector 4 event flag is NOT set"
 has_group_documentation: true

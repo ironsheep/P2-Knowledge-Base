@@ -1,8 +1,12 @@
 keyword: "FILE"
 type: keyword
-category: "Special"
+category: "Data Declaration"
 description: |
-  Compiler directive for file inclusion
-syntax: "FILE filename"
+  DAT directive that includes the bytes of a binary file at that point of a DAT block. FileDat FILE "Filename":
+  FileDat is a byte symbol that points to the included data. It does not include Spin2 source (source inclusion is the
+  preprocessor's #INCLUDE) and it is not allowed in in-line PASM code.
+syntax: 'FileDat FILE "filename"'
 examples:
-  - "FILE \"config.spin2\""
+  - 'FileDat FILE "data.bin"   '' FileDat points to the file''s first byte'
+related:
+  - language/spin2/assembly-directives/file.yaml

@@ -7,8 +7,7 @@ blocks:
     compile: not-code
     reason: "`syntax:` TEMPLATE: the words `expression`, `value1`, `value2`, `statements` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
   - at: examples[0]
-    fp: "dbc8092bddf395a8"
+    fp: "57856fe011774e08"
     compile: fragment
     wrap: spin2-method
     assumes: [day, month_name]
-    finding: "S-014"

@@ -184,9 +184,11 @@ common_patterns:
   - pattern: "thousands_separator"
     description: "Insert commas at thousands positions"
     code: |
-      PUB print_with_commas(value)
+      PUB print_with_commas(value) | flag, place, digit
+        flag~
+        place := 1_000_000_000
         repeat
-          if flag ||= (digit := value / place // 10) or place == 1
+          if flag ||= (digit := value / place // 10) || place == 1
             send("0" + digit)
             if LOOKDOWN(place : 1_000_000_000, 1_000_000, 1_000)
               send(",")

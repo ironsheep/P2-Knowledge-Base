@@ -39,9 +39,8 @@ blocks:
     wrap: spin2-top
     assumes: [configure_pin()->1/1, set_baud_rate()->1/1]
   - at: parameter_handling.array_parameters
-    fp: "791b71503387231e"
+    fp: "06bf94a48ede360c"
     compile: program
-    finding: "S-081"
   - at: parameter_handling.default_values
     fp: "0bea79f9152f6733"
     compile: fragment
@@ -84,11 +83,9 @@ blocks:
     fp: "a0da5c3120b16b87"
     compile: program
   - at: common_patterns[2].code
-    fp: "fbd9d450a3400d86"
+    fp: "1f4f364681783ca3"
     compile: fragment
     wrap: spin2-top
-    assumes: [x]
-    finding: "S-082"
   - at: pitfalls[0].wrong
     fp: "37bff1dff8debf2e"
     compile: never
@@ -98,11 +95,16 @@ blocks:
   - at: pitfalls[0].correct
     fp: "d22869880ab62840"
     compile: program
-  - at: pitfalls[1].example
-    fp: "d4752b8137cbcf9f"
+  - at: pitfalls[1].wrong
+    fp: "1ad91efffbb0d24f"
+    compile: never
+    wrap: spin2-top
+    reason: "teaches the compile error: a local named like a VAR of the same object is rejected (names are unique per object); the page pairs it with the corrected form"
+    fails_at: 4
+  - at: pitfalls[1].correct
+    fp: "121396ac95f34c8c"
     compile: program
-    finding: "S-083"
   - at: pasm_integration
-    fp: "4189e1b7314b217e"
+    fp: "bb915db3d7d6f74a"
     compile: not-code
     reason: "prose sentence (`PUB methods can contain inline PASM2:`) followed by a code excerpt; mixed prose + excerpt, not one compilable unit"

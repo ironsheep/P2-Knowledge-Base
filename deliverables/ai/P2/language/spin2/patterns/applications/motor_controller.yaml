@@ -8,13 +8,13 @@ implementation: |
     
   PUB set_servo_angle(pin, angle)
     angle := 1000 + (angle * 1000 / 180)
-    wypin(MULDIV64(angle, clkfreq, 1_000_000), pin)
-    
+    wypin(pin, MULDIV64(angle, clkfreq, 1_000_000))
+
   PUB step_motor(steps, delay)
     repeat steps
-      outa[STEP_PIN]~~
+      outa.[STEP_PIN]~~
       waitus(delay)
-      outa[STEP_PIN]~
+      outa.[STEP_PIN]~
 resources:
   pins: "2-4 per motor"
   smart_pins: "PWM mode"

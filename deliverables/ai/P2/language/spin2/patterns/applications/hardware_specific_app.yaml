@@ -67,8 +67,8 @@ implementation_template: |
     
   PUB detect_hardware_revision() | id_pins
     ' Read hardware ID pins specific to this board
-    dira[59..58] := %00  ' Set as inputs
-    id_pins := ina[59..58]
+    pinfloat(58 addpins 1)  ' Set as inputs
+    id_pins := pinread(58 addpins 1)
     
     case id_pins
       %00: hardware_revision := BOARD_REV_A
@@ -90,9 +90,9 @@ implementation_template: |
     ' Board-specific timing setup
     setup_board_clocking()
     
-  PUB run_board_application() | sensor_value, button_state
+  PUB run_board_application() | sensor_value, button_state, calibrated_value
     board_leds.show_startup_pattern()
-    board_uart.print_string(string("Board application started\r\n"))
+    board_uart.print_string(string("Board application started", 13, 10))
     
     repeat
       ' Read board-specific sensors
@@ -105,7 +105,7 @@ implementation_template: |
       board_leds.set_level(calibrated_value)
       
       ' Check board button
-      button_state := ina[BUTTON_PIN]
+      button_state := pinread(BUTTON_PIN)
       if button_state == 0  ' Pressed
         handle_board_button_press()
         
@@ -114,7 +114,7 @@ implementation_template: |
       
       waitms(100)
       
-  PUB apply_board_calibration(raw_value) : calibrated
+  PUB apply_board_calibration(raw_value) : calibrated | offset, scale
     ' Use board-specific calibration data
     offset := calibration_data[SENSOR_OFFSET]
     scale := calibration_data[SENSOR_SCALE]

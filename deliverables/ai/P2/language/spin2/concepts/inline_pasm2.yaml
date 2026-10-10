@@ -35,7 +35,7 @@ key_facts_summary:
     $100..$11F free for user code. This range overlaps the ORG..END inline
     code area, so multitasking and large inline-PASM blocks compete for the
     same space. Source: Chip Gracey clarification 2026-05-02 verbatim.
-  label_rule: "Inline labels must start with '.' or ':' (method-local only)"
+  label_rule: "Inline PASM labels are local to the ORG..END block; a plain label (lp), a '.'-prefixed (.lp) or a ':'-prefixed (:lp) label all work"
 
 canonical_source: language/spin2/constructs/inline_pasm.yaml
 

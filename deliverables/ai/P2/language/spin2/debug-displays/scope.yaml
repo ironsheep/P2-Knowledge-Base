@@ -92,13 +92,16 @@ examples:
       ' Packed full-window array feed. Each sub-sample is a full per-channel VALUE;
       ' two channels A/B interleave via LONGS_8BIT (four 8-bit values per long, low
       ' byte first). Build a full window, then feed the whole array in ONE message.
-      VAR long buff[128]                          ' 128 longs x 4 values = 256 A,B sample-sets
-      DEBUG(`SCOPE Sig SIZE 256 128 LONGS_8BIT)   ' create (config only)
-      DEBUG(`Sig 'A' 0 255 'B' 0 255)             ' declare both channels (each needs a range)
-      REPEAT
-        REPEAT i FROM 0 TO 127
-          buff[i] := pack_next_four_samples()     ' A,B,A,B as four low-first 8-bit values
-        DEBUG(`Sig `uhex_long_array_(@buff, 128)) ' whole window, one message
+      VAR
+        long buff[128]                            ' 128 longs x 4 values = 256 A,B sample-sets
+
+      PUB main() | i
+        DEBUG(`SCOPE Sig SIZE 256 128 LONGS_8BIT) ' create (config only)
+        DEBUG(`Sig 'A' 0 255 'B' 0 255)           ' declare both channels (each needs a range)
+        REPEAT
+          REPEAT i FROM 0 TO 127
+            buff[i] := pack_next_four_samples()   ' A,B,A,B as four low-first 8-bit values
+          DEBUG(`Sig `uhex_long_array_(@buff, 128)) ' whole window, one message
     description: "Packed full-window array feed (LONGS_8BIT, two channels interleaved) -- fills a scrolling SCOPE window"
 
 not_supported:

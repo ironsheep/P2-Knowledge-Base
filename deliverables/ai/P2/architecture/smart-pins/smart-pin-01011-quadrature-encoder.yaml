@@ -52,7 +52,7 @@ code_examples:
           velocity := rdpin(enc_b) sar 2         ' Velocity in detents/100ms
           
           ' Reset position on button press
-          if ina[0]
+          if ina.[0]
             pinclear(enc_a)                      ' Zero the counter
             pinstart(enc_a, P_QUADRATURE | P_PLUS1_B, 0, 0)
       
@@ -64,9 +64,11 @@ code_examples:
         wxpin   #0, #enc_a                       ' Continuous mode
         dirh    #enc_a                           ' Enable encoder
       .loop
-        rdpin   position, #enc_a                 ' Read position
-        sar     position, #2                     ' Convert to detents
+        rdpin   position_reg, #enc_a             ' Read position
+        sar     position_reg, #2                 ' Convert to detents
         jmp     #.loop
+
+      position_reg    res     1
 
 common_applications:
   - "Rotary encoder knobs for user interfaces"

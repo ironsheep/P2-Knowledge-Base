@@ -119,18 +119,18 @@ auto_increment_modes:
     syntax: "PTR++"
     operation: "Use PTR, then PTR += scale"
     scale: "1/2/4 based on operation size"
-    example: "RDLONG reg, PTRA++"
+    example: "RDLONG r0, PTRA++"
 
   pre_decrement:
     syntax: "--PTR"
     operation: "PTR -= scale, then use PTR"
     scale: "1/2/4 based on operation size"
-    example: "WRLONG reg, --PTRB"
+    example: "WRLONG r0, --PTRB"
 
   indexed_post_modify:
     syntax: "PTR++[index]"
     operation: "Use PTR, then PTR += (index × scale)"
-    example: "RDLONG reg, PTRA++[2]  ' PTRA += 8"
+    example: "RDLONG r0, PTRA++[2]  ' PTRA += 8"
 
 common_patterns:
   function_prologue:

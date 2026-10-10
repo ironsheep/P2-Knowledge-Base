@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "88d9e6a9dfd898e4"
+    fp: "4f83dd4a6a1ba32c"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [start]
-    finding: "S-008"
+    assumes: [start, fin]

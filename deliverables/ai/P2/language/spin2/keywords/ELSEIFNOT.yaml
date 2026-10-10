@@ -2,11 +2,14 @@ keyword: "ELSEIFNOT"
 type: keyword
 category: "Control Flow"
 description: |
-  Additional conditional branch with negated condition
+  Additional conditional branch with negated condition.
+  Must have the same indentation as the IF/IFNOT that begins the decision tree.
 syntax: |
   ELSEIFNOT condition
     statements
 examples:
   - |
-    ELSEIFNOT flag
-      result := "false case"
+    IF flag
+      result := @"true case"
+    ELSEIFNOT second
+      result := @"false case"

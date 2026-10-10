@@ -5,6 +5,6 @@ description: 'Reserve space (advance origin)
   '
 syntax: '[''RES count'']'
 examples:
-- RES 16  // Reserve 16 locations
+- RES 16  ' Reserve 16 registers
 group: Assembly
 last_updated: '2025-09-19T16:04:17.657587'

@@ -26,54 +26,51 @@ examples:
       {Spin2_v46}                              ' REQUIRED directive
       PUB flag_demo() | x
         x := 0
-        DEBUG(C_Z)                             ' Shows: C=0 Z=1 (zero result)
+        DEBUG(C_Z)
         x := 1
-        DEBUG(C_Z)                             ' Shows: C=0 Z=0 (non-zero result)
-    description: "Basic flag state display"
-    
+        DEBUG(C_Z)
+    description: "Print the C and Z flags at a DEBUG statement (the values are the cog's flags at that moment - see notes)"
+
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
       PUB inline_asm_debug() | a, b
         a := $FFFFFFFF
         b := 1
         org
-              add     a, b        wc, wz      ' Add with flag update
+              add     a, b        wcz         ' Add with flag update
         end
-        DEBUG("After ADD: ", C_Z)              ' Shows: C=1 Z=1 (overflow to 0)
+        DEBUG("After ADD: ", C_Z)
     description: "Debug inline assembly flag results"
-    
+
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
       PUB test_compare() | x, y
         x := 100
         y := 200
         org
-              cmp     x, y        wc, wz      ' Compare sets flags
+              cmp     x, y        wcz         ' Compare sets flags
         end
-        DEBUG("x vs y: ", C_Z)                 ' C=1 means x < y
+        DEBUG("x vs y: ", C_Z)
     description: "Debug comparison results"
-    
+
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
       PUB shift_debug() | value
         value := %00000001
         org
-              shl     value, #8   wc, wz      ' Shift left, check for overflow
+              shl     value, #8   wcz         ' Shift left, check for overflow
         end
         DEBUG("After SHL: ", C_Z, " Value: ", UHEX(value))
     description: "Debug shift operations with multiple formatters"
-    
+
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
-      PUB conditional_debug() | result
-        result := some_operation()
-        org
-              test    result, result  wz      ' Test if zero
-        end
-        if_z
-          DEBUG("Result is ZERO - ", C_Z)
+      PUB conditional_debug() | value
+        value := some_operation()
+        if value == 0
+          DEBUG("Value is ZERO - ", C_Z)
         else
-          DEBUG("Result is NON-ZERO - ", C_Z)
+          DEBUG("Value is NON-ZERO - ", C_Z)
     description: "Conditional debugging with flag inspection"
 
 flag_meanings:
@@ -108,8 +105,8 @@ use_cases:
 
 notes:
   - "REQUIRES {Spin2_v46} or later at start of source file"
-  - "Reads actual processor flag state at time of DEBUG call"
-  - "Most useful after inline assembly with WC/WZ modifiers"
+  - "Prints the C and Z flags the cog held when the DEBUG interrupt was taken (the interrupt saves them with its return address)"
+  - "Documented use is PASM code; in a Spin2 statement the flags are the Spin2 interpreter's own at that point, not the result of the preceding Spin2 statement"
   - "Flags may change between operations - capture immediately"
   - "C_Z has no underscore variant (always shows both labels)"
   - "Combine with other formatters for complete state display"

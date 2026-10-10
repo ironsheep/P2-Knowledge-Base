@@ -22,7 +22,7 @@ overview: |
   - Logical: AND/&&, OR/||, XOR/^^, NOT/!!
   - Bitwise: &, |, ^, !, >>, <<, SAR, ROR, ROL, REV
   - Limit: #> (min), <# (max)
-  - Assignment: :=, compound forms (+=, -=, etc.), swap (:=:)
+  - Assignment: :=, multiple assignment (a, b := b, a), compound forms (+=, -=, etc.); :=: swaps two structure variables (v45)
   - Special: ??, ~, ~~, @, @@, .., ? :, ++, --
 
 operator_categories:
@@ -47,7 +47,7 @@ operator_categories:
       - operator: "SCA"
         description: "Unsigned scale: (a * b) >> 32"
       - operator: "SCAS"
-        description: "Signed scale: (a * b) >> 32"
+        description: "Signed scale: (a * b) >> 30"
       - operator: "FRAC"
         description: "Fractional: high 32 bits of (a << 32) / b"
 
@@ -129,8 +129,8 @@ operator_categories:
       description: "Count number of 1 bits (population count)"
       example: "ONES %1010_1010  ' Returns 4"
     - operator: "REV"
-      description: "Reverse bottom N bits, zero the rest"
-      example: "%1010_0011 REV 8  ' Returns %1100_0101"
+      description: "Reverse order of bits 0..y of x and zero-extend"
+      example: "%1010_0011 REV 7  ' Returns %1100_0101"
     - operator: "ZEROX"
       description: "Zero extend from bit N"
       example: "$FF ZEROX 7  ' Returns $0000_00FF"
@@ -148,7 +148,7 @@ signed_vs_unsigned:
   division_example:
     signed_val: -100
     signed_division: "-100 / 7 = -14 (rounds toward zero)"
-    unsigned_division: "-100 +/ 7 = 613566751 (interprets -100 as large positive)"
+    unsigned_division: "-100 +/ 7 = 613566742 (interprets -100 as large positive)"
 
 common_patterns:
   - pattern: "safe_division"
@@ -177,7 +177,7 @@ common_patterns:
 
   - pattern: "extract_field"
     description: "Extract N bits starting at position P"
-    code: "field := (value >> P) & BMASK (N-1)"
+    code: "fld := (value >> P) & BMASK (N-1)"
 
   - pattern: "value_clamp"
     description: "Clamp value to min/max range"
@@ -193,18 +193,18 @@ common_patterns:
 
   - pattern: "next_power_of_two"
     description: "Round up to next power of 2"
-    code: "result := DECOD ENCOD (n - 1)"
+    code: "result := n > 1 ? DECOD (ENCOD (n - 1) + 1) : 1"
 
   - pattern: "swap_values"
     description: "Exchange two values"
-    code: "a :=: b  ' a and b are swapped"
+    code: "a, b := b, a  ' a and b are swapped (multiple assignment)"
 
 anti_patterns:
   - anti_pattern: "c_precedence_assumption_bitwise_compare"
     severity: "common_bug"
     description: |
       P2 differs from C: bitwise AND '&' (precedence level 4) binds TIGHTER than
-      equality '==' (level 13). So 'flags & MASK == EXPECTED' already groups as
+      equality '==' (level 11). So 'flags & MASK == EXPECTED' already groups as
       '(flags & MASK) == EXPECTED' — no parentheses needed.
     wrong: |
       if flags & (MASK == EXPECTED)  ' Mis-port from C (where '==' binds tighter)
@@ -215,7 +215,7 @@ anti_patterns:
     severity: "common_bug"
     description: |
       P2 differs from C: shift '<<' (precedence level 3) binds TIGHTER than add
-      '+' (level 9). So 'value << 2 + 1' groups as '(value << 2) + 1'.
+      '+' (level 8). So 'value << 2 + 1' groups as '(value << 2) + 1'.
     wrong: |
       result := value << (2 + 1)     ' Mis-port from C (=> value << 3)
     correct: |
@@ -256,7 +256,7 @@ anti_patterns:
       average := (FLOAT(a) +. FLOAT(b)) /. 2.0
 
 floating_point:
-  note: "P2 has no hardware FPU - float operations are slow (~100x integer)"
+  note: "P2 has no floating-point hardware instructions: the Spin2 float operators run as software routines in the interpreter; the KB publishes no per-operation timing"
   operators:
     - operator: "+."
       description: "Float addition"
@@ -277,10 +277,10 @@ floating_point:
 
 special_operators:
   - operator: "??"
-    description: "Random number (XORO32 hardware)"
+    description: "Iterate a long variable per the XORO32 instruction and return a pseudo-random value (??var; PUB/PRI only)"
     example: |
-      value := ??              ' Get random 32-bit value
-      value := ?? // 100       ' Random 0-99
+      value := ??seed              ' Iterate seed, get the pseudo-random value
+      value := (??seed) +// 100    ' Random 0-99 (+// is the unsigned remainder)
 
   - operator: "~"
     description: "Post-clear (postfix) - return variable's value, then clear it to 0"

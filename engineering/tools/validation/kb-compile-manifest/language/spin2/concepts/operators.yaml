@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: overview
-    fp: "aff8705b47942076"
+    fp: "824382aa3a43b96b"
     compile: not-code
     reason: "YAML prose (English sentences), not code"
   - at: operator_categories.limit.operators[0].example
@@ -31,7 +31,7 @@ blocks:
     compile: not-code
     reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
   - at: operator_categories.unary_bit_operations[4].example
-    fp: "4a15fe4879cfa093"
+    fp: "a67b3bf8032b12f4"
     compile: not-code
     reason: "Spin2 expression shown standalone with its value in a comment ('Returns ...'); legal only inside a statement. (A pasm2-dat PASS, where it occurs, is the PASM instruction of the same name -- ENCOD/DECOD/BMASK/ONES -- not the Spin2 operator)"
   - at: operator_categories.unary_bit_operations[5].example
@@ -66,11 +66,10 @@ blocks:
     wrap: spin2-method
     assumes: [flags, N=con, bit_is_set()->1/0]
   - at: common_patterns[5].code
-    fp: "c01c6286f4b3bb4b"
+    fp: "08bb8c7fd4856260"
     compile: fragment
     wrap: spin2-method
-    assumes: [value, P, N]
-    finding: "S-008"
+    assumes: [fld, value, P, N]
   - at: common_patterns[6].code
     fp: "87ae163ef423889e"
     compile: fragment
@@ -87,27 +86,25 @@ blocks:
     wrap: spin2-method
     assumes: [result, n]
   - at: common_patterns[9].code
-    fp: "d6871c36d5af28bc"
+    fp: "f4922675ee7aea2f"
     compile: fragment
     wrap: spin2-method
     assumes: [result, n]
   - at: common_patterns[10].code
-    fp: "b81e35c47d11ae50"
+    fp: "5ca985ece753c12f"
     compile: fragment
     wrap: spin2-method
     assumes: [a, b]
-    finding: "S-044"
   - at: anti_patterns[5].correct
     fp: "2bf80f138eac81af"
     compile: fragment
     wrap: spin2-method
     assumes: [average, a, b]
   - at: special_operators[0].example
-    fp: "d69475ebf07acaf0"
+    fp: "1135b87973174ed8"
     compile: fragment
     wrap: spin2-method
-    assumes: [value]
-    finding: "S-047"
+    assumes: [value, seed]
   - at: special_operators[1].example
     fp: "6e344fedca30d76f"
     compile: fragment

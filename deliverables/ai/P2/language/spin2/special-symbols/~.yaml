@@ -2,6 +2,6 @@ symbol: "~"
 type: special_symbol
 category: "Special"
 description: |
-  Post-clear operator - use value then clear
+  Post-clear operator (postfix): var~ returns var, then clears all bits of var
 examples:
-  - "value := ~flag  // use flag then clear it"
+  - "value := flag~  ' use flag, then clear it"

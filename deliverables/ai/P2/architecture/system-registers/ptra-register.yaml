@@ -63,7 +63,7 @@ examples:
     code: |
       ' In launching cog:
       SETQ    ##param_block         ' This goes to new cog's PTRA
-      COGINIT #0, ##entry_point     ' entry_point goes to new cog's PTRB
+      COGINIT #%0_1_0000, ##entry_point   ' load and start a free cog; entry_point goes to its PTRB
       
       ' In new cog:
       RDLONG  param1, PTRA++        ' Read first parameter

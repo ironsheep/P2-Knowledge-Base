@@ -3,11 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: quick_reference.periodic_execution
-    fp: "7e6b04857cdb2ae4"
+    fp: "4056d09c8cb11b20"
     compile: fragment
     wrap: spin2-method
-    assumes: [do_work()->0/0]
-    finding: "S-008"
+    assumes: [next_time, do_work()->0/0]
   - at: quick_reference.timeout_polling
     fp: "3e80609a6ccd084e"
     compile: fragment

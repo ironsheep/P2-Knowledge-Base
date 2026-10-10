@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: time_conversions.conversion_functions
-    fp: "36490106d1c35ed8"
+    fp: "8a29122d361f6f9f"
     compile: program
   - at: patterns[0].code
     fp: "3d2d0ca2fcbf9c63"
@@ -49,17 +49,15 @@ blocks:
     fp: "0d4a6be8e2c4ddd5"
     compile: program
   - at: anti_patterns[1].wrong
-    fp: "bf2b41e9ab664c45"
+    fp: "a12261d942c28073"
     compile: fragment
     wrap: spin2-top
     assumes: [do_work()->0/0]
-    finding: "S-020"
   - at: anti_patterns[1].correct
-    fp: "d213fbdbc6022033"
+    fp: "6adc75b202f5467b"
     compile: fragment
     wrap: spin2-top
     assumes: [do_work()->0/0]
-    finding: "S-020"
   - at: anti_patterns[2].wrong
     fp: "b2f09bb75f44ea3d"
     compile: fragment
@@ -87,17 +85,15 @@ blocks:
     fp: "1eb688ee7f916d91"
     compile: program
   - at: anti_patterns[5].wrong
-    fp: "2049421616f8a594"
+    fp: "e154d762e1881a6b"
     compile: fragment
     wrap: spin2-top
     assumes: [request_reading()->0/0, get_reading()->1/0]
-    finding: "S-020"
   - at: anti_patterns[5].correct
-    fp: "997d4b2e3b822aff"
+    fp: "15146d7c412e034b"
     compile: fragment
     wrap: spin2-top
     assumes: [request_reading()->0/0]
-    finding: "S-050"
   - at: system_counter.rollover_safe_subtraction
     fp: "4829c7fd1055a671"
     compile: not-code

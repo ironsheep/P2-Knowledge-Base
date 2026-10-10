@@ -3,8 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0]
-    fp: "115d5cbfe4e4e476"
+    fp: "125a60f5af57f6dc"
     compile: fragment
     wrap: spin2-method
-    assumes: [serial, str()->0/1]
-    finding: "S-111"
+    assumes: [i, indices]

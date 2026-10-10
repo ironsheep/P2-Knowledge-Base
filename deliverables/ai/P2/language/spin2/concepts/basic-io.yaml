@@ -106,7 +106,7 @@ single_pin_operations:
   read_pin:
     method: "PINREAD"
     syntax: "PINREAD(pin)"
-    returns: "TRUE (-1) if high, FALSE (0) if low"
+    returns: "1 if high, 0 if low (a single pin is LSB-justified and zero-extended)"
     example: |
       IF PINREAD(16)
         ' Pin is high
@@ -292,7 +292,7 @@ common_patterns:
         PINHIGH(BUTTON_PIN)               ' DIR=1, OUT=1 - a drive is live only while DIR is high
         
         REPEAT
-          IF !PINREAD(BUTTON_PIN)  ' Active low: a press pulls the pin to ground
+          IF NOT PINREAD(BUTTON_PIN)  ' Active low: a press pulls the pin to ground
             buttonPressed()
             
   parallel_bus_write:
@@ -361,25 +361,13 @@ application_examples:
           IF col <> $0F               ' Key pressed?
             RETURN decodeKey(row, col)
             
-  ws2812_bit_bang:
-    code: |
-      PUB sendBit(pin, bit)
-        IF bit
-          PINHIGH(pin)
-          WAITUS(1)      ' T1H = 800ns
-          PINLOW(pin)
-          WAITUS(0)      ' T1L = 450ns
-        ELSE
-          PINHIGH(pin)
-          WAITUS(0)      ' T0H = 400ns
-          PINLOW(pin)
-          WAITUS(1)      ' T0L = 850ns
+  ws2812: "Spin2 WAITUS takes whole microseconds and cannot make sub-microsecond pulses; use a WS2812 driver object (see the WS2811/WS2812 NeoPixel object page under community/quick-bytes and OBEX objects 2857 and 2852)"
 
 multi_cog_pin_coordination:
   architecture:
     per_cog_registers: "DIR/OUT/IN registers at $1FA-$1FF exist in each COG's private register RAM"
     independence: "Each COG controls only its own pin drivers via its DIR bits"
-    shared_access: "All COGs can access all 64 pins, but each COG's DIR determines if IT drives"
+    shared_access: "All cogs can access all 64 pins; a pin is driven when any cog's DIR bit for it is 1"
 
   coordination_strategies:
     single_cog_ownership:
@@ -396,9 +384,9 @@ multi_cog_pin_coordination:
       use_cases: "Bidirectional protocols, time-multiplexed pin usage, COG handoff"
 
   critical_rule:
-    avoid: "Multiple COGs simultaneously setting DIR=1 for same pin"
-    consequence: "Behavior undefined if COGs drive conflicting states (not documented in P2 spec)"
-    hardware_note: "No documented conflict resolution, wire-OR, or priority scheme"
+    avoid: "Multiple cogs simultaneously setting DIR=1 for the same pin unless their combined result is what you want"
+    consequence: "The DIR and OUT bits of all cogs are OR'd before they reach the pins: the pin's output enable is the OR of every cog's DIR bit and its output level is the OR of every cog's OUT bit, so a cog cannot pull low a pin that another cog sets high"
+    hardware_note: "Smart-pin write buses (WRPIN/WXPIN/WYPIN/RDPIN/AKPIN) are OR'd the same way; use RQPIN to read a smart pin from several cogs without bus conflict"
 
   safe_operations:
     reading: "All COGs can read any pin (INA/INB) simultaneously without coordination"
@@ -417,16 +405,6 @@ anti_patterns:
       WRPIN(PWM_PIN, P_PWM_TRIANGLE | P_OE)
       PINSTART(PWM_PIN, P_PWM_TRIANGLE | P_OE, period, duty)
 
-  - anti_pattern: "read_without_input_mode"
-    severity: "wrong_value"
-    description: "Reading pin that's still in output mode reads output latch, not actual pin"
-    wrong: |
-      PINHIGH(INPUT_PIN)           ' Pin is output
-      value := PINREAD(INPUT_PIN)  ' Reads output latch, not external signal!
-    correct: |
-      PINFLOAT(INPUT_PIN)          ' Set to input mode first
-      value := PINREAD(INPUT_PIN)  ' Now reads actual pin state
-
   - anti_pattern: "smart_pin_not_cleared"
     severity: "power_waste"
     description: "Smart pin keeps running after use, wasting power"
@@ -440,15 +418,14 @@ anti_patterns:
       PINCLEAR(ADC_PIN)            ' Stop smart pin
       PINFLOAT(ADC_PIN)            ' Return to input mode
 
-  - anti_pattern: "rdpin_blocking_forever"
-    severity: "hang_risk"
-    description: "RDPIN blocks until data ready - may hang if no data arrives"
+  - anti_pattern: "rdpin_without_data_ready_check"
+    severity: "wrong_value"
+    description: "RDPIN returns immediately with the pin's current result Z and acknowledges the pin; it never waits. With no new data it returns the previous value"
     wrong: |
-      value := RDPIN(SERIAL_RX)    ' Blocks forever if no data!
+      value := RDPIN(SERIAL_RX)    ' returns at once - the last byte again if nothing new arrived
     correct: |
-      ' Check data ready first or use timeout
-      REPEAT UNTIL PINREAD(SERIAL_RX) OR timeout_reached()
-      if PINREAD(SERIAL_RX)
+      ' The smart pin raises its IN flag when new data is ready; PINREAD sees it
+      IF PINREAD(SERIAL_RX)
         value := RDPIN(SERIAL_RX)
 
   - anti_pattern: "parameter_order_confusion"
@@ -474,9 +451,9 @@ anti_patterns:
       ' Use RDPIN to read and acknowledge
       value := RDPIN(ADC_PIN)      ' Reads and acknowledges
 
-      ' Or use AKPIN after RQPIN if you need non-blocking
+      ' Or read quietly with RQPIN and acknowledge separately with AKPIN
       if PINREAD(ADC_PIN)          ' Data ready?
-        value := RQPIN(ADC_PIN)    ' Read without blocking
+        value := RQPIN(ADC_PIN)    ' Read without acknowledging
         AKPIN(ADC_PIN)             ' Acknowledge to get fresh data next time
 
 related_concepts:

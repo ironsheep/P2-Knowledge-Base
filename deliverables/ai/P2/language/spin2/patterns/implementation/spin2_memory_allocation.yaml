@@ -3,15 +3,20 @@ when_use:
   - "Dynamic data structures"
   - "Hub RAM management"
 implementation: |
+  CON
+    HEAP_LONGS = 1024
+    HEAP_BYTES = HEAP_LONGS * 4
+
   VAR
-    long heap[1024]
-    long heap_ptr
-    
+    long heap[HEAP_LONGS]
+    long heap_ptr                          ' next free offset, in bytes
+
   PUB alloc(size) : ptr
+    size := (size + 3) & !3                ' round up to whole longs
+    if heap_ptr + size > HEAP_BYTES
+      return 0                             ' out of memory; heap_ptr unchanged
     ptr := @heap + heap_ptr
     heap_ptr += size
-    if heap_ptr > 1024
-      return 0
 resources:
   hub_ram: "varies"
   overhead: "pointer tracking"

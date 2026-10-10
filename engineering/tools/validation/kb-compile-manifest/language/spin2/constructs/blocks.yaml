@@ -7,7 +7,7 @@ blocks:
     compile: not-code
     reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
   - at: block_types[0].syntax
-    fp: "11eb27e48e48c3bf"
+    fp: "5b4e5d78a57d6924"
     compile: fragment
     wrap: spin2-top
   - at: block_types[0].example
@@ -19,7 +19,7 @@ blocks:
     compile: not-code
     reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
   - at: block_types[1].syntax
-    fp: "84818819c74b5f18"
+    fp: "22fd16c1001dae7f"
     compile: fragment
     wrap: spin2-top
   - at: block_types[1].instance_example
@@ -32,7 +32,7 @@ blocks:
     compile: not-code
     reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
   - at: block_types[2].syntax
-    fp: "dbe7ebaf0ff0bff7"
+    fp: "dbd287bcf669fcf8"
     compile: fragment
     wrap: spin2-top
     assumes: [ser.__kbstub(0), gpio.__kbstub(0), comm.__kbstub(0)]
@@ -41,23 +41,20 @@ blocks:
     compile: not-code
     reason: "YAML prose (English sentences), not code (a why_this_matters paragraph that opens with a block keyword)"
   - at: block_types[3].syntax
-    fp: "dca8fd6ac21110eb"
+    fp: "1b712ba644e8c3e4"
     compile: fragment
     wrap: spin2-top
-    finding: "S-074"
   - at: memory_organization_example
     fp: "a41e77a388f3e5df"
     compile: fragment
     wrap: spin2-top
     assumes: [serial.__kbstub(0)]
   - at: common_patterns[0].code
-    fp: "9e386e9db19a79ac"
+    fp: "fc3dc96caf49ed93"
     compile: program
-    finding: "S-020"
   - at: common_patterns[1].code
-    fp: "64019cd649177b34"
+    fp: "509a4cf2e4938090"
     compile: program
-    finding: "S-020"
   - at: common_patterns[2].code
     fp: "cb1800c3c2b6b1af"
     compile: program

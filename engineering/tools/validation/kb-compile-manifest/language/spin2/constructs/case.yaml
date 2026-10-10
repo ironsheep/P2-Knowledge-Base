@@ -3,18 +3,17 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: syntax_forms[0].example
-    fp: "7ad15f967a548371"
+    fp: "af14c600ce217f2c"
     compile: fragment
     wrap: spin2-method
-    assumes: [command, add_item()->0/0, delete_item()->0/0, show_error()->0/0]
-    finding: "S-008"
+    assumes: [command, add_item()->0/0, delete_item()->0/0, quit_app()->0/0, show_error()->0/0]
   - at: special_features[0].example
     fp: "7407a2d0f6361989"
     compile: fragment
     wrap: spin2-method
     assumes: [x, handle_overflow()->1/0, handle_underflow()->1/0, target, handle_match()->1/0, handle_normal()->1/0]
   - at: special_features[1].example
-    fp: "d09135092daf41ce"
+    fp: "2f48f66153150144"
     compile: fragment
     wrap: spin2-method
     assumes: [command_string, begin_process()->1/0, end_process()->1/0, pause_process()->1/0]
@@ -24,34 +23,22 @@ blocks:
     wrap: spin2-method
     assumes: [state, IDLE=con, trigger, ACTIVE=con, process_data()->1/0, done, COMPLETE=con, cleanup()->1/0, ERROR=con, handle_error()->1/0]
   - at: common_patterns[1].code
-    fp: "923ba2c330208e1e"
+    fp: "01cc4e1ba88dd5f1"
     compile: fragment
     wrap: spin2-method
     assumes: [command, value, param, read_register()->1/1, write_register()->0/2, show_status()->0/0, show_help()->0/0, send_string()->0/1, UPPER()->1/1]
-    finding: "S-014"
   - at: common_patterns[2].code
     fp: "1e3cb4dd6c3d963f"
     compile: fragment
     wrap: spin2-method
     assumes: [temperature, status, EXTREME_COLD=con, FREEZING=con, COLD=con, COMFORTABLE=con, WARM=con, HOT=con, EXTREME_HOT=con]
   - at: pitfalls[1].correct
-    fp: "3b5e98234f56446e"
+    fp: "257e6adfda5b39a5"
     compile: fragment
     wrap: spin2-method
     assumes: [state, idle()->0/0, running()->0/0, stopped()->0/0, log_error()->0/1]
-    finding: "S-014"
-  - at: pasm_equivalent.regular_case
-    fp: "7d3e53f48f69d143"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [x, action1, action2]
-  - at: pasm_equivalent.fast_case
-    fp: "a7a34f98396b7a67"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [x, max_case=con, case_other, case_0, case_1, case_2]
   - at: design_philosophy
-    fp: "938b17f1fff85d95"
+    fp: "2e023c6d823747f3"
     compile: not-code
     reason: "YAML description prose (English sentences), not code (design_philosophy: a bulleted paragraph that opens with CASE)"
   - at: syntax_forms[0].syntax
@@ -73,19 +60,21 @@ blocks:
     compile: not-code
     reason: "`syntax:` TEMPLATE: the words `expression`, `match1`, `action1`, `match2`, `action2` are placeholders for user parts (not names of anything), so the block is not a compilable statement; the page's concrete form is its `examples:` entry"
   - at: why_this_matters.efficiency
-    fp: "19cb7676bf3431a8"
+    fp: "0fd757844e722eaf"
     compile: not-code
     reason: "YAML description prose (English sentences), not code (why_this_matters paragraph that opens with CASE_FAST)"
   - at: pitfalls[0].wrong
-    fp: "f2fe7f56b3c085f0"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [x, max_value, process()->1/0]
+    fp: "0f9b0058b3c470b6"
+    compile: never
+    wrap: spin2-top
+    reason: "the pitfall's teaching point: CASE_FAST needs constant match values and ranges, and max_value is a variable; the compiler rejects it (Expected a constant, unary operator, or \"(\"). The page pairs it with the corrected form (plain CASE) in the next block"
+    fails_at: 3
+    assumes: [process()->1/0]
   - at: pitfalls[0].correct
-    fp: "89e51dc5da86f2bc"
+    fp: "a8e02ced38f01920"
     compile: fragment
-    wrap: spin2-method
-    assumes: [x, max_value, process()->1/0]
+    wrap: spin2-top
+    assumes: [process()->1/0]
   - at: pitfalls[1].wrong
     fp: "2836bf0e8f978259"
     compile: fragment

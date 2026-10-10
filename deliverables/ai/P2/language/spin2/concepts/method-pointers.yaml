@@ -14,7 +14,7 @@ description: |
   indirect (dynamic) method calls. They provide powerful capabilities for callbacks,
   dispatch tables, polymorphism, and decoupling callers from specific methods.
   
-  CRITICAL: Method pointers must be stored in LONG variables without bitfields.
+  CRITICAL: A method pointer is a LONG value and must be stored in a LONG variable.
 
 variable_requirements:
   valid_declarations:
@@ -24,11 +24,9 @@ variable_requirements:
     - "PUB Register(handler)   ' LONG parameter"
   invalid_declarations:
     - type: "BYTE ptr"
-      error: "Method pointers must be long variables without bitfields"
+      error: "Method pointers are LONG values; a BYTE variable cannot hold one"
     - type: "WORD ptr"
-      error: "Method pointers must be long variables without bitfields"
-    - type: "LONG ptr : 16"
-      error: "Method pointers must be long variables without bitfields"
+      error: "Method pointers are LONG values; a WORD variable cannot hold one"
 
 getting_method_addresses:
   local_method:
@@ -44,7 +42,12 @@ getting_method_addresses:
   indexed_object_method:
     syntax: "@obj[i].MethodName"
     description: "Address of method in indexed child object array"
-    example: "readMethod := @sensors[index].Read"
+    example: |
+      OBJ
+        sensors[4] : "sensor"
+
+      PUB getReader(index) : readMethod
+        readMethod := @sensors[index].Read
 
 calling_through_pointers:
   basic_call:
@@ -56,8 +59,8 @@ calling_through_pointers:
     description: "Call method with parameters"
     
   single_return:
-    syntax: "result := ptr()"
-    description: "Call and capture return value"
+    syntax: "result := ptr():1"
+    description: "Call and capture return value (the :1 gives the number of return values expected)"
     
   multiple_returns:
     syntax: "x, y, z := ptr() : 3"
@@ -66,10 +69,10 @@ calling_through_pointers:
     example: |
       VAR
         LONG coordGetter
-        
+
       PUB Example() | x, y, z
         coordGetter := @GetPosition
-        x, y, z := coordGetter() : 3    ' Expect 3 return values
+        x, y, z := coordGetter():3      ' Expect 3 return values
 
 null_check:
   description: "Always verify method pointer is valid before calling"
@@ -129,7 +132,7 @@ examples:
         
       PUB Update() | nextState
         if currentState >= 0 and currentState < NUM_STATES
-          nextState := stateHandlers[currentState]()
+          nextState := stateHandlers[currentState]():1
           currentState := nextState
     description: "State machine with dispatch table"
     
@@ -154,7 +157,7 @@ examples:
         pca[NBUS] : "pca9685_var"          ' one VAR instance per bus
       VAR
         LONG leafWrite[NBUS]
-      PUB Init()
+      PUB Init() | i
         repeat i from 0 to NBUS-1
           leafWrite[i] := @pca[i].write     ' bind leaf i to bus i
       PUB Drive(busId, channel, value)
@@ -165,7 +168,7 @@ examples:
       PUB TransformArray(pArray, count, transformFunc) | i, value
         repeat i from 0 to count - 1
           value := LONG[pArray][i]
-          LONG[pArray][i] := transformFunc(value)
+          LONG[pArray][i] := transformFunc(value):1
           
       ' Usage:
       PUB Example()
@@ -176,11 +179,11 @@ examples:
     description: "Higher-order function pattern"
     
   - code: |
-      PUB SortArray(pArray, count, compareFunc) | i, j, temp, cmp
+      PUB SortArray(pArray, count, compareFunc) | i, j, temp, order
         repeat i from 0 to count - 2
           repeat j from i + 1 to count - 1
-            cmp := compareFunc(LONG[pArray][i], LONG[pArray][j])
-            if cmp > 0
+            order := compareFunc(LONG[pArray][i], LONG[pArray][j]):1
+            if order > 0
               temp := LONG[pArray][i]
               LONG[pArray][i] := LONG[pArray][j]
               LONG[pArray][j] := temp
@@ -191,35 +194,32 @@ examples:
 
 recv_send_as_pointers:
   description: |
-    RECV and SEND are special built-in method pointers for inter-cog mailbox
-    communication. They can be assigned to variables for flexible I/O.
+    RECV and SEND are special built-in method pointers. Each is inherited from the
+    calling method and conveyed to all called methods, and each provides an efficient
+    input/output mechanism for data. They are assigned like method pointers.
   recv:
-    syntax: "inputMethod := RECV"
-    usage: "data := inputMethod()"
+    syntax: "RECV := @InMethod"
+    usage: "data := RECV()"
     restrictions:
-      - "Takes no parameters"
-      - "Always returns exactly one value"
+      - "Must point to a method that takes no parameters"
+      - "Must point to a method that returns a single value"
   send:
-    syntax: "outputMethod := SEND"
-    usage: "outputMethod(data)"
+    syntax: "SEND := @OutMethod"
+    usage: "SEND(data)"
     restrictions:
-      - "Returns no value"
+      - "Must point to a method that takes one parameter"
+      - "Must point to a method that returns no value"
   flexible_io_pattern: |
-    VAR
-      LONG inputMethod
-      LONG outputMethod
-      
-    PUB SetupMailboxIO()
-      inputMethod := RECV
-      outputMethod := SEND
-      
-    PUB SetupSerialIO()
-      inputMethod := @serial.rx
-      outputMethod := @serial.tx
-      
-    PUB ProcessIO() | char
-      char := inputMethod()
-      outputMethod(char)
+    OBJ
+      serial : "serial_driver"
+
+    PUB setup()
+      RECV := @serial.rx
+      SEND := @serial.tx
+
+    PUB echo() | c
+      c := RECV()
+      SEND(c)
 
 parameter_considerations:
   description: |
@@ -228,7 +228,7 @@ parameter_considerations:
   wrapper_pattern: |
     ' For dispatch tables with varying signatures, use wrappers:
     PUB Dispatch(index, p1, p2, p3) : result
-      result := handlers[index](p1, p2, p3)
+      result := handlers[index](p1, p2, p3):1
       
     PRI WrapNoParam(p1, p2, p3) : result
       result := ActualNoParam()
@@ -253,7 +253,7 @@ notes:
   - "Method pointers are 32-bit values encoding method index and VAR base"
   - "No compile-time type checking on parameters or returns"
   - "Use :N suffix to specify return count when calling through pointer"
-  - "RECV and SEND can be assigned to variables for I/O abstraction"
+  - "RECV and SEND are method pointers inherited by called methods; assign them with RECV := @InMethod and SEND := @OutMethod"
 
 related:
   - language/spin2/special-symbols/at.yaml

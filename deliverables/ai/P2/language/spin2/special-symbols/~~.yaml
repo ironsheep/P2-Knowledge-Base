@@ -2,6 +2,6 @@ symbol: "~~"
 type: special_symbol
 category: "Special"
 description: |
-  Post-set operator - use value then set to -1
+  Post-set operator (postfix): var~~ returns var, then sets all bits of var (-1)
 examples:
-  - "value := ~~flag  // use flag then set to -1"
+  - "value := flag~~  ' use flag, then set it to -1"

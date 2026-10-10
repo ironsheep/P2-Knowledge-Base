@@ -3,5 +3,5 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation_template
-    fp: "ed090bd996da72b1"
+    fp: "1334da316028b2d2"
     compile: program

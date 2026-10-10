@@ -7,29 +7,25 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "fdfd13449122428e"
+    fp: "a7eae11157b5b0cb"
     compile: program
   - at: examples[1].code
-    fp: "aa7d0dc07b007d4f"
+    fp: "e3ce150a21e5ada4"
     compile: fragment
     wrap: spin2-top
-    finding: "S-138"
   - at: examples[2].code
-    fp: "4cc5ba47030cc048"
+    fp: "fd244594d00ffc84"
     compile: fragment
     wrap: spin2-top
-    finding: "S-138"
   - at: examples[3].code
-    fp: "34a34f4bb4d7e80f"
+    fp: "1aba366d70da67c3"
     compile: fragment
     wrap: spin2-top
-    finding: "S-138"
   - at: examples[4].code
-    fp: "8394e84a9db99e30"
+    fp: "5491850a6c67ff16"
     compile: fragment
     wrap: spin2-top
     assumes: [some_operation()->1/0]
-    finding: "S-139"
   - at: syntax.basic
     fp: "1a6099f4f43575f3"
     compile: fragment

@@ -14,13 +14,12 @@ blocks:
     assumes: [outputMethod, serial.tx(0), lcd.Char(0)]
     with: ["examples[1].code"]
   - at: getting_method_addresses.indexed_object_method.example
-    fp: "4d0436d0d144596e"
+    fp: "f7947fd72d0a25d6"
     compile: fragment
-    wrap: spin2-method
-    assumes: [readMethod, index]
-    finding: "S-018"
+    wrap: spin2-top
+    assumes: [sensors.Read(0)]
   - at: calling_through_pointers.multiple_returns.example
-    fp: "d1ea4bca6d6b5a9d"
+    fp: "54ec6b619bb4bffb"
     compile: fragment
     wrap: spin2-top
     assumes: [GetPosition()->3/0]
@@ -33,51 +32,46 @@ blocks:
     wrap: spin2-top
     assumes: [serial.tx(0), lcd.Char(0)]
   - at: examples[2].code
-    fp: "b6b182dee3bde558"
+    fp: "84abb9cf800b8065"
     compile: fragment
     wrap: spin2-top
     assumes: [HandleIdle()->1/0, HandleRunning()->1/0, HandleError()->1/0]
-    finding: "S-017"
   - at: examples[3].code
     fp: "aad6bb1b0dd2aef7"
     compile: program
   - at: examples[4].code
-    fp: "538079af0909ab37"
+    fp: "aa56b275ab089099"
     compile: fragment
     wrap: spin2-top
-    assumes: [NBUS=con, pca.write(2)]
-    finding: "S-019"
+    assumes: [NBUS=con:4, pca.write(2)]
   - at: examples[5].code
-    fp: "2d0875a256c4d9e7"
+    fp: "8ff21afd7fd3bcef"
     compile: fragment
     wrap: spin2-top
     assumes: [values]
-    finding: "S-017"
   - at: examples[6].code
-    fp: "dcfbc204bfb1a5a8"
+    fp: "6433183d3137a595"
     compile: program
-    finding: "S-008+S-017"
   - at: recv_send_as_pointers.recv.usage
-    fp: "5215c8f4a0906923"
+    fp: "54da35227225ad4d"
     compile: fragment
     wrap: spin2-method
-    assumes: [data, inputMethod]
-    finding: "S-017"
+    assumes: [data]
   - at: recv_send_as_pointers.send.usage
-    fp: "d31071bd5db807a4"
+    fp: "70618a97bd3d7b54"
     compile: fragment
     wrap: spin2-method
-    assumes: [outputMethod, data]
+    assumes: [data]
   - at: recv_send_as_pointers.flexible_io_pattern
-    fp: "d14ed7ac8f9eed24"
-    compile: program
-    finding: "S-017+S-018+S-033"
+    fp: "6af5feb7f7c5b6cf"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [serial.rx(0), serial.tx(1)]
   - at: parameter_considerations.wrapper_pattern
-    fp: "d6b381f32b186569"
+    fp: "ed3c733e73639473"
     compile: fragment
     wrap: spin2-top
     assumes: [handlers, ActualNoParam()->1/0, ActualOneParam()->1/1]
-    finding: "S-017"
   - at: null_check.pattern
     fp: "3f76d684d6611f90"
     compile: fragment

@@ -22,6 +22,5 @@ blocks:
     fp: "9156e5c94ac3629d"
     compile: program
   - at: examples[3].code
-    fp: "531ef725aeeb3f5b"
+    fp: "db5094074033441b"
     compile: program
-    finding: "S-117"

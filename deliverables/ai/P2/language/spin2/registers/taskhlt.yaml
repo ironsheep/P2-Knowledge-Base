@@ -12,7 +12,7 @@ description: |
   corresponds to task 31, and bit 31 corresponds to task 0.
   REQUIRES: {Spin2_v47} or later version directive at start of source file.
 
-address: "512 ($200)"
+address: "$1CC (460) - an interpreter register inside the interpreter-occupied $120-$1D7 area"
 size: "32-bit"
 access: read_write
 

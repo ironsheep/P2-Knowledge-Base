@@ -19,11 +19,10 @@ blocks:
     fp: "ed2fb820596e9007"
     compile: program
   - at: trap_operator.trapping_object_methods.example
-    fp: "7d820e571de793a0"
+    fp: "74ad5c8cece3b5f0"
     compile: fragment
-    wrap: spin2-method
-    assumes: [result, i]
-    finding: "S-018"
+    wrap: spin2-top
+    assumes: [child_objects.method(0)]
   - at: trap_operator.trapping_method_pointers.example
     fp: "cde95a51c4dfd184"
     compile: fragment

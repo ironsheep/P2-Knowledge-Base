@@ -45,7 +45,7 @@ group_membership:
 specifics:
   selector_number: 4
   event_flag: SE4
-quick_example: WAITSE4  ; Wait for selector 4 event flag, then clear it
+quick_example: "WAITSE4  ' Wait for selector 4 event flag, then clear it"
 has_group_documentation: true
 related:
 - SETSEx

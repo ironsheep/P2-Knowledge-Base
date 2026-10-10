@@ -21,7 +21,7 @@ example: |
   ' Exit nested loops (level counts outward from the current loop):
   REPEAT x FROM 0 TO 9      ' outer loop
     REPEAT y FROM 0 TO 9    ' inner loop (current at the QUIT)
-      IF grid[x][y] == value
+      IF grid[x*10+y] == value
         QUIT 1              ' Exit the x loop (1 = 1st-outer), escaping both
 
 critical_behavior:
@@ -50,7 +50,7 @@ critical_pitfall: "QUIT only works in REPEAT loops, not in methods (use ABORT/RE
 comparison:
   quit: "Exits loop entirely"
   next: "Skips to next iteration"
-  abort: "Exits entire method"
+  abort: "Unwinds the call stack to the nearest trapped call (\\method()); with no trap the task or cog stops"
 
 related:
   - language/spin2/constructs/repeat.yaml

@@ -108,7 +108,7 @@ examples:
       DEBUG(`PLOT Game SIZE 320 240)
       DEBUG(`Game LAYER 1 'spritesheet.bmp')
       REPEAT frame FROM 0 TO 7
-        DEBUG(`Game CROP 1 `(frame*32) 0 32 32 100 100)   ' blit 32x32 frame (expr needs `(...) to evaluate)
+        DEBUG(`Game CROP 1 `(frame*32) 0 32 32 100 100)   ' blit 32x32 frame (the expression needs its own backtick before the parenthesis)
         WAITMS(100)
     description: "Bitmap layers and sprite-sheet animation"
   - code: |

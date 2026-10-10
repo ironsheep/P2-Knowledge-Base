@@ -17,10 +17,9 @@ blocks:
     fp: "182a13d854234e5c"
     compile: program
   - at: examples[2].code
-    fp: "49842f3dec919fbf"
+    fp: "217629fedc115bde"
     compile: fragment
     wrap: spin2-top
-    assumes: [process_type_a, process_type_b]
   - at: examples[3].code
     fp: "783b81be8342d5b9"
     compile: fragment
@@ -35,9 +34,8 @@ blocks:
     fp: "9ae68184dd89b2cd"
     compile: program
   - at: examples[6].code
-    fp: "dae8a8d89316eddc"
+    fp: "be0b44a212f71733"
     compile: program
-    finding: "S-118"
   - at: how_it_works.formula
     fp: "650ada0174a6f5b0"
     compile: not-code

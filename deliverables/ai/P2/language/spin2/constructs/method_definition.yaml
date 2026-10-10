@@ -71,14 +71,14 @@ special_behaviors:
       PUB null()    ' Prevents library from running standalone
       
   - behavior: "default_return"
-    description: "Methods without declared return values return 0"
-    
+    description: "A method with no declared results returns nothing and cannot be used in an expression"
+
   - behavior: "return_initialization"
     description: "Return variables initialize to 0"
-    
+
   - behavior: "parameter_passing"
-    description: "Parameters are passed by value (copies made)"
-    note: "Arrays and objects pass references"
+    description: "Every parameter is a long (or a structure of up to 15 longs, or a pointer when declared ^BYTE/^WORD/^LONG/^StructName), passed by value"
+    note: "An array or an object cannot be passed as such: pass its address (@array) and read it with BYTE[]/WORD[]/LONG[] or a typed pointer"
 
 method_visibility:
   pub_methods:
@@ -103,10 +103,10 @@ method_visibility:
         set_baud_rate(baud)
 
 parameter_handling:
-  passing_mechanism: "By value (copy) for simple types"
-  
+  passing_mechanism: "By value (a long copy per parameter)"
+
   array_parameters: |
-    PUB clear_array(@array, size)    ' Pass array address
+    PUB clear_array(array, size)    ' array = address of the first long (caller passes @buf); size = number of longs
       REPEAT size
         LONG[array][0] := 0
         array += 4
@@ -196,9 +196,8 @@ method_limits:
     
   register_mapping:
     count: 16
-    description: "First 16 local variables map to cog registers"
+    description: "In inline PASM, the method's first 16 long variables are copied into cog registers at the start of the block and written back at END"
     registers: "$1E0-$1EF"
-    benefit: "Faster access than hub RAM"
     includes: "Parameters, return values, and locals (in that order)"
 
 stack_usage: |
@@ -207,8 +206,9 @@ stack_usage: |
   - Parameters
   - Local variables
   - Return values
-  
-  Stack is in hub RAM, default 256 longs per COG
+
+  Parameters, then results, then local variables are packed into stack memory in the
+  order they are declared.
 
 common_patterns:
   - pattern: "initialization"
@@ -239,14 +239,22 @@ common_patterns:
       PUB get_value() : v
         v := _value
   
-  - pattern: "method_chaining"
-    description: "Return self for chaining"
+  - pattern: "setter_calls"
+    description: "Spin2 has no method chaining and no self reference: call each method as its own statement"
     code: |
-      PUB set_x(value) : self
+      VAR
+        LONG x, y
+
+      PUB set_x(value)
         x := value
-        self := @this    ' Return object reference
-      
-      ' Usage: obj.set_x(10).set_y(20).draw()
+
+      PUB set_y(value)
+        y := value
+
+      ' Usage, from a parent object:
+      '   obj.set_x(10)
+      '   obj.set_y(20)
+      '   obj.draw()
 
 pitfalls:
   - pitfall: "forgetting_return_declaration"
@@ -258,17 +266,23 @@ pitfalls:
       PUB calculate(x) : result
         RETURN x * 2    ' Or: result := x * 2
   
-  - pitfall: "variable_shadowing"
-    description: "Local variable shadows object variable"
-    example: |
+  - pitfall: "duplicate_names"
+    description: "Spin2 has no shadowing: a parameter, result or local with the name of a VAR, DAT or CON symbol of the same object is a compile error (names are unique per object and not case-sensitive)"
+    wrong: |
       VAR
         LONG count
-      
-      PUB method() | count    ' Local 'count' shadows VAR 'count'
-        count := 10           ' Sets local, not VAR
+
+      PUB method() | count    ' error: 'count' already names the VAR
+        count := 10
+    correct: |
+      VAR
+        LONG count
+
+      PUB method() | cnt2
+        cnt2 := 10
+        count := cnt2
 
 performance:
-  call_overhead: "~50 clock cycles for call/return"
   stack_operations: "Hub RAM access for parameters/locals"
   optimization_tips:
     - "Inline small, frequently-called methods manually"
@@ -280,7 +294,7 @@ pasm_integration: |
   
   PUB fast_multiply(x, y) : result
     ORG
-      MUL x, y
+      QMUL x, y
       GETQX result
     END
 

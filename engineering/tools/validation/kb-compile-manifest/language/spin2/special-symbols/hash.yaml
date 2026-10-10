@@ -40,7 +40,7 @@ blocks:
     wrap: spin2-method
     assumes: [reg_addr]
   - at: spin2_vs_pasm_context.in_pasm.example
-    fp: "83c8e78df3bb7062"
+    fp: "a2eaf9d114eb2559"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [rx]

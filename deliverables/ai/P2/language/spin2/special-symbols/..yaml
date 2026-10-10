@@ -5,4 +5,9 @@ description: |
   Decimal point or object method access
 examples:
   - "float_val := 3.14"
-  - "obj.method()"
+  - |
+    OBJ
+      child : "child_object"
+
+    PUB go()
+      child.method()

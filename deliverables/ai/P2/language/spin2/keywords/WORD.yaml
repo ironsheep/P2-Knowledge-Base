@@ -5,8 +5,10 @@ category: "Data Types"
 description: |
   16-bit data type. Unsigned range: 0 to 65,535. Signed range: -32,768 to 32,767.
   Used in multiple contexts: variable declarations (VAR), local variables,
-  method parameters, return types, DAT data, memory access operators,
-  type override (.WORD[n]), typed pointers (^WORD), and data constructors (WORD(...)).
+  DAT data, memory access operators, type override (.WORD[n]), typed pointers
+  (^WORD, including pointer parameters and results), and data constructors (WORD(...)).
+  PUB/PRI parameters and results are always longs (or pointers); there are no WORD
+  parameters or results.
 
 syntax: "WORD variable[count]"
 
@@ -17,12 +19,12 @@ usage_contexts:
   - context: "Local variable"
     syntax: "PUB method() | WORD localVar"
     example: "PUB process() | WORD index, WORD count"
-  - context: "Parameter"
-    syntax: "PUB method(WORD param)"
-    example: "PUB setValue(WORD value)"
-  - context: "Return value"
-    syntax: "PUB method() : WORD result"
-    example: "PUB readSensor() : WORD result"
+  - context: "Parameter (pointer)"
+    syntax: "PUB method(^WORD param)"
+    example: "PUB setTable(^WORD pTable)"
+  - context: "Return value (pointer)"
+    syntax: "PUB method() : ^WORD result"
+    example: "PUB getTable() : ^WORD pTable"
   - context: "DAT data"
     syntax: "label WORD value1, value2, ..."
     example: "myWords WORD 1000, 2000, 3000"
@@ -44,8 +46,9 @@ usage_contexts:
 
 type_propagation: |
   In VAR blocks, WORD is sticky — applies to all names on the same line.
-  In PUB/PRI parameters, returns, and locals, WORD is NOT sticky — each
-  name resets to LONG unless explicitly typed.
+  In PUB/PRI parameters and results every name is a long (or a pointer when it
+  carries ^BYTE/^WORD/^LONG/^StructName, per name); in locals a size applies only
+  to the name it precedes.
   See type-propagation concept for full rules.
 
 examples:
@@ -56,7 +59,6 @@ notes:
   - "Size: 16 bits (2 bytes)"
   - "Unsigned range: 0 to 65,535"
   - "Signed range: -32,768 to 32,767"
-  - "Word addresses should be word-aligned (even addresses) for optimal performance"
   - "Default type is LONG if no type specifier given"
   - "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See language/spin2/concepts/struct-bitfields.yaml"
 

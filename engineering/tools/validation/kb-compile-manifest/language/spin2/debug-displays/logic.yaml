@@ -17,11 +17,8 @@ blocks:
     wrap: spin2-method
     assumes: [bus_value]
   - at: examples[3].code
-    fp: "77fc4df70c529591"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [buff, j, packed, i]
-    finding: "S-142"
+    fp: "48d2bf2d05d8c543"
+    compile: program
   - at: syntax.create
     fp: "2b0ca595f0abe456"
     compile: fragment

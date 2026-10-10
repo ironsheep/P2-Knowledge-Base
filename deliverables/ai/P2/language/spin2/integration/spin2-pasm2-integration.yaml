@@ -111,21 +111,25 @@ spin2_pasm2_integration:
       syntax_examples:
         - spin2_code: |
             PUB setup()
-              CALL(#fastLoop)       ' Blocks until the PASM code below returns
+              REGLOAD(@fastChunk)       ' load the chunk into cog registers $080..
+              CALL(#fastLoop)           ' blocks until the PASM code below returns
 
             DAT
+            fastChunk
+              WORD fastLoop, fastEnd-fastLoop-1   ' start register, number of registers - 1
               ORG $080
             fastLoop
-              REP #1, ##1000        ' repeat next instruction 1000 times
+              REP #1, ##1000            ' repeat next instruction 1000 times
               MOV OUTA, INA
               RET
+            fastEnd
           pasm2_code: |
-            ' Code loaded at $080 in cog register space
+            ' REGLOAD copies the chunk (two header words, then the code) into cog registers starting at $080
             ' CALL(#label) is a blocking call: execution does not
             ' return to the caller until the PASM code executes RET
           explanation: "# prefix with a label calls PASM code by cog register address. CALL(#label) with a bare numeric literal (e.g. CALL(#$080)) is not accepted by the compiler -- always call through a label. CALL blocks the calling code until the target returns; it does not start a background task (use COGINIT for that)."
       use_cases:
-        - "Background processing loops"
+        - "Calling PASM routines loaded into cog registers"
         - "Interrupt service routine setup"
         - "Performance-critical repeated operations"
     
@@ -206,13 +210,13 @@ spin2_pasm2_integration:
               ORG $118
             setupStart
               MOV IJMP1, #timerISR
-              GETCT PA
-              ADDCT1 PA, ##1_000_000
+              GETCT PR0
+              ADDCT1 PR0, ##1_000_000
               SETINT1 #1
               RET                   ' Return to Spin2
             timerISR
               DRVNOT #56
-              ADDCT1 PA, ##1_000_000  
+              ADDCT1 PR0, ##1_000_000
               RETI1
             setupEnd
           explanation: "Combines REGLOAD and CALL for setup operations"
@@ -363,7 +367,7 @@ spin2_pasm2_integration:
               RET
 
             PUB start()
-              COGINIT(COGEXEC, @fastCode, 0)  ' Start in cog mode
+              COGINIT(COGEXEC_NEW, @fastCode, 0)  ' Start in a free cog, cog mode
           explanation: "Strategic use of both execution modes for optimization. REP's repeat-count (S) operand needs the ## prefix for values above 511 (a single # only encodes a 9-bit immediate); complexMath must be a defined label, since RET has nothing to return to otherwise."
       use_cases:
         - "Performance optimization"
@@ -408,9 +412,9 @@ spin2_pasm2_integration:
               MOV temp, ##-1
               WRLONG temp, shared_flag_addr
               RETI1
-            intEnd
             temp long 0
             shared_flag_addr long 0
+            intEnd
           explanation: "Interrupts handled in PASM, communicate with Spin2. A DAT-block PASM fragment cannot reach a Spin2 VAR by its bare name or by ##hubsymbol (see hub_address_resolution below) -- the caller pokes the real hub address of shared_flag into shared_flag_addr before REGEXEC starts the handler. A single # cannot hold a negative immediate (0..511 only); ##-1 is required."
       use_cases:
         - "Real-time event processing"
@@ -444,7 +448,7 @@ integration_rules:
     
   execution_context:
     inline_pasm: "Runs in current cog, returns to Spin2 method"
-    cog_call: "Runs in current cog, can be background or foreground"
+    cog_call: "Runs in the calling cog and blocks the caller until the PASM code executes RET (CALL starts no background task)"
     hub_call: "Runs in hub execution mode, slower but more flexible"
     
   hub_address_resolution:

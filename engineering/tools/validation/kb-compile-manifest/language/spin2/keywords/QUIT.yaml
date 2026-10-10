@@ -23,11 +23,10 @@ blocks:
     wrap: spin2-method
     assumes: [outer, max_outer, inner, max_inner, result, process()->1/2, error_code, handle_error()->1/1]
   - at: examples[4].code
-    fp: "dea4fb52b12ddd8b"
+    fp: "f3c35d8889027ea9"
     compile: fragment
     wrap: spin2-method
     assumes: [row, rows, col, cols, matrix, target, found_row, found_col]
-    finding: "S-009"
   - at: syntax.basic
     fp: "a872f67384948f79"
     compile: not-code

@@ -18,20 +18,20 @@ blocks:
     wrap: pasm2-dat
     assumes: [STACK_MASK=con]
   - at: auto_increment_modes.post_increment.example
-    fp: "a5b44614687db3fe"
+    fp: "52f190e115ee80a5"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: auto_increment_modes.pre_decrement.example
-    fp: "19323e6f26c33f00"
+    fp: "7d5fd98e76b7d276"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: auto_increment_modes.indexed_post_modify.example
-    fp: "1bac4f2b64024820"
+    fp: "83babac388f6102b"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-008"
+    assumes: [r0]
   - at: common_patterns.function_prologue.code
     fp: "f679e8ed0000a791"
     compile: fragment

@@ -18,11 +18,10 @@ blocks:
     wrap: spin2-method
     assumes: [adc]
   - at: examples[3].code
-    fp: "2ce62c4aed5112d1"
+    fp: "18cbdbdba88ef969"
     compile: fragment
-    wrap: spin2-method
-    assumes: [buff, i, pack_next_four_samples()->1/0]
-    finding: "S-142"
+    wrap: spin2-top
+    assumes: [pack_next_four_samples()->1/0]
   - at: syntax.create
     fp: "b30b82ce48ec87a1"
     compile: fragment

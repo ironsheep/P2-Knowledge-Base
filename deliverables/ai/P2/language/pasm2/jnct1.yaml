@@ -41,7 +41,7 @@ specifics:
   counter_number: 1
   event_flag: CT1
   condition: not set
-quick_example: 'JNCT1 #handler  ; Jump if counter 1 event flag is NOT set'
+quick_example: "JNCT1 #handler  ' Jump if counter 1 event flag is NOT set"
 has_group_documentation: true
 category: Event
 oneliner: Branch

@@ -7,15 +7,13 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: syntax_forms[1].syntax
-    fp: "fc3c7f3834cd5c05"
+    fp: "1a0b319000637c9d"
     compile: fragment
     wrap: spin2-top
-    finding: "S-078"
   - at: syntax_forms[2].syntax
-    fp: "390c7b0f1ead0477"
+    fp: "43a31964e1e5c185"
     compile: fragment
     wrap: spin2-top
-    finding: "S-078"
   - at: syntax_forms[3].syntax
     fp: "1c5f8be157dd4308"
     compile: program
@@ -27,19 +25,17 @@ blocks:
     compile: not-code
     reason: "notation with prose: two lines `ORG..END : code copied into cog RAM...` / `ORGH..END : ...` contrasting the two inline forms; not a statement sequence"
   - at: register_access.example
-    fp: "9aa7efa8b991b7da"
+    fp: "0a28a279b3d75aa0"
     compile: program
   - at: data_sharing_patterns[0].code
     fp: "e9820128155bb3d6"
     compile: program
   - at: data_sharing_patterns[1].code
-    fp: "491bc65d7e7ca94b"
+    fp: "e4c815d3f599f963"
     compile: program
-    finding: "S-079"
   - at: data_sharing_patterns[2].code
-    fp: "b59eb3615e65ce5e"
+    fp: "6bb7e13b48da8ee8"
     compile: program
-    finding: "S-080"
   - at: common_use_cases[0].code
     fp: "1711caae4e632a78"
     compile: program
@@ -50,7 +46,7 @@ blocks:
     fp: "6750b0c547a1f5c6"
     compile: program
   - at: common_use_cases[3].code
-    fp: "ab0bccfecd0aa170"
+    fp: "6a75ea477776eb50"
     compile: program
   - at: cog_loading.basic_pattern
     fp: "af5471a694ddfea0"

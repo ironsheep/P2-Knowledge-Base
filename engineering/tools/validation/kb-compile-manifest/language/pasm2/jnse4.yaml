@@ -7,7 +7,7 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: quick_example
-    fp: "e43962d588f300f6"
+    fp: "871733f8af1b502b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [handler=con]

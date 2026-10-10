@@ -61,7 +61,7 @@ selection_guide: |
      - Buffered I/O Object: Circular buffer producer-consumer
      - State Machine Object: Explicit states and events
      - Dual-COG Object: Spin2 API + PASM background
-     - PASM-Only Object: Maximum performance DAT code
+     - PASM Driver Object: a small PUB hands out the entry address of a DAT/PASM program
 
   2. Then select structural patterns for object composition
   3. Add implementation patterns for specific functionality

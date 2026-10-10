@@ -2,9 +2,12 @@ keyword: "WITH"
 type: keyword
 category: "Control Flow"
 description: |
-  Object context specifier for method calls
-syntax: "WITH object"
+  Part of the REPEAT count form (v40): REPEAT positive_count WITH variable repeats the indented code
+  positive_count times while the variable iterates from 0 to positive_count - 1. positive_count must be
+  greater than zero. WITH has no other use: it is not a statement and not an object-context specifier.
+  A child object's method is called as object_name.method_name(...), one call per statement.
+syntax: "REPEAT positive_count WITH variable"
 examples:
   - |
-    WITH serial
-      str("Hello World")
+    REPEAT 10 WITH i           ' i = 0, 1, ..., 9
+      indices[i] := i
