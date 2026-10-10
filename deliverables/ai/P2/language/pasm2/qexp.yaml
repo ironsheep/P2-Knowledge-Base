@@ -92,7 +92,7 @@ timing_notes: Result available 55 clocks after instruction issue. Each cog can i
   one CORDIC instruction per hub window (every 8 clocks).
 format_notes: Input must be in 5:27 logarithmic format as produced by QLOG. Complementary
   operation to QLOG.
-documentation_source: p2_datasheet
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.21, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_l
@@ -101,7 +101,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.411047'
 category: CORDIC Solver
 oneliner: Compute 2 to the power of a 5:27-bit logarithm, as a 32-bit unsigned integer

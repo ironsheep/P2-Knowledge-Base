@@ -25,11 +25,9 @@ object_metadata:
   metadata:
     created_date: ''
     discovery_date: '2026-06-29T00:00:00'
-    extraction_status: discovered
     import_source: github_archiver
     kb_integration: none
     last_scraped: '2026-06-29T00:00:00'
-    last_verified: '2026-06-29T00:00:00'
     original_archiver_name: Dennis Gately based on BR's original in the Propeller
       1 Object repo
     original_platform: github

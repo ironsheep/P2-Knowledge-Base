@@ -36,6 +36,5 @@ compiler_operand_format:
   valueType: 14
 compiler_encoding:
   operandFormat: 14
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.515786'
 oneliner: Call a subroutine; store return context on the stack and copy D into PA

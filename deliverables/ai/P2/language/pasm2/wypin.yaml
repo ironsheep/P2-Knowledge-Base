@@ -44,7 +44,6 @@ sources:
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: enhanced
 documentation_level: comprehensive
 related_instructions:
 - WXPIN: Configure smart pin X parameter
@@ -63,7 +62,6 @@ compiler_operand_format:
   valueType: 13
 compiler_encoding:
   operandFormat: 13
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.369522'
 category: Smart Pin
 oneliner: Set "Y" register of smart pins S[10:6]+S[5:0]

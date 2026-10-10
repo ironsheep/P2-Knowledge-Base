@@ -47,10 +47,11 @@ TIER DEFINITIONS ARE EVIDENCE-DERIVED, NOT INVENTED
           key from the shipped tree; once it is gone this note is moot.
 
       source: parallax-quick-bytes — 42 files. NOT weak at the time: it named a
-          corpus that existed. Ruling Q5 retires the LABEL: a batch label is not
-          a citation (the sourcing gate classes it BATCH_LABEL). Until each use
-          is rewritten to a canonical title it is scored as the gate scores any
-          non-canonical title-less value (NAMED), not as a document.
+          corpus that existed. Ruling Q5 retired the LABEL («#422» deleted all 42):
+          a batch label is not a citation (the sourcing gate classes it
+          BATCH_LABEL). A community/quick-bytes entry is CITED by its parallax.com
+          `url:` instead, and catalog_url_cited() tiers it CANONICAL by calling the
+          sourcing gate's own is_catalog() / catalog_cited() (imported, never copied).
 
 RATCHET, NOT ABSOLUTE
     A gate that is permanently RED is a gate people learn to ignore. Zero-unsourced
@@ -244,6 +245,12 @@ def classify_value(value: str, root: Path) -> tuple[str, str]:
     return "NAMED", stripped[:80]
 
 
+def catalog_url_cited(rel: str, text: str) -> bool:
+    """Q5: a community/quick-bytes entry whose `url:` is on parallax.com is CITED
+    by that url. Uses the sourcing gate's is_catalog() and catalog_cited()."""
+    return bool(SOURCING.is_catalog(Path(rel)) and SOURCING.catalog_cited(text.splitlines()))
+
+
 def exempt_reason(rel: str) -> str | None:
     for prefix, reason in EXEMPT_PREFIXES:
         if rel.startswith(prefix):
@@ -254,7 +261,8 @@ def exempt_reason(rel: str) -> str | None:
 def audit_file(path: Path, rel: str, root: Path) -> dict:
     """Classify one shipped YAML by its BEST provenance tier."""
     try:
-        doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        text = path.read_text(encoding="utf-8")
+        doc = yaml.safe_load(text)
     except Exception as exc:                       # a file we cannot parse is a finding
         return {"file": rel, "tier": "ABSENT", "detail": f"unparseable: {exc.__class__.__name__}",
                 "hits": [], "weak_blocks": [], "conflicts": []}
@@ -269,6 +277,12 @@ def audit_file(path: Path, rel: str, root: Path) -> dict:
             continue
         tier, detail = classify_value(value, root)
         hits.append({"key": key, "tier": tier, "detail": detail})
+
+    # Q5: a catalog (community/quick-bytes) entry is cited by its parallax.com
+    # `url:`. The rule is the sourcing gate's own, imported, never copied.
+    if catalog_url_cited(rel, text):
+        hits.append({"key": "url", "tier": "CANONICAL",
+                     "detail": "catalog entry cited by its parallax.com url (Q5)"})
 
     if not hits:
         return {"file": rel, "tier": "ABSENT", "detail": "no primary provenance key",
@@ -334,6 +348,18 @@ def negative_control() -> int:
           classify_value(CANON_OK + " engineering/tools/validation/audit-yaml-source-lock.py",
                          root)[0] != "CANONICAL", True)
     check("process label -> WEAK", classify_value("enhanced", root)[0], "WEAK")
+
+    # --- Q5 catalog-url controls (catalog_url_cited)
+    qb = "community/quick-bytes/tetris.yaml"
+    check("quick-bytes entry with a parallax.com url -> CANONICAL (Q5)",
+          catalog_url_cited(qb, "metadata:\n  url: https://www.parallax.com/tetris/\n"), True)
+    check("quick-bytes entry with a NON-parallax url is not CANONICAL",
+          catalog_url_cited(qb, "metadata:\n  url: https://example.com/tetris/\n"), False)
+    check("quick-bytes entry with NO url is not CANONICAL",
+          catalog_url_cited(qb, "metadata:\n  scraped: '2026-01-01'\n"), False)
+    check("a non-catalog file with a parallax.com url is not CANONICAL by this rule",
+          catalog_url_cited("language/pasm2/add.yaml",
+                            "metadata:\n  url: https://www.parallax.com/x/\n"), False)
 
     # --- ratchet controls (find_regressions)
     check("CANONICAL -> RESOLVABLE fails",

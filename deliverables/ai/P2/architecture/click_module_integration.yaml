@@ -121,7 +121,6 @@ implementation_patterns:
         sckPin := basePin + CLICK_OFST_SCK
         mosiPin := basePin + CLICK_OFST_MOSI
         misoPin := basePin + CLICK_OFST_MISO
-    source: P2-Click-eInk
     
   spi_click_pattern:
     description: "Standard SPI Click module initialization"
@@ -180,7 +179,6 @@ configuration_api_patterns:
           return INVALID_CONFIG
           
         ' Apply configuration...
-    source: P2-Click-eInk
     
   multi_device_support:
     description: "Supporting multiple Click module variants"

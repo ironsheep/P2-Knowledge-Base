@@ -18,7 +18,6 @@ flags_affected:
   Z: No effect
 silicon_errata:
   setq_block_ptrx_delta: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this WMLONG -- the intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT N*4. Full detail: language/pasm2/concepts/setq_block_ops.yaml. Source: P2 Silicon Doc v35 (KNOWN BUGS, Rev C); step measured for RDLONG/WRLONG -- WMLONG itself not tested."
-documentation_source: original
 documentation_level: enhanced
 related_instructions:
 - WRLONG
@@ -27,7 +26,6 @@ related_instructions:
 compiler_note: pnut-ts internally uses WMLONG_ (with underscore) but this is a compiler
   naming quirk, not a separate instruction. The enum_name ac_wmlong confirms the
   canonical name is WMLONG.
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-11-26'
 category: Hub RAM
 oneliner: Write masked long to hub RAM (non-zero bytes only)

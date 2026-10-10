@@ -83,7 +83,6 @@ compiler_encoding:
   operandFormat: 19
   rawValue: 39348
 compiler_effects: []
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 ret_prefix_caveat: >-

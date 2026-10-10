@@ -2,7 +2,7 @@ concept: event_interrupt_configuration
 title: Event and Interrupt Configuration
 category: event_handling
 description: Hardware event detection and interrupt handling with three program-visible interrupts, a hidden debug interrupt, and 16 event sources
-documentation_source: enhanced
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Events; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Interrupts"
 documentation_level: comprehensive
 
 overview: |

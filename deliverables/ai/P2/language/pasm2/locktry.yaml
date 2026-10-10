@@ -26,7 +26,6 @@ description: 'Try to acquire lock D[3:0]. C = 1 if got LOCK.
 flags_affected:
   C: Set if LOCK acquired
   Z: No effect
-documentation_source: enhanced
 documentation_level: comprehensive
 examples:
 - name: Resource Protection
@@ -50,7 +49,6 @@ examples:
     \ timeout\nspin_lock_timeout\n        mov     timeout, ##1000000\n.loop   locktry\
     \ lock_num           wc\nif_c    ret                          ' Got lock\n   \
     \     djnz    timeout, #.loop\n        ' Timeout - handle error\n"
-  source: synchronization_pattern
 - name: Multi-Resource Manager
   description: Manage multiple locks for complex operations; the outcome is returned in a register
   code: |
@@ -73,7 +71,6 @@ examples:
             lockrel #LOCK_A
     .fail   mov     result, #0           ' Failed
             ret
-  source: complex_synchronization
 related_instructions:
 - LOCKREL: Release lock
 - LOCKNEW: Allocate new lock
@@ -91,7 +88,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.561046'
 category: Hub Control
 oneliner: Try to acquire lock

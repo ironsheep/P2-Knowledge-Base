@@ -31,10 +31,8 @@ object_metadata:
     - driver
   metadata:
     discovery_date: '2025-09-12T12:43:56.829308'
-    extraction_status: author_extracted
     kb_integration: none
     last_author_extraction: '2025-09-12T13:22:11.420856'
-    last_verified: '2025-09-12T12:44:26.861186'
     page_discovered: 3
     quality_score: 5
     last_author_re_extraction: 2025-09-12T14:04:1

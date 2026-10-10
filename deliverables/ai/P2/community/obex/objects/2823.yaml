@@ -25,11 +25,9 @@ object_metadata:
     - spi
   metadata:
     discovery_date: '2025-09-12T12:44:09.461353'
-    extraction_status: complete
     kb_integration: none
     last_author_extraction: '2025-09-12T13:21:42.375866'
     last_complete_extraction: '2025-09-12T13:30:07.039172'
-    last_verified: '2025-09-12T12:46:26.458980'
     page_discovered: 12
     quality_score: 5
     last_html_corruption_fix: 2025-09-12T14:32:2

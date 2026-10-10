@@ -19,7 +19,7 @@ silicon_errata:
   block_read_after_no_wait_rdfast: "A SETQ block RDLONG started fewer than 16 clocks after a no-wait RDFAST (the SETQ counts toward the 16) can write one wrong long, leave the rest unwritten and overwrite cog registers outside its destination, or the cog does not finish. Use the waiting RDFAST, or 16 clocks (e.g. 6 two-clock instructions + the SETQ). Full account: language/pasm2/rdfast.yaml silicon_errata."
 notes:
 - "XBYTE role: besides COG-RAM block transfers, SETQ arms the PERSISTENT XBYTE mode. '_RET_ SETQ #mode' (with $1FF on the call stack) sets the dispatch-table base / compression threshold / flag-write configuration that XBYTE retains for ALL subsequent bytecodes; it is armed once, not per-bytecode. SETQ2 overrides it for a single bytecode (then dispatch reverts to the SETQ mode). See architecture/xbyte_engine.yaml."
-documentation_source: original
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_l
@@ -28,7 +28,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.884693'
 category: Miscellaneous
 oneliner: Set Q to D

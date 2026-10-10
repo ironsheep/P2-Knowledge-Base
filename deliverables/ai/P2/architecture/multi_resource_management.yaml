@@ -2,7 +2,6 @@ concept: multi_resource_management
 title: Single COG Managing Multiple Resources
 category: architectural_pattern
 description: Design pattern for a single COG efficiently managing multiple instances of the same resource type
-documentation_source: code_analysis
 documentation_level: comprehensive
 created: 2025-09-09
 
@@ -54,7 +53,6 @@ implementation_patterns:
         ' Status tracking
         LONG errorFlags[MAX_RESOURCES]
         LONG activeCount
-    source: P2-OctoSerial
     
   round_robin_servicing:
     description: "PASM2 round-robin resource polling"
@@ -77,7 +75,6 @@ implementation_patterns:
       if_nc   jmp     #.next
               
               jmp     #main_loop
-    source: P2-OctoSerial
     
   hub_cog_transfer:
     description: "Efficient block copy of configuration to COG"
@@ -93,7 +90,6 @@ implementation_patterns:
               rdlong  count, ptra++
               setq    #CONFIG_LONGS-1
               rdlong  config_start, ptra
-    source: P2-OctoSerial
 
 common_applications:
   serial_port_multiplexer:

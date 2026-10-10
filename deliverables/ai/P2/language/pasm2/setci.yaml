@@ -22,7 +22,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - SETCI {#}D
 last_updated: '2025-09-19T16:04:17.439699'

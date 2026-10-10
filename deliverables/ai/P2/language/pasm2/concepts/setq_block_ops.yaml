@@ -2,7 +2,6 @@ concept: setq_block_operations
 title: SETQ/SETQ2 Block Operations
 category: memory_operations
 description: Hardware-accelerated block memory transfers and operations using SETQ/SETQ2 prefixes
-documentation_source: enhanced
 documentation_level: comprehensive
 
 overview: |

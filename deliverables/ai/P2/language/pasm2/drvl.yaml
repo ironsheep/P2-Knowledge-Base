@@ -61,6 +61,5 @@ compiler_operand_format:
   valueType: 30
 compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 30
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.136539'
 oneliner: Set pin(s) direction to output and output level high (1) or low (0)

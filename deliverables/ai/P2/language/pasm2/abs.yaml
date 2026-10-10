@@ -38,7 +38,6 @@ compiler_operand_format:
   valueType: 3
 compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 3
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Get the absolute value of a number

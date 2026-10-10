@@ -35,7 +35,6 @@ compiler_operand_format:
   description: 'Memory operation: destination/immediate, source/immediate/pointer'
   valueType: 16
 compiler_effects: []
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 syntax_variants:
 - WRLONG {#}D,{#}S/P
 last_updated: '2025-09-19T16:04:17.074263'

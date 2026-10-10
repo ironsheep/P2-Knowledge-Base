@@ -28,10 +28,8 @@ object_metadata:
   metadata:
     created_date: '2024-11-20 19:55:50'
     discovery_date: '2026-06-29T00:00:00'
-    extraction_status: discovered
     kb_integration: none
     last_scraped: '2026-06-29T00:00:00'
-    last_verified: '2026-06-29T00:00:00'
     quality_score: 5
     rescrape_source: v2.2 re-scrape 2026-06-29
   object_id: '4933'

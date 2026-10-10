@@ -35,7 +35,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Get current cog's ID or any cog's status by ID

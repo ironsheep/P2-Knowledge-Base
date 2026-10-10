@@ -27,11 +27,9 @@ object_metadata:
     - display
   metadata:
     discovery_date: '2025-09-12T12:44:03.845001'
-    extraction_status: complete
     kb_integration: none
     last_author_extraction: '2025-09-12T13:21:36.987576'
     last_complete_extraction: '2025-09-12T13:30:07.032461'
-    last_verified: '2025-09-12T12:45:37.376997'
     page_discovered: 8
     quality_score: 5
     created_date: '2023-11-16 20:07:54'

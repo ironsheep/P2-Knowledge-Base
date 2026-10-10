@@ -16,7 +16,6 @@ description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: enhanced
 documentation_level: comprehensive
 examples:
 - name: Fast Checksum Calculation
@@ -32,7 +31,6 @@ examples:
     \ pointer\n        mov     count, block_size\n        \n.copy   rflong  temp \
     \                    ' Read via FIFO\n        wrlong  temp, ptrb++           \
     \  ' Write and increment\n        djnz    count, #.copy\n"
-  source: memory_operations
 - name: CRC Calculation
   description: Calculate CRC over memory region
   code: "' CRC-16 calculation over data\n        rdfast  #0, data_addr           \
@@ -44,7 +42,6 @@ examples:
     \ right, get bit\nif_c    xor     crc, ##$A001             ' Apply polynomial\
     \ if bit set\n        djnz    bit_count, #.bit_loop\n        djnz    count, #.crc_loop\n\
     \        \n        xor     crc, ##$FFFF             ' Final XOR\n        ret\n"
-  source: data_integrity
 related_instructions:
 - RFBYTE: Read byte via FIFO
 - RFWORD: Read word via FIFO
@@ -90,7 +87,6 @@ compiler_operand_format:
   valueType: 13
 compiler_encoding:
   operandFormat: 13
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.018932'
 category: Hub FIFO
 oneliner: Begin new fast hub read via FIFO

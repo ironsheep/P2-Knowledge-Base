@@ -2,7 +2,6 @@ concept: streamer_smartpin_control
 title: Streamer and Smart Pin Control
 category: peripheral_control
 description: Hardware streaming engine and autonomous Smart Pin configuration for high-speed I/O
-documentation_source: enhanced
 documentation_level: comprehensive
 
 overview: |
@@ -258,7 +257,6 @@ smart_pin_modes:
         dirh    encoder_pin_a
         rdpin   position, encoder_pin_a  ' Get count
         wypin   #0, encoder_pin_a        ' Reset count
-      source: motor_encoder
   
   adc_modes:
     calibrated_adc:

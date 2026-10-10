@@ -7,7 +7,6 @@ description: |
   Production-proven patterns for Smart Pin usage, extracted from
   Parallax official code and Iron Sheep Productions projects.
   
-documentation_source: enhanced
 documentation_level: comprehensive
 
 spi_patterns:
@@ -100,7 +99,6 @@ pwm_patterns:
       wxpin   #256, dac_pin            ' Dither period
       dirh    dac_pin                  ' Enable smart pin
       wypin   value_16bit, dac_pin     ' 16-bit value (Y after enable)
-    source: audio_output
 
 adc_patterns:
   calibrated_adc_reading:
@@ -141,7 +139,6 @@ timing_patterns:
       testp   input_pin           wc   ' Check if ready
       if_c    rdpin   width, input_pin ' Read width
               wypin   #0, input_pin     ' Acknowledge
-    source: servo_input
     
   frequency_measurement:
     description: Measure input frequency
@@ -156,7 +153,6 @@ timing_patterns:
       ' Read count after window
       waitx   ##80_000_000
       rdpin   frequency, freq_pin      ' Frequency in Hz
-    source: frequency_counter
 
 repository_patterns:
   shared_data_repository:
@@ -172,7 +168,6 @@ repository_patterns:
 
       ' COG B reads data
       rdpin   received, repo_pin
-    source: multi_cog_communication
 
 synchronization:
   streamer_smartpin_sync:

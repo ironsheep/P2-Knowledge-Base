@@ -41,7 +41,6 @@ compiler_operand_format:
   valueType: 0
 compiler_encoding:
   operandFormat: 0
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Set discrete bits of a value to that of another
@@ -74,7 +73,6 @@ examples:
     ' andn dest, mask
     ' and  temp, source, mask
     ' or   dest, temp
-  source: optimization_pattern
 - name: Multi-Pin State Update
   description: Update multiple pin states simultaneously
   code: |
@@ -84,7 +82,6 @@ examples:
 
     led_mask   long   %00001111_00000000_00000000_00000000  ' LEDs on pins 24-27
     led_states long   %00001010_00000000_00000000_00000000  ' Pattern to display
-  source: parallel_io
 related:
 - SETQ
 - MUXC

@@ -52,8 +52,6 @@ object_metadata:
     
   metadata:
     discovery_date: ""
-    last_verified: ""
-    extraction_status: "pending"  # pending, extracted, analyzed
     kb_integration: "none"  # none, referenced, integrated
     quality_score: 0  # 1-10 based on documentation, testing, etc.
     

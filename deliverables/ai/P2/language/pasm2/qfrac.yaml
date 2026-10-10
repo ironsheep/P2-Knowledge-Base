@@ -107,7 +107,7 @@ applications: Fixed-point arithmetic, fractional scaling, percentage calculation
   algorithms requiring integer.fraction dividend format.
 key_difference: 'QFRAC: {D, SETQ} / S vs QDIV: {SETQ, D} / S - QFRAC puts integer
   part in primary operand D.'
-documentation_source: p2_datasheet
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ls
@@ -116,7 +116,6 @@ compiler_operand_format:
   valueType: 13
 compiler_encoding:
   operandFormat: 13
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.150939'
 category: CORDIC Solver
 oneliner: Perform 64÷32 unsigned fractional division with D as upper 32 bits

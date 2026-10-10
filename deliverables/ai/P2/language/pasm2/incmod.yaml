@@ -51,7 +51,6 @@ examples:
     \ restart\n        jmp     #main_loop\n        \nportctr res     1           \
     \        ' Current port (0-7)\nportnum long    7                   ' Maximum port\
     \ number\n"
-  source: P2-OctoSerial
 - name: Circular Buffer Index
   description: Increment buffer index with wrap-around
   code: "' Increment tail index with modulo for circular buffer\n'' Note: buffer size\
@@ -59,7 +58,6 @@ examples:
     \ full (tail caught up to head)\ncmp     tail_idx, head_idx      wz\nif_z    jmp\
     \     #buffer_full\n\n'' Safe to add data at tail\nadd     buffer_ptr, tail_idx\n\
     wrbyte  new_data, buffer_ptr\n"
-  source: P2-OctoSerial
 - name: Multi-Resource Iterator
   description: Iterate through active resources only
   code: "' Service only active ports\n.next_port\n        alts    portctr, #port_active\n\
@@ -68,7 +66,6 @@ examples:
     \     ' Service this port\n        \n.skip   incmod  portctr, #7         wc\n\
     if_nc   jmp     #.next_port         ' Continue loop\n        \n        ' All ports\
     \ checked\n        ret\n"
-  source: P2-OctoSerial
 notes:
 - C flag indicates wrap-around (modulus reached)
 - Perfect for round-robin scheduling
@@ -83,7 +80,6 @@ compiler_operand_format:
   valueType: 0
 compiler_encoding:
   operandFormat: 0
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Increment with modulus

@@ -49,7 +49,6 @@ compiler_operand_format:
   valueType: 5
 compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 5
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter subsequent GETBYTE / ROLBYTE instruction
@@ -69,7 +68,6 @@ examples:
     \        ' ... rest of translation table ...\n        \n' Translate character\n\
     \        altgb   input_char, #xlate_table\n        getbyte output_char, 0-0, #0\
     \     ' Get translated value\n"
-  source: protocol_conversion
 related_instructions:
 - GETBYTE: Get byte from long register
 - ROLBYTE: Rotate byte from long register

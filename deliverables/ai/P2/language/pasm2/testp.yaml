@@ -44,7 +44,6 @@ description: 'Test the state of pin D[5:0] and write it to C or Z (WC/WZ), or co
 flags_affected:
   C: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with C
   Z: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with Z
-documentation_source: enhanced
 documentation_level: comprehensive
 examples:
 - name: Hall Sensor Reading
@@ -75,7 +74,6 @@ examples:
     testp   sensor_pin          xorz ' Z = condition flag XOR pin state
     ' Z now indicates: pin state XOR condition
     ' Useful for conditional inversion
-  source: debugger_pattern
 - name: Multi-Pin State Check
   description: Check multiple pin states efficiently
   code: "' Check if all required pins are high\ntestp   #PIN_A              wc\nif_nc\
@@ -102,7 +100,6 @@ compiler_operand_format:
   valueType: 31
 compiler_encoding:
   operandFormat: 31
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.623961'
 category: Pin
 oneliner: Test pin state into C or Z, optionally ANDed, ORed or XORed with the existing flag

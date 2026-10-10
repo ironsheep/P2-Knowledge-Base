@@ -25,7 +25,6 @@ examples:
   code: "' Send value to debugger for logging\n        mov     debug_val, result \
     \       ' Value to report\n        brk     debug_val                ' Pass to\
     \ debugger\n        \n        ' Debugger logs value and continues\n"
-  source: debug_logging
 - name: Multi-Level Debug
   description: Different debug levels with codes
   code: |
@@ -41,7 +40,6 @@ examples:
             brk     #DEBUG_WARNING           ' Warning-level break
 
     ' Debugger filters based on level
-  source: debug_infrastructure
 condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code (Silicon Doc, BRK in the debugging section). So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. pnut-ts compiles a conditional DEBUG() to the SKIP form, but leaves a hand-written conditional BRK as written, without a warning. Documented behaviour, not a silicon erratum."
 related_instructions:
 - GETBRK: Get breakpoint status/code
@@ -60,7 +58,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Break
 category: Interrupt

@@ -10,7 +10,6 @@ description: |
   Loads the Spin2 interpreter into the cog and begins executing the specified method.
   Returns the cog number that was started, or -1 if no cog was available.
   Essential for parallel Spin2 execution.
-documentation_source: enhanced
 documentation_level: comprehensive
 
 syntax: "COGSPIN(CogNum, Method({Parameters}), StackAddress) : CogID"

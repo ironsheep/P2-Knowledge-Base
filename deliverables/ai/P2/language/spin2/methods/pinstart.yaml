@@ -15,7 +15,6 @@ description: |
 sources:
   - "description (%11100 keeps the reset-time word): P2 Documentation, silicon-doc-text.txt %11100 section; bench-verified in continuous mode, P2-EMPIRICAL-FINDINGS.md EF-090"
 category: Smart Pin Operations
-documentation_source: enhanced
 documentation_level: comprehensive
 syntax: "PINSTART(PinField, Mode, Xval, Yval)"
 parameters:

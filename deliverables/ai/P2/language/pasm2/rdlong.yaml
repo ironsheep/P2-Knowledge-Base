@@ -50,7 +50,6 @@ compiler_operand_format:
   pattern: D,S/#/PTRA/PTRB
   description: Destination, source/immediate/pointer register
   valueType: 15
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 syntax_variants:
 - RDLONG D,{#}S/P
 last_updated: '2025-09-19T16:04:17.050451'

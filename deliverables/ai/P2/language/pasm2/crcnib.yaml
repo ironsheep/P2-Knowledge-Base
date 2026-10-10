@@ -9,11 +9,11 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Q = Q << 4.
+description: "Iterate CRC value in D using Q[31:28] and polynomial in S. Like CRCBIT x 4. Q = Q << 4. Use 'REP #n,#1'+SETQ+CRCNIB+CRCNIB+CRCNIB..."
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: original
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.148; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: minimal
 compiler_operand_format:
   name: operand_ds
@@ -22,7 +22,6 @@ compiler_operand_format:
   valueType: 0
 compiler_encoding:
   operandFormat: 0
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.633904'
 category: Math and Logic
-oneliner: Q = Q << 4
+oneliner: Iterate CRC value in D using Q[31:28] and polynomial in S

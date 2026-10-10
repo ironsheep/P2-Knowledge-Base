@@ -22,7 +22,7 @@ description: >-
 flags_affected:
   C: Set to 0 only when WC or WCZ is specified
   Z: Set to 0 only when WZ or WCZ is specified
-documentation_source: enhanced
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
 examples:
 - name: Inline PASM2 Timing
@@ -30,7 +30,6 @@ examples:
   code: "PUB pulse_pin(pin, width) | x\n  ORG\n    drvh    pin              ' Drive\
     \ pin high\n    waitx   width            ' Wait specified cycles\n    drvl   \
     \ pin              ' Drive pin low\n  END\n"
-  source: inline_pasm2_pattern
 - name: SPI Bit-Bang Timing
   description: Software SPI with controlled timing
   code: "' Software SPI with precise timing\nspi_write_byte\n        mov     bit_count,\
@@ -39,7 +38,6 @@ examples:
     \ sck_pin          ' Clock high\n        waitx   #4               ' Clock high\
     \ time\n        drvl    sck_pin          ' Clock low\n        waitx   #4     \
     \          ' Clock low time\n        djnz    bit_count, #.loop\n        ret\n"
-  source: bit_bang_spi
 - name: PWM Generation
   description: Generate PWM without smart pins
   code: "' Software PWM generation\npwm_loop\n        drvh    pwm_pin          ' Output\
@@ -47,7 +45,6 @@ examples:
     \          ' Output low\n        waitx   low_time         ' Low duration\n   \
     \     jmp     #pwm_loop        ' Repeat\n        \n' For 1kHz PWM at 200MHz clock:\n\
     ' period = 200,000 cycles\n' 50% duty = 100,000 high, 100,000 low\n"
-  source: software_pwm
 - name: Debounce Delay
   description: Button debounce timing
   code: "' Wait for button to stabilize\ncheck_button\n        testp   button_pin\
@@ -55,7 +52,6 @@ examples:
     \  waitx   ##20_000         ' 100us @ 200MHz\n        testp   button_pin  wc \
     \  ' Read again\n        if_nc   ret              ' Bounce - ignore\n        '\
     \ Button confirmed pressed\n        ret\n"
-  source: input_debounce
 related_instructions:
 - WAITCT1/2/3: Wait for specific CT value
 - WAITATN: Wait for attention signal
@@ -76,7 +72,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2026-02-27'
 category: Miscellaneous
 oneliner: Wait 2+D clock cycles, or 2+(D AND RND) with WC/WZ/WCZ

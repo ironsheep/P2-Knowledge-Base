@@ -27,10 +27,8 @@ object_metadata:
     - led
   metadata:
     discovery_date: '2025-09-12T12:44:10.850451'
-    extraction_status: author_extracted
     kb_integration: none
     last_author_extraction: '2025-09-12T13:22:09.675659'
-    last_verified: '2025-09-12T12:46:46.826325'
     page_discovered: 13
     quality_score: 5
     last_author_deep_search: 2025-09-12T13:39:2

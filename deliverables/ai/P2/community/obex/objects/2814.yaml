@@ -30,11 +30,9 @@ object_metadata:
     - driver
   metadata:
     discovery_date: '2025-09-12T12:44:10.850376'
-    extraction_status: complete
     kb_integration: none
     last_author_extraction: '2025-09-12T13:21:19.066303'
     last_complete_extraction: '2025-09-12T13:30:06.998397'
-    last_verified: '2025-09-12T12:46:37.182133'
     page_discovered: 13
     quality_score: 5
     last_author_re_extraction: 2025-09-12T14:04:1

@@ -42,7 +42,6 @@ compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   effects: 3
   operandFormat: 0
   rawValue: 1728
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Set a value into a register

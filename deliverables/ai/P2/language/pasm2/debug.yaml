@@ -32,7 +32,6 @@ compiler_operand_format:
 compiler_effects: []
 documentation_source: PNUT_TS_compiler_analysis
 documentation_level: comprehensive
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19T16:04:17.215079'
 category: Debug Directives
 oneliner: Place a BRK that triggers a DEBUG statement (when DEBUG is enabled)

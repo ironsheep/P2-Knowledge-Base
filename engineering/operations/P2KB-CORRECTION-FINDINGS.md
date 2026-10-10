@@ -170,6 +170,16 @@ never relabel in place. F-553 removed the `hub75_driver` and `P2-FLASH-FS` insta
 driver contradicted its attributions; the HUB75 examples were invented code under a driver's name
 (the real driver does use SETQ + MUXQ, and `muxq.yaml` now quotes it with a real source).
 
+> **Applied 2026-10-10 («#422», dispatch A).** All 42 `source: parallax-quick-bytes` lines are deleted
+> (Stephen's Q5: the entry's parallax.com `url:` is its citation; `scraped:` stays). Both gates read the
+> rule: the sourcing gate since «#412», and `audit-yaml-source-lock.py` now tiers a quick-bytes entry with
+> a parallax.com `url:` CANONICAL by importing the sourcing gate's `is_catalog()` / `catalog_cited()`,
+> with four new negative controls. The other 35 label lines (24 category names, 9 `P2-OctoSerial`,
+> 2 `P2-Click-eInk`; the tenth OctoSerial line was already gone) are deleted from their blocks, not
+> relabelled: none of them is a Parallax document, and a repo path is not a citation. The example code
+> stays; the compile gate still covers it. `waitx.yaml` lost its only provenance with the labels and now
+> cites the PASM2 Manual (p.159) and the P2 Instructions sheet.
+
 ### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
 > **Applied 2026-10-07.** `debug-strategy-guide.yaml` rewritten to the ruling: no compiler or
 > debugger figure stated as fact (title, aliases, `hard_limits` → `the_compilers_limits`, decision
@@ -644,6 +654,26 @@ list, so the drift cannot recur.
 > `smart-pins-002-button-reading.yaml` the same sheet's DIRL row plus the Spin2 v55 Cog Registers table,
 > each saying the example itself is illustrative, not a published listing. The key stays (the schema
 > now lists it as optional); it still reaches consumers.
+
+> **Key census and first removal, 2026-10-10 («#422», dispatch A).** Outside the OBEX catalog:
+> `authority_tier` is content (the decomposition pages, 92 lines in 15 files, and the sourcing gate
+> reads `authority_tier: EXAMPLE`) and stays; `grounding` (decomposition pages: pointers to the KB
+> keys a principle rests on) is content and stays; `extraction_status` and `last_verified` occur only
+> in the OBEX objects. Those two keys are **removed** from all 130 OBEX objects and from
+> `_template.yaml` (262 lines; no gate and no KB reader consumes them, and the OBEX-metadata parent
+> keeps its other children, so no null parent). **Still open, and assigned with S-392 because their
+> values are the very citations being rewritten:** `provenance:` / `primary_sources:` /
+> `cross_check_sources:` (application notes `p2an001`–`p2an007`, `click_module_integration.yaml`,
+> `addon-hyperram-hyperflash.yaml`) folding into `sources:`; `range_source` (12 `language/pasm2/`
+> pages) folding into `source:`. **Unclassified, needs a call:** `extraction_metadata` /
+> `extraction_date` (the spin2 symbol and integration pages, `io_pin_timing.yaml`, the system-register
+> pages, the two code examples) are process dates, recommended for removal; `cite:` (decomposition
+> method, KB-key pointers, content). The OBEX `metadata:` blocks still carry the same class of
+> scrape bookkeeping the spec did not name (`discovery_date`, `kb_integration`,
+> `last_author_extraction`, `last_complete_extraction`, `last_author_re_extraction`,
+> `last_author_deep_search`, `last_description_fix`, `last_created_date_fix`, `page_discovered`,
+> `quality_score`): recommended for the same removal, awaiting the call.
+> `import_source` / `rescrape_source` occur only in 28 OBEX objects, same class.
 
 ### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 > **Applied 2026-10-07 — and the defect was wider than filed.** The example's `source: P2-FLASH-FS`
@@ -1917,6 +1947,18 @@ file cannot read sentences.
 >   `code_analysis` (1).
 >
 > F-375 then closes.
+
+> **Applied 2026-10-10 («#422», dispatch A).** All 356 `enhancement_source:` lines are deleted (the
+> sourcing gate already ignores the key; `enhancement_source` is in the delivery filter's stripped set,
+> so no served text changed). Of the 40 bookkeeping `documentation_source:` words, 19 are deleted and 21
+> are **replaced with the real citation**, because deleting them would have dropped the page from a
+> poor tier to none: the 8 CORDIC pages cite the Datasheet's CORDIC Solver section (p.20 / p.21) and
+> its instruction table (p.44 / p.45) — each page's facts checked there; `qvector` / `qrotate` also cite
+> the Silicon Doc's CORDIC Solver section for the angle units, which the Datasheet does not state — and
+> 12 PASM2 pages plus `event_interrupt_config.yaml` cite the PASM2 Manual "in Brief" table page
+> (p.148–159), the P2 Instructions sheet, or the Silicon Doc Events / Interrupts sections. `crcnib.yaml`'s
+> description was a truncated fragment ("Q = Q << 4.") and is now the table's full text. A final grep of the
+> four words over the tree found none left. Closes with the next release that serves it.
 
 **The mechanism.** Both delivery paths run the same five-pattern line filter:
 `engineering/tools/p2kb/fetch-kb-file.sh:189` and the `FilterMetadata` contract recorded in

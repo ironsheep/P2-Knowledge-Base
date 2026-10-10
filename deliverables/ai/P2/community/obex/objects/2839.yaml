@@ -24,11 +24,9 @@ object_metadata:
     - driver
   metadata:
     discovery_date: '2025-09-12T12:44:06.662846'
-    extraction_status: complete
     kb_integration: none
     last_author_extraction: '2025-09-12T13:21:31.628910'
     last_complete_extraction: '2025-09-12T13:30:07.021949'
-    last_verified: '2025-09-12T12:46:04.147447'
     page_discovered: 10
     quality_score: 5
     last_html_corruption_fix: 2025-09-12T14:32:2

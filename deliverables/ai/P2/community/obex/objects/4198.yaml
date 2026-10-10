@@ -29,12 +29,10 @@ object_metadata:
   metadata:
     created_date: '2024-03-28 16:13:28'
     discovery_date: '2025-09-12T12:44:10.850424'
-    extraction_status: complete
     kb_integration: none
     last_author_cleanup: '2025-09-12T13:31:14.608046'
     last_author_extraction: '2025-09-12T13:22:41.904872'
     last_complete_extraction: '2025-09-12T13:30:07.136160'
-    last_verified: '2025-09-12T12:46:42.673452'
     page_discovered: 13
     quality_score: 5
     last_description_fix: 2025-09-12T14:20:1

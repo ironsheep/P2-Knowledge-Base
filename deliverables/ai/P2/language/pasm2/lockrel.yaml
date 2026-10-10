@@ -29,7 +29,6 @@ description: 'Release LOCK D[3:0]. If D is a register and WC, get current/last c
 flags_affected:
   C: 'When WC: C = 1 if lock is currently taken (last/owner state)'
   Z: No effect
-documentation_source: enhanced
 documentation_level: comprehensive
 examples:
 - name: Basic Lock Release
@@ -40,7 +39,6 @@ examples:
     \        ' Process data...\n        wrlong  data, shared_ptr\n        \n     \
     \   ' Always release lock\n        lockrel #DATA_LOCK               ' Release\
     \ for others\n        ret\n"
-  source: resource_protection
 - name: Debug Lock Management
   description: Release lock[15] so other cogs can own the save buffer and tx/rx pins
   code: "' Restore registers, then release lock[15]\ndebug_exit\n        setq  \
@@ -55,7 +53,6 @@ examples:
     \   lockrel lock_num             ' Release if we own it\n        add     lock_num,\
     \ #1\n        djnz    count, #.loop\n        ret\n        \n' Called on fatal\
     \ error before COG stop\n"
-  source: error_handling
 - name: Lock Ownership Verification
   description: Check lock owner before operations
   code: "' Verify we own the lock before modifying\nverify_ownership\n        cogid\
@@ -66,7 +63,6 @@ examples:
     \ my_cog wz\nif_nz   jmp     #not_owner           ' We don't own it\n        \n\
     \        ' Re-acquire since we released it\n        locktry lock_num         \
     \  wc\n        ret\n"
-  source: lock_validation
 - name: Scoped Lock Release
   description: Automatic lock release pattern
   code: "' Function with guaranteed lock release\nsafe_operation\n        locktry\
@@ -76,7 +72,6 @@ examples:
     \    #complex_operation\n        \n.cleanup\n        ' Always release if we got\
     \ it\n        testb   flags, #HAVE_LOCK  wc\nif_c    lockrel #CRITICAL_LOCK\n\
     \        bitl    flags, #HAVE_LOCK\n        ret\n"
-  source: structured_locking
 related_instructions:
 - LOCKTRY: Try to acquire lock
 - LOCKNEW: Allocate new lock
@@ -94,7 +89,6 @@ compiler_operand_format:
   valueType: 26
 compiler_encoding:
   operandFormat: 26
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.105107'
 category: Hub Control
 oneliner: Release LOCK

@@ -121,7 +121,7 @@ usage_notes: Use SETQ before QDIV to specify upper 32 bits of numerator. Without
 divide_by_zero: "S = 0 does not trap or stall: GETQX returns NOT (the upper 32 bits of the numerator) and GETQY the lower 32 bits (D), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected. So without SETQ: QDIV D,#0 -> $FFFF_FFFF remainder D; SETQ #1 -> $FFFF_FFFE; SETQ $FFFF_FFFF -> 0. Immediate #0 and a zero register behave the same. No Parallax document states it."
 applications: High-precision arithmetic, fixed-point scaling, remainder calculations,
   algorithm implementations requiring exact division.
-documentation_source: p2_datasheet
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ls
@@ -130,7 +130,6 @@ compiler_operand_format:
   valueType: 13
 compiler_encoding:
   operandFormat: 13
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.443443'
 category: CORDIC Solver
 oneliner: Perform 64÷32 unsigned division with 32-bit quotient and remainder

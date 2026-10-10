@@ -48,7 +48,6 @@ compiler_operand_format:
   valueType: 5
 compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 5
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter S field of next instruction
@@ -71,7 +70,6 @@ examples:
     '' rxd = destination for array element
 
     '
-  source: P2-OctoSerial
 - name: Multi-Resource Management
   description: Systematic access to multiple resource arrays
   code: "' Service multiple ports in round-robin\nloop\n        ' Get RX pin for current\
@@ -82,7 +80,6 @@ examples:
     \      \n        testb   txd, #31        wc\nif_nc   call    #tx_service\n   \
     \     \n        ' Next port\n        incmod  portctr, #7     wc\nif_nc   jmp \
     \    #loop\n"
-  source: P2-OctoSerial
 - name: Configuration Array Access
   description: Access configuration parameters by index
   code: ''' Get buffer pointer for port
@@ -104,7 +101,6 @@ examples:
     rdlong  head_idx, head_ptr
 
     '
-  source: P2-OctoSerial
 related_instructions:
 - ALTD: Modify destination field
 - ALTB: Modify bit field

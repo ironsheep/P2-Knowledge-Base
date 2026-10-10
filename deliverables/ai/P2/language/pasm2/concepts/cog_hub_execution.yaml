@@ -5,7 +5,6 @@
 concept: "COG vs HUB Execution"
 category: "pasm2_core"
 importance: "fundamental"
-documentation_source: enhanced
 documentation_level: comprehensive
 
 metadata:
@@ -303,7 +302,6 @@ loading_strategies:
       cmp     loaded_func, requested_func wz
       if_nz   call    #load_function
               call    #function_base
-    source: complex_systems
 
 fifo_behavior:
   # CANONICAL MENTAL MODEL — read this first when reasoning about hubexec timing.

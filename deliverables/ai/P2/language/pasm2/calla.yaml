@@ -32,7 +32,6 @@ compiler_operand_format:
   valueType: 19
 compiler_encoding:
   operandFormat: 19
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - 'CALLA #Addr'
 - 'CALLA #\Addr'
