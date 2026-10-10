@@ -1,0 +1,13 @@
+' CP-005 proof, command-line half: a 100-character symbol given with -D is seen as defined.
+' Run from the repository root with this file's repository-relative path and
+'   -D abcdefgh10abcdefgh20abcdefgh30abcdefgh40abcdefgh50abcdefgh60abcdefgh70abcdefgh80abcdefgh90abcdefg100
+' The #else branch names an undefined identifier, so the file compiles only if
+' #ifdef takes the defined branch.
+' Expected: compiles with no error.
+
+PUB main() : r
+#ifdef abcdefgh10abcdefgh20abcdefgh30abcdefgh40abcdefgh50abcdefgh60abcdefgh70abcdefgh80abcdefgh90abcdefg100
+  r := 1
+#else
+  r := no_such_name
+#endif

@@ -1,5 +1,5 @@
 # Spin2 Language Construct: CASE
-# Source: Spin2 v51 documentation, pnut_ts Control-Flow-Usage-Guide.md
+# Source: Spin2 v51 documentation, pnut-ts Control-Flow-Usage-Guide.md
 # Critical for: Multi-way branching and efficient decision trees
 
 construct: "CASE"

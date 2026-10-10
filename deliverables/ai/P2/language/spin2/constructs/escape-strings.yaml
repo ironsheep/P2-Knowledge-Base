@@ -8,7 +8,7 @@ description: |
   String literal syntax that supports escape character sequences. Using the @\"
   prefix enables interpretation of backslash escape sequences within the string.
   Standard @"..." strings do NOT process escapes; only @\"..." strings do.
-  Available in PNut/pnut_ts v50 and later compilers. No version directive required.
+  Available in PNut/pnut-ts v50 and later compilers. No version directive required.
 
 syntax:
   escape_string: "@\\\"string with \\n escapes\""
@@ -43,13 +43,9 @@ escape_sequences:
     value: 92
     description: "Literal backslash"
     
-  - escape: "\\\""
-    value: 34
-    description: "Literal double quote"
-    
   - escape: "\\xNN"
     value: "1-255"
-    description: "Hexadecimal character code (NN = 01 to FF)"
+    description: "Hexadecimal character code (NN = 01 to FF); \\x00 also compiles"
 
 examples:
   - code: |
@@ -77,12 +73,6 @@ examples:
         debug(@\"Humidity: 45%\n")
         debug(@\"===================\n")
     description: "Multi-line output with newlines"
-    
-  - code: |
-      PUB quote_in_string()
-        ' Include quotes inside string
-        debug(@\"She said \"Hello World\"")    ' Output: She said "Hello World"
-    description: "Escaped quotes within string"
     
   - code: |
       PUB hex_characters()
@@ -115,9 +105,9 @@ examples:
     description: "Terminal bell for alerts"
 
 restrictions:
+  - unknown_escape: "An unknown escape such as \\d does not compile (rejected with: Expected end of line); use only the escapes in the table"
   - escape: "\\x00"
-    note: "Not allowed - would terminate string prematurely"
-  - unknown_escape: "Passes through literally (e.g., \\q becomes \\q)"
+    note: "Compiles. What the byte does to the string is not stated here"
 
 comparison:
   standard_string:
@@ -133,18 +123,16 @@ comparison:
     use_case: "Formatted output, special characters"
 
 error_messages:
-  - error: "Expected a string character"
-    cause: "Unterminated escape sequence"
-  - error: "Invalid escape character"
-    cause: "Unknown escape sequence (may pass through)"
+  - error: "Expected end of line (m281)"
+    cause: "Unknown escape sequence, such as \\d"
 
 notes:
-  - "Available in PNut/pnut_ts v50 and later compilers"
+  - "Available in PNut/pnut-ts v50 and later compilers"
   - "No version directive required - this is NOT a gated feature"
   - "Standard @\"...\" strings do NOT process escapes"
   - "Only @\\\"...\" strings process escape sequences"
-  - "\\x00 is not allowed (would terminate string)"
-  - "Unknown escapes pass the backslash through literally"
+  - "An unknown escape such as \\d does not compile"
+  - "\\x00 compiles"
   - "Escape strings are null-terminated like standard strings"
   - "Use standard strings when no escapes needed (simpler)"
 
@@ -158,5 +146,7 @@ see_also:
   - "String handling"
   - "DEBUG output"
   - "Character codes"
+
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, version history v50 (escape strings); CP-003"
 
 oneliner: "String syntax @\\\"...\\\" with escape sequences like \\n, \\t, \\xNN (v50+)"

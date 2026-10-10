@@ -50,7 +50,7 @@ aliases:
   - DEBUG_WINDOWS_OFF
 
 # Clock Configuration Constants
-# Source: pnut_ts Clock-Configuration-Usage-Guide.md (compiler-verified)
+# Source: pnut-ts Clock-Configuration-Usage-Guide.md (compiler-verified)
 #
 # READ THE `range:` FIELDS AS COMPILER LIMITS, NOT SILICON LIMITS. Every range in
 # this block is what pnut-ts ACCEPTS; the P2's own limits are lower in all three
@@ -157,7 +157,7 @@ clock_configuration:
       - "Contains PLL dividers, multipliers, and source selection"
 
 clock_configuration_rules:
-  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5 -- engineering/ingestion/external-inputs/pnut_ts_facts/Clock-Configuration-Usage-Guide.md:65-69. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
+  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   rule_1:
     description: "Only ONE clock configuration per program"
     note: "Define clock constants in top-level object's CON block only"
@@ -181,7 +181,7 @@ clock_configuration_rules:
     note: "Internal oscillators ignore crystal/PLL configuration"
 
 clock_configuration_examples:
-  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5 -- engineering/ingestion/external-inputs/pnut_ts_facts/Clock-Configuration-Usage-Guide.md:65-69. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
+  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   common_200mhz:
     description: "Most common: 200 MHz with default 20 MHz crystal"
     code: |
@@ -214,7 +214,7 @@ clock_configuration_examples:
         _rcslow = TRUE  ' ~20 kHz internal
 
 clock_anti_patterns:
-  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5 -- engineering/ingestion/external-inputs/pnut_ts_facts/Clock-Configuration-Usage-Guide.md:65-69. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
+  source: "pnut-ts Clock-Configuration-Usage-Guide.md rules 1-5. These are COMPILER behaviours (what pnut-ts does with these CON symbols), so the compiler's own guide is the authority for them; the silicon frequency limits are the P2 Datasheet's and are stated on the individual symbols above."
   conflicting_sources:
     wrong: |
       CON

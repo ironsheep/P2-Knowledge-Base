@@ -1,5 +1,5 @@
 # Spin2 Language Construct: IF/IFNOT/ELSEIF/ELSEIFNOT/ELSE
-# Source: Spin2 v51 documentation, pnut_ts Control-Flow-Usage-Guide.md
+# Source: Spin2 v51 documentation, pnut-ts Control-Flow-Usage-Guide.md
 # Critical for: Conditional execution and branching
 
 construct: "IF/IFNOT/ELSEIF/ELSEIFNOT/ELSE"

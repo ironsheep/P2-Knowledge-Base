@@ -11,9 +11,10 @@ requires_version: "Spin2_v46"
 version_directive: "{Spin2_v46}"
 
 description: |
-  Debug formatter that displays the current state of the Carry (C) and Zero (Z)
-  processor flags. Outputs in the format "C=n Z=n" where n is 0 or 1.
-  Essential for debugging PASM2 inline assembly and understanding flag behavior.
+  Debug formatter that outputs the states of the Carry (C) and Zero (Z)
+  flags, in the form "C=n Z=n" where n is 0 or 1. It compiles in a Spin2
+  DEBUG statement (built with DEBUG enabled, pnut-ts -d). Written inside PASM
+  (a DAT block, or inline ORG..END), DEBUG(C_Z) is rejected: Expected "(".
   REQUIRES: {Spin2_v46} or later version directive at start of source file.
 
 syntax:
@@ -34,7 +35,7 @@ examples:
         DEBUG(C_Z)
         x := 1
         DEBUG(C_Z)
-    description: "Print the C and Z flags at a DEBUG statement (the values are the cog's flags at that moment - see notes)"
+    description: "A Spin2 DEBUG statement that outputs C_Z"
 
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
@@ -45,7 +46,7 @@ examples:
               add     a, b        wcz         ' Add with flag update
         end
         DEBUG("After ADD: ", C_Z)
-    description: "Debug inline assembly flag results"
+    description: "C_Z in a Spin2 DEBUG statement placed after an inline-assembly block"
 
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
@@ -56,7 +57,7 @@ examples:
               cmp     x, y        wcz         ' Compare sets flags
         end
         DEBUG("x vs y: ", C_Z)
-    description: "Debug comparison results"
+    description: "C_Z in a Spin2 DEBUG statement placed after an inline-assembly compare"
 
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
@@ -66,7 +67,7 @@ examples:
               shl     value, #8   wcz         ' Shift left, check for overflow
         end
         DEBUG("After SHL: ", C_Z, " Value: ", UHEX(value))
-    description: "Debug shift operations with multiple formatters"
+    description: "C_Z combined with other DEBUG formatters in one statement"
 
   - code: |
       {Spin2_v46}                              ' REQUIRED directive
@@ -76,7 +77,7 @@ examples:
           DEBUG("Value is ZERO - ", C_Z)
         else
           DEBUG("Value is NON-ZERO - ", C_Z)
-    description: "Conditional debugging with flag inspection"
+    description: "C_Z in the branches of a conditional DEBUG"
 
 flag_meanings:
   carry_flag:
@@ -100,19 +101,12 @@ flag_meanings:
       - "Result is non-zero"
       - "Explicitly cleared"
 
-use_cases:
-  - "Debugging PASM2 inline assembly code"
-  - "Verifying arithmetic overflow conditions"
-  - "Understanding comparison results"
-  - "Debugging conditional branching logic"
-  - "Analyzing shift/rotate operations"
-  - "Testing bit manipulation results"
-
 notes:
-  - "REQUIRES {Spin2_v46} or later at start of source file"
-  - "Prints the C and Z flags the cog held when the DEBUG interrupt was taken (the interrupt saves them with its return address)"
-  - "Documented use is PASM code; in a Spin2 statement the flags are the Spin2 interpreter's own at that point, not the result of the preceding Spin2 statement"
-  - "Flags may change between operations - capture immediately"
+  - "REQUIRES {Spin2_v46} or later at start of source file; without the directive (or under v45) DEBUG(C_Z) in Spin2 is rejected: Expected an expression term"
+  - "Compile with DEBUG enabled (pnut-ts -d)"
+  - "In Spin2 DEBUG(C_Z) compiles; in PASM (DAT block or inline ORG..END) DEBUG(C_Z) is rejected with Expected \"(\" even under {Spin2_v55}, although the same PASM DEBUG site accepts other formatters such as UHEX"
+  - "The Spin2 Language Documentation describes C_Z as useful in PASM code; that use does not compile"
+  - "What C_Z prints in a Spin2 statement is not established here"
   - "C_Z has no underscore variant (always shows both labels)"
   - "Combine with other formatters for complete state display"
 
@@ -128,4 +122,6 @@ see_also:
   - "PASM2 flag operations"
   - "Conditional execution"
 
-oneliner: "Display Carry (C) and Zero (Z) flag states (requires Spin2_v46)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG section and version history v46; CP-004"
+
+oneliner: "Output Carry (C) and Zero (Z) flag states in a Spin2 DEBUG statement (requires Spin2_v46; not accepted in PASM)"

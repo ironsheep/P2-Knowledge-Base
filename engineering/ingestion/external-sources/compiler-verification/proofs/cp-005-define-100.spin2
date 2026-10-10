@@ -1,0 +1,17 @@
+' CP-005 proof, outcome 5 of 5: a 100-character #DEFINE symbol compiles and is seen as defined.
+' The symbol is abcdefgh10 abcdefgh20 ... abcdefgh90 then abcdefgh100, written without
+' spaces: ten groups of ten characters, each group "abcdefgh" plus its two-digit count
+' (the last group is "abcdefg100"), so the symbol is exactly 100 characters.
+' The #else branch names an undefined identifier, so the file compiles only if
+' #ifdef takes the defined branch.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+#define abcdefgh10abcdefgh20abcdefgh30abcdefgh40abcdefgh50abcdefgh60abcdefgh70abcdefgh80abcdefgh90abcdefg100
+
+PUB main() : r
+#ifdef abcdefgh10abcdefgh20abcdefgh30abcdefgh40abcdefgh50abcdefgh60abcdefgh70abcdefgh80abcdefgh90abcdefg100
+  r := 1
+#else
+  r := no_such_name
+#endif

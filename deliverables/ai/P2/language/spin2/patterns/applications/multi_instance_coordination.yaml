@@ -99,7 +99,7 @@ implementation_template: |
     
     ' Coordinate synchronized operations
     if time_for_sync_operation()
-      initiate_synchronized_operation()
+      start_synchronized_operation()
       
   PUB perform_follower_duties() | task_assignment, sync_command
     ' Check for task assignments
@@ -129,7 +129,7 @@ implementation_template: |
     ' Announce new leader
     comm.broadcast_leader_announcement(leader_instance)
     
-  PUB initiate_synchronized_operation() | sync_id, response_count
+  PUB start_synchronized_operation() | sync_id, response_count
     sync_id := get_unique_sync_id()
     
     ' Send sync command to all instances

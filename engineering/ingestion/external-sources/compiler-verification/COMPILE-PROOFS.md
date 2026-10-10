@@ -340,3 +340,172 @@ build without `-d`. Version directives run: none, v45, v46 (Spin2); v46, v55 (DA
 (inline PASM). `C_Z` is run alone in each `DEBUG()`; combined with other commands it is not run.
 One compiler version.
 *→ EF:* none — legality stays CP.
+
+---
+
+## Preprocessor
+
+### CP-005 · `pnut-ts` accepts a `#DEFINE` symbol of 30, 31, 32, 33 and 100 characters and a `-D` symbol of 100, and sees each as defined: it enforces no 32-character limit on preprocessor symbols — `LEGALITY`
+*KB:* `language/spin2/preprocessor/define.yaml`
+*Class:* legality. Each run compiles with exit status 0. Every proof file names its symbol twice,
+in `#define` (or on the command line for the `-D` run) and in `#ifdef`, and carries an `#else`
+branch that names an undefined identifier (`no_such_name`), so the file compiles only if `#ifdef`
+takes the defined branch. What the preprocessor does with the symbol beyond that is not shown.
+*Source:* in `proofs/`, one file per length, differing only in the symbol: `cp-005-define-30.spin2`,
+`cp-005-define-31.spin2`, `cp-005-define-32.spin2`, `cp-005-define-33.spin2`,
+`cp-005-define-100.spin2`; and `cp-005-dflag-100.spin2` (no `#define`; the symbol arrives by `-D`).
+The 30- to 33-character symbols are `abcdefgh10abcdefgh20abcdefgh30` followed by nothing, `x`,
+`xy`, `xyz`; the 100-character symbol is nine groups `abcdefghNN` (NN = 10 to 90) then `abcdefg100`.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (`#DEFINE`, 30):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-30.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-30.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-30.bin (6292 bytes)
+pnut-ts: Done
+```
+*Command (`#DEFINE`, 31):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-31.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-31.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-31.bin (6292 bytes)
+pnut-ts: Done
+```
+*Command (`#DEFINE`, 32):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-32.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-32.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-32.bin (6292 bytes)
+pnut-ts: Done
+```
+*Command (`#DEFINE`, 33):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-33.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-33.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-33.bin (6292 bytes)
+pnut-ts: Done
+```
+*Command (`#DEFINE`, 100):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-100.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-100.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-define-100.bin (6292 bytes)
+pnut-ts: Done
+```
+*Command (`-D`, 100):* `pnut-ts -D abcdefgh10abcdefgh20abcdefgh30abcdefgh40abcdefgh50abcdefgh60abcdefgh70abcdefgh80abcdefgh90abcdefg100 engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-dflag-100.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -D abcdefgh10abcdefgh20abcdefgh30abcdefgh40abcdefgh50abcdefgh60abcdefgh70abcdefgh80abcdefgh90abcdefg100 engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-dflag-100.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-005-dflag-100.bin (6292 bytes)
+pnut-ts: Done
+```
+**Grounds:** contradicts the KB home's claim that a preprocessor symbol name is at most 32
+characters (`preprocessor/define.yaml` notes; `preprocessor/external-symbols.yaml`, the `-D` parameter
+description, `limits.max_name_length` and a note). That claim has no compile behind it; the
+compiler, which is the authority for legality, accepts names to 100 characters. Contrast CP-001:
+Spin2 symbols (CON, method, VAR, local, DAT label names) stop at 30.
+*Limits:* `pnut-ts` only. 100 characters is the longest run; nothing is said about longer names.
+`-D` is run once (100), `-U` and `#UNDEF` are not run, and whether the original PNut limits
+preprocessor symbols is not tested here. The `#ifdef` proof shows the symbol is defined, not
+that it is stored untruncated (a name that differed after character 32 is not run). One
+compiler version.
+*→ EF:* none — legality stays CP.
+
+---
+
+## Operators (continued)
+
+### CP-006 · `POW` binds at the level of `+` `-` `+.` `-.`, left to right: `2.0 POW 3.0 +. 1.0` folds to 9.0, `1.0 +. 3.0 POW 2.0` to 16.0, `2.0 POW 3.0 POW 2.0` to 64.0, and `*.` binds tighter (`2.0 *. 3.0 POW 2.0` folds to about 36.0) — `LEGALITY`
+*KB:* `language/spin2/operators/op_POW.yaml`
+*Class:* legality — how the compiler groups and folds a constant expression containing `POW`
+(compile-time value, read from the listing). It does not show how `POW` evaluates a run-time
+operand.
+*Source:* `proofs/cp-006-pow-precedence.spin2`, five `DAT` longs under `{Spin2_v51}`, compiled
+with `-l`. The listing holds one long per expression, in order.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-l`.
+
+*Command:* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-006-pow-precedence.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-006-pow-precedence.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-006-pow-precedence.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-006-pow-precedence.bin (6312 bytes)
+pnut-ts: Done
+```
+*Listing (`cp-006-pow-precedence.lst`, the data lines, verbatim):*
+```text
+00000- 1C 00 00 80 1E 00 00 00 00 00 10 41 00 00 80 41   '...........A...A'
+00010- 00 00 80 42 01 00 10 42 00 00 00 41 00 04 00 00   '...B...B...A....'
+```
+Reading it: after the 8-byte object header (`1C 00 00 80 1E 00 00 00`), the five longs
+are little-endian `$41100000` (9.0), `$41800000` (16.0), `$42800000` (64.0), `$42100001`
+(36.000004), `$41000000` (8.0, the control `2.0 POW 3.0`). The IEEE-754 decodings are
+arithmetic on those bit patterns, not printed by the compiler.
+**Grounds:** the Parallax *Spin2 Language Documentation* v55 operator table has no `POW` row
+(`spin2-v55-text.txt`: `POW` appears only in the version history, `:75`, and the new-keywords list, `:151`), so its precedence
+is not given by the document. The folded values are consistent only with `POW` at the `+ -`
+level, left-associative: `2.0 POW 3.0 +. 1.0` is (2^3)+1 = 9 (if `POW` were looser it would be
+2^(3+1) = 16), `1.0 +. 3.0 POW 2.0` is (1+3)^2 = 16 (if tighter it would be 10), and
+`2.0 POW 3.0 POW 2.0` is (2^3)^2 = 64 (right-associative would be 2^9 = 512). Settles the
+«#416» statement of level 8, left-associative.
+*Limits:* constant folding only; run-time evaluation of `POW` is not run. Four expressions;
+`POW` against operators other than `+.` and `*.` is not run. The `*.` value is approximate
+(`$42100001`, one unit in the last place above 36.0). One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-007 · A typed pointer cannot be an array: `^BYTE pArray[10]` is rejected in a VAR block (`Pointers cannot be arrays (m480)`) and in a method's local list (`Pointers cannot be arrays (m481)`) — `LEGALITY`
+*KB:* `language/spin2/operators/typed-pointers.yaml`
+*Class:* legality. Both failing runs stop with exit status 1 at the declaration; a control with
+`^BYTE pByte` (no array size) and a `LONG ptrTable[10]` array compiles.
+*Source:* `proofs/cp-007-pointer-array-var.spin2`, `proofs/cp-007-pointer-array-local.spin2`,
+`proofs/cp-007-pointer-control.spin2`; all under `{Spin2_v45}`.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (VAR):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-array-var.spin2`
+*Output (2026-10-10; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-array-var.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-array-var.spin2:8:error:Pointers cannot be arrays (m480)
+```
+*Command (local):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-array-local.spin2`
+*Output (2026-10-10; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-array-local.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-array-local.spin2:8:error:Pointers cannot be arrays (m481)
+```
+*Command (control):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-control.spin2`
+*Output (2026-10-10; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-control.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-007-pointer-control.bin (6296 bytes)
+pnut-ts: Done
+```
+Each error line is the declaration line (VAR line 8; local list line 8).
+**Grounds:** the KB home already states "Pointers cannot be arrays" and `^BYTE pArray[10]` as an
+error; no ingested Parallax document was found that says it, so the compile is its only
+backing («#416» carried it from `pnut-ts`'s message). The compiler's two message numbers
+differ by site (m480 VAR, m481 local).
+*Limits:* `^BYTE` only; `^WORD`, `^LONG`, `^structName` arrays are not run, nor a method
+parameter or result declared as a pointer array. One compiler version.
+*→ EF:* none — legality stays CP.

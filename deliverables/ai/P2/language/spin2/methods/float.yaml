@@ -1,7 +1,7 @@
 method: FLOAT
 type: method
 category: Conversion
-# Source: pnut_ts Floating-Point-Usage-Guide.md
+# Source: pnut-ts Floating-Point-Usage-Guide.md
 
 description: |
   Convert an integer value to IEEE-754 single-precision floating-point.

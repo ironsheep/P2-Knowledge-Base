@@ -99,7 +99,7 @@ notes:
   - "COMPILER DIVERGENCE -- symbol values: under PNut a symbol has no value, it is simply defined or not. Under PNut-TS a symbol also carries substitution text: the value is everything after the symbol name, and the symbol name is replaced by it wherever it appears in the file, including inside a quoted string. A symbol defined with no value substitutes the text 1. Use presence only (#IFDEF/#IFNDEF) for source that must build under both"
   - "PNut-TS: a trailing tick or brace comment on the #DEFINE line is excluded from the value; interior spacing within the value is preserved"
   - "PNut-TS: a function-like #DEFINE is an ERROR -- '#define does not support arguments — only simple symbol definitions'. There are no parameterized macros in this preprocessor."
-  - "Maximum symbol name length is 32 characters"
+  - "pnut-ts accepts a #DEFINE symbol name of 33 and of 100 characters and treats it as defined; no maximum length is taught for a preprocessor symbol (the 30-character limit is for Spin2 symbols)"
   - "Up to 16 external symbols can be defined via command line under PNut; PNut-TS does not impose that cap -- keep to 16 for portability"
   - "Defining an already-defined symbol is allowed (no error)"
 
@@ -114,5 +114,7 @@ see_also:
   - "Preprocessor system"
   - "Conditional compilation"
   - "Build configurations"
+
+source: "CP-005 (symbol name length)"
 
 oneliner: "Define a preprocessor symbol for conditional compilation (v48+)"

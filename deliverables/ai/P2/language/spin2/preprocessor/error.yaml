@@ -95,7 +95,7 @@ common_patterns:
       #ENDIF
       #ENDIF
 
-  - pattern: "require_pnut_ts"
+  - pattern: "require-pnut-ts"
     description: "Stop the build unless the PNut-TS extensions (#ERROR, #WARN, #INCLUDE, #PRAGMA) are available"
     code: |
       #IFNDEF __PNUT_TS__

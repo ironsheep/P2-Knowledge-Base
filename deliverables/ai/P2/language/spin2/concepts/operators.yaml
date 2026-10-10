@@ -344,6 +344,8 @@ special_operators:
     description: "Post-assign (postfix) - return variable's value, then assign x to the variable (var\\x)"
     example: |
       x := value\5   ' x gets value's old contents, then value becomes 5
+    note: "A term only: written alone as a statement, value\\5 does not compile (Variable needs an operator); write value := 5 instead"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators; CP-002"
 
   - operator: "@"
     description: "Hub address of a VAR/PUB/PRI/DAT variable (@hubvar); pointer to a method (@method, @object.method, may be @object[i].method)"

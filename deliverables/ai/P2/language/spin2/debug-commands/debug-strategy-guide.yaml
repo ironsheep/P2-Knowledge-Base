@@ -1,7 +1,7 @@
 title: "Debug Strategy Guide: Keeping a Debug Build Within the Compiler's Limits"
 type: guide
 category: Debugging
-documentation_source: pnut_ts_facts
+documentation_source: "pnut-ts Debug-Strategy-Guide.md"
 documentation_level: comprehensive
 
 aliases:

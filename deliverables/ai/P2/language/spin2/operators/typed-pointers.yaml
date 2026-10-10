@@ -233,8 +233,9 @@ gotchas:
           debug("rate = ", sdec_(pCfg.rate))   ' Then access members normally
 
   pointer_arrays_not_supported:
-    description: "Pointer variables cannot be declared as arrays (the compiler reports: Pointers cannot be arrays)"
+    description: "Pointer variables cannot be declared as arrays, in a VAR block or a method's local list (the compiler reports: Pointers cannot be arrays)"
     wrong: "^BYTE pArray[10]         ' ERROR: pointers cannot be arrays"
+    source: "CP-007"
     workaround: "Use a LONG array to store raw addresses, then point a typed pointer at one of them"
     example: |
       VAR

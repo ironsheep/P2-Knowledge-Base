@@ -1,0 +1,8 @@
+' CP-007 proof, outcome 2 of 3: a typed pointer declared as an array in a method's
+' local list is rejected.
+' Run from the repository root with this file's repository-relative path.
+' Expected: the compiler stops with an error naming the pointer array.
+
+{Spin2_v45}
+
+PUB main() | ^BYTE pArray[10]

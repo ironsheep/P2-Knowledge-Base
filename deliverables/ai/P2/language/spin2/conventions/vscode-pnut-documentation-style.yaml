@@ -477,7 +477,7 @@ toolchain_support:
     - Insert Doc Comment command (Ctrl+Alt+Cmd+C on macOS)
     - Outline panel with section labels and method signatures
 
-  pnut_ts_features:
+  pnut-ts_features:
     - Preserves documentation in compiled output
     - No impact on binary size
     - Compatible with debug information

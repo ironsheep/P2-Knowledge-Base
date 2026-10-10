@@ -1,0 +1,14 @@
+' CP-007 proof, outcome 3 of 3 (control): the same VAR declaration without the array
+' size, and the LONG-array workaround, compile.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+{Spin2_v45}
+
+VAR
+  ^BYTE pByte
+  LONG ptrTable[10]
+
+PUB main() : r | ^BYTE ptr
+  [ptr] := ptrTable[0]
+  r := 0

@@ -1,0 +1,15 @@
+' CP-005 proof, outcome 1 of 5: a 30-character #DEFINE symbol compiles and is seen as defined.
+' The symbol is abcdefgh10abcdefgh20abcdefgh30; each "NN" ends at character NN.
+' The #else branch names an undefined identifier, so the file compiles only if
+' #ifdef takes the defined branch.
+' Run from the repository root with this file's repository-relative path.
+' Expected: compiles with no error.
+
+#define abcdefgh10abcdefgh20abcdefgh30
+
+PUB main() : r
+#ifdef abcdefgh10abcdefgh20abcdefgh30
+  r := 1
+#else
+  r := no_such_name
+#endif

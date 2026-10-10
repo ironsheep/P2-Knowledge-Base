@@ -1,6 +1,6 @@
 # Clock System - Flexible Multi-Source Clock Generation
 # Source: Silicon Doc v35, P2 Datasheet (electrical characteristics table),
-#         pnut_ts Clock-Configuration-Usage-Guide.md
+#         pnut-ts Clock-Configuration-Usage-Guide.md
 
 component: Clock_System
 category: timing

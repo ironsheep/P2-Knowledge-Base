@@ -12,19 +12,15 @@ blocks:
     fp: "61d7a63fe2d9ef02"
     compile: program
   - at: examples[3].code
-    fp: "c02b6bc6b79c791e"
-    compile: program
-    finding: "S-066"
-  - at: examples[4].code
     fp: "87cad2d992e60e86"
     compile: program
-  - at: examples[5].code
+  - at: examples[4].code
     fp: "38f327d738293cd2"
     compile: program
-  - at: examples[6].code
+  - at: examples[5].code
     fp: "ea53fec5807c419a"
     compile: program
-  - at: examples[7].code
+  - at: examples[6].code
     fp: "34c16e7bd55f014d"
     compile: fragment
     wrap: spin2-top

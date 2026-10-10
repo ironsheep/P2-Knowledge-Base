@@ -1,7 +1,7 @@
 method: ROUND
 type: method
 category: Conversion
-# Source: pnut_ts Floating-Point-Usage-Guide.md
+# Source: pnut-ts Floating-Point-Usage-Guide.md
 
 description: |
   Convert a floating-point value to the nearest integer.

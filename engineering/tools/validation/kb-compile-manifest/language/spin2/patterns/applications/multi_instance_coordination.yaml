@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation_template
-    fp: "3afaa8437f292c04"
+    fp: "6de9fb652ddf1e16"
     compile: fragment
     wrap: spin2-top
     assumes: [initialize_instance()->0/0, update_instance_registry()->0/0, handle_coordinated_tasks()->0/0, COORDINATION_CYCLE_MS=con, add_instance_to_registry()->0/1, has_pending_tasks()->1/0, get_next_task()->1/0, find_best_instance_for_task()->1/1, assign_task_to_instance()->0/2, check_instance_health()->0/0, time_for_sync_operation()->1/0, execute_assigned_task()->0/1, report_task_completion()->0/1, participate_in_sync_operation()->0/1, send_heartbeat_to_leader()->0/0, get_unique_sync_id()->1/0, SYNC_START_OPERATION=con, SYNC_EXECUTE=con, SYNC_ABORT=con, wait_for_sync_responses()->1/1, perform_local_sync_operation()->0/0, comm.broadcast_discovery(1), comm.wait_for_response(1), comm.get_sender_id(1), comm.broadcast_leader_announcement(1), comm.check_for_assignment(0), comm.check_for_sync_command(0), comm.broadcast_sync_command(2), sync.__kbstub(0)]

@@ -1,0 +1,15 @@
+' CP-006 proof: the compile-time value of mixed constant expressions with POW,
+' read from the listing (-l) of five DAT longs. POW needs {Spin2_v51}.
+' Run from the repository root with this file's repository-relative path and -l.
+' Expected: compiles with no error; the listing holds one long per expression.
+
+{Spin2_v51}
+
+DAT
+  long 2.0 POW 3.0 +. 1.0           ' POW first (left): 8.0 +. 1.0
+  long 1.0 +. 3.0 POW 2.0           ' left to right: 4.0 POW 2.0
+  long 2.0 POW 3.0 POW 2.0          ' left to right: 8.0 POW 2.0
+  long 2.0 *. 3.0 POW 2.0           ' *. first: 6.0 POW 2.0
+  long 2.0 POW 3.0                  ' control: 8.0
+
+PUB main()

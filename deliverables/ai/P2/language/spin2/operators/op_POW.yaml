@@ -31,7 +31,7 @@ precedence:
   same_level: "+, -, +., -."
   note: "The v55 operator table has no POW row. This level was established by compiling mixed expressions with pnut-ts: POW groups with + - +. -. (2.0 POW 3.0 +. 1.0 is 9.0 and 1.0 +. 3.0 POW 2.0 is 16.0, both left to right), *. binds tighter (2.0 *. 3.0 POW 2.0 is about 36.0), and 2.0 POW 3.0 POW 2.0 is 64.0, so it associates left."
 
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, New Keywords Introduced by New Versions"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, New Keywords Introduced by New Versions; CP-006 (precedence)"
 aliases:
   - "POW"
   - "power"

@@ -1,7 +1,7 @@
 method: TRUNC
 type: method
 category: Conversion
-# Source: pnut_ts Floating-Point-Usage-Guide.md
+# Source: pnut-ts Floating-Point-Usage-Guide.md
 
 description: |
   Convert a floating-point value to integer by truncating toward zero.

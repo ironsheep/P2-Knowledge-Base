@@ -1,5 +1,5 @@
 # Spin2 Floating-Point Operations
-# Source: pnut_ts Floating-Point-Usage-Guide.md
+# Source: pnut-ts Floating-Point-Usage-Guide.md
 # Critical for: Sensor data, scientific calculations, control systems
 
 name: Floating-Point Operations

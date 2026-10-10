@@ -52,14 +52,13 @@ command_line:
 parameters:
   - name: "symbol"
     type: "identifier"
-    description: "Name of the symbol (case-insensitive, max 32 chars)"
+    description: "Name of the symbol (case-insensitive)"
   - name: "path"
     type: "directory"
     description: "Directory path for -I include search"
 
 limits:
   max_symbols: 16          # PNut's documented cap; PNut-TS does not enforce it
-  max_name_length: 32
 
 # The predefined symbols come in two KINDS. A presence-only symbol exists to be
 # tested with #IFDEF/#IFNDEF -- it is never text-substituted, and its numeric
@@ -278,7 +277,7 @@ notes:
   - "-D symbols are case-insensitive, like all Spin2 symbols"
   - "There is NO -D symbol=value form in either compiler. PNut-TS REJECTS the attempt: `-D VERS=200` gives `-D VERS=200 is not supported; -D takes a presence-only symbol name (use -D VERS)`, exits non-zero, and writes no output files. It rejects an illegal symbol name the same way (`-D 9BAD`, `-D BAD-NAME`). Older PNut-TS builds accepted the text silently and left the symbol undefined, so a build script carrying `=value` used to compile and quietly take the #ELSE branch -- if you meet that, the script was always wrong. To carry a value, use a source #DEFINE (PNut-TS only)"
   - "PNut accepts up to 16 external symbols via -D; PNut-TS does not enforce that cap -- keep to 16 for portability"
-  - "Maximum symbol name length is 32 characters"
+  - "pnut-ts accepts a -D symbol name of 100 characters and treats it as defined; no maximum length is taught for a preprocessor symbol"
   - "-D symbols CAN be undefined with #UNDEF in source -- they are ordinary user symbols. Only the predefined __*__ symbols are protected from #UNDEF"
   - "-D symbols are defined before any source is read, so a later source #DEFINE of the same symbol is a redefinition, not a conflict"
   - "-U does NOT undefine or prevent a symbol -- its only effect is to block a #PRAGMA EXPORTDEF of that symbol. A source #DEFINE of the symbol remains fully in effect, and -U SYM -D SYM leaves SYM defined (in either order)"
@@ -301,5 +300,7 @@ see_also:
   - "Build configurations"
   - "Command-line compilation"
   - "CI/CD integration"
+
+source: "CP-005 (symbol name length)"
 
 oneliner: "Command-line options -D, -U, -I for preprocessor configuration (v48+)"
