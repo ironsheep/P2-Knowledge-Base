@@ -79,15 +79,32 @@ a way to cite a designer-authored specification of a non-Parallax board (a new a
 changes what "cited" means), or remove the quantities the gate names, or move the board out of the served
 tree. Until he decides, the release cannot go green.
 
-### F-566 — Quick Bytes entry `simple-analog-input.yaml` cites an article URL that returns 404 — `NEEDS-VERIFICATION` (Stephen: current URL, or retired)
-Found 2026-10-10 by «#422» checking S-390. `community/quick-bytes/simple-analog-input.yaml` `url:` and
-`modalities.article` are `https://www.parallax.com/simple-analog-input/`; the arbiter's fetch on 2026-10-10
-returned HTTP 404. Under Stephen's Q5 that url IS the entry's citation, so the entry is currently cited to a
-dead page. S-390 applied meanwhile: `code_author: Jane Doe` (a placeholder-looking name no reachable page
-confirms) emptied to `''`, as two other entries already are. **Owed:** Stephen supplies the article's current
-parallax.com URL (then restore the url and re-check the author), or confirms it was retired (then the entry
-goes, and the KB's other references to it are redirected per Sacred Rule #7). Other Quick Bytes urls were not
-probed in this pass.
+### F-566 — Parallax moved www.parallax.com to Shopify; every Quick Bytes article now lives on the OBEX docs site, so all 42 catalog entries cited a dead root — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; closes when the next KB release serves it)
+Found 2026-10-10 by «#422» checking S-390: `community/quick-bytes/simple-analog-input.yaml` cited
+`https://www.parallax.com/simple-analog-input/`, which returned HTTP 404. Stephen's reading: the site moved, so
+"quick bytes urls may have changed ... all should be rerooted the same way". **Applied:** all 42 entries in
+`community/quick-bytes/` now cite `https://obex.parallax.com/docs/quick-bytes/propeller-2/<slug>/` in `url:`,
+`modalities.article` and `modalities.source_code.get_from` (the arbiter fetched each: HTTP 200). 30 slugs were
+unchanged; 12 moved and `slug:` is updated (the filenames keep the old slugs — they are KB keys):
+`breakout-board-options-for-p2`, `dht11-dht22-cm2302-object`, `floating-point-math`, `i2c-device-bus-scanner`,
+`i-o-test-utility-with-led-matrix`, `multiple-serial-port-16-object`, `p2-simple-video-driver-using-images-intro-to-using-video-2-of-3`,
+`rotary-encoder`, `smart-pins-tsl235r`, `video-hardware-character-map`, `visual-studio`, `wireless-programming`.
+The six hardware pages that linked a Quick Bytes article (`addon-goertzel-touch`, `addon-control-board`,
+`addon-av-breakout` x3, `addon-led-matrix`) were re-rooted the same way. **Downloads:** the old
+`download_mechanism: parallax-download-manager` is gone; each article page now lists its code as plain
+`/qbi/downloads/<file>` links on `obex.parallax.com` with no login wording on the page, so the field reads
+`direct-link`. `download_count` / `has_code` were corrected to what each page lists (flash reader 4→6, neopixel
+1→3, rotary 3→4, 32-channel ADC 1→2, DHT 2→1, DS3231 2→1, LED-matrix test 3→1; multi-servo, floating-point and
+serial-16 `has_code` false→true; wireless programming true→false, its page offers only a Google Drive
+firmware link, already in `reference_links`). `addon-av-breakout`'s character-map `source_package` now names
+the file the page lists. **`code_author` of `simple-analog-input.yaml`:** the new page's Document Author and
+Source Code Author blocks read "John Doe" and "Jane Doe" — template placeholders, not authors — so `code_author`
+stays `''` and `author: Ken Gracey` stands (the page carries no published date). The claim-sourcing gate
+(`audit-yaml-claim-sourcing.py` `CATALOG_URL_RE`) now accepts the `obex.parallax.com/docs/quick-bytes/` root
+beside `parallax.com/`; a non-Parallax host is still refused. **Owed:** other `www.parallax.com` links in the
+hardware pages that are not Quick Bytes articles (`/usbdrivers`, `/product/p2-to-mikrobus-click-adapter`, the
+bare home page) were not probed under the request to keep traffic to Parallax light; and the download links
+themselves were read from the pages, not fetched, so `auth_gated: false` rests on the page showing no gate.
 
 ### F-565 — `keywords/STRUCT.yaml` `gotchas.struct_pointer_obj_returns` said `pCfg := sensor.getConfig()` is a COMPILE ERROR for structures over 15 longs; no ingested source and no compile-proof record states it — `NEEDS-VERIFICATION` (compile probe)
 Found 2026-10-09 by «#415» fixing `language/spin2/keywords/STRUCT.yaml`. The page carried a

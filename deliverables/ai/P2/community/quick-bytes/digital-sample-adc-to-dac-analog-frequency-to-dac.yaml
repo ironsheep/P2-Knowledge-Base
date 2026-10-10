@@ -1,7 +1,7 @@
 quick_byte:
   title: Digital Sample ADC to DAC + Analog Frequency to DAC
   slug: digital-sample-adc-to-dac-analog-frequency-to-dac
-  url: https://www.parallax.com/digital-sample-adc-to-dac-analog-frequency-to-dac/
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/digital-sample-adc-to-dac-analog-frequency-to-dac/
   published_date: '2022-11-01'
   author: Ken Gracey
   code_author: Chip Gracey, Michael Mulholland
@@ -20,14 +20,14 @@ quick_byte:
   - human-input
   - smart-pins
   modalities:
-    article: https://www.parallax.com/digital-sample-adc-to-dac-analog-frequency-to-dac/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/digital-sample-adc-to-dac-analog-frequency-to-dac/
     video: https://www.youtube.com/watch?v=_qPpqEd8goA
     source_code:
       has_code: true
       download_count: 2
-      download_mechanism: parallax-download-manager
+      download_mechanism: direct-link
       auth_gated: false
-      get_from: https://www.parallax.com/digital-sample-adc-to-dac-analog-frequency-to-dac/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/digital-sample-adc-to-dac-analog-frequency-to-dac/
     reference_links: []
   cross_links:
     obex_object_ids: []

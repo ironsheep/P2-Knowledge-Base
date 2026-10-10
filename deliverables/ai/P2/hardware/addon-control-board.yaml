@@ -130,7 +130,7 @@ resources:
     driver_file: "jm_p2-es_control.spin2"
   quick_bytes:
     - title: "LEDs - Beyond the Basics"
-      url: "https://www.parallax.com/leds-beyond-the-basics/"
+      url: "https://obex.parallax.com/docs/quick-bytes/propeller-2/leds-beyond-the-basics/"
       description: "PWM brightness control, gamma correction, Smart Pin configuration"
   related_obex:
     - id: 2867

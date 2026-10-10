@@ -1,7 +1,7 @@
 quick_byte:
   title: Configuring Visual Studio Code for Programming the P2 on Mac, Windows, and Linux
-  slug: visual-studio
-  url: https://www.parallax.com/visual-studio/
+  slug: configuring-visual-studio-code-for-programming-the-p2-on-mac-windows-and-linux
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/configuring-visual-studio-code-for-programming-the-p2-on-mac-windows-and-linux/
   published_date: '2021-03-14'
   author: Ken Gracey
   code_author: Eric Smith, Stephen Moraco, Cluso99
@@ -13,14 +13,14 @@ quick_byte:
   - development-tools
   - visual
   modalities:
-    article: https://www.parallax.com/visual-studio/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/configuring-visual-studio-code-for-programming-the-p2-on-mac-windows-and-linux/
     video: https://www.youtube.com/watch?v=Ebgj-rOB9DQ
     source_code:
       has_code: false
       download_count: 0
       download_mechanism: ''
       auth_gated: false
-      get_from: https://www.parallax.com/visual-studio/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/configuring-visual-studio-code-for-programming-the-p2-on-mac-windows-and-linux/
     reference_links:
     - https://github.com/totalspectrum/flexprop
     - https://code.visualstudio.com/

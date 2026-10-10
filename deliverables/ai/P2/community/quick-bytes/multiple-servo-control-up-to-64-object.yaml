@@ -1,7 +1,7 @@
 quick_byte:
   title: Multiple Servo Control (up to 64) Object
   slug: multiple-servo-control-up-to-64-object
-  url: https://www.parallax.com/multiple-servo-control-up-to-64-object/
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/multiple-servo-control-up-to-64-object/
   published_date: '2021-01-26'
   author: Ken Gracey
   code_author: Jon McPhalen
@@ -15,14 +15,14 @@ quick_byte:
   - smart-pins
   - utility
   modalities:
-    article: https://www.parallax.com/multiple-servo-control-up-to-64-object/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/multiple-servo-control-up-to-64-object/
     video: https://www.youtube.com/watch?v=v51GHsNfRQk
     source_code:
-      has_code: false
-      download_count: 0
-      download_mechanism: ''
+      has_code: true
+      download_count: 1
+      download_mechanism: direct-link
       auth_gated: false
-      get_from: https://www.parallax.com/multiple-servo-control-up-to-64-object/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/multiple-servo-control-up-to-64-object/
     reference_links: []
   cross_links:
     obex_object_ids: []

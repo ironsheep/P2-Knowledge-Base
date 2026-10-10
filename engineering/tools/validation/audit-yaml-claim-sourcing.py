@@ -784,7 +784,13 @@ def claimed(key, value):
 
 
 CATALOG_DIR = "community/quick-bytes"
-CATALOG_URL_RE = re.compile(r"^\s*url:\s*[\"']?https?://(?:www\.)?parallax\.com/\S+", re.MULTILINE)
+# Parallax moved www.parallax.com to Shopify (2026-10); every Quick Bytes article
+# now lives under the OBEX docs site, obex.parallax.com/docs/quick-bytes/. Both
+# roots are Parallax's own; any other host is still refused.
+CATALOG_URL_RE = re.compile(
+    r"^\s*url:\s*[\"']?https?://"
+    r"(?:(?:www\.)?parallax\.com/|obex\.parallax\.com/docs/quick-bytes/)\S+",
+    re.MULTILINE)
 
 
 def is_catalog(rel):
@@ -792,7 +798,8 @@ def is_catalog(rel):
 
 
 def catalog_cited(lines):
-    """Q5: a catalog entry is cited by its parallax.com `url:`."""
+    """Q5: a catalog entry is cited by its parallax.com `url:` (www.parallax.com/
+    or obex.parallax.com/docs/quick-bytes/)."""
     return bool(CATALOG_URL_RE.search("\n".join(lines)))
 
 
@@ -1373,6 +1380,14 @@ def negative_control():
                   not catalog_cited(["metadata:", "  source: parallax-quick-bytes"])))
     extra.append(("catalog entry with a NON-parallax url is NOT cited (CONSTRUCTED)",
                   not catalog_cited(["metadata:", "  url: https://example.com/tetris/"])))
+    extra.append(("catalog entry with the NEW obex.parallax.com/docs/quick-bytes/ url IS cited (quick-bytes/tetris.yaml:4)",
+                  catalog_cited(["metadata:",
+                                 "  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/tetris/"])))
+    extra.append(("catalog entry with an obex.parallax.com url OUTSIDE /docs/quick-bytes/ is NOT cited (CONSTRUCTED)",
+                  not catalog_cited(["metadata:", "  url: https://obex.parallax.com/obex/tetris/"])))
+    extra.append(("catalog entry with a look-alike host (obex.parallax.com.example.com) is NOT cited (CONSTRUCTED)",
+                  not catalog_cited(["metadata:",
+                                     "  url: https://obex.parallax.com.example.com/docs/quick-bytes/propeller-2/tetris/"])))
     for label, passed in extra:
         ok &= passed
         print(f"  [{'PASS' if passed else 'FAIL'}] {label}")

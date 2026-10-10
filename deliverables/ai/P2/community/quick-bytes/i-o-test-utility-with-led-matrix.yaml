@@ -1,7 +1,7 @@
 quick_byte:
   title: LED Matrix used as an I/O Test Utility
-  slug: i-o-test-utility-with-led-matrix
-  url: https://www.parallax.com/i-o-test-utility-with-led-matrix/
+  slug: led-matrix-used-as-an-i-o-test-utility
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/led-matrix-used-as-an-i-o-test-utility/
   published_date: '2021-01-15'
   author: Ken Gracey
   code_author: Carroll James Moore Jr (Forum handle CJMJ)
@@ -18,14 +18,14 @@ quick_byte:
   - utility
   - visual
   modalities:
-    article: https://www.parallax.com/i-o-test-utility-with-led-matrix/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/led-matrix-used-as-an-i-o-test-utility/
     video: ''
     source_code:
       has_code: true
-      download_count: 3
-      download_mechanism: parallax-download-manager
+      download_count: 1
+      download_mechanism: direct-link
       auth_gated: false
-      get_from: https://www.parallax.com/i-o-test-utility-with-led-matrix/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/led-matrix-used-as-an-i-o-test-utility/
     reference_links:
     - https://en.wikipedia.org/wiki/Charlieplexing
     - https://en.wikipedia.org/wiki/Persistence_of_vision

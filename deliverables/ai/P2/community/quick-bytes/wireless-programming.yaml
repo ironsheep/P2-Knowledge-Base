@@ -1,7 +1,7 @@
 quick_byte:
   title: Wireless Programming with the ESP8266 WX Module
-  slug: wireless-programming
-  url: https://www.parallax.com/wireless-programming/
+  slug: wireless-programming-with-the-esp8266-wx-module
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/wireless-programming-with-the-esp8266-wx-module/
   published_date: '2021-01-17'
   author: Ken Gracey
   code_author: Michael Mulholland
@@ -17,14 +17,14 @@ quick_byte:
   - iot
   - wireless
   modalities:
-    article: https://www.parallax.com/wireless-programming/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/wireless-programming-with-the-esp8266-wx-module/
     video: ''
     source_code:
-      has_code: true
-      download_count: 2
-      download_mechanism: parallax-download-manager
+      has_code: false
+      download_count: 0
+      download_mechanism: ''
       auth_gated: false
-      get_from: https://www.parallax.com/wireless-programming/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/wireless-programming-with-the-esp8266-wx-module/
     reference_links:
     - https://drive.google.com/drive/folders/17Xh9A80skNweDfcSq5MR087GqHrKvtOK
   cross_links:

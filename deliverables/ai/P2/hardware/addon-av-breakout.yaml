@@ -180,15 +180,15 @@ compatibility:
 resources:
   quick_bytes:
     - title: "DVI/VGA Text Driver Demo"
-      url: "https://www.parallax.com/dvi-vga-text-driver-demo/"
+      url: "https://obex.parallax.com/docs/quick-bytes/propeller-2/dvi-vga-text-driver-demo/"
       description: "Text mode video driver for DVI and VGA output"
       source_package: "p2textdriver0_92b.zip"
     - title: "Video Hardware Character Map"
-      url: "https://www.parallax.com/video-hardware-character-map/"
+      url: "https://obex.parallax.com/docs/quick-bytes/propeller-2/video-hardware-with-character-map-demo-intro-to-using-video-1-of-3/"
       description: "Hardware-accelerated character map for video displays"
-      source_package: "P2-Character-Map-Code.zip"
+      source_package: "P2-Character-Map-Code-for-FlexProp.zip"
     - title: "Simple Sound Engine Demo"
-      url: "https://www.parallax.com/simple-sound-engine-demo/"
+      url: "https://obex.parallax.com/docs/quick-bytes/propeller-2/simple-sound-engine-demo/"
       description: "Audio synthesis and playback engine"
       note: "Requires a Parallax account for download"
 

@@ -1,7 +1,7 @@
 quick_byte:
   title: XBee RF Transparent and API Mode Demo
   slug: xbee-rf-transparent-and-api-mode-demo
-  url: https://www.parallax.com/xbee-rf-transparent-and-api-mode-demo/
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/xbee-rf-transparent-and-api-mode-demo/
   published_date: '2021-02-28'
   author: Ken Gracey
   code_author: Jon McPhalen
@@ -12,14 +12,14 @@ quick_byte:
   tags:
   - wireless
   modalities:
-    article: https://www.parallax.com/xbee-rf-transparent-and-api-mode-demo/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/xbee-rf-transparent-and-api-mode-demo/
     video: https://www.youtube.com/watch?v=muYP6l2jRlc
     source_code:
       has_code: true
       download_count: 3
-      download_mechanism: parallax-download-manager
+      download_mechanism: direct-link
       auth_gated: false
-      get_from: https://www.parallax.com/xbee-rf-transparent-and-api-mode-demo/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/xbee-rf-transparent-and-api-mode-demo/
     reference_links:
     - https://www.digi.com/resources/documentation/digidocs/90001526/tasks/t_download_and_install_xctu.htm
   cross_links:

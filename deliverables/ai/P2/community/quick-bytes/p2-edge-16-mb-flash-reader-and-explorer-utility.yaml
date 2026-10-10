@@ -1,7 +1,7 @@
 quick_byte:
   title: P2 Edge 16 MB Flash Reader and Explorer Utility
   slug: p2-edge-16-mb-flash-reader-and-explorer-utility
-  url: https://www.parallax.com/p2-edge-16-mb-flash-reader-and-explorer-utility/
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/p2-edge-16-mb-flash-reader-and-explorer-utility/
   published_date: '2021-01-31'
   author: Ken Gracey
   code_author: Jon McPhalen
@@ -19,14 +19,14 @@ quick_byte:
   - smart-pins
   - utility
   modalities:
-    article: https://www.parallax.com/p2-edge-16-mb-flash-reader-and-explorer-utility/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/p2-edge-16-mb-flash-reader-and-explorer-utility/
     video: ''
     source_code:
       has_code: true
-      download_count: 4
-      download_mechanism: parallax-download-manager
+      download_count: 6
+      download_mechanism: direct-link
       auth_gated: false
-      get_from: https://www.parallax.com/p2-edge-16-mb-flash-reader-and-explorer-utility/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/p2-edge-16-mb-flash-reader-and-explorer-utility/
     reference_links:
     - https://www.winbond.com/resource-files/w25q128jv%20revf%2003272018%20plus.pdf
   cross_links:

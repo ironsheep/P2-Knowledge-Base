@@ -120,7 +120,7 @@ resources:
     note: "The driver's API and features are documented by the OBEX object itself."
   quick_bytes:
     - title: "LED Matrix used as an I/O Test Utility"
-      url: "https://www.parallax.com/i-o-test-utility-with-led-matrix/"
+      url: "https://obex.parallax.com/docs/quick-bytes/propeller-2/led-matrix-used-as-an-i-o-test-utility/"
       description: "Charlieplex lookup table implementation, persistence of vision."
 
 use_cases:

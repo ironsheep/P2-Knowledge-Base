@@ -360,6 +360,8 @@ def negative_control() -> int:
     qb = "community/quick-bytes/tetris.yaml"
     check("quick-bytes entry with a parallax.com url -> CANONICAL (Q5)",
           catalog_url_cited(qb, "metadata:\n  url: https://www.parallax.com/tetris/\n"), True)
+    check("quick-bytes entry with the NEW obex.parallax.com/docs/quick-bytes/ url -> CANONICAL (Q5)",
+          catalog_url_cited(qb, "metadata:\n  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/tetris/\n"), True)
     check("quick-bytes entry with a NON-parallax url is not CANONICAL",
           catalog_url_cited(qb, "metadata:\n  url: https://example.com/tetris/\n"), False)
     check("quick-bytes entry with NO url is not CANONICAL",

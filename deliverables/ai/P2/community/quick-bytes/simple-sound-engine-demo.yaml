@@ -1,7 +1,7 @@
 quick_byte:
   title: Simple Sound Engine Demo
   slug: simple-sound-engine-demo
-  url: https://www.parallax.com/simple-sound-engine-demo/
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/simple-sound-engine-demo/
   published_date: '2021-02-13'
   author: Ken Gracey
   code_author: Ahle2
@@ -15,14 +15,14 @@ quick_byte:
   - memory
   - smart-pins
   modalities:
-    article: https://www.parallax.com/simple-sound-engine-demo/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/simple-sound-engine-demo/
     video: https://www.youtube.com/watch?v=lwQVsbZG1Dg
     source_code:
       has_code: true
       download_count: 4
-      download_mechanism: parallax-download-manager
+      download_mechanism: direct-link
       auth_gated: false
-      get_from: https://www.parallax.com/simple-sound-engine-demo/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/simple-sound-engine-demo/
     reference_links:
     - https://upload.wikimedia.org/wikipedia/en/1/19/Protracker_3.62_screenshot.png
     - https://en.wikipedia.org/wiki/MOD_(file_format)

@@ -495,7 +495,11 @@ def detect_auth_gated(html):
 
 
 def build(slug, meta, report):
-    url = f"https://www.parallax.com/{slug}/"
+    # Parallax moved www.parallax.com to Shopify (2026-10); every Quick Bytes
+    # article now lives under the OBEX docs site. The page markup is different
+    # there (downloads are plain /qbi/downloads/ links, not parallax.com/package/
+    # links), so the extractors below need re-pointing before a real scrape.
+    url = f"https://obex.parallax.com/docs/quick-bytes/propeller-2/{slug}/"
     html, from_cache = load_html(slug, url)
 
     soup = BeautifulSoup(html, "html.parser")

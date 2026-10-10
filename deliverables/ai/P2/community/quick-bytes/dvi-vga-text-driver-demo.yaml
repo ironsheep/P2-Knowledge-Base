@@ -1,7 +1,7 @@
 quick_byte:
   title: DVI/VGA Text Driver Demo
   slug: dvi-vga-text-driver-demo
-  url: https://www.parallax.com/dvi-vga-text-driver-demo/
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/dvi-vga-text-driver-demo/
   published_date: '2021-02-15'
   author: Ken Gracey
   code_author: rogloh
@@ -18,14 +18,14 @@ quick_byte:
   - vga-hdmi
   - visual
   modalities:
-    article: https://www.parallax.com/dvi-vga-text-driver-demo/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/dvi-vga-text-driver-demo/
     video: https://www.youtube.com/watch?v=Z2TN4cvIfKk
     source_code:
       has_code: true
       download_count: 1
-      download_mechanism: parallax-download-manager
+      download_mechanism: direct-link
       auth_gated: false
-      get_from: https://www.parallax.com/dvi-vga-text-driver-demo/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/dvi-vga-text-driver-demo/
     reference_links: []
   cross_links:
     obex_object_ids: []

@@ -166,7 +166,7 @@ documentation_note: >-
   module-side pin meanings.
 
 resources:
-  product_page: "https://www.parallax.com/product/p2-to-mikrobus-click-adapter"
+  product_page: "https://www.parallax.com/products/p2-to-mikrobus-click-adapter"
   mikrobus_standard: "MikroElektronika mikroBUS specification (www.mikroe.com) - authoritative for Click-side pin meanings and UART direction"
 
 see_also:

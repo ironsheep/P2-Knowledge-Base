@@ -124,7 +124,7 @@ compatibility:
 resources:
   quick_bytes:
     - title: "Goertzel Operation with Ultrasonic Transducers"
-      url: "https://www.parallax.com/goertzel-operation-with-ultrasonic-transducers/"
+      url: "https://obex.parallax.com/docs/quick-bytes/propeller-2/goertzel-operation-with-ultrasonic-transducers/"
       description: >-
         Goertzel correlation demonstration. Note: it drives external ultrasonic
         transducers wired to the board - an application of the P2 Goertzel

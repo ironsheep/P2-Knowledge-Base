@@ -23,6 +23,15 @@
 | Metadata extraction + QA | ⏳ | Mirror the OBEX pipeline (authors, dates, categories, provenance). |
 | Index + MCP serving | ⏳ | So agents can discover Quick Bytes objects like OBEX. |
 
+## Source root (2026-10-10)
+Parallax moved `www.parallax.com` to Shopify. **Every Quick Bytes article now lives under the OBEX docs
+site:** `https://obex.parallax.com/docs/quick-bytes/propeller-2/<slug>/` (e.g. `.../starting-your-p2-project-with-a-spin2-template/`).
+The 42 catalog entries in `deliverables/ai/P2/community/quick-bytes/` were re-rooted to it (twelve slugs also
+changed; the entry filenames are the OLD slugs and stay, being KB keys). Code downloads there are plain
+`/qbi/downloads/<file>` links on `obex.parallax.com`, not the old Parallax download manager. The scraper's
+article root is updated; its link extractors (written for the old markup) and the tag-taxonomy index URL
+in `extract-tag-taxonomy.py` still describe the old site and need re-pointing when the head is revived.
+
 ## Tier 3 — Drill-down
 - **Execution plan** → `engineering/ingestion/plans/QUICK-BYTES-READY-TO-EXECUTE.md`
 - **Plan + summary** → `engineering/ingestion/plans/quick-bytes-ingestion-plan.md` · `quick-bytes-ingestion-summary.md`

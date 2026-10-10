@@ -1,7 +1,7 @@
 quick_byte:
   title: Breakout Board Options for P2 Edge Modules
-  slug: breakout-board-options-for-p2
-  url: https://www.parallax.com/breakout-board-options-for-p2/
+  slug: breakout-board-options-for-p2-edge-modules
+  url: https://obex.parallax.com/docs/quick-bytes/propeller-2/breakout-board-options-for-p2-edge-modules/
   published_date: '2023-03-15'
   author: Michael Mulholland
   code_author: ''
@@ -12,14 +12,14 @@ quick_byte:
   tags:
   - development-tools
   modalities:
-    article: https://www.parallax.com/breakout-board-options-for-p2/
+    article: https://obex.parallax.com/docs/quick-bytes/propeller-2/breakout-board-options-for-p2-edge-modules/
     video: https://www.youtube.com/watch?v=YIxLPEVidzs
     source_code:
       has_code: false
       download_count: 0
       download_mechanism: ''
       auth_gated: false
-      get_from: https://www.parallax.com/breakout-board-options-for-p2/
+      get_from: https://obex.parallax.com/docs/quick-bytes/propeller-2/breakout-board-options-for-p2-edge-modules/
     reference_links: []
   cross_links:
     obex_object_ids: []
