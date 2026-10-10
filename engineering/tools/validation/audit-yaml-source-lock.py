@@ -15,28 +15,42 @@ WHY A LOCATOR AND NOT A TOKEN
 
     So this gate tiers the provenance VALUE by how far it can be followed:
 
-      RESOLVABLE  names a repo path (optionally :line) and that path EXISTS
+      CANONICAL   passes the claim-sourcing gate's acceptance rule: a canonical
+                  Parallax title with edition (and p.N where the document is
+                  paginated), or an EF-NNN / CP-NNN id that EXISTS in its ledger.
+                  This is the goal. The rule is IMPORTED from
+                  audit-yaml-claim-sourcing.py (classify(), CANONICAL_TITLES, the
+                  EF and CP id sets), never copied: two copies drift.
+      RESOLVABLE  legacy: names a repo path (optionally :line) and that path
+                  EXISTS. Still counted, but ranked BELOW CANONICAL, because the
+                  citation rulings (study decisions Q3/Q4/Q12, plan section 0 Q2)
+                  forbid repo paths as citations. RESOLVABLE -> CANONICAL is an
+                  improvement; any drop from CANONICAL is a regression.
       NAMED       names a real document by title, but gives no locator
       WEAK        a process label or bare token naming no document at all
       ABSENT      no provenance key anywhere in a claim-bearing file
 
-    Only RESOLVABLE can be checked by a machine. NAMED is checkable by a human
-    holding the document. WEAK and ABSENT are not checkable by anyone, which is
-    the finding.
+    CANONICAL and RESOLVABLE can be checked by following the citation. NAMED is
+    checkable by a human holding the document. WEAK and ABSENT are not checkable
+    by anyone, which is the finding.
 
 TIER DEFINITIONS ARE EVIDENCE-DERIVED, NOT INVENTED
     Every token in WEAK_VALUES below was observed in the shipped set on
-    2026-09-22 and hand-checked. Two candidates were REJECTED after checking, and
-    they are recorded here so nobody re-adds them:
+    2026-09-22 and hand-checked. Two candidates were REJECTED then, and they are
+    recorded here so nobody re-adds them as WEAK. Both findings have since been
+    overtaken by the citation rulings (the rejection reason is history):
 
       enhancement_source: PNUT_TS_v2.0_*  — 356 files. NOT weak: all 356 also
-          carry a real `documentation_source:`. It is a legitimate SECONDARY key
-          recording which tooling pass enriched the entry, not a substitute for
-          provenance. Scoring it weak would have produced 346 false findings.
+          carry a real `documentation_source:`. It was a SECONDARY key recording
+          which tooling pass enriched the entry, never a substitute for
+          provenance, and it stays out of PRIMARY_KEYS. Ruling Q3 DELETES the
+          key from the shipped tree; once it is gone this note is moot.
 
-      source: parallax-quick-bytes — 42 files. NOT weak: the corpus does exist
-          under engineering/ingestion/sources/quick-bytes-*. It is thin (the
-          corpus is only partly processed) but it names something real.
+      source: parallax-quick-bytes — 42 files. NOT weak at the time: it named a
+          corpus that existed. Ruling Q5 retires the LABEL: a batch label is not
+          a citation (the sourcing gate classes it BATCH_LABEL). Until each use
+          is rewritten to a canonical title it is scored as the gate scores any
+          non-canonical title-less value (NAMED), not as a document.
 
 RATCHET, NOT ABSOLUTE
     A gate that is permanently RED is a gate people learn to ignore. Zero-unsourced
@@ -54,6 +68,7 @@ USAGE
     audit-yaml-source-lock.py --write-baseline FILE  # record today's state
     audit-yaml-source-lock.py --baseline FILE        # gate: fail on regression
     audit-yaml-source-lock.py --tier WEAK --list     # locate one tier, in full
+    audit-yaml-source-lock.py --negative-control     # prove the ratchet and tiers fire
 
 EXIT
     0  clean (report mode always 0 unless --baseline given and regressions found)
@@ -64,6 +79,7 @@ EXIT
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import sys
@@ -153,7 +169,25 @@ PATH_RE = re.compile(
     r"(?::(?P<line>\d+(?:-\d+)?))?"
 )
 
-TIERS = ("RESOLVABLE", "NAMED", "WEAK", "ABSENT")
+TIERS = ("CANONICAL", "RESOLVABLE", "NAMED", "WEAK", "ABSENT")   # best first
+
+SOURCING_GATE = Path(__file__).resolve().parent / "audit-yaml-claim-sourcing.py"
+
+
+def _load_sourcing():
+    """Import the claim-sourcing gate (hyphenated filename) so the acceptance rule
+    -- classify(), CANONICAL_TITLES, EF_IDS, CP_IDS -- is used, never forked."""
+    spec = importlib.util.spec_from_file_location("audit_yaml_claim_sourcing", SOURCING_GATE)
+    if spec is None or spec.loader is None:
+        print(f"audit-yaml-source-lock: cannot load {SOURCING_GATE}", file=sys.stderr)
+        sys.exit(2)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = mod        # dataclass-style lookups need it registered
+    spec.loader.exec_module(mod)
+    return mod
+
+
+SOURCING = _load_sourcing()
 
 
 # ---------------------------------------------------------------------- helpers
@@ -193,6 +227,11 @@ def classify_value(value: str, root: Path) -> tuple[str, str]:
         return "WEAK", "empty value"
     if stripped.strip("\"'").lower() in WEAK_VALUES:
         return "WEAK", f"names no document: {stripped.strip()!r}"
+
+    # The goal tier: the value passes the sourcing gate's acceptance rule. A value
+    # carrying a repo path is never CANONICAL (the rule forbids it) -- it falls through.
+    if SOURCING.classify(stripped)[0]:
+        return "CANONICAL", stripped[:80]
 
     best = None
     for m in PATH_RE.finditer(stripped):
@@ -251,6 +290,77 @@ def audit_file(path: Path, rel: str, root: Path) -> dict:
             "hits": hits, "weak_blocks": weak_blocks, "conflicts": conflicts}
 
 
+def find_regressions(current: dict, baseline: dict) -> list[str]:
+    """Compare {file: tier} maps. A drop in rank, or a NEW WEAK/ABSENT file, fails."""
+    rank = {t: i for i, t in enumerate(TIERS)}          # lower index == better
+    regressions = []
+    for f, tier in current.items():
+        was = baseline.get(f)
+        if was is None:
+            if tier in ("WEAK", "ABSENT"):
+                regressions.append(f"NEW unsourced file: {f} [{tier}]")
+        elif rank[tier] > rank[was]:
+            regressions.append(f"WEAKENED: {f}  {was} -> {tier}")
+    return regressions
+
+
+CANON_OK = ("Parallax Propeller 2 Spin2 Language Documentation v55, Operators")
+
+
+def negative_control() -> int:
+    """Each case must produce the stated verdict; any surprise fails the control."""
+    root = Path.cwd()
+    ef = sorted(SOURCING.EF_IDS or [])
+    cp = sorted(SOURCING.CP_IDS or [])
+    cases = []
+
+    def check(name, got, want):
+        cases.append((name, got == want, got, want))
+
+    # --- tier controls (classify_value)
+    check("canonical title+edition -> CANONICAL", classify_value(CANON_OK, root)[0], "CANONICAL")
+    if ef:
+        check(f"existing {ef[0]} -> CANONICAL", classify_value(ef[0], root)[0], "CANONICAL")
+    if cp:
+        check(f"existing {cp[0]} -> CANONICAL", classify_value(cp[0], root)[0], "CANONICAL")
+    check("nonexistent EF-999 is not CANONICAL",
+          classify_value("EF-999", root)[0] != "CANONICAL", True)
+    check("nonexistent CP-999 is not CANONICAL",
+          classify_value("CP-999", root)[0] != "CANONICAL", True)
+    check("existing repo path -> RESOLVABLE (legacy)",
+          classify_value("engineering/tools/validation/audit-yaml-source-lock.py", root)[0],
+          "RESOLVABLE")
+    check("path + canonical title is not CANONICAL (repo paths forbidden)",
+          classify_value(CANON_OK + " engineering/tools/validation/audit-yaml-source-lock.py",
+                         root)[0] != "CANONICAL", True)
+    check("process label -> WEAK", classify_value("enhanced", root)[0], "WEAK")
+
+    # --- ratchet controls (find_regressions)
+    check("CANONICAL -> RESOLVABLE fails",
+          len(find_regressions({"a.yaml": "RESOLVABLE"}, {"a.yaml": "CANONICAL"})), 1)
+    check("CANONICAL -> NAMED fails",
+          len(find_regressions({"a.yaml": "NAMED"}, {"a.yaml": "CANONICAL"})), 1)
+    check("RESOLVABLE -> CANONICAL passes",
+          len(find_regressions({"a.yaml": "CANONICAL"}, {"a.yaml": "RESOLVABLE"})), 0)
+    check("NAMED -> CANONICAL passes",
+          len(find_regressions({"a.yaml": "CANONICAL"}, {"a.yaml": "NAMED"})), 0)
+    check("RESOLVABLE -> NAMED still fails",
+          len(find_regressions({"a.yaml": "NAMED"}, {"a.yaml": "RESOLVABLE"})), 1)
+    check("unchanged CANONICAL passes",
+          len(find_regressions({"a.yaml": "CANONICAL"}, {"a.yaml": "CANONICAL"})), 0)
+    check("new ABSENT file fails",
+          len(find_regressions({"n.yaml": "ABSENT"}, {})), 1)
+
+    bad = [c for c in cases if not c[1]]
+    for name, ok, got, want in cases:
+        print(f"  {'ok  ' if ok else 'FAIL'} {name}" + ("" if ok else f"   got {got!r}, want {want!r}"))
+    if bad:
+        print(f"\nNEGATIVE CONTROL FAILED: {len(bad)} of {len(cases)} case(s)")
+        return 1
+    print(f"\nNEGATIVE CONTROL OK: {len(cases)} case(s) behave as required")
+    return 0
+
+
 # ------------------------------------------------------------------------- main
 
 def main() -> int:
@@ -260,7 +370,12 @@ def main() -> int:
     ap.add_argument("--tier", choices=TIERS, help="restrict the listing to one tier")
     ap.add_argument("--list", action="store_true", help="list every file in full (never truncated)")
     ap.add_argument("--json", metavar="FILE", help="also emit the full result as JSON")
+    ap.add_argument("--negative-control", action="store_true",
+                    help="prove the tiers and the ratchet fire, then exit")
     args = ap.parse_args()
+
+    if args.negative_control:
+        return negative_control()
 
     root = repo_root()
     shipped = root / SHIPPED_ROOT
@@ -283,8 +398,9 @@ def main() -> int:
         pct = (counts[t] * 100.0 / audited) if audited else 0.0
         print(f"    {t:<11} {counts[t]:>5}   {pct:5.1f}%")
     machine = counts["RESOLVABLE"]
-    print(f"\n  machine-checkable provenance: {machine} of {audited} "
-          f"({machine * 100.0 / audited:.1f}%)" if audited else "")
+    print(f"\n  canonical provenance (the goal): {counts['CANONICAL']} of {audited} "
+          f"({counts['CANONICAL'] * 100.0 / audited:.1f}%)" if audited else "")
+    print(f"  legacy repo-path provenance (RESOLVABLE, to be rewritten): {machine}")
     print("  NAMED is checkable by a human holding the document; "
           "WEAK and ABSENT are checkable by no one.")
 
@@ -345,15 +461,7 @@ def main() -> int:
         except Exception as exc:
             print(f"\nFAIL: cannot read baseline {args.baseline}: {exc}", file=sys.stderr)
             return 2
-        rank = {t: i for i, t in enumerate(TIERS)}      # lower index == better
-        regressions = []
-        for f, tier in payload["files"].items():
-            was = base["files"].get(f)
-            if was is None:
-                if tier in ("WEAK", "ABSENT"):
-                    regressions.append(f"NEW unsourced file: {f} [{tier}]")
-            elif rank[tier] > rank[was]:
-                regressions.append(f"WEAKENED: {f}  {was} -> {tier}")
+        regressions = find_regressions(payload["files"], base["files"])
         if regressions:
             print(f"\nFAIL: {len(regressions)} provenance regression(s) against {args.baseline}\n")
             for r in regressions:
