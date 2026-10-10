@@ -123,8 +123,8 @@ WHAT MAY BE CITED -- THE ACCEPTANCE RULE («#412», S-393; Stephen Q3/Q4/Q5/Q12)
     deleted by «#422». CITE_KEY_RE teaches `documentation_source` only.
 
     BAD_CITATION (this rule applied to every claimed citation, wherever it sits)
-    BLOCKS, and so does Tier 1. Tier 2 is built SWITCHABLE (TIER2_BLOCKING) --
-    its switch-on follows S-295..S-307 and is OWED to the citations task.
+    BLOCKS, and so does Tier 1. Tier 2 is SWITCHABLE (TIER2_BLOCKING) and was
+    switched on by the citations task («#422»), so it blocks too.
 
 EXIT STATUS
     0  no Tier 1 violations
@@ -796,11 +796,9 @@ def catalog_cited(lines):
     return bool(CATALOG_URL_RE.search("\n".join(lines)))
 
 
-# The Tier-2 switch («#412», S-308b). Tier 2 (a file that cites nothing anywhere)
-# stays ADVISORY until S-295..S-307 are applied in the architecture/spin2 area
-# tasks. SWITCH-ON IS OWED TO THE CITATIONS TASK: flip this to True (or pass
-# --tier2-blocking) and record it there.
-TIER2_BLOCKING = False
+# The Tier-2 switch («#412», S-308b). Switched ON by the citations task («#422»,
+# 2026-10-10) once Tier 2 reached 0: a file that cites nothing anywhere now blocks.
+TIER2_BLOCKING = True
 
 # S-308a: example blocks are the author's chosen parameters, exempt by LOCATION.
 # NOT anti_patterns / common_patterns -- those state claims.
@@ -1421,7 +1419,7 @@ def main():
     ap.add_argument("--negative-control", action="store_true",
                     help="prove the tool can fail; audits nothing")
     ap.add_argument("--tier2-blocking", action="store_true",
-                    help="make Tier 2 BLOCK too (the S-308b switch; owed to the citations task)")
+                    help="make Tier 2 BLOCK (the S-308b switch; already on by default since #422)")
     ap.add_argument("--list", action="store_true",
                     help="list every BAD_CITATION (default: first 5 per class; counts are always complete)")
     args = ap.parse_args()
@@ -1486,7 +1484,7 @@ def main():
         print(f"FAIL  {len(tier1)} Tier 1 + {len(bad)} BAD_CITATION"
               f"{f' + {len(tier2)} Tier 2' if t2_block else ''} violation(s) across "
               f"{scanned} file(s); Tier 2 is "
-              f"{'BLOCKING' if t2_block else 'advisory (switch-on owed to the citations task)'}")
+              f"{'BLOCKING' if t2_block else 'advisory (--tier2-blocking off)'}")
         return 1
     print(f"PASS  no Tier 1 or BAD_CITATION violations across {scanned} file(s); "
           f"{len(tier2)} Tier 2 advisory block(s) remain (advisory, not blocking)")
