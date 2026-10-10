@@ -279,23 +279,29 @@ power_compatibility:
 # ============================================================================
 
 pin_usage_analysis:
+  source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, board photograph, p.1 (edge-header pairs P0-P15, P16-P31, P32-P47, P48-P63); 11. I/O Pin Breakout Edge Headers, p.9 (groups of eight); I/O Pin Assignments (P0-P55 fully free; Alternative functions for P56-P63), p.15"
   addon_pin_assignments:
     single_header_addons: >-
       Most add-on boards occupy ONE 8-pin accessory header (base_pin + 0..7), and
-      may be placed at any of the 8 header positions.
+      fit any of the 8 header positions -- but the P56-P63 header is the Eval
+      Board's dedicated group (see host_pin_availability.eval_board), so a board
+      there shares its pins with the board's own circuits.
     dual_header_addons: >-
       Four boards span TWO adjacent headers (16 consecutive pins, base_pin in
       [0, 16, 32, 48]): #64010 Universal Motor Driver, #64008 Click Adapter,
       #64004-ES HyperRAM+HyperFlash, and #64032 HUB75 Adapter. Each consumes two
       of the eight header positions, halving the simultaneous-capacity budget for
-      every one fitted.
+      every one fitted. The headers pair as P0-P15, P16-P31, P32-P47 and P48-P63,
+      one pair per side of the Eval Board; base_pin 48 takes in the dedicated
+      P56-P63 group.
     conflicts: "Direct pin conflicts when multiple add-ons share a header position"
     solution: "Physical separation on different header positions"
     
   host_pin_availability:
     eval_board:
       total_pins: 64
-      available_for_addons: "64 (all accessible)"
+      available_for_addons: "64 accessible at the edge headers; 56 fully free (P0-P55)"
+      dedicated_group: "P56-P63 are routed to the Eval Board's own circuits: P58-P61 the boot flash and microSD SPI lines, P62/P63 the PC-USB serial link (P2 TXD/RXD), every pin an on-board buffered LED, and P57 optionally the common LDO enable (not connected by default). An add-on fitted there shares those pins."
       addon_positions: "8 positions × 8 pins = 64 total possible"
       
     edge_carriers:

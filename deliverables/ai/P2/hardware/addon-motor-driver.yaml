@@ -48,7 +48,8 @@ pin_group:
     7..0). base_pin is the first pin of the 16-pin block.
   base_pin_options: [0, 16, 32, 48]
   base_pin_note: "The P2 Eval Board's eight edge headers sit in four side-by-side pairs, P0-P15, P16-P31, P32-P47 and P48-P63, so a 16-pin board mounts on one pair: base_pin 0, 16, 32 or 48."
-  source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, board photograph, p.1 (edge-header silkscreen: P0-P7 beside P8-P15, P16-P23 beside P24-P31, P32-P39 beside P40-P47, P48-P55 beside P56-P63); 11. I/O Pin Breakout Edge Headers, p.9 (groups of eight)"
+  source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, board photograph, p.1 (edge-header silkscreen: P0-P7 beside P8-P15, P16-P23 beside P24-P31, P32-P39 beside P40-P47, P48-P55 beside P56-P63); 11. I/O Pin Breakout Edge Headers, p.9 (groups of eight); I/O Pin Assignments (P0-P55 fully free; Alternative functions for P56-P63), p.15"
+  p56_p63_caution: 'base_pin 48 spans P48-P63 and so takes in the Eval Board''s dedicated group P56-P63, which the Eval Board routes to its own circuits: P58-P61 are the boot flash and microSD SPI lines, P62/P63 the PC-USB serial link (P2 TXD/RXD), every pin P56-P63 drives an on-board buffered LED, and P57 can be routed to the common LDO enable (a user option, not connected by default). A board fitted there shares those pins with those circuits. P0-P55 are the fully free pins.'
 
 # =============================================================================
 # PIN MAP - P2 DUAL ACCESSORY HEADER (16 pins)

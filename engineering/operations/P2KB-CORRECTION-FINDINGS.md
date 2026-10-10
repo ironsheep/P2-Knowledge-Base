@@ -96,6 +96,14 @@ needs a call or a record that is not in hand:
   boards and a driver enum) is removed. Class widened: the 11 single-header boards' `[0, 8, … 56]` had no
   citation either; `pin_group.source` added to each by script, audited against HEAD (parsed data
   equal plus that one key; diff exactly one added line; no other file touched).
+  **Widened the same day (Stephen: P56-P63 "are dedicated and would interfere with the function of
+  the eval board"):** all 15 pages offered base 48 (16-pin) or 56 (8-pin) with no warning. Each now
+  carries `pin_group.p56_p63_caution` — P58-P61 boot flash / microSD SPI, P62/P63 PC-USB serial, every
+  pin an on-board LED, P57 optionally the LDO enable; P0-P55 the fully free pins — and its source adds
+  the guide's I/O Pin Assignments table, p.15 (script + audit as above: 15 files, data equal plus the
+  two intended changes, diff exactly those 3 lines). `hardware-compatibility-matrix.yaml` said
+  "64 (all accessible)" available for add-ons and "any of the 8 header positions"; it now gives 56
+  fully free, a `dedicated_group` line, the header pairs, and a block `source:`.
 - **`combinations_are_compiler_verified`** and `errfreq_is_optional`'s "confirmed to compile"
   (`guides/pasm2-getting-started.yaml:105-107`): compile results served as prose with no CP record.
   Fix: record them as CP-NNN in `COMPILE-PROOFS.md`, cite in `source:`, state the fact only.
