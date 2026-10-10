@@ -120,10 +120,13 @@ def update_yaml_file(yaml_path, scraped_data):
         data['object_metadata']['version_tracking'].update({
             'obex_version': scraped_data['version'],
             'obex_upload_date': scraped_data['upload_date'],
-            'last_scraped': scraped_data['scrape_timestamp'],
             'has_github_repo': bool(scraped_data['github_repo'])
         })
-        
+        # the scrape time is tracking data: it lives under scrape_tracking, which the
+        # delivery filter removes, so it never reaches an agent
+        data['object_metadata'].setdefault('scrape_tracking', {})['version_last_scraped'] = \
+            scraped_data['scrape_timestamp']
+
         # Update technical_details version if we found one
         if scraped_data['version'] and 'technical_details' in data['object_metadata']:
             data['object_metadata']['technical_details']['version'] = scraped_data['version']

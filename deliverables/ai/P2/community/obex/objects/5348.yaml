@@ -28,6 +28,7 @@ object_metadata:
     kb_integration: none
     last_scraped: '2026-06-29T00:00:00'
     rescrape_source: v2.2 re-scrape 2026-06-29
+    version_last_scraped: '2026-06-29T00:00:00'
   object_id: '5348'
   technical_details:
     file_format: ZIP
@@ -46,6 +47,5 @@ object_metadata:
     obex_page: https://obex.parallax.com/obex/urldecode/
   version_tracking:
     has_github_repo: false
-    last_scraped: '2026-06-29T00:00:00'
     obex_upload_date: '2026-01-26'
     obex_version: ''

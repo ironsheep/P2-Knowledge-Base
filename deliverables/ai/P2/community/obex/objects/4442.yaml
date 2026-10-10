@@ -42,6 +42,7 @@ object_metadata:
     page_discovered: 6
     last_author_re_extraction: 2025-09-12T14:04:1
     last_html_corruption_fix: 2025-09-12T14:27:0
+    version_last_scraped: '2025-09-26T11:34:16.045539'
   object_id: '4442'
   technical_details:
     file_format: ZIP
@@ -63,5 +64,4 @@ object_metadata:
   version_tracking:
     obex_version: ''
     obex_upload_date: '2024-03-06'
-    last_scraped: '2025-09-26T11:34:16.045539'
     has_github_repo: false

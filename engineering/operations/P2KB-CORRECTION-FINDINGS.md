@@ -71,6 +71,15 @@ needs a call or a record that is not in hand:
   lookup. By Stephen's rule (F-545) it is tracking data; moving it under `scrape_tracking` collides
   with the `last_scraped` 17 files already carry there, so it needs a new tracking name or a second
   filtered name — **Stephen's call.** The writer is `scrape-obex-repos.py`.
+  **APPLIED 2026-10-10 (Stephen: "a"):** moved into `scrape_tracking` as `version_last_scraped` in all
+  130 OBEX objects (the filter list does not grow); `scrape-obex-repos.py` writes it there; the gate's
+  `open` line is deleted. Done by script under the new doctrine *A scripted change is done only when
+  an audit proves it changed nothing else*: an independent audit against HEAD passed for all 130 —
+  parsed data equal to before with exactly that key moved and its value unchanged, the diff exactly
+  one line out and one line in, and no file outside the OBEX objects touched. The same parse audit was
+  then run on the earlier 173-file `metadata:` → `scrape_tracking:` rename (`c5c5367f`): every file's
+  data equal to before apart from the key name; the template's other difference is the deliberate
+  removal of its empty `notes:` block.
 - **`base_pin_options_provenance`** (`hardware/addon-click-adapter.yaml:42`): provenance prose served,
   and it says the value it annotates (`base_pin_options: [0, 16, 32, 48]`) is stated by no source — it
   is inferred from the other dual-header boards and a driver enum. The same `[0, 16, 32, 48]` is on

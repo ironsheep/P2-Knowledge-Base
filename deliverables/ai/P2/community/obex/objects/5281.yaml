@@ -34,6 +34,7 @@ object_metadata:
     last_complete_extraction: '2025-09-12T13:30:07.094431'
     page_discovered: 1
     last_html_corruption_fix: 2025-09-12T14:32:2
+    version_last_scraped: '2025-09-26T11:35:00.438637'
   object_id: '5281'
   technical_details:
     file_format: ZIP
@@ -55,5 +56,4 @@ object_metadata:
   version_tracking:
     obex_version: ''
     obex_upload_date: '2025-08-20'
-    last_scraped: '2025-09-26T11:35:00.438637'
     has_github_repo: false

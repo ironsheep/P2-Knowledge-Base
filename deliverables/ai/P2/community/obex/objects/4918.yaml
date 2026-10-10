@@ -36,6 +36,7 @@ object_metadata:
     last_description_fix: 2025-09-12T14:20:1
     created_date: '2024-11-13 13:50:52'
     last_created_date_fix: 2025-09-12T15:28:0
+    version_last_scraped: '2025-09-26T11:34:48.096268'
   object_id: '4918'
   technical_details:
     file_format: ZIP
@@ -56,5 +57,4 @@ object_metadata:
   version_tracking:
     obex_version: ''
     obex_upload_date: '2024-11-13'
-    last_scraped: '2025-09-26T11:34:48.096268'
     has_github_repo: false

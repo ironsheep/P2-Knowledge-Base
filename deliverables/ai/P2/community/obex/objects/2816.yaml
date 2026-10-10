@@ -32,6 +32,7 @@ object_metadata:
       1 Object repo
     original_platform: github
     rescrape_source: v2.2 re-scrape 2026-06-29
+    version_last_scraped: '2026-06-29T00:00:00'
   object_id: '2816'
   technical_details:
     file_format: ZIP
@@ -50,6 +51,5 @@ object_metadata:
     obex_page: https://obex.parallax.com/obex/ds1302_full-2/
   version_tracking:
     has_github_repo: false
-    last_scraped: '2026-06-29T00:00:00'
     obex_upload_date: ''
     obex_version: ''

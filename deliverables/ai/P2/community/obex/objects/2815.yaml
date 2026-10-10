@@ -40,6 +40,7 @@ object_metadata:
     last_archiver_fix: 2025-09-12T15:53:3
     last_author_consolidation: 2025-09-12T16:06:1
     original_archiver_name: mike calyer (mcalyer, mike.calyer@yahoo.com)
+    version_last_scraped: '2025-09-26T11:32:13.862051'
   object_id: '2815'
   technical_details:
     file_format: ZIP
@@ -61,5 +62,4 @@ object_metadata:
   version_tracking:
     obex_version: ''
     obex_upload_date: '2023-11-16'
-    last_scraped: '2025-09-26T11:32:13.862051'
     has_github_repo: false

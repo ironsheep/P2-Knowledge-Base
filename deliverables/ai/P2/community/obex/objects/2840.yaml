@@ -32,6 +32,7 @@ object_metadata:
     last_license_corruption_fix: 2025-09-12T14:34:2
     created_date: '2020-10-27 12:00:00'
     last_created_date_fix: 2025-09-12T15:33:1
+    version_last_scraped: '2025-09-26T11:32:49.562665'
   object_id: '2840'
   technical_details:
     file_format: ZIP
@@ -52,5 +53,4 @@ object_metadata:
   version_tracking:
     obex_version: ''
     obex_upload_date: '2020-10-27'
-    last_scraped: '2025-09-26T11:32:49.562665'
     has_github_repo: false
