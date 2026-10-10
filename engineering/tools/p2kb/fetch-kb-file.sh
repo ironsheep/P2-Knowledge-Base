@@ -149,7 +149,11 @@ refresh_index() {
 #   nojq_index counts  <section>            -> "<name> <member count>" per member
 # -----------------------------------------------------------------------------
 nojq_index() {
-    LC_ALL=C awk -v mode="$1" -v sec="$2" -v want="$3" '
+    # `want` arrives through the environment, not `-v`: awk processes backslash
+    # escapes in a -v value, which turned the JSON text `\\` (an alias of `\`)
+    # back into `\` and lost the match.
+    NOJQ_WANT="$3" LC_ALL=C awk -v mode="$1" -v sec="$2" '
+        BEGIN { want = ENVIRON["NOJQ_WANT"] }
         $0 == "  \"" sec "\": {" { inside = 1; next }
         inside && /^  }/ { exit }
         !inside || !/^    "/ { next }
