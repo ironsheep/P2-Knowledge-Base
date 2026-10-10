@@ -210,7 +210,7 @@ class OBEXValidator:
                 with open(yaml_file, 'r', encoding='utf-8') as f:
                     data = yaml.safe_load(f)
                 
-                import_source = data['object_metadata']['metadata'].get('import_source', '')
+                import_source = data['object_metadata']['scrape_tracking'].get('import_source', '')
                 if import_source == 'github_archiver':
                     github_objects.append(yaml_file)
                     
@@ -229,7 +229,7 @@ class OBEXValidator:
                     data = yaml.safe_load(f)
                 
                 obj_id = data['object_metadata']['object_id']
-                original_platform = data['object_metadata']['metadata'].get('original_platform', '')
+                original_platform = data['object_metadata']['scrape_tracking'].get('original_platform', '')
                 obex_url = data['object_metadata']['urls'].get('obex_page', '')
                 
                 print(f"Checking GitHub reference for {obj_id}")
@@ -275,7 +275,7 @@ class OBEXValidator:
                     data = yaml.safe_load(f)
                 
                 obj_id = data['object_metadata']['object_id']
-                created_date = data['object_metadata']['metadata'].get('created_date', '')
+                created_date = data['object_metadata']['scrape_tracking'].get('created_date', '')
                 
                 if not created_date:
                     self.log_issue("DATES", f"Object {obj_id} missing created_date")

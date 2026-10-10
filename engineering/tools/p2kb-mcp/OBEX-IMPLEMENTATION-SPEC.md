@@ -54,12 +54,17 @@ object_metadata:
     hardware_support: []               # Hardware platforms
     peripherals: []                    # Connected peripherals
 
-  metadata:
+  scrape_tracking:                     # scraper bookkeeping; removed by the delivery filter
     discovery_date: "2025-09-12..."    # When indexed
-    last_verified: "2025-09-12..."     # Last verification
-    extraction_status: "author_extracted"  # Status
     created_date: "2020-05-09 12:00:00"    # Original upload date
 ```
+
+`scrape_tracking:` is the scrape bookkeeping (discovery and extraction dates, import source, and
+similar). It stays in the YAML for our own scraper and gates, and the delivery filter removes it
+(`scrape_tracking` is in the index's `remove_fields`; see `MCP-DELIVERY-FILTER-HANDOFF.md`, §3 and the
+2026-10-10 amendment). A `p2kb_obex_*` tool therefore never receives any field under it, including
+`discovery_date` and `created_date`. The upload date a consumer should read is
+`version_tracking.obex_upload_date`.
 
 ## Download URL Pattern
 

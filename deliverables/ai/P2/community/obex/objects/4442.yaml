@@ -33,7 +33,7 @@ object_metadata:
     - driver
     - ADC
     - demo
-  metadata:
+  scrape_tracking:
     created_date: '2024-03-06 09:26:57'
     discovery_date: '2025-09-12T12:44:00.896121'
     kb_integration: none

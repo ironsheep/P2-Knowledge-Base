@@ -10,6 +10,7 @@ aliases:
   - "P2 HD Audio Add-on Set"
   - "audio ADC DAC board"
   - "AK5704 add-on"
+  - "AK5704 I2C address CAD pin"
   - "high-definition audio board"
   - "4-channel audio ADC"
   - "Smart Pin DAC audio board"
@@ -30,20 +31,20 @@ description:
 
 # === ADC BOARD (AK5704EN) ===
 adc_board:
-  source: "P2 HD Audio Add-on Set (#64014) Guide v1.0 10/26/2022 (Parallax Inc.), P2 HD Audio ADC, Features and Key Specifications, p.2; Pin Connections, p.3; the I2C address, register range and SDTO2 default below are not stated in the guide (see source_trace)"
-  codec: "AKM AK5704EN (28-pin QFN), 32-bit 4ch ADC with MIC pre-amplifier"
+  source: "P2 HD Audio Add-on Set (#64014) Guide v1.0 10/26/2022 (Parallax Inc.), P2 HD Audio ADC, Features and Key Specifications, p.2; Pin Connections, p.3"
+  codec: "AKM AK5704EN, 32-bit 4ch ADC with MIC pre-amplifier (the codec's own register map, I2C address and pin behaviour are in adc_codec_chip below)"
   eval_header_occupant: true
   pin_group:
     size: 8
     addressing: "actual_P2_pin = base_pin + offset; single 8-pin accessory-header group."
-  interface: "I2C control (400 kHz) + I2S/TDM audio"
+  interface: "I2C control (400 kHz) + serial audio (MCKI, BCLK, LRCK, SDTO1, SDTO2)"
   signal_map:
     - {offset: 0, signal: "PDN (power-down)", direction: out, notes: "L = power-down, H = power-up."}
     - {offset: 1, signal: "MCKI (master clock in)", direction: out, notes: "Master clock input to the codec."}
     - {offset: 2, signal: "BCLK (bit clock)", direction: out, notes: "Audio serial data clock."}
     - {offset: 3, signal: "LRCK (frame sync)", direction: out, notes: "Frame/word-select clock."}
     - {offset: 4, signal: "SDTO1 (serial data out 1)", direction: in, notes: "Audio from the MIC input jack."}
-    - {offset: 5, signal: "SDTO2 (serial data out 2)", direction: in, notes: "Audio from the Line input jack."}
+    - {offset: 5, signal: "SDTO2 (serial data out 2)", direction: in, notes: "Audio from the Line input jack. The codec pin only drives SDTO2 once register 00H bit SDTO2E is set - see adc_codec_chip."}
     - {offset: 6, signal: "SCL (I2C clock)", direction: out, notes: "I2C control clock."}
     - {offset: 7, signal: "SDA (I2C data)", direction: bidir, notes: "I2C control data."}
   unpopulated:
@@ -51,20 +52,12 @@ adc_board:
   power_signals:
     VIO3V3: "3.3V supply to the ADC board."
     GND: "Common ground."
-  i2c_slave_address_7bit: "$10 (%0010000) - set by the CAD strap pin on the #64014 board"
-  i2c_address_bytes: "write = $20, read = $21 (AK5704_DEVICE_ID = $20)"
-  i2c_clock: "400 kHz; the ADC board carries its own pull-ups (the driver uses no external pull-ups)"
-  register_range: >-
-    Registers $00-$46: flow control, power management, clock-mode/PLL, audio I/F
-    format, mic amp gain + sensitivity, digital HPF/LPF filters, VAD, ALC. Full
-    bit-level detail lives in the AK5704 datasheet.
-  sdto2_default: >-
-    SDTO2 (offset +5) carries the Line-input audio serial data OUT of the codec
-    by default - the #64014 demo driver reads it as a P2 sync-serial input.
-  source_trace: >-
-    AK5704 I2C address + register usage resolved from the official Parallax
-    #64014 driver AK5704_Driver.spin2 (M. Mulholland, MIT; AK5704_DEVICE_ID=$20
-    @ 400 kHz), the AKM AK5704 datasheet and the 64014-RevA schematic.
+  i2c_clock: "400 kHz (the guide's Key Specifications: Control interface I2C bus (400 kHz))"
+  unknown_on_this_board: >-
+    UNKNOWN today: which level the #64014 ADC board ties the codec's CAD pin to
+    (so which of the two addresses in adc_codec_chip the board answers at), and
+    whether the board carries I2C pull-ups. The board guide states neither and
+    no other ingested document does; the board schematic is not ingested.
   inputs: "4 input channels via two stereo 3.5 mm jacks, or two unpopulated 0.1\" 3-way header pad sets."
   specs:
     max_bits: "32 bit"
@@ -74,6 +67,29 @@ adc_board:
     mic_gain: "+30 dB to 0 dB, 3 dB step"
     features: "VAD (voice activity detection); ultrasonic recording; configurable MIC pull-up for analog mics"
     pcb_dimensions: "1.6 x 1 in (40.64 x 25.4 mm)"
+
+# === ADC CODEC CHIP FACTS (the AK5704 itself - not the board) ===
+# Facts about the chip only, each from the chip maker's own datasheet. What the
+# #64014 board does with the chip (CAD level, pull-ups, wiring) is in adc_board.
+adc_codec_chip:
+  source: "AKM AK5704 Low-Power 4-ch 32-bit ADC with MIC-Amp, Rev.1 (019000890-E-01, 2022/01), 2. Features, p.1; 5.2 Functions, p.6; 9.16 I2C-bus Control Interface, pp.75-76; 9.17 Register Map, pp.78-79; 9.18 Register Definition (00H Flow Control), p.80; 13. Ordering Guide, p.108"
+  part: "AKM AK5704 (ordering code AK5704EN), 28-pin QFN, 4-ch 32-bit ADC with MIC-Amp"
+  i2c_clock: "I2C-bus control interface, fast-mode, max 400 kHz; SDA and SCL pull-up resistors must be connected to (TVDD+0.3) V or less"
+  i2c_slave_address_7bit: >-
+    %001000C - the top six bits are fixed at %001000 and the low bit is the level of
+    the chip's CAD pin ("I2C Chip Address Pin", pin 1): $10 with CAD low, $11 with
+    CAD high.
+  i2c_address_bytes: "CAD low: write = $20, read = $21. CAD high: write = $22, read = $23. The R/W bit is bit 0 of the first byte."
+  register_range: >-
+    Registers $00-$46 (the address counter rolls over to $00 after $46; writing $47-$7F
+    is prohibited): flow control, power management, MIC input and power, MIC amp gain,
+    digital MIC, clock-mode and PLL, audio I/F format, phase adjustment, HPF/filter
+    select, MIC sensitivity, VAD, ALC and input volume, filter coefficients.
+    Bit-level detail is in the datasheet.
+  sdto2_default: >-
+    Chip pin 6 is TDMIN (an INPUT) by default. It becomes the SDTO2 audio serial data
+    OUTPUT only when register $00 bit D6 (SDTO2E) is set to 1; SDTO2E resets to 0.
+  audio_formats: "32/24/16-bit I2S or MSB-justified, 16-bit PCM short/long frame, 4-ch TDM, 8/12/16-ch cascade TDM; master or slave mode"
 
 # === DAC BOARD (P2 Smart Pin DAC - no codec IC) ===
 dac_board:
@@ -133,17 +149,16 @@ specifications:
 
 limitations:
   - "AK5704 register bit-level detail is in the AK5704 datasheet (the board guide is board-level)"
+  - "Which I2C address the board answers at ($10 or $11) is unknown - the board guide does not state the CAD strap level"
   - "DAC is built on P2 Smart Pins (no codec) - audio quality bounded by the Smart-Pin DAC, not a dedicated DAC IC"
-  - "No code in the board guide itself; an official MIT Spin2 driver set is on the product page"
+  - "No code in the board guide itself; it points to example code on the product page"
 
 documentation:
   primary: "P2 HD Audio Add-on Set (#64014) Guide v1.0 10/26/2022 (Parallax), p.1"
 
 resources:
   product_page: "www.parallax.com (search 64014) - latest guide, schematics, example code"
-  codec_datasheet: "AKM AK5704EN datasheet (www.akm.com) - authoritative for the codec register map"
-  example_drivers: "Parallax #64014 driver set (Spin2): AK5704_Driver.spin2 (ADC), 4DAC_Analog_Driver.spin2 (DAC), ADCtoDAC + AnalogDAC demos - on the 64014 product page"
-  schematic: "64014-RevA P2 HD Audio Add-on Set schematic (2022-08-22) - CAD strap / address"
+  codec_datasheet: "AKM AK5704 Low-Power 4-ch 32-bit ADC with MIC-Amp, Rev.1 (019000890-E-01, 2022/01) - the authority for the codec's I2C address, register map and pin behaviour (adc_codec_chip)"
 
 see_also:
   - hardware/p2-hardware-feature-comparison.yaml

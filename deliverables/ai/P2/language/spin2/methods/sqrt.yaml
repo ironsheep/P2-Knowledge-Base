@@ -2,6 +2,7 @@ method: SQRT
 type: method
 description: Returns integer square root of a number
 category: Math Operations
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators (SQRT); the truncated (floor) result: EF-104"
 syntax: "result := SQRT(value)"
 parameters:
   - name: "value"
@@ -24,7 +25,7 @@ examples:
       rms := SQRT(sum_of_squares / count)
     description: "Root mean square calculation"
 notes:
-  - "Returns an integer result; how a non-perfect square is rounded is not documented"
+  - "Returns the truncated (floor) integer root, never rounded to nearest: SQRT(8) = 2, SQRT(99) = 9"
   - "Input treated as unsigned 32-bit"
   - "No floating-point variant; use FSQRT() for floats"
   - "Priority 2 operator (unary)"

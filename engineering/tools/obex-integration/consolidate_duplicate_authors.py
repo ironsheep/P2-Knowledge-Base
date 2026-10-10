@@ -43,7 +43,7 @@ class AuthorConsolidator:
                     
                     if author == old_name:
                         # Verify this is an archiver import
-                        import_source = data['object_metadata']['metadata'].get('import_source', '')
+                        import_source = data['object_metadata']['scrape_tracking'].get('import_source', '')
                         if import_source == 'github_archiver':
                             objects_to_update.append({
                                 'file_path': yaml_file,
@@ -68,8 +68,8 @@ class AuthorConsolidator:
                     
                     # Add consolidation timestamp
                     current_time = time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
-                    data['object_metadata']['metadata']['last_author_consolidation'] = current_time
-                    data['object_metadata']['metadata']['original_archiver_name'] = old_name
+                    data['object_metadata']['scrape_tracking']['last_author_consolidation'] = current_time
+                    data['object_metadata']['scrape_tracking']['original_archiver_name'] = old_name
                     
                     # Write back to file
                     with open(obj_info['file_path'], 'w', encoding='utf-8') as f:

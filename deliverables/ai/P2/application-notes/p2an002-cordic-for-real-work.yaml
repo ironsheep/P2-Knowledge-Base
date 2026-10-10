@@ -94,7 +94,7 @@ key_parameters:
     - "QEXP 5.27 fixed-point -> integer"
   # 2026-09-10: the "~28 bits" figure is stated by no Parallax source and is
   # not asserted. See architecture/cordic.yaml accuracy.trigonometric.
-  precision: "integer ops (mul/div/sqrt) exact; trig (rotate/vector/log/exp) iterative -- low bits approximate, no sourced bit count"
+  precision: "integer ops (mul/div/sqrt) exact -- the square root is the exact truncated (floor) root, not rounded to nearest; trig (rotate/vector/log/exp) iterative -- low bits approximate, no sourced bit count"
 
 prerequisites:
   - "Spin2 read/write, PASM2 read (throughput recipe + capstone are assembly)"
@@ -126,6 +126,7 @@ sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver"
   - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, CORDIC Solver (functions and throughput), p.20"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (CORDIC methods)"
+  - "EF-104: the square root is the truncated (floor) root"
 
 community_examples:
   - "OBEX #2811 Park transformation (ManAtWork) — the FOC capstone reference"

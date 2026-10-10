@@ -54,6 +54,18 @@ the committed source): **SURVIVES** — every gate held, all 15 arms 5 of 5, eac
 in the new speed's duration window; a separate parse of the 75 raw records re-derives the same verdict
 → **EF-102**.
 
+**Round 3 (one test, written 2026-10-10, «#422»; Stephen chose to settle it before the close-out release):**
+
+| # | Test (`tests/`) | Row | Question | Pins | Verdict | EF |
+|---|---|---|---|---|---|---|
+| 10 | `test-vo-j-036-qsqrt-rounding.spin2` | VO-J-036 | how do `QSQRT` and Spin2 `SQRT` round a root that is not exact — truncated, nearest or up? | none | FLOOR on both paths, 21,003 / 20,992 cases | EF-104 |
+
+**#10** (`debug_261010-161757`, 2026-10-10; `.bin` 11,848 bytes = the build): first run, GATE C passed, no
+GATE R failure; the verdict and all 22 raw distinguishing rows re-derived off the board with an exact
+integer square root. Written and reviewed in-session (not by separate agents, unlike rounds 1–2): its
+classifier was model-checked against a brute-force reference over every N < 5,000 before the run, which
+found and fixed an off-by-one in the CEIL test.
+
 **Nothing attached.** Every program is bare-board: pins come only from the bench's free set
 (P0–P7, P32–P47), and the smart-pin tests route between neighbours through the relative-pin input
 selectors. VO-J-032 names one conditional fallback (a second USB pair with jumpers P0→P2, P1→P3)

@@ -158,7 +158,7 @@ class FinalAuthorCleanup:
                 
                 if needs_update and correct_author != 'Unknown':
                     obj['author'] = correct_author
-                    obj['metadata']['last_author_cleanup'] = datetime.now().isoformat()
+                    obj['scrape_tracking']['last_author_cleanup'] = datetime.now().isoformat()
                     
                     with open(object_file, 'w') as f:
                         yaml.dump(data, f, default_flow_style=False, indent=2)

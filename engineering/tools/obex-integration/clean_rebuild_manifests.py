@@ -102,7 +102,7 @@ class CleanManifestBuilder:
                     'title': obj_data['title'],
                     'category': obj_data['functionality'].get('category', 'misc'),
                     'languages': obj_data['technical_details'].get('languages', []),
-                    'created_date': obj_data.get('metadata', {}).get('created_date', ''),
+                    'created_date': obj_data.get('scrape_tracking', {}).get('created_date', ''),
                     'yaml_path': f"../objects/{obj_id}.yaml"
                 })
             

@@ -1176,6 +1176,21 @@ def validate_duplicate_keys(verbose: bool = False) -> ValidationResult:
     return result
 
 
+def validate_provenance_key_names(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Is every provenance-shaped key name in the shipped YAML reviewed?
+
+    F-545: provenance written under a key the delivery filter does not list ships to
+    every consumer. The filter's list does not grow to chase it (Stephen, 2026-10-04),
+    so a NEW source/extract/verified/provenance/authority/scrape/tracking-shaped key
+    name must be reviewed and listed in the gate's allow-list, or fail here.
+    """
+    return _two_phase_gate(
+        "Provenance Key Names (F-545)", "audit-yaml-provenance-key-names.py",
+        "Scope: key NAMES only. A listed name's value can still be wrong, and provenance "
+        "written into a value or a sentence is not seen. 'open' names are counted, not hidden.",
+        verbose)
+
+
 def validate_adc_encoding(verbose: bool = False) -> ValidationResult:
     """BLOCKING. Does the shipped ADC X[5:4] sub-mode map still match silicon?
 
@@ -1538,6 +1553,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_kb_code_compiles,
         validate_source_lock,
         validate_duplicate_keys,
+        validate_provenance_key_names,
         validate_adc_encoding,
         validate_plain_scalar_comment,
         validate_index_integrity,

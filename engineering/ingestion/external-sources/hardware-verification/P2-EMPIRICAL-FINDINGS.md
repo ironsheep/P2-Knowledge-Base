@@ -1884,6 +1884,30 @@ other directives, colour, colour-mode and packed-mode words, a name of 30 or mor
 a name differing only in case, and a name reused after `CLOSE` were not run. The raw log is not versioned (the
 program regenerates it). *Source:* `campaigns/2026-07-debug-conflict-tests/probe-ch14-scope-create.spin2`.
 
+*EF-104 comes from the close-out bench, round 3 (same campaign, run by Stephen 2026-10-10, same board
+and conditions as rounds 1 and 2). Its verdict and every raw 64-bit and distinguishing row were
+re-derived off the board with an exact integer square root (Python `math.isqrt`): all 22 match.*
+
+### EF-104 · `QSQRT` truncates: the root is the floor of the exact square root, for 32-bit and 64-bit inputs; Spin2 `SQRT` returns the same — `CONFIRMED` (documentary silence decided)
+*KB:* `language/pasm2/qsqrt.yaml`; `language/spin2/operators/op_SQRT.yaml`
+*How proven:* `test-vo-j-036-qsqrt-rounding` (VO-J-036), no pins, cog 0. Two paths: inline PASM
+`QSQRT nl, nh` / `GETQX`, and the Spin2 `SQRT` operator. Cases: every N 0..16,383; N = i × 1,048,573 for
+i = 0..4,095 (the 32-bit range); every N `$FFFF_FE00`..`$FFFF_FFFF`; eleven 64-bit inputs with a non-zero
+upper long (QSQRT only). Each root is classified FLOOR / ROUND (nearest) / CEIL by a 64-bit QMUL classifier,
+gated by 14 hand-checked rows (GATE C), and the QSQRT sweep ran twice (GATE R, repeatability).
+*Result (log `debug_261010-161757`, 2026-10-10; `.bin` 11,848 bytes = the build):* GATE C passed; no
+GATE R failure. **QSQRT: FLOOR holds for 21,003 of 21,003 cases** (ROUND 10,289, CEIL 133). **SQRT: FLOOR
+holds for 20,992 of 20,992** (ROUND 10,282, CEIL 129). Pre-registered verdict `FLOOR` on both paths.
+Examples: √2 → 1, √3 → 1, √8 → 2, √13 → 3, √24 → 4, √99 → 9, √`$FFFF_FFFF` → 65,535; 2^33 → 92,681 (exact
+92,681.9); 2^63 → `$B504_F333`; 2^64 − 1 → `$FFFF_FFFF`; perfect squares (2^32, 2^34, 2^62,
+(2^32 − 1)^2) exact.
+**Grounds:** no ingested source states the rounding: the P2 Datasheet gives "Begin CORDIC square root of
+{S, D}. GETQX retrieves root." (`p2-datasheet-text.txt:2027`), and the v55 interpreter compiles `SQRT x` to
+`qsqrt x,#0` (`Spin2_interpreter.spin2` v55 `:220`). The integer root is the truncated root; code that
+needs the nearest integer must round itself. *Limits:* one board; 21,003 inputs (every 32-bit N up to
+16,383 and the top 512, a stride across the rest, eleven 64-bit N), not every input. *Source:*
+`campaigns/2026-10-p2kb-close-out/tests/test-vo-j-036-qsqrt-rounding.spin2`.
+
 ## Open / pending empirical questions
 
 - **SINC2 XZS-S2 start-up sample moved with the restyled cog-0 code (2026-09-26).** In

@@ -25,7 +25,7 @@ object_metadata:
     - sensor
     - driver
     - spi
-  metadata:
+  scrape_tracking:
     created_date: '2023-11-16 19:47:20'
     discovery_date: '2025-09-12T12:44:10.850352'
     kb_integration: none

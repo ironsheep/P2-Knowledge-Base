@@ -8,7 +8,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [sqrt_result]
   - at: examples[1].code
-    fp: "3a705fcbd539f192"
+    fp: "1bfb854cb0cf0db4"
     compile: fragment
     wrap: pasm2-dat
     assumes: [big_sqrt]

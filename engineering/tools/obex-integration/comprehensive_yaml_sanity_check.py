@@ -76,7 +76,7 @@ class ComprehensiveYamlChecker:
     def check_object_structure(self, obj_id, data, yaml_file):
         """Check for structural issues in YAML"""
         required_sections = ['object_metadata', 'object_metadata.functionality', 
-                           'object_metadata.technical_details', 'object_metadata.metadata']
+                           'object_metadata.technical_details', 'object_metadata.scrape_tracking']
         
         for section_path in required_sections:
             current = data
@@ -97,7 +97,7 @@ class ComprehensiveYamlChecker:
             ('author', data['object_metadata'].get('author', '')),
             ('description_short', data['object_metadata']['functionality'].get('description_short', '')),
             ('description_full', data['object_metadata']['functionality'].get('description_full', '')),
-            ('license', data['object_metadata']['metadata'].get('license', '')),
+            ('license', data['object_metadata']['scrape_tracking'].get('license', '')),
         ]
         
         for field_name, field_value in text_fields:
@@ -163,7 +163,7 @@ class ComprehensiveYamlChecker:
             })
         
         # Check license quality
-        license_info = data['object_metadata']['metadata'].get('license', '')
+        license_info = data['object_metadata']['scrape_tracking'].get('license', '')
         if isinstance(license_info, str):
             if not license_info or license_info in quality_checks['license']:
                 self.issues['poor_quality_license'].append({

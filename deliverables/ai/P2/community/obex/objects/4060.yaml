@@ -27,7 +27,7 @@ object_metadata:
     - led
     - adc
     - spi
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247268'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:21:38.789357'

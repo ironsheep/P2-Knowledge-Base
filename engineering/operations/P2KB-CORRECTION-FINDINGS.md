@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-568`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-570`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -62,9 +62,94 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»)
 
-### F-567 — `hardware/hub75_adapter.yaml` is an Iron Sheep board no Parallax document describes, so it fails the claim-sourcing gate (3 Tier 1) and the source-lock ratchet — `NEEDS-VERIFICATION` (Stephen's call)
+### F-569 — the new provenance-key gate's census: three provenance keys still reach agents, and the OBEX tooling it touched has two defects — `NEEDS-VERIFICATION` (found 2026-10-10, «#422»)
+Found building F-545's gate (`audit-yaml-provenance-key-names.py`, kind `open`). Each is understood but
+needs a call or a record that is not in hand:
+- **`last_scraped`** in OBEX `version_tracking` (130 files): a scraper timestamp served to every OBEX
+  lookup. By Stephen's rule (F-545) it is tracking data; moving it under `scrape_tracking` collides
+  with the `last_scraped` 17 files already carry there, so it needs a new tracking name or a second
+  filtered name — **Stephen's call.** The writer is `scrape-obex-repos.py`.
+- **`base_pin_options_provenance`** (`hardware/addon-click-adapter.yaml:42`): provenance prose served,
+  and it says the value it annotates (`base_pin_options: [0, 16, 32, 48]`) is stated by no source — it
+  is inferred from the other dual-header boards and a driver enum. The same `[0, 16, 32, 48]` is on
+  `addon-motor-driver.yaml`, `addon-hyperram-hyperflash.yaml` and `hub75_adapter.yaml`; whether each is
+  sourced (board guide, schematic, or the P2 Eval Board guide's header layout) is **not yet checked**.
+  Fix: check the class against the guides; cite or mark unknown; drop the provenance key.
+- **`combinations_are_compiler_verified`** and `errfreq_is_optional`'s "confirmed to compile"
+  (`guides/pasm2-getting-started.yaml:105-107`): compile results served as prose with no CP record.
+  Fix: record them as CP-NNN in `COMPILE-PROOFS.md`, cite in `source:`, state the fact only.
+- **OBEX tooling:** `engineering/tools/obex-integration/obex_discovery.py` does not compile at HEAD
+  (`185ff1c58`): the file is cut mid-method at `:128` (an unterminated `re.compile(r'/obex/[^/]+/`) and a
+  method body is lost. Not reconstructed (the lost text is unknown). `obex_discovery_fixed.py` sits beside
+  it. **Also** `scrape_tracking.created_date` disagrees with `version_tracking.obex_upload_date` in
+  OBEX 4800 and 4926 (`2024-07-09` / `2026-05-06`; `2025-04-07` / `2026-05-08`); only the latter is
+  served. And `original_archiver_name` (now filtered) carried one credit that is nowhere else on its
+  page: OBEX 2816, "based on BR's original in the Propeller 1 Object repo".
+
+### F-568 — `addon-hd-audio.yaml` and `addon-rtc.yaml` cited the chip datasheets only in prose, leaned on un-ingested drivers and a schematic, and stated two AK5704 facts wrongly — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; closes when the next KB release serves it)
+
+> **DECIDED by Stephen 2026-10-10 ("yes A"):** a chip maker's datasheet is citable for its own chip's
+> facts only (admission route 3, `AUTHORITATIVE-SOURCES.md`; doctrine *Provenance is for us*).
+> **Applied 2026-10-10 («#422»):** both datasheets ingested (`sources/P2-HD-Audio-Add-on/ak5704-datasheet-*`,
+> `sources/P2-RTC-Add-on/pcf8523-datasheet-*`): AKM *AK5704 Low-Power 4-ch 32-bit ADC with MIC-Amp*,
+> 019000890-E-01, Rev.1, 2022/01; NXP *PCF8523 Real-Time Clock (RTC) and calendar*, Rev. 7, 28 April 2015.
+> `audit-yaml-claim-sourcing.py` gains a row for each and a `DATASHEET_REVISION` rule (no revision →
+> NO_EDITION, another → STALE_EDITION), with refuse and accept controls (negative control 147 cases PASS).
+> **Wrong, now corrected from the AK5704 datasheet:** the address was a fixed `$10` / `$20` / `$21`; the
+> slave address is `%001000C`, the low bit set by the CAD pin (Fig 48, pp.75-76; text `ak5704-datasheet-text.txt:4441`,
+> `:4485-4486`), so `$11` / `$22` / `$23` with CAD high — and which level the #64014 board straps is stated
+> by no ingested document. SDTO2 was "the codec's Line data OUT by default"; register `$00` SDTO2E
+> defaults to 0, *"Disable (TDMIN pin: Default)"* (pp.6, 80; `:4751-4753`). **Removed as un-ingested
+> provenance:** `AK5704_DEVICE_ID`, "the ADC board carries its own pull-ups", the RTC driver's "3.3K
+> pull-up", both `source_trace` blocks and the driver / schematic resource entries. Chip facts now sit in
+> `adc_codec_chip` / `rtc_chip`, cited to the datasheet by title, revision and page; board facts in
+> `adc_board` / `board_interface`, cited to the Parallax guides; what neither states is marked unknown.
+> PCF8523 `$68` / `$D0` / `$D1`, reset `$58`, BCD, the 00h-13h map and CLKOUT checked against the datasheet
+> and kept (pp.6-9, 12, 33, 46, 52; `pcf8523-datasheet-text.txt:445`, `:2583`). Verified by the arbiter
+> against the extracts. **Gates:** claim sourcing PASS (0 Tier 1 / 0 BAD_CITATION / 0 Tier 2); source
+> lock PASS, both pages CANONICAL; format, plain-scalar, duplicate keys, crossref clean.
+> **Still open (a held document, needs an ingestion pass):** the #64014 board's CAD strap level and its
+> I2C pull-ups are on the Parallax *64014 Rev A* schematic, staged in
+> `sources/P2-HD-Audio-Add-on/NO-COMMIT/` but image-only (a printed PDF with no text layer), so not yet
+> ingested — routed to `KNOWLEDGE-GAPS.md` G-014. The #64013 pull-up question stays with the #64013
+> schematic, which is not held (G-013).
+
+### F-567 — `hardware/hub75_adapter.yaml` is an Iron Sheep board no Parallax document describes, so it fails the claim-sourcing gate (3 Tier 1) and the source-lock ratchet — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; Q-012 answered the same day; closes when the next KB release serves it)
+
+> **Q-012 answered and applied 2026-10-10 («#422»).** Stephen confirmed (a) the host boards, (b) the
+> address lines per panel height, (c) female pass-through headers and (d) retiring / limited stock, and
+> chose to remove (e). Recorded in the designer's statement (*Product facts confirmed*). In
+> `hub75_adapter.yaml`: `description`, `specifications` and `sources` cite the statement for (a)–(d);
+> the derived "8/16/32 row scan" figures are removed (he confirmed panel heights, not scan ratios),
+> as are `supported_panels` (scan rates incl. "1:4", resolutions, pixel pitches), `compatibility`
+> (a second, unconfirmed host list incl. "any P2 board with 16 consecutive pins", and a toolchain
+> list), the scan / daisy-chain / 18 AWG notes, "0.1 inch spacing" and "P16-P31 is the most common"
+> (in no source), and `references:` (two generic pointers, no document). Class search: no other KB
+> file carries the removed HUB75 claims (`grep -i hub75|64032` over `deliverables/ai/P2`: the
+> compatibility matrix, `p2-eval-board.yaml`, `addon-click-adapter.yaml`, `muxq.yaml`, OBEX 2850 and
+> 4616 — none states them).
+
+> **DECIDED by Stephen 2026-10-10.** His own hardware documents and hand measurements are golden
+> sources ("cite me as the source"); an ingestion run may rewrite the data it produces. **Applied
+> 2026-10-10 («#422»):** the schematic *HUB75E Adapter for P2 Eval* H/W Rev 1.4 (2020-11-25) was
+> ingested (`sources/p2-hub75-adapter/`, audit of record `p2-hub75-adapter-complete-extraction-audit.md`)
+> with a dated designer's statement for size / current / clock; the three 2025 captures are retired
+> to `archived/` (6 of their claims proven wrong). Both gates accept the two documents as a new
+> acceptance class (`audit-yaml-claim-sourcing.py` CANONICAL_TITLES rows `p2-hub75-adapter`,
+> `p2-hub75-adapter-designer`, with pass and refuse controls; `AUTHORITATIVE-SOURCES.md` admission
+> route 2). **YAML corrected from the schematic:** 5 V does NOT reach the HUB75 connector (the file
+> said it did); offsets 14/15 are spares brought out on J4 (direct) and J5 (5 V-buffered), not
+> "not connected"; added the two 74HCT244 buffers with output enables tied low, the J3 probe header,
+> J6 (HUB75 pin 4), the HUB75E pin-8 = E pinout and the lower-header-only 5 V input. **Class search:**
+> `hardware/hardware-compatibility-matrix.yaml` repeated "offsets 14-15 unused" and is fixed;
+> `p2-eval-board.yaml` and `language/pasm2/muxq.yaml` mention the board without a wrong claim.
+> **Gates:** claim sourcing PASS (0 Tier 1); source lock exit 0, hub75 RESOLVABLE→NAMED replaced
+> by CANONICAL (673 CANONICAL / 7 NAMED). **Still open:** host-board list, address-line → panel-row
+> mapping, "female pass-through" headers, retiring status, and the generic panel lists
+> (`supported_panels`, `compatibility.operating_systems`, panel-wiring note) are not in the schematic.
+> Asked of the designer as Q-012 (`KNOWLEDGE-GAPS.md`).
 Found 2026-10-10 by «#422» and carried through «#423»'s exit baseline. `audit-yaml-claim-sourcing.py` (Tier 2
 blocking since 89eb8c02) reports 3 Tier-1 blocks in this file — `description` (`:19`, 2 quantities in V),
 `specifications` (`:29`, 5 quantities in MHz, V, mA), `notes` (`:61`, 3 quantities in MHz, V) — "this file DOES
@@ -688,7 +773,7 @@ compares the payload with YAML's own reading and fails on any content line the f
 matters for the MCP roll:** the MCP does not yet apply this filter, so MCP consumers still had the
 line; rolling the MCP filter before this fix would have spread the loss.
 
-### F-545 — provenance ships under keys the delivery filter does not list (`last_verified`, `extraction_status`, `authority_tier`, `grounding`, …) — `PARTIAL` (census and folds applied 2026-10-10, «#420»/«#422», `PENDING-VALIDATION`; the new-key gate is not built and the OBEX `metadata:` bookkeeping is left by the arbiter)
+### F-545 — provenance ships under keys the delivery filter does not list (`last_verified`, `extraction_status`, `authority_tier`, `grounding`, …) — `PARTIAL` (census, folds, the `scrape_tracking` filter key and the new-key gate applied 2026-10-10, «#420»/«#422», `PENDING-VALIDATION`; three served provenance keys remain, F-569)
 Measured 2026-10-04 on the shipped payload (keys surviving the filter): `extraction_status` 131 files,
 `last_verified` 131, `last_author_extraction` 113, `last_complete_extraction` 73,
 `last_author_re_extraction` 29, `authority_tier` 92 lines / 15 files, `grounding` 28 / 10,
@@ -745,6 +830,32 @@ list, so the drift cannot recur.
 > source/extract/verified/provenance/authority and is not in the reviewed list — does not exist
 > (checked 2026-10-10: nothing in `validate-dod-release.py` or `engineering/tools/validation/` reads key
 > names); until it is built the drift can recur.
+
+> **Scrape bookkeeping moved under a filtered key, and the owed gate built, 2026-10-10 («#422»).**
+> **DECIDED by Stephen:** tracking data stays in the YAML and the delivery filter keeps it out of the
+> agent's context; only what helps an agent build code or understand the P2 and its drivers is served
+> (doctrine *Provenance is for us*). `metadata:` holds real content in 16 language/architecture pages
+> (query tags, common mistakes), so it cannot be filtered; the OBEX / Quick Bytes scraper block is
+> renamed `scrape_tracking:` in 173 files (131 OBEX objects incl. `_template.yaml`, 42 Quick Bytes
+> pages; one line each, `git diff --numstat` 1/1 on every file) and `scrape_tracking` is the one name
+> added to `remove_fields` — his exception to the 2026-10-04 no-growth rule ("yes A"). `rule_id`
+> `b431af2a…77ee` → `7dc618e4…4870` (`DELIVERY_FILTER`, `generate-p2kb-index.py`); the MCP handoff
+> (amendment note), the `.sh` / `.ps1` built-ins, `verify-ps1-filter.ps1`, the OBEX spec, 25 OBEX
+> scripts and the Quick Bytes scraper write and read the new key. The cert bundle is a frozen fixture
+> and is untouched. **The gate:** `audit-yaml-provenance-key-names.py`, in `validate-dod-release.py`:
+> every provenance-shaped key name (source / extract / scrape / verif / authorit / provenance /
+> tracking, by word) must be on a reviewed list with its reason; scrape bookkeeping must sit under
+> `scrape_tracking`; self-test with a synthetic `last_verified_by` and in-list cases. **Fixed in the
+> same pass from its census:** `wrlut` / `rdlut` `authority:` → `source:`; `fifo.yaml`
+> `verification_notes:` split into `hubexec_fifo_facts:` (the four verbatim Silicon Doc facts, content)
+> and `sources:`; `_template.yaml`'s empty `notes:` placeholder removed; `pin-capture.yaml`
+> `verification_status:` reviewed as content (measured facts, each sub-block with its EF `source:`).
+> **Still open (served today, recorded as `open` in the gate):** `last_scraped` in OBEX
+> `version_tracking` (130 files) — Stephen's call, see F-569; `base_pin_options_provenance`
+> (`addon-click-adapter.yaml`) and `combinations_are_compiler_verified` (`pasm2-getting-started.yaml`)
+> — F-569. **Needs Stephen on Windows:** `fetch-kb-file.ps1` changed, so *PowerShell Filter Verified*
+> stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
+> reads the published index rule and turns green when the index is regenerated after the commit.
 
 ### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 > **Applied 2026-10-07 — and the defect was wider than filed.** The example's `source: P2-FLASH-FS`

@@ -23,7 +23,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags: []
-  metadata:
+  scrape_tracking:
     created_date: '2026-03-15 06:03:24'
     discovery_date: '2026-06-29T00:00:00'
     kb_integration: none

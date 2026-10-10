@@ -77,9 +77,9 @@ New-Item -ItemType Directory -Path $tmp | Out-Null
 $IndexFile = Join-Path $tmp "p2kb-index.json"
 $CacheDir = Join-Path $tmp "cache"
 New-Item -ItemType Directory -Path $CacheDir | Out-Null
-$builtinId = "b431af2a9f515c11fe5fd982642c636c6f8843bf89ed2c3003ee0e28c04877ee"   # agreement §3.1
+$builtinId = "7dc618e436c3c56405e6de47fad9608840c2adad6689b1a115476c1e02674870"   # agreement §3.1
 $changedId = "1c59f31106a7096918596addaf9d7a6dff5ab770e73fdf828d698f3b90761219"   # ["source"], false -- from fetch-kb-file.sh
-$present = '{"delivery_filter": {"format": 1, "remove_fields": ["documentation_level", "documentation_source", "enhancement_source", "last_updated", "manual_extraction_date", "source", "source_reference", "sources", "verified_against"], "remove_column0_comments": true}, "files": {}}'
+$present = '{"delivery_filter": {"format": 1, "remove_fields": ["documentation_level", "documentation_source", "enhancement_source", "last_updated", "manual_extraction_date", "scrape_tracking", "source", "source_reference", "sources", "verified_against"], "remove_column0_comments": true}, "files": {}}'
 $changed = '{"delivery_filter": {"format": 1, "remove_fields": ["source"], "remove_column0_comments": false}, "files": {}}'
 try {
     [System.IO.File]::WriteAllText($IndexFile, $present)

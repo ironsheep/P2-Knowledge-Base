@@ -59,7 +59,7 @@ signal_map:
   - offset: 1
     signal: "SDA (I2C serial data)"
     direction: bidir
-    notes: "I2C serial data I/O (open-drain)."
+    notes: "I2C serial data I/O."
   - {offset: 2, signal: "Not Connected", direction: na, notes: "N/C."}
   - {offset: 3, signal: "Not Connected", direction: na, notes: "N/C."}
   - {offset: 4, signal: "Not Connected", direction: na, notes: "N/C."}
@@ -99,26 +99,29 @@ pin_mode_tip:
     board carries its own SDA/SCL pull-ups, and no ingested source states it - the
     board schematic would settle it.
 
+board_interface:
+  source: "P2 RTC Add-on (#64013) v1.0 11/29/2022, Features, p.1; Key Specifications (Supply voltage +3.3 VDC; Control interface I2C bus (100, 400, 1000 kHz)), p.2"
+  part: "NXP PCF8523"
+  control_interface: "I2C bus (100, 400, 1000 kHz); data rate up to 1000 kbit/s"
+  signal_levels: "3.3 V"
+  board_unknown: >-
+    UNKNOWN today: whether the #64013 board carries its own SDA/SCL pull-ups, and
+    which I2C speed a given P2 program should pick. The board guide states neither
+    and no other ingested document does.
+
+# === RTC CHIP FACTS (the PCF8523 itself - not the board) ===
+# Facts about the chip only, each from the chip maker's own datasheet.
 rtc_chip:
-  source: "P2 RTC Add-on (#64013) v1.0 11/29/2022, Features and Key Specifications (the PCF8523; I2C bus 100, 400, 1000 kHz; +3.3 VDC), pp.1-2"
+  source: "NXP PCF8523 Real-Time Clock (RTC) and calendar, Rev. 7 (28 April 2015), 1. General description and 2. Features, p.1; 7.2 Pin description, p.5; 8 Functional description, p.6; 8.1 Registers overview, pp.7-8; 8.2.1 Register Control_1, p.9; 8.3 Reset, p.12; 8.9.1.2 CLKOUT frequency selection, pp.32-33; 8.11 I2C-bus interface, p.44; 8.11.5 I2C-bus protocol, p.46; 13. Dynamic characteristics, p.52"
   part: "NXP PCF8523"
   type: "CMOS real-time clock + calendar + alarm"
-  bus: "I2C (open-drain), up to 1000 kbit/s"
+  bus: "I2C, up to 1000 kbit/s; SDA and SCL are connected to a positive supply through pull-up resistors (a bus requirement; INT1/CLKOUT is an open-drain output)"
   i2c_speeds_khz: [100, 400, 1000]
-  signal_levels: "3.3 V"
-  i2c_slave_address_7bit: "$68 (%1101000) - the single fixed address reserved for the PCF8523"
+  i2c_slave_address_7bit: "$68 (%1101000) - the single I2C slave address reserved for the PCF8523 (other addresses can be produced on request)"
   i2c_address_bytes: "write = $D0 (%1101_0000), read = $D1 (%1101_0001)"
-  register_format: "BCD for time/date counters (use bcd<->dec conversion)"
+  register_format: "BCD for the Seconds, Minutes, Hours, Days, Weekdays, Months and Years registers (use bcd<->dec conversion)"
   software_reset: "write $58 (%01011000) to Control_1 (00h)"
-  source_trace: >-
-    Address + register map are NOT in the board guide (it defers to the
-    datasheet); resolved from the NXP PCF8523 datasheet (Table 46 slave address;
-    register-overview Table 5, addresses 00h-13h) and CORROBORATED by the
-    official Parallax 64013 RTC driver (64013_RTC_Driver.spin2, M. Mulholland /
-    JonnyMac) which uses $68 at 400 kHz with its "3.3K pull-up" setting. (That is
-    the driver library's own term for a pull-up strength; on the P2 there is no
-    pull-up resistor and no 3.3 kOhm rung - see pin_mode_tip.) (Gap G-013
-    resolved.)
+  register_count: "20 registers, 00h-13h; the address auto-increments after each byte and wraps from 13h to 00h"
   register_map:
     "00h": "Control_1 (CAP_SEL, STOP, SR, 12_24, SIE, AIE, CIE)"
     "01h": "Control_2 (alarm/timer interrupt flags + enables)"
@@ -147,15 +150,15 @@ use_cases:
 limitations:
   - "Uses a shared +0 pin for SCL/INT/CLKOUT - cannot use all three simultaneously"
   - "Time/date stored in BCD; I2C address ($68) + register map come from the PCF8523 datasheet, not the board guide"
-  - "No code in the board guide itself; an official MIT Spin2 driver is on the product page"
+  - "No code in the board guide itself; it points to example code on the product page"
+  - "Whether the board carries SDA/SCL pull-ups is unknown - the board guide does not state it (see board_interface)"
 
 documentation:
   primary: "P2 RTC Add-on (#64013) v1.0 11/29/2022, p.1"
 
 resources:
   product_page: "www.parallax.com (search 64013) - latest guide, schematic, example code"
-  rtc_datasheet: "NXP PCF8523 datasheet (www.nxp.com) - authoritative for I2C address + register map"
-  example_driver: "Parallax 64013 RTC Driver/Example (Spin2) - on the 64013 product page; uses jm_i2c with that library's 3.3K pull-up setting (see pin_mode_tip for what the P2 actually does)"
+  rtc_datasheet: "NXP PCF8523 Real-Time Clock (RTC) and calendar, Rev. 7 (28 April 2015) - the authority for the chip's I2C address, register map and reset command (rtc_chip)"
   battery_datasheet: "Seiko MS421R (https://www.sii.co.jp/en/)"
 
 physical_and_battery:

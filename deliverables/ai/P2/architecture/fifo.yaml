@@ -253,10 +253,11 @@ cross_references:
 
 documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION and FAST SEQUENTIAL FIFO INTERFACE"
 last_updated: "2026-04-29"
-verification_notes: |
-  The hubexec instruction-prefetch role rests on Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION, verbatim:
-  - 'The FIFO contains (cogs+11) stages.'
-  - 'When in read mode, the FIFO loads continuously whenever less than (cogs+7) stages are filled, after which point, up to 5 more longs may stream in, potentially filling all (cogs+11) stages.'
-  - 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.'
-  - 'While in hub execution mode, the FIFO cannot be used for anything else.'
-  The sequential 2-clocks/instruction figure for hubexec follows from the Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148-159, which gives one Clocks value for Cog & LUT and Hub execution on each sequential instruction (the Silicon Doc describes the streaming mechanism qualitatively).
+hubexec_fifo_facts:
+  - "The FIFO contains (cogs+11) stages."
+  - "When in read mode, the FIFO loads continuously whenever less than (cogs+7) stages are filled, after which point, up to 5 more longs may stream in, potentially filling all (cogs+11) stages."
+  - "Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required."
+  - "While in hub execution mode, the FIFO cannot be used for anything else."
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION: the hub-execution FIFO facts in hubexec_fifo_facts, verbatim"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148-159: one Clocks value for Cog & LUT and Hub execution on each sequential instruction (the 2 clocks/instruction hubexec figure)"

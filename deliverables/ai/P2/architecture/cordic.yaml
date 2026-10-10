@@ -78,8 +78,8 @@ operations:
     instruction: "QSQRT"
     operation: "64-bit → 32-bit square root (unsigned)"
     setup: "QSQRT D,S - input is the 64-bit value {S, D} (S = upper 32, D = lower 32)"
-    result: "32-bit root in X (via GETQX)"
-    
+    result: "32-bit root in X (via GETQX), truncated (floor) -- see language/pasm2/qsqrt.yaml"
+
   rotate:
     instruction: "QROTATE"
     operation: "2D vector rotation by angle"
@@ -181,10 +181,11 @@ accuracy:
   source: >-
     Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features: CORDIC solver summary), which states the solver and each operation's result format verbatim.
     Per-operation detail lives in the instruction entries below; this block states only the result formats and does not restate them.
+    The truncated (floor) square root: EF-104.
   solver: "32-bit, pipelined, with scale-factor correction (Silicon Doc verbatim)"
   multiply: "Exact -- 32 x 32 unsigned, 64-bit result (see language/pasm2/qmul.yaml)"
   divide: "Exact -- 64 / 32 unsigned, 32-bit quotient and 32-bit remainder (see language/pasm2/qdiv.yaml)"
-  square_root: "64-bit -> 32-bit square root (see language/pasm2/qsqrt.yaml)"
+  square_root: "64-bit -> 32-bit square root, truncated (floor) (see language/pasm2/qsqrt.yaml)"
   logarithm: "32-bit unsigned -> 5.27 fixed-point logarithm (see language/pasm2/qlog.yaml)"
   exponential: "5.27 fixed-point logarithm -> 32-bit unsigned (see language/pasm2/qexp.yaml)"
   trigonometric: >-

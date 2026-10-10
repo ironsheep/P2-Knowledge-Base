@@ -4,13 +4,16 @@ category: Unary
 description: |
   Square root of an unsigned value: `SQRT x`. Priority 2. For a floating-point square
   root use `FSQRT`.
+  The result is truncated (floor), never rounded to nearest: SQRT 8 = 2, SQRT 99 = 9,
+  SQRT $FFFF_FFFF = 65535; a perfect square gives its exact root. SQRT runs the CORDIC
+  QSQRT instruction with a zero upper long.
 priority: 2
 term_form: "SQRT x"
 assign_form: "SQRT= var   (PUB/PRI only, priority 1)"
 block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "side := SQRT(area)"
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators; SQRT compiled to QSQRT: Parallax Spin2 Interpreter v55, SQRT operator; the truncated result: EF-104"
 aliases:
   - "SQRT"
   - "square root"

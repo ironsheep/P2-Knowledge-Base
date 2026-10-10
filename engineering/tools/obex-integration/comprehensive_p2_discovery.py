@@ -291,7 +291,7 @@ class ComprehensiveP2Discovery:
                     'dependencies': []
                 },
                 
-                'metadata': {
+                'scrape_tracking': {
                     'discovery_date': object_data.get('discovery_date', datetime.now().isoformat()),
                     'last_verified': datetime.now().isoformat(),
                     'extraction_status': 'discovered',

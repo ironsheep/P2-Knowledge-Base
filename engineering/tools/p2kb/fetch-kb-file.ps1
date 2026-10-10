@@ -239,7 +239,7 @@ $FilterEngineVersion = "3.5"   # bump whenever Filter-Metadata or Get-FilterRule
 
 function Get-BuiltinFilterRule {
     # BEGIN BUILTIN-RULE (validate-dod-release.py compares this list with the index rule)
-    $fields = @("documentation_level", "documentation_source", "enhancement_source", "last_updated", "manual_extraction_date", "source", "source_reference", "sources", "verified_against")
+    $fields = @("documentation_level", "documentation_source", "enhancement_source", "last_updated", "manual_extraction_date", "scrape_tracking", "source", "source_reference", "sources", "verified_against")
     # END BUILTIN-RULE
     return @{ Fields = $fields; Column0 = $true; Source = "built-in" }
 }

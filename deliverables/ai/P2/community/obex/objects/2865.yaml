@@ -25,7 +25,7 @@ object_metadata:
     - led
     - driver
     - spi
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:03.844930'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:20:17.213931'

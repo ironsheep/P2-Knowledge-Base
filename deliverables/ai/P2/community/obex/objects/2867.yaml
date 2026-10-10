@@ -22,7 +22,7 @@ object_metadata:
     - spi
     - demo
     - driver
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356277'
     kb_integration: none
     last_author_cleanup: '2025-09-12T13:31:14.620058'

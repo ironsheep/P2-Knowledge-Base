@@ -39,12 +39,14 @@ from typing import Dict, Any, Set, List, Optional, Tuple
 # rather than holding their own copy: a copy per receiver is what let F-439 happen.
 # Contract: MCP-DELIVERY-FILTER-HANDOFF.md §3 (format 1). The list does not grow to
 # chase provenance into new keys -- that is fixed in the KB (Stephen, 2026-10-04, F-545).
+# One name added 2026-10-10 (Stephen): scrape_tracking, the OBEX/Quick Bytes scraper
+# bookkeeping -- tracking stays in the YAML and the filter removes it.
 DELIVERY_FILTER = {
     'format': 1,
     'remove_fields': sorted([
         'documentation_level', 'documentation_source', 'enhancement_source',
-        'last_updated', 'manual_extraction_date', 'source', 'source_reference',
-        'sources', 'verified_against',
+        'last_updated', 'manual_extraction_date', 'scrape_tracking', 'source',
+        'source_reference', 'sources', 'verified_against',
     ]),
     'remove_column0_comments': True,
 }

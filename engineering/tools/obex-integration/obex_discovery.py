@@ -402,7 +402,7 @@ class OBEXDiscovery:
                     'related_objects': []
                 },
                 
-                'metadata': {
+                'scrape_tracking': {
                     'discovery_date': object_data.get('discovery_date', datetime.now().isoformat()),
                     'last_verified': datetime.now().isoformat(),
                     'extraction_status': 'discovered',
@@ -937,7 +937,7 @@ if __name__ == '__main__':
                     'related_objects': []
                 },
                 
-                'metadata': {
+                'scrape_tracking': {
                     'discovery_date': object_data.get('discovery_date', datetime.now().isoformat()),
                     'last_verified': datetime.now().isoformat(),
                     'extraction_status': 'discovered',
@@ -1502,7 +1502,7 @@ if __name__ == '__main__':
                     'related_objects': []
                 },
                 
-                'metadata': {
+                'scrape_tracking': {
                     'discovery_date': object_data.get('discovery_date', datetime.now().isoformat()),
                     'last_verified': datetime.now().isoformat(),
                     'extraction_status': 'discovered',

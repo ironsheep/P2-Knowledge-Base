@@ -25,14 +25,11 @@ long_description: 'The QSQRT instruction performs square root calculation using 
   the 32-bit square root result can be retrieved using the GETQX instruction.
 
 
-  This instruction is essential for mathematical calculations requiring precise square
-  root operations on large values, such as distance calculations, RMS computations,
-  geometric algorithms, and signal processing applications where maintaining precision
-  across the full 64-bit range is important.
-
-
-  How the 32-bit result is rounded when the input is not a perfect square is not
-  documented.
+  The result is the truncated (floor) square root: the largest integer whose square
+  does not exceed the input. A perfect square gives its exact root; any other input
+  rounds DOWN, never to the nearest integer (sqrt of 8 gives 2, sqrt of 99 gives 9,
+  sqrt of $FFFF_FFFF gives 65535, sqrt of 2^64-1 gives $FFFF_FFFF). For a
+  nearest-integer root, round yourself: if input - r*r > r, add 1 to r.
 
   '
 examples:
@@ -54,7 +51,7 @@ examples:
 
     '' ... other work for 55 clocks ...
 
-    GETQX   big_sqrt
+    GETQX   big_sqrt                   '' $4444_4444 (truncated)
 
     '
   description: Square root of 64-bit number
@@ -127,14 +124,14 @@ operand_details:
   S: Upper 32 bits of 64-bit input value
   D: Lower 32 bits of 64-bit input value
 result_details:
-  GETQX: 32-bit square root result
+  GETQX: 32-bit square root result, truncated (floor) -- never rounded to nearest
 timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
   one CORDIC instruction per hub window (every 8 clocks).
 usage_notes: Input formed as {S, D} where S contains upper 32 bits. For 32-bit square
   roots, use S=0.
 applications: Distance calculations, RMS computations, geometric algorithms, signal
-  processing, mathematical operations requiring high-precision square roots.
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.45; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+  processing.
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.45; P2 Instructions v35 - Rev B/C Silicon, Sheet1; the truncated (floor) result: EF-104"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ls

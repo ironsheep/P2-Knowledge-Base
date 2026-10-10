@@ -64,7 +64,7 @@ immediate_address_limit:
   compiler_behavior: >-
     The PNut-TS v1.55 compiler enforces the limit; the over-range case was
     verified by compiling it.
-  authority: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the S/#/PTRx operand: #%0AAAAAAAA 8-bit immediate address versus #%1SUPNNNNN PTR expression)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the S/#/PTRx operand: #%0AAAAAAAA 8-bit immediate address versus #%1SUPNNNNN PTR expression)"
 related:
 - architecture/lookup_ram.yaml
 - language/pasm2/wrlut.yaml

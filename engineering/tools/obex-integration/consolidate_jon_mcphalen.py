@@ -41,10 +41,10 @@ def consolidate_jon_mcphalen_entries():
                 
                 # Update metadata
                 current_time = time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
-                if 'metadata' not in data['object_metadata']:
-                    data['object_metadata']['metadata'] = {}
-                
-                data['object_metadata']['metadata']['last_author_consolidation'] = current_time
+                if 'scrape_tracking' not in data['object_metadata']:
+                    data['object_metadata']['scrape_tracking'] = {}
+
+                data['object_metadata']['scrape_tracking']['last_author_consolidation'] = current_time
                 
                 # Write back to file
                 with open(yaml_file, 'w', encoding='utf-8') as f:

@@ -22,7 +22,7 @@ object_metadata:
     tags:
     - FlexProp
     - PropTool
-  metadata:
+  scrape_tracking:
     created_date: ''
     discovery_date: '2026-06-29T00:00:00'
     import_source: github_archiver

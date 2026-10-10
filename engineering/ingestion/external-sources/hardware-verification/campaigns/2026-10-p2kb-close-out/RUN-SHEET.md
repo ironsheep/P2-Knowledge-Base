@@ -40,6 +40,17 @@ Any `RIG FAIL` or `NO VERDICT`: send the log as is.
 A `RIG FAIL` on gate P (a late write) means the run's timing missed a deadline — send the log; it is a
 rerun, not a result.
 
+**Round 3 (added 2026-10-10)** — same rules as above:
+
+| # | Program | Pins in use (keep clear) | Runs | Hang limit | Look for |
+|---|---|---|---|---|---|
+| 10 | `test-vo-j-036-qsqrt-rounding.spin2` | none | ~1 s | 15 s | `GATE C passed`, the `RAW` lines, `COUNT` lines, and one `VERDICT VO-J-036` line per path (QSQRT, SQRT) |
+
+**#10** — build `pnut-ts -d` (11,848 bytes), load, save the whole log. It asks how QSQRT and Spin2's
+`SQRT` round a root that is not exact (truncated, nearest or rounded up). `MISS` lines are expected:
+they show where each rounding model fails and are not failures of the run. `RIG FAIL` or
+`NO VERDICT`: send the log as is.
+
 **Two things that may happen and are not failures of the run**
 - **#6 prints INCONCLUSIVE** (the bare USB pair could not sense its own line state). Then, only
   if you choose to, the fallback is jumpers P0→P2 and P1→P3 and a second-pair version, which I

@@ -33,7 +33,7 @@ class CreatedDateAnalyzer:
                     
                 obj_id = data['object_metadata']['object_id']
                 title = data['object_metadata']['title']
-                created_date = data['object_metadata']['metadata'].get('created_date', '')
+                created_date = data['object_metadata']['scrape_tracking'].get('created_date', '')
                 
                 if not created_date or created_date == '':
                     self.empty_dates.append({

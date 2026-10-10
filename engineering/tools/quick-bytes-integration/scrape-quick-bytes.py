@@ -558,7 +558,9 @@ def build(slug, meta, report):
                 "obex_object_ids": obex_ids,
                 "related_boards": meta["boards"],
             },
-            "metadata": {
+            # Scrape bookkeeping: the delivery filter removes `scrape_tracking`, so it never
+            # reaches the agent. (Not `metadata`: that key holds real content on other pages.)
+            "scrape_tracking": {
                 "source": "parallax-quick-bytes",
                 "scraped": SCRAPED_DATE,
             },

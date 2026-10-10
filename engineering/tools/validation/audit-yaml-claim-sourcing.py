@@ -387,8 +387,16 @@ def points_away(value):
 # on purpose: Smart Pins (Titus), chip-gracey-clarifications, p2-qa-spreadsheet,
 # p2docs-github-io (community / upstream leads); pnut-ts-pasm-ref,
 # iron-sheep-compiler, quick-bytes-code (not Parallax documents); the TAQOZ Bit
-# Bashers Guide (Peter Jakacki); p2-hub75-adapter (manufacturer is not Parallax);
-# the AK5704 datasheet (third party). Parallax's published SOURCE LISTINGS (the
+# Bashers Guide (Peter Jakacki). A chip maker's own DATASHEET is IN since Stephen's
+# ruling of 2026-10-10 (AUTHORITATIVE-SOURCES.md admission route 3), for facts about
+# THAT CHIP ONLY -- the AKM AK5704 and the NXP PCF8523 rows. They are third-party
+# documents: a citation of one must carry the printed title, the printed REVISION
+# (DATASHEET_REVISION below) and the page, and it never backs a claim about the
+# Parallax board or the P2 (that part no tool can check -- it is the author's rule).
+# The DESIGNER'S OWN HARDWARE is IN since Stephen's ruling of 2026-10-10: for a board
+# Stephen designed and sells (Iron Sheep; today only the #64032 HUB75 adapter), his
+# schematic and his dated designer's statement are golden sources -- the
+# p2-hub75-adapter rows, AUTHORITATIVE-SOURCES.md admission route 2. Parallax's published SOURCE LISTINGS (the
 # Spin2 interpreter, the Spin2 debugger, the ROM booter, the flash loader) ARE
 # citable since Stephen's ruling of 2026-10-10, pinned to their edition -- they
 # are the rows at the END of this table, each marked in LISTING_EDITION_RE.
@@ -512,6 +520,33 @@ CANONICAL_TITLES = [
      "Part Number 64008, Revision A", False,
      "p2-click-adapter/p2-click-adapter-text.txt:6, :11, :13 (the schematic's title block; a "
      "one-page schematic, so no page number)"),
+    # --- THE DESIGNER'S OWN HARDWARE (Stephen, 2026-10-10). Not Parallax documents:
+    # golden sources by AUTHORITATIVE-SOURCES.md admission route 2.
+    ("p2-hub75-adapter",
+     ["HUB75E Adapter for P2 Eval"],
+     "H/W Rev 1.4, 2020-11-25", False,
+     "p2-hub75-adapter/p2-hub75-adapter-netlist.md (title block, read off the rendered sheet "
+     "`assets/images-p2-hub75-adapter-2026-10-10/schematic-page1-200dpi.png`: `Title: HUB75E "
+     "Adapter for P2 Eval`, `Date: 2020-11-25`, `Rev: H/W 1.4`; one-page schematic, no page number)"),
+    ("p2-hub75-adapter-designer",
+     ["designer's statement for the P2 Eval HUB75 Adapter (#64032)"],
+     "2026-10-10", False,
+     "p2-hub75-adapter/p2-hub75-adapter-designer-statement-2026-10-10.md (its `Cite as:` line; "
+     "the designer's verbatim words, dated)"),
+    # --- CHIP MAKERS' DATASHEETS (Stephen, 2026-10-10; admission route 3). Third-party
+    # documents admitted for facts about their OWN chip only; see DATASHEET_REVISION.
+    ("pcf8523-datasheet",
+     ["PCF8523 Real-Time Clock (RTC) and calendar"],
+     "Rev. 7 (28 April 2015)", True,
+     "P2-RTC-Add-on/pcf8523-datasheet-text.txt:2-3 (page 1: `PCF8523 / Real-Time Clock (RTC) and "
+     "calendar`, `Rev. 7 — 28 April 2015   Product data sheet`; footer :96 `Rev. 7 — 28 April 2015  "
+     "2 of 78`). The PDF is NO-COMMIT/PCF8523.pdf (git-ignored)"),
+    ("ak5704-datasheet",
+     ["AK5704 Low-Power 4-ch 32-bit ADC with MIC-Amp"],
+     "Rev.1 (019000890-E-01, 2022/01)", True,
+     "P2-HD-Audio-Add-on/ak5704-datasheet-text.txt:6-7 (page 1: `AK5704 / Low-Power 4-ch 32-bit ADC "
+     "with MIC-Amp`), :57 (footer `019000890-E-01  2022/01`), :6553-6555 (revision 01, 22/01/31) and "
+     ":6619 (`Rev.1`, page 109). The PDF is ak5704en-en-datasheet.pdf (git-ignored)"),
     # --- PUBLISHED SOURCE LISTINGS (Stephen, 2026-10-10). For these rows the edition
     # field is the CURRENTLY INGESTED edition, written as a citation writes it -- the
     # staleness check reads the current edition from HERE and nowhere else. When a
@@ -565,6 +600,14 @@ LISTING_EDITION_RE = {
 }
 _LISTING_CURRENT = {row[0]: LISTING_EDITION_RE[row[0]].match(row[2].lower()).group(1)
                     for row in CANONICAL_TITLES if row[0] in LISTING_EDITION_RE}
+
+
+# Chip makers' datasheets (route 3): a title with a SECTION but no revision is not enough
+# -- a datasheet is revised in place, and a register or address fact belongs to one
+# revision. The citation must write the printed revision (`Rev. 7`, `Rev.1`); a different
+# one is STALE_EDITION. Value = the revision number of the ingested edition.
+DATASHEET_REVISION = {"pcf8523-datasheet": "7", "ak5704-datasheet": "1"}
+DATASHEET_REV_RE = re.compile(r"\brev\.?\s*(\d+)\b")
 
 
 def listing_edition_class(key, nv, end):
@@ -682,6 +725,23 @@ def classify(value):
                     elif cls not in classes:
                         classes.append(cls)
                     at = nv.find(f, at + 1)
+            continue
+        if key in DATASHEET_REVISION:
+            if not any(f in nv for f in forms):
+                continue
+            revs = DATASHEET_REV_RE.findall(nv)
+            if not revs:
+                cls = "NO_EDITION"
+            elif any(r != DATASHEET_REVISION[key] for r in revs):
+                cls = "STALE_EDITION"
+            elif paginated and not PAGE_RE.search(v):
+                cls = "NO_PAGE"
+            else:
+                cls = None
+            if cls is None:
+                good = True
+            elif cls not in classes:
+                classes.append(cls)
             continue
         end = max((nv.find(f) + len(f) for f in forms if f in nv), default=-1)
         if end < 0:
@@ -1309,6 +1369,34 @@ def negative_control():
          '  source: "OBEX community objects"', "NO_PARALLAX_DOC"),
         ("a real OBEX id beside a nonexistent one is still refused (CONSTRUCTED)",
          '  source: "OBEX 2842 (Full Duplex Serial); OBEX 99999 (Imaginary Driver)"', "BAD_ID"),
+        ("the designer's statement cited with NO date (CONSTRUCTED)",
+         '  source: "Stephen M Moraco, designer\'s statement for the P2 Eval HUB75 Adapter (#64032)"',
+         "NO_EDITION"),
+        ("the HUB75 schematic by our netlist file, not its title (CONSTRUCTED)",
+         '  source: "p2-hub75-adapter-netlist.md, signal path table"', "REGISTER_PATH"),
+        # Chip makers' datasheets (Stephen, 2026-10-10; route 3): a revision is mandatory.
+        ("PCF8523 datasheet with a section and page but NO revision (CONSTRUCTED)",
+         '  source: "NXP PCF8523 Real-Time Clock (RTC) and calendar, 8.11.5 I2C-bus protocol, p.46"',
+         "NO_EDITION"),
+        ("AK5704 datasheet with the document number but NO revision (CONSTRUCTED)",
+         '  source: "AKM AK5704 Low-Power 4-ch 32-bit ADC with MIC-Amp (019000890-E-01, 2022/01), '
+         '9.16 I2C-bus Control Interface, p.75"', "NO_EDITION"),
+        ("PCF8523 datasheet at an OLDER revision (CONSTRUCTED)",
+         '  source: "NXP PCF8523 Real-Time Clock (RTC) and calendar, Rev. 6, Table 46, p.46"',
+         "STALE_EDITION"),
+        ("PCF8523 datasheet with a revision but NO page (CONSTRUCTED)",
+         '  source: "NXP PCF8523 Real-Time Clock (RTC) and calendar, Rev. 7 (28 April 2015), Table 46"',
+         "NO_PAGE"),
+        ("the PCF8523 datasheet by OUR text extract, not its title (CONSTRUCTED)",
+         '  source: "PCF8523 Rev. 7, pcf8523-datasheet-text.txt:2583"', "EXTRACTION_PATH"),
+        ("the PCF8523 datasheet by OUR reading-of-record file (CONSTRUCTED)",
+         '  source: "pcf8523-datasheet-reading.md, I2C slave address"', "REGISTER_PATH"),
+        ("the AK5704 datasheet by OUR text extract (CONSTRUCTED)",
+         '  source: "AK5704 Rev.1, ak5704-datasheet-text.txt:4485"', "EXTRACTION_PATH"),
+        ("the AK5704 datasheet by OUR reading-of-record file (CONSTRUCTED)",
+         '  source: "ak5704-datasheet-reading.md, CAD pin"', "REGISTER_PATH"),
+        ("the AK5704 datasheet by a bare word, no title (CONSTRUCTED)",
+         '  source: "AK5704 datasheet, I2C address"', "NO_PARALLAX_DOC"),
         ("listing with NO edition (CONSTRUCTED)",
          '  source: "Parallax Spin2 Interpreter, PINHIGH routine"', "NO_EDITION"),
         ("listing edition written BEFORE the title, not after -- architecture/xbyte_engine.yaml:113",
@@ -1342,6 +1430,18 @@ def negative_control():
          '  source: "Parallax Spin2 Interpreter v55 (2026.05.07), PINHIGH routine"'),
         ("listing in the banner's own spelling `<title> - v55 - <date>` (CONSTRUCTED)",
          '  source: "Spin2 Interpreter - v55 - 2026.05.07, PINHIGH routine"'),
+        ("the designer's own schematic, as hub75_adapter.yaml cites it",
+         '  source: "HUB75E Adapter for P2 Eval, H/W Rev 1.4, 2020-11-25, schematic '
+         '(Iron Sheep Productions, LLC): U1/U2 74HCT244 VCC on +5VA from J2 pin 7"'),
+        ("the designer's dated statement, as hub75_adapter.yaml cites it",
+         '  source: "Stephen M Moraco (Iron Sheep Productions, LLC), designer\'s statement for '
+         'the P2 Eval HUB75 Adapter (#64032), 2026-10-10"'),
+        ("the PCF8523 datasheet in full, as addon-rtc.yaml cites it (route 3)",
+         '  source: "NXP PCF8523 Real-Time Clock (RTC) and calendar, Rev. 7 (28 April 2015), '
+         '8.11.5 I2C-bus protocol, Table 46, p.46"'),
+        ("the AK5704 datasheet in full, as addon-hd-audio.yaml cites it (route 3)",
+         '  source: "AKM AK5704 Low-Power 4-ch 32-bit ADC with MIC-Amp, Rev.1 (019000890-E-01, '
+         '2022/01), 9.16 I2C-bus Control Interface, pp.75-76"'),
     ]
     # One positive per CANONICAL_TITLES document and per printed form: the form,
     # an edition, a section, and `p.N` where the document is paginated.

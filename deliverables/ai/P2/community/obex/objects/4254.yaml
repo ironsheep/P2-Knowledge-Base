@@ -27,7 +27,7 @@ object_metadata:
     - driver
     - led
     - display
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896204'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:22:06.027499'

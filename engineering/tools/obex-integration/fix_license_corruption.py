@@ -40,7 +40,7 @@ class LicenseCorruptionFixer:
                     
                 obj_id = data['object_metadata']['object_id']
                 title = data['object_metadata']['title']
-                license_info = data['object_metadata']['metadata'].get('license', '')
+                license_info = data['object_metadata']['scrape_tracking'].get('license', '')
                 
                 if not license_info:
                     continue
@@ -135,12 +135,12 @@ class LicenseCorruptionFixer:
                     data = yaml.safe_load(f)
                 
                 # Update license field
-                old_license = data['object_metadata']['metadata']['license']
-                data['object_metadata']['metadata']['license'] = corruption['clean_license']
+                old_license = data['object_metadata']['scrape_tracking']['license']
+                data['object_metadata']['scrape_tracking']['license'] = corruption['clean_license']
                 
                 # Update metadata timestamp
                 current_time = time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
-                data['object_metadata']['metadata']['last_license_corruption_fix'] = current_time
+                data['object_metadata']['scrape_tracking']['last_license_corruption_fix'] = current_time
                 
                 # Write back to file
                 with open(corruption['file_path'], 'w', encoding='utf-8') as f:

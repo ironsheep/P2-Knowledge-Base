@@ -23,7 +23,7 @@ object_metadata:
     - motor
     - led
     - spi
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356197'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:21:44.169997'

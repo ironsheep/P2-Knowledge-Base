@@ -28,15 +28,15 @@ def generate_adoption_requests():
                 data = yaml.safe_load(f)
                 
             author = data['object_metadata'].get('author', '')
-            import_source = data['object_metadata']['metadata'].get('import_source', '')
-            original_archiver_name = data['object_metadata']['metadata'].get('original_archiver_name', '')
+            import_source = data['object_metadata']['scrape_tracking'].get('import_source', '')
+            original_archiver_name = data['object_metadata']['scrape_tracking'].get('original_archiver_name', '')
             
             # Check if this is an archiver import for one of our target authors
             if import_source == 'github_archiver' and author in adoptable_authors:
                 obj_id = data['object_metadata']['object_id']
                 title = data['object_metadata']['title']
                 obex_url = data['object_metadata']['urls'].get('obex_page', '')
-                created_date = data['object_metadata']['metadata'].get('created_date', 'Unknown')
+                created_date = data['object_metadata']['scrape_tracking'].get('created_date', 'Unknown')
                 
                 if author not in adoption_requests:
                     adoption_requests[author] = {

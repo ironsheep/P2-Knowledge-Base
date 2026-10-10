@@ -27,7 +27,7 @@ object_metadata:
     - adc
     - driver
     - I2C
-  metadata:
+  scrape_tracking:
     created_date: '2025-05-30 06:33:41'
     discovery_date: '2025-09-12T12:43:55.437646'
     kb_integration: none

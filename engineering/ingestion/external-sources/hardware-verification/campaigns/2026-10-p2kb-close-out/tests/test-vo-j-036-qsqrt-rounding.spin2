@@ -1,0 +1,410 @@
+'' ===========================================================================
+''
+''   File.......  test-vo-j-036-qsqrt-rounding.spin2
+''   Purpose....  VO-J-036: how QSQRT (and the Spin2 SQRT operator built on it)
+''                rounds when the input is not a perfect square - truncated
+''                (floor), rounded to nearest, or rounded up (ceiling)?
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+'' ===========================================================================
+
+{ WHAT IS DECIDED  (KNOWLEDGE BASE: language/pasm2/qsqrt.yaml, spin2/operators/op_SQRT.yaml)
+
+  The sources state the operation and say nothing about rounding:
+    - "QSQRT {#}D,{#}S  Begin CORDIC square root of {S, D}. GETQX retrieves
+      root." (p2-datasheet-text.txt:2027): a 64-bit unsigned input, S the
+      upper long, D the lower long, a 32-bit root;
+    - Spin2 "SQRT x" is compiled by the v55 interpreter to "qsqrt x,#0"
+      (Spin2_interpreter.spin2 v55, :220), so it is QSQRT with S = 0.
+  NOT STATED anywhere ingested: what the 32-bit root is when the input is not
+  a perfect square.  qsqrt.yaml says so in as many words; op_SQRT.yaml says
+  nothing.
+
+  THIS PROGRAM MEASURES AND PREDICTS NOTHING.  It prints the readings below
+  before the run and lets the results select one.
+
+RIG
+  Bare P2 board, 200 MHz.  NO PINS, no jumper, nothing attached.  Everything
+  runs in cog 0 (DEBUG_COGS = %0000_0001): QSQRT from inline PASM, the SQRT
+  operator from Spin2, and the classifier from inline PASM.
+
+THE INSTRUMENT (classify)
+  For an input N = {nh, nl} and a root q, classify() computes q*q exactly
+  (QMUL, 64 bits) and decides, in 64-bit unsigned arithmetic with carries:
+    FLOOR   q*q <= N < (q+1)*(q+1)                      (truncated root)
+    ROUND   q*q - q < N <= q*q + q   (q = 0: N = 0)     (nearest, a .5 tie
+            cannot occur for an integer N, since (q+0.5)^2 = q^2+q+0.25)
+    CEIL    (q-1)*(q-1) < N <= q*q   (q = 0: N = 0)     (rounded up)
+  A root may satisfy several (an exact square satisfies all three; N = 12,
+  q = 3 is both FLOOR and ROUND).  A model "holds" for a path when it holds
+  for EVERY case run on that path.
+
+  GATE C (instrument control, run first): classify() on 14 hand-checked
+  (N, q) pairs, including the 64-bit edge N = 2^64-1, must return exactly the
+  flags listed in ctlTbl.  Any miss = RIG FAIL (the instrument is wrong) and
+  no reading is issued.
+
+THE CASES
+  S1  every N from 0 to 16_383                       (both paths)
+  S2  N = i * 1_048_573 for i = 0..4_095, spanning the 32-bit range (both)
+  S3  every N from $FFFF_FE00 to $FFFF_FFFF, the top of the range  (both)
+  W   eleven 64-bit inputs in wideTbl, the S operand non-zero  (QSQRT only)
+  The QSQRT sweep S1-S3 runs TWICE and the two passes must agree root for
+  root (GATE R, repeatability; a miss = RIG FAIL).
+  Paths: P = inline PASM "qsqrt nl, nh / getqx q"; S = Spin2 "SQRT N".
+
+THE READINGS (printed BEFORE the run; one per path)
+    FLOOR   every root is the truncated root
+    ROUND   every root is the nearest-integer root
+    CEIL    every root is the rounded-up root
+    OTHER   no model holds for every case (the first mismatches per model
+            are printed raw: they are the finding)
+  For each path the program prints, per model, the number of cases it holds
+  for, then one VERDICT line.  It also prints the distinguishing cases raw:
+  N = 2, 3, 8, 12, 13, 15, 24, 99, $FFFF_0000, $FFFF_0001, $FFFF_FFFF and all
+  of W.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000         ' system clock: 200 MHz
+  DEBUG_COGS      = %0000_0001          ' debug interrupt in cog 0 ONLY
+
+  S1_TOP          = 16_383              ' S1: every N 0..S1_TOP
+  S2_COUNT        = 4_096               ' S2: N = i * S2_STRIDE, i = 0..S2_COUNT-1
+  S2_STRIDE       = 1_048_573
+  S3_BASE         = $FFFF_FE00          ' S3: every N S3_BASE..$FFFF_FFFF
+  S3_COUNT        = 512
+  N_CTL           = 14                  ' rows in ctlTbl
+  N_WIDE          = 11                  ' rows in wideTbl
+  N_SHOW          = 11                  ' rows in showTbl
+  MAX_MISS        = 4                   ' mismatches printed per model per path
+
+  ' classify() flag bits
+  F_FLOOR         = %001
+  F_ROUND         = %010
+  F_CEIL          = %100
+
+CON ' ---- Identifiers ----
+  #0, M_FLOOR, M_ROUND, M_CEIL, N_MODEL
+  #0, P_PASM, P_SPIN, N_PATH
+
+VAR ' ---- Rig State ----
+  long holdCnt[N_PATH * N_MODEL]        ' cases each model holds for, per path
+  long missCnt[N_PATH * N_MODEL]        ' mismatches printed so far
+  long caseCnt[N_PATH]                  ' cases run per path
+  long failCnt                          ' RIG FAIL lines printed
+
+PUB main() | idx, flags, q1, q2, nVal
+'' Check the instrument, run every case on both paths, print the readings.
+
+' Local Variables:
+' @local idx - table / sweep index
+' @local flags - classify() result
+' @local q1 - QSQRT root, pass 1
+' @local q2 - QSQRT root, pass 2
+' @local nVal - the input N (low long)
+
+  failCnt := 0
+  print_header()
+
+  ' ---- GATE C: the instrument ----
+  repeat idx from 0 to N_CTL - 1
+    flags := classify(ctlTbl[idx * 4], ctlTbl[idx * 4 + 1], ctlTbl[idx * 4 + 2])
+    if flags <> ctlTbl[idx * 4 + 3]
+      debug("RIG FAIL: GATE C row ", udec_(idx), " N=", uhex_long_(ctlTbl[idx * 4]), "_", uhex_long_(ctlTbl[idx * 4 + 1]), " q=", uhex_long_(ctlTbl[idx * 4 + 2]), " flags ", ubin_byte_(flags), " expected ", ubin_byte_(ctlTbl[idx * 4 + 3]))
+      failCnt++
+  if failCnt
+    debug("=== END: NO VERDICT (the instrument failed GATE C) ===")
+    finish()
+  debug("GATE C passed: classify() agrees with all ", udec_(N_CTL), " hand-checked rows")
+
+  ' ---- the distinguishing cases, raw ----
+  repeat idx from 0 to N_SHOW - 1
+    nVal := showTbl[idx]
+    q1 := qsqrt64(0, nVal)
+    q2 := SQRT nVal
+    debug("RAW N=", uhex_long_(nVal), " (", udec_(nVal), ")  QSQRT=", udec_(q1), " ", ubin_byte_(classify(0, nVal, q1)), "  SQRT=", udec_(q2), " ", ubin_byte_(classify(0, nVal, q2)), "   [flags: CEIL ROUND FLOOR]")
+  repeat idx from 0 to N_WIDE - 1
+    q1 := qsqrt64(wideTbl[idx * 2], wideTbl[idx * 2 + 1])
+    debug("RAW N=", uhex_long_(wideTbl[idx * 2]), "_", uhex_long_(wideTbl[idx * 2 + 1]), "  QSQRT=", uhex_long_(q1), " (", udec_(q1), ") ", ubin_byte_(classify(wideTbl[idx * 2], wideTbl[idx * 2 + 1], q1)))
+
+  ' ---- S1 to S3 on both paths, the QSQRT path twice (GATE R) ----
+  repeat idx from 0 to S1_TOP
+    run_case(idx)
+  repeat idx from 0 to S2_COUNT - 1
+    run_case(idx * S2_STRIDE)
+  repeat idx from 0 to S3_COUNT - 1
+    run_case(S3_BASE + idx)
+
+  ' ---- W: 64-bit inputs, QSQRT only ----
+  repeat idx from 0 to N_WIDE - 1
+    q1 := qsqrt64(wideTbl[idx * 2], wideTbl[idx * 2 + 1])
+    q2 := qsqrt64(wideTbl[idx * 2], wideTbl[idx * 2 + 1])
+    if q1 <> q2
+      debug("RIG FAIL: GATE R, W row ", udec_(idx), " pass 1 ", uhex_long_(q1), " pass 2 ", uhex_long_(q2))
+      failCnt++
+    tally(P_PASM, wideTbl[idx * 2], wideTbl[idx * 2 + 1], q1)
+
+  print_verdict()
+  finish()
+
+PRI run_case(nVal) | q1, q2
+' Run one 32-bit N on both paths; the QSQRT path twice.
+'
+' @param nVal - the input N (S = 0)
+
+' Local Variables:
+' @local q1 - QSQRT root, pass 1
+' @local q2 - QSQRT root, pass 2
+
+  q1 := qsqrt64(0, nVal)
+  q2 := qsqrt64(0, nVal)
+  if q1 <> q2
+    if failCnt < MAX_MISS
+      debug("RIG FAIL: GATE R, N=", uhex_long_(nVal), " pass 1 ", uhex_long_(q1), " pass 2 ", uhex_long_(q2))
+    failCnt++
+  tally(P_PASM, 0, nVal, q1)
+  tally(P_SPIN, 0, nVal, SQRT nVal)
+
+PRI tally(path, nh, nl, q) | flags, model
+' Count which models hold for one case; print the first mismatches.
+'
+' @param path - P_PASM or P_SPIN
+' @param nh - N, upper long
+' @param nl - N, lower long
+' @param q - the root returned
+
+' Local Variables:
+' @local flags - classify() result
+' @local model - model index
+
+  caseCnt[path]++
+  flags := classify(nh, nl, q)
+  repeat model from 0 to N_MODEL - 1
+    if flags & (1 << model)
+      holdCnt[path * N_MODEL + model]++
+    elseif missCnt[path * N_MODEL + model] < MAX_MISS
+      missCnt[path * N_MODEL + model]++
+      debug("MISS ", zstr_(pathName(path)), " ", zstr_(modelName(model)), ": N=", uhex_long_(nh), "_", uhex_long_(nl), " root=", uhex_long_(q), " (", udec_(q), ")")
+
+PRI print_verdict() | path, model, holds, verdict
+' Print the counts and one VERDICT line per path.
+
+' Local Variables:
+' @local path - path index
+' @local model - model index
+' @local holds - models that hold for every case (bit per model)
+' @local verdict - the reading's name
+
+  repeat path from 0 to N_PATH - 1
+    holds := 0
+    repeat model from 0 to N_MODEL - 1
+      debug("COUNT ", zstr_(pathName(path)), " ", zstr_(modelName(model)), " holds for ", udec_(holdCnt[path * N_MODEL + model]), " of ", udec_(caseCnt[path]), " cases")
+      if holdCnt[path * N_MODEL + model] == caseCnt[path]
+        holds |= 1 << model
+    if failCnt
+      debug("NO VERDICT ", zstr_(pathName(path)), ": ", udec_(failCnt), " RIG FAIL line(s) above")
+    else
+      case holds
+        F_FLOOR : verdict := string("FLOOR (every root is the truncated root)")
+        F_ROUND : verdict := string("ROUND (every root is the nearest-integer root)")
+        F_CEIL  : verdict := string("CEIL (every root is the rounded-up root)")
+        0       : verdict := string("OTHER (no model holds for every case; the MISS lines are the finding)")
+        other   : verdict := string("AMBIGUOUS (more than one model holds; the cases do not separate them)")
+      debug("VERDICT VO-J-036 ", zstr_(pathName(path)), ": ", zstr_(verdict))
+  debug("=== END ===")
+
+PRI print_header()
+' Print the readings before the run.
+
+  debug("=== VO-J-036 QSQRT / SQRT rounding - Rev C bench, cog 0, no pins ===")
+  debug("READINGS (one per path): FLOOR = truncated root | ROUND = nearest-integer root | CEIL = rounded-up root | OTHER = none holds for every case")
+  debug("PATHS: QSQRT = inline PASM qsqrt nl,nh / getqx | SQRT = the Spin2 operator")
+  debug("CASES: N 0..16383; N = i*1048573, i 0..4095; N $FFFF_FE00..$FFFF_FFFF; 11 64-bit inputs (QSQRT only)")
+
+PRI finish()
+' Every terminal path ends here. pnut-term-ts ends the run when
+' DEBUG_END_SESSION appears in the output.
+
+  debug("DEBUG_END_SESSION")
+  repeat
+
+PRI pathName(path) : pStr
+' Name of a path.
+'
+' @param path - P_PASM or P_SPIN
+' @returns pStr - hub string
+
+  pStr := path == P_PASM ? string("QSQRT") : string("SQRT")
+
+PRI modelName(model) : pStr
+' Name of a model.
+'
+' @param model - M_FLOOR, M_ROUND or M_CEIL
+' @returns pStr - hub string
+
+  case model
+    M_FLOOR : pStr := string("FLOOR")
+    M_ROUND : pStr := string("ROUND")
+    other   : pStr := string("CEIL")
+
+PRI qsqrt64(nh, nl) : q
+' The root QSQRT returns for N = {nh, nl}.
+'
+' @param nh - N, upper long (the S operand)
+' @param nl - N, lower long (the D operand)
+' @returns q - GETQX after QSQRT
+
+  org
+                qsqrt   nl, nh
+                getqx   q
+  end
+
+PRI classify(nh, nl, q) : flags | sl, sh, tl, th, fb
+' Which rounding models the root q satisfies for N = {nh, nl}, decided in
+' 64-bit unsigned arithmetic (see THE INSTRUMENT).
+'
+' @param nh - N, upper long
+' @param nl - N, lower long
+' @param q - the root
+' @returns flags - F_FLOOR | F_ROUND | F_CEIL for each model that holds
+
+' Local Variables:
+' @local sl - q*q, lower long
+' @local sh - q*q, upper long
+' @local tl - work value, lower long
+' @local th - work value, upper long
+' @local fb - raw comparison bits (see below)
+
+  ' fb bit 0  N >= q*q
+  '    bit 1  N <= q*q
+  '    bit 2  N <= q*q + q          bit 3  q*q + q overflowed 64 bits
+  '    bit 4  N <= q*q + 2q         bit 5  q*q + 2q overflowed 64 bits
+  '    bit 6  N >  q*q - q          (q*q >= q for every q, no borrow)
+  '    bit 7  N >  (q-1)^2          (computed as q*q - 2q + 1; used only for q >= 1)
+  org
+                qmul    q, q
+                getqx   sl
+                getqy   sh
+                mov     fb, #0
+                ' N >= q*q : C = N < q*q
+                cmp     nl, sl          wc
+                cmpx    nh, sh          wc
+                bitnc   fb, #0
+                ' N <= q*q : C = q*q < N
+                cmp     sl, nl          wc
+                cmpx    sh, nh          wc
+                bitnc   fb, #1
+                ' t = q*q + q
+                mov     tl, sl
+                mov     th, sh
+                add     tl, q           wc
+                addx    th, #0          wc
+                bitc    fb, #3
+                cmp     tl, nl          wc
+                cmpx    th, nh          wc
+                bitnc   fb, #2
+                ' t = q*q + 2q
+                add     tl, q           wc
+                addx    th, #0          wc
+                bitc    fb, #5
+                cmp     tl, nl          wc
+                cmpx    th, nh          wc
+                bitnc   fb, #4
+                ' t = q*q - q
+                mov     tl, sl
+                mov     th, sh
+                sub     tl, q           wc
+                subx    th, #0
+                cmp     tl, nl          wc
+                cmpx    th, nh          wc
+                bitc    fb, #6
+                ' t = q*q - 2q + 1 = (q-1)^2, exact modulo 2^64 for q >= 1
+                sub     tl, q           wc
+                subx    th, #0
+                add     tl, #1          wc
+                addx    th, #0
+                cmp     tl, nl          wc
+                cmpx    th, nh          wc
+                bitc    fb, #7
+  end
+
+  flags := 0
+  ' FLOOR: N >= q*q and N < (q+1)^2, i.e. N <= q*q + 2q
+  if fb.[0] and (fb.[4] or fb.[5])
+    flags |= F_FLOOR
+  ' ROUND: q = 0 -> N = 0; else q*q - q < N <= q*q + q
+  if q == 0
+    if fb.[1]
+      flags |= F_ROUND
+  elseif fb.[6] and (fb.[2] or fb.[3])
+    flags |= F_ROUND
+  ' CEIL: N <= q*q and (q = 0 or N > (q-1)^2)
+  if fb.[1] and (q == 0 or fb.[7])
+    flags |= F_CEIL
+
+DAT ' ---- Tables ----
+
+' GATE C: N upper, N lower, q, expected flags (%CEIL_ROUND_FLOOR), hand-checked
+ctlTbl  long    0, 0, 0, %111                           ' 0 = 0^2 exactly
+        long    0, 8, 2, %001                           ' sqrt 8 = 2.83: 2 is FLOOR only
+        long    0, 8, 3, %110                           ' 3 is ROUND and CEIL
+        long    0, 12, 3, %011                          ' sqrt 12 = 3.46: 3 is FLOOR and ROUND
+        long    0, 12, 4, %100                          ' 4 is CEIL only
+        long    0, 13, 3, %001                          ' sqrt 13 = 3.61: 3 is FLOOR only
+        long    0, 13, 4, %110                          ' 4 is ROUND and CEIL
+        long    0, 16, 4, %111                          ' exact square
+        long    0, 16, 5, %000                          ' wrong root: no model
+        long    0, 1, 0, %000                           ' sqrt 1 = 1: 0 is wrong
+        long    0, 2, 1, %011                           ' sqrt 2 = 1.41: FLOOR and ROUND
+        long    0, 2, 2, %100                           ' CEIL only
+        long    $FFFF_FFFF, $FFFF_FFFF, $FFFF_FFFF, %001 ' sqrt(2^64-1) = 4294967295.99..: FLOOR only
+        long    0, $FFFF_FFFF, $0001_0000, %110         ' sqrt(2^32-1) = 65535.99..: 65536 is ROUND and CEIL
+
+' W: N upper, N lower
+wideTbl long    $0000_0001, $0000_0000                  ' 2^32, root 65536 exactly
+        long    $0000_0001, $0000_0001                  ' 2^32 + 1
+        long    $0000_0002, $0000_0000                  ' 2^33, root 92681.9
+        long    $0000_0004, $0000_0000                  ' 2^34, root 131072 exactly
+        long    $1234_5678, $9ABC_DEF0
+        long    $4000_0000, $0000_0000                  ' 2^62, root 2^31 exactly
+        long    $7FFF_FFFF, $FFFF_FFFF
+        long    $8000_0000, $0000_0000                  ' 2^63, root 3037000499.97
+        long    $FFFF_FFFE, $0000_0001                  ' (2^32-1)^2, root $FFFF_FFFF exactly
+        long    $FFFF_FFFE, $0000_0002                  ' (2^32-1)^2 + 1
+        long    $FFFF_FFFF, $FFFF_FFFF                  ' 2^64 - 1
+
+' the distinguishing 32-bit cases, printed raw
+showTbl long    2, 3, 8, 12, 13, 15, 24, 99, $FFFF_0000, $FFFF_0001, $FFFF_FFFF
+
+CON { license }
+{{
+
+ -------------------------------------------------------------------------------------------------
+  MIT License
+
+  Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+ -------------------------------------------------------------------------------------------------
+}}

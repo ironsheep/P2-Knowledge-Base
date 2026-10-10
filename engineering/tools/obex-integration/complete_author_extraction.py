@@ -226,12 +226,12 @@ class CompleteAuthorExtractor:
                     print(f"  ❓ {obj_id}: Unknown")
                 
                 # Update enhanced metadata
-                if enhanced_meta['creation_date'] and not obj['metadata'].get('created_date'):
-                    obj['metadata']['created_date'] = enhanced_meta['creation_date']
+                if enhanced_meta['creation_date'] and not obj['scrape_tracking'].get('created_date'):
+                    obj['scrape_tracking']['created_date'] = enhanced_meta['creation_date']
                     updated = True
                 
                 if enhanced_meta['license']:
-                    obj['metadata']['license'] = enhanced_meta['license']
+                    obj['scrape_tracking']['license'] = enhanced_meta['license']
                     updated = True
                 
                 if enhanced_meta['tags_extracted']:
@@ -248,8 +248,8 @@ class CompleteAuthorExtractor:
                 
                 # Save if updated
                 if updated:
-                    obj['metadata']['last_complete_extraction'] = datetime.now().isoformat()
-                    obj['metadata']['extraction_status'] = 'complete'
+                    obj['scrape_tracking']['last_complete_extraction'] = datetime.now().isoformat()
+                    obj['scrape_tracking']['extraction_status'] = 'complete'
                     
                     with open(object_file, 'w') as f:
                         yaml.dump(data, f, default_flow_style=False, indent=2)

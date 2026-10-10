@@ -25,7 +25,7 @@ object_metadata:
     - Filesystem
     - FlexProp
     - SD card
-  metadata:
+  scrape_tracking:
     created_date: '2026-04-25 03:04:45'
     discovery_date: '2026-06-29T00:00:00'
     kb_integration: none

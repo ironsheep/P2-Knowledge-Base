@@ -39,7 +39,7 @@ object_metadata:
     - motor
     - adc
     - spi
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:10.850413'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:23:19.663296'

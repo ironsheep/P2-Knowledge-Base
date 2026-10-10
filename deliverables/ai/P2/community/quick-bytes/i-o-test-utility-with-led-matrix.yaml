@@ -33,5 +33,5 @@ quick_byte:
     obex_object_ids: []
     related_boards:
     - 64006C
-  metadata:
+  scrape_tracking:
     scraped: '2026-06-29'

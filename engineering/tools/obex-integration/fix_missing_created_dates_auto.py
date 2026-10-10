@@ -35,7 +35,7 @@ class CreatedDateFixer:
                     
                 obj_id = data['object_metadata']['object_id']
                 title = data['object_metadata']['title']
-                created_date = data['object_metadata']['metadata'].get('created_date', '')
+                created_date = data['object_metadata']['scrape_tracking'].get('created_date', '')
                 obex_url = data['object_metadata']['urls'].get('obex_page', '')
                 
                 if not created_date or created_date == '':
@@ -124,11 +124,11 @@ class CreatedDateFixer:
                 try:
                     # Update the YAML data
                     data = missing['data']
-                    data['object_metadata']['metadata']['created_date'] = created_date
+                    data['object_metadata']['scrape_tracking']['created_date'] = created_date
                     
                     # Add extraction timestamp
                     current_time = time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
-                    data['object_metadata']['metadata']['last_created_date_fix'] = current_time
+                    data['object_metadata']['scrape_tracking']['last_created_date_fix'] = current_time
                     
                     # Write back to file
                     with open(missing['file_path'], 'w', encoding='utf-8') as f:

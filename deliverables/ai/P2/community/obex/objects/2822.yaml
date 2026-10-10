@@ -26,7 +26,7 @@ object_metadata:
     - I2C
     - jonnymac
     - rtc
-  metadata:
+  scrape_tracking:
     created_date: '2025-04-08 23:09:19'
     discovery_date: '2026-06-29T00:00:00'
     kb_integration: none

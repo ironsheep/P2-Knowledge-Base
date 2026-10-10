@@ -50,11 +50,6 @@ object_metadata:
     modification_notes: []
     related_objects: []
     
-  metadata:
+  scrape_tracking:
     discovery_date: ""
     kb_integration: "none"  # none, referenced, integrated
-    
-  notes:
-    extraction_notes: ""
-    analysis_notes: ""
-    integration_todo: []

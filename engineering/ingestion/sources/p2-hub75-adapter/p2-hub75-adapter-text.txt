@@ -1,0 +1,62 @@
++5VA R1 wa
+ald B1 GND
++ R2 G2
+ral Ba GND <— GND here is Really E
+U1 A
+J7 0.4uF o B
+[oor |, T4HCT244 & c D
+| CLK LAT
+. Gi___—2 v 18 _G1_OUT
+1A0 9 1Y0 =
+| P2 Eval Edge Expansion Socket (dual) | GND Ri 4 |js, > 4yy[ 46 R4_OUT OE GND
+| R2__6 J4q5 4y2| 44 —_R2_0UT DATA-IN
+B18 yas yy3{42___B4_OUT
+ViIO3V3 5V 4 | 10414 47 Jong >yo|- 310+ 14_OUT
+= = P2 Eval p8-15 10415 15 |on4 > oy4 2 10+15_OUT
+SF mu 4 7 G2__13 |5,9 2¥2|-L—-62_0UT
+10+15_ 2 8B 10414 B2__ 14 9 _B2_OUT
+oo 2A3 2Y3
+A a B2___3 9 G2
+Ua =10 R2__ 4 10. BA 1 dior IDC 2x8 Shrouded Header, Keyed
+om =8 | Gt 5 41 Rt ae = J3 s7
+a = S 12 SL, 2 LA Probe Header — HUB75 signals 2x8 Shrouded Header IDC
+: — py <7 ° R1_OUT___4 2___G1_OUT R1_OUT___4 2___G1_OUT
+GND GND & GND GND | GND =a B1_OUT__3 4 _H75_UNUSED_OUT B4_OUT__ 3 4 _H75_UNUSED_OUT
+z <7 R2_OUT__5 6 _G2_OUT R2_OUT__5 6 _G2_OUT
+| 3.3v pins (both connectors) are not connected. GND a ut Z 5 ur out Z 5 ur
+5 C_OUT__414 12 _D_OUT C_OUT__414 12 _D_OUT
+vio3V3 5V ¥ J2 4. s5va .5va CLK_OUT__13 14 LATCH_OUT CLK_OUT__13 14 LATCH_OUT
+= = P2 Eval pO—p7 , OFb_OUT__15 16 OEb_OUT__15 16
+hey =6 bE 2 8D a or P
+5 =i4 Cc 3 9B co GND GND
+: i U2
+3m m2 A 4 10 __ LATCH Ot uF
+OEb 5 11__—CLK 2 T4HCT244 og
+1 =e i a 42 fay i & N
+o | GND OEb 2 1449 S 1yo 418 OEb_OUT
+GND GND GND GND CLK 4 Jan, > yy, | 46 CLK_OUT
+A 6 Jy a5 ty7| 44 A_OUT
+LATCH 8 Jy az y3|42___LATCH_OUT
+D__17 }5,9 2¥0 3 —_P_0uT
+| E15 }5a1 PS 2yi{- 5 Eur
+Sc B13 |5y5 5y2|_7__B_OUT
+C14 |oaz 5y3|-9 _C_OUT
+C C
+prcrnennnny 50 10E
+| Through Holes so can populate and | Q20E z
+: connect unused pins if need be. : SL, S
+H H Pt
+Unused P2 Pins 14, 15 GND LY
+l0+15_ 3 | GND
+10+14 2
+GND
+i Unused P2 Pins 14, 15 level shifted to 5v }
+10+15_OUT_ 3 |
+10+14_OUT 2
+GND
+6 Iron Sheep Productions, LLC
+. Sheet: /
+ave uuuety out “ File: hub75—adaptor.sch
+ee Title: HUB75E Adapter for P2 Eval
+Date: 2020-11-25 Rev: H/W 1.4
+KiCad E.D.A. kicad (5.1.7-0-10_14) Id: 1/1

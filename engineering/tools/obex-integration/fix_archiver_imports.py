@@ -135,22 +135,22 @@ class ArchiverImportFixer:
                     data['object_metadata']['author'] = archiver_info['real_author']
                     
                     # Add archiver metadata
-                    if 'metadata' not in data['object_metadata']:
-                        data['object_metadata']['metadata'] = {}
-                    
-                    data['object_metadata']['metadata']['import_source'] = 'github_archiver'
-                    data['object_metadata']['metadata']['original_platform'] = 'github'
-                    
+                    if 'scrape_tracking' not in data['object_metadata']:
+                        data['object_metadata']['scrape_tracking'] = {}
+
+                    data['object_metadata']['scrape_tracking']['import_source'] = 'github_archiver'
+                    data['object_metadata']['scrape_tracking']['original_platform'] = 'github'
+
                     if archiver_info['archiver_date']:
-                        data['object_metadata']['metadata']['archiver_date'] = archiver_info['archiver_date']
-                    
+                        data['object_metadata']['scrape_tracking']['archiver_date'] = archiver_info['archiver_date']
+
                     # Update object date if we found one and it's missing
-                    if archiver_info['object_date'] and not data['object_metadata']['metadata'].get('created_date'):
-                        data['object_metadata']['metadata']['created_date'] = archiver_info['object_date']
-                    
+                    if archiver_info['object_date'] and not data['object_metadata']['scrape_tracking'].get('created_date'):
+                        data['object_metadata']['scrape_tracking']['created_date'] = archiver_info['object_date']
+
                     # Add timestamp
                     current_time = time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
-                    data['object_metadata']['metadata']['last_archiver_fix'] = current_time
+                    data['object_metadata']['scrape_tracking']['last_archiver_fix'] = current_time
                     
                     # Write back to file
                     with open(obj_info['file_path'], 'w', encoding='utf-8') as f:

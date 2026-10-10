@@ -25,7 +25,7 @@ object_metadata:
     - sensor
     - display
     - led
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:10.850451'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:22:09.675659'

@@ -359,7 +359,7 @@ check_cache_stamp() {
 # Empty input gives empty output. Standalone (no rule loaded) it applies the
 # built-in rule, which is the agreement's §3 block exactly.
 filter_metadata() {
-    local builtin="documentation_level,documentation_source,enhancement_source,last_updated,manual_extraction_date,source,source_reference,sources,verified_against"
+    local builtin="documentation_level,documentation_source,enhancement_source,last_updated,manual_extraction_date,scrape_tracking,source,source_reference,sources,verified_against"
     if [[ "$1" == "--builtin-fields" ]]; then
         printf '%s' "$builtin"
         return 0

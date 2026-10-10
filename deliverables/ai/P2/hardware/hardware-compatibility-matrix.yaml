@@ -164,8 +164,8 @@ addon_board_host_compatibility:
 
       - part: "64032"
         name: "HUB75 Adapter"
-        pins_used: "16 pins (dual accessory header); 14 signals used, offsets 14-15 unused"
-        note: "All 14 used signals are P2 outputs, driven through the adapter's level shifters"
+        pins_used: "16 pins (dual accessory header); 14 HUB75 signals, offsets 14-15 spare (brought out on through-holes, direct and 5 V-buffered)"
+        note: "All 14 HUB75 signals are P2 outputs, driven through the adapter's 74HCT244 level shifters; see hardware/hub75_adapter.yaml"
         conflicts: "uses a full dual header; check panel power budget separately"
 
   edge_carrier_compatibility:

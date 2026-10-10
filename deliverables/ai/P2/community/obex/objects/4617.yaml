@@ -25,7 +25,7 @@ object_metadata:
     - motor
     - spi
     - display
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509850'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:20:46.291697'

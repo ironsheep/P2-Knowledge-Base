@@ -228,7 +228,7 @@ class OBEXAuthorExtractor:
             
             # Update dates if found
             if extracted_info.get('created_date'):
-                obj['metadata']['created_date'] = extracted_info['created_date']
+                obj['scrape_tracking']['created_date'] = extracted_info['created_date']
             
             # Update description if better than current
             current_desc = obj['functionality'].get('description_full', '')
@@ -251,8 +251,8 @@ class OBEXAuthorExtractor:
                 obj['technical_details']['file_size'] = extracted_info['file_size_extracted']
             
             # Update extraction metadata
-            obj['metadata']['last_author_extraction'] = extracted_info['extraction_date']
-            obj['metadata']['extraction_status'] = 'author_extracted'
+            obj['scrape_tracking']['last_author_extraction'] = extracted_info['extraction_date']
+            obj['scrape_tracking']['extraction_status'] = 'author_extracted'
             
             # Save updated file
             with open(object_file, 'w') as f:

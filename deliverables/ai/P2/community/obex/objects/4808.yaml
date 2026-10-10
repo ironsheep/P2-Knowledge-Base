@@ -22,7 +22,7 @@ object_metadata:
     tags:
     - CAN bus
     - CANbus
-  metadata:
+  scrape_tracking:
     created_date: '2024-07-13 21:54:37'
     discovery_date: '2026-06-29T00:00:00'
     kb_integration: none

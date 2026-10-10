@@ -43,7 +43,8 @@ only a fixed engine that applies it. A rule change reaches every receiver on its
   "format": 1,
   "remove_fields": [
     "documentation_level", "documentation_source", "enhancement_source", "last_updated",
-    "manual_extraction_date", "source", "source_reference", "sources", "verified_against"
+    "manual_extraction_date", "scrape_tracking", "source", "source_reference", "sources",
+    "verified_against"
   ],
   "remove_column0_comments": true
 }
@@ -82,11 +83,20 @@ bundle's README states it for every rule in the bundle (§9).
 `rule_id` is:
 
 ```
-b431af2a9f515c11fe5fd982642c636c6f8843bf89ed2c3003ee0e28c04877ee
+7dc618e436c3c56405e6de47fad9608840c2adad6689b1a115476c1e02674870
 ```
 
-(Reproduce: `printf 'p2kb-delivery-filter\nformat=1\nremove_fields=documentation_level,documentation_source,enhancement_source,last_updated,manual_extraction_date,source,source_reference,sources,verified_against\nremove_column0_comments=true\n' | sha256sum`.)
+(Reproduce: `printf 'p2kb-delivery-filter\nformat=1\nremove_fields=documentation_level,documentation_source,enhancement_source,last_updated,manual_extraction_date,scrape_tracking,source,source_reference,sources,verified_against\nremove_column0_comments=true\n' | sha256sum`.)
 Use it as a unit-test value for `RuleID`.
+
+> **Amendment, 2026-10-10, Stephen:** one name added, `scrape_tracking`, the OBEX/Quick Bytes
+> scraper bookkeeping; tracking stays in the YAML and the filter removes it. The rule block, the
+> built-in rule and its `rule_id` above are the amended values (the previous `rule_id` was
+> `b431af2a9f515c11fe5fd982642c636c6f8843bf89ed2c3003ee0e28c04877ee`, without the new name). The
+> list is still sorted; `scrape_tracking` sits between `manual_extraction_date` and `source`. The
+> server's `BuiltinRule` and its `RuleID` unit-test value change to match; a server that follows the
+> index needs nothing else. The certification bundle under `cert-bundle/` is a frozen fixture of the
+> earlier rule and is not rebuilt for this amendment.
 
 ## 4. The engine — format 1, exact
 
@@ -170,12 +180,13 @@ type Rule struct {
     RemoveColumn0Comments bool
 }
 
-// BuiltinRule is the §3 block exactly. rule_id b431af2a…77ee (§3.1).
+// BuiltinRule is the §3 block exactly. rule_id 7dc618e4…4870 (§3.1).
 var BuiltinRule = Rule{
     Format: 1,
     RemoveFields: []string{
         "documentation_level", "documentation_source", "enhancement_source", "last_updated",
-        "manual_extraction_date", "source", "source_reference", "sources", "verified_against",
+        "manual_extraction_date", "scrape_tracking", "source", "source_reference", "sources",
+        "verified_against",
     },
     RemoveColumn0Comments: true,
 }
@@ -329,8 +340,9 @@ still correct.
 hash check, before it is parsed, cached or returned** — the bodies `p2kb_get` returns, and equally
 the OBEX object YAMLs (`deliverables/ai/P2/community/obex/objects/*.yaml`, which are KB files listed
 in the main index) that the `p2kb_obex_*` tools read. No path uses a raw body. (Measured 2026-10-07:
-the OBEX objects carry none of the §3 fields and one column-0 comment, in `_template.yaml`; filtering
-them changes almost nothing today, and keeps them covered when that changes.)
+the OBEX objects carried none of the §3 fields and one column-0 comment, in `_template.yaml`. Since
+the 2026-10-10 amendment they carry `scrape_tracking:`, which the filter removes, so the `p2kb_obex_*`
+tools no longer see the scraper bookkeeping — see the amendment note below §3.)
 
 ## 6. Cache
 

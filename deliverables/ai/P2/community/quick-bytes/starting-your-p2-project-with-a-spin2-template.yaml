@@ -24,5 +24,5 @@ quick_byte:
   cross_links:
     obex_object_ids: []
     related_boards: []
-  metadata:
+  scrape_tracking:
     scraped: '2026-06-29'

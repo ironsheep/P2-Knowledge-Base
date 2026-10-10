@@ -30,7 +30,7 @@ object_metadata:
     - sensor
     - adc
     - spi
-  metadata:
+  scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247238'
     kb_integration: none
     last_author_extraction: '2025-09-12T13:23:03.687946'
