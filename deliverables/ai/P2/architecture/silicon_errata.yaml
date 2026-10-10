@@ -1,0 +1,134 @@
+concept: silicon_errata
+title: "P2 Silicon Errata E1-E7"
+category: silicon_errata
+description: >-
+  The seven silicon errata of the P2 (P2X8C4M64P, Rev C silicon), E1 to E7. Each entry
+  below gives what the erratum affects, what happens, and the rule code must follow;
+  `related:` names the pages that carry the full account.
+p2kb_key: "p2kbArchSiliconErrata"
+aliases:
+  - "P2 errata"
+  - "errata"
+  - "erratum"
+  - "silicon errata"
+  - "P2 silicon errata"
+  - "E1-E7"
+  - "erratum E1"
+  - "erratum E2"
+  - "erratum E3"
+  - "erratum E4"
+  - "erratum E5"
+  - "erratum E6"
+  - "erratum E7"
+  - "E1"
+  - "E2"
+  - "E3"
+  - "E4"
+  - "E5"
+  - "E6"
+  - "E7"
+  - "known silicon bugs"
+
+errata:
+  E1:
+    title: "SETQ Block Transfers Lose Their Pointer Step"
+    affects: "A SETQ/SETQ2 block RDLONG, WRLONG or WMLONG that updates PTRA or PTRB (e.g. ptra++), when an ALTx, AUGS or AUGD sits between the SETQ/SETQ2 and the transfer."
+    effect: "Every long of the block still transfers, but PTRx steps by the plain expression's own step (+4 for ptra++, +12 for ptra++[3]) instead of past the whole block."
+    rule: "Write the SETQ/SETQ2 directly before the block transfer, with nothing between them."
+    related:
+      - language/pasm2/concepts/setq_block_ops.yaml
+      - language/pasm2/setq.yaml
+      - language/pasm2/augs.yaml
+      - language/pasm2/augd.yaml
+    sources:
+      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (the SETQ/SETQ2 block-size PTRx delta entry)"
+      - "EF-067"
+
+  E2:
+    title: "An Immediate ALTx Takes a Pending AUGS"
+    affects: "PASM2 that places an ALTx with an immediate #S (e.g. ALTD index,#base) between an AUGS and the instruction the AUGS was written for."
+    effect: "The ALTx is augmented too, and the AUGS is not cancelled, so its intended target still receives it. The ALTx's base register (S[8:0]) is the intended one, but its D-register auto-increment is taken from bits 17:9 of the augmented value, silently moving its D register."
+    rule: "Give any ALTx placed between an AUGS and its target a register S, not an immediate #S."
+    related:
+      - language/pasm2/augs.yaml
+      - language/pasm2/altd.yaml
+    sources:
+      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (the AUGS / immediate-#S ALTx entry)"
+      - "EF-066"
+
+  E3:
+    title: "GETCT Returns a Stale Upper Long"
+    affects: "GETCT WC (the upper long of the 64-bit counter), Spin2 GETMS() and GETSEC(), and DEBUG_TIMESTAMP stamps, in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the counter's lower long (every 2^32 clocks, 21.47 s at 200 MHz). From reset only cog 0 runs, so the first cog a program starts in 4-7 after the first wrap meets it."
+    effect: "The upper long is behind by one per missed wrap until that group runs through its next wrap. GETCT without WC, Spin2 GETCT(), and the CT waits, polls, jumps and interrupts are correct."
+    rule: "Keep a cog of each group in use running at every wrap: e.g. start a keeper cog of 4-7 (code 'keeper jmp #keeper') as the first line of main(); a cog held in WAITATN, WAITX or WAITCT1 counts as running. Or take no 64-bit time in that group until it has run through one wrap."
+    related:
+      - language/pasm2/getct.yaml
+      - language/spin2/methods/getms.yaml
+      - language/spin2/methods/getsec.yaml
+      - language/spin2/constants/special-configuration-symbols.yaml
+    sources:
+      - "EF-068"
+      - "EF-075"
+      - "EF-078"
+      - "EF-079"
+      - "EF-080"
+      - "EF-081"
+      - "EF-082"
+      - "EF-083"
+
+  E4:
+    title: "GETXACC Clears Only During a Goertzel Burst"
+    affects: "DDS/Goertzel measurements read with GETXACC while the streamer is idle or running another mode, e.g. a discrete XINIT / WAITXFI / GETXACC sequence."
+    effect: "GETXACC clears the Goertzel accumulators only while a Goertzel burst runs. An idle read returns the running total and clears nothing, so a read after a burst holds every earlier burst too."
+    rule: "Read GETXACC idle before and after each burst and subtract; do not rely on GETXACC to clear outside a Goertzel burst."
+    related:
+      - language/pasm2/getxacc.yaml
+      - architecture/streamer/dds-goertzel.yaml
+    sources:
+      - "EF-069"
+      - "EF-076"
+
+  E5:
+    title: "The Goertzel Accumulators Trail by One Clock"
+    affects: "DDS/Goertzel bursts whose sums are read with GETXACC after the burst."
+    effect: "A reading after a burst of N clocks holds N-1 terms. The last term is added on the first active clock of the next Goertzel burst; waiting does not deliver it."
+    rule: "Follow each burst with a short zero-term burst (same mode, input enables S[15:12] clear) before reading. The GETXACC helper routine does this and the E4 subtraction together (SINC1)."
+    related:
+      - language/pasm2/getxacc.yaml
+      - architecture/streamer/dds-goertzel.yaml
+    sources:
+      - "EF-070"
+      - "EF-076"
+
+  E6:
+    title: "In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC"
+    affects: "A pin in a DAC smart-pin mode (%SSSSS = %00001 to %00011) configured with TT = %00, whose ADC the program switches on with OUT."
+    effect: "Raising OUT does not start the ADC; the pin reads exactly as with OUT low."
+    rule: "Set TT bit 0 in the WRPIN word ($40, P_TT_01). The DAC then drives the pin while the ADC runs."
+    related:
+      - architecture/smart_pins.yaml
+      - architecture/smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml
+      - architecture/smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml
+      - architecture/smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml
+      - language/spin2/methods/wrpin.yaml
+    sources:
+      - "EF-071"
+      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, %TT table (the published rule the bench contradicts)"
+
+  E7:
+    title: "After a No-Wait RDFAST, the Next Hub Instruction Can Complete Early"
+    affects: "Cog code that starts the hub FIFO with a no-wait RDFAST (D[31] = 1) and starts another hub instruction fewer than 16 clocks later: a hub read or write, a SETQ block read, or a waiting RDFAST."
+    effect: "Depending on hub alignment, that instruction can complete early: a read returns the previous hub read's data with that value's C/Z; a write is lost if a hub read follows at once; a SETQ block read writes one wrong long and can overwrite cog registers, or the cog does not finish; a waiting RDFAST does not wait and the next RFLONG returns $0000_0000. Nothing flags it."
+    rule: "Use the waiting RDFAST (D[31] = 0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts (e.g. WAITX #12 directly after it). A no-wait WRFAST is not affected."
+    related:
+      - language/pasm2/rdfast.yaml
+      - language/pasm2/rdlong.yaml
+      - language/pasm2/wrlong.yaml
+      - language/pasm2/setq.yaml
+    sources:
+      - "EF-074"
+      - "EF-077"
+      - "EF-084"
+      - "EF-086"
+      - "EF-087"
+      - "EF-088"

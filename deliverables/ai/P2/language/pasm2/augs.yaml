@@ -47,6 +47,7 @@ flags_affected:
   Z: No effect
 silicon_errata:
   setq_ptrx_block_size_delta_cancelled:
+    erratum: "E1"
     severity: critical
     description: |
       AUGS placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx cancels the
@@ -57,6 +58,7 @@ silicon_errata:
     status: "Active in Rev C silicon (current production)."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS ('Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
   intervening_altx_immediate_s_consumes_augs:
+    erratum: "E2"
     severity: critical
     description: |
       An ALTx instruction with an immediate #S operand, placed BETWEEN AUGS and the AUGS'
@@ -74,8 +76,8 @@ silicon_errata:
       ADD   0-0,#$123         ' #$123 is augmented by the AUGS and cancels the AUGS
     workaround: "Use a register (not an immediate #S) for the S operand of any ALTx placed between AUGS and its target."
     status: "Active in Rev C silicon (current production)."
-    scope_note: "The Silicon Doc documents THIS errata (an intervening ALTx with immediate #S consuming the AUGS value) for AUGS only; AUGD is not mentioned in the source (P2 Silicon Doc v35, KNOWN BUGS). This is distinct from the block-size PTRx-delta bug above (KNOWN BUGS), which DOES explicitly name ALTx/AUGS/AUGD together. AUGD on silicon: a pending AUGD survived an intervening immediate-S ALTS and reached its #D target intact (AUGD / ALTS idxs,#0 / WRLONG #$13C wrote $1357_9B3C, idxs unchanged); an ALTx has no immediate-D form, so it cannot consume a pending AUGD. One ALTx variant was tested for this half."
-    source: "P2 Silicon Doc v35 (KNOWN BUGS, Rev C) -- verbatim; the ALTD/ALTR effect and the register-S workaround hardware-verified on Rev C (EF-066)."
+    scope_note: "Applies to a pending AUGS. A pending AUGD survived an intervening immediate-S ALTS and reached its #D target intact (AUGD / ALTS idxs,#0 / WRLONG #$13C wrote $1357_9B3C, idxs unchanged); an ALTx has no immediate-D form, so it cannot consume a pending AUGD. One ALTx variant was tested for the AUGD half. Distinct from the block-size PTRx-delta erratum above (E1), which an intervening ALTx, AUGS or AUGD each trigger."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (the AUGS / immediate-#S ALTx entry and its example); the ALTD/ALTR auto-increment effect, the register-S workaround and the AUGD half of scope_note hardware-verified on Rev C (EF-066)."
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGS, p.51"
 documentation_level: comprehensive
 compiler_operand_format:
@@ -88,8 +90,16 @@ compiler_encoding:
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Augment next literal Src to 32-bits
+aliases:
+- "erratum E2"
+- "P2 erratum E2"
+- "E2 erratum"
+- "An Immediate ALTx Takes a Pending AUGS"
+- "ALTx immediate S consumes AUGS"
 related:
-- AUGD
+- language/pasm2/augd.yaml
+- language/pasm2/concepts/setq_block_ops.yaml
+- architecture/silicon_errata.yaml
 examples:
 - description: "Using ## syntax (compiler inserts AUGS automatically)"
   code: |

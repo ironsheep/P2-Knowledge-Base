@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-570`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-571`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -62,7 +62,34 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen)
+
+### F-570 — the seven P2 errata E1-E7 could not all be found: no page listed them, and E1, E2 and E6 were reachable by no name — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; closes when the next KB release serves it)
+Reported by Stephen 2026-10-10: an agent looking up all the errata could not find all of them. Measured on
+the committed index (HEAD `ce07fd8f`): `errata`, `erratum`, `P2 errata` and every `erratum EN` resolved to
+nothing; only `GETCT erratum E3`, `RDFAST erratum E7` and `Goertzel errata E4 E5` existed as aliases. **The
+index generator is not at fault** — it stores aliases as written (and upper-cased) and lists every file that
+shares one; the aliases were missing. **Applied 2026-10-10:** new hub `architecture/silicon_errata.yaml`
+(`p2kbArchSiliconErrata`, category `architecture_errata`): E1-E7, each with title, what it affects, what
+happens, the rule, `related:` full paths and `sources:` — E1/E2 the Parallax Propeller 2 Documentation v35
+KNOWN SILICON BUGS section plus EF-067/EF-066; E3 EF-068, 075, 078-083; E4 EF-069, 076; E5 EF-070, 076; E6
+EF-071 and the v35 %TT table; E7 EF-074, 077, 084, 086-088. Aliases on the hub: `P2 errata`, `errata`,
+`erratum`, `silicon errata`, `E1-E7`, `erratum E1`..`E7`, bare `E1`..`E7`. Each home page
+(`setq_block_ops`, `augs`, `augd`, `getct`, `getxacc`, `dds-goertzel`, `smart_pins`, `rdfast`) gains
+`erratum EN` aliases, an `erratum:` label on its block and a `related:` link to the hub. **Wrong, fixed
+in the same pass:** `setq_block_ops.yaml` `applies_to` said "SETQ/SETQ2 immediately followed by" a block
+transfer — the opposite of the bug, which needs an ALTx/AUGS/AUGD *between* them (v35 KNOWN SILICON BUGS,
+`silicon-doc-text.txt:123`); `getxacc.yaml`'s workaround claimed the zero burst does not flush under SINC2,
+which no record tested (EF-076 covers SINC1; EF-072 calls the SINC2 note untested) — now "proven for SINC1
+only"; the E6 block in `smart_pins.yaml` cited nothing — now EF-071 and the %TT table; `augs`/`augd` bare
+`related:` names replaced by full paths. **Lookups after (throwaway regen):** `errata`, `erratum`,
+`P2 errata`, `E1`..`E7` → the hub; `erratum EN` → the hub plus that erratum's home page. **Gates:** format,
+claim sourcing (1006 files, 0 Tier 1), source lock PASS, duplicate keys, plain scalar, provenance key
+names, index findability, crossref (4210 resolve), compile gate (72 blocks PASS), internal ids, register
+ids, history prose — all clean. **Not done (left out, ungrounded):** the E1 case where a `##` operand on the
+transfer inserts an AUGS needs a compile-proof record. Pages that mention an erratum without its number
+(`rdlong`, `wrlong`, `wmlong`, `rdbyte`, `rdword`, `wrbyte`, `wrword`, `setq`, Spin2 `getct`/`getms`/`getsec`,
+the DAC smart-pin pages, `wrpin`) point to the home pages, which carry it.
 
 ### F-569 — the new provenance-key gate's census: three provenance keys still reach agents, and the OBEX tooling it touched has two defects — `NEEDS-VERIFICATION` (found 2026-10-10, «#422»)
 Found building F-545's gate (`audit-yaml-provenance-key-names.py`, kind `open`). Each is understood but

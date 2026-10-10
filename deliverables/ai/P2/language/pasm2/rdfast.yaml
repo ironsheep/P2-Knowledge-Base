@@ -58,6 +58,7 @@ notes:
 
 silicon_errata:
   no_wait_rdfast_releases_next_hub_op:
+    erratum: "E7"
     condition: "A hub instruction started fewer than 16 clocks after the start of a no-wait RDFAST (D[31]=1), while it still waits for its hub slot. Cog execution (hub execution cannot use RDFAST)."
     effect: "It can complete before its own hub access (43 of 64 hub alignments at the next instruction; none from 16 clocks): RDBYTE/RDWORD/RDLONG return the PREVIOUS hub read's data (byte/word at their own offset) with that value's C/Z, and PTRA++ still steps; WRBYTE/WRWORD/WRLONG is lost if a hub read follows at once; a SETQ block RDLONG writes one wrong long, leaves the rest unwritten and can overwrite cog registers outside its destination, or the cog does not finish; a blocking RDFAST issued 8-15 clocks after it takes 2 clocks without waiting and the next RFLONG returns $0000_0000. Nothing flags any of these."
     workaround: "Rule at each use: use the waiting form (D[31]=0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts -- e.g. WAITX #12 directly after it (2 + 14 = 16 clocks), or 7 two-clock non-hub instructions (a SETQ counts as one). The waiting form and the 16-clock spacing are proven on silicon for every read and write width, SETQ block reads and a following RDFAST (spacing tested with WAITX and NOPs only)."
@@ -93,6 +94,10 @@ oneliner: Begin new fast hub read via FIFO
 aliases:
 - no-wait RDFAST
 - RDFAST erratum E7
+- erratum E7
+- P2 erratum E7
+- E7 erratum
+- After a No-Wait RDFAST, the Next Hub Instruction Can Complete Early
 - RDLONG returns stale value after RDFAST
 - WRLONG lost after RDFAST
 - RFLONG returns zero after RDFAST
@@ -106,3 +111,4 @@ related:
   - architecture/boot-rom/spi-flash-boot.yaml
   - code-examples/flash-loader-case-study.yaml
   - language/pasm2/idioms/hub-memory.yaml
+  - architecture/silicon_errata.yaml

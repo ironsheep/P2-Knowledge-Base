@@ -3,6 +3,12 @@ title: SETQ/SETQ2 Block Operations
 category: memory_operations
 description: Hardware-accelerated block memory transfers and operations using SETQ/SETQ2 prefixes
 documentation_level: comprehensive
+aliases:
+  - "erratum E1"
+  - "P2 erratum E1"
+  - "E1 erratum"
+  - "SETQ Block Transfers Lose Their Pointer Step"
+  - "SETQ block PTRx step lost"
 
 overview: |
   SETQ and SETQ2 are prefix instructions that modify the next instruction to perform block operations.
@@ -14,7 +20,7 @@ overview: |
 silicon_errata:
   intervening_altx_augs_augd_cancels_ptrx_block_delta:
     severity: critical
-    applies_to: "SETQ/SETQ2 immediately followed by a block RDLONG/WRLONG/WMLONG that uses a PTRx expression (e.g. ptra++)"
+    applies_to: "A SETQ/SETQ2 block RDLONG/WRLONG/WMLONG that uses a PTRx update expression (e.g. ptra++), with an ALTx, AUGS or AUGD between the SETQ/SETQ2 and the transfer"
     description: |
       An ALTx, AUGS, or AUGD instruction placed BETWEEN SETQ/SETQ2 and the block
       RDLONG/WRLONG/WMLONG cancels the special-case block-size PTRx delta. The expected
@@ -312,3 +318,4 @@ related:
   - language/pasm2/idioms/hub-memory.yaml
   - code-examples/flash-loader-case-study.yaml
   - architecture/boot-rom/spi-flash-boot.yaml
+  - architecture/silicon_errata.yaml

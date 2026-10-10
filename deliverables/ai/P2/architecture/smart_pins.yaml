@@ -24,6 +24,11 @@ aliases:
   - "IN signal semantics"
   - "smart pin handshake"
   - "SSSSS field"
+  - "erratum E6"
+  - "P2 erratum E6"
+  - "E6 erratum"
+  - "In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC"
+  - "DAC mode OUT does not start ADC"
 description: |
   64 identical smart I/O pins, each with autonomous processing capabilities for
   timing, counting, serial protocols, ADC/DAC operations, and more. Offloads
@@ -413,7 +418,9 @@ configuration_format:
           enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
           adc_control: "0x=OUT enables ADC, 1x=OTHER enables ADC (M[7:0] overridden)"
           silicon_errata:
-            out_needs_tt_bit0_to_run_adc: "The two published rules do not combine as written: with TT = %00, raising OUT runs NOTHING -- the ADC stays off and the pin reads exactly as with OUT low. With TT = %01 (output enabled), OUT runs the ADC, and the fast DAC drives the pin while it does. Workaround (rule at each use): set TT bit 0 in the WRPIN word and accept the DAC driving the pin. Only TT = %00/%01 tested; the OTHER forms (TT = %1x) not. Contradicts the Silicon Doc %TT table."
+            erratum: "E6"
+            out_needs_tt_bit0_to_run_adc: "The two published rules do not combine as written: with TT = %00, raising OUT runs NOTHING -- the ADC stays off and the pin reads exactly as with OUT low. With TT = %01 (output enabled), OUT runs the ADC, and the fast DAC drives the pin while it does. Workaround (rule at each use): set TT bit 0 in the WRPIN word ($40, P_TT_01) and accept the DAC driving the pin. Only TT = %00/%01 tested; the OTHER forms (TT = %1x) not. Contradicts the published %TT table."
+            source: "Hardware-verified on Rev C silicon (EF-071), both runs; the published rules: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, %TT table (x0 = output disabled, regardless of DIR; 0x = OUT enables ADC in DAC_MODE)"
       which_modes_need_p_oe:
         required: "All output modes: NCO (%00110-%00111), PWM (%01000-%01010), Pulse/Transition (%00100-%00101), Serial TX (%11100, %11110), DAC (%00001-%00011), USB (%11011)"
         not_needed: "Input-only modes: Timing (%10000-%10010), Counters (%01011-%01111), Period/Freq (%10011-%10111), ADC (%11000-%11010), Serial RX (%11101, %11111)"
@@ -649,6 +656,7 @@ related:
   - language/spin2/symbols/spin2-builtin-symbols-complete.yaml
   - language/pasm2/wrpin.yaml
   - language/spin2/methods/wrpin.yaml
+  - architecture/silicon_errata.yaml
 
 see_also:
   - "Smart pin mode reference (modes/ directory)"

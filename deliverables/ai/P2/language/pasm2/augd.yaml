@@ -43,6 +43,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   clocks: '2'
 silicon_errata:
   setq_ptrx_block_size_delta_cancelled:
+    erratum: "E1"
     severity: critical
     description: |
       AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx cancels the
@@ -69,7 +70,9 @@ last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Augment next literal Dest to 32-bits
 related:
-- AUGS
+- language/pasm2/augs.yaml
+- language/pasm2/concepts/setq_block_ops.yaml
+- architecture/silicon_errata.yaml
 examples:
 - description: "Using ## syntax (compiler auto-generates AUGD)"
   code: |

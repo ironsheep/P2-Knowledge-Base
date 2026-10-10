@@ -111,6 +111,10 @@
       "description": "Execution engines",
       "files": ["xbyte_engine"]
     },
+    "errata": {
+      "description": "P2 silicon errata E1-E7: what each affects and the rule code must follow",
+      "files": ["silicon_errata"]
+    },
     "decomposition": {
       "description": "Decomposition reasoning layer — the generative method, forces, lenses, and worked derivation for cutting a design across the P2's parallel fabric",
       "files": [

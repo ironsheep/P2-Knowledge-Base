@@ -23,12 +23,15 @@ flags_affected:
   Z: No effect
 silicon_errata:
   clear_only_during_goertzel_burst:
+    erratum: "E4"
     effect: "With the streamer idle, or running any non-Goertzel mode, GETXACC returns the live accumulator and clears nothing: repeated reads -- including right after XINIT of a non-Goertzel command -- return the same value, and the accumulators keep growing from one burst to the next. During a Goertzel burst the clear does act, and partitions the burst exactly (a read inside it plus the next read = one unread burst)."
     source: "Hardware-verified on Rev C (EF-069): 50 of 50 idle/non-Goertzel reads equal the prior value; 8 of 8 mid-burst partitions exact. Contradicts the Silicon Doc's capture-and-clear statement."
   last_term_lands_in_next_burst:
-    effect: "A reading after a Goertzel burst of N clocks holds N-1 terms; the last term waits in an internal register no instruction reads and is added on the first active clock of the NEXT Goertzel burst. Waiting does not deliver it."
+    erratum: "E5"
+    effect: "A reading after a Goertzel burst of N clocks holds N-1 terms; the last term waits in an internal register no instruction reads and is added on the first active clock of the NEXT Goertzel burst. Waiting does not deliver it. A short zero-term burst (same mode, input enables S[15:12] clear) after the burst delivers it: the reading then holds all N terms and nothing spills into the next burst."
     evidence: "Hardware-verified on Rev C: 16 of 16 sequences, N = 64 and 65, both signs. (SINC2's iteration-count corruption is a separate, documented behaviour -- see goertzel_usage.sinc2_constraint.)"
-  workaround: "Helper routine (SINC1): take each burst's sums as the difference of two idle reads, and deliver the held term before each: (1) a zero-term burst -- XINIT with the caller's D at count 4 and the caller's S with S[15:12] = 0 (every summed input off) -- then WAITXFI; (2) GETXACC idle = baseline; (3) the caller's burst, WAITXFI; (4) another zero-term burst, WAITXFI; (5) GETXACC idle; (6) subtract. Returned exactly N terms in 60 of 60 calls, N = 1..1001, back to back. Not for SINC2 (its first stage is a running integral the zero burst does not flush)."
+    source: "Hardware-verified on Rev C silicon: EF-070 (the one-clock lag and the zero-term-burst delivery); helper routine below: EF-076"
+  workaround: "Helper routine (SINC1), for E4 and E5 together: take each burst's sums as the difference of two idle reads, and deliver the held term before each: (1) a zero-term burst -- XINIT with the caller's D at count 4 and the caller's S with S[15:12] = 0 (every summed input off) -- then WAITXFI; (2) GETXACC idle = baseline; (3) the caller's burst, WAITXFI; (4) another zero-term burst, WAITXFI; (5) GETXACC idle; (6) subtract. Returned exactly N terms in 60 of 60 calls, N = 1..1001, back to back. Proven for SINC1 only; for SINC2 see goertzel_usage.sinc2_constraint."
 documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the documented capture/clear/repeat-read statement); silicon behaviour: hardware-verified EF-069, EF-070, EF-076"
 documentation_level: enhanced
 compiler_operand_format:
@@ -45,6 +48,14 @@ aliases:
 - GETXACC does not clear
 - Goertzel sum missing last term
 - Goertzel errata E4 E5
+- erratum E4
+- P2 erratum E4
+- E4 erratum
+- GETXACC Clears Only During a Goertzel Burst
+- erratum E5
+- P2 erratum E5
+- E5 erratum
+- The Goertzel Accumulators Trail by One Clock
 - SINC2 corrupted samples
 examples:
   - context: DTMF tone detection with magnitude calculation
@@ -93,7 +104,10 @@ notes:
   - "A burst's last term lands in the next Goertzel burst unless a zero-term burst delivers it first"
   - Y value is injected into NEXT instruction's S operand
   - Must have appropriate instruction following GETXACC
-  - Typical pattern: GETXACC + QVECTOR for magnitude extraction
+  - "Typical pattern: GETXACC + QVECTOR for magnitude extraction"
+
+related:
+  - architecture/silicon_errata.yaml
 
 see_also:
   - architecture/streamer/dds-goertzel.yaml

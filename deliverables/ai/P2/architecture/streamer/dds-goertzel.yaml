@@ -176,8 +176,8 @@ reading_results:
     4. Each Goertzel burst's last term is added on the first clock of the NEXT
        Goertzel burst, so a reading after a burst of N clocks holds N-1 terms.
     (The Silicon Doc describes capture-and-clear into holding registers on every
-    GETXACC; Rev C silicon clears only during a Goertzel burst -- silicon errata
-    in language/pasm2/getxacc.yaml.)
+    GETXACC; Rev C silicon clears only during a Goertzel burst -- P2 errata E4 and
+    E5, in language/pasm2/getxacc.yaml silicon_errata.)
 
   reading_protocol: |
     READ BEFORE AND AFTER, TAKE THE DIFFERENCE. With a discrete XINIT / WAITXFI /
@@ -188,7 +188,7 @@ reading_results:
     language/pasm2/getxacc.yaml, SINC1). Inside a running Goertzel burst a read does clear, so the XCONT-loop
     form in the Silicon Doc demo reads once per command and subtracts a baseline
     established on the first pass.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (documented behaviour); Rev C behaviour: EF-069"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (documented behaviour); Rev C behaviour: EF-069 (item 3), EF-070 (item 4), EF-076 (the helper routine)"
 
   example: |
     getxacc cos_result       ' Cosine → D
