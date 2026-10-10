@@ -47,6 +47,8 @@ pin_group:
     drive signals (offsets 15..8), the lower header carries feedback (offsets
     7..0). base_pin is the first pin of the 16-pin block.
   base_pin_options: [0, 16, 32, 48]
+  base_pin_note: "The P2 Eval Board's eight edge headers sit in four side-by-side pairs, P0-P15, P16-P31, P32-P47 and P48-P63, so a 16-pin board mounts on one pair: base_pin 0, 16, 32 or 48."
+  source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, board photograph, p.1 (edge-header silkscreen: P0-P7 beside P8-P15, P16-P23 beside P24-P31, P32-P39 beside P40-P47, P48-P55 beside P56-P63); 11. I/O Pin Breakout Edge Headers, p.9 (groups of eight)"
 
 # =============================================================================
 # PIN MAP - P2 DUAL ACCESSORY HEADER (16 pins)

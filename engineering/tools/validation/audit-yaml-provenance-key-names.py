@@ -102,7 +102,6 @@ ALLOW = {
     "consequence_source":     ("content", "smart_pins: the statement the consequence rests on (declared-conflict note)"),
     "verification_status":    ("content", "streamer/pin-capture.yaml: what was measured on silicon (the facts themselves), each sub-block with its own EF source: line"),
     # ---- provenance that reaches consumers today (kind 'open') --------------------------
-    "base_pin_options_provenance": ("open", "hardware/addon-click-adapter: provenance note under an unlisted key (hardware pages are owned by another pass)"),
     "combinations_are_compiler_verified": ("open", "pasm2-getting-started: a compile-verification claim under an unlisted key; the CP register is the home for it"),
 }
 

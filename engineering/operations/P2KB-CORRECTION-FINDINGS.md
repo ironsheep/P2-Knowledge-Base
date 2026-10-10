@@ -86,6 +86,16 @@ needs a call or a record that is not in hand:
   `addon-motor-driver.yaml`, `addon-hyperram-hyperflash.yaml` and `hub75_adapter.yaml`; whether each is
   sourced (board guide, schematic, or the P2 Eval Board guide's header layout) is **not yet checked**.
   Fix: check the class against the guides; cite or mark unknown; drop the provenance key.
+  **APPLIED 2026-10-10.** Stephen explained it: the Eval Board's headers are used alone, one per 8-pin
+  group, or in pairs that form the 16-pin groups. The Eval Board Rev C guide shows it: the board
+  photograph, p.1, silkscreens P0-P7 beside P8-P15, P16-P23 beside P24-P31, P32-P39 beside P40-P47 and
+  P48-P55 beside P56-P63 (one pair per side), and 11. I/O Pin Breakout Edge Headers, p.9, says each
+  header carries one group of eight. So `[0, 16, 32, 48]` is right for the four dual-header boards
+  (click, motor driver, HyperRAM/HyperFlash, HUB75): each now says why in `base_pin_note` and cites the
+  guide in `pin_group.source`; the click page's `base_pin_options_provenance` (inference from sibling
+  boards and a driver enum) is removed. Class widened: the 11 single-header boards' `[0, 8, … 56]` had no
+  citation either; `pin_group.source` added to each by script, audited against HEAD (parsed data
+  equal plus that one key; diff exactly one added line; no other file touched).
 - **`combinations_are_compiler_verified`** and `errfreq_is_optional`'s "confirmed to compile"
   (`guides/pasm2-getting-started.yaml:105-107`): compile results served as prose with no CP record.
   Fix: record them as CP-NNN in `COMPILE-PROOFS.md`, cite in `source:`, state the fact only.

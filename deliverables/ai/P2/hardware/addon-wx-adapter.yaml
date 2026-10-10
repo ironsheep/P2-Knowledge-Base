@@ -32,6 +32,7 @@ pin_group:
     actual_P2_pin = base_pin + offset. Routes accessory-header pins to the WX
     Wi-Fi module SIP socket. base_pin is the first pin of the 8-pin group.
   base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
+  source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, 11. I/O Pin Breakout Edge Headers, p.9 (each edge header carries one group of eight pins); board photograph, p.1 (edge-header silkscreen P0-P7 ... P56-P63)"
   base_pin_note: >-
     Wireless P2 PROGRAMMING requires the P56-P63 header marked with the "RES"
     logo (base_pin 56); serial-over-Wi-Fi works on any accessory header.
