@@ -12,7 +12,7 @@ blocks:
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: instructions[0].usage_example
-    fp: "de8048c2cb4b2bd7"
+    fp: "35c5371781ea7e3a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_num, got_lock]
@@ -21,7 +21,7 @@ blocks:
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: instructions[1].usage_example
-    fp: "30080ef9109d9e40"
+    fp: "26923d9e952138df"
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_num, not_owner]
@@ -39,7 +39,7 @@ blocks:
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: instructions[3].usage_example
-    fp: "35c56a807c332fec"
+    fp: "88ce3cba35f88bd6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_num]
@@ -98,6 +98,6 @@ blocks:
     wrap: pasm2-dat
     assumes: [lock_num]
   - at: debugging_tips[2].example
-    fp: "ac84e53c26aeda2c"
+    fp: "2b8bcb3d21242df0"
     compile: not-code
     reason: "comment-only block (a list of \"system lock assignments\" in `'` lines); there is no statement to compile (the assignments themselves are unsourced, see the observations)"

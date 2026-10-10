@@ -5,8 +5,8 @@ category: decomposition_reasoning
 summary: |
   The third primary force, and the one the catalogue is most blind to. Devices and
   signals live in different TIME DOMAINS: a WS2812 chain wants nanosecond-precise bit
-  timing, servos want a smooth ~50 Hz stream, a voice recognizer is polled lazily and
-  clock-stretches, a battery reading is meaningful at ~1 Hz, an ultrasonic echo is a
+  timing, servos want a smooth stream at their frame rate, a voice recognizer is polled lazily and
+  clock-stretches, a battery reading is meaningful only occasionally, an ultrasonic echo is a
   one-shot event. Whenever data crosses from one cadence to another, something must
   adapt the rate — and that adapter is its own responsibility, hence its own object.
 
@@ -72,7 +72,8 @@ how_it_cuts:
     authority_tier: HEURISTIC
     body: |
       The Force 1 x Force 3 tension: Force 1 says "one cog per bus," but several devices
-      on ONE bus may want different cadences (servos 50 Hz, IMU 100 Hz, battery 1 Hz).
+      on ONE bus may want different cadences (servos, an IMU and a battery gauge; the
+      example below gives figures).
       You cannot split the bus across cogs (Force 1 forbids it). The resolution is
       COOPERATIVE TASKING within the one owning cog: multiple coroutines sharing the cog
       and the bus, each running at its own cadence and yielding for bus coherence. This

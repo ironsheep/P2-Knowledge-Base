@@ -21,7 +21,7 @@ operation: |
 # Parameters
 x_register:
   function: "Base period and initial phase"
-  X[15:0]: "Base period divider (1-65536 clocks)"
+  X[15:0]: "Base period in clocks"
   X[31:16]: "Initial phase load to Z[31:16]"
   
 y_register:
@@ -32,6 +32,8 @@ y_register:
     - "$80000000 = 50% duty"
     - "$40000000 = 25% duty"
     - "$C0000000 = 75% duty"
+  zero: "Y = 0 produces no output: the pin never reads high and IN is never raised."
+  source: "EF-098"
 
 z_register:
   function: "32-bit accumulator"
@@ -51,35 +53,18 @@ spin2_complete: |
   PUB main()
     ' Variable duty PWM
     pwm_duty(PWM_PIN, 50)      ' 50% duty
-    
-    ' Servo control
-    servo_pulse(1500)           ' 1.5ms pulse
-    
+
   PUB pwm_duty(pin, duty_percent) | mode, y_value
     mode := P_NCO_DUTY | P_OE
-    
-    ' Convert percentage to Y value
-    y_value := (duty_percent * $FFFFFFFF) / 100
-    
+
+    ' Convert percentage (0..99) to Y value: (percent << 32) / 100
+    y_value := duty_percent FRAC 100
+
     PINCLEAR(pin)
     WRPIN(pin, mode)
     WXPIN(pin, 1000)            ' 1000 clock base period
     PINHIGH(pin)                ' Enable FIRST (general init order)
     WYPIN(pin, y_value)         ' THEN set duty cycle
-    
-  PUB servo_pulse(us_width) | mode, y_value, period
-    ' 20ms period, variable pulse width
-    mode := P_NCO_DUTY | P_OE
-    period := _clkfreq / 50     ' 20ms @ 50Hz
-    
-    ' Calculate Y for desired pulse width
-    y_value := MULDIV64(us_width, _clkfreq, 1_000_000) * ($FFFFFFFF / period)
-    
-    PINCLEAR(PWM_PIN)
-    WRPIN(PWM_PIN, mode)
-    WXPIN(PWM_PIN, period)
-    PINHIGH(PWM_PIN)            ' Enable FIRST (general init order)
-    WYPIN(PWM_PIN, y_value)     ' THEN set duty
     
   PUB led_dimmer(brightness) | mode, y_value
     ' LED brightness control (0-255)
@@ -110,10 +95,9 @@ pasm2_complete: |
           WXPIN base_period, pin     ' Set base
           
           ' Calculate Y for duty%
-          MOV   y_value, duty_pct
-          MUL   y_value, ##$28F5C29   ' × (2^32/100)
-          SHL   y_value, #2
-          
+          QFRAC duty_pct, #100        ' {duty_pct, 32'b0} / 100 = duty_pct x 2^32 / 100
+          GETQX y_value               ' Y for duty_pct percent
+
           DIRH  pin                  ' Enable FIRST (general init order)
           WYPIN y_value, pin         ' THEN set duty
           RET
@@ -136,7 +120,7 @@ pasm2_complete: |
   ' Breathing LED effect
   breathing
           MOV   index, #0
-  .loop   MOV   ptra, #breath_table
+  .loop   MOV   ptra, ##@breath_table
           ADD   ptra, index
           RDBYTE temp, ptra
           SHL   temp, #24            ' Scale to 32-bit
@@ -182,7 +166,6 @@ vs_nco_freq: |
 common_uses:
   - "PWM motor control"
   - "LED dimming"
-  - "Servo control"
   - "Power regulation"
   - "Audio modulation"
 

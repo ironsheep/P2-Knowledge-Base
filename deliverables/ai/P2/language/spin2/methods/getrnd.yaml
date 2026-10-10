@@ -96,17 +96,6 @@ anti_patterns:
       value := GETRND() +// 256  ' Full 32-bit randomness scaled
       value := GETRND() >> 24    ' Or high 8 bits (equally random)
 
-  - anti_pattern: "reseeding_every_call"
-    severity: "performance"
-    description: "Using GETRND in tight loop when PRNG would suffice"
-    wrong: |
-      REPEAT 10000
-        value := GETRND()        ' Slow - 2-9 cycles each
-    correct: |
-      ' Use PRNG for speed when true randomness not needed
-      REPEAT 10000
-        value := ??prng_state    ' Fast - single cycle
-
 when_to_use:
   getrnd:
     - "Cryptographic key generation"

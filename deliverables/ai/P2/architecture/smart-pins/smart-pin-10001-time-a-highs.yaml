@@ -17,6 +17,7 @@ detailed_description:
     IN flag raised on high-to-low transitions only
     Z register captures duration of just-completed high state
     Z limited to $80000000 (~10.7 seconds at 200MHz)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %10001 = Time A-input high states (Z will be limited to $80000000); $8000_0000 / 200_000_000 = 10.74 s"
 
 registers:
   x_register:
@@ -62,20 +63,22 @@ code_examples:
       .loop
         testp   #pulse_pin wc                    ' Wait for transition
         if_nc   jmp #.loop
-        rdpin   pulse_width, #pulse_pin          ' Read high duration
-        
-        ' Store in array or process
-        alts    pulse_count, #pulse_array
-        mov     0-0, pulse_width
-        
+        rdpin   width_reg, #pulse_pin            ' Read high duration
+
+        ' Store in array or process (pulse_count runs 10..1, so index from pulse_array-1)
+        alts    pulse_count, #pulse_array-1
+        mov     0-0, width_reg
+
         djnz    pulse_count, #.loop
-        
+
       pulse_array   res     10
+      width_reg     res     1
+      pulse_count   res     1
 
 common_applications:
   - "Positive pulse width measurement"
   - "High-active signal timing"
-  - "Servo pulse measurement (1-2ms pulses)"
+  - "Servo pulse measurement (RC hobby servos conventionally use 1-2 ms pulses; that is a servo convention, not a P2 property)"
   - "Ultrasonic sensor echo timing"
 
 related_modes:

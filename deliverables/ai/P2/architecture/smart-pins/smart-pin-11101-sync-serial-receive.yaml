@@ -71,7 +71,7 @@ spin2_complete: |
   VAR
     BYTE buffer[256]
     
-  PUB main() | mode, data
+  PUB main() | mode, data, idx
     ' 8-bit SPI slave RX, positive edge
     mode := P_SYNC_RX | P_PLUS1_B            ' Clock from pin+1
     PINSTART(RX_PIN, mode, %0_00111, 0)      ' Pre-edge, 8-bit
@@ -98,7 +98,7 @@ spin2_complete: |
     ' Handle MSB-first protocol
     REPEAT UNTIL PINREAD(RX_PIN)
     data := RDPIN(RX_PIN)
-    data := REV data                          ' Reverse bit order
+    data := data REV 31                       ' Reverse bit order (x REV y reverses bits 0..y)
     result := data & $FF                     ' Mask to 8 bits
 
 # Complete PASM2 Example
@@ -134,9 +134,12 @@ pasm2_complete: |
   
   ' Receive MSB-first byte
   receive_msb
-          CALL  #receive_byte         ' Get byte (LSB-first)
-          REV   data                  ' Reverse bits
-          ZEROX data, #7              ' Mask to 8 bits
+          MOV   pin, rx_pin
+  .wait   TESTP pin WC                ' Test IN flag
+    IF_NC JMP   #.wait                ' Wait for data
+          RDPIN data, pin             ' Read the raw MSB-justified word
+          REV   data                  ' Reverse the whole long
+          ZEROX data, #7              ' Keep the 8-bit word
           RET
   
   ' Setup for fast P2-to-P2

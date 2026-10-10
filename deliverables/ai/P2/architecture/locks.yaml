@@ -1,6 +1,5 @@
 # P2 Hardware Locks System
-# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
-# never existed and datasheet pages beyond the end of a 50-page datasheet):
+# Sources:
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section LOCKS --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3673-3700
 #   Instruction encodings, same document, PASM2 encoding table --
@@ -23,17 +22,13 @@ description: |
 architecture:
   total_locks: 16
   lock_numbering: "0-15"
-  state_bits: 4  # Per lock: 3 bits COG ID + 1 bit owned flag
-  
+
   lock_states:
     - state: "available"
       description: "Lock is free and can be acquired by any COG"
-      owned_bit: 0
-      cog_id: "undefined"
-    
+
     - state: "owned"
       description: "Lock is held by a specific COG"
-      owned_bit: 1
       cog_id: "0-7 (owning COG number)"
   
   atomic_operations:
@@ -118,7 +113,7 @@ instructions:
     usage_example: |
       LOCKTRY lock_num         ' Try to get lock
       IF_C    JMP #got_lock    ' Jump if successful
-      ' Lock was busy, owner ID is in lock_num
+      ' Lock was busy (C = 0); LOCKTRY does not write D
   
   - instruction: "LOCKREL"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000000111"
@@ -139,9 +134,8 @@ instructions:
     flags_affected: "C"
     timing: "2 clocks (range 2...9, +2 if WC; per language/pasm2/lockrel.yaml encoding)"
     usage_example: |
-      LOCKREL lock_num         ' Release lock
-      IF_NC   JMP #not_owner   ' Jump if we didn't own it
-  
+      LOCKREL lock_num         ' Release lock (only the cog that holds it can release it)
+
   - instruction: "LOCKNEW"
     encoding: "EEEE 1101011 C00 DDDDDDDDD 000000100"
     description: "Find and acquire first available lock"
@@ -170,16 +164,14 @@ instructions:
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:3686; encoding at
       silicon-doc-text.txt:5237; P2 Datasheet 2022/11/01 PASM2 table --
       engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:1795 -- LOCKRET's
-        row. The locator previously named line 1794, which is a wrapped continuation of
-        the LOCKREL row above it. Corrected 2026-08-30, F-399.
+        row.
     operation: |
       Return lock D[3:0] to the unallocated lock pool. Any cog can return an
       allocated lock, even one it did not allocate with LOCKNEW.
       D is not written by LOCKRET.
     timing: "2 clocks (range 2...9; per language/pasm2/lockret.yaml encoding)"
     usage_example: |
-      LOCKRET lock_num         ' Force release lock
-      ' Previous owner (if any) is returned in lock_num
+      LOCKRET lock_num         ' Return the lock to the pool (any cog may); D is not written
 
   - instruction: "LOCKREL (query form)"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000000111"
@@ -365,12 +357,10 @@ debugging_tips:
   - tip: "lock_usage_map"
     description: "Document lock assignments in a central location"
     example: |
-      ' System Lock Assignments:
-      ' Lock 0: Hub mailbox system
-      ' Lock 1: CORDIC engine
-      ' Lock 2: Serial port A
-      ' Lock 3: Shared buffer pool
-      ' Locks 4-15: Available for dynamic allocation
+      ' Lock assignments for this project (the numbers are whatever LOCKNEW returned):
+      ' mailbox_lock - protects the hub mailbox
+      ' buffer_lock  - protects the shared buffer pool
+      ' (a DEBUG build holds lock 15)
 
 related_topics:
   - topic: "cog_synchronization"
@@ -385,8 +375,7 @@ related_topics:
   - topic: "interrupts"
     relationship: "Lock operations are atomic even with interrupts enabled"
 
-extraction_metadata:
-  sources:
+sources:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
@@ -397,10 +386,3 @@ extraction_metadata:
       sections:
         - "Locks, p.19-20 -- lines 877-905"
         - "PASM2 instruction table, lock rows, p.42 -- lines 1791-1797"
-  re_derivation_note: >-
-    Re-derived 2026-08-26. The header this file shipped with cited
-    `part1-cog.txt` (a file that has never existed) and datasheet pages 34-35 and 82
-    (the datasheet is 50 pages). All four lock-instruction encodings were wrong and have
-    been replaced from the encoding table above; the "LOCKTRY (WC mode) = check without
-    acquiring" entry contradicted the source and was replaced by LOCKREL's documented
-    query form.

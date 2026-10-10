@@ -89,7 +89,7 @@ spin2_complete: |
     
   PUB output_sine(angle) | value16
     ' Output sine wave value
-    value16 := $8000 + (SIN(angle, $7FFF) >> 16)
+    value16 := $8000 + QSIN($7FFF, angle, 360)   ' angle in degrees
     
     ' Wait for sample period complete
     REPEAT UNTIL PINREAD(DAC_PIN)

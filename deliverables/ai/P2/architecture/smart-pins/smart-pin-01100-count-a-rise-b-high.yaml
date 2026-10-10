@@ -59,9 +59,11 @@ code_examples:
         wxpin   #0, #sig_pin                     ' Continuous mode
         dirh    #sig_pin                         ' Enable counter
       .loop
-        rdpin   count, #sig_pin                  ' Read current count
+        rdpin   count_reg, #sig_pin              ' Read current count
         ' Count only increments when P17 is high
         jmp     #.loop
+
+      count_reg       res     1
 
 common_applications:
   - "Gated frequency measurement"

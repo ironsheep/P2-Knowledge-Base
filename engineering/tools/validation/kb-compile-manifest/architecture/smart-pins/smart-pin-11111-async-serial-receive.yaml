@@ -3,13 +3,11 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "5172b101030ba841"
+    fp: "04ec2609d28078ee"
     compile: program
-    finding: "S-220"
   - at: code_examples[1].code
-    fp: "fb36fadc7528ef41"
+    fp: "5ba82561d9a623cc"
     compile: program
-    finding: "S-050"
   - at: code_examples[2].code
     fp: "bdde314f6d2e15f4"
     compile: program

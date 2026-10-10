@@ -24,9 +24,9 @@ x_register:
   X[15:0]: "Base period in clocks (high+low time)"
   X[31:16]: "Compare value (output high when counter > this)"
   examples:
-    - "X=$0003_0002: 3-clock period, high for 1 clock (pattern: 0-0-1)"
+    - "X=$0002_0003: 3-clock period, high for 1 clock (pattern: 0-0-1)"
     - "X=$0000_nnnn: Continuous high while Y > 0"
-    - "X=$0010_0008: 16-clock period, 50% duty (8 high, 8 low)"
+    - "X=$0008_0010: 16-clock period, 50% duty (8 high, 8 low)"
 
 y_register:
   function: "Number of pulses/cycles"
@@ -52,10 +52,10 @@ spin2_complete: |
     
   PUB main()
     ' Single pulse example
-    single_pulse(1000, 16)         ' 1ms pulse, 16 times
-    
+    single_pulse(1000, 16)         ' 1000-clock pulse, 16 times
+
     ' Square wave burst
-    square_wave_burst(50)          ' 50% duty, 100 cycles
+    square_wave_burst(50)          ' 50% duty, 50 cycles
     
   PUB single_pulse(width_clocks, count) | mode
     mode := P_PULSE | P_OE
@@ -71,7 +71,7 @@ spin2_complete: |
     
   PUB square_wave_burst(cycles) | mode, period
     mode := P_PULSE | P_OE
-    period := $0010_0008            ' 16 clocks, 50% duty
+    period := $0008_0010            ' X[15:0] = 16-clock period, X[31:16] = 8: high for 8 of 16 clocks (50% duty)
     
     PINCLEAR(PULSE_PIN)
     WRPIN(PULSE_PIN, mode)
@@ -82,7 +82,7 @@ spin2_complete: |
   PUB custom_pattern() | mode, pattern
     ' Generate 0-0-1 pattern
     mode := P_PULSE | P_OE
-    pattern := $0003_0002           ' 3-clock period, high when > 2
+    pattern := $0002_0003           ' X[15:0] = 3-clock period, X[31:16] = 2: high while counter > 2
     
     PINCLEAR(PULSE_PIN)
     WRPIN(PULSE_PIN, mode)
@@ -104,8 +104,7 @@ pasm2_complete: |
           MOV   pin, pulse_pin
           DIRL  pin                   ' Reset
           WRPIN pulse_mode, pin       ' Configure
-          MOV   x, width              ' Base period
-          SHL   x, #16               ' X[31:16] = 0 (continuous)
+          MOV   x, width              ' X[15:0] = base period; X[31:16] = 0 (continuous high)
           WXPIN x, pin               ' Set timing
           DIRH  pin                  ' Enable FIRST (general init order)
           WYPIN count, pin           ' THEN trigger: set count
@@ -155,7 +154,7 @@ timing_control: |
 
 special_cases: |
   X[31:16]=0: Continuous high while Y > 0
-  X[31:16]=X[15:0]-1: Single clock low pulse
+  X[31:16]=X[15:0]-1: Single clock high pulse (high for 1 clock of each period)
   X[31:16]=X[15:0]/2: 50% duty square wave
 
 common_uses:

@@ -15,12 +15,11 @@ blocks:
     compile: not-code
     reason: "prose rule with `WRONG:` / `RIGHT:` labelled one-line contrasts; the labels and English make it notation (the two code lines are compiled in spi-implementation-guide.yaml common_mistake)"
   - at: spin2_complete
-    fp: "7fd9714a6e51559f"
+    fp: "143cdadb0abeb5be"
     compile: fragment
     wrap: spin2-top
-    finding: "S-019+S-222"
   - at: pasm2_complete
-    fp: "68601fab9298b8f1"
+    fp: "00a7530a17e3b909"
     compile: program
   - at: spin2_inline
     fp: "4f06a33e63108470"

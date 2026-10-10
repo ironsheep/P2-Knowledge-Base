@@ -17,22 +17,20 @@ blocks:
     wrap: spin2-top
     assumes: [activeCount, count, CONFIG_LONGS=con:16, config_start]
   - at: common_applications.serial_port_multiplexer.example
-    fp: "f66ed018c2890a0e"
+    fp: "6a64e9f45533c7a6"
     compile: fragment
     wrap: spin2-top
-    assumes: [RX1=con, TX1=con, MODE_NONE=con, PU_3K3=con, RX2=con, TX2=con, serial.addPort(5), serial.start(0), serial.txStr(2)]
+    assumes: [RX1=con, TX1=con, RX2=con, TX2=con, serial.addPort(5), serial.start(0), serial.txStr(2)]
   - at: common_applications.multi_spi_manager.example
-    fp: "30c3d8677104bbcd"
+    fp: "64f915c58dc74420"
     compile: fragment
     wrap: spin2-method
     assumes: [device, MAX_DEVICES=con, deviceActive, chipSelect, sendSPI()->1/1, deviceData]
-    finding: "S-013"
   - at: common_applications.pwm_channel_controller.example
-    fp: "bd4277a79bf42eb3"
+    fp: "f20867dd0ef90e75"
     compile: fragment
     wrap: spin2-method
     assumes: [channel, MAX_CHANNELS=con, dutyCycle, pwmPin]
-    finding: "S-013"
   - at: debugging_techniques.visualization
     fp: "7e509e10198ef4b0"
     compile: fragment

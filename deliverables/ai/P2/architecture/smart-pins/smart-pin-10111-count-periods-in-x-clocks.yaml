@@ -152,3 +152,7 @@ notes:
   - "Combines with mode %10101 (time) and %10110 (states) for full characterization"
   - "B-input can be same as A-input for single-pin period counting"
   - "Documentation states: 'At least two measurements must be made concurrently for useful results'"
+  - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe (bench-measured on one board, one Y value for this mode)"
+
+sources:
+  - "EF-097"

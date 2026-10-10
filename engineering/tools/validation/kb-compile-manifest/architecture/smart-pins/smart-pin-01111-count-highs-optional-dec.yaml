@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "cd01e0f3e887025c"
+    fp: "4958121006721c7b"
     compile: fragment
     wrap: spin2-top
     assumes: [pulse_width]

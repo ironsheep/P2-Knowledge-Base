@@ -34,37 +34,33 @@ boot_sequence:
     rom_listing_confirmation: "serial_done calls reset_pins, then 'if_z jmp #0' -- 'if SPI program, run it, else shut down'."
 
 auto_baud_detection:
-  mechanism: "Measures bit timing from CR character"
-  trigger: "'> ' followed by space (0x3E, 0x20)"
-  
+  mechanism: "The loader automatically adapts to the sender's baud rate from every greater-than '>' character ($3E) it receives."
+  initial_sequence: "The sender must send '> ' (greater-than, space; $3E, $20) before the first command, and then use '>' characters periodically throughout the data to keep the baud rate tightly calibrated to the internal RC oscillator the loader uses during the boot process. Received '>' characters are not passed to the command parser, so they can be placed anywhere."
+
   supported_rates:
     minimum: "9600 baud"
     maximum: "2 Mbaud"
     common: [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 2000000]
-    
-  detection_sequence:
-    1: "Send '> ' prompt"
-    2: "Wait for CR (0x0D) or '>' character"
-    3: "Measure bit timing"
-    4: "Calculate baud divisor"
-    5: "Configure UART"
 
 protocol_commands:
+  whitespace: "Whitespace is required between command keywords and data. TAB ($09), LF ($0A), CR ($0D), SPACE ($20) and '=' ($3D, Base64 padding), singly or in any contiguous combination, constitute a single whitespace."
+  chip_identifier: "Each command keyword is followed by four 32-bit hex values <INAmask> <INAdata> <INBmask> <INBdata>; the normal case is zeros for each, which talks to any and all connected chips."
+
   prop_chk:
-    syntax: "Prop_Chk"
-    response: "'Prop_Ver Au' (version A silicon)"
-    purpose: "Validate communication"
-    encoding: "Plain ASCII"
-    
+    syntax: "Prop_Chk <INAmask> <INAdata> <INBmask> <INBdata>"
+    response: "CR+LF+\"Prop_Ver\"+SPACE+<version_character>+CR+LF, where <version_character> is \"A\"..\"Z\" and indicates the version of Propeller 2. The Rev B/C silicon responds with \"G\" (A-F were FPGA builds)."
+    purpose: "Verify the Propeller 2 connection and retrieve its version"
+    exchange: "Sender: \"> Prop_Chk 0 0 0 0\"+CR / Loader: CR+LF+\"Prop_Ver G\"+CR+LF"
+
   prop_clk:
-    syntax: "Prop_Clk P1 P2 P3"
+    syntax: "Prop_Clk <INAmask> <INAdata> <INBmask> <INBdata> <HUBSETclocksetting>"
     parameters:
-      p1: "0=RCFAST, 1=RCSLOW, 2=XI/crystal"
-      p2: "Multiply factor (crystal mode)"
-      p3: "Divider (crystal mode)"
-    purpose: "Configure system clock"
-    example: "Prop_Clk 2 8 1 (crystal * 8 / 1)"
-    
+      hubset_clock_setting: "The HUBSET ##$0xxxxxxx clock configuration value, in hex (see the clock configuration page)"
+    purpose: "Update the clock source, as if HUBSET ##$0xxxxxxx were executed"
+    response: "A '.' immediately for a valid command; then the loader switches to the internal 20 MHz clock, sets the desired configuration (except mode), waits about 5 ms for the clock hardware to settle, and enables the desired clock mode. The sender should wait an additional 10 ms, then send '> ' to adjust the baud rate to the new clock configuration."
+    example: "Set PLL to 148.5 MHz: Sender: \"> Prop_Clk 0 0 0 0 19D28F8\"+CR / Loader: \".\" / Sender: (wait about 10 ms) / Sender: \"> Prop_Clk 0 0 0 0 19D28FB\"+CR / Loader: \".\". Return to the boot clock: \"> Prop_Clk 0 0 0 0 F0\"+CR / Loader: \".\""
+    note: "If an image is loaded after switching to a PLL clock mode different from the mode that image uses, the image may need to issue HUBSET #$F0 before switching to its clock mode; or use the same clock configuration as the image."
+
   prop_hex:
     syntax: "Prop_Hex <INAmask> <INAdata> <INBmask> <INBdata> <hexdatabytes> ~ | ?"
     format: "whitespace-separated raw hex bytes (NOT Intel HEX)"
@@ -75,38 +71,39 @@ protocol_commands:
       Only the bottom 8 bits of each hex value are used as data.
       No record structure, no address fields, no per-record checksums.
     embedded_checksum: |
-      Optional: append a long-aligned checksum long computed as
-      $706F7250 ('Prop') minus the sum of all data longs.
-      Loader sends '.' for correct checksum, '!' for incorrect.
+      Optional: include a checksum-complement long computed as $706F7250
+      ('Prop' read as a little-endian long) minus the sum of all data longs. It
+      may be placed anywhere in the data, as long as it is long-aligned.
+      With a '?' terminator the loader sends '.' for a valid checksum (then runs
+      the code) or '!' for an invalid one (then waits for another command).
     example: "Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD ~"
     
   prop_txt:
-    syntax: "Prop_Txt ~"
-    format: "Base64 encoded binary"
-    purpose: "Load binary data efficiently"
-    terminator: "~ character"
-    
+    syntax: "Prop_Txt <INAmask> <INAdata> <INBmask> <INBdata> <base64chrs> ~ | ?"
+    format: "Base64 encoded binary (A-Z, a-z, 0-9, +, /), six bits per character, assembled into bytes as received"
+    purpose: "Like Prop_Hex, but delivers Base64 data; this format is 2.25x denser than hex"
+    terminator: "~ runs the image without verification; ? verifies the checksum, responds, then runs it"
+
     encoding:
-      alphabet: "RFC 4648 standard Base64"
-      efficiency: "~75% vs 44% for hex"
-      padding: "= padding as needed"
-      
+      padding: "'=' may be present as padding in Base64 data (it counts as whitespace)"
+      byte_order: "The Base64 stream is generated from the assembled data in its given byte order, from MSB to LSB within each byte; the checksum is calculated on little-endian long values and must be appended to the data before Base64 conversion."
+
     features:
-      - "Terminal-safe characters only"
-      - "More efficient than hex"
-      - "Supports whitespace"
+      - "Whitespace among Base64 characters is ignored"
+      - "While waiting for a new command, Base64 data destined for another chip is ignored, because each command keyword contains an underscore, an illegal Base64 character"
+    exchange: "Sender: \"> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0 ~\" (the Prop_Hex example program); with the checksum complement appended and a '?' terminator: \"> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0k2KCJ ?\" / Loader: \".\""
 
 response_codes:
-  dot: "'.' - Processing/success"
-  question: "'?' - Error/invalid"
-  prompt: "'> ' - Ready for command"
+  dot: "'.' - a valid Prop_Clk command was accepted; or a Prop_Hex/Prop_Txt checksum was valid (when terminated with '?')"
+  exclamation: "'!' - the checksum was invalid (Prop_Hex/Prop_Txt terminated with '?'); the loader waits for another command"
+  sender_characters: "'?' and '~' are the sender's data terminators, and '> ' is the sender's auto-baud sequence; the loader does not send them"
 
 loading_process:
   command_reception:
-    1: "Wait for command at prompt"
-    2: "Echo characters as received"
-    3: "Process on CR (0x0D)"
-    
+    1: "The sender sends '> ' ($3E, $20) first, so the loader can calibrate to its baud rate"
+    2: "The sender sends a command keyword, the four-value chip identifier and any data"
+    3: "A Prop_Hex or Prop_Txt command ends with '~' (run without verification) or '?' (verify, respond, then run if valid)"
+
   data_reception:
     hex_mode:
       - "Receive whitespace-separated raw hex bytes"
@@ -120,9 +117,9 @@ loading_process:
       - "Stop on '~' character"
       
   execution:
-    checksum: "Validate 'Prop' marker and checksum"
+    checksum: "Only with a '?' terminator: the embedded checksum-complement long is verified"
     start_address: "$00000 in hub"
-    cog_start: "COG 0 loads and executes"
+    cog_start: "Cog 0 is relaunched (COGINIT #0,#0) to run the new program"
 
 multi_chip_support:
   ina_masking:
@@ -132,41 +129,35 @@ multi_chip_support:
   inb_masking:
     description: "Use INB pattern to select specific chip"
     pins: "P63-P32 state must match"
-    
+
+  ina_limit: "INA[1:0] (P0 and P1) cannot be matched: the loader configures them as smart pins monitoring P63 for automatic baud detection, so all ID patterns are valid using pins P2 and beyond."
+
   broadcast:
     description: "No masking loads all chips"
 
 programming_examples:
   basic_loader_session: |
-    > Prop_Chk
-    Prop_Ver Au
-    .
+    > Prop_Chk 0 0 0 0
+    Prop_Ver G
     > Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD ~
-    .
-    (chip executes)
-    
+    (chip executes; a '~' terminator gives no response)
+
   base64_loading: |
-    > Prop_Txt ~
-    UHJvcAQAAAACAAAA...
-    ...base64 data...
-    ~
+    > Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0k2KCJ ?
     .
-    (chip executes)
-    
+    (checksum valid: chip executes)
+
   clock_configuration: |
-    > Prop_Clk 2 16 1
+    > Prop_Clk 0 0 0 0 19D28F8
     .
-    (now running at crystal * 16)
+    (wait about 10 ms)
+    > Prop_Clk 0 0 0 0 19D28FB
+    .
+    (now running at 148.5 MHz from a 20 MHz crystal)
 
 error_handling:
-  invalid_command: "Returns '?'"
-  checksum_error: "Returns '?' and aborts"
-  timeout: "Returns to boot sequence"
-  
-  recovery:
-    - "Send CR to get new prompt"
-    - "Reset chip to restart"
-    - "Check baud rate"
+  unexpected_character: "A character that does not fit expectations for that moment (for example an 'x' where hex digits are expected) aborts the current command; the loader waits for a new command."
+  checksum_error: "A '?'-terminated Prop_Hex or Prop_Txt with an invalid checksum is answered with '!' and the loader waits for another command."
 
 terminal_software:
   requirements:
@@ -183,14 +174,10 @@ terminal_software:
     - "loadp2 utility"
 
 validation_format:
-  header_structure:
-    offset_0: "'Prop' marker (4 bytes)"
-    offset_4: "Checksum (4 bytes)"
-    offset_8: "Data length (4 bytes)"
-    
   checksum_calculation:
-    algorithm: "Sum all longs, negate"
-    validation: "Sum of all longs = 0"
+    algorithm: "Checksum complement = $706F7250 ('Prop' read as a little-endian long) minus the sum of all longs of the program image"
+    placement: "The complement long may be anywhere in the data, as long as it is long-aligned"
+    worked_sum: "A 5-long image summing to $E6CE9A2C has complement $706F7250 - $E6CE9A2C = $89A0D824, sent as the bytes 24 D8 A0 89"
 
 special_features:
   debug_friendly: "Plain text protocol"
@@ -201,13 +188,6 @@ special_features:
 security_considerations:
   no_authentication: "No password protection"
   physical_access: "Requires serial connection"
-  disable_option: "Don't pull up P61"
-
-performance:
-  hex_loading: "~44% efficiency"
-  base64_loading: "~75% efficiency"
-  max_speed: "2 Mbaud = ~200KB/second"
-  typical_load_time: "< 3 seconds for 512KB"
 
 related_components:
   boot_rom: "Contains serial loader code"

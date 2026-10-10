@@ -136,10 +136,7 @@ configuration_patterns:
       don't-care in that mode only. This is why the two 256 patterns print it as
       a bare %x. (Chip Gracey: "there is nothing to switch between with 8-bit,
       so the bit is ignored.")
-    withdrawn_reading: |
-      An earlier revision read bit 1 as a 'stack-pop control', inferred from the
-      demo's 'no stack pop' comment. That reading was INCORRECT and is withdrawn;
-      the 'no stack pop' comment is unrelated to bit 1.
+    not_a_stack_pop_control: "Bit 1 is not a stack-pop control; the demo's 'no stack pop' comment is unrelated to it."
     guidance: "Leave bit 1 = 0 unless you deliberately want a smaller table's high-bits index form."
 
   full_256_bytecodes:

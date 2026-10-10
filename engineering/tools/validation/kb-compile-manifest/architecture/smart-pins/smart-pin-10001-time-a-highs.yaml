@@ -3,8 +3,5 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "d0d77c4c52033e5e"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [pulse_count]
-    finding: "S-220"
+    fp: "1ef453808ba85825"
+    compile: program

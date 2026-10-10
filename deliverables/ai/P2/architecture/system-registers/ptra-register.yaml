@@ -26,7 +26,7 @@ usage_patterns:
     read_operations: "RDLONG data, PTRA"
     write_operations: "WRLONG value, PTRA"
     auto_increment: "RDLONG data, PTRA++ (read then increment by 4)"
-    auto_decrement: "WRLONG value, PTRB-- (decrement by 4 then write)"
+    auto_decrement: "WRLONG value, PTRA-- (write at PTRA, then decrement it by 4; --PTRA decrements first)"
     
   pointer_manipulation:
     direct_assignment: "MOV PTRA, ##$10000"

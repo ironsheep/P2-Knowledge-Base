@@ -61,12 +61,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [state, STATE_IDLE=con, STATE_ACTIVE=con, STATE_DONE=con, done_state, timeout]
   - at: programming_patterns[2].code
-    fp: "372633a77f25858c"
+    fp: "ae0ee608791857a0"
     compile: fragment
     wrap: pasm2-dat
     assumes: [last_state, current, pins_changed]
   - at: programming_patterns[3].code
-    fp: "9a7be5a7869a4612"
+    fp: "564da6be78959023"
     compile: fragment
     wrap: pasm2-dat
     assumes: [next_sample, sample1, sample2, sample3, ptr]
@@ -92,7 +92,7 @@ blocks:
     compile: not-code
     reason: "a bare binary value (`%0100`) giving the SETINTx event selector for the row it sits in; a literal with no statement"
   - at: common_applications[0].implementation
-    fp: "78f5802b60e896fd"
+    fp: "cf56fa9eb90ce32e"
     compile: fragment
     wrap: pasm2-dat
     assumes: [BUTTON_PIN=con, state]
@@ -102,7 +102,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [PULSE_PIN=con, start_time, end_time]
   - at: common_applications[2].implementation
-    fp: "55d2e4fbccb66dd2"
+    fp: "eadfd50efc2ad375"
     compile: fragment
     wrap: pasm2-dat
     assumes: [timeout, DATA_PIN=con, timeout_handler, data_received]

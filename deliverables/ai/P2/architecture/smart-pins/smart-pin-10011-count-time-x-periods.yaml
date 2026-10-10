@@ -17,6 +17,7 @@ detailed_description:
     Accumulates time over X complete periods
     Y[1:0] selects edge types for A and B inputs
     Z limited to $80000000 (~10.7 seconds at 200MHz)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %10011 = For X periods, count time (Z will be limited to $80000000); $8000_0000 / 200_000_000 = 10.74 s"
 
 registers:
   x_register:
@@ -91,3 +92,7 @@ notes:
   - "Use BBBB bits to select B input source"
   - "Setting B=A measures single signal period"
   - "Z register accumulates all X period times"
+  - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe (bench-measured on one board, one Y value for this mode)"
+
+sources:
+  - "EF-097"

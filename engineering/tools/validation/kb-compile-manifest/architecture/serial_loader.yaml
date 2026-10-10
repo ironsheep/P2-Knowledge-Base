@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: protocol_commands.prop_clk.example
-    fp: "a98259334b353633"
+    fp: "27fbdd69f3a75071"
     compile: not-code
     reason: "serial-loader protocol command line (`Prop_Clk ...`, `Prop_Hex ... ~`): a host-to-chip text protocol transcript, neither Spin2 nor PASM2"
   - at: protocol_commands.prop_hex.example

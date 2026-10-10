@@ -24,13 +24,6 @@ aliases:
   - "IN signal semantics"
   - "smart pin handshake"
   - "SSSSS field"
-change_log:
-  - version: "1.1"
-    date: "2025-11-25"
-    changes: "Added event_driven_waiting section to in_flag"
-  - version: "1.0"
-    date: "2025-09-07"
-    changes: "Initial version"
 description: |
   64 identical smart I/O pins, each with autonomous processing capabilities for
   timing, counting, serial protocols, ADC/DAC operations, and more. Offloads
@@ -45,21 +38,21 @@ architecture:
   pin_count: 64
   pins_per_cog: "All 64 accessible by each COG"
   independence: "Each pin operates autonomously"
-  configuration: "Per-pin 16-bit configuration"
+  configuration: "Per-pin 32-bit configuration: the WRPIN D value %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
 
 capabilities:
   operating_modes: 32
   input_routing: "±3 pins from any pin"
   output_override: "Smart pin can control output"
-  adc_per_pin: "12-bit SAR ADC"
+  adc_per_pin: "Delta-sigma ADC with 5 ranges, 2 sources and VIO/GIO calibration; results are SINC2/SINC3-filtered bitstream sums"
   dac_per_pin: "8-bit DAC (16-bit with dithering)"
 
 operating_modes:
   repository_modes:
     00000: "Normal mode (pass-through)"
-    00001: "Long repository or DAC noise"
-    00010: "Long repository"
-    00011: "Long repository"
+    00001: "Long repository (M[12:10] != %101) or DAC noise (M[12:10] = %101)"
+    00010: "Long repository (M[12:10] != %101) or 16-bit DAC dither, pseudo-random (M[12:10] = %101)"
+    00011: "Long repository (M[12:10] != %101) or 16-bit DAC dither, PWM (M[12:10] = %101)"
     
   pulse_nco_modes:
     00100: "Pulse/cycle output"
@@ -104,7 +97,7 @@ operating_modes:
 critical_requirements:
   reset_before_configure:
     mandatory: false
-    source: "Silicon Doc, silicon-doc-text.txt:3854 (configure while DIR is low); consequences_of_skipping: Silicon Doc, silicon-doc-text.txt:3856; correct_sequence order: bench-measured, P2-EMPIRICAL-FINDINGS.md EF-011 (pulse, transition, async TX required; NCO, DAC-noise safe) and EF-090 (sync TX %11100 continuous primes in reset), with the Silicon Doc %11100 text at silicon-doc-text.txt:4650; Y zeroed in reset for pulse and transition at silicon-doc-text.txt:3984 and :3997"
+    source: "Silicon Doc, silicon-doc-text.txt:3854 (configure while DIR is low); consequences_of_skipping: Silicon Doc, silicon-doc-text.txt:3856; correct_sequence order: bench-measured, P2-EMPIRICAL-FINDINGS.md EF-011 (pulse, transition, async TX required; NCO, DAC-noise safe), EF-097 (counter and timing modes %01110, %01111, %10010-%10111 and ADC %11001 order-safe) and EF-090 (sync TX %11100 continuous primes in reset), with the Silicon Doc %11100 text at silicon-doc-text.txt:4650; Y zeroed in reset for pulse and transition at silicon-doc-text.txt:3984 and :3997"
     description: |
       **Configure while DIR is low**: a smart pin should be configured while its DIR
       bit is low, holding it in reset. A WRPIN while DIR
@@ -119,7 +112,10 @@ critical_requirements:
         before DIRH does not take effect. For the trigger modes the reason is
         documented -- Y is set to zero during reset; for asynchronous serial transmit
         the effect is measured on the bench. The value modes measured (NCO %00110,
-        DAC-noise %00001) work in either order.
+        DAC-noise %00001) work in either order, and so do the counter and timing
+        modes %01110, %01111, %10010-%10111 and the external-clock ADC mode %11001: a Y
+        written while DIR is low is in force after DIRH (bench-measured on one board,
+        one Y value per mode).
         EXCEPTION -- synchronous serial transmit (%11100) in continuous mode needs its
         FIRST word written with WYPIN DURING reset: that write primes the shifter,
         and enabling first loses the word.
@@ -229,6 +225,9 @@ input_routing:
       filt1: {length: "1 (3 flipflops)", tap: "5 (32:1)", low_pass_time: "600ns (6.25ns * 3 * 32)"}
       filt2: {length: "2 (5 flipflops)", tap: "19 (512K:1)", low_pass_time: "16.4ms (6.25ns * 5 * 512K)"}
       filt3: {length: "3 (8 flipflops)", tap: "22 (4M:1)", low_pass_time: "210ms (6.25ns * 8 * 4M)"}
+    measured_delay:
+      fact: "With the timing tap at 0 (every clock), a filter of N flipflops delays the filtered input by N + 1 clocks: 2, 3, 5 and 8 flipflops gave 3, 4, 6 and 9 clocks, rising and falling edges alike, against 0 clocks unfiltered. With 5 flipflops at tap 3 (every 8th clock) the delay measured 37 clocks. Measured through the streamer's pin capture on one board; the tap-0 lengths and one tap-3 point were measured, other taps were not."
+      source: "EF-095"
 
 in_signal_semantics:
   # ONE HOME for what a pin's IN signal MEANS. The %FFF discussion above states
@@ -405,10 +404,11 @@ configuration_format:
             "%0x": "OUT drives output"
             "%1x": "OTHER drives output"
           dac_mode:
-            "%00": "OUT enables ADC, M[7:0] sets DAC level"
+            "%00": "DIR enables the DAC output; OUT enables the ADC; M[7:0] sets DAC level"
             "%01": "OUT enables ADC, M[3:0] selects cog DAC channel"
             "%10": "OUT drives BIT_DAC"
             "%11": "OTHER drives BIT_DAC"
+          source: "%00 row: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, DAC with Optional ADC pin schematic, p.31 (the DAC output enable is DIR, the ADC enable is OUT) and Pin DIR/OUT Control table (DIR enables DAC); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, Pin DIR/OUT Control (OUT enables ADC); EF-055 (a P_DAC_124R_3V pin at TT=%00 started with WRPIN and DIRH, no OUT write, drove)"
         non_dac_smart_pin_modes:
           condition: "%SSSSS = %00100..%11111"
           enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
@@ -477,7 +477,7 @@ in_flag:
     whenever it does a WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on it. This causes the smart
     pin to lower its IN signal...\" and the RQPIN exception, at
     engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:150-153
-    (silicon-doc-text.txt:3845). The list previously named only RDPIN and AKPIN."
+    (silicon-doc-text.txt:3845)."
 
   event_driven_waiting:
     description: "Use events instead of polling for efficient waiting"
@@ -494,19 +494,15 @@ in_flag:
     see_also: "architecture/event_system.yaml"
 
 adc_capabilities:
-  resolution: "12 bits"
-  type: "SAR (Successive Approximation)"
-  sampling_rate: "Up to 1 MSPS"
-  
+  type: "Delta-sigma: the A input is sampled as a 1-bit stream on every clock (internally clocked) or on each B rise (externally clocked)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %11000 = ADC sample/filter/capture, internally clocked (the A input is sampled on every clock) and the delta-sigma ADC with 5 ranges, 2 sources and VIO/GIO calibration"
+
   modes:
-    single: "Single sample"
-    continuous: "Continuous sampling"
-    scope: "Triggered capture"
-    
-  filtering:
-    sinc1: "First-order sinc filter"
-    sinc2: "Second-order sinc filter"
-    sinc3: "Third-order sinc filter"
+    sinc2_sampling: "complete SINC2 conversion in hardware, power-of-2 periods (X[5:4] = %00)"
+    sinc2_filtering: "SINC2 accumulator, software computes the difference (%01)"
+    sinc3_filtering: "SINC3 accumulator, software computes the differences (%10)"
+    bitstream: "raw 32-bit snapshots (%11)"
+    scope: "triggered 8-bit capture (smart pin mode %11010)"
 
 dac_capabilities:
   native_resolution: "8 bits"
@@ -543,9 +539,7 @@ common_applications:
     - "Sigma-delta modulation"
 
 performance:
-  max_toggle_rate: "Clock/2 (synchronous modes)"
-  async_serial: "Clock/16 (typical UART limit)"
-  adc_sample_rate: "1 MSPS maximum"
+  adc_sample_period: "POWER(2, X[3:0]) clocks (SINC2 sampling); any period up to the 27-bit accumulator limits via WYPIN in the other modes"
   pwm_resolution: "Up to 16 bits at lower frequencies"
 
 pin_pairing:

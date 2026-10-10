@@ -1,6 +1,5 @@
 # P2 Interrupt System
-# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
-# never existed and datasheet pages beyond the end of a 50-page datasheet):
+# Sources:
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section INTERRUPTS --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2262-2392
 #     (event-source table :2274-2291; IJMPx/IRETx map :2296-2301;
@@ -508,8 +507,7 @@ related_topics:
   - topic: "cog_attention"
     relationship: "ATN signals can trigger interrupts"
 
-extraction_metadata:
-  sources:
+sources:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
@@ -525,15 +523,3 @@ extraction_metadata:
       source: "deliverables/ai/P2/language/pasm2/"
       sections:
         - "language/pasm2/reti0.yaml, language/pasm2/reti1.yaml, language/pasm2/reti2.yaml, language/pasm2/reti3.yaml -- alias encodings"
-  re_derivation_note: >-
-    Re-derived 2026-08-26. The header this file shipped with cited
-    `part1-cog.txt` (a file that has never existed) and datasheet pages 71-72 (the
-    datasheet is 50 pages; it has no interrupt section at all). Corrected in this pass:
-    the IJMPx/IRETx address map, which was inverted -- $1F0 is IJMP3 and $1F4 is IJMP1,
-    not the reverse; a `shadow_registers` block claiming per-level shadows of PA, PB,
-    PTRA, PTRB and Q, which no source describes and the dispatch mechanism contradicts;
-    a fabricated interrupt-source taxonomy naming sources ("Any-edge-on-SELH",
-    "Hub-CORDIC-finished") that are not in the sixteen; source 15, described as "CORDIC
-    operation complete" when it is the opposite; and all fifteen instruction encodings.
-  confidence: "high"
-  last_updated: "2024-12-30"

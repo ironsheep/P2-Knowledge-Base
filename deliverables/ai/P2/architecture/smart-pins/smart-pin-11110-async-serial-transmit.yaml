@@ -70,16 +70,16 @@ code_examples:
       DAT
       ' PASM2 example - high-speed serial output
         org
-        mov     bit_period, ##(_clkfreq / baud) << 16
-        or      bit_period, #7                   ' 8 data bits (X[4:0] = N-1)
-        
+        mov     bit_clks, ##(_clkfreq / baud) << 16
+        or      bit_clks, #7                     ' 8 data bits (X[4:0] = N-1)
+
         dirl    #tx_pin                          ' Reset smart pin
         wrpin   tx_mode, #tx_pin                 ' Configure mode
-        wxpin   bit_period, #tx_pin              ' Set baud and bits
+        wxpin   bit_clks, #tx_pin                ' Set baud and bits
         dirh    #tx_pin                          ' Enable smart pin
-        
+
         ' Send message
-        mov     ptra, ##message
+        mov     ptra, ##@message                 ' hub address of the message
       .loop
         rdbyte  data, ptra++                     ' Get next character
         cmp     data, #0 wz                      ' Check for null
@@ -99,7 +99,9 @@ code_examples:
         long    P_ASYNC_TX | P_OE
       message
         byte    "Hello!", 13, 10, 0
+        alignl
       data    long    0
+      bit_clks res    1
 
   - title: "Precise Baud Rate with Fractional Timing"
     description: "Use fractional bits for exact baud rates"

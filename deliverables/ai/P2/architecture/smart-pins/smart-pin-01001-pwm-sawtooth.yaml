@@ -13,15 +13,16 @@ detailed_description:
     overrides OUT signal for direct pin control.
   
   timing: |
-    Base period = System clock ÷ X[15:0] clock cycles
+    Base period = X[15:0] system clocks
     Frame period = X[31:16] × base period = PWM period
     IN flag raised when Y captured at frame start (counter reset)
     Fast rise, slow fall characteristic creates sawtooth pattern
 
 registers:
   x_register:
-    bits_15_0: "Base period divisor (1-65536 system clocks)"
-    bits_31_16: "Frame period in base periods (1-65536)"
+    bits_15_0: "Base period in system clocks (a zero acts as 65,536)"
+    bits_31_16: "Frame period in base periods (a zero acts as 65,536)"
+    source: "EF-100"
   y_register:  
     bits_15_0: "PWM duty value (0 to frame period value)"
     bits_31_16: "Unused"
@@ -35,6 +36,7 @@ flags:
 code_examples:
   - title: "25% Duty Cycle Sawtooth PWM at 48.8kHz"
     description: "25MHz clock, 40ns base period, 512 base periods frame"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01001 = PWM sawtooth (base period in clocks, PWM period one frame period); 25 MHz / (512 x 1) = 48.8 kHz"
     code: |
       CON
         _clkfreq = 25_000_000

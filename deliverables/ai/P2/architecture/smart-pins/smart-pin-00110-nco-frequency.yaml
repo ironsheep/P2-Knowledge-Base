@@ -21,7 +21,7 @@ operation: |
 # Parameters
 x_register:
   function: "Base period and initial phase"
-  X[15:0]: "Base period divider (1-65536 clocks)"
+  X[15:0]: "Base period in clocks"
   X[31:16]: "Initial phase load to Z[31:16] on WXPIN"
   phase: "Use X[31:16] for phase offset between pins"
 
@@ -30,6 +30,7 @@ y_register:
   Y[31:0]: "Added to Z accumulator each base period"
   formula: "Y = 2^32 × (Fout × X[15:0]) / Fclk"
   zero: "Y = 0 produces NO output: the accumulator never carries and the pin stays static."
+  source: "EF-013 and EF-098"
 
 z_register:
   function: "32-bit phase accumulator"
@@ -68,9 +69,8 @@ spin2_complete: |
     WYPIN(pin, y_value)         ' THEN set frequency
     
   PRI calc_nco_value(freq_hz, x_div) : y_value
-    ' Use QFRAC for accurate calculation
-    QFRAC(freq_hz * x_div, _clkfreq)
-    y_value := GETQX()
+    ' FRAC divides {numerator, 32'b0} by the denominator: (freq * x_div << 32) / clkfreq
+    y_value := (freq_hz * x_div) FRAC _clkfreq
     
   PUB audio_tone(freq_hz) | mode, y_value
     mode := P_NCO_FREQ | P_OE | P_DAC_124R_3V

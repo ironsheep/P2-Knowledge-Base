@@ -31,7 +31,7 @@ pin_access:
   
 connectivity:
   programming:
-    # Corrected 2026-08-25: this board has NO on-board USB-to-serial converter.
+    # This board has NO on-board USB-to-serial converter.
     # 64020 P2 Edge Module Breadboard Product Guide v1.2 (Parallax, 2021-01-07):
     # "Programming: Serial up to 2 MBaud; requires Parallax Prop-Plug programming
     # adapter", and "3. Prop Plug Programming
@@ -56,15 +56,7 @@ connectivity:
     addon_compatibility: "Limited - focus on breadboard"
 
 power:
-  # Restored 2026-08-26. This file previously shipped a wide-input barrel-jack
-  # voltage that the #64020 guide contradicts; the wrong figure was removed with its
-  # whole block and nothing replaced it, leaving the file with no power figure at
-  # all. The guide is unambiguous: 5 VDC only, absolute maximum 5.5 VDC. The removed
-  # wording is deliberately not repeated here.
-# Source: the removed wording is recorded in
-#   2026-08-25-yaml-release-change-ledger.md (item 7). That ledger was superseded by
-#   2026-08-27-yaml-release-change-ledger.md and moved to archived/ on the way; this
-#   locator was left pointing at the pre-move path until 2026-09-05.
+  # The guide is unambiguous: 5 VDC only, absolute maximum 5.5 VDC.
   source: >-
     64020 P2 Edge Module Breadboard Product Guide v1.2 (Parallax Inc., 2021-01-07),
     "Key Specifications" and the numbered feature descriptions --

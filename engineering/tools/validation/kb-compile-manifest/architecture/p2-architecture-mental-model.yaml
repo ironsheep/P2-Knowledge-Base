@@ -3,6 +3,6 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: shared_resources.egg_beater.description
-    fp: "a504dd2b81e871ab"
+    fp: "827a491c0edb0d91"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"

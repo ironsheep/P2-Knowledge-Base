@@ -34,9 +34,7 @@ encoding:
       the ALTERNATE-BIT-ORDER flag, D[16] (Silicon Doc
       "Some of
       these modes have the %a bit in D[16] to reorder the data sequence within the
-      individual bytes to top-first when %a = 1". The locator previously named lines
-      3653-3654, a superseded p2-documentation.txt number; corrected 2026-08-30).
-      It is NOT a pin
+      individual bytes to top-first when %a = 1"). It is NOT a pin
       bit. Writing a 4th p where an `a` belongs is a specific error.
     "b": "a LUT base-address bit, in the LUT-indexed modes only."
   field_notation_caveat: >-

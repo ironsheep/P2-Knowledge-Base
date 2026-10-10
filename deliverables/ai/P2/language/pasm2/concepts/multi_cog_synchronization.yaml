@@ -19,9 +19,7 @@ hardware_primitives:
     numbers: "0-15"
     atomic_operations: "Test-and-set via LOCKTRY"
     traditional_usage:
-      lock_15: "Reserved for debug monitor"
-      lock_14: "Often used for serial console"
-      lock_0_13: "Application-specific"
+      lock_15: "Held by a DEBUG build"
     
     lock_operations:
       LOCKTRY:
@@ -40,7 +38,7 @@ hardware_primitives:
       LOCKREL:
         syntax: "LOCKREL {#}lock_num {WC}"
         operation: "Release lock"
-        with_wc: "Returns previous owner COG ID"
+        with_wc: "C = lock currently taken; a register D receives the current/last owner cog ID"
         
       LOCKNEW:
         syntax: "LOCKNEW lock_reg {WC}"

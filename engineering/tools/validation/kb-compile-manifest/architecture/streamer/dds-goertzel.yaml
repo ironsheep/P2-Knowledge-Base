@@ -7,16 +7,15 @@ blocks:
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: lut_setup.example
-    fp: "b54822a3f8fa97ba"
+    fp: "129f88e059c79bfd"
     compile: fragment
-    wrap: spin2-method
-    assumes: [i, cos, sin, t]
-    finding: "S-013"
+    wrap: pasm2-dat
+    assumes: [ampl=con, x, y, z]
   - at: lut_setup.sinc2_amplitude
-    fp: "7c40f014afccadf7"
+    fp: "255d517c45e4cb89"
     compile: fragment
-    wrap: spin2-method
-    assumes: [i, cos, sin]
+    wrap: pasm2-dat
+    assumes: [z]
   - at: reading_results.reading_protocol
     fp: "fa91ef92f94d0827"
     compile: not-code

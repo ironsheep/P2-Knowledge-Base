@@ -82,8 +82,7 @@ application_specific_guides:
     total_investment: "$200-350"
     capabilities:
       # The #64006H guide lists sockets and signal formats, not a resolution
-      # ceiling. "VGA video output up to 1024x768" was stated here with no
-      # source and has been replaced by the guide's own feature list.
+      # ceiling.
       # Resolution is a function of
       # the streamer/NCO timing you drive, not of the breakout board -- see
       # architecture/streamer/nco-timing.yaml.
@@ -215,12 +214,8 @@ development_workflow_optimization:
     programming: "In-circuit via PropPlug or custom programmer"
 
 compatibility_considerations:
-  # CORRECTED 2026-08-30. `power_supply_requirements` previously read
-  # "5V @ 1A minimum (USB-C or barrel jack)" for the eval board -- the #64000 has
-  # neither a USB-C socket nor a barrel jack, and 1 A appears in no guide; and
-  # "Regulated 3.3V or 5V depending on model" for the carriers, which take 5 VDC
-  # only. The "50-500mA each" add-on budget was likewise unsourced: the #64006
-  # guide gives a current figure for two of its eight boards and none for the rest.
+  # The #64006 guide gives a current figure for two of its eight boards and none
+  # for the rest.
   source: >-
     64000 Propeller 2 Eval Board Rev C Guide (Parallax Inc.) --
     engineering/ingestion/sources/p2-eval-board/complete-p2-eval-board-reference.md:47

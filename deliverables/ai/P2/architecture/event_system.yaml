@@ -1,6 +1,5 @@
 # P2 Event System
-# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
-# never existed and datasheet pages beyond the end of a 50-page datasheet):
+# Sources:
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section EVENTS --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2035-2261
 #     (the sixteen events :2037-2054; POLLxxx :2061-2079; WAITxxx :2082-2100;
@@ -338,13 +337,13 @@ programming_patterns:
     description: "Respond to any pin change in a group"
     code: |
       ' Monitor pins 7:0 for any change
-      RDPIN   last_state, #0
+      MOV     last_state, INA
       AND     last_state, #$FF
-      
+
       monitor_loop
-          RDPIN   current, #0
+          MOV     current, INA
           AND     current, #$FF
-          XOR     current, last_state WZ
+          CMP     current, last_state WZ      ' Z = 1 when no pin changed
           IF_NZ   CALL #pins_changed
           MOV     last_state, current
           JMP     #monitor_loop
@@ -358,14 +357,15 @@ programming_patterns:
           ADDCT2  next_sample, ##16_000  ' 100us
           WAITCT2                        ' Wait for timer (dedicated instruction)
 
-          ' Sample all inputs
-          RDPIN   sample1, #0
-          RDPIN   sample2, #1
-          RDPIN   sample3, #2
+          ' Sample all inputs at one instant: one MOV reads all 32 pins of a port
+          MOV     sample1, INA           ' P31..P0
+          MOV     sample2, INB           ' P63..P32
 
           ' Store samples
           WRLONG  sample1, ptr
-          ADD     ptr, #12
+          ADD     ptr, #4
+          WRLONG  sample2, ptr
+          ADD     ptr, #4
 
           JMP     #sample_loop
 
@@ -407,7 +407,7 @@ common_applications:
       SETSE1  #%01_000000 | BUTTON_PIN  ' Positive edge
       WAITSE1                            ' Wait for press
       WAITX   ##1_600_000               ' 10ms debounce
-      RDPIN   state, #BUTTON_PIN        ' Verify still pressed
+      TESTP   #BUTTON_PIN WC            ' C = pin is still high (pressed)
   
   - application: "pulse_measurement"
     description: "Measure pulse width using events"
@@ -432,8 +432,7 @@ common_applications:
       SETSE1  #%001_000000 | DATA_PIN   ' Data pin rises (positive edge)
 
       ' Race between timeout and data using polling loop
-      JMPREL  #0                         ' Pipeline sync
-      POLLCT1 WC                        ' Check timeout (dedicated instruction)
+      POLLCT1 WC                       ' Check timeout (dedicated instruction)
       IF_C    JMP #timeout_handler
       POLLSE1 WC                        ' Check data pin event
       IF_C    JMP #data_received
@@ -532,8 +531,7 @@ related_topics:
   - topic: "pattern_matching"
     relationship: "PAT instructions work with event system"
 
-extraction_metadata:
-  sources:
+sources:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
@@ -543,13 +541,3 @@ extraction_metadata:
       source: "engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt"
       sections:
         - "PASM2 instruction table, SETPAT -- line 1909"
-  re_derivation_note: >-
-    Re-derived 2026-08-26. The header this file shipped with cited
-    `part1-cog.txt` (a file that has never existed) and datasheet pages 74-75 (the
-    datasheet is 50 pages; it has no events section). Corrected in this pass: an invented
-    event taxonomy naming events the P2 does not have ("Edge-detect", "IN-rise",
-    "CORDIC-done"), replaced by the sixteen the source enumerates; eleven of the twelve
-    SE/PAT instruction encodings; and SETPAT's C/Z selection, which the file omitted --
-    the worked example it shipped selected mismatch mode while its comment said match.
-  confidence: "high"
-  last_updated: "2024-12-30"

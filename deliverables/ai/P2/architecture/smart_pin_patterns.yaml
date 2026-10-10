@@ -40,6 +40,9 @@ spi_patterns:
         SPI_MOSI = 41
         SPI_MISO = 42
 
+      DAT
+              org
+
       ' Clock generator
       wrpin   ##P_TRANSITION | P_OE, #SPI_CLK
       wxpin   ##clk_period, #SPI_CLK

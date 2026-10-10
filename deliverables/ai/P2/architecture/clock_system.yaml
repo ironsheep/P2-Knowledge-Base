@@ -174,7 +174,6 @@ stabilization_timing:
   rcfast: "Can be switched to at any time."
   rcslow: "Can be switched to at any time."
   emitted_wait: "WAITX ##20_000_000/100 -- the wait the sources themselves emit for the 10ms case, computed at the RCFAST rate the code is still running at."
-  conflict_resolved: "An earlier form of this block stated pll_lock as ~10 microseconds. Three Parallax sources state 10ms, each via two independent extraction paths (raw text and reconstructed table); the microsecond figure has no source."
 
 clock_sources:
   rcfast:
@@ -211,7 +210,6 @@ clock_sources:
 clock_switching:
   glitch_free: true
   switch_away_from_pll_warning: "No automatic fallback is documented. Switching away from the PLL (SS=%11, CC<>%00) with PPPP=%1111 can glitch the clock and hang the chip until reset; first switch to an RC oscillator (SS=%00 or %01) keeping PPPP=%1111 and CC."
-  switching_time: "~5 microseconds typical"
   sources:
     - "switch_away_from_pll_warning: Silicon Doc, silicon-doc-text.txt:2726"
   
@@ -233,26 +231,24 @@ programming_examples:
   pll_160mhz_from_20mhz_crystal:
     code: |
       ' 20 MHz crystal → 160 MHz via PLL
-      ' VCO = 20MHz * 16 = 320MHz
-      ' Output = 320MHz / 2 = 160MHz
+      ' VCO = 20 MHz * 8 = 160 MHz (inside the 100-200 MHz range); %PPPP = 15 selects VCO / 1
       HUBSET  ##%10_00                              ' Enable crystal (15pF), stay on RCFAST
       WAITX   ##20_000_000/100                      ' Wait 10ms
       HUBSET  ##%10_10                              ' Switch to crystal (XI)
-      HUBSET  ##%0000_0001_0000_0000_0000_1111_0000_1010  ' PLL on, /1 * 16 / 2, source still XI
+      HUBSET  ##%0000_0001_0000_0000_0000_0111_1111_1010  ' PLL on, /1 * 8 / 1, source still XI
       WAITX   ##20_000_000/100                      ' Wait ~10ms for crystal+PLL to stabilize
-      HUBSET  ##%0000_0001_0000_0000_0000_1111_0000_1011  ' Switch to PLL output
+      HUBSET  ##%0000_0001_0000_0000_0000_0111_1111_1011  ' Switch to PLL output
       
   overclock_250mhz:
     code: |
       ' 20 MHz crystal → 250 MHz (overclock)
-      ' VCO = 20MHz * 25 = 500MHz (overclock)
-      ' Output = 500MHz / 2 = 250MHz
+      ' VCO = 20 MHz / 2 * 25 = 250 MHz, above the 100-200 MHz range (overclock); %PPPP = 15 selects VCO / 1
       HUBSET  ##%10_00                              ' Enable crystal (15pF), stay on RCFAST
       WAITX   ##20_000_000/100                      ' Wait 10ms
       HUBSET  ##%10_10                              ' Switch to crystal (XI)
-      HUBSET  ##%0000_0001_0000_0000_0001_1000_0000_1010  ' PLL on, /1 * 25 / 2, source still XI
+      HUBSET  ##%0000_0001_0000_0100_0001_1000_1111_1010  ' PLL on, /2 * 25 / 1, source still XI
       WAITX   ##20_000_000/100                      ' Wait ~10ms for crystal+PLL to stabilize
-      HUBSET  ##%0000_0001_0000_0000_0001_1000_0000_1011  ' Switch to PLL output
+      HUBSET  ##%0000_0001_0000_0100_0001_1000_1111_1011  ' Switch to PLL output
 
 clock_specifications:
   source: "P2 Datasheet, DC and AC Characteristics -- Oscillator Frequency table -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2195-2209; overclock_ceiling: Propeller 2 Documentation v35 (Silicon Doc), engineering/ingestion/sources/silicon-doc/part3-interrupts.txt:545"
@@ -275,7 +271,7 @@ clock_distribution:
   system_clock: "Main clock for all COGs"
   peripheral_clock: "Same as system clock"
   smart_pin_clock: "Derived from system clock"
-  adc_clock: "System clock / 2"
+  adc_clock: "Internally clocked ADC modes sample the A input on every system clock"
   
   clock_domains:
     - "COG execution units"

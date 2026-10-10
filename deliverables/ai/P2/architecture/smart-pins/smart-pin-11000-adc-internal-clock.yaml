@@ -29,7 +29,7 @@ registers:
       %11 = Bitstream capturing (raw 32-bit ADC snapshot, read every 32 clocks, LSB=oldest)
     bits_3_0: "Sample period configuration (resolution/period setting)"
   y_register:
-    function: "Trigger level for scope modes (not used in basic ADC mode)"
+    function: "Not used in this mode"
   z_register:
     function: "ADC sample value (raw bitstream or accumulated filter result)"
 
@@ -46,9 +46,9 @@ code_examples:
         adc_pin = 46                             ' Analog input pin
       
       PUB main() | adc_value
-        ' Configure ADC mode: %100011 in bits 17:12, mode %11000
-        ' M[12:10] = %100 enables ADC functionality
-        pinstart(adc_pin, $8_C600, %00_0111, 0)  ' 8-bit resolution
+        ' Configure ADC mode: P_ADC (mode %11000) with the 1x input range P_ADC_1X
+        ' P_ADC_1X sets M[12:10] = %100, which enables the ADC
+        pinstart(adc_pin, P_ADC | P_ADC_1X, %00_0111, 0)  ' 8-bit resolution
         
         repeat
           waitms(10)                             ' Delay between samples
@@ -116,7 +116,7 @@ code_examples:
         ' pins work; pins that share a node/reference must stay within ONE four-pin power
         ' group (0-3, 4-7, ...) to share a supply domain - see p2kbArchPinPowerDomains.
         repeat ch from 0 to num_channels-1
-          pinstart(adc_base + ch, $8_C600, %00_0111, 0)
+          pinstart(adc_base + ch, P_ADC | P_ADC_1X, %00_0111, 0)
         
         repeat
           waitms(100)
@@ -138,7 +138,7 @@ related_modes:
 configuration_constants:
   mode_constant: "P_ADC"
   binary_value: "%11000"
-  required_pin_config: "%100011_00000000_00_11000_0 (M[12:10]=%100 enables ADC)"
+  required_pin_config: "%100011_0000000_00_11000_0 = P_ADC_1X | P_ADC (M[12:10]=%100 enables ADC)"
   
   adc_input_modes:
     # GIO / VIO / FLOAT are NOT input ranges - they select an INTERNAL reference as the

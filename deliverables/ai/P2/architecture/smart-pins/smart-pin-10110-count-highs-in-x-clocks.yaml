@@ -119,3 +119,7 @@ notes:
   - "All concurrent measurements must be started together with the same X window for matched timing"
   - "B-input defaults to the same pin as A-input for single-pin period detection - no routing constant needed"
   - "Measurement restarts automatically after each window completes"
+  - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe (bench-measured on one board, one Y value for this mode)"
+
+sources:
+  - "EF-097"

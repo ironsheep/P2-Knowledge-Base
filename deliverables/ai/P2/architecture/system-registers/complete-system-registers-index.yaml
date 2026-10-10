@@ -20,16 +20,13 @@ metadata:
   description: "All P2 system registers with addresses, functions, and key characteristics"
   source: "Silicon Doc v35"
   extraction_date: "2025-09-06"
-  total_registers: "16 special-purpose + 8 dual-purpose + 496 general-purpose"
+  total_registers: "8 special-purpose ($1F8-$1FF) + 8 dual-purpose ($1F0-$1F7) + 496 general-purpose ($000-$1EF) = 512"
   per_register_files: >-
     This index carries the full content for every register it lists -- address, normal and
     special function, description, access, category and key features -- inline. It is
-    self-sufficient; nothing here defers to a per-register file. Three per-register files
+    self-sufficient; nothing here defers to a per-register file. Two per-register files
     exist alongside it (architecture/system-registers/ptra-register.yaml, architecture/system-registers/dira-dirb-registers.yaml) and are pointed to
-    by `yaml_file:` where they do. Thirteen further `yaml_file:` pointers, naming eleven
-    files that were never written, were removed on 2026-08-26 rather than
-    satisfied by writing thin stubs: that would put one fact in two homes. If per-register
-    files are ever wanted, everything needed to generate them is already in this file.
+    by `yaml_file:` where they do.
 
 # Memory Map Overview
 memory_regions:
@@ -97,8 +94,7 @@ dual_purpose_registers:
     note: >-
       PA holds the RETURN address written by a CALLD with an immediate operand -- it is
       not that instruction's parameter. Separately, PA is the parameter register read by
-      CALLPA. Both roles are real and they are different; earlier text here collapsed
-      them into "CALLD-imm parameter", which named neither.
+      CALLPA. Both roles are real and they are different.
 
   "$1F7":
     normal_use: "General-purpose RAM"
@@ -113,8 +109,8 @@ dual_purpose_registers:
       engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:565.
     note: >-
       PB mirrors PA: the CALLD-imm return address, and the parameter register read by
-      CALLPB (not CALLPA). These two rows are deliberately NOT identical -- an earlier
-      revision made them so, which lost the CALLPA/CALLPB distinction the sources draw.
+      CALLPB (not CALLPA). These two rows are deliberately NOT identical: the sources
+      draw the CALLPA/CALLPB distinction.
 
 # Special-Purpose Registers ($1F8-$1FF)
 special_purpose_registers:
@@ -312,8 +308,7 @@ register_interactions:
 
 # Performance Considerations
 performance_notes:
-  register_access_speed: "All register access completes in single clock cycle"
-  hub_access_timing: "PTRA/PTRB hub access follows hub timing rules (0-7 clock delay)"
+  hub_access_timing: "PTRA/PTRB hub access follows hub timing rules: from cog-exec code a hub read (RDLONG) takes 9...16 clocks and a hub write (WRLONG) 3...10 clocks, depending on when the cog's hub slot arrives"
   io_update_timing: "DIR/OUT changes take effect immediately"
   in_read_timing: "IN register reflects pin states with minimal delay"
 
@@ -325,7 +320,9 @@ usage_patterns:
     
   io_initialization:
     pattern: "Set DIR then OUT for output pins"
-    example: "MOV DIRA, pin_mask / MOV OUTA, initial_states"
+    example: |
+      MOV DIRA, pin_mask
+      MOV OUTA, initial_states
     
   pin_manipulation:
     pattern: "Use bit operations for selective pin control" 
@@ -333,7 +330,9 @@ usage_patterns:
     
   parameter_passing:
     pattern: "SETQ before COGINIT for parameter block"
-    example: "SETQ ##params / COGINIT #cog, ##entry"
+    example: |
+      SETQ ##params
+      COGINIT #cog, ##entry
 
 see_also:
   - "Hub Memory Access Instructions"

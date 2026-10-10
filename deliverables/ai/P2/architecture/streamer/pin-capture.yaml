@@ -170,9 +170,9 @@ neighbour_capture_composition:
     AFTER the A/B selectors, and the resultant 'A' is what drives IN. Leaving %FFF at
     its default %000 keeps the path unfiltered. Any filt setting inserts flipflops in
     the sampled path; the filter lengths and taps are in architecture/smart_pins.yaml
-    input_routing.global_digital_filters. Whether a filt selection adds enough delay
-    to skew one captured channel against another is NOT established -- see
-    what_is_not_established_here."
+    input_routing.global_digital_filters. A filt selection delays its lane against an
+    unfiltered one: with the tap at 0, N flipflops delay the lane by N + 1 clocks (see
+    verification_status.filter_delay for the measured values)."
 
 parallax_worked_example:
   what_it_is: "Parallax's own Spin2 v55 documentation builds exactly this composition
@@ -288,19 +288,29 @@ verification_status:
     smart-pin mode presents the smart pin's handshake on IN, not the pin's level (both
     observed with smart-pin counters). The command-word hazards (base-pin composition,
     the output-side DIR requirement) and the debug-interrupt hazard are measured too."
-  not_yet_run: "Streamer digital capture into hub RAM (Pins-to-WRFAST) itself. That
-    path follows the Propeller 2 Documentation and Parallax's worked Spin2 v55
-    example."
+  streamer_capture_into_hub_ram: >-
+    Streamer digital capture into hub RAM (Pins-to-WRFAST) in the 4-, 8- and 16-pin
+    modes, one board, pins P32-P47: six static patterns per mode were captured exactly
+    (lane N is pin base + N; 4-pin samples are packed low nibble first); a smart pin's
+    own lane carries one edge (its completion flag) while a routed neighbour carries
+    the waveform; no buffer over-run in 98 captures.
+  sustained_sample_rate: >-
+    One sample per clock is sustained in the 4-, 8- and 16-pin modes: 1024-sample
+    captures with the NCO rolling over every clock (and at 1:2, 1:4, 1:8, 1:16) were
+    exact in 4 of 4 repetitions at every rate, with every byte written. Limits: 1024-sample
+    bursts, one hub pattern, no other cog loading the hub, one stimulus rate.
+  filter_delay: >-
+    With the filter timing tap at 0 (every clock), a %FFF filter of N flipflops delays
+    its lane by N + 1 clocks against an unfiltered lane: 2, 3, 5 and 8 flipflops gave 3,
+    4, 6 and 9 clocks, rising and falling edges alike (unfiltered lanes: 0 clocks). With 5
+    flipflops at tap 3 (every 8th clock) the delay measured 37 clocks.
+  source: "EF-095"
 
 what_is_not_established_here:
   why_named: "So the omissions are deliberate rather than silent."
-  sustained_sample_rate_ceiling: "NOT STATED. The NCO can be set to roll over every
-    system clock, and the accrual rule says how many rollovers make a hub write -- but
-    no Parallax source states a sustained capture rate the hub FIFO can hold, and this
-    project has never measured one. Any figure here would be invented."
-  filter_latency_and_inter_channel_skew: "NOT STATED. Whether a %FFF filt selection on
-    one monitor pin delays that lane relative to an unfiltered lane, and by how much,
-    is not stated by any source we hold and has not been measured."
+  sustained_sample_rate_32_pin: "NOT MEASURED. The 32-pin capture mode needs more pins
+    than the free set of the test board and was not run; no Parallax source states a
+    sustained rate for it. Any figure here would be invented."
   protocol_decoding: "Out of scope entirely. Neither the streamer nor the DEBUG LOGIC
     window decodes SPI, I2C, UART or CAN; a capture yields levels over time."
 

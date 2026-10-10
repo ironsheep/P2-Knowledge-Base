@@ -25,8 +25,6 @@ parameters:
         COGSPIN table defines
 
       DO NOT pass -1. It is not a synonym for NEWCOG -- see not_an_input below.
-    # CORRECTED 2026-08-30. This read "NEWCOG or -1: Start any available
-    # cog". The two are not interchangeable and the difference costs a cog.
     source: >-
       Spin2 v55 Language Documentation, "Built-In Symbol for COGSPIN() Usage" --
       engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1667-1669

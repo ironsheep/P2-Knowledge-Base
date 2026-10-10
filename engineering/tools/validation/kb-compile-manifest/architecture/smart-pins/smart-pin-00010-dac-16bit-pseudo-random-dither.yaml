@@ -22,7 +22,7 @@ blocks:
     fp: "c3834566012fa92a"
     compile: program
   - at: pasm2_complete
-    fp: "c7028944c21cceb5"
+    fp: "f4ea2977b1b59a5c"
     compile: program
   - at: spin2_inline
     fp: "909879d454d95b06"

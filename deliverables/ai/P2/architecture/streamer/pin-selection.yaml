@@ -71,10 +71,6 @@ pin_groups:
       description: "Wrap-around (32 pins)"
 
 # Sub-pin selection (for <8 pin modes)
-#
-# CORRECTED 2026-08-26. This block previously printed a DENSE slot table
-# -- 2-pin "%001 = Pins 3..2", 4-pin "%111 = Pins 31..28" -- which no source
-# states and which the bench contradicts. See below.
 sub_pin_selection:
   field: "D[19:17], the low three bits of the six-bit pin number in D[22:17]"
   rule: |
@@ -226,11 +222,6 @@ alt_bit_order:
     recommendation it cannot ground.
 
 # Pin base calculation
-#
-# CORRECTED 2026-08-26. The worked example here used to be
-# `X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + count` -- an 8-pin mode at a base that
-# is not a multiple of 8, composed with `+`. That is the unaligned-base trap verbatim, in a
-# second mode family, printed as the example a reader copies.
 pin_base_encoding:
   description: "Pin base is encoded in D[22:17]: D[22:20] is the 8-pin group,
     D[19:17] resolves within it. How many of D[19:17] a mode leaves free depends on

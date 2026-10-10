@@ -12,15 +12,16 @@ detailed_description:
     Total PWM period is twice the frame period. Mode overrides OUT signal for direct pin control.
   
   timing: |
-    Base period = System clock ÷ X[15:0] clock cycles
+    Base period = X[15:0] system clocks
     Frame period = X[31:16] × base period  
     PWM period = 2 × frame period (due to up-down counting)
     IN flag raised when Y captured at frame start
 
 registers:
   x_register:
-    bits_15_0: "Base period divisor (1-65536 system clocks)"
-    bits_31_16: "Frame period in base periods (1-65536)"
+    bits_15_0: "Base period in system clocks (a zero acts as 65,536)"
+    bits_31_16: "Frame period in base periods (a zero acts as 65,536)"
+    source: "EF-100"
   y_register:  
     bits_15_0: "PWM duty value (0 to frame period value)"
     bits_31_16: "Unused"
@@ -33,7 +34,8 @@ flags:
 
 code_examples:
   - title: "50% Duty Cycle Triangle PWM at 24.4kHz"
-    description: "25MHz clock, 1µs base period, 512 base periods frame"
+    description: "25MHz clock, 40 ns base period, 512 base periods frame"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01000 = PWM triangle (base period in clocks, PWM period two frame periods); 25 MHz / (2 x 512 x 1) = 24.4 kHz"
     code: |
       CON
         _clkfreq = 25_000_000

@@ -6,13 +6,11 @@ blocks:
     fp: "d7483b2179baa456"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-137"
   - at: access_patterns.direct_addressing.examples[1]
     fp: "13434b4eaae610e6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [result]
-    finding: "S-137"
   - at: access_patterns.symbolic_addressing.examples[0]
     fp: "562c642a8af8973a"
     compile: fragment
@@ -27,33 +25,27 @@ blocks:
     fp: "6230baf97bd47168"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-137"
   - at: access_patterns.bit_manipulation.examples[1]
     fp: "00aa370079185e84"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-137"
   - at: usage_patterns.memory_operations.example
     fp: "00b3bc35d83896c2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [data]
-    finding: "S-137"
   - at: usage_patterns.io_initialization.example
-    fp: "e5e1663eea25a228"
+    fp: "1363ccb6f4c747b3"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pin_mask, initial_states]
-    finding: "S-165"
   - at: usage_patterns.pin_manipulation.example
     fp: "fbf649781654ad91"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pin_bit]
-    finding: "S-137"
   - at: usage_patterns.parameter_passing.example
-    fp: "61b6592180059fcf"
+    fp: "918d21b3b6b2b424"
     compile: fragment
     wrap: pasm2-dat
     assumes: [params, cog, entry]
-    finding: "S-165"

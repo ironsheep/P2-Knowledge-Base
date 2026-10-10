@@ -23,13 +23,9 @@ analysis_date: "2025-09-06"
 
 edge_module_carrier_compatibility:
   description: "Edge modules with carrier board compatibility"
-  # CORRECTED 2026-08-30. Every row previously carried a single bare
-  # `pin_access:` integer, and the integer meant a different thing on different
-  # rows -- sometimes the carrier's header count, sometimes the module's free-pin
-  # count -- so several were wrong (P2-EC32MB on a full 64-pin carrier read 40).
   # A pin budget is the product of TWO independently sourced facts: which pins
   # the MODULE leaves free, and which pins the CARRIER brings to a header. Both
-  # are now stated per row, from their own guides, and neither is a derived total.
+  # are stated per row, from their own guides, and neither is a derived total.
   source: >-
     Module side -- hardware/edge-standard-module.yaml ("64 accessible at the edge
     connector, 56 fully free"; free pins P0-P55, P56-P63 routed to peripherals)
@@ -193,12 +189,9 @@ addon_board_host_compatibility:
         conflicts: "uses a full dual header; check panel power budget separately"
 
   edge_carrier_compatibility:
-    # CORRECTED 2026-08-30. This block previously stated that the #64029 and
-    # #64019 carriers have "No 2x6 expansion headers" and therefore
-    # `addon_support: none`. All three carrier guides state the opposite: every
-    # carrier brings its I/O pins out to 2x6 way P2 accessory headers and takes
-    # the #64006-series boards. The corrected counts below come from the guides
-    # and agree with hardware/edge-standard-breakout.yaml,
+    # All three carrier guides state that every carrier brings its I/O pins out to
+    # 2x6 way P2 accessory headers and takes the #64006-series boards. The counts
+    # below come from the guides and agree with hardware/edge-standard-breakout.yaml,
     # hardware/edge-mini-breakout.yaml and hardware/p2-hardware-feature-comparison.yaml.
     source: >-
       64029 P2 Edge Breakout Board Guide (2023-03-01) --
@@ -429,10 +422,6 @@ incompatibilities:
     (the Serial Host 5 V supply and its ACC HDR / 5V shunt jumper) and :357-359
     ("Tip: Always use the P2-EVAL 3.3V LDO Power selection when working with
     Audio!" -- the A/V Breakout).
-    This block previously listed "Edge carriers (64029, 64019) have no 2x6
-    addon headers / Cannot use 64006-series add-on boards" as the first hardware
-    conflict. That is the opposite of what the guides say and it has been
-    removed -- see the note under `edge_carrier_compatibility`.
   hardware_conflicts:
     - description: "The #64019 Mini Breakout brings out only 40 of the 64 I/O pins (P0-P31, P56-P63) at four accessory headers"
       impact: "Fewer simultaneous accessory positions than the #64029 or #64020, and P32-P55 reach no header but may be picked up with jumper wires on the bottom side of the PCB"

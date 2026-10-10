@@ -24,50 +24,46 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: debug_modes[0].handler
-    fp: "8efb2a2a06f65910"
+    fp: "e35b08a8e05749be"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [PC, trace_ptr]
+    assumes: [trace_ptr]
   - at: debug_modes[1].configuration
     fp: "cc6ca3bc2491f99d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [break_addr=con]
   - at: debug_modes[1].handler
-    fp: "3171729fe21f99d0"
+    fp: "fd1f97ad414bd629"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [PC, break_log, value, watch_addr]
+    assumes: [break_log, value, watch_addr, break_addr=con]
   - at: debug_modes[2].configuration
     fp: "ade8df117152e1af"
     compile: fragment
     wrap: pasm2-dat
   - at: debug_modes[2].handler
-    fp: "6fdbe4a8dcc3677d"
+    fp: "62f35db94dcb3f04"
     compile: fragment
     wrap: pasm2-dat
     assumes: [status]
   - at: programming_patterns[0].code
-    fp: "fba3f4b3fa1563e1"
+    fp: "81cf7ad234883d5e"
     compile: fragment
     wrap: pasm2-dat
     assumes: [trace_ptr, TRACE_BUFFER=con, TRACE_END=con]
   - at: programming_patterns[1].code
-    fp: "e08140fccbfa6cde"
+    fp: "9537a6a2d8bf99a6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value, watch_var, break_value, debug_cog, debug_value]
   - at: programming_patterns[2].code
-    fp: "e03aed2a3ffc8f7f"
+    fp: "94b8e77f72804f94"
     compile: fragment
     wrap: pasm2-dat
     assumes: [current_time, last_time, total_time, instruction_count]
   - at: programming_patterns[3].code
-    fp: "6db53bccf6827029"
+    fp: "2f18e5c5e423e512"
     compile: fragment
     wrap: pasm2-dat
     assumes: [target_cog=con, target_pc, debug_data, some_var]
-  - at: debugging_capabilities[0].implementation
-    fp: "b8a68e0ce2ba94b2"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"

@@ -15,11 +15,11 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: programming_examples.pll_160mhz_from_20mhz_crystal.code
-    fp: "f0609086723e4475"
+    fp: "94af098e81b33da3"
     compile: fragment
     wrap: pasm2-dat
   - at: programming_examples.overclock_250mhz.code
-    fp: "ae4a6ee26c134f87"
+    fp: "6c4509b58f161c34"
     compile: fragment
     wrap: pasm2-dat
   - at: frequency_measurement.measuring_actual_frequency.code

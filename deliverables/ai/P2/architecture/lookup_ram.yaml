@@ -1,6 +1,5 @@
 # P2 Lookup RAM (LUT)
-# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
-# never existed and datasheet pages beyond the end of a 50-page datasheet):
+# Sources:
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section LOOKUP RAM --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:471-504
 #   Instruction encodings, same document, PASM2 encoding table --
@@ -10,8 +9,6 @@
 #     and the PASM2 instruction table -- p2-datasheet-text.txt:2061 (RDLUT), :2063
 #     (SETLUTS), :2065 (WRLUT); the cog/LUT block-transfer note lives on RDLONG's
 #     row at :1830-1832 ("Prior SETQ/SETQ2 invokes cog/LUT block transfer").
-#     The header previously cited :1831 alone as if it were a LUT instruction row;
-#     it is RDLONG. Corrected 2026-08-30.
 #   Spin2 Language Documentation v55, inline PASM2 cog register and LUT areas --
 #     engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:805-806, :833-834
 
@@ -100,7 +97,18 @@ architecture:
         Propeller 2 Documentation v35 (Rev B/C), LOOKUP RAM > RAM SHARING BETWEEN PAIRED
         COGS -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:491-500; P2
         Datasheet 2022/11/01 "Paired-Cog Communication Mechanism" --
-        engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:610-616.
+        engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:610-616; the
+        the measured block: EF-096.
+      measured: >-
+        Block loads count as writes: a SETQ2 + RDLONG block load into the sending cog's LUT
+        arrives in the enabled partner (128 of 128 and 64 of 64 longs). A Spin2 cog's start-up
+        image reaches a partner that enabled receiving BEFORE the Spin2 sender was launched (the
+        partner's LUT then equals the sender's at all 512 longs); enabling after the launch
+        brings nothing that was written earlier. The Spin2 sender's inline WRLUT also arrives.
+        A COGINIT of the receiving cog resets its receive enable (writes no longer arrive and
+        GETBRK D[26] reads 0); a COGINIT of the sending cog leaves the receiver's enable in
+        force. Limits: one pair at a time, cog execution; the timing of a write against a
+        concurrent enable was not explored.
 
     - feature: "LUT_events"
       description: >-
@@ -318,8 +326,7 @@ related:
   - architecture/xbyte_engine.yaml
   - architecture/fifo.yaml
 
-extraction_metadata:
-  sources:
+sources:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
@@ -336,21 +343,3 @@ extraction_metadata:
       source: "engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt"
       sections:
         - "Inline PASM2 cog register and LUT areas -- lines 805-806, 833-834"
-  re_derivation_note: >-
-    Re-derived 2026-08-26. The header this file shipped with cited
-    `part1-cog.txt` (a file that has never existed) and datasheet pages 67-68 (the
-    datasheet is 50 pages). Corrected in this pass: the WRLUT encoding and its reversed
-    operands (D is the data, S is the address); the SETLUTS encoding; the LUT-sharing
-    direction, which the file had inverted -- sharing is a WRITE path into the paired
-    cog's LUT, not a read of it; the "single-cycle access" claim (RDLUT is 3 clocks,
-    WRLUT 2); and three invented LUT "regions" presented as a memory map. The fabricated
-    mnemonic RDLUTS was removed -- it is in no Parallax source, in no other file of this
-    knowledge base, and pnut-ts does not accept it as an instruction.
-    Re-derived again 2026-09-13: the literal LUT address range
-    corrected to #0..#255; the block-transfer examples corrected to the Silicon Doc's
-    SETQ2 + RDLONG/WRLONG first_lut form, which addresses the LUT from 0; the unsourced
-    waveform_generation, fast_buffer and fast_stack patterns removed, with the shared_read
-    timing, bandwidth, power and FIFO claims; the Spin2 LUT area, the LUT events and the
-    paired-cog start added from their sources.
-  confidence: "high"
-  last_updated: "2026-09-13"

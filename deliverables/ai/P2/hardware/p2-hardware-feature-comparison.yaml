@@ -264,24 +264,7 @@ addon_boards:
     educational_concepts: ["Goertzel correlation", "Non-contact sensing", "Position sensing"]
     primary_applications: ["touch_sensing", "proximity", "position_sensing"]
     complexity_level: "advanced"
-    correction_note: >-
-      This entry previously described 64006G as a "Combined Digital I/O" board
-      with 4 LEDs and 4 switches. No such board exists in the #64006 series;
-      64006G is the Goertzel board.
-      The name also stood in two feature_matrix guidance lists
-      (educational_progression.intermediate_path and
-      application_domains.user_interfaces) and was removed from both on
-      2026-08-26. It was NOT renamed to `goertzel` there: the reason 64006G had
-      been placed in those lists was the fabricated "4 LEDs and 4 switches"
-      feature set, and this board's own record above rates it
-      complexity_level "advanced", so neither placement survives the correction.
-      Sweeping the same class across the whole file on 2026-08-26 found two more
-      guidance slugs naming no board key: `eval_board` (4 sites) where the key is
-      `p2_eval_board`, and `breakouts` (1 site) where the file defines
-      `mini_breakout` and `standard_breakout` separately. Both repaired. Nothing
-      validates these lists -- `feature_matrix` slugs are not cross-reference
-      fields -- which is why a fabricated name survived here in the first place.
-    
+
   av_breakout:
     part_number: "64006H"
     component_type: "Audio/Video Interface"
@@ -438,11 +421,8 @@ compatibility_matrix:
     caution: >-
       The P56-P63 group carries the USB serial link, the SPI flash and the microSD
       signals -- avoid it for accessory boards.
-    correction_note: >-
-      This entry previously read "Up to 2 add-on boards" with a pin allocation of
-      "A-side (P32-P39) + B-side (P24-P31)". The #64000 has eight headers covering
-      all 64 pins.
-    
+    headers_note: "The #64000 has eight headers covering all 64 pins."
+
   recommended_combinations:
     education_starter:
       main: "P2 Eval Board"

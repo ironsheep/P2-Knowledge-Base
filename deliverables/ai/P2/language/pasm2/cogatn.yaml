@@ -21,6 +21,9 @@ parameters:
   which cogs to signal.
 syntax_variants:
 - COGATN {#}D
+self_attention:
+  behavior: "COGATN with the issuing cog's own bit set delivers the strobe to the issuing cog: its own attention event flag is raised, exactly as when another cog strobes it (POLLATN, JATN and WAITATN with a timeout all saw it; the attention interrupt path was not tested)"
+  verified_against: "EF-099"
 timing:
   cycles: 2
   type: fixed

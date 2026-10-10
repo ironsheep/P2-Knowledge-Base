@@ -1,16 +1,11 @@
 # `+//` -- REDIRECT
 #
-# The definition home for `+//` is language/spin2/operators/op_addmodulo.yaml
-# (2026-09-05). This file previously carried a second, conflicting
-# definition: it called `+//` an "Unsigned Modulo Add" that "performs addition
-# with unsigned modulo". It performs no addition -- the leading `+` selects the
-# UNSIGNED form of `//`. Its worked ring-buffer material was correct and has been
-# folded into the home file unchanged.
+# The definition home for `+//` is language/spin2/operators/op_addmodulo.yaml.
+# `+//` performs no addition -- the leading `+` selects the UNSIGNED form of `//`.
 #
 # The file is kept rather than deleted because its index key
-# (p2kbSpin2OpModuloAdd) is present in the published v1.17.0 set, and removing a
-# published key breaks any consumer that cached it. It resolves, it is findable,
-# and it now says one true thing instead of a conflicting definition.
+# (p2kbSpin2OpModuloAdd) is published, and removing a published key breaks any
+# consumer that cached it. It resolves and it is findable.
 
 redirect_for_operator: "+//"
 name: Unsigned Remainder (see language/spin2/operators/op_addmodulo.yaml)

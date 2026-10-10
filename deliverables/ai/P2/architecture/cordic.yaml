@@ -63,7 +63,7 @@ operations:
   divide:
     instruction: "QDIV"
     operation: "64÷32 → 32-bit quotient, 32-bit remainder"
-    setup: "SETQ {#}D then QDIV divisor,dividend"
+    setup: "SETQ {#}D (upper 32 bits of the dividend) then QDIV dividend_low,divisor"
     result: "Quotient in X, remainder in Y"
     notes: "SETQ provides upper 32 bits of 64-bit dividend"
     
@@ -157,7 +157,7 @@ programming_patterns:
   divide_64_32:
     code: |
       SETQ    dividend_high     ' Upper 32 bits
-      QDIV    divisor, dividend_low
+      QDIV    dividend_low, divisor
       ' ... do other work ...
       GETQX   quotient
       GETQY   remainder

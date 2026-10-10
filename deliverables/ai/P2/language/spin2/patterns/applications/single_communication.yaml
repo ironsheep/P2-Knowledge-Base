@@ -148,7 +148,11 @@ implementation_template: |
 
 notes:
   - "Uses (getms() - last_message_time) > TIMEOUT — the correct GETMS-based pattern for protocol timeouts. GETMS handles multi-second deadlines cleanly (49.7-day wrap)."
-  - "For the rationale, and why GETCT is wrong for protocol timeouts beyond ~10 s at 200 MHz, see language/spin2/concepts/timing_operations.yaml method_selection."
+  - "For the rationale, and why GETCT is wrong for long protocol timeouts, see language/spin2/concepts/timing_operations.yaml method_selection."
+
+timeout_arithmetic:
+  statement: "A GETCT-based deadline has a safe window of 2^31 clocks, about 10.7 s at 200 MHz; GETMS rolls over every 49.7 days."
+  derived_from: "Parallax Propeller 2 Spin2 Language Documentation v55, Timing Methods (GETMS rolls over every 49.7 days; GETCT returns the 32-bit system counter); 2^31 / 200_000_000 = 10.7 s"
 
 related:
   - language/spin2/concepts/timing_operations.yaml

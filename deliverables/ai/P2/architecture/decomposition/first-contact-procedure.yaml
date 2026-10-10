@@ -66,7 +66,7 @@ procedure:
       escape_condition: "If every device runs at one shared cadence with no discrete->continuous path, no rate adapters are needed — record that and move on."
     - n: 5
       name: "Resolve same-bus rate conflicts"
-      observation: "Is any single bus serving multiple cadences (e.g. servos at 50 Hz, IMU at 100 Hz, battery at 1 Hz all on one I2C bus)?"
+      observation: "Is any single bus serving multiple cadences (e.g. servos, an IMU and a battery gauge, each at its own rate, all on one I2C bus)?"
       routes_to: "the Force 1 x Force 3 tension — cooperative tasks WITHIN the one owning cog, not a second cog on the bus (Force 1 forbids splitting the bus)"
       see_also: "p2kbArchRateAdaptation"
       output: "Per-cadence cooperative tasks (coroutines) inside the single owning cog, each yielding for bus coherence."

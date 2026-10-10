@@ -66,14 +66,19 @@ spin2_complete: |
     WYPIN(pin, transitions)         ' THEN write Y -> triggers the transitions
 
   PUB sync_serial_clock() | mode
-    ' Clock for synchronous serial modes
-    mode := P_TRANSITION | P_OE
+    ' Clock for synchronous serial modes: TX_PIN is a sync-serial transmitter whose
+    ' B input (the clock) is the pin one below it, CLK_PIN (P_MINUS1_B)
+    PINCLEAR(TX_PIN)
+    WRPIN(TX_PIN, P_SYNC_TX | P_OE | P_MINUS1_B)
+    WXPIN(TX_PIN, %1_00111)         ' Start-stop, 8-bit
+    PINHIGH(TX_PIN)                 ' Enable the TX data pin
+    WYPIN(TX_PIN, $A5)              ' Byte to send (AFTER enable)
 
+    mode := P_TRANSITION | P_OE
     PINCLEAR(CLK_PIN)
     WRPIN(CLK_PIN, mode)
     WXPIN(CLK_PIN, 100)             ' Bit period
-    PINHIGH(TX_PIN)                 ' Enable the TX data pin
-    PINHIGH(CLK_PIN)                ' Enable the clock pin FIRST
+    PINHIGH(CLK_PIN)                ' Enable the clock pin
     WYPIN(CLK_PIN, 16)              ' THEN trigger: 8 bits = 16 transitions
 
 # Complete PASM2 Example
@@ -105,9 +110,10 @@ pasm2_complete: |
           MOV   pin, #41              ' TX pin
           DIRL  pin
           ' Configure TX pin first
-          WRPIN ##P_SYNC_TX | P_OE, pin
-          WXPIN #%1_00111, pin        ' 8-bit
+          WRPIN ##P_SYNC_TX | P_OE | P_MINUS1_B, pin   ' B input = the clock pin (pin-1)
+          WXPIN #%1_00111, pin        ' Start-stop, 8-bit
           DIRH  pin
+          WYPIN #$A5, pin             ' Byte to send (AFTER enable)
 
           MOV   pin, clk_pin
           DIRL  pin

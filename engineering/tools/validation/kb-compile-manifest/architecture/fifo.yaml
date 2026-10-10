@@ -7,15 +7,15 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: programming_patterns[0].code
-    fp: "a7d44ba2d5924faa"
+    fp: "31c004e16ed779b6"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [hub_buffer=con, temp, dest]
+    assumes: [hub_buffer=con, temp, idx, dest0]
   - at: programming_patterns[1].code
-    fp: "9f7a1e303d52958d"
+    fp: "702a3cb4b5f13670"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [hub_dest=con, count=con:16, temp, source]
+    assumes: [hub_dest=con, temp, idx, src0]
   - at: programming_patterns[2].code
     fp: "b378bcb96f33209f"
     compile: fragment

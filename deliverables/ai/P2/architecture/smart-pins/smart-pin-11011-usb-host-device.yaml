@@ -6,28 +6,39 @@ compatible_languages: ["Spin2", "PASM2"]
 brief_description: "USB differential pair control for host/device communication (even/odd pin pair = DM/DP)"
 
 detailed_description:
-  source: "Propeller 2 Documentation v35, %11011 = USB host/device -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:4579; the mode line 'USB host/device (even/odd pin pair = DM/DP)' also at engineering/ingestion/sources/silicon-doc/part4-smart-pins.txt:140; wrpin_data_conflict: PDF-derived capture of v35 p2-documentation.txt:8886 (now superseded), DOCX capture of v35 silicon-doc-text.txt:4579, general rule silicon-doc-text.txt:3856; registers comment: Silicon Doc silicon-doc-text.txt:4579; start_sequence and the PASM example's order (WYPIN after DIR is set): silicon-doc-text.txt:4593"
-  pin_pairing: "This mode requires that two adjacent pins be configured together to form a USB pair, whose OUTs will be overridden to control their output states. These pins must be an even/odd pair, having only the LSB of their pin numbers different. For example: pins 0 and 1, pins 2 and 3, and pins 4 and 5 can form USB pairs."
+  sources:
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), %11011 = USB host or device, full-speed (12Mbps) or low-speed (1.5Mbps): pairing, WRPIN and WXPIN data, the WXPIN on-the-fly sentence, start sequence, WYPIN values, receiver status bits"
+    - "Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, USB Host/Device (%11011), p.57: the sentence 'A new WRPIN can be done to effect such a change without resetting the smart pin'"
+    - "EF-093"
+    - "EF-102"
+  pin_pairing: "This mode requires that two adjacent pins be configured together to form a USB pair, whose OUTs and %HHH_LLL drive modes will be overridden to control their output states. These pins must be an even/odd pair, having only the LSB of their pin numbers different. For example: pins 0 and 1, pins 2 and 3, and pins 4 and 5 can form USB pairs."
   which_pin_is_which:
     upper_odd_pin: "The upper (odd) pin is the DP pin. This pin's IN is raised whenever the output buffer empties, signalling that a new output byte can be written via WYPIN to the lower (even) pin. No WXPIN/WYPIN instructions are used for this pin."
     lower_even_pin: "The lower (even) pin is the DM pin. This pin's IN is raised whenever a change of status occurs in the receiver, at which point a RDPIN/RQPIN can be used on this pin to read the 16-bit status word. WXPIN is used on this pin to set the NCO baud rate."
     caveat: "These DP/DM electrical designations can actually be switched by swapping low-speed and full-speed modes, due to USB's complementary line signalling."
   configuration:
     wrpin_data: "They can be configured via WRPIN with identical D data of %1_11011_0. Using D data of %0_11011_0 will disable output drive and effectively create a USB 'sniffer'. A new WRPIN can be done to effect such a change without resetting the smart pin."
-    wrpin_data_conflict: >-
-      ⚠ THAT LAST SENTENCE IS NOT SETTLED. It comes from the PDF-derived capture of v35
-      (now superseded). The DOCX capture of the SAME v35
-      document omits it entirely while stating the opposite
-      general rule -- a WRPIN issued while DIR is high remaps 126 bits of state
-      under a running mode, "unpredictable and quite certainly useless behavior", which
-      is why modes are configured only while DIR is low (see
-      architecture/smart_pins.yaml critical_requirements). Either USB is a genuine
-      exception -- the sniffer change flips output drive rather than changing mode, so the
-      multiplexing hazard may not apply -- or the sentence was removed because it was
-      wrong. No document separates the two; they are the same document. Bench-testable
-      and jumper-only. The claim is kept rather than deleted because it may well be right, but do
-      not rely on it without testing.
+    wrpin_data_on_a_running_pair: >-
+      A new WRPIN on a running USB pair switches it between drive (%1_11011_0) and sniffer
+      (%0_11011_0) without resetting the smart pin and without cycling DIR. This holds even
+      though the general rule is to change a smart pin's mode only while DIR is low.
+      Measured on one pair (full-speed
+      host, nothing attached, the receiver sensing the pair's own output): the receiver status
+      after a live WRPIN to the sniffer word matched the status after the same change made
+      through a DIR cycle, the status after a live WRPIN back to the drive word showed the
+      driven K state, and a packet written afterwards arrived intact, in 5 of 5 rounds. Limits: one pair, full speed, host mode, no external device or resistors; only
+      the drive/sniffer change (the %TT field) was tested.
     wxpin_data: "WXPIN is used on the lower pin to establish the specific USB mode and set the baud rate. D[15] must be 1 for 'host' or 0 for 'device'. D[14] must be 1 for 'full-speed' or 0 for 'low-speed'. D[13:0] sets the baud rate, which is a 16-bit fraction of the system clock, whose two MSBs must be 0, necessitating that the baud rate be less than 1/4th of the system clock frequency."
+    wxpin_on_the_fly: >-
+      Once established, these settings can be changed on-the-fly without resetting the USB
+      smart pins; this is necessary when talking to both 'full-speed' and 'low-speed'
+      devices over a USB hub. Measured: a WXPIN on a running pair -- the same word again, or a
+      word with a different baud (the full-speed baud to the low-speed baud and back) -- sets
+      the baud (D[13:0]) in force for the next packet, which arrives intact (5 of 5 rounds).
+      The shortest gap tested from the WXPIN to writing the packet was about 119 clocks.
+      The measurement covers the baud only: the full-speed/low-speed signalling bit D[14] is
+      not observable on the test rig, so a change of that bit on a running pair is not
+      claimed. Limits: host mode, one pair sensing its own output, nothing attached.
     worked_example: "For example, if the main clock is 80MHz and you want a 12MHz baud rate (full-speed), use 12,000,000 / 80,000,000 * $10000 = 9830, or $2666. To use this baud rate and select 'host' mode and 'full-speed', you could do 'WXPIN ##$E666,lowerpin'."
   start_sequence: "To start USB, clear the DIR bits of the intended two pins and configure them each via WRPIN. Use WXPIN on the lower pin to set the mode and baud rate. Then, set the pins' DIR bits. You are now ready to read the receiver status via RDPIN/RQPIN and set output states and send packets via WYPIN, both on the lower pin."
   state_machines: "There are separate state machines for transmitting and receiving. Only the baud generator is common between them. Note that the receiver receives not just input from another host/device, but all local output, as well."
@@ -35,7 +46,7 @@ detailed_description:
 
 registers:
   # All WXPIN/WYPIN/RDPIN for USB are issued on the LOWER (even / DM) pin.
-  # Silicon Doc.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), %11011 = USB host or device, full-speed (12Mbps) or low-speed (1.5Mbps): WXPIN data, WYPIN values, receiver status bits"
   x_register:
     function: "USB mode + baud rate, set via WXPIN on the lower (even) pin"
     D_15: "1 = host, 0 = device"
@@ -58,13 +69,13 @@ registers:
       - "[31:16] unused ($0000)"
       - "[15:8]  byte — last byte received"
       - "[7] byte toggle — cleared on SOP, toggled on each byte received"
-      - "[6] error — cleared on SOP; set on bit-unstuff error, EOP SE0 > 3 bits, or SE1"
-      - "[5] EOP in — cleared on SOP or 7+ bits of J/K, set on EOP"
-      - "[4] SOP in — cleared on EOP or 7+ bits of J/K, set on SOP"
-      - "[3] SE1 in (illegal) — cleared on !SE1, set on 1+ bits of SE1"
-      - "[2] SE0 in (RESET) — cleared on !SE0, set on 1+ bits of SE0"
-      - "[1] K in (RESUME) — cleared on !K, set on 7+ bits of K"
-      - "[0] J in (IDLE) — cleared on !J, set on 7+ bits of J"
+      - "[6] error — cleared on SOP, set on bit-unstuff error or EOP SE0 > 2 bit periods or SE1"
+      - "[5] EOP in — cleared on SOP or 7 bit periods of J or K, set on EOP"
+      - "[4] SOP in — cleared on EOP or 7 bit periods of J or K, set on SOP"
+      - "[3] steady state — cleared on DP/DM state change, set on 7 bit periods of no change"
+      - "[2] SE0 in — high when DP/DM state is SE0"
+      - "[1] K in — high when DP/DM state is K"
+      - "[0] J in — high when DP/DM state is J"
 
 flags:
   in_flag_odd_dp: "Upper (odd / DP) pin: IN raised when the output buffer empties (a new TX byte can be written via WYPIN to the lower pin). No WXPIN/WYPIN are used on this pin."

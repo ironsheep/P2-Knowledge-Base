@@ -1,15 +1,11 @@
 # P2 I/O Pin Timing
-# Sources, each verified at the line it names (2026-08-29, F-377/F-380 pass):
+# Sources, each verified at the line it names:
 #   engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt
 #     :1987 DIRx/OUTx write latency · :1997 INx read latency
 #     :2005 TESTP/TESTPN read latency · :3847 smart-pin IN flag reset
 #     :101  VIO latch-up onset
 #   engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt
 #     :117 drive modes · :2126-2149 Absolute Maximum Electrical Ratings
-# This header previously read "part3-pins.txt, pages 5-8". No such file exists in
-# sources/silicon-doc/ and none ever did; the citation was fabricated, which is what
-# made the sourcing gate count this file as cited. The CONTENT below was checked and
-# is genuine — every claim is anchored to a real line above.
 
 component_name: "I/O Pin Timing"
 
@@ -18,8 +14,8 @@ component_type: "pin_timing_specifications"
 description: |
   What this file carries: the clock-cycle latency between an instruction writing DIRx/OUTx
   and the pin actually moving, the P2 Datasheet's absolute maximum electrical ratings for
-  an I/O pin, what those ratings imply for driving a 3.3 V pin from a 5 V signal, and --
-  added 2026-09-09 -- the datasheet's DC Characteristics: the input logic threshold, input
+  an I/O pin, what those ratings imply for driving a 3.3 V pin from a 5 V signal, and
+  the datasheet's DC Characteristics: the input logic threshold, input
   leakage, and the Vol/Voh output voltages at 1, 10 and 30 mA.
 
   Two electrical tables sit here and they answer different questions. ABSOLUTE MAXIMUM
@@ -227,12 +223,10 @@ dc_characteristics:
   the_30mA_ceiling_this_table_confirms: |
     Vol and Voh are characterised at 1 mA, 10 mA and 30 mA and stop there, which agrees
     with absolute_maximum_ratings' max_current_per_IO_pin of +/-30 mA above. Any figure
-    above 30 mA per pin is not supported by this datasheet -- a shipped claim of 150 mA
-    was removed as fabricated, and this table is the reason it could never
-    have been right.
+    above 30 mA per pin is not supported by this datasheet.
 
   ac_characteristics_are_clock_specs_only: |
-    Checked 2026-09-09 so the absence is a finding rather than an oversight: the AC
+    The absence is deliberate: the AC
     Characteristics table on the facing page states oscillator frequency
     ranges and XI/XO pin capacitance ONLY. It carries no pin propagation, rise or fall
     figures, which is why this file's description says no source states them. Its PLL

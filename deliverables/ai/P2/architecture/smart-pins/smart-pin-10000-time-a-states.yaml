@@ -17,6 +17,7 @@ detailed_description:
     IN flag raised on every state transition
     C flag indicates previous state (1=was high, 0=was low)
     Z limited to $80000000 (~10.7 seconds at 200MHz)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %10000 = Time A-input states (Z will be limited to $80000000); $8000_0000 / 200_000_000 = 10.74 s"
 
 registers:
   x_register:
@@ -67,10 +68,14 @@ code_examples:
       .loop
         testp   #pwm_pin wc                      ' Wait for transition
         if_nc   jmp #.loop
-        rdpin   duration, #pwm_pin wc            ' Read duration, C=state
-        if_c    mov high_time, duration          ' Was high
-        if_nc   mov low_time, duration           ' Was low
+        rdpin   duration_reg, #pwm_pin wc        ' Read duration, C=state
+        if_c    mov high_reg, duration_reg       ' Was high
+        if_nc   mov low_reg, duration_reg        ' Was low
         jmp     #.loop
+
+      duration_reg    res     1
+      high_reg        res     1
+      low_reg         res     1
 
 common_applications:
   - "PWM duty cycle and frequency measurement"

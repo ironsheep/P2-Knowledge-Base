@@ -126,55 +126,36 @@ implementation_patterns:
   spi_click_pattern:
     description: "Standard SPI Click module initialization"
     code: |
+      OBJ
+        spi : "jm_ez_spi"
+
       PRI initializeSPI(basePin) | csPin, sckPin, mosiPin, misoPin
         ' Calculate actual pins
         csPin := basePin + CLICK_OFST_CS
         sckPin := basePin + CLICK_OFST_SCK
         mosiPin := basePin + CLICK_OFST_MOSI
         misoPin := basePin + CLICK_OFST_MISO
-        
-        ' Initialize SPI driver
-        spi.start(sckPin, mosiPin, misoPin, SPI_MODE, SPI_CLK_MHZ)
-        
+
+        ' Initialize SPI driver: start(sdipin, sdopin, sckpin, khz)
+        spi.start(misoPin, mosiPin, sckPin, SPI_CLK_KHZ)
+
         ' Set CS high (inactive)
         pinh(csPin)
-        
-      PRI spiTransaction(data) | result
-        ' CS low - start transaction
-        pinl(csPin)
-        
-        ' Transfer data
-        result := spi.transfer(data)
-        
-        ' CS high - end transaction
-        pinh(csPin)
-        
-        return result
-    
+
   i2c_click_pattern:
     description: "Standard I2C Click module initialization"
     code: |
+      OBJ
+        i2c : "isp_i2c_singleton"
+
       PRI initializeI2C(basePin) | sclPin, sdaPin
         ' Calculate actual pins
         sclPin := basePin + CLICK_OFST_SCL
         sdaPin := basePin + CLICK_OFST_SDA
-        
-        ' Initialize I2C driver (with pull-ups)
-        i2c.setup(sclPin, sdaPin, I2C_SPEED, I2C_PULLUP)
-    
-  uart_click_pattern:
-    description: "Standard UART Click module initialization"
-    source: >-
-      P2-Click-eInk driver (code analysis). The CROSSOVER below is driver-derived,
-      NOT schematic-derived -- see uart_direction_caveat before relying on it.
-    code: |
-      PRI initializeUART(basePin) | rxPin, txPin
-        ' Calculate actual pins (note the swap!)
-        rxPin := basePin + CLICK_OFST_TX  ' TX on Click = RX on P2
-        txPin := basePin + CLICK_OFST_RX  ' RX on Click = TX on P2
-        
-        ' Initialize UART
-        serial.start(rxPin, txPin, MODE, BAUD)
+
+        ' Initialize I2C driver: setup(pScl, pSda, khz, pullup)
+        ' I2C_PULLUP is one of i2c.PU_NONE, i2c.PU_1K5, i2c.PU_3K3, i2c.PU_15K
+        i2c.setup(sclPin, sdaPin, I2C_KHZ, I2C_PULLUP)
 
 configuration_api_patterns:
   enum_based_config:
@@ -270,9 +251,7 @@ uart_direction_caveat:
     offset +3). Whether "TX" denotes the P2's transmit or the Click module's
     transmit is NOT settled by any Parallax source held in this repo. The
     MikroElektronika mikroBUS standard is the authority and is not held here.
-    The crossover shown in uart_click_pattern comes from working driver code --
-    a peer derivation, credible but not authoritative. Verify against the
-    specific Click module's datasheet before wiring a UART Click.
+    Verify against the specific Click module's datasheet before wiring a UART Click.
 
 related_concepts:
   - spi_communication: SPI protocol for Click modules

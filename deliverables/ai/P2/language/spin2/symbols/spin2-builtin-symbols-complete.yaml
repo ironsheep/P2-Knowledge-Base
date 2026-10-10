@@ -1960,8 +1960,8 @@ spin2_builtin_symbols:
 # tally of every symbol it names. They are NOT a promise that a record exists here for
 # each one, and for the `clock` category no record exists at all: `clock_sources`,
 # `crystal_dividers` and `pll_multipliers` each carry ZERO records in this file.
-# The XMUL/XDIV/XSEL symbol records were removed because those names appear nowhere in
-# Spin2 v55, our current source -- they survive only in the superseded v51 extraction.
+# No records are carried for the names XMUL/XDIV/XSEL: they appear nowhere in Spin2 v55,
+# the current source.
 # Do not read "pll_multipliers: 1024 symbols" as 1024 lookups you can perform here.
 # Clock configuration is documented in architecture/clock_system.yaml and
 # language/spin2/constants/special-configuration-symbols.yaml.

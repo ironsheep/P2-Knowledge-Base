@@ -74,7 +74,7 @@ code_examples:
         jmp     #.loop
       
       adc_mode
-        long    %0000_0000_000_100011_0000001_00_11001_0  ' P_PLUS1_B for clock
+        long    P_ADC_EXT | P_PLUS1_B            ' B input = the clock pin (pin+1)
       result
         long    0
 
@@ -99,24 +99,22 @@ code_examples:
         if_nc   jmp #.loop
         rdpin   x, #adc_data_pin                 ' Get SINC3 accumulator
         
-        ' Post-processing: compute difference
-        shl     x, #5                            ' Prescale 27-bit to 32-bit
+        ' Post-processing: compute differences
         sub     x, diff1                         ' First difference
-        add     diff1, x                         ' Update accumulator
+        add     diff1, x                         ' Update diff1 value
         sub     x, diff2                         ' Second difference
-        add     diff2, x                         ' Update accumulator
-        sub     x, diff3                         ' Third difference
-        add     diff3, x                         ' Update accumulator
-        
-        ' x now contains the sample
+        add     diff2, x                         ' Update diff2 value
+        zerox   x, #26                           ' Trim to the 27-bit accumulator width
+
+        ' x holds the filtered sample; for a power-of-2 period, shift right by
+        ' LOG2(clocks per period) to justify it
         jmp     #.loop
-      
+
       adc_mode
-        long    %0000_0000_000_100011_0000001_00_11001_0
+        long    P_ADC_EXT | P_PLUS1_B            ' B input = the clock pin (pin+1)
       x       res     1
       diff1   res     1
       diff2   res     1
-      diff3   res     1
 
   - title: "Bitstream Capture Mode"
     description: "Capture raw ADC bitstream for custom processing"
@@ -148,7 +146,7 @@ related_modes:
 configuration_constants:
   mode_constant: "P_ADC_EXT"
   binary_value: "%11001"
-  required_pin_config: "%100011_00000000_00_11001_0"
+  required_pin_config: "P_ADC_EXT | P_PLUS1_B (the A input is the external ADC's bitstream; the B input is its clock)"
   
   filtering_modes:
     - "%00 - SINC2 sampling (complete in hardware, power-of-2 periods only)"
@@ -172,14 +170,18 @@ notes:
   - "A-input carries data, B-input is sample clock (use P_PLUS1_B modifier)"
   - "Samples A-input on each B-input rising edge"
   - "Y register overrides X[3:0] period for non-power-of-2 sample rates"
-  - "SINC2 accurate starting second period, SINC3 accurate starting third period"
+  - "SINC2 filtering becomes accurate starting on the third sample, SINC3 filtering starting on the fifth sample"
   - "27-bit accumulators require careful overflow handling in software"
   - "SINC3 limited to 512 samples/period due to accumulator size"
   - "SINC2 supports up to 11,585 clocks/period"
   - "Prescale 27-bit to 32-bit (SHL #5) or post-trim (ZEROX #26) for overflow handling"
   - "Multiple pins can be configured simultaneously using pin group bits"
+  - "A Y override written while DIR is low (before DIRH, as in the SINC3 example) is in force after DIRH: this mode is order-safe (bench-measured on one board, one Y value for this mode)"
   - "Resolution figures are NOMINAL decimation word-widths (theoretical bits), NOT ENOB. ENOB (Effective Number of Bits) is the MEASURED effective resolution after noise and distortion; true effective resolution on P2 is lower than the nominal figures and depends on the reference supply, source impedance, and temperature — it must be characterized on hardware."
   - "The SINC3 column's apparent doubling of resolution over SINC2 is an idealized figure the P2 ADC does not actually deliver; treat SINC3 nominal figures as optimistic upper bounds, not attainable resolution."
+
+sources:
+  - "EF-097"
 
 power_domain:
   fact: |

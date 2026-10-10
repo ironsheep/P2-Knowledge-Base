@@ -84,7 +84,7 @@ related_instructions:
 - COGID: Get current COG ID
 notes:
 - Always release locks when done
-- WC option returns previous owner
+- WC option reports whether the lock is taken (C) and the current/last owner cog ID (a register D)
 - Releasing unheld lock is safe (no-op)
 - Critical for preventing deadlocks
 compiler_operand_format:

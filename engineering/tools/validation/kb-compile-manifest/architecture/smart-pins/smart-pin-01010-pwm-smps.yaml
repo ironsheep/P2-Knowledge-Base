@@ -3,6 +3,5 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "826e7a559a015357"
+    fp: "6b5d07adbbd8c6b9"
     compile: program
-    finding: "S-003"

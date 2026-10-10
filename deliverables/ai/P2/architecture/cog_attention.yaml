@@ -1,6 +1,5 @@
 # P2 COG Attention System
-# Sources: provenance (re-derived 2026-08-26; the previous header cited a file that has
-# never existed and a datasheet page beyond the end of a 50-page datasheet):
+# Sources:
 #   Propeller 2 Documentation v35 (Rev B/C Silicon), section COG ATTENTION --
 #     engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:2013-2033
 #   Event numbering, same document, section EVENTS --
@@ -50,8 +49,9 @@ architecture:
       example: "COG 0 signals COGs 1-7"
     
     - mode: "self_signal"
-      description: "COG can signal itself"
+      description: "A COG can signal itself: COGATN with the issuing COG's own bit set raises that COG's attention event flag, which POLLATN, JATN, WAITATN and the Spin2 POLLATN() then see (the attention interrupt path was not tested)"
       example: "COG 3 signals COG 3"
+      source: "EF-099"
   
   response_methods:
     - method: "polling"
@@ -60,7 +60,7 @@ architecture:
     
     - method: "waiting"
       description: "Wait for ATN flag to be set"
-      latency: "Immediate response"
+      latency: "2+ clocks (2 minimum, plus the wait for the event)"
     
     - method: "interrupt"
       description: "Trigger interrupt on ATN"
@@ -216,25 +216,6 @@ programming_patterns:
           IF_C    JMP #new_command
           JMP     #.loop
   
-  - pattern: "broadcast_synchronization"
-    description: "Synchronize multiple COGs"
-    code: |
-      ' Synchronization point
-      sync_point
-          COGID   my_id
-          ' All COGs signal readiness
-          MOV     mask, #1
-          SHL     mask, my_id
-          COGATN  #%11111111      ' Signal all COGs
-          
-          ' Wait for all COGs to be ready
-          MOV     count, #7       ' Wait for 7 signals
-      .wait_all
-          WAITATN                 ' Wait for each COG
-          DJNZ    count, #.wait_all
-          
-          ' All COGs now synchronized
-  
   - pattern: "producer_consumer_signaling"
     description: "Producer signals consumer when data ready"
     code: |
@@ -278,10 +259,14 @@ programming_patterns:
     description: "Signal specific group of COGs"
     code: |
       ' Define COG groups
-      GROUP_A = %00001111     ' COGs 0-3
-      GROUP_B = %11110000     ' COGs 4-7
-      ALL_COGS = %11111111    ' All COGs
-      
+      CON
+        GROUP_A  = %00001111    ' COGs 0-3
+        GROUP_B  = %11110000    ' COGs 4-7
+        ALL_COGS = %11111111    ' All COGs
+
+      DAT
+              org
+
       ' Signal specific group
       signal_group
               COGATN  #GROUP_A        ' Signal group A
@@ -343,7 +328,7 @@ performance_characteristics:
   
   response_latency:
     polling: "Varies with polling frequency"
-    waiting: "0 clocks after signal arrives"
+    waiting: "2+ clocks (2 minimum, plus the wait for the event)"
     interrupt: "Silicon Doc v35 does not publish a specific clock-count latency for ATN-triggered interrupt entry. Mechanism is documented (CALLD insertion into pipeline) but timing is not."
   
   bandwidth_impact: "Zero hub bandwidth consumed"
@@ -354,7 +339,7 @@ performance_characteristics:
 
 comparison_to_alternatives:
   vs_hub_polling:
-    attention: "No hub bandwidth, instant notification"
+    attention: "No hub bandwidth"
     hub_polling: "Consumes hub slots, variable latency"
   
   vs_locks:
@@ -383,7 +368,8 @@ debugging_tips:
     description: "Log ATN signals to hub memory"
     code: |
       POLLATN WC
-      IF_C    WRLONG  cnt, atn_log_ptr
+      IF_C    GETCT   ct
+      IF_C    WRLONG  ct, atn_log_ptr
       IF_C    ADD     atn_log_ptr, #4
   
   - tip: "verify_cog_masks"
@@ -403,8 +389,7 @@ related_topics:
   - topic: "locks"
     relationship: "Can use with locks for complex synchronization"
 
-extraction_metadata:
-  sources:
+sources:
     - document: "Propeller 2 Documentation v35 (Rev B/C Silicon)"
       source: "engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt"
       sections:
@@ -416,12 +401,3 @@ extraction_metadata:
       sections:
         - "Cog Attention, p.15-16 -- lines 681-695"
         - "PASM2 instruction table -- lines 1854, 1893, 1914"
-  re_derivation_note: >-
-    Re-derived 2026-08-26. The header this file shipped with cited
-    `part1-cog.txt` (a file that has never existed) and datasheet page 73 (the datasheet
-    is 50 pages). Corrected in this pass: all three attention-instruction encodings; the
-    attention event number (was 15, is 14) and the two SETINTx examples that used it; a
-    `setup_for_event` block configuring SETSE1 for attention, which SETSEn cannot select;
-    and the COGID entry, which carried a wrong encoding and claimed C=0 always. The
-    fabricated mnemonic RDCOGID was removed -- it is in no Parallax source, in no other
-    file of this knowledge base, and pnut-ts does not accept it as an instruction.

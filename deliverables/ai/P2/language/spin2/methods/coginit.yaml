@@ -28,8 +28,6 @@ parameters:
 
       DO NOT pass -1. It is not a synonym for "any available cog" -- see
       not_an_input below.
-    # CORRECTED 2026-08-30. This read "COGEXEC_NEW or NEWCOG (-1): Start
-    # any available cog". -1 is TASKSPIN's NEWTASK, not a COGINIT input.
     source: >-
       Spin2 v55 Language Documentation, "Built-In Symbols for COGINIT() Usage" --
       engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1658-1665

@@ -17,6 +17,7 @@ detailed_description:
     Timeout mode (Y[2]=1): Triggers after X clocks without event
     Y[1:0] selects event type: high(00), rise(01), edge(1x)
     Z limited to $80000000 (~10.7 seconds at 200MHz)
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %10010 = Time X A-input highs/rises/edges (Z will be limited to $80000000); $8000_0000 / 200_000_000 = 10.74 s"
 
 registers:
   x_register:
@@ -50,7 +51,7 @@ code_examples:
           repeat until pinr(freq_pin)            ' Wait for measurement
           period := rdpin(freq_pin) & $7FFFFFFF  ' Clock count for 100 edges
           
-          frequency := (_clkfreq * 100) / period
+          frequency := muldiv64(_clkfreq, 100, period)   ' 64-bit intermediate: _clkfreq * 100 overflows 32 bits
           debug("Frequency: ", udec(frequency), " Hz")
       
       DAT
@@ -99,3 +100,7 @@ notes:
   - "Event types: level-sensitive (high) or edge-sensitive (rise/edge)"
   - "Timeout mode maintains running count since last event"
   - "Z register limited to $80000000 clocks"
+  - "A Y written before DIRH (pinstart(), and the WYPIN-before-DIRH line in the PASM2 example) is in force after DIRH: this mode is order-safe (bench-measured on one board, one Y value for this mode)"
+
+sources:
+  - "EF-097"

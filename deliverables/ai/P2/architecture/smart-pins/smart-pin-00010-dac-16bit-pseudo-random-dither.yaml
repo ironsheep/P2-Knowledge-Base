@@ -127,7 +127,7 @@ pasm2_complete: |
   ' Generate sine wave using table
   sine_wave
           MOV   index, #0
-  .loop   MOV   ptra, #sine_table
+  .loop   MOV   ptra, ##@sine_table
           ADD   ptra, index
           RDBYTE value16, ptra        ' Get 8-bit sine
           SHL   value16, #8           ' Scale to 16-bit
@@ -163,9 +163,9 @@ spin2_inline: |
 
 # Key Points
 resolution: |
-  True 16-bit resolution through temporal dithering
+  Nominal 16-bit output through temporal dithering (see accuracy_caveat)
   8-bit DAC switches between adjacent levels
-  Averaging achieves 16-bit precision
+  The 16-bit output is the average over time
   
 update_modes: |
   X=1: Immediate updates, no IN flag cycling

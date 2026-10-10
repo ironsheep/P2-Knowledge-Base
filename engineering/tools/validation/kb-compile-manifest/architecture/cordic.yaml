@@ -21,7 +21,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [value1, value2, result_low, result_high]
   - at: programming_patterns.divide_64_32.code
-    fp: "90c09aedd163eca5"
+    fp: "4e5ca1d816130998"
     compile: fragment
     wrap: pasm2-dat
     assumes: [dividend_high, divisor, dividend_low, quotient, remainder]
@@ -40,7 +40,7 @@ blocks:
     compile: not-code
     reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
   - at: operations.divide.setup
-    fp: "cd5257c9ebd196ac"
+    fp: "4f9b95bb4b8b9282"
     compile: not-code
     reason: "instruction-syntax / placeholder notation (operand placeholders, ellipsis, `<...>`), not compilable code"
   - at: operations.fractional_divide.setup

@@ -91,7 +91,7 @@ best_practices:
   - "Store lock ID in VAR or DAT for later LOCKRET"
   - "Return locks in cleanup/stop methods"
   - "Document which lock protects which resource"
-  - "Consider lock assignment: Lock 0-7 for static, 8-15 for dynamic"
+  - "Document which lock number protects which resource; use the number LOCKNEW returned"
 
 notes:
   - "P2 has 16 hardware locks (0-15)"

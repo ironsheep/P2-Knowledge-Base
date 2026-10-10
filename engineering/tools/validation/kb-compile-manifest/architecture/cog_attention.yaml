@@ -65,25 +65,19 @@ blocks:
     wrap: pasm2-dat
     assumes: [new_command]
   - at: programming_patterns[1].code
-    fp: "037ebea0d0acab91"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [my_id, mask, count]
-  - at: programming_patterns[2].code
     fp: "aabd61aa5a9a3b39"
     compile: fragment
     wrap: pasm2-dat
     assumes: [data, buffer_ptr, consumer_mask]
-  - at: programming_patterns[3].code
+  - at: programming_patterns[2].code
     fp: "0bef19b53e68b78f"
     compile: fragment
     wrap: pasm2-dat
     assumes: [command, mailbox, result]
-  - at: programming_patterns[4].code
-    fp: "ca4746220752c3d7"
+  - at: programming_patterns[3].code
+    fp: "57ea39f2353a15ef"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-164"
   - at: common_applications[0].example
     fp: "4d2daa8f0ac56e30"
     compile: fragment
@@ -102,8 +96,7 @@ blocks:
     compile: not-code
     reason: "comment-only block (two `'` lines describing a pattern); there is no statement to compile"
   - at: debugging_tips[0].code
-    fp: "7b6a7f981285825a"
+    fp: "00ceea91055711d0"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [atn_log_ptr]
-    finding: "S-221"
+    assumes: [atn_log_ptr, ct]

@@ -23,8 +23,8 @@ blocks:
     compile: not-code
     reason: "value gloss (a number or field value followed by its meaning), not a statement"
   - at: spin2_complete
-    fp: "8e115212bd6fce58"
+    fp: "6cac716613e60735"
     compile: program
   - at: pasm2_complete
-    fp: "359719482d6d70ed"
+    fp: "e8331f3c62ddb876"
     compile: program

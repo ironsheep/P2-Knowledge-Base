@@ -23,10 +23,9 @@ blocks:
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: spin2_complete
-    fp: "8d00133fc2a1acd8"
+    fp: "164dd59db6a22f76"
     compile: fragment
     wrap: spin2-top
-    finding: "S-120"
   - at: pasm2_complete
     fp: "5481950d0beea979"
     compile: program

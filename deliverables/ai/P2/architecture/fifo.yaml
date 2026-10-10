@@ -163,23 +163,27 @@ programming_patterns:
   - pattern: "sequential_read"
     description: "Read sequential data from Hub RAM"
     code: |
-      ' Read 256 bytes from hub_buffer into COG RAM
+      ' Read 256 bytes from hub_buffer into COG RAM (64 longs, registers dest0..dest0+63)
               rdfast  #0, ##hub_buffer     ' Start FIFO read, unlimited blocks
+              mov     idx, #0              ' index into the destination registers
               rep     @.end, #64           ' Repeat 64 times
               rflong  temp                 ' Read 4 bytes
-              mov     dest, temp           ' Store in COG RAM
-              add     dest, #1             ' Next COG location
+              altd    idx, #dest0          ' next instruction's D = dest0 + idx
+              mov     0-0, temp            ' Store in COG RAM
+              add     idx, #1              ' Next COG location
       .end
 
   - pattern: "sequential_write"
     description: "Write sequential data to Hub RAM"
     code: |
-      ' Write COG array to Hub RAM
+      ' Write COG array to Hub RAM (64 longs, registers src0..src0+63)
               wrfast  #0, ##hub_dest       ' Start FIFO write
-              rep     @.end, #count
-              mov     temp, source         ' Get COG value
+              mov     idx, #0              ' index into the source registers
+              rep     @.end, #64           ' Repeat 64 times
+              alts    idx, #src0           ' next instruction's S = src0 + idx
+              mov     temp, 0-0            ' Get COG value
               wflong  temp                 ' Write to FIFO
-              add     source, #1           ' Next COG location
+              add     idx, #1              ' Next COG location
       .end
 
   - pattern: "circular_buffer"

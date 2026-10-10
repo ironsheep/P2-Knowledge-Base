@@ -13,14 +13,14 @@ detailed_description:
     restart when voltage sags. Mode overrides OUT for direct FET gate control.
   
   timing: |
-    Base period = System clock ÷ X[15:0] clock cycles
+    Base period = X[15:0] system clocks
     Frame period = X[31:16] × base period
     Waits for A-input low after frame complete before restarting
     B-input high immediately truncates current PWM cycle
 
 registers:
   x_register:
-    bits_15_0: "Base period divisor (1-65536 system clocks)"
+    bits_15_0: "Base period in system clocks"
     bits_31_16: "PWM frame period in base periods"
   y_register:  
     bits_15_0: "PWM duty value (0 to frame period)"
@@ -36,27 +36,21 @@ flags:
 
 code_examples:
   - title: "Basic SMPS Controller Setup"
-    description: "100kHz switching, voltage/current feedback on adjacent pins"
+    description: "6400-clock frame (25-clock base x 256; 39 kHz at 250 MHz), voltage/current feedback on adjacent pins"
     code: |
       CON
         _clkfreq = 250_000_000
         smps_out = 20                            ' FET gate driver
-        v_sense = 21                             ' Voltage feedback  
-        i_sense = 19                             ' Current sense
-      
+        v_sense = 21                             ' Voltage feedback: the A input (relative +1 pin)
+        i_sense = 19                             ' Current sense: the B input (relative -1 pin)
+
       PUB main() | mode, xval, yval
-        ' Configure voltage comparator on pin 21
-        wrpin(v_sense, P_COMPARE_AB | P_COMPARE_AB_FB)
-        wxpin(v_sense, $80)                      ' Set voltage threshold
-        dirh(v_sense)
-        
-        ' Configure current comparator on pin 19
-        wrpin(i_sense, P_COMPARE_AB | P_COMPARE_AB_FB)
-        wxpin(i_sense, $40)                      ' Set current limit
-        dirh(i_sense)
-        
+        ' Pin 21 (A) and pin 19 (B) must present the feedback signals. For example, a pin in
+        ' a level-comparison mode such as P_LEVEL_A, whose 8-bit level is the low byte of its
+        ' WRPIN mode word, reads high when its input is above that level.
+
         ' Configure SMPS controller
-        mode := P_PWM_SMPS | P_OE | P_MINUS1_A | P_PLUS1_B
+        mode := P_PWM_SMPS | P_OE | P_PLUS1_A | P_MINUS1_B
         xval := $0100_0019                       ' 25 clocks base, 256 frame
         yval := $0000_0080                       ' 50% max duty
         
@@ -67,7 +61,7 @@ code_examples:
       ' PASM2 equivalent
         org
         dirl    #smps_out
-        wrpin   ##P_PWM_SMPS | P_OE | P_MINUS1_A | P_PLUS1_B, #smps_out
+        wrpin   ##P_PWM_SMPS | P_OE | P_PLUS1_A | P_MINUS1_B, #smps_out
         wxpin   ##$0100_0019, #smps_out
         dirh    #smps_out
         wypin   #$80, #smps_out                  ' Set duty cycle once
@@ -95,5 +89,5 @@ notes:
   - "A-input low triggers new PWM cycle (voltage below target)"
   - "B-input high immediately cuts PWM output (over-current)"
   - "Can set Y once and run indefinitely with feedback control"
-  - "Adjacent pins often configured as DAC comparators"
+  - "The A and B inputs can be adjacent pins in the internal-DAC-comparison (level-comparison) mode"
   - "Output starts low during reset (DIR=0)"

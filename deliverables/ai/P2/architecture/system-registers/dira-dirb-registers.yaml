@@ -56,7 +56,8 @@ smart_pin_interaction:
 instruction_access:
   direct_bit_ops:
     set_output: "DRVH #pin_num (sets DIR bit and drives high)"
-    set_input: "DRVL #pin_num (sets DIR bit and drives low)"
+    drive_low: "DRVL #pin_num (sets DIR bit and drives low)"
+    set_input: "DIRL #pin_num (clears DIR bit: pin becomes an input)"
     float_pin: "FLTL #pin_num (clears DIR bit, high impedance)"
     
   register_ops:

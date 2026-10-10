@@ -74,9 +74,8 @@ adc_input_pins:
     source: "Silicon Doc engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1565
       (the S[19:0] configuration paragraph) and :1586-1600 (the S[11:0] table and the
       %A/%T rule: 'the lower bits being the sum of the %T bits and the topmost NCO
-      bits ... to shift or modulate the phase of playback'). The locator previously
-      named lines 4062-4095, which is the PWM/SMPS smart-pin mode text; corrected
-      2026-08-30, F-399. field_8_0: Silicon Doc silicon-doc-text.txt:1602."
+      bits ... to shift or modulate the phase of playback'). field_8_0: Silicon Doc
+      silicon-doc-text.txt:1602."
   bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit."
   gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the shipped Silicon Doc demo can use high gain because it couples capacitively through a touch pad."
 
@@ -145,21 +144,24 @@ lut_setup:
     byte_0: "Optional (can be output waveform)"
     
   example: |
-    ' Build a 512-entry sine/cosine table — matches the %000 loop size (S[11:9] = %000).
-    ' A different loop size needs a table of that many entries, not 512.
-    repeat i from 0 to 511
-      cos, sin := polxy(127, i << 23)
-      t.byte[3] := sin      ' Sine for Goertzel
-      t.byte[2] := cos      ' Cosine for Goertzel
-      t.byte[1] := 0        ' Unused
-      t.byte[0] := sin      ' DAC output
-      wrlut(t, i)
-      
+    ' Make sine and cosine tables in LUT bytes 3 and 2: a 512-sample table, matching the
+    ' %000 loop size (S[11:9] = %000). A different loop size needs a table of that many
+    ' entries, not 512. Run as PASM2 in a cog (Spin2 has no LUT write); ampl = 127 for SINC1.
+            mov     z, #$1FF            ' 512 samples, counting down to 0
+    sincos  shl     z, #32-9            ' get angle into top 9 bits of z
+            qrotate #ampl, z            ' rotate (ampl, 0) by z
+            shr     z, #32-9            ' restore z
+            getqy   y                   ' get y
+            getqx   x                   ' get x
+            shl     y, #24              ' y into byte 3
+            setbyte y, x, #2            ' x into byte 2
+            wrlut   y, z                ' write sin:cos:0:0 into LUT
+            djnf    z, #sincos          ' loop until 512 samples
+
   sinc2_amplitude: |
-    ' For SINC2 mode, reduce amplitude to prevent overflow (512-entry / %000 loop size)
-    repeat i from 0 to 511
-      cos, sin := polxy(10, i << 23)  ' ±10 max
-      ...
+    ' For SINC2 mode, reduce amplitude to prevent overflow (512-entry / %000 loop size):
+    ' the same table builder with ampl = 10 (+/-10 max) instead of 127.
+            qrotate #10, z              ' rotate (10, 0) by z
 
 # Reading results
 reading_results:
@@ -298,9 +300,7 @@ usage_pattern:
     A GOERTZEL DETECTOR, and only that. Its own dds_cmd sets %dddd = %0000
     (X_DACS_OFF), so no streamer DAC channel is routed anywhere, and it reads the
     result back with GETXACC/QVECTOR. It therefore configures NO DAC output pin.
-    Until 2026-08-21 it did -- `wrpin ##P_DAC_124R_3V` plus `dirh` on a pin that
-    nothing in the program ever drove, giving a configured, enabled, silent pin and
-    no diagnostic. If you want the DDS OUTPUT half instead, that is a
+    If you want the DDS OUTPUT half instead, that is a
     different arrangement, not a line to add here: route the DACs in %dddd and set
     the pin up as a streamer-fed DAC -- see dac_output_pin_setup below.
   dac_output_pin_setup: >-
@@ -313,8 +313,7 @@ usage_pattern:
   source: "Shape and constants follow the Silicon Doc's worked DDS/Goertzel program --
       engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:1621-1640 (the
       program's description and setup) and :1686-1687 (the dds_d / dds_s mode and data
-      longs). The second locator previously named lines 4289-4305, which is Table 34's
-      streamer clocks/bits rows; corrected 2026-08-30, F-399. dac_output_pin_setup: language/pasm2/wrpin.yaml:54."
+      longs). dac_output_pin_setup: language/pasm2/wrpin.yaml:54."
 
 see_also:
   - architecture/streamer/modes-reference.yaml

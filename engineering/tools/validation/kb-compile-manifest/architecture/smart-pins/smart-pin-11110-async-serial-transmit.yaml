@@ -3,9 +3,8 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "920d2d8bbcdec2b7"
+    fp: "a2d72b9daf23dce3"
     compile: program
-    finding: "S-074+S-220"
   - at: code_examples[1].code
     fp: "6e37120b8905c965"
     compile: fragment

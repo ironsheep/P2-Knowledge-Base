@@ -103,8 +103,10 @@ common_applications:
         serial : "isp_octoport_serial"
       
       PUB main() | port1, port2
-        port1 := serial.addPort(RX1, TX1, MODE_NONE, 115200, PU_3K3)
-        port2 := serial.addPort(RX2, TX2, MODE_NONE, 9600, PU_3K3)
+        ' addPort(rxp, txp, mode, baudrate, txPullup): mode 0 is the object's MODE_NONE,
+        ' pull-up 2 is the object's PU_3K3 -- both are constants of the object (serial.MODE_NONE, serial.PU_3K3)
+        port1 := serial.addPort(RX1, TX1, 0, 115200, 2)
+        port2 := serial.addPort(RX2, TX2, 0, 9600, 2)
         serial.start()
         
         serial.txStr(port1, string("Hello Port 1"))
@@ -116,16 +118,16 @@ common_applications:
       ' Manage multiple chip selects
       repeat device from 0 to MAX_DEVICES-1
         if deviceActive[device]
-          drvl    chipSelect[device]
+          pinlow(chipSelect[device])
           sendSPI(deviceData[device])
-          drvh    chipSelect[device]
+          pinhigh(chipSelect[device])
     
   pwm_channel_controller:
     description: "Multiple PWM channels with synchronized updates"
     example: |
       ' Update all PWM channels
       repeat channel from 0 to MAX_CHANNELS-1
-        wypin   dutyCycle[channel], pwmPin[channel]
+        wypin(pwmPin[channel], dutyCycle[channel])
 
 best_practices:
   initialization:

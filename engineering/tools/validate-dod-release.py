@@ -648,7 +648,7 @@ def validate_metadata_filter(verbose: bool = False) -> ValidationResult:
     if structural_failures:
         result.fail(f"{len(structural_failures)} file(s) deliver a structurally "
                     f"broken payload after filtering")
-        for key, msg in structural_failures[:10]:
+        for key, msg in structural_failures:      # every hit: a capped list reads like a clean one
             result.info(f"  {key}: {msg}")
     else:
         result.ok("Filtered payload re-parses cleanly with no filter-induced null keys and no deleted content")
@@ -1263,7 +1263,7 @@ def validate_nojq_lookup(verbose: bool = False) -> ValidationResult:
     result.info(f"Checked without jq: {len(keys)} keys, {len(aliases)} aliases")
     if problems:
         result.fail(f"{len(problems)} lookup(s) differ from json.load without jq")
-        for p in problems[:10]:
+        for p in problems:                         # every hit: a capped list reads like a clean one
             result.info(f"  {p}")
     else:
         result.ok("Every key and alias resolves without jq exactly as json.load reads it")

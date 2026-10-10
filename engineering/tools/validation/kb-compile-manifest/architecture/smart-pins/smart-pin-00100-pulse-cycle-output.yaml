@@ -11,7 +11,7 @@ blocks:
     compile: not-code
     reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
   - at: x_register.examples[0]
-    fp: "e4f99eb50fcb103e"
+    fp: "f49233a5f3c97401"
     compile: not-code
     reason: "value gloss (a number or field value followed by its meaning), not a statement"
   - at: x_register.examples[1]
@@ -19,14 +19,14 @@ blocks:
     compile: not-code
     reason: "value gloss (a number or field value followed by its meaning), not a statement"
   - at: x_register.examples[2]
-    fp: "a189c31bbcda5851"
+    fp: "3f4e55608a2f0885"
     compile: not-code
     reason: "value gloss (a number or field value followed by its meaning), not a statement"
   - at: spin2_complete
-    fp: "2092cea91bcd9102"
+    fp: "e4855f0cde378bc6"
     compile: program
   - at: pasm2_complete
-    fp: "447192b64c1e2aa0"
+    fp: "8e00dfe0ad5ddfc3"
     compile: program
   - at: spin2_inline
     fp: "aa19dc8ad4dcbafc"

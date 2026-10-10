@@ -8,11 +8,10 @@ blocks:
     wrap: pasm2-dat
     assumes: [spi_ck=con]
   - at: spi_patterns.spi_full_duplex.setup
-    fp: "d7fb3c3e77dadb62"
+    fp: "1ebf1a1c5dac5a60"
     compile: fragment
     wrap: spin2-top
     assumes: [clk_period=con]
-    finding: "S-223"
   - at: pwm_patterns.motor_pwm_with_deadtime.setup
     fp: "1a1448462adbd89a"
     compile: fragment

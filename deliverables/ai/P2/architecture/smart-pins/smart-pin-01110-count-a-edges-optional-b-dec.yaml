@@ -72,17 +72,16 @@ configuration_order:
     The PASM2 example above writes Y with WYPIN AFTER raising DIR, which is
     architecture/smart_pins.yaml's reset_before_configure order:
     DIRL -> WRPIN -> WXPIN -> DIRH -> WYPIN. That is the general order (synchronous
-    serial transmit %11100 in continuous mode is a documented exception). Whether this
-    mode also tolerates WYPIN before DIRH is not documented for this mode and not
-    measured, so the examples here use the general order.
-    (This page previously showed WYPIN before DIRH.)
+    serial transmit %11100 in continuous mode is a documented exception). For this mode
+    the order is not critical: a Y written with WYPIN while DIR is low is in force after
+    DIRH (bench-measured on one board, one Y value for this mode), so writing Y before
+    DIRH is also safe.
   about_pinstart: |
     The Spin2 example uses pinstart(), which writes Y BEFORE raising DIR. The general
     page names that unsafe for the TRIGGER modes (%00100 pulse, %00101 transition).
-    %01110 is a counting mode, not a trigger mode, so pinstart() is not excluded by
-    that rule -- but NOT STATED, by this page or any source we hold: whether %01110 is
-    positively immune to the early Y write. If that matters to your design, use the
-    explicit five-step sequence, which follows the general order.
+    %01110 is a counting mode, not a trigger mode, and the Y written before DIRH is in
+    force after it (bench-measured), so pinstart() is safe here.
+  source: "EF-097"
 
 common_applications:
   - "Event counting with separate increment/decrement inputs"

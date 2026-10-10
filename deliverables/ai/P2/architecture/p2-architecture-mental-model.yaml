@@ -117,13 +117,14 @@ shared_resources:
     description: |
       Hub RAM (512 KB), the CORDIC math pipeline, and certain system functions are
       shared through a round-robin mechanism called the "Egg Beater." Each COG gets
-      a guaranteed access slot every 8 clock cycles. A hub operation (RDLONG, WRLONG,
-      etc.) completes in 2-9 clocks depending on when the COG's slot arrives -- this
+      a guaranteed access slot every 8 clock cycles. A hub read (RDBYTE/RDWORD/RDLONG) takes
+      9...16 clocks and a hub write (WRBYTE/WRWORD/WRLONG) 3...10 clocks from cog-exec code
+      (9...26 and 3...20 from hub-exec code), depending on when the COG's slot arrives -- this
       is deterministic and predictable, never random. For batch transfers, use
       SETQ+RDLONG/WRLONG which transfers at 1 long per clock after initial sync.
     timing:
-      best_case: "2 clocks (slot aligned)"
-      worst_case: "9 clocks (just missed slot)"
+      read_cog_exec: "9...16 clocks (RDLONG)"
+      write_cog_exec: "3...10 clocks (WRLONG)"
       batch_transfer: "1 long per clock after sync"
       rotation_period: "8 clocks"
 
@@ -132,9 +133,12 @@ shared_resources:
       The CORDIC solver is a 54-stage pipelined math engine shared through the same
       hub rotation. It provides hardware multiply (32x32->64), divide (64/32),
       square root, trigonometric functions, vector rotation, and logarithm/exponential.
-      Each COG can have 7-8 operations in flight simultaneously.
-    latency: "55 clocks per operation"
-    throughput: "1 result per COG every 8 clocks"
+      Because each COG's hub slot comes around every 8 clocks and the pipeline is 54 clocks
+      long, CORDIC commands can be overlapped: several commands are in flight per COG at
+      once, and results are read in order (the Parallax documentation says "several" and
+      gives no hard count; 54 / 8 is about 6-7).
+    latency: "55 clocks from command to result"
+    throughput: "overlapped commands: at most one new command per COG hub slot (every 8 clocks)"
 
 # =============================================================================
 # INTER-COG COMMUNICATION

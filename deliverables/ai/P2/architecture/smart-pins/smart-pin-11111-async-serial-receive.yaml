@@ -53,10 +53,7 @@ code_examples:
         ' Receive and display characters
         repeat
           received_byte := receive_byte()
-          if received_byte >= 32 and received_byte < 127
-            debug("Received: ", zstr(received_byte))
-          else
-            debug("Received: $", uhex_byte(received_byte))
+          debug("Received: ", uhex_byte_(received_byte))
       
       PUB receive_byte() : value
         ' Wait for character received
@@ -68,16 +65,16 @@ code_examples:
       DAT
       ' PASM2 example - buffered serial receive
         org
-        mov     bit_period, ##(_clkfreq / baud) << 16
-        or      bit_period, #7                   ' 8 data bits (X[4:0] = N-1)
+        mov     bit_clks, ##(_clkfreq / baud) << 16
+        or      bit_clks, #7                     ' 8 data bits (X[4:0] = N-1)
 
         dirl    #rx_pin                          ' Reset smart pin
         wrpin   rx_mode, #rx_pin                 ' Configure mode
-        wxpin   bit_period, #rx_pin              ' Set baud and bits
+        wxpin   bit_clks, #rx_pin                ' Set baud and bits
         dirh    #rx_pin                          ' Enable smart pin
 
         ' Receive loop with buffering
-        mov     ptra, ##buffer
+        mov     ptra, ##@buffer                  ' hub address of the buffer
         mov     count, #0
       .loop
         testp   #rx_pin wc                       ' Check for data
@@ -86,7 +83,7 @@ code_examples:
         shr     data, #24                        ' LSB-justify 8-bit byte (32-8)
         wrbyte  data, ptra++                     ' Store in buffer
         add     count, #1
-        cmp     count, #buffer_size wz
+        cmp     count, buffer_size wz
         if_nz   jmp #.loop                       ' Continue if buffer not full
         
         ' Process buffer...
@@ -94,11 +91,12 @@ code_examples:
       
       rx_mode
         long    P_ASYNC_RX
-      buffer  long    0[256]                     ' 256-byte buffer
+      buffer  byte    0[256]                     ' 256-byte buffer
       buffer_size
         long    256
       data    long    0
       count   long    0
+      bit_clks res    1
 
   - title: "Receive with Timeout Detection"
     description: "Detect and handle receive timeouts"
@@ -123,8 +121,8 @@ code_examples:
         bit_period := (_clkfreq / baud) << 16
         pinstart(rx_pin, P_ASYNC_RX, (bit_period | 7), 0)   ' 8 data bits (N-1)
 
-      PUB receive_with_timeout(timeout_ms) : value | deadline
-        deadline := getms() + timeout_ms
+      PUB receive_with_timeout(wait_ms) : value | deadline
+        deadline := getms() + wait_ms
 
         repeat
           if pinread(rx_pin)

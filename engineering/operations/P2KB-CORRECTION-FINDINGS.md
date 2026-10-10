@@ -118,6 +118,13 @@ VERDICT for its own question). **Class sweep** (`grep -rn "SE1 in\|EOP SE0 > 3\|
 this file only. **Fix:** replace lines 61-67's [6] and [3..0] with the DOCX wording, cited to the P2
 Documentation v35, *USB smart pin* section; close-out sprint (KB v1.24.0).
 
+> **Applied 2026-10-10 («#419»); the entry stays PENDING-VALIDATION until a release serves it.**
+> `smart-pin-11011-usb-host-device.yaml` `registers.z_register.bits` [6] and [3..0] (and [5]/[4], which
+> carried the same older "7+ bits" wording) now read as `silicon-doc-text.txt:4621-4629`: `[6] … EOP SE0 > 2
+> bit periods or SE1`, `[3] steady state — cleared on DP/DM state change, set on 7 bit periods of no
+> change`, `[2]`/`[1]`/`[0]` "high when DP/DM state is" SE0/K/J. Class sweep re-run:
+> `grep -rn "SE1 in\|EOP SE0 > 3\|7+ bits of J" deliverables/ai/P2` returns nothing.
+
 ### F-562 — `hub75_adapter.yaml` names the OBEX driver and URL differently from OBEX 2850's own metadata — `NEEDS-VERIFICATION`
 Found 2026-10-07 by the independent check of F-556. `hardware/hub75_adapter.yaml:156,158` gives
 "P2-HUB75 LED Matrix Driver" and `https://obex.parallax.com/obex/p2-hub75-led-matrix-driver/`;
@@ -360,6 +367,17 @@ timing from CR"; `validation_format` describes a `'Prop'` header at offset 0 wit
 "disable_option: Don't pull up P61" and the `performance` figures have no source.
 **Fix (M-L):** per `.claude/skills/SOURCE-REPAIR-ORDER.md` — remove the uncited blocks and
 re-derive from HW Manual :1580-1725 (+ Silicon Doc :4860 ff.), every field quoted or cited.
+
+> **Applied 2026-10-10 («#419»); the entry stays PENDING-VALIDATION until a release serves it.**
+> `architecture/serial_loader.yaml` was re-derived from HW Manual `:1588-1725` and Silicon Doc `:4850-4868`:
+> `prop_chk` (four-field syntax, `Prop_Ver G`, A-F are FPGA builds, `rom_booter_v33_01j.lst:125-131`);
+> `prop_clk` (five fields, the HUBSET value, `.` reply, ~5 ms + 10 ms re-sync, the 148.5 MHz and boot-clock
+> examples); `prop_txt` (four-field syntax, 2.25x denser than hex, the manual's Base64 examples);
+> `response_codes` (`.`/`!`; `?`, `~` and `> ` are sender characters); `auto_baud_detection` (adapts at every
+> `>`, initial `> `); `validation_format` (checksum-complement long, long-aligned anywhere);
+> `multi_chip_support` (INA[1:0] cannot be matched); `programming_examples`/`error_handling` rewritten from the
+> manual; the unsourced `disable_option`, `performance` and `recovery` lines removed. Class sweep
+> (`Prop_Ver`, `Prop_Clk [0-9]`, `prop_chk`): this file only.
 
 ### F-549 — `pinstart.yaml`'s HUB75 and sensor-array examples carry invented `source:` labels, and the HUB75 one contradicts the board's pinout — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
 > **Applied 2026-10-07, and widened to every example in the file.** The two named examples were
@@ -1484,6 +1502,14 @@ the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
 > %01100–%10111 (`:4116-4254`, Z only). Neither order is proven safe or harmful for those eight, so
 > they are **not reordered** on inference: VO-J-028 (jumper-only) decides it.
 
+> **Settled 2026-10-10 («#419»): EF-097 — order-safe, all nine; no reorder.** VO-J-028 ran (nine
+> modes: `%01110`, `%01111`, `%10010`–`%10111`, `%11001`; `%01110` added to the eight). In every mode a Y
+> written with WYPIN while DIR is low is in force after DIRH. Each of the nine mode pages now states it
+> (a `notes` line and a `configuration_order.source` citing EF-097), `smart_pins.yaml`
+> `critical_requirements.reset_before_configure` names the nine beside NCO and DAC-noise, and the
+> `%01110` page's "NOT STATED … immunity" paragraph became the measured statement (so `pinstart()` is
+> safe there). Limits carried: one board, one Y value pair per mode, internal routing only.
+
 > **The named page is done, verified in the tree 2026-09-22.**
 > `architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml:64-65` now runs `dirh`
 > before `wypin` with the comment `' Count A only - Y AFTER DIRH`; `:70-83` adds a
@@ -1927,6 +1953,16 @@ documented behaviour is its own kind of damage — but it now carries the confli
 editions, and points at the gap. **Routed to `KNOWLEDGE-GAPS` as G-027: bench-testable and
 jumper-only** — configure a USB pair, issue a new WRPIN with DIR high, and observe whether the pin
 continues or breaks. That is the only thing that settles it.
+
+> **Settled 2026-10-10 («#419»): EF-093 (WRPIN, drive ↔ sniffer) and EF-102 (WXPIN, baud).**
+> EF-093: a live WRPIN that switches a running USB pair between the drive word `$76` and the sniffer word
+> `$36` took effect without a reset or a DIR cycle, 5 of 5 (one pair, full speed, host mode, nothing
+> attached). The Hardware Manual's sentence stands. `smart-pin-11011-usb-host-device.yaml`
+> `configuration.wrpin_data_conflict` ("NOT SETTLED … the same document") is replaced by
+> `wrpin_data_on_a_running_pair`; `detailed_description.source` cites the P2 Documentation, the Hardware
+> Manual, EF-093 and EF-102; `pin_pairing` names the overridden `%HHH_LLL` drive modes (`silicon-doc-text.txt:4579`).
+> EF-102 supplies the P2 Documentation's on-the-fly WXPIN sentence (`:4581`) for the **baud only**
+> (`configuration.wxpin_on_the_fly`); the FS/LS bit D[14] is not claimed.
 
 ## Two same-named Silicon Doc DOCX copies disagree, and the KB garbled a flag semantic from that passage (2026-08-26, «#314» pre-flight) — F-367 · F-368 · F-369
 
@@ -2780,6 +2816,14 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > **«#296» must not ship the `P_HIGH_15K | P_LOW_FLOAT` string as sourced.**
 
 ### F-337 — the P2 Datasheet and the P2 Hardware Manual agree with each other and contradict the Silicon Doc on `%TT` in DAC_MODE, and the shipped YAML follows the minority source — `PARTIAL` (re-verified 2026-10-05 «#386»: EF-071 settles the smart-mode row; the smart-pin-off DAC_MODE %TT=00 row has no bench result)
+
+> **Applied 2026-10-10 («#419»); the entry stays PENDING-VALIDATION until a release serves it.** The
+> smart-pin-off row needs no bench (`bench-groupD-recheck.md` §3.2): the texts do not conflict there — the
+> Datasheet names the DAC enable (DIR), the Silicon Doc the ADC enable (OUT), and Datasheet p.31 shows both;
+> EF-055 measured the DAC driving at `TT=%00` with no OUT write. `smart_pins.yaml`
+> `…behavior_by_context.smart_pin_off.dac_mode."%00"` now reads "DIR enables the DAC output; OUT enables the
+> ADC; M[7:0] sets DAC level" with its `source`. The DAC smart-mode rows keep the Silicon Doc wording and
+> the existing EF-071 TT-bit-0 condition.
 
 > **Two disagreements, both in the `(T) Pin DIR/OUT Control` table, both about whether it is the
 > DAC or the ADC that gets enabled.**
